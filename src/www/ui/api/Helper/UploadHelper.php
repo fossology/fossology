@@ -588,14 +588,16 @@ class UploadHelper
   }
 
   /**
-   * Get the license list for given upload scanned by provided agents
+   * Get the license and copyright list for given upload scanned by provided agents
    * @param integer $uploadId        Upload ID
    * @param array $agents            List of agents to get list from
    * @param boolean $printContainers If true, print container info also
+   * @param boolean $boolLicense If true, return license
+   * @param boolean $boolCopyright If true return copyright also
    * @return array Array containing `filePath`, `agentFindings` and
    * `conclusions` for each upload tree item
    */
-  public function getUploadLicenseList($uploadId, $agents, $printContainers)
+  public function getUploadLicenseList($uploadId, $agents, $printContainers, $boolLicense, $boolCopyright)
   {
     global $container;
     $restHelper = $container->get('helper.restHelper');
@@ -612,21 +614,65 @@ class UploadHelper
     /** @var UIExportList $licenseListObj
      * UIExportList object to get licenses
      */
-    $licenseListObj = $restHelper->getPlugin('export-list');
-    $licenseList = $licenseListObj->createListOfLines($uploadTreeTableName,
-      $parent->getItemId(), $agent_ids, -1, true, '', !$printContainers);
-    if (array_key_exists("warn", $licenseList)) {
-      unset($licenseList["warn"]);
+    if ($boolLicense) {
+      $licenseListObj = $restHelper->getPlugin('export-list');
+      $licenseList = $licenseListObj->createListOfLines($uploadTreeTableName,
+        $parent->getItemId(), $agent_ids, -1, true, '', !$printContainers);
+      if (array_key_exists("warn", $licenseList)) {
+        unset($licenseList["warn"]);
+      }
+    }
+
+    /** @var UIExportList $copyrightListObj
+     * UIExportList object to get copyright
+     */
+    if ($boolCopyright) {
+      $copyrightListObj = $restHelper->getPlugin('export-list');
+      $copyrightList = $copyrightListObj->getCopyrights($uploadId,
+        $parent->getItemId(), $uploadTreeTableName, -1, '');
+      if (array_key_exists("warn", $copyrightList)) {
+        unset($copyrightList["warn"]);
+      }
     }
 
     $responseList = array();
-    foreach ($licenseList as $license) {
-      $findings = new Findings($license['agentFindings'],
-        $license['conclusions']);
-      $responseRow = array();
-      $responseRow['filePath'] = $license['filePath'];
-      $responseRow['findings'] = $findings->getArray();
-      $responseList[] = $responseRow;
+
+    if ($boolLicense) {
+      foreach ($licenseList as $license) {
+        if ($boolCopyright) {
+          $copyrightContent = array();
+          foreach ($copyrightList as $copy) {
+            if (($license['filePath'] == $copy['filePath']) !== false ) {
+              array_push($copyrightContent,$copy['content']);
+            }
+          }
+          if (count($copyrightContent)==0) {
+            $copyrightContent = null;
+          }
+        }
+
+        $findings = new Findings($license['agentFindings'],
+          $license['conclusions'], $copyrightContent);
+        $responseRow = array();
+        $responseRow['filePath'] = $license['filePath'];
+        $responseRow['findings'] = $findings->getArray();
+        $responseList[] = $responseRow;
+      }
+    } elseif (!$boolLicense && $boolCopyright) {
+      foreach ($copyrightList as $copyFilepath) {
+        $copyrightContent = array();
+        foreach ($copyrightList as $copy) {
+          if (($copyFilepath['filePath'] == $copy['filePath']) === true) {
+            array_push($copyrightContent,$copy['content']);
+          }
+        }
+        $findings = new Findings();
+        $findings->setCopyright($copyrightContent);
+        $responseRow = array();
+        $responseRow['filePath'] = $copy['filePath'];
+        $responseRow['copyright'] = $findings->getCopyright();
+        $responseList[] = $responseRow;
+      }
     }
     return $responseList;
   }

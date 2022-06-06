@@ -757,7 +757,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('getUploadLicenseList')
-      ->withArgs([$uploadId, ['nomos', 'monk'], false])
+      ->withArgs([$uploadId, ['nomos', 'monk'], false, true, false])
       ->andReturn($licenseResponse);
 
     $expectedResponse = (new ResponseHelper())->withJson($licenseResponse, 200);
