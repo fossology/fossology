@@ -1,5 +1,8 @@
 # fossjobs man page input file
-# Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
+
+# SPDX-FileCopyrightText: © 2007-2013 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 #
 
 =head1 NAME
