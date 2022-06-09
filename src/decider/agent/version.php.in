@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
 <?php
 define("AGENT_DECIDER_NAME", "decider");
 define("AGENT_DECIDER_VERSION", "{$VERSION}");
