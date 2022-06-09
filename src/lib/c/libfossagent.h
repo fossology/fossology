@@ -1,5 +1,13 @@
+/*
+ SPDX-FileCopyrightText: © 2011 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2015 Siemens AG
+
+ SPDX-License-Identifier: LGPL-2.1-only
+*/
+
+
 /**************************************************************
-Copyright (C) 20011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 Copyright (C) 2015 Siemens AG
 
 This library is free software; you can redistribute it and/or

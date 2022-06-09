@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright Siemens AG 2014-2015,2021
+SPDX-FileCopyrightText: © 2014-2015, 2021 Siemens AG
 
-Copying and distribution of this file, with or without modification,
-are permitted in any medium without royalty provided the copyright
-notice and this notice are preserved.  This file is offered as-is,
-without any warranty.
+SPDX-License-Identifier: FSFAP
 -->
 
 <container xmlns="http://symfony.com/schema/dic/services"

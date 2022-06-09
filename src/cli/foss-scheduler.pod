@@ -1,5 +1,7 @@
 # fossched man page input file
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2007 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # VERSION: $Id: foss-scheduler.pod 548 2008-05-03 01:37:52Z rrando $
 #
