@@ -40,11 +40,12 @@
   error = NULL; }
 
 #define EMAIL_BUILD_CMD "%s %s --header 'Subject: %s' --to '%s'" \
-    " --body - --silent --auth-hide-password" ///< Email command format
+    " --silent --auth-hide-password" \
+    " --output '&STDOUT' --body -" ///< Email command format
 #define DEFAULT_HEADER  "FOSSology scan complete\nmessage:\"" ///< Default email header
 #define DEFAULT_FOOTER  "\""                  ///< Default email footer
 #define DEFAULT_SUBJECT "FOSSology scan complete\n" ///< Default email subject
-#define DEFAULT_COMMAND "/usr/bin/mailx"      ///< Default email command to use
+#define DEFAULT_COMMAND "/usr/bin/swaks"      ///< Default email command to use
 
 #define min(x, y) (x < y ? x : y)     ///< Return the minimum of x, y
 
@@ -418,6 +419,86 @@ static gint email_checkjobstatus(scheduler_t* scheduler, job_t* job)
   return ret;
 }
 
+static gboolean
+cb_out_watch( GIOChannel   *channel,
+              GIOCondition  cond,
+              gpointer      data )
+{
+    gchar *string;
+    gsize  size;
+
+    if( cond == G_IO_HUP )
+    {
+        g_io_channel_unref( channel );
+        return( FALSE );
+    }
+
+    g_io_channel_read_line( channel, &string, &size, NULL, NULL );
+    NOTIFY("STDOUT: '%s'", string);
+    g_free( string );
+
+    return( TRUE );
+}
+
+static gboolean
+cb_err_watch( GIOChannel   *channel,
+              GIOCondition  cond,
+              gpointer      data )
+{
+    gchar *string;
+    gsize  size;
+
+    if( cond == G_IO_HUP )
+    {
+        g_io_channel_unref( channel );
+        return( FALSE );
+    }
+
+    g_io_channel_read_line( channel, &string, &size, NULL, NULL );
+    NOTIFY("STDERR: '%s'", string);
+    g_free( string );
+
+    return( TRUE );
+}
+
+static gboolean
+guest_exec_input_watch( GIOChannel   *channel,
+              GIOCondition  cond,
+              gpointer      data )
+{
+  NOTIFY("WRITING TO STDOUT");
+  GString *string;
+  gsize  size;
+  GIOStatus status;
+  GError *error = NULL;
+
+  string = g_string_new((char*) data);
+  status = g_io_channel_write_chars(channel,
+                                    string->str,
+                                    string->len,
+                                    &size,
+                                    &error);
+
+  if (status == G_IO_STATUS_NORMAL || status == G_IO_STATUS_AGAIN)
+  {
+    g_string_free(string, TRUE);
+    return TRUE;
+  }
+
+  if (error)
+  {
+    ERROR("Writing to child process failed: '%s'.\n",
+      error->message);
+    g_error_free(error);
+  }
+
+  g_io_channel_shutdown(channel, TRUE, NULL);
+  g_io_channel_unref(channel);
+  g_string_free(string, TRUE);
+
+  return(FALSE);
+}
+
 /**
  * Sends an email notification that a particular job has completed correctly.
  * This compiles the email based upon the header file, footer file, and the job
@@ -433,14 +514,20 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
   int j_id = job->id;
   int upload_id;
   int status;
-  int retcode;
+  // int retcode;
   char* val;
-  char* final_cmd = NULL;
   char sql[1024];
-  FILE* mail_io;
   GString* email_txt;
   job_status curr_status = job->status;
   email_replace_args args;
+  GError *error = NULL;
+  gint stdin, stdout, stderr;
+  GIOChannel *input_channel,
+             *out_ch,
+             *err_ch;
+  GPid pid;
+  char* final_cmd = NULL;
+  gchar **cargs = NULL;
 
   if(is_meta_special(g_tree_lookup(scheduler->meta_agents, job->agent_type), SAG_NOEMAIL) ||
       !(status = email_checkjobstatus(scheduler, job)))
@@ -521,25 +608,41 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
       g_string_free(email_txt, TRUE);
       return;
     }
-    if((mail_io = popen(final_cmd, "w")) != NULL)
+
+    g_shell_parse_argv(final_cmd, NULL, &cargs, &error);
+    g_spawn_async_with_pipes(NULL, cargs, NULL,
+      G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_FILE_AND_ARGV_ZERO,
+      NULL, NULL, &pid, &stdin, &stdout, &stderr, &error);
+    g_free(final_cmd);
+    g_strfreev(cargs);
+
+    out_ch = g_io_channel_unix_new(stdout);
+    err_ch = g_io_channel_unix_new(stderr);
+
+    /* Add watches to channels */
+    g_io_add_watch(out_ch, G_IO_IN | G_IO_HUP, (GIOFunc)cb_out_watch, NULL);
+    g_io_add_watch(err_ch, G_IO_IN | G_IO_HUP, (GIOFunc)cb_err_watch, NULL);
+
+    if (error)
     {
-      fprintf(mail_io, "%s", val);
-      fflush(mail_io);
-      retcode = WEXITSTATUS(pclose(mail_io));
-      if(retcode != 0)
-      {
-        ERROR("Received error code %d from '%s'", retcode, scheduler->email_command);
-      }
+      WARNING("Unable to spawn email notification process: '%s'.\n",
+        error->message);
+      g_error_free(error);
+      pid = 0;
     }
     else
     {
-      WARNING("Unable to spawn email notification process: '%s'.\n",
-              scheduler->email_command);
+      NOTIFY("Email process id: %d", pid);
+      input_channel = g_io_channel_unix_new(stdin);
+      g_io_channel_set_buffered(input_channel, FALSE);
+      g_io_channel_set_flags(input_channel, G_IO_FLAG_NONBLOCK, NULL);
+      g_io_add_watch(input_channel, G_IO_OUT, (GIOFunc)guest_exec_input_watch, val);
+      g_child_watch_add(pid, (GChildWatchFunc)mail_process_exit_callback, NULL);
     }
+
     job->status = curr_status;
     if(scheduler->parse_db_email != NULL)
       g_free(val);
-    g_free(final_cmd);
     g_string_free(email_txt, TRUE);
   }
   SafePQclear(db_result);
@@ -1044,7 +1147,7 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
   int i;
   GString* client_cmd;
   GHashTable* smtpvariables;
-  char* temp_smtpvariable;
+  gchar* temp_smtpvariable;
   char* final_command;
 
   db_result_smtp = database_exec(scheduler, smtp_values);
@@ -1088,7 +1191,7 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
     }
     if(g_hash_table_contains(smtpvariables, "SMTPFrom"))
     {
-      g_string_append_printf(client_cmd, " --from='%s'",
+      g_string_append_printf(client_cmd, " --from=\\'%s\\'",
           (char *)g_hash_table_lookup(smtpvariables, "SMTPFrom"));
     }
     if(g_hash_table_contains(smtpvariables, "SMTPSslVerify"))
@@ -1101,11 +1204,11 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
     }
     if(g_hash_table_contains(smtpvariables, "SMTPAuthUser"))
     {
-      g_string_append_printf(client_cmd, " --auth-user='%s'",
+      g_string_append_printf(client_cmd, " --auth-user=\\'%s\\'",
         (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthUser"));
       if(g_hash_table_lookup(smtpvariables, "SMTPAuthPasswd"))
       {
-        g_string_append_printf(client_cmd, " --auth-password='%s'",
+        g_string_append_printf(client_cmd, " --auth-password=\\'%s\\'",
           (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthPasswd"));
       }
     }

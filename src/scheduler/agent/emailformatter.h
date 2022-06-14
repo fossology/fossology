@@ -23,5 +23,8 @@ typedef struct
 /* Format rows as plain text */
 const gchar* email_format_text(GPtrArray *rows, gchar *fossy_url);
 
+/* Callback function for email process */
+void mail_process_exit_callback(GPid pid, gint wait_status, gpointer ignore);
+
 #endif /* EMAILFORMATTER_H_INCLUDE */
 
