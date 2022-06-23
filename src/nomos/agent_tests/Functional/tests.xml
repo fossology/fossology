@@ -1,3 +1,7 @@
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: FSFAP
+-->
 <phpunit backupGlobals="true">
   <testsuites>
     <testsuite name="nomos/agent_tests/Functional Tests">

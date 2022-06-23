@@ -1,6 +1,10 @@
 #!/usr/bin/php
 <?php
+/*
+ SPDX-FileCopyrightText: © Fossology contributors
 
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * 1stest - play with simpletest
 */

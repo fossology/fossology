@@ -1,0 +1,25 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: FOSSology
+Source: https://github.com/fossology/fossology/
+Upstream-Contact: FOSSology <fossology@fossology.org>
+Disclaimer: <text> This file is offered as-is, without any warranty. </text>
+
+Files: src/nomos/agent_tests/testdata/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: src/nomos/ui_tests/testdata/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: src/copyright/agent_tests/testdata/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: src/lib/php/Test/repo/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: src/pkgagent/agent_tests/testdata/*
+Copyright: Fossology contributors
+License: GPL-2.0-only

@@ -1,7 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2019 Vivek Kumar
-Author: Vivek Kumar<vvksindia@gmail.com>
+ Author: Vivek Kumar<vvksindia@gmail.com>
  SPDX-FileCopyrightText: © 2022 Siemens AG
 
  SPDX-License-Identifier: GPL-2.0-only

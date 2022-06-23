@@ -1,4 +1,10 @@
 <?php
+/*
+ SPDX-FileCopyrightText: © Fossology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
 define("AGENT_REPORTIMPORT_NAME", "reportImport");
 define("AGENT_REPORTIMPORT_VERSION", "{$VERSION}");
 define("AGENT_REPORTIMPORT_REV", "{$COMMIT_HASH}");
