@@ -1,6 +1,8 @@
 # FOSSology Makefile - agent/nomossa
 # This is to make a version of nomos that does not require any of the fossology build dependencies.
-# Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2013 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf

@@ -1,3 +1,7 @@
+; SPDX-FileCopyrightText: © Fossology contributors
+
+; SPDX-License-Identifier: FSFAP
+
 [VERSION]
 VERSION=2.0.0
 COMMIT_HASH=4876M
