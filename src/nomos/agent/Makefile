@@ -1,5 +1,7 @@
 # FOSSology Makefile - agent/nomos
-# Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2006-2014 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf

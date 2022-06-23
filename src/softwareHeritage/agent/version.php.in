@@ -1,4 +1,10 @@
 <?php
+/*
+ SPDX-FileCopyrightText: © Fossology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
 define("SOFTWARE_HERITAGE_AGENT_NAME", "softwareHeritage");
 defined("AGENT_VERSION") or define("AGENT_VERSION", "{$VERSION}");
 defined("AGENT_REV") or define("AGENT_REV", "{$COMMIT_HASH}");

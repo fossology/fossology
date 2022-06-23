@@ -1,4 +1,10 @@
 <?php
+/*
+ SPDX-FileCopyrightText: © Fossology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
 define("README_AGENT_NAME", "readmeoss");
 define("AGENT_VERSION", "{$VERSION}");
 define("AGENT_REV", "{$COMMIT_HASH}");
