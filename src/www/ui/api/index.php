@@ -168,6 +168,8 @@ $app->group('/groups',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('', GroupController::class . ':getGroups');
     $app->post('', GroupController::class . ':createGroup');
+    $app->delete('/{id:\\d+}', GroupController::class . ':deleteGroup');
+    $app->any('/{params:.*}', BadRequestController::class);
   });
 
 ////////////////////////////JOBS/////////////////////

@@ -1,7 +1,8 @@
 <?php
 /***************************************************************
  Copyright (C) 2021 Orange
- Author: Piotr Pszczola <piotr.pszczola@orange.com>
+ Copyright (C) 2022 Samuel Dushimimana <dushsam100@gmail.com>
+ Authors: Piotr Pszczola <piotr.pszczola@orange.com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,6 +17,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
+
 /**
  * @file
  * @brief Controller for user queries
@@ -90,6 +92,46 @@ class GroupController extends RestController
     } else {
       $returnVal = new Info(400, "ERROR - no group name provided", InfoType::ERROR);
     }
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Delete a given group
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function deleteGroup($request, $response, $args)
+  {
+    $returnVal = null;
+
+    if (!empty($args['id'])) {
+
+      $userId = $this->restHelper->getUserId();
+
+      /** @var UserDao $userDao */
+      $userDao = $this->restHelper->getUserDao();
+      $groupMap = $userDao->getDeletableAdminGroupMap($userId,
+        $_SESSION[Auth::USER_LEVEL]);
+      $groupId = intval($args['id']);
+
+      if ($this->dbHelper->doesIdExist("groups", "group_pk", $groupId)) {
+        try {
+          $userDao->deleteGroup($groupId);
+          $returnVal = new Info(202, "User Group will be deleted", InfoType::INFO);
+          unset($groupMap[$groupId]);
+        } catch (\Exception $e) {
+          $returnVal = new Info(400, $e->getMessage(), InfoType::ERROR);
+        }
+      } else {
+        $returnVal = new Info(404, "Group id not found!", InfoType::ERROR);
+      }
+    } else {
+      $returnVal = new Info(400, "ERROR - no group id provided", InfoType::ERROR);
+    }
+
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 }
