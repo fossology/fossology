@@ -1,5 +1,7 @@
 # FOSSology Makefile - test for agents/pkgagent
-# Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2009-2013 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf

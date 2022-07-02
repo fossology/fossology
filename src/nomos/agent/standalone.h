@@ -1,3 +1,9 @@
+/*
+ SPDX-FileCopyrightText: © Fossology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
 #ifndef _STANDALONE_H
 #define _STANDALONE_H 1
 #include <stdlib.h>
