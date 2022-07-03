@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
 # Defaults for fossology initscript
 # sourced by /etc/init.d/fossology
 

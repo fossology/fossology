@@ -1,3 +1,9 @@
+/*
+ SPDX-FileCopyrightText: © Fossology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
 .select2-container--default .select2-results>.select2-results__options{
     max-height: 500px !important;
 }

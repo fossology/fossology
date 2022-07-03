@@ -1,4 +1,9 @@
 <?php
+/*
+ SPDX-FileCopyrightText: © Fossology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @file
  * @brief Test scheduler connection and status
