@@ -1,4 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only 
+-->
 <project>
   <actions/>
   <description>Launch the script runBuild_v2.0.php as user &apos;build&apos; on fossbuild to build the packages</description>

@@ -23,3 +23,31 @@ License: GPL-2.0-only
 Files: src/pkgagent/agent_tests/testdata/*
 Copyright: Fossology contributors
 License: GPL-2.0-only
+
+Files: src/pkgagent/agent_tests/testdata/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: src/delagent/agent_tests/testdata/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: src/monk/agent_tests/testlicenses/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: src/testing/dataFiles/TestData/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: src/ununpack/agent_tests/testdata/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: src/www/ui/css/images/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: src/www/ui/images/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
