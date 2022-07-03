@@ -1,3 +1,6 @@
+; SPDX-FileCopyrightText: © Fossology contributors
+
+; SPDX-License-Identifier: FSFAP
 ; basic Scheduer.conf for the version 2.0 of the scheduler
 ; this is a simple key-value configuration file
 ; should have two groups

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: © Fossology contributors
+
+-- SPDX-License-Identifier: GPL-2.0-only
 
 INSERT INTO agent VALUES (1, 'nomos', '2.4.1-ng.695dd8', 'License Scanner', true, NULL, '2015-05-04 11:37:39.12504+02');
 INSERT INTO agent VALUES (2, 'delagent', '2.4.1-ng.695dd8', '(null)', true, NULL, '2015-05-04 11:42:21.477678+02');

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
+
 set -o errexit -o nounset -o xtrace
 
 docker-compose build

@@ -1,3 +1,8 @@
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only
+-->
+
 This directory contains the testing infrastructure and testing utilities code.
 The tests for each fossology module are contained in {module}/agent_tests and
 {module}/ui_tests.
