@@ -165,6 +165,7 @@ $app->group('/groups',
     $app->delete('/{id:\\d+}', GroupController::class . ':deleteGroup');
     $app->delete('/{id:\\d+}/user/{uid:\\d+}', GroupController::class . ':deleteGroupMember');
     $app->get('/deletable', GroupController::class . ':getDeletableGroups');
+    $app->get('/{id:\\d+}/members', GroupController::class . ':getGroupMembers');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

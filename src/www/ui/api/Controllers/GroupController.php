@@ -13,6 +13,8 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\UI\Api\Models\User;
+use Fossology\UI\Api\Models\UserGroupMember;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
@@ -188,5 +190,58 @@ class GroupController extends RestController
       $groupList[] = $groupObject->getArray();
     }
     return $response->withJson($groupList, 200);
+  }
+
+  /**
+   * Get users with their roles from a given group
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getGroupMembers($request, $response, $args)
+  {
+    $userId = $this->restHelper->getUserId();
+    /** @var UserDao */
+    $userDao = $this->restHelper->getUserDao();
+    $groupMap = $userDao->getAdminGroupMap($userId, $_SESSION[Auth::USER_LEVEL]);
+    $res = null;
+
+    if (empty($groupMap)) {
+      $res = new Info(400, "You have no permission to manage any group.", InfoType::ERROR);
+    } else {
+
+      /**
+       * Get the group id from the params *
+       **/
+      $groupId = intval($args['id']);
+
+      /**
+       * The query to get the list of users with corresponding roles from the group. *
+       **/
+      $dbManager = $this->dbHelper->getDbManager();
+
+      $stmt = __METHOD__ . "getUsersWithGroup";
+      $dbManager->prepare($stmt, "SELECT user_pk, group_perm
+         FROM users INNER JOIN group_user_member gum ON gum.user_fk=users.user_pk AND gum.group_fk=$1;");
+
+      $result = $dbManager->execute($stmt, array($groupId));
+      $usersWithGroup = $dbManager->fetchAll($result);
+
+      /**
+       * Convert back fields [user_pk , group_user_member_pk ,group_perm ] from String to Integer*
+       **/
+      $memberList = array();
+      foreach ($usersWithGroup as $record) {
+        $user = $this->dbHelper->getUsers($record['user_pk']);
+        $userGroupMember = new UserGroupMember($user[0],$record["group_perm"]);
+        $memberList[] = $userGroupMember->getArray();
+      }
+      $dbManager->freeResult($result);
+
+      return $response->withJson($memberList, 200);
+    }
+    return $response->withJson($res->getArray(), $res->getCode());
   }
 }
