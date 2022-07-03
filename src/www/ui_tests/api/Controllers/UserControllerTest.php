@@ -114,8 +114,8 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
         continue;
       }
       $user = new User($userId, "user$userId", "User $userId",
-        "user$userId@example.com", $accessLevel, 2, 4, "", 2);
-      $userArray[] = $user->getArray();
+        "user$userId@example.com", $accessLevel, 2, 4, "");
+      $userArray[] = $user;
     }
     return $userArray;
   }
@@ -133,7 +133,7 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs(["users", "user_pk", $userId])->andReturn(true);
     $this->dbHelper->shouldReceive('getUsers')->withArgs([$userId])
       ->andReturn($user);
-    $expectedResponse = (new ResponseHelper())->withJson($user[0], 200);
+    $expectedResponse = (new ResponseHelper())->withJson($user[0]->getArray(), 200);
     $actualResponse = $this->userController->getUsers(null, new ResponseHelper(),
       ['id' => $userId]);
     $this->assertEquals($expectedResponse->getStatusCode(),
@@ -173,7 +173,13 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $users = $this->getUsers([2, 3, 4]);
     $this->dbHelper->shouldReceive('getUsers')->withArgs([null])
       ->andReturn($users);
-    $expectedResponse = (new ResponseHelper())->withJson($users, 200);
+
+    $allUsers = array();
+    foreach ($users as $user) {
+      $allUsers[] = $user->getArray();
+    }
+
+    $expectedResponse = (new ResponseHelper())->withJson($allUsers, 200);
     $actualResponse = $this->userController->getUsers(null, new ResponseHelper(), []);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
@@ -233,15 +239,21 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
   {
     $userId = 2;
     $user = $this->getUsers([$userId]);
-    $user[0]["default_group"] = "fossy";
+
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->dbHelper->shouldReceive('getUsers')->withArgs([$userId])
       ->andReturn($user);
-    $expectedResponse = (new ResponseHelper())->withJson($user[0], 200);
-    $this->userDao->shouldReceive('getUserAndDefaultGroupByUserName')->withArgs([$user[0]["name"]])
+    $this->userDao->shouldReceive('getUserAndDefaultGroupByUserName')->withArgs([$user[0]->getArray()["name"]])
       ->andReturn(["group_name" => "fossy"]);
+
+    $expectedUser = $user[0]->getArray();
+    $expectedUser["default_group"] = "fossy";
+
+    $expectedResponse = (new ResponseHelper())->withJson($expectedUser, 200);
+
     $actualResponse = $this->userController->getCurrentUser(null,
       new ResponseHelper(), []);
+
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
