@@ -273,17 +273,7 @@ class UploadSrvPage extends UploadPageBase
       return array(false, $text, _($ErrorMsg));
     }
 
-    AgentCheckBoxDo($jobpk, $uploadId);
-
-    $message = "";
-    /** check if the scheudler is running */
-    $status = GetRunnableJobList();
-    if (empty($status)) {
-      $message .= _("Is the scheduler running? ");
-    }
-    $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
-    $message .= "The file $sourceFiles has been uploaded. ";
-    $keep = "It is <a href='$Url'>upload #" . $uploadId . "</a>.\n";
+    $message = $this->postUploadAddJobs($request, $Name, $uploadId, $jobpk);
     return array(true, $message.$keep, $description, $uploadId);
   }
 }
