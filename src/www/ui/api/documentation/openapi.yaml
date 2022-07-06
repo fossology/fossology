@@ -603,7 +603,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-          
+
   /uploads/{id}/copyrights:
     parameters:
       - name: id
@@ -1298,7 +1298,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-          $ref: '#/components/responses/defaultResponse' 
+          $ref: '#/components/responses/defaultResponse'
+  /groups/deletable:
+    get:
+      operationId: deletableGroups
+      tags:
+        - Groups
+      summary: Give a list of deletable groups
+      description: >
+        Return a list of the groups which it is possible to delete.
+      responses:
+        '200':
+          description: List of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /report:
     get:
       operationId: getReportsByUpload

@@ -165,4 +165,28 @@ class GroupController extends RestController
 
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
+
+  /**
+   * Get a list of groups that can be deleted
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getDeletableGroups($request, $response, $args)
+  {
+    $userId = $this->restHelper->getUserId();
+    /* @var $userDao UserDao */
+    $userDao = $this->restHelper->getUserDao();
+    $groupMap = $userDao->getDeletableAdminGroupMap($userId,
+      $_SESSION[Auth::USER_LEVEL]);
+
+    $groupList = array();
+    foreach ($groupMap as $key => $value) {
+      $groupObject = new Group($key, $value);
+      $groupList[] = $groupObject->getArray();
+    }
+    return $response->withJson($groupList, 200);
+  }
 }
