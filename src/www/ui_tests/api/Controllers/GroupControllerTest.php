@@ -137,5 +137,23 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
       $this->getResponseJson($actualResponse));
   }
 
-
+  /**
+   * @test
+   * -# Test GroupController::getDeletableGroups()
+   * -# Check if the response is a list of groups.
+   */
+  public function testGetDeletableGroups()
+  {
+    $userId = 2;
+    $groupList = array();
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->userDao->shouldReceive('getDeletableAdminGroupMap')->withArgs([$userId,
+      $_SESSION[Auth::USER_LEVEL]])->andReturn([]);
+    $expectedResponse = (new ResponseHelper())->withJson($groupList, 200);
+    $actualResponse = $this->groupController->getDeletableGroups(null, new ResponseHelper(), []);
+    $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
+  }
+  
 }
