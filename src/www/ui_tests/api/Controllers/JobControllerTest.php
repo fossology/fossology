@@ -29,6 +29,7 @@ use Fossology\UI\Api\Models\Job;
 use Fossology\Lib\Dao\JobDao;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\User;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Slim\Psr7\Request;
@@ -133,15 +134,38 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
+   * Generate array of users
+   * @param array $userIds User ids to be generated
+   * @return array[]
+   */
+  private function getUsers($userIds)
+  {
+    $userArray = array();
+    foreach ($userIds as $userId) {
+      if ($userId == 2) {
+        $accessLevel = PLUGIN_DB_ADMIN;
+      } elseif ($userId > 2 && $userId <= 4) {
+        $accessLevel = PLUGIN_DB_WRITE;
+      } elseif ($userId == 5) {
+        $accessLevel = PLUGIN_DB_READ;
+      } else {
+        continue;
+      }
+      $user = new User($userId, "user$userId", "User $userId",
+        "user$userId@example.com", $accessLevel, 2, 4, "");
+      $userArray[] = $user->getArray();
+    }
+    return $userArray;
+  }
+
+  /**
    * @test
    * -# Test JobController::getJobs() for all jobs
    * -# Check if response is 200
    */
   public function testGetJobs()
   {
-    $job = new Job(11, "job_name", "01-01-2020", 4, 2, 2, 0, "Completed");
-    $this->dbHelper->shouldReceive('getJobs')->withArgs(array(null, 0, 1))
-      ->andReturn([[$job], 1]);
+    $job = new Job(11, "job_name", "01-01-2020", 4, 2, 2, 0, "Completed");    
     $this->jobDao->shouldReceive('getAllJobStatus')->withArgs(array(4, 2, 2))
       ->andReturn(['11' => 0]);
     $this->showJobsDao->shouldReceive('getEstimatedTime')
@@ -154,6 +178,11 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("GET", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
     $response = new ResponseHelper();
+    $userId = 2;
+    $user = $this->getUsers([$userId]);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->dbHelper->shouldReceive('getUserJobs')->withArgs(array(null, 2, 0, 1))
+      ->andReturn([[$job], 1]);
     $actualResponse = $this->jobController->getJobs($request, $response, []);
     $expectedResponse = $job->getArray();
     $this->assertEquals(200, $actualResponse->getStatusCode());
@@ -170,9 +199,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testGetJobsLimitPage()
   {
-    $jobTwo = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");
-    $this->dbHelper->shouldReceive('getJobs')->withArgs(array(null, 1, 2))
-      ->andReturn([[$jobTwo], 2]);
+    $jobTwo = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");   
     $this->jobDao->shouldReceive('getAllJobStatus')->withArgs(array(4, 2, 2))
       ->andReturn(['11' => 0]);
     $this->jobDao->shouldReceive('getAllJobStatus')->withArgs(array(5, 2, 2))
@@ -189,6 +216,11 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("GET", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
     $response = new ResponseHelper();
+    $userId = 2;
+    $user = $this->getUsers([$userId]);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->dbHelper->shouldReceive('getUserJobs')->withArgs(array(null, 2, 1, 2))
+    ->andReturn([[$jobTwo], 2]);
     $actualResponse = $this->jobController->getJobs($request, $response, []);
     $expectedResponse = $jobTwo->getArray();
     $this->assertEquals(200, $actualResponse->getStatusCode());
@@ -215,6 +247,9 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("GET", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
     $response = new ResponseHelper();
+    $userId = 2;
+    $user = $this->getUsers([$userId]);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $actualResponse = $this->jobController->getJobs($request, $response, [
       "id" => 2]);
     $expectedResponse = new Info(404, "Job id 2 doesn't exist", InfoType::ERROR);
@@ -248,6 +283,9 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("GET", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
     $response = new ResponseHelper();
+    $userId = 2;
+    $user = $this->getUsers([$userId]);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $actualResponse = $this->jobController->getJobs($request, $response, [
       "id" => 12]);
     $expectedResponse = $job->getArray();
@@ -285,6 +323,9 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
       $requestHeaders, [], [], $body);
     $request = $request->withQueryParams([JobController::UPLOAD_PARAM => 5]);
     $response = new ResponseHelper();
+    $userId = 2;
+    $user = $this->getUsers([$userId]);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $actualResponse = $this->jobController->getJobs($request, $response, []);
     $expectedResponse = $job->getArray();
     $this->assertEquals(200, $actualResponse->getStatusCode());

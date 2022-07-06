@@ -71,7 +71,7 @@ class JobController extends RestController
   public function getJobs($request, $response, $args)
   {
     $query = $request->getQueryParams();
-
+    $userId = $this->restHelper->getUserId();
     $limit = 0;
     $page = 1;
     if ($request->hasHeader('limit')) {
@@ -109,7 +109,8 @@ class JobController extends RestController
       return $this->getFilteredResults(intval($query[self::UPLOAD_PARAM]),
         $response, $limit, $page);
     } else {
-      return $this->getAllResults($id, $response, $limit, $page);
+      $id = null;
+      return $this->getAllUserResults($id,$userId, $response, $limit, $page);
     }
   }
 
@@ -171,6 +172,29 @@ class JobController extends RestController
       $error = new Info(400, "Folder id and upload id should be integers!", InfoType::ERROR);
       return $response->withJson($error->getArray(), $error->getCode());
     }
+  }
+  /**
+   * Get all jobs created by the current user.
+   *
+   * @param integer|null $id Specific job id or null for all jobs
+   * @param integer $uid Specific user id
+   * @param ResponseHelper $response Response object
+   * @param integer $limit   Limit of jobs per page
+   * @param integer $page    Page number required
+   * @return ResponseHelper
+   */
+  private function getAllUserResults($id, $uid, $response, $limit, $page)
+  {
+    list($jobs, $count) = $this->dbHelper->getUserJobs($id, $uid, $limit, $page);
+    $finalJobs = [];
+    foreach ($jobs as $job) {
+      $this->updateEtaAndStatus($job);
+      $finalJobs[] = $job->getArray();
+    }
+    if ($id !== null) {
+      $finalJobs = $finalJobs[0];
+    }
+    return $response->withHeader("X-Total-Pages", $count)->withJson($finalJobs, 200);
   }
 
   /**
