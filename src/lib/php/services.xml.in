@@ -52,6 +52,13 @@ SPDX-License-Identifier: FSFAP
             <argument type="service" id="dao.user"/>
             <argument type="service" id="dao.upload"/>
         </service>
+
+        <service id="dao.project" class="Fossology\Lib\Dao\ProjectDao" public="true">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.user"/>
+            <argument type="service" id="dao.upload"/>
+        </service>
+
         <service id="dao.package" class="Fossology\Lib\Dao\PackageDao" public="true">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>
@@ -170,6 +177,12 @@ SPDX-License-Identifier: FSFAP
         <service id="ui.folder.nav" class="Fossology\Lib\UI\FolderNav" public="true">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.folder"/>
+        </service>
+
+        <service id="ui.project.nav" class="Fossology\Lib\UI\ProjectNav" public="true">
+            <argument type="service" id="db.manager"/>
+            <!-- <argument type="service" id="dao.folder"/> -->
+            <argument type="service" id="dao.project"/>
         </service>
 
         <service id="twig.loader" class="Twig\Loader\FilesystemLoader" public="true">

@@ -2,6 +2,7 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\ProjectDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 /*
@@ -72,6 +73,51 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
   $dbManager->getSingleRow("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ($1,$2,$3)",
                array($folder_pk,FolderDao::MODE_UPLOAD,$uploadId),'insert.foldercontents');
 
+  // Force insertion
+  if ($setGlobal != 1) {
+    $setGlobal = 0;
+  }
+  /* @var UploadDao $uploadDao */
+  $uploadDao = $GLOBALS['container']->get('dao.upload');
+  $uploadDao->getGlobalDecisionSettingsFromInfo($uploadId, $setGlobal);
+
+  /**
+   * ** Add user permission to perm_upload ****
+   */
+  if (empty($groupId)) {
+    $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',
+      array($userId), __METHOD__.'.select.user');
+    $groupId = $usersRow['group_fk'];
+  }
+  $perm_admin = Auth::PERM_ADMIN;
+
+  $dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES ($1,$2,$3)",
+               array($perm_admin, $uploadId, $groupId),'insert.perm_upload');
+
+  return ($uploadId);
+}
+
+function JobAddUploadWithProject($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $project_pk, $public_perm=Auth::PERM_NONE, $setGlobal=0)
+{
+  global $container;
+
+  $dbManager = $container->get('db.manager');
+  /* check all required inputs */
+  if (empty($userId) || empty($job_name) || empty($filename) ||
+      empty($UploadMode) || empty($folder_pk) || empty($project_pk)) {
+        return;
+  }
+
+  $row = $dbManager->getSingleRow("INSERT INTO upload
+      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin,public_perm) VALUES ($1,$2,$3,$4,$5,$6) RETURNING upload_pk",
+      array($desc,$job_name,$userId,$UploadMode,$filename, $public_perm),__METHOD__.'.insert.upload');
+  $uploadId = $row['upload_pk'];
+
+  $dbManager->getSingleRow("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ($1,$2,$3)",
+               array($folder_pk,FolderDao::MODE_UPLOAD,$uploadId),'insert.foldercontents');
+
+  $dbManager->getSingleRow("INSERT INTO projectcontents (parent_fk,projectcontents_mode,child_id) VALUES ($1,$2,$3)",
+               array($project_pk,ProjectDao::MODE_UPLOAD,$uploadId),'insert.projectcontents');
   // Force insertion
   if ($setGlobal != 1) {
     $setGlobal = 0;
@@ -194,6 +240,7 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
   $sql .= $jq_cmd_args ? "'$jq_cmd_args')" : "NULL)";
 
   $result = pg_query($PG_CONN, $sql);
+  
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
 

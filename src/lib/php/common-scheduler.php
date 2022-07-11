@@ -126,6 +126,7 @@ function fo_communicate_with_scheduler($input, &$output, &$error_msg)
   $sock = fo_scheduler_connect($address, $port, $error_msg);
   if ($sock) {
     $msg = trim($input);
+
     $write_result = fo_scheduler_write($sock, $msg);
     if ($write_result) {
       while ($buf = fo_scheduler_read($sock)) {

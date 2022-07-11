@@ -783,6 +783,26 @@
   $Schema["TABLE"]["folder"]["folder_perm"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"folder_perm\" int4";
   $Schema["TABLE"]["folder"]["folder_perm"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_perm\" DROP NOT NULL";
 
+  $Schema["TABLE"]["project"]["project_pk"]["DESC"] = "";
+  $Schema["TABLE"]["project"]["project_pk"]["ADD"] = "ALTER TABLE \"project\" ADD COLUMN \"project_pk\" int4 DEFAULT nextval('project_project_pk_seq'::regclass)";
+  $Schema["TABLE"]["project"]["project_pk"]["ALTER"] = "ALTER TABLE \"project\" ALTER COLUMN \"project_pk\" SET NOT NULL, ALTER COLUMN \"project_pk\" SET DEFAULT nextval('project_project_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["project"]["project_name"]["DESC"] = "";
+  $Schema["TABLE"]["project"]["project_name"]["ADD"] = "ALTER TABLE \"project\" ADD COLUMN \"project_name\" text";
+  $Schema["TABLE"]["project"]["project_name"]["ALTER"] = "ALTER TABLE \"project\" ALTER COLUMN \"project_name\" SET NOT NULL";
+
+  $Schema["TABLE"]["project"]["user_fk"]["DESC"] = "";
+  $Schema["TABLE"]["project"]["user_fk"]["ADD"] = "ALTER TABLE \"project\" ADD COLUMN \"user_fk\" int4";
+  $Schema["TABLE"]["project"]["user_fk"]["ALTER"] = "ALTER TABLE \"project\" ALTER COLUMN \"user_fk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["project"]["project_desc"]["DESC"] = "";
+  $Schema["TABLE"]["project"]["project_desc"]["ADD"] = "ALTER TABLE \"project\" ADD COLUMN \"project_desc\" text";
+  $Schema["TABLE"]["project"]["project_desc"]["ALTER"] = "ALTER TABLE \"project\" ALTER COLUMN \"project_desc\" DROP NOT NULL";
+
+  $Schema["TABLE"]["project"]["project_perm"]["DESC"] = "COMMENT ON COLUMN \"project\".\"project_perm\" IS 'future permission'";
+  $Schema["TABLE"]["project"]["project_perm"]["ADD"] = "ALTER TABLE \"project\" ADD COLUMN \"project_perm\" int4";
+  $Schema["TABLE"]["project"]["project_perm"]["ALTER"] = "ALTER TABLE \"project\" ALTER COLUMN \"project_perm\" DROP NOT NULL";
+
 
   $Schema["TABLE"]["foldercontents"]["foldercontents_pk"]["DESC"] = "";
   $Schema["TABLE"]["foldercontents"]["foldercontents_pk"]["ADD"] = "ALTER TABLE \"foldercontents\" ADD COLUMN \"foldercontents_pk\" int4 DEFAULT nextval('foldercontents_foldercontents_pk_seq'::regclass)";
@@ -799,6 +819,22 @@
   $Schema["TABLE"]["foldercontents"]["child_id"]["DESC"] = "";
   $Schema["TABLE"]["foldercontents"]["child_id"]["ADD"] = "ALTER TABLE \"foldercontents\" ADD COLUMN \"child_id\" int4";
   $Schema["TABLE"]["foldercontents"]["child_id"]["ALTER"] = "ALTER TABLE \"foldercontents\" ALTER COLUMN \"child_id\" SET NOT NULL";
+
+  $Schema["TABLE"]["projectcontents"]["projectcontents_pk"]["DESC"] = "";
+  $Schema["TABLE"]["projectcontents"]["projectcontents_pk"]["ADD"] = "ALTER TABLE \"projectcontents\" ADD COLUMN \"projectcontents_pk\" int4 DEFAULT nextval('projectcontents_projectcontents_pk_seq'::regclass)";
+  $Schema["TABLE"]["projectcontents"]["projectcontents_pk"]["ALTER"] = "ALTER TABLE \"projectcontents\" ALTER COLUMN \"projectcontents_pk\" SET NOT NULL, ALTER COLUMN \"projectcontents_pk\" SET DEFAULT nextval('projectcontents_projectcontents_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["projectcontents"]["parent_fk"]["DESC"] = "COMMENT ON COLUMN \"projectcontents\".\"parent_fk\" IS 'parent folder_fk'";
+  $Schema["TABLE"]["projectcontents"]["parent_fk"]["ADD"] = "ALTER TABLE \"projectcontents\" ADD COLUMN \"parent_fk\" int4";
+  $Schema["TABLE"]["projectcontents"]["parent_fk"]["ALTER"] = "ALTER TABLE \"projectcontents\" ALTER COLUMN \"parent_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["projectcontents"]["projectcontents_mode"]["DESC"] = "COMMENT ON COLUMN \"projectcontents\".\"projectcontents_mode\" IS '1<<0 child is folder_fk, 1<<1 child is upload_fk, 1<<2 child is an uploadtree_fk'";
+  $Schema["TABLE"]["projectcontents"]["projectcontents_mode"]["ADD"] = "ALTER TABLE \"projectcontents\" ADD COLUMN \"projectcontents_mode\" int4";
+  $Schema["TABLE"]["projectcontents"]["projectcontents_mode"]["ALTER"] = "ALTER TABLE \"projectcontents\" ALTER COLUMN \"projectcontents_mode\" SET NOT NULL";
+
+  $Schema["TABLE"]["projectcontents"]["child_id"]["DESC"] = "";
+  $Schema["TABLE"]["projectcontents"]["child_id"]["ADD"] = "ALTER TABLE \"projectcontents\" ADD COLUMN \"child_id\" int4";
+  $Schema["TABLE"]["projectcontents"]["child_id"]["ALTER"] = "ALTER TABLE \"projectcontents\" ALTER COLUMN \"child_id\" SET NOT NULL";
 
 
   $Schema["TABLE"]["group_user_member"]["group_user_member_pk"]["DESC"] = "";
@@ -1977,9 +2013,16 @@
   $Schema["TABLE"]["users"]["root_folder_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"root_folder_fk\" int4";
   $Schema["TABLE"]["users"]["root_folder_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"root_folder_fk\" SET NOT NULL";
 
+  $Schema["TABLE"]["users"]["root_project_fk"]["DESC"] = "COMMENT ON COLUMN \"users\".\"root_project_fk\" IS 'root project for this user'";
+  $Schema["TABLE"]["users"]["root_project_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"root_project_fk\" int4";
+  
   $Schema["TABLE"]["users"]["default_folder_fk"]["DESC"] = "COMMENT ON COLUMN \"users\".\"default_folder_fk\" IS 'default folder for this user'";
   $Schema["TABLE"]["users"]["default_folder_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"default_folder_fk\" int4 DEFAULT -1";
   $Schema["TABLE"]["users"]["default_folder_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"default_folder_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["users"]["default_project_fk"]["DESC"] = "COMMENT ON COLUMN \"users\".\"default_project_fk\" IS 'default project for this user'";
+  $Schema["TABLE"]["users"]["default_project_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"default_project_fk\" int4 DEFAULT -1";
+  $Schema["TABLE"]["users"]["default_project_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"default_project_fk\" SET NOT NULL";
 
   $Schema["TABLE"]["users"]["last_connection"]["DESC"] = "";
   $Schema["TABLE"]["users"]["last_connection"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"last_connection\" timestamptz";
@@ -2143,6 +2186,8 @@
 
   $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::timestamp with time zone AS ts, NULL::integer AS upload_pk, NULL::integer AS pfile_fk, NULL::integer AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::integer AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
 
+  $Schema["VIEW"]["projectlist"] = "CREATE VIEW \"projectlist\" AS SELECT project.project_pk, project.project_name AS name, project.project_desc AS description, projectcontents.parent_fk AS parent, projectcontents.projectcontents_mode, NULL::timestamp with time zone AS ts, NULL::integer AS upload_pk, NULL::integer AS pfile_fk, NULL::integer AS ufile_mode FROM project, projectcontents WHERE ((projectcontents.projectcontents_mode = 1) AND (projectcontents.child_id = project.project_pk)) UNION ALL SELECT NULL::integer AS project_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, projectcontents.parent_fk AS parent, projectcontents.projectcontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN projectcontents ON (((projectcontents.projectcontents_mode = 2) AND (projectcontents.child_id = upload.upload_pk))));";
+
 
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"sysconfig_sysconfig_pk_seq\"";
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"]["UPDATE"] = "SELECT setval('sysconfig_sysconfig_pk_seq',(SELECT greatest(1,max(sysconfig_pk)) val FROM sysconfig))";
@@ -2201,8 +2246,16 @@
   $Schema["SEQUENCE"]["folder_folder_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"folder_folder_pk_seq\"";
   $Schema["SEQUENCE"]["folder_folder_pk_seq"]["UPDATE"] = "SELECT setval('folder_folder_pk_seq',(SELECT greatest(1,max(folder_pk)) val FROM folder))";
 
+  $Schema["SEQUENCE"]["project_project_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"project_project_pk_seq\"";
+  $Schema["SEQUENCE"]["project_project_pk_seq"]["UPDATE"] = "SELECT setval('project_project_pk_seq',(SELECT greatest(1,max(project_pk)) val FROM project))";
+
+
   $Schema["SEQUENCE"]["foldercontents_foldercontents_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"foldercontents_foldercontents_pk_seq\"";
   $Schema["SEQUENCE"]["foldercontents_foldercontents_pk_seq"]["UPDATE"] = "SELECT setval('foldercontents_foldercontents_pk_seq',(SELECT greatest(1,max(foldercontents_pk)) val FROM foldercontents))";
+
+  $Schema["SEQUENCE"]["projectcontents_projectcontents_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"projectcontents_projectcontents_pk_seq\"";
+  $Schema["SEQUENCE"]["projectcontents_projectcontents_pk_seq"]["UPDATE"] = "SELECT setval('projectcontents_projectcontents_pk_seq',(SELECT greatest(1,max(foldercontents_pk)) val FROM foldercontents))";
+
 
   $Schema["SEQUENCE"]["package_package_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"package_package_pk_seq\"";
   $Schema["SEQUENCE"]["package_package_pk_seq"]["UPDATE"] = "SELECT setval('package_package_pk_seq',(SELECT greatest(1,max(package_pk)) val FROM package))";

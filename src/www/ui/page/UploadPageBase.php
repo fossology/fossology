@@ -1,4 +1,5 @@
 <?php
+
 /*
  SPDX-FileCopyrightText: © 2015 Siemens AG
 
@@ -16,10 +17,13 @@ use Fossology\Lib\UI\MenuHook;
 use Monolog\Logger;
 use Symfony\Component\HttpFoundation\Request;
 
+use Fossology\Lib\Dao\ProjectDao;
+
 abstract class UploadPageBase extends DefaultPlugin
 {
   const NAME = "upload_file";
   const FOLDER_PARAMETER_NAME = 'folder';
+  const PROJECT_PARAMETER_NAME = 'project';
 
   const DESCRIPTION_INPUT_NAME = 'descriptionInputName';
   const DESCRIPTION_VALUE = 'descriptionValue';
@@ -36,6 +40,9 @@ abstract class UploadPageBase extends DefaultPlugin
   /** @var UserDao */
   private $userDao;
 
+  /** @var projectDao */
+  private $projectDao;
+
   public function __construct($name, $parameters = array())
   {
     parent::__construct($name, $parameters);
@@ -44,6 +51,8 @@ abstract class UploadPageBase extends DefaultPlugin
     $this->uploadDao = $this->getObject('dao.upload');
     $this->logger = $this->getObject('logger');
     $this->userDao = $this->getObject('dao.user');
+
+    $this->projectDao = $this->getObject('dao.project');
   }
   abstract protected function handleUpload(Request $request);
   abstract protected function handleView(Request $request, $vars);
@@ -52,6 +61,8 @@ abstract class UploadPageBase extends DefaultPlugin
   {
     // Handle request
     $this->folderDao->ensureTopLevelFolder();
+
+    $this->projectDao->ensureTopLevelProject();
 
     $message = "";
     $description = "";
@@ -64,6 +75,9 @@ abstract class UploadPageBase extends DefaultPlugin
     $vars['folderParameterName'] = self::FOLDER_PARAMETER_NAME;
     $vars['upload_max_filesize'] = ini_get('upload_max_filesize');
     $vars['agentCheckBoxMake'] = '';
+
+    $vars['projectParameterName'] = self::PROJECT_PARAMETER_NAME;
+
     global $SysConf;
     $userId = Auth::getUserId();
     $UserRec = $this->userDao->getUserByPk($userId);
@@ -72,16 +86,29 @@ abstract class UploadPageBase extends DefaultPlugin
     } else {
       $vars['uploadVisibility'] = $SysConf['SYSCONFIG']['UploadVisibility'];
     }
+
     $rootFolder = $this->folderDao->getDefaultFolder(Auth::getUserId());
     if ($rootFolder == NULL) {
       $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
     }
     $folderStructure = $this->folderDao->getFolderStructure($rootFolder->getId());
-
     $vars['folderStructure'] = $folderStructure;
+
+    $rootProject = $this->projectDao->getDefaultProject(Auth::getUserId());
+    if ($rootProject == NULL) {
+      $rootProject = $this->projectDao->getRootProject(Auth::getUserId());
+    }
+    $projectStructure = $this->projectDao->getProjectStructure($rootProject->getId());
+    $vars['projectStructure'] = $projectStructure;
+
+    $vars['projectStructure'] = $projectStructure;
+
+
     $vars['baseUrl'] = $request->getBaseUrl();
     $vars['moduleName'] = $this->getName();
     $vars[self::FOLDER_PARAMETER_NAME] = $request->get(self::FOLDER_PARAMETER_NAME);
+
+    $vars[self::PROJECT_PARAMETER_NAME] = $request->get(self::PROJECT_PARAMETER_NAME);
 
     $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
     $vars['parmAgentContents'] = array();
@@ -93,7 +120,7 @@ abstract class UploadPageBase extends DefaultPlugin
     }
 
     $session = $request->getSession();
-    $session->set(self::UPLOAD_FORM_BUILD_PARAMETER_NAME, time().':'.$_SERVER['REMOTE_ADDR']);
+    $session->set(self::UPLOAD_FORM_BUILD_PARAMETER_NAME, time() . ':' . $_SERVER['REMOTE_ADDR']);
     $vars['uploadFormBuild'] = $session->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME);
     $vars['uploadFormBuildParameterName'] = self::UPLOAD_FORM_BUILD_PARAMETER_NAME;
 
@@ -101,6 +128,7 @@ abstract class UploadPageBase extends DefaultPlugin
       $skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
       $vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $skip);
     }
+
     return $this->handleView($request, $vars);
   }
 
@@ -112,11 +140,12 @@ abstract class UploadPageBase extends DefaultPlugin
     if ($jobId === null) {
       $jobId = JobAddJob($userId, $groupId, $fileName, $uploadId);
     }
+
     $dummy = "";
     $unpackArgs = intval($request->get('scm')) == 1 ? '-I' : '';
     $adj2nestDependencies = array();
     if ($wgetDependency) {
-      $adj2nestDependencies = array(array('name'=>'agent_unpack','args'=>$unpackArgs,AgentPlugin::PRE_JOB_QUEUE=>array('wget_agent')));
+      $adj2nestDependencies = array(array('name' => 'agent_unpack', 'args' => $unpackArgs, AgentPlugin::PRE_JOB_QUEUE => array('wget_agent')));
     }
     $adj2nestplugin = \plugin_find('agent_adj2nest');
     $adj2nestplugin->AgentAdd($jobId, $uploadId, $dummy, $adj2nestDependencies, null, (empty($adj2nestDependencies) ? $unpackArgs : ''));
@@ -140,8 +169,8 @@ abstract class UploadPageBase extends DefaultPlugin
     $message = empty($status) ? _("Is the scheduler running? ") : "";
     $jobUrl = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
     $message .= _("The file") . " " . $fileName . " " . _("has been uploaded. It is") .
-        ' <a href=' . $jobUrl . '>upload #' . $uploadId . "</a>.\n";
-    if ($request->get('public')==self::PUBLIC_GROUPS) {
+      ' <a href=' . $jobUrl . '>upload #' . $uploadId . "</a>.\n";
+    if ($request->get('public') == self::PUBLIC_GROUPS) {
       $this->getObject('dao.upload.permission')->makeAccessibleToAllGroupsOf($uploadId, $userId);
     }
     return $message;
@@ -159,9 +188,11 @@ abstract class UploadPageBase extends DefaultPlugin
   function str_contains_notescaped_char($str, $char)
   {
     $pos = 0;
-    while ($pos < strlen($str) &&
-           ($pos = strpos($str,$char,$pos)) !== false) {
-      foreach (range(($pos++) -1, 1, -2) as $tpos) {
+    while (
+      $pos < strlen($str) &&
+      ($pos = strpos($str, $char, $pos)) !== false
+    ) {
+      foreach (range(($pos++) - 1, 1, -2) as $tpos) {
         if ($tpos > 0 && $str[$tpos] !== '\\') {
           break;
         }
@@ -200,7 +231,7 @@ abstract class UploadPageBase extends DefaultPlugin
   protected function path_can_escape($path)
   {
     return $this->str_contains_notescaped_char($path, '$')
-      || strpos($path,'..') !== false;
+      || strpos($path, '..') !== false;
   }
 
   /**
@@ -213,9 +244,9 @@ abstract class UploadPageBase extends DefaultPlugin
    *         FALSE on error
    *
    */
-  function normalize_path($path, $host="localhost", $appendix="")
+  function normalize_path($path, $host = "localhost", $appendix = "")
   {
-    if (strpos($path,'/') === false || $path === '/') {
+    if (strpos($path, '/') === false || $path === '/') {
       return false;
     }
     if ($this->path_is_pattern($path)) {
@@ -224,19 +255,21 @@ abstract class UploadPageBase extends DefaultPlugin
         return false;
       }
 
-      if (strcmp($host,"localhost") === 0) {
-        return $this->normalize_path(dirname($path),
-                                     $host,
-                                     $bpath . ($appendix == '' ?
-                                               '' :
-                                               '/' . $appendix));
+      if (strcmp($host, "localhost") === 0) {
+        return $this->normalize_path(
+          dirname($path),
+          $host,
+          $bpath . ($appendix == '' ?
+            '' :
+            '/' . $appendix)
+        );
       } else {
         if ($this->path_can_escape($path)) {
           return false;
         }
         return $path . ($appendix == '' ?
-                        '' :
-                        '/' . $appendix);
+          '' :
+          '/' . $appendix);
       }
     } else {
       $rpath = realpath($path);
@@ -244,8 +277,8 @@ abstract class UploadPageBase extends DefaultPlugin
         return false;
       }
       return $rpath . ($appendix == '' ?
-                       '' :
-                       '/' . $appendix);
+        '' :
+        '/' . $appendix);
     }
   }
 

@@ -1,0 +1,16 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% if selected is not defined %}
+  {% set selected = -1 %}
+{% endif %}
+<select name="{{ name }}"{% if id is defined %} id="{{ id }}"{% endif %} class="ui-render-select2 form-control-sm">
+  {% for entry in projectStructure %}
+    <option value="{{ entry.project.id }}"{% if selected == entry.project.id %} selected="selected"{% endif %}>
+      {% for i in range(1, entry.depth*2) %}&nbsp;{% endfor %}{{ entry.project.name | escape('html') }}
+    </option>
+  {% endfor %}
+</select>
