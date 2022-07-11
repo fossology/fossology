@@ -69,6 +69,11 @@ class User
    * Current user's analysis from $agents
    */
   private $analysis;
+  /**
+   * @var int $defaultBucketPool
+   * Default bucket pool of the user
+   */
+  private $defaultBucketPool;
 
   /**
    * User constructor.
@@ -81,8 +86,10 @@ class User
    * @param integer $default_group_fk
    * @param boolean $emailNotification
    * @param object $agents
+   * @param integer $defaultBucketPool
    */
-  public function __construct($id, $name, $description, $email, $accessLevel, $root_folder_id, $emailNotification, $agents, $default_group_fk=null)
+  public function __construct($id, $name, $description, $email, $accessLevel, $root_folder_id, $emailNotification,
+                              $agents, $default_group_fk=null, $defaultBucketPool=null)
   {
     $this->id = intval($id);
     $this->name = $name;
@@ -94,6 +101,9 @@ class User
         break;
       case PLUGIN_DB_WRITE:
         $this->accessLevel = "read_write";
+        break;
+      case PLUGIN_DB_CADMIN:
+        $this->accessLevel = "clearing_admin";
         break;
       case PLUGIN_DB_ADMIN:
         $this->accessLevel = "admin";
@@ -107,6 +117,11 @@ class User
     $this->agents = $agents;
     $this->analysis = new Analysis();
     $this->analysis->setUsingString($this->agents);
+    if ($defaultBucketPool != null) {
+      $this->defaultBucketPool = intval($defaultBucketPool);
+    } else {
+      $this->defaultBucketPool = null;
+    }
   }
 
   ////// Getters //////
@@ -183,6 +198,14 @@ class User
   }
 
   /**
+   * @return int
+   */
+  public function getDefaultBucketPool()
+  {
+    return $this->defaultBucketPool;
+  }
+
+  /**
    * Get current user in JSON representation
    * @return string
    */
@@ -216,6 +239,9 @@ class User
     }
     if ($this->agents !== null) {
       $returnUser["agents"] = $this->analysis->getArray();
+    }
+    if ($this->defaultBucketPool !== null) {
+      $returnUser["defaultBucketpool"] = $this->defaultBucketPool;
     }
     return $returnUser;
   }

@@ -764,6 +764,70 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
   /users:
+    post:
+        operationId: createUser
+        tags:
+        - User
+        - Admin
+        summary: Create a new user
+        description: >
+          Create a new user
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/User'
+                  - type: object
+                    properties:
+                      user_pass:
+                        type: string
+                      defaultVisibility:
+                        type: string
+                        enum:
+                          - public
+                          - protected
+                          - private
+                    required:
+                      - name
+            application/x-www-form-urlencoded:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/User'
+                  - type: object
+                    properties:
+                      user_pass:
+                        type: string
+                      defaultVisibility:
+                        type: string
+                        enum:
+                          - public
+                          - protected
+                          - private
+                    required:
+                      - name
+        responses:
+          '201':
+            description: User created successfully
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Info'
+          '409':
+            description: User with the same email or username already exists
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Info'
+          '500':
+            description: Internal server error with details
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Info'
+          default:
+              $ref: '#/components/responses/defaultResponse'
     get:
       operationId: getUsers
       tags:
@@ -2052,6 +2116,10 @@ components:
           description: Default group id of the user
         agents:
           $ref: '#/components/schemas/Analysis'
+        defaultBucketpool:
+          description: Default bucket pool id
+          type: integer
+          nullable: true
       required:
         - id
     Analysis:

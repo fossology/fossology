@@ -50,6 +50,67 @@ class UserController extends RestController
   }
 
   /**
+   * Create a user
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function addUser($request, $response, $args)
+  {
+    $userDetails = $this->getParsedBody($request);
+    $userHelper = new UserHelper();
+    // creating symphony request
+    $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
+    $symfonyRequest->request->set('username', $userDetails['name']);
+    $symfonyRequest->request->set('pass1', $userDetails['user_pass']);
+    $symfonyRequest->request->set('pass2', $userDetails['user_pass']);
+    $symfonyRequest->request->set('description', $userDetails['description']);
+    $symfonyRequest->request->set('permission', $userHelper->getEquivalentValueForPermission($userDetails['accessLevel']));
+    $symfonyRequest->request->set('folder', $userDetails['rootFolderId']);
+    $symfonyRequest->request->set('enote', $userDetails['emailNotification'] ? 'y' : 'n');
+    $symfonyRequest->request->set('email', $userDetails['email']);
+    $symfonyRequest->request->set('public', $userDetails['defaultVisibility']);
+    $symfonyRequest->request->set('default_bucketpool_fk', isset($userDetails['defaultBucketpool']) ? $userDetails['defaultBucketpool'] : 2);
+
+    $agents = array();
+    if (isset($userDetails['agents'])) {
+      if (is_string($userDetails['agents'])) { // If 'x-www-form-urlencoded', inner elements are not decoded
+        $userDetails['agents'] = json_decode($userDetails['agents'], true);
+      }
+      $agents['Check_agent_mimetype'] = isset($userDetails['agents']['mime']) && $userDetails['agents']['mime'] ? 1 : 0;
+      $agents['Check_agent_monk'] = isset($userDetails['agents']['monk']) && $userDetails['agents']['monk'] ? 1 : 0;
+      $agents['Check_agent_ojo'] = isset($userDetails['agents']['ojo']) && $userDetails['agents']['ojo'] ? 1 : 0;
+      $agents['Check_agent_bucket'] = isset($userDetails['agents']['bucket']) && $userDetails['agents']['bucket'] ? 1 : 0 ;
+      $agents['Check_agent_copyright'] = isset($userDetails['agents']['copyright_email_author']) && $userDetails['agents']['copyright_email_author'] ? 1 : 0;
+      $agents['Check_agent_ecc'] = isset($userDetails['agents']['ecc']) && $userDetails['agents']['ecc'] ? 1 : 0;
+      $agents['Check_agent_keyword'] = isset($userDetails['agents']['keyword']) && $userDetails['agents']['keyword'] ? 1 : 0;
+      $agents['Check_agent_nomos'] = isset($userDetails['agents']['nomos']) && $userDetails['agents']['nomos'] ? 1 : 0;
+      $agents['Check_agent_pkgagent'] = isset($userDetails['agents']['package']) && $userDetails['agents']['package'] ? 1 : 0;
+      $agents['Check_agent_reso'] = isset($userDetails['agents']['reso']) && $userDetails['agents']['reso'] ? 1 : 0;
+      $agents['Check_agent_shagent'] = isset($userDetails['agents']['heritage']) && $userDetails['agents']['heritage'] ? 1 : 0 ;
+    }
+
+    $symfonyRequest->request->set('user_agent_list', userAgents($agents));
+
+    // initialising the user_add object
+    global $container;
+    $restHelper = $container->get('helper.restHelper');
+    $userAddObj = $restHelper->getPlugin('user_add');
+
+    // calling the add function
+    $ErrMsg = $userAddObj->add($symfonyRequest);
+
+    if ($ErrMsg != '') {
+      $returnVal = new Info(500, $ErrMsg, InfoType::ERROR);
+    } else {
+      $returnVal = new Info(201, "User created successfully", InfoType::INFO);
+    }
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
    * Delete a given user
    *
    * @param ServerRequestInterface $request
