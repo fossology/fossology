@@ -27,6 +27,13 @@
             {% include 'components/select-folder.html.twig' with {'name': folderParameterName, 'id': 'uploadFolderSelector'} %}
         </div>
       </li>
+      <li>
+        <div class="form-group">
+          <label for="{{ projectParameterName }}">{{ 'Select the project for storing the uploaded files'| trans }}:</label>
+            <br/>
+            {% include 'components/select-project.html.twig' with {'name': projectParameterName, 'id': 'uploadProjectSelector'} %}
+        </div>
+      </li>
       {% block fileselect %}
       {% endblock %}
       {% block filedescription %}

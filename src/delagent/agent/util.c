@@ -242,6 +242,33 @@ int check_write_permission_folder(long folder_id, int userId, int userPerm)
   return 0; // can be deleted
 }
 
+
+int check_write_permission_project(long project_id, int userId, int userPerm)
+{
+  char SQL[MAXSQL];
+  PGresult *result;
+  int count = 0;
+
+  if (userPerm < PERM_WRITE)
+  {
+    return 1; // can not be deleted
+  }
+
+  snprintf(SQL,MAXSQL,"SELECT count(*) FROM project JOIN users ON (users.user_pk = project.user_fk OR users.user_perm = 10) WHERE project_pk = %ld AND users.user_pk = %d;",project_id,userId);
+  result = PQexec(pgConn, SQL);
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
+  {
+    return -1;
+  }
+  count = atol(PQgetvalue(result,0,0));
+  if(count == 0)
+  {
+    return 1; // can not be deleted
+  }
+  return 0; // can be deleted
+}
+
+
 /**
  * \brief check if the license can be deleted, that is the user have
  * the permission to delete this license
@@ -720,6 +747,188 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int userI
   return 0; /* success */
 } /* listFoldersRecurse() */
 
+
+int listProjectsRecurse (long Parent, int Depth, long Row, int DelFlag, int userId, int userPerm)
+{
+  int r, i, rc, maxRow;
+  int count, resultUploadCount;
+  long Fid;
+  char *Desc;
+  char SQL[MAXSQL], SQLUpload[MAXSQL];
+  char SQLProject[MAXSQLProject];
+  PGresult *result, *resultUpload, *resultProject;
+
+  rc = check_write_permission_project(Parent, userId, userPerm);
+  if(rc < 0)
+  {
+    return rc;
+  }
+  if(DelFlag && rc > 0){
+    return 1;
+  }
+
+  snprintf(SQLProject, MAXSQLProject,"SELECT COUNT(*) FROM projectlist WHERE project_pk=%ld",Parent);
+  resultProject = PQexec(pgConn, SQLProject);
+  count= atoi(PQgetvalue(resultProject,0,0));
+  PQclear(resultProject);
+
+  /* Find all projects with this parent and recurse, but don't show uploads, if they also exist in other directories */
+  snprintf(SQL,MAXSQL,"SELECT project_pk,projectcontents_mode,name,description,upload_pk,pfile_fk FROM projectlist WHERE parent=%ld"
+                      " ORDER BY name,parent,project_pk ", Parent);
+  result = PQexec(pgConn, SQL);
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
+  {
+    return -1;
+  }
+  maxRow = PQntuples(result);
+  for(r=0; r < maxRow; r++)
+  {
+    if (atol(PQgetvalue(result,r,0)) == Parent)
+    {
+      continue;
+    }
+
+    Fid = atol(PQgetvalue(result,r,0));
+    if (Fid != 0)
+    {
+      if (!DelFlag)
+      {
+        for(i=0; i<Depth; i++)
+        {
+          fputs("   ",stdout);
+        }
+        printf("%4ld :: %s",Fid,PQgetvalue(result,r,2));
+        Desc = PQgetvalue(result,r,3);
+        if (Desc && Desc[0])
+        {
+          printf(" (%s)",Desc);
+        }
+        printf("\n");
+      }
+      rc = listProjectsRecurse(Fid,Depth+1,Parent,DelFlag,userId,userPerm);
+      if (rc < 0)
+      {
+        if (DelFlag)
+        {
+          printf("Deleting the project failed.");
+        }
+        return 1;
+      }
+    }
+    else
+    {
+      if (DelFlag==1 && unlinkContent(Parent,Row,1,userId,userPerm)==0)
+      {
+        continue;
+      }
+      if (rc < 0)
+      {
+        return rc;
+      }
+      if (DelFlag)
+      {
+        snprintf(SQLUpload, MAXSQL,"SELECT COUNT(*) FROM projectlist WHERE pfile_fk=%ld", atol(PQgetvalue(result,r,5)));
+        resultUpload = PQexec(pgConn, SQLUpload);
+        resultUploadCount = atoi(PQgetvalue(resultUpload,0,0));
+        if(count < 2 && resultUploadCount < 2)
+        {
+          rc = deleteUpload(atol(PQgetvalue(result,r,4)),userId, userPerm);
+          if (rc < 0)
+          {
+            return rc;
+          }
+          if (rc != 0)
+          {
+            printf("Deleting the project failed since it contains uploads you can't delete.");
+            return rc;
+          }
+        }
+        else{
+          rc = unlinkContent(atol(PQgetvalue(result,r,4)),Parent,2,userId,userPerm);
+          if(rc < 0){
+            return rc;
+          }
+        }
+      }
+      else
+      {
+        rc = check_read_permission_upload(atol(PQgetvalue(result,r,4)),userId,userPerm);
+        if (rc < 0)
+        {
+          return rc;
+        }
+        if (rc == 0)
+        {
+          for(i=0; i<Depth; i++)
+          {
+            fputs("   ",stdout);
+          }
+          printf("%4s :: Contains: %s\n","--",PQgetvalue(result,r,2));
+        }
+      }
+    }
+  }
+  PQclear(result);
+
+  switch(Parent)
+  {
+    case 1: /* skip default parent */
+      if (DelFlag != 0)
+      {
+        printf("INFO: Default project not deleted.\n");
+      }
+      break;
+    case 0: /* it's an upload */
+      break;
+    default:  /* it's a project */
+      if (DelFlag == 0)
+      {
+        break;
+      }
+      printf("INFO: project id=%ld will be deleted with flag %d\n",Parent,DelFlag);
+      if (DelFlag==1)
+      {
+        rc = unlinkContent(Parent,Row,1,userId,userPerm);
+        if (rc == 0)
+        {
+          break;
+        }
+        if (rc < 0)
+        {
+          return rc;
+        }
+      }
+      if(Row > 0)
+        snprintf(SQL,MAXSQL,"DELETE FROM projectcontents WHERE projectcontents_mode=1 AND parent_fk=%ld AND child_id=%ld",Row,Parent);
+      else
+        snprintf(SQL,MAXSQL,"DELETE FROM projectcontents WHERE projectcontents_mode=1 AND child_id=%ld",Parent);
+      if (Test)
+      {
+        printf("TEST: %s\n",SQL);
+      }
+      else
+      {
+        PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
+      }
+      if(Row > 0)
+        snprintf(SQL,MAXSQL,"DELETE FROM project f USING projectcontents fc WHERE  f.project_pk = fc.child_id AND fc.parent_fk='%ld' AND f.project_pk = '%ld';",Row,Parent);
+      else
+        snprintf(SQL,MAXSQL,"DELETE FROM project WHERE project_pk = '%ld';",Parent);
+      if (Test)
+      {
+        printf("TEST: %s\n",SQL);
+      }
+      else
+      {
+        PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
+      }
+  } /* switch() */
+
+  return 0; /* success */
+} /* listProjectsRecurse() */
+
+
+
 /**
  * \brief Given a PGresult, find detached folders
  * \param result PGresult from a query
@@ -967,6 +1176,14 @@ int deleteFolder(long cFolder, long pFolder,  int userId, int userPerm)
   return listFoldersRecurse(cFolder, 0,pFolder,2,userId,userPerm);
 } /* deleteFolder() */
 
+
+int deleteProject(long cProject, long pProject,  int userId, int userPerm)
+{
+  if(pProject == 0) pProject= -1 ;
+  return listProjectsRecurse(cProject, 0,pProject,2,userId,userPerm);
+} /* deleteProject() */
+
+
 /**********************************************************************/
 
 /**
@@ -1035,6 +1252,11 @@ int readAndProcessParameter (char *Parm, int userId, int userPerm)
     Target=3; /* folder */
     L+=6;
   }
+  else if (!strncasecmp(L,"PROJECT",7) && (isspace(L[7]) || !L[7]))
+  {
+    Target=4; /* project */
+    L+=7;
+  }
 
   len = strlen(L);
   memcpy(a, L,len);
@@ -1055,6 +1277,10 @@ int readAndProcessParameter (char *Parm, int userId, int userPerm)
   else if ((Type==1) && (Target==3))
   {
     rc = deleteFolder(fd[1],fd[0], userId, userPerm);
+  }
+  else if ((Type==1) && (Target==4))
+  {
+    rc = deleteProject(fd[1],fd[0], userId, userPerm);
   }
   else if (((Type==2) && (Target==1)) || ((Type==2) && (Target==2)))
   {

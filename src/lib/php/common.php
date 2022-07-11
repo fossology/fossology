@@ -36,6 +36,9 @@ require_once("common-scheduler.php");
 require_once("common-menu.php");
 require_once("common-plugin.php");
 require_once("common-folders.php");
+
+require_once("common-projects.php");
+
 require_once("common-dir.php");
 require_once("common-parm.php");
 require_once("common-repo.php");

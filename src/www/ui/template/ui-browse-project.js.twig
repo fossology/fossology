@@ -1,0 +1,118 @@
+{# Copyright 2014-2018 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+tableColumns = [
+  {"sTitle": "{{ "Upload Name and Description"|trans }}", "sClass": "left"},
+  {"sTitle": "{{ "Action"|trans }}", "sClass": "center", "bSortable": false, "bSearchable": false},
+  {"sTitle": "{{ "Status"|trans }}", "sClass": "center", "bSortable": false, "bSearchable": false},
+  {"sTitle": "{{ "Comment"|trans }}", "sClass": "center cc", "bSortable": false, "bSearchable": false, "mRender": 2},
+  {"sTitle": "{{ "Main licenses"|trans }}", "sClass": "center", "bSearchable": false, "bSortable": false},
+  {"sTitle": "{{ "Upload Date"|trans }}", "sClass": "center", "sType": "string", "bSearchable": false},
+  {"sTitle": "{{ "Assigned to"|trans }}", "sClass": "center", "bSearchable": false}
+];
+
+tableSorting = [
+  [5, "desc"],
+  [0, "asc"],
+  [6, "desc"]
+];
+
+var project = {{ project }};
+var browseTable;
+
+dataTableConfig =
+    {
+      "bServerSide": true,
+      "sAjaxSource": "?mod=browseProject-processPost",
+      "fnServerData": function (sSource, aoData, fnCallback) {
+          aoData.push({"name": "project", "value": project});
+          aoData.push({"name": "show", "value": "{{ show }}"});
+        aoData.push({"name": "assigneeSelected", "value": assigneeSelected});
+        aoData.push({"name": "statusSelected", "value": statusSelected});
+        $.getJSON(sSource, aoData, fnCallback).fail(failed);
+      },
+      "sPaginationType": "listbox",
+      "aoColumns": tableColumns,
+      "aaSorting": tableSorting,
+      "iDisplayLength": 50,
+      "bProcessing": true,
+      "bStateSave": true,
+      "bRetrieve": true
+    };
+
+function createBrowseTable() {
+  var otable = $('#browsetbl').DataTable(dataTableConfig);
+  return otable;
+}
+
+$(document).ready(function() {
+  browseTable = createBrowseTable();
+  $('.clickable-project').click(function(event){
+    project = $(this).attr('data-project');
+    browseTable.draw();
+    $('#current-project').text($(this).text());
+    $('#browse-upload-all').val(project);
+    return false;
+  });
+  $('#browse-upload-all').button().change(function ( event ){
+    $('#browse-upload-all-label').removeClass("ui-state-focus ui-state-hover ui-state-active");
+    var wholeProject = $(this).prop('checked');
+    if(wholeProject) {
+      $('#wholeProject').switchClass('browse-upload-all-off','browse-upload-all-on');
+      $('#markedUpload').switchClass('browse-upload-all-on','browse-upload-all-off');
+    } else {
+      $('#wholeProject').switchClass('browse-upload-all-on','browse-upload-all-off');
+      $('#markedUpload').switchClass('browse-upload-all-off','browse-upload-all-on');
+    }
+  });
+  $('#browse-upload-all-label').removeClass("ui-state-focus ui-state-hover ui-state-active");
+  $("#searchProjectTree").on('keyup',function(){
+    var projectName = $(this).val().toLowerCase();
+    $("#tree li").each(function(){
+      if ($(this).text().toLowerCase().search(projectName) > -1) {
+        $(this).show();
+      } else {
+        $(this).hide();
+      }
+    });
+  })
+});
+
+$('#nav-hider').click(function() {
+  $('#nav-cell').hide('slow');
+  $('#nav-shower').show('slow');  
+});
+$('#nav-shower').click(function() {
+  $('#nav-shower').hide('slow');
+  $('#nav-cell').show('slow');
+});
+
+function removeMainLicense(uploadId,licenseId) {
+  if(confirm("{{'Remove this license from the main license list?'|trans}}"))
+  {
+    $.getJSON("?mod=conclude-license&do=removeMainLicense&upload=" + uploadId + "&licenseId=" + licenseId)
+      .done(function (data) {
+        var table = createBrowseTable();
+        table.draw(false);
+      })
+      .fail(failed);
+  }
+}
+
+$('.multi-upload-agent').click( function() {
+  $('#mod').val( $(this).attr('name') );
+  return true;
+});
+
+$(function() {
+  $("#tree").treeview({
+    collapsed: false,
+    animated: "fast",
+    control: "#sidetreecontrol",
+    persist: "cookie",
+    cookieId: "fossology_treeview"
+    });
+  });

@@ -57,6 +57,8 @@ extern PGconn* pgConn;
  */
 #define myBUFSIZ 2048
 
+#define MAXSQLProject 1024
+
 /* authentication and permission checking */
 int authentication(char *user, char * password, int *userId, int *userPerm);
 
