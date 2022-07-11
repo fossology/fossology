@@ -104,7 +104,7 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
         'user_pk' => $i, 'user_name' => "user$i", 'user_desc' => "user $i",
         'user_email' => "user$i@local", 'email_notify' => 'y',
         'root_folder_fk' => 2, 'group_fk' => 2, 'user_perm' => $perm_list[$i],
-        'user_agent_list' => $agent_list[$i]
+        'user_agent_list' => $agent_list[$i], 'default_bucketpool_fk' => 2
       ];
       $userRows[$i] = $row;
     }
@@ -125,7 +125,7 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
       if ($currentUser === null || $row['user_pk'] == $currentUser) {
         $user = new User($row["user_pk"], $row["user_name"], $row["user_desc"],
             $row["user_email"], $row["user_perm"], $row["root_folder_fk"],
-          $row["email_notify"], $row["user_agent_list"], $row['group_fk']);
+          $row["email_notify"], $row["user_agent_list"], $row['group_fk'], $row["default_bucketpool_fk"]);
       } else {
         $user = new User($row["user_pk"], $row["user_name"], $row["user_desc"],
           null, null, null, null, null, null);
@@ -148,8 +148,8 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $sql = 'SELECT user_pk, user_name, user_desc, user_email,
-                  email_notify, root_folder_fk, group_fk, user_perm, user_agent_list ' .
-      'FROM users;';
+                  email_notify, root_folder_fk, group_fk, user_perm, user_agent_list, ' .
+      'default_bucketpool_fk FROM users;';
     $statement = DbHelper::class . "::getUsers.getAllUsers";
     $userRows = $this->generateUserRow();
 
@@ -177,8 +177,8 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
 
     $sql = 'SELECT user_pk, user_name, user_desc, user_email,
-                  email_notify, root_folder_fk, group_fk, user_perm, user_agent_list ' .
-      'FROM users;';
+                  email_notify, root_folder_fk, group_fk, user_perm, user_agent_list, ' .
+      'default_bucketpool_fk FROM users;';
     $statement = DbHelper::class . "::getUsers.getAllUsers";
     $userRows = $this->generateUserRow();
 
@@ -207,7 +207,7 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $sql = "SELECT user_pk, user_name, user_desc, user_email,
-                email_notify, root_folder_fk, group_fk, user_perm, user_agent_list FROM users
+                email_notify, root_folder_fk, group_fk, user_perm, user_agent_list, default_bucketpool_fk FROM users
                 WHERE user_pk = $1;";
     $statement = DbHelper::class . "::getUsers.getSpecificUser";
     $userRows = $this->generateUserRow();
@@ -237,7 +237,7 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
 
     $sql = "SELECT user_pk, user_name, user_desc, user_email,
-                email_notify, root_folder_fk, group_fk, user_perm, user_agent_list FROM users
+                email_notify, root_folder_fk, group_fk, user_perm, user_agent_list, default_bucketpool_fk FROM users
                 WHERE user_pk = $1;";
     $statement = DbHelper::class . "::getUsers.getSpecificUser";
     $userRows = $this->generateUserRow();

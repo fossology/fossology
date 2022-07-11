@@ -5,24 +5,29 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Plugin\DefaultPlugin;
+use Symfony\Component\HttpFoundation\Request;
 
 define("TITLE_USER_ADD", _("Add A User"));
 
-class user_add extends FO_Plugin
+class user_add extends DefaultPlugin
 {
+  const NAME = "user_add";
 
   /** @var DbManager */
   private $dbManager;
 
   function __construct()
   {
-    $this->Name = "user_add";
-    $this->Title = TITLE_USER_ADD;
-    $this->MenuList = "Admin::Users::Add";
-    $this->DBaccess = PLUGIN_DB_ADMIN;
-    parent::__construct();
-    $this->dbManager = $GLOBALS['container']->get('db.manager');
+    parent::__construct(self::NAME, array(
+      self::TITLE => TITLE_USER_ADD,
+      self::MENU_LIST => 'Admin::Users::Add',
+      self::REQUIRES_LOGIN => true,
+      self::PERMISSION => Auth::PERM_ADMIN
+    ));
+    $this->dbManager = $this->getObject('db.manager');
   }
 
   /**
@@ -30,34 +35,23 @@ class user_add extends FO_Plugin
    *
    * \return NULL on success, string on failure.
    */
-  function Add()
+  public function add(Request $request)
   {
-
-    global $PG_CONN;
-
-    if (! $PG_CONN) {
-      DBconnect();
-      if (! $PG_CONN) {
-        $text = _("NO DB connection!");
-        echo "<pre>$text\n</pre>";
-      }
-    }
-
     /* Get the parameters */
-    $User = str_replace("'", "''", GetParm('username', PARM_TEXT));
+    $User = str_replace("'", "''", $request->get('username'));
     $User = trim($User);
-    $Pass = GetParm('pass1', PARM_TEXT);
-    $Pass2 = GetParm('pass2', PARM_TEXT);
+    $Pass = $request->get('pass1');
+    $Pass2 = $request->get('pass2');
     $options = array('cost' => 10);
     $Hash = password_hash($Pass, PASSWORD_DEFAULT, $options);
-    $Desc = str_replace("'", "''", GetParm('description', PARM_TEXT));
-    $Perm = GetParm('permission', PARM_INTEGER);
-    $Folder = GetParm('folder', PARM_INTEGER);
-    $Email_notify = GetParm('enote', PARM_TEXT);
-    $Email = str_replace("'", "''", GetParm('email', PARM_TEXT));
-    $Upload_visibility = GetParm('public', PARM_TEXT);
-    $agentList = userAgents();
-    $default_bucketpool_fk = GetParm('default_bucketpool_fk', PARM_INTEGER);
+    $Desc = str_replace("'", "''", $request->get('description'));
+    $Perm = $request->get('permission');
+    $Folder = $request->get('folder');
+    $Email_notify = $request->get('enote');
+    $Email = str_replace("'", "''", $request->get('email'));
+    $Upload_visibility = $request->get('public');
+    $agentList = is_null($request->get('user_agent_list')) ? userAgents() : $request->get('user_agent_list');
+    $default_bucketpool_fk = $request->get('default_bucketpool_fk');
 
     /* Make sure username looks valid */
     if (empty($User)) {
@@ -130,119 +124,49 @@ class user_add extends FO_Plugin
   } // Add()
 
 
-  public function Output()
+  public function handle(Request $request)
   {
     /* If this is a POST, then process the request. */
-    $User = GetParm('username', PARM_TEXT);
+    $User = $request->get('username');
     if (! empty($User)) {
-      $rc = $this->Add();
+      $rc = $this->add($request);
       if (empty($rc)) {
         $text = _("User");
         $text1 = _("added");
-        $this->vars['message'] = "$text $User $text1.";
+        $vars['message'] = "$text $User $text1.";
       } else {
-        $this->vars['message'] = $rc;
+        $vars['message'] = $rc;
       }
     }
 
-    $V = "<form name='user_add' method='POST'>\n";
-    $V.= _("To create a new user, enter the following information:<P />\n");
-    $Style = "<tr style='border-bottom:1px solid black'>";
-    $V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='75%'>";
-    $Val = htmlentities(GetParm('username', PARM_TEXT), ENT_QUOTES);
-    $text = _("Username");
-    $V.= "$Style<th width='25%' >$text</th>";
-    $V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
-    $V.= "</tr>\n";
-    $Val = htmlentities(GetParm('description', PARM_TEXT), ENT_QUOTES);
-    $text = _("Description, full name, contact, etc. (optional)");
-    $V.= "$Style<th>$text</th>\n";
-    $V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
-    $V.= "</tr>\n";
-    $Val = htmlentities(GetParm('email', PARM_TEXT), ENT_QUOTES);
-    $text = _("Email address");
-    $V .= "$Style<th>$text</th>\n";
-    $V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
-    $V.= "</tr>\n";
-    $text = _("Access level");
-    $V.= "$Style<th>$text</th>";
-    $V.= "<td><select name='permission'>\n";
-    $text = _("None (very basic, no database access)");
-    $V.= "<option value='" . PLUGIN_DB_NONE . "'>$text</option>\n";
-    $text = _("Read-only (read, but no writes or downloads)");
-    $V.= "<option selected value='" . PLUGIN_DB_READ . "'>$text</option>\n";
-    $text = _("Read-Write (read, download, or edit information)");
-    $V.= "<option value='" . PLUGIN_DB_WRITE . "'>$text</option>\n";
-    $text = _("Clearing Administrator (read, download, edit information and edit decisions)");
-    $V.= "<option value='" . PLUGIN_DB_CADMIN . "'>$text</option>\n";
-    $text = _("Full Administrator (all access including adding and deleting users)");
-    $V.= "<option value='" . PLUGIN_DB_ADMIN . "'>$text</option>\n";
-    $V.= "</select></td>\n";
-    $V.= "</tr>\n";
-    $text = _("User root folder");
-    $V.= "$Style<th>$text";
-    $V.= "</th>";
-    $V.= "<td><select name='folder' class='ui-render-select2'>";
-    $V.= FolderListOption(-1, 0);
-    $V.= "</select></td>\n";
-    $V.= "</tr>\n";
-    $text = _("Password (optional)");
+    $vars['userName'] = htmlentities($request->get('username'), ENT_QUOTES);
+    $vars['userDescription'] = htmlentities($request->get('description'), ENT_QUOTES);
+    $vars['userEmail'] = htmlentities($request->get('email'), ENT_QUOTES);
+    $vars['accessLevel'] = [
+      PLUGIN_DB_NONE,
+      PLUGIN_DB_READ,
+      PLUGIN_DB_WRITE,
+      PLUGIN_DB_CADMIN,
+      PLUGIN_DB_ADMIN
+    ];
+    $vars['folderListOption'] = FolderListOption(-1, 0);
+    $vars['passOptional'] = " (Optional)";
     if (passwordPolicyEnabled()) {
-      $text = _("Password");
+      $vars['passOptional'] = "";
     }
-    $V.= "$Style<th>$text</th><td><input type='password' name='pass1' id='passcheck' size=20>";
-    $policy = generate_password_policy_string();
-    if ($policy != "No policy defined.") {
-      $V.= "<br /><span class='passPolicy'>$policy</span>";
+    $vars['passwordPolicy'] = generate_password_policy_string();
+    if ($vars['passwordPolicy'] == "No policy defined.") {
+      $vars['passwordPolicy'] = "";
     }
-    $V.= "</td>\n</tr>\n";
-    $text = _("Re-enter password");
-    $V.= "$Style<th>$text</th><td><input type='password' name='pass2' id='pass2' size=20 style='margin:4px'></td>\n";
-    $V.= "</tr>\n";
-    $text = _("E-mail Notification");
-    $text1 = _("Check to enable email notification when upload scan completes .");
-    $V .= "$Style<th>$text</th><td><input type='checkbox'" .
-            "name='enote' value='y' checked='checked'>" .
-            "$text1</td>\n";
-    $V.= "</tr>\n";
-    $text = _("Default upload visibility");
-    $text1 = _("Visible only for active group");
-    $text2 = _("Visible for all groups");
-    $text3 = _("Make Public");
-    $text4 = _("which is the currently selected group");
-    $text5 = _("which are accessible by you now");
-    $text6 = _("visible for all users");
-    $V.= "$Style<th>$text</th><td>" .
-    "<input type='radio' name='public' value='private'/>$text1<img src='images/info_16.png' title='$text4' alt='' class='info-bullet'/><br/>" .
-    "<input type='radio' name='public' value='protected'/>$text2<img src='images/info_16.png' title='$text5' alt='' class='info-bullet'/><br/>" .
-    "<input type='radio' name='public' value='public'/>$text3<img src='images/info_16.png' title='$text6' alt='' class='info-bullet'/><br/></td>\n";
-    $V.= "</tr>\n";
-    $text = _("Agents selected by default when uploading");
-    $V .= "$Style<th>$text\n</th><td> ";
-    $V.= AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest", "wget_agent"));
+    $vars['agentSelector'] = AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest", "wget_agent"));
 
-    $V .= "</td>\n";
-    $text = _("Default bucketpool");
-    $V.= "$Style<th>$text</th>";
-    $V.= "<td>";
     $default_bucketpool_fk = 0;
-    $V.= SelectBucketPool($default_bucketpool_fk);
-    $V.= "</td>";
-    $V .= "</tr>\n";
-    $V.= "</table border=0><P />";
-
-    $text = _("Add User");
-    $V.= "<input type='submit' value='$text'>\n";
-    $V.= "</form>\n";
-
-    $this->vars['formName'] = "user_add";
-    $this->vars['policyDisabled'] = passwordPolicyEnabled() ? "false" : "true";
-    $this->vars['policyRegex'] = generate_password_policy();
-    $passwordScript = $this->renderString("password-policy-check.js.twig");
-    $this->renderScripts('<script type="text/javascript">' . $passwordScript .
-      '</script>');
-
-    return $V;
+    $vars['bucketPool'] = SelectBucketPool($default_bucketpool_fk);
+    $vars['formName'] = "user_add";
+    $vars['policyDisabled'] = passwordPolicyEnabled() ? "false" : "true";
+    $vars['policyRegex'] = generate_password_policy();
+    return $this->render('user_add.html.twig', $this->mergeWithDefault($vars));
   }
 }
-$NewPlugin = new user_add;
+
+register_plugin(new user_add());

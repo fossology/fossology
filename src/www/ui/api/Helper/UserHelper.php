@@ -35,7 +35,7 @@ class UserHelper
    *
    * @param $user_pk
    */
-  public function __construct($user_pk)
+  public function __construct($user_pk=null)
   {
     $this->user_pk = $user_pk;
   }
@@ -99,26 +99,7 @@ class UserHelper
     $symfonyRequest->request->set('default_bucketpool_fk', isset($userDetails['defaultBucketpool']) ? $userDetails['defaultBucketpool'] : $user['default_bucketpool_fk']);
 
     if (isset($userDetails['accessLevel'])) {
-      $user_perm = 0;
-      switch ($userDetails['accessLevel']) {
-        case 'none':
-          $user_perm = Auth::PERM_NONE;
-          break;
-        case 'read_only':
-          $user_perm = Auth::PERM_READ;
-          break;
-        case 'read_write':
-          $user_perm = Auth::PERM_WRITE;
-          break;
-        case 'clearing_admin':
-          $user_perm = Auth::PERM_CADMIN;
-          break;
-        case 'admin':
-          $user_perm = Auth::PERM_ADMIN;
-          break;
-        default:
-          break;
-      }
+      $user_perm = $this->getEquivalentValueForPermission($userDetails['accessLevel']);
       $symfonyRequest->request->set('user_perm', $user_perm);
     } else {
       $symfonyRequest->request->set('user_perm', $user['user_perm']);
@@ -178,5 +159,27 @@ class UserHelper
     $symfonyRequest->request->set('user_agent_list', userAgents($agents));
 
     return $symfonyRequest;
+  }
+
+  /**
+   * @param string $perm which is user permission
+   * @return int permission value
+   */
+  public function getEquivalentValueForPermission($perm)
+  {
+    switch ($perm) {
+      case 'none':
+        return Auth::PERM_NONE;
+      case 'read_only':
+        return Auth::PERM_READ;
+      case 'read_write':
+        return Auth::PERM_WRITE;
+      case 'clearing_admin':
+        return Auth::PERM_CADMIN;
+      case 'admin':
+        return Auth::PERM_ADMIN;
+      default:
+        return Auth::PERM_NONE;
+    }
   }
 }

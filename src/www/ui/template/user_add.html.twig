@@ -1,0 +1,97 @@
+{# SPDX-FileCopyrightText: © Fossology contributors
+ 
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block styles %}
+  {{ parent() }}
+  <link rel='stylesheet' href='css/access-token.css'>
+{% endblock %}
+
+{% block content %}
+  {% set style = "style='border-bottom:1px solid black'" %}
+
+  <form name="{{ formName }}" method="POST">
+  {{ "To create a new user, enter the following information:<P />"|trans }}
+
+  <table style='border:1px solid black; text-align:left; background:lightyellow;'>
+    <tr {{ style }}>
+      <th width="25%">{{ "Username."|trans }}</th>
+      <td><input type="text" value="{{ userName|e }}" name="username" size="20" /></td>
+    </tr>
+    <tr {{ style }}>
+      <th width="25%">{{ "Description (name, contact, or other information)."|trans }} {{ "This may be blank."|trans }}</th>
+      <td><input type="text" value="{{ userDescription|e }}" name="description" size="60" /></td>
+    </tr>
+    <tr {{ style }}>
+      <th width="25%">{{ "Email address."|trans }} {{ "This may be blank."|trans }}</th>
+      <td><input type="text" value="{{ userEmail|e }}" name="email" size="60" /></td>
+    </tr>
+    <tr {{ style }}>
+      <th width="25%">{{ "Access level"|trans }}</th>
+      <td><select name='permission'>
+        <option value="{{ accessLevel[0] }}">{{ "None (very basic, no database access)"|trans }}</option>
+        <option value="{{ accessLevel[1] }}">{{ "Read-only (read, but no writes or downloads)"|trans }}</option>
+        <option value="{{ accessLevel[2] }}">{{ "Read-Write (read, download, or edit information)"|trans }}</option>
+        <option value="{{ accessLevel[3] }}">{{ "Clearing Administrator (read, download, edit information and edit decisions)"|trans }}</option>
+        <option value="{{ accessLevel[4] }}">{{ "Full Administrator (all access including adding and deleting users)"|trans }}</option>
+        </select>
+      </td>
+    </tr>
+    <tr {{ style }}>
+      <th width="25%">{{ "User root folder"|trans }}</th>
+      <td><select name="folder" class="ui-render-select2">
+        {{ folderListOption }}
+      </select></td>
+    </tr>
+    <tr {{ style }}>
+      <th width="25%">{{ "Password"|trans }}{{ passOptional|trans }}</th>
+      <td><input type="password" name="pass1" size="20" id="passcheck" />{% if passwordPolicy is not empty %}
+      <br /><span class="passPolicy">{{ passwordPolicy }}</span>
+      {% endif %}</td>
+    </tr>
+    <tr {{ style }}>
+      <th width='25%'>{{ "Re-enter password."|trans }}</th>
+      <td><input type="password" name="pass2" size="20" id="pass2" style='margin:4px' /></td>
+    </tr>
+    <tr {{ style }}>
+      <th width="25%">{{ "E-mail Notification"|trans }}</th>
+      <td><input type="checkbox" name="enote" value="y" checked="checked" />
+        {{ "Check to enable email notification when upload scan completes."|trans }}</td>
+    </tr>
+    <tr {{ style }}>
+      <th width='25%'>{{ "Default upload visibility" |trans }}</th>
+      <td>
+        <input type="radio" name="public" value="private" id="apr" />
+        <label for="apr">
+          {{ 'Visible only for active group'| trans }}<img src="images/info_16.png" title="{{ 'which is the currently selected group'|trans }}" alt="" class="info-bullet"/>
+        </label><br/>
+        <input type="radio" name="public" value="protected" id="app" />
+        <label for="app">
+          {{ 'Visible for all groups'| trans }}<img src="images/info_16.png" title="{{ 'which are accessible by you now'|trans }}" alt="" class="info-bullet"/>
+        </label><br/>
+        <input type="radio" name="public" value="public" id="apu" />
+        <label for="apu">
+          {{ 'Make Public'| trans }}<img src="images/info_16.png" title="{{ 'visible for all users'|trans }}" alt="" class="info-bullet"/>
+        </label><br/>
+      </td>
+    </tr>
+    <tr {{ style }}>
+      <th width='25%'>{{ 'Agents selected by default when uploading'|trans }}</th>
+      <td>{{ agentSelector }}</td>
+    </tr>
+    <tr {{ style }}>
+      <th width="25%">{{ "Default bucket pool"| trans }}</th>
+      <td>{{ bucketPool }}</td>
+    </tr>
+  </table><P />
+  <br />
+  <input type="submit" value="{{ 'Add User'|trans }}"/>
+  </form>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript">{% include "password-policy-check.js.twig" %}</script>
+{% endblock %}
