@@ -146,7 +146,7 @@ class ui_spasht extends FO_Plugin
     $contributionInfo = trim(GetParm("jsonStringContributionInfo", PARM_STRING));
     $contributionRevision = trim(GetParm("hiddenRevision", PARM_STRING));
     $contributionDataValid = trim(GetParm("contributionDataValid", PARM_STRING));
-    
+
     $this->vars['storeStatus'] = "false";
     $this->vars['pageNo'] = "definition_not_found";
 
@@ -387,7 +387,8 @@ class ui_spasht extends FO_Plugin
     * @param string  $contributionRevision  Revision of selected definition
     * @return array
     */
-  protected function handleContributionToClearlyDefined($coordinatesInfo, $contributionInfo, $contributionRevision) {
+  protected function handleContributionToClearlyDefined($coordinatesInfo, $contributionInfo, $contributionRevision) 
+  {
     $contributionPacket = array();
 
     $coordinatesInfo = json_decode($coordinatesInfo);
@@ -413,7 +414,7 @@ class ui_spasht extends FO_Plugin
         array_push($patches, $patch);
         $contributionPacket["patches"] = $patches;
 
-    if(!empty($contributionPacket)) {
+    if (!empty($contributionPacket)) {
       $jsonPacket = json_encode($contributionPacket);
       return $contributionPacket;
     }
