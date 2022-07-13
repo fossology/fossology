@@ -350,9 +350,7 @@ class ui_spasht extends FO_Plugin
     $this->vars['fileList'] = $this->getFileListing($uploadtree_pk, $uri,
       $uploadtree_tablename, $agentId, $uploadId);
 
-    
-    if($contributionDataValid === "true" && !empty($coordinatesInfo) && !empty($contributionInfo)) 
-    {
+    if ($contributionDataValid === "true" && !empty($coordinatesInfo) && !empty($contributionInfo)) {
       $contributionJsonPacket = $this->handleContributionToClearlyDefined($coordinatesInfo ,$contributionInfo, $contributionRevision);
 
       try {
@@ -389,8 +387,7 @@ class ui_spasht extends FO_Plugin
     * @param string  $contributionRevision  Revision of selected definition
     * @return array
     */
-  protected function handleContributionToClearlyDefined($coordinatesInfo, $contributionInfo, $contributionRevision) 
-  {
+  protected function handleContributionToClearlyDefined($coordinatesInfo, $contributionInfo, $contributionRevision) {
     $contributionPacket = array();
 
     $coordinatesInfo = json_decode($coordinatesInfo);
@@ -416,8 +413,7 @@ class ui_spasht extends FO_Plugin
         array_push($patches, $patch);
         $contributionPacket["patches"] = $patches;
 
-    if(!empty($contributionPacket)) 
-    {
+    if(!empty($contributionPacket)) {
       $jsonPacket = json_encode($contributionPacket);
       return $contributionPacket;
     }
