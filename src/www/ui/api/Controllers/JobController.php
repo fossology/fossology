@@ -29,6 +29,7 @@ use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\Analysis;
 use Fossology\UI\Api\Models\Decider;
+use Fossology\Lib\Auth\Auth;
 use Fossology\UI\Api\Models\Scancode;
 use Fossology\UI\Api\Models\Reuser;
 use Fossology\UI\Api\Models\ScanOptions;
@@ -60,6 +61,42 @@ class JobController extends RestController
    * Job failed
    */
   const JOB_FAILED = 0x1 << 4;
+
+  /**
+   * Get all jobs created by all the users
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getAllJobs($request, $response, $args)
+  {
+    if (Auth::isAdmin()) {
+      $id = null;
+      $limit = 0;
+      $page = 1;
+      if ($request->hasHeader('limit')) {
+        $limit = $request->getHeaderLine('limit');
+        $page = $request->getHeaderLine('page');
+        if (empty($page)) {
+          $page = 1;
+        }
+        if ((isset($limit) && (! is_numeric($limit) || $limit < 0)) ||
+            (! is_numeric($page) || $page < 1)) {
+            $returnVal = new Info(400,
+              "Limit and page cannot be smaller than 1 and has to be numeric!",
+              InfoType::ERROR);
+            return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+        }
+      }
+      return $this->getAllResults($id, $response, $limit, $page);
+    } else {
+      $returnVal = new Info(403,'Access Denied', InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+  }
+
   /**
    * Get all jobs by a user
    *

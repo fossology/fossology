@@ -881,6 +881,51 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  
+  /jobs/all:
+    get:
+      operationId: getAllJobs
+      tags:
+      - Job
+      summary: Gets all jobs created by all users
+      description: Returns all jobs with their status created by every user. This API returns a response only if the requesting user is an Admin.
+      parameters:
+        - name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          in: header
+        - name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          in: header
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Total-Pages:
+              description: Total number of pages which can be generated based on limit
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+
+        
+        default:
+          $ref: '#/components/responses/defaultResponse'    
   /jobs/{id}:
     parameters:
       - name: id
