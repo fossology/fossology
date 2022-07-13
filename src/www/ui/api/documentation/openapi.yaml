@@ -810,8 +810,8 @@ paths:
       operationId: getJobs
       tags:
       - Job
-      summary: Gets all jobs
-      description: Returns all jobs with their status
+      summary: Gets all jobs created by the logged in user
+      description: Returns all jobs with their status created by the logged in user
       parameters:
         - name: limit
           required: false

@@ -357,6 +357,77 @@ FROM $tableName WHERE $idRowName = $1", [$id],
   }
 
   /**
+   * @brief Get the recent jobs created by an user.
+   *
+   * If a limit is passed, the results are trimmed. If an ID is passed, the
+   * information for the given id is only retrieved.
+   *
+   * @param integer $id       Set to get information of only given job id
+   * @param integer $uid      Set to get information of only given user's ID
+   * @param integer $limit    Set to limit the result length
+   * @param integer $page     Page number required
+   * @param integer $uploadId Upload ID to be filtered
+   * @return array[] List of jobs at first index and total number of pages at
+   *         second.
+   */
+  public function getUserJobs($id = null, $uid=null, $limit = 0, $page = 1, $uploadId = null)
+  {
+    $jobSQL = "SELECT job_pk, job_queued, job_name, job_upload_fk," .
+      " job_user_fk, job_group_fk FROM job WHERE job_user_fk=$1";
+    $totalJobSql = "SELECT count(*) AS cnt FROM job WHERE job_user_fk=$1";
+    $filter = "";
+    $pagination = "";
+    $params = [];
+    $params[] = $uid;
+    $statement = __METHOD__ . ".getUserJobs";
+    $countStatement = __METHOD__ . ".getJobCount";
+    if ($id == null) {
+      if ($uploadId !== null) {
+        $params[] = $uploadId;
+        $filter = "WHERE job_upload_fk = $" . count($params);
+        $statement .= ".withUploadFilter";
+        $countStatement .= ".withUploadFilter";
+      }
+    } else {
+      $params[] = $id;
+      $filter = "WHERE job_pk = $" . count($params);
+      $statement .= ".withJobFilter";
+      $countStatement .= ".withJobFilter";
+    }
+
+    $result = $this->dbManager->getSingleRow("$totalJobSql $filter;", $params,
+      $countStatement);
+
+    $totalResult = $result['cnt'];
+
+    $offset = ($page - 1) * $limit;
+    if ($limit > 0) {
+      $params[] = $limit;
+      $pagination = "LIMIT $" . count($params);
+      $params[] = $offset;
+      $pagination .= " OFFSET $" . count($params);
+      $statement .= ".withLimit";
+      $totalResult = ceil($totalResult / $limit);
+    } else {
+      $totalResult = 1;
+    }
+
+    $jobs = [];
+    $result = $this->dbManager->getRows("$jobSQL $filter $pagination;", $params,
+      $statement);
+    foreach ($result as $row) {
+      $job = new Job($row["job_pk"]);
+      $job->setName($row["job_name"]);
+      $job->setQueueDate($row["job_queued"]);
+      $job->setUploadId($row["job_upload_fk"]);
+      $job->setUserId($row["job_user_fk"]);
+      $job->setGroupId($row["job_group_fk"]);
+      $jobs[] = $job;
+    }
+    return [$jobs, $totalResult];
+  }
+
+  /**
    * Get the required information to validate a token based on token id.
    *
    * @param int $tokenId Token id (primary key of the table).
