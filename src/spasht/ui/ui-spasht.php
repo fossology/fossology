@@ -387,7 +387,7 @@ class ui_spasht extends FO_Plugin
     * @param string  $contributionRevision  Revision of selected definition
     * @return array
     */
-  protected function handleContributionToClearlyDefined($coordinatesInfo, $contributionInfo, $contributionRevision) 
+  protected function handleContributionToClearlyDefined($coordinatesInfo, $contributionInfo, $contributionRevision)
   {
     $contributionPacket = array();
 
@@ -416,7 +416,7 @@ class ui_spasht extends FO_Plugin
 
     if (!empty($contributionPacket)) {
       $jsonPacket = json_encode($contributionPacket);
-      return $contributionPacket;
+      return $jsonPacket;
     }
   }
 
