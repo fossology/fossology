@@ -1,4 +1,8 @@
 <phpunit>
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only
+-->
   <testsuites>
     <testsuite name="ununpack/agent_tests/Functional Tests">
       <file>cliParamsTest4UnunpackException.php</file>

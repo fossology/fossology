@@ -1,6 +1,8 @@
 #!/bin/sh
 # Init script for the {$PROJECT} scheduler.
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2011 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Based on the example skeleton:
 #	Written by Miquel van Smoorenburg <miquels@cistron.nl>.
