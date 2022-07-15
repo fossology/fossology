@@ -36,6 +36,7 @@ class UserTest extends \PHPUnit\Framework\TestCase
       "email"        => 'fossy@localhost',
       "accessLevel"  => 'admin',
       "rootFolderId" => 2,
+      "defaultGroup" => 0,
       "emailNotification" => true,
       "agents"       => [
         "bucket"    => true,
@@ -54,12 +55,13 @@ class UserTest extends \PHPUnit\Framework\TestCase
       "id"           => 8,
       "name"         => 'userii',
       "description"  => 'very useri',
+      "defaultGroup" => 0,
     ];
 
     $actualCurrentUser = new User(2, 'fossy', 'super user', 'fossy@localhost',
-      PLUGIN_DB_ADMIN, 2, true, "bucket,copyright,nomos,ojo");
+      PLUGIN_DB_ADMIN, 2, true, "bucket,copyright,nomos,ojo", 0);
     $actualNonAdminUser = new User(8, 'userii', 'very useri', null, null, null,
-      null, null);
+      null, null, 0);
 
     $this->assertEquals($expectedCurrentUser, $actualCurrentUser->getArray());
     $this->assertEquals($expectedNonAdminUser, $actualNonAdminUser->getArray());

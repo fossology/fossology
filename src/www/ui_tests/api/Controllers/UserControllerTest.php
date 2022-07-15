@@ -114,7 +114,7 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
         continue;
       }
       $user = new User($userId, "user$userId", "User $userId",
-        "user$userId@example.com", $accessLevel, 2, 4, "");
+        "user$userId@example.com", $accessLevel, 2, 4, "", 0);
       $userArray[] = $user->getArray();
     }
     return $userArray;
