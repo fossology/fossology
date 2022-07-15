@@ -89,7 +89,7 @@ paths:
                 type: object
                 properties:
                   header:
-                      type: string
+                    type: string
               example:
                 {"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2NhbGhvc3QiLCJhdWQiOiJsb2NhbGhvc3QiLCJleHAiOjE1NTEyOTIyMDAsIm5iZiI6MTU1MTIwNTgwMCwianRpIjoiTmk0eiIsInNjb3BlIjoicmVhZCJ9.71D6xTD2QE45t9AVCwbrQwSSae5lC4yzKCMpZWXoC2Q"}
         '404':
@@ -635,14 +635,14 @@ paths:
         in: query
         schema:
           type: boolean
-          default: true    
+          default: true
       - name: copyright
         required: false
         description: Show copyrights in response
         in: query
         schema:
           type: boolean
-          default: false    
+          default: false
       - name: groupName
         description: The group name to chose while accessing the package
         in: header
@@ -1133,9 +1133,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
-        
+
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
     delete:
       operationId: deleteUserById
       tags:
@@ -1152,7 +1152,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
   /users/self:
     get:
       operationId: getSelf
@@ -1165,7 +1165,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'      
+                allOf:
+                  - $ref: '#/components/schemas/User'
+                  - type: object
+                    properties:
+                      default_group:
+                        type: string
+                        description: Default group of the user
+                        example:
+                          "fossy"
         default:
           $ref: '#/components/responses/defaultResponse'
   /users/tokens:
@@ -1256,7 +1264,7 @@ paths:
     get:
       operationId: getJobs
       tags:
-      - Job
+        - Job
       summary: Gets all jobs created by the logged in user
       description: Returns all jobs with their status created by the logged in user
       parameters:
@@ -1328,12 +1336,12 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-  
+
   /jobs/all:
     get:
       operationId: getAllJobs
       tags:
-      - Job
+        - Job
       summary: Gets all jobs created by all users
       description: Returns all jobs with their status created by every user. This API returns a response only if the requesting user is an Admin.
       parameters:
@@ -1370,9 +1378,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
 
-        
+
         default:
-          $ref: '#/components/responses/defaultResponse'    
+          $ref: '#/components/responses/defaultResponse'
   /jobs/{id}:
     parameters:
       - name: id
@@ -1384,7 +1392,7 @@ paths:
     get:
       operationId: getJobById
       tags:
-      - Job
+        - Job
       summary: Gets single job by id
       description: Returns job with the status
       responses:
@@ -1395,7 +1403,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Job'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
 
   /folders:
     parameters:
@@ -1409,7 +1417,7 @@ paths:
     get:
       operationId: getFolders
       tags:
-      - Folders
+        - Folders
       summary: Get the list of accessible folders
       description: >
         Get all folders or from a specific group
@@ -1423,13 +1431,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/Folder'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
     post:
       operationId: createFolder
       tags:
-      - Organize
-      - Admin
-      - Folders
+        - Organize
+        - Admin
+        - Folders
       summary: Create a new folder
       description: >
         Create a new child folder with optional description
@@ -1466,7 +1474,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
   /folders/{id}:
     parameters:
       - name: id
@@ -1485,7 +1493,7 @@ paths:
     get:
       operationId: getFolderById
       tags:
-      - Folders
+        - Folders
       summary: Get a single folder details
       description:
         Get a single folder by id
@@ -1497,13 +1505,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Folder'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
     delete:
       operationId: deleteFolderById
       tags:
-      - Organize
-      - Folders
-      - Admin
+        - Organize
+        - Folders
+        - Admin
       summary: Delete a folder
       description: >
         Schedule a folder deletion
@@ -1515,12 +1523,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
     patch:
       operationId: patchFolderById
       tags:
-      - Organize
-      - Folders
+        - Organize
+        - Folders
       parameters:
         - name: name
           in: header
@@ -1545,12 +1553,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
     put:
       operationId: moveFolderById
       tags:
-      - Organize
-      - Folders
+        - Organize
+        - Folders
       parameters:
         - name: parent
           in: header
@@ -1578,13 +1586,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
 
   /groups:
     get:
       operationId: getGroups
       tags:
-      - Groups
+        - Groups
       summary: Get the list of groups
       description: >
         Returns accessible groups for a user, all groups for an admin
@@ -1598,13 +1606,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/Group'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
     post:
       operationId: createGroup
       tags:
-      - Organize
-      - Groups
-      - Admin
+        - Organize
+        - Groups
+        - Admin
       summary: Create a new group
       description: >
         Create a new user group
@@ -1635,7 +1643,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
   /groups/{id}:
     parameters:
       - name: id
@@ -1763,7 +1771,6 @@ paths:
                   $ref: '#/components/schemas/Group'
         default:
           $ref: '#/components/responses/defaultResponse'
-
   /groups/{id}/members:
     parameters:
       - name: id
@@ -1790,13 +1797,72 @@ paths:
                   $ref: '#/components/schemas/UserGroupMember'
         default:
           $ref: '#/components/responses/defaultResponse'
-          
+  /groups/{groupId}/user/{userId}:
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Group id
+        schema:
+          type: string
+      - name: userId
+        in: path
+        required: true
+        description: User Id
+        schema:
+          type: string
+    put:
+      operationId: updatePermissionByGroupIdAndUserId
+      tags:
+        - Users
+        - Groups
+      summary: Update Permission
+      description: >
+        Update User's permission in group.
+      requestBody:
+        description: Value of the new permission
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewGroupPermission'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NewGroupPermission'
+      responses:
+        '202':
+          description: User's permission will be updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Group or user doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /report:
     get:
       operationId: getReportsByUpload
       tags:
-      - Job
-      - Report
+        - Job
+        - Report
       summary: Get the reports for a given upload
       description: >
         List all reports available for a given upload
@@ -1835,7 +1901,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
   /report/{id}:
     parameters:
       - name: id
@@ -1854,8 +1920,8 @@ paths:
     get:
       operationId: getReportById
       tags:
-      - Job
-      - Report
+        - Job
+        - Report
       summary: Download the report
       description: >
         Get a report by id
@@ -1888,7 +1954,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
   /report/import:
     parameters:
       - name: groupName
@@ -1969,20 +2035,20 @@ paths:
     post:
       operationId: getFiles
       tags:
-      - Upload
-      - Search
+        - Upload
+        - Search
       summary: Get the information of files matching the provided hashes
       description: >
         Get a list of files by hashes
       requestBody:
-          description: List of file hashes to fetch
-          required: true
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Hash'
+        description: List of file hashes to fetch
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Hash'
       responses:
         '200':
           description: List of matching files
@@ -1993,7 +2059,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/File'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
   /license:
     parameters:
       - name: groupName
@@ -2006,7 +2072,7 @@ paths:
     get:
       operationId: getLicenses
       tags:
-      - License
+        - License
       parameters:
         - name: page
           description: Page number to fetch
@@ -2067,11 +2133,11 @@ paths:
                             125
                     - $ref: '#/components/schemas/License'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
     post:
       operationId: createLicense
       tags:
-      - License
+        - License
       summary: Create a new license
       description: >
         Add a new license to the database
@@ -2105,7 +2171,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
   /license/import-csv:
     post:
       operationId: importLicense
@@ -2169,7 +2235,7 @@ paths:
     get:
       operationId: getLicenseByShortname
       tags:
-      - License
+        - License
       summary: Get a specific license
       description: >
         Get information about a specific license
@@ -2202,11 +2268,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
     patch:
       operationId: updateLicenseByShortname
       tags:
-      - License
+        - License
       summary: Update a license
       description: >
         Update information about a given license
@@ -2251,7 +2317,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
 
 components:
   securitySchemes:
@@ -2560,7 +2626,7 @@ components:
       properties:
         license:
           type: boolean
-          description: A full comparison between the database of licenses present in ScanCode and the code uploaded by users based approach. 
+          description: A full comparison between the database of licenses present in ScanCode and the code uploaded by users based approach.
         copyright:
           type: boolean
           description: Copyright along with copyright holder/author information.
@@ -2993,6 +3059,19 @@ components:
           description: Date from which to remove older log files from repository.
           nullable: true
           example: "2022-07-16"
+    NewGroupPermission:
+      description: User Group permission update
+      type: object
+      properties:
+        perm:
+          type: integer
+          description: |
+            New user permission in the group.
+            0: User
+            1: Admin
+            2: Advisor
+          minimum: 0
+          maximum: 2
     AddMember:
       description: UserMember options
       type: object

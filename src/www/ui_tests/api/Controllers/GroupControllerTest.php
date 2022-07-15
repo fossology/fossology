@@ -20,6 +20,7 @@ use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\User;
+use Fossology\UI\Page\AdminGroupUsers;
 use Fossology\UI\Api\Models\UserGroupMember;
 use Mockery as M;
 use Fossology\Lib\Dao\UserDao;
@@ -31,6 +32,7 @@ use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request;
 use Slim\Psr7\Uri;
+
 
 /**
  * @class GroupControllerTest
@@ -64,6 +66,12 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
   private $restHelper;
 
   /**
+   * @var M\MockInterface $adminPlugin
+   * AdminGroupUsersPlugin mock
+   */
+  private $adminPlugin;
+
+  /**
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
@@ -74,10 +82,14 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper = M::mock(DbHelper::class);
     $this->restHelper = M::mock(RestHelper::class);
     $this->userDao = M::mock(UserDao::class);
+    $this->adminPlugin = M::mock('AdminGroupUsers');
 
     $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
     $this->restHelper->shouldReceive('getUserDao')
       ->andReturn($this->userDao);
+
+    $this->restHelper->shouldReceive('getPlugin')
+      ->withArgs(array('group_manage_users'))->andReturn($this->adminPlugin);
 
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
@@ -306,6 +318,39 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $expectedResponse =  new Info(400, "Already a member!", InfoType::ERROR);
 
     $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['id' => $groupId,'userId' => $newuser]);
+    $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
+    $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
+  }
+      /**
+   * @test
+   * -# Test GroupController::getGroupMembers() for all groups
+   * -# Check if the response is list of group members
+   */
+  public function testChangeUserPermission()
+  {
+    $groupIds = [1,2,3,4,5,6];
+    $userId = 1;
+    $group_user_member_pk = 1;
+    $newPerm = 2;
+
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupIds[0]])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$userId])->andReturn(true);
+    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
+
+    $this->adminPlugin->shouldReceive('updateGUMPermission')->withArgs([$group_user_member_pk,$newPerm, $this->dbManager ]);
+
+    $body = $this->streamFactory->createStream(json_encode([
+      "perm" => $newPerm
+    ]));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $expectedResponse = new Info(202, "Permission updated successfully.", InfoType::INFO);
+
+    $actualResponse = $this->groupController->changeUserPermission($request, new ResponseHelper(), ['id' => $groupIds[0],'userId' => $userId]);
     $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
     $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
   }
