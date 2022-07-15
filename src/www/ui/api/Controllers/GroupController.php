@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Controllers;
 
 use Fossology\UI\Api\Models\User;
 use Fossology\UI\Api\Models\UserGroupMember;
+use Fossology\UI\Page\AdminGroupUsers;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
@@ -155,7 +156,7 @@ class GroupController extends RestController
         if (!empty($fetchResult)) {
           $group_user_member_pk = $fetchResult[0]['group_user_member_pk'];
           $adminGroupUsers = $this->restHelper->getPlugin('group_manage_users');
-          $adminGroupUsers->updateGUMPermission($group_user_member_pk, -1);
+          $adminGroupUsers->updateGUMPermission($group_user_member_pk, -1,$dbManager);
           $returnVal = new Info(200, "User will be removed from group.", InfoType::INFO);
         } else {
           $returnVal = new Info(404, "Not a member !", InfoType::ERROR);
@@ -295,5 +296,60 @@ class GroupController extends RestController
       }
     }
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Change user permission
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function changeUserPermission($request, $response, $args)
+  {
+    // Extract all  prerequisites (dbManager , user_pk , new_permission , group_pk ) for this functionality
+    $dbManager = $this->dbHelper->getDbManager();
+    $user_pk = intval($args['userId']);
+    $newperm = intval($this->getParsedBody($request)['perm']);
+    $group_pk = intval($args['id']);
+
+    // Validate arguments
+
+    if (!isset($newperm)) {
+      $info = new Info(400, "Permission should be provided", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist("groups", "group_pk", $group_pk)) {
+      $info = new Info(404, "GroupId doesn't exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist("users", "user_pk", $user_pk)) {
+      $info = new Info(404, "UserId doesn't exist", InfoType::ERROR);
+    } else if ($newperm < 0) {
+      $info = new Info(400, "ERROR - permission can not be negative", InfoType::ERROR);
+    } else if ($newperm > 2) {
+      $info = new Info(400, "ERROR - permission can not be greater than 2", InfoType::ERROR);
+    } else {
+
+      // Check if the relation already exists and retrieve the PK.
+      // IF not create a new relation and get PK.
+
+      $group_user_member_pk = $dbManager->getSingleRow("SELECT group_user_member_pk FROM group_user_member WHERE group_fk=$1 AND user_fk=$2",
+        [$group_pk, $user_pk],
+        __METHOD__ . ".getByGroupAndUser")['group_user_member_pk'];
+
+      if (empty($group_user_member_pk)) {
+        // insert a new record
+        $dbManager->prepare($stmt = __METHOD__ . ".insertGUP",
+          "insert into group_user_member (group_fk, user_fk, group_perm) values ($1,$2,$3)");
+        $result = $dbManager->execute($stmt, array($group_pk, $user_pk, $newperm));
+        $dbManager->freeResult($result);
+
+      } else {
+        $adminGroupUsers = $this->restHelper->getPlugin('group_manage_users');
+        $adminGroupUsers->updateGUMPermission($group_user_member_pk, $newperm,$dbManager);
+      }
+
+      $info = new Info(202, "Permission updated successfully.", InfoType::INFO);
+    }
+
+    return $response->withJson($info->getArray(), $info->getCode());
   }
 }
