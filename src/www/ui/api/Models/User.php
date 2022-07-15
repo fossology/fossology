@@ -50,6 +50,11 @@ class User
    */
   private $rootFolderId;
   /**
+   * @var integer $defaultGroup
+   * Current user's default group id
+   */
+  private $defaultGroup;
+  /**
    * @var boolean $emailNotification
    * Current user's email preference
    */
@@ -73,10 +78,11 @@ class User
    * @param string $email
    * @param integer $accessLevel
    * @param integer $root_folder_id
+   * @param integer $default_group_fk
    * @param boolean $emailNotification
    * @param object $agents
    */
-  public function __construct($id, $name, $description, $email, $accessLevel, $root_folder_id, $emailNotification, $agents)
+  public function __construct($id, $name, $description, $email, $accessLevel, $root_folder_id, $emailNotification, $agents, $default_group_fk=null)
   {
     $this->id = intval($id);
     $this->name = $name;
@@ -96,6 +102,7 @@ class User
         $this->accessLevel = "none";
     }
     $this->rootFolderId = intval($root_folder_id);
+    $this->defaultGroup = is_null($default_group_fk) ? null : intval($default_group_fk);
     $this->emailNotification = $emailNotification;
     $this->agents = $agents;
     $this->analysis = new Analysis();
@@ -152,6 +159,14 @@ class User
   }
 
   /**
+   * @return integer
+   */
+  public function getDefaultGroupId()
+  {
+    return $this->defaultGroup;
+  }
+
+  /**
    * @return boolean
    */
   public function getEmailNotification()
@@ -192,6 +207,9 @@ class User
     }
     if ($this->rootFolderId !== null && $this->rootFolderId != 0) {
       $returnUser["rootFolderId"] = $this->rootFolderId;
+    }
+    if ($this->defaultGroup !== null) {
+      $returnUser["defaultGroup"] = $this->defaultGroup;
     }
     if ($this->emailNotification !== null) {
       $returnUser["emailNotification"] = $this->emailNotification;

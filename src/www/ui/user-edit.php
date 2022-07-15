@@ -59,7 +59,7 @@ class UserEditPage extends DefaultPlugin
    * 2) User has chosen a user to edit from the 'userid' select list  \n
    * 3) User hit submit to update user data\n
    */
-  protected function handle(Request $request)
+  function handle(Request $request)
   {
     global $SysConf;
     /* Is the session owner an admin? */
@@ -364,7 +364,7 @@ class UserEditPage extends DefaultPlugin
    *
    * \return TRUE if the session user is an admin.  Otherwise, return FALSE
    */
-  private function IsSessionAdmin($UserRec)
+  function IsSessionAdmin($UserRec)
   {
     return ($UserRec['user_perm'] == PLUGIN_DB_ADMIN);
   }
@@ -425,7 +425,7 @@ class UserEditPage extends DefaultPlugin
       if (!empty($UserRec['email_notify'])) {
         $UserRec['email_notify'] = 'y';
       }
-      $UserRec['user_agent_list'] = userAgents();
+      $UserRec['user_agent_list'] = is_null($request->get('user_agent_list')) ? userAgents() : $request->get('user_agent_list');
       $UserRec['default_bucketpool_fk'] = intval($request->get("default_bucketpool_fk"));
     }
     return $UserRec;

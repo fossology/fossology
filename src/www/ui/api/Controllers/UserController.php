@@ -16,7 +16,7 @@ use Fossology\UI\Api\Helper\ResponseHelper;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use Fossology\Lib\Dao\UserDao;
+use Fossology\UI\Api\Helper\UserHelper;
 
 /**
  * @class UserController
@@ -85,5 +85,27 @@ class UserController extends RestController
     $defaultGroup = $userDao->getUserAndDefaultGroupByUserName($user["name"])["group_name"];
     $user["default_group"] = $defaultGroup;
     return $response->withJson($user, 200);
+  }
+
+  /**
+   * Updates the user details
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function updateUser($request, $response, $args)
+  {
+    $id = intval($args['id']);
+    $returnVal = null;
+    if ($this->dbHelper->doesIdExist("users","user_pk", $id)) {
+      $reqBody = $this->getParsedBody($request);
+      $userHelper = new UserHelper($id);
+      $returnVal = $userHelper->modifyUserDetails($reqBody);
+    } else {
+      $returnVal = new Info(404, "UserId doesn't exist!", InfoType::ERROR);
+    }
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 }

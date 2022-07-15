@@ -240,11 +240,11 @@ FROM $tableName WHERE $idRowName = $1", [$id],
   {
     if ($id == null) {
       $usersSQL = "SELECT user_pk, user_name, user_desc, user_email,
-                  email_notify, root_folder_fk, user_perm, user_agent_list FROM users;";
+                  email_notify, root_folder_fk, group_fk, user_perm, user_agent_list FROM users;";
       $statement = __METHOD__ . ".getAllUsers";
     } else {
       $usersSQL = "SELECT user_pk, user_name, user_desc, user_email,
-                email_notify, root_folder_fk, user_perm, user_agent_list FROM users
+                email_notify, root_folder_fk, group_fk, user_perm, user_agent_list FROM users
                 WHERE user_pk = $1;";
       $statement = __METHOD__ . ".getSpecificUser";
     }
@@ -263,7 +263,7 @@ FROM $tableName WHERE $idRowName = $1", [$id],
         ($row["user_pk"] == $currentUser)) {
         $user = new User($row["user_pk"], $row["user_name"], $row["user_desc"],
           $row["user_email"], $row["user_perm"], $row["root_folder_fk"],
-          $row["email_notify"], $row["user_agent_list"]);
+          $row["email_notify"], $row["user_agent_list"], $row["group_fk"]);
       } else {
         $user = new User($row["user_pk"], $row["user_name"], $row["user_desc"],
           null, null, null, null, null);

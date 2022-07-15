@@ -358,9 +358,9 @@ function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
  *
  * \return String $agentsChecked list of checked agents
  */
-function userAgents()
+function userAgents($agents=null)
 {
-  return implode(',', array_keys(checkedAgents()));
+  return implode(',', array_keys(checkedAgents($agents)));
 }
 
 /**
@@ -369,13 +369,19 @@ function userAgents()
  *
  * \return Plugin[] list of checked agent plugins, mapped by name
  */
-function checkedAgents()
+function checkedAgents($agents=null)
 {
   $agentsChecked = array();
   $agentList = listAgents();
   foreach ($agentList as $agentName => &$agentPlugin) {
-    if (GetParm("Check_" . $agentName, PARM_INTEGER) == 1) {
-      $agentsChecked[$agentName] = &$agentPlugin;
+    if (is_null($agents)) {
+      if (GetParm("Check_" . $agentName, PARM_INTEGER) == 1) {
+        $agentsChecked[$agentName] = &$agentPlugin;
+      }
+    } else {
+      if ($agents["Check_" . $agentName] == 1) {
+        $agentsChecked[$agentName] = &$agentPlugin;
+      }
     }
   }
   unset($agentPlugin);
