@@ -108,4 +108,88 @@ class UserController extends RestController
     }
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
+
+  /**
+   * Create a new REST API Token
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function createRestApiToken($request, $response, $args)
+  {
+    $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
+    $reqBody = $this->getParsedBody($request);
+    $paramsReq = [
+      "token_name",
+      "token_scope",
+      "token_expire"
+    ];
+    $returnVal = null;
+    if (array_diff_key(array_flip($paramsReq), $reqBody)) {
+      $returnVal = new Info(400,
+      "Following parameters are required in the request body: " .
+      join(",", $paramsReq), InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    } else {
+      $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
+
+      // translating values for symfony request
+      $symfonyRequest->request->set('pat_name', $reqBody['token_name']);
+      $symfonyRequest->request->set('pat_expiry', $reqBody['token_expire']);
+      $symfonyRequest->request->set('pat_scope', $reqBody['token_scope'] == "write" ? "w" : "r");
+
+      // initialising the user_edit plugin
+      global $container;
+      $restHelper = $container->get('helper.restHelper');
+      $userEditObj = $restHelper->getPlugin('user_edit');
+
+      // creating the REST token
+      $token = $userEditObj->generateNewToken($symfonyRequest);
+
+      $returnVal = new Info(201, "Token created successfully", InfoType::INFO);
+      $res = $returnVal->getArray();
+      $res['token'] = $token;
+      return $response->withJson($res, $returnVal->getCode());
+    }
+  }
+
+  /**
+   * Get all the REST API tokens (active | expired)
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getTokens($request, $response, $args)
+  {
+    $tokenType = $args['type'];
+    if ($tokenType == "active" || $tokenType == "expired") {
+      // initialising the user_edit plugin
+      global $container;
+      $restHelper = $container->get('helper.restHelper');
+      $userEditObj = $restHelper->getPlugin('user_edit');
+
+      // getting the list of tokens based on the type of token requested
+      $tokens = $tokenType == "active" ? $userEditObj->getListOfActiveTokens() : $userEditObj->getListOfExpiredTokens();
+      $manageTokenObj = $restHelper->getPlugin('manage-token');
+
+      $finalTokens = array();
+      foreach ($tokens as $token) {
+        list($tokenPk) = explode(".", $token['id']);
+        $tokenVal = $manageTokenObj->revealToken($tokenPk);
+        $finalTokens[] = array_merge($token, ['token' => $tokenVal['token']]);
+      }
+
+      $returnVal = new Info(200, "Success", InfoType::INFO);
+      $res = $returnVal->getArray();
+      $res[$tokenType . '_tokens'] = $finalTokens;
+      return $response->withJson($res, $returnVal->getCode());
+    } else {
+      $returnVal = new Info(400, "Invalid request!", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+  }
 }
