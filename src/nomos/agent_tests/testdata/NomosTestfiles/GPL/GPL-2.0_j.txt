@@ -1,2 +1,4 @@
+// REUSE-IgnoreStart
 // SPDX-License-Identifier: GPL-2.0
+// REUSE-IgnoreStart
 MODULE_LICENSE("GPL");
