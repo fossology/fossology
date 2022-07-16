@@ -1,9 +1,11 @@
 /*
+   
    LZ4 - Fast LZ compression algorithm
    Copyright (C) 2011-2015, Yann Collet.
-
+   REUSE-IgnoreStart
    SPDX-License-Identifier: BSD-2-Clause
-
+   REUSE-IgnoreStart
+   
    You can contact the author at :
    - LZ4 source repository : https://github.com/Cyan4973/lz4
    - LZ4 public forum : https://groups.google.com/forum/#!forum/lz4c

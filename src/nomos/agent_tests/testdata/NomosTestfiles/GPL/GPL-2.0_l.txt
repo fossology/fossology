@@ -1,4 +1,6 @@
+/* REUSE-IgnoreStart */
 /* SPDX-License-Identifier: GPL-2.0 */
+/* REUSE-IgnoreStart */
 #ifndef __API_FS__
 #define __API_FS__
 

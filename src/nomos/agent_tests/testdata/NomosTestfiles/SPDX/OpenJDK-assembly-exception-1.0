@@ -1,2 +1,4 @@
+# REUSE-IgnoreStart
 SPDX-License-Identifier: {some license} WITH OpenJDK-assembly-exception-1.0
+# REUSE-IgnoreEnd
 
