@@ -41,8 +41,10 @@ protected:
 
     const std::string gplLicense = "GPL-2.0";
     const std::string lgplLicense = "LGPL-2.1+";
+    // REUSE-IgnoreStart
     std::string content = "SPDX-License-Identifier: " + gplLicense + " AND "
         + lgplLicense;
+    // REUSE-IgnoreStart
     boost::regex listRegex(SPDX_LICENSE_LIST, boost::regex_constants::icase);
     boost::regex nameRegex(SPDX_LICENSE_NAMES, boost::regex_constants::icase);
 
@@ -103,8 +105,10 @@ protected:
 
     const std::string gplLicense = "GPL-2.0";
     const std::string badLicense = "AB";
+    // REUSE-IgnoreStart
     std::string content = "SPDX-License-Identifier: " + gplLicense + " AND "
         + badLicense;
+    // REUSE-IgnoreStart
     boost::regex listRegex(SPDX_LICENSE_LIST, boost::regex_constants::icase);
     boost::regex nameRegex(SPDX_LICENSE_NAMES, boost::regex_constants::icase);
 

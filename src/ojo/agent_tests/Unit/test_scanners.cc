@@ -26,6 +26,7 @@ ostream& operator<<(ostream& out, const vector<ojomatch>& l)
 /**
  * \brief test data
  */
+// REUSE-IgnoreStart
 const std::string testContent = "!/usr/bin/env python3\n"
     "# -*- coding: utf-8 -*-\n"
     "\n"
@@ -45,6 +46,7 @@ const std::string testContent = "!/usr/bin/env python3\n"
     "with this program; if not, write to the Free Software Foundation, Inc.,\n"
     "51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.\n"
     "\"\"\"";
+// REUSE-IgnoreEnd
 
 const std::string testContentWithoutIdentifier = "!/usr/bin/env python3\n"
     "# -*- coding: utf-8 -*-\n"
@@ -63,6 +65,7 @@ const std::string testContentWithoutIdentifier = "!/usr/bin/env python3\n"
     "51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.\n"
     "\"\"\"";
 
+// REUSE-IgnoreStart
 const std::string multipleSpdxLicense = "!/usr/bin/env python3\n"
     "# -*- coding: utf-8 -*-\n"
     "\n"
@@ -82,6 +85,7 @@ const std::string multipleSpdxLicense = "!/usr/bin/env python3\n"
     "with this program; if not, write to the Free Software Foundation, Inc.,\n"
     "51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.\n"
     "\"\"\"";
+// REUSE-IgnoreEnd
 
 class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (scannerTestSuite);

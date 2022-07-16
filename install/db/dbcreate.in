@@ -1,6 +1,8 @@
 #!/bin/bash
 # FOSSology dbcreate script
-# Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2008-2012 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # This script checks to see if the the fossology db exists and if not
 # then creates it.

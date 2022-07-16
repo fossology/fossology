@@ -1,4 +1,6 @@
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2011 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf

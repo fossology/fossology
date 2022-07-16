@@ -1,8 +1,9 @@
 #!/bin/sh
 
-# Copyright 2018 Siemens AG
+# SPDX-FileCopyrightText: © 2018 Siemens AG
 # Author: Gaurav Mishra <mishra.gaurav@siemens.com>
 
+# SPDX-License-Identifier: GPL-2.0-only
 DISTRO=$(lsb_release -is)
 
 CUNIT=""

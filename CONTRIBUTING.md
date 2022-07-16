@@ -1,3 +1,7 @@
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only
+-->
 # Contributing
 
 We welcome contributions in several forms, e.g.

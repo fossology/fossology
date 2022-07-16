@@ -1,5 +1,8 @@
 #!/bin/bash
-#
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
+
 # part of the scripting for building packages with package builder
 # second script that runs docker containers for target platforms
 set -x

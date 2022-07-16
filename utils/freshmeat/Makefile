@@ -1,5 +1,7 @@
 # FOSSology Makefile - utils/freshmeat
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2008 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 TOP=../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Copyright (C) 2017 Maximilian Huber
-# Copyright (C) 2017 Siemens AG
+# SPDX-FileCopyrightText: © 2017 Maximilian Huber
+# SPDX-FileCopyrightText: © 2017 Siemens AG
+
+# SPDX-License-Identifier: GPL-2.0-only
 # based on documentation found at https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
 
 ################################################################################

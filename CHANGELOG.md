@@ -1,3 +1,7 @@
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only
+-->
 # Changelog of FOSSology
 
 ### 4.1.0 (May 12th 2022)
