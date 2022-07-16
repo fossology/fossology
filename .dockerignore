@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: FSFAP
 ################################################################################
 # omit rebuilding after changing some unrelated files.
 .editorconfig

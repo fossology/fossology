@@ -1,3 +1,7 @@
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only
+-->
 # FOSSology
 
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/fossology/fossology)

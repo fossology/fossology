@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# Stefan Schroeder 2010-10-01 
+# SPDX-FileCopyrightText: © 2010 Stefan Schroeder
+#
+# SPDX-License-Identifier: GPL-2.0-only
 #
 #, fuzzy
 msgid ""
@@ -3055,7 +3055,9 @@ msgid "FOSSology"
 msgstr ""
 
 #: plugins/ui-about.php:29
+# REUSE-IgnoreStart
 msgid "Copyright (C) 2007-2010 Hewlett-Packard Development Company, L.P."
+# REUSE-IgnoreEnd
 msgstr ""
 
 #: plugins/ui-about.php:30

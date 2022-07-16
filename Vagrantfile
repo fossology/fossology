@@ -1,8 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Copyright Siemens AG, 2014
-# SPDX-License-Identifier:  GPL-2.0 LGPL-2.1
+# SPDX-FileCopyrightText: © 2014 Siemens AG
+
+# SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
 $post_up_message = <<WELCOME
 Use your FOSSology at http://localhost:8081/repo/
   user: fossy , password: fossy

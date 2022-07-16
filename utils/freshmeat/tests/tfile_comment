@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: FSFAP
+
 #
 # this is a test file, my name is tfile_comment, I'm supposed to have
 # comments and blank lines. I can have data as well, but that's optional.

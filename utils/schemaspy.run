@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: FSFAP
 #
 # cron script for running schemaspy.  NOTE you must supply the db, 
 # user and password. They are xxxxx for now.

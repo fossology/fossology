@@ -2,8 +2,9 @@
  * jQuery Cookie Plugin v1.4.1
  * https://github.com/carhartl/jquery-cookie
  *
- * Copyright 2013 Klaus Hartl
- * Released under the MIT license
+ * SPDX-FileCopyrightText: © 2013 Klaus Hartl
+ * 
+ * SPDX-License-Identifier: MIT
  */
 (function (factory) {
   if (typeof define === 'function' && define.amd) {

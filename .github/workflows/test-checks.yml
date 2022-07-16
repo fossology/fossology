@@ -1,6 +1,7 @@
-# Copyright 2021 Anupam Ghosh <ag.4ums@gmail.com>,
-#   Gaurav Mishra <gmishx@gmishx.in>
-# SPDX-License-Identifier: GPL-2.0 AND LGPL-2.1
+# SPDX-FileCopyrightText: © 2021 Anupam Ghosh <ag.4ums@gmail.com>
+# SPDX-FileCopyrightText: © Gaurav Mishra <gmishx@gmishx.in>
+
+# SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
 
 name: c tests
 

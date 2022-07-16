@@ -1,4 +1,8 @@
 <?xml version="1.0"?>
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only
+-->
 <ruleset name="FOSSology PHP Coding Standard">
   <description>Coding standard created based on FOSSology's Coding
     Guidelines for PHP</description>

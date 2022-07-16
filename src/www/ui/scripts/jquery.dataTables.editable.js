@@ -3,14 +3,9 @@
 * Version:     2.3.3.
 * Author:      Jovan Popovic 
 * 
-* Copyright 2010-2012 Jovan Popovic, all rights reserved.
+* SPDX-FileCopyrightText: © 2010-2012 Jovan Popovic, all rights reserved.
 *
-* This source file is free software, under either the GPL v2 license or a
-* BSD style license, as supplied with this software.
-* 
-* This source file is distributed in the hope that it will be useful, but 
-* WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
-* or FITNESS FOR A PARTICULAR PURPOSE. 
+* SPDX-License-Identifier: GPL-2.0-only OR BSD-3-Clause
 * 
 * Parameters:
 * @sUpdateURL                       String      URL of the server-side page used for updating cell. Default value is "UpdateData".

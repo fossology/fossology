@@ -51,3 +51,19 @@ License: GPL-2.0-only
 Files: src/www/ui/images/*
 Copyright: Fossology contributors
 License: GPL-2.0-only
+
+Files: src/www/ui_tests/BasicTests/TestData/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: pbconf/fossology/deb/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: debian/*
+Copyright: Fossology contributors
+License: GPL-2.0-only
+
+Files: pbconf/pbcl pbconf/fossology/pbve.pre
+Copyright: Fossology contributors
+License: GPL-2.0-only

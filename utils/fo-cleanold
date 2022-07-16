@@ -1,6 +1,8 @@
 #!/bin/sh
 # fo-cleanold - a utility to clean up old fossology installs
-# Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # This utility is designed to clean fossology installs off a system. By
 # default it

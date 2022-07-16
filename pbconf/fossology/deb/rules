@@ -1,5 +1,8 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: FSFAP
 # Sample debian/rules that uses debhelper.
 #
 # This file was originally written by Joey Hess and Craig Small.

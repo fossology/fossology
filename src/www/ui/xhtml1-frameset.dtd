@@ -8,8 +8,9 @@
 
    For further information, see: http://www.w3.org/TR/xhtml1
 
-   Copyright (c) 1998-2002 W3C (MIT, INRIA, Keio),
-   All Rights Reserved. 
+   SPDX-FileCopyrightText: © 1998-2002 W3C (MIT, INRIA, Keio), All Rights Reserved. 
+   
+   SPDX-License-Identifier: W3C-19980720
 
    This DTD module is identified by the PUBLIC and SYSTEM identifiers:
 

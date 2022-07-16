@@ -1,5 +1,7 @@
-# Copyright 2021 Siemens AG, Gaurav Mishra <mishra.gaurav@siemens.com>
-# SPDX-License-Identifier: GPL-2.0 AND LGPL-2.1
+# SPDX-FileCopyrightText: © 2021 Siemens AG
+# SPDX-FileCopyrightText: © Gaurav Mishra <mishra.gaurav@siemens.com>
+
+# SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
 name: Publish Release Packages
 
 on:
