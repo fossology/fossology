@@ -151,6 +151,8 @@ $app->group('/users',
     $app->put('[/{id:\\d+}]', UserController::class . ':updateUser');
     $app->delete('/{id:\\d+}', UserController::class . ':deleteUser');
     $app->get('/self', UserController::class . ':getCurrentUser');
+    $app->post('/tokens', UserController::class . ':createRestApiToken');
+    $app->get('/tokens/{type:\\w+}', UserController::class . ':getTokens');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

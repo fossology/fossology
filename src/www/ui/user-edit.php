@@ -441,17 +441,17 @@ class UserEditPage extends DefaultPlugin
    * @uses Fossology::UI::Api::Helper::RestHelper::validateTokenRequest()
    * @uses Fossology::UI::Api::Helper::DbHelper::insertNewTokenKey()
    */
-  private function generateNewToken(Request $request)
+  function generateNewToken(Request $request)
   {
     global $container;
 
     $user_pk = Auth::getUserId();
-    $tokenName = GetParm('pat_name', PARM_STRING);
-    $tokenExpiry = GetParm('pat_expiry', PARM_STRING);
+    $tokenName = $request->get('pat_name');
+    $tokenExpiry = $request->get('pat_expiry');
     if ($_SESSION[Auth::USER_LEVEL] < 3) {
       $tokenScope = 'r';
     } else {
-      $tokenScope = GetParm('pat_scope', PARM_STRING);
+      $tokenScope = $request->get('pat_scope');
     }
     $tokenScope = array_search($tokenScope, RestHelper::SCOPE_DB_MAP);
     $restHelper = $container->get('helper.restHelper');
@@ -493,7 +493,7 @@ class UserEditPage extends DefaultPlugin
    * template. Also check if the token is expired.
    * @return array
    */
-  private function getListOfActiveTokens()
+  function getListOfActiveTokens()
   {
     $user_pk = Auth::getUserId();
     $sql = "SELECT pat_pk, user_fk, expire_on, token_scope, token_name, created_on, active " .
@@ -522,7 +522,7 @@ class UserEditPage extends DefaultPlugin
    * Get a list of expired tokens for current user.
    * @return array
    */
-  private function getListOfExpiredTokens()
+  function getListOfExpiredTokens()
   {
     $user_pk = Auth::getUserId();
     $sql = "SELECT pat_pk, user_fk, expire_on, token_scope, token_name, created_on " .

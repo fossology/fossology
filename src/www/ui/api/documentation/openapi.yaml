@@ -62,12 +62,22 @@ paths:
         description: Required details for generating new token
         required: true
         content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TokenRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/TokenRequest'
+              allOf:
+                - $ref: '#/components/schemas/TokenRequest'
+                - type: object
+                  properties:
+                    username:
+                      type: string
+                      description: Username of the login user.
+                    password:
+                      type: string
+                      format: password
+                      description: Password of the user trying to login.
+                  required:
+                    - username
+                    - password
       responses:
         '201':
           description: Token generated
@@ -898,6 +908,82 @@ paths:
                 $ref: '#/components/schemas/User'      
         default:
           $ref: '#/components/responses/defaultResponse'
+  /users/tokens:
+    post:
+      operationId: createRestApiToken
+      tags:
+        - User
+        - Admin
+      summary: Create a new REST API Token
+      description: >
+        Create a new REST API Token
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+      responses:
+        '201':
+          description: Token created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Info'
+                  - type: object
+                    properties:
+                      token:
+                        type: string
+                        example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTgwODI1OTksIm5iZiI6MTY1NzkwOTgwMCwianRpIjoiTXk0eiIsInNjb3BlIjoid3JpdGUifQ.Sl1acvN0GlCe7VUZJQX00u_vpfWrtfJlVYQ63FBkzP4
+        '400':
+          description: Following parameters are required in the request body -- token_name,token_scope,token_expire
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        
+        default:
+            $ref: '#/components/responses/defaultResponse'
+  /users/tokens/{type}:
+    parameters:
+      - name: type
+        required: true
+        in: path
+        schema:
+          type: string
+          enum:
+          - active
+          - expired
+    get:
+      operationId: getTokensByType
+      tags:
+        - User
+        - Admin
+      summary: Get all the REST API tokens (active | expired)
+      description: >
+        Get all the REST API tokens (active | expired)
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Info'
+                  - type: object
+                    properties:
+                      active_tokens:
+                        $ref: '#/components/schemas/Token'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        
+        default:
+            $ref: '#/components/responses/defaultResponse'
   /jobs:
     parameters:
       - name: groupName
@@ -1902,6 +1988,35 @@ components:
             - INFO
             - ERROR
           description: Denotes if info was created on error
+    Token:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Token Id
+        token_name:
+          type: string
+          description: Name of the Token
+        created:
+          type: string
+          format: date
+          description: Denotes when the token was created
+          example: 2022-07-11
+        token_expire:
+          type: string
+          format: date
+          description: Denotes when the token was created
+          example: 2022-07-11
+        scope:
+          type: string
+          enum:
+          - read
+          - write
+          description: Scope of the token
+        token:
+          type: string
+          description: Scope of the token
+          example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTg5NDY1OTksIm5iZiI6MTY1NzkwOTgwMCwianRpIjoiTnk0eiIsInNjb3BlIjoid3JpdGUifQ.Yqwdt7Fzx-Qw3megYix_OYu1mqBOoz4Rrc1cgJasmJA
     User:
       type: object
       properties:
@@ -2032,13 +2147,6 @@ components:
     TokenRequest:
       type: object
       properties:
-        username:
-          type: string
-          description: Username of the login user.
-        password:
-          type: string
-          format: password
-          description: Password of the user trying to login.
         token_name:
           type: string
           maxLength: 40
