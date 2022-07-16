@@ -1,4 +1,7 @@
 #!/usr/bash
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: FSFAP
 #
 # update schemaspy output on the system, once a week, must be run as root (sudo)
 #

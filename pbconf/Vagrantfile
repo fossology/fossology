@@ -1,11 +1,11 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+# SPDX-FileCopyrightText: © Fossology contributors
 
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # original script by maximilian.huber@tngtech.com
 # additions by bruno.cornec@hpe.com michael.c.jaeger@siemens.com
-#
-# SPDX-License-Identifier: GPL-2.0
 #
 # this script starts a VM in order to run project builder inside
 # for development and debugging

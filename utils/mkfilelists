@@ -1,5 +1,8 @@
 #!/bin/sh
 # mkfilelist - make lists of installed files for sysadmin and distro cases
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: FSFAP
 rm -rf /tmp/fo-sysadmin
 mkdir /tmp/fo-sysadmin
 make clean

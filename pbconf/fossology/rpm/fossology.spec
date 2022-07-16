@@ -1,13 +1,8 @@
-#
 # Spec file for fossology for building rpm packages
-#
-# SPDX-License-Identifier: GPL-2.0
-#
-# Copying and distribution of this file, with or without modification,
-# are permitted in any medium without royalty provided the copyright
-# notice and this notice are preserved.  This file is offered as-is,
-# without any warranty.
-#
+
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
 
 %define srcname PBPKG
 

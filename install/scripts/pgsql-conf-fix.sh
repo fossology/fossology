@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Accept/require postgresql version as an argument to adjust config file directory to suit
 #

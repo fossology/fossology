@@ -1,5 +1,8 @@
 # FOSSology Makefile - Makefile.process
-# Copyright (C) 2008, 2012 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2008, 2012 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
+
 # This Makefile is included by other Makefiles in the tree that need
 # these targets in order to preprocess files with embedded references
 # to the variables in Makefile.conf

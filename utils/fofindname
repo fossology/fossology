@@ -1,3 +1,6 @@
 # search a directory tree for a filename, ignore svn files
 # e.g. fofindname myfile.h
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: FSFAP
 find . -type f -not \( -wholename "*svn*" \) -not \( -wholename "*~" \) -wholename "*$1*"

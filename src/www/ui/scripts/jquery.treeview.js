@@ -4,11 +4,9 @@
  * http://bassistance.de/jquery-plugins/jquery-plugin-treeview/
  * http://docs.jquery.com/Plugins/Treeview
  *
- * Copyright (c) 2007 Jörn Zaefferer
- *
- * Dual licensed under the MIT and GPL licenses:
- *   http://www.opensource.org/licenses/mit-license.php
- *   http://www.gnu.org/licenses/gpl.html
+ * SPDX-FileCopyrightText: © 2007 Jörn Zaefferer
+ * 
+ * SPDX-License-Identifier: MIT AND GPL-2.0-only
  *
  * Revision: $Id: jquery.treeview.js 5759 2008-07-01 07:50:28Z joern.zaefferer $
  *

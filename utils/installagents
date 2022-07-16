@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: FSFAP
 # After you build a fossology tarball with fo-mktar,  you can use
 # this script to copy the fossology tarball to the multiple agent machines 
 # specified in the for loop.
