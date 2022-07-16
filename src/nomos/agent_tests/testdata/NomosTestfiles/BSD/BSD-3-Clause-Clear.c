@@ -28,8 +28,9 @@
 */
 
 
-
+// REUSE-IgnoreStart
 /* SPDX-License-Identifier: BSD-3-Clause-Clear */
+// REUSE-IgnoreEnd
 /*
 The Clear BSD License
 

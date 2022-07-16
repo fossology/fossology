@@ -28,8 +28,9 @@
 */
 
 
-
+// REUSE-IgnoreStart
 /* SPDX-License-Identifier: Apache-1.0 */
+// REUSE-IgnoreEnd
 /*
 Copyright (c) 1995-1999 The Apache Group. All rights
 reserved.
