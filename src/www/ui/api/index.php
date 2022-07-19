@@ -138,6 +138,8 @@ $app->group('/uploads',
     $app->patch('/{id:\\d+}', UploadController::class . ':updateUpload');
     $app->put('/{id:\\d+}', UploadController::class . ':moveUpload');
     $app->post('', UploadController::class . ':postUpload');
+    $app->put('/{id:\\d+}/permissions', UploadController::class . ':setUploadPermissions');
+    $app->get('/{id:\\d+}/perm-groups', UploadController::class . ':getGroupsWithPermissions');
     $app->get('/{id:\\d+}/summary', UploadController::class . ':getUploadSummary');
     $app->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
     $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');

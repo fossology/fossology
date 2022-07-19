@@ -64,6 +64,7 @@ class UploadPermissionPage extends DefaultPlugin
     $newgroup = intval($request->get('newgroup'));
     $newperm = intval($request->get('newperm'));
     $public_perm = $request->get('public', -1);
+
     $commu_status = fo_communicate_with_scheduler('status', $response_from_scheduler, $error_info);
     if ($commu_status) {
       $response_from_scheduler = "";
@@ -72,6 +73,44 @@ class UploadPermissionPage extends DefaultPlugin
       $error_info = null;
     }
 
+    $res = $this->editPermissionsForUpload($commu_status, $folder_pk, $upload_pk, $allUploadsPerm, $perm_upload_pk, $perm,$newgroup, $newperm, $public_perm);
+    $vars = array(
+            'folderStructure' => $this->folderDao->getFolderStructure($res['root_folder_pk']),
+            'groupArray' => $groupsWhereUserIsAdmin,
+            'uploadId' => $res['upload_pk'],
+            'allUploadsPerm' => $res['allUploadsPerm'],
+            'folderId' => $res['folder_pk'],
+            'baseUri' => Traceback_uri() . '?mod=upload_permissions',
+            'newPerm' => $res['newperm'],
+            'newGroup' => $res['newgroup'],
+            'uploadList' => $res['UploadList'],
+            'permNames' => $GLOBALS['PERM_NAMES'],
+            'message' => $response_from_scheduler
+            );
+
+    if (!empty($vars['uploadList'])) {
+      $vars['publicPerm'] = $this->uploadPermDao->getPublicPermission($vars['uploadId']);
+      $permGroups = $this->uploadPermDao->getPermissionGroups($vars['uploadId']);
+      $vars['permGroups'] = $permGroups;
+      $additableGroups = array(0 => '-- select group --');
+      foreach ($groupsWhereUserIsAdmin as $gId=>$gName) {
+        if (!array_key_exists($gId, $permGroups)) {
+          $additableGroups[$gId] = $gName;
+        }
+      }
+      $vars['additableGroups'] = $additableGroups;
+    }
+    $vars['gumJson'] = json_encode($this->getGroupMembers($groupsWhereUserIsAdmin));
+
+    if (!empty($vars['uploadId'])) {
+      $vars['permNamesWithReuse'] = $this->getPermNamesWithReuse($vars['uploadId']);
+    }
+
+    return $this->render('upload_permissions.html.twig', $this->mergeWithDefault($vars));
+  }
+
+  function editPermissionsForUpload($commu_status, $folder_pk,$upload_pk,$allUploadsPerm,$perm_upload_pk,$perm,$newgroup,$newperm,$public_perm)
+  {
     $root_folder_pk = $this->folderDao->getRootFolder(Auth::getUserId())->getId();
     if (empty($folder_pk)) {
       $folder_pk = $root_folder_pk;
@@ -104,39 +143,18 @@ class UploadPermissionPage extends DefaultPlugin
         }
       }
     }
-    $vars = array(
-            'folderStructure' => $this->folderDao->getFolderStructure($root_folder_pk),
-            'groupArray' => $groupsWhereUserIsAdmin,
-            'uploadId' => $upload_pk,
-            'allUploadsPerm' => $allUploadsPerm,
-            'folderId' => $folder_pk,
-            'baseUri' => Traceback_uri() . '?mod=upload_permissions',
-            'newPerm' => $newperm,
-            'newGroup' => $newgroup,
-            'uploadList' => $UploadList,
-            'permNames' => $GLOBALS['PERM_NAMES'],
-            'message' => $response_from_scheduler
-            );
 
-    if (!empty($UploadList)) {
-      $vars['publicPerm'] = $this->uploadPermDao->getPublicPermission($upload_pk);
-      $permGroups = $this->uploadPermDao->getPermissionGroups($upload_pk);
-      $vars['permGroups'] = $permGroups;
-      $additableGroups = array(0 => '-- select group --');
-      foreach ($groupsWhereUserIsAdmin as $gId=>$gName) {
-        if (!array_key_exists($gId, $permGroups)) {
-          $additableGroups[$gId] = $gName;
-        }
-      }
-      $vars['additableGroups'] = $additableGroups;
-    }
-    $vars['gumJson'] = json_encode($this->getGroupMembers($groupsWhereUserIsAdmin));
+    $res = array(
+      'root_folder_pk' => $root_folder_pk,
+      'upload_pk' => $upload_pk,
+      'allUploadsPerm' => $allUploadsPerm,
+      'folder_pk' => $folder_pk,
+      'newperm' => $newperm,
+      'newgroup' => $newgroup,
+      'UploadList' => $UploadList,
+    );
 
-    if (!empty($upload_pk)) {
-      $vars['permNamesWithReuse'] = $this->getPermNamesWithReuse($upload_pk);
-    }
-
-    return $this->render('upload_permissions.html.twig', $this->mergeWithDefault($vars));
+    return $res;
   }
 
   private function getPermNamesWithReuse($uploadId)
@@ -156,7 +174,7 @@ class UploadPermissionPage extends DefaultPlugin
     return $permNamesWithReuse;
   }
 
-  private function insertPermission($groupId,$uploadId,$permission,$uploadList)
+  function insertPermission($groupId,$uploadId,$permission,$uploadList)
   {
     $fileName = false;
     foreach ($uploadList as $uploadEntry) {
