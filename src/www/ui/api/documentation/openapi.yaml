@@ -1144,6 +1144,30 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
+  /groups/{id}:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the group
+        in: path
+        schema:
+          type: integer
+    delete:
+      operationId: deleteGroupById
+      tags:
+        - Groups
+      summary: Delete group by id
+      description: >
+        Deletes a single group by id.
+      responses:
+        '202':
+          description: User group will be deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /report:
     get:
