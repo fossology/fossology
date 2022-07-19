@@ -14,6 +14,7 @@ namespace Fossology\UI\Api\Controllers;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\DelAgent\UI\DeleteMessages;
+use Fossology\Lib\Auth\Auth;
 use Fossology\UI\Page\UploadPageBase;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -649,5 +650,105 @@ class UploadController extends RestController
       }
     }
     return true;
+  }
+
+  /**
+   * Set permissions for a upload in a folder for different groups
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function setUploadPermissions($request, $response, $args)
+  {
+    $returnVal = null;
+    // checking if the scheduler is running or not
+    $commu_status = fo_communicate_with_scheduler('status', $response_from_scheduler, $error_info);
+    if ($commu_status) {
+      // Initialising upload-permissions plugin
+      global $container;
+      $restHelper = $container->get('helper.restHelper');
+      $uploadPermissionObj = $restHelper->getPlugin('upload_permissions');
+
+      $dbManager = $this->dbHelper->getDbManager();
+      // parsing the request body
+      $reqBody = $this->getParsedBody($request);
+
+      $folder_pk = intval($reqBody['folderId']);
+      $upload_pk = intval($args['id']);
+      $upload = $this->uploadAccessible($this->restHelper->getGroupId(), $upload_pk);
+      if ($upload !== true) {
+        return $response->withJson($upload->getArray(), $upload->getCode());
+      }
+      $allUploadsPerm = $reqBody['allUploadsPermission'] ? 1 : 0;
+      $newgroup = intval($reqBody['groupId']);
+      $newperm = intval($this->getEquivalentValueForPermission($reqBody['newPermission']));
+      $public_perm = isset($reqBody['publicPermission']) ? $this->getEquivalentValueForPermission($reqBody['publicPermission']) : -1;
+
+      $query = "SELECT perm, perm_upload_pk FROM perm_upload WHERE upload_fk=$1 and group_fk=$2;";
+      $result = $dbManager->getSingleRow($query, [$upload_pk, $newgroup], __METHOD__.".getOldPerm");
+      if (!empty($result)) {
+        $perm_upload_pk = intVal($result['perm_upload_pk']);
+        $perm = $newperm;
+      }
+
+      $uploadPermissionObj->editPermissionsForUpload($commu_status, $folder_pk, $upload_pk, $allUploadsPerm, $perm_upload_pk, $perm, $newgroup, $newperm, $public_perm);
+
+      $returnVal = new Info(202, "Permissions updated successfully!", InfoType::INFO);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    } else {
+      $returnVal = new Info(503, "Scheduler is not running!", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+  }
+
+  public function getEquivalentValueForPermission($perm)
+  {
+    switch ($perm) {
+      case 'none':
+        return Auth::PERM_NONE;
+      case 'read_only':
+        return Auth::PERM_READ;
+      case 'read_write':
+        return Auth::PERM_WRITE;
+      case 'clearing_admin':
+        return Auth::PERM_CADMIN;
+      case 'admin':
+        return Auth::PERM_ADMIN;
+      default:
+        return Auth::PERM_NONE;
+    }
+  }
+
+  /**
+   * Get all the groups with their respective permissions for a upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getGroupsWithPermissions($request, $response, $args)
+  {
+    $upload_pk = intval($args['id']);
+    $upload = $this->uploadAccessible($this->restHelper->getGroupId(), $upload_pk);
+    if ($upload !== true) {
+      return $response->withJson($upload->getArray(), $upload->getCode());
+    }
+    $publicPerm = $this->restHelper->getUploadPermissionDao()->getPublicPermission($upload_pk);
+    $permGroups = $this->restHelper->getUploadPermissionDao()->getPermissionGroups($upload_pk);
+
+    // Removing the perm_upload_pk parameter in response
+    $finalPermGroups = array();
+    foreach ($permGroups as $value) {
+      unset($value["perm_upload_pk"]);
+      array_push($finalPermGroups, $value);
+    }
+
+    $res = array();
+    $res["publicPerm"] = $publicPerm;
+    $res["permGroups"] = $finalPermGroups;
+    return $response->withJson($res, 200);
   }
 }

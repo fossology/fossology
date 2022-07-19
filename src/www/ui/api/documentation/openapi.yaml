@@ -660,6 +660,128 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /uploads/{id}/permissions:
+    parameters:
+      - name: id
+        required: true
+        description: Enter any upload id
+        in: path
+        schema:
+          type: integer
+    put:
+      operationId: setUploadPermissions
+      tags:
+        - Upload
+      summary: Set permissions for a upload in a folder for different groups
+      description: >
+        Set permissions for a upload in a folder for different groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                folderId:
+                  type: integer
+                  description: Enter a folder id
+                allUploadsPermission:
+                  type: boolean
+                  enum:
+                  - true
+                  - false
+                  description: Apply same permissions to all uploads in this folder
+                groupId:
+                  type: integer
+                  description: Enter the id of the group you want to add or edit permission for this upload
+                newPermission:
+                  type: string
+                  enum:
+                  - none
+                  - read_only
+                  - read_write
+                  - clearing_admin
+                  - admin
+                  description: Select the permission for selected group
+                publicPermission:
+                  type: string
+                  enum:
+                  - none
+                  - read_only
+                  - read_write
+                  - clearing_admin
+                  - admin
+                  description: Select the public permission for this upload
+              required:
+                - allUploadsPermission
+      responses:
+        '202':
+          description: Permissions updated successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '404':
+          description: Upload does not exist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '503':
+          description: Scheduler is not running
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/perm-groups:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getGroupsWithPermissions
+      tags:
+        - Upload
+      summary: Get all the groups with their respective permissions for a upload
+      description:
+        Returns the list of all the groups with their respective permissions for a upload
+      responses:
+        '200':
+          description: Get Groups with permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadPermGroups'
+        '404':
+          description: Upload does not exist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /search:
     get:
       operationId: searchFile
@@ -2289,6 +2411,25 @@ components:
             example: 
             - "path/to/file1"
             - "path/to/file2"
+    UploadPermGroups:
+      description: Groups with their respective permissions for a upload
+      type: object
+      properties:
+        publicPerm:
+          type: string
+          description: Public permission for the upload
+        permGroups:
+          type: array
+          description: Indexed Object of GroupIds with their respective permissions for a upload
+          items:
+            type: object
+            properties:
+              perm:
+                type: string
+              group_pk:
+                type: string
+              group_name:
+                type: string
     UrlUpload:
       description: To create an upload from a URL
       type: object
