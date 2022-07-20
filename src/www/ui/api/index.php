@@ -151,6 +151,7 @@ $app->group('/uploads',
     $app->post('', UploadController::class . ':postUpload');
     $app->get('/{id:\\d+}/summary', UploadController::class . ':getUploadSummary');
     $app->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
+    $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
