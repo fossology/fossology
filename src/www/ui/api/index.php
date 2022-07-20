@@ -176,6 +176,7 @@ $app->group('/groups',
 $app->group('/jobs',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('[/{id:\\d+}]', JobController::class . ':getJobs');
+    $app->get('/all', JobController::class . ':getAllJobs');
     $app->post('', JobController::class . ':createJob');
     $app->any('/{params:.*}', BadRequestController::class);
   });
