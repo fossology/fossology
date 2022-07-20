@@ -21,6 +21,7 @@ use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadUrlPage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadVcsPage;
 use Fossology\UI\Api\Models\Analysis;
 use Fossology\UI\Api\Models\Decider;
+use Fossology\Lib\Auth\Auth;
 use Fossology\UI\Api\Models\Findings;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -30,6 +31,7 @@ use Fossology\UI\Api\Models\ScanOptions;
 use Fossology\UI\Api\Models\UploadSummary;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use UIExportList;
+use Fossology\Lib\Data\DecisionTypes;
 
 /**
  * @class UploadHelper
@@ -685,6 +687,35 @@ class UploadHelper
   }
 
   /**
+    *  Get the clearing status for files within an upload
+    *  @param ItemTreeBounds $itemTreeBounds ItemTreeBounds object for the uploadtree
+    *  @param ClearingDao $clearingDao ClearingDao object
+     * @param DbManager $dbManager DbManager object
+     * @param integer $uploadTreeTableId upload tree id of the file
+     * @param integer $groupId groupId of the user
+     * @return String String containing the Clearing status message
+*/
+
+  public function fetchClearingStatus($itemTreeBounds, $clearingDao, $dbManager, $uploadTreeTableId, $groupId)
+  {
+    $decTypes = new DecisionTypes;
+    if ($itemTreeBounds !== null) {
+        $clearingList = $clearingDao->getFileClearings($itemTreeBounds, $groupId);
+    } else {
+        $clearingList = "NOPE";
+    }
+        $clearingArray=[];
+    foreach ($clearingList as $clearingDecision) {
+      $clearingArray[] = $clearingDecision->getType();
+    }
+    if ($clearingArray[0] === null) {
+      return("not_found");
+    } else {
+      return ($decTypes->getTypeName($clearingArray[0]));
+    }
+  }
+
+  /**
    * Get the license and copyright list for given upload scanned by provided agents
    * @param integer $uploadId        Upload ID
    * @param array $agents            List of agents to get list from
@@ -700,13 +731,14 @@ class UploadHelper
     $restHelper = $container->get('helper.restHelper');
     $uploadDao = $restHelper->getUploadDao();
     $agentDao = $container->get('dao.agent');
-
+    $dbManager = $restHelper->getDbHelper()->getDbManager();
     $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
     $parent = $uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
-
+    $groupId = $restHelper->getGroupId();
     $scanProx = new ScanJobProxy($agentDao, $uploadId);
     $scanProx->createAgentStatus($agents);
     $agent_ids = $scanProx->getLatestSuccessfulAgentIds();
+    $clearingDao = $GLOBALS['container']->get("dao.clearing");
 
     /** @var UIExportList $licenseListObj
      * UIExportList object to get licenses
@@ -752,8 +784,17 @@ class UploadHelper
         $findings = new Findings($license['agentFindings'],
           $license['conclusions'], $copyrightContent);
         $responseRow = array();
+        $uploadTreeTableId = $license['uploadtree_pk'];
+        $uploadtree_tablename = $uploadDao->getUploadtreeTableName($uploadId);
+        if ($uploadTreeTableId!==null) {
+          $itemTreeBounds = $uploadDao->getItemTreeBounds($uploadTreeTableId,$uploadtree_tablename);
+        } else {
+          $itemTreeBounds=null;
+        }
+        $clearingDecision= $this->fetchClearingStatus($itemTreeBounds, $clearingDao, $dbManager, $uploadTreeTableId, $groupId);
         $responseRow['filePath'] = $license['filePath'];
         $responseRow['findings'] = $findings->getArray();
+        $responseRow['clearing_status'] = $clearingDecision;
         $responseList[] = $responseRow;
       }
     } elseif (!$boolLicense && $boolCopyright) {
