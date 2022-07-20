@@ -2722,6 +2722,9 @@ components:
             example: "path/to/LICENSE"
           findings:
             $ref: '#/components/schemas/Findings'
+          clearing_status:
+            type: string
+            example: "DO_NOT_USE"
     UploadCopyrights:
       type: array
       items:
@@ -2733,7 +2736,7 @@ components:
             example: "Copyright (C) 2017-2020 Free Software Foundation, Inc."
           filePath:
             description: Path of the files for which the copyright information is provided
-            type: array
+            type: string
             items:
               type: string
             example:

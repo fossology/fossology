@@ -284,6 +284,94 @@ class LicenseDao
     $this->dbManager->freeResult($result);
     return $licensesPerFileId;
   }
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param Array(int) $selectedAgentIds
+   * @param bool $includeSubFolders
+   * @param String $excluding
+   * @param bool $ignore ignore files without license
+   * @return array
+   */
+  public function getLicensesAndTreeIdPerFileNameForAgentId(ItemTreeBounds $itemTreeBounds,
+                                                   $selectedAgentIds=null,
+                                                   $includeSubfolders=true,
+                                                   $excluding='',
+                                                   $ignore=false,
+                                                   &$clearingDecisionsForLicList = array())
+  {
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName;
+    $param = array();
+
+    $condition = " (ufile_mode & (1<<28)) = 0";
+    if ($includeSubfolders) {
+      $param[] = $itemTreeBounds->getLeft();
+      $param[] = $itemTreeBounds->getRight();
+      $condition .= " AND lft BETWEEN $1 AND $2";
+      $statementName .= ".subfolders";
+    } else {
+      $param[] = $itemTreeBounds->getItemId();
+      $condition .= " AND realparent = $1";
+    }
+
+    if ('uploadtree_a' == $uploadTreeTableName) {
+      $param[] = $itemTreeBounds->getUploadId();
+      $condition .= " AND upload_fk=$".count($param);
+    }
+
+    $agentSelect = "";
+    if ($selectedAgentIds !== null) {
+      $statementName .= ".".count($selectedAgentIds)."agents";
+      $agentSelect = "WHERE agent_fk IS NULL";
+      foreach ($selectedAgentIds as $selectedAgentId) {
+        $param[] = $selectedAgentId;
+        $agentSelect .= " OR agent_fk = $".count($param);
+      }
+    }
+
+    $sql = "
+SELECT uploadtree_pk, ufile_name, lft, rgt, ufile_mode,
+       rf_shortname, agent_fk
+FROM (SELECT
+        uploadtree_pk, ufile_name,
+        lft, rgt, ufile_mode, pfile_fk
+      FROM $uploadTreeTableName
+      WHERE $condition) AS subselect1
+LEFT JOIN (SELECT rf_shortname,pfile_fk,agent_fk
+           FROM license_file, license_ref
+           WHERE rf_fk = rf_pk) AS subselect2
+  ON subselect1.pfile_fk = subselect2.pfile_fk
+$agentSelect
+ORDER BY lft asc
+";
+
+    $this->dbManager->prepare($statementName, $sql);
+    $result = $this->dbManager->execute($statementName, $param);
+    $licensesPerFileName = array();
+
+    $row = $this->dbManager->fetchArray($result);
+    $pathStack = array($row['ufile_name']);
+    $rgtStack = array($row['rgt']);
+    $lastLft = $row['lft'];
+    $path = implode('/', $pathStack);
+    $uploadTreeId = $row['uploadtree_pk'];
+    $this->addToLicensesAndTreeIdPerFileName($licensesPerFileName, $path, $row, $ignore, $clearingDecisionsForLicList, $uploadTreeId);
+    while ($row = $this->dbManager->fetchArray($result)) {
+      if (!empty($excluding) && false!==strpos("/$row[ufile_name]/", $excluding)) {
+        $lastLft = $row['rgt'] + 1;
+        continue;
+      }
+      if ($row['lft'] < $lastLft) {
+        continue;
+      }
+
+      $this->updateStackState($pathStack, $rgtStack, $lastLft, $row);
+      $path = implode('/', $pathStack);
+      $this->addToLicensesAndTreeIdPerFileName($licensesPerFileName, $path, $row, $ignore, $clearingDecisionsForLicList, $uploadTreeId);
+    }
+    $this->dbManager->freeResult($result);
+    return array_reverse($licensesPerFileName);
+  }
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
@@ -393,6 +481,21 @@ ORDER BY lft asc
     if (($row['ufile_mode'] & (1 << 29)) == 0) {
       if ($row['rf_shortname']) {
         $licensesPerFileName[$path]['scanResults'][] = $row['rf_shortname'];
+        if (array_key_exists($row['uploadtree_pk'], $clearingDecisionsForLicList)) {
+          $licensesPerFileName[$path]['concludedResults'][] = $clearingDecisionsForLicList[$row['uploadtree_pk']];
+        }
+      }
+    } else if (!$ignore) {
+      $licensesPerFileName[$path] = false;
+    }
+  }
+
+  private function addToLicensesAndTreeIdPerFileName(&$licensesPerFileName, $path, $row, $ignore, &$clearingDecisionsForLicList = array(), $uploadTreeId=null)
+  {
+    if (($row['ufile_mode'] & (1 << 29)) == 0) {
+      if ($row['rf_shortname']) {
+        $licensesPerFileName[$path]['scanResults'][] = $row['rf_shortname'];
+        $licensesPerFileName[$path]['uploadtree_pk'][] = $row['uploadtree_pk'];
         if (array_key_exists($row['uploadtree_pk'], $clearingDecisionsForLicList)) {
           $licensesPerFileName[$path]['concludedResults'][] = $clearingDecisionsForLicList[$row['uploadtree_pk']];
         }
