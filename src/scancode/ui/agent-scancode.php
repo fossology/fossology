@@ -62,9 +62,27 @@ class ScancodesAgentPlugin extends AgentPlugin
   {
     $dependencies = array();
     $flags = $request->get('scancodeFlags') ?: array();
+    $unpackArgs = intval(@$_POST['scm']) == 1 ? 'I' : '';
+    $args = $this->getScanCodeArgs($flags, $unpackArgs);
+    if ($args === null) {
+      return 0;
+    }
+    if (!empty($unpackArgs)) {
+      $dependencies[] = 'agent_mimetype';
+    }
+    return parent::AgentAdd($jobId, $uploadId, $errorMsg, array_unique($dependencies) , $args);
+  }
+
+  /**
+   * Translate request flags to agent's args string
+   * @param string[] $flags Array of flags
+   * @param string $unpackArgs Unpack agent args
+   * @return null|string NULL if no args created, string otherwise
+   */
+  public function getScanCodeArgs($flags, $unpackArgs)
+  {
     $scanMode = '';
-    foreach ($flags as $flag)
-    {
+    foreach ($flags as $flag) {
       switch ($flag)
       {
         case "license":
@@ -81,18 +99,13 @@ class ScancodesAgentPlugin extends AgentPlugin
           break;
       }
     }
-    if (empty($scanMode))
-    {
-      return 0;
+    if (empty($scanMode)) {
+      return null;
     }
-    $unpackArgs = intval(@$_POST['scm']) == 1 ? 'I' : '';
-    if (!empty($unpackArgs))
-    {
-      $dependencies[] = 'agent_mimetype';
+    if (!empty($unpackArgs)) {
       $scanMode .= $unpackArgs;
     }
-    $args = self::SCAN_FLAG.$scanMode;
-    return parent::AgentAdd($jobId, $uploadId, $errorMsg, array_unique($dependencies) , $args);
+    return self::SCAN_FLAG . $scanMode;
   }
 
   /**
