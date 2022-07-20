@@ -459,6 +459,31 @@ class UploadController extends RestController
     return $response->withJson($licenseList, 200);
   }
 
+   /**
+   * Get list of copyright and files for given upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+
+  public function getUploadCopyrights($request, $response, $args)
+  {
+    $id = intval($args['id']);
+    $upload = $this->uploadAccessible($this->restHelper->getGroupId(), $id);
+    if ($upload !== true) {
+      return $response->withJson($upload->getArray(), $upload->getCode());
+    }
+    $adj2nest = $this->isAdj2nestDone($id, $response);
+    if ($adj2nest !== true) {
+      return $adj2nest;
+    }
+    $uploadHelper = new UploadHelper();
+    $licenseList = $uploadHelper->getUploadCopyrightList($id);
+    return $response->withJson($licenseList, 200);
+  }
+
   /**
    * Update an upload
    *
