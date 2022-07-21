@@ -1213,7 +1213,54 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-
+  /groups/{id}/user/{uid}:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the group
+        in: path
+        schema:
+          type: integer
+      - name: uid
+        required: true
+        description: user id of the member
+        in: path
+        schema:
+          type: integer
+    delete:
+      operationId: deleteGroupMemberByGroupIdAndUserId
+      tags:
+        - Groups
+      summary: Delete group member by groupId and userId
+      description: >
+        Deletes a single group member by groupId and userId
+      responses:
+        '200':
+          description: User will be removed from group.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Not found Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation based error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description:  Internal server error with details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse' 
   /report:
     get:
       operationId: getReportsByUpload
