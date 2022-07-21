@@ -169,6 +169,7 @@ $app->group('/groups',
     $app->get('', GroupController::class . ':getGroups');
     $app->post('', GroupController::class . ':createGroup');
     $app->delete('/{id:\\d+}', GroupController::class . ':deleteGroup');
+    $app->delete('/{id:\\d+}/user/{uid:\\d+}', GroupController::class . ':deleteGroupMember');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

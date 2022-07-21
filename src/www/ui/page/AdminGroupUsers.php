@@ -152,7 +152,7 @@ class AdminGroupUsers extends DefaultPlugin
     return $this->render('admin_group_users.html.twig', $this->mergeWithDefault($vars));
   }
 
-  private function updateGUMPermission($gum_pk, $perm)
+  public function updateGUMPermission($gum_pk, $perm)
   {
     $dbManager = $this->getObject('db.manager');
     if ($perm === -1) {
