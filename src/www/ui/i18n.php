@@ -1,7 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2010-2011 Stefan Schroeder
- 
+
  SPDX-License-Identifier: GPL-2.0-only
 */
 

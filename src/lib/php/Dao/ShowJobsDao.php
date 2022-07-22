@@ -309,7 +309,7 @@ class ShowJobsDao
   /**
    * @brief Return total Job data with time elapsed
    * @param $job_pk
-   * @return $row
+   * @return array
    */
   public function getDataForASingleJob($jq_pk)
   {
