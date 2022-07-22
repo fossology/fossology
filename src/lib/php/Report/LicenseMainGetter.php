@@ -2,7 +2,7 @@
 /*
  SPDX-FileCopyrightText: © 2016-2017 Siemens AG
  Author: Daniele Fognini, Shaheem Azmal M MD
- 
+
  SPDX-License-Identifier: GPL-2.0-only
 */
 

@@ -5,7 +5,7 @@
  SPDX-FileCopyrightText: © Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
  Author: Shaheem Azmal<shaheem.azmal@siemens.com>,
          Anupam Ghosh <anupam.ghosh@siemens.com>
-         
+
  SPDX-License-Identifier: GPL-2.0-only
 */
 

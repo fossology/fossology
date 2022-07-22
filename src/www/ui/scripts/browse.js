@@ -1,6 +1,6 @@
 /*
  SPDX-FileCopyrightText: © 2014-2015 Siemens AG
-Author: Steffen Weber, Johannes Najjar
+ Author: Steffen Weber, Johannes Najjar
 
  SPDX-License-Identifier: GPL-2.0-only
 */
