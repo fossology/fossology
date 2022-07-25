@@ -50,7 +50,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   email_notify = 0;        \
   error = NULL; }
 
-#define EMAIL_BUILD_CMD "%s %s -s '%s' %s"    ///< Email command format
+#define EMAIL_BUILD_CMD "%s %s --header 'Subject: %s' --to '%s'" \
+    " --silent --auth-hide-password" \
+    " --output '&STDOUT' --body -" ///< Email command format
 #define DEFAULT_HEADER  "FOSSology scan complete\nmessage:\"" ///< Default email header
 #define DEFAULT_FOOTER  "\""                  ///< Default email footer
 #define DEFAULT_SUBJECT "FOSSology scan complete\n" ///< Default email subject
@@ -428,6 +430,86 @@ static gint email_checkjobstatus(scheduler_t* scheduler, job_t* job)
   return ret;
 }
 
+static gboolean
+cb_out_watch( GIOChannel   *channel,
+              GIOCondition  cond,
+              gpointer      data )
+{
+    gchar *string;
+    gsize  size;
+
+    if( cond == G_IO_HUP )
+    {
+        g_io_channel_unref( channel );
+        return( FALSE );
+    }
+
+    g_io_channel_read_line( channel, &string, &size, NULL, NULL );
+    NOTIFY("STDOUT: '%s'", string);
+    g_free( string );
+
+    return( TRUE );
+}
+
+static gboolean
+cb_err_watch( GIOChannel   *channel,
+              GIOCondition  cond,
+              gpointer      data )
+{
+    gchar *string;
+    gsize  size;
+
+    if( cond == G_IO_HUP )
+    {
+        g_io_channel_unref( channel );
+        return( FALSE );
+    }
+
+    g_io_channel_read_line( channel, &string, &size, NULL, NULL );
+    NOTIFY("STDERR: '%s'", string);
+    g_free( string );
+
+    return( TRUE );
+}
+
+static gboolean
+guest_exec_input_watch( GIOChannel   *channel,
+              GIOCondition  cond,
+              gpointer      data )
+{
+  NOTIFY("WRITING TO STDOUT");
+  GString *string;
+  gsize  size;
+  GIOStatus status;
+  GError *error = NULL;
+
+  string = g_string_new((char*) data);
+  status = g_io_channel_write_chars(channel,
+                                    string->str,
+                                    string->len,
+                                    &size,
+                                    &error);
+
+  if (status == G_IO_STATUS_NORMAL || status == G_IO_STATUS_AGAIN)
+  {
+    g_string_free(string, TRUE);
+    return TRUE;
+  }
+
+  if (error)
+  {
+    ERROR("Writing to child process failed: '%s'.\n",
+      error->message);
+    g_error_free(error);
+  }
+
+  g_io_channel_shutdown(channel, TRUE, NULL);
+  g_io_channel_unref(channel);
+  g_string_free(string, TRUE);
+
+  return(FALSE);
+}
+
 /**
  * Sends an email notification that a particular job has completed correctly.
  * This compiles the email based upon the header file, footer file, and the job
@@ -443,14 +525,20 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
   int j_id = job->id;
   int upload_id;
   int status;
-  int retcode;
+  // int retcode;
   char* val;
-  char* final_cmd = NULL;
   char sql[1024];
-  FILE* mail_io;
   GString* email_txt;
   job_status curr_status = job->status;
   email_replace_args args;
+  GError *error = NULL;
+  gint stdin, stdout, stderr;
+  GIOChannel *input_channel,
+             *out_ch,
+             *err_ch;
+  GPid pid;
+  char* final_cmd = NULL;
+  gchar **cargs = NULL;
 
   if(is_meta_special(g_tree_lookup(scheduler->meta_agents, job->agent_type), SAG_NOEMAIL) ||
       !(status = email_checkjobstatus(scheduler, job)))
@@ -531,25 +619,41 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
       g_string_free(email_txt, TRUE);
       return;
     }
-    if((mail_io = popen(final_cmd, "w")) != NULL)
+
+    g_shell_parse_argv(final_cmd, NULL, &cargs, &error);
+    g_spawn_async_with_pipes(NULL, cargs, NULL,
+      G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_FILE_AND_ARGV_ZERO,
+      NULL, NULL, &pid, &stdin, &stdout, &stderr, &error);
+    g_free(final_cmd);
+    g_strfreev(cargs);
+
+    out_ch = g_io_channel_unix_new(stdout);
+    err_ch = g_io_channel_unix_new(stderr);
+
+    /* Add watches to channels */
+    g_io_add_watch(out_ch, G_IO_IN | G_IO_HUP, (GIOFunc)cb_out_watch, NULL);
+    g_io_add_watch(err_ch, G_IO_IN | G_IO_HUP, (GIOFunc)cb_err_watch, NULL);
+
+    if (error)
     {
-      fprintf(mail_io, "%s", val);
-      fflush(mail_io);
-      retcode = WEXITSTATUS(pclose(mail_io));
-      if(retcode != 0)
-      {
-        ERROR("Received error code %d from '%s'", retcode, scheduler->email_command);
-      }
+      WARNING("Unable to spawn email notification process: '%s'.\n",
+        error->message);
+      g_error_free(error);
+      pid = 0;
     }
     else
     {
-      WARNING("Unable to spawn email notification process: '%s'.\n",
-              scheduler->email_command);
+      NOTIFY("Email process id: %d", pid);
+      input_channel = g_io_channel_unix_new(stdin);
+      g_io_channel_set_buffered(input_channel, FALSE);
+      g_io_channel_set_flags(input_channel, G_IO_FLAG_NONBLOCK, NULL);
+      g_io_add_watch(input_channel, G_IO_OUT, (GIOFunc)guest_exec_input_watch, val);
+      g_child_watch_add(pid, (GChildWatchFunc)mail_process_exit_callback, NULL);
     }
+
     job->status = curr_status;
     if(scheduler->parse_db_email != NULL)
       g_free(val);
-    g_free(final_cmd);
     g_string_free(email_txt, TRUE);
   }
   SafePQclear(db_result);
@@ -1043,39 +1147,6 @@ void database_job_priority(scheduler_t* scheduler, job_t* job, int priority)
 }
 
 /**
- * @brief Find s-nail version to check if mta is supported 
- *
- * \return 1 if mta is supported, 0 if not
- */
-int check_mta_support()
-{
-  char cmd[] = "dpkg -s s-nail | grep -i 'Version' | awk '{print$2}' | cut -c -4";
-  char version_str[128];
-  char buf[128];
-  float version_float;
-  FILE *fp;
-
-  fp = popen(cmd, "r");
-  if(!fp)
-  {
-    WARNING("Unable to run the command '%s'.\n", cmd);
-    return 0;
-  }
-  while(fgets(buf, sizeof(buf), fp) != NULL)
-  {
-    strcpy(version_str,buf);
-  }
-  pclose(fp);
-  sscanf(version_str, "%f", &version_float);
-
-  if(version_float - 14.8 > 0.0001)
-  {
-    return 1;
-  }
-  return 0;
-}
-
-/**
  * \brief Build command to run to send email
  * \param scheduler  Current scheduler object
  * \param user_email Email id to send mail to
@@ -1087,7 +1158,7 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
   int i;
   GString* client_cmd;
   GHashTable* smtpvariables;
-  char* temp_smtpvariable;
+  gchar* temp_smtpvariable;
   char* final_command;
 
   db_result_smtp = database_exec(scheduler, smtp_values);
@@ -1114,7 +1185,7 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
       temp_smtpvariable = (char *)g_hash_table_lookup(smtpvariables, "SMTPStartTls");
       if(g_strcmp0(temp_smtpvariable, "1") == 0)
       {
-        g_string_append_printf(client_cmd, " -S smtp-use-starttls");
+        g_string_append_printf(client_cmd, " -tls");
       }
     }
     if(g_hash_table_contains(smtpvariables, "SMTPAuth"))
@@ -1122,80 +1193,46 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
       temp_smtpvariable = (char *)g_hash_table_lookup(smtpvariables, "SMTPAuth");
       if(g_strcmp0(temp_smtpvariable, "L") == 0)
       {
-        g_string_append_printf(client_cmd, " -S smtp-auth=login");
+        g_string_append_printf(client_cmd, " --auth LOGIN");
       }
       else if(g_strcmp0(temp_smtpvariable, "P") == 0)
       {
-        g_string_append_printf(client_cmd, " -S smtp-auth=plain");
-      }
-      else if(g_strcmp0(temp_smtpvariable, "N") == 0)
-      {
-        g_string_append_printf(client_cmd, " -S smtp-auth=none");
+        g_string_append_printf(client_cmd, " --auth PLAIN");
       }
     }
     if(g_hash_table_contains(smtpvariables, "SMTPFrom"))
     {
-      g_string_append_printf(client_cmd, " -S from=\"%s\"",
+      g_string_append_printf(client_cmd, " --from=\\'%s\\'",
           (char *)g_hash_table_lookup(smtpvariables, "SMTPFrom"));
     }
     if(g_hash_table_contains(smtpvariables, "SMTPSslVerify"))
     {
       temp_smtpvariable = (char *)g_hash_table_lookup(smtpvariables, "SMTPSslVerify");
-      g_string_append(client_cmd, " -S ssl-verify=");
-      if(g_strcmp0(temp_smtpvariable, "I") == 0)
+      if(g_strcmp0(temp_smtpvariable, "1") == 0)
       {
-        g_string_append(client_cmd, "ignore");
+        g_string_append_printf(client_cmd, " --tls-verify");
       }
-      else if(g_strcmp0(temp_smtpvariable, "S") == 0)
-      {
-        g_string_append(client_cmd, "strict");
-      }
-      else if(g_strcmp0(temp_smtpvariable, "W") == 0)
-      {
-        g_string_append(client_cmd, "warn");
-      }
-    }
-    g_string_append_printf(client_cmd, " -S v15-compat");
-    if(!check_mta_support())
-    {
-      g_string_append_printf(client_cmd, " -S smtp=\"");
-    }
-    else
-    {
-      g_string_append_printf(client_cmd, " -S mta=\"");
-    }
-    /* use smtps only if port is not 25 or SMTPStartTls is provided */
-    if((g_strcmp0((char *)g_hash_table_lookup(smtpvariables, "SMTPPort"), "25") !=  0) 
-        || g_strcmp0((char *)g_hash_table_lookup(smtpvariables, "SMTPStartTls"), "1") == 0)
-    {
-      g_string_append_printf(client_cmd, "smtps://");
-    }
-    else
-    {
-      g_string_append_printf(client_cmd, "smtp://");
     }
     if(g_hash_table_contains(smtpvariables, "SMTPAuthUser"))
     {
-      temp_smtpvariable = g_hash_table_lookup(smtpvariables, "SMTPAuthUser");
-      g_string_append_uri_escaped(client_cmd, temp_smtpvariable, NULL, TRUE);
+      g_string_append_printf(client_cmd, " --auth-user=\\'%s\\'",
+        (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthUser"));
       if(g_hash_table_lookup(smtpvariables, "SMTPAuthPasswd"))
       {
-        g_string_append_printf(client_cmd, ":");
-        temp_smtpvariable = g_hash_table_lookup(smtpvariables, "SMTPAuthPasswd");
-        g_string_append_uri_escaped(client_cmd, temp_smtpvariable, NULL, TRUE);
+        g_string_append_printf(client_cmd, " --auth-password=\\'%s\\'",
+          (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthPasswd"));
       }
-      g_string_append_printf(client_cmd, "@");
-      g_string_append_printf(client_cmd, "%s:%s\"", (char *)g_hash_table_lookup(smtpvariables, "SMTPHostName"),
-          (char *)g_hash_table_lookup(smtpvariables, "SMTPPort"));
     }
+    g_string_append_printf(client_cmd, " --server=%s",
+      (char *)g_hash_table_lookup(smtpvariables, "SMTPHostName"));
+    g_string_append_printf(client_cmd, " --port=%s",
+      (char *)g_hash_table_lookup(smtpvariables, "SMTPPort"));
     temp_smtpvariable = NULL;
     final_command = g_strdup_printf(EMAIL_BUILD_CMD, scheduler->email_command,
                   client_cmd->str, scheduler->email_subject, user_email);
   }
   else
   {
-    NOTIFY("Unable to send email. SMTP host or port not found in the configuration.\n"
-        "Please check Configuration Variables.");
     final_command = NULL;
   }
   g_hash_table_destroy(smtpvariables);

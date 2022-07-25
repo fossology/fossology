@@ -1,5 +1,5 @@
 /* **************************************************************
- Copyright (C) 2018 Siemens AG
+ Copyright (C) 2018, 2022 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
 
  This program is free software; you can redistribute it and/or
@@ -60,3 +60,31 @@ const gchar* email_format_text(GPtrArray *rows, gchar *fossy_url)
   return ret->str;
 }
 
+/**
+ * @brief Callback function for email process
+ *
+ * Checks if process exits successfully. If process failed, print the error
+ * message.
+ * Closes the process at end.
+ * @param pid PID of spawned process
+ * @param wait_status Status of the process
+ * @param ignore Not used
+ */
+void mail_process_exit_callback(GPid pid, gint wait_status,
+                                gpointer ignore)
+{
+  NOTIFY("Callback called for pid: %d", pid);
+  GError* error = NULL;
+  if (!g_spawn_check_exit_status(wait_status, &error))
+  {
+    ERROR("Mail process exited with code (%d) and message: %s", error->code,
+          error->message);
+    g_error_free(error);
+  }
+  else
+  {
+    NOTIFY("Mail process exited successfully.\n");
+  }
+  g_spawn_close_pid(pid);
+  NOTIFY("PID closed\n");
+}
