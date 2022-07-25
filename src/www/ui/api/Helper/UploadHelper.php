@@ -588,6 +588,59 @@ class UploadHelper
   }
 
   /**
+   * Get the copyright list for given upload scanned by copyright agent
+   * @param integer $uploadId        Upload ID
+   * @return array Array containing `copyright` and
+   * `filepath` for each upload tree item
+   */
+  public function getUploadCopyrightList($uploadId)
+  {
+    global $container;
+    $restHelper = $container->get('helper.restHelper');
+    $uploadDao = $restHelper->getUploadDao();
+    $agentDao = $container->get('dao.agent');
+
+    $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
+    $parent = $uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
+
+    $scanProx = new ScanJobProxy($agentDao, $uploadId);
+    /** @var UIExportList $copyrightListObj
+     * UIExportList object to get copyright
+     */
+
+    $copyrightListObj = $restHelper->getPlugin('export-list');
+    $copyrightList = $copyrightListObj->getCopyrights($uploadId,
+      $parent->getItemId(), $uploadTreeTableName, -1, '');
+    if (array_key_exists("warn", $copyrightList)) {
+      unset($copyrightList["warn"]);
+    }
+
+    $responseList = array();
+    foreach ($copyrightList as $copyFilepath) {
+      $flag=0;
+      foreach ($responseList as $response) {
+        if ($copyFilepath['content'] == $response['copyright']) {
+          $flag=1;
+          break;
+        }
+      }
+      if ($flag==0) {
+        $copyrightContent = array();
+        foreach ($copyrightList as $copy) {
+          if (strcasecmp($copyFilepath['content'], $copy['content']) == 0) {
+            $copyrightContent[] = $copy['filePath'];
+          }
+        }
+        $responseRow = array();
+        $responseRow['copyright'] = $copyFilepath['content'];
+        $responseRow['filePath'] = $copyrightContent;
+        $responseList[] = $responseRow;
+      }
+    }
+    return $responseList;
+  }
+
+  /**
    * Get the license and copyright list for given upload scanned by provided agents
    * @param integer $uploadId        Upload ID
    * @param array $agents            List of agents to get list from
