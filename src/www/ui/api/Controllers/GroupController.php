@@ -134,4 +134,47 @@ class GroupController extends RestController
 
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
+
+   /**
+   * Delete a given group member
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function deleteGroupMember($request, $response, $args)
+  {
+    $returnVal = null;
+    $dbManager = $this->dbHelper->getDbManager();
+
+    $group_pk = intval($args['id']);
+    $user_pk = intval($args['uid']);
+
+    if (!$this->dbHelper->doesIdExist("groups", "group_pk", $group_pk)) {
+      $returnVal = new Info(404, "Group id not found!", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist("users", "user_pk", $user_pk)) {
+      $returnVal = new Info(404, "User id not found!", InfoType::ERROR);
+    } else {
+      try {
+        $dbManager->prepare($stmt = __METHOD__ . ".getByGroupAndUser",
+          "SELECT group_user_member_pk FROM group_user_member WHERE group_fk=$1 AND user_fk=$2");
+        $fetchResult = $dbManager->execute($stmt, array($group_pk, $user_pk));
+        $fetchResult = $dbManager->fetchAll($fetchResult);
+        $dbManager->freeResult($fetchResult);
+        if (!empty($fetchResult)) {
+          $group_user_member_pk = $fetchResult[0]['group_user_member_pk'];
+          $adminGroupUsers = $this->restHelper->getPlugin('group_manage_users');
+          $adminGroupUsers->updateGUMPermission($group_user_member_pk, -1);
+          $returnVal = new Info(200, "User will be removed from group.", InfoType::INFO);
+        } else {
+          $returnVal = new Info(404, "Not a member !", InfoType::ERROR);
+        }
+      } catch (\Exception $e) {
+        $returnVal = new Info(500, $e->getMessage(), InfoType::ERROR);
+      }
+    }
+
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
 }
