@@ -13,6 +13,7 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\UI\Component\Menu;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use League\OAuth2\Client\Provider\GenericProvider;
@@ -172,6 +173,10 @@ class core_auth extends FO_Plugin
     if (!$oauth) {
       $_SESSION['oauthCheck'] = $userRow['oauth'];
     }
+    if (array_key_exists(Menu::BANNER_COOKIE, $_COOKIE)) {
+      $_COOKIE[Menu::BANNER_COOKIE] = 0;
+    }
+    setcookie(Menu::BANNER_COOKIE, "", time() - 3600);
   }
 
   /**
