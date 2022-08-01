@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Simple shell script to adjust php.ini to recommended Fossology  settings as of 2013
 #

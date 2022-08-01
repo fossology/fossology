@@ -1,5 +1,7 @@
 # FOSSology Makefile - install/
-# Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2008-2011 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 
 # Create and install:
 #  fo-postinstall

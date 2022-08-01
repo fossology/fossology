@@ -1,11 +1,8 @@
 #!/bin/bash
 # FOSSology Easy Install script
-# Copyright Siemens AG 2017
+# SPDX-FileCopyrightText: © 2017 Siemens AG
 #
-# Copying and distribution of this file, with or without modification,
-# are permitted in any medium without royalty provided the copyright
-# notice and this notice are preserved.  This file is offered as-is,
-# without any warranty.
+# SPDX-License-Identifier: FSFAP
 #
 # Description: Easy install script for fossology. Goes through the steps on the Fossology wiki
 set -e

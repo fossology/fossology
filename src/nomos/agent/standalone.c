@@ -1,3 +1,8 @@
+/*
+ SPDX-FileCopyrightText: © Fossology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * \file
  * \brief Dummy implementations of library functions for stand-alone operations

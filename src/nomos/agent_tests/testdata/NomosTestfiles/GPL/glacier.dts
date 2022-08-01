@@ -1,9 +1,11 @@
 /*
+ * REUSE-IgnoreStart
  * Device Tree Source for AMCC Glacier (460GT)
  *
  * Copyright 2008-2010 DENX Software Engineering, Stefan Roese <sr@denx.de>
  *
  * SPDX-License-Identifier:	GPL-2.0
+ * REUSE-IgnoreEnd
  */
 
 /dts-v1/;

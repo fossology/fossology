@@ -1,19 +1,8 @@
-/*********************************************************************
-Copyright (C) 2019 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2019 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*********************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -37,6 +26,7 @@ ostream& operator<<(ostream& out, const vector<ojomatch>& l)
 /**
  * \brief test data
  */
+// REUSE-IgnoreStart
 const std::string testContent = "!/usr/bin/env python3\n"
     "# -*- coding: utf-8 -*-\n"
     "\n"
@@ -56,6 +46,7 @@ const std::string testContent = "!/usr/bin/env python3\n"
     "with this program; if not, write to the Free Software Foundation, Inc.,\n"
     "51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.\n"
     "\"\"\"";
+// REUSE-IgnoreEnd
 
 const std::string testContentWithoutIdentifier = "!/usr/bin/env python3\n"
     "# -*- coding: utf-8 -*-\n"
@@ -74,6 +65,7 @@ const std::string testContentWithoutIdentifier = "!/usr/bin/env python3\n"
     "51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.\n"
     "\"\"\"";
 
+// REUSE-IgnoreStart
 const std::string multipleSpdxLicense = "!/usr/bin/env python3\n"
     "# -*- coding: utf-8 -*-\n"
     "\n"
@@ -93,6 +85,7 @@ const std::string multipleSpdxLicense = "!/usr/bin/env python3\n"
     "with this program; if not, write to the Free Software Foundation, Inc.,\n"
     "51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.\n"
     "\"\"\"";
+// REUSE-IgnoreEnd
 
 class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (scannerTestSuite);

@@ -1,5 +1,6 @@
-# Copyright 2021 Gaurav Mishra <mishra.gaurav@siemens.com>
-# SPDX-License-Identifier: GPL-2.0 AND LGPL-2.1
+# SPDX-FileCopyrightText: © 2021 Gaurav Mishra <mishra.gaurav@siemens.com>
+
+# SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
 
 name: Check PRs for conflicts
 

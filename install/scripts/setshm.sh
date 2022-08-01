@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Report initial settings, make changes, report final settings !
 #

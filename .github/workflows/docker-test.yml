@@ -1,5 +1,7 @@
-# Copyright 2022 Siemens AG, Gaurav Mishra <mishra.gaurav@siemens.com>
-# SPDX-License-Identifier: GPL-2.0 AND LGPL-2.1
+# SPDX-FileCopyrightText: © 2022 Siemens AG
+# SPDX-FileCopyrightText: © Gaurav Mishra <mishra.gaurav@siemens.com>
+
+# SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
 name: Docker test
 
 on:

@@ -1,11 +1,10 @@
 # FOSSology Dockerfile
-# Copyright Siemens AG 2016, fabio.huser@siemens.com
-# Copyright TNG Technology Consulting GmbH 2016-2017, maximilian.huber@tngtech.com
+# SPDX-FileCopyrightText: © 2016 Siemens AG
+# SPDX-FileCopyrightText: © fabio.huser@siemens.com
+# SPDX-FileCopyrightText: © 2016-2017 TNG Technology Consulting GmbH
+# SPDX-FileCopyrightText: © maximilian.huber@tngtech.com
 #
-# Copying and distribution of this file, with or without modification,
-# are permitted in any medium without royalty provided the copyright
-# notice and this notice are preserved.  This file is offered as-is,
-# without any warranty.
+# SPDX-License-Identifier: FSFAP
 #
 # Description: Docker container image recipe
 

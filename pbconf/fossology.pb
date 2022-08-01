@@ -1,10 +1,9 @@
-#
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
 # Project Builder configuration file
 # For project fossology
 # at least modifications by bruno.cerne@hpe.com michael.c.jaeger@siemens.com
-#
-# SPDX-License-Identifier: GPL-2.0
-#
 
 #
 # What is the project URL

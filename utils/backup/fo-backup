@@ -1,7 +1,8 @@
 #!/bin/bash
 # FOSSology data backup script
-# Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2009 Hewlett-Packard Development Company, L.P.
 #
+# SPDX-License-Identifier: GPL-2.0-only
 # fo-backup.sh backs up the fossology database and repository.
 # This runs while the fossology system.
 #

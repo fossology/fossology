@@ -1,4 +1,8 @@
 <phpunit>
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only 
+-->
   <testsuites>
     <testsuite name="lib/php Tests">
       <file>test_common_active.php</file>

@@ -1,5 +1,8 @@
 #!/bin/bash
-#
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
+
 # One of the files for the project builder setup
 #
 # this part installs the dependencies needed for running project builder

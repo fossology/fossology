@@ -1,5 +1,7 @@
 # FOSSology Makefile dependencies
-# Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2008-2011 Hewlett-Packard Development Company, L.P.
+#
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # This file contains some targets used in multiple places in the build
 # tree, mostly for dependencies. They can't go in Makefile.conf because

@@ -1,3 +1,7 @@
+-- SPDX-FileCopyrightText: © Fossology contributors
+
+-- SPDX-License-Identifier: GPL-2.0-only
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'SQL_ASCII';

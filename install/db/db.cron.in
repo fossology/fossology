@@ -1,7 +1,8 @@
 # this cron should be run daily by user postgres for fossology database
 # 
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2007 Hewlett-Packard Development Company, L.P.
 
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # cluster
 #0 0 * * * if [ -x /usr/bin/clusterdb ]; then /usr/bin/clusterdb --username postgres fossology >/dev/null; fi

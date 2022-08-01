@@ -1,10 +1,7 @@
-# Copyright 2019
+# SPDX-FileCopyrightText: © 2019 Vivek Kumar <vvksindia@gmail.com>
 # Author: Vivek Kumar <vvksindia@gmaail.com>
-#
-# Copying and distribution of this file, with or without modification,
-# are permitted in any medium without royalty provided the copyright
-# notice and this notice are preserved.  This file is offered as-is,
-# without any warranty.
+
+# SPDX-License-Identifier: FSFAP
 
 TOP = ../..
 VARS = $(TOP)/Makefile.conf

@@ -1,5 +1,7 @@
 #!/bin/bash
+# SPDX-FileCopyrightText: © Fossology contributors
 
+# SPDX-License-Identifier: GPL-2.0-only
 set -e
 
 git clone --branch release-1.1104 https://github.com/dagolden/IO-CaptureOutput.git

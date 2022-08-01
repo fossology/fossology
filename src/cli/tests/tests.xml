@@ -1,4 +1,9 @@
 <phpunit>
+<!-- 
+  SPDX-FileCopyrightText: © Fossology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only 
+-->
   <testsuites>
     <testsuite name="cli Tests">
       <file>test_fossjobs.php</file>

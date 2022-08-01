@@ -1,4 +1,8 @@
 <?php
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
+
 define("AGENT_DECIDER_NAME", "decider");
 define("AGENT_DECIDER_VERSION", "{$VERSION}");
 define("AGENT_DECIDER_REV", "{$COMMIT_HASH}");

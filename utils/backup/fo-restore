@@ -1,7 +1,8 @@
 #!/bin/bash
 # FOSSology data restore script
-# Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2009 Hewlett-Packard Development Company, L.P.
 #
+# SPDX-License-Identifier: GPL-2.0-only
 # fo-restore.sh restore the fossology database and repository.
 #
 # Warning Notes: 1.This script restore the entire db cluster, not just the fossology database

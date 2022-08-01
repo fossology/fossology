@@ -1,7 +1,9 @@
 /*
+ * REUSE-IgnoreStart
  * Copyright 2016 Toradex AG
  *
  * SPDX-License-Identifier:     GPL-2.0+ or X11
+ * REUSE-IgnoreEnd
  */
 
 /dts-v1/;

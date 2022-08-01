@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: © Fossology contributors
+
+-- SPDX-License-Identifier: GPL-2.0-only
 create role fossy with createdb login password 'fossy';
 --
 -- PostgreSQL database dump

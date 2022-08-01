@@ -1,1 +1,3 @@
+# REUSE-IgnoreStart
 SPDX-License-Identifier: foo-short-name AND bar-short-name OR zlib-acknowledgement
+# REUSE-IgnoreEnd

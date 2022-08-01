@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
+
 CFLAGS:
 The default CFLAGS for all C compilation is "-g -O2 -Wall". Let's say
 you wanted to build the whole tree with debugging and warnings but

@@ -1,6 +1,8 @@
 # FOSSology Makefile - src dir
-# Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
-# Copyright (C) 2015,2021, Siemens AG
+# SPDX-FileCopyrightText: © 2011-2013 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2015, 2021 Siemens AG
+
+# SPDX-License-Identifier: GPL-2.0-only
 
 TOP = ..
 VARS = $(TOP)/Makefile.conf

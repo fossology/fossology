@@ -1,11 +1,10 @@
 /*
  * Jeditable - jQuery in place edit plugin
  *
- * Copyright (c) 2006-2009 Mika Tuupola, Dylan Verheul
- * Copyright (c) 2015 Siemens AG
- *
- * Licensed under the MIT license:
- *   http://www.opensource.org/licenses/mit-license.php
+ * SPDX-FileCopyrightText: © 2006-2009 Mika Tuupola, Dylan Verheul
+ * SPDX-FileCopyrightText: © 2015 Siemens AG
+ * 
+ * SPDX-License-Identifier: MIT
  *
  * Project home:
  *   http://www.appelsiini.net/projects/jeditable

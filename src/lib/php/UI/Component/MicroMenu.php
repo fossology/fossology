@@ -1,4 +1,7 @@
 <?php
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
 
 namespace Fossology\Lib\UI\Component;
 

@@ -1,4 +1,7 @@
 <?php
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
 
 include_once dirname(dirname(__DIR__)) . "/lib/php/common.php";
 include_once "DeleteResponse.php";

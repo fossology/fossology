@@ -1,6 +1,8 @@
 
 /*
+* REUSE-IgnoreStart
 * Copyright © 2010-2014 Stéphane Raimbault <stephane.raimbault@gmail.com>
 *
 * SPDX-License-Identifier: LGPL-2.1+
+* REUSE-IgnoreEnd
 */

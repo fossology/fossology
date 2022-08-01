@@ -1,22 +1,11 @@
-/************************************************************
-librep: A set of functions for accessing the file repository.
+/*
+ librep: A set of functions for accessing the file repository.
 
-Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2007-2011 Hewlett-Packard Development Company, L.P.
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License version 2.1 as published by the Free Software Foundation.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with this library; if not, write to the Free Software Foundation, Inc.0
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
-**************************
+ SPDX-License-Identifier: LGPL-2.1-only
+*/
+/**
 Repository config files:
 /etc/fossology/
 RepPath.conf # contains path to the mounted directory
@@ -34,7 +23,7 @@ host2/	# Each host has a directory. This can be mounted or local
 host2/type/	# Type describes the repository (e.g., gold, file, license)
 host2/type/00/	# Directories are lowercase octets (00 to ff)
 host2/type/00/00/	# Directories are lowercase octets (00 to ff)
-************************************************************/
+**/
 
 #ifndef LIBFOSSREPO_H
 #define LIBFOSSREPO_H

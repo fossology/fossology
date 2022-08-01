@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# Jeroen Baten 2011-02-15
+# Copyright (C) 2011 Jeroen Baten
+#
+# SPDX-License-Identifier: GPL-2.0-only
 #
 msgid ""
 msgstr ""

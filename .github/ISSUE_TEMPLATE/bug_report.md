@@ -1,3 +1,7 @@
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only
+-->
 ---
 name: Bug report
 about: Create a report to help us improve

@@ -1,2 +1,5 @@
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
 # PBREC is replaced by the list of recommended pkgs
 filter PBREC = 
