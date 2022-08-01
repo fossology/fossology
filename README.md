@@ -12,6 +12,7 @@
 [![Slack Channel](https://img.shields.io/badge/slack-fossology-blue.svg?longCache=true&logo=slack)](https://join.slack.com/t/fossology/shared_invite/enQtNzI0OTEzMTk0MjYzLTYyZWQxNDc0N2JiZGU2YmI3YmI1NjE4NDVjOGYxMTVjNGY3Y2MzZmM1OGZmMWI5NTRjMzJlNjExZGU2N2I5NGY)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/fossology/fossology)](https://github.com/fossology/fossology/releases/latest)
 [![YouTube Channel](https://img.shields.io/badge/youtube-FOSSology-red.svg?&logo=youtube&link=https://www.youtube.com/channel/UCZGPJnQZVnEPQWxOuNamLpw)](https://www.youtube.com/channel/UCZGPJnQZVnEPQWxOuNamLpw)
+[![REUSE status](https://api.reuse.software/badge/github.com/fossology/fossology)](https://api.reuse.software/info/github.com/fossology/fossology)
 
 ## About
 
