@@ -18,6 +18,7 @@ use Fossology\Lib\Dao\PackageDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Plugin\AgentPlugin;
 use Fossology\Lib\Util\StringOperation;
+use Fossology\Scancode\Ui\ScancodesAgentPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
 include_once(dirname(__DIR__) . "/agent/version.php");
@@ -178,6 +179,18 @@ class ReuserAgentPlugin extends AgentPlugin
     }
     if ($request->get("Check_agent_copyright", false)) {
       $dependencies[] = "agent_copyright";
+    }
+    if (!empty($request->get("scancodeFlags", []))) {
+      /**
+       * @var ScancodesAgentPlugin ScanCode agent
+       */
+      $agentScanCode = plugin_find('agent_scancode');
+      $flags = $request->get('scancodeFlags');
+      $unpackArgs = intval($request->get('scm', 0)) == 1 ? 'I' : '';
+      $dependencies[] = [
+        "name" => "agent_scancode",
+        "args" => $agentScanCode->getScanCodeArgs($flags, $unpackArgs)
+      ];
     }
     return $dependencies;
   }
