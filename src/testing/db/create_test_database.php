@@ -485,12 +485,17 @@ $PG_CONN = $test_db_conn;
 */
 if(!is_file(__DIR__ . '/../../vendor/autoload.php'))
 {
-  throw new Exception('you need to run "composer install" before creating adatabase via ApplySchema');
+  throw new Exception('you need to run "composer install" before creating a database via ApplySchema');
 }
 
 require_once(__DIR__ . '/../../lib/php/libschema.php');
 require_once(__DIR__ . '/../../lib/php/common-db.php');
 require_once(__DIR__ . '/../../lib/php/common-cache.php');
+require_once(__DIR__ . '/../../../install/fossinit-common.php');
+
+global $SysConf;
+$SysConf = bootstrap($testing_temp_dir);
+get_pg_conn($testing_temp_dir, $SysConf);
 
 // apply the core schema
 // We need to buffer the output in order to silence the normal

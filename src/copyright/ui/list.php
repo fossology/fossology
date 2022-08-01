@@ -160,8 +160,7 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
     $ExclArray = explode(":", $excl);
 
     /* filter will need to know the rf_pk of "No_license_found" or "Void" */
-    if (!empty($filter) && ($filter == "nolic"))
-    {
+    if (!empty($filter) && ($filter == "nolic")) {
       $NoLicStr = "No_license_found";
       $VoidLicStr = "Void";
       $rf_clause = "";
@@ -171,10 +170,10 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
       $this->dbManager->prepare($statement, $sql);
       $result = $this->dbManager->execute($statement,array("$NoLicStr", "$VoidLicStr"));
       $rf_rows = $this->dbManager->fetchAll($result);
-      if(!empty($rf_rows)){
-        foreach($rf_rows as $row)
-        {
-          if (!empty($rf_clause)) { $rf_clause .= " or ";
+      if (!empty($rf_rows)) {
+        foreach ($rf_rows as $row) {
+          if (!empty($rf_clause)) {
+            $rf_clause .= " or ";
           }
           $rf_clause .= " rf_fk=$row[rf_pk]";
         }
@@ -182,35 +181,30 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
       $this->dbManager->freeResult($result);
     }
 
-    for($RowIdx = 0; $RowIdx < $NumRows; $RowIdx++)
-    {
+    for ($RowIdx = 0; $RowIdx < $NumRows; $RowIdx++) {
       $row = $rows[$RowIdx];
       /* remove non matching entries */
       if ($row['hash'] != $hash) {
         unset($rows[$RowIdx]);
       }
       /* remove excluded files */
-      if ($excl)
-      {
+      if ($excl) {
         $FileExt = GetFileExt($rows[$RowIdx]['ufile_name']);
-        if (in_array($FileExt, $ExclArray))
-        {
+        if (in_array($FileExt, $ExclArray)) {
           unset($rows[$RowIdx]);
           continue;
         }
       }
 
       /* apply filters */
-      if (($filter == "nolic") && ($rf_clause))
-      {
+      if (($filter == "nolic") && ($rf_clause)) {
         /* discard file unless it has no license */
         $sql = "select rf_fk from license_file where ($rf_clause) and pfile_fk=$1";
         $statement = __METHOD__."CheckForNoLicenseFound";
         $this->dbManager->prepare($statement, $sql);
         $result = $this->dbManager->execute($statement,array("{$row['pf']}"));
         $FoundRows = $this->dbManager->fetchAll($result);
-        if (empty($FoundRows))
-        {
+        if (empty($FoundRows)) {
           unset($rows[$RowIdx]);
           continue;
         }
@@ -227,10 +221,8 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
     /* remove duplicate files */
     $NumRows = count($rows2);
     $prev = 0;
-    for($RowIdx = 0; $RowIdx < $NumRows; $RowIdx++)
-    {
-      if ($RowIdx > 0)
-      {
+    for ($RowIdx = 0; $RowIdx < $NumRows; $RowIdx++) {
+      if ($RowIdx > 0) {
         /* Since rows are ordered by uploadtree_pk,
          * remove duplicate uploadtree_pk's.  This can happen if there
          * are multiple same copyrights in one file.
@@ -282,16 +274,14 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
     $type = GetParm("type",PARM_RAW);
     $excl = GetParm("excl",PARM_RAW);
     $filter = GetParm("filter",PARM_RAW);
-    if (empty($uploadtree_pk) || empty($hash) || empty($type) || empty($agent_pk))
-    {
+    if (empty($uploadtree_pk) || empty($hash) || empty($type) || empty($agent_pk)) {
       $this->vars['pageContent'] = $this->Name . _(" is missing required parameters");
       return;
     }
 
     /* Check item1 and item2 upload permissions */
     $Row = $this->uploadDao->getUploadEntry($uploadtree_pk);
-    if (!$this->uploadDao->isAccessible($Row['upload_fk'], Auth::getGroupId()))
-    {
+    if (!$this->uploadDao->isAccessible($Row['upload_fk'], Auth::getGroupId())) {
       $this->vars['pageContent'] = "<h2>" . _("Permission Denied") . "</h2>";
       return;
     }
@@ -316,8 +306,7 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
     $OutBuf .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
 
     $RowCount = count($rows);
-    if ($RowCount)
-    {
+    if ($RowCount) {
       $TypeStr = "";
       $Content = htmlentities($rows[0]['content']);
       $Offset = ($Page < 0) ? 0 : $Page*$Max;
@@ -329,24 +318,18 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
       $text5 = _("url");
       switch ($type)
       {
+        case "scancode_statement":
         case "statement":
           $TypeStr = "$text3";
           break;
-        case "scancode_statement":
-          $TypeStr = "$text3";
-          break;
+        case "scancode_email":
         case "email":
           $TypeStr = "$text4";
           break;
+        case "scancode_url":
         case "url":
           $TypeStr = "$text5";
           break;
-        case "scancode_email":
-            $TypeStr = "$text4";
-            break;
-        case "scancode_url":
-            $TypeStr = "$text5";
-            break;
         case "ecc":
           $TypeStr = _("export restriction");
           break;
@@ -361,17 +344,15 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
       $OutBuf .= ": <b>$Content</b>";
 
       $text = _("Display excludes files with these extensions");
-      if (!empty($excl)) { $OutBuf .= "<br>$text: $excl";
+      if (!empty($excl)) {
+        $OutBuf .= "<br>$text: $excl";
       }
 
       /* Get the page menu */
-      if (($RowCount >= $Max) && ($Page >= 0))
-      {
+      if (($RowCount >= $Max) && ($Page >= 0)) {
         $PagingMenu = "<P />\n" . MenuPage($Page, intval($RowCount / $Max)) . "<P />\n";
         $OutBuf .= $PagingMenu;
-      }
-      else
-      {
+      } else {
         $PagingMenu = "";
       }
 
@@ -384,8 +365,7 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
 
       // display rows
       $RowNum = 0;
-      foreach($rows as $row)
-      {
+      foreach ($rows as $row) {
         ++$RowNum;
         if ($RowNum < $Offset) {
           continue;
@@ -406,23 +386,19 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
         $Header = "<a href=$URL>$text.</a>";
 
         $ok = true;
-        if ($excl)
-        {
+        if ($excl) {
           $ExclArray = explode(":", $excl);
           if (in_array($FileExt, $ExclArray)) {
             $ok = false;
           }
         }
 
-        if ($ok)
-        {
+        if ($ok) {
           $OutBuf .= Dir2Browse($modBack, $row['uploadtree_pk'], $LinkLast,
             $ShowBox, $ShowMicro, $RowNum, $Header, '', $uploadtree_tablename);
         }
       }
-    }
-    else
-    {
+    } else {
       $OutBuf .= _("No files found");
     }
 

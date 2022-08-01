@@ -36,12 +36,15 @@ abstract class ClearedGetterCommon
     $this->groupBy = $groupBy;
   }
 
+  /**
+   * @throws \Exception Throws exception if user argument is missing
+   */
   public function getCliArgs()
   {
     $args = getopt("u:", array("uId:","gId:"));
 
     if (!array_key_exists('u',$args)) {
-      throw new Exception("missing required parameter -u {uploadId}\n",2);
+      throw new \Exception("missing required parameter -u {uploadId}\n",2);
     }
 
     $this->uploadId = intval($args['u']);
@@ -205,10 +208,10 @@ abstract class ClearedGetterCommon
   public function getCleared($uploadId, $objectAgent, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
-    $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName, $uploadId);
-    $statements = $this->groupStatements($ungrupedStatements, $extended, $agentcall, $isUnifiedReport, $objectAgent);
-    return $statements;
+    $ungroupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
+    $this->changeTreeIdsToPaths($ungroupedStatements, $uploadTreeTableName, $uploadId);
+    return $this->groupStatements($ungroupedStatements, $extended, $agentcall,
+      $isUnifiedReport, $objectAgent);
   }
 
   public function getLicenseHistogramForReport($uploadId, $groupId)
@@ -221,7 +224,14 @@ abstract class ClearedGetterCommon
   {
     $escapeChars = array('\\f',"\\", "/", "\"");
     $withThisValue = array("","\\\\", "\\/", "\\\"");
-    $clearedString = str_replace($escapeChars, $withThisValue, $this->getCleared($uploadId, null, $groupId, false, null, false));
+    $groupedStatements = $this->getCleared($uploadId, null, $groupId, false,
+      null, false);
+    if (array_key_exists("statements", $groupedStatements)) {
+      $clearedString = str_replace($escapeChars, $withThisValue,
+        $groupedStatements["statements"]);
+    } else { // Called from unknown entity
+      $clearedString = $groupedStatements;
+    }
     $json = json_encode($clearedString);
     return str_replace('\u001b','',$json);
   }

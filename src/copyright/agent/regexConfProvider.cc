@@ -50,7 +50,7 @@ string getRegexConfFile(const string& identity)
 
   string confRelativeToTestDir("../../agent/" + identity + ".conf");
 
-  string confInInstallDir((sysconfigdir ? string(sysconfigdir) : "/usr/local/share/fossology/")
+  string confInInstallDir((sysconfigdir ? string(sysconfigdir) + "/mods-enabled/" : "/usr/local/share/fossology/")
                           + identity +  "/agent/" + identity + ".conf");
 
   if(testIfFileExists( confInSameDir ))

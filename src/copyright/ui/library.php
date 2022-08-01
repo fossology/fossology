@@ -205,18 +205,14 @@ function MassageContent(&$row, $hash)
   /* remove control characters */
   $content = preg_replace('/[\x0-\x1f]/', ' ', $OriginalContent);
 
-  if ($row['type'] == 'statement')
-  {
+  if ($row['type'] == 'statement') {
     /* !"#$%&' */
     $content = preg_replace('/([\x21-\x27])|([*@])/', ' ', $content);
 
     /*  numbers-numbers, two or more digits, ', ' */
     $content = preg_replace('/(([0-9]+)-([0-9]+))|([0-9]{2,})|(,)/', ' ', $content);
     $content = preg_replace('/ : /', ' ', $content);  // free :, probably followed a date
-  }
-  else
-  if ($row['type'] == 'email')
-  {
+  } elseif ($row['type'] == 'email') {
     $content = str_replace(":;<=>()", " ", $content);
   }
 
@@ -233,7 +229,8 @@ function MassageContent(&$row, $hash)
   }
 
   /* skip empty content */
-  if (empty($content)) { return true;
+  if (empty($content)) {
+    return true;
   }
 
   /* Step 1B: rearrange copyright statments to try and put the holder first,
@@ -247,7 +244,8 @@ function MassageContent(&$row, $hash)
   $row['content'] = $content;
   $row['copyright_count'] = 1;
   $row['hash'] = md5($row['content']);
-  if ($hash && ($row['hash'] != $hash)) { return true;
+  if ($hash && ($row['hash'] != $hash)) {
+    return true;
   }
 
   return false;

@@ -13,7 +13,8 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class EccAgentPlugin extends AgentPlugin
 {
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_ecc";
     $this->Title = _("ECC Analysis, scanning for text fragments potentially relevant for export control");
     $this->AgentName = "ecc";

@@ -10,6 +10,8 @@
  * \brief unit tests for common-menu.php
  */
 
+use PHPUnit\Runner\Version as PHPUnitVersion;
+
 require_once(dirname(__FILE__) . '/../common-menu.php');
 require_once(dirname(__FILE__) . '/../common-parm.php');
 
@@ -36,8 +38,13 @@ class test_common_menu extends \PHPUnit\Framework\TestCase
     $Uri = "http://fossology.org/repo/";
     $expected = "<a href='http:\/\/fossology.org\/repo\/&page=9'>\[Prev\]<\/a>";
     $result = MenuPage($Page, $TotalPage, $Uri);
-    $this->assertRegExp("/<b>11<\/b>/", $result);
-    $this->assertRegExp("/$expected/", $result);
+    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+      $this->assertMatchesRegularExpression("/<b>11<\/b>/", $result);
+      $this->assertMatchesRegularExpression("/$expected/", $result);
+    } else {
+      $this->assertRegExp("/<b>11<\/b>/", $result);
+      $this->assertRegExp("/$expected/", $result);
+    }
   }
 
   /**
@@ -51,8 +58,13 @@ class test_common_menu extends \PHPUnit\Framework\TestCase
     $Uri = "http://fossology.org/repo/";
     $expected = "<a href='http:\/\/fossology.org\/repo\/&page=9'>\[Prev\]<\/a>";
     $result = MenuEndlessPage($Page, 1, $Uri);
-    $this->assertRegExp("/<b>11<\/b>/", $result);
-    $this->assertRegExp("/$expected/", $result);
+    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+      $this->assertMatchesRegularExpression("/<b>11<\/b>/", $result);
+      $this->assertMatchesRegularExpression("/$expected/", $result);
+    } else {
+      $this->assertRegExp("/<b>11<\/b>/", $result);
+      $this->assertRegExp("/$expected/", $result);
+    }
   }
 
   /**
@@ -98,12 +110,21 @@ class test_common_menu extends \PHPUnit\Framework\TestCase
 
     print "test function menu_to_1html)\n";
     $result = menu_to_1html($MenuList);
-    $this->assertRegExp("/TestMenu/", $result);
+    $pattern = "/TestMenu/";
+    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+      $this->assertMatchesRegularExpression($pattern, $result);
+    } else {
+      $this->assertRegExp($pattern, $result);
+    }
 
     print "test function menu_to_1list)\n";
     $Parm = "";
     $result = menu_to_1list($MenuList, $Parm, "", "");
-    $this->assertRegExp("/TestMenu/", $result);
+    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+      $this->assertMatchesRegularExpression($pattern, $result);
+    } else {
+      $this->assertRegExp($pattern, $result);
+    }
     print "Ending unit test for common-menu.php\n";
   }
 

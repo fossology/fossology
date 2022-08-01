@@ -7,8 +7,9 @@
 */
 
 use PhpOffice\PhpWord\Element\Section;
-use \PhpOffice\PhpWord\Shared\Html;
-use \PhpOffice\PhpWord\Style;
+use PhpOffice\PhpWord\Element\TextRun;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Element\Cell;
 
 /**
  * @class ReportStatic
@@ -37,6 +38,20 @@ class ReportStatic
                               "borderColor" => "000000",
                               "cellSpacing" => 5
                              );
+
+  /**
+   * @var array $firstColStyle
+   * Style of first column
+   */
+  private $firstColStyle = array (
+    "size" => 11 , "bold"=> true, "bgcolor" => "FFFFC2");
+
+  /**
+   * @var array $secondColStyle
+   * Style of second column
+   */
+  private $secondColStyle = array (
+    "size" => 11 , "bold"=> true, "bgcolor"=> "E0FFFF");
 
   function __construct($timeStamp)
   {
@@ -89,6 +104,7 @@ class ReportStatic
   /**
    * @brief Generates clearing protocol change log table
    * @param Section $section
+   * @param String  $heading Section heading
    */
   function clearingProtocolChangeLogTable(Section $section, $heading)
   {
@@ -122,7 +138,7 @@ class ReportStatic
    * @param Cell $cell
    * @param string $value
    * @param string $text
-   * @return checkbox with text
+   * @return TextRun checkbox with text
    */
   function addCheckBoxText($cell, $value, $text)
   {
@@ -140,8 +156,10 @@ class ReportStatic
 
   /**
    * @brief Generate assessment summary table
-   * @param Section $section
-   * @param string $otherStatement
+   * @param Section  $section
+   * @param String[] $otherStatement
+   * @param String   $heading
+   * @return Cell|\PhpOffice\PhpWord\Element\Text
    */
   function assessmentSummaryTable(Section $section, $otherStatement, $heading)
   {
@@ -264,14 +282,14 @@ class ReportStatic
    */
   protected function reArrangeObligationText($text)
   {
-    $texts = explode(PHP_EOL, $text);
-    return $texts;
+    return explode(PHP_EOL, $text);
   }
 
 
   /**
    * @brief Generate todo table
    * @param Section $section
+   * @param String $heading
    */
   function todoTable(Section $section, $heading)
   {
@@ -372,8 +390,6 @@ class ReportStatic
     $secondRowTextStyle1 = array("size" => 11, "bold" => false);
     $secondRowTextStyle2 = array("size" => 10, "bold" => false);
     $secondRowTextStyle2Bold = array("size" => 10, "bold" => true);
-    $firstColStyle = array ("size" => 11 , "bold"=> true, "bgcolor" => "FFFFC2");
-    $secondColStyle = array ("size" => 11 , "bold"=> true, "bgcolor"=> "E0FFFF");
     $subHeading = " Additional obligations, restrictions & risks beyond common rules";
     $subHeadingInfoText1 = "This chapter contains all obligations in addition"
       ." to “common obligations, restrictions and risks” (common rules) of"
@@ -401,15 +417,17 @@ class ReportStatic
     if (!empty($obligations)) {
       foreach ($obligations as $obligation) {
         $table->addRow($rowWidth);
-        $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($obligation["topic"]), $firstRowTextStyle);
-          $table->addCell($secondColLen,$secondColStyle)->addText(htmlspecialchars(implode(",",$obligation["license"])));
+        $table->addCell($firstColLen, $this->firstColStyle)->addText(htmlspecialchars($obligation["topic"]),
+          $firstRowTextStyle);
+          $table->addCell($secondColLen, $this->secondColStyle)->addText(htmlspecialchars(implode(",",
+            $obligation["license"])));
           $obligationText = str_replace("\n", "<w:br/>", htmlspecialchars($obligation["text"], ENT_DISALLOWED));
           $table->addCell($thirdColLen)->addText($obligationText);
       }
     } else {
       $table->addRow($rowWidth);
-      $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($key), $firstRowTextStyle);
-      $table->addCell($secondColLen,$secondColStyle);
+      $table->addCell($firstColLen, $this->firstColStyle)->addText("", $firstRowTextStyle);
+      $table->addCell($secondColLen, $this->secondColStyle);
       $table->addCell($thirdColLen);
     }
     $section->addTextBreak();
@@ -438,15 +456,16 @@ class ReportStatic
     if (!empty($obligations)) {
       foreach ($obligations as $obligation) {
         $table->addRow($rowWidth);
-        $table->addCell($secondColLen,$firstColStyle)->addText(htmlspecialchars(implode(",",$obligation["license"])));
-        $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($obligation["topic"]));
+        $table->addCell($secondColLen, $this->firstColStyle)->addText(htmlspecialchars(implode(",",
+          $obligation["license"])));
+        $table->addCell($firstColLen, $this->firstColStyle)->addText(htmlspecialchars($obligation["topic"]));
       }
     }
     if (!empty($whiteLists)) {
       foreach ($whiteLists as $whiteList) {
         $table->addRow($rowWidth);
-        $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($whiteList));
-        $table->addCell($secondColLen,$firstColStyle)->addText("");
+        $table->addCell($firstColLen, $this->firstColStyle)->addText(htmlspecialchars($whiteList));
+        $table->addCell($secondColLen, $this->firstColStyle)->addText("");
       }
     }
     $section->addTextBreak();

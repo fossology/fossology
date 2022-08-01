@@ -14,6 +14,7 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Db\DbManager;
 use PHPUnit\Framework\TestCase;
 use Fossology\Lib\Test\TestPgDb;
+use PHPUnit\Runner\Version as PHPUnitVersion;
 
 /**
  * @class LicenseStdCommentDaoTest
@@ -79,18 +80,22 @@ class LicenseStdCommentDaoTest extends TestCase
   {
     $allComments = $this->licenseStdCommentDao->getAllComments();
     $this->assertCount(self::COMMENTS_IN_DB, $allComments);
-    $this->assertContains([
+    $testData = [
       "lsc_pk" => 2,
       "name" => "Test comment #1",
       "comment" => "This will be your first comment!",
       "is_enabled" => "t"
-    ], $allComments, false);
-    $this->assertContains([
+    ];
+    $this->assertTrue(in_array($testData, $allComments),
+      'Missing test data 1 in DB.');
+    $testData = [
       "lsc_pk" => 8,
       "name" => "not-set",
       "comment" => "This comment is not set!",
       "is_enabled" => "f"
-    ], $allComments, false);
+    ];
+    $this->assertTrue(in_array($testData, $allComments),
+      'Missing test data 2 in DB.');
   }
 
   /**
@@ -104,18 +109,22 @@ class LicenseStdCommentDaoTest extends TestCase
   {
     $filteredComments = $this->licenseStdCommentDao->getAllComments(true);
     $this->assertCount(self::COMMENTS_IN_DB - 1, $filteredComments);
-    $this->assertContains([
+    $testData = [
       "lsc_pk" => 2,
       "name" => "Test comment #1",
       "comment" => "This will be your first comment!",
-      "is_enabled" => true
-    ], $filteredComments, false);
-    $this->assertNotContains([
+      "is_enabled" => "t"
+    ];
+    $this->assertTrue(in_array($testData, $filteredComments),
+      'Missing expected data in DB.');
+    $testData = [
       "lsc_pk" => 8,
       "name" => "not-set",
       "comment" => "This comment is not set!",
-      "is_enabled" => false
-    ], $filteredComments);
+      "is_enabled" => "f"
+    ];
+    $this->assertFalse(in_array($testData, $filteredComments),
+      'Unexpected data returned for comments.');
   }
 
   /**
@@ -136,7 +145,13 @@ class LicenseStdCommentDaoTest extends TestCase
     $row = $this->dbManager->getSingleRow($sql);
     $this->assertEquals("Updated comment #1", $row["name"]);
     $this->assertEquals("This comment is updated!", $row["comment"]);
-    $this->assertRegExp("/^" . date('Y-m-d') . ".*/", $row['updated']);
+
+    $pattern = "/^" . date('Y-m-d') . ".*/";
+    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+      $this->assertMatchesRegularExpression($pattern, $row['updated']);
+    } else {
+      $this->assertRegExp($pattern, $row['updated']);
+    }
     $this->assertEquals(2, $row['user_fk']);
   }
 
@@ -202,7 +217,12 @@ class LicenseStdCommentDaoTest extends TestCase
     foreach ($rows as $row) {
       $this->assertEquals("Updated comment #" . ($id - 1), $row["name"]);
       $this->assertEquals("This comment is updated!", $row["comment"]);
-      $this->assertRegExp("/^" . date('Y-m-d') . ".*/", $row['updated']);
+      $pattern = "/^" . date('Y-m-d') . ".*/";
+      if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+        $this->assertMatchesRegularExpression($pattern, $row['updated']);
+      } else {
+        $this->assertRegExp($pattern, $row['updated']);
+      }
       $this->assertEquals(2, $row['user_fk']);
       $id++;
     }
@@ -358,7 +378,12 @@ class LicenseStdCommentDaoTest extends TestCase
     $row = $this->dbManager->getSingleRow($sql, [$returnVal]);
     $this->assertEquals("Inserted comment #1", $row["name"]);
     $this->assertEquals("This first inserted comment!", $row["comment"]);
-    $this->assertRegExp("/^" . date('Y-m-d') . ".*/", $row['updated']);
+    $pattern = "/^" . date('Y-m-d') . ".*/";
+    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+      $this->assertMatchesRegularExpression($pattern, $row['updated']);
+    } else {
+      $this->assertRegExp($pattern, $row['updated']);
+    }
     $this->assertEquals(2, $row['user_fk']);
     $this->assertEquals("t", $row["is_enabled"]);
   }

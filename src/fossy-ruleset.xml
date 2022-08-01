@@ -13,20 +13,24 @@
     based on new features/files.
   -->
   <file>cli</file>
+  <file>clixml</file>
+  <file>copyright/ui</file>
   <file>decider</file>
   <file>deciderjob</file>
   <file>delagent/ui</file>
   <file>lib/php</file>
   <file>monk/ui</file>
   <file>nomos/ui</file>
+  <file>ojo/ui</file>
   <file>readmeoss</file>
+  <file>reso</file>
   <file>reuser</file>
+  <file>scancode/ui</file>
+  <file>softwareHeritage</file>
   <file>spasht</file>
   <file>spdx2</file>
   <file>unifiedreport</file>
-  <file>softwareHeritage</file>
   <file>www/ui</file>
-  <file>reso</file>
 
   <!--
     The vendor folder by composer must not be scanned.
@@ -46,7 +50,7 @@
   <rule ref="Generic.WhiteSpace.DisallowTabIndent" />
   <rule ref="PEAR.ControlStructures.ControlSignature" />
   <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace" />
-  <rule ref="Zend.Files.ClosingTag"></rule>
+  <rule ref="Zend.Files.ClosingTag" />
 
   <rule ref="Generic.WhiteSpace.ScopeIndent">
     <properties>

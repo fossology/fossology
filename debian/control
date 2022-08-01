@@ -6,9 +6,9 @@ Build-Depends: debhelper (>=9~), libglib2.0-dev, libmagic-dev, libxml2-dev,
  libmxml-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev,
  libssl-dev, postgresql-server-dev-all, libboost-regex-dev, libicu-dev,
  libboost-program-options-dev, libjsoncpp-dev, libjson-c-dev, libpq-dev,
- php7.0-cli|php7.2-cli|php7.3-cli|php7.4-cli, php-mbstring, php-zip,
- php-xml, libboost-system-dev, libboost-filesystem-dev, libgcrypt20-dev,
- composer
+ php7.0-cli|php7.2-cli|php7.3-cli|php7.4-cli, php-mbstring, php-zip, php-curl,
+ php-gd, php-pgsql, php-uuid, php-xml, libboost-system-dev,
+ libboost-filesystem-dev, libgcrypt20-dev, composer
 Standards-Version: 3.9.1
 Homepage: https://fossology.org
 
@@ -48,8 +48,9 @@ Description: open and modular architecture for analyzing software
 Package: fossology-common
 Architecture: any
 Depends: php7.0-pgsql|php7.2-pgsql|php7.3-pgsql|php7.4-pgsql, php-pear,
- php7.0-cli|php7.2-cli|php7.3-cli|php7.4-cli, php-mbstring,
- php7.0-json|php7.2-json|php7.3-json|php7.4-json, php-zip, php-xml,
+ php7.0-cli|php7.2-cli|php7.3-cli|php7.4-cli, php-mbstring, php-zip, php-xml,
+ php7.0-gd|php7.2-gd|php7.3-gd|php7.4-gd, php-uuid,
+ php7.0-json|php7.2-json|php7.3-json|php7.4-json,
  php7.0-curl|php7.2-curl|php7.3-curl|php7.4-curl,
  ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, common files

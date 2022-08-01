@@ -124,12 +124,12 @@ class UnifiedReport extends Agent
    */
   private $licenseMainGetter;
 
-  /** @var cpClearedGetter $cpClearedGetter
+  /** @var XpClearedGetter $cpClearedGetter
    * Copyright clearance object
    */
   private $cpClearedGetter;
 
-  /** @var eccClearedGetter $eccClearedGetter
+  /** @var XpClearedGetter $eccClearedGetter
    * ECC clearance object
    */
   private $eccClearedGetter;
@@ -154,7 +154,7 @@ class UnifiedReport extends Agent
    */
   private $bulkMatchesGetter;
 
-  /** @var licenseIrrelevantCommentGetter $licenseIrrelevantCommentGetter
+  /** @var LicenseIrrelevantGetter $licenseIrrelevantCommentGetter
    * licenseIrrelevantCommentGetter object
    */
   private $licenseIrrelevantCommentGetter;
@@ -464,13 +464,13 @@ class UnifiedReport extends Agent
     if (!empty($licenses)) {
       foreach ($licenses as $licenseStatement) {
         $table->addRow($this->rowHeight);
-        $cell1 = $table->addCell($firstColLen, null, "pStyle");
+        $cell1 = $table->addCell($firstColLen, "pStyle");
         $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
         $cell2 = $table->addCell($secondColLen, "pStyle");
         // replace new line character
         $licenseText = str_replace("\n", "<w:br/>\n", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
         $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
-        $cell3 = $table->addCell($thirdColLen, null, "pStyle");
+        $cell3 = $table->addCell($thirdColLen, "pStyle");
         asort($licenseStatement["files"]);
         foreach ($licenseStatement["files"] as $fileName) {
           $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
@@ -595,6 +595,7 @@ class UnifiedReport extends Agent
     $firstColLen = 5000;
     $secondColLen = 5000;
     $thirdColLen = 5000;
+    $rowWidth = 200;
 
     $section->addTitle(htmlspecialchars($title), 2);
     $section->addText($titleSubHeading, $this->subHeadingStyle);

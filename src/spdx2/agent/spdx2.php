@@ -136,7 +136,11 @@ class SpdxTwoAgent extends Agent
   {
     // deduce the agent name from the command line arguments
     $args = getopt("", array(self::OUTPUT_FORMAT_KEY.'::'));
-    $agentName = trim($args[self::OUTPUT_FORMAT_KEY]);
+    if (array_key_exists(self::OUTPUT_FORMAT_KEY, $args)) {
+      $agentName = trim($args[self::OUTPUT_FORMAT_KEY]);
+    } else {
+      $agentName = "";
+    }
     if (empty($agentName)) {
         $agentName = self::DEFAULT_OUTPUT_FORMAT;
     }

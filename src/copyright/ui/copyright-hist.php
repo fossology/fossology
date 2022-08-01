@@ -14,7 +14,8 @@ define("TITLE_COPYRIGHTHISTOGRAM", _("Copyright Browser"));
  * @class CopyrightHistogram
  * @brief Create histogram plugin for copyright
  */
-class CopyrightHistogram extends HistogramBase {
+class CopyrightHistogram extends HistogramBase
+{
   function __construct()
   {
     $this->Name = "copyright-hist";
@@ -41,9 +42,8 @@ class CopyrightHistogram extends HistogramBase {
     );
     $tableVars = array();
     $output = array();
-    foreach($typeDescriptionPairs as $type=>$description)
-    {
-      if($type==="scancode_statement"){
+    foreach ($typeDescriptionPairs as $type=>$description) {
+      if ($type==="scancode_statement") {
         $agentId=LatestAgentpk($upload_pk, 'scancode_ars');
         $this->agentName = "scancode";
       }
@@ -87,15 +87,11 @@ class CopyrightHistogram extends HistogramBase {
     $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
-    if (!empty($Item) && !empty($Upload))
-    {
-      if (GetParm("mod",PARM_STRING) == $this->Name)
-      {
+    if (!empty($Item) && !empty($Upload)) {
+      if (GetParm("mod",PARM_STRING) == $this->Name) {
         menu_insert("Browse::Copyright",10);
         menu_insert("Browse::[BREAK]",100);
-      }
-      else
-      {
+      } else {
         $text = _("View copyright histogram");
         menu_insert("Browse::Copyright",10,$URI,$text);
       }
@@ -131,7 +127,6 @@ class CopyrightHistogram extends HistogramBase {
     });
     ";
   }
-
 }
 
 $NewPlugin = new CopyrightHistogram;
