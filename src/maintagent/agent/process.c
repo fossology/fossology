@@ -668,6 +668,7 @@ FUNCTION void removeOldLogFiles(const char* olderThan)
   long StartTime, EndTime;
   char ch;
   FILE* tempFile;
+  int retval;                ///< Return value of find
 
   StartTime = (long)time(0);
   if (sscanf(olderThan, "%d-%d-%d", &ti.tm_year, &ti.tm_mon, &ti.tm_mday) != 3)
@@ -685,7 +686,13 @@ FUNCTION void removeOldLogFiles(const char* olderThan)
 
   snprintf(cmd, myBUFSIZ, "/usr/bin/find %s/logs -type f -mtime +%ld -fprint %s",
            fo_sysconfig("FOSSOLOGY", "path"), ellapsed_time, file_template);
-  system(cmd); // Find and print files in temp location
+  retval = system(cmd); // Find and print files in temp location
+  if (!WIFEXITED(retval))
+  { // find fail
+    LOG_FATAL("Unable run find for logs files.");
+    unlink(file_template);
+    exitNow(-148);
+  }
   tempFile = fdopen(fd, "r");
   if (tempFile == NULL)
   {
@@ -702,7 +709,14 @@ FUNCTION void removeOldLogFiles(const char* olderThan)
   }
 
   snprintf(cmd, myBUFSIZ, "/usr/bin/xargs --arg-file=%s /bin/rm -f", file_template);
-  system(cmd);
+  retval = system(cmd);
+  if (!WIFEXITED(retval))
+  { // xargs fail
+    LOG_FATAL("Unable delete log files with xargs.");
+    fclose(tempFile);
+    unlink(file_template);
+    exitNow(-148);
+  }
   fclose(tempFile);
   unlink(file_template);
 

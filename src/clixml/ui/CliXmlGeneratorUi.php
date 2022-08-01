@@ -26,8 +26,7 @@ class CliXmlGeneratorUi extends DefaultPlugin
     $possibleOutputFormat = trim(GetParm("outputFormat",PARM_STRING));
     if (strcmp($possibleOutputFormat,"") !== 0 &&
         strcmp($possibleOutputFormat,self::DEFAULT_OUTPUT_FORMAT) !== 0 &&
-        ctype_alnum($possibleOutputFormat))
-    {
+        ctype_alnum($possibleOutputFormat)) {
       $this->outputFormat = $possibleOutputFormat;
     }
     parent::__construct(self::NAME, array(
@@ -52,8 +51,7 @@ class CliXmlGeneratorUi extends DefaultPlugin
     $uploadIds = $request->get('uploads') ?: array();
     $uploadIds[] = intval($request->get('upload'));
     $addUploads = array();
-    foreach($uploadIds as $uploadId)
-    {
+    foreach ($uploadIds as $uploadId) {
       if (empty($uploadId)) {
         continue;
       }
@@ -67,13 +65,11 @@ class CliXmlGeneratorUi extends DefaultPlugin
       }
     }
     $folderId = $request->get('folder');
-    if(!empty($folderId))
-    {
+    if (!empty($folderId)) {
       /* @var $folderDao FolderDao */
       $folderDao = $this->getObject('dao.folder');
       $folderUploads = $folderDao->getFolderUploads($folderId, $groupId);
-      foreach($folderUploads as $uploadProgress)
-      {
+      foreach ($folderUploads as $uploadProgress) {
         $addUploads[$uploadProgress->getId()] = $uploadProgress;
       }
     }
@@ -126,8 +122,7 @@ class CliXmlGeneratorUi extends DefaultPlugin
       $sql .= ' AND jq_cmd_args=$5';
       $params[] = $jqCmdArgs;
       $log .= '.args';
-    }
-    else {
+    } else {
       $sql .= ' AND jq_cmd_args IS NULL';
     }
     $scheduled = $dbManager->getSingleRow($sql,$params,$log);
@@ -137,8 +132,7 @@ class CliXmlGeneratorUi extends DefaultPlugin
     $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
     $error = "";
     $jobQueueId = $clixmlAgent->AgentAdd($jobId, $uploadId, $error, array(), $jqCmdArgs);
-    if ($jobQueueId<0)
-    {
+    if ($jobQueueId<0) {
       throw new Exception(_("Cannot schedule").": ".$error);
     }
     return array ($jobId, $jobQueueId);
@@ -146,20 +140,17 @@ class CliXmlGeneratorUi extends DefaultPlugin
 
   protected function getUpload($uploadId, $groupId)
   {
-    if ($uploadId <=0)
-    {
+    if ($uploadId <=0) {
       throw new Exception(_("parameter error: $uploadId"));
     }
     /* @var $uploadDao UploadDao */
     $uploadDao = $this->getObject('dao.upload');
-    if (!$uploadDao->isAccessible($uploadId, $groupId))
-    {
+    if (!$uploadDao->isAccessible($uploadId, $groupId)) {
       throw new Exception(_("permission denied"));
     }
     /** @var Upload */
     $upload = $uploadDao->getUpload($uploadId);
-    if ($upload === null)
-    {
+    if ($upload === null) {
       throw new Exception(_('cannot find uploadId'));
     }
     return $upload;

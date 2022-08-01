@@ -55,9 +55,10 @@ class admin_scheduler extends FO_Plugin
       return $job_list_option;
     }
     $job_array = GetRunnableJobList(); /* get all job list */
-    for ($i = 0; $i < sizeof($job_array); $i ++) {
-      $job_id = $job_array[$i];
-      $job_list_option .= "<option value='$job_id'>$job_id</option>";
+    if (!empty($job_array)) {
+      foreach ($job_array as $job_id) {
+        $job_list_option .= "<option value='$job_id'>$job_id</option>";
+      }
     }
     return $job_list_option;
   }

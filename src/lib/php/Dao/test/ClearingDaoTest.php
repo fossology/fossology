@@ -213,6 +213,8 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $itemTreeBounds->shouldReceive('getUploadId')->andReturn($this->items[301][0]);
     $itemTreeBounds->shouldReceive('getLeft')->andReturn($this->items[301][4]);
     $itemTreeBounds->shouldReceive('getRight')->andReturn($this->items[301][5]);
+    $this->uploadDao->shouldReceive('getGlobalDecisionSettingsFromInfo')
+      ->withArgs([$this->items[301][0]])->andReturn(false);
 
     $events1 = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
 
@@ -381,6 +383,9 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(102);
 
+    $this->uploadDao->shouldReceive('getGlobalDecisionSettingsFromInfo')
+      ->withArgs([102])->andReturn(false);
+
     $map = $this->clearingDao->getClearedLicenseIdAndMultiplicities($treeBounds, $groupId);
     assertThat($map, is(array('FOO'=>array('count'=>2,'shortname'=>'FOO','rf_pk'=>401))));
   }
@@ -404,6 +409,9 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $treeBounds->shouldReceive('getRight')->andReturn(8);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(102);
+
+    $this->uploadDao->shouldReceive('getGlobalDecisionSettingsFromInfo')
+      ->withArgs([102])->andReturn(false);
 
     $map = $this->clearingDao->getClearedLicenses($treeBounds, $groupId);
     assertThat($map, equalTo(array(new LicenseRef($rf,'FOO','foo full'))));

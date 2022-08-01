@@ -29,7 +29,8 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
     $this->testDb = new TestPgDb();
     $this->dbManager = &$this->testDb->getDbManager();
 
-    $this->testDb->createPlainTables(array('upload','uploadtree'));
+    $this->testDb->createPlainTables(array('upload', 'uploadtree',
+      'report_info'));
 
     $this->dbManager->prepare($stmt = 'insert.upload',
         "INSERT INTO upload (upload_pk, uploadtree_tablename) VALUES ($1, $2)");

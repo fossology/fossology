@@ -3,7 +3,7 @@
 
 # SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
 
-name: c tests
+name: Unit and Functional Tests
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['7.4'] # Can be extended in future
+        php: ['7.4', '8.1']
     services:
       postgres:
         image: postgres:12
@@ -32,7 +32,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
       - uses: actions/checkout@v2
         with:
@@ -49,7 +48,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, gd, xml, zip, json, sqlite3, curl
+          extensions: gettext, mbstring, gd, json, xml, zip, pgsql, curl, uuid, posix, sqlite3
         env:
           fail-fast: true
 
@@ -69,3 +68,63 @@ jobs:
           make test-cli test-copyright test-lib test-monk \
           test-nomos test-ojo test-reuser test-scheduler test-spdx2 \
           test-unifiedreport test-www
+
+  php-unit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.1']
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 50
+      - name: Install Dependencies
+        run: |
+          sudo ./utils/fo-installdeps -y -e
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: gettext, mbstring, gd, json, xml, zip, pgsql, curl, uuid, posix, sqlite3
+          tools: phpunit
+          coverage: xdebug
+        env:
+          fail-fast: true
+      - name: Setup test database and build
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+        run: |
+          ./utils/prepare-test -afty
+          make
+          find . -type d -name 'agent_tests' -exec make -C {} all \;
+          composer install --working-dir=src
+          mkdir coverage
+          echo "XDEBUG_MODE=coverage" >> $GITHUB_ENV
+      - name: PHPUnit test suit
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+        run: |
+          phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite" --colors=always --coverage-clover ./coverage/unit-clover.xml
+      - name: PHPUnit agent test suit
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+        run: |
+          phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Agent Test Suite" --colors=always --coverage-clover ./coverage/agent-clover.xml

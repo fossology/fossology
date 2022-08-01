@@ -138,8 +138,9 @@ class agent_nomos_once extends FO_Plugin
     }
 
     /* Only register with the menu system if the user is logged in. */
-    if (! empty($_SESSION['User'])) {
-      if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
+    if (! empty($_SESSION[Auth::USER_NAME])) {
+      if (array_key_exists(Auth::USER_LEVEL, $_SESSION) &&
+        $_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
         menu_insert("Main::Upload::One-Shot Nomos Analysis", $this->MenuOrder,
           $this->Name, $this->MenuTarget);
       }

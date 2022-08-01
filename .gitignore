@@ -194,3 +194,4 @@ ubuntu-*
 # PHPUnit cache
 .phpunit.result.cache
 *-Xunit.xml
+/phpenv/

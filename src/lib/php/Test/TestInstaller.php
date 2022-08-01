@@ -27,8 +27,15 @@ class TestInstaller
     $fakeInstallationDir = "$sysConf/inst";
 
     $projectGroup = `id -g -n`;
-    $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n"
-      . "[DIRECTORIES]\nMODDIR = $fakeInstallationDir\nPROJECTGROUP = $projectGroup";
+    $projectUser = `id -u -n`;
+    $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n" .
+      "[DIRECTORIES]\nMODDIR = $fakeInstallationDir\n" .
+      "PROJECTGROUP = $projectGroup\n" .
+      "PROJECTUSER = $projectUser\n" .
+      "PREFIX = $fakeInstallationDir\n" .
+      "BINDIR = \$PREFIX/bin\n" .
+      "SBINDIR = \$PREFIX/sbin\n" .
+      "LIBEXECDIR = \$PREFIX/lib\n";
     file_put_contents($confFile, $config);
 
     if (! is_dir($fakeInstallationDir)) {

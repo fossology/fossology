@@ -14,7 +14,8 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class CopyrightAgentPlugin extends AgentPlugin
 {
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_copyright";
     $this->Title =  _("Copyright/Email/URL/Author Analysis");
     $this->AgentName = "copyright";

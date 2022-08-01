@@ -8,7 +8,6 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\SpashtDao;
-use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Util\DataTablesUtility;
 use Fossology\Agent\Copyright\UI\TextFindingsAjax;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -313,7 +312,7 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
   {
     $columnNamesInDatabase = array('copyright_count', 'content');
 
-    $defaultOrder = CopyrightHistogram::returnSortOrder();
+    $defaultOrder = HistogramBase::returnSortOrder();
 
     return $this->dataTablesUtility->getSortingString($_GET,
       $columnNamesInDatabase, $defaultOrder);

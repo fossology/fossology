@@ -14,7 +14,8 @@ class ScancodesAgentPlugin extends AgentPlugin
 {
   const SCAN_FLAG = '-';
 
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_scancode";
     $this->Title =  _("Scancode Toolkit");
     $this->AgentName = "scancode";
@@ -54,7 +55,7 @@ class ScancodesAgentPlugin extends AgentPlugin
    *
    * @param int $jobId  schedule Job Id which has to add
    * @param int $uploadId     Uploaded pfile Id
-   * @param string $errorMsg  Erraor message which has to be dispalyed
+   * @param string $errorMsg  Error message which has to be displayed
    * @param Request $request  Session request in html
    * @return int  $jobQueueId jq_pk of scheduled jobqueue or 0 if not scheduled
    */

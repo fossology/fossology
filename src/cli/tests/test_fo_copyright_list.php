@@ -57,7 +57,7 @@ class test_fo_copyright_list extends \PHPUnit\Framework\TestCase
     $this->assertEquals("B.zip/B/1b/AAL_B: copyright (c) 2002 by author", $output[22]);
   }
 
-  function test_get_copryright_list_email()
+  function test_get_copyright_list_email()
   {
     $upload_id = 2;
     $auth = "--user fossy --password fossy";
@@ -69,7 +69,7 @@ class test_fo_copyright_list extends \PHPUnit\Framework\TestCase
     $this->assertEquals("B.zip/B/1b/3DFX_B: info@3dfx.com", $output[7]);
   }
 
-  function test_get_copryright_list_withoutContainer()
+  function test_get_copyright_list_withoutContainer()
   {
     $upload_id = 2;
     $auth = "--user fossy --password fossy";

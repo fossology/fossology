@@ -14,7 +14,7 @@ use Fossology\Lib\Test\TestPgDb;
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
 
-class SchedulerTest extends \PHPUnit_Framework_TestCase
+class SchedulerTest extends \PHPUnit\Framework\TestCase
 {
   /** @var int */
   private $userId = 2;
@@ -30,7 +30,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   /** @var SchedulerTestRunnerCli */
   private $runnerCli;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("clixmltest");
     $this->dbManager = $this->testDb->getDbManager();
@@ -41,7 +41,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->agentDir = dirname(dirname(__DIR__));
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;
@@ -81,8 +81,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private function getHeartCount($output)
   {
     $matches = array();
-    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches))
-    {
+    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches)) {
       return intval($matches[1]);
     }
     return -1;

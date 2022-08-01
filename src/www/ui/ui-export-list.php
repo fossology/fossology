@@ -147,7 +147,7 @@ class UIExportList extends FO_Plugin
       if (GetParm("agentToInclude_".$agent, PARM_STRING)) {
         /* get last nomos agent_pk that has data for this upload */
         $AgentRec = AgentARSList($agent."_ars", $upload_pk, 1);
-        if ($AgentRec !== false) {
+        if (!empty($AgentRec)) {
           $agent_pks[$agent] = $AgentRec[0]["agent_fk"];
         } else {
           $agent_pks[$agent] = false;
@@ -556,6 +556,8 @@ class UIExportList extends FO_Plugin
           $row['agentFindings'][$key] = $row['conclusions'][$key];
         }
         $row['conclusions'] = null;
+      } elseif ($row['agentFindings'] == null) {
+        continue;
       } else {
         foreach ($row['agentFindings'] as $key => $value) {
           if ($value == "No_license_found") {
@@ -572,9 +574,6 @@ class UIExportList extends FO_Plugin
             unset($row['agentFindings'][$key]);
           }
         }
-      }
-      if ($row['agentFindings'] == null) {
-        continue;
       }
       $newLines[] = $row;
     }

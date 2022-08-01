@@ -1,10 +1,10 @@
 <?php
 /**
- * SPDX-FileCopyrightText: © Fossology contributors 
+ * SPDX-FileCopyrightText: © Fossology contributors
  * SPDX-License-Identifier: GPL-2.0-only
- * @file services.php
- * @brief Add the template path of copyright twig templates
- * to twig.loader
+ */
+/** @file services.php
+ * @brief Add the template path of copyright twig templates to twig.loader
  * @see Twig_Loader_Filesystem
 **/
 global $container;

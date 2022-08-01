@@ -13,6 +13,7 @@ use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\ShowJobsDao;
@@ -45,8 +46,15 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
   private $highlightDao;
   /** @var ShowJobsDao */
   private $showJobsDao;
+  /** @var CopyrightDao $copyrightDao */
+  private $copyrightDao;
 
-  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, HighlightDao $highlightDao, ShowJobsDao $showJobsDao, ClearingDecisionProcessor $clearingDecisionProcessor, AgentLicenseEventProcessor $agentLicenseEventProcessor)
+  public function __construct(DbManager $dbManager, AgentDao $agentDao,
+                              ClearingDao $clearingDao, UploadDao $uploadDao,
+                              HighlightDao $highlightDao, ShowJobsDao $showJobsDao,
+                              ClearingDecisionProcessor $clearingDecisionProcessor,
+                              AgentLicenseEventProcessor $agentLicenseEventProcessor,
+                              CopyrightDao $copyrightDao)
   {
     $this->clearingDao = $clearingDao;
     $this->agentDao = $agentDao;
@@ -57,6 +65,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $this->decisionTypes = new DecisionTypes();
     $this->clearingDecisionProcessor = $clearingDecisionProcessor;
     $this->agentLicenseEventProcessor = $agentLicenseEventProcessor;
+    $this->copyrightDao = $copyrightDao;
   }
 
   /**
@@ -88,6 +97,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $container->shouldReceive('get')->with('decision.types')->andReturn($this->decisionTypes);
     $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($this->clearingDecisionProcessor);
     $container->shouldReceive('get')->with('businessrules.agent_license_event_processor')->andReturn($this->agentLicenseEventProcessor);
+    $container->shouldReceive('get')->with('dao.copyright')->andReturn($this->copyrightDao);
     $GLOBALS['container'] = $container;
 
     $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::class);

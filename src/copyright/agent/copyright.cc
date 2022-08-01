@@ -67,13 +67,13 @@ int main(int argc, char** argv)
 
   bool json = cliOptions.doJsonOutput();
   bool ignoreFilesWithMimeType = cliOptions.doignoreFilesWithMimeType();
-  CopyrightState state = getState(std::move(cliOptions));
 
   if (!fileNames.empty())
   {
     const unsigned long fileNamesCount = fileNames.size();
     bool fileError = false;
     bool printComma = false;
+    CopyrightState state = getState(std::move(cliOptions));
 
     if (json)
     {
@@ -109,12 +109,14 @@ int main(int argc, char** argv)
   }
   else if (directoryToScan.length() > 0)
   {
+    CopyrightState state = getState(std::move(cliOptions));
     scanDirectory(state, json, directoryToScan);
   }
   else
   {
     DbManager dbManager(&argc, argv);
     int agentId = queryAgentId(dbManager.getConnection());
+    CopyrightState state = getState(std::move(cliOptions));
 
     CopyrightDatabaseHandler copyrightDatabaseHandler(dbManager);
     if (!copyrightDatabaseHandler.createTables())

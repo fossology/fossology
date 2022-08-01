@@ -49,6 +49,7 @@ class ComponentType
     self::NUGET => 'nuget',
     self::NPM => 'npm',
     self::PYPI => 'pypi',
-    self::PACKAGEURL => 'package-url'
+    self::PACKAGEURL => 'package-url',
+    '' => ''
   ];
 }

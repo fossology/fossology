@@ -77,9 +77,8 @@ INSERT INTO pfile VALUES (4, 'BE09F57E1E58119F1537439BA545835C', 'FD7D17CFA15074
 INSERT INTO pfile VALUES (5, '39C379E9C7F5BB524754C4DEF5FEF135', '840B588279248271D93ACA3092AD5F4DC724BDA4', '47A4CEE30C085C497E628BAB975FD586B5BED6FB25CC2720AE17339937436158', 285, NULL);
 INSERT INTO pfile VALUES (6, '2702A657B801333C3150BDC8BE642F9B', '798826BF3EB294E5D514ECFA3222CCF09BBCD985', '8DF6EB5D69FFE2BF61937D49F3EF72E98213FD09F9AD41C626E419503178BACD', 14554, NULL);
 
-
-INSERT INTO users VALUES (1, 'Default User', 1, 'Default User when nobody is logged in', 'Seed', 'Pass', 0, NULL, 'y', NULL, NULL, 'simple', NULL, NULL, NULL);
-INSERT INTO users VALUES (2, 'fossy', 1, 'Default Administrator', '14272952581103610285', 'cdd40d0517419e8495a6e40b14369b6a39031581', 10, 'y', 'y', NULL, NULL, 'simple', NULL, NULL, NULL);
+INSERT INTO users (user_pk, user_name, root_folder_fk, user_desc, user_seed, user_pass, user_perm, user_email, user_agent_list, email_notify, ui_preference, default_folder_fk) VALUES (1, 'Default User', 1, 'Default User when nobody is logged in', 'Seed', 'Pass', 0, NULL, NULL, 'y', 'simple', 1);
+INSERT INTO users (user_pk, user_name, root_folder_fk, user_desc, user_seed, user_pass, user_perm, user_email, user_agent_list, email_notify, ui_preference, default_folder_fk) VALUES (2, 'fossy', 1, 'Default Administrator', '14272952581103610285', 'cdd40d0517419e8495a6e40b14369b6a39031581', 10, NULL, NULL, 'y', 'simple', 1);
 
 
 INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) VALUES (2, 4, 2, 2, 2, 5, 1, '2015-05-04 11:43:18.276425+02');

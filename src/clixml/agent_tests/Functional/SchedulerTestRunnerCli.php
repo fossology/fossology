@@ -16,12 +16,12 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
 {
   /** @var TestPgDb */
   private $testDb;
-  
+
   public function __construct(TestPgDb $testDb)
   {
     $this->testDb = $testDb;
   }
-  
+
   public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
   {
     $sysConf = $this->testDb->getFossSysConf();
@@ -36,15 +36,12 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
 
     $output = "";
     $retCode = -1;
-    if ($success) 
-    {
+    if ($success) {
       while (($buffer = fgets($pipeFd, 4096)) !== false) {
         $output .= $buffer;
       }
       $retCode = pclose($pipeFd);
-    }
-    else 
-    {
+    } else {
       print "failed opening pipe to $cmd";
     }
 

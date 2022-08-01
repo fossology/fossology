@@ -39,7 +39,8 @@ class ui_download extends FO_Plugin
   {
     global $SysConf;
     $text = _("Download this file");
-    if ($_SESSION[Auth::USER_LEVEL] >= $SysConf['SYSCONFIG']['SourceCodeDownloadRights']) {
+    if (array_key_exists(Auth::USER_LEVEL, $_SESSION) &&
+      $_SESSION[Auth::USER_LEVEL] >= $SysConf['SYSCONFIG']['SourceCodeDownloadRights']) {
       menu_insert("Browse-Pfile::Download",0,$this->Name,$text);
     }
 

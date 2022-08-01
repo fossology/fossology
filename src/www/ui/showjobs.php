@@ -45,7 +45,8 @@ class showjobs extends FO_Plugin
     menu_insert("Main::Jobs::My Recent Jobs", $this->MenuOrder - 1, $this->Name,
       $this->MenuTarget);
 
-    if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) {
+    if (array_key_exists(Auth::USER_LEVEL, $_SESSION) &&
+      $_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) {
       $URIpart = $this->Name . Traceback_parm_keep(array(
         "page"
       )) . "&allusers=";

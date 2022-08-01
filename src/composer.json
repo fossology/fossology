@@ -15,6 +15,9 @@
         "ext-mbstring": "*",
         "ext-json" : "*",
         "ext-xml" : "*",
+        "ext-pgsql": "*",
+        "ext-curl": "*",
+        "ext-uuid": "*",
         "firebase/php-jwt": "v6.1.2",
         "monolog/monolog" : "2.3.5",
         "phpoffice/phpword" : "0.18.2",
@@ -40,10 +43,10 @@
         "mockery/mockery" : "v1.3.5",
         "myclabs/deep-copy" : "1.10.2",
         "php-coveralls/php-coveralls" : "v2.5.2",
-        "phpunit/phpunit" : "8.5.21",
+        "phpunit/phpunit" : "8.5.28",
         "sebastian/phpcpd" : "4.1.0",
         "squizlabs/php_codesniffer" : "3.6.1",
-        "phpstan/phpstan" : "1.2.0"
+        "phpstan/phpstan" : "1.8.2"
     },
     "autoload" : {
         "psr-4" : {
@@ -77,5 +80,9 @@
         "spdx",
         "license-management",
         "license"
-    ]
+    ],
+    "scripts": {
+      "phpcs": "phpcs --standard=fossy-ruleset.xml -p",
+      "phpcbf": "phpcbf --standard=fossy-ruleset.xml -p"
+    }
 }
