@@ -1,6 +1,6 @@
-; basic Scheduer.conf for the version 2.0 of the scheduler
+; basic Scheduler.conf for the version 2.0 of the scheduler
 ; SPDX-FileCopyrightText: © Fossology contributors
-
+;
 ; SPDX-License-Identifier: GPL-2.0-only
 
 ; this is a simple key-value configuration file
