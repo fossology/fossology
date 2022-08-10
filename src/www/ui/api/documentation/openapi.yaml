@@ -128,7 +128,48 @@ paths:
                 $ref: '#/components/schemas/ApiInfo'
         default:
           $ref: '#/components/responses/defaultResponse'
-
+  /maintenance:
+    post:
+      operationId: initiateMaintenance
+      tags:
+        - Maintenance
+      summary:  Initiate maintenance operations
+      description: > 
+        Perform maintenance operations corresponding to the user options.
+      requestBody:
+        description: Maintenance options
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMaintenance'
+      responses:
+        '201':
+          description: Maintenance Initiated Successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Key Not Found Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /health:
     get:
       operationId: getHealth
@@ -2294,6 +2335,43 @@ components:
               description: Date on which packages were built in ISO8601 format
               nullable: true
               example: "2022-01-07T11:13:00+05:30"
+    CreateMaintenance:
+      description: Maintenance options
+      type: object
+      properties:
+        options:
+          type: array
+          description: options list
+          nullable: false
+          items:
+            type: string
+            enum:
+              - a
+              - A
+              - F
+              - g
+              - E
+              - L
+              - N
+              - R
+              - t
+              - T
+              - D
+              - Z
+              - I
+              - v
+              - o
+              - l
+        logsDate:
+          type: string
+          description: Date from which to remove older gold files from repository.
+          nullable: true
+          example: "2021-08-19"
+        goldDate:
+          type: string
+          description: Date from which to remove older log files from repository.
+          nullable: true
+          example: "2022-07-16"
     HealthInfo:
       description: Health status of server
       type: object
