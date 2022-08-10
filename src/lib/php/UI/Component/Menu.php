@@ -14,6 +14,11 @@ use Twig\Environment;
 class Menu
 {
   const FULL_MENU_DEBUG = 'fullmenudebug';
+  /**
+   * @var string
+   * Name of cookie to handle banner close state.
+   */
+  const BANNER_COOKIE = 'close_banner';
   var $MenuTarget = "treenav";
   protected $renderer;
 
@@ -222,9 +227,16 @@ class Menu
     global $SysConf;
     $sysConfig = $SysConf['SYSCONFIG'];
 
+    $hide_banner = (array_key_exists(self::BANNER_COOKIE, $_COOKIE)
+                    && $_COOKIE[self::BANNER_COOKIE] == 1);
+
     $vars = array();
     $vars['title'] = empty($title) ? _("Welcome to FOSSology") : $title;
-    $vars['bannerMsg'] = @$sysConfig['BannerMsg'];
+    if ($hide_banner) {
+      $vars['bannerMsg'] = "";
+    } else {
+      $vars['bannerMsg'] = @$sysConfig['BannerMsg'];
+    }
     $vars['logoLink'] =  $sysConfig['LogoLink']?: 'http://fossology.org';
     $vars['logoImg'] =  $sysConfig['LogoImage']?: 'images/fossology-logo.gif';
 
