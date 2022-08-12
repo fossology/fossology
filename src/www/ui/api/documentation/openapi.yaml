@@ -795,6 +795,77 @@ paths:
                 $ref: '#/components/schemas/User'
         default:
             $ref: '#/components/responses/defaultResponse'
+    put:
+      operationId: modifyUserById
+      tags:
+        - User
+        - Admin
+      summary: Edit user details by id
+      description: >
+        Edit user details by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/User'
+                - type: object
+                  properties:
+                    user_pass:
+                      type: string
+                    defaultFolderId:
+                      type: integer
+                    defaultVisibility:
+                      type: string
+                      enum:
+                        - public
+                        - protected
+                        - private
+          application/x-www-form-urlencoded:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/User'
+                - type: object
+                  properties:
+                    user_pass:
+                      type: string
+                    defaultFolderId:
+                      type: integer
+                    defaultVisibility:
+                      type: string
+                      enum:
+                        - public
+                        - protected
+                        - private
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Missing or wrong parameters in request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: The session owner is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: UserId doesn't exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        
+        default:
+            $ref: '#/components/responses/defaultResponse'
     delete:
       operationId: deleteUserById
       tags:
@@ -824,15 +895,7 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/User'
-                  - type: object
-                    properties:
-                      default_group:
-                        type: string
-                        description: Default group of the user
-                        example:
-                          "fossy"        
+                $ref: '#/components/schemas/User'      
         default:
           $ref: '#/components/responses/defaultResponse'
   /jobs:
@@ -1860,6 +1923,7 @@ components:
             - none
             - read_only
             - read_write
+            - clearing_admin
             - admin
         rootFolderId:
           type: number
@@ -1868,12 +1932,13 @@ components:
         emailNotification:
           type: boolean
           description: enable email notification when upload scan completes
+        defaultGroup:
+          type: integer
+          description: Default group id of the user
         agents:
           $ref: '#/components/schemas/Analysis'
       required:
         - id
-        - name
-        - description
     Analysis:
       type: object
       properties:
@@ -1907,6 +1972,9 @@ components:
         reso:
           type: boolean
           description: Should REUSE.Software Analysis be run on this upload.
+        heritage:
+          type: boolean
+          description: Should Software Heritage Analysis be run on this upload.
     Reuser:
       type: object
       properties:
