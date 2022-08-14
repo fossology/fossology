@@ -91,6 +91,12 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
   private $userDao;
 
   /**
+   * @var M\MockInterface $adminLicensePlugin
+   * admin_license_from_csv mock
+   */
+  private $adminLicensePlugin;
+
+  /**
    * @var StreamFactory $streamFactory
    * Stream factory to create body streams.
    */
@@ -111,6 +117,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper = M::mock(RestHelper::class);
     $this->licenseDao = M::mock(LicenseDao::class);
     $this->userDao = M::mock(UserDao::class);
+    $this->adminLicensePlugin = M::mock('admin_license_from_csv');
 
     $this->dbHelper->shouldReceive('getDbManager')->andReturn($this->dbManager);
 
@@ -118,6 +125,10 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper->shouldReceive('getGroupId')->andReturn($this->groupId);
     $this->restHelper->shouldReceive('getUserId')->andReturn($this->userId);
     $this->restHelper->shouldReceive('getUserDao')->andReturn($this->userDao);
+
+
+    $this->restHelper->shouldReceive('getPlugin')
+      ->withArgs(array('admin_license_from_csv'))->andReturn($this->adminLicensePlugin);
 
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
@@ -785,4 +796,49 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
   }
+
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for LicenseController::handleImportLicense()
+   * -# Check if response status is 200
+   * -# Check if response body is matches the expected response body
+   */
+  public function testImportLicense()
+  {
+
+    $delimiter =  ',';
+    $enclosure = '"';
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+
+    $body = $this->streamFactory->createStream(json_encode([]));
+
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $FILE_INPUT_NAME = "file_input";
+
+    $this->adminLicensePlugin->shouldReceive('getFileInputName')
+      ->andReturn($FILE_INPUT_NAME);
+
+    $res = array(true,"random_message",200);
+
+    $this->adminLicensePlugin->shouldReceive('handleFileUpload')-> withArgs([NULL,$delimiter,$enclosure])
+      ->andReturn($res);
+
+    $info = new Info(200, "random_message", InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->licenseController->handleImportLicense($request,
+      new ResponseHelper(), []);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
 }
