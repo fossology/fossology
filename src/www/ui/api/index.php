@@ -225,6 +225,7 @@ $app->group('/license',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('', LicenseController::class . ':getAllLicenses');
     $app->post('', LicenseController::class . ':createLicense');
+    $app->get('/candidates', LicenseController::class . ':getCandidates');
     $app->get('/{shortname:.+}', LicenseController::class . ':getLicense');
     $app->patch('/{shortname:.+}', LicenseController::class . ':updateLicense');
     $app->any('/{params:.*}', BadRequestController::class);

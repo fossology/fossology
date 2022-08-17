@@ -366,4 +366,20 @@ class LicenseController extends RestController
       $statement);
     return $result["cnt"] == 0;
   }
+
+  /**
+   * Get list of all license candidates, paginated upon request params
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getCandidates($request, $response, $args)
+  {
+     $adminLicenseCandidate = $this->restHelper->getPlugin("admin_license_candidate");
+     $res = $adminLicenseCandidate->handleGetArrayData();
+     $newInfo = new Info(200, $res, InfoType::INFO);
+     return $response->withJson($newInfo->getArray(), $newInfo->getCode());
+  }
 }

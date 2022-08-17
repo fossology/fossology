@@ -12,6 +12,7 @@
 
 namespace Fossology\UI\Api\Test\Controllers;
 
+use Fossology\UI\Page\AdminLicenseCandidate;
 use Mockery as M;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
@@ -97,6 +98,13 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
   private $streamFactory;
 
   /**
+   * @var M\MockInterface $licenseCandidatePlugin
+   * admin_license_candidate mock
+   */
+  private $licenseCandidatePlugin;
+
+
+  /**
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
@@ -111,9 +119,11 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper = M::mock(RestHelper::class);
     $this->licenseDao = M::mock(LicenseDao::class);
     $this->userDao = M::mock(UserDao::class);
+    $this->licenseCandidatePlugin = M::mock('admin_license_candidate');
 
     $this->dbHelper->shouldReceive('getDbManager')->andReturn($this->dbManager);
 
+    $this->restHelper->shouldReceive('getPlugin')->withArgs(["admin_license_candidate"])->andReturn($this->licenseCandidatePlugin);
     $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
     $this->restHelper->shouldReceive('getGroupId')->andReturn($this->groupId);
     $this->restHelper->shouldReceive('getUserId')->andReturn($this->userId);
@@ -780,6 +790,28 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
     $actualResponse = $this->licenseController->updateLicense($request,
       new ResponseHelper(), ["shortname" => $license->getShortName()]);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::getCandidates()
+   * -# Check if status is 200
+   * -# Check if response-body matches
+   */
+  public function testGetCandidates()
+  {
+    $this->licenseCandidatePlugin->shouldReceive('handleGetArrayData')->andReturn([]);
+    $rows = array();
+    $info = new Info(200, $rows,
+      InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->licenseController->getCandidates(null,
+      new ResponseHelper(), null);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
