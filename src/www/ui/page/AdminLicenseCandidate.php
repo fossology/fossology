@@ -153,9 +153,17 @@ class AdminLicenseCandidate extends DefaultPlugin
     $dbManager = $this->getObject('db.manager');
     $dbManager->prepare($stmt = __METHOD__, $sql);
     $res = $dbManager->execute($stmt);
+    $rows =  $dbManager->fetchArray($res);
+    $dbManager->freeResult($res);
+    return $rows;
+  }
+
+  private function getArrayArrayData()
+  {
+    $rows = $this->handleGetArrayData();
     $aaData = array();
     $delete = "";
-    while ($row = $dbManager->fetchArray($res)) {
+    while ($row = $rows) {
       $link = Traceback_uri() . '?mod=' . self::NAME . '&rf=' . $row['rf_pk'];
       $edit = '<a href="' . $link . '"><img border="0" src="images/button_edit.png"></a>';
       $delete = '<img border="0" id="deletecandidate'.$row['rf_pk'].'" onClick="deleteCandidate('.$row['rf_pk'].')" src="images/icons/close_16.png">';
@@ -166,7 +174,6 @@ class AdminLicenseCandidate extends DefaultPlugin
         htmlentities($row['group_name']),$delete
       );
     }
-    $dbManager->freeResult($res);
     return $aaData;
   }
 

@@ -401,4 +401,19 @@ class LicenseController extends RestController
 
     return $response->withJson($newInfo->getArray(), $newInfo->getCode());
   }
+
+  /**
+   * Get list of all license candidates, paginated upon request params
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getCandidates($request, $response, $args)
+  {
+     $adminLicenseCandidate = $this->restHelper->getPlugin("admin_license_candidate");
+     $res = $adminLicenseCandidate->handleGetArrayData();
+     return $response->withJson($res ?: [],200);
+  }
 }

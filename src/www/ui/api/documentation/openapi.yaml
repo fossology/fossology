@@ -2327,7 +2327,32 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-
+  /license/candidates:
+    get:
+      operationId: getLicenseCandidates
+      tags:
+        - License
+      summary: Get license Candidates
+      description: >
+        Get a list of license candidates from the database.
+      responses:
+        '200':
+          description: Request is successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                   - $ref: '#/components/schemas/LicenseCandidate'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -2529,6 +2554,27 @@ components:
           type: string
           description: Scope of the token
           example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTg5NDY1OTksIm5iZiI6MTY1NzkwOTgwMCwianRpIjoiTnk0eiIsInNjb3BlIjoid3JpdGUifQ.Yqwdt7Fzx-Qw3megYix_OYu1mqBOoz4Rrc1cgJasmJA
+    LicenseCandidate:
+      type: object
+      properties:
+        rf_pk:
+          type: integer
+          description: ID of the license-candidate.
+        rf_shortname:
+          type: string
+          description: shortname of the license-candidate.
+        rf_fullname:
+          type: string
+          description: fullname of the license-candidate.
+        rf_text:
+          type: string
+          description: text of the license-candidate.
+        group_name:
+          type: string
+          description: group_name of the license-candidate.
+        group_pk:
+            type: integer
+            description: group_id of the license-candidate.
     User:
       type: object
       properties:
