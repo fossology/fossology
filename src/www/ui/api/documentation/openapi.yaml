@@ -2352,6 +2352,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
+            $ref: '#/components/responses/defaultResponse'
+  /license/candidates/{id}:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the license-candidate
+        in: path
+        schema:
+          type: integer
+    delete:
+      operationId: deleteByLicenseCandidateId
+      tags:
+        - LicenseCandidate
+        - Admin
+      summary: Delete license candidate by id.
+      description: >
+        Delete a single admin-license-candidate by the given id.
+      responses:
+        '200':
+          description: License candidate will be deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
           $ref: '#/components/responses/defaultResponse'
 components:
   securitySchemes:

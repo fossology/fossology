@@ -110,6 +110,12 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
 
   /**
+   * @var Auth $auth
+   * Auth mock
+   */
+  private $auth;
+
+  /**
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
@@ -120,6 +126,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->groupId = 2;
     $container = M::mock('ContainerBuilder');
     $this->dbHelper = M::mock(DbHelper::class);
+    $this->auth = M::mock(Auth::class);
     $this->dbManager = M::mock(DbManager::class);
     $this->restHelper = M::mock(RestHelper::class);
     $this->licenseDao = M::mock(LicenseDao::class);
@@ -847,6 +854,76 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+
+  /**
+   * @test
+   * -# Test for LicenseController::deleteAdminLicenseCandidate() to delete license-candidate.
+   * -# User is admin
+   * -# License-candidate is does exist
+   * -# Check if response is 200
+   * -# Check if reponse-body matches
+   */
+  public function testDeleteAdminLicenseCandidateIsAdmin(){
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $id = 1;
+    $this->auth->shouldReceive('isAdmin')->andReturn(true);
+    $this->adminLicenseCandidate->shouldReceive('getDataRow')->withArgs([$id])->andReturn(true);
+    $res = new Response('true',Response::HTTP_OK,array('Content-type'=>'text/plain'));
+    $this->adminLicenseCandidate->shouldReceive("doDeleteCandidate")->withArgs([$id,false])->andReturn($res);
+    $expectedResponse = new Info(200,"License candidate will be deleted.",  InfoType::INFO);
+    $actualResponse = $this->licenseController->deleteAdminLicenseCandidate(null,
+      new ResponseHelper(), ["id" => $id]);
+    $this->assertEquals($expectedResponse->getCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($expectedResponse->getArray(),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::deleteAdminLicenseCandidate() to delete license-candidate.
+   * -# User is not-admin
+   * -# License-candidate is does exist
+   * -# Check if response is 400
+   * -# Check if reponse-body matches
+   */
+  public function testDeleteAdminLicenseCandidateNotAdmin(){
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $id = 1;
+    $this->auth->shouldReceive('isAdmin')->andReturn(false);
+    $expectedResponse = new Info(400, "Only admin can perform this operation.", InfoType::ERROR);
+    $actualResponse = $this->licenseController->deleteAdminLicenseCandidate(null,
+      new ResponseHelper(), ["id" => $id]);
+    $this->assertEquals($expectedResponse->getCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($expectedResponse->getArray(),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::deleteAdminLicenseCandidate() to delete license-candidate.
+   * -# User is admin
+   * -# License-candidate is doesn't exist
+   * -# Check if response is 404
+   * -# Check if reponse-body matches
+   */
+  public function testDeleteAdminLicenseCandidateNotFound(){
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $id = 1;
+    $this->auth->shouldReceive('isAdmin')->andReturn(true);
+    $this->adminLicenseCandidate->shouldReceive('getDataRow')->withArgs([$id])->andReturn(false);
+    $res = new Response('true',Response::HTTP_OK,array('Content-type'=>'text/plain'));
+    $this->adminLicenseCandidate->shouldReceive("doDeleteCandidate")->withArgs([$id])->andReturn($res);
+    $expectedResponse = new Info(404, "License candidate not found.", InfoType::ERROR);
+    $actualResponse = $this->licenseController->deleteAdminLicenseCandidate(null,
+      new ResponseHelper(), ["id" => $id]);
+    $this->assertEquals($expectedResponse->getCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($expectedResponse->getArray(),
       $this->getResponseJson($actualResponse));
   }
 
