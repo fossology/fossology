@@ -424,4 +424,31 @@ class LicenseController extends RestController
     $info = new Info(200, $licenses, InfoType::INFO);
     return $response->withJson($info->getArray(), $info->getCode());
   }
+
+  /**
+   * Delete license candidate by id.
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function deleteAdminLicenseCandidate($request, $response, $args)
+  {
+    $resInfo = null;
+    if (!Auth::isAdmin()) {
+      $resInfo = new Info(400, "Only admin can perform this operation.", InfoType::ERROR);
+    } else {
+      $id = intval($args['id']);
+      $adminLicenseCandidate = $this->restHelper->getPlugin('admin_license_candidate');
+
+      if ($adminLicenseCandidate->getDataRow($id)) {
+        $res = $adminLicenseCandidate->doDeleteCandidate($id,false);
+        $resInfo = new Info($res->getStatusCode(),$res->getContent() === 'true' ? "License candidate will be deleted." : $res->getContent(), $res->getStatusCode() == 200 ? InfoType::INFO : InfoType::ERROR);
+      } else {
+        $resInfo = new Info(404, "License candidate not found.", InfoType::ERROR);
+      }
+    }
+    return $response->withJson($resInfo->getArray(), $resInfo->getCode());
+  }
 }

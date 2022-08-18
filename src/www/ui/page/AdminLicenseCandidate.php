@@ -174,7 +174,7 @@ class AdminLicenseCandidate extends DefaultPlugin
   }
 
 
-  private function getDataRow($licId,$table='license_candidate')
+  public function getDataRow($licId,$table='license_candidate')
   {
     $sql = "SELECT rf_pk,rf_spdx_id,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,rf_notes,rf_risk";
     if ($table == 'license_candidate') {
@@ -261,7 +261,7 @@ class AdminLicenseCandidate extends DefaultPlugin
     return true;
   }
 
-  protected function doDeleteCandidate($rfPk)
+  public function doDeleteCandidate($rfPk,$includeHtml=true)
   {
     $dbManager = $this->getObject('db.manager');
     $stmt = __METHOD__.".getUploadtreeFkForUsedCandidates";
@@ -280,11 +280,12 @@ class AdminLicenseCandidate extends DefaultPlugin
       return new Response('true', Response::HTTP_OK, array('Content-type'=>'text/plain'));
     } else {
       $treeDao = $this->getObject('dao.tree');
-      $message = "<div class='candidateFileList'><ol>";
+      $message = $includeHtml ? "<div class='candidateFileList'><ol>":"";
       foreach ($dataFetch as $cnt => $uploadTreeFk) {
-        $message .= "<li>".$treeDao->getFullPath($uploadTreeFk['uploadtree_fk'], 'uploadtree')."</li>";
+        $path= $treeDao->getFullPath($uploadTreeFk['uploadtree_fk'], 'uploadtree');
+        $message .= $includeHtml ? "<li>".$path."</li>":$path;
       }
-      $message .= "</ol></div>";
+      $message .= $includeHtml ? "</ol></div>":"";
       return new Response($message, Response::HTTP_OK, array('Content-type'=>'text/plain'));
     }
   }

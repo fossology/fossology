@@ -250,6 +250,7 @@ $app->group('/license',
     $app->get('/admincandidates', LicenseController::class . ':getCandidates');
     $app->get('/{shortname:.+}', LicenseController::class . ':getLicense');
     $app->patch('/{shortname:.+}', LicenseController::class . ':updateLicense');
+    $app->delete('/candidates/{id:\\d+}', LicenseController::class . ':deleteAdminLicenseCandidate');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
