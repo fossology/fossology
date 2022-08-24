@@ -16,6 +16,7 @@ use Fossology\Lib\BusinessRules\ClearingEventProcessor;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\ShowJobsDao;
@@ -62,6 +63,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   private $highlightDao;
   /** @var ShowJobsDao */
   private $showJobsDao;
+  /** @var CopyrightDao $copyrightDao */
+  private $copyrightDao;
   /** @var SchedulerTestRunnerCli */
   private $runnerCli;
   /** @var SchedulerTestRunnerMock */
@@ -86,12 +89,16 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
     $this->showJobsDao = new ShowJobsDao($this->dbManager, $this->uploadDao);
     $this->clearingDecisionProcessor = new ClearingDecisionProcessor($this->clearingDao, $this->agentLicenseEventProcessor, $clearingEventProcessor, $this->dbManager);
+    $this->copyrightDao = M::mock(CopyrightDao::class);
 
     global $container;
     $container = M::mock('ContainerBuilder');
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManager);
 
-    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->highlightDao, $this->showJobsDao, $this->clearingDecisionProcessor, $this->agentLicenseEventProcessor);
+    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao,
+      $this->clearingDao, $this->uploadDao, $this->highlightDao,
+      $this->showJobsDao, $this->clearingDecisionProcessor,
+      $this->agentLicenseEventProcessor, $this->copyrightDao);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
@@ -107,6 +114,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->highlightDao = null;
     $this->showJobsDao = null;
     $this->clearingDao = null;
+    $this->copyrightDao = null;
     M::close();
   }
 
@@ -137,7 +145,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   {
     $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk',
       'license_set_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight',
-      'highlight_keyword','agent','pfile','ars_master','users','group_user_member','license_map','jobqueue','job'),false);
+      'highlight_keyword','agent','pfile','ars_master','users','group_user_member','license_map','jobqueue','job',
+      'sysconfig','report_info'), false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq',
       'license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq',
       'clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey',
@@ -613,8 +622,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->queryOnce("DELETE FROM license_file");
 
     /* insert NoLicenseKnown decisions */
-    $this->dbManager->queryOnce("INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added)"
-            . " VALUES (2, $itemId, $pfile, $userId, $groupId, ".DecisionTypes::IDENTIFIED.", ".DecisionScopes::ITEM.", '2015-05-04 11:43:18.276425+02')");
+    $this->dbManager->queryOnce("INSERT INTO clearing_decision (uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added)"
+            . " VALUES ($itemId, $pfile, $userId, $groupId, ".DecisionTypes::IDENTIFIED.", ".DecisionScopes::ITEM.", '2015-05-04 11:43:18.276425+02')");
     $isWipBeforeDecider = $this->clearingDao->isDecisionCheck($itemId, $groupId, DecisionTypes::WIP);
     assertThat($isWipBeforeDecider, equalTo(false));
 

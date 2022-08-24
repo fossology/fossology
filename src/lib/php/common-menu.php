@@ -154,7 +154,7 @@ function MenuEndlessPage($Page, $Next = 1, $Uri = '')
  *         1  a < b\n
  *         0  a->Order = b->Order and a->Name = b->Name
  */
-function menu_cmp(&$a, &$b)
+function menu_cmp($a, $b)
 {
   if ($a->Order > $b->Order) {
     return (-1);

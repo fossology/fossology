@@ -10,7 +10,8 @@ require_once('HistogramBase.php');
 
 define("TITLE_EMAILHISTOGRAM", _("Email/URL/Author Browser"));
 
-class EmailHistogram extends HistogramBase {
+class EmailHistogram extends HistogramBase
+{
   function __construct()
   {
     $this->Name = "email-hist";
@@ -38,12 +39,11 @@ class EmailHistogram extends HistogramBase {
             'scancode_url' => _("URL"),
             'scancode_email' => _("Email")
       );
-      
+
     $tableVars = array();
     $output = array();
-    foreach($typeDescriptionPairs as $type=>$description)
-    {
-      if($type =="scancode_author" || $type =="scancode_email" || $type =="scancode_url"){
+    foreach ($typeDescriptionPairs as $type=>$description) {
+      if ($type =="scancode_author" || $type =="scancode_email" || $type =="scancode_url") {
         $agentId=LatestAgentpk($upload_pk, 'scancode_ars');
         $this->agentName = "scancode";
       }
@@ -66,8 +66,8 @@ class EmailHistogram extends HistogramBase {
     list($VEmail, $VUrl, $VAuthor, $VScanAuthor, $VScanUrl, $VScanEmail, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
     $out = $this->renderString('emailhist_tables.html.twig',
-            array('contEmail'=>$VEmail, 
-            'contUrl'=>$VUrl, 
+            array('contEmail'=>$VEmail,
+            'contUrl'=>$VUrl,
             'contAuthor'=>$VAuthor,
             'contScanAuthor' => $VScanAuthor,
             'contScanUrl' => $VScanUrl,
@@ -86,15 +86,11 @@ class EmailHistogram extends HistogramBase {
     $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
-    if (!empty($Item) && !empty($Upload))
-    {
-      if (GetParm("mod",PARM_STRING) == $this->Name)
-      {
+    if (!empty($Item) && !empty($Upload)) {
+      if (GetParm("mod",PARM_STRING) == $this->Name) {
         menu_insert("Browse::Email/URL/Author",10);
         menu_insert("Browse::[BREAK]",100);
-      }
-      else
-      {
+      } else {
         $text = _("View email/URL/author histogram");
         menu_insert("Browse::Email/URL/Author",10,$URI,$text);
       }
@@ -105,7 +101,7 @@ class EmailHistogram extends HistogramBase {
    * @copydoc HistogramBase::createScriptBlock()
    * @see HistogramBase::createScriptBlock()
    */
-   
+
   protected function createScriptBlock()
   {
     return "
@@ -182,7 +178,6 @@ class EmailHistogram extends HistogramBase {
     });
     ";
   }
-
 }
 
 $NewPlugin = new EmailHistogram;

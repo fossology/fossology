@@ -90,6 +90,7 @@ class ObligationsGetter
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $parentTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
     $bulkHistory = $this->clearingDao->getBulkHistory($parentTreeBounds, $groupId, false);
+    $licenseId = [];
     if (!empty($bulkHistory)) {
       $licenseLists = array_column($bulkHistory, 'addedLicenses');
       $allLicenses = array();

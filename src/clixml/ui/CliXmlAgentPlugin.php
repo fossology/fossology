@@ -11,11 +11,12 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class CliXmlAgentPlugin extends AgentPlugin
 {
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_clixml";
     $this->Title =  _("CliXml generation");
     $this->AgentName = "clixml";
-    
+
     parent::__construct();
   }
 
@@ -23,7 +24,7 @@ class CliXmlAgentPlugin extends AgentPlugin
   {
     // no AgentCheckBox
   }
-  
+
   public function uploadsAdd($uploads)
   {
     if (count($uploads) == 0) {

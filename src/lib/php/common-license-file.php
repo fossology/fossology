@@ -99,7 +99,7 @@ function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtre
 {
   $LicStr = "";
   $LicArray = GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename);
-  return implode($LicArray,', ');
+  return implode(', ', $LicArray);
 }
 
 /**
@@ -123,7 +123,7 @@ function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtre
  */
 function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
                              $PkgsOnly=false, $offset=0, $limit="ALL",
-                             $order="", $tag_pk=null, $uploadtree_tablename)
+                             $order="", $tag_pk=null, $uploadtree_tablename="uploadtree")
 {
   global $PG_CONN;
 
@@ -213,7 +213,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
  *
  * \returns Array of uploadtree_pk ==> ufile_name
  */
-function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=false, $uploadtree_tablename)
+function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=false, $uploadtree_tablename="uploadtree")
 {
   $pkarray = array();
 

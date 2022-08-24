@@ -37,6 +37,8 @@ class SchedulerTestRunnerCli
     $execDir = "$agentDir/agent";
     system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
 
+    $curdir = getcwd();
+    chdir(__DIR__);
     $pipeFd = popen($cmd = "$execDir/$agentName $args", "r");
     $success = $pipeFd !== false;
 
@@ -50,6 +52,7 @@ class SchedulerTestRunnerCli
     } else {
       print "failed opening pipe to $cmd";
     }
+    chdir($curdir);
 
     unlink("$sysConf/mods-enabled/$agentName/VERSION");
     rmdir("$sysConf/mods-enabled/$agentName");

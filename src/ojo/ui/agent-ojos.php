@@ -9,7 +9,8 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class OjosAgentPlugin extends AgentPlugin
 {
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_ojo";
     $this->Title =  _("Ojo License Analysis, scanning for licenses using SPDX-License-Identifier");
     $this->AgentName = "ojo";
@@ -21,7 +22,7 @@ class OjosAgentPlugin extends AgentPlugin
   {
     return CheckARS($uploadId, $this->AgentName, "ojo agent", "ojo_ars");
   }
-  
+
   /**
    * @copydoc Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    * @see \Fossology\Lib\Plugin\AgentPlugin::AgentAdd()

@@ -17,7 +17,8 @@ define("TITLE_AGENT_COPYRIGHT_ONCE", _("One-Shot Copyright/Email/URL Analysis"))
  * @class agent_copyright_once
  * @brief One-Shot plugin for Copyright/Email/URL Analysis
  */
-class agent_copyright_once extends FO_Plugin {
+class agent_copyright_once extends FO_Plugin
+{
 
   function __construct()
   {
@@ -41,7 +42,8 @@ class agent_copyright_once extends FO_Plugin {
    * \brief Analyze one uploaded file.
    * \return string
    */
-  function AnalyzeOne() {
+  function AnalyzeOne()
+  {
     global $Plugins;
     global $SYSCONFDIR;
     $ModBack = GetParm("modback",PARM_STRING);
@@ -53,7 +55,7 @@ class agent_copyright_once extends FO_Plugin {
     $tempFileName = $_FILES['licfile']['tmp_name'];
     $ui_dir = getcwd();
     $copyright_dir =  "$SYSCONFDIR/mods-enabled/copyright/agent/";
-    if(!chdir($copyright_dir)) {
+    if (!chdir($copyright_dir)) {
       $errmsg = _("unable to change working directory to $copyright_dir\n");
       return $errmsg;
     }
@@ -79,13 +81,13 @@ class agent_copyright_once extends FO_Plugin {
         'url' => Highlight::URL);
     while (!feof($inputFile)) {
       $Line = fgets($inputFile);
-      if ($Line[0] == '/') { continue;
+      if ($Line[0] == '/') {
+        continue;
       }
       $count = strlen($Line);
       if ($count > 0) {
         /** $Line is not "'", also $Line is not end with ''', please notice that: usually $Line is end with NL(new line) */
-        if ((($count > 1) && ("'" != $Line[$count - 2])) || ((1 == $count) && ("'" != $Line[$count - 1])))
-        {
+        if ((($count > 1) && ("'" != $Line[$count - 2])) || ((1 == $count) && ("'" != $Line[$count - 1]))) {
           $Line = str_replace("\n", ' ', $Line); // in order to preg_match_all correctly, replace NL with white space
           $realline .= $Line;
           continue;
@@ -108,8 +110,7 @@ class agent_copyright_once extends FO_Plugin {
     }
     pclose($inputFile);
 
-    if ($this->NoHTML) // For REST API:
-    {
+    if ($this->NoHTML) { // For REST API:
       return $copyright_array;
     }
 
@@ -118,7 +119,7 @@ class agent_copyright_once extends FO_Plugin {
       $V = $view->getView($inputFile, $ModBack, 0, NULL, $highlights); // do not show Header and micro menus
       fclose($inputFile);
     }
-    if(!chdir($ui_dir)) {
+    if (!chdir($ui_dir)) {
       $errmsg = _("unable to change back to working directory $ui_dir\n");
       return $errmsg;
     }
@@ -133,7 +134,8 @@ class agent_copyright_once extends FO_Plugin {
    * \return int 1 on success.
    * @see FO_Plugin::RegisterMenus()
    */
-  function RegisterMenus() {
+  function RegisterMenus()
+  {
     if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     } // don't run
@@ -147,8 +149,7 @@ class agent_copyright_once extends FO_Plugin {
     }
     if (GetParm("mod", PARM_STRING) == $this->Name) {
       $ThisMod = 1;
-    }
-    else {
+    } else {
       $ThisMod = 0;
     }
     /* Check for a wget post (wget cannot post to a variable name) */
@@ -165,8 +166,7 @@ class agent_copyright_once extends FO_Plugin {
         $_FILES['licfile']['tmp_name'] = $Ftmp;
         $_FILES['licfile']['size'] = filesize($Ftmp);
         $_FILES['licfile']['unlink_flag'] = 1;
-      }
-      else {
+      } else {
         unlink($Ftmp);
       }
       fclose($Fin);
@@ -176,11 +176,10 @@ class agent_copyright_once extends FO_Plugin {
       /* default header is plain text */
     }
     /* Only register with the menu system if the user is logged in. */
-    if (!empty($_SESSION[Auth::USER_NAME]))
-    {
+    if (!empty($_SESSION[Auth::USER_NAME])) {
       // Debugging changes to license analysis NOTE: this comment doesn't make sense.
-      if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE)
-      {
+      if (array_key_exists(Auth::USER_LEVEL, $_SESSION) &&
+        $_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
         menu_insert("Main::Upload::One-Shot Copyright/ Email/ URL Analysis", $this->MenuOrder, $this->Name, $this->MenuTarget);
       }
     }
@@ -190,7 +189,8 @@ class agent_copyright_once extends FO_Plugin {
    * @copydoc FO_Plugin::Output()
    * @see FO_Plugin::Output()
    */
-  function Output() {
+  function Output()
+  {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
@@ -200,18 +200,15 @@ class agent_copyright_once extends FO_Plugin {
     */
 
     $tmp_name = '';
-    if (array_key_exists('licfile', $_FILES) && array_key_exists('tmp_name', $_FILES['licfile']))
-    {
+    if (array_key_exists('licfile', $_FILES) && array_key_exists('tmp_name', $_FILES['licfile'])) {
       $tmp_name = $_FILES['licfile']['tmp_name'];
     }
 
     $this->vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
-    if ($this->OutputType!='HTML' && file_exists($tmp_name))
-    {
+    if ($this->OutputType!='HTML' && file_exists($tmp_name)) {
       $copyright_res = $this->AnalyzeOne();
       $cont = '';
-      foreach ($copyright_res as $copyright)
-      {
+      foreach ($copyright_res as $copyright) {
         $cont = "$copyright\n";
       }
       unlink($tmp_name);
@@ -223,8 +220,7 @@ class agent_copyright_once extends FO_Plugin {
       if ($tmp_name) {
         if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10) {
           $this->vars['content'] = $this->AnalyzeOne();
-        }
-        else {
+        } else {
           $this->vars['message'] =  _('file is to large for one-shot copyright analyze');
         }
         return;

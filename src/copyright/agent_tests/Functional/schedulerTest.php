@@ -101,7 +101,7 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
 
     $agentName = "copyright";
 
-    $agentDir = dirname(dirname(__DIR__));
+    $agentDir = dirname(__DIR__, 2);
     $execDir = "$agentDir/agent";
     system("install -D $agentDir/VERSION-copyright $sysConf/mods-enabled/$agentName/VERSION");
     system("install -D $agentDir/agent/copyright.conf  $sysConf/mods-enabled/$agentName/agent/copyright.conf");

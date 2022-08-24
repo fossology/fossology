@@ -42,8 +42,7 @@ class CopyrightView extends Xpview
    */
   protected function additionalVars($uploadId, $uploadTreeId, $agentId)
   {
-    if (empty($agentId))
-    {
+    if (empty($agentId)) {
       $agentMap = $this->agentDao->getLatestAgentResultForUpload($uploadId,array('copyright'));
       $agentId = array_key_exists('copyright',$agentMap) ? $agentMap['copyright'] : 0;
     }
@@ -55,15 +54,14 @@ class CopyrightView extends Xpview
     $output = array();
     $modCopyrightHist = plugin_find('copyright-hist');
     $filter = '';
-    foreach($typeDescriptionPairs as $type=>$description)
-    {
-      if($type==="scancode_statement"){
+    foreach ($typeDescriptionPairs as $type=>$description) {
+      if ($type==="scancode_statement") {
         $agentId=LatestAgentpk($uploadId, 'scancode_ars');
         $this->agentName = "scancode";
       }
-    list($out, $vars) = $modCopyrightHist->getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId);
-    $tableVars[$type] = $vars;
-    $output[] = $out;
+      list($out, $vars) = $modCopyrightHist->getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId);
+      $tableVars[$type] = $vars;
+      $output[] = $out;
     }
 
     list ($vCopyright, $vScancode)=$output;
@@ -73,7 +71,7 @@ class CopyrightView extends Xpview
         'script' => $this->createScriptBlock());
     return $vars;
   }
-  
+
   protected function createScriptBlock()
   {
     return "
@@ -95,7 +93,6 @@ class CopyrightView extends Xpview
     });
     ";
   }
-
 }
 
 register_plugin(new CopyrightView());

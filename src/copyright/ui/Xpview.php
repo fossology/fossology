@@ -87,14 +87,13 @@ class Xpview extends DefaultPlugin
     $vars = array();
     $uploadId = intval($request->get('upload'));
     $uploadTreeId = intval($request->get('item'));
-    if (empty($uploadTreeId) || empty($uploadId))
-    {
+    if (empty($uploadTreeId) || empty($uploadId)) {
       $text = _("Empty Input");
       $vars['message']= "<h2>$text</h2>";
       return $this->responseBad($vars);
     }
 
-    if( !$this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) ) {
+    if (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId())) {
       $text = _("Permission Denied");
       $vars['message']= "<h2>$text</h2>";
       return $this->responseBad();
@@ -102,25 +101,21 @@ class Xpview extends DefaultPlugin
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName);
-    if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']))
-    {
+    if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode'])) {
       $parent = $this->uploadDao->getUploadParent($uploadEntry['upload_fk']);
-      if (!isset($parent))
-      {
+      if (!isset($parent)) {
         return $this->responseBad();
       }
 
       $uploadTree = $this->uploadDao->getNextItem($uploadEntry['upload_fk'], $parent);
-      if ($uploadTree === UploadDao::NOT_FOUND)
-      {
+      if ($uploadTree === UploadDao::NOT_FOUND) {
         return $this->responseBad();
       }
       $uploadTreeId = $uploadTree->getId();
 
       return new RedirectResponse(Traceback_uri() . '?mod=' . $this->getName() . Traceback_parm_keep(array('show','upload')) . "&item=$uploadTreeId");
     }
-    if (empty($uploadTreeId))
-    {
+    if (empty($uploadTreeId)) {
       return $this->responseBad('No item selected.');
     }
 
@@ -130,8 +125,7 @@ class Xpview extends DefaultPlugin
     $lastItem = GetParm("lastItem", PARM_INTEGER);
     $changed= GetParm("changedSomething", PARM_STRING);
     $userId = Auth::getUserId();
-    if (!empty($lastItem) && $changed =="true")
-    {
+    if (!empty($lastItem) && $changed =="true") {
       $lastUploadEntry = $this->uploadDao->getUploadEntry($lastItem, $uploadTreeTableName);
       $clearingType = GetParm('clearingTypes', PARM_INTEGER);
       $description = trim(GetParm('description', PARM_STRING));
@@ -158,14 +152,12 @@ class Xpview extends DefaultPlugin
     $scanJobProxy->createAgentStatus(array($this->agentName));
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     $highlights = array();
-    if(array_key_exists($this->agentName, $selectedScanners))
-    {
+    if (array_key_exists($this->agentName, $selectedScanners)) {
       $latestXpAgentId = $selectedScanners[$this->agentName];
       $highlights = $this->copyrightDao->getHighlights($uploadTreeId, $this->tableName, $latestXpAgentId, $this->typeToHighlightTypeMap);
     }
 
-    if (count($highlights) < 1)
-    {
+    if (count($highlights) < 1) {
       $vars['message'] = _("No ").$this->tableName ._(" data is available for this file.");
     }
 
@@ -240,8 +232,7 @@ class Xpview extends DefaultPlugin
   function legendBox()
   {
     $output = _("file text");
-    foreach ($this->highlightTypeToStringMap as $colorKey => $txt)
-    {
+    foreach ($this->highlightTypeToStringMap as $colorKey => $txt) {
       $output .= '<br/>' . $this->highlightRenderer->createStartSpan($colorKey, $txt) . $txt . '</span>';
     }
     return $output;
@@ -263,8 +254,7 @@ class Xpview extends DefaultPlugin
 
     // For all other menus, permit coming back here.
     $uploadId = GetParm("upload", PARM_INTEGER);
-    if (!empty($itemId) && !empty($uploadId))
-    {
+    if (!empty($itemId) && !empty($uploadId)) {
       $menuText = "Copyright/Email/Url/Author";
       $menuPosition = 57;
       $tooltipText = _("View Copyright/Email/Url/Author info");
@@ -272,8 +262,7 @@ class Xpview extends DefaultPlugin
       $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText, $menuPosition, $this->getName(), $URI, $tooltipText);
     }
     $licId = GetParm("lic", PARM_INTEGER);
-    if (!empty($licId))
-    {
+    if (!empty($licId)) {
       $this->NoMenu = 1;
     }
   }

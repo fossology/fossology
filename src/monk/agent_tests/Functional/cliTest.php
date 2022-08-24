@@ -7,6 +7,7 @@
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use PHPUnit\Runner\Version as PHPUnitVersion;
 
 class MonkCliTest extends \PHPUnit\Framework\TestCase
 {
@@ -105,7 +106,12 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
 
     $this->assertEquals(0, $retCode, 'monk failed: '.$output);
 
-    $this->assertRegExp("/found full match between \".*expectedFull\\/Apache-2.0\" and \"Apache-2\\.0\" \\(rf_pk=[0-9]*\\); matched: 0\\+10456\n/", $output);
+    $pattern = "/found full match between \".*expectedFull\\/Apache-2.0\" and \"Apache-2\\.0\" \\(rf_pk=[0-9]*\\); matched: 0\\+10456\n/";
+    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+      $this->assertMatchesRegularExpression($pattern, $output);
+    } else {
+      $this->assertRegExp($pattern, $output);
+    }
   }
 
   private function extractSortedLines($output) {
@@ -135,7 +141,11 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
       $regex = preg_replace("/\\\$fileName/", $fileName, $regex);
       $regex = preg_replace("/\\\$licenseName/", $licenseName, $regex);
 
-      $this->assertRegExp($regex, $line);
+      if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+        $this->assertMatchesRegularExpression($regex, $line);
+      } else {
+        $this->assertRegExp($regex, $line);
+      }
     }
   }
 
@@ -199,7 +209,11 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
 
     $expectedOutputRgx = '/Usage:.*/';
 
-    $this->assertRegExp($expectedOutputRgx,$output);
+    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+      $this->assertMatchesRegularExpression($expectedOutputRgx, $output);
+    } else {
+      $this->assertRegExp($expectedOutputRgx, $output);
+    }
   }
 
   /**

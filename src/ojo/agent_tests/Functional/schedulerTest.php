@@ -9,8 +9,8 @@
  * @file
  * @brief Functional test cases for ojo agent using scheduler
  */
-require_once "./SchedulerTestRunnerCli.php";
-require_once "./SchedulerTestRunnerScheduler.php";
+require_once "SchedulerTestRunnerCli.php";
+require_once "SchedulerTestRunnerScheduler.php";
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
@@ -72,7 +72,7 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
    */
   protected function setUp() : void
   {
-    $this->regressionFile = "regexTest.json";
+    $this->regressionFile = __DIR__ . DIRECTORY_SEPARATOR . "regexTest.json";
 
     $this->testDb = new TestPgDb("ojoSched" . time());
     $this->dbManager = $this->testDb->getDbManager();

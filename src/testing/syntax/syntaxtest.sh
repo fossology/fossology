@@ -86,7 +86,7 @@ then
 fi
 
 # scan each of the php files
-phpScanResults=$(find . -not \( -path ./vendor -prune \) -type f -name \*.php | xargs -L1 -P$threads -I {} sh -c "php --syntax-check {} || :")
+phpScanResults=$(find . -not \( -path ./vendor -prune \) -not \( -path ./nomos/agent_tests/testdata -prune \) -type f -name \*.php | xargs -L1 -P$threads -I {} sh -c "php --syntax-check {} || :")
 phpScanErrors=$(echo "$phpScanResults" | egrep -v '^No syntax errors detected in' | egrep -v '^$')
 
 if isVerbose
