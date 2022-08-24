@@ -183,6 +183,7 @@ $app->group('/jobs',
     $app->get('[/{id:\\d+}]', JobController::class . ':getJobs');
     $app->get('/all', JobController::class . ':getAllJobs');
     $app->post('', JobController::class . ':createJob');
+    $app->get('/history', JobController::class . ':getJobsHistory');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

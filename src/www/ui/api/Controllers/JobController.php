@@ -25,6 +25,8 @@ use Fossology\UI\Api\Models\Scancode;
 use Fossology\UI\Api\Models\Reuser;
 use Fossology\UI\Api\Models\ScanOptions;
 use Fossology\UI\Api\Models\Job;
+use Fossology\UI\Api\Models\JobQueue;
+use Fossology\UI\Api\Models\ShowJob;
 
 /**
  * @class JobController
@@ -338,5 +340,76 @@ class JobController extends RestController
       $jobStatusString = "Completed";
     }
     return $jobStatusString;
+  }
+
+  /**
+   * Get the history of all the jobs queued based on an upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getJobsHistory($request, $response, $args)
+  {
+    $query = $request->getQueryParams();
+    $returnVal = null;
+    if (!array_key_exists(self::UPLOAD_PARAM, $query)) {
+      $returnVal = new Info(400, "Bad Request. **upload** is a required query param", InfoType::INFO);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $upload_fk = $query['upload'];
+    // checking if the upload exists and if yes, whether it is accessible
+    $res = true;
+    if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $upload_fk)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+      $res = false;
+    } else if (! $this->restHelper->getUploadDao()->isAccessible($upload_fk, $this->restHelper->getGroupId())) {
+      $returnVal = new Info(403, "Upload is not accessible", InfoType::ERROR);
+      $res = false;
+    }
+    if ($res !== true) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    // initialising the DB manager
+    $dbManager = $this->dbHelper->getDbManager();
+
+    // getting all the jobs from the DB for the upload id
+    $query = "SELECT job_pk FROM job WHERE job_upload_fk=$1;";
+    $statement = __METHOD__.".getJobs";
+    $result = $dbManager->getRows($query, [$upload_fk], $statement);
+
+    // creating a list of all the job_pks
+    $allJobPks = array();
+    foreach ($result as $jobs) {
+      array_push($allJobPks, $jobs['job_pk']);
+    }
+
+    // initialising the show jobs Dao
+    $showJobsDao = $this->container->get('dao.show_jobs');
+
+    $jobsInfo = $showJobsDao->getJobInfo($allJobPks);
+    usort($jobsInfo, array($this, "compareJobsInfo"));
+
+    // initialising the show jobs ajax plugin
+    $ajaxShowJobs = $this->restHelper->getPlugin('ajaxShowJobs');
+
+    // getting the show jobs data for each job
+    $showJobData = $ajaxShowJobs->getShowJobsForEachJob($jobsInfo);
+
+    // creating the response structure
+    $allJobsHistory = array();
+    foreach ($showJobData as $jobValObj) {
+      $finalJobqueue = array();
+      foreach ($jobValObj['job']['jobQueue'] as $jqVal) {
+        unset($jqVal['jq_schedinfo'], $jqVal['jq_end_bits'], $jqVal['jq_schedinfo'], $jqVal['jq_cmd_args'], $jqVal['jq_host'], $jqVal['jq_log'], $jqVal['jq_runonpfile'], $jqVal['jdep_jq_depends_fk'], $jqVal['jq_job_fk'], $jqVal['jq_args']);
+        $jobQueue = new JobQueue($jqVal['jq_pk'], $jqVal['jq_type'], $jqVal['jq_starttime'], $jqVal['jq_endtime'], $jqVal['jq_endtext'], $jqVal['jq_itemsprocessed'], $jqVal['depends'], $jqVal['itemsPerSec'], $jqVal['canDoActions'], $jqVal['isInProgress'], $jqVal['isReady'], $jqVal['download']);
+        array_push($finalJobqueue, $jobQueue->getArray());
+      }
+      $job = new ShowJob($jobValObj['job']['jobId'], $jobValObj['job']['jobName'], $finalJobqueue, $jobValObj['upload']);
+      array_push($allJobsHistory, $job->getArray());
+    }
+    return $response->withJson($allJobsHistory, 200);
   }
 }
