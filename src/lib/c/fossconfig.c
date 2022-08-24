@@ -207,11 +207,18 @@ static gboolean fo_config_eval(const GMatchInfo* match, GTree** g_current,
   /* check to make sure we haven't hit an error */
   if ((error_t = g_match_info_fetch_named(match, "error")) != NULL)
   {
-    g_set_error(error, PARSE_ERROR, fo_invalid_file,
-      "%s[line %d]: incorrectly formated line \"%s\".",
-      yyfile, yyline, error_t);
-    g_free(error_t);
-    return TRUE;
+    if (strlen(error_t) > 0)
+    {
+      g_set_error(error, PARSE_ERROR, fo_invalid_file,
+        "%s[line %d]: incorrectly formated line \"%s\".",
+        yyfile, yyline, error_t);
+      g_free(error_t);
+      return TRUE;
+    }
+    else
+    {
+      g_free(error_t);
+    }
   }
 
   gchar* group = g_match_info_fetch_named(match, "group");

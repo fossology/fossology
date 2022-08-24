@@ -763,7 +763,9 @@ class fo_libschema
         if (!empty($Key)) {
           $Key .= ",";
         }
-        $Key .= '"' . $this->currSchema['TABLEID'][$Results[$i]['table_name']][$K] . '"';
+        if (!empty($this->currSchema['TABLEID'][$Results[$i]['table_name']][$K])) {
+          $Key .= '"' . $this->currSchema['TABLEID'][$Results[$i]['table_name']][$K] . '"';
+        }
       }
       $Results[$i]['constraint_key'] = $Key;
       $Key = "";
