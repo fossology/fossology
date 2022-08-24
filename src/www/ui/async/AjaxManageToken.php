@@ -81,7 +81,7 @@ class AjaxManageToken extends DefaultPlugin
    * @param string $hostname Host issuing the token
    * @returns array Array with success status and token.
    */
-  private function revealToken($tokenPk, $hostname)
+  function revealToken($tokenPk, $hostname="")
   {
     global $container;
     $restDbHelper = $container->get("helper.dbHelper");
