@@ -602,10 +602,12 @@ class UploadHelper
     if ($mainLicenses !== null) {
       $summary->setMainLicense(implode(",", $mainLicenses));
     }
-    $summary->setUniqueLicenses($hist['uniqueLicenseCount']);
-    $summary->setTotalLicenses($hist['scannerLicenseCount']);
-    $summary->setUniqueConcludedLicenses($hist['editedUniqueLicenseCount']);
-    $summary->setTotalConcludedLicenses($hist['editedLicenseCount']);
+    if (is_null($hist->headers)) {
+      $summary->setUniqueLicenses($hist['uniqueLicenseCount']);
+      $summary->setTotalLicenses($hist['scannerLicenseCount']);
+      $summary->setUniqueConcludedLicenses($hist['editedUniqueLicenseCount']);
+      $summary->setTotalConcludedLicenses($hist['editedLicenseCount']);
+    }
     $summary->setFilesToBeCleared($filesToBeCleared);
     $summary->setFilesCleared($clearingCount);
     $summary->setClearingStatus($uploadDao->getStatus($uploadId, $groupId));

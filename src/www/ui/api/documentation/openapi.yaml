@@ -1414,6 +1414,50 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /jobs/history:
+    parameters:
+      - name: upload
+        required: true
+        in: query
+        description: Return jobs for the given upload id
+        schema:
+          type: integer
+    get:
+      operationId: getJobsHistory
+      tags:
+      - Job
+      summary: Get the history of all the jobs queued based on an upload
+      description: Returns the history of all the jobs queued based on an upload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShowJob'
+        '400':
+          description: 'Bad Request. **upload** is a required query param'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Upload is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Upload does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+            $ref: '#/components/responses/defaultResponse'
+
   /folders:
     parameters:
       - name: groupName
@@ -2832,6 +2876,73 @@ components:
                 type: string
               group_name:
                 type: string
+    JobQueue:
+      description: Structure of jobs queue
+      type: object
+      properties:
+        jobQueueId:
+          description: Job queue id
+          type: integer
+        jobQueueType:
+          description: Job queue type
+          type: string
+        startTime:
+          description: Job queue start time
+          type: string
+        endTime:
+          description: Job queue end time
+          type: string
+        status:
+          description: Job queue completion status
+          type: string
+        itemsProcessed:
+          description: Number of items processed
+          type: integer
+        dependencies:
+          description: List of dependencies
+          type: array
+          items:
+            type: string
+        itemsPerSec:
+          description: Number of items processed per second
+          type: number
+          format: float
+        canDoActions:
+          type: boolean
+        isInProgress:
+          description: Checks if the job queue is still in progress
+          type: boolean
+        isReady:
+          description: Is the job queue ready
+          type: boolean
+        download:
+          description: Report download text
+          type: string
+    ShowJob:
+      description: History of all the jobs and the job queue info
+      type: object
+      properties:
+        jobId:
+          type: string
+        jobName:
+          type: string
+        jobQueue:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobQueue'
+        upload:
+          type: object
+          properties:
+            uploadName:
+              type: string
+            uploadId:
+              type: string
+            uploadDesc:
+              type: string
+            uploadItem:
+              type: string
+            uploadEta:
+              type: string
     UrlUpload:
       description: To create an upload from a URL
       type: object

@@ -209,7 +209,7 @@ class AjaxShowJobs extends \FO_Plugin
    * @param array $jobData
    * @return Returns an upload job status in array
    **/
-  protected function getShowJobsForEachJob($jobData)
+  public function getShowJobsForEachJob($jobData)
   {
     if (count($jobData) == 0) {
       return array('showJobsData' => "There are no jobs to display");
@@ -396,7 +396,7 @@ class AjaxShowJobs extends \FO_Plugin
    * @brief get data of all jobs using uploadpk
    * @return a json jobqueue data.
    */
-  protected function getJobs($uploadPk)
+  public function getJobs($uploadPk)
   {
     $page = GetParm('page', PARM_INTEGER);
     $allusers = GetParm("allusers", PARM_INTEGER);
