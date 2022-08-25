@@ -2,13 +2,24 @@
 
 # SPDX-License-Identifier: GPL-2.0-only
 
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
+DIRS = Unit Functional
+
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+
+all:
+	$(call DIR_LOOP, )
+
 test:
-	@echo "src/maintagent/agent_tests: NO TESTS HAVE BEEN WRITTEN"
+	$(call DIR_LOOP,test)
+
+coverage:
+	$(call DIR_LOOP,coverage)
+
 clean:
-	@echo "src/maintagent/agent_tests: NO TESTS HAVE BEEN WRITTEN. Nothing to Clean."
-install:
-	@echo "src/maintagent/agent_tests: NO TESTS HAVE BEEN WRITTEN. Nothing to install."
-uninstall:
-	@echo "src/maintagent/agent_tests: NO TESTS HAVE BEEN WRITTEN. Nothing to uninstall."
+	$(call DIR_LOOP,clean)
 
 .PHONY: all test clean install uninstall coverage
