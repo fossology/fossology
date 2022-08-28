@@ -542,20 +542,24 @@ class SpdxTwoAgent extends Agent
    */
   protected function addCopyrightResults(&$filesWithLicenses, $uploadId)
   {
-    $agentName = 'copyright';
+    $agentName = array('copyright', 'reso');
     /** @var CopyrightDao $copyrightDao */
     $copyrightDao = $this->container->get('dao.copyright');
     /** @var ScanJobProxy $scanJobProxy */
     $scanJobProxy = new ScanJobProxy($this->container->get('dao.agent'),
       $uploadId);
 
-    $scanJobProxy->createAgentStatus(array($agentName));
+    $scanJobProxy->createAgentStatus($agentName);
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
-    if (!array_key_exists($agentName, $selectedScanners)) {
+    if (!array_key_exists($agentName[0], $selectedScanners)) {
       return;
     }
-    $latestAgentId = $selectedScanners[$agentName];
-    $extrawhere = ' agent_fk='.$latestAgentId;
+    $latestAgentId[] = $selectedScanners[$agentName[0]];
+    if (array_key_exists($agentName[1], $selectedScanners)) {
+      $latestAgentId[] = $selectedScanners[$agentName[1]];
+    }
+    $ids = implode(',', $latestAgentId);
+    $extrawhere = ' agent_fk IN ('.$ids.')';
 
     $uploadtreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
     $allScannerEntries = $copyrightDao->getScannerEntries('copyright', $uploadtreeTable, $uploadId, $type='statement', $extrawhere);

@@ -38,7 +38,11 @@ class ResoAgentPlugin extends AgentPlugin
    */
   public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
   {
-    $dependencies[] = "ojo";
+    $copyrightAgentScheduled = GetParm("Check_agent_copyright", PARM_INTEGER) == 1;
+    $dependencies[] = "agent_ojo";
+    if ($copyrightAgentScheduled) {
+      $dependencies[] = "agent_copyright";
+    }
     if ($this->AgentHasResults($uploadId) == 1) {
       return 0;
     }
@@ -48,7 +52,7 @@ class ResoAgentPlugin extends AgentPlugin
       return $jobQueueId;
     }
 
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_ojo"),$uploadId);
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId);
   }
 
   /**

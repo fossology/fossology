@@ -35,12 +35,12 @@ class CopyrightDao
   /**
    * @param int $uploadTreeId
    * @param string $tableName
-   * @param int $agentId
+   * @param array $agentId
    * @param array $typeToHighlightTypeMap
    * @throws \Exception
    * @return Highlight[]
    */
-  public function getHighlights($uploadTreeId, $tableName="copyright", $agentId=0,
+  public function getHighlights($uploadTreeId, $tableName="copyright", $agentId=array(0),
           $typeToHighlightTypeMap=array(
                                           'statement' => Highlight::COPYRIGHT,
                                           'email' => Highlight::EMAIL,
@@ -61,10 +61,11 @@ class CopyrightDao
     $statementName = __METHOD__.$tableName;
     $params = array($pFileId);
     $addAgentValue = "";
-    if (!empty($agentId)) {
+    if (!empty($agentId) && $agentId[0] != 0) {
+      $agentIds = implode(",", $agentId);
       $statementName .= '.agentId';
-      $addAgentValue = ' AND agent_fk=$2';
-      $params[] = $agentId;
+      $addAgentValue = ' AND agent_fk= ANY($2::int[])';
+      $params[] = "{" . $agentIds . "}";
     }
     $columnsToSelect = "type, content, copy_startbyte, copy_endbyte";
     $getHighlightForTableName = "SELECT $columnsToSelect FROM $tableName WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1 $addAgentValue";
@@ -463,15 +464,23 @@ ORDER BY copyright_pk, UT.uploadtree_pk, content DESC";
     $agentName = $this->getAgentName($cpTable);
     $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),
       $uploadId);
-    $scanJobProxy->createAgentStatus([$agentName]);
+    if ($agentName == "copyright") {
+      $scanJobProxy->createAgentStatus(array($agentName, 'reso'));
+    } else {
+      $scanJobProxy->createAgentStatus(array($agentName));
+    }
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     if (!array_key_exists($agentName, $selectedScanners)) {
       return array();
     }
-    $latestAgentId = $selectedScanners[$agentName];
+    $latestXpAgentId[] = $selectedScanners[$agentName];
+    if (array_key_exists('reso', $selectedScanners)) {
+      $latestXpAgentId[] = $selectedScanners['reso'];
+    }
     $agentFilter = '';
     if (!empty($latestAgentId)) {
-      $agentFilter = ' AND cp.agent_fk='.$latestAgentId;
+      $latestAgentIds = implode(",", $latestAgentId);
+      $agentFilter = ' AND cp.agent_fk IN ('. $latestAgentIds .')';
     }
 
     $sql = "SELECT DISTINCT ON ($cpTablePk, ut.uploadtree_pk) $cpTablePk, ut.uploadtree_pk, ut.upload_fk, ce." . $cpTableEvent . "_pk
@@ -529,6 +538,7 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
    * - copyright => copyright
    * - ecc       => ecc
    * - keyword   => keyword
+   * - scancode_copyright, scancode_author => scancode
    * - others    => copyright
    * @param string $table Table name
    * @return string Agent name

@@ -75,7 +75,7 @@ class copyright_list extends FO_Plugin
   /**
    * @brief Get statement rows for a specified set
    * @param int $Uploadtree_pk Uploadtree id
-   * @param int $Agent_pk Agent id
+   * @param string $Agent_pk Agent id
    * @param int $upload_pk Upload id
    * @param string $hash Content hash
    * @param string $type Content type
@@ -126,11 +126,11 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
                 AND ut.lft BETWEEN $2 AND $3
               LEFT JOIN $eventTable AS ce ON ce.$eventFk = cp.$tablePk
                 AND ce.upload_fk = ut.upload_fk AND ce.uploadtree_fk = ut.uploadtree_pk
-              WHERE agent_fk=$4 AND (cp.hash=$5 OR ce.hash=$5) AND type=$6
+              WHERE agent_fk = ANY($4::int[]) AND (cp.hash=$5 OR ce.hash=$5) AND type=$6
                 $active_filter
               ORDER BY uploadtree_pk";
       $params = [
-        $upload_pk, $lft, $rgt, $Agent_pk, $hash, $type
+        $upload_pk, $lft, $rgt, "{". $Agent_pk . "}", $hash, $type
       ];
     }
     $statement = __METHOD__.$tableName;
@@ -268,7 +268,7 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
     $Max = 50;
 
     /*  Input parameters */
-    $agent_pk = GetParm("agent",PARM_INTEGER);
+    $agent_pk = GetParm("agent",PARM_STRING);
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
     $hash = GetParm("hash",PARM_RAW);
     $type = GetParm("type",PARM_RAW);

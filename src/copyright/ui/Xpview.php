@@ -149,11 +149,18 @@ class Xpview extends DefaultPlugin
     }
 
     $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
-    $scanJobProxy->createAgentStatus(array($this->agentName));
+    if ($this->agentName == "copyright") {
+      $scanJobProxy->createAgentStatus(array($this->agentName, 'reso'));
+    } else {
+      $scanJobProxy->createAgentStatus(array($this->agentName));
+    }
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     $highlights = array();
+    if (array_key_exists('reso', $selectedScanners)) {
+      $latestXpAgentId[] = $selectedScanners['reso'];
+    }
     if (array_key_exists($this->agentName, $selectedScanners)) {
-      $latestXpAgentId = $selectedScanners[$this->agentName];
+      $latestXpAgentId[] = $selectedScanners[$this->agentName];
       $highlights = $this->copyrightDao->getHighlights($uploadTreeId, $this->tableName, $latestXpAgentId, $this->typeToHighlightTypeMap);
     }
 
@@ -185,7 +192,7 @@ class Xpview extends DefaultPlugin
     $vars['clearingTypes'] = $copyrightDecisionMap;
     $vars['xptext'] = $this->xptext;
 
-    $agentId = intval($request->get("agent"));
+    $agentId = strval($request->get("agent"));
     $vars = array_merge($vars,$this->additionalVars($uploadId, $uploadTreeId, $agentId));
     return $this->render('ui-cp-view.html.twig',$this->mergeWithDefault($vars));
   }
@@ -194,7 +201,7 @@ class Xpview extends DefaultPlugin
    * @brief Get additional variables for a give item
    * @param int $uploadId
    * @param int $uploadTreeId
-   * @param int $agentId
+   * @param string $agentId
    * @return array
    * @todo Not implemented
    */

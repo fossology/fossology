@@ -286,11 +286,18 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $agentDao = M::mock('Fossology\Lib\Dao\AgentDao');
     $agentDao->shouldReceive('arsTableExists')->withArgs(['copyright'])
       ->andReturn(true);
+    $agentDao->shouldReceive('arsTableExists')->withArgs(['reso'])
+      ->andReturn(true);
     $agentDao->shouldReceive('getSuccessfulAgentEntries')
       ->withArgs(['copyright', 1])->andReturn([['agent_id' => '8',
       'agent_rev' => 'trunk.271e3e', 'agent_name' => 'copyright']]);
+    $agentDao->shouldReceive('getSuccessfulAgentEntries')
+      ->withArgs(['reso', 1])->andReturn([['agent_id' => '8',
+      'agent_rev' => 'trunk.271e3e', 'agent_name' => 'reso']]);
     $agentDao->shouldReceive('getCurrentAgentRef')->withArgs(['copyright'])
       ->andReturn(new AgentRef(8, 'copyright', 'trunk.271e3e'));
+    $agentDao->shouldReceive('getCurrentAgentRef')->withArgs(['reso'])
+      ->andReturn(new AgentRef(8, 'reso', 'trunk.271e3e'));
 
     $container->shouldReceive('get')->withArgs(['dao.agent'])
       ->andReturn($agentDao);
@@ -317,11 +324,18 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $agentDao = M::mock('Fossology\Lib\Dao\AgentDao');
     $agentDao->shouldReceive('arsTableExists')->withArgs(['copyright'])
       ->andReturn(true);
+    $agentDao->shouldReceive('arsTableExists')->withArgs(['reso'])
+      ->andReturn(true);
     $agentDao->shouldReceive('getSuccessfulAgentEntries')
       ->withArgs(['copyright', 1])->andReturn([['agent_id' => '8',
       'agent_rev' => 'trunk.271e3e', 'agent_name' => 'copyright']]);
+    $agentDao->shouldReceive('getSuccessfulAgentEntries')
+      ->withArgs(['reso', 1])->andReturn([['agent_id' => '8',
+      'agent_rev' => 'trunk.271e3e', 'agent_name' => 'reso']]);
     $agentDao->shouldReceive('getCurrentAgentRef')->withArgs(['copyright'])
       ->andReturn(new AgentRef(8, 'copyright', 'trunk.271e3e'));
+    $agentDao->shouldReceive('getCurrentAgentRef')->withArgs(['reso'])
+      ->andReturn(new AgentRef(8, 'reso', 'trunk.271e3e'));
 
     $container->shouldReceive('get')->withArgs(['dao.agent'])
       ->andReturn($agentDao);

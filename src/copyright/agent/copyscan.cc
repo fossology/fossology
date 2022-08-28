@@ -31,6 +31,8 @@ hCopyrightScanner::hCopyrightScanner()
 
   regSimpleCopyright = rx::regex(rcp.getRegexValue("copyright","REG_SIMPLE_COPYRIGHT"),
                      rx::regex_constants::icase);
+  regSpdxCopyright = rx::regex(rcp.getRegexValue("copyright","REG_SPDX_COPYRIGHT"),
+                     rx::regex_constants::icase);
 }
 
 /**
@@ -74,6 +76,10 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
         string::const_iterator beginOfLine = j;
         ++beginOfLine;
         string::const_iterator endOfLine = find(beginOfLine, end, '\n');
+        if (rx::regex_search(beginOfLine, endOfLine, regSpdxCopyright)){
+          // Found end
+          break;
+        }
         if (rx::regex_search(beginOfLine, endOfLine, regSimpleCopyright)
           || !rx::regex_match(beginOfLine, endOfLine, regNonBlank))
         {
