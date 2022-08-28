@@ -48,6 +48,20 @@ string cleanGeneral(string::const_iterator sBegin, string::const_iterator sEnd)
 }
 
 /**
+ * \brief Truncate SPDX-CopyrightText from copyright statement
+ * \param sBegin String begin
+ * \param sEnd   String end
+ * \return string Clean spdx statements
+ */
+string cleanSpdxStatement(string::const_iterator sBegin, string::const_iterator sEnd)
+{
+  stringstream ss;
+  rx::regex_replace(ostream_iterator<char>(ss), sBegin, sEnd, rx::regex("spdx-filecopyrighttext:", rx::regex_constants::icase), " ");
+  string s = ss.str();
+  return cleanGeneral(s.begin(), s.end());
+}
+
+/**
  * \brief Clean copyright statements from special characters
  * (comment characters in programming languages, multiple spaces etc.)
  * \param sBegin String begin
@@ -59,7 +73,7 @@ string cleanStatement(string::const_iterator sBegin, string::const_iterator sEnd
   stringstream ss;
   rx::regex_replace(ostream_iterator<char>(ss), sBegin, sEnd, rx::regex("\n[[:space:][:punct:]]*"), " ");
   string s = ss.str();
-  return cleanGeneral(s.begin(), s.end());
+  return cleanSpdxStatement(s.begin(), s.end());
 }
 
 /**

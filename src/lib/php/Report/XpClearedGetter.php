@@ -39,18 +39,25 @@ class XpClearedGetter extends ClearedGetterCommon
   {
     $agentName = $this->tableName;
     $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'), $uploadId);
-    $scanJobProxy->createAgentStatus(array($agentName));
+    if ($agentName == "copyright") {
+      $scanJobProxy->createAgentStatus(array($agentName, 'reso'));
+    } else {
+      $scanJobProxy->createAgentStatus(array($agentName));
+    }
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     if (!array_key_exists($agentName, $selectedScanners)) {
       return array();
     }
-    $latestXpAgentId = $selectedScanners[$agentName];
+    $latestXpAgentId[] = $selectedScanners[$agentName];
+    if (array_key_exists('reso', $selectedScanners)) {
+      $latestXpAgentId[] = $selectedScanners['reso'];
+    }
+    $ids = implode(',', $latestXpAgentId);
     if (!empty($this->extrawhere)) {
       $this->extrawhere .= ' AND';
     }
-    $this->extrawhere .= ' agent_fk='.$latestXpAgentId;
+    $this->extrawhere .= ' agent_fk IN ('.$ids.')';
 
     return $this->copyrightDao->getAllEntriesReport($this->tableName, $uploadId, $uploadTreeTableName, $this->type, $this->getOnlyCleared, DecisionTypes::IDENTIFIED, $this->extrawhere, $groupId);
   }
 }
-

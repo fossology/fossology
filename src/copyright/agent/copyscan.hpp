@@ -29,8 +29,10 @@ private:
    * Regex to find non blank statements
    * \var rx::regex regSimpleCopyright
    * Simple regex for copyright
+   * \var rx::regex regSpdxCopyright
+   * Regex for SPDX-FileCopyrightText
    */
-  rx::regex regCopyright, regException, regNonBlank, regSimpleCopyright;
+  rx::regex regCopyright, regException, regNonBlank, regSimpleCopyright, regSpdxCopyright;
 } ;
 
 #endif

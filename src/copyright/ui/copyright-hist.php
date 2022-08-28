@@ -30,7 +30,7 @@ class CopyrightHistogram extends HistogramBase
    * @param int    $upload_pk    Upload id for fetch request
    * @param int    $uploadtreeId Upload tree id of the item
    * @param string $filter       Filter to apply for query
-   * @param int    $agentId      Agent id which populate the result
+   * @param string $agentId      Agent id which populate the result
    * @return array Copyright contents, upload tree items in result
    */
   protected function getTableContent($upload_pk, $uploadtreeId, $filter, $agentId)

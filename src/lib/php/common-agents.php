@@ -340,7 +340,7 @@ function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
     if (empty($agent_pk)) {
       $select .= " SELECTED ";
       $agent_pk = $row["agent_pk"];
-    } else if ($agent_pk == $row['agent_pk']) {
+    } else if (in_array($row['agent_pk'], $agent_pk)) {
       $select .= " SELECTED ";
     }
 

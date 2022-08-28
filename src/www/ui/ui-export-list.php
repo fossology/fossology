@@ -372,16 +372,20 @@ class UIExportList extends FO_Plugin
   public function getCopyrights($uploadId, $uploadtree_pk, $uploadTreeTableName,
     $NomostListNum, $exclude, $copyrightType = "all")
   {
-    $agentName = "copyright";
+    $agentName = array('copyright', 'reso');
     $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),
       $uploadId);
-    $scanJobProxy->createAgentStatus([$agentName]);
+    $scanJobProxy->createAgentStatus($agentName);
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
-    if (!array_key_exists($agentName, $selectedScanners)) {
+    if (!array_key_exists($agentName[0], $selectedScanners)) {
       return array();
     }
-    $latestAgentId = $selectedScanners[$agentName];
-    $agentFilter = ' AND C.agent_fk='.$latestAgentId;
+    $latestAgentIds[] = $selectedScanners[$agentName[0]];
+    if (array_key_exists($agentName[1], $selectedScanners)) {
+      $latestAgentIds[] = $selectedScanners[$agentName[1]];
+    }
+    $ids = implode(',', $latestAgentIds);
+    $agentFilter = ' AND C.agent_fk IN ('.$ids.')';
 
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadtree_pk,
       $uploadTreeTableName);
@@ -392,7 +396,7 @@ class UIExportList extends FO_Plugin
     }
     $lines = [];
 
-    $copyrights =  $this->copyrightDao->getScannerEntries($agentName,
+    $copyrights =  $this->copyrightDao->getScannerEntries($agentName[0],
       $uploadTreeTableName, $uploadId, null, $extrawhere . $agentFilter);
     $this->updateCopyrightList($lines, $copyrights, $NomostListNum,
       $uploadTreeTableName, "content");
