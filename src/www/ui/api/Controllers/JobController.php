@@ -167,6 +167,72 @@ class JobController extends RestController
     $error = new Info(400, "Folder id and upload id should be integers!", InfoType::ERROR);
     return $response->withJson($error->getArray(), $error->getCode());
   }
+
+  /**
+   * Delete a job using it's Job ID and Queue ID. Job ID is job_pk in job table
+   * and Queue ID is jobqueue_pk in jobqueue table
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function deleteJob($request, $response, $args)
+  {
+    $userId = $this->restHelper->getUserId();
+    $userName = $this->restHelper->getUserDao()->getUserName($userId);
+
+    /* Check if the job exists */
+    $jobId  = intval($args['id']);
+    if (! $this->dbHelper->doesIdExist("job", "job_pk", $jobId)) {
+      $returnVal = new Info(404, "Job id " . $jobId . " doesn't exist",
+        InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    /* Check if user has permission to delete this job*/
+    $canDeleteJob = $this->restHelper->getJobDao()->hasActionPermissionsOnJob($jobId, $userId, $this->restHelper->getGroupId());
+    if (! $canDeleteJob) {
+      $returnVal = new Info(403, "You don't have permission to delete this job.",
+        InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $queueId = $args['queue'];
+
+    /* Get Jobs that depend on the job to be deleted */
+    $JobQueue = $this->restHelper->getShowJobDao()->getJobInfo([$jobId])[$jobId]["jobqueue"];
+
+    $dependentJobs = [];
+
+    if (array_key_exists($queueId, $JobQueue)) {
+      $dependentJobs[] = $queueId;
+    } else {
+      $returnVal = new Info(404, "Job queue " . $queueId . " doesn't exist in Job " . $jobId,
+        InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    foreach ($JobQueue as $job) {
+      if (in_array($queueId, $job["depends"])) {
+        $dependentJobs[] = $job["jq_pk"];
+      }
+    }
+
+    /* Delete All jobs in dependentJobs */
+    foreach ($dependentJobs as $job) {
+      $Msg = "\"" . _("Killed by") . " " . $userName . "\"";
+      $command = "kill $job $Msg";
+      $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
+      if ($rv == false) {
+        $returnVal = new Info(500, "Failed to kill job $jobId", InfoType::ERROR);
+        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      }
+    }
+    $returnVal = new Info(200, "Job deleted successfully", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
   /**
    * Get all jobs created by the current user.
    *
