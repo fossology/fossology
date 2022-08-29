@@ -2,6 +2,7 @@
 /*
  SPDX-FileCopyrightText: © 2018 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+ SPDX-FileCopyrightText: © 2022 Samuel Dushimimana <dushsam100@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -13,6 +14,7 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\UI\Api\Helper\ResponseHelper;
+use Fossology\UI\Api\Helper\UploadHelper;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -158,42 +160,8 @@ class JobController extends RestController
         $error = new Info(403, "No agents selected!", InfoType::ERROR);
         return $response->withJson($error->getArray(), $error->getCode());
       }
-      $parametersSent = false;
-      $analysis = new Analysis();
-      if (array_key_exists("analysis", $scanOptionsJSON) && ! empty($scanOptionsJSON["analysis"])) {
-        $analysis->setUsingArray($scanOptionsJSON["analysis"]);
-        $parametersSent = true;
-      }
-      $decider = new Decider();
-      if (array_key_exists("decider", $scanOptionsJSON) && ! empty($scanOptionsJSON["decider"])) {
-        $decider->setUsingArray($scanOptionsJSON["decider"]);
-        $parametersSent = true;
-      }
-      $scancode = new Scancode();
-      if (array_key_exists("scancode", $scanOptionsJSON) && ! empty($scanOptionsJSON["scancode"])) {
-        $scancode->setUsingArray($scanOptionsJSON["scancode"]);
-        $parametersSent = true;
-      }
-      $reuser = new Reuser(0, 'groupName', false, false);
-      try {
-        if (array_key_exists("reuse", $scanOptionsJSON) && ! empty($scanOptionsJSON["reuse"])) {
-          $reuser->setUsingArray($scanOptionsJSON["reuse"]);
-          $parametersSent = true;
-        }
-      } catch (\UnexpectedValueException $e) {
-        $error = new Info($e->getCode(), $e->getMessage(), InfoType::ERROR);
-        return $response->withJson($error->getArray(), $error->getCode());
-      }
-
-      if (! $parametersSent) {
-        $error = new Info(403, "No parameters selected for agents!",
-          InfoType::ERROR);
-        return $response->withJson($error->getArray(), $error->getCode());
-      }
-
-      $scanOptions = new ScanOptions($analysis, $reuser, $decider, $scancode);
-      $info = $scanOptions->scheduleAgents($folder, $upload);
-      return $response->withJson($info->getArray(), $info->getCode());
+      $uploadHelper = new UploadHelper();
+      $uploadHelper->handleScheduleAnalysis($folder, $upload, $scanOptionsJSON);
     } else {
       $error = new Info(400, "Folder id and upload id should be integers!", InfoType::ERROR);
       return $response->withJson($error->getArray(), $error->getCode());

@@ -443,13 +443,19 @@ paths:
       description: >
         Endpoint to create a new upload in FOSSology
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/VcsUpload'
-                - $ref: '#/components/schemas/UrlUpload'
-                - $ref: '#/components/schemas/ServerUpload'
+              type: object
+              properties:
+                data:
+                    oneOf:
+                      - $ref: '#/components/schemas/VcsUpload'
+                      - $ref: '#/components/schemas/UrlUpload'
+                      - $ref: '#/components/schemas/ServerUpload'
+                scanOptions:
+                  $ref: '#/components/schemas/ScanOptions'
           multipart/form-data:
             schema:
               type: object

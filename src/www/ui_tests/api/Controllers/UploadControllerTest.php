@@ -2,6 +2,7 @@
 /*
  SPDX-FileCopyrightText: © 2020 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+ SPDX-FileCopyrightText: © 2022 Samuel Dushimimana <dushsam100@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -555,27 +556,41 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   public function testPostUpload()
   {
     $folderId = 2;
+    $uploadId = 20;
     $uploadDescription = "Test Upload";
+    $reqBody = [
+      "data" => "data",
+      "scanOptions" => "scanOptions"
+    ];
 
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('folderId', $folderId);
     $requestHeaders->setHeader('uploadDescription', $uploadDescription);
     $requestHeaders->setHeader('ignoreScm', 'true');
-    $body = $this->streamFactory->createStream();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+
+    $body = $this->streamFactory->createStream(json_encode(
+      $reqBody
+    ));
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
 
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('createNewUpload')
-      ->withArgs([null, $folderId, $uploadDescription, 'protected', 'true',
+      ->withArgs([$reqBody["data"], $folderId, $uploadDescription, 'protected', 'true',
         'vcs', false])
-      ->andReturn([true, '', '', 20]);
+      ->andReturn([true, '', '', $uploadId]);
+
+    $info = new Info(201, intval(20), InfoType::INFO);
+
+    $uploadHelper->shouldReceive('handleScheduleAnalysis')->withArgs([$uploadId,$folderId,$reqBody["scanOptions"],false])
+    ->andReturn($info);
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
       ->withArgs([$folderId])->andReturn(true);
 
-    $info = new Info(201, intval(20), InfoType::INFO);
+
     $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
       $info->getCode());
     $actualResponse = $this->uploadController->postUpload($request,
@@ -600,9 +615,13 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('folderId', $folderId);
+    $requestHeaders->setHeader('Content-type', 'application/json');
     $requestHeaders->setHeader('uploadDescription', $uploadDescription);
     $requestHeaders->setHeader('ignoreScm', 'true');
-    $body = $this->streamFactory->createStream();
+    $body = $this->streamFactory->createStream(json_encode([
+      'data' =>"data",
+      'scanOptions' =>'scanOptions'
+    ]));
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
 
@@ -638,9 +657,13 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('folderId', $folderId);
+    $requestHeaders->setHeader('Content-type', 'application/json');
     $requestHeaders->setHeader('uploadDescription', $uploadDescription);
     $requestHeaders->setHeader('ignoreScm', 'true');
-    $body = $this->streamFactory->createStream();
+    $body = $this->streamFactory->createStream(json_encode([
+      'data' =>"vcsData",
+      'scanOptions' =>'scanOptions'
+    ]));
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
 
@@ -674,17 +697,23 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $errorMessage = "Failed to insert upload record";
     $errorDesc = "";
 
+
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('folderId', $folderId);
+    $requestHeaders->setHeader('Content-type', 'application/json');
     $requestHeaders->setHeader('uploadDescription', $uploadDescription);
     $requestHeaders->setHeader('ignoreScm', 'true');
-    $body = $this->streamFactory->createStream();
+    $body = $this->streamFactory->createStream(json_encode([
+      'data' =>"vcsData",
+      'scanOptions' =>'scanOptions'
+    ]));
+
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
 
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('createNewUpload')
-      ->withArgs([null, $folderId, $uploadDescription, 'protected', 'true',
+      ->withArgs(['vcsData', $folderId, $uploadDescription, 'protected', 'true',
         'vcs', false])
       ->andReturn([false, $errorMessage, $errorDesc, [-1]]);
 
