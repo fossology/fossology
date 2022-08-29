@@ -139,7 +139,7 @@ class GroupController extends RestController
     $dbManager = $this->dbHelper->getDbManager();
 
     $group_pk = intval($args['id']);
-    $user_pk = intval($args['uid']);
+    $user_pk = intval($args['userId']);
 
     if (!$this->dbHelper->doesIdExist("groups", "group_pk", $group_pk)) {
       $returnVal = new Info(404, "Group id not found!", InfoType::ERROR);
@@ -243,5 +243,57 @@ class GroupController extends RestController
       return $response->withJson($memberList, 200);
     }
     return $response->withJson($res->getArray(), $res->getCode());
+  }
+
+
+  /**
+   * Add a user to a group
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function addMember($request, $response, $args)
+  {
+    $returnVal = null;
+    $dbManager = $this->dbHelper->getDbManager();
+
+    $body = $this->getParsedBody($request);
+
+    $group_pk = intval($args['id']);
+    $newuser = intval($args['userId']);
+    $newperm = intval($body['perm']);
+
+    if (!isset($newperm)) {
+      $returnVal = new Info(400, "ERROR - no default permission provided", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist("groups", "group_pk", $group_pk)) {
+      $returnVal = new Info(404, "Group id not found!", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist("users", "user_pk", $newuser)) {
+      $returnVal = new Info(404, "User id not found ! ".$newuser, InfoType::ERROR);
+    } else if ($newperm < 0 || $newperm > 2) {
+      $returnVal = new Info(400, "ERROR - Permission should be in range [0-2]", InfoType::ERROR);
+    } else {
+      try {
+        $stmt = __METHOD__ . ".getByGroupAndUser";
+        $sql = "SELECT group_user_member_pk FROM group_user_member WHERE group_fk=$1 AND user_fk=$2;";
+        $fetchResult = $dbManager->getSingleRow($sql, [$group_pk, $newuser], $stmt);
+
+        // Do not produce duplicate
+        if (empty($fetchResult)) {
+          $dbManager->prepare($stmt = __METHOD__ . ".insertGUP",
+            "INSERT INTO group_user_member (group_fk, user_fk, group_perm) VALUES ($1,$2,$3)");
+          $dbManager->freeResult(
+            $dbManager->execute($stmt, array($group_pk, $newuser, $newperm)));
+
+          $returnVal = new Info(200, "User will be added to group.", InfoType::INFO);
+        } else {
+          $returnVal = new Info(400, "Already a member!", InfoType::ERROR);
+        }
+      } catch (\Exception $e) {
+        $returnVal = new Info(500, $e->getMessage(), InfoType::ERROR);
+      }
+    }
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 }
