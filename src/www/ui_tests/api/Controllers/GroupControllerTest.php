@@ -27,6 +27,10 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Controllers\GroupController;
+use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\Headers;
+use Slim\Psr7\Request;
+use Slim\Psr7\Uri;
 
 /**
  * @class GroupControllerTest
@@ -81,7 +85,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
     $this->dbManager = M::mock(DbManager::class);
     $this->dbHelper->shouldReceive('getDbManager')->andReturn($this->dbManager);
-
+    $this->streamFactory = new StreamFactory();
   }
 
 
@@ -232,4 +236,77 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($expectedResponse->getStatusCode(),$actualResponse->getStatusCode());
   }
 
+
+ /**
+   * @test
+   * -# Test GroupController::addMember()
+   * -# The user already a member
+   * -# Test if the response body matches
+   * -# Test if the response status is 200
+   *
+   */
+  public function testAddMemberUserNotMember()
+  {
+    $groupId = 1;
+    $newuser = 1;
+    $newPerm = 2;
+    $emptyArr=[];
+
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
+    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn($emptyArr);
+
+    $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
+    $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $newuser,$newPerm)])->andReturn(1);
+    $this->dbManager->shouldReceive('freeResult')->withArgs([1]);
+
+
+    $body = $this->streamFactory->createStream(json_encode([
+      "perm" => $newPerm
+    ]));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $expectedResponse =  new Info(200, "User will be added to group.", InfoType::INFO);
+
+    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['id' => $groupId,'userId' => $newuser]);
+    $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
+    $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
+  }
+
+
+  /**
+   * @test
+   * -# Test GroupController::addMember()
+   * -# The user already a member
+   * -# Test if the response body matches
+   * -# Test if the response status is 400
+   *
+   */
+  public function testAddMemberUserAlreadyMember()
+  {
+    $groupId = 1;
+    $newuser = 1;
+    $newPerm = 2;
+
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
+    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(true);
+
+    $body = $this->streamFactory->createStream(json_encode([
+      "perm" => $newPerm
+    ]));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $expectedResponse =  new Info(400, "Already a member!", InfoType::ERROR);
+
+    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['id' => $groupId,'userId' => $newuser]);
+    $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
+    $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
+  }
 }
