@@ -83,21 +83,24 @@ class ScanOptions
    * current settings.
    * @param integer $folderId Folder with the upload
    * @param integer $uploadId Upload to be scanned
-   * @return Fossology::UI::Api::Models::Info
+   * @return \Fossology\UI\Api\Models\Info
    */
-  public function scheduleAgents($folderId, $uploadId)
+  public function scheduleAgents($folderId, $uploadId , $folderCheck = true)
   {
     $uploadsAccessible = FolderListUploads_perm($folderId, Auth::PERM_WRITE);
-    $found = false;
-    foreach ($uploadsAccessible as $singleUpload) {
-      if ($singleUpload['upload_pk'] == $uploadId) {
-        $found = true;
-        break;
+
+    if ($folderCheck) {
+      $found = false;
+      foreach ($uploadsAccessible as $singleUpload) {
+        if ($singleUpload['upload_pk'] == $uploadId) {
+          $found = true;
+          break;
+        }
       }
-    }
-    if ($found === false) {
-      return new Info(404, "Folder id $folderId does not have upload id ".
-        "$uploadId or you do not have write access to the folder.", InfoType::ERROR);
+      if ($found === false) {
+        return new Info(404, "Folder id $folderId does not have upload id ".
+          "$uploadId or you do not have write access to the folder.", InfoType::ERROR);
+      }
     }
 
     $paramAgentRequest = new Request();

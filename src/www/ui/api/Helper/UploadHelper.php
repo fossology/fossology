@@ -12,6 +12,13 @@
  */
 namespace Fossology\UI\Api\Helper;
 
+use Fossology\UI\Api\Models\Analysis;
+use Fossology\UI\Api\Models\Decider;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\Reuser;
+use Fossology\UI\Api\Models\Scancode;
+use Fossology\UI\Api\Models\ScanOptions;
 use Slim\Psr7\Request;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadFilePage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadVcsPage;
@@ -85,6 +92,56 @@ class UploadHelper
     $this->uploadUrlPage = new HelperToUploadUrlPage();
     $this->uploadSrvPage = new HelperToUploadSrvPage();
   }
+
+  /**
+   * Schedule Analysis after the upload
+   * @param integer $id Upload ID
+   * @param integer $folderId Folder ID
+   * @param object $ScanOptionsJSON scanOptions
+   * @param boolean $folderCheck folderCheck
+   * @return Info Response
+   */
+  public function handleScheduleAnalysis($uploadId, $folderId, $scanOptionsJSON, $folderCheck=true)
+  {
+
+    $parametersSent = false;
+    $analysis = new Analysis();
+
+    if (array_key_exists("analysis", $scanOptionsJSON) && ! empty($scanOptionsJSON["analysis"])) {
+      $analysis->setUsingArray($scanOptionsJSON["analysis"]);
+      $parametersSent = true;
+    }
+
+    $decider = new Decider();
+    if (array_key_exists("decider", $scanOptionsJSON) && ! empty($scanOptionsJSON["decider"])) {
+      $decider->setUsingArray($scanOptionsJSON["decider"]);
+      $parametersSent = true;
+    }
+
+    $scancode = new Scancode();
+    if (array_key_exists("scancode", $scanOptionsJSON) && ! empty($scanOptionsJSON["scancode"])) {
+      $scancode->setUsingArray($scanOptionsJSON["scancode"]);
+      $parametersSent = true;
+    }
+
+    $reuser = new Reuser(0, 'groupName', false, false);
+    try {
+      if (array_key_exists("reuse", $scanOptionsJSON) && ! empty($scanOptionsJSON["reuse"])) {
+        $reuser->setUsingArray($scanOptionsJSON["reuse"]);
+        $parametersSent = true;
+      }
+    } catch (\UnexpectedValueException $e) {
+      return new Info($e->getCode(),$e->getMessage(),InfoType::ERROR);
+    }
+
+    if (! $parametersSent) {
+      return new Info(403,"No parameters selected for agents!",InfoType::ERROR);
+    }
+
+    $scanOptions = new ScanOptions($analysis, $reuser, $decider, $scancode);
+    return $scanOptions->scheduleAgents($folderId, $uploadId,$folderCheck);
+  }
+
 
   /**
    * Get a request from Slim and translate to Symfony request to be

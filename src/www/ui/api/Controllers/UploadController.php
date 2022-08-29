@@ -3,6 +3,7 @@
  SPDX-FileCopyrightText: © 2018, 2020 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>,
  Soham Banerjee <sohambanerjee4abc@hotmail.com>
+ SPDX-FileCopyrightText: © 2022 Samuel Dushimimana <dushsam100@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -13,6 +14,11 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\UI\Api\Models\Analysis;
+use Fossology\UI\Api\Models\Decider;
+use Fossology\UI\Api\Models\Reuser;
+use Fossology\UI\Api\Models\Scancode;
+use Fossology\UI\Api\Models\ScanOptions;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\DelAgent\UI\DeleteMessages;
 use Fossology\Lib\Auth\Auth;
@@ -394,8 +400,16 @@ class UploadController extends RestController
    */
   public function postUpload($request, $response, $args)
   {
+
+    $reqBody = $this->getParsedBody($request);
+    $scanOptions = $request->getHeaderLine('uploadType') === 'file' ? json_decode($reqBody['scanOptions'],true) : $reqBody['scanOptions'];
+
     $uploadHelper = new UploadHelper();
-    if ($request->hasHeader('folderId') &&
+
+    if (empty($reqBody)) {
+      $error = new Info(400, "Request body shouldn't be empty", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    } else if ($request->hasHeader('folderId') &&
       is_numeric($folderId = $request->getHeaderLine('folderId')) && $folderId > 0) {
 
       $allFolderIds = $this->restHelper->getFolderDao()->getAllFolderIds();
@@ -419,8 +433,8 @@ class UploadController extends RestController
       if (empty($uploadType)) {
         $uploadType = "vcs";
       }
-      $reqBody = $this->getParsedBody($request);
-      $uploadResponse = $uploadHelper->createNewUpload($reqBody, $folderId,
+
+      $uploadResponse = $uploadHelper->createNewUpload($reqBody["data"], $folderId,
         $description, $public, $ignoreScm, $uploadType, $applyGlobal);
       $status = $uploadResponse[0];
       $message = $uploadResponse[1];
@@ -430,7 +444,7 @@ class UploadController extends RestController
           InfoType::ERROR);
       } else {
         $uploadId = $uploadResponse[3];
-        $info = new Info(201, intval($uploadId), InfoType::INFO);
+        $info =  $uploadHelper->handleScheduleAnalysis(intval($uploadId),intval($folderId),$scanOptions,false);
       }
       return $response->withJson($info->getArray(), $info->getCode());
     } else {
