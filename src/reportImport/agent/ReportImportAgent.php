@@ -11,7 +11,6 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 require_once 'SpdxTwoImportSource.php';
@@ -34,8 +33,6 @@ class ReportImportAgent extends Agent
   private $uploadDao;
   /** @var UserDao */
   private $userDao;
-  /** @var UploadPermissionDao */
-  private $permissionDao;
   /** @var DbManager */
   protected $dbManager;
   /** @var LicenseDao */
@@ -51,7 +48,6 @@ class ReportImportAgent extends Agent
   {
     parent::__construct(AGENT_REPORTIMPORT_NAME, AGENT_REPORTIMPORT_VERSION, AGENT_REPORTIMPORT_REV);
     $this->uploadDao = $this->container->get('dao.upload');
-    $this->permissionDao = $this->container->get('dao.upload.permission');
     $this->dbManager = $this->container->get('db.manager');
     $this->userDao = $this->container->get('dao.user');
     $this->licenseDao = $this->container->get('dao.license');
@@ -114,9 +110,6 @@ class ReportImportAgent extends Agent
     $this->heartbeat(0);
 
     self::preWorkOnArgsFlp($this->args, self::REPORT_KEY);
-    if (!$this->permissionDao->isEditable($uploadId, $this->groupId)) {
-      return false;
-    }
 
     $reportPre = array_key_exists(self::REPORT_KEY,$this->args) ? $this->args[self::REPORT_KEY] : "";
     global $SysConf;
