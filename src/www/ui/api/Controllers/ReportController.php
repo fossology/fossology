@@ -375,4 +375,77 @@ class ReportController extends RestController
     }
     return $response->withJson($info->getArray(), $info->getCode());
   }
+
+  /**
+   * Import a report
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function importReport($request, $response, $args)
+  {
+    $returnVal = null;
+    $query = $request->getQueryParams();
+    if (!array_key_exists("upload", $query)) {
+      $returnVal = new Info(400, "Bad Request. **upload** is a required query param", InfoType::INFO);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $upload_pk = intval($query['upload']);
+    // checking if the scheduler is running or not
+    $commu_status = fo_communicate_with_scheduler('status', $response_from_scheduler, $error_info);
+    if ($commu_status) {
+      // parsing the request body
+      $reqBody = $this->getParsedBody($request);
+      // checking if the upload exists and if yes, whether it is accessible
+      $res = true;
+      if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $upload_pk)) {
+        $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+        $res = false;
+      } else if (! $this->restHelper->getUploadDao()->isAccessible($upload_pk, $this->restHelper->getGroupId())) {
+        $returnVal = new Info(403, "Upload is not accessible", InfoType::ERROR);
+        $res = false;
+      }
+      if ($res !== true) {
+        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      }
+      $reportImport = $this->restHelper->getPlugin('ui_reportImport');
+      $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
+
+      $files = $request->getUploadedFiles();
+
+      if (empty($files['report'])) {
+        $info = new Info(400, "No file uploaded", InfoType::ERROR);
+        return $response->withJson($info->getArray(), $info->getCode());
+      }
+      // Extracting file from uploaded files
+      /** @var \Psr\Http\Message\UploadedFileInterface $file */
+      $file = $files['report'];
+
+      // moving the uploaded file to the ReportImport Directory
+      global $SysConf;
+      $fileBase = $SysConf['FOSSOLOGY']['path'] . "/ReportImport/";
+      if (!is_dir($fileBase)) {
+        mkdir($fileBase, 0755, true);
+      }
+      $targetFile = time() . '_' . rand() . '_' . $file->getClientFilename();
+      $file->moveTo($fileBase . $targetFile);
+
+      // translating values for symfony request
+      $symfonyRequest->request->set('addConcludedAsDecisions', filter_var($reqBody['addConcludedAsDecisions'], FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false');
+      $symfonyRequest->request->set('addLicenseInfoFromInfoInFile', filter_var($reqBody['addLicenseInfoFromInfoInFile'], FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false');
+      $symfonyRequest->request->set('addLicenseInfoFromConcluded', filter_var($reqBody['addLicenseInfoFromConcluded'], FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false');
+      $symfonyRequest->request->set('addConcludedAsDecisionsOverwrite', filter_var($reqBody['addConcludedAsDecisionsOverwrite'], FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false');
+      $symfonyRequest->request->set('addConcludedAsDecisionsTBD', filter_var($reqBody['addConcludedAsDecisionsTBD'], FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false');
+      $symfonyRequest->request->set('addCopyrights', filter_var($reqBody['addCopyrights'], FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false');
+      $symfonyRequest->request->set('addNewLicensesAs', $reqBody['addNewLicensesAs']);
+
+      $reportImport->runImport($upload_pk, $targetFile, $symfonyRequest);
+      $returnVal = new Info(202, "ReportImport job is scheduled successfully for the given upload.", InfoType::INFO);
+    } else {
+      $returnVal = new Info(503, "Scheduler is not running!", InfoType::ERROR);
+    }
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
 }
