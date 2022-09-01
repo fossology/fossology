@@ -7,7 +7,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.5.0
+  version: 1.5.1
   contact:
     email: fossology@fossology.org
   license:
@@ -2016,6 +2016,7 @@ paths:
         schema:
           enum:
             - decisionimporter
+            - spdxRdf
     post:
       operationId: uploadReport
       tags:
@@ -2029,6 +2030,53 @@ paths:
             schema:
               oneOf:
                 - $ref: '#/components/schemas/DecisionImporter'
+          multipart/form-dataa:
+            schema:
+              type: object
+              properties:
+                addLicenseInfoFromInfoInFile:
+                  type: boolean
+                  description: SPDX tag of type licenseInfoInFile
+                  default: false
+                  required: false
+                addConcludedAsDecisions:
+                  type: boolean
+                  description: Add concluded licenses as decisions
+                  required: false
+                  default: false
+                addLicenseInfoFromConcluded:
+                  type: boolean
+                  description: SPDX tag of type licenseConcluded
+                  default: false
+                  required: false
+                addConcludedAsDecisionsOverwrite:
+                  type: boolean
+                  description: also overwrite existing decissions
+                  default: false
+                  required: false
+                addConcludedAsDecisionsTBD:
+                  type: boolean
+                  description: import as "to be discussed"
+                  default: false
+                  required: false
+                addCopyrights:
+                  type: boolean
+                  description: Add the copyright information as textfindings
+                  default: false
+                  required: false
+                addNewLicensesAs:
+                  type: string
+                  description: Create new licenses as
+                  enum:
+                    - candidate
+                    - license
+                  required: true
+                  default: candidate
+                report:
+                  type: string
+                  format: binary
+                  description: Select report to upload
+                  required: true
       responses:
         '201':
           description: ReportImport job is scheduled successfully for the given upload.
