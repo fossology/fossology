@@ -101,7 +101,7 @@ class ReportImportPlugin extends DefaultPlugin
     return $this->render('ReportImportPlugin.html.twig', $this->mergeWithDefault($vars));
   }
 
-  protected function runImport($uploadId, $report, $request)
+  public function runImport($uploadId, $report, $request)
   {
     $reportImportAgent = plugin_find('agent_reportImport');
 
