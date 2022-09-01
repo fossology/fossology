@@ -135,7 +135,7 @@ class HomePage extends DefaultPlugin
       "urlAuthorize"            => $SysConf['SYSCONFIG']['OidcAuthorizeURL'],
       "urlAccessToken"          => $SysConf['SYSCONFIG']['OidcAccessTokenURL'],
       "urlResourceOwnerDetails" => $SysConf['SYSCONFIG']['OidcResourceURL'],
-      "responseResourceOwnerId" => "email",
+      "responseResourceOwnerId" => $SysConf['SYSCONFIG']['OidcResourceOwnerId'],
       "proxy"                   => $proxy
     ]);
     $accessToken = $provider->getAccessToken('authorization_code',
@@ -163,7 +163,16 @@ class HomePage extends DefaultPlugin
      */
     $authHelper = $this->container->get('helper.authHelper');
     $jwks = $authHelper::loadJwks();
-    $jwtToken = $accessToken->getToken();
+    $jwtToken = null;
+    if ($SysConf['SYSCONFIG']['OidcTokenType'] === "A") {
+      $jwtToken = $accessToken->getToken();
+    } elseif ($SysConf['SYSCONFIG']['OidcTokenType'] === "I") {
+      $jwtToken = $accessToken->getValues()['id_token'];
+    }
+    if (empty($jwtToken)) {
+      throw new \UnexpectedValueException("Unable to get identity from OIDC token. " .
+        "Please check 'Token to use from provider' field in config.");
+    }
     $jwtTokenDecoded = JWT::decode(
       $jwtToken,
       JWK::parseKeySet($jwks)
