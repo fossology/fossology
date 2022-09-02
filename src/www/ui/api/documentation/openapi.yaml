@@ -516,6 +516,37 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /uploads/{id}/download:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Download file using Upload ID
+        schema:
+          type: integer
+    get:
+      operationId: getUploadFileById
+      tags:
+      - Upload
+      summary: Download the file
+      description: >
+        Get a file by upload id
+      responses:
+        '200':
+          description: Required report
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Upload is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+            $ref: '#/components/responses/defaultResponse'
 
   /uploads/{id}/summary:
     parameters:
