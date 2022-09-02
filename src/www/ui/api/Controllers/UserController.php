@@ -43,10 +43,15 @@ class UserController extends RestController
       }
     }
     $users = $this->dbHelper->getUsers($id);
-    if ($id !== null) {
-      $users = $users[0];
+
+    $allUsers = array();
+    foreach ($users as $user) {
+      $allUsers[] = $user->getArray();
     }
-    return $response->withJson($users, 200);
+    if ($id !== null) {
+      $allUsers = $allUsers[0];
+    }
+    return $response->withJson($allUsers, 200);
   }
 
   /**
@@ -141,7 +146,7 @@ class UserController extends RestController
    */
   public function getCurrentUser($request, $response, $args)
   {
-    $user = $this->dbHelper->getUsers($this->restHelper->getUserId())[0];
+    $user = $this->dbHelper->getUsers($this->restHelper->getUserId())[0]->getArray();
     $userDao = $this->restHelper->getUserDao();
     $defaultGroup = $userDao->getUserAndDefaultGroupByUserName($user["name"])["group_name"];
     $user["default_group"] = $defaultGroup;

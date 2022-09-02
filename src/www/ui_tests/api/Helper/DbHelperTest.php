@@ -161,7 +161,12 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
     $expectedUsers = array_values($this->generateUserFromRow($userRows));
     $actualUsers = $this->dbHelper->getUsers();
 
-    $this->assertEquals($expectedUsers, $actualUsers);
+    $allUsers = array();
+    foreach ($actualUsers as $user) {
+      $allUsers[] = $user->getArray();
+    }
+
+    $this->assertEquals($expectedUsers, $allUsers);
   }
 
   /**
@@ -190,8 +195,11 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
     $expectedUsers = array_values($this->generateUserFromRow($userRows,
       $userId));
     $actualUsers = $this->dbHelper->getUsers();
-
-    $this->assertEquals($expectedUsers, $actualUsers);
+    $allUsers = array();
+    foreach ($actualUsers as $user) {
+      $allUsers[] = $user->getArray();
+    }
+    $this->assertEquals($expectedUsers, $allUsers);
   }
 
   /**
@@ -220,7 +228,11 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
     $expectedUsers = $this->generateUserFromRow($userRows, $userId);
     $actualUsers = $this->dbHelper->getUsers($userId);
 
-    $this->assertEquals([$expectedUsers[$userId]], $actualUsers);
+    $allUsers = array();
+    foreach ($actualUsers as $user) {
+      $allUsers[] = $user->getArray();
+    }
+    $this->assertEquals([$expectedUsers[$userId]], $allUsers);
   }
 
   /**
@@ -250,6 +262,10 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
     $expectedUsers = $this->generateUserFromRow($userRows, $userId);
     $actualUsers = $this->dbHelper->getUsers($fetchId);
 
-    $this->assertEquals([$expectedUsers[$fetchId]], $actualUsers);
+    $allUsers = array();
+    foreach ($actualUsers as $user) {
+      $allUsers[] = $user->getArray();
+    }
+    $this->assertEquals([$expectedUsers[$fetchId]], $allUsers);
   }
 }

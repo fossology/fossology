@@ -1,8 +1,8 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2022 Samuel Dushimimana <dushsam100@gmail.com>
-
- SPDX-License-Identifier: GPL-2.0-only
+ * SPDX-FileCopyrightText: © 2022 Samuel Dushimimana <dushsam100@gmail.com>
+ *
+ * SPDX-License-Identifier: GPL-2.0-only
 */
 /**
  * @file
@@ -19,6 +19,8 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\User;
+use Fossology\UI\Api\Models\UserGroupMember;
 use Mockery as M;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
@@ -106,6 +108,50 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     return json_decode($response->getBody()->getContents(), true);
   }
 
+  /**
+   * Generate array of group-members
+   * @param array $userIds User ids to be generated
+   * @return array[]
+   */
+  private function getGroupMembers($userIds)
+  {
+    $groupPermissions = array("NONE" => -1, UserDao::USER => 0,
+      UserDao::ADMIN => 1, UserDao::ADVISOR => 2);
+
+    $memberList = array();
+    foreach ($userIds as $userId) {
+      $key = array_rand($groupPermissions);
+      $userGroupMember =  new UserGroupMember(new User($userId, "user$userId", "User $userId",
+        null, null, null, null, null),$groupPermissions[$key]) ;
+      $memberList[] = $userGroupMember->getArray();
+    }
+    return $memberList;
+  }
+
+  /**
+   * Generate array of users-with-group
+   * @param array $userIds User ids to be generated
+   * @return array[]
+   */
+  private function getUsersWithGroup($userIds)
+  {
+    $groupPermissions = array("NONE" => -1, UserDao::USER => 0,
+      UserDao::ADMIN => 1, UserDao::ADVISOR => 2);
+
+    $usersWithGroup = array();
+    foreach ($userIds as $userId) {
+      $perm = array_rand($groupPermissions);
+      $user = [
+        "user_pk"   => $userId,
+        "group_perm"=> $perm,
+        "user_name" => $userId."username",
+        "user_desc" => $userId."desc",
+        "user_status"=> 'active'
+      ];
+      $usersWithGroup[] = $user;
+    }
+    return $usersWithGroup;
+  }
 
 
 
@@ -155,5 +201,35 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
   }
-  
+    /**
+   * @test
+   * -# Test GroupController::getGroupMembers() for all groups
+   * -# Check if the response is list of group members
+   */
+  public function testGetGroupMembers()
+  {
+    $userIds = [2];
+    $groupId = 1;
+    $memberList = $this->getGroupMembers($userIds);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userIds[0]);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->userDao->shouldReceive('getAdminGroupMap')->withArgs([$userIds[0],$_SESSION[Auth::USER_LEVEL]])->andReturn($this->getGroups());
+
+    $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
+    $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId)])->andReturn(1);
+    $this->dbManager->shouldReceive('fetchAll')->withArgs([1])->andReturn($this->getUsersWithGroup($userIds));
+    $this->dbManager->shouldReceive('freeResult')->withArgs([1]);
+
+    $user = $this->getUsersWithGroup($userIds)[0];
+    $users = [];
+    $users[] = new User($user["user_pk"], $user["user_name"], $user["user_desc"],
+      null, null, null, null, null);
+    $this->dbHelper->shouldReceive("getUsers")->withArgs([$user['user_pk']])->andReturn($users);
+
+    $expectedResponse = (new ResponseHelper())->withJson($memberList, 200);
+
+    $actualResponse = $this->groupController->getGroupMembers(null, new ResponseHelper(), ['id' => $groupId]);
+    $this->assertEquals($expectedResponse->getStatusCode(),$actualResponse->getStatusCode());
+  }
+
 }

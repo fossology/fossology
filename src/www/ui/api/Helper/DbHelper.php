@@ -99,7 +99,7 @@ class DbHelper
     if ($uploadId !== null) {
       $recursive = true;
       $user = $this->getUsers($userId);
-      $folderId = $user[0]['rootFolderId'];
+      $folderId = $user[0]->getArray()['rootFolderId'];
       $folders = [$folderId];
     }
 
@@ -234,7 +234,7 @@ FROM $tableName WHERE $idRowName = $1", [$id],
    *
    * @param integer $id User id of the required user, or NULL to fetch all
    *        users.
-   * @return User[][] Users as an associative array
+   * @return User[] Users as an associative array
    */
   public function getUsers($id = null)
   {
@@ -268,7 +268,7 @@ FROM $tableName WHERE $idRowName = $1", [$id],
         $user = new User($row["user_pk"], $row["user_name"], $row["user_desc"],
           null, null, null, null, null, null);
       }
-      $users[] = $user->getArray();
+      $users[] = $user;
     }
 
     return $users;
