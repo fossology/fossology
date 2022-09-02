@@ -219,6 +219,17 @@ class ui_download extends FO_Plugin
   }
 
   /**
+   * Get the file response for a given file path
+   * @param int $jobId
+   * @return BinaryFileResponse
+   * @throws Exception
+   */
+  public function getDownload($path , $name)
+  {
+    return $this->downloadFile($path, $name);
+  }
+
+  /**
    * Get the file response for a given report job id
    * @param int $jobId
    * @return BinaryFileResponse
