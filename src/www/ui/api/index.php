@@ -25,6 +25,7 @@ use Fossology\UI\Api\Controllers\BadRequestController;
 use Fossology\UI\Api\Controllers\FolderController;
 use Fossology\UI\Api\Controllers\FileSearchController;
 use Fossology\UI\Api\Controllers\JobController;
+use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
@@ -185,6 +186,14 @@ $app->group('/search',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('', SearchController::class . ':performSearch');
   });
+
+////////////////////////////MAINTENANCE/////////////////////
+$app->group('/maintenance',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->post('', MaintenanceController::class . ':createMaintenance');
+    $app->any('/{params:.*}', BadRequestController::class);
+  });
+
 
 ////////////////////////////FOLDER/////////////////////
 $app->group('/folders',

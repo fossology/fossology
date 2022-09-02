@@ -2,6 +2,7 @@
 /*
  SPDX-FileCopyrightText: © 2013 Hewlett-Packard Development Company, L.P.
  SPDX-FileCopyrightText: © 2019 Siemens AG
+ SPDX-FileCopyrightText: © 2022 Samuel Dushimimana <dushsam100@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -16,6 +17,28 @@ use Fossology\Lib\Auth\Auth;
  */
 class maintagent extends FO_Plugin {
 
+   const OPTIONS = [
+    "a"=>"Run all non slow maintenance operations.",
+    "A"=>"Run all maintenance operations.",
+    "F"=>"Validate folder contents.",
+    "g"=>"Remove orphaned gold files.",
+    "E"=>"Remove orphaned rows from database.",
+    "L"=>"Remove orphaned log files from file system.",
+    "N"=>"Normalize priority ",
+    // "p"=>_("Verify file permissions (report only)."),
+    //  "P"=>_("Verify and fix file permissions."),
+    "R"=>"Remove uploads with no pfiles.",
+    "t"=>"Remove expired personal access tokens.",
+    "T"=>"Remove orphaned temp tables.",
+    "D"=>"Vacuum Analyze the database.",
+    //       "U"=>_("Process expired uploads (slow)."),
+    "Z"=>"Remove orphaned files from the repository (slow).",
+    "I"=>"Reindexing of database (This activity may take 5-10 mins. Execute only when system is not in use).",
+    "v"=>"verbose (turns on debugging output)",
+    "o"=>"Remove older gold files from repository.",
+    "l"=>"Remove older log files from repository."
+    ];
+
   public function __construct()
   {
     $this->Name = "maintagent";
@@ -29,7 +52,7 @@ class maintagent extends FO_Plugin {
    * \brief Queue the job
    * \returns string Status string
    */
-  function QueueJob()
+  public function handle($request)
   {
     global $SysConf;
 
@@ -37,17 +60,17 @@ class maintagent extends FO_Plugin {
      * They look like _REQUEST["a"] = "a", _REQUEST["b"]="b", ...
      */
     $options = "-";
-    foreach ($_REQUEST as $key => $value) {
+    foreach ($request['options'] as $key => $value) {
       if ($key == $value) {
         $options .= $value;
         if ($key === "t") {
           $retentionPeriod = $SysConf['SYSCONFIG']['PATMaxPostExpiryRetention'];
           $options .= $retentionPeriod;
         } elseif ($key === "l") {
-          $options .= GetParm("logsDate", PARM_TEXT) . " ";
+          $options .= $request['logsDate'];
         }
         if ($key == "o") {
-          $options .= GetParm("goldDate", PARM_TEXT) . " ";
+          $options .= $request['goldDate'];
         }
       }
     }
@@ -79,31 +102,11 @@ class maintagent extends FO_Plugin {
    */
   function DisplayForm()
   {
-    /* Array of maintagent options and description */
-    $Options = array("a"=>_("Run all non slow maintenance operations."),
-                     "A"=>_("Run all maintenance operations."),
-                     "F"=>_("Validate folder contents."),
-                     "g"=>_("Remove orphaned gold files."),
-                     "E"=>_("Remove orphaned rows from database."),
-                     "L"=>_("Remove orphaned log files from file system."),
-                     "N"=>_("Normalize priority "),
-              //       "p"=>_("Verify file permissions (report only)."),
-              //       "P"=>_("Verify and fix file permissions."),
-                     "R"=>_("Remove uploads with no pfiles."),
-                     "t"=>_("Remove expired personal access tokens."),
-                     "T"=>_("Remove orphaned temp tables."),
-                     "D"=>_("Vacuum Analyze the database."),
-              //       "U"=>_("Process expired uploads (slow)."),
-                     "Z"=>_("Remove orphaned files from the repository (slow)."),
-                     "I"=>_("Reindexing of database (This activity may take 5-10 mins. Execute only when system is not in use)."),
-                     "v"=>_("verbose (turns on debugging output)"),
-                     "o"=>_("Remove older gold files from repository."),
-                     "l"=>_("Remove older log files from repository.")
-                    );
+
     $V = "";
 
     $V .= "<form method='post'>\n"; // no url = this url
-    foreach ($Options as $option => $description) {
+    foreach (self::OPTIONS as $option => $description) {
       $V .= "<div class='form-group'><div class='form-check'>";
       $V .= " <input class='form-check-input' type='checkbox' name='$option' value='$option' id='men$option'>
         <label class='form-check-label' for='men$option'>$description</label>";
@@ -142,11 +145,16 @@ class maintagent extends FO_Plugin {
     $queue = GetParm('queue', PARM_STRING);
     if (!empty($queue))
     {
-      $Msg = $this->QueueJob();
-      $V .= "<font style='background-color:gold'>" . $Msg . "</font>";
+      $request = ['options' => $_REQUEST , 'logsDate' => GetParm('logsDate', PARM_TEXT), 'goldDate' => GetParm('goldDate', PARM_TEXT)];
+      $Msg = $this->handle($request);
+      $V .= "<font style='background-color:#111110'>" . $Msg . "</font>";
     }
     $V .= $this->DisplayForm();
     return $V;
+  }
+
+  public function getOptions() {
+    return $this::OPTIONS;
   }
 }
 
