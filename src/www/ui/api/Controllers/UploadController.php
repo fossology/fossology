@@ -688,6 +688,8 @@ class UploadController extends RestController
 
       $query = "SELECT perm, perm_upload_pk FROM perm_upload WHERE upload_fk=$1 and group_fk=$2;";
       $result = $dbManager->getSingleRow($query, [$upload_pk, $newgroup], __METHOD__.".getOldPerm");
+      $perm_upload_pk = 0;
+      $perm = 0;
       if (!empty($result)) {
         $perm_upload_pk = intVal($result['perm_upload_pk']);
         $perm = $newperm;
