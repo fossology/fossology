@@ -1,7 +1,8 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2018, 2020 Siemens AG
- Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+ Author: Gaurav Mishra <mishra.gaurav@siemens.com>,
+ Soham Banerjee <sohambanerjee4abc@hotmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -25,6 +26,7 @@ use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
 use Fossology\UI\Api\Helper\ResponseHelper;
+use Slim\Psr7\Factory\StreamFactory;
 
 /**
  * @class UploadController
@@ -236,6 +238,52 @@ class UploadController extends RestController
     }
     return $response->withHeader("X-Total-Pages", $pages)->withJson($uploads,
       200);
+  }
+
+  /**
+   * Gets file response for each upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function uploadDownload($request, $response, $args)
+  {
+    $ui_download = $this->restHelper->getPlugin('download');
+    $id = null;
+
+    if (isset($args['id'])) {
+      $id = intval($args['id']);
+      $upload = $this->uploadAccessible($this->restHelper->getGroupId(), $id);
+      if ($upload !== true) {
+        return $response->withJson($upload->getArray(), $upload->getCode());
+      }
+    }
+    $dbManager = $this->restHelper->getDbHelper()->getDbManager();
+    $uploadDao = $this->restHelper->getUploadDao();
+    $uploadTreeTableName = $uploadDao->getUploadtreeTableName($id);
+    $itemTreeBounds = $uploadDao->getParentItemBounds($id,$uploadTreeTableName);
+    $sql =  "SELECT pfile_fk , ufile_name FROM uploadtree_a WHERE uploadtree_pk=$1";
+    $params = array($itemTreeBounds->getItemId());
+    $descendants = $dbManager->getSingleRow($sql,$params);
+    $path= RepPath(($descendants['pfile_fk']));
+    $responseFile = $ui_download->getDownload($path, $descendants['ufile_name']);
+    $responseContent = $responseFile->getFile();
+    $newResponse = $response->withHeader('Content-Description',
+        'File Transfer')
+        ->withHeader('Content-Type',
+        $responseContent->getMimeType())
+        ->withHeader('Content-Disposition',
+        $responseFile->headers->get('Content-Disposition'))
+        ->withHeader('Cache-Control', 'must-revalidate')
+        ->withHeader('Pragma', 'private')
+        ->withHeader('Content-Length', filesize($responseContent->getPathname()));
+    $sf = new StreamFactory();
+    $newResponse = $newResponse->withBody(
+      $sf->createStreamFromFile($responseContent->getPathname())
+    );
+    return($newResponse);
   }
 
   /**
