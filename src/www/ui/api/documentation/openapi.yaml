@@ -1970,6 +1970,52 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
+  /license/import-csv:
+    post:
+      operationId: importLicense
+      tags:
+        - License
+      summary: Import a csv license
+      description: >
+        Import a csv license to the database
+      requestBody:
+        description: Information about delimiters, inclosure and csv file.
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                enclosure:
+                  type: string
+                  description: Enclosure for string in CSV
+                  default: '"'
+                  required: false
+                delimiter:
+                  type: string
+                  description: Delimiters for fields in CSV
+                  default: ','
+                  required: false
+                file_input:
+                  type: string
+                  format: binary
+                  description: CSV to be imported
+                  required: true
+      responses:
+          '400':
+            description: Validation Error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Info'
+          '200':
+            description: Successfully imported
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Info'
+          default:
+            $ref: '#/components/responses/defaultResponse'
   /license/{shortname}:
     parameters:
       - name: shortname

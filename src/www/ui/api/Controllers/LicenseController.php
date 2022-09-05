@@ -51,6 +51,7 @@ class LicenseController extends RestController
    */
   private $licenseDao;
 
+
   /**
    * @param ContainerInterface $container
    */
@@ -365,5 +366,39 @@ class LicenseController extends RestController
     $result = $this->dbHelper->getDbManager()->getSingleRow($sql, $params,
       $statement);
     return $result["cnt"] == 0;
+  }
+
+  /**
+   *  Handle the upload of a license
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function handleImportLicense($request, $response, $args)
+  {
+
+    $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+    $adminLicenseFromCsv = $this->restHelper->getPlugin('admin_license_from_csv');
+
+    $uploadedFile = $symReq->files->get($adminLicenseFromCsv->getFileInputName(),
+      null);
+
+    $requestBody =  $this->getParsedBody($request);
+    $delimiter = ',';
+    $enclosure = '"';
+    if (array_key_exists("delimiter", $requestBody) && !empty($requestBody["delimiter"])) {
+         $delimiter = $requestBody["delimiter"];
+    }
+    if (array_key_exists("enclosure", $requestBody) && !empty($requestBody["enclosure"])) {
+        $enclosure = $requestBody["enclosure"];
+    }
+
+    $res = $adminLicenseFromCsv->handleFileUpload($uploadedFile,$delimiter,$enclosure);
+
+    $newInfo = new Info($res[2], $res[1], $res[0] == 200 ? InfoType::INFO : InfoType::ERROR);
+
+    return $response->withJson($newInfo->getArray(), $newInfo->getCode());
   }
 }
