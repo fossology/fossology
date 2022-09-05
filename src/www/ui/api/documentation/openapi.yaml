@@ -1658,7 +1658,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-  /groups/{id}/user/{uid}:
+  /groups/{id}/user/{userId}:
     parameters:
       - name: id
         required: true
@@ -1666,7 +1666,7 @@ paths:
         in: path
         schema:
           type: integer
-      - name: uid
+      - name: userId
         required: true
         description: user id of the member
         in: path
@@ -1706,7 +1706,42 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-
+    post:
+      operationId: addMember
+      tags:
+        - Groups
+        - Admin
+      summary: Add user to a group
+      description: >
+        add a new user to group
+      requestBody:
+        description: Request options
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddMember'
+      responses:
+        '200':
+          description: User has been added to group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /groups/deletable:
     get:
       operationId: deletableGroups
@@ -2891,6 +2926,17 @@ components:
           description: Date from which to remove older log files from repository.
           nullable: true
           example: "2022-07-16"
+    AddMember:
+      description: UserMember options
+      type: object
+      properties:
+        perm:
+          type: integer
+          description: Default permission of the new member.
+          nullable: false
+          minimum: 0
+          maximum: 2
+          example: 0
     HealthInfo:
       description: Health status of server
       type: object

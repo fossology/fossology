@@ -166,8 +166,9 @@ $app->group('/groups',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('', GroupController::class . ':getGroups');
     $app->post('', GroupController::class . ':createGroup');
+    $app->post('/{id:\\d+}/user/{userId:\\d+}', GroupController::class . ':addMember');
     $app->delete('/{id:\\d+}', GroupController::class . ':deleteGroup');
-    $app->delete('/{id:\\d+}/user/{uid:\\d+}', GroupController::class . ':deleteGroupMember');
+    $app->delete('/{id:\\d+}/user/{userId:\\d+}', GroupController::class . ':deleteGroupMember');
     $app->get('/deletable', GroupController::class . ':getDeletableGroups');
     $app->get('/{id:\\d+}/members', GroupController::class . ':getGroupMembers');
     $app->any('/{params:.*}', BadRequestController::class);
