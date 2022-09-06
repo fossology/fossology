@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-SPDX-FileCopyrightText: © 2014-2015, 2021 Siemens AG
+SPDX-FileCopyrightText: © 2014-2015, 2021-2022 Siemens AG
 
 SPDX-License-Identifier: FSFAP
 -->
@@ -105,6 +105,9 @@ SPDX-License-Identifier: FSFAP
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>
         </service>
+        <service id="dao.searchhelperdao" class="Fossology\Lib\Dao\SearchHelperDao" public="true">
+            <argument type="service" id="db.manager"/>
+        </service>
 
         <service id="event.types" class="Fossology\Lib\Data\Clearing\ClearingEventTypes" public="true">
         </service>
@@ -151,6 +154,14 @@ SPDX-License-Identifier: FSFAP
         <service id="businessrules.obligationmap"
                  class="Fossology\Lib\BusinessRules\ObligationMap" public="true">
             <argument type="service" id="db.manager"/>
+        </service>
+
+        <service id="businessrules.detectlicensesfolder"
+                 class="Fossology\Lib\BusinessRules\DetectLicensesFolder" public="true">
+        </service>
+
+        <service id="businessrules.reusereportprocessor"
+                 class="Fossology\Lib\BusinessRules\ReuseReportProcessor" public="true">
         </service>
 
         <service id="app.license_csv_import" class="Fossology\Lib\Application\LicenseCsvImport" public="true">

@@ -1,22 +1,26 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2019-2020 Siemens AG
+ SPDX-FileCopyrightText: © 2019-2022 Siemens AG
  Author: Andreas J. Reichel <andreas.reichel@tngtech.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
 
-include_once "search-helper.php";
 require_once dirname(dirname(dirname(__FILE__))) . "/lib/php/common-repo.php";
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\SearchHelperDao;
+use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class AjaxNoticeFiles extends FO_Plugin
 {
   /** @var UploadDao */
   private $uploadDao;
+
+  /** @var SearchHelperDao */
+  private $searchHelperDao;
 
   function __construct()
   {
@@ -28,6 +32,7 @@ class AjaxNoticeFiles extends FO_Plugin
     parent::__construct();
 
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
+    $this->searchHelperDao = $GLOBALS['container']->get('dao.searchhelperdao');
   }
 
   function PostInitialize()
@@ -38,7 +43,6 @@ class AjaxNoticeFiles extends FO_Plugin
 
   function Output()
   {
-    global $PG_CONN;
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
@@ -62,9 +66,9 @@ class AjaxNoticeFiles extends FO_Plugin
     $License = "";
     $Copyright = "";
 
-    $UploadtreeRecsResult = GetResults($Item, $Filename, $uploadId, $tag, $Page, $Limit, $SizeMin,
+    $UploadtreeRecsResult = $this->searchHelperDao->GetResults($Item, $Filename, $uploadId, $tag, $Page, $Limit, $SizeMin,
       $SizeMax, $searchtype, $License, $Copyright, $this->uploadDao,
-      Auth::getGroupId(), $PG_CONN);
+      Auth::getGroupId());
 
     foreach ($UploadtreeRecsResult[0] as $k => $res) {
 
