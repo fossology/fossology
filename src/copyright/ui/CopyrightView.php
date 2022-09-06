@@ -43,8 +43,12 @@ class CopyrightView extends Xpview
   protected function additionalVars($uploadId, $uploadTreeId, $agentId)
   {
     if (empty($agentId)) {
-      $agentMap = $this->agentDao->getLatestAgentResultForUpload($uploadId,array('copyright'));
+      $agentMap = $this->agentDao->getLatestAgentResultForUpload($uploadId,array('copyright', 'reso'));
       $agentId = array_key_exists('copyright',$agentMap) ? $agentMap['copyright'] : 0;
+      if (array_key_exists('reso',$agentMap)) {
+        $ResoagentId = $agentMap['reso'];
+        $agentId = $agentId . "," . $ResoagentId;
+      }
     }
     $typeDescriptionPairs = array(
       'statement' => _("FOSSology"),
@@ -56,7 +60,7 @@ class CopyrightView extends Xpview
     $filter = '';
     foreach ($typeDescriptionPairs as $type=>$description) {
       if ($type==="scancode_statement") {
-        $agentId=LatestAgentpk($uploadId, 'scancode_ars');
+        $agentId = LatestAgentpk($uploadId, 'scancode_ars');
         $this->agentName = "scancode";
       }
       list($out, $vars) = $modCopyrightHist->getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId);
