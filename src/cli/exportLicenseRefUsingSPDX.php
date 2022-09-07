@@ -31,6 +31,7 @@ class exportLicenseRef
     $updateExisting = '';
     $addNewLicense = '';
     $newLicenseRefData = array();
+    $showUsage = '';
     $scanList = array(
       'licenses' => 'https://spdx.org/licenses/licenses.json',
       'exceptions' => 'https://spdx.org/licenses/exceptions.json'
