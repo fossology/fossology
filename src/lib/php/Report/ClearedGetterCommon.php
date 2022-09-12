@@ -104,6 +104,8 @@ abstract class ClearedGetterCommon
 
   protected function groupStatements($ungrupedStatements, $extended, $agentCall, $isUnifiedReport, $objectAgent)
   {
+    echo("groupStatements begin"."\n");
+    
     $statements = array();
     $findings = array();
     $countLoop = 0;

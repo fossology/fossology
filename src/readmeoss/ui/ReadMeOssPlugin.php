@@ -17,6 +17,8 @@ use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
+use Fossology\Lib\Dao\ProjectDao;
+
 /**
  * @class ReadMeOssPlugin
  * @brief Agent plugin for Readme_OSS agent
@@ -66,7 +68,12 @@ class ReadMeOssPlugin extends DefaultPlugin
         return $this->flushContent($e->getMessage());
       }
     }
+
     $folderId = $request->get('folder');
+
+    echo("<script>console.log('folderId');</script>");
+    echo("<script>console.log('".json_encode($folderId)."');</script>");
+
     if (!empty($folderId)) {
       /* @var $folderDao FolderDao */
       $folderDao = $this->getObject('dao.folder');
@@ -75,12 +82,37 @@ class ReadMeOssPlugin extends DefaultPlugin
         $addUploads[$uploadProgress->getId()] = $uploadProgress;
       }
     }
+
+    $pojectId = $request->get('poject');
+
+    echo("<script>console.log('pojectId');</script>");
+    echo("<script>console.log('".json_encode($pojectId)."');</script>");
+
+    if (!empty($pojectId)) {
+      /* @var $pojectDao PojectDao */
+      $pojectDao = $this->getObject('dao.poject');
+      $pojectUploads = $pojectDao->getPojectUploads($pojectId, $groupId);
+      foreach ($pojectUploads as $uploadProgress) {
+        $addUploads[$uploadProgress->getId()] = $uploadProgress;
+      }
+    }
+
+    
+
     if (empty($addUploads)) {
       return $this->flushContent(_('No upload selected'));
     }
     $upload = array_pop($addUploads);
     try {
-      list($jobId,$jobQueueId) = $this->getJobAndJobqueue($groupId, $upload, $addUploads);
+      // list($jobId,$jobQueueId) = $this->getJobAndJobqueue($groupId, $upload, $addUploads);
+      if (!empty($folderId)) {
+        list($jobId,$jobQueueId) = $this->getJobAndJobqueueWithType($groupId, $upload, $addUploads, "folder");
+      } else if (!empty($pojectId)) {
+        list($jobId,$jobQueueId) = $this->getJobAndJobqueueWithType($groupId, $upload, $addUploads, "project");
+      } else {
+        list($jobId,$jobQueueId) = $this->getJobAndJobqueue($groupId, $upload, $addUploads);
+      }
+      
     } catch (Exception $ex) {
       return $this->flushContent($ex->getMessage());
     }
@@ -108,10 +140,20 @@ class ReadMeOssPlugin extends DefaultPlugin
    */
   protected function getJobAndJobqueue($groupId, $upload, $addUploads)
   {
+
+    echo("<script>console.log('getJobAndJobqueue begin');</script>");
+    echo("<script>console.log('addUploads');</script>");
+    echo("<script>console.log('".json_encode($addUploads)."');</script>");
+
+
     $uploadId = $upload->getId();
     $readMeOssAgent = plugin_find('agent_readmeoss');
     $userId = Auth::getUserId();
     $jqCmdArgs = $readMeOssAgent->uploadsAdd($addUploads);
+
+    echo("<script>console.log('jqCmdArgs');</script>");
+    echo("<script>console.log('".json_encode($jqCmdArgs)."');</script>");
+
     $dbManager = $this->getObject('db.manager');
     $sql = 'SELECT jq_pk,job_pk FROM jobqueue, job '
          . 'WHERE jq_job_fk=job_pk AND jq_type=$1 AND job_group_fk=$4 AND job_user_fk=$3 AND jq_args=$2 AND jq_endtime IS NULL';
@@ -124,6 +166,69 @@ class ReadMeOssPlugin extends DefaultPlugin
     } else {
       $sql .= ' AND jq_cmd_args IS NULL';
     }
+
+    echo("<script>console.log('params');</script>");
+    echo("<script>console.log('".json_encode($params)."');</script>");
+
+    $scheduled = $dbManager->getSingleRow($sql,$params,$log);
+    if (!empty($scheduled)) {
+      return array($scheduled['job_pk'],$scheduled['jq_pk']);
+    }
+    if (empty($jqCmdArgs)) {
+      $jobName = $upload->getFilename();
+    } else {
+      $jobName = "Multi File ReadmeOSS";
+    }
+    $jobId = JobAddJob($userId, $groupId, $jobName, $uploadId);
+    $error = "";
+    $jobQueueId = $readMeOssAgent->AgentAdd($jobId, $uploadId, $error, array(), $jqCmdArgs);
+    if ($jobQueueId < 0) {
+      throw new Exception(_("Cannot schedule").": ".$error);
+    }
+    return array($jobId, $jobQueueId, $error);
+  }
+
+    /**
+   * @brief Get parameters from job queue and schedule them
+   * @param int $groupId
+   * @param int $upload
+   * @param int $addUploads
+   * @param String type
+   * @throws Exception
+   * @return int Array of job id and job queue id
+   */
+  protected function getJobAndJobqueueWithType($groupId, $upload, $addUploads, $type)
+  {
+
+    echo("<script>console.log('getJobAndJobqueue begin');</script>");
+    echo("<script>console.log('addUploads');</script>");
+    echo("<script>console.log('".json_encode($addUploads)."');</script>");
+
+
+    $uploadId = $upload->getId();
+    $readMeOssAgent = plugin_find('agent_readmeoss');
+    $userId = Auth::getUserId();
+    $jqCmdArgs = $readMeOssAgent->uploadsAddWithType($addUploads, $type);
+
+    echo("<script>console.log('jqCmdArgs');</script>");
+    echo("<script>console.log('".json_encode($jqCmdArgs)."');</script>");
+
+    $dbManager = $this->getObject('db.manager');
+    $sql = 'SELECT jq_pk,job_pk FROM jobqueue, job '
+         . 'WHERE jq_job_fk=job_pk AND jq_type=$1 AND job_group_fk=$4 AND job_user_fk=$3 AND jq_args=$2 AND jq_endtime IS NULL';
+    $params = array($readMeOssAgent->AgentName,$uploadId,$userId,$groupId);
+    $log = __METHOD__;
+    if ($jqCmdArgs) {
+      $sql .= ' AND jq_cmd_args=$5';
+      $params[] = $jqCmdArgs;
+      $log .= '.args';
+    } else {
+      $sql .= ' AND jq_cmd_args IS NULL';
+    }
+
+    echo("<script>console.log('params');</script>");
+    echo("<script>console.log('".json_encode($params)."');</script>");
+
     $scheduled = $dbManager->getSingleRow($sql,$params,$log);
     if (!empty($scheduled)) {
       return array($scheduled['job_pk'],$scheduled['jq_pk']);

@@ -58,6 +58,7 @@ $(document).ready(function() {
     return false;
   });
   $('#browse-upload-all').button().change(function ( event ){
+    console.log('browse-upload-all change!');
     $('#browse-upload-all-label').removeClass("ui-state-focus ui-state-hover ui-state-active");
     var wholeProject = $(this).prop('checked');
     if(wholeProject) {

@@ -50,6 +50,14 @@ class ReadMeOssAgentPlugin extends AgentPlugin
     }
     return '--uploadsAdd='. implode(',', array_keys($uploads));
   }
+
+  public function uploadsAddWithType($uploads, $type)
+  {
+    if (count($uploads) == 0) {
+      return '';
+    }
+    return '--uploadsAdd='. implode(',', array_keys($uploads))." --type=".$type;
+  }
 }
 
 register_plugin(new ReadMeOssAgentPlugin());
