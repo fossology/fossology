@@ -138,13 +138,23 @@ abstract class Agent
    */
   function scheduler_connect()
   {
+
+    // echo("scheduler_connect begin\n");
+    
+
     $schedulerHandledOpts = "c:";
     $schedulerHandledLongOpts = array("userID:","groupID:","jobId:","scheduler_start",'config:');
 
     $longOpts = array_merge($schedulerHandledLongOpts, $this->agentSpecifLongOptions);
     $shortOpts = $schedulerHandledOpts . $this->agentSpecifOptions;
 
+
+    
+
+
     $args = getopt($shortOpts, $longOpts);
+
+
 
     $this->schedulerMode = (array_key_exists("scheduler_start", $args));
 
@@ -169,6 +179,14 @@ abstract class Agent
     }
 
     $this->args = $args;
+
+    // echo("longOpts\n");
+    // echo(json_encode($longOpts));
+    // echo("shortOpts\n");
+    // echo(json_encode($shortOpts));
+
+    // echo("args\n");
+    // echo(json_encode($args));
   }
 
   /**

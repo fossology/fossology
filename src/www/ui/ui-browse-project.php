@@ -54,6 +54,7 @@ class ui_browse_project extends FO_Plugin
     {
         global $container;
         /** @var DbManager */
+        xdebug_break();
         $dbManager = $container->get('db.manager');
         $RowStyle1 = "style='background-color:#ecfaff'";  // pale blue
         $RowStyle2 = "style='background-color:#ffffe3'";  // pale yellow

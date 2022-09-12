@@ -88,6 +88,8 @@ class ReadmeOssAgent extends Agent
     $this->uploadDao = $this->container->get('dao.upload');
 
     $this->agentSpecifLongOptions[] = self::UPLOAD_ADDS.':';
+    // $this->agentSpecifLongOptions[] = 'type:';
+    
   }
 
   /**
@@ -97,10 +99,45 @@ class ReadmeOssAgent extends Agent
    */
   function processUploadId($uploadId)
   {
+
+    echo("<script>console.log('processUploadId begin');</script>");
+    echo("<script>console.log('uploadId');</script>");
+    echo("<script>console.log('".json_encode($uploadId)."');</script>");
+
     $groupId = $this->groupId;
 
     $args = $this->args;
-    $this->additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
+
+    echo("args");
+    echo(json_encode($args));
+
+
+    $type = array_key_exists("type", $args) ? $args["type"] : "";
+    echo("<script>console.log('type');</script>");
+    echo("<script>console.log('".json_encode($type)."');</script>");
+
+
+    // $this->additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
+
+    if ( array_key_exists(self::UPLOAD_ADDS,$args)) {
+      $tmp1 = $args[self::UPLOAD_ADDS];
+      echo("tmp1"."\n");
+      echo(json_encode($tmp1)."\n");
+
+      $tmpArr = explode(' ',$tmp1);
+      echo("tmpArr"."\n");
+      echo(json_encode($tmpArr)."\n");
+
+      $this->additionalUploadIds = explode(',',$tmpArr[0]);
+      echo("additionalUploadIds"."\n");
+      echo(json_encode($this->additionalUploadIds)."\n");
+      
+      $type = substr($tmpArr[1], 7);
+      echo("type"."\n");
+      echo(json_encode($type)."\n");
+    }
+    
+
     $uploadIds = $this->additionalUploadIds;
     array_unshift($uploadIds, $uploadId);
 
@@ -115,17 +152,52 @@ class ReadmeOssAgent extends Agent
         continue;
       }
       $moreLicenses = $this->licenseClearedGetter->getCleared($addUploadId, $this, $groupId, true, "license", false);
+
+      echo("moreLicenses"."\n");
+      echo(json_encode($moreLicenses)."\n");
+
       $licenseStmts = array_merge($licenseStmts, $moreLicenses['statements']);
       $this->heartbeat(count($moreLicenses['statements']));
+
+      
+      echo("licenseStmts"."\n");
+      echo(json_encode($licenseStmts)."\n");
+
       $this->licenseClearedGetter->setOnlyAcknowledgements(true);
       $moreAcknowledgements = $this->licenseClearedGetter->getCleared($addUploadId, $this, $groupId, true, "license", false);
+
+      echo("moreAcknowledgements"."\n");
+      echo(json_encode($moreAcknowledgements)."\n");
+
       $licenseAcknowledgements = array_merge($licenseAcknowledgements, $moreAcknowledgements['statements']);
+
+      echo("licenseAcknowledgements"."\n");
+      echo(json_encode($licenseAcknowledgements)."\n");
+
       $this->heartbeat(count($moreAcknowledgements['statements']));
       $moreCopyrights = $this->cpClearedGetter->getCleared($addUploadId, $this, $groupId, true, "copyright", false);
+
+      echo("moreCopyrights"."\n");
+      echo(json_encode($moreCopyrights)."\n");
+
       $copyrightStmts = array_merge($copyrightStmts, $moreCopyrights['statements']);
+
+      echo("copyrightStmts"."\n");
+      echo(json_encode($copyrightStmts)."\n");
+
       $this->heartbeat(count($moreCopyrights['statements']));
       $moreMainLicenses = $this->licenseMainGetter->getCleared($addUploadId, $this, $groupId, true, null, false);
+
+      echo("moreMainLicenses"."\n");
+      echo(json_encode($moreMainLicenses)."\n");
+      
       $licenseStmtsMain = array_merge($licenseStmtsMain, $moreMainLicenses['statements']);
+
+
+      echo("licenseStmtsMain"."\n");
+      echo(json_encode($licenseStmtsMain)."\n");
+      
+
       $this->heartbeat(count($moreMainLicenses['statements']));
     }
     list($licenseStmtsMain, $licenseStmts) = $this->licenseClearedGetter->updateIdentifiedGlobalLicenses($licenseStmtsMain, $licenseStmts);

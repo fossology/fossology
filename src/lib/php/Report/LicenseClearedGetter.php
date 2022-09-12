@@ -47,10 +47,19 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
   protected function getStatements($uploadId, $uploadTreeTableName, $groupId = null)
   {
+
+    echo("getStatements"."\n");
+
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
     $dbManager = $GLOBALS['container']->get('db.manager');
     $licenseMap = new LicenseMap($dbManager, $groupId, LicenseMap::REPORT);
+
+    echo("clearingDecisions"."\n");
+    echo(json_encode($clearingDecisions)."\n");
+    echo("licenseMap"."\n");
+    echo(json_encode($licenseMap)."\n");
+
     $ungroupedStatements = array();
     foreach ($clearingDecisions as $clearingDecision) {
       if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
@@ -106,11 +115,23 @@ class LicenseClearedGetter extends ClearedGetterCommon
   public function getCleared($uploadId, $objectAgent, $groupId=null,
     $extended=true, $agentCall=null, $isUnifiedReport=false)
   {
+    echo("getCleared begin"."\n");
+
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $ungroupedStatements = $this->getStatements($uploadId, $uploadTreeTableName,
       $groupId);
+
+    echo("uploadTreeTableName"."\n");
+    echo(json_encode($uploadTreeTableName)."\n");
+    echo("ungroupedStatements"."\n");
+    echo(json_encode($ungroupedStatements)."\n");
+
     $this->changeTreeIdsToPaths($ungroupedStatements, $uploadTreeTableName,
       $uploadId);
+
+    echo("ungroupedStatements"."\n");
+    echo(json_encode($ungroupedStatements)."\n");
+  
     if ($this->onlyAcknowledgements || $this->onlyComments) {
       return $this->groupStatementsSpecial($ungroupedStatements, $objectAgent);
     }
