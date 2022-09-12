@@ -7,7 +7,6 @@
 */
 
 
-
 namespace Fossology\UI\Page;
 
 use Fossology\UI\Page\UploadPageBase;
