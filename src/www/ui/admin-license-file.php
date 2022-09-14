@@ -72,7 +72,7 @@ class admin_license_file extends FO_Plugin
 
     // Add new rec to db
     if (@$_POST["addit"]) {
-      $resultstr = $this->Adddb();
+      $resultstr = $this->Adddb($_POST);
       $this->vars['message'] = $resultstr;
       if (strstr($resultstr, $errorstr)) {
         return $this->Updatefm(0);
@@ -349,7 +349,7 @@ class admin_license_file extends FO_Plugin
   }
 
   /** @brief check if shortname or license text of this license is existing */
-  private function isShortnameBlocked($rfId, $shortname, $text)
+  public function isShortnameBlocked($rfId, $shortname, $text)
   {
     $sql = "SELECT count(*) from license_ref where rf_pk <> $1 and (LOWER(rf_shortname) = LOWER($2) or (rf_text <> ''
       and rf_text = $3 and LOWER(rf_text) NOT LIKE 'license by nomos.'))";
@@ -478,18 +478,18 @@ class admin_license_file extends FO_Plugin
    *
    * \return An add status string
    */
-  function Adddb()
+  public function Adddb($REQ)
   {
-    $rf_shortname = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_shortname']));
-    $rf_fullname = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_fullname']));
-    $rf_url = $_POST['rf_url'];
-    $rf_notes = $_POST['rf_notes'];
-    $rf_text = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_text']));
-    $parent = $_POST['rf_parent'];
-    $report = $_POST['rf_report'];
-    $riskLvl = intval($_POST['risk_level']);
+    $rf_shortname = StringOperation::replaceUnicodeControlChar(trim($REQ['rf_shortname']));
+    $rf_fullname = StringOperation::replaceUnicodeControlChar(trim($REQ['rf_fullname']));
+    $rf_url = $REQ['rf_url'];
+    $rf_notes = $REQ['rf_notes'];
+    $rf_text = StringOperation::replaceUnicodeControlChar(trim($REQ['rf_text']));
+    $parent = $REQ['rf_parent'];
+    $report = $REQ['rf_report'];
+    $riskLvl = intval($REQ['risk_level']);
     $selectedObligations = array_key_exists($this->obligationSelectorName,
-      $_POST) ? $_POST[$this->obligationSelectorName] : [];
+      $REQ) ? $REQ[$this->obligationSelectorName] : [];
 
     if (empty($rf_shortname)) {
       $text = _("ERROR: The license shortname is empty. License not added.");
@@ -512,17 +512,17 @@ class admin_license_file extends FO_Plugin
     $this->dbManager->prepare($stmt,$sql);
     $res = $this->dbManager->execute($stmt,
       array(
-        $_POST['rf_active'],
-        $_POST['marydone'],
+        $REQ['rf_active'],
+        $REQ['marydone'],
         $rf_shortname,
         $rf_fullname,
         $rf_url,
         $rf_notes,
         $rf_text,
-        $_POST['rf_text_updatable'],
-        $_POST['rf_detector_type'],
+        $REQ['rf_text_updatable'],
+        $REQ['rf_detector_type'],
         $riskLvl,
-        $_POST['rf_spdx_compatible']
+        $REQ['rf_spdx_compatible']
       ));
     $row = $this->dbManager->fetchArray($res);
     $rfId = $row['rf_pk'];
@@ -554,7 +554,7 @@ class admin_license_file extends FO_Plugin
       $obligationMap->associateLicenseWithObligation($obligation, $rfId);
     }
 
-    return "License $_POST[rf_shortname] (id=$rfId) added.<p>";
+    return "License $REQ[rf_shortname] (id=$rfId) added.<p>";
   }
 
 

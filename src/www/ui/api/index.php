@@ -243,6 +243,7 @@ $app->group('/license',
     $app->get('', LicenseController::class . ':getAllLicenses');
     $app->post('/import-csv', LicenseController::class . ':handleImportLicense');
     $app->post('', LicenseController::class . ':createLicense');
+    $app->post('/admin', LicenseController::class . ':createAdminLicense');
     $app->get('/{shortname:.+}', LicenseController::class . ':getLicense');
     $app->patch('/{shortname:.+}', LicenseController::class . ':updateLicense');
     $app->any('/{params:.*}', BadRequestController::class);

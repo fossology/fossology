@@ -1,9 +1,11 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2021 HH Partners
+ SPDX-FileCopyrightText: © 2022 Samuel DUSHIMIMANA (dushsam100@gmail.com)
 
  SPDX-License-Identifier: GPL-2.0-only
 */
+
 /**
  * @file
  * @brief Controller for licenses
@@ -400,5 +402,56 @@ class LicenseController extends RestController
     $newInfo = new Info($res[2], $res[1], $res[0] == 200 ? InfoType::INFO : InfoType::ERROR);
 
     return $response->withJson($newInfo->getArray(), $newInfo->getCode());
+  }
+
+  /**
+   *  Create Admin License
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function createAdminLicense($request, $response, $args)
+  {
+    $body = $this->getParsedBody($request);
+
+         //   VALIDATIONS
+
+    // Validate the Authority.
+    // validate if shortname is empty.
+    // validate if rf_text_updatable , rf_spdx_compatible , marydone  and rf_active are boolean.
+    // validate if detector_type is from range of 1 to 3.
+    // check if risk_level is in range of 0 to 5.
+
+    if (!Auth::isAdmin()) {
+      $info = new Info(401, "Only admins can create this license.", InfoType::ERROR);
+    } else {
+      if (empty($body['rf_shortname'])) {
+        $info = new Info(400, "Shortname is required.", InfoType::ERROR);
+      } else if (!empty($body['rf_text_updatable']) && !is_bool($body['rf_text_updatable'])) {
+        $info = new Info(400, "rf_text_updatable should be boolean.", InfoType::ERROR);
+      } else if (!empty($body['rf_spdx_compatible']) && !is_bool($body['rf_spdx_compatible'])) {
+        $info = new Info(400, "rf_spdx_compatible should be boolean.", InfoType::ERROR);
+      } else if (!empty($body['marydone']) && !is_bool($body['marydone'])) {
+        $info = new Info(400, "marydone should be boolean.", InfoType::ERROR);
+      } else if (!empty($body['rf_active']) && !is_bool($body['rf_active'])) {
+        $info = new Info(400, "rf_active should be boolean.", InfoType::ERROR);
+      } else if (!empty($body['detector_type']) && !in_array($body['detector_type'], [1, 2, 3])) {
+        $info = new Info(400, "detector_type should be 1, 2 or 3.", InfoType::ERROR);
+      } else if (!empty($body['risk']) && !in_array($body['risk'], [0, 1, 2, 3, 4, 5])) {
+        $info = new Info(400, "risk should be 0, 1, 2, 3, 4 or 5.", InfoType::ERROR);
+      } else {
+        $adminLicenseFile = $this->restHelper->getPlugin('admin_license');
+
+        // check if the rf_shortname exist or the rf_text already exist
+        if ($adminLicenseFile->isShortnameBlocked(0, $body["rf_shortname"], $body["rf_text"])) {
+          $info = new Info(400, "The shortname or license text already exist in the license list.", InfoType::ERROR);
+        } else {
+          $info = new Info(201, $adminLicenseFile->Adddb($body), InfoType::INFO);
+        }
+      }
+    }
+    return $response->withJson($info->getArray(), $info->getCode());
   }
 }

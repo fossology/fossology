@@ -2036,6 +2036,49 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
+  /license/admin:
+    post:
+      operationId: createAdminLicense
+      tags:
+        - License
+      summary: Create a new admin license
+      description: >
+        Add a new admin license to the database
+      requestBody:
+        description: Information about new Admin license
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/AdminLicense'
+      responses:
+        '201':
+          description: License added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /license/import-csv:
     post:
       operationId: importLicense
@@ -2762,6 +2805,76 @@ components:
         isCandidate:
           description: Is the license a candidate?
           type: boolean
+    AdminLicense:
+      description: AdminLicense from the database
+      type: object
+      properties:
+        rf_active:
+          description: Is the license active?
+          type: boolean
+          example:
+           true
+        marydone:
+          description: Is the license done?
+          type: boolean
+          example:
+            true
+        rf_shortname:
+          description: Short name
+          type: string
+          example:
+            "MIT"
+        rf_fullname:
+          description: Full name
+          type: string
+          example:
+            "MIT License"
+        rf_url:
+          description: URL of the license text
+          type: string
+          example:
+            "https://opensource.org/licenses/MIT"
+        rf_notes:
+          description: Notes
+          type: string
+          example:
+            "Short Notes about license"
+        rf_text:
+          description: License text
+          type: string
+          example:
+            "MIT License Copyright (c) <year> <copyright holders> ..."
+        rf_parent:
+          description: Parent license
+          type: string
+          example:
+            "MIT"
+        rf_report:
+          description: Report info
+          type: string
+          example:
+            "Report Info"
+        risk_level:
+          description: Risk level
+          type: integer
+          nullable: true
+          example:
+            3
+        rf_text_updatable:
+          description: Is the license text updatable?
+          type: boolean
+          example:
+            true
+        rf_detector_type:
+          description: Detector type
+          type: integer
+          example:
+            1
+        rf_spdx_compatible:
+          description: Is the license SPDX compatible?
+          type: boolean
+          example:
+            true
     Group:
       description: Group object
       type: object
