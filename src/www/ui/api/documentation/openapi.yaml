@@ -47,6 +47,8 @@ tags:
   description: Upload's report
 - name: License
   description: License and obligation management
+- name: Maintenance
+  description: Maintenance operations
 
 paths:
   /tokens:
@@ -2064,7 +2066,8 @@ paths:
                   type: string
                   format: binary
                   description: CSV to be imported
-                  
+              required:
+                - file_input
       responses:
           '400':
             description: Validation Error
@@ -2588,9 +2591,7 @@ components:
           filePath:
             description: Path of the files for which the copyright information is provided
             type: string
-            example: 
-            - "path/to/file1"
-            - "path/to/file2"
+            example: "path/to/file1"
     UploadPermGroups:
       description: Groups with their respective permissions for a upload
       type: object
