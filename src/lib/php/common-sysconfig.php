@@ -199,71 +199,84 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "'client-id'", "'$oidcPrompt'",
     strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "2", "'$oidcDesc'", "null", "null");
 
+  $variable = "OidcResourceOwnerId";
+  $oidcPrompt = _('Resource owner id field');
+  $oidcDesc = _('e.g. "email", "upn"<br>Field in token which provides user id. The field <b>should not be empty</b>.');
+  $valueArray[$variable] = array("'$variable'", "'email'", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "3", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcTokenType";
+  $oidcPrompt = _('Token to use from provider');
+  $oidcDesc = _('OpenID Connect providers 2 types of tokens, access and id. Which to use for authentication?<br>AzureAD prefers ID token.');
+  $valueArray[$variable] = array("'$variable'", "'A'", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_DROP), "'OauthSupport'", "4", "'$oidcDesc'", "null", "'Access Token{A}|ID Token{I}'");
+
   $variable = "OidcAppId";
   $oidcPrompt = _('OIDC Client Id');
   $oidcDesc = _('e.g. "e0ec21b9f4b21adc76f185962b52bdfc13af134a"<br>Client ID generated while registering your application.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "3", "'$oidcDesc'", "null", "null");
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "5", "'$oidcDesc'", "null", "null");
 
   $variable = "OidcSecret";
   $oidcPrompt = _('OIDC Secret');
   $oidcDesc = _('e.g. "cf13476f185b9f4b2e0ec962b52211adbdfc13aa"<br>Secret generated while registering your application.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
-    strval(CONFIG_TYPE_PASSWORD), "'OauthSupport'", "4", "'$oidcDesc'", "null", "null");
+    strval(CONFIG_TYPE_PASSWORD), "'OauthSupport'", "6", "'$oidcDesc'", "null", "null");
 
   $variable = "OidcRedirectURL";
   $oidcPrompt = _('Redirect URL');
   $oidcDesc = _('e.g. "http://fossology.application.url.com/repo"<br>URL of your fossology application.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "5", "'$oidcDesc'", "null", "null");
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "7", "'$oidcDesc'", "null", "null");
 
   $variable = "OidcDiscoveryURL";
   $oidcPrompt = _('OIDC Discovery URL');
   $oidcDesc = _('e.g. "http://oauth.com/.well-known/openid-configuration"<br>URL for OIDC Discovery document JSON to fill following fields upon save.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "6", "'$oidcDesc'", "null", "null");
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "8", "'$oidcDesc'", "null", "null");
 
   $variable = "OidcIssuer";
   $oidcPrompt = _('OIDC Token Issuer');
   $oidcDesc = _('e.g. "http://oauth.com"<br>Issuer for OIDC tokens.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "7", "'$oidcDesc'", "null", "null");
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "9", "'$oidcDesc'", "null", "null");
 
   $variable = "OidcAuthorizeURL";
   $oidcPrompt = _('OIDC Authorize URL');
   $oidcDesc = _('e.g. "http://oauth.com/authorization.oauth2"<br>URL for OAuth2 authorization endpoint.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "8", "'$oidcDesc'", "null", "null");
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "10", "'$oidcDesc'", "null", "null");
 
   $variable = "OidcAccessTokenURL";
   $oidcPrompt = _('OIDC Access Token URL');
   $oidcDesc = _('e.g. "http://oauth.com/token.oauth2"<br>URL for OAuth2 access token endpoint.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "9", "'$oidcDesc'", "null", "null");
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "11", "'$oidcDesc'", "null", "null");
 
   $variable = "OidcResourceURL";
   $oidcPrompt = _('OIDC User Info URL');
   $oidcDesc = _('e.g. "http://oauth.com/userinfo.oauth2"<br>URL for OAuth2 user info endpoint.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "10", "'$oidcDesc'", "null", "null");
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "12", "'$oidcDesc'", "null", "null");
 
   $variable = "OidcJwksURL";
   $oidcPrompt = _('OIDC JWKS URL');
   $oidcDesc = _('e.g. "http://oauth.com/jwks.oauth2"<br>URL for OIDC JWKS keys.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "11", "'$oidcDesc'", "null", "null");
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "13", "'$oidcDesc'", "null", "null");
 
   $variable = "OidcJwkAlgInject";
   $oidcPrompt = _('OIDC JWKS Algorithm inject');
-  $oidcDesc = _('Algorithm value to inject for JWKS. Leave empty to not modifiy.<br><a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.4">Check info</a>.');
+  $oidcDesc = _('Algorithm value to inject for JWKS. Leave empty to not modifiy.' .
+    '<br><a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.4">Check info</a>.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "12", "'$oidcDesc'", "null", "null");
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "14", "'$oidcDesc'", "null", "null");
 
   $variable = "OidcLogoutURL";
   $oidcPrompt = _('Logout URL');
   $oidcDesc = _('e.g. "http://oauth.com/logout.oauth2"<br>URL to redirect user to for logout.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "13", "'$oidcDesc'", "null", "null");
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "15", "'$oidcDesc'", "null", "null");
 
   /*  Banner Message */
   $variable = "BannerMsg";
