@@ -2056,17 +2056,15 @@ paths:
                   type: string
                   description: Enclosure for string in CSV
                   default: '"'
-                  required: false
                 delimiter:
                   type: string
                   description: Delimiters for fields in CSV
                   default: ','
-                  required: false
                 file_input:
                   type: string
                   format: binary
                   description: CSV to be imported
-                  required: true
+                  
       responses:
           '400':
             description: Validation Error
@@ -2589,7 +2587,7 @@ components:
             example: "Copyright (C) 2017-2020 Free Software Foundation, Inc."
           filePath:
             description: Path of the files for which the copyright information is provided
-            type: array
+            type: string
             example: 
             - "path/to/file1"
             - "path/to/file2"
