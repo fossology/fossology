@@ -44,7 +44,7 @@ class ReportImportPlugin extends DefaultPlugin
     $uploadId = intval(GetArrayVal("uploadselect", $_POST));
     if (empty($uploadId) ||
         !array_key_exists('report',$_FILES) ||
-        sizeof($_FILES['report']['name']) != 1)
+        empty($_FILES['report']['size']))
     {
       return $this->showUiToChoose();
     }
