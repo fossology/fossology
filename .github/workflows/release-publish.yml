@@ -22,6 +22,7 @@ jobs:
           - 'debian:bullseye'
           - 'ubuntu:bionic'
           - 'ubuntu:focal'
+          - 'ubuntu:jammy'
 
     runs-on: ubuntu-latest
     container: ${{ matrix.os }}
