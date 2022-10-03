@@ -1,21 +1,24 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2010-2014 Hewlett-Packard Development Company, L.P.
- SPDX-FileCopyrightText: © 2015-2017 Siemens AG
+ SPDX-FileCopyrightText: © 2015-2022 Siemens AG
 
  SPDX-License-Identifier: GPL-2.0-only
 */
 
-include_once "search-helper.php";
-
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\SearchHelperDao;
+use Fossology\Lib\Db\DbManager;
 
 class search extends FO_Plugin
 {
   protected $MaxPerPage  = 100;  /* maximum number of result items per page */
   /** @var UploadDao */
   private $uploadDao;
+
+  /** @var SearchHelperDao */
+  private $searchHelperDao;
 
   function __construct()
   {
@@ -29,6 +32,7 @@ class search extends FO_Plugin
     parent::__construct();
 
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
+    $this->searchHelperDao = $GLOBALS['container']->get('dao.searchhelperdao');
   }
 
   function PostInitialize()
@@ -210,9 +214,9 @@ class search extends FO_Plugin
       if (empty($Page)) {
         $Page = 0;
       }
-      $UploadtreeRecsResult = GetResults($Item, $Filename,$Upload, $tag, $Page, $Limit, $SizeMin,
+      $UploadtreeRecsResult = $this->searchHelperDao->GetResults($Item, $Filename,$Upload, $tag, $Page, $Limit, $SizeMin,
         $SizeMax, $searchtype, $License, $Copyright, $this->uploadDao,
-        Auth::getGroupId(), $PG_CONN);
+        Auth::getGroupId());
       $html = "<hr>\n";
       $message = _(
         "The indented search results are same files in different folders");

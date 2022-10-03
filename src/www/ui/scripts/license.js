@@ -31,6 +31,9 @@ $(document).ready(function () {
   if (typeof createLicHistTable === 'function') {
     createLicHistTable();
   }
+  if (typeof createReuseReportTable === 'function') {
+    createReuseReportTable();
+  }
 
   searchField = $('#dirlist_filter input');
   var dirListFilter = getCookie('dirListFilter');

@@ -1,4 +1,4 @@
-{# SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2014-2015, 2022 Siemens AG
 
    SPDX-License-Identifier: FSFAP
 #}
@@ -33,4 +33,23 @@ function createLicHistTable() {
     };
     dTable=$('#lichistogram').dataTable(licHistTableConfig);
   {% endif %}
+}
+
+function createReuseReportTable() {
+  var reuseReportTableConfig = {
+    "ajax": {
+      "url":"?mod=ajax_reuse_report&upload={{ uploadId }}",
+      "type": "GET",
+      "cache": "true"
+    },
+    "columns": [
+      {"data": "title"},
+      {"data": "value"}
+    ],
+    "paging": false,
+    "ordering": false,
+    "info": false,
+    "searching": false
+  };
+  return $('#reuseTable').dataTable(reuseReportTableConfig);
 }

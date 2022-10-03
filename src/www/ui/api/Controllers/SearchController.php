@@ -17,6 +17,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\SearchResult;
+use Fossology\Lib\Dao\SearchHelperDao;
+use Fossology\Lib\Db\DbManager;
 
 require_once dirname(dirname(__DIR__)) . "/search-helper.php";
 
@@ -26,6 +28,9 @@ require_once dirname(dirname(__DIR__)) . "/search-helper.php";
  */
 class SearchController extends RestController
 {
+  /** @var SearchHelperDao */
+  private $searchHelperDao;
+
   /**
    * Perform a search on FOSSology
    *
@@ -36,6 +41,8 @@ class SearchController extends RestController
    */
   public function performSearch($request, $response, $args)
   {
+    $this->searchHelperDao = $this->container->get('dao.searchhelperdao');
+
     $searchType = $request->getHeaderLine("searchType");
     $filename = $request->getHeaderLine("filename");
     $tag = $request->getHeaderLine("tag");
@@ -103,10 +110,10 @@ class SearchController extends RestController
     }
 
     $item = GetParm("item", PARM_INTEGER);
-    list($results, $count) = GetResults($item, $filename, $uploadId, $tag, $page-1, $limit,
+    list($results, $count) = $this->searchHelperDao->GetResults($item,
+      $filename, $uploadId, $tag, $page-1, $limit,
       $filesizeMin, $filesizeMax, $searchType, $license, $copyright,
-      $this->restHelper->getUploadDao(), $this->restHelper->getGroupId(),
-      $GLOBALS['PG_CONN']);
+      $this->restHelper->getUploadDao(), $this->restHelper->getGroupId());
     $totalPages = intval(ceil($count / $limit));
 
     $searchResults = [];
