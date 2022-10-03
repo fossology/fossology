@@ -4,6 +4,103 @@
 -->
 # Changelog of FOSSology
 
+### 4.2.0-rc1 (Sep 30th 2022)
+
+This release adds important corrections to
+[4.1.0](https://github.com/fossology/fossology/releases/tag/4.1.0)
+
+The release 4.2.0-rc1 introduces reuse specifications to fossology.
+
+The release 4.2.0-rc1 introduces a number of corrections to
+[4.1.0](https://github.com/fossology/fossology/releases/tag/4.1.0)
+and major changes to FOSSology, including:
+
+* Support ubuntu jammy 22.04
+* Detect SPDX-FileCopyrightText keyword
+* Allow user to configure token
+* Reuse all report columns
+* Detect Licenses Folder
+
+#### Credits to contributors for 4.2.0-rc1
+
+From the GIT commit history, we have following contributors since
+[4.1.0](https://github.com/fossology/fossology/releases/tag/4.1.0):
+
+```
+> aman1971 <ak584584@gmail.com>
+> Antoine Auger @antoineauger
+> Avinal Kumar <avinal.xlvii@gmail.com>
+> dushimsam <dushsam@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Karthik Krishna <gkarthikkrishna1@gmail.com>
+> Krishna Mahato <krishhtrishh9304@gmail.com>
+> Martin Daur <mdaur@gmx.net>
+> pret3nti0u5 <vineetvatsal09@gmail.com>
+> rohitpandey49 <rohit.pandey4900@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> soham4abc <sohambanerjee4abc@hotmail.com>
+> Thanvi pendyala <thanvipendyala194@gmail.com>
+
+```
+#### Features
+
+* `eb07d7626` feat(reuse): detect Licenses Folder
+* `f9f9023a2` feat(ubuntu): support ubuntu jammy 22.04 for fossology
+* `afa5fd58a` feat(licenseRef): add/update licenses from spdx.org
+* `88025d5a6` feat(copyright): Detect SPDX-FileCopyrightText keyword
+* `41674a5bd` feat(API): add user to a group.
+* `b154feee9` feat(api): Download file using UploadID
+* `7fbbe736c` feat(API): import csv-license file
+* `85cf46567` feat(oidc): allow user to configure token
+* `54f80533c` feat(api): Set permissions for a upload in a folder for different groups
+* `14aba0a4c` feat(API): REST-API to initiate FOSSology mantainance
+* `a5d6a18d5` feat(API): get group members with corresponding roles
+* `42e7f0c13` feat(API): remove member from group.
+* `0c9620e95` feat(api): new endpoint for geting copyright details
+* `c2b09f16e` feat(api): jobs/all endpoint added
+* `53b043b19` feat(API): delete user group
+* `917ee86af` feat(API): jobs returns only logged in user's jobs
+* `4038daac1` feat(reuse): ignore text of testdata
+* `454c8cede` feat(resue): reuse standard
+* `40dfd5833` feat(reuse): implemented REUSE standard
+* `f60b09983` feat(reuse): implemented REUSE standard
+* `a3e8f235e` feat(reuse): Adopted Reuse.software standard
+* `3424028f5` feat(API): Add pagination to search request
+* `9c12b6222` feat(copyrightexport): Added copyright export to fo_nomos_license_list
+* `262b93954` feat(ui): close banner for a session
+* `11f424ac3` feat(API): added a copyright feat in /uploads/{id}/licenses api
+
+#### Corrections
+
+* `cc1f48985` fix(lint): openapi lint corrected
+* `f88a614ec` fix(api): add missing variables
+* `b8de588a6` fix(reportImport): remove dual check for access and fix array warning
+* `6778a6041` refactor(demomod): add missing code in makefile
+* `118f29e0f` fix(copyright): fix regex conf files
+* `41cd3d446` fix(default_group): exposed deafult_group in /users/self
+* `8bde786a7` fix(ui): restore license text for bulk modal
+* `fa4964c83` fix(reuser): reuse all report columns
+* `b9f727dc4` fix(ci): update spectral-action to fix ci test
+* `a9054815a` fix(uploadPermission):introduced error on changing upload permissions
+* `20376e602` fix(reuse): perform code fixes on reuse branch
+* `75a386bc1` test(ci): Run REUSE compliance check in CI
+* `dd873faf6` fix(reuser): add scancode as dependency if sched
+* `8c9f8bf92` fix(ui): Fix upload from Srv for parameterize agent
+* `13fb71910` fix(make): Fix warnings in make for Ubuntu 20.04.2 LTS
+* `d94cced54` fix(readme): typo fixed
+
+#### Infrastructure
+
+* `251be4682` chore(deps): bump twig/twig from 3.3.8 to 3.4.3 in /src
+* `03b180355` chore(Dockerfile): add OCI annotations
+* `534564bc9` docs(openapi): fix spectral lint warnings/errors
+* `045440de8` chore(component-id): use package-url instead purl
+* `ff8e440de` chore(deps): bump guzzlehttp/guzzle from 7.4.1 to 7.4.3 in /src
+* `42aa7c40d` chore(workflow): update GHA dependencies
+* `c7d61ba6d` chore(deps): bump guzzlehttp/guzzle from 7.4.4 to 7.4.5 in /src
+* `113253c2d` chore(deps): bump guzzlehttp/guzzle from 7.4.3 to 7.4.4 in /src
+* `fe2bd41a0` docs(reuse): reuse badge added
+
 ### 4.1.0 (May 12th 2022)
 
 This release adds important corrections to
