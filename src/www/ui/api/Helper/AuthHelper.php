@@ -17,15 +17,17 @@
  */
 namespace Fossology\UI\Api\Helper;
 
-use Symfony\Component\HttpFoundation\Session\Session;
-use Fossology\Lib\Dao\UserDao;
-use Fossology\Lib\Auth\Auth;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
-use Firebase\JWT\JWK;
+use Firebase\JWT\CachedKeySet;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use \GuzzleHttp\Client;
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UserDao;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\HttpFactory;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\HttpFoundation\Session\Session;
 use UnexpectedValueException;
 
 /**
@@ -295,17 +297,21 @@ class AuthHelper
    * @param[out] integer $userId     User ID from DB
    * @param[out] string  $tokenScope Token scope from DB
    *
-   * @return mixed True on success, Info object on failure.
+   * @return bool|Info True on success, Info object on failure.
    */
   private function validateOauthLogin($jwtToken, &$userId, &$tokenScope)
   {
     global $SysConf;
     $jwks = $this->loadJwks();
     try {
-      $jwtTokenDecoded = JWT::decode(
-        $jwtToken,
-        JWK::parseKeySet($jwks)
-      );
+      try {
+        $jwtTokenDecoded = JWT::decode(
+          $jwtToken,
+          $jwks
+        );
+      } catch (\Exception $e) {
+        throw new \UnexpectedValueException("JWKS: " . $e->getMessage());
+      }
       $clientId = $jwtTokenDecoded->{$SysConf['SYSCONFIG']['OidcClientIdClaim']};
       $tokenId = $this->dbHelper->getTokenIdFromClientId($clientId);
       $dbRows = $this->dbHelper->getTokenKey($tokenId);
@@ -336,7 +342,7 @@ class AuthHelper
    * Load the JWK list from cache file (if exists), otherwise download from
    * server and cache it. The cache is stored for 24 hours.
    *
-   * @return array JWK keys
+   * @return CachedKeySet JWK keys
    * @throws UnexpectedValueException Throws exception if jwk does not contain
    *                                  "keys"
    */
@@ -344,14 +350,12 @@ class AuthHelper
   {
     global $SysConf;
     $cacheDir = array_key_exists('CACHEDIR', $GLOBALS) ? $GLOBALS['CACHEDIR'] : null;
-    $cacheFile = "$cacheDir/oauth.jwks";
-    if (file_exists($cacheFile)) {
-      $mtime = filemtime($cacheFile);
-      $mtime += 24 * 60 * 60;
-      if ($mtime > time()) {
-        return json_decode(file_get_contents($cacheFile), true);
-      }
+    $cacheDuration = 60 * 60 * 24; // 24 hours
+    $algInject = $SysConf['SYSCONFIG']['OidcJwkAlgInject'];
+    if (empty($algInject)) {
+      $algInject = null;
     }
+
     $proxy = [];
 
     if (
@@ -381,23 +385,20 @@ class AuthHelper
       'proxy' => $proxy,
       'headers' => $headers
     ]);
-    $response = $guzzleClient->get($SysConf['SYSCONFIG']['OidcJwksURL']);
-    $content = $response->getBody()->getContents();
-    $jwks = json_decode($content, true);
-    if (!array_key_exists("keys", $jwks)) {
-      throw new UnexpectedValueException('"keys" member must exist in the JWK Set');
-    }
-    $algInject = $SysConf['SYSCONFIG']['OidcJwkAlgInject'];
-    if (!empty($algInject)) {
-      // Change alg key if DB has value
-      for ($i=0; $i < count($jwks['keys']); $i++) {
-        if (!array_key_exists("alg", $jwks['keys'][$i])) {
-          $jwks['keys'][$i]["alg"] = $algInject;
-        }
-      }
-    }
-    file_put_contents($cacheFile, json_encode($jwks));
-    return $jwks;
+
+    $httpFactory = new HttpFactory();
+
+    $cacheItemPool = new FilesystemAdapter('rest', $cacheDuration, $cacheDir);
+
+    return new CachedKeySet(
+      $SysConf['SYSCONFIG']['OidcJwksURL'],
+      $guzzleClient,
+      $httpFactory,
+      $cacheItemPool,
+      $cacheDuration,
+      true,
+      $algInject
+    );
   }
 
   /**
