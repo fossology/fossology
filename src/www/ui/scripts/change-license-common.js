@@ -265,7 +265,7 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
     whatCol = what;
     $(refTextId).val(htmlDecode(clearingsForSingleFile));
     if (what == 4 || what == "comment") {
-      createDropDown($("#textModal > form > div"), $("#referenceText"));
+      createDropDown($("#textModalComment"), $("#referenceText"));
     } else {
       $("#licenseStdCommentDropDown-text").hide();
       $("#licenseStdCommentDropDown").next(".select2-container").hide();
@@ -276,7 +276,7 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
     whatCol = what;
     whatLicId = licenseId;
     if (what == 4 || what == "comment") {
-      createDropDown($("#textModal > form > div"), $("#referenceText"));
+      createDropDown($("#textModalComment"), $("#referenceText"));
     } else {
       $("#licenseStdCommentDropDown-text").hide();
       $("#licenseStdCommentDropDown").next(".select2-container").hide();
@@ -449,7 +449,8 @@ function createDropDown(element, textBox) {
   }
   dropDown = $("<select />", {
     "id": "licenseStdCommentDropDown",
-    "class": "ui-render-select2"
+    "class": "ui-render-select2",
+    "style": "width:100%"
   }).on("select2:select", function(e) {
     let id = e.params.data.id;
     getStdLicenseComments(id, function (comment) {
