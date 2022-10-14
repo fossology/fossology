@@ -146,10 +146,10 @@ class OneShot extends DefaultPlugin
     foreach (explode(',', $lineMatches['diff']) as $diff) {
       // t[0+4798] M0 s[0+4834]
       if (preg_match('/t\[(?P<start>[0-9]*)\+?(?P<len>[0-9]*)?\] M(?P<type>.?) s\[(?P<rf_start>[0-9]*)\+?(?P<rf_len>[0-9]*)?\]/', $diff, $diffMatches)) {
-        $start = $diffMatches['start'];
-        $end = $start + $diffMatches['len'];
+        $start = intval($diffMatches['start']);
+        $end = $start + intval($diffMatches['len']);
         $rfStart = intval($diffMatches['rf_start']);
-        $rfEnd = $rfStart + $diffMatches['rf_len'];
+        $rfEnd = $rfStart + intval($diffMatches['rf_len']);
 
         switch ($diffMatches['type']) {
           case '0':
