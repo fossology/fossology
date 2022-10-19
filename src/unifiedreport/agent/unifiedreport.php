@@ -421,7 +421,8 @@ class UnifiedReport extends Agent
         $cell1->addText(htmlspecialchars($licenseMain["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
         $cell2 = $table->addCell($secondColLen);
         // replace new line character
-        $licenseText = str_replace("\n", "<w:br/>\n", htmlspecialchars($licenseMain["text"], ENT_DISALLOWED));
+        $licenseText = str_replace("\n", "</w:t>\n<w:br />\n<w:t xml:space=\"preserve\">", htmlspecialchars($licenseMain["text"], ENT_DISALLOWED));
+        $licenseText = str_replace("\r", "", $licenseText);
         $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
         if (!empty($licenseMain["files"])) {
           $cell3 = $table->addCell($thirdColLen, $styleColumn);
@@ -468,7 +469,8 @@ class UnifiedReport extends Agent
         $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
         $cell2 = $table->addCell($secondColLen, "pStyle");
         // replace new line character
-        $licenseText = str_replace("\n", "<w:br/>\n", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
+        $licenseText = str_replace("\n", "</w:t>\n<w:br />\n<w:t xml:space=\"preserve\">", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
+        $licenseText = str_replace("\r", "", $licenseText);
         $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
         $cell3 = $table->addCell($thirdColLen, "pStyle");
         asort($licenseStatement["files"]);
@@ -513,7 +515,8 @@ class UnifiedReport extends Agent
           $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
           $cell2 = $table->addCell($secondColLen);
           // replace new line character
-          $licenseText = str_replace("\n", "<w:br/>\n", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
+          $licenseText = str_replace("\n", "</w:t>\n<w:br />\n<w:t xml:space=\"preserve\">", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
+          $licenseText = str_replace("\r", "", $licenseText);
           $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
           $cell3 = $table->addCell($thirdColLen, $riskarray['color']);
           asort($licenseStatement["files"]);
