@@ -11,6 +11,7 @@ var uploadId = {{ uploadId }};
 var allUsers = {{ allusersval }};
 var pageIndex = {{ page }};
 var fullUri = '?mod=showjobs&upload=' + uploadId;
+var allJobsUri = '?mod=all_job_status';
 if (allUsers != 0) {
   fullUri += '&allusers=' + allUsers;
 }
@@ -106,12 +107,21 @@ function createTableForJob(job) {
     uploadLink = '<span style="color:black">' + job.job.jobName + '</span>';
   }
   var uploadETA = "";
-  if ((job.upload !== null) && (job.upload.uploadEta !== null)) {
-    uploadETA = job.upload.uploadEta;
-  }
+  var allJobsStatus = "";
+  $.each(job.job.jobQueue, function(jobQueueId, jobQueueData) {
+    if (jobQueueData.canDoActions && jobQueueData.isInProgress) {
+      if ((job.upload !== null) && (job.upload.uploadEta !== null)) {
+        uploadETA = job.upload.uploadEta;
+      }
+      if (allJobsStatus == ""){
+        allJobsStatus += ' [<a href="' + allJobsUri;
+        allJobsStatus += '" title="{{ 'View all jobs in dashboard'|trans }}">{{ 'Status'|trans }}</a>]';
+      }
+    }
+  });
   tableTemplate.html('<thead><tr><th></th>' +
     '<th colspan="6" class="text-center">' + uploadLink + '</th><th style="color:black">' +
-    uploadETA + '</th></tr>' + '</thead><tbody></tbody>');
+    allJobsStatus +' '+ uploadETA + '</th></tr>' + '</thead><tbody></tbody>');
   return tableTemplate;
 }
 

@@ -153,7 +153,8 @@ class core_auth extends FO_Plugin
     global $SysConf;
 
     if (empty($userRow)) {
-      $userRow = $this->userDao->getUserAndDefaultGroupByUserName('Default User');
+      $username = 'Default User';
+      $userRow = $this->userDao->getUserAndDefaultGroupByUserName($username);
     }
 
     $_SESSION[Auth::USER_ID] = $userRow['user_pk'];
