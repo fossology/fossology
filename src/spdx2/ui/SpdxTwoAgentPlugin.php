@@ -8,7 +8,7 @@
  * @dir
  * @brief UI for SPDX2 agent
  */
-namespace Fossology\SpdxTwo;
+namespace Fossology\SpdxTwo\UI;
 
 use Fossology\Lib\Plugin\AgentPlugin;
 

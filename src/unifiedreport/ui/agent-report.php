@@ -5,6 +5,8 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
+namespace Fossology\UnifiedReport\UI;
+
 use Fossology\Lib\Plugin\AgentPlugin;
 
 /**

@@ -12,21 +12,20 @@
 
 namespace Fossology\UI\Api\Test\Controllers;
 
-use Mockery as M;
-use Fossology\CliXml\CliXmlGeneratorUi;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Helper\DbHelper;
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use Fossology\UI\Api\Helper\ResponseHelper;
-use Slim\Psr7\Request;
+use Mockery as M;
 use Slim\Psr7\Factory\StreamFactory;
-use Slim\Psr7\Uri;
 use Slim\Psr7\Headers;
+use Slim\Psr7\Request;
+use Slim\Psr7\Uri;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
@@ -47,7 +46,8 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     'spdx2tv',
     'readmeoss',
     'unifiedreport',
-    'clixml'
+    'clixml',
+    'decisionexporter'
   );
 
   /**
@@ -75,7 +75,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
   private $groupId;
 
   /**
-   * @var SpdxTwoGeneratorUi $spdxPlugin
+   * @var M\MockInterface $spdxPlugin
    * SPDX generator mock
    */
   private $spdxPlugin;
@@ -105,6 +105,12 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
   private $downloadPlugin;
 
   /**
+   * @var M\MockInterface $decisionExporterPlugin
+   * DecisionExporterAgentPlugin mock
+   */
+  private $decisionExporterPlugin;
+
+  /**
    * @var DbManager $dbManager
    * DbManager mock
    */
@@ -131,15 +137,16 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     global $container;
     $this->userId = 2;
     $this->groupId = 2;
-    $container = M::mock('ContainerBuilder');
+    $container = M::mock('Psr\Container\ContainerInterface');
     $this->dbHelper = M::mock(DbHelper::class);
     $this->dbManager = M::mock(DbManager::class);
     $this->restHelper = M::mock(RestHelper::class);
     $this->uploadDao = M::mock(UploadDao::class);
-    $this->spdxPlugin = M::mock(SpdxTwoGeneratorUi::class);
+    $this->spdxPlugin = M::mock('SpdxTwoGeneratorUi');
     $this->readmeossPlugin = M::mock('ReadMeOssPlugin');
-    $this->clixmlPlugin = M::mock(CliXmlGeneratorUi::class);
+    $this->clixmlPlugin = M::mock('CliXmlGeneratorUi');
     $this->unifiedPlugin = M::mock('FoUnifiedReportGenerator');
+    $this->decisionExporterPlugin = M::mock('DecisionExporterAgentPlugin');
     $this->downloadPlugin = M::mock('ui_download');
 
     $this->dbHelper->shouldReceive('getDbManager')->andReturn($this->dbManager);
@@ -159,6 +166,8 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper->shouldReceive('getPlugin')
       ->withArgs(array('agent_founifiedreport'))
       ->andReturn($this->unifiedPlugin);
+    $this->restHelper->shouldReceive('getPlugin')
+      ->withArgs(['agent_fodecisionexporter'])->andReturn($this->decisionExporterPlugin);
 
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
@@ -262,6 +271,8 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs([$this->groupId, $upload])->andReturn([32, 33, ""]);
     $this->clixmlPlugin->shouldReceive('scheduleAgent')
       ->withArgs([$this->groupId, $upload])->andReturn([32, 33, ""]);
+    $this->decisionExporterPlugin->shouldReceive('scheduleAgent')
+      ->withArgs([$this->groupId, $upload])->andReturn([32, 33]);
 
     $expectedResponse = new Info(201, "localhost/api/v1/report/32",
       InfoType::INFO);

@@ -215,6 +215,7 @@ $app->group('/report',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('', ReportController::class . ':getReport');
     $app->get('/{id:\\d+}', ReportController::class . ':downloadReport');
+    $app->post('/import', ReportController::class . ':importReport');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

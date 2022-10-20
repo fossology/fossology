@@ -12,15 +12,21 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Psr\Http\Message\ServerRequestInterface;
+use Fossology\CliXml\UI\CliXmlGeneratorUi;
+use Fossology\DecisionExporter\UI\FoDecisionExporter;
+use Fossology\DecisionImporter\UI\AgentDecisionImporterPlugin;
+use Fossology\ReadmeOSS\UI\ReadMeOssPlugin;
+use Fossology\SpdxTwo\UI\SpdxTwoGeneratorUi;
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Data\Upload\Upload;
-use Fossology\UI\Api\Helper\ResponseHelper;
+use Fossology\UnifiedReport\UI\FoUnifiedReportGenerator;
+use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\StreamFactory;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @class ReportController
@@ -39,8 +45,17 @@ class ReportController extends RestController
     'spdx2tv',
     'readmeoss',
     'unifiedreport',
-    'clixml'
+    'clixml',
+    'decisionexporter'
   );
+
+  /**
+   * @var string[] $importAllowed
+   * Allowed report types to be imported.
+   */
+  private $importAllowed = [
+    'decisionimporter'
+  ];
 
   /**
    * Get the required report for the required upload
@@ -74,23 +89,33 @@ class ReportController extends RestController
         case $this->reportsAllowed[0]:
         case $this->reportsAllowed[1]:
         case $this->reportsAllowed[2]:
+          /** @var SpdxTwoGeneratorUi $spdxGenerator */
           $spdxGenerator = $this->restHelper->getPlugin('ui_spdx2');
           list ($jobId, $jobQueueId, $error) = $spdxGenerator->scheduleAgent(
             $this->restHelper->getGroupId(), $upload, $reportFormat);
           break;
         case $this->reportsAllowed[3]:
+          /** @var ReadMeOssPlugin $readmeGenerator */
           $readmeGenerator = $this->restHelper->getPlugin('ui_readmeoss');
           list ($jobId, $jobQueueId, $error) = $readmeGenerator->scheduleAgent(
             $this->restHelper->getGroupId(), $upload);
           break;
         case $this->reportsAllowed[4]:
+          /** @var FoUnifiedReportGenerator $unifiedGenerator */
           $unifiedGenerator = $this->restHelper->getPlugin('agent_founifiedreport');
           list ($jobId, $jobQueueId, $error) = $unifiedGenerator->scheduleAgent(
             $this->restHelper->getGroupId(), $upload);
           break;
         case $this->reportsAllowed[5]:
+          /** @var CliXmlGeneratorUi $clixmlGenerator */
           $clixmlGenerator = $this->restHelper->getPlugin('ui_clixml');
           list ($jobId, $jobQueueId) = $clixmlGenerator->scheduleAgent(
+            $this->restHelper->getGroupId(), $upload);
+          break;
+        case $this->reportsAllowed[6]:
+          /** @var FoDecisionExporter $decisionExporter */
+          $decisionExporter = $this->restHelper->getPlugin('agent_fodecisionexporter');
+          list($jobId, $jobQueueId) = $decisionExporter->scheduleAgent(
             $this->restHelper->getGroupId(), $upload);
           break;
         default:
@@ -259,5 +284,105 @@ class ReportController extends RestController
     }
     // Everything went well
     return true;
+  }
+
+  /**
+   * Download the report with the given job id
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function importReport(ServerRequestInterface $request, ResponseHelper $response, array $args): ResponseHelper
+  {
+    $returnVal = null;
+    $query = $request->getQueryParams();
+    if (!array_key_exists("upload", $query)) {
+      $returnVal = new Info(400, "Bad Request. **upload** is a required query param", InfoType::INFO);
+    } elseif (!array_key_exists("reportFormat", $query) || !in_array($query["reportFormat"], $this->importAllowed)) {
+      $returnVal = new Info(400, "Bad Request. Missing or wrong query param 'reportFormat'", InfoType::ERROR);
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $upload_pk = intval($query['upload']);
+    // checking if the scheduler is running or not
+    $commu_status = fo_communicate_with_scheduler('status', $response_from_scheduler, $error_info);
+    if ($commu_status) {
+      $reqBody = $this->getParsedBody($request);
+      $res = true;
+      if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $upload_pk)) {
+        $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+        $res = false;
+      } else if (! $this->restHelper->getUploadDao()->isAccessible($upload_pk, $this->restHelper->getGroupId())) {
+        $returnVal = new Info(403, "Upload is not accessible", InfoType::ERROR);
+        $res = false;
+      }
+      if (!$res) {
+        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      }
+      $reportFormat = $query["reportFormat"];
+      switch ($reportFormat) {
+        case $this->importAllowed[0]:
+          $returnVal = $this->importDecisionJson($request, $response, $reqBody, $upload_pk);
+      }
+      return $returnVal;
+    }
+    $returnVal = new Info(503, "Scheduler is not running!", InfoType::ERROR);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Run decision importer agent for JSON report.
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $reqBody
+   * @param int $uploadId
+   * @return ResponseHelper
+   */
+  private function importDecisionJson(ServerRequestInterface $request, ResponseHelper $response, array $reqBody, int $uploadId): ResponseHelper
+  {
+    /** @var AgentDecisionImporterPlugin $decisionImporter */
+    $decisionImporter = $this->restHelper->getPlugin("ui_fodecisionimporter");
+    $symfonyRequest = new Request();
+
+    $files = $request->getUploadedFiles();
+
+    if (empty($files['report'])) {
+      $info = new Info(400, "No file uploaded", InfoType::ERROR);
+      return $response->withJson($info->getArray(), $info->getCode());
+    } elseif (!array_key_exists("importerUser", $reqBody)) {
+      $info = new Info(400, "Missing parameter 'importerUser'", InfoType::ERROR);
+      return $response->withJson($info->getArray(), $info->getCode());
+    }
+
+    $importerUser = intval($reqBody["importerUser"]);
+    if (empty($importerUser)) {
+      $importerUser = $this->restHelper->getUserId();
+    }
+
+    /** @var \Slim\Psr7\UploadedFile $slimFile */
+    $slimFile = $files['report'];
+
+    $uploadedFile = new UploadedFile($slimFile->getFilePath(), $slimFile->getClientFilename(), $slimFile->getClientMediaType());
+
+    $symfonyRequest->files->set('report', $uploadedFile);
+    $symfonyRequest->request->set('uploadselect', $uploadId);
+    $symfonyRequest->request->set('userselect', $importerUser);
+
+    try {
+      $agentResp = $decisionImporter->handleRequest($symfonyRequest);
+    } catch (\Exception $e) {
+      $error = new Info(500, $e->getMessage(), InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    if ($agentResp === false) {
+      $info = new Info(400, "Missing required fields", InfoType::ERROR);
+    } else {
+      $info = new Info(201, intval($agentResp[0]), InfoType::INFO);
+    }
+    return $response->withJson($info->getArray(), $info->getCode());
   }
 }

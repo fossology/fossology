@@ -56,6 +56,8 @@ set(CPACK_COMPONENTS_ALL
     debug
     decider
     deciderjob
+    decisionexporter
+    decisionimporter
     delagent
     mimetype
     monk
@@ -421,6 +423,32 @@ set(CPACK_DEBIAN_DECIDERJOB_PACKAGE_DEPENDS
     "fossology-common")
 
 set(CPACK_DEBIAN_DECIDERJOB_PACKAGE_SECTION "utils")
+
+## FOSSOLOGY-DECISIONEXPORTER PACKAGE
+set(CPACK_DEBIAN_DECISIONEXPORTER_PACKAGE_NAME "fossology-decisionexporter")
+set(CPACK_DEBIAN_DECISIONEXPORTER_FILE_NAME "fossology-decisionexporter_${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_DECISIONEXPORTER_DESCRIPTION
+"architecture for analyzing software, decisionexporter
+${FO_PACKAGE_COMMON_DESCRIPTION}
+This package contains the decisionexporter agent program and its resources.")
+
+set(CPACK_DEBIAN_DECISIONEXPORTER_PACKAGE_DEPENDS
+    "fossology-common")
+
+set(CPACK_DEBIAN_DECISIONEXPORTER_PACKAGE_SECTION "utils")
+
+## FOSSOLOGY-DECISIONIMPORTER PACKAGE
+set(CPACK_DEBIAN_DECISIONIMPORTER_PACKAGE_NAME "fossology-decisionimporter")
+set(CPACK_DEBIAN_DECISIONIMPORTER_FILE_NAME "fossology-decisionimporter_${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_DECISIONIMPORTER_DESCRIPTION
+"architecture for analyzing software, decisionimporter
+${FO_PACKAGE_COMMON_DESCRIPTION}
+This package contains the decisionimporter agent program and its resources.")
+
+set(CPACK_DEBIAN_DECISIONIMPORTER_PACKAGE_DEPENDS
+    "fossology-common")
+
+set(CPACK_DEBIAN_DECISIONIMPORTER_PACKAGE_SECTION "utils")
 
 ## FOSSOLOGY-READMEOSS PACKAGE
 set(CPACK_DEBIAN_READMEOSS_PACKAGE_NAME "fossology-readmeoss")

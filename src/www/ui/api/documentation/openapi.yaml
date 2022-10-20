@@ -1889,6 +1889,74 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
+  /report/import:
+    parameters:
+      - name: groupName
+        description: The group name to chose while uploading report
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided
+      - name: upload
+        in: query
+        required: true
+        description: Upload ID
+        schema:
+          type: integer
+      - name: reportFormat
+        in: query
+        required: true
+        description: Type of report being uploaded
+        schema:
+          enum:
+            - decisionimporter
+    post:
+      operationId: uploadReport
+      tags:
+        - Report
+      summary: Import a report to an existing upload
+      description: >
+        Import a report to an existing upload
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/DecisionImporter'
+      responses:
+        '201':
+          description: ReportImport job is scheduled successfully for the given upload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Bad Request, missing parameters in request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Upload is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Upload does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '503':
+          description: Scheduler is not running!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /filesearch:
     parameters:
       - name: groupName
@@ -2967,9 +3035,26 @@ components:
               enum:
                 - OK
                 - ERROR
+    DecisionImporter:
+      description: Information required by Decision Importer agent
+      type: object
+      properties:
+        importerUser:
+          type: integer
+          description: User ID on which to tag imported decisions. Use '0' for self.
+          default: 0
+          example: 3
+          required: true
+        report:
+          $ref: '#/components/schemas/ReportImportFile'
+    ReportImportFile:
+      description: Report file to be imported
+      type: string
+      format: binary
+      required: true
   responses:
     defaultResponse:
-      description: Some error occured. Check the "message"
+      description: Some error occurred. Check the "message"
       content:
         application/json:
           schema:

@@ -12,6 +12,8 @@
  * @brief UI component of ReadMe_OSS agent
  */
 
+namespace Fossology\ReadmeOSS\UI;
+
 use Fossology\Lib\Plugin\AgentPlugin;
 
 /**
