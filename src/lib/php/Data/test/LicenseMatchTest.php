@@ -38,8 +38,9 @@ class LicenseMatchTest extends \PHPUnit\Framework\TestCase
   {
     $this->id = 8;
     $this->shortName = "testSN";
+    $this->spdxId = "testSN";
     $this->fullName = "testFN";
-    $this->licenseRef = new LicenseRef($this->id, $this->shortName, $this->fullName);
+    $this->licenseRef = new LicenseRef($this->id, $this->shortName, $this->fullName, $this->spdxId);
 
     $this->agentId = 12;
     $this->agentName = "Monk";

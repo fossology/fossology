@@ -45,17 +45,17 @@ class CliXml extends Agent
   /** @var string */
   protected $packageName;
 
-  /** @var cpClearedGetter $cpClearedGetter
+  /** @var XpClearedGetter $cpClearedGetter
    * Copyright clearance object
    */
   private $cpClearedGetter;
 
-  /** @var ipraClearedGetter $ipraClearedGetter
+  /** @var XpClearedGetter $ipraClearedGetter
    * IPRA clearance object
    */
   private $ipraClearedGetter;
 
-  /** @var eccClearedGetter $eccClearedGetter
+  /** @var XpClearedGetter $eccClearedGetter
    * ECC clearance object
    */
   private $eccClearedGetter;

@@ -11,7 +11,7 @@ $(document).ready(function () {
   //
 
   // Note: At this point one has to use delegated event handlers.
-  //  Ordinaray handlers are only registered for elements that exist in the DOM at the time of registration
+  //  Ordinarily handlers are only registered for elements that exist in the DOM at the time of registration
   //  Datatable pagination breaks this as ordinary handlers are only registered for elements of the one visible table page.
   $('#adminLicenseTable').on('mouseover', '.licenseTextArea', function() {
     if( $(this).data('textloaded')==false ) {
@@ -44,7 +44,7 @@ function getDataForTable() {
     "edit":               [ "{{ entry['rf_pk'] }}", "{{ entry['marydone'] }}", "{{ entry['rf_shortname']|escape('js') }}"],
     "marydone":           "{{ entry['marydone'] }}",
     "rf_pk":              "{{ entry['rf_pk'] }}",
-    "rf_spdx_compatible": "{{ entry['rf_spdx_compatible'] }}",
+    "rf_spdx_id":         "{{ entry['rf_spdx_id']|escape('js') }}",
     "rf_shortname":       "{{ entry['rf_shortname']|escape('js') }}",
     "rf_fullname":        "{{ entry['rf_fullname']|escape('js') }}",
     "rf_text":            [ "{{ entry['rf_pk'] }}", "{{ entry['rf_text'][:120]|escape('js') }}" ],
@@ -72,7 +72,7 @@ function createLicenseTable() {
     columns: [
       {title: "Edit", data: "edit", defaultContent: "", render: renderEdit, orderable: false},
       {title: "Checked", data: "marydone", defaultContent: "", render: renderBoolean},
-      {title: "SPDX Compatible", data: "rf_spdx_compatible", defaultContent: "", render: renderBoolean},
+      {title: "SPDX ID", data: "rf_spdx_id", defaultContent: ""},
       {title: "Shortname", data: "rf_shortname", defaultContent: ""},
       {title: "Fullname", data: "rf_fullname", defaultContent: ""},
       {title: "Text", data: "rf_text", defaultContent: "", render: renderLicenseText},
@@ -134,7 +134,7 @@ function createLicenseTable() {
       options.push("<option>" + ob_topics[i] + "</option>");
     }
     return "<div style='overflow:auto;max-width:280px'>" +
-      "<select size='4' readonly>" + options.join("") +
+      "<select size='4' style='width:100%' readonly>" + options.join("") +
       "</select></div>";
   }
 

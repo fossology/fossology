@@ -148,7 +148,7 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
 
     /** @var LicenseRef */
     $matchedLicense = $licenseMatch->getLicenseRef();
-    $this->assertEquals($matchedLicense->getShortName(), "GPL-3.0");
+    $this->assertEquals($matchedLicense->getShortName(), "GPL-3.0-only");
 
     /** @var AgentRef */
     $agentRef = $licenseMatch->getAgentRef();
@@ -200,7 +200,7 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
 
     /** @var LicenseRef */
     $matchedLicense = $licenseMatch->getLicenseRef();
-    $this->assertEquals($matchedLicense->getShortName(), "GPL-3.0");
+    $this->assertEquals($matchedLicense->getShortName(), "GPL-3.0-only");
 
     /** @var AgentRef */
     $agentRef = $licenseMatch->getAgentRef();

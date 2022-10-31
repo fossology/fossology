@@ -16,7 +16,8 @@ class ReportImportAgentPlugin extends AgentPlugin
     'addConcludedAsDecisionsOverwrite',
     'addConcludedAsDecisionsTBD',
     'addCopyrights',
-    'addNewLicensesAs'
+    'addNewLicensesAs',
+    'licenseMatch'
   );
 
   public function __construct() {

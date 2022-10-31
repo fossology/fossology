@@ -29,16 +29,16 @@ class License extends LicenseRef
   /**
    * @var string
    */
-  private $spdxCompatible;
+  private $spdxId;
 
-  function __construct($id, $shortName, $fullName, $risk, $text, $url, $detectorType, $spdxCompatible = false)
+  function __construct($id, $shortName, $fullName, $risk, $text, $url, $detectorType, $spdxId = null)
   {
-    parent::__construct($id, $shortName, $fullName);
+    parent::__construct($id, $shortName, $fullName, $spdxId);
     $this->text = $text;
     $this->url = $url;
     $this->risk = $risk;
     $this->detectorType = $detectorType;
-    $this->spdxCompatible = $spdxCompatible;
+    $this->spdxId = $spdxId;
   }
 
   /**
@@ -58,11 +58,11 @@ class License extends LicenseRef
   }
 
   /**
-   * @return boolean
+   * @return string
    */
-  public function getSpdxCompatible()
+  public function getSpdxId()
   {
-    return $this->spdxCompatible;
+    return $this->spdxId;
   }
 
   /**
@@ -84,6 +84,7 @@ class License extends LicenseRef
   /** @return LicenseRef */
   public function getRef()
   {
-    return new parent($this->getId(), $this->getShortName(), $this->getFullName());
+    return new parent($this->getId(), $this->getShortName(),
+      $this->getFullName(), $this->getSpdxId());
   }
 }

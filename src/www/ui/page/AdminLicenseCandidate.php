@@ -14,7 +14,6 @@ use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminLicenseCandidate extends DefaultPlugin
@@ -72,7 +71,6 @@ class AdminLicenseCandidate extends DefaultPlugin
     $shortname = $request->get('shortname') ?: $vars['rf_shortname'];
     $vars['shortname'] = $shortname;
     $rfText = $vars['rf_text'];
-    $vars['rf_text'] = $rfText;
 
     $suggest = intval($request->get('suggest_rf'));
     $suggestLicense = false;
@@ -89,6 +87,7 @@ class AdminLicenseCandidate extends DefaultPlugin
     }
     if ($suggestLicense !== false) {
       $vars['suggest_rf'] = $suggest;
+      $vars['suggest_spdx_id'] = $suggestLicense['rf_spdx_id'];
       $vars['suggest_shortname'] = $suggestLicense['rf_shortname'];
       $vars['suggest_fullname'] = $suggestLicense['rf_fullname'];
       $vars['suggest_text'] = $suggestLicense['rf_text'];
@@ -147,7 +146,7 @@ class AdminLicenseCandidate extends DefaultPlugin
 
   private function getArrayArrayData()
   {
-    $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,group_name,group_pk "
+    $sql = "SELECT rf_pk,rf_spdx_id,rf_shortname,rf_fullname,rf_text,group_name,group_pk "
             . "FROM license_candidate, groups "
             . "WHERE group_pk=group_fk AND marydone";
     /* @var $dbManager DbManager */
@@ -161,11 +160,11 @@ class AdminLicenseCandidate extends DefaultPlugin
       $edit = '<a href="' . $link . '"><img border="0" src="images/button_edit.png"></a>';
       $delete = '<img border="0" id="deletecandidate'.$row['rf_pk'].'" onClick="deleteCandidate('.$row['rf_pk'].')" src="images/icons/close_16.png">';
 
-      $aaData[] = array($edit, htmlentities($row['rf_shortname']),
-          htmlentities($row['rf_fullname']),
-          '<div style="overflow-y:scroll;max-height:150px;margin:0;">' . nl2br(htmlentities($row['rf_text'])) . '</div>',
-          htmlentities($row['group_name']),$delete
-          );
+      $aaData[] = array($edit, htmlentities($row['rf_spdx_id']),
+        htmlentities($row['rf_shortname']), htmlentities($row['rf_fullname']),
+        '<div style="overflow-y:scroll;max-height:150px;margin:0;">' . nl2br(htmlentities($row['rf_text'])) . '</div>',
+        htmlentities($row['group_name']),$delete
+      );
     }
     $dbManager->freeResult($res);
     return $aaData;
@@ -174,7 +173,7 @@ class AdminLicenseCandidate extends DefaultPlugin
 
   private function getDataRow($licId,$table='license_candidate')
   {
-    $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,rf_notes,rf_risk";
+    $sql = "SELECT rf_pk,rf_spdx_id,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,rf_notes,rf_risk";
     if ($table == 'license_candidate') {
       $sql .= ',group_name,group_pk FROM license_candidate LEFT JOIN groups ON group_pk=group_fk '
               . 'WHERE rf_pk=$1 AND marydone';
@@ -216,10 +215,10 @@ class AdminLicenseCandidate extends DefaultPlugin
     /* @var $dbManager DbManager */
     $dbManager = $this->getObject('db.manager');
     $dbManager->begin();
-    $dbManager->getSingleRow('INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft,
+    $dbManager->getSingleRow('INSERT INTO license_ref (rf_pk, rf_spdx_id, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft,
         "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora",
         marydone, rf_active, rf_text_updatable, rf_md5 , rf_detector_type, rf_risk)
-      (SELECT rf_pk, $2 as rf_shortname, rf_text, rf_url, now() as rf_add_date, rf_copyleft,
+      (SELECT rf_pk, rf_spdx_id, $2 as rf_shortname, rf_text, rf_url, now() as rf_add_date, rf_copyleft,
         "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora",
         false AS marydone, rf_active, rf_text_updatable, md5(rf_text) rf_md5 , 1 rf_detector_type, rf_risk
   FROM license_candidate WHERE rf_pk=$1)',array($rf,$shortname),__METHOD__.'.insert');

@@ -18,8 +18,10 @@ abstract class ClearedGetterCommon
   /** @var TreeDao */
   protected $treeDao;
 
-  /** @var array */
+  /** @var array $fileNameCache */
   private $fileNameCache = array();
+  /** @var array $fileHashes */
+  private $fileHashes = array();
 
   private $userId;
   private $groupId;
@@ -95,9 +97,11 @@ abstract class ClearedGetterCommon
 
       if (!array_key_exists($uploadTreeId, $this->fileNameCache)) {
         $this->fileNameCache[$uploadTreeId] = $this->treeDao->getFullPath($uploadTreeId, $uploadTreeTableName, $parentId);
+        $this->fileHashes[$uploadTreeId] = $this->treeDao->getItemHashes($uploadTreeId);
       }
 
       $statement['fileName'] = $this->fileNameCache[$uploadTreeId];
+      $statement['fileHash'] = strtolower($this->fileHashes[$uploadTreeId]["sha1"]);
     }
     unset($statement);
   }
@@ -113,6 +117,12 @@ abstract class ClearedGetterCommon
       $content = htmlspecialchars($content, ENT_DISALLOWED);
       $comments = convertToUTF8($statement['comments'], false);
       $fileName = $statement['fileName'];
+      $fileHash = $statement['fileHash'];
+      if (array_key_exists('acknowledgement', $statement)) {
+        $acknowledgement = $statement['acknowledgement'];
+      } else {
+        $acknowledgement = "";
+      }
 
       if (!array_key_exists('text', $statement)) {
         $description = $statement['description'];
@@ -140,17 +150,24 @@ abstract class ClearedGetterCommon
 
       if (empty($comments) && array_key_exists($groupBy, $statements)) {
         $currentFiles = &$statements[$groupBy]['files'];
+        $currentHash = &$statements[$groupBy]['hash'];
+        $currentAcknowledgement = &$statements[$groupBy]['acknowledgement'];
         if (!in_array($fileName, $currentFiles)) {
           $currentFiles[] = $fileName;
+          $currentHash[] = $fileHash;
+          $currentAcknowledgement[] = $acknowledgement;
         }
       } else {
         $singleStatement = array(
             "licenseId" => $licenseId,
             "content" => convertToUTF8($content, false),
             "text" => convertToUTF8($text, false),
-            "files" => array($fileName)
+            "files" => array($fileName),
+            "hash" => array($fileHash),
+            "acknowledgement" => array($acknowledgement)
           );
         if ($extended) {
+          $singleStatement["licenseId"] = $licenseId;
           $singleStatement["comments"] = convertToUTF8($comments, false);
           $singleStatement["risk"] =  $statement['risk'];
         }
@@ -161,12 +178,14 @@ abstract class ClearedGetterCommon
           $statements[] = $singleStatement;
         }
       }
+
       if (!empty($statement['textfinding']) && !empty($agentCall) && $agentCall != "license") {
         $findings[] = array(
             "licenseId" => $licenseId,
             "content" => convertToUTF8($statement['textfinding'], false),
             "text" => convertToUTF8($text, false),
-            "files" => array($fileName)
+            "files" => array($fileName),
+            "hash" => array($fileHash)
           );
         if ($extended) {
           $key = array_search($statement['textfinding'], array_column($findings, 'content'));

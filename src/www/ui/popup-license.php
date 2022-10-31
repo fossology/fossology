@@ -5,8 +5,8 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
-use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\LicenseDao;
 
 define("TITLE_POPUPLICENSE", _("Show Reference License"));
 
@@ -50,6 +50,7 @@ class PopupLicense extends FO_Plugin
       return;
     }
     $this->vars['shortName'] = $license->getShortName();
+    $this->vars['spdxId'] = $license->getSpdxId();
     $this->vars['fullName'] = $license->getFullName();
     $parent = $this->licenseDao->getLicenseParentById($license->getId());
     if ($parent !== null) {

@@ -46,20 +46,18 @@ use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\CopyrightDao;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\Package\ComponentType;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
-use Fossology\Lib\Dao\LicenseDao;
-use Fossology\Lib\Data\License;
-use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Data\Package\ComponentType;
 
 include_once(__DIR__ . "/spdx2utils.php");
 
@@ -127,11 +125,6 @@ class SpdxTwoAgent extends Agent
    */
   protected $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
 
-  /** @var callable $spdxValidityChecker
-   * SPDX validator to be used
-   */
-  protected $spdxValidityChecker = null;
-
   function __construct()
   {
     // deduce the agent name from the command line arguments
@@ -155,28 +148,16 @@ class SpdxTwoAgent extends Agent
 
     $this->agentSpecifLongOptions[] = self::UPLOAD_ADDS.':';
     $this->agentSpecifLongOptions[] = self::OUTPUT_FORMAT_KEY.':';
-
-    $dbManager = $this->dbManager;
-    $licenseDao = $this->licenseDao;
-    $groupId = $this->groupId;
-    $this->spdxValidityChecker = function ($licenseShortname) use ($dbManager, $licenseDao, $groupId)
-    {
-      $lic = $licenseDao->getLicenseByShortName($licenseShortname, $groupId);
-      if ($lic === null) {
-        return false;
-      }
-      return $dbManager->booleanFromDb($lic->getSpdxCompatible());
-    };
   }
 
   /**
    * @brief Parse arguments
-   * @param string $args Array of arguments to be parsed
+   * @param string[] $args Array of arguments to be parsed
    * @return array $args Parsed arguments
    */
   protected function preWorkOnArgs($args)
   {
-    if ((!array_key_exists(self::OUTPUT_FORMAT_KEY,$args)
+    if ((!array_key_exists(self::OUTPUT_FORMAT_KEY, $args)
          || $args[self::OUTPUT_FORMAT_KEY] === "")
         && array_key_exists(self::UPLOAD_ADDS,$args)) {
       $args = SpdxTwoUtils::preWorkOnArgsFlp($args,self::UPLOAD_ADDS,self::OUTPUT_FORMAT_KEY);
@@ -230,9 +211,8 @@ class SpdxTwoAgent extends Agent
       case "spdx2":
         $postfix = ".xml" . $postfix;
         break;
-      case "spdx2tv":
-        break;
       case "spdx2csv":
+      case "spdx2tv":
         break;
       case "dep5":
         $prefix = $prefix . "copyright-";
@@ -334,7 +314,7 @@ class SpdxTwoAgent extends Agent
     }
 
     if (strcmp($this->outputFormat, "dep5")!==0) {
-      $mainLicenses = SpdxTwoUtils::addPrefixOnDemandList($mainLicenses, $this->spdxValidityChecker);
+      $mainLicenses = SpdxTwoUtils::addPrefixOnDemandList($mainLicenses);
     }
 
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
@@ -369,7 +349,7 @@ class SpdxTwoAgent extends Agent
         'sha256' => $hashes['sha256'],
         'verificationCode' => $this->getVerificationCode($upload),
         'mainLicenses' => $mainLicenses,
-        'mainLicense' => SpdxTwoUtils::implodeLicenses($mainLicenses, $this->spdxValidityChecker),
+        'mainLicense' => SpdxTwoUtils::implodeLicenses($mainLicenses),
         'licenseComments' => $licenseComment,
         'fileNodes' => $fileNodes)
     );
@@ -405,14 +385,14 @@ class SpdxTwoAgent extends Agent
         $filesWithLicenses[$clearingDecision->getUploadTreeId()]['comment'][] = $clearingLicense->getComment();
         if ($clearingEvent->getReportinfo()) {
           $customLicenseText = $clearingEvent->getReportinfo();
-          $reportedLicenseShortname = $this->licenseMap->getProjectedShortname($this->licenseMap->getProjectedId($clearingLicense->getLicenseId())) .
+          $reportedLicenseShortname = $this->licenseMap->getProjectedSpdxId($this->licenseMap->getProjectedId($clearingLicense->getLicenseId())) .
                                     '-' . md5($customLicenseText);
           $this->includedLicenseIds[$reportedLicenseShortname] = $customLicenseText;
           $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $reportedLicenseShortname;
         } else {
           $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
           $this->includedLicenseIds[$reportedLicenseId] = true;
-          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $this->licenseMap->getProjectedShortname($reportedLicenseId);
+          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $this->licenseMap->getProjectedSpdxId($reportedLicenseId);
         }
       }
     }
@@ -422,7 +402,7 @@ class SpdxTwoAgent extends Agent
   /**
    * @brief Map licenses, copyrights, files and full path to filesWithLicenses array
    * @param[in,out] string $filesWithLicenses
-   * @param string $licenses
+   * @param string[] $licenses
    * @param string $copyrights
    * @param string $file
    * @param string $fullPath
@@ -450,7 +430,7 @@ class SpdxTwoAgent extends Agent
    * @brief Map findings to the files
    * @param[in,out] string &$filesWithLicenses
    * @param string $treeTableName
-   * @return String array of files with associated findings
+   * @return string[] Array of files with associated findings
    */
   protected function toLicensesWithFiles(&$filesWithLicenses, $treeTableName)
   {
@@ -490,7 +470,7 @@ class SpdxTwoAgent extends Agent
    * @brief Attach finding agents to the files and return names of scanners
    * @param[in,out] string &$filesWithLicenses
    * @param ItemTreeBounds $itemTreeBounds
-   * @return Name(s) of scanners used
+   * @return string Name(s) of scanners used
    */
   protected function addScannerResults(&$filesWithLicenses, ItemTreeBounds $itemTreeBounds)
   {
@@ -615,7 +595,7 @@ class SpdxTwoAgent extends Agent
   /**
    * @brief Write the report the file and update report table
    * @param string $packageNodes
-   * @param int $packageIds
+   * @param int[] $packageIds
    * @param int $uploadId
    */
   protected function writeReport(&$packageNodes, $packageIds, $uploadId)
@@ -629,7 +609,7 @@ class SpdxTwoAgent extends Agent
 
     $licenseTexts=$this->getLicenseTexts();
     if (strcmp($this->outputFormat, "dep5")!==0) {
-      $licenseTexts = SpdxTwoUtils::addPrefixOnDemandKeys($licenseTexts, $this->spdxValidityChecker);
+      $licenseTexts = SpdxTwoUtils::addPrefixOnDemandKeys($licenseTexts);
     }
 
     $message = $this->renderString($this->getTemplateFile('document'),array(
@@ -676,9 +656,9 @@ class SpdxTwoAgent extends Agent
 
   /**
    * @brief Generate report nodes for files
-   * @param string $filesWithLicenses
+   * @param string[][][] $filesWithLicenses
    * @param string $treeTableName
-   * @param int $uploadID
+   * @param int $uploadId
    * @return string Node content
    */
   protected function generateFileNodes($filesWithLicenses, $treeTableName, $uploadId)
@@ -692,9 +672,9 @@ class SpdxTwoAgent extends Agent
 
   /**
    * @brief For each file, generate the nodes by files
-   * @param string &$filesWithLicenses
+   * @param string[][][] $filesWithLicenses
    * @param string $treeTableName
-   * @param int $uploadID
+   * @param int $uploadId
    * @return string Node string
    */
   protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName, $uploadId)
@@ -733,9 +713,9 @@ class SpdxTwoAgent extends Agent
           'fileDirName' => dirname($fileName),
           'fileBaseName' => basename($fileName),
           'isCleared' => $licenses['isCleared'],
-          'concludedLicense' => SpdxTwoUtils::implodeLicenses($licenses['concluded'], $this->spdxValidityChecker),
-          'concludedLicenses' => SpdxTwoUtils::addPrefixOnDemandList($licenses['concluded'], $this->spdxValidityChecker),
-          'scannerLicenses' => SpdxTwoUtils::addPrefixOnDemandList($licenses['scanner'], $this->spdxValidityChecker),
+          'concludedLicense' => SpdxTwoUtils::implodeLicenses($licenses['concluded']),
+          'concludedLicenses' => SpdxTwoUtils::addPrefixOnDemandList($licenses['concluded']),
+          'scannerLicenses' => SpdxTwoUtils::addPrefixOnDemandList($licenses['scanner']),
           'copyrights' => $licenses['copyrights'],
           'licenseCommentState' => $stateComment
         );
@@ -751,7 +731,7 @@ class SpdxTwoAgent extends Agent
 
   /**
    * @brief For each file, generate the nodes by licenses
-   * @param string &$filesWithLicenses
+   * @param string[][][] $filesWithLicenses
    * @param string $treeTableName
    * @return string Node string
    */
@@ -850,7 +830,7 @@ class SpdxTwoAgent extends Agent
    * @brief Get spdx license comment state for a given upload
    *
    * @param int $uploadId
-   * @return boolval License comment state (TRUE : show license comment, FALSE : don't show it)
+   * @return bool License comment state (TRUE : show license comment, FALSE : don't show it)
    */
   protected function getSPDXReportConf($uploadId, $key)
   {

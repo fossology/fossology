@@ -519,7 +519,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
    */
   private function createClearingEvent($eventId, $timestamp, $licenseId, $licenseShortName, $licenseFullName, $eventType = ClearingEventTypes::USER, $isRemoved = false, $reportInfo = "<reportInfo>", $comment = "<comment>")
   {
-    $licenseRef = new LicenseRef($licenseId, $licenseShortName, $licenseFullName);
+    $licenseRef = new LicenseRef($licenseId, $licenseShortName, $licenseFullName, $licenseShortName);
     $clearingLicense = new ClearingLicense($licenseRef, $isRemoved, $reportInfo, $comment);
     return new ClearingEvent($eventId, $this->uploadTreeId, $timestamp, $this->userId, $this->groupId, $eventType, $clearingLicense);
   }
@@ -529,7 +529,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
    */
   protected function createScannerDetectedLicenses($licenseId = 13, $licenseShortname = "licA", $licenseFullName = "License-A")
   {
-    $licenseRef = new LicenseRef($licenseId, $licenseShortname, $licenseFullName);
+    $licenseRef = new LicenseRef($licenseId, $licenseShortname, $licenseFullName, $licenseShortname);
 
     $agentRef = M::mock(AgentRef::class);
 

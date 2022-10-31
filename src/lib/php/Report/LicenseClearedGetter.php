@@ -7,15 +7,16 @@
 
 namespace Fossology\Lib\Report;
 
+use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Data\License;
-use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Agent\Agent;
+use Fossology\Lib\Proxy\ScanJobProxy;
 
 class LicenseClearedGetter extends ClearedGetterCommon
 {
@@ -31,7 +32,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
   private $agentDao;
   /** @var string[] */
   private $licenseCache = array();
-  /** @var agentNames */
+  /** @var array $agentNames */
   protected $agentNames = AgentRef::AGENT_LIST;
 
   public function __construct()
@@ -88,7 +89,8 @@ class LicenseClearedGetter extends ClearedGetterCommon
         $ungroupedStatements[] = array(
           'licenseId' => $licenseId,
           'risk' => $risk,
-          'content' => $licenseMap->getProjectedShortname($originLicenseId, $clearingLicense->getShortName()),
+          'content' => $licenseMap->getProjectedSpdxId(
+              $originLicenseId, $clearingLicense->getSpdxId()),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
           'text' => $text
         );
@@ -198,7 +200,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
   /**
    * @param int $licenseId, $groupId
-   * @return Risk
+   * @return int|string
    */
   protected function getCachedLicenseRisk($licenseId, $groupId)
   {
@@ -210,7 +212,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
   /**
    * @param int $uploadId, $groupId
-   * @return scannerLicenseHistogram, editedLicensesHist
+   * @return array scannerLicenseHistogram, editedLicensesHist
    */
   protected function getHistogram($uploadId, $groupId)
   {
@@ -234,10 +236,17 @@ class LicenseClearedGetter extends ClearedGetterCommon
         $count = $scannerLicenseHistogram[$licenseShortName]['unique'];
       }
       $editedCount = array_key_exists($licenseShortName, $editedLicensesHist) ? $editedLicensesHist[$licenseShortName]['count'] : 0;
-      if (strcmp($licenseShortName, LicenseDao::NO_LICENSE_FOUND) !== 0) {
-        $LicenseHistArray[] = array("scannerCount" => $count, "editedCount" => $editedCount, "licenseShortname" => $licenseShortName);
+
+      if (array_key_exists($licenseShortName, $scannerLicenseHistogram)) {
+        $licenseReportId = $scannerLicenseHistogram[$licenseShortName]['spdx_id'];
       } else {
-        $LicenseHistArray[] = array("scannerCount" => $noScannerLicenseFoundCount, "editedCount" => $editedNoLicenseFoundCount, "licenseShortname" => $licenseShortName);
+        $licenseReportId = $editedLicensesHist[$licenseShortName]['spdx_id'];
+      }
+
+      if (strcmp($licenseShortName, LicenseDao::NO_LICENSE_FOUND) !== 0) {
+        $LicenseHistArray[] = array("scannerCount" => $count, "editedCount" => $editedCount, "licenseShortname" => $licenseReportId);
+      } else {
+        $LicenseHistArray[] = array("scannerCount" => $noScannerLicenseFoundCount, "editedCount" => $editedNoLicenseFoundCount, "licenseShortname" => $licenseReportId);
       }
     }
     return $LicenseHistArray;
@@ -247,7 +256,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
     * @brief callback to compare licenses
     * @param array $licenses1
     * @param array $licenses2
-    * @return interger difference of license ids
+    * @return int difference of license ids
     */
   function checkLicenseId($licenses1, $licenses2)
   {

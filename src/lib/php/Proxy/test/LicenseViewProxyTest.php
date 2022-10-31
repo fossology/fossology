@@ -20,7 +20,7 @@ class LicenseViewProxyTest extends \PHPUnit\Framework\TestCase
     $container = M::mock('ContainerBuilder');
     $this->dbManagerMock = M::mock(DbManager::class);
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManagerMock);
-    $this->almostAllColumns = 'rf_pk,rf_shortname,rf_text,rf_url,rf_add_date,rf_copyleft,rf_fullname,rf_notes,marydone,rf_active,rf_text_updatable,rf_md5,rf_detector_type,rf_source';
+    $this->almostAllColumns = 'rf_pk,rf_spdx_id,rf_shortname,rf_text,rf_url,rf_add_date,rf_copyleft,rf_fullname,rf_notes,marydone,rf_active,rf_text_updatable,rf_md5,rf_detector_type,rf_source';
   }
 
   protected function tearDown() : void

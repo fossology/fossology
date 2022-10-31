@@ -99,14 +99,39 @@ class ClearedComonReportTest extends \PHPUnit\Framework\TestCase
          ->andReturn("a/1");
 
     $this->treeDao
+         ->shouldReceive('getItemHashes')
+         ->with(1)
+         ->andReturn(array('sha1'=> "9B12538E" ,'md5'=> "MD52538E"));
+
+    $this->treeDao
          ->shouldReceive('getFullPath')
          ->with(2, $uploadTreeTableName, $parentId)
          ->andReturn("a/2");
 
     $this->treeDao
+         ->shouldReceive('getItemHashes')
+         ->with(2)
+         ->andReturn(array('sha1'=> "8C2275AE" ,'md5'=> "MD5275AE"));
+
+    $this->treeDao
          ->shouldReceive('getFullPath')
          ->with(3, $uploadTreeTableName, $parentId)
          ->andReturn("a/b/1");
+
+    $this->treeDao
+         ->shouldReceive('getItemHashes')
+         ->with(3)
+         ->andReturn(array('sha1'=> "CA10238C" ,'md5'=> "MD50238C"));
+
+    $this->treeDao
+         ->shouldReceive('getFullPath')
+         ->with(4, $uploadTreeTableName, $parentId)
+         ->andReturn("a/4");
+
+    $this->treeDao
+         ->shouldReceive('getItemHashes')
+         ->with(4)
+         ->andReturn(array('sha1'=> "AB12838A" ,'md5'=> "MD52838A"));
 
     $statements = $this->clearedGetterTest->getCleared($uploadId, null);
     $expected = array(
@@ -115,22 +140,41 @@ class ClearedComonReportTest extends \PHPUnit\Framework\TestCase
           "licenseId" => "371",
           "risk" => "5",
           "content" => "1",
-          "text" => "t1",
+          "text" => "d1",
           "comments" => "c1",
-          "files" => array("a/1", "a/2")
+          "files" => array("a/1", "a/2"),
+          "hash" => array("9B12538E","8C2275AE")
+        ),
+        array(
+          "licenseId" => "213",
+          "risk" => "5",
+          "content" => "tf1",
+          "text" => "d1",
+          "comments" => "c1",
+          "files" => array("a/1"),
+          "hash" => array("9B12538E")
         ),
         array(
           "licenseId" => "243",
+          "risk" => "3",
+          "content" => "tf1",
+          "text" => "d2",
+          "comments" => "c4",
+          "files" => array("a/4"),
+          "hash" => array("AB12838A")
+        ),
+        array(
+          "licenseId" => "8",
           "risk" => "4",
           "content" => "2",
           "text" => "t3",
           "comments" => "c3",
-          "files" => array("a/b/1")
+          "files" => array("a/b/1"),
+          "hash" => array("CA10238C")
         )
       )
     );
-    $expected = arsort($expected);
-    assertThat($expected, equalTo($statements));
+    assertThat(arsort($expected), equalTo($statements));
   }
 
   public function testGetFileNamesGroupByText()
@@ -156,14 +200,39 @@ class ClearedComonReportTest extends \PHPUnit\Framework\TestCase
          ->andReturn("a/1");
 
     $this->treeDao
+         ->shouldReceive('getItemHashes')
+         ->with(1)
+         ->andReturn(array('sha1'=> "9B12538E" ,'md5'=> "MD52538E"));
+
+    $this->treeDao
          ->shouldReceive('getFullPath')
          ->with(2, $uploadTreeTableName, $parentId)
          ->andReturn("a/2");
 
     $this->treeDao
+         ->shouldReceive('getItemHashes')
+         ->with(2)
+         ->andReturn(array('sha1'=> "8C2275AE" ,'md5'=> "MD5275AE"));
+
+    $this->treeDao
          ->shouldReceive('getFullPath')
          ->with(3, $uploadTreeTableName, $parentId)
          ->andReturn("a/b/1");
+
+    $this->treeDao
+         ->shouldReceive('getItemHashes')
+         ->with(3)
+         ->andReturn(array('sha1'=> "CA10238C" ,'md5'=> "MD50238C"));
+
+    $this->treeDao
+         ->shouldReceive('getFullPath')
+         ->with(4, $uploadTreeTableName, $parentId)
+         ->andReturn("a/4");
+
+    $this->treeDao
+         ->shouldReceive('getItemHashes')
+         ->with(4)
+         ->andReturn(array('sha1'=> "AB12838A" ,'md5'=> "MD52838A"));
 
     $tester = new TestClearedGetter("text");
     $statements = $tester->getCleared($uploadId, null);
@@ -172,18 +241,20 @@ class ClearedComonReportTest extends \PHPUnit\Framework\TestCase
         array(
           "licenseId" => "371",
           "risk" => "5",
-          "content" => "1",
-          "text" => "t1",
+          "content" => "tf1",
+          "text" => "d1",
           "comments" => "c1",
-          "files" => array("a/1")
+          "files" => array("a/1"),
+          "hash" => array("9B12538E")
         ),
         array(
-          "licenseId" => "213",
+          "licenseId" => "243",
           "risk" => "4",
           "content" => "1",
           "text" => "t2",
           "comments" => "c1",
-          "files" => array("a/2")
+          "files" => array("a/2"),
+          "hash" => array("8C2275AE")
         ),
         array(
           "licenseId" => "243",
@@ -191,12 +262,21 @@ class ClearedComonReportTest extends \PHPUnit\Framework\TestCase
           "content" => "2",
           "text" => "t3",
           "comments" => "c3",
-          "files" => array("a/b/1")
+          "files" => array("a/b/1"),
+          "hash" => array("CA10238C")
+        ),
+        array(
+          "licenseId" => "8",
+          "risk" => "3",
+          "content" => "tf1",
+          "text" => "d1",
+          "comments" => "c1",
+          "files" => array("a/4"),
+          "hash" => array("AB12838A")
         )
       )
     );
-    $expected = arsort($expected);
-    assertThat($expected, equalTo($statements));
+    assertThat(arsort($expected), equalTo($statements));
   }
 
   function testWeirdChars()
