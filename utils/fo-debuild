@@ -60,21 +60,21 @@ while true; do
 done
 
 # Get the version
-VERSION=$(eval ${VERSION_COMMAND})
+VERSION=$(eval "${VERSION_COMMAND}")
 VERSION="${VERSION/-rc/~rc}-1"
 DISTRO=$(lsb_release --codename --short)
 
 # Update debian/changelog
 echo "Updating changelog with ${DISTRO} distro and ${VERSION} version."
-debchange --distribution ${DISTRO} \
-  --newversion ${VERSION} \
+debchange --distribution "${DISTRO}" \
+  --newversion "${VERSION}" \
   --urgency low --maintmaint "New patch build"
 
 utils/fo-mktar
 
 # Clean and build packages
 echo "Building packages..."
-make clean phpvendors
+make clean
 dpkg-buildpackage ${NOSIGN}
 
 # Discard changelog changes
