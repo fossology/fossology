@@ -4,6 +4,59 @@
 -->
 # Changelog of FOSSology
 
+### 4.2.0 (Nov 11th 2022)
+
+This release adds important corrections to
+[4.2.0-rc1](https://github.com/fossology/fossology/releases/tag/4.2.0-rc1)
+
+Since RC1, minor updates with dependencies and a fix to unified report has
+happened.
+
+The release 4.2.0 introduces a number of corrections to
+[4.1.0](https://github.com/fossology/fossology/releases/tag/4.1.0)
+and major changes to FOSSology, including:
+
+* Adopting REUSE.software standards to FOSSology source code.
+* Detecting copyrights as per REUSE standards.
+* Support for Ubuntu Jammy (22.04)
+* Display package health according to Licenses folder.
+* Update various dependencies.
+* Fix line breaks for LibreOffice.
+* Multiple new features in REST API.
+
+#### Credits to contributors for 4.2.0
+
+From the GIT commit history, we have the following contributors since
+[4.1.0](https://github.com/fossology/fossology/releases/tag/4.1.0):
+
+```
+> aman1971 <ak584584@gmail.com>
+> Antoine Auger <antoineauger@users.noreply.github.com>
+> Avinal Kumar <avinal.xlvii@gmail.com>
+> dushimsam <dushsam100@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Karthik Krishna <gkarthikkrishna1@gmail.com>
+> Krishna Mahato <krishhtrishh9304@gmail.com>
+> Martin Daur <mdaur@gmx.net>
+> pret3nti0u5 <vineetvatsal09@gmail.com>
+> rohitpandey49 <rohit.pandey4900@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Soham Banerjee <sohambanerjee4abc@hotmail.com>
+> Thanvi pendyala <thanvipendyala194@gmail.com>
+```
+
+#### Features
+
+* `76dc5801d` chore(php-jwt): use new features from v6.3.0
+* `fd8eef901` feat(composer): update composer dependencies
+
+#### Corrections
+
+* `88faee7e7` fix(debian): prevent duplication of bootstrap
+* `965552b12` fix(unifiedReport): fix line break issue in libre office
+* `f2650a9de` fix(oneShotMonk): convert value to int to fix php fatal
+* `28de987d6` fix(licenseView): fix missing comment select
+
 ### 4.2.0-rc1 (Sep 30th 2022)
 
 This release adds important corrections to

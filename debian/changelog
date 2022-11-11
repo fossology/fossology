@@ -1,3 +1,10 @@
+fossology (4.2.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.2.0 for details
+
+ -- Gaurav Mishra <mishra.gaurav@siemens.com>  Fri, 11 Nov 2022 16:13:47 +0530
+
 fossology (4.2.0~rc1-1) unstable; urgency=low
 
   * New upstream release
