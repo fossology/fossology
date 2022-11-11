@@ -96,10 +96,15 @@ composer_install:
 	@echo "current dir: '$${PWD}'"
 	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
 	(cd $(DESTDIR)$(MODDIR); export COMPOSER_HOME=/dev/null; export COMPOSER_ALLOW_SUPERUSER=1; $(COMPOSER_PHAR) install --no-plugins --no-scripts --no-dev)
-	rm -rf $(DESTDIR)$(MODDIR)/www/ui/css/bootstrap
-	rm -rf $(DESTDIR)$(MODDIR)/www/ui/scripts/bootstrap
-	$(INSTALL_DATA) $(DESTDIR)$(MODDIR)/vendor/twbs/bootstrap/dist/css/* -t $(DESTDIR)$(MODDIR)/www/ui/css/bootstrap
-	$(INSTALL_DATA) $(DESTDIR)$(MODDIR)/vendor/twbs/bootstrap/dist/js/* -t $(DESTDIR)$(MODDIR)/www/ui/scripts/bootstrap
+	@if expr "$(DESTDIR)" : ".*fossology-common" >/dev/null; then \
+	  echo "Not duplicating bootstrap in Debian packaging"; \
+	else \
+	  echo "Copying bootstrap files to www"; \
+		rm -rf $(DESTDIR)$(MODDIR)/www/ui/css/bootstrap; \
+		rm -rf $(DESTDIR)$(MODDIR)/www/ui/scripts/bootstrap; \
+		$(INSTALL_DATA) $(DESTDIR)$(MODDIR)/vendor/twbs/bootstrap/dist/css/* -t $(DESTDIR)$(MODDIR)/www/ui/css/bootstrap; \
+		$(INSTALL_DATA) $(DESTDIR)$(MODDIR)/vendor/twbs/bootstrap/dist/js/* -t $(DESTDIR)$(MODDIR)/www/ui/scripts/bootstrap; \
+  fi
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)
