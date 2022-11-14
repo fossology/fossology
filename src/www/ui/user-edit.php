@@ -525,10 +525,13 @@ class UserEditPage extends DefaultPlugin
   function getListOfExpiredTokens()
   {
     $user_pk = Auth::getUserId();
+    $retentionPeriod = $this->getMaxExpiredTokenRetentionPeriod();
     $sql = "SELECT pat_pk, user_fk, expire_on, token_scope, token_name, created_on " .
       "FROM personal_access_tokens " .
-      "WHERE user_fk = $1 AND active = false AND client_id IS NULL;";
-    $rows = $this->dbManager->getRows($sql, [$user_pk],
+      "WHERE user_fk = $1 AND active = false " .
+      "AND expire_on >= (SELECT CURRENT_DATE - ($2)::integer) " .
+      "AND client_id IS NULL;";
+    $rows = $this->dbManager->getRows($sql, [$user_pk, $retentionPeriod],
       __METHOD__ . ".getExpiredTokens");
     $response = [];
     foreach ($rows as $row) {
@@ -658,6 +661,15 @@ class UserEditPage extends DefaultPlugin
     array_multisort(array_column($response, "created"), SORT_ASC, $response);
     return $response;
   }
-}
 
+  /**
+   * @brief getMaxExpiredTokenRetentionPeriod() get the refresh time from DB.
+   * @Returns number of days to retain expired token.
+   **/
+  public function getMaxExpiredTokenRetentionPeriod()
+  {
+    global $SysConf;
+    return $SysConf['SYSCONFIG']['PATMaxPostExpiryRetention'];
+  } /* getMaxExpiredTokenRetentionPeriod() */
+}
 register_plugin(new UserEditPage());
