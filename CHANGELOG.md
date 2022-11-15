@@ -4,6 +4,33 @@
 -->
 # Changelog of FOSSology
 
+### 4.2.1 (Nov 15th 2022)
+
+This release is for the quick hot-fix on [4.2.0](https://github.com/fossology/fossology/releases/tag/4.2.0).
+
+This release applies fix for REST API to patch access to User object.
+More fixes like importing missing classes and handling 
+other PHP Errors and Notices.
+
+#### Credits to contributors for 4.2.1
+
+From the GIT commit history, we have the following contributors since
+[4.2.0](https://github.com/fossology/fossology/releases/tag/4.2.0):
+
+```
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+```
+
+#### Features
+
+* `4bcf25682` feat(user-edit): make use of retention period to display expired tokens
+
+#### Corrections
+
+* `53c047bfb` fix(ui): fix PHP error and notices
+* `aeceaff6a` hotfix(ui): fix User object accessing
+
 ### 4.2.0 (Nov 11th 2022)
 
 This release adds important corrections to
