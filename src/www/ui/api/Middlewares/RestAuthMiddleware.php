@@ -53,8 +53,14 @@ class RestAuthMiddleware
       stristr($request->getMethod(), "post") !== false) {
       $response = $handler->handle($request);
     } else {
+      /** @var AuthHelper $authHelper */
       $authHelper = $GLOBALS['container']->get('helper.authHelper');
-      $jwtToken = $request->getHeader('Authorization')[0];
+      $authHeaders = $request->getHeader('Authorization');
+      if (!empty($authHeaders)) {
+        $jwtToken = $authHeaders[0];
+      } else {
+        $jwtToken = "";
+      }
       $userId = -1;
       $tokenScope = false;
       $tokenValid = $authHelper->verifyAuthToken($jwtToken, $userId,
