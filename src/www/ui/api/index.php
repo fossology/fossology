@@ -20,6 +20,7 @@ require_once dirname(dirname(dirname(__DIR__))) . "/vendor/autoload.php";
 require_once dirname(dirname(dirname(dirname(__FILE__)))) .
   "/lib/php/bootstrap.php";
 
+use Fossology\Lib\Util\TimingLogger;
 use Fossology\UI\Api\Controllers\AuthController;
 use Fossology\UI\Api\Controllers\BadRequestController;
 use Fossology\UI\Api\Controllers\FolderController;
@@ -41,6 +42,7 @@ use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
+use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Factory\AppFactory;
 use Slim\Middleware\ContentLengthMiddleware;
@@ -97,8 +99,8 @@ $app->setBasePath(BASE_PATH);
  * 1. The call enters from Rest Auth and initialize session variables.
  * 2. It then goes to FOSSology Init and initialize all plugins
  * 3. The normal flow continues.
- * 4. The call now enteres FOSSology Init again and plugins are unloaded.
- * 5. Then call then enters Rest Auth and leaves as is.
+ * 4. The call now enters FOSSology Init again and plugins are unloaded.
+ * 5. The call then enters Rest Auth and leaves as is.
  */
 if ($dbConnected) {
   // Middleware for plugin initialization

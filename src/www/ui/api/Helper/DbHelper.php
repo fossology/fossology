@@ -91,15 +91,15 @@ class DbHelper
     $uploadProxy = new UploadBrowseProxy($groupId, 0, $this->dbManager);
     $folderId = $options["folderId"];
     if ($folderId === null) {
-      $user = $this->getUsers($userId);
-      $folderId = $user[0]['rootFolderId'];
+      $users = $this->getUsers($userId);
+      $folderId = $users[0]->getRootFolderId();
     }
     $folders = [$folderId];
 
     if ($uploadId !== null) {
       $recursive = true;
-      $user = $this->getUsers($userId);
-      $folderId = $user[0]->getArray()['rootFolderId'];
+      $users = $this->getUsers($userId);
+      $folderId = $users[0]->getRootFolderId();
       $folders = [$folderId];
     }
 
@@ -250,10 +250,9 @@ FROM $tableName WHERE $idRowName = $1", [$id],
     }
     $users = [];
     if ($id === null) {
-      $result = $result = $this->dbManager->getRows($usersSQL, [], $statement);
+      $result = $this->dbManager->getRows($usersSQL, [], $statement);
     } else {
-      $result = $result = $this->dbManager->getRows($usersSQL, [$id],
-        $statement);
+      $result = $this->dbManager->getRows($usersSQL, [$id], $statement);
     }
     $currentUser = Auth::getUserId();
     $userIsAdmin = Auth::isAdmin();
