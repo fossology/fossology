@@ -24,6 +24,7 @@ use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\UI\Api\Models\Findings;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use UIExportList;
 
 /**
  * @class UploadHelper
@@ -679,11 +680,12 @@ class UploadHelper
 
     if ($boolLicense) {
       foreach ($licenseList as $license) {
+        $copyrightContent = null;
         if ($boolCopyright) {
-          $copyrightContent = array();
+          $copyrightContent = [];
           foreach ($copyrightList as $copy) {
             if (($license['filePath'] == $copy['filePath']) !== false ) {
-              array_push($copyrightContent,$copy['content']);
+              $copyrightContent[] = $copy['content'];
             }
           }
           if (count($copyrightContent)==0) {
@@ -703,13 +705,13 @@ class UploadHelper
         $copyrightContent = array();
         foreach ($copyrightList as $copy) {
           if (($copyFilepath['filePath'] == $copy['filePath']) === true) {
-            array_push($copyrightContent,$copy['content']);
+            $copyrightContent[] = $copy['content'];
           }
         }
         $findings = new Findings();
         $findings->setCopyright($copyrightContent);
         $responseRow = array();
-        $responseRow['filePath'] = $copy['filePath'];
+        $responseRow['filePath'] = $copyFilepath['filePath'];
         $responseRow['copyright'] = $findings->getCopyright();
         $responseList[] = $responseRow;
       }

@@ -48,6 +48,10 @@ class ScheduleAgent extends DefaultPlugin
       $upload = $this->uploadDao->getUpload($uploadId);
       $uploadName = $upload->getFilename();
       $ourPlugin = plugin_find($agentName);
+      if ($ourPlugin === null) {
+        return new Response(json_encode(["error" => "Unable to find $agentName"]),
+          Response::HTTP_INTERNAL_SERVER_ERROR, ["Content-type" => "text/json"]);
+      }
 
       $jobqueueId = isAlreadyRunning($ourPlugin->AgentName, $uploadId);
       if ($jobqueueId == 0) {
