@@ -18,13 +18,13 @@ import sys
 import yaml
 
 # SYSCONFDIR path
-SYSCONFDIR = "{$SYSCONFDIR}"
+SYSCONFDIR = "@FO_SYSCONFDIR@"
 
 # Fossology LOG path
-LOGDIR = "{$LOGDIR}"
+LOGDIR = "@FO_LOGDIR@"
 
 #base dir for fossdash reporting
-TEMP_BASE_DIR = "{$REPODIR}/fossdash"
+TEMP_BASE_DIR = "@FO_REPODIR@/fossdash"
 
 # Fossology DB configuration file
 DB_CONFIG_FILE = SYSCONFDIR + "/Db.conf"
@@ -53,7 +53,7 @@ config = " ".join(["=".join(config) for config in CONFIG_STATIC.items()])
 timestamp = datetime.datetime.now().strftime("%s000000000")
 
 # Quries to fetch fossdashconfig value from database
-QUERIES = \{
+QUERIES = {
     'uuid': "SELECT instance_uuid uuid FROM instance;",
     'FossDashReportingAPIUrl': "select conf_value from fossdashconfig where variablename='FossDashReportingAPIUrl'",
     'FossdashMetricConfig':  "select conf_value from fossdashconfig where variablename='FossdashMetricConfig'",
@@ -65,7 +65,7 @@ QUERIES = \{
     'InfluxDBUser': "select conf_value from fossdashconfig where variablename='InfluxDBUser'",
     'InfluxDBUserPassword': "select conf_value from fossdashconfig where variablename='InfluxDBUserPassword'",
     'InfluxDBToken': "select conf_value from fossdashconfig where variablename='InfluxDBToken'"
-\}
+}
 
 # prefix for generating fossdash fileName
 file_name_prefix = os.path.basename(__file__)[:-3]
@@ -252,7 +252,7 @@ def pushAllUnreportedFilesToInfluxDB(connection, fossdash_url, auth_type):
         pushMetricsToInflux(connection, fossdash_url, os.path.join(TEMP_BASE_DIR,file_name), auth_type)
 
 def addCronjobToSystem(cron_job_interval):
-    cron_update_cmd = '(crontab -l | grep -v fossdash ; echo "'+cron_job_interval+' python3 {$LIBEXECDIR}/fossdash-publish.py >> ' + os.path.join(LOGDIR,"fossdash.log") + ' 2>&1") | crontab -'
+    cron_update_cmd = '(crontab -l | grep -v fossdash ; echo "'+cron_job_interval+' python3 @FO_LIBEXECDIR@/fossdash-publish.py >> ' + os.path.join(LOGDIR,"fossdash.log") + ' 2>&1") | crontab -'
     # print(cron_update_cmd)
     cron_update_cmd_output = subprocess.Popen(cron_update_cmd,shell=True)
 

@@ -59,8 +59,8 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
 
     $agentName = "monk";
 
-    $agentDir = dirname(dirname(__DIR__));
-    $execDir = __DIR__;
+    $agentDir = dirname(__DIR__,4).'/build/src/monk';
+    $execDir = $agentDir.'/agent';
     system("install -D $agentDir/VERSION-monk $sysConf/mods-enabled/$agentName/VERSION");
 
     foreach ($files as $file) {

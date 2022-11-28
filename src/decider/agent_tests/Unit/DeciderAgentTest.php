@@ -7,16 +7,16 @@
 
 namespace Fossology\Decider;
 
-use Fossology\Lib\Dao\CopyrightDao;
-use Fossology\Lib\Data\LicenseMatch;
 use Mockery as M;
 use Fossology\Lib\Test\Reflectory;
+use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Data\DecisionTypes;
@@ -62,6 +62,7 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     $this->agentDao->shouldReceive('getCurrentAgentId')->andReturn(1234);
     $this->highlightDao = M::mock(HighlightDao::class);
     $this->uploadDao = M::mock(UploadDao::class);
+    $this->copyrightDao = M::mock(CopyrightDao::class);
     $this->showJobsDao = new ShowJobsDao($this->dbManager, $this->uploadDao);
     $this->copyrightDao = M::mock(CopyrightDao::class);
     $this->clearingDao = M::mock(ClearingDao::class);
@@ -74,6 +75,7 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     $container->shouldReceive('get')->with('dao.show_jobs')->andReturn($this->showJobsDao);
     $container->shouldReceive('get')->with('dao.copyright')->andReturn($this->copyrightDao);
     $container->shouldReceive('get')->withArgs(array('dao.upload'))->andReturn($this->uploadDao);
+    $container->shouldReceive('get')->withArgs(array('dao.copyright'))->andReturn($this->copyrightDao);
     $container->shouldReceive('get')->withArgs(array('dao.clearing'))->andReturn($this->clearingDao);
     $container->shouldReceive('get')->withArgs(array('decision.types'))->andReturn(M::mock(DecisionTypes::class));
     $container->shouldReceive('get')->withArgs(array('businessrules.clearing_decision_processor'))->andReturn($this->clearingDecisionProcessor);

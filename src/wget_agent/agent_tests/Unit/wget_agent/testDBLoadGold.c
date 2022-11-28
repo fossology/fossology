@@ -12,7 +12,7 @@
 #include <ctype.h>
 #include "libfodbreposysconf.h"
 
-#define AGENT_DIR "../../"
+// #define AGENT_DIR "../"
 /**
  * \file
  * \brief testing for the function DBLoadGold

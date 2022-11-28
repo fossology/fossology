@@ -23,7 +23,7 @@ extern char *DBConfFile;
  */
 void test_GetMetadataDebSource()
 {
-  char *repFile = "../testdata/fossology_1.4.1.dsc";
+  char *repFile = "./testdata/fossology_1.4.1.dsc";
   struct debpkginfo *pi;
   //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
@@ -64,7 +64,7 @@ void test_GetMetadataDebSource()
  */
 void test_GetMetadataDebSource_wrong_testfile()
 {
-  char *repFile = "../testdata/fossology-1.2.0-1.el5.i386.rpm";
+  char *repFile = "./testdata/fossology-1.2.0-1.el5.i386.rpm";
   struct debpkginfo *pi;
   char *ErrorBuf;
 

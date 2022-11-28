@@ -29,7 +29,14 @@ class test_fo_copyright_list extends \PHPUnit\Framework\TestCase
     $this->testDb->setupSysconfig();
 
     $sysConf = $this->testDb->getFossSysConf();
-    $this->fo_copyright_list_path = dirname(__DIR__) . '/fo_copyright_list -c '.$sysConf;
+    // Create softlink to fo_wrapper.php
+    $target = dirname(__DIR__, 3) . '/build/src/cli/gen/fo_wrapper.php';
+    $link = dirname(__DIR__) . '/fo_copyright_list';
+    if (file_exists($link)) {
+      unlink($link);
+    }
+    symlink($target, $link);
+    $this->fo_copyright_list_path = "$link -c $sysConf";
 
     $this->testInstaller = new TestInstaller($sysConf);
     $this->testInstaller->init();
@@ -37,7 +44,7 @@ class test_fo_copyright_list extends \PHPUnit\Framework\TestCase
 
   protected function tearDown() : void
   {
-    return;
+    unlink(dirname(__DIR__) . "/fo_copyright_list");
     $this->testInstaller->clear();
     $this->testDb->fullDestruct();
     $this->testDb = null;

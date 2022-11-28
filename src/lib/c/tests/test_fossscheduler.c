@@ -167,7 +167,7 @@ void signal_connect_version()
 void test_scheduler_no_connect()
 {
   int argc = 2;
-  char* argv[] = {"./testlibs", "--config=./scheddata"};
+  char* argv[] = {"./test_clibs", "--config=./scheddata"};
 
   fo_scheduler_connect(&argc, argv, NULL);
 
@@ -199,7 +199,7 @@ void test_scheduler_no_connect()
 void test_scheduler_connect()
 {
   int argc = 2;
-  char* argv[] = {"./testlibs", "--config=./scheddata", "--scheduler_start"};
+  char* argv[] = {"./test_clibs", "--config=./scheddata", "--scheduler_start"};
   char* tmp;
 
   fo_scheduler_connect(&argc, argv, NULL);

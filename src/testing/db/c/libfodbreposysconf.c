@@ -162,8 +162,8 @@ int create_db_repo_sysconf(int type, char* agent_name, char* sysconfdir) {
     return 1;
   }
 #endif
-
-  const char INIT_CMD[] = "../../../testing/db/createTestDB.php";
+#define CREATEDB TESTDBDIR "/createTestDB.php"
+  const char INIT_CMD[] = CREATEDB;
   char *CMD, *tmp;
 
   CMD = (char *)malloc(strlen(INIT_CMD) + 1);
@@ -227,7 +227,7 @@ int create_db_repo_sysconf(int type, char* agent_name, char* sysconfdir) {
 void drop_db_repo_sysconf(char* DBName) {
   char CMD[ARRAY_LENGTH];
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "../../../testing/db/createTestDB.php -d %s", DBName);
+  sprintf(CMD, "%s/createTestDB.php -d %s", TESTDBDIR, DBName);
   command_output(CMD);
 #ifdef TEST
   printf("remove DBName is:%s\n", DBName);
@@ -353,7 +353,7 @@ char *createTestConfDir(char* cwd, char* agentName)
 
   sprintf(confDir, "%s/testconf", cwd);
   sprintf(confFile, "%s/fossology.conf", confDir);
-  sprintf(agentDir, "%s/../..", cwd);
+  sprintf(agentDir, "%s/..", cwd);
 
   if (stat(confDir, &st) == -1)
   {
@@ -385,11 +385,11 @@ char *createTestConfDir(char* cwd, char* agentName)
   fclose(testConfFile);
 
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "install -D %s/../../../../VERSION %s/VERSION", cwd, confDir);
+  sprintf(CMD, "install -D %s/../VERSION %s/VERSION", cwd, confDir);
   rc = system(CMD);
 
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "install -D %s/../../../../install/defconf/Db.conf %s/Db.conf", cwd, confDir);
+  sprintf(CMD, "install -D %s/../../../install/gen/Db.conf %s/Db.conf", cwd, confDir);
   rc = system(CMD);
 
   memset(CMD, '\0', sizeof(CMD));

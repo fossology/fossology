@@ -403,6 +403,7 @@ int ignore(MonkState* state, const File* file) {
 }
 
 int noop(MonkState* state) {
+  (void)state; // Do nothing
   return 1;
 }
 

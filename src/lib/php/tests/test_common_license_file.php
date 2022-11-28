@@ -11,7 +11,7 @@
  */
 
 use Fossology\Lib\Db\ModernDbManager;
-use Fossology\Lib\Test\TestLiteDb;
+use Fossology\Lib\Test\TestPgDb;
 
 require_once(dirname(__FILE__) . '/../common-license-file.php');
 require_once(dirname(__FILE__) . '/../common-db.php');
@@ -29,11 +29,9 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
   public $agent_pk = 0;
   public $uploadtree_tablename = 'uploadtree';
 
-  public $DB_COMMAND =  "";
-  public $DB_NAME =  "";
-
-  /** @var TestLiteDb */
+  /** @var TestPgDb */
   private $testDb;
+
   /** @var ModernDbManager */
   private $dbManager;
 
@@ -44,33 +42,29 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
    */
   protected function setUp() : void
   {
-    global $PG_CONN;
+    $this->testDb = new TestPgDb("fosslibtest");
+    $tables = array('license_ref','license_file','pfile','agent','upload','uploadtree');
+    $this->testDb->createPlainTables($tables);
+    $sequences = array('license_ref_rf_pk_seq', 'license_file_fl_pk_seq',
+      'pfile_pfile_pk_seq', 'agent_agent_pk_seq', 'upload_upload_pk_seq',
+      'uploadtree_uploadtree_pk_seq');
+    $this->testDb->createSequences($sequences);
+    $this->testDb->createConstraints([
+      'rf_pkpk', 'license_file_pkey', 'pfile_pkey', 'agent_pkey', 'upload_pkey_idx', 'ufile_rel_pkey'
+    ]);
+    $this->testDb->alterTables($tables);
+    $this->testDb->createViews(['license_file_ref']);
+    // $this->testDb->insertData($tables);
+
     global $upload_pk;
     global $pfile_pk_parent;
     global $pfile_pk_child;
     global $agent_pk;
 
-    global $DB_COMMAND;
-    global $DB_NAME;
-
-    $DB_COMMAND  = dirname(dirname(dirname(dirname(__FILE__))))."/testing/db/createTestDB.php";
-    print "*** path to test db creation command: " . $DB_COMMAND;
-    exec($DB_COMMAND, $dbout, $rc);
-    if (!empty($rc)) {
-      throw new Exception(implode("\n", $dbout));
-    }
-    preg_match("/(\d+)/", $dbout[0], $matches);
-    $test_name = $matches[1];
-    $db_conf = $dbout[0];
-    $DB_NAME = "fosstest".$test_name;
-
-    $PG_CONN = DBconnect($db_conf);
-
     $logger = new Monolog\Logger('default');
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/db.sqlite.log';
     $logger->pushHandler(new Monolog\Handler\StreamHandler($this->logFileName, Monolog\Logger::ERROR));
-    $this->dbManager = new ModernDbManager($logger);
-    $this->dbManager->setDriver(new Fossology\Lib\Db\Driver\Postgres($PG_CONN));
+    $this->dbManager = $this->testDb->getDbManager();
 
     /** preparation, add uploadtree, upload, pfile, license_file record */
     $upload_filename = "license_file_test"; /* upload file name */
@@ -148,17 +142,13 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
    */
   function testGetFileLicenses()
   {
-    global $PG_CONN;
     global $agent_pk;
 
     $license_array = GetFileLicenses($agent_pk, '' , $this->uploadtree_pk_parent, $this->uploadtree_tablename);
     /** the expected license value */
     $sql = "SELECT rf_shortname from license_ref where rf_pk = 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->dbManager->getSingleRow($sql);
     $license_value_expected = $row['rf_shortname'];
-    pg_free_result($result);
     $count = count($license_array);
 
     $this->assertEquals($license_value_expected, $license_array[1]);
@@ -171,22 +161,16 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
    */
   function testGetFileLicensesDul()
   {
-    global $PG_CONN;
     global $pfile_pk_parent;
     global $agent_pk;
     $sql = "INSERT INTO license_file(rf_fk, agent_fk, pfile_fk) VALUES(1, $agent_pk, $pfile_pk_parent);";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
+    $this->dbManager->getSingleRow($sql, [], __METHOD__ . ".insert");
 
     $license_array = GetFileLicenses($agent_pk, '' , $this->uploadtree_pk_parent, $this->uploadtree_tablename, "yes");
     /** the expected license value */
     $sql = "SELECT rf_shortname from license_ref where rf_pk = 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->dbManager->getSingleRow($sql, [], __METHOD__ . ".get");
     $license_value_expected = $row['rf_shortname'];
-    pg_free_result($result);
 
     $count = count($license_array);
     $this->assertEquals(2, $count);
@@ -200,17 +184,13 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
    */
   function testGetFileLicenses_string()
   {
-    global $PG_CONN;
     global $agent_pk;
 
     $license_string = GetFileLicenses_string($agent_pk, '', $this->uploadtree_pk_parent, $this->uploadtree_tablename);
     /** the expected license value */
     $sql = "SELECT rf_shortname from license_ref where rf_pk = 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->dbManager->getSingleRow($sql);
     $license_value_expected = $row['rf_shortname'];
-    pg_free_result($result);
 
     $this->assertEquals($license_value_expected, $license_string);
   }
@@ -220,17 +200,13 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
    */
   function testGetFilesWithLicense()
   {
-    global $PG_CONN;
     global $pfile_pk_parent;
     global $agent_pk;
 
     /** get a license short name */
     $sql = "SELECT rf_shortname from license_ref where rf_pk = 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->dbManager->getSingleRow($sql);
     $rf_shortname = $row['rf_shortname'];
-    pg_free_result($result);
 
     $files_result = GetFilesWithLicense($agent_pk, $rf_shortname, $this->uploadtree_pk_parent, false, 0, "ALL", "", null, $this->uploadtree_tablename);
     $row = pg_fetch_assoc($files_result);
@@ -244,16 +220,12 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
    */
   function testLevel1WithLicense()
   {
-    global $PG_CONN;
     global $agent_pk;
 
     /** get a license short name */
     $sql = "SELECT rf_shortname from license_ref where rf_pk = 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->dbManager->getSingleRow($sql);
     $rf_shortname = $row['rf_shortname'];
-    pg_free_result($result);
 
     $file_name = Level1WithLicense($agent_pk, $rf_shortname, $this->uploadtree_pk_parent, false, $this->uploadtree_tablename);
     $this->assertEquals("license_test.file.child", $file_name[$this->uploadtree_pk_child]);
@@ -268,44 +240,8 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
     if (!is_callable('pg_connect')) {
       return;
     }
-    global $PG_CONN;
-    global $pfile_pk_parent;
-    global $pfile_pk_child;
-    global $upload_pk;
-    global $DB_COMMAND;
-    global $DB_NAME;
-
-    /** delte the uploadtree record */
-    $sql = "DELETE FROM uploadtree where upload_fk = $upload_pk;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    /** delte the license_file record */
-    $sql = "DELETE FROM license_file where pfile_fk IN ($pfile_pk_parent, $pfile_pk_child);";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    /** delte the upload record */
-    $sql = "DELETE FROM upload where upload_pk = $upload_pk;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    /** delte the pfile record */
-    $sql = "DELETE FROM pfile where pfile_pk IN ($pfile_pk_parent, $pfile_pk_child);";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    /** delete the agent record */
-    $sql = "DELETE FROM agent where agent_name = 'nomos';";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    pg_close($PG_CONN);
-    exec("$DB_COMMAND -d $DB_NAME");
+    $this->testDb->fullDestruct();
+    $this->testDb = null;
+    $this->dbManager = null;
   }
 }

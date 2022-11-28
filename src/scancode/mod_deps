@@ -87,7 +87,8 @@ if [[ $RUNTIME ]]; then
   case "$DISTRO" in
     Debian|Ubuntu)
       apt-get $YesOpt install \
-        libbz2-1.0 xz-utils zlib1g libxml2-dev libxslt1-dev libpopt0
+        libbz2-1.0 xz-utils zlib1g libxml2-dev libxslt1-dev libpopt0 \
+        python3 python3-pip
       case "$CODENAME" in
         stretch)
           apt-get $YesOpt install libjsoncpp1 libboost-program-options1.62.0;;
@@ -108,13 +109,15 @@ if [[ $RUNTIME ]]; then
     Fedora)
       yum $YesOpt install \
         jsoncpp boost \
-        xz-libs zlib libxml2-devel libxslt-devel bzip2-libs libpopt0
+        xz-libs zlib libxml2-devel libxslt-devel bzip2-libs libpopt0 \
+        python3 python3-pip
       ;;
     RedHatEnterprise*|CentOS)
       yum $YesOpt install epel-release;
       yum $YesOpt install \
         jsoncpp boost \
-        zlib bzip2-libs xz-libs libxml2-devel libxslt-devel libpopt0
+        zlib bzip2-libs xz-libs libxml2-devel libxslt-devel libpopt0 \
+        python3 python3-pip
       ;;
     *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
   esac

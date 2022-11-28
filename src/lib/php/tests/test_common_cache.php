@@ -9,16 +9,23 @@
  * \file test_common_cache.php
  * \brief unit tests for common-cache.php
  */
+use Fossology\Lib\Db\ModernDbManager;
+use Fossology\Lib\Test\TestPgDb;
 
-require_once(dirname(__FILE__) . '/../common-cache.php');
-require_once(dirname(__FILE__) . '/../common-db.php');
+require_once(dirname(__FILE__, 2) . '/common-cache.php');
+require_once(dirname(__FILE__, 2) . '/common-db.php');
 
 /**
  * \class test_common_cache
  */
 class test_common_cached extends \PHPUnit\Framework\TestCase
 {
-  public $PG_CONN;
+   /** @var TestPgDb */
+   private $testDb;
+
+    /** @var ModernDbManager */
+  private $dbManager;
+
   public $upload_pk = 0;
   public $uploadtree_pk = 0;
   public $UserCacheStat = 0;
@@ -28,12 +35,19 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
    */
   protected function setUp() : void
   {
-    global $PG_CONN;
-    $sysconfig = dirname(__FILE__).'/sysconfigDirTest';
-    if (!is_callable('pg_connect')) {
-      $this->markTestSkipped("php-psql not found");
-    }
-    $PG_CONN = DBconnect($sysconfig);
+    $this->testDb = new TestPgDb("fosslibtest");
+    $tables = array('upload', 'uploadtree', 'report_cache');
+    $this->testDb->createPlainTables($tables);
+    $sequences = array('upload_upload_pk_seq', 'uploadtree_uploadtree_pk_seq', 'report_cache_report_cache_pk_seq');
+    $this->testDb->createSequences($sequences);
+    $this->testDb->createConstraints(['upload_pkey_idx', 'ufile_rel_pkey', 'report_cache_pkey', 'report_cache_report_cache_key_key']);
+    $this->testDb->alterTables($tables);
+
+    global $upload_pk;
+    global $uploadtree_pk;
+    global $UserCacheStat;
+
+    $this->dbManager = $this->testDb->getDbManager();
   }
 
   /**
@@ -41,38 +55,27 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
    */
   function preparation4ReportCachePut()
   {
-    global $PG_CONN;
     global $upload_pk;
     global $uploadtree_pk;
 
     /** preparation, add uploadtree, upload, pfile record */
     /** add an upload record */
     $sql = "INSERT INTO upload (upload_filename,upload_mode,upload_ts) VALUES ('cache_test',40,now());";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "insert.upload");
 
     /** get upload id */
     $sql = "SELECT upload_pk from upload where upload_filename = 'cache_test';";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "upload.select");
     $upload_pk= $row['upload_pk'];
-    pg_free_result($result);
 
     /** add an uploadtree record */
     $sql= "INSERT INTO uploadtree (upload_fk) VALUES($upload_pk)";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "insert.uploadtree");
 
     /** get uploadtree id */
     $sql = "SELECT uploadtree_pk from uploadtree where upload_fk = $upload_pk;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "uploadtree.select");
     $uploadtree_pk= $row['uploadtree_pk'];
-    pg_free_result($result);
   }
 
   /**
@@ -82,7 +85,6 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
   {
     print "Start unit test for common-cache.php\n";
     print "test function ReportCachePut()\n";
-    global $PG_CONN;
     global $upload_pk;
     global $uploadtree_pk;
 
@@ -93,11 +95,8 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
     ReportCachePut($CacheKey, $CacheValue);
     /** get report_cache_value to check */
     $sql = "SELECT report_cache_value from report_cache where report_cache_uploadfk = $upload_pk;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "select.report_cache");
     $value = $row['report_cache_value'];
-    pg_free_result($result);
     $this->assertEquals($CacheValue, $value);
     $this->resetEnv4ReportCachePut();
   }
@@ -108,7 +107,6 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
   function testReportCachePut_upload_id_null()
   {
     print "test function ReportCachePut()\n";
-    global $PG_CONN;
     global $upload_pk;
     global $uploadtree_pk;
 
@@ -119,11 +117,8 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
     ReportCachePut($CacheKey, $CacheValue);
     /** get report_cache_value to check */
     $sql = "SELECT report_cache_value from report_cache where report_cache_uploadfk = $upload_pk;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "select.report_cache");
     $value = $row['report_cache_value'];
-    pg_free_result($result);
     $this->assertEquals($CacheValue, $value);
     $this->resetEnv4ReportCachePut();
   }
@@ -134,7 +129,6 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
   function testReportCacheGet()
   {
     print "test function ReportCacheGet()\n";
-    global $PG_CONN;
     global $upload_pk;
     global $uploadtree_pk;
     global $UserCacheStat;
@@ -158,24 +152,17 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
    */
   function resetEnv4ReportCachePut()
   {
-    global $PG_CONN;
     global $upload_pk;
     /** delete the test data */
     /** delete the report_cache record */
     $sql = "DELETE from report_cache where report_cache_uploadfk = $upload_pk;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "delete.report_cache");
     /** delete the uploadtree record */
     $sql= "DELETE from uploadtree where upload_fk = $upload_pk;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "delete.uploadtree");
     /** delete the upload record */
     $sql = "DELETE from upload where upload_pk = $upload_pk;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "delete.upload");
   }
 
   /**
@@ -183,10 +170,11 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
    */
   protected function tearDown() : void
   {
-    global $PG_CONN;
-    /** db close */
-    if (is_callable('pg_close')) {
-      pg_close($PG_CONN);
+    if (!is_callable('pg_connect')) {
+      return;
     }
+    $this->testDb->fullDestruct();
+    $this->testDb = null;
+    $this->dbManager = null;
   }
 }

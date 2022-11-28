@@ -10,12 +10,11 @@
  * \brief unit tests for common-sysconfig.php
  */
 
-use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
+use Fossology\Lib\Test\TestInstaller;
 
 require_once(dirname(dirname(__FILE__)) . '/common-container.php');
 require_once(dirname(dirname(__FILE__)) . '/common-db.php');
-require_once(dirname(dirname(__FILE__)) . '/common-sysconfig.php');
 
 /**
  * \class test_common_sysconfig
@@ -80,7 +79,7 @@ class test_common_sysconfig extends \PHPUnit\Framework\TestCase
   }
 
   /**
-   * \brief clean the env db
+   * \brief clean the env
    */
   protected function tearDownDb()
   {

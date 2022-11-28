@@ -12,6 +12,7 @@
 
 #include <boost/regex.hpp>
 #include <fstream>
+#include <sstream>
 
 #include "OjosDatabaseHandler.hpp"
 #include "ojomatch.hpp"

@@ -77,11 +77,13 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   {
     $this->testDb = new TestPgDb("deciderSched");
     $this->dbManager = $this->testDb->getDbManager();
+    $this->testDb->setupSysconfig();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $logger = M::mock('Monolog\Logger');
     $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::class);
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
+    $this->copyrightDao = new CopyrightDao($this->dbManager, $this->uploadDao);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $agentDao = new AgentDao($this->dbManager, $logger);
     $this->agentLicenseEventProcessor = new AgentLicenseEventProcessor($this->licenseDao, $agentDao);
@@ -97,8 +99,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
     $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao,
       $this->clearingDao, $this->uploadDao, $this->highlightDao,
-      $this->showJobsDao, $this->clearingDecisionProcessor,
-      $this->agentLicenseEventProcessor, $this->copyrightDao);
+      $this->showJobsDao, $this->copyrightDao, $this->clearingDecisionProcessor,
+      $this->agentLicenseEventProcessor);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
@@ -146,7 +148,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk',
       'license_set_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight',
       'highlight_keyword','agent','pfile','ars_master','users','group_user_member','license_map','jobqueue','job',
-      'sysconfig','report_info'), false);
+      'report_info'), false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq',
       'license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq',
       'clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey',

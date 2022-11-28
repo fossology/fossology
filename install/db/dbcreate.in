@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # FOSSology dbcreate script
 # SPDX-FileCopyrightText: © 2008-2012 Hewlett-Packard Development Company, L.P.
 
@@ -62,9 +62,9 @@ if [ $? = 0 ]; then
    fi
 else
    echo "*** Initializing database ***"
-   su postgres -c psql < {$LIBEXECDIR}/fossologyinit.sql
+   su postgres -c psql < @FO_LIBEXECDIR@/fossologyinit.sql
    if [ $? != 0 ] ; then
-      echo "ERROR: Database failed during configuration.\n"
+      echo "ERROR: Database failed during configuration."
       exit 1
    fi
 fi

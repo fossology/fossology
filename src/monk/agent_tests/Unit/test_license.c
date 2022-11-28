@@ -77,7 +77,7 @@ void _assertLicIds(const GArray* lics, unsigned int n, ...) {
 
   va_start(args, n);
 
-  for (int i=0; i<n; i++) {
+  for (unsigned int i=0; i<n; i++) {
     int expectedLicId = va_arg(args, int);
     CU_ASSERT_EQUAL(license_index(lics, i)->refId, expectedLicId);
   }

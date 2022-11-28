@@ -69,12 +69,12 @@ void test_streamTokenize() {
 
   size_t len = strlen(test);
 
-  int chunkSize = 2;
+  size_t chunkSize = 2;
   char* ptr = test;
   size_t rea = 0;
   while (rea < len) {
     unsigned int tokenCount = token->len;
-    int thisChunkSize = MIN(chunkSize, len - rea);
+    size_t thisChunkSize = MIN(chunkSize, len - rea);
 
     int addedTokens = streamTokenize(ptr, thisChunkSize, delimiters, &token, &remainder);
 
@@ -121,7 +121,7 @@ void test_streamTokenizeEventuallyGivesUp() {
   printf("test: expecting a warning: ");
   int chunkSize = 5;
   char* ptr = test;
-  int addedTokens = 0;
+  guint addedTokens = 0;
   uint32_t i = 0;
   while ((i < 1 << 27) && (*ptr) && (ptr <= endPtr)) {
     unsigned int tokenCount = token->len;
@@ -129,7 +129,7 @@ void test_streamTokenizeEventuallyGivesUp() {
 
     addedTokens = streamTokenize(ptr, thisChunkSize, delimiters, &token, &remainder);
 
-    if (addedTokens == -1) {
+    if (addedTokens == (guint)-1) {
       break;
     } else
       if (addedTokens != token->len - tokenCount)
@@ -147,7 +147,7 @@ void test_streamTokenizeEventuallyGivesUp() {
   g_free(test);
 }
 
-void assertTokenPosition(char* string, int count, ...) {
+void assertTokenPosition(char* string, guint count, ...) {
   char* test = g_strdup(string);
 
   GArray* tokens = tokenize(test, "^");
@@ -158,10 +158,10 @@ void assertTokenPosition(char* string, int count, ...) {
     va_list argptr;
     va_start(argptr, count);
     for (size_t i = 0; i < tokens->len; i++) {
-      int expected = va_arg(argptr, int);
+      size_t expected = va_arg(argptr, size_t);
       size_t current = token_position_of(i, tokens);
       if (current != expected) {
-        printf("ASSERT tokenizing '%s': posof(token[%ld]) == %ld != %d\n", string, i, current, expected);
+        printf("ASSERT tokenizing '%s': posof(token[%ld]) == %ld != %ld\n", string, i, current, expected);
         CU_FAIL("see output");
         break;
       }

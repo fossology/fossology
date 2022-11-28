@@ -1,0 +1,2 @@
+/etc/init.d/fossology
+/etc/logrotate.d/fossology-scheduler

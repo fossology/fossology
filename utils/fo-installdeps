@@ -95,7 +95,7 @@ if [[ $BUILDTIME ]]; then
             build-essential libtext-template-perl subversion rpm librpm-dev \
             libmagic-dev libglib2.0 libboost-regex-dev \
             libboost-program-options-dev libpq-dev composer patch devscripts \
-            libdistro-info-perl
+            libdistro-info-perl cmake ninja-build
          case "$CODENAME" in
            stretch)
              apt-get $YesOpt install php-mbstring php7.0-cli php7.0-xml php7.0-zip php7.0-gd php7.0-pgsql php7.0-curl php7.0-uuid;;
@@ -138,14 +138,14 @@ if [[ $BUILDTIME ]]; then
             perl-Text-Template subversion \
             postgresql-devel file-devel \
             libxml2 \
-            boost-devel php-mbstring libicu-devel libpq-devel patch
+            boost-devel php-mbstring libicu-devel libpq-devel patch cmake ninja-build
          ;;
       RedHatEnterprise*|CentOS)
          yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
             perl-Text-Template subversion \
-            boost-devel php-mbstring libicu-devel libpq-devel patch
+            boost-devel php-mbstring libicu-devel libpq-devel patch cmake ninja-build
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
@@ -169,7 +169,7 @@ if [[ $RUNTIME ]]; then
             poppler-utils upx-ucl \
             unrar-free unzip p7zip-full p7zip wget \
             subversion git \
-            dpkg-dev
+            dpkg-dev php-uuid
          case "$CODENAME" in
             stretch)
                apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql libapache2-mod-php7.0 php7.0-pgsql \

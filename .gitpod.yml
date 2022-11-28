@@ -59,3 +59,8 @@ vscode:
     - "felixfbecker.php-debug"
     - "ms-azuretools.vscode-docker"
     - "fterrag.vscode-php-cs-fixer"
+    - "twxs.cmake"
+    - "ms-vscode.cmake-tools"
+    - "bmewburn.vscode-intelephense-client"
+    - "mblode.twig-language-2"
+    - "42Crunch.vscode-openapi"

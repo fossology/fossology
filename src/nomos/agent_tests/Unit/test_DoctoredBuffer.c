@@ -72,7 +72,7 @@ void test_doctorBuffer_uncollapse()
   doctorBuffer(fer, 0, 0, 0);
   printf("Before %d, after %d", (int) strlen(cfer), (int) strlen(fer));
 
-  for (int i = 0; i < strlen(fer); i++)
+  for (size_t i = 0; i < strlen(fer); i++)
   {
     CU_ASSERT_EQUAL(*(fer + i), *(cfer + uncollapsePosition(i, cur.docBufferPositionsAndOffsets)));
   }
@@ -87,10 +87,10 @@ void test_doctorBuffer_uncollapse()
 static void report_Match(char* buf)
 {
   printf("I have %i matches \n", cur.theMatches->len);
-  for (int i = 0; i < cur.theMatches->len; ++i)
+  for (guint i = 0; i < cur.theMatches->len; ++i)
   {
     LicenceAndMatchPositions* licenceAndMatch =  getLicenceAndMatchPositions(cur.theMatches, i);
-    for (int k=0; k < licenceAndMatch->matchPositions->len; ++k) {
+    for (guint k=0; k < licenceAndMatch->matchPositions->len; ++k) {
       MatchPositionAndType* PaT = getMatchfromHighlightInfo(
           licenceAndMatch->matchPositions, k);
       printf("Match from %d to %d: ", PaT->start, PaT->end);
@@ -117,10 +117,10 @@ void test_doctorBuffer_fromFile()
 {
 
   licenseInit();
-  char* buf, *undoc;
-  buf = (char*) malloc(3000);
-
-  int f = open("../testdata/NomosTestfiles/WXwindows/WXwindows.txt", O_RDONLY);
+  char *buf, *undoc, *filename;
+  filename = buf = (char*)malloc(3000);
+  sprintf(filename, "%s/NomosTestfiles/WXwindows/WXwindows.txt", TESTDATADIR);
+  int f = open(filename, O_RDONLY);
   int whatIread = read(f, buf, 3000);
   close(f);
 

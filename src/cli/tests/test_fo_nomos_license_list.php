@@ -41,7 +41,7 @@ class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase
 
   // this method is run once for the entire test class, before any of the
   // test methods are executed.
-  public static function setUpBeforeClass()
+  public static function setUpBeforeClass() : void
   {
 
     global $fossology_testconfig;
@@ -249,7 +249,7 @@ class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase
 
   // this method is run once for the entire test class, after all of the
   // test methods are executed.
-  public static function tearDownAfterClass()
+  public static function tearDownAfterClass() : void
   {
 
     global $fossology_testconfig;

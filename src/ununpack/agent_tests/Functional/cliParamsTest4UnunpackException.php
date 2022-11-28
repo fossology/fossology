@@ -13,7 +13,7 @@
  *
  * @group ununpack
  */
-require_once './utility.php';
+require_once __DIR__.'/utility.php';
 
 use Fossology\Lib\Test\TestPgDb;
 use Fossology\Lib\Test\TestInstaller;
@@ -45,7 +45,7 @@ class cliParamsTest4UnunpackExcption extends \PHPUnit\Framework\TestCase
   function setUp() : void
   {
     $this->testDb = new TestPgDb('ununpackExceptional');
-    $this->agentDir = dirname(dirname(__DIR__))."/";
+    $this->agentDir = dirname(__DIR__, 4)."/build/src/ununpack";
 
     $sysConf = $this->testDb->getFossSysConf();
     $this->testInstaller = new TestInstaller($sysConf);

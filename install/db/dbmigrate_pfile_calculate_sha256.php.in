@@ -27,7 +27,7 @@ require_once 'fossinit-common.php';
 function checkCorrectUser()
 {
   $processUser = posix_getpwuid(posix_geteuid());
-  if ($processUser['uid'] !== 0 && $processUser['name'] != "{$PROJECTUSER}") {
+  if ($processUser['uid'] !== 0 && $processUser['name'] != "@FO_PROJECTUSER@") {
     return false;
   }
   return true;
@@ -48,7 +48,7 @@ function explainPfileUsage()
 
 /* Condition must be satisfied */
 if (!checkCorrectUser()) {
-  echo "Error: " . basename($argv[0]) . " must either run by root or {$PROJECTUSER} " .
+  echo "Error: " . basename($argv[0]) . " must either run by root or @FO_PROJECTUSER@ " .
     "user!\n";
   exit(-2);
 }
@@ -60,7 +60,7 @@ $AllPossibleOpts = "abc:d:efghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345
 
 /* defaults */
 $DatabaseName = "fossology";
-$sysconfdir = "{$SYSCONFDIR}";
+$sysconfdir = "@FO_SYSCONFDIR@";
 $force = true;
 
 /* command-line options */

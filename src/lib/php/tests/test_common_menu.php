@@ -36,13 +36,13 @@ class test_common_menu extends \PHPUnit\Framework\TestCase
     $Page = 10;
     $TotalPage = 15;
     $Uri = "http://fossology.org/repo/";
-    $expected = "<a href='http:\/\/fossology.org\/repo\/&page=9'>\[Prev\]<\/a>";
+    $expected = "<a class='page-link' href='http:\/\/fossology.org\/repo\/&page=9'>Prev<\/a>";
     $result = MenuPage($Page, $TotalPage, $Uri);
     if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
-      $this->assertMatchesRegularExpression("/<b>11<\/b>/", $result);
+      $this->assertMatchesRegularExpression("/<a class='page-link' href='#'>11<\/a>/", $result);
       $this->assertMatchesRegularExpression("/$expected/", $result);
     } else {
-      $this->assertRegExp("/<b>11<\/b>/", $result);
+      $this->assertRegExp("/<a class='page-link' href='#'>11<\/a>/", $result);
       $this->assertRegExp("/$expected/", $result);
     }
   }
@@ -56,13 +56,13 @@ class test_common_menu extends \PHPUnit\Framework\TestCase
 
     $Page = 10;
     $Uri = "http://fossology.org/repo/";
-    $expected = "<a href='http:\/\/fossology.org\/repo\/&page=9'>\[Prev\]<\/a>";
+    $expected = "<a class='page-link' href='http:\/\/fossology.org\/repo\/&page=9'>Prev<\/a>";
     $result = MenuEndlessPage($Page, 1, $Uri);
     if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
-      $this->assertMatchesRegularExpression("/<b>11<\/b>/", $result);
+      $this->assertMatchesRegularExpression("/<a class='page-link' href='#'>11<\/a>/", $result);
       $this->assertMatchesRegularExpression("/$expected/", $result);
     } else {
-      $this->assertRegExp("/<b>11<\/b>/", $result);
+      $this->assertRegExp("/<a class='page-link' href='#'>11<\/a>/", $result);
       $this->assertRegExp("/$expected/", $result);
     }
   }
@@ -102,7 +102,8 @@ class test_common_menu extends \PHPUnit\Framework\TestCase
     $HTML = "TestHTML";
     $countMenuListBefore = count($MenuList);
     $result = menu_insert($Path, $LastOrder, $URI, $Title, $Target, $HTML);
-    $this->assertEquals($Path,$MenuList[$countMenuListBefore]->FullName);
+    $this->assertEquals($Path,
+      $MenuList[$countMenuListBefore]->SubMenu[0]->SubMenu[0]->FullName);
 
     print "test function menu_find)\n";
     $depth = 2;

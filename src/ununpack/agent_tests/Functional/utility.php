@@ -5,5 +5,5 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
-$TEST_DATA_PATH = dirname(__DIR__)."/testdata";
-$TEST_RESULT_PATH = __DIR__."/test_result";
+$TEST_DATA_PATH = dirname(__DIR__, 4)."/build/src/ununpack/agent_tests/testdata";
+$TEST_RESULT_PATH =dirname(__DIR__, 4)."/build/src/ununpack/agent_tests/test_result";

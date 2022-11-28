@@ -478,7 +478,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
   if (header_status) {
     data_size = rpmtdCount(&req);
     pi->requires = calloc(data_size, sizeof(char *));
-    for (j=0; j<data_size;j++){
+    for (j=0; j<(int)data_size;j++){
       const char * temp = rpmtdNextString(&req);
       pi->requires[j] = malloc(MAXCMD);
       strcpy(pi->requires[j],temp);
@@ -778,8 +778,8 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
     if (!strcasecmp(field, "Depends")) {
       char *depends = NULL;
       char tempvalue[MAXCMD];
-      int size,i,length;
-      length = MAXLENGTH;
+      int size,i;
+      size_t length = MAXLENGTH;
       size = 0;
       if (value[0] != '\0'){
         strncpy(tempvalue, value, sizeof(tempvalue));
@@ -938,9 +938,9 @@ int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
     if (!strcasecmp(field, "Build-Depends")) {
       char *depends = NULL;
       char tempvalue[MAXCMD];
-      int size,i,length;
+      int size,i;
       size = 0;
-      length = MAXLENGTH;
+      size_t length = MAXLENGTH;
       if (value[0] != '\0'){
         strncpy(tempvalue, value, sizeof(tempvalue));
         depends = strtok(value, ",");

@@ -14,6 +14,7 @@ NOTICES
 NOTICES.spdx
 Dockerfile
 docker-compose.yml
+utils/automation/Dockerfile.ci
 
 Vagrantfile
 
@@ -45,6 +46,7 @@ VERSION
 .#*
 
 # compiled or derived files
+build/
 install/db/dbcreate
 install/defconf/Db.conf
 install/defconf/fossology.conf

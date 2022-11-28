@@ -405,7 +405,7 @@ void scheduler_destroy(scheduler_t* scheduler)
  */
 static gboolean isMaxLimitReached(meta_agent_t* agent)
 {
-  if (agent->max_run <= agent->run_count)
+  if (agent != NULL && agent->max_run <= agent->run_count)
   {
     return TRUE;
   }

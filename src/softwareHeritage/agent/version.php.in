@@ -6,5 +6,5 @@
 */
 
 define("SOFTWARE_HERITAGE_AGENT_NAME", "softwareHeritage");
-defined("AGENT_VERSION") or define("AGENT_VERSION", "{$VERSION}");
-defined("AGENT_REV") or define("AGENT_REV", "{$COMMIT_HASH}");
+defined("AGENT_VERSION") or define("AGENT_VERSION", "@FO_VERSION@");
+defined("AGENT_REV") or define("AGENT_REV", "@FO_COMMIT_HASH@");

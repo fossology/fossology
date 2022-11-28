@@ -10,6 +10,9 @@
  * \brief unit tests for common-pkg.php
  */
 
+use Fossology\Lib\Db\ModernDbManager;
+use Fossology\Lib\Test\TestPgDb;
+
 require_once(dirname(__FILE__) . '/../common-pkg.php');
 require_once(dirname(__FILE__) . '/../common-db.php');
 
@@ -18,29 +21,24 @@ require_once(dirname(__FILE__) . '/../common-db.php');
  */
 class test_common_pkg extends \PHPUnit\Framework\TestCase
 {
-  public $PG_CONN;
-  public $DB_COMMAND =  "";
-  public $DB_NAME =  "";
+  /** @var TestPgDb */
+  private $testDb;
+
+  /** @var ModernDbManager */
+  private $dbManager;
 
   /* initialization */
   protected function setUp() : void
   {
-    if (!is_callable('pg_connect')) {
-      $this->markTestSkipped("php-psql not found");
-    }
-    global $PG_CONN;
-    global $DB_COMMAND;
-    global $DB_NAME;
-    print "Starting unit test for common-pkg.php\n";
 
-    $DB_COMMAND  = dirname(dirname(dirname(dirname(__FILE__))))."/testing/db/createTestDB.php";
-    exec($DB_COMMAND, $dbout, $rc);
-    preg_match("/(\d+)/", $dbout[0], $matches);
-    $test_name = $matches[1];
-    $db_conf = $dbout[0];
-    $DB_NAME = "fosstest".$test_name;
-    #$sysconfig = './sysconfigDirTest';
-    $PG_CONN = DBconnect($db_conf);
+    $this->testDb = new TestPgDb("fosslibtest");
+    $tables = array('mimetype');
+    $this->testDb->createPlainTables($tables);
+    $sequences = array('mimetype_mimetype_pk_seq');
+    $this->testDb->createSequences($sequences);
+    $this->testDb->createConstraints(['dirmodemask', 'mimetype_pk']);
+    $this->testDb->alterTables($tables);
+    $this->dbManager = $this->testDb->getDbManager();
   }
 
   /**
@@ -49,35 +47,28 @@ class test_common_pkg extends \PHPUnit\Framework\TestCase
   function test_GetPkgMimetypes()
   {
     print "test function GetPkgMimetypes()\n";
-    global $PG_CONN;
 
     #prepare database testdata
     $mimeType = "application/x-rpm";
     /** delete test data pre testing */
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType');";
-    $result = pg_query($PG_CONN, $sql);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "delete.mimetype");
     /** insert on record */
     $sql = "INSERT INTO mimetype(mimetype_pk, mimetype_name) VALUES(10000, '$mimeType');";
-    $result = pg_query($PG_CONN, $sql);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "insert.mimetype");
 
     #begin test GetPkgMimetypes()
     $sql = "select * from mimetype where
              mimetype_name='application/x-rpm'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "select.mimetype");
     $expected = $row['mimetype_pk'];
-    pg_free_result($result);
 
     $result = GetPkgMimetypes();
     $this->assertContains($expected, $result);
 
     /** delete test data post testing */
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType');";
-    $result = pg_query($PG_CONN, $sql);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "delete.mimetype");
   }
 
   /**
@@ -88,11 +79,8 @@ class test_common_pkg extends \PHPUnit\Framework\TestCase
     if (!is_callable('pg_connect')) {
       return;
     }
-    global $PG_CONN;
-    global $DB_COMMAND;
-    global $DB_NAME;
-
-    pg_close($PG_CONN);
-    exec("$DB_COMMAND -d $DB_NAME");
+    $this->testDb->fullDestruct();
+    $this->testDb = null;
+    $this->dbManager = null;
   }
 }

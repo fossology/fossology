@@ -52,15 +52,16 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
   public function __construct(DbManager $dbManager, AgentDao $agentDao,
                               ClearingDao $clearingDao, UploadDao $uploadDao,
                               HighlightDao $highlightDao, ShowJobsDao $showJobsDao,
+                              CopyrightDao $copyrightDao,
                               ClearingDecisionProcessor $clearingDecisionProcessor,
-                              AgentLicenseEventProcessor $agentLicenseEventProcessor,
-                              CopyrightDao $copyrightDao)
+                              AgentLicenseEventProcessor $agentLicenseEventProcessor)
   {
     $this->clearingDao = $clearingDao;
     $this->agentDao = $agentDao;
     $this->uploadDao = $uploadDao;
     $this->highlightDao = $highlightDao;
     $this->showJobsDao = $showJobsDao;
+    $this->copyrightDao = $copyrightDao;
     $this->dbManager = $dbManager;
     $this->decisionTypes = new DecisionTypes();
     $this->clearingDecisionProcessor = $clearingDecisionProcessor;
@@ -94,6 +95,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $container->shouldReceive('get')->with('dao.upload')->andReturn($this->uploadDao);
     $container->shouldReceive('get')->with('dao.highlight')->andReturn($this->highlightDao);
     $container->shouldReceive('get')->with('dao.show_jobs')->andReturn($this->showJobsDao);
+    $container->shouldReceive('get')->with('dao.copyright')->andReturn($this->copyrightDao);
     $container->shouldReceive('get')->with('decision.types')->andReturn($this->decisionTypes);
     $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($this->clearingDecisionProcessor);
     $container->shouldReceive('get')->with('businessrules.agent_license_event_processor')->andReturn($this->agentLicenseEventProcessor);

@@ -554,6 +554,9 @@ class UIExportList extends FO_Plugin
     $newLines = [];
     foreach ($lines as $row) {
       $consolidatedLicenses = array();
+      if ($row['agentFindings'] == null) {
+        continue;
+      }
       if ($row['conclusions'] !== null) {
         $row['agentFindings'] = array();
         foreach ($row['conclusions'] as $key => $value) {

@@ -8,12 +8,12 @@
 
 _runcopyright()
 {
-  ./copyright "$@" | sed -e '1d'
+  ../../../../build/src/copyright/agent/copyright "$@" | sed -e '1d'
 }
 
 _runcopyrightPositives()
 {
-  ./copyright --regex '1@@<s>([^\0]*?)</s>' -T 0 "$1" | sed -e '1d'
+  ../../../../build/src/copyright/agent/copyright --regex '1@@<s>([^\0]*?)</s>' -T 0 "$1" | sed -e '1d'
 }
 
 _checkFound()

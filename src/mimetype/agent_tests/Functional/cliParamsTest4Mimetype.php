@@ -14,7 +14,9 @@
  * @group mimetype agent
  */
 
-require_once (__DIR__ . "/../../../testing/db/createEmptyTestEnvironment.php");
+use Fossology\Lib\Db\ModernDbManager;
+use Fossology\Lib\Test\TestPgDb;
+use Fossology\Lib\Test\TestInstaller;
 
 /**
  * @class cliParamsTest4Mimetype
@@ -23,10 +25,17 @@ require_once (__DIR__ . "/../../../testing/db/createEmptyTestEnvironment.php");
 class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
 
   public $EXE_PATH = "";
-  public $PG_CONN;
-  public $DB_COMMAND =  "";
-  public $DB_NAME =  "";
+  public $cwd;
   public $DB_CONF = "";
+
+  /** @var TestPgDb */
+  private $testDb;
+
+  /** @var ModernDbManager */
+  private $dbManager;
+
+  /** @var TestInstaller */
+  private $testInstaller;
 
   /**
    * @biref Initialization
@@ -34,17 +43,23 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
    */
   protected function setUp() : void {
     global $EXE_PATH;
-    global $PG_CONN;
-    global $DB_COMMAND;
-    global $DB_NAME;
+    global $cwd;
     global $DB_CONF;
 
-    $cwd = getcwd();
-    list($test_name, $DB_CONF, $DB_NAME, $PG_CONN) = setupTestEnv($cwd, "mimetype");
+    $cwd = dirname(__DIR__, 4).'/build/src/mimetype/agent_tests';
+    $this->testDb = new TestPgDb("fossmimetypetest");
+    $tables = array('mimetype', 'agent');
+    $this->testDb->createPlainTables($tables);
+    $this->testDb->createSequences(['mimetype_mimetype_pk_seq', 'agent_agent_pk_seq']);
+    $this->testDb->createConstraints(['mimetype_pk', 'dirmodemask','agent_pkey']);
+    $this->testDb->alterTables($tables);
+    $this->dbManager = $this->testDb->getDbManager();
+    $DB_CONF = $this->testDb->getFossSysConf();
+    $this->testInstaller = new TestInstaller($DB_CONF);
+    $this->testInstaller->init();
+    $this->testInstaller->cpRepo();
+    $this->testInstaller->install($cwd.'/..');
 
-    $sql = "CREATE TABLE mimetype (mimetype_pk SERIAL, mimetype_name text);";
-    $result = pg_query($PG_CONN, $sql);
-    pg_free_result($result);
     $sql = "INSERT INTO public.mimetype (mimetype_pk, mimetype_name) VALUES (2, 'application/gzip'),"
          . " (3, 'application/x-gzip'), (4, 'application/x-compress'), (5, 'application/x-bzip'), (6, 'application/x-bzip2'),"
          . " (7, 'application/x-upx'), (8, 'application/pdf'), (9, 'application/x-pdf'), (10, 'application/x-zip'),"
@@ -56,14 +71,13 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
          . " (28, 'application/x-x86_boot'), (29, 'application/x-debian-source'), (30, 'application/x-xz'),"
          . " (31, 'application/jar'), (32, 'application/java-archive'), (33, 'application/x-dosexec'),"
          . " (34, 'text/plain');";
-    $result = pg_query($PG_CONN, $sql);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "insert.mimetype");
 
-    $EXE_PATH = '../../agent/mimetype';
+    $EXE_PATH = $cwd . '/../agent/mimetype';
     $usage= "";
     if(file_exists($EXE_PATH))
     {
-      $usage = 'Usage: ../../agent/mimetype [options] [file [file [...]]';
+      $usage = 'Usage: '.$EXE_PATH.' [options] [file [file [...]]';
     }
     else
     {
@@ -86,22 +100,21 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
    */
   function testMimetypeNotInDB(){
     global $EXE_PATH;
-    global $PG_CONN;
 
-    $mimeType1 = "application/x-sharedlib";
+    $mimeType1 = "application/x-msi";
     /* delete test data pre testing */
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType1');";
-    $result = pg_query($PG_CONN, $sql);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "delete.mimetype");
 
     /* the file is one executable file */
-    $filePath = "../../agent/mimetype";
+    // HACK: Hot fix to use different binary
+    $filePath = dirname(__DIR__, 4).'/build/src/ununpack/agent_tests/testdata/test.msi';
     $command = "$EXE_PATH $filePath";
     exec($command, $out, $rtn);
     $this->assertStringStartsWith($mimeType1, $out[0]);
 
     /* the file is one text file */
-    $filePath = "../../mimetype.conf";
+    $filePath = dirname(__DIR__, 2)."/mimetype.conf";
     $command = "$EXE_PATH $filePath";
     $out = "";
     exec($command, $out, $rtn);
@@ -109,8 +122,7 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
     $this->assertStringStartsWith($mimeType2, $out[0]);
     /* delete test data post testing */
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType1');";
-    $result = pg_query($PG_CONN, $sql);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "delete.mimetype");
   }
 
 
@@ -122,42 +134,38 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
    */
   function testMimetypeInDB(){
     global $EXE_PATH;
-    global $PG_CONN;
 
-    $mimeType = "text/x-makefile";
+    $mimeType = "text/plain";
     /* delete test data pre testing */
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType');";
-    $result = pg_query($PG_CONN, $sql);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "delete.mimetype");
     /* insert on record */
     $sql = "INSERT INTO mimetype(mimetype_pk, mimetype_name) VALUES(10000, '$mimeType');";
-    $result = pg_query($PG_CONN, $sql);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "insert.mimetype");
     /* the file is one c source file */
-    $filePath = "./Makefile";
+    $filePath = dirname(__DIR__)."/CMakeLists.txt";
     $command = "$EXE_PATH $filePath";
     exec($command, $out, $rtn);
-    $expected_string = "text/x-makefile : mimetype_pk=10000";
+    $expected_string = "text/plain : mimetype_pk=10000";
     $this->assertStringStartsWith($expected_string, $out[0]);
 
     /* delete test data post testing */
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType');";
-    $result = pg_query($PG_CONN, $sql);
-    pg_free_result($result);
+    $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "delete.mimetype");
   }
 
   /**
    * \brief clean the env
    */
   protected function tearDown() : void {
-    global $PG_CONN;
-    global $DB_COMMAND;
-    global $DB_NAME;
-    global $DB_CONF;
-
-    pg_close($PG_CONN);
-    exec("$DB_COMMAND -d $DB_NAME");
-    exec("rm -rf $DB_CONF");
+    global $cwd;
+    if (!is_callable('cwdect')) {
+      return;
+    }
+    $this->testDb->fullDestruct();
+    $this->testDb = null;
+    $this->dbManager = null;
+    $this->testInstaller->uninstall($cwd.'/..');
   }
 }
 

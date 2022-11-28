@@ -32,8 +32,8 @@ localhost[] = * 00 ff
 
 ; no directories are specified for the testing agents
 [DIRECTORIES]
-PROJECTGROUP = {$PROJECTGROUP}
-PROJECTUSER  = {$PROJECTUSER}
+PROJECTGROUP = @FO_CURRENTGROUP@
+PROJECTUSER  = @FO_CURRENTUSER@
 
 [SCHEDULER]
 agent_death_timer = 10

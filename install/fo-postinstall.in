@@ -10,7 +10,7 @@
 # idempotent, meaning that running it repeatedly will still do the
 # right thing, regardless of the success of previous runs.
 
-show_help() \{
+show_help() {
   cat <<EOF
 Usage: fo-postinstall [options]
   -a or --agent           : agent specific actions
@@ -30,7 +30,7 @@ Usage: fo-postinstall [options]
   --debian                : running as part of debian installation step
   --python-experimental   : install experimental python dependencies
 EOF
-\}
+}
 
 AGENT=''
 DATABASE=''
@@ -81,7 +81,7 @@ while true; do
 done
 
 # If everything flags were sent, set everything to true to prevent overwrite
-if [[ $OPT == *" -e "* || $OPT == *" --everything "* ]]; then
+if [[ $OPTS == *" -e "* || $OPTS == *" --everything "* ]]; then
     EVERYTHING=true
 fi
 
@@ -97,39 +97,39 @@ if [[ $EVERYTHING ]]; then
    LICENSEREF=true
 fi
 
-must_run_as_root() \{
+must_run_as_root() {
   # This must run as root.
   if [[ $(id -u) -ne 0 ]] ; then
     echo >&2 "ERROR: fo-postinstall must run as root."
     echo >&2 "Aborting."
     exit 1
   fi
-\}
+}
 
-read_config_value() \{
+read_config_value() {
    local line="$1"
    local key="$2"
    local out="$3"
-   [[ "$out" =~ ^[a-zA-Z]+$ ]] || \{ echo >&2 "FATAL: bad parameters to read_config_value: $@"; exit 1; \}
+   [[ "$out" =~ ^[a-zA-Z]+$ ]] || { echo >&2 "FATAL: bad parameters to read_config_value: $@"; exit 1; }
    if [[ $line =~ ^[[:space:]]*${key}[[:space:]]*\=[[:space:]]*([^[:space:]\']*) ]]; then
-      eval "$out='$\{BASH_REMATCH[1]\}'"
+      eval "$out='${BASH_REMATCH[1]}'"
    fi
-\}
+}
 
-set_value_in_section() \{
+set_value_in_section() {
    echo "NOTE: writing $2=$3 in section $4 of $1"
    sed -e "s/\[$4\]/[$4]\n$2=$3/" -i.bak "$1"
-\}
+}
 
 REPO=''
 PROJECTGROUP=''
-CONFIG="{$SYSCONFDIR}/fossology.conf"
+CONFIG="@FO_SYSCONFDIR@/fossology.conf"
 if [[ -f $CONFIG ]]; then
    while read line; do
       read_config_value "$line" path REPO
       read_config_value "$line" PROJECTGROUP PROJECTGROUP
    done < "$CONFIG"
-   [[ $PROJECTGROUP =~ ^[a-z0-9]*$ ]] || \{ echo >&2 "ERROR: bad value for PROJECTGROUP in config"; exit 2; \}
+   [[ $PROJECTGROUP =~ ^[a-z0-9]*$ ]] || { echo >&2 "ERROR: bad value for PROJECTGROUP in config"; exit 2; }
 else
    echo >&2 "ERROR: Cannot find $CONFIG"
    exit 1
@@ -140,13 +140,13 @@ if [[ $COMMON ]]; then
    echo "*** Running postinstall for common actions***"
 
    # check path to repo
-   [[ $REPO ]] || \{ echo >&2 "ERROR: path is not set in $CONFIG"; exit 1; \}
+   [[ $REPO ]] || { echo >&2 "ERROR: path is not set in $CONFIG"; exit 1; }
 
    # set default when PROJECTGROUP is not set
-   [[ $PROJECTGROUP ]] || \{
-      set_value_in_section "$CONFIG" PROJECTGROUP {$PROJECTGROUP} 'DIRECTORIES'
-      PROJECTGROUP="{$PROJECTGROUP}"
-   \}
+   [[ $PROJECTGROUP ]] || {
+      set_value_in_section "$CONFIG" PROJECTGROUP @FO_PROJECTGROUP@ 'DIRECTORIES'
+      PROJECTGROUP="@FO_PROJECTGROUP@"
+   }
 
    ## create user and group
    # Because we are doing these by name, in the multi-machine install case
@@ -169,59 +169,59 @@ if [[ $COMMON ]]; then
    fi
 
    # check for user
-   if grep -q "^{$PROJECTUSER}:" /etc/passwd; then
-      echo "NOTE: user '{$PROJECTUSER}' already exists, good."
-      USERSHELL=$(grep "^{$PROJECTUSER}:" /etc/passwd | cut -d: -f 7)
+   if grep -q "^@FO_PROJECTUSER@:" /etc/passwd; then
+      echo "NOTE: user '@FO_PROJECTUSER@' already exists, good."
+      USERSHELL=$(grep "^@FO_PROJECTUSER@:" /etc/passwd | cut -d: -f 7)
       if [[ $USERSHELL == "/bin/false" ]]; then
-         echo >&2 "ERROR: {$PROJECTUSER} shell must be a real shell"
+         echo >&2 "ERROR: @FO_PROJECTUSER@ shell must be a real shell"
          exit 1
       fi
-      USERHOME=$(grep "^{$PROJECTUSER}:" /etc/passwd | cut -d: -f 6)
-      if [[ $USERHOME != "/home/{$PROJECTUSER}" ]]; then
-         echo "NOTE: change user '{$PROJECTUSER}' homedir from $USERHOME to /home/{$PROJECTUSER}."
-         mkdir --parents /home/{$PROJECTUSER}
-         chown {$PROJECTUSER}:$PROJECTGROUP /home/{$PROJECTUSER}
-         usermod --home /home/{$PROJECTUSER} {$PROJECTUSER}
+      USERHOME=$(grep "^@FO_PROJECTUSER@:" /etc/passwd | cut -d: -f 6)
+      if [[ $USERHOME != "/home/@FO_PROJECTUSER@" ]]; then
+         echo "NOTE: change user '@FO_PROJECTUSER@' homedir from $USERHOME to /home/@FO_PROJECTUSER@."
+         mkdir --parents /home/@FO_PROJECTUSER@
+         chown @FO_PROJECTUSER@:$PROJECTGROUP /home/@FO_PROJECTUSER@
+         usermod --home /home/@FO_PROJECTUSER@ @FO_PROJECTUSER@
       fi
-   elif useradd --comment "{$PROJECT}" --gid $PROJECTGROUP --create-home --shell /bin/bash --system {$PROJECTUSER}; then
-      echo "NOTE: user '{$PROJECTUSER}' created"
+   elif useradd --comment "@FO_PROJECT@" --gid $PROJECTGROUP --create-home --shell /bin/bash --system @FO_PROJECTUSER@; then
+      echo "NOTE: user '@FO_PROJECTUSER@' created"
    else
-      echo >&2 "ERROR: Unable to create user '{$PROJECTUSER}'"
+      echo >&2 "ERROR: Unable to create user '@FO_PROJECTUSER@'"
       exit 1
    fi
 
    ## check for existance/ownership/permissions of needed directories
    echo "*** Making sure needed dirs exist with right ownership/permissions ***"
 
-   if [[ -d "{$CACHEDIR}" ]]; then
+   if [[ -d "@FO_CACHEDIR@" ]]; then
        echo "*** clearing file cache ***"
-       rm --force --recursive {$CACHEDIR}/*
+       rm --force --recursive @FO_CACHEDIR@/*
    fi
    if [[ -d "$REPO" ]]; then
        echo "NOTE: Repository already exists at $REPO"
    fi
 
    mkdir --parents \
-      "{$PROJECTSTATEDIR}" \
-      "{$PROJECTSTATEDIR}/agents" \
-      "{$CACHEDIR}" \
+      "@FO_PROJECTSTATEDIR@" \
+      "@FO_PROJECTSTATEDIR@/agents" \
+      "@FO_CACHEDIR@" \
       "$REPO" \
-      "{$REPODIR}/fossdash"
+      "@FO_REPODIR@/fossdash"
 
-   chown root:$PROJECTGROUP "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR}
-   chmod 2775 "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR} "{$REPODIR}/fossdash"
+   chown root:$PROJECTGROUP "@FO_PROJECTSTATEDIR@" "@FO_PROJECTSTATEDIR@/agents" @FO_CACHEDIR@
+   chmod 2775 "@FO_PROJECTSTATEDIR@" "@FO_PROJECTSTATEDIR@/agents" @FO_CACHEDIR@ "@FO_REPODIR@/fossdash"
 
    # make sure repo and its parent dir has the right permissions
-   if [[ $(stat -c "%G" $REPO) != {$PROJECTGROUP} ]]; then
+   if [[ $(stat -c "%G" $REPO) != @FO_PROJECTGROUP@ ]]; then
      echo "NOTE: Repository group is not correct."
      echo "Fixing..This may take long duration, depending on your repository size."
-     chown --recursive {$PROJECTUSER}:$PROJECTGROUP $\{REPO%/*\} $REPO
+     chown --recursive @FO_PROJECTUSER@:$PROJECTGROUP ${REPO%/*} $REPO
    fi
-   chmod 2770 $\{REPO%/*\} $REPO
+   chmod 2770 ${REPO%/*} $REPO
 
    # make install sets Db.conf's mode to 660, but can't chgrp it because
    # the group doesn't exist until we create it above. So chgrp now
-   chgrp $PROJECTGROUP {$SYSCONFDIR}/Db.conf || echo >&2 "ERROR: failed to chgrp {$SYSCONFDIR}/Db.conf"
+   chgrp $PROJECTGROUP @FO_SYSCONFDIR@/Db.conf || echo >&2 "ERROR: failed to chgrp @FO_SYSCONFDIR@/Db.conf"
 
    cat <<EOF
 NOTE: Running the PostgreSQL vacuum and analyze command can result in a large database performance improvement.
@@ -230,7 +230,7 @@ NOTE: Running the PostgreSQL vacuum and analyze command can result in a large da
 EOF
 fi
 
-[[ $PROJECTGROUP ]] || \{ echo "PROJECTGROUP is not set"; exit 2; \}
+[[ $PROJECTGROUP ]] || { echo "PROJECTGROUP is not set"; exit 2; }
 
 if [[ $WEBONLY ]]; then
    echo "*** Running postinstall for web-only actions***"
@@ -240,32 +240,32 @@ fi
 ########################################################################
 
 if [[ $DATABASE && $RUNNINGDATABASE ]]; then
-   {$LIBEXECDIR}/dbcreate
+   @FO_LIBEXECDIR@/dbcreate
 fi # end of DATABASE
 
 if [[ $LICENSEREF && $RUNNINGDATABASE ]]; then
     must_run_as_root
     echo "*** update the database and license_ref table ***"
-    {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR} $FORCEDECISION $FORCEPFILE $FORCEENCODE
+    @FO_LIBEXECDIR@/fossinit.php -l -c @FO_SYSCONFDIR@ $FORCEDECISION $FORCEPFILE $FORCEENCODE
 fi # end of license reference
 
 ########################################################################
 
 if [[ $AGENT ]]; then
    must_run_as_root
-   # change all files ownership to {$PROJECTUSER}:$PROJECTGROUP
-   chown --recursive {$PROJECTUSER}:$PROJECTGROUP {$MODDIR} {$LIBEXECDIR} {$SYSCONFDIR}
-   chown --silent {$PROJECTUSER}:$PROJECTGROUP {$INCLUDEDIR}/libfossology.h
-   chown --silent {$PROJECTUSER}:$PROJECTGROUP {$MAN1DIR}/cp2foss.1\{,.gz\} {$MAN1DIR}/fossjobs.1\{,.gz\} || echo
+   # change all files ownership to @FO_PROJECTUSER@:$PROJECTGROUP
+   chown --recursive @FO_PROJECTUSER@:$PROJECTGROUP @FO_MODDIR@ @FO_LIBEXECDIR@ @FO_SYSCONFDIR@
+   chown --silent @FO_PROJECTUSER@:$PROJECTGROUP @FO_INCLUDEDIR@/libfossology.h
+   chown --silent @FO_PROJECTUSER@:$PROJECTGROUP @FO_MAN1DIR@/cp2foss.1{,.gz} @FO_MAN1DIR@/fossjobs.1{,.gz} || echo
    # Install Python dependencies for source install only
-   if [[ "{$DESTDIR}" != *"debian"* ]]; then
-     {$LIBEXECDIR}/fo-install-pythondeps -y --runtime --user {$PROJECTUSER} $PYTHONEXPERI $DEBIAN
+   if [[ "@FO_DESTDIR@" != *"debian"* ]]; then
+     @FO_LIBEXECDIR@/fo-install-pythondeps -y --runtime --user @FO_PROJECTUSER@ $PYTHONEXPERI $DEBIAN
    fi
 fi
 
 if [[ $AGENT && $RUNNINGDATABASE ]]; then
-   if ! {$LIBEXECDIR}/fo_dbcheck.php -c {$SYSCONFDIR}; then
-     echo "FATAL: unable to connect to database, please check {$SYSCONFDIR}/Db.conf"
+   if ! @FO_LIBEXECDIR@/fo_dbcheck.php -c @FO_SYSCONFDIR@; then
+     echo "FATAL: unable to connect to database, please check @FO_SYSCONFDIR@/Db.conf"
      exit 1
    fi
    echo "Database connectivity is good."
@@ -278,14 +278,14 @@ if [[ $SCHEDULERONLY ]]; then
    echo "*** Setting up scheduler ***"
 
    # Create the scheduler log directory.
-   if [[ -f {$LOGDIR} ]] ; then
+   if [[ -f @FO_LOGDIR@ ]] ; then
      # Must be a directory and not a file
-     rm --force {$LOGDIR}
+     rm --force @FO_LOGDIR@
    fi
-   mkdir --parents {$LOGDIR}
-   chown --recursive {$PROJECTUSER}:$PROJECTGROUP {$LOGDIR}
-   chmod 2775 {$LOGDIR}
-   find {$LOGDIR} -type f -print0 | xargs --no-run-if-empty --null chmod 660
+   mkdir --parents @FO_LOGDIR@
+   chown --recursive @FO_PROJECTUSER@:$PROJECTGROUP @FO_LOGDIR@
+   chmod 2775 @FO_LOGDIR@
+   find @FO_LOGDIR@ -type f -print0 | xargs --no-run-if-empty --null chmod 660
 fi # end of SCHEDULERONLY
 
 ########################################################################
@@ -328,22 +328,22 @@ if [[ $WEBONLY ]]; then
   fi
 
   # Enable fossology for source install
-  if [[ "{$DESTDIR}" != *"debian"* ]]; then
-    if [[ -d {$APACHE2_SITE_DIR} ]]; then
-      if [[ -f {$APACHE2_SITE_DIR}/fossology.conf ]]; then
+  if [[ "@FO_DESTDIR@" != *"debian"* ]]; then
+    if [[ -d @FO_APACHE2SITE_DIR@ ]]; then
+      if [[ -f @FO_APACHE2SITE_DIR@/fossology.conf ]]; then
         echo "Fossology already enabled for apache2";
       else
         echo "NOTE: enabling fossology site for apache2";
-        ln -s {$DESTDIR}{$SYSCONFDIR}/conf/src-install-apache-example.conf {$APACHE2_SITE_DIR}/fossology.conf;
-        {$APACHE2_EN_SITE} fossology.conf;
+        ln -s @FO_DESTDIR@@FO_SYSCONFDIR@/conf/src-install-apache-example.conf @FO_APACHE2SITE_DIR@/fossology.conf;
+        @FO_APACHE2_EN_SITE@ fossology.conf;
         RESTART_MESSAGE=true
       fi;
-    elif [[ -d {$HTTPD_SITE_DIR} ]]; then
-      if [[ -f {$HTTPD_SITE_DIR}/fossology.conf ]]; then
+    elif [[ -d @FO_HTTPD_SITE_DIR@ ]]; then
+      if [[ -f @FO_HTTPD_SITE_DIR@/fossology.conf ]]; then
         echo "Fossology already enabled for httpd";
       else
         echo "NOTE: enabling fossology site for httpd";
-        ln -s {$DESTDIR}{$SYSCONFDIR}/conf/src-install-apache-example.conf {$HTTPD_SITE_DIR}/fossology.conf;
+        ln -s @FO_DESTDIR@@FO_SYSCONFDIR@/conf/src-install-apache-example.conf @FO_HTTPD_SITE_DIR@/fossology.conf;
         RESTART_MESSAGE=true
       fi;
     fi;

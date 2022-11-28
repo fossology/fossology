@@ -10,7 +10,7 @@
  */
 /* local variables */
 static char *Fname = "";
-struct stat Stat;
+struct stat Statf;
 static char *Dst = NULL;
 static int Result = 0;
 
@@ -46,9 +46,9 @@ void testPruneFileFileSzieIs0()
   Fname = "../testdata/null_file";
   deleteTmpFiles(NewDir);
   strcpy(Dst, "./test-result/nullfile");
-  stat(Fname, &Stat);
+  stat(Fname, &Statf);
   CopyFile(Fname, Dst);
-  Result = Prune(Dst, Stat);
+  Result = Prune(Dst, Statf);
   exists = file_dir_exists(Dst);
   FO_ASSERT_EQUAL(exists, 0); //  not  existing
   FO_ASSERT_EQUAL(Result, 1); // pruned
@@ -65,9 +65,9 @@ void testPruneRegFile()
   Fname = "../testdata/test.ar";
   deleteTmpFiles(NewDir);
   strcpy(Dst, "./test-result/test.ar");
-  stat(Fname, &Stat);
+  stat(Fname, &Statf);
   CopyFile(Fname, Dst);
-  Result = Prune(Dst, Stat);
+  Result = Prune(Dst, Statf);
   exists = file_dir_exists(Dst);
   FO_ASSERT_EQUAL(exists, 1); // existing
   FO_ASSERT_EQUAL(Result, 0); // not pruned
@@ -83,8 +83,8 @@ void testPruneRegFile()
 void testPruneCharFile()
 {
   Fname = "../testdata/ext2file.fs";
-  stat(Fname, &Stat);
-  Result = Prune(Fname, Stat);
+  stat(Fname, &Statf);
+  Result = Prune(Fname, Statf);
   exists = file_dir_exists(Fname);
   FO_ASSERT_EQUAL(exists, 0); //  not  existing
   FO_ASSERT_EQUAL(Result, 1); // pruned

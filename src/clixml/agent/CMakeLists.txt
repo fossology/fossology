@@ -1,0 +1,25 @@
+#[=======================================================================[
+SPDX-License-Identifier: GPL-2.0-only
+SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
+#]=======================================================================]
+
+generate_version_php()
+
+install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/
+    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent
+    COMPONENT clixml
+    FILES_MATCHING
+    PATTERN *.php
+    PATTERN *.twig
+    PATTERN version.php EXCLUDE
+)
+
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen/
+    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent
+    COMPONENT clixml
+    FILES_MATCHING
+    PATTERN *.php
+    PATTERN *.twig
+)
+
+add_symlink(${PROJECT_NAME} ${FO_LIBEXECDIR}/fo_wrapper ${FO_MODDIR}/${PROJECT_NAME}/agent)

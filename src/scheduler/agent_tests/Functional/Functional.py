@@ -1,4 +1,4 @@
-#!/usr/bin/python -u
+#!/usr/bin/python3 -u
 ##
 # @dir
 # @brief Functional testing module
@@ -715,7 +715,7 @@ def main():
       suiteNode.setAttribute("errors", str(errors))
       top_output.appendChild(suiteNode)
   
-  os.chdir(dir);
+  os.chdir(dir)
   
   output = open(options.resultfile, 'w')
   resultsDoc.writexml(output, "", "  ", "\n")

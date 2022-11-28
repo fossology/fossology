@@ -4,6 +4,10 @@
 # SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
 name: Docker images - master
 
+concurrency:
+  group: docker-${{ github.head_ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -11,6 +15,7 @@ on:
   release:
     types:
       - published
+  workflow_dispatch:
 
 jobs:
   docker-build:

@@ -33,9 +33,9 @@
   -->
   <testsuite name="JustStop" longest="57">
     <definitions pwd       = "{$pwd}"
-                 config    = "{pwd}/scheduler/agent_tests/agents"
+                 config    = "{pwd}/src/scheduler/agent_tests/gen/agents"
                  log       = "{config}/fossology.log"
-                 agentdir  = "{pwd}/scheduler/agent"
+                 agentdir  = "{pwd}/src/scheduler/agent"
                  scheduler = "{agentdir}/fo_scheduler"
                  cli       = "{agentdir}/fo_cli"/>
     <setup>
@@ -63,9 +63,9 @@
   -->
   <testsuite name="TestAgents" longest="53">
     <definitions pwd       = "{$pwd}"
-                 config    = "{pwd}/scheduler/agent_tests/agents"
+                 config    = "{pwd}/src/scheduler/agent_tests/gen/agents"
                  log       = "{config}/fossology.log"
-                 agentdir  = "{pwd}/scheduler/agent"
+                 agentdir  = "{pwd}/src/scheduler/agent"
                  scheduler = "{agentdir}/fo_scheduler"
                  cli       = "{agentdir}/fo_cli"/>
     <setup>
@@ -102,9 +102,9 @@
   -->
   <testsuite name="Stop/Die" longest="12">
     <definitions pwd       = "{$pwd}"
-                 config    = "{pwd}/scheduler/agent_tests/agents"
+                 config    = "{pwd}/src/scheduler/agent_tests/gen/agents"
                  log       = "{config}/fossology.log"
-                 agentdir  = "{pwd}/scheduler/agent"
+                 agentdir  = "{pwd}/src/scheduler/agent"
                  scheduler = "{agentdir}/fo_scheduler"
                  cli       = "{agentdir}/fo_cli"/>
     
@@ -133,9 +133,9 @@
   -->
   <testsuite name="RealAgents" longest="3">
     <definitions pwd       = "{$pwd}"
-                 config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
+                 config    = "{pwd}/src/scheduler/agent_tests/gen/agents"
                  log       = "{config}/fossology.log"
-                 agentdir  = "{pwd}/scheduler/agent"
+                 agentdir  = "{pwd}/src/scheduler/agent"
                  scheduler = "{agentdir}/fo_scheduler"
                  cli       = "{agentdir}/fo_cli"/>
     <setup>
@@ -169,9 +169,9 @@
   -->
   <testsuite name="StopRealAgents" longest="7">
     <definitions pwd       = "{$pwd}"
-                 config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
+                 config    = "{pwd}/src/scheduler/agent_tests/gen/agents"
                  log       = "{config}/fossology.log"
-                 agentdir  = "{pwd}/scheduler/agent"
+                 agentdir  = "{pwd}/src/scheduler/agent"
                  scheduler = "{agentdir}/fo_scheduler"
                  cli       = "{agentdir}/fo_cli"/>
     <setup>
@@ -196,18 +196,18 @@
   -->
   <testsuite name="SimpleUpload" longest="600">
     <definitions pwd       = "{$pwd}"
-                 config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
+                 config    = "{pwd}/src/scheduler/agent_tests/gen/agents"
                  log       = "{config}/fossology.log"
-                 agentdir  = "{pwd}/scheduler/agent"
+                 agentdir  = "{pwd}/src/scheduler/agent"
                  scheduler = "{agentdir}/fo_scheduler"
-                 cp2foss   = "{pwd}/cli/cp2foss"
-                 fossjobs  = "{pwd}/cli/fossjobs"
+                 cp2foss   = "{pwd}/src/cli/cp2foss"
+                 fossjobs  = "{pwd}/src/cli/fossjobs"
                  cli       = "{agentdir}/fo_cli"
                  user      = "fossy"
                  pass      = "fossy"
                  dbuser    = "fossologytest"/>
     <setup>
-      <upload file="{pwd}/testing/dataFiles/TestData/archives/3files.tar.bz2"/>
+      <upload file="{pwd}/../src/testing/dataFiles/TestData/archives/3files.tar.bz2"/>
       <schedule upload="{upload_pk:0}"/>
       <sequential command="{cli}" params="--config={config} -S" retval="0"
                   result="scheduler:{pids:0} revision:{BUILD:COMMIT_HASH} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
@@ -229,12 +229,12 @@
   -->
   <testsuite name="UploadSeveral" longest="600">
     <definitions pwd       = "{$pwd}"
-                 config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
+                 config    = "{pwd}/src/scheduler/agent_tests/gen/agents"
                  log       = "{config}/fossology.log"
-                 agentdir  = "{pwd}/scheduler/agent"
+                 agentdir  = "{pwd}/src/scheduler/agent"
                  scheduler = "{agentdir}/fo_scheduler"
-                 cp2foss   = "{pwd}/cli/cp2foss"
-                 fossjobs  = "{pwd}/cli/fossjobs"
+                 cp2foss   = "{pwd}/src/cli/cp2foss"
+                 fossjobs  = "{pwd}/src/cli/fossjobs"
                  cli       = "{agentdir}/fo_cli"
                  user      = "fossy"
                  pass      = "fossy"
@@ -248,7 +248,7 @@
                               fossI16L518.7z"/>
     <setup>
       <loop varname="filename" values="{filelist}">
-        <upload file="{pwd}/testing/dataFiles/TestData/archives/{filename}"/>
+        <upload file="{pwd}/../src/testing/dataFiles/TestData/archives/{filename}"/>
       </loop>
       <loop varname="i" iterations="7">
         <schedule upload="{upload_pk:{i}}"/>

@@ -219,8 +219,10 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
    */
   private function compareMatches($left, $right)
   {
-    if (strcmp($left["file"], $right["file"]) !== 0) {
-      return strcmp($left["file"], $right["file"]);
+    $leftFile = basename($left["file"]);
+    $rightFile = basename($right["file"]);
+    if (strcmp($leftFile, $rightFile) !== 0) {
+      return strcmp($leftFile, $rightFile);
     }
     if ($left["results"] === null) {
       if ($right["results"] === null) {
@@ -317,7 +319,7 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
    */
   public function testCli()
   {
-    $testFile = "../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/MPL-2.0_AND_BSD-2-Clause_AND_MIT_OR_Apache-2.0.txt";
+    $testFile = dirname(__DIR__, 3)."/nomos/agent_tests/testdata/NomosTestfiles/SPDX/MPL-2.0_AND_BSD-2-Clause_AND_MIT_OR_Apache-2.0.txt";
 
     $args = "--json $testFile";
     list ($success, $output, $retCode) = $this->cliRunner->run($args);
@@ -350,7 +352,7 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
    */
   public function regressionTest()
   {
-    $testDir = "../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX";
+    $testDir = dirname(__DIR__, 3)."/nomos/agent_tests/testdata/NomosTestfiles/SPDX";
 
     $args = "--json --directory $testDir";
     list ($success, $output, $retCode) = $this->cliRunner->run($args);

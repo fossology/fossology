@@ -136,10 +136,9 @@ class SpdxTwoAgent extends Agent
   {
     // deduce the agent name from the command line arguments
     $args = getopt("", array(self::OUTPUT_FORMAT_KEY.'::'));
+    $agentName = "";
     if (array_key_exists(self::OUTPUT_FORMAT_KEY, $args)) {
       $agentName = trim($args[self::OUTPUT_FORMAT_KEY]);
-    } else {
-      $agentName = "";
     }
     if (empty($agentName)) {
         $agentName = self::DEFAULT_OUTPUT_FORMAT;
@@ -351,7 +350,11 @@ class SpdxTwoAgent extends Agent
     } elseif ($componentType == ComponentType::PACKAGEURL) {
       $componentType = "purl";
     } else {
-      $componentType = ComponentType::TYPE_MAP[$componentType];
+      if (!empty($componentType)) {
+        $componentType = ComponentType::TYPE_MAP[$componentType];
+      } else {
+        $componentType = ComponentType::TYPE_MAP[ComponentType::PURL];
+      }
     }
 
     return $this->renderString($this->getTemplateFile('package'),array(

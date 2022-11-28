@@ -19,7 +19,7 @@ NinkaDatabaseHandler::NinkaDatabaseHandler(DbManager dbManager) :
 
 vector<unsigned long> NinkaDatabaseHandler::queryFileIdsForUpload(int uploadId)
 {
-  return queryFileIdsVectorForUpload(uploadId);
+  return queryFileIdsVectorForUpload(uploadId, true);
 }
 
 // TODO: see function saveToDb() from src/monk/agent/database.c

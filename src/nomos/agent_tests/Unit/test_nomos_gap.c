@@ -29,8 +29,8 @@ void test_collapseInvisible()
   buf=g_strdup_printf("\377abc\377\377de\377\377fg\377hi");
   fer=g_strdup(buf);
 
-   po=collapseInvisible(buf,(char)'\377');
-  for(int i=0; i<po->len; ++i) {
+  po=collapseInvisible(buf,(char)'\377');
+  for(guint i=0; i<po->len; ++i) {
     pairPosOff* thePoA = getPairPosOff(po, i);
     CU_ASSERT_EQUAL(*(buf+thePoA->pos), *(fer+thePoA->pos+thePoA->off));
   }
@@ -54,7 +54,7 @@ void test_uncollapseInvisible()
   fer=g_strdup(buf);
   po=collapseInvisible(buf,(char)'\377'  );
 
-  for(int i=0; i< strlen(buf); i++){
+  for(size_t i=0; i< strlen(buf); i++){
     CU_ASSERT_EQUAL( *(buf+i) , *(fer + uncollapsePosition(i,po)) );
   }
   g_array_free(po,TRUE);
@@ -76,7 +76,7 @@ void test_collapseSpaces()
   buf=g_strdup_printf("  abc  d e      fghi");
   fer=g_strdup(buf);
   po = collapseSpaces(buf);
-  for(int i=0; i<po->len; ++i) {
+  for(guint i=0; i<po->len; ++i) {
     pairPosOff* thePoA = getPairPosOff(po, i);
     CU_ASSERT_EQUAL(*(buf+thePoA->pos), *(fer+thePoA->pos+thePoA->off));
   }
@@ -99,7 +99,7 @@ void test_uncollapseSpaces()
   buf=g_strdup_printf("  abc  d e      fghi");
   fer=g_strdup(buf);
   po = collapseSpaces(buf);
-  for(int i=0; i< strlen(buf); i++){
+  for(size_t i=0; i< strlen(buf); i++){
     CU_ASSERT_EQUAL( *(buf+i) , *(fer + uncollapsePosition(i,po)) );
   }
   g_array_free(po,TRUE);
