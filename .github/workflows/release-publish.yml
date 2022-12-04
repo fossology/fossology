@@ -89,7 +89,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake -GNinja ..
+        cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr -DFO_SYSCONFDIR=/etc/fossology ..
 
     - name: Build Debs
       run: ninja -C build package
