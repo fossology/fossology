@@ -1,6 +1,6 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ SPDX-FileCopyrightText: © 2014-2015,2022, Siemens AG
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -169,7 +169,6 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @brief Run the test
-   * @test
    * -# Setup test tables
    * -# Setup test repo
    * -# Run copyright on upload id 1

@@ -1,5 +1,5 @@
 /*
- SPDX-FileCopyrightText: © 2014-2017 Siemens AG
+ SPDX-FileCopyrightText: © 2014-2017,2022, Siemens AG
  Author: Daniele Fognini, Johannes Najjar
 
  SPDX-License-Identifier: GPL-2.0-only
@@ -342,27 +342,6 @@ std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int a
 
   return queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong);
 
-}
-
-/**
- * \brief Insert empty findings in database to prevent scan on next upload
- * \param agentId Id of agent which did not find any statement
- * \param pFileId Id of the file on which no statements were found
- * \return True on success, false otherwise
- */
-bool CopyrightDatabaseHandler::insertNoResultInDatabase(long int agentId, long int pFileId) const
-{
-  return dbManager.execPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager.getStruct_dbManager(),
-      "insertNoResultInDatabase",
-      "INSERT INTO "
-      IDENTITY
-      "(agent_fk, pfile_fk) VALUES($1,$2)",
-      long, long
-    ),
-    agentId, pFileId
-  );
 }
 
 /**

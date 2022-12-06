@@ -29,7 +29,7 @@ class AjaxClearingView extends FO_Plugin
 {
   const OPTION_SKIP_FILE = "option_skipFile";
   const OPTION_SKIP_FILE_COPYRIGHT = "option_skipFileCopyRight";
-  const OPTION_SKIP_FILE_IP = "option_skipFileIp";
+  const OPTION_SKIP_FILE_IPRA = "option_skipFileIpra";
   const OPTION_SKIP_FILE_ECC = "option_skipFileEcc";
   const OPTION_SKIP_FILE_KEYWORD = "option_skipFileKeyword";
 
@@ -216,7 +216,7 @@ class AjaxClearingView extends FO_Plugin
 
       case "setNextPrev":
       case "setNextPrevCopyRight":
-      case "setNextPrevIp":
+      case "setNextPrevIpra":
       case "setNextPrevEcc":
       case "setNextPrevKeyword":
         return new JsonResponse(
@@ -442,9 +442,9 @@ class AjaxClearingView extends FO_Plugin
         $opt = self::OPTION_SKIP_FILE_COPYRIGHT;
         break;
 
-      case "setNextPrevIp":
-        $modName = "ip-view";
-        $opt = self::OPTION_SKIP_FILE_IP;
+      case "setNextPrevIpra":
+        $modName = "ipra-view";
+        $opt = self::OPTION_SKIP_FILE_IPRA;
         break;
 
       case "setNextPrevEcc":

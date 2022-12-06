@@ -1,5 +1,5 @@
 /*
- SPDX-FileCopyrightText: © 2014-2018 Siemens AG
+ SPDX-FileCopyrightText: © 2014-2018,2022, Siemens AG
  Author: Daniele Fognini, Johannes Najjar
 
  SPDX-License-Identifier: GPL-2.0-only
@@ -223,10 +223,16 @@ static void addDefaultScanners(CopyrightState& state)
     state.addScanner(new regexScanner("author", "copyright"));
 #endif
 
+#ifdef IDENTITY_IPRA
+  if (types & 1<<0)
+    state.addScanner(new regexScanner("ipra", "ipra"));
+#endif
+
 #ifdef IDENTITY_ECC
   if (types & 1<<0)
     state.addScanner(new regexScanner("ecc", "ecc"));
 #endif
+
 #ifdef IDENTITY_KW
   if (types & 1<<0)
     state.addScanner(new regexScanner("keyword", "keyword"));
@@ -400,7 +406,7 @@ bool processUploadId(const CopyrightState& state, int agentId, int uploadId, Cop
 {
   vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(agentId, uploadId, ignoreFilesWithMimeType);
 
-#pragma omp parallel
+#pragma omp parallel num_threads(THREADS)
   {
     CopyrightDatabaseHandler threadLocalDatabaseHandler(databaseHandler.spawn());
 

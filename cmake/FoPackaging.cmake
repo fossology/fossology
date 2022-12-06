@@ -54,6 +54,7 @@ set(CPACK_COMPONENTS_ALL
     copyright
     ecc
     keyword
+    ipra
     db
     debug
     decider
@@ -93,8 +94,9 @@ fossology-common package.")
 
 set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_DEPENDS
     "fossology-web, fossology-scheduler, fossology-ununpack,
-    fossology-copyright, fossology-ecc, fossology-keyword, fossology-buckets,
-    fossology-mimetype, fossology-delagent, fossology-wgetagent")
+    fossology-copyright, fossology-ecc, fossology-keyword, fossology-ipra,
+    fossology-buckets, fossology-mimetype, fossology-delagent,
+    fossology-wgetagent")
 set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_RECOMMENDS
     "fossology-monk, fossology-monkbulk, fossology-decider,
     fossology-readmeoss, fossology-spdx2, fossology-reportimport,
@@ -279,6 +281,20 @@ This package contains the keyword agent programs and their resources.")
 
 set(CPACK_DEBIAN_KEYWORD_PACKAGE_DEPENDS
     "fossology-common, fossology-copyright, libpcre3")
+set(CPACK_DEBIAN_KEYWORD_PACKAGE_SECTION "utils")
+
+## FOSSOLOGY-IPRA
+set(CPACK_DEBIAN_IPRA_PACKAGE_NAME "fossology-ipra")
+set(CPACK_DEBIAN_IPRA_FILE_NAME "fossology-ipra_${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_IPRA_DESCRIPTION
+"architecture for analyzing software, ipra
+${FO_PACKAGE_COMMON_DESCRIPTION}
+This package contains the ipra agent programs and their resources.")
+
+set(CPACK_DEBIAN_IPRA_PACKAGE_DEPENDS
+    "fossology-common, fossology-copyright, libpcre3")
+
+set(CPACK_DEBIAN_IPRA_PACKAGE_SECTION "utils")
 
 ## FOSSOLOGY-BUCKETS
 set(CPACK_DEBIAN_BUCKETS_PACKAGE_NAME "fossology-buckets")

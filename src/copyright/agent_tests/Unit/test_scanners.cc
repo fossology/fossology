@@ -59,6 +59,7 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (scannerTestSuite);
   CPPUNIT_TEST (copyscannerTest);
   CPPUNIT_TEST (regAuthorTest);
+  CPPUNIT_TEST (regIpraTest);
   CPPUNIT_TEST (regEccTest);
   CPPUNIT_TEST (regUrlTest);
   CPPUNIT_TEST (regEmailTest);
@@ -134,6 +135,18 @@ protected:
       "Author4",
       "maintained by benjamin drieu <benj@debian.org>"
     });
+  }
+
+  /**
+   * \brief Test Ipra scanner
+   * \test
+   * -# Create a Ipra scanner
+   * -# Load test data and expected data
+   * -# Test using scannerTest()
+   */
+  void regIpraTest () {
+    regexScanner sc("ipra", "ipra");
+    scannerTest(sc, testContent, "ipra", { "US patents 1 , 2 ,3" });
   }
 
   /**

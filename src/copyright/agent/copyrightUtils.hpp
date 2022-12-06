@@ -1,5 +1,5 @@
 /*
- SPDX-FileCopyrightText: © 2014 Siemens AG
+ SPDX-FileCopyrightText: © 2014,2022, Siemens AG
  Author: Daniele Fognini, Johannes Najjar
 
  SPDX-License-Identifier: GPL-2.0-only
@@ -26,6 +26,7 @@
 #include "copyrightState.hpp"
 #include "database.hpp"
 #include "cleanEntries.hpp"
+#define THREADS 2
 
 extern "C" {
 #include "libfossology.h"

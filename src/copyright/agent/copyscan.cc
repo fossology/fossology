@@ -1,5 +1,5 @@
 /*
- SPDX-FileCopyrightText: © 2015 Siemens AG
+ SPDX-FileCopyrightText: © 2015,2022, Siemens AG
  Author: Florian Krügel
 
  SPDX-License-Identifier: GPL-2.0-only
@@ -88,9 +88,9 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
         }
         j = endOfLine;
       }
-      if (j - foundPos >= 999)
+      if (j - foundPos >= 301)
         // Truncate
-        out.push_back(match(foundPos - begin, (foundPos - begin) + 998, copyrightType));
+        out.push_back(match(foundPos - begin, (foundPos - begin) + 300, copyrightType));
       else
       {
         out.push_back(match(foundPos - begin, j - begin, copyrightType));
