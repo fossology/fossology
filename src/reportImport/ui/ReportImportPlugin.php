@@ -1,19 +1,8 @@
 <?php
 /*
-  Copyright (C) 2014-2016 Siemens AG
+ SPDX-FileCopyrightText: © 2014-2016 Siemens AG
 
-  This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU General Public License
-  version 2 as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License along
-  with this program; if not, write to the Free Software Foundation, Inc.,
-  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 use Fossology\Lib\Auth\Auth;
@@ -55,7 +44,7 @@ class ReportImportPlugin extends DefaultPlugin
     $uploadId = intval(GetArrayVal("uploadselect", $_POST));
     if (empty($uploadId) ||
         !array_key_exists('report',$_FILES) ||
-        sizeof($_FILES['report']['name']) != 1)
+        empty($_FILES['report']['size']))
     {
       return $this->showUiToChoose();
     }
@@ -92,7 +81,7 @@ class ReportImportPlugin extends DefaultPlugin
       if (!$this->uploadDao->isEditable($uploadProgress->getId(), $groupId)) {
         continue;
       }
-      $display = $uploadProgress->getFilename() . _(" from ") . date("Y-m-d H:i",$uploadProgress->getTimestamp());
+      $display = $uploadProgress->getFilename() . _(" from ") . Convert2BrowserTime(date("Y-m-d H:i:s",$uploadProgress->getTimestamp()));
       $uploadsById[$uploadProgress->getId()] = $display;
     }
     $vars['uploadList'] = $uploadsById;
@@ -108,9 +97,6 @@ class ReportImportPlugin extends DefaultPlugin
     $folderStructure = $this->folderDao->getFolderStructure($rootFolder->getId());
     $vars['folderStructure'] = $folderStructure;
     $vars['baseUri'] = $Uri = Traceback_uri() . "?mod=" . self::NAME . "&folder=";
-
-    $baseFolderUri = $vars['baseUri']."$folder_pk&upload=";
-    $vars['uploadAction'] = "onchange=\"js_url(this.value, '$baseFolderUri')\"";
 
     return $this->render('ReportImportPlugin.html.twig', $this->mergeWithDefault($vars));
   }

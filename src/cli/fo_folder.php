@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2015 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2015 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
@@ -34,9 +23,10 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
   --linkFolder= create a link to this folder (id)
   --linkUpload= create a link to this upload (id)\n";
 
-$opts = getopt("hc:", array("username:", "groupname:", "folderId:", "password:", "linkFolder:", "linkUpload:"));
-if(array_key_exists('h', $opts))
-{
+$opts = getopt("hc:", array("username:", "groupname:",
+    "folderId:",
+    "password:", "linkFolder:", "linkUpload:"));
+if (array_key_exists('h', $opts)) {
   print $Usage;
   exit(0);
 }
@@ -55,27 +45,19 @@ $folderDao = $GLOBALS['container']->get("dao.folder");
 
 if (array_key_exists("folderId", $opts)) {
   $folderId = $opts["folderId"];
-}
-else
-{
+} else {
   $folderId = $folderDao->getRootFolder($userId)->getId();
 }
 
 $linkFolder = array_key_exists("linkFolder", $opts) ? $opts["linkFolder"] : null;
 $linkUpload = array_key_exists("linkUpload", $opts) ? $opts["linkUpload"] : null;
-if(!empty($linkFolder))
-{
+if (!empty($linkFolder)) {
   $folderDao->insertFolderContents($folderId,FolderDao::MODE_FOLDER,$linkFolder);
-}
-elseif(!empty($linkUpload))
-{
+} elseif (!empty($linkUpload)) {
   $folderDao->insertFolderContents($folderId,FolderDao::MODE_UPLOAD,$linkUpload);
-}
-else
-{
+} else {
   $structure = $folderDao->getFolderStructure($folderId);
-  foreach($structure as $folder)
-  {
+  foreach ($structure as $folder) {
     for ($i = 0; $i < $folder[FolderDao::DEPTH_KEY]; $i++) {
       echo '-';
     }
@@ -83,5 +65,5 @@ else
     $theFolder = $folder[FolderDao::FOLDER_KEY];
     echo $theFolder->getName().' (id='.$theFolder->getId().")\n";
   }
-  
+
 }

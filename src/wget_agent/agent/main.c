@@ -1,20 +1,8 @@
-/***************************************************************
- Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011-2013 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /**
  * \file
@@ -24,6 +12,7 @@
 
 #define _GNU_SOURCE
 #include "wget_agent.h"
+#include <gcrypt.h>
 
 #ifdef COMMIT_HASH_S
 char BuildVersion[]="wget_agent build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
@@ -115,16 +104,16 @@ int main  (int argc, char *argv[])
   int user_pk;
   char *agent_desc = "Network downloader.  Uses wget(1).";
 
-  memset(GlobalTempFile,'\0',MAXCMD);
-  memset(GlobalURL,'\0',MAXCMD);
-  memset(GlobalParam,'\0',MAXCMD);
-  memset(GlobalType,'\0',MAXCMD);
+  memset(GlobalTempFile,'\0',STRMAX);
+  memset(GlobalURL,'\0',URLMAX);
+  memset(GlobalParam,'\0',STRMAX);
+  memset(GlobalType,'\0',STRMAX);
   GlobalUploadKey = -1;
   int upload_pk = 0;           // the upload primary key
   //int Agent_pk;
   char *COMMIT_HASH;
   char *VERSION;
-  char agent_rev[MAXCMD];
+  char agent_rev[STRMAX];
 
   /* open the connection to the scheduler and configuration */
   fo_scheduler_connect(&argc, argv, &pgConn);
@@ -156,16 +145,16 @@ int main  (int argc, char *argv[])
           strcpy(GlobalTempFile,"wget.default_download");
         break;
       case 'A':
-        strncat(GlobalParam, " -A ", MAXCMD - strlen(GlobalParam) -1);
-        strncat(GlobalParam, optarg, MAXCMD - strlen(GlobalParam) -1);
+        strncat(GlobalParam, " -A ", STRMAX - strlen(GlobalParam) -1);
+        strncat(GlobalParam, optarg, STRMAX - strlen(GlobalParam) -1);
         break;
       case 'R':
-        strncat(GlobalParam, " -R ", MAXCMD - strlen(GlobalParam) -1);
-        strncat(GlobalParam, optarg, MAXCMD - strlen(GlobalParam) -1);
+        strncat(GlobalParam, " -R ", STRMAX - strlen(GlobalParam) -1);
+        strncat(GlobalParam, optarg, STRMAX - strlen(GlobalParam) -1);
         break;
       case 'l':
-        strncat(GlobalParam, " -l ", MAXCMD - strlen(GlobalParam) -1);
-        strncat(GlobalParam, optarg, MAXCMD - strlen(GlobalParam) -1);
+        strncat(GlobalParam, " -l ", STRMAX - strlen(GlobalParam) -1);
+        strncat(GlobalParam, optarg, STRMAX - strlen(GlobalParam) -1);
         break;
       case 'c': break; /* handled by fo_scheduler_connect() */
       case 'C':
@@ -195,6 +184,11 @@ int main  (int argc, char *argv[])
     SafeExit(0);
   }
 
+  /* Initialize gcrypt and disable security memory */
+  gcry_check_version(NULL);
+  gcry_control (GCRYCTL_DISABLE_SECMEM, 0);
+  gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
+
   COMMIT_HASH = fo_sysconfig("wget_agent", "COMMIT_HASH");
   VERSION = fo_sysconfig("wget_agent", "VERSION");
   sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
@@ -208,7 +202,7 @@ int main  (int argc, char *argv[])
   for(arg=optind; arg < argc; arg++)
   {
     memset(GlobalURL,'\0',sizeof(GlobalURL));
-    strncpy(GlobalURL,argv[arg],sizeof(GlobalURL));
+    strncpy(GlobalURL,argv[arg],sizeof(GlobalURL)-1);
     /* If the file contains "://" then assume it is a URL.
        Else, assume it is a file. */
     LOG_VERBOSE0("Command-line: %s",GlobalURL);
@@ -229,7 +223,7 @@ int main  (int argc, char *argv[])
       LOG_VERBOSE0("It's a file -- GlobalUploadKey = %ld",GlobalUploadKey);
       if (GlobalUploadKey != -1)
       {
-        memcpy(GlobalTempFile,GlobalURL,MAXCMD);
+        memcpy(GlobalTempFile,GlobalURL,STRMAX);
         DBLoadGold();
       }
     }
@@ -256,9 +250,9 @@ int main  (int argc, char *argv[])
           continue;
         }
 
-        char TempDir[MAXCMD];
-        memset(TempDir,'\0',MAXCMD);
-        snprintf(TempDir, MAXCMD-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget
+        char TempDir[STRMAX];
+        memset(TempDir,'\0',STRMAX);
+        snprintf(TempDir, STRMAX-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget
         struct stat Status = {};
 
         if (GlobalType[0])

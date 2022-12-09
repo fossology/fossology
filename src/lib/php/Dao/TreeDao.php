@@ -1,27 +1,17 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
-Copyright (C) 2017 TNG Technology Consulting GmbH
-Authors: Andreas Würl, Steffen Weber, Maximilian Huber
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ SPDX-FileCopyrightText: © 2017 TNG Technology Consulting GmbH
+ Authors: Andreas Würl, Steffen Weber, Maximilian Huber
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
 use Monolog\Logger;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 class TreeDao
 {
@@ -40,11 +30,9 @@ class TreeDao
   {
     $statementName = __METHOD__.".".$tableName;
 
-    if ($parentId==$itemId)
-    {
+    if ($parentId==$itemId) {
       return $this->getFullPath($itemId, $tableName);
-    }    
-    else if ($parentId > 0) {
+    } else if ($parentId > 0) {
       $params = array($itemId, $parentId);
       $parentClause = " = $2";
       $parentLoopCondition = "AND (ut.parent != $2)";
@@ -97,10 +85,9 @@ class TreeDao
       throw new \Exception("could not find path of $itemId:\n$sql--".print_r($params,true));
     }
 
-    if(! $dropArtifactPrefix)
-    {
+    if (! $dropArtifactPrefix) {
       return $row['artifact_path_prefix'].$row['file_path'];
-    }else{
+    } else {
       return $row['file_path'];
     }
   }
@@ -123,18 +110,18 @@ class TreeDao
 
      return $row ? $row['uploadtree_pk'] : 0;
   }
-  
+
   /**
    * @param int $uploadtreeId
-   * @return array with keys sha1, md5
+   * @return array with keys sha1, md5, sha256
    */
   public function getItemHashes($uploadtreeId, $uploadtreeTablename='uploadtree')
   {
     $pfile = $this->dbManager->getSingleRow("SELECT pfile.* FROM $uploadtreeTablename, pfile WHERE uploadtree_pk=$1 AND pfile_fk=pfile_pk",
         array($uploadtreeId), __METHOD__);
-    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
+    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5'],'sha256'=>$pfile['pfile_sha256']);
   }
-  
+
   public function getRepoPathOfPfile($pfileId, $repo="files")
   {
     $pfileRow = $this->dbManager->getSingleRow('SELECT * FROM pfile WHERE pfile_pk=$1',array($pfileId));
@@ -146,5 +133,20 @@ class TreeDao
     $path = '';
     exec("$LIBEXECDIR/reppath $repo $hash", $path);
     return($path[0]);
+  }
+
+  /**
+   * Get the parent item of a given uploadtree item
+   * @param ItemTreeBounds $itemTreeBounds Item bounds to get parent for
+   * @return integer Item id of parent
+   */
+  public function getParentOfItem($itemTreeBounds)
+  {
+    $item = $itemTreeBounds->getItemId();
+    $tableName = $itemTreeBounds->getUploadTreeTableName();
+    $sql = "SELECT realparent FROM $tableName WHERE uploadtree_pk = $1;";
+    $statement = __METHOD__ . ".$tableName";
+    $row = $this->dbManager->getSingleRow($sql, [$item], $statement);
+    return $row['realparent'];
   }
 }

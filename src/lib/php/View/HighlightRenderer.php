@@ -1,20 +1,9 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
-Authors: Andreas Würl, Daniele Fognini
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ Authors: Andreas Würl, Daniele Fognini
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\View;
@@ -29,10 +18,10 @@ use Fossology\Lib\Data\SplitPosition;
 class HighlightRenderer
 {
   const DEFAULT_PADDING = 0;
-  
+
   public $classMapping = array('' => '',
             Highlight::UNDEFINED=>'hi-undefined',
-          
+
             Highlight::MATCH => 'hi-match',
             Highlight::CHANGED => 'hi-changed',
             Highlight::ADDED => 'hi-added',
@@ -48,7 +37,7 @@ class HighlightRenderer
             Highlight::IP => 'hi-ip',
             Highlight::ECC => 'hi-mediumorchid'
           );
-  
+
   /**
    * @param SplitPosition $entry
    * @return string
@@ -61,11 +50,9 @@ class HighlightRenderer
 
     $wrappendElement = "";
 
-    if ($highlight)
-    {
+    if ($highlight) {
       $htmlElement = $highlight->getHtmlElement();
-      if ($htmlElement)
-      {
+      if ($htmlElement) {
         $wrappendElement = $htmlElement->getOpeningText();
       }
     }
@@ -83,11 +70,9 @@ class HighlightRenderer
 
     $wrappendElement = "";
 
-    if ($highlight)
-    {
+    if ($highlight) {
       $htmlElement = $highlight->getHtmlElement();
-      if ($htmlElement)
-      {
+      if ($htmlElement) {
         $wrappendElement = $htmlElement->getClosingText();
       }
     }
@@ -104,12 +89,10 @@ class HighlightRenderer
   public function createStyleWithPadding($type, $title, $depth = 0)
   {
     $style = $this->createStartSpan($type, $title);
-    if ($depth < self::DEFAULT_PADDING)
-    {
+    if ($depth < self::DEFAULT_PADDING) {
       $padd = (2 * (self::DEFAULT_PADDING - $depth - 2)) . 'px';
       return $this->getStyleWithPadding($padd, $style);
-    } else
-    {
+    } else {
       return $style;
     }
   }
@@ -132,12 +115,10 @@ class HighlightRenderer
    */
   public function createStartSpan($type, $title)
   {
-    if ($type == 'K ' || $type == 'K')
-    {
+    if ($type == 'K ' || $type == 'K') {
       return "<span class=\"hi-keyword\">";
     }
-    if (!array_key_exists($type, $this->classMapping))
-    {
+    if (! array_key_exists($type, $this->classMapping)) {
       $type = Highlight::UNDEFINED;
     }
     $class = $this->classMapping[$type];
@@ -164,11 +145,9 @@ class HighlightRenderer
             Highlight::BULK => _('bulk'))
         : array(
             Highlight::UNDEFINED => _("license relevant text"));
-    foreach ($colorDefinition as $colorKey => $txt)
-    {
+    foreach ($colorDefinition as $colorKey => $txt) {
       $data[] = array('class'=>$this->classMapping[$colorKey], 'text' => $txt);
     }
     return $data;
   }
-
-} 
+}

@@ -1,20 +1,9 @@
 <?php
-/***************************************************************
-Copyright (C) 2017 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2017, 2020 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @file
  * @brief Upload model
@@ -58,10 +47,16 @@ class Upload
    */
   private $uploadDate;
   /**
-   * @var integer $fileSize
-   * Upload size
+   * @var integer $assignee
+   * Upload assignee id
    */
-  private $fileSize;
+  private $assignee;
+  /**
+   * @var Hash $hash
+   * Hash information of the upload
+   */
+  private $hash;
+
   /**
    * Upload constructor.
    * @param integer $folderId
@@ -70,10 +65,10 @@ class Upload
    * @param string $description
    * @param string $uploadName
    * @param string $uploadDate
-   * @param integer $fileSize
-   * @param string $tag
+   * @param Hash $hash
    */
-  public function __construct($folderId, $folderName, $uploadId, $description, $uploadName, $uploadDate, $fileSize, $tag = NULL)
+  public function __construct($folderId, $folderName, $uploadId, $description,
+    $uploadName, $uploadDate, $assignee, $hash)
   {
     $this->folderId = intval($folderId);
     $this->folderName = $folderName;
@@ -81,7 +76,8 @@ class Upload
     $this->description = $description;
     $this->uploadName = $uploadName;
     $this->uploadDate = $uploadDate;
-    $this->fileSize = intval($fileSize);
+    $this->assignee = $assignee == 1 ? null : intval($assignee);
+    $this->hash = $hash;
   }
 
   /**
@@ -106,7 +102,8 @@ class Upload
       "description" => $this->description,
       "uploadname"  => $this->uploadName,
       "uploaddate"  => $this->uploadDate,
-      "filesize"    => $this->fileSize
+      "assignee"    => $this->assignee,
+      "hash"        => $this->hash->getArray()
     ];
   }
 }

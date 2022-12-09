@@ -1,20 +1,9 @@
 <?php
 /*
- Copyright (C) 2015-2018 Siemens AG
+ SPDX-FileCopyrightText: © 2015-2018 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 namespace Fossology\SpdxTwo;
 
@@ -42,8 +31,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     $possibleOutputFormat = trim(GetParm("outputFormat",PARM_STRING));
     if (strcmp($possibleOutputFormat,"") !== 0 &&
         strcmp($possibleOutputFormat,self::DEFAULT_OUTPUT_FORMAT) !== 0 &&
-        ctype_alnum($possibleOutputFormat))
-    {
+        ctype_alnum($possibleOutputFormat)) {
       $this->outputFormat = $possibleOutputFormat;
     }
     parent::__construct(self::NAME, array(
@@ -59,15 +47,18 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
    */
   function preInstall()
   {
-    $text = _("Generate SPDX report");
-    menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;RDF", 0, self::NAME, $text);
+    $text = _("Generate SPDX report in RDF format");
+    menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;RDF&nbsp;report", 0, self::NAME, $text);
     menu_insert("UploadMulti::Generate&nbsp;SPDX", 0, self::NAME, $text);
 
     $text = _("Generate SPDX report in tag:value format");
-    menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;tag:value", 0, self::NAME . '&outputFormat=spdx2tv', $text);
+    menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;tag:value&nbsp;report", 0, self::NAME . '&outputFormat=spdx2tv', $text);
+
+    $text = _("Generate CSV report (with SPDX IDs)");
+    menu_insert("Browse-Pfile::Export&nbsp;CSV&nbsp;report&nbsp;(SPDX)", 0, self::NAME . '&outputFormat=spdx2csv', $text);
 
     $text = _("Generate Debian Copyright file");
-    menu_insert("Browse-Pfile::Export&nbsp;DEP5", 0, self::NAME . '&outputFormat=dep5', $text);
+    menu_insert("Browse-Pfile::Export&nbsp;DEP5&nbsp;report", 0, self::NAME . '&outputFormat=dep5', $text);
   }
 
   /**
@@ -81,28 +72,22 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     $uploadIds = $request->get('uploads') ?: array();
     $uploadIds[] = intval($request->get('upload'));
     $addUploads = array();
-    foreach($uploadIds as $uploadId)
-    {
+    foreach ($uploadIds as $uploadId) {
       if (empty($uploadId)) {
         continue;
       }
-      try
-      {
+      try {
         $addUploads[$uploadId] = $this->getUpload($uploadId, $groupId);
-      }
-      catch(Exception $e)
-      {
+      } catch(Exception $e) {
         return $this->flushContent($e->getMessage());
       }
     }
     $folderId = $request->get('folder');
-    if(!empty($folderId))
-    {
+    if (!empty($folderId)) {
       /* @var $folderDao FolderDao */
       $folderDao = $this->getObject('dao.folder');
       $folderUploads = $folderDao->getFolderUploads($folderId, $groupId);
-      foreach($folderUploads as $uploadProgress)
-      {
+      foreach ($folderUploads as $uploadProgress) {
         $addUploads[$uploadProgress->getId()] = $uploadProgress;
       }
     }
@@ -110,11 +95,9 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
       return $this->flushContent(_('No upload selected'));
     }
     $upload = array_pop($addUploads);
-    try
-    {
+    try {
       list($jobId,$jobQueueId) = $this->getJobAndJobqueue($groupId, $upload, $addUploads);
-    }
-    catch (\Exception $ex) {
+    } catch (\Exception $ex) {
       return $this->flushContent($ex->getMessage());
     }
 
@@ -123,7 +106,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
                   'reportType' => $this->outputFormat);
     $text = sprintf(_("Generating ". $this->outputFormat . " report for '%s'"), $upload->getFilename());
     $vars['content'] = "<h2>".$text."</h2>";
-    $content = $this->renderer->loadTemplate("report.html.twig")->render($vars);
+    $content = $this->renderer->load("report.html.twig")->render($vars);
     $message = '<h3 id="jobResult"></h3>';
     $request->duplicate(array('injectedMessage'=>$message,'injectedFoot'=>$content,'mod'=>'showjobs'))->overrideGlobals();
     $showJobsPlugin = \plugin_find('showjobs');
@@ -168,15 +151,14 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
       $sql .= ' AND jq_cmd_args=$5';
       $params[] = $jqCmdArgs;
       $log .= '.args';
-    }
-    else {
+    } else {
       $sql .= ' AND jq_cmd_args IS NULL';
     }
     $scheduled = $dbManager->getSingleRow($sql,$params,$log);
     if (!empty($scheduled)) {
       return array($scheduled['job_pk'],$scheduled['jq_pk']);
     }
-    if(empty($jqCmdArgs)) {
+    if (empty($jqCmdArgs)) {
       $jobName = $upload->getFilename();
     } else {
       $jobName = "Multi File SPDX2";
@@ -184,8 +166,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     $jobId = JobAddJob($userId, $groupId, $jobName, $uploadId);
     $error = "";
     $jobQueueId = $spdxTwoAgent->AgentAdd($jobId, $uploadId, $error, array(), $jqCmdArgs);
-    if ($jobQueueId<0)
-    {
+    if ($jobQueueId < 0) {
       throw new \Exception(_("Cannot schedule").": ".$error);
     }
     return array($jobId,$jobQueueId, $error);
@@ -200,20 +181,17 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
    */
   protected function getUpload($uploadId, $groupId)
   {
-    if ($uploadId <=0)
-    {
+    if ($uploadId <= 0) {
       throw new \Exception(_("parameter error: $uploadId"));
     }
     /* @var $uploadDao UploadDao */
     $uploadDao = $this->getObject('dao.upload');
-    if (!$uploadDao->isAccessible($uploadId, $groupId))
-    {
+    if (!$uploadDao->isAccessible($uploadId, $groupId)) {
       throw new \Exception(_("permission denied"));
     }
     /** @var Upload */
     $upload = $uploadDao->getUpload($uploadId);
-    if ($upload === null)
-    {
+    if ($upload === null) {
       throw new \Exception(_('cannot find uploadId'));
     }
     return $upload;

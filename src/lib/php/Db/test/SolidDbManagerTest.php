@@ -1,33 +1,22 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Db;
 
 class SolidDbManagerTest extends DbManagerTest
 {
-  function setUp()
+  function setUp() : void
   {
     parent::setUp();
     $this->dbManager = new SolidDbManager($this->logger);
     $this->dbManager->setDriver($this->driver);
   }
 
-  function tearDown()
+  function tearDown() : void
   {
     parent::tearDown();
   }
@@ -60,13 +49,13 @@ class SolidDbManagerTest extends DbManagerTest
     assertThat($map,hasKey('k0'));
     assertThat($map,EqualTo(array('k0'=>'v0','k1'=>'v1')));
   }
-  
+
   function testEvaluateStatement()
   {
     $this->driver->shouldReceive('query');
     $sqlStmt = 'SELECT pet FROM africa WHERE cervical=$1 AND class=$2 AND $3';
     $this->dbManager->prepare($stmt='statement',$sqlStmt);
-    
+
     $reflection = new \ReflectionClass(get_class($this->dbManager));
     $method = $reflection->getMethod('evaluateStatement');
     $method->setAccessible(true);
@@ -74,21 +63,21 @@ class SolidDbManagerTest extends DbManagerTest
     $params = array(7,'Mammalia',true);
     $sql = $method->invoke($this->dbManager,$stmt,$params);
     assertThat($sql, is('SELECT pet FROM africa WHERE cervical=7 AND class=\'Mammalia\' AND t') );
-    
+
     $params = array(7,'Mammalia\'; SELECT * FROM passwords WHERE user like \'%',true);
     $sql = $method->invoke($this->dbManager,$stmt,$params);
     assertThat($sql, is('SELECT pet FROM africa WHERE cervical=7 AND class=\'Mammalia\'\'; SELECT * FROM passwords WHERE user like \'\'%\' AND t') );
-  }  
-    
+  }
+
   function testEvaluateStatement_exception()
   {
     $sqlStmt = 'SELECT pet FROM africa WHERE cervical=$1 AND class=$2';
     $this->dbManager->prepare($stmt='statement',$sqlStmt);
-    
+
     $reflection = new \ReflectionClass(get_class($this->dbManager));
     $method = $reflection->getMethod('evaluateStatement');
     $method->setAccessible(true);
-    
+
     $exceptionMsg = false;
     $params = array(7,'Mammalia','non-used parameter');
     try {
@@ -99,5 +88,4 @@ class SolidDbManagerTest extends DbManagerTest
     }
     assertThat($exceptionMsg, is('$3 not found in prepared statement'));
   }
-  
-} 
+}

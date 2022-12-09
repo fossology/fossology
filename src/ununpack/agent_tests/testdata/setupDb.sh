@@ -24,7 +24,7 @@ mkdir -p $confDir
 touch $confDir$confFile
 echo "[FOSSOLOGY]\ndepth = 0\npath = $confDir\n" >> $confDir$confFile
 cp `pwd`/../../../../install/defconf/Db.conf $confDir/Db.conf
-ln -fs `pwd`/../../../../VERSION $confDir/VERSION
+ln -fs `pwd`/../../../install/VERSION $confDir/VERSION
 mkdir -p $confDir/mods-enabled/ununpack
 ln -fs $agentDir/VERSION $confDir/mods-enabled/ununpack/VERSION
 ln -fs $agentDir/agent $confDir/mods-enabled/ununpack

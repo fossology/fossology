@@ -1,25 +1,15 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
-Authors: Johannes Najjar, Andreas Würl
+ SPDX-FileCopyrightText: © 2014 Siemens AG
+ Authors: Johannes Najjar, Andreas Würl
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Data;
 
-class LicenseTest extends \PHPUnit\Framework\TestCase {
+class LicenseTest extends \PHPUnit\Framework\TestCase
+{
   /** @var string */
   private $text;
   /** @var string */
@@ -27,12 +17,12 @@ class LicenseTest extends \PHPUnit\Framework\TestCase {
   /** @var License */
   private $license;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->text = "The License text";
     $this->url = "http://www.fossology.org";
 
-    $this->license = new License(8,"testSN", "testFN", 4, $this->text, $this->url, 1);
+    $this->license = new License(8, "testSN", "testFN", 4, $this->text, $this->url, 1);
   }
 
   public function testText()

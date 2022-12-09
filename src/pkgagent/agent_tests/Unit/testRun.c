@@ -1,19 +1,8 @@
-/*********************************************************************
-Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011-2013 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *********************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * \dir
  * \brief Unit test for pkgagent
@@ -40,7 +29,7 @@ extern CU_TestInfo testcases_GetMetadataDebBinary[];
 char *DBConfFile = NULL;
 fo_dbManager* dbManager = NULL;
 
-#define AGENT_DIR "../../"
+#define AGENT_DIR "../"
 
 /**
  * \brief initialize db
@@ -64,7 +53,6 @@ int PkgagentDBClean()
 }
 
 /* create test suite */
-#if CU_VERSION_P == 213
 CU_SuiteInfo suites[] = {
     {"Testing the function GetFieldValue:", NULL, NULL, NULL, NULL, testcases_GetFieldValue},
     //{"Testing the function ProcessUpload:", NULL, NULL, NULL, NULL, testcases_ProcessUpload},
@@ -75,18 +63,6 @@ CU_SuiteInfo suites[] = {
     {"Testing the function GetMetadata:", NULL, NULL, (CU_SetUpFunc)PkgagentDBInit, (CU_TearDownFunc)PkgagentDBClean, testcases_GetMetadata},
     CU_SUITE_INFO_NULL
 };
-#else
-CU_SuiteInfo suites[] = {
-    {"Testing the function GetFieldValue:", NULL, NULL, testcases_GetFieldValue},
-    //{"Testing the function ProcessUpload:", NULL, NULL, testcases_ProcessUpload},
-    {"Testing the function RecordMetadataDEB:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataDEB},
-    {"Testing the function GetMetadataDebSource:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadataDebSource},
-    {"Testing the function RecordMetadataRPM:", PkgagentDBInit, PkgagentDBClean, testcases_RecordMetadataRPM},
-    {"Testing the function GetMetadataDebBinary:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadataDebBinary},
-    {"Testing the function GetMetadata:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadata},
-    CU_SUITE_INFO_NULL
-};
-#endif
 
 int main( int argc, char *argv[] )
 {

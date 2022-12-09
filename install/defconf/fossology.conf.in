@@ -1,4 +1,8 @@
-; basic Scheduer.conf for the version 2.0 of the scheduler
+; basic Scheduler.conf for the version 2.0 of the scheduler
+; SPDX-FileCopyrightText: © Fossology contributors
+;
+; SPDX-License-Identifier: GPL-2.0-only
+
 ; this is a simple key-value configuration file
 ; should have two groups
 ;   FOSSOLOGY: basic configurations
@@ -13,7 +17,7 @@ address = localhost
 depth = 3
 
 ; REPLACEMENT for RepPath.conf
-path = /srv/fossology/repository
+path = @FO_REPODIR@
 
 ; REPLACEMENT for Proxy.conf
 ; proxy settings that will be used by fossology agents
@@ -26,26 +30,27 @@ path = /srv/fossology/repository
 ; REPLACEMENT for Hosts.conf
 ; set up the set of hosts available to analyze files. If there is an entry
 ; for localhost it will be read, if there isn't one then it is assumed that
-; localhost cannot host any agents. A man of -1 does not indicate that a 
+; localhost cannot host any agents. A man of -1 does not indicate that a
 ; host can have as many agents running as necessary, (i.e. there should always
 ; be a max on the number of agents for a particular host).
 [HOSTS]
-localhost = localhost {$SYSCONFDIR} 10
+localhost = localhost @FO_SYSCONFDIR@ 10
 
 [REPOSITORY]
 localhost[] = * 00 ff
 
 [DIRECTORIES]
 
-; Project Name and Group 
-; Do not change after installation since PROJECT and PROJECTGROUP is used in installation 
-; directory names and ownership.
+; Project Name and Group
+; Do not change after installation since PROJECT, PROJECTUSER and PROJECTGROUP
+; is used in installation directory names and ownership.
 ; Use PREFIX to install multiple copies of FOSSology.
-PROJECT={$PROJECT}
-PROJECTGROUP={$PROJECTGROUP}
+PROJECT=@FO_PROJECT@
+PROJECTGROUP=@FO_PROJECTGROUP@
+PROJECTUSER=@FO_PROJECTUSER@
 
 ; base of the program data tree
-PREFIX={$PREFIX}
+PREFIX=@FO_PREFIX@
 
 ; executable programs that users run
 BINDIR=$PREFIX/bin
@@ -69,7 +74,7 @@ DATAROOTDIR=$PREFIX/share
 MODDIR=$DATAROOTDIR/$PROJECT
 
 ; local state
-LOCALSTATEDIR={$LOCALSTATEDIR}
+LOCALSTATEDIR=@FO_LOCALSTATEDIR@
 
 ; project local state
 PROJECTSTATEDIR=$LOCALSTATEDIR/lib/$PROJECT
@@ -89,6 +94,41 @@ LOGDIR=/var/log/$PROJECT
 header  = sampleheader.txt
 footer  = samplefooter.txt
 subject = FOSSology scan complete
-client  = /usr/bin/mailx
+client  = /usr/bin/s-nail
 
+[EXT_AUTH]
+; Use external Authentication
+CONF_EXT_AUTH_ENABLE=false
 
+; Environment variable where to find the User name
+CONF_EXT_AUTH_ENV_USER=
+
+; Environment variable where to find the User email
+CONF_EXT_AUTH_ENV_MAIL=
+
+; Environment variable where to find the User Description
+CONF_EXT_AUTH_ENV_DESC=
+
+; Set to true to force usernames to lowercase
+CONF_EXT_AUTH_LOWERCASE_USER=true
+
+; Set to true to automatically create an account for users
+; logging in for the first time
+CONF_EXT_AUTH_NEW_USER_AUTO_CREATE=true
+
+; List of agents attributed to newly created users
+; Example:
+; "agent_copyright,agent_keyword,agent_mimetype,agent_monk,agent_nomos,agent_ojo,agent_shagent"
+CONF_EXT_AUTH_NEW_USER_AGENT_LIST=
+
+; Section to allow password login
+[AUTHENTICATION]
+; Should be one of
+; password : to allow passwords for login
+; external : passwords are not allowed
+provider = password
+; REST API token should be one of
+; token : to allow FOSSology tokens for use
+; oauth : to allow only oauth tokens
+; both  : to allow both FOSSology and oauth tokens
+resttoken = token

@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\BusinessRules;
@@ -23,20 +12,24 @@ use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Mockery as M;
 
-class ClearingDecisionFilterTest extends \PHPUnit\Framework\TestCase {
+class ClearingDecisionFilterTest extends \PHPUnit\Framework\TestCase
+{
 
   /** @var ClearingDecisionFilter */
   private $clearingDecisionFilter;
 
-  protected function setUp() {
+  protected function setUp() : void
+  {
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
   }
 
-  protected function tearDown() {
+  protected function tearDown() : void
+  {
     M::close();
   }
 
-  public function testFilterCurrentClearingDecisions() {
+  public function testFilterCurrentClearingDecisions()
+  {
     $itemId = 543;
     $pfileId = 432;
     $decision1 = M::mock(ClearingDecision::class);
@@ -60,12 +53,10 @@ class ClearingDecisionFilterTest extends \PHPUnit\Framework\TestCase {
   }
 
 
-  /**
-   * @expectedException \InvalidArgumentException
-   * @expectedExceptionMessage unhandled clearing decision scope '12345'
-   */
   public function testCreateClearingResultCreationFailsOfNoEventsWereFound()
   {
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage("unhandled clearing decision scope '12345'");
     $itemId = 543;
     $pfileId = 432;
     $decision = M::mock(ClearingDecision::class);
@@ -77,7 +68,8 @@ class ClearingDecisionFilterTest extends \PHPUnit\Framework\TestCase {
     $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision));
   }
 
-  public function testFilterCurrentReusableClearingDecisions() {
+  public function testFilterCurrentReusableClearingDecisions()
+  {
     $itemId = 543;
     $itemId2 = 432;
     $decision1 = M::mock(ClearingDecision::class);

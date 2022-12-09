@@ -1,4 +1,9 @@
 <refentry>
+<!-- 
+  SPDX-FileCopyrightText: © Fossology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only 
+-->
   <refnamediv>
     <refname>FOSSology Test User Guide</refname>
         <refpurpose> A quick guide (for now) of the test suites</refpurpose>

@@ -1,4 +1,1679 @@
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only
+-->
 # Changelog of FOSSology
+
+### 4.2.1 (Nov 15th 2022)
+
+This release is for the quick hot-fix on [4.2.0](https://github.com/fossology/fossology/releases/tag/4.2.0).
+
+This release applies fix for REST API to patch access to User object.
+More fixes like importing missing classes and handling 
+other PHP Errors and Notices.
+
+#### Credits to contributors for 4.2.1
+
+From the GIT commit history, we have the following contributors since
+[4.2.0](https://github.com/fossology/fossology/releases/tag/4.2.0):
+
+```
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+```
+
+#### Features
+
+* `4bcf25682` feat(user-edit): make use of retention period to display expired tokens
+
+#### Corrections
+
+* `53c047bfb` fix(ui): fix PHP error and notices
+* `aeceaff6a` hotfix(ui): fix User object accessing
+
+### 4.2.0 (Nov 11th 2022)
+
+This release adds important corrections to
+[4.2.0-rc1](https://github.com/fossology/fossology/releases/tag/4.2.0-rc1)
+
+Since RC1, minor updates with dependencies and a fix to unified report has
+happened.
+
+The release 4.2.0 introduces a number of corrections to
+[4.1.0](https://github.com/fossology/fossology/releases/tag/4.1.0)
+and major changes to FOSSology, including:
+
+* Adopting REUSE.software standards to FOSSology source code.
+* Detecting copyrights as per REUSE standards.
+* Support for Ubuntu Jammy (22.04)
+* Display package health according to Licenses folder.
+* Update various dependencies.
+* Fix line breaks for LibreOffice.
+* Multiple new features in REST API.
+
+#### Credits to contributors for 4.2.0
+
+From the GIT commit history, we have the following contributors since
+[4.1.0](https://github.com/fossology/fossology/releases/tag/4.1.0):
+
+```
+> aman1971 <ak584584@gmail.com>
+> Antoine Auger <antoineauger@users.noreply.github.com>
+> Avinal Kumar <avinal.xlvii@gmail.com>
+> dushimsam <dushsam100@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Karthik Krishna <gkarthikkrishna1@gmail.com>
+> Krishna Mahato <krishhtrishh9304@gmail.com>
+> Martin Daur <mdaur@gmx.net>
+> pret3nti0u5 <vineetvatsal09@gmail.com>
+> rohitpandey49 <rohit.pandey4900@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Soham Banerjee <sohambanerjee4abc@hotmail.com>
+> Thanvi pendyala <thanvipendyala194@gmail.com>
+```
+
+#### Features
+
+* `76dc5801d` chore(php-jwt): use new features from v6.3.0
+* `fd8eef901` feat(composer): update composer dependencies
+
+#### Corrections
+
+* `88faee7e7` fix(debian): prevent duplication of bootstrap
+* `965552b12` fix(unifiedReport): fix line break issue in libre office
+* `f2650a9de` fix(oneShotMonk): convert value to int to fix php fatal
+* `28de987d6` fix(licenseView): fix missing comment select
+
+### 4.2.0-rc1 (Sep 30th 2022)
+
+This release adds important corrections to
+[4.1.0](https://github.com/fossology/fossology/releases/tag/4.1.0)
+
+The release 4.2.0-rc1 introduces reuse specifications to fossology.
+
+The release 4.2.0-rc1 introduces a number of corrections to
+[4.1.0](https://github.com/fossology/fossology/releases/tag/4.1.0)
+and major changes to FOSSology, including:
+
+* Support ubuntu jammy 22.04
+* Detect SPDX-FileCopyrightText keyword
+* Allow user to configure token
+* Reuse all report columns
+* Detect Licenses Folder
+
+#### Credits to contributors for 4.2.0-rc1
+
+From the GIT commit history, we have following contributors since
+[4.1.0](https://github.com/fossology/fossology/releases/tag/4.1.0):
+
+```
+> aman1971 <ak584584@gmail.com>
+> Antoine Auger @antoineauger
+> Avinal Kumar <avinal.xlvii@gmail.com>
+> dushimsam <dushsam@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Karthik Krishna <gkarthikkrishna1@gmail.com>
+> Krishna Mahato <krishhtrishh9304@gmail.com>
+> Martin Daur <mdaur@gmx.net>
+> pret3nti0u5 <vineetvatsal09@gmail.com>
+> rohitpandey49 <rohit.pandey4900@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> soham4abc <sohambanerjee4abc@hotmail.com>
+> Thanvi pendyala <thanvipendyala194@gmail.com>
+
+```
+#### Features
+
+* `eb07d7626` feat(reuse): detect Licenses Folder
+* `f9f9023a2` feat(ubuntu): support ubuntu jammy 22.04 for fossology
+* `afa5fd58a` feat(licenseRef): add/update licenses from spdx.org
+* `88025d5a6` feat(copyright): Detect SPDX-FileCopyrightText keyword
+* `41674a5bd` feat(API): add user to a group.
+* `b154feee9` feat(api): Download file using UploadID
+* `7fbbe736c` feat(API): import csv-license file
+* `85cf46567` feat(oidc): allow user to configure token
+* `54f80533c` feat(api): Set permissions for a upload in a folder for different groups
+* `14aba0a4c` feat(API): REST-API to initiate FOSSology mantainance
+* `a5d6a18d5` feat(API): get group members with corresponding roles
+* `42e7f0c13` feat(API): remove member from group.
+* `0c9620e95` feat(api): new endpoint for geting copyright details
+* `c2b09f16e` feat(api): jobs/all endpoint added
+* `53b043b19` feat(API): delete user group
+* `917ee86af` feat(API): jobs returns only logged in user's jobs
+* `4038daac1` feat(reuse): ignore text of testdata
+* `454c8cede` feat(resue): reuse standard
+* `40dfd5833` feat(reuse): implemented REUSE standard
+* `f60b09983` feat(reuse): implemented REUSE standard
+* `a3e8f235e` feat(reuse): Adopted Reuse.software standard
+* `3424028f5` feat(API): Add pagination to search request
+* `9c12b6222` feat(copyrightexport): Added copyright export to fo_nomos_license_list
+* `262b93954` feat(ui): close banner for a session
+* `11f424ac3` feat(API): added a copyright feat in /uploads/{id}/licenses api
+
+#### Corrections
+
+* `cc1f48985` fix(lint): openapi lint corrected
+* `f88a614ec` fix(api): add missing variables
+* `b8de588a6` fix(reportImport): remove dual check for access and fix array warning
+* `6778a6041` refactor(demomod): add missing code in makefile
+* `118f29e0f` fix(copyright): fix regex conf files
+* `41cd3d446` fix(default_group): exposed deafult_group in /users/self
+* `8bde786a7` fix(ui): restore license text for bulk modal
+* `fa4964c83` fix(reuser): reuse all report columns
+* `b9f727dc4` fix(ci): update spectral-action to fix ci test
+* `a9054815a` fix(uploadPermission):introduced error on changing upload permissions
+* `20376e602` fix(reuse): perform code fixes on reuse branch
+* `75a386bc1` test(ci): Run REUSE compliance check in CI
+* `dd873faf6` fix(reuser): add scancode as dependency if sched
+* `8c9f8bf92` fix(ui): Fix upload from Srv for parameterize agent
+* `13fb71910` fix(make): Fix warnings in make for Ubuntu 20.04.2 LTS
+* `d94cced54` fix(readme): typo fixed
+
+#### Infrastructure
+
+* `251be4682` chore(deps): bump twig/twig from 3.3.8 to 3.4.3 in /src
+* `03b180355` chore(Dockerfile): add OCI annotations
+* `534564bc9` docs(openapi): fix spectral lint warnings/errors
+* `045440de8` chore(component-id): use package-url instead purl
+* `ff8e440de` chore(deps): bump guzzlehttp/guzzle from 7.4.1 to 7.4.3 in /src
+* `42aa7c40d` chore(workflow): update GHA dependencies
+* `c7d61ba6d` chore(deps): bump guzzlehttp/guzzle from 7.4.4 to 7.4.5 in /src
+* `113253c2d` chore(deps): bump guzzlehttp/guzzle from 7.4.3 to 7.4.4 in /src
+* `fe2bd41a0` docs(reuse): reuse badge added
+
+### 4.1.0 (May 12th 2022)
+
+This release adds important corrections to
+[4.1.0-rc1](https://github.com/fossology/fossology/releases/tag/4.1.0-rc1)
+
+The release 4.1.0 introduces new agent `ScanCode`, used to scan for licenses,
+copyrights etc.
+
+The release 4.1.0 also introduces new feature to automatically deactivate the
+copyrights and cutter removal. There is a special note about this feature.
+> As this feature can still be improved, we are marking this as `experimental`
+and not recomended for productive instances.
+> Also this feature requires to install additional dependencies. One needs to
+run fo-postinstall with --python-experimental.
+
+The release 4.1.0 introduces a number of corrections to
+[4.1.0-rc1](https://github.com/fossology/fossology/releases/tag/4.1.0-rc1)
+and major changes to FOSSology, including:
+
+* Security fix for JWT tokens
+* Migration fix for copyrights
+
+#### Credits to contributors for 4.1.0
+
+From the GIT commit history, we have following contributors since
+[4.0.0](https://github.com/fossology/fossology/releases/tag/4.0.0):
+
+```
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Archisman Dawn <archismandawn7@gmail.com>
+> coder-whale @coder-whale
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Ettinger Katharina <katharina.ettinger@siemens.com>
+> Karthik Krishna <gkarthikkrishna1@gmail.com>
+> Kaushlendra Pratap <kaushlendrapratap.9837@gmail.com>
+> krishna9304 <krishna.mahato@precily.com>
+> Rohit Pandey <rohit.pandey4900@gmail.com>
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> SvetaInChina <Huaying.Liu@mediatek.com>
+> Tassilo Pitrasch <t.pitrasch@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+```
+
+#### Corrections
+
+* `840479e51` fix(scancode): add missing class name to fix tooltip
+* `31ca7525a` fix(scancode): move python dependencies
+* `cc5d9d8e5` fix(jwt): explicitly declare jwk algorithm
+* `f8a18ae7e` fix(copyright): do not update empty copyrights
+
+#### Infrastructure
+
+* `f431c98c7` chore(scancode): hide scancode UI if not installed
+
+### 4.1.0-rc1 (April 8th 2022)
+
+This release adds important corrections to
+[4.0.0](https://github.com/fossology/fossology/releases/tag/4.0.0)
+
+The release 4.1.0-rc1 also introduces new agent `ScanCode`, used to
+scan for licenses, copyrights etc.
+
+The release 4.1.0-rc1 also introduces new feature to automatically
+deactivate the copyrights and cutter removal. There is a
+special note about this feature.
+> As this feature can still be improved, we are marking this as
+`experimental` and not recomended for productive instances.
+> Also this feature requires to install additional dependencies.
+One needs to run fo-postinstall with --python-experimental.
+
+The release 4.1.0-rc1 introduces a number of corrections to
+[4.0.0](https://github.com/fossology/fossology/releases/tag/4.0.0)
+and major changes to FOSSology, including:
+
+* Add a new agent scancode-toolkit
+* Deciding copyrights with Spacy
+* Add new decision type non-functional
+* Admin can delete any upload
+* Fix unicode replacement in exportLicenseRef
+* Provide server version on REST api
+* Update license texts from SPDX
+* Clixml-xml based reporting format
+
+#### Credits to contributors for 4.1.0-rc1
+
+From the GIT commit history, we have following contributors since
+[4.0.0](https://github.com/fossology/fossology/releases/tag/4.0.0):
+
+```
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Archisman Dawn <archismandawn7@gmail.com>
+> coder-whale @coder-whale
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Ettinger Katharina <katharina.ettinger@siemens.com>
+> Karthik Krishna <gkarthikkrishna1@gmail.com>
+> Kaushlendra Pratap <kaushlendrapratap.9837@gmail.com>
+> krishna9304 <krishna.mahato@precily.com>
+> Rohit Pandey <rohit.pandey4900@gmail.com>
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> SvetaInChina <Huaying.Liu@mediatek.com>
+> Tassilo Pitrasch <t.pitrasch@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+```
+
+#### Corrections
+
+* `3fb149388` fix(rest): fix CORS issue
+* `163866bd6` fix(rest): Added default client ID claim
+* `711618199` fix(rest): Allows client ID claim to be configurable
+* `0f53f78fd` fix(exportLicenseRef): fix unicode replacement
+* `32ed138b2` fix(pkgagent): Fixes FossologyUI unexpected token error
+* `13603a0c6` fix(API): Fixes FossologyUI CORS error for localhost
+* `346db84fc` fix(openapi.yaml): OpenAPI Description: Fix typo in HeathInfo
+* `784bb5782` fix(api): Correct uploadId is returned for UploadFromURL
+* `568fe02e3` fix(rest): fix scope for oauth
+* `6e6688402` fix(nomos): Improved nomos GPL detection
+* `b81696054` feat(nomos): add 'BSD-4-Clauset-Shortened' license
+* `4739e6c93` fix(scancode): update load function and fix testcases for scan code
+* `d10e3c3f8` hotfix(rest): fix file upload
+* `4e26e35b7` fix(deleteupload): Admin can delete any upload
+* `d5bdf4acd` fix(installdeps): fix call to external script
+* `f15fe07db` fix(global): add statement name for global query to fix reuser
+* `b2e1273f6` fix(clixml): fix free text fields in clixml
+* `79d604d8b` fix(testcase): fix test cases for lib
+* `fc603ef54` fix(rest): Slim fixes for REST API
+* `b37948fe5` fix(phpunit): Fix function signature for PHPUnit
+* `52e37ca0b` fix(test): fix test failures caused by sysconfig
+* `2e9b8f1de` fix(report): Set content type header
+
+
+#### Features
+
+* `0b65c31b6` feat(licenseRef): add or update license texts from SPDX
+* `c00bc94f8` feat(scancode): add scancode to debian packaging
+* `bc577a049` feat(report): accept package URL
+* `19d6cb2f0` feat(copyright): Deciding copyrights with Spacy
+* `cc9f94bd3` feat(dev-ctbutton): Added clean text button at license text field
+* `2a7d18e86` feat(rest): oidc based authentication
+* `24f666101` feat(upload): Warning on duplicate upload
+* `b8e94ac29` feat(scancode):Added scancode API and minor fixes
+* `6cf46d450` feat(copyright):Integrating scancode to copyrightUI
+* `14437f970` feat(scancode):Add a new agent scancode-toolkit
+* `e08eeb71f` feat(version): Update sysconfig release from version
+* `cc30d1293` feat(newAgent): clixml-xml based reporting format
+* `7fcf09f70` feat(ui): show dropdown for "mark as" decisions
+* `bb85d5350` feat(decisions): add new decision type non-functional
+* `438f178f2` feat(upload): allow multifile upload from UI
+* `d98041925` feat(gdpr) deactivate users + Store last cnx timestamp
+* `7445f15bf` feat(keyword): add new word 'stolen from' to keyword agent
+* `f9d17c50c` feat(lbtablelength):Added all for license browser table
+* `1da36ad53` feat(rest): Provide server version on REST api
+
+#### Infrastructure
+
+* `5d3b01304` chore(deps): bump guzzlehttp/psr7 from 2.1.0 to 2.2.1 in /src
+* `5fd23105f` chore(install): update python deps installation
+* `01bafc2e2` test(ci): run docker tests in GitHub Actions
+* `d70570c56` chore(browse): redirect to license view if empty
+* `3fc43965f` chore(composer): update composer form 1.9.0 to 2.2.6 version
+* `830608b62` chore(deps): bump twig/twig from 3.3.4 to 3.3.8 in /src
+* `8d245be73` chore(composer): Update composer dependencies
+* `9b1df8f77` refactor(clearingDao): add few functions to a single one
+* `0aeebfe2e` refactor(ui-clearing-view_rhs.html.twig) : Changed tooltip description for "Do not use"
+* `10011f039` perf(sysconfig): Setup sysconfig at fossinit
+
+### 4.0.0 (Jan 20th 2022)
+
+This release adds important corrections to
+[4.0.0-rc1](https://github.com/fossology/fossology/releases/tag/4.0.0-rc1)
+
+The release 4.0.0 introduces following major changes since
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0):
+
+* Support Debian 11
+* Add bootstrap in fossology to beautify ui
+* Remove old gold files
+* Remove old log files
+* Provide custom delimiters for monkbulk scan
+* New info and health endpoints for rest
+* Update license texts from SPDX
+* Add new report format CSV.
+* Option to make user details read-only
+* Make global decisions configurable while upload
+
+NOTE:
+ The release also introduces new look to fossology tool,
+ only few pages have changes/classes of new bootstrap UI. Other
+ pages still needs corrections.
+
+#### Credits to contributors for 4.0.0
+
+From the GIT commit history, we have following contributors since
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0):
+
+```
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Ettinger Katharina <katharina.ettinger@siemens.com>
+> Marion Deveaud <marion.deveaud@siemens.com>
+> Piyussshh @Piyussshh
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+> Wonjae Park <wonjae.park@lge.com>
+```
+
+#### Corrections
+
+* `734f439e4` fix(reportImport): Fix interfaces in report import
+* `bc70462a8` fix(ui): Fix bulk modal with selectable bg
+* `d4f32b865` fix(reports) fix CSV report action title
+* `1287c5723` Fix merge errors
+
+#### Features
+
+* `574c13d1c` feat(reports): fix indent errors
+* `2550919a2` feat(reports): Add new CSV report type
+* `df3573982` feat(nomos): See file regex to include view
+* `44acd2029` feat(nomos): New see-url pattern
+* `01273ae78` feat(users) Add option to make user details read-only
+* `306260bfc` feat(reports) Fix DEP5 report menu entry
+* `144875921` feat(reports): change report names in drop down menu
+* `a778c5f68` feat(upload): make global decisions configurable
+* `f1c4ed4fa` Add option to make user details read-only
+
+#### Infrastructure
+
+* `0afbb8fe5` chore(cd): Continue release build on failure
+* `ff3b7d63a` Update src/www/ui/async/AjaxShowJobs.php
+* `ec0a26956` Revert "fix(login): Allow non-admin user to update"
+* `5596f78d7` Revert "Add option to make user details read-only"
+* `e063beda2` Revert "Fix merge errors"
+* `a07ccd939` Merge all GDPR related work
+
+### 4.0.0-rc1 (Dec 21st 2021)
+
+This release adds important corrections to
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0)
+
+The release 4.0.0-rc1 introduces following major changes since
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0):
+
+* Support Debian 11
+* Add bootstrap in fossology to beautify ui
+* Remove old gold files
+* Remove old log files
+* Provide custom delimiters for monkbulk scan
+* New info and health endpoints for rest
+* Update license texts from SPDX
+
+NOTE:
+ The release also introduces new look to fossology tool,
+ only few pages have changes/classes of new bootstrap UI. Other
+ pages still needs corrections.
+
+#### Credits to contributors for 4.0.0-rc1
+
+From the GIT commit history, we have following contributors since
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0):
+
+```
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Marion Deveaud <marion.deveaud@siemens.com>
+> Piyussshh @Piyussshh
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+> Wonjae Park <wonjae.park@lge.com>
+```
+
+#### Corrections
+
+* `b7fca0b45` fix(logrotate): Send SIGHUP
+* `272c0c8a3` fix(report): same license text for different shortname
+* `31127344e` fix(ui):Fix upload from VCS for parameterize agent
+* `93c5fa446` fix(ui): Change folder edit to bootstrap
+* `8a52c390d` fix (build): do not fail is /usr/share/man* folders already exist
+* `f7dbf3833` fix(rest): fixed the pagination in apis
+* `d8b776ba1` fix(unifiedreport): Fix upload link for API
+* `a3c92909e` hotfix(api): Add missing auth controller
+* `4a978109a` fix(upload): Fix upload description input
+* `36a1573ae` fix(login): Allow non-admin user to update
+* `6c241d202` fix(test): Fix licenseRef.json
+* `e62c84291` fix(ci): Update OpenAPI lint
+* `c039b4c37` fix(ui): Allign folder tree
+* `7e7cf82db` fix(rest): fix typo in openapi.yaml, s/reuse_uplod/reuse_upload/
+* `5b17c4999` fix(ui): add line break in upload name if exceeds 20 chars
+
+#### Features
+
+* `7db93f622` feat(gitpod): Inital contribution
+* `2e2b27642` feat(spasht): Show effective score
+* `7f117cbe6` feat(ui): add bootstrap in fossology to beautify ui
+* `bb9d7f946` feat(licenseText): update license texts from SPDX
+* `5f0696095` feat(monkbulk): Custom delimters
+* `f42e07318` feat(monk): New delimiters dnl
+* `143e20e80` feat(edit-user): Let user can define default folder and use the default
+* `b6de455d6` feat(rest): New info and health endpoints
+* `50ebaf51f` feat(maintagent): Implement deleteOrphanGold fn
+* `9b474be28` feat(ui): Read delimiters for clean text
+* `267ef0af4` feat(rest): Filter uploads with 4 new parameters
+* `31dd1c44f` feat(ci): GitHub-ci for c-tests
+* `3d71a2ca7` feat(os): Support Debian 11
+* `4064dfc31` feat(maintagent): Implement removeOrphanedFiles fn
+* `d0f7bddcf` feat(maintagent): Remove old gold files
+* `856a2c40d` feat(maintagent): Remove old log files
+
+#### Infrastructure
+
+* `6af218c92` chore(os): Drop xenial support for eol
+* `2844492a0` docs(openapi): complete OAS spec to pass linting
+* `32f707c25` chore(lint): make sure swagger spec is correct
+* `a309c814d` ci(actions): Build Docker images in Actions
+* `0d5227960` docs: Updated README.md and CONTRIBUTING.md
+* `50b3bf168` feat(rest): Update upload information
+* `b3d8b4789` feat(unifiedreport): include assigned to in component clearing section
+
+### 3.11.0 (Jul 27th 2021)
+
+This release adds important corrections to
+[3.11.0-rc2](https://github.com/fossology/fossology/releases/tag/3.11.0-rc2)
+
+The release 3.11.0 introduces following major changes since
+[3.10.0](https://github.com/fossology/fossology/releases/tag/3.10.0):
+
+* Add bulk undo for deactivated copyrights.
+* Configurable irrelevant file scan for monkbulk.
+* Add job to remove expired tokens from database.
+* Add a simple search to get folder.
+* Unit test cases for REST API.
+* Reuse edited copyright.
+* Add scroll to NOTICE file modal.
+* Set candidate license creator for ojo.
+* Fix external auth.
+* Updating the license info files.
+
+NOTE:
+ The release 3.11.0 also introduces new agent `reso` which copies
+ license findings from OJO based on REUSE.Software standard on
+ what license is a binary file licensed under(if available).
+
+#### Credits to contributors for 3.11.0
+
+From the GIT commit history, we have following contributors since
+[3.10.0](https://github.com/fossology/fossology/releases/tag/3.10.0):
+
+```
+> Aman Dwivedi <aman.dwivedi5@gmail.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Anwar Hashmi @HashmiAS
+> bighnesh0404 <saibighneshprusty@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Michael C. Jaeger <michael.c.jaeger@siemens.com>
+> Nicolas Toussaint <nicolas1.toussaint@orange.com>
+> OmarAbdelSamea <1700903@eng.asu.edu.eg>
+> R3da <hash.rkh@gmail.com>
+> Rolf Eike Beer <eb@emlix.com>
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> shivamgoyal7 <goyalshivam661@gmail.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Wonjae Park <wonjae.park@lge.com>
+> Ying-Chun Liu (PaulLiu) <paulliu@debian.org>
+
+```
+#### Corrections
+
+* `e4803b8fe` fix(migration): check if uploadtree is empty
+* `635d4904a` fix(rules) : adding debian package for reso agent
+* `b44249e2d` fix(copyright):Change menu text of copyright page
+
+### 3.11.0-RC2 (Jul 12th 2021)
+
+This release adds important corrections to
+[3.11.0-rc1](https://github.com/fossology/fossology/releases/tag/3.11.0-rc1)
+
+The release 3.11.0-rc2 introduces following major changes since
+[3.11.0-rc1](https://github.com/fossology/fossology/releases/tag/3.11.0-rc1):
+
+* Set candidate license creator for ojo.
+* Fix external auth.
+* Updating the license info files.
+
+The release 3.11.0-rc2 also introduces new agent `reso` which copies
+license findings from OJO based on REUSE.Software standard on
+what license is a binary file licensed under(if available).
+
+#### Credits to contributors for 3.11.0-RC2
+
+From the GIT commit history, we have following contributors since
+[3.11.0-rc1](https://github.com/fossology/fossology/releases/tag/3.11.0-rc1):
+
+```
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Michael C. Jaeger <michael.c.jaeger@siemens.com>
+> Nicolas Toussaint <nicolas1.toussaint@orange.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+
+```
+#### Corrections
+
+* `f7c7715fa` fix(reso) fix comment
+* `8e399f0cd` fix(ojo): Set candidate license creator
+* `8031b128b` fix(auth): read default visibility from database rather then config file
+* `b3f0d1db0` fix(api): Check for duplicate shortnames
+* `2d6d8b187` fix(auth): fix call to add_user() when login from external auth
+
+#### Features
+
+* `df52e53ba` feat(rest): Filter licenses by kind
+* `3c98947cf` feat(expose-headers): added the expose headers option for response headers
+* `d1031cae3` feat(reso): new agent for REUSE.Software standard
+* `2e1d28eb1` feat(rest): Add POST/PATCH license endpoints
+
+#### Infrastructure
+
+* `93a47eab0` docs(licenses): updating the license info files
+* `0eacc14af` test(api): Test cases for LicenseController
+
+### 3.11.0-RC1 (Jun 29th 2021)
+
+This release adds important corrections to
+[3.10.0](https://github.com/fossology/fossology/releases/tag/3.10.0)
+
+The release 3.11.0-rc1 introduces following major changes since
+[3.10.0](https://github.com/fossology/fossology/releases/tag/3.10.0):
+
+* Add bulk undo for deactivated copyrights.
+* Configurable irrelevant file scan for monkbulk.
+* Add job to remove expired tokens from database.
+* Add a simple search to get folder.
+* Unit test cases for REST API.
+* Reuse edited copyright.
+* Add scroll to NOTICE file modal
+
+```
+> Aman Dwivedi <aman.dwivedi5@gmail.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Anwar Hashmi @HashmiAS
+> bighnesh0404 <saibighneshprusty@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> OmarAbdelSamea <1700903@eng.asu.edu.eg>
+> R3da <hash.rkh@gmail.com>
+> Rolf Eike Beer <eb@emlix.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> shivamgoyal7 <goyalshivam661@gmail.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Wonjae Park <wonjae.park@lge.com>
+> Ying-Chun Liu (PaulLiu) <paulliu@debian.org>
+
+```
+#### Corrections
+
+* `858a9070d` fix(ui): Fix the modal height for small screens
+* `01afe6c2d` fix(reuser): Reuse edited copyright
+* `7343edb40` fix(copyright): Make check strict
+* `d90541903` fix(nomos): improved nomos MPL-2.0 detection
+* `e16588a8c` fix(api): Add missing reuser options
+* `7782452a7` fix(ui): Break long lines in copyright table
+* `65832e9a0` fix(debian): Add php-gd package as dependency
+* `576bf4c79` fix(ui-export-list): Dont add integers
+* `c985342f9` fix(ui): License text editor
+* `ac86e7e6c` fix(ui): Add scroll to NOTICE file modal
+* `06796d149` fix: remove wrong 'extern "C"' guards
+* `5365585a6` fix(links): fix broken links
+* `c7a2a9ab1` fix(decision): Create ce for folder decisions irr
+* `1139443b7` fix(Dockerfile): upgrade debian distribution
+* `58160879f` fix(ui): Show error message for invalid license id
+* `d9857c6dc` fix(report): Do not merge ack text
+* `3a6454b4d` Update ReuserAgent.php
+* `c7cfffbdc` fix(UI): fix html errors, css errors and add viewport meta tag
+* `f2ff40b6d` fix(username): update session variable on username change
+* `d92ee4c0b` fix(email): Update email command for s-nail
+* `d5d56f7c2` fix(gcc-10): Fix errors and warnings
+* `83e857261` fix(test): Add new assignee attribute to REST
+* `c38d57888` fix(cli): Dependency exception
+* `858a9070d` fix(ui): Fix the modal height for small screens
+
+#### Features
+
+* `b1ab4d0a0` feat(dbcreate): retry psql check while starting
+* `1d7f5f9fc` feat(restAPI): Added options request and verification function
+* `ff3816fb3` test(rest): Unit test cases for REST API
+* `1c3dab241` feat(licenseExport): include obligation topic in exported CSV
+* `61c320418` feat(ui): Remember assignee filter on Browse view
+* `1e8764463` feat(rest): Add assignee id to fossology API
+* `40b3e2faf` feat(Ui): added Default upload visibility
+* `af89659c7` feat(addMetadata): added creationdate,lastModifiedDate,usernameCreated and usernameModified in candidate license
+* `2bc632925` feat(migration): general improvements for copyright migration
+* `5a7d45708` feat(copyright): add bulk undo for deactivated copyrights
+* `86fe8a3f2` feat(browse): add a simple search to get folder
+* `1dc44506d` feat(ci): Mark PRs with conflict with Actions
+* `47d9cb9be` feat(maintagent): add job to remove expired tokens from database
+* `c563e80ce` feat(export): Download results in spreadsheet (xlsx)
+* `26fe22e8a` feat(monkbulk): Configurable irrelevant file scan
+* `d973e1983` feat(export) : Consolidating results per file or directories
+* `02fcb8afd` feat(rest): Add /users/self endpoint
+
+#### Infrastructure
+
+* `ccabb703c` chore(gitignore): add db.cron and fossdash-publish.py to .gitignore
+* `4238d7808` chore(dependency): update jquery and select2 version
+
+### 3.10.0 (May 7th 2021)
+
+This release adds important corrections to
+[3.10.0-rc2](https://github.com/fossology/fossology/releases/tag/3.10.0-rc2)
+
+The release 3.10.0 introduces following major changes since
+[3.9.0](https://github.com/fossology/fossology/releases/tag/3.9.0):
+
+* Change copyright handling add new table copyright_event.
+* Drop support for PHP5 and update dependencies for PHP7
+* Update password hashing algorithm from SHA1 to more secure bcrypt.
+* Advance search and replace for copyrights.
+* Ability to enforce password policies.
+* Feature to import license acknowledgement from NOTICE file.
+* Ununpack agent can be compiled to work in standalone mode.
+* Create new licenses as candidate for OJO.
+* Read XML in chunks to support large files for ReportImport.
+* Add license search based on short name in REST.
+* Do not add decisions if the events have no change.
+
+NOTE: This release also adds a migration script which migrates copyright data to new table copyright_event.
+      Migration processes is mandatory because without migration, old copyright activation/deactivation may not work.
+      also it approximately takes 15 min for 1M records.
+
+#### Credits to contributors for 3.10.0
+
+From the GIT commit history, we have following contributors since
+[3.9.0](https://github.com/fossology/fossology/releases/tag/3.9.0):
+
+```
+> Alan Hohn <Alan.M.Hohn@lmco.com>
+> Aman Dwivedi <aman.dwivedi5@gmail.com>
+> Andreas J. Reichel <andreas.reichel@tngtech.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Avinal Kumar <avinal.xlvii@gmail.com>
+> Bartłomiej Dróżdż <bartlomiej.drozdz@orange.com>
+> Darshan <kansagara.darshan97@gmail.com>
+> David Lechner <david@pybricks.com>
+> Dineshkumar Devarajan (RBEI/BSF6) <Devarajan.Dineshkumar@in.bosch.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Helio Chissini de Castro <helio@kde.org>
+> Mikko Murto <mikko.murto@hhpartners.fi>
+> Michael C.Jaeger <michael.c.jaeger@siemens.com>
+> Pawan Kumar Meena <Pawank1804@gmail.com>
+> Piotr Pszczola <piotr.pszczola@orange.com>
+> rlintu <raino.lintulampi@bittium.com>
+> Sahil <sjha200000@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+> YashJipkate <yashjipkate@gmail.com>
+
+```
+
+#### Corrections
+
+* `58e1e4c9d` fix(docker-compose): Revert container port to 8081
+* `d269582a5` fix(actions): Build pages on release
+
+#### Infrastructure
+
+* `e9ca31401` perf(migration): remove offset to make the query faster
+* `271287be1` fix(build): Make script compatible with Xenial
+
+### 3.10.0-RC2 (Apr 19th 2021)
+
+This release adds important corrections to
+[3.10.0-rc1](https://github.com/fossology/fossology/releases/tag/3.10.0-rc1)
+
+The release 3.10.0-RC2 introduces following major changes:
+
+* Change copyright handling add new table copyright_event.
+* Create new licenses as candidate for OJO.
+* Read XML in chunks to support large files for ReportImport.
+* Show parent folder on *Browser views.
+* Add license search based on short name in REST.
+* Do not add decisions if the events have no change.
+* Migrate github pages deployment to GHA.
+
+NOTE: This release also adds a migration script which migrates copyright data to new table copyright_event.
+      Migration processes is mandatory because without migration, old copyright activation/deactivation may not work.
+      also it approximately takes 30 mins for 1M records.
+
+#### Credits to contributors for 3.10.0-RC2
+
+From the GIT commit history, we have following contributors since
+[3.10.0-rc1](https://github.com/fossology/fossology/releases/tag/3.10.0-rc1):
+
+```
+> Alan Hohn <Alan.M.Hohn@lmco.com>
+> Aman Dwivedi <aman.dwivedi5@gmail.com>
+> Anupam <ag.4ums@gmail.com>
+> Avinal Kumar <avinal.xlvii@gmail.com>
+> Darshan <kansagara.darshan97@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Mikko Murto <mikko.murto@hhpartners.fi>
+> Pawan Kumar Meena <Pawank1804@gmail.com>
+> Piotr Pszczola <piotr.pszczola@orange.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+> YashJipkate <yashjipkate@gmail.com>
+```
+
+#### Corrections
+
+* `53aa058cb` fix(DBMigrate): add rows with same agent_fk for migration
+* `8e1e7bfcd` fix(ui): updated the link of scheduler documentation
+* `71cc0cea1` fix(copyright): improve reuse and correct update queries
+* `23fe64335` fix(link): changed the broken documentation page link
+* `3a5eeab03` fix(copyrightevent): General improvements
+* `50b9dd5e4` fix(rest): missing Group component in API documentation
+* `0bda7e2b7` fix(nomos): Flush stdout in JSON writer
+* `44dea1ab0` fix(UploadTreeProxy): Get if candidate license
+* `36200a90a` fix(ui): Show parent folder on *Browser views
+* `5fc03c699` fix(uploadDao): Fetch status based on group id
+* `405e8529e` fix(globalDecision): fix global decision prevent adding history in case of global decision
+* `a4e5dd93a` fix(decider): Do not global ojo decisions
+* `729e654fb` fix(ojo): Create new licenses as candidate
+* `1e9138445` fix(reuser): updated misleading UI label This closes issue 1876
+* `81ac2b584` fix(reportImport): Read XML in chunks
+* `cf547a77f` fix(reuser): Do not process pfiles with id 0
+* `3e4dcdf7b` fix(reuse): correct docstring
+* `ca9395bfd` fix(globaldecision): do not add decisions if the events have no change
+* `de92148a8` fix(cd): Use published event to build release pkgs
+* `1c42760b7` fix(fossdash) : waiting for completing the execuition of find command
+* `84d9153fa` bugfix(fossdash) : updated find cmd to clean reported files
+* `707b93149` fix(fossdash script):  script file to install fossdash dependencies
+* `fae866901` fix(fossdash script) : fix the improper formate of data to influxDB.
+* `14e7ee101` other(fossdash config): changed config file link to permanent wiki page.
+* `4d2c1791d` other(fossdash.log) : changed fossdash log path
+* `a635bc1aa` removed(bootstrap file): removed bootstrap min js and it's related references.
+* `870e5fd94` Other(license changed) : License info changed and fossdash UI config changed
+* `3c28b7df9` remove(log counter) : remove error counter feat from fossdash. and consider it in the future scope.
+* `a6341a21f` fix(fossdash-config): fixed substring find
+* `4ff79d6c0` fix(uuid-ossp): Create extension as postgres
+
+#### Features
+
+* `9a1fd6163` feat(static-checks.yml): migrate static checks and analysis to GHA
+* `2a90ff34b` feat(copyright): save deleted copyrights in copyright_event table
+* `eded1d7d2` feat(deploy-pages.yml): migrate github pages deployment to GHA
+* `f91881a7b` feat(swh): Allow API token
+* `1e28973b2` feat(rest): get groups and create group functionality
+* `41d8e88fa` feat(reuse): Change data type of reuse_group from int to string
+* `8aa47c444` feat(rest): add license search based on short name
+* `6181f9165` feat(rest): get copyright info for file hash
+* `7d1fa425b` feat(fossdash metrics config): using default metrics file, if metric config is empty.
+* `14afdd588` feat(beautify error) : Added ERROR and WARNING sign
+* `e8da2b880` feat(log counter) : Maintain and push log counter into influxDB.
+* `57db5d36f` Test(fossdash-config) : unit-test for fossdash_config.php
+
+#### Infrastructure
+
+* `0dba2364c` docs(deploy-pages.yml): add copyright
+* `d434bf7b5` docs(CONTRIBUTING.md): Fixed broken link and typos
+* `98311e89d` docs(README): fixed broken links, typos, grammatical errors and added test instance
+* `0886d574f` refactor(.travis.yml): remove static checks and analysis
+* `f0603b6e1` refactor(.travis.yml): remove github pages deployment
+* `cbdb12d73` Revert "feat(copyright): save deleted copyrights in copyright_event table"
+* `0c564843c` refac(swh): Move agent configuration to Sysconf
+* `5c23a327e` refactor(fossdash UI menu) :  created new menu and new php pages for fossdash.
+* `5e39eb87b` refactor(fossdash script) : remove all metric queries from the code, Put them into configuration way.
+* `3f1ecc583` add the cron-triggered metrics exporter for FossDash
+* `744485fd2` chore(ui): Show candidate licenses from agents
+* `50fc42213` chore(reportImport): Make agent immortal
+
+### 3.10.0-RC1 (Jan 8th 2021)
+
+With every new release, FOSSology brings various bug fixes, infrastructure
+changes and various new features.
+
+You can check the list of commits in release bellow but few highlights for the
+release will be:
+
+* Drop support for PHP5 and update dependencies for PHP7
+* Update password hashing algorithm from SHA1 to more secure bcrypt.
+* Ability to search file from hash values in REST API.
+* New licenses from SPDX 3.10 and many fixes in nomos.
+* Advance search and replace for copyrights.
+* Ability to enforce password policies.
+* Feature to import license acknowledgement from NOTICE file.
+* Change the versioning scheme to include patch number (featched from GIT).
+* Ununpack agent can be compiled to work in standalone mode.
+
+#### Credits to contributors for 3.10.0-RC1
+
+From the GIT commit history, we have following contributors since
+[3.9.0](https://github.com/fossology/fossology/releases/tag/3.9.0):
+
+```
+> Aman Dwivedi <aman.dwivedi5@gmail.com>
+> Andreas J. Reichel <andreas.reichel@tngtech.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Bartłomiej Dróżdż <bartlomiej.drozdz@orange.com>
+> David Lechner <david@pybricks.com>
+> Dineshkumar Devarajan (RBEI/BSF6) <Devarajan.Dineshkumar@in.bosch.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Helio Chissini de Castro <helio@kde.org>
+> Mikko Murto <mikko.murto@hhpartners.fi>
+> Piotr Pszczola <piotr.pszczola@orange.com>
+> rlintu <raino.lintulampi@bittium.com>
+> Sahil <sjha200000@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+```
+
+#### Corrections
+
+* `9027b8711` fix(login): Do not set group_fk if empty
+* `e6b060fbe` fix(db): add indexes to pfile on sha1 and sha256
+* `0714946c9` fix(ack): add missing uploadid in getresults function
+* `71981e494` fix(API): added container-interop dependency for resolving Internal Server Error
+* `c6d1c87a3` fix(twig): Update twig version to preserve spaces
+* `d250b735b` fix(globalDecision): make includesubfolders true in case of global to capture previous decisions
+* `32cef88e4` fix(readmeoss): unescape contents
+* `34486d07d` fix(conf): fix not able to save conf in case of brackets
+* `88024fe35` fix(ununpack): Initialize gcrypt
+* `40d96ebeb` fix(rest) : Set job status as Failed when any one of the job is failed
+
+#### Infrastructure
+
+* `a0338b740` refactor(login): updated password hashing algorithm
+* `30f0b773a` docs(db): remove obsolete comment from schema
+* `3d29039b7` chore(cd): Use fo-debuild script to build packages
+* `65041f002` debian: Improve deb package building (#1828)
+* `855aec69a` update(org): upgraded php version to php7
+
+#### Features
+
+* `932b82d76` feat(ununpack): standalone
+* `106a95907` feat(docker): improve database healthcheck command
+* `3291eec27` feat(docker): services healthchecks in docker-compose file
+* `fc8b111ca` feat(build): Get build version number from git
+* `7f36edb90` feat(password): Create password policy
+* `a3dad10ab` feat(browser): total files in license browser view
+* `4fd3007e4` feat(copyright): Search and replace with regex
+* `c1773ec41` feat(conf): make unified report configurable
+* `b96010ea1` feat(licenses): New licenses added from SPDX 3.10 to nomos.
+* `9b327e80b` Nomos: New licenses from SPDX 3.10 added. Lots of other corrections.
+* `323155150` feat(cd): Build Focal packages on release
+* `a9ce7e738` feat(nomos): add new license intel-binary
+* `bc3e1bf6b` feat(rest): Filter uploads by folder id
+* `03f7f53c4` feat(utils): Filter inputs for unicode ctrl chars
+* `5e4fae26e` feat(search) - possibility to search in selected upload only
+* `d03ed3493` feat(gui): Add Bucket link for license view page
+* `f9cdc2d38` feat(conf): add textarea in conf page for notes
+* `42ffc492f` feat(nomos): Apache detection
+* `5db568481` feat(rest): Get file info from hash
+* `d1fdfe4d7` feat(modal): use jquery-ui dailog instead of plain modal
+* `d013e0903` feat(noticeImport): add child modal to load notice files
+* `d1583ca87` feat(notice_import): Increase size of textarea and fix a max notice preview length
+* `0642f8ed2` feat(notice_import): Import notice file content into acknowledgement
+
+### 3.9.0 (November 30th 2020)
+
+This release adds important corrections to
+[3.9.0-rc2](https://github.com/fossology/fossology/releases/tag/3.9.0-rc2)
+
+The release 3.9.0 introduces following major changes:
+- Introduce support for Ubuntu Focal Fossa (20.04)
+- Drop support for Debian 8 Jessie
+- Obligations now refer to license conclusions
+- Auto deactivation of copyrights for irrelevant files
+- REST API now supports upload from URL
+- Display time in browser's timezone wherever possible
+- Ability to export Copyright CSV
+
+The release 3.9.0 also introduces new agent `Spasht` which connects with
+ClearlyDefined server and pulls information like License and Copyrights (if
+available).
+To use it, upload a package, open it and goto Spasht page from the
+top yellow bar. From there, search for the desired package on ClearlyDefined and
+schedule the scan. Licenses and copyrights will appear on the same page.
+
+#### Credits to contributors for 3.9.0
+
+From the git commit history, we have following contributors since
+[3.8.0](https://github.com/fossology/fossology/releases/tag/3.8.0):
+```
+> adityabisoi <adityabisoi1999@gmail.com>
+> Akash-Sareen <akash7sareen@gmail.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Avneet Singh <Avneet.Singh@sony.com>
+> Dineshkumar Devarajan (RBEI/BSF6) <Devarajan.Dineshkumar@in.bosch.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Lakshmi Bhavani <Nagavalli.LakshmiBhavani@in.bosch.com>
+> Marion Deveaud <marion.deveaud@siemens.com>
+> Michael C. Jaeger <michael.c.jaeger@siemens.com>
+> Mikko Murto <mikko.murto@hhpartners.fi>
+> Piotr Pszczola <piotr.pszczola@orange.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> sjha2048 <sjha200000@gmail.com>
+> vivek kumar <vvksindia@gmail.com>
+```
+
+#### Features
+* `d9ed388d5` chore(documentation): updating basic license info in UI
+* `81e029137` feat(about): add new page for third party licenses
+* `a333fb5eb` update(org): added focal-fossa support
+* `010f94747` chore(spdx): bump spdx version to 2.2
+
+#### Corrections
+* `6a2ce3dee` fix(spasht): Fix advance search
+* `be5189da4` fix(swh): Update User-Agent, lowecase SHA256
+* `bd65ab70b` fix(ununpack): Correct the mimetype for deb files
+* `4f4f311b2` fix(copyrightDao): Change statement in updateTable
+
+#### Infrastructure
+* `87829c8e4` feat(cd): Publish release packages with Actions
+* `bc2f2eb07` update(org): drop debian 8 support
+
+### 3.9.0-RC2 (Oct 8th 2020)
+
+This pre-release adds important corrections to 3.9.0-RC2.
+
+#### Corrections
+
+* `4df3358c2` perf(ui): Reduce load time for tree view
+* `c56ae1733` fix(ClearingDao): Get uploadtree table name
+
+### 3.9.0-RC1 (Aug 31st 2020)
+
+With every new release, FOSSology brings various bug fixes, infrastructure changes and various new features.
+
+You can check the list of commits in release bellow but few highlights for the release will be:
+
+* New agent **Spasht** which searches for decisions from ClearlyDefined.io and bring them to FOSSology.
+* New Docker image to use in CI
+* PostgreSQL 12 support
+* New page to check status of all job in a server
+* Using user's time zone to change time in UI
+* Ability to specify GIT branch in Upload from VCS
+* Reuse of deactivated copyrights
+* Remove OpenSSL dependency and use `libgcrypt`
+* Removal of redundant MD5 checksum from `licenseRef.json`
+
+#### Credits to contributors for 3.9.0-RC1
+
+From the GIT commit history, we have following contributors since [3.8.1](https://github.com/fossology/fossology/releases/tag/3.8.1):
+
+```
+> adityabisoi <adityabisoi1999@gmail.com>
+> Akash-Sareen <akash7sareen@gmail.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Avneet Singh <Avneet.Singh@sony.com>
+> Dineshkumar Devarajan (RBEI/BSF6) <Devarajan.Dineshkumar@in.bosch.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Lakshmi Bhavani <Nagavalli.LakshmiBhavani@in.bosch.com>
+> Marion Deveaud <marion.deveaud@siemens.com>
+> Michael <michael.c.jaeger@siemens.com>
+> Mikko Murto <mikko.murto@gmail.com>
+> Piotr Pszczola <piotr.pszczola@orange.com>
+> Sahil <sjha200000@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> vivek kumar <vvksindia@gmail.com>
+```
+
+#### Corrections
+
+* `f24547d85` fix(licenseRef): Fix type in array_map
+* `f09761d20` fix(licenseref): handle errors license errors
+* `2fcbff0b1` fix(Nomos): Added a new License signature
+* `a7908a68d` fix(spasht-ui): Removed extension from the spasht search
+* `5638337f2` fix(report): Don't group results with custom text
+* `865f8ac02` fix(licenseRef): Fix import of licenseRef.json
+* `23504c7a2` fix(lib): Correct non-default argument position
+* `059ed1cfb` fix(lib): Remove extra parameters
+* `485ddc75d` fix(obligation): Refer to license conclusions
+* `eb60785b5` fix(rest): fixed ignoreScm flag when input is false
+* `7880e856a` fix(delagent): Remove clearing_decision and lrb
+* `a41120ad8` fix(spdxReport): add missing artifact to file path in spdx reporting
+* `40792c1c2` fix(ui): Use default timezone if not set
+* `75c59cde8` fix(bulk): add class to show text highlighted for matched page
+* `3931634dd` fix(spdx): Fix duplicate copyrights
+* `0728965c8` fix(clearingDao): Copy acknowledgement with event
+* `441d224e4` fix(clearingCount): do not add count as cleared in case of to be discussed
+* `58562d7da` fix(nomos-standalone): included changes for the PR #1600
+* `c07cf2ee0` fix(SCM): fix warnings in apache log if SCM is not selected
+* `eb08c0e2b` fix(unifiedreport): Get department from config
+* `7b8b5ef77` fix(fo-installdeps): added a missing dependency
+* `420903394` fix(upload): Fix the check for expire_action
+* `1b062b135` fix(spdx): fix spdx-rdf export.
+* `de279e3de` fix(libschema): Schema fix for PostgreSQL 12
+* `421a4221f` fix(AdviceLicense):show error message on failed merge
+* `c08a54f8c` fix(rest): Get upload summary without UI
+
+#### Infrastructure
+
+* `73c5b6a08` chore(alljobs): Restrict to read
+* `b002820e9` perf(license_candidate): Create PRIMARY KEY
+* `7fecfc84e` test(GetHashes): Change tests for sha256
+* `685e78632` table reference fixed
+* `52f4096a0` chore(delagent): Remove OpenSSL dependency
+* `926f8540f` chore(ununpack): Remove external checksum code
+
+#### Features
+
+* `e35f31c73` feat(licenseRef): update existing licenses
+* `cb06d031e` feat(spasht): Use dialog for details
+* `758ed16ab` feat(spasht): Change UI and remove some steps
+* `e27a9862d` feat(spasht): Added Agent spasht
+* `3aa573e33` feat(reuser): reuse deactivated copyrights
+* `dbd411529` feat(showjobs): Show delete file name
+* `87f8876f5` feat(ci): Use FOSSology scanners in GitLab CI
+* `46c1384fb` feat(decisions): auto deactivate copyrights
+* `84185975d` feat(conf): add feature to change all local clearings to global from conf
+* `bd5662577` feat(ReportDao): send heartbeat from Dao to keep the agent alive for large files
+* `a737c4bcb` feat(jobs): Show all running jobs
+* `462591e8c` feat(export): Export Copyrights
+* `4e025c1b7` feat(download): Limit source code download only for users with specified access rights
+* `00a68a13d` feat(ui): Display Job timings in browser timezone and formatted date time to Y-m-d H:i:s
+* `2ca5257cd` feat(rest): Upload from URL and server
+* `08132e0c9` feat(rest): extend upload model with filesha1
+* `0bc755ad7` feat(globalDecision): show warning if the candidate license is added to license list
+* `8f395952a` feat(upload): Add possibility to upload specific Git branch
+* `a35edb985` feat(groups): Update default group for user
+* `e834b41bd` feat(spdx export): Add sha256 to exported spdx.
+* `d90175480` feat(copyright): Enable agent to read authors from ROS catkin package manifest files as per spec
+* `bbaf4f071` feat(nomos): Print JSON directly to STDOUT
+* `807f6614b` feat(nomos): Optimize JSON output
+* `af22a5b21` feat(scanner): ignore files from scanning using mimetype
+* `59464a500` feat(maintenance): Remove orphan log files
+
+### 3.8.0 (April 23rd 2020)
+
+This release adds important corrections to
+[3.8.0-rc1](https://github.com/fossology/fossology/releases/tag/3.8.0-rc1)
+
+The release 3.8.0 also introduces new agent `Software Heritage`. There is a
+special note about this agent.
+> Due to rate-limiting from Software Heritage, the agent might run slow. Please
+> check the **Geeky Scan Details** of the agent to understand the cause of the
+> delay.
+
+Please check https://archive.softwareheritage.org/api/#rate-limiting for more
+info.
+
+Some notes about the UTF-8 database. The copyright (and sister) agent now
+creates only UTF-8 string. So it is safe to update to Postgres with UTF-8
+encoded database. For more information, please refer to the wikipage
+[Migration to UTF-8 DB](https://github.com/fossology/fossology/wiki/Migration-to-UTF-8-DB)
+
+#### Credits to contributors for 3.8.0
+
+From the git commit history, we have following contributors since
+[3.8.0-rc1](https://github.com/fossology/fossology/releases/tag/3.8.0-rc1):
+```
+> adityabisoi <adityabisoi1999@gmail.com>
+> Anupam <ag.4ums@gmail.com>
+> Carmen Bianca Bakker <carmenbianca.bakker@liferay.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Kaushl2208 <kaushlendrapratap.9837@gmail.com>
+> Mikko Murto <mikko.murto@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> sjha2048 <sjha200000@gmail.com>
+```
+
+#### Features
+* `5ca84b7a4` feat(SWH): catch exceptions in case of bad response
+* `d8ac396c7` feat(DB): Recode copyright tables to UTF-8
+* `3bbb7156a` feat(SWH): add time to reset if X-RateLimit-Limit reached for SWH agent
+* `144b81c19` feat(Copyright): Fixed the checking of config file in wrong folder
+* `3b6f4fac6` feat(unifiedReport): move obligations to DAO layer remove unused file
+
+#### Corrections
+* `148b774e5` fix(delete): Do not remove upload_pk
+* `6296b6738` fix(schema): Match schema with schema export
+* `c49c5a691` fix(spdx-rdf-report): Fix comments in export.
+* `8880d1a98` fix(travis): Fix build config warnings
+* `c9c6f3cb9` fix(fo-installdeps): Added missing Fedora dependecies
+* `7d905ed6a` fix(AdviceLicense):Show error message on failure
+* `c0a4b25b3` fix(package): fix syntax
+* `eec0a5faa` fix(rest): Remove hostname from JWT
+
+#### Infrastructure
+* `88f6de2e8` fix(travis): Fix page deploy stage
+* `a106def1c` fix(packaging): Create apache softlink on source
+* `b3abe195b` docs(contributing.md): Fixed broken link in contributing.md
+* `018de9705` fix(git) : add php.ini to gitignore
+* `09b48ffe5` docs(README): Refer to the correct file for the licenses
+* `5a28eabdc` fix(apache): Enable fossology on source install
+
+### 3.8.0-RC1 (Mar 05th 2020)
+
+This release brings a number of corrections (see below) and changes to the infrastructure. But it also adds new features to FOSSology, including:
+
+* A new agent added `Software Heritage Analysis` which searches for file existance in softare heritage
+* Reuse of report configuration settings
+* New decision type `do not use`
+* Consider a particular license for its obligation to be listed in report in conf
+* Add external authentification feature
+* New dashboard pages with submenu
+
+#### Credits to contributors for 3.8.0-RC1
+
+From the git commit history, we have following contributors since [3.7.0](https://github.com/fossology/fossology/releases/tag/3.7.0):
+
+```
+> Andreas J. Reichel <andreas.reichel@tngtech.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Bartłomiej Dróżdż <bartlomiej.drozdz@orange.com>
+> dineshr93 <dineshr93@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Michael <michael.c.jaeger@siemens.com>
+> Nicolas Toussaint <nicolas1.toussaint@orange.com>
+> Piotr Pszczola <piotr.pszczola@orange.com>
+> sandipbhuyan <sandipbhuyan@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Woznicki Pawel <pawel.woznicki@orange.com>
+```
+
+#### Corrections
+
+* `31d4c7b39` fix(copyright): Remove non utf8 strings
+* `ddcaa8eb9` fix(conf): Update install/defconf/fossology.conf.in
+* `50e7cf569` Fix(Dockerfile): make clean install clean
+* `2143f6aec` fix(lib): Check group on local decision only
+* `5a7bd82a8` fix(reuser): Run decider after reuser
+* `d97f9cec9` fix(ext-auth): check that external authentication is configured
+* `c20b7fb0f` fix(SHagent): add proxy settings, add SH agent to PHPCS
+* `c60150d59` fix(bulk): Fix dropdown bulk on folder level
+* `251fd8dfd` fix(ojo): Add lower limit to license length
+* `fbc86017c` fix(nomos):test-cases
+* `a1b287e06` fix(nomos) : CC-BY-SA identification
+* `4c04b59bc` fix(nomos) : segfault for large offset value
+* `ffdd07786` fix(highlight): highlight for reference text that exists in different page
+* `a3323dac8` fix(log): fix warnings from apache error log
+* `415b2ae78` fix(view-license): Browse file without scanner ars
+* `efe1301ab` fix(ui): decision and scope for licenses
+* `7c9ca59ef` fix(CHANGELOG): Fix the changelog
+* `87e709233` fix(build-dep): Add PHP-CLI as build dependency
+* `73fe66278` fix(ojo): Handle dual-license and SPDX new naming
+* `b84b6d26b` fix(admin): Allow read user to edit user
+* `c839f02b6` fix(copyright): Wait for ajax calls
+* `ca9a1908c` fix(license-csv): Handle candidate licenses
+* `bdaad200d` fix(license-csv): Update license if exists
+* `50558dcb5` fix(rest): Hide sensitive user info
+* `79d42b791` fix(wget_agent): Fix possible memory corruption and leaks
+* `a84db62f8` fix(wget_agent): Archivefs: Prevent possible buffer overflow
+* `1c5498f0c` fix(wget_agent): GetURL: Part 3 - Prevent possible buffer overflow
+* `afed499a3` fix(wget_agent): GetURL: Part 2 - Prevent possible buffer overflow
+* `1db296e2c` fix(wget_agent): GetURL: Part 1 - Prevent possible buffer overflow
+
+#### Infrastructure
+
+* `88d98224f` Revert "Merge pull request #1498 from siemens/feat/rest/provide-group-upload"
+* `a55e1e818` chore(wget_agent): Remove redndant code
+* `8cb62708e` chore(nomos): Rename test file
+* `12b7da1d7` chore(lib): Move agent list to common place
+* `f50ff3ca6` refac(wget_agent): DBLoadGold Don't open pipe before checking Fin
+* `7237b38b8` refac(wget_agent): DBLoadGold: Prevent possible buffer overflow
+* `d9beb426a` refac(wget_agent): Remove superfluous rc_system variable
+* `2244a9150` refac(wget_agent): Part 1 - Prevent possible buffer overflow
+* `dff78a713` refac(wget_agent): add function for destination of wget command
+
+#### Features
+
+* `c3dca9ae0` feat(migrate): Program to make file UTF-8 compatible
+* `b31ba2ff1` feat(unifiedReport): include DNU information in assesment summary
+* `80a184dad` feat(SWHagent): add status of request to DB
+* `e2b92bc15` feat(auth): Add external authentification feature
+* `8f4c63010` feat(ojo): Remove upper limit from license name
+* `2a6ab581b` feat(rest): Get the license list for upload
+* `164fb898f` feat(reuse): add reuse of report configuration settings
+* `28111118e` feat(SHagent): add new table column with Software Heritage Status
+* `d15c64d3b` feat(email-smtp-config): Add SMTP User field into Fossology email
+* `6f00ed38e` feat(rest): Add group context (groupName param) for REST Api calls
+* `9d981d2ce` feat(rest): Send upload summary
+* `f4b56e186` feat(upload): add feature to change permission of a all uploads in a folder
+* `77d4d8895` feat(decisions): add new decision type do not use
+* `74aa499d2` feat(ui): Place DataTables processing at top
+* `f3bb51eac` feat(software-heritage): Update the description in debian package
+* `a05ac660d` feat(software-heritage): Update the composer.lock file
+* `d9fdbd6c1` feat(softwareHeritage): Update software heritage details in debian package
+* `1e994d646` feat(softwareHeritageView): Show the details of software heritage in the license list page
+* `de6a46b85` feat(softwareHeritageView): Show the details of software heritage in the license list page
+* `71d785cda` feat(software-heritage): Make softwareHeritage dao function and add all
+* `abb463dd9` feat(software-heritage): Redundancy check while inserting softwareHeritage record
+* `6a9786544` feat(software-heritage): Make the ui section of software heritage
+* `0869f6c66` feat(software-heritage): Create a software heritage agent
+* `bf47edabd` feat(db): Make table of software heritage to store information
+* `034c48aa2` feat(dashboard): New dashboard pages with submenu
+* `9fe3d90d3` feat(unifiedReport): exclude scanner found copyrights of irrelevent files
+* `66a009d83` feat(conf): add obligations to consider a particular license for its obligation
+
+### 3.7.0 (Dec 11th 2019)
+
+This release adds important corrections to
+[3.7.0-RC1](https://github.com/fossology/fossology/releases/tag/3.7.0-rc1)
+
+### Contributors
+
+Credits go to the following persons for this release since
+[3.7.0-RC1](https://github.com/fossology/fossology/releases/tag/3.7.0-rc1):
+
+```
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Martin Michlmayr <tbm@cyrius.com>
+> Maximilian Huber <maximilian.huber@tngtech.com>
+> Michael C. Jaeger <michael.c.jaeger@siemens.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+```
+
+#### Corrections
+
+* `7cdc6b50a` fix(obligation): Move candidate licenses
+* `c74f2f4af` fix(obligation): Associate all lic with same name
+* `68094159b` fix(copyright): only scanner finding copyrights to unifiedreport
+* `23cb2f66a` fix(counter): Optimize clearing counter queries
+* `3885ac14d` fix(db): Optimize license browse queries
+* `96a4da4c3` refactor(report): edited global license code make it available for unified repot fix php codesniffer
+* `08ac47678` fix(decider): remove force dependency of nomos and monk for ojo decider add nomos dependency if required
+
+#### Infrastructure
+
+* `48c0caa14` chore(composer.json): updated symfony/dependency-injection version
+* `252bbaeb2` chore(installdeps): remove php-yaml from os level and add it to composer update composer.lock..
+* `2e158034e` docs(changelog): fix typo
+* `d85038afc` chore(unifiedReport): change phpword to a latest version update composer.lock with new changes
+* `a674aa9e3` chore(docker-compose): harmonize versions with sw360chores
+
+### 3.7.0-RC1 (Oct 24th 2019)
+
+This release was created in order to bring important changes for the REST endpoints to a release, so integration, for example with sw360, work on a release but not with latest master. Besides improvement is the extension of the decider agent to allow for decisions based on found SPDX-License-Identifier tags found by the ojo agent.
+
+#### Contributors
+
+There are many ways to commit to the source code, but if you count the commits to master, then the credits go to the following persons for this release since `3.6.0`:
+
+```
+> Andreas J. Reichel <andreas.reichel@tngtech.com>,
+> Anupam <anupam.ghosh@siemens.com>,
+> Bruno Cornec <bruno.cornec@hpe.com>,
+> Gaurav Mishra <mishra.gaurav@siemens.com>,
+> Maximilian Huber <maximilian.huber@tngtech.com>,
+> Michael <michael.c.jaeger@siemens.com>,
+> Onyemenam Ndubuisi <onyemenamndu@gmail.com>,
+> Piotr Pszczola <piotr.pszczola@orange.com>,
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>,
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>,
+> vivek kumar <vvksindia@gmail.com>,
+> abirw,
+```
+
+#### Features
+
+* `8bbe52d2b` feat(rest): add auto conclusion for ojo findings if
+* `af3f5738d` feat(license): Provide predefined license comments
+* `651a89088` feat(rest): Provide group ID during POST upload
+* `1a82e74a2` feat(decider): add auto conclusion for ojo findings if no contradiction with other findings
+* `71d1b7871` feat(rest): Provide API version as an endpoint
+* `808fa1db2` feat(rest): Upload packages from VCS
+* `fa2c27d16` feat(upload_vcs.html.twig) Use HTML <option selected>
+* `7887f02ad` feat(spdx): add user found copyrights to SPDX reports
+* `0505ca138` feat(upload_vcs.html.twig) make Git the default VCS rather than SVN
+* `8a5f14fd3` feat(pbconf): adapt to pb 0.15 and new fossology 3.3+
+* `5a9a341be` feat(api): Add pagination to jobs endpoint
+* `7a190c110` feat(api): Add OJO analysis to REST API
+* `12f064abe` feat(api): Get job status and ETA
+* `8989c1e17` feat(copyright): New directory scan and better JSON
+
+#### Corrections
+
+* `49fcfa05a` fix(rest): do not schedule decider if the option is empty
+* `1045cf4f6` fix(readmeoss): added edited global license text in readmeoss
+* `213222d31` fix(notices): updating notice file, debian copyright and spdx lic info
+* `9e524ef52` fix(rest): getUploads - invoke getRows with proper parameters
+* `416da0abc` fix: fix formatting as suggested in comment
+* `9a3f86d64` fix(groups): add validations and remove CONSTRAINTS
+* `e4e811f22` fix(geekyscan): make full job report link more descriptive closes #1346
+* `fcc5ef797` fix(deps): Added missing php-pgsql
+* `41fe2b4cd` fix(deps): Fix dependencies for Debian Buster
+* `f0348b64c` fix(buckets): Prevent possible buffer overflow/-run
+* `5f77fe45d` fix(ununpack): Fix compiler warnings for Debian 10/gcc8
+* `7beb859d1` fix(pkgagent): Avoid possible buffer overrun with strncpy
+* `359ae6101` fix(lib/c): Prevent possible buffer overflow/-run
+* `89e461394` fix(delagent): Fix possible buffer overrun
+* `7ee6b5955` fix(mimetype): Fix usage of strncpy, remove memset
+* `4a2829ef2` fix(testing/db/c): Prevent buffer overflows
+* `c1d165af6` fix(ununpack): Increase buffer sizes to prevent overflow
+* `7b62b6759` Attempting to fix bug in fo_nomos_license_list
+
+#### Infrastructure
+
+* `e559e388a` chore(control): Remove ninka from debian/control
+* `c4df71415` refactor(fossology): Refactor modularity
+* `8c3caef81` chore(composer): Bumping composer to 1.9.0
+* `ff1aa9fe3` chore(ninka): Remove Ninka packaging from master
+* `f0e56b1c5` test(licenseStdCommentDao): Add test cases for DAO
+
+### 3.6.0 (Sep 10th 2019)
+
+After two release candidates, making fixes for migration tests, unified report and
+load issues with tree-view, FOSSology is stable enough for a new release. The main features
+of the 3.6.0 release can be found under
+[RC1](https://github.com/fossology/fossology/releases/tag/3.6.0-rc1). Particular
+corrections after RC1 can be found under
+[RC2](https://github.com/fossology/fossology/releases/tag/3.6.0-rc2).
+
+Few interesting features in this release are:
+
+* A new agent named `ojo` (eye in Spanish) which does dedicated searches for the 'SPDX-License-Identifier' statements
+* Improved handling of manually added copyright statements to files
+* Improvements to the SPDX reporting, for example output also of comments
+* Calculating the SHA256 values for files from now on, because that is going to be used for integration of, for example, Software Heritage or Clearly defined
+
+#### Credits to 3.6.0
+
+From the git commit history, we have following contributors since 3.5.0:
+
+> @andi8086 <andreas.reichel@tngtech.com>,
+>
+> @ag4ums <anupam.ghosh@siemens.com>,
+>
+> @hastagAB <classicayush@gmail.com>,
+>
+> @chienphamvu <chienphamvu@gmail.com>,
+>
+> @ChristopheRequillart <christophe.requillart@atos.net>,
+>
+> @GMishx <mishra.gaurav@siemens.com>,
+>
+> @maxhbr <maximilian.huber@tngtech.com>,
+>
+> @mcjaeger <michael.c.jaeger@siemens.com>,
+>
+> @NicolasToussaint <nicolas1.toussaint@orange.com>,
+>
+> @PeterDaveHello <hsu@peterdavehello.org>,
+>
+> @rlintu <raino.lintulampi@bittium.com>,
+>
+> @sandipbhuyan <sandipbhuyan@gmail.com>,
+>
+> @shaheemazmalmmd <shaheem.azmal@siemens.com>,
+>
+> @tiegz <tieg@tidelift.com>,
+>
+> @vivekaindia <vvksindia@gmail.com>
+
+#### Corrections
+
+* `7a17bc7b6` fix(src/ununpack/agent/utils.c) update SHA256 of existing entries, patch proposed by @fogninid.
+* `bdd004e43` fix(src/ununpack/agent/utils.c) remove unused #define
+* `ef4820fcd` fix(ajaxExplorer): Reduce view creation
+* `f16c0eecb` fix(importReport): update easyRDF to a stable version
+
+### 3.6.0-RC2 (Aug 24th 2019)
+
+This pre-release adds important corrections to 3.6.0-RC2.
+
+#### Corrections
+
+* `f4c2de9df` fix(dbMigrate): Fix PHP syntax error
+* `69b03a368` fix(copyright): Check if empty decision sent
+* `83897a185` fix(obligation): add default value if the obligation type and classification is empty
+* `90b7f551f` feat(unifiedreport): add candidate licenses to the list of obligations
+* `49d901c02` fix(ojo): Remove call to omitEndingLineFeed on<0.6
+
+### 3.6.0-RC1 (Aug 12th 2019)
+
+This release brings a number of corrections (see below) and changes to the infrastructure. But it also adds nw features to FOSSology, including:
+
+* A new agent named `ojo` (eye in Spanish) which does dedicated searches for the 'SPDX-License-Identifier' statements
+* Improved handling of manually added copyright statements to files
+* Improvements to the SPDX reporting, for example output also of comments
+* Calculating the SHA256 values for files from now on, because that is going to be used for integration of, for example, Software Heritage or Clearly defined
+
+## Contributors
+
+There are many ways to commit to the source code, but if you count the commits to master, then the credits go to the following persons for this release:
+
+```
+ag4ums
+shaheemazmalmmd
+NicolasToussaint
+rlintu
+sandipbhuyan (GSOC 2019!)
+ChristopheRequillart
+GMishx
+hastagAB (GSOC 2019!)
+vivekaindia (GSOC 2019!)
+maxhbr
+mcjaeger
+PeterDaveHello
+tiegz
+chienphamvu
+```
+
+## Features
+
+* `21bd38428` feat(api): Cache Slim DI container
+* `840ba9b8d` feat(ci): Run travis jobs on Xenial
+* `62c86b865` feat(codesniffer): check php codesniffer through travis
+* `64878b7d7` feat(copyright): Show text findings in copyright
+* `1bbc203cc` feat(cp2foss): cp2foss prints out FolderPk as well
+* `cc16066ef` feat(datatable): add select plugin of datatable to change paging
+* `d3641939e` feat(db): Calculate the sha256 value of the uploading file and store it in database
+* `6b705539f` feat(db): Store SHA256 of the uploaded file
+* `7bc49eaec` feat(dbmigrate_3.5-3.6): add limit to process number of records
+* `4790c6353` feat(licenseRef): add new functionality to add new licenses and update existing licenses from SPDX
+* `d8076a088` feat(licenseref): convert licenseref file from sql to json format
+* `5ab3fe831` feat(licenses): nomos merge error fixed
+* `020595190` feat(licenses): SPDX identifier detection modified to include AND and OR options
+* `84cbbbbea` feat(ojo): New license scanner for SPDX
+* `fbfdc79fc` feat(spdx2): ignore files with no info in SPDX reports
+* `92cbbc2a0` feat(spdx2): SPDX output does not yet show license comments
+* `e514dc6d9` feat(ui): Add user description of available user in group management page
+* `dcc74a9be` feat(ui): Show both user description and user name in 'Assigned to' list
+* `57493d0f1` feat(unifiedReport): separate user and scanner findings of copyrights
+* `f3c9e3df7` feat(unifiedReport): update phpword version from v0.13.* to v0.16.*
+
+## Corrections
+
+* `d528e4fb4` fix(obligations): fix UI and connected db to dropdown menu
+* `f65397495` fix(admin-license-file): Fix update conclusion to self
+* `de2f76fd0` fix(advicelicense): fix double select of risk in advice license remove select2 initialisation in macro
+* `db9f8c8fa` fix(api): Adhere to specification
+* `5ef99c95b` fix(build): Fix clean build from all dirs
+* `61f06e348` fix(codesniffer): Fix errors reported by phpcs
+* `1d1b94fbb` fix(copyright): Fix pagination of copyright
+* `d6d2fabe3` fix(copyright): fix php notices in copyright hist view
+* `53849883c` fix(dbmigrate_3.5-3.6): add single quotes to string and calculate actual minutes
+* `0943d97ad` fix(download): Fix a call to non-static function
+* `4fb3dd1f0` fix(init.d): Implement missing function
+* `1a961298f` fix(migration): Make pfile sha calculation separate script
+* `0c6d64741` fix(nomos): nomos crash (#1337)
+* `9705b2d64` fix(pfile): Fix warnings in ununpack and wget
+* `75fc1252f` fix(pfile): SHA256 is still optional
+* `fd1dc495a` fix(reportConf): include correct array from  to fix report conf closes #1377
+* `d6f62de15` fix(showjob): General fix after refactor
+* `9659ac1b2` fix(showjobs): Check empty for allusers before updating
+* `c2585dcb9` fix(showjobs): Fix the pagination
+* `3f2117c46` fix(spdx2): remove dependency from upload table
+* `de64361f7` fix(strings): correct typo
+* `ad9c6d7bc` fix(UI): increased the size of upload to reuse window in upload files
+* `40defdb6b` fix(ui): Show license findings for folder with single child
+* `65896cd3e` fix(unifiedreport): fixed issue with irrelevant file display
+* `5361fefd2` fix(unifiedReport): remove php warnings from job log
+* `453da1f13` fix(upload): remove dependency from upload table for SPDX shift the report info to new conf page
+* `e304e4e39` fix(vscode): Add vscode editor file to gitignore
+* `b6fdf1121` fix(process): Fix the PHP agent installation
+
+## Infrastructure and Testing
+
+* `3bccc4078` test(ojo): Test cases
+* `dcc429edc` chore(debian): Fix lintian erros and warnings
+* `82653993d` chore(decisions): Store SHA256 of text findings
+* `c2a22fb4a` chore(fo-installdeps): drop unsupported distros
+* `3b6a06e28` chore(travis): Disable unnecessary addon to speed up tests
+* `13e2cfd39` chore(travis): Enable ccache to speed up tests
+* `df793036e` chore(travis): Enable composer cache to speed up tests
+* `34b8784e0` chore(travis): Enable Fast-Finish to retrieve build result faster
+* `0fc133583` chore(travis): Fix Coveralls execution path
+* `a45fc6965` chore(travis): Fix Coveralls output json file not writable issue
+* `f1676582d` chore(travis): Leverage yaml anchor for phpunit
+* `b576acbdc` chore(travis): Remove deprecated Travis CI `sudo` config
+* `fcff243fd` chore(travis): Run PHPUnit via phpdbg to speed up tests
+* `90e7bdfe4` chore(travis): Set pipefail in Travis CI PHPUnit on PHP 7.0
+* `e5f9651c6` chore(travis): Show ccache bins & statistics summary
+* `2d24945f2` chore(version): Force the VERSION variable
+
+## Refactorings
+
+* `a7db0edd6` refac(showjobs): Refactor code to send JSON
+
+### 3.5.0 (Apr 11th 2019)
+
+After two release candidates, making fixes for REST API installation and various
+migration tests, FOSSology is stable enough for a new release. The main features
+of the 3.5.0 release can be found under
+[RC1](https://github.com/fossology/fossology/releases/tag/3.5.0-rc1). Particular
+corrections after RC1 can be found under
+[RC2](https://github.com/fossology/fossology/releases/tag/3.5.0-rc2).
+
+Mainly 3.5.0 adds more documentation, infrastructure improvements and support
+for brand new FOSSology REST API.
+
+Moreover, new functionality has improved JSON output for nomos and restructured
+license detection for nomos. Last but not the least, FOSSology now have
+capabilities to ignore files specific to version control systems from the
+scanning improving scan times.
+
+#### Credits
+
+From the git commit history, we have following contributors since 3.4.0:
+
+> @ag4ums,
+> @ChristopheRequillart,
+> @AMDmi3,
+> @GMishx,
+> @mcieno,
+> @max-wittig,
+> @maxhbr,
+> @rlintu,
+> @sandipbhuyan,
+> @shaheemazmalmmd
+
+#### Corrections
+
+* `9c1bf18a9` : chore(docker): bump docker base image to stretch
+
+#### Refactorings, Infrastructure
+
+* `8df86b308` : fixup! chore(docker): bump docker base image to stretch
+
+### 3.5.0-RC2 (Apr 3rd 2019)
+
+This pre-release adds important corrections to 3.5.0-RC1.
+
+#### Corrections
+
+* `262634d99` fix(apache): Add rewrite string to apache conf
+* `ba2b25ba6` fix(git): Add ubuntu log file to gitignore
+
+### 3.5.0-RC1 (Mar 29th 2019)
+
+#### Features
+* `e63c17534` : feat(tokenExp): Make token max validity configurable
+* `16762d5a8` : feat(rest): Use bearer auth instead of basic
+* `229860e6f` : feat(nomos): Fix the JSON output
+* `e72db0331` : feat(scm): correct  in cli/cp2foss.php and add comment in agent/utils.c
+* `3b72db061` : feat(scm): ignore scm data when scanning
+* `0f277a1cb` : chore(docker): update dockerignore
+* `a4f136ab9` : feat(trac): Fix typo `flase` instead of `false`
+* `8e314a12b` : feat(licenseref): add new exception text to fossology database
+* `854817d74` : feat(report): Added new endpoint to create reports
+* `62b25d07d` : feat(restapi): Post upload and get folders path
+* `0f5991a74` : chore(restapi): Use Slim inplace of Silex
+* `93dbe3df9` : feat(licenses): creative commons detection rewritten. Bug fixes.
+* `94b0f1ee3` : feat(license-admin): Show obligations for license
+* `3b3eb3f5e` : refactor(maintagent): refactor maintagent code
+* `c46cb3bef` : feat(reused-info): Show reused package in info page
+* `47307a87e` : docs(lib-php): Doxygen comments for BusinessRules
+* `388bd2245` : refactor(view-page): Use Twig templates for info page
+* `e47676311` : feat(maintagent): add feature to delete orphaned files from database
+* `041b5770c` : docs(lib-php): Doxygen comments for Auth namespace
+* `c9cc5cd01` : docs(lib-php): Added doxygen comments for Application namespace
+* `ba2193c3b` : docs(lib-php): Added doxygen comment for Agent class
+* `8805b55ca` : docs(libphp): Added doxygen comments for PHP common lib
+* `8fda5381b` : docs(libcpp): Added doxygen comments for CPP library
+* `a9e862baf` : test(nomos): Added test case for EPL in pom.xml
+* `9a30827ee` : docs(templates): Fix minor typos in templates
+* `e1608f9e6` : chore(fo-postinstall.in): Give better notification
+* `b6645af42` : feat(licenseRef): check flag before updating the license text
+* `6b6dbb186` : feat(copyright): select and replace copyright in bulk mode
+* `34661939a` : docs(restapi): Option to create API documentation
+* `af6ba64f9` : chore(common-job): Remove unnecessery changes
+* `87cb1104f` : chore(restapi): Change the path for REST classes
+* `bea3cf48c` : chore(restapi): Allocate namespaces to the files
+* `07ab61055` : replay 6a1f712, 45f02535 and 8c3a710
+* `7aa12b0a7` : add auth
+* `8fb000fef` : feat(api): add fossology openapi specification
+* `ec5ebeb99` : feat(select2): Use select2 lib for drop-downs
+* `ab40ea0f8` : feat(pages): Deploy FOSSology GitHub pages using Travis
+* `8fc071da7` : chore: add best practices badge
+
+#### Corrections
+
+* `ec9409ab1` : fix(restApi): Fix for missing plugins
+* `5e9433d29` : fix(maintagent): do not delete decisions with scope 1
+* `4a3c7cb01` : fix(Vagrantfile): Enable mod rewrite in vagrant for REST
+* `14e1a4517` : fix(api): Change back to version 1, remove trailing '/'
+* `7623c4436` : fix(schema): Use open api 3.0.0 to describe API documentation
+* `93dbe3df9` : feat(licenses): creative commons detection rewritten. Bug fixes.
+* `3b01a5333` : fix(fo-installdeps): Add php-mbstring to build deps
+* `fa2378625` : fix(delagent): delete existing clearing events using delagent
+* `6e26fdde1` : fix(scheduler): add check for empty results from query
+* `d9fd5fe4b` : fix(filter): Update the filter in license browser
+* `7e6506355` : fix(nomos): Detect EPL-1.0
+* `78b41aee3` : fix(constraints): Also clean old constraints
+* `36e22784c` : fix(licenses): restore regexp POSIX compatibility
+* `2c71518ae` : fix(nomos): Fix license string checks
+* `191abff84` : fix(nomos): Use space as separator
+* `47b71300f` : fix(restapi): Implement TODOs
+* `a115b460a` : fix(restapi): Use FOSSology functions
+* `11486eea9` : fix(response): Use JsonResponse instead of plain Response
+* `0ccea49a5` : fix(libschema): Remove schema to match PHP strings
+* `b71c25696` : fix(bulk-license): Resize the dropdown for bluk license
+* `e8bc89878` : fix(web.postinst): Reflect changes from php-conf-fix
+* `7e3e9b081` : fix(ScheduleAgent): Prevent multiple agent schedules
+* `d05d30aa9` : fix(agent): Reschedule failed agents
+
 
 ### 3.4.0 (Nov 29th 2018)
 
@@ -23,7 +1698,7 @@ Looking into the git commit history, it shows you all the users who have contrib
 
 #### Corrections
 
-* `ee8b69c` fix(constraints): Remove more faulty constraints    
+* `ee8b69c` fix(constraints): Remove more faulty constraints
 * `c6743d5` fix(unifiedreport): add default count as 0 in result of scan
 
 #### Refactorings, Infrastructure
@@ -38,7 +1713,7 @@ This pre-release adds important corrections to 3.4.0-RC1 and also the commit to 
 
 #### Corrections
 
-* `b6cb10d` fix(dashboard): change comparison statements for postgres 
+* `b6cb10d` fix(dashboard): change comparison statements for postgres
 * `5c463d1` fix(constraints): Remove faulty constraints
 * `6b017b1` fix(resequence): Check the column name from DB
 * `1983b29` fix(tests): fix PHPCS and phpunit testcases for deciderjob
@@ -47,7 +1722,7 @@ This pre-release adds important corrections to 3.4.0-RC1 and also the commit to 
 #### Refactorings, Infrastructure
 
 * `99a56a1` fix(postgresql): Fixed postgresql version to 9.6 and use a volume
-* `0ce85bd` chore(copyright): Remove DISABLE_JSON macro 
+* `0ce85bd` chore(copyright): Remove DISABLE_JSON macro
 * `31be206` feat(copyright): Use package based dependency for json
 
 #### Documentation
@@ -71,7 +1746,7 @@ This pre-release adds important corrections to 3.4.0-RC1 and also the commit to 
 * `346546d` feat(docker): Replaced standalone Dockerfile with docker-compose. Changes: .dockerignore: * Added some unrelated files for docker.
 * `058a41b` feat(emailConfig): Move config settings to sysconfig table
 * `215b6d8` feat(fo-installdeps): Drop support for End-of-Life distributions.
-* `7b804e1` feat(fo-postinstall): Added flag to omit all database operations. 
+* `7b804e1` feat(fo-postinstall): Added flag to omit all database operations.
 * `063d5df` feat(fo-postinstall): Implemented best practises for bash script.
 * `e9345a2` feat(fossology): Support for Bionic Beaver
 * `d89c334` feat(info): change tag from input to textarea refactor ShowReportInfo add missing </tr>
@@ -395,7 +2070,7 @@ This pre-release adds important corrections to 3.4.0-RC1 and also the commit to 
 #### Corrections
 
 * fix(ninka): ninka needs a new dependency
-* fix(docker): use a simpler Dockerfile for standalone build 
+* fix(docker): use a simpler Dockerfile for standalone build
 * fix(browsefolder): added a check to see, if the folder is accessible
 * fix(copyright): invalid pointer to regex
 * fix(copyrightandeccview): added tooltip next to description
@@ -415,7 +2090,7 @@ This pre-release adds important corrections to 3.4.0-RC1 and also the commit to 
 * fix(user-creation): email needs to be unique and required
 * fix(www): correct ETA in all job view
 * fix(www): PHP warnings
-* fix(cleanup): remove HACKING, install_locations.xls, build.xml 
+* fix(cleanup): remove HACKING, install_locations.xls, build.xml
 * fix(spdx): typo in template and bump LicenseListVersion
 * fix(spdx): add files with no license found to generated output format
 
@@ -454,87 +2129,87 @@ This pre-release adds important corrections to 3.4.0-RC1 and also the commit to 
 
 #### Refactoring
 
-* refactor(ui) rewrite upload pages 
-* refactor(ui) rewrite/refactor delagent and fix #273 
-* refactor(ui) escape strings which become HTML or SQL 
+* refactor(ui) rewrite upload pages
+* refactor(ui) rewrite/refactor delagent and fix #273
+* refactor(ui) escape strings which become HTML or SQL
 
 #### New Larger Features
 
 * New Dockerfile also used for Docker Hub, including composed containers with separate DB server
 * DEP5 / debian-copyright file generation
-* Adding tag-value format for the SPDX2 generation 
+* Adding tag-value format for the SPDX2 generation
 * More efficient UI for bulk scan with multiple licenses at the same time
 
 #### New Smaller Features
 
 * feature(CONTRIBUTING.md) create initial CONTRIBUTING.md to support github feature
 * feature(database) add reindexing option to maintenance agent, as turned out necessary
-* feature(database) add some indexes and clusters to database 
+* feature(database) add some indexes and clusters to database
 * feature(infrastructure) add coverage coverage, adding badge to README.md
-* feature(license-list) improve UI for allowing more agents 
-* feature(spdx-tools) install spdx-tools script for vagrant and travis 
-* feature(ui) add security check to `user-edit.php` 
-* feature(ui) allow users to move and copy their uploads 
+* feature(license-list) improve UI for allowing more agents
+* feature(spdx-tools) install spdx-tools script for vagrant and travis
+* feature(ui) add security check to `user-edit.php`
+* feature(ui) allow users to move and copy their uploads
 * feature(vagrant) increase upload size setting
-* feature(vagrant) support proxy from host_ip:3128 
+* feature(vagrant) support proxy from host_ip:3128
 
 #### Corrections on the (PHP) UI
 
-* fix(ui) fix ui-view error reporting [#615] 
-* fix(ui) fo_copyright_list - bad error checking, - bad error message #277 and #276 
-* fix(ui) handled exception in common-auth.php for incorrect username 
-* fix(ui) mark decisions as irrelevant from file tree [edit] option for uploads 
+* fix(ui) fix ui-view error reporting [#615]
+* fix(ui) fo_copyright_list - bad error checking, - bad error message #277 and #276
+* fix(ui) handled exception in common-auth.php for incorrect username
+* fix(ui) mark decisions as irrelevant from file tree [edit] option for uploads
 * fix(ui) password handling for adding users improved
-* fix(ui) #635: add parameter to URLs for showjobs 
-* fix(ui) only admin should be able to create groups 
-* fix(ui) repair error, which emerges in PHP <= 5.4 
-* fix(ui) repair issue mentioned in #660 
-* fix(ui) repair prepared statement in `admin-license-file.php` 
-* fix(ui-download) add $filenameFallback solve #589 
+* fix(ui) #635: add parameter to URLs for showjobs
+* fix(ui) only admin should be able to create groups
+* fix(ui) repair error, which emerges in PHP <= 5.4
+* fix(ui) repair issue mentioned in #660
+* fix(ui) repair prepared statement in `admin-license-file.php`
+* fix(ui-download) add $filenameFallback solve #589
 * fix(ui) added branch name and separated version into string
 * fix(license-browser) menu order with ECC and other corrected
 * fix(upload-browser) visibility issues with selection of "entire folder"
 
 #### Corrections on the Application Functionality
 
-* fix(agents) fossupload_status print usage on error or --help 
+* fix(agents) fossupload_status print usage on error or --help
 * fix(agents) repair the calls of `heartbeat` #560
-* fix(composer) replace hash with correct one 
-* fix(copyright) fixing listing of copyrights at Readme export 
-* fix(copyright) increase maximum length of TLD's 
+* fix(composer) replace hash with correct one
+* fix(copyright) fixing listing of copyrights at Readme export
+* fix(copyright) increase maximum length of TLD's
 * fix(copyrights) removed extra where condition which leads to miss copyright statements
-* fix(dashboard) missing $this-> in method call 
-* fix(delagent) any user who is not the owner can delete any folder via /delagent -F 
-* fix(delagent) delagent error message wording 
+* fix(dashboard) missing $this-> in method call
+* fix(delagent) any user who is not the owner can delete any folder via /delagent -F
+* fix(delagent) delagent error message wording
 * fix(monk) fix one shot functionality
 * fix(nomos) #340 correct path output on command line use
-* fix(nomos) Remove extra spaces from the end of usage messages 
-* fix(reuse) Corrected lrb_ori to lrb_origin in bulkreuser 
-* fix(security) SQL injection vulnerability in read_permission 
+* fix(nomos) Remove extra spaces from the end of usage messages
+* fix(reuse) Corrected lrb_ori to lrb_origin in bulkreuser
+* fix(security) SQL injection vulnerability in read_permission
 * fix(showjobs) correct view  for `&upload=-1` in the URL
 * fix(spdx2) Remove control characters from SPDX output #591
-* fix(spdx2) fix several bugs in DEP5 and SPDX2 reports 
-* fix(ununpack) remove extraneous parentheses 
-* fix(wget_agent) fix issue #298 
-* fix(wget_agent) fix issue #298 
+* fix(spdx2) fix several bugs in DEP5 and SPDX2 reports
+* fix(ununpack) remove extraneous parentheses
+* fix(wget_agent) fix issue #298
+* fix(wget_agent) fix issue #298
 
 #### Corrections to the Database, Deployment, Tests and Framework
 
-* fix(infrastructure) agent_desc not being initialized in install 
-* fix(infrastrcuture) add to vagrant support for ninka 
-* fix(infrastructure) Added DTD to index file to prevent phpunit test case failure 
-* fix(infrastructure) add fo_chmod and fo_folder to .gitignore 
-* fix(infrastructure) emoved SVN_REV from files and replaced Commit with commit_hash #331 
-* fix(infrastructure) error which emerges in PHP <= 5.4 
+* fix(infrastructure) agent_desc not being initialized in install
+* fix(infrastrcuture) add to vagrant support for ninka
+* fix(infrastructure) Added DTD to index file to prevent phpunit test case failure
+* fix(infrastructure) add fo_chmod and fo_folder to .gitignore
+* fix(infrastructure) emoved SVN_REV from files and replaced Commit with commit_hash #331
+* fix(infrastructure) error which emerges in PHP <= 5.4
 * fix(infrastructure) improved protocol inference #580
-* fix(infrastructure) Missing newline in fossupload_status utility 
-* fix(infrastructure) Missing newlines in fo_chmod error messages 
-* fix(infrastructure) reading of .fossology.rc for not parsing values 
-* fix(infrastructure) remove duplicate test and fix #579 
-* fix(infrastructure) SVN_REV and added branch name in version file #331 
-* fix(infrastructure) Write correct version of DB-scheme to DB 
-* fix(travis) `apt-get install -qq ...` times out 
-* fix(travis) use debian perl instead of cpan 
+* fix(infrastructure) Missing newline in fossupload_status utility
+* fix(infrastructure) Missing newlines in fo_chmod error messages
+* fix(infrastructure) reading of .fossology.rc for not parsing values
+* fix(infrastructure) remove duplicate test and fix #579
+* fix(infrastructure) SVN_REV and added branch name in version file #331
+* fix(infrastructure) Write correct version of DB-scheme to DB
+* fix(travis) `apt-get install -qq ...` times out
+* fix(travis) use debian perl instead of cpan
 
 #### Closed Issues for this Release
 
@@ -709,7 +2384,7 @@ See the RC1 notes below for what changed.
 * Fix special case where Freetype license was missed
 * Fix MIT that should have been MIT-style
 * Fix special case of missed CPL-1.0
-* Fix cases of missed file references 
+* Fix cases of missed file references
 * Add LIBGCJ license
 * Add WordNet (was being detected as MIT/Princeton license
 * Add Interbase-1.0 license

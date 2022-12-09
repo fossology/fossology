@@ -1,1 +1,3 @@
-SPDX-License-Identifier: TCP-wrappers
+# REUSE-IgnoreStart
+SPDX-License-Identifier: foo-short-name AND bar-short-name OR TCP-wrappers
+# REUSE-IgnoreEnd

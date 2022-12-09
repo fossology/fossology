@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2008-2011 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 use Fossology\Lib\Dao\FolderDao;
 
 class folder_create extends FO_Plugin
@@ -44,23 +33,20 @@ class folder_create extends FO_Plugin
   public function create($parentId, $newFolder, $desc)
   {
     $folderName = trim($newFolder);
-    if (empty ($folderName))
-    {
+    if (empty($folderName)) {
       return (0);
     }
-    
+
     /* @var $folderDao FolderDao*/
     $folderDao = $GLOBALS['container']->get('dao.folder');
 
     $parentExists = $folderDao->getFolder($parentId);
-    if (!$parentExists)
-    {
+    if (! $parentExists) {
       return (0);
     }
 
     $folderWithSameNameUnderParent = $folderDao->getFolderId($folderName, $parentId);
-    if (!empty ($folderWithSameNameUnderParent))
-    {
+    if (! empty($folderWithSameNameUnderParent)) {
       return 4;
     }
 
@@ -77,18 +63,14 @@ class folder_create extends FO_Plugin
     $ParentId = GetParm('parentid', PARM_INTEGER);
     $NewFolder = GetParm('newname', PARM_TEXT);
     $Desc = GetParm('description', PARM_TEXT);
-    if (!empty ($ParentId) && !empty ($NewFolder))
-    {
+    if (! empty($ParentId) && ! empty($NewFolder)) {
       $rc = $this->create($ParentId, $NewFolder, $Desc);
-      if ($rc == 1)
-      {
+      if ($rc == 1) {
         /* Need to refresh the screen */
         $text = _("Folder");
         $text1 = _("Created");
         $this->vars['message'] = "$text " . htmlentities($NewFolder) . " $text1";
-      }
-      else if ($rc == 4)
-      {
+      } else if ($rc == 4) {
         $text = _("Folder");
         $text1 = _("Exists");
         $this->vars['message'] = "$text " . htmlentities($NewFolder) . " $text1";
@@ -101,5 +83,6 @@ class folder_create extends FO_Plugin
     return $this->renderString("admin-folder-create-form.html.twig",$formVars);
   }
 }
-$NewPlugin = new folder_create;
+
+$NewPlugin = new folder_create();
 $NewPlugin->Initialize();

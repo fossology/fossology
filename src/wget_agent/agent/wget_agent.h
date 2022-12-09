@@ -1,19 +1,8 @@
-/*********************************************************************
-Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011-2014 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *********************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /*
  * \file wget_agent.h
@@ -47,19 +36,20 @@ typedef struct stat stat_t;
 
 #include "../../ununpack/agent/checksum.h"
 
-#define MAXCMD  2048
+#define URLMAX   3072
+#define STRMAX   2048
 #define FILEPATH 2048
 
-extern char SQL[MAXCMD];
+extern char SQL[STRMAX];
 
 /* for the DB */
 extern PGconn *pgConn;
 /* input for this system */
 extern long GlobalUploadKey;
-extern char GlobalTempFile[MAXCMD];
-extern char GlobalURL[MAXCMD];
-extern char GlobalParam[MAXCMD];
-extern char GlobalType[MAXCMD];
+extern char GlobalTempFile[STRMAX];
+extern char GlobalURL[URLMAX];
+extern char GlobalParam[STRMAX];
+extern char GlobalType[STRMAX];
 extern int GlobalImportGold; /* set to 0 to not store file in gold repository */
 extern gid_t ForceGroup;
 

@@ -1,20 +1,9 @@
 /*
- * Copyright (C) 2014, Siemens AG
- * Author: Daniele Fognini
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- */
+ SPDX-FileCopyrightText: © 2014 Siemens AG
+ Author: Daniele Fognini
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 #ifndef DATABASE_HPP
 #define DATABASE_HPP
@@ -71,7 +60,7 @@ public:
   bool createTables() const;
   bool insertInDatabase(DatabaseEntry& entry) const;
   bool insertNoResultInDatabase(long agentId, long pFileId) const;
-  std::vector<unsigned long> queryFileIdsForUpload(int agentId, int uploadId);
+  std::vector<unsigned long> queryFileIdsForUpload(int agentId, int uploadId, bool ignoreFilesWithMimeType);
 
 private:
   /**

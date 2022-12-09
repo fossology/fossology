@@ -1,19 +1,8 @@
-/* **************************************************************
-Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-************************************************************** */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 #ifndef AGENT_H_INCLUDE
 #define AGENT_H_INCLUDE
@@ -98,6 +87,7 @@ typedef struct
     char* version_source;       ///< the machine that reported the version information
     char* version;              ///< the version of the agent that is running on all hosts
     int valid;                  ///< flag indicating if the meta_agent is valid
+    int run_count;              ///< the count of agents in running state
 } meta_agent_t;
 
 /**
@@ -179,5 +169,8 @@ void kill_agents(scheduler_t* scheduler);
 
 int  is_meta_special(meta_agent_t* ma, int special_type);
 int  is_agent_special(agent_t* agent, int special_type);
+
+void meta_agent_increase_count(meta_agent_t*);
+void meta_agent_decrease_count(meta_agent_t*);
 
 #endif /* AGENT_H_INCLUDE */

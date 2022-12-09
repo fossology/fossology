@@ -1,12 +1,11 @@
 #!/bin/bash
 # FOSSology docker-entrypoint script
-# Copyright Siemens AG 2016, fabio.huser@siemens.com
-# Copyright TNG Technology Consulting GmbH 2016, maximilian.huber@tngtech.com
+# SPDX-FileCopyrightText: © 2016 Siemens AG
+# SPDX-FileCopyrightText: © fabio.huser@siemens.com
+# SPDX-FileCopyrightText: © 2016 TNG Technology Consulting GmbH
+# SPDX-FileCopyrightText: © maximilian.huber@tngtech.com
 #
-# Copying and distribution of this file, with or without modification,
-# are permitted in any medium without royalty provided the copyright
-# notice and this notice are preserved.  This file is offered as-is,
-# without any warranty.
+# SPDX-License-Identifier: FSFAP
 #
 # Description: startup helper script for the FOSSology Docker container
 
@@ -58,7 +57,7 @@ echo
 echo 'Fossology initialisation complete; Starting up...'
 echo
 if [[ $# -eq 0 ]]; then
-  /etc/init.d/fossology start
+  /etc/init.d/cron start
   /usr/local/share/fossology/scheduler/agent/fo_scheduler \
     --log /dev/stdout \
     --verbose=3 \
@@ -70,6 +69,7 @@ elif [[ $# -eq 1 && "$1" == "scheduler" ]]; then
     --verbose=3 \
     --reset
 elif [[ $# -eq 1 && "$1" == "web" ]]; then
+  /etc/init.d/cron start
   exec /usr/sbin/apache2ctl -e info -D FOREGROUND
 else
   exec "$@"

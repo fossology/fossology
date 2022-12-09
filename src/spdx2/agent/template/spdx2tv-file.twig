@@ -1,8 +1,6 @@
-{# Copyright 2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
 
-   Copying and distribution of this file, with or without modification,
-   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-   This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 
 ##File
@@ -11,6 +9,7 @@ FileName: {{ fileName }}
 SPDXID: SPDXRef-item{{ fileId }}
 {# FileType: OTHER #}
 FileChecksum: SHA1: {{ sha1 | lower }}
+FileChecksum: SHA256: {{ sha256 | lower }}
 FileChecksum: MD5: {{ md5 | lower }}
 {% if isCleared %}
 {% if concludedLicenses|default is empty %}
@@ -20,6 +19,12 @@ LicenseConcluded: {{ concludedLicense }}
 {% endif%}
 {% else %}
 LicenseConcluded: NOASSERTION
+{% endif %}
+{% if licenseCommentState %}
+{% if licenseComment is not empty %}
+LicenseComments: <text>{{ licenseComment |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                                         |replace({'\f':''}) }} </text>
+{% endif %}
 {% endif %}
 {% if scannerLicenses|default is empty %}
 LicenseInfoInFile: NOASSERTION

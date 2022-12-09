@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Proxy;
@@ -28,7 +17,7 @@ class UploadTreeViewProxyTest extends \PHPUnit\Framework\TestCase
   /** @var ItemTreeBounds|M\MockInterface */
   private $itemTreeBounds;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->itemTreeBounds = M::mock(ItemTreeBounds::class);
   }
@@ -132,12 +121,10 @@ class UploadTreeViewProxyTest extends \PHPUnit\Framework\TestCase
     assertThat($uploadTreeView->getDbViewQuery(), is("SELECT * FROM foo WHERE upload_fk = 5 AND ((ufile_mode & (3<<28))=0) AND pfile_fk != 0 AND lft BETWEEN 22 AND 43"));
   }
 
-  /**
-   * @expectedException \InvalidArgumentException
-   * @expectedExceptionMessage constraint bar is not defined
-   */
   public function testExcpetionWithUnknownConstraint()
   {
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage("constraint bar is not defined");
     $this->itemTreeBounds->shouldReceive("getUploadTreeTableName")->once()->withNoArgs()->andReturn("foo");
 
     new UploadTreeViewProxy($this->itemTreeBounds, array('bar'));

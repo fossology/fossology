@@ -1,23 +1,13 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use PHPUnit\Runner\Version as PHPUnitVersion;
 
 class MonkCliTest extends \PHPUnit\Framework\TestCase
 {
@@ -36,14 +26,14 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
     );
   }
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDataDir = dirname(__DIR__)."/testlicenses";
     $this->testDb = new TestPgDb("monkCli".time());
     $this->dbManager = $this->testDb->getDbManager();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;
@@ -69,8 +59,8 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
 
     $agentName = "monk";
 
-    $agentDir = dirname(dirname(__DIR__));
-    $execDir = __DIR__;
+    $agentDir = dirname(__DIR__,4).'/build/src/monk';
+    $execDir = $agentDir.'/agent';
     system("install -D $agentDir/VERSION-monk $sysConf/mods-enabled/$agentName/VERSION");
 
     foreach ($files as $file) {
@@ -100,6 +90,7 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
   {
     $this->testDb->createPlainTables(array('license_ref'),false);
     $this->testDb->createSequences(array('license_ref_rf_pk_seq'),false);
+    $this->testDb->alterTables(array('license_ref'),false);
 
     $this->testDb->insertData_license_ref(1<<10);
   }
@@ -115,7 +106,12 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
 
     $this->assertEquals(0, $retCode, 'monk failed: '.$output);
 
-    $this->assertRegExp("/found full match between \".*expectedFull\\/Apache-2.0\" and \"Apache-2\\.0\" \\(rf_pk=[0-9]*\\); matched: 0\\+10272\n/", $output);
+    $pattern = "/found full match between \".*expectedFull\\/Apache-2.0\" and \"Apache-2\\.0\" \\(rf_pk=[0-9]*\\); matched: 0\\+10456\n/";
+    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+      $this->assertMatchesRegularExpression($pattern, $output);
+    } else {
+      $this->assertRegExp($pattern, $output);
+    }
   }
 
   private function extractSortedLines($output) {
@@ -145,7 +141,11 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
       $regex = preg_replace("/\\\$fileName/", $fileName, $regex);
       $regex = preg_replace("/\\\$licenseName/", $licenseName, $regex);
 
-      $this->assertRegExp($regex, $line);
+      if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+        $this->assertMatchesRegularExpression($regex, $line);
+      } else {
+        $this->assertRegExp($regex, $line);
+      }
     }
   }
 
@@ -209,7 +209,11 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
 
     $expectedOutputRgx = '/Usage:.*/';
 
-    $this->assertRegExp($expectedOutputRgx,$output);
+    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+      $this->assertMatchesRegularExpression($expectedOutputRgx, $output);
+    } else {
+      $this->assertRegExp($expectedOutputRgx, $output);
+    }
   }
 
   /**

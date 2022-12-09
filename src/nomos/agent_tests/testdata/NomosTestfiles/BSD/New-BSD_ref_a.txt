@@ -1,0 +1,12 @@
+Code in:
+lib/protobuf-java.jar
+
+Protocol Buffers
+URL: http://code.google.com/p/protobuf/
+Version: 2.3.0
+License: New BSD License
+
+Description: Supporting libraries for protocol buffers,
+an encoding of structured data.
+
+Local Modifications: None

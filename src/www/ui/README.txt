@@ -1,4 +1,6 @@
-Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+SPDX-FileCopyrightText: © 2008 Hewlett-Packard Development Company, L.P.
+
+SPDX-License-Identifier: GPL-2.0-only
 
 Plugins have prefixes for maintenance convenience.
   "core-"  :: These are core plugins that are used by other plugins.

@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- * Copyright (C) 2014-2015,2018 Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2014-2015, 2018 Siemens AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\DeciderJob\UI\DeciderJobAgentPlugin;
 use Fossology\Lib\Auth\Auth;
@@ -54,26 +43,23 @@ class ChangeLicenseBulk extends DefaultPlugin
   protected function handle(Request $request)
   {
     $uploadTreeId = intval($request->get('uploadTreeId'));
-    if ($uploadTreeId <= 0)
-    {
-      return new JsonResponse(array("error" => 'bad request'), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+    if ($uploadTreeId <= 0) {
+      return new JsonResponse(array("error" => 'bad request'), JsonResponse::HTTP_BAD_REQUEST);
     }
 
-    try
-    {
+    try {
       $jobQueueId = $this->getJobQueueId($uploadTreeId, $request);
-    } catch (Exception $ex)
-    {
+    } catch (Exception $ex) {
       $errorMsg = $ex->getMessage();
       return new JsonResponse(array("error" => $errorMsg), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
     }
     ReportCachePurgeAll();
-    
+
     return new JsonResponse(array("jqid" => $jobQueueId));
   }
 
   /**
-   * 
+   *
    * @param int $uploadTreeId
    * @param Request $request
    * @return int $jobQueueId
@@ -84,15 +70,13 @@ class ChangeLicenseBulk extends DefaultPlugin
     $uploadId = intval($uploadEntry['upload_fk']);
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
-    
-    if ($uploadId <= 0 || !$this->uploadDao->isAccessible($uploadId, $groupId))
-    {
+
+    if ($uploadId <= 0 || !$this->uploadDao->isAccessible($uploadId, $groupId)) {
       throw new Exception('permission denied');
     }
 
     $bulkScope = $request->get('bulkScope');
-    switch ($bulkScope)
-    {
+    switch ($bulkScope) {
       case 'u':
         $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
         $topBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTable);
@@ -100,8 +84,9 @@ class ChangeLicenseBulk extends DefaultPlugin
         break;
 
       case 'f':
-        if (!Isdir($uploadEntry['ufile_mode']) && !Iscontainer($uploadEntry['ufile_mode']) && !Isartifact($uploadEntry['ufile_mode']))
-        {
+        if (!Isdir($uploadEntry['ufile_mode']) &&
+            !Iscontainer($uploadEntry['ufile_mode']) &&
+            !Isartifact($uploadEntry['ufile_mode'])) {
           $uploadTreeId = $uploadEntry['parent'] ?: $uploadTreeId;
         }
         break;
@@ -112,16 +97,18 @@ class ChangeLicenseBulk extends DefaultPlugin
 
     $refText = $request->get('refText');
     $actions = $request->get('bulkAction');
+    $ignoreIrrelevantFiles = (intval($request->get('ignoreIrre')) == 1);
+    $delimiters = $request->get('delimiters');
 
     $licenseRemovals = array();
-    foreach($actions as $licenseAction)
-    {
+    foreach ($actions as $licenseAction) {
       $licenseRemovals[$licenseAction['licenseId']] = array(($licenseAction['action']=='Remove'), $licenseAction['comment'], $licenseAction['reportinfo'], $licenseAction['acknowledgement']);
     }
-    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText);
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId,
+      $uploadTreeId, $licenseRemovals, $refText, $ignoreIrrelevantFiles,
+      $delimiters);
 
-    if ($bulkId <= 0)
-    {
+    if ($bulkId <= 0) {
       throw new Exception('cannot insert bulk reference');
     }
     $upload = $this->uploadDao->getUpload($uploadId);
@@ -134,8 +121,7 @@ class ChangeLicenseBulk extends DefaultPlugin
     $errorMsg = '';
     $jqId = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies, $conflictStrategyId);
 
-    if (!empty($errorMsg))
-    {
+    if (!empty($errorMsg)) {
       throw new Exception(str_replace('<br>', "\n", $errorMsg));
     }
     return $jqId;

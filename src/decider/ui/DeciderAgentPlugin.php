@@ -1,20 +1,10 @@
 <?php
-/***********************************************************
- * Copyright (C) 2014-2018, Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2014-2018 Siemens AG
+
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Plugin\AgentPlugin;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,7 +19,8 @@ class DeciderAgentPlugin extends AgentPlugin
 {
   const RULES_FLAG = "-r";
 
-  function __construct() {
+  function __construct()
+  {
     $this->Name = "agent_decider";
     $this->Title = _("Automatic Concluded License Decider, based on scanners Matches");
     $this->AgentName = AGENT_DECIDER_NAME;
@@ -45,13 +36,15 @@ class DeciderAgentPlugin extends AgentPlugin
    */
   public function renderContent(&$vars)
   {
+    global $SysConf;
     $renderer = $GLOBALS['container']->get('twig.environment');
     $vars['isNinkaInstalled'] = false;
-    if($ninkaUi=plugin_find('agent_ninka'))
-    {
+    if ($ninkaUi=plugin_find('agent_ninka')) {
       $vars['isNinkaInstalled'] = $ninkaUi->isNinkaInstalled();
     }
-    return $renderer->loadTemplate('agent_decider.html.twig')->render($vars);
+    $vars['isSpacyInstalled'] = file_exists("/home/" .
+      $SysConf['DIRECTORIES']['PROJECTUSER'] . "/pythondeps/bin/spacy");
+    return $renderer->load('agent_decider.html.twig')->render($vars);
   }
 
   /**
@@ -77,10 +70,15 @@ class DeciderAgentPlugin extends AgentPlugin
     $dependencies = array();
 
     $rules = $request->get('deciderRules') ?: array();
+    $agents = $request->get('agents') ?: array();
+    if (in_array('agent_nomos', $agents)) {
+      $checkAgentNomos = true;
+    } else {
+      $checkAgentNomos = $request->get('Check_agent_nomos') ?: false;
+    }
     $rulebits = 0;
 
-    foreach($rules as $rule)
-    {
+    foreach ($rules as $rule) {
       switch ($rule) {
         case 'nomosInMonk':
           $dependencies[] = 'agent_nomos';
@@ -96,16 +94,30 @@ class DeciderAgentPlugin extends AgentPlugin
         case 'reuseBulk':
           $dependencies[] = 'agent_nomos';
           $dependencies[] = 'agent_monk';
+          $dependencies[] = 'agent_reuser';
           $rulebits |= 0x4;
+          break;
+        case 'ojoNoContradiction':
+          if ($checkAgentNomos) {
+            $dependencies[] = 'agent_nomos';
+          }
+          $dependencies[] = 'agent_ojo';
+          $rulebits |= 0x10;
           break;
         case 'wipScannerUpdates':
           $this->addScannerDependencies($dependencies, $request);
           $rulebits |= 0x8;
+          break;
+        case 'copyrightDeactivation':
+          $rulebits |= 0x20;
+          break;
+        case 'copyrightDeactivationClutterRemoval':
+          $rulebits |= 0x40;
+          break;
       }
     }
 
-    if (empty($rulebits))
-    {
+    if (empty($rulebits)) {
       return 0;
     }
 
@@ -143,7 +155,6 @@ class DeciderAgentPlugin extends AgentPlugin
   {
     menu_insert("ParmAgents::" . $this->Title, 0, $this->Name);
   }
-
 }
 
 register_plugin(new DeciderAgentPlugin());

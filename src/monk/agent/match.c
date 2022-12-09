@@ -1,19 +1,8 @@
 /*
-Authors: Daniele Fognini, Andreas Wuerl, Marion Deveaud
-Copyright (C) 2013-2015, Siemens AG
+ Authors: Daniele Fognini, Andreas Wuerl, Marion Deveaud
+ SPDX-FileCopyrightText: © 2013-2015 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 #include "match.h"
@@ -105,15 +94,15 @@ static char* getFileName(MonkState* state, long pFileId) {
   return pFileName;
 }
 
-int matchPFileWithLicenses(MonkState* state, long pFileId, const Licenses* licenses, const MatchCallbacks* callbacks) {
+int matchPFileWithLicenses(MonkState* state, long pFileId, const Licenses* licenses, const MatchCallbacks* callbacks, char* delimiters) {
   File file;
   file.id = pFileId;
+  int result = 0;
 
   file.fileName = getFileName(state, pFileId);
 
-  int result = 0;
   if (file.fileName != NULL) {
-    result = readTokensFromFile(file.fileName, &(file.tokens), DELIMITERS);
+    result = readTokensFromFile(file.fileName, &(file.tokens), delimiters);
 
     if (result) {
       result = matchFileWithLicenses(state, &file, licenses, callbacks);

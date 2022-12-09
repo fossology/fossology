@@ -1,20 +1,9 @@
 /*
- * Copyright (C) 2014-2015, Siemens AG
- * Author: Johannes Najjar, Daniele Fognini
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- */
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ Author: Johannes Najjar, Daniele Fognini
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 #include "copyrightState.hpp"
 #include "identity.hpp"
@@ -53,11 +42,13 @@ const std::list<unptr::shared_ptr<scanner>>& CopyrightState::getScanners() const
  * \param verbosity Verbosity set by CLI
  * \param type      Type set by CLI
  * \param json      True to get output in JSON format
+ * \param ignoreFilesWithMimeType      True to ignore files with particular mimetype
  */
-CliOptions::CliOptions(int verbosity, unsigned int type, bool json) :
+CliOptions::CliOptions(int verbosity, unsigned int type, bool json, bool ignoreFilesWithMimeType) :
   verbosity(verbosity),
   optType(type),
   json(json),
+  ignoreFilesWithMimeType(ignoreFilesWithMimeType),
   cliScanners()
 {
 }
@@ -68,6 +59,7 @@ CliOptions::CliOptions(int verbosity, unsigned int type, bool json) :
 CliOptions::CliOptions() :
   verbosity(0),
   optType(ALL_TYPES),
+  ignoreFilesWithMimeType(false),
   cliScanners()
 {
 }
@@ -126,3 +118,11 @@ bool CliOptions::doJsonOutput() const
   return json;
 }
 
+/**
+ * \brief Check to ignore files with particular mimetype
+ * \return True if required, else false
+ */
+bool CliOptions::doignoreFilesWithMimeType() const
+{
+  return ignoreFilesWithMimeType;
+}

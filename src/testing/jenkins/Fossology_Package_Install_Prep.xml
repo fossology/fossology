@@ -1,4 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only 
+-->
 <project>
   <actions/>
   <description>Prepare for package install testing, revert all VMs snapshot.</description>

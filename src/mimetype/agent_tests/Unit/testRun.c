@@ -1,21 +1,9 @@
-/*********************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2018 Siemens AG
 
-Copyright (C) 2018 Siemens AG
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*********************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 #include "testRun.h"
 #include "finder.h"
@@ -31,12 +19,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 
 char *DBConfFile = NULL;
+fo_dbManager* dbManager = NULL;
 
 /**
  * \brief all test suites for mimetype
  */
 
-#if CU_VERSION_P == 213
 CU_SuiteInfo suites[] = {
     // for finder.c
     {"DBCheckMime", NULL, NULL, (CU_SetUpFunc)DBCheckMimeInit, (CU_TearDownFunc)DBCheckMimeClean, testcases_DBCheckMime},
@@ -47,18 +35,6 @@ CU_SuiteInfo suites[] = {
     {"Utilities", NULL, NULL, NULL, NULL, testcases_Utilities},
     CU_SUITE_INFO_NULL
 };
-#else
-CU_SuiteInfo suites[] = {
-    // for finder.c
-    {"DBCheckMime", DBCheckMimeInit, DBCheckMimeClean, testcases_DBCheckMime},
-    {"DBLoadMime", DBLoadMimeInit, DBLoadMimeClean, testcases_DBLoadMime},
-    {"DBFindMime", DBFindMimeInit, DBFindMimeClean, testcases_DBFindMime},
-    {"CheckMimeType", DBInit, DBClean, testcases_CheckMimeTypes},
-    {"DBCheckFileExtention", DBInit, DBClean, testcases_DBCheckFileExtention},
-    {"Utilities", NULL, NULL, testcases_Utilities},
-    CU_SUITE_INFO_NULL
-};
-#endif
 
 /*
  * \brief Create required tables
@@ -151,26 +127,37 @@ void createTables()
  */
 int main( int argc, char *argv[] )
 {
-  char cwd[2048];
-  char* confDir = NULL;
-  char CMD[2048];
-  int rc;
+  // char cwd[2048];
+  // char* confDir = NULL;
+  // char CMD[2048];
+  // int rc;
 
-  if(getcwd(cwd, sizeof(cwd)) != NULL)
-  {
-    confDir = createTestConfDir(cwd, "mimetype");
-  }
+  // if(getcwd(cwd, sizeof(cwd)) != NULL)
+  // {
+  //   confDir = createTestConfDir(cwd, "mimetype");
+  // }
 
-  create_db_repo_sysconf(0, "mimetype", confDir);
+  // create_db_repo_sysconf(0, "mimetype", confDir);
+  // DBConfFile = get_dbconf();
+
+  // createTables();
+  // sprintf(CMD,"rm -rf %s", confDir);
+  // rc = system(CMD);
+
+  // rc = focunit_main(argc, argv, "mimetype_Tests", suites) ;
+  // drop_db_repo_sysconf(get_db_name());
+
+  // return rc;
+
+  dbManager = createTestEnvironment(AGENT_DIR, "mimetype", 0);
   DBConfFile = get_dbconf();
-
   createTables();
-  sprintf(CMD,"rm -rf %s", confDir);
-  rc = system(CMD);
-
-  rc = focunit_main(argc, argv, "mimetype_Tests", suites) ;
-  drop_db_repo_sysconf(get_db_name());
-
-  return rc;
+  const int returnValue = focunit_main(argc, argv, "mimetype_Tests", suites);
+  if (returnValue == 0) {
+    dropTestEnvironment(dbManager, AGENT_DIR, "mimetype");
+  } else {
+    printf("preserving test environment in '%s'\n", get_sysconfdir());
+  }
+  return returnValue;
 }
 

@@ -1,13 +1,8 @@
 /*
+ SPDX-FileCopyrightText: © 2014, 2018 Siemens AG
 
-Copyright Siemens AG 2014,2018
-
-Copying and distribution of this file, with or without modification,
-are permitted in any medium without royalty provided the copyright
-notice and this notice are preserved.  This file is offered as-is,
-without any warranty.
-
- */
+ SPDX-License-Identifier: FSFAP
+*/
 
 table.dataTable {
   margin: 0 auto;
@@ -195,7 +190,7 @@ table.dataTable tr.even td.sorting_3 { background-color: #F9F9FF; }
  */
 .dataTables_processing {
   position: absolute;
-  top: 50%;
+  top: 10%;
   left: 50%;
   width: 250px;
   height: 30px;
@@ -205,8 +200,9 @@ table.dataTable tr.even td.sorting_3 { background-color: #F9F9FF; }
   border: 1px solid #ddd;
   text-align: center;
   color: #999;
-  font-size: 14px;
+  font-size: 12pt;
   background-color: white;
+  z-index: 999;
 }
 
 
@@ -316,6 +312,12 @@ table.dataTable thead td:active {
   /* W3C */
   box-shadow: inset 0 0 3px #111;
 }
+
 .dataTables_wrapper .dataTables_paginate .ellipsis {
   padding: 0 1em;
+}
+
+table.wordbreaktable td {
+  word-break: normal;
+  overflow-wrap: anywhere;
 }

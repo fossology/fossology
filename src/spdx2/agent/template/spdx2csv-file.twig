@@ -1,0 +1,35 @@
+{# SPDX-FileCopyrightText: © 2021 Orange
+
+   SPDX-License-Identifier: FSFAP
+#}
+{{- fileName -}},SPDXRef-item{{- fileId -}},
+{%- if isCleared -%}
+{%- if concludedLicenses|default is empty -%}
+NONE,
+{%- else -%}
+"{{- concludedLicense -}}",
+{%- endif -%}
+{%- else -%}
+NOASSERTION,
+{%- endif -%}
+{%- if licenseComment != null -%}
+"{{ licenseComment
+                                       |replace({ '\r\n': ' ', '\n': ' ', '\r': ' ' })
+                                       |replace({'\f':''})
+                                       |replace({'"':'""'}) }}"
+{%- endif -%},
+{%- if scannerLicenses|default is empty -%}
+NOASSERTION,
+{%- else -%}
+"{{- scannerLicenses|join('AND')
+                    |replace({' ':'-'})
+                    |replace({'AND':' AND '}) -}}",
+{%- endif -%}
+{%- if copyrights|default is empty -%}
+NOASSERTION
+{%- else -%}
+"{{- copyrights |join(';')
+                |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                |replace({ '\r\n': ' ', '\n': ' ', '\r': ' ' })
+                |replace({'\f':''})
+                |replace({'"':'""'}) }}" {% endif %}                                    

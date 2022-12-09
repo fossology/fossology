@@ -1,8 +1,6 @@
-{# Copyright 2014-2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2014-2015 Siemens AG
 
-   Copying and distribution of this file, with or without modification,
-   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-   This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 {% if successfulAgents|length <1 %}
   {{ "The agent"|trans }} <b>{{agentName}}</b> {{ "has not been run on this upload."|trans }}
@@ -25,7 +23,7 @@
 
 {% if successfulAgents|length <1 or latestSuccess.agent_id != currentAgentId %}
   <span id="{{ agentName }}_span"><br/>
-    <button type="button" id="{{ agentName }}" name="{{ agentName }}"
+    <button class="btn btn-default btn-sm" type="button" id="{{ agentName }}" name="{{ agentName }}"
             onclick="scheduleScan({{ uploadId }}, 'agent_{{ agentName }}','#job{{ agentName }}IdResult');">
       {% if isAgentRunning %}{{ "Reschedule %s scan"|trans|format(agentName) }}
       {% else %}{{ "Schedule %s scan"|trans|format(agentName) }}

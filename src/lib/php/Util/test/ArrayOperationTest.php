@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Util;
@@ -21,12 +10,12 @@ namespace Fossology\Lib\Util;
 class ArrayOperationTest extends \PHPUnit\Framework\TestCase
 {
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
@@ -71,10 +60,10 @@ class ArrayOperationTest extends \PHPUnit\Framework\TestCase
     }, $values, 2), is(array(2, 2)));
   }
 
-  /** @expectedException \InvalidArgumentException
-   * @expectedExceptionMessage chunk size should be positive
-   */
-  public function testCallChunkedShouldThrowExceptionWhenChunkSizeIsNotPositive() {
+  public function testCallChunkedShouldThrowExceptionWhenChunkSizeIsNotPositive()
+  {
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage("chunk size should be positive");
     ArrayOperation::callChunked(function ($values)
     {
       return array(count($values));
@@ -90,5 +79,4 @@ class ArrayOperationTest extends \PHPUnit\Framework\TestCase
     assertThat(ArrayOperation::multiSearch(array(200),$haystack),is(false));
     assertThat(ArrayOperation::multiSearch(array(200,102),$haystack),is(2));
   }
-
 }

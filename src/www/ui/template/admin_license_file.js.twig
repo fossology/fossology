@@ -1,8 +1,6 @@
-{# Copyright 2017 Siemens AG
+{# SPDX-FileCopyrightText: © 2017 Siemens AG
 
-  Copying and distribution of this file, with or without modification,
-  are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-  This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 
 $(document).ready(function () {
@@ -51,7 +49,7 @@ function getDataForTable() {
     "rf_fullname":        "{{ entry['rf_fullname']|escape('js') }}",
     "rf_text":            [ "{{ entry['rf_pk'] }}", "{{ entry['rf_text'][:120]|escape('js') }}" ],
     "rf_url":             "{{ entry['rf_url'] }}",
-    "ob_topic":           "{{ entry['ob_topic'] }}"
+    "ob_topic":           "{{ entry['ob_topic']|escape('js') }}"
   });
   {% endfor %}
 
@@ -67,6 +65,7 @@ function createLicenseTable() {
   var adminLicenseTable = $('#adminLicenseTable').DataTable({
     data: getDataForTable(),
     dom: "lBrtip",
+    sPaginationType: "listbox",
     deferRender: true,
     responsive: true,
     scroller: true,

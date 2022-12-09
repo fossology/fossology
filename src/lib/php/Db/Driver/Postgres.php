@@ -1,20 +1,9 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
-Authors: Steffen Weber, Andreas Würl
+ SPDX-FileCopyrightText: © 2014 Siemens AG
+ Authors: Steffen Weber, Andreas Würl
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Db\Driver;
@@ -40,13 +29,11 @@ class Postgres implements Driver
   private function identifierHash($stmt)
   {
     $namedatalen = 63;
-    if ($namedatalen >= strlen($stmt))
-    {
+    if ($namedatalen >= strlen($stmt)) {
       return $stmt;
     }
     $hash = substr($stmt, 0, $namedatalen);
-    for($i=$namedatalen; $i<strlen($stmt);$i++)
-    {
+    for ($i = $namedatalen; $i < strlen($stmt); $i ++) {
       $hash[$i%$namedatalen] = chr((ord($hash[$i%$namedatalen])+ord($stmt[$i])-32)%96+32);
     }
     return $hash;
@@ -121,8 +108,7 @@ class Postgres implements Driver
    */
   public function fetchAll($res)
   {
-    if (pg_num_rows($res) == 0)
-    {
+    if (pg_num_rows($res) == 0) {
       return array();
     }
     return pg_fetch_all($res);
@@ -131,7 +117,8 @@ class Postgres implements Driver
   /**
    * @return void
    */
-  public function begin(){
+  public function begin()
+  {
     pg_query($this->dbConnection, "BEGIN");
     return;
   }
@@ -139,7 +126,8 @@ class Postgres implements Driver
   /**
    * @return void
    */
-  public function commit(){
+  public function commit()
+  {
     pg_query($this->dbConnection, "COMMIT");
     return;
   }
@@ -147,7 +135,8 @@ class Postgres implements Driver
   /**
    * @return void
    */
-  public function rollback(){
+  public function rollback()
+  {
     pg_query($this->dbConnection, "ROLLBACK");
     return;
   }
@@ -192,12 +181,9 @@ class Postgres implements Driver
              WHERE table_catalog='$dbName'
                AND table_name='". strtolower($tableName) . "'";
     $res = pg_query($this->dbConnection, $sql);
-    if (!$res && pg_connection_status($this->dbConnection)===PGSQL_CONNECTION_OK)
-    {
+    if (!$res && pg_connection_status($this->dbConnection) === PGSQL_CONNECTION_OK) {
       throw new \Exception(pg_last_error($this->dbConnection));
-    }
-    else if(!$res)
-    {
+    } else if (! $res) {
       throw new \Exception('DB connection lost');
     }
     $row = pg_fetch_assoc($res);
@@ -220,12 +206,9 @@ class Postgres implements Driver
                AND table_name='". strtolower($tableName) . "'
                AND column_name='". strtolower($columnName) . "'";
     $res = pg_query($this->dbConnection, $sql);
-    if (!$res && pg_connection_status($this->dbConnection)===PGSQL_CONNECTION_OK)
-    {
+    if (!$res && pg_connection_status($this->dbConnection) === PGSQL_CONNECTION_OK) {
       throw new \Exception(pg_last_error($this->dbConnection));
-    }
-    else if(!$res)
-    {
+    } else if (! $res) {
       throw new \Exception('DB connection lost');
     }
     $row = pg_fetch_assoc($res);

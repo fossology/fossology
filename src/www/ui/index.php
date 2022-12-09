@@ -1,21 +1,10 @@
 <?php
-/***********************************************************
- * Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014 Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2008-2011 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2014 Siemens AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Util\TimingLogger;
 use Fossology\UI\Page\HomePage;
@@ -26,8 +15,7 @@ use Fossology\UI\Page\HomePage;
  */
 
 /* initialize session variable to run test in cli mode */
-if (!isset($_SESSION))
-{
+if (! isset($_SESSION)) {
   $_SESSION = array();
 }
 
@@ -44,6 +32,10 @@ global $container;
 $timingLogger = $container->get("log.timing");
 $timingLogger->logWithStartTime("bootstrap", $startTime);
 
+/* Load UI templates */
+$loader = $container->get('twig.loader');
+$loader->addPath(dirname(__FILE__).'/template');
+
 /* Initialize global system configuration variables $SysConfig[] */
 $timingLogger->tic();
 ConfigInit($SYSCONFDIR, $SysConf);
@@ -56,13 +48,11 @@ plugin_postinstall();
 $timingLogger->toc("setup plugins");
 
 $plugin = plugin_find(GetParm("mod", PARM_STRING) ?: HomePage::NAME);
-if ($plugin)
-{
+if ($plugin) {
   $timingLogger->tic();
   $plugin->execute();
   $timingLogger->toc("plugin execution");
-} else
-{
+} else {
   $linkUri = Traceback_uri() . "?mod=auth";
   $errorText = _("Module unavailable or your login session timed out.");
   print "$errorText <P />";

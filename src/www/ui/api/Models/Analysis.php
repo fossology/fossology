@@ -1,20 +1,10 @@
 <?php
-/***************************************************************
-Copyright (C) 2017 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2017 Siemens AG
+ SPDX-FileCopyrightText: © 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @dir
  * @brief Data models/resources supported by REST api
@@ -65,6 +55,16 @@ class Analysis
    */
   private $nomos;
   /**
+   * @var boolean $ojo
+   * Whether to schedule ojo agent or not
+   */
+  private $ojo;
+  /**
+   * @var boolean $pkgagent
+   * Whether to schedule reso agent or not
+   */
+  private $reso;
+  /**
    * @var boolean $pkgagent
    * Whether to schedule package agent or not
    */
@@ -79,10 +79,12 @@ class Analysis
    * @param boolean $mime
    * @param boolean $monk
    * @param boolean $nomos
+   * @param boolean $ojo
+   * @param boolean $reso
    * @param boolean $package
    */
   public function __construct($bucket = false, $copyright = false, $ecc = false, $keyword = false,
-    $mimetype = false, $monk = false, $nomos = false, $pkgagent = false)
+    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $reso = false, $pkgagent = false)
   {
     $this->bucket = $bucket;
     $this->copyright = $copyright;
@@ -91,6 +93,8 @@ class Analysis
     $this->mimetype = $mimetype;
     $this->monk = $monk;
     $this->nomos = $nomos;
+    $this->ojo = $ojo;
+    $this->reso = $reso;
     $this->pkgagent = $pkgagent;
   }
 
@@ -101,29 +105,40 @@ class Analysis
    */
   public function setUsingArray($analysisArray)
   {
-    if(array_key_exists("bucket", $analysisArray)) {
-      $this->bucket = filter_var($analysisArray["bucket"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("bucket", $analysisArray)) {
+      $this->bucket = filter_var($analysisArray["bucket"],
+        FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("copyright_email_author", $analysisArray)) {
-      $this->copyright = filter_var($analysisArray["copyright_email_author"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("copyright_email_author", $analysisArray)) {
+      $this->copyright = filter_var($analysisArray["copyright_email_author"],
+        FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("ecc", $analysisArray)) {
+    if (array_key_exists("ecc", $analysisArray)) {
       $this->ecc = filter_var($analysisArray["ecc"], FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("keyword", $analysisArray)) {
-      $this->keyword = filter_var($analysisArray["keyword"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("keyword", $analysisArray)) {
+      $this->keyword = filter_var($analysisArray["keyword"],
+        FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("mime", $analysisArray)) {
-      $this->mimetype = filter_var($analysisArray["mime"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("mime", $analysisArray)) {
+      $this->mimetype = filter_var($analysisArray["mime"],
+        FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("monk", $analysisArray)) {
+    if (array_key_exists("monk", $analysisArray)) {
       $this->monk = filter_var($analysisArray["monk"], FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("nomos", $analysisArray)) {
+    if (array_key_exists("nomos", $analysisArray)) {
       $this->nomos = filter_var($analysisArray["nomos"], FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("package", $analysisArray)) {
-      $this->pkgagent = filter_var($analysisArray["package"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("ojo", $analysisArray)) {
+      $this->ojo = filter_var($analysisArray["ojo"], FILTER_VALIDATE_BOOLEAN);
+    }
+    if (array_key_exists("reso", $analysisArray)) {
+      $this->reso = filter_var($analysisArray["reso"], FILTER_VALIDATE_BOOLEAN);
+    }
+    if (array_key_exists("package", $analysisArray)) {
+      $this->pkgagent = filter_var($analysisArray["package"],
+        FILTER_VALIDATE_BOOLEAN);
     }
     return $this;
   }
@@ -135,28 +150,34 @@ class Analysis
    */
   public function setUsingString($analysisString)
   {
-    if(stristr($analysisString, "bucket")) {
+    if (stristr($analysisString, "bucket")) {
       $this->bucket = true;
     }
-    if(stristr($analysisString, "copyright")) {
+    if (stristr($analysisString, "copyright")) {
       $this->copyright = true;
     }
-    if(stristr($analysisString, "ecc")) {
+    if (stristr($analysisString, "ecc")) {
       $this->ecc = true;
     }
-    if(stristr($analysisString, "keyword")) {
+    if (stristr($analysisString, "keyword")) {
       $this->keyword = true;
     }
-    if(stristr($analysisString, "mimetype")) {
+    if (stristr($analysisString, "mimetype")) {
       $this->mimetype = true;
     }
-    if(stristr($analysisString, "monk")) {
+    if (stristr($analysisString, "monk")) {
       $this->monk = true;
     }
-    if(stristr($analysisString, "nomos")) {
+    if (stristr($analysisString, "nomos")) {
       $this->nomos = true;
     }
-    if(stristr($analysisString, "pkgagent")) {
+    if (stristr($analysisString, "ojo")) {
+      $this->ojo = true;
+    }
+    if (stristr($analysisString, "reso")) {
+      $this->reso = true;
+    }
+    if (stristr($analysisString, "pkgagent")) {
       $this->pkgagent = true;
     }
     return $this;
@@ -217,6 +238,22 @@ class Analysis
   public function getNomos()
   {
     return $this->nomos;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getOjo()
+  {
+    return $this->ojo;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getReso()
+  {
+    return $this->reso;
   }
 
   /**
@@ -285,6 +322,22 @@ class Analysis
   }
 
   /**
+   * @param boolean $ojo
+   */
+  public function setOjo($ojo)
+  {
+    $this->ojo = filter_var($ojo, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
+   * @param boolean $reso
+   */
+  public function setReso($reso)
+  {
+    $this->reso = filter_var($reso, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
    * @param boolean $package
    */
   public function setPackage($package)
@@ -306,9 +359,9 @@ class Analysis
       "mimetype"  => $this->mimetype,
       "monk"      => $this->monk,
       "nomos"     => $this->nomos,
+      "ojo"       => $this->ojo,
+      "reso"       => $this->reso,
       "package"   => $this->pkgagent
     ];
   }
-
-
 }

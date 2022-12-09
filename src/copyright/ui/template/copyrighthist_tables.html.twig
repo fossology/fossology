@@ -1,14 +1,26 @@
-{# Copyright 2014-2017 Siemens AG
+{# SPDX-FileCopyrightText: © 2014-2017,2019 Siemens AG
 
-   Copying and distribution of this file, with or without modification,
-   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-   This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 <table border="0" width="100%">
 <tr>
   <td valign="top">
-    {{ contCopyright }}
-    <br/>
+    <div id="copyrightFindingsTabs" style="padding-bottom:2em">
+      <ul>
+        <li><a href="#copyrightTab">FOSSology Findings</a></li>
+        <li><a href="#scancodeCopyrightTab">ScanCode Findings</a></li>
+        <li><a href="#textFindingsTab">User Findings</a></li>
+      </ul>
+      <div id="copyrightTab">
+        {{ contCopyright }}
+      </div>
+       <div id="scancodeCopyrightTab">
+        {{ contScancodeCopyright }}
+      </div>
+      <div id="textFindingsTab">
+        {{ contTextFindings }}
+      </div>
+    </div>
   </td>
   <td valign="top">{{ fileList }}</td>
 </tr>

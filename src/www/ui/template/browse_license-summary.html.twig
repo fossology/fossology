@@ -1,8 +1,6 @@
-{# Copyright 2014-2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2014-2015, 2022 Siemens AG
 
-   Copying and distribution of this file, with or without modification,
-   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-   This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 <h3>{{ "Summary"|trans }}</h3>
 {% if uniqueLicenseCount==0 %}
@@ -22,4 +20,16 @@
   <tr><td class="even">{{ "Files with no detected licenses"|trans }}</td><td align="right" class="even">{{ noScannerLicenseFoundCount }}</td>
   <td align="right" class="odd">{{ editedNoLicenseFoundCount }}</td><td class="odd">{{ "Concluded files with no detected licenses"|trans }}</td></tr>
 
+</table>
+
+<h4>{{ "REUSE Standard Report"|trans }}</h4>
+
+<table id="reuseTable">
+  <thead>
+    <tr>
+      <th>Property</th>
+      <th>Licenses</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
 </table>

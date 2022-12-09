@@ -1,21 +1,9 @@
 <?php
 /*
-  Copyright (C) 2014-2015, Siemens AG
-  Author: Johannes Najjar
-
-  This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU General Public License
-  version 2 as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License along
-  with this program; if not, write to the Free Software Foundation, Inc.,
-  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ Author: Johannes Najjar
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 namespace Fossology\Lib\Data;
 
@@ -46,7 +34,7 @@ class LicenseMatchTest extends \PHPUnit\Framework\TestCase
   /** @var LicenseMatch */
   private $licenseMatch;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->id = 8;
     $this->shortName = "testSN";
@@ -67,7 +55,7 @@ class LicenseMatchTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
@@ -102,5 +90,4 @@ class LicenseMatchTest extends \PHPUnit\Framework\TestCase
   {
     assertThat($this->licenseMatch->getLicenseId(), equalTo($this->id));
   }
-
 }

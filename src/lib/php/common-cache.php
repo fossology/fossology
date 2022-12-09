@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2008-2012 Hewlett-Packard Development Company, L.P.
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License version 2.1 as published by the Free Software Foundation.
-
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-***********************************************************/
+ SPDX-License-Identifier: LGPL-2.1-only
+*/
 
 /**
  * \file
@@ -53,8 +42,7 @@ function ReportCacheGet($CacheKey)
   global $UserCacheStat;
 
   /* Purge old entries ~ 1/500 of the times this fcn is called */
-  if ( rand(1,500) == 1)
-  {
+  if (rand(1, 500) == 1) {
     ReportCachePurgeByDate(" now() - interval '365 days'");
   }
 
@@ -62,17 +50,15 @@ function ReportCacheGet($CacheKey)
    * If a record does not exist for this user, then the cache is on default
    * is used.
    */
-  if ($UserCacheStat == 0)
-  {
+  if ($UserCacheStat == 0) {
     $sql = "SELECT cache_on FROM report_cache_user WHERE user_fk='$_SESSION[UserId]';";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
     pg_free_result($result);
-    if (!empty($row['cache_on']) && ($result['cache_on'] == 'N'))
-    {
+    if (! empty($row['cache_on']) && ($result['cache_on'] == 'N')) {
       $UserCacheStat = 2;
-      return;  /* cache is off for this user */
+      return; /* cache is off for this user */
     }
   }
 
@@ -89,6 +75,9 @@ function ReportCacheGet($CacheKey)
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
+  if ($row == false) {
+    return;
+  }
   $cashedvalue = $row['report_cache_value'];
   pg_free_result($result);
   return $cashedvalue;
@@ -112,8 +101,7 @@ function ReportCachePut($CacheKey, $CacheValue)
   * If it isn't, it is safe to fallback to the default
   * behavior (cache is on).
   */
-  if ($UserCacheStat == 2)
-  {
+  if ($UserCacheStat == 2) {
     return;
   }
 
@@ -126,20 +114,21 @@ function ReportCachePut($CacheKey, $CacheValue)
   $ParsedURI = array();
   parse_str($EscKey, $ParsedURI);
   /* use 'upload= ' to define the upload in the cache key */
-  if (array_key_exists("upload", $ParsedURI))
+  if (array_key_exists("upload", $ParsedURI)) {
     $Upload = $ParsedURI['upload'];
-  else
-    if (array_key_exists("item", $ParsedURI))
-    {
-      $sql = "SELECT upload_fk FROM uploadtree WHERE uploadtree_pk='$ParsedURI[item]';";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
+  }
+  if (array_key_exists("item", $ParsedURI)) {
+    $sql = "SELECT upload_fk FROM uploadtree WHERE uploadtree_pk='$ParsedURI[item]';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-      $row = pg_fetch_assoc($result);
-      $Upload = $row['upload_fk'];
-      pg_free_result($result);
-    }
-  if (empty($Upload)) $Upload = "Null";
+    $row = pg_fetch_assoc($result);
+    $Upload = $row['upload_fk'];
+    pg_free_result($result);
+  }
+  if (empty($Upload)) {
+    $Upload = "Null";
+  }
 
   $sql = "INSERT INTO report_cache (report_cache_key, report_cache_value, report_cache_uploadfk)
                            VALUES ('$EscKey', '$EscValue', $Upload);";
@@ -148,10 +137,9 @@ function ReportCachePut($CacheKey, $CacheValue)
   pg_free_result($result);
   $PGError = pg_last_error($PG_CONN);
   /* If duplicate key, do an update, else report the error */
-  if (strpos($PGError, "uplicate") > 0)
-  {
-    $sql = "UPDATE report_cache SET report_cache_value = '$EscValue', "
-         . "report_cache_tla=now() WHERE report_cache_key = '$EscKey';";
+  if (strpos($PGError, "uplicate") > 0) {
+    $sql = "UPDATE report_cache SET report_cache_value = '$EscValue', " .
+      "report_cache_tla=now() WHERE report_cache_key = '$EscKey';";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);

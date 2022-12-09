@@ -2,7 +2,7 @@
     "name" : "fossology/fossology",
     "description" : "FOSSology is a open source license compliance software system and toolkit.",
     "_comment" : [
-        "Copyright Siemens AG 2014-2016",
+        "Copyright Siemens AG 2014-2022",
         "",
         "Copying and distribution of this file, with or without modification,",
         "are permitted in any medium without royalty provided the copyright",
@@ -10,32 +10,43 @@
         "without any warranty."
     ],
     "require" : {
-        "easyrdf/easyrdf" : "0.9.*",
+        "easyrdf/easyrdf" : "1.1.1",
         "ext-gettext": "*",
         "ext-mbstring": "*",
         "ext-json" : "*",
         "ext-xml" : "*",
-        "monolog/monolog" : "1.22.*",
-        "phpoffice/phpword" : "v0.13.*",
-        "symfony/config" : "3.3.*",
-        "symfony/http-foundation" : "3.3.*",
-        "symfony/dependency-injection" : "3.3.*",
-        "twig/twig" : "1.*",
-        "twig/extensions" : "1.*",
-        "slim/slim": "3.11.0",
-        "flexsounds/slim-symfony-di-container": "1.0.1"
+        "ext-pgsql": "*",
+        "ext-curl": "*",
+        "ext-uuid": "*",
+        "firebase/php-jwt": "v6.3.0",
+        "monolog/monolog" : "2.8.0",
+        "phpoffice/phpword" : "0.18.3",
+        "slim/slim": "4.8.1",
+        "slim/psr7": "1.4",
+        "symfony/cache": "v5.4.13",
+        "symfony/config" : "v5.4.11",
+        "symfony/http-foundation" : "v5.4.13",
+        "symfony/dependency-injection" : "v5.4.13",
+        "symfony/translation" : "v5.4.12",
+        "symfony/yaml" : "v5.4.12",
+        "symfony/mime" : "v5.4.13",
+        "twig/twig" : "v3.4.3",
+        "guzzlehttp/guzzle": "v7.5.0",
+        "phpoffice/phpspreadsheet": "1.19.0",
+        "twbs/bootstrap": "v4.1.0",
+        "league/oauth2-client": "2.6.1"
     },
     "require-dev" : {
-        "doctrine/instantiator" : "1.0.5",
+        "doctrine/instantiator" : "v1.4.1",
         "ext-posix" : "*",
         "ext-sqlite3" : "*",
-        "hamcrest/hamcrest-php" : "^2",
-        "mockery/mockery" : "^1",
-        "myclabs/deep-copy" : "1.7.0",
-        "php-coveralls/php-coveralls" : "^2",
-        "phpunit/phpunit" : "^5.7 || ^6",
-        "sebastian/phpcpd" : "^3",
-        "squizlabs/php_codesniffer" : "^3"
+        "hamcrest/hamcrest-php" : "v2.0.1",
+        "mockery/mockery" : "v1.3.6",
+        "myclabs/deep-copy" : "1.11.0",
+        "php-coveralls/php-coveralls" : "v2.5.3",
+        "phpunit/phpunit" : "8.5.30",
+        "squizlabs/php_codesniffer" : "3.7.1",
+        "phpstan/phpstan" : "1.8.8"
     },
     "autoload" : {
         "psr-4" : {
@@ -50,7 +61,7 @@
     },
     "config" : {
         "platform" : {
-            "php" : "5.6"
+            "php" : "7.2.24"
         }
     },
     "homepage" : "https://www.fossology.org/",
@@ -69,5 +80,9 @@
         "spdx",
         "license-management",
         "license"
-    ]
+    ],
+    "scripts": {
+        "phpcs": "phpcs --standard=fossy-ruleset.xml -p",
+        "phpcbf": "phpcbf --standard=fossy-ruleset.xml -p"
+    }
 }

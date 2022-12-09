@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2007 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * Test the description parameter
  * Test cases are:
@@ -24,11 +13,13 @@
  * @version "$Id: desc.php 626 2008-05-24 03:04:12Z rrando $"
  *
  */
-class TestDashD extends UnitTestCase {
+class TestDashD extends UnitTestCase
+{
 
   public $command = '/usr/local/bin/test.cp2foss';
 
-  function TestDesc(){
+  function TestDesc()
+  {
 
     $output = array();
     $error = exec("$this->command -p CP2fossTest -n foo -a /tmp/zlib.tar.bz2 -d \"a comment\"", $output, $retval);
@@ -41,4 +32,4 @@ class TestDashD extends UnitTestCase {
     $this->assertPattern('/ERROR, -d /', $output[0]);
   }
 }
-?>
+

@@ -1,21 +1,10 @@
 <?php
-/***********************************************************
- * Copyright (C) 2014-2015 Siemens AG
- * Author: J.Najjar, S. Weber
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ Author: J.Najjar, S. Weber
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 namespace Fossology\UI\Ajax;
 
@@ -72,15 +61,13 @@ class AjaxBrowse extends DefaultPlugin
     $groupId = Auth::getGroupId();
     $gup = $this->dbManager->getSingleRow('SELECT group_perm FROM group_user_member WHERE user_fk=$1 AND group_fk=$2',
         array(Auth::getUserId(), $groupId), __METHOD__ . '.user_perm');
-    if (!$gup)
-    {
+    if (!$gup) {
       throw new \Exception('You are assigned to wrong group.');
     }
     $this->userPerm = $gup['group_perm'];
 
     $uploadId = intval($request->get('uploadId'));
-    if ($uploadId && !$this->uploadDao->isAccessible($uploadId, $groupId))
-    {
+    if ($uploadId && !$this->uploadDao->isAccessible($uploadId, $groupId)) {
       throw new \Exception('You cannot access to this upload');
     }
 
@@ -92,24 +79,19 @@ class AjaxBrowse extends DefaultPlugin
     $commentText = $request->get('commentText');
     $direction = $request->get('direction');
 
-    if (!empty($columnName) && !empty($uploadId) && !empty($value))
-    {
+    if (! empty($columnName) && ! empty($uploadId) && ! empty($value)) {
       $uploadBrowseProxy = new UploadBrowseProxy($groupId, $this->userPerm, $this->dbManager);
       $uploadBrowseProxy->updateTable($columnName, $uploadId, $value);
-    } else if (!empty($moveUpload) && !empty($beyondUpload))
-    {
+    } else if (! empty($moveUpload) && ! empty($beyondUpload)) {
       $uploadBrowseProxy = new UploadBrowseProxy($groupId, $this->userPerm, $this->dbManager);
       $uploadBrowseProxy->moveUploadBeyond($moveUpload, $beyondUpload);
-    } else if (!empty($uploadId) && !empty($direction))
-    {
+    } else if (! empty($uploadId) && ! empty($direction)) {
       $uploadBrowseProxy = new UploadBrowseProxy($groupId, $this->userPerm, $this->dbManager);
       $uploadBrowseProxy->moveUploadToInfinity($uploadId, $direction == 'top');
-    } else if (!empty($uploadId) && !empty($commentText) && !empty($statusId))
-    {
+    } else if (!empty($uploadId) && !empty($commentText) && !empty($statusId)) {
       $uploadBrowseProxy = new UploadBrowseProxy($groupId, $this->userPerm, $this->dbManager);
       $uploadBrowseProxy->setStatusAndComment($uploadId, $statusId, $commentText);
-    } else
-    {
+    } else {
       return $this->respondFolderGetTableData($request);
     }
     return new Response('');
@@ -134,17 +116,14 @@ class AjaxBrowse extends DefaultPlugin
     $users = $this->userDao->getUserChoices();
 
     $statusTypesAvailable = $this->uploadDao->getStatusTypeMap();
-    if (!$this->userPerm)
-    {
+    if (!$this->userPerm) {
       unset($statusTypesAvailable[4]);
     }
 
     $output = array();
     $rowCounter = 0;
-    while ($row = $this->dbManager->fetchArray($result))
-    {
-      if (empty($row['upload_pk']) || !$this->uploadDao->isAccessible($row['upload_pk'],Auth::getGroupId()))
-      {
+    while ($row = $this->dbManager->fetchArray($result)) {
+      if (empty($row['upload_pk']) || !$this->uploadDao->isAccessible($row['upload_pk'],Auth::getGroupId())) {
         continue;
       }
       $rowCounter++;
@@ -180,57 +159,53 @@ class AjaxBrowse extends DefaultPlugin
     $description = htmlentities($row['upload_desc']);
 
     $fileName = $row['ufile_name'];
-    if (empty($fileName))
-    {
+    if (empty($fileName)) {
       $fileName = $row['upload_filename'];
     }
 
     $itemId = Isartifact($row['ufile_mode']) ? DirGetNonArtifact($row['uploadtree_pk']) : $row['uploadtree_pk'];
-
-    $nameColumn = "<b>$fileName</b>";
-    if (IsContainer($row['ufile_mode']))
-    {
+    if (strlen($fileName) > 20) {
+      $splitFileName = str_split($fileName, 20);
+      $fileName = "";
+      foreach ($splitFileName as $key => $value) {
+        if (strlen($value) > 3 && $key > 0) {
+          $fileName .= "<br/>".$value;
+        } else {
+          $fileName = $fileName.$value;
+        }
+      }
+    }
+    $nameColumn = "<strong class='btn btn-sm font-weight-bold' style='margin-left:10px;font-size:11pt;'>$fileName</strong>";
+    if (IsContainer($row['ufile_mode'])) {
       $nameColumn = "<a href='$uri&upload=$uploadId&folder=$folder&item=$itemId&show=$show'>$nameColumn</a>";
     }
     $nameColumn .= "<br>";
-    if (!empty($description))
-    {
+    if (!empty($description)) {
       $nameColumn .= "<i>$description</i><br>";
     }
     $Parm = "upload=$uploadId&show=$show&item=" . $row['uploadtree_pk'];
-    if (Iscontainer($row['ufile_mode']))
-    {
-      $nameColumn .= MenuRenderer::menuToActiveSelect($menuPfile, $Parm, $uploadId);
-    }
-    else
-    {
-      $nameColumn .= MenuRenderer::menuToActiveSelect($menuPfileNoCompare, $Parm, $uploadId);
+    if (Iscontainer($row['ufile_mode'])) {
+      $nameAction = MenuRenderer::menuToActiveSelect($menuPfile, $Parm, $uploadId);
+    } else {
+      $nameAction = MenuRenderer::menuToActiveSelect($menuPfileNoCompare, $Parm, $uploadId);
     }
 
     $modsUploadMulti = MenuHook::getAgentPluginNames('UploadMulti');
-    if (!empty($modsUploadMulti))
-    {
-      $nameColumn = '<input type="checkbox" name="uploads[]" class="browse-upload-checkbox" value="'.$uploadId.'"/>'.$nameColumn;
+    if (!empty($modsUploadMulti)) {
+      $nameColumn = '<input type="checkbox" name="uploads[]" class="browse-upload-checkbox" style="width:1.10rem;height:1.10rem;" value="'.$uploadId.'"/>'.$nameColumn;
     }
 
-    $dateCol = substr($row['upload_ts'], 0, 19);
-    $pairIdPrio = array($uploadId, floatval($row[UploadBrowseProxy::PRIO_COLUMN]));
-    if (!$this->userPerm && 4 == $row['status_fk'])
-    {
+    $dateCol = Convert2BrowserTime(substr($row['upload_ts'], 0, 19));
+    if (!$this->userPerm && 4 == $row['status_fk']) {
       $currentStatus = $this->statusTypes[4];
-    }
-    else
-    {
+    } else {
       $statusAction = " onchange =\"changeTableEntry(this, $uploadId,'status_fk' )\" ";
       $currentStatus = $this->createSelect("Status" . $this->userPerm . "Of_$rowCounter", $statusTypesAvailable, $row['status_fk'], $statusAction);
     }
-    if ($this->userPerm)
-    {
+    if ($this->userPerm) {
       $action = " onchange =\"changeTableEntry(this, $uploadId, 'assignee')\"";
       $currentAssignee = $this->createSelectUsers("AssignedTo_$rowCounter", $users, $row['assignee'], $action );
-    }
-    else
-    {
+    } else {
       $currentAssignee = array_key_exists($row['assignee'], $users) ? $users[$row['assignee']] : _('Unassigned');
     }
     $rejectableUploadId = ($this->userPerm || $row['status_fk'] < 4) ? $uploadId : 0;
@@ -242,7 +217,7 @@ class AjaxBrowse extends DefaultPlugin
     $this->dbManager->prepare($stmt, $sql);
     $res = $this->dbManager->execute($stmt,array(Auth::getGroupId(),$uploadId));
     $mainLicenses = array();
-    while($lic=$this->dbManager->fetchArray($res)){
+    while ($lic=$this->dbManager->fetchArray($res)) {
       $mainLicenses[] = '<a onclick="javascript:window.open(\''.Traceback_uri()
               ."?mod=popup-license&rf=$lic[rf_pk]','License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');"
               .'" href="javascript:;">'.$lic['rf_shortname'].'</a>'
@@ -250,7 +225,7 @@ class AjaxBrowse extends DefaultPlugin
     }
     $this->dbManager->freeResult($res);
 
-    $output = array($nameColumn, $currentStatus, $tripleComment, implode(', ', $mainLicenses), $currentAssignee, $dateCol, $pairIdPrio);
+    $output = array($nameColumn, $nameAction, $currentStatus, $tripleComment, implode(', ', $mainLicenses), $dateCol, $currentAssignee);
     return $output;
   }
 
@@ -262,8 +237,7 @@ class AjaxBrowse extends DefaultPlugin
    */
   private function createSelectUsers($selectElementName, $databaseMap, $selectedValue, $action = "")
   {
-    if (array_key_exists($_SESSION['UserId'], $databaseMap))
-    {
+    if (array_key_exists($_SESSION['UserId'], $databaseMap)) {
       $databaseMap[$_SESSION['UserId']] = _('-- Me --');
     }
     $databaseMap[1] = _('Unassigned');
@@ -273,12 +247,10 @@ class AjaxBrowse extends DefaultPlugin
 
   private function createSelect($id,$options,$select='',$action='')
   {
-    $html = "<select name=\"$id\" id=\"$id\" $action class=\"ui-render-select2\">";
-    foreach($options as $key=>$disp)
-    {
+    $html = "<select class='form-control-sm' style=\"max-width:250px;\" name=\"$id\" id=\"$id\" $action class=\"ui-render-select2\">";
+    foreach ($options as $key=>$disp) {
       $html .= '<option value="'.$key.'"';
-      if ($key == $select)
-      {
+      if ($key == $select) {
         $html .= ' selected';
       }
       $html .= ">$disp</option>";
@@ -338,8 +310,7 @@ class AjaxBrowse extends DefaultPlugin
 
   private function getSearchString($searchPattern)
   {
-    if (empty($searchPattern))
-    {
+    if (empty($searchPattern)) {
       return '';
     }
     $this->filterParams[] = "%$searchPattern%";
@@ -352,14 +323,12 @@ class AjaxBrowse extends DefaultPlugin
    */
   private function getIntegerFilter($var, $columnName)
   {
-    if (empty($var))
-    {
+    if (empty($var)) {
       return '';
     }
     $this->filterParams[] = $var;
     return " AND $columnName=$" . count($this->filterParams) . ' ';
   }
-
 }
 
 register_plugin(new AjaxBrowse());

@@ -1,19 +1,7 @@
 /*
-Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
-Author: Johannes Najjar, Steffen Weber
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 /**
  * \file
@@ -84,7 +72,7 @@ void test_doctorBuffer_uncollapse()
   doctorBuffer(fer, 0, 0, 0);
   printf("Before %d, after %d", (int) strlen(cfer), (int) strlen(fer));
 
-  for (int i = 0; i < strlen(fer); i++)
+  for (size_t i = 0; i < strlen(fer); i++)
   {
     CU_ASSERT_EQUAL(*(fer + i), *(cfer + uncollapsePosition(i, cur.docBufferPositionsAndOffsets)));
   }
@@ -99,10 +87,10 @@ void test_doctorBuffer_uncollapse()
 static void report_Match(char* buf)
 {
   printf("I have %i matches \n", cur.theMatches->len);
-  for (int i = 0; i < cur.theMatches->len; ++i)
+  for (guint i = 0; i < cur.theMatches->len; ++i)
   {
     LicenceAndMatchPositions* licenceAndMatch =  getLicenceAndMatchPositions(cur.theMatches, i);
-    for (int k=0; k < licenceAndMatch->matchPositions->len; ++k) {
+    for (guint k=0; k < licenceAndMatch->matchPositions->len; ++k) {
       MatchPositionAndType* PaT = getMatchfromHighlightInfo(
           licenceAndMatch->matchPositions, k);
       printf("Match from %d to %d: ", PaT->start, PaT->end);
@@ -129,10 +117,10 @@ void test_doctorBuffer_fromFile()
 {
 
   licenseInit();
-  char* buf, *undoc;
-  buf = (char*) malloc(3000);
-
-  int f = open("../testdata/NomosTestfiles/WXwindows/WXwindows.txt", O_RDONLY);
+  char *buf, *undoc, *filename;
+  filename = buf = (char*)malloc(3000);
+  sprintf(filename, "%s/NomosTestfiles/WXwindows/WXwindows.txt", TESTDATADIR);
+  int f = open(filename, O_RDONLY);
   int whatIread = read(f, buf, 3000);
   close(f);
 

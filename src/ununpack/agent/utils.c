@@ -1,23 +1,13 @@
-/*******************************************************************
- Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011-2013 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *******************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * \file
  * \brief Contains all utility functions used by FOSSology
- */
+**/
+
 #include "ununpack.h"
 #include "externs.h"
 #include "regex.h"
@@ -51,9 +41,9 @@ int IsInflatedFile(char *FileName, int InflateSize)
 {
   int result = 0;
   char FileNameParent[PATH_MAX];
-  memset(FileNameParent, 0, PATH_MAX);
   struct stat st, stParent;
-  strncpy(FileNameParent, FileName, sizeof(FileNameParent));
+  memcpy(FileNameParent, FileName, sizeof(FileNameParent));
+  FileNameParent[PATH_MAX-1] = 0;
   char  *lastSlashPos = strrchr(FileNameParent, '/');
   if (NULL != lastSlashPos)
   {
@@ -630,7 +620,7 @@ void	CheckCommands	(int Show)
 int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
     char *Out, char *Where)
 {
-  char Cmd1[FILENAME_MAX * 3];
+  char Cmd1[FILENAME_MAX * 5];
   char CWD[FILENAME_MAX];
   int rc;
   char TempPre[FILENAME_MAX];
@@ -1124,15 +1114,17 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 {
   PGresult *result;
   char *Val; /* string result from SQL query */
+  long tempMimeType; ///< Temporary storage for mimetype fk from DB
+  char *tempSha256; ///< Temporary storage for pfile_sha256 from DB
 
   /* idiot checking */
   if (!Fuid || (Fuid[0] == '\0')) return(1);
 
   /* Check if the pfile exists */
   memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile "
+  snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk,pfile_sha256 FROM pfile "
       "WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
-      Fuid,Fuid+41,Fuid+74);
+      Fuid,Fuid+41,Fuid+140);
   result =  PQexec(pgConn, SQL); /* SELECT */
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(12);
 
@@ -1146,14 +1138,14 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
     memset(SQL,'\0',MAXSQL);
     if (CMD[CI->PI.Cmd].DBindex > 0)
     {
-      snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_size,pfile_mimetypefk) "
-               "VALUES ('%.40s','%.32s','%s','%ld');",
-          Fuid,Fuid+41,Fuid+74,CMD[CI->PI.Cmd].DBindex);
+      snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_sha256,pfile_size,pfile_mimetypefk) "
+               "VALUES ('%.40s','%.32s','%.64s','%s','%ld');",
+          Fuid,Fuid+41,Fuid+74,Fuid+140,CMD[CI->PI.Cmd].DBindex);
     }
     else
     {
-      snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_size) VALUES ('%.40s','%.32s','%s');",
-          Fuid,Fuid+41,Fuid+74);
+      snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_sha256,pfile_size) VALUES ('%.40s','%.32s','%.64s','%s');",
+          Fuid,Fuid+41,Fuid+74,Fuid+140);
     }
     result =  PQexec(pgConn, SQL); /* INSERT INTO pfile */
     // ignore duplicate constraint failure (23505), report others
@@ -1168,9 +1160,9 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
     /* Now find the pfile_pk.  Since it might be a dup, we cannot rely
        on currval(). */
     memset(SQL,'\0',MAXSQL);
-    snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile "
-        "WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
-        Fuid,Fuid+41,Fuid+74);
+    snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk,pfile_sha256 FROM pfile "
+        "WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_sha256 = '%.64s' AND pfile_size = '%s';",
+        Fuid,Fuid+41,Fuid+74,Fuid+140);
     result =  PQexec(pgConn, SQL);  /* SELECT */
     if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(14);
   }
@@ -1181,14 +1173,26 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   {
     CI->pfile_pk = atol(Val);
     if (Verbose) LOG_DEBUG("pfile_pk = %ld",CI->pfile_pk);
+    tempMimeType = atol(PQgetvalue(result,0,1));
+    tempSha256 = PQgetvalue(result,0,2);
     /* For backwards compatibility... Do we need to update the mimetype? */
     if ((CMD[CI->PI.Cmd].DBindex > 0) &&
-        (atol(PQgetvalue(result,0,1)) != CMD[CI->PI.Cmd].DBindex))
+        ((tempMimeType != CMD[CI->PI.Cmd].DBindex)))
     {
       PQclear(result);
       memset(SQL,'\0',MAXSQL);
       snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_mimetypefk = '%ld' WHERE pfile_pk = '%ld';",
           CMD[CI->PI.Cmd].DBindex, CI->pfile_pk);
+      result =  PQexec(pgConn, SQL); /* UPDATE pfile */
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(16);
+    }
+    /* Update the SHA256 for the pfile if it does not exists */
+    if (strncasecmp(tempSha256, Fuid+74, 64) != 0)
+    {
+      PQclear(result);
+      memset(SQL,'\0',MAXSQL);
+      snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_sha256 = '%.64s' WHERE pfile_pk = '%ld';",
+          Fuid+74, CI->pfile_pk);
       result =  PQexec(pgConn, SQL); /* UPDATE pfile */
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(16);
     }
@@ -1336,7 +1340,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 
   /*
    * Tests for SCM Data: IgnoreSCMData is global and defined in ununpack_globals.h with false value
-   * and pass to true if ununpack is called with -I option to ignore SCM data. 
+   * and pass to true if ununpack is called with -I option to ignore SCM data.
    * So if IgnoreSCMData is false the right test is true.
    * Otherwise if IgnoreSCMData is true and CI->Source is not a SCM data then add it in database.
   */
@@ -1390,7 +1394,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
  *
  * This modifies the CI record's pfile and ufile indexes!
  * @param CI
- * @param Fuid sha1.md5.size
+ * @param Fuid sha1.md5.sha256.size
  * @param Mask file mode mask
  * @returns 1 if added, 0 if already exists!
  **/
@@ -1403,17 +1407,25 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
   /* If we ever want to skip artifacts, use && !CI->Artifact */
   if ((Fuid[0]!='\0') && UseRepository)
   {
+    /* Translate the new Fuid into old Fuid */
+    char FuidNew[1024];
+    memset(FuidNew, '\0', sizeof(FuidNew));
+    // Copy the value till md5
+    strncpy(FuidNew, Fuid, 74);
+    // Copy the size of the file
+    strcat(FuidNew,Fuid+140);
+
     /* put file in repository */
     if (!fo_RepExist(REP_FILES,Fuid))
     {
-      if (fo_RepImport(CI->Source,REP_FILES,Fuid,1) != 0)
+      if (fo_RepImport(CI->Source,REP_FILES,FuidNew,1) != 0)
       {
-        LOG_ERROR("Failed to import '%s' as '%s' into the repository",CI->Source,Fuid);
+        LOG_ERROR("Failed to import '%s' as '%s' into the repository",CI->Source,FuidNew);
         SafeExit(21);
       }
     }
     if (Verbose) LOG_DEBUG("Repository[%s]: insert '%s' as '%s'",
-        REP_FILES,CI->Source,Fuid);
+        REP_FILES,CI->Source,FuidNew);
   }
 
   /* PERFORMANCE NOTE:
@@ -1557,19 +1569,31 @@ int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
   {
     CksumFile *CF;
     Cksum *Sum;
+    char SHA256[65];
+
+    memset(SHA256, '\0', sizeof(SHA256));
 
     CF = SumOpenFile(CI->Source);
+    if(calc_sha256sum(CI->Source, SHA256))
+    {
+        LOG_FATAL("Unable to calculate SHA256 of %s\n", CI->Source);
+        SafeExit(56);
+    }
+
     if (CF)
     {
       Sum = SumComputeBuff(CF);
       SumCloseFile(CF);
+
       if (Sum)
       {
         for(i=0; i<20; i++) { sprintf(Fuid+0+i*2,"%02X",Sum->SHA1digest[i]); }
         Fuid[40]='.';
         for(i=0; i<16; i++) { sprintf(Fuid+41+i*2,"%02X",Sum->MD5digest[i]); }
         Fuid[73]='.';
-        snprintf(Fuid+74,sizeof(Fuid)-74,"%Lu",(long long unsigned int)Sum->DataLen);
+        for(i=0; i<64; i++) { sprintf(Fuid+74+i,"%c",SHA256[i]); }
+        Fuid[139]='.';
+        snprintf(Fuid+140,sizeof(Fuid)-140,"%Lu",(long long unsigned int)Sum->DataLen);
         if (ListOutFile) fprintf(ListOutFile,"fuid=\"%s\" ",Fuid);
         free(Sum);
       } /* if Sum */
@@ -1587,7 +1611,9 @@ int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
           Fuid[40]='.';
           for(i=0; i<16; i++) { sprintf(Fuid+41+i*2,"%02X",Sum->MD5digest[i]); }
           Fuid[73]='.';
-          snprintf(Fuid+74,sizeof(Fuid)-74,"%Lu",(long long unsigned int)Sum->DataLen);
+          for(i=0; i<64; i++) { sprintf(Fuid+74+i,"%c",SHA256[i]); }
+          Fuid[139]='.';
+          snprintf(Fuid+140,sizeof(Fuid)-140,"%Lu",(long long unsigned int)Sum->DataLen);
           if (ListOutFile) fprintf(ListOutFile,"fuid=\"%s\" ",Fuid);
           free(Sum);
         }
@@ -1668,7 +1694,7 @@ char *PathCheck(char *DirPath)
     free(NewPath);
     NewPath = strdup(TmpPath);
   }
-
+#ifndef STANDALONE
   if ((subs = strstr(NewPath, "%R")) )
   {
     /* repo location substitution */
@@ -1678,7 +1704,7 @@ char *PathCheck(char *DirPath)
     free(NewPath);
     NewPath = strdup(TmpPath);
   }
-
+#endif
   return(NewPath);
 }
 
@@ -1735,7 +1761,6 @@ void	Usage	(char *Name, char *Version)
   fprintf(stderr,"  Boot partitions: x86, vmlinuz\n");
   CheckCommands(Quiet);
 } /* Usage() */
-
 
 /**
  * @brief Dummy postgresql notice processor.

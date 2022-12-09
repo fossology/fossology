@@ -1,8 +1,6 @@
-{# Copyright 2014-2017 Siemens AG
+{# SPDX-FileCopyrightText: © 2014-2017 Siemens AG
 
-   Copying and distribution of this file, with or without modification,
-   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-   This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 <form name="Updatefm" action="{{ actionUri }}" method="post">
   <input type="hidden" name="ob_pk" value="{{ ob_pk }}"/>
@@ -25,7 +23,7 @@
         {% if isReadOnly %}
           ({{ 'read only'|trans }}){% endif %}
       </td>
-      <td align="left">{{ macro.selectsingle('ob_type', obligationTypes, 'ob_type', 'Obligation', 'style="min-width:120px;"', 4) }}
+      <td align="left">{{ macro.selectsingle('ob_type', obligationTypes, 'ob_type', ob_type, 'style="min-width:120px;"', 4) }}
       </td>
     </tr>
     <tr>
@@ -38,19 +36,19 @@
       </td>
     </tr>
     <tr>
-      <td align="right">{{ 'Optional: level of attention this obligation </br> should raise in the clearing process'|trans }}
+      <td align="right">{{ 'Optional: level of attention this obligation <br/> should raise in the clearing process'|trans }}
         {% if isReadOnly %}
           ({{ 'read only'|trans }}){% endif %}
       </td>
-      <td align="left">{{ macro.selectsingle('ob_classification', obligationClassification, 'ob_classification', 'green', 'style="min-width:120px;"', 4) }}
+      <td align="left">{{ macro.selectsingle('ob_classification', obligationClassification, 'ob_classification', ob_classification, 'style="min-width:120px;"', 4) }}
       </td>
     </tr>
     <tr>
-      <td align="right">{{ 'Optional: does this obligation apply</br> on modified source code?'|trans }}</td>
+      <td align="right">{{ 'Optional: does this obligation apply<br/> on modified source code?'|trans }}</td>
       <td align="left">{{ macro.select('ob_modifications',YesNoMap,'ob_modifications',ob_modifications) }}</td>
     </tr>
     <tr>
-      <td align="right">{{ "Associated Licenses"|trans }}</td>
+      <td align="right">{{ "Associated Licenses (conclusions)"|trans }}</td>
       <td align="left">{{ macro.selectwitharray(licenseSelectorName, licenseShortnames, licenseSelectorId, licnames, 'style="min-width:575px;"', 8) }}</td>
     </tr>
     <tr>

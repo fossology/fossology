@@ -1,25 +1,31 @@
-#! /bin/sh
-# Init script for the {$PROJECT} scheduler.
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+#!/bin/sh
+# Init script for the @FO_PROJECT@ scheduler.
+# SPDX-FileCopyrightText: © 2011 Hewlett-Packard Development Company, L.P.
+#
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Based on the example skeleton:
 #	Written by Miquel van Smoorenburg <miquels@cistron.nl>.
 #	Modified for Debian by Ian Murdock <imurdock@gnu.ai.mit.edu>.
 #
 ### BEGIN INIT INFO
-# Provides:          {$PROJECT}
+# Provides:          @FO_PROJECT@
 # Required-Start:    $network $local_fs $remote_fs $syslog $named
 # Required-Stop:     $network $local_fs $remote_fs $syslog $named
+# Should-Start:      postgresql
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: FOSSology scheduler daemon
 ### END INIT INFO
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON={$MODDIR}/scheduler/agent/fo_scheduler
-CLI={$MODDIR}/scheduler/agent/fo_cli
+DAEMON=@FO_MODDIR@/scheduler/agent/fo_scheduler
+CLI=@FO_MODDIR@/scheduler/agent/fo_cli
 NAME=fossology
 DESC="FOSSology job scheduler"
+
+# Include default init-functions for Debian
+[ -e /lib/lsb/init-functions ] && . /lib/lsb/init-functions
 
 test -x $DAEMON || exit 0
 
@@ -27,11 +33,11 @@ test -x $DAEMON || exit 0
 ENABLED=1
 
 # Include scheduler defaults if available
-SCHEDULEROPT="--daemon --reset --verbose=1" 
-if [ -f {$SYSCONFDIR}/default/fossology ] ; then
+SCHEDULEROPT="--daemon --reset --verbose=1"
+if [ -f @FO_SYSCONFDIR@/default/fossology ] ; then
     # This can override SCHEDULEROPT.
     # Be sure to keep "-d" for daemon mode
-    . {$SYSCONFDIR}/default/fossology
+    . @FO_SYSCONFDIR@/default/fossology
 fi
 
 # Quit quietly, if $ENABLED is 0.
@@ -39,44 +45,52 @@ test "$ENABLED" != "0" || exit 0
 
 set -e
 
-case "$1" in
-  start)
+start () {
     echo -n "Starting $DESC: "
     $DAEMON $SCHEDULEROPT
     echo "$NAME."
-    ;;
-  stop)
+}
+
+stop () {
     echo -n "Stopping $DESC: "
     # we don't really care about the exit code as long as it's stopped
     $DAEMON --kill || echo -n "no "
     echo "$NAME killed."
-    ;;
-  graceful-stop)
+}
+
+gracefulstop () {
     echo -n "Gracefully shutting down $DESC after all current jobs finish: "
     # we don't really care about the exit code as long as it's stopped
     $DAEMON --shutdown
     echo "$NAME shutdown."
+}
+
+reload () {
+    $CLI --reload
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  graceful-stop)
+    gracefulstop
     ;;
   restart)
     echo -n "Restarting $DESC: "
-    $DAEMON --kill || true
+    stop
     sleep 1
-    $DAEMON $SCHEDULEROPT
-    echo "$NAME."
+    start
     ;;
-  reload)
-    #
-    #	If the daemon can reload its config files on the fly
-    #	for example by sending it SIGHUP, do it here.
-    #
-    #	If the daemon responds to changes in its config file
-    #	directly anyway, make this a do-nothing entry.
-    #
-    $CLI --reload
+  reload|force-reload)
+    reload
     ;;
   *)
-    N={$INITDIR}/init.d/$NAME
-    echo "Usage: $N \{start|stop|graceful-stop|restart|reload\}" >&2
+    N=@FO_INITDIR@/init.d/$NAME
+    echo "Usage: $N {start|stop|graceful-stop|restart|reload|force-reload}" >&2
     exit 1
 	;;
 esac

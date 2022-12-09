@@ -1,4 +1,6 @@
+# SPDX-FileCopyrightText: © Fossology contributors
 
+# SPDX-License-Identifier: FSFAP
 =head1 NAME
 
 MANPAGENAME:

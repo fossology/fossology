@@ -1,20 +1,10 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
+
 
 namespace Fossology\Monk\UI;
 
@@ -46,7 +36,7 @@ class OneShot extends DefaultPlugin
   {
     parent::__construct(self::NAME, array(
         self::TITLE => "One-Shot Monk",
-        self::MENU_LIST => "Upload::One-Shot Monk",
+        self::MENU_LIST => "Upload::One-Shot Monk Analysis",
         self::PERMISSION => Auth::PERM_WRITE,
         self::REQUIRES_LOGIN => true
     ));
@@ -64,8 +54,7 @@ class OneShot extends DefaultPlugin
   {
     /** @var UploadedFile */
     $uploadFile = $request->files->get('file_input');
-    if($uploadFile===null)
-    {
+    if ($uploadFile === null) {
       return $this->render('oneshot-upload.html.twig', $this->getDefaultVars());
     }
     $fullpath = $uploadFile->getPath().'/'.$uploadFile->getFilename();
@@ -79,8 +68,7 @@ class OneShot extends DefaultPlugin
   public function scanMonkRendered($text)
   {
     $tmpFileName = tempnam("/tmp", "monk");
-    if (!$tmpFileName)
-    {
+    if (!$tmpFileName) {
       throw new \Exception("cannot create temporary file");
     }
     $handle = fopen($tmpFileName, "w");
@@ -88,7 +76,7 @@ class OneShot extends DefaultPlugin
     fclose($handle);
     list($licenseIds, $highlights) = $this->scanMonk($tmpFileName);
     unlink($tmpFileName);
-    
+
     $this->highlightProcessor->addReferenceTexts($highlights);
     $splitPositions = $this->highlightProcessor->calculateSplitPositions($highlights);
     $textFragment = new TextFragment(0, $text);
@@ -97,12 +85,12 @@ class OneShot extends DefaultPlugin
 
     return array($licenseIds, $rendered);
   }
-  
-  
+
+
   public function scanMonkFileRendered($tmpfname)
   {
     list($licenseIds, $highlights) = $this->scanMonk($tmpfname);
-    
+
     $text = file_get_contents($tmpfname);
 
     $this->highlightProcessor->addReferenceTexts($highlights);
@@ -113,7 +101,7 @@ class OneShot extends DefaultPlugin
 
     return array($licenseIds, $rendered);
   }
-  
+
 
   public function scanMonk($fileName)
   {
@@ -127,17 +115,14 @@ class OneShot extends DefaultPlugin
     $qFileName = preg_quote($fileName, "/");
     $licenseIds = array();
     $highlights = array();
-    foreach ($output as $line)
-    {
+    foreach ($output as $line) {
       $lineMatches = array();
-      if (preg_match('/found diff match between "'.$qFileName.'" and "[^"]*" \(rf_pk=(?P<rf>[0-9]+)\); rank (?P<rank>[0-9]{1,3}); diffs: \{(?P<diff>[st\[\]0-9, MR+-]+)}/', $line, $lineMatches))
-      {
+      if (preg_match('/found diff match between "'.$qFileName.'" and "[^"]*" \(rf_pk=(?P<rf>[0-9]+)\); rank (?P<rank>[0-9]{1,3}); diffs: \{(?P<diff>[st\[\]0-9, MR+-]+)}/', $line, $lineMatches)) {
         $licenseId = $lineMatches['rf'];
         $licenseIds[] = $licenseId;
         $this->addDiffsToHighlights($licenseId, $lineMatches, $highlights);
       }
-      if (preg_match('/found full match between "'.$qFileName.'" and "[^"]*" \(rf_pk=(?P<rf>[0-9]+)\); matched: (?P<start>[0-9]*)\+?(?P<len>[0-9]*)?/', $line, $lineMatches))
-      {
+      if (preg_match('/found full match between "'.$qFileName.'" and "[^"]*" \(rf_pk=(?P<rf>[0-9]+)\); matched: (?P<start>[0-9]*)\+?(?P<len>[0-9]*)?/', $line, $lineMatches)) {
         $licenseId = $lineMatches['rf'];
         $licenseIds[] = $licenseId;
 
@@ -158,18 +143,15 @@ class OneShot extends DefaultPlugin
 
   private function addDiffsToHighlights($licenseId, $lineMatches, &$highlights)
   {
-    foreach (explode(',', $lineMatches['diff']) as $diff)
-    {
+    foreach (explode(',', $lineMatches['diff']) as $diff) {
       // t[0+4798] M0 s[0+4834]
-      if (preg_match('/t\[(?P<start>[0-9]*)\+?(?P<len>[0-9]*)?\] M(?P<type>.?) s\[(?P<rf_start>[0-9]*)\+?(?P<rf_len>[0-9]*)?\]/', $diff, $diffMatches))
-      {
-        $start = $diffMatches['start'];
-        $end = $start + $diffMatches['len'];
+      if (preg_match('/t\[(?P<start>[0-9]*)\+?(?P<len>[0-9]*)?\] M(?P<type>.?) s\[(?P<rf_start>[0-9]*)\+?(?P<rf_len>[0-9]*)?\]/', $diff, $diffMatches)) {
+        $start = intval($diffMatches['start']);
+        $end = $start + intval($diffMatches['len']);
         $rfStart = intval($diffMatches['rf_start']);
-        $rfEnd = $rfStart + $diffMatches['rf_len'];
+        $rfEnd = $rfStart + intval($diffMatches['rf_len']);
 
-        switch ($diffMatches['type'])
-        {
+        switch ($diffMatches['type']) {
           case '0':
             $type = Highlight::MATCH;
             break;
@@ -189,8 +171,7 @@ class OneShot extends DefaultPlugin
         $highlight->setLicenseId($licenseId);
 
         $highlights[] = $highlight;
-      } else
-      {
+      } else {
         throw new \Exception('failed parsing diff element: '.$diff);
       }
     }
@@ -204,22 +185,18 @@ class OneShot extends DefaultPlugin
     /** @var LicenseDao $licenseDao */
     $licenseDao = $container->get('dao.license');
     $isLoggedIn = $this->isLoggedIn();
-    foreach($licenseIds as $licenseId)
-    {
+    foreach ($licenseIds as $licenseId) {
       /** @var License */
       $license = $licenseDao->getLicenseById($licenseId);
-      if ($isLoggedIn)
-      {
+      if ($isLoggedIn) {
         $js = "javascript:window.open('?mod=popup-license&rf=" . $license->getId() . "','License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');";
         $content .= '<li><a onclick="' . $js . '" href="javascript:;">' . $license->getShortName() . '</a></li>';
-      } else
-      {
+      } else {
         $content .= '<li>' . $license->getShortName() . '</li>';
       }
     }
     return $content ? _('Possible licenses').":<ul>$content</ul>" : _('No match found').'<hr/>';
   }
-
 }
 
 register_plugin(new OneShot());

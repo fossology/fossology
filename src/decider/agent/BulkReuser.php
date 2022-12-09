@@ -1,19 +1,8 @@
 <?php
 /*
- Copyright (C) 2015-2018, Siemens AG
+ SPDX-FileCopyrightText: © 2015-2018 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Decider;
@@ -68,8 +57,8 @@ class BulkReuser
      */
     $deciderPlugin = plugin_find("agent_deciderjob");
     $dependecies = array();
-    $sql = "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_text,upload_fk,uploadtree_fk) "
-            . "SELECT $1 AS user_fk, $2 AS group_fk,rf_text,$3 AS upload_fk, $4 as uploadtree_fk
+    $sql = "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_text,upload_fk,uploadtree_fk,ignore_irrelevant,bulk_delimiters) "
+            . "SELECT $1 AS user_fk, $2 AS group_fk,rf_text,$3 AS upload_fk, $4 as uploadtree_fk, ignore_irrelevant, bulk_delimiters
               FROM license_ref_bulk WHERE lrb_pk=$5 RETURNING lrb_pk, $5 as lrb_origin";
     $sqlLic = "INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing, comment, reportinfo, acknowledgement) "
             ."SELECT $1 as lrb_fk, rf_fk, removing, comment, reportinfo, acknowledgement FROM license_set_bulk WHERE lrb_fk=$2";

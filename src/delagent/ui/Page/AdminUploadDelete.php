@@ -1,21 +1,10 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015-2017 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2015-2017 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @namespace Fossology::DelAgent::UI::Page
  * @brief UI namespace for delagent
@@ -51,7 +40,7 @@ class AdminUploadDelete extends DefaultPlugin
         self::TITLE => _("Delete Uploaded File"),
         self::MENU_LIST => "Organize::Uploads::Delete Uploaded File",
         self::PERMISSION => Auth::PERM_ADMIN,
-        self::REQUIRES_LOGIN => TRUE
+        self::REQUIRES_LOGIN => true
     ));
 
     global $container;
@@ -76,7 +65,7 @@ class AdminUploadDelete extends DefaultPlugin
     }
     /* Add job: job "Delete" has jobqueue item "delagent" */
     $jqargs = "DELETE UPLOAD $uploadpk";
-    $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, NULL, NULL);
+    $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, null, null);
     if (empty($jobqueuepk)) {
       return _("Failed to place delete in job queue");
     }
@@ -89,7 +78,7 @@ class AdminUploadDelete extends DefaultPlugin
       $LinkText = _("View Jobs");
       return "$error_msg <a href=\"$URL\">$LinkText</a>";
     }
-    return NULL;
+    return null;
   }
 
   /**
@@ -103,8 +92,7 @@ class AdminUploadDelete extends DefaultPlugin
     $uploadpks = $request->get('uploads');
     $folderId = $request->get('folder');
 
-    if (!empty($uploadpks))
-    {
+    if (!empty($uploadpks)) {
       $vars['message'] = $this->initDeletion($uploadpks, $folderId);
     }
 
@@ -115,7 +103,7 @@ class AdminUploadDelete extends DefaultPlugin
 
     $uploadList = array();
     $folderList = FolderListUploads_perm($root_folder_pk, Auth::PERM_WRITE);
-    foreach($folderList as $L) {
+    foreach ($folderList as $L) {
       $desc = $L['name'];
       if (!empty($L['upload_desc'])) {
         $desc .= " (" . $L['upload_desc'] . ")";
@@ -139,30 +127,26 @@ class AdminUploadDelete extends DefaultPlugin
    */
   private function initDeletion($uploadpks, $folderId)
   {
-    if(sizeof($uploadpks) <= 0)
-    {
+    if (sizeof($uploadpks) <= 0) {
       return _("No uploads selected");
     }
 
     $errorMessages = [];
-    $deleteResponse = NULL;
-    foreach($uploadpks as $uploadPk)
-    {
+    $deleteResponse = null;
+    foreach ($uploadpks as $uploadPk) {
       $deleteResponse = $this->TryToDelete(intval($uploadPk), $folderId);
 
-      if($deleteResponse->getDeleteMessageCode() != DeleteMessages::SUCCESS)
-      {
+      if ($deleteResponse->getDeleteMessageCode() != DeleteMessages::SUCCESS) {
         $errorMessages[] = $deleteResponse;
       }
     }
 
-    if(sizeof($uploadpks) == 1)
-    {
+    if (sizeof($uploadpks) == 1) {
       return $deleteResponse->getDeleteMessageString().$deleteResponse->getAdditionalMessage();
     }
 
     $displayMessage = "";
-    $countErrorMessages = array_count_values($errorMessages);
+    $countErrorMessages = array_count_values(array_filter($errorMessages));
     if (in_array(DeleteMessages::SCHEDULING_FAILED, $errorMessages)) {
       $displayMessage .= "<br/>Scheduling failed for " .
               $countErrorMessages[DeleteMessages::SCHEDULING_FAILED] . " uploads<br/>";
@@ -186,12 +170,12 @@ class AdminUploadDelete extends DefaultPlugin
    */
   private function TryToDelete($uploadpk, $folderId)
   {
-    if(!$this->uploadDao->isEditable($uploadpk, Auth::getGroupId())) {
+    if (!$this->uploadDao->isEditable($uploadpk, Auth::getGroupId())) {
       $returnMessage = DeleteMessages::NO_PERMISSION;
       return new DeleteResponse($returnMessage);
     }
 
-    if(!empty($this->folderDao->isRemovableContent($uploadpk,2))) {
+    if (!empty($this->folderDao->isRemovableContent($uploadpk,2))) {
       $this->folderDao->removeContentById($uploadpk, $folderId);
       $returnMessage = DeleteMessages::SUCCESS;
       return new DeleteResponse($returnMessage);

@@ -1,19 +1,8 @@
-/*********************************************************************
-Copyright (C) 2014-2015, 2018 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2014-15, 2018 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*********************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -21,6 +10,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "regex.hpp"
 #include "regscan.hpp"
 #include "copyrightUtils.hpp"
+#include "cleanEntries.hpp"
 #include <list>
 #include <cstring>
 #include <ostream>
@@ -50,6 +40,10 @@ const char testContent[] = "© 2007 Hugh Jackman\n\n"
   "if (c) { return -1 } \n\n"
   "Written by: me, myself and Irene.\n\n"
   "Authors all the people at ABC\n\n"
+  "<author>Author1</author>"
+  "<head>All the people</head>"
+  "<author>Author1 Author2 Author3</author>"
+  "<author>Author4</author><b>example</b>"
   "Apache\n\n"
   "This file is protected under pants 1 , 2 ,3\n\n"
   "Do not modify this document\n\n"
@@ -58,7 +52,8 @@ const char testContent[] = "© 2007 Hugh Jackman\n\n"
   "maintained by benjamin drieu <benj@debian.org>\n\n"
   "* Copyright (c) 1989, 1993\n" // Really just one newline here!
   "* The Regents of the University of California. All rights reserved.\n\n"
-  "to be licensed as a whole";
+  "to be licensed as a whole"
+  "/* Most of the following tests are stolen from RCS 5.7's src/conf.sh.  */";
 
 class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (scannerTestSuite);
@@ -68,6 +63,7 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST (regUrlTest);
   CPPUNIT_TEST (regEmailTest);
   CPPUNIT_TEST (regKeywordTest);
+  CPPUNIT_TEST (cleanEntries);
 
   CPPUNIT_TEST_SUITE_END ();
 
@@ -133,6 +129,9 @@ protected:
     scannerTest(sc, testContent, "author", {
       "Written by: me, myself and Irene.",
       "Authors all the people at ABC",
+      "Author1",
+      "Author1 Author2 Author3",
+      "Author4",
       "maintained by benjamin drieu <benj@debian.org>"
     });
   }
@@ -172,9 +171,70 @@ protected:
     regexScanner sc("email", "copyright",1);
     scannerTest(sc, testContent, "email", { "info@mysite.org", "benj@debian.org" });
   }
+
+  /**
+   * \brief Test copyright scanner for keywords
+   * \test
+   * -# Create a keyword scanner
+   * -# Load test data and expected data
+   * -# Test using scannerTest()
+   */
   void regKeywordTest () {
     regexScanner sc("keyword", "keyword");
-    scannerTest(sc, testContent, "keyword", {"patent", "licensed as"});
+    scannerTest(sc, testContent, "keyword", {"patent", "licensed as", "stolen from"});
+  }
+
+  /**
+   * \brief Test cleanMatch() to remove non-UTF8 text and extra spaces
+   * \test
+   * -# Load test data and expected data
+   * -# Generate matches to clean each line in the file
+   * -# Call cleanMatch() to clean each line
+   * -# Check if cleaned test data matches expected data
+   */
+  void cleanEntries () {
+    // Binary content
+    string actualFileContent;
+    ReadFileToString("../testdata/testdata142", actualFileContent);
+
+    vector<string> binaryStrings;
+    std::stringstream *ss = new std::stringstream(actualFileContent);
+    string temp;
+
+    while (std::getline(*ss, temp)) {
+      binaryStrings.push_back(temp);
+    }
+
+    // Simulate matches. Each line is a match
+    vector<match> matches;
+    int pos = 0;
+    int size = binaryStrings.size();
+    for (int i = 0; i < size; i++)
+    {
+      int length = binaryStrings[i].length();
+      matches.push_back(
+        match(pos, pos + length, "statement"));
+      pos += length + 1;
+    }
+
+    // Expected data
+    string expectedFileContent;
+    ReadFileToString("../testdata/testdata142_exp", expectedFileContent);
+
+    delete(ss);
+    ss = new std::stringstream(expectedFileContent);
+    vector<string> expectedStrings;
+    while (std::getline(*ss, temp)) {
+      expectedStrings.push_back(temp);
+    }
+
+    vector<string> actualStrings;
+    for (size_t i = 0; i < matches.size(); i ++)
+    {
+      actualStrings.push_back(cleanMatch(actualFileContent, matches[i]));
+    }
+
+    CPPUNIT_ASSERT(expectedStrings == actualStrings);
   }
 };
 

@@ -1,21 +1,10 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2015 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
@@ -48,8 +37,13 @@ class ui_download extends FO_Plugin
    */
   function RegisterMenus()
   {
+    global $SysConf;
     $text = _("Download this file");
-    menu_insert("Browse-Pfile::Download",0,$this->Name,$text);
+    if (array_key_exists(Auth::USER_LEVEL, $_SESSION) &&
+      $_SESSION[Auth::USER_LEVEL] >= $SysConf['SYSCONFIG']['SourceCodeDownloadRights']) {
+      menu_insert("Browse-Pfile::Download",0,$this->Name,$text);
+    }
+
   } // RegisterMenus()
 
   /**
@@ -67,11 +61,11 @@ class ui_download extends FO_Plugin
     header('Expires: Expires: Thu, 19 Nov 1981 08:52:00 GMT'); /* mark it as expired (value from Apache default) */
 
     $V = "";
-    if (($this->NoMenu == 0) && ($this->Name != "menus"))
-    {
+    if (($this->NoMenu == 0) && ($this->Name != "menus")) {
       $Menu = &$Plugins[plugin_find_id("menus")];
+    } else {
+      $Menu = null;
     }
-    else { $Menu = NULL; }
 
     /* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
     $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
@@ -79,32 +73,35 @@ class ui_download extends FO_Plugin
     $V .= "<html>\n";
     $V .= "<head>\n";
     $V .= "<meta name='description' content='The study of Open Source'>\n";
-    if ($this->NoHeader == 0)
-    {
+    if ($this->NoHeader == 0) {
       /** Known bug: DOCTYPE "should" be in the HEADER
        and the HEAD tags should come first.
        Also, IE will ignore <style>...</style> tags that are NOT
        in a <head>...</head>block.
        **/
-      if (!empty($this->Title)) $V .= "<title>" . htmlentities($this->Title) . "</title>\n";
+      if (!empty($this->Title)) {
+        $V .= "<title>" . htmlentities($this->Title) . "</title>\n";
+      }
       $V .= "<link rel='stylesheet' href='css/fossology.css'>\n";
-      if (!empty($Menu)) print $Menu->OutputCSS();
+      if (!empty($Menu)) {
+        print $Menu->OutputCSS();
+      }
       $V .= "</head>\n";
       $V .= "<body class='text'>\n";
       print $V;
-      if (!empty($Menu)) { $Menu->Output($this->Title); }
+      if (! empty($Menu)) {
+        $Menu->Output($this->Title);
+      }
     }
 
     $P = &$Plugins[plugin_find_id("view")];
-    $P->ShowView(NULL,"browse");
-    exit;
-  } // CheckRestore()
-
+    $P->ShowView(null, "browse");
+    exit();
+  }
 
   function getResponse()
   {
-    try
-    {
+    try {
       $output = $this->getPathAndName();
       list($Filename, $Name) = $output;
       $response = $this->downloadFile($Filename, $Name);
@@ -127,11 +124,11 @@ class ui_download extends FO_Plugin
       throw new Exception('Download plugin is not ready');
     }
 
+    global $SysConf;
     global $container;
     /** @var DbManager $dbManager */
     $dbManager = $container->get('db.manager');
-    if (!$dbManager->getDriver())
-    {
+    if (!$dbManager->getDriver()) {
       throw new Exception("Missing database connection.");
     }
 
@@ -139,51 +136,41 @@ class ui_download extends FO_Plugin
     $item = GetParm("item",PARM_INTEGER);
     $logJq = GetParm('log', PARM_INTEGER);
 
-    if (!empty($reportId))
-    {
+    if (!empty($reportId)) {
       $row = $dbManager->getSingleRow("SELECT * FROM reportgen WHERE job_fk = $1", array($reportId), "reportFileName");
-      if ($row === false)
-      {
+      if ($row === false) {
         throw new Exception("Missing report");
       }
       $path = $row['filepath'];
       $filename = basename($path);
       $uploadId = $row['upload_fk'];
-    }
-    elseif (!empty($logJq))
-    {
+    } elseif (!empty($logJq)) {
       $sql = "SELECT jq_log, job_upload_fk FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk =$1";
       $row = $dbManager->getSingleRow($sql, array($logJq), "jqLogFileName");
-      if ($row === false)
-      {
+      if ($row === false) {
         throw new Exception("Missing report");
       }
       $path = $row['jq_log'];
       $filename = basename($path);
       $uploadId = $row['job_upload_fk'];
-    }
-    elseif (empty($item))
-    {
+    } elseif (empty($item)) {
       throw new Exception("Invalid item parameter");
-    }
-    else
-    {
+    } elseif ($_SESSION[Auth::USER_LEVEL] < $SysConf['SYSCONFIG']['SourceCodeDownloadRights']) {
+      throw new Exception("User permissions not sufficient for source code download");
+    } else {
       $path = RepPathItem($item);
-      if (empty($path))
-      {
+      if (empty($path)) {
         throw new Exception("Invalid item parameter");
       }
 
       $fileHandle = @fopen( RepPathItem($item) ,"rb");
       /* note that CheckRestore() does not return. */
-      if (empty($fileHandle))
-      {
+      if (empty($fileHandle)) {
         $this->CheckRestore($item, $path);
       }
 
       $row = $dbManager->getSingleRow("SELECT ufile_name, upload_fk FROM uploadtree WHERE uploadtree_pk = $1",array($item));
-      if ($row===false)
-      {
+      if ($row===false) {
         throw new Exception("Missing item");
       }
       $filename = $row['ufile_name'];
@@ -192,16 +179,13 @@ class ui_download extends FO_Plugin
 
     /* @var $uploadDao UploadDao */
     $uploadDao = $GLOBALS['container']->get('dao.upload');
-    if (!Auth::isAdmin() && !$uploadDao->isAccessible($uploadId, Auth::getGroupId()))
-    {
+    if (!Auth::isAdmin() && !$uploadDao->isAccessible($uploadId, Auth::getGroupId())) {
       throw new Exception("No Permission: $uploadId");
     }
-    if (!file_exists($path))
-    {
+    if (!file_exists($path)) {
       throw new Exception("File does not exist");
     }
-    if (!is_file($path))
-    {
+    if (!is_file($path)) {
       throw new Exception("Not a regular file");
     }
     return array($path, $filename);
@@ -209,8 +193,8 @@ class ui_download extends FO_Plugin
 
   /**
    * @global type $container
-   * @param type $path
-   * @param type $filename
+   * @param string $path
+   * @param string $filename
    * @return BinaryFileResponse
    */
   protected function downloadFile($path, $filename)
@@ -225,16 +209,24 @@ class ui_download extends FO_Plugin
 
     $response = new BinaryFileResponse($path);
     $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename, $filenameFallback);
-    if (pathinfo($filename, PATHINFO_EXTENSION) == 'docx')
-    {
-      $response->headers->set('Content-Type', ''); // otherwise mineType would be zip
-    }
+    $response->headers->set('Content-Type', $response->getFile()->getMimeType());
 
     $logger = $container->get("logger");
     $logger->pushHandler(new NullHandler(Logger::DEBUG));
-    BrowserConsoleHandler::reset();
+    BrowserConsoleHandler::resetStatic();
 
     return $response;
+  }
+
+  /**
+   * Get the file response for a given file path
+   * @param int $jobId
+   * @return BinaryFileResponse
+   * @throws Exception
+   */
+  public function getDownload($path , $name)
+  {
+    return $this->downloadFile($path, $name);
   }
 
   /**
@@ -251,5 +243,5 @@ class ui_download extends FO_Plugin
   }
 }
 
-$NewPlugin = new ui_download;
+$NewPlugin = new ui_download();
 $NewPlugin->Initialize();

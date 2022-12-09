@@ -1,21 +1,10 @@
 <?php
-/***************************************************************
- Copyright (C) 2018 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2018 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @file
  * @brief Controller for folder queries
@@ -23,9 +12,8 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
-use Fossology\Lib\Auth\Auth;
 use Fossology\UI\Api\Models\Folder;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -41,9 +29,9 @@ class FolderController extends RestController
    * Get all folders accessible by the user
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function getFolders($request, $response, $args)
   {
@@ -58,7 +46,7 @@ class FolderController extends RestController
         $returnVal = new Info(403, "Folder id $id is not accessible",
           InfoType::ERROR);
       }
-      if($folderDao->getFolder($id) === null) {
+      if ($folderDao->getFolder($id) === null) {
         $returnVal = new Info(404, "Folder id $id does not exists",
           InfoType::ERROR);
       }
@@ -77,7 +65,9 @@ class FolderController extends RestController
     $foldersList = array();
     foreach ($allUserFolders as $folderId) {
       $folder = $folderDao->getFolder($folderId);
-      $folderModel = new Folder($folder->getId(), $folder->getName(), $folder->getDescription());
+      $parentId = $folderDao->getFolderParentId($folderId);
+      $folderModel = new Folder($folder->getId(), $folder->getName(),
+        $folder->getDescription(), $parentId);
       $foldersList[] = $folderModel->getArray();
     }
     if ($id !== null) {
@@ -90,9 +80,9 @@ class FolderController extends RestController
    * Create a new folder
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function createFolder($request, $response, $args)
   {
@@ -115,7 +105,7 @@ class FolderController extends RestController
     if ($info !== null) {
       return $response->withJson($info->getArray(), $info->getCode());
     }
-    $folderCreate = plugin_find('folder_create');
+    $folderCreate = $this->restHelper->getPlugin('folder_create');
     $rc = $folderCreate->create($parentFolder, $folderName, $folderDescription);
     if ($rc == 4) {
       $info = new Info(200, "Folder $folderName already exists!", InfoType::INFO);
@@ -132,9 +122,9 @@ class FolderController extends RestController
    * Delete a folder all sub-folders and uploads within the folder
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function deleteFolder($request, $response, $args)
   {
@@ -148,13 +138,13 @@ class FolderController extends RestController
     } elseif ($folderDao->getFolder($folderId) === null) {
       $info = new Info(404, "Folder id not found!", InfoType::ERROR);
     } else {
-      $folderDelete = plugin_find('admin_folder_delete');
+      $folderDelete = $this->restHelper->getPlugin('admin_folder_delete');
       $folderName = FolderGetName($folderId);
       $folderArray = Folder2Path($folderId);
       $folderParent = intval($folderArray[count($folderArray) - 2]['folder_pk']);
       $folderId = "$folderParent $folderId";
 
-      $rc = $folderDelete->Delete($folderId, Auth::getUserId());
+      $rc = $folderDelete->Delete($folderId, $this->restHelper->getUserId());
       if ($rc == "No access to delete this folder") {
         $info = new Info(403, $rc, InfoType::ERROR);
       } elseif ($rc !== null) {
@@ -170,9 +160,9 @@ class FolderController extends RestController
    * Change the description/name of the folder
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function editFolder($request, $response, $args)
   {
@@ -187,7 +177,7 @@ class FolderController extends RestController
     } elseif (! $folderDao->isFolderAccessible($folderId, $this->restHelper->getUserId())) {
       $info = new Info(403, "Folder is not accessible!", InfoType::ERROR);
     } else {
-      $folderEdit = plugin_find('folder_properties');
+      $folderEdit = $this->restHelper->getPlugin('folder_properties');
       $folderName = FolderGetName($folderId);
       $folderEdit->Edit($folderId, $newName, $newDesc);
       $info = new Info(200, "Folder \"$folderName\" updated.", InfoType::INFO);
@@ -199,9 +189,9 @@ class FolderController extends RestController
    * Copy/move the folder
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function copyFolder($request, $response, $args)
   {
@@ -227,13 +217,13 @@ class FolderController extends RestController
     } elseif (strcmp($action, "copy") != 0 && strcmp($action, "move") != 0) {
       $info = new Info(400, "Action can be one of [copy,move]!", InfoType::ERROR);
     } else {
-      $folderMove = plugin_find('content_move');
+      $folderMove = $this->restHelper->getPlugin('content_move');
       $folderName = FolderGetName($folderId);
       $parentFolderName = FolderGetName($newParent);
       $isCopy = (strcmp($action, "copy") == 0);
       $message = $folderMove->copyContent(
         [
-          $folderDao->getFolderContentsId($folderId)
+          $folderDao->getFolderContentsId($folderId, $folderDao::MODE_FOLDER)
         ], $newParent, $isCopy);
       if (empty($message)) {
         $info = new Info(202,

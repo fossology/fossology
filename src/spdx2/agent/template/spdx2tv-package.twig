@@ -1,8 +1,6 @@
-{# Copyright 2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
 
-   Copying and distribution of this file, with or without modification,
-   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-   This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 
 PackageName: {{ packageName }}
@@ -11,7 +9,7 @@ SPDXID: SPDXRef-upload{{ packageId }}
 PackageDownloadLocation: NOASSERTION
 PackageVerificationCode: {{ verificationCode }}
 PackageChecksum: SHA1: {{ sha1 | lower }}
-{# PackageChecksum: SHA256: #}
+PackageChecksum: SHA256: {{ sha256 | lower }}
 PackageChecksum: MD5: {{ md5 | lower }}
 {# PackageChecksum: SSDEEP: #}
 {% if mainLicenses|default is empty %}
@@ -28,6 +26,9 @@ PackageCopyrightText: NOASSERTION
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-upload{{ packageId }}
 {# RelationshipComment: #}
+{%- if componentId is not empty ~%}
+ExternalRef: PACKAGE-MANAGER {{ componentType }} {{ componentId }}
+{%- endif ~%}
 
 ##--------------------------
 ## File Information

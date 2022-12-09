@@ -1,20 +1,18 @@
-{# Copyright 2014-2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2014-2015 Siemens AG
 
-   Copying and distribution of this file, with or without modification,
-   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-   This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 {% extends "include/base.html.twig" %}
 
 {% block content %}
-  
+
 {{ "Select the group to manage"|trans }}:
 {% import "include/macros.html.twig" as macro %}
-{{ macro.select('groupselect',groupMap,'groupselect',groupId,groupMapAction) }}
+{{ macro.select('groupselect',groupMap,'groupselect',groupId,groupMapAction ~ 'class="ui-render-select2"') }}
 
 <table border="1">
   <tr><th>{{ "User"|trans }}</th><th>{{ 'Permission'|trans }}</th></tr>
-  {% for gum in usersWithGroup if gum.group_user_member_pk %}
+  {% for gum in usersWithGroup %}{% if gum.group_user_member_pk %}
     <tr>
       <td>{{ gum.user_name }}</td>
       <td>
@@ -22,11 +20,11 @@
         {{ macro.select('permselect',permissionMap,'permselect',gum.group_perm,onchange) }}
       </td>
     </tr>
-  {% endfor %}
+  {% endif %}{% endfor %}
   {% if existsOtherUsers %}
     <tr>
       <td>
-      {{ macro.select("userselectnew", otherUsers, "userselectnew", '', ' onchange="js_url(this.value, newpermurl)"') }}
+      {{ macro.select("userselectnew", otherUsers, "userselectnew", '', ' class="ui-render-select2" onchange="js_url(this.value, newpermurl)"') }}
     </td>
     <td>
       {{ macro.select("permselectnew",newPermissionMap, "permselectnew",-1,' onchange="setNewPermUrl(this.value)"') }}
@@ -38,8 +36,12 @@
 <br/>
 {{ 'All user permissions take place immediately when a value is changed.  There is no submit button.'|trans }}
 <br/>
-{{ 'Add new users on the last line.'|trans }}  
-
+{{ 'Add new users on the last line.'|trans }}
+<br/>
+<br/>
+<b>{{ 'Note: By removing users, you may loose access to uploads, that are uploaded by them.'|trans }}</b>
+<br/>
+<br/>
 {% endblock %}
 
 {% block foot %}

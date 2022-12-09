@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2008-2012 Hewlett-Packard Development Company, L.P.
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License version 2.1 as published by the Free Software Foundation.
-
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- ***********************************************************/
+ SPDX-License-Identifier: LGPL-2.1-only
+*/
 /**
  * \file
  * \brief Common menu functions
@@ -27,7 +16,8 @@ const MENU_BREAK = "[BREAK]";       ///< Break menu at this
  * \brief
  * Code for creating a menu list (2D linked list) from a set of plugins.
  */
-class menu {
+class menu
+{
   var $Name = "";       ///< Name of the menu item
   var $URI = NULL;      ///< URI for the plugin (everything after the "?mod=")
   var $HTML = NULL;     ///< HTML to include (if provided, used in place of all else)
@@ -45,8 +35,7 @@ class menu {
    */
   public function getName($showFullName=false)
   {
-    if($showFullName)
-    {
+    if ($showFullName) {
       return $this->FullName . "(" . $this->Order . ")";
     }
     return $this->Name;
@@ -68,8 +57,9 @@ $MenuMaxDepth = 0;    ///< How deep is the tree (for UI display)
  *
  * \return String containing menu HTML
  */
-function MenuPage($Page, $TotalPage, $Uri = '') {
-  $V = "<font class='text'><center>";
+function MenuPage($Page, $TotalPage, $Uri = '')
+{
+  $V = "<ul class='pagination pagination-sm justify-content-center'>";
   if (empty($Uri)) {
     $Uri = Traceback();
   }
@@ -78,8 +68,8 @@ function MenuPage($Page, $TotalPage, $Uri = '') {
   if ($Page > 0) {
     $text = _("First");
     $text1 = _("Prev");
-    $V.= "<a href='$Uri&page=0'>[$text]</a> ";
-    $V.= "<a href='$Uri&page=" . ($Page - 1) . "'>[$text1]</a> ";
+    $V.= "<li class='page-item'><a class='page-link' href='$Uri&page=0'>$text</a></li>";
+    $V.= "<li class='page-item'><a class='page-link' href='$Uri&page=" . ($Page - 1) . "'>$text1</a></li>";
     if ($Page > 9) {
       $V.= " ... ";
     }
@@ -87,14 +77,14 @@ function MenuPage($Page, $TotalPage, $Uri = '') {
   /* Create previous list page */
   for ($i = $Page - 9;$i < $Page;$i++) {
     if ($i >= 0) {
-      $V.= "<a href='$Uri&page=$i'>" . ($i + 1) . "</a> ";
+      $V.= "<li class='page-item'><a class='page-link' href='$Uri&page=$i'>" . ($i + 1) . "</a></li>";
     }
   }
   /* Show current page number */
-  $V.= "<b>" . ($Page + 1) . "</b>";
+  $V.= "<li class='page-item active'><a class='page-link' href='#'>" . ($Page + 1) . "</a></li>";
   /* Create next page */
   for ($i = $Page + 1;($i <= $TotalPage) && ($i < $Page + 9);$i++) {
-    $V.= " <a href='$Uri&page=$i'>" . ($i + 1) . "</a>";
+    $V.= "<li class='page-item'><a class='page-link' href='$Uri&page=$i'>" . ($i + 1) . "</a></li>";
   }
   if ($Page < $TotalPage) {
     if ($Page < $TotalPage - 9) {
@@ -102,10 +92,10 @@ function MenuPage($Page, $TotalPage, $Uri = '') {
     }
     $text = _("Next");
     $text1 = _("Last");
-    $V.= " <a href='$Uri&page=" . ($Page + 1) . "'>[$text]</a>";
-    $V.= " <a href='$Uri&page=" . ($TotalPage) . "'>[$text1]</a>";
+    $V.= "<li class='page-item'><a class='page-link' href='$Uri&page=" . ($Page + 1) . "'>$text</a></li>";
+    $V.= "<li class='page-item'><a class='page-link' href='$Uri&page=" . ($TotalPage) . "'>$text1</a></li>";
   }
-  $V.= "</center></font>";
+  $V.= "</ul>";
   return ($V);
 } // MenuPage
 
@@ -118,8 +108,9 @@ function MenuPage($Page, $TotalPage, $Uri = '') {
  *
  * \return String containing menu HTML
  */
-function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
-  $V = "<font class='text'><center>";
+function MenuEndlessPage($Page, $Next = 1, $Uri = '')
+{
+  $V = "<center><ul class='pagination pagination-sm justify-content-center'>";
   if (empty($Uri)) {
     $Uri = Traceback();
   }
@@ -128,8 +119,8 @@ function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
   if ($Page > 0) {
     $text = _("First");
     $text1 = _("Prev");
-    $V.= "<a href='$Uri&page=0'>[$text]</a> ";
-    $V.= "<a href='$Uri&page=" . ($Page - 1) . "'>[$text1]</a> ";
+    $V.= "<li class='page-item'><a class='page-link' href='$Uri&page=0'>$text</a></li>";
+    $V.= "<li class='page-item'><a class='page-link' href='$Uri&page=" . ($Page - 1) . "'>$text1</a></li>";
     if ($Page > 9) {
       $V.= " ... ";
     }
@@ -137,19 +128,19 @@ function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
   /* Create previous list page */
   for ($i = $Page - 9;$i < $Page;$i++) {
     if ($i >= 0) {
-      $V.= "<a href='$Uri&page=$i'>" . ($i + 1) . "</a> ";
+      $V.= "<li class='page-item'><a class='page-link' href='$Uri&page=$i'>" . ($i + 1) . "</a></li>";
     }
   }
   /* Show current page number */
-  $V.= "<b>" . ($Page + 1) . "</b>";
+  $V.= "<li class='page-item active'><a class='page-link' href='#'>" . ($Page + 1) . "</a></li>";
   /* Create next page */
   if ($Next) {
     $text = _("Next");
     $i = $Page + 1;
-    $V.= " <a href='$Uri&page=$i'>" . ($i + 1) . "</a>";
-    $V.= " ... <a href='$Uri&page=$i'>[$text]</a>";
+    $V.= "<li class='page-item'><a class='page-link' href='$Uri&page=$i'>" . ($i + 1) . "</a></li>";
+    $V.= "<li class='page-item'><a class='page-link' href='$Uri&page=$i'>$text</a></li>";
   }
-  $V.= "</center></font>";
+  $V.= "</ul></center>";
   return ($V);
 } // MenuEndlessPage()
 
@@ -163,7 +154,8 @@ function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
  *         1  a < b\n
  *         0  a->Order = b->Order and a->Name = b->Name
  */
-function menu_cmp(&$a, &$b) {
+function menu_cmp($a, $b)
+{
   if ($a->Order > $b->Order) {
     return (-1);
   }
@@ -208,13 +200,12 @@ function menu_insert_r(&$menuItems, $path, $pathRemainder, $LastOrder, $Target, 
 
   $currentMenuItem = NULL;
   if ($menuItemsExist) {
-    foreach($menuItems as &$menuItem) {
+    foreach ($menuItems as &$menuItem) {
       // need to escape the [ ] or the string will not match
       if (!strcmp($menuItem->Name, $pathElement) && strcmp($menuItem->Name, MENU_BREAK)) {
         $currentMenuItem = $menuItem;
         break;
-      }
-      else if (!strcmp($menuItem->Name, MENU_BREAK) && ($menuItem->Order == $LastOrder)) {
+      } else if (!strcmp($menuItem->Name, MENU_BREAK) && ($menuItem->Order == $LastOrder)) {
         $currentMenuItem = $menuItem;
         break;
       }
@@ -231,8 +222,7 @@ function menu_insert_r(&$menuItems, $path, $pathRemainder, $LastOrder, $Target, 
     $currentMenuItem->Name = $pathElement;
     $currentMenuItem->FullName = $FullName;
 
-    if (!$menuItemsExist)
-    {
+    if (! $menuItemsExist) {
       $menuItems = array();
     }
     array_push($menuItems, $currentMenuItem);
@@ -251,8 +241,7 @@ function menu_insert_r(&$menuItems, $path, $pathRemainder, $LastOrder, $Target, 
     $currentMenuItem->URI = $URI;
     $currentMenuItem->HTML = $HTML;
     $currentMenuItem->Title = $Title;
-  }
-  else {
+  } else {
     $Depth = menu_insert_r($currentMenuItem->SubMenu, $path, $pathRemainder, $LastOrder, $Target, $URI, $HTML, $Title);
     $currentMenuItem->MaxDepth = max ($currentMenuItem->MaxDepth, $Depth + 1);
   }
@@ -309,18 +298,17 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL)
     return ($Menu);
   }
   $PathParts = explode('::', $Name, 2);
-  foreach($Menu as $Val) {
+  foreach ($Menu as $Val) {
     if ($Val->Name == $PathParts[0]) {
       if (empty($PathParts[1])) {
         $MaxDepth = $Val->MaxDepth;
         return ($Val->SubMenu);
-      }
-      else {
+      } else {
         return (menu_find($PathParts[1], $MaxDepth, $Val->SubMenu));
       }
     }
   }
-  return (NULL);
+  return (null);
 } // menu_find()
 
 
@@ -363,7 +351,7 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
   }
   $First = 1;
   if (!empty($Menu)) {
-    foreach($Menu as $Val) {
+    foreach ($Menu as $Val) {
       if ($Val->Name == MENU_BREAK) {
         if (!$First) {
           $V .= " &nbsp;&nbsp;&bull;";
@@ -373,16 +361,14 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
           $V .= "&nbsp;&nbsp; ";
         }
         $First = 1;
-      }
-      else if (!empty($Val->HTML)) {
+      } else if (!empty($Val->HTML)) {
         $V.= $Val->HTML;
         if ($showFullName) {
           $V .= getFullNameAddition($Val);
 
         }
         $First = 0;
-      }
-      else if (!empty($Val->URI)) {
+      } else if (!empty($Val->URI)) {
         if (!$First) {
           $V.= " | ";
         }
@@ -393,21 +379,18 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
         $V.= ">";
         if ($showFullName) {
           $V.= $Val->FullName . getFullNameAddition($Val);
-        }
-        else {
+        } else {
           $V.= $Val->Name;
         }
         $V.= "</a>";
         $First = 0;
-      }
-      else if ($ShowAll) {
+      } else if ($ShowAll) {
         if (!$First) {
           $V.= " | ";
         }
         if ($showFullName) {
           $V.= $Val->FullName . getFullNameAddition($Val);
-        }
-        else {
+        } else {
           $V.= $Val->Name;
         }
         $First = 0;
@@ -419,7 +402,7 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
       $V.= " &nbsp;&nbsp;&bull;&nbsp;&nbsp; ";
     }
     $V.= $Std;
-    $Std = NULL;
+    $Std = null;
   }
   $menu_to_1html_counter++;
   return ("<div id='menu1html-$menu_to_1html_counter' align='right' style='padding:0px 5px 0px 5px'><small>$V</small></div>");
@@ -460,15 +443,15 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $uplo
   $showFullName = isset($_SESSION) && array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
   $V = "";
 
-  foreach($Menu as $Val) {
+  foreach ($Menu as $Val) {
     if (!empty($Val->HTML)) {
       $entry = $Val->HTML;
-    }
-    else if (!empty($Val->URI)) {
-      if (!empty($upload_id) && "tag" == $Val->URI)
-      {
+    } else if (!empty($Val->URI)) {
+      if (!empty($upload_id) && "tag" == $Val->URI) {
         $tagstatus = TagStatus($upload_id);
-        if (0 == $tagstatus) break; // tagging on this upload is disabled
+        if (0 == $tagstatus) {
+          break; // tagging on this upload is disabled
+        }
       }
 
       $entry = "[<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "&" . $Parm . "'";
@@ -478,12 +461,9 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $uplo
       $entry .= ">" ;
       $entry .= $Val->getName($showFullName);
       $entry .= "</a>]";
-    }
-    else if ($ShowAll) {
+    } else if ($ShowAll) {
       $entry = "[" . $Val->getName($showFullName) . "]";
-    }
-    else
-    {
+    } else {
       continue;
     }
     $V .= $Pre . $entry . $Post;
@@ -505,7 +485,7 @@ function menu_print(&$Menu, $Indent)
   if (!isset($Menu)) {
     return;
   }
-  foreach($Menu as $Val) {
+  foreach ($Menu as $Val) {
     for ($i = 0;$i < $Indent;$i++) {
       print " ";
     }
@@ -554,9 +534,10 @@ function menu_print(&$Menu, $Indent)
 function menu_remove($Menu, $RmName)
 {
   $NewArray = array();
-  foreach ($Menu as $MenuObj)
-  {
-    if ($MenuObj->Name != $RmName) $NewArray[] = $MenuObj;
+  foreach ($Menu as $MenuObj) {
+    if ($MenuObj->Name != $RmName) {
+      $NewArray[] = $MenuObj;
+    }
   }
   return $NewArray;
 }

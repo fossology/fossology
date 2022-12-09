@@ -1,21 +1,10 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2015 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Upload\Upload;
@@ -40,7 +29,8 @@ class AgentAdder extends DefaultPlugin
    * @param Request $request
    * @return Response
    */
-  protected function handle(Request $request) {
+  protected function handle(Request $request)
+  {
     $folderId = intval($request->get('folder'));
     if (empty($folderId)) {
       $folderId = FolderGetTop();
@@ -49,21 +39,17 @@ class AgentAdder extends DefaultPlugin
     $agents = $request->get('agents') ?: '';
     $vars = [];
 
-    if (!empty($uploadId) && !empty($agents) && is_array($agents))
-    {
-      $rc = $this->agentsAdd($uploadId,$agents,$request);
-      if (is_numeric($rc))
-      {
+    if (! empty($uploadId) && ! empty($agents) && is_array($agents)) {
+      $rc = $this->agentsAdd($uploadId, $agents, $request);
+      if (is_numeric($rc)) {
         $status = GetRunnableJobList();
         $scheduler_msg = empty($status) ? _("Is the scheduler running? ") : '';
         $url = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
         $text = _("Your jobs have been added to job queue.");
         $linkText = _("View Jobs");
-        $msg = "$scheduler_msg"."$text <a href=\"$url\">$linkText</a>";
+        $msg = "$scheduler_msg" . "$text <a href=\"$url\">$linkText</a>";
         $vars['message'] = $msg;
-      }
-      else
-      {
+      } else {
         $text = _("Scheduling of Agent(s) failed: ");
         $vars['message'] = $text.$rc;
       }
@@ -78,10 +64,9 @@ class AgentAdder extends DefaultPlugin
     $vars['uploadId'] = $uploadId;
 
     $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
-    $out =  '<ol>';
+    $out = '<ol>';
     $parmAgentFoots = '';
-    foreach($parmAgentList as $parmAgent)
-    {
+    foreach ($parmAgentList as $parmAgent) {
       $agent = plugin_find($parmAgent);
       $out .= "<br/><b>".$agent->AgentName.":</b><br/>";
       $out .= $agent->renderContent($vars);
@@ -102,45 +87,42 @@ class AgentAdder extends DefaultPlugin
    */
   private function agentsAdd($uploadId, $agentsToStart, Request $request)
   {
-    if (!is_array($agentsToStart)) {
+    $mimetypeIgnore = intval($request->get('scm') == 1) ? '-I' : '';
+    if (! is_array($agentsToStart)) {
       return "bad parameters";
     }
-    if (!$uploadId) {
+    if (! $uploadId) {
       return "agent-add.php AgentsAdd(): No upload_pk specified";
     }
 
     /* @var $upload Upload */
     $upload = $GLOBALS['container']->get('dao.upload')->getUpload($uploadId);
-    if ($upload===null)
-    {
+    if ($upload===null) {
       return _("Upload") . " " . $uploadId . " " .  _("not found");
     }
-
     $agents = array();
     $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
     $plainAgentList = MenuHook::getAgentPluginNames("Agents");
     $agentList = array_merge($plainAgentList, $parmAgentList);
-    foreach($agentList as $agentName) {
-      if (in_array($agentName, $agentsToStart))
-      {
+    foreach ($agentList as $agentName) {
+      if (in_array($agentName, $agentsToStart)) {
         $agents[$agentName] = plugin_find($agentName);
       }
-    }
-    if (count($agents)==0)
-    {
-      return _("no valid agent specified");
     }
 
     $jobId = JobAddJob(Auth::getUserId(), Auth::getGroupId(), $upload->getFilename(), $uploadId);
     $errorMsg = '';
-    foreach($parmAgentList as $parmAgent) {
+    foreach ($parmAgentList as $parmAgent) {
       $agent = plugin_find($parmAgent);
       $agent->scheduleAgent($jobId, $uploadId, $errorMsg, $request);
     }
 
-    foreach($agents as &$agent)
-    {
-      $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
+    foreach ($agents as &$agent) {
+      if (!empty($mimetypeIgnore)) {
+        $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array("agent_mimetype"), $mimetypeIgnore);
+      } else {
+        $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
+      }
       if ($rv == -1) {
         return $errorMsg;
       }

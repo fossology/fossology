@@ -1,10 +1,192 @@
+fossology (4.2.1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.2.1 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Tue, 15 Nov 2022 15:26:02 +0530
+
+fossology (4.2.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.2.0 for details
+
+ -- Gaurav Mishra <mishra.gaurav@siemens.com>  Fri, 11 Nov 2022 16:13:47 +0530
+
+fossology (4.2.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.2.0-rc1 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Fri, 30 Sep 2022 12:43:33 +0530
+
+fossology (4.1.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.1.0 for details
+
+ -- Gaurav Mishra <mishra.gaurav@siemens.com>  Tue, 17 May 2022 17:45:44 +0530
+
+fossology (4.1.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.1.0-rc1 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Fri, 08 Apr 2022 12:55:20 +0530
+
+fossology (4.0.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.0.0 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Wed, 20 Jan 2022 12:51:20 +0530
+
+fossology (4.0.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.0.0-rc1 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Tue, 21 Dec 2021 14:44:40 +0530
+
+fossology (3.11.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.11.0 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Tue, 27 Jul 2021 14:14:40 +0530
+
+fossology (3.11.0~rc2-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.11.0-rc2 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Tue, 12 Jul 2021 12:25:12 +0530
+
+fossology (3.11.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.11.0-rc1 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Tue, 29 Jun 2021 13:18:18 +0530
+
+fossology (3.10.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.10.0 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Fri, 7 May 2021 14:22:32 +0530
+
+fossology (3.10.0~rc2-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.10.0-rc2 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Mon, 19 Apr 2021 20:26:18 +0530
+
+fossology (3.10.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.10.0-rc1 for details
+
+ -- Gaurav Mishra <mishra.gaurav@siemens.com>  Fri, 08 Jan 2021 15:03:44 +0530
+
+fossology (3.9.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.9.0 for details
+
+ -- Gaurav Mishra <mishra.gaurav@siemens.com>  Mon, 30 Nov 2020 11:11:11 +0530
+
+fossology (3.9.0~rc2-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.9.0-rc2 for details
+
+ -- Anupam Ghosh <anupam.ghosh@siemens.com>  Thu, 08 Oct 2020 18:56:32 +0530
+
+fossology (3.9.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.9.0-rc1 for details
+
+ -- Gaurav Mishra <mishra.gaurav@siemens.com>  Mon, 31 Aug 2020 18:56:32 +0530
+
+fossology (3.8.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.8.0 for details
+
+ -- Gaurav Mishra <mishra.gaurav@siemens.com>  Mon, 04 May 2020 15:30:50 +0530
+
+fossology (3.8.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.8.0-rc1 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Thu, 05 Mar 2020 18:18:18 +0530
+
+fossology (3.7.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.7.0 for details
+
+ -- Anupam Ghosh <anupam.ghosh@siemens.com>  Wed, 11 Dec 2019 12:13:15 +0530
+
+fossology (3.7.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.7.0-rc1 for details
+
+ -- Michael C. Jaeger <michael.c.jaeger@siemens.com>  Thu, 24 Oct 2019 12:00:00 +0100
+
+fossology (3.6.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.6.0 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Tue, 10 Sep 2019 12:22:58 +0530
+
+fossology (3.6.0~rc2-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.6.0-rc2 for details
+
+ -- Anupam Ghosh <anupam.ghosh@siemens.com>  Sat, 24 Aug 2019 14:09:58 +0530
+
+fossology (3.6.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.6.0-rc1 for details
+
+ -- Michael C. Jaeger <michael.c.jaeger@siemens.com>  Mon, 12 Aug 2019 12:00:00 +0100
+
+fossology (3.5.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.5.0 for details
+
+ -- Gaurav Mishra <mishra.gaurav@siemens.com>  Thu, 11 Apr 2019 12:21:21 +0530
+
+fossology (3.5.0~rc2-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.5.0-rc2 for details
+
+ -- Anupam Ghosh <anupam.ghosh@siemens.com>  Wed, 03 Apr 2019 11:04:58 +0530
+
+fossology (3.5.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.5.0-rc1 for details
+
+ -- Anupam Ghosh <anupam.ghosh@siemens.com>  Fri, 29 Mar 2019 16:29:23 +0530
+
 fossology (3.4.0-1) unstable; urgency=low
 
   * New upstream release
   * https://github.com/fossology/fossology/releases/tag/3.4.0 for details
 
  -- Michael C. Jaeger <michael.c.jaeger@siemens.com>  Sun, 29 Nov 2018 12:00:00 +0100
- 
+
 fossology (3.4.0~rc2-1) unstable; urgency=low
 
   * New upstream release
@@ -91,7 +273,7 @@ fossology (2.5.0-1) unstable; urgency=low
   * New upstream release
 
  -- larainema <larainema@localhost.localdomain>  Tue, 08 Apr 2014 15:35:55 +0800
- 
+
 fossology (2.4.0-1) unstable; urgency=low
 
   * New upstream release
@@ -102,38 +284,38 @@ fossology (2.3.0-1) unstable; urgency=low
 
   * New upstream release
 
- -- larainema <larainema@localhost.localdomain>  Web, 25 Sep 2013 15:35:55 +0800
+ -- larainema <larainema@localhost.localdomain>  Wed, 25 Sep 2013 15:35:55 +0800
 
 fossology (2.2.0-1) unstable; urgency=low
 
   * New upstream release
 
  -- larainema <larainema@localhost.localdomain>  Fri, 28 Jun 2013 15:35:55 +0800
- 
+
 fossology (2.1.0-1) unstable; urgency=low
 
   * New upstream release
 
- -- madong <madong@bl480c1>  Thu, 01 Nov 2012 15:35:55 +0800
+ -- madong <madong@bl480c1.localdomain>  Thu, 01 Nov 2012 15:35:55 +0800
 
 fossology (2.0.0-1) unstable; urgency=low
 
   * New upstream release
   * New package structure
 
- -- madong <madong@bl480c1>  Fri, 08 Jun 2012 15:35:55 +0800
+ -- madong <madong@bl480c1.localdomain>  Fri, 08 Jun 2012 15:35:55 +0800
 
 fossology (2.0.0~rc3-1) unstable; urgency=low
 
   * Release candidate 3 for v2.0
 
- -- madong <madong@bl480c-1>  Fri, 01 Jun 2012 15:22:47 +0800
+ -- madong <madong@bl480c-1.localdomain>  Fri, 01 Jun 2012 15:22:47 +0800
 
 fossology (2.0.0~rc1-1) unstable; urgency=low
 
   * The first release candidate for v2.0
 
- -- madong <madong@bl480c-1>  Wed, 02 May 2012 15:22:47 +0800
+ -- madong <madong@bl480c-1.localdomain>  Wed, 02 May 2012 15:22:47 +0800
 
 fossology (1.4.1-1) unstable; urgency=low
 
@@ -151,7 +333,7 @@ fossology (1.4.0-1) unstable; urgency=low
   * authentication using Siteminder
   * Multiple file upload from URL
   * Bugs fix
-  
+
  -- Mark Donohoe <markd@localhost.localdomain>  Thu, 05 May 2011 17:55:09 -0700
 
 fossology (1.3.0-1) unstable; urgency=low
@@ -163,7 +345,7 @@ fossology (1.3.0-1) unstable; urgency=low
   * Fixed a cp2foss authentication bug
   * fixed unpack defects and made some improvements
 
- -- Mark Donohoe <markd@steezy>  Fri, 07 Jan 2011 10:35:08 -0800
+ -- Mark Donohoe <markd@steezy.localdomain>  Fri, 07 Jan 2011 10:35:08 -0800
 
 fossology (1.2.1~SVNBUILD-1) unstable; urgency=low
 

@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Proxy;
@@ -46,8 +35,7 @@ class UploadTreeViewProxy extends DbViewProxy
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $isDefaultTable = $uploadTreeTableName == 'uploadtree_a' || $uploadTreeTableName == 'uploadtree';
-    if ($isDefaultTable)
-    {
+    if ($isDefaultTable) {
       $constraints[] = self::CONDITION_UPLOAD;
     }
     $baseQuery = "SELECT * FROM $uploadTreeTableName";
@@ -58,7 +46,7 @@ class UploadTreeViewProxy extends DbViewProxy
   private static function getConstraintsCondition(ItemTreeBounds $itemTreeBounds, $constraints)
   {
     $conditions = array();
-    foreach(array_unique($constraints) as $constraint) {
+    foreach (array_unique($constraints) as $constraint) {
       $conditions[] = self::getConstraintCondition($itemTreeBounds, $constraint);
     }
     $condition = implode(' AND ', $conditions);
@@ -67,8 +55,7 @@ class UploadTreeViewProxy extends DbViewProxy
 
   private static function getConstraintCondition(ItemTreeBounds $itemTreeBounds, $constraint)
   {
-    switch ($constraint)
-    {
+    switch ($constraint) {
       case self::CONDITION_UPLOAD:
         $uploadId = $itemTreeBounds->getUploadId();
         return "upload_fk = $uploadId";
@@ -82,4 +69,4 @@ class UploadTreeViewProxy extends DbViewProxy
         throw new \InvalidArgumentException("constraint $constraint is not defined");
     }
   }
-} 
+}

@@ -1,20 +1,9 @@
 <?php
 /*
- Copyright (C) 2014-2018, Siemens AG
- Author: Daniele Fognini, Andreas Würl
+ SPDX-FileCopyrightText: © 2014-2018 Siemens AG
+Author: Daniele Fognini, Andreas Würl
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Reuser;
@@ -26,6 +15,9 @@ use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\ClearingEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\Item;
@@ -67,6 +59,14 @@ class ReuserAgent extends Agent
    * ClearingDao object
    */
   private $clearingDao;
+  /** @var CopyrightDao $copyrightDao
+   * CopyrightDao object
+   */
+  private $copyrightDao;
+  /** @var AgentDao $aagentDao
+   * AgentDao object
+   */
+  private $aagentDao;
   /** @var DecisionTypes $decisionTypes
    * DecisionTypes object
    */
@@ -75,8 +75,10 @@ class ReuserAgent extends Agent
   function __construct()
   {
     parent::__construct(REUSER_AGENT_NAME, AGENT_VERSION, AGENT_REV);
+    $this->aagentDao = $this->container->get('dao.agent');
     $this->uploadDao = $this->container->get('dao.upload');
     $this->clearingDao = $this->container->get('dao.clearing');
+    $this->copyrightDao = $this->container->get('dao.copyright');
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingEventProcessor = $this->container->get('businessrules.clearing_event_processor');
     $this->clearingDecisionFilter = $this->container->get('businessrules.clearing_decision_filter');
@@ -92,8 +94,7 @@ class ReuserAgent extends Agent
   function processUploadId($uploadId)
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
-    foreach($this->uploadDao->getReusedUpload($uploadId, $this->groupId) as $reuseTriple)
-    {
+    foreach ($this->uploadDao->getReusedUpload($uploadId, $this->groupId) as $reuseTriple) {
       // Get the reuse upload id
       $reusedUploadId = $reuseTriple['reused_upload_fk'];
       // Get the group id
@@ -102,25 +103,36 @@ class ReuserAgent extends Agent
       $reuseMode = $reuseTriple['reuse_mode'];
       // Get the ItemTreeBounds for the upload
       $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
-      if (false === $itemTreeBoundsReused)
-      {
+      if (false === $itemTreeBoundsReused) {
         continue;
       }
-      if($reuseMode & UploadDao::REUSE_ENHANCED){
+
+      if ($reuseMode & UploadDao::REUSE_ENHANCED) {
         $this->processEnhancedUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
-      }
-      elseif($reuseMode & UploadDao::REUSE_MAIN){
-        $this->reuseMainLicense($uploadId, $this->groupId, $reusedUploadId, $reusedGroupId);
+      } else {
         $this->processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
       }
-      elseif($reuseMode & UploadDao::REUSE_ENH_MAIN){
+
+      if ($reuseMode & UploadDao::REUSE_MAIN) {
         $this->reuseMainLicense($uploadId, $this->groupId, $reusedUploadId, $reusedGroupId);
-        $this->processEnhancedUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
       }
-      else{
-        $this->processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
+
+      if ($reuseMode & UploadDao::REUSE_CONF) {
+        $this->reuseConfSettings($uploadId, $reusedUploadId);
+      }
+
+      if ($reuseMode & UploadDao::REUSE_COPYRIGHT) {
+        $this->reuseCopyrights($uploadId, $reusedUploadId);
       }
     }
+    return true;
+  }
+  protected function reuseConfSettings($uploadId, $reusedUploadId)
+  {
+    if (!$this->uploadDao->insertReportConfReuse($uploadId, $reusedUploadId)) {
+      echo "INFO :: Report configuration for select upload doesn't exists. Unable to copy!!!";
+    }
+    $this->heartbeat(1);
     return true;
   }
 
@@ -137,15 +149,84 @@ class ReuserAgent extends Agent
   protected function reuseMainLicense($uploadId, $groupId, $reusedUploadId, $reusedGroupId)
   {
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($reusedUploadId, $reusedGroupId);
-    if(!empty($mainLicenseIds))
-    {
-      foreach($mainLicenseIds as $mainLicenseId)
-      {
-        if(in_array($mainLicenseId, $this->clearingDao->getMainLicenseIds($uploadId, $groupId))){
+    if (!empty($mainLicenseIds)) {
+      foreach ($mainLicenseIds as $mainLicenseId) {
+        if (in_array($mainLicenseId, $this->clearingDao->getMainLicenseIds($uploadId, $groupId))) {
           continue;
-        }
-        else{
+        } else {
           $this->clearingDao->makeMainLicense($uploadId, $groupId, $mainLicenseId);
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief getAgentId from upload
+   *
+   * Get add the main licenses from previous upload and make them in new upload
+   * @param int $uploadId       uplaodId
+   * @return int agentId
+   */
+  protected function getAgentId($uploadId)
+  {
+    $agentName = 'copyright';
+
+    /** @var ScanJobProxy $scanJobProxy */
+    $scanJobProxy = new ScanJobProxy($this->aagentDao, $uploadId);
+
+    $scanJobProxy->createAgentStatus(array($agentName));
+    $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
+    if (!array_key_exists($agentName, $selectedScanners)) {
+      return;
+    }
+    $latestAgentId = $selectedScanners[$agentName];
+    return $latestAgentId;
+  }
+
+
+  /**
+   * @brief Reuse deactivated Copyrights from previous upload
+   *
+   * Get add the main licenses from previous upload and make them in new upload
+   * @param int $uploadId       Current upload
+   * @param int $reusedUploadId Upload to reuse
+   * @return boolean True once finished
+   */
+  protected function reuseCopyrights($uploadId, $reusedUploadId)
+  {
+    $agentId = $this->getAgentId($uploadId);
+    $reusedAgentId = $this->getAgentId($reusedUploadId);
+    if ($agentId == null || $reusedAgentId == null) {
+      return true;
+    }
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $extrawhere = ' agent_fk='.$agentId;
+    $allCopyrights = $this->copyrightDao->getScannerEntries('copyright',
+      $uploadTreeTableName, $uploadId, null, $extrawhere);
+
+    $reusedCopyrights = $this->copyrightDao->getAllEventEntriesForUpload(
+      $reusedUploadId, $reusedAgentId);
+
+    if (!empty($reusedCopyrights) && !empty($allCopyrights)) {
+      foreach ($reusedCopyrights as $reusedCopyright) {
+        foreach ($allCopyrights as $copyrightKey => $copyright) {
+          if (strcmp($copyright['hash'], $reusedCopyright['hash']) == 0) {
+            if ($this->dbManager->booleanFromDb($reusedCopyright['is_enabled'])) {
+              $action = "update";
+              $content = $reusedCopyright["contentedited"];
+            } else {
+              $action = "delete";
+              $content = "";
+            }
+            $hash = $copyright['hash'];
+            $item = $this->uploadDao->getItemTreeBounds(intval($copyright['uploadtree_pk']),
+                      $uploadTreeTableName);
+            $this->copyrightDao->updateTable($item, $hash, $content,
+              $this->userId, 'copyright', $action);
+            unset($allCopyrights[$copyrightKey]);
+            $this->heartbeat(1);
+          }
         }
       }
     }
@@ -187,15 +268,15 @@ class ReuserAgent extends Agent
           );
         }, array_keys($clearingDecisionToImportByFileId), 100);
 
-    foreach ($containedItems as $item)
-    {
+    foreach ($containedItems as $item) {
       $fileId = $item->getFileId();
-      if (array_key_exists($fileId, $clearingDecisionToImportByFileId))
-      {
-        $this->createCopyOfClearingDecision($item->getId(), $userId, $groupId, $clearingDecisionToImportByFileId[$fileId]);
+      if (empty($fileId)) {
+        continue;
       }
-      else
-      {
+      if (array_key_exists($fileId, $clearingDecisionToImportByFileId)) {
+        $this->createCopyOfClearingDecision($item->getId(), $userId, $groupId,
+          $clearingDecisionToImportByFileId[$fileId]);
+      } else {
         throw new \Exception("bad internal state");
       }
 
@@ -228,15 +309,21 @@ class ReuserAgent extends Agent
     $this->dbManager->prepare($stmt, $sql);
     $treeDao = $this->container->get('dao.tree');
 
-    foreach($clearingDecisionsToImport as $clearingDecision)
-    {
+    foreach ($clearingDecisionsToImport as $clearingDecision) {
       $reusedPath = $treeDao->getRepoPathOfPfile($clearingDecision->getPfileId());
+      if (empty($reusedPath)) {
+        // File missing from repo
+        continue;
+      }
 
       $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId(),
         $itemTreeBoundsReused->getUploadId(),$clearingDecision->getPfileId()));
-      while($row = $this->dbManager->fetchArray($res))
-      {
+      while ($row = $this->dbManager->fetchArray($res)) {
         $newPath = $treeDao->getRepoPathOfPfile($row['pfile_fk']);
+        if (empty($newPath)) {
+          // File missing from repo
+          continue;
+        }
         $this->copyClearingDecisionIfDifferenceIsSmall($reusedPath, $newPath, $clearingDecision, $row['uploadtree_pk']);
       }
       $this->dbManager->freeResult($res);
@@ -256,13 +343,11 @@ class ReuserAgent extends Agent
    */
   protected function copyClearingDecisionIfDifferenceIsSmall($reusedPath,$newPath,$clearingDecision,$itemId)
   {
-    $diffLevel = system("diff $reusedPath $newPath | wc -l");
-    if($diffLevel===false)
-    {
+    $diffLevel = exec("diff $reusedPath $newPath | wc -l");
+    if ($diffLevel === false) {
       throw new \Exception('cannot use diff tool');
     }
-    if($diffLevel<5)
-    {
+    if ($diffLevel < 5) {
       $this->createCopyOfClearingDecision($itemId, $this->userId, $this->groupId, $clearingDecision);
       $this->heartbeat(1);
     }
@@ -278,8 +363,7 @@ class ReuserAgent extends Agent
   protected function mapByFileId($clearingDecisions)
   {
     $clearingDecisionByFileId = array();
-    foreach ($clearingDecisions as $clearingDecision)
-    {
+    foreach ($clearingDecisions as $clearingDecision) {
       $fileId = $clearingDecision->getPfileId();
       if (!array_key_exists($fileId, $clearingDecisionByFileId)) {
         $clearingDecisionByFileId[$fileId] = $clearingDecision;
@@ -299,8 +383,7 @@ class ReuserAgent extends Agent
   {
     $clearingEventIdsToCopy = array();
     /** @var ClearingEvent $clearingEvent */
-    foreach ($clearingDecisionToCopy->getClearingEvents() as $clearingEvent)
-    {
+    foreach ($clearingDecisionToCopy->getClearingEvents() as $clearingEvent) {
       $licenseId = $clearingEvent->getLicenseId();
       $uploadTreeId = $itemId;
       $isRemoved = $clearingEvent->isRemoved();
@@ -342,5 +425,4 @@ class ReuserAgent extends Agent
 
     return $mapped;
   }
-
 }

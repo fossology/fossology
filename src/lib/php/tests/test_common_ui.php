@@ -1,20 +1,9 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
-Author: Steffen Weber
+ SPDX-FileCopyrightText: © 2014 Siemens AG
+ Author: Steffen Weber
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 /**
@@ -30,7 +19,7 @@ require_once(dirname(__FILE__) . '/../common-ui.php');
 class test_common_ui extends \PHPUnit\Framework\TestCase
 {
   /* initialization */
-  protected function setUp()
+  protected function setUp() : void
   {
     //print "Starting unit test for common-ui.php\n";
     print('.');
@@ -39,7 +28,7 @@ class test_common_ui extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     print "Ending unit test for common-ui.php\n";
   }
@@ -57,5 +46,4 @@ class test_common_ui extends \PHPUnit\Framework\TestCase
     $result = HumanSize(1024 * (1024 * 99 + 511));
     $this->assertEquals("99.5 MB", $result);
   }
-
 }

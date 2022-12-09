@@ -1,26 +1,17 @@
 <?php
-/***********************************************************
- * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014 Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2014 Siemens AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 namespace Fossology\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,6 +24,7 @@ class AdminLicenseFromCSV extends DefaultPlugin
 {
   const NAME = "admin_license_from_csv";
   const KEY_UPLOAD_MAX_FILESIZE = 'upload_max_filesize';
+  const FILE_INPUT_NAME = 'file_input';
 
   function __construct()
   {
@@ -52,12 +44,12 @@ class AdminLicenseFromCSV extends DefaultPlugin
   {
     $vars = array();
 
-    if ($request->isMethod('POST'))
-    {
-      $uploadFile = $request->files->get('file_input');
-      $delimiter = $request->get('delimiter')?:',';
-      $enclosure = $request->get('enclosure')?:'"';
-      $vars['message'] = $this->handleFileUpload($uploadFile,$delimiter,$enclosure);
+    if ($request->isMethod('POST')) {
+      $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
+      $delimiter = $request->get('delimiter') ?: ',';
+      $enclosure = $request->get('enclosure') ?: '"';
+      $vars['message'] = $this->handleFileUpload($uploadFile, $delimiter,
+        $enclosure)[1];
     }
 
     $vars[self::KEY_UPLOAD_MAX_FILESIZE] = ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
@@ -66,36 +58,44 @@ class AdminLicenseFromCSV extends DefaultPlugin
     return $this->render("admin_license_from_csv.html.twig", $this->mergeWithDefault($vars));
   }
 
+
   /**
    * @param UploadedFile $uploadedFile
-   * @return null|string
+   * @return array
    */
-  protected function handleFileUpload($uploadedFile,$delimiter=',',$enclosure='"')
+  public function handleFileUpload($uploadedFile,$delimiter=',',$enclosure='"')
   {
     $errMsg = '';
-    if ( !($uploadedFile instanceof UploadedFile) )
-    {
+    if (! ($uploadedFile instanceof UploadedFile)) {
       $errMsg = _("No file selected");
+    } elseif ($uploadedFile->getError() !== UPLOAD_ERR_OK) {
+      $errMsg = $uploadedFile->getErrorMessage();
+    } elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
+      $errMsg = _("Larger than upload_max_filesize ") .
+        ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
+    } elseif ($uploadedFile->getClientOriginalExtension() != 'csv') {
+      $errMsg = _('Invalid extension ') .
+        $uploadedFile->getClientOriginalExtension() . ' of file ' .
+        $uploadedFile->getClientOriginalName();
     }
-    elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0)
-    {
-      $errMsg = _("Larger than upload_max_filesize ") . ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
-    }
-    elseif($uploadedFile->getClientOriginalExtension()!='csv')
-    {
-      $errMsg = _('Invalid extension ').$uploadedFile->getClientOriginalExtension().' of file '.$uploadedFile->getClientOriginalName();
-    }
-    if (!empty($errMsg))
-    {
-      return $errMsg;
+    if (! empty($errMsg)) {
+      return array(false, $errMsg,400);
     }
     /** @var LicenseCsvImport */
     $licenseCsvImport = $this->getObject('app.license_csv_import');
     $licenseCsvImport->setDelimiter($delimiter);
     $licenseCsvImport->setEnclosure($enclosure);
-    return $licenseCsvImport->handleFile($uploadedFile->getRealPath());
+
+    return array(true,$licenseCsvImport->handleFile($uploadedFile->getRealPath()),200);
   }
 
+  /**
+   * @return string
+   */
+  public function getFileInputName()
+  {
+    return $this::FILE_INPUT_NAME;
+  }
 }
 
 register_plugin(new AdminLicenseFromCSV());

@@ -1,21 +1,10 @@
 <?php
 /*
  Author: Daniele Fognini
- Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @file DeciderJobAgent.php
  * @brief Decider agent
@@ -61,7 +50,8 @@ include_once(__DIR__ . "/version.php");
  * @class DeciderJobAgent
  * @brief Get the decision from Monk bulk and apply decisions
  */
-class DeciderJobAgent extends Agent {
+class DeciderJobAgent extends Agent
+{
   const FORCE_DECISION = 1;
 
   /** @var int $conflictStrategyId
@@ -130,11 +120,9 @@ class DeciderJobAgent extends Agent {
     $jobId = $this->jobId;
 
     $eventsOfThisJob = $this->clearingDao->getEventIdsOfJob($jobId);
-    foreach ($eventsOfThisJob as $uploadTreeId => $additionalEventsFromThisJob)
-    {
+    foreach ($eventsOfThisJob as $uploadTreeId => $additionalEventsFromThisJob) {
       $containerBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
-      foreach($this->loopContainedItems($containerBounds) as $itemTreeBounds)
-      {
+      foreach ($this->loopContainedItems($containerBounds) as $itemTreeBounds) {
         $this->processClearingEventsForItem($itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob);
       }
     }
@@ -147,15 +135,13 @@ class DeciderJobAgent extends Agent {
    */
   private function loopContainedItems($itemTreeBounds)
   {
-    if (!$itemTreeBounds->containsFiles())
-    {
+    if (!$itemTreeBounds->containsFiles()) {
       return array($itemTreeBounds);
     }
     $result = array();
     $condition = "(ut.lft BETWEEN $1 AND $2) AND ((ut.ufile_mode & (3<<28)) = 0)";
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
-    foreach($this->uploadDao->getContainedItems($itemTreeBounds, $condition, $params) as $item)
-    {
+    foreach ($this->uploadDao->getContainedItems($itemTreeBounds, $condition, $params) as $item) {
       $result[] = $item->getItemTreeBounds();
     }
     return $result;
@@ -168,12 +154,20 @@ class DeciderJobAgent extends Agent {
   function processUploadId($uploadId)
   {
     $args = $this->args;
-    $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : NULL;
+    $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : null;
 
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $this->licenseMapUsage);
 
-    $this->processClearingEventOfCurrentJob();
-
+    if ($this->conflictStrategyId == 'global') {
+      $uploadTreeId = 0; // zero because we are checking candidate license for whole upload.
+      if (!empty($this->clearingDao->getCandidateLicenseCountForCurrentDecisions($uploadTreeId, $uploadId))) {
+        throw new \Exception( _("Cannot add candidate license as global decision\n") );
+      }
+      $this->heartbeat(1);
+      $this->heartbeat($this->clearingDao->marklocalDecisionsAsGlobal($uploadId));
+    } else {
+      $this->processClearingEventOfCurrentJob();
+    }
     return true;
   }
 
@@ -190,8 +184,7 @@ class DeciderJobAgent extends Agent {
 
     $itemId = $itemTreeBounds->getItemId();
 
-    switch ($this->conflictStrategyId)
-    {
+    switch ($this->conflictStrategyId) {
       case self::FORCE_DECISION:
         $createDecision = true;
         break;
@@ -200,14 +193,10 @@ class DeciderJobAgent extends Agent {
         $createDecision = !$this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId, $additionalEventsFromThisJob, $this->licenseMap);
     }
 
-    if ($createDecision)
-    {
+    if ($createDecision) {
       $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal, $additionalEventsFromThisJob);
-    }
-    else
-    {
-      foreach ($additionalEventsFromThisJob as $eventId)
-      {
+    } else {
+      foreach ($additionalEventsFromThisJob as $eventId) {
         $this->clearingDao->copyEventIdTo($eventId, $itemId, $userId, $groupId);
       }
       $this->clearingDao->markDecisionAsWip($itemId, $userId, $groupId);

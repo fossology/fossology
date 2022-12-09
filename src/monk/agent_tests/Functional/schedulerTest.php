@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2015, 2019 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 use Fossology\Lib\Dao\ClearingDao;
@@ -50,7 +39,7 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
   /** @var HighlightDao */
   private $highlightDao;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("monkSched");
     $this->dbManager = $this->testDb->getDbManager();
@@ -62,10 +51,10 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
 
-    $this->agentDir = dirname(dirname(__DIR__));
+    $this->agentDir = dirname(__DIR__, 4).'/build/src/monk';
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;
@@ -80,7 +69,7 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
     $sysConf = $this->testDb->getFossSysConf();
 
     $agentName = "monk";
-    $execDir = __DIR__;
+    $execDir = dirname(__DIR__,4).'/build/src/monk/agent';
 
     $pipeFd = popen("echo $uploadId | $execDir/$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start $args", "r");
     $this->assertTrue($pipeFd !== false, 'running monk failed');
@@ -117,10 +106,10 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_event_clearing_event_pk_seq','clearing_decision_clearing_decision_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey','clearing_decision_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event','license_file','highlight','clearing_decision'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_ref','license_set_bulk','clearing_event','license_file','highlight','clearing_decision'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->insertData(array('pfile','upload','uploadtree_a','users'), false);
-    $this->testDb->insertData_license_ref();
+    $this->testDb->insertData_license_ref(200);
   }
 
   private function getHeartCount($output)
@@ -167,7 +156,7 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
 
     $highlights = $this->highlightDao->getHighlightDiffs($this->uploadDao->getItemTreeBounds(7));
 
-    $expectedHighlight = new Highlight(18, 35825, Highlight::MATCH, 20, 35819);
+    $expectedHighlight = new Highlight(18, 35824, Highlight::MATCH, 0, 34505);
     $expectedHighlight->setLicenseId($matchedLicense->getId());
 
     $this->assertEquals(array($expectedHighlight), $highlights);
@@ -175,9 +164,9 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
     $highlights = $this->highlightDao->getHighlightDiffs($this->uploadDao->getItemTreeBounds(11));
 
     $expectedHighlights = array();
-    $expectedHighlights[] = new Highlight(18, 339, Highlight::MATCH, 20, 350);
-    $expectedHighlights[] = new Highlight(340, 347, Highlight::CHANGED, 351, 357);
-    $expectedHighlights[] = new Highlight(348, 35149, Highlight::MATCH, 358, 35819);
+    $expectedHighlights[] = new Highlight(18, 338, Highlight::MATCH, 0, 265);
+    $expectedHighlights[] = new Highlight(339, 346, Highlight::CHANGED, 266, 272);
+    $expectedHighlights[] = new Highlight(347, 35148, Highlight::MATCH, 273, 34505);
     foreach($expectedHighlights as $expectedHighlight) {
       $expectedHighlight->setLicenseId($matchedLicense->getId());
     }

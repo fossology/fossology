@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2010-2013 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /**
  * @file admin-bucket-pool.php
@@ -140,7 +129,7 @@ select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbuck
 
     $V = "<p>";
     $V .= _("The purpose of this is to facilitate editing an existing bucketpool.  Make sure you understand");
-    $V .= " <a href='http://www.fossology.org/projects/fossology/wiki/Buckets'>";
+    $V .= " <a href='https://github.com/fossology/fossology/wiki/Buckets'>";
     $V .= _("Creating Bucket Pools");
     $V .= "</a> ";
     $V .= _("before continuing.");

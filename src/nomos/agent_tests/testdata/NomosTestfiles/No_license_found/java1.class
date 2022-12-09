@@ -1,0 +1,6 @@
+allHeaders[Lorg/apache/http/Header;currentIndexI
+headerNameLjava/lang/String;<init>.([Lorg/apache/http/Header;Ljava/lang/String;)VCodeLineNumberTableLocalVariableTablethis-Lorg/apache/http/message/BasicHeaderIterator;headersnamefindNext(I)IposfromtofoundZ
+StackMapTablefilterHeader(I)ZindexhasNext()Z
+nextHeader()Lorg/apache/http/Header;current
+Exceptionsnext()Ljava/lang/Object;remove()
+SourceFileBasicHeaderIterator.java9Header arrayRST%&-.UVWXYZ java/util/NoSuchElementExceptionIteration already finished.[23'java/lang/UnsupportedOperationException"Removing headers is not supported.+org/apache/http/message/BasicHeaderIteratorjava/lang/Objectorg/apache/http/HeaderIteratororg/apache/http/util/ArgsnotNull8(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;org/apache/http/HeadergetName()Ljava/lang/String;java/lang/StringequalsIgnoreCase(Ljava/lang/String;)Z(Ljava/lang/String;)V!n

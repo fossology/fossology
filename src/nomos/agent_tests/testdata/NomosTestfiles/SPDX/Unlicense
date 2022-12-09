@@ -1,1 +1,3 @@
-SPDX-License-Identifier: Unlicense
+# REUSE-IgnoreStart
+SPDX-License-Identifier: foo-short-name AND bar-short-name OR Unlicense
+# REUSE-IgnoreEnd

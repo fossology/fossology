@@ -1,1 +1,3 @@
-SPDX-License-Identifier: Noweb
+# REUSE-IgnoreStart
+SPDX-License-Identifier: foo-short-name AND bar-short-name AND Noweb
+# REUSE-IgnoreEnd

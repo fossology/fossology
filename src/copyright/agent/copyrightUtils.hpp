@@ -1,20 +1,9 @@
 /*
- * Copyright (C) 2014, Siemens AG
- * Author: Daniele Fognini, Johannes Najjar
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- */
+ SPDX-FileCopyrightText: © 2014 Siemens AG
+ Author: Daniele Fognini, Johannes Najjar
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 #ifndef COPYRIGHTUTILS_HPP_
 #define COPYRIGHTUTILS_HPP_
@@ -28,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <json/json.h>
 
 #include "scanners.hpp"
 #include "regscan.hpp"
@@ -47,7 +37,8 @@ void bail(int exitval);
 
 int writeARS(int agentId, int arsId, int uploadId, int success, const fo::DbManager& dbManager);
 
-bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::string>& fileNames);
+bool parseCliOptions(int argc, char** argv, CliOptions& dest,
+    std::vector<std::string>& fileNames, std::string& directoryToScan);
 
 CopyrightState getState(CliOptions&& cliOptions);
 
@@ -57,8 +48,16 @@ std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std
 */
 void normalizeContent(std::string& content);
 
-bool processUploadId(const CopyrightState& state, int agentId, int uploadId, CopyrightDatabaseHandler& handler);
+bool processUploadId(const CopyrightState& state, int agentId, int uploadId, CopyrightDatabaseHandler& handler, bool ignoreFilesWithMimeType);
 
+std::pair<std::string, std::list<match>> processSingleFile(const CopyrightState& state,
+  const std::string fileName);
+
+void appendToJson(const std::string fileName,
+    const std::pair<string, list<match>> resultPair, bool &printComma);
+
+void printResultToStdout(const std::string fileName,
+    const std::pair<string, list<match>> resultPair);
 
 #endif /* COPYRIGHTUTILS_HPP_ */
 

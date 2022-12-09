@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\BusinessRules;
@@ -32,7 +21,7 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
   private $groupId = 101;
 
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb();
     $this->testDb->createPlainTables(
@@ -78,7 +67,7 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
@@ -162,10 +151,11 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt);
     $map = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    assertThat($map,is(arrayWithSize(2)));
+    assertThat($map,is(arrayWithSize(3)));
     $expected = array(
         array('rf_origin'=>1, 'rf_pk'=>1,'rf_shortname'=>'One','rf_fullname'=>'One-1'),
-        array('rf_origin'=>2, 'rf_pk'=>1,'rf_shortname'=>'One','rf_fullname'=>'One-1')
+        array('rf_origin'=>2, 'rf_pk'=>1,'rf_shortname'=>'One','rf_fullname'=>'One-1'),
+        array('rf_origin'=>3, 'rf_pk'=>3,'rf_shortname'=>'Three','rf_fullname'=>'Three-3')
     );
     assertThat($map,containsInAnyOrder($expected));
   }
@@ -186,5 +176,4 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     assertThat($map,hasItemInArray(array('rf_fk'=>2,'parent_shortname'=>'One','rf_parent'=>1)));
     assertThat($map,hasItemInArray(array('rf_fk'=>3,'parent_shortname'=>'Three','rf_parent'=>3)));
   }
-
 }

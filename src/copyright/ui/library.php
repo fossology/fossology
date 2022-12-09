@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2010-2013 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /**
  * @file library.php
@@ -216,18 +205,14 @@ function MassageContent(&$row, $hash)
   /* remove control characters */
   $content = preg_replace('/[\x0-\x1f]/', ' ', $OriginalContent);
 
-  if ($row['type'] == 'statement')
-  {
+  if ($row['type'] == 'statement') {
     /* !"#$%&' */
     $content = preg_replace('/([\x21-\x27])|([*@])/', ' ', $content);
 
     /*  numbers-numbers, two or more digits, ', ' */
     $content = preg_replace('/(([0-9]+)-([0-9]+))|([0-9]{2,})|(,)/', ' ', $content);
     $content = preg_replace('/ : /', ' ', $content);  // free :, probably followed a date
-  }
-  else
-  if ($row['type'] == 'email')
-  {
+  } elseif ($row['type'] == 'email') {
     $content = str_replace(":;<=>()", " ", $content);
   }
 
@@ -239,11 +224,14 @@ function MassageContent(&$row, $hash)
 
   /* remove leading "dnl " */
   if ((strlen($content) > 4) &&
-  (substr_compare($content, "dnl ", 0, 4, true) == 0))
-  $content = substr($content, 4);
+  (substr_compare($content, "dnl ", 0, 4, true) == 0)) {
+    $content = substr($content, 4);
+  }
 
   /* skip empty content */
-  if (empty($content)) return true;
+  if (empty($content)) {
+    return true;
+  }
 
   /* Step 1B: rearrange copyright statments to try and put the holder first,
    * followed by the rest of the statement, less copyright years.
@@ -256,7 +244,9 @@ function MassageContent(&$row, $hash)
   $row['content'] = $content;
   $row['copyright_count'] = 1;
   $row['hash'] = md5($row['content']);
-  if ($hash && ($row['hash'] != $hash)) return true;
+  if ($hash && ($row['hash'] != $hash)) {
+    return true;
+  }
 
   return false;
 }  /* End of MassageContent() */

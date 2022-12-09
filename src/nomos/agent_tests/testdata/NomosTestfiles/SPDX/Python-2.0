@@ -1,1 +1,3 @@
-SPDX-License-Identifier: Python-2.0
+# REUSE-IgnoreStart
+SPDX-License-Identifier: foo-short-name AND bar-short-name AND Python-2.0
+# REUSE-IgnoreEnd

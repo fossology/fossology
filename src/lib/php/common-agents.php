@@ -1,21 +1,10 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2018 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2008-2012 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2018 Siemens AG
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License version 2.1 as published by the Free Software Foundation.
-
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- ***********************************************************/
+ SPDX-License-Identifier: LGPL-2.1-only
+*/
 
 /**
  * \file
@@ -60,7 +49,9 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
   if (!empty($AgentList)) {
     // get user agent preferences
     $userName = $_SESSION['User'];
-    if (!empty($specified_username)) $userName = $specified_username;
+    if (!empty($specified_username)) {
+      $userName = $specified_username;
+    }
     $sql = "SELECT user_name, user_agent_list, default_bucketpool_fk FROM users WHERE
 				    user_name='$userName';";
     $result = pg_query($PG_CONN, $sql);
@@ -69,16 +60,17 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
     pg_free_result($result);
     // Ulist should never be empty, if it is, something really wrong,
     // like the user_agent_list column is missing.
-    if(empty($uList))
-    {
+    if (empty($uList)) {
       $text = _("Fatal! Query Failed getting user_agent_list for user");
       return("<h3 style='color:red'>$text $userName</h3>");
     }
     $list = explode(',',$uList[0]['user_agent_list']);
     $default_bucketpool_fk = $uList[0]['default_bucketpool_fk'];
-    if (empty($default_bucketpool_fk)) $SkipAgents[] = "agent_bucket";
+    if (empty($default_bucketpool_fk)) {
+      $SkipAgents[] = "agent_bucket";
+    }
 
-    foreach($AgentList as $AgentItem) {
+    foreach ($AgentList as $AgentItem) {
       $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
       if (empty($Agent)) {
         continue;
@@ -86,20 +78,19 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
 
       // ignore agents to skip from list
       $FoundSkip = false;
-      foreach($SkipAgents as $SkipAgent)
-      {
-        if ($Agent->Name == $SkipAgent)
-        {
+      foreach ($SkipAgents as $SkipAgent) {
+        if ($Agent->Name == $SkipAgent) {
           $FoundSkip = true;
           break;
         }
       }
-      if ($FoundSkip) continue;
+      if ($FoundSkip) {
+        continue;
+      }
 
       if ($upload_pk != -1) {
         $rc = $Agent->AgentHasResults($upload_pk);
-      }
-      else {
+      } else {
         $rc = 0;
       }
       if ($rc != 1) {
@@ -108,15 +99,12 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
 
         // display user agent preferences
 
-        if(in_array($Name, $list))
-        {
+        if (in_array($Name, $list)) {
           $Selected = " checked ";
-        }
-        else
-        {
+        } else {
           $Selected = "";
         }
-        $V .= "<input type='checkbox' name='Check_$Name' value='1' $Selected />$Desc<br />\n";
+        $V .= "<input type='checkbox' class='browse-upload-checkbox view-license-rc-size' name='Check_$Name' value='1' $Selected /> $Desc<br />\n";
       }
     }
   }
@@ -149,8 +137,7 @@ function AgentCheckBoxDo($job_pk, $upload_pk)
 function AgentSchedule($jobId, $uploadId, $agents)
 {
   $errorMsg = "";
-  foreach($agents as &$agent)
-  {
+  foreach ($agents as &$agent) {
     $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
     if ($rv == -1) {
       return $errorMsg;
@@ -195,29 +182,22 @@ function FindDependent($UploadPk, $list=NULL)
   pg_free_result($result);
 
   $jobList = array();
-  foreach($Jobs as $Row) {
-    if($Row['job_name'] == 'Copyright Analysis') {
+  foreach ($Jobs as $Row) {
+    if ($Row['job_name'] == 'Copyright Analysis') {
       $jobList[] = $Row['job_pk'];
-    }
-    elseif($Row['job_name'] == 'Bucket Analysis')
-    {
+    } elseif ($Row['job_name'] == 'Bucket Analysis') {
       $jobList[] = $Row['job_pk'];
-    }
-    elseif($Row['job_name'] == 'Package Agents')
-    {
+    } elseif ($Row['job_name'] == 'Package Agents') {
       $jobList[] = $Row['job_pk'];
-    }
-    elseif($Row['job_name'] == 'Nomos License Analysis')
-    {
+    } elseif ($Row['job_name'] == 'Nomos License Analysis') {
       $jobList[] = $Row['job_pk'];
     }
   }
 
   // get the jq_pk's for each job, retrun the list of jq_pk's
-  foreach($jobList as $job)
-  {
+  foreach ($jobList as $job) {
     $sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE jq_job_fk = $job " .
-					 " order by jq_pk desc;";
+                     " order by jq_pk desc;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $Q = pg_fetch_all($result);
@@ -250,8 +230,7 @@ function GetAgentKey($agentName, $agentDesc)
   $result = pg_query($PG_CONN, $sqlselect);
   DBCheckResult($result, $sqlselect, __FILE__, __LINE__);
 
-  if (pg_num_rows($result) == 0)
-  {
+  if (pg_num_rows($result) == 0) {
     /* no match, so add an agent rec */
     $sql = "INSERT INTO agent (agent_name,agent_desc,agent_enabled) VALUES ('$agentName',E'$agentDesc',1)";
     $result = pg_query($PG_CONN, $sqlselect);
@@ -349,8 +328,7 @@ function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
   $NumRows = pg_num_rows($result);
-  if ($NumRows == 1) // only one result
-  {
+  if ($NumRows == 1) { // only one result
     pg_free_result($result);
     return;  /* only one result */
   }
@@ -359,12 +337,10 @@ function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
   while ($row = pg_fetch_assoc($result)) {
     $select .= "<option value='$row[agent_pk]'";
 
-    if (empty($agent_pk))
-    {
+    if (empty($agent_pk)) {
       $select .= " SELECTED ";
       $agent_pk = $row["agent_pk"];
-    } else if ($agent_pk == $row['agent_pk'])
-    {
+    } else if (in_array($row['agent_pk'], $agent_pk)) {
       $select .= " SELECTED ";
     }
 
@@ -382,9 +358,9 @@ function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
  *
  * \return String $agentsChecked list of checked agents
  */
-function userAgents()
+function userAgents($agents=null)
 {
-  return implode(',', array_keys(checkedAgents()));
+  return implode(',', array_keys(checkedAgents($agents)));
 }
 
 /**
@@ -393,15 +369,19 @@ function userAgents()
  *
  * \return Plugin[] list of checked agent plugins, mapped by name
  */
-function checkedAgents()
+function checkedAgents($agents=null)
 {
   $agentsChecked = array();
   $agentList = listAgents();
-  foreach($agentList as $agentName => &$agentPlugin)
-  {
-    if (GetParm("Check_" . $agentName, PARM_INTEGER) == 1)
-    {
-      $agentsChecked[$agentName] = &$agentPlugin;
+  foreach ($agentList as $agentName => &$agentPlugin) {
+    if (is_null($agents)) {
+      if (GetParm("Check_" . $agentName, PARM_INTEGER) == 1) {
+        $agentsChecked[$agentName] = &$agentPlugin;
+      }
+    } else {
+      if ($agents["Check_" . $agentName] == 1) {
+        $agentsChecked[$agentName] = &$agentPlugin;
+      }
     }
   }
   unset($agentPlugin);
@@ -420,7 +400,7 @@ function listAgents()
 
   $agentList = menu_find("Agents",$Depth);
   if (!empty($agentList)) {
-    foreach($agentList as $agentItem) {
+    foreach ($agentList as $agentItem) {
       /*
        The URI below contains the agent name e.g agent_license, this is
        not be confused with the Name attribute in the class, for example,

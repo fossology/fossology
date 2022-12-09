@@ -1,25 +1,14 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Auth\Auth;
 
-define("TITLE_PopupLicense", _("Show Reference License"));
+define("TITLE_POPUPLICENSE", _("Show Reference License"));
 
 class PopupLicense extends FO_Plugin
 {
@@ -30,7 +19,7 @@ class PopupLicense extends FO_Plugin
   function __construct()
   {
     $this->Name = "popup-license";
-    $this->Title = TITLE_PopupLicense;
+    $this->Title = TITLE_POPUPLICENSE;
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
@@ -40,50 +29,42 @@ class PopupLicense extends FO_Plugin
     $this->licenseDao = $container->get('dao.license');
   }
 
-
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       return 0;
     }
     $licenseShortname = GetParm("lic", PARM_TEXT);
     $licenseId = GetParm("rf", PARM_NUMBER);
     $groupId = $_SESSION[Auth::GROUP_ID];
-    if (empty($licenseShortname) && empty($licenseId))
-    {
+    if (empty($licenseShortname) && empty($licenseId)) {
       return;
     }
-    if ($licenseId)
-    {
+    if ($licenseId) {
       $license = $this->licenseDao->getLicenseById($licenseId, $groupId);
+    } else {
+      $license = $this->licenseDao->getLicenseByShortName($licenseShortname,
+        $groupId);
     }
-    else
-    {
-      $license = $this->licenseDao->getLicenseByShortName($licenseShortname, $groupId);
-    }
-    if ($license === null)
-    {
+    if ($license === null) {
       return;
     }
     $this->vars['shortName'] = $license->getShortName();
     $this->vars['fullName'] = $license->getFullName();
     $parent = $this->licenseDao->getLicenseParentById($license->getId());
-    if($parent!==null)
-    {
+    if ($parent !== null) {
       $this->vars['parentId'] = $parent->getId();
       $this->vars['parentShortName'] = $parent->getShortName();
     }
     $licenseUrl = $license->getUrl();
-    if (strtolower($licenseUrl) == 'none')
-    {
+    if (strtolower($licenseUrl) == 'none') {
       $licenseUrl = NULL;
     }
     $this->vars['url'] = $licenseUrl;
     $this->vars['text'] = $license->getText();
     $this->vars['risk'] = $license->getRisk() ?: 0;
     return $this->render('popup_license.html.twig');
-  }  
+  }
 }
 
 $NewPlugin = new PopupLicense();

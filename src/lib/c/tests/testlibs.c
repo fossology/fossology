@@ -1,19 +1,8 @@
-/*********************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*********************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @dir
  * @brief Unit tests for libfossology
@@ -40,7 +29,6 @@ extern CU_TestInfo libfossdbmanager_testcases[];
 * \todo Fix `fossscheduler_testcases`
 */
 
-#if CU_VERSION_P == 213
 CU_SuiteInfo suites[] =
   {
     {"Testing libfossdb", NULL, NULL, NULL, NULL, libfossdb_testcases},
@@ -49,16 +37,6 @@ CU_SuiteInfo suites[] =
     // TODO fix { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
     CU_SUITE_INFO_NULL
   };
-#else
-CU_SuiteInfo suites[] =
-  {
-    {"Testing libfossdb", NULL, NULL, libfossdb_testcases},
-    {"Testing fossconfig", NULL, NULL, fossconfig_testcases},
-    {"Testing libfossdbmanger", NULL, NULL, libfossdbmanager_testcases},
-    // TODO fix { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
-    CU_SUITE_INFO_NULL
-  };
-#endif
 
 /* ************************************************************************** */
 /* **** main function ******************************************************* */

@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Auth\Auth;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,20 +12,20 @@ use Symfony\Component\HttpFoundation\Response;
  * \file ajax-uploads.php
  * \brief This plugin is used to list all uploads associated
  * with a folder.  This is NOT intended to be a user-UI
- * plugin. 
+ * plugin.
  * This is intended as an active plugin to provide support
  * data to the UI.
  * User must have PERM_WRITE to the uploads.
  */
 
-define("TITLE_core_uploads", _("List Uploads as Options"));
+define("TITLE_CORE_UPLOADS", _("List Uploads as Options"));
 
 class core_uploads extends FO_Plugin
 {
   function __construct()
   {
     $this->Name       = "upload_options";
-    $this->Title      = TITLE_core_uploads;
+    $this->Title      = TITLE_CORE_UPLOADS;
     $this->DBaccess   = PLUGIN_DB_READ;
     $this->OutputType = 'Text'; /* This plugin needs no HTML content help */
 
@@ -54,23 +43,20 @@ class core_uploads extends FO_Plugin
     }
     $V = '';
     $uploadList = FolderListUploads_perm($FolderId, Auth::PERM_WRITE);
-    foreach($uploadList as $upload)
-    {
+    foreach ($uploadList as $upload) {
       $V .= "<option value='" . $upload['upload_pk'] . "'>";
       $V .= htmlentities($upload['name']);
-      if (!empty($upload['upload_desc']))
-      {
+      if (! empty($upload['upload_desc'])) {
         $V .= " (" . htmlentities($upload['upload_desc']) . ")";
       }
-      if (!empty($upload['upload_ts']))
-      {
-        $V .= " :: " . htmlentities($upload['upload_ts']);
+      if (! empty($upload['upload_ts'])) {
+        $V .= " :: " . htmlentities(Convert2BrowserTime($upload['upload_ts']));
       }
       $V .= "</option>\n";
     }
     return new Response($V, Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }
-
 }
-$NewPlugin = new core_uploads;
+
+$NewPlugin = new core_uploads();
 $NewPlugin->Initialize();

@@ -1,8 +1,6 @@
-{# Copyright 2014-2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2014-2015 Siemens AG
 
-   Copying and distribution of this file, with or without modification,
-   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-   This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 {% if selected is not defined %}
   {% set selected = -1 %}
@@ -11,7 +9,7 @@
   {% for entry in folderStructure %}
     {% for entryReuse in entry.reuse %}
       <option value="{{ entry.folder.id }},{{ entryReuse.group_id }}"{% if selected == entry.folder.id %} selected="selected"{% endif %}>
-        {% for i in range(0, entry.depth) if i > 0 %}&nbsp; {% endfor %}{{ entry.folder.name | escape('html') }} ({{ entryReuse.group_name | escape('html') }}:{{ entryReuse.count }})
+        {% for i in range(1, entry.depth) %}&nbsp; {% endfor %}{{ entry.folder.name | escape('html') }} ({{ entryReuse.group_name | escape('html') }}:{{ entryReuse.count }})
       </option>
     {% endfor %}
   {% endfor %}

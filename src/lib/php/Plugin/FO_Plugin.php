@@ -1,21 +1,10 @@
 <?php
-/***********************************************************
- * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014-2017 Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2014-2017 Siemens AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\Plugin;
@@ -41,6 +30,7 @@ define("PLUGIN_STATE_READY", 2); // used during post-install
 define("PLUGIN_DB_NONE", 0);
 define("PLUGIN_DB_READ", 1);
 define("PLUGIN_DB_WRITE", 3);        /* DB writes permitted */
+define("PLUGIN_DB_CADMIN", 5);       /* DB writes permitted, with additional clearing permissions */
 define("PLUGIN_DB_ADMIN", 10);        /* add/delete users */
 
 
@@ -49,7 +39,8 @@ $NoneText = _("None");
 $ReadText = _("Read");
 $WriteText = _("Write");
 $AdminText = _("Admin");
-$GLOBALS['PERM_NAMES'] = array(Auth::PERM_NONE => $NoneText, Auth::PERM_READ => $ReadText, Auth::PERM_WRITE => $WriteText, Auth::PERM_ADMIN => $AdminText);
+$cAdminText = _("Clearing Admin");
+$GLOBALS['PERM_NAMES'] = array(Auth::PERM_NONE => $NoneText, Auth::PERM_READ => $ReadText, Auth::PERM_WRITE => $WriteText, Auth::PERM_ADMIN => $AdminText, Auth::PERM_CADMIN => $cAdminText);
 
 /**
  * \class FO_Plugin
@@ -223,7 +214,7 @@ class FO_Plugin implements Plugin
    */
   function Initialize()
   {
-    return (TRUE);
+    return (true);
   } // Initialize()
 
   /**
@@ -238,21 +229,17 @@ class FO_Plugin implements Plugin
    */
   function PostInitialize()
   {
-    if ($this->State != PLUGIN_STATE_VALID)
-    {
+    if ($this->State != PLUGIN_STATE_VALID) {
       return 0;
     } // don't run
 
-    if (empty($_SESSION['User']) && $this->LoginFlag)
-    {
+    if (empty($_SESSION['User']) && $this->LoginFlag) {
       return 0;
     }
     // Make sure dependencies are met
-    foreach ($this->Dependency as $key => $val)
-    {
+    foreach ($this->Dependency as $key => $val) {
       $id = plugin_find_id($val);
-      if ($id < 0)
-      {
+      if ($id < 0) {
         $this->Destroy();
         return (0);
       }
@@ -265,8 +252,7 @@ class FO_Plugin implements Plugin
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
     // Add this plugin to the menu
-    if ($this->MenuList !== "")
-    {
+    if ($this->MenuList !== "") {
       menu_insert("Main::" . $this->MenuList, $this->MenuOrder, $this->Name, $this->MenuTarget);
     }
     return ($this->State == PLUGIN_STATE_READY);
@@ -283,8 +269,7 @@ class FO_Plugin implements Plugin
    */
   function RegisterMenus()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     } // don't run
     // Add your own menu items here.
@@ -319,8 +304,7 @@ class FO_Plugin implements Plugin
    */
   function OutputOpen()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     }
 
@@ -331,11 +315,11 @@ class FO_Plugin implements Plugin
 
     $metadata = "<meta name='description' content='The study of Open Source'>\n";
     $metadata .= "<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>\n";
+    $metadata .= "<meta name='viewport' content='width=device-width,initial-scale=1.0'>\n";
 
     $this->vars['metadata'] = $metadata;
 
-    if (!empty($this->Title))
-    {
+    if (!empty($this->Title)) {
       $this->vars['title'] = htmlentities($this->Title);
     }
 
@@ -343,17 +327,16 @@ class FO_Plugin implements Plugin
     $styles .= "<link rel='stylesheet' href='css/select2.min.css'>\n";
     $styles .= "<link rel='stylesheet' href='css/jquery.dataTables.css'>\n";
     $styles .= "<link rel='stylesheet' href='css/fossology.css'>\n";
+    $styles .= "<link rel='stylesheet' href='css/bootstrap/bootstrap.min.css'>\n";
     $styles .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
     $styles .= "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
 
-    if ($this->NoMenu == 0)
-    {
+    if ($this->NoMenu == 0) {
       $styles .= $this->menu->OutputCSS();
     }
     $this->vars['styles'] = $styles;
 
-    if ($this->NoMenu == 0)
-    {
+    if ($this->NoMenu == 0) {
       $this->vars['menu'] = $this->menu->Output($this->Title);
     }
 
@@ -376,8 +359,7 @@ class FO_Plugin implements Plugin
    */
   function OutputUnSet()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       return 0;
     }
     return "";
@@ -391,17 +373,12 @@ class FO_Plugin implements Plugin
     ob_start();
     $output = $this->Output();
 
-    if($output instanceof Response)
-    {
+    if ($output instanceof Response) {
       $response = $output;
-    }
-    else
-    {
-      if (empty($this->vars['content']) && $output)
-      {
+    } else {
+      if (empty($this->vars['content']) && $output) {
         $this->vars['content'] = $output;
-      } elseif (empty($this->vars['content']))
-      {
+      } elseif (empty($this->vars['content'])) {
         $this->vars['content'] = ob_get_contents();
       }
       $response = $this->render($this->getTemplateName());
@@ -418,7 +395,8 @@ class FO_Plugin implements Plugin
    * (OutputOpen and Output are separated so one plugin
    * can call another plugin's Output.)
    */
-  function Output() {
+  function Output()
+  {
     return new Response("ERROR: Output() method of FO_Plugin not defined in class '" . get_class($this) . "'", Response::HTTP_INTERNAL_SERVER_ERROR);
   }
 
@@ -434,7 +412,7 @@ class FO_Plugin implements Plugin
    */
   public function renderString($templateName, $vars = null)
   {
-    return $this->renderer->loadTemplate($templateName)->render($vars ?: $this->vars);
+    return $this->renderer->load($templateName)->render($vars ?: $this->vars);
   }
 
   /**
@@ -468,8 +446,7 @@ class FO_Plugin implements Plugin
    */
   public function getRequest()
   {
-    if (!isset($this->request))
-    {
+    if (!isset($this->request)) {
       $this->request = Request::createFromGlobals();
     }
     return $this->request;
@@ -485,12 +462,10 @@ class FO_Plugin implements Plugin
 
   function preInstall()
   {
-    if ($this->State == PLUGIN_STATE_VALID)
-    {
+    if ($this->State == PLUGIN_STATE_VALID) {
       $this->PostInitialize();
     }
-    if ($this->State == PLUGIN_STATE_READY)
-    {
+    if ($this->State == PLUGIN_STATE_READY) {
       $this->RegisterMenus();
     }
   }
@@ -498,8 +473,7 @@ class FO_Plugin implements Plugin
   function postInstall()
   {
     $state = $this->Install();
-    if ($state != 0)
-    {
+    if ($state != 0) {
       throw new Exception("install of plugin " . $this->Name . " failed");
     }
   }

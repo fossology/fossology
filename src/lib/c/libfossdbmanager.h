@@ -1,19 +1,8 @@
 /*
-Author: Daniele Fognini
-Copyright (C) 2014-2015, Siemens AG
+ Author: Daniele Fognini
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 #ifndef LIBFOSSDBMANAGER_H
@@ -22,6 +11,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libpq-fe.h>
 #include <stdarg.h>
 #include <glib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct fo_dbmanager_preparedstatement fo_dbManager_PreparedStatement;
 typedef struct fo_dbmanager fo_dbManager;
@@ -80,6 +73,7 @@ fo_dbManager_PrepareStamement_str(dbManager, \
   query, \
   #__VA_ARGS__\
 )
+
 fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(fo_dbManager* dbManager, const char* name, const char* query, const char* paramtypes);
 
 PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...);
@@ -91,5 +85,9 @@ int fo_dbManager_exists(fo_dbManager* dbManager, const char* type, const char* n
 // visible for testing
 int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params);
 char* fo_dbManager_printStatement(fo_dbManager_PreparedStatement* preparedStatement);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* LIBFOSSDBMANAGER_H */

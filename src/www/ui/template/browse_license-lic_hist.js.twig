@@ -1,15 +1,13 @@
-{# Copyright 2014-2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2014-2015, 2022 Siemens AG
 
-   Copying and distribution of this file, with or without modification,
-   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-   This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 function createLicHistTable() {
 
   tableColumns = [
       {"sTitle": "{{ "Scanner Count"|trans }}", "sClass": "right", "sWidth": "5%", "bSearchable": false, "sType": "num-html"},
       {"sTitle": "{{ "Concluded License Count"|trans }}", "sClass": "right", "sWidth": "5%", "bSearchable": false, "sType": "num-html"},
-      {"sTitle": "{{ "License Name"|trans }}", "sClass": "left", "mRender": dressContents}
+      {"sTitle": "{{ "License Name"|trans }} <img src='images/info_16.png' title='{{ "Click on the license name to search for where the license is found in the file listing."|trans}}' alt='' class='info-bullet'/>", "sClass": "left", "mRender": dressContents}
   ];
 
   tableSorting = [
@@ -20,8 +18,8 @@ function createLicHistTable() {
 
   tableLanguage = {
       "sInfo": "Showing _START_ to _END_ of _TOTAL_ licenses",
-      "sSearch": "_INPUT_ <button onclick=\"clearSearchLicense()\" title=\"{{ 'Clear license filter'|trans }}\">{{ "Clear"|trans }}</button>",
-      "sLengthMenu": "{{ 'Display'|trans }} <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> {{ 'licenses'|trans }}"
+      "sSearch": "_INPUT_ <button class=\"btn btn-default btn-sm\" style=\"vertical-align:top;margin:1px;\" onclick=\"clearSearchLicense()\" title=\"{{ 'Clear license filter'|trans }}\">{{ "Clear"|trans }}</button>",
+      "sLengthMenu": "{{ 'Display'|trans }} <select class=\"form-control-sm\"><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> {{ 'licenses'|trans }}"
   };
 
   {% if tableDataJson is not empty %}
@@ -30,8 +28,28 @@ function createLicHistTable() {
       "aoColumns": tableColumns,
       "aaSorting": tableSorting,
       "iDisplayLength": 25,
+      "sPaginationType": "listbox",
       "oLanguage": tableLanguage
     };
     dTable=$('#lichistogram').dataTable(licHistTableConfig);
   {% endif %}
+}
+
+function createReuseReportTable() {
+  var reuseReportTableConfig = {
+    "ajax": {
+      "url":"?mod=ajax_reuse_report&upload={{ uploadId }}",
+      "type": "GET",
+      "cache": "true"
+    },
+    "columns": [
+      {"data": "title"},
+      {"data": "value"}
+    ],
+    "paging": false,
+    "ordering": false,
+    "info": false,
+    "searching": false
+  };
+  return $('#reuseTable').dataTable(reuseReportTableConfig);
 }

@@ -1,21 +1,9 @@
-/***************************************************************
- Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014, Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2006-2014 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /**
  * \dir
@@ -80,6 +68,7 @@
 #ifndef	_GNU_SOURCE
 #define	_GNU_SOURCE
 #endif	/* not defined _GNU_SOURCE */
+#include <glib.h>
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -103,6 +92,9 @@
 #include <sys/time.h>
 #include "nomos_gap.h"
 #include <stdbool.h>
+#include <semaphore.h>
+#include <stdbool.h>
+#include "json_writer.h"
 
 /** Use nomos in standalone mode (no FOSSology DB) */
 #ifdef STANDALONE
@@ -111,8 +103,6 @@
 #include <libfossology.h>
 #include <libfossdbmanager.h>
 #endif
-
-#include <glib.h>
 
 /**
  * To use our local version of debug-malloc(), compile -DMEMORY_TRACING
@@ -130,7 +120,7 @@
 #define	PROC_TRACE
 #endif	/* PROC_TRACE_SWITCH */
 
-#define	myBUFSIZ	2048      ///< Buffer max length
+#define	myBUFSIZ	4096      ///< Buffer max length
 #define	MAX_RENAME	1000    ///< Max rename length
 #define TEMP_FILE_LEN 100   ///< Max temp file length
 
@@ -151,12 +141,13 @@
 #define OPTS_HIGHLIGHT_STDOUT 0x8
 #define OPTS_NO_HIGHLIGHTINFO 0x10
 #define OPTS_JSON_OUTPUT 0x20
+#define OPTS_SCANNING_DIRECTORY 0x40
 
-char debugStr[myBUFSIZ];        ///< Debug string
-char dbErrString[myBUFSIZ];     ///< DB error string
-char saveLics[myBUFSIZ];        ///< License string
+extern char debugStr[myBUFSIZ];        ///< Debug string
+extern char dbErrString[myBUFSIZ];     ///< DB error string
+extern char saveLics[myBUFSIZ];        ///< License string
 
-size_t hashEntries;             ///< Hash entries
+extern size_t hashEntries;             ///< Hash entries
 
 /**
   Flags for program control
@@ -398,11 +389,11 @@ typedef struct  {
   \brief Struct that tracks state related to current file being scanned.
  */
 struct curScan {
-    char cwd[myBUFSIZ]; /**< CDB, Would like to workaround and eliminate. */
+  char cwd[myBUFSIZ];      /**< CDB, Would like to workaround and eliminate. */
   char targetDir[myBUFSIZ]; 	/**< Directory where file is */ /* check */
   char targetFile[myBUFSIZ]; 	/**< File we're scanning (tmp file)*/ /* check */
   char filePath[myBUFSIZ];    /**< the original file path passed in */
-    long pFileFk; /**< [in] pfile_fk from scheduler */
+  long pFileFk;            /**< [in] pfile_fk from scheduler */
   char pFile[myBUFSIZ];       /**< [in] pfilename from scheduler */
   char *licPara;
   char *matchBase;
@@ -416,16 +407,15 @@ struct curScan {
   list_t offList;
   list_t lList;
   char compLic[myBUFSIZ];  	/**< the license(s) found, None or NotLikely.
-    							     comma separated if multiple names are found.
-   */
+                                comma separated if multiple names are found. */
   int nLines;
   int cliMode;                /**< boolean to indicate running from command line */
   char *tmpLics;              /**< pointer to storage for parsed names */
   char *licenseList[512];     /**< list of license names found, can be a single name */
 
-    GArray* indexList; /**< List of license indexes */
-    GArray* theMatches; /**< List of matches */
-    GArray* keywordPositions; /**< List of matche positions */
+  GArray* indexList; /**< List of license indexes */
+  GArray* theMatches; /**< List of matches */
+  GArray* keywordPositions; /**< List of matche positions */
   GArray* docBufferPositionsAndOffsets;
   int currentLicenceIndex;
 };
@@ -464,10 +454,10 @@ typedef struct licensetext licText_t;
  * License scan result
  */
 struct scanResults {
-    int score;        ///< License match score
+  int score;        ///< License match score
   int kwbm;
   int size;
-    int flag;         ///< Flags
+  int flag;         ///< Flags
   int dataOffset;
   char fullpath[myBUFSIZ];
   char linkname[16];

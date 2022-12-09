@@ -1,3 +1,8 @@
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only
+-->
+
 <!-- Before filling this issue, please read the Wiki (https://github.com/fossology/fossology/wiki)
 and search if the bug do not already exists in the issues (https://github.com/fossology/fossology/issues). -->
 

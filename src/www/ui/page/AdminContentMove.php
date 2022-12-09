@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2015 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2015 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
@@ -43,8 +32,7 @@ class AdminContentMove extends DefaultPlugin
   protected function RegisterMenus()
   {
     parent::RegisterMenus();
-    if (!$this->isRequiresLogin() || $this->isLoggedIn())
-    {
+    if (!$this->isRequiresLogin() || $this->isLoggedIn()) {
       menu_insert("Main::Organize::Uploads::Move or Copy", 0, $this->name, $this->name);
     }
   }
@@ -82,28 +70,18 @@ class AdminContentMove extends DefaultPlugin
   private function performAction($folderContentIds, $parentFolderId, $isCopyRequest)
   {
     $message = "";
-    for ($i = 0; $i < sizeof($folderContentIds); $i++)
-    {
+    for ($i = 0; $i < sizeof($folderContentIds); $i++) {
       $folderContentId = intval($folderContentIds[$i]);
-      if ($folderContentId && $parentFolderId && $isCopyRequest)
-      {
-        try
-        {
+      if ($folderContentId && $parentFolderId && $isCopyRequest) {
+        try {
           $this->folderDao->copyContent($folderContentId, $parentFolderId);
-        }
-        catch (Exception $ex)
-        {
+        } catch (Exception $ex) {
           $message .= $ex->getMessage();
         }
-      }
-      elseif ($folderContentId && $parentFolderId)
-      {
-        try
-        {
+      } elseif ($folderContentId && $parentFolderId) {
+        try {
           $this->folderDao->moveContent($folderContentId, $parentFolderId);
-        }
-        catch (Exception $ex)
-        {
+        } catch (Exception $ex) {
           $message .= $ex->getMessage();
         }
       }

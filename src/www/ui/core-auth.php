@@ -1,29 +1,24 @@
 <?php
-/***********************************************************
- * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2015 Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2015-2016, 2021 Siemens AG
+ SPDX-FileCopyrightText: © 2020 Robert Bosch GmbH
+ SPDX-FileCopyrightText: © Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
+ SPDX-FileCopyrightText: © 2021-2022 Orange
+ Contributors: Piotr Pszczola, Bartlomiej Drozdz
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\UI\Component\Menu;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use League\OAuth2\Client\Provider\GenericProvider;
 
-define("TITLE_core_auth", _("Login"));
+define("TITLE_CORE_AUTH", _("Login"));
 
 class core_auth extends FO_Plugin
 {
@@ -34,11 +29,13 @@ class core_auth extends FO_Plugin
   private $userDao;
   /** @var Session */
   private $session;
+  /** @var External Authentication */
+  private $authExternal;
 
   function __construct()
   {
     $this->Name = "auth";
-    $this->Title = TITLE_core_auth;
+    $this->Title = TITLE_CORE_AUTH;
     $this->PluginLevel = 1000; /* make this run first! */
     $this->LoginFlag = 0;
     parent::__construct();
@@ -47,6 +44,7 @@ class core_auth extends FO_Plugin
     $this->dbManager = $container->get("db.manager");
     $this->userDao = $container->get('dao.user');
     $this->session = $container->get('session');
+    $this->authExternal = auth_external_check();
   }
 
   /**
@@ -78,19 +76,21 @@ class core_auth extends FO_Plugin
     global $SysConf;
 
     /* if Site Minder enabled core-auth will be disabled*/
-    if (siteminder_check() != -1)
-    {
+    if (siteminder_check() != -1) {
       return (0);
     }
 
-    if (!$this->session->isStarted())
-    {
+    if (!$this->session->isStarted()) {
       $this->session->setName('Login');
       $this->session->start();
     }
 
-    if (array_key_exists('selectMemberGroup', $_POST))
-    {
+    //--------- Authentification external connection for auto-login-----------
+    if ($this->authExternal !== false && $this->authExternal['useAuthExternal']) {
+      $this->checkUsernameAndPassword($this->authExternal['loginAuthExternal'], $this->authExternal['passwordAuthExternal']);
+    }
+
+    if (array_key_exists('selectMemberGroup', $_POST)) {
       $selectedGroupId = intval($_POST['selectMemberGroup']);
       $this->userDao->setDefaultGroupMembership(intval($_SESSION[Auth::USER_ID]), $selectedGroupId);
       $_SESSION[Auth::GROUP_ID] = $selectedGroupId;
@@ -98,46 +98,44 @@ class core_auth extends FO_Plugin
       $SysConf['auth'][Auth::GROUP_ID] = $selectedGroupId;
     }
 
-    if (array_key_exists(Auth::USER_ID, $_SESSION)) $SysConf['auth'][Auth::USER_ID] = $_SESSION[Auth::USER_ID];
-    if (array_key_exists(Auth::GROUP_ID, $_SESSION)) $SysConf['auth'][Auth::GROUP_ID] = $_SESSION[Auth::GROUP_ID];
+    if (array_key_exists(Auth::USER_ID, $_SESSION)) {
+      $SysConf['auth'][Auth::USER_ID] = $_SESSION[Auth::USER_ID];
+    }
+    if (array_key_exists(Auth::GROUP_ID, $_SESSION)) {
+      $SysConf['auth'][Auth::GROUP_ID] = $_SESSION[Auth::GROUP_ID];
+    }
 
     $Now = time();
-    if (!empty($_SESSION['time']))
-    {
-      /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
-      if (@$_SESSION['time'] + (60 * 480) < $Now) $this->updateSession("");
+    /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
+    if (!empty($_SESSION['time']) && @$_SESSION['time'] + (60 * 480) < $Now) {
+      $this->updateSession("");
     }
 
     $_SESSION['time'] = $Now;
-    if (empty($_SESSION['ip']))
-    {
+    if (empty($_SESSION['ip'])) {
       $_SESSION['ip'] = $this->getIP();
-    } else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->getIP()))
-    {
+    } else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->getIP())) {
       /* Sessions are not transferable. */
-      $this->updateSession("");
+      $this->updateSession("", true);
       $_SESSION['ip'] = $this->getIP();
     }
 
-    if (@$_SESSION[Auth::USER_NAME])
-    {
+    if (@$_SESSION[Auth::USER_NAME]) {
       /* Recheck the user in case he is suddenly blocked or changed. */
-      if (empty($_SESSION['time_check']))
-      {
+      if (empty($_SESSION['time_check'])) {
         $_SESSION['time_check'] = time() + (480 * 60);
       }
-      if (time() >= @$_SESSION['time_check'])
-      {
-        $row = $this->userDao->getUserAndDefaultGroupByUserName(@$_SESSION[Auth::USER_NAME]);
+      if (time() >= @$_SESSION['time_check']) {
+        $row = $this->userDao->getUserAndDefaultGroupByUserName(@$_SESSION[Auth::USER_NAME], @$_SESSION['oauthCheck']);
         /* Check for instant logouts */
-        if (empty($row['user_pass']))
-        {
+        if (empty($row['user_pass'])) {
           $row = "";
         }
         $this->updateSession($row);
       }
-    } else
-      $this->updateSession("");
+    } else {
+      $this->updateSession("", true);
+    }
 
     /* Disable all plugins with >= level access */
     plugin_disable($_SESSION[Auth::USER_LEVEL]);
@@ -148,13 +146,13 @@ class core_auth extends FO_Plugin
    * \brief Set $_SESSION and $SysConf user variables
    * \param $UserRow users table row, if empty, use Default User
    * \return void, updates globals $_SESSION and $SysConf[auth][UserId] variables
+   * \oauth variable if false then update vice versa.
    */
-  function updateSession($userRow)
+  function updateSession($userRow, $oauth=false)
   {
     global $SysConf;
 
-    if (empty($userRow))
-    {
+    if (empty($userRow)) {
       $userRow = $this->userDao->getUserAndDefaultGroupByUserName('Default User');
     }
 
@@ -172,6 +170,13 @@ class core_auth extends FO_Plugin
     $SysConf['auth'][Auth::GROUP_ID] = $userRow['group_fk'];
     $this->session->set(Auth::GROUP_ID, $userRow['group_fk']);
     $_SESSION['GroupName'] = $userRow['group_name'];
+    if (!$oauth) {
+      $_SESSION['oauthCheck'] = $userRow['oauth'];
+    }
+    if (array_key_exists(Menu::BANNER_COOKIE, $_COOKIE)) {
+      $_COOKIE[Menu::BANNER_COOKIE] = 0;
+    }
+    setcookie(Menu::BANNER_COOKIE, "", time() - 3600);
   }
 
   /**
@@ -184,10 +189,8 @@ class core_auth extends FO_Plugin
   {
     /* NOTE: This can be easily defeated wtih fake HTTP headers. */
     $Vars = array('HTTP_CLIENT_IP', 'HTTP_X_COMING_FROM', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED');
-    foreach ($Vars as $V)
-    {
-      if (!empty($_SERVER[$V]))
-      {
+    foreach ($Vars as $V) {
+      if (!empty($_SERVER[$V])) {
         return ($_SERVER[$V]);
       }
     }
@@ -199,41 +202,96 @@ class core_auth extends FO_Plugin
    */
   public function Output()
   {
+    global $SysConf;
+
+    $this->vars['loginProvider'] = "password";
+    if (array_key_exists('AUTHENTICATION', $SysConf) &&
+      array_key_exists('provider', $SysConf['AUTHENTICATION'])) {
+      $this->vars['loginProvider'] = $SysConf['AUTHENTICATION']['provider'];
+    }
+
     $userName = GetParm("username", PARM_TEXT);
     $password = GetParm("password", PARM_TEXT);
+    $timezone = GetParm("timezone", PARM_TEXT);
+    if (empty($timezone) || strpos($timezone,"Unknown") == true) {
+      $timezone = date_default_timezone_get();
+    }
+    $_SESSION['timezone'] = $timezone;
     $referrer = GetParm("HTTP_REFERER", PARM_TEXT);
-    if (empty($referrer))
-    {
+    $getEmail = "";
+    $providerCheck = GetParm("providerCheck", PARM_TEXT);
+    $proxy = "";
+    if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
+      $proxy = $SysConf['FOSSOLOGY']['http_proxy'];
+    }
+    if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['https_proxy'])) {
+      $proxy = $SysConf['FOSSOLOGY']['https_proxy'];
+    }
+
+    if (! empty($providerCheck)) {
+      $provider = new GenericProvider([
+        "clientId"                => $SysConf['SYSCONFIG']['OidcAppId'],
+        "clientSecret"            => $SysConf['SYSCONFIG']['OidcSecret'],
+        "redirectUri"             => $SysConf['SYSCONFIG']['OidcRedirectURL'],
+        "urlAuthorize"            => $SysConf['SYSCONFIG']['OidcAuthorizeURL'],
+        "urlAccessToken"          => $SysConf['SYSCONFIG']['OidcAccessTokenURL'],
+        "urlResourceOwnerDetails" => $SysConf['SYSCONFIG']['OidcResourceURL'],
+        "proxy"                   => $proxy
+      ]);
+      $authorizationUrl = $provider->getAuthorizationUrl([
+        "scope" => ['email openid']
+      ]);
+      $_SESSION['oauth2state'] = $provider->getState();
+      $_SESSION['HTTP_REFERER'] = $referrer;
+      header('Location: ' . $authorizationUrl);
+      exit;
+    }
+
+    if (empty($referrer) && array_key_exists('HTTP_REFERER', $_SESSION)) {
+      $referrer = $_SESSION['HTTP_REFERER'];
+    } else if (empty($referrer)) {
       $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);
     }
+
+    if (array_key_exists("oauthemail", $_SESSION)) {
+      $getEmail = $_SESSION['oauthemail'];
+      unset($_SESSION['oauthemail']);
+    }
     $referrerQuery = parse_url($referrer,PHP_URL_QUERY);
-    if($referrerQuery) {
+    if ($referrerQuery) {
       $params = array();
       parse_str($referrerQuery,$params);
       if (array_key_exists('mod', $params) && $params['mod'] == $this->Name) {
         $referrer = Traceback_uri();
       }
     }
-
-    $validLogin = $this->checkUsernameAndPassword($userName, $password);
-    if ($validLogin)
-    {
-      return new RedirectResponse($referrer);
+    if (!empty($getEmail) && empty($userName)) {
+      $validLogin = $this->checkUsernameAndPassword($getEmail, "", true);
+    } else {
+      $validLogin = $this->checkUsernameAndPassword($userName, $password);
+    }
+    if ($validLogin) {
+      if (empty($referrer)) {
+        if (plugin_find_id('browse') < 0) {
+          $newReferrer = Traceback_uri() . '?mod=' . 'browse' . '&oauth=true';
+        }
+        return new RedirectResponse($newReferrer);
+      } else {
+        return new RedirectResponse($referrer);
+      }
     }
 
     $initPluginId = plugin_find_id("init");
-    if ($initPluginId >= 0)
-    {
+    if ($initPluginId >= 0) {
       global $Plugins;
       $this->vars['info'] = $Plugins[$initPluginId]->infoFirstTimeUsage();
     }
 
-    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off")
-    {
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off") {
       $this->vars['protocol'] = "HTTPS";
-    }
-    else
-    {
+    } else {
       $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
     }
 
@@ -241,6 +299,11 @@ class core_auth extends FO_Plugin
     $this->vars['loginFailure'] = !empty($userName) || !empty($password);
     if (!empty($userName) && $userName!='Default User') {
       $this->vars['userName'] = $userName;
+    }
+    if (!empty($SysConf['SYSCONFIG']['OidcAppName'])) {
+      $this->vars['providerExist'] = $SysConf['SYSCONFIG']['OidcAppName'];
+    } else {
+      $this->vars['providerExist'] = 0;
     }
     return $this->render('login.html.twig',$this->vars);
   }
@@ -250,57 +313,118 @@ class core_auth extends FO_Plugin
    */
   function OutputOpen()
   {
-    if (array_key_exists('User', $_SESSION) && $_SESSION['User'] != "Default User")
-    {
+    if (array_key_exists('User', $_SESSION) && $_SESSION['User'] != "Default User") {
+      global $SysConf;
+      if (!empty($SysConf['SYSCONFIG']['OidcLogoutURL'])) {
+        $uri = $SysConf['SYSCONFIG']['OidcLogoutURL'];
+      } else {
+        $uri = Traceback_uri();
+      }
       $this->updateSession("");
-      $Uri = Traceback_uri();
-      header("Location: $Uri");
+      $_SESSION['oauth2state'] = "";
+      header("Location: $uri");
       exit;
     }
     parent::OutputOpen();
   }
 
-
   /**
-   * \brief See if a username/password is valid.
-   *
+   * See if a username/password is valid.
+   * @param string $userName
+   * @param string $password
+   * @param boolean $oauth   Request from oauth login
+   * @param boolean $isRest  Request from API token
    * @return boolean
    */
-  function checkUsernameAndPassword($userName, $password)
+  function checkUsernameAndPassword($userName, $password, $oauth=false,
+    $isRest=false)
   {
-    if (empty($userName) || $userName == 'Default User')
-    {
+    global $SysConf;
+
+    $user_exists = true;
+    $options = array('cost' => 10);
+
+    /* Check the user for external authentication */
+    if ($this->authExternal !== false && $this->authExternal['useAuthExternal']) {
+      $username = $this->authExternal['loginAuthExternal'];
+      /* checking if user exists */
+      try {
+        $this->userDao->getUserAndDefaultGroupByUserName($username);
+      } catch (Exception $e) {
+        $user_exists=false;
+      }
+      if (! $user_exists && $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_NEW_USER_AUTO_CREATE']) {
+        /* If user does not exist then we create it */
+        $User = trim(str_replace("'", "''", $this->authExternal['loginAuthExternal']));
+        $Pass = $this->authExternal['passwordAuthExternal'] ;
+        $Hash = password_hash($Pass, PASSWORD_DEFAULT, $options);
+        $Desc = $this->authExternal['descriptionAuthExternal'];
+        $Perm = 3;
+        $Folder = 1;
+        $Email_notify = "y";
+        $Email = $this->authExternal['emailAuthExternal'];
+        /* Set default list of agents when a new user is created */
+        $agentList = $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_NEW_USER_AGENT_LIST'];
+        add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify,
+          $GLOBALS['SysConf']['SYSCONFIG']['UploadVisibility'], $agentList, $Folder);
+      }
+    }
+
+    $authProvider = "password";
+    if (array_key_exists('AUTHENTICATION', $SysConf) &&
+      array_key_exists('provider', $SysConf['AUTHENTICATION'])) {
+        $authProvider = $SysConf['AUTHENTICATION']['provider'];
+    }
+
+    if (empty($userName) || $userName == 'Default User') {
       return false;
     }
-    try
-    {
-      $row = $this->userDao->getUserAndDefaultGroupByUserName($userName);
-    }
-    catch(Exception $e)
-    {
+    try {
+      $row = $this->userDao->getUserAndDefaultGroupByUserName($userName, $oauth);
+    } catch (Exception $e) {
       return false;
     }
 
-    if (empty($row['user_name']))
-    {
+    if (empty($row['user_name'])) {
       return false;
     }
 
-    /* Check the password -- only if a password exists */
-    if (!empty($row['user_seed']) && !empty($row['user_pass']))
-    {
-      $passwordHash = sha1($row['user_seed'] . $password);
-      if (strcmp($passwordHash, $row['user_pass']) != 0)
-      {
+    if (! $oauth) {
+      if (!$isRest && $authProvider != "password") {
+        // Password authentication is not allowed and request if not from REST
+        // API
         return false;
       }
-    } else if (!empty($row['user_seed']))
-    {
-      /* Seed with no password hash = no login */
-      return false;
-    } else if (!empty($password))
-    {
-      /* empty password required */
+      /* Check the password -- only if a password exists */
+      if (! empty($row['user_pass'])) {
+        $options = array('cost' => 10);
+        /* Check if the password matches by password_verify */
+        if (password_verify($password, $row['user_pass'])) {
+          if (password_needs_rehash($row['user_pass'], PASSWORD_DEFAULT, $options)) {
+            $newHash = password_hash($password, PASSWORD_DEFAULT, $options);
+            /* Update old hash with new hash */
+            update_password_hash($userName, $newHash);
+          }
+        } else if (! empty($row['user_seed'])) {
+          $passwordHash = sha1($row['user_seed'] . $password);
+          /* If verify with new hash fails check with the old hash */
+          if (strcmp($passwordHash, $row['user_pass']) == 0) {
+            $newHash = password_hash($password, PASSWORD_DEFAULT, $options);
+            /* Update old hash with new hash */
+            update_password_hash($userName, $newHash);
+          } else {
+            return false;
+          }
+        }
+      } else if (!empty($password)) {
+        /* empty password required */
+        return false;
+      }
+    }
+
+    if (!$this->userDao->isUserActive($userName)) {
+      /* user not active */
+      $this->vars['userInactive'] = true;
       return false;
     }
 
@@ -309,25 +433,23 @@ class core_auth extends FO_Plugin
 
     $_SESSION['time_check'] = time() + (480 * 60);
     /* No specified permission means ALL permission */
-    if ("X" . $row['user_perm'] == "X")
-    {
+    if ("X" . $row['user_perm'] == "X") {
       $_SESSION[Auth::USER_LEVEL] = PLUGIN_DB_ADMIN;
-    } else
-    {
+    } else {
       $_SESSION[Auth::USER_LEVEL] = $row['user_perm'];
     }
     $_SESSION['checkip'] = GetParm("checkip", PARM_STRING);
     /* Check for the no-popup flag */
-    if (GetParm("nopopup", PARM_INTEGER) == 1)
-    {
+    if (GetParm("nopopup", PARM_INTEGER) == 1) {
       $_SESSION['NoPopup'] = 1;
-    } else
-    {
+    } else {
       $_SESSION['NoPopup'] = 0;
     }
+
+    $this->userDao->updateUserLastConnection($row['user_pk']);
+
     return true;
   }
-
 }
 
-$NewPlugin = new core_auth;
+$NewPlugin = new core_auth();

@@ -1,20 +1,8 @@
-/***************************************************************
- Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2006-2014 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 #ifndef NOMOS_UTILS_H_
 #define NOMOS_UTILS_H_
@@ -28,11 +16,15 @@
 #include "process.h"
 #include "nomos.h"
 #include "nomos_regex.h"
-#include "_autodefs.h"
+#include <_autodefs.h>
 
 #define PG_ERRCODE_UNIQUE_VIOLATION "23505"
 #define FOSSY_EXIT( XY , XZ) printf(" %s %s,%d", XY , __FILE__, __LINE__);  Bail( XZ );
 #define LICENSE_REF_TABLE "ONLY license_ref"
+#define SEM_DEFAULT_VALUE 4
+
+extern sem_t* mutexJson;           ///< Mutex to handle JSON writes
+extern gboolean* printcomma;       ///< True to print comma while printing JSON object
 
 
 /** shortname cache very simple nonresizing hash table */

@@ -1,19 +1,8 @@
-/*********************************************************************
-Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2012 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*********************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 #include "run_tests.h"
 #include "../agent/externs.h"
 /**
@@ -150,7 +139,7 @@ void testDBInsertPfile()
   ContainerInfo CITest = {"../testdata/test_1.orig.tar.gz", "./test-result/",
       "test_1.orig.tar.gz", "test_1.orig.tar.gz.dir", 1, 1, 0, 0, Stat, PI, 0, 0, 0, 0, 0, 0};
   CI = &CITest;
-  char *Fuid = "383A1791BA72A77F80698A90F22C1B7B04C59BEF.720B5CECCC4700FC90D628FCB45490E3.1312";
+  char *Fuid = "383A1791BA72A77F80698A90F22C1B7B04C59BEF.720B5CECCC4700FC90D628FCB45490E3.1aa248f65785e15aa9da4fa3701741d85653584544ab4003ef45e232a761a2f1.1312";
   int result = DBInsertPfile(CI, Fuid);
   CU_ASSERT_EQUAL(result, 1);
 }

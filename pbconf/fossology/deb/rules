@@ -1,5 +1,8 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: FSFAP
 # Sample debian/rules that uses debhelper.
 #
 # This file was originally written by Joey Hess and Craig Small.
@@ -162,7 +165,11 @@ install-arch:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-readmeoss \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/readmeoss install
-	
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-clixml \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/clixml install
+
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reuser \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/reuser install

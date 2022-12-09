@@ -1,21 +1,9 @@
 /*
- * Copyright (C) 2015, Siemens AG
- * Author: Florian Krügel
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- */
+ SPDX-FileCopyrightText: © 2015 Siemens AG
+ Author: Florian Krügel
 
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 #ifndef COPYSCAN_HPP_
 #define COPYSCAN_HPP_
 
@@ -41,8 +29,10 @@ private:
    * Regex to find non blank statements
    * \var rx::regex regSimpleCopyright
    * Simple regex for copyright
+   * \var rx::regex regSpdxCopyright
+   * Regex for SPDX-FileCopyrightText
    */
-  rx::regex regCopyright, regException, regNonBlank, regSimpleCopyright;
+  rx::regex regCopyright, regException, regNonBlank, regSimpleCopyright, regSpdxCopyright;
 } ;
 
 #endif

@@ -1,20 +1,9 @@
 <?php
-/***************************************************************
-Copyright (C) 2018 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2018 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @file
  * @brief Folder model
@@ -41,17 +30,27 @@ class Folder
   private $description;
 
   /**
+   * @var int $parent Id of the parent folder
+   */
+  private $parent;
+
+  /**
    * Folder constructor.
    *
    * @param int $id
    * @param string $name
    * @param string $description
    */
-  public function __construct($id, $name, $description)
+  public function __construct($id, $name, $description, $parent)
   {
     $this->id = intval($id);
     $this->name = $name;
     $this->description = $description;
+    if ($parent !== null) {
+      $this->parent = intval($parent);
+    } else {
+      $this->parent = $parent;
+    }
   }
 
   ////// Getters //////
@@ -78,6 +77,14 @@ class Folder
   public function getDescription()
   {
     return $this->description;
+  }
+
+  /**
+   * @return number
+   */
+  public function getParent()
+  {
+    return $this->parent;
   }
 
   /**
@@ -115,6 +122,18 @@ class Folder
   }
 
   /**
+   * @param string $parent
+   */
+  public function setParent($parent)
+  {
+    if ($parent !== null) {
+      $this->parent = intval($parent);
+    } else {
+      $this->parent = $parent;
+    }
+  }
+
+  /**
    * Get the file element as associative array
    *
    * @return array
@@ -124,7 +143,8 @@ class Folder
     return [
       'id' => intval($this->id),
       'name' => $this->name,
-      'description' => $this->description
+      'description' => $this->description,
+      'parent' => $this->parent
     ];
   }
 }

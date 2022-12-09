@@ -1,19 +1,8 @@
-/*********************************************************************
-Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011-2012 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*********************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /* cunit includes */
 #include <CUnit/CUnit.h>
@@ -23,7 +12,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <ctype.h>
 #include "libfodbreposysconf.h"
 
-#define AGENT_DIR "../../"
+// #define AGENT_DIR "../"
 /**
  * \file
  * \brief testing for the function DBLoadGold
@@ -42,9 +31,9 @@ static fo_dbManager* dbManager;
  */
 int  DBLoadGoldInit()
 {
-  char URL[MAXCMD];
-  char TempFileDir[MAXCMD];
-  char TempFile[MAXCMD];
+  char URL[URLMAX];
+  char TempFileDir[STRMAX];
+  char TempFile[STRMAX];
 
   /** -# Create db */
   dbManager = createTestEnvironment(AGENT_DIR, "wget_agent", 1);
@@ -65,8 +54,8 @@ int  DBLoadGoldInit()
   strcpy(GlobalURL, "https://mirrors.kernel.org/fossology/releases/3.0.0/ubuntu/14.04/");
 
   /** -# Delete the record that upload_filename is wget.tar, pre testing */
-  memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD, "DELETE FROM upload where upload_filename = 'fossology.sources.list';");
+  memset(SQL,'\0',STRMAX);
+  snprintf(SQL,STRMAX, "DELETE FROM upload where upload_filename = 'fossology.sources.list';");
   result = PQexec(pgConn, SQL);
   if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
   {
@@ -76,8 +65,8 @@ int  DBLoadGoldInit()
   PQclear(result);
 
   /** -# Insert upload wget.tar */
-  memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD,"INSERT INTO upload (upload_filename,upload_mode,upload_ts) VALUES ('fossology.sources.list',40,now());");
+  memset(SQL,'\0',STRMAX);
+  snprintf(SQL,STRMAX,"INSERT INTO upload (upload_filename,upload_mode,upload_ts) VALUES ('fossology.sources.list',40,now());");
   result = PQexec(pgConn, SQL);
   if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
   {
@@ -86,8 +75,8 @@ int  DBLoadGoldInit()
   }
   PQclear(result);
   /** -# Get upload id */
-  memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD,"SELECT upload_pk from upload where upload_filename = 'fossology.sources.list';");
+  memset(SQL,'\0',STRMAX);
+  snprintf(SQL,STRMAX,"SELECT upload_pk from upload where upload_filename = 'fossology.sources.list';");
   result = PQexec(pgConn, SQL);
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__))
   {
@@ -97,11 +86,11 @@ int  DBLoadGoldInit()
   GlobalUploadKey = atoi(PQgetvalue(result,0,0));
   PQclear(result);
 
-  GError* error;
+  GError* error = NULL;
   char* foConf = get_confFile();
 
-  char cmd[MAXCMD+1];
-  snprintf(cmd, MAXCMD, "sed -i 's|depth.*|depth=3|' %s", foConf);
+  char cmd[STRMAX+1];
+  snprintf(cmd, STRMAX, "sed -i 's|depth.*|depth=3|' %s", foConf);
   if (system(cmd) != 0) {
     printf("cannot reset depth to 3 with %s\n", cmd);
     return 1;
@@ -121,10 +110,10 @@ int  DBLoadGoldInit()
  */
 int DBLoadGoldClean()
 {
-  memset(GlobalTempFile, 0, MAXCMD);
-  memset(GlobalURL, 0, MAXCMD);
-  memset(GlobalParam, 0, MAXCMD);
-  char TempFileDir[MAXCMD];
+  memset(GlobalTempFile, 0, STRMAX);
+  memset(GlobalURL, 0, URLMAX);
+  memset(GlobalParam, 0, STRMAX);
+  char TempFileDir[STRMAX];
 
   strcpy(TempFileDir, "./test_result");
   if (file_dir_existed(TempFileDir))
@@ -136,8 +125,8 @@ int DBLoadGoldClean()
     fo_config_free(sysconfig);
   }
 
-  char repoDir[MAXCMD+1];
-  if (snprintf(repoDir, MAXCMD, "%s/repo", get_sysconfdir())>0) {
+  char repoDir[STRMAX+1];
+  if (snprintf(repoDir, STRMAX, "%s/repo", get_sysconfdir())>0) {
     RemoveDir(repoDir);
   }
 
@@ -175,12 +164,12 @@ void testDBLoadGold()
   //printf("db start\n");
   DBLoadGold();
   //printf("db end\n");
-  char SQL[MAXCMD];
+  char SQL[STRMAX];
   char *pfile_sha1;
   char *pfile_md5;
-  memset(SQL, 0, MAXCMD);
+  memset(SQL, 0, STRMAX);
   PGresult *result;
-  snprintf(SQL, MAXCMD-1, "select pfile_sha1, pfile_md5 from pfile where pfile_pk in (select pfile_fk from "
+  snprintf(SQL, STRMAX-1, "select pfile_sha1, pfile_md5 from pfile where pfile_pk in (select pfile_fk from "
       "upload where upload_pk = %ld);", GlobalUploadKey);
   result =  PQexec(pgConn, SQL); /* SELECT */
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
@@ -194,8 +183,8 @@ void testDBLoadGold()
   string_tolower(pfile_sha1);
   string_tolower(pfile_md5);
   //printf("pfile_sha1, pfile_md5 are:%s, %s\n", pfile_sha1, pfile_md5 );
-  char file_name_file[MAXCMD] = {0};
-  char file_name_gold[MAXCMD] = {0};
+  char file_name_file[STRMAX] = {0};
+  char file_name_gold[STRMAX] = {0};
   char string0[3] = {0};
   char string1[3] = {0};
   char string2[3] = {0};

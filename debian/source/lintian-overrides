@@ -1,0 +1,20 @@
+# Test files
+fossology source: * *test* *
+
+# Long lines in minified javascript files in source files
+fossology source: source-is-missing src/www/ui/scripts/jquery-ui.js *
+fossology source: source-is-missing src/www/ui/scripts/jquery.validate.js *
+fossology source: insane-line-length-in-source-file debian/missing-sources/jquery-3.6.0.js *
+fossology source: insane-line-length-in-source-file debian/missing-sources/jquery.dataTables.js *
+fossology source: insane-line-length-in-source-file debian/missing-sources/jquery.plainmodal.js *
+fossology source: insane-line-length-in-source-file debian/missing-sources/select2.full.js *
+fossology source: insane-line-length-in-source-file src/www/ui/scripts/jquery-ui.js *
+fossology source: insane-line-length-in-source-file src/www/ui/scripts/jquery.validate.js *
+
+# File contains license text which is imported in the DB.
+# This does not license the file under that license.
+fossology source: license-problem-bad-php-license install/db/licenseRef.json
+fossology source: license-problem-gfdl-invariants install/db/licenseRef.json *
+fossology source: license-problem-json-evil install/db/licenseRef.json
+fossology source: license-problem-php-license install/db/licenseRef.json
+

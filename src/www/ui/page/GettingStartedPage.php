@@ -1,21 +1,10 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014, Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 
 namespace Fossology\UI\Page;
@@ -28,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 class GettingStartedPage extends DefaultPlugin
 {
   const NAME = 'Getting Started';
-  
+
   function __construct()
   {
     parent::__construct(self::NAME, array(
@@ -48,7 +37,7 @@ class GettingStartedPage extends DefaultPlugin
     menu_insert($topMenuList.'::Overview', $menuOrder-10, $this->getName()."&show=welcome");
     menu_insert($topMenuList.'::License Browser', $menuOrder, $this->getName()."&show=licensebrowser");
   }
-  
+
   /**
    * @param Request $request
    * @return Response
@@ -56,12 +45,11 @@ class GettingStartedPage extends DefaultPlugin
   protected function handle(Request $request)
   {
     $show = $request->get('show');
-    if ($show=='licensebrowser'){
+    if ($show == 'licensebrowser') {
       return $this->render("getting_started_licensebrowser.html.twig");
     }
     $login = _("Login");
-    if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))
-    {
+    if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0)) {
       $login = "<a href='".Traceback_uri()."?mod=auth'>$login</a>";
     }
     $vars = array('login'=>$login, 'SiteURI'=> Traceback_uri());

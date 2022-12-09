@@ -1,6 +1,8 @@
 #!/bin/bash
 # FOSSology dbcreate script
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2008 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # This script checks to see if the the fossology db exists and if not
 # then creates it.
@@ -42,12 +44,23 @@ if [ $? = 0 ]; then
          echo "ERROR: failed to add plpgsql to $dbname database"
       fi
    fi
+   echo "*** Checking for 'uuid-ossp' support ***"
+   su postgres -c "echo 'SELECT * FROM pg_extension;' | psql -t $dbname" |grep -q uuid-ossp
+   if [ $? = 0 ]; then
+      echo "NOTE: 'uuid-ossp' already exists in $dbname database, good"
+   else
+      echo "NOTE: 'uuid-ossp' doesn't exist, adding"
+      su postgres -c "echo 'CREATE EXTENSION \"uuid-ossp\";' | psql $dbname"
+      if [ $? != 0 ]; then
+         echo "ERROR: failed to add 'uuid-ossp' to $dbname database"
+      fi
+   fi
 else
    echo "sysconfdir from env is -> $SYSCONFDIR"
    echo "*** Initializing database ***"
    echo "testroot is->$TESTROOT"
    if [ -z $TESTROOT ]
-   then 
+   then
      TESTROOT=`pwd`;
      #echo "TESTROOT IS:$TESTROOT";
    #else
@@ -64,7 +77,7 @@ else
    else
        fossSql='fosstestinit.sql'
    fi
-  
+
    echo "DB: before su to postgres"
    su postgres -c "psql < ./$fossSql"
    if [ $? != 0 ] ; then

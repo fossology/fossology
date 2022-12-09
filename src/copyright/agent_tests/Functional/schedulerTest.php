@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 /**
@@ -71,7 +60,7 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
    * @brief Setup the test cases and initialize the objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("copyrightSched".time());
     $this->dbManager = $this->testDb->getDbManager();
@@ -88,7 +77,7 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
    * @brief Destruct the objects initialized during setUp()
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;
@@ -112,7 +101,7 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
 
     $agentName = "copyright";
 
-    $agentDir = dirname(dirname(__DIR__));
+    $agentDir = dirname(__DIR__, 4).'/build/src/copyright';
     $execDir = "$agentDir/agent";
     system("install -D $agentDir/VERSION-copyright $sysConf/mods-enabled/$agentName/VERSION");
     system("install -D $agentDir/agent/copyright.conf  $sysConf/mods-enabled/$agentName/agent/copyright.conf");
@@ -167,7 +156,7 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
    */
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('agent','uploadtree','upload','pfile','users','bucketpool','mimetype','ars_master','author'));
+    $this->testDb->createPlainTables(array('agent','uploadtree','upload','pfile','users','bucketpool','mimetype','ars_master','author','copyright_event'));
     $this->testDb->createSequences(array('agent_agent_pk_seq','upload_upload_pk_seq','pfile_pfile_pk_seq','users_user_pk_seq','nomos_ars_ars_pk_seq'));
     $this->testDb->createConstraints(array('agent_pkey','upload_pkey_idx','pfile_pkey','user_pkey'));
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','users'));

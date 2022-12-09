@@ -1,20 +1,9 @@
-/* **************************************************************
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015, 2018 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2011 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2015, 2018 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-************************************************************** */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * \file libfodbreposysconf.c
  * \brief api for db, sysconfig, repo.
@@ -173,20 +162,51 @@ int create_db_repo_sysconf(int type, char* agent_name, char* sysconfdir) {
     return 1;
   }
 #endif
+#define CREATEDB TESTDBDIR "/createTestDB.php"
+  const char INIT_CMD[] = CREATEDB;
+  char *CMD, *tmp;
 
-  char CMD[ARRAY_LENGTH] = "../../../testing/db/createTestDB.php";
-  if(sysconfdir != NULL)
+  CMD = (char *)malloc(strlen(INIT_CMD) + 1);
+  if (!CMD)
   {
-    sprintf(CMD, "%s -c %s", CMD, sysconfdir);
+    return -1;
+  }
+  sprintf(CMD, "%s", INIT_CMD);
+
+  if (sysconfdir)
+  {
+    tmp = (char *)malloc(strlen(CMD) + 4 + strlen(sysconfdir) + 1);
+    if (!tmp)
+    {
+      free(CMD);
+      return -1;
+    }
+    sprintf(tmp, "%s -c %s", CMD, sysconfdir);
+    free(CMD);
+    CMD = tmp;
   }
 
-  if (1 == type) {
-    command_output(CMD);
+  switch(type)
+  {
+    case 0:
+      tmp = (char *)malloc(strlen(CMD) + 4);
+      if (!tmp)
+      {
+        free(CMD);
+        return -1;
+      }
+      sprintf(tmp, "%s -e", CMD);
+      free(CMD);
+      CMD = tmp;
+    case 1:
+      command_output(CMD);
+      break;
+    default:
+      break;
   }
-  else if (0 == type) {
-    sprintf(CMD, "%s -e", CMD);
-    command_output(CMD);
-  }
+
+  free(CMD);
+
   int argc = 3;
   char* argv[] = {agent_name, "-c", Sysconf};
 
@@ -207,7 +227,7 @@ int create_db_repo_sysconf(int type, char* agent_name, char* sysconfdir) {
 void drop_db_repo_sysconf(char* DBName) {
   char CMD[ARRAY_LENGTH];
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "../../../testing/db/createTestDB.php -d %s", DBName);
+  sprintf(CMD, "%s/createTestDB.php -d %s", TESTDBDIR, DBName);
   command_output(CMD);
 #ifdef TEST
   printf("remove DBName is:%s\n", DBName);
@@ -282,11 +302,25 @@ char* get_confFile() {
  * \return repo path
  */
 char* get_repodir() {
-  memset(RepoDir, '\0', sizeof(RepoDir));
-  strcpy(RepoDir, Sysconf);
+  strncpy(RepoDir, Sysconf, ARRAY_LENGTH);
+  RepoDir[ARRAY_LENGTH-1] = '\0';
+
   char* test_name_tmp = strstr(RepoDir, "testDbConf");
-  *test_name_tmp = 0;
-  sprintf(RepoDir, "%stestDbRepo%s", RepoDir, get_test_name());
+  if (test_name_tmp)
+  {
+    *test_name_tmp = '\0';
+  }
+
+  char *tmp = malloc(strlen(RepoDir) + 1);
+  if (!tmp) {
+    return NULL;
+  }
+
+  sprintf(tmp, "%s", RepoDir);
+  sprintf(RepoDir, "%stestDbRepo%s", tmp, get_test_name());
+
+  free(tmp);
+
 #ifdef TEST
   printf("RepoDir is:%s\n", RepoDir);
 #endif
@@ -319,7 +353,7 @@ char *createTestConfDir(char* cwd, char* agentName)
 
   sprintf(confDir, "%s/testconf", cwd);
   sprintf(confFile, "%s/fossology.conf", confDir);
-  sprintf(agentDir, "%s/../..", cwd);
+  sprintf(agentDir, "%s/..", cwd);
 
   if (stat(confDir, &st) == -1)
   {
@@ -351,11 +385,11 @@ char *createTestConfDir(char* cwd, char* agentName)
   fclose(testConfFile);
 
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "install -D %s/../../../../VERSION %s/VERSION", cwd, confDir);
+  sprintf(CMD, "install -D %s/../VERSION %s/VERSION", cwd, confDir);
   rc = system(CMD);
 
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "install -D %s/../../../../install/defconf/Db.conf %s/Db.conf", cwd, confDir);
+  sprintf(CMD, "install -D %s/../../../install/gen/Db.conf %s/Db.conf", cwd, confDir);
   rc = system(CMD);
 
   memset(CMD, '\0', sizeof(CMD));

@@ -1,20 +1,10 @@
 <?php
-/***************************************************************
-Copyright (C) 2017 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2017 Siemens AG
+ SPDX-FileCopyrightText: © 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @file
  * @brief Scan options model
@@ -23,12 +13,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\UI\Api\Models;
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Reuser\ReuserAgentPlugin;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Symfony\Component\HttpFoundation\Request;
+use Fossology\Lib\Dao\UserDao;
 
-require_once dirname(dirname(__DIR__)) . "/agent-add.php";
+if (!class_exists("AgentAdder", false)) {
+  require_once dirname(dirname(__DIR__)) . "/agent-add.php";
+}
 require_once dirname(dirname(dirname(dirname(__DIR__)))) . "/lib/php/common-folders.php";
 
 /**
@@ -52,18 +44,24 @@ class ScanOptions
    * Decider settings
    */
   private $decider;
-
+  /**
+   * @var Scancode $scancode
+   * Scancode settings
+   */
+  private $scancode;
   /**
    * ScanOptions constructor.
    * @param Analysis $analysis
    * @param Reuser $reuse
    * @param Decider $decider
+   * @param Scancode $scancode
    */
-  public function __construct($analysis, $reuse, $decider)
+  public function __construct($analysis, $reuse, $decider, $scancode)
   {
     $this->analysis = $analysis;
     $this->reuse = $reuse;
     $this->decider = $decider;
+    $this->scancode = $scancode;
   }
 
   /**
@@ -75,7 +73,8 @@ class ScanOptions
     return [
       "analysis"  => $this->analysis,
       "reuse"     => $this->reuse,
-      "decide"    => $this->decider
+      "decide"    => $this->decider,
+      "scancode"  => $this->scancode
     ];
   }
 
@@ -90,14 +89,13 @@ class ScanOptions
   {
     $uploadsAccessible = FolderListUploads_perm($folderId, Auth::PERM_WRITE);
     $found = false;
-    foreach ($uploadsAccessible as $singleUpload)
-    {
-      if($singleUpload['upload_pk'] == $uploadId) {
+    foreach ($uploadsAccessible as $singleUpload) {
+      if ($singleUpload['upload_pk'] == $uploadId) {
         $found = true;
         break;
       }
     }
-    if($found === false) {
+    if ($found === false) {
       return new Info(404, "Folder id $folderId does not have upload id ".
         "$uploadId or you do not have write access to the folder.", InfoType::ERROR);
     }
@@ -106,8 +104,9 @@ class ScanOptions
     $agentsToAdd = $this->prepareAgents();
     $this->prepareReuser($paramAgentRequest);
     $this->prepareDecider($paramAgentRequest);
+    $this->prepareScancode($paramAgentRequest);
     $returnStatus = (new \AgentAdder())->scheduleAgents($uploadId, $agentsToAdd, $paramAgentRequest);
-    if(is_numeric($returnStatus)) {
+    if (is_numeric($returnStatus)) {
       return new Info(201, $returnStatus, InfoType::INFO);
     } else {
       return new Info(403, $returnStatus, InfoType::ERROR);
@@ -118,11 +117,16 @@ class ScanOptions
    * Prepare agentsToAdd string based on Analysis settings.
    * @return string[]
    */
-  private function prepareAgents() {
+  private function prepareAgents()
+  {
     $agentsToAdd = [];
     foreach ($this->analysis->getArray() as $agent => $set) {
-      if($set === true) {
-        $agentsToAdd[] = "agent_$agent";
+      if ($set === true) {
+        if ($agent == "copyright_email_author") {
+          $agentsToAdd[] = "agent_copyright";
+        } else {
+          $agentsToAdd[] = "agent_$agent";
+        }
       }
     }
     return $agentsToAdd;
@@ -132,22 +136,28 @@ class ScanOptions
    * Prepare Request object based on Reuser settings.
    * @param Request $request
    */
-  private function prepareReuser(Request &$request) {
-    if($this->reuse->getReuseUpload() == 0) {
+  private function prepareReuser(Request &$request)
+  {
+    if ($this->reuse->getReuseUpload() == 0) {
       // No upload to reuse
       return;
     }
     $reuserRules = [];
-    if($this->reuse->getReuseMain() === true) {
+    if ($this->reuse->getReuseMain() === true) {
       $reuserRules[] = 'reuseMain';
     }
-    if($this->reuse->getReuseEnhanced() === true) {
+    if ($this->reuse->getReuseEnhanced() === true) {
       $reuserRules[] = 'reuseEnhanced';
     }
-    $reuserSelector = $this->reuse->getReuseUpload() . "," . $this->reuse->getReuseGroup();
-    $request->request->set(ReuserAgentPlugin::UPLOAD_TO_REUSE_SELECTOR_NAME, $reuserSelector);
-    //global $SysConf;
-    //$request->request->set('groupId', $SysConf['auth'][Auth::GROUP_ID]);
+    if ($this->reuse->getReuseReport() === true) {
+      $reuserRules[] = 'reuseConf';
+    }
+    if ($this->reuse->getReuseCopyright() === true) {
+      $reuserRules[] = 'reuseCopyright';
+    }
+    $userDao = $GLOBALS['container']->get("dao.user");
+    $reuserSelector = $this->reuse->getReuseUpload() . "," . $userDao->getGroupIdByName($this->reuse->getReuseGroup());
+    $request->request->set('uploadToReuse', $reuserSelector);
     $request->request->set('reuseMode', $reuserRules);
   }
 
@@ -155,17 +165,46 @@ class ScanOptions
    * Prepare Request object based on Decider settings.
    * @param Request $request
    */
-  private function prepareDecider(Request &$request) {
+  private function prepareDecider(Request &$request)
+  {
     $deciderRules = [];
-    if($this->decider->getNomosMonk() === true) {
+    if ($this->decider->getNomosMonk() === true) {
       $deciderRules[] = 'nomosInMonk';
     }
-    if($this->decider->getBulkReused() === true) {
+    if ($this->decider->getBulkReused() === true) {
       $deciderRules[] = 'reuseBulk';
     }
-    if($this->decider->getNewScanner() === true) {
+    if ($this->decider->getNewScanner() === true) {
       $deciderRules[] = 'wipScannerUpdates';
     }
+    if ($this->decider->getOjoDecider() === true) {
+      $deciderRules[] = 'ojoNoContradiction';
+    }
     $request->request->set('deciderRules', $deciderRules);
+    if ($this->analysis->getNomos()) {
+      $request->request->set('Check_agent_nomos', 1);
+    }
+  }
+
+  /**
+   * Prepare Request object based on Scancode settings.
+   * @param Request $request
+   */
+  private function prepareScancode(Request &$request)
+  {
+    $scancodeRules = [];
+    if ($this->scancode->getScanLicense() === true) {
+      $scancodeRules[] = 'license';
+    }
+    if ($this->scancode->getScanCopyright() === true) {
+      $scancodeRules[] = 'copyright';
+    }
+    if ($this->scancode->getScanEmail() === true) {
+      $scancodeRules[] = 'email';
+    }
+    if ($this->scancode->getScanUrl() === true) {
+      $scancodeRules[] = 'url';
+    }
+    $request->request->set('scancodeFlags', $scancodeRules);
   }
 }

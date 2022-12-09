@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Author: Daniele Fognini, Andreas Wuerl
+# SPDX-FileCopyrightText: © 2013-2014 Siemens AG
+
+# SPDX-License-Identifier: GPL-2.0-only
+
+./squareBuilder
+if [ ! -e _squareVisitor.h.gen ]; then
+    exit 1
+fi
+cat _squareVisitor.h.pre _squareVisitor.h.gen _squareVisitor.h.post > _squareVisitor.h

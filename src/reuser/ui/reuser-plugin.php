@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- * Copyright (C) 2014-2018, Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2014-2018 Siemens AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @file
  */
@@ -71,11 +60,9 @@ class ReuserPlugin extends DefaultPlugin
   {
     $allFolder = $this->folderDao->getAllFolderIds();
     $result = array();
-    for($i=0; $i < sizeof($allFolder); $i++)
-    {
+    for ($i=0; $i < sizeof($allFolder); $i++) {
       $listObject = $this->prepareFolderUploads($allFolder[$i]);
-      foreach ($listObject as $key => $value)
-      {
+      foreach ($listObject as $key => $value) {
         $result[explode(",",$key)[0]] = $value;
       }
     }
@@ -92,15 +79,11 @@ class ReuserPlugin extends DefaultPlugin
     list($folderId, $trustGroupId) = $this->getFolderIdAndTrustGroup($request->get(self::FOLDER_PARAMETER_NAME));
     $ajaxMethodName = $request->get('do');
 
-    if ($ajaxMethodName == "getUploads")
-    {
+    if ($ajaxMethodName == "getUploads") {
       $uploadsById = "";
-      if(empty($folderId) || empty($trustGroupId))
-      {
+      if (empty($folderId) || empty($trustGroupId)) {
         $uploadsById = $this->getAllUploads();
-      }
-      else
-      {
+      } else {
         $uploadsById = $this->prepareFolderUploads($folderId, $trustGroupId);
       }
       return new JsonResponse($uploadsById, JsonResponse::HTTP_OK);
@@ -121,9 +104,7 @@ class ReuserPlugin extends DefaultPlugin
       list($folder, $trustGroup) = $folderGroupPair;
       $folderId = intval($folder);
       $trustGroupId = intval($trustGroup);
-    }
-    else
-    {
+    } else {
       $trustGroupId = Auth::getGroupId();
       $folderId = 0;
     }
@@ -137,20 +118,17 @@ class ReuserPlugin extends DefaultPlugin
    */
   public function renderContent(&$vars)
   {
-    if (!array_key_exists('folderStructure', $vars))
-    {
+    if (!array_key_exists('folderStructure', $vars)) {
       $rootFolderId = $this->folderDao->getRootFolder(Auth::getUserId())->getId();
       $vars['folderStructure'] = $this->folderDao->getFolderStructure($rootFolderId);
     }
-    if ($this->folderDao->isWithoutReusableFolders($vars['folderStructure']))
-    {
+    if ($this->folderDao->isWithoutReusableFolders($vars['folderStructure'])) {
       return '';
     }
     $pair = array_key_exists(self::FOLDER_PARAMETER_NAME, $vars) ? $vars[self::FOLDER_PARAMETER_NAME] : '';
 
     list($folderId, $trustGroupId) = $this->getFolderIdAndTrustGroup($pair);
-    if (empty($folderId) && !empty($vars['folderStructure']))
-    {
+    if (empty($folderId) && !empty($vars['folderStructure'])) {
       $folderId = $vars['folderStructure'][0][FolderDao::FOLDER_KEY]->getId();
     }
 
@@ -160,7 +138,7 @@ class ReuserPlugin extends DefaultPlugin
     $vars['folderUploads'] = $this->prepareFolderUploads($folderId, $trustGroupId);
 
     $renderer = $this->getObject('twig.environment');
-    return $renderer->loadTemplate('agent_reuser.html.twig')->render($vars);
+    return $renderer->load('agent_reuser.html.twig')->render($vars);
   }
 
   /**
@@ -174,7 +152,7 @@ class ReuserPlugin extends DefaultPlugin
     $vars['folderParameterName'] = self::FOLDER_PARAMETER_NAME;
     $vars['uploadToReuseSelectorName'] = self::UPLOAD_TO_REUSE_SELECTOR_NAME;
     $renderer = $this->getObject('twig.environment');
-    return $renderer->loadTemplate('agent_reuser.js.twig')->render($vars);
+    return $renderer->load('agent_reuser.js.twig')->render($vars);
   }
 
   /**
@@ -194,11 +172,10 @@ class ReuserPlugin extends DefaultPlugin
     $folderUploads = $this->folderDao->getFolderUploads($folderId, $trustGroupId);
 
     $uploadsById = array();
-    foreach ($folderUploads as $uploadProgress)
-    {
+    foreach ($folderUploads as $uploadProgress) {
       $key = $uploadProgress->getId().','.$uploadProgress->getGroupId();
       $display = $uploadProgress->getFilename() . _(" from ")
-               . date("Y-m-d H:i",$uploadProgress->getTimestamp())
+               . Convert2BrowserTime(date("Y-m-d H:i:s",$uploadProgress->getTimestamp()))
                . ' ('. $uploadProgress->getStatusString() . ')';
       $uploadsById[$key] = $display;
     }

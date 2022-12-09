@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2015 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2015 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
@@ -35,8 +24,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
 // TODO support much more command line options
 
 $opts = getopt("hc:", array("username:", "groupname:", "uploadId:", "password:", "destgroup:"));
-if(array_key_exists('h', $opts))
-{
+if (array_key_exists('h', $opts)) {
   print $Usage;
   exit(0);
 }

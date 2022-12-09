@@ -1,21 +1,10 @@
 #!/usr/bin/php
 <?php
 /*
- Copyright (C) 2013-2014 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2013-2014 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 // If set to TRUE, print additional DEBUG information.  Note that
 // printing this information will prevent the script from working
@@ -280,11 +269,7 @@ $test_db_name = "fossologytest_$testing_timestamp";
 $test_pg_conn = @pg_connect($initial_postgres_params)
     or die("FAIL: Could not connect to Postgres server!");
 
-// note: normal 'mortal' users cannot choose 'SQL_ASCII' encoding
-// unless the LC_CTYPE environment variable is set correctly
-//$sql_statement="CREATE DATABASE $test_db_name ENCODING='SQL_ASCII'";
-// In the long run, FOSSology should be using a UTF8 encoding for text
-$sql_statement="CREATE DATABASE $test_db_name ENCODING='UTF8' TEMPLATE template0";
+$sql_statement="CREATE DATABASE $test_db_name ENCODING='UTF8' TEMPLATE template1";
 $result = pg_query($test_pg_conn, $sql_statement)
     or die("FAIL: Could not create test database!\n");
 
@@ -327,6 +312,23 @@ if ( $plpgsql_already_installed == FALSE ) {
     $sql_statement = "CREATE LANGUAGE plpgsql";
     $result = pg_query($test_db_conn, $sql_statement)
         or die("Could not create plpgsql language in the database\n");
+}
+
+$sql_statement = "select extname from pg_extension where extname = 'uuid-ossp'";
+
+$result = pg_query($test_db_conn, $sql_statement)
+    or die("Could not check the database for uuid-ossp extension\n");
+
+$uuid_already_installed = FALSE;
+if ( $row = pg_fetch_row($result) ) {
+    $uuid_already_installed = TRUE;
+}
+
+// then create extension uuid-ossp if not already created
+if ( $uuid_already_installed == FALSE ) {
+    $sql_statement = 'CREATE EXTENSION "uuid-ossp";';
+    $result = pg_query($test_db_conn, $sql_statement)
+        or die("Could not create uuid-ossp extension in the database\n");
 }
 
 
@@ -483,12 +485,17 @@ $PG_CONN = $test_db_conn;
 */
 if(!is_file(__DIR__ . '/../../vendor/autoload.php'))
 {
-  throw new Exception('you need to run "composer install" before creating adatabase via ApplySchema');
+  throw new Exception('you need to run "composer install" before creating a database via ApplySchema');
 }
 
 require_once(__DIR__ . '/../../lib/php/libschema.php');
 require_once(__DIR__ . '/../../lib/php/common-db.php');
 require_once(__DIR__ . '/../../lib/php/common-cache.php');
+require_once(__DIR__ . '/../../../install/fossinit-common.php');
+
+global $SysConf;
+$SysConf = bootstrap($testing_temp_dir);
+get_pg_conn($testing_temp_dir, $SysConf);
 
 // apply the core schema
 // We need to buffer the output in order to silence the normal
@@ -512,8 +519,9 @@ debug("Elapsed Time = $elapsed");
 
 // insert the 'fossy' user into the test database
 // this is the FOSSology user 'fossy' (not a Postgres user, or a system user)
-$random_seed = rand().rand();
-$hash = sha1($random_seed . "fossy");
+$random_seed = 'Seed';
+$options = array('cost' => 10);
+$hash = password_hash("fossy", PASSWORD_DEFAULT, $options);
 $user_sql = "INSERT INTO users (user_pk, user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk) VALUES (1, 'fossy', 'Default Administrator', '$random_seed', '$hash', 10, 'fossy', 'n', 1);";
 pg_query($test_db_conn, $user_sql)
     or die("FAIL: could not insert default user into user table\n");

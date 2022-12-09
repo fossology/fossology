@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2008-2012 Hewlett-Packard Development Company, L.P.
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License version 2.1 as published by the Free Software Foundation.
-
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-***********************************************************/
+ SPDX-License-Identifier: LGPL-2.1-only
+*/
 
 /**
  * \file
@@ -53,12 +42,13 @@ function js_url()
  *
  * \return The html to display (with embeded javascript)
  */
-function displayMessage($Message,$keep=NULL) {
+function displayMessage($Message, $keep = null)
+{
 
-  $HTML = NULL;
+  $HTML = null;
   $HTML .= "\n<div id='dmessage'>";
   $text = _("Close");
-  $HTML .= "<button name='eraseme' value='close' onclick='rmMsg()'> $text</button>\n";
+  $HTML .= "<button name='eraseme' value='close' class='btn btn-default btn-sm' onclick='rmMsg()'> $text</button>\n";
   $HTML .= $Message;
   $HTML .= $keep . "\n</p>";
   $HTML .= "  <hr>\n";
@@ -102,8 +92,7 @@ function ActiveHTTPscript($RequestName,$IncludeScriptTags=1)
 {
   $HTML="";
 
-  if ($IncludeScriptTags)
-  {
+  if ($IncludeScriptTags) {
     $HTML="<script language='javascript'>\n<!--\n";
   }
 
@@ -139,8 +128,7 @@ function ActiveHTTPscript($RequestName,$IncludeScriptTags=1)
   $HTML .= "  }\n";
   $HTML .= "}\n";
 
-  if ($IncludeScriptTags)
-  {
+  if ($IncludeScriptTags) {
     $HTML .= "\n// -->\n</script>\n";
   }
 

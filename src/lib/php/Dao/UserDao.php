@@ -1,21 +1,12 @@
 <?php
-/***********************************************************
- * Copyright (C) 2014-2017 Siemens AG
- * Author: J. Najjar, S. Weber, A. Wührl
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2014-2017 Siemens AG
+ Author: J. Najjar, S. Weber, A. Wührl
+ SPDX-FileCopyrightText: © 2021-2022 Orange
+ Contributors: Piotr Pszczola, Bartlomiej Drozdz
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 namespace Fossology\Lib\Dao;
 
@@ -29,6 +20,8 @@ class UserDao
   const USER = 0;
   const ADMIN = 1;
   const ADVISOR = 2;
+
+  const USER_ACTIVE_STATUS = 'active';
 
   const SUPER_USER = 'fossy';
 
@@ -58,13 +51,12 @@ class UserDao
     }
     $userChoices = array();
     $statementN = __METHOD__;
-    $sql = "SELECT user_pk, user_name FROM users LEFT JOIN group_user_member AS gum ON users.user_pk = gum.user_fk"
-            . " WHERE gum.group_fk = $1";
+    $sql = "SELECT user_pk, user_name, user_desc FROM users LEFT JOIN group_user_member AS gum ON users.user_pk = gum.user_fk"
+            . " WHERE gum.group_fk = $1 AND users.user_status='active'";
     $this->dbManager->prepare($statementN, $sql);
     $res = $this->dbManager->execute($statementN, array($groupId));
-    while ($rw = $this->dbManager->fetchArray($res))
-    {
-      $userChoices[$rw['user_pk']] = $rw['user_name'];
+    while ($rw = $this->dbManager->fetchArray($res)) {
+      $userChoices[$rw['user_pk']] = $rw['user_desc'] . ' (' . $rw['user_name'] . ')';
     }
     $this->dbManager->freeResult($res);
     return $userChoices;
@@ -77,8 +69,7 @@ class UserDao
    */
   function getAdminGroupMap($userId,$userLevel=0)
   {
-    if ($userLevel == PLUGIN_DB_ADMIN)
-    {
+    if ($userLevel == PLUGIN_DB_ADMIN) {
       return $this->dbManager->createMap('groups', 'group_pk', 'group_name');
     }
     $sql = "SELECT group_pk, group_name FROM groups, group_user_member"
@@ -87,8 +78,7 @@ class UserDao
     $this->dbManager->prepare($stmt=__METHOD__, $sql);
     $res = $this->dbManager->execute($stmt,$param);
     $groupMap = array();
-    while($row = $this->dbManager->fetchArray($res))
-    {
+    while ($row = $this->dbManager->fetchArray($res)) {
       $groupMap[$row['group_pk']] = $row['group_name'];
     }
     $this->dbManager->freeResult($res);
@@ -106,8 +96,7 @@ class UserDao
     $this->dbManager->prepare($stmt=__METHOD__, $sql);
     $res = $this->dbManager->execute($stmt,array($userId));
     $groupMap = array();
-    while($row = $this->dbManager->fetchArray($res))
-    {
+    while ($row = $this->dbManager->fetchArray($res)) {
       $groupMap[$row['group_pk']] = $row['group_name'];
     }
     $this->dbManager->freeResult($res);
@@ -121,13 +110,11 @@ class UserDao
    */
   function getDeletableAdminGroupMap($userId,$userLevel=0)
   {
-    if ($userLevel == PLUGIN_DB_ADMIN)
-    {
+    if ($userLevel == PLUGIN_DB_ADMIN) {
       $sql = "SELECT group_pk, group_name FROM groups LEFT JOIN users ON group_name=user_name "
            . "WHERE user_name IS NULL";
       $param = array();
-    }
-    else{
+    } else {
       $sql = "SELECT group_pk, group_name FROM groups LEFT JOIN users ON group_name=user_name "
            . " INNER JOIN group_user_member ON group_pk=group_user_member.group_fk AND user_fk=$1 AND group_perm=$2 "
            . "WHERE user_name IS NULL";
@@ -136,8 +123,7 @@ class UserDao
     $this->dbManager->prepare($stmt=__METHOD__.".$userLevel", $sql);
     $res = $this->dbManager->execute($stmt,$param);
     $groupMap = array();
-    while($row = $this->dbManager->fetchArray($res))
-    {
+    while ($row = $this->dbManager->fetchArray($res)) {
       $groupMap[$row['group_pk']] = $row['group_name'];
     }
     $this->dbManager->freeResult($res);
@@ -159,23 +145,19 @@ class UserDao
     }
     $groupArray = $this->dbManager->getSingleRow('SELECT group_pk, group_name FROM groups WHERE group_pk=$1',
             array($groupId),__METHOD__.'.exists');
-    if ($groupArray===false)
-    {
+    if ($groupArray===false) {
       throw new \Exception( _("Group does not exist.  Not deleted.") );
     }
     $groupConstraint = $this->dbManager->getSingleRow('SELECT count(*) cnt FROM users WHERE user_name=$1',
             array($groupArray['group_name']),__METHOD__.'.contraint');
-    if ($groupConstraint['cnt'])
-    {
+    if ($groupConstraint['cnt']) {
       throw new \Exception( _("Group must not be deleted due to name constraint.") );
     }
-    if ($_SESSION[Auth::USER_LEVEL] != PLUGIN_DB_ADMIN)
-    {
+    if ($_SESSION[Auth::USER_LEVEL] != PLUGIN_DB_ADMIN) {
       $userId = Auth::getUserId();
       $adminLevel = $this->dbManager->getSingleRow("SELECT count(*) cnt FROM group_user_member WHERE group_fk=$1 and user_fk=$2 and group_perm=1",
               array($groupId,$userId),__METHOD__.'.admin_lvl');
-      if ($adminLevel['cnt']< 1)
-      {
+      if ($adminLevel['cnt']< 1) {
         $text = _("Permission Denied.");
         throw new \Exception($text);
       }
@@ -200,11 +182,9 @@ class UserDao
     return true;
   }
 
-  function updateUserTable() {
+  function updateUserTable()
+  {
     $statementBasename = __FUNCTION__;
-    $this->dbManager->getSingleRow("UPDATE users SET user_seed = $1 WHERE user_seed IS NULL;",
-            array(rand()),
-            $statementBasename . '.randomizeEmptySeeds');
 
     /* No users with no seed and no perm -- make them read-only */
     $this->dbManager->getSingleRow("UPDATE users SET user_perm = $1 WHERE user_perm IS NULL;",
@@ -213,8 +193,7 @@ class UserDao
     /* There must always be at least one default user. */
     $defaultUser = $this->getUserByName('Default User');
 
-    if (empty($defaultUser['user_name']))
-    {
+    if (empty($defaultUser['user_name'])) {
       $level = PLUGIN_DB_NONE;
       $this->dbManager->getSingleRow("
         INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
@@ -225,22 +204,18 @@ class UserDao
      If he does not exist, make it SUPER_USER with the same password. */
     $perm = PLUGIN_DB_ADMIN;
     $row = $this->getUserByPermission($perm);
-    if (empty($row['user_name']))
-    {
+    if (empty($row['user_name'])) {
       /* No user with PLUGIN_DB_ADMIN access. */
-      $seed = rand() . rand();
-      $hash = sha1($seed . self::SUPER_USER);
+      $options = array('cost' => 10);
+      $hash = password_hash(self::SUPER_USER, PASSWORD_DEFAULT, $options);
       $row0 = $this->getUserByName(self::SUPER_USER);
 
-      if (empty($row0['user_name']))
-      {
+      if (empty($row0['user_name'])) {
         $this->dbManager->getSingleRow("
           INSERT INTO users (user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk)
             VALUES ($1,'Default Administrator',$2, $3, $4, $1,'y',1)",
-            array(self::SUPER_USER, $seed, $hash, $perm), $statementBasename . '.createDefaultAdmin');
-      }
-      else
-      {
+            array(self::SUPER_USER, 'Seed', $hash, $perm), $statementBasename . '.createDefaultAdmin');
+      } else {
         $this->dbManager->getSingleRow("UPDATE users SET user_perm = $1, email_notify = 'y'," .
             " user_email=$2 WHERE user_name =$2",
             array($perm, self::SUPER_USER), $statementBasename . '.updateDefaultUserToDefaultAdmin');
@@ -292,18 +267,27 @@ class UserDao
    * @param int $userId
    * @param int $groupId
    */
-  public function setDefaultGroupMembership($userId, $groupId) {
+  public function setDefaultGroupMembership($userId, $groupId)
+  {
     $this->dbManager->getSingleRow("UPDATE users SET group_fk=$2 WHERE user_pk=$1",
         array($userId, $groupId), __FUNCTION__);
   }
 
-  public function getUserAndDefaultGroupByUserName($userName) {
+  public function getUserAndDefaultGroupByUserName($userName, $oauth=false)
+  {
+    $searchEmail = " ";
+    $statement = __METHOD__;
+    if ($oauth) {
+      $searchEmail = " OR user_email=$1";
+      $statement .= "oauth";
+    }
     $userRow = $this->dbManager->getSingleRow(
-        "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
-        array($userName), __FUNCTION__);
-    if(empty($userRow)) {
+        "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1$searchEmail",
+        array($userName), $statement);
+    if (empty($userRow)) {
       throw new \Exception('invalid user name');
     }
+    $userRow['oauth'] = $oauth;
     if ($userRow['group_fk']) {
       return $userRow;
     }
@@ -312,6 +296,37 @@ class UserDao
     $userRow['group_fk'] = $groupRow['group_fk'];
     $userRow['group_name'] = $groupRow['group_name'];
     return $userRow;
+  }
+
+  /**
+   * @param string $userName
+   * @return boolean true if user status=active
+   */
+  public function isUserActive($userName)
+  {
+    $row = $this->dbManager->getSingleRow("SELECT user_status FROM users WHERE user_name=$1",
+        array($userName), __METHOD__);
+    return $row!==false && ($row['user_status']==self::USER_ACTIVE_STATUS);
+  }
+
+  /**
+   * @param int $userId
+   * @return boolean true if user status=active
+   */
+  public function isUserIdActive($userId)
+  {
+    $row = $this->dbManager->getSingleRow("SELECT user_status FROM users WHERE user_pk=$1",
+        array($userId), __METHOD__);
+    return $row!==false && ($row['user_status']==self::USER_ACTIVE_STATUS);
+  }
+
+  /**
+   * @param int $userId
+   */
+  public function updateUserLastConnection($userId)
+  {
+    $this->dbManager->getSingleRow("UPDATE users SET last_connection=now() WHERE user_pk=$1",
+        array($userId), __FUNCTION__);
   }
 
   /**
@@ -324,14 +339,12 @@ class UserDao
     $groupRow = $this->dbManager->getSingleRow(
           "SELECT group_fk,group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1",
           array($userId), __FUNCTION__.".getGroup");
-    if($groupRow)
-    {
+    if ($groupRow) {
       return $groupRow;
     }
 
     $groupId = $this->getGroupIdByName($groupName);
-    if(empty($groupId))
-    {
+    if (empty($groupId)) {
       $groupId = $this->addGroup($groupName);
       $this->addGroupMembership($groupId, $userId);
     }
@@ -353,16 +366,14 @@ class UserDao
    */
   public function addGroup($groupName)
   {
-    if (empty($groupName))
-    {
+    if (empty($groupName)) {
       throw new \Exception(_("Error: Group name must be specified."));
     }
 
     $groupAlreadyExists = $this->dbManager->getSingleRow("SELECT group_pk FROM groups WHERE group_name=$1",
             array($groupName),
             __METHOD__.'.gExists');
-    if ($groupAlreadyExists)
-    {
+    if ($groupAlreadyExists) {
       throw new \Exception(_("Group already exists.  Not added."));
     }
 
@@ -370,8 +381,7 @@ class UserDao
     $groupNowExists = $this->dbManager->getSingleRow("SELECT * FROM groups WHERE group_name=$1",
             array($groupName),
             __METHOD__.'.gNowExists');
-    if (!$groupNowExists)
-    {
+    if (!$groupNowExists) {
       throw new \Exception(_("Failed to create group"));
     }
     return $groupNowExists['group_pk'];
@@ -390,8 +400,7 @@ class UserDao
   public function getUserName($userId)
   {
     $userRow = $this->dbManager->getSingleRow("SELECT user_name FROM users WHERE user_pk=$1",array($userId),__METHOD__);
-    if(!$userRow)
-    {
+    if (!$userRow) {
       throw new \Exception('unknown user with id='.$userId);
     }
     return $userRow['user_name'];
@@ -404,8 +413,7 @@ class UserDao
   public function getGroupNameById($groupId)
   {
     $groupRow =  $this->dbManager->getSingleRow("SELECT group_name FROM groups WHERE group_pk = $1",array($groupId),__METHOD__);
-    if (empty($groupRow))
-    {
+    if (empty($groupRow)) {
       throw new \Exception('Error: GroupId ='. $groupId .' not a member of a valid group.');
     }
     return $groupRow['group_name'];
@@ -418,8 +426,7 @@ class UserDao
   public function getUserEmail($userId)
   {
     $userRow = $this->dbManager->getSingleRow("SELECT user_email FROM users WHERE user_pk=$1",array($userId),__METHOD__);
-    if(!$userRow)
-    {
+    if (!$userRow) {
       throw new \Exception('unknown user with id='.$userId);
     }
     return $userRow['user_email'];

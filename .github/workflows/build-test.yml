@@ -1,0 +1,277 @@
+# SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
+
+name: Build and Test
+
+concurrency:
+  group: build-${{ github.head_ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    continue-on-error: ${{ matrix.config.experimental }}
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+              name: "Ubuntu 20.04 GCC 9",
+              os: ubuntu-20.04,
+              build_type: "Debug",
+              cc: "gcc-9",
+              cxx: "g++-9",
+              php: "8.1",
+              experimental: false,
+            }
+          - {
+              name: "Ubuntu 20.04 GCC 8",
+              os: ubuntu-20.04,
+              build_type: "Debug",
+              cc: "gcc-8",
+              cxx: "g++-8",
+              php: "7.4",
+              experimental: false,
+            }
+          - {
+              name: "Ubuntu 20.04 CLANG",
+              os: ubuntu-20.04,
+              build_type: "Debug",
+              cc: "clang",
+              cxx: "clang++",
+              php: "8.1",
+              experimental: false,
+            }
+
+    steps:
+      - name: Setup git
+        run: |
+          sudo apt update
+          sudo apt install -y git
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 50
+
+      - name: Fetch tags
+        run: |
+          git fetch --tags
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libboost-system-dev libboost-filesystem-dev \
+              libcppunit-dev libcunit1-dev libdbd-sqlite3-perl libjsoncpp-dev \
+              libjson-c-dev liblocal-lib-perl libspreadsheet-writeexcel-perl \
+              libtext-template-perl libgcrypt20-dev lsb-release
+          sudo ./utils/fo-installdeps --everything -y
+          echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
+          echo COMPOSER_HOME="$HOME/.composer/" >> $GITHUB_ENV
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.config.php }}
+          extensions: gettext, mbstring, gd, json, xml, zip, pgsql, curl, uuid, posix, sqlite3
+        env:
+          fail-fast: true
+
+      - name: Install additional Dependencies
+        if: ${{ matrix.config.cc == 'gcc-8' }}
+        run: sudo apt install -y gcc-8 g++-8
+
+      - name: Configure and Generate CMake Project
+        run: |
+          mkdir build
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -GNinja -DTESTING=ON -S . -B ./build
+        env:
+          CC: ${{ matrix.config.cc }}
+          CXX: ${{ matrix.config.cxx }}
+
+      - name: Build Project
+        run: cmake --build build --config ${{ matrix.config.build_type }} --parallel
+
+      - name: Prepare and Run Tests
+        run: |
+          ./utils/prepare-test -afty -u postgres -p postgres
+          cd build
+          ctest --output-on-failure --verbose
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
+          PGHOST: localhost
+          PGPORT: ${{ job.services.postgres.ports[5432] }}
+
+  gcc7-test:
+    name: "Ubuntu 18.04 GCC 7"
+    runs-on: ubuntu-latest
+    container: "ubuntu:bionic"
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+    steps:
+      - name: Setup git
+        run: |
+          ## Install git
+          apt-get update
+          apt-get install -y software-properties-common
+          add-apt-repository $GIT_REPO -y
+          apt-get update
+          apt-get install git sudo -y
+
+          # Remove source repo's
+          add-apt-repository --remove $GIT_REPO -y
+          apt-get update
+        env:
+          GIT_REPO: "ppa:git-core/ppa"
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 50
+
+      - name: Fetch tags
+        run: |
+          chown -R $(id -u):$(id -g) .
+          git fetch --tags
+
+      - name: Install Dependencies
+        run: |
+          apt update
+          apt install -y libboost-system-dev libboost-filesystem-dev \
+            libcppunit-dev libcunit1-dev libdbd-sqlite3-perl libjsoncpp-dev \
+            libjson-c-dev liblocal-lib-perl libspreadsheet-writeexcel-perl \
+            libtext-template-perl libgcrypt20-dev gcc-7 g++-7 lsb-release \
+            php7.2-sqlite3 openjdk-11-jdk
+          ./utils/fo-installdeps --everything -y
+          echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
+          echo COMPOSER_HOME="$HOME/.composer/" >> $GITHUB_ENV
+
+      - name: Setup Postgres
+        run: |
+          echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+          apt-get update
+          apt-get -y install postgresql-13
+          pg_lsclusters
+          pg_dropcluster --stop 13 main
+          pg_upgradecluster 10 main || echo "Postgres 10 not installed"
+          pg_ctlcluster 13 main start || true
+
+      - name: Get CMake v3.23.0
+        uses: lukka/get-cmake@v3.23.0
+
+      - name: Configure and Generate CMake Project
+        run: |
+          mkdir build
+          cmake -DCMAKE_BUILD_TYPE=Debug -GNinja -DTESTING=ON -S . -B ./build
+        env:
+          CC: gcc-7
+          CXX: g++-7
+
+      - name: Build Project
+        run: cmake --build build --config Debug --parallel
+
+      - name: Prepare Tests
+        run: |
+          ./utils/prepare-test -afty
+          echo PGPASSFILE="$HOME/.pgpass" >> $GITHUB_ENV
+
+      - name: Run Tests
+        run: |
+          cd build
+          ctest --output-on-failure --verbose
+
+  php-unit:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.1']
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 50
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libboost-system-dev libboost-filesystem-dev \
+                libcppunit-dev libcunit1-dev libdbd-sqlite3-perl libjsoncpp-dev \
+                libjson-c-dev liblocal-lib-perl libspreadsheet-writeexcel-perl \
+                libtext-template-perl libgcrypt20-dev gcc-7 g++-7 lsb-release \
+                openjdk-11-jdk
+          sudo ./utils/fo-installdeps --everything -y
+          echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
+          echo COMPOSER_HOME="$HOME/.composer/" >> $GITHUB_ENV
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: gettext, mbstring, gd, json, xml, zip, pgsql, curl, uuid, posix, sqlite3
+          tools: phpunit
+          coverage: xdebug
+        env:
+          fail-fast: true
+      - name: Configure and Generate CMake Project
+        run: |
+          mkdir build
+          cmake -DCMAKE_BUILD_TYPE=Debug -GNinja -DTESTING=ON -S . -B ./build
+      - name: Build Project
+        run: |
+          cmake --build build --config Debug --parallel
+          echo "XDEBUG_MODE=coverage" >> $GITHUB_ENV
+      - name: Setup test database and build
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+        run: |
+          ./utils/prepare-test -afty
+          composer install --working-dir=src
+          mkdir coverage
+      - name: PHPUnit test suit
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+        run: |
+          phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite" --colors=always --coverage-clover ./coverage/unit-clover.xml
+      - name: PHPUnit agent test suit
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+        run: |
+          phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Agent Test Suite" --colors=always --coverage-clover ./coverage/agent-clover.xml

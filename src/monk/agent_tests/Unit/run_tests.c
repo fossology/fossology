@@ -1,19 +1,8 @@
 /*
-Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2015, Siemens AG
+ Author: Daniele Fognini, Andreas Wuerl
+ SPDX-FileCopyrightText: © 2013-2015 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 /* local includes */
@@ -22,7 +11,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* cunit includes */
 #include <libfodbreposysconf.h>
 
-#define AGENT_DIR "../../"
+// #define AGENT_DIR "../"
 
 fo_dbManager* dbManager;
 
@@ -51,7 +40,6 @@ extern int database_tearDownFunc();
 /* **** create test suite *************************************************** */
 /* ************************************************************************** */
 
-#if CU_VERSION_P == 213
 CU_SuiteInfo suites[] = {
     {"Testing process:", NULL, NULL, NULL, NULL, string_operations_testcases},
     {"Testing monk:", NULL, NULL, NULL, NULL, file_operations_testcases},
@@ -65,21 +53,6 @@ CU_SuiteInfo suites[] = {
     {"Testing serialize:", NULL, NULL, NULL, NULL, serialize_testcases},
     CU_SUITE_INFO_NULL
 };
-#else
-CU_SuiteInfo suites[] = {
-    {"Testing process:", NULL, NULL, string_operations_testcases},
-    {"Testing monk:", NULL, NULL, file_operations_testcases},
-    {"Testing license:", license_setUpFunc, license_tearDownFunc, license_testcases},
-    {"Testing highlighting:", NULL, NULL, highlight_testcases},
-    {"Testing hash:", NULL, NULL, hash_testcases},
-    {"Testing diff:", NULL, NULL, diff_testcases},
-    {"Testing match:", NULL, NULL, match_testcases},
-    {"Testing database:", database_setUpFunc, database_tearDownFunc, database_testcases},
-    {"Testing encoding:", NULL, NULL, encoding_testcases},
-    {"Testing serialize:", NULL, NULL, serialize_testcases},
-    CU_SUITE_INFO_NULL
-};
-#endif
 
 /* ************************************************************************** */
 /* **** main test functions ************************************************* */

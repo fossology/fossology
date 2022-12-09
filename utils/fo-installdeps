@@ -1,18 +1,8 @@
 #!/usr/bin/env bash
 # FOSSology fo-installdeps script
-# Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# version 2 as published by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# SPDX-FileCopyrightText: © 2008-2014 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # This script helps you install build and runtime dependencies on a system.
 # It is NOT indented to replace package dependencies, it's just a tool to
@@ -98,27 +88,46 @@ echo "install core dependencies"
 if [[ $BUILDTIME ]]; then
    echo "*** Installing $DISTRO buildtime dependencies ***";
    case "$DISTRO" in
-      Debian|Ubuntu|LinuxMint)
+      Debian|Ubuntu)
          echo "DB: Installing build essential....."
          apt-get $YesOpt install \
-            libmxml-dev curl libxml2-dev libcunit1-dev \
-            build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
+            libmxml-dev curl libxml2-dev libcunit1-dev libicu-dev \
+            build-essential libtext-template-perl subversion rpm librpm-dev \
+            libmagic-dev libglib2.0 libboost-regex-dev \
+            libboost-program-options-dev libpq-dev composer patch devscripts \
+            libdistro-info-perl cmake ninja-build
          case "$CODENAME" in
-           xenial|stretch|buster|sid|bionic)
-             apt-get $YesOpt install php-mbstring;;
+           stretch)
+             apt-get $YesOpt install php-mbstring php7.0-cli php7.0-xml php7.0-zip php7.0-gd php7.0-pgsql php7.0-curl php7.0-uuid;;
+           buster)
+             apt-get $YesOpt install php-mbstring php7.3-cli php7.3-xml php7.3-zip php7.3-gd php7.3-pgsql php7.3-curl php7.3-uuid;;
+           bullseye)
+             apt-get $YesOpt install php7.4-mbstring php7.4-cli php7.4-xml php7.4-zip php7.4-gd php7.4-pgsql php7.4-curl php7.4-uuid;;
+           bionic)
+             apt-get $YesOpt install php-mbstring php7.2-cli php7.2-xml php7.2-zip php7.2-gd php7.2-pgsql php7.2-curl php7.2-uuid;;
+           sid)
+             apt-get $YesOpt install php-mbstring php-cli php-xml php-zip php-gd php-pgsql php-curl php-uuid;;
+           focal)
+             apt-get $YesOpt install php-mbstring php-cli php-xml php-zip php-gd php-pgsql php-curl php-uuid;;
+           jammy)
+             apt-get $YesOpt install php-mbstring php-cli php-xml php-zip php-gd php-pgsql php-curl php-uuid;;
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
-              trusty)
-                apt-get $YesOpt install postgresql-server-dev-9.3;;
-              jessie)
-                apt-get $YesOpt install postgresql-server-dev-9.4;;
-              xenial)
-                apt-get $YesOpt install postgresql-server-dev-9.5;;
-              stretch|buster|sid)
+              stretch)
                 apt-get $YesOpt install postgresql-server-dev-9.6;;
+              buster)
+                apt-get $YesOpt install postgresql-server-dev-11;;
+              bullseye)
+                apt-get $YesOpt install postgresql-server-dev-13;;
               bionic)
                 apt-get $YesOpt install postgresql-server-dev-10;;
+              sid)
+                apt-get $YesOpt install postgresql-server-dev-11;;
+              focal)
+                apt-get $YesOpt install postgresql-server-dev-12;;
+              jammy)
+                apt-get $YesOpt install postgresql-server-dev-14;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
            esac
          fi
@@ -129,14 +138,14 @@ if [[ $BUILDTIME ]]; then
             perl-Text-Template subversion \
             postgresql-devel file-devel \
             libxml2 \
-            boost-devel php-mbstring
+            boost-devel php-mbstring libicu-devel libpq-devel patch cmake ninja-build
          ;;
       RedHatEnterprise*|CentOS)
          yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
             perl-Text-Template subversion \
-            boost-devel php-mbstring
+            boost-devel php-mbstring libicu-devel libpq-devel patch cmake ninja-build
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
@@ -150,47 +159,65 @@ if [[ $RUNTIME ]]; then
    echo "*** installed. Consult with your system administrator. Or try ***";
    echo "*** apt-get install mail-transport-agent, pick one and install it***";
    case "$DISTRO" in
-      Debian|Ubuntu|LinuxMint)
+      Debian|Ubuntu)
         echo "doing runtime"
          apt-get $YesOpt install apache2
          apt-get $YesOpt install php-pear \
             libxml2 \
-            binutils php-gettext \
+            binutils \
             cabextract cpio sleuthkit genisoimage \
             poppler-utils upx-ucl \
             unrar-free unzip p7zip-full p7zip wget \
             subversion git \
-            dpkg-dev
+            dpkg-dev php-uuid
          case "$CODENAME" in
-            trusty)
-               apt-get $YesOpt install postgresql-9.3 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl heirloom-mailx libboost-program-options1.54.0 libboost-regex1.54.0;;
-            jessie)
-               apt-get $YesOpt install postgresql-9.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl heirloom-mailx libboost-program-options1.55.0 libboost-regex1.55.0;;
-            xenial)
-               apt-get $YesOpt install postgresql-9.5 php7.0 libapache2-mod-php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-mbstring php7.0-zip s-nail libboost-program-options1.58.0 libboost-regex1.58.0;;
-            stretch|buster|sid)
-               apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip php-mbstring s-nail libboost-program-options1.62.0 libboost-regex1.62.0;;
+            stretch)
+               apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql libapache2-mod-php7.0 php7.0-pgsql \
+                 php7.0-cli php7.0-curl php7.0-xml php7.0-zip php7.0-mbstring php7.0-uuid php-gettext s-nail libboost-program-options1.62.0 \
+                 libboost-regex1.62.0 libicu57;;
+            buster)
+               apt-get $YesOpt install postgresql-11 php7.3 php7.3-pgsql libapache2-mod-php7.3 php7.3-pgsql \
+                 php7.3-cli php7.3-curl php7.3-xml php7.3-zip php7.3-mbstring php7.3-uuid php-gettext s-nail libboost-program-options1.67.0 \
+                 libboost-regex1.67.0 libicu63;;
+            bullseye)
+               apt-get $YesOpt install postgresql-13 php7.4 php7.4-pgsql \
+               libapache2-mod-php7.4 php7.4-pgsql php7.4-cli php7.4-curl \
+               php7.4-xml php7.4-zip php7.4-mbstring php7.4-uuid php-php-gettext s-nail \
+               libboost-program-options1.74.0 libboost-regex1.74.0 libicu67;;
             bionic)
-               apt-get $YesOpt install postgresql-10 php7.2 php7.2-pgsql php7.2-cli php7.2-curl php7.2-xml php7.2-zip php7.2-mbstring s-nail libboost-program-options1.65.1 libboost-regex1.65.1;;
+               apt-get $YesOpt install postgresql-10 php7.2 php7.2-pgsql libapache2-mod-php7.2 php7.2-pgsql \
+                 php7.2-cli php7.2-curl php7.2-xml php7.2-zip php7.2-mbstring php7.2-uuid php-gettext s-nail libboost-program-options1.65.1 \
+                 libboost-regex1.65.1 libicu60;;
+            sid)
+               apt-get $YesOpt install postgresql php php-pgsql php-cli php-curl php-xml php-zip php-mbstring php-uuid php-gettext s-nail \
+                 libboost-program-options1.74.0 libboost-regex1.74.0 libicu67;;
+            focal)
+               apt-get $YesOpt install postgresql php php-pgsql php-cli php-curl php-xml php-zip php-mbstring php-uuid s-nail \
+                 libboost-program-options1.71.0 libboost-regex1.71.0 libicu66;;
+            jammy)
+               apt-get $YesOpt install postgresql-14 php8.1 php8.1-pgsql \
+               libapache2-mod-php8.1 php8.1-pgsql php8.1-cli php8.1-curl \
+               php8.1-xml php8.1-zip php8.1-mbstring php8.1-uuid php-php-gettext s-nail \
+               libboost-program-options1.74.0 libboost-regex1.74.0 libicu70;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
          esac
          ;;
       Fedora)
-         yum $YesOpt install postgresql-server httpd
+         yum $YesOpt install postgresql-server httpd chkconfig
          yum $YesOpt install \
             postgresql \
             php php-pear php-pgsql php-process php-xml php-mbstring\
             smtpdaemon \
             libxml2 \
             binutils mailx \
-            sleuthkit boost
+            sleuthkit boost libicu
 
          # enable, possible init, and start postgresql
          /sbin/chkconfig postgresql on
          if [ ! -f /var/lib/pgsql/data/PG_VERSION ]; then
-            /sbin/service postgresql initdb
+            /usr/bin/postgresql-setup --initdb
          fi
-         /sbin/service postgresql start
+         /usr/bin/systemctl start postgresql
 
          echo "NOTE: unrar is not available in Fedora release $CODENAME,"
          echo "   please install from upstream sources."
@@ -202,13 +229,13 @@ if [[ $RUNTIME ]]; then
             php php-pear php-pgsql php-process php-mbstring\
             smtpdaemon \
             file libxml2 \
-            binutils mailx boost
+            binutils mailx boost libicu
          echo "NOTE: cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources."
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
-   
+
    if [[ $OFFLINE ]]; then
        echo "WARNING: composer is not installed, and the installer does not install it due to the offline switch"
        echo "Please run the equivalent of 'sudo ./utils/install_composer.sh'"

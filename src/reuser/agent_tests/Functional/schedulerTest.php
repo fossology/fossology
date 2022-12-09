@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2015, 2019 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 /**
  * @dir
@@ -30,6 +19,7 @@ namespace Fossology\Reuser\Test;
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\TreeDao;
@@ -84,6 +74,10 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    * ClearingDao object
    */
   private $clearingDao;
+  /** @var CopyrightDao $copyrightDao
+   * CopyrightDao object
+   */
+  private $copyrightDao;
   /** @var ClearingDecisionFilter $clearingDecisionFilter
    * ClearingDecisionFilter object
    */
@@ -118,7 +112,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Setup test env
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("reuserSched");
     $this->dbManager = $this->testDb->getDbManager();
@@ -130,19 +124,21 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
+    $this->copyrightDao = new CopyrightDao($this->dbManager, $this->uploadDao);
     $this->treeDao = \Mockery::mock(TreeDao::class);
 
     $agentDao = new AgentDao($this->dbManager, $logger);
 
     $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao,
-      $this->clearingDao, $this->uploadDao, $this->clearingDecisionFilter, $this->treeDao);
+                        $this->clearingDao, $this->uploadDao, $this->clearingDecisionFilter,
+                        $this->treeDao, $this->copyrightDao);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
   /**
    * @brief Tear down test env
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;
@@ -150,6 +146,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->licenseDao = null;
     $this->highlightDao = null;
     $this->clearingDao = null;
+    $this->copyrightDao = null;
   }
 
   /**
@@ -181,25 +178,28 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
       'uploadtree_a','license_ref','license_ref_bulk','clearing_decision',
       'clearing_decision_event','clearing_event','license_file','highlight',
       'highlight_bulk','agent','pfile','ars_master','users','group_user_member',
-
-    'upload_clearing_license'),false);
+      'upload_clearing_license','report_info'),false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq',
       'upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq',
       'license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq',
-      'clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq'),false);
+      'clearing_decision_clearing_decision_pk_seq',
+      'clearing_event_clearing_event_pk_seq','report_info_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey',
       'upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master',
-      'license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
+      'license_ref_bulk','license_ref','clearing_event','clearing_decision','license_file','highlight'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('monk'));
 
     $this->testDb->insertData(array('pfile','upload','uploadtree_a','users',
-      'group_user_member','agent','license_file','monk_ars'), false);
+      'group_user_member','agent','license_file','monk_ars','report_info'),
+      false);
     $this->testDb->insertData_license_ref(80);
 
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
+
+    $this->testDb->setupSysconfig();
   }
 
   /**
@@ -208,11 +208,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   private function getHeartCount($output)
   {
     $matches = array();
-    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches))
-    {
+    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches)) {
       return intval($matches[1]);
-    } else
-    {
+    } else {
       return -1;
     }
   }
@@ -283,7 +281,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    */
   protected function insertDecisionFromTwoEvents($scope=DecisionScopes::ITEM,$originallyClearedItemId=23)
   {
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
     $licenseRef2 = $this->licenseDao->getLicenseByShortName("Glide")->getRef();
 
     $addedLicenses = array($licenseRef1, $licenseRef2);
@@ -521,8 +519,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     assertThat($newEvents, is(arrayWithSize(count($clearingLicenses))));
 
     /** @var ClearingEvent $newEvent */
-    foreach($newEvents as $newEvent)
-    {
+    foreach ($newEvents as $newEvent) {
       assertThat($newEvent->getEventId(), anyOf($addedEventIds));
       assertThat($newEvent->getClearingLicense(), anyOf($clearingLicenses));
     }
@@ -606,8 +603,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     assertThat($newEvents, is(arrayWithSize(count($clearingLicenses))));
 
     /** @var ClearingEvent $newEvent */
-    foreach($newEvents as $newEvent)
-    {
+    foreach ($newEvents as $newEvent) {
       assertThat($newEvent->getEventId(), anyOf($addedEventIds));
       assertThat($newEvent->getClearingLicense(), anyOf($clearingLicenses));
     }
@@ -621,5 +617,4 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($mainLicenseIdForReuseSingle, $mainLicenseSingle);
     $this->rmRepo();
   }
-
 }

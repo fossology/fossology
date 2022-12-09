@@ -1,21 +1,10 @@
 <?php
-/***********************************************************
- * Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014-2015 Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2010-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
@@ -24,9 +13,10 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\UI\FolderNav;
 use Fossology\Lib\UI\MenuHook;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-define("TITLE_ui_browse", _("Browse"));
+define("TITLE_UI_BROWSE", _("Browse"));
 
 class ui_browse extends FO_Plugin
 {
@@ -38,7 +28,7 @@ class ui_browse extends FO_Plugin
   function __construct()
   {
     $this->Name = "browse";
-    $this->Title = TITLE_ui_browse;
+    $this->Title = TITLE_UI_BROWSE;
     $this->MenuList = "Browse";
     $this->MenuOrder = 80; // just to right of Home(100)
     $this->MenuTarget = "";
@@ -60,18 +50,14 @@ class ui_browse extends FO_Plugin
     menu_insert("Main::" . $this->MenuList, $this->MenuOrder, $this->Name, $this->Name);
 
     $Upload = GetParm("upload", PARM_INTEGER);
-    if (empty($Upload))
-    {
+    if (empty($Upload)) {
       return;
     }
     // For the Browse menu, permit switching between detail and simple.
     $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
-    if (GetParm("mod", PARM_STRING) == $this->Name)
-    {
+    if (GetParm("mod", PARM_STRING) == $this->Name) {
       menu_insert("Browse::Browse", 1);
-    }
-    else
-    {
+    } else {
       menu_insert("Browse::Browse", 1, $URI);
     }
     return ($this->State == PLUGIN_STATE_READY);
@@ -102,10 +88,8 @@ class ui_browse extends FO_Plugin
     $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
     /* menu with only Tag and Compare */
     $MenuTag = array();
-    foreach ($MenuPfile as $value)
-    {
-      if (($value->Name == 'Tag') or ($value->Name == 'Compare'))
-      {
+    foreach ($MenuPfile as $value) {
+      if (($value->Name == 'Tag') || ($value->Name == 'Compare')) {
         $MenuTag[] = $value;
       }
     }
@@ -115,9 +99,10 @@ class ui_browse extends FO_Plugin
     $V .= "<table class='text' style='border-collapse: collapse' border=0 padding=0>\n";
     $stmtGetFirstChild = __METHOD__.'.getFirstChild';
     $dbManager->prepare($stmtGetFirstChild,"SELECT uploadtree_pk FROM $uploadtree_tablename WHERE parent=$1 limit 1");
-    foreach ($Results as $Row)
-    {
-      if (empty($Row['uploadtree_pk'])) continue;
+    foreach ($Results as $Row) {
+      if (empty($Row['uploadtree_pk'])) {
+        continue;
+      }
       $ShowSomething = 1;
       $Name = $Row['ufile_name'];
 
@@ -133,51 +118,42 @@ class ui_browse extends FO_Plugin
       $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
       $Link = $HasChildren ? "$Uri&show=$Show&upload=$Upload&item=$Row[uploadtree_pk]" : NULL;
 
-      if ($Show == 'detail')
-      {
+      if ($Show == 'detail') {
         $V .= "<td class='mono'>" . DirMode2String($Row['ufile_mode']) . "</td>";
-        if (!Isdir($Row['ufile_mode']))
-        {
+        if (!Isdir($Row['ufile_mode'])) {
           $V .= "<td align='right'>&nbsp;&nbsp;" . number_format($Row['pfile_size'], 0, "", ",") . "&nbsp;&nbsp;</td>";
-        } else
-        {
+        } else {
           $V .= "<td>&nbsp;</td>";
         }
       }
-      
+
       $displayItem = Isdir($Row['ufile_mode']) ? "$Name/" : $Name;
-      if(!empty($Link))
-      {
+      if (!empty($Link)) {
         $displayItem = "<a href=\"$Link\">$displayItem</a>";
       }
-      if (Iscontainer($Row['ufile_mode']))
-      {
+      if (Iscontainer($Row['ufile_mode'])) {
         $displayItem = "<b>$displayItem</b>";
       }
       $V .= "<td>$displayItem</td>\n";
 
-      if (!Iscontainer($Row['ufile_mode']))
+      if (!Iscontainer($Row['ufile_mode'])) {
         $V .= menu_to_1list($MenuPfileNoCompare, $Parm, "<td>", "</td>\n", 1, $Upload);
-      else if (!Isdir($Row['ufile_mode']))
+      } else if (!Isdir($Row['ufile_mode'])) {
         $V .= menu_to_1list($MenuPfile, $Parm, "<td>", "</td>\n", 1, $Upload);
-      else
+      } else {
         $V .= menu_to_1list($MenuTag, $Parm, "<td>", "</td>\n", 1, $Upload);
-
+      }
     } /* foreach($Results as $Row) */
     $V .= "</table>\n";
-    if (!$ShowSomething)
-    {
+    if (! $ShowSomething) {
       $text = _("No files");
       $V .= "<b>$text</b>\n";
-    } else
-    {
+    } else {
       $V .= "<hr>\n";
-      if (count($Results) == 1)
-      {
+      if (count($Results) == 1) {
         $text = _("1 item");
         $V .= "$text\n";
-      } else
-      {
+      } else {
         $text = _("items");
         $V .= count($Results) . " $text\n";
       }
@@ -191,24 +167,35 @@ class ui_browse extends FO_Plugin
    */
   private function ShowFolder($folderId)
   {
-    $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
+    $rootFolder = $this->folderDao->getDefaultFolder(Auth::getUserId());
+    if ($rootFolder == NULL) {
+      $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
+    }
     /* @var $uiFolderNav FolderNav */
     $uiFolderNav = $GLOBALS['container']->get('ui.folder.nav');
-    
-    $folderNav = '<div id="sidetree">';
+
+    $folderNav = '<div id="sidetree" class="container justify-content-center" style="min-width: 234px;">';
     if ($folderId != $rootFolder->getId()) {
-      $folderNav .= '<div class="treeheader" style="display:inline;"><a href="'. Traceback_uri() . '?mod=' . $this->Name . '">Top</a> | </div>';
+      $folderNav .= '<div class="treeheader" style="display:inline;"><a class="btn btn-outline-success btn-sm" href="' .
+          Traceback_uri() . '?mod=' . $this->Name . '">Top folder</a> | </div>';
     }
-    $folderNav .= '<div id="sidetreecontrol" class="treeheader" style="display:inline;"><a href="?#">Collapse All</a> | <a href="?#">Expand All</a></div>';
+    $folderNav .= '<div id="sidetreecontrol" class="treeheader" style="display:inline;">
+                     <a class="btn btn-outline-success btn-sm" href="?#">Collapse All</a> |
+                     <a class="btn btn-outline-success btn-sm" href="?#">Expand All</a>
+                   </div><br/><br/>';
+    $folderNav .= '
+      <div class="col-sm-20" style="margin-top:-10px;">
+        <input id="searchFolderTree" type="text" class="form-control" name="searchFolderTree" placeholder="Search folder" autofocus="autofocus"">
+      </div>';
     $folderNav .= $uiFolderNav->showFolderTree($folderId).'</div>';
-   
+
     $this->vars['folderNav'] = $folderNav;
 
     $assigneeArray = $this->getAssigneeArray();
     $this->vars['assigneeOptions'] = $assigneeArray;
     $this->vars['statusOptions'] = $this->uploadDao->getStatusTypeMap();
     $this->vars['folder'] = $folderId;
-    $this->vars['folderName'] = $rootFolder->getName();
+    $this->vars['folderName'] = $this->folderDao->getFolder($folderId)->getName();
   }
 
   /**
@@ -216,8 +203,7 @@ class ui_browse extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       return 0;
     }
     $this->folderDao->ensureTopLevelFolder();
@@ -227,42 +213,35 @@ class ui_browse extends FO_Plugin
     $Item = GetParm("item", PARM_INTEGER);  // uploadtree_pk to browse
 
     /* check if $folder_pk is accessible to logged in user */
-    if(!empty($folder_pk) && !$this->folderDao->isFolderAccessible($folder_pk))
-    {
+    if (!empty($folder_pk) && !$this->folderDao->isFolderAccessible($folder_pk)) {
       $this->vars['message'] = _("Permission Denied");
       return $this->render('include/base.html.twig');
     }
 
     /* check permission if $Upload is given */
-    if (!empty($Upload) && !$this->uploadDao->isAccessible($Upload, Auth::getGroupId()))
-    {
+    if (!empty($Upload) && !$this->uploadDao->isAccessible($Upload, Auth::getGroupId())) {
       $this->vars['message'] = _("Permission Denied");
       return $this->render('include/base.html.twig');
     }
 
-    if (empty($folder_pk))
-    {
+    if (empty($folder_pk)) {
       try {
         $folder_pk = $this->getFolderId($Upload);
-      }
-      catch (Exception $exc) {
+      } catch (Exception $exc) {
         return $exc->getMessage();
       }
     }
 
     $output = $this->outputItemHtml($Item, $folder_pk, $Upload);
-    if ($output instanceof Response)
-    {
+    if ($output instanceof Response) {
       return $output;
     }
 
     $this->vars['content'] = $output;
     $modsUploadMulti = MenuHook::getAgentPluginNames('UploadMulti');
-    if (!empty($modsUploadMulti))
-    {
+    if (!empty($modsUploadMulti)) {
       $multiUploadAgents = array();
-      foreach($modsUploadMulti as $mod)
-      {
+      foreach ($modsUploadMulti as $mod) {
         $multiUploadAgents[$mod] = $GLOBALS['Plugins'][$mod]->title;
       }
       $this->vars['multiUploadAgents'] = $multiUploadAgents;
@@ -278,31 +257,33 @@ class ui_browse extends FO_Plugin
    */
   private function getFolderId($uploadId)
   {
-    $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
-    if (empty($uploadId))
-    {
+    $rootFolder = $this->folderDao->getDefaultFolder(Auth::getUserId());
+    if ($rootFolder == NULL) {
+      $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
+    }
+    if (empty($uploadId)) {
       return $rootFolder->getId();
     }
-    
+
     global $container;
     /* @var $dbManager DbManager */
     $dbManager = $container->get('db.manager');
-    $uploadExists = $dbManager->getSingleRow("SELECT count(*) cnt FROM upload WHERE upload_pk=$1",array($uploadId));
-    if ($uploadExists['cnt']< 1)
-    {
+    $uploadExists = $dbManager->getSingleRow(
+      "SELECT count(*) cnt FROM upload WHERE upload_pk=$1 " .
+      "AND (expire_action IS NULL OR expire_action!='d') AND pfile_fk IS NOT NULL", array($uploadId));
+    if ($uploadExists['cnt']< 1) {
       throw new Exception("This upload no longer exists on this system.");
     }
-    
-    
+
     $folderTreeCte = $this->folderDao->getFolderTreeCte($rootFolder);
-    
+
     $parent = $dbManager->getSingleRow(
-           $folderTreeCte." SELECT ft.folder_pk FROM foldercontents fc LEFT JOIN folder_tree ft ON fc.parent_fk=ft.folder_pk "
-            . "WHERE child_id=$2 AND foldercontents_mode=$3 ORDER BY depth LIMIT 1",
-               array($rootFolder->getId(), $uploadId, FolderDao::MODE_UPLOAD),
-            __METHOD__.'.parent');
-    if (!$parent)
-    {
+        $folderTreeCte .
+        " SELECT ft.folder_pk FROM foldercontents fc LEFT JOIN folder_tree ft ON fc.parent_fk=ft.folder_pk "
+        . "WHERE child_id=$2 AND foldercontents_mode=$3 ORDER BY depth LIMIT 1",
+        array($rootFolder->getId(), $uploadId, FolderDao::MODE_UPLOAD),
+        __METHOD__.'.parent');
+    if (!$parent) {
       throw new Exception("Upload $uploadId missing from foldercontents in your foldertree.");
     }
     return $parent['folder_pk'];
@@ -321,51 +302,47 @@ class ui_browse extends FO_Plugin
     $show = 'quick';
     $html = '';
     $uploadtree_tablename = "";
-    if (!empty($uploadTreeId))
-    {
+    if (! empty($uploadTreeId)) {
       $sql = "SELECT ufile_mode, upload_fk FROM uploadtree WHERE uploadtree_pk = $1";
       $row = $dbManager->getSingleRow($sql, array($uploadTreeId));
       $Upload = $row['upload_fk'];
-      if (!$this->uploadDao->isAccessible($Upload, Auth::getGroupId()))
-      {
+      if (! $this->uploadDao->isAccessible($Upload, Auth::getGroupId())) {
         $this->vars['message'] = _("Permission Denied");
         return $this->render('include/base.html.twig');
       }
 
-      if (!Iscontainer($row['ufile_mode']))
-      {
+      if (! Iscontainer($row['ufile_mode'])) {
+        $parentItemBounds = $this->uploadDao->getParentItemBounds($Upload);
+        if (! $parentItemBounds->containsFiles()) {
+          // Upload with a single file, open license view
+          return new RedirectResponse(Traceback_uri() . '?mod=view-license'
+            . Traceback_parm_keep(array("upload", "item")));
+        }
         global $Plugins;
         $View = &$Plugins[plugin_find_id("view")];
-        if (!empty($View))
-        {
+        if (! empty($View)) {
           $this->vars['content'] = $View->ShowView(NULL, "browse");
           return $this->render('include/base.html.twig');
         }
       }
       $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($row['upload_fk']);
       $html .= Dir2Browse($this->Name, $uploadTreeId, NULL, 1, "Browse", -1, '', '', $uploadtree_tablename) . "\n";
-    }
-    else if (!empty($Upload))
-    {
+    } else if (!empty($Upload)) {
       $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($Upload);
-      $html .= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse", $uploadtree_tablename) . "\n";
+      $html .= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse",
+        $uploadtree_tablename) . "\n";
     }
 
-    if (empty($Upload))
-    {
+    if (empty($Upload)) {
       $this->vars['show'] = $show;
       $this->ShowFolder($Folder);
       return $html;
     }
 
-    if (empty($uploadTreeId))
-    {
-      try
-      {
+    if (empty($uploadTreeId)) {
+      try {
         $uploadTreeId = $this->uploadDao->getUploadParent($Upload);
-      }
-      catch(Exception $e)
-      {
+      } catch(Exception $e) {
         $this->vars['message'] = $e->getMessage();
         return $this->render('include/base.html.twig');
       }

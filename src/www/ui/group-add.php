@@ -1,35 +1,25 @@
 <?php
 
 use Fossology\Lib\Auth\Auth;
-/***********************************************************
- Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 205 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2015 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
-
-define("TITLE_add_group", _("Add Group"));
+define("TITLE_ADD_GROUP", _("Add Group"));
 
 /**
  * \class group_add extends FO_Plugin
  * \brief add a new group
  */
-class group_add extends FO_Plugin {
+class group_add extends FO_Plugin
+{
   function __construct()
   {
     $this->Name = "group_add";
-    $this->Title = TITLE_add_group;
+    $this->Title = TITLE_ADD_GROUP;
     $this->MenuList = "Admin::Groups::Add Group";
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->LoginFlag = 1;  /* Don't allow Default User to add a group */
@@ -42,20 +32,16 @@ class group_add extends FO_Plugin {
     $V = "";
     /* If this is a POST, then process the request. */
     $groupname = GetParm('groupname', PARM_TEXT);
-    if (!empty($groupname)) 
-    {
-      try
-      {
+    if (! empty($groupname)) {
+      try {
         /* @var $userDao UserDao */
         $userDao = $GLOBALS['container']->get('dao.user');
         $groupId = $userDao->addGroup($groupname);
-        $userDao->addGroupMembership($groupId,Auth::getUserId());
+        $userDao->addGroupMembership($groupId, Auth::getUserId());
         $text = _("Group");
         $text1 = _("added");
         $this->vars['message'] = "$text $groupname $text1.";
-      }
-      catch(Exception $e)
-      {
+      } catch (Exception $e) {
         $this->vars['message'] = $e->getMessage();
       }
     }

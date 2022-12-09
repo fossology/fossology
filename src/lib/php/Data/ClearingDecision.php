@@ -1,20 +1,9 @@
 <?php
 /*
-Copyright (C) 2014-2018, Siemens AG
-Author: Johannes Najjar, Steffen Weber
+ SPDX-FileCopyrightText: © 2014-2018 Siemens AG
+ Author: Johannes Najjar, Steffen Weber
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Data;
@@ -114,7 +103,7 @@ class ClearingDecision
   public function getClearingLicenses()
   {
     $clearingLicenses = array();
-    foreach($this->clearingEvents as $clearingEvent) {
+    foreach ($this->clearingEvents as $clearingEvent) {
       $clearingLicenses[] = $clearingEvent->getClearingLicense();
     }
     return $clearingLicenses;
@@ -126,11 +115,9 @@ class ClearingDecision
   public function getPositiveLicenses()
   {
     $result = array();
-    foreach($this->clearingEvents as $clearingEvent)
-    {
+    foreach ($this->clearingEvents as $clearingEvent) {
       $clearingLicense = $clearingEvent->getClearingLicense();
-      if (!$clearingLicense->isRemoved())
-      {
+      if (! $clearingLicense->isRemoved()) {
         $result[] = $clearingLicense->getLicenseRef();
       }
     }
@@ -223,10 +210,11 @@ class ClearingDecision
    */
   public function isInScope()
   {
-    switch ($this->getScope())
-    {
-      case 'global': return true;
-      case 'upload': return $this->sameFolder;
+    switch ($this->getScope()) {
+      case 'global':
+        return true;
+      case 'upload':
+        return $this->sameFolder;
     }
     return false;
   }
@@ -235,11 +223,12 @@ class ClearingDecision
   {
     $output = "ClearingDecision(#" . $this->clearingId . ", ";
 
-    foreach ($this->clearingLicenses as $clearingLicense) {
-      $output .= ($clearingLicense->isRemoved() ? "-": "" ). $clearingLicense->getShortName() . ", ";
+    $clearingLicenses = $this->getClearingLicenses();
+
+    foreach ($clearingLicenses as $clearingLicense) {
+      $output .= ($clearingLicense->isRemoved() ? "-" : ""). $clearingLicense->getShortName() . ", ";
     }
 
     return $output . $this->getUserName() . ")";
   }
-
 }

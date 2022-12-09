@@ -1,21 +1,10 @@
 <?php
-/***********************************************************
- * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014-2017 Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2014-2017 Siemens AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 namespace Fossology\UI\Page;
 
@@ -52,8 +41,7 @@ class AdminObligationFromCSV extends DefaultPlugin
   {
     $vars = array();
 
-    if ($request->isMethod('POST'))
-    {
+    if ($request->isMethod('POST')) {
       $uploadFile = $request->files->get('file_input');
       $delimiter = $request->get('delimiter')?:',';
       $enclosure = $request->get('enclosure')?:'"';
@@ -73,20 +61,16 @@ class AdminObligationFromCSV extends DefaultPlugin
   protected function handleFileUpload($uploadedFile,$delimiter=',',$enclosure='"')
   {
     $errMsg = '';
-    if ( !($uploadedFile instanceof UploadedFile) )
-    {
+    if (! ($uploadedFile instanceof UploadedFile)) {
       $errMsg = _("No file selected");
-    }
-    elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0)
-    {
+    } elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
       $errMsg = _("Larger than upload_max_filesize ") . ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
+    } elseif ($uploadedFile->getClientOriginalExtension()!='csv') {
+      $errMsg = _('Invalid extension ') .
+          $uploadedFile->getClientOriginalExtension() . ' of file ' .
+          $uploadedFile->getClientOriginalName();
     }
-    elseif($uploadedFile->getClientOriginalExtension()!='csv')
-    {
-      $errMsg = _('Invalid extension ').$uploadedFile->getClientOriginalExtension().' of file '.$uploadedFile->getClientOriginalName();
-    }
-    if (!empty($errMsg))
-    {
+    if (! empty($errMsg)) {
       return $errMsg;
     }
     /** @var LicenseCsvImport */
@@ -95,7 +79,6 @@ class AdminObligationFromCSV extends DefaultPlugin
     $obligationCsvImport->setEnclosure($enclosure);
     return $obligationCsvImport->handleFile($uploadedFile->getRealPath());
   }
-
 }
 
 register_plugin(new AdminObligationFromCSV());

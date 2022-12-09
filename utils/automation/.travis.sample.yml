@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: © 2020 Siemens AG
+# SPDX-FileCopyrightText: © anupam.ghosh@siemens.com
+# SPDX-FileCopyrightText: © gaurav.mishra@siemens.com
+
+# SPDX-License-Identifier: FSFAP
+
+dist: bionic
+os: linux
+
+services:
+  - docker
+
+jobs:
+  include:
+    - stage: Compliance
+      name: Copyright
+      addons: {}
+      services: docker
+      script:
+        - >-
+          if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+          docker pull fossology/fossology:scanner
+          && docker run --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo
+          -e TRAVIS=${TRAVIS} -e TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
+          -e TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}
+          fossology/fossology:scanner "/bin/fossologyscanner" copyright keyword ;
+          fi
+    - stage: Compliance
+      name: License
+      addons: {}
+      services: docker
+      script:
+        - >-
+          if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+          docker pull fossology/fossology:scanner
+          && docker run --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo
+          -e TRAVIS=${TRAVIS} -e TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
+          -e TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}
+          fossology/fossology:scanner "/bin/fossologyscanner" nomos ojo ;
+          fi

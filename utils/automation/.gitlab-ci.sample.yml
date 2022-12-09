@@ -1,0 +1,56 @@
+# SPDX-FileCopyrightText: © 2020 Siemens AG
+# SPDX-FileCopyrightText: © anupam.ghosh@siemens.com
+# SPDX-FileCopyrightText: © gaurav.mishra@siemens.com
+
+# SPDX-License-Identifier: FSFAP
+
+stages:
+  - license
+
+license_check:
+  stage: license
+  image: fossology/fossology:scanner
+  script:
+    - /bin/fossologyscanner nomos ojo
+  only: [merge_requests]
+  artifacts:
+    paths:
+    - results
+    expire_in: 1 week
+    when: on_failure
+
+copyright_check:
+  stage: license
+  image: fossology/fossology:scanner
+  script:
+    - /bin/fossologyscanner copyright keyword
+  only: [merge_requests]
+  artifacts:
+    paths:
+    - results
+    expire_in: 1 week
+    when: on_failure
+
+repo_license_scan:
+  stage: license
+  image: fossology/fossology:scanner
+  script:
+    - /bin/fossologyscanner repo nomos ojo
+  only: [tags]
+  artifacts:
+    paths:
+    - results
+    expire_in: 1 week
+    when: on_failure
+
+repo_copyright_check:
+  stage: license
+  image: fossology/fossology:scanner
+  script:
+    - /bin/fossologyscanner copyright keyword repo
+  only: [tags]
+  artifacts:
+    paths:
+    - results
+    expire_in: 1 week
+    when: on_failure

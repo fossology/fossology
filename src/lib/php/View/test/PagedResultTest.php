@@ -1,25 +1,15 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
-Author: Andreas Würl
+ SPDX-FileCopyrightText: © 2014 Siemens AG
+ Author: Andreas Würl
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\View;
 
-class TestPagedResult extends PagedResult {
+class TestPagedResult extends PagedResult
+{
 
   /**
    * @param string $text
@@ -31,7 +21,8 @@ class TestPagedResult extends PagedResult {
   }
 }
 
-class PagedResultTest extends \PHPUnit\Framework\TestCase {
+class PagedResultTest extends \PHPUnit\Framework\TestCase
+{
 
   const START_OFFSET = 12;
   const META_TEXT = "<meta>";
@@ -40,7 +31,7 @@ class PagedResultTest extends \PHPUnit\Framework\TestCase {
   /** @var TestPagedResult */
   private $pagedResult;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->pagedResult = new TestPagedResult(self::START_OFFSET);
   }
@@ -96,5 +87,4 @@ class PagedResultTest extends \PHPUnit\Framework\TestCase {
     assertThat($this->pagedResult->getCurrentOffset(), is(self::START_OFFSET + strlen(self::CONTENT_TEXT)));
     assertThat($this->pagedResult->getText(), is(self::META_TEXT . self::CONTENT_TEXT));
   }
-
 }

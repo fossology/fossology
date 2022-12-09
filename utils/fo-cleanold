@@ -1,6 +1,8 @@
 #!/bin/sh
 # fo-cleanold - a utility to clean up old fossology installs
-# Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+# SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
+
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # This utility is designed to clean fossology installs off a system. By
 # default it
@@ -19,7 +21,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o h --long delete-conffiles,delete-database,delete-repository,delete-user,delete-everything,help -n 'fo-cleanold' -- "$@"`
+OPTS=$(getopt -o h --long delete-conffiles,delete-database,delete-repository,delete-user,delete-everything,help -n 'fo-cleanold' -- "$@")
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -61,7 +63,7 @@ fi
 
 
 # This must run as root.
-if [ `id -u` != "0" ] ; then
+if [ "$(id -u)" != "0" ] ; then
    echo "ERROR: fo-cleanold must run as root."
    echo "Aborting."
    exit 1
@@ -80,7 +82,7 @@ if [ ! $EVERYTHING ]; then
         echo "ERROR: you have bucket data in $BUCKET,"
         echo " please migrate it to the new location and ensure this directory"
         echo " is empty before re-running fo-cleanold. See"
-        echo " http://fossology.org/buckets for more info." 
+        echo " https://github.com/fossology/fossology/wiki/Buckets for more info." 
         exit 1
     fi
   done  
@@ -166,7 +168,7 @@ DIRS="/usr/local/fossology/
 /usr/local/etc/fossology/mods-enabled
 /usr/local/share/nomos3/"
 
-TMPDIR=`mktemp -d /tmp/fossology-configs.XXXXXX` || exit 1
+TMPDIR=$(mktemp -d /tmp/fossology-configs.XXXXXX) || exit 1
 echo "*** Searching for old fossology config files ***"
 for conffile in $OLDSAVE; do
    if [ -e "$conffile" -o -L "$conffile" ]; then
@@ -180,7 +182,7 @@ echo "*** Searching for new fossology config files ***"
 for conffile in $NEWSAVE; do
    if [ -f "$conffile" -o -L "$conffile" ]; then
       if [ $RMCONF ]; then
-         path=`dirname $conffile`
+         path=$(dirname $conffile)
          destpath="$TMPDIR/$path"
          if [ ! -d $destpath ]; then
            mkdir -p $destpath
@@ -234,6 +236,11 @@ if [ $RMDB ]; then
       fi
    fi
 fi
+
+## cron job
+echo "*** Cleaning up old cron job for www-data and fossy user ***"
+crontab -r -u www-data
+crontab -r -u fossy
 
 ## Repository
 if [ $RMREPO ]; then

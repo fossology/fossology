@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2015,2019 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 /**
  * @file schedulerTest.php
@@ -81,11 +70,12 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Setup the objects, database and repository
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("deciderJobSched".time());
     $this->dbManager = $this->testDb->getDbManager();
     $logger = M::mock('Monolog\Logger');
+    $this->testDb->setupSysconfig();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::class);
@@ -104,7 +94,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Destroy objects, database and repository
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;
@@ -139,11 +129,15 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    */
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight','highlight_bulk','agent','pfile','ars_master','users','group_user_member','license_map'),false);
+    $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree',
+      'uploadtree_a','license_ref','license_ref_bulk','clearing_decision',
+      'clearing_decision_event','clearing_event','license_file','highlight',
+      'highlight_bulk','agent','pfile','ars_master','users','group_user_member',
+      'license_map','report_info'),false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','clearing_event_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_ref','clearing_event','clearing_decision','license_file','highlight'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('nomos','monk'));
 
@@ -161,18 +155,16 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   private function getHeartCount($output)
   {
     $matches = array();
-    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches))
-    {
+    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches)) {
       return intval($matches[1]);
-    } else
-    {
+    } else {
       return -1;
     }
   }
 
 
-  /** 
-   * @group Functional 
+  /**
+   * @group Functional
    * @test
    * -# Insert few clearing events
    * -# Run DeciderJobAgent Mock
@@ -184,8 +176,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->runnerDeciderScanWithTwoEventAndNoAgentShouldMakeADecision($this->runnerMock);
   }
 
-  /** 
-   * @group Functional 
+  /**
+   * @group Functional
    * @test
    * -# Insert few clearing events
    * -# Run DeciderJobAgent Cli
@@ -207,7 +199,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
     $jobId = 42;
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
     $licenseRef2 = $this->licenseDao->getLicenseByShortName("Glide")->getRef();
 
     $addedLicenses = array($licenseRef1, $licenseRef2);
@@ -242,7 +234,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->rmRepo();
   }
 
-  /** 
+  /**
    * @group Functional
    * @test
    * -# Create findings with nomos
@@ -254,7 +246,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->runnerDeciderScanWithNoEventsAndOnlyNomosShouldNotMakeADecision($this->runnerMock);
   }
 
-  /** 
+  /**
    * @group Functional
    * @test
    * -# Create findings with nomos
@@ -274,7 +266,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
 
     $licId1 = $licenseRef1->getId();
 
@@ -418,7 +410,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
     $jobId = 42;
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
     $licenseRef2 = $this->licenseDao->getLicenseByShortName("Glide")->getRef();
 
     $agentLicId = $this->licenseDao->getLicenseByShortName("Adaptec")->getRef()->getId();
@@ -466,5 +458,4 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
     $this->rmRepo();
   }
-
 }

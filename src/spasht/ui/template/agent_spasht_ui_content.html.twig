@@ -1,0 +1,29 @@
+{# SPDX-FileCopyrightText: © 2019 Vivek Kumar <vvksindia@gmail.com>
+   Author: Vivek Kumar<vvksindia@gmail.com>
+
+   SPDX-License-Identifier: FSFAP
+#}
+
+<div class="spasht-full-row">
+  {% include 'agent_spasht_search.html.twig' %}
+</div>
+{% if pageNo == "definition_not_found" %}
+  <div class="spasht-full-row">
+    <div id="definitionsTableNOTFound">No Match Found</div>
+  </div>
+{% elseif pageNo == "show_upload_table" %}
+  <div class="spasht-full-row">
+    {% include 'show_uploads_table.html.twig' %}
+  </div>
+{% elseif pageNo == "show_definitions" %}
+  <div class="spasht-full-row">
+    <span class="spasht-full-row">
+      {% include 'show_definitions.html.twig' %}
+    </span>
+  </div>
+  {% include 'show_details_table.html.twig' %}
+{% else %}
+  <div class="spasht-full-row">
+    <b>Please Search and Select Revision</b>
+  </div>
+{% endif %}

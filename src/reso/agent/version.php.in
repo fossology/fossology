@@ -1,0 +1,10 @@
+<?php
+/*
+ SPDX-FileCopyrightText: © Fossology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
+define("RESO_AGENT_NAME", "reso");
+defined("AGENT_VERSION") or define("AGENT_VERSION", "@FO_VERSION@");
+defined("AGENT_REV") or define("AGENT_REV", "@FO_COMMIT_HASH@");

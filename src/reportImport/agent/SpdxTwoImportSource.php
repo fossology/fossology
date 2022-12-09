@@ -1,24 +1,13 @@
 <?php
 /*
- * Copyright (C) 2015-2017, Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+ SPDX-FileCopyrightText: © 2015-2017 Siemens AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 namespace Fossology\ReportImport;
 
 use Fossology\Lib\Data\License;
-use EasyRdf_Graph;
+use EasyRdf\Graph;
 require_once 'ReportImportData.php';
 require_once 'ReportImportDataItem.php';
 require_once 'ImportSource.php';
@@ -33,7 +22,7 @@ class SpdxTwoImportSource implements ImportSource
   private $filename;
   /** @var  string */
   private $uri;
-  /** @var EasyRdf_Graph */
+  /** @var Graph $graph */
   private $graph;
   /** @var array */
   private $index;
@@ -58,8 +47,8 @@ class SpdxTwoImportSource implements ImportSource
 
   private function loadGraph($filename, $uri = null)
   {
-    /** @var EasyRdf_Graph */
-    $graph = new EasyRdf_Graph();
+    /** @var Graph $graph */
+    $graph = new Graph();
     $graph->parseFile($filename, 'rdfxml', $uri);
     return $graph;
   }

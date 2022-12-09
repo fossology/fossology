@@ -1,14 +1,17 @@
-{# Copyright 2014-2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2014-2015 Siemens AG
 
-   Copying and distribution of this file, with or without modification,
-   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-   This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 {% extends "include/base.html.twig" %}
 
 {% block content %}
-    {% if loginFailure %}
-      {{ 'The combination of user name and password was not found.'|trans }}<br/><br/> 
+    {% if userInactive %}
+      {{ 'User is inactive'|trans }}<br/><br/>
+    {% elseif loginFailure %}
+      {{ 'The combination of user name and password was not found.'|trans }}<br/><br/>
     {% endif %}
-    {% include "components/login-form.html.twig" with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl, 'userName': userName} only %}
+    {% include "components/login-form.html.twig" with {
+      'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl,
+      'userName': userName, 'providerExist': providerExist,
+      'loginProvider': loginProvider} only %}
 {% endblock %}

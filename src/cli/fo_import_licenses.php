@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2015 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2015 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 use Fossology\Lib\Dao\UserDao;
 
@@ -33,20 +22,16 @@ $usage = "Usage: " . basename($argv[0]) . " [options]
 ";
 $opts = getopt("h", array('username:', 'password:', 'delimiter:', 'enclosure:', "csv:"));
 
-if(array_key_exists('h',$opts))
-{
+if (array_key_exists('h',$opts)) {
   print "$usage\n";
   return 0;
 }
 
-if(!array_key_exists('csv',$opts))
-{
+if (!array_key_exists('csv',$opts)) {
   print "no input file given\n";
   print "$usage\n";
   return 0;
-}
-else
-{
+} else {
   $filename = $opts['csv'];
 }
 
@@ -56,21 +41,17 @@ $passwd = array_key_exists("password", $opts) ? $opts["password"] : null;
 $delimiter = array_key_exists("delimiter", $opts) ? $opts["delimiter"] : ',';
 $enclosure = array_key_exists("enclosure", $opts) ? $opts["enclosure"] : '"';
 
-if(!account_check($username, $passwd, $group))
-{
+if (!account_check($username, $passwd, $group)) {
   print "Fossology login failure\n";
   return 2;
-}
-else
-{
+} else {
   print "Logged in as user $username\n";
 }
 
 /** @var UserDao */
 $userDao = $GLOBALS['container']->get("dao.user");
 $adminRow = $userDao->getUserByName($username);
-if ($adminRow["user_perm"] < PLUGIN_DB_ADMIN)
-{
+if ($adminRow["user_perm"] < PLUGIN_DB_ADMIN) {
   print "You have no permission to admin the licenses\n";
   return 1;
 }

@@ -1,21 +1,11 @@
 <?php
-/***********************************************************
- * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2015 Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2015 Siemens AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Highlight;
 
@@ -24,7 +14,7 @@ use Fossology\Lib\Data\Highlight;
  * \brief Run an analysis for a single file, do not store results in the DB.
  */
 
-define("TITLE_agent_nomos_once", _("One-Shot License Analysis"));
+define("TITLE_AGENT_NOMOS_ONCE", _("One-Shot License Analysis"));
 
 /**
  * @class agent_nomos_once
@@ -39,7 +29,7 @@ class agent_nomos_once extends FO_Plugin
   function __construct()
   {
     $this->Name = "agent_nomos_once";
-    $this->Title = TITLE_agent_nomos_once;
+    $this->Title = TITLE_AGENT_NOMOS_ONCE;
     $this->Dependency = array();
     $this->NoHTML = 0; // always print text output for now
     /* For anyone to access, without login, use: */
@@ -84,8 +74,9 @@ class agent_nomos_once extends FO_Plugin
     global $PG_CONN;
     if (empty($PG_CONN)) {
       return (1);
-    } else
+    } else {
       return (0);
+    }
   }
 
   /**
@@ -147,25 +138,11 @@ class agent_nomos_once extends FO_Plugin
     }
 
     /* Only register with the menu system if the user is logged in. */
-    if (! empty($_SESSION['User'])) {
-      if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
-        menu_insert("Main::Upload::One-Shot Analysis", $this->MenuOrder,
+    if (! empty($_SESSION[Auth::USER_NAME])) {
+      if (array_key_exists(Auth::USER_LEVEL, $_SESSION) &&
+        $_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
+        menu_insert("Main::Upload::One-Shot Nomos Analysis", $this->MenuOrder,
           $this->Name, $this->MenuTarget);
-      }
-      // Debugging changes to license analysis
-      if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_ADMIN) {
-        $URI = $this->Name . Traceback_parm_keep(array(
-          "format",
-          "item"
-        ));
-        $menuText = "One-Shot License";
-        $menuPosition = 100;
-        $tooltipText = _("One-shot License, real-time license analysis");
-        menu_insert("View::[BREAK]", $menuPosition);
-        menu_insert("View::{$menuText}", $menuPosition + 1, $URI, $tooltipText);
-        menu_insert("View-Meta::[BREAK]", $menuPosition);
-        menu_insert("View-Meta::{$menuText}", $menuPosition + 1, $URI,
-          $tooltipText);
       }
     }
   }

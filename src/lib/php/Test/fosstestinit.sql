@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: © Fossology contributors
+
+-- SPDX-License-Identifier: GPL-2.0-only
 do 
 $$
   declare num_users integer;
@@ -13,7 +16,7 @@ $$
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
-CREATE DATABASE fosstest WITH TEMPLATE = template0; -- ENCODING = 'SQL_ASCII';
+CREATE DATABASE fosstest WITH TEMPLATE = template1; -- ENCODING = 'UTF8';
 
 ALTER DATABASE fosstest OWNER TO fossy;
 

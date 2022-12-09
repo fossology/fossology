@@ -1,8 +1,6 @@
-{# Copyright 2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
 
-   Copying and distribution of this file, with or without modification,
-   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-   This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 <spdx:relationship>
   <spdx:Relationship>
@@ -12,6 +10,17 @@
         <spdx:name>{{ packageName }}</spdx:name>
         <spdx:packageFileName>{{ uploadName }}</spdx:packageFileName>
         <spdx:downloadLocation rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+        {%- if componentId is not empty ~%}
+        <spdx:externalRef>
+          <spdx:ExternalRef>
+            <spdx:referenceCategory rdf:resource
+              ="http://spdx.org/rdf/terms#referenceCategory_packageManager" />
+            <spdx:referenceType rdf:resource
+              ="http://spdx.org/rdf/references/{{ componentType }}" />
+            <spdx:referenceLocator>{{ componentId|trim }}</spdx:referenceLocator>
+          </spdx:ExternalRef>
+        </spdx:externalRef>
+        {%- endif ~%}
         <spdx:packageVerificationCode>
           <spdx:PackageVerificationCode>
           <spdx:packageVerificationCodeValue>{{ verificationCode }}</spdx:packageVerificationCodeValue>
@@ -23,7 +32,13 @@
             <spdx:checksumValue>{{ sha1 | lower }}</spdx:checksumValue>
           </spdx:Checksum>
         </spdx:checksum>
-        <spdx:checksum> 
+        <spdx:checksum>
+          <spdx:Checksum>
+            <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha256" />
+            <spdx:checksumValue>{{ sha256 | lower }}</spdx:checksumValue>
+          </spdx:Checksum>
+        </spdx:checksum>
+        <spdx:checksum>
           <spdx:Checksum>
             <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5" />
             <spdx:checksumValue>{{ md5 | lower }}</spdx:checksumValue>
@@ -33,9 +48,9 @@
           <spdx:DisjunctiveLicenseSet>
   {% for res in mainLicenses %}
   {% if res starts with 'LicenseRef-' %}
-            <spdx:member rdf:resource="{{ uri }}#{{ res|replace(' ','-')|url_encode }}" />
+            <spdx:member rdf:resource="{{ uri }}#{{ res|replace({' ': '-'})|url_encode }}" />
   {% else %}
-            <spdx:member rdf:resource="http://spdx.org/licenses/{{ res|replace(' ','-')|url_encode }}" />
+            <spdx:member rdf:resource="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
   {% endif %}
   {% endfor %}
           </spdx:DisjunctiveLicenseSet>
@@ -43,7 +58,6 @@
         {% if licenseComments %}<spdx:licenseComments><![CDATA[
           {{ licenseComments|replace({']]>':']]><![CDATA[>'}) }}
         ]]></spdx:licenseComments>
-        <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#noassertion" />
         {% endif %}<spdx:licenseDeclared rdf:resource="http://spdx.org/rdf/terms#noassertion" />
         <spdx:licenseInfoFromFiles rdf:resource="http://spdx.org/rdf/terms#noassertion" />
         <spdx:copyrightText rdf:resource="http://spdx.org/rdf/terms#noassertion" />

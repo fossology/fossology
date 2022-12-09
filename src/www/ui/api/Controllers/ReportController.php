@@ -1,21 +1,10 @@
 <?php
-/***************************************************************
- Copyright (C) 2018 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2018, 2021 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @file
  * @brief Controller for report queries
@@ -24,11 +13,14 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Upload\Upload;
+use Fossology\UI\Api\Helper\ResponseHelper;
+use Slim\Psr7\Factory\StreamFactory;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * @class ReportController
@@ -46,16 +38,17 @@ class ReportController extends RestController
     'spdx2',
     'spdx2tv',
     'readmeoss',
-    'unifiedreport'
+    'unifiedreport',
+    'clixml'
   );
 
   /**
    * Get the required report for the required upload
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function getReport($request, $response, $args)
   {
@@ -81,19 +74,24 @@ class ReportController extends RestController
         case $this->reportsAllowed[0]:
         case $this->reportsAllowed[1]:
         case $this->reportsAllowed[2]:
-          $spdxGenerator = plugin_find('ui_spdx2');
+          $spdxGenerator = $this->restHelper->getPlugin('ui_spdx2');
           list ($jobId, $jobQueueId, $error) = $spdxGenerator->scheduleAgent(
-            Auth::getGroupId(), $upload, $reportFormat);
+            $this->restHelper->getGroupId(), $upload, $reportFormat);
           break;
         case $this->reportsAllowed[3]:
-          $readmeGenerator = plugin_find('ui_readmeoss');
+          $readmeGenerator = $this->restHelper->getPlugin('ui_readmeoss');
           list ($jobId, $jobQueueId, $error) = $readmeGenerator->scheduleAgent(
-            Auth::getGroupId(), $upload);
+            $this->restHelper->getGroupId(), $upload);
           break;
         case $this->reportsAllowed[4]:
-          $unifiedGenerator = plugin_find('agent_founifiedreport');
+          $unifiedGenerator = $this->restHelper->getPlugin('agent_founifiedreport');
           list ($jobId, $jobQueueId, $error) = $unifiedGenerator->scheduleAgent(
-            Auth::getGroupId(), $upload);
+            $this->restHelper->getGroupId(), $upload);
+          break;
+        case $this->reportsAllowed[5]:
+          $clixmlGenerator = $this->restHelper->getPlugin('ui_clixml');
+          list ($jobId, $jobQueueId) = $clixmlGenerator->scheduleAgent(
+            $this->restHelper->getGroupId(), $upload);
           break;
         default:
           $error = new Info(500, "Some error occured!", InfoType::ERROR);
@@ -129,6 +127,9 @@ class ReportController extends RestController
     if (! $uploadDao->isAccessible($uploadId, $this->restHelper->getGroupId())) {
       $upload = new Info(403, "Upload is not accessible!", InfoType::ERROR);
     }
+    if ($upload !== null) {
+      return $upload;
+    }
     $upload = $uploadDao->getUpload($uploadId);
     if ($upload === null) {
       $upload = new Info(404, "Upload does not exists!", InfoType::ERROR);
@@ -142,34 +143,35 @@ class ReportController extends RestController
    * @param integer $jobId The new job id created by agent
    * @return string The path to download the report
    */
-  private function buildDownloadPath($request, $jobId) {
+  private function buildDownloadPath($request, $jobId)
+  {
     $path = $request->getUri()->getHost();
     $path .= $request->getRequestTarget();
     $url_parts = parse_url($path);
     $download_path = "";
-    if(array_key_exists("scheme", $url_parts)) {
+    if (array_key_exists("scheme", $url_parts)) {
       $download_path .= $url_parts["scheme"] . "://";
     }
-    if(array_key_exists("user", $url_parts)) {
+    if (array_key_exists("user", $url_parts)) {
       $download_path .= $url_parts["user"];
     }
-    if(array_key_exists("pass", $url_parts)) {
+    if (array_key_exists("pass", $url_parts)) {
       $download_path .= ':' . $url_parts["pass"];
     }
-    if(array_key_exists("host", $url_parts)) {
+    if (array_key_exists("host", $url_parts)) {
       $download_path .= $url_parts["host"];
     }
-    if(array_key_exists("port", $url_parts)) {
+    if (array_key_exists("port", $url_parts)) {
       $download_path .= ':' . $url_parts["port"];
     }
-    if($url_parts["path"][-1] !== '/') {
+    if (substr($url_parts["path"], -1) !== '/') {
       $url_parts["path"] .= '/';
     }
     $download_path .= $url_parts["path"] . $jobId;
-    if(array_key_exists("query", $url_parts)) {
+    if (array_key_exists("query", $url_parts)) {
       $download_path .= '?' . $url_parts["query"];
     }
-    if(array_key_exists("fragment", $url_parts)) {
+    if (array_key_exists("fragment", $url_parts)) {
       $download_path .= '#' . $url_parts["fragment"];
     }
     return $download_path;
@@ -179,9 +181,9 @@ class ReportController extends RestController
    * Download the report with the given job id
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function downloadReport($request, $response, $args)
   {
@@ -195,24 +197,30 @@ class ReportController extends RestController
       return $newResponse->withJson($returnVal->getArray(),
         $returnVal->getCode());
     }
-    $ui_download = plugin_find('download');
+    $ui_download = $this->restHelper->getPlugin('download');
     try {
       /**
        * @var BinaryFileResponse $responseFile
        */
       $responseFile = $ui_download->getReport($args['id']);
+      /**
+       * @var File $responseContent
+       */
       $responseContent = $responseFile->getFile();
       $newResponse = $response->withHeader('Content-Description',
         'File Transfer')
         ->withHeader('Content-Type',
-        $responseFile->headers->get('Content-Type'))
+        $responseContent->getMimeType())
         ->withHeader('Content-Disposition',
         $responseFile->headers->get('Content-Disposition'))
         ->withHeader('Cache-Control', 'must-revalidate')
         ->withHeader('Pragma', 'private')
-        ->withHeader('Content-Length', filesize($responseContent));
+        ->withHeader('Content-Length', filesize($responseContent->getPathname()));
+      $sf = new StreamFactory();
+      $newResponse = $newResponse->withBody(
+        $sf->createStreamFromFile($responseContent->getPathname())
+      );
 
-      readfile($responseContent);
       return $newResponse;
     } catch (\Exception $e) {
       $error = new Info(500, $e->getMessage(), InfoType::ERROR);

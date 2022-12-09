@@ -1,20 +1,9 @@
-/***************************************************************
- Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2010-2014 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- ***************************************************************/
 /**
  * \file walk.c
  * Processing a given file
@@ -222,19 +211,23 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
      */
     if (isPkg)
     {
-      strncpy(package.pkgname, PQgetvalue(result, 0, 0), sizeof(package.pkgname));
+      strncpy(package.pkgname, PQgetvalue(result, 0, 0), sizeof(package.pkgname)-1);
+      package.pkgname[sizeof(package.pkgname)-1] = 0;
       if (package.pkgname[strlen(package.pkgname)-1] == '\n')
         package.pkgname[strlen(package.pkgname)-1] = 0;
 
-      strncpy(package.pkgvers, PQgetvalue(result, 0, 1), sizeof(package.pkgvers));
+      strncpy(package.pkgvers, PQgetvalue(result, 0, 1), sizeof(package.pkgvers)-1);
+      package.pkgvers[sizeof(package.pkgvers)-1] = 0;
       if (package.pkgvers[strlen(package.pkgvers)-1] == '\n')
         package.pkgvers[strlen(package.pkgvers)-1] = 0;
 
-      strncpy(package.vendor, PQgetvalue(result, 0, 2), sizeof(package.vendor));
+      strncpy(package.vendor, PQgetvalue(result, 0, 2), sizeof(package.vendor)-1);
+      package.vendor[sizeof(package.vendor)-1] = 0;
       if (package.vendor[strlen(package.vendor)-1] == '\n')
         package.vendor[strlen(package.vendor)-1] = 0;
 
-      strncpy(package.srcpkgname, PQgetvalue(result, 0, 3), sizeof(package.srcpkgname));
+      strncpy(package.srcpkgname, PQgetvalue(result, 0, 3), sizeof(package.srcpkgname)-1);
+      package.srcpkgname[sizeof(package.srcpkgname)-1] = 0;
       if (package.srcpkgname[strlen(package.srcpkgname)-1] == '\n')
         package.srcpkgname[strlen(package.srcpkgname)-1] = 0;
     }

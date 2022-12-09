@@ -1,3 +1,8 @@
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only
+-->
+
 demomod is a working demonstration FOSSology module.  All you have to do is a make, sudo make install,
 and link this directory in your fossology/mods-enabled/ 
 

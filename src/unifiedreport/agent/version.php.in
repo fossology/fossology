@@ -1,3 +1,8 @@
 <?php
-define("AGENT_VERSION", "{$VERSION}");
-define("AGENT_REV", "{$COMMIT_HASH}");
+/*
+ SPDX-FileCopyrightText: © Fossology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+define("AGENT_VERSION", "@FO_VERSION@");
+define("AGENT_REV", "@FO_COMMIT_HASH@");

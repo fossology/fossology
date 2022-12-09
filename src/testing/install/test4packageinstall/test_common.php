@@ -1,20 +1,9 @@
 <?php
 /*
-   Copyright (C) 2012-2014 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2012-2014 Hewlett-Packard Development Company, L.P.
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   version 2 as published by the Free Software Foundation.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License along
-   with this program; if not, write to the Free Software Foundation, Inc.,
-   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
   /**
    * \file test library
@@ -142,8 +131,8 @@
   function add_user($user='fossy', $password='fossy') {
     global $PG_CONN;
     /* User does not exist.  Create it. */
-    $Seed = rand() . rand();
-    $Hash = sha1($Seed . $password);
+    $options = array('cost' => 10);
+    $Hash = password_hash($password, PASSWORD_DEFAULT, $options);
     $sql = "SELECT * FROM users WHERE user_name = '$user';";
     $result = pg_query($PG_CONN, $sql);
     $row0 = pg_fetch_assoc($result);
@@ -152,7 +141,7 @@
       /* User does not exist.  Create it. */
       $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass," .
         "user_perm,user_email,email_notify,root_folder_fk)
-        VALUES ('$user','Default Administrator','$Seed','$Hash',10,'$password','y',1);";
+        VALUES ('$user','Default Administrator','Seed','$Hash',10,'$password','y',1);";
       // $text = _("*** Created default administrator: '$user' with password '$password'.");
       $result = pg_query($PG_CONN, $SQL);
       pg_free_result($result);

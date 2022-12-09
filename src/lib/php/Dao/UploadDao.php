@@ -1,20 +1,9 @@
 <?php
 /*
-Copyright (C) 2014-2018, Siemens AG
-Authors: Andreas Würl, Steffen Weber
+ SPDX-FileCopyrightText: © 2014-2018 Siemens AG
+ Authors: Andreas Würl, Steffen Weber
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Dao;
@@ -37,7 +26,28 @@ class UploadDao
   const REUSE_NONE = 0;
   const REUSE_ENHANCED = 2;
   const REUSE_MAIN = 4;
-  const REUSE_ENH_MAIN = 8;
+  const REUSE_CONF = 16;
+  const REUSE_COPYRIGHT = 128;
+  const UNIFIED_REPORT_HEADINGS = array(
+    "assessment" => array("Assessment Summary" => true),
+    "compliancetasks" => array("Required license compliance tasks" => true),
+    "acknowledgements" => array("Acknowledgements" => true),
+    "exportrestrictions" => array("Export Restrictions" => true),
+    "notes" => array("Notes" => true),
+    "scanresults" => array("Results of License Scan" => true),
+    "mainlicenses" => array("Main Licenses" => true),
+    "redlicense" => array("Other OSS Licenses (red) - Do not Use Licenses" => true),
+    "yellowlicense" => array("Other OSS Licenses (yellow) - additional obligations to common rules (e.g. copyleft)" => true),
+    "whitelicense" => array("Other OSS Licenses (white) - only common rules" => true),
+    "overviewwithwithoutobligations" => array("Overview of All Licenses with or without Obligations" => true),
+    "copyrights" => array("Copyrights" => true),
+    "copyrightsuf" => array("Copyrights (User Findings)" => true),
+    "bulkfindings" => array("Bulk Findings" => true),
+    "licensenf" => array("Non-Functional Licenses" => true),
+    "irrelevantfiles" => array("Irrelevant Files" => true),
+    "dnufiles" => array("Do not use Files" => true),
+    "changelog" => array("Clearing Protocol Change Log" => true)
+  );
 
   /** @var DbManager */
   private $dbManager;
@@ -64,11 +74,27 @@ class UploadDao
     $stmt = __METHOD__ . ".$uploadTreeTableName";
     $uploadEntry = $this->dbManager->getSingleRow("SELECT * FROM $uploadTreeTableName WHERE uploadtree_pk = $1",
         array($uploadTreeId), $stmt);
-    if ($uploadEntry)
-    {
+    if ($uploadEntry) {
       $uploadEntry['tablename'] = $uploadTreeTableName;
     }
     return $uploadEntry;
+  }
+
+  /**
+   * Get the first entry for uploadtree_pk for a given pfile in a given upload.
+   * @param integer $uploadFk Upload id
+   * @param integer $pfileFk  Pfile id
+   * @return integer Uploadtree_pk
+   */
+  public function getUploadtreeIdFromPfile($uploadFk, $pfileFk)
+  {
+    $uploadTreeTableName = $this->getUploadtreeTableName($uploadFk);
+    $stmt = __METHOD__ . ".$uploadTreeTableName";
+    $uploadEntry = $this->dbManager->getSingleRow("SELECT uploadtree_pk " .
+      "FROM $uploadTreeTableName " .
+      "WHERE upload_fk = $1 AND pfile_fk = $2",
+      array($uploadFk, $pfileFk), $stmt);
+    return intval($uploadEntry['uploadtree_pk']);
   }
 
   /**
@@ -82,6 +108,20 @@ class UploadDao
         array($uploadId), $stmt);
 
     return $row ? Upload::createFromTable($row) : null;
+  }
+
+  public function getActiveUploadsArray()
+  {
+    $stmt = __METHOD__;
+    $queryResult = $this->dbManager->getRows("SELECT * FROM upload where pfile_fk IS NOT NULL",
+        array(), $stmt);
+
+    $results = array();
+    foreach ($queryResult as $row) {
+      $results[] = Upload::createFromTable($row);
+    }
+
+    return $results;
   }
 
   /**
@@ -112,10 +152,9 @@ class UploadDao
    * @throws Exception
    * @return ItemTreeBounds
    */
-  public function getParentItemBounds($uploadId, $uploadTreeTableName = NULL)
+  public function getParentItemBounds($uploadId, $uploadTreeTableName = null)
   {
-    if ($uploadTreeTableName === null)
-    {
+    if ($uploadTreeTableName === null) {
       $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
     }
 
@@ -156,12 +195,10 @@ class UploadDao
 
   private function handleUploadIdForTable($uploadTreeTableName, $uploadId, &$parameters)
   {
-    if ($uploadTreeTableName === "uploadtree" || $uploadTreeTableName === "uploadtree_a")
-    {
+    if ($uploadTreeTableName === "uploadtree" || $uploadTreeTableName === "uploadtree_a") {
       $parameters[] = $uploadId;
       return " AND upload_fk = $" . count($parameters) . " ";
-    } else
-    {
+    } else {
       return "";
     }
   }
@@ -178,20 +215,49 @@ class UploadDao
   }
 
   /**
-   * @brief unused function
+   * @brief Get the upload status.
+   * @param int $uploadId Upload to get status for
+   * @param int $groupId  Effective group
+   * @return integer Status fk or 1 if not found
+   * @throws Exception if upload not accessible.
    */
   public function getStatus($uploadId, $groupId)
   {
     if ($this->isAccessible($uploadId, $groupId)) {
-      $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload_clearing WHERE upload_fk = $1", array($uploadId));
+      $row = $this->dbManager->getSingleRow("SELECT status_fk " .
+        "FROM upload_clearing WHERE upload_fk=$1 AND group_fk=$2;",
+        array($uploadId, $groupId));
       if (false === $row) {
-        throw new \Exception("cannot find uploadId=$uploadId");
+        return 1;
       }
       return $row['status_fk'];
     } else {
       throw new \Exception("permission denied");
     }
   }
+
+
+  /**
+   * @brief Get the upload assignee id.
+   * @param int $uploadId Upload to get assignee id
+   * @param int $groupId  Effective group
+   * @return integer 1 if not found
+   * @throws Exception if upload not accessible.
+   */
+  public function getAssignee($uploadId, $groupId)
+  {
+    if ($this->isAccessible($uploadId, $groupId)) {
+      $row = $this->dbManager->getSingleRow("SELECT assignee FROM upload_clearing WHERE upload_fk=$1 AND group_fk=$2;",
+       array($uploadId, $groupId));
+      if (false === $row) {
+        return 1;
+      }
+      return $row['assignee'];
+    } else {
+      throw new \Exception("permission denied");
+    }
+  }
+
 
   /**
    * \brief Get the uploadtree table name for this upload_pk
@@ -203,16 +269,14 @@ class UploadDao
    */
   public function getUploadtreeTableName($uploadId)
   {
-    if (!empty($uploadId))
-    {
+    if (!empty($uploadId)) {
       $statementName = __METHOD__;
       $row = $this->dbManager->getSingleRow(
           "SELECT uploadtree_tablename FROM upload WHERE upload_pk=$1",
           array($uploadId),
           $statementName
       );
-      if (!empty($row['uploadtree_tablename']))
-      {
+      if (!empty($row['uploadtree_tablename'])) {
         return $row['uploadtree_tablename'];
       }
     }
@@ -243,7 +307,7 @@ class UploadDao
   const DIR_BCK = -1;
   const NOT_FOUND = null;
 
-  
+
   /**
    * @param $uploadId
    * @param $itemId
@@ -258,35 +322,29 @@ class UploadDao
 
     $options[UploadTreeProxy::OPT_ITEM_FILTER] = " AND ut.ufile_mode & (3<<28) = 0";
     $uploadTreeViewName = 'items2care';
-    
-    if($direction == self::DIR_FWD)
-    {
+
+    if ($direction == self::DIR_FWD) {
       $uploadTreeViewName .= 'fwd';
       $options[UploadTreeProxy::OPT_ITEM_FILTER] .= " AND lft>$1";
       $order = 'ASC';
-    }
-    else
-    {
+    } else {
       $uploadTreeViewName .= 'bwd';
       $options[UploadTreeProxy::OPT_ITEM_FILTER] .= " AND lft<$1";
       $order = 'DESC';
     }
-    
+
     $uploadTreeView = new UploadTreeProxy($uploadId, $options, $uploadTreeTableName, $uploadTreeViewName);
     $statementName = __METHOD__ . ".$uploadTreeViewName.";
     $query = $uploadTreeView->getDbViewQuery()." ORDER BY lft $order";
 
     $newItemRow = $this->dbManager->getSingleRow("$query LIMIT 1", array($originLft), $statementName);
-    if ($newItemRow)
-    {
+    if ($newItemRow) {
       return $this->createItem($newItemRow, $uploadTreeTableName);
-    }
-    else
-    {
+    } else {
       return self::NOT_FOUND;
     }
   }
-  
+
 
   /**
    * @param $uploadId
@@ -301,7 +359,7 @@ class UploadDao
         "SELECT uploadtree_pk
             FROM $uploadTreeTableName
             WHERE upload_fk=$1 AND parent IS NULL", array($uploadId), $statementname);
-    if(false === $parent) {
+    if (false === $parent) {
       throw new \Exception("Missing upload tree parent for upload");
     }
     return $parent['uploadtree_pk'];
@@ -375,14 +433,15 @@ class UploadDao
   /**
    * @param int $uploadId
    * @param int $groupId
-   * @return int
+   * @return array Assoc array of reused_upload_fk, reused_group_fk and
+   *               reuse_mode
    */
   public function getReusedUpload($uploadId, $groupId)
   {
     $statementName = __METHOD__;
 
     $this->dbManager->prepare($statementName,
-        "SELECT reused_upload_fk, reused_group_fk, reuse_mode FROM upload_reuse WHERE upload_fk = $1 AND group_fk=$2");
+        "SELECT reused_upload_fk, reused_group_fk, reuse_mode FROM upload_reuse WHERE upload_fk = $1 AND group_fk=$2 ORDER BY date_added DESC");
     $res = $this->dbManager->execute($statementName, array($uploadId, $groupId));
     $reusedPairs = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
@@ -417,13 +476,12 @@ class UploadDao
    */
   protected function createItemTreeBounds($uploadEntryData, $uploadTreeTableName)
   {
-    if ($uploadEntryData === FALSE)
-    {
+    if ($uploadEntryData === false) {
       throw new Exception("did not find uploadTreeId in $uploadTreeTableName");
     }
     return new ItemTreeBounds(intval($uploadEntryData['uploadtree_pk']), $uploadTreeTableName, intval($uploadEntryData['upload_fk']), intval($uploadEntryData['lft']), intval($uploadEntryData['rgt']));
   }
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param bool $isFlat plain files from sub*folders instead of folders
@@ -435,30 +493,27 @@ class UploadDao
     $sql = "SELECT count(*) FROM ".$itemTreeBounds->getUploadTreeTableName()." ut "
          . "WHERE ut.upload_fk=$1";
     $params = array($itemTreeBounds->getUploadId());
-    if (!$isFlat)
-    {
+    if (!$isFlat) {
       $stmt = __METHOD__.'.parent';
       $params[] = $itemTreeBounds->getItemId();
       $sql .= " AND ut.ufile_mode & (1<<28) = 0 AND ut.realparent = $2";
-    }
-    else
-    {
+    } else {
       $params[] = $itemTreeBounds->getLeft();
       $params[] = $itemTreeBounds->getRight();
       $sql .= " AND ut.ufile_mode & (3<<28) = 0 AND (ut.lft BETWEEN $2 AND $3)";
     }
-    
+
     $descendants = $this->dbManager->getSingleRow($sql,$params);
     return $descendants['count'];
   }
-  
-  
-  public function isAccessible($uploadId, $groupId) 
+
+
+  public function isAccessible($uploadId, $groupId)
   {
     return $this->permissionDao->isAccessible($uploadId, $groupId);
   }
-  
-  public function isEditable($uploadId, $groupId) 
+
+  public function isEditable($uploadId, $groupId)
   {
     return $this->permissionDao->isEditable($uploadId, $groupId);
   }
@@ -472,18 +527,18 @@ class UploadDao
   {
     $this->permissionDao->makeAccessibleToAllGroupsOf($uploadId, $userId, $perm);
   }
- 
+
   /**
    * @param int $uploadId
-   * @return array with keys sha1, md5
+   * @return array with keys sha1, md5, sha256
    */
   public function getUploadHashes($uploadId)
   {
     $pfile = $this->dbManager->getSingleRow('SELECT pfile.* FROM upload, pfile WHERE upload_pk=$1 AND pfile_fk=pfile_pk',
         array($uploadId), __METHOD__);
-    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
+    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5'],'sha256'=>$pfile['pfile_sha256']);
   }
-  
+
   /**
    * @param int $itemId
    * @param string $uploadId
@@ -492,7 +547,7 @@ class UploadDao
    */
   public function getFatItemArray($itemId,$uploadId,$uploadtreeTablename)
   {
-    $sqlChildrenOf = "SELECT COUNT(*) FROM $uploadtreeTablename s 
+    $sqlChildrenOf = "SELECT COUNT(*) FROM $uploadtreeTablename s
          WHERE ufile_mode&(1<<28)=0 and s.upload_fk=$2 AND s.realparent=";
     $sql="WITH RECURSIVE item_path (item_id,num_children,depth,ufile_mode,ufile_name) AS (
         SELECT uploadtree_pk item_id, ($sqlChildrenOf $1) num_children, 0 depth, ufile_mode, ufile_name
@@ -506,7 +561,7 @@ class UploadDao
         SELECT * FROM item_path WHERE num_children!=1 OR ufile_mode&(1<<29)=0 ORDER BY depth DESC LIMIT 1";
     return $this->dbManager->getSingleRow($sql,array($itemId, $uploadId),__METHOD__.$uploadtreeTablename);
   }
-    
+
   /**
    * @param int $itemId
    * @param string $uploadId
@@ -534,15 +589,14 @@ class UploadDao
     $condition = " lft BETWEEN $1 AND $2";
     $condition .= " AND (ufile_mode & (1<<28)) = 0";
 
-    if ('uploadtree_a' == $uploadTreeTableName)
-    {
+    if ('uploadtree_a' == $uploadTreeTableName) {
       $param[] = $itemTreeBounds->getUploadId();
       $condition .= " AND upload_fk=$".count($param);
     }
 
     $sql = "
 SELECT ufile_name, uploadtree_pk, lft, rgt, ufile_mode,
-       pfile_pk, pfile_md5, pfile_sha1
+       pfile_pk, pfile_md5, pfile_sha1, pfile_sha256
 FROM $uploadTreeTableName
   LEFT JOIN pfile
     ON pfile_fk = pfile_pk
@@ -559,10 +613,8 @@ ORDER BY lft asc
     $rgtStack = array($row['rgt']);
     $lastLft = $row['lft'];
     $this->addToPFilePerFileName($pfilePerFileName, $pathStack, $row);
-    while ($row = $this->dbManager->fetchArray($result))
-    {
-      if ($row['lft'] < $lastLft)
-      {
+    while ($row = $this->dbManager->fetchArray($result)) {
+      if ($row['lft'] < $lastLft) {
         continue;
       }
 
@@ -575,15 +627,12 @@ ORDER BY lft asc
 
   private function updateStackState(&$pathStack, &$rgtStack, &$lastLft, $row)
   {
-    if ($row['lft'] >= $lastLft)
-    {
-      while(count($rgtStack) > 0 && $row['lft'] > $rgtStack[count($rgtStack)-1])
-      {
+    if ($row['lft'] >= $lastLft) {
+      while (count($rgtStack) > 0 && $row['lft'] > $rgtStack[count($rgtStack)-1]) {
         array_pop($pathStack);
         array_pop($rgtStack);
       }
-      if ($row['lft'] > $lastLft)
-      {
+      if ($row['lft'] > $lastLft) {
         array_push($pathStack, $row['ufile_name']);
         array_push($rgtStack, $row['rgt']);
         $lastLft = $row['lft'];
@@ -593,13 +642,13 @@ ORDER BY lft asc
 
   private function addToPFilePerFileName(&$pfilePerFileName, $pathStack, $row)
   {
-    if (($row['ufile_mode']&(1<<29)) == 0)
-    {
-      $path = implode($pathStack,'/');
+    if (($row['ufile_mode'] & (1 << 29)) == 0) {
+      $path = implode('/', $pathStack);
       $pfilePerFileName[$path]['pfile_pk'] = $row['pfile_pk'];
       $pfilePerFileName[$path]['uploadtree_pk'] = $row['uploadtree_pk'];
       $pfilePerFileName[$path]['md5'] = $row['pfile_md5'];
       $pfilePerFileName[$path]['sha1'] = $row['pfile_sha1'];
+      $pfilePerFileName[$path]['sha256'] = $row['pfile_sha256'];
     }
   }
 
@@ -619,8 +668,7 @@ ORDER BY lft asc
     $condition = " lft BETWEEN $1 AND $2";
     $condition .= " AND (ufile_mode & (1<<28)) = 0";
 
-    if ('uploadtree_a' == $uploadTreeTableName)
-    {
+    if ('uploadtree_a' == $uploadTreeTableName) {
       $param[] = $itemTreeBounds->getUploadId();
       $condition .= " AND upload_fk=$".count($param);
     }
@@ -639,10 +687,8 @@ ORDER BY lft asc
     $result = $this->dbManager->execute($statementName, $param);
 
     $pfilePerHashAlgo = array();
-    while ($row = $this->dbManager->fetchArray($result))
-    {
-      if (($row['ufile_mode']&(1<<29)) == 0)
-      {
+    while ($row = $this->dbManager->fetchArray($result)) {
+      if (($row['ufile_mode']&(1<<29)) == 0) {
         $pfilePerHashAlgo[strtolower($row['hash'])][] = array('pfile_pk' => $row['pfile_fk'],
                                                               'uploadtree_pk' => $row['uploadtree_pk']);
       }
@@ -651,18 +697,17 @@ ORDER BY lft asc
     return $pfilePerHashAlgo;
   }
 
- 
+
    /* @param int $uploadId
    * @return array
    */
   public function getReportInfo($uploadId)
   {
     $stmt = __METHOD__;
-    $sql = "SELECT * FROM report_info where upload_fk=$1";
-    $this->dbManager->prepare(__METHOD__,$sql);
+    $sql = "SELECT * FROM report_info WHERE upload_fk = $1";
     $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
 
-    if(empty($row)){
+    if (empty($row)) {
       $this->dbManager->begin();
       $stmt = __METHOD__.'ifempty';
       $sql = "INSERT INTO report_info (upload_fk) VALUES ($1) RETURNING *";
@@ -670,5 +715,89 @@ ORDER BY lft asc
       $this->dbManager->commit();
     }
     return $row;
+  }
+  /* @param int $uploadId
+   * @return ri_globaldecision
+   */
+  public function getGlobalDecisionSettingsFromInfo($uploadId, $setGlobal=null)
+  {
+    $stmt = __METHOD__ . 'get';
+    $sql = "SELECT ri_globaldecision FROM report_info WHERE upload_fk = $1";
+    $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
+    if (empty($row)) {
+      if ($setGlobal === null) {
+        // Old upload, set default value to enable
+        $setGlobal = 1;
+      }
+      $stmt = __METHOD__ . 'ifempty';
+      $sql = "INSERT INTO report_info (upload_fk, ri_globaldecision) VALUES ($1, $2) RETURNING ri_globaldecision";
+      $row = $this->dbManager->getSingleRow($sql, array($uploadId, $setGlobal), $stmt);
+    }
+
+    if (!empty($setGlobal)) {
+      $stmt = __METHOD__ . 'update';
+      $sql = "UPDATE report_info SET ri_globaldecision = $2 WHERE upload_fk = $1 RETURNING ri_globaldecision";
+      $row = $this->dbManager->getSingleRow($sql, array($uploadId, $setGlobal), $stmt);
+    }
+
+    return $row['ri_globaldecision'];
+  }
+
+  /**
+   * @brief Get Pfile hashes from the pfile id
+   * @param $pfilePk
+   * @return array
+   */
+  public function getUploadHashesFromPfileId($pfilePk)
+  {
+    $stmt = __METHOD__."getUploadHashesFromPfileId";
+    $sql = "SELECT * FROM pfile WHERE pfile_pk = $1";
+    $row = $this->dbManager->getSingleRow($sql, array($pfilePk), $stmt);
+
+    return ["sha1" => $row["pfile_sha1"], "md5" => $row["pfile_md5"], "sha256" => $row["pfile_sha256"]];
+  }
+
+  /**
+   * @param int $uploadId
+   * @param int $reusedUploadId
+   * @return bolean
+   */
+  public function insertReportConfReuse($uploadId, $reusedUploadId)
+  {
+    $stmt = __METHOD__ . ".checkReused";
+    $sql = "SELECT 1 AS exists FROM report_info WHERE upload_fk = $1 LIMIT 1;";
+    $row = $this->dbManager->getSingleRow($sql, array($reusedUploadId), $stmt);
+
+    if (empty($row['exists'])) {
+      return false;
+    }
+
+    $this->dbManager->begin();
+
+    $stmt = __METHOD__ . ".removeExists";
+    $sql = "DELETE FROM report_info WHERE upload_fk = $1;";
+    $this->dbManager->getSingleRow($sql, [$uploadId], $stmt);
+
+    $stmt = __METHOD__ . ".getAllColumns";
+    $sql = "SELECT string_agg(column_name, ',') AS columns
+      FROM information_schema.columns
+      WHERE table_name = 'report_info'
+        AND column_name != 'ri_pk'
+        AND column_name != 'upload_fk';";
+    $row = $this->dbManager->getSingleRow($sql, [], $stmt);
+    $columns = $row['columns'];
+
+    $stmt = __METHOD__."CopyinsertReportConfReuse";
+    $this->dbManager->prepare($stmt,
+      "INSERT INTO report_info(upload_fk, $columns)
+      SELECT $1, $columns
+      FROM report_info WHERE upload_fk = $2"
+    );
+    $this->dbManager->freeResult($this->dbManager->execute(
+      $stmt, array($uploadId, $reusedUploadId)
+    ));
+
+    $this->dbManager->commit();
+    return true;
   }
 }

@@ -1,21 +1,9 @@
 <?php
-
 /*
- Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2011-2014 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /**
  * @brief test the wget agent thu command line.
@@ -26,9 +14,11 @@
  * @group wget_agent
  */
 
-require_once (__DIR__ . "/../../../testing/db/createEmptyTestEnvironment.php");
 
 $TEST_RESULT_PATH = "./test_result";
+
+use Fossology\Lib\Test\TestPgDb;
+use Fossology\Lib\Test\TestInstaller;
 
 /**
  * @class cliParamsTest4Wget
@@ -37,34 +27,32 @@ $TEST_RESULT_PATH = "./test_result";
 class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
 
   public $WGET_PATH = "";
-  public $DB_COMMAND = "";
-  public $DB_NAME = "";
-  public $SYSCONF_DIR = "";
+
+  /** @var TestPgDb */
+  private $testDb;
 
   /**
    * @biref Initialization
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp() {
+  protected function setUp() : void {
     global $WGET_PATH;
-    global $DB_COMMAND;
-    global $DB_NAME;
     global $db_conf;
-    global $REPO_NAME;
-    global $SYSCONF_DIR;
-
     $db_conf = "";
 
-    $cwd = getcwd();
-    list($test_name, $db_conf, $DB_NAME, $PG_CONN) = setupTestEnv($cwd, "wget_agent");
+    $cwd = dirname(__DIR__, 4).'/build/src/wget_agent';
 
-    $REPO_NAME = "testDbRepo".$test_name;
-
-    $WGET_PATH = '../../agent/wget_agent';
+    $this->testDb = new TestPgDb("fosswgetagenttest");
+    $db_conf = $this->testDb->getFossSysConf();
+    $this->testInstaller = new TestInstaller($db_conf);
+    $this->testInstaller->init();
+    $this->testInstaller->cpRepo();
+    $this->testInstaller->install($cwd);
+    $WGET_PATH = $cwd . '/agent/wget_agent';
     $usage= "";
     if(file_exists($WGET_PATH))
     {
-      $usage = 'Usage: ../../agent/wget_agent [options] [OBJ]';
+      $usage = "Usage: $WGET_PATH [options] [OBJ]";
     }
     else
     {
@@ -231,24 +219,6 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
     $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-scheduler_2.0.0-1_i386.deb");
   }
 
-  /**
-   * \brief Replace default repo with new repo
-   */
-  function preparations() {
-    global $REPO_NAME;
-    global $db_conf;
-
-    if (is_dir("/srv/fossology/$REPO_NAME")) {
-      exec("sudo chmod 2770 /srv/fossology/$REPO_NAME"); // change mode to 2770
-      exec("sudo chown fossy /srv/fossology/$REPO_NAME -R"); // change owner of REPO to fossy
-      exec("sudo chgrp fossy /srv/fossology/$REPO_NAME -R"); // change grp of REPO to fossy
-    }
-    if (is_dir($db_conf)) {
-      exec("sudo chown fossy $SYSCONF_DIR -R"); // change owner of sysconfdir to fossy
-      exec("sudo chgrp fossy $SYSCONF_DIR -R"); // change grp of sysconfdir to fossy
-    }
-  }
-
 
   /**
    * \brief Change proxy to test
@@ -327,18 +297,12 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
 	 * \brief Clean the env
 	 * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown() {
-    global $TEST_RESULT_PATH;
-    global $DB_COMMAND;
-    global $DB_NAME;
-    global $SYSCONF_DIR;
-
-    // delete the directory ./test_result
-    exec("/bin/rm -rf $TEST_RESULT_PATH $SYSCONF_DIR");
-    // remove the sysconf/db/repo
-    if (!empty($DB_COMMAND) && !empty($DB_NAME)) {
-      exec("$DB_COMMAND -d $DB_NAME");
+  protected function tearDown() : void {
+    if (!is_callable('pg_connect')) {
+      return;
     }
+    $this->testDb->fullDestruct();
+    $this->testDb = null;
   }
 }
 

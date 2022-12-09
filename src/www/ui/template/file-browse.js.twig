@@ -1,8 +1,6 @@
-{# Copyright 2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
 
-   Copying and distribution of this file, with or without modification,
-   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
-   This file is offered as-is, without any warranty.
+   SPDX-License-Identifier: FSFAP
 #}
 
 function createDirlistTable() {
@@ -25,8 +23,9 @@ function createDirlistTable() {
         }
     },
     "aoColumns": [{"sTitle":"Files","sClass":"left"},
-        {"sTitle":"Scanner Results (N: nomos, M: monk, Nk: ninka, I: reportImport)","sClass":"left","bSortable":false},
+        {"sTitle":"Scanner Results&nbsp;{{ agent_list }}","sClass":"left","bSortable":false},
         {"sTitle":"Actions","sClass":"left","bSortable":false,"bSearchable":false}],
+    "sPaginationType": "listbox",
     "iDisplayLength": 25,
     "bProcessing": true,
     "bStateSave": true,
@@ -36,10 +35,10 @@ function createDirlistTable() {
     "bAutoWidth": true,
     "iDisplayLength":50,
     "oLanguage":{"sInfo":"Showing _START_ to _END_ of _TOTAL_ files" ,
-      "sSearch":'_INPUT_<button onclick="clearSearchFiles();" title=\"{{ 'Clear file filter'|trans }}\" >Clear<\/button>',
-      "sLengthMenu":'Display <select><option value="10">10<\/option><option value="25">25<\/option><option value="50">50<\/option><option value="100">100<\/option><\/select> {#
+      "sSearch":'_INPUT_<button class="btn btn-default btn-sm" onclick="clearSearchFiles();" title=\"{{ 'Clear file filter'|trans }}\" >Clear<\/button>',
+      "sLengthMenu":'Display <select class="form-control-sm"><option value="10">10<\/option><option value="25">25<\/option><option value="50">50<\/option><option value="100">100<\/option><\/select> {#
        #}   {{ 'files'|trans }} ({% if isFlat %}<a href="{{ fileSwitch }}">{{ 'tree view'|trans }}</a> {{ 'or'|trans }} <b>{{ 'flat'|trans }}</b>{#
-       #}{% else %}<b>{{ 'tree view'|trans }}</b> {{ 'or'|trans }} <a href="{{ fileSwitch }}">{{ 'flat'|trans }}</a>{% endif %})' 
+       #}{% else %}<b>{{ 'tree view'|trans }}</b> {{ 'or'|trans }} <a href="{{ fileSwitch }}">{{ 'flat'|trans }}</a>{% endif %})'
       }
   };
 
@@ -48,8 +47,8 @@ function createDirlistTable() {
 
 $(document).ready(function () {
   createDirlistTable();
-  $(document).tooltip();
+  $('img').tooltip();
   $("#lichistogram_length select").css('text-align','right');
-  $("#dirlist_length select").css('text-align','right');  
+  $("#dirlist_length select").css('text-align','right');
 });
 

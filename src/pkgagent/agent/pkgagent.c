@@ -1,20 +1,8 @@
-/***************************************************************
- Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011-2014 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * \file
  * \brief Local function of pkgagent
@@ -345,7 +333,8 @@ int ProcessUpload (long upload_pk)
      * */
     if (!strcasecmp(mimetype,"application/x-rpm")) {
       pi->pFileFk = atoi(PQgetvalue(result, i, 0));
-      strncpy(pi->pFile, PQgetvalue(result, i, 1), sizeof(pi->pFile));
+      strncpy(pi->pFile, PQgetvalue(result, i, 1), sizeof(pi->pFile)-1);
+      pi->pFile[sizeof(pi->pFile)-1] = '\0';
       repFile = fo_RepMkPath("files", pi->pFile);
       if (!repFile) {
         LOG_FATAL("pfile %ld PkgAgent unable to open file %s",
@@ -363,7 +352,8 @@ int ProcessUpload (long upload_pk)
     }
     else if (!strcasecmp(mimetype, "application/x-debian-package")){
       dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
-      strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile));
+      strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile)-1);
+      dpi->pFile[sizeof(dpi->pFile)-1] = '\0';
       if (GetMetadataDebBinary(upload_pk, dpi) != -1){
         if (RecordMetadataDEB(dpi) != 0) continue;
       }
@@ -375,7 +365,8 @@ int ProcessUpload (long upload_pk)
     }
     else if (!strcasecmp(mimetype, "application/x-debian-source")){
       dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
-      strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile));
+      strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile)-1);
+      dpi->pFile[sizeof(dpi->pFile)-1] = '\0';
       repFile = fo_RepMkPath("files", dpi->pFile);
       if (!repFile) {
         LOG_FATAL("pfile %ld PkgAgent unable to open file %s\n",
@@ -458,7 +449,8 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
         case RPMTAG_BUILDTIME:
           t = atol(msgstr);
           tp = &t;
-          strncpy(pi->buildDate,trim(asctime(gmtime((time_t*)tp))),sizeof(pi->buildDate));
+          strncpy(pi->buildDate,trim(asctime(gmtime((time_t*)tp))),sizeof(pi->buildDate)-1);
+          pi->buildDate[sizeof(pi->buildDate)-1] = '\0';
           break;
         case RPMTAG_VENDOR:
           EscapeString(msgstr, pi->vendor, sizeof(pi->vendor));
@@ -486,7 +478,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
   if (header_status) {
     data_size = rpmtdCount(&req);
     pi->requires = calloc(data_size, sizeof(char *));
-    for (j=0; j<data_size;j++){
+    for (j=0; j<(int)data_size;j++){
       const char * temp = rpmtdNextString(&req);
       pi->requires[j] = malloc(MAXCMD);
       strcpy(pi->requires[j],temp);
@@ -786,8 +778,8 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
     if (!strcasecmp(field, "Depends")) {
       char *depends = NULL;
       char tempvalue[MAXCMD];
-      int size,i,length;
-      length = MAXLENGTH;
+      int size,i;
+      size_t length = MAXLENGTH;
       size = 0;
       if (value[0] != '\0'){
         strncpy(tempvalue, value, sizeof(tempvalue));
@@ -946,9 +938,9 @@ int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
     if (!strcasecmp(field, "Build-Depends")) {
       char *depends = NULL;
       char tempvalue[MAXCMD];
-      int size,i,length;
+      int size,i;
       size = 0;
-      length = MAXLENGTH;
+      size_t length = MAXLENGTH;
       if (value[0] != '\0'){
         strncpy(tempvalue, value, sizeof(tempvalue));
         depends = strtok(value, ",");

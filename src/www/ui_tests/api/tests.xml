@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only
+-->
+<phpunit
+  bootstrap="../../../phpunit-bootstrap.php" colors="true"
+  backupGlobals="true"
+  beStrictAboutTestsThatDoNotTestAnything="false"
+  convertErrorsToExceptions="true"
+  convertNoticesToExceptions="false"
+  stopOnFailure="false">
+
+  <testsuites>
+    <testsuite name="Fossology PhpUnit REST API">
+      <directory suffix="Test.php">Controllers</directory>
+      <directory suffix="Test.php">Helper</directory>
+      <directory suffix="Test.php">Models</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>

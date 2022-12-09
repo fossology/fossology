@@ -1,21 +1,12 @@
 <?php
-/***********************************************************
- Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2017, Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2009-2014 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2017 Siemens AG
+ SPDX-FileCopyrightText: © 2020 Robert Bosch GmbH
+ SPDX-FileCopyrightText: © Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License version 2.1 as published by the Free Software Foundation.
-
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-***********************************************************/
+ SPDX-License-Identifier: LGPL-2.1-only
+*/
 use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
@@ -41,18 +32,20 @@ function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "",
 $FirstEmpty=false, $SelElt=true, $Options="", $ReturnKey=true)
 {
   $str ="\n<select name='$SLName' $Options>\n";
-  if ($FirstEmpty == true) $str .= "<option value='' > </option>\n";
-
-  foreach ($KeyValArray as $key => $val)
-  {
-    if ($SelElt == true)
-    $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
-    else
-    $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
-    if ($ReturnKey == true)
-    $str .= "<option value='$key' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
-    else
-    $str .= "<option value='$val' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
+  if ($FirstEmpty == true) {
+    $str .= "<option value='' > </option>\n";
+  }
+  foreach ($KeyValArray as $key => $val) {
+    if ($SelElt == true) {
+      $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
+    } else {
+      $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
+    }
+    if ($ReturnKey == true) {
+      $str .= "<option value='$key' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
+    } else {
+      $str .= "<option value='$val' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
+    }
   }
   $str .= "</select>";
   return $str;
@@ -105,9 +98,8 @@ function debugprint($val, $title)
  */
 function HumanSize( $bytes )
 {
-  foreach(array('B','KB','MB','GB','TB') as $unit){
-    if ($bytes < 1024)
-    {
+  foreach (array('B','KB','MB','GB','TB') as $unit) {
+    if ($bytes < 1024) {
       return(round($bytes, 2) .' '. $unit);
     }
     $bytes /= 1024;
@@ -140,11 +132,14 @@ function GetFileExt($fname)
  */
 function GetArrayVal($Key, $Arr)
 {
-  if (!is_array($Arr)) return "";
-  if (array_key_exists($Key, $Arr))
-  return ($Arr[$Key]);
-  else
-  return "";
+  if (! is_array($Arr)) {
+    return "";
+  }
+  if (array_key_exists($Key, $Arr)) {
+    return ($Arr[$Key]);
+  } else {
+    return "";
+  }
 }
 
 /**
@@ -157,12 +152,13 @@ function HostListOption()
   global $SysConf;
   $options = "";
   $i = 0;
-  foreach($SysConf['HOSTS'] as $key=>$value)
-  {
+  foreach ($SysConf['HOSTS'] as $key => $value) {
     $options .= "<option value='$key' SELECTED> $key </option>\n";
-    $i++;
+    $i ++;
   }
-  if (1 == $i) return ""; // if only have one host, does not display
+  if (1 == $i) {
+    return ""; // if only have one host, does not display
+  }
   return $options;
 }
 
@@ -178,7 +174,9 @@ function HostListOption()
 function DownloadString2File($text, $name, $contentType)
 {
   $connstat = connection_status();
-  if ($connstat != 0) return _("Lost connection.");
+  if ($connstat != 0) {
+    return _("Lost connection.");
+  }
 
   $session = new Session();
   $session->save();
@@ -193,7 +191,9 @@ function DownloadString2File($text, $name, $contentType)
   header("Content-Transfer-Encoding: binary\n");
 
   echo $text;
-  if ((connection_status()==0) and !connection_aborted()) return True;
+  if ((connection_status() == 0) and ! connection_aborted()) {
+    return true;
+  }
   return _("Lost connection.");
 }
 
@@ -208,11 +208,9 @@ function DownloadString2File($text, $name, $contentType)
  */
 function GetUploadtreeTableName($upload_pk)
 {
-  if (!empty($upload_pk))
-  {
+  if (! empty($upload_pk)) {
     $upload_rec = GetSingleRec("upload", "where upload_pk='$upload_pk'");
-    if (!empty($upload_rec['uploadtree_tablename']))
-    {
+    if (! empty($upload_rec['uploadtree_tablename'])) {
       return $upload_rec['uploadtree_tablename'];
     }
   }
@@ -228,11 +226,16 @@ function GetUploadtreeTableName($upload_pk)
  */
 function GetUploadName($upload_pk)
 {
-  if (empty($upload_pk)) return "";
+  if (empty($upload_pk)) {
+    return "";
+  }
   $upload_rec = GetSingleRec("upload", "where upload_pk='$upload_pk'");
   $upload_filename = $upload_rec['upload_filename'];
-  if (empty($upload_filename)) return "";
-  else return $upload_filename;
+  if (empty($upload_filename)) {
+    return "";
+  } else {
+    return $upload_filename;
+  }
 }
 
 /**
@@ -244,11 +247,16 @@ function GetUploadName($upload_pk)
  */
 function GetUploadID($uploadtreeid)
 {
-  if (empty($uploadtreeid)) return "";
+  if (empty($uploadtreeid)) {
+    return "";
+  }
   $upload_rec = GetSingleRec("uploadtree", "where uploadtree_pk=$uploadtreeid");
   $uploadid = $upload_rec['upload_fk'];
-  if (empty($uploadid)) return "" ;
-  else return $uploadid;
+  if (empty($uploadid)) {
+    return "";
+  } else {
+    return $uploadid;
+  }
 }
 
 /**
@@ -261,7 +269,9 @@ function GetUploadID($uploadtreeid)
 function Get1stUploadtreeID($upload)
 {
   global $PG_CONN;
-  if (empty($upload)) return "";
+  if (empty($upload)) {
+    return "";
+  }
   $sql = "SELECT max(uploadtree_pk) from uploadtree where upload_fk = $upload and parent is null;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -269,4 +279,20 @@ function Get1stUploadtreeID($upload)
   $uploadtree_id = $row['max'];
   pg_free_result($result);
   return $uploadtree_id;
+}
+
+/**
+ * \brief Convert the server time to browser time
+ * \param time $server_time to be converted
+ */
+function Convert2BrowserTime($server_time)
+{
+  $server_timezone = date_default_timezone_get();
+  $browser_time = new \DateTime($server_time, new \DateTimeZone($server_timezone));
+  if (array_key_exists("timezone", $_SESSION)) {
+    $tz = $_SESSION["timezone"];
+    $browser_time->setTimeZone(new \DateTimeZone($tz));
+  }
+  $time = $browser_time->format('Y-m-d H:i:s');
+  return $time;
 }

@@ -1,20 +1,9 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
-Author: Andreas Würl
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ Author: Andreas Würl
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 namespace Fossology\Lib\View;
 
@@ -35,14 +24,14 @@ class TextRendererTest extends \PHPUnit\Framework\TestCase
   /** @var TextRenderer */
   private $textRenderer;
 
-  function setUp()
+  function setUp() : void
   {
     $this->textFragment = new TextFragment(self::START_OFFSET, self::FRAGMENT_TEXT);
     $this->textRenderer = new TextRenderer(new HighlightRenderer());
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  function tearDown()
+  function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
@@ -194,5 +183,4 @@ class TextRendererTest extends \PHPUnit\Framework\TestCase
 
     assertThat($cleanText, is("foo bar baz quux"));
   }
-
 }

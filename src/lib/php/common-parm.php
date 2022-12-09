@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2008-2012 Hewlett-Packard Development Company, L.P.
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License version 2.1 as published by the Free Software Foundation.
-
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- ***********************************************************/
+ SPDX-License-Identifier: LGPL-2.1-only
+*/
 
 /**
  * \file
@@ -57,29 +46,41 @@ define("PARM_RAW",5);
 function GetParm($parameterName, $parameterType)
 {
   $Var = null;
-  if (array_key_exists($parameterName, $_GET)) {$Var = $_GET[$parameterName];}
-  if (!isset($Var) && isset($_POST) && array_key_exists($parameterName, $_POST)) { $Var = $_POST[$parameterName]; }
-  if (!isset($Var) && isset($_SERVER) && array_key_exists($parameterName, $_SERVER)) { $Var = $_SERVER[$parameterName]; }
-  if (!isset($Var) && isset($_SESSION) && array_key_exists($parameterName, $_SESSION)) { $Var = $_SESSION[$parameterName]; }
-  if (!isset($Var) && isset($_COOKIE) && array_key_exists($parameterName, $_COOKIE)) { $Var = $_COOKIE[$parameterName]; }
-  if (!isset($Var)) {
+  if (array_key_exists($parameterName, $_GET)) {
+    $Var = $_GET[$parameterName];
+  }
+  if (! isset($Var) && isset($_POST) && array_key_exists($parameterName, $_POST)) {
+    $Var = $_POST[$parameterName];
+  }
+  if (! isset($Var) && isset($_SERVER) &&
+    array_key_exists($parameterName, $_SERVER)) {
+    $Var = $_SERVER[$parameterName];
+  }
+  if (! isset($Var) && isset($_SESSION) &&
+    array_key_exists($parameterName, $_SESSION)) {
+    $Var = $_SESSION[$parameterName];
+  }
+  if (! isset($Var) && isset($_COOKIE) &&
+    array_key_exists($parameterName, $_COOKIE)) {
+    $Var = $_COOKIE[$parameterName];
+  }
+  if (! isset($Var)) {
     return null;
   }
   /* Convert $Var to a string */
-  switch($parameterType)
-  {
+  switch ($parameterType) {
     case PARM_INTEGER:
-      return(intval($Var));
+      return (intval($Var));
     case PARM_NUMBER:
-      return(floatval($Var));
+      return (floatval($Var));
     case PARM_TEXT:
-      return(stripslashes($Var));
+      return (stripslashes($Var));
     case PARM_STRING:
-      return(urldecode($Var));
+      return (urldecode($Var));
     case PARM_RAW:
-      return($Var);
+      return ($Var);
   }
-  return NULL;
+  return null;
 } // GetParm()
 
 /**
@@ -111,20 +112,19 @@ function Traceback_parm($ShowMod=1)
   /* need to check the size to avoid accessing past the array, there are
    * request URI's that only have a single entry after the explode.
    */
-  if(count($V) >= 2) {
-    $V = preg_replace("/^mod=/","",$V[1]);
-  }
-  else if (count($V) == 1)
-  {
+  if (count($V) >= 2) {
+    $V = preg_replace("/^mod=/", "", $V[1]);
+  } else if (count($V) == 1) {
     $V = 'Default';
   }
 
-  if (!$ShowMod)
-  {
-    $V = preg_replace("/^[^&]*/","",$V);
+  if (! $ShowMod) {
+    $V = preg_replace("/^[^&]*/", "", $V);
   }
 
-  if (is_array($V)) return $V[0];
+  if (is_array($V)) {
+    return $V[0];
+  }
   return $V;
 } // Traceback_parm()
 
@@ -137,11 +137,12 @@ function Traceback_parm_keep($List)
 {
   $Opt="";
   $Max = count($List);
-  for($i=0; $i < $Max ; $i++)
-  {
+  for ($i = 0; $i < $Max; $i ++) {
     $L = &$List[$i];
-    $Val = GetParm($L,PARM_STRING);
-    if (!empty($Val)) { $Opt .= "&" . "$L=$Val"; }
+    $Val = GetParm($L, PARM_STRING);
+    if (! empty($Val)) {
+      $Opt .= "&" . "$L=$Val";
+    }
   }
   return($Opt);
 } // Traceback_parm_keep()
@@ -154,7 +155,9 @@ function Traceback_dir()
   $V = explode('?',@$_SERVER['REQUEST_URI'],2);
   $V = $V[0];
   $i = strlen($V);
-  while(($i > 0) && ($V[$i-1] != '/')) { $i--; }
+  while (($i > 0) && ($V[$i - 1] != '/')) {
+    $i --;
+  }
   $V = substr($V,0,$i);
   return($V);
 } // Traceback_uri()
@@ -164,13 +167,13 @@ function Traceback_dir()
  */
 function tracebackTotalUri()
 {
-  if(!empty(@$_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' && $_SERVER['HTTPS'] == 'on' ||
-     @$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'){
+  if (! empty(@$_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' &&
+    $_SERVER['HTTPS'] == 'on' || @$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
     $protoUri = 'https://';
-  }else{
+  } else {
     $protoUri = 'http://';
   }
-  $portUri = (@$_SERVER["SERVER_PORT"] == "80") ? "" : (":".@$_SERVER["SERVER_PORT"]);
-  $V = $protoUri.@$_SERVER['SERVER_NAME'].$portUri.Traceback_uri();
+  $portUri = (@$_SERVER["SERVER_PORT"] == "80") ? "" : (":" . @$_SERVER["SERVER_PORT"]);
+  $V = $protoUri . @$_SERVER['SERVER_NAME'] . $portUri . Traceback_uri();
   return($V);
 } // tracebackTotalUri()

@@ -1,21 +1,10 @@
 <?php
-/***********************************************************
-Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
-Copyright (C) 2017-2018 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2017-2018 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 require_once __DIR__ . "/../../lib/php/common-db.php";
 require_once __DIR__ . "/../../lib/php/common-perms.php";
@@ -26,7 +15,7 @@ require_once __DIR__ . "/../../lib/php/common-perms.php";
  * \param $dbManager DB Manager used.
  * \return NULL on success, string on failure.
  */
-function DeleteUser($UserId, $dbManager)
+function deleteUser($UserId, $dbManager)
 {
   global $PG_CONN;
 
@@ -49,16 +38,15 @@ function DeleteUser($UserId, $dbManager)
 
   $userCheckStatement = __METHOD__ . ".getUserbyName";
   $dbManager->prepare($userCheckStatement,
-    "SELECT * FROM users WHERE user_name = $1 LIMIT 1;");
+    "SELECT count(*) AS cnt FROM users WHERE user_name = $1 LIMIT 1;");
 
   /* See if the user already exists */
   $result = $dbManager->execute($userSelectStatement, [$UserId]);
   $row = $dbManager->fetchArray($result);
   $dbManager->freeResult($result);
-  if (empty($row['user_name']))
-  {
+  if (empty($row['user_name'])) {
     $text = _("User does not exist.");
-    return($text);
+    return ($text);
   }
 
   /* Delete the users group
@@ -79,13 +67,12 @@ function DeleteUser($UserId, $dbManager)
 
   /* Make sure it was deleted */
   $result = $dbManager->execute($userCheckStatement, [$UserId]);
-  $rowCount = count($dbManager->fetchArray($result));
+  $rowEmpty = empty($dbManager->fetchArray($result)['cnt']);
   $dbManager->freeResult($result);
-  if ($rowCount != 0)
-  {
+  if (! $rowEmpty) {
     $text = _("Failed to delete user.");
-    return($text);
+    return ($text);
   }
 
-  return(NULL);
+  return(null);
 } // Delete()

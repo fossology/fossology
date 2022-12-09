@@ -1,21 +1,9 @@
-/***************************************************************
- Copyright (C) 2006-2015 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014, 2018 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2006-2015 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2014, 2018 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * \file
  * \brief Main for the nomos agent
@@ -36,6 +24,11 @@
 extern licText_t licText[]; /* Defined in _autodata.c */
 struct globals gl;
 struct curScan cur;
+
+char debugStr[myBUFSIZ];
+char dbErrString[myBUFSIZ];
+
+size_t hashEntries;
 
 int schedulerMode = 0; /**< Non-zero when being run from scheduler */
 int Verbose = 0; /**< Verbosity level */
@@ -62,15 +55,15 @@ char BuildVersion[] = "nomos build version: NULL.\n";
  *
  * At the end, make an entry in the ars using fo_WriteARS().
  * \param cacheroot Root for hash table
+ * \param ignoreFilesWithMimeType to exclude files with particular mimetype
  */
-void arsNomos(cacheroot_t* cacheroot){
+void arsNomos(cacheroot_t* cacheroot, bool ignoreFilesWithMimeType) {
   int i;
   int upload_pk = 0;
   int numrows;
   int ars_pk = 0;
   int user_pk = 0;
   char *AgentARSName = "nomos_ars";
-  char sqlbuf[1024];
   PGresult *result;
 
   char *repFile;
@@ -90,14 +83,8 @@ void arsNomos(cacheroot_t* cacheroot){
       LOG_ERROR("You have no update permissions on upload %d", upload_pk);
       continue;
     }
-    /* if it is duplicate request (same upload_pk, sameagent_fk), then do not repeat */
-    snprintf(sqlbuf, sizeof(sqlbuf),
-        "select ars_pk from nomos_ars,agent \
-                where agent_pk=agent_fk and ars_success=true \
-                  and upload_fk='%d' and agent_fk='%d'",
-        upload_pk, gl.agentPk);
-    result = PQexec(gl.pgConn, sqlbuf);
-    if (fo_checkPQresult(gl.pgConn, result, sqlbuf, __FILE__, __LINE__))
+    result = checkDuplicateReq(gl.pgConn, upload_pk, gl.agentPk);
+    if (fo_checkPQresult(gl.pgConn, result, NULL, __FILE__, __LINE__))
       Bail(-__LINE__);
     if (PQntuples(result) != 0)
     {
@@ -106,17 +93,12 @@ void arsNomos(cacheroot_t* cacheroot){
       continue;
     }
     PQclear(result);
+
     /* Record analysis start in nomos_ars, the nomos audit trail. */
     ars_pk = fo_WriteARS(gl.pgConn, ars_pk, upload_pk, gl.agentPk, AgentARSName, 0, 0);
-    /* retrieve the records to process */
-    snprintf(sqlbuf, sizeof(sqlbuf),
-        "SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename \
-         FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS \
-              left outer join license_file on (PF=pfile_fk and agent_fk='%d') inner join pfile on PF=pfile_pk\
-         WHERE fl_pk IS null or agent_fk <>'%d'",
-        upload_pk, gl.agentPk, gl.agentPk);
-    result = PQexec(gl.pgConn, sqlbuf);
-    if (fo_checkPQresult(gl.pgConn, result, sqlbuf, __FILE__, __LINE__))
+
+    result = getSelectedPFiles(gl.pgConn, upload_pk, gl.agentPk, ignoreFilesWithMimeType);
+    if (fo_checkPQresult(gl.pgConn, result, NULL, __FILE__, __LINE__))
       Bail(-__LINE__);
     numrows = PQntuples(result);
     /* process all files in this upload */
@@ -195,7 +177,7 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
         list_dir(filename_buf, process_count, distribute_count, pFile); // deep into this directory and travel it
       }
       else {
-        sprintf(filename_buf, "%s\n", filename_buf); // add one new line character by the end of one file path, one line is one file path
+        strncat(filename_buf, "\n", PATH_MAX - 1); // add one new line character by the end of one file path, one line is one file path
         /* write on average process_count */
         file_number = *distribute_count%process_count;
         fwrite (filename_buf, sizeof(char), strlen(filename_buf), pFile[file_number]);
@@ -253,7 +235,7 @@ void myFork(int proc_num, FILE **pFile) {
   {
     LOG_FATAL("fork failed\n");
   }
-  else if (pid == 0) { // chile process, every singe process runs on one temp path file
+  else if (pid == 0) { // Child process, every single process runs on one temp path file
     read_file_grab_license(proc_num, pFile); // grabbing licenses on /tmp/foss-XXXXXX
     return;
   }
@@ -288,6 +270,7 @@ int main(int argc, char **argv)
   cacheroot_t cacheroot;
   char *scanning_directory= NULL;
   int process_count = 0;
+  bool ignoreFilesWithMimeType = false;
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &(gl.pgConn));
@@ -315,13 +298,13 @@ int main(int argc, char **argv)
   /* Record the progname name */
   if ((cp = strrchr(*argv, '/')) == NULL_STR)
   {
-    strncpy(gl.progName, *argv, sizeof(gl.progName));
+    strncpy(gl.progName, *argv, sizeof(gl.progName)-1);
   }
   else
   {
     while (*cp == '.' || *cp == '/')
       cp++;
-    strncpy(gl.progName, cp, sizeof(gl.progName));
+    strncpy(gl.progName, cp, sizeof(gl.progName)-1);
   }
 
   if (putenv("LANG=C") < 0)
@@ -354,7 +337,7 @@ int main(int argc, char **argv)
   }
 
   /* Process command line options */
-  while ((c = getopt(argc, argv, "VJSNvhilc:d:n:")) != -1)
+  while ((c = getopt(argc, argv, "VJSNvhiIlc:d:n:")) != -1)
   {
     switch (c) {
       case 'c': break; /* handled by fo_scheduler_connect() */
@@ -367,19 +350,20 @@ int main(int argc, char **argv)
         break;
       case 'v':
         Verbose++; break;
-    case 'J':
-      gl.progOpts |= OPTS_JSON_OUTPUT;
-      break;
-    case 'S':
-      gl.progOpts |= OPTS_HIGHLIGHT_STDOUT;
-      break;
-    case 'N':
-      gl.progOpts |= OPTS_NO_HIGHLIGHTINFO;
-      break;
+      case 'J':
+        gl.progOpts |= OPTS_JSON_OUTPUT;
+        break;
+      case 'S':
+        gl.progOpts |= OPTS_HIGHLIGHT_STDOUT;
+        break;
+      case 'N':
+        gl.progOpts |= OPTS_NO_HIGHLIGHTINFO;
+        break;
       case 'V':
         printf("%s", BuildVersion);
         Bail(0);
       case 'd': /* diretory to scan */
+        gl.progOpts |= OPTS_SCANNING_DIRECTORY;
         scanning_directory = optarg;
         struct stat dir_sta;
         int ret = stat(scanning_directory, &dir_sta);
@@ -393,6 +377,9 @@ int main(int argc, char **argv)
         break;
       case 'n': /* spawn mutiple processes to scan */
         process_count = atoi(optarg);
+        break;
+      case 'I':
+        ignoreFilesWithMimeType = true;
         break;
       case 'h':
       default:
@@ -414,7 +401,7 @@ int main(int argc, char **argv)
 
   if (file_count == 0 && !scanning_directory)
   {
-    arsNomos(&cacheroot);
+    arsNomos(&cacheroot, ignoreFilesWithMimeType);
   }
   else
   { /******** Files on the command line ********/
@@ -426,7 +413,12 @@ int main(int argc, char **argv)
     /* when scanning_directory is real direcotry, scan license in parallel */
     if (scanning_directory) {
       if (process_count < 2) process_count = 2; // the least count is 2, at least has one child process
-
+      if (mutexJson == NULL && optionIsSet(OPTS_JSON_OUTPUT))
+      {
+        initializeJson();
+        printf("{\n\"results\":[\n");
+        fflush(0);
+      }
       pFile = malloc(process_count*(sizeof(FILE*)));
       pTempFileName = malloc(process_count*sizeof(char[50]));
       int i = 0;
@@ -482,6 +474,12 @@ int main(int argc, char **argv)
           }
         }
 
+        if (optionIsSet(OPTS_JSON_OUTPUT))
+        {
+          printf("]\n}\n");
+          destroyJson();
+        }
+
         /* free memeory */
         free(pFile);
         free(pTempFileName);
@@ -492,11 +490,22 @@ int main(int argc, char **argv)
       {
         printf("Warning: -n {nprocs} ONLY works with -d {directory}.\n");
       }
+      if (optionIsSet(OPTS_JSON_OUTPUT))
+      {
+        initializeJson();
+        printf("{\n\"results\":[\n");
+        fflush(0);
+      }
       for (i = 0; i < file_count; i++) {
         initializeCurScan(&cur);
         processFile(files_to_be_scanned[i]);
         recordScanToDB(&cacheroot, &cur);
         freeAndClearScan(&cur);
+      }
+      if (optionIsSet(OPTS_JSON_OUTPUT))
+      {
+        printf("]\n}\n");
+        destroyJson();
       }
     }
   }

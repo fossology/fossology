@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Proxy;
@@ -29,7 +18,7 @@ class DbViewProxyTest extends \PHPUnit\Framework\TestCase
   private $dbViewDao;
   private $dbManagerMock;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->dbViewDao = new DbViewProxy($this->dbViewQuery, $this->dbViewName);
     global $container;
@@ -38,7 +27,7 @@ class DbViewProxyTest extends \PHPUnit\Framework\TestCase
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManagerMock);
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     M::close();
   }
@@ -79,5 +68,4 @@ class DbViewProxyTest extends \PHPUnit\Framework\TestCase
   {
     assertThat($this->dbViewDao->asCTE(),is("WITH $this->dbViewName AS (".$this->dbViewQuery.")"));
   }
-
 }

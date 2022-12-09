@@ -1,17 +1,19 @@
 # FOSSology Dockerfile
-# Copyright Siemens AG 2016, fabio.huser@siemens.com
-# Copyright TNG Technology Consulting GmbH 2016-2017, maximilian.huber@tngtech.com
+# SPDX-FileCopyrightText: © 2016,2022 Siemens AG
+# SPDX-FileCopyrightText: © fabio.huser@siemens.com
+# SPDX-FileCopyrightText: © mishra.gaurav@siemens.com
+# SPDX-FileCopyrightText: © 2016-2017 TNG Technology Consulting GmbH
+# SPDX-FileCopyrightText: © maximilian.huber@tngtech.com
 #
-# Copying and distribution of this file, with or without modification,
-# are permitted in any medium without royalty provided the copyright
-# notice and this notice are preserved.  This file is offered as-is,
-# without any warranty.
+# SPDX-License-Identifier: FSFAP
 #
 # Description: Docker container image recipe
 
-FROM debian:jessie-slim as builder
-
-LABEL maintainer="Fossology <fossology@fossology.org>"
+FROM debian:buster-slim as builder
+LABEL org.opencontainers.image.authors="Fossology <fossology@fossology.org>"
+LABEL org.opencontainers.image.source="https://github.com/fossology/fossology"
+LABEL org.opencontainers.image.vendor="FOSSology"
+LABEL org.opencontainers.image.licenses="GPL-2.0-only AND LGPL-2.1-only"
 
 WORKDIR /fossology
 
@@ -19,16 +21,22 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       git \
       lsb-release \
-      php5-cli \
+      php7.3-cli \
       sudo \
+      cmake \
+      ninja-build \
  && rm -rf /var/lib/apt/lists/*
 
 COPY ./utils/fo-installdeps ./utils/fo-installdeps
+COPY ./install/fo-install-pythondeps ./install/fo-install-pythondeps
 COPY ./utils/utils.sh ./utils/utils.sh
 COPY ./src/copyright/mod_deps ./src/copyright/
 COPY ./src/delagent/mod_deps ./src/delagent/
 COPY ./src/mimetype/mod_deps ./src/mimetype/
+COPY ./src/nomos/mod_deps ./src/nomos/
+COPY ./src/ojo/mod_deps ./src/ojo/
 COPY ./src/pkgagent/mod_deps ./src/pkgagent/
+COPY ./src/scancode/mod_deps ./src/scancode/
 COPY ./src/scheduler/mod_deps ./src/scheduler/
 COPY ./src/ununpack/mod_deps ./src/ununpack/
 COPY ./src/wget_agent/mod_deps ./src/wget_agent/
@@ -38,18 +46,24 @@ RUN mkdir -p /fossology/dependencies-for-runtime \
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --build -y \
+ && DEBIAN_FRONTEND=noninteractive /fossology/install/fo-install-pythondeps --build -y \
  && rm -rf /var/lib/apt/lists/*
 
 COPY . .
 
-RUN /fossology/utils/install_composer.sh
+RUN cmake -DCMAKE_BUILD_TYPE=MinSizeRel -S. -B./build -G Ninja \
+ && cmake --build ./build --parallel \
+ && ninja -C ./build install
 
-RUN make install clean
+FROM debian:buster-slim
 
-
-FROM debian:jessie-slim
-
-LABEL maintainer="Fossology <fossology@fossology.org>"
+LABEL org.opencontainers.image.authors="Fossology <fossology@fossology.org>"
+LABEL org.opencontainers.image.url="https://fossology.org"
+LABEL org.opencontainers.image.source="https://github.com/fossology/fossology"
+LABEL org.opencontainers.image.vendor="FOSSology"
+LABEL org.opencontainers.image.licenses="GPL-2.0-only AND LGPL-2.1-only"
+LABEL org.opencontainers.image.title="FOSSology"
+LABEL org.opencontainers.image.description="FOSSology is an open source license compliance software system and toolkit.  As a toolkit you can run license, copyright and export control scans from the command line.  As a system, a database and web ui are provided to give you a compliance workflow. License, copyright and export scanners are tools used in the workflow."
 
 ### install dependencies
 COPY --from=builder /fossology/dependencies-for-runtime /fossology
@@ -57,26 +71,32 @@ COPY --from=builder /fossology/dependencies-for-runtime /fossology
 WORKDIR /fossology
 
 # Fix for Postgres and other packages in slim variant
-RUN mkdir /usr/share/man/man1 /usr/share/man/man7 \
+# Note: cron, python, python-psycopg2 are installed
+#       specifically for metrics reporting
+RUN mkdir -p /usr/share/man/man1 /usr/share/man/man7 \
  && DEBIAN_FRONTEND=noninteractive apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       curl \
       lsb-release \
       sudo \
+      cron \
+      python \
+      python3 \
+      python3-yaml \
+      python3-psycopg2 \
+      python3-requests \
+      python3-pip \
+ && python3 -m pip install pip==21.2.2 \
  && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --offline --runtime -y \
- && DEBIAN_FRONTEND=noninteractive apt-get purge -y lsb-release \
- && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y \
- && rm -rf /var/lib/apt/lists/*
+ && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
 
 # configure php
 COPY ./install/scripts/php-conf-fix.sh ./install/scripts/php-conf-fix.sh
 RUN /fossology/install/scripts/php-conf-fix.sh --overwrite
 
 # configure apache
-COPY ./install/src-install-apache-example.conf /etc/apache2/conf-available/fossology.conf
-RUN a2enconf fossology.conf \
- && a2enmod rewrite \
- && mkdir -p /var/log/apache2/ \
+RUN mkdir -p /var/log/apache2/ \
  && ln -sf /proc/self/fd/1 /var/log/apache2/access.log \
  && ln -sf /proc/self/fd/1 /var/log/apache2/error.log
 
@@ -89,4 +109,6 @@ COPY --from=builder /etc/init.d/fossology /etc/init.d/fossology
 COPY --from=builder /usr/local/ /usr/local/
 
 # the database is filled in the entrypoint
-RUN /usr/local/lib/fossology/fo-postinstall --agent --common --scheduler-only --web-only --no-running-database
+RUN /usr/local/lib/fossology/fo-postinstall --agent --common --scheduler-only \
+     --web-only --no-running-database --python-experimental \
+ && rm -rf /var/lib/apt/lists/*

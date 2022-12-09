@@ -1,21 +1,10 @@
 <?php
-/***********************************************************
- Copyright (C) 2011-2015 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2011-2015 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2015 Siemens AG
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License version 2.1 as published by the Free Software Foundation.
-
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- ***********************************************************/
+ SPDX-License-Identifier: LGPL-2.1-only
+*/
 
 /**
  * \file
@@ -34,8 +23,7 @@ function siteminder_check()
 {
   // $IDEnvVar = 'HPPF_AUTH_UID';  // for example for PingIdentity
   $IDEnvVar = 'HTTP_SMUNIVERSALID';
-  if (isset($_SERVER[$IDEnvVar]))
-  {
+  if (isset($_SERVER[$IDEnvVar])) {
     $SEA = $_SERVER[$IDEnvVar];
     return $SEA;
   }
@@ -43,7 +31,41 @@ function siteminder_check()
 } // siteminder_check()
 
 /**
- * \brief Check if this account is correct
+ * \brief Check if the external HTTP authentication is enabled.
+ *  The mapping variables should be configured in fossology.conf
+ *  Usernames are forced lowercase.
+ * \return false if not enabled
+ */
+function auth_external_check()
+{
+  $EXT_AUTH_ENABLE = false;
+  if (array_key_exists('EXT_AUTH', $GLOBALS['SysConf'])) {
+    if (array_key_exists('CONF_EXT_AUTH_ENABLE', $GLOBALS['SysConf']['EXT_AUTH'])) {
+        $EXT_AUTH_ENABLE = $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_ENABLE'];
+    }
+  }
+  if ($EXT_AUTH_ENABLE) {
+    $EXT_AUTH_USER_KW = $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_ENV_USER'];
+    $EXT_AUTH_USER = $GLOBALS['_SERVER']["{$EXT_AUTH_USER_KW}"];
+    if (isset($EXT_AUTH_USER) && !empty($EXT_AUTH_USER)) {
+      if ($GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_LOWERCASE_USER']) {
+          $EXT_AUTH_USER = strtolower($EXT_AUTH_USER);
+      }
+      $out['useAuthExternal']         = true;
+      $out['loginAuthExternal']       = $EXT_AUTH_USER;
+      $out['passwordAuthExternal']    = sha1($EXT_AUTH_USER);
+      $EXT_AUTH_MAIL_KW = $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_ENV_MAIL'];
+      $out['emailAuthExternal']       = $GLOBALS['_SERVER']["{$EXT_AUTH_MAIL_KW}"];
+      $EXT_AUTH_DESC_KW = $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_ENV_DESC'];
+      $out['descriptionAuthExternal'] = $GLOBALS['_SERVER']["{$EXT_AUTH_DESC_KW}"];
+      return $out;
+    }
+  }
+  return $out['useAuthExternal'] = false;
+}
+
+/**
+ * \brief check if this account is correct
  *
  * \param string &$user   User name, reference variable
  * \param string &$passwd Password, reference variable
@@ -61,23 +83,27 @@ function account_check(&$user, &$passwd, &$group = "")
     $user_passwd_array = parse_ini_file($user_passwd_file, true, INI_SCANNER_RAW);
 
     /* get username and password from conf file */
-    if(!empty($user_passwd_array) && !empty($user_passwd_array['user']))
+    if (! empty($user_passwd_array) && ! empty($user_passwd_array['user'])) {
       $user = $user_passwd_array['user'];
-    if(!empty($user_passwd_array) && !empty($user_passwd_array['username']))
+    }
+    if (! empty($user_passwd_array) && ! empty($user_passwd_array['username'])) {
       $user = $user_passwd_array['username'];
-    if(!empty($user_passwd_array) && !empty($user_passwd_array['groupname']))
+    }
+    if (! empty($user_passwd_array) && ! empty($user_passwd_array['groupname'])) {
       $group = $user_passwd_array['groupname'];
-    if(!empty($user_passwd_array) && !empty($user_passwd_array['password']))
+    }
+    if (! empty($user_passwd_array) && ! empty($user_passwd_array['password'])) {
       $passwd = $user_passwd_array['password'];
+    }
   }
   /* check if the user name/passwd is valid */
   if (empty($user)) {
     /*
-       $uid_arr = posix_getpwuid(posix_getuid());
-       $user = $uid_arr['name'];
+     * $uid_arr = posix_getpwuid(posix_getuid());
+     * $user = $uid_arr['name'];
      */
-    echo "FATAL: You should add '--username USERNAME' when running OR add "
-       . "'username=USERNAME' in ~/.fossology.rc before running.\n";
+    echo "FATAL: You should add '--username USERNAME' when running OR add " .
+      "'username=USERNAME' in ~/.fossology.rc before running.\n";
     exit(1);
   }
   if (empty($passwd)) {
@@ -90,11 +116,11 @@ function account_check(&$user, &$passwd, &$group = "")
     }
   }
 
-  if (!empty($user)) {
+  if (! empty($user)) {
     $userDao = $GLOBALS['container']->get('dao.user');
     try {
       $row = $userDao->getUserAndDefaultGroupByUserName($user);
-    }catch (Exception $e) {
+    } catch (Exception $e) {
       echo $e->getMessage(), "\n";
       exit(1);
     }
@@ -104,15 +130,12 @@ function account_check(&$user, &$passwd, &$group = "")
     if (empty($group)) {
       $group = $row['group_name'];
       $groupId = $row['group_fk'];
-    }
-    else {
+    } else {
       $rowGroup = $dbManager->getSingleRow(
         "SELECT group_pk
         FROM group_user_member INNER JOIN groups ON groups.group_pk = group_user_member.group_fk
-        WHERE user_fk = $1 AND group_name = $2",
-        array($userId, $group),
-        __METHOD__.".lookUpGroup"
-      );
+        WHERE user_fk = $1 AND group_name = $2", array($userId, $group),
+        __METHOD__ . ".lookUpGroup");
       if (false === $rowGroup) {
         echo "User is not in group.\n";
         exit(1);
@@ -125,11 +148,27 @@ function account_check(&$user, &$passwd, &$group = "")
       exit(1);
     }
 
-    if (!empty($row['user_seed']) && !empty($row['user_pass'])) {
-      $passwd_hash = sha1($row['user_seed'] . $passwd);
-      if (strcmp($passwd_hash, $row['user_pass']) != 0) {
-        echo "User name or password is invalid.\n";
-        exit(1);
+    if (! empty($row['user_pass'])) {
+      $options = array('cost' => 10);
+      if (password_verify($passwd, $row['user_pass'])) {
+        if (password_needs_rehash($row['user_pass'], PASSWORD_DEFAULT, $options)) {
+          $newHash = password_hash($passwd, PASSWORD_DEFAULT, $options);
+          /* Update old hash with new hash  */
+          update_password_hash($user, $newHash);
+        }
+        return true;
+      } else if (! empty($row['user_seed'])) {
+        $passwd_hash = sha1($row['user_seed'] . $passwd);
+        /* If verify with new hash fails check with the old hash */
+        if (strcmp($passwd_hash, $row['user_pass']) == 0) {
+          $newHash = password_hash($passwd, PASSWORD_DEFAULT, $options);
+          /* Update old hash with new hash */
+          update_password_hash($user, $newHash);
+          return true;
+        } else {
+          echo "User name or password is invalid.\n";
+          exit(1);
+        }
       }
     }
   }
@@ -159,7 +198,7 @@ function read_permission($upload, $user)
     __METHOD__.".checkUpload"
   );
 
-  if (!empty($row)) {
+  if (! empty($row)) {
     /* user has permission */
     return 1;
   }
@@ -173,7 +212,7 @@ function read_permission($upload, $user)
     __METHOD__.".checkPerm"
   );
 
-  if (!empty($row)) {
+  if (! empty($row)) {
     /* user has permission */
     return 1;
   }
@@ -182,3 +221,107 @@ function read_permission($upload, $user)
   return 0;
 }
 
+/**
+ * Check if the password policy has been enabled
+ * @return boolean
+ */
+function passwordPolicyEnabled()
+{
+  $sysconfig = $GLOBALS['SysConf']['SYSCONFIG'];
+  if (! array_key_exists('PasswdPolicy', $sysconfig) ||
+    $sysconfig['PasswdPolicy'] == 'false') {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Generate the password policy regex from sysconfig
+ * @return string Regex based on policy selected
+ */
+function generate_password_policy()
+{
+  $sysconfig = $GLOBALS['SysConf']['SYSCONFIG'];
+  if (! passwordPolicyEnabled()) {
+    return ".*";
+  }
+  $limit = "*";
+  $min = trim($sysconfig['PasswdPolicyMinChar']);
+  $max = trim($sysconfig['PasswdPolicyMaxChar']);
+  if (!empty($min) || !empty($max)) {
+    if (empty($min)) {
+      $min = 0;
+    }
+    $min = intval($min) < 0 ? 0 : $min;
+    $max = intval($max) < 0 ? 0 : $max;
+    $limit = '{' . $min . ",$max}";
+  }
+  $lookAhead = "";
+  $charset = "a-zA-Z\\d";
+  if ($sysconfig['PasswdPolicyLower'] == 'true') {
+    $lookAhead .= '(?=.*[a-z])';
+  }
+  if ($sysconfig['PasswdPolicyUpper'] == 'true') {
+    $lookAhead .= '(?=.*[A-Z])';
+  }
+  if ($sysconfig['PasswdPolicyDigit'] == 'true') {
+    $lookAhead .= '(?=.*\\d)';
+  }
+  $special = trim($sysconfig['PasswdPolicySpecial']);
+  if (!empty($special)) {
+    $lookAhead .= "(?=.*[$special])";
+    $charset .= $special;
+    $charset = '[' . $charset . ']';
+  } else {
+    $charset = '.';  // Allow any special character
+  }
+  return $lookAhead . $charset . $limit;
+}
+
+/**
+ * Translate selected password policy into user understandable string
+ * @return string
+ */
+function generate_password_policy_string()
+{
+  $sysconfig = $GLOBALS['SysConf']['SYSCONFIG'];
+  if (! passwordPolicyEnabled()) {
+    return "No policy defined.";
+  }
+  $limit = "Any length.";
+  $min = trim($sysconfig['PasswdPolicyMinChar']);
+  $max = trim($sysconfig['PasswdPolicyMaxChar']);
+  if (!empty($min) || !empty($max)) {
+    if (empty($min)) {
+      $min = 0;
+    }
+    $limit = "Minimum $min";
+    if (!empty($max)) {
+      $limit .= ", maximum $max";
+    }
+    $limit .= " characters.";
+  }
+  $others = [];
+  if ($sysconfig['PasswdPolicyLower'] == 'true') {
+    $others[] = "lower case";
+  }
+  if ($sysconfig['PasswdPolicyUpper'] == 'true') {
+    $others[] = "upper case";
+  }
+  if ($sysconfig['PasswdPolicyDigit'] == 'true') {
+    $others[] = "digit";
+  }
+  if (!empty($others)) {
+    $others = "At least one " . join(", ", $others);
+  } else {
+    $others = "";
+  }
+  $special = trim($sysconfig['PasswdPolicySpecial']);
+  if (!empty($special)) {
+    if (!empty($others)) {
+      $others .= " and";
+    }
+    $others .= " one of <em>$special</em>";
+  }
+  return "$limit $others.";
+}

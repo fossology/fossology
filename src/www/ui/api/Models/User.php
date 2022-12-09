@@ -1,20 +1,9 @@
 <?php
-/***************************************************************
-Copyright (C) 2017 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2017 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @file
  * @brief User model
@@ -61,6 +50,11 @@ class User
    */
   private $rootFolderId;
   /**
+   * @var integer $defaultGroup
+   * Current user's default group id
+   */
+  private $defaultGroup;
+  /**
    * @var boolean $emailNotification
    * Current user's email preference
    */
@@ -75,6 +69,11 @@ class User
    * Current user's analysis from $agents
    */
   private $analysis;
+  /**
+   * @var int $defaultBucketPool
+   * Default bucket pool of the user
+   */
+  private $defaultBucketPool;
 
   /**
    * User constructor.
@@ -84,10 +83,13 @@ class User
    * @param string $email
    * @param integer $accessLevel
    * @param integer $root_folder_id
+   * @param integer $default_group_fk
    * @param boolean $emailNotification
    * @param object $agents
+   * @param integer $defaultBucketPool
    */
-  public function __construct($id, $name, $description, $email, $accessLevel, $root_folder_id, $emailNotification, $agents)
+  public function __construct($id, $name, $description, $email, $accessLevel, $root_folder_id, $emailNotification,
+                              $agents, $default_group_fk=null, $defaultBucketPool=null)
   {
     $this->id = intval($id);
     $this->name = $name;
@@ -100,6 +102,9 @@ class User
       case PLUGIN_DB_WRITE:
         $this->accessLevel = "read_write";
         break;
+      case PLUGIN_DB_CADMIN:
+        $this->accessLevel = "clearing_admin";
+        break;
       case PLUGIN_DB_ADMIN:
         $this->accessLevel = "admin";
         break;
@@ -107,10 +112,16 @@ class User
         $this->accessLevel = "none";
     }
     $this->rootFolderId = intval($root_folder_id);
+    $this->defaultGroup = is_null($default_group_fk) ? null : intval($default_group_fk);
     $this->emailNotification = $emailNotification;
     $this->agents = $agents;
     $this->analysis = new Analysis();
     $this->analysis->setUsingString($this->agents);
+    if ($defaultBucketPool != null) {
+      $this->defaultBucketPool = intval($defaultBucketPool);
+    } else {
+      $this->defaultBucketPool = null;
+    }
   }
 
   ////// Getters //////
@@ -163,6 +174,14 @@ class User
   }
 
   /**
+   * @return integer
+   */
+  public function getDefaultGroupId()
+  {
+    return $this->defaultGroup;
+  }
+
+  /**
    * @return boolean
    */
   public function getEmailNotification()
@@ -176,6 +195,14 @@ class User
   public function getAgents()
   {
     return $this->agents;
+  }
+
+  /**
+   * @return int
+   */
+  public function getDefaultBucketPool()
+  {
+    return $this->defaultBucketPool;
   }
 
   /**
@@ -193,15 +220,29 @@ class User
    */
   public function getArray()
   {
-    return [
-      "id"       => $this->id,
-      "name"         => $this->name,
-      "description"  => $this->description,
-      "email"        => $this->email,
-      "accessLevel"  => $this->accessLevel,
-      "rootFolderId" => $this->rootFolderId,
-      "emailNotification" => $this->emailNotification,
-      "agents"       => $this->analysis->getArray()
-    ];
+    $returnUser = array();
+    $returnUser["id"] = $this->id;
+    $returnUser["name"] = $this->name;
+    $returnUser["description"] = $this->description;
+    if ($this->email !== null) {
+      $returnUser["email"] = $this->email;
+      $returnUser["accessLevel"] = $this->accessLevel;
+    }
+    if ($this->rootFolderId !== null && $this->rootFolderId != 0) {
+      $returnUser["rootFolderId"] = $this->rootFolderId;
+    }
+    if ($this->defaultGroup !== null) {
+      $returnUser["defaultGroup"] = $this->defaultGroup;
+    }
+    if ($this->emailNotification !== null) {
+      $returnUser["emailNotification"] = $this->emailNotification;
+    }
+    if ($this->agents !== null) {
+      $returnUser["agents"] = $this->analysis->getArray();
+    }
+    if ($this->defaultBucketPool !== null) {
+      $returnUser["defaultBucketpool"] = $this->defaultBucketPool;
+    }
+    return $returnUser;
   }
 }

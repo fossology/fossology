@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014-2017, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2017 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Application;
@@ -30,7 +19,8 @@ use Fossology\Lib\Util\ArrayOperation;
  * @class ObligationCsvImport
  * @brief Helper class for Obligation CSV Import
  */
-class ObligationCsvImport {
+class ObligationCsvImport
+{
   /** @var DbManager $dbManager
    * DB manager to be used */
   protected $dbManager;
@@ -92,25 +82,21 @@ class ObligationCsvImport {
    */
   public function handleFile($filename)
   {
-    if (!is_file($filename) || ($handle = fopen($filename, 'r')) === FALSE) {
+    if (!is_file($filename) || ($handle = fopen($filename, 'r')) === false) {
       return _('Internal error');
     }
     $cnt = -1;
     $msg = '';
-    try
-    {
-      while(($row = fgetcsv($handle,0,$this->delimiter,$this->enclosure)) !== FALSE) {
+    try {
+      while (($row = fgetcsv($handle,0,$this->delimiter,$this->enclosure)) !== false) {
         $log = $this->handleCsv($row);
-        if (!empty($log))
-        {
+        if (!empty($log)) {
           $msg .= "$log\n";
         }
         $cnt++;
       }
       $msg .= _('Read csv').(": $cnt ")._('obligations');
-    }
-    catch(\Exception $e)
-    {
+    } catch(\Exception $e) {
       fclose($handle);
       return $msg .= _('Error while parsing file').': '.$e->getMessage();
     }
@@ -126,14 +112,13 @@ class ObligationCsvImport {
    */
   private function handleCsv($row)
   {
-    if($this->headrow===null)
-    {
+    if ($this->headrow===null) {
       $this->headrow = $this->handleHeadCsv($row);
       return 'head okay';
     }
 
     $mRow = array();
-    foreach( array('type','topic','text','classification','modifications','comment','licnames','candidatenames') as $needle){
+    foreach (array('type','topic','text','classification','modifications','comment','licnames','candidatenames') as $needle) {
       $mRow[$needle] = $row[$this->headrow[$needle]];
     }
 
@@ -149,10 +134,9 @@ class ObligationCsvImport {
   private function handleHeadCsv($row)
   {
     $headrow = array();
-    foreach( array('type','topic','text','classification','modifications','comment','licnames','candidatenames') as $needle){
+    foreach (array('type','topic','text','classification','modifications','comment','licnames','candidatenames') as $needle) {
       $col = ArrayOperation::multiSearch($this->alias[$needle], $row);
-      if (false === $col)
-      {
+      if (false === $col) {
         throw new \Exception("Undetermined position of $needle");
       }
       $headrow[$needle] = $col;
@@ -231,33 +215,29 @@ class ObligationCsvImport {
     $exists = $this->getKeyFromTopicAndText($row);
     $associatedLicenses = "";
     $candidateLicenses = "";
-    $listFromCsv = "";
     $msg = "";
-    if ($exists !== false)
-    {
+    if ($exists !== false) {
       $msg = "Obligation topic '$row[topic]' already exists in DB (id=".$exists."),";
       if ( $this->compareLicList($exists, $row['licnames'], false, $row) === 0 ) {
         $msg .=" No Changes in AssociateLicense";
-      }
-      else {
+      } else {
         $this->clearListFromDb($exists, false);
-        if (!empty ($row['licnames'] ) ) {
-          $associatedLicenses = $this->AssociateWithLicenses($row['licnames'], $exists, false);
+        if (!empty($row['licnames'])) {
+          $associatedLicenses .= $this->AssociateWithLicenses($row['licnames'], $exists, false);
         }
         $msg .=" Updated AssociatedLicense license";
       }
-      if($this->compareLicList($exists, $row['candidatenames'], True, $row) === 0) {
+      if ($this->compareLicList($exists, $row['candidatenames'], true, $row) === 0) {
         $msg .=" No Changes in CandidateLicense";
-      }
-      else {
-        $this->clearListFromDb($exists, $listFromCsv);
-        if(!empty($row['candidatenames'])) {
-          $associatedLicenses = $this->AssociateWithLicenses($row['candidatenames'], $exists, True);
+      } else {
+        $this->clearListFromDb($exists, true);
+        if (!empty($row['candidatenames'])) {
+          $associatedLicenses .= $this->AssociateWithLicenses($row['candidatenames'], $exists, true);
         }
         $msg .=" Updated CandidateLicense";
       }
       $this->updateOtherFields($exists, $row);
-      return $msg."\n";
+      return $msg . "\n" . $associatedLicenses . "\n";
     }
 
     $stmtInsert = __METHOD__.'.insert';
@@ -268,10 +248,10 @@ class ObligationCsvImport {
     $dbManager->freeResult($resi);
 
     if (!empty($row['licnames'])) {
-      $associatedLicenses = $this->AssociateWithLicenses($row['licnames'], $new['ob_pk']);
+      $associatedLicenses .= $this->AssociateWithLicenses($row['licnames'], $new['ob_pk']);
     }
     if (!empty($row['candidatenames'])) {
-      $candidateLicenses = $this->AssociateWithLicenses($row['candidatenames'], $new['ob_pk'], True);
+      $candidateLicenses = $this->AssociateWithLicenses($row['candidatenames'], $new['ob_pk'], true);
     }
 
     $message = "License association results for obligation '$row[topic]':\n";
@@ -295,30 +275,25 @@ class ObligationCsvImport {
     $message = "";
 
     $licenses = explode(";",$licList);
-    foreach ($licenses as $license)
-    {
-      $licId = $this->obligationMap->getIdFromShortname($license, $candidate);
-      if ($this->obligationMap->isLicenseAssociated($obPk, $licId, $candidate))
-      {
-        continue;
+    foreach ($licenses as $license) {
+      $licIds = $this->obligationMap->getIdFromShortname($license, $candidate);
+      $updated = false;
+      if (empty($licIds)) {
+        $message .= "License $license could not be found in the DB.\n";
+      } else {
+        $updated = $this->obligationMap->associateLicenseFromLicenseList($obPk,
+          $licIds, $candidate);
       }
-
-      if (!empty($licId))
-      {
-        $this->obligationMap->associateLicenseWithObligation($obPk, $licId, $candidate);
-        if ($associatedLicenses == "")
-        {
+      if ($updated) {
+        if ($associatedLicenses == "") {
           $associatedLicenses = "$license";
         } else {
           $associatedLicenses .= ";$license";
         }
-      } else {
-        $message .= "License $license could not be found in the DB.\n";
       }
     }
 
-    if (!empty($associatedLicenses))
-    {
+    if (!empty($associatedLicenses)) {
       $message .= "$associatedLicenses were associated.\n";
     } else {
       $message .= "No ";

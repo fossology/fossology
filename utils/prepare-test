@@ -1,19 +1,9 @@
 #!/bin/bash
 
-# Copyright 2018 Siemens AG
+# SPDX-FileCopyrightText: © 2018 Siemens AG
 # Author: Gaurav Mishra <mishra.gaurav@siemens.com>
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# version 2 as published by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # This script helps you install build and runtime dependencies on a system.
 # It is NOT indented to replace package dependencies, it's just a tool to
@@ -30,6 +20,8 @@ Usage: prepare-test [options]
   -f              : Create fossy user in Database
   -t              : Create fossologytest user in Database
   -y              : Automatic yes to prompts
+  -u              : Super user for connection (default postgres)
+  -p              : Password for super user (default none)
   -h              : This help text
 EOF
 }
@@ -47,6 +39,13 @@ YesOpt=''
 # Setting default options
 CreateFossy="N"
 CreateFossyTest="N"
+PG_USER="postgres"
+PG_PASS=""
+
+# Use localhost as default host
+if [[ -z "${PGHOST}" ]]; then
+  PGHOST="localhost"
+fi
 
 cat <<EOF
 ****************************************************************************
@@ -61,7 +60,7 @@ cat <<EOF
 
 EOF
 
-while getopts ":aftyh" o; do
+while getopts ":aftyhu:p:" o; do
   case "${o}" in
     a)
       WarnAccept="Y"
@@ -74,6 +73,12 @@ while getopts ":aftyh" o; do
       ;;
     y)
       YesOpt='-y'
+      ;;
+    u)
+      PG_USER="${OPTARG}"
+      ;;
+    p)
+      PG_PASS="${OPTARG}"
       ;;
     h)
       show_help; exit;;
@@ -92,20 +97,36 @@ fi
 echo
 
 if echo ${WarnAccept} | grep -q -e "^[yY]$" ; then
+  uid=$(id -u)
+  gid=$(id -g)
   sudo mkdir -p /var/local/cache/fossology
-  sudo chown "$(whoami)" /var/local/cache/fossology
+  sudo chown "${uid}:${gid}" /var/local/cache/fossology
   sudo mkdir -p /srv/fossologyTestRepo
-  sudo chown "$(whoami)" /srv/fossologyTestRepo
+  sudo chown "${uid}:${gid}" /srv/fossologyTestRepo
+  if [[ -z "${PG_PASS}" ]]; then
+    sudo --preserve-env su postgres -c "echo 'CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";'|psql -d template1" || true
+  else
+    echo 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'|PGPASSWORD="${PG_PASS}" psql -d template1 -U ${PG_USER} || true
+  fi
   if [[ "${CreateFossy}" == "Y" ]]; then
-    sudo su postgres -c "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true >/dev/null
-    echo "localhost:*:*:fossy:fossy" >> ~/.pgpass
+    if [[ -z "${PG_PASS}" ]]; then
+      sudo --preserve-env su postgres -c "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true >/dev/null
+      sudo --preserve-env su postgres -c "echo 'CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;'|psql" || true
+    else
+      echo "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;"|PGPASSWORD="${PG_PASS}" psql -U ${PG_USER} || true >/dev/null
+      echo 'CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;'|PGPASSWORD="${PG_PASS}" psql -U ${PG_USER} || true
+    fi
+    echo "${PGHOST}:*:*:fossy:fossy" >> ~/.pgpass
     chmod 0600 ~/.pgpass
-    sudo su postgres -c "echo 'CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;'|psql" || true
   fi
   if [[ "${CreateFossyTest}" == "Y" ]]; then
     testDbPassword=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13)
-    sudo su postgres -c "echo \"CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';\"|psql" || true >/dev/null
-    echo "localhost:*:*:fossologytest:${testDbPassword}" >> ~/.pgpass
+    if [[ -z "${PG_PASS}" ]]; then
+      sudo --preserve-env su postgres -c "echo \"CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';\"|psql" || true >/dev/null
+    else
+      echo "CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';"|PGPASSWORD="${PG_PASS}" psql -U ${PG_USER} || true >/dev/null
+    fi
+    echo "${PGHOST}:*:*:fossologytest:${testDbPassword}" >> ~/.pgpass
     chmod 0600 ~/.pgpass
   fi
   case "${DISTRO}" in

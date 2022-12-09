@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2017, Siemens AG
+ SPDX-FileCopyrightText: © 2017 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Application;
@@ -30,7 +19,8 @@ use Fossology\Lib\Db\DbManager;
  * @class ObligationCsvExport
  * @brief Helper class to export obligations as a CSV
  */
-class ObligationCsvExport {
+class ObligationCsvExport
+{
   /** @var DbManager $dbManager
    * DB manager to be used */
   protected $dbManager;
@@ -79,8 +69,7 @@ class ObligationCsvExport {
     $csvarray = array();
     $sql = "SELECT ob_pk,ob_type,ob_topic,ob_text,ob_classification,ob_modifications,ob_comment
             FROM obligation_ref;";
-    if ($ob>0)
-    {
+    if ($ob>0) {
       $stmt = __METHOD__.'.ob';
       $sql .= ' WHERE ob_pk=$'.$ob;
       $row = $this->dbManager->getSingleRow($sql,$stmt);
@@ -91,17 +80,14 @@ class ObligationCsvExport {
       array_push($vars,$liclist);
       array_push($vars,$candidatelist);
       $csvarray = $vars;
-    }
-    else
-    {
+    } else {
       $stmt = __METHOD__;
       $this->dbManager->prepare($stmt,$sql);
       $res = $this->dbManager->execute($stmt);
       $vars = $this->dbManager->fetchAll($res);
       $this->dbManager->freeResult($res);
 
-      foreach ($vars as $row)
-      {
+      foreach ($vars as $row) {
         $liclist = $this->obligationMap->getLicenseList($row['ob_pk']);
         $candidatelist = $this->obligationMap->getLicenseList($row['ob_pk'], True);
         array_shift($row);
@@ -115,13 +101,11 @@ class ObligationCsvExport {
     ob_start();
     $head = array('Type','Obligation or Risk topic','Full Text','Classification','Apply on modified source code','Comment','Associated Licenses','Associated candidate Licenses');
     fputcsv($out, $head, $this->delimiter, $this->enclosure);
-    foreach($csvarray as $row)
-    {
+    foreach ($csvarray as $row) {
       fputcsv($out, $row, $this->delimiter, $this->enclosure);
     }
     $content = ob_get_contents();
     ob_end_clean();
     return $content;
   }
-
 }

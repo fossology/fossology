@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2012-2013 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 use Fossology\Lib\Auth\Auth;
 
 
@@ -23,14 +12,14 @@ use Fossology\Lib\Auth\Auth;
  * \brief "Enable/Disable tag
  */
 
-define("TITLE_admin_tag_manage", _("Enable/Disable Tag Display"));
+define("TITLE_ADMIN_TAG_MANAGE", _("Enable/Disable Tag Display"));
 
 class admin_tag_manage extends FO_Plugin
 {
   function __construct()
   {
     $this->Name       = "admin_tag_manage";
-    $this->Title      = TITLE_admin_tag_manage;
+    $this->Title      = TITLE_ADMIN_TAG_MANAGE;
     $this->MenuList = "Admin::Tag::Enable/Disable Tag";
     $this->Version = "1.3";
     $this->DBaccess = PLUGIN_DB_ADMIN;
@@ -52,21 +41,29 @@ class admin_tag_manage extends FO_Plugin
     global $PG_CONN;
 
     /** no operation */
-    if (empty($manage)) return;
-    if (empty($folder_id) && empty($upload_id)) return;
+    if (empty($manage)) {
+      return;
+    }
+    if (empty($folder_id) && empty($upload_id)) {
+      return;
+    }
 
     /** get upload list */
     $upload_list = array();
-    if (!empty($upload_id)) $upload_list[0] = array('upload_pk'=>$upload_id);
-    else $upload_list = FolderListUploadsRecurse($folder_id, NULL, Auth::PERM_WRITE); // want to manage all uploads under a folder
+    if (!empty($upload_id)) {
+      $upload_list[0] = array('upload_pk'=>$upload_id);
+    } else {
+      $upload_list = FolderListUploadsRecurse($folder_id, NULL, Auth::PERM_WRITE); // want to manage all uploads under a folder
+    }
 
-    foreach($upload_list as $upload)
-    {
+    foreach ($upload_list as $upload) {
       $upload_id = $upload['upload_pk'];
 
-      if ("Enable" === $manage)
+      if ("Enable" === $manage) {
         $manage_value = false;
-      else $manage_value = true;
+      } else {
+        $manage_value = true;
+      }
 
       /** check if this upload has been disabled */
       $sql = "select * from tag_manage where upload_fk = $upload_id and is_disabled = true;";
@@ -74,15 +71,12 @@ class admin_tag_manage extends FO_Plugin
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $count = pg_num_rows($result);
       pg_free_result($result);
-      if (empty($count) && $manage_value == true) // has not been disabled, and want to disable this upload
-      {
+      if (empty($count) && $manage_value == true) { // has not been disabled, and want to disable this upload
         $sql = "INSERT INTO tag_manage(upload_fk, is_disabled) VALUES($upload_id, true);";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         pg_free_result($result);
-      }
-      else if ($count == 1 && $manage_value == false) // has been disabled, and want to enable this upload
-      {
+      } else if ($count == 1 && $manage_value == false) { // has been disabled, and want to enable this upload
         $sql = "delete from tag_manage where upload_fk = $upload_id;";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -112,8 +106,11 @@ class admin_tag_manage extends FO_Plugin
       $folder_path = FolderGetName($Folder);
       $upload_name = GetUploadName($upload_id);
 
-      if (empty($upload_id)) $text = $text1;
-      else $text = "'$upload_name' $text2";
+      if (empty($upload_id)) {
+        $text = $text1;
+      } else {
+        $text = "'$upload_name' $text2";
+      }
 
       $Msg = "$manage $text '$folder_path'";
       $this->vars['message'] = $Msg;
@@ -152,7 +149,6 @@ class admin_tag_manage extends FO_Plugin
     $V .= "  }\n";
     $V .= "</script>\n";
 
-
     $V .= "<form name='formy' method='post'>\n"; // no url = this url
     $V .= _("Displaying tags while browsing can be slow for large uploads.  This interface allows you to select an upload to disable (or enable) the tag display.  By default the tag display is enabled.<p>\n");
 
@@ -171,12 +167,10 @@ class admin_tag_manage extends FO_Plugin
     $V .= "<div id='tagdiv'>\n";
     $V .= "<select size='10' name='upload' onChange='Tagging_Get(\"" . Traceback_uri() . "?mod=upload_tagging&upload=\" + this.value)'>\n";
     $List = FolderListUploads_perm($Folder, Auth::PERM_WRITE);
-    foreach($List as $L)
-    {
+    foreach ($List as $L) {
       $V .= "<option value='" . $L['upload_pk'] . "'>";
       $V .= htmlentities($L['name']);
-      if (!empty($L['upload_desc']))
-      {
+      if (! empty($L['upload_desc'])) {
         $V .= " (" . htmlentities($L['upload_desc']) . ")";
       }
       $V .= "</option>\n";

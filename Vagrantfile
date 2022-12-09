@@ -1,8 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Copyright Siemens AG, 2014
-# SPDX-License-Identifier:  GPL-2.0 LGPL-2.1
+# SPDX-FileCopyrightText: © 2014 Siemens AG
+
+# SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
 $post_up_message = <<WELCOME
 Use your FOSSology at http://localhost:8081/repo/
   user: fossy , password: fossy
@@ -52,16 +53,17 @@ sudo /usr/local/lib/fossology/fo-postinstall
 
 sudo cp /fossology/install/src-install-apache-example.conf /etc/apache2/conf-available/fossology.conf
 sudo a2enconf fossology.conf
-sudo a2enmod rewrite
 
 # increase upload size
 sudo /fossology/install/scripts/php-conf-fix.sh --overwrite
 
 sudo /etc/init.d/apache2 restart
+
+sudo systemctl daemon-reload
 SCRIPT
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/xenial64"
+  config.vm.box = "ubuntu/focal64"
   config.vm.post_up_message = $post_up_message
   config.vm.synced_folder ".", "/vagrant", disabled: true
   config.vm.synced_folder ".", "/fossology"

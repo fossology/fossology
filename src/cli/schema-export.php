@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2008-2012 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /**
  * @file schema-export.php
@@ -44,10 +33,8 @@ $SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
 
 /* command-line options */
 $Options = getopt($AllPossibleOpts);
-foreach($Options as $Option => $OptVal)
-{
-  switch($Option)
-  {
+foreach ($Options as $Option => $OptVal) {
+  switch ($Option) {
     case 'c': /* used by fo_wrapper */
       break;
     case 'd': /* optional database name */
@@ -65,30 +52,23 @@ foreach($Options as $Option => $OptVal)
   }
 }
 
-if($showUsage)
-{
+if ($showUsage) {
   global $argv;
 
   $usage = "Usage: " . basename($argv[0]) . " [options]
   Update FOSSology database.  Options are:
   -d  {database name} default is 'fossology'
-  -f  {output file} 
+  -f  {output file}
   -h  this help usage";
   print "$usage\n";
-}
-else
-{ 
-  if (file_exists($SchemaFilePath) && !@unlink($SchemaFilePath))
-  {
+} else {
+  if (file_exists($SchemaFilePath) && !@unlink($SchemaFilePath)) {
     $FailMsg = "Existing schema data file ($SchemaFilePath) could not be removed.";
-  }
-  else
-  {
+  } else {
     $FailMsg = ExportSchema($SchemaFilePath);
   }
-  
-  if ($FailMsg !== false)
-  {
+
+  if ($FailMsg !== false) {
     print "ERROR: $FailMsg \n";
     exit(1);
   }

@@ -1,32 +1,22 @@
 <?php
 /*
-Copyright (C) 2015, Siemens AG
+ SPDX-FileCopyrightText: © 2015 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Decider;
 
-use Fossology\Lib\Data\LicenseMatch;
 use Mockery as M;
 use Fossology\Lib\Test\Reflectory;
+use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Data\DecisionTypes;
@@ -56,12 +46,14 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
   private $highlightDao;
   /** @var ShowJobsDao */
   private $showJobsDao;
+  /** @var CopyrightDao $copyrightDao */
+  private $copyrightDao;
 
   /**
    * @brief Setup test objects, database and repo
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     global $container;
     $container = M::mock('ContainerBuilder');
@@ -70,7 +62,9 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     $this->agentDao->shouldReceive('getCurrentAgentId')->andReturn(1234);
     $this->highlightDao = M::mock(HighlightDao::class);
     $this->uploadDao = M::mock(UploadDao::class);
+    $this->copyrightDao = M::mock(CopyrightDao::class);
     $this->showJobsDao = new ShowJobsDao($this->dbManager, $this->uploadDao);
+    $this->copyrightDao = M::mock(CopyrightDao::class);
     $this->clearingDao = M::mock(ClearingDao::class);
     $this->clearingDecisionProcessor = M::mock(ClearingDecisionProcessor::class);
     $this->agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::class);
@@ -79,7 +73,9 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     $container->shouldReceive('get')->withArgs(array('dao.agent'))->andReturn($this->agentDao);
     $container->shouldReceive('get')->with('dao.highlight')->andReturn($this->highlightDao);
     $container->shouldReceive('get')->with('dao.show_jobs')->andReturn($this->showJobsDao);
+    $container->shouldReceive('get')->with('dao.copyright')->andReturn($this->copyrightDao);
     $container->shouldReceive('get')->withArgs(array('dao.upload'))->andReturn($this->uploadDao);
+    $container->shouldReceive('get')->withArgs(array('dao.copyright'))->andReturn($this->copyrightDao);
     $container->shouldReceive('get')->withArgs(array('dao.clearing'))->andReturn($this->clearingDao);
     $container->shouldReceive('get')->withArgs(array('decision.types'))->andReturn(M::mock(DecisionTypes::class));
     $container->shouldReceive('get')->withArgs(array('businessrules.clearing_decision_processor'))->andReturn($this->clearingDecisionProcessor);
@@ -91,7 +87,7 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
    * @brief Remove test objects
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
@@ -285,5 +281,4 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     $licenseMatch->shouldReceive("getLicenseId")->withNoArgs()->andReturn($licId);
     return $licenseMatch;
   }
-
 }

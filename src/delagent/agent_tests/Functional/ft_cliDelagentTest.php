@@ -1,21 +1,9 @@
 <?php
-
 /*
- Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2011-2013 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /**
  * \brief test the delagent agent thru command line.
@@ -36,7 +24,7 @@ class ft_cliDelagentTest extends \PHPUnit\Framework\TestCase {
   public $DB_CONF = "";
 
   /* initialization */
-  protected function setUp() {
+  protected function setUp() : void {
     global $EXE_PATH;
     global $PG_CONN;
     global $DB_COMMAND;
@@ -178,7 +166,7 @@ class ft_cliDelagentTest extends \PHPUnit\Framework\TestCase {
   /**
    * \brief clean the env
    */
-  protected function tearDown() {
+  protected function tearDown() : void {
     global $PG_CONN;
     global $DB_COMMAND;
     global $DB_NAME;
@@ -190,4 +178,4 @@ class ft_cliDelagentTest extends \PHPUnit\Framework\TestCase {
   }
 }
 
-?>
+

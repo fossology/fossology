@@ -1,18 +1,7 @@
 /*
- Copyright (C) 2013-2014, Siemens AG
+ SPDX-FileCopyrightText: © 2013-2014 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License version 2
- as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty
- of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software Foundation,
- Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 #include "libfossdbmanagerclass.hpp"
@@ -96,12 +85,30 @@ char* fo::AgentDatabaseHandler::getPFileNameForFileId(unsigned long pfileId) con
 /**
  * \brief Get pfile ids for a given upload id
  * \param uploadId Upload id to fetch from
+ * \param ignoreFilesWithMimeType ignore files with particular mimetype
  * \return Vector of pfile ids in given upload id
  * \sa queryFileIdsForUpload()
  */
-std::vector<unsigned long> fo::AgentDatabaseHandler::queryFileIdsVectorForUpload(int uploadId) const
+std::vector<unsigned long> fo::AgentDatabaseHandler::queryFileIdsVectorForUpload(int uploadId, bool ignoreFilesWithMimeType) const
 {
-  QueryResult queryResult(queryFileIdsForUpload(dbManager.getStruct_dbManager(), uploadId));
+  QueryResult queryResult(queryFileIdsForUpload(dbManager.getStruct_dbManager(), uploadId, ignoreFilesWithMimeType));
+  return queryResult.getSimpleResults(0, fo::stringToUnsignedLong);
+}
+
+/**
+ * \brief Get pfile ids for a given upload id which agent has not scanned
+ * \param uploadId Upload id to fetch from
+ * \param agentId  Agent id to filter pfiles for
+ * \param ignoreFilesWithMimeType ignore files with particular mimetype
+ * \return Vector of pfile ids in given upload id
+ * \sa getSelectedPFiles()
+ */
+std::vector<unsigned long> fo::AgentDatabaseHandler::queryFileIdsVectorForUpload (
+    int uploadId, int agentId, bool ignoreFilesWithMimeType) const
+{
+  QueryResult queryResult(
+    getSelectedPFiles(dbManager.getConnection(), uploadId, agentId,
+                      ignoreFilesWithMimeType));
   return queryResult.getSimpleResults(0, fo::stringToUnsignedLong);
 }
 

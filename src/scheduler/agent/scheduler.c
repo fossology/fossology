@@ -1,19 +1,8 @@
-/* **************************************************************
-Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-************************************************************** */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * \file
  * \brief Scheduler operations
@@ -407,6 +396,26 @@ void scheduler_destroy(scheduler_t* scheduler)
 }
 
 /**
+ * @brief Check if the current agent's max limit is respected.
+ *
+ * Compare the number of running agents and run limit of the agent.
+ * @param agent     Agent which has to be scheduled.
+ * @return True if the agent can be scheduled (no. of running agents < max run
+ *         limit of the agent), false otherwise.
+ */
+static gboolean isMaxLimitReached(meta_agent_t* agent)
+{
+  if (agent != NULL && agent->max_run <= agent->run_count)
+  {
+    return TRUE;
+  }
+  else
+  {
+    return FALSE;
+  }
+}
+
+/**
  * @brief Update function called after every event
  *
  * The heart of the scheduler, the actual scheduling algorithm. This will be
@@ -453,6 +462,15 @@ void scheduler_update(scheduler_t* scheduler)
   {
     while((job = peek_job(scheduler->job_queue)) != NULL)
     {
+      // Check the max limit of running agents
+      if (isMaxLimitReached(
+          g_tree_lookup(scheduler->meta_agents, job->agent_type)))
+      {
+        V_SCHED("JOB_INIT: Unable to run agent %s due to max_run limit.\n",
+            job->agent_type);
+        job = NULL;
+        break;
+      }
       // check if the agent is required to run on local host
       if(is_meta_special(
           g_tree_lookup(scheduler->meta_agents, job->agent_type), SAG_LOCAL))

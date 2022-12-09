@@ -1,21 +1,9 @@
-/***************************************************************
- Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014,2019 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2014, 2019 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  \file maintagent.c
  \brief FOSSology maintenance agent
@@ -37,7 +25,11 @@
  -p|Verify file permissions (report only)
  -P|Verify and fix file permissions|
  -R|Remove uploads with no pfiles|
+ -t #|Remove personal access tokens expired # days ago.|
  -T|Remove orphaned temp tables|
+ -L|Remove orphaned log files from file systems|
+ -o <yyyy-mm-dd>|Remove gold files older than given date (slow)|
+ -l #|Remove log files older than given date|
  -U|Process expired uploads (slow)|
  -Z|Remove orphaned files from the repository (slow)|
  -i|Initialize the database, then exit|
@@ -46,11 +38,12 @@
  -V|print the version info, then exit|
  -c SYSCONFDIR|Specify the directory for the system configuration.|
 
-  Anyone with execute access can run this agent. This makes it easy to put in a cron job.
-  If run from the FOSSology UI, you must be an admin.
-  \section maintagentsource Agent source
-   - \link src/maintagent/agent \endlink
-   - \link src/maintagent/ui \endlink
+ Anyone with execute access can run this agent. This makes it easy to put in a
+ cron job.
+ If run from the FOSSology UI, you must be an admin.
+ \section maintagentsource Agent source
+  - \link src/maintagent/agent \endlink
+  - \link src/maintagent/ui \endlink
  */
 
 #include "maintagent.h"
@@ -74,6 +67,7 @@ int main(int argc, char **argv)
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
+  dbManager = fo_dbManager_new(pgConn);
 
   /* get agent pk
    * Note, if GetAgentKey fails, this process will exit.
@@ -94,164 +88,239 @@ int main(int argc, char **argv)
   int removeOrphanedFilesExe = 0;
   int reIndexAllTablesExe = 0;
   int removeOrphanedRowsExe = 0;
+  int removeOrphanedLogs = 0;
+  int removeExpiredTokensExe = 0;
+  int tokenRetentionPeriod = 30;
+  int removeOldGoldExe = 0;
+  int removeOldLogsExe = 0;
+  char goldOlder[11];
+  char oldLogsDate[11] = {};
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "aADEFghIpNPRTUZivVc:")) != -1)
+  while ((cmdopt = getopt(argc, argv, "aAc:DEFghiIl:LNo:pPRt:TUvVZ")) != -1)
   {
     switch (cmdopt)
     {
       case 'a': /* All non slow operations */
-          if (validateFoldersExe == 0) {
-            validateFolders();
-            validateFoldersExe = 1;
-          }
-          if (verifyFilePermsExe == 0) {
-            verifyFilePerms(1);
-            verifyFilePermsExe = 1;
-          }
-          if (removeUploadsExe == 0) {
-            removeUploads();
-            removeUploadsExe = 1;
-          }
-          if (normalizeUploadPrioritiesExe == 0) {
-            normalizeUploadPriorities();
-            normalizeUploadPrioritiesExe = 1;
-          }
-          if (removeTempsExe == 0) {
-            removeTemps();
-            removeTempsExe = 1;
-          }
-          if (vacAnalyzeExe == 0) {
-            vacAnalyze();
-            vacAnalyzeExe = 1;
-          }
-          break;
+        if (validateFoldersExe == 0)
+        {
+          validateFolders();
+          validateFoldersExe = 1;
+        }
+        if (verifyFilePermsExe == 0)
+        {
+          verifyFilePerms(1);
+          verifyFilePermsExe = 1;
+        }
+        if (removeUploadsExe == 0)
+        {
+          removeUploads();
+          removeUploadsExe = 1;
+        }
+        if (normalizeUploadPrioritiesExe == 0)
+        {
+          normalizeUploadPriorities();
+          normalizeUploadPrioritiesExe = 1;
+        }
+        if (removeTempsExe == 0)
+        {
+          removeTemps();
+          removeTempsExe = 1;
+        }
+        if (vacAnalyzeExe == 0)
+        {
+          vacAnalyze();
+          vacAnalyzeExe = 1;
+        }
+        if (removeOrphanedLogs == 0)
+        {
+          removeOrphanedLogFiles();
+          removeOrphanedLogs = 1;
+        }
+        break;
       case 'A': /* All operations */
-          if (validateFoldersExe == 0) {
-            validateFolders();
-            validateFoldersExe = 1;
-          }
-          if (verifyFilePermsExe == 0) {
-            verifyFilePerms(1);
-            verifyFilePermsExe = 1;
-          }
-          if (removeUploadsExe == 0) {
-            removeUploads();
-            removeUploadsExe = 1;
-          }
-          if (normalizeUploadPrioritiesExe == 0) {
-            normalizeUploadPriorities();
-            normalizeUploadPrioritiesExe = 1;
-          }
-          if (removeTempsExe == 0) {
-            removeTemps();
-            removeTempsExe = 1;
-          }
-          if (vacAnalyzeExe == 0) {
-            vacAnalyze();
-            vacAnalyzeExe = 1;
-          }
-          if (processExpiredExe == 0) {
-            processExpired();
-            processExpiredExe = 1;
-          }
-          if (removeOrphanedFilesExe == 0) {
-            removeOrphanedFiles();
-            removeOrphanedFilesExe = 1;
-          }
-          if (reIndexAllTablesExe == 0) {
-            reIndexAllTables();
-            reIndexAllTablesExe = 1;
-          }
-          if (removeOrphanedRowsExe == 0) {
-            removeOrphanedRows();
-            removeOrphanedRowsExe = 1;
-          }
-          break;
+        if (validateFoldersExe == 0)
+        {
+          validateFolders();
+          validateFoldersExe = 1;
+        }
+        if (verifyFilePermsExe == 0)
+        {
+          verifyFilePerms(1);
+          verifyFilePermsExe = 1;
+        }
+        if (removeUploadsExe == 0)
+        {
+          removeUploads();
+          removeUploadsExe = 1;
+        }
+        if (normalizeUploadPrioritiesExe == 0)
+        {
+          normalizeUploadPriorities();
+          normalizeUploadPrioritiesExe = 1;
+        }
+        if (removeTempsExe == 0)
+        {
+          removeTemps();
+          removeTempsExe = 1;
+        }
+        if (vacAnalyzeExe == 0)
+        {
+          vacAnalyze();
+          vacAnalyzeExe = 1;
+        }
+        if (processExpiredExe == 0)
+        {
+          processExpired();
+          processExpiredExe = 1;
+        }
+        if (removeOrphanedFilesExe == 0)
+        {
+          removeOrphanedFiles();
+          removeOrphanedFilesExe = 1;
+        }
+        if (reIndexAllTablesExe == 0)
+        {
+          reIndexAllTables();
+          reIndexAllTablesExe = 1;
+        }
+        if (removeOrphanedRowsExe == 0)
+        {
+          removeOrphanedRows();
+          removeOrphanedRowsExe = 1;
+        }
+        if (removeOrphanedLogs == 0)
+        {
+          removeOrphanedLogFiles();
+          removeOrphanedLogs = 1;
+        }
+        break;
       case 'D': /* Vac/Analyze (slow) */
-          if (vacAnalyzeExe == 0) {
-            vacAnalyze();
-            vacAnalyzeExe = 1;
-          }
-          break;
+        if (vacAnalyzeExe == 0)
+        {
+          vacAnalyze();
+          vacAnalyzeExe = 1;
+        }
+        break;
       case 'F': /* Validate folder contents */
-          if (validateFoldersExe == 0) {
-            validateFolders();
-            validateFoldersExe = 1;
-          }
-          break;
+        if (validateFoldersExe == 0)
+        {
+          validateFolders();
+          validateFoldersExe = 1;
+        }
+        break;
       case 'g': /* Delete orphan gold files */
-          deleteOrphanGold();
-          break;
+        deleteOrphanGold();
+        break;
       case 'h':
-            usage(argv[0]);
-            exitNow(0);
+        usage(argv[0]);
+        exitNow(0);
       case 'N': /* Remove uploads with no pfiles */
-          if (normalizeUploadPrioritiesExe == 0) {
-            normalizeUploadPriorities();
-            normalizeUploadPrioritiesExe = 1;
-          }
-          break;
+        if (normalizeUploadPrioritiesExe == 0)
+        {
+          normalizeUploadPriorities();
+          normalizeUploadPrioritiesExe = 1;
+        }
+        break;
+      case 'o': /* Gold files older than given date */
+        if (removeOldGoldExe == 0)
+        {
+          strncpy(goldOlder, optarg, 10);
+          deleteOldGold(goldOlder);
+          removeOldGoldExe = 1;
+        }
+        break;
       case 'p': /* Verify file permissions */
-          verifyFilePerms(0);
-          break;
+        verifyFilePerms(0);
+        break;
       case 'P': /* Verify and fix file permissions */
-          if (verifyFilePermsExe == 0) {
-            verifyFilePerms(1);
-            verifyFilePermsExe = 1;
-          }
-          break;
+        if (verifyFilePermsExe == 0)
+        {
+          verifyFilePerms(1);
+          verifyFilePermsExe = 1;
+        }
+        break;
       case 'R': /* Remove uploads with no pfiles */
-          if (removeUploadsExe == 0) {
-            removeUploads();
-            removeUploadsExe = 1;
-          }
-          break;
+        if (removeUploadsExe == 0)
+        {
+          removeUploads();
+          removeUploadsExe = 1;
+        }
+        break;
+      case 't': /* Remove expired personal access token */
+        if (removeExpiredTokensExe == 0)
+        {
+          tokenRetentionPeriod = atol(optarg);
+          removeExpiredTokens(tokenRetentionPeriod);
+          removeExpiredTokensExe = 1;
+        }
+        break;
       case 'T': /* Remove orphaned temp tables */
-          if (removeTempsExe == 0) {
-            removeTemps();
-            removeTempsExe = 1;
-          }
-          break;
+        if (removeTempsExe == 0)
+        {
+          removeTemps();
+          removeTempsExe = 1;
+        }
+        break;
       case 'U': /* Process expired uploads (slow) */
-          if (processExpiredExe == 0) {
-            processExpired();
-            processExpiredExe = 1;
-          }
-          break;
+        if (processExpiredExe == 0)
+        {
+          processExpired();
+          processExpiredExe = 1;
+        }
+        break;
       case 'Z': /* Remove orphaned files from the repository (slow) */
-          if (removeOrphanedFilesExe == 0) {
-            removeOrphanedFiles();
-            removeOrphanedFilesExe = 1;
-          }
-          break;
+        if (removeOrphanedFilesExe == 0)
+        {
+          removeOrphanedFiles();
+          removeOrphanedFilesExe = 1;
+        }
+        break;
       case 'I': /* Reindexing of database */
-          if (reIndexAllTablesExe == 0) {
-            reIndexAllTables();
-            reIndexAllTablesExe = 1;
-          }
-          break;
+        if (reIndexAllTablesExe == 0)
+        {
+          reIndexAllTables();
+          reIndexAllTablesExe = 1;
+        }
+        break;
       case 'E': /* Remove orphaned files from the database */
-          if (removeOrphanedRowsExe == 0) {
-            removeOrphanedRows();
-            removeOrphanedRowsExe = 1;
-          }
-          break;
+        if (removeOrphanedRowsExe == 0)
+        {
+          removeOrphanedRows();
+          removeOrphanedRowsExe = 1;
+        }
+        break;
+      case 'l': /* Remove old log files */
+        if (removeOldLogsExe == 0)
+        {
+          strncpy(oldLogsDate, optarg, 10);
+          removeOldLogFiles(oldLogsDate);
+          removeOldLogsExe = 1;
+        }
+        break;
+      case 'L': /* Remove orphaned log files from file system */
+        if (removeOrphanedLogs == 0)
+        {
+          removeOrphanedLogFiles();
+          removeOrphanedLogs = 1;
+        }
+        break;
       case 'i': /* "Initialize" */
-            exitNow(0);
+        exitNow(0);
       case 'v': /* verbose output for debugging  */
-          agent_verbose++;   // global agent verbose flag.  Can be changed in running agent by the scheduler on each fo_scheduler_next() call
-            break;
+        agent_verbose++;  ///< global agent verbose flag. Can be changed in running agent by the scheduler on each fo_scheduler_next() call
+        break;
       case 'V': /* print version info */
-            printf("%s", BuildVersion);
-            exitNow(0);
-      case 'c': break; /* handled by fo_scheduler_connect() */
+        printf("%s", BuildVersion);
+        exitNow(0);
+      case 'c':
+        break; /* handled by fo_scheduler_connect() */
       default:
-            usage(argv[0]);
-            exitNow(-1);
+        usage(argv[0]);
+        exitNow(-1);
     }
   }
 
-  exitNow(0);  /* success */
-  return(0);   /* Never executed but prevents compiler warning */
+  exitNow(0); /* success */
+  return (0); /* Never executed but prevents compiler warning */
 } /* main() */

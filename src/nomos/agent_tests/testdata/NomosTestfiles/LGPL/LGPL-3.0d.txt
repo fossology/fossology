@@ -1,0 +1,2 @@
+/* radare2, Sharp LH5801 disassembler.
+* (C) Copyright 2014-2015 jn, published under the LGPLv3 */

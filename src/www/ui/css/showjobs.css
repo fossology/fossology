@@ -1,19 +1,8 @@
-/***********************************************************
- Copyright (C) 2015 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2015, 2019 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 .jobQueued
 {
@@ -48,4 +37,49 @@
   font: normal 8pt verdana, arial, helvetica;
   background: lavender;
   color: black;
+}
+
+.jobTable {
+  width: 100%;
+}
+
+.jobTable thead th {
+  font: bold 10pt verdana, arial, helvetica;
+  background: gold;
+  color: white;
+}
+
+.jobTableNewJob td {
+  text-align: center;
+  font: bold 8pt verdana, arial, helvetica;
+  background: lavender;
+  color: black;
+}
+
+.jobTable tbody tr {
+  width: 100%;
+}
+
+.jobTable tbody td {
+  width: 10%;
+}
+
+.jobTable tbody tr:not(.jobTableNewJob) :nth-child(2) {
+  text-align: center;
+}
+
+.jobTable tbody tr:not(.jobTableNewJob) :nth-child(4) {
+  text-align: right;
+}
+
+.jobTable tbody tr:not(.jobTableNewJob) :nth-child(5) {
+  width: 30%;
+}
+
+.jobTable tbody tr:not(.jobTableNewJob) :nth-child(6) {
+  text-align: right;
+}
+
+.jobTable tbody tr:not(.jobTableNewJob) :nth-child(7) {
+  text-align: center;
 }

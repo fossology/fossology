@@ -1,0 +1,3 @@
+# Moving maximum / minimum code taken from Bottleneck under the terms
+# of its Simplified BSD license
+# https://github.com/kwgoodman/bottleneck

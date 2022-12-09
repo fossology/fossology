@@ -1,20 +1,9 @@
 <?php
 /*
- Copyright (C) 2018 Siemens AG
+ SPDX-FileCopyrightText: © 2018 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /**
  * \brief Create a fossology test database, test configuration directory and
@@ -29,7 +18,7 @@ function setupTestEnv($workingDir, $agent, $agentTable=true)
 {
   $SYSCONF_DIR = "$workingDir/testconf";
   $confFile = "fossology.conf";
-  $agentDir = "$workingDir/../..";
+  $agentDir = "$workingDir/..";
 
   exec("rm -rf $SYSCONF_DIR");
   if(!mkdir($SYSCONF_DIR)) {
@@ -53,11 +42,11 @@ function setupTestEnv($workingDir, $agent, $agentTable=true)
   fwrite($confFile_fh, 'LIBEXECDIR=$MODDIR/../install/db' . "\n");
   fwrite($confFile_fh, "LOGDIR=$SYSCONF_DIR\n");
   fclose($confFile_fh);
-  symlink("$workingDir/../../../../VERSION", "$SYSCONF_DIR/VERSION");
+  symlink("$workingDir/../VERSION", "$SYSCONF_DIR/VERSION");
   mkdir("$SYSCONF_DIR/mods-enabled");
   symlink($agentDir, "$SYSCONF_DIR/mods-enabled/$agent");
 
-  $DB_COMMAND  = "../../../testing/db/createTestDB.php -c $SYSCONF_DIR -e";
+  $DB_COMMAND  = __DIR__."/createTestDB.php -c $SYSCONF_DIR -e";
 
   exec($DB_COMMAND, $dbout, $rc);
   if ($rc != 0) {

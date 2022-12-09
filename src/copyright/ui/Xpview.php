@@ -1,21 +1,10 @@
 <?php
 /*
- Copyright (C) 2014-2015, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
  Author: Johannes Najjar
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /**
  * @namespace Fossology::Agent::Copyright::UI
@@ -34,6 +23,7 @@ use Fossology\Lib\UI\Component\MicroMenu;
 use Fossology\Lib\View\HighlightRenderer;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use ui_view;
 
 /**
@@ -97,14 +87,13 @@ class Xpview extends DefaultPlugin
     $vars = array();
     $uploadId = intval($request->get('upload'));
     $uploadTreeId = intval($request->get('item'));
-    if (empty($uploadTreeId) || empty($uploadId))
-    {
+    if (empty($uploadTreeId) || empty($uploadId)) {
       $text = _("Empty Input");
       $vars['message']= "<h2>$text</h2>";
       return $this->responseBad($vars);
     }
 
-    if( !$this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) ) {
+    if (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId())) {
       $text = _("Permission Denied");
       $vars['message']= "<h2>$text</h2>";
       return $this->responseBad();
@@ -112,25 +101,21 @@ class Xpview extends DefaultPlugin
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName);
-    if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']))
-    {
+    if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode'])) {
       $parent = $this->uploadDao->getUploadParent($uploadEntry['upload_fk']);
-      if (!isset($parent))
-      {
+      if (!isset($parent)) {
         return $this->responseBad();
       }
 
       $uploadTree = $this->uploadDao->getNextItem($uploadEntry['upload_fk'], $parent);
-      if ($uploadTree === UploadDao::NOT_FOUND)
-      {
+      if ($uploadTree === UploadDao::NOT_FOUND) {
         return $this->responseBad();
       }
       $uploadTreeId = $uploadTree->getId();
 
       return new RedirectResponse(Traceback_uri() . '?mod=' . $this->getName() . Traceback_parm_keep(array('show','upload')) . "&item=$uploadTreeId");
     }
-    if (empty($uploadTreeId))
-    {
+    if (empty($uploadTreeId)) {
       return $this->responseBad('No item selected.');
     }
 
@@ -140,30 +125,46 @@ class Xpview extends DefaultPlugin
     $lastItem = GetParm("lastItem", PARM_INTEGER);
     $changed= GetParm("changedSomething", PARM_STRING);
     $userId = Auth::getUserId();
-    if (!empty($lastItem) && $changed =="true")
-    {
+    if (!empty($lastItem) && $changed =="true") {
       $lastUploadEntry = $this->uploadDao->getUploadEntry($lastItem, $uploadTreeTableName);
-      $clearingType = $_POST['clearingTypes'];
-      $description = $_POST['description'];
-      $textFinding = $_POST['textFinding'];
-      $comment = $_POST['comment'];
-      $decision_pk = $_POST['decision_pk'];
-      $this->copyrightDao->saveDecision($this->decisionTableName ,$lastUploadEntry['pfile_fk'], $userId , $clearingType,
-        $description, $textFinding, $comment, $decision_pk);
+      $clearingType = GetParm('clearingTypes', PARM_INTEGER);
+      $description = trim(GetParm('description', PARM_STRING));
+      $textFinding = trim(GetParm('textFinding', PARM_STRING));
+      $comment = trim(GetParm('comment', PARM_STRING));
+      $decision_pk = GetParm('decision_pk', PARM_INTEGER);
+      if (empty($clearingType) || empty($textFinding)) {
+        if (empty($clearingType)) {
+          $text = _("The clearing type cannot be empty. " .
+            "Please choose a value and submit again.");
+        } else {
+          $text = _("The text finding cannot be empty. " .
+            "Please enter a text and submit again.");
+        }
+        $vars['message']= "<strong>$text</strong>";
+      } else {
+        $this->copyrightDao->saveDecision($this->decisionTableName,
+          $lastUploadEntry['pfile_fk'], $userId , $clearingType, $description,
+          $textFinding, $comment, $decision_pk);
+      }
     }
 
     $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
-    $scanJobProxy->createAgentStatus(array($this->agentName));
+    if ($this->agentName == "copyright") {
+      $scanJobProxy->createAgentStatus(array($this->agentName, 'reso'));
+    } else {
+      $scanJobProxy->createAgentStatus(array($this->agentName));
+    }
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     $highlights = array();
-    if(array_key_exists($this->agentName, $selectedScanners))
-    {
-      $latestXpAgentId = $selectedScanners[$this->agentName];
+    if (array_key_exists('reso', $selectedScanners)) {
+      $latestXpAgentId[] = $selectedScanners['reso'];
+    }
+    if (array_key_exists($this->agentName, $selectedScanners)) {
+      $latestXpAgentId[] = $selectedScanners[$this->agentName];
       $highlights = $this->copyrightDao->getHighlights($uploadTreeId, $this->tableName, $latestXpAgentId, $this->typeToHighlightTypeMap);
     }
 
-    if (count($highlights) < 1)
-    {
+    if (count($highlights) < 1) {
       $vars['message'] = _("No ").$this->tableName ._(" data is available for this file.");
     }
 
@@ -191,7 +192,7 @@ class Xpview extends DefaultPlugin
     $vars['clearingTypes'] = $copyrightDecisionMap;
     $vars['xptext'] = $this->xptext;
 
-    $agentId = intval($request->get("agent"));
+    $agentId = strval($request->get("agent"));
     $vars = array_merge($vars,$this->additionalVars($uploadId, $uploadTreeId, $agentId));
     return $this->render('ui-cp-view.html.twig',$this->mergeWithDefault($vars));
   }
@@ -200,7 +201,7 @@ class Xpview extends DefaultPlugin
    * @brief Get additional variables for a give item
    * @param int $uploadId
    * @param int $uploadTreeId
-   * @param int $agentId
+   * @param string $agentId
    * @return array
    * @todo Not implemented
    */
@@ -231,7 +232,6 @@ class Xpview extends DefaultPlugin
     return $this->render("include/base.html.twig",$vars);
   }
 
-
   /**
    * @brief Create legend box
    * @return string rendered legend box
@@ -239,8 +239,7 @@ class Xpview extends DefaultPlugin
   function legendBox()
   {
     $output = _("file text");
-    foreach ($this->highlightTypeToStringMap as $colorKey => $txt)
-    {
+    foreach ($this->highlightTypeToStringMap as $colorKey => $txt) {
       $output .= '<br/>' . $this->highlightRenderer->createStartSpan($colorKey, $txt) . $txt . '</span>';
     }
     return $output;
@@ -262,8 +261,7 @@ class Xpview extends DefaultPlugin
 
     // For all other menus, permit coming back here.
     $uploadId = GetParm("upload", PARM_INTEGER);
-    if (!empty($itemId) && !empty($uploadId))
-    {
+    if (!empty($itemId) && !empty($uploadId)) {
       $menuText = "Copyright/Email/Url/Author";
       $menuPosition = 57;
       $tooltipText = _("View Copyright/Email/Url/Author info");
@@ -271,8 +269,7 @@ class Xpview extends DefaultPlugin
       $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText, $menuPosition, $this->getName(), $URI, $tooltipText);
     }
     $licId = GetParm("lic", PARM_INTEGER);
-    if (!empty($licId))
-    {
+    if (!empty($licId)) {
       $this->NoMenu = 1;
     }
   }

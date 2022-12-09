@@ -1,19 +1,8 @@
-/*******************************************************************
- Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011-2014 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *******************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * \file
  * \brief Contains global declaration of variables
@@ -105,7 +94,8 @@ cmdlist CMD[] =
 /* 30 */{ "application/jar","unzip","-q -P none -o","-x / >/dev/null 2>&1","unzip -Zhzv '%s' > '%s'",CMD_ARC,1,0177000,0177000, },
 /* 31 */{ "application/java-archive","unzip","-q -P none -o","-x / >/dev/null 2>&1","unzip -Zhzv '%s' > '%s'",CMD_ARC,1,0177000,0177000, },
 /* 32 */{ "application/x-dosexec","7z","x -y -pjunk",">/dev/null 2>&1","",CMD_ARC,1,0177000,0177000, },
-/* 33 */{ "","","",">/dev/null 2>&1","",CMD_DEFAULT,1,0177000,0177000, },
+/* 33 */{ "application/vnd.debian.binary-package","ar","x",">/dev/null 2>&1","dpkg -I '%s' > '%s'",CMD_AR,1,0177000,0177777, },
+/* 34 */{ "","","",">/dev/null 2>&1","",CMD_DEFAULT,1,0177000,0177000, },
   { NULL,NULL,NULL,NULL,NULL,-1,-1,0177000,0177000, },
 };
 #endif

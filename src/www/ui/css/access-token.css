@@ -1,0 +1,42 @@
+/*
+ SPDX-FileCopyrightText: © 2019 Siemens AG
+ Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
+.active-token-table, .expired-token-table {
+	border: 1px solid black;
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.active-token-table tr, .expired-token-table tr {
+	border-bottom: 1px inset #aaa;
+}
+
+.active-token-table td, .expired-token-table td {
+	padding: 5px;
+}
+
+.pat-action {
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.5, #e31),
+		color-stop(1, #a31));
+	background-color: #d31;
+	border-radius: 4px;
+	border: 1px solid #b21;
+	color: #fff;
+	padding: 3px 8px 3px 8px;
+}
+
+.pat-action:hover {
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #a31),
+		color-stop(1, #e31));
+	background-color: #d31;
+}
+
+.pat-action:active {
+	box-shadow: 0px 2px 8px 0px #555;
+	position: relative;
+	top: 1px;
+}

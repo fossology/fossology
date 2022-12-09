@@ -1,20 +1,9 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
-Authors: Andreas Würl, Steffen Weber
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ Authors: Andreas Würl, Steffen Weber
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Dao;
@@ -128,6 +117,22 @@ class FolderDao
     return $rootFolder;
   }
 
+  /**
+   * @param int $userId
+   * @return Folder|null
+   */
+  public function getDefaultFolder($userId)
+  {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName,
+      "SELECT f.* FROM folder f INNER JOIN users u ON f.folder_pk = u.default_folder_fk WHERE u.user_pk = $1");
+    $res = $this->dbManager->execute($statementName, array($userId));
+    $row = $this->dbManager->fetchArray($res);
+    $rootFolder = $row ? new Folder(intval($row['folder_pk']), $row['folder_name'], $row['folder_desc'], intval($row['folder_perm'])) : null;
+    $this->dbManager->freeResult($res);
+    return $rootFolder;
+  }
+
   public function getFolderTreeCte($parentId = null)
   {
     $parentCondition = $parentId ? 'folder_pk=$1' : 'folder_pk=' . self::TOP_LEVEL;
@@ -164,8 +169,7 @@ class FolderDao
     $userGroupMap = $this->userDao->getUserGroupMap(Auth::getUserId());
 
     $results = array();
-    while ($row = $this->dbManager->fetchArray($res))
-    {
+    while ($row = $this->dbManager->fetchArray($res)) {
       $countUploads = $this->countFolderUploads(intval($row['folder_pk']), $userGroupMap);
 
       $results[] = array(
@@ -200,8 +204,7 @@ GROUP BY group_fk
 ");
     $res = $this->dbManager->execute($statementName, $parameters);
     $results = array();
-    while ($row = $this->dbManager->fetchArray($res))
-    {
+    while ($row = $this->dbManager->fetchArray($res)) {
       $row['group_name'] = $userGroupMap[$row['group_id']];
       $results[$row['group_name']] = $row;
     }
@@ -218,8 +221,7 @@ GROUP BY group_fk
     $this->dbManager->freeResult($res);
 
     $allIds = array();
-    for($i=0; $i < sizeof($results); $i++)
-    {
+    for ($i=0; $i < sizeof($results); $i++) {
       array_push($allIds, intval($results[$i]['folder_pk']));
     }
 
@@ -249,13 +251,11 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
    */
   public function getFolderUploads($parentId, $trustGroupId = null)
   {
-    if (empty($trustGroupId))
-    {
+    if (empty($trustGroupId)) {
       $trustGroupId = Auth::getGroupId();
     }
     $results = array();
-    foreach ($this->getFolderChildUploads($parentId, $trustGroupId) as $row)
-    {
+    foreach ($this->getFolderChildUploads($parentId, $trustGroupId) as $row) {
       $results[] = UploadProgress::createFromTable($row);
     }
     return $results;
@@ -271,8 +271,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
 
   public function ensureTopLevelFolder()
   {
-    if (!$this->hasTopLevelFolder())
-    {
+    if (!$this->hasTopLevelFolder()) {
       $this->dbManager->insertTableRow("folder", array("folder_pk" => self::TOP_LEVEL, "folder_name" => "Software Repository", "folder_desc" => "Top Folder"));
       $this->insertFolderContents(1, 0, 0);
       $this->fixFolderSequence();
@@ -281,10 +280,12 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
 
   public function isWithoutReusableFolders($folderStructure)
   {
-    foreach ($folderStructure as $folder)
-    {
-      $posibilities = array_reduce($folder[self::REUSE_KEY], function($sum,$groupInfo){ return $sum+$groupInfo['count'];},0);
-      if($posibilities > 0) {
+    foreach ($folderStructure as $folder) {
+      $posibilities = array_reduce($folder[self::REUSE_KEY], function($sum,$groupInfo)
+      {
+        return $sum+$groupInfo['count'];
+      }, 0);
+      if ($posibilities > 0) {
         return false;
       }
     }
@@ -300,13 +301,12 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
     return !empty($cycle);
   }
 
-  protected function getContent($folderContentId)
+  public function getContent($folderContentId)
   {
     $content = $this->dbManager->getSingleRow('SELECT * FROM foldercontents WHERE foldercontents_pk=$1',
       array($folderContentId),
       __METHOD__ . '.getContent');
-    if (empty($content))
-    {
+    if (empty($content)) {
       throw new \Exception('invalid FolderContentId');
     }
     return $content;
@@ -314,29 +314,23 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
 
   protected function isContentMovable($content, $newParentId)
   {
-    if ($content['parent_fk'] == $newParentId)
-    {
+    if ($content['parent_fk'] == $newParentId) {
       return false;
     }
     $newParent = $this->dbManager->getSingleRow('SELECT * FROM folder WHERE folder_pk=$1',
       array($newParentId),
       __METHOD__ . '.getParent');
-    if (empty($newParent))
-    {
+    if (empty($newParent)) {
       throw new \Exception('invalid parent folder');
     }
 
-    if ($content['foldercontents_mode'] == self::MODE_FOLDER)
-    {
-      if ($this->isInFolderTree($content['child_id'], $newParentId))
-      {
+    if ($content['foldercontents_mode'] == self::MODE_FOLDER) {
+      if ($this->isInFolderTree($content['child_id'], $newParentId)) {
         throw new \Exception("action would cause a cycle");
       }
-    } elseif ($content['foldercontents_mode'] == self::MODE_UPLOAD)
-    {
+    } elseif ($content['foldercontents_mode'] == self::MODE_UPLOAD) {
       $uploadId = $content['child_id'];
-      if (!$this->uploadDao->isEditable($uploadId, Auth::getGroupId()))
-      {
+      if (!$this->uploadDao->isEditable($uploadId, Auth::getGroupId())) {
         throw new \Exception('permission to upload denied');
       }
     }
@@ -347,8 +341,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
   public function moveContent($folderContentId, $newParentId)
   {
     $content = $this->getContent($folderContentId);
-    if (!$this->isContentMovable($content, $newParentId))
-    {
+    if (!$this->isContentMovable($content, $newParentId)) {
       return;
     }
 
@@ -359,8 +352,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
   public function copyContent($folderContentId, $newParentId)
   {
     $content = $this->getContent($folderContentId);
-    if (!$this->isContentMovable($content, $newParentId))
-    {
+    if (!$this->isContentMovable($content, $newParentId)) {
       return;
     }
 
@@ -377,8 +369,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
     $this->dbManager->prepare($stmt = __METHOD__, $sql);
     $res = $this->dbManager->execute($stmt, array($folderId));
     $contents = array();
-    while ($row = $this->dbManager->fetchArray($res))
-    {
+    while ($row = $this->dbManager->fetchArray($res)) {
       $contents[] = $row['foldercontents_pk'];
     }
     $this->dbManager->freeResult($res);
@@ -395,8 +386,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
   public function removeContent($folderContentId)
   {
     $content = $this->getContent($folderContentId);
-    if ($this->isRemovableContent($content['child_id'], $content['foldercontents_mode']))
-    {
+    if ($this->isRemovableContent($content['child_id'], $content['foldercontents_mode'])) {
       $sql = "DELETE FROM foldercontents WHERE foldercontents_pk=$1";
       $this->dbManager->getSingleRow($sql, array($folderContentId), __METHOD__);
     }
@@ -417,8 +407,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
       . " AND foldercontents_mode=" . self::MODE_FOLDER;
     $this->dbManager->prepare($stmtFolder, $sqlFolder);
     $res = $this->dbManager->execute($stmtFolder, array($folderId));
-    while ($row = $this->dbManager->fetchArray($res))
-    {
+    while ($row = $this->dbManager->fetchArray($res)) {
       $results[$row['foldercontents_pk']] = $row;
     }
     $this->dbManager->freeResult($res);
@@ -432,8 +421,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
   public function getFolder($folderId)
   {
     $folderRow = $this->dbManager->getSingleRow('SELECT * FROM folder WHERE folder_pk = $1', array($folderId));
-    if (!$folderRow)
-    {
+    if (!$folderRow) {
       return null;
     }
     return new Folder($folderRow['folder_pk'], $folderRow['folder_name'], $folderRow['folder_desc'], $folderRow['folder_perm']);
@@ -444,17 +432,15 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
    * @param int $userId
    * @return true|false
    */
-  public function isFolderAccessible($folderId, $userId = NULL)
+  public function isFolderAccessible($folderId, $userId = null)
   {
     $allUserFolders = array();
-    if($userId == NULL)
-    {
+    if ($userId == null) {
       $userId = Auth::getUserId();
     }
     $rootFolder = $this->getRootFolder($userId)->getId();
     GetFolderArray($rootFolder, $allUserFolders);
-    if (in_array($folderId, array_keys($allUserFolders)))
-    {
+    if (in_array($folderId, array_keys($allUserFolders))) {
       return true;
     }
     return false;
@@ -463,17 +449,32 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
   /**
    * Get the folder contents id for a given child id
    * @param integer $childId Id of the child
+   * @param integer $mode    Mode of child
    * @return NULL|integer Folder content id if success, NULL otherwise
    */
-  public function getFolderContentsId($childId)
+  public function getFolderContentsId($childId, $mode)
   {
     $folderContentsRow = $this->dbManager->getSingleRow(
       'SELECT foldercontents_pk FROM foldercontents '.
-      'WHERE child_id = $1', [$childId]);
-    if (!$folderContentsRow)
-    {
+      'WHERE child_id = $1 AND foldercontents_mode = $2', [$childId, $mode]);
+    if (!$folderContentsRow) {
       return null;
     }
     return intval($folderContentsRow['foldercontents_pk']);
+  }
+
+  /**
+   * For a given folder id, get the parent folder id.
+   * @param integer $folderPk ID of the folder
+   * @return number Parent id if parent exists, null otherwise.
+   */
+  public function getFolderParentId($folderPk)
+  {
+    $sql = "SELECT parent_fk FROM foldercontents " .
+      "WHERE foldercontents_mode = " . self::MODE_FOLDER .
+      " AND child_id = $1;";
+    $statement = __METHOD__ . ".getParentId";
+    $row = $this->dbManager->getSingleRow($sql, [$folderPk], $statement);
+    return (empty($row)) ? null : $row['parent_fk'];
   }
 }

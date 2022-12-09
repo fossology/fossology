@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License version 2.1 as published by the Free Software Foundation.
-
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-***********************************************************/
+ SPDX-License-Identifier: LGPL-2.1-only
+*/
 
 /**
  * @dir
@@ -38,6 +27,7 @@
 require_once(dirname(dirname(dirname(__FILE__))) . "/vendor/autoload.php");
 
 require_once("common-sysconfig.php");
+require_once("fossdash-config.php");
 
 // setup dependency injection
 require_once("common-container.php");
@@ -66,7 +56,6 @@ require_once("common-users.php");
 require_once("common-string.php");
 /* Only include the command-line interface functions if it is required. */
 global $UI_CLI;
-if (!empty($UI_CLI) && ($UI_CLI == 1))
-{
-  require_once("common-cli.php");
+if (! empty($UI_CLI) && ($UI_CLI == 1)) {
+  require_once ("common-cli.php");
 }

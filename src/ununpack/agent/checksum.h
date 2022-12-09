@@ -1,21 +1,10 @@
-/************************************************************
+/*
  checksum.h - Checksum computation header file
 
- Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2007-2011 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 #ifndef CHECKSUM_H
 #define CHECKSUM_H
 
@@ -31,7 +20,11 @@
 #include <fcntl.h>
 #include <dirent.h>
 
+#ifdef STANDALONE
+#include "standalone.h"
+#else
 #include "libfossology.h"
+#endif
 
 /**
  * \brief Store check sum of a file
@@ -62,4 +55,5 @@ int	CountDigits	(uint64_t Num);
 Cksum *	SumComputeFile	(FILE *Fin);
 Cksum *	SumComputeBuff	(CksumFile *CF);
 char *	SumToString	(Cksum *Sum);
+int calc_sha256sum(char* filename, char* dst);
 #endif

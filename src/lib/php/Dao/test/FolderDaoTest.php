@@ -1,24 +1,14 @@
 <?php
 /*
-Copyright (C) 2014-2017, Siemens AG
-Author: Steffen Weber
+ SPDX-FileCopyrightText: © 2014-2017 Siemens AG
+ Author: Steffen Weber
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Dao;
 
+use Exception;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
@@ -32,7 +22,7 @@ class FolderDaoTest extends \PHPUnit\Framework\TestCase
   /** @var FolderDao */
   private $folderDao;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
@@ -48,7 +38,7 @@ class FolderDaoTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;
@@ -161,11 +151,9 @@ class FolderDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($this->folderDao->getFolderChildFolders(FolderDao::TOP_LEVEL),is(arrayWithSize(2)));
   }
 
-  /**
-   * @expectedException Exception
-   */
   public function testMoveContentShouldFailIfCyclesAreProduced()
   {
+    $this->expectException(Exception::class);
     $this->folderDao->ensureTopLevelFolder();
     $folderA = $this->folderDao->insertFolder($folderName='A', '/A', FolderDao::TOP_LEVEL);
     $folderB = $this->folderDao->insertFolder($folderName='B', '/A/B', $folderA);

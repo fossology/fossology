@@ -1,21 +1,10 @@
 <?php
-/***************************************************************
- Copyright (C) 2018 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2018 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * @file
  * @brief Controller for search queries
@@ -23,11 +12,13 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\SearchResult;
+use Fossology\Lib\Dao\SearchHelperDao;
+use Fossology\Lib\Db\DbManager;
 
 require_once dirname(dirname(__DIR__)) . "/search-helper.php";
 
@@ -37,16 +28,21 @@ require_once dirname(dirname(__DIR__)) . "/search-helper.php";
  */
 class SearchController extends RestController
 {
+  /** @var SearchHelperDao */
+  private $searchHelperDao;
+
   /**
    * Perform a search on FOSSology
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function performSearch($request, $response, $args)
   {
+    $this->searchHelperDao = $this->container->get('dao.searchhelperdao');
+
     $searchType = $request->getHeaderLine("searchType");
     $filename = $request->getHeaderLine("filename");
     $tag = $request->getHeaderLine("tag");
@@ -54,10 +50,18 @@ class SearchController extends RestController
     $filesizeMax = $request->getHeaderLine("filesizemax");
     $license = $request->getHeaderLine("license");
     $copyright = $request->getHeaderLine("copyright");
+    $uploadId = $request->getHeaderLine("uploadId");
+    $page = $request->getHeaderLine("page");
+    $limit = $request->getHeaderLine("limit");
 
     // set searchtype to search allfiles by default
     if (empty($searchType)) {
       $searchType = "allfiles";
+    }
+
+    // set uploadId to 0 - search in all files
+    if (empty($uploadId)) {
+      $uploadId = 0;
     }
 
     /*
@@ -82,22 +86,52 @@ class SearchController extends RestController
       return $response->withJson($returnVal->getArray(), $returnVal->getCode());
     }
 
+    /*
+     * check if page && limit are numeric, if existing
+     */
+    if ((! ($page==='') && (! is_numeric($page) || $page < 1)) ||
+      (! ($limit==='') && (! is_numeric($limit) || $limit < 1))) {
+      $returnVal = new Info(400,
+        "Bad Request. page and limit need to be positive integers!",
+        InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    // set page to 1 by default
+    if (empty($page)) {
+      $page = 1;
+    }
+
+    // set limit to 50 by default and max as 100
+    if (empty($limit)) {
+      $limit = 50;
+    } else if ($limit > 100) {
+      $limit = 100;
+    }
+
     $item = GetParm("item", PARM_INTEGER);
-    $results = GetResults($item, $filename, $tag, 0,
+    list($results, $count) = $this->searchHelperDao->GetResults($item,
+      $filename, $uploadId, $tag, $page-1, $limit,
       $filesizeMin, $filesizeMax, $searchType, $license, $copyright,
-      $this->restHelper->getUploadDao(), $this->restHelper->getGroupId(),
-      $GLOBALS['PG_CONN'])[0];
+      $this->restHelper->getUploadDao(), $this->restHelper->getGroupId());
+    $totalPages = intval(ceil($count / $limit));
 
     $searchResults = [];
     // rewrite it and add additional information about it's parent upload
     for ($i = 0; $i < sizeof($results); $i ++) {
       $currentUpload = $this->dbHelper->getUploads(
-        $this->restHelper->getUserId(), $results[$i]["upload_fk"])[0];
+        $this->restHelper->getUserId(), $this->restHelper->getGroupId(), 1, 1,
+        $results[$i]["upload_fk"], null, true)[1];
+      if (! empty($currentUpload)) {
+        $currentUpload = $currentUpload[0];
+      } else {
+        continue;
+      }
       $uploadTreePk = $results[$i]["uploadtree_pk"];
       $filename = $this->dbHelper->getFilenameFromUploadTree($uploadTreePk);
       $currentResult = new SearchResult($currentUpload, $uploadTreePk, $filename);
       $searchResults[] = $currentResult->getArray();
     }
-    return $response->withJson($searchResults, 200);
+    return $response->withHeader("X-Total-Pages", $totalPages)->withJson($searchResults, 200);
   }
 }

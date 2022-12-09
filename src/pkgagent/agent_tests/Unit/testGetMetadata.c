@@ -1,19 +1,8 @@
-/*********************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *********************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 #include "pkgagent.h"
 
 #include <stdio.h>
@@ -33,7 +22,7 @@ extern char *DBConfFile;
  */
 void test_GetMetadata_normal()
 {
-  char *pkg = "../testdata/fossology-1.2.0-1.el5.i386.rpm";
+  char *pkg = "./testdata/fossology-1.2.0-1.el5.i386.rpm";
   struct rpmpkginfo *pi;
   //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
@@ -76,7 +65,7 @@ void test_GetMetadata_normal()
  */
 void test_GetMetadata_wrong_testfile()
 {
-  char *pkg = "../testdata/fossology_1.4.1.dsc";
+  char *pkg = "./testdata/fossology_1.4.1.dsc";
   struct rpmpkginfo *pi;
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   memset(pi, 0, sizeof(struct rpmpkginfo));

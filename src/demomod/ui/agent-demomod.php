@@ -1,27 +1,16 @@
 <?php
-/***********************************************************
- Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2013 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /**
  * \file
  * \brief run the demomod agent
  */
 
-define("TITLE_agent_demomod", _("Demomod scanner"));
+define("TITLE_AGENT_DEMOMOD", _("Demomod scanner"));
 
 /**
  * @class agent_demomod
@@ -30,7 +19,7 @@ define("TITLE_agent_demomod", _("Demomod scanner"));
 class agent_demomod extends FO_Plugin {
 
   public $Name = "agent_demomod";       ///< Mod name
-  public $Title = TITLE_agent_demomod;  ///< Page title
+  public $Title = TITLE_AGENT_DEMOMOD;  ///< Page title
   public $Version = "1.0";              ///< Plugin versin
   public $Dependency = array();         ///< Dependecy for plugin
   public $DBaccess = PLUGIN_DB_WRITE;   ///< DB access required
@@ -42,7 +31,8 @@ class agent_demomod extends FO_Plugin {
    */
   function RegisterMenus()
   {
-    if ($this->State != PLUGIN_STATE_READY)  return (0); // don't run
+    if ($this->State != PLUGIN_STATE_READY) {  return (0); // don't run
+    }
     menu_insert("Agents::" . $this->Title, 0, $this->Name);
   }
 
@@ -89,4 +79,4 @@ class agent_demomod extends FO_Plugin {
 }
 
 $NewPlugin = new agent_demomod;
-?>
+

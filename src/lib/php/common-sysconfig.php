@@ -1,20 +1,12 @@
 <?php
-/***********************************************************
- Copyright (C) 2011-2015 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011-2015 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2021 Siemens AG
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License version 2.1 as published by the Free Software Foundation.
+ SPDX-License-Identifier: LGPL-2.1-only
+*/
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-***********************************************************/
+use Fossology\Lib\Auth\Auth;
 
 /**
  * \file
@@ -31,6 +23,8 @@ define("CONFIG_TYPE_TEXTAREA", 3);
 define("CONFIG_TYPE_PASSWORD", 4);
 /** Dropdown type config */
 define("CONFIG_TYPE_DROP", 5);
+/** Checkbox type config */
+define("CONFIG_TYPE_BOOL", 6);
 
 
 /**
@@ -56,9 +50,7 @@ define("CONFIG_TYPE_DROP", 5);
  *
  * \param string $sysconfdir   Path to SYSCONFDIR
  * \param[out] array &$SysConf Configuration variable array (updated by this function)
- *
- * If the sysconfig table doesn't exist then create it.
- * Write records for the core variables into sysconfig table.
+ * \param boolean $exitOnDbFail Do an exit() if can't connect to DB?
  *
  * The first array dimension of $SysConf is the group, the second is the variable name.
  * For example:
@@ -70,10 +62,27 @@ define("CONFIG_TYPE_DROP", 5);
  * to be global, this function will define the same globals (everything in the
  * DIRECTORIES section of fossology.conf).
  */
-function ConfigInit($sysconfdir, &$SysConf)
+function ConfigInit($sysconfdir, &$SysConf, $exitOnDbFail=true)
 {
   global $PG_CONN;
 
+  $PG_CONN = get_pg_conn($sysconfdir, $SysConf, $exitOnDbFail);
+
+  populate_from_sysconfig($PG_CONN, $SysConf);
+} // ConfigInit()
+
+/**
+ * Parse the VERSION file and Db.conf and initialize respective keys in SysConf
+ *
+ * The function also opens the connection to Postgres DB and return the object.
+ * \param string $sysconfdir Path to SYSCONFDIR
+ * \param[in,out] array $SysConf Configuration variable array
+ * \param boolean $exitOnDbFail Do an exit() if can't connect to DB?
+ *
+ * \returns resource Postgres connection resource
+ */
+function get_pg_conn($sysconfdir, &$SysConf, $exitOnDbFail=true)
+{
   /*************  Parse VERSION *******************/
   $versionFile = "{$sysconfdir}/VERSION";
   $versionConf = parse_ini_file($versionFile, true);
@@ -81,8 +90,8 @@ function ConfigInit($sysconfdir, &$SysConf)
   /* Add this file contents to $SysConf, then destroy $VersionConf
    * This file can define its own groups and is eval'd.
    */
-  foreach($versionConf as $groupName => $groupArray) {
-    foreach($groupArray as $var => $assign) {
+  foreach ($versionConf as $groupName => $groupArray) {
+    foreach ($groupArray as $var => $assign) {
       $toeval = "\$$var = \"$assign\";";
       eval($toeval);
       $SysConf[$groupName][$var] = ${$var};
@@ -98,99 +107,46 @@ function ConfigInit($sysconfdir, &$SysConf)
   /* Add this file contents to $SysConf, then destroy $dbConf
    * This file can define its own groups and is eval'd.
    */
-  foreach($dbConf as $var => $val) $SysConf['DBCONF'][$var] = $val;
+  foreach ($dbConf as $var => $val) {
+    $SysConf['DBCONF'][$var] = $val;
+  }
   unset($dbConf);
 
   /*
    * Connect to the database.  If the connection fails,
    * DBconnect() will print a failure message and exit.
    */
-  $PG_CONN = DBconnect($sysconfdir);
+  $pg_conn = DBconnect($sysconfdir, "", $exitOnDbFail);
+
+  if (! $exitOnDbFail && ($pg_conn === null || $pg_conn === false)) {
+    return -1;
+  }
 
   global $container;
-  $postgresDriver = new \Fossology\Lib\Db\Driver\Postgres($PG_CONN);
+  $postgresDriver = new \Fossology\Lib\Db\Driver\Postgres($pg_conn);
   $container->get('db.manager')->setDriver($postgresDriver);
 
-  /**************** read/create/populate the sysconfig table *********/
-  /* create if sysconfig table if it doesn't exist */
-  $newTable  = Create_sysconfig();
-  $newColumn = Create_option_value();
+  return $pg_conn;
+}
 
-  /* populate it with core variables */
-  Populate_sysconfig();
-
+/**
+ * Populate SysConf array with sysconfig DB table.
+ *
+ * \param resource $conn Connection to Postgres
+ * \param[in,out] array $SysConf Configuration variable array
+ */
+function populate_from_sysconfig($conn, &$SysConf)
+{
   /* populate the global $SysConf array with variable/value pairs */
   $sql = "SELECT variablename, conf_value FROM sysconfig;";
-  $result = pg_query($PG_CONN, $sql);
+  $result = pg_query($conn, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-  while($row = pg_fetch_assoc($result)) {
+  while ($row = pg_fetch_assoc($result)) {
     $SysConf['SYSCONFIG'][$row['variablename']] = $row['conf_value'];
   }
   pg_free_result($result);
-
-  return;
-} // ConfigInit()
-
-
-/**
- * \brief Create the sysconfig table.
- *
- * \return 0 if table already exists.
- * 1 if it was created
- */
-function Create_sysconfig()
-{
-  global $PG_CONN;
-
-  /* If sysconfig exists, then we are done */
-  $sql = "SELECT typlen  FROM pg_type WHERE typname='sysconfig' limit 1;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $numrows = pg_num_rows($result);
-  pg_free_result($result);
-  if ($numrows > 0) return 0;
-
-  /* Create the sysconfig table */
-  $sql = "
-CREATE TABLE sysconfig (
-    sysconfig_pk serial NOT NULL PRIMARY KEY,
-    variablename character varying(30) NOT NULL UNIQUE,
-    conf_value text,
-    ui_label character varying(60) NOT NULL,
-    vartype int NOT NULL,
-    group_name character varying(20) NOT NULL,
-    group_order int,
-    description text NOT NULL,
-    validation_function character varying(40) DEFAULT NULL,
-    option_value character varying(40) DEFAULT NULL
-);
-";
-
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-
-  /* Document columns */
-  $sql = "
-COMMENT ON TABLE sysconfig IS 'System configuration values';
-COMMENT ON COLUMN sysconfig.variablename IS 'Name of configuration variable';
-COMMENT ON COLUMN sysconfig.conf_value IS 'value of config variable';
-COMMENT ON COLUMN sysconfig.ui_label IS 'Label that appears on user interface to prompt for variable';
-COMMENT ON COLUMN sysconfig.group_name IS 'Name of this variables group in the user interface';
-COMMENT ON COLUMN sysconfig.group_order IS 'The order this variable appears in the user interface group';
-COMMENT ON COLUMN sysconfig.description IS 'Description of variable to document how/where the variable value is used.';
-COMMENT ON COLUMN sysconfig.validation_function IS 'Name of function to validate input. Not currently implemented.';
-COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textarea, 4=password, 5=dropdown';
-COMMENT ON COLUMN sysconfig.option_value IS 'If vartype is 5, provide options in format op1{val1}|op2{val2}|...';
-    ";
-  /* this is a non critical update */
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-  return 1;
 }
-
 
 /**
  * \brief Populate the sysconfig table with core variables.
@@ -202,6 +158,13 @@ function Populate_sysconfig()
   $columns = array("variablename", "conf_value", "ui_label", "vartype", "group_name",
     "group_order", "description", "validation_function", "option_value");
   $valueArray = array();
+
+  /*  CorsOrigin */
+  $variable = "CorsOrigins";
+  $prompt = _('Allowed origins for REST API');
+  $desc = _('[scheme]://[hostname]:[port], "*" for anywhere');
+  $valueArray[$variable] = array("'$variable'", "'*'", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'PAT'", "3", "'$desc'", "null", "null");
 
   /*  Email */
   $variable = "SupportEmailLabel";
@@ -222,6 +185,98 @@ function Populate_sysconfig()
   $supportEmailSubjectDesc = _('e.g. "fossology support"<br>Subject line to use on support email.');
   $valueArray[$variable] = array("'$variable'", "'FOSSology Support'", "'$supportEmailSubjectPrompt'",
     strval(CONFIG_TYPE_TEXT), "'Support'", "3", "'$supportEmailSubjectDesc'", "null", "null");
+
+  /* oAuth2 Service */
+  $variable = "OidcAppName";
+  $oidcPrompt = _('OIDC App Name');
+  $oidcDesc = _('e.g. "my oAuth"<br>App name to display on login page.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "1", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcClientIdClaim";
+  $oidcPrompt = _('OIDC Client Id Claim');
+  $oidcDesc = _('e.g. "azp"<br>Client ID claim in the decoded payload.');
+  $valueArray[$variable] = array("'$variable'", "'client-id'", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "2", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcResourceOwnerId";
+  $oidcPrompt = _('Resource owner id field');
+  $oidcDesc = _('e.g. "email", "upn"<br>Field in token which provides user id. The field <b>should not be empty</b>.');
+  $valueArray[$variable] = array("'$variable'", "'email'", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "3", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcTokenType";
+  $oidcPrompt = _('Token to use from provider');
+  $oidcDesc = _('OpenID Connect providers 2 types of tokens, access and id. Which to use for authentication?<br>AzureAD prefers ID token.');
+  $valueArray[$variable] = array("'$variable'", "'A'", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_DROP), "'OauthSupport'", "4", "'$oidcDesc'", "null", "'Access Token{A}|ID Token{I}'");
+
+  $variable = "OidcAppId";
+  $oidcPrompt = _('OIDC Client Id');
+  $oidcDesc = _('e.g. "e0ec21b9f4b21adc76f185962b52bdfc13af134a"<br>Client ID generated while registering your application.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "5", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcSecret";
+  $oidcPrompt = _('OIDC Secret');
+  $oidcDesc = _('e.g. "cf13476f185b9f4b2e0ec962b52211adbdfc13aa"<br>Secret generated while registering your application.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_PASSWORD), "'OauthSupport'", "6", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcRedirectURL";
+  $oidcPrompt = _('Redirect URL');
+  $oidcDesc = _('e.g. "http://fossology.application.url.com/repo"<br>URL of your fossology application.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "7", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcDiscoveryURL";
+  $oidcPrompt = _('OIDC Discovery URL');
+  $oidcDesc = _('e.g. "http://oauth.com/.well-known/openid-configuration"<br>URL for OIDC Discovery document JSON to fill following fields upon save.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "8", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcIssuer";
+  $oidcPrompt = _('OIDC Token Issuer');
+  $oidcDesc = _('e.g. "http://oauth.com"<br>Issuer for OIDC tokens.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "9", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcAuthorizeURL";
+  $oidcPrompt = _('OIDC Authorize URL');
+  $oidcDesc = _('e.g. "http://oauth.com/authorization.oauth2"<br>URL for OAuth2 authorization endpoint.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "10", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcAccessTokenURL";
+  $oidcPrompt = _('OIDC Access Token URL');
+  $oidcDesc = _('e.g. "http://oauth.com/token.oauth2"<br>URL for OAuth2 access token endpoint.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "11", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcResourceURL";
+  $oidcPrompt = _('OIDC User Info URL');
+  $oidcDesc = _('e.g. "http://oauth.com/userinfo.oauth2"<br>URL for OAuth2 user info endpoint.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "12", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcJwksURL";
+  $oidcPrompt = _('OIDC JWKS URL');
+  $oidcDesc = _('e.g. "http://oauth.com/jwks.oauth2"<br>URL for OIDC JWKS keys.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "13", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcJwkAlgInject";
+  $oidcPrompt = _('OIDC JWKS Algorithm inject');
+  $oidcDesc = _('Algorithm value to inject for JWKS. Leave empty to not modifiy.' .
+    '<br><a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.4">Check info</a>.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "14", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcLogoutURL";
+  $oidcPrompt = _('Logout URL');
+  $oidcDesc = _('e.g. "http://oauth.com/logout.oauth2"<br>URL to redirect user to for logout.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "15", "'$oidcDesc'", "null", "null");
 
   /*  Banner Message */
   $variable = "BannerMsg";
@@ -248,12 +303,22 @@ function Populate_sysconfig()
   $variable = "FOSSologyURL";
   $urlPrompt = _("FOSSology URL");
   $hostname = exec("hostname -f");
-  if (empty($hostname)) $hostname = "localhost";
+  if (empty($hostname)) {
+    $hostname = "localhost";
+  }
   $fossologyURL = $hostname."/repo/";
   $urlDesc = _("URL of this FOSSology server, e.g. $fossologyURL");
   $urlValid = "check_fossology_url";
   $valueArray[$variable] = array("'$variable'", "'$fossologyURL'", "'$urlPrompt'",
     strval(CONFIG_TYPE_TEXT), "'URL'", "1", "'$urlDesc'", "'$urlValid'", "null");
+
+  $variable = "ClearlyDefinedURL";
+  $urlPrompt = _("ClearlyDefined URL");
+  $cdURL = "https://api.clearlydefined.io/";
+  $urlDesc = _("URL of ClearlyDefined server, e.g. $cdURL");
+  $urlValid = "check_url";
+  $valueArray[$variable] = array("'$variable'", "'$cdURL'", "'$urlPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'URL'", "2", "'$urlDesc'", "'$urlValid'", "null");
 
   $variable = "NomostListNum";
   $nomosNumPrompt = _("Maximum licenses to List");
@@ -344,95 +409,186 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "'L'", "'$smtpAuthPrompt'",
     strval(CONFIG_TYPE_DROP), "'SMTP'", "3", "'$smtpAuthDesc'", "null", "'Login{L}|None{N}|Plain{P}'");
 
+  $variable = "SMTPFrom";
+  $smtpFrom = _('SMTP Email');
+  $smtpFromDesc = _('e.g.: "user@domain.com"<br>Sender email.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$smtpFrom'",
+    strval(CONFIG_TYPE_TEXT), "'SMTP'", "4", "'$smtpFromDesc'", "'check_email_address'", "null");
+
   $variable = "SMTPAuthUser";
   $smtpAuthUserPrompt = _('SMTP User');
-  $smtpAuthUserDesc = _('e.g.: "user@domain.com"<br>Email to be used for login in SMTP and for from address.');
+  $smtpAuthUserDesc = _('e.g.: "user"<br>Login to be used for login on SMTP Server.');
   $valueArray[$variable] = array("'$variable'", "null", "'$smtpAuthUserPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'SMTP'", "4", "'$smtpAuthUserDesc'", "'check_email_address'", "null");
+    strval(CONFIG_TYPE_TEXT), "'SMTP'", "5", "'$smtpAuthUserDesc'", "null", "null");
 
   $variable = "SMTPAuthPasswd";
   $smtpAuthPasswdPrompt = _('SMTP Login Password');
   $smtpAuthPasswdDesc = _('Password used for SMTP login.');
   $valueArray[$variable] = array("'$variable'", "null", "'$smtpAuthPasswdPrompt'",
-    strval(CONFIG_TYPE_PASSWORD), "'SMTP'", "5", "'$smtpAuthPasswdDesc'", "null", "null");
+    strval(CONFIG_TYPE_PASSWORD), "'SMTP'", "6", "'$smtpAuthPasswdDesc'", "null", "null");
 
   $variable = "SMTPSslVerify";
   $smtpSslPrompt = _('SMTP SSL Verify');
   $smtpSslDesc = _('The SSL verification for connection is required?');
   $valueArray[$variable] = array("'$variable'", "'S'", "'$smtpSslPrompt'",
-    strval(CONFIG_TYPE_DROP), "'SMTP'", "6", "'$smtpSslDesc'", "null", "'Ignore{I}|Strict{S}|Warn{W}'");
+    strval(CONFIG_TYPE_DROP), "'SMTP'", "7", "'$smtpSslDesc'", "null", "'Ignore{I}|Strict{S}|Warn{W}'");
 
   $variable = "SMTPStartTls";
   $smtpTlsPrompt = _('Start TLS');
   $smtpTlsDesc = _('Use TLS connection for SMTP?');
   $valueArray[$variable] = array("'$variable'", "'1'", "'$smtpTlsPrompt'",
-    strval(CONFIG_TYPE_DROP), "'SMTP'", "7", "'$smtpTlsDesc'", "null", "'Yes{1}|No{2}'");
+    strval(CONFIG_TYPE_DROP), "'SMTP'", "8", "'$smtpTlsDesc'", "null", "'Yes{1}|No{2}'");
 
+  $variable = "UploadVisibility";
+  $prompt = _('Default Upload Visibility');
+  $desc = _('Default Visibility for uploads by the user');
+  $valueArray[$variable] = array("'$variable'", "'protected'", "'$prompt'",
+    strval(CONFIG_TYPE_DROP), "'UploadFlag'", "1", "'$desc'", "null", "'Visible only for active group{private}|Visible for all groups{protected}|Make Public{public}'");
+
+  /* Password policy config */
+  $variable = "PasswdPolicy";
+  $prompt = _('Enable password policy');
+  $desc = _('Enable password policy check');
+  $valueArray[$variable] = array("'$variable'", "false", "'$prompt'",
+    strval(CONFIG_TYPE_BOOL), "'PASSWD'", "1", "'$desc'",
+    "'check_boolean'", "null");
+
+  $variable = "PasswdPolicyMinChar";
+  $prompt = _('Minimum characters');
+  $desc = _('Blank for no limit');
+  $valueArray[$variable] = array("'$variable'", "8", "'$prompt'",
+    strval(CONFIG_TYPE_INT), "'PASSWD'", "2", "'$desc'", "null", "null");
+
+  $variable = "PasswdPolicyMaxChar";
+  $prompt = _('Maximum characters');
+  $desc = _('Blank for no limit');
+  $valueArray[$variable] = array("'$variable'", "16", "'$prompt'",
+    strval(CONFIG_TYPE_INT), "'PASSWD'", "3", "'$desc'", "null", "null");
+
+  $variable = "PasswdPolicyLower";
+  $prompt = _('Lowercase');
+  $desc = _('Minimum one lowercase character.');
+  $valueArray[$variable] = array("'$variable'", "true", "'$prompt'",
+    strval(CONFIG_TYPE_BOOL), "'PASSWD'", "4", "'$desc'",
+    "'check_boolean'", "null");
+
+  $variable = "PasswdPolicyUpper";
+  $prompt = _('Uppercase');
+  $desc = _('Minimum one uppercase character.');
+  $valueArray[$variable] = array("'$variable'", "true", "'$prompt'",
+    strval(CONFIG_TYPE_BOOL), "'PASSWD'", "5", "'$desc'",
+    "'check_boolean'", "null");
+
+  $variable = "PasswdPolicyDigit";
+  $prompt = _('Digit');
+  $desc = _('Minimum one digit.');
+  $valueArray[$variable] = array("'$variable'", "true", "'$prompt'",
+    strval(CONFIG_TYPE_BOOL), "'PASSWD'", "6", "'$desc'",
+    "'check_boolean'", "null");
+
+  $variable = "PasswdPolicySpecial";
+  $prompt = _('Allowed special characters');
+  $desc = _('Empty for do not care');
+  $valueArray[$variable] = array("'$variable'", "'@$!%*?&'", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'PASSWD'", "7", "'$desc'", "null", "null");
+
+  $variable = "PATMaxExipre";
+  $patTokenValidityPrompt = _('Max token validity');
+  $patTokenValidityDesc = _('Maximum validity of tokens (in days)');
+  $valueArray[$variable] = array("'$variable'", "30", "'$patTokenValidityPrompt'",
+    strval(CONFIG_TYPE_INT), "'PAT'", "1", "'$patTokenValidityDesc'", "null", "null");
+
+  $variable = "PATMaxPostExpiryRetention";
+  $patTokenRetentionPrompt = _('Max expired token retention period');
+  $patTokenRetentionDesc = _('Maximum retention period of expired tokens (in days) for Maintagent');
+  $valueArray[$variable] = array("'$variable'", "30", "'$patTokenRetentionPrompt'",
+    strval(CONFIG_TYPE_INT), "'PAT'", "2", "'$patTokenRetentionDesc'", "null", "null");
+
+  $variable = "SkipFiles";
+  $mimeTypeToSkip = _("Skip MimeTypes from scanning");
+  $mimeTypeDesc = _("add  comma (,) separated mimetype to exclude files from scanning");
+  $valueArray[$variable] = array("'$variable'", "null", "'$mimeTypeToSkip'",
+    strval(CONFIG_TYPE_TEXT), "'Skip'", "1", "'$mimeTypeDesc'", "null", "null");
+
+  $perm_admin=Auth::PERM_ADMIN;
+  $perm_write=Auth::PERM_WRITE;
+  $variable = "SourceCodeDownloadRights";
+  $SourceDownloadRightsPrompt = _('Access rights required to download source code');
+  $SourceDownloadRightsDesc = _('Choose which access level will be required for user to be able to download source code.');
+  $valueArray[$variable] = array("'$variable'", "'$perm_write'", "'$SourceDownloadRightsPrompt'",
+  strval(CONFIG_TYPE_DROP), "'DOWNLOAD'", "1", "'$SourceDownloadRightsDesc'", "null", "'Administrator{{$perm_admin}}|Read_Write{{$perm_write}}'");
+
+  $variable = "UserDescReadOnly";
+  $prompt = _('Make account details read-only');
+  $desc = _('Make account details (username, email, description) read-only');
+  $valueArray[$variable] = array("'$variable'", "false", "'$prompt'",
+    strval(CONFIG_TYPE_BOOL), "'USER_READ_ONLY'", "1", "'$desc'",
+    "'check_boolean'", "null");
+
+  /* SoftwareHeritage agent config */
+  $variable = "SwhURL";
+  $prompt = _('SoftwareHeritage URL');
+  $desc = _('URL to Software Heritage servers');
+  $valueArray[$variable] = array("'$variable'",
+    "'https://archive.softwareheritage.org'", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'SWH'", "1", "'$desc'", "'check_url'", "null");
+
+  $variable = "SwhBaseURL";
+  $prompt = _('SoftwareHeritage API base URI');
+  $desc = _('Base URI for API calls');
+  $valueArray[$variable] = array("'$variable'", "'/api/1/content/sha256:'",
+    "'$prompt'", strval(CONFIG_TYPE_TEXT), "'SWH'", "2", "'$desc'", "null",
+    "null");
+
+  $variable = "SwhContent";
+  $prompt = _('Content endpoint');
+  $desc = _('Endpoint to get content about file');
+  $valueArray[$variable] = array("'$variable'", "'/license'", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'SWH'", "3", "'$desc'", "null", "null");
+
+  $variable = "SwhSleep";
+  $prompt = _('Max sleep time');
+  $desc = _('Max time to sleep for rate-limit. Note: This concerns with scheduler heartbeat.');
+  $valueArray[$variable] = array("'$variable'", "100", "'$prompt'",
+    strval(CONFIG_TYPE_INT), "'SWH'", "4", "'$desc'", "null", "null");
+
+  $variable = "SwhToken";
+  $prompt = _('Auth token');
+  $desc = _('');
+  $valueArray[$variable] = array("'$variable'", "''", "'$prompt'",
+    strval(CONFIG_TYPE_PASSWORD), "'SWH'", "5", "'$desc'", "null", "null");
 
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.
   */
   foreach ($valueArray as $variable => $values) {
-    /* Check if the variable already exists.  Insert it if it does not.
+    /*
+     * Check if the variable already exists. Insert it if it does not.
      * This is better than an insert ignoring duplicates, because that
-    * generates a postresql log message.
-    */
+     * generates a postresql log message.
+     */
     $VarRec = GetSingleRec("sysconfig", "WHERE variablename='$variable'");
     if (empty($VarRec)) {
-      $sql = "INSERT INTO sysconfig (" . implode(",", $columns) . ") VALUES ("
-        . implode(",", $values) . ");";
+      $sql = "INSERT INTO sysconfig (" . implode(",", $columns) . ") VALUES (" .
+        implode(",", $values) . ");";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
     } else { // Values exist, update them
       $updateString = [];
       foreach ($columns as $index => $column) {
-        if ($index != 0 && $index != 1) // Skip variablename and conf_value
+        if ($index != 0 && $index != 1) { // Skip variablename and conf_value
           $updateString[] = $column . "=" . $values[$index];
+        }
       }
-      $sql = "UPDATE sysconfig SET ". implode(",", $updateString) ." WHERE variablename='$variable';";
+      $sql = "UPDATE sysconfig SET " . implode(",", $updateString) .
+        " WHERE variablename='$variable';";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
     }
     unset($VarRec);
   }
-}
-
-/**
- * \brief Create the option_value column in sysconfig table.
- *
- * \return 0 if column already exists.
- * 1 if it was created
- */
-function Create_option_value()
-{
-  global $PG_CONN;
-
-  /* If sysconfig exists, then we are done */
-  $sql = "SELECT column_name FROM information_schema.columns WHERE "
-       . "table_name='sysconfig' and column_name='option_value' limit 1;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $numrows = pg_num_rows($result);
-  pg_free_result($result);
-  if ($numrows > 0) return 0;
-
-  /* Create the option_value column */
-  $sql = "ALTER TABLE sysconfig ADD COLUMN option_value character varying(40) DEFAULT NULL;";
-
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-
-  /* Document columns */
-  $sql = "COMMENT ON COLUMN sysconfig.option_value IS 'If vartype is 5, "
-       . "provide options in format op1{val1}|op2{val2}|...';";
-  /* this is a non critical update */
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-  return 1;
 }
 
 /**
@@ -447,7 +603,7 @@ function Create_option_value()
  */
 function check_boolean($value)
 {
-  if (!strcmp($value, 'true') || !strcmp($value, 'false')) {
+  if (! strcmp($value, 'true') || ! strcmp($value, 'false')) {
     return 1;
   } else {
     return 0;
@@ -467,12 +623,16 @@ function check_fossology_url($url)
 {
   $url_array = explode("/", $url, 2);
   $name = $url_array[0];
-  if (!empty($name)) {
+  if (! empty($name)) {
     $hostname = exec("hostname -f");
-    if (empty($hostname)) $hostname = "localhost";
-    if(check_IP($name)) {
+    if (empty($hostname)) {
+      $hostname = "localhost";
+    }
+    if (check_IP($name)) {
       $hostname1 = gethostbyaddr($name);
-      if (strcmp($hostname, $hostname1) == 0)  return 0;  // host is not reachable
+      if (strcmp($hostname, $hostname1) == 0) {
+        return 0; // host is not reachable
+      }
     }
     $server_name = $_SERVER['SERVER_NAME'];
 
@@ -480,7 +640,9 @@ function check_fossology_url($url)
     if (strcmp($name, $hostname) && strcmp($name, $server_name)) {
       return 0;
     }
-  } else return 0;
+  } else {
+    return 0;
+  }
   return 1;
 }
 
@@ -495,14 +657,16 @@ function check_fossology_url($url)
  */
 function check_logo_url($url)
 {
-  if (empty($url)) return 1; /* logo url can be null, with the default */
-
-  //$res = check_url($url);
+  if (empty($url)) {
+    return 1; /* logo url can be null, with the default */
+  }
+  // $res = check_url($url);
   $res = is_available($url);
   if (1 == $res) {
     return 1;
+  } else {
+    return 0;
   }
-  else return 0;
 }
 
 /**
@@ -518,14 +682,16 @@ function check_logo_image_url($url)
 {
   global $SysConf;
 
-  if (empty($url)) return 1; /* logo url can be null, with the default */
-
+  if (empty($url)) {
+    return 1; /* logo url can be null, with the default */
+  }
   $logoLink = @$SysConf["LogoLink"];
-  $new_url = $logoLink.$url;
+  $new_url = $logoLink . $url;
   if (is_available($url) || is_available($new_url)) {
     return 1;
+  } else {
+    return 0;
   }
-  else return 0;
 
 }
 
@@ -558,18 +724,26 @@ function is_available($url, $timeout = 2, $tries = 2)
   global $SysConf;
 
   $proxyStmts = "";
-  if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) && $SysConf['FOSSOLOGY']['http_proxy'])
+  if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
+    $SysConf['FOSSOLOGY']['http_proxy']) {
     $proxyStmts .= "export http_proxy={$SysConf['FOSSOLOGY']['http_proxy']};";
-  if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) && $SysConf['FOSSOLOGY']['https_proxy'])
+  }
+  if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
+    $SysConf['FOSSOLOGY']['https_proxy']) {
     $proxyStmts .= "export https_proxy={$SysConf['FOSSOLOGY']['https_proxy']};";
-  if (array_key_exists('ftp_proxy', $SysConf['FOSSOLOGY']) && $SysConf['FOSSOLOGY']['ftp_proxy'])
+  }
+  if (array_key_exists('ftp_proxy', $SysConf['FOSSOLOGY']) &&
+    $SysConf['FOSSOLOGY']['ftp_proxy']) {
     $proxyStmts .= "export ftp_proxy={$SysConf['FOSSOLOGY']['ftp_proxy']};";
+  }
 
   $commands = "$proxyStmts wget --spider '$url' --tries=$tries --timeout=$timeout";
   system($commands, $return_var);
   if (0 == $return_var) {
     return 1;
-  } else return 0;
+  } else {
+    return 0;
+  }
 }
 
 /**
@@ -579,10 +753,13 @@ function is_available($url, $timeout = 2, $tries = 2)
  */
 function check_url($url)
 {
-  if (empty($url) || preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $url) != 1 || preg_match("@[[:space:]]@", $url) != 0) {
+  if (empty($url) ||
+    preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $url) != 1 ||
+    preg_match("@[[:space:]]@", $url) != 0) {
     return 0;
+  } else {
+    return 1;
   }
-  else return 1;
 }
 
 /**
@@ -592,6 +769,16 @@ function check_url($url)
  */
 function check_IP($ip)
 {
-  $e="([0-9]|1[0-9]{2}|[1-9][0-9]|2[0-4][0-9]|25[0-5])";
+  $e = "([0-9]|1[0-9]{2}|[1-9][0-9]|2[0-4][0-9]|25[0-5])";
   return preg_match("/^$e\.$e\.$e\.$e$/", $ip);
+}
+
+/**
+ * Set PYTHONPATH to appropriate location
+ */
+function set_python_path()
+{
+  global $SysConf;
+  putenv("PYTHONPATH=/home/" . $SysConf['DIRECTORIES']['PROJECTUSER'] .
+      "/pythondeps");
 }

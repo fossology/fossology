@@ -1,14 +1,20 @@
 Source: fossology
 Section: utils
-Priority: extra
+Priority: optional
 Maintainer: Michael Jaeger <michael.c.jaeger@siemens.com>
-Build-Depends: debhelper, libglib2.0-dev, libmagic-dev, libxml2-dev, libmxml-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev, libssl-dev, postgresql-server-dev-all, libboost-regex-dev, libboost-program-options-dev, libjsoncpp-dev, php5-cli|php7.0-cli|php7.2-cli, php-mbstring|php5, php-zip|php5, php-xml|php5
+Build-Depends: debhelper (>=9~), libglib2.0-dev, libmagic-dev, libxml2-dev,
+ libmxml-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev,
+ libssl-dev, postgresql-server-dev-all, libboost-regex-dev, libicu-dev,
+ libboost-program-options-dev, libjsoncpp-dev, libjson-c-dev, libpq-dev,
+ php7.2-cli|php7.3-cli|php7.4-cli|php8.1-cli, php-mbstring, php-zip, php-curl,
+ php-gd, php-pgsql, php-uuid, php-xml, libboost-system-dev,
+ libboost-filesystem-dev, libgcrypt20-dev, composer
 Standards-Version: 3.9.1
-Homepage: http://fossology.org
+Homepage: https://fossology.org
 
 Package: fossology-dev
 Architecture: any
-Depends: php5-cli|php7.0-cli|php7.2-cli
+Depends: php7.2-cli|php7.3-cli|php7.4-cli|php8.1-cli, ${misc:Depends}
 Description: architecture for analyzing software, development utils
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -20,8 +26,12 @@ Description: architecture for analyzing software, development utils
 
 Package: fossology
 Architecture: any
-Depends: fossology-web, fossology-scheduler, fossology-ununpack, fossology-copyright, fossology-buckets, fossology-mimetype, fossology-delagent, fossology-wgetagent, ${misc:Depends}
-Recommends: fossology-monk, fossology-monkbulk, fossology-decider, fossology-readmeoss, fossology-spdx2, fossology-reportimport, fossology-reuser, fossology-ninka
+Depends: fossology-web, fossology-scheduler, fossology-ununpack,
+ fossology-copyright, fossology-buckets, fossology-mimetype,
+ fossology-delagent, fossology-wgetagent, ${misc:Depends}
+Recommends: fossology-monk, fossology-monkbulk, fossology-decider,
+ fossology-readmeoss, fossology-spdx2, fossology-reportimport,
+ fossology-softwareheritage, fossology-reuser, fossology-ninka
 Conflicts: fossology-db (<= 1.4.1), fossology-common (<= 1.4.1)
 Description: open and modular architecture for analyzing software
  The FOSSology project is a web based framework that allows you to
@@ -37,7 +47,12 @@ Description: open and modular architecture for analyzing software
 
 Package: fossology-common
 Architecture: any
-Depends: php5-pgsql|php7.0-pgsql|php7.2-pgsql, php-pear, php5-cli|php7.0-cli|php7.2-cli, php5-json|php7.0-json|php7.2-json, php-mbstring|php5, php-zip|php5, php-xml|php5, ${shlibs:Depends}, ${misc:Depends}
+Depends: php7.2-pgsql|php7.3-pgsql|php7.4-pgsql|php8.1-pgsql, php-pear,
+ php7.2-cli|php7.3-cli|php7.4-cli|php8.1-cli, php-mbstring, php-zip, php-xml,
+ php7.2-gd|php7.3-gd|php7.4-gd|php8.1-gd, php-uuid,
+ php7.2-json|php7.3-json|php7.4-json|php8.1-json,
+ php7.2-curl|php7.3-curl|php7.4-curl|php8.1-curl,
+ ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, common files
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -46,11 +61,14 @@ Description: architecture for analyzing software, common files
  type identification.
  .
  This package contains the resources needed by all of the other
- fossology components. This includes admin tools for maintainance.
+ fossology components. This includes admin tools for maintenance.
 
 Package: fossology-web
 Architecture: any
-Depends: fossology-common, fossology-db, fossology-decider, apache2, libapache2-mod-php5|libapache2-mod-php7.0|libapache2-mod-php7.2, ${misc:Depends}
+Depends: fossology-common, apache2, php7.2-gd|php7.3-gd|php7.4-gd|php8.1-gd,
+ libapache2-mod-php7.2|libapache2-mod-php7.3|libapache2-mod-php7.4|libapache2-mod-php8.1,
+ ${misc:Depends}
+Recommends: fossology-db
 Description: architecture for analyzing software, web interface
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -62,7 +80,8 @@ Description: architecture for analyzing software, web interface
 
 Package: fossology-scheduler
 Architecture: any
-Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}, heirloom-mailx | s-nail
+Depends: fossology-common, s-nail, ${shlibs:Depends},
+ ${misc:Depends}
 Conflicts: fossology-scheduler-single
 Description: architecture for analyzing software, scheduler
  The FOSSology project is a web based framework that allows you to
@@ -92,7 +111,9 @@ Description: architecture for analyzing software, database
 
 Package: fossology-ununpack
 Architecture: any
-Depends: fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoimage, poppler-utils, rpm, upx-ucl, unrar-free, unzip, p7zip-full, p7zip, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit,
+ genisoimage, poppler-utils, rpm, upx-ucl, unrar-free, unzip, p7zip-full,
+ p7zip, ${shlibs:Depends}, ${misc:Depends}
 Conflicts: fossology-agents-single
 Description: architecture for analyzing software, ununpack and adj2nest
  The FOSSology project is a web based framework that allows you to
@@ -101,7 +122,8 @@ Description: architecture for analyzing software, ununpack and adj2nest
  Existing agents include license analysis, metadata extraction, and MIME
  type identification.
  .
- This package contains the ununpack and adj2nest agent programs and their resources.
+ This package contains the ununpack and adj2nest agent programs and their
+ resources.
 
 Package: fossology-copyright
 Architecture: any
@@ -177,7 +199,8 @@ Description: architecture for analyzing software, delagent
 
 Package: fossology-wgetagent
 Architecture: any
-Depends: fossology-common, wget, subversion, git, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-common, wget, subversion, git, ${shlibs:Depends},
+ ${misc:Depends}
 Replaces: fossology-wgetagent (<= 2.2.0)
 Description: architecture for analyzing software, wget_agent
  The FOSSology project is a web based framework that allows you to
@@ -214,7 +237,7 @@ Description: architecture for analyzing software, monk
 
 Package: fossology-monkbulk
 Architecture: any
-Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-common, fossology-deciderjob, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, monk bulk scanning
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -224,21 +247,33 @@ Description: architecture for analyzing software, monk bulk scanning
  .
  This package contains the monk bulk agent programs and their resources.
 
-Package: fossology-ninka
+Package: fossology-ojo
 Architecture: any
-Depends: fossology-common, ninka (>=1.2), ${shlibs:Depends}, ${misc:Depends}
-Description: architecture for analyzing software, ninka
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, ojo
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
  which produce results that are then browsable via the web interface.
  Existing agents include license analysis, metadata extraction, and MIME
  type identification.
  .
- This package contains the ninka wrapper agent programs and their resources.
+ This package contains the ojo agent programs and their resources.
+
+Package: fossology-reso
+Architecture: any
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, reso
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the reso agent programs and their resources.
 
 Package: fossology-decider
 Architecture: any
-Depends: fossology-common, ${misc:Depends}
+Depends: fossology-common, fossology-deciderjob, ${misc:Depends}
 Description: architecture for analyzing software, decider
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -272,9 +307,21 @@ Description: architecture for analyzing software, OSS readme generator
  .
  This package contains the readmeoss agent programs and their resources.
 
+Package: fossology-clixml
+Architecture: any
+Depends: fossology-common, php-uuid, ${misc:Depends}
+Description: architecture for analyzing software, XML based report generator
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the clixml agent programs and their resources.
+
 Package: fossology-unifiedreport
 Architecture: any
-Depends: fossology-common, php-zip|php5, php-xml|php5, ${misc:Depends}
+Depends: fossology-common, php-zip, php-xml, ${misc:Depends}
 Description: architecture for analyzing software, Microsoft Word report generator
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -310,7 +357,7 @@ Description: architecture for analyzing software, SPDX v2.0 generator
 
 Package: fossology-reportimport
 Architecture: any
-Depends: fossology-common, php-mbstring|php5, ${misc:Depends}
+Depends: fossology-common, php-mbstring, ${misc:Depends}
 Description: architecture for analyzing software, report importer
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -319,3 +366,41 @@ Description: architecture for analyzing software, report importer
  type identification.
  .
  This package contains the reportImport agent programs and their resources.
+
+Package: fossology-softwareheritage
+Architecture: any
+Depends: fossology-common, fossology-ununpack, fossology-wgetagent,
+ ${misc:Depends}
+Description: architecture for fetching the origin of a file software heritage archive.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the softwareHeritage agent programs and their resources.
+
+Package: fossology-scancode
+Architecture: any
+Depends: fossology-common, fossology-ununpack, fossology-wgetagent,
+ ${misc:Depends}
+Description: architecture to fetch license, copyright information from scancode.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the scancode agent programs and their resources.
+
+Package: fossology-spasht
+Architecture: any
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture to connect clearlyDefined, spasht
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the spasht agent programs and their resources.

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: © Fossology contributors
+
+-- SPDX-License-Identifier: GPL-2.0-only
 
 INSERT INTO agent VALUES (1, 'nomos', '2.4.1-ng.695dd8', 'License Scanner', true, NULL, '2015-05-04 11:37:39.12504+02');
 INSERT INTO agent VALUES (2, 'delagent', '2.4.1-ng.695dd8', '(null)', true, NULL, '2015-05-04 11:42:21.477678+02');
@@ -105,21 +108,19 @@ INSERT INTO mimetype VALUES (31, 'application/x-dosexec');
 --
 -- Data for Name: pfile; Type: TABLE DATA; Schema: public; Owner: fossy
 --
-
-INSERT INTO pfile VALUES (1, '149FD9DAC3A1FF6AD491F95F49E90BF2', '403C2B25B9B02A2EBB6817C459B37AFC1F9BA3B5', 35328, 11);
-INSERT INTO pfile VALUES (2, '8F4010C5B689A6EA4A28671FD1907F23', '75E8FBDFAB38D5406BD718711D8FDDDB530CA174', 6880, NULL);
-INSERT INTO pfile VALUES (3, 'C2047D353D61BCE5D6335CC1C30C1780', '2634F1C5473C7A9E9B9238EC2AAB1FCA468911A8', 6894, NULL);
-INSERT INTO pfile VALUES (4, 'BE09F57E1E58119F1537439BA545835C', 'FD7D17CFA15074F73F183C086B1983EB9F31781F', 296, NULL);
-INSERT INTO pfile VALUES (5, '39C379E9C7F5BB524754C4DEF5FEF135', '840B588279248271D93ACA3092AD5F4DC724BDA4', 285, NULL);
-INSERT INTO pfile VALUES (6, '2702A657B801333C3150BDC8BE642F9B', '798826BF3EB294E5D514ECFA3222CCF09BBCD985', 14554, NULL);
-
+INSERT INTO pfile VALUES (1, '149FD9DAC3A1FF6AD491F95F49E90BF2', '403C2B25B9B02A2EBB6817C459B37AFC1F9BA3B5', 'b4c2050b25d3d296d5cf58589ca00816dc72df42262c2f629d5c6a984a161aa4', 35328, 11);
+INSERT INTO pfile VALUES (2, '8F4010C5B689A6EA4A28671FD1907F23', '75E8FBDFAB38D5406BD718711D8FDDDB530CA174', 'fda70df85987b394ff384b899703bc0e55ac7bdba94d06f47462e155cf0c0350', 6880, NULL);
+INSERT INTO pfile VALUES (3, 'C2047D353D61BCE5D6335CC1C30C1780', '2634F1C5473C7A9E9B9238EC2AAB1FCA468911A8', '1c8d3cc6810ecd3623ebff7d2c3db1a44024260c5ae662f8166d69b9425828ed', 6894, NULL);
+INSERT INTO pfile VALUES (4, 'BE09F57E1E58119F1537439BA545835C', 'FD7D17CFA15074F73F183C086B1983EB9F31781F', '395f150240d43dff8baea6586baf5665337de57b8204a501fbd6148b2fe165b7', 296, NULL);
+INSERT INTO pfile VALUES (5, '39C379E9C7F5BB524754C4DEF5FEF135', '840B588279248271D93ACA3092AD5F4DC724BDA4', '47a4cee30c085c497e628bab975fd586b5bed6fb25cc2720ae17339937436158', 285, NULL);
+INSERT INTO pfile VALUES (6, '2702A657B801333C3150BDC8BE642F9B', '798826BF3EB294E5D514ECFA3222CCF09BBCD985', '8df6eb5d69ffe2bf61937d49f3ef72e98213fd09f9ad41c626e419503178bacd', 14554, NULL);
 
 --
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: fossy
 --
 
-INSERT INTO users VALUES (1, 'Default User', 1, 'Default User when nobody is logged in', 'Seed', 'Pass', 0, NULL, 'y', NULL, NULL, 'simple', NULL, NULL, NULL);
-INSERT INTO users VALUES (2, 'fossy', 1, 'Default Administrator', '14272952581103610285', 'cdd40d0517419e8495a6e40b14369b6a39031581', 10, 'y', 'y', NULL, NULL, 'simple', NULL, NULL, NULL);
+INSERT INTO users (user_pk, user_name, root_folder_fk, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, upload_visibility, user_agent_list, default_bucketpool_fk, ui_preference, new_upload_group_fk, new_upload_perm, default_folder_fk) VALUES (1, 'Default User', 1, 'Default User when nobody is logged in', 'Seed', 'Pass', 0, NULL, 'y', 'public', NULL, NULL, 'simple', NULL, NULL, 1);
+INSERT INTO users (user_pk, user_name, root_folder_fk, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, upload_visibility, user_agent_list, default_bucketpool_fk, ui_preference, new_upload_group_fk, new_upload_perm, default_folder_fk) VALUES (2, 'fossy', 1, 'Default Administrator', '16294329171791449506', 'b27fd9578d6893916952c2fb74a64bbc9e1bf0b9', 10, 'y', 'y', 'public', 'agent_copyright,agent_mimetype,agent_monk,agent_nomos,agent_pkgagent', 1, '', NULL, NULL, 1);
 
 
 --

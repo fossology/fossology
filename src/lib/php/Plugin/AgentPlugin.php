@@ -1,27 +1,16 @@
 <?php
-/***********************************************************
- * Copyright (C) 2015, Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2015 Siemens AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 namespace Fossology\Lib\Plugin;
 
 abstract class AgentPlugin implements Plugin
 {
   const PRE_JOB_QUEUE = 'preJq';
-  
+
   public $AgentName;
   public $Name = "agent_abstract";
   public $Dependency = array();
@@ -30,16 +19,24 @@ abstract class AgentPlugin implements Plugin
   public $State = PLUGIN_STATE_READY;
   public $DBaccess = PLUGIN_DB_WRITE;
 
-  function __construct(){}
-  function execute(){}
-  function postInstall(){}
+  function __construct()
+  {
+  }
+  function execute()
+  {
+  }
+  function postInstall()
+  {
+  }
 
   function preInstall()
   {
     menu_insert("Agents::" . $this->Title, 0, $this->Name);
   }
 
-  function unInstall(){}
+  function unInstall()
+  {
+  }
 
   /**
    * @return string
@@ -75,14 +72,12 @@ abstract class AgentPlugin implements Plugin
   public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
   {
     $dependencies[] = "agent_adj2nest";
-    if ($this->AgentHasResults($uploadId) == 1)
-    {
+    if ($this->AgentHasResults($uploadId) == 1) {
       return 0;
     }
 
     $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
-    if ($jobQueueId != 0)
-    {
+    if ($jobQueueId != 0) {
       return $jobQueueId;
     }
 
@@ -104,29 +99,24 @@ abstract class AgentPlugin implements Plugin
   protected function doAgentAdd($jobId, $uploadId, &$errorMsg, $dependencies, $jqargs = "", $jq_cmd_args = null)
   {
     $deps = array();
-    foreach ($dependencies as $dependency)
-    {
+    foreach ($dependencies as $dependency) {
       $dep = $this->implicitAgentAdd($jobId, $uploadId, $errorMsg, $dependency);
-      if ($dep == -1)
-      {
+      if ($dep == - 1) {
         return -1;
       }
       $deps[] = $dep;
     }
 
-    if (empty($jqargs))
-    {
+    if (empty($jqargs)) {
       $jqargs = $uploadId;
     }
     $jobQueueId = \JobQueueAdd($jobId, $this->AgentName, $jqargs, "", $deps, NULL, $jq_cmd_args);
-    if (empty($jobQueueId))
-    {
+    if (empty($jobQueueId)) {
       $errorMsg = "Failed to insert agent $this->AgentName into job queue. jqargs: $jqargs";
       return -1;
     }
     $success = \fo_communicate_with_scheduler("database", $output, $errorMsg);
-    if (!$success)
-    {
+    if (! $success) {
       $errorMsg .= "\n" . $output;
     }
 
@@ -142,21 +132,17 @@ abstract class AgentPlugin implements Plugin
    */
   protected function implicitAgentAdd($jobId, $uploadId, &$errorMsg, $dependency)
   {
-    if (is_array($dependency))
-    {
+    if (is_array($dependency)) {
       $pluginName = $dependency['name'];
       $depArgs = array_key_exists('args', $dependency) ? $dependency['args'] : null;
       $preJq = array_key_exists(self::PRE_JOB_QUEUE, $dependency) ? $dependency[self::PRE_JOB_QUEUE] : array();
-    }
-    else
-    {
+    } else {
       $pluginName = $dependency;
       $depArgs = null;
       $preJq = array();
     }
     $depPlugin = plugin_find($pluginName);
-    if (!$depPlugin)
-    {
+    if (! $depPlugin) {
       $errorMsg = "Invalid plugin name: $pluginName, (implicitAgentAdd())";
       return -1;
     }

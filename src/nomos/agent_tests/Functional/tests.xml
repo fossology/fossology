@@ -1,4 +1,8 @@
 <phpunit backupGlobals="true">
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: FSFAP
+-->
   <testsuites>
     <testsuite name="nomos/agent_tests/Functional Tests">
       <file>CommonCliTest.php</file>

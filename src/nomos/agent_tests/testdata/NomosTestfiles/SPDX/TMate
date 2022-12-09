@@ -1,1 +1,3 @@
-SPDX-License-Identifier: TMate
+# REUSE-IgnoreStart
+SPDX-License-Identifier: foo-short-name AND bar-short-name OR TMate
+# REUSE-IgnoreEnd

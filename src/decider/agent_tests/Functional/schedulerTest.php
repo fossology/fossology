@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014-2018, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2019 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 /**
  * @namespace Fossology::Decider::Test
@@ -27,6 +16,7 @@ use Fossology\Lib\BusinessRules\ClearingEventProcessor;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\ShowJobsDao;
@@ -73,6 +63,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   private $highlightDao;
   /** @var ShowJobsDao */
   private $showJobsDao;
+  /** @var CopyrightDao $copyrightDao */
+  private $copyrightDao;
   /** @var SchedulerTestRunnerCli */
   private $runnerCli;
   /** @var SchedulerTestRunnerMock */
@@ -81,15 +73,17 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Setup the objects, database and repository
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("deciderSched");
     $this->dbManager = $this->testDb->getDbManager();
+    $this->testDb->setupSysconfig();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $logger = M::mock('Monolog\Logger');
     $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::class);
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
+    $this->copyrightDao = new CopyrightDao($this->dbManager, $this->uploadDao);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $agentDao = new AgentDao($this->dbManager, $logger);
     $this->agentLicenseEventProcessor = new AgentLicenseEventProcessor($this->licenseDao, $agentDao);
@@ -97,19 +91,23 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
     $this->showJobsDao = new ShowJobsDao($this->dbManager, $this->uploadDao);
     $this->clearingDecisionProcessor = new ClearingDecisionProcessor($this->clearingDao, $this->agentLicenseEventProcessor, $clearingEventProcessor, $this->dbManager);
+    $this->copyrightDao = M::mock(CopyrightDao::class);
 
     global $container;
     $container = M::mock('ContainerBuilder');
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManager);
 
-    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->highlightDao, $this->showJobsDao, $this->clearingDecisionProcessor, $this->agentLicenseEventProcessor);
+    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao,
+      $this->clearingDao, $this->uploadDao, $this->highlightDao,
+      $this->showJobsDao, $this->copyrightDao, $this->clearingDecisionProcessor,
+      $this->agentLicenseEventProcessor);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
   /**
    * @brief Destroy objects, database and repository
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;
@@ -118,6 +116,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->highlightDao = null;
     $this->showJobsDao = null;
     $this->clearingDao = null;
+    $this->copyrightDao = null;
     M::close();
   }
 
@@ -148,7 +147,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   {
     $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk',
       'license_set_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight',
-      'highlight_keyword','agent','pfile','ars_master','users','group_user_member','license_map','jobqueue','job'),false);
+      'highlight_keyword','agent','pfile','ars_master','users','group_user_member','license_map','jobqueue','job',
+      'report_info'), false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq',
       'license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq',
       'clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey',
@@ -156,7 +156,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','clearing_event_pkey','jobqueue_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event',
-      'clearing_decision','license_file','highlight','jobqueue','job'),false);
+      'clearing_decision','license_file', 'license_ref','highlight','jobqueue','job'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('nomos','monk','copyright'));
 
@@ -175,11 +175,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   private function getHeartCount($output)
   {
     $matches = array();
-    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches))
-    {
+    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches)) {
       return intval($matches[1]);
-    } else
-    {
+    } else {
       return -1;
     }
   }
@@ -201,7 +199,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
 
     $licId1 = $licenseRef1->getId();
 
@@ -247,7 +245,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
 
     $licId1 = $licenseRef1->getId();
 
@@ -294,7 +292,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
 
     $licId1 = $licenseRef1->getId();
 
@@ -342,7 +340,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
 
     $licId1 = $licenseRef1->getId();
 
@@ -394,9 +392,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
-    $licenseRef2 = $this->licenseDao->getLicenseByShortName("GPL-1.0")->getRef();
-    $licenseRef3 = $this->licenseDao->getLicenseByShortName("APL-1.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("BSL-1.0")->getRef();
+    $licenseRef3 = $this->licenseDao->getLicenseByShortName("ZPL-1.1")->getRef();
 
     $licId1 = $licenseRef1->getId();
     $licId2 = $licenseRef2->getId();
@@ -453,9 +451,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
-    $licenseRef2 = $this->licenseDao->getLicenseByShortName("GPL-1.0")->getRef();
-    $licenseRef3 = $this->licenseDao->getLicenseByShortName("APL-1.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("BSL-1.0")->getRef();
+    $licenseRef3 = $this->licenseDao->getLicenseByShortName("ZPL-1.1")->getRef();
 
     $licId1 = $licenseRef1->getId();
     $licId2 = $licenseRef2->getId();
@@ -512,9 +510,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
-    $licenseRef2 = $this->licenseDao->getLicenseByShortName("GPL-1.0")->getRef();
-    $licenseRef3 = $this->licenseDao->getLicenseByShortName("APL-1.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("BSL-1.0")->getRef();
+    $licenseRef3 = $this->licenseDao->getLicenseByShortName("ZPL-1.1")->getRef();
 
     $licId1 = $licenseRef1->getId();
     $licId2 = $licenseRef2->getId();
@@ -567,7 +565,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
     $licId1 = $licenseRef1->getId();
 
     $agentBulk = 6;
@@ -614,7 +612,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpRepo();
     $monkAgentId = 5;
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
     $licId1 = $licenseRef1->getId();
 
     $pfile = 4;
@@ -626,9 +624,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->queryOnce("DELETE FROM license_file");
 
     /* insert NoLicenseKnown decisions */
-    $this->dbManager->queryOnce("INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added)"
-            . " VALUES (2, $itemId, $pfile, $userId, $groupId, ".DecisionTypes::IDENTIFIED.", ".DecisionScopes::ITEM.", '2015-05-04 11:43:18.276425+02')");
-    $isWipBeforeDecider = $this->clearingDao->isDecisionWip($itemId, $groupId);
+    $this->dbManager->queryOnce("INSERT INTO clearing_decision (uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added)"
+            . " VALUES ($itemId, $pfile, $userId, $groupId, ".DecisionTypes::IDENTIFIED.", ".DecisionScopes::ITEM.", '2015-05-04 11:43:18.276425+02')");
+    $isWipBeforeDecider = $this->clearingDao->isDecisionCheck($itemId, $groupId, DecisionTypes::WIP);
     assertThat($isWipBeforeDecider, equalTo(false));
 
     $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$monkAgentId)");
@@ -640,7 +638,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
 
-    $isWip = $this->clearingDao->isDecisionWip($itemId, $groupId);
+    $isWip = $this->clearingDao->isDecisionCheck($itemId, $groupId, DecisionTypes::WIP);
     assertThat($isWip, equalTo(true));
 
     $this->rmRepo();
@@ -658,7 +656,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpRepo();
     $monkAgentId = 5;
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
     $licId1 = $licenseRef1->getId();
 
     $pfile = 4;
@@ -690,5 +688,4 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
     $this->rmRepo();
   }
-
 }

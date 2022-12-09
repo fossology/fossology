@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Data\Package;
@@ -21,7 +10,8 @@ namespace Fossology\Lib\Data\Package;
 use Fossology\Lib\Data\Upload\Upload;
 use Mockery as M;
 
-class PackageTest extends \PHPUnit\Framework\TestCase {
+class PackageTest extends \PHPUnit\Framework\TestCase
+{
 
   private $id = 123;
 
@@ -32,7 +22,8 @@ class PackageTest extends \PHPUnit\Framework\TestCase {
   /** @var Package */
   private $package;
 
-  protected function setUp() {
+  protected function setUp() : void
+  {
     $this->uploads = array(M::mock(Upload::class));
 
     $this->package = new Package($this->id, $this->name, $this->uploads);

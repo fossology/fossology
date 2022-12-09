@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2008-2011 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 class ui_refresh extends FO_Plugin
 {
@@ -43,7 +32,9 @@ class ui_refresh extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
     global $Plugins;
     $P = &$Plugins[plugin_find_id("Default")];
     $GoMod = GetParm("remod",PARM_STRING);
@@ -52,5 +43,6 @@ class ui_refresh extends FO_Plugin
     return($P->Output($GoMod,$GoOpt));
   }
 }
-$NewPlugin = new ui_refresh;
+
+$NewPlugin = new ui_refresh();
 $NewPlugin->Initialize();

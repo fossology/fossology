@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Plugin;
@@ -98,7 +87,7 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
   /** @var TestPlugin */
   private $plugin;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->session = M::mock('Symfony\Component\HttpFoundation\Session\SessionInterface');
 
@@ -120,7 +109,8 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
     $this->plugin = new TestPlugin($this->name);
   }
 
-  protected function tearDown() {
+  protected function tearDown() : void
+  {
     M::close();
   }
 
@@ -185,16 +175,15 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
     assertThat($this->plugin->getInitOrder(), is(15));
   }
 
-  /**
-   * @expectedException Exception
-   * @expectedExceptionMessage not allowed without login
-   */
   public function testExceptionWhenLoginIsRequired()
   {
+    $this->expectException(Exception::class);
+    $this->expectExceptionMessage("not allowed without login");
     $this->plugin->getResponse();
   }
 
-  public function testSessionIsWrappedInRequest() {
+  public function testSessionIsWrappedInRequest()
+  {
     $this->logger->shouldReceive("debug")->once()->with(startsWith("handle request in"));
 
     $this->plugin = new TestPlugin($this->name, array(TestPlugin::REQUIRES_LOGIN => false));

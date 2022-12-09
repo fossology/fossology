@@ -1,20 +1,8 @@
-/***************************************************************
- Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2006-2014 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -29,6 +17,10 @@
  * \file
  * \brief Utilities used by nomos
  */
+
+sem_t* mutexJson;
+gboolean* printcomma;
+char saveLics[myBUFSIZ];
 
 /**
  \brief Add a new license to license_ref table
@@ -60,7 +52,7 @@ FUNCTION long add2license_ref(char *licenseName)
   LOG_WARNING("Does license name %s have multibyte encoding?", licenseName)
 
   /* verify the license is not already in the table */
-  sprintf(query, "SELECT rf_pk FROM " LICENSE_REF_TABLE " where rf_shortname='%s'", escLicName);
+  snprintf(query, myBUFSIZ - 1, "SELECT rf_pk FROM " LICENSE_REF_TABLE " where rf_shortname='%s'", escLicName);
   result = PQexec(gl.pgConn, query);
   if (fo_checkPQresult(gl.pgConn, result, query, __FILE__, __LINE__))
     return 0;
@@ -76,7 +68,7 @@ FUNCTION long add2license_ref(char *licenseName)
   /* Insert the new license */
   specialLicenseText = "License by Nomos.";
 
-  sprintf(insert, "insert into license_ref(rf_shortname, rf_text, rf_detector_type) values('%s', '%s', 2)", escLicName,
+  snprintf(insert, myBUFSIZ - 1, "insert into license_ref(rf_shortname, rf_text, rf_detector_type) values('%s', '%s', 2)", escLicName,
       specialLicenseText);
   result = PQexec(gl.pgConn, insert);
   // ignore duplicate constraint failure (23505), report others

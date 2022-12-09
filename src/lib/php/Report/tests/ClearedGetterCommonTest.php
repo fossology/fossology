@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Report;
@@ -49,9 +38,11 @@ class WeirdCharClearedGetter extends ClearedGetterCommon
     parent::__construct($groupBy);
   }
 
-  protected function getStatements($uploadId, $uploadTreeTableName, $userId = null, $groupId=null){}
+  protected function getStatements($uploadId, $uploadTreeTableName, $userId = null, $groupId=null)
+  {
+  }
 
-  public function getCleared($uploadId, $groupId=null, $extended = true, $agentcall = NULL)
+  public function getCleared($uploadId, $objectAgent, $groupId = null, $extended = true, $agentcall = null, $isUnifiedReport = false)
   {
     return array(
       array("good" => "漢", "esc" => "escape", "uml" => ' ü ')
@@ -66,7 +57,7 @@ class ClearedComonReportTest extends \PHPUnit\Framework\TestCase
   /** @var TreeDao|MockInterface */
   private $treeDao;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->uploadDao = M::mock(UploadDao::class);
     $this->treeDao = M::mock(TreeDao::class);
@@ -79,7 +70,7 @@ class ClearedComonReportTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
@@ -117,7 +108,7 @@ class ClearedComonReportTest extends \PHPUnit\Framework\TestCase
          ->with(3, $uploadTreeTableName, $parentId)
          ->andReturn("a/b/1");
 
-    $statements = $this->clearedGetterTest->getCleared($uploadId);
+    $statements = $this->clearedGetterTest->getCleared($uploadId, null);
     $expected = array(
       "statements" => array(
         array(
@@ -175,7 +166,7 @@ class ClearedComonReportTest extends \PHPUnit\Framework\TestCase
          ->andReturn("a/b/1");
 
     $tester = new TestClearedGetter("text");
-    $statements = $tester->getCleared($uploadId);
+    $statements = $tester->getCleared($uploadId, null);
     $expected = array(
       "statements" => array(
         array(

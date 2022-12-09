@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2010-2014 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Auth\Auth;
 /**
@@ -22,18 +11,19 @@ use Fossology\Lib\Auth\Auth;
  * \brief One-Shot Copyright/Email/URL Analysis
  */
 
-define("TITLE_agent_copyright_once", _("One-Shot Copyright/Email/URL Analysis"));
+define("TITLE_AGENT_COPYRIGHT_ONCE", _("One-Shot Copyright/Email/URL Analysis"));
 
 /**
  * @class agent_copyright_once
  * @brief One-Shot plugin for Copyright/Email/URL Analysis
  */
-class agent_copyright_once extends FO_Plugin {
+class agent_copyright_once extends FO_Plugin
+{
 
   function __construct()
   {
     $this->Name = "agent_copyright_once";
-    $this->Title = TITLE_agent_copyright_once;
+    $this->Title = TITLE_AGENT_COPYRIGHT_ONCE;
     $this->Version = "1.0";
     //$this->Dependency = array("browse", "view");
     $this->DBaccess = PLUGIN_DB_NONE;
@@ -52,7 +42,8 @@ class agent_copyright_once extends FO_Plugin {
    * \brief Analyze one uploaded file.
    * \return string
    */
-  function AnalyzeOne() {
+  function AnalyzeOne()
+  {
     global $Plugins;
     global $SYSCONFDIR;
     $ModBack = GetParm("modback",PARM_STRING);
@@ -64,7 +55,7 @@ class agent_copyright_once extends FO_Plugin {
     $tempFileName = $_FILES['licfile']['tmp_name'];
     $ui_dir = getcwd();
     $copyright_dir =  "$SYSCONFDIR/mods-enabled/copyright/agent/";
-    if(!chdir($copyright_dir)) {
+    if (!chdir($copyright_dir)) {
       $errmsg = _("unable to change working directory to $copyright_dir\n");
       return $errmsg;
     }
@@ -90,12 +81,13 @@ class agent_copyright_once extends FO_Plugin {
         'url' => Highlight::URL);
     while (!feof($inputFile)) {
       $Line = fgets($inputFile);
-      if ($Line[0] == '/') continue;
+      if ($Line[0] == '/') {
+        continue;
+      }
       $count = strlen($Line);
       if ($count > 0) {
         /** $Line is not "'", also $Line is not end with ''', please notice that: usually $Line is end with NL(new line) */
-        if ((($count > 1) && ("'" != $Line[$count - 2])) || ((1 == $count) && ("'" != $Line[$count - 1])))
-        {
+        if ((($count > 1) && ("'" != $Line[$count - 2])) || ((1 == $count) && ("'" != $Line[$count - 1]))) {
           $Line = str_replace("\n", ' ', $Line); // in order to preg_match_all correctly, replace NL with white space
           $realline .= $Line;
           continue;
@@ -107,18 +99,18 @@ class agent_copyright_once extends FO_Plugin {
         //print_r($match);
         if (!empty($match['start'])) {
           $stuff[$match['type'][0]][] = $match['content'][0];
-          if ($this->NoHTML) // For REST API
+          if ($this->NoHTML) { // For REST API
             array_push($copyright_array, $match['content'][0]);
-          else
+          } else {
             $highlights[] = new Highlight($match['start'][0], $match['end'][0], $typeToHighlightTypeMap[$match['type'][0]], -1, -1, $match['content'][0]);
+          }
         }
       }
       $realline = "";
     }
     pclose($inputFile);
 
-    if ($this->NoHTML) // For REST API:
-    {
+    if ($this->NoHTML) { // For REST API:
       return $copyright_array;
     }
 
@@ -127,7 +119,7 @@ class agent_copyright_once extends FO_Plugin {
       $V = $view->getView($inputFile, $ModBack, 0, NULL, $highlights); // do not show Header and micro menus
       fclose($inputFile);
     }
-    if(!chdir($ui_dir)) {
+    if (!chdir($ui_dir)) {
       $errmsg = _("unable to change back to working directory $ui_dir\n");
       return $errmsg;
     }
@@ -142,7 +134,8 @@ class agent_copyright_once extends FO_Plugin {
    * \return int 1 on success.
    * @see FO_Plugin::RegisterMenus()
    */
-  function RegisterMenus() {
+  function RegisterMenus()
+  {
     if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     } // don't run
@@ -156,8 +149,7 @@ class agent_copyright_once extends FO_Plugin {
     }
     if (GetParm("mod", PARM_STRING) == $this->Name) {
       $ThisMod = 1;
-    }
-    else {
+    } else {
       $ThisMod = 0;
     }
     /* Check for a wget post (wget cannot post to a variable name) */
@@ -174,8 +166,7 @@ class agent_copyright_once extends FO_Plugin {
         $_FILES['licfile']['tmp_name'] = $Ftmp;
         $_FILES['licfile']['size'] = filesize($Ftmp);
         $_FILES['licfile']['unlink_flag'] = 1;
-      }
-      else {
+      } else {
         unlink($Ftmp);
       }
       fclose($Fin);
@@ -185,20 +176,11 @@ class agent_copyright_once extends FO_Plugin {
       /* default header is plain text */
     }
     /* Only register with the menu system if the user is logged in. */
-    if (!empty($_SESSION[Auth::USER_NAME]))
-    {
+    if (!empty($_SESSION[Auth::USER_NAME])) {
       // Debugging changes to license analysis NOTE: this comment doesn't make sense.
-      if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE)
-      {
-        menu_insert("Main::Upload::One-Shot Copyright/Email/URL", $this->MenuOrder, $this->Name, $this->MenuTarget);
-
-        $tooltipText = _("Copyright/Email/URL One-shot, real-time analysis");
-        $menuText = "One-Shot Copyright/Email/URL";
-        $menuPosition = 100;
-        menu_insert("View::[BREAK]", $menuPosition);
-        menu_insert("View::{$menuText}", $menuPosition + 1, $this->Name, $tooltipText);
-        menu_insert("View-Meta::[BREAK]", $menuPosition);
-        menu_insert("View-Meta::{$menuText}", $menuPosition + 1, $this->Name, $tooltipText);
+      if (array_key_exists(Auth::USER_LEVEL, $_SESSION) &&
+        $_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
+        menu_insert("Main::Upload::One-Shot Copyright/ Email/ URL Analysis", $this->MenuOrder, $this->Name, $this->MenuTarget);
       }
     }
   } // RegisterMenus()
@@ -207,7 +189,8 @@ class agent_copyright_once extends FO_Plugin {
    * @copydoc FO_Plugin::Output()
    * @see FO_Plugin::Output()
    */
-  function Output() {
+  function Output()
+  {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
@@ -217,18 +200,15 @@ class agent_copyright_once extends FO_Plugin {
     */
 
     $tmp_name = '';
-    if (array_key_exists('licfile', $_FILES) && array_key_exists('tmp_name', $_FILES['licfile']))
-    {
+    if (array_key_exists('licfile', $_FILES) && array_key_exists('tmp_name', $_FILES['licfile'])) {
       $tmp_name = $_FILES['licfile']['tmp_name'];
     }
 
     $this->vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
-    if ($this->OutputType!='HTML' && file_exists($tmp_name))
-    {
+    if ($this->OutputType!='HTML' && file_exists($tmp_name)) {
       $copyright_res = $this->AnalyzeOne();
       $cont = '';
-      foreach ($copyright_res as $copyright)
-      {
+      foreach ($copyright_res as $copyright) {
         $cont = "$copyright\n";
       }
       unlink($tmp_name);
@@ -240,8 +220,7 @@ class agent_copyright_once extends FO_Plugin {
       if ($tmp_name) {
         if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10) {
           $this->vars['content'] = $this->AnalyzeOne();
-        }
-        else {
+        } else {
           $this->vars['message'] =  _('file is to large for one-shot copyright analyze');
         }
         return;

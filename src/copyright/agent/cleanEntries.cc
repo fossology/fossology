@@ -1,20 +1,10 @@
 /*
- * Copyright (C) 2014-2015, Siemens AG
- * Author: Johannes Najjar
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- */
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ Author: Johannes Najjar
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
 /**
  * \file cleanEntries.cc
  * \brief Clean strings
@@ -58,6 +48,20 @@ string cleanGeneral(string::const_iterator sBegin, string::const_iterator sEnd)
 }
 
 /**
+ * \brief Truncate SPDX-CopyrightText from copyright statement
+ * \param sBegin String begin
+ * \param sEnd   String end
+ * \return string Clean spdx statements
+ */
+string cleanSpdxStatement(string::const_iterator sBegin, string::const_iterator sEnd)
+{
+  stringstream ss;
+  rx::regex_replace(ostream_iterator<char>(ss), sBegin, sEnd, rx::regex("spdx-filecopyrighttext:", rx::regex_constants::icase), " ");
+  string s = ss.str();
+  return cleanGeneral(s.begin(), s.end());
+}
+
+/**
  * \brief Clean copyright statements from special characters
  * (comment characters in programming languages, multiple spaces etc.)
  * \param sBegin String begin
@@ -69,7 +73,7 @@ string cleanStatement(string::const_iterator sBegin, string::const_iterator sEnd
   stringstream ss;
   rx::regex_replace(ostream_iterator<char>(ss), sBegin, sEnd, rx::regex("\n[[:space:][:punct:]]*"), " ");
   string s = ss.str();
-  return cleanGeneral(s.begin(), s.end());
+  return cleanSpdxStatement(s.begin(), s.end());
 }
 
 /**
@@ -83,9 +87,15 @@ string cleanStatement(string::const_iterator sBegin, string::const_iterator sEnd
 string cleanMatch(const string& sText, const match& m)
 {
   string::const_iterator it = sText.begin();
+  icu::UnicodeString unicodeStr = fo::recodeToUnicode(string(it + m.start,
+    it + m.end));
+  string utfCompatibleText;
+
+  unicodeStr.toUTF8String(utfCompatibleText);
+
   if (m.type == "statement")
-    return cleanStatement(it + m.start, it + m.end);
+    return cleanStatement(utfCompatibleText.begin(), utfCompatibleText.end());
   else
-    return cleanGeneral(it + m.start, it + m.end);
+    return cleanGeneral(utfCompatibleText.begin(), utfCompatibleText.end());
 }
 

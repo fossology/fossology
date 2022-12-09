@@ -1,20 +1,9 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
-Authors: Steffen Weber, Andreas Würl
+ SPDX-FileCopyrightText: © 2014 Siemens AG
+ Authors: Steffen Weber, Andreas Würl
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Db;
@@ -35,10 +24,8 @@ class SolidDbManager extends DbManager
    */
   public function prepare($statementName, $sqlStatement)
   {
-    if (array_key_exists($statementName, $this->preparedStatements))
-    {
-      if ($this->preparedStatements[$statementName] !== $sqlStatement)
-      {
+    if (array_key_exists($statementName, $this->preparedStatements)) {
+      if ($this->preparedStatements[$statementName] !== $sqlStatement) {
         throw new \Exception("Existing Statement mismatch: $statementName");
       }
       return;
@@ -56,8 +43,7 @@ class SolidDbManager extends DbManager
    */
   public function execute($statementName, $params = array())
   {
-    if (!array_key_exists($statementName, $this->preparedStatements))
-    {
+    if (! array_key_exists($statementName, $this->preparedStatements)) {
       throw new \Exception("Unknown Statement");
     }
     $startTime = microtime(true);
@@ -65,7 +51,7 @@ class SolidDbManager extends DbManager
     $res = $this->dbDriver->query($statement);
     $execTime = microtime(true) - $startTime;
     $this->collectStatistics($statementName, $execTime);
-    $this->logger->addDebug("execution of '$statementName' took " . $this->formatMilliseconds($execTime));
+    $this->logger->debug("execution of '$statementName' took " . $this->formatMilliseconds($execTime));
     $this->checkResult($res, "$statementName :: $statement");
     return $res;
   }
@@ -80,34 +66,26 @@ class SolidDbManager extends DbManager
   {
     $sql = $this->preparedStatements[$statementName];
     $cnt = 0;
-    foreach($params as $var)
-    {
+    foreach ($params as $var) {
       $cnt++;
-      if ($var === null)
-      {
+      if ($var === null) {
         throw new \Exception('given argument for $' . $cnt . ' is null');
       }
-      if(is_bool($var))
-      {
+      if (is_bool($var)) {
         $masked = $this->dbDriver->booleanToDb($var);
-      }
-      else if(is_numeric($var))
-      {
+      } else if (is_numeric($var)) {
         $masked = $var;
-      }
-      else
-      {
+      } else {
         $masked =  "'". $this->dbDriver->escapeString($var)."'";
       }
       $sqlRep = preg_replace('/(\$'.$cnt.')([^\d]|$)/', "$masked$2", $sql);
-      if ($sqlRep == $sql)
-      {
+      if ($sqlRep == $sql) {
         throw new \Exception('$' . $cnt . ' not found in prepared statement');
       }
       $sql = $sqlRep;
     }
-    if(preg_match('/(\$[\d]+)([^\d]|$)/',$sql, $match)){
-      $this->logger->addDebug($match[1]." in '$statementName not resolved");  
+    if (preg_match('/(\$[\d]+)([^\d]|$)/', $sql, $match)) {
+      $this->logger->debug($match[1]." in '$statementName not resolved");
     }
     return $sql;
   }

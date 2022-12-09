@@ -1,0 +1,65 @@
+{# SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{# Set common list of agents. Displayed by various pages #}
+{%
+  set agent_list = "(N: nomos, M: monk, Nk: ninka, I: reportImport, O: ojo, S: scancode, Sp: spasht, Rs: reso)"
+%}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% block head %}
+      {% include "include/head.html.twig" %}
+      <title>{% block title %}{{ title|e }}{% endblock %}</title>
+      {{ metadata }}
+      {% block styles %}
+      {{ styles }}
+      {% endblock %}
+    {% endblock %}
+  </head>
+  <body class="text">
+    {% block menu %}
+      {{ menu }}
+    {% endblock %}
+
+    {% block micromenu %}
+      {% if micromenu %}
+        <div class='alert alert-info' style='padding:5px;'>
+          {{ micromenu }}
+        </div>
+      {% endif %}
+    {% endblock %}
+
+    {% block message %}
+      
+      {% if progressBar %}
+        <div class="progress" style="height:30px">
+          <div class="progress-bar bg-success" style="{{ progressBar }}">{% if message %}  {{ message|raw|nl2br }} {% endif %}</div>
+        </div>
+      {% else %}
+        <div id="dmessage" style="border-bottom: 1px dashed gray;">
+          <button name="eraseme" class="btn btn-default btn-sm" value="close" onclick="rmMsg();">{{ 'Close'| trans }}</button>
+          {% if message %}  {{ message|raw|nl2br }} {% endif %}
+        </div>
+      {% endif %}
+
+      <script type="text/javascript">
+        function rmMsg() {
+          var div = document.getElementById("dmessage");
+          div.style.display = "none";
+        }
+        {% if message %}{% else %} rmMsg();{% endif %}
+    </script>
+  {% endblock %}
+
+
+  {% block content %}
+    {{ content }}
+  {% endblock %}
+
+  {% block foot %}
+    {% include "include/foot.html.twig" %}
+  {% endblock %}
+</body>
+</html>

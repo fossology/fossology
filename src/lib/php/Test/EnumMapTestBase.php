@@ -1,26 +1,16 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Test;
 
 use Fossology\Lib\Data\Types;
 
-class EnumMapTestBase extends \PHPUnit\Framework\TestCase {
+class EnumMapTestBase extends \PHPUnit\Framework\TestCase
+{
 
   /** @var Types */
   private $types;
@@ -28,7 +18,8 @@ class EnumMapTestBase extends \PHPUnit\Framework\TestCase {
   /**
    * @param Types $types
    */
-  protected function setTypes($types) {
+  protected function setTypes($types)
+  {
     $this->types = $types;
   }
 
@@ -37,7 +28,8 @@ class EnumMapTestBase extends \PHPUnit\Framework\TestCase {
    * @param string $expectedTypeName
    * @throws \Exception
    */
-  protected function checkMapping($type, $expectedTypeName) {
+  protected function checkMapping($type, $expectedTypeName)
+  {
     $typeName = $this->types->getTypeName($type);
 
     assertThat($typeName, is($expectedTypeName));

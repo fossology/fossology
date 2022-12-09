@@ -1,20 +1,9 @@
 <?php
 /*
-Copyright (C) 2016, Siemens AG
-Copyright (C) 2017 TNG Technology Consulting GmbH
+ SPDX-FileCopyrightText: © 2016 Siemens AG
+ SPDX-FileCopyrightText: © 2017 TNG Technology Consulting GmbH
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 /**
  * @dir
@@ -38,7 +27,7 @@ class spdx2Test extends \PHPUnit\Framework\TestCase
    * @brief Setup test env
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
@@ -47,7 +36,7 @@ class spdx2Test extends \PHPUnit\Framework\TestCase
    * @brief Tear down test env
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
@@ -110,8 +99,12 @@ class spdx2Test extends \PHPUnit\Framework\TestCase
    */
   public function provideLicenseSetAddPrefixOnDemand()
   {
-    $constTrue = function ($licId) { return true; };
-    $constFalse = function ($licId) { return false; };
+    $constTrue = function ($licId){
+      return true;
+    };
+    $constFalse = function ($licId){
+      return false;
+    };
 
     return array(
         'null' => array("LIC1", null, "LIC1"),
@@ -142,8 +135,14 @@ class spdx2Test extends \PHPUnit\Framework\TestCase
    */
   public function provideLicenseSetAddPrefixOnDemandList()
   {
-    $constTrue = function ($licId) { return true; };
-    $constFalse = function ($licId) { return false; };
+    $constTrue = function ($licId)
+    {
+      return true;
+    };
+    $constFalse = function ($licId)
+    {
+      return false;
+    };
 
     return array(
         'single with null' => array(array("LIC1"), null, array("LIC1")),
@@ -155,9 +154,15 @@ class spdx2Test extends \PHPUnit\Framework\TestCase
             . "LIC2", SpdxTwoUtils::$prefix . "LIC3")),
         'multiple with const true' => array(array("LIC1","LIC2","LIC3"), $constTrue, array("LIC1","LIC2","LIC3")),
         'two licenses with one prefix (A)' => array(array("LIC1","LIC2"),
-          function ($licId) { return $licId === 'LIC2';}, array(SpdxTwoUtils::$prefix.'LIC1', 'LIC2')),
+          function ($licId)
+          {
+            return $licId === 'LIC2';
+          }, array(SpdxTwoUtils::$prefix.'LIC1', 'LIC2')),
         'two licenses with one prefix (2)' => array(array("LIC1","LIC2"),
-          function ($licId) { return $licId === 'LIC1';}, array('LIC1', SpdxTwoUtils::$prefix.'LIC2'))
+          function ($licId)
+          {
+            return $licId === 'LIC1';
+          }, array('LIC1', SpdxTwoUtils::$prefix.'LIC2'))
     );
   }
 
@@ -179,8 +184,14 @@ class spdx2Test extends \PHPUnit\Framework\TestCase
    */
   public function provideLicenseSetImplodeLicenses()
   {
-    $constTrue = function ($licId) { return true; };
-    $constFalse = function ($licId) { return false; };
+    $constTrue = function ($licId)
+    {
+      return true;
+    };
+    $constFalse = function ($licId)
+    {
+      return false;
+    };
 
     return array(
         'null' => array(null, $constTrue,  ''),
@@ -192,9 +203,15 @@ class spdx2Test extends \PHPUnit\Framework\TestCase
         'dual license 2nd pos' => array(array("LIC1", "Dual-license", "LIC3"), $constTrue, 'LIC1 OR LIC3'),
         'dual license 3rd pos' => array(array("LIC1", "LIC2", "Dual-license"), $constTrue,  'LIC1 OR LIC2'),
         'dual license with prefix' => array(array("LIC1","LIC2", "Dual-license"),
-            function ($licId) { return $licId === 'LIC2';}, SpdxTwoUtils::$prefix.'LIC1 OR LIC2'),
+            function ($licId)
+            {
+              return $licId === 'LIC2';
+            }, SpdxTwoUtils::$prefix.'LIC1 OR LIC2'),
         'dual license with prefix' => array(array("LIC1","LIC2", "Dual-license"),
-            function ($licId) { return $licId === 'LIC1';}, 'LIC1 OR '.SpdxTwoUtils::$prefix.'LIC2'),
+            function ($licId)
+            {
+              return $licId === 'LIC1';
+            }, 'LIC1 OR '.SpdxTwoUtils::$prefix.'LIC2'),
         'dual license with prefix ($constFalse)' => array(array("LIC1","LIC2", "Dual-license"),
             $constFalse, SpdxTwoUtils::$prefix.'LIC1 OR '.SpdxTwoUtils::$prefix.'LIC2'),
         'multiple dualLicense' => array(array("LIC1","LIC2 OR LIC3"),  $constTrue, '(LIC2 OR LIC3) AND LIC1'),

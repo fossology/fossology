@@ -1,23 +1,13 @@
 <?php
 /*
-Copyright (C) 2015, Siemens AG
+ SPDX-FileCopyrightText: © 2015 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Proxy;
 
+use Exception;
 use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
 
@@ -29,7 +19,7 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
   private $assertCountBefore;
 
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestLiteDb();
     $this->testDb->createPlainTables( array('agent','ars_master') );
@@ -39,7 +29,7 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
@@ -83,11 +73,9 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
     assertThat($scanners,arrayContainingInAnyOrder(array(array('agent_pk'=>6,'agent_name'=>'nomos'),array('agent_pk'=>5,'agent_name'=>'monk'))));
   }
 
-  /**
-   * @expectedException \Exception
-   */
   public function testQueryNoScanners()
   {
+    $this->expectException(Exception::class);
     $uploadId = 2;
     $agentNames = array();
     new LatestScannerProxy($uploadId,$agentNames,'latest_scanner', "AND agent_enabled='true'");
@@ -111,11 +99,9 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
     $latestScannerProxy->materialize();
   }
 
-  /**
-   * @expectedException \Exception
-   */
   public function testMaterializeNotPossibleForParameterizedQuery()
   {
+    $this->expectException(Exception::class);
     $agentNames = array('nomos');
     $latestScannerProxy = new LatestScannerProxy('$1',$agentNames,'latest_scanner', "AND agent_enabled='true'");
     $latestScannerProxy->materialize();
@@ -131,14 +117,11 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
     assertThat($map,equalTo(array('nomos'=>6)));
   }
 
-  /**
-   * @expectedException \Exception
-   */
   public function testGetNameToIdMapNotPossibleForParameterizedQuery()
   {
+    $this->expectException(Exception::class);
     $agentNames = array('nomos');
     $latestScannerProxy = new LatestScannerProxy('$1',$agentNames,'latest_scanner', "AND agent_enabled='true'");
     $latestScannerProxy->getNameToIdMap();
   }
-
 }

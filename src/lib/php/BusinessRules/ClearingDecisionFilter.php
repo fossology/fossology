@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014-2017, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2017, 2020 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\BusinessRules;
@@ -45,18 +34,15 @@ class ClearingDecisionFilter
     /* @var ClearingDecision[][] $clearingDecisionsByItemId */
     $clearingDecisionsMapped = array();
 
-    foreach ($clearingDecisions as $clearingDecision)
-    {
-      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
-      {
+    foreach ($clearingDecisions as $clearingDecision) {
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
         continue;
       }
       $itemId = $clearingDecision->getUploadTreeId();
       $fileId = $clearingDecision->getPfileId();
       $scope = $clearingDecision->getScope();
 
-      switch ($scope)
-      {
+      switch ($scope) {
         case DecisionScopes::ITEM:
           $clearingDecisionsMapped[$fileId][$itemId] = $clearingDecision;
           break;
@@ -85,14 +71,14 @@ class ClearingDecisionFilter
   {
     $clearingDecisionsForLicList = array();
 
-    foreach ($clearingDecisions as $clearingDecision){
+    foreach ($clearingDecisions as $clearingDecision) {
 
-      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT){
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
         continue;
       }
 
       foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
-        if ($clearingLicense->isRemoved()){
+        if ($clearingLicense->isRemoved()) {
           continue;
         }
         $itemId = $clearingDecision->getUploadTreeId();
@@ -112,8 +98,7 @@ class ClearingDecisionFilter
   {
     /** @var ClearingDecision[] $clearingDecisionsByItemId */
     $clearingDecisionsByItemId = array();
-    foreach ($clearingDecisions as $clearingDecision)
-    {
+    foreach ($clearingDecisions as $clearingDecision) {
       $itemId = $clearingDecision->getUploadTreeId();
       $clearingDecisionsByItemId[$itemId] = $clearingDecision;
     }
@@ -127,11 +112,9 @@ class ClearingDecisionFilter
    */
   public function getDecisionOf($decisionMap, $itemId, $pfileId)
   {
-    if (array_key_exists($pfileId, $decisionMap))
-    {
+    if (array_key_exists($pfileId, $decisionMap)) {
       $pfileMap = $decisionMap[$pfileId];
-      if (array_key_exists($itemId, $pfileMap))
-      {
+      if (array_key_exists($itemId, $pfileMap)) {
         return $pfileMap[$itemId];
       }
       if (array_key_exists(self::KEYREPO, $pfileMap)) {
@@ -140,5 +123,39 @@ class ClearingDecisionFilter
     }
 
     return false;
+  }
+
+  /**
+   * @brief Get clearing decision as map of `<item-id> => <license-shortnames>`
+   * for copyright list
+   *
+   * Irrelevant decisions and removed licenses are marked as `"Void"`.
+   * @param ClearingDecision[] $clearingDecisions Clearing decisions to be
+   * filtered.
+   * @return ClearingDecision[]
+   */
+  public function filterCurrentClearingDecisionsForCopyrightList($clearingDecisions)
+  {
+    $clearingDecisionsForCopyList = array();
+
+    foreach ($clearingDecisions as $clearingDecision) {
+      $itemId = $clearingDecision->getUploadTreeId();
+      $clearingDecisionsForCopyList[$itemId] = array();
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
+        $clearingDecisionsForCopyList[$itemId][] = "Void";
+        continue;
+      }
+
+      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+        if ($clearingLicense->isRemoved()) {
+          continue;
+        }
+        $clearingDecisionsForCopyList[$itemId][] = $clearingLicense->getShortName();
+      }
+      if (empty($clearingDecisionsForCopyList[$itemId])) {
+        $clearingDecisionsForCopyList[$itemId][] = "Void";
+      }
+    }
+    return $clearingDecisionsForCopyList;
   }
 }

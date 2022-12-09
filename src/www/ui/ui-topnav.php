@@ -1,20 +1,9 @@
 <?php
-/***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2008-2011 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 /**
  * \class ui_topnav extends FO_Plugin
@@ -32,8 +21,10 @@ class ui_topnav extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
-    
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
+
     global $SysConf;
     global $Plugins;
 
@@ -41,13 +32,11 @@ class ui_topnav extends FO_Plugin
 
     $Uri = Traceback_dir();
 
-    if (@$SysConf['SYSCONFIG']['LogoImage'] and @$SysConf['SYSCONFIG']['LogoLink'])
-    {
+    if (@$SysConf['SYSCONFIG']['LogoImage'] and
+      @$SysConf['SYSCONFIG']['LogoLink']) {
       $LogoLink = $SysConf['SYSCONFIG']['LogoLink'];
       $LogoImg = $SysConf['SYSCONFIG']['LogoImage'];
-    }
-    else
-    {
+    } else {
       $LogoLink = 'http://fossology.org';
       $LogoImg = Traceback_uri . 'images/fossology-logo.gif';
     }
@@ -66,5 +55,5 @@ class ui_topnav extends FO_Plugin
   }
 }
 
-$NewPlugin = new ui_topnav;
+$NewPlugin = new ui_topnav();
 $NewPlugin->Initialize();

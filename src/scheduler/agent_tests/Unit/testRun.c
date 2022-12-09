@@ -1,19 +1,8 @@
-/*********************************************************************
-Copyright (C) 2011, 2012 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011, 2012 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*********************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * \dir
  * \brief Unit tests for scheduler
@@ -87,7 +76,6 @@ int clean_suite(void)
 /* ************************************************************************** */
 
 /* create test suite */
-#if CU_VERSION_P == 213
 /** \todo tests_job is not running */
 CU_SuiteInfo suites[] =
 {
@@ -103,22 +91,6 @@ CU_SuiteInfo suites[] =
     {"Event",           NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_event },
     CU_SUITE_INFO_NULL
 };
-#else
-CU_SuiteInfo suites[] =
-{
-    {"Host",            init_suite, clean_suite, tests_host             },
-    {"Interface",       init_suite, clean_suite, tests_interface        },
-    {"InterfaceThread", init_suite, clean_suite, tests_interface_thread },
-    {"Database",init_suite,clean_suite, tests_database },
-    {"Email",init_suite,clean_suite, tests_email },
-  //  {"Job",init_suite,clean_suite, tests_job },
-    {"Scheduler", init_suite,clean_suite, tests_scheduler },
-    {"MetaAgent", init_suite, clean_suite, tests_meta_agent },
-    {"Agent", init_suite, clean_suite, tests_agent },
-    {"Event",init_suite,clean_suite, tests_event },
-    CU_SUITE_INFO_NULL
-};
-#endif
 
 int main( int argc, char *argv[] )
 {

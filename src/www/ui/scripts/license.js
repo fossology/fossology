@@ -1,20 +1,9 @@
 /*
- Copyright (C) 2014-2015, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
  Author: Daniele Fognini, Johannes Najjar, Steffen Weber
- 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
- 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 function addArsGo(formid, selectid)
 {
@@ -42,6 +31,9 @@ $(document).ready(function () {
   if (typeof createLicHistTable === 'function') {
     createLicHistTable();
   }
+  if (typeof createReuseReportTable === 'function') {
+    createReuseReportTable();
+  }
 
   searchField = $('#dirlist_filter input');
   var dirListFilter = getCookie('dirListFilter');
@@ -51,20 +43,23 @@ $(document).ready(function () {
   });
   
   var scanFilter = getCookie('scanFilter');
-  if(scanFilter==="")
+  if(scanFilter==="") {
     scanFilter = 0;
+  }
   $('#scanFilter option[value='+scanFilter+']').parent().val(scanFilter);
   $('#scanFilter').change(function (){ filterScan($(this).val(),'scan'); });
 
   var conFilter = getCookie('conFilter');
-  if(conFilter==="")
+  if(conFilter==="") {
     conFilter = 0;
+  }
   $('#conFilter option[value='+conFilter+']').parent().val(conFilter);
   $('#conFilter').change(function (){ filterScan($(this).val(),'con'); });
   
   var openFilter = getCookie('openFilter');
-  if(openFilter==='true' || openFilter==='checked')
+  if(openFilter==='true' || openFilter==='checked') {
     $('#openCBoxFilter').prop('checked',openFilter);
+  }
   $('#openCBoxFilter').click(function (){
     setCookie('openFilter', $(this).prop('checked'));
     otable.fnFilter('');
@@ -122,9 +117,9 @@ function scheduleScan(upload, agentName, resultEntityKey) {
         $('#' + agentName.replace("agent_", "") + "_span").hide();
         queueUpdateCheck(jqPk, function () {
             resultEntity.html(agentName.replace("agent_", "") + " done.<br/>");
-          }, function () {
-            resultEntity.html(agentName.replace("agent_", "") + " failed!<br/>");
-          }
+        }, function () {
+          resultEntity.html(agentName.replace("agent_", "") + " failed!<br/>");
+        }
         );
       }
       else {
@@ -141,8 +136,9 @@ function scheduleScan(upload, agentName, resultEntityKey) {
 }
 
 function dressContents(data, type, full) {
-  if (type === 'display')
+  if (type === 'display') {
     return '<a href=\'#\' onclick=\'filterScan(' + data[1] + ',\"scan\")\'>' + data[0] + '</a>';
+  }
   return data;
 }
 

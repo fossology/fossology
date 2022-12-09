@@ -1,20 +1,8 @@
-/* **************************************************************
- Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+/*
+ SPDX-FileCopyrightText: © 2011-2013 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- ************************************************************** */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 /**
  * \file
  * \brief FOSSology library to read config file
@@ -219,11 +207,18 @@ static gboolean fo_config_eval(const GMatchInfo* match, GTree** g_current,
   /* check to make sure we haven't hit an error */
   if ((error_t = g_match_info_fetch_named(match, "error")) != NULL)
   {
-    g_set_error(error, PARSE_ERROR, fo_invalid_file,
-      "%s[line %d]: incorrectly formated line \"%s\".",
-      yyfile, yyline, error_t);
-    g_free(error_t);
-    return TRUE;
+    if (strlen(error_t) > 0)
+    {
+      g_set_error(error, PARSE_ERROR, fo_invalid_file,
+        "%s[line %d]: incorrectly formated line \"%s\".",
+        yyfile, yyline, error_t);
+      g_free(error_t);
+      return TRUE;
+    }
+    else
+    {
+      g_free(error_t);
+    }
   }
 
   gchar* group = g_match_info_fetch_named(match, "group");

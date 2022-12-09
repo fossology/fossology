@@ -1,19 +1,8 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 /**
@@ -96,12 +85,10 @@ class AgentLicenseEventProcessor
 
     $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds, $usageId);
 
-    foreach ($licenseFileMatches as $licenseMatch)
-    {
+    foreach ($licenseFileMatches as $licenseMatch) {
       $licenseRef = $licenseMatch->getLicenseRef();
       $licenseId = $licenseRef->getId();
-      if ($licenseRef->getShortName() === "No_license_found")
-      {
+      if ($licenseRef->getShortName() === "No_license_found") {
         continue;
       }
       $agentRef = $licenseMatch->getAgentRef();
@@ -131,12 +118,10 @@ class AgentLicenseEventProcessor
 
     $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
 
-    foreach ($licenseFileMatches as $licenseMatch)
-    {
+    foreach ($licenseFileMatches as $licenseMatch) {
       $licenseRef = $licenseMatch->getLicenseRef();
       $licenseId = $licenseRef->getId();
-      if ($licenseRef->getShortName() === "No_license_found")
-      {
+      if ($licenseRef->getShortName() === "No_license_found") {
         continue;
       }
       $agentRef = $licenseMatch->getAgentRef();
@@ -158,8 +143,7 @@ class AgentLicenseEventProcessor
   protected function filterLatestScannerDetectedMatches($agentDetectedLicenses, $uploadId)
   {
     $agentNames = array_keys($agentDetectedLicenses);
-    if (empty($agentNames))
-    {
+    if (empty($agentNames)) {
       return array();
     }
 
@@ -178,17 +162,19 @@ class AgentLicenseEventProcessor
    */
   private function getLatestAgentIdPerAgent($uploadId, $agentNames)
   {
-    if(!array_key_exists($uploadId,$this->latestAgentMapCache)
-            || count(array_diff_key($agentNames, $this->latestAgentMapCache[$uploadId]))>0)
-    {
+    if (!array_key_exists($uploadId,$this->latestAgentMapCache)
+            || count(array_diff_key($agentNames, $this->latestAgentMapCache[$uploadId]))>0) {
       $latestScannerProxy = new LatestScannerProxy($uploadId, $agentNames, "latest_scanner$uploadId");
       $latestAgentIdPerAgent = $latestScannerProxy->getNameToIdMap();
-      foreach($latestAgentIdPerAgent as $agentName=>$agentMap)
-      {
+      foreach ($latestAgentIdPerAgent as $agentName=>$agentMap) {
         $this->latestAgentMapCache[$uploadId][$agentName] = $agentMap;
       }
     }
-    return $this->latestAgentMapCache[$uploadId];
+    if (array_key_exists($uploadId, $this->latestAgentMapCache)) {
+      return $this->latestAgentMapCache[$uploadId];
+    } else {
+      return array();
+    }
   }
 
   /**
@@ -201,19 +187,15 @@ class AgentLicenseEventProcessor
   {
     $latestAgentDetectedLicenses = array();
 
-    foreach ($agentDetectedLicenses as $agentName => $licensesFoundPerAgentId)
-    {
-      if (!array_key_exists($agentName, $agentLatestMap))
-      {
+    foreach ($agentDetectedLicenses as $agentName => $licensesFoundPerAgentId) {
+      if (!array_key_exists($agentName, $agentLatestMap)) {
         continue;
       }
       $latestAgentId = $agentLatestMap[$agentName];
-      if (!array_key_exists($latestAgentId, $licensesFoundPerAgentId))
-      {
+      if (!array_key_exists($latestAgentId, $licensesFoundPerAgentId)) {
         continue;
       }
-      foreach ($licensesFoundPerAgentId[$latestAgentId] as $licenseId => $properties)
-      {
+      foreach ($licensesFoundPerAgentId[$latestAgentId] as $licenseId => $properties) {
         $latestAgentDetectedLicenses[$licenseId][$agentName] = $properties;
       }
     }
@@ -230,10 +212,8 @@ class AgentLicenseEventProcessor
   {
     $licenses = array();
 
-    foreach ($details as $licenseId => $agentEntries)
-    {
-      foreach ($agentEntries as $matchProperties)
-      {
+    foreach ($details as $licenseId => $agentEntries) {
+      foreach ($agentEntries as $matchProperties) {
         $licenses[$licenseId] = $matchProperties[0]['licenseRef'];
         break;
       }
@@ -253,13 +233,10 @@ class AgentLicenseEventProcessor
     $agentDetails = $this->getScannerDetectedLicenseDetails($itemTreeBounds, $usageId);
 
     $result = array();
-    foreach ($agentDetails as $licenseId => $properties)
-    {
+    foreach ($agentDetails as $licenseId => $properties) {
       $agentClearingEvents = array();
-      foreach ($properties as $licenseProperties)
-      {
-        foreach ($licenseProperties as $licenseProperty)
-        {
+      foreach ($properties as $licenseProperties) {
+        foreach ($licenseProperties as $licenseProperty) {
           $agentClearingEvents[] = $this->createAgentClearingEvent($licenseProperty);
         }
       }

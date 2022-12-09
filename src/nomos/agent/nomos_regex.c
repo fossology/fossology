@@ -1,21 +1,9 @@
-/***************************************************************
- Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014, Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2006-2011 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2014 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- ***************************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 //#define DEBUG_TNG
 #ifndef DEBUG_TNG
 #define CALL_IF_DEBUG_MODE(x)
@@ -37,6 +25,7 @@
 static char regexErrbuf[myBUFSIZ];
 
 regex_t idx_regc[NFOOTPRINTS];
+regex_t regc[NFOOTPRINTS];
 
 /**
  * \brief Log an error caused by regex
@@ -447,7 +436,7 @@ int idxGrep_base(int index, char *data, int flags, int mode)
     else if (cur.currentLicenceIndex > -1 ) {
        rememberWhatWeFound( getLicenceAndMatchPositions(cur.theMatches, cur.currentLicenceIndex )->matchPositions , allmatches, index, mode);
     }
-
+    g_array_free(allmatches, 1);
     CALL_IF_DEBUG_MODE(printf("Bye!\n");)
  }
 

@@ -1,20 +1,9 @@
-/***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015-2018 Siemens AG
+/*
+ SPDX-FileCopyrightText: © 2008 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2015-2018 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 .text
 {
@@ -34,19 +23,15 @@
   border-style: none none dotted none;
 }
 
+hr.menu {
+  border: 1px solid #d1ecf1;
+  padding: 0px;
+  margin: 3px;
+}
+
 table { border-spacing:0; }
 
 th { background:lightsteelblue; }
-
-a, a:visited, a:link
-{
-  text-decoration:none;
-  color:blue;
-}
-a:active, a:hover
-{
-  color:red;
-}
 
 div
 {
@@ -92,6 +77,12 @@ table
   background: -o-linear-gradient(top, #ffffff 0%,#efefef 100%); /* Opera11.10+ */
   background: -ms-linear-gradient(top, #ffffff 0%,#efefef 100%); /* IE10+ */
   background: linear-gradient(to top, #ffffff, #efefef); /* W3C */
+  position: relative;
+}
+
+.buttonLink:active {
+  top: 1px;
+  left: 1px;
 }
 /* Fun bug: When using the DTD, you need to define html and body
    to be 100% AND div must be used.  Otherwise, iframe becomes
@@ -109,7 +100,7 @@ html, body
 .semibordered
 {
   border:1px solid black;
-  border-collapse:collapse;    
+  border-collapse:collapse;
 }
 
 .semibordered td, .semibordered th
@@ -134,14 +125,6 @@ html, body
   background-color: #bebebe;
 }
 
-.modal {
-  padding: 20px 40px;
-  color: #000000;
-  background-color: #E6E6E6;
-  border-radius: 10px;
-  display: none;
-}
-
 .icon-small {
   width: 16px;
   height: 16px;
@@ -154,7 +137,6 @@ html, body
 .boxnew {
   background-color: #ffffff;
   border: 5px solid #f2f2f2;
-  display: inline-block;
   float: left;
   height: 700px;
   overflow: auto;
@@ -177,20 +159,9 @@ html, body
   overflow: auto;
 }
 
-.scrollable {
-  /*overflow: auto;*/
-  /*max-height: 20%;*/
-}
-
-.scrollable2 {
-  /*overflow: auto;*/
-  /*max-height: 30%;*/
-}
-
 .headerBox {
   width: 99%;
   background-color: #ffffff;
-  display: inline-block;
   float: right;
   height: 700px;
   overflow: auto;
@@ -207,7 +178,6 @@ img.delete, img.add, img.deleted, img.added {
   height: 16px;
   width: 16px;
   margin: 0 auto;
-  padding: 0 auto;
 }
 
 img.add, img.delete {
@@ -244,13 +214,19 @@ img.deleted {
   margin-left: 3px;
   width: 11px;
 }
+
+.view-license-rc-size {
+  width:1.10rem;
+  height:1.10rem;
+}
+
 .nobreaktext {
   white-space: nowrap;
 }
 
 .browse-upload-checkbox {
-  vertical-align: bottom;
-  margin:0px;
+  vertical-align: middle;
+  margin:1px;
 }
 
 .ui-button-text .browse-upload-all-off {
@@ -283,7 +259,6 @@ tr.classic {
 
 td.dashboard {
   vertical-align: top;
-  horiz-align: center;
   padding-right: 10%;
 }
 
@@ -341,4 +316,23 @@ div.infoTable {
 
 .riskLevelBackgroud5 {
   background: #e95850;
+}
+
+.passPolicy {
+  font-size: .9em;
+  color: #FF666C;
+}
+
+.passFail {
+  box-shadow: 0 0 6px #FF2F4D;
+  margin: 4px;
+}
+
+.passPass {
+  box-shadow: 0 0 6px #2EFF57;
+  margin: 4px;
+}
+
+#passcheck, #pass2 {
+  margin: 4px;
 }

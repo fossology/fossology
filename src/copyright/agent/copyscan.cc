@@ -1,20 +1,9 @@
 /*
- * Copyright (C) 2015, Siemens AG
- * Author: Florian Krügel
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- */
+ SPDX-FileCopyrightText: © 2015 Siemens AG
+ Author: Florian Krügel
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 #include "copyscan.hpp"
 #include <cctype>
@@ -41,6 +30,8 @@ hCopyrightScanner::hCopyrightScanner()
   regNonBlank = rx::regex(rcp.getRegexValue("copyright","REG_NON_BLANK"));
 
   regSimpleCopyright = rx::regex(rcp.getRegexValue("copyright","REG_SIMPLE_COPYRIGHT"),
+                     rx::regex_constants::icase);
+  regSpdxCopyright = rx::regex(rcp.getRegexValue("copyright","REG_SPDX_COPYRIGHT"),
                      rx::regex_constants::icase);
 }
 
@@ -85,6 +76,10 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
         string::const_iterator beginOfLine = j;
         ++beginOfLine;
         string::const_iterator endOfLine = find(beginOfLine, end, '\n');
+        if (rx::regex_search(beginOfLine, endOfLine, regSpdxCopyright)){
+          // Found end
+          break;
+        }
         if (rx::regex_search(beginOfLine, endOfLine, regSimpleCopyright)
           || !rx::regex_match(beginOfLine, endOfLine, regNonBlank))
         {

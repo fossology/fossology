@@ -1,21 +1,10 @@
 <?php
 /*
- Copyright (C) 2014-2017, Siemens AG
+ SPDX-FileCopyrightText: © 2014-2017 Siemens AG
  Author: Daniele Fognini
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 namespace Fossology\Lib\Report;
 
@@ -33,7 +22,8 @@ class XpClearedGetter extends ClearedGetterCommon
   protected $getOnlyCleared;
   protected $extrawhere;
 
-  public function __construct($tableName, $type=null, $getOnlyCleared=false, $extraWhere=null) {
+  public function __construct($tableName, $type=null, $getOnlyCleared=false, $extraWhere=null)
+  {
     global $container;
 
     $this->copyrightDao = $container->get('dao.copyright');
@@ -49,18 +39,25 @@ class XpClearedGetter extends ClearedGetterCommon
   {
     $agentName = $this->tableName;
     $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'), $uploadId);
-    $scanJobProxy->createAgentStatus(array($agentName));
+    if ($agentName == "copyright") {
+      $scanJobProxy->createAgentStatus(array($agentName, 'reso'));
+    } else {
+      $scanJobProxy->createAgentStatus(array($agentName));
+    }
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     if (!array_key_exists($agentName, $selectedScanners)) {
       return array();
     }
-    $latestXpAgentId = $selectedScanners[$agentName];
+    $latestXpAgentId[] = $selectedScanners[$agentName];
+    if (array_key_exists('reso', $selectedScanners)) {
+      $latestXpAgentId[] = $selectedScanners['reso'];
+    }
+    $ids = implode(',', $latestXpAgentId);
     if (!empty($this->extrawhere)) {
       $this->extrawhere .= ' AND';
     }
-    $this->extrawhere .= ' agent_fk='.$latestXpAgentId;
+    $this->extrawhere .= ' agent_fk IN ('.$ids.')';
 
-    return $this->copyrightDao->getAllEntriesReport($this->tableName, $uploadId, $uploadTreeTableName, $this->type, $this->getOnlyCleared, DecisionTypes::IDENTIFIED, $this->extrawhere);
+    return $this->copyrightDao->getAllEntriesReport($this->tableName, $uploadId, $uploadTreeTableName, $this->type, $this->getOnlyCleared, DecisionTypes::IDENTIFIED, $this->extrawhere, $groupId);
   }
 }
-

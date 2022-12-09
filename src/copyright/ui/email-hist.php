@@ -1,31 +1,21 @@
 <?php
-/***********************************************************
- * Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014-2017 Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
+/*
+ SPDX-FileCopyrightText: © 2010-2014 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2014-2017 Siemens AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
 
 require_once('HistogramBase.php');
 
-define("TITLE_emailHistogram", _("Email/URL/Author Browser"));
+define("TITLE_EMAILHISTOGRAM", _("Email/URL/Author Browser"));
 
-class EmailHistogram extends HistogramBase {
+class EmailHistogram extends HistogramBase
+{
   function __construct()
   {
     $this->Name = "email-hist";
-    $this->Title = TITLE_emailHistogram;
+    $this->Title = TITLE_EMAILHISTOGRAM;
     $this->viewName = "email-view";
     $this->agentName = "copyright";
     parent::__construct();
@@ -44,12 +34,19 @@ class EmailHistogram extends HistogramBase {
     $typeDescriptionPairs = array(
             'email' => _("Email"),
             'url' => _("URL"),
-            'author' => _("Author")
+            'author' => _("Author"),
+            'scancode_author' => _("Author"),
+            'scancode_url' => _("URL"),
+            'scancode_email' => _("Email")
       );
+
     $tableVars = array();
     $output = array();
-    foreach($typeDescriptionPairs as $type=>$description)
-    {
+    foreach ($typeDescriptionPairs as $type=>$description) {
+      if ($type =="scancode_author" || $type =="scancode_email" || $type =="scancode_url") {
+        $agentId=LatestAgentpk($upload_pk, 'scancode_ars');
+        $this->agentName = "scancode";
+      }
       list($out, $vars) = $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
       $tableVars[$type] = $vars;
       $output[] = $out;
@@ -66,11 +63,16 @@ class EmailHistogram extends HistogramBase {
    */
   protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
   {
-    list($VEmail, $VUrl, $VAuthor, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
+    list($VEmail, $VUrl, $VAuthor, $VScanAuthor, $VScanUrl, $VScanEmail, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
     $out = $this->renderString('emailhist_tables.html.twig',
-            array('contEmail'=>$VEmail, 'contUrl'=>$VUrl, 'contAuthor'=>$VAuthor,
-                'fileList'=>$VF));
+            array('contEmail'=>$VEmail,
+            'contUrl'=>$VUrl,
+            'contAuthor'=>$VAuthor,
+            'contScanAuthor' => $VScanAuthor,
+            'contScanUrl' => $VScanUrl,
+            'contScanEmail' => $VScanEmail,
+            'fileList'=>$VF));
     return array($out, $tableVars);
   }
 
@@ -84,15 +86,11 @@ class EmailHistogram extends HistogramBase {
     $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
-    if (!empty($Item) && !empty($Upload))
-    {
-      if (GetParm("mod",PARM_STRING) == $this->Name)
-      {
+    if (!empty($Item) && !empty($Upload)) {
+      if (GetParm("mod",PARM_STRING) == $this->Name) {
         menu_insert("Browse::Email/URL/Author",10);
         menu_insert("Browse::[BREAK]",100);
-      }
-      else
-      {
+      } else {
         $text = _("View email/URL/author histogram");
         menu_insert("Browse::Email/URL/Author",10,$URI,$text);
       }
@@ -103,19 +101,83 @@ class EmailHistogram extends HistogramBase {
    * @copydoc HistogramBase::createScriptBlock()
    * @see HistogramBase::createScriptBlock()
    */
+
   protected function createScriptBlock()
   {
     return "
 
+    var emailTabCookie = 'stickyEmailTab';
+    var emailTabFossCookie = 'stickyEmailFossTab';
+    var emailTabScanCookie = 'stickyEmailScanTab';
     $(document).ready(function() {
       tableEmail = createTableemail();
       tableUrl = createTableurl();
       tableAuthor = createTableauthor();
-      $(\"#EmailUrlAuthorTabs\").tabs();
+      tableScanEmail = createTablescancode_email();
+      tableScanUrl = createTablescancode_url();
+      tableScanAuthor = createTablescancode_author();
+      $('#testReplacementemail').click(function() {
+        testReplacement(tableEmail, 'email');
+      });
+      $('#testReplacementurl').click(function() {
+        testReplacement(tableUrl, 'url');
+      });
+      $('#testReplacementauthor').click(function() {
+        testReplacement(tableAuthor, 'author');
+      });
+      $('#testReplacementScanemail').click(function() {
+        testReplacement(tableScanEmail, 'email');
+      });
+      $('#testReplacementScanurl').click(function() {
+        testReplacement(tableScanUrl, 'url');
+      });
+      $('#testReplacementScanauthor').click(function() {
+        testReplacement(tableScanAuthor, 'author');
+      });
+      $('#EmailUrlAuthorTabs').tabs({
+        active: ($.cookie(emailTabCookie) || 0),
+        activate: function(e, ui){
+          // Get active tab index and update cookie
+          var idString = $(e.currentTarget).attr('id');
+          idString = parseInt(idString.slice(-1)) - 1;
+          $.cookie(emailTabCookie, idString);
+        }
+      });
+      $('#FossEmailUrlAuthorTabs').tabs({
+        active: ($.cookie(emailTabFossCookie) || 0),
+        activate: function(e, ui){
+          // Get active tab index and update cookie
+          var tabIdFoss = $(ui.newPanel).attr('id');
+          var idStringFoss = 0;
+          if (tabIdFoss == 'FossEmailTab') {
+            idStringFoss = 0;
+          } else if (tabIdFoss == 'FossUrlTab') {
+            idStringFoss = 1;
+          } else if (tabIdFoss == 'FossAuthorTab') {
+            idStringFoss = 2;
+          }
+          $.cookie(emailTabFossCookie, idStringFoss);
+        }
+      });
+      $('#ScanEmailUrlAuthorTabs').tabs({
+        active: ($.cookie(emailTabScanCookie) || 0),
+        activate: function(e, ui){
+          // Get active tab index and update cookie
+          var tabIdScan = $(ui.newPanel).attr('id');
+          var idStringScan = 0;
+          if (tabIdScan == 'ScanEmailTab') {
+            idStringScan = 0;
+          } else if (tabIdScan == 'ScanUrlTab') {
+            idStringScan = 1;
+          } else if (tabIdScan == 'ScanAuthorTab') {
+            idStringScan = 2;
+          }
+          $.cookie(emailTabScanCookie, idStringScan);
+        }
+      });
     });
     ";
   }
-
 }
 
 $NewPlugin = new EmailHistogram;

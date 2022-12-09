@@ -1,20 +1,9 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
-Author: Andreas Würl
+ SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ Author: Andreas Würl
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\View;
@@ -72,10 +61,8 @@ class HighlightState
    */
   public function processSplitEntries($entries)
   {
-    foreach ($entries as $entry)
-    {
-      switch ($entry->getAction())
-      {
+    foreach ($entries as $entry) {
+      switch ($entry->getAction()) {
         case SplitPosition::START:
           $this->push($entry);
           $this->checkForAnchor($entry);
@@ -93,22 +80,22 @@ class HighlightState
    */
   public function insertElements($entries, PagedResult $result)
   {
-    foreach ($entries as $entry)
-    {
-      switch ($entry->getAction())
-      {
+    foreach ($entries as $entry) {
+      switch ($entry->getAction()) {
         case SplitPosition::START:
           $this->push($entry);
           $result->appendMetaText($this->startSpan($entry));
           break;
         case SplitPosition::ATOM:
           $result->appendMetaText($this->startSpan($entry));
-          $result->appendMetaText(self::PLACEHOLDER . $this->highlightRenderer->createSpanEnd($entry));
+          $result->appendMetaText(
+            self::PLACEHOLDER . $this->highlightRenderer->createSpanEnd($entry));
           break;
 
         case SplitPosition::END:
           $this->pop();
-          $result->appendMetaText($this->highlightRenderer->createSpanEnd($entry));
+          $result->appendMetaText(
+            $this->highlightRenderer->createSpanEnd($entry));
           break;
       }
     }
@@ -119,9 +106,9 @@ class HighlightState
    */
   public function closeOpenElements(PagedResult $result)
   {
-    foreach ($this->elementStack as $splitPosition)
-    {
-      $result->appendMetaText($this->highlightRenderer->createSpanEnd($splitPosition));
+    foreach ($this->elementStack as $splitPosition) {
+      $result->appendMetaText(
+        $this->highlightRenderer->createSpanEnd($splitPosition));
     }
   }
 
@@ -130,8 +117,7 @@ class HighlightState
    */
   public function openExistingElements(PagedResult $result)
   {
-    foreach ($this->elementStack as $entry)
-    {
+    foreach ($this->elementStack as $entry) {
       $result->appendMetaText($this->highlightRenderer->createSpanStart($entry));
     }
   }
@@ -156,8 +142,7 @@ class HighlightState
   protected function checkForAnchor(SplitPosition $entry)
   {
     $shouldShowAnchor = !$this->anchorDrawn && $entry->getHighlight()->getType() != Highlight::KEYWORD;
-    if ($shouldShowAnchor)
-    {
+    if ($shouldShowAnchor) {
       $this->anchorDrawn = true;
     }
     return $shouldShowAnchor;
