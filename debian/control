@@ -31,7 +31,8 @@ Depends: fossology-web, fossology-scheduler, fossology-ununpack,
  fossology-delagent, fossology-wgetagent, ${misc:Depends}
 Recommends: fossology-monk, fossology-monkbulk, fossology-decider,
  fossology-readmeoss, fossology-spdx2, fossology-reportimport,
- fossology-softwareheritage, fossology-reuser, fossology-ninka
+ fossology-softwareheritage, fossology-reuser, fossology-ninka,
+ fossology-decisionexporter, fossology-decisionimporter
 Conflicts: fossology-db (<= 1.4.1), fossology-common (<= 1.4.1)
 Description: open and modular architecture for analyzing software
  The FOSSology project is a web based framework that allows you to
@@ -404,3 +405,27 @@ Description: architecture to connect clearlyDefined, spasht
  type identification.
  .
  This package contains the spasht agent programs and their resources.
+
+Package: fossology-decisionexporter
+Architecture: any
+Depends:  fossology-common, ${misc:Depends}
+Description: architecture for analyzing software, decisionexporter
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the decisionexporter agent programs and their resources.
+
+Package: fossology-decisionimporter
+Architecture: any
+Depends:  fossology-common, ${misc:Depends}
+Description: architecture for analyzing software, decisionimporter
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the decisionimporter agent program and its resources.

@@ -52,9 +52,15 @@
         "psr-4" : {
             "Fossology\\Lib\\" : "@FO_SOURCEDIR@/lib/php",
             "Fossology\\Agent\\Copyright\\UI\\" : "@FO_SOURCEDIR@/copyright/ui",
+            "Fossology\\CliXml\\UI\\" : "@FO_SOURCEDIR@/clixml/ui",
             "Fossology\\DeciderJob\\UI\\" : "@FO_SOURCEDIR@/deciderjob/ui",
             "Fossology\\Decider\\UI\\" : "@FO_SOURCEDIR@/decider/ui",
+            "Fossology\\DecisionExporter\\UI\\" : "@FO_SOURCEDIR@/decisionexporter/ui",
+            "Fossology\\DecisionImporter\\UI\\" : "@FO_SOURCEDIR@/decisionimporter/ui",
             "Fossology\\DelAgent\\UI\\" : "@FO_SOURCEDIR@/delagent/ui",
+            "Fossology\\ReadmeOSS\\UI\\" : "@FO_SOURCEDIR@/readmeoss/ui",
+            "Fossology\\SpdxTwo\\UI\\" : "@FO_SOURCEDIR@/spdx2/ui",
+            "Fossology\\UnifiedReport\\UI\\" : "@FO_SOURCEDIR@/unifiedreport/ui",
             "Fossology\\UI\\Page\\" : "@FO_SOURCEDIR@/www/ui/page",
             "Fossology\\UI\\Api\\" : "@FO_SOURCEDIR@/www/ui/api"
         }

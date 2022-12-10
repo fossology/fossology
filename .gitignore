@@ -66,6 +66,15 @@ src/copyright/agent/keyword
 src/copyright/agent/fo_unicode_clean
 src/copyright/agent_tests/Functional/copyright
 src/copyright/agent_tests/Unit/test_copyright
+src/copyright/agent_tests/results
+src/decider/agent/decider
+src/decider/agent/version.php
+src/deciderjob/agent/deciderjob
+src/deciderjob/agent/version.php
+src/decisionexporter/agent/decisionexporter
+src/decisionexporter/agent/version.php
+src/decisionimporter/agent/decisionimporter
+src/decisionimporter/agent/version.php
 src/delagent/agent/delagent
 src/demomod/agent/demomod
 src/lib/c/fossconfigTest
@@ -86,6 +95,7 @@ src/mimetype/agent/mimetype
 src/mimetype/agent_tests/Unit/test_mimetype
 src/monk/agent/_squareVisitor.h.gen
 src/monk/agent/monk
+src/monk/agent/monkbulk
 src/monk/agent/monk_cov
 src/monk/agent/monkbulk_cov
 src/monk/agent/squareBuilder
@@ -151,6 +161,8 @@ variable.list
 /src/deciderjob/agent/version.php
 /src/decider/agent/decider
 /src/decider/agent/version.php
+/src/decisionexporter/agent/version.php
+/src/decisionexporter/agent/decisionexporter
 /testReport/
 /src/readmeoss/agent/version.php
 /src/reuser/agent/reuser

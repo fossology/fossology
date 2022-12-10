@@ -1,35 +1,38 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2017 Siemens AG
+ SPDX-FileCopyrightText: © 2022 Siemens AG
 
  SPDX-License-Identifier: GPL-2.0-only
 */
 
 /**
  * @dir
- * @brief Contains UI plugin for unified report agent
+ * @brief Contains UI plugin for Decision Exporter agent
  * @file
- * @brief Contains UI plugin for unified report agent
+ * @brief Contains UI plugin for Decision Exporter agent
  */
-namespace Fossology\UnifiedReport\UI;
 
+namespace Fossology\DecisionExporter\UI;
+
+use Exception;
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Data\Upload\Upload;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
+use Fossology\Lib\Data\Upload\Upload;
 
 /**
- * @class FoUnifiedReportGenerator
- * @brief Unified report generator UI plugin
+ * @class FoDecisionExporter
+ * @brief FOSSology Decision Exporter UI plugin
  */
-class FoUnifiedReportGenerator extends DefaultPlugin
+class FoDecisionExporter extends DefaultPlugin
 {
-  const NAME = 'agent_founifiedreport';       ///< Plugin mod name
+  const NAME = 'agent_fodecisionexporter';       ///< Plugin mod name
 
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => _("Unified Report generation"),
+        self::TITLE => _("FOSSology Dump Exporter"),
         self::PERMISSION => Auth::PERM_WRITE,
         self::REQUIRES_LOGIN => TRUE
     ));
@@ -57,8 +60,8 @@ class FoUnifiedReportGenerator extends DefaultPlugin
 
     $vars = array('jqPk' => $jobQueueId,
                   'downloadLink' => Traceback_uri(). "?mod=download&report=".$jobId,
-                  'reportType' => "Unified");
-    $text = sprintf(_("Generating new report for '%s'"), $upload->getFilename());
+                  'reportType' => "dumpexporter");
+    $text = sprintf(_("Generating FOSSology Decisions for '%s'"), $upload->getFilename());
     $vars['content'] = "<h2>".$text."</h2>";
     $content = $this->renderer->load("report.html.twig")->render($vars);
     $message = '<h3 id="jobResult"></h3>';
@@ -99,12 +102,12 @@ class FoUnifiedReportGenerator extends DefaultPlugin
    */
   function preInstall()
   {
-    $text = _("Generate Report");
-    menu_insert("Browse-Pfile::Export&nbsp;Unified&nbsp;Report", 0, self::NAME, $text);
+    $text = _("Decision Dump Exporter");
+    menu_insert("Browse-Pfile::Export&nbsp;FOSSology&nbsp;Dump", 0, self::NAME, $text);
   }
 
   /**
-   * Schedules unified report agent to generate report
+   * Schedules Decision Exporter agent to Decision Exporter Decisions
    *
    * @param int $groupId
    * @param Upload $upload
@@ -112,16 +115,16 @@ class FoUnifiedReportGenerator extends DefaultPlugin
    */
   public function scheduleAgent($groupId, $upload)
   {
-    $reportGenAgent = plugin_find('agent_unifiedreport');
+    $decisionExpoAgent = plugin_find('agent_decisionexporter');
     $userId = Auth::getUserId();
     $uploadId = $upload->getId();
     $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
     $error = "";
     $url = tracebackTotalUri();
     $url = preg_replace("/api\/.*/i", "", $url); // Remove api/v1/report
-    $jobQueueId = $reportGenAgent->AgentAdd($jobId, $uploadId, $error, array(), $url);
+    $jobQueueId = $decisionExpoAgent->AgentAdd($jobId, $uploadId, $error, array(), $url);
     return array($jobId, $jobQueueId, $error);
   }
 }
 
-register_plugin(new FoUnifiedReportGenerator());
+register_plugin(new FoDecisionExporter());

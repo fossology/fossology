@@ -183,7 +183,7 @@ class AjaxBrowse extends DefaultPlugin
     if (!empty($description)) {
       $nameColumn .= "<i>$description</i><br>";
     }
-    $Parm = "upload=$uploadId&show=$show&item=" . $row['uploadtree_pk'];
+    $Parm = "upload=$uploadId&show=$show&item=" . $row['uploadtree_pk'] . "&folder=$folder";
     if (Iscontainer($row['ufile_mode'])) {
       $nameAction = MenuRenderer::menuToActiveSelect($menuPfile, $Parm, $uploadId);
     } else {

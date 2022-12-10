@@ -108,6 +108,10 @@ SPDX-License-Identifier: FSFAP
         <service id="dao.searchhelperdao" class="Fossology\Lib\Dao\SearchHelperDao" public="true">
             <argument type="service" id="db.manager"/>
         </service>
+        <service id="dao.alldecisions" class="Fossology\Lib\Dao\AllDecisionsDao" public="true">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="logger"/>
+        </service>
 
         <service id="event.types" class="Fossology\Lib\Data\Clearing\ClearingEventTypes" public="true">
         </service>

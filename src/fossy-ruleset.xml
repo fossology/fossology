@@ -17,6 +17,8 @@
   <file>copyright/ui</file>
   <file>decider</file>
   <file>deciderjob</file>
+  <file>decisionexporter</file>
+  <file>decisionimporter</file>
   <file>delagent/ui</file>
   <file>lib/php</file>
   <file>monk/ui</file>

@@ -431,4 +431,13 @@ class UserDao
     }
     return $userRow['user_email'];
   }
+
+  /**
+   * Get all users from users table
+   * @return array
+   */
+  public function getAllUsers()
+  {
+    return $this->dbManager->getRows("SELECT * FROM users ORDER BY user_name;");
+  }
 }
