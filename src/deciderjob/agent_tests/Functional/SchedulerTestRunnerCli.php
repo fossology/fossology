@@ -42,7 +42,7 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
 
     $agentName = "deciderjob";
 
-    $agentDir = dirname(dirname(__DIR__));
+    $agentDir = dirname(__DIR__, 2);
     $execDir = "$agentDir/agent";
     system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
 

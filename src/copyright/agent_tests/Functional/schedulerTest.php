@@ -15,6 +15,7 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
 use Monolog\Logger;
 
@@ -35,6 +36,11 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
    * Object for test database
    */
   private $testDb;
+  /** @var TestInstaller $testInstaller
+   * Object for testinstaller
+   */
+  private $testInstaller;
+
   /** @var DbManager $dbManager
    * Database manager from test database
    */
@@ -101,7 +107,7 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
 
     $agentName = "copyright";
 
-    $agentDir = dirname(__DIR__, 4).'/build/src/copyright';
+    $agentDir = dirname(__DIR__, 4) . '/build/src/copyright';
     $execDir = "$agentDir/agent";
     system("install -D $agentDir/VERSION-copyright $sysConf/mods-enabled/$agentName/VERSION");
     system("install -D $agentDir/agent/copyright.conf  $sysConf/mods-enabled/$agentName/agent/copyright.conf");
@@ -133,13 +139,9 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
 
-    $confFile = $sysConf."/fossology.conf";
-    system("touch ".$confFile);
-    $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n";
-    file_put_contents($confFile, $config);
-
-    $testRepoDir = dirname(dirname(dirname(__DIR__)))."/lib/php/Test/";
-    system("cp -a $testRepoDir/repo $sysConf/");
+    $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
+    $this->testInstaller->cpRepo();
   }
 
   /**
