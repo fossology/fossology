@@ -9,6 +9,7 @@ namespace Fossology\CliXml\UI;
 
 use Exception;
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
