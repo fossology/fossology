@@ -195,7 +195,7 @@ function DBCheckResult($result, $sql, $filenm, $lineno)
     } else {
       echo "FATAL: DB connection lost.";
     }
-    echo "<br> $sql";
+    echo "<br> ".htmlspecialchars($sql);
     debugbacktrace();
     echo "<hr>";
     exit(1);
