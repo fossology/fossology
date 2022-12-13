@@ -68,7 +68,7 @@ class changeLicenseProcessPost extends FO_Plugin
     $buckets_dir = $SysConf['DIRECTORIES']['MODDIR'];
     /** rerun bucket on the file */
     foreach ($bucketpool_array as $bucketpool) {
-      $command = "$buckets_dir/buckets/agent/buckets -r -t $uploadTreeId -p $bucketpool";
+      $command = "$buckets_dir/buckets/agent/buckets -r -t ".escapeshellarg($uploadTreeId)." -p $bucketpool";
       exec($command);
     }
   }
