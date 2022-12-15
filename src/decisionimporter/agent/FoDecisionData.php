@@ -396,6 +396,7 @@ class FoDecisionData
         "old_pfile" => $uploadTreeItem['pfile_fk'],
         "lft" => $uploadTreeItem['lft'],
         "rgt" => $uploadTreeItem['rgt'],
+        "path" => array_key_exists("path", $uploadTreeItem) ? $uploadTreeItem["path"] : ""
       ];
     }
     return $this;

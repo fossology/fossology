@@ -29,8 +29,6 @@ require_once "FoDecisionData.php";
  */
 class DecisionImporterDataCreator
 {
-  const UPDATE_COUNT = 1000;          ///< How many rows to update at once to DB
-
   /**
    * @var DbManager $dbManager
    * DbManager object
@@ -153,8 +151,8 @@ class DecisionImporterDataCreator
       ], __METHOD__ . ".insertCd", "clearing_decision_pk");
       $clearingDecisionList[$oldDecisionId]["new_decision"] = $newCdId;
       $i++;
-      if ($i == self::UPDATE_COUNT) {
-        $agentObj->heartbeat(self::UPDATE_COUNT);
+      if ($i == DecisionImporter::$UPDATE_COUNT) {
+        $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
         $i = 0;
       }
     }
@@ -179,8 +177,8 @@ class DecisionImporterDataCreator
       ], __METHOD__ . ".insertCe", "clearing_event_pk");
       $clearingEventList[$oldEventId]["new_event"] = $newCeId;
       $i++;
-      if ($i == self::UPDATE_COUNT) {
-        $agentObj->heartbeat(self::UPDATE_COUNT);
+      if ($i == DecisionImporter::$UPDATE_COUNT) {
+        $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
         $i = 0;
       }
     }
@@ -309,8 +307,8 @@ class DecisionImporterDataCreator
       }
       $cxList[$oldId]["new_id"] = $newCp;
       $i++;
-      if ($i == self::UPDATE_COUNT) {
-        $agentObj->heartbeat(self::UPDATE_COUNT);
+      if ($i == DecisionImporter::$UPDATE_COUNT) {
+        $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
         $i = 0;
       }
     }
@@ -325,8 +323,8 @@ class DecisionImporterDataCreator
         $decisionItem['textfinding'], $decisionItem['comment']);
       $decisionList[$oldId]["new_id"] = $newDecision;
       $i++;
-      if ($i == self::UPDATE_COUNT) {
-        $agentObj->heartbeat(self::UPDATE_COUNT);
+      if ($i == DecisionImporter::$UPDATE_COUNT) {
+        $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
         $i = 0;
       }
     }
@@ -357,8 +355,8 @@ class DecisionImporterDataCreator
         ], __METHOD__ . ".insertCe." . $agentName);
       }
       $i++;
-      if ($i == self::UPDATE_COUNT) {
-        $agentObj->heartbeat(self::UPDATE_COUNT);
+      if ($i == DecisionImporter::$UPDATE_COUNT) {
+        $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
         $i = 0;
       }
     }
@@ -443,8 +441,8 @@ class DecisionImporterDataCreator
       $clearingEventList[$oldEventId]["new_lrbid"] = $newLrbId;
       $clearingEventList[$oldEventId]["job_fk"] = $jobId;
       $i++;
-      if ($i == self::UPDATE_COUNT) {
-        $agentObj->heartbeat(self::UPDATE_COUNT);
+      if ($i == DecisionImporter::$UPDATE_COUNT) {
+        $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
         $i = 0;
       }
     }
@@ -461,8 +459,8 @@ class DecisionImporterDataCreator
         $this->dbManager->updateTableRow("clearing_event", $assocParams, "clearing_event_pk",
           $clearingEventItem["new_event"], __METHOD__ . ".updateCeJob");
         $i++;
-        if ($i == self::UPDATE_COUNT) {
-          $agentObj->heartbeat(self::UPDATE_COUNT);
+        if ($i == DecisionImporter::$UPDATE_COUNT) {
+          $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
           $i = 0;
         }
       }
@@ -481,7 +479,7 @@ class DecisionImporterDataCreator
       ];
       $this->dbManager->insertTableRow("highlight_bulk", $assocParams, __METHOD__ . ".insertHighlightBulk");
       $i++;
-      if ($i == self::UPDATE_COUNT) {
+      if ($i == DecisionImporter::$UPDATE_COUNT) {
         $agentObj->heartbeat(0);
         $i = 0;
       }

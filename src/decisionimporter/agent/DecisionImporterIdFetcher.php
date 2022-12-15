@@ -112,7 +112,7 @@ class DecisionImporterIdFetcher
 
     $this->updatePfileIds($pfileList);
     $agentObj->heartbeat(0);
-    $this->updateUploadTreeIds($uploadTreeList, $pfileList);
+    $this->updateUploadTreeIds($uploadTreeList, $pfileList, $agentObj);
     $agentObj->heartbeat(0);
     $this->updateClearingDecision($clearingDecisionList, $uploadTreeList, $pfileList);
     $agentObj->heartbeat(0);
@@ -173,19 +173,42 @@ class DecisionImporterIdFetcher
    * Update upload tree ids using pfile, lft and rgt
    * @param array $uploadTreeList
    * @param array $pfileList
+   * @param DecisionImporter $agentObj Agent object to send heartbeats
    */
-  private function updateUploadTreeIds(array &$uploadTreeList, array $pfileList): void
+  private function updateUploadTreeIds(array &$uploadTreeList, array $pfileList,
+                                       DecisionImporter &$agentObj): void
   {
-    $sql = "SELECT * FROM uploadtree WHERE pfile_fk = $1 AND upload_fk = $2 AND lft = $3 AND rgt = $4;";
-    $statement = __METHOD__;
+    $sqlAllTree = "SELECT * FROM uploadtree WHERE upload_fk = $1 AND ufile_mode & (1<<28) = 0;";
+    $statementAllTree = __METHOD__ . ".allTree";
+    $allUploadTree = $this->dbManager->getRows($sqlAllTree, [$this->uploadId], $statementAllTree);
+    $i = 0;
     foreach ($uploadTreeList as $oldItemId => $item) {
       $new_pfile = $pfileList[$item["old_pfile"]]["new_pfile"];
-      $uploadtree = $this->dbManager->getSingleRow($sql, [$new_pfile, $this->uploadId, $item["lft"], $item["rgt"]],
-        $statement);
-      if (empty($uploadtree)) {
+      $matchIndex = -INF;
+      foreach ($allUploadTree as $index => $uploadTreeItem) {
+        if ($uploadTreeItem["pfile_fk"] == $new_pfile) {
+          if (array_key_exists("path", $item)) {
+            $newpath = Dir2Path($uploadTreeItem["uploadtree_pk"]);
+            $newpath = implode("/", array_column($newpath, "ufile_name"));
+            if ($newpath == $item["path"]) {
+              $matchIndex = $index;
+              break;
+            }
+          } elseif ($uploadTreeItem["lft"] == $item["lft"] && $uploadTreeItem["rgt"] == $item["rgt"]) {
+            $matchIndex = $index;
+            break;
+          }
+        }
+      }
+      if ($matchIndex == -INF) {
         throw new UnexpectedValueException("Can't find item with pfile '$new_pfile' in upload '$this->uploadId'");
       }
-      $uploadTreeList[$oldItemId]["new_itemid"] = $uploadtree["uploadtree_pk"];
+      $uploadTreeList[$oldItemId]["new_itemid"] = $allUploadTree[$matchIndex]["uploadtree_pk"];
+      $i++;
+      if ($i == DecisionImporter::$UPDATE_COUNT) {
+        $agentObj->heartbeat(0);
+        $i = 0;
+      }
     }
   }
 

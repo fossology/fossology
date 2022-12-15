@@ -98,10 +98,15 @@ class AllDecisionsDao
    */
   public function getAllAgentUploadTreeDataForUpload($uploadId, $tableName)
   {
-    $sql = "SELECT uploadtree_pk, ut.pfile_fk, ut.lft, ut.rgt FROM uploadtree ut ".
-         " INNER JOIN ".$tableName." ON ".$tableName.".pfile_fk=ut.pfile_fk WHERE upload_fk=$1";
+    $sql = "SELECT DISTINCT ON(uploadtree_pk) " .
+         "uploadtree_pk, ut.pfile_fk, ut.lft, ut.rgt FROM uploadtree ut " .
+         "INNER JOIN ".$tableName." ON ".$tableName.".pfile_fk=ut.pfile_fk WHERE upload_fk=$1";
     $statementName = __METHOD__ . ".allLicEntriesuploadtreeForUpload";
     $rows = $this->dbManager->getRows($sql, array($uploadId), $statementName);
+    foreach ($rows as $index => $row) {
+      $rows[$index]["path"] = implode("/",
+        array_column(Dir2Path($row["uploadtree_pk"]), "ufile_name"));
+    }
     return $rows;
   }
 

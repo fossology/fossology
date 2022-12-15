@@ -34,6 +34,12 @@ require_once "DecisionImporterDataCreator.php";
  */
 class DecisionImporter extends Agent
 {
+  /**
+   * @var int $UPDATE_COUNT
+   * How many rows to update at once to DB
+   */
+  public static $UPDATE_COUNT = 1000;
+
   const REPORT_KEY = "report";          ///< Key used to pass report name
   const LONG_OPT_KEYS = ["userselect"]; ///< Other CLI args required by agents
 
