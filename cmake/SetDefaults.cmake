@@ -126,9 +126,7 @@ pkg_check_modules(jsonc REQUIRED json-c)
 set(CMAKE_INSTALL_MESSAGE NEVER) # control if messages should be displayed while installing
 
 include(${FO_CMAKEDIR}/FoUtilities.cmake)
-if(NOT DEFINED FO_COMMIT_DATE)
-    getGitVersion()
-endif(NOT DEFINED FO_COMMIT_DATE)
+getGitVersion()
 
 # Variables for testing
 execute_process(

@@ -84,3 +84,15 @@ add_symlink()
 foreach(WWW_INSTALL page async)
     add_symlink(www-${WWW_INSTALL} ${FO_MODDIR}/${PROJECT_NAME}/ui/${WWW_INSTALL})
 endforeach()
+
+# Clean TWIG cache on each install
+file(GLOB CACHE_FILES_REMOVE ${FO_TWIG_CACHE}/*)
+
+list(LENGTH CACHE_FILES_REMOVE CACHE_FILE_COUNT)
+
+if(${CACHE_FILE_COUNT} GREATER 0)
+    install(CODE
+        "file(REMOVE_RECURSE ${CACHE_FILES_REMOVE})"
+        COMPONENT lib
+    )
+endif()
