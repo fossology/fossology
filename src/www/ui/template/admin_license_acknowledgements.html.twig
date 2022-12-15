@@ -1,0 +1,63 @@
+{# SPDX-FileCopyrightText: © 2022 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+  <p id="messageSpace"></p>
+  <form name="adminLicenseAcknowledgementForm" id="adminLicenseAcknowledgementForm">
+    <table id="adminLicenseAcknowledgementTable" class="simpleTable" cellpadding="3">
+      <thead>
+        <tr>
+          <th>Sl. No.</th>
+          <th>Name</th>
+          <th>Acknowledgement</th>
+          <th>Enabled</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for acknowledgement in acknowledgementArray %}
+        <tr>
+          <td style="text-align:center">{{ loop.index }}</td>
+          <td>
+            <input type="text" name="{{ acknowledgementNameParam }}[{{ acknowledgement.la_pk }}]"
+              value="{{ acknowledgement.name }}"
+              placeholder="{{ "Please enter a name for the acknowledgement"|trans }}" />
+          </td>
+          <td>
+            <textarea rows="7" cols="80" name="{{ acknowledgementParam }}[{{ acknowledgement.la_pk }}]"
+              placeholder="{{ "Please enter a acknowledgement"|trans }}">{{ acknowledgement.acknowledgement }}</textarea>
+          </td>
+          <td>
+            <input type="checkbox" name="{{ enableParam }}[{{ acknowledgement.la_pk }}]"
+              value="t" class="licStdAckToggle"
+              {% if acknowledgement.is_enabled starts with 't' %}checked{% endif %} />
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4">
+            <button id="addLicAcknowledgement" title="{{ "Add a new acknowledgement"|trans }}"
+              style="width:100%" type="button">
+              <img src="images/icons/add_16.png" />{{ "Add a new acknowledgement"|trans }}
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4"><input type="submit" value="Save" style="width:auto" /></td>
+        </tr>
+      </tfoot>
+    </table>
+  </form>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript" src="scripts/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="scripts/jquery.dataTables.select.js"></script>
+  <script type="text/javascript" src="scripts/admin-license-acknowledgements.js"></script>
+{% endblock %}

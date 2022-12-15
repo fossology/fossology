@@ -264,6 +264,12 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
     idLicUploadTree = uploadTreeId+','+licenseId;
     whatCol = what;
     $(refTextId).val(htmlDecode(clearingsForSingleFile));
+    if (what == 3 || what == "acknowledgement") {
+      createAcknowledgementDropDown($("#textModalComment"), $("#referenceText"));
+    } else {
+      $("#licenseAcknowledgementDropDown-text").hide();
+      $("#licenseAcknowledgementDropDown").next(".select2-container").hide();
+    }
     if (what == 4 || what == "comment") {
       createDropDown($("#textModalComment"), $("#referenceText"));
     } else {
@@ -275,6 +281,12 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
     $(refTextId).val(htmlDecode($("#"+licenseId+what+type).attr('title')));
     whatCol = what;
     whatLicId = licenseId;
+    if (what == 3 || what == "acknowledgement") {
+      createAcknowledgementDropDown($("#textModalComment"), $("#referenceText"));
+    } else {
+      $("#licenseAcknowledgementDropDown-text").hide();
+      $("#licenseAcknowledgementDropDown").next(".select2-container").hide();
+    }
     if (what == 4 || what == "comment") {
       createDropDown($("#textModalComment"), $("#referenceText"));
     } else {
@@ -491,6 +503,70 @@ function getStdLicenseComments(scope, callback) {
   $.ajax({
     type: "GET",
     url: "?mod=ajax_license_std_comments",
+    data: {"scope": scope},
+    success: function(data) {
+      callback(data);
+    },
+    error: function(data) {
+      callback(data.error);
+    }
+  });
+}
+
+function createAcknowledgementDropDown(element, textBox) {
+  let dropDown = null;
+  if ($("#licenseAcknowledgementDropDown").length) {
+    // The dropdown already exists
+    $("#licenseAcknowledgementDropDown-text").show();
+    dropDown = $("#licenseAcknowledgementDropDown");
+    dropDown.val(null).trigger('change');
+    dropDown.next(".select2-container").show();
+    return;
+  }
+  dropDown = $("<select />", {
+    "id": "licenseAcknowledgementDropDown",
+    "class": "ui-render-select2",
+    "style": "width:100%"
+  }).on("select2:select", function(e) {
+    let id = e.params.data.id;
+    getLicenseAcknowledgements(id, function (acknowledgement) {
+      if (acknowledgement.hasOwnProperty("error")) {
+        console.log("Error while fetching acknowledgements: " + acknowledgement.error);
+      } else {
+        textBox.val(textBox.val() + "\n" + acknowledgement.acknowledgement);
+      }
+    });
+  });
+  dropDown.insertBefore(element);
+  $("<p />", {
+    "id": "licenseAcknowledgementDropDown-text"
+  }).html("Select license acknowledgements:").insertBefore(dropDown);
+  getLicenseAcknowledgements("visible", function (data) {
+    // Add a placeholder for select2
+    data.splice(0, 0, {
+      "la_pk": -1,
+      "name": ""});
+    dropDown.select2({
+      selectOnClose: true,
+      dropdownParent: textModal,
+      placeholder: {
+        id: '-1',
+        text: "Select a acknowledgement"
+      },
+      data: $.map(data, function(obj) {
+        return {
+          "id": obj.la_pk,
+          "text": obj.name
+        };
+      })
+    });
+  });
+}
+
+function getLicenseAcknowledgements(scope, callback) {
+  $.ajax({
+    type: "GET",
+    url: "?mod=ajax_license_acknowledgements",
     data: {"scope": scope},
     success: function(data) {
       callback(data);

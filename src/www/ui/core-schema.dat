@@ -1241,6 +1241,31 @@
   $Schema["TABLE"]["license_std_comment"]["is_enabled"]["ALTER"] = "ALTER TABLE \"license_std_comment\" ALTER COLUMN \"is_enabled\" SET NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
+  $Schema["TABLE"]["license_std_acknowledgement"]["la_pk"]["DESC"] = "COMMENT ON COLUMN \"license_std_acknowledgement\".\"la_pk\" IS 'Acknowledgement id'";
+  $Schema["TABLE"]["license_std_acknowledgement"]["la_pk"]["ADD"] = "ALTER TABLE \"license_std_acknowledgement\" ADD COLUMN \"la_pk\" int4 DEFAULT nextval('license_std_acknowledgement_la_pk_seq'::regclass)";
+  $Schema["TABLE"]["license_std_acknowledgement"]["la_pk"]["ALTER"] = "ALTER TABLE \"license_std_acknowledgement\" ALTER COLUMN \"la_pk\" SET NOT NULL, ALTER COLUMN \"la_pk\" SET DEFAULT nextval('license_std_acknowledgement_la_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["license_std_acknowledgement"]["name"]["DESC"] = "COMMENT ON COLUMN \"license_std_acknowledgement\".\"name\" IS 'Friendly name of the acknowledgement'";
+  $Schema["TABLE"]["license_std_acknowledgement"]["name"]["ADD"] = "ALTER TABLE \"license_std_acknowledgement\" ADD COLUMN \"name\" text DEFAULT 'not-set'::text";
+  $Schema["TABLE"]["license_std_acknowledgement"]["name"]["ALTER"] = "ALTER TABLE \"license_std_acknowledgement\" ALTER COLUMN \"name\" SET NOT NULL, ALTER COLUMN \"name\" SET DEFAULT 'not-set'::text";
+
+  $Schema["TABLE"]["license_std_acknowledgement"]["acknowledgement"]["DESC"] = "COMMENT ON COLUMN \"license_std_acknowledgement\".\"acknowledgement\" IS 'The standard license acknowledgement'";
+  $Schema["TABLE"]["license_std_acknowledgement"]["acknowledgement"]["ADD"] = "ALTER TABLE \"license_std_acknowledgement\" ADD COLUMN \"acknowledgement\" text";
+  $Schema["TABLE"]["license_std_acknowledgement"]["acknowledgement"]["ALTER"] = "ALTER TABLE \"license_std_acknowledgement\" ALTER COLUMN \"acknowledgement\" DROP NOT NULL";
+
+  $Schema["TABLE"]["license_std_acknowledgement"]["updated"]["DESC"] = "COMMENT ON COLUMN \"license_std_acknowledgement\".\"updated\" IS 'When this acknowledgement was last updated'";
+  $Schema["TABLE"]["license_std_acknowledgement"]["updated"]["ADD"] = "ALTER TABLE \"license_std_acknowledgement\" ADD COLUMN \"updated\" timestamptz DEFAULT now()";
+  $Schema["TABLE"]["license_std_acknowledgement"]["updated"]["ALTER"] = "ALTER TABLE \"license_std_acknowledgement\" ALTER COLUMN \"updated\" SET NOT NULL, ALTER COLUMN \"updated\" SET DEFAULT now()";
+
+  $Schema["TABLE"]["license_std_acknowledgement"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"license_std_acknowledgement\".\"user_fk\" IS 'Which user did the last update'";
+  $Schema["TABLE"]["license_std_acknowledgement"]["user_fk"]["ADD"] = "ALTER TABLE \"license_std_acknowledgement\" ADD COLUMN \"user_fk\" int4";
+  $Schema["TABLE"]["license_std_acknowledgement"]["user_fk"]["ALTER"] = "ALTER TABLE \"license_std_acknowledgement\" ALTER COLUMN \"user_fk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["license_std_acknowledgement"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"license_std_acknowledgement\".\"is_enabled\" IS 'Is the acknowledgement enabled?'";
+  $Schema["TABLE"]["license_std_acknowledgement"]["is_enabled"]["ADD"] = "ALTER TABLE \"license_std_acknowledgement\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["license_std_acknowledgement"]["is_enabled"]["ALTER"] = "ALTER TABLE \"license_std_acknowledgement\" ALTER COLUMN \"is_enabled\" SET NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
+
+
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["DESC"] = "";
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["ADD"] = "ALTER TABLE \"mimetype\" ADD COLUMN \"mimetype_pk\" int4 DEFAULT nextval('mimetype_mimetype_pk_seq'::regclass)";
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["ALTER"] = "ALTER TABLE \"mimetype\" ALTER COLUMN \"mimetype_pk\" SET NOT NULL, ALTER COLUMN \"mimetype_pk\" SET DEFAULT nextval('mimetype_mimetype_pk_seq'::regclass)";
@@ -2234,6 +2259,9 @@
   $Schema["SEQUENCE"]["license_std_comment_lsc_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_std_comment_lsc_pk_seq\"";
   $Schema["SEQUENCE"]["license_std_comment_lsc_pk_seq"]["UPDATE"] = "SELECT setval('license_std_comment_lsc_pk_seq',(SELECT greatest(1,max(lsc_pk)) val FROM license_std_comment))";
 
+  $Schema["SEQUENCE"]["license_std_acknowledgement_la_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_std_acknowledgement_la_pk_seq\"";
+  $Schema["SEQUENCE"]["license_std_acknowledgement_la_pk_seq"]["UPDATE"] = "SELECT setval('license_std_acknowledgement_la_pk_seq',(SELECT greatest(1,max(la_pk)) val FROM license_std_acknowledgement))";
+  
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"mimetype_mimetype_pk_seq\"";
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"]["UPDATE"] = "SELECT setval('mimetype_mimetype_pk_seq',(SELECT greatest(1,max(mimetype_pk)) val FROM mimetype))";
 
@@ -2392,6 +2420,7 @@
   $Schema["CONSTRAINT"]["license_map_pkpk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_pkpk\" PRIMARY KEY (\"license_map_pk\");";
   $Schema["CONSTRAINT"]["license_map_rf_fkfk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_rf_fkfk\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["license_std_comment_user_fk_fkey"] = "ALTER TABLE \"license_std_comment\" ADD CONSTRAINT \"license_std_comment_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE SET NULL ON DELETE SET NULL;";
+  $Schema["CONSTRAINT"]["license_std_acknowledgement_user_fk_fkey"] = "ALTER TABLE \"license_std_acknowledgement\" ADD CONSTRAINT \"license_std_acknowledgement_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE SET NULL ON DELETE SET NULL;";
   $Schema["CONSTRAINT"]["rf_pkpk"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_pkpk\" PRIMARY KEY (\"rf_pk\");";
   $Schema["CONSTRAINT"]["rf_md5unique"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_md5unique\" UNIQUE (\"rf_md5\");";
   $Schema["CONSTRAINT"]["license_ref_bulk_pkey"] = "ALTER TABLE \"license_ref_bulk\" ADD CONSTRAINT \"license_ref_bulk_pkey\" PRIMARY KEY (\"lrb_pk\");";
