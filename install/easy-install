@@ -1,6 +1,6 @@
 #!/bin/bash
 # FOSSology Easy Install script
-# SPDX-FileCopyrightText: © 2017 Siemens AG
+# SPDX-FileCopyrightText: © 2017,2022, Siemens AG
 #
 # SPDX-License-Identifier: FSFAP
 #
@@ -8,10 +8,10 @@
 set -e
 cd "$(dirname $(readlink -f "${BASH_SOURCE[0]}"))"/..
 sudo utils/fo-cleanold
-make clean
 sudo utils/fo-installdeps
-make
-sudo make install
+sudo cmake -DCMAKE_BUILD_TYPE=Release -S. -B./build -G Ninja 
+sudo cmake --build ./build --parallel 
+sudo ninja -C ./build install
 sudo /usr/local/lib/fossology/fo-postinstall
 sudo cp install/src-install-apache-example.conf /etc/apache2/sites-available/fossology.conf
 sudo ln -s /etc/apache2/sites-available/fossology.conf /etc/apache2/sites-enabled/fossology.conf
