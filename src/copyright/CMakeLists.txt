@@ -7,6 +7,11 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 project(copyright LANGUAGES CXX C)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/SetDefaults.cmake)
 
+find_package(jsoncpp REQUIRED
+    NAMES
+        jsoncpp jsoncpp_lib
+)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/agent)
 
 install(DIRECTORY ui

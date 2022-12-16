@@ -8,6 +8,11 @@ project(scancode)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/SetDefaults.cmake)
 
+find_package(jsoncpp REQUIRED
+    NAMES
+        jsoncpp jsoncpp_lib
+)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/agent)
 generate_version()
 

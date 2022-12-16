@@ -38,7 +38,8 @@ target_compile_definitions(test_monk
 target_include_directories(test_monk 
     PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${glib_INCLUDE_DIRS}
         ${PostgreSQL_INCLUDE_DIRS} ${FO_CLIB_SRC} ${FO_CWD}/../agent)
-target_link_libraries(test_monk PRIVATE cunit fodbreposysconf focunit monk)
+target_link_libraries(test_monk
+    PRIVATE ${cunit_LIBRARIES} fodbreposysconf focunit monk)
 
 add_test(monk_unit_test test_monk)
 

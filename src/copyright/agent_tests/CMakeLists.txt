@@ -18,7 +18,9 @@ target_sources(test_copyright
         ${FO_CWD}/Unit/test_regex.cc
         ${FO_CWD}/Unit/test_scanners.cc
         ${FO_CWD}/Unit/test_regexConfProvider.cc)
-target_link_libraries(test_copyright PRIVATE copyright_lib dl cppunit)
+target_link_libraries(test_copyright
+    PRIVATE
+        copyright_lib dl ${cppunit_LIBRARIES} jsoncpp_lib)
 target_include_directories(test_copyright 
     PRIVATE ${FO_CWD}/../agent ${glib_INCLUDE_DIRS} ${jsoncpp_INCLUDE_DIRS}
     ${PostgreSQL_INCLUDE_DIRS} ${FO_CLIB_SRC} ${FO_CXXLIB_SRC})
@@ -30,4 +32,4 @@ add_test(NAME copyright_functional_cli_test
     WORKING_DIRECTORY ${FO_CWD}/Functional)
 
 add_test(NAME copyright_functional_scheduler_test
-    COMMAND ${PHPUNIT} --bootstrap ${PHPUNIT_BOOTSTRAP}  ${FO_CWD}/Functional/schedulerTest.php)
+    COMMAND ${PHPUNIT} --bootstrap ${PHPUNIT_BOOTSTRAP} ${FO_CWD}/Functional/schedulerTest.php)

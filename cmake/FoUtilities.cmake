@@ -76,7 +76,7 @@ macro(getGitVersion)
         OUTPUT_STRIP_TRAILING_WHITESPACE
         WORKING_DIRECTORY ${FO_SOURCEDIR}
     )
-    set(FO_COMMIT_DATE ${COMMIT_DATE} CACHE INTERNAL "latest commit hash")
+    set(FO_COMMIT_DATE ${COMMIT_DATE} CACHE INTERNAL "latest commit date")
 
     set_property(GLOBAL APPEND
         PROPERTY CMAKE_CONFIGURE_DEPENDS

@@ -31,7 +31,7 @@ target_compile_definitions(test_nomos
 target_include_directories(test_nomos 
     PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${glib_INCLUDE_DIRS} 
         $<TARGET_FILE_DIR:encode> ${PostgreSQL_INCLUDE_DIRS} ${FO_CLIB_SRC} ${FO_CWD}/../agent)
-target_link_libraries(test_nomos PRIVATE cunit focunit nomos)
+target_link_libraries(test_nomos PRIVATE ${cunit_LIBRARIES} focunit nomos)
 
 add_test(nomos_unit_test test_nomos)
 
