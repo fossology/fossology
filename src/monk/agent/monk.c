@@ -61,6 +61,7 @@ void parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
         break;
       case 'h':
       case '?':
+      default:
         printf("Usage:\n"
                "\nAs CLI tool using the licenses from the FOSSology database:\n");
         printf("       %s [options] file [file [...]]\n", argv[0]);

@@ -37,4 +37,3 @@ add_test(nomos_unit_test test_nomos)
 
 add_test(NAME nomos_functional_test
     COMMAND ${PHPUNIT} --log-junit nomos-Xunit.xml --configuration ${FO_CWD}/Functional/tests.xml)
-    
