@@ -109,4 +109,46 @@ class SpdxTwoUtils
       return implode(" AND ", $licenses);
     }
   }
+
+  /**
+   * Clean an array of strings by trimming the elements and removing empty
+   * strings.
+   * @param string[] $texts Array of texts to be concatenated.
+   * @return string[] String array with all trimmed string elements.
+   */
+  static public function cleanTextArray($texts): array
+  {
+    if (!$texts || !is_array($texts) || sizeof($texts) == 0) {
+      return [];
+    }
+
+    sort($texts, SORT_NATURAL | SORT_FLAG_CASE);
+
+    $cleanArray = [];
+    foreach ($texts as $text) {
+      $text = trim($text);
+      if (empty($text)) {
+        continue;
+      }
+      $cleanArray[] = $text;
+    }
+    return $cleanArray;
+  }
+
+  /**
+   * Remove empty and 'NOASSERTION' licenses from list.
+   * @param string[] $licenses List of licenses.
+   * @return array List of licenses removing empty and 'NOASSERTION's.
+   */
+  public static function removeEmptyLicenses(array $licenses): array
+  {
+    $newList = [];
+    foreach ($licenses as $license) {
+      if (empty($license) || $license === "NOASSERTION") {
+        continue;
+      }
+      $newList[] = $license;
+    }
+    return $newList;
+  }
 }

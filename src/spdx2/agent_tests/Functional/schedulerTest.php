@@ -68,7 +68,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
 
-    $this->agentDir = dirname(dirname(__DIR__));
+    $this->agentDir = dirname(__DIR__, 4) . '/build/src/spdx2';
   }
 
   /**
@@ -175,7 +175,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   public function runJobFromJobque($uploadId, $jobId)
   {
     list($success,$output,$retCode) = $this->runnerCli->run($uploadId, $this->userId, $this->groupId, $jobId);
-    var_dump([$success,$output,$retCode]);
 
     assertThat('cannot run runner', $success, equalTo(true));
     assertThat('report failed: "'.$output.'"', $retCode, equalTo(0));
@@ -196,7 +195,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     assertThat($row, hasKeyValuePair('job_fk', $jobId));
     $filepath = $row['filepath'];
     assertThat($filepath, endsWith('.rdf'));
-    assertThat(file_exists($filepath),equalTo(true));
+    $this->assertFileExists($filepath, "RDF report does not exists.");
 
     return $filepath;
   }

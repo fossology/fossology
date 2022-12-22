@@ -2,9 +2,8 @@
 
    SPDX-License-Identifier: FSFAP
 #}
-
 <spdx:hasFile>
-  <spdx:File rdf:about="{{ uri }}#SPDXRef-item{{ fileId|url_encode }}">
+  <spdx:File rdf:about="#SPDXRef-item{{ fileId|url_encode }}">
     <spdx:fileName>{{ fileName|e }}</spdx:fileName>
     <spdx:checksum>
       <spdx:Checksum>
@@ -27,18 +26,33 @@
 {% if isCleared %}
 {% if concludedLicenses|default is empty %}
     <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#none" />
-{% else %}
+{% elseif concludedLicenses|length > 1 %}
     <spdx:licenseConcluded>
+{% if 'Dual-license' in concludedLicenses and concludedLicenses|length > 2 %}
       <spdx:DisjunctiveLicenseSet>
+{% else %}
+      <spdx:ConjunctiveLicenseSet>
+{% endif %}
 {% for res in concludedLicenses %}
 {% if res starts with 'LicenseRef-' %}
-        <spdx:member rdf:resource="{{ uri }}#{{ res|replace({' ': '-'})|url_encode }}" />
+        <spdx:member rdf:resource="#{{ res|replace({' ': '-'})|url_encode }}" />
 {% else %}
         <spdx:member rdf:resource="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
 {% endif %}
 {% endfor %}
+{% if 'Dual-license' in concludedLicenses and concludedLicenses|length > 2 %}
       </spdx:DisjunctiveLicenseSet>
+{% else %}
+      </spdx:ConjunctiveLicenseSet>
+{% endif %}
     </spdx:licenseConcluded>
+{% elseif concludedLicenses|length == 1 %}
+{% set res = concludedLicenses[0] %}
+{% if res starts with 'LicenseRef-' %}
+    <spdx:licenseConcluded rdf:resource="#{{ res|replace({' ': '-'})|url_encode }}" />
+{% else %}
+    <spdx:licenseConcluded rdf:resource="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
+{% endif %}
 {% endif %}
 {% else %}
     <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#noassertion" />
@@ -54,7 +68,7 @@
     <spdx:licenseInfoInFile rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {% else %}{% for res in scannerLicenses %}
 {% if res starts with 'LicenseRef-' %}
-    <spdx:licenseInfoInFile rdf:resource="{{ uri }}#{{ res|replace({' ': '-'})|url_encode }}" />
+    <spdx:licenseInfoInFile rdf:resource="#{{ res|replace({' ': '-'})|url_encode }}" />
 {% else %}
     <spdx:licenseInfoInFile rdf:resource="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
 {% endif %}
@@ -68,5 +82,9 @@
 {% endfor %}
     ]]></spdx:copyrightText>
 {% endif %}
+{% for ack in acknowledgements %}
+    <spdx:attributionText><![CDATA[{{ ack|replace({'\f':''})
+            |replace({']]>':']]]]><![CDATA[>'}) }}]]></spdx:attributionText>
+{% endfor %}
   </spdx:File>
 </spdx:hasFile>
