@@ -398,15 +398,15 @@ for ($i = 1; $i < $argc; $i ++) {
       exit(0);
     case '--username':
       $i++;
-      $user = $argv[$i];
+      $user = escapeshellarg($argv[$i]);
       break;
     case '--groupname':
       $i++;
-      $group = $argv[$i];
+      $group = escapeshellarg($argv[$i]);
       break;
     case '--password':
       $i++;
-      $passwd = $argv[$i];
+      $passwd = escapeshellarg($argv[$i]);
       break;
     case '--user':
       $i++;
@@ -454,18 +454,18 @@ for ($i = 1; $i < $argc; $i ++) {
       break;
     case '-d': /* specify upload description */
       $i++;
-      $UploadDescription = $argv[$i];
+      $UploadDescription = escapeshellarg($argv[$i]);
       break;
     case '-n': /* specify upload name */
       $i++;
-      $UploadName = $argv[$i];
+      $UploadName = escapeshellarg($argv[$i]);
       break;
     case '-Q': /** list all available processing agents */
       $OptionQ = 1;
       break;
     case '-q':
       $i++;
-      $QueueList = $argv[$i];
+      $QueueList = escapeshellarg($argv[$i]);
       break;
     case '-s':
       $OptionS = true;
@@ -524,7 +524,7 @@ for ($i = 1; $i < $argc; $i ++) {
         exit(1);
       }
       /* No hyphen means it is a file! */
-      $UploadArchive = $argv[$i];
+      $UploadArchive = escapeshellarg($argv[$i]);
   } /* switch */
 } /* for each parameter */
 

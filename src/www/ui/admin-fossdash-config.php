@@ -172,7 +172,7 @@ class FossdashConfig extends FO_Plugin
               "update fossdashconfig set conf_value=$1 where variablename=$2",
               array($VarValue, $VarName), __METHOD__ . '.setVarNameData');
             if ($VarName == "FossdashEnableDisable") {
-                $exec_fossdash_configuration_cmd = "python3 ".$LIBEXECDIR."/fossdash-publish.py fossdash_configure " . $VarValue;
+                $exec_fossdash_configuration_cmd = "python3 ".$LIBEXECDIR."/fossdash-publish.py fossdash_configure " . escapeshellarg($VarValue);
                 $output = shell_exec($exec_fossdash_configuration_cmd);
                 file_put_contents('php://stderr', "output of the cmd for fossology_configuration(enable/Disable) changed ={$output} \n");
             } elseif ($VarName == "FossologyInstanceName") {
