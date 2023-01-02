@@ -2,7 +2,7 @@
 
    SPDX-License-Identifier: FSFAP
 #}
-SPDXVersion: SPDX-2.2
+SPDXVersion: SPDX-2.3
 DataLicense: CC0-1.0
 
 ##-------------------------
@@ -17,7 +17,9 @@ SPDXID: SPDXRef-DOCUMENT
 ## Creation Information
 ##-------------------------
 
-Creator: Tool: spdx2
+{% if toolVersion is not empty %}
+Creator: Tool: {{ toolVersion }}
+{% endif %}
 {% if userName is not empty %}
 Creator: Person: {{ userName }}
 {% endif %}
@@ -27,8 +29,8 @@ Creator: Organization: {{ organisation }}
 CreatorComment: <text>
 This document was created using license information and a generator from Fossology.
 </text>
-Created: {{ 'now'|date('Y-m-d\\TH:i:s\\Z')}}
-LicenseListVersion: 2.6
+Created: {{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}
+LicenseListVersion: 3.19
 
 ##-------------------------
 ## Package Information

@@ -7,6 +7,13 @@ PackageName: {{ packageName }}
 PackageFileName: {{ uploadName }}
 SPDXID: SPDXRef-upload{{ packageId }}
 PackageDownloadLocation: NOASSERTION
+{% if packageVersion is not empty %}
+PackageVersion: {{ packageVersion }}
+{% endif %}
+{% if releaseDate is not empty %}
+ReleaseDate: {{ releaseDate }}
+{% endif %}
+FilesAnalyzed: true
 PackageVerificationCode: {{ verificationCode }}
 PackageChecksum: SHA1: {{ sha1 | lower }}
 PackageChecksum: SHA256: {{ sha256 | lower }}
@@ -23,6 +30,14 @@ PackageLicenseDeclared: {{ mainLicense }}
 {% endif %}
 PackageLicenseInfoFromFiles: NOASSERTION
 PackageCopyrightText: NOASSERTION
+{%- if generalAssessment is not empty ~%}
+PackageComment: <text> {{ generalAssessment|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'}) }} </text>
+{%- endif ~%}
+{% if obligations|default is not empty %}
+PackageAttributionText: <text> {{ obligations|join('\n')
+                                             |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                                             |replace({'\f':''}) }} </text>
+{% endif %}
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-upload{{ packageId }}
 {# RelationshipComment: #}
