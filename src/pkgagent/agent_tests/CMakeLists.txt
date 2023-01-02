@@ -35,9 +35,11 @@ target_sources(test_pkgagent
 target_compile_definitions(test_pkgagent PRIVATE _FILE_OFFSET_BITS=64)
 target_include_directories(test_pkgagent 
     PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${glib_INCLUDE_DIRS}
-        ${PostgreSQL_INCLUDE_DIRS} ${FO_CLIB_SRC} ${FO_CWD}/../agent /usr/include/rpm)
+        ${PostgreSQL_INCLUDE_DIRS} ${FO_CLIB_SRC} ${FO_CWD}/../agent
+        ${rpm_INCLUDE_DIRS})
 target_link_libraries(test_pkgagent 
-    PRIVATE fossology cunit focunit rpmio fodbreposysconf pthread rpm)
+    PRIVATE fossology cunit focunit ${rpm_LIBRARIES} fodbreposysconf pthread
+        ${rpm_LIBRARIES})
 
 add_test(pkgagent_unit_test test_pkgagent)
 

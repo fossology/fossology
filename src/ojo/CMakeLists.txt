@@ -8,6 +8,11 @@ project(ojo LANGUAGES CXX)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/SetDefaults.cmake)
 
+find_package(jsoncpp REQUIRED
+    NAMES
+        jsoncpp jsoncpp_lib
+)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/agent)
 configure_file(${FO_CMAKEDIR}/TestInstall.make.in ${CMAKE_CURRENT_BINARY_DIR}/TestInstall.make
     NEWLINE_STYLE LF @ONLY)

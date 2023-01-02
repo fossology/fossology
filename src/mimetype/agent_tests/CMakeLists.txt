@@ -29,7 +29,8 @@ target_compile_definitions(test_mimetype PRIVATE _FILE_OFFSET_BITS=64 AGENT_DIR=
 target_include_directories(test_mimetype 
     PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${glib_INCLUDE_DIRS}
         ${PostgreSQL_INCLUDE_DIRS} ${FO_CLIB_SRC} ${FO_CWD}/../agent)
-target_link_libraries(test_mimetype PRIVATE cunit fodbreposysconf focunit mimetype)
+target_link_libraries(test_mimetype
+    PRIVATE ${cunit_LIBRARIES} fodbreposysconf focunit mimetype)
 
 add_test(mimetype_unit_test test_mimetype)
 
