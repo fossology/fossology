@@ -219,7 +219,7 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1, $li
 
     /* Load any subfolders */
     /* Now create the HTML */
-    $V .= htmlentities($Name);
+    $V .= htmlentities($Name, ENT_HTML5 | ENT_QUOTES);
     $V .= "</option>\n";
   }
   /* Load any subfolders */
