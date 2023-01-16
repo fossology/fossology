@@ -170,7 +170,7 @@ class LicenseDao
   public function getConclusionLicenseRefs($groupId, $search = null, $orderAscending = true, $exclude=array())
   {
     $rfTable = 'license_all';
-    $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname'),
+    $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname', 'rf_active'),
                      'candidatePrefix' => $this->candidatePrefix);
     $licenseViewDao = new LicenseViewProxy($groupId, $options, $rfTable);
     $order = $orderAscending ? "ASC" : "DESC";
@@ -178,7 +178,7 @@ class LicenseDao
     $param = array();
     /* exclude license with parent, excluded child or selfexcluded */
     $sql = $licenseViewDao->asCTE()." SELECT rf_pk,rf_shortname,rf_fullname FROM $rfTable
-                  WHERE NOT EXISTS (select * from license_map WHERE rf_pk=rf_fk AND rf_fk!=rf_parent)";
+                  WHERE rf_active = 'yes' AND NOT EXISTS (select * from license_map WHERE rf_pk=rf_fk AND rf_fk!=rf_parent)";
     if ($search) {
       $param[] = '%' . $search . '%';
       $statementName .= '.search';
@@ -209,7 +209,7 @@ class LicenseDao
   {
     $statementName = __METHOD__;
     $rfTable = 'license_all';
-    $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname'), 'candidatePrefix' => $this->candidatePrefix);
+    $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname', 'rf_active'), 'candidatePrefix' => $this->candidatePrefix);
     if ($groupId === null) {
       $groupId = (isset($_SESSION) && array_key_exists('GroupId', $_SESSION)) ? $_SESSION['GroupId'] : 0;
     }
@@ -217,7 +217,7 @@ class LicenseDao
     $withCte = $licenseViewDao->asCTE();
 
     $this->dbManager->prepare($statementName,
-        $withCte . " select rf_pk id,rf_shortname shortname,rf_fullname fullname from $rfTable order by LOWER(rf_shortname)");
+        $withCte . " select rf_pk id,rf_shortname shortname,rf_fullname fullname from $rfTable WHERE rf_active = 'yes' ORDER BY LOWER(rf_shortname)");
     $result = $this->dbManager->execute($statementName);
     $licenseRefs = $this->dbManager->fetchAll($result);
     $this->dbManager->freeResult($result);
