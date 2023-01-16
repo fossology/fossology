@@ -215,8 +215,8 @@ class ReportStatic
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Source / binary integration notes"), $leftColStyle, "pStyle");
     $cell = $table->addCell($cellLen);
-    $this->addCheckBoxText($cell, $getCheckboxList[0], $nocriticalfiles);
-    $this->addCheckBoxText($cell, $getCheckboxList[1], $criticalfiles);
+    $this->addCheckBoxText($cell, (array_key_exists(0,$getCheckboxList)) ? $getCheckboxList[0] : '', $nocriticalfiles);
+    $this->addCheckBoxText($cell, (array_key_exists(1,$getCheckboxList)) ? $getCheckboxList[1] : '', $criticalfiles);
 
     $nodependenciesfound = " no dependencies found, neither in source code nor in binaries";
     $dependenciesfoundinsourcecode = " dependencies found in source code (see obligations)";
@@ -224,9 +224,9 @@ class ReportStatic
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Dependency notes"), $leftColStyle, "pStyle");
     $cell = $table->addCell($cellLen);
-    $this->addCheckBoxText($cell, $getCheckboxList[2], $nodependenciesfound);
-    $this->addCheckBoxText($cell, $getCheckboxList[3], $dependenciesfoundinsourcecode);
-    $this->addCheckBoxText($cell, $getCheckboxList[4], $dependenciesfoundinbinaries);
+    $this->addCheckBoxText($cell, (array_key_exists(2,$getCheckboxList)) ? $getCheckboxList[2] : '', $nodependenciesfound);
+    $this->addCheckBoxText($cell, (array_key_exists(3,$getCheckboxList)) ? $getCheckboxList[3] : '', $dependenciesfoundinsourcecode);
+    $this->addCheckBoxText($cell, (array_key_exists(4,$getCheckboxList)) ? $getCheckboxList[4] : '', $dependenciesfoundinbinaries);
     if ($otherStatement["ri_depnotes"] != 'NA' && !empty($otherStatement["ri_depnotes"])) {
       $extraNotes = str_replace("\n", "</w:t>\n<w:br />\n<w:t xml:space=\"preserve\">", htmlspecialchars($otherStatement["ri_depnotes"], ENT_DISALLOWED));
       $extraNotes = str_replace("\r", "", $extraNotes);
@@ -238,8 +238,8 @@ class ReportStatic
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Export restrictions by copyright owner"), $leftColStyle, "pStyle");
     $cell = $table->addCell($cellLen);
-    $this->addCheckBoxText($cell, $getCheckboxList[5], $noexportrestrictionsfound);
-    $this->addCheckBoxText($cell, $getCheckboxList[6], $exportrestrictionsfound);
+    $this->addCheckBoxText($cell, (array_key_exists(5,$getCheckboxList)) ? $getCheckboxList[5] : '', $noexportrestrictionsfound);
+    $this->addCheckBoxText($cell, (array_key_exists(6,$getCheckboxList)) ? $getCheckboxList[6] : '', $exportrestrictionsfound);
     if ($otherStatement["ri_exportnotes"] != 'NA' && !empty($otherStatement["ri_exportnotes"])) {
       $extraNotes = str_replace("\n", "</w:t>\n<w:br />\n<w:t xml:space=\"preserve\">", htmlspecialchars($otherStatement["ri_exportnotes"], ENT_DISALLOWED));
       $extraNotes = str_replace("\r", "", $extraNotes);
@@ -252,8 +252,8 @@ class ReportStatic
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Restrictions for use (e.g. not for Nuclear Power) by copyright owner"),
       $leftColStyle, "pStyle");
     $cell = $table->addCell($cellLen);
-    $this->addCheckBoxText($cell, $getCheckboxList[7], $norestrictionsforusefound);
-    $this->addCheckBoxText($cell, $getCheckboxList[8], $restrictionsforusefound);
+    $this->addCheckBoxText($cell, (array_key_exists(7,$getCheckboxList)) ? $getCheckboxList[7] : '', $norestrictionsforusefound);
+    $this->addCheckBoxText($cell, (array_key_exists(8,$getCheckboxList)) ? $getCheckboxList[8] : '', $restrictionsforusefound);
     if ($otherStatement["ri_copyrightnotes"] != 'NA' && !empty($otherStatement["ri_copyrightnotes"])) {
       $extraNotes = str_replace("\n", "</w:t>\n<w:br />\n<w:t xml:space=\"preserve\">", htmlspecialchars($otherStatement["ri_copyrightnotes"], ENT_DISALLOWED));
       $extraNotes = str_replace("\r", "", $extraNotes);
