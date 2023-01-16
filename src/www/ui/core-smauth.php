@@ -313,7 +313,7 @@ class core_smauth extends FO_Plugin
       $_SESSION['UserEmail'] = NULL;
       $_SESSION['Folder'] = NULL;
       $_SESSION['UiPref'] = NULL;
-      $Uri = Traceback_uri() . "logout.html?" . rand();
+      $Uri = Traceback_uri() . "logout.html?" . random_int(0, getrandmax());
       //$Uri = Traceback_uri() . "?mod=refresh&remod=default";
       $V.= "<script language='javascript'>\n";
       $V.= "window.open('$Uri','_top');\n";

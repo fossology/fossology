@@ -146,7 +146,7 @@ class TestCreateFolder extends WebTestCase {
     $this->assertTrue($this->setField('parentid', 'Software Repository'));
     // Generate a random number so names will not collide with multiple
     // test runs.
-    $tail = rand();
+    $tail = random_int(0, getrandmax());
     $folder_name = 'TestFolder' . "$tail";
     $this->setField('newname', $folder_name);
     $this->clickSubmit('Create!');

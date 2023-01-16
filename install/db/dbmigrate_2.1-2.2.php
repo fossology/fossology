@@ -56,7 +56,7 @@ function Migrate_21_22($Verbose)
   {
     // No Default User, so create one
     $Perm = 10;  //PLUGIN_DB_ADMIN;
-    $Seed = rand() . rand();
+    $Seed = random_int(0, getrandmax()) . random_int(0, getrandmax());
     $Hash = sha1($Seed . $user_name);
     $sql = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
         VALUES ('$user_name','Default Administrator','$Seed','$Hash',$Perm,'y',1);";

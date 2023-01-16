@@ -42,7 +42,7 @@ function ReportCacheGet($CacheKey)
   global $UserCacheStat;
 
   /* Purge old entries ~ 1/500 of the times this fcn is called */
-  if (rand(1, 500) == 1) {
+  if (random_int(1, 500) == 1) {
     ReportCachePurgeByDate(" now() - interval '365 days'");
   }
 
