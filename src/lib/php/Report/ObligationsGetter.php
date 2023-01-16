@@ -52,6 +52,7 @@ class ObligationsGetter
    */
   function getObligations($licenseStatements, $mainLicenseStatements, $uploadId, $groupId)
   {
+    $whiteLists = array();
     $licenseIds = $this->contentOnly($licenseStatements) ?: array();
     $mainLicenseIds = $this->contentOnly($mainLicenseStatements);
 
