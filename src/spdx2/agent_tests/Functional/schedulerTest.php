@@ -20,6 +20,7 @@ namespace Fossology\SpdxTwo\Test;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
+use ZipArchive;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
@@ -246,21 +247,28 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    * @brief Pull SPDX toolkit from github if not found
    *
    * -# Verify if Java is installed
-   * -# Pull version 2.2.2
-   * -# Store only spdx-tools-2.2.2-jar-with-dependencies.jar
+   * -# Pull version 1.1.3
+   * -# Store only tools-java-1.1.3-jar-with-dependencies.jar
    * @return string Jar file path
    */
   protected function pullSpdxTools()
   {
     $this-> verifyJavaIsInstalled();
 
-    $version='2.2.2';
+    $version='1.1.3';
     $tag='v'.$version;
 
-    $jarFileBasename = 'spdx-tools-'.$version.'-jar-with-dependencies.jar';
+    $jarFileBasename = 'tools-java-'.$version.'-jar-with-dependencies.jar';
     $jarFile = __DIR__.'/'.$jarFileBasename;
     if (!file_exists($jarFile)) {
-      file_put_contents($jarFile, fopen('https://github.com/spdx/tools/releases/download/'.$tag.'/'.$jarFileBasename, 'r'));
+      $zipFile = __DIR__ . "/spdx-tools-java-$version.zip";
+      file_put_contents($zipFile, fopen("https://github.com/spdx/tools-java/releases/download/$tag/tools-java-$version.zip", 'r'));
+      $zip = new ZipArchive;
+      if ($zip->open($zipFile) === TRUE) {
+        $zip->extractTo(__DIR__, [$jarFileBasename]);
+        $zip->close();
+      }
+      unlink($zipFile);
     }
     $this->assertFileExists($jarFile, 'could not download SPDXTools');
     return $jarFile;
