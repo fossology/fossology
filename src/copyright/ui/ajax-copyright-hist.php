@@ -1,7 +1,7 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2014-2019 Siemens AG
- Author: Daniele Fognini, Johannes Najjar, Steffen Weber
+ SPDX-FileCopyrightText: © 2014-2019, 2022, Siemens AG
+ Author: Daniele Fognini, Johannes Najjar, Steffen Weber, Shaheem Azmal M MD
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -325,6 +325,9 @@ count(*) AS copyright_count " .
   private function getTableName($type)
   {
     switch ($type) {
+      case "ipra" :
+        $tableName = "ipra";
+        break;
       case "ecc" :
         $tableName = "ecc";
         break;

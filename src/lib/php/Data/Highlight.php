@@ -24,7 +24,7 @@ class Highlight
   const URL = "U";
   const EMAIL = "E";
   const AUTHOR = "A";
-  const IP = "I";
+  const IPRA = "I";
   const ECC = "X";
   const KEYWORDOTHERS = "KW";
   const UNDEFINED = "any";

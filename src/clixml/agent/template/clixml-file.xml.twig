@@ -192,6 +192,37 @@
   {%- endif %}
 {% endfor %}
 
+{%- for ipra in contents %}
+  {%- if ipra %}
+    {%- for idc in ipra %}
+      {%~ if idc.contentIpra %}
+  <Patents>
+    <Content><![CDATA[{{ idc.contentIpra }}
+]]></Content>
+    <Files><![CDATA[
+      {%- for id in idc.files %}
+        {%- if id %}
+          {{- id -}}
+        {%- endif ~%}
+      {%~ endfor %}
+]]></Files>
+    <FileHash><![CDATA[
+      {%- for id in idc.hash %}
+        {%- if id %}
+          {{- id -}}
+        {%- endif ~%}
+      {%~ endfor %}
+]]></FileHash>
+    {%- if idc.commentsIpra ~%}
+    <Comment><![CDATA[{{ idc.commentsIpra }}
+]]></Comment>
+    {%- endif ~%}
+  </Patents>
+      {%~ endif %}
+    {%- endfor %}
+  {%- endif %}
+{% endfor %}
+
 {% if contents.licensesIrre %}
   <IrrelevantFiles>
     <Files><![CDATA[

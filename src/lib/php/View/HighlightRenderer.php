@@ -34,7 +34,7 @@ class HighlightRenderer
             Highlight::URL => 'hi-url',
             Highlight::AUTHOR => 'hi-author',
             Highlight::BULK => 'hi-bulk',
-            Highlight::IP => 'hi-ip',
+            Highlight::IPRA => 'hi-ipra',
             Highlight::ECC => 'hi-mediumorchid'
           );
 

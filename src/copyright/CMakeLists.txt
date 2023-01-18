@@ -21,9 +21,10 @@ install(DIRECTORY ui
     PATTERN *.php
     PATTERN *.twig
     PATTERN "agent-ecc.php" EXCLUDE
-    PATTERN "agent-keyword.php" EXCLUDE)
+    PATTERN "agent-keyword.php" EXCLUDE
+    PATTERN "agent-ipra.php" EXCLUDE)
 
-foreach(COP ecc keyword copyright)
+foreach(COP ecc keyword copyright ipra)
     set(PROJECT_NAME ${COP})
     generate_version(${COP} "VERSION-${COP}")
     install(FILES ui/agent-${COP}.php

@@ -61,6 +61,7 @@ src/cli/fossupload_status
 src/cli/exportLicenseRefUsingSPDX
 src/clixml/agent/version.php
 src/clixml/agent/clixml
+src/copyright/agent/ipra
 src/copyright/agent/copyright
 src/copyright/agent/keyword
 src/copyright/agent/fo_unicode_clean
@@ -171,6 +172,7 @@ variable.list
 /src/copyright/VERSION-ecc
 /src/copyright/VERSION-keyword
 /src/copyright/VERSION-copyright
+/src/copyright/VERSION-ipra
 /src/spdx2/agent_tests/Functional/spdx-tools-2.2.2-jar-with-dependencies.jar*
 /src/spdx2/agent/version.php
 /src/unifiedreport/agent/unifiedreport

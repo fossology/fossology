@@ -1,5 +1,5 @@
 /*
- SPDX-FileCopyrightText: © 2014 Siemens AG
+ SPDX-FileCopyrightText: © 2014,2022, Siemens AG
  Author: Daniele Fognini, Andreas Wuerl, Johannes Najjar
 
  SPDX-License-Identifier: GPL-2.0-only
@@ -80,7 +80,7 @@ int main(int argc, char** argv)
       cout << "[" << endl;
     }
 
-#pragma omp parallel
+#pragma omp parallel num_threads(THREADS)
     {
 #pragma omp for
       for (unsigned int argn = 0; argn < fileNamesCount; ++argn)
