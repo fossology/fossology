@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: FSFAP
 /.idea
 /.vscode
+/.phpstorm
 *iml
 _*.c
 _*.h

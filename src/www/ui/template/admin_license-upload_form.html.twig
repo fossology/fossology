@@ -15,66 +15,73 @@
   <table>
     {% import 'include/macros.html.twig' as macro %}
     <tr>
-      <td align="right">{{ 'Active'|trans }}</td>
+      <td align="right"><label for="rf_active">{{ 'Active'|trans }}</label></td>
       <td align="left">{{ macro.select('rf_active',boolYesNoMap,'rf_active',rf_active) }}</td>
     </tr>
     <tr>
-      <td align="right">{{ 'Checked'|trans }}</td>
+      <td align="right"><label for="marydone">{{ 'Checked'|trans }}</label></td>
       <td align="left">{{ macro.select('marydone',boolYesNoMap,'marydone',marydone) }}</td>
     </tr>
     <tr>
-      <td align="right">{{ 'SPDX Compatible'|trans }}</td>
-      <td align="left">{{ macro.select('rf_spdx_compatible',boolYesNoMap,'rf_spdx_compatible',rf_spdx_compatible) }}</td>
+      <td align="right"><label for="rf_spdx_id">{{ 'SPDX ID'|trans }}{% if isReadOnly %} ({{ 'read only'|trans }}){% endif %}</label></td>
+      <td><input type="text" name="rf_spdx_id" value="{{ rf_spdx_id|e }}" id="rf_spdx_id"
+             size="30" {% if rfId and isReadOnly %} readonly="readonly"{% endif %}>
+        ({{ 'used in report'|trans }})
+      </td>
     </tr>
     <tr>
-      <td align="right">{{ "Short name"|trans }}</td>
-      {% if rfId %}
-        <td><input type="text" name="rf_shortname" value="{{ rf_shortname|e }}" size="30" readonly> ({{ 'must be unique'|trans }})</td>
-      {% else %}
-        <td><input type="text" name="rf_shortname" value="{{ rf_shortname|e }}" size="30"> ({{ 'must be unique'|trans }})</td>
-      {% endif %}
+      <td align="right"><label for="rf_shortname">{{ "Short name"|trans }}</label></td>
+      <td><input type="text" name="rf_shortname" value="{{ rf_shortname|e }}" id="rf_shortname"
+                 size="30" {% if rfId %}readonly{% endif %}>
+        ({{ 'must be unique'|trans }})
+      </td>
     </tr>
     <tr>
-      <td align="right">{{ "Full name"|trans }}</td>
-      <td><input type="text" name="rf_fullname" value="{{ rf_fullname|e }}" size="60"></td>
+      <td align="right"><label for="rf_fullname">{{ "Full name"|trans }}</label></td>
+      <td><input type="text" name="rf_fullname" value="{{ rf_fullname|e }}"
+                 id="rf_fullname" size="60"></td>
     </tr>
     <tr>
-      <td align="right">{{ 'License Text'|trans }}{% if isReadOnly %} ({{ 'read only'|trans }}){% endif %}</td>
-      <td><textarea name="rf_text" rows="10" cols="80" {% if isReadOnly %} readonly="readonly"{% endif %}>{{ rf_text|e }}</textarea></td>
+      <td align="right">
+        <label for="rf_text">{{ 'License Text'|trans }}{% if isReadOnly %} ({{ 'read only'|trans }}){% endif %}</label>
+      </td>
+      <td><textarea name="rf_text" rows="10" cols="80" id="rf_text"
+          {% if isReadOnly %}readonly="readonly"{% endif %}>{{ rf_text|e }}</textarea>
+      </td>
     </tr>
     <tr>
-      <td align="right">{{ 'Text Updatable'|trans }}</td>
+      <td align="right"><label for="rf_text_updatable">{{ 'Text Updatable'|trans }}</label></td>
       <td align="left">{{ macro.select('rf_text_updatable',boolYesNoMap,'rf_text_updatable',rf_text_updatable) }}</td>
     </tr>
     <tr>
-      <td align="right">{{ 'Detector Type'|trans }}</td>
+      <td align="right"><label for="rf_detector_type">{{ 'Detector Type'|trans }}</label></td>
       <td align="left">{{ macro.select('rf_detector_type',detectorTypes,'rf_detector_type',rf_detector_type) }}</td>
     </tr>
     <tr>
       <td align=right>
-        {{ 'URL'|trans }}
+        <label for="rf_url">{{ 'URL'|trans }}</label>
         {% if rf_url %}<a href="{{ rf_url }}"><img border="0" src="images/right-point-bullet.gif"/></a>{% endif %}
       </td>
-      <td><input type="text" name="rf_url" value="{{ rf_url }}" size="60"></td>
+      <td><input type="text" name="rf_url" value="{{ rf_url }}" id="rf_url" size="60"></td>
     </tr>
     <tr>
-      <td align="right">{{ 'Public notes'|trans }}</td>
-      <td><textarea name="rf_notes" rows="5" cols="80">{{ rf_notes|e }}</textarea></td>
+      <td align="right"><label for="rf_notes">{{ 'Public notes'|trans }}</label></td>
+      <td><textarea name="rf_notes" id="rf_notes" rows="5" cols="80">{{ rf_notes|e }}</textarea></td>
     </tr>
     <tr>
-      <td align="right">{{ 'Conclusion'|trans }}</td>
+      <td align="right"><label for="rf_parent">{{ 'Conclusion'|trans }}</label></td>
       <td align="left">{{ macro.select('rf_parent',parentMap,'rf_parent',rf_parent, 'class="ui-render-select2"') }}</td>
     </tr>
     <tr>
-      <td align="right">{{ 'Reported license'|trans }}</td>
+      <td align="right"><label for="rf_report">{{ 'Reported license'|trans }}</label></td>
       <td align="left">{{ macro.select('rf_report',reportMap,'rf_report',rf_report, 'class="ui-render-select2"') }}</td>
     </tr>
     <tr>
-      <td align="right">{{ 'Risk level'|trans }}</td>
+      <td align="right"><label for="risk_level">{{ 'Risk level'|trans }}</label></td>
       <td align="left">{{ macro.selectsingle('risk_level',range(0,5),'risk_level',risk_level) }}</td>
     </tr>
     <tr>
-      <td align="right">{{ "Associated Obligations"|trans }}</td>
+      <td align="right"><label for="{{ obligationSelectorId }}">{{ "Associated Obligations"|trans }}</label></td>
       <td align="left">{{ macro.selectwitharray(obligationSelectorName, obligationTopics, obligationSelectorId, obligationSelected, 'style="min-width:575px;"', 8) }}</td>
     </tr>
   </table>

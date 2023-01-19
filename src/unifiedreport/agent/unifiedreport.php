@@ -23,7 +23,7 @@
  *     -# Common obligations, restrictions and risks
  *     -# Additional obligations, restrictions & risks beyond common rules
  * -# Acknowledgements
- *     Every acknowledgements entered by the user during clearing.
+ *     Every acknowledgement entered by the user during clearing.
  * -# Export Restrictions
  *     Contains findings of ECC.
  * -# Notes
@@ -90,19 +90,18 @@ define("REPORT_AGENT_NAME", "unifiedreport");
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
-use Fossology\Lib\Report\LicenseClearedGetter;
-use Fossology\Lib\Report\LicenseIrrelevantGetter;
-use Fossology\Lib\Report\LicenseDNUGetter;
-use Fossology\Lib\Report\LicenseNonFunctionalGetter;
 use Fossology\Lib\Report\BulkMatchesGetter;
-use Fossology\Lib\Report\XpClearedGetter;
+use Fossology\Lib\Report\LicenseClearedGetter;
+use Fossology\Lib\Report\LicenseDNUGetter;
+use Fossology\Lib\Report\LicenseIrrelevantGetter;
 use Fossology\Lib\Report\LicenseMainGetter;
+use Fossology\Lib\Report\LicenseNonFunctionalGetter;
 use Fossology\Lib\Report\ObligationsGetter;
 use Fossology\Lib\Report\OtherGetter;
-use PhpOffice\PhpWord\PhpWord;
+use Fossology\Lib\Report\XpClearedGetter;
 use PhpOffice\PhpWord\Element\Section;
 use PhpOffice\PhpWord\IOFactory;
-use PhpOffice\PhpWord\Shared\Html;
+use PhpOffice\PhpWord\PhpWord;
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/reportStatic.php");
@@ -165,7 +164,7 @@ class UnifiedReport extends Agent
    */
   private $licenseIrrelevantCommentGetter;
 
-  /** @var obligationsGetter $obligationsGetter
+  /** @var ObligationsGetter $obligationsGetter
    * obligationsGetter object
    */
   private $obligationsGetter;

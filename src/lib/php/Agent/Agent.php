@@ -19,8 +19,8 @@
  */
 namespace Fossology\Lib\Agent;
 
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Db\DbManager;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 require_once(dirname(dirname(__FILE__))."/common-cli.php");
@@ -268,6 +268,7 @@ abstract class Agent
    * This function is implemented by agent and should call heartbeat() at
    * regular intervals.
    * @param int $uploadId Upload to be processed by the agent.
+   * @return bool Process status
    */
   abstract protected function processUploadId($uploadId);
 

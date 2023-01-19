@@ -13,6 +13,7 @@ class LicenseRefTest extends \PHPUnit\Framework\TestCase
   private $id = 321;
   private $shortName = "<shortName>";
   private $fullName = "<fullName>";
+  private $spdxId = "<spdxId>";
 
   /**
    * @var LicenseRef
@@ -21,7 +22,7 @@ class LicenseRefTest extends \PHPUnit\Framework\TestCase
 
   protected function setUp() : void
   {
-    $this->licenseRef = new LicenseRef($this->id, $this->shortName, $this->fullName);
+    $this->licenseRef = new LicenseRef($this->id, $this->shortName, $this->fullName, $this->spdxId);
   }
 
   public function testGetId()
@@ -37,5 +38,16 @@ class LicenseRefTest extends \PHPUnit\Framework\TestCase
   public function testGetFullName()
   {
     assertThat($this->licenseRef->getFullName(), is($this->fullName));
+  }
+
+  public function testGetSpdxId()
+  {
+    assertThat($this->licenseRef->getSpdxId(), is($this->spdxId));
+  }
+
+  public function testDefaultSpdxId()
+  {
+    $licenseRef = new LicenseRef($this->id, $this->shortName, $this->fullName, "");
+    assertThat($licenseRef->getSpdxId(), is(LicenseRef::SPDXREF_PREFIX . $this->shortName));
   }
 }

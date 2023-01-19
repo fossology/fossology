@@ -20,7 +20,7 @@ class SpdxTwoUtils
    *
    * Get the array of arguments and find $key1 and $key2 values and assign
    * to $args[$key1] and $args[$key2].
-   * @param string $args String array
+   * @param string[] $args String array
    * @param string $key1 Key1
    * @param string $key2 Key2
    * @return string[] $args
@@ -41,10 +41,9 @@ class SpdxTwoUtils
   /**
    * @brief Add prefix to the license based on SPDX2 standards
    * @param string $license
-   * @param callable $spdxValidityChecker
    * @return string
    */
-  static public function addPrefixOnDemand($license, $spdxValidityChecker = null)
+  static public function addPrefixOnDemand($license)
   {
     if (empty($license) || $license === "NOASSERTION") {
       return "NOASSERTION";
@@ -54,30 +53,20 @@ class SpdxTwoUtils
       return "(" . $license . ")";
     }
 
-    if ($spdxValidityChecker === null ||
-        (is_callable($spdxValidityChecker) &&
-            call_user_func($spdxValidityChecker, $license))) {
-      return $license;
-    }
-
-    // if we get here, we're using a non-standard SPDX license
-    // make sure our license text conforms to the SPDX specifications
     $license = preg_replace('/[^a-zA-Z0-9\-\_\.\+]/','-',$license);
-    $license = preg_replace('/\+(?!$)/','-',$license);
-    return self::$prefix . $license;
+    return preg_replace('/\+(?!$)/','-',$license);
   }
 
   /**
    * @brief Add prefix to license keys
    * @param array $licenses
-   * @param callable $spdxValidityChecker
    * @return string[]
    */
-  static public function addPrefixOnDemandKeys($licenses, $spdxValidityChecker = null)
+  static public function addPrefixOnDemandKeys($licenses)
   {
     $ret = array();
     foreach ($licenses as $license=>$text) {
-      $ret[self::addPrefixOnDemand($license, $spdxValidityChecker)] = $text;
+      $ret[self::addPrefixOnDemand($license)] = $text;
     }
     return $ret;
   }
@@ -85,40 +74,38 @@ class SpdxTwoUtils
   /**
    * @brief Add prefix to license list
    * @param array $licenses
-   * @param callable $spdxValidityChecker
    * @return array
    */
-  static public function addPrefixOnDemandList($licenses, $spdxValidityChecker = null)
+  static public function addPrefixOnDemandList($licenses)
   {
-    return array_map(function ($license) use ($spdxValidityChecker)
+    return array_map(function ($license)
     {
-      return SpdxTwoUtils::addPrefixOnDemand($license, $spdxValidityChecker);
+      return SpdxTwoUtils::addPrefixOnDemand($license);
     },$licenses);
   }
 
   /**
    * @brief Implode licenses with "AND" or "OR"
-   * @param string $licenses
-   * @param callable $spdxValidityChecker
+   * @param string[] $licenses
    * @return string
    */
-  static public function implodeLicenses($licenses, $spdxValidityChecker = null)
+  static public function implodeLicenses($licenses)
   {
     if (!$licenses || !is_array($licenses) || sizeof($licenses) == 0) {
       return "";
     }
 
-    $licenses = self::addPrefixOnDemandList($licenses, $spdxValidityChecker);
+    $licenses = self::addPrefixOnDemandList($licenses);
     sort($licenses, SORT_NATURAL | SORT_FLAG_CASE);
 
     if (count($licenses) == 3 &&
        ($index = array_search("Dual-license",$licenses)) !== false) {
       return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
     } elseif (count($licenses) == 3 &&
-        ($index = array_search(self::$prefix . "Dual-license",$licenses)) !== false) {
+        ($index = array_search(self::$prefix . "Dual-license", $licenses)) !== false) {
       return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
     } else {
-      // Add prefixes where needed, enclose statments containing ' OR ' with parantheses
+      // Add prefixes where needed, enclose statements containing ' OR ' with parentheses
       return implode(" AND ", $licenses);
     }
   }

@@ -15,6 +15,7 @@ use Fossology\ReportImport\ReportImportHelper;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Db\DbManager;
 
 require_once 'ReportImportConfiguration.php';
 
@@ -135,7 +136,11 @@ class ReportImportSink
   public function getIdForDataItemOrCreateLicense($dataItem, $groupId)
   {
     $licenseShortName = $dataItem->getLicenseId();
-    $license = $this->licenseDao->getLicenseByShortName($licenseShortName, $groupId);
+    if ($this->configuration->shouldMatchLicenseNameWithSPDX()) {
+      $license = $this->licenseDao->getLicenseBySpdxId($licenseShortName, $groupId);
+    } else {
+      $license = $this->licenseDao->getLicenseByShortName($licenseShortName, $groupId);
+    }
     if ($license !== null)
     {
       return $license->getId();
@@ -164,7 +169,8 @@ class ReportImportSink
           date(DATE_ATOM),
           $this->userId,
           false,
-          0
+          0,
+          $licenseCandidate->getShortName()
         );
         return $licenseId;
       }
@@ -172,7 +178,7 @@ class ReportImportSink
       {
         echo "creating it as license ...\n";
         $licenseText = trim($licenseCandidate->getText());
-        return $this->licenseDao->insertLicense($licenseCandidate->getShortName(), $licenseText, $licenseCandidate->getSpdxCompatible());
+        return $this->licenseDao->insertLicense($licenseCandidate->getShortName(), $licenseText, $licenseCandidate->getShortName());
       }
     }
     return -1;

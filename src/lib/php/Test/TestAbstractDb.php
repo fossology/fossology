@@ -78,12 +78,29 @@ abstract class TestAbstractDb
       'rf_GPLv3compatible'=> '"rf_GPLv3compatible"',
       'rf_Fedora' => '"rf_Fedora"'
       );
+    $keysToReplicate = [
+      "rf_spdx_id" => "rf_shortname",
+    ];
+    $keysToRemove = [
+      "rf_spdx_compatible"
+    ];
 
     /** import licenseRef.json */
     $LIBEXECDIR = $this->dirnameRec(__FILE__, 5) . '/install/db';
     $jsonData = json_decode(file_get_contents("$LIBEXECDIR/licenseRef.json"), true);
     $statementName = __METHOD__.'.insertInToLicenseRef';
     foreach ($jsonData as $licenseArrayKey => $licenseArray) {
+      foreach ($keysToReplicate as $duplicateKey => $originalKey) {
+        if ($licenseArray['rf_spdx_compatible'] == 't') {
+          $licenseArray[$duplicateKey] = $licenseArray[$originalKey];
+        } else {
+          $licenseArray[$duplicateKey] = "";
+        }
+      }
+      foreach ($keysToRemove as $key) {
+        unset($licenseArray[$key]);
+      }
+      ksort($licenseArray);
       $arrayKeys = array_keys($licenseArray);
       $arrayValues = array_values($licenseArray);
       $keys = strtr(implode(",", $arrayKeys), $keysToBeChanged);

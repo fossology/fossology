@@ -83,6 +83,14 @@ class ClearingLicense
   }
 
   /**
+   * @return string
+   */
+  public function getSpdxId()
+  {
+    return $this->getLicenseRef()->getSpdxId();
+  }
+
+  /**
    * @return boolean
    */
   public function isRemoved()

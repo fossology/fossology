@@ -12,7 +12,8 @@
     <tr> {% if canEdit %}<th width="5%"></th>{% endif %}
       <th width="10%"></th>
       <th width="10%"></th>
-      <th width="{% if canEdit %}65{% else %}60{% endif %}%"></th>
+      <th width="10%"></th>
+      <th width="{% if canEdit %}55{% else %}50{% endif %}%"></th>
       <th width="10%"></th>
       <th width="5%"></th></tr>
   </thead>
@@ -36,6 +37,7 @@
       {% if canEdit %}
         {"sTitle": "{{ "Edit"|trans }}", "sClass": "center", "bSearchable": false},
       {% endif %}
+      {"sTitle": "{{ "SPDX ID"|trans }}", "sClass": "center", "bSearchable": true},
       {"sTitle": "{{ "Shortname"|trans }}", "sClass": "center", "bSearchable": true},
       {"sTitle": "{{ "Fullname"|trans }}", "sClass": "center", "bSearchable": true},
       {"sTitle": "{{ "Text"|trans }}", "sClass": "left", "bSearchable": true},
@@ -43,7 +45,7 @@
       {"sTitle": "{{ "Merge Request"|trans }}", "sClass": "center", "bSearchable": false}
     ];
 
-    tableSorting = [ [1, "asc"] ];
+    tableSorting = [ [2, "asc"] ];
 
     dataTableConfig =
         {

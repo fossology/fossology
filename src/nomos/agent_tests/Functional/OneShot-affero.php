@@ -51,14 +51,14 @@ class OneShotafferoTest extends CommonCliTest
     list(,$fname1,,,$license1) = explode(' ', $output);
     $this->assertEquals($fname1, 'Affero-v1.0', "Error processed filename $fname1
        does not equal Affero-v1.0");
-    $this->assertEquals(trim($license1), 'AGPL-1.0', "Error license does not equal Affero_v1,
+    $this->assertEquals(trim($license1), 'AGPL-1.0-only', "Error license does not equal Affero_v1,
       $license1 was returned");
 
     list($out3,) = $this->runNomos("",array($this->affero3));
     list(,$fname,,,$license) = explode(' ', $out3);
     $this->assertEquals($fname, 'agpl-3.0.txt', "Error processed filename $fname
        does not equal agpl-3.0.txt");
-    $this->assertEquals(trim($license), 'AGPL-3.0', "Error license
+    $this->assertEquals(trim($license), 'AGPL-3.0-only', "Error license
       does not equal Affero_v3, $license was returned");
   }
 }
