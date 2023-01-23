@@ -3,7 +3,7 @@
    SPDX-License-Identifier: FSFAP
 #}
 SPDXVersion: SPDX-2.3
-DataLicense: CC0-1.0
+DataLicense: {{ dataLicense.id|replace({' ': '-'}) }}
 
 ##-------------------------
 ## Document Information
@@ -42,10 +42,10 @@ LicenseListVersion: 3.19
 ## License Information
 ##-------------------------
 
-{% for licenseId,licenseData in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
-LicenseID: {{ licenseId|replace({' ': '-'}) }}
-LicenseName: {{ licenseData['name'] }}
-ExtractedText: <text> {{ licenseData['text']|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
-                                            |replace({'\f':''}) }} </text>
+{% for licenseData in licenseTexts %}{% if licenseData.id starts with 'LicenseRef-' %}
+LicenseID: {{ licenseData.id|replace({' ': '-'}) }}
+LicenseName: {{ licenseData.name }}
+ExtractedText: <text> {{ licenseData.text|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                                         |replace({'\f':''}) }} </text>
 
 {% endif %}{% endfor %}
