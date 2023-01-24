@@ -7,14 +7,14 @@
 
 namespace Fossology\SpdxTwo;
 
+use Fossology\Lib\Data\LicenseRef;
+
 /**
  * @class SpdxTwoUtils
  * @brief Utilities for SPDX2
  */
 class SpdxTwoUtils
 {
-  static public $prefix = "LicenseRef-";      ///< Prefix to be used
-
   /**
    * @brief For a given set of arguments assign $args[$key1] and $args[$key2]
    *
@@ -54,6 +54,10 @@ class SpdxTwoUtils
     }
 
     $license = preg_replace('/[^a-zA-Z0-9\-\_\.\+]/','-',$license);
+    if (strpos($license, LicenseRef::SPDXREF_PREFIX) !== false) {
+      // License ref can not end with a '+'
+      $license = preg_replace('/\+$/', '-or-later', $license);
+    }
     return preg_replace('/\+(?!$)/','-',$license);
   }
 
@@ -102,7 +106,7 @@ class SpdxTwoUtils
        ($index = array_search("Dual-license",$licenses)) !== false) {
       return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
     } elseif (count($licenses) == 3 &&
-        ($index = array_search(self::$prefix . "Dual-license", $licenses)) !== false) {
+        ($index = array_search(LicenseRef::SPDXREF_PREFIX . "Dual-license", $licenses)) !== false) {
       return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
     } else {
       // Add prefixes where needed, enclose statements containing ' OR ' with parentheses
@@ -140,7 +144,7 @@ class SpdxTwoUtils
    * @param string[] $licenses List of licenses.
    * @return array List of licenses removing empty and 'NOASSERTION's.
    */
-  public static function removeEmptyLicenses(array $licenses): array
+  public static function removeEmptyLicenses($licenses): array
   {
     $newList = [];
     foreach ($licenses as $license) {

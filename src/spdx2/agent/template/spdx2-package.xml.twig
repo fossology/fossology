@@ -91,7 +91,7 @@
 {% for obligation in obligations  %}
         <spdx:attributionText>{{ obligation }}</spdx:attributionText>
 {% endfor %}
-        {{ fileNodes|replace({'\n':'\n          '}) }}
+        {{ fileNodes|replace({'\n':'\n        '}) }}
       </spdx:Package>
     </spdx:relatedSpdxElement>
   </spdx:Relationship>

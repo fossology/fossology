@@ -828,7 +828,7 @@ class SpdxTwoAgent extends Agent
           'acknowledgements' => SpdxTwoUtils::cleanTextArray($licenses['acknowledgement'])
         );
         if ($stateComment) {
-          $dataTemplate['licenseComment'] = SpdxTwoUtils::implodeLicenses(
+          $dataTemplate['licenseComment'] = implode("\n",
                     SpdxTwoUtils::removeEmptyLicenses($licenses['comment']));
         }
         $content .= $this->renderString($this->getTemplateFile('file'),$dataTemplate);

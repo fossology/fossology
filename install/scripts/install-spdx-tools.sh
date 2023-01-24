@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: © Fossology contributors
 
 # SPDX-License-Identifier: GPL-2.0-only
-VERSION="1.1.3"
+VERSION="1.1.4"
 TAG="v${VERSION}"
 DOWNLOAD_LOC=$(dirname $0)/../../src/spdx2/agent_tests/Functional
 
