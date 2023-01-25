@@ -7,7 +7,9 @@
 
 use Fossology\Lib\Data\Package\ComponentType;
 use PhpOffice\PhpWord\Element\Section;
-use \PhpOffice\PhpWord\Style;
+use PhpOffice\PhpWord\Style;
+use PhpOffice\PhpWord\SimpleType\JcTable;
+use PhpOffice\PhpWord\Style\Table;
 
 /**
  * @class ReportSummary
@@ -26,7 +28,9 @@ class ReportSummary
   private $tablestyle = array("borderSize" => 2,
                               "name" => "Arial",
                               "borderColor" => "000000",
-                              "cellSpacing" => 5
+                              "cellSpacing" => 5,
+                              "alignment"   => JcTable::START,
+                              "layout"      => Table::LAYOUT_FIXED
                              );
 
   /** @var array $subHeadingStyle
