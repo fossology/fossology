@@ -7,9 +7,11 @@
 
 namespace Fossology\UI\Page;
 
+use Composer\Spdx\SpdxLicenses;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
@@ -143,6 +145,8 @@ class AdviceLicense extends DefaultPlugin
    */
   private function saveInput(Request $request, $oldRow, $userId)
   {
+    $spdxLicenses = new SpdxLicenses();
+
     $spdxId = $request->get('spdx_id');
     $shortname = $request->get('shortname');
     $fullname = $request->get('fullname');
@@ -170,6 +174,15 @@ class AdviceLicense extends DefaultPlugin
     }
     if ($oldRow['rf_pk'] == -1) {
       $oldRow['rf_pk'] = $licenseDao->insertUploadLicense($shortname, $rfText, Auth::getGroupId(), $userId);
+    }
+
+    if (! empty($spdxId) &&
+      strstr(strtolower($spdxId), strtolower(LicenseRef::SPDXREF_PREFIX)) === false) {
+      if (! $spdxLicenses->validate($spdxId)) {
+        $spdxId = LicenseRef::convertToSpdxId($spdxId, null);
+      }
+    } elseif (empty($spdxId)) {
+      $spdxId = null;
     }
 
     $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname,

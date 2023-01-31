@@ -42,6 +42,8 @@ foreach(SPDX_INSTALL spdx2 spdx2tv dep5 spdx2csv)
 endforeach()
 
 if(TESTING)
+    configure_file(${FO_CMAKEDIR}/TestInstall.make.in ${CMAKE_CURRENT_BINARY_DIR}/TestInstall.make
+        NEWLINE_STYLE LF @ONLY)
     enable_testing()
     add_subdirectory(agent_tests)
 endif(TESTING)

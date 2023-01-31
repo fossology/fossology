@@ -174,7 +174,7 @@ variable.list
 /src/copyright/VERSION-keyword
 /src/copyright/VERSION-copyright
 /src/copyright/VERSION-ipra
-/src/spdx2/agent_tests/Functional/spdx-tools-2.2.2-jar-with-dependencies.jar*
+/src/spdx2/agent_tests/Functional/tools-java-*-jar-with-dependencies.jar
 /src/spdx2/agent/version.php
 /src/unifiedreport/agent/unifiedreport
 /src/unifiedreport/agent/version.php

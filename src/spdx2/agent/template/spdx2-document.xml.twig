@@ -4,39 +4,55 @@
 #}
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:spdx="http://spdx.org/rdf/terms#"
-    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xml:base="{{ uri }}">
 <spdx:SpdxDocument rdf:about="{{ uri }}#SPDXRef-DOCUMENT">
-  <spdx:specVersion>SPDX-2.2</spdx:specVersion>
-  <spdx:dataLicense rdf:resource="http://spdx.org/licenses/CC0-1.0" />
+  <spdx:specVersion>SPDX-2.3</spdx:specVersion>
+  <spdx:dataLicense>
+    <spdx:ListedLicense rdf:about="http://spdx.org/licenses/{{ dataLicense.id|replace({' ': '-'})|url_encode }}">
+      <spdx:name>{{ dataLicense.name|e }}</spdx:name>
+      <spdx:licenseId>{{ dataLicense.id|replace({' ': '-'})|e }}</spdx:licenseId>
+      <spdx:licenseText><![CDATA[
+{{ dataLicense.text|replace({'\f':''})
+                   |replace({']]>':']]]]><![CDATA[>'}) }}
+      ]]></spdx:licenseText>
+{% if dataLicense.url is not empty %}
+      <rdfs:seeAlso>{{ dataLicense.url }}</rdfs:seeAlso>
+{% endif %}
+    </spdx:ListedLicense>
+  </spdx:dataLicense>
   <spdx:creationInfo>
     <spdx:CreationInfo>
-      <spdx:licenseListVersion>2.6</spdx:licenseListVersion>
+      <spdx:licenseListVersion>3.19</spdx:licenseListVersion>
       <spdx:creator>Person: {{ userName|e }}</spdx:creator>
       <spdx:creator>Organization: {{ organisation|e }}</spdx:creator>
-      <spdx:creator>Tool: spdx2</spdx:creator>
-      <spdx:created>{{ 'now'|date('Y-m-d\\TH:i:s\\Z')}}{# date('c') for ISO 8601 is not parsed by spdxTool #}</spdx:created>
+      <spdx:creator>Tool: {{ toolVersion|e }}</spdx:creator>
+      <spdx:created>{{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}{# date('c') for ISO 8601 is not parsed by spdxTool #}</spdx:created>
     </spdx:CreationInfo>
   </spdx:creationInfo>
   <spdx:name>{{ documentName|e }}</spdx:name>
   <rdfs:comment>
     This document was created using license information and a generator from Fossology.
   </rdfs:comment>
-  {% for licenseId,licenseData in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
+  {%- for licenseData in licenseTexts %}{% if licenseData.id starts with 'LicenseRef-' ~%}
   <spdx:hasExtractedLicensingInfo>
-{% if licenseId starts with 'LicenseRef-' %}
-    <spdx:ExtractedLicensingInfo rdf:about="{{ uri }}#{{ licenseId|replace({' ': '-'})|url_encode }}">
+{% if licenseData.id starts with 'LicenseRef-' %}
+    <spdx:ExtractedLicensingInfo rdf:about="#{{ licenseData.id|replace({' ': '-'})|url_encode }}">
 {% else %}
-    <spdx:ExtractedLicensingInfo rdf:about="http://spdx.org/licenses/{{ licenseId|replace({' ': '-'})|url_encode }}">
+    <spdx:ExtractedLicensingInfo rdf:about="http://spdx.org/licenses/{{ licenseData.id|replace({' ': '-'})|url_encode }}">
 {% endif %}
-      <spdx:licenseId>{{ licenseId|replace({' ': '-'})|e }}</spdx:licenseId>
-      <spdx:name>{{ licenseData['name']|e }}</spdx:name>
+      <spdx:licenseId>{{ licenseData.id|replace({' ': '-'})|e }}</spdx:licenseId>
+      <spdx:name>{{ licenseData.name|e }}</spdx:name>
       <spdx:extractedText><![CDATA[
-{{ licenseData['text']|replace({'\f':''})
-                      |replace({']]>':']]]]><![CDATA[>'}) }}
+{{ licenseData.text|replace({'\f':''})
+                   |replace({']]>':']]]]><![CDATA[>'}) }}
       ]]></spdx:extractedText>
+{% if licenseData.url is not empty %}
+      <rdfs:seeAlso>{{ licenseData.url }}</rdfs:seeAlso>
+{% endif %}
     </spdx:ExtractedLicensingInfo>
   </spdx:hasExtractedLicensingInfo>
-{% endif %}{% endfor %}
+{%- endif %}{% endfor ~%}
   {{ packageNodes|replace({'\n':'\n  '}) }}
 </spdx:SpdxDocument>
 </rdf:RDF>

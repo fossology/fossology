@@ -7,14 +7,14 @@
 
 namespace Fossology\SpdxTwo;
 
+use Fossology\Lib\Data\LicenseRef;
+
 /**
  * @class SpdxTwoUtils
  * @brief Utilities for SPDX2
  */
 class SpdxTwoUtils
 {
-  static public $prefix = "LicenseRef-";      ///< Prefix to be used
-
   /**
    * @brief For a given set of arguments assign $args[$key1] and $args[$key2]
    *
@@ -54,6 +54,10 @@ class SpdxTwoUtils
     }
 
     $license = preg_replace('/[^a-zA-Z0-9\-\_\.\+]/','-',$license);
+    if (strpos($license, LicenseRef::SPDXREF_PREFIX) !== false) {
+      // License ref can not end with a '+'
+      $license = preg_replace('/\+$/', '-or-later', $license);
+    }
     return preg_replace('/\+(?!$)/','-',$license);
   }
 
@@ -102,11 +106,53 @@ class SpdxTwoUtils
        ($index = array_search("Dual-license",$licenses)) !== false) {
       return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
     } elseif (count($licenses) == 3 &&
-        ($index = array_search(self::$prefix . "Dual-license", $licenses)) !== false) {
+        ($index = array_search(LicenseRef::SPDXREF_PREFIX . "Dual-license", $licenses)) !== false) {
       return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
     } else {
       // Add prefixes where needed, enclose statements containing ' OR ' with parentheses
       return implode(" AND ", $licenses);
     }
+  }
+
+  /**
+   * Clean an array of strings by trimming the elements and removing empty
+   * strings.
+   * @param string[] $texts Array of texts to be concatenated.
+   * @return string[] String array with all trimmed string elements.
+   */
+  static public function cleanTextArray($texts): array
+  {
+    if (!$texts || !is_array($texts) || sizeof($texts) == 0) {
+      return [];
+    }
+
+    sort($texts, SORT_NATURAL | SORT_FLAG_CASE);
+
+    $cleanArray = [];
+    foreach ($texts as $text) {
+      $text = trim($text);
+      if (empty($text)) {
+        continue;
+      }
+      $cleanArray[] = $text;
+    }
+    return $cleanArray;
+  }
+
+  /**
+   * Remove empty and 'NOASSERTION' licenses from list.
+   * @param string[] $licenses List of licenses.
+   * @return array List of licenses removing empty and 'NOASSERTION's.
+   */
+  public static function removeEmptyLicenses($licenses): array
+  {
+    $newList = [];
+    foreach ($licenses as $license) {
+      if (empty($license) || $license === "NOASSERTION") {
+        continue;
+      }
+      $newList[] = $license;
+    }
+    return $newList;
   }
 }

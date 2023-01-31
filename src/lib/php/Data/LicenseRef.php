@@ -101,10 +101,16 @@ class LicenseRef
   {
     if (strcasecmp($shortname, LicenseDao::NO_LICENSE_FOUND) === 0 ||
         strcasecmp($shortname, LicenseDao::VOID_LICENSE) === 0) {
-      return $shortname;
+      $spdxLicense = $shortname;
     } elseif (empty($spdxId)) {
-      return self::SPDXREF_PREFIX . $shortname;
+      $spdxLicense = self::SPDXREF_PREFIX . $shortname;
+    } else {
+      $spdxLicense = $spdxId;
     }
-    return $spdxId;
+    if (strpos($spdxLicense, LicenseRef::SPDXREF_PREFIX) !== false) {
+      // License ref can not end with a '+'
+      $spdxLicense = preg_replace('/\+$/', '-or-later', $spdxLicense);
+    }
+    return $spdxLicense;
   }
 }

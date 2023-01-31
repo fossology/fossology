@@ -6,8 +6,11 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
+use Composer\Spdx\SpdxLicenses;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\BusinessRules\ObligationMap;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\StringOperation;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +21,9 @@ class admin_license_file extends FO_Plugin
 {
   /** @var DbManager */
   private $dbManager;
+
+  /** @var LicenseDao $licenseDao */
+  private $licenseDao;
 
   function __construct()
   {
@@ -31,6 +37,7 @@ class admin_license_file extends FO_Plugin
     parent::__construct();
 
     $this->dbManager = $GLOBALS['container']->get('db.manager');
+    $this->licenseDao = $GLOBALS['container']->get('dao.license');
   }
 
   /**
@@ -379,18 +386,31 @@ class admin_license_file extends FO_Plugin
    */
   function Updatedb()
   {
+    $spdxLicenses = new SpdxLicenses();
+    $errors = [];
+
     $rfId = intval($_POST['rf_pk']);
     $shortname = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_shortname']));
     $fullname = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_fullname']));
     $url = $_POST['rf_url'];
     $notes = $_POST['rf_notes'];
     $text = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_text']));
+    $spdxId = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_spdx_id']));
     $parent = $_POST['rf_parent'];
     $report = $_POST['rf_report'];
     $riskLvl = intval($_POST['risk_level']);
     $selectedObligations = array_key_exists($this->obligationSelectorName,
       $_POST) ? $_POST[$this->obligationSelectorName] : [];
 
+    if (! empty($spdxId) &&
+        strstr(strtolower($spdxId), strtolower(LicenseRef::SPDXREF_PREFIX)) === false) {
+      if (! $spdxLicenses->validate($spdxId)) {
+        $spdxId = LicenseRef::convertToSpdxId($spdxId, null);
+        $errors[] = "SPDX ID changed to $spdxId to be compliant with SPDX.";
+      }
+    } elseif (empty($spdxId)) {
+      $spdxId = null;
+    }
     if (empty($shortname)) {
       $text = _("ERROR: The license shortname is empty. License not added.");
       return "<b>$text</b><p>";
@@ -411,7 +431,7 @@ class admin_license_file extends FO_Plugin
     $params = array($rfId,
       $_POST['rf_active'],$_POST['marydone'],$shortname,$fullname,
       $url,$notes,$_POST['rf_text_updatable'],$_POST['rf_detector_type'],$text,
-      $riskLvl,$_POST['rf_spdx_id'],2);
+      $riskLvl,$spdxId,2);
     $statement = __METHOD__ . ".updateLicense";
     if ($md5term == "null") {
       $statement .= ".nullMD5";
@@ -466,8 +486,7 @@ class admin_license_file extends FO_Plugin
       $obligationMap->unassociateLicenseFromObligation($obligation, $rfId);
     }
 
-    $ob = "License $_POST[rf_shortname] updated.<p>";
-    return $ob;
+    return "License $_POST[rf_shortname] updated. " . join(" ", $errors) . "<p>";
   }
 
 
@@ -478,6 +497,9 @@ class admin_license_file extends FO_Plugin
    */
   function Adddb()
   {
+    $spdxLicenses = new SpdxLicenses();
+    $errors = [];
+
     $rf_shortname = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_shortname']));
     $rf_fullname = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_fullname']));
     $rf_spdx_id = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_spdx_id']));
@@ -490,7 +512,13 @@ class admin_license_file extends FO_Plugin
     $selectedObligations = array_key_exists($this->obligationSelectorName,
       $_POST) ? $_POST[$this->obligationSelectorName] : [];
 
-    if (empty($rf_spdx_id)) {
+    if (! empty($rf_spdx_id) &&
+        strstr(strtolower($rf_spdx_id), strtolower(LicenseRef::SPDXREF_PREFIX)) === false) {
+      if (! $spdxLicenses->validate($rf_spdx_id)) {
+        $rf_spdx_id = LicenseRef::convertToSpdxId($rf_spdx_id, null);
+        $errors[] = "SPDX ID changed to $rf_spdx_id to be compliant with SPDX.";
+      }
+    } elseif (empty($rf_spdx_id)) {
       $rf_spdx_id = null;
     }
 
@@ -557,7 +585,8 @@ class admin_license_file extends FO_Plugin
       $obligationMap->associateLicenseWithObligation($obligation, $rfId);
     }
 
-    return "License $_POST[rf_shortname] (id=$rfId) added.<p>";
+    return "License $_POST[rf_shortname] (id=$rfId) added. " .
+      join(" ", $errors) . "<p>";
   }
 
 
@@ -591,13 +620,12 @@ class admin_license_file extends FO_Plugin
 
   private function getLicenseTextForID($licenseID)
   {
-    $sql = "select rf_text from license_ref where rf_pk=$1";
-    $result = $this->dbManager->getSingleRow($sql, array($licenseID));
+    $license = $this->licenseDao->getLicenseById($licenseID);
 
-    if (! $result) {
+    if ($license == null) {
       return false;
     }
-    return $result['rf_text'];
+    return $license->getText();
   }
 }
 

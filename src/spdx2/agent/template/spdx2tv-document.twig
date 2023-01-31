@@ -2,8 +2,8 @@
 
    SPDX-License-Identifier: FSFAP
 #}
-SPDXVersion: SPDX-2.2
-DataLicense: CC0-1.0
+SPDXVersion: SPDX-2.3
+DataLicense: {{ dataLicense.id|replace({' ': '-'}) }}
 
 ##-------------------------
 ## Document Information
@@ -17,7 +17,9 @@ SPDXID: SPDXRef-DOCUMENT
 ## Creation Information
 ##-------------------------
 
-Creator: Tool: spdx2
+{% if toolVersion is not empty %}
+Creator: Tool: {{ toolVersion }}
+{% endif %}
 {% if userName is not empty %}
 Creator: Person: {{ userName }}
 {% endif %}
@@ -27,8 +29,8 @@ Creator: Organization: {{ organisation }}
 CreatorComment: <text>
 This document was created using license information and a generator from Fossology.
 </text>
-Created: {{ 'now'|date('Y-m-d\\TH:i:s\\Z')}}
-LicenseListVersion: 2.6
+Created: {{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}
+LicenseListVersion: 3.19
 
 ##-------------------------
 ## Package Information
@@ -40,10 +42,10 @@ LicenseListVersion: 2.6
 ## License Information
 ##-------------------------
 
-{% for licenseId,licenseData in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
-LicenseID: {{ licenseId|replace({' ': '-'}) }}
-LicenseName: {{ licenseData['name'] }}
-ExtractedText: <text> {{ licenseData['text']|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
-                                            |replace({'\f':''}) }} </text>
+{% for licenseData in licenseTexts %}{% if licenseData.id starts with 'LicenseRef-' %}
+LicenseID: {{ licenseData.id|replace({' ': '-'}) }}
+LicenseName: {{ licenseData.name }}
+ExtractedText: <text> {{ licenseData.text|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                                         |replace({'\f':''}) }} </text>
 
 {% endif %}{% endfor %}
