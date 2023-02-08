@@ -102,6 +102,8 @@ use Fossology\Lib\Report\XpClearedGetter;
 use PhpOffice\PhpWord\Element\Section;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\SimpleType\JcTable;
+use PhpOffice\PhpWord\Style\Table;
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/reportStatic.php");
@@ -195,7 +197,9 @@ class UnifiedReport extends Agent
   private $tablestyle = array("borderSize" => 2,
                               "name" => "Arial",
                               "borderColor" => "000000",
-                              "cellSpacing" => 5
+                              "cellSpacing" => 5,
+                              "alignment"   => JcTable::START,
+                              "layout"      => Table::LAYOUT_FIXED
                              );
 
   /** @var array $subHeadingStyle
