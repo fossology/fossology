@@ -9,7 +9,7 @@
 #
 # Description: Docker container image recipe
 
-FROM debian:buster-slim as builder
+FROM debian-alpine
 LABEL org.opencontainers.image.authors="Fossology <fossology@fossology.org>"
 LABEL org.opencontainers.image.source="https://github.com/fossology/fossology"
 LABEL org.opencontainers.image.vendor="FOSSology"
@@ -42,9 +42,8 @@ COPY ./src/ununpack/mod_deps ./src/ununpack/
 COPY ./src/wget_agent/mod_deps ./src/wget_agent/
 
 RUN mkdir -p /fossology/dependencies-for-runtime \
- && cp -R /fossology/src /fossology/utils /fossology/dependencies-for-runtime/
-
-RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+ && cp -R /fossology/src /fossology/utils /fossology/dependencies-for-runtime \
+ && DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --build -y \
  && DEBIAN_FRONTEND=noninteractive /fossology/install/fo-install-pythondeps --build -y \
  && rm -rf /var/lib/apt/lists/*
