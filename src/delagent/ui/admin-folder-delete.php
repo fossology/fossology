@@ -132,7 +132,7 @@ class admin_folder_delete extends FO_Plugin
     $V.= FolderListOption(-1, 0, 1, -1, true);
     $V.= "</select><P />\n";
     $text = _("Delete");
-    $V.= "<input type='submit' value='$text'>\n";
+    $V.= "<input type='submit' class='btn btn-outline-danger' value='$text'>\n";
     $V.= "</form>\n";
     return $V;
   }

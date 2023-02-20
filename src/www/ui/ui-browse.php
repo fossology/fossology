@@ -167,6 +167,34 @@ class ui_browse extends FO_Plugin
    */
   private function ShowFolder($folderId)
   {
+    // Delete folder algorithm 
+    $deleteFolder= "<form method='post'>\n"; // no url = this url
+    $text  =  _("Select the folder to");
+    $text1 = _("delete");
+    $deleteFolder.= "$text <em>$text1</em>.\n";
+    $deleteFolder.= "<ul>\n";
+    $text = _("This will");
+    $text1 = _("delete");
+    $text2 = _("the folder, all subfolders, and all uploaded files stored within the folder!");
+    $deleteFolder.= "<li>$text <em>$text1</em> $text2\n";
+    $text = _("Be very careful with your selection since you can delete a lot of work!");
+    $deleteFolder.= "<li>$text\n";
+    $text = _("All analysis only associated with the deleted uploads will also be deleted.");
+    $deleteFolder.= "<li>$text\n";
+    $text = _("THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.");
+    $deleteFolder.= "<li>$text\n";
+    $deleteFolder.= "</ul>\n";
+    $text = _("Select the folder to delete:  ");
+    $deleteFolder.= "<P>$text\n";
+    $deleteFolder.= "<select name='deleteFolder' class='ui-render-select2'>\n";
+    $text = _("select folder");
+    $deleteFolder.= "<option value='' disabled selected>[$text]</option>\n";
+    $deleteFolder.= FolderListOption(-1, 0, 1, -1, true);
+    $deleteFolder.= "</select><P />\n";
+    $text = _("Delete");
+    $deleteFolder.= "<input type='submit' class='btn btn-outline-danger' value='$text'>\n";
+    $deleteFolder.= "</form>\n";
+
     $rootFolder = $this->folderDao->getDefaultFolder(Auth::getUserId());
     if ($rootFolder == NULL) {
       $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
@@ -189,13 +217,87 @@ class ui_browse extends FO_Plugin
       </div>';
     $folderNav .= $uiFolderNav->showFolderTree($folderId).'</div>';
 
-    $this->vars['folderNav'] = $folderNav;
+    $this->vars['folderNav'] = $folderNav .'<br/><hr/><br/>'. $deleteFolder;
 
     $assigneeArray = $this->getAssigneeArray();
     $this->vars['assigneeOptions'] = $assigneeArray;
     $this->vars['statusOptions'] = $this->uploadDao->getStatusTypeMap();
     $this->vars['folder'] = $folderId;
     $this->vars['folderName'] = $this->folderDao->getFolder($folderId)->getName();
+  }
+
+  /**
+   * @brief Creates a job to detele the folder
+   * @param int $folderpk the folder_pk to remove
+   * @param int $userId   the user deleting the folder
+   * @return NULL on success, string on failure.
+   */
+  function Delete($folderpk, $userId)
+  {
+    $splitFolder = explode(" ",$folderpk);
+    if (! $this->folderDao->isFolderAccessible($splitFolder[1], $userId)) {
+      $text = _("No access to delete this folder");
+      return ($text);
+    }
+    /* Can't remove top folder */
+    if ($splitFolder[1] == FolderGetTop()) {
+      $text = _("Can Not Delete Root Folder");
+      return ($text);
+    }
+    /* Get the folder's name */
+    $FolderName = FolderGetName($splitFolder[1]);
+    /* Prepare the job: job "Delete" */
+    $groupId = Auth::getGroupId();
+    $jobpk = JobAddJob($userId, $groupId, "Delete Folder: $FolderName");
+    if (empty($jobpk) || ($jobpk < 0)) {
+      $text = _("Failed to create job record");
+      return ($text);
+    }
+    /* Add job: job "Delete" has jobqueue item "delagent" */
+    $jqargs = "DELETE FOLDER $folderpk";
+    $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, NULL, NULL);
+    if (empty($jobqueuepk)) {
+      $text = _("Failed to place delete in job queue");
+      return ($text);
+    }
+
+    /* Tell the scheduler to check the queue. */
+    $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
+    if (! $success) {
+      return $error_msg . "\n" . $output;
+    }
+
+    return (null);
+  } // Delete()
+
+   function deleteFolder($folder) {
+    $splitFolder = explode(" ",$folder);
+    if (!empty($folder)) {
+      $userId = Auth::getUserId();
+
+      global $container;
+      /** @var DbManager */
+      $dbManager = $container->get('db.manager');
+
+      $sql = "SELECT folder_name FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = $1 and users.user_pk = $2;";
+      $Folder = $dbManager->getSingleRow($sql,array($splitFolder[1],$userId),__METHOD__."GetRowWithFolderName");
+      if (!empty($Folder['folder_name'])) {
+        $rc = $this->Delete($folder, $userId);
+        if (empty($rc)) {
+          /* Need to refresh the screen */
+          $text = _("Deletion of folder ");
+          $text1 = _(" added to job queue");
+          $this->vars['message'] = $text . $Folder['folder_name'] . $text1;
+        } else {
+          $text = _("Deletion of ");
+          $text1 = _(" failed: ");
+          $this->vars['message'] =  $text . $Folder['folder_name'] . $text1 . $rc;
+        }
+      } else {
+        $text = _("Cannot delete this folder :: Permission denied");
+        $this->vars['message'] = $text;
+      }
+    }
   }
 
   /**
@@ -212,10 +314,12 @@ class ui_browse extends FO_Plugin
     $Upload = GetParm("upload", PARM_INTEGER);  // upload_pk to browse
     $Item = GetParm("item", PARM_INTEGER);  // uploadtree_pk to browse
 
-    /* check if $folder_pk is accessible to logged in user */
-    if (!empty($folder_pk) && !$this->folderDao->isFolderAccessible($folder_pk)) {
-      $this->vars['message'] = _("Permission Denied");
-      return $this->render('include/base.html.twig');
+    // Check for delete operation 
+    if(array_key_exists('deleteFolder', $_POST)) {
+      $deleteFolder = GetParm("deleteFolder", PARM_RAW);
+      if (!empty($deleteFolder)) {
+        $this->deleteFolder($deleteFolder);
+      }
     }
 
     /* check permission if $Upload is given */
