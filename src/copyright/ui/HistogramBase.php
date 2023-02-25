@@ -68,7 +68,12 @@ abstract class HistogramBase extends FO_Plugin
       $typeDescriptor = $description;
     }
     $output = "<h4>Activated $typeDescriptor statements:</h4>
-<div><table border=1 width='100%' id='copyright".$type."' class='wordbreaktable'></table></div>
+<div>
+  <div class='btn btn-default' style='float:right; padding:5px; margin:5px;'>
+    <input type='checkbox' style='padding:2px;' id='inverseSearchActivated".$type."' name='inverseSearch'/> 
+    <label class='control-label' for='inverseSearchActivated".$type."'>Inverse Search</label>
+  </div>
+<table border=1 width='100%' id='copyright".$type."' class='wordbreaktable'></table></div>
 <br/><br/>
 <div>
   <table border=0 width='100%' id='searchReplaceTable".$type."'>
@@ -113,6 +118,10 @@ abstract class HistogramBase extends FO_Plugin
   </table>
   <br/><br/>
   <h4>Deactivated $typeDescriptor statements:</h4>
+  <div class='btn btn-default' style='float:right; padding:5px; margin:5px;'>
+  <input type='checkbox' id='inverseSearchDeactivated".$type."' name='inverseSearch'/> 
+  <label class='control-label' for='inverseSearchDeactivated".$type."'>Inverse Search</label>
+  </div>
 </div>
 <div><table border=1 width='100%' id='copyright".$type."deactivated' class='wordbreaktable'></table>
   <br/><br/>

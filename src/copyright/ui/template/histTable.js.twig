@@ -36,6 +36,23 @@ function createTableBase{{ table.type }}(activated) {
       aoData.push({ "name":"agent", "value": "{{ table.agentId }}" });
       aoData.push({ "name":"type", "value": "{{ table.type }}" });
       aoData.push({ "name":"filter", "value": "{{ table.filter }}" });
+      if(activated)
+      {
+        if($('#inverseSearchActivated{{table.type}}').is(':checked'))
+        {
+          aoData.push( { "name":"isInverse", "value": "true"} );
+        } else {
+          aoData.push( { "name":"isInverse", "value": "false" } );
+        }
+      } else {
+        if($('#inverseSearchDeactivated{{table.type}}').is(':checked'))
+        {
+          aoData.push( { "name":"isInverse", "value": "true"} );
+        } else {
+          aoData.push( { "name":"isInverse", "value": "false" } );
+        }
+      }
+      
       $.getJSON(sSource, aoData, fnCallback).fail(function() {
         if (confirm("You are not logged in. Go to login page?"))
           window.location.href = "?mod=auth";
