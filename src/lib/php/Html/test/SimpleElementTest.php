@@ -8,7 +8,7 @@
 
 namespace Fossology\Lib\Html;
 
-class SimpleHtmlElementTest extends \PHPUnit\Framework\TestCase
+class SimpleElementTest extends \PHPUnit\Framework\TestCase
 {
 
   public function testElementWithoutAttributes()

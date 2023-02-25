@@ -11,12 +11,12 @@ use Exception;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\UI\Component\Menu;
 use Fossology\Lib\UI\Component\MicroMenu;
+use Mockery as M;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Mockery as M;
 
 class TestPlugin extends DefaultPlugin
 {
@@ -31,7 +31,7 @@ class TestPlugin extends DefaultPlugin
   {
     parent::__construct($title, $parameters);
 
-    $this->response = Response::create();
+    $this->response = new Response();
   }
 
   /**

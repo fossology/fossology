@@ -30,7 +30,7 @@ if (!function_exists('Traceback_uri'))
  * @class CopyrightScheduledTest
  * @brief Unit test cases for copyright agent using scheduler
  */
-class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
+class schedulerTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb $testDb
    * Object for test database

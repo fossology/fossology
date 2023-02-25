@@ -16,18 +16,17 @@ require_once dirname(dirname(dirname(dirname(__DIR__)))) .
 
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Db\DbManager;
+use Fossology\UI\Api\Controllers\GroupController;
+use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
+use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\User;
-use Fossology\UI\Page\AdminGroupUsers;
 use Fossology\UI\Api\Models\UserGroupMember;
 use Mockery as M;
-use Fossology\Lib\Dao\UserDao;
-use Fossology\Lib\Db\DbManager;
-use Fossology\UI\Api\Helper\DbHelper;
-use Fossology\UI\Api\Helper\RestHelper;
-use Fossology\UI\Api\Controllers\GroupController;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request;
@@ -229,7 +228,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $memberList = $this->getGroupMembers($userIds);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userIds[0]);
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
-    $this->userDao->shouldReceive('getAdminGroupMap')->withArgs([$userIds[0],$_SESSION[Auth::USER_LEVEL]])->andReturn($this->getGroups());
+    $this->userDao->shouldReceive('getAdminGroupMap')->withArgs([$userIds[0],$_SESSION[Auth::USER_LEVEL]])->andReturn([1]);
 
     $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
     $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId)])->andReturn(1);
@@ -263,15 +262,93 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $newuser = 1;
     $newPerm = 2;
     $emptyArr=[];
+    $userId = 1;
 
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn($emptyArr);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(true);
 
     $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
     $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $newuser,$newPerm)])->andReturn(1);
     $this->dbManager->shouldReceive('freeResult')->withArgs([1]);
 
+
+    $body = $this->streamFactory->createStream(json_encode([
+      "perm" => $newPerm
+    ]));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $expectedResponse =  new Info(200, "User will be added to group.", InfoType::INFO);
+
+    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['id' => $groupId,'userId' => $newuser]);
+    $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
+    $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::addMember()
+   * -# The user is not an admin
+   * -# Test if the response status is 403
+   */
+  public function testAddMemberUserNotAdmin()
+  {
+    $groupId = 1;
+    $newuser = 1;
+    $newPerm = 2;
+    $userId = 1;
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(false);
+
+    $body = $this->streamFactory->createStream(json_encode([
+      "perm" => $newPerm
+    ]));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $expectedResponse = new Info(403, "Not advisor or admin of the group. " .
+      "Can not process request.", InfoType::ERROR);
+
+    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['id' => $groupId,'userId' => $newuser]);
+    $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::addMember()
+   * -# The user is not an admin but group admin
+   * -# Test if the response status is 200
+   */
+  public function testAddMemberUserGroupAdmin()
+  {
+    $groupId = 1;
+    $newuser = 1;
+    $newPerm = 2;
+    $emptyArr=[];
+    $userId = 1;
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
+    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn($emptyArr);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(true);
+
+    $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
+    $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $newuser,$newPerm)])->andReturn(1);
+    $this->dbManager->shouldReceive('freeResult')->withArgs([1]);
 
     $body = $this->streamFactory->createStream(json_encode([
       "perm" => $newPerm
@@ -302,10 +379,14 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $groupId = 1;
     $newuser = 1;
     $newPerm = 2;
+    $userId = 1;
 
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(true);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(true);
 
     $body = $this->streamFactory->createStream(json_encode([
       "perm" => $newPerm
@@ -332,10 +413,14 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $userId = 1;
     $group_user_member_pk = 1;
     $newPerm = 2;
+    $userPk = 1;
 
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupIds[0]])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$userId])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userPk);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userPk, $groupIds[0]])->andReturn(true);
 
     $this->adminPlugin->shouldReceive('updateGUMPermission')->withArgs([$group_user_member_pk,$newPerm, $this->dbManager ]);
 

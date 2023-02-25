@@ -8,7 +8,7 @@
 namespace Fossology\Lib\Db;
 
 
-class ModernDbManagerTest extends DbManagerTest
+class ModernDbManagerTest extends DbManagerTestCase
 {
 
   function setUp() : void
