@@ -23,32 +23,32 @@ externalDocs:
   description: Basic guide
   url: https://github.com/fossology/fossology/wiki/FOSSology-REST-API
 tags:
-- name: auth
-  description: Authentication endpoints
-- name: info
-  description: Basic info about API
-- name: Upload
-  description: Endpoints related to uploads
-- name: Organize
-  description: Endpoints for organization of data
-- name: Search
-  description: Searching data on FOSSology
-- name: User
-  description: User management
-- name: Admin
-  description: Administrator tasks
-- name: Job
-  description: FOSSology jobs
-- name: Folders
-  description: Folder management
-- name: Groups
-  description: User group management
-- name: Report
-  description: Upload's report
-- name: License
-  description: License and obligation management
-- name: Maintenance
-  description: Maintenance operations
+  - name: auth
+    description: Authentication endpoints
+  - name: info
+    description: Basic info about API
+  - name: Upload
+    description: Endpoints related to uploads
+  - name: Organize
+    description: Endpoints for organization of data
+  - name: Search
+    description: Searching data on FOSSology
+  - name: User
+    description: User management
+  - name: Admin
+    description: Administrator tasks
+  - name: Job
+    description: FOSSology jobs
+  - name: Folders
+    description: Folder management
+  - name: Groups
+    description: User group management
+  - name: Report
+    description: Upload's report
+  - name: License
+    description: License and obligation management
+  - name: Maintenance
+    description: Maintenance operations
 
 paths:
   /tokens:
@@ -146,7 +146,7 @@ paths:
       tags:
         - Maintenance
       summary:  Initiate maintenance operations
-      description: > 
+      description: >
         Perform maintenance operations corresponding to the user options.
       requestBody:
         description: Maintenance options
@@ -529,7 +529,7 @@ paths:
     get:
       operationId: getUploadFileById
       tags:
-      - Upload
+        - Upload
       summary: Download the file
       description: >
         Get a file by upload id
@@ -548,7 +548,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
 
   /uploads/{id}/summary:
     parameters:
@@ -761,8 +761,8 @@ paths:
                 allUploadsPermission:
                   type: boolean
                   enum:
-                  - true
-                  - false
+                    - true
+                    - false
                   description: Apply same permissions to all uploads in this folder
                 groupId:
                   type: integer
@@ -770,20 +770,20 @@ paths:
                 newPermission:
                   type: string
                   enum:
-                  - none
-                  - read_only
-                  - read_write
-                  - clearing_admin
-                  - admin
+                    - none
+                    - read_only
+                    - read_write
+                    - clearing_admin
+                    - admin
                   description: Select the permission for selected group
                 publicPermission:
                   type: string
                   enum:
-                  - none
-                  - read_only
-                  - read_write
-                  - clearing_admin
-                  - admin
+                    - none
+                    - read_only
+                    - read_write
+                    - clearing_admin
+                    - admin
                   description: Select the public permission for this upload
               required:
                 - allUploadsPermission
@@ -961,69 +961,69 @@ paths:
           $ref: '#/components/responses/defaultResponse'
   /users:
     post:
-        operationId: createUser
-        tags:
+      operationId: createUser
+      tags:
         - User
         - Admin
-        summary: Create a new user
-        description: >
-          Create a new user
-        requestBody:
-          required: true
+      summary: Create a new user
+      description: >
+        Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/User'
+                - type: object
+                  properties:
+                    user_pass:
+                      type: string
+                    defaultVisibility:
+                      type: string
+                      enum:
+                        - public
+                        - protected
+                        - private
+                  required:
+                    - name
+          application/x-www-form-urlencoded:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/User'
+                - type: object
+                  properties:
+                    user_pass:
+                      type: string
+                    defaultVisibility:
+                      type: string
+                      enum:
+                        - public
+                        - protected
+                        - private
+                  required:
+                    - name
+      responses:
+        '201':
+          description: User created successfully
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/User'
-                  - type: object
-                    properties:
-                      user_pass:
-                        type: string
-                      defaultVisibility:
-                        type: string
-                        enum:
-                          - public
-                          - protected
-                          - private
-                    required:
-                      - name
-            application/x-www-form-urlencoded:
+                $ref: '#/components/schemas/Info'
+        '409':
+          description: User with the same email or username already exists
+          content:
+            application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/User'
-                  - type: object
-                    properties:
-                      user_pass:
-                        type: string
-                      defaultVisibility:
-                        type: string
-                        enum:
-                          - public
-                          - protected
-                          - private
-                    required:
-                      - name
-        responses:
-          '201':
-            description: User created successfully
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Info'
-          '409':
-            description: User with the same email or username already exists
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Info'
-          '500':
-            description: Internal server error with details
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Info'
-          default:
-              $ref: '#/components/responses/defaultResponse'
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
     get:
       operationId: getUsers
       tags:
@@ -1064,7 +1064,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
     put:
       operationId: modifyUserById
       tags:
@@ -1212,7 +1212,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
   /users/tokens/{type}:
     parameters:
       - name: type
@@ -1221,8 +1221,8 @@ paths:
         schema:
           type: string
           enum:
-          - active
-          - expired
+            - active
+            - expired
     get:
       operationId: getTokensByType
       tags:
@@ -1251,7 +1251,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
   /jobs:
     parameters:
       - name: groupName
@@ -1752,6 +1752,51 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+    put:
+      operationId: updatePermissionByGroupIdAndUserId
+      tags:
+        - Users
+        - Groups
+      summary: Update Permission
+      description: >
+        Update User's permission in group.
+      requestBody:
+        description: Value of the new permission
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewGroupPermission'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NewGroupPermission'
+      responses:
+        '202':
+          description: User's permission will be updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Group or user doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /groups/deletable:
     get:
       operationId: deletableGroups
@@ -1811,51 +1856,6 @@ paths:
         description: User Id
         schema:
           type: string
-    put:
-      operationId: updatePermissionByGroupIdAndUserId
-      tags:
-        - Users
-        - Groups
-      summary: Update Permission
-      description: >
-        Update User's permission in group.
-      requestBody:
-        description: Value of the new permission
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NewGroupPermission'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/NewGroupPermission'
-      responses:
-        '202':
-          description: User's permission will be updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        '404':
-          description: Group or user doesn't exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        '400':
-          description: Validation Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        '500':
-          description: Internal server error with details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
 
   /report:
     get:
@@ -2203,20 +2203,20 @@ paths:
               required:
                 - file_input
       responses:
-          '400':
-            description: Validation Error
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Info'
-          '200':
-            description: Successfully imported
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Info'
-          default:
-            $ref: '#/components/responses/defaultResponse'
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '200':
+          description: Successfully imported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /license/{shortname}:
     parameters:
       - name: shortname
@@ -2513,8 +2513,8 @@ components:
         scope:
           type: string
           enum:
-          - read
-          - write
+            - read
+            - write
           description: Scope of the token
         token:
           type: string
@@ -2915,7 +2915,7 @@ components:
       type: object
       properties:
         user:
-            $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/User'
         group_perm:
           type: integer
           description: Permission of the user in the group.
@@ -3123,14 +3123,13 @@ components:
           description: User ID on which to tag imported decisions. Use '0' for self.
           default: 0
           example: 3
-          required: true
         report:
           $ref: '#/components/schemas/ReportImportFile'
+      required: ["importerUser", "report"]
     ReportImportFile:
       description: Report file to be imported
       type: string
       format: binary
-      required: true
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"

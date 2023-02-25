@@ -19,7 +19,7 @@ require_once(__DIR__ . '/../../agent/spdx2utils.php');
  * @class spdx2Test
  * @brief Unit tests for SPDX2
  */
-class spdx2Test extends \PHPUnit\Framework\TestCase
+class spdx2utilTest extends \PHPUnit\Framework\TestCase
 {
   private $assertCountBefore;       ///< Assertion count
 

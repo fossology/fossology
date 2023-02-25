@@ -9,7 +9,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use PHPUnit\Runner\Version as PHPUnitVersion;
 
-class MonkCliTest extends \PHPUnit\Framework\TestCase
+class cliTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;
