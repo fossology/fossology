@@ -602,6 +602,113 @@
   $Schema["TABLE"]["ecc_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
+  $Schema["TABLE"]["ipra"]["ipra_pk"]["DESC"] = "";
+  $Schema["TABLE"]["ipra"]["ipra_pk"]["ADD"] = "ALTER TABLE \"ipra\" ADD COLUMN \"ipra_pk\" int8 DEFAULT nextval('ipra_pk_seq'::regclass)";
+  $Schema["TABLE"]["ipra"]["ipra_pk"]["ALTER"] = "ALTER TABLE \"ipra\" ALTER COLUMN \"ipra_pk\" SET NOT NULL, ALTER COLUMN \"ipra_pk\" SET DEFAULT nextval('ipra_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["ipra"]["agent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["ipra"]["agent_fk"]["ADD"] = "ALTER TABLE \"ipra\" ADD COLUMN \"agent_fk\" int8";
+  $Schema["TABLE"]["ipra"]["agent_fk"]["ALTER"] = "ALTER TABLE \"ipra\" ALTER COLUMN \"agent_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["ipra"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["ipra"]["pfile_fk"]["ADD"] = "ALTER TABLE \"ipra\" ADD COLUMN \"pfile_fk\" int8";
+  $Schema["TABLE"]["ipra"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"ipra\" ALTER COLUMN \"pfile_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["ipra"]["content"]["DESC"] = "";
+  $Schema["TABLE"]["ipra"]["content"]["ADD"] = "ALTER TABLE \"ipra\" ADD COLUMN \"content\" text";
+  $Schema["TABLE"]["ipra"]["content"]["ALTER"] = "ALTER TABLE \"ipra\" ALTER COLUMN \"content\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ipra"]["hash"]["DESC"] = "";
+  $Schema["TABLE"]["ipra"]["hash"]["ADD"] = "ALTER TABLE \"ipra\" ADD COLUMN \"hash\" text";
+  $Schema["TABLE"]["ipra"]["hash"]["ALTER"] = "ALTER TABLE \"ipra\" ALTER COLUMN \"hash\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ipra"]["type"]["DESC"] = "";
+  $Schema["TABLE"]["ipra"]["type"]["ADD"] = "ALTER TABLE \"ipra\" ADD COLUMN \"type\" text";
+  $Schema["TABLE"]["ipra"]["type"]["ALTER"] = "ALTER TABLE \"ipra\" ALTER COLUMN \"type\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ipra"]["copy_startbyte"]["DESC"] = "";
+  $Schema["TABLE"]["ipra"]["copy_startbyte"]["ADD"] = "ALTER TABLE \"ipra\" ADD COLUMN \"copy_startbyte\" int4";
+  $Schema["TABLE"]["ipra"]["copy_startbyte"]["ALTER"] = "ALTER TABLE \"ipra\" ALTER COLUMN \"copy_startbyte\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ipra"]["copy_endbyte"]["DESC"] = "";
+  $Schema["TABLE"]["ipra"]["copy_endbyte"]["ADD"] = "ALTER TABLE \"ipra\" ADD COLUMN \"copy_endbyte\" int4";
+  $Schema["TABLE"]["ipra"]["copy_endbyte"]["ALTER"] = "ALTER TABLE \"ipra\" ALTER COLUMN \"copy_endbyte\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ipra"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"ipra\".\"is_enabled\" IS 'true to enable, false to disable'";
+  $Schema["TABLE"]["ipra"]["is_enabled"]["ADD"] = "ALTER TABLE \"ipra\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["ipra"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ipra\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
+
+
+  $Schema["TABLE"]["ipra_event"]["ipra_event_pk"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_event"]["ipra_event_pk"]["ADD"] = "ALTER TABLE \"ipra_event\" ADD COLUMN \"ipra_event_pk\" int8 DEFAULT nextval('ipra_event_pk_seq'::regclass)";
+  $Schema["TABLE"]["ipra_event"]["ipra_event_pk"]["ALTER"] = "ALTER TABLE \"ipra_event\" ALTER COLUMN \"ipra_event_pk\" SET NOT NULL, ALTER COLUMN \"ipra_event_pk\" SET DEFAULT nextval('ipra_event_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["ipra_event"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_event"]["upload_fk"]["ADD"] = "ALTER TABLE \"ipra_event\" ADD COLUMN \"upload_fk\" int8";
+  $Schema["TABLE"]["ipra_event"]["upload_fk"]["ALTER"] = "ALTER TABLE \"ipra_event\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["ipra_event"]["uploadtree_fk"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_event"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"ipra_event\" ADD COLUMN \"uploadtree_fk\" int4";
+  $Schema["TABLE"]["ipra_event"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"ipra_event\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["ipra_event"]["ipra_fk"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_event"]["ipra_fk"]["ADD"] = "ALTER TABLE \"ipra_event\" ADD COLUMN \"ipra_fk\" int8";
+  $Schema["TABLE"]["ipra_event"]["ipra_fk"]["ALTER"] = "ALTER TABLE \"ipra_event\" ALTER COLUMN \"ipra_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["ipra_event"]["content"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_event"]["content"]["ADD"] = "ALTER TABLE \"ipra_event\" ADD COLUMN \"content\" text";
+  $Schema["TABLE"]["ipra_event"]["content"]["ALTER"] = "ALTER TABLE \"ipra_event\" ALTER COLUMN \"content\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ipra_event"]["hash"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_event"]["hash"]["ADD"] = "ALTER TABLE \"ipra_event\" ADD COLUMN \"hash\" text";
+  $Schema["TABLE"]["ipra_event"]["hash"]["ALTER"] = "ALTER TABLE \"ipra_event\" ALTER COLUMN \"hash\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ipra_event"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"ipra_event\".\"is_enabled\" IS 'true to enabled with edited, false to disable'";
+  $Schema["TABLE"]["ipra_event"]["is_enabled"]["ADD"] = "ALTER TABLE \"ipra_event\" ADD COLUMN \"is_enabled\" bool DEFAULT false";
+  $Schema["TABLE"]["ipra_event"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ipra_event\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT false";
+
+  $Schema["TABLE"]["ipra_event"]["scope"]["DESC"] = "COMMENT ON COLUMN \"ipra_event\".\"scope\" IS '1 for normal and 2 for deactivation from license page ex: irrelevent'";
+  $Schema["TABLE"]["ipra_event"]["scope"]["ADD"] = "ALTER TABLE \"ipra_event\" ADD COLUMN \"scope\" int4 DEFAULT 1";
+  $Schema["TABLE"]["ipra_event"]["scope"]["ALTER"] = "ALTER TABLE \"ipra_event\" ALTER COLUMN \"scope\" SET NOT NULL, ALTER COLUMN \"scope\" SET DEFAULT 1";
+
+
+  $Schema["TABLE"]["ipra_decision"]["ipra_decision_pk"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_decision"]["ipra_decision_pk"]["ADD"] = "ALTER TABLE \"ipra_decision\" ADD COLUMN \"ipra_decision_pk\" int8 DEFAULT nextval('ipra_decision_pk_seq'::regclass)";
+  $Schema["TABLE"]["ipra_decision"]["ipra_decision_pk"]["ALTER"] = "ALTER TABLE \"ipra_decision\" ALTER COLUMN \"ipra_decision_pk\" SET NOT NULL, ALTER COLUMN \"ipra_decision_pk\" SET DEFAULT nextval('ipra_decision_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["ipra_decision"]["user_fk"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_decision"]["user_fk"]["ADD"] = "ALTER TABLE \"ipra_decision\" ADD COLUMN \"user_fk\" int8";
+  $Schema["TABLE"]["ipra_decision"]["user_fk"]["ALTER"] = "ALTER TABLE \"ipra_decision\" ALTER COLUMN \"user_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["ipra_decision"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_decision"]["pfile_fk"]["ADD"] = "ALTER TABLE \"ipra_decision\" ADD COLUMN \"pfile_fk\" int8";
+  $Schema["TABLE"]["ipra_decision"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"ipra_decision\" ALTER COLUMN \"pfile_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["ipra_decision"]["clearing_decision_type_fk"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_decision"]["clearing_decision_type_fk"]["ADD"] = "ALTER TABLE \"ipra_decision\" ADD COLUMN \"clearing_decision_type_fk\" int8";
+  $Schema["TABLE"]["ipra_decision"]["clearing_decision_type_fk"]["ALTER"] = "ALTER TABLE \"ipra_decision\" ALTER COLUMN \"clearing_decision_type_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["ipra_decision"]["description"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_decision"]["description"]["ADD"] = "ALTER TABLE \"ipra_decision\" ADD COLUMN \"description\" text";
+  $Schema["TABLE"]["ipra_decision"]["description"]["ALTER"] = "ALTER TABLE \"ipra_decision\" ALTER COLUMN \"description\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ipra_decision"]["textfinding"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_decision"]["textfinding"]["ADD"] = "ALTER TABLE \"ipra_decision\" ADD COLUMN \"textfinding\" text";
+  $Schema["TABLE"]["ipra_decision"]["textfinding"]["ALTER"] = "ALTER TABLE \"ipra_decision\" ALTER COLUMN \"textfinding\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ipra_decision"]["hash"]["DESC"] = "COMMENT ON COLUMN \"ipra_decision\".\"hash\" IS 'SHA256 hash of textfinding for grouping statements.'";
+  $Schema["TABLE"]["ipra_decision"]["hash"]["ADD"] = "ALTER TABLE \"ipra_decision\" ADD COLUMN \"hash\" char(64)";
+  $Schema["TABLE"]["ipra_decision"]["hash"]["ALTER"] = "ALTER TABLE \"ipra_decision\" ALTER COLUMN \"hash\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ipra_decision"]["comment"]["DESC"] = "";
+  $Schema["TABLE"]["ipra_decision"]["comment"]["ADD"] = "ALTER TABLE \"ipra_decision\" ADD COLUMN \"comment\" text";
+  $Schema["TABLE"]["ipra_decision"]["comment"]["ALTER"] = "ALTER TABLE \"ipra_decision\" ALTER COLUMN \"comment\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ipra_decision"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"ipra_decision\".\"is_enabled\" IS 'true to enable, false to disable'";
+  $Schema["TABLE"]["ipra_decision"]["is_enabled"]["ADD"] = "ALTER TABLE \"ipra_decision\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["ipra_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ipra_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
+
+
   $Schema["TABLE"]["ecc_event"]["ecc_event_pk"]["DESC"] = "";
   $Schema["TABLE"]["ecc_event"]["ecc_event_pk"]["ADD"] = "ALTER TABLE \"ecc_event\" ADD COLUMN \"ecc_event_pk\" int8 DEFAULT nextval('ecc_event_pk_seq'::regclass)";
   $Schema["TABLE"]["ecc_event"]["ecc_event_pk"]["ALTER"] = "ALTER TABLE \"ecc_event\" ALTER COLUMN \"ecc_event_pk\" SET NOT NULL, ALTER COLUMN \"ecc_event_pk\" SET DEFAULT nextval('ecc_event_pk_seq'::regclass)";
@@ -981,7 +1088,7 @@
   $Schema["TABLE"]["jobqueue"]["jq_host"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_host\" DROP NOT NULL";
 
   $Schema["TABLE"]["jobqueue"]["jq_cmd_args"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_cmd_args\" IS 'command line arguments, i.e. \"-ab -u 123 -c /my/dir\"'";
-  $Schema["TABLE"]["jobqueue"]["jq_cmd_args"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_cmd_args\" varchar(1024)";
+  $Schema["TABLE"]["jobqueue"]["jq_cmd_args"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_cmd_args\" text";
   $Schema["TABLE"]["jobqueue"]["jq_cmd_args"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_cmd_args\" DROP NOT NULL";
 
 
@@ -1127,9 +1234,9 @@
   $Schema["TABLE"]["license_ref"]["rf_risk"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_risk\" int4";
   $Schema["TABLE"]["license_ref"]["rf_risk"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_risk\" DROP NOT NULL";
 
-  $Schema["TABLE"]["license_ref"]["rf_spdx_compatible"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_spdx_compatible\" IS 'change this to true if you want the reference of license to be removed from spdx reports'";
-  $Schema["TABLE"]["license_ref"]["rf_spdx_compatible"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_spdx_compatible\" bool DEFAULT false";
-  $Schema["TABLE"]["license_ref"]["rf_spdx_compatible"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_spdx_compatible\" SET NOT NULL, ALTER COLUMN \"rf_spdx_compatible\" SET DEFAULT false";
+  $Schema["TABLE"]["license_ref"]["rf_spdx_id"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_spdx_id\" IS 'Valid SPDX License Identifier for license. This will be exported in report.'";
+  $Schema["TABLE"]["license_ref"]["rf_spdx_id"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_spdx_id\" text DEFAULT NULL";
+  $Schema["TABLE"]["license_ref"]["rf_spdx_id"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_spdx_id\" SET DEFAULT NULL";
 
   $Schema["TABLE"]["license_ref"]["rf_flag"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_flag\" IS 'default will be 1 if it gets updated from UI it will be 2'";
   $Schema["TABLE"]["license_ref"]["rf_flag"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_flag\" int4 DEFAULT 1";
@@ -1139,7 +1246,6 @@
   $Schema["TABLE"]["license_candidate"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"group_fk\" IS 'group seeing this candidate'";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"group_fk\" int8";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
-
 
   $Schema["TABLE"]["license_candidate"]["rf_creationdate"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"rf_creationdate\" IS 'License creation date'";
   $Schema["TABLE"]["license_candidate"]["rf_creationdate"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"rf_creationdate\" timestamptz DEFAULT now()";
@@ -1239,6 +1345,31 @@
   $Schema["TABLE"]["license_std_comment"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"license_std_comment\".\"is_enabled\" IS 'Is the comment enabled?'";
   $Schema["TABLE"]["license_std_comment"]["is_enabled"]["ADD"] = "ALTER TABLE \"license_std_comment\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
   $Schema["TABLE"]["license_std_comment"]["is_enabled"]["ALTER"] = "ALTER TABLE \"license_std_comment\" ALTER COLUMN \"is_enabled\" SET NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
+
+
+  $Schema["TABLE"]["license_std_acknowledgement"]["la_pk"]["DESC"] = "COMMENT ON COLUMN \"license_std_acknowledgement\".\"la_pk\" IS 'Acknowledgement id'";
+  $Schema["TABLE"]["license_std_acknowledgement"]["la_pk"]["ADD"] = "ALTER TABLE \"license_std_acknowledgement\" ADD COLUMN \"la_pk\" int4 DEFAULT nextval('license_std_acknowledgement_la_pk_seq'::regclass)";
+  $Schema["TABLE"]["license_std_acknowledgement"]["la_pk"]["ALTER"] = "ALTER TABLE \"license_std_acknowledgement\" ALTER COLUMN \"la_pk\" SET NOT NULL, ALTER COLUMN \"la_pk\" SET DEFAULT nextval('license_std_acknowledgement_la_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["license_std_acknowledgement"]["name"]["DESC"] = "COMMENT ON COLUMN \"license_std_acknowledgement\".\"name\" IS 'Friendly name of the acknowledgement'";
+  $Schema["TABLE"]["license_std_acknowledgement"]["name"]["ADD"] = "ALTER TABLE \"license_std_acknowledgement\" ADD COLUMN \"name\" text DEFAULT 'not-set'::text";
+  $Schema["TABLE"]["license_std_acknowledgement"]["name"]["ALTER"] = "ALTER TABLE \"license_std_acknowledgement\" ALTER COLUMN \"name\" SET NOT NULL, ALTER COLUMN \"name\" SET DEFAULT 'not-set'::text";
+
+  $Schema["TABLE"]["license_std_acknowledgement"]["acknowledgement"]["DESC"] = "COMMENT ON COLUMN \"license_std_acknowledgement\".\"acknowledgement\" IS 'The standard license acknowledgement'";
+  $Schema["TABLE"]["license_std_acknowledgement"]["acknowledgement"]["ADD"] = "ALTER TABLE \"license_std_acknowledgement\" ADD COLUMN \"acknowledgement\" text";
+  $Schema["TABLE"]["license_std_acknowledgement"]["acknowledgement"]["ALTER"] = "ALTER TABLE \"license_std_acknowledgement\" ALTER COLUMN \"acknowledgement\" DROP NOT NULL";
+
+  $Schema["TABLE"]["license_std_acknowledgement"]["updated"]["DESC"] = "COMMENT ON COLUMN \"license_std_acknowledgement\".\"updated\" IS 'When this acknowledgement was last updated'";
+  $Schema["TABLE"]["license_std_acknowledgement"]["updated"]["ADD"] = "ALTER TABLE \"license_std_acknowledgement\" ADD COLUMN \"updated\" timestamptz DEFAULT now()";
+  $Schema["TABLE"]["license_std_acknowledgement"]["updated"]["ALTER"] = "ALTER TABLE \"license_std_acknowledgement\" ALTER COLUMN \"updated\" SET NOT NULL, ALTER COLUMN \"updated\" SET DEFAULT now()";
+
+  $Schema["TABLE"]["license_std_acknowledgement"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"license_std_acknowledgement\".\"user_fk\" IS 'Which user did the last update'";
+  $Schema["TABLE"]["license_std_acknowledgement"]["user_fk"]["ADD"] = "ALTER TABLE \"license_std_acknowledgement\" ADD COLUMN \"user_fk\" int4";
+  $Schema["TABLE"]["license_std_acknowledgement"]["user_fk"]["ALTER"] = "ALTER TABLE \"license_std_acknowledgement\" ALTER COLUMN \"user_fk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["license_std_acknowledgement"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"license_std_acknowledgement\".\"is_enabled\" IS 'Is the acknowledgement enabled?'";
+  $Schema["TABLE"]["license_std_acknowledgement"]["is_enabled"]["ADD"] = "ALTER TABLE \"license_std_acknowledgement\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["license_std_acknowledgement"]["is_enabled"]["ALTER"] = "ALTER TABLE \"license_std_acknowledgement\" ALTER COLUMN \"is_enabled\" SET NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["DESC"] = "";
@@ -2234,6 +2365,9 @@
   $Schema["SEQUENCE"]["license_std_comment_lsc_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_std_comment_lsc_pk_seq\"";
   $Schema["SEQUENCE"]["license_std_comment_lsc_pk_seq"]["UPDATE"] = "SELECT setval('license_std_comment_lsc_pk_seq',(SELECT greatest(1,max(lsc_pk)) val FROM license_std_comment))";
 
+  $Schema["SEQUENCE"]["license_std_acknowledgement_la_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_std_acknowledgement_la_pk_seq\"";
+  $Schema["SEQUENCE"]["license_std_acknowledgement_la_pk_seq"]["UPDATE"] = "SELECT setval('license_std_acknowledgement_la_pk_seq',(SELECT greatest(1,max(la_pk)) val FROM license_std_acknowledgement))";
+  
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"mimetype_mimetype_pk_seq\"";
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"]["UPDATE"] = "SELECT setval('mimetype_mimetype_pk_seq',(SELECT greatest(1,max(mimetype_pk)) val FROM mimetype))";
 
@@ -2305,6 +2439,12 @@
   $Schema["SEQUENCE"]["ecc_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_pk_seq\"";
   $Schema["SEQUENCE"]["ecc_pk_seq"]["UPDATE"] = "SELECT setval('ecc_pk_seq',(SELECT greatest(1,max(ecc_pk)) val FROM ecc))";
 
+  $Schema["SEQUENCE"]["ipra_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ipra_pk_seq\"";
+  $Schema["SEQUENCE"]["ipra_pk_seq"]["UPDATE"] = "SELECT setval('ipra_pk_seq',(SELECT greatest(1,max(ipra_pk)) val FROM ipra))";
+
+  $Schema["SEQUENCE"]["ipra_event_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ipra_event_pk_seq\"";
+  $Schema["SEQUENCE"]["ipra_event_pk_seq"]["UPDATE"] = "SELECT setval('ipra_event_pk_seq',(SELECT greatest(1,max(ipra_event_pk)) val FROM ipra_event))";
+
   $Schema["SEQUENCE"]["author_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"author_pk_seq\"";
   $Schema["SEQUENCE"]["author_pk_seq"]["UPDATE"] = "SELECT setval('author_pk_seq',(SELECT greatest(1,max(author_pk)) val FROM author))";
 
@@ -2313,6 +2453,9 @@
 
   $Schema["SEQUENCE"]["ecc_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_decision_pk_seq\"";
   $Schema["SEQUENCE"]["ecc_decision_pk_seq"]["UPDATE"] = "SELECT setval('ecc_decision_pk_seq',(SELECT greatest(1,max(ecc_decision_pk)) val FROM ecc_decision))";
+
+  $Schema["SEQUENCE"]["ipra_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ipra_decision_pk_seq\"";
+  $Schema["SEQUENCE"]["ipra_decision_pk_seq"]["UPDATE"] = "SELECT setval('ipra_decision_pk_seq',(SELECT greatest(1,max(ipra_decision_pk)) val FROM ipra_decision))";
 
   $Schema["SEQUENCE"]["keyword_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"keyword_decision_pk_seq\"";
   $Schema["SEQUENCE"]["keyword_decision_pk_seq"]["UPDATE"] = "SELECT setval('keyword_decision_pk_seq',(SELECT greatest(1,max(keyword_decision_pk)) val FROM keyword_decision))";
@@ -2361,6 +2504,11 @@
   $Schema["CONSTRAINT"]["ecc_pfile_fk_fkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["ecc_decision_pkey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pkey\" PRIMARY KEY (\"ecc_decision_pk\");";
   $Schema["CONSTRAINT"]["ecc_decision_pfile_fk_fkey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["ipra_decision_pkey"] = "ALTER TABLE \"ipra_decision\" ADD CONSTRAINT \"ipra_decision_pkey\" PRIMARY KEY (\"ipra_decision_pk\");";
+  $Schema["CONSTRAINT"]["ipra_pkey"] = "ALTER TABLE \"ipra\" ADD CONSTRAINT \"ipra_pkey\" PRIMARY KEY (\"ipra_pk\");";
+  $Schema["CONSTRAINT"]["ipra_agent_fk_fkey"] = "ALTER TABLE \"ipra\" ADD CONSTRAINT \"ipra_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["ipra_pfile_fk_fkey"] = "ALTER TABLE \"ipra\" ADD CONSTRAINT \"ipra_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["ipra_decision_pfile_hash_ukey"] = "ALTER TABLE \"ipra_decision\" ADD CONSTRAINT \"ipra_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\", \"hash\");";
   $Schema["CONSTRAINT"]["ecc_decision_pfile_hash_ukey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\",\"hash\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["file_picker_user_fk_ukey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_user_fk_ukey\" UNIQUE (\"user_fk\",\"uploadtree_fk1\",\"uploadtree_fk2\");";
@@ -2392,6 +2540,7 @@
   $Schema["CONSTRAINT"]["license_map_pkpk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_pkpk\" PRIMARY KEY (\"license_map_pk\");";
   $Schema["CONSTRAINT"]["license_map_rf_fkfk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_rf_fkfk\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["license_std_comment_user_fk_fkey"] = "ALTER TABLE \"license_std_comment\" ADD CONSTRAINT \"license_std_comment_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE SET NULL ON DELETE SET NULL;";
+  $Schema["CONSTRAINT"]["license_std_acknowledgement_user_fk_fkey"] = "ALTER TABLE \"license_std_acknowledgement\" ADD CONSTRAINT \"license_std_acknowledgement_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE SET NULL ON DELETE SET NULL;";
   $Schema["CONSTRAINT"]["rf_pkpk"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_pkpk\" PRIMARY KEY (\"rf_pk\");";
   $Schema["CONSTRAINT"]["rf_md5unique"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_md5unique\" UNIQUE (\"rf_md5\");";
   $Schema["CONSTRAINT"]["license_ref_bulk_pkey"] = "ALTER TABLE \"license_ref_bulk\" ADD CONSTRAINT \"license_ref_bulk_pkey\" PRIMARY KEY (\"lrb_pk\");";
@@ -2469,6 +2618,9 @@
   $Schema["CONSTRAINT"]["keyword_event_pkey"] = "ALTER TABLE \"keyword_event\" ADD CONSTRAINT \"keyword_event_pkey\" PRIMARY KEY (\"keyword_event_pk\");";
   $Schema["CONSTRAINT"]["keyword_event_upload_fk_fkey"] = "ALTER TABLE \"keyword_event\" ADD CONSTRAINT \"keyword_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["keyword_event_keyword_fk_fkey"] = "ALTER TABLE \"keyword_event\" ADD CONSTRAINT \"keyword_event_keyword_fk_fkey\" FOREIGN KEY (\"keyword_fk\") REFERENCES \"keyword\" (\"keyword_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["ipra_event_pkey"] = "ALTER TABLE \"ipra_event\" ADD CONSTRAINT \"ipra_event_pkey\" PRIMARY KEY (\"ipra_event_pk\");";
+  $Schema["CONSTRAINT"]["ipra_event_upload_fk_fkey"] = "ALTER TABLE \"ipra_event\" ADD CONSTRAINT \"ipra_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["ipra_event_ipra_fk_fkey"] = "ALTER TABLE \"ipra_event\" ADD CONSTRAINT \"ipra_event_ipra_fk_fkey\" FOREIGN KEY (\"ipra_fk\") REFERENCES \"ipra\" (\"ipra_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
 
 
   $Schema["INDEX"]["bucket_container"]["bucketcontainer_uploadtree"] = "CREATE INDEX bucketcontainer_uploadtree ON bucket_container USING btree (uploadtree_fk);";
@@ -2517,6 +2669,17 @@
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_user_fk_index"] = "CREATE INDEX ecc_decision_user_fk_index ON ecc_decision USING btree (user_fk);";
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_pfile_hash_index"] = "CREATE INDEX ecc_decision_pfile_hash_index ON ecc_decision USING btree (hash, pfile_fk);";
 
+  $Schema["INDEX"]["ipra"]["ipra_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX ipra_pfile_fk_is_enabled_false_idx ON ipra USING btree (pfile_fk, is_enabled) WHERE is_enabled = false;";
+  $Schema["INDEX"]["ipra"]["ipra_agent_fk_index"] = "CREATE INDEX ipra_agent_fk_index ON ipra USING btree (agent_fk);";
+  $Schema["INDEX"]["ipra"]["ipra_hash_index"] = "CREATE INDEX ipra_hash_index ON ipra USING btree (hash);";
+  $Schema["INDEX"]["ipra"]["ipra_pfile_fk_index"] = "CREATE INDEX ipra_pfile_fk_index ON ipra USING btree (pfile_fk);";
+  $Schema["INDEX"]["ipra"]["ipra_pfile_hash_idx"] = "CREATE INDEX ipra_pfile_hash_idx ON ipra using btree (hash, pfile_fk);";
+
+  $Schema["INDEX"]["ipra_decision"]["ipra_decision_clearing_decision_type_fk_index"] = "CREATE INDEX ipra_decision_clearing_decision_type_fk_index ON ipra_decision USING btree (clearing_decision_type_fk);";
+  $Schema["INDEX"]["ipra_decision"]["ipra_decision_pfile_fk_index"] = "CREATE INDEX ipra_decision_pfile_fk_index ON ipra_decision USING btree (pfile_fk);";
+  $Schema["INDEX"]["ipra_decision"]["ipra_decision_user_fk_index"] = "CREATE INDEX ipra_decision_user_fk_index ON ipra_decision USING btree (user_fk);";
+  $Schema["INDEX"]["ipra_decision"]["ipra_decision_pfile_hash_index"] = "CREATE INDEX ipra_decision_pfile_hash_index ON ipra_decision USING btree (hash, pfile_fk);";
+
   $Schema["INDEX"]["keyword"]["keyword_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX keyword_pfile_fk_is_enabled_false_idx ON keyword USING btree (pfile_fk, is_enabled) WHERE is_enabled = false;";
   $Schema["INDEX"]["keyword"]["keyword_agent_fk_index"] = "CREATE INDEX keyword_agent_fk_index ON keyword USING btree (agent_fk);";
   $Schema["INDEX"]["keyword"]["keyword_hash_index"] = "CREATE INDEX keyword_hash_index ON keyword USING btree (hash);";
@@ -2541,6 +2704,7 @@
   $Schema["INDEX"]["license_file"]["lf_pfile_agent_rf_lf_idx"] = "CREATE INDEX lf_pfile_agent_rf_lf_idx ON license_file USING btree (pfile_fk, agent_fk, rf_fk, fl_pk);";
 
   $Schema["INDEX"]["license_ref"]["rf_shortname_idx"] = "CREATE INDEX rf_shortname_idx ON license_ref USING btree (rf_shortname);";
+  $Schema["INDEX"]["license_ref"]["rf_spdx_id_idx"] = "CREATE INDEX rf_spdx_id_idx ON license_ref USING btree (rf_spdx_id);";
 
   $Schema["INDEX"]["license_ref_bulk"]["license_ref_bulk_uploadtree_fk_idx"] = "CREATE INDEX license_ref_bulk_uploadtree_fk_idx ON license_ref_bulk USING btree (uploadtree_fk);";
   $Schema["INDEX"]["license_ref_bulk"]["license_ref_bulk_group_fk_idx"] = "CREATE INDEX license_ref_bulk_group_fk_idx ON license_ref_bulk USING btree (group_fk);";
@@ -2590,6 +2754,10 @@
   $Schema["INDEX"]["ecc_event"]["ecc_event_upload_fk_index"] = "CREATE INDEX ecc_event_upload_fk_index ON ecc_event USING btree (upload_fk);";
   $Schema["INDEX"]["ecc_event"]["ecc_event_uploadtree_fk_index"] = "CREATE INDEX ecc_event_uploadtree_fk_index ON ecc_event USING btree (uploadtree_fk);";
   $Schema["INDEX"]["ecc_event"]["ecc_event_ecc_fk_index"] = "CREATE INDEX ecc_event_ecc_fk_index ON ecc_event USING btree (ecc_fk);";
+
+  $Schema["INDEX"]["ipra_event"]["ipra_event_upload_fk_index"] = "CREATE INDEX ipra_event_upload_fk_index ON ipra_event USING btree (upload_fk);";
+  $Schema["INDEX"]["ipra_event"]["ipra_event_uploadtree_fk_index"] = "CREATE INDEX ipra_event_uploadtree_fk_index ON ipra_event USING btree (uploadtree_fk);";
+  $Schema["INDEX"]["ipra_event"]["ipra_event_ipra_fk_index"] = "CREATE INDEX ipra_event_ipra_fk_index ON ipra_event USING btree (ipra_fk);";
 
   $Schema["CLUSTER"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" CLUSTER ON \"upload_pkey_idx\";";
   $Schema["CLUSTER"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" CLUSTER ON \"ufile_rel_pkey\";";

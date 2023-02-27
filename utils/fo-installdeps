@@ -93,9 +93,9 @@ if [[ $BUILDTIME ]]; then
          apt-get $YesOpt install \
             libmxml-dev curl libxml2-dev libcunit1-dev libicu-dev \
             build-essential libtext-template-perl subversion rpm librpm-dev \
-            libmagic-dev libglib2.0 libboost-regex-dev \
+            libmagic-dev libglib2.0 libboost-regex-dev libzstd-dev \
             libboost-program-options-dev libpq-dev composer patch devscripts \
-            libdistro-info-perl cmake ninja-build
+            libdistro-info-perl libcppunit-dev cmake ninja-build
          case "$CODENAME" in
            stretch)
              apt-get $YesOpt install php-mbstring php7.0-cli php7.0-xml php7.0-zip php7.0-gd php7.0-pgsql php7.0-curl php7.0-uuid;;
@@ -163,7 +163,7 @@ if [[ $RUNTIME ]]; then
         echo "doing runtime"
          apt-get $YesOpt install apache2
          apt-get $YesOpt install php-pear \
-            libxml2 \
+            libxml2 libzstd1 \
             binutils \
             cabextract cpio sleuthkit genisoimage \
             poppler-utils upx-ucl \

@@ -41,7 +41,6 @@ macro(getGitVersion)
         "\\1.\\3\\2" VERSION_GIT ${VERSION_GIT})
     endif()
     set(FO_VERSION ${VERSION_GIT} CACHE INTERNAL "fossology version")
-    message(STATUS "Current fossology version ${FO_VERSION}")
 
     execute_process(
         COMMAND "${GIT_EXECUTABLE}" show -s --format=%h
@@ -52,7 +51,6 @@ macro(getGitVersion)
     )
     string(SUBSTRING "${COMMIT_HASH}" 0 6 COMMIT_HASH)
     set(FO_COMMIT_HASH ${COMMIT_HASH} CACHE INTERNAL "latest commit hash")
-    message(STATUS "Latest commit hash: ${FO_COMMIT_HASH}")
 
     execute_process(
         COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref HEAD
@@ -62,7 +60,6 @@ macro(getGitVersion)
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     set(FO_BRANCH ${BRANCH} CACHE INTERNAL "current branch")
-    message(STATUS "Current Branch: ${FO_BRANCH}")
 
     execute_process(
         COMMAND date +"%Y/%m/%d %R %:z"
@@ -71,7 +68,6 @@ macro(getGitVersion)
         WORKING_DIRECTORY ${FO_SOURCEDIR}
     )
     set(FO_BUILD_DATE ${BUILD_DATE} CACHE INTERNAL "latest build date")
-    message(STATUS "Current Build Data: ${FO_BUILD_DATE}")
 
     execute_process(
         COMMAND "${GIT_EXECUTABLE}" show -s --format=@%ct
@@ -80,8 +76,7 @@ macro(getGitVersion)
         OUTPUT_STRIP_TRAILING_WHITESPACE
         WORKING_DIRECTORY ${FO_SOURCEDIR}
     )
-    set(FO_COMMIT_DATE ${COMMIT_DATE} CACHE INTERNAL "latest commit hash")
-    message(STATUS "Latest Commit date: ${FO_COMMIT_DATE}")
+    set(FO_COMMIT_DATE ${COMMIT_DATE} CACHE INTERNAL "latest commit date")
 
     set_property(GLOBAL APPEND
         PROPERTY CMAKE_CONFIGURE_DEPENDS

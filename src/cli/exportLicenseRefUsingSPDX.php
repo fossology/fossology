@@ -1,9 +1,11 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2019,2021 Siemens AG
+ SPDX-FileCopyrightText: © 2019,2021,2022 Siemens AG
 
  SPDX-License-Identifier: GPL-2.0-only
 */
+
+use Fossology\Lib\Util\StringOperation;
 
 /**
  * @file exportLicenseRefUsingSPDX.php
@@ -15,7 +17,7 @@
 class exportLicenseRef
 {
   /**
-   * @var mapArrayData $mapArrayData
+   * @var array $mapArrayData
    * actual names for license/exception in SPDX for text and licenseid
    */
   private $mapArrayData = array(
@@ -30,6 +32,7 @@ class exportLicenseRef
     $updateWithNew = '';
     $updateExisting = '';
     $addNewLicense = '';
+    $deleteDeprecated = false;
     $newLicenseRefData = array();
     $showUsage = '';
     $scanList = array(
@@ -47,6 +50,8 @@ class exportLicenseRef
 
         -n    Only add new licenses.
 
+        -d    Delete deprecated licenses.
+
        --type Usually licenses/exceptions (optional)
               (ex: --type 'licenses')
 
@@ -59,8 +64,8 @@ class exportLicenseRef
 
           For type 'exceptions' URL is : $scanList[exceptions]";
 
-    $options = getopt("hcEen", array("type:", "url:"));
-    /* get type and url if exists if not set them to empty */
+    $options = getopt("hcEend", array("type:", "url:"));
+    /* get type and url if exists, if not set them to empty */
     $type = array_key_exists("type", $options) ? $options["type"] : '';
     $URL =  array_key_exists("url", $options) ? $options["url"] : '';
     foreach ($options as $option => $optVal) {
@@ -76,6 +81,9 @@ class exportLicenseRef
         case 'n': /* only add new licenses */
           $addNewLicense = $option;
           break;
+        case 'd': /* Delete deprecated licenses */
+          $deleteDeprecated = true;
+          break;
         case 'h': /* help */
           $showUsage = true;
           break;
@@ -89,14 +97,16 @@ class exportLicenseRef
 
     if (!empty($updateWithNew) || !empty($updateExisting) || !empty($addNewLicense)) {
       if (!empty($type) && !empty($URL)) {
-        $newLicenseRefData = $this->getListSPDX($type, $URL, $updateWithNew, $updateExisting, $addNewLicense, $newLicenseRefData);
+        $newLicenseRefData = $this->getListSPDX($type, $URL, $updateWithNew, $updateExisting, $addNewLicense,
+          $newLicenseRefData, $deleteDeprecated);
       } else if (!empty($type) && empty($URL)) {
         echo "Notice: --url cannot be empty if --type is provided \n";
       } else if (empty($type) && !empty($URL)) {
         echo "Notice: --type cannot be empty if --url is provided \n";
       } else {
         foreach ($scanList as $type => $URL) {
-          $newLicenseRefData = $this->getListSPDX($type, $URL, $updateWithNew, $updateExisting, $addNewLicense, $newLicenseRefData);
+          $newLicenseRefData = $this->getListSPDX($type, $URL, $updateWithNew, $updateExisting, $addNewLicense,
+            $newLicenseRefData, $deleteDeprecated);
         }
       }
       $newFileName = "licenseRefNew.json";
@@ -116,34 +126,17 @@ class exportLicenseRef
   }
 
   /**
-   * @brief check if -only or -or-later exists.
-   *
-   * Check if -only or -or-later exists
-   * @returns license name after concatunation otherwise actual license name.
-   */
-  function getLicenseNameWithOutSuffix($RFShortName)
-  {
-    if (strpos($RFShortName, "-only") !== false) {
-      return strstr($RFShortName, "-only", true);
-    } else if (strpos($RFShortName, "-or-later") !== false) {
-      $licenseShortname = strstr($RFShortName, "-or-later", true);
-      return $licenseShortname . "+";
-    } else {
-      return $RFShortName;
-    }
-  }
-
-  /**
    * @brief get SPDX license or exception list and update licenseref.json
    *
    * get SPDX license or exception list
    * update the licenseref.json file with changes in existing license text
-   * or add a new license if licenseref.json does'nt contain it.
+   * or add a new license if licenseref.json doesn't contain it.
    * Create a new licenserefnew.json file from where it is getting executed.
    * user need to copy the additional license texts from licenserefnew.json
    * to actual licenseref.json
    */
-  function getListSPDX($type, $URL, $updateWithNew, $updateExisting, $addNewLicense, $existingLicenseRefData)
+  function getListSPDX($type, $URL, $updateWithNew, $updateExisting, $addNewLicense, $existingLicenseRefData,
+                       $deleteDeprecated)
   {
     global $LIBEXECDIR;
 
@@ -167,7 +160,7 @@ class exportLicenseRef
     if (empty($existingLicenseRefData)) {
       echo "INFO: get existing licenseRef.json from $LIBEXECDIR\n";
       $getExistingLicenseRefData = file_get_contents("$fileName");
-      /* dump all the data from licenseRef.json file to a array */
+      /* dump all the data from licenseRef.json file to an array */
       $existingLicenseRefData = (array) json_decode($getExistingLicenseRefData, true);
     }
     /* get license list and each license's URL */
@@ -185,14 +178,29 @@ class exportLicenseRef
       $getCurrentData = (array) json_decode($getCurrentData, true);
       echo "INFO: search for license " . $getCurrentData[$this->mapArrayData[$type][0]] . "\n";
       /* check if the licenseid of the current license exists in old license data */
-      $licenseIdCheck = array_search($getCurrentData[$this->mapArrayData[$type][0]], array_column($existingLicenseRefData, 'rf_shortname'));
+      $licenseIdCheck = array_search($getCurrentData[$this->mapArrayData[$type][0]],
+        array_column($existingLicenseRefData, 'rf_shortname'));
       $currentText = $this->replaceUnicode($getCurrentData[$this->mapArrayData[$type][1]]);
       $textCheck = array_search($currentText, array_column($existingLicenseRefData, 'rf_text'));
-      if (!is_numeric($licenseIdCheck)) {
-        /* if licenseid does'nt exists then remove the suffix if any and search again */
-        $getCurrentData[$this->mapArrayData[$type][0]] = $this->getLicenseNameWithOutSuffix($getCurrentData[$this->mapArrayData[$type][0]]);
-        $getCurrentData[$this->mapArrayData[$type][0]];
-        $licenseIdCheck = array_search($getCurrentData[$this->mapArrayData[$type][0]], array_column($existingLicenseRefData, 'rf_shortname'));
+      if ($deleteDeprecated && $listValue->isDeprecatedLicenseId && (
+          is_numeric($licenseIdCheck) &&
+          (!empty($updateWithNew) || !empty($updateExisting)))) {
+        // Existing deprecated license, delete it
+        echo "INFO: removing deprecated license " .
+          $getCurrentData[$this->mapArrayData[$type][0]] . "\n";
+        unset($existingLicenseRefData[$licenseIdCheck]);
+        $existingLicenseRefData = array_values($existingLicenseRefData);
+        continue;
+      } elseif ($listValue->isDeprecatedLicenseId) {
+        continue;
+      }
+      if (is_numeric($licenseIdCheck) &&
+          (!empty($updateWithNew) || !empty($updateExisting))) {
+        // License exists, just remove old fields
+        if (array_key_exists('rf_spdx_compatible',
+            $existingLicenseRefData[$licenseIdCheck])) {
+          unset($existingLicenseRefData[$licenseIdCheck]['rf_spdx_compatible']);
+        }
       }
       if (
         is_numeric($licenseIdCheck) &&
@@ -233,13 +241,13 @@ class exportLicenseRef
           'rf_detector_type' => 1,
           'rf_source' => null,
           'rf_risk' => null,
-          'rf_spdx_compatible' => "t",
-          'rf_flag' => "1"
+          'rf_spdx_compatible' => $listValue->isDeprecatedLicenseId == false,
+          'rf_flag' => "1",
         );
         echo "INFO: new license " . $getCurrentData[$this->mapArrayData[$type][0]] . " added\n\n";
       }
     }
-    return $existingLicenseRefData;
+    return array_values($existingLicenseRefData);
   }
 
   /**
@@ -273,7 +281,8 @@ class exportLicenseRef
       "\n",
     ];
 
-    return str_replace($search, $replace, $text);
+    return StringOperation::replaceUnicodeControlChar(str_replace($search,
+      $replace, $text));
   }
 
   /**
@@ -291,4 +300,4 @@ class exportLicenseRef
   }
 }
 $obj = new exportLicenseRef();
-echo $obj->startProcessingLicenseData();
+$obj->startProcessingLicenseData();

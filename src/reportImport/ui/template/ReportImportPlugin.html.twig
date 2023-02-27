@@ -44,6 +44,20 @@
             </ul>
           </li>
           <li>
+            {{ 'Match license using'|trans }}
+            <ul>
+              <li>
+                <input type="radio" id="licenseMatch-shortname" name="licenseMatch" value="shortname">
+                <label for="licenseMatch-shortname">Shortname</label>
+                <br/>
+              </li>
+              <li>
+                <input type="radio" id="licenseMatch-spdxid" name="licenseMatch" value="spdxid" checked="checked">
+                <label for="licenseMatch-spdxid">SPDX ID</label>
+              </li>
+            </ul>
+          </li>
+          <li>
             {{ 'Add the License Info as findings from'|trans }}
             <ul>
               <li>
@@ -81,8 +95,10 @@
             </ul>
           </li>
           <li>
-            <input type="checkbox" name="addCopyrights" value="true"/>
-            {{ 'Add the copyright information as textfindings'|trans }}
+            <label>
+              <input type="checkbox" name="addCopyrights" value="true"/>
+              {{ 'Add the copyright information as textfindings'|trans }}
+            </label>
           </li>
         </ul>
       </li>

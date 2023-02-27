@@ -20,10 +20,10 @@
 
 #include <sys/wait.h>
 
-#include "rpmlib.h"
-#include "rpmts.h"
-#include "rpmlog.h"
-#include "rpmmacro.h"
+#include "rpm/rpmlib.h"
+#include "rpm/rpmts.h"
+#include "rpm/rpmlog.h"
+#include "rpm/rpmmacro.h"
 
 #include <libfossology.h>
 

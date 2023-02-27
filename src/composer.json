@@ -18,6 +18,7 @@
         "ext-pgsql": "*",
         "ext-curl": "*",
         "ext-uuid": "*",
+        "composer/spdx-licenses": "1.5.7",
         "firebase/php-jwt": "v6.3.0",
         "monolog/monolog" : "2.8.0",
         "phpoffice/phpword" : "0.18.3",
@@ -40,6 +41,7 @@
         "doctrine/instantiator" : "v1.4.1",
         "ext-posix" : "*",
         "ext-sqlite3" : "*",
+        "ext-zip": "*",
         "hamcrest/hamcrest-php" : "v2.0.1",
         "mockery/mockery" : "v1.3.6",
         "myclabs/deep-copy" : "1.11.0",
@@ -52,9 +54,15 @@
         "psr-4" : {
             "Fossology\\Lib\\" : "lib/php",
             "Fossology\\Agent\\Copyright\\UI\\" : "copyright/ui",
+            "Fossology\\CliXml\\UI\\" : "clixml/ui",
             "Fossology\\DeciderJob\\UI\\" : "deciderjob/ui",
             "Fossology\\Decider\\UI\\" : "decider/ui",
+            "Fossology\\DecisionExporter\\UI\\" : "decisionexporter/ui",
+            "Fossology\\DecisionImporter\\UI\\" : "decisionimporter/ui",
             "Fossology\\DelAgent\\UI\\" : "delagent/ui",
+            "Fossology\\ReadmeOSS\\UI\\" : "readmeoss/ui",
+            "Fossology\\SpdxTwo\\UI\\" : "spdx2/ui",
+            "Fossology\\UnifiedReport\\UI\\" : "unifiedreport/ui",
             "Fossology\\UI\\Page\\" : "www/ui/page",
             "Fossology\\UI\\Api\\" : "www/ui/api"
         }

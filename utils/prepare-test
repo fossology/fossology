@@ -131,7 +131,11 @@ if echo ${WarnAccept} | grep -q -e "^[yY]$" ; then
   fi
   case "${DISTRO}" in
     Debian|Ubuntu|LinuxMint)
-      sudo apt-get install -q $YesOpt cppcheck ;;
+      if dpkg-query --show --showformat='${db:Status-Status}' cppcheck | grep -q 'not-installed' ; then
+        sudo apt-get install -q $YesOpt cppcheck
+      else
+        echo "cppcheck installed. Not installing again."
+      fi ;;
     Fedora|RedHatEnterprise*|CentOS)
       yum $YesOpt install cppcheck ;;
   esac

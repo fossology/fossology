@@ -75,13 +75,13 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     }
 
     $refArray = array(
-        array(401, 'FOO', 'foo full', 'foo text'),
-        array(402, 'BAR', 'bar full', 'bar text'),
-        array(403, 'BAZ', 'baz full', 'baz text'),
-        array(404, 'QUX', 'qux full', 'qux text')
+        array(401, 'FOO', 'FOO', 'foo full', 'foo text'),
+        array(402, 'BAR', 'BAR', 'bar full', 'bar text'),
+        array(403, 'BAZ', 'BAZ', 'baz full', 'baz text'),
+        array(404, 'QUX', 'QUX', 'qux full', 'qux text')
     );
     foreach ($refArray as $params) {
-      $this->dbManager->insertInto('license_ref', 'rf_pk, rf_shortname, rf_fullname, rf_text', $params, $logStmt = 'insert.ref');
+      $this->dbManager->insertInto('license_ref', 'rf_pk, rf_shortname, rf_spdx_id, rf_fullname, rf_text', $params, $logStmt = 'insert.ref');
     }
 
     $modd = 536888320;
@@ -387,7 +387,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
       ->withArgs([102])->andReturn(false);
 
     $map = $this->clearingDao->getClearedLicenseIdAndMultiplicities($treeBounds, $groupId);
-    assertThat($map, is(array('FOO'=>array('count'=>2,'shortname'=>'FOO','rf_pk'=>401))));
+    assertThat($map, is(array('FOO'=>array('count'=>2,'shortname'=>'FOO','spdx_id'=>'FOO','rf_pk'=>401))));
   }
 
   public function testGetClearedLicenses()
@@ -414,7 +414,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
       ->withArgs([102])->andReturn(false);
 
     $map = $this->clearingDao->getClearedLicenses($treeBounds, $groupId);
-    assertThat($map, equalTo(array(new LicenseRef($rf,'FOO','foo full'))));
+    assertThat($map, equalTo(array(new LicenseRef($rf,'FOO','foo full', 'FOO'))));
   }
 
 

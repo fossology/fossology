@@ -65,9 +65,11 @@ foreach(FO_NOM_TARGET nomos nomos_cov nomos_exec nomos_cov_exec nomossa)
     if(${FO_NOM_TARGET} MATCHES "nomossa")
         target_sources(${FO_NOM_TARGET} PRIVATE ${FO_CWD}/standalone.c)
         target_compile_definitions(${FO_NOM_TARGET} PRIVATE STANDALONE=1)
-        target_link_libraries(${FO_NOM_TARGET} PRIVATE ${jsonc_LIBRARIES} ${glib_LIBRARIES} pthread rt)
+        target_link_libraries(${FO_NOM_TARGET}
+            PRIVATE ${json-c_LIBRARIES} ${glib_LIBRARIES} pthread rt)
     else()
-        target_link_libraries(${FO_NOM_TARGET} PRIVATE fossology ${jsonc_LIBRARIES} pthread rt)
+        target_link_libraries(${FO_NOM_TARGET}
+            PRIVATE fossology ${json-c_LIBRARIES} pthread rt)
     endif()
     if(${FO_NOM_TARGET} MATCHES "cov")
         target_compile_options(${FO_NOM_TARGET} PRIVATE ${FO_COV_FLAGS})

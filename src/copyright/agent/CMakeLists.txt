@@ -21,8 +21,8 @@ foreach(COMMON_OBJ copyright regscan scanners cleanEntries regexConfProvider
     add_library(${COMMON_OBJ}.cc.o OBJECT EXCLUDE_FROM_ALL
         ${FO_CWD}/${COMMON_OBJ}.cc)
     target_link_libraries(${COMMON_OBJ}.cc.o
-        PRIVATE fossologyCPP m icuuc icudata stdc++
-        ${Boost_LIBRARIES} ${jsoncpp_LIBRARIES})
+        PRIVATE fossologyCPP m ${icu-uc_LIBRARIES} stdc++
+        ${Boost_LIBRARIES} jsoncpp_lib)
     list(APPEND COMMON_COPY_OBJECTS ${COMMON_OBJ}.cc.o)
 endforeach()
 
@@ -31,10 +31,11 @@ add_library(copyright_cov_lib EXCLUDE_FROM_ALL "")
 add_executable(copyright "")
 add_executable(ecc "")
 add_executable(keyword "")
+add_executable(ipra "")
 add_executable(fo_unicode_clean "")
 add_executable(copyright_cov EXCLUDE_FROM_ALL "")
 foreach(FO_COPY_TARGET copyright_lib copyright copyright_cov_lib copyright_cov
-    ecc keyword fo_unicode_clean)
+    ecc keyword ipra fo_unicode_clean)
     target_compile_definitions(${FO_COPY_TARGET}
         PRIVATE
         DATADIR="${FO_MODDIR}"
@@ -48,6 +49,8 @@ foreach(FO_COPY_TARGET copyright_lib copyright copyright_cov_lib copyright_cov
         target_compile_definitions(${FO_COPY_TARGET} PRIVATE IDENTITY_ECC)
     elseif(${FO_COPY_TARGET} STREQUAL "keyword")
         target_compile_definitions(${FO_COPY_TARGET} PRIVATE IDENTITY_KW)
+    elseif(${FO_COPY_TARGET} STREQUAL "ipra")
+        target_compile_definitions(${FO_COPY_TARGET} PRIVATE IDENTITY_IPRA)
     endif()
     if(NOT ${FO_COPY_TARGET} STREQUAL "fo_unicode_clean")
         if(${FO_COPY_TARGET} MATCHES "^copyright")
@@ -66,8 +69,8 @@ foreach(FO_COPY_TARGET copyright_lib copyright copyright_cov_lib copyright_cov
         set(COPY_LIBS "")
     endif()
     target_link_libraries(${FO_COPY_TARGET}
-        PRIVATE fossologyCPP m icuuc icudata stdc++
-        ${Boost_LIBRARIES} ${jsoncpp_LIBRARIES} ${COPY_LIBS})
+        PRIVATE fossologyCPP m ${icu-uc_LIBRARIES} stdc++
+        ${Boost_LIBRARIES} jsoncpp_lib ${COPY_LIBS})
 endforeach()
 target_compile_options(copyright_cov PRIVATE ${FO_COV_FLAGS})
 set_target_properties(copyright_lib PROPERTIES OUTPUT_NAME copyright)
@@ -84,7 +87,7 @@ install(TARGETS fo_unicode_clean
     DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent
     COMPONENT copyright)
 
-foreach(COP ecc keyword copyright)
+foreach(COP ecc keyword copyright ipra)
     install(TARGETS ${COP}
         RUNTIME
         DESTINATION ${FO_MODDIR}/${COP}/agent

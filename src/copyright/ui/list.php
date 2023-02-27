@@ -1,7 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2010-2012 Hewlett-Packard Development Company, L.P.
- SPDX-FileCopyrightText: © 2013-2016, 2018 Siemens AG
+ SPDX-FileCopyrightText: © 2013-2016, 2018,2022, Siemens AG
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -36,7 +36,7 @@ class copyright_list extends FO_Plugin
     $this->Name = "copyright-list";
     $this->Title = TITLE_COPYRIGHT_LIST;
     $this->Version = "1.0";
-    $this->Dependency = array("copyright-hist", "ecc-hist");
+    $this->Dependency = array("copyright-hist", "ecc-hist", "ipra-hist");
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
@@ -330,8 +330,11 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
         case "url":
           $TypeStr = "$text5";
           break;
+        case "ipra":
+          $TypeStr = _("Patent Relavent Analysis");
+          break;
         case "ecc":
-          $TypeStr = _("export restriction");
+          $TypeStr = _("Export Restriction");
           break;
         case "keyword":
           $TypeStr = _("Keyword Analysis");
@@ -433,6 +436,11 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
   {
 
     switch ($type) {
+      case "ipra" :
+        $tableName = "ipra";
+        $modBack = "ipra-hist";
+        $viewName = "ipra-view";
+        break;
       case "ecc" :
         $tableName = "ecc";
         $modBack = "ecc-hist";

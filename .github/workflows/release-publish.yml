@@ -87,9 +87,7 @@ jobs:
         echo PACKAGE_NAME=$(echo "FOSSology-${VERSION}-$(lsb_release -si | tr [:upper:] [:lower:])-$(lsb_release -sc | tr [:upper:] [:lower:]).tar.gz") >> $GITHUB_ENV
     - name: Configure and Generate CMake Project
       run: |
-        mkdir build
-        cd build
-        cmake -GNinja ..
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DFO_SYSCONFDIR=/etc/fossology -DFO_LOCALSTATEDIR=/var -S. -B./build -G Ninja
 
     - name: Build Debs
       run: ninja -C build package

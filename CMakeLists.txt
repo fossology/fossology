@@ -9,6 +9,13 @@ project(FOSSOLOGY)
 # set defaults for the project
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/SetDefaults.cmake)
 
+# Check latest version info from git
+message(STATUS "Current fossology version ${FO_VERSION}")
+message(STATUS "Latest commit hash: ${FO_COMMIT_HASH}")
+message(STATUS "Current Branch: ${FO_BRANCH}")
+message(STATUS "Current Build Date: ${FO_BUILD_DATE}")
+message(STATUS "Latest Commit Date: ${FO_COMMIT_DATE}")
+
 if(TESTING)
     enable_testing()
 endif()

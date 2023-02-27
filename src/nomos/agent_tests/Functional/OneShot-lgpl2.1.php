@@ -32,7 +32,7 @@ class OneShotgplv21Test extends CommonCliTest
     list($output,) = $this->runNomos("",array($gplv21));
     list(,$fname,,,$license) = explode(' ', $output);
     $this->assertEquals($fname, 'gplv2.1', "Error filename $fname does not equal gplv2.1");
-    $this->assertEquals(trim($license), 'LGPL-2.1', "Error license does not equal LGPL_v2.1,
+    $this->assertEquals(trim($license), 'LGPL-2.1-only', "Error license does not equal LGPL_v2.1,
        $license was returned");
   }
 }

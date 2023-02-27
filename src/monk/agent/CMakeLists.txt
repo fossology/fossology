@@ -70,4 +70,4 @@ install(TARGETS monk_exec
 install(TARGETS monkbulk
     RUNTIME
     DESTINATION ${FO_MODDIR}/${PROJECT_NAME}bulk/agent 
-    COMPONENT monk)
+    COMPONENT monkbulk)

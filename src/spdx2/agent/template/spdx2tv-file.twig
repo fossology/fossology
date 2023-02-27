@@ -40,4 +40,9 @@ FileCopyrightText: NOASSERTION
 FileCopyrightText: <text> {{ copyrights|join('\n')
                                        |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
                                        |replace({'\f':''}) }} </text>
-{% endif %} 
+{% endif %}
+{% if acknowledgements|default is not empty %}
+FileAttributionText: <text> {{ acknowledgements|join('\n')
+                                               |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                                               |replace({'\f':''}) }} </text>
+{% endif %}

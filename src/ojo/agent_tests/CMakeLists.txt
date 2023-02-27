@@ -21,7 +21,9 @@ target_compile_definitions(test_ojo PRIVATE _FILE_OFFSET_BITS=64)
 target_include_directories(test_ojo 
     PRIVATE ${glib_INCLUDE_DIRS} ${PostgreSQL_INCLUDE_DIRS} ${FO_CXXLIB_SRC} 
         ${FO_CLIB_SRC} ${FO_CWD}/../agent)
-target_link_libraries(test_ojo PRIVATE cppunit ojo boost_regex fossologyCPP icuuc)
+target_link_libraries(test_ojo
+    PRIVATE ${cppunit_LIBRARIES} ojo ${Boost_LIBRARIES} fossologyCPP
+        ${icu-uc_LIBRARIES})
 
 add_test(ojo_unit_test test_ojo)
 

@@ -182,11 +182,11 @@ class foconfig extends FO_Plugin
              */
             if (! strcmp($validation_function, 'check_boolean')) {
               $warning_msg = _(
-                "Error: You set $ui_label to $VarValue. Valid  values are 'true' and 'false'.");
+                "Error: You set $ui_label to ".htmlspecialchars($VarValue).". Valid  values are 'true' and 'false'.");
               echo "<script>alert('$warning_msg');</script>";
             } else if (strpos($validation_function, "url")) {
               $warning_msg = _(
-                "Error: $ui_label $VarValue, is not a reachable URL.");
+                "Error: $ui_label ".htmlspecialchars($VarValue).", is not a reachable URL.");
               echo "<script>alert('$warning_msg');</script>";
             }
 

@@ -116,19 +116,29 @@ if(DEFINED CMAKE_CXX_COMPILER)
     find_package(Boost REQUIRED regex system filesystem program_options)
 endif()
 find_package(Git REQUIRED)
-foreach(SCHE_LIBS glib-2.0 gthread-2.0 gio-2.0 gobject-2.0)
+
+# libmagic, libgcrypt does not have pc module on Debian buster
+# json-c does not have cmake aware packages on Debian buster
+foreach(SCHE_LIBS
+        glib-2.0 gthread-2.0 gio-2.0 gobject-2.0 rpm libxml-2.0 libxslt icu-uc
+        json-c
+)
     string(REPLACE "-2.0" "" LIB_NAME ${SCHE_LIBS})
     pkg_check_modules(${LIB_NAME} REQUIRED ${SCHE_LIBS})
 endforeach()
-pkg_check_modules(jsoncpp REQUIRED jsoncpp)
-pkg_check_modules(jsonc REQUIRED json-c)
+
+if(TESTING)
+    foreach(TEST_LIBS
+            cunit cppunit
+    )
+        pkg_check_modules(${TEST_LIBS} REQUIRED ${TEST_LIBS})
+    endforeach()
+endif(TESTING)
 
 set(CMAKE_INSTALL_MESSAGE NEVER) # control if messages should be displayed while installing
 
 include(${FO_CMAKEDIR}/FoUtilities.cmake)
-if(NOT DEFINED FO_COMMIT_DATE)
-    getGitVersion()
-endif(NOT DEFINED FO_COMMIT_DATE)
+getGitVersion()
 
 # Variables for testing
 execute_process(

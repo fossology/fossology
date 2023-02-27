@@ -16,7 +16,8 @@ class ReportImportAgentPlugin extends AgentPlugin
     'addConcludedAsDecisionsOverwrite',
     'addConcludedAsDecisionsTBD',
     'addCopyrights',
-    'addNewLicensesAs'
+    'addNewLicensesAs',
+    'licenseMatch'
   );
 
   public function __construct() {
@@ -65,7 +66,7 @@ class ReportImportAgentPlugin extends AgentPlugin
         mkdir($fileBase,0755,true);
       }
       // TODO: validate filename
-      $targetFile = time().'_'.rand().'_'.$report['name'];
+      $targetFile = time().'_'.random_int(0, getrandmax()).'_'.$report['name'];
       if (move_uploaded_file($report['tmp_name'], $fileBase.$targetFile))
       {
         return '--report='.$targetFile;

@@ -30,7 +30,8 @@ target_compile_definitions(test_wget_agent PRIVATE AGENT_DIR="${CMAKE_CURRENT_BI
 target_include_directories(test_wget_agent
     PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${FO_CWD}/../agent 
     ${glib_INCLUDE_DIRS} ${PostgreSQL_INCLUDE_DIRS} ${FO_CWD}/Unit ${FO_CLIB_SRC})
-target_link_libraries(test_wget_agent PRIVATE cunit fodbreposysconf focunit wget_agent)
+target_link_libraries(test_wget_agent
+        PRIVATE ${cunit_LIBRARIES} fodbreposysconf focunit wget_agent)
 
 add_test(wget_agent_unit_test test_wget_agent)
 

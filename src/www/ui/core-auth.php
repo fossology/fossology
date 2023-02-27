@@ -126,7 +126,8 @@ class core_auth extends FO_Plugin
         $_SESSION['time_check'] = time() + (480 * 60);
       }
       if (time() >= @$_SESSION['time_check']) {
-        $row = $this->userDao->getUserAndDefaultGroupByUserName(@$_SESSION[Auth::USER_NAME], @$_SESSION['oauthCheck']);
+        $userName = @$_SESSION[Auth::USER_NAME];
+        $row = $this->userDao->getUserAndDefaultGroupByUserName($userName, @$_SESSION['oauthCheck']);
         /* Check for instant logouts */
         if (empty($row['user_pass'])) {
           $row = "";
@@ -153,7 +154,8 @@ class core_auth extends FO_Plugin
     global $SysConf;
 
     if (empty($userRow)) {
-      $userRow = $this->userDao->getUserAndDefaultGroupByUserName('Default User');
+      $username = 'Default User';
+      $userRow = $this->userDao->getUserAndDefaultGroupByUserName($username);
     }
 
     $_SESSION[Auth::USER_ID] = $userRow['user_pk'];

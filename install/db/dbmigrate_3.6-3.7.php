@@ -1,6 +1,7 @@
 <?php
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\BusinessRules\ObligationMap;
+use Fossology\Lib\Db\DbManager;
 
 /*
  SPDX-FileCopyrightText: © 2019 Siemens AG
@@ -223,7 +224,7 @@ function removeNonConcLicensesFromObligation($dbManager, $migrationData)
 /**
  * Migration from FOSSology 3.6.0 to 3.7.0
  * @param DbManager $dbManager
- * @param boolean $dryRun
+ * @param boolean $verbose
  */
 function Migrate_36_37($dbManager, $verbose)
 {

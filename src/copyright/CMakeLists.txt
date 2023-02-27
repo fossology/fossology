@@ -7,6 +7,11 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 project(copyright LANGUAGES CXX C)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/SetDefaults.cmake)
 
+find_package(jsoncpp REQUIRED
+    NAMES
+        jsoncpp jsoncpp_lib
+)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/agent)
 
 install(DIRECTORY ui
@@ -16,9 +21,10 @@ install(DIRECTORY ui
     PATTERN *.php
     PATTERN *.twig
     PATTERN "agent-ecc.php" EXCLUDE
-    PATTERN "agent-keyword.php" EXCLUDE)
+    PATTERN "agent-keyword.php" EXCLUDE
+    PATTERN "agent-ipra.php" EXCLUDE)
 
-foreach(COP ecc keyword copyright)
+foreach(COP ecc keyword copyright ipra)
     set(PROJECT_NAME ${COP})
     generate_version(${COP} "VERSION-${COP}")
     install(FILES ui/agent-${COP}.php

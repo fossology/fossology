@@ -273,7 +273,7 @@ class UserDao
         array($userId, $groupId), __FUNCTION__);
   }
 
-  public function getUserAndDefaultGroupByUserName($userName, $oauth=false)
+  public function getUserAndDefaultGroupByUserName(&$userName, $oauth=false)
   {
     $searchEmail = " ";
     $statement = __METHOD__;
@@ -286,6 +286,9 @@ class UserDao
         array($userName), $statement);
     if (empty($userRow)) {
       throw new \Exception('invalid user name');
+    }
+    if ($oauth) {
+      $userName = $userRow['user_name'];
     }
     $userRow['oauth'] = $oauth;
     if ($userRow['group_fk']) {
@@ -430,5 +433,14 @@ class UserDao
       throw new \Exception('unknown user with id='.$userId);
     }
     return $userRow['user_email'];
+  }
+
+  /**
+   * Get all users from users table
+   * @return array
+   */
+  public function getAllUsers()
+  {
+    return $this->dbManager->getRows("SELECT * FROM users ORDER BY user_name;");
   }
 }

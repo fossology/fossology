@@ -45,12 +45,17 @@ class CliXml extends Agent
   /** @var string */
   protected $packageName;
 
-  /** @var cpClearedGetter $cpClearedGetter
+  /** @var XpClearedGetter $cpClearedGetter
    * Copyright clearance object
    */
   private $cpClearedGetter;
 
-  /** @var eccClearedGetter $eccClearedGetter
+  /** @var XpClearedGetter $ipraClearedGetter
+   * IPRA clearance object
+   */
+  private $ipraClearedGetter;
+
+  /** @var XpClearedGetter $eccClearedGetter
    * ECC clearance object
    */
   private $eccClearedGetter;
@@ -73,6 +78,7 @@ class CliXml extends Agent
 
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement");
     $this->eccClearedGetter = new XpClearedGetter("ecc", "ecc");
+    $this->ipraClearedGetter = new XpClearedGetter("ipra", "ipra");
     $this->licenseIrrelevantGetter = new LicenseIrrelevantGetter();
     $this->licenseIrrelevantGetterComments = new LicenseIrrelevantGetter(false);
     $this->licenseDNUGetter = new LicenseDNUGetter();
@@ -218,6 +224,13 @@ class CliXml extends Agent
     }
     $this->heartbeat(empty($ecc) ? 0 : count($ecc["statements"]));
 
+    if (array_values($unifiedColumns['intellectualProperty'])[0]) {
+      $ipra = $this->ipraClearedGetter->getCleared($uploadId, $this, $groupId, true, "ipra", false);
+    } else {
+      $ipra = array("statements" => array());
+    }
+    $this->heartbeat(empty($ipra) ? 0 : count($ipra["statements"]));
+
     if (array_values($unifiedColumns['notes'])[0]) {
       $notes = htmlspecialchars($otherStatement['ri_ga_additional'], ENT_DISALLOWED);
     } else {
@@ -249,6 +262,7 @@ class CliXml extends Agent
       "obligations" => $obligations,
       "copyrights" => $copyrights["statements"],
       "ecc" => $ecc["statements"],
+      "ipra" => $ipra["statements"],
       "licensesIrre" => $licensesIrre["statements"],
       "irreComments" => $irreComments["statements"],
       "licensesDNU" => $licensesDNU["statements"],
@@ -385,6 +399,19 @@ class CliXml extends Agent
         'hash' => $changeKey['hash']
       );
     }, $contents["ecc"]);
+
+    $contents["ipra"] = array_map(function($changeKey) {
+      $content = htmlspecialchars_decode($changeKey['content']);
+      $content = str_replace("]]>", "]]&gt;", $content);
+      $comments = htmlspecialchars_decode($changeKey['comments']);
+      $comments = str_replace("]]>", "]]&gt;", $comments);
+      return array(
+        'contentIpra' => $content,
+        'commentsIpra' => $comments,
+        'files' => $changeKey['files'],
+        'hash' => $changeKey['hash']
+      );
+    }, $contents["ipra"]);
 
     $contents["irreComments"] = array_map(function($changeKey) {
       return array(

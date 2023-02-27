@@ -296,7 +296,12 @@ class fo_libschema
         $newTable = true;
       }
       foreach ($columns as $column => $modification) {
-        if ($newTable ||
+        if (!$newTable && !array_key_exists($column, $this->currSchema['TABLE'][$table])) {
+          $colNewTable = true;
+        } else {
+          $colNewTable = $newTable;
+        }
+        if ($colNewTable ||
             $this->currSchema['TABLE'][$table][$column]['ADD'] != $modification['ADD']) {
           $rename = "";
           if (DB_ColExists($table, $column)) {
@@ -320,7 +325,7 @@ class fo_libschema
             $this->applyOrEchoOnce($sql = "ALTER TABLE \"$table\" DROP COLUMN \"$rename\"");
           }
         }
-        if ($newTable ||
+        if ($colNewTable ||
             $this->currSchema['TABLE'][$table][$column]['ALTER'] != $modification['ALTER'] && isset($modification['ALTER'])) {
           $sql = $modification['ALTER'];
           if ($this->debug) {
@@ -329,7 +334,7 @@ class fo_libschema
             $this->dbman->queryOnce($sql);
           }
         }
-        if ($newTable ||
+        if ($colNewTable ||
             $this->currSchema['TABLE'][$table][$column]['DESC'] != $modification['DESC']) {
           $sql = empty($modification['DESC']) ? "COMMENT ON COLUMN \"$table\".\"$column\" IS ''" : $modification['DESC'];
           $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . "$table.$column.comment");

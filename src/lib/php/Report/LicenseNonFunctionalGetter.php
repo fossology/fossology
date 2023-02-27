@@ -8,13 +8,14 @@
 namespace Fossology\Lib\Report;
 
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Data\LicenseRef;
 
 class LicenseNonFunctionalGetter extends ClearedGetterCommon
 {
-  /** @var ClearingDao */
+  /** @var ClearingDao $clearingDao */
   private $clearingDao;
 
-  /** @var nonFunctionalFilesOnly */
+  /** @var bool $nonFunctionalFilesOnly */
   private $nonFunctionalFilesOnly;
 
   public function __construct($nonFunctionalFilesOnly=true)
@@ -38,8 +39,8 @@ class LicenseNonFunctionalGetter extends ClearedGetterCommon
 
   /**
    * @overwrite
-   * @param type $ungrupedStatements
-   * @return type
+   * @param array $ungrupedStatements
+   * @return array
    */
   protected function groupStatements($ungrupedStatements, $extended, $agentcall, $isUnifiedReport, $objectAgent)
   {
@@ -49,7 +50,8 @@ class LicenseNonFunctionalGetter extends ClearedGetterCommon
       $dirName = dirname($statement['fileName']);
       $baseName = basename($statement['fileName']);
       $comment = $statement['comment'];
-      $licenseName = $statement['shortname'];
+      $licenseName = LicenseRef::convertToSpdxId($statement['shortname'],
+        $statement['spdx_id']);
       if ($this->nonFunctionalFilesOnly) {
         if (array_key_exists($fileName, $statements)) {
           $currentLics = &$statements[$fileName]["licenses"];

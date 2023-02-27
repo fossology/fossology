@@ -49,18 +49,18 @@ class LicenseMap
     $licenseView = new LicenseViewProxy($groupId);
     if ($full) {
       $query = $licenseView->asCTE()
-            .' SELECT distinct on(rf_pk) rf_pk rf_fk, rf_shortname parent_shortname, rf_parent FROM (
-                SELECT r1.rf_pk, r2.rf_shortname, usage, rf_parent FROM '.$licenseView->getDbViewName()
+            .' SELECT distinct on(rf_pk) rf_pk rf_fk, rf_shortname parent_shortname, rf_spdx_id AS parent_spdx_id, rf_parent FROM (
+                SELECT r1.rf_pk, r2.rf_shortname, r2.rf_spdx_id, usage, rf_parent FROM '.$licenseView->getDbViewName()
             .' r1 inner join license_map on usage=$1 and rf_fk=r1.rf_pk
              left join license_ref r2 on rf_parent=r2.rf_pk
             UNION
-            SELECT rf_pk, rf_shortname, -1 usage, rf_pk rf_parent from '.$licenseView->getDbViewName()
+            SELECT rf_pk, rf_shortname, rf_spdx_id, -1 usage, rf_pk rf_parent from '.$licenseView->getDbViewName()
             .') full_map ORDER BY rf_pk,usage DESC';
 
       $stmt = __METHOD__.".$this->usageId,$groupId,full";
     } else {
       $query = $licenseView->asCTE()
-            .' SELECT rf_fk, rf_shortname parent_shortname, rf_parent FROM license_map, '.$licenseView->getDbViewName()
+            .' SELECT rf_fk, rf_shortname AS parent_shortname, rf_spdx_id AS parent_spdx_id, rf_parent FROM license_map, '.$licenseView->getDbViewName()
             .' WHERE rf_pk=rf_parent AND rf_fk!=rf_parent AND usage=$1';
       $stmt = __METHOD__.".$this->usageId,$groupId";
     }
@@ -102,6 +102,22 @@ class LicenseMap
   }
 
   /**
+   * @brief For a given license id, get the projected SPDX ID (or shortname if
+   * ID does not exist).
+   * @param int $licenseId  License id to be queried
+   * @param string $defaultID Default ID to return if license not found in map
+   * @return string|null Projected shortname or default name
+   */
+  public function getProjectedSpdxId($licenseId, $defaultID=null)
+  {
+    if (array_key_exists($licenseId, $this->map)) {
+      return LicenseRef::convertToSpdxId($this->map[$licenseId]['parent_shortname'],
+        $this->map[$licenseId]['parent_spdx_id']);
+    }
+    return $defaultID;
+  }
+
+  /**
    * Get the Usage of the map.
    * @return number
    */
@@ -126,10 +142,10 @@ class LicenseMap
   public function getTopLevelLicenseRefs()
   {
     $licenseView = new LicenseViewProxy($this->groupId,
-      array('columns'=>array('rf_pk','rf_shortname','rf_fullname')),
+      array('columns'=>array('rf_pk','rf_shortname', 'rf_spdx_id', 'rf_fullname')),
       'license_visible');
     $query = $licenseView->asCTE()
-          .' SELECT rf_pk, rf_shortname, rf_fullname FROM '.$licenseView->getDbViewName()
+          .' SELECT rf_pk, rf_shortname, rf_spdx_id, rf_fullname FROM '.$licenseView->getDbViewName()
           .' LEFT JOIN license_map ON rf_pk=rf_fk AND rf_fk!=rf_parent AND usage=$1'
           .' WHERE license_map_pk IS NULL';
     $stmt = __METHOD__.".$this->usageId,$this->groupId";
@@ -137,7 +153,7 @@ class LicenseMap
     $res = $this->dbManager->execute($stmt,array($this->usageId));
     $topLevel = array();
     while ($row = $this->dbManager->fetchArray($res)) {
-      $topLevel[$row['rf_pk']] = new LicenseRef($row['rf_pk'],$row['rf_shortname'],$row['rf_fullname']);
+      $topLevel[$row['rf_pk']] = new LicenseRef($row['rf_pk'],$row['rf_shortname'],$row['rf_fullname'],$row['rf_spdx_id']);
     }
     return $topLevel;
   }
@@ -148,7 +164,7 @@ class LicenseMap
    */
   public static function getMappedLicenseRefView($usageExpr='$1')
   {
-    return "SELECT bot.rf_pk rf_origin, top.rf_pk, top.rf_shortname, top.rf_fullname FROM license_ref bot "
+    return "SELECT bot.rf_pk rf_origin, top.rf_pk, top.rf_shortname, top.rf_fullname, top.rf_spdx_id FROM license_ref bot "
           ."LEFT JOIN license_map ON bot.rf_pk=rf_fk AND usage=$usageExpr "
           ."INNER JOIN license_ref top ON rf_parent=top.rf_pk OR rf_parent IS NULL AND bot.rf_pk=top.rf_pk";
   }

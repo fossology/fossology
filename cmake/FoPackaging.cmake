@@ -52,10 +52,15 @@ set(CPACK_COMPONENTS_ALL
     vendor
     buckets
     copyright
+    ecc
+    keyword
+    ipra
     db
     debug
     decider
     deciderjob
+    decisionexporter
+    decisionimporter
     delagent
     mimetype
     monk
@@ -64,7 +69,7 @@ set(CPACK_COMPONENTS_ALL
     ojo
     pkgagent
     readmeoss
-    unifiedReport
+    unifiedreport
     reuser
     reso
     scancode
@@ -89,8 +94,9 @@ fossology-common package.")
 
 set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_DEPENDS
     "fossology-web, fossology-scheduler, fossology-ununpack,
-    fossology-copyright, fossology-buckets, fossology-mimetype,
-    fossology-delagent, fossology-wgetagent")
+    fossology-copyright, fossology-ecc, fossology-keyword, fossology-ipra,
+    fossology-buckets, fossology-mimetype, fossology-delagent,
+    fossology-wgetagent")
 set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_RECOMMENDS
     "fossology-monk, fossology-monkbulk, fossology-decider,
     fossology-readmeoss, fossology-spdx2, fossology-reportimport,
@@ -112,11 +118,11 @@ This package contains the resources needed by all of the other
 fossology components. This includes admin tools for maintenance.")
 
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_DEPENDS
-    "php7.2-pgsql | php7.3-pgsql | php7.4-pgsql, php-pear,
-    php7.2-cli | php7.3-cli | php7.4-cli, php-mbstring,
-    php7.2-json | php7.3-json | php7.4-json, php-zip, php-xml,
-    php7.2-curl | php7.3-curl | php7.4-curl, php-uuid,
-    php7.2-gd | php7.3-gd | php7.4-gd")
+    "php7.2-pgsql | php7.3-pgsql | php7.4-pgsql | php8.1-pgsql, php-pear,
+    php7.2-cli | php7.3-cli | php7.4-cli | php8.1-cli, php-mbstring,
+    php7.2-json | php7.3-json | php7.4-json | php8.1-json, php-zip, php-xml,
+    php7.2-curl | php7.3-curl | php7.4-curl | php8.1-curl, php-uuid,
+    php7.2-gd | php7.3-gd | php7.4-gd | php8.1-gd")
 
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_CONTROL_EXTRA
@@ -131,8 +137,8 @@ ${FO_PACKAGE_COMMON_DESCRIPTION}
 This package depends on the packages for the web interface.")
 
 set(CPACK_DEBIAN_WWW_PACKAGE_DEPENDS
-    "fossology-common, apache2, php7.2-gd|php7.3-gd|php7.4-gd,
-    libapache2-mod-php7.2|libapache2-mod-php7.3|libapache2-mod-php7.4")
+    "fossology-common, apache2, php7.2-gd|php7.3-gd|php7.4-gd|php8.1-gd,
+    libapache2-mod-php7.2|libapache2-mod-php7.3|libapache2-mod-php7.4|libapache2-mod-php8.1")
 
 set(CPACK_DEBIAN_WWW_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_WWW_PACKAGE_RECOMMENDS "fossology-db")
@@ -251,6 +257,44 @@ set(CPACK_DEBIAN_COPYRIGHT_PACKAGE_DEPENDS
     "fossology-common, libpcre3")
 
 set(CPACK_DEBIAN_COPYRIGHT_PACKAGE_SECTION "utils")
+
+## FOSSOLOGY-ECC
+set(CPACK_DEBIAN_ECC_PACKAGE_NAME "fossology-ecc")
+set(CPACK_DEBIAN_ECC_FILE_NAME "fossology-ecc_${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_ECC_DESCRIPTION
+"architecture for analyzing software, ecc
+${FO_PACKAGE_COMMON_DESCRIPTION}
+This package contains the ecc agent programs and their resources.")
+
+set(CPACK_DEBIAN_ECC_PACKAGE_DEPENDS
+    "fossology-common, fossology-copyright, libpcre3")
+
+set(CPACK_DEBIAN_ECC_PACKAGE_SECTION "utils")
+
+## FOSSOLOGY-KEYWORD
+set(CPACK_DEBIAN_KEYWORD_PACKAGE_NAME "fossology-keyword")
+set(CPACK_DEBIAN_KEYWORD_FILE_NAME "fossology-keyword_${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_KEYWORD_DESCRIPTION
+"architecture for analyzing software, keyword
+${FO_PACKAGE_COMMON_DESCRIPTION}
+This package contains the keyword agent programs and their resources.")
+
+set(CPACK_DEBIAN_KEYWORD_PACKAGE_DEPENDS
+    "fossology-common, fossology-copyright, libpcre3")
+set(CPACK_DEBIAN_KEYWORD_PACKAGE_SECTION "utils")
+
+## FOSSOLOGY-IPRA
+set(CPACK_DEBIAN_IPRA_PACKAGE_NAME "fossology-ipra")
+set(CPACK_DEBIAN_IPRA_FILE_NAME "fossology-ipra_${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_IPRA_DESCRIPTION
+"architecture for analyzing software, ipra
+${FO_PACKAGE_COMMON_DESCRIPTION}
+This package contains the ipra agent programs and their resources.")
+
+set(CPACK_DEBIAN_IPRA_PACKAGE_DEPENDS
+    "fossology-common, fossology-copyright, libpcre3")
+
+set(CPACK_DEBIAN_IPRA_PACKAGE_SECTION "utils")
 
 ## FOSSOLOGY-BUCKETS
 set(CPACK_DEBIAN_BUCKETS_PACKAGE_NAME "fossology-buckets")
@@ -421,6 +465,32 @@ set(CPACK_DEBIAN_DECIDERJOB_PACKAGE_DEPENDS
     "fossology-common")
 
 set(CPACK_DEBIAN_DECIDERJOB_PACKAGE_SECTION "utils")
+
+## FOSSOLOGY-DECISIONEXPORTER PACKAGE
+set(CPACK_DEBIAN_DECISIONEXPORTER_PACKAGE_NAME "fossology-decisionexporter")
+set(CPACK_DEBIAN_DECISIONEXPORTER_FILE_NAME "fossology-decisionexporter_${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_DECISIONEXPORTER_DESCRIPTION
+"architecture for analyzing software, decisionexporter
+${FO_PACKAGE_COMMON_DESCRIPTION}
+This package contains the decisionexporter agent program and its resources.")
+
+set(CPACK_DEBIAN_DECISIONEXPORTER_PACKAGE_DEPENDS
+    "fossology-common")
+
+set(CPACK_DEBIAN_DECISIONEXPORTER_PACKAGE_SECTION "utils")
+
+## FOSSOLOGY-DECISIONIMPORTER PACKAGE
+set(CPACK_DEBIAN_DECISIONIMPORTER_PACKAGE_NAME "fossology-decisionimporter")
+set(CPACK_DEBIAN_DECISIONIMPORTER_FILE_NAME "fossology-decisionimporter_${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_DECISIONIMPORTER_DESCRIPTION
+"architecture for analyzing software, decisionimporter
+${FO_PACKAGE_COMMON_DESCRIPTION}
+This package contains the decisionimporter agent program and its resources.")
+
+set(CPACK_DEBIAN_DECISIONIMPORTER_PACKAGE_DEPENDS
+    "fossology-common")
+
+set(CPACK_DEBIAN_DECISIONIMPORTER_PACKAGE_SECTION "utils")
 
 ## FOSSOLOGY-READMEOSS PACKAGE
 set(CPACK_DEBIAN_READMEOSS_PACKAGE_NAME "fossology-readmeoss")

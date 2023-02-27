@@ -23,7 +23,7 @@
  *     -# Common obligations, restrictions and risks
  *     -# Additional obligations, restrictions & risks beyond common rules
  * -# Acknowledgements
- *     Every acknowledgements entered by the user during clearing.
+ *     Every acknowledgement entered by the user during clearing.
  * -# Export Restrictions
  *     Contains findings of ECC.
  * -# Notes
@@ -90,19 +90,20 @@ define("REPORT_AGENT_NAME", "unifiedreport");
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
-use Fossology\Lib\Report\LicenseClearedGetter;
-use Fossology\Lib\Report\LicenseIrrelevantGetter;
-use Fossology\Lib\Report\LicenseDNUGetter;
-use Fossology\Lib\Report\LicenseNonFunctionalGetter;
 use Fossology\Lib\Report\BulkMatchesGetter;
-use Fossology\Lib\Report\XpClearedGetter;
+use Fossology\Lib\Report\LicenseClearedGetter;
+use Fossology\Lib\Report\LicenseDNUGetter;
+use Fossology\Lib\Report\LicenseIrrelevantGetter;
 use Fossology\Lib\Report\LicenseMainGetter;
+use Fossology\Lib\Report\LicenseNonFunctionalGetter;
 use Fossology\Lib\Report\ObligationsGetter;
 use Fossology\Lib\Report\OtherGetter;
-use PhpOffice\PhpWord\PhpWord;
+use Fossology\Lib\Report\XpClearedGetter;
 use PhpOffice\PhpWord\Element\Section;
 use PhpOffice\PhpWord\IOFactory;
-use PhpOffice\PhpWord\Shared\Html;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\SimpleType\JcTable;
+use PhpOffice\PhpWord\Style\Table;
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/reportStatic.php");
@@ -128,6 +129,12 @@ class UnifiedReport extends Agent
    * Copyright clearance object
    */
   private $cpClearedGetter;
+
+
+  /** @var XpClearedGetter $ipraClearedGetter
+   * IP clearance object
+   */
+  private $ipraClearedGetter;
 
   /** @var XpClearedGetter $eccClearedGetter
    * ECC clearance object
@@ -159,7 +166,7 @@ class UnifiedReport extends Agent
    */
   private $licenseIrrelevantCommentGetter;
 
-  /** @var obligationsGetter $obligationsGetter
+  /** @var ObligationsGetter $obligationsGetter
    * obligationsGetter object
    */
   private $obligationsGetter;
@@ -190,7 +197,9 @@ class UnifiedReport extends Agent
   private $tablestyle = array("borderSize" => 2,
                               "name" => "Arial",
                               "borderColor" => "000000",
-                              "cellSpacing" => 5
+                              "cellSpacing" => 5,
+                              "alignment"   => JcTable::START,
+                              "layout"      => Table::LAYOUT_FIXED
                              );
 
   /** @var array $subHeadingStyle
@@ -231,6 +240,7 @@ class UnifiedReport extends Agent
   function __construct()
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement");
+    $this->ipraClearedGetter = new XpClearedGetter("ipra", "ipra");
     $this->eccClearedGetter = new XpClearedGetter("ecc", "ecc");
     $this->licenseClearedGetter = new LicenseClearedGetter();
     $this->licenseMainGetter = new LicenseMainGetter();
@@ -249,6 +259,7 @@ class UnifiedReport extends Agent
     $this->uploadDao = $this->container->get("dao.upload");
     $this->userDao = $this->container->get("dao.user");
   }
+
 
   /**
    * @copydoc Fossology::Lib::Agent::Agent::processUploadId()
@@ -305,6 +316,9 @@ class UnifiedReport extends Agent
     $ecc = $this->eccClearedGetter->getCleared($uploadId, $this, $groupId, true, "ecc", false);
     $this->heartbeat(empty($ecc) ? 0 : count($ecc["statements"]));
 
+    $ipra = $this->ipraClearedGetter->getCleared($uploadId, $this, $groupId, true, "ipra", false);
+    $this->heartbeat(empty($ip) ? 0 : count($ip["statements"]));
+
     $otherStatement = $this->otherGetter->getReportData($uploadId);
     $this->heartbeat(empty($otherStatement) ? 0 : count($otherStatement));
     $otherStatement['includeDNU'] = (count($licensesDNU["statements"]) > 0) ? true : false;
@@ -317,6 +331,7 @@ class UnifiedReport extends Agent
                         "licenseComments" => $licenseComments,
                         "copyrights" => $copyrights,
                         "ecc" => $ecc,
+                        "ipra" => $ipra,
                         "licensesIrre" => $licensesIrre,
                         "licensesIrreComment" => $licensesIrreComment,
                         "licensesDNU" => $licensesDNU,
@@ -768,6 +783,15 @@ class UnifiedReport extends Agent
                ." The ECCN is seen as an attribute of the component release and"
                ." thus it shall be present in the component catalogue.";
       $this->getRowsAndColumnsForCEI($section, $heading, $contents['ecc']['statements'], $titleSubHeadingCEI, $textEcc);
+    }
+
+    $heading = array_keys($unifiedColumns['intellectualProperty'])[0];
+    $isEnabled = array_values($unifiedColumns['intellectualProperty'])[0];
+    if ($isEnabled) {
+      /* Display IPRA statements and files */
+      $heading = "Patent Relevant Statements";
+      $textIpra = "The content of this paragraph is not the result of the evaluation of the IP professionals. It contains information found by the scanner which shall be taken in consideration by the IP professionals during the evaluation process.";
+      $this->getRowsAndColumnsForCEI($section, $heading, $contents['ipra']['statements'], $titleSubHeadingCEI, $textIpra);
     }
 
     $heading = array_keys($unifiedColumns['notes'])[0];

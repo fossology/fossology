@@ -43,7 +43,7 @@ class OneShotgpl3Test extends CommonCliTest
     list(,$fname,,,$license) = explode(' ', $output);
 
     $this->assertEquals($fname, 'gpl-3.0.txt', "Error filename $fname does not equal gpl-3.0.txt");
-    $this->assertEquals(trim($license), 'GPL-3.0',
+    $this->assertEquals(trim($license), 'GPL-3.0-only',
       "Error license does not equal FSF,GPL_v3. $license was returned");
   }
 }

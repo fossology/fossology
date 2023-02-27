@@ -45,7 +45,7 @@ target_include_directories(test_scheduler
     PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${glib_INCLUDE_DIRS}
     ${PostgreSQL_INCLUDE_DIRS} ${FO_CLIB_SRC} ${FO_CWD}/../agent ${FO_CWD}/Unit)
 target_link_libraries(test_scheduler PRIVATE
-    cunit focunit scheduler fodbreposysconf pcre)
+    ${cunit_LIBRARIES} focunit scheduler fodbreposysconf pcre)
 
 configure_file("${FO_CWD}/agents/fossology.conf.in"
     ${CMAKE_CURRENT_BINARY_DIR}/gen/agents/fossology.conf

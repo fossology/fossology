@@ -65,6 +65,9 @@ SPDX-License-Identifier: FSFAP
         <service id="dao.license.stdc" class="Fossology\Lib\Dao\LicenseStdCommentDao" public="true">
             <argument type="service" id="db.manager"/>
         </service>
+        <service id="dao.license.acknowledgement" class="Fossology\Lib\Dao\LicenseAcknowledgementDao" public="true">
+            <argument type="service" id="db.manager"/>
+        </service>
         <service id="dao.clearing" class="Fossology\Lib\Dao\ClearingDao" public="true">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.upload"/>
@@ -107,6 +110,10 @@ SPDX-License-Identifier: FSFAP
         </service>
         <service id="dao.searchhelperdao" class="Fossology\Lib\Dao\SearchHelperDao" public="true">
             <argument type="service" id="db.manager"/>
+        </service>
+        <service id="dao.alldecisions" class="Fossology\Lib\Dao\AllDecisionsDao" public="true">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="logger"/>
         </service>
 
         <service id="event.types" class="Fossology\Lib\Data\Clearing\ClearingEventTypes" public="true">

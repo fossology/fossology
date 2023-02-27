@@ -14,9 +14,10 @@ class LicenseViewProxy extends DbViewProxy
   /** @var int */
   private $groupId;
   /** @var array */
-  private $allColumns = array('rf_pk', 'rf_shortname', 'rf_text', 'rf_url', 'rf_add_date', 'rf_copyleft', 'rf_fullname',
-             'rf_notes', 'marydone', 'rf_active', 'rf_text_updatable', 'rf_md5', 'rf_detector_type', 'rf_source',
-             'group_fk');
+  private $allColumns = array('rf_pk', 'rf_spdx_id', 'rf_shortname', 'rf_text',
+    'rf_url', 'rf_add_date', 'rf_copyleft', 'rf_fullname', 'rf_notes',
+    'marydone', 'rf_active', 'rf_text_updatable', 'rf_md5', 'rf_detector_type',
+    'rf_source', 'group_fk');
 
   /**
    * @param int $groupId

@@ -1,0 +1,58 @@
+{# SPDX-FileCopyrightText: © 2022 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% import "include/macros.html.twig" as macro %}
+
+{% block content %}
+  <form enctype="multipart/form-data" name="formy" method="post">
+    <ol>
+      <li>{{ 'Select the folder that contains the upload'|trans }}:
+        {% include 'components/select-folder.html.twig' with {'name': 'oldfolderid', 'id': 'oldfolderid', 'selected': folderId} %}
+      </li>
+      <li>{{ "Select the upload you wish to import"|trans }}:
+        {% if uploadList is not empty %}
+          {{ macro.select('uploadselect',uploadList,'uploadselect',uploadId,'class="ui-render-select2"') }}
+        {% else %}
+          {{ 'No upload available in this folder'|trans }}
+        {% endif %}
+      </li>
+      <li>
+        <label>
+          {{ 'Select dump report to upload'|trans }}:
+          <input id="importUploadFileChooser" name="report" type="file" />
+        </label>
+      </li>
+      <li>
+        {{ 'Select how the information should be imported:'|trans }}
+        <ul>
+          <li>
+            {{ 'Import decision as'|trans }}
+            <ul>
+              <li>
+                {{ macro.select('userselect',userList,'userselect',userid,'class="ui-render-select2"') }}
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ol>
+    <input id="importSubmitButton" type="submit" value="{{ 'Upload and Import'|trans }}" disabled="disabled" />
+  </form>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript">
+   $(document).ready(function() {
+     $('#oldfolderid').change(function(){
+       window.location.href = "{{ baseUri }}" + $(this).val();
+     });
+     $('#importUploadFileChooser').change(function(){
+       $('#importSubmitButton').prop('disabled', !$(this).val());
+     });
+   });
+  </script>
+{% endblock %}

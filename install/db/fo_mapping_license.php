@@ -507,7 +507,7 @@ function check_shortname($shortname)
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
   pg_free_result($result);
-  if ($row['rf_pk']) return $row['rf_pk'];
+  if ($row && $row['rf_pk']) return $row['rf_pk'];
   else return -1;
 }
 

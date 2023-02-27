@@ -33,6 +33,7 @@ class UploadDao
     "compliancetasks" => array("Required license compliance tasks" => true),
     "acknowledgements" => array("Acknowledgements" => true),
     "exportrestrictions" => array("Export Restrictions" => true),
+    "intellectualProperty" => array("Patent Relevant Statements" => true),
     "notes" => array("Notes" => true),
     "scanresults" => array("Results of License Scan" => true),
     "mainlicenses" => array("Main Licenses" => true),

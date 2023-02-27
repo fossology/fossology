@@ -31,7 +31,7 @@ target_compile_definitions(test_clibs PRIVATE)
 target_include_directories(test_clibs PRIVATE 
     ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c)
 target_link_libraries(test_clibs 
-    PRIVATE fossology cunit fodbreposysconf focunit)
+    PRIVATE fossology ${cunit_LIBRARIES} fodbreposysconf focunit)
 
 file(COPY ${CMAKE_CURRENT_LIST_DIR}/testClib.php DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

@@ -69,7 +69,7 @@ for ($i = 1;$i < $argc;$i++) {
       return (0);
     case '-V':
       $i++;
-      $Version = $argv[$i];
+      $Version = escapeshellarg($argv[$i]);
       break;  
     case '-t':
       $Trunk = 1;

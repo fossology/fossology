@@ -20,6 +20,7 @@ namespace Fossology\SpdxTwo\Test;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
+use ZipArchive;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
@@ -67,7 +68,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
 
-    $this->agentDir = dirname(dirname(__DIR__));
+    $this->agentDir = dirname(__DIR__, 4) . '/build/src/spdx2';
   }
 
   /**
@@ -174,7 +175,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   public function runJobFromJobque($uploadId, $jobId)
   {
     list($success,$output,$retCode) = $this->runnerCli->run($uploadId, $this->userId, $this->groupId, $jobId);
-    var_dump([$success,$output,$retCode]);
 
     assertThat('cannot run runner', $success, equalTo(true));
     assertThat('report failed: "'.$output.'"', $retCode, equalTo(0));
@@ -195,7 +195,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     assertThat($row, hasKeyValuePair('job_fk', $jobId));
     $filepath = $row['filepath'];
     assertThat($filepath, endsWith('.rdf'));
-    assertThat(file_exists($filepath),equalTo(true));
+    $this->assertFileExists($filepath, "RDF report does not exists.");
 
     return $filepath;
   }
@@ -246,21 +246,28 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    * @brief Pull SPDX toolkit from github if not found
    *
    * -# Verify if Java is installed
-   * -# Pull version 2.2.2
-   * -# Store only spdx-tools-2.2.2-jar-with-dependencies.jar
+   * -# Pull version 1.1.4
+   * -# Store only tools-java-1.1.4-jar-with-dependencies.jar
    * @return string Jar file path
    */
   protected function pullSpdxTools()
   {
     $this-> verifyJavaIsInstalled();
 
-    $version='2.2.2';
+    $version='1.1.4';
     $tag='v'.$version;
 
-    $jarFileBasename = 'spdx-tools-'.$version.'-jar-with-dependencies.jar';
+    $jarFileBasename = 'tools-java-'.$version.'-jar-with-dependencies.jar';
     $jarFile = __DIR__.'/'.$jarFileBasename;
     if (!file_exists($jarFile)) {
-      file_put_contents($jarFile, fopen('https://github.com/spdx/tools/releases/download/'.$tag.'/'.$jarFileBasename, 'r'));
+      $zipFile = __DIR__ . "/spdx-tools-java-$version.zip";
+      file_put_contents($zipFile, fopen("https://github.com/spdx/tools-java/releases/download/$tag/tools-java-$version.zip", 'r'));
+      $zip = new ZipArchive;
+      if ($zip->open($zipFile) === TRUE) {
+        $zip->extractTo(__DIR__, [$jarFileBasename]);
+        $zip->close();
+      }
+      unlink($zipFile);
     }
     $this->assertFileExists($jarFile, 'could not download SPDXTools');
     return $jarFile;

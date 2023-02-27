@@ -8,13 +8,14 @@
 namespace Fossology\Lib\Report;
 
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Data\LicenseRef;
 
 class LicenseIrrelevantGetter extends ClearedGetterCommon
 {
   /** @var ClearingDao */
   private $clearingDao;
 
-  /** @var irreleavntFilesOnly */
+  /** @var bool $irreleavntFilesOnly */
   private $irreleavntFilesOnly;
 
   public function __construct($irreleavntFilesOnly=true)
@@ -38,8 +39,8 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
 
   /**
    * @overwrite
-   * @param type $ungrupedStatements
-   * @return type
+   * @param array $ungrupedStatements
+   * @return array
    */
   protected function groupStatements($ungrupedStatements, $extended, $agentcall, $isUnifiedReport, $objectAgent)
   {
@@ -49,7 +50,8 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
       $dirName = dirname($statement['fileName']);
       $baseName = basename($statement['fileName']);
       $comment = $statement['comment'];
-      $licenseName = $statement['shortname'];
+      $licenseName = LicenseRef::convertToSpdxId($statement['shortname'],
+        $statement['spdx_id']);
       if ($this->irreleavntFilesOnly) {
         if (array_key_exists($fileName, $statements)) {
           $currentLics = &$statements[$fileName]["licenses"];
@@ -60,6 +62,7 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
           $statements[$fileName] = array(
             "content" => convertToUTF8($dirName, false),
             "fileName" => $baseName,
+            "fullPath" => convertToUTF8($fileName, false),
             "licenses" => array($licenseName)
             );
         }
@@ -72,7 +75,9 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
           );
         }
       }
-      $objectAgent->heartbeat(1);
+      if (!empty($objectAgent)) {
+        $objectAgent->heartbeat(1);
+      }
     }
     return array("statements" => array_values($statements));
   }

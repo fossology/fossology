@@ -13,6 +13,8 @@ use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Test\TestLiteDb;
 use Fossology\Lib\Test\TestPgDb;
 
 class LicenseDaoTest extends \PHPUnit\Framework\TestCase
@@ -77,7 +79,7 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
     $itemTreeBounds = new ItemTreeBounds($uploadtreeId,"uploadtree",$uploadID,$left,$right);
     $matches = $licDao->getAgentFileLicenseMatches($itemTreeBounds);
 
-    $licenseRef = new LicenseRef($licenseRefNumber, $lic0['rf_shortname'], $lic0['rf_fullname']);
+    $licenseRef = new LicenseRef($licenseRefNumber, $lic0['rf_shortname'], $lic0['rf_fullname'], $lic0['rf_spdx_id']);
     $agentRef = new AgentRef($agentId, $agentName, $agentRev);
     $expected = array( new LicenseMatch($pfileId, $licenseRef, $agentRef, $licenseFileId, $matchPercent) );
 
@@ -420,7 +422,7 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
     $itemTreeBounds = new ItemTreeBounds($uploadtreeId,"uploadtree",$uploadID,$left,$right);
     $matches = $licDao->getAgentFileLicenseMatches($itemTreeBounds,LicenseMap::CONCLUSION);
 
-    $licenseRef = new LicenseRef($licRefId, $lic0['rf_shortname'], $lic0['rf_fullname']);
+    $licenseRef = new LicenseRef($licRefId, $lic0['rf_shortname'], $lic0['rf_fullname'], $lic0['rf_spdx_id']);
     $agentRef = new AgentRef($agentId, $agentName, $agentRev);
     $expected = array( new LicenseMatch($pfileId, $licenseRef, $agentRef, $licenseFileId, $matchPercent) );
 

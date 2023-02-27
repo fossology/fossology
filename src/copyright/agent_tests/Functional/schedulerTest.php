@@ -1,6 +1,6 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ SPDX-FileCopyrightText: © 2014-2015,2022, Siemens AG
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -15,6 +15,7 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
 use Monolog\Logger;
 
@@ -29,12 +30,17 @@ if (!function_exists('Traceback_uri'))
  * @class CopyrightScheduledTest
  * @brief Unit test cases for copyright agent using scheduler
  */
-class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
+class schedulerTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb $testDb
    * Object for test database
    */
   private $testDb;
+  /** @var TestInstaller $testInstaller
+   * Object for testinstaller
+   */
+  private $testInstaller;
+
   /** @var DbManager $dbManager
    * Database manager from test database
    */
@@ -101,7 +107,7 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
 
     $agentName = "copyright";
 
-    $agentDir = dirname(__DIR__, 4).'/build/src/copyright';
+    $agentDir = dirname(__DIR__, 4) . '/build/src/copyright';
     $execDir = "$agentDir/agent";
     system("install -D $agentDir/VERSION-copyright $sysConf/mods-enabled/$agentName/VERSION");
     system("install -D $agentDir/agent/copyright.conf  $sysConf/mods-enabled/$agentName/agent/copyright.conf");
@@ -133,13 +139,9 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
 
-    $confFile = $sysConf."/fossology.conf";
-    system("touch ".$confFile);
-    $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n";
-    file_put_contents($confFile, $config);
-
-    $testRepoDir = dirname(dirname(dirname(__DIR__)))."/lib/php/Test/";
-    system("cp -a $testRepoDir/repo $sysConf/");
+    $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
+    $this->testInstaller->cpRepo();
   }
 
   /**
@@ -167,7 +169,6 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @brief Run the test
-   * @test
    * -# Setup test tables
    * -# Setup test repo
    * -# Run copyright on upload id 1

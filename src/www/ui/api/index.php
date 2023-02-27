@@ -173,6 +173,7 @@ $app->group('/groups',
     $app->delete('/{id:\\d+}/user/{userId:\\d+}', GroupController::class . ':deleteGroupMember');
     $app->get('/deletable', GroupController::class . ':getDeletableGroups');
     $app->get('/{id:\\d+}/members', GroupController::class . ':getGroupMembers');
+    $app->put('/{id:\\d+}/user/{userId:\\d+}', GroupController::class . ':changeUserPermission');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -215,6 +216,7 @@ $app->group('/report',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('', ReportController::class . ':getReport');
     $app->get('/{id:\\d+}', ReportController::class . ':downloadReport');
+    $app->post('/import', ReportController::class . ':importReport');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

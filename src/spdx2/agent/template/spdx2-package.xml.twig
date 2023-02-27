@@ -6,10 +6,15 @@
   <spdx:Relationship>
     <spdx:relationshipType rdf:resource="http://spdx.org/rdf/terms#relationshipType_describes" />
     <spdx:relatedSpdxElement>
-      <spdx:Package rdf:about="{{ uri }}#SPDXRef-upload{{ packageId|url_encode }}">
+      <spdx:Package rdf:about="#SPDXRef-upload{{ packageId|url_encode }}">
         <spdx:name>{{ packageName }}</spdx:name>
         <spdx:packageFileName>{{ uploadName }}</spdx:packageFileName>
         <spdx:downloadLocation rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+        <spdx:versionInfo>{{ packageVersion|e }}</spdx:versionInfo>
+        {%- if releaseDate is not empty ~%}
+        <spdx:releaseDate>{{ releaseDate }}</spdx:releaseDate>
+        {%- endif ~%}
+        <spdx:filesAnalyzed>true</spdx:filesAnalyzed>
         {%- if componentId is not empty ~%}
         <spdx:externalRef>
           <spdx:ExternalRef>
@@ -44,24 +49,49 @@
             <spdx:checksumValue>{{ md5 | lower }}</spdx:checksumValue>
           </spdx:Checksum>
         </spdx:checksum>
+{% if mainLicenses|length > 1 %}
         <spdx:licenseConcluded>
+{% if 'Dual-license' in mainLicenses and mainLicenses|length > 2 %}
           <spdx:DisjunctiveLicenseSet>
-  {% for res in mainLicenses %}
-  {% if res starts with 'LicenseRef-' %}
-            <spdx:member rdf:resource="{{ uri }}#{{ res|replace({' ': '-'})|url_encode }}" />
-  {% else %}
+{% else %}
+          <spdx:ConjunctiveLicenseSet>
+{% endif %}
+{% for res in mainLicenses %}
+{% if res starts with 'LicenseRef-' %}
+            <spdx:member rdf:resource="#{{ res|replace({' ': '-'})|url_encode }}" />
+{% else %}
             <spdx:member rdf:resource="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
-  {% endif %}
-  {% endfor %}
+{% endif %}
+{% endfor %}
+{% if 'Dual-license' in concludedLicenses and concludedLicenses|length > 2 %}
           </spdx:DisjunctiveLicenseSet>
+{% else %}
+          </spdx:ConjunctiveLicenseSet>
+{% endif %}
         </spdx:licenseConcluded>
+{% elseif mainLicenses|length == 1 %}
+{% set res = mainLicenses[0] %}
+{% if res starts with 'LicenseRef-' %}
+        <spdx:licenseConcluded rdf:resource="#{{ res|replace({' ': '-'})|url_encode }}" />
+{% else %}
+        <spdx:licenseConcluded rdf:resource="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
+{% endif %}
+{% endif %}
         {% if licenseComments %}<spdx:licenseComments><![CDATA[
           {{ licenseComments|replace({']]>':']]><![CDATA[>'}) }}
         ]]></spdx:licenseComments>
         {% endif %}<spdx:licenseDeclared rdf:resource="http://spdx.org/rdf/terms#noassertion" />
         <spdx:licenseInfoFromFiles rdf:resource="http://spdx.org/rdf/terms#noassertion" />
         <spdx:copyrightText rdf:resource="http://spdx.org/rdf/terms#noassertion" />
-        {{ fileNodes|replace({'\n':'\n          '}) }}
+        {%- if generalAssessment is not empty ~%}
+        <rdfs:comment><![CDATA[
+          {{ generalAssessment|replace({']]>':']]><![CDATA[>'}) }}
+        ]]></rdfs:comment>
+        {%- endif ~%}
+{% for obligation in obligations  %}
+        <spdx:attributionText>{{ obligation }}</spdx:attributionText>
+{% endfor %}
+        {{ fileNodes|replace({'\n':'\n        '}) }}
       </spdx:Package>
     </spdx:relatedSpdxElement>
   </spdx:Relationship>

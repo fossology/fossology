@@ -11,10 +11,12 @@
  * @file
  * @brief Contains UI plugin for unified report agent
  */
+namespace Fossology\UnifiedReport\UI;
+
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
-use Fossology\Lib\Data\Upload\Upload;
 
 /**
  * @class FoUnifiedReportGenerator

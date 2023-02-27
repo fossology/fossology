@@ -10,12 +10,14 @@ namespace Fossology\Lib\UI;
 class MenuRenderer
 {
    /**
-   * @param $menu     menu list need to show as list
-   * @param $parm     a list of parameters to add to the URL.
-   * @param $uploadId upload id
+   * @param array $menu   menu list need to show as list
+   * @param string $parm  a list of parameters to add to the URL.
+   * @param int $uploadId upload id
+   * @param int $folderId Folder ID for action items
    */
-  public static function menuToActiveSelect($menu, &$parm, $uploadId = "")
+  public static function menuToActiveSelect($menu, &$parm, $uploadId = "", $folderId = 0)
   {
+    $agentRequiringFolderId = ["ui_reportImport", "ui_fodecisionimporter"];
     if (empty($menu)) {
       return '';
     }
@@ -34,7 +36,11 @@ class MenuRenderer
           }
         }
 
-        $entry = '<option value="' . Traceback_uri() . '?mod=' . $Val->URI . '&' . $parm . '"';
+        $value = Traceback_uri() . '?mod=' . $Val->URI . '&' . $parm;
+        if ($folderId != 0 && in_array($Val->URI, $agentRequiringFolderId)) {
+          $value .= '&folder=' . $folderId;
+        }
+        $entry = '<option value="' . $value . '"';
         if (!empty($Val->Title)) {
           $entry .= ' title="' . htmlentities($Val->Title, ENT_QUOTES) . '"';
         }

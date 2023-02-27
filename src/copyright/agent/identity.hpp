@@ -1,10 +1,14 @@
 /*
- SPDX-FileCopyrightText: © 2014, 2018 Siemens AG
+ SPDX-FileCopyrightText: © 2014, 2018,2022, Siemens AG
  Author: Daniele Fognini, anupam.ghosh@siemens.com
 
  SPDX-License-Identifier: GPL-2.0-only
 */
 
+/**
+ * \def IDENTITY_ECC
+ * \brief If the current agent being compiled is IPRA
+ */
 /**
  * \def IDENTITY_ECC
  * \brief If the current agent being compiled is ECC
@@ -28,39 +32,58 @@
 
 #ifndef IDENTITY_KW
 #ifndef IDENTITY_ECC
+#ifndef IDENTITY_IPRA
 #ifndef IDENTITY_COPYRIGHT
 #define IDENTITY_COPYRIGHT
 #endif
 #endif
 #endif
+#endif
 
 #ifndef IDENTITY_KW
-  #ifndef IDENTITY_ECC
-     #ifdef IDENTITY_COPYRIGHT
-       #define IDENTITY "copyright"
-       #define MAX_TYPES 4
-     #else
-       #error
-     #endif
-  #else
+ #ifndef IDENTITY_ECC
+  #ifndef IDENTITY_IPRA
+   #ifdef IDENTITY_COPYRIGHT
+    #define IDENTITY "copyright"
+    #define MAX_TYPES 4
+   #else
+    #error
+   #endif
+   #else
     #ifndef IDENTITY_COPYRIGHT
-      #define IDENTITY "ecc"
-      #define MAX_TYPES 1
-    #else
-      #error
-    #endif
+    #define IDENTITY "ipra"
+    #define MAX_TYPES 1
+   #else
+    #error
+   #endif
   #endif
+ #else
+  #ifndef IDENTITY_IPRA
+   #ifndef IDENTITY_COPYRIGHT
+    #define IDENTITY "ecc"
+    #define MAX_TYPES 1
+   #else
+    #error
+   #endif
+  #else
+   #error
+  #endif
+ #endif
 #else
  #ifndef IDENTITY_ECC
-    #ifndef IDENTITY_COPYRIGHT
-      #define IDENTITY "keyword"
-      #define MAX_TYPES 1
-    #else
-      #error
-    #endif
-  #else
+  #ifndef IDENTITY_IPRA
+   #ifndef IDENTITY_COPYRIGHT
+    #define IDENTITY "keyword"
+    #define MAX_TYPES 1
+   #else
     #error
+   #endif
+  #else
+   #error
   #endif
+ #else
+  #error
+ #endif
 #endif
 
 #define ALL_TYPES ((1<<MAX_TYPES) -1)

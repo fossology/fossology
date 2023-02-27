@@ -138,7 +138,9 @@ foreach ($temp_dirs as $temp_dir) {
        fossologytest_YYYYMMDD_HHmmSS/' */
     if (preg_match('/\/fossologytest_\d{8}_\d{6}\/?$/', $temp_dir)) {
         echo "Deleting $temp_dir\n";
-        `rm -rf $temp_dir`;
+        $escaped_temp_dir = escapeshellarg($temp_dir);
+        `rm -rf $escaped_temp_dir`;
+
     }
 }
 

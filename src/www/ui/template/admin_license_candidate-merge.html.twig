@@ -17,38 +17,44 @@
         <th></th>
         <th>{{ 'Candidate'|trans }}</th>
         <th>{{ 'Reference'|trans }}</th>
-      </tr>{% endif %}
-    <tr >
+      </tr>
+    {% endif %}
+    <tr>
+      <td>{{ 'SPDX ID'|trans }}:</td>
+      <td><input type="text" id="spdx_id" value="{{ rf_spdx_id|e }}" size="30"></td>
+      {% if suggest_rf %}<td>{{ suggest_spdx_id|e }}</td>{% endif %}
+    </tr>
+    <tr style="background-color:#F5F5DC;">
       <td>{{ 'Shortname'|trans }}:</td>
       <td><input type="text" id="shortname" value="{{ shortname|e }}" size="30"></td>
       {% if suggest_rf %}<td>{{ suggest_shortname|e }}</td>{% endif %}
     </tr>
-    <tr style="background-color:#F5F5DC;">
+    <tr>
       <td>{{ 'Fullname'|trans }}:</td>
       <td>{{ rf_fullname|e }}</td>
       {% if suggest_rf %}<td>{{ suggest_fullname|e }}</td>{% endif %}
     </tr>
-    <tr>
+    <tr style="background-color:#F5F5DC;">
       <td valign="top">{{ 'Reference text'|trans }}:</td>
       <td><div style="overflow-y:scroll;max-height:450px;margin:0;">{{ rf_text }}</div></td>
       {% if suggest_rf %}<td><div style="overflow-y:scroll;max-height:450px;margin:0;">{{ suggest_text }}</div></td>{% endif %}
     </tr>
-    <tr style="background-color:#F5F5DC;">
+    <tr>
       <td>{{ 'URL'|trans }}:</td>
       <td>{{ rf_url|e }}</td>
       {% if suggest_rf %}<td>{{ suggest_url|e }}</td>{% endif %}
     </tr>
-    <tr>
+    <tr style="background-color:#F5F5DC;">
       <td>{{ 'Public notes'|trans }}:</td>
       <td>{{ rf_notes|e }}</td>
       {% if suggest_rf %}<td>{{ suggest_notes|e }}</td>{% endif %}
     </tr>
-    <tr style="background-color:#F5F5DC;">
+    <tr>
       <td>{{ 'Risk level'|trans }}:</td>
       <td>{{ rf_risk }}</td>
       {% if suggest_rf %}<td>{{ suggest_risk }}</td>{% endif %}
     </tr>
-    <tr>
+    <tr style="background-color:#F5F5DC;">
       <td></td>
       <td>
         <input type="button" id="verify-button" value="{{ 'Verify as new license'|trans }}"/>
@@ -91,4 +97,3 @@
 
   </script>
 {% endblock %}
-  

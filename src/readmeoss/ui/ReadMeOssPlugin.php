@@ -10,6 +10,8 @@
  * @brief UI plugin for ReadMeOSS agent
  */
 
+namespace Fossology\ReadmeOSS\UI;
+
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;

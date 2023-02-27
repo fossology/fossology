@@ -53,14 +53,14 @@ services:
       - FOSSOLOGY_SCHEDULER_HOST=scheduler
     command: web
     ports:
-      - 8081:80
+      - "8081:80"
     depends_on:
       - db
       - scheduler
     volumes:
       - repository:/srv/fossology/repository/
     healthcheck:
-      test: ["CMD-SHELL", "curl -sSf localhost/repo/api/v1/version || exit 1"]
+      test: ["CMD-SHELL", "curl -sSf localhost/repo/api/v1/health | grep -q '{\"status\":\"OK\",' || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 5
