@@ -11,7 +11,7 @@ use Exception;
 use Mockery as M;
 use Mockery\MockInterface;
 
-abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
+abstract class DbManagerTestCase extends \PHPUnit\Framework\TestCase
 {
   /** @var Driver|MockInterface */
   protected $driver;
@@ -109,5 +109,16 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
 
     $returnId = $this->dbManager->insertInto('europe', 'animal', array('mouse'), $log='logging', 'id');
     assertThat($returnId,equalTo(23));
+  }
+}
+
+class DbManagerTest extends \PHPUnit\Framework\TestCase
+{
+  /**
+   * Sample testcase to keep abstract class DbManagerTestCase.
+   */
+  public function testTrue()
+  {
+    $this->assertTrue(true);
   }
 }

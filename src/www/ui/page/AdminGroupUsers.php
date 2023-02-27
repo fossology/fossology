@@ -66,7 +66,7 @@ class AdminGroupUsers extends DefaultPlugin
       if ($atleastOneUserShouldBePart['cnt'] <= 1) {
          $text = _("Error: atleast one user should be part of a group.");
       } else {
-        $this->updateGUMPermission($gum_pk, $perm);
+        $this->updateGUMPermission($gum_pk, $perm,$dbManager);
       }
       $groupMap = $userDao->getAdminGroupMap($userId,
         $_SESSION[Auth::USER_LEVEL]);
@@ -141,9 +141,8 @@ class AdminGroupUsers extends DefaultPlugin
     return $this->render('admin_group_users.html.twig', $this->mergeWithDefault($vars));
   }
 
-  public function updateGUMPermission($gum_pk, $perm)
+  public function updateGUMPermission($gum_pk, $perm,$dbManager)
   {
-    $dbManager = $this->getObject('db.manager');
     if ($perm === -1) {
       $dbManager->prepare($stmt = __METHOD__ . ".delByGUM",
           "DELETE FROM group_user_member WHERE group_user_member_pk=$1 RETURNING user_fk, group_fk");

@@ -13,16 +13,14 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Fossology\UI\Api\Models\User;
-use Fossology\UI\Api\Models\UserGroupMember;
-use Psr\Http\Message\ServerRequestInterface;
-use Fossology\UI\Api\Helper\RestHelper;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
-use Fossology\UI\Api\Models\Group;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\UI\Api\Helper\ResponseHelper;
+use Fossology\UI\Api\Models\Group;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\UserGroupMember;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @class GroupController
@@ -141,21 +139,27 @@ class GroupController extends RestController
     $group_pk = intval($args['id']);
     $user_pk = intval($args['userId']);
 
+    $userIsAdmin = Auth::isAdmin();
+    $userHasGroupAccess = $this->restHelper->getUserDao()->isAdvisorOrAdmin(
+      $this->restHelper->getUserId(), $group_pk);
+
     if (!$this->dbHelper->doesIdExist("groups", "group_pk", $group_pk)) {
       $returnVal = new Info(404, "Group id not found!", InfoType::ERROR);
     } else if (!$this->dbHelper->doesIdExist("users", "user_pk", $user_pk)) {
       $returnVal = new Info(404, "User id not found!", InfoType::ERROR);
+    } else if (! $userIsAdmin && ! $userHasGroupAccess) {
+      $returnVal = new Info(403, "Not advisor or admin of the group. " .
+        "Can not process request.", InfoType::ERROR);
     } else {
       try {
-        $dbManager->prepare($stmt = __METHOD__ . ".getByGroupAndUser",
-          "SELECT group_user_member_pk FROM group_user_member WHERE group_fk=$1 AND user_fk=$2");
-        $fetchResult = $dbManager->execute($stmt, array($group_pk, $user_pk));
-        $fetchResult = $dbManager->fetchAll($fetchResult);
-        $dbManager->freeResult($fetchResult);
+        $fetchResult = $dbManager->getSingleRow(
+          "SELECT group_user_member_pk FROM group_user_member " .
+          "WHERE group_fk=$1 AND user_fk=$2", [$group_pk, $user_pk],
+          __METHOD__ . ".getByGroupAndUser");
         if (!empty($fetchResult)) {
-          $group_user_member_pk = $fetchResult[0]['group_user_member_pk'];
+          $group_user_member_pk = $fetchResult['group_user_member_pk'];
           $adminGroupUsers = $this->restHelper->getPlugin('group_manage_users');
-          $adminGroupUsers->updateGUMPermission($group_user_member_pk, -1);
+          $adminGroupUsers->updateGUMPermission($group_user_member_pk, -1,$dbManager);
           $returnVal = new Info(200, "User will be removed from group.", InfoType::INFO);
         } else {
           $returnVal = new Info(404, "Not a member !", InfoType::ERROR);
@@ -265,6 +269,10 @@ class GroupController extends RestController
     $newuser = intval($args['userId']);
     $newperm = intval($body['perm']);
 
+    $userIsAdmin = Auth::isAdmin();
+    $userHasGroupAccess = $this->restHelper->getUserDao()->isAdvisorOrAdmin(
+      $this->restHelper->getUserId(), $group_pk);
+
     if (!isset($newperm)) {
       $returnVal = new Info(400, "ERROR - no default permission provided", InfoType::ERROR);
     } else if (!$this->dbHelper->doesIdExist("groups", "group_pk", $group_pk)) {
@@ -273,6 +281,9 @@ class GroupController extends RestController
       $returnVal = new Info(404, "User id not found ! ".$newuser, InfoType::ERROR);
     } else if ($newperm < 0 || $newperm > 2) {
       $returnVal = new Info(400, "ERROR - Permission should be in range [0-2]", InfoType::ERROR);
+    } else if (! $userIsAdmin && ! $userHasGroupAccess) {
+      $returnVal = new Info(403, "Not advisor or admin of the group. " .
+        "Can not process request.", InfoType::ERROR);
     } else {
       try {
         $stmt = __METHOD__ . ".getByGroupAndUser";
@@ -295,5 +306,60 @@ class GroupController extends RestController
       }
     }
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Change user permission
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function changeUserPermission($request, $response, $args)
+  {
+    // Extract all  prerequisites (dbManager , user_pk , new_permission , group_pk ) for this functionality
+    $dbManager = $this->dbHelper->getDbManager();
+    $user_pk = intval($args['userId']);
+    $newperm = intval($this->getParsedBody($request)['perm']);
+    $group_pk = intval($args['id']);
+    $userIsAdmin = Auth::isAdmin();
+    $userHasGroupAccess = $this->restHelper->getUserDao()->isAdvisorOrAdmin(
+      $this->restHelper->getUserId(), $group_pk);
+
+    // Validate arguments
+
+    if (!isset($newperm)) {
+      $info = new Info(400, "Permission should be provided", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist("groups", "group_pk", $group_pk)) {
+      $info = new Info(404, "GroupId doesn't exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist("users", "user_pk", $user_pk)) {
+      $info = new Info(404, "UserId doesn't exist", InfoType::ERROR);
+    } else if ($newperm < 0) {
+      $info = new Info(400, "ERROR - permission can not be negative", InfoType::ERROR);
+    } else if ($newperm > 2) {
+      $info = new Info(400, "ERROR - permission can not be greater than 2", InfoType::ERROR);
+    } else if (! $userIsAdmin && ! $userHasGroupAccess) {
+      $info = new Info(403, "Not advisor or admin of the group. " .
+        "Can not process request.", InfoType::ERROR);
+    } else {
+
+      // Check if the relation already exists, retrieve the PK.
+      // IF not, return 404 error
+
+      $group_user_member_pk = $dbManager->getSingleRow("SELECT group_user_member_pk FROM group_user_member WHERE group_fk=$1 AND user_fk=$2",
+        [$group_pk, $user_pk],
+        __METHOD__ . ".getByGroupAndUser")['group_user_member_pk'];
+
+      if (empty($group_user_member_pk)) {
+        $info = new Info(404, "User not part of the group", InfoType::ERROR);
+      } else {
+        $adminGroupUsers = $this->restHelper->getPlugin('group_manage_users');
+        $adminGroupUsers->updateGUMPermission($group_user_member_pk, $newperm,$dbManager);
+        $info = new Info(202, "Permission updated successfully.", InfoType::INFO);
+      }
+    }
+
+    return $response->withJson($info->getArray(), $info->getCode());
   }
 }

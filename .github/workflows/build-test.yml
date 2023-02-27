@@ -208,7 +208,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['7.4', '8.1']
+        config:
+          - {
+            php: "8.1",
+            phpunit: "^10.0.12",
+          }
+          - {
+            php: "7.4",
+            phpunit: "^9.6.3",
+          }
     services:
       postgres:
         image: postgres:12
@@ -241,9 +249,9 @@ jobs:
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php }}
+          php-version: ${{ matrix.config.php }}
           extensions: gettext, mbstring, gd, json, xml, zip, pgsql, curl, uuid, posix, sqlite3
-          tools: phpunit
+          tools: phpunit:${{ matrix.config.phpunit }}
           coverage: xdebug
         env:
           fail-fast: true
