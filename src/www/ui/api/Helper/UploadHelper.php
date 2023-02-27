@@ -12,17 +12,22 @@
  */
 namespace Fossology\UI\Api\Helper;
 
-use Slim\Psr7\Request;
-use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadFilePage;
-use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadVcsPage;
-use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadUrlPage;
-use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadSrvPage;
-use Fossology\UI\Api\Models\UploadSummary;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
-use Fossology\Lib\Dao\AgentDao;
+use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadFilePage;
+use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadSrvPage;
+use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadUrlPage;
+use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadVcsPage;
+use Fossology\UI\Api\Models\Analysis;
+use Fossology\UI\Api\Models\Decider;
 use Fossology\UI\Api\Models\Findings;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\Reuser;
+use Fossology\UI\Api\Models\Scancode;
+use Fossology\UI\Api\Models\ScanOptions;
+use Fossology\UI\Api\Models\UploadSummary;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use UIExportList;
 
@@ -87,10 +92,60 @@ class UploadHelper
   }
 
   /**
+   * Schedule Analysis after the upload
+   * @param integer $uploadId Upload ID
+   * @param integer $folderId Folder ID
+   * @param array $scanOptionsJSON scanOptions
+   * @param boolean $newUpload Request is for new upload?
+   * @return Info Response
+   */
+  public function handleScheduleAnalysis($uploadId, $folderId, $scanOptionsJSON,
+                                         $newUpload = false)
+  {
+    $parametersSent = false;
+    $analysis = new Analysis();
+
+    if (array_key_exists("analysis", $scanOptionsJSON) && ! empty($scanOptionsJSON["analysis"])) {
+      $analysis->setUsingArray($scanOptionsJSON["analysis"]);
+      $parametersSent = true;
+    }
+
+    $decider = new Decider();
+    if (array_key_exists("decider", $scanOptionsJSON) && ! empty($scanOptionsJSON["decider"])) {
+      $decider->setUsingArray($scanOptionsJSON["decider"]);
+      $parametersSent = true;
+    }
+
+    $scancode = new Scancode();
+    if (array_key_exists("scancode", $scanOptionsJSON) && ! empty($scanOptionsJSON["scancode"])) {
+      $scancode->setUsingArray($scanOptionsJSON["scancode"]);
+      $parametersSent = true;
+    }
+
+    $reuser = new Reuser(0, 'groupName', false, false);
+    try {
+      if (array_key_exists("reuse", $scanOptionsJSON) && ! empty($scanOptionsJSON["reuse"])) {
+        $reuser->setUsingArray($scanOptionsJSON["reuse"]);
+        $parametersSent = true;
+      }
+    } catch (\UnexpectedValueException $e) {
+      return new Info($e->getCode(), $e->getMessage(), InfoType::ERROR);
+    }
+
+    if (! $parametersSent) {
+      return new Info(400, "No parameters selected for agents!", InfoType::ERROR);
+    }
+
+    $scanOptions = new ScanOptions($analysis, $reuser, $decider, $scancode);
+    return $scanOptions->scheduleAgents($folderId, $uploadId, $newUpload);
+  }
+
+
+  /**
    * Get a request from Slim and translate to Symfony request to be
    * processed by FOSSology
    *
-   * @param array|null $request
+   * @param array|null $reqBody
    * @param string $folderId ID of the folder to upload the file
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic   Upload is `public, private or protected`
@@ -102,7 +157,8 @@ class UploadHelper
    * @see createFileUpload()
    */
   public function createNewUpload($reqBody, $folderId, $fileDescription,
-    $isPublic, $ignoreScm, $uploadType, $applyGlobal = false)
+                                  $isPublic, $ignoreScm, $uploadType,
+                                  $applyGlobal = false)
   {
     $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
     $uploadedFile = $symReq->files->get($this->uploadFilePage::FILE_INPUT_NAME,

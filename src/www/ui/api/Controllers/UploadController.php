@@ -3,6 +3,7 @@
  SPDX-FileCopyrightText: © 2018, 2020 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>,
  Soham Banerjee <sohambanerjee4abc@hotmail.com>
+ SPDX-FileCopyrightText: © 2022 Samuel Dushimimana <dushsam100@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -13,19 +14,17 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Psr\Http\Message\ServerRequestInterface;
 use Fossology\DelAgent\UI\DeleteMessages;
 use Fossology\Lib\Auth\Auth;
-use Fossology\UI\Page\UploadPageBase;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
-use Fossology\UI\Api\Helper\UploadHelper;
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
 use Fossology\UI\Api\Helper\ResponseHelper;
+use Fossology\UI\Api\Helper\UploadHelper;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
+use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\StreamFactory;
 
 /**
@@ -394,8 +393,32 @@ class UploadController extends RestController
    */
   public function postUpload($request, $response, $args)
   {
+    $uploadType = $request->getHeaderLine('uploadType');
+    if (empty($uploadType)) {
+      $uploadType = 'vcs';
+    }
+    $reqBody = $this->getParsedBody($request);
+    $scanOptions = [];
+    if (array_key_exists('scanOptions', $reqBody)) {
+      if ($uploadType == 'file') {
+        $scanOptions = json_decode($reqBody['scanOptions'], true);
+      } else {
+        $scanOptions = $reqBody['scanOptions'];
+      }
+    }
+
+    if (! is_array($scanOptions)) {
+      $scanOptions = [];
+    }
+
     $uploadHelper = new UploadHelper();
-    if ($request->hasHeader('folderId') &&
+
+    if ($uploadType != "file" && (empty($reqBody) ||
+        ! array_key_exists("location", $reqBody))) {
+      $error = new Info(400, "Require location object if uploadType != file.",
+        InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    } else if ($request->hasHeader('folderId') &&
       is_numeric($folderId = $request->getHeaderLine('folderId')) && $folderId > 0) {
 
       $allFolderIds = $this->restHelper->getFolderDao()->getAllFolderIds();
@@ -415,19 +438,32 @@ class UploadController extends RestController
       $applyGlobal = filter_var($request->getHeaderLine('applyGlobal'),
         FILTER_VALIDATE_BOOLEAN);
       $ignoreScm = $request->getHeaderLine('ignoreScm');
-      $uploadType = $request->getHeaderLine('uploadType');
-      if (empty($uploadType)) {
-        $uploadType = "vcs";
+
+      $locationObject = [];
+      if (array_key_exists("location", $reqBody)) {
+        $locationObject = $reqBody["location"];
+      } elseif ($request->getHeaderLine('uploadType') != 'file') {
+        $error = new Info(400, "Require location object if uploadType != file",
+          InfoType::ERROR);
+        return $response->withJson($error->getArray(), $error->getCode());
       }
-      $reqBody = $this->getParsedBody($request);
-      $uploadResponse = $uploadHelper->createNewUpload($reqBody, $folderId,
-        $description, $public, $ignoreScm, $uploadType, $applyGlobal);
+
+      $uploadResponse = $uploadHelper->createNewUpload($locationObject,
+        $folderId, $description, $public, $ignoreScm, $uploadType,
+        $applyGlobal);
       $status = $uploadResponse[0];
       $message = $uploadResponse[1];
       $statusDescription = $uploadResponse[2];
       if (! $status) {
         $info = new Info(500, $message . "\n" . $statusDescription,
           InfoType::ERROR);
+      } elseif (! empty($scanOptions)) {
+        $uploadId = $uploadResponse[3];
+        $info =  $uploadHelper->handleScheduleAnalysis(intval($uploadId),
+          intval($folderId), $scanOptions, true);
+        if ($info->getCode() == 201) {
+          $info = new Info($info->getCode(), intval($uploadId), $info->getType());
+        }
       } else {
         $uploadId = $uploadResponse[3];
         $info = new Info(201, intval($uploadId), InfoType::INFO);

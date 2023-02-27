@@ -7,7 +7,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.4.3
+  version: 1.5.0
   contact:
     email: fossology@fossology.org
   license:
@@ -443,13 +443,19 @@ paths:
       description: >
         Endpoint to create a new upload in FOSSology
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/VcsUpload'
-                - $ref: '#/components/schemas/UrlUpload'
-                - $ref: '#/components/schemas/ServerUpload'
+              type: object
+              properties:
+                location:
+                  oneOf:
+                    - $ref: '#/components/schemas/VcsUpload'
+                    - $ref: '#/components/schemas/UrlUpload'
+                    - $ref: '#/components/schemas/ServerUpload'
+                scanOptions:
+                  $ref: '#/components/schemas/ScanOptions'
           multipart/form-data:
             schema:
               type: object
@@ -457,6 +463,10 @@ paths:
                 fileInput:
                   type: string
                   format: binary
+                scanOptions:
+                  $ref: '#/components/schemas/ScanOptions'
+              required:
+                - fileInput
       parameters:
         - name: folderId
           description: Folder Id, where upload should be created
@@ -501,10 +511,11 @@ paths:
           description: >
             Type of upload done. Required for VCS, URL and server uploads
           in: header
-          required: false
+          required: true
           schema:
             type: string
             enum:
+              - file
               - vcs
               - url
               - server
@@ -1210,7 +1221,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
-        
+
         default:
           $ref: '#/components/responses/defaultResponse'
   /users/tokens/{type}:
@@ -1249,7 +1260,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
-        
+
         default:
           $ref: '#/components/responses/defaultResponse'
   /jobs:
@@ -1377,8 +1388,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
-
-
         default:
           $ref: '#/components/responses/defaultResponse'
   /jobs/{id}:
@@ -1816,6 +1825,7 @@ paths:
                   $ref: '#/components/schemas/Group'
         default:
           $ref: '#/components/responses/defaultResponse'
+
   /groups/{id}/members:
     parameters:
       - name: id
@@ -1856,7 +1866,6 @@ paths:
         description: User Id
         schema:
           type: string
-
   /report:
     get:
       operationId: getReportsByUpload
@@ -2724,8 +2733,12 @@ components:
             example: "Copyright (C) 2017-2020 Free Software Foundation, Inc."
           filePath:
             description: Path of the files for which the copyright information is provided
-            type: string
-            example: "path/to/file1"
+            type: array
+            items:
+              type: string
+            example:
+              - "path/to/file1"
+              - "path/to/file2"
     UploadPermGroups:
       description: Groups with their respective permissions for a upload
       type: object

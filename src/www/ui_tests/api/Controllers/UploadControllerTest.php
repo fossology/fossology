@@ -2,6 +2,7 @@
 /*
  SPDX-FileCopyrightText: © 2020 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+ SPDX-FileCopyrightText: © 2022 Samuel Dushimimana <dushsam100@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -12,29 +13,27 @@
 
 namespace Fossology\UI\Api\Test\Controllers;
 
-use Mockery as M;
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\UploadStatus;
+use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Helper\DbHelper;
-use Fossology\Lib\Db\DbManager;
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
-use Fossology\Lib\Data\UploadStatus;
-use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\UI\Api\Models\Upload;
+use Fossology\UI\Api\Models\Hash;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use Fossology\DelAgent\UI\DeleteResponse;
-use Fossology\DelAgent\UI\DeleteMessages;
-use Fossology\Lib\Dao\FolderDao;
-use Fossology\Lib\Dao\AgentDao;
-use Fossology\Lib\Dao\UserDao;
-use Fossology\UI\Api\Models\Hash;
-use Fossology\UI\Api\Helper\ResponseHelper;
-use Slim\Psr7\Request;
+use Fossology\UI\Api\Models\Upload;
+use Mockery as M;
 use Slim\Psr7\Factory\StreamFactory;
-use Slim\Psr7\Uri;
 use Slim\Psr7\Headers;
+use Slim\Psr7\Request;
+use Slim\Psr7\Uri;
 
 function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
 {
@@ -555,27 +554,41 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   public function testPostUpload()
   {
     $folderId = 2;
+    $uploadId = 20;
     $uploadDescription = "Test Upload";
+    $reqBody = [
+      "location" => "data",
+      "scanOptions" => "scanOptions"
+    ];
 
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('folderId', $folderId);
     $requestHeaders->setHeader('uploadDescription', $uploadDescription);
     $requestHeaders->setHeader('ignoreScm', 'true');
-    $body = $this->streamFactory->createStream();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+
+    $body = $this->streamFactory->createStream(json_encode(
+      $reqBody
+    ));
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
 
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('createNewUpload')
-      ->withArgs([null, $folderId, $uploadDescription, 'protected', 'true',
+      ->withArgs([$reqBody["location"], $folderId, $uploadDescription, 'protected', 'true',
         'vcs', false])
-      ->andReturn([true, '', '', 20]);
+      ->andReturn([true, '', '', $uploadId]);
+
+    $info = new Info(201, intval(20), InfoType::INFO);
+
+    $uploadHelper->shouldReceive('handleScheduleAnalysis')->withArgs([$uploadId,$folderId,$reqBody["scanOptions"],false])
+    ->andReturn($info);
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
       ->withArgs([$folderId])->andReturn(true);
 
-    $info = new Info(201, intval(20), InfoType::INFO);
+
     $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
       $info->getCode());
     $actualResponse = $this->uploadController->postUpload($request,
@@ -600,9 +613,13 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('folderId', $folderId);
+    $requestHeaders->setHeader('Content-type', 'application/json');
     $requestHeaders->setHeader('uploadDescription', $uploadDescription);
     $requestHeaders->setHeader('ignoreScm', 'true');
-    $body = $this->streamFactory->createStream();
+    $body = $this->streamFactory->createStream(json_encode([
+      'location' => "data",
+      'scanOptions' => 'scanOptions'
+    ]));
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
 
@@ -638,9 +655,13 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('folderId', $folderId);
+    $requestHeaders->setHeader('Content-type', 'application/json');
     $requestHeaders->setHeader('uploadDescription', $uploadDescription);
     $requestHeaders->setHeader('ignoreScm', 'true');
-    $body = $this->streamFactory->createStream();
+    $body = $this->streamFactory->createStream(json_encode([
+      'location' => "vcsData",
+      'scanOptions' => 'scanOptions'
+    ]));
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
 
@@ -674,17 +695,23 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $errorMessage = "Failed to insert upload record";
     $errorDesc = "";
 
+
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('folderId', $folderId);
+    $requestHeaders->setHeader('Content-type', 'application/json');
     $requestHeaders->setHeader('uploadDescription', $uploadDescription);
     $requestHeaders->setHeader('ignoreScm', 'true');
-    $body = $this->streamFactory->createStream();
+    $body = $this->streamFactory->createStream(json_encode([
+      'location' => "vcsData",
+      'scanOptions' => 'scanOptions'
+    ]));
+
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
 
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('createNewUpload')
-      ->withArgs([null, $folderId, $uploadDescription, 'protected', 'true',
+      ->withArgs(['vcsData', $folderId, $uploadDescription, 'protected', 'true',
         'vcs', false])
       ->andReturn([false, $errorMessage, $errorDesc, [-1]]);
 
