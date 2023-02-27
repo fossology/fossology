@@ -14,24 +14,17 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Fossology\UI\Api\Models\Analysis;
-use Fossology\UI\Api\Models\Decider;
-use Fossology\UI\Api\Models\Reuser;
-use Fossology\UI\Api\Models\Scancode;
-use Fossology\UI\Api\Models\ScanOptions;
-use Psr\Http\Message\ServerRequestInterface;
 use Fossology\DelAgent\UI\DeleteMessages;
 use Fossology\Lib\Auth\Auth;
-use Fossology\UI\Page\UploadPageBase;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
-use Fossology\UI\Api\Helper\UploadHelper;
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
 use Fossology\UI\Api\Helper\ResponseHelper;
+use Fossology\UI\Api\Helper\UploadHelper;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
+use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\StreamFactory;
 
 /**
@@ -400,14 +393,30 @@ class UploadController extends RestController
    */
   public function postUpload($request, $response, $args)
   {
-
+    $uploadType = $request->getHeaderLine('uploadType');
+    if (empty($uploadType)) {
+      $uploadType = 'vcs';
+    }
     $reqBody = $this->getParsedBody($request);
-    $scanOptions = $request->getHeaderLine('uploadType') === 'file' ? json_decode($reqBody['scanOptions'],true) : $reqBody['scanOptions'];
+    $scanOptions = [];
+    if (array_key_exists('scanOptions', $reqBody)) {
+      if ($uploadType == 'file') {
+        $scanOptions = json_decode($reqBody['scanOptions'], true);
+      } else {
+        $scanOptions = $reqBody['scanOptions'];
+      }
+    }
+
+    if (! is_array($scanOptions)) {
+      $scanOptions = [];
+    }
 
     $uploadHelper = new UploadHelper();
 
-    if (empty($reqBody)) {
-      $error = new Info(400, "Request body shouldn't be empty", InfoType::ERROR);
+    if ($uploadType != "file" && (empty($reqBody) ||
+        ! array_key_exists("location", $reqBody))) {
+      $error = new Info(400, "Require location object if uploadType != file.",
+        InfoType::ERROR);
       return $response->withJson($error->getArray(), $error->getCode());
     } else if ($request->hasHeader('folderId') &&
       is_numeric($folderId = $request->getHeaderLine('folderId')) && $folderId > 0) {
@@ -429,22 +438,35 @@ class UploadController extends RestController
       $applyGlobal = filter_var($request->getHeaderLine('applyGlobal'),
         FILTER_VALIDATE_BOOLEAN);
       $ignoreScm = $request->getHeaderLine('ignoreScm');
-      $uploadType = $request->getHeaderLine('uploadType');
-      if (empty($uploadType)) {
-        $uploadType = "vcs";
+
+      $locationObject = [];
+      if (array_key_exists("location", $reqBody)) {
+        $locationObject = $reqBody["location"];
+      } elseif ($request->getHeaderLine('uploadType') != 'file') {
+        $error = new Info(400, "Require location object if uploadType != file",
+          InfoType::ERROR);
+        return $response->withJson($error->getArray(), $error->getCode());
       }
 
-      $uploadResponse = $uploadHelper->createNewUpload($reqBody["data"], $folderId,
-        $description, $public, $ignoreScm, $uploadType, $applyGlobal);
+      $uploadResponse = $uploadHelper->createNewUpload($locationObject,
+        $folderId, $description, $public, $ignoreScm, $uploadType,
+        $applyGlobal);
       $status = $uploadResponse[0];
       $message = $uploadResponse[1];
       $statusDescription = $uploadResponse[2];
       if (! $status) {
         $info = new Info(500, $message . "\n" . $statusDescription,
           InfoType::ERROR);
+      } elseif (! empty($scanOptions)) {
+        $uploadId = $uploadResponse[3];
+        $info =  $uploadHelper->handleScheduleAnalysis(intval($uploadId),
+          intval($folderId), $scanOptions, true);
+        if ($info->getCode() == 201) {
+          $info = new Info($info->getCode(), intval($uploadId), $info->getType());
+        }
       } else {
         $uploadId = $uploadResponse[3];
-        $info =  $uploadHelper->handleScheduleAnalysis(intval($uploadId),intval($folderId),$scanOptions,false);
+        $info = new Info(201, intval($uploadId), InfoType::INFO);
       }
       return $response->withJson($info->getArray(), $info->getCode());
     } else {

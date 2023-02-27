@@ -13,29 +13,27 @@
 
 namespace Fossology\UI\Api\Test\Controllers;
 
-use Mockery as M;
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\UploadStatus;
+use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Helper\DbHelper;
-use Fossology\Lib\Db\DbManager;
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
-use Fossology\Lib\Data\UploadStatus;
-use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\UI\Api\Models\Upload;
+use Fossology\UI\Api\Models\Hash;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use Fossology\DelAgent\UI\DeleteResponse;
-use Fossology\DelAgent\UI\DeleteMessages;
-use Fossology\Lib\Dao\FolderDao;
-use Fossology\Lib\Dao\AgentDao;
-use Fossology\Lib\Dao\UserDao;
-use Fossology\UI\Api\Models\Hash;
-use Fossology\UI\Api\Helper\ResponseHelper;
-use Slim\Psr7\Request;
+use Fossology\UI\Api\Models\Upload;
+use Mockery as M;
 use Slim\Psr7\Factory\StreamFactory;
-use Slim\Psr7\Uri;
 use Slim\Psr7\Headers;
+use Slim\Psr7\Request;
+use Slim\Psr7\Uri;
 
 function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
 {
@@ -559,7 +557,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $uploadId = 20;
     $uploadDescription = "Test Upload";
     $reqBody = [
-      "data" => "data",
+      "location" => "data",
       "scanOptions" => "scanOptions"
     ];
 
@@ -577,7 +575,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('createNewUpload')
-      ->withArgs([$reqBody["data"], $folderId, $uploadDescription, 'protected', 'true',
+      ->withArgs([$reqBody["location"], $folderId, $uploadDescription, 'protected', 'true',
         'vcs', false])
       ->andReturn([true, '', '', $uploadId]);
 
@@ -619,8 +617,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders->setHeader('uploadDescription', $uploadDescription);
     $requestHeaders->setHeader('ignoreScm', 'true');
     $body = $this->streamFactory->createStream(json_encode([
-      'data' =>"data",
-      'scanOptions' =>'scanOptions'
+      'location' => "data",
+      'scanOptions' => 'scanOptions'
     ]));
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
@@ -661,8 +659,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders->setHeader('uploadDescription', $uploadDescription);
     $requestHeaders->setHeader('ignoreScm', 'true');
     $body = $this->streamFactory->createStream(json_encode([
-      'data' =>"vcsData",
-      'scanOptions' =>'scanOptions'
+      'location' => "vcsData",
+      'scanOptions' => 'scanOptions'
     ]));
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
@@ -704,8 +702,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders->setHeader('uploadDescription', $uploadDescription);
     $requestHeaders->setHeader('ignoreScm', 'true');
     $body = $this->streamFactory->createStream(json_encode([
-      'data' =>"vcsData",
-      'scanOptions' =>'scanOptions'
+      'location' => "vcsData",
+      'scanOptions' => 'scanOptions'
     ]));
 
     $request = new Request("POST", new Uri("HTTP", "localhost"),

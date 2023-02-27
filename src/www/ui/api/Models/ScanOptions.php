@@ -13,10 +13,7 @@
 namespace Fossology\UI\Api\Models;
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
 use Symfony\Component\HttpFoundation\Request;
-use Fossology\Lib\Dao\UserDao;
 
 if (!class_exists("AgentAdder", false)) {
   require_once dirname(dirname(__DIR__)) . "/agent-add.php";
@@ -83,13 +80,15 @@ class ScanOptions
    * current settings.
    * @param integer $folderId Folder with the upload
    * @param integer $uploadId Upload to be scanned
+   * @param boolean $newUpload If true, do not check if the folder contains the
+   *                           upload. Should be false for existing uploads.
    * @return \Fossology\UI\Api\Models\Info
    */
-  public function scheduleAgents($folderId, $uploadId , $folderCheck = true)
+  public function scheduleAgents($folderId, $uploadId , $newUpload = true)
   {
     $uploadsAccessible = FolderListUploads_perm($folderId, Auth::PERM_WRITE);
 
-    if ($folderCheck) {
+    if (! $newUpload) {
       $found = false;
       foreach ($uploadsAccessible as $singleUpload) {
         if ($singleUpload['upload_pk'] == $uploadId) {
