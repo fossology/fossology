@@ -291,6 +291,7 @@ class LicenseDao
    * @param bool $includeSubFolders
    * @param String $excluding
    * @param bool $ignore ignore files without license
+   * @param bool $includeTreeId Include tree id in the response array?
    * @return array
    */
   public function getLicensesPerFileNameForAgentId(ItemTreeBounds $itemTreeBounds,
@@ -298,7 +299,8 @@ class LicenseDao
                                                    $includeSubfolders=true,
                                                    $excluding='',
                                                    $ignore=false,
-                                                   &$clearingDecisionsForLicList = array())
+                                                   &$clearingDecisionsForLicList = array(),
+                                                   $includeTreeId=false)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
@@ -355,7 +357,8 @@ ORDER BY lft asc
     $rgtStack = array($row['rgt']);
     $lastLft = $row['lft'];
     $path = implode('/', $pathStack);
-    $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $clearingDecisionsForLicList);
+    $this->addToLicensesPerFileName($licensesPerFileName, $path, $row,
+      $ignore, $clearingDecisionsForLicList, $includeTreeId);
     while ($row = $this->dbManager->fetchArray($result)) {
       if (!empty($excluding) && false!==strpos("/$row[ufile_name]/", $excluding)) {
         $lastLft = $row['rgt'] + 1;
@@ -367,7 +370,8 @@ ORDER BY lft asc
 
       $this->updateStackState($pathStack, $rgtStack, $lastLft, $row);
       $path = implode('/', $pathStack);
-      $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $clearingDecisionsForLicList);
+      $this->addToLicensesPerFileName($licensesPerFileName, $path, $row,
+        $ignore, $clearingDecisionsForLicList, $includeTreeId);
     }
     $this->dbManager->freeResult($result);
     return array_reverse($licensesPerFileName);
@@ -388,7 +392,10 @@ ORDER BY lft asc
     }
   }
 
-  private function addToLicensesPerFileName(&$licensesPerFileName, $path, $row, $ignore, &$clearingDecisionsForLicList = array())
+  private function addToLicensesPerFileName(&$licensesPerFileName, $path, $row,
+                                            $ignore,
+                                            &$clearingDecisionsForLicList = array(),
+                                            $includeTreeId=false)
   {
     if (($row['ufile_mode'] & (1 << 29)) == 0) {
       if ($row['rf_shortname']) {
@@ -399,6 +406,9 @@ ORDER BY lft asc
       }
     } else if (!$ignore) {
       $licensesPerFileName[$path] = false;
+    }
+    if ($includeTreeId) {
+      $licensesPerFileName[$path]['uploadtree_pk'][] = $row['uploadtree_pk'];
     }
   }
 

@@ -12,7 +12,11 @@
  */
 namespace Fossology\UI\Api\Helper;
 
+use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Exception;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadFilePage;
@@ -21,6 +25,7 @@ use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadUrlPage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadVcsPage;
 use Fossology\UI\Api\Models\Analysis;
 use Fossology\UI\Api\Models\Decider;
+use Fossology\UI\Api\Models\FileLicenses;
 use Fossology\UI\Api\Models\Findings;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -685,6 +690,35 @@ class UploadHelper
   }
 
   /**
+   * Get the clearing status for files within an upload
+   * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds object for the uploadtree
+   * @param ClearingDao $clearingDao ClearingDao object
+   * @param integer $groupId groupId of the user
+   * @return string String containing the Clearing status message
+   * @throws Exception In case decision type not found
+   */
+  public function fetchClearingStatus($itemTreeBounds, $clearingDao, $groupId)
+  {
+    $decTypes = new DecisionTypes;
+    if ($itemTreeBounds !== null) {
+      $clearingList = $clearingDao->getFileClearings($itemTreeBounds, $groupId);
+    } else {
+      $clearingList = [];
+    }
+
+    $clearingArray = [];
+    foreach ($clearingList as $clearingDecision) {
+      $clearingArray[] = $clearingDecision->getType();
+    }
+
+    if (empty($clearingArray) || $clearingArray[0] === null) {
+      return "NOASSERTION";
+    } else {
+      return $decTypes->getTypeName($clearingArray[0]);
+    }
+  }
+
+  /**
    * Get the license and copyright list for given upload scanned by provided agents
    * @param integer $uploadId        Upload ID
    * @param array $agents            List of agents to get list from
@@ -700,13 +734,13 @@ class UploadHelper
     $restHelper = $container->get('helper.restHelper');
     $uploadDao = $restHelper->getUploadDao();
     $agentDao = $container->get('dao.agent');
-
     $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
     $parent = $uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
-
+    $groupId = $restHelper->getGroupId();
     $scanProx = new ScanJobProxy($agentDao, $uploadId);
     $scanProx->createAgentStatus($agents);
     $agent_ids = $scanProx->getLatestSuccessfulAgentIds();
+    $clearingDao = $container->get("dao.clearing");
 
     /** @var UIExportList $licenseListObj
      * UIExportList object to get licenses
@@ -751,10 +785,18 @@ class UploadHelper
 
         $findings = new Findings($license['agentFindings'],
           $license['conclusions'], $copyrightContent);
-        $responseRow = array();
-        $responseRow['filePath'] = $license['filePath'];
-        $responseRow['findings'] = $findings->getArray();
-        $responseList[] = $responseRow;
+        $uploadTreeTableId = $license['uploadtree_pk'];
+        $uploadtree_tablename = $uploadDao->getUploadtreeTableName($uploadId);
+        if ($uploadTreeTableId!==null) {
+          $itemTreeBounds = $uploadDao->getItemTreeBounds($uploadTreeTableId,$uploadtree_tablename);
+        } else {
+          $itemTreeBounds=null;
+        }
+        $clearingDecision = $this->fetchClearingStatus($itemTreeBounds,
+          $clearingDao, $groupId);
+        $responseRow = new FileLicenses($license['filePath'], $findings,
+          $clearingDecision);
+        $responseList[] = $responseRow->getArray();
       }
     } elseif (!$boolLicense && $boolCopyright) {
       foreach ($copyrightList as $copyFilepath) {
@@ -766,10 +808,8 @@ class UploadHelper
         }
         $findings = new Findings();
         $findings->setCopyright($copyrightContent);
-        $responseRow = array();
-        $responseRow['filePath'] = $copyFilepath['filePath'];
-        $responseRow['copyright'] = $findings->getCopyright();
-        $responseList[] = $responseRow;
+        $responseRow = new FileLicenses($copyFilepath['filePath'], $findings);
+        $responseList[] = $responseRow->getArray();
       }
     }
     return $responseList;

@@ -2722,6 +2722,9 @@ components:
             example: "path/to/LICENSE"
           findings:
             $ref: '#/components/schemas/Findings'
+          clearing_status:
+            type: string
+            example: "Do not use"
     UploadCopyrights:
       type: array
       items:
