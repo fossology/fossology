@@ -144,18 +144,22 @@ class AdminLicenseCandidate extends DefaultPlugin
     return $this->render('admin_license_candidate-merge.html.twig', $this->mergeWithDefault($vars));
   }
 
-  private function getArrayArrayData()
+  public function getCandidateArrayData()
   {
     $sql = "SELECT rf_pk,rf_spdx_id,rf_shortname,rf_fullname,rf_text,group_name,group_pk "
             . "FROM license_candidate, groups "
             . "WHERE group_pk=group_fk AND marydone";
     /* @var $dbManager DbManager */
     $dbManager = $this->getObject('db.manager');
-    $dbManager->prepare($stmt = __METHOD__, $sql);
-    $res = $dbManager->execute($stmt);
+    return $dbManager->getRows($sql, [], __METHOD__);
+  }
+
+  private function getArrayArrayData()
+  {
+    $rows = $this->getCandidateArrayData();
     $aaData = array();
     $delete = "";
-    while ($row = $dbManager->fetchArray($res)) {
+    while ($row = $rows) {
       $link = Traceback_uri() . '?mod=' . self::NAME . '&rf=' . $row['rf_pk'];
       $edit = '<a href="' . $link . '"><img border="0" src="images/button_edit.png"></a>';
       $delete = '<img border="0" id="deletecandidate'.$row['rf_pk'].'" onClick="deleteCandidate('.$row['rf_pk'].')" src="images/icons/close_16.png">';
@@ -166,7 +170,6 @@ class AdminLicenseCandidate extends DefaultPlugin
         htmlentities($row['group_name']),$delete
       );
     }
-    $dbManager->freeResult($res);
     return $aaData;
   }
 
