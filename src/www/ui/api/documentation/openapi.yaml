@@ -2327,12 +2327,12 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-  /license/candidates:
+  /license/admincandidates:
     get:
-      operationId: getLicenseCandidates
+      operationId: getAdminLicenseCandidates
       tags:
         - License
-      summary: Get license Candidates
+      summary: Get license Candidates for admin view
       description: >
         Get a list of license candidates from the database.
       responses:
@@ -2557,22 +2557,25 @@ components:
     LicenseCandidate:
       type: object
       properties:
-        rf_pk:
+        id:
           type: integer
           description: ID of the license-candidate.
-        rf_shortname:
+        shortname:
           type: string
           description: shortname of the license-candidate.
-        rf_fullname:
+        spdxid:
+          type: string
+          description: SPDX ID of the license-candiate.
+        fullname:
           type: string
           description: fullname of the license-candidate.
-        rf_text:
+        text:
           type: string
           description: text of the license-candidate.
         group_name:
           type: string
           description: group_name of the license-candidate.
-        group_pk:
+        group_id:
             type: integer
             description: group_id of the license-candidate.
     User:
