@@ -11,9 +11,9 @@
  */
 namespace Fossology\DecisionImporter;
 
-include_once(__DIR__ . "/DecisionImporter.php");
+include_once(__DIR__ . "/DecisionImporterAgent.php");
 
-$agent = new DecisionImporter();
+$agent = new DecisionImporterAgent();
 $agent->scheduler_connect();
 $agent->run_scheduler_event_loop();
 $agent->scheduler_disconnect(0);
