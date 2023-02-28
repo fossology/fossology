@@ -29,6 +29,7 @@ use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request;
 use Slim\Psr7\Uri;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @class LicenseControllerTest
@@ -870,10 +871,10 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $id = 1;
     $this->auth->shouldReceive('isAdmin')->andReturn(true);
-    $this->adminLicenseCandidate->shouldReceive('getDataRow')->withArgs([$id])->andReturn(true);
+    $this->licenseCandidatePlugin->shouldReceive('getDataRow')->withArgs([$id])->andReturn(true);
     $res = new Response('true',Response::HTTP_OK,array('Content-type'=>'text/plain'));
-    $this->adminLicenseCandidate->shouldReceive("doDeleteCandidate")->withArgs([$id,false])->andReturn($res);
-    $expectedResponse = new Info(200,"License candidate will be deleted.",  InfoType::INFO);
+    $this->licenseCandidatePlugin->shouldReceive("doDeleteCandidate")->withArgs([$id,false])->andReturn($res);
+    $expectedResponse = new Info(202,"License candidate will be deleted.",  InfoType::INFO);
     $actualResponse = $this->licenseController->deleteAdminLicenseCandidate(null,
       new ResponseHelper(), ["id" => $id]);
     $this->assertEquals($expectedResponse->getCode(),
@@ -894,7 +895,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
     $id = 1;
     $this->auth->shouldReceive('isAdmin')->andReturn(false);
-    $expectedResponse = new Info(400, "Only admin can perform this operation.", InfoType::ERROR);
+    $expectedResponse = new Info(403, "Only admin can perform this operation.", InfoType::ERROR);
     $actualResponse = $this->licenseController->deleteAdminLicenseCandidate(null,
       new ResponseHelper(), ["id" => $id]);
     $this->assertEquals($expectedResponse->getCode(),
@@ -915,9 +916,9 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $id = 1;
     $this->auth->shouldReceive('isAdmin')->andReturn(true);
-    $this->adminLicenseCandidate->shouldReceive('getDataRow')->withArgs([$id])->andReturn(false);
+    $this->licenseCandidatePlugin->shouldReceive('getDataRow')->withArgs([$id])->andReturn(false);
     $res = new Response('true',Response::HTTP_OK,array('Content-type'=>'text/plain'));
-    $this->adminLicenseCandidate->shouldReceive("doDeleteCandidate")->withArgs([$id])->andReturn($res);
+    $this->licenseCandidatePlugin->shouldReceive("doDeleteCandidate")->withArgs([$id])->andReturn($res);
     $expectedResponse = new Info(404, "License candidate not found.", InfoType::ERROR);
     $actualResponse = $this->licenseController->deleteAdminLicenseCandidate(null,
       new ResponseHelper(), ["id" => $id]);
@@ -939,9 +940,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $this->licenseCandidatePlugin->shouldReceive('getCandidateArrayData')->andReturn([]);
 
-    $info = new Info(200, [], InfoType::INFO);
-    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
-      $info->getCode());
+    $expectedResponse = (new ResponseHelper())->withJson([], 200);
     $actualResponse = $this->licenseController->getCandidates(null,
       new ResponseHelper(), null);
     $this->assertEquals($expectedResponse->getStatusCode(),

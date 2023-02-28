@@ -1764,7 +1764,7 @@ paths:
     put:
       operationId: updatePermissionByGroupIdAndUserId
       tags:
-        - Users
+        - User
         - Groups
       summary: Update Permission
       description: >
@@ -1852,20 +1852,6 @@ paths:
                   $ref: '#/components/schemas/UserGroupMember'
         default:
           $ref: '#/components/responses/defaultResponse'
-  /groups/{groupId}/user/{userId}:
-    parameters:
-      - name: groupId
-        in: path
-        required: true
-        description: Group id
-        schema:
-          type: string
-      - name: userId
-        in: path
-        required: true
-        description: User Id
-        schema:
-          type: string
   /report:
     get:
       operationId: getReportsByUpload
@@ -2343,8 +2329,7 @@ paths:
               schema:
                 type: array
                 items:
-                  allOf:
-                   - $ref: '#/components/schemas/LicenseCandidate'
+                  $ref: '#/components/schemas/LicenseCandidate'
         '500':
           description: Internal server error with details
           content:
@@ -2353,7 +2338,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
-  /license/candidates/{id}:
+  /license/admincandidates/{id}:
     parameters:
       - name: id
         required: true
@@ -2364,19 +2349,19 @@ paths:
     delete:
       operationId: deleteByLicenseCandidateId
       tags:
-        - LicenseCandidate
+        - License
         - Admin
       summary: Delete license candidate by id.
       description: >
         Delete a single admin-license-candidate by the given id.
       responses:
-        '200':
+        '202':
           description: License candidate will be deleted.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
-        '400':
+        '403':
           description: Validation error.
           content:
             application/json:
