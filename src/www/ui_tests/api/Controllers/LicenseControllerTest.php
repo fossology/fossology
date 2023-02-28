@@ -12,24 +12,23 @@
 
 namespace Fossology\UI\Api\Test\Controllers;
 
-use Fossology\UI\Page\AdminLicenseCandidate;
-use Mockery as M;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Helper\DbHelper;
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\License;
 use Fossology\UI\Api\Models\Obligation;
-use Fossology\UI\Api\Helper\ResponseHelper;
-use Slim\Psr7\Request;
+use Mockery as M;
 use Slim\Psr7\Factory\StreamFactory;
-use Slim\Psr7\Uri;
 use Slim\Psr7\Headers;
+use Slim\Psr7\Request;
+use Slim\Psr7\Uri;
 
 /**
  * @class LicenseControllerTest
@@ -860,10 +859,32 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testGetCandidates()
   {
-    $this->licenseCandidatePlugin->shouldReceive('handleGetArrayData')->andReturn([]);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $this->licenseCandidatePlugin->shouldReceive('getCandidateArrayData')->andReturn([]);
 
-    $expectedResponse = (new ResponseHelper())->withJson([],
-      200);
+    $info = new Info(200, [], InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->licenseController->getCandidates(null,
+      new ResponseHelper(), null);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::getCandidates() as a non-admin user
+   * -# Check if status is 403
+   */
+  public function testGetCandidatesNoAdmin()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_READ;
+
+    $info = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
     $actualResponse = $this->licenseController->getCandidates(null,
       new ResponseHelper(), null);
     $this->assertEquals($expectedResponse->getStatusCode(),

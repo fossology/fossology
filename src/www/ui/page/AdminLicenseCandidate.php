@@ -144,23 +144,19 @@ class AdminLicenseCandidate extends DefaultPlugin
     return $this->render('admin_license_candidate-merge.html.twig', $this->mergeWithDefault($vars));
   }
 
-  private function getArrayArrayData()
+  public function getCandidateArrayData()
   {
     $sql = "SELECT rf_pk,rf_spdx_id,rf_shortname,rf_fullname,rf_text,group_name,group_pk "
             . "FROM license_candidate, groups "
             . "WHERE group_pk=group_fk AND marydone";
     /* @var $dbManager DbManager */
     $dbManager = $this->getObject('db.manager');
-    $dbManager->prepare($stmt = __METHOD__, $sql);
-    $res = $dbManager->execute($stmt);
-    $rows =  $dbManager->fetchArray($res);
-    $dbManager->freeResult($res);
-    return $rows;
+    return $dbManager->getRows($sql, [], __METHOD__);
   }
 
   private function getArrayArrayData()
   {
-    $rows = $this->handleGetArrayData();
+    $rows = $this->getCandidateArrayData();
     $aaData = array();
     $delete = "";
     while ($row = $rows) {
