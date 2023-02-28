@@ -421,7 +421,46 @@ class LicenseController extends RestController
     /** @var AdminLicenseCandidate $adminLicenseCandidate */
     $adminLicenseCandidate = $this->restHelper->getPlugin("admin_license_candidate");
     $licenses = LicenseCandidate::convertDbArray($adminLicenseCandidate->getCandidateArrayData());
-    $info = new Info(200, $licenses, InfoType::INFO);
-    return $response->withJson($info->getArray(), $info->getCode());
+    return $response->withJson($licenses, 200);
+  }
+
+  /**
+   * Delete license candidate by id.
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function deleteAdminLicenseCandidate($request, $response, $args)
+  {
+    $resInfo = null;
+    if (!Auth::isAdmin()) {
+      $resInfo = new Info(403, "Only admin can perform this operation.",
+        InfoType::ERROR);
+    } else {
+      $id = intval($args['id']);
+      $adminLicenseCandidate = $this->restHelper->getPlugin('admin_license_candidate');
+
+      if ($adminLicenseCandidate->getDataRow($id)) {
+        $res = $adminLicenseCandidate->doDeleteCandidate($id,false);
+        $message = $res->getContent();
+        $infoType = InfoType::ERROR;
+        if ($res->getContent() === 'true') {
+          $message = "License candidate will be deleted.";
+          $infoType = InfoType::INFO;
+          $resCode = 202;
+        } else {
+          $message = "License used at following locations, can not delete: " .
+            $message;
+          $resCode = 409;
+        }
+        $resInfo = new Info($resCode, $message, $infoType);
+      } else {
+        $resInfo = new Info(404, "License candidate not found.",
+          InfoType::ERROR);
+      }
+    }
+    return $response->withJson($resInfo->getArray(), $resInfo->getCode());
   }
 }
