@@ -236,6 +236,7 @@ function delete{{ table.type }}(upload, item, hash, kind) {
       success: function(data) {
         $("#delete{{ table.type }}" + hash).hide();
         $("#update{{ table.type }}" + hash).attr("style","display:inline !important;");
+        $("tr.row"+hash+" td").attr("style","background-color:#fdff32 !important");
       },
       error: function(errorResponse) {
         alert(errorResponse.responseText);
@@ -253,6 +254,7 @@ function undo{{ table.type }}(upload, item, hash, kind) {
         $("#delete{{ table.type }}" + hash).show();
         $("#update{{ table.type }}" + hash).hide();
         $("#deleteBySelect{{ table.type }}" + hash).prop('checked', false);
+        $("tr.row"+hash+" td").attr("style","background-color:''");
       },
       error: function(errorResponse) {
         alert(errorResponse.responseText);
