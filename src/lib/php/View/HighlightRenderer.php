@@ -35,7 +35,8 @@ class HighlightRenderer
             Highlight::AUTHOR => 'hi-author',
             Highlight::BULK => 'hi-bulk',
             Highlight::IPRA => 'hi-ipra',
-            Highlight::ECC => 'hi-mediumorchid'
+            Highlight::ECC => 'hi-mediumorchid',
+            Highlight::KEYWORDOTHERS => 'hi-teal'
           );
 
   /**
