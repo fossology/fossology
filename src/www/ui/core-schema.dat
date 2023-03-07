@@ -2609,10 +2609,10 @@
   $Schema["CONSTRAINT"]["copyright_event_pkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_pkey\" PRIMARY KEY (\"copyright_event_pk\");";
   $Schema["CONSTRAINT"]["copyright_event_upload_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_event_copyright_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_copyright_fk_fkey\" FOREIGN KEY (\"copyright_fk\") REFERENCES \"copyright\" (\"copyright_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-    $Schema["CONSTRAINT"]["author_event_pkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_pkey\" PRIMARY KEY (\"author_event_pk\");";
+  $Schema["CONSTRAINT"]["author_event_pkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_pkey\" PRIMARY KEY (\"author_event_pk\");";
   $Schema["CONSTRAINT"]["author_event_upload_fk_fkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["author_event_author_fk_fkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_author_fk_fkey\" FOREIGN KEY (\"author_fk\") REFERENCES \"author\" (\"author_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-    $Schema["CONSTRAINT"]["ecc_event_pkey"] = "ALTER TABLE \"ecc_event\" ADD CONSTRAINT \"ecc_event_pkey\" PRIMARY KEY (\"ecc_event_pk\");";
+  $Schema["CONSTRAINT"]["ecc_event_pkey"] = "ALTER TABLE \"ecc_event\" ADD CONSTRAINT \"ecc_event_pkey\" PRIMARY KEY (\"ecc_event_pk\");";
   $Schema["CONSTRAINT"]["ecc_event_upload_fk_fkey"] = "ALTER TABLE \"ecc_event\" ADD CONSTRAINT \"ecc_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["ecc_event_ecc_fk_fkey"] = "ALTER TABLE \"ecc_event\" ADD CONSTRAINT \"ecc_event_ecc_fk_fkey\" FOREIGN KEY (\"ecc_fk\") REFERENCES \"ecc\" (\"ecc_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["keyword_event_pkey"] = "ALTER TABLE \"keyword_event\" ADD CONSTRAINT \"keyword_event_pkey\" PRIMARY KEY (\"keyword_event_pk\");";
@@ -2637,9 +2637,9 @@
   $Schema["INDEX"]["clearing_event"]["clearing_event_job_fk_idx"] = "CREATE INDEX clearing_event_job_fk_idx ON clearing_event USING btree (job_fk);";
   $Schema["INDEX"]["clearing_event"]["clearing_event_uploadtree_fk_idx"] = "CREATE INDEX clearing_event_uploadtree_fk_idx ON clearing_event USING btree (uploadtree_fk);";
   $Schema["INDEX"]["clearing_event"]["clearing_event_uploadtree_group_fk_idx"] = "CREATE INDEX clearing_event_uploadtree_group_fk_idx ON clearing_event USING btree (uploadtree_fk, group_fk, date_added);";
-  $Schema["INDEX"]["clearing_event"]["clearing_event_pk_removed_idx"] = "CREATE INDEX clearing_event_pk_removed_idx ON clearing_event USING btree(clearing_event_pk, removed, rf_fk) WHERE NOT removed;";
+  $Schema["INDEX"]["clearing_event"]["clearing_event_pk_removed_idx"] = "CREATE INDEX clearing_event_pk_removed_idx ON clearing_event USING btree (clearing_event_pk, removed, rf_fk) WHERE (NOT removed);";
 
-  $Schema["INDEX"]["copyright"]["copyright_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX copyright_pfile_fk_is_enabled_false_idx ON copyright USING btree (pfile_fk, is_enabled) WHERE is_enabled = false;";
+  $Schema["INDEX"]["copyright"]["copyright_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX copyright_pfile_fk_is_enabled_false_idx ON copyright USING btree (pfile_fk, is_enabled) WHERE (is_enabled = false);";
   $Schema["INDEX"]["copyright"]["copyright_agent_fk_idx"] = "CREATE INDEX copyright_agent_fk_idx ON copyright USING btree (agent_fk);";
   $Schema["INDEX"]["copyright"]["copyright_pfile_fk_index"] = "CREATE INDEX copyright_pfile_fk_index ON copyright USING btree (pfile_fk);";
   $Schema["INDEX"]["copyright"]["copyright_pfile_hash_idx"] = "CREATE INDEX copyright_pfile_hash_idx ON copyright USING btree (hash, pfile_fk);";
@@ -2653,12 +2653,12 @@
   $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_pfile_fk_index"] = "CREATE INDEX copyright_spasht_pfile_fk_index ON copyright_spasht USING btree (pfile_fk);";
   $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_pfile_hash_index"] = "CREATE INDEX copyright_spasht_pfile_hash_index ON copyright_spasht USING btree (hash, pfile_fk);";
 
-  $Schema["INDEX"]["author"]["author_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX author_pfile_fk_is_enabled_false_idx ON author USING btree (pfile_fk, is_enabled) WHERE is_enabled = false;";
+  $Schema["INDEX"]["author"]["author_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX author_pfile_fk_is_enabled_false_idx ON author USING btree (pfile_fk, is_enabled) WHERE (is_enabled = false);";
   $Schema["INDEX"]["author"]["author_agent_fk_idx"] = "CREATE INDEX author_agent_fk_idx ON author USING btree (agent_fk);";
   $Schema["INDEX"]["author"]["author_pfile_fk_index"] = "CREATE INDEX author_pfile_fk_index ON author USING btree (pfile_fk);";
   $Schema["INDEX"]["author"]["author_pfile_hash_idx"] = "CREATE INDEX author_pfile_hash_idx ON author USING btree (hash, pfile_fk);";
 
-  $Schema["INDEX"]["ecc"]["ecc_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX ecc_pfile_fk_is_enabled_false_idx ON ecc USING btree (pfile_fk, is_enabled) WHERE is_enabled = false;";
+  $Schema["INDEX"]["ecc"]["ecc_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX ecc_pfile_fk_is_enabled_false_idx ON ecc USING btree (pfile_fk, is_enabled) WHERE (is_enabled = false);";
   $Schema["INDEX"]["ecc"]["ecc_agent_fk_index"] = "CREATE INDEX ecc_agent_fk_index ON ecc USING btree (agent_fk);";
   $Schema["INDEX"]["ecc"]["ecc_hash_index"] = "CREATE INDEX ecc_hash_index ON ecc USING btree (hash);";
   $Schema["INDEX"]["ecc"]["ecc_pfile_fk_index"] = "CREATE INDEX ecc_pfile_fk_index ON ecc USING btree (pfile_fk);";
@@ -2669,18 +2669,18 @@
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_user_fk_index"] = "CREATE INDEX ecc_decision_user_fk_index ON ecc_decision USING btree (user_fk);";
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_pfile_hash_index"] = "CREATE INDEX ecc_decision_pfile_hash_index ON ecc_decision USING btree (hash, pfile_fk);";
 
-  $Schema["INDEX"]["ipra"]["ipra_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX ipra_pfile_fk_is_enabled_false_idx ON ipra USING btree (pfile_fk, is_enabled) WHERE is_enabled = false;";
+  $Schema["INDEX"]["ipra"]["ipra_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX ipra_pfile_fk_is_enabled_false_idx ON ipra USING btree (pfile_fk, is_enabled) WHERE (is_enabled = false);";
   $Schema["INDEX"]["ipra"]["ipra_agent_fk_index"] = "CREATE INDEX ipra_agent_fk_index ON ipra USING btree (agent_fk);";
   $Schema["INDEX"]["ipra"]["ipra_hash_index"] = "CREATE INDEX ipra_hash_index ON ipra USING btree (hash);";
   $Schema["INDEX"]["ipra"]["ipra_pfile_fk_index"] = "CREATE INDEX ipra_pfile_fk_index ON ipra USING btree (pfile_fk);";
-  $Schema["INDEX"]["ipra"]["ipra_pfile_hash_idx"] = "CREATE INDEX ipra_pfile_hash_idx ON ipra using btree (hash, pfile_fk);";
+  $Schema["INDEX"]["ipra"]["ipra_pfile_hash_idx"] = "CREATE INDEX ipra_pfile_hash_idx ON ipra USING btree (hash, pfile_fk);";
 
   $Schema["INDEX"]["ipra_decision"]["ipra_decision_clearing_decision_type_fk_index"] = "CREATE INDEX ipra_decision_clearing_decision_type_fk_index ON ipra_decision USING btree (clearing_decision_type_fk);";
   $Schema["INDEX"]["ipra_decision"]["ipra_decision_pfile_fk_index"] = "CREATE INDEX ipra_decision_pfile_fk_index ON ipra_decision USING btree (pfile_fk);";
   $Schema["INDEX"]["ipra_decision"]["ipra_decision_user_fk_index"] = "CREATE INDEX ipra_decision_user_fk_index ON ipra_decision USING btree (user_fk);";
   $Schema["INDEX"]["ipra_decision"]["ipra_decision_pfile_hash_index"] = "CREATE INDEX ipra_decision_pfile_hash_index ON ipra_decision USING btree (hash, pfile_fk);";
 
-  $Schema["INDEX"]["keyword"]["keyword_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX keyword_pfile_fk_is_enabled_false_idx ON keyword USING btree (pfile_fk, is_enabled) WHERE is_enabled = false;";
+  $Schema["INDEX"]["keyword"]["keyword_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX keyword_pfile_fk_is_enabled_false_idx ON keyword USING btree (pfile_fk, is_enabled) WHERE (is_enabled = false);";
   $Schema["INDEX"]["keyword"]["keyword_agent_fk_index"] = "CREATE INDEX keyword_agent_fk_index ON keyword USING btree (agent_fk);";
   $Schema["INDEX"]["keyword"]["keyword_hash_index"] = "CREATE INDEX keyword_hash_index ON keyword USING btree (hash);";
   $Schema["INDEX"]["keyword"]["keyword_pfile_fk_index"] = "CREATE INDEX keyword_pfile_fk_index ON keyword USING btree (pfile_fk);";
