@@ -130,9 +130,10 @@ class DecisionImporterDataCreator
    * It creates the clearing decisions and events from the report.
    *
    * @param FoDecisionData $reportData The FoDecisionData object that contains the data to be imported.
-   * @param DecisionImporter $agentObj Agent object to send heartbeats
+   * @param DecisionImporterAgent $agentObj Agent object to send heartbeats
    */
-  public function createClearingDecisions(FoDecisionData &$reportData, DecisionImporter &$agentObj): void
+  public function createClearingDecisions(FoDecisionData &$reportData,
+                                          DecisionImporterAgent &$agentObj): void
   {
     $clearingDecisionList = $reportData->getClearingDecisionList();
     $clearingEventList = $reportData->getClearingEventList();
@@ -151,8 +152,8 @@ class DecisionImporterDataCreator
       ], __METHOD__ . ".insertCd", "clearing_decision_pk");
       $clearingDecisionList[$oldDecisionId]["new_decision"] = $newCdId;
       $i++;
-      if ($i == DecisionImporter::$UPDATE_COUNT) {
-        $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
+      if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
+        $agentObj->heartbeat(DecisionImporterAgent::$UPDATE_COUNT);
         $i = 0;
       }
     }
@@ -177,8 +178,8 @@ class DecisionImporterDataCreator
       ], __METHOD__ . ".insertCe", "clearing_event_pk");
       $clearingEventList[$oldEventId]["new_event"] = $newCeId;
       $i++;
-      if ($i == DecisionImporter::$UPDATE_COUNT) {
-        $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
+      if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
+        $agentObj->heartbeat(DecisionImporterAgent::$UPDATE_COUNT);
         $i = 0;
       }
     }
@@ -253,12 +254,13 @@ class DecisionImporterDataCreator
    * It then creates records for decisions and events.
    *
    * @param FoDecisionData $reportData The report data object.
-   * @param DecisionImporter $agentObj Agent object to send heartbeats
-   * @param string $agentName The name of the agent. (can be "copyright", "ecc" or "ip")
+   * @param DecisionImporterAgent $agentObj Agent object to send heartbeats
+   * @param string $agentName The name of the agent. (can be "copyright", "ecc" or "ipra")
    * @param int $jobId Current job id
    */
-  public function createCopyrightData(FoDecisionData &$reportData, DecisionImporter &$agentObj, string $agentName,
-                                      int            $jobId): void
+  public function createCopyrightData(FoDecisionData &$reportData,
+                                      DecisionImporterAgent &$agentObj,
+                                      string $agentName, int $jobId): void
   {
     if (!$this->agentDao->arsTableExists($agentName)) {
       throw new UnexpectedValueException("No agent '$agentName' exists on server.");
@@ -307,8 +309,8 @@ class DecisionImporterDataCreator
       }
       $cxList[$oldId]["new_id"] = $newCp;
       $i++;
-      if ($i == DecisionImporter::$UPDATE_COUNT) {
-        $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
+      if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
+        $agentObj->heartbeat(DecisionImporterAgent::$UPDATE_COUNT);
         $i = 0;
       }
     }
@@ -323,8 +325,8 @@ class DecisionImporterDataCreator
         $decisionItem['textfinding'], $decisionItem['comment']);
       $decisionList[$oldId]["new_id"] = $newDecision;
       $i++;
-      if ($i == DecisionImporter::$UPDATE_COUNT) {
-        $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
+      if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
+        $agentObj->heartbeat(DecisionImporterAgent::$UPDATE_COUNT);
         $i = 0;
       }
     }
@@ -355,8 +357,8 @@ class DecisionImporterDataCreator
         ], __METHOD__ . ".insertCe." . $agentName);
       }
       $i++;
-      if ($i == DecisionImporter::$UPDATE_COUNT) {
-        $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
+      if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
+        $agentObj->heartbeat(DecisionImporterAgent::$UPDATE_COUNT);
         $i = 0;
       }
     }
@@ -403,9 +405,10 @@ class DecisionImporterDataCreator
    * -# Update `clearing_event` entries with `job_fk`
    * -# Create `highlight_bulk` entries.
    * @param FoDecisionData $reportData
-   * @param DecisionImporter $agentObj
+   * @param DecisionImporterAgent $agentObj
    */
-  public function createMonkBulkData(FoDecisionData &$reportData, DecisionImporter &$agentObj): void
+  public function createMonkBulkData(FoDecisionData &$reportData,
+                                     DecisionImporterAgent &$agentObj): void
   {
     $licenseRefBulkList = $reportData->getLicenseRefBulkList();
     $licenseSetBulkList = $reportData->getLicenseSetBulkList();
@@ -441,8 +444,8 @@ class DecisionImporterDataCreator
       $clearingEventList[$oldEventId]["new_lrbid"] = $newLrbId;
       $clearingEventList[$oldEventId]["job_fk"] = $jobId;
       $i++;
-      if ($i == DecisionImporter::$UPDATE_COUNT) {
-        $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
+      if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
+        $agentObj->heartbeat(DecisionImporterAgent::$UPDATE_COUNT);
         $i = 0;
       }
     }
@@ -459,8 +462,8 @@ class DecisionImporterDataCreator
         $this->dbManager->updateTableRow("clearing_event", $assocParams, "clearing_event_pk",
           $clearingEventItem["new_event"], __METHOD__ . ".updateCeJob");
         $i++;
-        if ($i == DecisionImporter::$UPDATE_COUNT) {
-          $agentObj->heartbeat(DecisionImporter::$UPDATE_COUNT);
+        if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
+          $agentObj->heartbeat(DecisionImporterAgent::$UPDATE_COUNT);
           $i = 0;
         }
       }
@@ -479,7 +482,7 @@ class DecisionImporterDataCreator
       ];
       $this->dbManager->insertTableRow("highlight_bulk", $assocParams, __METHOD__ . ".insertHighlightBulk");
       $i++;
-      if ($i == DecisionImporter::$UPDATE_COUNT) {
+      if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
         $agentObj->heartbeat(0);
         $i = 0;
       }
