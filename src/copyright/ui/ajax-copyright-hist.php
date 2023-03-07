@@ -429,7 +429,7 @@ count(*) AS copyright_count " .
   private function fillTableRow($row, $uploadTreeId, $upload, $agentId, $type,$listPage, $filter = "", $activated = true, $rw = true)
   {
     $hash = $row['hash'];
-    $output = array('DT_RowId' => "$upload,$uploadTreeId,$hash,$type" );
+    $output = array('DT_RowId' => "$upload,$uploadTreeId,$hash,$type", "DT_RowClass" => "row$hash");
 
     $link = "<a href='";
     $link .= Traceback_uri();
