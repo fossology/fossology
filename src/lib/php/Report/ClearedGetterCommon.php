@@ -112,10 +112,10 @@ abstract class ClearedGetterCommon
     $findings = array();
     $countLoop = 0;
     foreach ($ungrupedStatements as $statement) {
-      $licenseId = $statement['licenseId'];
-      $content = convertToUTF8($statement['content'], false);
+      $licenseId = (array_key_exists('licenseId', $statement)) ? convertToUTF8($statement['licenseId'], false) : '';
+      $content = (array_key_exists('content', $statement)) ? convertToUTF8($statement['content'], false) : '';
       $content = htmlspecialchars($content, ENT_DISALLOWED);
-      $comments = convertToUTF8($statement['comments'], false);
+      $comments = (array_key_exists('comments', $statement)) ? convertToUTF8($statement['comments'], false) : '';
       $fileName = $statement['fileName'];
       $fileHash = $statement['fileHash'];
       if (array_key_exists('acknowledgement', $statement)) {
@@ -125,8 +125,8 @@ abstract class ClearedGetterCommon
       }
 
       if (!array_key_exists('text', $statement)) {
-        $description = $statement['description'];
-        $textfinding = $statement['textfinding'];
+        $description = (array_key_exists('description', $statement)) ? convertToUTF8($statement['description'], false) : '';
+        $textfinding = (array_key_exists('textfinding', $statement)) ? convertToUTF8($statement['textfinding'], false) : '';
 
         if ($description === null) {
           $text = "";
@@ -169,7 +169,7 @@ abstract class ClearedGetterCommon
         if ($extended) {
           $singleStatement["licenseId"] = $licenseId;
           $singleStatement["comments"] = convertToUTF8($comments, false);
-          $singleStatement["risk"] =  $statement['risk'];
+          $singleStatement["risk"] = (array_key_exists('risk', $statement)) ? convertToUTF8($statement['risk'], false) : 0;
         }
 
         if (empty($comments)) {
