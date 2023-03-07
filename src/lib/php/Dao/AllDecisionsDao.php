@@ -46,7 +46,7 @@ class AllDecisionsDao
   {
     $extendedQuery = " AND jq_type LIKE 'nomos' OR jq_type LIKE 'monk'".
                      " OR jq_type LIKE 'ojo' OR jq_type LIKE 'copyright'".
-                     " OR jq_type LIKE 'ecc'";
+                     " OR jq_type LIKE 'ecc' OR jq_type LIKE 'ipra'";
     $sql = "SELECT DISTINCT(jq_type) FROM jobqueue INNER JOIN job ON jq_job_fk=job_pk " .
       "WHERE jq_end_bits ='1'".$extendedQuery." AND job_upload_fk=$1;";
     $statementName = __METHOD__ . ".getAllFinishedJobsForUploadId";
@@ -287,6 +287,7 @@ class AllDecisionsDao
     $licensePfile = array();
     $copyrightPfile = array();
     $eccPfile = array();
+    $ipPfile = array();
     $licenseAgentNames = array('nomos','monk','ojo');
     $executedAgents = $this->getAllJobTypeForUpload($uploadId);
     foreach ($executedAgents as $agent) {
@@ -299,8 +300,11 @@ class AllDecisionsDao
       } else if ($agent == 'ecc') {
         $executedAgents = array_diff($executedAgents,array('ecc'));
         $eccPfile = $this->getSqlQueryDataPfile($uploadId, $groupId, $userId, 'noEcc');
+      } else if ($agent == 'ipra') {
+        $executedAgents = array_diff($executedAgents,array('ipra'));
+        $ipPfile = $this->getSqlQueryDataPfile($uploadId, $groupId, $userId, 'noIpra');
       }
     }
-    return $licensePfile + $copyrightPfile + $eccPfile;
+    return $licensePfile + $copyrightPfile + $eccPfile + $ipPfile;
   }
 }
