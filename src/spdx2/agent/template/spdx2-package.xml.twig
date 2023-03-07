@@ -89,7 +89,8 @@
         ]]></rdfs:comment>
         {%- endif ~%}
 {% for obligation in obligations  %}
-        <spdx:attributionText>{{ obligation }}</spdx:attributionText>
+        <spdx:attributionText><![CDATA[{{ obligation|replace({'\f':''})
+                |replace({']]>':']]]]><![CDATA[>'}) }}]]></spdx:attributionText>
 {% endfor %}
         {{ fileNodes|replace({'\n':'\n        '}) }}
       </spdx:Package>
