@@ -90,6 +90,12 @@ class DecisionExporter extends Agent
     $this->heartbeat(1);
     $eccEventData = $this->allDecisionsDao->getAllDataForGivenEventTableUpload($uploadId, 'ecc_event', 'ecc');
     $this->heartbeat(1);
+    $ipraData = $this->allDecisionsDao->getAllDataForGivenTableUpload($tableName, 'ipra');
+    $this->heartbeat(1);
+    $ipraDecisionData = $this->allDecisionsDao->getAllDataForGivenDecisionTableUpload($tableName, 'ipra_decision');
+    $this->heartbeat(1);
+    $ipraEventData = $this->allDecisionsDao->getAllDataForGivenEventTableUpload($uploadId, 'ipra_event', 'ipra');
+    $this->heartbeat(1);
     $reportInfoData = $this->uploadDao->getReportInfo($uploadId);
     $this->heartbeat(1);
     $licenseData = $this->allDecisionsDao->getAllLicenseDataForUpload($uploadId);
@@ -111,6 +117,9 @@ class DecisionExporter extends Agent
       'ecc'=>$eccData,
       'ecc_decision'=>$eccDecisionData,
       'ecc_event'=>$eccEventData,
+      'ipra'=>$ipraData,
+      'ipra_decision'=>$ipraDecisionData,
+      'ipra_event'=>$ipraEventData,
       'report_info'=>$reportInfoData,
       'licenses'=>$licenseData,
       'upload_clearing_license'=>array_values($mainLicenseData)

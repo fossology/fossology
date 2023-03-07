@@ -60,6 +60,15 @@ class FoDecisionData
   /** @var array $ecc_eventList */
   private $ecc_eventList;
 
+  /** @var array $ipraList */
+  private $ipraList;
+
+  /** @var array $ipra_decisionList */
+  private $ipra_decisionList;
+
+  /** @var array $ipra_eventList */
+  private $ipra_eventList;
+
   /** @var array $report_info */
   private $report_info;
 
@@ -96,6 +105,9 @@ class FoDecisionData
       ->insertEccList($data['ecc'])
       ->insertEccDecisionList($data['ecc_decision'])
       ->insertEccEventList($data['ecc_event'])
+      ->insertIpraList($data['ipra'])
+      ->insertIpraDecisionList($data['ipra_decision'])
+      ->insertIpraEventList($data['ipra_event'])
       ->insertReportInfo($data['report_info'])
       ->insertLicensesList($data['licenses'])
       ->insertMainListList($data['upload_clearing_license']);
@@ -141,6 +153,19 @@ class FoDecisionData
   }
 
   /**
+   * @param array $ipra_eventList
+   * @return FoDecisionData
+   */
+  private function insertIpraEventList(array $ipra_eventList): FoDecisionData
+  {
+    $this->ipra_eventList = [];
+    foreach ($ipra_eventList as $ipraEventItem) {
+      $this->ipra_eventList[] = $this->createEventItem($ipraEventItem, "ipra");
+    }
+    return $this;
+  }
+
+  /**
    * @param array $eventItemData
    * @param string $agentName
    * @return array
@@ -158,6 +183,20 @@ class FoDecisionData
   }
 
   /**
+   * @param array $ipra_decisionList
+   * @return FoDecisionData
+   */
+  private function insertIpraDecisionList(array $ipra_decisionList): FoDecisionData
+  {
+    $this->ipra_decisionList = [];
+    foreach ($ipra_decisionList as $ipraDecisionItem) {
+      $this->ipra_decisionList[$ipraDecisionItem['ipra_decision_pk']] =
+        $this->createDecisionItem($ipraDecisionItem);
+    }
+    return $this;
+  }
+
+  /**
    * @param array $decisionItemData
    * @return array
    */
@@ -171,6 +210,19 @@ class FoDecisionData
       "hash" => $decisionItemData['hash'],
       "comment" => $decisionItemData['comment'],
     ];
+  }
+
+  /**
+   * @param array $ipraList
+   * @return FoDecisionData
+   */
+  private function insertIpraList(array $ipraList): FoDecisionData
+  {
+    $this->ipraList = [];
+    foreach ($ipraList as $ipraItem) {
+      $this->ipraList[$ipraItem['ipra_pk']] = $this->createCxItem($ipraItem);
+    }
+    return $this;
   }
 
   /**
@@ -682,6 +734,60 @@ class FoDecisionData
   public function setEccEventList(array $ecc_eventList): FoDecisionData
   {
     $this->ecc_eventList = $ecc_eventList;
+    return $this;
+  }
+
+  /**
+   * @return array
+   */
+  public function getIpraList(): array
+  {
+    return $this->ipraList;
+  }
+
+  /**
+   * @param array $ipraList
+   * @return FoDecisionData
+   */
+  public function setIpraList(array $ipraList): FoDecisionData
+  {
+    $this->ipraList = $ipraList;
+    return $this;
+  }
+
+  /**
+   * @return array
+   */
+  public function getIpraDecisionList(): array
+  {
+    return $this->ipra_decisionList;
+  }
+
+  /**
+   * @param array $ipra_decisionList
+   * @return FoDecisionData
+   */
+  public function setIpraDecisionList(array $ipra_decisionList): FoDecisionData
+  {
+    $this->ipra_decisionList = $ipra_decisionList;
+    return $this;
+  }
+
+  /**
+   * @return array
+   */
+  public function getIpraEventList(): array
+  {
+    return $this->ipra_eventList;
+  }
+
+  /**
+   * @param array $ipra_eventList
+   * @return FoDecisionData
+   */
+  public function setIpraEventList(array $ipra_eventList): FoDecisionData
+  {
+    $this->ipra_eventList = $ipra_eventList;
     return $this;
   }
 
