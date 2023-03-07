@@ -8,10 +8,10 @@
 namespace Fossology\Lib\Proxy;
 
 use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\Data\AgentRef;
 
 class UploadTreeProxy extends DbViewProxy
 {
@@ -241,7 +241,9 @@ class UploadTreeProxy extends DbViewProxy
       case "noLicense":
       case self::OPT_SKIP_ALREADY_CLEARED:
       case "noCopyright":
+      case "noIpra":
       case "noEcc":
+      case "noKeyword":
 
         $queryCondition = self::getQueryCondition($skipThese, $options, $groupId, $agentFilter, $applyGlobal)." ".$additionalCondition;
         if ('uploadtree' === $uploadTreeTableName || 'uploadtree_a' == $uploadTreeTableName) {
@@ -320,6 +322,9 @@ ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
       case "noCopyright":
         return "EXISTS (SELECT copyright_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )".
               " OR EXISTS (SELECT 1 FROM copyright_decision AS cd WHERE ut.pfile_fk = cd.pfile_fk)";
+      case "noIpra":
+        return "EXISTS (SELECT ipra_pk FROM ipra cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )".
+              " OR EXISTS (SELECT 1 FROM ipra_decision AS cd WHERE ut.pfile_fk = cd.pfile_fk)";
       case "noEcc":
         return "EXISTS (SELECT ecc_pk FROM ecc cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )".
               " OR EXISTS (SELECT 1 FROM ecc_decision AS cd WHERE ut.pfile_fk = cd.pfile_fk)";
