@@ -13,18 +13,17 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\ShowJobsDao;
+use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\UploadHelper;
-use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use Fossology\UI\Api\Models\Analysis;
-use Fossology\UI\Api\Models\Decider;
-use Fossology\Lib\Auth\Auth;
-use Fossology\UI\Api\Models\Scancode;
-use Fossology\UI\Api\Models\Reuser;
-use Fossology\UI\Api\Models\ScanOptions;
-use Fossology\UI\Api\Models\Job;
+use Fossology\UI\Api\Models\JobQueue;
+use Fossology\UI\Api\Models\ShowJob;
+use Psr\Http\Message\ServerRequestInterface;
+use Slim\Psr7\Request;
 
 /**
  * @class JobController
@@ -161,11 +160,12 @@ class JobController extends RestController
         return $response->withJson($error->getArray(), $error->getCode());
       }
       $uploadHelper = new UploadHelper();
-      $uploadHelper->handleScheduleAnalysis($folder, $upload, $scanOptionsJSON);
-    } else {
-      $error = new Info(400, "Folder id and upload id should be integers!", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      $info = $uploadHelper->handleScheduleAnalysis($folder, $upload,
+        $scanOptionsJSON);
+      return $response->withJson($info->getArray(), $info->getCode());
     }
+    $error = new Info(400, "Folder id and upload id should be integers!", InfoType::ERROR);
+    return $response->withJson($error->getArray(), $error->getCode());
   }
   /**
    * Get all jobs created by the current user.
@@ -285,7 +285,7 @@ class JobController extends RestController
     $eta = $showJobDao->getEstimatedTime($jobId, '', 0, $uploadId);
     $eta = explode(":", $eta);
     if (count($eta) > 1) {
-      $eta = ($eta[0] * 3600) + ($eta[1] * 60) + ($eta[2]);
+      $eta = (intval($eta[0]) * 3600) + (intval($eta[1]) * 60) + intval($eta[2]);
     } else {
       $eta = 0;
     }
@@ -338,5 +338,110 @@ class JobController extends RestController
       $jobStatusString = "Completed";
     }
     return $jobStatusString;
+  }
+
+  /**
+   * Get the history of all the jobs queued based on an upload
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getJobsHistory($request, $response, $args)
+  {
+    $query = $request->getQueryParams();
+    $returnVal = null;
+    if (!array_key_exists(self::UPLOAD_PARAM, $query)) {
+      $returnVal = new Info(400, "Bad Request. 'upload' is a required query param", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $upload_fk = intval($query[self::UPLOAD_PARAM]);
+    // checking if the upload exists and if yes, whether it is accessible
+    $res = true;
+    if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $upload_fk)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+      $res = false;
+    } else if (! $this->restHelper->getUploadDao()->isAccessible($upload_fk, $this->restHelper->getGroupId())) {
+      $returnVal = new Info(403, "Upload is not accessible", InfoType::ERROR);
+      $res = false;
+    }
+    if ($res !== true) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    /**
+     * @var DbManager $dbManager
+     * initialising the DB manager
+     */
+    $dbManager = $this->dbHelper->getDbManager();
+
+    // getting all the jobs from the DB for the upload id
+    $query = "SELECT job_pk FROM job WHERE job_upload_fk=$1;";
+    $statement = __METHOD__.".getJobs";
+    $result = $dbManager->getRows($query, [$upload_fk], $statement);
+
+    // creating a list of all the job_pks
+    $allJobPks = array_column($result, 'job_pk');
+
+    /**
+     * @var ShowJobsDao $showJobsDao
+     * initialising the show jobs Dao
+     */
+    $showJobsDao = $this->container->get('dao.show_jobs');
+
+    $jobsInfo = $showJobsDao->getJobInfo($allJobPks);
+    usort($jobsInfo, [$this, "compareJobsInfo"]);
+
+    /**
+     * @var \Fossology\UI\Ajax\AjaxShowJobs $ajaxShowJobs
+     * initialising the show jobs ajax plugin
+     */
+    $ajaxShowJobs = $this->restHelper->getPlugin('ajaxShowJobs');
+
+    // getting the show jobs data for each job
+    $showJobData = $ajaxShowJobs->getShowJobsForEachJob($jobsInfo);
+
+    // creating the response structure
+    $allJobsHistory = array();
+    foreach ($showJobData as $jobValObj) {
+      $finalJobqueue = array();
+      foreach ($jobValObj['job']['jobQueue'] as $jqVal) {
+        $depends = [];
+        if ($jqVal['depends'][0] != null) {
+          $depends = $jqVal['depends'];
+        }
+        $download = null;
+        if (!empty($jqVal['download'])) {
+          $download = [
+            "text" => $jqVal["download"],
+            "link" => ReportController::buildDownloadPath($request,
+              $jqVal['jq_job_fk'])
+          ];
+        }
+        $jobQueue = new JobQueue($jqVal['jq_pk'], $jqVal['jq_type'],
+          $jqVal['jq_starttime'], $jqVal['jq_endtime'], $jqVal['jq_endtext'],
+          $jqVal['jq_itemsprocessed'], $jqVal['jq_log'], $depends,
+          $jqVal['itemsPerSec'], $jqVal['canDoActions'], $jqVal['isInProgress'],
+          $jqVal['isReady'], $download);
+        $finalJobqueue[] = $jobQueue->getArray();
+      }
+      $job = new ShowJob($jobValObj['job']['jobId'],
+        $jobValObj['job']['jobName'], $finalJobqueue,
+        $jobValObj['upload']['uploadId']);
+      $allJobsHistory[] = $job->getArray();
+    }
+    return $response->withJson($allJobsHistory, 200);
+  }
+
+  /**
+   * @brief Sort compare function to order $JobsInfo by job_pk
+   * @param array $JobsInfo1 Result from GetJobInfo
+   * @param array $JobsInfo2 Result from GetJobInfo
+   * @return int
+   */
+  private function compareJobsInfo($JobsInfo1, $JobsInfo2)
+  {
+    return $JobsInfo2["job"]["job_pk"] - $JobsInfo1["job"]["job_pk"];
   }
 }

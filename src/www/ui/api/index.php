@@ -55,6 +55,8 @@ const BASE_PATH   = "/repo/api/v" . REST_VERSION;
 
 const AUTH_METHOD = "JWT_TOKEN";
 
+$GLOBALS['apiBasePath'] = BASE_PATH;
+
 $startTime = microtime(true);
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
@@ -183,6 +185,7 @@ $app->group('/jobs',
     $app->get('[/{id:\\d+}]', JobController::class . ':getJobs');
     $app->get('/all', JobController::class . ':getAllJobs');
     $app->post('', JobController::class . ':createJob');
+    $app->get('/history', JobController::class . ':getJobsHistory');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
