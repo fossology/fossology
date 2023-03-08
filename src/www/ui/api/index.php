@@ -55,6 +55,8 @@ const BASE_PATH   = "/repo/api/v" . REST_VERSION;
 
 const AUTH_METHOD = "JWT_TOKEN";
 
+$GLOBALS['apiBasePath'] = BASE_PATH;
+
 $startTime = microtime(true);
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
