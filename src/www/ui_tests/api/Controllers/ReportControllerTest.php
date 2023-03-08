@@ -237,12 +237,13 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
    */
   private function getResponseForReport($uploadId, $reportFormat)
   {
+    $GLOBALS["apiBasePath"] = "/repo/api/v1";
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('uploadId', $uploadId);
     $requestHeaders->setHeader('reportFormat', $reportFormat);
     $body = $this->streamFactory->createStream();
     $request = new Request("GET", new Uri("HTTP", "localhost", 80,
-      "/api/v1/report"), $requestHeaders, [], [], $body);
+      "/repo/api/v1/report"), $requestHeaders, [], [], $body);
     $response = new ResponseHelper();
     return $this->reportController->getReport($request, $response, []);
   }
@@ -274,7 +275,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $this->decisionExporterPlugin->shouldReceive('scheduleAgent')
       ->withArgs([$this->groupId, $upload])->andReturn([32, 33]);
 
-    $expectedResponse = new Info(201, "localhost/api/v1/report/32",
+    $expectedResponse = new Info(201, "http://localhost/repo/api/v1/report/32",
       InfoType::INFO);
 
     foreach ($this->reportsAllowed as $reportFormat) {

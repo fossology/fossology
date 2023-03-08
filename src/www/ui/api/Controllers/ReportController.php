@@ -23,6 +23,7 @@ use Fossology\UI\Api\Models\InfoType;
 use Fossology\UnifiedReport\UI\FoUnifiedReportGenerator;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\Request as SlimRequest;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -60,7 +61,7 @@ class ReportController extends RestController
   /**
    * Get the required report for the required upload
    *
-   * @param ServerRequestInterface $request
+   * @param SlimRequest $request
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
@@ -164,41 +165,30 @@ class ReportController extends RestController
 
   /**
    * Generate the path to download URL based on current request and new Job id
-   * @param ServerRequestInterface $request
+   * @param SlimRequest $request
    * @param integer $jobId The new job id created by agent
    * @return string The path to download the report
    */
-  private function buildDownloadPath($request, $jobId)
+  public static function buildDownloadPath($request, $jobId)
   {
-    $path = $request->getUri()->getHost();
-    $path .= $request->getRequestTarget();
-    $url_parts = parse_url($path);
+    $url_parts = $request->getUri();
     $download_path = "";
-    if (array_key_exists("scheme", $url_parts)) {
-      $download_path .= $url_parts["scheme"] . "://";
+    if (!empty($url_parts->getScheme())) {
+      $download_path .= $url_parts->getScheme() . "://";
     }
-    if (array_key_exists("user", $url_parts)) {
-      $download_path .= $url_parts["user"];
+    if (!empty($url_parts->getHost())) {
+      $download_path .= $url_parts->getHost();
     }
-    if (array_key_exists("pass", $url_parts)) {
-      $download_path .= ':' . $url_parts["pass"];
+    if (!empty($url_parts->getPort())) {
+      $download_path .= ':' . $url_parts->getPort();
     }
-    if (array_key_exists("host", $url_parts)) {
-      $download_path .= $url_parts["host"];
+    $endpoint = substr($url_parts->getPath(), 0, strpos($url_parts->getPath(),
+        $GLOBALS["apiBasePath"]) + strlen($GLOBALS["apiBasePath"]));
+    if (substr($endpoint, -1) !== '/') {
+      $endpoint .= '/';
     }
-    if (array_key_exists("port", $url_parts)) {
-      $download_path .= ':' . $url_parts["port"];
-    }
-    if (substr($url_parts["path"], -1) !== '/') {
-      $url_parts["path"] .= '/';
-    }
-    $download_path .= $url_parts["path"] . $jobId;
-    if (array_key_exists("query", $url_parts)) {
-      $download_path .= '?' . $url_parts["query"];
-    }
-    if (array_key_exists("fragment", $url_parts)) {
-      $download_path .= '#' . $url_parts["fragment"];
-    }
+    $endpoint .= "report/" . $jobId;
+    $download_path .= $endpoint;
     return $download_path;
   }
 

@@ -47,6 +47,11 @@ class JobQueue
    */
   private $itemsProcessed;
   /**
+   * @var string|null $log
+   * Log location
+   */
+  private $log;
+  /**
    * @var array $dependencies
    * Job dependencies
    */
@@ -71,7 +76,7 @@ class JobQueue
    */
   private $isReady;
   /**
-   * @var boolean $download
+   * @var array|null $download
    * Any download related info
    */
   private $download;
@@ -84,26 +89,242 @@ class JobQueue
    * @param string $endTime
    * @param string $status
    * @param integer $itemsProcessed
+   * @param string|null $log
    * @param array $dependencies
    * @param float $itemsPerSec
    * @param boolean $canDoActions
    * @param boolean $isInProgress
    * @param boolean $isReady
-   * @param string $download
+   * @param array|null $download
    */
-  public function __construct($jobQueueId, $jobQueueType, $startTime, $endTime, $status, $itemsProcessed, $dependencies, $itemsPerSec, $canDoActions, $isInProgress, $isReady, $download)
+  public function __construct($jobQueueId, $jobQueueType, $startTime, $endTime,
+                              $status, $itemsProcessed, $log, $dependencies,
+                              $itemsPerSec, $canDoActions, $isInProgress,
+                              $isReady, $download)
+  {
+    $this->setJobQueueId($jobQueueId);
+    $this->setJobQueueType($jobQueueType);
+    $this->setStartTime($startTime);
+    $this->setEndTime($endTime);
+    $this->setStatus($status);
+    $this->setItemsProcessed($itemsProcessed);
+    $this->setLog($log);
+    $this->setDependencies($dependencies);
+    $this->setItemsPerSec($itemsPerSec);
+    $this->setCanDoActions($canDoActions);
+    $this->setIsInProgress($isInProgress);
+    $this->setIsReady($isReady);
+    $this->setDownload($download);
+  }
+
+  /**
+   * @return int
+   */
+  public function getJobQueueId()
+  {
+    return $this->jobQueueId;
+  }
+
+  /**
+   * @param int $jobQueueId
+   */
+  public function setJobQueueId($jobQueueId)
   {
     $this->jobQueueId = intval($jobQueueId);
+  }
+
+  /**
+   * @return string
+   */
+  public function getJobQueueType()
+  {
+    return $this->jobQueueType;
+  }
+
+  /**
+   * @param string $jobQueueType
+   */
+  public function setJobQueueType($jobQueueType)
+  {
     $this->jobQueueType = $jobQueueType;
+  }
+
+  /**
+   * @return string
+   */
+  public function getStartTime()
+  {
+    return $this->startTime;
+  }
+
+  /**
+   * @param string $startTime
+   */
+  public function setStartTime($startTime)
+  {
     $this->startTime = $startTime;
+  }
+
+  /**
+   * @return string
+   */
+  public function getEndTime()
+  {
+    return $this->endTime;
+  }
+
+  /**
+   * @param string $endTime
+   */
+  public function setEndTime($endTime)
+  {
     $this->endTime = $endTime;
+  }
+
+  /**
+   * @return string
+   */
+  public function getStatus()
+  {
+    return $this->status;
+  }
+
+  /**
+   * @param string $status
+   */
+  public function setStatus($status)
+  {
     $this->status = $status;
+  }
+
+  /**
+   * @return int
+   */
+  public function getItemsProcessed()
+  {
+    return $this->itemsProcessed;
+  }
+
+  /**
+   * @param int $itemsProcessed
+   */
+  public function setItemsProcessed($itemsProcessed)
+  {
     $this->itemsProcessed = intval($itemsProcessed);
-    $this->dependencies = $dependencies;
+  }
+
+  /**
+   * @return string|null
+   */
+  public function getLog()
+  {
+    return $this->log;
+  }
+
+  /**
+   * @param string|null $log
+   */
+  public function setLog($log)
+  {
+    $this->log = $log;
+  }
+
+  /**
+   * @return array
+   */
+  public function getDependencies()
+  {
+    return $this->dependencies;
+  }
+
+  /**
+   * @param array $dependencies
+   */
+  public function setDependencies($dependencies)
+  {
+    $this->dependencies = [];
+    foreach ($dependencies as $dependency) {
+      $this->dependencies[] = intval($dependency);
+    }
+  }
+
+  /**
+   * @return float
+   */
+  public function getItemsPerSec()
+  {
+    return $this->itemsPerSec;
+  }
+
+  /**
+   * @param float $itemsPerSec
+   */
+  public function setItemsPerSec($itemsPerSec)
+  {
     $this->itemsPerSec = floatval($itemsPerSec);
+  }
+
+  /**
+   * @return bool
+   */
+  public function isCanDoActions()
+  {
+    return $this->canDoActions;
+  }
+
+  /**
+   * @param bool $canDoActions
+   */
+  public function setCanDoActions($canDoActions)
+  {
     $this->canDoActions = $canDoActions;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isInProgress()
+  {
+    return $this->isInProgress;
+  }
+
+  /**
+   * @param bool $isInProgress
+   */
+  public function setIsInProgress($isInProgress)
+  {
     $this->isInProgress = $isInProgress;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isReady()
+  {
+    return $this->isReady;
+  }
+
+  /**
+   * @param bool $isReady
+   */
+  public function setIsReady($isReady)
+  {
     $this->isReady = $isReady;
+  }
+
+  /**
+   * @return array|null
+   */
+  public function getDownload()
+  {
+    return $this->download;
+  }
+
+  /**
+   * @param array|null $download
+   */
+  public function setDownload($download)
+  {
     $this->download = $download;
   }
 
@@ -123,18 +344,22 @@ class JobQueue
   public function getArray()
   {
     return [
-        "jobQueueId" => $this->jobQueueId,
-        "jobQueueType" => $this->jobQueueType,
-        "startTime" => $this->startTime,
-        "endTime" => $this->endTime,
-        "status" => $this->status,
-        "itemsProcessed" => $this->itemsProcessed,
-        "dependencies" => $this->dependencies,
-        "itemsPerSec" => $this->itemsPerSec,
-        "canDoActions" => $this->canDoActions,
-        "isInProgress" => $this->isInProgress,
-        "isReady" => $this->isReady,
-        "download" => $this->download
+      "jobQueueId" => $this->getJobQueueId(),
+      "jobQueueType" => $this->getJobQueueType(),
+      "startTime" => $this->getStartTime(),
+      "endTime" => $this->getEndTime(),
+      "status" => $this->getStatus(),
+      "itemsProcessed" => $this->getItemsProcessed(),
+      "log" => $this->getLog(),
+      "dependencies" => $this->getDependencies(),
+      "itemsPerSec" => $this->getItemsPerSec(),
+      "canDoActions" => $this->isCanDoActions(),
+      "isInProgress" => $this->isInProgress(),
+      "isReady" => $this->isReady(),
+      "download" => $this->getDownload() == null ? null : [
+        "text" => $this->getDownload()["text"],
+        "link" => $this->getDownload()["link"]
+      ]
     ];
   }
 }

@@ -1423,7 +1423,7 @@ paths:
         schema:
           type: integer
     get:
-      operationId: getJobsHistory
+      operationId: getJobsHistoryPerUpload
       tags:
       - Job
       summary: Get the history of all the jobs queued based on an upload
@@ -1438,7 +1438,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/ShowJob'
         '400':
-          description: 'Bad Request. **upload** is a required query param'
+          description: "Bad Request. 'upload' is a required query param"
           content:
             application/json:
               schema:
@@ -2884,7 +2884,7 @@ components:
           description: Job queue id
           type: integer
         jobQueueType:
-          description: Job queue type
+          description: Job queue type (generally agent name)
           type: string
         startTime:
           description: Job queue start time
@@ -2898,51 +2898,57 @@ components:
         itemsProcessed:
           description: Number of items processed
           type: integer
+        log:
+          description: Location of log file if exists
+          type: string
+          nullable: true
         dependencies:
-          description: List of dependencies
+          description: List of dependent job queue ids
           type: array
           items:
-            type: string
+            type: integer
         itemsPerSec:
           description: Number of items processed per second
           type: number
           format: float
         canDoActions:
+          description: Job can accept new actions like pause and cancel
           type: boolean
         isInProgress:
           description: Checks if the job queue is still in progress
           type: boolean
         isReady:
-          description: Is the job queue ready
+          description: Is the job ready
           type: boolean
         download:
-          description: Report download text
-          type: string
+          description: Report download information
+          type: object
+          nullable: true
+          properties:
+            text:
+              description: Text for download link
+              type: string
+            link:
+              description: Link to download the report
+              type: string
     ShowJob:
       description: History of all the jobs and the job queue info
       type: object
       properties:
         jobId:
-          type: string
+          type: integer
+          description: Job ID
         jobName:
           type: string
+          description: Job name (generally upload name)
         jobQueue:
           type: array
           items:
             $ref: '#/components/schemas/JobQueue'
-        upload:
-          type: object
-          properties:
-            uploadName:
-              type: string
-            uploadId:
-              type: string
-            uploadDesc:
-              type: string
-            uploadItem:
-              type: string
-            uploadEta:
-              type: string
+          description: Jobs queued for the current job
+        uploadId:
+          type: integer
+          description: Upload ID to which the job belongs to.
     UrlUpload:
       description: To create an upload from a URL
       type: object

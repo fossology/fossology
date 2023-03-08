@@ -16,9 +16,9 @@
 namespace Fossology\UI\Ajax;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Dao\UserDao;
-use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -396,7 +396,7 @@ class AjaxShowJobs extends \FO_Plugin
    * @brief get data of all jobs using uploadpk
    * @return a json jobqueue data.
    */
-  public function getJobs($uploadPk)
+  protected function getJobs($uploadPk)
   {
     $page = GetParm('page', PARM_INTEGER);
     $allusers = GetParm("allusers", PARM_INTEGER);

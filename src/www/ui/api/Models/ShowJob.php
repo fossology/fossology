@@ -32,24 +32,88 @@ class ShowJob
    */
   private $jobQueue;
   /**
-   * @var array $upload
-   * Upload Information
+   * @var int $uploadId
+   * Upload ID for the job
    */
-  private $upload;
+  private $uploadId;
 
   /**
    * ShowJob constructor.
    * @param integer $jobId
    * @param string $jobName
    * @param array $jobQueue
-   * @param string $upload
+   * @param integer $uploadId
    */
-  public function __construct($jobId, $jobName, $jobQueue, $upload)
+  public function __construct($jobId, $jobName, $jobQueue, $uploadId)
+  {
+    $this->setJobId($jobId);
+    $this->setJobName($jobName);
+    $this->setJobQueue($jobQueue);
+    $this->setUploadId($uploadId);
+  }
+
+  /**
+   * @return int
+   */
+  public function getJobId()
+  {
+    return $this->jobId;
+  }
+
+  /**
+   * @param int $jobId
+   */
+  public function setJobId($jobId)
   {
     $this->jobId = intval($jobId);
+  }
+
+  /**
+   * @return string
+   */
+  public function getJobName()
+  {
+    return $this->jobName;
+  }
+
+  /**
+   * @param string $jobName
+   */
+  public function setJobName($jobName)
+  {
     $this->jobName = $jobName;
+  }
+
+  /**
+   * @return array
+   */
+  public function getJobQueue(): array
+  {
+    return $this->jobQueue;
+  }
+
+  /**
+   * @param array $jobQueue
+   */
+  public function setJobQueue($jobQueue)
+  {
     $this->jobQueue = $jobQueue;
-    $this->upload = $upload;
+  }
+
+  /**
+   * @return int
+   */
+  public function getUploadId()
+  {
+    return $this->uploadId;
+  }
+
+  /**
+   * @param int $uploadId
+   */
+  public function setUploadId($uploadId)
+  {
+    $this->uploadId = intval($uploadId);
   }
 
   /**
@@ -68,10 +132,10 @@ class ShowJob
   public function getArray()
   {
     return [
-        "jobId" => $this->jobId,
-        "jobName" => $this->jobName,
-        "jobQueue" => $this->jobQueue,
-        "upload" => $this->upload
+      "jobId" => $this->getJobId(),
+      "jobName" => $this->getJobName(),
+      "jobQueue" => $this->getJobQueue(),
+      "uploadId" => $this->getUploadId()
     ];
   }
 }
