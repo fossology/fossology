@@ -394,7 +394,7 @@ ORDER BY copyright_pk, UT.uploadtree_pk, content DESC";
   {
     $statementName = __METHOD__.$tableName;
     $orderTablePk = $tableName.'_pk';
-    $sql = "SELECT * FROM $tableName where pfile_fk = $1 and is_enabled order by $orderTablePk desc";
+    $sql = "SELECT * FROM $tableName where pfile_fk = $1 order by $orderTablePk desc";
     $params = array($pfileId);
 
     return $this->dbManager->getRows($sql, $params, $statementName);
