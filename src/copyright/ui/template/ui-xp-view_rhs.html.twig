@@ -72,11 +72,11 @@
           {% endif %}
         </td>
         <td id='actionsOf{{ row["#{decisionsTable}_pk"] }}'>
-          <span class="basicActions">
+          <span class="basicActions" {% if row.is_enabled == 'f' %} hidden {% endif %}>
             <img src="images/button_edit.png" onclick="editDecision({{ row["#{decisionsTable}_pk"] }}, '{{ row.textfinding|e('js') }}', '{{ row.description|e('js') }}', '{{ row.comment|e('js') }}', {{ row.clearing_decision_type_fk }});">
             <img class="delete" src="images/space_16.png" onclick="deleteDecision({{ row["#{decisionsTable}_pk"] }});">
           </span>
-          <span class="undoActions" hidden>
+          <span class="undoActions" {% if row.is_enabled == 't' %} hidden {% endif %}>
             deleted [<a href="#" onclick="event.preventDefault();undoDecision({{ row["#{decisionsTable}_pk"] }});">undo</a>]
           </span>
         </td>
