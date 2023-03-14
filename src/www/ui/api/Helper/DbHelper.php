@@ -14,21 +14,19 @@ namespace Fossology\UI\Api\Helper;
 require_once dirname(dirname(dirname(dirname(__DIR__)))) .
   "/lib/php/common-db.php";
 
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Data\Folder\Folder;
+use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Db\ModernDbManager;
 use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
 use Fossology\Lib\Exceptions\DuplicateTokenNameException;
+use Fossology\Lib\Proxy\LicenseViewProxy;
+use Fossology\Lib\Proxy\UploadBrowseProxy;
 use Fossology\UI\Api\Models\Hash;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\Job;
 use Fossology\UI\Api\Models\Upload;
 use Fossology\UI\Api\Models\User;
-use Fossology\Lib\Dao\FolderDao;
-use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Proxy\UploadBrowseProxy;
-use Fossology\Lib\Data\Folder\Folder;
-use Fossology\Lib\Proxy\LicenseViewProxy;
 
 /**
  * @class DbHelper
@@ -199,8 +197,8 @@ FROM $partialQuery $where ORDER BY upload_pk ASC LIMIT $limit OFFSET $" .
   public function getFilenameFromUploadTree($uploadTreePk)
   {
     return $this->dbManager->getSingleRow(
-      'SELECT DISTINCT ufile_name FROM uploadtree
-WHERE uploadtree_pk=' . pg_escape_string($uploadTreePk))["ufile_name"];
+      "SELECT DISTINCT ufile_name FROM uploadtree
+WHERE uploadtree_pk=$1", [$uploadTreePk])["ufile_name"];
   }
 
   /**
