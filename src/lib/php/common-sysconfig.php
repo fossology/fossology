@@ -558,6 +558,20 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "''", "'$prompt'",
     strval(CONFIG_TYPE_PASSWORD), "'SWH'", "5", "'$desc'", "null", "null");
 
+  $variable = "ScAPIURL";
+  $prompt = _('Scanoss API url');
+  $desc = _('Set URL to SCANOSS API (blank for default osskb.org)');
+  $valueArray[$variable] = array("'$variable'",
+    "''", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'SSS'", "1", "'$desc'", "null", "null");
+
+  $variable = "ScToken";
+  $prompt = _('Access token');
+  $desc = _('Set token to access full service (blank for basic scan)');
+  $valueArray[$variable] = array("'$variable'",
+    "''", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'SSS'", "2", "'$desc'", "null", "null");
+
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.
   */

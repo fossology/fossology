@@ -157,11 +157,11 @@ if [[ $RUNTIME ]]; then
     ###########################################################################
     if [[ $EXPERIMENTAL ]]; then
       # Include experimental dependencies
-      su $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install --target=$HOME/pythondeps --no-input --upgrade spacy pandas scancode-toolkit'
+      su $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install --target=$HOME/pythondeps --no-input --upgrade spacy pandas scancode-toolkit scanoss'
       su $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m spacy download en_core_web_sm --target=$HOME/pythondeps'
     else
       # Only non-experimental dependencies
-      su $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install --target=$HOME/pythondeps --no-input --upgrade scancode-toolkit'
+      su $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install --target=$HOME/pythondeps --no-input --upgrade scancode-toolkit scanoss'
     fi
     ###########################################################################
   else
