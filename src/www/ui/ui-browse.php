@@ -167,19 +167,28 @@ class ui_browse extends FO_Plugin
    */
   private function ShowFolder($folderId)
   {
-    /* Delete Folder Algorithm */
-    $deleteFolder= "<form method='post'>\n"; // no url = this url
-    $text = _("Select the folder to delete:  ");
-    $deleteFolder.= "<P>$text\n";
-    $deleteFolder.= "<select name='deleteFolder' class='ui-render-select2'>\n";
-    $text = _("select folder");
-    $deleteFolder.= "<option value='' disabled selected>$text</option>\n";
-    $deleteFolder.= FolderListOption(-1, 0, 1, -1, true);
-    $deleteFolder.= "</select>";
-    $text = _("Delete");
-    $deleteFolder.= "&nbsp<input type='submit' class='btn btn-outline-danger' value='$text' style='font-size: 10px;'><P />\n";
-    $deleteFolder.= "</form>\n";
-
+    if ($folderId!="") {
+      /* Delete Folder Algorithm */
+      $deleteFolder= "<form method='post'>\n"; // no url = this url
+      $text = _("Select the folder to delete:  ");
+      $deleteFolder.= "<P id='cancelDelete'>$text\n";
+      $deleteFolder.= "<select name='deleteFolder' class='ui-render-select2'>\n";
+      $text = _("select folder");
+      $deleteFolder.= "<option value='' disabled selected>$text</option>\n";
+      $deleteFolder.= FolderListOption(-1, 0, 1, -1, true);
+      $deleteFolder.= "</select>";
+      $text = _("Delete");
+      $deleteFolder.= "&nbsp <input type='submit' onclick='myFunction()' value='$text' class='btn btn-outline-danger' style='font-size: 10px;'><script>
+      function myFunction() {
+        let text;
+        if (confirm('All uploads inside this folder will also get deleted. Are you sure you want to delete this folder ?') == false) {
+          text = 'Delete Job canceled!';
+          document.getElementById('cancelDelete').innerHTML = text;
+        } 
+      }
+      </script><P />\n";
+      $deleteFolder.= "</form>\n";
+    }
     $rootFolder = $this->folderDao->getDefaultFolder(Auth::getUserId());
     if ($rootFolder == NULL) {
       $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
@@ -211,7 +220,7 @@ class ui_browse extends FO_Plugin
     $this->vars['folderName'] = $this->folderDao->getFolder($folderId)->getName();
   }
 
-  function deleteFolder($folder) 
+  function deleteFolder($folder)
   {
     $splitFolder = explode(" ",$folder);
     if (!empty($folder)) {
@@ -240,7 +249,7 @@ class ui_browse extends FO_Plugin
         $text = _("Cannot delete this folder :: Permission denied");
         $this->vars['message'] = $text;
       }
-     }
+    }
   }
 
 
@@ -264,6 +273,7 @@ class ui_browse extends FO_Plugin
       $deleteFolder = GetParm("deleteFolder", PARM_RAW);
       if (!empty($deleteFolder)) {
         $this->deleteFolder($deleteFolder);
+        return new RedirectResponse(Traceback_uri() . '?mod=' . 'showjobs');
       }
     }
 

@@ -168,7 +168,7 @@ class AdminUploadDelete extends DefaultPlugin
    * @param $folderId The folder(folder_id) containing the uploads
    * @return string with the message.
    */
-  private function TryToDelete($uploadpk, $folderId)
+  public function TryToDelete($uploadpk, $folderId)
   {
     if (!$this->uploadDao->isEditable($uploadpk, Auth::getGroupId())) {
       $returnMessage = DeleteMessages::NO_PERMISSION;
