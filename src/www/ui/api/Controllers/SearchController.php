@@ -12,15 +12,12 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\Lib\Dao\SearchHelperDao;
 use Fossology\UI\Api\Helper\ResponseHelper;
-use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\SearchResult;
-use Fossology\Lib\Dao\SearchHelperDao;
-use Fossology\Lib\Db\DbManager;
-
-require_once dirname(dirname(__DIR__)) . "/search-helper.php";
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @class SearchController
@@ -117,17 +114,17 @@ class SearchController extends RestController
     $totalPages = intval(ceil($count / $limit));
 
     $searchResults = [];
-    // rewrite it and add additional information about it's parent upload
-    for ($i = 0; $i < sizeof($results); $i ++) {
+    // rewrite it and add additional information about its parent upload
+    foreach ($results as $result) {
       $currentUpload = $this->dbHelper->getUploads(
         $this->restHelper->getUserId(), $this->restHelper->getGroupId(), 1, 1,
-        $results[$i]["upload_fk"], null, true)[1];
+        $result["upload_fk"], null, true)[1];
       if (! empty($currentUpload)) {
         $currentUpload = $currentUpload[0];
       } else {
         continue;
       }
-      $uploadTreePk = $results[$i]["uploadtree_pk"];
+      $uploadTreePk = $result["uploadtree_pk"];
       $filename = $this->dbHelper->getFilenameFromUploadTree($uploadTreePk);
       $currentResult = new SearchResult($currentUpload, $uploadTreePk, $filename);
       $searchResults[] = $currentResult->getArray();
