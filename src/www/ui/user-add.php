@@ -78,21 +78,19 @@ class user_add extends DefaultPlugin
       return ($text);
     }
 
-    if (empty($Email)) {
-      $text = _("Email must be specified. Not added.");
-      return ($text);
-    }
-
-    /* Make sure email looks valid */
-    if (! filter_var($Email, FILTER_VALIDATE_EMAIL)) {
+    /* Make sure email looks valid (If email field not empty) */
+    if (! empty($Email) && ! filter_var($Email, FILTER_VALIDATE_EMAIL)) {
       $text = _("Invalid email address.  Not added.");
       return ($text);
     }
 
-    /* Make sure email is unique */
-    $email_count = $this->dbManager->getSingleRow(
-      "SELECT COUNT(*) as count FROM users WHERE user_email = $1 LIMIT 1;",
-      array($Email))["count"];
+    /* Make sure email is unique (If email field not empty) */
+    $email_count = 0;
+    if (! empty($Email)) { 
+      $email_count = $this->dbManager->getSingleRow(
+        "SELECT COUNT(*) as count FROM users WHERE user_email = $1 LIMIT 1;",
+        array($Email))["count"];
+    }
     if ($email_count > 0) {
       $text = _("Email address already exists.  Not added.");
       return ($text);
