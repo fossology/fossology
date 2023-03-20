@@ -184,6 +184,9 @@ class AdviceLicense extends DefaultPlugin
     } elseif (empty($spdxId)) {
       $spdxId = null;
     }
+    if (! empty($spdxId)) {
+      $spdxId = LicenseRef::replaceSpaces($spdxId);
+    }
 
     $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname,
       $rfText, $url, $note, $lastmodified, $userIdmodified, !empty($marydone),

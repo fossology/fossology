@@ -7,17 +7,17 @@
 namespace Fossology\CliXml;
 
 use Fossology\Lib\Agent\Agent;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Package\ComponentType;
-use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Report\XpClearedGetter;
-use Fossology\Lib\Report\LicenseMainGetter;
 use Fossology\Lib\Report\LicenseClearedGetter;
+use Fossology\Lib\Report\LicenseDNUGetter;
+use Fossology\Lib\Report\LicenseIrrelevantGetter;
+use Fossology\Lib\Report\LicenseMainGetter;
 use Fossology\Lib\Report\ObligationsGetter;
 use Fossology\Lib\Report\OtherGetter;
-use Fossology\Lib\Report\LicenseIrrelevantGetter;
-use Fossology\Lib\Report\LicenseDNUGetter;
+use Fossology\Lib\Report\XpClearedGetter;
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/services.php");
@@ -35,6 +35,9 @@ class CliXml extends Agent
 
   /** @var DbManager */
   protected $dbManager;
+
+  /** @var LicenseDao */
+  protected $licenseDao;
 
   /** @var Twig_Environment */
   protected $renderer;
@@ -73,6 +76,7 @@ class CliXml extends Agent
 
     $this->uploadDao = $this->container->get('dao.upload');
     $this->dbManager = $this->container->get('db.manager');
+    $this->licenseDao = $this->container->get('dao.license');
     $this->renderer = $this->container->get('twig.environment');
     $this->renderer->setCache(false);
 
@@ -239,6 +243,7 @@ class CliXml extends Agent
 
     $countAcknowledgement = 0;
     $includeAcknowledgements = array_values($unifiedColumns['acknowledgements'])[0];
+    $licenses["statements"] = $this->addLicenseNames($licenses["statements"]);
     $licensesWithAcknowledgement = $this->removeDuplicateAcknowledgements(
       $licenses["statements"], $countAcknowledgement, $includeAcknowledgements);
 
@@ -346,6 +351,7 @@ class CliXml extends Agent
     $lenMainLicenses=count($contents["licensesMain"]);
     for ($i=0; $i<$lenMainLicenses; $i++) {
       $contents["licensesMain"][$i]["contentMain"] = $contents["licensesMain"][$i]["content"];
+      $contents["licensesMain"][$i]["nameMain"] = $contents["licensesMain"][$i]["name"];
       $contents["licensesMain"][$i]["textMain"] = $contents["licensesMain"][$i]["text"];
       $contents["licensesMain"][$i]["riskMain"] = $contents["licensesMain"][$i]["risk"];
       if (array_key_exists('acknowledgement', $contents["licensesMain"][$i])) {
@@ -568,6 +574,23 @@ class CliXml extends Agent
       'usageRestrictionsFound' => $usage,
       'additionalNotes' => $row['ri_ga_additional']
     ]];
+  }
+
+  /**
+   * Add license names to the list of license statements.
+   * @param array $licenses License statements from
+   * @return array License statements with name filed
+   */
+  private function addLicenseNames($licenses)
+  {
+    $statementsWithNames = [];
+    foreach ($licenses as $license) {
+      $allLicenseCols = $this->licenseDao->getLicenseById($license["licenseId"],
+        $this->groupId);
+      $license["name"] = $allLicenseCols->getFullName();
+      $statementsWithNames[] = $license;
+    }
+    return $statementsWithNames;
   }
 }
 
