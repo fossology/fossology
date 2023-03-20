@@ -8,6 +8,7 @@
 namespace Fossology\Lib\Application;
 
 use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
@@ -60,6 +61,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
       $licenses[$i] = array(
         'rf_pk' => $i,
         'rf_shortname' => 'lic' . $i,
+        'rf_spdx_id' => 'lrf-lic' . $i,
         'rf_fullname' => 'lice' . $i,
         'rf_text' => 'text' . $i,
         'rf_url' => $i . $i,
@@ -75,6 +77,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
         'rf_pk' => $i + 4,
         'rf_shortname' => 'candlic' . $i,
         'rf_fullname' => 'candlice' . $i,
+        'rf_spdx_id' => null,
         'rf_text' => 'text' . $i,
         'rf_url' => $i . $i,
         'rf_notes' => 'note' . $i,
@@ -94,7 +97,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
     $dbManager->insertTableRow('license_map', array('rf_fk'=>3,'rf_parent'=>2,'usage'=>LicenseMap::REPORT));
 
     $licenseCsvExport = new LicenseCsvExport($dbManager);
-    $head = array('shortname','fullname','text','parent_shortname','report_shortname','url','notes','source','risk','group', 'obligations');
+    $head = array('shortname','fullname', 'spdx_id','text','parent_shortname','report_shortname','url','notes','source','risk','group', 'obligations');
     $out = fopen('php://output', 'w');
 
     $csv = $licenseCsvExport->createCsv();
@@ -102,6 +105,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
     fputcsv($out, $head);
     fputcsv($out, array($licenses[1]['rf_shortname'],
         $licenses[1]['rf_fullname'],
+        $licenses[1]['rf_spdx_id'],
         $licenses[1]['rf_text'],
         null,
         null,
@@ -113,6 +117,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
 
     fputcsv($out, array($licenses[2]['rf_shortname'],
         $licenses[2]['rf_fullname'],
+        $licenses[2]['rf_spdx_id'],
         $licenses[2]['rf_text'],
         null,
         null,
@@ -124,6 +129,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
 
     fputcsv($out, array($licenses[3]['rf_shortname'],
         $licenses[3]['rf_fullname'],
+        $licenses[3]['rf_spdx_id'],
         $licenses[3]['rf_text'],
         $licenses[1]['rf_shortname'],
         $licenses[2]['rf_shortname'],
@@ -135,6 +141,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
 
     fputcsv($out, array($candLicenses[2]['rf_shortname'],
       $candLicenses[2]['rf_fullname'],
+      LicenseRef::convertToSpdxId($candLicenses[2]['rf_shortname'], $candLicenses[2]['rf_spdx_id']),
       $candLicenses[2]['rf_text'],
       null,
       null,
@@ -146,6 +153,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
 
     fputcsv($out, array($candLicenses[4]['rf_shortname'],
       $candLicenses[4]['rf_fullname'],
+      LicenseRef::convertToSpdxId($candLicenses[4]['rf_shortname'], $candLicenses[4]['rf_spdx_id']),
       $candLicenses[4]['rf_text'],
       null,
       null,
@@ -166,6 +174,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
     fputcsv($out, $head, $delimiter);
     fputcsv($out, array($licenses[3]['rf_shortname'],
           $licenses[3]['rf_fullname'],
+          $licenses[3]['rf_spdx_id'],
           $licenses[3]['rf_text'],
           $licenses[1]['rf_shortname'],
           $licenses[2]['rf_shortname'],
