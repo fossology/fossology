@@ -12,6 +12,7 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Exception;
 use Fossology\CliXml\UI\CliXmlGeneratorUi;
 use Fossology\DecisionExporter\UI\FoDecisionExporter;
 use Fossology\DecisionImporter\UI\AgentDecisionImporterPlugin;
@@ -24,6 +25,7 @@ use Fossology\UnifiedReport\UI\FoUnifiedReportGenerator;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Request as SlimRequest;
+use Slim\Psr7\UploadedFile as SlimUploadedFile;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -55,7 +57,8 @@ class ReportController extends RestController
    * Allowed report types to be imported.
    */
   private $importAllowed = [
-    'decisionimporter'
+    'decisionimporter',
+    'spdxrdf'
   ];
 
   /**
@@ -123,7 +126,7 @@ class ReportController extends RestController
           $error = new Info(500, "Some error occured!", InfoType::ERROR);
           return $response->withJson($error->getArray(), $error->getCode());
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       $error = new Info(500, $e->getMessage(), InfoType::ERROR);
       return $response->withJson($error->getArray(), $error->getCode());
     }
@@ -237,7 +240,7 @@ class ReportController extends RestController
       );
 
       return $newResponse;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       $error = new Info(500, $e->getMessage(), InfoType::ERROR);
       return $response->withJson($error->getArray(), $error->getCode());
     }
@@ -284,38 +287,57 @@ class ReportController extends RestController
    * @param array $args
    * @return ResponseHelper
    */
-  public function importReport(ServerRequestInterface $request, ResponseHelper $response, array $args): ResponseHelper
+  public function importReport(ServerRequestInterface $request,
+                               ResponseHelper $response, array $args): ResponseHelper
   {
     $returnVal = null;
     $query = $request->getQueryParams();
     if (!array_key_exists("upload", $query)) {
-      $returnVal = new Info(400, "Bad Request. **upload** is a required query param", InfoType::INFO);
-    } elseif (!array_key_exists("reportFormat", $query) || !in_array($query["reportFormat"], $this->importAllowed)) {
-      $returnVal = new Info(400, "Bad Request. Missing or wrong query param 'reportFormat'", InfoType::ERROR);
+      $returnVal = new Info(400,
+        "Bad Request. **upload** is a required query param", InfoType::INFO);
+    } elseif (!array_key_exists("reportFormat", $query) ||
+        !in_array($query["reportFormat"], $this->importAllowed)) {
+      $returnVal = new Info(400,
+        "Bad Request. Missing or wrong query param 'reportFormat'", InfoType::ERROR);
     }
     if ($returnVal !== null) {
       return $response->withJson($returnVal->getArray(), $returnVal->getCode());
     }
     $upload_pk = intval($query['upload']);
     // checking if the scheduler is running or not
-    $commu_status = fo_communicate_with_scheduler('status', $response_from_scheduler, $error_info);
+    $commu_status = fo_communicate_with_scheduler('status',
+      $response_from_scheduler, $error_info);
     if ($commu_status) {
-      $reqBody = $this->getParsedBody($request);
+      $files = $request->getUploadedFiles();
+
       $res = true;
-      if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $upload_pk)) {
+      if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $upload_pk)) {
         $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
         $res = false;
-      } else if (! $this->restHelper->getUploadDao()->isAccessible($upload_pk, $this->restHelper->getGroupId())) {
+      } elseif (!$this->restHelper->getUploadDao()->isAccessible($upload_pk, $this->restHelper->getGroupId())) {
         $returnVal = new Info(403, "Upload is not accessible", InfoType::ERROR);
+        $res = false;
+      } elseif (empty($files['report'])) {
+        $returnVal = new Info(400, "No file uploaded", InfoType::ERROR);
         $res = false;
       }
       if (!$res) {
-        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+        return $response->withJson($returnVal->getArray(),
+          $returnVal->getCode());
       }
+      /** @var SlimUploadedFile $slimFile */
+      $slimFile = $files['report'];
+
       $reportFormat = $query["reportFormat"];
       switch ($reportFormat) {
         case $this->importAllowed[0]:
-          $returnVal = $this->importDecisionJson($request, $response, $reqBody, $upload_pk);
+          $returnVal = $this->importDecisionJson($request, $response,
+            $upload_pk, $slimFile);
+          break;
+        case $this->importAllowed[1]:
+          $returnVal = $this->importSpdxReport($request, $response, $upload_pk,
+            $slimFile);
+          break;
       }
       return $returnVal;
     }
@@ -325,24 +347,24 @@ class ReportController extends RestController
 
   /**
    * Run decision importer agent for JSON report.
+   *
    * @param ServerRequestInterface $request
    * @param ResponseHelper $response
-   * @param array $reqBody
    * @param int $uploadId
+   * @param SlimUploadedFile $slimFile
    * @return ResponseHelper
    */
-  private function importDecisionJson(ServerRequestInterface $request, ResponseHelper $response, array $reqBody, int $uploadId): ResponseHelper
+  private function importDecisionJson(ServerRequestInterface $request,
+                                      ResponseHelper $response, int $uploadId,
+                                      SlimUploadedFile $slimFile): ResponseHelper
   {
     /** @var AgentDecisionImporterPlugin $decisionImporter */
     $decisionImporter = $this->restHelper->getPlugin("ui_fodecisionimporter");
     $symfonyRequest = new Request();
 
-    $files = $request->getUploadedFiles();
+    $reqBody = $this->getParsedBody($request);
 
-    if (empty($files['report'])) {
-      $info = new Info(400, "No file uploaded", InfoType::ERROR);
-      return $response->withJson($info->getArray(), $info->getCode());
-    } elseif (!array_key_exists("importerUser", $reqBody)) {
+    if (!array_key_exists("importerUser", $reqBody)) {
       $info = new Info(400, "Missing parameter 'importerUser'", InfoType::ERROR);
       return $response->withJson($info->getArray(), $info->getCode());
     }
@@ -352,10 +374,8 @@ class ReportController extends RestController
       $importerUser = $this->restHelper->getUserId();
     }
 
-    /** @var \Slim\Psr7\UploadedFile $slimFile */
-    $slimFile = $files['report'];
-
-    $uploadedFile = new UploadedFile($slimFile->getFilePath(), $slimFile->getClientFilename(), $slimFile->getClientMediaType());
+    $uploadedFile = new UploadedFile($slimFile->getFilePath(),
+      $slimFile->getClientFilename(), $slimFile->getClientMediaType());
 
     $symfonyRequest->files->set('report', $uploadedFile);
     $symfonyRequest->request->set('uploadselect', $uploadId);
@@ -363,7 +383,7 @@ class ReportController extends RestController
 
     try {
       $agentResp = $decisionImporter->handleRequest($symfonyRequest);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       $error = new Info(500, $e->getMessage(), InfoType::ERROR);
       return $response->withJson($error->getArray(), $error->getCode());
     }
@@ -374,5 +394,86 @@ class ReportController extends RestController
       $info = new Info(201, intval($agentResp[0]), InfoType::INFO);
     }
     return $response->withJson($info->getArray(), $info->getCode());
+  }
+
+  /**
+   * Import a SPDX RDF report
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param int $upload_pk
+   * @param SlimUploadedFile $slimFile
+   * @return ResponseHelper
+   */
+  public function importSpdxReport(ServerRequestInterface $request,
+                                   ResponseHelper $response, int $upload_pk,
+                                   SlimUploadedFile $slimFile): ResponseHelper
+  {
+    $reqBody = $this->getParsedBody($request);
+    /** @var \ReportImportPlugin $reportImport */
+    $reportImport = $this->restHelper->getPlugin('ui_reportImport');
+    $symfonyRequest = new Request();
+
+    // moving the uploaded file to the ReportImport Directory
+    global $SysConf;
+    $fileBase = $SysConf['FOSSOLOGY']['path'] . "/ReportImport/";
+    if (!is_dir($fileBase)) {
+      mkdir($fileBase, 0755, true);
+    }
+    $targetFile = time() . '_' . rand() . '_' . $slimFile->getClientFilename();
+    $slimFile->moveTo($fileBase . $targetFile);
+
+    // Get default values for parameters
+    $addNewLicensesAs = "candidate";
+    $addLicenseInfoFromInfoInFile = "true";
+    $addLicenseInfoFromConcluded = "false";
+    $addConcludedAsDecisions = "true";
+    $addConcludedAsDecisionsTBD = "true";
+    $addCopyrights = "false";
+    if (array_key_exists("addNewLicensesAs", $reqBody) &&
+        $reqBody["addNewLicensesAs"] === "license") {
+      $addNewLicensesAs = "license";
+    }
+    if (array_key_exists("addLicenseInfoFromInfoInFile", $reqBody) &&
+          !filter_var($reqBody["addLicenseInfoFromInfoInFile"],
+            FILTER_VALIDATE_BOOLEAN)) {
+      $addLicenseInfoFromInfoInFile = "false";
+    }
+    if (array_key_exists("addLicenseInfoFromConcluded", $reqBody) &&
+        filter_var($reqBody["addLicenseInfoFromConcluded"],
+          FILTER_VALIDATE_BOOLEAN)) {
+      $addLicenseInfoFromConcluded = "true";
+    }
+    if (array_key_exists("addConcludedAsDecisions", $reqBody) &&
+        !filter_var($reqBody["addConcludedAsDecisions"],
+          FILTER_VALIDATE_BOOLEAN)) {
+      $addConcludedAsDecisions = "false";
+    }
+    if (array_key_exists("addConcludedAsDecisionsTBD", $reqBody) &&
+        !filter_var($reqBody["addConcludedAsDecisionsTBD"],
+          FILTER_VALIDATE_BOOLEAN)) {
+      $addConcludedAsDecisionsTBD = "false";
+    }
+    if (array_key_exists("addCopyrights", $reqBody) &&
+        filter_var($reqBody["addCopyrights"],
+          FILTER_VALIDATE_BOOLEAN)) {
+      $addCopyrights = "true";
+    }
+
+    // translating values for symfony request
+    $symfonyRequest->request->set('addNewLicensesAs', $addNewLicensesAs);
+    $symfonyRequest->request->set('addLicenseInfoFromInfoInFile',
+      $addLicenseInfoFromInfoInFile);
+    $symfonyRequest->request->set('addLicenseInfoFromConcluded',
+      $addLicenseInfoFromConcluded);
+    $symfonyRequest->request->set('addConcludedAsDecisions',
+      $addConcludedAsDecisions);
+    $symfonyRequest->request->set('addConcludedAsDecisionsTBD',
+      $addConcludedAsDecisionsTBD);
+    $symfonyRequest->request->set('addCopyrights', $addCopyrights);
+
+    $agentResp = $reportImport->runImport($upload_pk, $targetFile, $symfonyRequest);
+    $returnVal = new Info(201, intval($agentResp[0]), InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 }

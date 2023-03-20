@@ -7,7 +7,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.5.0
+  version: 1.5.1
   contact:
     email: fossology@fossology.org
   license:
@@ -1425,7 +1425,7 @@ paths:
     get:
       operationId: getJobsHistoryPerUpload
       tags:
-      - Job
+        - Job
       summary: Get the history of all the jobs queued based on an upload
       description: Returns the history of all the jobs queued based on an upload
       responses:
@@ -1456,7 +1456,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
 
   /folders:
     parameters:
@@ -2016,6 +2016,7 @@ paths:
         schema:
           enum:
             - decisionimporter
+            - spdxrdf
     post:
       operationId: uploadReport
       tags:
@@ -2024,11 +2025,20 @@ paths:
       description: >
         Import a report to an existing upload
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
+              type: object
+              properties:
+                report:
+                  description: Report file to be imported
+                  type: string
+                  format: binary
               oneOf:
                 - $ref: '#/components/schemas/DecisionImporter'
+                - $ref: '#/components/schemas/SpdxRdfImport'
+              required: ["report"]
       responses:
         '201':
           description: ReportImport job is scheduled successfully for the given upload.
@@ -2381,7 +2391,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
   /license/admincandidates/{id}:
     parameters:
       - name: id
@@ -2642,8 +2652,8 @@ components:
           type: string
           description: group_name of the license-candidate.
         group_id:
-            type: integer
-            description: group_id of the license-candidate.
+          type: integer
+          description: group_id of the license-candidate.
     User:
       type: object
       properties:
@@ -3327,13 +3337,42 @@ components:
           description: User ID on which to tag imported decisions. Use '0' for self.
           default: 0
           example: 3
-        report:
-          $ref: '#/components/schemas/ReportImportFile'
-      required: ["importerUser", "report"]
-    ReportImportFile:
-      description: Report file to be imported
-      type: string
-      format: binary
+      required: ["importerUser"]
+    SpdxRdfImport:
+      description: Information required by SPDX RDF report import agent.
+      type: object
+      properties:
+        addNewLicensesAs:
+          type: string
+          description: Create new licenses as
+          enum:
+            - candidate
+            - license
+          default: candidate
+        addLicenseInfoFromInfoInFile:
+          type: boolean
+          description: >
+            Add the License Info as findings from SPDX tag of type
+            licenseInfoInFile
+          default: true
+        addLicenseInfoFromConcluded:
+          type: boolean
+          description: >
+            Add the License Info as findings from SPDX tag of type
+            licenseConcluded
+          default: false
+        addConcludedAsDecisions:
+          type: boolean
+          description: Add concluded licenses as decisions
+          default: true
+        addConcludedAsDecisionsTBD:
+          type: boolean
+          description: Add concluded licenses imported as "to be discussed"
+          default: true
+        addCopyrights:
+          type: boolean
+          description: Add the copyright information as text findings
+          default: false
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"
