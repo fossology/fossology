@@ -258,7 +258,6 @@ class admin_license_file extends FO_Plugin
     $vars['actionUri'] = "?mod=" . $this->Name . "&rf_pk=$rf_pk_update";
     $vars['req_marydone'] = array_key_exists('req_marydone', $_POST) ? $_POST['req_marydone'] : '';
     $vars['req_shortname'] = array_key_exists('req_shortname', $_POST) ? $_POST['req_shortname'] : '';
-    $vars['req_marydone'] = array_key_exists('req_marydone', $_POST) ? $_POST['req_marydone'] : '';
     $vars['rf_shortname'] = array_key_exists('rf_shortname', $_POST) ? $_POST['rf_shortname'] : '';
     $vars['rf_fullname'] = array_key_exists('rf_fullname', $_POST) ? $_POST['rf_fullname'] : '';
     $vars['rf_text'] = array_key_exists('rf_text', $_POST) ? $_POST['rf_text'] : '';
@@ -411,6 +410,10 @@ class admin_license_file extends FO_Plugin
     } elseif (empty($spdxId)) {
       $spdxId = null;
     }
+    if (! empty($spdxId)) {
+      $spdxId = LicenseRef::replaceSpaces($spdxId);
+    }
+
     if (empty($shortname)) {
       $text = _("ERROR: The license shortname is empty. License not added.");
       return "<b>$text</b><p>";
@@ -520,6 +523,9 @@ class admin_license_file extends FO_Plugin
       }
     } elseif (empty($rf_spdx_id)) {
       $rf_spdx_id = null;
+    }
+    if (! empty($rf_spdx_id)) {
+      $rf_spdx_id = LicenseRef::replaceSpaces($rf_spdx_id);
     }
 
     if (empty($rf_shortname)) {
