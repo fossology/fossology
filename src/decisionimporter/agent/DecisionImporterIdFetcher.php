@@ -197,6 +197,7 @@ class DecisionImporterIdFetcher
     foreach ($uploadTreeList as $oldItemId => $item) {
       $new_pfile = $pfileList[$item["old_pfile"]]["new_pfile"];
       $matchIndex = -INF;
+      $j = 0;
       foreach ($allUploadTree as $index => $uploadTreeItem) {
         if ($uploadTreeItem["pfile_fk"] == $new_pfile) {
           if (array_key_exists("path", $item)) {
@@ -211,11 +212,23 @@ class DecisionImporterIdFetcher
             break;
           }
         }
+        $j++;
+        if ($j == DecisionImporterAgent::$UPDATE_COUNT) {
+          $agentObj->heartbeat(0);
+          $j = 0;
+        }
       }
       if ($matchIndex == -INF) {
-        throw new UnexpectedValueException("Can't find item with pfile '$new_pfile' in upload '$this->uploadId'");
+        $path = $oldItemId;
+        if (array_key_exists("path", $item)) {
+          $path = $item["path"];
+        }
+        echo "Can't find item with pfile '$new_pfile' in upload " .
+          "'$this->uploadId'.\nIgnoring: $path";
+        $uploadTreeList[$oldItemId]["new_itemid"] = null;
+      } else {
+        $uploadTreeList[$oldItemId]["new_itemid"] = $allUploadTree[$matchIndex]["uploadtree_pk"];
       }
-      $uploadTreeList[$oldItemId]["new_itemid"] = $allUploadTree[$matchIndex]["uploadtree_pk"];
       $i++;
       if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
         $agentObj->heartbeat(0);
