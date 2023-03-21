@@ -33,8 +33,15 @@ $(document).ready(function () {
         openCommentModal(source[0],source[1],source[2]);
     } );
     $('select.goto-active-option').change(function() {
-      var url = $(this).val();
-      if(url){ window.location = url;}
+      const url = $(this).val();
+      const optionText = $(this).find("option:selected").text();
+      let userResponse = true
+      if (optionText === "Delete") {
+        userResponse = confirm("Are you sure you want to delete this upload ?")
+      } 
+      if(url && userResponse) {
+        window.location = url;
+      }
     });
   });
   commentModal = $('#commentModal').modal('hide');
