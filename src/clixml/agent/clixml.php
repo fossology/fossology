@@ -18,6 +18,7 @@ use Fossology\Lib\Report\LicenseMainGetter;
 use Fossology\Lib\Report\ObligationsGetter;
 use Fossology\Lib\Report\OtherGetter;
 use Fossology\Lib\Report\XpClearedGetter;
+use Twig\Environment;
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/services.php");
@@ -39,7 +40,7 @@ class CliXml extends Agent
   /** @var LicenseDao */
   protected $licenseDao;
 
-  /** @var Twig_Environment */
+  /** @var Environment */
   protected $renderer;
 
   /** @var string */
@@ -280,7 +281,7 @@ class CliXml extends Agent
     $generalInformation['componentHash'] = $componentHash['sha1'];
     return $this->renderString($this->getTemplateFile('file'),array(
       'documentName' => $this->packageName,
-      'version' => "1.5",
+      'version' => "1.6",
       'uri' => $this->uri,
       'userName' => $this->container->get('dao.user')->getUserName($this->userId),
       'organisation' => '',
@@ -504,6 +505,7 @@ class CliXml extends Agent
    */
   private function getReportSummary($uploadId)
   {
+    global $SysConf;
     $row = $this->uploadDao->getReportInfo($uploadId);
 
     $review = htmlspecialchars($row['ri_reviewed']);
@@ -555,6 +557,14 @@ class CliXml extends Agent
       $componentId = "";
     }
 
+    $parentItem = $this->uploadDao->getUploadParent($uploadId);
+
+    $uploadLink = $SysConf['SYSCONFIG']['FOSSologyURL'];
+    if (substr($uploadLink, 0, 4) !== "http") {
+      $uploadLink = "http://" . $uploadLink;
+    }
+    $uploadLink .= "?mod=browse&upload=$uploadId&item=$parentItem";
+
     return [[
       'reportId' => uuid_create(UUID_TYPE_TIME),
       'reviewedBy' => $review,
@@ -564,6 +574,7 @@ class CliXml extends Agent
       'componentHash' => '',
       'componentReleaseDate' => htmlspecialchars($row['ri_release_date']),
       'linkComponentManagement' => htmlspecialchars($row['ri_sw360_link']),
+      'linkScanTool' => $uploadLink,
       'componentType' => htmlspecialchars($componentType),
       'componentId' => htmlspecialchars($componentId)
     ], [
@@ -577,7 +588,7 @@ class CliXml extends Agent
   }
 
   /**
-   * Add license names to the list of license statements.
+   * Add license shortname to the list of license statements.
    * @param array $licenses License statements from
    * @return array License statements with name filed
    */
@@ -587,7 +598,7 @@ class CliXml extends Agent
     foreach ($licenses as $license) {
       $allLicenseCols = $this->licenseDao->getLicenseById($license["licenseId"],
         $this->groupId);
-      $license["name"] = $allLicenseCols->getFullName();
+      $license["name"] = $allLicenseCols->getShortName();
       $statementsWithNames[] = $license;
     }
     return $statementsWithNames;
