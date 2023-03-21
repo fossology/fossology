@@ -92,9 +92,9 @@ class DecisionImporterIdFetcher
    * Update the IDs from report to IDs from DB.
    *
    * @param FoDecisionData $reportData The report data object.
-   * @param DecisionImporter $agentObj The agent object to send heartbeat.
+   * @param DecisionImporterAgent $agentObj The agent object to send heartbeat.
    */
-  public function getOrCreateIds(FoDecisionData &$reportData, DecisionImporter &$agentObj): void
+  public function getOrCreateIds(FoDecisionData &$reportData, DecisionImporterAgent &$agentObj): void
   {
     $pfileList = $reportData->getPfileList();
     $uploadTreeList = $reportData->getUploadtreeList();
@@ -105,6 +105,9 @@ class DecisionImporterIdFetcher
     $eccList = $reportData->getEccList();
     $eccDecisionList = $reportData->getEccDecisionList();
     $eccEventList = $reportData->getEccEventList();
+    $ipraList = $reportData->getIpraList();
+    $ipraDecisionList = $reportData->getIpraDecisionList();
+    $ipraEventList = $reportData->getIpraEventList();
     $licenseList = $reportData->getLicensesList();
     $clearingEventList = $reportData->getClearingEventList();
     $licenseSetBulkList = $reportData->getLicenseSetBulkList();
@@ -128,6 +131,12 @@ class DecisionImporterIdFetcher
     $agentObj->heartbeat(0);
     $this->updateEventList($eccEventList, $uploadTreeList);
     $agentObj->heartbeat(0);
+    $this->updateCxList($ipraList, $pfileList);
+    $agentObj->heartbeat(0);
+    $this->updateDecisionList($ipraDecisionList, $pfileList);
+    $agentObj->heartbeat(0);
+    $this->updateEventList($ipraEventList, $uploadTreeList);
+    $agentObj->heartbeat(0);
     $this->updateLicenses($licenseList);
     $agentObj->heartbeat(0);
     $this->updateClearingEvent($clearingEventList, $uploadTreeList, $licenseList);
@@ -146,6 +155,9 @@ class DecisionImporterIdFetcher
       ->setEccList($eccList)
       ->setEccDecisionList($eccDecisionList)
       ->setEccEventList($eccEventList)
+      ->setIpraList($ipraList)
+      ->setIpraDecisionList($ipraDecisionList)
+      ->setIpraEventList($ipraEventList)
       ->setLicensesList($licenseList)
       ->setClearingEventList($clearingEventList)
       ->setLicenseSetBulkList($licenseSetBulkList)
@@ -173,10 +185,10 @@ class DecisionImporterIdFetcher
    * Update upload tree ids using pfile, lft and rgt
    * @param array $uploadTreeList
    * @param array $pfileList
-   * @param DecisionImporter $agentObj Agent object to send heartbeats
+   * @param DecisionImporterAgent $agentObj Agent object to send heartbeats
    */
   private function updateUploadTreeIds(array &$uploadTreeList, array $pfileList,
-                                       DecisionImporter &$agentObj): void
+                                       DecisionImporterAgent &$agentObj): void
   {
     $sqlAllTree = "SELECT * FROM uploadtree WHERE upload_fk = $1 AND ufile_mode & (1<<28) = 0;";
     $statementAllTree = __METHOD__ . ".allTree";
@@ -205,7 +217,7 @@ class DecisionImporterIdFetcher
       }
       $uploadTreeList[$oldItemId]["new_itemid"] = $allUploadTree[$matchIndex]["uploadtree_pk"];
       $i++;
-      if ($i == DecisionImporter::$UPDATE_COUNT) {
+      if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
         $agentObj->heartbeat(0);
         $i = 0;
       }
