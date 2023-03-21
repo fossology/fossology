@@ -141,15 +141,19 @@ class DecisionImporterDataCreator
 
     $i = 0;
     foreach ($clearingDecisionList as $oldDecisionId => $decisionItem) {
-      $newCdId = $this->dbManager->insertTableRow("clearing_decision", [
-        "uploadtree_fk" => $decisionItem["new_itemid"],
-        "pfile_fk" => $decisionItem["new_pfile"],
-        "decision_type" => $decisionItem["decision_type"],
-        "group_fk" => $this->groupId,
-        "user_fk" => $this->userId,
-        "scope" => $decisionItem["scope"],
-        "date_added" => $decisionItem["date_added"]
-      ], __METHOD__ . ".insertCd", "clearing_decision_pk");
+      if ($decisionItem["new_itemid"] !== null) {
+        $newCdId = $this->dbManager->insertTableRow("clearing_decision", [
+          "uploadtree_fk" => $decisionItem["new_itemid"],
+          "pfile_fk" => $decisionItem["new_pfile"],
+          "decision_type" => $decisionItem["decision_type"],
+          "group_fk" => $this->groupId,
+          "user_fk" => $this->userId,
+          "scope" => $decisionItem["scope"],
+          "date_added" => $decisionItem["date_added"]
+        ], __METHOD__ . ".insertCd", "clearing_decision_pk");
+      } else {
+        $newCdId = null;
+      }
       $clearingDecisionList[$oldDecisionId]["new_decision"] = $newCdId;
       $i++;
       if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
@@ -163,19 +167,23 @@ class DecisionImporterDataCreator
 
     $i = 0;
     foreach ($clearingEventList as $oldEventId => $eventItem) {
-      $newCeId = $this->dbManager->insertTableRow("clearing_event", [
-        "uploadtree_fk" => $eventItem["new_itemid"],
-        "rf_fk" => $eventItem["new_rfid"],
-        "removed" => $eventItem["removed"],
-        "user_fk" => $this->userId,
-        "group_fk" => $this->groupId,
-        "job_fk" => null,
-        "type_fk" => $eventItem["type_fk"],
-        "comment" => $eventItem["comment"],
-        "reportinfo" => $eventItem["reportinfo"],
-        "acknowledgement" => $eventItem["acknowledgement"],
-        "date_added" => $eventItem["date_added"]
-      ], __METHOD__ . ".insertCe", "clearing_event_pk");
+      if ($eventItem["new_itemid"] !== null) {
+        $newCeId = $this->dbManager->insertTableRow("clearing_event", [
+          "uploadtree_fk" => $eventItem["new_itemid"],
+          "rf_fk" => $eventItem["new_rfid"],
+          "removed" => $eventItem["removed"],
+          "user_fk" => $this->userId,
+          "group_fk" => $this->groupId,
+          "job_fk" => null,
+          "type_fk" => $eventItem["type_fk"],
+          "comment" => $eventItem["comment"],
+          "reportinfo" => $eventItem["reportinfo"],
+          "acknowledgement" => $eventItem["acknowledgement"],
+          "date_added" => $eventItem["date_added"]
+        ], __METHOD__ . ".insertCe", "clearing_event_pk");
+      } else {
+        $newCeId = null;
+      }
       $clearingEventList[$oldEventId]["new_event"] = $newCeId;
       $i++;
       if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
@@ -189,6 +197,9 @@ class DecisionImporterDataCreator
 
     foreach ($clearingDecisionEventList as $oldCdId => $ceList) {
       $newCdId = $clearingDecisionList[$oldCdId]["new_decision"];
+      if ($newCdId === null) {
+        continue;
+      }
       foreach ($ceList as $oldCeId) {
         $newCeId = $clearingEventList[$oldCeId]["new_event"];
         $this->dbManager->insertTableRow("clearing_decision_event", [
