@@ -20,6 +20,9 @@
     <ComponentHash>{{ generalInformation.componentHash|trim }}</ComponentHash>
     <ComponentReleaseDate>{{ generalInformation.componentReleaseDate|trim }}</ComponentReleaseDate>
     <LinkComponentManagement><![CDATA[{{ generalInformation.linkComponentManagement|trim }}]]></LinkComponentManagement>
+    {%- if generalInformation.linkScanTool is not empty ~%}
+    <LinkScanTool><![CDATA[{{ generalInformation.linkScanTool|trim }}]]></LinkScanTool>
+    {%- endif ~%}
     {%- if generalInformation.componentId is not empty ~%}
     <ComponentId>
       <Type>{{ generalInformation.componentType|trim }}</Type>
