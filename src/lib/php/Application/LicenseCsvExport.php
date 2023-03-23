@@ -9,6 +9,7 @@
 namespace Fossology\Lib\Application;
 
 use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 
 /**
@@ -66,7 +67,7 @@ class LicenseCsvExport
    */
   public function createCsv($rf=0)
   {
-    $forGroupBy = " GROUP BY rf.rf_shortname, rf.rf_fullname, rf.rf_text, rc.rf_shortname, rr.rf_shortname, rf.rf_url, rf.rf_notes, rf.rf_source, rf.rf_risk, gp.group_name";
+    $forGroupBy = " GROUP BY rf.rf_shortname, rf.rf_fullname, rf.rf_spdx_id, rf.rf_text, rc.rf_shortname, rr.rf_shortname, rf.rf_url, rf.rf_notes, rf.rf_source, rf.rf_risk, gp.group_name";
     $sql = "WITH marydoneCand AS (
   SELECT * FROM license_candidate
   WHERE marydone = true
@@ -75,9 +76,10 @@ SELECT DISTINCT ON(rf_pk) * FROM
   ONLY license_ref
   NATURAL FULL JOIN marydoneCand)
 SELECT
-  rf.rf_shortname, rf.rf_fullname, rf.rf_text, rc.rf_shortname parent_shortname,
-  rr.rf_shortname report_shortname, rf.rf_url, rf.rf_notes, rf.rf_source,
-  rf.rf_risk, gp.group_name, string_agg(ob_topic, ', ') obligations
+  rf.rf_shortname, rf.rf_fullname, rf.rf_spdx_id, rf.rf_text,
+  rc.rf_shortname parent_shortname, rr.rf_shortname report_shortname, rf.rf_url,
+  rf.rf_notes, rf.rf_source, rf.rf_risk, gp.group_name,
+  string_agg(ob_topic, ', ') obligations
 FROM allLicenses AS rf
   LEFT OUTER JOIN obligation_map om ON om.rf_fk = rf.rf_pk
   LEFT OUTER JOIN obligation_ref ON ob_fk = ob_pk
@@ -106,10 +108,13 @@ WHERE rf.rf_detector_type=$1";
     $out = fopen('php://output', 'w');
     ob_start();
     $head = array(
-      'shortname', 'fullname', 'text', 'parent_shortname', 'report_shortname',
-      'url', 'notes', 'source', 'risk', 'group', 'obligations');
+      'shortname', 'fullname', 'spdx_id', 'text', 'parent_shortname',
+      'report_shortname', 'url', 'notes', 'source', 'risk', 'group',
+      'obligations');
     fputcsv($out, $head, $this->delimiter, $this->enclosure);
     foreach ($vars as $row) {
+      $row['rf_spdx_id'] = LicenseRef::convertToSpdxId($row['rf_shortname'],
+        $row['rf_spdx_id']);
       fputcsv($out, $row, $this->delimiter, $this->enclosure);
     }
     $content = ob_get_contents();

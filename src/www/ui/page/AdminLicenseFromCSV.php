@@ -8,14 +8,12 @@
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Application\LicenseCsvImport;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Fossology\Lib\Application\LicenseCsvImport;
 
 /**
  * \brief Upload a file from the users computer using the UI.
@@ -81,7 +79,7 @@ class AdminLicenseFromCSV extends DefaultPlugin
     if (! empty($errMsg)) {
       return array(false, $errMsg,400);
     }
-    /** @var LicenseCsvImport */
+    /** @var LicenseCsvImport $licenseCsvImport */
     $licenseCsvImport = $this->getObject('app.license_csv_import');
     $licenseCsvImport->setDelimiter($delimiter);
     $licenseCsvImport->setEnclosure($enclosure);
