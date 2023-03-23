@@ -58,10 +58,9 @@ class DecisionExporter extends Agent
     $tableName = "decision_exporter_pfile_" . $uploadId;
 
     $pfileData = $this->allDecisionsDao->getAllAgentPfileIdsForUpload($uploadId, $groupId, $userId);
-    if (!empty($pfileData)) {
-      $this->createPfileTable($uploadId, $tableName);
-    }
+    $this->createPfileTable($uploadId, $tableName);
     $this->heartbeat(count($pfileData));
+
     $this->insertPfileData($uploadId, $pfileData, $tableName);
     $this->heartbeat(1);
     $uploadTreeData = $this->allDecisionsDao->getAllAgentUploadTreeDataForUpload($uploadId, $tableName);
@@ -124,9 +123,8 @@ class DecisionExporter extends Agent
       'licenses'=>$licenseData,
       'upload_clearing_license'=>array_values($mainLicenseData)
     );
-    if (!empty($pfileData)) {
-      $this->dropPfileTable($uploadId, $tableName);
-    }
+
+    $this->dropPfileTable($uploadId, $tableName);
     $this->writeReport($contents, $uploadId);
 
     return true;
