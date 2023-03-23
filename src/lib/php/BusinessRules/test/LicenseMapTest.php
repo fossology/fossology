@@ -164,16 +164,16 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
   {
     $licenseMap = new LicenseMap($this->dbManager, $this->groupId+1, LicenseMap::CONCLUSION, true);
     $map = \Fossology\Lib\Test\Reflectory::getObjectsProperty($licenseMap, 'map');
-    assertThat($map,hasItemInArray(array('rf_fk'=>1,'parent_shortname'=>'One','parent_spdx_id'=>'One','rf_parent'=>1)));
-    assertThat($map,hasItemInArray(array('rf_fk'=>2,'parent_shortname'=>'One','parent_spdx_id'=>'One','rf_parent'=>1)));
+    assertThat($map,hasItemInArray(array('rf_fk'=>1,'parent_shortname'=>'One','parent_spdx_id'=>'One','rf_parent'=>1,'parent_fullname'=>'One-1')));
+    assertThat($map,hasItemInArray(array('rf_fk'=>2,'parent_shortname'=>'One','parent_spdx_id'=>'One','rf_parent'=>1,'parent_fullname'=>'One-1')));
   }
 
   public function testFullMapWithCandidates()
   {
     $licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::CONCLUSION, true);
     $map = \Fossology\Lib\Test\Reflectory::getObjectsProperty($licenseMap, 'map');
-    assertThat($map,hasItemInArray(array('rf_fk'=>1,'parent_shortname'=>'One','parent_spdx_id'=>'One','rf_parent'=>1)));
-    assertThat($map,hasItemInArray(array('rf_fk'=>2,'parent_shortname'=>'One','parent_spdx_id'=>'One','rf_parent'=>1)));
-    assertThat($map,hasItemInArray(array('rf_fk'=>3,'parent_shortname'=>'Three','parent_spdx_id'=>'Three','rf_parent'=>3)));
+    assertThat($map,hasItemInArray(array('rf_fk'=>1,'parent_shortname'=>'One','parent_spdx_id'=>'One','rf_parent'=>1,'parent_fullname'=>'One-1')));
+    assertThat($map,hasItemInArray(array('rf_fk'=>2,'parent_shortname'=>'One','parent_spdx_id'=>'One','rf_parent'=>1,'parent_fullname'=>'One-1')));
+    assertThat($map,hasItemInArray(array('rf_fk'=>3,'parent_shortname'=>'Three','parent_spdx_id'=>'Three','rf_parent'=>3,'parent_fullname'=>'Three-3')));
   }
 }

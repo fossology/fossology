@@ -111,6 +111,18 @@ class LicenseRef
       // License ref can not end with a '+'
       $spdxLicense = preg_replace('/\+$/', '-or-later', $spdxLicense);
     }
-    return $spdxLicense;
+    return self::replaceSpaces($spdxLicense);
+  }
+
+  /**
+   * Replace all spaces with '-' if they are not surrounding 'AND', 'WITH' or
+   * 'OR'
+   * @param string $licenseName SPDX expression
+   * @return string SPDX expression with space replaced with dash
+   */
+  public static function replaceSpaces($licenseName): string
+  {
+    $licenseName = str_replace(' ', '-', $licenseName);
+    return preg_replace('/-(OR|AND|WITH)-(?!later)/i', ' $1 ', $licenseName);
   }
 }
