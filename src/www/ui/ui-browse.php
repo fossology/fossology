@@ -167,6 +167,27 @@ class ui_browse extends FO_Plugin
    */
   private function ShowFolder($folderId)
   {
+    if ($folderId!="") {
+      $deleteFolder= "<form method='post'>\n"; // no url = this url
+      $text = _("Select the folder to delete:  ");
+      $deleteFolder.= "<P id='cancelDelete'>$text\n";
+      $deleteFolder.= "<select name='deleteFolder' class='ui-render-select2'>\n";
+      $text = _("select folder");
+      $deleteFolder.= "<option value='' disabled selected>$text</option>\n";
+      $deleteFolder.= FolderListOption(-1, 0, 1, -1, true);
+      $deleteFolder.= "</select>";
+      $text = _("Delete");
+      $deleteFolder.= "&nbsp <input type='submit' onclick='myFunction()' value='$text' class='btn btn-outline-danger' style='font-size: 10px;'><script>
+      function myFunction() {
+        let text;
+        if (confirm('All uploads inside this folder will also get deleted. Are you sure you want to delete this folder ?') == false) {
+          text = 'Delete Job canceled!';
+          document.getElementById('cancelDelete').innerHTML = text;
+        }
+      }
+      </script><P />\n";
+      $deleteFolder.= "</form>\n";
+    }
     $rootFolder = $this->folderDao->getDefaultFolder(Auth::getUserId());
     if ($rootFolder == NULL) {
       $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
@@ -189,7 +210,7 @@ class ui_browse extends FO_Plugin
       </div>';
     $folderNav .= $uiFolderNav->showFolderTree($folderId).'</div>';
 
-    $this->vars['folderNav'] = $folderNav;
+    $this->vars['folderNav'] = $folderNav .'<hr/>'. $deleteFolder;
 
     $assigneeArray = $this->getAssigneeArray();
     $this->vars['assigneeOptions'] = $assigneeArray;
@@ -197,6 +218,39 @@ class ui_browse extends FO_Plugin
     $this->vars['folder'] = $folderId;
     $this->vars['folderName'] = $this->folderDao->getFolder($folderId)->getName();
   }
+
+  function deleteFolder($folder)
+  {
+    $splitFolder = explode(" ",$folder);
+    if (!empty($folder)) {
+      $userId = Auth::getUserId();
+
+      global $container;
+      /** @var DbManager */
+      $dbManager = $container->get('db.manager');
+
+      $sql = "SELECT folder_name FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = $1 and users.user_pk = $2;";
+      $Folder = $dbManager->getSingleRow($sql,array($splitFolder[1],$userId),__METHOD__."GetRowWithFolderName");
+      if (!empty($Folder['folder_name'])) {
+        $adminUploadDelete = plugin_find("admin_folder_delete");
+        $adminUploadDelete->Delete($folder, $userId);
+        if (!empty($adminUploadDelete)) {
+          /* Need to refresh the screen */
+          $text = _("Deletion of folder ");
+          $text1 = _(" added to job queue");
+          $this->vars['message'] = $text . $Folder['folder_name'] . $text1;
+        } else {
+          $text = _("Deletion of ");
+          $text1 = _(" failed: ");
+          $this->vars['message'] =  $text . $Folder['folder_name'] . $text1 . $rc;
+        }
+      } else {
+        $text = _("Cannot delete this folder :: Permission denied");
+        $this->vars['message'] = $text;
+      }
+    }
+  }
+
 
   /**
    * \brief This function returns the output html
@@ -211,6 +265,15 @@ class ui_browse extends FO_Plugin
     $folder_pk = GetParm("folder", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);  // upload_pk to browse
     $Item = GetParm("item", PARM_INTEGER);  // uploadtree_pk to browse
+
+    /* check for delete operation */
+    if (array_key_exists('deleteFolder', $_POST)) {
+      $deleteFolder = GetParm("deleteFolder", PARM_RAW);
+      if (!empty($deleteFolder)) {
+        $this->deleteFolder($deleteFolder);
+        return new RedirectResponse(Traceback_uri() . '?mod=' . 'showjobs');
+      }
+    }
 
     /* check if $folder_pk is accessible to logged in user */
     if (!empty($folder_pk) && !$this->folderDao->isFolderAccessible($folder_pk)) {

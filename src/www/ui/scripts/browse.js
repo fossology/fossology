@@ -37,7 +37,7 @@ $(document).ready(function () {
       const optionText = $(this).find("option:selected").text();
       let userResponse = true
       if (optionText === "Delete") {
-        userResponse = confirm("Are you sure you want to delete this upload ?")
+        userResponse = confirm("Are you sure you want to delete this upload ?");
       } 
       if(url && userResponse) {
         window.location = url;

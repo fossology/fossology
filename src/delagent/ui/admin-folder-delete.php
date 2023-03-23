@@ -39,7 +39,7 @@ class admin_folder_delete extends FO_Plugin
    * @param int $userId   the user deleting the folder
    * @return NULL on success, string on failure.
    */
-  function Delete($folderpk, $userId)
+  public function Delete($folderpk, $userId)
   {
     $splitFolder = explode(" ",$folderpk);
     if (! $this->folderDao->isFolderAccessible($splitFolder[1], $userId)) {
