@@ -8,9 +8,9 @@
 namespace Fossology\Lib\Application;
 
 use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ArrayOperation;
-use Fossology\Lib\Dao\UserDao;
 
 /**
  * @file
@@ -49,6 +49,7 @@ class LicenseCsvImport
   protected $alias = array(
       'shortname'=>array('shortname','Short Name'),
       'fullname'=>array('fullname','Long Name'),
+      'spdx_id'=>array('spdx_id', 'SPDX ID'),
       'text'=>array('text','Full Text'),
       'parent_shortname'=>array('parent_shortname','Decider Short Name'),
       'report_shortname'=>array('report_shortname','Regular License Text Short Name'),
@@ -138,7 +139,7 @@ class LicenseCsvImport
     }
     foreach (array('parent_shortname' => null, 'report_shortname' => null,
       'url' => '', 'notes' => '', 'source' => '', 'risk' => 0,
-      'group' => null) as $optNeedle=>$defaultValue) {
+      'group' => null, 'spdx_id' => null) as $optNeedle=>$defaultValue) {
       $mRow[$optNeedle] = $defaultValue;
       if ($this->headrow[$optNeedle]!==false && array_key_exists($this->headrow[$optNeedle], $row)) {
         $mRow[$optNeedle] = $row[$this->headrow[$optNeedle]];
@@ -165,7 +166,7 @@ class LicenseCsvImport
       $headrow[$needle] = $col;
     }
     foreach (array('parent_shortname', 'report_shortname', 'url', 'notes',
-      'source', 'risk', 'group') as $optNeedle) {
+      'source', 'risk', 'group', 'spdx_id') as $optNeedle) {
       $headrow[$optNeedle] = ArrayOperation::multiSearch($this->alias[$optNeedle], $row);
     }
     return $headrow;
@@ -181,7 +182,7 @@ class LicenseCsvImport
   {
     $stmt = __METHOD__ . '.getOldLicense';
     $oldLicense = $this->dbManager->getSingleRow('SELECT ' .
-      'rf_shortname, rf_fullname, rf_text, rf_url, rf_notes, rf_source, rf_risk ' .
+      'rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk ' .
       'FROM license_ref WHERE rf_pk = $1', array($rfPk), $stmt);
 
     $stmt = __METHOD__ . '.getOldMapping';
@@ -220,6 +221,12 @@ class LicenseCsvImport
       $stmt .= '.fullN';
       $extraParams[] = "rf_fullname=$" . count($param);
       $log .= ", updated fullname";
+    }
+    if (!empty($row['spdx_id']) && $row['spdx_id'] != $oldLicense['rf_spdx_id']) {
+      $param[] = $row['spdx_id'];
+      $stmt .= '.spId';
+      $extraParams[] = "rf_spdx_id=$" . count($param);
+      $log .= ", updated SPDX ID";
     }
     if (!empty($row['text']) && $row['text'] != $oldLicense['rf_text']) {
       $param[] = $row['text'];
@@ -429,6 +436,7 @@ class LicenseCsvImport
     $columns = array(
       "rf_shortname" => $row['shortname'],
       "rf_fullname"  => $row['fullname'],
+      "rf_spdx_id"   => $row['spdx_id'],
       "rf_text"      => $row['text'],
       "rf_md5"       => md5($row['text']),
       "rf_detector_type" => 1,

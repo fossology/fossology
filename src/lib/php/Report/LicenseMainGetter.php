@@ -43,7 +43,9 @@ class LicenseMainGetter extends ClearedGetterCommon
         'licenseId' => $originLicenseId,
         'risk' => $allLicenseCols->getRisk(),
         'content' => $licenseMap->getProjectedSpdxId($originLicenseId),
-        'text' => $allLicenseCols->getText()
+        'text' => $allLicenseCols->getText(),
+        'name' => $licenseMap->getProjectedShortname($originLicenseId,
+            $allLicenseCols->getShortName())
       );
     }
     return $allStatements;

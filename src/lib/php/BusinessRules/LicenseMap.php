@@ -49,18 +49,23 @@ class LicenseMap
     $licenseView = new LicenseViewProxy($groupId);
     if ($full) {
       $query = $licenseView->asCTE()
-            .' SELECT distinct on(rf_pk) rf_pk rf_fk, rf_shortname parent_shortname, rf_spdx_id AS parent_spdx_id, rf_parent FROM (
-                SELECT r1.rf_pk, r2.rf_shortname, r2.rf_spdx_id, usage, rf_parent FROM '.$licenseView->getDbViewName()
+            .' SELECT distinct on(rf_pk) rf_pk rf_fk, rf_shortname parent_shortname,
+                   rf_spdx_id AS parent_spdx_id, rf_parent, rf_fullname AS parent_fullname
+               FROM (
+                SELECT r1.rf_pk, r2.rf_shortname, r2.rf_spdx_id, usage,
+                   rf_parent, r2.rf_fullname FROM '.$licenseView->getDbViewName()
             .' r1 inner join license_map on usage=$1 and rf_fk=r1.rf_pk
              left join license_ref r2 on rf_parent=r2.rf_pk
             UNION
-            SELECT rf_pk, rf_shortname, rf_spdx_id, -1 usage, rf_pk rf_parent from '.$licenseView->getDbViewName()
+            SELECT rf_pk, rf_shortname, rf_spdx_id, -1 usage, rf_pk rf_parent,
+                  rf_fullname FROM '.$licenseView->getDbViewName()
             .') full_map ORDER BY rf_pk,usage DESC';
 
       $stmt = __METHOD__.".$this->usageId,$groupId,full";
     } else {
       $query = $licenseView->asCTE()
-            .' SELECT rf_fk, rf_shortname AS parent_shortname, rf_spdx_id AS parent_spdx_id, rf_parent FROM license_map, '.$licenseView->getDbViewName()
+            .' SELECT rf_fk, rf_shortname AS parent_shortname, rf_spdx_id AS parent_spdx_id, '
+            .'rf_parent, rf_fullname AS parent_fullname FROM license_map, '.$licenseView->getDbViewName()
             .' WHERE rf_pk=rf_parent AND rf_fk!=rf_parent AND usage=$1';
       $stmt = __METHOD__.".$this->usageId,$groupId";
     }
@@ -106,7 +111,7 @@ class LicenseMap
    * ID does not exist).
    * @param int $licenseId  License id to be queried
    * @param string $defaultID Default ID to return if license not found in map
-   * @return string|null Projected shortname or default name
+   * @return string|null Projected SPDX ID or default name
    */
   public function getProjectedSpdxId($licenseId, $defaultID=null)
   {
@@ -115,6 +120,25 @@ class LicenseMap
         $this->map[$licenseId]['parent_spdx_id']);
     }
     return $defaultID;
+  }
+
+  /**
+   * @brief For a given license id, get the projected fullname. If empty, get
+   * the shortname instead.
+   * @param int $licenseId  License ID
+   * @param string $defaultName Default name if license not in map
+   * @return mixed|string|null Projected fullname or default name
+   */
+  public function getProjectedName($licenseId, $defaultName=null)
+  {
+    if (array_key_exists($licenseId, $this->map)) {
+      $licenseName = $this->map[$licenseId]['parent_fullname'];
+      if (empty($licenseName)) {
+        $licenseName = $this->getProjectedShortname($licenseId, $defaultName);
+      }
+      return $licenseName;
+    }
+    return $defaultName;
   }
 
   /**
