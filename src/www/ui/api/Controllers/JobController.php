@@ -160,7 +160,7 @@ class JobController extends RestController
         return $response->withJson($error->getArray(), $error->getCode());
       }
       $uploadHelper = new UploadHelper();
-      $info = $uploadHelper->handleScheduleAnalysis($folder, $upload,
+      $info = $uploadHelper->handleScheduleAnalysis($upload, $folder,
         $scanOptionsJSON);
       return $response->withJson($info->getArray(), $info->getCode());
     }
