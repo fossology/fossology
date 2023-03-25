@@ -12,7 +12,25 @@ cp2foss - upload one or more files or archives into FOSSology and run scans.
 
  Usage: cp2foss [options] [archives]
  Options: -AQThv [-f path] [-AA num] [-q {agent,agent.. | all}] [-X path]
- [-n name] [-f description] [--username user name] [--password password]
+ [-n name] [-d description] [--username user name] [--password password]
+ Usage: cp2foss [options] [archives]
+ Options: -AQThv [-f path] [-AA num] [-q {agent,agent.. | all}] [-X path]
+ [-n name] [-f('/path/to/file.txt') description] [--username user name] [--password password] [-D folder_description]
+
+ -A               : Automatically accept licenses.
+ -Q               : Quiet mode; do not print any status messages.
+ -T               : Test mode; do not upload files to the server.
+ -h               : Show this help message and exit.
+ -v               : Print version information and exit.
+ -f path          : Path to the file or directory to be uploaded.
+ -AA num          : Set the reuse analysis level (0-3) for the upload.
+ -q {agent,agent.. | all} : Set the queue to use for analysis.
+ -X path          : Path to the exclude file.
+ -n name          : Set the name of the file or directory to be uploaded.
+ -d description   : Set the description of the file(s) being uploaded.
+ --username user name   : Set the FOSSology server username.
+ --password password    : Set the FOSSology server password.
+ -D folder_description  : Set the description of the folder where the uploaded files will be stored.
  [-c configuration directory] [-s Run synchronously]
  [-P set public permission]
  [-S upload from subversion repo] [-G upload from git repo] [--user user name for vcs] [--pass password for vcs]
