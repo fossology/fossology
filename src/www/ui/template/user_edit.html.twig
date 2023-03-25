@@ -65,29 +65,13 @@
       </tr>
       {% endif %}
     {% endif %}
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Toggle Password Visibility</title>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" />
-      <link rel="stylesheet" href="css/style.css" />
+
     <tr class="classic">
       <th width="25%">{{ "Password."|trans }}</th>
-      <td><input type="password" name="_pass1" size="20" id="passcheck"/><i class="bi bi-eye-slash" id="togglePassword" style="margin-left: -30px; cursor: pointer;"></i>{% if passwordPolicy is not empty %}
+      <td><input type="password" name="_pass1" size="20" id="passcheck"/>{% if passwordPolicy is not empty %}
       <br /><span class="passPolicy">{{ passwordPolicy }}</span>
       {% endif %}</td>
     </tr>
-    <script>
-        const togglePassword = document.querySelector('#togglePassword');
-        const password = document.querySelector('#passcheck');
-
-        togglePassword.addEventListener('click', function (e) {
-          // toggle the type attribute
-          const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-          password.setAttribute('type', type);
-          // toggle the eye slash icon
-          this.classList.toggle('fa-eye-slash');
-      });
-    </script>
     <tr class="classic">
       <th width='25%'>{{ "Re-enter password."|trans }}</th>
       <td><input type="password" name="_pass2" size="20" id="pass2"/></td>
