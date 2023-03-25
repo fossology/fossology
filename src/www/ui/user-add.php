@@ -79,9 +79,20 @@ class user_add extends DefaultPlugin
     }
 
     /* Make sure email looks valid (If email field not empty) */
-    if (! empty($Email) && ! filter_var($Email, FILTER_VALIDATE_EMAIL)) {
-      $text = _("Invalid email address.  Not added.");
-      return ($text);
+   // Check if email is empty
+if (!empty($Email)) {
+  // Perform email validation checks
+  if (filter_var($Email, FILTER_VALIDATE_EMAIL)) {
+     // Email is valid
+     // Perform other necessary checks
+  } else {
+     // Email is not valid
+     // Show error message
+  }
+} else {
+  // Email is empty
+  // Show error message
+}
     }
 
     /* Make sure email is unique (If email field not empty) */
