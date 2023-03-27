@@ -159,7 +159,7 @@ class AdminLicenseCandidate extends DefaultPlugin
     $rows = $this->getCandidateArrayData();
     $aaData = array();
     $delete = "";
-    while ($row = $rows) {
+    foreach ($rows as $row) {
       $link = Traceback_uri() . '?mod=' . self::NAME . '&rf=' . $row['rf_pk'];
       $edit = '<a href="' . $link . '"><img border="0" src="images/button_edit.png"></a>';
       $delete = '<img border="0" id="deletecandidate'.$row['rf_pk'].'" onClick="deleteCandidate('.$row['rf_pk'].')" src="images/icons/close_16.png">';
