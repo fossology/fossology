@@ -106,7 +106,7 @@ class CliXml extends Agent
   protected function preWorkOnArgsFlp($args,$key1,$key2)
   {
     $needle = ' --'.$key2.'=';
-    if (strpos($args[$key1],$needle) !== false) {
+    if (array_key_exists($key1,$args) && strpos($args[$key1],$needle) !== false) {
       $exploded = explode($needle,$args[$key1]);
       $args[$key1] = trim($exploded[0]);
       $args[$key2] = trim($exploded[1]);
