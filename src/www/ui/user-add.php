@@ -163,6 +163,8 @@ class user_add extends DefaultPlugin
     $vars['formName'] = "user_add";
     $vars['policyDisabled'] = passwordPolicyEnabled() ? "false" : "true";
     $vars['policyRegex'] = generate_password_policy();
+    $scripts = "<script src='scripts/togglePasswords.js' type='text/javascript'></script>";
+    $vars['scripts'] = $scripts;
     return $this->render('user_add.html.twig', $this->mergeWithDefault($vars));
   }
 }
