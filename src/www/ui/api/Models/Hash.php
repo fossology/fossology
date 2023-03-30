@@ -21,7 +21,7 @@ class Hash
    * @var array $ALLOWED_KEYS
    * Allowed keys from user to parse
    */
-  const ALLOWED_KEYS = ['sha1', 'sha256', 'md5'];
+  const ALLOWED_KEYS = ['sha1', 'sha256', 'md5', 'size'];
 
   /**
    * @var string $id
