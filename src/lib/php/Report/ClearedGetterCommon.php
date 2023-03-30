@@ -20,6 +20,7 @@ abstract class ClearedGetterCommon
 
   /** @var array $fileNameCache */
   private $fileNameCache = array();
+
   /** @var array $fileHashes */
   private $fileHashes = array();
 

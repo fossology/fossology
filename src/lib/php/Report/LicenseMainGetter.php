@@ -58,6 +58,7 @@ class LicenseMainGetter extends ClearedGetterCommon
     if (!$extended) {
       for ($i=0; $i<=count($statements); $i++) {
         unset($statements[$i]['risk']);
+        unset($statements[$i]['licenseId']);
       }
     }
     return array("statements" => array_values($statements));

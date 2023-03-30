@@ -63,11 +63,13 @@ class LicenseClearedGetter extends ClearedGetterCommon
           continue;
         }
 
-        if ($this->onlyComments && !($comment = $clearingLicense->getComment())) {
+        $comment = $clearingLicense->getComment();
+        if ($this->onlyComments && !($comment)) {
           continue;
         }
 
-        if ($this->onlyAcknowledgements && !($acknowledgement = $clearingLicense->getAcknowledgement())) {
+        $acknowledgement = $clearingLicense->getAcknowledgement();
+        if ($this->onlyAcknowledgements && !($acknowledgement)) {
           continue;
         }
 
@@ -84,6 +86,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
           $reportInfo = $clearingLicense->getReportInfo();
           $text = $reportInfo ? : $this->getCachedLicenseText($licenseId, "any");
           $risk = $this->getCachedLicenseRisk($licenseId, $groupId);
+          $acknowledgement = $clearingLicense->getAcknowledgement();
         }
 
         $ungroupedStatements[] = array(
@@ -92,7 +95,8 @@ class LicenseClearedGetter extends ClearedGetterCommon
           'content' => $licenseMap->getProjectedSpdxId(
               $originLicenseId, $clearingLicense->getSpdxId()),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
-          'text' => $text
+          'text' => $text,
+          'acknowledgement' => $acknowledgement
         );
       }
     }
@@ -272,10 +276,10 @@ class LicenseClearedGetter extends ClearedGetterCommon
   function updateIdentifiedGlobalLicenses($licensesMain, $licenses)
   {
     $onlyMainLic = array_udiff($licensesMain, $licenses, array($this, "checkLicenseId"));
-    $mainLicensesInIdetifiedFiles = array_uintersect($licenses, $licensesMain, array($this, "checkLicenseId"));
+    $mainLicensesInIdentifiedFiles = array_uintersect($licenses, $licensesMain, array($this, "checkLicenseId"));
     $onlyLicense = array_udiff($licenses, $licensesMain, array($this, "checkLicenseId"));
     return array(
-      array_values(array_merge($onlyMainLic, $mainLicensesInIdetifiedFiles)),
+      array_values(array_merge($onlyMainLic, $mainLicensesInIdentifiedFiles)),
       array_values($onlyLicense)
     );
   }
