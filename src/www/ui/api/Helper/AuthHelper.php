@@ -114,9 +114,6 @@ class AuthHelper
       $jwtTokenPayloadDecoded = JWT::jsonDecode(
         JWT::urlsafeB64Decode($jwtTokenPayload));
 
-      if ($jwtTokenPayloadDecoded->{'jti'} === null) {
-        $returnValue = new Info(403, "Invalid token sent.", InfoType::ERROR);
-      }
       $restToken = Auth::getRestTokenType();
       if (($restToken & Auth::TOKEN_OAUTH) == Auth::TOKEN_OAUTH &&
         property_exists($jwtTokenPayloadDecoded, 'iss') &&
