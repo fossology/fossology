@@ -33,6 +33,7 @@ use Fossology\UI\Api\Models\Reuser;
 use Fossology\UI\Api\Models\Scancode;
 use Fossology\UI\Api\Models\ScanOptions;
 use Fossology\UI\Api\Models\UploadSummary;
+use Fossology\UI\Page\BrowseLicense;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use UIExportList;
 
@@ -592,8 +593,16 @@ class UploadHelper
 
     $mainLicenses = $this->getMainLicenses($dbManager, $uploadId, $groupId);
 
+    /** @var BrowseLicense $uiLicense */
     $uiLicense = $restHelper->getPlugin("license");
     $hist = $uiLicense->getUploadHist($itemTreeBounds);
+    if (!is_array($hist) || !array_key_exists('uniqueLicenseCount', $hist)) {
+      $hist = [];
+      $hist['uniqueLicenseCount'] = 0;
+      $hist['scannerLicenseCount'] = 0;
+      $hist['editedUniqueLicenseCount'] = 0;
+      $hist['editedLicenseCount'] = 0;
+    }
 
     $summary = new UploadSummary();
     $summary->setUploadId($uploadId);
