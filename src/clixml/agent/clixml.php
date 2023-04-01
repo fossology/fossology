@@ -314,6 +314,9 @@ class CliXml extends Agent
   protected function riskMapping($licenseContent)
   {
     foreach ($licenseContent as $riskKey => $riskValue) {
+      if (!array_key_exists('risk', $riskValue)) {
+        $riskValue['risk'] = 0;
+      }
       if ($riskValue['risk'] == '2' || $riskValue['risk'] == '3') {
         $licenseContent[$riskKey]['risk'] = 'otheryellow';
       } else if ($riskValue['risk'] == '4' || $riskValue['risk'] == '5') {

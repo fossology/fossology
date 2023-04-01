@@ -62,6 +62,7 @@ class LicenseDNUGetter extends ClearedGetterCommon
           $statements[$fileName] = array(
             "content" => convertToUTF8($dirName, false),
             "fileName" => $baseName,
+            "fullPath" => convertToUTF8($fileName, false),
             "licenses" => array($licenseName)
             );
         }
