@@ -77,7 +77,7 @@ def copyrightDeactivationMain(df, clutter_flag):
     # Implementing NER and POS Tags after normalization
     doc2 = nlp(list_of_copyrights)
 
-    # All the NER taggings will be contained in a dictionary having "Entity" and "Values" as keys
+    # NER taggings will be contained in a dictionary having "Entity" and "Values" as keys
     ent_dict = {}
 
     full_table_ner = {"Entity": [], "Values": []}
@@ -93,13 +93,7 @@ def copyrightDeactivationMain(df, clutter_flag):
     pos_dict = {}
     full_table_pos = {"Entity": [], "POS_TAG": []}
 
-    for token in doc:
-      if not token.is_punct | token.is_space:
-        pos_dict[token.text] = token.pos_
-
-    for key in pos_dict:
-      full_table_pos["Entity"].append(key)
-      full_table_pos["POS_TAG"].append(pos_dict[key])
+    full_table_pos["Entity"], full_table_pos["POS_TAG"] = zip(*((token.text, token.pos_) for token in doc2 if not token.is_punct | token.is_space))
 
     # The checking function call happening with each iteration
     entityCheck(full_table_pos, full_table_ner, index, clutter_flag, df)
