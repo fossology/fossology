@@ -681,6 +681,23 @@ paths:
         schema:
           type: boolean
           default: false
+      - name: page
+        description: Page number (starts from 1)
+        required: false
+        in: header
+        schema:
+          type: integer
+          default: 1
+          minimum: 1
+      - name: limit
+        description: Limits of responses per request
+        required: false
+        in: header
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+          maximum: 1000
       - name: groupName
         description: The group name to chose while accessing the package
         in: header
@@ -698,10 +715,23 @@ paths:
       responses:
         '200':
           description: Get licenses
+          headers:
+            X-Total-Pages:
+              description: Total number of pages which can be generated based on limit
+              schema:
+                type: integer
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UploadLicenses'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
         '503':
           description: >
             The ununpack agent or queried agents have not started yet. Please
