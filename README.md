@@ -6,7 +6,6 @@
 
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/fossology/fossology)
 [![GPL-2.0](https://img.shields.io/github/license/fossology/fossology)](LICENSE)
-[![Travis-CI Build Status](https://travis-ci.org/fossology/fossology.svg?branch=master)](https://travis-ci.org/fossology/fossology)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2395/badge)](https://bestpractices.coreinfrastructure.org/projects/2395)
 [![Coverage Status](https://coveralls.io/repos/github/fossology/fossology/badge.svg?branch=master)](https://coveralls.io/github/fossology/fossology?branch=master)
 [![Slack Channel](https://img.shields.io/badge/slack-fossology-blue.svg?longCache=true&logo=slack)](https://join.slack.com/t/fossology/shared_invite/enQtNzI0OTEzMTk0MjYzLTYyZWQxNDc0N2JiZGU2YmI3YmI1NjE4NDVjOGYxMTVjNGY3Y2MzZmM1OGZmMWI5NTRjMzJlNjExZGU2N2I5NGY)
