@@ -9,6 +9,7 @@
 namespace Fossology\Lib\Data;
 
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Util\StringOperation;
 
 class LicenseRef
 {
@@ -103,11 +104,14 @@ class LicenseRef
         strcasecmp($shortname, LicenseDao::VOID_LICENSE) === 0) {
       $spdxLicense = $shortname;
     } elseif (empty($spdxId)) {
-      $spdxLicense = self::SPDXREF_PREFIX . $shortname;
+      $spdxLicense = $shortname;
+      if (! StringOperation::stringStartsWith($shortname, self::SPDXREF_PREFIX)) {
+        $spdxLicense = self::SPDXREF_PREFIX . $shortname;
+      }
     } else {
       $spdxLicense = $spdxId;
     }
-    if (strpos($spdxLicense, LicenseRef::SPDXREF_PREFIX) !== false) {
+    if (StringOperation::stringStartsWith($spdxLicense, self::SPDXREF_PREFIX)) {
       // License ref can not end with a '+'
       $spdxLicense = preg_replace('/\+$/', '-or-later', $spdxLicense);
     }
