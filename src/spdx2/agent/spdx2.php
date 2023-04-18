@@ -442,6 +442,7 @@ class SpdxTwoAgent extends Agent
           $customLicenseText = $clearingEvent->getReportinfo();
           $reportedLicenseShortname = $this->licenseMap->getProjectedSpdxId($this->licenseMap->getProjectedId($clearingLicense->getLicenseId())) .
                                     '-' . md5($customLicenseText);
+          $reportedLicenseShortname = LicenseRef::convertToSpdxId($reportedLicenseShortname, "");
           $this->includedLicenseIds[$reportedLicenseShortname] = $customLicenseText;
           $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $reportedLicenseShortname;
         } else {
@@ -761,10 +762,10 @@ class SpdxTwoAgent extends Agent
       $hashes = $treeDao->getItemHashes($fileId);
       $fileName = $treeDao->getFullPath($fileId, $treeTableName, 0);
       if (!array_key_exists('concluded', $licenses) || !is_array($licenses['concluded'])) {
-        $licenses['concluded'] = array();
+        $licenses['concluded'] = [];
       }
       if (!array_key_exists('scanner', $licenses) || !is_array($licenses['scanner'])) {
-        $licenses['scanner'] = array();
+        $licenses['scanner'] = [];
       }
       if (!array_key_exists('isCleared', $licenses)) {
         $licenses['isCleared'] = false;
@@ -774,6 +775,9 @@ class SpdxTwoAgent extends Agent
       }
       if (!array_key_exists('acknowledgement', $licenses)) {
         $licenses['acknowledgement'] = [];
+      }
+      if (!array_key_exists('comment', $licenses)) {
+        $licenses['comment'] = [];
       }
       $stateComment = $this->getSPDXReportConf($uploadId, 0);
       $stateWoInfos = $this->getSPDXReportConf($uploadId, 1);
