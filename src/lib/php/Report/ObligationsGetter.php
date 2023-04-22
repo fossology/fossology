@@ -128,7 +128,7 @@ class ObligationsGetter
       $licenseName = LicenseRef::convertToSpdxId($obligation['rf_shortname'],
         $obligation['rf_spdx_id']);
       $groupBy = $obText;
-      if (!empty($excludedObligations)) {
+      if (!empty($excludedObligations) && array_key_exists($obTopic, $excludedObligations)) {
         $obligationLicenseNames = $excludedObligations[$obTopic];
       } else {
         $obligationLicenseNames = array();
