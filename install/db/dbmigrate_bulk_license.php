@@ -14,9 +14,14 @@
  * This should be called after fossinit calls apply_schema.
  **/
 
-echo "Transform bulk licenses into bulk license sets...";
-$dbManager->queryOnce('
+$rf_fkExists = $dbManager->existsColumn("license_ref_bulk", "rf_fk");
+$removingExists = $dbManager->existsColumn("license_ref_bulk", "removing");
+
+if ($rf_fkExists && $removingExists) {
+  echo "Transform bulk licenses into bulk license sets...";
+  $dbManager->queryOnce('
   INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing)
   SELECT lrb_pk lrb_fk, rf_fk, removing FROM license_ref_bulk');
-echo "...and drop the old columns\n";
-$libschema->dropColumnsFromTable(array('rf_fk','removing'), 'license_ref_bulk');
+  echo "...and drop the old columns\n";
+  $libschema->dropColumnsFromTable(array('rf_fk', 'removing'), 'license_ref_bulk');
+}

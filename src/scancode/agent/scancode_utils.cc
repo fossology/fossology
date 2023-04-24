@@ -188,9 +188,7 @@ bool saveLicenseMatchesToDatabase(const State &state,
                                   unsigned long pFileId,
                                   ScancodeDatabaseHandler &databaseHandler) 
                                   {
-  for (vector<Match>::const_iterator it = matches.begin();
-       it != matches.end(); ++it) {
-    const Match &match = *it;
+  for (const auto & match : matches) {
     databaseHandler.insertOrCacheLicenseIdForName(
         match.getMatchName(), match.getLicenseFullName(), match.getTextUrl());
   }
@@ -198,9 +196,7 @@ bool saveLicenseMatchesToDatabase(const State &state,
   if (!databaseHandler.begin()) {
     return false;
   }
-  for (vector<Match>::const_iterator it = matches.begin(); it != matches.end();
-       ++it) {
-    const Match &match = *it;
+  for (const auto & match : matches) {
     int agentId = state.getAgentId();
     string rfShortname = match.getMatchName();
     int percent = match.getPercentage();
@@ -257,9 +253,7 @@ bool saveOtherMatchesToDatabase(const State &state,
   if (!databaseHandler.begin())
     return false;
 
-  for (vector<Match>::const_iterator it = matches.begin();
-       it != matches.end(); ++it) {
-    const Match &match = *it;
+  for (const auto & match : matches) {
     DatabaseEntry entry(match,state.getAgentId(),pFileId);
 
     if (!databaseHandler.insertInDatabase(entry))

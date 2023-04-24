@@ -9,14 +9,14 @@
 #define MINSCORE 50
 
 /**
- * @brief convertes start line to start byte of the matched text
+ * @brief converts start line to start byte of the matched text
  *
  * count number of characters before start line and add it to the
  * characters before the matched text in the start line.
  *
  * @param filename name of the file uploaded
  * @param start_line  start line of the matched text by scancode
- * @param match_text  text inthe codefile matched by scancode
+ * @param match_text  text in the codefile matched by scancode
  * @return  start byte of the matched text on success, -1 on failure
  */
 unsigned getFilePointer(const string &filename, size_t start_line,
@@ -78,8 +78,9 @@ string scanFileWithScancode(const State &state, const fo::File &file) {
       state.getCliOptions() +
       " --custom-output - --custom-template scancode_template.html " +
       file.getFileName() + " --quiet " +
-      ((state.getCliOptions().find('l') != string::npos) ? " --license-text --license-score " + to_string(MINSCORE): "");
-  string result = "";
+      ((state.getCliOptions().find('l') != string::npos) ? " --license-text --license-score " +
+      to_string(MINSCORE): "");
+  string result;
 
   if (!(in = popen(command.c_str(), "r"))) {
     LOG_FATAL("could not execute scancode command: %s \n", command.c_str());
@@ -94,9 +95,9 @@ string scanFileWithScancode(const State &state, const fo::File &file) {
     LOG_FATAL("could not execute scancode command: %s \n", command.c_str());
     bail(1);
   }
-  unsigned int startjson = result.find("{");
-  result=result.substr(startjson, string::npos);
-return result;
+  unsigned int startjson = result.find('{');
+  result = result.substr(startjson, string::npos);
+  return result;
 }
 
 /**
@@ -134,16 +135,14 @@ map<string, vector<Match>> extractDataFromScancodeResult(const string& scancodeR
   vector<Match> licenses;
   if (isSuccessful) {
     Json::Value licensearrays = scancodevalue["licenses"];
-    if(!licensearrays.size())
+    if(licensearrays.empty())
     {
-      LOG_NOTICE("No license found\n");
       result["scancode_license"].push_back(Match("No_license_found"));
     }
     else
     {
-      for (unsigned int i = 0; i < licensearrays.size(); i++)
+      for (auto oneresult : licensearrays)
       {
-          Json::Value oneresult = licensearrays[i];
           string licensename = oneresult["key"].asString();
           int percentage = (int)oneresult["score"].asFloat();
           string full_name=oneresult["name"].asString();
@@ -158,8 +157,7 @@ map<string, vector<Match>> extractDataFromScancodeResult(const string& scancodeR
     }
 
     Json::Value copyarrays = scancodevalue["copyrights"];
-    for (unsigned int i = 0; i < copyarrays.size(); i++) {
-        Json::Value oneresult = copyarrays[i];
+    for (auto oneresult : copyarrays) {
         string copyrightname = oneresult["value"].asString();
         unsigned long start_line=oneresult["start"].asUInt();
         string temp_text= copyrightname.substr(0,copyrightname.find("[\n\t]"));
@@ -170,8 +168,7 @@ map<string, vector<Match>> extractDataFromScancodeResult(const string& scancodeR
     }
 
     Json::Value holderarrays = scancodevalue["holders"];
-    for (unsigned int i = 0; i < holderarrays.size(); i++) {
-        Json::Value oneresult = holderarrays[i];
+    for (auto oneresult : holderarrays) {
         string holdername = oneresult["value"].asString();
         unsigned long start_line=oneresult["start"].asUInt();
         string temp_text= holdername.substr(0,holdername.find("\n"));

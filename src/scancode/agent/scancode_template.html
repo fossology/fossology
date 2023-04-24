@@ -20,36 +20,39 @@
                     "start_line": {{ license.start_line }},
                     "matched_text": {{ license.matched_text|tojson }}
                 }
-                {%- if loop.nextitem and not loop.lastitem -%},{%- endif -%}
+                {%- if loop.nextitem and not loop.last -%},{%- endif -%}
             {%- endfor -%}
         {%- endif -%}
     ],
     "copyrights": 
     [
     {%- if files.license_copyright -%}
+        {%- set copyright_ns = namespace(print=false) -%}
         {%- for path, data in files.license_copyright.items() -%}
             {%- for row in data -%}
                 {%- if row.what != 'license' -%}
+                    {%- if copyright_ns.print -%},{%- else -%}{%- set copyright_ns.print = true -%}{%- endif -%}
                     {
                          "value": {{ row.value|tojson }},
                          "start": {{ row.start }}
-                     }
+                    }
                 {%- endif -%}
-            {%- endfor -%} {%- if loop.nextitem and not loop.lastitem -%},{%- endif -%}
+            {%- endfor -%}
         {%- endfor -%}
     {%- endif -%}
     ],
     "holders": 
     [
         {%- if files.infos -%}
+            {%- set holder_ns = namespace(print=false) -%}
             {%- for path, row in files.infos.items() -%}
                 {%- if row.holders -%}
                     {%- for data in row.holders -%}
+                        {%- if holder_ns.print -%},{%- else -%}{%- set holder_ns.print = true -%}{%- endif -%}
                         {
-                             "value": {{ data.value|tojson }},
+                             "value": {{ data.holder|tojson }},
                              "start": {{ data.start_line }}
                         }
-                        {%- if loop.nextitem and not loop.lastitem -%},{%- endif -%}
                     {%- endfor -%}
                 {%- endif -%}
             {%- endfor -%}

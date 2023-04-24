@@ -146,22 +146,27 @@ if [[ $RUNTIME && -z "$DEBIAN" ]]; then
 fi
 if [[ $RUNTIME ]]; then
   if id "$TARGETUSER" &>/dev/null; then
-    su $TARGETUSER -c 'mkdir -p $HOME/pythondeps && touch $HOME/.bashrc'
-    su $TARGETUSER -c 'grep -qF pythondeps $HOME/.bashrc || printf "export PATH=\"$PATH:$HOME/pythondeps/bin\"\nexport PYTHONPATH=\"$HOME/pythondeps\"" >> $HOME/.bashrc'
+    su "$TARGETUSER" -c 'mkdir -p $HOME/pythondeps && touch $HOME/.bashrc'
+    su "$TARGETUSER" -c 'grep -qF pythondeps $HOME/.bashrc || printf "export PATH=\"$PATH:$HOME/pythondeps/bin\"\nexport PYTHONPATH=\"$HOME/pythondeps\"" >> $HOME/.bashrc'
     ###########################################################################
     # Install pip dependencies together.
     # Using --target causes conflict in bin dir, using --upgrade overwrites it.
     # See https://github.com/pypa/pip/issues/8063
     # Dependencies for scancode
-    su $TARGETUSER -c 'python3 -m pip install --target=$HOME/pythondeps --no-input setuptools wheel'
+    su "$TARGETUSER" -c 'python3 -m pip install --target=$HOME/pythondeps --no-input setuptools wheel'
     ###########################################################################
     if [[ $EXPERIMENTAL ]]; then
       # Include experimental dependencies
-      su $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install --target=$HOME/pythondeps --no-input --upgrade spacy pandas scancode-toolkit scanoss'
-      su $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m spacy download en_core_web_sm --target=$HOME/pythondeps'
+      su "$TARGETUSER" -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install\
+      --target=$HOME/pythondeps --no-input --upgrade \
+      spacy pandas scancode-toolkit==31.2.4 scanoss==1.5.1'
+      su "$TARGETUSER" -c 'PYTHONPATH="$HOME/pythondeps" python3 -m spacy \
+      download en_core_web_sm --target=$HOME/pythondeps'
     else
       # Only non-experimental dependencies
-      su $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install --target=$HOME/pythondeps --no-input --upgrade scancode-toolkit scanoss'
+      su "$TARGETUSER" -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install\
+       --target=$HOME/pythondeps --no-input --upgrade \
+       scancode-toolkit==31.2.4 scanoss==1.5.1'
     fi
     ###########################################################################
   else
