@@ -104,14 +104,14 @@ if echo ${WarnAccept} | grep -q -e "^[yY]$" ; then
   sudo mkdir -p /srv/fossologyTestRepo
   sudo chown "${uid}:${gid}" /srv/fossologyTestRepo
   if [[ -z "${PG_PASS}" ]]; then
-    sudo --preserve-env su postgres -c "echo 'CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";'|psql -d template1" || true
+    sudo --preserve-env su --whitelist-environment="PGHOST" postgres -c "echo 'CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";'|psql -d template1" || true
   else
     echo 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'|PGPASSWORD="${PG_PASS}" psql -d template1 -U ${PG_USER} || true
   fi
   if [[ "${CreateFossy}" == "Y" ]]; then
     if [[ -z "${PG_PASS}" ]]; then
-      sudo --preserve-env su postgres -c "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true >/dev/null
-      sudo --preserve-env su postgres -c "echo 'CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;'|psql" || true
+      sudo --preserve-env su --whitelist-environment="PGHOST" postgres -c "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true >/dev/null
+      sudo --preserve-env su --whitelist-environment="PGHOST" postgres -c "echo 'CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;'|psql" || true
     else
       echo "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;"|PGPASSWORD="${PG_PASS}" psql -U ${PG_USER} || true >/dev/null
       echo 'CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;'|PGPASSWORD="${PG_PASS}" psql -U ${PG_USER} || true
@@ -122,7 +122,7 @@ if echo ${WarnAccept} | grep -q -e "^[yY]$" ; then
   if [[ "${CreateFossyTest}" == "Y" ]]; then
     testDbPassword=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13)
     if [[ -z "${PG_PASS}" ]]; then
-      sudo --preserve-env su postgres -c "echo \"CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';\"|psql" || true >/dev/null
+      sudo --preserve-env su --whitelist-environment="PGHOST" postgres -c "echo \"CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';\"|psql" || true >/dev/null
     else
       echo "CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';"|PGPASSWORD="${PG_PASS}" psql -U ${PG_USER} || true >/dev/null
     fi

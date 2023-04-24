@@ -25,6 +25,10 @@ github:
     addBadge: true
 workspaceLocation: fossology
 checkoutLocation:  fossology
+coreDump:
+  enabled: true
+  softLimit: 10000
+  hardLimit: 10000
 
 tasks:
   - init: |
