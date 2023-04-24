@@ -214,7 +214,7 @@ void ScancodeDatabaseHandler::insertOrCacheLicenseIdForName(string const& rfShor
  */
 unsigned long ScancodeDatabaseHandler::getCachedLicenseIdForName(string const& rfShortName) const
 {
-  std::unordered_map<string,long>::const_iterator findIterator = licenseRefCache.find(rfShortName);
+  auto findIterator = licenseRefCache.find(rfShortName);
   if (findIterator != licenseRefCache.end())
   {
     return findIterator->second;
@@ -419,7 +419,7 @@ bool ScancodeDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
 
 /**
  * @brief create tables to save copyright and author informations
- * @return  true on sucessful creation, false otherwise
+ * @return  true on successful creation, false otherwise
  */
 bool ScancodeDatabaseHandler::createTables() const
 {
@@ -444,7 +444,7 @@ bool ScancodeDatabaseHandler::createTables() const
     }
   }
   if (tablesChecked && (failedCounter > 0))
-    LOG_NOTICE("table creation succeded on try %d/%d \n", failedCounter, MAX_TABLE_CREATION_RETRIES);
+    LOG_NOTICE("table creation succeeded on try %d/%d \n", failedCounter, MAX_TABLE_CREATION_RETRIES);
   dbManager.ignoreWarnings(false);
   return tablesChecked;
 }
