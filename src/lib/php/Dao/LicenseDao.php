@@ -508,17 +508,20 @@ ORDER BY lft asc
         $param, __METHOD__ . ".$condition.only");
     if (false === $row && isset($groupId)) {
       $userId = (isset($_SESSION) && array_key_exists('UserId', $_SESSION)) ? $_SESSION['UserId'] : 0;
+      $statementName = __METHOD__ . ".$condition";
       if (!empty($userId)) {
         $param[] = $userId;
         $extraCondition = "AND group_fk IN (SELECT group_fk FROM group_user_member WHERE user_fk=$".count($param).")";
+        $statementName .= ".userId";
       }
       if (is_int($groupId) && empty($userId)) {
         $param[] = $groupId;
         $extraCondition = "AND group_fk=$".count($param);
+        $statementName .= ".groupId";
       }
       $row = $this->dbManager->getSingleRow(
         "SELECT rf_pk, rf_shortname, rf_spdx_id, rf_fullname, rf_text, rf_url, rf_risk, rf_detector_type FROM license_candidate WHERE $condition $extraCondition",
-        $param, __METHOD__ . ".$condition.group");
+        $param, $statementName);
     }
     if (false === $row) {
       return null;
