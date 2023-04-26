@@ -23,7 +23,8 @@ class AgentRef
     'ojo' => 'O',
     'scancode' => 'S',
     'spasht' => 'Sp',
-    'reso' => 'Rs'
+    'reso' => 'Rs',
+    'scanoss' => 'Sc'
   );
   /**
    * @var int

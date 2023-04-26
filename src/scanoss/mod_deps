@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+######################################################################
+# SCANOSS Agent for FOSSLogy
+# Copyright (C) 2018-2022 SCANOSS.COM
+# 
+#  This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+######################################################################
+
+# SPDX-FileCopyrightText: © 2023 SCANOSS 
+
+# SPDX-License-Identifier: GPL-2.0-only
+
+source "$(dirname ${BASH_SOURCE[0]})/../../utils/utils.sh"
+
+#
+# Don't show the -y option.  Should only be used for install testing, as using
+# it without being careful can destroy your system.
+#
+YesOpt=''
+
+EVERYTHING=''
+RUNTIME=''
+BUILDTIME=''
+
+## Options parsing and setup
+# parse options
+OPTS=$(getopt -o rbehy --long runtime,buildtime,everything,help -n 'mod_deps' -- "$@")
+
+if [[ $? -ne 0 ]]; then
+  OPTS='--help'
+fi
+
+eval set -- "$OPTS"
+
+# if no options or just -y then do everything
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
+  EVERYTHING=true
+fi
+
+while true; do
+  case "$1" in
+    -r|--runtime)     RUNTIME=true; shift;;
+    -b|--buildtime)   BUILDTIME=true; shift;;
+    -e|--everything)  EVERYTHING=true; shift;;
+    -y)               YesOpt='-y'; shift;;
+    -h|--help)        show_help_for_mod_deps; exit;;
+    --)               shift; break;;
+    *)                echo "ERROR: option $1 not recognised"; exit 1;;
+  esac
+done
+
+set -o errexit -o nounset -o pipefail
+
+must_run_as_root
+need_lsb_release
+
+if [[ $EVERYTHING ]]; then
+  echo "*** Installing both runtime and buildtime dependencies ***"
+  RUNTIME=true
+  BUILDTIME=true
+fi
+
+# figure out what distro we're on
+DISTRO=$(lsb_release --id --short)
+
+########################################################################
+
+if [[ $BUILDTIME ]]; then
+  echo "*** Installing $DISTRO buildtime dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu)
+      apt-get $YesOpt install \
+        libcurl4 libcurl4-gnutls-dev libssl-dev jq
+      ;;
+    RedHatEnterprise*|CentOS|Fedora)
+      yum $YesOpt install \
+        libcurl-devel libgcrypt20-dev jq
+      ;;
+  esac
+fi
+
+if [[ $RUNTIME ]]; then
+  echo "*** Installing $DISTRO runtime dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu)
+      apt-get $YesOpt install \
+        libcurl4 libcurl4-gnutls-dev libssl-dev jq
+      ;;
+    RedHatEnterprise*|CentOS|Fedora)
+      yum $YesOpt install \
+        libcurl-devel libgcrypt20-dev jq
+      ;;
+  esac
+fi
+
+#######################################################################
