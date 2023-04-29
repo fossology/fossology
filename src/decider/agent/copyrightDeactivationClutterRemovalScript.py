@@ -9,183 +9,111 @@ import spacy
 import pandas as pd
 import argparse
 import re
-import csv
 
 THE_PROBABLE_LOGIC_POS_CHECK = ['NOUN', 'NUM', 'PROPN', 'PROPN']
 THE_PROBABLE_LOGIC_NER_CHECK = ['DATE', 'PERSON', 'CARDINAL', 'ORG']
 CLUTTER_REGEX = r"(Copyright|copyright\s*(©)?([\w \-\,\[\]]+)?(\.com)?\.?|Copyright\s*(©)?|©([\w \-\,\.\[\]]+)?(Copyright)?)|(Copyright\s*(\(c\))?|\(c\)\s*(Copyright)?(?:[\w \,\-\.\"\[\]]{2,53}\s*)?\.?|\(c\)\s*(Copyright)?)|Copyright|([\w,]|(\s*\d+(\s(?:\,|-)\s*\d+)?\s*))(\s*\d+(\s*(?:\,|-)\s*\d+)?\,?\s*)\s*[a-zA-Z\&\| ,\s0-9]{3,50}(\.com)?\.?|(\.|\,)?\s*(\@[^>]*?\.com)|Inc+(\.)?| Company+|Corporation+|& Co+|GmbH+|All rights reserved(?:\.)?|Ltd|\<|[\w.]+@[a-zA-Z0-9-_.]+|\>|([A-Za-z0-9]+\.com)|rights\s*reserved|(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-\w+&@#/%=~|$?!:,.]*\)|[-\w+&@#/%=~|$?!:,.])*(?:\([\w+&@#/%=~|$?!:,.]*\)|[\w+&@#/%=~|$])|\<|\>|\(|\)"
 
 
-def preProcessing(file, clutter_flag):
-  with open(file, 'r') as f:
-    df = pd.read_json(f, orient='records')
+def preprocess(file, clutter_flag):
+    df = pd.read_json(file, orient='records')
     df['content'] = df['content'].str.lower()
-  copyrightDeactivationMain(df, clutter_flag)
+    copyright_deactivation_main(df, clutter_flag)
+    print(df.to_json(orient='records'))
 
 
-def copyrightDeactivationMain(df, clutter_flag):
-  nlp = spacy.load("en_core_web_sm")
-  # Iterating through each row and doing preprocessing over it.
-  # Picking out the manual tags from the csv and putting them into seperate column "Original Tag"
-  for index, row in df.iterrows():
-    text = df.loc[index, 'content']
-    doc = nlp(text)
+def copyright_deactivation_main(df, clutter_flag):
+    nlp = spacy.load("en_core_web_sm")
 
-    if type(text) == float:
-      continue
-
-    # Lemmatization
-    lemma_list = []
-    for token in doc:
-      lemma_list.append(token.lemma_)
-
-    # Filter the stopword
-    filtered_sentence = []
-    for word in lemma_list:
-      lexeme = nlp.vocab[word]
-      if lexeme.is_stop == False:
-        filtered_sentence.append(word)
-
-    # Remove punctuation
+    df['lemma_list'] = df['content'].apply(lambda x: [token.lemma_ for token in nlp(x)])
+    df['filtered_sentence'] = df['lemma_list'].apply(lambda x: [word for word in x if not nlp.vocab[word].is_stop])
     punctuations = "?:!.,;'"
-    for word in filtered_sentence:
-      if word in punctuations:
-        filtered_sentence.remove(word)
+    df['filtered_sentence'] = df['filtered_sentence'].apply(lambda x: [word for word in x if word not in punctuations])
+    df['normalized_text'] = df['filtered_sentence'].apply(lambda x: " ".join(x))
 
-    # List joining and Filtering (c) and copyright unicode symbol
-    list_of_copyrights = " ".join(map(str, filtered_sentence))
     substring = "( c )"
     cp_symbol = '\xa9'  # Unicode for copyright Symbol
 
-    if "copyright" not in list_of_copyrights:
-      if substring in list_of_copyrights:
-        list_of_copyrights = list_of_copyrights.replace(
-            substring, "copyright")
+    df['normalized_text'] = df['normalized_text'].str.replace(substring, "copyright")
+    df['normalized_text'] = df['normalized_text'].str.replace(cp_symbol, "copyright")
 
-      if cp_symbol in list_of_copyrights:
-        list_of_copyrights = list_of_copyrights.replace(
-            cp_symbol, "copyright")
+    df['ner_tags'] = df['normalized_text'].apply(lambda x: [(ent.text, ent.label_) for ent in nlp(x).ents])
+    df['pos_tags'] = df['lemma_list'].apply(lambda x: [(token.text, token.pos_) for token in nlp(" ".join(x)) if not token.is_punct and not token.is_space])
 
-    if substring in list_of_copyrights:
-      list_of_copyrights = list_of_copyrights.replace(
-          substring, "copyright")
+    df['is_copyright'] = False
 
-    if cp_symbol in list_of_copyrights:
-      list_of_copyrights = list_of_copyrights.replace(
-          cp_symbol, "copyright")
+    def entity_check(row):
+        ner_tags = row['ner_tags']
+        pos_tags = row['pos_tags']
+        
+        if any(tag[1] in THE_PROBABLE_LOGIC_POS_CHECK for tag in pos_tags):
+            if any(tag[1] in THE_PROBABLE_LOGIC_NER_CHECK for tag in ner_tags):
+                for entity, value in ner_tags:
+                    if THE_PROBABLE_LOGIC_NER_CHECK[0] in value:
+                        row['is_copyright'] = True
+                    elif THE_PROBABLE_LOGIC_NER_CHECK[2] in value:
+                        pattern_regex = r'''((?:19|20)\d{2}|\d{2})(?!\d)(?:[, \t-]{1,3}((?:19|20)\d{2}|\d{1,2}))?'''
+                        extract_list = re.search(pattern_regex, entity)
+                        if extract_list:
+                            row['is_copyright'] = True
+                    elif THE_PROBABLE_LOGIC_NER_CHECK[1] in value or THE_PROBABLE_LOGIC_NER_CHECK[3] in value:
+                        if THE_PROBABLE_LOGIC_NER_CHECK[0] in value:
+                            row['is_copyright'] = True
+            else:
+                row['is_copyright'] = False
+        
+        if clutter_flag == 1 and row['is_copyright']:
+            row['edited_text'] = clutter_removal(row['content'], ner_tags)
+        else:
+            row['edited_text'] = row['content']
+        
+        return row
 
-    # Implementing NER and POS Tags after normalization
-    doc2 = nlp(list_of_copyrights)
-
-    # All the NER taggings will be contained in a dictionary having "Entity" and "Values" as keys
-    ent_dict = {}
-
-    full_table_ner = {"Entity": [], "Values": []}
-
-    for x in doc2.ents:
-      ent_dict[x.text] = x.label_
-
-    for key in ent_dict:
-      full_table_ner["Entity"].append(key)
-      full_table_ner["Values"].append(ent_dict[key])
-
-    # All the POS taggings will be contained in a dictionary having "Entity" and "POS_TAGS" as keys
-    pos_dict = {}
-    full_table_pos = {"Entity": [], "POS_TAG": []}
-
-    for token in doc:
-      if not token.is_punct | token.is_space:
-        pos_dict[token.text] = token.pos_
-
-    for key in pos_dict:
-      full_table_pos["Entity"].append(key)
-      full_table_pos["POS_TAG"].append(pos_dict[key])
-
-    # The checking function call happening with each iteration
-    entityCheck(full_table_pos, full_table_ner, index, clutter_flag, df)
-  print(df.to_json(orient='records'))
+    df = df.apply(entity_check, axis=1)
+    print(df.to_json(orient='records'))
 
 
-def entityCheck(listA, listB, index, clutter_flag, df):
-  if set(THE_PROBABLE_LOGIC_POS_CHECK).intersection(set(listA["POS_TAG"])):
-    if set(THE_PROBABLE_LOGIC_NER_CHECK).intersection(set(listB["Values"])):
-      for _values in listB["Values"]:
-        if THE_PROBABLE_LOGIC_NER_CHECK[0] in _values:
-          df.loc[index, 'is_copyright'] = "t"
-        elif THE_PROBABLE_LOGIC_NER_CHECK[2] in _values:
-          for _val in listB["Entity"]:
-            pattern_regex = r'''((?:19|20)\d{2}|\d{2})(?!\d)(?:[, \t-]{1,3}((?:19|20)\d{2}|\d{1,2}))?'''
-            extract_list = re.search(pattern_regex, _val)
-            if extract_list:
-              df.loc[index, 'is_copyright'] = "t"
-        elif THE_PROBABLE_LOGIC_NER_CHECK[1] in _values or THE_PROBABLE_LOGIC_NER_CHECK[3] in _values:
-          if THE_PROBABLE_LOGIC_NER_CHECK[0] in _values:
-            df.loc[index, 'is_copyright'] = "t"
+def clutter_removal(text, ner_tags):
+    string1 = "all rights reserved"
+    string2 = "distributed under the mit software license"
+    
+    if string1 in text:
+        clutter_removed = text[:text.index(string1)]
+    elif string2 in text:
+        clutter_removed = text[:text.index(string1)]
     else:
-      df.loc[index, 'is_copyright'] = "f"
-
-    if clutter_flag == 1 and df.loc[index, 'is_copyright'] == "t":
-      clutterRemoval(df, index, listB)
-  return
-
-
-def clutterRemoval(df, index, ner_list):
-  string1 = "all rights reserved"
-  string2 = "distributed under the mit software license"
-  string3 = df.loc[index, 'content']
-
-  if string1 in string3:
-    clutter_removed = string3[:string3.index(string1)]
-    df.loc[index, 'edited_text'] = clutter_removed
-
-  elif string2 in string3:
-    clutter_removed = string3[:string3.index(string1)]
-    df.loc[index, 'edited_text'] = clutter_removed
-  org_pos = -1
-  person_pos = -1
-  if 'ORG' in ner_list['Values']:
-    string3 = re.sub(
-        r'''[^\w\s()]+''', '', string3)  # I am not sure why this is in only one of the branch
-    las_ent = len(ner_list['Values']) - ner_list['Values'][::-
-                                                           1].index('ORG') - 1  # Get the last org
-    org_name = ner_list['Entity'][las_ent]
-    try:
-      org_pos = string3.rindex(org_name) + len(org_name)
-    except:
-      org_pos = -1
-  if 'PERSON' in ner_list['Values']:
-    # Get the last person
-    las_ent = len(ner_list['Values']) - \
-        ner_list['Values'][::-1].index('PERSON') - 1
-    person_name = ner_list['Entity'][las_ent]
-    try:
-      person_pos = string3.rindex(person_name) + len(person_name)
-    except:
-      person_pos = -1
-  if org_pos > 0 or person_pos > 0:
-    del_upto = max(org_pos, person_pos)
-    df.loc[index, 'edited_text'] = string3[:del_upto]
-  else:
-    clutter_removed = re.finditer(CLUTTER_REGEX, string3, re.MULTILINE)
-    clutter_collect = list()
-    for _clutter in clutter_removed:
-      start1 = _clutter.start()
-      end1 = _clutter.end()
-      clutter_collect.append(string3[start1:end1])
-    clutter_removed = ''.join(clutter_collect)
-    if clutter_removed:
-      df.loc[index, 'edited_text'] = clutter_removed
-    else:
-      df.loc[index, 'edited_text'] = string3
+        org_pos = -1
+        person_pos = -1
+        if 'ORG' in [tag[1] for tag in ner_tags]:
+            string3 = re.sub(r'''[^\w\s()]+''', '', text)
+            las_ent = len(ner_tags) - [tag[1] for tag in ner_tags][::-1].index('ORG') - 1
+            org_name = ner_tags[las_ent][0]
+            try:
+                org_pos = string3.rindex(org_name) + len(org_name)
+            except ValueError:
+                org_pos = -1
+        if 'PERSON' in [tag[1] for tag in ner_tags]:
+            las_ent = len(ner_tags) - [tag[1] for tag in ner_tags][::-1].index('PERSON') - 1
+            person_name = ner_tags[las_ent][0]
+            try:
+                person_pos = string3.rindex(person_name) + len(person_name)
+            except ValueError:
+                person_pos = -1
+        if org_pos > 0 or person_pos > 0:
+            del_upto = max(org_pos, person_pos)
+            clutter_removed = text[:del_upto]
+        else:
+            clutter_removed = re.findall(CLUTTER_REGEX, text, re.MULTILINE)
+            clutter_removed = ''.join(clutter_removed) if clutter_removed else ""
+    
+    return clutter_removed
 
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser()
-  parser.add_argument(
-      "-f", "--file", help="File to be processed", required=True)
-  parser.add_argument("-c", "--clutter",
-                      help="Integer Flag for clutter removal", required=True)
-  args = parser.parse_args()
-  file = args.file
-  clutter_flag = int(args.clutter)
-  preProcessing(file, clutter_flag)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--file", help="File to be processed", required=True)
+    parser.add_argument("-c", "--clutter", help="Integer Flag for clutter removal", required=True)
+    args = parser.parse_args()
+    file = args.file
+    clutter_flag = int(args.clutter)
+    preProcessing(file, clutter_flag)
