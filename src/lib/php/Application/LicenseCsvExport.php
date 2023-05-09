@@ -71,7 +71,7 @@ class LicenseCsvExport
     if ($allCandidates) {
       $forAllCandidates = "";
     }
-    $forGroupBy = " GROUP BY rf.rf_shortname, rf.rf_fullname, rf.rf_spdx_id, rf.rf_text, rc.rf_shortname, rr.rf_shortname, rf.rf_url, rf.rf_notes, rf.rf_source, rf.rf_risk, gp.group_name";
+    $forGroupBy = " GROUP BY rf.rf_shortname, rf.rf_fullname, rf.rf_licensetype, rf.rf_spdx_id, rf.rf_text, rc.rf_shortname, rr.rf_shortname, rf.rf_url, rf.rf_notes, rf.rf_source, rf.rf_risk, gp.group_name";
     $sql = "WITH marydoneCand AS (
   SELECT * FROM license_candidate
   $forAllCandidates

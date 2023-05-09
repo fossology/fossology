@@ -7,12 +7,12 @@
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Application\LicenseCompatibilityRulesYamlImport;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Fossology\Lib\Application\LicenseCompatibilityRulesYamlImport;
 
 /**
  * \brief Upload a file from the users computer using the UI.
@@ -30,10 +30,10 @@ class AdminLicenseFromYAML extends DefaultPlugin
           self::PERMISSION => Auth::PERM_ADMIN
         ));
   }
-    /**
-     * @param Request $request
-     * @return Response
-     */
+  /**
+   * @param Request $request
+   * @return Response
+   */
   protected function handle (Request $request)
   {
     $vars = array();
@@ -45,29 +45,31 @@ class AdminLicenseFromYAML extends DefaultPlugin
     $vars['baseUrl'] = $request->getBaseUrl();
     return $this->render("admin_license_from_yaml.html.twig", $this->mergeWithDefault($vars));
   }
-    /**
-     * @param UploadedFile $uploadedFile
-     * @return null|string
-     */
+
+  /**
+   * @param UploadedFile $uploadedFile
+   * @return null|string
+   */
   protected function handleFileUpload($uploadedFile)
   {
     $errMsg = '';
     if (! ($uploadedFile instanceof UploadedFile)) {
       $errMsg = _("No file selected");
     } elseif ($uploadedFile->getError() !== UPLOAD_ERR_OK) {
-        $errMsg = $uploadedFile->getErrorMessage();
+      $errMsg = $uploadedFile->getErrorMessage();
     } elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
-        $errMsg = _("Larger than upload_max_filesize ") .
-        ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
-    } elseif ($uploadedFile->getClientOriginalExtension() != 'yaml') {
-        $errMsg = _('Invalid extension ') .
+      $errMsg = _("Larger than upload_max_filesize ") .
+      ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
+    } elseif ($uploadedFile->getClientOriginalExtension() != 'yaml' &&
+        $uploadedFile->getClientOriginalExtension() != 'yml') {
+      $errMsg = _('Invalid extension ') .
         $uploadedFile->getClientOriginalExtension() . ' of file ' .
         $uploadedFile->getClientOriginalName();
     }
     if (! empty($errMsg)) {
       return $errMsg;
     }
-    /** @var LicenseYamlImport */
+    /** @var LicenseCompatibilityRulesYamlImport $licenseYamlImport */
     $licenseYamlImport = $this->getObject('app.license_yaml_import');
     return $licenseYamlImport->handleFile($uploadedFile->getRealPath());
   }

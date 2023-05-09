@@ -523,6 +523,20 @@ class UploadController extends RestController
     } else {
       $info = new Info(201, intval($uploadId), InfoType::INFO);
     }
+    if (array_key_exists("mainLicense", $reqBody) &&
+        ! empty($reqBody["mainLicense"])) {
+      global $container;
+      /** @var LicenseDao $licenseDao */
+      $licenseDao = $container->get('dao.license');
+      $mainLicense = $licenseDao
+        ->getLicenseByShortName($reqBody["mainLicense"]);
+      if ($mainLicense !== null) {
+        /** @var ClearingDao $clearingDao */
+        $clearingDao = $container->get('dao.clearing');
+        $clearingDao->makeMainLicense($uploadId,
+          $this->restHelper->getGroupId(), $mainLicense->getId());
+      }
+    }
     return $response->withJson($info->getArray(), $info->getCode());
   }
 

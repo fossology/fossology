@@ -12,7 +12,8 @@
 namespace Fossology\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\LicenseStdCommentDao;
+use Fossology\Lib\Dao\CompatibilityDao;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -150,11 +151,10 @@ class AdminLicenseCompatibilityRules extends DefaultPlugin
       return new JsonResponse($this->updateRules($request),
         JsonResponse::HTTP_OK);
     } elseif ($request->get("action", 0) === "deleterule") {
-        return new JsonResponse($this->deleteRules($request),
-          JsonResponse::HTTP_OK);
+      return new JsonResponse($this->deleteRules($request),
+        JsonResponse::HTTP_OK);
     }
     global $SysConf;
-    $groupId = Auth::getGroupId();
     $vars = [];
     $vars["firstTypeParam"] = self::INSERT_FIRST_LIC_TYPE_PARAM_NAME;
     $vars["secondTypeParam"] = self::INSERT_SECOND_LIC_TYPE_PARAM_NAME;
@@ -175,6 +175,7 @@ class AdminLicenseCompatibilityRules extends DefaultPlugin
     $licenseType = $SysConf['SYSCONFIG']['LicenseTypes'];
     $licenseType = explode(',', $licenseType);
     $licenseType = array_map('trim', $licenseType);
+    $licenseType = ["---", ...$licenseType];
     $vars['licenseTypes'] = array_combine($licenseType, $licenseType);
 
     $vars['ruleArray'] = $this->compatibilityDao->getAllRules();
@@ -182,19 +183,17 @@ class AdminLicenseCompatibilityRules extends DefaultPlugin
     $licenseArray = $this->licenseDao->getLicenseArray(0);
     $licenseArray = array_column($licenseArray, 'shortname', 'id');
 
-    $licenseList=[0=>"---"];
-    foreach ($licenseArray as $id=>$shortname) {
-        $licenseList[$id]=$shortname;
-    }
+    $licenseList = [0 => "---"];
+    $licenseList += $licenseArray;
     $vars['licenseArray'] = $licenseList;
     return $this->render('admin_license_compatibility_rules.html.twig',
       $this->mergeWithDefault($vars));
   }
 
   /**
-   * @brief update the already existing rules
+   * @brief Update the already existing rules
    * @param Request $request
-   * @return array containing the updated values of the licenses
+   * @return array Containing the updated values of the licenses
    */
   private function updateRules(Request $request)
   {
@@ -221,32 +220,48 @@ class AdminLicenseCompatibilityRules extends DefaultPlugin
     $licResult = $request->get(self::RESULT_PARAM_NAME);
     $insertResult = $request->get(self::INSERT_RESULT_PARAM_NAME);
 
-    if ($licFirstName !== null && !empty($licFirstName)) {
+    if (!empty($licFirstName)) {
       foreach ($licFirstName as $rulePk => $firstLic) {
-        $rules[$rulePk]['firstLic'] = $firstLic;
+        if ($firstLic == "0") {
+          $rules[$rulePk]['firstLic'] = null;
+        } else {
+          $rules[$rulePk]['firstLic'] = $firstLic;
+        }
       }
     }
-    if ($licSecondName !== null && !empty($licSecondName)) {
+    if (!empty($licSecondName)) {
       foreach ($licSecondName as $rulePk => $secondLic) {
-        $rules[$rulePk]['secondLic'] = $secondLic;
+        if ($secondLic == "0") {
+          $rules[$rulePk]['secondLic'] = null;
+        } else {
+          $rules[$rulePk]['secondLic'] = $secondLic;
+        }
       }
     }
-    if ($licFirstType !== null && !empty($licFirstType)) {
+    if (!empty($licFirstType)) {
       foreach ($licFirstType as $rulePk => $firstType) {
-        $rules[$rulePk]['firstType'] = $firstType;
+        if ($firstType == "---") {
+          $rules[$rulePk]['firstType'] = null;
+        } else {
+          $rules[$rulePk]['firstType'] = $firstType;
+        }
       }
     }
-    if ($licSecondType !== null && !empty($licSecondType)) {
+    if (!empty($licSecondType)) {
       foreach ($licSecondType as $rulePk => $secondType) {
-        $rules[$rulePk]['secondType'] = $secondType;
+        if ($secondType == "---") {
+          $rules[$rulePk]['secondType'] = null;
+        } else {
+          $rules[$rulePk]['secondType'] = $secondType;
+        }
       }
     }
-    if ($licText !== null && !empty($licText)) {
+    if (!empty($licText)) {
       foreach ($licText as $rulePk => $text) {
-        $rules[$rulePk]['text'] = $text;
+        $rules[$rulePk]['comment'] = $text;
       }
     }
-    if ($licResult !== null && !empty($licResult)) {
+    if (!empty($licResult)) {
       foreach ($licResult as $rulePk => $result) {
         $rules[$rulePk]['result'] = $result;
       }
@@ -261,39 +276,46 @@ class AdminLicenseCompatibilityRules extends DefaultPlugin
       }
     }
 
-    $update["inserted"] = $this->insertRules($insertFirstName, $insertSecondName, $insertFirstType, $insertSecondType, $insertText, $insertResult);
+    $update["inserted"] = $this->insertRules($insertFirstName,
+      $insertSecondName, $insertFirstType, $insertSecondType, $insertText,
+      $insertResult);
     return $update;
   }
 
   /**
-   * @brief insert new rules in the UI
-   * @param unknown $firstNameArray
-   * @param unknown $secondNameArray
-   * @param unknown $firstTypeArray
-   * @param unknown $secondTypeArray
-   * @param unknown $textArray
-   * @param unknown $resultArray
-   * @return array containing the status whether rule is inserted or not
+   * @brief Insert new rules from the UI
+   * @param array $firstNameArray
+   * @param array $secondNameArray
+   * @param array $firstTypeArray
+   * @param array $secondTypeArray
+   * @param array $commentArray
+   * @param array $resultArray
+   * @return array Containing the status whether rule is inserted or not
    */
-  private function insertRules($firstNameArray, $secondNameArray, $firstTypeArray, $secondTypeArray, $textArray, $resultArray)
+  private function insertRules($firstNameArray, $secondNameArray,
+                               $firstTypeArray, $secondTypeArray, $commentArray,
+                               $resultArray)
   {
     $returnVal = [];
-    if (($firstNameArray !== null && $secondNameArray !== null && $firstTypeArray !== null && $secondTypeArray !== null && $textArray !== null) &&
-        (!empty($firstNameArray) && !empty($secondNameArray) && !empty($firstTypeArray) && !empty($secondTypeArray) && !empty($textArray))) {
-      for ($i = 0; $i < count($textArray); $i++) {
+    if ((!empty($firstNameArray) && !empty($secondNameArray)
+        && !empty($firstTypeArray) && !empty($secondTypeArray)
+        && !empty($commentArray))) {
+      for ($i = 0; $i < count($commentArray); $i++) {
         if ($firstNameArray[$i] == "0") {
-          $firstNameArray[$i]=null;
+          $firstNameArray[$i] = null;
         }
         if ($secondNameArray[$i] == "0") {
-          $secondNameArray[$i]=null;
+          $secondNameArray[$i] = null;
         }
         if ($firstTypeArray[$i] == "---") {
-          $firstTypeArray[$i]=null;
+          $firstTypeArray[$i] = null;
         }
         if ($secondTypeArray[$i] == "---") {
-          $secondTypeArray[$i]=null;
+          $secondTypeArray[$i] = null;
         }
-          $returnVal[] = $this->compatibilityDao->insertRule($firstNameArray[$i], $secondNameArray[$i], $firstTypeArray[$i], $secondTypeArray[$i], $textArray[$i], $resultArray[$i]);
+        $returnVal[] = $this->compatibilityDao->insertRule($firstNameArray[$i],
+            $secondNameArray[$i], $firstTypeArray[$i], $secondTypeArray[$i],
+            $commentArray[$i], $resultArray[$i]);
       }
       $returnVal['status'] = 0;
       // Check if at least one value was inserted
@@ -315,20 +337,16 @@ class AdminLicenseCompatibilityRules extends DefaultPlugin
   }
 
   /**
-   * @brief delete a rule from the UI
+   * @brief Delete a rule from the UI
    * @param Request $request
-   * @return array if 1 then rule is deleted otherwise not
+   * @return array If 1 then rule is deleted otherwise not
    */
   private function deleteRules(Request $request)
   {
     $returnVal = [];
     $rulePk = $request->get("rule");
     $val = $this->compatibilityDao->deleteRule($rulePk);
-    if ($val) {
-      $returnVal['status'] = 1;
-    } else {
-        $returnVal['status'] = -1;
-    }
+    $returnVal['status'] = $val ? 1 : -1;
     return $returnVal;
   }
 }

@@ -48,6 +48,7 @@ IndentCaseLabels: true
 IndentPPDirectives: None
 IndentWidth: 2
 KeepEmptyLinesAtTheStartOfBlocks: true
+Language: Cpp
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: All
 ObjCSpaceAfterProperty: false

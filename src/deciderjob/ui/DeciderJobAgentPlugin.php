@@ -38,14 +38,15 @@ class DeciderJobAgentPlugin extends AgentPlugin
    */
   function preInstall()
   {
-    // no menue entry
+    // no menu entry
   }
 
   /**
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
    * @see Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
    */
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $conflictStrategyId=null)
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
+      $arguments=null, $request=null, $unpackArgs=null)
   {
     $dependencies[] = "agent_adj2nest";
 
@@ -54,9 +55,10 @@ class DeciderJobAgentPlugin extends AgentPlugin
       return $jobQueueId;
     }
 
-    $args = ($conflictStrategyId !== null) ? $this::CONFLICT_STRATEGY_FLAG.$conflictStrategyId : '';
+    $args = ($arguments !== null) ? $this::CONFLICT_STRATEGY_FLAG.$arguments : '';
 
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $args);
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies,
+        $uploadId, $args, $request);
   }
 }
 

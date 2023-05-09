@@ -7,16 +7,16 @@
 
 namespace Fossology\Decider\Test;
 
-use Fossology\Decider\DeciderAgent;
-use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
-use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CompatibilityDao;
 use Fossology\Lib\Dao\CopyrightDao;
-use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\HighlightDao;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\ShowJobsDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Db\DbManager;
 use Mockery as M;
@@ -48,11 +48,16 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
   private $showJobsDao;
   /** @var CopyrightDao $copyrightDao */
   private $copyrightDao;
+  /** @var CompatibilityDao $compatibilityDao */
+  private $compatibilityDao;
+  /** @var LicenseDao $licenseDao */
+  private $licenseDao;
 
   public function __construct(DbManager $dbManager, AgentDao $agentDao,
                               ClearingDao $clearingDao, UploadDao $uploadDao,
                               HighlightDao $highlightDao, ShowJobsDao $showJobsDao,
-                              CopyrightDao $copyrightDao,
+                              CopyrightDao $copyrightDao, CompatibilityDao $compatibilityDao,
+                              LicenseDao $licenseDao,
                               ClearingDecisionProcessor $clearingDecisionProcessor,
                               AgentLicenseEventProcessor $agentLicenseEventProcessor)
   {
@@ -63,10 +68,11 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $this->showJobsDao = $showJobsDao;
     $this->copyrightDao = $copyrightDao;
     $this->dbManager = $dbManager;
+    $this->compatibilityDao = $compatibilityDao;
+    $this->licenseDao = $licenseDao;
     $this->decisionTypes = new DecisionTypes();
     $this->clearingDecisionProcessor = $clearingDecisionProcessor;
     $this->agentLicenseEventProcessor = $agentLicenseEventProcessor;
-    $this->copyrightDao = $copyrightDao;
   }
 
   /**
@@ -99,7 +105,8 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $container->shouldReceive('get')->with('decision.types')->andReturn($this->decisionTypes);
     $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($this->clearingDecisionProcessor);
     $container->shouldReceive('get')->with('businessrules.agent_license_event_processor')->andReturn($this->agentLicenseEventProcessor);
-    $container->shouldReceive('get')->with('dao.copyright')->andReturn($this->copyrightDao);
+    $container->shouldReceive('get')->with('dao.compatibility')->andReturn($this->compatibilityDao);
+    $container->shouldReceive('get')->with('dao.license')->andReturn($this->licenseDao);
     $GLOBALS['container'] = $container;
 
     $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::class);

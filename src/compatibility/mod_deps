@@ -92,12 +92,18 @@ if [[ $RUNTIME ]]; then
           apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.62.0 libboost-program-options1.62.0 libboost-regex1.62.0 libyaml-cpp0.5v5;;
         buster)
           apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.67.0 libboost-program-options1.67.0 libboost-regex1.67.0 libyaml-cpp0.6;;
-        bullseye|sid)
+        bullseye)
           apt-get $YesOpt install libjsoncpp24 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0 libyaml-cpp0.6;;
+        bookworm)
+          apt-get $YesOpt install libjsoncpp24 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0 libyaml-cpp0.7;;
+        sid)
+          apt-get $YesOpt install libjsoncpp24 libboost-filesystem1.83.0 libboost-program-options1.83.0 libboost-regex1.83.0 libyaml-cpp0.8;;
         focal)
           apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.71.0 libboost-program-options1.71.0 libboost-regex1.71.0 libyaml-cpp0.6;;
         jammy)
           apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0 libyaml-cpp0.7;;
+        noble)
+          apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0 libyaml-cpp0.8;;
         *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
       esac;;
     Fedora)

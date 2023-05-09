@@ -24,9 +24,11 @@ class MonkBulkAgentPlugin extends AgentPlugin
     // no AgentCheckBox
   }
 
-  function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $bulkId='')
+  function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
+     $arguments=null, $request=null, $unpackArgs=null)
   {
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $bulkId);
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies,
+        $arguments, null, $request);
   }
 }
 

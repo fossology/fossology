@@ -8,51 +8,84 @@
 namespace Fossology\Compatibility\Ui;
 
 use Fossology\Lib\Plugin\AgentPlugin;
+use Symfony\Component\HttpFoundation\Request;
+
+define("AGENT_COMPATIBILITY_NAME", "compatibility");
 
 class CompatibilityAgentPlugin extends AgentPlugin
 {
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_compatibility";
-    $this->Title =  _("Compatibility License Analysis, scanning for licenses compatibility");
-    $this->AgentName = "compatibility";
+    $this->Title = _("Compatibility License Analysis, scanning for licenses compatibility");
+    $this->AgentName = AGENT_COMPATIBILITY_NAME;
 
     parent::__construct();
   }
 
-  function AgentHasResults($uploadId=0)
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies = [],
+                           $arguments = null, $request = null, $unpackArgs = null)
+  {
+    if ($this->AgentHasResults($uploadId) == 1) {
+      return 0;
+    }
+
+    $compatibilityDependencies = array("agent_adj2nest");
+
+    if ($request == null) {
+      $request = $_POST;
+    }
+    $compatibilityDependencies = array_merge($compatibilityDependencies,
+        $this->getCompatibilityDependencies($request));
+
+    $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
+    if ($jobQueueId != 0) {
+      return $jobQueueId;
+    }
+
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg,
+        array_unique($compatibilityDependencies), $arguments, null, $request);
+  }
+
+  function AgentHasResults($uploadId = 0)
   {
     return CheckARS($uploadId, $this->AgentName, "compatibility agent", "compatibility_ars");
   }
-  
- public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
-  {
-    $compatibilityDependencies = array("agent_adj2nest");
 
-    $compatibilityDependencies = array_merge($compatibilityDependencies,
-      $this->getCompatibilityDependencies($_POST));
-
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg,
-      array_unique($compatibilityDependencies), $arguments);
-  }
-  
+  /**
+   * @param Request|array $request
+   * @return array
+   */
   private function getCompatibilityDependencies($request)
   {
     $dependencies = array();
-    if (array_key_exists("Check_agent_nomos", $request) && $request["Check_agent_nomos"]==1) {
+    if (is_object($request)) {
+      $postEmulate = [];
+      $postEmulate["Check_agent_nomos"] = intval($request->get(
+          "Check_agent_nomos", 0));
+      $postEmulate["Check_agent_monk"] = intval($request->get(
+          "Check_agent_monk", 0));
+      $postEmulate["Check_agent_ojo"] = intval($request->get(
+          "Check_agent_ojo", 0));
+      $postEmulate["Check_agent_ninka"] = intval($request->get(
+          "Check_agent_ninka", 0));
+      $request = $postEmulate;
+    }
+    if (array_key_exists("Check_agent_nomos", $request) && $request["Check_agent_nomos"] == 1) {
       $dependencies[] = "agent_nomos";
     }
-    if (array_key_exists("Check_agent_monk", $request) && $request["Check_agent_monk"]==1) {
+    if (array_key_exists("Check_agent_monk", $request) && $request["Check_agent_monk"] == 1) {
       $dependencies[] = "agent_monk";
     }
-    if (array_key_exists("Check_agent_ojo", $request) && $request["Check_agent_ojo"]==1) {
+    if (array_key_exists("Check_agent_ojo", $request) && $request["Check_agent_ojo"] == 1) {
       $dependencies[] = "agent_ojo";
     }
-    if (array_key_exists("Check_agent_ninka", $request) && $request["Check_agent_ninka"]==1) {
+    if (array_key_exists("Check_agent_ninka", $request) && $request["Check_agent_ninka"] == 1) {
       $dependencies[] = "agent_ninka";
     }
-    
+
     return $dependencies;
   }
-  
 }
+
 register_plugin(new CompatibilityAgentPlugin());

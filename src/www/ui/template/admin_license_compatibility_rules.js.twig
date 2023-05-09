@@ -2,17 +2,16 @@
 
    SPDX-License-Identifier: FSFAP
 #}
- 
+
 <script type="text/javascript">
- {% import 'include/macros.html.twig' as macro %}
+{% import 'include/macros.html.twig' as macro %}
 
 function showTheMessage(message) {
-  $("html, body").animate({ scrollTop: 0 }, "slow");
+  $("html, body").animate({ scrollTop: 0}, "slow");
   $("#messageSpace").html(message + "<hr />").fadeIn(500).delay(5000).fadeOut(500);
 }
 
 $(document).ready(function() {
-
   var form = $('form#adminLicenseRulesForm');
 
   var t = $("#adminLicenseRulesTable").DataTable({
@@ -42,20 +41,19 @@ $(document).ready(function() {
       cell.innerHTML = i+1;
     });
   }).draw();
-  
-  t.on( 'draw', function () {
+
+  t.on('draw', function () {
     form.find("input[type=checkbox],textarea,select").on("change", function(){
-      if(!$(this).hasClass("newRuleInputs"))
-      {
-      $(this).addClass("inputChanged");
+      if(!$(this).hasClass("newRuleInputs")) {
+        $(this).addClass("inputChanged");
       }
     });
   });
 
-   form.find("input[type=checkbox],textarea,select").on("change", function(){
-     $(this).addClass("inputChanged");
-    });
-  
+  form.find("input[type=checkbox],textarea,select").on("change", function(){
+    $(this).addClass("inputChanged");
+  });
+
   form.submit(function(event) {
     var updatedFields = form.find(".inputChanged").serializeArray();
     var insertedFields = form.find(".newRuleInputs").serializeArray();
@@ -94,8 +92,8 @@ $(document).ready(function() {
               messageIns.push("exceptions during insertion");
             }
           }
-          location.reload();
           showTheMessage(message + ".<br />" + messageIns.join(" with some ") + ".");
+          setTimeout(location.reload.bind(location), 5_000);
         },
         error : function(data) {
           showTheMessage(data);
@@ -103,61 +101,63 @@ $(document).ready(function() {
       });
     }
     event.preventDefault();
-    
   });
- 
+
   $("#addLicRule").on('click', function(){
+    let newRowNumber = t.data().length + 10001;
     t.row.add([
-      Number.MAX_SAFE_INTEGER,
-      `{{ macro.select("#{firstNameParam}[]",licenseArray, firstNameParam, 0, 'class="newRuleInputs ui-render-select2" style="width:100%"') }}`,
-      `{{ macro.select("#{secondNameParam}[]",licenseArray, secondNameParam, 0, 'class="newRuleInputs ui-render-select2" style="width:100%"') }}`,
-      `{{ macro.select("#{firstTypeParam}[]",licenseTypes, firstTypeParam, firstTypeParam, 'class="newRuleInputs ui-render-select2" style="width:100%"') }}`,
-      `{{ macro.select("#{secondTypeParam}[]",licenseTypes, secondTypeParam, secondTypeParam, 'class="newRuleInputs ui-render-select2" style="width:100%"') }}`,   
-      '<input type="checkbox" name="{{ result }}[]" value="t" id="check1" class="newRuleInputs" />' +
-      '<label for="check1"> yes</label><br>' +
-      '<input type="checkbox" name="{{ result }}[]" value="f" id="check2" class="newRuleInputs"/>' +
-      '<label for="check2"> no</label><br>',
+      newRowNumber,
+      `{{ macro.select("#{firstNameParam}[]", licenseArray, firstNameParam, 0,
+    'class="newRuleInputs ui-render-select2" style="width:100%"') }}`,
+      `{{ macro.select("#{secondNameParam}[]", licenseArray, secondNameParam,
+    0, 'class="newRuleInputs ui-render-select2" style="width:100%"') }}`,
+      `{{ macro.select("#{firstTypeParam}[]", licenseTypes, firstTypeParam,
+    firstTypeParam, 'class="newRuleInputs ui-render-select2" style="width:100%"') }}`,
+      `{{ macro.select("#{secondTypeParam}[]", licenseTypes, secondTypeParam,
+    secondTypeParam, 'class="newRuleInputs ui-render-select2" style="width:100%"') }}`,
+      '<input type="checkbox" name="{{ result }}[]" value="t" id="ruleyes' +
+    newRowNumber + '" class="newRuleInputs" />' +
+      '<label for="ruleyes' + newRowNumber + '"> yes</label><br>' +
+      '<input type="checkbox" name="{{ result }}[]" value="f" id="ruleno' +
+    newRowNumber + '" class="newRuleInputs"/>' +
+      '<label for="ruleno' + newRowNumber + '"> no</label><br>',
       '<textarea rows="5" cols="40" name="{{ desc }}[]" ' +
-        'placeholder="Please enter rule description" ' +
-        'class="newRuleInputs"></textarea>',
-      '<img class="delete" src="images/space_16.png" onclick="">'
+        'placeholder="Please enter rule description" required="required" ' +
+        'class="newRuleInputs" style="width:100%"></textarea>',
+      '<img class="delete" src="images/space_16.png" onclick="" alt="delete">'
     ]).draw(false);
     renderSelect2();
   });
-  
- $("input:checkbox").on('click', function() {
-  var $box = $(this);
-  if ($box.is(":checked")) {
-    var group = "input:checkbox[name='" + $box.attr("name") + "']";
-    $(group).prop("checked", false);
-    $box.prop("checked", true);
-  } else {
-    $box.prop("checked", false);
-  }
+
+  $("input:checkbox").on('click', function() {
+    var $box = $(this);
+    if ($box.is(":checked")) {
+      var group = "input:checkbox[name='" + $box.attr("name") + "']";
+      $(group).prop("checked", false);
+      $box.prop("checked", true);
+    } else {
+      $box.prop("checked", false);
+    }
   });
- 
 });
 
-  function deleteCompRule(pk) {
-      $.ajax({
-        type: 'POST',
-        dataType: 'json',
-        url: '?mod=admin_license_compatibility_rules&action=deleterule',
-        data: { rule : pk
-        },
-        success: function(data) {
-        if(data.status == 1){
+function deleteCompRule(pk) {
+  $.ajax({
+    type: 'POST',
+    dataType: 'json',
+    url: '?mod=admin_license_compatibility_rules&action=deleterule',
+    data: { rule : pk },
+    success: function(data) {
+      if (data.status == 1) {
         showTheMessage("Rule successfully deleted");
-        location.reload();
-        }
-        else {
+        setTimeout(location.reload.bind(location), 5_000);
+      } else {
         showTheMessage("Unable to delete");
-        }
-        },
-        error : function(data) {
-          showTheMessage("Unable to delete");
-        }
-      });
+      }
+    },
+    error : function(data) {
+      showTheMessage("Unable to delete");
     }
-
+  });
+}
 </script>

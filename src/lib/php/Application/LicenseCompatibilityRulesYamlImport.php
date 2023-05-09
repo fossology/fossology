@@ -7,11 +7,11 @@
 
 namespace Fossology\Lib\Application;
 
-use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\Dao\CompatibilityDao;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ArrayOperation;
-use Fossology\Lib\Dao\UserDao;
-use Fossology\Lib\Dao\LicenseDao;
 
 /**
  * @file
@@ -33,34 +33,40 @@ class LicenseCompatibilityRulesYamlImport
   /** @var LicenseDao $licenseDao
    * License DAO to use */
   protected $licenseDao;
+  /** @var CompatibilityDao $compatibilityDao
+   * Compatibility DAO to use */
+  protected $compatibilityDao;
 
-  protected $alias = array(
-      'mainname'=>array('mainname','Main Name'),
-      'subname'=>array('subname','Sub Name'),
-      'maintype'=>array('maintype','Main Type'),
-      'subtype'=>array('subtype','Sub Type'),
-      'compatibility'=>array('compatibility','Compatibility'),
-      'text'=>array('text','Text')
-      );
+  protected $alias = [
+    'firstname'     => ['firstname', 'mainname', 'First Name'],
+    'secondname'    => ['secondname', 'subname', 'Second Name'],
+    'firsttype'     => ['firsttype', 'maintype', 'First Type'],
+    'secondtype'    => ['secondtype', 'subtype', 'Second Type'],
+    'compatibility' => ['compatibility', 'Compatibility'],
+    'comment'       => ['comment', 'text', 'Comment']
+  ];
 
   /**
    * Constructor
-   * @param DbManager $dbManager DB manager to use
-   * @param UserDao $userDao     User Dao to use
-   * @param LicenseDao $licenseDao     License Dao to use
+   * @param DbManager $dbManager   DB manager to use
+   * @param UserDao $userDao       User Dao to use
+   * @param LicenseDao $licenseDao License Dao to use
+   * @param CompatibilityDao $compatibilityDao Compatibility DAO to use
    */
-  public function __construct(DbManager $dbManager, UserDao $userDao, LicenseDao $licenseDao)
+  public function __construct(DbManager $dbManager, UserDao $userDao,
+                              LicenseDao $licenseDao,
+                              CompatibilityDao $compatibilityDao)
   {
     $this->dbManager = $dbManager;
     $this->userDao = $userDao;
     $this->licenseDao = $licenseDao;
+    $this->compatibilityDao = $compatibilityDao;
   }
-
 
   /**
    * @brief Read the YAML line by line and import it.
    * @param string $filename Location of the YAML file.
-   * @return string message Error message, if any. Otherwise
+   * @return string Error message, if any. Otherwise
    *         `Read yaml: <count> licenses` on success.
    */
   public function handleFile($filename)
@@ -70,10 +76,10 @@ class LicenseCompatibilityRulesYamlImport
     }
     $cnt = 0;
     $msg = '';
-    $var=yaml_parse_file($filename);
+    $file_content = yaml_parse_file($filename);
     try {
-      foreach ($var["rules"] as $row) {
-        $log = $this-> handleYaml($row);
+      foreach ($file_content["rules"] as $row) {
+        $log = $this->handleYaml($row);
         if (!empty($log)) {
           $msg .= "$log\n";
         }
@@ -81,8 +87,8 @@ class LicenseCompatibilityRulesYamlImport
       }
       $msg .= _('Read yaml').(": $cnt ")._('license rules');
     } catch(\Exception $e) {
-        fclose($handle);
-        return $msg .= _('Error while parsing file').': '.$e->getMessage();
+      fclose($handle);
+      return $msg . _('Error while parsing file') . ': ' . $e->getMessage();
     }
     fclose($handle);
     return $msg;
@@ -90,68 +96,76 @@ class LicenseCompatibilityRulesYamlImport
 
   /**
    * Handle a single row read from the YAML.
-   * @param array $row   Single row from YAML
-   * @return string $log Log messages
+   * @param array $row Single row from YAML
+   * @return string Log messages
    */
   private function handleYaml($row)
   {
-    if ($row["mainname"] != null) {
-      $new = $this->licenseDao->getLicenseByShortName($row["mainname"], null);
-      $new2= $new->getId();
-      $row["mainname"]=$new2;
+    $normalizedRow = [];
+    foreach (array_keys($this->alias) as $key) {
+      $col = ArrayOperation::multiSearch($this->alias[$key], array_keys($row));
+      if ($col === false) {
+        throw new \UnexpectedValueException("Unable to find key for $key in " .
+          "YAML");
+      }
+      $col = array_keys($row)[$col];
+      $normalizedRow[$key] = $row[$col];
     }
-    if ($row["subname"] != null) {
-      $new = $this->licenseDao->getLicenseByShortName($row["subname"], null);
-      $new2= $new->getId();
-      $row["subname"]=$new2;
+    if ($normalizedRow["firstname"] != null) {
+      $firstLicense = $this->licenseDao->getLicenseByShortName(
+          $normalizedRow["firstname"], null);
+      $firstLicenseId = $firstLicense->getId();
+      $normalizedRow["firstname"] = $firstLicenseId;
     }
-    return $this->handleYamlLicense($row);
+    if ($normalizedRow["secondname"] != null) {
+      $secondLicense = $this->licenseDao->getLicenseByShortName(
+          $normalizedRow["secondname"], null);
+      $secondLicenseId = $secondLicense->getId();
+      $normalizedRow["secondname"] = $secondLicenseId;
+    }
+    return $this->handleYamlLicense($normalizedRow);
   }
 
   /**
    * @brief Update the license info in the DB.
-   * @param array $row  Row with new values.
-   * @param array $lfPk Matched license ID.
+   * @param array $row Row with new values.
+   * @param int $lrPk  Matched license ID.
    * @return string Log messages.
    */
   private function updateLicense($row, $lrPk)
   {
-    $stmt = __METHOD__ . '.getOldRule';
-    $oldRule = $this->dbManager->getSingleRow('SELECT ' .
-      'compatibility, text ' .
-        'FROM license_rules WHERE lr_pk = $1', array($lrPk), $stmt);
+    $rule = [];
+    $oldRule = $this->dbManager->getSingleRow("SELECT
+        compatibility, comment FROM license_rules WHERE lr_pk = $1",
+        [$lrPk], __METHOD__ . '.getOldRule');
 
-    $stmt = __METHOD__ . '.updateLicenseRules';
-    $sql = "UPDATE license_rules SET ";
-    $extraParams = array();
-    $param = array($lrPk);
     $old_comp= $this->dbManager->booleanFromDb($oldRule["compatibility"]);
     $new_comp= filter_var($row["compatibility"], FILTER_VALIDATE_BOOLEAN);
+
+    $log = [];
     if ($old_comp != $new_comp) {
-      $param[] = $this->dbManager->booleanToDb($new_comp);
-      $stmt .= '.compatibility';
-      $extraParams[] = "compatibility=$" . count($param);
-      $log .= ", updated compatibility";
+      $rule["compatibility"] = $this->dbManager->booleanToDb($new_comp);
+      $log[] = "updated compatibility";
     }
-    if (!empty($row['text']) && $row['text'] != $oldRule['text']) {
-      $param[] = $row['text'];
-      $stmt .= '.text';
-      $extraParams[] = "text=$" . count($param);
-      $log .= ", updated text";
+    if (!empty($row['comment']) && $row['comment'] != $oldRule['comment']) {
+      $rule["comment"] = $row["comment"];
+      $log[] = "updated comment";
     }
-    if (count($param) > 1) {
-      $sql .= join(",", $extraParams);
-      $sql .= " WHERE lr_pk=$1;";
-      $this->dbManager->getSingleRow($sql, $param, $stmt);
+    if (count($rule) > 1) {
+      try {
+        $this->compatibilityDao->updateRuleFromArray([$lrPk => $rule]);
+      } catch (\UnexpectedValueException $e) {
+        $log[] = $e->getMessage();
+      }
     }
-    return $log;
+    return join(", ", $log);
   }
 
   /**
    * @brief Handle a single row from YAML.
    *
    * The function checks if the license data is already in the DB, then
-   * updates it. Otherwise inserts new row in the DB.
+   * updates it. Otherwise, inserts new row in the DB.
    * @param array $row YAML row to be inserted.
    * @return string Log messages.
    */
@@ -159,67 +173,53 @@ class LicenseCompatibilityRulesYamlImport
   {
     $stmt = __METHOD__ . '.LicRules';
     $sql = "SELECT lr_pk FROM license_rules WHERE ";
-    $extraParams = array();
-    $param = array();
-    $lr_pk="";
-    if (!empty($row['mainname'])) {
-      $param[] = $row['mainname'];
+    $extraParams = [];
+    $param = [];
+    $lr_pk = "";
+    if (!empty($row['firstname'])) {
+      $param[] = $row['firstname'];
       $stmt .= '.lic1';
-      $extraParams[] = "main_rf_fk=$" . count($param);
+      $extraParams[] = "first_rf_fk=$" . count($param);
     }
-    if (!empty($row['subname'])) {
-      $param[] = $row['subname'];
+    if (!empty($row['secondname'])) {
+      $param[] = $row['secondname'];
       $stmt .= '.lic2';
-      $extraParams[] = "sub_rf_fk=$" . count($param);
+      $extraParams[] = "second_rf_fk=$" . count($param);
     }
-    if (!empty($row['maintype'])) {
-      $param[] = $row['maintype'];
+    if (!empty($row['firsttype'])) {
+      $param[] = $row['firsttype'];
       $stmt .= '.type1';
-      $extraParams[] = "main_type=$" . count($param);
+      $extraParams[] = "first_type=$" . count($param);
     }
-    if (!empty($row['subtype'])) {
-      $param[] = $row['subtype'];
+    if (!empty($row['secondtype'])) {
+      $param[] = $row['secondtype'];
       $stmt .= '.type2';
-      $extraParams[] = "sub_type=$" . count($param);
+      $extraParams[] = "second_type=$" . count($param);
     }
     if (count($param) == 2) {
-      $sql .= join(" AND ",$extraParams);
+      $sql .= join(" AND ", $extraParams);
       $res = $this->dbManager->getSingleRow($sql, $param, $stmt);
-      $lr_pk= $res["lr_pk"];
+      if ($res) {
+        $lr_pk = $res["lr_pk"];
+      }
     }
-    if (!empty(($lr_pk))) {
+    if (!empty($lr_pk)) {
       return $this->updateLicense($row, $lr_pk);
     } else {
-        $return= $this->insertNewLicense($row);
+      $return = $this->insertNewLicense($row);
     }
     return $return;
   }
 
   /**
    * @brief Insert a new license in DB
-   * @param array $row        Rows comming from YAML
-   * @return number
+   * @param array $row Rows coming from YAML
+   * @return int
    */
   private function insertNewLicense($row)
   {
-    $params = [
-        'main_rf_fk' => $row["mainname"],
-        'sub_rf_fk' => $row["subname"],
-        'main_type' => $row["maintype"],
-        'sub_type' => $row["subtype"],
-        'text' => $row["text"],
-        'compatibility' => $row["compatibility"]
-    ];
-    $statement = __METHOD__ . ".insertLicCompatibilityRule";
-    $returning = "lr_pk";
-    $returnVal = -1;
-    try {
-      $returnVal = $this->dbManager->insertTableRow("license_rules",
-                   $params, $statement, $returning);
-    }
-    catch (\Exception $e) {
-      $returnVal = -2;
-    }
-    return $returnVal;
+    return $this->compatibilityDao->insertRule($row["firstname"],
+        $row["secondname"], $row["firsttype"], $row["secondtype"],
+        $row["comment"], $row["compatibility"]);
   }
 }

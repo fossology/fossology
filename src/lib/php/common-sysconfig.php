@@ -528,11 +528,11 @@ function Populate_sysconfig()
     "'check_boolean'", "null");
 
   $variable = "LicenseTypes";
-  $licenseTypeTitle = _("License Title");
+  $licenseTypeTitle = _("License Types");
   $contextValue = "Permissive, Strong Copyleft, Weak Copyleft";
-  $licenseTypeDesc = _("add  comma (,) separated different license types");
+  $licenseTypeDesc = _("add comma (,) separated different license types");
   $valueArray[$variable] = array("'$variable'", "'$contextValue'", "'$licenseTypeTitle'",
-    strval(CONFIG_TYPE_TEXT), "'License'", "1", "'$licenseTypeDesc'", "null", "null");
+    strval(CONFIG_TYPE_TEXT), "'LICENSE'", "1", "'$licenseTypeDesc'", "null", "null");
 
   /* SoftwareHeritage agent config */
   $variable = "SwhURL";
