@@ -4,6 +4,129 @@
 -->
 # Changelog of FOSSology
 
+### 4.3.0-rc1 (May 9th 2023)
+
+This release adds important corrections to
+[4.2.1](https://github.com/fossology/fossology/releases/tag/4.2.1)
+
+The release 4.3.0-rc1 introduces a number of corrections to
+[4.2.1](https://github.com/fossology/fossology/releases/tag/4.2.1)
+and major changes to FOSSology, including:
+
+* Integration with [ScanOSS](https://scanoss.com/)
+* Add new field SPDX ID for licenses, making FOSSology reports more SPDX
+  compliant.
+  * Same time, fix SPDX reports and update to v2.3
+  * Rename deprecated licenses like GPL-2.0+
+* Update build system to CMake from GNU Make.
+* New option to export and import FOSSology decisions.
+* Several security fixes.
+* New list to define predefined acknowledgements for easy reuse.
+
+#### Credits to contributors for 4.3.0-rc1
+
+From the GIT commit history, we have the following contributors since
+[4.2.1](https://github.com/fossology/fossology/releases/tag/4.2.1):
+
+```
+> Avinal Kumar <avinal.xlvii@gmail.com>
+> dushimsam <dushsam@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Krishna Mahato <krishhtrishh9304@gmail.com>
+> mayank-pathakk <mayank234pathak@gmail.com>
+> Sanjay Krishna S R <sanjaykrishna1203@gmail.com>
+> scanoss-qg <quique.goni@scanoss.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Simran Nigam <nigamsimran14@gmail.com>
+> soham4abc <sohambanerjee4abc@hotmail.com>
+> srideep-banerjee <banerjee.srideep@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+```
+
+#### Features
+
+* `e826f5141` feat(docker): update images to Debian 11 (bullseye)
+* `081bc812c` feat(clixml): introduce LinkScanTool
+* `1faf25a60` feat(licenseCsv): export spdx id in license CSV
+* `d62e603d9` feat(deleteFileFromBrowse): Ability to delete file from browse page
+* `bda57059b` feat(viewPasswordInLogin): Eye button to view Password while logging in
+* `0576ef943` feat(scanoss-agent): Initial version of SCANOSS agent for FOSSology
+* `987b2774a` feat(API): POST report/import route for initiating a report import job
+* `de006de77` feat(decision-dump): export-import IPRA data
+* `485bb8856` feat(invertSearch):Added inverse search in Email/Url/Author Page
+* `e40e7ae37` feat(API): /jobs/{id}/history GET route to get the history of all the jobs queued based on an upload
+* `fec0e60da` feat(highlightRows):Highlighted deleted rows on copyright/URL/Author/Email tables
+* `644879dd6` feat(api): update response for candidate delete
+* `a4721ab4a` feat(API): delete admin-license candidate
+* `7ed947d3c` feat(API): get license candidates
+* `0fd6be41c` feat(api): clearing status
+* `2ac466b19` feat(api): change API schema for file uploads
+* `23ff12e3f` feat(API): change group member's permission
+* `d9b2597a7` feat(spdx): validate SPDX ID before adding
+* `a113b816c` feat(spdx): update tag:value format to v2.3
+* `f844ea1d7` feat(spdx): update to v2.3
+* `c173a05ce` feat(nomos): update SPDX license shortnames
+* `738c259c2` feat(spdx-tools): update to new repository
+* `d6aaaf805` feat(license): use spdx identifiers for licenses
+* `c4e702f82` feat(copyright): add new agent IPRA to FOSSology
+* `266299f06` feat(copyright): add new keywords for ECC and keyword agent
+* `7e1b7a801` feat(cmake): include libraries using cmake style
+* `52ac2abad` feat(install): cmake changes for easy-install and vagrantfile
+* `df8ddfe41` feat(eximporter): add file path for upload tree
+* `f9d7e2156` feat(acknowledgements): add new ack dropdown to select saved ack
+* `c5d8c5b78` feat(showjobs): show status link for inprogress jobs
+* `de52028e6` feat(newagent): new agent decision export import
+* `4b9c941c0` feat(buildsystem): Add CMake Build System
+
+#### Corrections
+
+* `24983d146` fix(dao): getLicenseByCondition set statement name on condition
+* `add8abf00` fix(report): check array key exists
+* `d4adf4a09` fix(spdx): create LicenseRef for custom license text
+* `54562ca00` fix(README): Fix broken Travis SVG
+* `fb9d50f8e` fix(api): check if hist has required keys
+* `fc34bb660` fix(clixml): add acknowledgement to reports
+* `e98e22e15` fix(api): jti not required for oauth tokens
+* `9540a9cbd` fix(adminLicensecandidate): replace while loop with foreach and correct variables
+* `5ba11350b` fix(rest): swap upload and folder id to create job
+* `01019b5f4` fix(dumpExport): create pfile table always
+* `8c729eee8` fix(import): ignore missing utree in dump import
+* `1295ea11d` fix(clixml): use license full name in clixml report
+* `d1bd7b55d` fix(api): unify dump and report import
+* `ada5f201a` fix(search): fix search endpoint
+* `56ba70bb0` fix(manualCopyright):Made Disabled Manual Copyrights Visible in UI
+* `73c471438` fix(api): change response of job history
+* `e40e7ae37` feat(API): /jobs/{id}/history GET route to get the history of all the jobs queued based on an upload
+* `62212dbed` fix(decisionImporter): deduplicate file
+* `5bf20e3ef` fix(obligationsGetter): separate licenses
+* `963faaae1` fix(unifiedreport): fix warnings of unified report agent
+* `7f4df1597` fix(spdx-rdf): use CDATA for attributionText
+* `affc84466` fix(core-schema): fix index to match DB
+* `14723b5d3` fix(api): add new model LicenseCandidate for admin endpoint
+* `eb5d5e0bd` fix(api): add new model FileLicenses for REST API
+* `4c7be95ca` fix(API): merge multiple upload-api calls into one.
+* `bd38495bc` fix(api): check user permission before editing groups
+* `b7a6a9c15` fix(unifiedReport): fix table distortion for component link
+* `523d832fc` fix(ci): add missing dependency to runner image
+* `7bd7ecba6` fix(spdx): add license text for valid RDF
+* `f5eb9ea13` fix(security) fix inaproppriate encoding for output context Added `ENT_HTML5 | ENT_QUOTES` to ensure that all characters are properly encoded on output
+* `d10d972e5` fix(security) fix Reflected XSS vulnerability, where input data was displayed directly on the web page
+* `29604025e` fix(security) Sanitized  external command parameter with `escapeshellarg` as untrusted string may contain malicious system-level commands engineered by an attacker
+* `bd2fb8f2e` fix(security) Replaced cryptographically insecure PHP rand() function with built-in for PHP random_int() with secure pseudo-random number generator
+* `58fec86e2` fix(build): various build fixes
+* `47066a32c` fix(oauth): update username if oauth email matches
+* `1fcc19be9` fix(licenseRef): show only active licenses in bulk and user decisions
+* `5d39fab5a` Fix(api): Fixed filesearch request
+* `5dafd15a5` fix(conf): add escape string and fetch raw content
+
+#### Infrastructure
+
+* `3149e444d` chore(deps): bump guzzlehttp/psr7 from 2.4.3 to 2.5.0 in /src
+* `df2fb2716` chore(scancode): fix the version to 31.2.4
+* `34fd909db` chore(cmake): do not cache git version
+* `c443aebca` chore(build): fix building of monkbulk package
+* `14f8ea382` chore(Makefile): remove old Makefiles
+
 ### 4.2.1 (Nov 15th 2022)
 
 This release is for the quick hot-fix on [4.2.0](https://github.com/fossology/fossology/releases/tag/4.2.0).
