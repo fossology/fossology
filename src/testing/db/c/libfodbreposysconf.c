@@ -54,7 +54,7 @@ fo_dbManager* createTestEnvironment(const char* srcDirs, const char* doConnectAs
   Sysconf = calloc(1, ARRAY_LENGTH + 1);
   size_t count = fread(Sysconf, 1, ARRAY_LENGTH, pipe);
 
-  int rv = fclose(pipe);
+  int rv = pclose(pipe);
 
   if (rv != 0 || count == 0) {
     printf("command %s failed with output:\n%s\n", cmd, Sysconf);
@@ -108,7 +108,7 @@ void dropTestEnvironment(fo_dbManager* dbManager, const char* srcDir, const char
       return;
     }
 
-    fclose(pipe);
+    pclose(pipe);
     free(Sysconf);
   }
 }

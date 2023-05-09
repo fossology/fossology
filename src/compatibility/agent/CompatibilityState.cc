@@ -27,6 +27,7 @@ CompatibilityState::CompatibilityState(
 void CompatibilityState::setAgentId(const int agentId)
 {
   this->agentId = agentId;
+  this->compatibilityAgent.setAgentId(agentId);
 }
 
 /**

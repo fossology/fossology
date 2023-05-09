@@ -98,17 +98,23 @@ void bail(int exitval)
  * @param state           State of the agent
  * @param uploadId        Upload ID to be scanned
  * @param databaseHandler Database handler to be used
+ * @param groupId         Group who scheduled the agent
  * @return True in case of successful scan, false otherwise.
  */
 bool processUploadId(const CompatibilityState& state, int uploadId,
-                     CompatibilityDatabaseHandler& databaseHandler)
+                     CompatibilityDatabaseHandler& databaseHandler, int groupId)
 {
   vector<unsigned long> fileIds =
       databaseHandler.queryFileIdsForScan(uploadId, state.getAgentId());
+  vector<unsigned long> agentIds = databaseHandler.queryScannerIdsForUpload
+                                   (uploadId);
+  auto mainLicenses = databaseHandler.queryMainLicenseForUpload(uploadId,
+                                                                groupId);
   bool errors = false;
 
 #pragma omp parallel default(none) \
-    shared(databaseHandler, fileIds, state, errors, stdout)
+    shared(databaseHandler, fileIds, agentIds, state, errors, stdout, \
+           mainLicenses)
   {
     CompatibilityDatabaseHandler threadLocalDatabaseHandler(
         databaseHandler.spawn());
@@ -127,7 +133,16 @@ bool processUploadId(const CompatibilityState& state, int uploadId,
         continue;
 
       vector<unsigned long> licId =
-          threadLocalDatabaseHandler.queryLicIdsFromPfile(pFileId);
+          threadLocalDatabaseHandler.queryLicIdsFromPfile(pFileId, agentIds);
+      if (!mainLicenses.empty())
+      {
+        set<unsigned long> licSet;
+        licSet.insert(licId.begin(), licId.end());
+        licSet.insert(mainLicenses.begin(), mainLicenses.end());
+
+        licId.clear();
+        licId.insert(licId.end(), licSet.begin(), licSet.end());
+      }
 
       if (licId.size() < 2)
       {
@@ -145,6 +160,7 @@ bool processUploadId(const CompatibilityState& state, int uploadId,
       catch (std::runtime_error& e)
       {
         LOG_FATAL("Unable to read %s.", e.what());
+        errors = true;
         continue;
       }
 
@@ -169,32 +185,39 @@ bool processUploadId(const CompatibilityState& state, int uploadId,
  * @param[out] types Path of the csv file to be scanned
  * @param[out] rules Path of the yaml file to be scanned
  * @param[out] jFile Path of the json file to be scanned
+ * @param[out] mainLicense Main license for the package
  * @return True if success, false otherwise
  */
 bool parseCliOptions(int argc, char** argv, CompatibilityCliOptions& dest,
-                     std::string& types, std::string& rules, string& jFile)
+                     std::string& types, std::string& rules, string& jFile,
+                     string& mainLicense)
 {
   boost::program_options::options_description desc(AGENT_NAME
                                                    ": recognized options");
-  desc.add_options()("help,h", "shows help")("verbose,v", "increase verbosity")(
-      "file,f", boost::program_options::value<string>(),
-      "json file, containing fileNames and licenses within that fileNames")(
-      "json,J", "output as JSON")("config,c",
-                                  boost::program_options::value<string>(),
-                                  "path to the sysconfigdir")(
-      "scheduler_start",
-      "specifies, that the agent was called by the scheduler")(
-      "userID", boost::program_options::value<int>(),
+  desc.add_options()
+      ("help,h", "shows help")
+      ("verbose,v", "increase verbosity")
+      ("file,f", boost::program_options::value<string>(),
+       "json file, containing fileNames and licenses within that fileNames")
+      ("json,J", "output as JSON")
+      ("main_license", boost::program_options::value<string>(),
+       "name of main license to check licenses in files against")
+      ("config,c", boost::program_options::value<string>(),
+       "path to the sysconfigdir")
+      ("scheduler_start",
+       "specifies, that the agent was called by the scheduler")
+      ("userID", boost::program_options::value<int>(),
       "the id of the user that created the job (only in combination with "
-      "--scheduler_start)")("groupID", boost::program_options::value<int>(),
-                            "the id of the group of the user that created the "
-                            "job (only in combination with --scheduler_start)")(
-      "jobId", boost::program_options::value<int>(),
-      "the id of the job (only in combination with --scheduler_start)")(
-      "types,t", boost::program_options::value<string>(),
-      "license types for compatibility rules")(
-      "rules,r", boost::program_options::value<string>(),
-      "license compatibility rules");
+       "--scheduler_start)")
+      ("groupID", boost::program_options::value<int>(),
+       "the id of the group of the user that created the job (only in "
+       "combination with --scheduler_start)")
+      ("jobId", boost::program_options::value<int>(),
+       "the id of the job (only in combination with --scheduler_start)")
+      ("types,t", boost::program_options::value<string>(),
+       "license types for compatibility rules")
+      ("rules,r", boost::program_options::value<string>(),
+       "license compatibility rules");
 
   boost::program_options::positional_options_description p;
   boost::program_options::variables_map vm;
@@ -210,7 +233,7 @@ bool parseCliOptions(int argc, char** argv, CompatibilityCliOptions& dest,
 
     if (vm.count("help") > 0)
     {
-      cout << desc << endl;
+      cout << desc << '\n';
       exit(0);
     }
 
@@ -229,6 +252,11 @@ bool parseCliOptions(int argc, char** argv, CompatibilityCliOptions& dest,
       jFile = vm["file"].as<std::string>();
     }
 
+    if (vm.count("main_license"))
+    {
+      mainLicense = vm["main_license"].as<std::string>();
+    }
+
     int verbosity = (int) vm.count("verbose");
     bool json = vm.count("json") > 0;
 
@@ -238,14 +266,14 @@ bool parseCliOptions(int argc, char** argv, CompatibilityCliOptions& dest,
   }
   catch (boost::bad_any_cast&)
   {
-    cout << "wrong parameter type" << endl;
-    cout << desc << endl;
+    cout << "wrong parameter type\n";
+    cout << desc << '\n';
     return false;
   }
   catch (boost::program_options::error&)
   {
-    cout << "wrong command line arguments" << endl;
-    cout << desc << endl;
+    cout << "wrong command line arguments\n";
+    cout << desc << '\n';
     return false;
   }
 }
@@ -258,7 +286,7 @@ bool parseCliOptions(int argc, char** argv, CompatibilityCliOptions& dest,
  * @param printComma Set true to print comma. Will be set true after first
  *                   data is printed
  */
-void appendToJson(const std::vector<tuple<string, string, string>>& resultPair,
+void appendToJson(const std::vector<tuple<string, string, bool>>& resultPair,
                   const std::string& fileName, bool& printComma)
 {
   Json::Value result;
@@ -298,13 +326,12 @@ void appendToJson(const std::vector<tuple<string, string, string>>& resultPair,
     result["package-level-result"] = res;
   }
 
-
   // Thread-Safety: output all matches JSON at once to STDOUT
 #pragma omp critical(jsonPrinter)
   {
     if (printComma)
     {
-      cout << "," << endl;
+      cout << ",\n";
     }
     else
     {
@@ -320,9 +347,7 @@ void appendToJson(const std::vector<tuple<string, string, string>>& resultPair,
     // For version >= 1.4.0, \n is not appended.
     jsonString = Json::writeString(jsonBuilder, result);
 #endif
-    cout << "  " << jsonString << flush;
-
-    // cout << "  " << jsonBuilder.write(result) << flush;
+    cout << "  " << jsonString;
   }
 }
 
@@ -333,24 +358,48 @@ void appendToJson(const std::vector<tuple<string, string, string>>& resultPair,
  * their compatibility result
  */
 void printResultToStdout(
-    const std::vector<tuple<string, string, string>>& resultPair,
+    const std::vector<tuple<string, string, bool>>& resultPair,
     const std::string& fileName)
 {
   stringstream ss;
   if (fileName != "null")
   {
-    cout << "----" << fileName << "----" << endl;
+    cout << "----" << fileName << "----\n";
     for (const auto& i : resultPair)
     {
-      cout << get<0>(i) << "," << get<1>(i) << " ::" << get<2>(i) << endl;
+      string result = get<2>(i) ? "true" : "false";
+      cout << get<0>(i) << "," << get<1>(i) << "::" << result << '\n';
     }
   }
   else
   {
-    cout << "----all licenses with their compatibility----" << endl;
+    cout << "----all licenses with their compatibility----\n";
     for (const auto& i : resultPair)
     {
-      cout << get<0>(i) << "," << get<1>(i) << " ::" << get<2>(i) << endl;
+      string result = get<2>(i) ? "true" : "false";
+      cout << get<0>(i) << "," << get<1>(i) << "::" << result << '\n';
     }
   }
+}
+
+/**
+ * Converts a main license string (which may contain AND) to a set of licenses.
+ * @param mainLicense Main license string from CLI
+ * @return List of individual licenses
+ */
+std::set<std::string> mainLicenseToSet(const string& mainLicense)
+{
+  std::set<std::string> licenses;
+  std::string delimiter = " AND ";
+  std::string s = mainLicense;
+  size_t pos;
+
+  while ((pos = s.find(delimiter)) != std::string::npos) {
+    licenses.insert(s.substr(0, pos));
+    s.erase(0, pos + delimiter.length());
+  }
+  if (licenses.empty()) {
+    licenses.insert(mainLicense);
+  }
+  return licenses;
 }

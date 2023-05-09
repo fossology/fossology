@@ -41,6 +41,7 @@
  *   - @link src/compatibility/ui @endlink
  */
 
+#include <stdexcept>
 #include "compatibility.hpp"
 
 using namespace fo;
@@ -56,12 +57,96 @@ using namespace fo;
     return (retval); \
   } while (0)
 
+/**
+ * \brief Check and print license compatibility of scan result.
+ * \param lic_type_loc    Location of CSV holding license types
+ * \param rule_loc        Location of YAML holding rules
+ * \param json            Is JSON output required?
+ * \param lic_result_json Location of JSON holding scan results
+ * \param main_license    Main license for the package to use
+ */
+void check_file_compatibility(const string& lic_type_loc,
+                              const string& rule_loc, bool json,
+                              const string& lic_result_json,
+                              const string& main_license)
+{
+  bool printComma = false;
+
+  set<string> all_license_list;
+  const unordered_map<string, string>& license_map =
+      initialize_license_map(lic_type_loc);
+  const map<tuple<string, string, string, string>, bool>& rule_list =
+      initialize_rule_list(rule_loc);
+  map<tuple<string, string>, bool> compatibility_results;
+
+  auto main_license_set = mainLicenseToSet(main_license);
+
+  if (json)
+  {
+    cout << "[\n";
+  }
+
+  Json::Value root;
+  std::ifstream ifs(lic_result_json.c_str());
+  ifs >> root;
+  ifs.close();
+
+  for (const auto& fileItems : root["results"]) // iterating the json_file
+  {
+    const string fileName = fileItems["file"].asString();
+    set<string> file_license_set = set<string>(main_license_set);
+    for (const auto& license : fileItems["licenses"]) // iterating the
+                                                      // license array
+    {
+      string str = license.asString();
+      if (str == "Dual-license" || str == "No_license_found" || str == "Void")
+      {
+        continue;
+      }
+      file_license_set.insert(str);
+      all_license_list.insert(str);
+    }
+    if (file_license_set.size() > 1) // Compute only if file has > 1 license
+    {
+      vector<tuple<string, string, bool>> result;
+      result = checkCompatibility(file_license_set, license_map, rule_list,
+                                  compatibility_results);
+      if (json)
+      {
+        appendToJson(result, fileName, printComma);
+      }
+      else
+      {
+        printResultToStdout(result, fileName);
+      }
+    }
+  }
+  vector<tuple<string, string, bool>> result;
+  string name = "null";
+  result = checkCompatibility(all_license_list, license_map, rule_list,
+                              compatibility_results);
+  if (json)
+  {
+    appendToJson(result, name, printComma);
+  }
+  else
+  {
+    printResultToStdout(result, name);
+  }
+
+  if (json)
+  {
+    cout << "\n]\n";
+  }
+}
+
 int main(int argc, char** argv)
 {
   CompatibilityCliOptions cliOptions;
   vector<string> licenseNames;
-  string lic_types, rule, jFile;
-  if (!parseCliOptions(argc, argv, cliOptions, lic_types, rule, jFile))
+  string lic_types, rule, jFile, mainLicense;
+  if (!parseCliOptions(argc, argv, cliOptions, lic_types, rule, jFile,
+                       mainLicense))
   {
     return_sched(1);
   }
@@ -79,6 +164,7 @@ int main(int argc, char** argv)
     while (fo_scheduler_next() != nullptr)
     {
       int uploadId = atoi(fo_scheduler_current());
+      int groupId = fo_scheduler_groupID();
 
       if (uploadId == 0)
       {
@@ -92,7 +178,7 @@ int main(int argc, char** argv)
         bail(5);
       }
 
-      if (!processUploadId(state, uploadId, databaseHandler))
+      if (!processUploadId(state, uploadId, databaseHandler, groupId))
       {
         bail(2);
       }
@@ -107,201 +193,283 @@ int main(int argc, char** argv)
   }
   else
   {
-    bool fileError = false;
-    bool printComma = false;
-
-    string main_name, main_type, sub_name, sub_type;
-    set<string> allLic;
-    if (json)
+    try
     {
-      cout << "[" << endl;
+      check_file_compatibility(lic_types, rule, json, jFile, mainLicense);
     }
-
-    Json::Value root;
-    std::ifstream ifs(jFile.c_str());
-    ifs >> root;
-
-    for (const auto& fileItems : root["results"]) // iterating the json_file
+    catch (invalid_argument& e)
     {
-      const string fileName = fileItems["file"].asString();
-      vector<string> myVec;
-      if (fileItems["licenses"].size()
-          > 1) // checking if a file contains more than one license
-      {
-        for (const auto& license :
-             fileItems["licenses"]) // iterating the license array
-        {
-          string str = license.asString();
-          if (str == "Dual-license" || str == "No_license_found")
-          {
-            continue;
-          }
-          myVec.push_back(str);
-          allLic.insert(str);
-        }
-      }
-      vector<tuple<string, string, string>> result;
-      result = checkCompatibility(myVec, lic_types, rule);
-      if (json)
-      {
-        appendToJson(result, fileName, printComma);
-      }
-      else
-      {
-        printResultToStdout(result, fileName);
-      }
+      cerr << e.what();
+      return -1;
     }
-    vector<tuple<string, string, string>> result;
-    string name = "null";
-    result = checkCompatibility(vector<string>(allLic.begin(), allLic.end()),
-                                lic_types, rule);
-    if (json)
-    {
-      appendToJson(result, name, printComma);
-    }
-    else
-    {
-      printResultToStdout(result, name);
-    }
-
-    if (json)
-    {
-      cout << endl << "]" << endl;
-    }
-    return fileError ? 1 : 0;
   }
   return 0;
 }
 
+
+/**
+ * \brief Check the licenses against rules and get the compatibility result.
+ * \param first_name  Name of the license 1
+ * \param first_type  Type of the license 1
+ * \param second_name Name of the license 2
+ * \param second_type Type of the license 2
+ * \param rule_list Map of the compatibility rules
+ * \return True or False based on rule list or default value.
+ */
+bool are_licenses_compatible(const string& first_name,
+    const string& first_type, const string& second_name,
+    const string& second_type,
+    const map<tuple<string, string, string, string>, bool>& rule_list)
+{
+  auto result_check =
+      rule_list.find(make_tuple(first_name, "", second_name, ""));
+  if (result_check == rule_list.end())
+  {
+    result_check = rule_list.find(make_tuple(second_name, "", first_name, ""));
+  }
+  if (result_check != rule_list.end())
+  {
+    return result_check->second;
+  }
+  result_check = rule_list.find(make_tuple("", first_type, "", second_type));
+  if (result_check == rule_list.end())
+  {
+    result_check = rule_list.find(make_tuple("", second_type, "", first_type));
+  }
+  if (result_check != rule_list.end())
+  {
+    return result_check->second;
+  }
+  result_check = rule_list.find(make_tuple(first_name, "", "", second_type));
+  if (result_check == rule_list.end())
+  {
+    result_check = rule_list.find(make_tuple("", first_type, second_name, ""));
+  }
+  if (result_check != rule_list.end())
+  {
+    return result_check->second;
+  }
+  auto default_value = rule_list.find(make_tuple("~", "~", "~", "~"));
+  if (default_value == rule_list.end())
+  {
+    return false;
+  }
+  else
+  {
+    return default_value->second;
+  }
+}
+
 /**
  * @brief find the compatibility for cli mode
- * @param myVec containing licenses present in the file
- * @param lic_types containing location of the csv file in which license
- * information is present
- * @param rule containing location of the yaml file in which the rules are
- * defined
+ * @param license_set containing licenses present in the file
+ * @param license_map  map of license name and its type
+ * @param rule_list    Parsed map of YAML rule file
  * @return vector of tuple
  */
-vector<tuple<string, string, string>> checkCompatibility(
-    vector<string> myVec, const string& lic_types, const string& rule)
+vector<tuple<string, string, bool>> checkCompatibility(
+    const set<string>& license_set,
+    const unordered_map<string, string>& license_map,
+    const map<tuple<string, string, string, string>, bool>& rule_list,
+    map<tuple<string, string>, bool>& scan_results)
 {
-  std::ifstream ip(lic_types.c_str());
-  YAML::Node rules = YAML::LoadFile(rule);
-  string main_name, main_type, sub_name, sub_type;
-  vector<tuple<string, string, string>> res;
+  string first_name, first_type, second_name, second_type;
+  vector<tuple<string, string, bool>> res;
+  vector<string> license_list = vector<string>(license_set.begin(),
+                                               license_set.end());
 
-  string line, name, type;
-  vector<string> license_name;
-  vector<string> license_type;
-
-  while (getline(ip, line)) // parsing the csv file
+  unsigned int license_len = license_list.size();
+  for (unsigned int i = 0; i < (license_len - 1); i++)
   {
-    stringstream ss(line);
-    getline(ss, name, ',');
-    getline(ss, type, ',');
-    license_name.push_back(name);
-    license_type.push_back(type);
-  }
-
-  unsigned int vecSize = myVec.size();
-  for (unsigned int argn = 0; argn < (vecSize - 1); argn++)
-  {
-    for (unsigned int argn2 = (argn + 1); argn2 < vecSize; argn2++)
+    first_name = license_list[i];
+    try
     {
-      for (unsigned int i = 1; i < license_name.size(); i++)
+      first_type = license_map.at(first_name);
+    }
+    catch (out_of_range&)
+    {
+      first_type = "";
+    }
+    for (unsigned int j = (i + 1); j < license_len; j++)
+    {
+      second_name = license_list[j];
+      try
       {
-        if (myVec[argn] == license_name[i])
-        {
-          main_name = license_name[i];
-          main_type = license_type[i];
-        }
-        if (myVec[argn2] == license_name[i])
-        {
-          sub_name = license_name[i];
-          sub_type = license_type[i];
-        }
+        second_type = license_map.at(second_name);
+      }
+      catch (out_of_range&)
+      {
+        second_type = "";
       }
 
-      int def = 0, priority = 0;
+      auto existing_result = scan_results.find(
+          make_tuple(first_name, second_name));
+      if (existing_result == scan_results.end())
+      {
+        existing_result = scan_results.find(
+            make_tuple(second_name, first_name));
+      }
 
-      for (const auto& yml_rfile : rules["rules"]) // iterating the yml.rules
+      if (existing_result != scan_results.end())
       {
-        string type = "", type2 = "", name = "", name2 = "", ans = "";
-        int rule1 = 0, rule2 = 0, rule3 = 0, rule4 = 0;
-        for (const auto& tag : yml_rfile)
-        {
-          string first = tag.first.as<string>();
-          string second = tag.second.as<string>();
-          if (first == "text")
-          {
-            continue;
-          }
-          if (first == "compatibility")
-          {
-            ans = second;
-            rule1++;
-            rule4++;
-            rule2++;
-            rule3++;
-          }
-          if (first == "maintype" && (second != "~"))
-          {
-            rule1++;
-            rule4++;
-            type = second;
-          }
-          if (first == "subtype" && (second != "~"))
-          {
-            rule1++;
-            rule3++;
-            type2 = second;
-          }
-          if (first == "mainname" && (second != "~"))
-          {
-            rule2++;
-            rule3++;
-            name = second;
-          }
-          if (first == "subname" && (second != "~"))
-          {
-            rule2++;
-            rule4++;
-            name2 = second;
-          }
-          if ((rule1 == 3)
-              && (main_type == type
-                  && sub_type == type2)) // rule1 for maintype and subtype
-          {
-            res.emplace_back(main_name, sub_name, ans);
-            def++;
-            continue;
-          }
-          if ((rule2 == 3)
-              && (((main_name == name) || (main_name == name2))
-                  && ((sub_name == name)
-                      || (sub_name
-                          == name2)))) // rule2 for mainname and subname
-          {
-            res.emplace_back(main_name, sub_name, ans);
-            ++priority;
-            def++;
-            continue;
-          }
-          if ((rule3 == 3) && (priority == 0)
-              && ((main_name == name) || (sub_name == name))
-              && ((main_type == type2)
-                  || (sub_type == type2))) // rule3 for mainname and subtype
-          {
-            res.emplace_back(main_name, sub_name, ans);
-            def++;
-          }
-        }
+        res.emplace_back(first_name, second_name, existing_result->second);
+        continue;
       }
-      if (def == 0)
-      {
-        res.emplace_back(main_name, sub_name, rules["default"].as<string>());
-      }
+
+      bool compatibility = are_licenses_compatible(first_name, first_type,
+                                                   second_name, second_type,
+                                                   rule_list);
+      res.emplace_back(first_name, second_name, compatibility);
+      scan_results[make_tuple(first_name, second_name)] = compatibility;
     }
   }
   return res;
+}
+
+/**
+ * \brief Get the column index for shortname and licensetype columns from CSV
+ * header.
+ * \param header        String containing CSV header
+ * \param[out] name_col Index of shortname column
+ * \param[out] type_col Index of licensetype column
+ * \return -1 if shortname not found, -2 if licensetype not found, 0 if both
+ * found.
+ */
+int get_column_ids(const string& header, int& name_col, int& type_col)
+{
+  stringstream lineStream(header);
+  string cell;
+  int i = 0;
+  while(getline(lineStream, cell, ','))
+  {
+    string::size_type start = cell.find_first_not_of(' ');
+    string::size_type end = cell.find_last_not_of(' ');
+
+    cell = cell.substr(start, end - start + 1);
+
+    if (cell == "shortname")
+    {
+      name_col = i;
+    }
+    else if (cell == "licensetype")
+    {
+      type_col = i;
+    }
+    i++;
+  }
+  if (name_col == -1)
+  {
+    return -1;
+  }
+  else if (type_col == -1)
+  {
+    return -2;
+  }
+  return 1;
+}
+
+/**
+ * \brief Parse license type CSV and create a map
+ * \param file_location Location of the CSV file
+ * \return Map with license name as key and type as value
+ * \throws invalid_argument If CSV is missing required headers
+ */
+unordered_map<string, string> initialize_license_map(
+    const string& file_location)
+{
+  std::ifstream ip(file_location);
+  string line, name, type;
+  unordered_map<string, string> license_type_map;
+  int name_column = -1, type_column = -1;
+  getline(ip, line);
+  int retval = get_column_ids(line, name_column, type_column);
+  if (retval != 1)
+  {
+    throw invalid_argument("missing header `shortname` and/or `licensetype` "
+      "from CSV file.");
+  }
+  while (getline(ip, line)) // parsing the csv file
+  {
+    stringstream ss(line);
+    string cell;
+    int i = 0;
+    while (getline(ss, cell, ','))
+    {
+      if (i == name_column)
+      {
+        name = cell;
+      }
+      if (i == type_column)
+      {
+        type = cell;
+      }
+      i++;
+    }
+    license_type_map[name] = type;
+  }
+  return license_type_map;
+}
+
+/**
+ * \brief Read YAML file of rules and parse it as map.
+ *
+ * The map has key of tuple (first name, first type, second name, second
+ * type) and value as boolean of compatibility result.
+ *
+ * A special key with tuple (~, ~, ~, ~) holds the default value.
+ * \param file_location Location to rule YAML
+ * \return Map of rules
+ */
+map<tuple<string, string, string, string>, bool> initialize_rule_list(
+    const string& file_location)
+{
+  YAML::Node root = YAML::LoadFile(file_location);
+  map<tuple<string, string, string, string>, bool> rule_map;
+
+  for (const auto& yml_rule : root["rules"]) // iterating the yml.rules
+  {
+    string first_type, second_type, first_name, second_name;
+    bool ans = false;
+    for (const auto& tag : yml_rule)
+    {
+      string first = tag.first.as<string>();
+      if (first == "comment")
+      {
+        continue;
+      }
+      string second;
+      if (tag.second.IsNull())
+      {
+        second = "~";
+      }
+      else
+      {
+        second = tag.second.as<string>();
+      }
+      if (first == "compatibility")
+      {
+        ans = second == "true";
+      }
+      else if (first == "firsttype" && (second != "~"))
+      {
+        first_type = second;
+      }
+      else if (first == "secondtype" && (second != "~"))
+      {
+        second_type = second;
+      }
+      else if (first == "firstname" && (second != "~"))
+      {
+        first_name = second;
+      }
+      else if (first == "secondname" && (second != "~"))
+      {
+        second_name = second;
+      }
+    }
+    rule_map[make_tuple(first_name, first_type, second_name, second_type)] = ans;
+  }
+  rule_map[make_tuple("~", "~", "~", "~")] =
+      root["default"].as<string>() == "true";
+  return rule_map;
 }

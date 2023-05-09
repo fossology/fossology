@@ -10,6 +10,10 @@
 
 #include "CompatibilityDatabaseHandler.hpp"
 
+#include "libfossagentref.h"
+
+#include <iterator>
+#include <sstream>
 #include <utility>
 
 
@@ -53,14 +57,13 @@ vector<unsigned long> CompatibilityDatabaseHandler::queryFileIdsForScan(
       fo_dbManager_PrepareStamement(
           dbManager.getStruct_dbManager(),
           ("pfileForUploadFilterAgent" + uploadtreeTableName).c_str(),
-          ("SELECT distinct(ut.pfile_fk) FROM " + uploadtreeTableName
-           + " AS ut "
-             "INNER JOIN license_file AS lf ON ut.pfile_fk = lf.pfile_fk "
-             "LEFT JOIN comp_result AS cr ON ut.pfile_fk = cr.pfile_fk "
-             "AND cr.agent_fk = $2 WHERE cr.pfile_fk IS NULL "
-             "AND ut.upload_fk = $1 AND (ut.ufile_mode&x'3C000000'::int)=0;")
-              .c_str(),
-          int, int),
+          ("SELECT distinct(ut.pfile_fk) FROM " + uploadtreeTableName +
+           " AS ut "
+           "INNER JOIN license_file AS lf ON ut.pfile_fk = lf.pfile_fk "
+           "LEFT JOIN comp_result AS cr ON ut.pfile_fk = cr.pfile_fk "
+           "AND cr.agent_fk = $2 WHERE cr.pfile_fk IS NULL "
+           "AND ut.upload_fk = $1 AND (ut.ufile_mode&x'3C000000'::int)=0;")
+          .c_str(), int, int),
       uploadId, agentId);
 
   return queryResult.getSimpleResults(0, fo::stringToUnsignedLong);
@@ -71,17 +74,28 @@ vector<unsigned long> CompatibilityDatabaseHandler::queryFileIdsForScan(
  * @param pFileId
  * @return List of licenses for the given file id
  */
-vector<unsigned long> CompatibilityDatabaseHandler::queryLicIdsFromPfile(
-    unsigned long pFileId) // to get licId from pfile_id
+std::vector<unsigned long> CompatibilityDatabaseHandler::queryLicIdsFromPfile(
+    unsigned long pFileId,
+    vector<unsigned long> agentIds) // to get licId from pfile_id
 {
+  std::stringstream ss;
+
+  ss << "{";
+  for (size_t i = 0; i < agentIds.size() - 1; i++)
+  {
+    ss << agentIds[i] << ",";
+  }
+  ss << agentIds[agentIds.size() - 1] << "}";
+
   QueryResult queryResult = dbManager.execPrepared(
       fo_dbManager_PrepareStamement(
-          dbManager.getStruct_dbManager(), "myTable",
+          dbManager.getStruct_dbManager(), "getLicenses",
           ("SELECT DISTINCT rf_fk FROM license_file INNER JOIN license_ref "
            "ON rf_fk = rf_pk AND rf_shortname NOT IN"
-           "('Dual-license', 'No_license_found', 'Void') WHERE pfile_fk= $1"),
-          unsigned long),
-      pFileId);
+           "('Dual-license', 'No_license_found', 'Void') WHERE pfile_fk = $1 "
+           "AND agent_fk = ANY($2::int[])"),
+          unsigned long, char*),
+      pFileId, ss.str().c_str());
 
   return queryResult.getSimpleResults(0, fo::stringToUnsignedLong);
 }
@@ -122,9 +136,9 @@ CompatibilityStatus CompatibilityDatabaseHandler::queryRule1(
   QueryResult queryResult = dbManager.execPrepared(
       fo_dbManager_PrepareStamement(
           dbManager.getStruct_dbManager(), "getCompatibilityOnLicenseId",
-          ("SELECT compatibility FROM license_rules WHERE (main_rf_fk = $1 AND "
-           "sub_rf_fk = "
-           "$2) OR (sub_rf_fk = $1 AND main_rf_fk = $2)"),
+          ("SELECT compatibility FROM license_rules WHERE (first_rf_fk = $1 AND "
+           "second_rf_fk = "
+           "$2) OR (second_rf_fk = $1 AND first_rf_fk = $2)"),
           unsigned long, unsigned long),
       get<0>(lic1), get<0>(lic2));
   if (queryResult.getRowCount() == 0)
@@ -160,8 +174,8 @@ CompatibilityStatus CompatibilityDatabaseHandler::queryRule2(
       fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
                                     "getCompatibilityOnLicenseType",
                                     ("SELECT compatibility FROM license_rules "
-                                     "WHERE (main_type = $1 AND sub_type = $2) "
-                                     "OR (sub_type = $1 AND main_type = $2)"),
+                                     "WHERE (first_type = $1 AND second_type = $2) "
+                                     "OR (second_type = $1 AND first_type = $2)"),
                                     char*, char*),
       get<1>(lic1).c_str(), get<1>(lic2).c_str());
   if (queryResult.getRowCount() == 0)
@@ -202,9 +216,8 @@ CompatibilityStatus CompatibilityDatabaseHandler::queryRule3(
   QueryResult queryResult = dbManager.execPrepared(
       fo_dbManager_PrepareStamement(
           dbManager.getStruct_dbManager(), "getCompatibilityOnLicenseIdAndType",
-          ("SELECT compatibility FROM license_rules WHERE (main_rf_fk = $1 AND "
-           "sub_type = "
-           "$2) OR (main_rf_fk = $3 AND sub_type = $4)"),
+          ("SELECT compatibility FROM license_rules WHERE (first_rf_fk = $1 AND "
+           "second_type = $2) OR (first_rf_fk = $3 AND second_type = $4)"),
           unsigned long, char*, unsigned long, char*),
       licenseId1, licenseType2, licenseId2, licenseType1);
 
@@ -283,4 +296,69 @@ CompatibilityDatabaseHandler CompatibilityDatabaseHandler::spawn() const
 {
   DbManager spawnedDbMan(dbManager.spawn());
   return CompatibilityDatabaseHandler(spawnedDbMan);
+}
+
+/**
+ * \brief Get the default rule from DB as CompatibilityStatus
+ * \return COMPATIBLE if default rule not found, otherwise the value from DB
+ */
+CompatibilityStatus CompatibilityDatabaseHandler::getDefaultRule() const
+{
+  QueryResult queryResult = dbManager.execPrepared(
+      fo_dbManager_PrepareStamement(
+          dbManager.getStruct_dbManager(), "getDefaultRule",
+          "SELECT compatibility FROM license_rules "
+          "WHERE first_rf_fk IS NULL AND second_rf_fk IS NULL AND "
+          "first_type IS NULL AND second_type IS NULL;"));
+  if (queryResult.getRowCount() == 0)
+  {
+    return COMPATIBLE;
+  }
+  bool result = queryResult.getSimpleResults(0, fo::stringToBool)[0];
+  if (result)
+  {
+    return COMPATIBLE;
+  }
+  return NOTCOMPATIBLE;
+}
+
+/**
+ * \brief Get the agent id of latest scanners run on the upload
+ * \param uploadId Upload ID
+ * \return Vectory of latest agent ids of scanners run on the upload
+ */
+std::vector<unsigned long> CompatibilityDatabaseHandler::
+    queryScannerIdsForUpload(int uploadId)
+{
+  QueryResult agentIdResult = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager.getStruct_dbManager(), "latestScanner",
+      ("SELECT DISTINCT ON (agent_name) agent_pk FROM agent AS ag "
+       "INNER JOIN ars_master AS am "
+       " ON ag.agent_pk = am.agent_fk AND am.upload_fk = $1"
+       "  AND am.ars_success = true "
+       "WHERE agent_name IN (" FOSSOLOGY_SCANNER_AGENT_NAME_ARRAY ") "
+       "ORDER BY agent_name, agent_ts DESC;"),
+      unsigned long),
+    uploadId);
+  return agentIdResult.getSimpleResults(0, fo::stringToUnsignedLong);
+}
+
+/**
+ * \brief Get the main licenses for the upload.
+ * \param uploadId Upload ID
+ * \return Vector of main licenses
+ */
+std::vector<unsigned long> CompatibilityDatabaseHandler::
+    queryMainLicenseForUpload(int uploadId, int groupId)
+{
+  QueryResult agentIdResult = dbManager.execPrepared(
+      fo_dbManager_PrepareStamement(
+          dbManager.getStruct_dbManager(), "mainLicense",
+          ("SELECT DISTINCT rf_fk FROM "
+           "upload_clearing_license "
+           "WHERE upload_fk = $1 AND group_fk = $2;"),
+          unsigned long, unsigned long),
+      uploadId, groupId);
+  return agentIdResult.getSimpleResults(0, fo::stringToUnsignedLong);
 }

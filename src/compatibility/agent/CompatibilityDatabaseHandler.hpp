@@ -71,8 +71,12 @@ public:
 
   std::vector<unsigned long> queryFileIdsForUpload(int uploadId);
   std::vector<unsigned long> queryFileIdsForScan(int uploadId, int agentId);
+  std::vector<unsigned long> queryScannerIdsForUpload(int uploadId);
 
-  std::vector<unsigned long> queryLicIdsFromPfile(unsigned long pFileId);
+  std::vector<unsigned long> queryLicIdsFromPfile(
+      unsigned long pFileId, vector<unsigned long> agentIds);
+  std::vector<unsigned long> queryMainLicenseForUpload(int uploadId,
+                                                       int groupId);
   std::vector<std::tuple<unsigned long, std::string>> queryLicDetails(
       const std::vector<unsigned long>& licId);
   CompatibilityStatus queryRule1(tuple<unsigned long, string> lic1,
@@ -86,6 +90,7 @@ public:
   bool queryInsertResult(unsigned long pFileId, int a_id, unsigned long id1,
                          unsigned long id2, const string& comp);
   bool check(unsigned long id1, unsigned long id2, unsigned long pFileId);
+  CompatibilityStatus getDefaultRule() const;
 };
 
 #endif // COMPATIBILITY_AGENT_DATABASE_HANDLER_HPP

@@ -1186,6 +1186,7 @@
   $Schema["TABLE"]["license_ref"]["rf_licensetype"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_licensetype\" IS 'Permissive, Copyleft, Copyright, ...'";
   $Schema["TABLE"]["license_ref"]["rf_licensetype"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_licensetype\" text";
   $Schema["TABLE"]["license_ref"]["rf_licensetype"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_licensetype\" SET DEFAULT 'PERMISSIVE'";
+
   $Schema["TABLE"]["license_ref"]["rf_text"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_text\" IS 'reference License text, or regex'";
   $Schema["TABLE"]["license_ref"]["rf_text"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_text\" text";
   $Schema["TABLE"]["license_ref"]["rf_text"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_text\" SET NOT NULL";
@@ -1329,29 +1330,31 @@
   $Schema["TABLE"]["license_rules"]["lr_pk"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"lr_pk\" int8 DEFAULT nextval('license_rules_lr_pk_seq'::regclass)";
   $Schema["TABLE"]["license_rules"]["lr_pk"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"lr_pk\" SET NOT NULL, ALTER COLUMN \"lr_pk\" SET DEFAULT nextval('license_rules_lr_pk_seq'::regclass)";
 
-  $Schema["TABLE"]["license_rules"]["main_rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"main_rf_fk\" IS 'License1 id'";
-  $Schema["TABLE"]["license_rules"]["main_rf_fk"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"main_rf_fk\" int8";
-  $Schema["TABLE"]["license_rules"]["main_rf_fk"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"main_rf_fk\" DROP NOT NULL";
+  $Schema["TABLE"]["license_rules"]["first_rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"first_rf_fk\" IS 'License1 id'";
+  $Schema["TABLE"]["license_rules"]["first_rf_fk"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"first_rf_fk\" int8";
+  $Schema["TABLE"]["license_rules"]["first_rf_fk"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"first_rf_fk\" DROP NOT NULL";
 
-  $Schema["TABLE"]["license_rules"]["sub_rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"sub_rf_fk\" IS 'License2 id'";
-  $Schema["TABLE"]["license_rules"]["sub_rf_fk"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"sub_rf_fk\" int8";
-  $Schema["TABLE"]["license_rules"]["sub_rf_fk"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"sub_rf_fk\" DROP NOT NULL";
+  $Schema["TABLE"]["license_rules"]["second_rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"second_rf_fk\" IS 'License2 id'";
+  $Schema["TABLE"]["license_rules"]["second_rf_fk"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"second_rf_fk\" int8";
+  $Schema["TABLE"]["license_rules"]["second_rf_fk"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"second_rf_fk\" DROP NOT NULL";
 
-  $Schema["TABLE"]["license_rules"]["main_type"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"main_type\" IS 'License1 type'";
-  $Schema["TABLE"]["license_rules"]["main_type"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"main_type\" text";
-  $Schema["TABLE"]["license_rules"]["main_type"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"main_type\" DROP NOT NULL";
+  $Schema["TABLE"]["license_rules"]["first_type"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"first_type\" IS 'License1 type'";
+  $Schema["TABLE"]["license_rules"]["first_type"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"first_type\" text";
+  $Schema["TABLE"]["license_rules"]["first_type"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"first_type\" DROP NOT NULL";
 
-  $Schema["TABLE"]["license_rules"]["sub_type"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"sub_type\" IS 'License2 type'";
-  $Schema["TABLE"]["license_rules"]["sub_type"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"sub_type\" text";
-  $Schema["TABLE"]["license_rules"]["sub_type"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"sub_type\" DROP NOT NULL";
+  $Schema["TABLE"]["license_rules"]["second_type"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"second_type\" IS 'License2 type'";
+  $Schema["TABLE"]["license_rules"]["second_type"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"second_type\" text";
+  $Schema["TABLE"]["license_rules"]["second_type"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"second_type\" DROP NOT NULL";
 
   $Schema["TABLE"]["license_rules"]["compatibility"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"compatibility\" IS 'Tells whether license1/main_id and license2/sub_id are compatible or not'";
   $Schema["TABLE"]["license_rules"]["compatibility"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"compatibility\" bool";
   $Schema["TABLE"]["license_rules"]["compatibility"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"compatibility\" SET NOT NULL";
 
-  $Schema["TABLE"]["license_rules"]["text"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"text\" IS 'Rule Description'";
-  $Schema["TABLE"]["license_rules"]["text"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"text\" text";
-  $Schema["TABLE"]["license_rules"]["text"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"text\" SET NOT NULL";
+  $Schema["TABLE"]["license_rules"]["comment"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"comment\" IS 'Rule Description'";
+  $Schema["TABLE"]["license_rules"]["comment"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"comment\" text";
+  $Schema["TABLE"]["license_rules"]["comment"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"comment\" SET NOT NULL";
+
+
   $Schema["TABLE"]["license_set_bulk"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_set_bulk\".\"rf_fk\" IS 'reference to license_ref* (not only license_ref)'";
   $Schema["TABLE"]["license_set_bulk"]["rf_fk"]["ADD"] = "ALTER TABLE \"license_set_bulk\" ADD COLUMN \"rf_fk\" int8";
   $Schema["TABLE"]["license_set_bulk"]["rf_fk"]["ALTER"] = "ALTER TABLE \"license_set_bulk\" ALTER COLUMN \"rf_fk\" SET NOT NULL";

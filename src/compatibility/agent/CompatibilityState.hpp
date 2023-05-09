@@ -52,8 +52,7 @@ public:
 private:
   int agentId;                              /**< Agent id */
   const CompatibilityCliOptions cliOptions; /**< CLI options passed */
-  const CompatibilityAgent
-      compatibilityAgent;                   /**< Compatibility agent object */
+  CompatibilityAgent compatibilityAgent;    /**< Compatibility agent object */
 };
 
 #endif // COMPATIBILITY_AGENT_STATE_HPP

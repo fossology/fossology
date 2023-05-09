@@ -7,7 +7,10 @@
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Application\LicenseCompatibilityRulesYamlExport;
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\CompatibilityDao;
+use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,7 +35,12 @@ class AdminLicenseToYAML extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
-    $licenseYamlExport = new \Fossology\Lib\Application\LicenseCompatibilityRulesYamlExport($this->getObject('db.manager'));
+    /** @var DbManager $dbManager */
+    $dbManager = $this->getObject('db.manager');
+    /** @var CompatibilityDao $compatibilityDao */
+    $compatibilityDao = $this->getObject('dao.compatibility');
+    $licenseYamlExport = new LicenseCompatibilityRulesYamlExport($dbManager,
+        $compatibilityDao);
     $content = $licenseYamlExport->createYaml(0);
     $fileName = "fossology-license-comp-rules-export-".date("YMj-Gis");
     $headers = array(

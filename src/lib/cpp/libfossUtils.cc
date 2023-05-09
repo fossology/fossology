@@ -26,7 +26,7 @@ unsigned long fo::stringToUnsignedLong(const char* string)
 
 /**
  * Translates a string to boolean type.
- * \param string String to be translated
+ * \param str String to be translated
  * \return Translated boolean value
  */
 bool fo::stringToBool(const char* str)

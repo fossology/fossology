@@ -39,9 +39,16 @@ class ResoAgentPlugin extends AgentPlugin
    * @copydoc Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    * @see \Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    */
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
+      $arguments=null, $request=null, $unpackArgs=null)
   {
-    $copyrightAgentScheduled = GetParm("Check_agent_copyright", PARM_INTEGER) == 1;
+    if ($request != null) {
+      $copyrightAgentScheduled = intval($request->get("Check_agent_copyright",
+              0)) == 1;
+    } else {
+      $copyrightAgentScheduled = GetParm("Check_agent_copyright",
+              PARM_INTEGER) == 1;
+    }
     $dependencies[] = "agent_ojo";
     if ($copyrightAgentScheduled) {
       $dependencies[] = "agent_copyright";
@@ -55,7 +62,8 @@ class ResoAgentPlugin extends AgentPlugin
       return $jobQueueId;
     }
 
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId);
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies,
+        $uploadId, null, $request);
   }
 
   /**

@@ -25,43 +25,39 @@
       {% import 'include/macros.html.twig' as macro %}
       {% for rule in ruleArray %}
         <tr>
-        {#
-            <select id="License" style="width:100%" class="ui-render-select2" name="{{ firstLicNameParam }}[{{ rule.lr_pk }}]" >
-              {% for license in licenseArray %}
-                <option value="{{ license.id }}" title="{{ license.fullname|e }}">{{ license.shortname|e }}</option>
-              {% endfor %}
-            </select>
-        #}
           <td style="text-align:center">{{ loop.index }}</td>
           <td id="Lic">
-          {{ macro.select("#{firstLicNameParam}[#{rule.lr_pk}]", licenseArray, "#{firstLicNameParam}_#{rule.lr_pk}", rule.main_rf_fk, 'class="ui-render-select2" style="width:100%"') }}
+          {{ macro.select("#{firstLicNameParam}[#{rule.lr_pk}]", licenseArray, "#{firstLicNameParam}_#{rule.lr_pk}", rule.first_rf_fk, 'class="ui-render-select2" style="width:100%"') }}
           </td>
           <td id="Lic2">
-          {{ macro.select("#{secondLicNameParam}[#{rule.lr_pk}]", licenseArray, "#{secondLicNameParam}_#{rule.lr_pk}", rule.sub_rf_fk, 'class="ui-render-select2" style="width:100%"') }}
+          {{ macro.select("#{secondLicNameParam}[#{rule.lr_pk}]", licenseArray, "#{secondLicNameParam}_#{rule.lr_pk}", rule.second_rf_fk, 'class="ui-render-select2" style="width:100%"') }}
           </td>
           <td>
-          {{ macro.select("#{firstLicTypeParam}[#{rule.lr_pk}]", licenseTypes, "#{firstLicTypeParam}_#{rule.lr_pk}", rule.main_type, 'class="ui-render-select2" style="width:100%"') }}
+          {{ macro.select("#{firstLicTypeParam}[#{rule.lr_pk}]", licenseTypes, "#{firstLicTypeParam}_#{rule.lr_pk}", rule.first_type, 'class="ui-render-select2" style="width:100%"') }}
           </td>
           <td>
-          {{ macro.select("#{secondLicTypeParam}[#{rule.lr_pk}]", licenseTypes, "#{secondLicTypeParam}_#{rule.lr_pk}", rule.sub_type, 'class="ui-render-select2" style="width:100%"') }}
+          {{ macro.select("#{secondLicTypeParam}[#{rule.lr_pk}]", licenseTypes, "#{secondLicTypeParam}_#{rule.lr_pk}", rule.second_type, 'class="ui-render-select2" style="width:100%"') }}
           </td>
           <td>
-            <input type="checkbox" name="{{ resultParam }}[{{ rule.lr_pk }}] id="check1"
-              value="t"
+            <input type="checkbox" name="{{ resultParam }}[{{ rule.lr_pk }}]"
+              id="ruleyes{{ rule.lr_pk }}" value="t"
               {% if rule.compatibility starts with 't' %}checked{% endif %} />
-              <label for="check1"> yes</label><br>
-              <input type="checkbox" name="{{ resultParam }}[{{ rule.lr_pk }}] id="check2"
-              value="f"
+            <label for="ruleyes{{ rule.lr_pk }}"> yes</label><br>
+            <input type="checkbox" name="{{ resultParam }}[{{ rule.lr_pk }}]"
+              id="ruleno{{ rule.lr_pk }}" value="f"
               {% if rule.compatibility starts with 'f' %}checked{% endif %} />
-              <label for="check2"> no</label><br>
+            <label for="ruleno{{ rule.lr_pk }}"> no</label><br>
           </td>
           <td>
             <textarea rows="5" cols="40" name="{{ textParam }}[{{ rule.lr_pk }}]"
-              placeholder="{{ "Please enter rule description"|trans }}">{{ rule.text }}</textarea>
+              style="width:100%" required="required"
+              placeholder="{{ "Please enter rule description"|trans }}">{{
+              rule.comment }}</textarea>
           </td>
           <td>
             <span class="basicActions">
-              <img class="delete" src="images/space_16.png" onclick="deleteCompRule({{ rule.lr_pk }});">
+              <img class="delete" src="images/space_16.png"
+                onclick="deleteCompRule({{ rule.lr_pk }});" alt="delete">
             </span>
           </td>
         </tr>
@@ -72,7 +68,8 @@
           <td colspan="8">
             <button id="addLicRule" title="{{ "Add a new Rule"|trans }}"
               style="width:100%" type="button">
-              <img src="images/icons/add_16.png" />{{ "Add a new Rule"|trans }}
+              <img src="images/icons/add_16.png" alt="add" />
+              {{ "Add a new Rule"|trans }}
             </button>
           </td>
         </tr>

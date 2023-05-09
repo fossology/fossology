@@ -31,7 +31,7 @@ bool insertResultInDb(CompatibilityStatus status, bool verbosityDebug,
   if (verbosityDebug)
   {
     cout << ruleName << ((status == COMPATIBLE) ? "" : " not")
-         << " compatible, " << pFileId << endl;
+         << " compatible, " << pFileId << '\n';
   }
   return databaseHandler.queryInsertResult(pFileId, agentId, lid1, lid2,
                                            compatibility);
@@ -57,26 +57,27 @@ bool CompatibilityAgent::checkCompatibilityForPfile(
     CompatibilityDatabaseHandler& databaseHandler) const
 {
   vector<tuple<unsigned long, string>> licenseTypes;
-  string def = "f";
+  CompatibilityStatus defaultStatus = databaseHandler.getDefaultRule();
+  string defaultRule = defaultStatus == COMPATIBLE ? "t" : "f";
   bool res, resultExists;
   licenseTypes = databaseHandler.queryLicDetails(licId);
   size_t length = licenseTypes.size();
-  for (size_t main = 0; main < (length - 1); ++main)
+  for (size_t first = 0; first < (length - 1); ++first)
   {
-    for (size_t sub = (main + 1); sub < length; ++sub)
+    for (size_t second = (first + 1); second < length; ++second)
     {
       CompatibilityStatus status;
       unsigned long licenseId1, licenseId2;
-      licenseId1 = get<0>(licenseTypes[main]);
-      licenseId2 = get<0>(licenseTypes[sub]);
+      licenseId1 = get<0>(licenseTypes[first]);
+      licenseId2 = get<0>(licenseTypes[second]);
       resultExists = databaseHandler.check(licenseId1, licenseId2, pFileId);
       if (resultExists)
       {
         continue;
       }
 
-      status =
-          databaseHandler.queryRule1(licenseTypes[main], licenseTypes[sub]);
+      status = databaseHandler.queryRule1(licenseTypes[first],
+                                          licenseTypes[second]);
       if (status != UNKNOWN)
       {
         res = insertResultInDb(status, verbosityDebug, databaseHandler, pFileId,
@@ -88,8 +89,8 @@ bool CompatibilityAgent::checkCompatibilityForPfile(
         continue;
       }
 
-      status =
-          databaseHandler.queryRule2(licenseTypes[main], licenseTypes[sub]);
+      status = databaseHandler.queryRule2(licenseTypes[first],
+                                          licenseTypes[second]);
       if (status != UNKNOWN)
       {
         res = insertResultInDb(status, verbosityDebug, databaseHandler, pFileId,
@@ -101,8 +102,8 @@ bool CompatibilityAgent::checkCompatibilityForPfile(
         continue;
       }
 
-      status =
-          databaseHandler.queryRule3(licenseTypes[main], licenseTypes[sub]);
+      status = databaseHandler.queryRule3(licenseTypes[first],
+                                          licenseTypes[second]);
       if (status != UNKNOWN)
       {
         res = insertResultInDb(status, verbosityDebug, databaseHandler, pFileId,
@@ -115,12 +116,21 @@ bool CompatibilityAgent::checkCompatibilityForPfile(
       }
 
       res = databaseHandler.queryInsertResult(pFileId, agentId, licenseId1,
-                                              licenseId2, def);
+                                              licenseId2, defaultRule);
       if (verbosityDebug)
       {
-        cout << "default rule " << pFileId << endl;
+        cout << "default rule " << pFileId << '\n';
       }
     }
   }
   return true;
+}
+
+/**
+ * \brief Set the agent ID for the agent object
+ * \param agentId New agent id
+ */
+void CompatibilityAgent::setAgentId(const int agentId)
+{
+  this->agentId = agentId;
 }

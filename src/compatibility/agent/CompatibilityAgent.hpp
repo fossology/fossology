@@ -28,6 +28,7 @@ public:
   bool checkCompatibilityForPfile(
       vector<unsigned long>& licId, unsigned long& pFileId,
       CompatibilityDatabaseHandler& databaseHandler) const;
+  void setAgentId(const int agentId);
 
 private:
   int agentId;
