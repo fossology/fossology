@@ -65,7 +65,6 @@ jobs:
         ./utils/fo-installdeps -y -b
         ./install/scripts/install-spdx-tools.sh
         rm -rf src/vendor
-        make clean phpvendors
 
     - name: Get CMake v3.23.0
       uses: lukka/get-cmake@v3.23.0
