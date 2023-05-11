@@ -27,8 +27,8 @@ macro(getGitVersion)
     elseif(${VAR_LEN} EQUAL 2)
         list(GET FO_VERSION_GIT 0 VERSION_GIT)
         list(GET FO_VERSION_GIT 1 VERSION_RC)
-        string(APPEND ".0" ${VERSION_GIT})
-        string(APPEND ${VERSION_RC} ${VERSION_GIT})
+        string(APPEND VERSION_GIT ".0")
+        string(APPEND VERSION_GIT "-" ${VERSION_RC})
     # Commit after release (4.0.0-92-gea9184770)
     elseif(${VAR_LEN} EQUAL 3)
         string(REGEX REPLACE
@@ -100,8 +100,8 @@ macro(generate_version)
         list(GET FO_ARGS 0 FO_PROJECT_NAME)
         list(GET FO_ARGS 1 VERSION_FILE_NAME)
     endif()
-    add_custom_target(${FO_PROJECT_NAME}_version ALL 
-        COMMAND ${CMAKE_COMMAND} 
+    add_custom_target(${FO_PROJECT_NAME}_version ALL
+        COMMAND ${CMAKE_COMMAND}
             -DIN_FILE_NAME="VERSION.in"
             -DINPUT_FILE_DIR="${FO_CMAKEDIR}"
             -DOUTPUT_FILE_DIR="${PROJECT_BINARY_DIR}"
@@ -109,8 +109,8 @@ macro(generate_version)
             -DPROJECT_NAME="${PROJECT_NAME}"
             -DFO_VERSION="${FO_VERSION}"
             -DFO_BRANCH="${FO_BRANCH}"
-            -DFO_COMMIT_HASH="${FO_COMMIT_HASH}" 
-            -DFO_BUILD_DATE="${FO_BUILD_DATE}" 
+            -DFO_COMMIT_HASH="${FO_COMMIT_HASH}"
+            -DFO_BUILD_DATE="${FO_BUILD_DATE}"
             -DFO_COMMIT_DATE="${FO_COMMIT_DATE}"
             -P ${FO_CMAKEDIR}/FoVersionFile.cmake
         DEPENDS "${FO_CMAKEDIR}/VERSION.in" "${FO_PROJECT_NAME}"
@@ -130,7 +130,7 @@ macro(generate_version_php)
         list(GET FO_ARGS 0 FO_PROJECT_NAME)
     endif()
     add_custom_target(${FO_PROJECT_NAME} ALL
-        COMMAND ${CMAKE_COMMAND} 
+        COMMAND ${CMAKE_COMMAND}
             -DIN_FILE_NAME="version.php.in"
             -DINPUT_FILE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
             -DOUTPUT_FILE_DIR="${CMAKE_CURRENT_BINARY_DIR}/gen"
