@@ -40,8 +40,8 @@ jobs:
       matrix:
         config:
           - {
-              name: "Ubuntu 20.04 GCC 9",
-              os: ubuntu-20.04,
+              name: "Ubuntu 22.04 GCC 9",
+              os: ubuntu-22.04,
               build_type: "Debug",
               cc: "gcc-9",
               cxx: "g++-9",
@@ -49,17 +49,17 @@ jobs:
               experimental: false,
             }
           - {
-              name: "Ubuntu 20.04 GCC 8",
-              os: ubuntu-20.04,
+              name: "Ubuntu 22.04 GCC 11",
+              os: ubuntu-22.04,
               build_type: "Debug",
-              cc: "gcc-8",
-              cxx: "g++-8",
-              php: "7.4",
+              cc: "gcc-11",
+              cxx: "g++-11",
+              php: "8.1",
               experimental: false,
             }
           - {
-              name: "Ubuntu 20.04 CLANG",
-              os: ubuntu-20.04,
+              name: "Ubuntu 22.04 CLANG",
+              os: ubuntu-22.04,
               build_type: "Debug",
               cc: "clang",
               cxx: "clang++",
@@ -119,93 +119,15 @@ jobs:
         run: |
           ./utils/prepare-test -afty -u postgres -p postgres
           cd build
-          ctest --output-on-failure --verbose
+          ctest --output-on-failure --extra-verbose
         env:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
           PGHOST: localhost
           PGPORT: ${{ job.services.postgres.ports[5432] }}
 
-  gcc7-test:
-    name: "Ubuntu 18.04 GCC 7"
-    runs-on: ubuntu-latest
-    container: "ubuntu:bionic"
-    env:
-      DEBIAN_FRONTEND: "noninteractive"
-    steps:
-      - name: Setup git
-        run: |
-          ## Install git
-          apt-get update
-          apt-get install -y software-properties-common
-          add-apt-repository $GIT_REPO -y
-          apt-get update
-          apt-get install git sudo -y
-
-          # Remove source repo's
-          add-apt-repository --remove $GIT_REPO -y
-          apt-get update
-        env:
-          GIT_REPO: "ppa:git-core/ppa"
-
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 50
-
-      - name: Fetch tags
-        run: |
-          chown -R $(id -u):$(id -g) .
-          git fetch --tags
-
-      - name: Install Dependencies
-        run: |
-          apt update
-          apt install -y libboost-system-dev libboost-filesystem-dev \
-            libcppunit-dev libcunit1-dev libdbd-sqlite3-perl libjsoncpp-dev \
-            libjson-c-dev liblocal-lib-perl libspreadsheet-writeexcel-perl \
-            libtext-template-perl libgcrypt20-dev gcc-7 g++-7 lsb-release \
-            php7.2-sqlite3 openjdk-11-jdk
-          ./utils/fo-installdeps --everything -y
-          echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
-          echo COMPOSER_HOME="$HOME/.composer/" >> $GITHUB_ENV
-
-      - name: Setup Postgres
-        run: |
-          echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
-          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-          apt-get update
-          apt-get -y install postgresql-13
-          pg_lsclusters
-          pg_dropcluster --stop 13 main
-          pg_upgradecluster 10 main || echo "Postgres 10 not installed"
-          pg_ctlcluster 13 main start || true
-
-      - name: Get CMake v3.23.0
-        uses: lukka/get-cmake@v3.23.0
-
-      - name: Configure and Generate CMake Project
-        run: |
-          mkdir build
-          cmake -DCMAKE_BUILD_TYPE=Debug -GNinja -DTESTING=ON -S . -B ./build
-        env:
-          CC: gcc-7
-          CXX: g++-7
-
-      - name: Build Project
-        run: cmake --build build --config Debug --parallel
-
-      - name: Prepare Tests
-        run: |
-          ./utils/prepare-test -afty
-          echo PGPASSFILE="$HOME/.pgpass" >> $GITHUB_ENV
-
-      - name: Run Tests
-        run: |
-          cd build
-          ctest --output-on-failure --verbose
-
   php-unit:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -220,7 +142,7 @@ jobs:
           }
     services:
       postgres:
-        image: postgres:12
+        image: postgres:14
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_HOST_AUTH_METHOD: trust
@@ -242,7 +164,7 @@ jobs:
           sudo apt install -y libboost-system-dev libboost-filesystem-dev \
                 libcppunit-dev libcunit1-dev libdbd-sqlite3-perl libjsoncpp-dev \
                 libjson-c-dev liblocal-lib-perl libspreadsheet-writeexcel-perl \
-                libtext-template-perl libgcrypt20-dev gcc-7 g++-7 lsb-release \
+                libtext-template-perl libgcrypt20-dev gcc-11 g++-11 lsb-release \
                 openjdk-11-jdk
           sudo ./utils/fo-installdeps --everything -y
           echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV

@@ -20,7 +20,6 @@ jobs:
         os:
           - 'debian:buster'
           - 'debian:bullseye'
-          - 'ubuntu:bionic'
           - 'ubuntu:focal'
           - 'ubuntu:jammy'
 
