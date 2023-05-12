@@ -25,11 +25,8 @@
  */
 #define _GNU_SOURCE
 #include "snippet_scan.h"
-#include <sys/stat.h>
 #include <stdio.h>
 #include <errno.h>
-
-int runScan(char *path,  char **licenses, unsigned char *purl,unsigned char *url, unsigned char *matchType, unsigned char *oss_lines, unsigned char *filePath);
 
 extern void logme(char *msg);
 
@@ -67,13 +64,13 @@ void extract_csv(char *out, char *in, int n, long limit,char sep)
   int count=0;
    while( token != NULL ) {
      count++;// printf( " %s\n", token ); //printing each token
-     if (count==n){ 
+     if (count==n){
          sprintf(out,"%s",token);
      break;
-         
+
      }
       token = strtok(NULL, seps);
-     
+
    }
 }
 
@@ -81,7 +78,7 @@ void extract_csv(char *out, char *in, int n, long limit,char sep)
  * \brief Open a file of the repository given its primary key
  * \param pFileKey the key of the file to be retrieved
  * \return Pointer to the file
-*/ 
+*/
 FILE *openFileByKey(long pFileKey)
 {
   char sqlbuf[200];
@@ -125,7 +122,7 @@ int getLicenseId(unsigned char *name)
 
 /*!
 * \brief Dumps the content of a file in the repository to a temporary file
-  \param path Path to the temporay file
+  \param path Path to the temporary file
   \param content Buffer containing the file
   \param size Size of the file to be stored
 */
@@ -159,13 +156,13 @@ void RestoreTempFile(char * uploadFolder, long key, long realParent, char *realN
     rewind(f);
     size_t readSize = fread(contents, size, 1, f);
     fo_RepFclose(f);
-    if(readSize==0) 
-      return; 
+    if(readSize==0)
+      return;
     dumpToFile(dstName, contents, size);
   }
 }
 
- 
+
      /*1 inventory_id,
        2 path,
        3 detected_usage,
@@ -182,14 +179,14 @@ void RestoreTempFile(char * uploadFolder, long key, long realParent, char *realN
 */
 /*!
 * \brief Parse results from a temporary file and store results on database
-  \param folder Path to the temporay project folder
+  \param folder Path to the temporary project folder
 */
 
 void ParseResults(char *folder){
   PGresult *result;
   char Cmd[100];
   char auxSql[MAXCMD*4];
- 
+
   char detectedUsage[MAXCMD];
   char detPurls[MAXCMD];
   char detLicenses[MAXCMD];
@@ -198,10 +195,10 @@ void ParseResults(char *folder){
   char detLines[MAXCMD];
   char detPath[MAXCMD];
   char detUrl[MAXCMD];
-  
+
   sprintf(Cmd, "%s/results.csv", folder);
   FILE* file = fopen(Cmd, "r");
-  
+
   char line[MAXCMD*10];
   int resCount=0;
   if(file==NULL) {
@@ -218,24 +215,24 @@ void ParseResults(char *folder){
       if( path!=NULL) {
         sscanf(path,"%ld_%ld_%s",&parent,&key,srcName);
       } else {return;}
-      
+
       int lenLine=strlen(line);
       extract_csv(detectedUsage, line, 3,lenLine,',');
       extract_csv(detPurls, line, 8,lenLine,',');
       extract_csv(detLicenses, line, 5,lenLine,',');
        extract_csv(detUrl, line, 9,lenLine,',');
-     
+
       extract_csv(detMatch, line, 10,lenLine,',');
       extract_csv(detLines, line, 12,lenLine,',');
       extract_csv(detPath, line, 13,lenLine,',');
-           
+
       // License store
-    
+
       for (int i=1;i<5;i++){
         char aux[100];
         extract_csv(aux, detLicenses, i,strlen(detLicenses),';');
-        if (aux==NULL) break; 
-          else {    
+        if (aux==NULL) break;
+          else {
             int detLic= getLicenseId((unsigned char *) aux); /* ... from name, get the key of license that matches short_name at license_ref */
             if(detLic!=0){    /** If the key is valid, insert the result on DB Table */
               sprintf(auxSql,"INSERT INTO license_file(rf_fk, agent_fk, rf_timestamp, pfile_fk) VALUES(%d,%d, now(), %ld);",detLic,Agent_pk,key);
@@ -245,19 +242,19 @@ void ParseResults(char *folder){
             }
         }
       }
-    
-      
-      //File info store  
-      if(strcmp((char *)detectedUsage,"none") && (!(strcmp((char *)detectedUsage,"file"))||!(strcmp((char *)detectedUsage,"snippet")) )){  
+
+
+      //File info store
+      if(strcmp((char *)detectedUsage,"none") && (!(strcmp((char *)detectedUsage,"file"))||!(strcmp((char *)detectedUsage,"snippet")) )){
         char *auxSQL;
         asprintf(&auxSQL,"INSERT INTO scanoss_fileinfo (pfile_fk, matchtype, lineranges, purl,filepath,url) VALUES(%ld, '%s', '%s', '%s','%s','%s');", key,detectedUsage,detLines,detPurls,detPath,detUrl);//,url,filePath);
         result = PQexec(db_conn,auxSQL);
         free(auxSQL);
         if (PQntuples(result) == 0)
-        { 
+        {
          PQclear(result);
         }
-      } 
+      }
       resCount++;
      } else {break;}
   }
@@ -265,7 +262,7 @@ void ParseResults(char *folder){
 
 
 /*!
- * \brief Scans a Temporary folder 
+ * \brief Scans a Temporary folder
  * \details Scans a Temporary folder with a rebuild project and place it results on a file results.csv
  * \param folder path to temp folder
  */
@@ -278,19 +275,19 @@ int ScanFolder(char *folder)
 
   unsigned char apiurl[400];
   unsigned char key[110];
- 
+
   if(ApiUrl[0]!='\0')  {
       sprintf((char *) apiurl,"--apiurl %s",ApiUrl);
-  }  
-  else  
+  }
+  else
       memset(apiurl,0,sizeof(apiurl));
 
   if(accToken[0]!='\0' && accToken[0]!=' ')  {
     sprintf((char *)key,"--key %s",accToken);
-  }  
-  else  
+  }
+  else
         memset(key,0,sizeof(key));
-  
+
   char *user;
   asprintf(&user,"%s",fo_config_get(sysconfig, "DIRECTORIES", "PROJECTUSER", NULL));
 
@@ -317,7 +314,7 @@ int RebuildUpload(long upload_pk,char *tempFolder)
   int numrows;
   int i;
   char *uploadtree_tablename;
- 
+
   if (!upload_pk) // when upload_pk is empty
   {
     LOG_ERROR("Snippet scan: Missing upload key");
@@ -346,7 +343,7 @@ int RebuildUpload(long upload_pk,char *tempFolder)
   /*  for each record, get it name and real parent */
   for (i = 0; i < numrows; i++)
   { //fo_scheduler_heart(1);
-  
+
     parent = atoi(PQgetvalue(result, i, 1));
     realParent = atoi(PQgetvalue(result, i, 2));
     fileMode = atol(PQgetvalue(result, i, 5));
@@ -354,13 +351,13 @@ int RebuildUpload(long upload_pk,char *tempFolder)
     for(int j=0;j<strlen(realName);j++){
         if(( realName[j]>='A' && realName[j]<='Z' ) ||
         ( realName[j]>='a' && realName[j]<='z' ) ||
-        ( realName[j]>='0' && realName[j]<='9' ) || realName[j]=='.'); 
+        ( realName[j]>='0' && realName[j]<='9' ) || realName[j]=='.');
         else   realName[j]='_';
-        
+
     }
     //Nothing to be done on folders entries
       if (parent != realParent && (fileMode == ((1<<28)|(1<<13)|(1<<9)))){
-    
+
       } else {
       // Ensure that it is a real file
       //fileMode & ((1<<28)|(1<<13)|(1<<9)) == 0
@@ -368,15 +365,15 @@ int RebuildUpload(long upload_pk,char *tempFolder)
         pFileFK = atoi(PQgetvalue(result, i, 4));
         if (pFileFK != 0){
           RestoreTempFile(tempFolder, pFileFK,parent,realName);
-     
+
         }
-          
+
       }
     }
     free(realName);
   }
   PQclear(result);
-  
+
 
   return (0);
 }
