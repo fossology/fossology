@@ -2,7 +2,7 @@
 /*!
  * snippet_scan.h
  *
- * SCANOSS Scanner interface for SCANOSS Agent for Fossology 
+ * SCANOSS Scanner interface for SCANOSS Agent for Fossology
  *
  * Copyright (C) 2018-2022 SCANOSS.COM
  *

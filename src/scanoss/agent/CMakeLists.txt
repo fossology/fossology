@@ -19,21 +19,21 @@ endif()
 
 set(AGENT_SOURCES ${FO_CWD}/main.c ${FO_CWD}/snippet_scan.c)
 
-
-
-add_executable(scanoss ${AGENT_SOURCES} )
+add_executable(scanoss ${AGENT_SOURCES})
 
 target_compile_definitions(scanoss
     PRIVATE
     _FILE_OFFSET_BITS=64
     VERSION_S="${FO_VERSION}"
-    COMMIT_HASH_S="${FO_COMMIT_HASH}")
+    COMMIT_HASH_S="${FO_COMMIT_HASH}"
+    FO_USER_S="${FO_PROJECTUSER}"
+    )
 
-    target_link_libraries(scanoss PRIVATE fossology)
+    target_link_libraries(scanoss PRIVATE fossology
+            ${json-c_LIBRARIES})
 
 install(TARGETS scanoss
     RUNTIME
-    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent 
+    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent
     COMPONENT scanoss)
 
-   
