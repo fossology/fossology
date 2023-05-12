@@ -95,7 +95,7 @@ if [[ $BUILDTIME ]]; then
             build-essential libtext-template-perl subversion rpm librpm-dev \
             libmagic-dev libglib2.0 libboost-regex-dev libzstd-dev \
             libboost-program-options-dev libpq-dev composer patch devscripts \
-            libdistro-info-perl libcppunit-dev cmake ninja-build
+            libdistro-info-perl libcppunit-dev libomp-dev cmake ninja-build
          case "$CODENAME" in
            stretch)
              apt-get $YesOpt install php-mbstring php7.0-cli php7.0-xml php7.0-zip php7.0-gd php7.0-pgsql php7.0-curl php7.0-uuid;;
@@ -103,8 +103,6 @@ if [[ $BUILDTIME ]]; then
              apt-get $YesOpt install php-mbstring php7.3-cli php7.3-xml php7.3-zip php7.3-gd php7.3-pgsql php7.3-curl php7.3-uuid;;
            bullseye)
              apt-get $YesOpt install php7.4-mbstring php7.4-cli php7.4-xml php7.4-zip php7.4-gd php7.4-pgsql php7.4-curl php7.4-uuid;;
-           bionic)
-             apt-get $YesOpt install php-mbstring php7.2-cli php7.2-xml php7.2-zip php7.2-gd php7.2-pgsql php7.2-curl php7.2-uuid;;
            sid)
              apt-get $YesOpt install php-mbstring php-cli php-xml php-zip php-gd php-pgsql php-curl php-uuid;;
            focal)
@@ -120,8 +118,6 @@ if [[ $BUILDTIME ]]; then
                 apt-get $YesOpt install postgresql-server-dev-11;;
               bullseye)
                 apt-get $YesOpt install postgresql-server-dev-13;;
-              bionic)
-                apt-get $YesOpt install postgresql-server-dev-10;;
               sid)
                 apt-get $YesOpt install postgresql-server-dev-11;;
               focal)
@@ -138,14 +134,16 @@ if [[ $BUILDTIME ]]; then
             perl-Text-Template subversion \
             postgresql-devel file-devel \
             libxml2 \
-            boost-devel php-mbstring libicu-devel libpq-devel patch cmake ninja-build
+            boost-devel php-mbstring libicu-devel libpq-devel patch \
+            libomp-devel cmake ninja-build
          ;;
       RedHatEnterprise*|CentOS)
          yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
             perl-Text-Template subversion \
-            boost-devel php-mbstring libicu-devel libpq-devel patch cmake ninja-build
+            boost-devel php-mbstring libicu-devel libpq-devel patch \
+            libomp-devel cmake ninja-build
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
@@ -184,10 +182,6 @@ if [[ $RUNTIME ]]; then
                libapache2-mod-php7.4 php7.4-pgsql php7.4-cli php7.4-curl \
                php7.4-xml php7.4-zip php7.4-mbstring php7.4-uuid php-php-gettext s-nail \
                libboost-program-options1.74.0 libboost-regex1.74.0 libicu67;;
-            bionic)
-               apt-get $YesOpt install postgresql-10 php7.2 php7.2-pgsql libapache2-mod-php7.2 php7.2-pgsql \
-                 php7.2-cli php7.2-curl php7.2-xml php7.2-zip php7.2-mbstring php7.2-uuid php-gettext s-nail libboost-program-options1.65.1 \
-                 libboost-regex1.65.1 libicu60;;
             sid)
                apt-get $YesOpt install postgresql php php-pgsql php-cli php-curl php-xml php-zip php-mbstring php-uuid php-gettext s-nail \
                  libboost-program-options1.74.0 libboost-regex1.74.0 libicu67;;

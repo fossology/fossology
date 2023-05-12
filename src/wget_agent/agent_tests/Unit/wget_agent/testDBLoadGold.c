@@ -121,10 +121,6 @@ int DBLoadGoldClean()
     RemoveDir(TempFileDir);
   }
 
-  if (sysconfig) {
-    fo_config_free(sysconfig);
-  }
-
   char repoDir[STRMAX+1];
   if (snprintf(repoDir, STRMAX, "%s/repo", get_sysconfdir())>0) {
     RemoveDir(repoDir);

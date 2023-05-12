@@ -17,7 +17,7 @@ on:
 
 jobs:
   syntax-check:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Install Dependencies
         run: |
@@ -46,7 +46,7 @@ jobs:
         run: composer validate --no-check-all --working-dir=src --strict
 
   code-analysis:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Install Dependencies
         run: |
@@ -61,7 +61,7 @@ jobs:
         run: cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/
 
   codesniffer:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -78,7 +78,7 @@ jobs:
           composer --working-dir=src run-script phpcs
 
   copy-paste:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     continue-on-error: true
     steps:
       - name: Setup PHP
@@ -98,7 +98,7 @@ jobs:
           phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/ || echo -e "\033[0;31mDuplication detected: Task Failed"
 
   openapi-lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Setup default rules
