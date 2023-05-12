@@ -321,7 +321,8 @@ class ui_report_conf extends FO_Plugin
       $columns = "";
       foreach ($this->mapDBColumns as $key => $value) {
         $columns .= $value." = $".$i.", ";
-        $parms[] = pg_escape_string(GetParm($key, PARM_RAW));
+        $escaped = pg_escape_string(GetParm($key, PARM_RAW));
+        $parms[] = str_replace("''", "'", $escaped);
         $i++;
       }
       $parms[] = $this->getCheckBoxSelectionList($this->radioListUR);
