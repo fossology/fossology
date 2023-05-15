@@ -93,8 +93,6 @@ if [[ $RUNTIME ]]; then
           apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.67.0;;
         bullseye|sid)
           apt-get $YesOpt install libjsoncpp24 libboost-filesystem1.74.0;;
-        bionic)
-          apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.65.1;;
         focal)
           apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.71.0;;
         jammy)

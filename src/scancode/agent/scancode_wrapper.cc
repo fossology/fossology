@@ -128,9 +128,12 @@ string scanFileWithScancode(const State &state, const fo::File &file) {
  */
 
 map<string, vector<Match>> extractDataFromScancodeResult(const string& scancodeResult, const string& filename) {
-  Json::Reader scanner;
+  Json::CharReaderBuilder json_reader_builder;
+  auto scanner = unique_ptr<Json::CharReader>(json_reader_builder.newCharReader());
   Json::Value scancodevalue;
-  bool isSuccessful = scanner.parse(scancodeResult, scancodevalue);
+  string errors;
+  const bool isSuccessful = scanner->parse(scancodeResult.c_str(),
+      scancodeResult.c_str() + scancodeResult.length(), &scancodevalue, &errors);
   map<string, vector<Match>> result;
   vector<Match> licenses;
   if (isSuccessful) {
@@ -178,7 +181,7 @@ map<string, vector<Match>> extractDataFromScancodeResult(const string& scancodeR
         result["scancode_author"].push_back(Match(holdername,type,start_pointer,length));
     }
   } else {
-    LOG_FATAL("JSON parsing failed %s \n", scanner.getFormattedErrorMessages().c_str());
+    LOG_FATAL("JSON parsing failed %s \n", errors.c_str());
   }
   return result;
 }
