@@ -70,7 +70,7 @@ class ReportStatic
   function reportHeader(Section $section)
   {
     global $SysConf;
-    $text = $SysConf['SYSCONFIG']["ReportHeaderText"];
+    $text = (array_key_exists('ReportHeaderText',$SysConf['SYSCONFIG'])) ? $SysConf['SYSCONFIG']["ReportHeaderText"] : '';
     $headerStyle = array("color" => "009999", "size" => 20, "bold" => true);
     $header = $section->addHeader();
     $header->addText(htmlspecialchars($text), $headerStyle);
@@ -304,9 +304,15 @@ class ReportStatic
   function todoTable(Section $section, $heading)
   {
     global $SysConf;
-    $textCommonObligation = $this->reArrangeObligationText($SysConf['SYSCONFIG']["CommonObligation"]);
-    $textAdditionalObligation = $this->reArrangeObligationText($SysConf['SYSCONFIG']["AdditionalObligation"]);
-    $textObligationAndRisk = $this->reArrangeObligationText($SysConf['SYSCONFIG']["ObligationAndRisk"]);
+    $textCommonObligation = $this->reArrangeObligationText(
+      (array_key_exists('CommonObligation',$SysConf['SYSCONFIG'])) ? $SysConf['SYSCONFIG']["CommonObligation"] : ''
+    );
+    $textAdditionalObligation = $this->reArrangeObligationText(
+      (array_key_exists('AdditionalObligation',$SysConf['SYSCONFIG'])) ? $SysConf['SYSCONFIG']["AdditionalObligation"] : ''
+    );
+    $textObligationAndRisk = $this->reArrangeObligationText(
+      (array_key_exists('ObligationAndRisk',$SysConf['SYSCONFIG'])) ? $SysConf['SYSCONFIG']["ObligationAndRisk"] : ''
+    );
 
     $rowStyle = array("bgColor" => "E0E0E0", "spaceBefore" => 0, "spaceAfter" => 0, "spacing" => 0);
     $secondRowColorStyle = array("color" => "008000");
