@@ -21,9 +21,10 @@
 #include "string.h"
 
 #include <stdio.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <json-c/json.h>
+
 #ifdef COMMIT_HASH_S
 char BuildVersion[] = "scanoss build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
@@ -60,13 +61,13 @@ void loadAgentConfiguration(PGconn *pg_conn)
 {
   PGresult *result;
   char sqlA[] = "select conf_value from sysconfig where variablename='ScAPIURL';";
- 
+
   result = PQexec(pg_conn, sqlA);
   // check if ApiUrl exists
-  if (fo_checkPQresult(pg_conn, result, sqlA, __FILE__, __LINE__)) {   
+  if (fo_checkPQresult(pg_conn, result, sqlA, __FILE__, __LINE__)) {
    sprintf(ApiUrl, "%s", "");
-  } else { 
-    if(PQgetisnull(result,0,0)){ 
+  } else {
+    if(PQgetisnull(result,0,0)){
       char sqlHost[]="INSERT INTO sysconfig (variablename, conf_value, ui_label, vartype, group_name, group_order, description, validation_function, option_value) \
       VALUES('ScAPIURL', '', 'SCANOSS API URL', 2, 'SCANOSS', 1, '(leave blank for default https://osskb.org/api/scan/direct))', NULL, NULL);";
       result = PQexec(pg_conn, sqlHost);
@@ -78,7 +79,7 @@ void loadAgentConfiguration(PGconn *pg_conn)
       sprintf(ApiUrl, "%s", PQgetvalue(result, 0, 0));
     }
   }
-    
+
 
   char sqlB[] = "select conf_value from sysconfig where variablename='ScToken';";
 
@@ -87,8 +88,8 @@ void loadAgentConfiguration(PGconn *pg_conn)
   {
     memset(accToken,'\0',100);
 
-  } else { 
-    if(PQgetisnull(result,0,0)){ 
+  } else {
+    if(PQgetisnull(result,0,0)){
       char sqlToken[]="INSERT INTO sysconfig ( variablename, conf_value, ui_label, vartype, group_name, group_order, description, validation_function, option_value) \
         VALUES( 'ScToken', '', 'SCANOSS access token', 2, 'SCANOSS', 2, 'Set token to access full scanning service.', NULL, NULL);";
       result = PQexec(pg_conn, sqlToken);
@@ -100,7 +101,7 @@ void loadAgentConfiguration(PGconn *pg_conn)
     sprintf(accToken, "%s", PQgetvalue(result, 0, 0));
    }
   }
- 
+
 }
 
 
@@ -111,7 +112,7 @@ int createTables(PGconn* pgConn)
   PGresult* result;
 
   if (!fo_tableExists(pgConn, "scanoss_fileinfo")) {
-   
+
     snprintf(sql, sizeof(sql), "\
           CREATE TABLE scanoss_fileinfo (\
 	          pfile_fk int4 NOT NULL,\
@@ -122,7 +123,7 @@ int createTables(PGconn* pgConn)
             filepath varchar NULL,\
             fileinfo_pk serial4 NOT NULL\
           );");
-     
+
     result = PQexec(pgConn, sql);
     if (fo_checkPQcommand(pgConn, result, sql, __FILE__, __LINE__)) {
 
@@ -171,7 +172,7 @@ int main(int argc, char *argv[])
 
   /* Process command-line */
   char filename[200];
-  
+
   while ((c = getopt(argc, argv, "ic:CvVh")) != -1)
   {
     switch (c)
@@ -233,7 +234,7 @@ int main(int argc, char *argv[])
       sprintf(aux,"ready to process %d",upload_pk );
       if (RebuildUpload(upload_pk,tempFolder) != 0) /* process the upload_pk code */{
           LOG_ERROR("Error processing upload\n");
-      } else { 
+      } else {
         ScanFolder(tempFolder);
         ParseResults(tempFolder);
         char cmdRemove[600];
@@ -249,18 +250,71 @@ int main(int argc, char *argv[])
   {
     /* Run the scanner from command line */
     char Cmd[MAXCMD];
-    char buf[300];
-    sprintf(Cmd, "scanner  %s  |jq -r 'to_entries[] |select(.value[]|.licenses!=null)| \" \\(.key) -> \\( .value[]|.licenses[]|.name )\"'", filename);
-    FILE *Fin = popen(Cmd, "r");
-    if (!Fin)
-    {
-      printf("Could not open process");
+    char outputFile[MAXCMD];
+    unsigned char apiurl[410];
+    unsigned char key[110];
+
+    if(ApiUrl[0] != '\0') {
+      sprintf((char *) apiurl,"--apiurl %s", ApiUrl);
     }
-    while (fgets(buf, 300, Fin) != NULL)
-    {
-      printf("%s", buf);
+    else {
+      memset(apiurl, 0, sizeof(apiurl));
+    }
+
+    if(accToken[0]!='\0' && accToken[0]!=' ')  {
+      sprintf((char *)key,"--key %s", accToken);
+    }
+    else {
+      memset(key, 0, sizeof(key));
+    }
+
+    char tempFolder[512];
+    sprintf(tempFolder, "%s/%ld", baseTMP, time(NULL));
+    mkdir(tempFolder, 0700);
+    sprintf(outputFile, "%s/result.json", tempFolder);
+
+    sprintf(Cmd, "PYTHONPATH='/home/%s/pythondeps/' /home/%s/pythondeps/bin/scanoss-py "
+                 "scan %s %s -o %s %s", FO_USER_S, FO_USER_S, apiurl, key,
+        outputFile, filename); /* Create the command to run */
+    FILE *Fin = popen(Cmd, "r");  /* Run the command */
+    if (!Fin) {
+      LOG_ERROR("Snippet scan: failed to start scan %s", strerror(errno));
+      pclose(Fin);
+      return -1;
     }
     pclose(Fin);
+
+    struct json_object *result_json = json_object_from_file(outputFile);
+    if (result_json == NULL) {
+      LOG_ERROR("Unable to parse json output: %s", json_util_get_last_err());
+      return -1;
+    }
+    sprintf(Cmd, "rm -rf %s", tempFolder);
+    system(Cmd);
+    json_object_object_foreach(result_json, obj_filename, obj_val)
+    {
+      for (int i = 0; i < json_object_array_length(obj_val); ++i) {
+        struct json_object *inner_obj = json_object_array_get_idx(obj_val, i);
+        struct json_object *licenses_array = json_object_object_get(inner_obj, "licenses");
+        if (licenses_array == NULL) {
+          continue;
+        }
+        for (int j = 0; j < json_object_array_length(licenses_array); ++j) {
+          struct json_object *license_obj = json_object_array_get_idx(licenses_array, j);
+          printf("%s -> %s\n", obj_filename,
+              json_object_get_string(json_object_object_get(license_obj, "name")));
+        }
+        const char *matched = json_object_get_string(
+            json_object_object_get(inner_obj, "matched"));
+        printf("%s matched with purls: ", matched);
+        struct json_object *purl_array = json_object_object_get(inner_obj, "purl");
+        for (int j = 0; j < json_object_array_length(purl_array); ++j) {
+          printf("%s,", json_object_get_string(
+              json_object_array_get_idx(purl_array, j)));
+        }
+        printf("\n");
+      }
+    }
   }
   PQfinish(db_conn);
   fo_scheduler_disconnect(0);
