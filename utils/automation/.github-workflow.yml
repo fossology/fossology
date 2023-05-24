@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: © 2020 Siemens AG
+# SPDX-FileCopyrightText: © anupam.ghosh@siemens.com
+# SPDX-FileCopyrightText: © gaurav.mishra@siemens.com
+
+# SPDX-License-Identifier: FSFAP
+
+name: Check diff for license with Fossology
+
+on:
+  pull_request:
+
+jobs:
+  check-license:
+    name: Check license
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          docker run --rm --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo \
+            -e GITHUB_TOKEN=${{ github.token }} \
+            -e GITHUB_PULL_REQUEST=${{ github.event.number }} \
+            -e GITHUB_REPOSITORY=${{ github.repository }} \
+            -e GITHUB_ACTIONS \
+            fossology/fossology:scanner "/bin/fossologyscanner" nomos ojo
+
+  check-copyright:
+    name: Check copyright
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          docker run --rm --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo \
+            -e GITHUB_TOKEN=${{ github.token }} \
+            -e GITHUB_PULL_REQUEST=${{ github.event.number }} \
+            -e GITHUB_REPOSITORY=${{ github.repository }} \
+            -e GITHUB_ACTIONS \
+            fossology/fossology:scanner "/bin/fossologyscanner" copyright keyword

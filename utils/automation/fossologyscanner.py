@@ -24,6 +24,9 @@ API_URL = None
 PROJECT_ID = None
 MR_IID = None
 API_TOKEN = None
+GITHUB_TOKEN = None
+GITHUB_REPOSITORY = None
+GITHUB_PULL_REQUEST = None
 
 
 def get_ci_name():
@@ -37,6 +40,9 @@ def get_ci_name():
   global PROJECT_ID
   global MR_IID
   global API_TOKEN
+  global GITHUB_TOKEN
+  global GITHUB_REPOSITORY
+  global GITHUB_PULL_REQUEST
 
   if 'GITLAB_CI' in os.environ:
     RUNNING_ON = 'GITLAB'
@@ -48,6 +54,11 @@ def get_ci_name():
     RUNNING_ON = 'TRAVIS'
     TRAVIS_REPO_SLUG = os.environ['TRAVIS_REPO_SLUG']
     TRAVIS_PULL_REQUEST = os.environ['TRAVIS_PULL_REQUEST']
+  elif 'GITHUB_ACTIONS' in os.environ and os.environ['GITHUB_ACTIONS'] == 'true':
+    RUNNING_ON = 'GITHUB'
+    GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
+    GITHUB_REPOSITORY = os.environ['GITHUB_REPOSITORY']
+    GITHUB_PULL_REQUEST = os.environ['GITHUB_PULL_REQUEST']
 
 class CliOptions(object):
   '''
@@ -142,6 +153,16 @@ class RepoSetup:
       headers = {'Private-Token': API_TOKEN}
       path_key = "new_path"
       change_key = "diff"
+    elif RUNNING_ON == "GITHUB":
+      api_req_url = f"https://api.github.com/repos/{GITHUB_REPOSITORY}" + \
+          f"/pulls/{GITHUB_PULL_REQUEST}/files"
+      headers = {
+          "Authorization": f"Bearer {GITHUB_TOKEN}",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "Accept": "application/vnd.github+json"
+      }
+      path_key = "filename"
+      change_key = "patch"
     else:
       api_req_url = f"https://api.github.com/repos/{TRAVIS_REPO_SLUG}" + \
         f"/pulls/{TRAVIS_PULL_REQUEST}/files"
@@ -170,7 +191,7 @@ class RepoSetup:
     remove_diff_regex = re.compile(r"^([ +-])(.*)$", re.MULTILINE)
 
     for change in changes:
-      if change[path_key] is not None:
+      if path_key in change and change_key in change:
         path_to_be_excluded = self.__is_excluded_path(change[path_key])
         if path_to_be_excluded == False:
           curr_file = os.path.join(self.temp_dir.name, change[path_key])
