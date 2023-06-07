@@ -21,16 +21,24 @@ namespace {
 
 namespace Fossology\UI\Api\Test\Controllers {
 
+  use ClearingView;
   use Fossology\Lib\Auth\Auth;
   use Fossology\Lib\Dao\UploadDao;
+  use Fossology\Lib\Data\DecisionTypes;
   use Fossology\Lib\Data\UploadStatus;
   use Fossology\Lib\Db\DbManager;
   use Fossology\UI\Api\Controllers\UploadTreeController;
   use Fossology\UI\Api\Helper\DbHelper;
   use Fossology\UI\Api\Helper\ResponseHelper;
   use Fossology\UI\Api\Helper\RestHelper;
+  use Fossology\UI\Api\Models\Info;
+  use Fossology\UI\Api\Models\InfoType;
   use Mockery as M;
   use Slim\Psr7\Factory\StreamFactory;
+  use Slim\Psr7\Headers;
+  use Slim\Psr7\Request;
+  use Slim\Psr7\Response;
+  use Slim\Psr7\Uri;
 
   /**
    * @class UploadControllerTest
@@ -81,6 +89,18 @@ namespace Fossology\UI\Api\Test\Controllers {
     private $viewFilePlugin;
 
     /**
+     * @var M\MockInterface $viewLicensePlugin
+     * ViewFilePlugin mock
+     */
+    private $viewLicensePlugin;
+
+    /**
+     * @var DecisionTypes $decisionTypes
+     * Decision types object
+     */
+    private $decisionTypes;
+
+    /**
      * @brief Setup test objects
      * @see PHPUnit_Framework_TestCase::setUp()
      */
@@ -94,11 +114,14 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->dbManager = M::mock(DbManager::class);
       $this->restHelper = M::mock(RestHelper::class);
       $this->uploadDao = M::mock(UploadDao::class);
-
+      $this->decisionTypes = M::mock(DecisionTypes::class);
       $this->viewFilePlugin = M::mock('ui_view');
+      $this->viewLicensePlugin = M::mock(ClearingView::class);
 
       $this->restHelper->shouldReceive('getPlugin')
         ->withArgs(array('view'))->andReturn($this->viewFilePlugin);
+      $this->restHelper->shouldReceive('getPlugin')
+        ->withArgs(array('view-license'))->andReturn($this->viewLicensePlugin);
 
       $this->dbManager->shouldReceive('getSingleRow')
         ->withArgs([M::any(), [$this->groupId, UploadStatus::OPEN,
@@ -112,10 +135,22 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->andReturn($this->uploadDao);
       $container->shouldReceive('get')->withArgs(array(
         'helper.restHelper'))->andReturn($this->restHelper);
-
+      $container->shouldReceive('get')->withArgs(['decision.types'])->andReturn($this->decisionTypes);
       $this->uploadTreeController = new UploadTreeController($container);
       $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
       $this->streamFactory = new StreamFactory();
+    }
+
+    /**
+     * Helper function to get JSON array from response
+     *
+     * @param Response $response
+     * @return array Decoded response
+     */
+    private function getResponseJson($response)
+    {
+      $response->getBody()->seek(0);
+      return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
@@ -142,6 +177,91 @@ namespace Fossology\UI\Api\Test\Controllers {
       $actualResponse = $this->uploadTreeController->viewLicenseFile(null, new ResponseHelper(), ['id' => $upload_pk, 'itemId' => $item_pk]);
       $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
       $this->assertEquals($expectedResponse->getBody()->getContents(), $actualResponse->getBody()->getContents());
+    }
+
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::setClearingDecision() for setting a clearing decision
+     * -# Check if response status is 200 and response body matches
+     */
+    public function testSetClearingDecisionReturnsOk()
+    {
+      $upload_pk = 1;
+      $item_pk = 200;
+      $rq = [
+        "decisionType" => 3,
+        "globalDecision" => false,
+      ];
+      $dummyDecisionTypes = array_map(function ($i) {
+        return $i;
+      }, range(1, 7));
+
+      $this->decisionTypes->shouldReceive('getMap')
+        ->andReturn($dummyDecisionTypes);
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$item_pk])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $item_pk])->andReturn(true);
+
+
+      $this->viewLicensePlugin->shouldReceive('updateLastItem')->withArgs([2, 2, $item_pk, $item_pk]);
+
+      $info = new Info(200, "Successfully set decision", InfoType::INFO);
+
+      $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), $info->getCode());
+      $reqBody = $this->streamFactory->createStream(json_encode(
+        $rq
+      ));
+      $requestHeaders = new Headers();
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $reqBody);
+      $actualResponse = $this->uploadTreeController->setClearingDecision($request, new ResponseHelper(), ['id' => $upload_pk, 'itemId' => $item_pk]);
+
+      $this->assertEquals($expectedResponse->getStatusCode(),
+        $actualResponse->getStatusCode());
+      $this->assertEquals($this->getResponseJson($expectedResponse),
+        $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::setClearingDecision() for setting a clearing decision
+     * -# Check if response status is 400, if the given decisionType is invalid
+     */
+    public function testSetClearingDecisionReturnsError()
+    {
+      $upload_pk = 1;
+      $item_pk = 200;
+      $rq = [
+        "decisionType" => 40,
+        "globalDecision" => false,
+      ];
+      $dummyDecisionTypes = array_map(function ($i) {
+        return $i;
+      }, range(1, 7));
+
+      $this->decisionTypes->shouldReceive('getMap')
+        ->andReturn($dummyDecisionTypes);
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$item_pk])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $item_pk])->andReturn(true);
+
+      $this->viewLicensePlugin->shouldReceive('updateLastItem')->withArgs([2, 2, $item_pk, $item_pk]);
+
+      $info = new Info(400, "Decision Type should be one of the following keys: " . implode(", ", $dummyDecisionTypes), InfoType::ERROR);
+
+      $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), $info->getCode());
+      $reqBody = $this->streamFactory->createStream(json_encode(
+        $rq
+      ));
+      $requestHeaders = new Headers();
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $reqBody);
+
+      $actualResponse = $this->uploadTreeController->setClearingDecision($request, new ResponseHelper(), ['id' => $upload_pk, 'itemId' => $item_pk]);
+      $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
     }
   }
 }
