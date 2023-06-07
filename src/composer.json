@@ -23,7 +23,7 @@
         "monolog/monolog" : "2.8.0",
         "phpoffice/phpword" : "0.18.3",
         "slim/slim": "4.8.1",
-        "slim/psr7": "1.4",
+        "slim/psr7": "1.4.1",
         "symfony/cache": "v5.4.13",
         "symfony/config" : "v5.4.11",
         "symfony/http-foundation" : "v5.4.13",
