@@ -12,10 +12,12 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Container\ContainerInterface;
 
 
 /**
@@ -24,6 +26,19 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class UploadTreeController extends RestController
 {
+
+  /**
+   * @var DecisionTypes $decisionTypes
+   * Decision types object
+   */
+  private $decisionTypes;
+
+
+  public function __construct($container)
+  {
+    parent::__construct($container);
+    $this->decisionTypes = $this->container->get('decision.types');
+  }
 
   /**
    * Get the contents of a specific file
@@ -73,5 +88,54 @@ class UploadTreeController extends RestController
     return $response->withHeader("Content-Type", "text/plain")
       ->withHeader("Cache-Control", "max-age=1296000, must-revalidate")
       ->withHeader("Etag", md5($response->getBody()));
+  }
+
+  /**
+   * Set the clearing decision for a particular upload-tree
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function setClearingDecision($request, $response, $args)
+  {
+    $body = $this->getParsedBody($request);
+    $decisionType = $body['decisionType'];
+    $global = $body['globalDecision'];
+
+    // check if the given globalDecision value is a boolean
+    if ($global !== null && !is_bool($global)) {
+      $returnVal = new Info(400, "GlobalDecision should be a boolean", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $uploadTreeId = intval($args['itemId']);
+
+    $returnVal = null;
+    $uploadDao = $this->restHelper->getUploadDao();
+
+    // check if the given key exists in the known decision types
+    if (!array_key_exists($decisionType, $this->decisionTypes->getMap())) {
+      $returnVal = new Info(400, "Decision Type should be one of the following keys: " . implode(", ", array_keys($this->decisionTypes->getMap())), InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($uploadDao->getUploadtreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    }
+
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    try {
+      $viewLicensePlugin = $this->restHelper->getPlugin('view-license');
+      $_GET['clearingTypes'] = $decisionType;
+      $_GET['globalDecision'] = $global ? 1 : 0;
+      $viewLicensePlugin->updateLastItem($this->restHelper->getUserId(), $this->restHelper->getGroupId(), $uploadTreeId, $uploadTreeId);
+      $returnVal = new Info(200, "Successfully set decision", InfoType::INFO);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    } catch (\Exception $e) {
+      $returnVal = new Info(500, $e->getMessage(), InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
   }
 }
