@@ -585,7 +585,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->queryOnce("INSERT INTO job (job_pk, job_queued, job_priority, job_upload_fk, job_user_fk, job_group_fk)"
             . " VALUES ($otherJob, '2014-08-07 09:22:22.718312+00', 0, 1, 2, $groupId)");
 
-    $this->dbManager->queryOnce("INSERT INTO license_ref_bulk (lrb_pk, user_fk, group_fk, rf_text, upload_fk, uploadtree_fk) VALUES (123456, 2, $groupId, 'foo bar', 1, 7)");
+    $this->dbManager->queryOnce("INSERT INTO license_ref_bulk (lrb_pk, user_fk, group_fk, rf_text, upload_fk, uploadtree_fk) VALUES (123456, 2, $groupId, 'foo bar', 1, 1)");
     $this->dbManager->queryOnce("INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing) VALUES (123456, $licId1, 'f')");
 
     $this->dbManager->queryOnce("INSERT INTO upload_reuse (upload_fk, reused_upload_fk, group_fk, reused_group_fk, reuse_mode)"
