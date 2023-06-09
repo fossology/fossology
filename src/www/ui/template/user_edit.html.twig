@@ -66,10 +66,10 @@
       </tr>
       {% endif %}
     {% endif %}
-      <title>Toggle Password Visibility</title>
+    <title>Toggle Password Visibility</title>
     <tr class="classic">
       <th width="25%">{{ "Password."|trans }}</th>
-       <td><input type="password" name="_pass1" size="20" id="passcheck" onchange="togglePasswords();"/><span class="bi bi-eye"></span><img src="images/eyes.png" class="bi bi-eye-slash" id="togglePasswords"></img>{% if passwordPolicy is not empty %}
+      <td><input type="password" name="_pass1" size="20" id="passcheck" onchange="togglePasswords();"/><span class="bi bi-eye"></span><img src="images/eyes.png" class="bi bi-eye-slash" id="togglePasswords"></img>{% if passwordPolicy is not empty %}
       <br /><span class="passPolicy">{{ passwordPolicy }}</span>
       {% endif %}</td>
     </tr>

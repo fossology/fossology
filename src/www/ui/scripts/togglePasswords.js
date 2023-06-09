@@ -1,11 +1,10 @@
 /*
- SPDX-FileCopyrightText: © 2014 Siemens AG
+ SPDX-FileCopyrightText: © 2023 Simran Nigam <nigamsimran14@gmail.com>
  Author: Simran Nigam
 
  SPDX-License-Identifier: GPL-2.0-only
 */
 const togglePassword = document.querySelector('#togglePasswords');
-// const togglePassword = document.querySelector('#togglePasswords');
 if (togglePassword) {
   const password = document.querySelector('#passcheck');
   togglePassword.addEventListener('click', function (e) {
@@ -25,5 +24,5 @@ if (togglePassword) {
     // toggle the eye slash icon
     this.classList.toggle('fa-eye-slash');
   });
-  }
-  
+}
+

@@ -27,21 +27,16 @@ File derived from https://github.com/twbs/icons/blob/main/font/bootstrap-icons.c
 }
 
 .bi-eye-slash-fill::before { content: "\f31f";
-  margin-left: 6%; 
-  cursor: pointer; 
-}
-
-.bi-eye-slash::before { 
-  max-width: 10%;
-  height: auto;
-  content: "\f320"; 
-  margin-left: -6%; 
+  margin-left: 6%;
   cursor: pointer;
 }
 
-img#togglePassword {
-  width: 1.5rem;
-  height: 2rem
+.bi-eye-slash::before {
+  max-width: 10%;
+  height: auto;
+  content: "\f320";
+  margin-left: -6%;
+  cursor: pointer;
 }
 
 img#togglePasswords {
@@ -57,17 +52,17 @@ img#togglePasswords {
   color: #495057;
   background-color: #fff;
   background-clip: padding-box;
-  border: 0.063rem solid #ced4da;        
+  border: 0.063rem solid #ced4da;
   border-radius: 0.25rem;
-  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out"
+  transition: "border-color .15s ease-in-out,box-shadow .15s ease-in-out"
 }
 
 #togglePassword {
-  margin-left: -6%; 
+  margin-left: -6%;
   cursor: pointer;
 }
 
 #togglePasswords {
-  margin-left: -2.5%; 
+  margin-left: -2.5%;
   cursor: pointer;
 }
