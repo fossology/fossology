@@ -265,6 +265,17 @@ class UserEditPage extends DefaultPlugin
       $Errors .= "<li>" . _("Invalid email address.") . "</li>";
     }
 
+    /* Make sure email is unique */
+    $email_count = 0;
+    if (!empty($UserRec['user_email'])) {
+      $email_count = $this->dbManager->getSingleRow(
+        "SELECT COUNT(*) as count FROM users WHERE user_email = $1 LIMIT 1;",
+        array($UserRec['user_email']))["count"];
+    }
+    if ($email_count > 0) {
+      $Errors .= "<li>" . _("Email address already exists.") . "</li>";
+    }
+
     /* Make sure user can't ask for blank password if policy is enabled */
     if (passwordPolicyEnabled() && !empty($UserRec['_blank_pass'])) {
       $Errors .= "<li>" . _("Password policy enabled, can't have a blank password.") . "</li>";
