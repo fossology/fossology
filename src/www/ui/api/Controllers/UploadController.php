@@ -964,4 +964,43 @@ class UploadController extends RestController
     $returnVal = new Info(200, "Successfully added new main license", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
+
+  /***
+   * Remove the main license from the upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function removeMainLicense($request, $response, $args)
+  {
+    $uploadId = intval($args['id']);
+    $shortName = $args['shortName'];
+    $returnVal = null;
+    $licenseDao = $this->container->get('dao.license');
+    $clearingDao = $this->container->get('dao.clearing');
+    $license = $licenseDao->getLicenseByShortName($shortName, $this->restHelper->getGroupId());
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if ($license === null) {
+      $returnVal = new Info(404, "No license with shortname '$shortName' found.",
+        InfoType::ERROR);
+    } else {
+      $licenseIds = $clearingDao->getMainLicenseIds($uploadId, $this->restHelper->getGroupId());
+      if (!in_array($license->getId(), $licenseIds)) {
+        $returnVal = new Info(400, "License '$shortName' is not a main license for this upload.",
+          InfoType::ERROR);
+      }
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $clearingDao = $this->container->get('dao.clearing');
+    $clearingDao->removeMainLicense($uploadId, $this->restHelper->getGroupId(), $license->getId());
+    $returnVal = new Info(200, "Main license removed successfully.", InfoType::INFO);
+
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
 }
