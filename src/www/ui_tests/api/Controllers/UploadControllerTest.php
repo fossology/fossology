@@ -105,18 +105,6 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   private $uploadDao;
 
   /**
-   * @var LicenseDao $licenseDao
-   * LicenseDao mock
-   */
-  private $licenseDao;
-
-  /**
-   * @var ClearingDao $clearingDao
-   * LicenseDao mock
-   */
-  private $clearingDao;
-
-  /**
    * @var FolderDao $folderDao
    * FolderDao mock
    */
@@ -127,6 +115,18 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    * AgentDao mock
    */
   private $agentDao;
+
+  /**
+   * @var ClearingDao $clearingDao
+   * ClearingDao mock
+   */
+  private $clearingDao;
+
+  /**
+   * @var LicenseDao $licenseDao
+   * LicenseDao mock
+   */
+  private $licenseDao;
 
 
   /**
@@ -156,6 +156,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->clearingDao = M::mock(ClearingDao::class);
     $this->licenseDao = M::mock(LicenseDao::class);
 
+
     $this->dbManager->shouldReceive('getSingleRow')
       ->withArgs([M::any(), [$this->groupId, UploadStatus::OPEN,
         Auth::PERM_READ]]);
@@ -170,14 +171,12 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       ->andReturn($this->folderDao);
     $this->restHelper->shouldReceive('getUserDao')
       ->andReturn($this->userDao);
-
+    $container->shouldReceive('get')->withArgs(['dao.license'])->andReturn(
+      $this->licenseDao);
     $container->shouldReceive('get')->withArgs(array(
       'dao.clearing'))->andReturn($this->clearingDao);
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
-    $container->shouldReceive('get')->withArgs(['dao.license'])->andReturn(
-      $this->licenseDao);
-    $container->shouldReceive('get')->withArgs(['dao.clearing'])->andReturn($this->clearingDao);
     $container->shouldReceive('get')->withArgs(array(
       'dao.agent'))->andReturn($this->agentDao);
     $container->shouldReceive('get')->withArgs(array('dao.license'))->andReturn($this->licenseDao);
@@ -1053,6 +1052,42 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $actualResponse = $this->uploadController->setMainLicense($request, new ResponseHelper(), ['id' => $uploadId]);
 
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+
+  /**
+   * @test
+   * -# Test for UploadController::removeMainLicense()
+   * -# Check if response status is 200 and the body matches
+   */
+  public function testRemoveMainLicense()
+  {
+    $uploadId = 3;
+    $licenseId = 1;
+    $shortName = "MIT";
+    $license = new License($licenseId, $shortName, "MIT License", "risk", "texts", [],
+      'type', 1);
+    $licenseIds[$licenseId] = $licenseId;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["license_ref", "rf_pk", $licenseId])->andReturn(true);
+    $this->clearingDao->shouldReceive('getMainLicenseIds')->withArgs([$uploadId, $this->groupId])->andReturn($licenseIds);
+    
+    $this->clearingDao->shouldReceive('removeMainLicense')->withArgs([$uploadId, $this->groupId, $licenseId])->andReturn(null);
+    $this->licenseDao->shouldReceive('getLicenseByShortName')
+      ->withArgs([$shortName, $this->groupId])->andReturn($license);
+
+    $info = new Info(200, "Main license removed successfully.", InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->uploadController->removeMainLicense(null,
+      new ResponseHelper(), ['id' => $uploadId, 'shortName' => $shortName]);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
