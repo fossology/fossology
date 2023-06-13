@@ -867,6 +867,62 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /uploads/{id}/items/{itemId}/licenses:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the itemId
+        in: path
+        schema:
+          type: integer
+    post:
+      operationId: addLicenseDecision
+      tags:
+        - Upload
+      summary: Add new license decision
+      description: >
+        Add a license decision for a particular upload tree item
+      requestBody:
+        description: ClearingDecision payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddNewLicenseDecision'
+      responses:
+        '200':
+          description: Successfully added license decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Short name missing from the request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /search:
     get:
       operationId: searchFile
@@ -3286,6 +3342,14 @@ components:
             2: Advisor
           minimum: 0
           maximum: 2
+    AddNewLicenseDecision:
+      description: New license decision
+      type: object
+      properties:
+        shortName:
+          type: string
+          description: Short name of the license
+          example: MIT
     AddMember:
       description: UserMember options
       type: object
