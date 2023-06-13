@@ -24,6 +24,8 @@ use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\UploadHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\License;
+use Fossology\UI\Api\Models\Obligation;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\StreamFactory;
 
@@ -836,5 +838,57 @@ class UploadController extends RestController
     $res["publicPerm"] = $publicPerm;
     $res["permGroups"] = $finalPermGroups;
     return $response->withJson($res, 200);
+  }
+  /**
+   * Get the main licenses for the upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getMainLicenses($request, $response, $args)
+  {
+    $uploadId = intval($args['id']);
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $clearingDao = $this->container->get('dao.clearing');
+    $licenseIds = $clearingDao->getMainLicenseIds($uploadId, $this->restHelper->getGroupId());
+    $licenseDao = $this->container->get('dao.license');
+    $licenses = array();
+
+    foreach ($licenseIds as $key => $value) {
+      $licenseId = intval($value);
+      $obligations = $licenseDao->getLicenseObligations([$licenseId],
+        false);
+      $obligations = array_merge($obligations,
+        $licenseDao->getLicenseObligations([$licenseId], true));
+      $obligationList = [];
+      foreach ($obligations as $obligation) {
+        $obligationList[] = new Obligation(
+          $obligation['ob_pk'],
+          $obligation['ob_topic'],
+          $obligation['ob_type'],
+          $obligation['ob_text'],
+          $obligation['ob_classification'],
+          $obligation['ob_comment']
+        );
+      }
+      $license = $licenseDao->getLicenseById($licenseId);
+      $licenseObj = new License(
+        $license->getId(),
+        $license->getShortName(),
+        $license->getFullName(),
+        $license->getText(),
+        $license->getUrl(),
+        $obligationList,
+        $license->getRisk()
+      );
+      $licenses[] = $licenseObj->getArray();
+    }
+    return $response->withJson($licenses, 200);
   }
 }

@@ -7,7 +7,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.5.1
+  version: 1.5.2
   contact:
     email: fossology@fossology.org
   license:
@@ -864,6 +864,45 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/licenses/main:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getMainLicenses
+      tags:
+        - Upload
+      summary: Get main licenses on the upload
+      description: >
+        Get main licenses assigned on a particular upload
+      responses:
+        '200':
+          description: All main licenses from an upload
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/License'
+        '404':
+          description: Upload not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
 
