@@ -86,7 +86,7 @@ class user_add extends DefaultPlugin
 
     /* Make sure email is unique (If email field not empty) */
     $email_count = 0;
-    if (! empty($Email)) { 
+    if (! empty($Email)) {
       $email_count = $this->dbManager->getSingleRow(
         "SELECT COUNT(*) as count FROM users WHERE user_email = $1 LIMIT 1;",
         array($Email))["count"];
