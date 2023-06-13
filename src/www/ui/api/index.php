@@ -149,6 +149,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
     $app->get('/{id:\\d+}/download', UploadController::class . ':uploadDownload');
     $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');
+    $app->get('/{id:\\d+}/licenses/main', UploadController::class . ':getMainLicenses');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
