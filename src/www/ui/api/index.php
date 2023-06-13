@@ -5,12 +5,14 @@
 
  SPDX-License-Identifier: GPL-2.0-only
 */
+
 /**
  * @dir
  * @brief REST api for FOSSology
  * @file
  * @brief Provides router for REST api requests
  */
+
 namespace Fossology\UI\Api;
 
 $GLOBALS['apiCall'] = true;
@@ -33,6 +35,7 @@ use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
+use Fossology\UI\Api\Controllers\UploadTreeController;
 use Fossology\UI\Api\Controllers\UserController;
 use Fossology\UI\Api\Helper\ResponseFactoryHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
@@ -51,7 +54,7 @@ use Throwable;
 
 const REST_VERSION = "1";
 
-const BASE_PATH   = "/repo/api/v" . REST_VERSION;
+const BASE_PATH = "/repo/api/v" . REST_VERSION;
 
 const AUTH_METHOD = "JWT_TOKEN";
 
@@ -69,7 +72,7 @@ $timingLogger->logWithStartTime("bootstrap", $startTime);
 
 /* Load UI templates */
 $loader = $container->get('twig.loader');
-$loader->addPath(dirname(dirname(__FILE__)).'/template');
+$loader->addPath(dirname(dirname(__FILE__)) . '/template');
 
 /* Initialize global system configuration variables $SysConfig[] */
 $timingLogger->tic();
@@ -114,12 +117,12 @@ if ($dbConnected) {
 } else {
   // DB not connected
   // Respond to health request as expected
-  $app->get('/health', function($req, $res) {
+  $app->get('/health', function ($req, $res) {
     $handler = new InfoController($GLOBALS['container']);
     return $handler->getHealth($req, $res, -1);
   });
   // Handle any other request and respond explicitly
-  $app->any('{route:.*}', function(ServerRequestInterface $req, ResponseHelper $res) {
+  $app->any('{route:.*}', function (ServerRequestInterface $req, ResponseHelper $res) {
     $error = new Info(503, "Unable to connect to DB.", InfoType::ERROR);
     return $res->withJson($error->getArray(), $error->getCode());
   });
@@ -149,6 +152,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
     $app->get('/{id:\\d+}/download', UploadController::class . ':uploadDownload');
     $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');
+    $app->delete('/{id:\\d+}/items/{itemId:\\d+}/licenses/{licenseId:\\d+}', UploadTreeController::class . ':removeLicenseDecision');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -262,11 +266,11 @@ $app->group('/license',
 // Define Custom Error Handler
 $customErrorHandler = function (
   ServerRequestInterface $request,
-  Throwable $exception,
-  bool $displayErrorDetails,
-  bool $logErrors,
-  bool $logErrorDetails,
-  ?LoggerInterface $logger = null
+  Throwable              $exception,
+  bool                   $displayErrorDetails,
+  bool                   $logErrors,
+  bool                   $logErrorDetails,
+  ?LoggerInterface       $logger = null
 ) use ($app) {
   if ($logger === null) {
     $logger = $app->getContainer()->get('logger');
@@ -275,7 +279,7 @@ $customErrorHandler = function (
     $logger->error($exception->getMessage(), $exception->getTrace());
   }
   if ($displayErrorDetails) {
-    $payload = ['error'=> $exception->getMessage(),
+    $payload = ['error' => $exception->getMessage(),
       'trace' => $exception->getTraceAsString()];
   } else {
     $error = new Info(500, "Something went wrong! Please try again later.",
@@ -286,7 +290,7 @@ $customErrorHandler = function (
   $response = $app->getResponseFactory()->createResponse(500)
     ->withHeader("Content-Type", "application/json");
   $response->getBody()->write(
-      json_encode($payload, JSON_UNESCAPED_UNICODE)
+    json_encode($payload, JSON_UNESCAPED_UNICODE)
   );
 
   return $response;
@@ -300,19 +304,19 @@ $errorMiddleware->setDefaultErrorHandler($customErrorHandler);
 $errorMiddleware->setErrorHandler(
   HttpNotFoundException::class,
   function (ServerRequestInterface $request, Throwable $exception, bool $displayErrorDetails) {
-      $response = new ResponseHelper();
-      $error = new Info(404, "Resource not found", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+    $response = new ResponseHelper();
+    $error = new Info(404, "Resource not found", InfoType::ERROR);
+    return $response->withJson($error->getArray(), $error->getCode());
   });
 
 // Set the Not Allowed Handler
 $errorMiddleware->setErrorHandler(
   HttpMethodNotAllowedException::class,
   function (ServerRequestInterface $request, Throwable $exception, bool $displayErrorDetails) {
-      $response = new Response();
-      $response->getBody()->write('405 NOT ALLOWED');
+    $response = new Response();
+    $response->getBody()->write('405 NOT ALLOWED');
 
-      return $response->withStatus(405);
+    return $response->withStatus(405);
   });
 
 $app->run();

@@ -867,6 +867,55 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /uploads/{id}/items/{itemId}/licenses/{licenseId}:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the itemId
+        in: path
+        schema:
+          type: integer
+      - name: licenseId
+        required: true
+        description: Id of the license to be delete
+        in: path
+        schema:
+          type: integer
+    delete:
+      operationId: deleteLicenseDecision
+      tags:
+        - Upload
+      summary: Delete license from an item
+      description: >
+        Delete a particular license for a particular upload tree item
+      responses:
+        '200':
+          description: Successfully removed license.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /search:
     get:
       operationId: searchFile
