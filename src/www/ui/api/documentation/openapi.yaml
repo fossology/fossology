@@ -867,6 +867,68 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /uploads/{id}/items/{itemId}/licenses/{licenseId}/clearing-info:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the Item
+        in: path
+        schema:
+          type: integer
+      - name: licenseId
+        required: true
+        description: Id of the license
+        in: path
+        schema:
+          type: integer
+    put:
+      operationId: setClearingInfo
+      tags:
+        - Upload
+      summary: Set text, comment or the acknowledgement
+      description: >
+        Set text, comment or the acknowledgement for a license
+      requestBody:
+        description: ClearingInfo payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetClearingInfo'
+      responses:
+        '200':
+          description: Successfully updated the clearing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Invalid ColumnId
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /search:
     get:
       operationId: searchFile
@@ -2455,6 +2517,18 @@ components:
         filename:
           type: string
           description: Filename of the treeItem
+    SetClearingInfo:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Clearing info text
+        column:
+          type: string
+          enum:
+            - TEXT
+            - ACK
+            - COMMENT
     LicenseDecider:
       type: object
       properties:
