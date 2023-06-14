@@ -1,7 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2019, 2021 Siemens AG
- Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+ Author: Gaurav Mishra <mishra.gaurav@siemens.com>, Soham Banerjee <sohambanerjee4abc@hotmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -117,5 +117,25 @@ class InfoController extends RestController
         "status" => $dbStatus
       ]
     ), $statusCode);
+  }
+
+  /**
+   * Get the current OpenAPI info
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @return ResponseHelper
+   */
+  public function getOpenApi($request, $response)
+  {
+    global $SysConf;
+    try {
+      $yaml = new Parser();
+      $yamlDocArray = $yaml->parse(file_get_contents(__DIR__ ."/../documentation/openapi.yaml"));
+    } catch (ParseException $exception) {
+      printf("Unable to parse the YAML string: %s", $exception->getMessage());
+      return $response->withStatus(500, "Unable to read openapi.yaml");
+    }
+    return $response->withJson(array($yamlDocArray), 200);
   }
 }

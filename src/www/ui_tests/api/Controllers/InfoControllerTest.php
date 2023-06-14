@@ -139,4 +139,17 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
   }
+
+  public function testGetOpenApi()
+  {
+    $yaml = new Parser();
+    $yamlDocArray = $yaml->parseFile(self::YAML_LOC);
+    $expectedResponse = (new ResponseHelper())->withJson(array($yamlDocArray), 200);
+    $actualResponse = $this->infoController->getOpenApi(null,
+      new ResponseHelper(), []);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
 }
