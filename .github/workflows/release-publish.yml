@@ -88,7 +88,9 @@ jobs:
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DFO_SYSCONFDIR=/etc/fossology -DFO_LOCALSTATEDIR=/var -S. -B./build -G Ninja
 
     - name: Build Debs
-      run: cd build && cpack --config CPackConfig.cmake
+      run: |
+        cmake --build build --parallel
+        cd build && cpack --config CPackConfig.cmake
 
     - name: Rename package
       run: |
