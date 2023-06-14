@@ -238,6 +238,10 @@ $app->group('/health',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('', InfoController::class . ':getHealth');
   });
+$app->group('/openapi',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', InfoController::class . ':getOpenApi');
+  });
 
 /////////////////////////FILE SEARCH////////////////////
 $app->group('/filesearch',
