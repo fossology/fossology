@@ -280,4 +280,47 @@ class CopyrightController extends RestController
     $returnVal = new Info(200, "Successfully restored Copyright.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), 200);
   }
+
+  /**
+   * Get total number of copyrights for a particular upload-tree
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getTotalFileCopyrights($request, $response, $args)
+  {
+    $uploadPk = $args["id"];
+    $uploadTreeId = $args["itemId"];
+    $query = $request->getQueryParams();
+    $statusVal = true;
+    $returnVal = null;
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($this->restHelper->getUploadDao()->getUploadtreeTableName($uploadPk), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    }
+    if (!array_key_exists(self::COPYRIGHT_PARAM, $query)) {
+      $returnVal = new Info(400, "Bad Request. 'status' is a required query param with expected values 'active' or 'inactive", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $status = $query[self::COPYRIGHT_PARAM];
+    if ($status == "active") {
+      $statusVal = true;
+    } else if ($status == "inactive") {
+      $statusVal = false;
+    } else {
+      $returnVal = new Info(400, "Bad Request. Invalid query parameter, expected values 'active' or 'inactive", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $agentId = $this->copyrightHist->getAgentId($uploadPk, 'copyright_ars');
+    $uploadTreeTableName = $this->restHelper->getUploadDao()->getUploadtreeTableName($uploadPk);
+    $returnVal = $this->copyrightDao->getTotalCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName, $agentId, 'statement', $statusVal);
+    return $response->withJson(array("total_copyrights" => intval($returnVal)), 200);
+  }
 }
