@@ -286,7 +286,11 @@ int main(int argc, char *argv[])
 
     struct json_object *result_json = json_object_from_file(outputFile);
     if (result_json == NULL) {
+#if JSON_C_MINOR_VERSION > 12
       LOG_ERROR("Unable to parse json output: %s", json_util_get_last_err());
+#else
+      LOG_ERROR("Unable to parse json output.");
+#endif
       return -1;
     }
     sprintf(Cmd, "rm -rf %s", tempFolder);
