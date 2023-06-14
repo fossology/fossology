@@ -28,11 +28,13 @@ use Fossology\UI\Api\Controllers\FolderController;
 use Fossology\UI\Api\Controllers\GroupController;
 use Fossology\UI\Api\Controllers\InfoController;
 use Fossology\UI\Api\Controllers\JobController;
+use Fossology\UI\Api\Controllers\CopyrightController;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
+use Fossology\UI\Api\Controllers\UploadTreeController;
 use Fossology\UI\Api\Controllers\UserController;
 use Fossology\UI\Api\Helper\ResponseFactoryHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
@@ -149,6 +151,10 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
     $app->get('/{id:\\d+}/download', UploadController::class . ':uploadDownload');
     $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');
+    $app->get('/{id:\\d+}/licenses/main', UploadController::class . ':getMainLicenses');
+    $app->get('/{id:\\d+}/item/{itemId:\\d+}/view', UploadTreeController::class. ':viewLicenseFile');
+    $app->put('/{id:\\d+}/item/{itemId}/clearing-decision', UploadTreeController::class . ':setClearingDecision');
+    $app->get('/{id:\\d+}/item/{itemId:\\d+}/copyrights/inactive', CopyrightController::class . ':getInactiveFileCopyrights');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -243,6 +249,11 @@ $app->group('/filesearch',
     $app->post('', FileSearchController::class . ':getFiles');
     $app->any('/{params:.*}', BadRequestController::class);
   });
+$app->group('/file',
+function (\Slim\Routing\RouteCollectorProxy $app) {
+  
+  $app->any('/{params:.*}', BadRequestController::class);
+});
 
 /////////////////////////LICENSE SEARCH/////////////////
 $app->group('/license',
