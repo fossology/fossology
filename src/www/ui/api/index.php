@@ -33,7 +33,9 @@ use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
+use Fossology\UI\Api\Controllers\UploadTreeController;
 use Fossology\UI\Api\Controllers\UserController;
+use Fossology\UI\Api\Controllers\CopyrightController;
 use Fossology\UI\Api\Helper\ResponseFactoryHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Middlewares\FossologyInitMiddleware;
@@ -149,8 +151,15 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
     $app->get('/{id:\\d+}/download', UploadController::class . ':uploadDownload');
     $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');
+    $app->get('/{id:\\d+}/licenses/main', UploadController::class . ':getMainLicenses');
+    $app->post('/{id:\\d+}/licenses/main', UploadController::class . ':setMainLicense');
+    $app->delete('/{id:\\d+}/licenses/{shortName:[\\w\\- \\.]+}/main', UploadController::class . ':removeMainLicense');
+    $app->get('/{id:\\d+}/item/{itemId:\\d+}/view', UploadTreeController::class. ':viewLicenseFile');
+    $app->put('/{id:\\d+}/item/{itemId}/clearing-decision', UploadTreeController::class . ':setClearingDecision');
+    $app->get('/{id:\\d+}/item/{itemId:\\d+}/copyrights', CopyrightController::class . ':getFileCopyrights');
     $app->any('/{params:.*}', BadRequestController::class);
   });
+
 
 ////////////////////////////ADMIN-USERS/////////////////////
 $app->group('/users',
@@ -186,6 +195,7 @@ $app->group('/jobs',
     $app->get('/all', JobController::class . ':getAllJobs');
     $app->post('', JobController::class . ':createJob');
     $app->get('/history', JobController::class . ':getJobsHistory');
+    $app->delete('/{id:\\d+}/{queue:\\d+}', JobController::class . ':deleteJob');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -235,6 +245,10 @@ $app->group('/info',
 $app->group('/health',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('', InfoController::class . ':getHealth');
+  });
+$app->group('/openapi',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', InfoController::class . ':getOpenApi');
   });
 
 /////////////////////////FILE SEARCH////////////////////

@@ -3,11 +3,11 @@
 
 # SPDX-License-Identifier: GPL-2.0-only
 
-openapi: 3.0.2
+openapi: 3.0.3
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.5.1
+  version: 1.5.2
   contact:
     email: fossology@fossology.org
   license:
@@ -138,6 +138,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiInfo'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /openapi:
+    get:
+      operationId: getOpenApi
+      tags:
+        - info
+      security: []
+      summary: Get the current openapi.yaml file
+      description: >
+        Get the current API documentation as a response with content negotiation.
+      responses:
+        '200':
+          description: The API documentation
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                $ref: '#/components/schemas/APIinfo'
+            application/yaml:
+              schema:
+                $ref: '#/components/schemas/APIinfo'
+            application/vnd.oai.openapi+json:
+              schema:
+                $ref: '#/components/schemas/APIinfo'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIinfo'
         default:
           $ref: '#/components/responses/defaultResponse'
   /maintenance:
@@ -654,6 +681,23 @@ paths:
         schema:
           type: boolean
           default: false
+      - name: page
+        description: Page number (starts from 1)
+        required: false
+        in: header
+        schema:
+          type: integer
+          default: 1
+          minimum: 1
+      - name: limit
+        description: Limits of responses per request
+        required: false
+        in: header
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+          maximum: 1000
       - name: groupName
         description: The group name to chose while accessing the package
         in: header
@@ -671,10 +715,23 @@ paths:
       responses:
         '200':
           description: Get licenses
+          headers:
+            X-Total-Pages:
+              description: Total number of pages which can be generated based on limit
+              schema:
+                type: integer
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UploadLicenses'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
         '503':
           description: >
             The ununpack agent or queried agents have not started yet. Please
@@ -867,6 +924,224 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /uploads/{id}/item/{itemId}/view:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the item
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: viewTheContentOfTheFile
+      tags:
+        - Upload
+        - License
+      summary: Get the contents of the file
+      description:
+        Returns the contents of a specific file
+      responses:
+        '200':
+          description: Get contents
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Upload or Item does not exist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'  
+  
+  /uploads/{id}/item/{itemId}/clearing-decision:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the itemId
+        in: path
+        schema:
+          type: integer
+    put:
+      operationId: setClearingDecision
+      tags:
+        - Upload
+      summary: Set the clearing decision for a particular upload tree item.
+      description: >
+        Set the clearing decision for a particular upload tree item.
+      requestBody:
+        description: ClearingDecision payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClearingDecision'
+      responses:
+        '200':
+          description: Clearing decision set successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Invalid clearingDecision type or invalid set globalDecision value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+          
+  /uploads/{id}/licenses/main:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getMainLicenses
+      tags:
+        - Upload
+      summary: Get main licenses on the upload
+      description: >
+        Get main licenses assigned on a particular upload
+      responses:
+        '200':
+          description: All main licenses from an upload
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/License'
+        '404':
+          description: Upload not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    post:
+      operationId: setMainLicense
+      tags:
+        - Upload
+      summary: Set the main license for the upload
+      description: >
+        Set the main license for a particular upload.
+      requestBody:
+        description: MainLicense payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetMainLicense'
+      responses:
+        '200':
+          description: Main license set successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Short name missing from request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'  
+  
+  /uploads/{id}/licenses/{shortName}/main:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: shortName
+        required: true
+        description: shortName of the main license to be deleted
+        in: path
+        schema:
+          type: string
+    delete:
+      operationId: deleteMainLicense
+      tags:
+        - Upload
+      summary: Delete a main license from an upload
+      description: >
+        Delete a main license from an upload.
+      responses:
+        '200':
+          description: License is removed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /search:
     get:
       operationId: searchFile
@@ -1263,6 +1538,71 @@ paths:
 
         default:
           $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/item/{itemId}/copyrights:
+    parameters:
+      - name: id
+        required: true
+        description: Upload Id
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: UploadTree ID
+        in: path
+        schema:
+          type: integer
+      - name: status
+        required: true
+        in: query
+        description: status of the copyright
+        schema:
+          type: string
+          enum:
+              - active
+              - inactive
+      - name: limit
+        description: Limits of responses per request
+        required: false
+        in: header
+        schema:
+          type: integer
+          default: 100
+          minimum: 1
+          maximum: 1000
+      - name: page
+        description: Page number for responses
+        required: false
+        in: header
+        schema:
+          type: integer
+          default: 1
+          minimum: 1
+    get:
+      operationId: getFileCopyrights
+      tags:
+        - Copyrights
+      summary: Get the copyrights of the mentioned upload tree ID
+      description: Returns the list of copyrights associated with the file
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Total-Pages:
+              description: Total number of pages which can be generated based on limit
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetFileCopyrights'
+        '400':
+          description: "Bad Request. 'upload' is a required query param"
+          $ref: '#/components/responses/defaultResponse'
+          
   /jobs:
     parameters:
       - name: groupName
@@ -1451,6 +1791,54 @@ paths:
                 $ref: '#/components/schemas/Info'
         '404':
           description: Upload does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+            $ref: '#/components/responses/defaultResponse'
+
+  /jobs/{id}/{queue}:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the Job
+        in: path
+        schema:
+          type: integer
+      - name: queue
+        required: true
+        description: Id of the job queue to be deleted
+        in: path
+        schema:
+          type: integer
+    delete:
+      operationId: deleteJob
+      tags:
+        - Job
+      summary: Deletes a job using its Id and Queue
+      description: Deletes a job queue and all the other job queues depending on it
+      responses:
+        '200':
+          description: Job deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: You don't have permission to delete this job.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Job/JobQueue not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Failed to kill job.
           content:
             application/json:
               schema:
@@ -2941,6 +3329,19 @@ components:
             link:
               description: Link to download the report
               type: string
+    GetFileCopyrights:
+      description: Copyright details of a file
+      type: object
+      properties:
+        content:
+          type: string
+          description: Copyright content
+        hash:
+          type: string
+          description: copyright hash
+        copyright_count:
+          type: integer
+          description: count of the copyrights
     ShowJob:
       description: History of all the jobs and the job queue info
       type: object
@@ -3286,6 +3687,35 @@ components:
             2: Advisor
           minimum: 0
           maximum: 2
+    ClearingDecision:
+      description: Clearing decision information
+      type: object
+      properties:
+        decisionType:
+          type: integer
+          description: |
+            Type of decision.
+            0: WIP
+            3: To be discussed
+            4: Irrelevant
+            5: Identified
+            6: Do not use
+            7: Non functional
+          example: 3
+          enum: [0, 3, 4, 5, 6, 7]
+        globalDecision:
+          type: boolean
+          description: |
+            Is the decision global?
+            If true, the decision is applied to all occurrence of the file on the server!
+    SetMainLicense:
+      description: Set Main License information
+      type: object
+      properties:
+        shortName:
+          type: string
+          description: short name of the license
+          example: MIT
     AddMember:
       description: UserMember options
       type: object
@@ -3328,6 +3758,28 @@ components:
               enum:
                 - OK
                 - ERROR
+    APIinfo:
+      description: Api Documentation
+      type: object
+      properties:
+        openapi:
+          type: string
+          description: version
+        info:
+          type: string
+          description: version info
+        servers:
+          type: string
+          description: server info
+        security:
+          type: string
+          description: security info
+        tags:
+          type: string
+          description: API tags
+        paths:
+          type: string
+          description: API endpoints
     DecisionImporter:
       description: Information required by Decision Importer agent
       type: object
