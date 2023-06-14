@@ -552,4 +552,92 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
     }
     return "copyright";
   }
+
+  /**
+   * @brief Get table name based on statement type
+   *
+   * - statement => copyright
+   * - ecc       => ecc
+   * - others    => author
+   * - scancode_statement => scancode copyright
+   * - scancode_email => scancode email
+   * - scancode_author => scancode author
+   * - scancode_url => scancode url
+   * @param string $type Result type
+   * @return string Table name
+   */
+  public function getTableName($type)
+  {
+    switch ($type) {
+      case "ipra":
+        $tableName = "ipra";
+        break;
+      case "ecc":
+        $tableName = "ecc";
+        break;
+      case "keyword":
+        $tableName = "keyword";
+        $filter = "none";
+        break;
+      case "statement":
+        $tableName = "copyright";
+        break;
+      case "scancode_statement":
+        $tableName = "scancode_copyright";
+        break;
+      case "scancode_email":
+      case "scancode_author":
+      case "scancode_url":
+        $tableName = "scancode_author";
+        break;
+      default:
+        $tableName = "author";
+    }
+    return $tableName;
+  }
+
+  /**
+   * @brief Get total number of copyrights for a uploadtree
+   * @param int     $upload_pk           Upload id to get results from
+   * @param int     $item                Upload tree id of the item
+   * @param string  $uploadTreeTableName Upload tree table to use
+   * @param string  $agentId             Id of the agent who loaded the results
+   * @param string  $type                Type of the statement (statement, url, email, author or ecc)
+   * @param boolean $activated           True to get activated copyrights, else false
+   * @return integer Number of total Records
+   */
+  public function getTotalCopyrights($upload_pk, $item, $uploadTreeTableName, $agentId, $type, $activated = true)
+  {
+    $tableName = $this->getTableName($type);
+    $tableNameEvent = $tableName . '_event';
+    list($left, $right) = $this->uploadDao->getLeftAndRight($item, $uploadTreeTableName);
+    $sql_upload = "";
+    if ('uploadtree_a' == $uploadTreeTableName) {
+      $sql_upload = " AND UT.upload_fk=$5 ";
+    }
+    $activatedClause = "ce.is_enabled = 'false'";
+    if ($activated) {
+      $activatedClause = "ce.is_enabled IS NULL OR ce.is_enabled = 'true'";
+    }
+    $params = array($left, $right, $type, "{" . $agentId . "}", $upload_pk);
+    $join = " INNER JOIN license_file AS LF on cp.pfile_fk=LF.pfile_fk ";
+    $unorderedQuery = "FROM $tableName AS cp " .
+    "INNER JOIN $uploadTreeTableName AS UT ON cp.pfile_fk = UT.pfile_fk " .
+    "LEFT JOIN $tableNameEvent AS ce ON ce." . $tableName . "_fk = cp." . $tableName . "_pk " .
+    "AND ce.upload_fk = $5 AND ce.uploadtree_fk = UT.uploadtree_pk " .
+    $join .
+      "WHERE cp.content!='' " .
+      "AND ( UT.lft  BETWEEN  $1 AND  $2 ) " .
+      "AND cp.type = $3 " .
+      "AND cp.agent_fk = ANY($4::int[]) " .
+      "AND ($activatedClause)" .
+      $sql_upload;
+    $grouping = " GROUP BY mcontent ";
+    $countAllQuery = "SELECT count(*) FROM (SELECT
+    (CASE WHEN (ce.content IS NULL OR ce.content = '') THEN cp.content ELSE ce.content END) AS mcontent
+    $unorderedQuery$grouping) as K";
+    $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__, $tableName . "count.all" . ($activated ? '' : '_deactivated'));
+    $iTotalRecords = $iTotalRecordsRow['count'];
+    return $iTotalRecords;
+  }
 }

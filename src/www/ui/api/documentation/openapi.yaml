@@ -2099,7 +2099,6 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
-
   /jobs/{id}/{queue}:
     parameters:
       - name: id
@@ -2420,6 +2419,72 @@ paths:
       responses:
         '202':
           description: Folder will be copied/moved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/item/{ItemId}/totalcopyrights:
+    parameters:
+      - name: id
+        required: true
+        description: Upload Id
+        in: path
+        schema:
+          type: integer
+      - name: ItemId
+        required: true
+        description: Upload Tree ID
+        in: path
+        schema:
+          type: integer
+      - name: status
+        required: true
+        in: query
+        description: status of the copyright
+        schema:
+          type: string
+          enum:
+              - active
+              - inactive
+    get:
+      operationId: getTotalFileCopyrights
+      tags:
+        - Copyrights
+      summary: Get the total copyrights of the mentioned upload tree ID
+      description: Returns the total number of copyrights associated with the file
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - type: object
+                      properties:
+                        total_copyrights:
+                          type: integer
+                          description: Total Number of copyrights for the uploadtree
+                          example:
+                            125
+        '400':
+          description: "Bad Request. 'upload' is a required query param"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Upload is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Upload does not exist
           content:
             application/json:
               schema:
