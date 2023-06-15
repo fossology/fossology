@@ -1,5 +1,5 @@
 # FOSSology CI Dockerfile
-# SPDX-FileCopyrightText: © 2020 Siemens AG
+# SPDX-FileCopyrightText: © 2020,2023 Siemens AG
 # SPDX-FileCopyrightText: © anupam.ghosh@siemens.com
 # SPDX-FileCopyrightText: © gaurav.mishra@siemens.com
 #
@@ -54,7 +54,12 @@ RUN dpkg-shlibdeps -Orun-deps -ebuild/src/nomos/agent/nomossa \
 
 FROM debian:bullseye-slim
 
-LABEL maintainer="Fossology <fossology@fossology.org>"
+LABEL org.opencontainers.image.authors="Fossology <fossology@fossology.org>"
+LABEL org.opencontainers.image.url="https://fossology.org"
+LABEL org.opencontainers.image.source="https://github.com/fossology/fossology"
+LABEL org.opencontainers.image.vendor="FOSSology"
+LABEL org.opencontainers.image.licenses="GPL-2.0-only AND LGPL-2.1-only"
+LABEL org.opencontainers.image.title="FOSSology CI"
 
 COPY --from=builder /fossology/build/src/nomos/agent/nomossa /bin/nomossa
 COPY --from=builder /fossology/build/src/ojo/agent/ojo /bin/ojo
@@ -65,12 +70,15 @@ COPY --from=builder /fossology/src/copyright/agent/keyword.conf /usr/local/share
 COPY --from=builder /fossology/run-deps /opt/run-deps
 
 COPY ./utils/automation/fossologyscanner.py /bin/fossologyscanner
+COPY ./utils/automation/FoScanner /bin/FoScanner
+COPY ./utils/automation/requirements.txt /bin/
 
 RUN echo 'APT::Install-Recommends "0" ; APT::Install-Suggests "0" ;' >> /etc/apt/apt.conf \
  && DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install --yes \
- --no-install-recommends $(cat /opt/run-deps) python3 \
+ --no-install-recommends $(cat /opt/run-deps) python3 python3-pip \
+ && python3 -m pip install -r /bin/requirements.txt \
  && DEBIAN_FRONTEND=noninteractive apt-get autoremove --yes \
- && rm -rf /var/lib/apt/lists/* /opt/run-deps
+ && rm -rf /var/lib/apt/lists/* /opt/run-deps /bin/requirements.txt
 
 CMD ["bash"]
