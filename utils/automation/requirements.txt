@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: © 2023 Siemens AG
+# SPDX-FileContributor: Gaurav Mishra <mishra.gaurav@siemens.com>
+
+# SPDX-License-Identifier: FSFAP
+# Description: Dependencies used by the CI scanner script
+spdx-tools==0.8.0a2

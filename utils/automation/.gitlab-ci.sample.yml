@@ -35,22 +35,22 @@ repo_license_scan:
   stage: license
   image: fossology/fossology:scanner
   script:
-    - /bin/fossologyscanner repo nomos ojo
+    - /bin/fossologyscanner repo nomos ojo --report SPDX_JSON
   only: [tags]
   artifacts:
     paths:
     - results
     expire_in: 1 week
-    when: on_failure
+    when: always
 
-repo_copyright_check:
+repo_sbom:
   stage: license
   image: fossology/fossology:scanner
   script:
-    - /bin/fossologyscanner copyright keyword repo
+    - /bin/fossologyscanner copyright keyword repo nomos ojo --report SPDX_JSON
   only: [tags]
   artifacts:
     paths:
     - results
     expire_in: 1 week
-    when: on_failure
+    when: always
