@@ -161,6 +161,7 @@ $app->group('/uploads',
     $app->put('/{id:\\d+}/item/{itemId:\\d+}/copyrights/{hash:.*}', CopyrightController::class . ':updateFileCopyrights');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/prev-next', UploadTreeController::class . ':getNextPreviousItem');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/bulk-history', UploadTreeController::class . ':getBulkHistory');
+    $app->get('/{id:\\d+}/item/{itemId:\\d+}/clearing-history', UploadTreeController::class . ':getClearingHistory');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
