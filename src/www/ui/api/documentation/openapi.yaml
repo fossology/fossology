@@ -1244,6 +1244,50 @@ paths:
           $ref: '#/components/responses/defaultResponse'
 
 
+  /uploads/{id}/item/{itemId}/clearing-history:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the itemId
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getClearingHistory
+      tags:
+        - Upload
+      summary: Get the clearing history
+      description: >
+        Get the clearing history for a specific upload item
+      responses:
+        '200':
+          description: List of the data about clearing history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetClearingHistory'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+
   /search:
     get:
       operationId: searchFile
@@ -3725,7 +3769,7 @@ components:
           type: integer
           example:
             3
-            
+                       
     GetBulkHistory:
       type: object
       properties:
@@ -3758,6 +3802,47 @@ components:
         removedLicenses:
           type: array
           description: List of license shortnames removed from the scan
+          items:
+            type: string
+            example: "GPL-2.0"
+
+    GetClearingHistory:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          description: Date of the clearing history
+          example: "2023-06-15"
+        username:
+          type: string
+          description: Username of the user who created the decision.
+          example: "fossy"
+        scope:
+          type: string
+          description: Scope of the clearing
+          enum:
+            - local
+            - package
+            - global
+        type:
+          type: string
+          description: Type of the clearing
+          enum:
+            - TO_BE_DISCUSSED
+            - IRRELEVANT
+            - IDENTIFIED
+            - DO_NOT_USE
+            - NON_FUNCTIONAL
+        addedLicenses:
+          type: array
+          description: List of license shortnames added to the decision
+          items:
+            type: string
+            example: "MIT"
+        removedLicenses:
+          type: array
+          description: List of license shortnames removed from the decision
           items:
             type: string
             example: "GPL-2.0"

@@ -29,6 +29,17 @@ class DecisionTypes extends Types
     );
   }
 
+  public function getConstantNameFromKey($key)
+  {
+    return array(
+        self::TO_BE_DISCUSSED => "TO_BE_DISCUSSED",
+        self::IRRELEVANT => "IRRELEVANT",
+        self::IDENTIFIED => "IDENTIFIED",
+        self::DO_NOT_USE => "DO_NOT_USE",
+        self::NON_FUNCTIONAL => "NON_FUNCTIONAL"
+    )[$key];
+  }
+
   public function getExtendedMap()
   {
     $map = $this->map;
