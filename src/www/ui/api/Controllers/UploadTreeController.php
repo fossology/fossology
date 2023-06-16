@@ -17,7 +17,6 @@ use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Container\ContainerInterface;
 
 
 /**
@@ -137,5 +136,51 @@ class UploadTreeController extends RestController
       $returnVal = new Info(500, $e->getMessage(), InfoType::ERROR);
       return $response->withJson($returnVal->getArray(), $returnVal->getCode());
     }
+  }
+  /**
+   * Get the next and previous item for a given upload and itemId
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getNextPreviousItem($request, $response, $args)
+  {
+    $uploadTreeId = intval($args['itemId']);
+    $uploadId = intval($args['id']);
+    $query = $request->getQueryParams();
+    $uploadDao = $this->restHelper->getUploadDao();
+    $returnVal = null;
+    $selection = "";
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($uploadDao->getUploadtreeTableName($uploadId), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    } else if ($query['selection'] !== null) {
+      $selection = $query['selection'];
+      if ($selection != "withLicenses" && $selection != "noClearing") {
+        $returnVal = new Info(400, "selection should be either 'withLicenses' or 'noClearing'", InfoType::ERROR);
+      }
+    }
+
+    if ($returnVal != null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $options = array('skipThese' => $selection == "withLicenses" ? "noLicense" : ($selection == "noClearing" ? "alreadyCleared" : ""), 'groupId' => $this->restHelper->getGroupId());
+
+    $prevItem = $uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
+    $prevItemId = $prevItem ? $prevItem->getId() : null;
+
+    $nextItem = $uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
+    $nextItemId = $nextItem ? $nextItem->getId() : null;
+
+    $res = [
+      "prevItemId" => $prevItemId,
+      "nextItemId" => $nextItemId
+    ];
+    return $response->withJson($res, 200);
   }
 }
