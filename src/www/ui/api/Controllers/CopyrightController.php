@@ -248,4 +248,36 @@ class CopyrightController extends RestController
     $returnVal = new Info(200, "Successfully Updated Copyright.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), 200);
   }
+
+  /**
+   * Restore copyrights for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileCopyrights($request, $response, $args)
+  {
+    $uploadPk = intval($args['id']);
+    $uploadTreeId = intval($args['itemId']);
+    $copyrightHash = ($args['hash']);
+    $userId = $this->restHelper->getUserId();
+    $cpTable = $this->copyrightHist->getTableName('statement');
+    $returnVal = null;
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($this->restHelper->getUploadDao()->getUploadTreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
+    $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+    $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'rollback');
+    $returnVal = new Info(200, "Successfully restored Copyright.", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), 200);
+  }
 }
