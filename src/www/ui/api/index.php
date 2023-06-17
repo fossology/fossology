@@ -29,6 +29,7 @@ use Fossology\UI\Api\Controllers\GroupController;
 use Fossology\UI\Api\Controllers\InfoController;
 use Fossology\UI\Api\Controllers\JobController;
 use Fossology\UI\Api\Controllers\LicenseController;
+use Fossology\UI\Api\Controllers\CopyrightController;
 use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
@@ -157,6 +158,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/view', UploadTreeController::class. ':viewLicenseFile');
     $app->put('/{id:\\d+}/item/{itemId}/clearing-decision', UploadTreeController::class . ':setClearingDecision');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/copyrights', CopyrightController::class . ':getFileCopyrights');
+    $app->delete('/{id:\\d+}/item/{itemId:\\d+}/copyrights/{hash:.*}', CopyrightController::class . ':deleteFileCopyrights');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
