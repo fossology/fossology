@@ -18,8 +18,8 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use PhpOffice\PhpSpreadsheet\Calculation\LookupRef\Offset;
 use Psr\Http\Message\ServerRequestInterface;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 
 class CopyrightController extends RestController
@@ -50,6 +50,22 @@ class CopyrightController extends RestController
    */
   const COPYRIGHT_FETCH_LIMIT = 100;
 
+  /**
+   * @var ClearingDao
+   */
+  private $clearingDao;
+
+  /**
+   * @var LicenseDao $licenseDao
+   * License Dao object
+   */
+  private $licenseDao;
+
+  /**
+   * @var UploadDao $uploadDao
+   * Upload Dao object
+   */
+  private $uploadDao;
 
   /**
    * @var copyrightHist $copyrightHist
@@ -57,9 +73,16 @@ class CopyrightController extends RestController
    */
   private $copyrightHist;
 
+  /**
+   * @var CopyrightDao $copyrightDao
+   * Copyright Dao object
+   */
+  private $copyrightDao;
+
   public function __construct($container)
   {
     parent::__construct($container);
+    $this->copyrightDao = $container->get('dao.copyright');
     $this->copyrightHist = $this->restHelper->getPlugin('ajax-copyright-hist');
   }
 
@@ -157,5 +180,39 @@ class CopyrightController extends RestController
       return $retVal;
     }
     return $response->withHeader("X-Total-Pages", $totalPages)->withJson($finalVal, 200);
+  }
+
+  /**
+   * Delete copyrights for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileCopyrights($request, $response, $args)
+  {
+
+    $uploadDao = $this->restHelper->getUploadDao();
+    $uploadPk = intval($args['id']);
+    $uploadTreeId = intval($args['itemId']);
+    $copyrightHash = $args['hash'];
+    $userId = $this->restHelper->getUserId();
+    $cpTable = $this->copyrightHist->getTableName('statement');
+    $returnVal = null;
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($uploadDao->getUploadTreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $uploadTreeTableName = $uploadDao->getUploadTreeTableName($uploadTreeId);
+    $item = $uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+    $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'delete');
+    $returnVal = new Info(200, "Successfully removed Copyright.", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 }

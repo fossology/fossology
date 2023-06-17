@@ -321,7 +321,7 @@ count(*) AS copyright_count " .
    * @param string $type Result type
    * @return string Table name
    */
-  private function getTableName($type)
+  public function getTableName($type)
   {
     switch ($type) {
       case "ipra" :

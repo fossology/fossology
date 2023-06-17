@@ -1845,6 +1845,49 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /uploads/{id}/item/{itemId}/copyrights/{hash}:
+    parameters:
+      - name: id
+        required: true
+        description: upload ID
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Upload tree ID
+        in: path
+        schema:
+          type: integer
+      - name: hash
+        required: true
+        description: copyright hash
+        in: path
+        schema:
+          type: string
+    delete:
+      operationId: deleteFileCopyrights
+      tags:
+        - Copyright
+      summary: Deletes a copyright for a file
+      description: Deletes a copyright statement for a particular file
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /folders:
     parameters:
