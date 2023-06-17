@@ -2112,6 +2112,29 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+    patch:
+      operationId: restoreFileCopyrights
+      tags:
+        - Copyrights
+      summary: Restores a copyright for a file
+      description: Restores a copyright statement for a particular file
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
     put:
       operationId: updateFileCopyrights
       tags:
