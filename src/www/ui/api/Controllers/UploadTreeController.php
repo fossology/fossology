@@ -759,4 +759,121 @@ class UploadTreeController extends RestController
       'errors' => $errors
     ], 200);
   }
+
+  /**
+   * Schedule a bulk scan for an uploadtree item
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function scheduleBulkScan($request, $response, $args)
+  {
+    $body = $this->getParsedBody($request);
+    $uploadTreeId = intval($args['itemId']);
+    $uploadId = intval($args['id']);
+    $uploadDao = $this->restHelper->getUploadDao();
+    $licenseDao = $this->container->get('dao.license');
+    $returnVal = null;
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($uploadDao->getUploadtreeTableName($uploadId), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    }
+
+    if ($returnVal != null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $isValid = true;
+
+    // Validation errors
+    $errors = [];
+
+    // Verify if each element from $body was given in the request
+    $requiredFields = ['bulkActions', 'refText', 'bulkScope', 'forceDecision', 'ignoreIrre', 'delimiters'];
+
+    foreach ($requiredFields as $field) {
+      if (!array_key_exists($field, $body)) {
+        $isValid = false;
+        $errors[] = "$field should be given";
+      }
+    }
+    // Additional validations for specific fields
+    if ($isValid) {
+      // Check if refText is not equal to ""
+      if ($body['refText'] === "") {
+        $isValid = false;
+        $errors[] = "refText should not be empty";
+      }
+      // Check if forceDecision and ignoreIrre are true or false
+      if (!in_array($body['forceDecision'], [true, false]) || !in_array($body['ignoreIrre'], [true, false])) {
+        $isValid = false;
+        $errors[] = "forceDecision and ignoreIrre should be either true or false";
+      }
+      // Check if delimiters is a string
+      if (!is_string($body['delimiters'])) {
+        $isValid = false;
+        $errors[] = "delimiters should be a string";
+      }
+      // check if bulkScope value is either folder or upload
+      if (!in_array($body['bulkScope'], ["folder", "upload"])) {
+        $isValid = false;
+        $errors[] = "bulkScope should be either folder or upload";
+      }
+      // check if the bulkActions property is an array and if each element has a valid license id
+      if (!is_array($body['bulkActions'])) {
+        $isValid = false;
+        $errors[] = "bulkActions should be an array";
+      } else {
+        foreach ($body['bulkActions'] as &$license) {
+          $existingLicense = $licenseDao->getLicenseByShortName($license['licenseShortName'],
+            $this->restHelper->getGroupId());
+          if ($existingLicense == null) {
+            $isValid = false;
+            $errors[] = "License with short name " . $license['licenseShortName'] . " does not exist";
+          } else if ($license['licenseAction'] != null && !in_array($license['licenseAction'], ["ADD", "REMOVE"])) {
+            $isValid = false;
+            $errors[] = "License action should be either ADD or REMOVE";
+          }
+
+          $license['licenseId'] = $existingLicense->getId();
+          $license['reportinfo'] = $license['licenseText'];
+          $license['action'] = $license['licenseAction'] == 'REMOVE' ? 'Remove' : 'Add';
+        }
+      }
+    }
+
+    $errorMess = "";
+    if (!$isValid) {
+      foreach ($errors as $error) {
+        $errorMess = $error . "\n";
+      }
+      $returnVal = new Info(400, $errorMess, InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
+    $symfonyRequest->request->set('bulkAction', $body['bulkActions']);
+    $symfonyRequest->request->set('refText', $body['refText']);
+    $symfonyRequest->request->set('bulkScope', $body['bulkScope'] == "folder" ? 'f' : 'u');
+    $symfonyRequest->request->set('uploadTreeId', $uploadTreeId);
+    $symfonyRequest->request->set('forceDecision', $body['forceDecision'] ? 1 : 0);
+    $symfonyRequest->request->set('ignoreIrre', $body['ignoreIrre'] ? 1 : 0);
+    $symfonyRequest->request->set('delimiters', $body['delimiters']);
+
+    $changeLicenseBulk = $this->restHelper->getPlugin('change-license-bulk');
+    $res = $changeLicenseBulk->handle($symfonyRequest);
+    $status = $res->getStatusCode();
+
+    if ($status != 200) {
+      $returnVal = new Info($status, json_decode($res->getContent(), true)["error"], InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $info = new Info(201, json_decode($res->getContent(), true)["jqid"], InfoType::INFO);
+    return $response->withJson($info->getArray(), $info->getCode());
+  }
 }
