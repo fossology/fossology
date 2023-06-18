@@ -22,6 +22,7 @@ namespace {
 namespace Fossology\UI\Api\Test\Controllers {
 
   use AjaxClearingView;
+  use ChangeLicenseBulk;
   use ClearingView;
   use Fossology\Lib\Auth\Auth;
   use Fossology\Lib\Dao\ClearingDao;
@@ -43,6 +44,7 @@ namespace Fossology\UI\Api\Test\Controllers {
   use Fossology\Lib\Data\LicenseRef;
   use Fossology\Lib\Data\UploadStatus;
   use Fossology\Lib\Db\DbManager;
+  use Symfony\Component\HttpFoundation\JsonResponse;
   use Fossology\UI\Api\Controllers\UploadTreeController;
   use Fossology\UI\Api\Helper\DbHelper;
   use Fossology\UI\Api\Helper\ResponseHelper;
@@ -134,6 +136,12 @@ namespace Fossology\UI\Api\Test\Controllers {
     private $decisionScopes;
 
     /**
+     * @var ChangeLicenseBulk $changeLicenseBulk
+     * ChangeLicenseBulk mock
+     */
+    private $changeLicenseBulk;
+
+    /**
      * @var M\MockInterface $viewFilePlugin
      * ViewFilePlugin mock
      */
@@ -188,13 +196,17 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->itemTreeBoundsMock = M::mock(ItemTreeBounds::class);
       $this->concludeLicensePlugin = M::mock(AjaxClearingView::class);
       $this->licenseDao = M::mock(LicenseDao::class);
+      $this->changeLicenseBulk = M::mock(ChangeLicenseBulk::class);
+      $this->licenseDao = M::mock(LicenseDao::class);
 
       $this->restHelper->shouldReceive('getPlugin')
         ->withArgs(array('view'))->andReturn($this->viewFilePlugin);
       $this->restHelper->shouldReceive('getPlugin')
         ->withArgs(array('view-license'))->andReturn($this->viewLicensePlugin);
       $this->restHelper->shouldReceive('getPlugin')
-        ->withArgs(array('conclude-license'))->andReturn($this->concludeLicensePlugin);
+        ->withArgs(array('conclude-license'))->andReturn($this->concludeLicensePlugin);      $this->restHelper->shouldReceive('getPlugin')
+        ->withArgs(array('change-license-bulk'))->andReturn($this->changeLicenseBulk);
+
       $this->dbManager->shouldReceive('getSingleRow')
         ->withArgs([M::any(), [$this->groupId, UploadStatus::OPEN,
           Auth::PERM_READ]]);
@@ -776,6 +788,72 @@ namespace Fossology\UI\Api\Test\Controllers {
       $request = new Request("PUT", new Uri("HTTP", "localhost"),
         $requestHeaders, [], [], $reqBody);
       $actualResponse = $this->uploadTreeController->handleAddEditAndDeleteLicenseDecision($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+
+      $this->assertEquals($expectedResponse->getStatusCode(),
+        $actualResponse->getStatusCode());
+      $this->assertEquals($this->getResponseJson($expectedResponse),
+        $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::getNextPreviousItem()
+     * -# Check if response status is 200 and RES body matches
+     */
+    public function testScheduleBulkScan()
+    {
+      $licenseId = 357;
+      $licenseShortName = "MIT";
+      $existingLicense = new License( $licenseId, $licenseShortName, "FULL NAME", "text", "url", [], "1");
+      $body = [
+        'bulkActions' => [
+          [
+            'licenseShortName' => $licenseShortName,
+            'licenseText' => '',
+            'acknowledgement' => '',
+            'comment' => '',
+            'licenseAction' => 'ADD'
+          ]
+        ],
+        'refText' => 'Copyright (c) 2011-2023 The Bootstrap Authors',
+        'bulkScope' => 'folder',
+        'forceDecision' => 0,
+        'ignoreIrre' => 0,
+        'delimiters' => 'DEFAULT'
+      ];
+      $jobId = 122;
+      $res = new JsonResponse(array("jqid" => $jobId));
+
+      $itemId = 1;
+      $uploadId = 1;
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["license_ref", "rf_pk", $licenseId])->andReturn(true);
+      $this->licenseDao->shouldReceive('getLicenseByShortName')
+        ->withArgs([$licenseShortName, $this->groupId])
+        ->andReturn($existingLicense);
+      $this->changeLicenseBulk->shouldReceive('handle')
+        ->withArgs([M::any()])
+        ->andReturn($res);
+
+      $info = new Info(201, json_decode($res->getContent(), true)["jqid"], InfoType::INFO);
+
+      $reqBody = $this->streamFactory->createStream(json_encode(
+        $body
+      ));
+
+      $requestHeaders = new Headers();
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("POST", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $reqBody);
+
+      $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), $info->getCode());
+      $actualResponse = $this->uploadTreeController->scheduleBulkScan($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
 
       $this->assertEquals($expectedResponse->getStatusCode(),
         $actualResponse->getStatusCode());

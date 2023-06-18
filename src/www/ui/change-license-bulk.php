@@ -40,7 +40,7 @@ class ChangeLicenseBulk extends DefaultPlugin
    * @param Request $request
    * @return Response
    */
-  protected function handle(Request $request)
+  public function handle(Request $request)
   {
     $uploadTreeId = intval($request->get('uploadTreeId'));
     if ($uploadTreeId <= 0) {
