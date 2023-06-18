@@ -14,6 +14,7 @@ namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\UI\Api\Helper\ResponseHelper;
+use Fossology\UI\Api\Models\BulkHistory;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ServerRequestInterface;
@@ -182,5 +183,50 @@ class UploadTreeController extends RestController
       "nextItemId" => $nextItemId
     ];
     return $response->withJson($res, 200);
+  }
+
+  /**
+   * Get the bulk history of an item
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getBulkHistory($request, $response, $args)
+  {
+    $uploadTreeId = intval($args['itemId']);
+    $uploadId = intval($args['id']);
+    $uploadDao = $this->restHelper->getUploadDao();
+    $clearingDao = $this->container->get('dao.clearing');
+    $returnVal = null;
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($uploadDao->getUploadtreeTableName($uploadId), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    }
+
+    if ($returnVal != null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
+    $itemTreeBounds = $uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+
+    $res = $clearingDao->getBulkHistory($itemTreeBounds, $this->restHelper->getGroupId());
+    $updatedRes = [];
+
+    foreach ($res as $value) {
+      $obj = new BulkHistory(
+        intval($value['bulkId']),
+        intval($value['id']),
+        $value['text'],
+        $value['matched'],
+        $value['tried'],
+        $value['addedLicenses'],
+        $value['removedLicenses']);
+      $updatedRes[] = $obj->getArray();
+    }
+    return $response->withJson($updatedRes, 200);
   }
 }
