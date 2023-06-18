@@ -1021,6 +1021,52 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  
+  /uploads/{id}/item/{itemId}/bulk-history:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the itemId
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getBulkHistory
+      tags:
+        - Upload
+      summary: Get the bulk history
+      description: >
+        Get the bulk history for a specific upload item
+      responses:
+        '200':
+          description: List of the data about the bulk history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetBulkHistory'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
 
   /uploads/{id}/licenses/main:
     parameters:
@@ -1196,6 +1242,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
 
   /search:
     get:
@@ -3678,6 +3725,42 @@ components:
           type: integer
           example:
             3
+            
+    GetBulkHistory:
+      type: object
+      properties:
+        bulkId:
+          type: integer
+          description: The bulk id
+          example: 1
+        clearingEventId:
+          type: integer
+          description: The event id associated with the bulk
+          example: 1
+        text:
+          type: string
+          description: Scan reference text
+          example: "Licensed under MIT"
+        matched:
+          type: boolean
+          description: Whether matched or not
+          example: false
+        tried:
+          type: boolean
+          description: Whether tried or not
+          example: true
+        addedLicenses:
+          type: array
+          description: List of license shortnames added to the scan
+          items:
+            type: string
+            example: "MIT"
+        removedLicenses:
+          type: array
+          description: List of license shortnames removed from the scan
+          items:
+            type: string
+            example: "GPL-2.0"
     UserGroupMember:
       type: object
       properties:
