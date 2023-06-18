@@ -296,6 +296,9 @@ class AjaxShowJobs extends \FO_Plugin
           case 'clixml':
             $jobArr['jobQueue'][$key]['download'] = "Clixml Report";
             break;
+          case 'cyclonedx':
+            $jobArr['jobQueue'][$key]['download'] = "CycloneDX json Report";
+            break;
           case 'decisionexporter':
             $jobArr['jobQueue'][$key]['download'] = "FOSSology Decisions";
             break;

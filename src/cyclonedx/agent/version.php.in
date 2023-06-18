@@ -1,0 +1,10 @@
+<?php
+/*
+ SPDX-FileCopyrightText: © 2023 Sushant Kumar <sushantmishra02102002@gmail.com>
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
+define("CYCLONEDX_AGENT_NAME", "cyclonedx");
+define("AGENT_VERSION", "@FO_VERSION@");
+define("AGENT_REV", "@FO_COMMIT_HASH@");
