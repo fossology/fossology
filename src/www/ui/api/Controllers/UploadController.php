@@ -20,6 +20,7 @@ use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
+use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\UploadHelper;
 use Fossology\UI\Api\Models\Info;
@@ -1002,5 +1003,49 @@ class UploadController extends RestController
     $returnVal = new Info(200, "Main license removed successfully.", InfoType::INFO);
 
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Get the clearing progress info of the upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getClearingProgressInfo($request, $response, $args)
+  {
+    $uploadId = intval($args['id']);
+    $uploadDao = $this->restHelper->getUploadDao();
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
+
+    $noLicenseUploadTreeView = new UploadTreeProxy($uploadId,
+      array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
+        UploadTreeProxy::OPT_GROUP_ID => $this->restHelper->getGroupId()),
+      $uploadTreeTableName,
+      'no_license_uploadtree' . $uploadId);
+
+    $filesOfInterest = $noLicenseUploadTreeView->count();
+
+    $nonClearedUploadTreeView = new UploadTreeProxy($uploadId,
+      array(UploadTreeProxy::OPT_SKIP_THESE => "alreadyCleared",
+        UploadTreeProxy::OPT_GROUP_ID =>  $this->restHelper->getGroupId()),
+      $uploadTreeTableName,
+      'already_cleared_uploadtree' . $uploadId);
+    $filesToBeCleared = $nonClearedUploadTreeView->count();
+
+    $filesAlreadyCleared = $filesOfInterest - $filesToBeCleared;
+
+    $res = [
+      "totalFilesOfInterest" => intval($filesOfInterest),
+      "totalFilesCleared" => intval($filesAlreadyCleared),
+    ];
+    return $response->withJson($res, 200);
   }
 }

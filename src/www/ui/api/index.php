@@ -151,6 +151,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
     $app->get('/{id:\\d+}/download', UploadController::class . ':uploadDownload');
     $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');
+    $app->get('/{id:\\d+}/clearing-progress', UploadController::class . ':getClearingProgressInfo');
     $app->get('/{id:\\d+}/licenses/main', UploadController::class . ':getMainLicenses');
     $app->post('/{id:\\d+}/licenses/main', UploadController::class . ':setMainLicense');
     $app->delete('/{id:\\d+}/licenses/{shortName:[\\w\\- \\.]+}/main', UploadController::class . ':removeMainLicense');
