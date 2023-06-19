@@ -925,7 +925,81 @@ paths:
                   $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-
+  /uploads/{id}/item/{itemId}/highlight:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the item
+        in: path
+        schema:
+          type: integer
+      - name: clearingId
+        required: false
+        description: Id of the clearing event
+        in: query
+        schema:
+          type: integer
+      - name: licenseId
+        required: false
+        description: Id of the license
+        in: query
+        schema:
+          type: integer
+      - name: highlightId
+        required: false
+        description: Id of the highlight
+        in: query
+        schema:
+          type: integer
+      - name: agentId
+        required: false
+        description: Id of the agent
+        in: query
+        schema:
+          type: integer
+    get:
+      operationId: getHighlightEntries
+      tags:
+        - Upload
+      summary: Get highlight entries of the content.
+      description: >
+        Get highlight entries of the content for the given upload and item id.
+      responses:
+        '200':
+          description: List of the data about highlight entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HighlightInfo'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+          
   /uploads/{id}/item/{itemId}/view:
     parameters:
       - name: id
@@ -3846,6 +3920,55 @@ components:
           items:
             type: string
             example: "GPL-2.0"
+            
+    HighlightInfo:
+      type: object
+      properties:
+        start:
+          type: integer
+          description: Start position of the highlight in file
+          example: 68
+        end:
+          type: integer
+          description: End position of the highlight in file
+          example: 70
+        type:
+          type: string
+          description: Type of highlight
+          enum:
+            - M | Match
+            - MC | Changed
+            - MA | Added
+            - MD | Deleted
+            - S | Signature
+            - K | Keyword
+            - B | Bulk
+            - C | Copyright
+            - U | Url
+            - E | Email
+            - A | Author
+            - I | IPRA
+            - X | ECC
+            - KW | Keyword others
+            - any | Undefined
+        shortName:
+          type: string
+          description: License shortname
+          example: MIT
+        refStart:
+          type: integer
+          description: Start of monk diff highlight (relative)
+          example: 0
+        refEnd:
+          type: integer
+          description: End of monk diff highlight (relative)
+          example: 53
+        infoText:
+          type: string
+          description: Tooltip text
+          example: "MIT: 'MIT License\n\nCopyright (c) <year> <copyright holders>'"
+        htmlElement:
+          type: string
     UserGroupMember:
       type: object
       properties:

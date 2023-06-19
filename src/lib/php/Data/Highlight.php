@@ -195,6 +195,23 @@ class Highlight
     return $this->htmlElement;
   }
 
+  /**
+   * Get Highlight element as associative array
+   * @return array
+   */
+  public function getArray()
+  {
+    return array(
+      "start" => $this->start,
+      "end" => $this->end,
+      "type" => $this->type,
+      "licenseId" => $this->licenseId,
+      "refStart" => $this->refStart,
+      "refEnd" => $this->refEnd,
+      "infoText" => $this->infoText,
+      "htmlElement" => $this->htmlElement
+    );
+  }
 
   public function __toString()
   {

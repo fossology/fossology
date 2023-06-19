@@ -30,6 +30,7 @@ namespace Fossology\UI\Api\Test\Controllers {
   use Fossology\Lib\Data\DecisionTypes;
   use Fossology\Lib\Data\Tree\Item;
   use Fossology\Lib\Data\Tree\ItemTreeBounds;
+  use Fossology\Lib\Data\Highlight;
   use Fossology\Lib\Data\UploadStatus;
   use Fossology\Lib\Db\DbManager;
   use Fossology\UI\Api\Controllers\UploadTreeController;
@@ -455,6 +456,50 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->withArgs([$fileClearings[0]->getType()])->andReturn("TO_BE_DISCUSSED");
       $expectedResponse = (new ResponseHelper())->withJson($result, 200);
       $actualResponse = $this->uploadTreeController->getClearingHistory(null, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+      $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+      $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for UploadController::viewLicenseFile() with valid status
+     * -# Check if response status is 200 and the body has the expected contents
+     */
+    public function testGetHighlightEntries()
+    {
+      $uploadId = 1;
+      $itemId = 200;
+      $res [] = array(
+        "start" => 70,
+        "end" => 70,
+        "type" => "MD",
+        "licenseId" => null,
+        "refStart" => 0,
+        "refEnd" => 53,
+        "infoText" => "MIT: 'MIT License\n\nCopyright (c) <year> <copyright holders>'",
+        "htmlElement" => null
+      );
+
+      $highlight = new Highlight($res[0]["start"], $res[0]["end"], $res[0]["type"], $res[0]["refStart"], $res[0]["refEnd"], $res[0]["infoText"]);
+      $itemTreeBounds = new ItemTreeBounds($itemId, 'uploadtree', $uploadId, 1, 2);
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive("getItemTreeBounds")->withArgs([$itemId, "uploadtree"])->andReturn($itemTreeBounds);
+      $this->viewLicensePlugin->shouldReceive('getSelectedHighlighting')->withArgs([$itemTreeBounds, null, null, null, null, $uploadId])->andReturn([$highlight]);
+
+      $expectedResponse = (new ResponseHelper())->withJson($res, 200);
+      $queryParams = ['clearingId' => null, 'agentId' => null, 'highlightId' => null, 'licenseId' => null];
+      $request = $this->getMockBuilder(ServerRequestInterface::class)
+        ->getMock();
+      $request->expects($this->any())
+        ->method('getQueryParams')
+        ->willReturn($queryParams);
+
+      $actualResponse = $this->uploadTreeController->getHighlightEntries($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
       $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
       $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
     }

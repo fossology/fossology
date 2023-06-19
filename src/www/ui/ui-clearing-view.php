@@ -98,7 +98,7 @@ class ClearingView extends FO_Plugin
    * @param int $uploadId
    * @return Highlight[]
    */
-  private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId, $uploadId)
+  public function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId, $uploadId)
   {
     $unmaskAgents = $selectedAgentId;
     if (empty($selectedAgentId)) {

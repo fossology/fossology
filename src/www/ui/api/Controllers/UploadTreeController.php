@@ -280,4 +280,57 @@ class UploadTreeController extends RestController
     }
     return $response->withJson($data, 200);
   }
+
+  /**
+   * Get highlight entries for the contents of the item
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getHighlightEntries($request, $response, $args)
+  {
+    $uploadTreeId = intval($args['itemId']);
+    $uploadId = intval($args['id']);
+    $query = $request->getQueryParams();
+    $uploadDao = $this->restHelper->getUploadDao();
+    $returnVal = null;
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($uploadDao->getUploadtreeTableName($uploadId), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    }
+    $agentId = $query['agentId'] ?? null;
+    $highlightId = $query['highlightId'] ?? null;
+    $licenseId = $query['licenseId'] ?? null;
+    $clearingId = $query['clearingId'] ?? null;
+
+    if ($licenseId !== null && !$this->dbHelper->doesIdExist("license_ref", "rf_pk", $licenseId)) {
+      $returnVal = new Info(404, "License does not exist", InfoType::ERROR);
+    } else if ($highlightId !== null && !$this->dbHelper->doesIdExist("highlight", "fl_fk", $highlightId)) {
+      $returnVal = new Info(404, "Highlight does not exist", InfoType::ERROR);
+    } else if ($agentId !== null && !$this->dbHelper->doesIdExist("agent", "agent_pk", $agentId)) {
+      $returnVal = new Info(404, "Agent does not exist", InfoType::ERROR);
+    } else if ($clearingId !== null && !$this->dbHelper->doesIdExist("clearing_event", "clearing_event_pk", $clearingId)) {
+      $returnVal = new Info(404, "Clearing does not exist", InfoType::ERROR);
+    }
+
+    if ($returnVal != null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
+    $itemTreeBounds = $uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+    $viewLicensePlugin = $this->restHelper->getPlugin('view-license');
+    $res = $viewLicensePlugin->getSelectedHighlighting($itemTreeBounds, $licenseId,
+      $agentId, $highlightId, $clearingId, $uploadId);
+
+    $transformedRes = [];
+    foreach ($res as $value) {
+      $transformedRes[] = $value->getArray();
+    }
+    return $response->withJson($transformedRes, 200);
+  }
 }

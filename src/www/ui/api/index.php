@@ -162,6 +162,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/prev-next', UploadTreeController::class . ':getNextPreviousItem');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/bulk-history', UploadTreeController::class . ':getBulkHistory');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/clearing-history', UploadTreeController::class . ':getClearingHistory');
+    $app->get('/{id:\\d+}/item/{itemId:\\d+}/highlight', UploadTreeController::class . ':getHighlightEntries');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
