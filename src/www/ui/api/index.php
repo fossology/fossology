@@ -28,6 +28,7 @@ use Fossology\UI\Api\Controllers\FolderController;
 use Fossology\UI\Api\Controllers\GroupController;
 use Fossology\UI\Api\Controllers\InfoController;
 use Fossology\UI\Api\Controllers\JobController;
+use Fossology\UI\Api\Controllers\CopyrightController;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\ReportController;
@@ -241,6 +242,11 @@ $app->group('/health',
 $app->group('/filesearch',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->post('', FileSearchController::class . ':getFiles');
+    $app->any('/{params:.*}', BadRequestController::class);
+  });
+$app->group('/file',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('/upload/{id:\\d+}/item/{itemId:\\d+}/copyrights', CopyrightController::class . ':getFileCopyrights');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

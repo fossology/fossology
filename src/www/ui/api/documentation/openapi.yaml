@@ -699,6 +699,56 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /file/upload/{id}/item/{ItemId}/copyrights:
+    parameters:
+      - name: id
+        required: true
+        description: Upload Id
+        in: path
+        schema:
+          type: integer
+      - name: ItemId
+        required: true
+        description: Upload Tree ID
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getFileCopyrights
+      tags:
+        - Copyrights
+      summary: Get the copyrights of the mentioned upload tree ID
+      description: Returns the list of copyrights associated with the file
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetFileCopyrights'
+        '400':
+          description: "Bad Request. 'upload' is a required query param"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Upload is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Upload does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /uploads/{id}/copyrights:
     parameters:
       - name: id
@@ -2959,6 +3009,19 @@ components:
         uploadId:
           type: integer
           description: Upload ID to which the job belongs to.
+    GetFileCopyrights:
+      description: Copyright details of a file
+      type: object
+      properties:
+        content:
+          type: string
+          description: Copyright content
+        hash:
+          type: string
+          description: copyright hash
+        copyright_count:
+          type: integer
+          description: count of the copyrights
     UrlUpload:
       description: To create an upload from a URL
       type: object
