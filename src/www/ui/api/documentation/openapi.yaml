@@ -804,6 +804,34 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+    delete:
+      operationId: DeleteFileCopyrights
+      tags:
+        - Copyrights
+      summary: Deletes a copyright for a file
+      description: Deletes a copyright statement for a particular file
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Total-Pages:
+              description: Total number of pages which can be generated based on limit
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/deleteCopyright'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'    
 
   /uploads/{id}/copyrights:
     parameters:
@@ -3089,6 +3117,21 @@ components:
           type: string
           description: Success message
           example: "Successfully Updated Copyright."
+        type:
+          type: string
+          description: type of message
+          example: "INFO"
+    deleteCopyright:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Status code
+          example: 200
+        content:
+          type: string
+          description: Success message
+          example: "Successfully removed Copyright."
         type:
           type: string
           description: type of message
