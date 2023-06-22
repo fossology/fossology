@@ -249,6 +249,7 @@ $app->group('/file',
     $app->get('/upload/{id:\\d+}/item/{itemId:\\d+}/copyrights', CopyrightController::class . ':getFileCopyrights');
     $app->put('/upload/{id:\\d+}/item/{itemId:\\d+}/copyright/{hash:.*}', CopyrightController::class . ':UpdateFileCopyrights');
     $app->delete('/upload/{id:\\d+}/item/{itemId:\\d+}/copyright/{hash:.*}', CopyrightController::class . ':DeleteFileCopyrights');
+    $app->patch('/upload/{id:\\d+}/item/{itemId:\\d+}/copyright/{hash:.*}', CopyrightController::class . ':RestoreFileCopyrights');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

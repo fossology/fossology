@@ -831,7 +831,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-          $ref: '#/components/responses/defaultResponse'    
+          $ref: '#/components/responses/defaultResponse'
+    patch:
+      operationId: RestoreFileCopyrights
+      tags:
+        - Copyrights
+      summary: Restores a copyright for a file
+      description: Restores a copyright statement for a particular file
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Total-Pages:
+              description: Total number of pages which can be generated based on limit
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/restoreCopyright'
 
   /uploads/{id}/copyrights:
     parameters:
@@ -3132,6 +3152,21 @@ components:
           type: string
           description: Success message
           example: "Successfully removed Copyright."
+        type:
+          type: string
+          description: type of message
+          example: "INFO"
+    restoreCopyright:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Status code
+          example: 200
+        content:
+          type: string
+          description: Success message
+          example: "Successfully restored Copyright."
         type:
           type: string
           description: type of message

@@ -151,7 +151,6 @@ class CopyrightController extends RestController
    * @return ResponseHelper
    */
 
-
   public function DeleteFileCopyrights($request, $response, $args)
   {
     try {
@@ -172,6 +171,42 @@ class CopyrightController extends RestController
       }
       $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'delete');
       $returnVal = new Info(200, "Successfully removed Copyright.", InfoType::INFO);
+      return $response->withJson($returnVal->getArray(), 200);
+    } catch (\Exception $e) {
+      $returnVal = new Info(500, $e->getMessage(), InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+  }
+
+  /**
+   * Restore copyrights for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+
+  public function RestoreFileCopyrights($request, $response, $args)
+  {
+    try {
+      $uploadDao = $this->restHelper->getUploadDao();
+      $uploadTreeId = intval($args['itemId']);
+      $copyrightHash = ($args['hash']);
+      $userId = $this->restHelper->getUserId();
+      $UploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadTreeId);
+      $cpTable = $this->CopyrightHist->getTableName('statement');
+      $returnVal = null;
+      $item = $uploadDao->getItemTreeBounds($uploadTreeId, $UploadTreeTableName);
+
+      if (!$this->dbHelper->doesIdExist($uploadDao->getUploadtreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
+        $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+      }
+      if ($returnVal !== null) {
+        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      }
+      $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'rollback');
+      $returnVal = new Info(200, "Successfully restored Copyright.", InfoType::INFO);
       return $response->withJson($returnVal->getArray(), 200);
     } catch (\Exception $e) {
       $returnVal = new Info(500, $e->getMessage(), InfoType::ERROR);
