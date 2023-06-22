@@ -244,9 +244,12 @@ $app->group('/filesearch',
     $app->post('', FileSearchController::class . ':getFiles');
     $app->any('/{params:.*}', BadRequestController::class);
   });
+
+/////////////////////////COPYRIGHTS////////////////////
 $app->group('/file',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('/upload/{id:\\d+}/item/{itemId:\\d+}/copyrights', CopyrightController::class . ':getFileCopyrights');
+    $app->get('/upload/{id:\\d+}/item/{itemId:\\d+}/copyrights/inactive', CopyrightController::class . ':getInactiveFileCopyrights');
     $app->put('/upload/{id:\\d+}/item/{itemId:\\d+}/copyright/{hash:.*}', CopyrightController::class . ':UpdateFileCopyrights');
     $app->delete('/upload/{id:\\d+}/item/{itemId:\\d+}/copyright/{hash:.*}', CopyrightController::class . ':DeleteFileCopyrights');
     $app->patch('/upload/{id:\\d+}/item/{itemId:\\d+}/copyright/{hash:.*}', CopyrightController::class . ':RestoreFileCopyrights');

@@ -213,4 +213,36 @@ class CopyrightController extends RestController
       return $response->withJson($returnVal->getArray(), $returnVal->getCode());
     }
   }
+
+  /**
+   * Get all inactive copyrights for a particular upload-tree
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getInactiveFileCopyrights($request, $response, $args)
+  {
+    $uploadPk = $args["id"];
+    $uploadTreeId = $args["itemId"];
+    $agentId = $this->CopyrightHist->getAgentId($uploadPk, 'copyright_ars');
+    $UploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadPk);
+    $returnVal = null;
+    try {
+      if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
+        $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+      } else if (!$this->dbHelper->doesIdExist($this->uploadDao->getUploadtreeTableName($uploadPk), "uploadtree_pk", $uploadTreeId)) {
+        $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+      }
+      if ($returnVal !== null) {
+        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      }
+      $returnVal = $this->CopyrightHist->getCopyrights($uploadPk, $uploadTreeId, $UploadTreeTableName, $agentId, 'statement', 'inactive', false);
+      return $response->withJson($returnVal, 200);
+    } catch (\Exception $e) {
+      $returnVal = new Info(500, $e->getMessage(), InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+  }
 }
