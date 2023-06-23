@@ -151,6 +151,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/download', UploadController::class . ':uploadDownload');
     $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');
     $app->get('/{id:\\d+}/licenses/main', UploadController::class . ':getMainLicenses');
+    $app->post('/{id:\\d+}/licenses/main', UploadController::class . ':setMainLicense');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/view', UploadTreeController::class. ':viewLicenseFile');
     $app->put('/{id:\\d+}/item/{itemId}/clearing-decision', UploadTreeController::class . ':setClearingDecision');
     $app->any('/{params:.*}', BadRequestController::class);

@@ -3,7 +3,7 @@
  SPDX-FileCopyrightText: © 2018, 2020 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>,
  Soham Banerjee <sohambanerjee4abc@hotmail.com>
- SPDX-FileCopyrightText: © 2022 Samuel Dushimimana <dushsam100@gmail.com>
+ SPDX-FileCopyrightText: © 2022, 2023 Samuel Dushimimana <dushsam100@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -669,7 +669,7 @@ class UploadController extends RestController
   /**
    * Check if upload is accessible
    * @param integer $groupId Group ID
-   * @param integer $id      Upload ID
+   * @param integer $id Upload ID
    * @return Fossology::UI::Api::Models::Info|boolean Info object on failure or
    *         true otherwise
    */
@@ -916,5 +916,52 @@ class UploadController extends RestController
       $licenses[] = $licenseObj->getArray();
     }
     return $response->withJson($licenses, 200);
+  }
+
+  /**
+   * Set the main license for the upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function setMainLicense($request, $response, $args)
+  {
+    $uploadId = intval($args['id']);
+    $body = $this->getParsedBody($request);
+    $shortName = $body['shortName'];
+    $returnVal = null;
+    $license = null;
+    $licenseDao = $this->container->get('dao.license');
+    $clearingDao = $this->container->get('dao.clearing');
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (empty($shortName)) {
+      $returnVal = new Info(400, "Short name missing from request.",
+        InfoType::ERROR);
+    } else {
+      $license = $licenseDao->getLicenseByShortName($shortName,
+        $this->restHelper->getGroupId());
+
+      if ($license === null) {
+        $returnVal = new Info(404, "No license with shortname '$shortName' found.",
+          InfoType::ERROR);
+      } else {
+        $licenseIds = $clearingDao->getMainLicenseIds($uploadId, $this->restHelper->getGroupId());
+        if (in_array($license->getId(), $licenseIds)) {
+          $returnVal = new Info(400, "License already exists for this upload.",
+            InfoType::ERROR);
+        }
+      }
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $clearingDao = $this->container->get('dao.clearing');
+    $clearingDao->makeMainLicense($uploadId, $this->restHelper->getGroupId(), $license->getId());
+    $returnVal = new Info(200, "Successfully added new main license", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 }
