@@ -1604,6 +1604,50 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /uploads/{id}/licenses/scanned:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: agentId
+        required: false
+        description: Id of the agent
+        in: query
+        schema:
+          type: integer
+    get:
+      operationId: getAllScannedLicenses
+      tags:
+        - Upload
+      summary: Get the scanned licenses list
+      description: >
+        Get the scanned licenses list for a specific upload
+      responses:
+        '200':
+          description: List of the scanned licenses in the upload
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScannedLicense'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /uploads/{id}/item/{itemId}/tree/view:
     parameters:
@@ -1693,15 +1737,15 @@ paths:
           default: 50
           minimum: 1
     get:
-      operationId: getLicenseDecisions
+      operationId: getItemTreeView
       tags:
         - Upload
-      summary: Get the license decisions list
+      summary: Get the tree view for the given upload and item id
       description: >
-        Get the license decisions list for the given upload and item id
+        Get the tree view for the given upload and item id
       responses:
         '200':
-          description: List of the license decisions for the upload-tree id
+          description: Tree view for the given upload and item id
           content:
             application/json:
               schema:
@@ -4716,6 +4760,29 @@ components:
               type: integer
               description: The total count of files.
               example: 99
+    ScannedLicense:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Id of the license
+          example: 29
+        shortname:
+          type: string
+          description: Short name of the license
+          example: Apache-2.0
+        occurrence:
+          type: integer
+          description: Number of occurrences of the license
+          example: 1
+        unique:
+          type: integer
+          description: Number of unique occurrences of the license
+          example: 1
+        spdxName:
+          type: string
+          description: SPDX name associated with the license
+          example: Apache-2.0
     UserGroupMember:
       type: object
       properties:
