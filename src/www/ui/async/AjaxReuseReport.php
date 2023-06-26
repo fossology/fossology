@@ -38,7 +38,7 @@ class AjaxReuseReport extends DefaultPlugin
    * @return Response
    * @throws \Exception If upload is not accessible.
    */
-  protected function handle(Request $request)
+  public function handle(Request $request)
   {
     $upload = intval($request->get("upload"));
     $groupId = Auth::getGroupId();
