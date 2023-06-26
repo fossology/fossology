@@ -1395,6 +1395,50 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /uploads/{id}/licenses/histogram:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: agentId
+        required: false
+        description: Id of the agent
+        in: query
+        schema:
+          type: integer
+    get:
+      operationId: getLicensesHistogram
+      tags:
+        - Upload
+      summary: Get the licenses histogram
+      description: >
+        Get the licenses histogram for a specific upload
+      responses:
+        '200':
+          description: Get the licenses histogram for the upload
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LicenseHistogram'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /search:
     get:
       operationId: searchFile
@@ -4038,6 +4082,21 @@ components:
           type: integer
           example:
             200
+    LicenseHistogram:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 357
+        name:
+          type: string
+          example: "ACE"
+        scannerCount:
+          type: integer
+          example: 0
+        concludedCount:
+          type: integer
+          example: 1
     UserGroupMember:
       type: object
       properties:
@@ -4186,6 +4245,30 @@ components:
           description: Date from which to remove older log files from repository.
           nullable: true
           example: "2022-07-16"
+    ScannedEditedLicense:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 29
+        name:
+          type: string
+          example: Apache-2.0
+        details:
+          type: object
+          properties:
+            count:
+              type: integer
+              example: 1
+            unique:
+              type: integer
+              example: 1
+            rf_pk:
+              type: integer
+              example: 29
+            spdx_id:
+              type: string
+              example: Apache-2.0
     NewGroupPermission:
       description: User Group permission update
       type: object
