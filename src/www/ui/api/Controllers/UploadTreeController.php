@@ -333,4 +333,122 @@ class UploadTreeController extends RestController
     }
     return $response->withJson($transformedRes, 200);
   }
+
+    /**
+   * Get the tree view of the upload
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getTreeView($request, $response, $args)
+  {
+    $uploadTreeId = intval($args['itemId']);
+    $uploadId = intval($args['id']);
+    $query = $request->getQueryParams();
+    $agentId = $query['agentId'] ?? null;
+    $flatten = $query['flatten'] ?? null;
+    $scanFilter = $query['scanLicenseFilter'] ?? null;
+    $editedFilter = $query['editedLicenseFilter'] ?? null;
+    $sortDir = $query['sort'] ?? null;
+    $page = $request->getHeaderLine('page');
+    $limit = $request->getHeaderLine('limit');
+    $tagId = $query['tagId'] ?? null;
+    $sSearch = $query['search'] ?? null;
+    $openCBoxFilter = $query['filterOpen'] ?? null;
+    $show = ($query['showQuick'] !== null && $query['showQuick'] !== 'false') ? true : null;
+    $licenseDao = $this->container->get('dao.license');
+
+    $uploadDao = $this->restHelper->getUploadDao();
+    $returnVal = null;
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($uploadDao->getUploadtreeTableName($uploadId), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    } else if ($agentId !== null && !$this->dbHelper->doesIdExist("agent", "agent_pk", $agentId)) {
+      $returnVal = new Info(404, "Agent does not exist", InfoType::ERROR);
+    } else if ($tagId !== null && !$this->dbHelper->doesIdExist("tag", "tag_pk", $tagId)) {
+      $returnVal = new Info(404, "Given Tag does not exist", InfoType::ERROR);
+    } else if ($openCBoxFilter !== null && ($openCBoxFilter !== 'true' && $openCBoxFilter !== 'false')) {
+      $returnVal = new Info(400, "openCBoxFilter must be a boolean value", InfoType::ERROR);
+    } else if ($flatten !== null && ($flatten !== 'true' && $flatten !== 'false')) {
+      $returnVal = new Info(400, "flatten must be a boolean value", InfoType::ERROR);
+    } else if ($sortDir != null && !($sortDir == "asc" || $sortDir == "desc")) {
+      $returnVal = new Info(400, "sortDirection must be asc or desc", InfoType::ERROR);
+    } else if ($page != null && (!is_numeric($page) || intval($page) < 1)) {
+      $returnVal = new Info(400, "page should be positive integer Greater or Equal to 1", InfoType::ERROR);
+    } else if ($show != null && $show != 'true' && $show != 'false') {
+      $returnVal = new Info(400, "show must be a boolean value", InfoType::ERROR);
+    } else if ($limit != null && (!is_numeric($limit) || intval($limit) < 1)) {
+      $returnVal = new Info(400, "limit must be a positive integer Greater Or Equal to 1", InfoType::ERROR);
+    } else {
+      $queryKeys = array_keys($query);
+      $allowedKeys = ['showQuick', 'agentId', 'flatten', 'scanLicenseFilter', 'editedLicenseFilter', 'sort', 'tagId', 'search', 'filterOpen'];
+      $diff = array_diff($queryKeys, $allowedKeys);
+      if (count($diff) > 0) {
+        $returnVal = new Info(400, "Invalid query parameter(s) : " . implode(",", $diff), InfoType::ERROR);
+      }
+    }
+
+    if ($returnVal != null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    if ($editedFilter !== null) {
+      $license = $licenseDao->getLicenseByShortName($editedFilter, $this->restHelper->getGroupId());
+      if ($license === null) {
+        $returnVal = new Info(404, "Edited License filter $editedFilter does not exist", InfoType::ERROR);
+        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      } else {
+        $editedFilter = $license->getId();
+      }
+    }
+
+    if ($scanFilter !== null) {
+      $license = $licenseDao->getLicenseByShortName($scanFilter, $this->restHelper->getGroupId());
+      if ($license === null) {
+        $returnVal = new Info(404, "Scan License filter $scanFilter does not exist", InfoType::ERROR);
+        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      } else {
+        $scanFilter = $license->getId();
+      }
+    }
+
+    if ($page == null) {
+      $page = 1;
+    }
+    if ($limit == null) {
+      $limit = 50;
+    }
+
+    if ($show) {
+      $uploadTreeId = $uploadDao->getFatItemId($uploadTreeId, $uploadId, $uploadDao->getUploadtreeTableName($uploadId));
+    }
+
+    $ajaxExplorerPlugin = $this->restHelper->getPlugin('ajax_explorer');
+    $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
+    $symfonyRequest->request->set('agentId', $agentId);
+    $symfonyRequest->request->set('tag', $tagId);
+    $symfonyRequest->request->set('item', $uploadTreeId);
+    $symfonyRequest->request->set('upload', $uploadId);
+    $symfonyRequest->request->set('fromRest', true);
+    $symfonyRequest->request->set('flatten', ($flatten !== null && $flatten !== 'false') ? true : null);
+    $symfonyRequest->request->set('openCBoxFilter', $openCBoxFilter);
+    $symfonyRequest->request->set('show', $show ? "quick" : null);
+    $symfonyRequest->request->set('iSortingCols', "1");
+    $symfonyRequest->request->set('bSortable_0', "true");
+    $symfonyRequest->request->set('iSortCol_0', "0");
+    $symfonyRequest->request->set('sSortDir_0', $sortDir != null ? $sortDir : 'asc');
+    $symfonyRequest->request->set('iDisplayStart', (intval($page) - 1) * intval($limit));
+    $symfonyRequest->request->set('iDisplayLength', intval($limit));
+    $symfonyRequest->request->set("sSearch", $sSearch);
+    $symfonyRequest->request->set("conFilter", $editedFilter);
+    $symfonyRequest->request->set("scanFilter", $scanFilter);
+
+    $res = $ajaxExplorerPlugin->handle($symfonyRequest);
+
+    return $response->withJson(json_decode($res->getContent(), true)["aaData"], 200);
+  }
 }

@@ -102,7 +102,7 @@ class AjaxExplorer extends DefaultPlugin
    * @param Request $request
    * @return Response
    */
-  protected function handle(Request $request)
+  public function handle(Request $request)
   {
     $upload = intval($request->get("upload"));
     $groupId = Auth::getGroupId();
@@ -126,7 +126,7 @@ class AjaxExplorer extends DefaultPlugin
 
     $UniqueTagArray = array();
     $this->licenseProjector = new LicenseMap($this->getObject('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
-    $vars = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy);
+    $vars = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy, $request);
 
     return new JsonResponse(array(
             'sEcho' => intval($request->get('sEcho')),
@@ -144,9 +144,10 @@ class AjaxExplorer extends DefaultPlugin
    * @param $selectedAgentId
    * @param int $groupId
    * @param ScanJobProxy $scanJobProxy
+   * @param Request $request
    * @return array
    */
-  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy)
+  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy, $request)
   {
     if (!empty($selectedAgentId)) {
       $agentName = $this->agentDao->getAgentName($selectedAgentId);
@@ -157,7 +158,7 @@ class AjaxExplorer extends DefaultPlugin
 
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
-    $isFlat = isset($_GET['flatten']);
+    $isFlat = $request->get('flatten') !== null;
 
     if ($isFlat) {
       $options = array(UploadTreeProxy::OPT_RANGE => $itemTreeBounds);
@@ -166,7 +167,7 @@ class AjaxExplorer extends DefaultPlugin
     }
 
     $searchMap = array();
-    foreach (explode(' ',GetParm('sSearch', PARM_RAW)) as $pair) {
+    foreach (explode(' ',$request->get('sSearch')) as $pair) {
       $a = explode(':',$pair);
       if (count($a) == 1) {
         $searchMap['head'] = $pair;
@@ -181,15 +182,15 @@ class AjaxExplorer extends DefaultPlugin
     if (array_key_exists('head', $searchMap) && strlen($searchMap['head'])>=1) {
       $options[UploadTreeProxy::OPT_HEAD] = $searchMap['head'];
     }
-    if (($rfId=GetParm('scanFilter',PARM_INTEGER))>0) {
+    if (($rfId=$request->get('scanFilter'))>0) {
       $options[UploadTreeProxy::OPT_AGENT_SET] = $selectedScanners;
       $options[UploadTreeProxy::OPT_SCAN_REF] = $rfId;
     }
-    if (($rfId=GetParm('conFilter',PARM_INTEGER))>0) {
+    if (($rfId=$request->get('conFilter'))>0) {
       $options[UploadTreeProxy::OPT_GROUP_ID] = Auth::getGroupId();
       $options[UploadTreeProxy::OPT_CONCLUDE_REF] = $rfId;
     }
-    $openFilter = GetParm('openCBoxFilter',PARM_RAW);
+    $openFilter = $request->get('openCBoxFilter');
     if ($openFilter=='true' || $openFilter=='checked') {
       $options[UploadTreeProxy::OPT_AGENT_SET] = $selectedScanners;
       $options[UploadTreeProxy::OPT_GROUP_ID] = Auth::getGroupId();
@@ -202,10 +203,11 @@ class AjaxExplorer extends DefaultPlugin
 
     $columnNamesInDatabase = array($isFlat?'ufile_name':'lft');
     $defaultOrder = array(array(0, "asc"));
-    $orderString = $this->getObject('utils.data_tables_utility')->getSortingString($_GET, $columnNamesInDatabase, $defaultOrder);
 
-    $offset = GetParm('iDisplayStart', PARM_INTEGER);
-    $limit = GetParm('iDisplayLength', PARM_INTEGER);
+    $orderString = $this->getObject('utils.data_tables_utility')->getSortingString($request->get('fromRest') ? $request->request->all(): $request->query->all(), $columnNamesInDatabase, $defaultOrder);
+
+    $offset = $request->get('iDisplayStart');
+    $limit = $request->get('iDisplayLength');
     if ($offset) {
       $orderString .= " OFFSET $offset";
     }
@@ -255,7 +257,7 @@ class AjaxExplorer extends DefaultPlugin
       if (empty($child)) {
         continue;
       }
-      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $baseUri, $ModLicView, $UniqueTagArray, $isFlat, $latestSuccessfulAgentIds);
+      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $baseUri, $ModLicView, $UniqueTagArray, $isFlat, $latestSuccessfulAgentIds, $request);
     }
 
     $vars['fileData'] = $tableData;
@@ -275,18 +277,26 @@ class AjaxExplorer extends DefaultPlugin
    * @param array $UniqueTagArray
    * @param boolean $isFlat
    * @param int[] $latestSuccessfulAgentIds
+   * @param Request $request
    * @return array
    */
-  private function createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $uri, $ModLicView, &$UniqueTagArray, $isFlat, $latestSuccessfulAgentIds)
+  private function createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $uri, $ModLicView, &$UniqueTagArray, $isFlat, $latestSuccessfulAgentIds, $request)
   {
+    $fileDetails = array(
+      "fileName" => "", "id" => "", "uploadId" => $uploadId, "agentId" => "", "isContainer" => false,
+    );
+
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
     $linkUri = '';
     if (!empty($fileId) && !empty($ModLicView)) {
       $linkUri = Traceback_uri();
       $linkUri .= "?mod=view-license&upload=$uploadId&item=$childUploadTreeId";
+      $fileDetails["id"] = intval($childUploadTreeId);
+      $fileDetails["uploadId"] = $uploadId;
       if ($selectedAgentId) {
         $linkUri .= "&agentId=$selectedAgentId";
+        $fileDetails["agentId"] = $selectedAgentId;
       }
     }
 
@@ -306,8 +316,10 @@ class AjaxExplorer extends DefaultPlugin
           $groupId, $editedMappedLicenses, $parentItemTreeBound));
 
       $linkUri = "$uri&item=" . $uploadtree_pk;
+      $fileDetails["id"] = intval($uploadtree_pk);
       if ($selectedAgentId) {
         $linkUri .= "&agentId=$selectedAgentId";
+        $fileDetails["agentId"] = $selectedAgentId;
       }
       $child['ufile_name'] = $fatChild['ufile_name'];
       if (!Iscontainer($fatChild['ufile_mode'])) {
@@ -316,8 +328,11 @@ class AjaxExplorer extends DefaultPlugin
     } else if ($isContainer) {
       $uploadtree_pk = Isartifact($child['ufile_mode']) ? DirGetNonArtifact($childUploadTreeId, $this->uploadtree_tablename) : $childUploadTreeId;
       $linkUri = "$uri&item=" . $uploadtree_pk;
+      $fileDetails["id"] = intval($uploadtree_pk);
+      $fileDetails["isContainer"] = true;
       if ($selectedAgentId) {
         $linkUri .= "&agentId=$selectedAgentId";
+        $fileDetails["agentId"] = $selectedAgentId;
       }
     }
 
@@ -325,23 +340,38 @@ class AjaxExplorer extends DefaultPlugin
     /* id of each element is its uploadtree_pk */
     $fileName = $child['ufile_name'];
     if ($isContainer) {
+      $fileDetails["fileName"] = $fileName;
       $fileName = "<a href='$linkUri'><span style='color: darkblue'> <b>$fileName</b> </span></a>";
     } else if (!empty($linkUri)) {
+      $fileDetails["fileName"] = $fileName;
       $fileName = "<a href='$linkUri'>$fileName</a>";
     }
     /* show licenses under file name */
     $childItemTreeBounds =
         new ItemTreeBounds($childUploadTreeId, $this->uploadtree_tablename, $child['upload_fk'], $child['lft'], $child['rgt']);
     $totalFilesCount = $this->uploadDao->countPlainFiles($childItemTreeBounds);
+    $licenseEntriesRest = array();
     if ($isContainer) {
+      $fileDetails["isContainer"] = true;
       $agentFilter = $selectedAgentId ? array($selectedAgentId) : $latestSuccessfulAgentIds;
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array());
       $editedLicenses = $this->clearingDao->getClearedLicenses($childItemTreeBounds, $groupId);
+
+      if ($request->get('fromRest')) {
+        foreach ($licenseEntries as $shortName) {
+          $licenseEntriesRest[] = array(
+            "id" => $this->licenseDao->getLicenseByShortName($shortName)->getId(),
+            "name" => $shortName,
+            "agents" => []
+          );
+        }
+      }
     } else {
       $licenseEntries = array();
       if (array_key_exists($fileId, $pfileLicenses)) {
         foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo) {
           $agentEntries = array();
+          $agentEntriesRest = array();
           foreach ($rfInfo as $agent => $match) {
             $agentName = $this->agentNames[$agent];
             $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$match[agent_id]&licenseId=$match[license_id]#highlight'>" . $agentName . "</a>";
@@ -350,7 +380,17 @@ class AjaxExplorer extends DefaultPlugin
               $agentEntry .= ": $match[match_percentage]%";
             }
             $agentEntries[] = $agentEntry;
+            $agentEntriesRest[] = array(
+              "name" => $agentName,
+              "id" => intval($match['agent_id']),
+              "matchPercentage" => intval($match['match_percentage']),
+            );
           }
+          $licenseEntriesRest[] = array(
+            "id" => $this->licenseDao->getLicenseByShortName($shortName)->getId(),
+            "name" => $shortName,
+            "agents" => $agentEntriesRest,
+          );
           $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
         }
       }
@@ -362,13 +402,14 @@ class AjaxExplorer extends DefaultPlugin
         $editedLicenses = array();
       }
     }
-
+    $concludedLicensesRest = array();
     $concludedLicenses = array();
     /** @var LicenseRef $licenseRef */
     foreach ($editedLicenses as $licenseRef) {
       $projectedId = $this->licenseProjector->getProjectedId($licenseRef->getId());
       $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(),$licenseRef->getShortName());
       $concludedLicenses[$projectedId] = $projectedName;
+      $concludedLicensesRest[] = array('id' => $projectedId, 'name' => $projectedName);
     }
 
     $editedLicenseList = implode(', ', $concludedLicenses);
@@ -413,7 +454,17 @@ class AjaxExplorer extends DefaultPlugin
 
     $img = ($isDecisionDNU || $isDecisionNonFunctional) ? 'redGreen' : $img;
 
-    return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared / $filesToBeCleared / $totalFilesCount", $fileListLinks);
+    return $request->get('fromRest') ? array(
+      "fileDetails" => $fileDetails,
+      "licenseList" => $licenseEntriesRest,
+      "editedLicenseList" => $concludedLicensesRest,
+      "clearingStatus" => $img,
+      "clearingProgress" => array(
+        "filesCleared" => intval($filesCleared),
+        "filesToBeCleared" => intval($filesToBeCleared),
+        "totalFilesCount" => intval($totalFilesCount)
+      ),
+    ) : array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared / $filesToBeCleared / $totalFilesCount", $fileListLinks);
   }
 
   /**
