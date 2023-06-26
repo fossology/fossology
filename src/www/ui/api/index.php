@@ -151,6 +151,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
     $app->get('/{id:\\d+}/licenses/histogram', UploadController::class . ':getLicensesHistogram');
     $app->get('/{id:\\d+}/agents', UploadController::class . ':getAllAgents');
+    $app->get('/{id:\\d+}/licenses/edited', UploadController::class . ':getEditedLicenses');
     $app->get('/{id:\\d+}/download', UploadController::class . ':uploadDownload');
     $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');
     $app->get('/{id:\\d+}/clearing-progress', UploadController::class . ':getClearingProgressInfo');
