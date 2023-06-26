@@ -46,7 +46,7 @@ class ReuseReportProcessor
    * @return array $vars - array of declearedLicense, clearedLicense, usedLicense,
    *               unusedLicense and missingLicense
    */
-  function getReuseSummary($uploadId)
+  public function getReuseSummary($uploadId)
   {
     $declearedLicenses = $this->detectLicensesFolder->getDeclearedLicenses($uploadId);
     $groupId = Auth::getGroupId();
@@ -71,7 +71,7 @@ class ReuseReportProcessor
     if (empty($declearedLicenses)) {
       $vars["usedLicense"] = "";
       $vars["unusedLicense"] = "";
-      $vars["missingLicense"] = implode($concludedLicenses);
+      $vars["missingLicense"] = implode(", ", $concludedLicenses);
       return $vars;
     }
 

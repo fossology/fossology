@@ -14,6 +14,7 @@
 namespace Fossology\UI\Api\Test\Controllers;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\BusinessRules\ReuseReportProcessor;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\FolderDao;
@@ -130,6 +131,12 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   private $licenseDao;
 
   /**
+   * @var ReuseReportProcessor $reuseReportProcess
+   * ReuseReportProcessor mock
+   */
+  private $reuseReportProcess;
+
+  /**
    * @var StreamFactory $streamFactory
    * Stream factory to create body streams.
    */
@@ -155,6 +162,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->userDao = M::mock(UserDao::class);
     $this->clearingDao = M::mock(ClearingDao::class);
     $this->licenseDao = M::mock(LicenseDao::class);
+    $this->reuseReportProcess = M::mock(ReuseReportProcessor::class);
 
     $this->dbManager->shouldReceive('getSingleRow')
       ->withArgs([M::any(), [$this->groupId, UploadStatus::OPEN,
@@ -183,6 +191,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $container->shouldReceive('get')->withArgs(
       ['db.manager'])->andReturn($this->dbManager);
     $container->shouldReceive('get')->withArgs(array('dao.license'))->andReturn($this->licenseDao);
+    $container->shouldReceive('get')->withArgs(array(
+      'businessrules.reusereportprocessor'))->andReturn($this->reuseReportProcess);
     $this->uploadController = new UploadController($container);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
     $this->streamFactory = new StreamFactory();
@@ -1125,6 +1135,35 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $expectedResponse = (new ResponseHelper())->withJson($res, 200);
     $actualResponse = $this->uploadController->getClearingProgressInfo(null,
       new ResponseHelper(), ['id' => $uploadId]);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+  /**
+   * @test
+   * -# Test for UploadController::getReuseReportSummary()
+   * -# Check if response status is 200 & Response body is correct
+   */
+  public function testGetReuseReportSummary()
+  {
+    $uploadId = 2;
+    $reuseReportSummary = [
+        'declearedLicense' => "",
+        'clearedLicense' => "MIT, BSD-3-Clause",
+        'usedLicense' => "",
+        'unusedLicense' => "",
+        'missingLicense' => "MIT, BSD-3-Clause",
+      ];
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->reuseReportProcess->shouldReceive('getReuseSummary')
+      ->withArgs([$uploadId])->andReturn($reuseReportSummary);
+
+    $expectedResponse = (new ResponseHelper())->withJson($reuseReportSummary,
+      200);
+    $actualResponse = $this->uploadController->getReuseReportSummary(
+      null, new ResponseHelper(), ['id' => $uploadId]);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
