@@ -1128,4 +1128,39 @@ class UploadController extends RestController
     }
     return $response->withJson($outputArray, 200);
   }
+  /**
+   * Get all the groups with their respective permissions for a upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getAllAgents($request, $response, $args)
+  {
+    $uploadId = intval($args['id']);
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $scannerAgents = array_keys($this->agentNames);
+    $agentDao = $this->container->get('dao.agent');
+    $scanJobProxy = new ScanJobProxy($agentDao, $uploadId);
+    $res = $scanJobProxy->createAgentStatus($scannerAgents);
+
+    foreach ($res as &$item) {
+      if (count($item['successfulAgents']) > 0) {
+        $item['isAgentRunning'] = false;
+      } else {
+        $item['currentAgentId'] = $agentDao->getCurrentAgentRef($item["agentName"])->getAgentId();
+        $item['currentAgentRev'] = "";
+      }
+      foreach ($item['successfulAgents'] as &$agent) {
+        $agent['agent_id'] = intval($agent['agent_id']);
+      }
+    }
+    return $response->withJson($res, 200);
+  }
 }

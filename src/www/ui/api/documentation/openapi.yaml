@@ -1439,6 +1439,45 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /uploads/{id}/agents:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getAgentsByUploadId
+      tags:
+        - Upload
+      summary: Get agents for a upload
+      description: >
+        Returns the list of agents for a upload.
+      responses:
+        '200':
+          description: Get agents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentOfUpload'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /search:
     get:
       operationId: searchFile
@@ -4162,6 +4201,37 @@ components:
         concludedCount:
           type: integer
           example: 1
+    AgentOfUpload:
+      type: object
+      properties:
+        successfulAgents:
+          type: array
+          items:
+              properties:
+                agent_id:
+                  type: integer
+                  example: 20
+                agent_rev:
+                  type: string
+                  example: "4.1.0.282-rc1.ffb851"
+                agent_name:
+                  type: string
+                  example: "reso"
+        uploadId:
+          type: integer
+          example: 10
+        agentName:
+          type: string
+          example: "reso"
+        currentAgentId:
+          type: integer
+          example: 20
+        currentAgentRev:
+          type: string
+          example: "4.1.0.282-rc1.ffb851"
+        isAgentRunning:
+          type: boolean
+          example: false
     UserGroupMember:
       type: object
       properties:
