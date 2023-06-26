@@ -1363,7 +1363,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-
+  
   /uploads/{id}/clearing-progress:
     parameters:
       - name: id
@@ -1469,6 +1469,44 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AgentOfUpload'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /uploads/{id}/licenses/edited:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getAllEditedLicenses
+      tags:
+        - Upload
+      summary: Get the edited licenses list
+      description: >
+        Get the edited licenses list for a specific upload
+      responses:
+        '200':
+          description: List of the edited licenses in the upload
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EditedLicense'
         '404':
           description: Resource Not Found
           content:
@@ -4680,6 +4718,21 @@ components:
           type: string
           description: short name of the license
           example: MIT
+    EditedLicense:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 29
+        shortName:
+          type: string
+          example: Apache-2.0
+        count:
+          type: integer
+          example: 1
+        spdx_id:
+          type: string
+          example: LicenseRef-fossology-ACE
     AddMember:
       description: UserMember options
       type: object

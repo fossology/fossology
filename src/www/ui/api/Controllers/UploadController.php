@@ -1186,4 +1186,39 @@ class UploadController extends RestController
     }
     return $response->withJson($res, 200);
   }
+
+  /**
+   * Get all edited licenses for the entire upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getEditedLicenses($request, $response, $args)
+  {
+    $clearingDao = $this->container->get('dao.clearing');
+    $licenseDao = $this->container->get('dao.license');
+
+    $uploadId = intval($args['id']);
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $uploadDao = $this->restHelper->getUploadDao();
+    $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
+    $itemTreeBounds = $uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
+    $res = $clearingDao->getClearedLicenseIdAndMultiplicities($itemTreeBounds, $this->restHelper->getGroupId());
+    $outputArray = [];
+
+    foreach ($res as $key => $value) {
+      $outputArray[] = [
+        "id" => intval($value["rf_pk"]),
+        "shortName" => $key,
+        "count" =>intval($value["count"]),
+        "spdx_id" => $value["spdx_id"],
+      ];
+    }
+    return $response->withJson($outputArray, 200);
+  }
 }
