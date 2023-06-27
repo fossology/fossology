@@ -1293,4 +1293,35 @@ class UploadController extends RestController
     }
     return $response->withJson($outputArray, 200);
   }
+  /**
+   * Get all the revisions for the successful agents of an upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getAgentsRevision($request, $response, $args)
+  {
+    $agentDao = $this->container->get('dao.agent');
+    $uploadId = intval($args['id']);
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $scannerAgents = array_keys($this->agentNames);
+    $scanJobProxy = new ScanJobProxy($agentDao, $uploadId);
+    $scanJobProxy->createAgentStatus($scannerAgents);
+
+    $res = array();
+    foreach ($scanJobProxy->getSuccessfulAgents() as $agent) {
+      $res[] = array(
+        "id" => $agent->getAgentId(),
+        "name" => $agent->getAgentName(),
+        "revision" => $agent->getAgentRevision(),
+      );
+    }
+    return $response->withJson($res, 200);
+  }
 }
