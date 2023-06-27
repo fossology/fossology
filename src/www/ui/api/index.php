@@ -34,6 +34,7 @@ use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
+use Fossology\UI\Api\Controllers\ConfController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UploadTreeController;
 use Fossology\UI\Api\Controllers\UserController;
@@ -174,6 +175,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/totalcopyrights', CopyrightController::class . ':getTotalFileCopyrights');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/tree/view', UploadTreeController::class . ':getTreeView');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/info', FileInfoController::class . ':getItemInfo');
+    $app->get('/{id:\\d+}/conf', ConfController::class . ':getConfInfo');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
