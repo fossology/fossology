@@ -1803,6 +1803,46 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/agents/revision:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getRevisionsForAgents
+      tags:
+        - Upload
+      summary: Get revisions for successful agents
+      description: >
+        Returns the list of revisions for the successful agents for the upload
+      responses:
+        '200':
+          description: Get successful agents with revisions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentsRevision'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /search:
     get:
       operationId: searchFile
@@ -4783,6 +4823,18 @@ components:
           type: string
           description: SPDX name associated with the license
           example: Apache-2.0
+    AgentsRevision:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 68
+        name:
+          type: string
+          example: "monk"
+        revision:
+          type: string
+          example: "\"4.1.0.283-rc1\".705d4b"
     UserGroupMember:
       type: object
       properties:
