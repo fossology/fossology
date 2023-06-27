@@ -3364,6 +3364,32 @@ paths:
                   $ref: '#/components/schemas/File'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /uploads/{id}/conf:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Upload Id
+        schema:
+          type: integer
+    get:
+      operationId: getConfInfo
+      tags:
+        - Upload
+      summary: Get the conf information of a particular upload
+      description: >
+        Get conf information
+      responses:
+        '200':
+          description: current conf information
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConfResponse'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /license:
     parameters:
       - name: groupName
@@ -5106,6 +5132,96 @@ components:
               enum:
                 - OK
                 - ERROR
+    ConfResponse:
+      type: object
+      properties:
+        reviewed:
+          type: string
+          description: shows reviewed by name
+        footer:
+          type: string
+          description: footer value
+        reportRel:
+          type: string
+          description: release date
+        community:
+          type: string
+          description: shows community name
+        component:
+          type: string
+          description: shows component name
+        version:
+          type: string
+          description: shows version
+        releaseDate:
+          type: string
+          description: shows version
+        sw360Link:
+          type: string
+          description: shows sw360Link
+        componentType:
+          type: string
+          enum:
+            - purl
+            - maven
+            - nuget
+            - npm
+            - pypi
+            - package-url
+          description: shows component type
+        componentId:
+          type: string
+          description: shows component id
+        generalAssesment:
+          type: string
+          description: shows assesment test
+        gaAdditional:
+          type: string
+          description: shows additional info
+        gaRisk:
+          type: string
+          description: shows risk info
+        gaCheckbox:
+          type: string
+          description: shows checkbox status
+        spdxSelection:
+          type: string
+          description: shows checkbox status for spdx
+        excludedObligations:
+          type: string
+          description: shows excluded obligations
+        department:
+          type: string
+          description: shows department
+        depNotes:
+          type: string
+          description: shows department notes
+        exportNotes:
+          type: string
+          description: shows export notes
+        copyrightNotes:
+          type: string
+          description: shows copyright notes
+        unifiedColumns:
+          type: object
+          properties:
+            report conf section id:
+              type: string
+              enum:
+                - on
+                - off
+              example: on
+          description: unified columns value
+        globalDecision:
+          type: boolean
+          description: shows copyright notes
+        type:
+          type: string
+          enum:
+            - INFO
+            - ERROR
+          description: Denotes if info was created on error
+
     APIinfo:
       description: Api Documentation
       type: object
