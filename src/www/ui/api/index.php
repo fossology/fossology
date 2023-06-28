@@ -186,6 +186,7 @@ $app->group('/jobs',
     $app->get('/all', JobController::class . ':getAllJobs');
     $app->post('', JobController::class . ':createJob');
     $app->get('/history', JobController::class . ':getJobsHistory');
+    $app->delete('/{id:\\d+}/{queue:\\d+}', JobController::class . ':deleteJob');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
