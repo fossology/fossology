@@ -15,7 +15,9 @@ namespace Fossology\UI\Api\Test\Controllers;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -28,6 +30,7 @@ use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Hash;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\License;
 use Fossology\UI\Api\Models\Upload;
 use Mockery as M;
 use Slim\Psr7\Factory\StreamFactory;
@@ -114,6 +117,19 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   private $agentDao;
 
   /**
+   * @var ClearingDao $clearingDao
+   * ClearingDao mock
+   */
+  private $clearingDao;
+
+  /**
+   * @var LicenseDao $licenseDao
+   * LicenseDao mock
+   */
+  private $licenseDao;
+
+
+  /**
    * @var StreamFactory $streamFactory
    * Stream factory to create body streams.
    */
@@ -137,6 +153,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->folderDao = M::mock(FolderDao::class);
     $this->agentDao = M::mock(AgentDao::class);
     $this->userDao = M::mock(UserDao::class);
+    $this->clearingDao = M::mock(ClearingDao::class);
+    $this->licenseDao = M::mock(LicenseDao::class);
 
     $this->dbManager->shouldReceive('getSingleRow')
       ->withArgs([M::any(), [$this->groupId, UploadStatus::OPEN,
@@ -154,9 +172,12 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       ->andReturn($this->userDao);
 
     $container->shouldReceive('get')->withArgs(array(
+      'dao.clearing'))->andReturn($this->clearingDao);
+    $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
     $container->shouldReceive('get')->withArgs(array(
       'dao.agent'))->andReturn($this->agentDao);
+    $container->shouldReceive('get')->withArgs(array('dao.license'))->andReturn($this->licenseDao);
     $this->uploadController = new UploadController($container);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
     $this->streamFactory = new StreamFactory();
@@ -916,5 +937,33 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::getMainLicenses()
+   * -# Check if response status is 200 and RES body matches
+   */
+  public function testGetMainLicenses()
+  {
+    $uploadId = 1;
+    $licenseIds = array();
+    $licenseId = 123;
+    $licenseIds[$licenseId] = $licenseId;
+    $license = new License($licenseId, "MIT", "MIT License", "risk", "texts", [],
+      'type', false);
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->clearingDao->shouldReceive('getMainLicenseIds')->withArgs([$uploadId, $this->groupId])->andReturn($licenseIds);
+    $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], false])->andReturn([]);
+    $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], true])->andReturn([]);
+    $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId])->andReturn($license);
+
+    $licenses[] = $license->getArray();
+    $expectedResponse = (new ResponseHelper())->withJson($licenses, 200);
+    $actualResponse = $this->uploadController->getMainLicenses(null, new ResponseHelper(), ['id' => $uploadId]);
+    $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
   }
 }
