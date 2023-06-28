@@ -19,16 +19,16 @@ CLUTTER_REGEX = r"(Copyright|copyright\s*(©)?([\w \-\,\[\]]+)?(\.com)?\.?|Copyr
 def preProcessing(file, clutter_flag):
   with open(file, 'r') as f:
     df = pd.read_json(f, orient='records')
-    df['content'] = df['content'].str.lower()
+    df['content_lower'] = df['content'].str.lower()
   copyrightDeactivationMain(df, clutter_flag)
 
 
 def copyrightDeactivationMain(df, clutter_flag):
   nlp = spacy.load("en_core_web_sm")
   # Iterating through each row and doing preprocessing over it.
-  # Picking out the manual tags from the csv and putting them into seperate column "Original Tag"
-  for index, row in df.iterrows():
-    text = df.loc[index, 'content']
+  # Picking out the manual tags from the csv and putting them into separate column "Original Tag"
+  for index in df.index.to_list():
+    text = df.loc[index, 'content_lower']
     doc = nlp(text)
 
     if type(text) == float:
@@ -40,42 +40,29 @@ def copyrightDeactivationMain(df, clutter_flag):
       lemma_list.append(token.lemma_)
 
     # Filter the stopword
-    filtered_sentence = []
+    filtered_list = []
     for word in lemma_list:
       lexeme = nlp.vocab[word]
       if lexeme.is_stop == False:
-        filtered_sentence.append(word)
+        filtered_list.append(word)
 
     # Remove punctuation
     punctuations = "?:!.,;'"
-    for word in filtered_sentence:
+    for word in filtered_list:
       if word in punctuations:
-        filtered_sentence.remove(word)
+        filtered_list.remove(word)
 
     # List joining and Filtering (c) and copyright unicode symbol
-    list_of_copyrights = " ".join(map(str, filtered_sentence))
+    copyright_string = " ".join(map(str, filtered_list))
     substring = "( c )"
     cp_symbol = '\xa9'  # Unicode for copyright Symbol
 
-    if "copyright" not in list_of_copyrights:
-      if substring in list_of_copyrights:
-        list_of_copyrights = list_of_copyrights.replace(
-            substring, "copyright")
-
-      if cp_symbol in list_of_copyrights:
-        list_of_copyrights = list_of_copyrights.replace(
-            cp_symbol, "copyright")
-
-    if substring in list_of_copyrights:
-      list_of_copyrights = list_of_copyrights.replace(
-          substring, "copyright")
-
-    if cp_symbol in list_of_copyrights:
-      list_of_copyrights = list_of_copyrights.replace(
-          cp_symbol, "copyright")
+    # Replace ( c ) and the copyright unicode symbol © with "copyright"
+    copyright_string = copyright_string.replace(substring, "copyright")
+    copyright_string = copyright_string.replace(cp_symbol, "copyright")
 
     # Implementing NER and POS Tags after normalization
-    doc2 = nlp(list_of_copyrights)
+    doc2 = nlp(copyright_string)
 
     # All the NER taggings will be contained in a dictionary having "Entity" and "Values" as keys
     ent_dict = {}
