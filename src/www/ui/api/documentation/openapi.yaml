@@ -893,7 +893,51 @@ paths:
                   $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-
+  /uploads/{id}/item/{itemId}/view:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the item
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: viewTheContentOfTheFile
+      tags:
+        - Upload
+        - License
+      summary: Get the contents of the file
+      description:
+        Returns the contents of a specific file
+      responses:
+        '200':
+          description: Get contents
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Upload or Item does not exist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /uploads/{id}/licenses/main:
     parameters:
       - name: id

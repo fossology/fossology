@@ -163,7 +163,7 @@ class ui_view extends FO_Plugin
    * \brief Given a file handle, display "strings" of the file.
    */
   function getText($inputFile, $startOffset, $Flowed, $outputLength = -1,
-    $splitPositions = null, $insertBacklink = false)
+    $splitPositions = null, $insertBacklink = false, $fromRest = false)
   {
     if (! ($outputLength = $this->checkAndPrepare($inputFile, $startOffset,
       $outputLength))) {
@@ -183,7 +183,7 @@ class ui_view extends FO_Plugin
     $output .= ($Flowed ? nl2br($renderedText) : $renderedText) .
       (! $Flowed ? "</pre>" : "") . "</div>\n";
 
-    return $output;
+    return $fromRest ? $renderedText : $output;
   } // ShowText()
 
   /**
