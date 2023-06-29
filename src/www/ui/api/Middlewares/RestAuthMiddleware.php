@@ -14,10 +14,10 @@
 
 namespace Fossology\UI\Api\Middlewares;
 
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Helper\AuthHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
@@ -41,16 +41,23 @@ class RestAuthMiddleware
   {
     global $SysConf;
     $requestUri = $request->getUri();
+    $requestPath = strtolower($requestUri->getPath());
+    $authFreePaths = ["/version", "/info", "/openapi", "/health"];
+
+    $isPassThroughPath = false;
+    foreach ($authFreePaths as $authFreePath) {
+      if (strpos($requestPath, $authFreePath) !== false) {
+        $isPassThroughPath = true;
+        break;
+      }
+    }
+
     if (stristr($request->getMethod(), "options") !== false) {
       $response = $handler->handle($request);
-    } elseif (stristr($requestUri->getPath(), "/version") !== false) {
-      $response = $handler->handle($request);
-    } elseif (stristr($requestUri->getPath(), "/info") !== false) {
-      $response = $handler->handle($request);
-    } elseif (stristr($requestUri->getPath(), "/health") !== false) {
+    } elseif ($isPassThroughPath) {
       $response = $handler->handle($request);
     } elseif (stristr($requestUri->getPath(), "/tokens") !== false &&
-      stristr($request->getMethod(), "post") !== false) {
+        stristr($request->getMethod(), "post") !== false) {
       $response = $handler->handle($request);
     } else {
       /** @var AuthHelper $authHelper */
