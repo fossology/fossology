@@ -21,6 +21,7 @@ namespace {
 
 namespace Fossology\UI\Api\Test\Controllers {
 
+  use AjaxClearingView;
   use ClearingView;
   use Fossology\Lib\Auth\Auth;
   use Fossology\Lib\Dao\ClearingDao;
@@ -103,6 +104,12 @@ namespace Fossology\UI\Api\Test\Controllers {
     private $licenseDao;
 
     /**
+     * @var AjaxClearingView $concludeLicensePlugin ;
+     * AjaxClearingView mock
+     */
+    private $concludeLicensePlugin;
+
+    /**
      * @var HighlightDao $highlightDao
      * ClearingDao mock
      */
@@ -179,17 +186,19 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->highlightDao = M::mock(HighlightDao::class);
       $this->clearingEventTypes = M::mock(ClearingEventTypes::class);
       $this->itemTreeBoundsMock = M::mock(ItemTreeBounds::class);
+      $this->concludeLicensePlugin = M::mock(AjaxClearingView::class);
+      $this->licenseDao = M::mock(LicenseDao::class);
 
       $this->restHelper->shouldReceive('getPlugin')
         ->withArgs(array('view'))->andReturn($this->viewFilePlugin);
       $this->restHelper->shouldReceive('getPlugin')
         ->withArgs(array('view-license'))->andReturn($this->viewLicensePlugin);
-
+      $this->restHelper->shouldReceive('getPlugin')
+        ->withArgs(array('conclude-license'))->andReturn($this->concludeLicensePlugin);
       $this->dbManager->shouldReceive('getSingleRow')
         ->withArgs([M::any(), [$this->groupId, UploadStatus::OPEN,
           Auth::PERM_READ]]);
       $this->dbHelper->shouldReceive('getDbManager')->andReturn($this->dbManager);
-
       $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
       $this->restHelper->shouldReceive('getGroupId')->andReturn($this->groupId);
       $this->restHelper->shouldReceive('getUserId')->andReturn($this->userId);
@@ -199,6 +208,7 @@ namespace Fossology\UI\Api\Test\Controllers {
         'helper.restHelper'))->andReturn($this->restHelper);
       $container->shouldReceive('get')->withArgs(['decision.types'])->andReturn($this->decisionTypes);
       $container->shouldReceive('get')->withArgs(['dao.clearing'])->andReturn($this->clearingDao);
+      $container->shouldReceive('get')->withArgs(['dao.license'])->andReturn($this->licenseDao);
 
       $container->shouldReceive('get')->withArgs(['businessrules.clearing_decision_processor'])->andReturn($this->clearingDecisionEventProcessor);
       $container->shouldReceive('get')->withArgs(['dao.highlight'])->andReturn($this->highlightDao);
@@ -602,6 +612,175 @@ namespace Fossology\UI\Api\Test\Controllers {
       $actualResponse = $this->uploadTreeController->getLicenseDecisions(null, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
       $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
       $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
+    }
+    /**
+     * @test
+     * -# Test for UploadTreeController::handleAddEditAndDeleteLicenseDecision() for adding, editing, and deleting license decision
+     * -# Check if response status is 200 and response body matches
+     */
+    public function testHandleAddEditAndDeleteLicenseDecision_Add()
+    {
+      $uploadId = 1;
+      $itemId = 200;
+      $shortName = "MIT";
+      $licenseId = 23;
+      $license = new License($licenseId, "MIT", "MIT License", "risk", "texts", [],
+        'type', false);
+      $itemTreeBounds = new ItemTreeBounds($itemId, 'uploadtree_a', $uploadId, 1, 2);
+      $rq = [
+        array(
+          "shortName" => "MIT",
+          "add" => true
+        )
+      ];
+
+      $existingLicenses = array(['DT_RowId' => "$itemId,400", 'DT_RowClass' => 'removed']);
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$itemId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getItemTreeBoundsFromUploadId')->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
+      $this->concludeLicensePlugin->shouldReceive('getCurrentSelectedLicensesTableData')->withArgs([$itemTreeBounds, $this->groupId, true])->andReturn($existingLicenses);
+      $this->licenseDao->shouldReceive('getLicenseByShortName')
+        ->withArgs([$shortName, $this->groupId])->andReturn($license);
+      $this->clearingDao->shouldReceive('insertClearingEvent')
+        ->withArgs([$itemId, $this->userId, $this->groupId, $licenseId, false])->andReturn(null);
+
+      $info = new Info(200, 'Successfully added MIT as a new license decision.', InfoType::INFO);
+      $res = [
+        'success' => [$info->getArray()],
+        'errors' => []
+      ];
+      $expectedResponse = (new ResponseHelper())->withJson($res, 200);
+      $reqBody = $this->streamFactory->createStream(json_encode(
+        $rq
+      ));
+      $requestHeaders = new Headers();
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $reqBody);
+      $actualResponse = $this->uploadTreeController->handleAddEditAndDeleteLicenseDecision($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+
+      $this->assertEquals($expectedResponse->getStatusCode(),
+        $actualResponse->getStatusCode());
+      $this->assertEquals($this->getResponseJson($expectedResponse),
+        $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::handleAddEditAndDeleteLicenseDecision() for adding, editing, and deleting license decision
+     * -# Check if response status is 200 and response body matches
+     */
+    public function testHandleAddEditAndDeleteLicenseDecision_Edit()
+    {
+      $uploadId = 1;
+      $itemId = 200;
+      $shortName = "MIT";
+      $licenseId = 23;
+      $license = new License($licenseId, "MIT", "MIT License", "risk", "texts", [],
+        'type', false);
+      $itemTreeBounds = new ItemTreeBounds($itemId, 'uploadtree_a', $uploadId, 1, 2);
+      $rq = [
+        array(
+          "shortName" => "MIT",
+          "add" => true,
+          "text" => "Updated license text",
+        )
+      ];
+
+      $existingLicenses = array(['DT_RowId' => "$itemId,$licenseId", 'DT_RowClass' => 'removed']);
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$itemId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getItemTreeBoundsFromUploadId')->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
+      $this->concludeLicensePlugin->shouldReceive('getCurrentSelectedLicensesTableData')->withArgs([$itemTreeBounds, $this->groupId, true])->andReturn($existingLicenses);
+      $this->licenseDao->shouldReceive('getLicenseByShortName')
+        ->withArgs([$shortName, $this->groupId])->andReturn($license);
+      $this->clearingDao->shouldReceive('updateClearingEvent')
+        ->withArgs([$itemId, $this->userId, $this->groupId, $licenseId, 'reportinfo', "Updated license text"])->andReturn(null);
+
+      $info = new Info(200, "Successfully updated MIT's license reportinfo", InfoType::INFO);
+      $res = [
+        'success' => [$info->getArray()],
+        'errors' => []
+      ];
+      $expectedResponse = (new ResponseHelper())->withJson($res, 200);
+      $reqBody = $this->streamFactory->createStream(json_encode(
+        $rq
+      ));
+      $requestHeaders = new Headers();
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $reqBody);
+      $actualResponse = $this->uploadTreeController->handleAddEditAndDeleteLicenseDecision($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+
+      $this->assertEquals($expectedResponse->getStatusCode(),
+        $actualResponse->getStatusCode());
+      $this->assertEquals($this->getResponseJson($expectedResponse),
+        $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::handleAddEditAndDeleteLicenseDecision() for adding, editing, and deleting license decision
+     * -# Check if response status is 200 and response body matches
+     */
+    public function testHandleAddEditAndDeleteLicenseDecision_Delete()
+    {
+      $uploadId = 1;
+      $itemId = 200;
+      $shortName = "MIT";
+      $licenseId = 23;
+      $license = new License($licenseId, "MIT", "MIT License", "risk", "texts", [],
+        'type', false);
+      $itemTreeBounds = new ItemTreeBounds($itemId, 'uploadtree_a', $uploadId, 1, 2);
+      $rq = [
+        array(
+          "shortName" => "MIT",
+          "add" => false,
+          "text" => "Updated license text",
+        )
+      ];
+
+      $existingLicenses = array(['DT_RowId' => "$itemId,$licenseId", 'DT_RowClass' => 'removed']);
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$itemId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getItemTreeBoundsFromUploadId')->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
+      $this->concludeLicensePlugin->shouldReceive('getCurrentSelectedLicensesTableData')->withArgs([$itemTreeBounds, $this->groupId, true])->andReturn($existingLicenses);
+      $this->licenseDao->shouldReceive('getLicenseByShortName')
+        ->withArgs([$shortName, $this->groupId])->andReturn($license);
+      $this->clearingDao->shouldReceive('insertClearingEvent')
+        ->withArgs([$itemId, $this->userId, $this->groupId, $licenseId, true])->andReturn(null);
+
+      $info = new Info(200, 'Successfully deleted MIT from license decision list.', InfoType::INFO);
+      $res = [
+        'success' => [$info->getArray()],
+        'errors' => []
+      ];
+      $expectedResponse = (new ResponseHelper())->withJson($res, 200);
+      $reqBody = $this->streamFactory->createStream(json_encode(
+        $rq
+      ));
+      $requestHeaders = new Headers();
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $reqBody);
+      $actualResponse = $this->uploadTreeController->handleAddEditAndDeleteLicenseDecision($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+
+      $this->assertEquals($expectedResponse->getStatusCode(),
+        $actualResponse->getStatusCode());
+      $this->assertEquals($this->getResponseJson($expectedResponse),
+        $this->getResponseJson($actualResponse));
     }
   }
 }
