@@ -1,7 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2019, 2021 Siemens AG
- Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+ Author: Gaurav Mishra <mishra.gaurav@siemens.com>, Soham Banerjee <sohambanerjee4abc@hotmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -13,9 +13,11 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\UI\Api\Helper\ResponseHelper;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Parser;
 
 /**
  * @class InfoController
@@ -117,5 +119,50 @@ class InfoController extends RestController
         "status" => $dbStatus
       ]
     ), $statusCode);
+  }
+
+  /**
+   * Get the current OpenAPI info
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @return ResponseHelper
+   */
+  public function getOpenApi($request, $response)
+  {
+    $isJsonRequest = false;
+    $requestFormat = $request->getHeader("Accept");
+    if (!empty($requestFormat) && !empty($requestFormat[0])) {
+      $requestFormat = $requestFormat[0];
+    } else {
+      $requestFormat = "";
+    }
+    if (strcasecmp($requestFormat, "application/vnd.oai.openapi+json") === 0
+        || strcasecmp($requestFormat, "application/json") === 0) {
+      $isJsonRequest = true;
+    }
+    if ($isJsonRequest) {
+      try {
+        $yaml = new Parser();
+        $yamlDocArray = $yaml->parse(file_get_contents(dirname(__DIR__) . "/documentation/openapi.yaml"));
+      } catch (ParseException $exception) {
+        printf("Unable to parse the YAML string: %s", $exception->getMessage());
+        $error = new Info(500, "Unable to read openapi.yaml", InfoType::ERROR);
+        return $response->withJson($error->getArray(), $error->getCode());
+      }
+      return $response
+        ->withHeader("Content-Disposition", "inline; filename=\"openapi.json\"")
+        ->withJson($yamlDocArray, 200);
+    }
+    $yaml = file_get_contents(dirname(__DIR__) . "/documentation/openapi.yaml");
+    if (empty($yaml)) {
+      $error = new Info(500, "Unable to read openapi.yaml", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $response->getBody()->write($yaml);
+    return $response
+      ->withHeader("Content-Type", "application/vnd.oai.openapi;charset=utf-8")
+      ->withHeader("Content-Disposition", "inline; filename=\"openapi.yaml\"")
+      ->withStatus(200);
   }
 }

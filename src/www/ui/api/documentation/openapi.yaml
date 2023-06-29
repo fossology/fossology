@@ -3,7 +3,7 @@
 
 # SPDX-License-Identifier: GPL-2.0-only
 
-openapi: 3.0.2
+openapi: 3.0.3
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
@@ -138,6 +138,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiInfo'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /openapi:
+    get:
+      operationId: getOpenApi
+      tags:
+        - info
+      security: []
+      summary: Get the current openapi.yaml file
+      description: >
+        Get the current API documentation as a response with content negotiation.
+      responses:
+        '200':
+          description: The API documentation
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                $ref: '#/components/schemas/APIinfo'
+            application/yaml:
+              schema:
+                $ref: '#/components/schemas/APIinfo'
+            application/vnd.oai.openapi+json:
+              schema:
+                $ref: '#/components/schemas/APIinfo'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIinfo'
         default:
           $ref: '#/components/responses/defaultResponse'
   /maintenance:
@@ -1496,7 +1523,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
-  
+
   /jobs/{id}/{queue}:
     parameters:
       - name: id
@@ -3415,6 +3442,28 @@ components:
               enum:
                 - OK
                 - ERROR
+    APIinfo:
+      description: Api Documentation
+      type: object
+      properties:
+        openapi:
+          type: string
+          description: version
+        info:
+          type: string
+          description: version info
+        servers:
+          type: string
+          description: server info
+        security:
+          type: string
+          description: security info
+        tags:
+          type: string
+          description: API tags
+        paths:
+          type: string
+          description: API endpoints
     DecisionImporter:
       description: Information required by Decision Importer agent
       type: object
