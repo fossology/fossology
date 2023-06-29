@@ -148,11 +148,20 @@ paths:
       security: []
       summary: Get the current openapi.yaml file
       description: >
-        Get the current API documentation as a API response
+        Get the current API documentation as a response with content negotiation.
       responses:
         '200':
           description: The API documentation
           content:
+            application/vnd.oai.openapi:
+              schema:
+                $ref: '#/components/schemas/APIinfo'
+            application/yaml:
+              schema:
+                $ref: '#/components/schemas/APIinfo'
+            application/vnd.oai.openapi+json:
+              schema:
+                $ref: '#/components/schemas/APIinfo'
             application/json:
               schema:
                 $ref: '#/components/schemas/APIinfo'
@@ -1514,7 +1523,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
-  
+
   /jobs/{id}/{queue}:
     parameters:
       - name: id
