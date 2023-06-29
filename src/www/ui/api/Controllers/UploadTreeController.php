@@ -67,6 +67,7 @@ class UploadTreeController extends RestController
    */
   private $decisionTypes;
 
+
   public function __construct($container)
   {
     parent::__construct($container);
@@ -74,6 +75,8 @@ class UploadTreeController extends RestController
     $this->licenseDao = $this->container->get('dao.license');
     $this->highlightDao = $container->get("dao.highlight");
     $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_processor');
+    $this->clearingDao = $this->container->get('dao.clearing');
+    $this->licenseDao = $this->container->get('dao.license');
     $this->decisionTypes = $this->container->get('decision.types');
   }
 
@@ -631,5 +634,129 @@ class UploadTreeController extends RestController
       'page' => null,
       'percentage' => null
     );
+  }
+
+  /**
+   * Handle add, edit and delete license decision
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function handleAddEditAndDeleteLicenseDecision($request, $response, $args)
+  {
+    $body = $this->getParsedBody($request);
+    $uploadTreeId = intval($args['itemId']);
+    $uploadId = intval($args['id']);
+    $uploadDao = $this->restHelper->getUploadDao();
+    $errors = [];
+    $success = [];
+
+    if (!isset($body) || empty($body)) {
+      $error = new Info(400, "Request body is missing or empty.", InfoType::ERROR);
+      $errors[] = $error->getArray();
+    } else if (!is_array($body)) {
+      $error = new Info(400, "Request body should be an array.", InfoType::ERROR);
+      $errors[] = $error->getArray();
+    } else if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $error = new Info(404, "Upload does not exist", InfoType::ERROR);
+      $errors[] = $error->getArray();
+    } else if (!$this->dbHelper->doesIdExist($uploadDao->getUploadtreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
+      $error = new Info(404, "Item does not exist", InfoType::ERROR);
+      $errors[] = $error->getArray();
+    } else {
+      $concludeLicensePlugin = $this->restHelper->getPlugin('conclude-license');
+      $res = $concludeLicensePlugin->getCurrentSelectedLicensesTableData($uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId), $this->restHelper->getGroupId(), true);
+      $existingLicenseIds = [];
+      foreach ($res as $license) {
+        $currId = $license['DT_RowId'];
+        $currId = explode(',', $currId)[1];
+        $existingLicenseIds[] = intval($currId);
+      }
+
+      foreach (array_keys($body) as $index) {
+        $licenseReq = $body[$index];
+
+        $shortName = $licenseReq['shortName'];
+        if (empty($shortName)) {
+          $error = new Info(400, "Short name missing from the request #" . ($index + 1), InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        }
+
+        $existingLicense = $this->licenseDao->getLicenseByShortName($shortName, $this->restHelper->getGroupId());
+        if ($existingLicense === null) {
+          $error = new Info(404, "License file with short name '$shortName' not found.",
+            InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        }
+
+        if (!isset($licenseReq['add'])) {
+          $error = new Info(400, "'add' property missing from the request #" . ($index + 1), InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        }
+
+        if ($licenseReq['add']) {
+          $columnsToUpdate = [];
+          if (isset($licenseReq['text'])) {
+            $columnsToUpdate[] = [
+              'columnId' => 'reportinfo',
+              'value' => $licenseReq['text']
+            ];
+          }
+          if (isset($licenseReq['ack'])) {
+            $columnsToUpdate[] = [
+              'columnId' => 'acknowledgement',
+              'value' => $licenseReq['ack']
+            ];
+          }
+          if (isset($licenseReq['comment'])) {
+            $columnsToUpdate[] = [
+              'columnId' => 'comment',
+              'value' => $licenseReq['comment']
+            ];
+          }
+
+          if (in_array($existingLicense->getId(), $existingLicenseIds)) {
+            $valText = "";
+            foreach (array_keys($columnsToUpdate) as $colIdx) {
+              $this->clearingDao->updateClearingEvent($uploadTreeId, $this->restHelper->getUserId(), $this->restHelper->getGroupId(), $existingLicense->getId(), $columnsToUpdate[$colIdx]['columnId'], $columnsToUpdate[$colIdx]['value']);
+              if ($colIdx == count($columnsToUpdate) - 1 && count($columnsToUpdate) > 1) {
+                $valText .= " and ";
+              } else if ($colIdx > 0 && count($columnsToUpdate) > 1) {
+                $valText .= ", ";
+              }
+              $valText .= $columnsToUpdate[$colIdx]['columnId'];
+            }
+            $val = new Info(200, "Successfully updated " . $shortName . "'s license " . $valText, InfoType::INFO);
+            $success[] = $val->getArray();
+          } else {
+            $this->clearingDao->insertClearingEvent($uploadTreeId, $this->restHelper->getUserId(), $this->restHelper->getGroupId(), $existingLicense->getId(), false);
+            foreach (array_keys($columnsToUpdate) as $colIdx) {
+              $this->clearingDao->updateClearingEvent($uploadTreeId, $this->restHelper->getUserId(), $this->restHelper->getGroupId(), $existingLicense->getId(), $columnsToUpdate[$colIdx]['columnId'], $columnsToUpdate[$colIdx]['value']);
+            }
+            $val = new Info(200, "Successfully added " . $shortName . " as a new license decision.", InfoType::INFO);
+            $success[] = $val->getArray();
+          }
+        } else {
+          if (!in_array($existingLicense->getId(), $existingLicenseIds)) {
+            $error = new Info(404, $shortName . " license does not exist on this item", InfoType::ERROR);
+            $errors[] = $error->getArray();
+            continue;
+          }
+          $this->clearingDao->insertClearingEvent($uploadTreeId, $this->restHelper->getUserId(), $this->restHelper->getGroupId(), $existingLicense->getId(), true);
+          $val = new Info(200, "Successfully deleted " . $shortName . " from license decision list.", InfoType::INFO);
+          $success[] = $val->getArray();
+        }
+      }
+    }
+
+    return $response->withJson([
+      'success' => $success,
+      'errors' => $errors
+    ], 200);
   }
 }

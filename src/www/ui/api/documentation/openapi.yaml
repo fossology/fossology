@@ -1227,7 +1227,61 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-
+    put:
+      operationId: addEditDeleteLicenseDecision
+      tags:
+        - Upload
+      summary: Add, update or delete a license decision.
+      description: >
+        Add, update or delete a license decision for a particular upload tree item.
+      requestBody:
+        description: Add, update or delete
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AddEditDeleteLicenseDecision'
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: array
+                    description: List of the items' responses whose requests processed successfully.
+                    items:
+                      $ref: '#/components/schemas/Info'
+                  errors:
+                    type: array
+                    description: List of the errors found.
+                    items:
+                      $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+          
   /uploads/{id}/licenses/main:
     parameters:
       - name: id
@@ -5303,6 +5357,31 @@ components:
         paths:
           type: string
           description: API endpoints
+    AddEditDeleteLicenseDecision:
+      type: object
+      properties:
+        shortName:
+          type: string
+          description: Short name of the license
+          example: "MIT"
+        add:
+          type: boolean
+          description: |
+            If true, add the license if not on the list, otherwise update it's properties.
+            If false, remove the license from the list.
+          example: true
+        text:
+          type: string
+          description: Clearing info text
+          example: "This is a license decision text"
+        ack:
+          type: string
+          description: Acknowledgement of license decision
+          example:  "This is a license decision acknowledgement text"
+        comment:
+          type: string
+          description: Comment for the license decision
+          example: "This is a license decision comment"
     DecisionImporter:
       description: Information required by Decision Importer agent
       type: object

@@ -158,6 +158,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/licenses/reuse', UploadController::class . ':getReuseReportSummary');
     $app->get('/{id:\\d+}/licenses/scanned', UploadController::class . ':getScannedLicenses');
     $app->get('/{id:\\d+}/agents/revision', UploadController::class . ':getAgentsRevision');
+    $app->put('/{id:\\d+}/item/{itemId:\\d+}/licenses', UploadTreeController::class . ':handleAddEditAndDeleteLicenseDecision');
     $app->get('/{id:\\d+}/download', UploadController::class . ':uploadDownload');
     $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');
     $app->get('/{id:\\d+}/clearing-progress', UploadController::class . ':getClearingProgressInfo');
