@@ -1183,6 +1183,51 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /uploads/{id}/item/{itemId}/licenses:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the itemId
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getLicenseDecisions
+      tags:
+        - Upload
+      summary: Get the license decisions list
+      description: >
+        Get the license decisions list for the given upload and item id
+      responses:
+        '200':
+          description: List of the license decisions for the upload-tree id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LicenseDecision'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /uploads/{id}/licenses/main:
     parameters:
       - name: id
@@ -4241,6 +4286,56 @@ components:
           example:
             - "Copyright (C) 2017-2020 Free Software Foundation, Inc."
             - "Copyright (C) 1991-2020 Free Software Foundation, Inc."
+    LicenseDecision:
+      description: Extended License model with additional fields
+      allOf:
+        - $ref: '#/components/schemas/License'
+      properties:
+        sources:
+          description: Array of sources
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the agent.
+                example: nomos
+              clearingId:
+                type: integer
+                description: The clearing ID.
+                example: 200
+              agentId:
+                type: integer
+                description: The agent ID.
+                example: 61
+              highlightId:
+                type: integer
+                description: The highlight ID.
+                example: 2297
+              page:
+                type: integer
+                description: The page number.
+                example: 0
+              percentage:
+                type: integer
+                description: The percentage value.
+                example: 78
+        comment:
+          description: Comment for the license decision
+          type: string
+          example: "This is a comment"
+        acknowledgement:
+          description: License acknowledgement
+          type: string
+        isMainLicense:
+          description: Is the license the main license?
+          type: boolean
+          example: true
+        isRemoved:
+          description: Is the license removed?
+          type: boolean
+          example: false
     License:
       description: License from the database
       type: object
