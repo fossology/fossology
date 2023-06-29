@@ -24,6 +24,10 @@ namespace Fossology\UI\Api\Test\Controllers {
   use ClearingView;
   use Fossology\Lib\Auth\Auth;
   use Fossology\Lib\Dao\ClearingDao;
+  use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
+  use Fossology\Lib\BusinessRules\LicenseMap;
+  use Fossology\Lib\Dao\HighlightDao;
+  use Fossology\Lib\Dao\LicenseDao;
   use Fossology\Lib\Dao\UploadDao;
   use Fossology\Lib\Data\ClearingDecision;
   use Fossology\Lib\Data\DecisionScopes;
@@ -31,6 +35,11 @@ namespace Fossology\UI\Api\Test\Controllers {
   use Fossology\Lib\Data\Tree\Item;
   use Fossology\Lib\Data\Tree\ItemTreeBounds;
   use Fossology\Lib\Data\Highlight;
+  use Fossology\Lib\Data\Clearing\ClearingEvent;
+  use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+  use Fossology\Lib\Data\Clearing\ClearingLicense;
+  use Fossology\Lib\Data\Clearing\ClearingResult;
+  use Fossology\Lib\Data\LicenseRef;
   use Fossology\Lib\Data\UploadStatus;
   use Fossology\Lib\Db\DbManager;
   use Fossology\UI\Api\Controllers\UploadTreeController;
@@ -41,6 +50,8 @@ namespace Fossology\UI\Api\Test\Controllers {
   use Fossology\UI\Api\Models\ClearingHistory;
   use Fossology\UI\Api\Models\Info;
   use Fossology\UI\Api\Models\InfoType;
+  use Fossology\UI\Api\Models\License;
+  use Fossology\UI\Api\Models\LicenseDecision;
   use Mockery as M;
   use Psr\Http\Message\ServerRequestInterface;
   use Slim\Psr7\Factory\StreamFactory;
@@ -86,14 +97,26 @@ namespace Fossology\UI\Api\Test\Controllers {
     private $uploadDao;
 
     /**
-     * @var ClearingDao $clearingDao
-     * ClearingDao mock
+     * @var LicenseDao $licenseDao
+     * LicenseDao mock
      */
-    private $clearingDao;
+    private $licenseDao;
 
     /**
-     * @var StreamFactory $streamFactory
-     * Stream factory to create body streams.
+     * @var HighlightDao $highlightDao
+     * ClearingDao mock
+     */
+    private $highlightDao;
+
+    /**
+     * @var ClearingEventTypes $clearingEventTypes
+     * ClearingDao mock
+     */
+    private $clearingEventTypes;
+
+    /**
+     * @var ClearingDao $clearingDao
+     * ClearingDao mock
      */
     private $streamFactory;
 
@@ -122,6 +145,17 @@ namespace Fossology\UI\Api\Test\Controllers {
     private $decisionTypes;
 
     /**
+     * @var ItemTreeBounds $itemTreeBoundsMock
+     * ItemTreeBounds Mock
+     */
+    private $itemTreeBoundsMock;
+
+    /** @var ClearingDecisionProcessor $clearingDecisionEventProcessor
+     * ClearingDecisionProcessor Mock
+     */
+    private $clearingDecisionEventProcessor;
+
+    /**
      * @brief Setup test objects
      * @see PHPUnit_Framework_TestCase::setUp()
      */
@@ -135,11 +169,16 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->dbManager = M::mock(DbManager::class);
       $this->restHelper = M::mock(RestHelper::class);
       $this->uploadDao = M::mock(UploadDao::class);
-      $this->decisionTypes = M::mock(DecisionTypes::class);
+      $this->decisionTypes = M::mock(DecisionTypes::class);      $this->clearingDao = M::mock(ClearingDao::class);
+      $this->licenseDao = M::mock(LicenseDao::class);
+      $this->clearingDecisionEventProcessor = M::mock(ClearingDecisionProcessor::class);
       $this->viewFilePlugin = M::mock('ui_view');
       $this->viewLicensePlugin = M::mock(ClearingView::class);
       $this->clearingDao = M::mock(ClearingDao::class);
       $this->decisionScopes = M::mock(DecisionScopes::class);
+      $this->highlightDao = M::mock(HighlightDao::class);
+      $this->clearingEventTypes = M::mock(ClearingEventTypes::class);
+      $this->itemTreeBoundsMock = M::mock(ItemTreeBounds::class);
 
       $this->restHelper->shouldReceive('getPlugin')
         ->withArgs(array('view'))->andReturn($this->viewFilePlugin);
@@ -161,7 +200,9 @@ namespace Fossology\UI\Api\Test\Controllers {
       $container->shouldReceive('get')->withArgs(['decision.types'])->andReturn($this->decisionTypes);
       $container->shouldReceive('get')->withArgs(['dao.clearing'])->andReturn($this->clearingDao);
 
-      $container->shouldReceive('get')->withArgs(['decision.types'])->andReturn($this->decisionTypes);
+      $container->shouldReceive('get')->withArgs(['businessrules.clearing_decision_processor'])->andReturn($this->clearingDecisionEventProcessor);
+      $container->shouldReceive('get')->withArgs(['dao.highlight'])->andReturn($this->highlightDao);
+      $container->shouldReceive('get')->withArgs(['dao.license'])->andReturn($this->licenseDao);
       $this->uploadTreeController = new UploadTreeController($container);
       $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
       $this->streamFactory = new StreamFactory();
@@ -500,6 +541,65 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->willReturn($queryParams);
 
       $actualResponse = $this->uploadTreeController->getHighlightEntries($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+      $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+      $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::getLicenseDecisions()
+     * -# Check if response status is 200 and RES body matches
+     * @throws \Fossology\Lib\Exception
+     */
+    public function testGetLicenseDecisions()
+    {
+      $itemId = 200;
+      $uploadId = 1;
+      $licenseId = 123;
+      $licenses = array();
+
+      $itemTreeBounds = new ItemTreeBounds($itemId, 'uploadtree_a', $uploadId, 0, 1);
+      $addedClearingResults = [];
+
+      $result = array(
+        'name' => 'Imported decision',
+        'clearingId' => null,
+        'agentId' => null,
+        'highlightId' => null,
+        'page' => 0,
+        'percentage' => null
+      );
+
+      $license = new License($licenseId, "MIT", "MIT License", "text", "url", [],
+        null, false);
+      $licenseDecision = new LicenseDecision($licenseId, "MIT", "MIT License", 'text', "url", array($result),
+        '', '', false, [], null, false);
+
+      $licenseRef = new LicenseRef($licenseId, "MIT", "MIT LICENSE", "spx");
+      $clearingEvent = new ClearingEvent(1, $itemId, 12, $this->userId, $this->groupId, 4, new ClearingLicense($licenseRef, false, "", "", "", ""));
+      $licenseDecisionResult = new ClearingResult($clearingEvent, []);
+      $addedClearingResults[$licenseId] = $licenseDecisionResult;
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+
+      $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+
+      $this->uploadDao->shouldReceive("getItemTreeBoundsFromUploadId")->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
+      $this->itemTreeBoundsMock->shouldReceive("containsFiles")->andReturn(false);
+      $this->clearingDao->shouldReceive('getMainLicenseIds')->andReturn([]);
+      $this->clearingEventTypes->shouldReceive('getTypeName')->withArgs([$clearingEvent->getEventType()])->andReturn($result['name']);
+      $this->highlightDao->shouldReceive('getHighlightRegion')->withArgs([1])->andReturn([""]);
+      $this->clearingDecisionEventProcessor->shouldReceive("getCurrentClearings")->withArgs([$itemTreeBounds, $this->groupId, LicenseMap::CONCLUSION])->andReturn([$addedClearingResults, []]);
+      $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], false])->andReturn([]);
+      $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], true])->andReturn([]);
+      $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId])->andReturn($license);
+      $licenses[] = $licenseDecision->getArray();
+
+      $expectedResponse = (new ResponseHelper())->withJson($licenses, 200);
+      $actualResponse = $this->uploadTreeController->getLicenseDecisions(null, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
       $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
       $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
     }
