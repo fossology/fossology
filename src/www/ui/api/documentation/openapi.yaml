@@ -967,6 +967,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
+          $ref: '#/components/responses/defaultResponse'  
+  
+  /uploads/{id}/item/{itemId}/clearing-decision:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the itemId
+        in: path
+        schema:
+          type: integer
+    put:
+      operationId: setClearingDecision
+      tags:
+        - Upload
+      summary: Set the clearing decision for a particular upload tree item.
+      description: >
+        Set the clearing decision for a particular upload tree item.
+      requestBody:
+        description: ClearingDecision payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClearingDecision'
+      responses:
+        '200':
+          description: Clearing decision set successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Invalid clearingDecision type or invalid set globalDecision value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
           $ref: '#/components/responses/defaultResponse'
   /uploads/{id}/licenses/main:
     parameters:
@@ -3474,6 +3524,27 @@ components:
             2: Advisor
           minimum: 0
           maximum: 2
+    ClearingDecision:
+      description: Clearing decision information
+      type: object
+      properties:
+        decisionType:
+          type: integer
+          description: |
+            Type of decision.
+            0: WIP
+            3: To be discussed
+            4: Irrelevant
+            5: Identified
+            6: Do not use
+            7: Non functional
+          example: 3
+          enum: [0, 3, 4, 5, 6, 7]
+        globalDecision:
+          type: boolean
+          description: |
+            Is the decision global?
+            If true, the decision is applied to all occurrence of the file on the server!
     AddMember:
       description: UserMember options
       type: object
