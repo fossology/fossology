@@ -737,7 +737,7 @@ class UploadHelper
    * @return array Array containing `filePath`, `agentFindings` and
    * `conclusions` for each upload tree item
    */
-  public function getUploadLicenseList($uploadId, $agents, $printContainers, $boolLicense, $boolCopyright)
+  public function getUploadLicenseList($uploadId, $agents, $printContainers, $boolLicense, $boolCopyright, $page = 0, $limit = 50)
   {
     global $container;
     $restHelper = $container->get('helper.restHelper');
@@ -821,6 +821,9 @@ class UploadHelper
         $responseList[] = $responseRow->getArray();
       }
     }
-    return $responseList;
+    $offset = $page * $limit;
+    $paginatedResponseList = array_slice($responseList, $offset, $limit);
+    $paginatedResponseListSize = sizeof($responseList);
+    return array($paginatedResponseList, $paginatedResponseListSize);
   }
 }

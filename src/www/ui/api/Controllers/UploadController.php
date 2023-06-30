@@ -490,6 +490,8 @@ class UploadController extends RestController
   {
     $id = intval($args['id']);
     $query = $request->getQueryParams();
+    $page = $request->getHeaderLine("page");
+    $limit = $request->getHeaderLine("limit");
 
     if (! array_key_exists(self::AGENT_PARAM, $query)) {
       $error = new Info(400, "'agent' parameter missing from query.",
@@ -530,9 +532,33 @@ class UploadController extends RestController
       return $agentScheduled;
     }
 
+    /*
+     * check if page && limit are numeric, if existing
+     */
+    if ((! ($page==='') && (! is_numeric($page) || $page < 1)) ||
+      (! ($limit==='') && (! is_numeric($limit) || $limit < 1))) {
+      $returnVal = new Info(400,
+        "Bad Request. page and limit need to be positive integers!",
+        InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    // set page to 1 by default
+    if (empty($page)) {
+      $page = 1;
+    }
+
+    // set limit to 50 by default and max as 1000
+    if (empty($limit)) {
+      $limit = 50;
+    } else if ($limit > 1000) {
+      $limit = 1000;
+    }
+
     $uploadHelper = new UploadHelper();
-    $licenseList = $uploadHelper->getUploadLicenseList($id, $agents, $containers, $license, $copyright);
-    return $response->withJson($licenseList, 200);
+    list($licenseList, $count) = $uploadHelper->getUploadLicenseList($id, $agents, $containers, $license, $copyright, $page-1, $limit);
+    $totalPages = intval(ceil($count / $limit));
+    return $response->withHeader("X-Total-Pages", $totalPages)->withJson($licenseList, 200);
   }
 
    /**

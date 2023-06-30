@@ -794,8 +794,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('getUploadLicenseList')
-      ->withArgs([$uploadId, ['nomos', 'monk'], false, true, false])
-      ->andReturn($licenseResponse);
+      ->withArgs([$uploadId, ['nomos', 'monk'], false, true, false, 0, 50])
+      ->andReturn(([[$licenseResponse], 1]));
 
     $expectedResponse = (new ResponseHelper())->withJson($licenseResponse, 200);
 
@@ -804,7 +804,9 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
+      $this->getResponseJson($actualResponse)[0]);
+    $this->assertEquals('1',
+      $actualResponse->getHeaderLine('X-Total-Pages'));
   }
 
   /**
