@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2021 HH Partners
+ SPDX-FileCopyrightText: © 2023 Samuel Dushimimana <dushsam100@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -12,6 +13,7 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\LicenseAcknowledgementDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Util\StringOperation;
@@ -53,6 +55,11 @@ class LicenseController extends RestController
    */
   private $licenseDao;
 
+  /**
+   * @var LicenseAcknowledgementDao $adminLicenseAckDao
+   * LicenseAcknowledgementDao object
+   */
+  private $adminLicenseAckDao;
 
   /**
    * @param ContainerInterface $container
@@ -61,6 +68,7 @@ class LicenseController extends RestController
   {
     parent::__construct($container);
     $this->licenseDao = $this->container->get('dao.license');
+    $this->adminLicenseAckDao = $this->container->get('dao.license.acknowledgement');
   }
 
   /**
@@ -462,5 +470,30 @@ class LicenseController extends RestController
       }
     }
     return $response->withJson($resInfo->getArray(), $resInfo->getCode());
+  }
+
+  /**
+   * Get all admin license acknowledgements
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getAllAdminAcknowledgements($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $res = $this->adminLicenseAckDao->getAllAcknowledgements();
+
+    foreach ($res as $key => $ack) {
+      $res[$key]['id'] = intval($ack['la_pk']);
+      unset($res[$key]['la_pk']);
+      $res[$key]['is_enabled'] = $ack['is_enabled'] == "t";
+    }
+
+    return $response->withJson($res, 200);
   }
 }
