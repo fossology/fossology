@@ -2709,6 +2709,42 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /license/adminacknowledgements:
+    post:
+      operationId: addAdminLicenseAcknowledgement
+      tags:
+        - License
+      summary: Add a new admin license acknowledgement
+      description: >
+        Add a new admin license acknowledgement to the list.
+      requestBody:
+        description: Information to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAdminLicenseAcknowledgement'
+      responses:
+        '200':
+          description: Request is successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -3704,6 +3740,17 @@ components:
           type: boolean
           description: Add the copyright information as text findings
           default: false
+    NewAdminLicenseAcknowledgement:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the AdminAcknowledgement
+          example: ackName
+        ack:
+          type: string
+          description: The acknowledgement text of the AdminAcknowledgement
+          example: ack text
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"

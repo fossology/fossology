@@ -266,6 +266,7 @@ $app->group('/license',
     $app->patch('/{shortname:.+}', LicenseController::class . ':updateLicense');
     $app->delete('/admincandidates/{id:\\d+}',
       LicenseController::class . ':deleteAdminLicenseCandidate');
+    $app->post('/adminacknowledgements', LicenseController::class . ':addNewAdminAcknowledgement');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

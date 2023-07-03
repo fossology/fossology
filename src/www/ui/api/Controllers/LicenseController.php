@@ -12,6 +12,7 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\LicenseAcknowledgementDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Util\StringOperation;
@@ -53,6 +54,11 @@ class LicenseController extends RestController
    */
   private $licenseDao;
 
+  /**
+   * @var LicenseAcknowledgementDao $adminLicenseAckDao
+   * LicenseAcknowledgementDao object
+   */
+  private $adminLicenseAckDao;
 
   /**
    * @param ContainerInterface $container
@@ -61,6 +67,7 @@ class LicenseController extends RestController
   {
     parent::__construct($container);
     $this->licenseDao = $this->container->get('dao.license');
+    $this->adminLicenseAckDao = $this->container->get('dao.license.acknowledgement');
   }
 
   /**
@@ -462,5 +469,40 @@ class LicenseController extends RestController
       }
     }
     return $response->withJson($resInfo->getArray(), $resInfo->getCode());
+  }
+
+  /**
+   * Add new admin license acknowledgement
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function addNewAdminAcknowledgement($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $body = $this->getParsedBody($request);
+
+    if (empty($body["name"]) || empty($body["ack"])) {
+      $error = new Info(400, "Name or Acknowledgement can not be empty.", InfoType::ERROR);
+    } else if ($this->dbHelper->doesIdExist("license_std_acknowledgement", "name", $body["name"])) {
+      $error = new Info(400, "Name already exists.", InfoType::ERROR);
+    }
+
+    if (isset($error)) {
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $res = $this->adminLicenseAckDao->insertAcknowledgement($body["name"], $body["ack"]);
+
+    if ($res == -2) {
+      $info = new Info(500, "Error while inserting new acknowledgement.", InfoType::ERROR);
+    } else {
+      $info = new Info(200, "Acknowledgement added successfully.", InfoType::INFO);
+    }
+    return $response->withJson($info->getArray(), $info->getCode());
   }
 }
