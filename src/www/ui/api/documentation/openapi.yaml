@@ -3481,6 +3481,31 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /license/adminacknowledgements:
+    get:
+      operationId: getAdminLicenseAcknowledgements
+      tags:
+        - License
+      summary: Get all admin license acknowledgements
+      description: >
+        Get a list of the admin license acknowledgements
+      responses:
+        '200':
+          description: Request is successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminLicenseAcknowledgement'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -4842,6 +4867,25 @@ components:
           type: boolean
           description: Add the copyright information as text findings
           default: false
+    AdminLicenseAcknowledgement:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The primary key of the AdminAcknowledgement
+          example: 2
+        name:
+          type: string
+          description: The name of the AdminAcknowledgement
+          example: ackupdated
+        acknowledgement:
+          type: string
+          description: The acknowledgement text of the AdminAcknowledgement
+          example: updated Ack text
+        is_enabled:
+          type: boolean
+          description: Indicates if the AdminAcknowledgement is enabled
+          example: true
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"
