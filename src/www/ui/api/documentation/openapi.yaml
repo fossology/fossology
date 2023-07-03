@@ -923,6 +923,7 @@ paths:
                   $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
   /uploads/{id}/item/{itemId}/view:
     parameters:
       - name: id
@@ -1018,6 +1019,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+          
   /uploads/{id}/licenses/main:
     parameters:
       - name: id
@@ -1056,7 +1058,47 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-
+    post:
+      operationId: setMainLicense
+      tags:
+        - Upload
+      summary: Set the main license for the upload
+      description: >
+        Set the main license for a particular upload.
+      requestBody:
+        description: MainLicense payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetMainLicense'
+      responses:
+        '200':
+          description: Main license set successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Short name missing from request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /search:
     get:
       operationId: searchFile
@@ -3545,6 +3587,14 @@ components:
           description: |
             Is the decision global?
             If true, the decision is applied to all occurrence of the file on the server!
+    SetMainLicense:
+      description: Set Main License information
+      type: object
+      properties:
+        shortName:
+          type: string
+          description: short name of the license
+          example: MIT
     AddMember:
       description: UserMember options
       type: object
