@@ -1098,6 +1098,49 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
+          $ref: '#/components/responses/defaultResponse'  
+  
+  /uploads/{id}/licenses/{shortName}/main:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: shortName
+        required: true
+        description: shortName of the main license to be deleted
+        in: path
+        schema:
+          type: string
+    delete:
+      operationId: deleteMainLicense
+      tags:
+        - Upload
+      summary: Delete a main license from an upload
+      description: >
+        Delete a main license from an upload.
+      responses:
+        '200':
+          description: License is removed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
           $ref: '#/components/responses/defaultResponse'
   /search:
     get:
