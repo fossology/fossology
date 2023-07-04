@@ -12,6 +12,7 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\LicenseAcknowledgementDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Util\StringOperation;
@@ -53,6 +54,11 @@ class LicenseController extends RestController
    */
   private $licenseDao;
 
+  /**
+   * @var LicenseAcknowledgementDao $adminLicenseAckDao
+   * LicenseAcknowledgementDao object
+   */
+  private $adminLicenseAckDao;
 
   /**
    * @param ContainerInterface $container
@@ -61,6 +67,7 @@ class LicenseController extends RestController
   {
     parent::__construct($container);
     $this->licenseDao = $this->container->get('dao.license');
+    $this->adminLicenseAckDao = $this->container->get('dao.license.acknowledgement');
   }
 
   /**
@@ -462,5 +469,43 @@ class LicenseController extends RestController
       }
     }
     return $response->withJson($resInfo->getArray(), $resInfo->getCode());
+  }
+
+  /**
+   * update admin license acknowledgement
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function updateAdminAcknowledgement($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $body = $this->getParsedBody($request);
+    $ackId = intval($args['ackId']);
+
+    if (empty($body["name"]) || empty($body["ack"])) {
+      $error = new Info(400, "Name or Acknowledgement can not be empty.", InfoType::ERROR);
+    } else {
+      $sql = "SELECT la_pk, name FROM license_std_acknowledgement WHERE la_pk = $1;";
+      $result = $this->dbHelper->getDbManager()->getSingleRow($sql, [$ackId]);
+      if (empty($result)) {
+        $error = new Info(404, "Acknowledgement not found.", InfoType::ERROR);
+      } else if ($result["name"] != $body["name"] && $this->dbHelper->doesIdExist("license_std_acknowledgement", "name", $body["name"])) {
+        $error = new Info(400, "Name already exists.", InfoType::ERROR);
+      }
+    }
+
+    if (isset($error)) {
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $this->adminLicenseAckDao->updateAcknowledgement($ackId, $body["name"], $body["ack"]);
+    $info = new Info(200, "Acknowledgement updated successfully.", InfoType::INFO);
+    return $response->withJson($info->getArray(), $info->getCode());
   }
 }
