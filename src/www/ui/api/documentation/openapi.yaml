@@ -3166,7 +3166,6 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-
   /customise:
     get:
       operationId: getCustomiseData
@@ -5256,8 +5255,6 @@ components:
         option_value:
           description: If type is 'dropdown', provide options in format op1{val1}|op2{val2}|...
           type: string
-
-
     Group:
       description: Group object
       type: object
