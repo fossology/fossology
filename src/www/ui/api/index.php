@@ -37,6 +37,7 @@ use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UploadTreeController;
 use Fossology\UI\Api\Controllers\UserController;
+use Fossology\UI\Api\Controllers\CustomiseController;
 use Fossology\UI\Api\Helper\ResponseFactoryHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Middlewares\FossologyInitMiddleware;
@@ -249,6 +250,12 @@ $app->group('/report',
     $app->get('/{id:\\d+}', ReportController::class . ':downloadReport');
     $app->post('/import', ReportController::class . ':importReport');
     $app->any('/{params:.*}', BadRequestController::class);
+  });
+
+/////////////////////////CUSTOMISE////////////////////
+$app->group('/customise',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', CustomiseController::class . ':getCustomiseData');
   });
 
 ////////////////////////////INFO/////////////////////

@@ -87,6 +87,10 @@ SPDX-License-Identifier: FSFAP
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>
         </service>
+        <service id="dao.sys_config" class="Fossology\Lib\Dao\SysConfigDao" public="true">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="logger"/>
+        </service>
         <service id="dao.user" class="Fossology\Lib\Dao\UserDao" public="true">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>
