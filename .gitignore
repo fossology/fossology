@@ -215,5 +215,6 @@ ubuntu-*
 /phpenv/
 # cmake ignore files
 **/build
+**/build-clang
 cmake-build-release
 cmake-build-debug
