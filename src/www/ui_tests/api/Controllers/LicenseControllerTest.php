@@ -158,6 +158,8 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
     $container->shouldReceive('get')->withArgs(array(
+      'dao.license.acknowledgement'))->andReturn($this->adminLicenseAckDao);
+    $container->shouldReceive('get')->withArgs(array(
       'dao.license'))->andReturn($this->licenseDao);
     $container->shouldReceive('get')->withArgs(array(
       'dao.license.acknowledgement'))->andReturn($this->adminLicenseAckDao);
