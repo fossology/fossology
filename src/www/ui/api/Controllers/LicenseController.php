@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Controllers;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseAcknowledgementDao;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\LicenseStdCommentDao;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Util\StringOperation;
 use Fossology\UI\Api\Helper\ResponseHelper;
@@ -61,6 +62,11 @@ class LicenseController extends RestController
    */
   private $adminLicenseAckDao;
 
+  /**
+   * @var LicenseStdCommentDao $licenseStdCommentDao
+   * License Dao object
+   */
+  private $licenseStdCommentDao;
 
   /**
    * @param ContainerInterface $container
@@ -70,6 +76,7 @@ class LicenseController extends RestController
     parent::__construct($container);
     $this->licenseDao = $this->container->get('dao.license');
     $this->adminLicenseAckDao = $this->container->get('dao.license.acknowledgement');
+    $this->licenseStdCommentDao = $this->container->get('dao.license.stdc');
   }
 
   /**
@@ -584,5 +591,24 @@ class LicenseController extends RestController
       'success' => $success,
       'errors' => $errors
     ], 200);
+  }
+
+  /**
+   * Get all license standard comments
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getAllLicenseStandardComments($request, $response, $args)
+  {
+    $res = $this->licenseStdCommentDao->getAllComments();
+    foreach ($res as $key => $ack) {
+      $res[$key]['id'] = intval($ack['lsc_pk']);
+      $res[$key]['is_enabled'] = $ack['is_enabled'] == "t";
+      unset($res[$key]['lsc_pk']);
+    }
+    return $response->withJson($res, 200);
   }
 }
