@@ -3943,6 +3943,44 @@ paths:
                   $ref: '#/components/schemas/StandardComment'
         default:
           $ref: '#/components/responses/defaultResponse'
+    put:
+      operationId: mutateStdComments
+      tags:
+        - License
+      summary: Add, Edit, Enable & Disable
+      description: >
+        Add, edit and toggle standard comments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/MutateStdComment'
+      responses:
+        '200':
+          description: Request is successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -5703,6 +5741,38 @@ components:
           type: integer
           description: "Number of fired jobs"
           example: 23
+    MutateStdComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: |
+            The ID of the standard comment.
+            Required if update is TRUE.
+          example: 2
+        name:
+          type: string
+          description: |
+            The name of the standard comment.
+            Required if update is FALSE.
+          example: commentName
+        comment:
+          type: string
+          description: |
+            The standard comment text.
+            Required if update is FALSE.
+          example: comment text
+        toggle:
+          type: boolean
+          description: A boolean indicating the toggle state.
+          example: true
+        update:
+          type: boolean
+          description: |
+            A boolean indicating if an update is needed.
+            If TRUE, update the given standard comment.
+            if FALSE, add new standard comment.
+          example: true
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"

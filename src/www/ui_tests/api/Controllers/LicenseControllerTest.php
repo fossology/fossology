@@ -159,7 +159,6 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper->shouldReceive('getUserId')->andReturn($this->userId);
     $this->restHelper->shouldReceive('getUserDao')->andReturn($this->userDao);
 
-
     $this->restHelper->shouldReceive('getPlugin')
       ->withArgs(array('admin_license_from_csv'))->andReturn($this->adminLicensePlugin);
     $container->shouldReceive('get')->withArgs(array(
