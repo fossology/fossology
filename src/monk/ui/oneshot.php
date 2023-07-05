@@ -65,7 +65,7 @@ class OneShot extends DefaultPlugin
     return $this->render('include/base.html.twig', $vars);
   }
 
-  public function scanMonkRendered($text)
+  public function scanMonkRendered($text, $fromRest = false)
   {
     $tmpFileName = tempnam("/tmp", "monk");
     if (!$tmpFileName) {
@@ -82,7 +82,9 @@ class OneShot extends DefaultPlugin
     $textFragment = new TextFragment(0, $text);
 
     $rendered = $this->textRenderer->renderText($textFragment, $splitPositions);
-
+    if ( $fromRest ) {
+      return array($licenseIds, $highlights);
+    }
     return array($licenseIds, $rendered);
   }
 

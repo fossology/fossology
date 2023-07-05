@@ -189,13 +189,13 @@ class AdminLicenseCandidate extends DefaultPlugin
     return $row;
   }
 
-  private function suggestLicenseId($str)
+  public function suggestLicenseId($str, $fromRest = false)
   {
     /* @var $monkOneShotPlugin \Fossology\Monk\UI\Oneshot */
     $monkOneShotPlugin = plugin_find("oneshot-monk");
 
     if (null !== $monkOneShotPlugin) {
-      return $monkOneShotPlugin->scanMonkRendered($str);
+      return $monkOneShotPlugin->scanMonkRendered($str, $fromRest);
     } else {
       return array(array(), $str);
     }

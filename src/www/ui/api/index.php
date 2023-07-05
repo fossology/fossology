@@ -326,6 +326,7 @@ $app->group('/license',
     $app->get('/adminacknowledgements', LicenseController::class . ':getAllAdminAcknowledgements');
     $app->get('/stdcomments', LicenseController::class . ':getAllLicenseStandardComments');
     $app->put('/stdcomments', LicenseController::class . ':handleLicenseStandardComment');
+    $app->post('/suggest', LicenseController::class . ':getSuggestedLicense');
     $app->get('/{shortname:.+}', LicenseController::class . ':getLicense');
     $app->patch('/{shortname:.+}', LicenseController::class . ':updateLicense');
     $app->delete('/admincandidates/{id:\\d+}',

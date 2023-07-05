@@ -643,7 +643,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-  /uploads/{id}/item/{itemId}/info:    
+  /uploads/{id}/item/{itemId}/info:
     parameters:
       - name: id
         required: true
@@ -1045,7 +1045,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-          
+
   /uploads/{id}/item/{itemId}/view:
     parameters:
       - name: id
@@ -1335,7 +1335,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-          
+
   /uploads/{id}/licenses/main:
     parameters:
       - name: id
@@ -1458,7 +1458,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-          
+
   /uploads/{id}/item/{itemId}/prev-next:
     parameters:
       - name: id
@@ -1553,7 +1553,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-  
+
   /uploads/{id}/clearing-progress:
     parameters:
       - name: id
@@ -1874,7 +1874,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-          
+
   /uploads/{id}/licenses/reuse:
     parameters:
       - name: id
@@ -2659,6 +2659,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
   /jobs/{id}/{queue}:
     parameters:
       - name: id
@@ -4219,6 +4220,50 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /license/suggest:
+    post:
+      operationId: getSuggestedLicense
+      tags:
+        - License
+        - Admin
+      summary: Get suggested license by reference text.
+      description: >
+        Get a single suggested license by the given reference text.
+      requestBody:
+        description: Reference text to get suggested license
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                referenceText:
+                  description: Reference text to get suggested license
+                  type: string
+                  example:
+                    "According to MIT license, add some modifications"
+      responses:
+        '200':
+          description: Request is successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSuggestedLicense'
+        '403':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -5006,7 +5051,7 @@ components:
       properties:
         key:
           description: field key
-          type: string          
+          type: string
         value:
           description: field value
           type: string
@@ -5033,7 +5078,7 @@ components:
           description: If type is 'dropdown', provide options in format op1{val1}|op2{val2}|...
           type: string
 
-            
+
     Group:
       description: Group object
       type: object
@@ -5061,7 +5106,7 @@ components:
           type: integer
           example:
             3
-                       
+
     GetBulkHistory:
       type: object
       properties:
@@ -5138,7 +5183,7 @@ components:
           items:
             type: string
             example: "GPL-2.0"
-            
+
     HighlightInfo:
       type: object
       properties:
@@ -6131,6 +6176,79 @@ components:
           enum:
             - "Running"
             - "Stopped"
+    GetSuggestedLicense:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The primary key of the suggested license.
+          example: 1329
+        spdxName:
+          type: string
+          description: The SPDX identifier of the suggested license.
+          example: "LicenseRef-fossology-testmerge"
+        shortname:
+          type: string
+          description: The short name of the suggested license.
+          example: "MIT"
+        fullname:
+          type: string
+          description: The full name of the suggested license.
+          example: "MIT license"
+        text:
+          type: string
+          description: The text content of the suggested license.
+          example: "Copyright (c) 2002 by AUTHOR PROFESSIONAL IDENTIFICATION * URL \"PROMOTIONAL SLOGAN FOR AUTHOR'S PROFESSIONAL PRACTICE\"\r\n"
+        url:
+          type: string
+          description: The URL associated with the suggested license.
+          example: "https://www.google.com/"
+        notes:
+          type: string
+          description: Additional notes or comments about the suggested license.
+          example: "public notes"
+        risk:
+          type: integer
+          description: The risk level associated with the suggested license.
+          example: 2
+        highlights:
+          type: array
+          items:
+            type: object
+            properties:
+              start:
+                type: integer
+                example: 0
+              end:
+                type: integer
+                example: 161
+              type:
+                type: string
+                example: M
+              licenseId:
+                type: integer
+                example: 126
+              refStart:
+                type: integer
+                example: 0
+              refEnd:
+                type: integer
+                example: 163
+              infoText:
+                type: string
+                example: MIT
+              htmlElement:
+                type: string
+                example: null
+          example:
+            - start: 0
+              end: 161
+              type: M
+              licenseId: 126
+              refStart: 0
+              refEnd: 163
+              infoText: MIT
+              htmlElement: null
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"
