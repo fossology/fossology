@@ -202,7 +202,9 @@ class CopyrightHistogramProcessPost extends FO_Plugin
    */
   private function getTableData($upload, $item, $agent_pk, $type, $listPage, $filter, $activated = true)
   {
-    list ($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->getCopyrights($upload, $item, $this->uploadtree_tablename, $agent_pk, $type, $filter, $activated);
+    $offset = GetParm('iDisplayStart', PARM_INTEGER);
+    $limit = GetParm('iDisplayLength', PARM_INTEGER);
+    list ($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->getCopyrights($upload, $item, $this->uploadtree_tablename, $agent_pk, $type, $filter, $activated, $offset, $limit);
     $aaData = array();
     if (!empty($rows)) {
       $rw = $this->uploadDao->isEditable($upload, Auth::getGroupId());
@@ -226,11 +228,8 @@ class CopyrightHistogramProcessPost extends FO_Plugin
    * @param boolean $activated           True to get activated copyrights, else false
    * @return array[][] Array of table records, filtered records, total records
    */
-  protected function getCopyrights($upload_pk, $item, $uploadTreeTableName, $agentId, $type, $filter, $activated = true)
+  public function getCopyrights($upload_pk, $item, $uploadTreeTableName, $agentId, $type, $filter, $activated = true, $offset = null , $limit = null)
   {
-    $offset = GetParm('iDisplayStart', PARM_INTEGER);
-    $limit = GetParm('iDisplayLength', PARM_INTEGER);
-
     $tableName = $this->getTableName($type);
     $tableNameEvent = $tableName.'_event';
     $orderString = $this->getOrderString();
@@ -365,6 +364,17 @@ count(*) AS copyright_count " .
     $orderString = $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase, $defaultOrder);
 
     return $orderString;
+  }
+
+  /**
+   * @brief Get Agent ID for an upload
+   * @param integer $upload_pk Upload ID
+   * @param string $copyrightType Copyright Type
+   * @return integer Agent ID
+   */
+  public function getAgentId($upload_pk,$copyrightType)
+  {
+    return (LatestAgentpk($upload_pk, $copyrightType));
   }
 
   /**

@@ -1538,6 +1538,71 @@ paths:
 
         default:
           $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/item/{itemId}/copyrights:
+    parameters:
+      - name: id
+        required: true
+        description: Upload Id
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: UploadTree ID
+        in: path
+        schema:
+          type: integer
+      - name: status
+        required: true
+        in: query
+        description: status of the copyright
+        schema:
+          type: string
+          enum:
+              - active
+              - inactive
+      - name: limit
+        description: Limits of responses per request
+        required: false
+        in: header
+        schema:
+          type: integer
+          default: 100
+          minimum: 1
+          maximum: 1000
+      - name: page
+        description: Page number for responses
+        required: false
+        in: header
+        schema:
+          type: integer
+          default: 1
+          minimum: 1
+    get:
+      operationId: getFileCopyrights
+      tags:
+        - Copyrights
+      summary: Get the copyrights of the mentioned upload tree ID
+      description: Returns the list of copyrights associated with the file
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Total-Pages:
+              description: Total number of pages which can be generated based on limit
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetFileCopyrights'
+        '400':
+          description: "Bad Request. 'upload' is a required query param"
+          $ref: '#/components/responses/defaultResponse'
+          
   /jobs:
     parameters:
       - name: groupName
@@ -3264,6 +3329,19 @@ components:
             link:
               description: Link to download the report
               type: string
+    GetFileCopyrights:
+      description: Copyright details of a file
+      type: object
+      properties:
+        content:
+          type: string
+          description: Copyright content
+        hash:
+          type: string
+          description: copyright hash
+        copyright_count:
+          type: integer
+          description: count of the copyrights
     ShowJob:
       description: History of all the jobs and the job queue info
       type: object
