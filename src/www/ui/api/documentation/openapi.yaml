@@ -1868,9 +1868,39 @@ paths:
     delete:
       operationId: deleteFileCopyrights
       tags:
-        - Copyright
+        - Copyrights
       summary: Deletes a copyright for a file
       description: Deletes a copyright statement for a particular file
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    put:
+      operationId: updateFileCopyrights
+      tags:
+        - Copyrights
+      summary: Updates a copyright for a file
+      description: Updates a copyright statement for a particular file
+      requestBody:
+        description: updateCopyright Payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetCopyrightInfo'
       responses:
         '200':
           description: OK
@@ -2984,6 +3014,12 @@ components:
         copyrightCount:
           type: integer
           description: No. of copyrights found in the upload.
+    SetCopyrightInfo:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Copyright text
     Job:
       type: object
       properties:
