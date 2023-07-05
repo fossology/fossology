@@ -826,4 +826,54 @@ class LicenseController extends RestController
     }
     return $response->withJson($info->getArray(), $info->getCode());
   }
+
+  /**
+   * Get suggested license from reference text
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getSuggestedLicense($request, $response, $args)
+  {
+    $body =  $this->getParsedBody($request);
+    $rfText = $body["referenceText"];
+    if (!Auth::isAdmin()) {
+      $resInfo = new Info(403, "Only admin can perform this operation.",
+        InfoType::ERROR);
+      return $response->withJson($resInfo->getArray(), $resInfo->getCode());
+    }
+    if (empty($rfText)) {
+      $error = new Info(400, "Reference text is missing.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $adminLicenseCandidate = $this->restHelper->getPlugin('admin_license_candidate');
+
+    list ($suggestIds, $rendered) = $adminLicenseCandidate->suggestLicenseId($rfText, true);
+
+    foreach ($rendered as $key => $value) {
+      $rendered[$key] = $value->getArray();
+    }
+
+    if (! empty($suggestIds)) {
+      $suggest = $suggestIds[0];
+      $suggestLicense = $adminLicenseCandidate->getDataRow($suggest, 'ONLY license_ref');
+      $suggestLicense = [
+        'id' => intval($suggestLicense['rf_pk']),
+        'spdxName' => $suggestLicense['rf_spdx_id'],
+        'shortName' => $suggestLicense['rf_shortname'],
+        'fullName' => $suggestLicense['rf_fullname'],
+        'text' => $suggestLicense['rf_text'],
+        'url' => $suggestLicense['rf_url'],
+        'notes' => $suggestLicense['rf_notes'],
+        'risk' => intval($suggestLicense['rf_risk']),
+        'highlights' => $rendered,
+      ];
+    }
+    if (empty($suggestLicense)) {
+      $suggestLicense = new \stdClass();
+    }
+    return $response->withJson($suggestLicense, 200);
+  }
 }
