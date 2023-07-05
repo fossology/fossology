@@ -23,6 +23,7 @@ namespace Fossology\UI\Api\Test\Controllers {
 
   use ClearingView;
   use Fossology\Lib\Auth\Auth;
+  use Fossology\Lib\Dao\ClearingDao;
   use Fossology\Lib\Dao\UploadDao;
   use Fossology\Lib\Data\DecisionTypes;
   use Fossology\Lib\Data\Tree\Item;
@@ -33,6 +34,7 @@ namespace Fossology\UI\Api\Test\Controllers {
   use Fossology\UI\Api\Helper\DbHelper;
   use Fossology\UI\Api\Helper\ResponseHelper;
   use Fossology\UI\Api\Helper\RestHelper;
+  use Fossology\UI\Api\Models\BulkHistory;
   use Fossology\UI\Api\Models\Info;
   use Fossology\UI\Api\Models\InfoType;
   use Mockery as M;
@@ -80,6 +82,12 @@ namespace Fossology\UI\Api\Test\Controllers {
     private $uploadDao;
 
     /**
+     * @var ClearingDao $clearingDao
+     * ClearingDao mock
+     */
+    private $clearingDao;
+
+    /**
      * @var StreamFactory $streamFactory
      * Stream factory to create body streams.
      */
@@ -120,6 +128,7 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->decisionTypes = M::mock(DecisionTypes::class);
       $this->viewFilePlugin = M::mock('ui_view');
       $this->viewLicensePlugin = M::mock(ClearingView::class);
+      $this->clearingDao = M::mock(ClearingDao::class);
 
       $this->restHelper->shouldReceive('getPlugin')
         ->withArgs(array('view'))->andReturn($this->viewFilePlugin);
@@ -138,6 +147,7 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->andReturn($this->uploadDao);
       $container->shouldReceive('get')->withArgs(array(
         'helper.restHelper'))->andReturn($this->restHelper);
+      $container->shouldReceive('get')->withArgs(['dao.clearing'])->andReturn($this->clearingDao);
       $container->shouldReceive('get')->withArgs(['decision.types'])->andReturn($this->decisionTypes);
       $this->uploadTreeController = new UploadTreeController($container);
       $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
@@ -348,6 +358,48 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->willReturn($queryParams);
 
       $actualResponse = $this->uploadTreeController->getNextPreviousItem($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+      $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+      $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::getClearingHistory()
+     * -# Check if response status is 200 and RES body matches
+     */
+    public function testGetClearingHistory()
+    {
+      $itemId = 200;
+      $uploadId = 1;
+      $itemTreeBounds = new ItemTreeBounds($itemId, 'uploadtree', $uploadId, 1, 2);
+
+      $res[] = array(
+        "bulkId" => 1,
+        "id" => 1,
+        "text" => "test",
+        "matched" => true,
+        "tried" => true,
+        "addedLicenses" => [],
+        "removedLicenses" => [],
+      );
+
+      $obj = new BulkHistory(1, 1, "test", true, true, [], []);
+      $updatedRes[] = $obj->getArray();
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+
+      $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+
+      $this->uploadDao->shouldReceive("getItemTreeBounds")
+        ->withArgs([$itemId, "uploadtree"])->andReturn($itemTreeBounds);
+
+      $this->clearingDao->shouldReceive("getBulkHistory")
+        ->withArgs([$itemTreeBounds, $this->groupId])->andReturn($res);
+      $expectedResponse = (new ResponseHelper())->withJson($updatedRes, 200);
+      $actualResponse = $this->uploadTreeController->getBulkHistory(null, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
       $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
       $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
     }
