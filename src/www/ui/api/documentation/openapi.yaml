@@ -1144,6 +1144,59 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+          
+  /uploads/{id}/item/{itemId}/prev-next:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the itemId
+        in: path
+        schema:
+          type: integer
+      - name: selection
+        required: false
+        schema:
+          type: string
+          enum:
+            - withLicenses
+            - noClearing
+        in: query
+        description: Return jobs for the given upload id only
+    get:
+      operationId: getPreviousAndNextItem
+      tags:
+        - Upload
+      summary: Get previous and next item for an upload
+      description: >
+        Get the index of the previous and the next time for an upload
+      responses:
+        '200':
+          description: List of the data about clearing history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPrevNextItem'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /search:
     get:
       operationId: searchFile
@@ -3612,6 +3665,19 @@ components:
           type: string
           example:
             "Main group"
+    GetPrevNextItem:
+      type: object
+      properties:
+        prevItemId:
+          description: Previous item Id
+          type: integer
+          example:
+            1
+        nextItemId:
+          description: Next item Id
+          type: integer
+          example:
+            3
     UserGroupMember:
       type: object
       properties:

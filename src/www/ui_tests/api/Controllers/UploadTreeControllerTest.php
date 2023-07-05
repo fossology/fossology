@@ -25,6 +25,8 @@ namespace Fossology\UI\Api\Test\Controllers {
   use Fossology\Lib\Auth\Auth;
   use Fossology\Lib\Dao\UploadDao;
   use Fossology\Lib\Data\DecisionTypes;
+  use Fossology\Lib\Data\Tree\Item;
+  use Fossology\Lib\Data\Tree\ItemTreeBounds;
   use Fossology\Lib\Data\UploadStatus;
   use Fossology\Lib\Db\DbManager;
   use Fossology\UI\Api\Controllers\UploadTreeController;
@@ -34,6 +36,7 @@ namespace Fossology\UI\Api\Test\Controllers {
   use Fossology\UI\Api\Models\Info;
   use Fossology\UI\Api\Models\InfoType;
   use Mockery as M;
+  use Psr\Http\Message\ServerRequestInterface;
   use Slim\Psr7\Factory\StreamFactory;
   use Slim\Psr7\Headers;
   use Slim\Psr7\Request;
@@ -262,6 +265,91 @@ namespace Fossology\UI\Api\Test\Controllers {
 
       $actualResponse = $this->uploadTreeController->setClearingDecision($request, new ResponseHelper(), ['id' => $upload_pk, 'itemId' => $item_pk]);
       $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+    }
+    /**
+     * @test
+     * -# Test for UploadTreeController::getNextPreviousItem()
+     * -# Check if response status is 200 and RES body matches
+     */
+    public function testGetNextPreviousItem()
+    {
+      $itemId = 200;
+      $uploadId = 1;
+      $nextItemId = 915;
+      $prevItemId = 109;
+      $itemTreeBounds1 = new ItemTreeBounds($nextItemId, 'uploadtree_a', $uploadId, 1, 2);
+      $itemTreeBounds2 = new ItemTreeBounds($prevItemId, 'uploadtree_a', $uploadId, 1, 2);
+
+      $item1 = new Item($itemTreeBounds1, 1, 1, 1, "fileName");
+      $item2 = new Item($itemTreeBounds2, 1, 1, 1, "fileName");
+
+      $result = array(
+        "prevItemId" => $prevItemId,
+        "nextItemId" => $nextItemId
+      );
+      $options = array('skipThese' => "", 'groupId' => $this->groupId);
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+
+      $this->uploadDao->shouldReceive('getNextItem')->withArgs([$uploadId, $itemId, $options])->andReturn($item1);
+      $this->uploadDao->shouldReceive('getPreviousItem')->withArgs([$uploadId, $itemId, $options])->andReturn($item2);
+      $expectedResponse = (new ResponseHelper())->withJson($result, 200);
+      $queryParams = ['selection' => null];
+      $request = $this->getMockBuilder(ServerRequestInterface::class)
+        ->getMock();
+      $request->expects($this->any())
+        ->method('getQueryParams')
+        ->willReturn($queryParams);
+
+      $actualResponse = $this->uploadTreeController->getNextPreviousItem($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+      $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+      $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::getNextPreviousItem()
+     * -# Check if response status 400 & response body matches
+     */
+    public function testGetNextPreviousItem_isSelectionValid()
+    {
+      $itemId = 200;
+      $uploadId = 1;
+      $nextItemId = 915;
+      $prevItemId = 109;
+      $itemTreeBounds1 = new ItemTreeBounds($nextItemId, 'uploadtree_a', $uploadId, 1, 2);
+      $itemTreeBounds2 = new ItemTreeBounds($prevItemId, 'uploadtree_a', $uploadId, 1, 2);
+
+      $item1 = new Item($itemTreeBounds1, 1, 1, 1, "fileName");
+      $item2 = new Item($itemTreeBounds2, 1, 1, 1, "fileName");
+
+      $options = array('skipThese' => "", 'groupId' => $this->groupId);
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+
+      $this->uploadDao->shouldReceive('getNextItem')->withArgs([$uploadId, $itemId, $options])->andReturn($item1);
+      $this->uploadDao->shouldReceive('getPreviousItem')->withArgs([$uploadId, $itemId, $options])->andReturn($item2);
+
+      $info = new Info(400, "selection should be either 'withLicenses' or 'noClearing'", InfoType::ERROR);
+      $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), 400);
+      $queryParams = ['selection' => "invalidSelection"];
+      $request = $this->getMockBuilder(ServerRequestInterface::class)
+        ->getMock();
+      $request->expects($this->any())
+        ->method('getQueryParams')
+        ->willReturn($queryParams);
+
+      $actualResponse = $this->uploadTreeController->getNextPreviousItem($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+      $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+      $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
     }
   }
 }
