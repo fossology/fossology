@@ -36,7 +36,6 @@ use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UploadTreeController;
 use Fossology\UI\Api\Controllers\UserController;
-use Fossology\UI\Api\Controllers\CopyrightController;
 use Fossology\UI\Api\Helper\ResponseFactoryHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Middlewares\FossologyInitMiddleware;
