@@ -29,6 +29,8 @@ tags:
     description: Basic info about API
   - name: Upload
     description: Endpoints related to uploads
+  - name: Copyrights
+    description: Copyright information
   - name: Organize
     description: Endpoints for organization of data
   - name: Search
@@ -968,8 +970,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-          $ref: '#/components/responses/defaultResponse'  
-  
+          $ref: '#/components/responses/defaultResponse'
+
   /uploads/{id}/item/{itemId}/clearing-decision:
     parameters:
       - name: id
@@ -1019,7 +1021,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-          
+
   /uploads/{id}/licenses/main:
     parameters:
       - name: id
@@ -1098,8 +1100,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-          $ref: '#/components/responses/defaultResponse'  
-  
+          $ref: '#/components/responses/defaultResponse'
+
   /uploads/{id}/licenses/{shortName}/main:
     parameters:
       - name: id
@@ -1601,8 +1603,13 @@ paths:
                   $ref: '#/components/schemas/GetFileCopyrights'
         '400':
           description: "Bad Request. 'upload' is a required query param"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
           $ref: '#/components/responses/defaultResponse'
-          
+
   /jobs:
     parameters:
       - name: groupName
