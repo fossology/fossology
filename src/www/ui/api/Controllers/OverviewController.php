@@ -85,4 +85,23 @@ class OverviewController extends RestController
     $res = $dashboardPlugin->GetPHPInfoTable(true);
     return $response->withJson($res, 200);
   }
+
+  /**
+   * Get the database for the dashboard overview
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getDatabaseMetrics($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "Only admin can view database metrics.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $dashboardPlugin = $this->restHelper->getPlugin('dashboard');
+    $res = $dashboardPlugin->DatabaseMetrics(true);
+    return $response->withJson($res, 200);
+  }
 }
