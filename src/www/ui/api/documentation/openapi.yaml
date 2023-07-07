@@ -3981,6 +3981,63 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /license/verify/{shortname}:
+    parameters:
+      - name: shortname
+        in: path
+        required: true
+        description: Shortname of the license to be verified
+        schema:
+          type: string
+    put:
+      operationId: verifyLicense
+      tags:
+        - License
+        - Admin
+      summary: Verify a license as new or variant
+      description: >
+        Verify a license as new or variant of another license
+      requestBody:
+        description: The shortname of the parent license |
+           Same name if it's to be verified as a new license
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                parentShortname:
+                  description: Shortname of the parent license
+                  type: string
+                  example:
+                    "MIT"
+      responses:
+        '200':
+          description: License verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Given License not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 components:
   securitySchemes:
     bearerAuth:

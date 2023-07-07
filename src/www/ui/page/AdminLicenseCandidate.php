@@ -207,7 +207,7 @@ class AdminLicenseCandidate extends DefaultPlugin
    * @param int $rfParent
    * @return bool
    */
-  private function verifyCandidate($rf, $shortname, $rfParent)
+  public function verifyCandidate($rf, $shortname, $rfParent)
   {
     /* @var $licenseDao LicenseDao */
     $licenseDao = $this->getObject('dao.license');
