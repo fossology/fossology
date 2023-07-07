@@ -12,9 +12,11 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\BulkHistory;
+use Fossology\UI\Api\Models\ClearingHistory;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ServerRequestInterface;
@@ -228,5 +230,54 @@ class UploadTreeController extends RestController
       $updatedRes[] = $obj->getArray();
     }
     return $response->withJson($updatedRes, 200);
+  }
+
+  /**
+   * Get the clearing history for a particular upload-tree
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getClearingHistory($request, $response, $args)
+  {
+    $itemId = intval($args['itemId']);
+    $uploadId = intval($args['id']);
+    $uploadDao = $this->restHelper->getUploadDao();
+    $clearingDao = $this->container->get('dao.clearing');
+
+    $returnVal = null;
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($uploadDao->getUploadtreeTableName($uploadId), "uploadtree_pk", $itemId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    }
+
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $itemTreeBounds = $uploadDao->getItemTreeBoundsFromUploadId($itemId, $uploadId);
+    $clearingDecWithLicenses = $clearingDao->getFileClearings($itemTreeBounds, $this->restHelper->getGroupId(), false, true);
+
+    $data = [];
+    $scope = new DecisionScopes();
+
+    foreach ($clearingDecWithLicenses as $clearingDecision) {
+      $removedLicenses = [];
+      $addedLicenses = [];
+
+      foreach ($clearingDecision->getClearingLicenses() as $lic) {
+        $shortName = $lic->getShortName();
+        $lic->isRemoved() ? $removedLicenses[] = $shortName : $addedLicenses[] = $shortName;
+      }
+      ksort($removedLicenses, SORT_STRING);
+      ksort($addedLicenses, SORT_STRING);
+      $obj =  new ClearingHistory(date('Y-m-d', $clearingDecision->getTimeStamp()), $clearingDecision->getUserName(), $scope->getTypeName($clearingDecision->getScope()), $this->decisionTypes->getConstantNameFromKey($clearingDecision->getType()), $addedLicenses, $removedLicenses);
+      $data[] = $obj->getArray();
+    }
+    return $response->withJson($data, 200);
   }
 }

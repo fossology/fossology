@@ -25,6 +25,8 @@ namespace Fossology\UI\Api\Test\Controllers {
   use Fossology\Lib\Auth\Auth;
   use Fossology\Lib\Dao\ClearingDao;
   use Fossology\Lib\Dao\UploadDao;
+  use Fossology\Lib\Data\ClearingDecision;
+  use Fossology\Lib\Data\DecisionScopes;
   use Fossology\Lib\Data\DecisionTypes;
   use Fossology\Lib\Data\Tree\Item;
   use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -35,6 +37,7 @@ namespace Fossology\UI\Api\Test\Controllers {
   use Fossology\UI\Api\Helper\ResponseHelper;
   use Fossology\UI\Api\Helper\RestHelper;
   use Fossology\UI\Api\Models\BulkHistory;
+  use Fossology\UI\Api\Models\ClearingHistory;
   use Fossology\UI\Api\Models\Info;
   use Fossology\UI\Api\Models\InfoType;
   use Mockery as M;
@@ -94,6 +97,12 @@ namespace Fossology\UI\Api\Test\Controllers {
     private $streamFactory;
 
     /**
+     * @var DecisionScopes $decisionScopes
+     * Decision types object
+     */
+    private $decisionScopes;
+
+    /**
      * @var M\MockInterface $viewFilePlugin
      * ViewFilePlugin mock
      */
@@ -129,6 +138,7 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->viewFilePlugin = M::mock('ui_view');
       $this->viewLicensePlugin = M::mock(ClearingView::class);
       $this->clearingDao = M::mock(ClearingDao::class);
+      $this->decisionScopes = M::mock(DecisionScopes::class);
 
       $this->restHelper->shouldReceive('getPlugin')
         ->withArgs(array('view'))->andReturn($this->viewFilePlugin);
@@ -147,7 +157,9 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->andReturn($this->uploadDao);
       $container->shouldReceive('get')->withArgs(array(
         'helper.restHelper'))->andReturn($this->restHelper);
+      $container->shouldReceive('get')->withArgs(['decision.types'])->andReturn($this->decisionTypes);
       $container->shouldReceive('get')->withArgs(['dao.clearing'])->andReturn($this->clearingDao);
+
       $container->shouldReceive('get')->withArgs(['decision.types'])->andReturn($this->decisionTypes);
       $this->uploadTreeController = new UploadTreeController($container);
       $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
@@ -367,7 +379,7 @@ namespace Fossology\UI\Api\Test\Controllers {
      * -# Test for UploadTreeController::getClearingHistory()
      * -# Check if response status is 200 and RES body matches
      */
-    public function testGetClearingHistory()
+    public function testGetBulkHistory()
     {
       $itemId = 200;
       $uploadId = 1;
@@ -400,6 +412,49 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->withArgs([$itemTreeBounds, $this->groupId])->andReturn($res);
       $expectedResponse = (new ResponseHelper())->withJson($updatedRes, 200);
       $actualResponse = $this->uploadTreeController->getBulkHistory(null, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+      $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+      $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::getClearingHistory()
+     * -# Check if response status is 200 and RES body matches
+     */
+    public function testGetClearingHistory()
+    {
+      $itemId = 200;
+      $uploadId = 1;
+      $itemTreeBounds = new ItemTreeBounds($itemId, 'uploadtree_a', $uploadId, 1, 2);
+      $fileClearings[] = new ClearingDecision(1, 1, $itemId, 1, 1, 1, 3, 1, 1, [], 1, 1, 1);
+      $obj = new ClearingHistory(
+        date('Y-m-d', 1),
+        1,
+        "global",
+        "TO_BE_DISCUSSED",
+        [],
+        [],
+      );
+      $result[] = $obj->getArray();
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+
+      $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+
+      $this->uploadDao->shouldReceive("getItemTreeBoundsFromUploadId")
+        ->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
+      $this->clearingDao->shouldReceive("getFileClearings")
+        ->withArgs([$itemTreeBounds, $this->groupId, false, true])->andReturn($fileClearings);
+      $this->decisionTypes->shouldReceive("getTypeName")
+        ->withArgs([$fileClearings[0]->getType()])->andReturn("test");
+      $this->decisionScopes->shouldReceive("getTypeName")->withArgs([$fileClearings[0]->getScope()])->andReturn("test");
+      $this->decisionTypes->shouldReceive("getConstantNameFromKey")
+        ->withArgs([$fileClearings[0]->getType()])->andReturn("TO_BE_DISCUSSED");
+      $expectedResponse = (new ResponseHelper())->withJson($result, 200);
+      $actualResponse = $this->uploadTreeController->getClearingHistory(null, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
       $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
       $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
     }
