@@ -231,7 +231,7 @@ class AdminLicenseCandidate extends DefaultPlugin
     return true;
   }
 
-  private function mergeCandidate($candidate, $suggest, $vars)
+  public function mergeCandidate($candidate, $suggest, $vars)
   {
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');

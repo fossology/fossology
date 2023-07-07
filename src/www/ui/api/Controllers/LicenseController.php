@@ -768,4 +768,62 @@ class LicenseController extends RestController
     }
     return $response->withJson($info->getArray(), $info->getCode());
   }
+
+  /**
+   * merge the license
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function mergeLicense($request, $response, $args)
+  {
+    $licenseShortName = $args["shortname"];
+    $body = $this->getParsedBody($request);
+    $parentName = $body["parentShortname"];
+
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "Only admin can perform this operation.",
+        InfoType::ERROR);
+    } else if (empty($licenseShortName) || empty($parentName)) {
+      $error = new Info(400, "License ShortName or Parent ShortName is missing.", InfoType::ERROR);
+    } else if ($licenseShortName == $parentName) {
+      $error = new Info(400, "License ShortName and Parent ShortName are same.", InfoType::ERROR);
+    }
+
+    if (isset($error)) {
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $license = $this->licenseDao->getLicenseByShortName($licenseShortName, $this->restHelper->getGroupId());
+    $mergeLicense = $this->licenseDao->getLicenseByShortName($parentName, $this->restHelper->getGroupId());
+
+    if (empty($license) || empty($mergeLicense)) {
+      $error = new Info(404, "License not found.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $adminLicenseCandidate = $this->restHelper->getPlugin('admin_license_candidate');
+    $vars = $adminLicenseCandidate->getDataRow($license->getId());
+    if ($vars === false) {
+      $error = new Info(404, 'invalid license candidate', InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    try {
+      $vars['shortname'] = $vars['rf_shortname'];
+      $ok = $adminLicenseCandidate->mergeCandidate($license->getId(), $mergeLicense->getId(), $vars);
+    } catch (\Throwable $th) {
+      $error = new Info(400, 'The license text already exists.', InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    if ($ok) {
+      $info = new Info(200, "Successfully merged candidate ($parentName) into ($licenseShortName).", InfoType::INFO);
+    } else {
+      $info = new Info(501, 'Sorry, this feature is not ready yet.', InfoType::ERROR);
+    }
+    return $response->withJson($info->getArray(), $info->getCode());
+  }
 }
