@@ -319,6 +319,7 @@ $app->group('/license',
     $app->post('/import-csv', LicenseController::class . ':handleImportLicense');
     $app->post('', LicenseController::class . ':createLicense');
     $app->put('/verify/{shortname:.+}', LicenseController::class . ':verifyLicense');
+    $app->put('/merge/{shortname:.+}', LicenseController::class . ':mergeLicense');
     $app->get('/admincandidates', LicenseController::class . ':getCandidates');
     $app->get('/adminacknowledgements', LicenseController::class . ':getAllAdminAcknowledgements');
     $app->get('/stdcomments', LicenseController::class . ':getAllLicenseStandardComments');
