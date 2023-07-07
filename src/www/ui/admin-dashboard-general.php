@@ -32,7 +32,7 @@ class dashboard extends FO_Plugin
    * \brief Return each html row for DatabaseContents()
    * \returns html table row
    */
-  function DatabaseContentsRow($TableName, $TableLabel)
+  function DatabaseContentsRow($TableName, $TableLabel, $fromRest = false)
   {
     $row = $this->dbManager->getSingleRow(
       "select sum(reltuples) as val from pg_class where relname like $1 and reltype !=0",
@@ -60,6 +60,15 @@ class dashboard extends FO_Plugin
     $V .= "<td $mystyle>" . substr($LastAnalyzeTime, 0, 16) . "</td>";
 
     $V .= "</tr>\n";
+
+    if ($fromRest) {
+      return [
+        "metric" => $TableLabel,
+        "total" => intval($item_count),
+        "lastVacuum" => $LastVacTime,
+        "lastAnalyze" => $LastAnalyzeTime
+      ];
+    }
     return $V;
   }
 
