@@ -20,12 +20,14 @@ class dashboard extends FO_Plugin
 
   function __construct()
   {
+    global $PG_CONN;
     $this->Name       = "dashboard";
     $this->Title      = TITLE_DASHBOARD_GENERAL;
     $this->MenuList   = "Admin::Dashboards::Overview";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     parent::__construct();
     $this->dbManager = $GLOBALS['container']->get('db.manager');
+    $this->pgVersion = pg_version($PG_CONN);
   }
 
   /**
@@ -189,9 +191,9 @@ class dashboard extends FO_Plugin
    * \brief Database metrics
    * \returns html table containing metrics
    */
-  function DatabaseMetrics()
+  function DatabaseMetrics($fromRest = false)
   {
-
+    $restRes = [];
     $V = "<table border=1>\n";
     $text = _("Metric");
     $text1 = _("Total");
@@ -205,10 +207,20 @@ class dashboard extends FO_Plugin
     $V .= "<tr><td>$text</td>";
     $V .= "<td align='right'> $Size </td></tr>\n";
 
+    $restRes[] = [
+      "metric" => $text,
+      "total" => $row['val']
+    ];
+
     /**** Version ****/
     $text = _("Postgresql version");
     $V .= "<tr><td>$text</td>";
     $V .= "<td align='right'> {$this->pgVersion['server']} </td></tr>\n";
+
+    $restRes[] = [
+      "metric" => $text,
+      "total" => $this->pgVersion['server']
+    ];
 
     /**** Query stats ****/
     // count current queries
@@ -222,6 +234,15 @@ class dashboard extends FO_Plugin
     $V .= "<td align='right'>" . number_format($connection_count,0,"",",") . "</td></tr>\n";
 
     $V .= "</table>\n";
+
+    $restRes[] = [
+      "metric" => $text,
+      "total" => $connection_count
+    ];
+
+    if ($fromRest) {
+      return $restRes;
+    }
 
     return $V;
   }
@@ -395,8 +416,6 @@ class dashboard extends FO_Plugin
 
   public function Output()
   {
-    global $PG_CONN;
-    $this->pgVersion = pg_version($PG_CONN);
 
     $V="";
     $V .= "<table style='width: 100%;' border=0>\n";
