@@ -53,6 +53,8 @@ tags:
     description: License and obligation management
   - name: Maintenance
     description: Maintenance operations
+  - name: Overview
+    description: Overview of FOSSology operations
 
 paths:
   /tokens:
@@ -4097,6 +4099,39 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /overview/database/contents:
+    get:
+      operationId: getDatabaseContents
+      tags:
+        - Overview
+        - Admin
+      summary: Get database contents
+      description: >
+        Get database contents for the dashboard display.
+      responses:
+        '200':
+          description: List of the database contents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetDatabaseContent'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -5889,6 +5924,25 @@ components:
             If TRUE, update the given standard comment.
             if FALSE, add new standard comment.
           example: true
+    GetDatabaseContent:
+      type: object
+      properties:
+        metric:
+          type: string
+          description: The metric associated with the object.
+          example: Users
+        total:
+          type: integer
+          description: The total count associated with the metric.
+          example: 2
+        lastVacuum:
+          type: string
+          description: The date and time of the last vacuum operation. If null, no vacuum operation has been performed.
+          example: null
+        lastAnalyze:
+          type: string
+          description: The date and time of the last analyze operation. If null, no analyze operation has been performed.
+          example: null
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"

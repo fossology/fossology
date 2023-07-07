@@ -33,6 +33,7 @@ use Fossology\UI\Api\Controllers\JobController;
 use Fossology\UI\Api\Controllers\CopyrightController;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Controllers\MaintenanceController;
+use Fossology\UI\Api\Controllers\OverviewController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\ConfController;
@@ -332,6 +333,11 @@ $app->group('/license',
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
+////////////////////////////OVERVIEW/////////////////////
+$app->group('/overview',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('/database/contents', OverviewController::class . ':getDatabaseContents');
+  });
 /////////////////////ERROR HANDLING/////////////////
 // Define Custom Error Handler
 $customErrorHandler = function (
