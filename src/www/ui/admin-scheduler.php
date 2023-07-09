@@ -19,7 +19,7 @@ define("TITLE_ADMIN_SCHEDULER", _("Scheduler Administration"));
 class admin_scheduler extends FO_Plugin
 {
   var $error_info = "";
-  var $operation_array;
+  public $operation_array;
 
   function __construct()
   {
@@ -27,6 +27,20 @@ class admin_scheduler extends FO_Plugin
     $this->Title      = TITLE_ADMIN_SCHEDULER;
     $this->MenuList   = "Admin::Scheduler";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
+    $this->operation_array = array
+    (
+      "status" => array(_("Status"), _("Display job or scheduler status.")),
+      "database" => array(_("Check job queue"),_("Check for new jobs.")),
+      "reload" => array(_("Reload"), _("Reload fossology.conf.")),
+      "agents" => array(_("Agents"), _("Show a list of enabled agents.")),
+      "verbose" => array(_("Verbose"), _("Change the verbosity level of the scheduler or a job.")),
+      "stop" => array(_("Shutdown Scheduler"), _("Shutdown the scheduler gracefully and stop all background processing.  This can take a while for all the agents to quit.")),
+      //    "start" => array(_("Start Scheduler"), _("Start Scheduler.")),
+      //    "restarts" => array(_("Restart Scheduler"), _("Restart Scheduler.")),
+      "restart" => array(_("Unpause a job"), _("Unpause a job.")),
+      "pause" => array(_("Pause a running job"), _("Pause a running job.")),
+      "priority" => array(_("Priority"), _("Change the priority of a job."))
+    );
     parent::__construct();
   }
 
@@ -197,21 +211,6 @@ class admin_scheduler extends FO_Plugin
   {
     $V="";
     $status_msg = "";
-
-    $this->operation_array = array
-    (
-    "status" => array(_("Status"), _("Display job or scheduler status.")),
-    "database" => array(_("Check job queue"),_("Check for new jobs.")),
-    "reload" => array(_("Reload"), _("Reload fossology.conf.")),
-    "agents" => array(_("Agents"), _("Show a list of enabled agents.")),
-    "verbose" => array(_("Verbose"), _("Change the verbosity level of the scheduler or a job.")),
-    "stop" => array(_("Shutdown Scheduler"), _("Shutdown the scheduler gracefully and stop all background processing.  This can take a while for all the agents to quit.")),
-    //    "start" => array(_("Start Scheduler"), _("Start Scheduler.")),
-    //    "restarts" => array(_("Restart Scheduler"), _("Restart Scheduler.")),
-    "restart" => array(_("Unpause a job"), _("Unpause a job.")),
-    "pause" => array(_("Pause a running job"), _("Pause a running job.")),
-    "priority" => array(_("Priority"), _("Change the priority of a job."))
-    );
 
     $operation = GetParm('operation', PARM_TEXT);
     $job_id = GetParm('job_list', PARM_TEXT);

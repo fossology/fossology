@@ -2546,6 +2546,48 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
+  /jobs/scheduler/operation/{operationName}:
+    parameters:
+      - name: operationName
+        required: true
+        description: Name of the operation
+        in: path
+        schema:
+          type: string
+          enum:
+            - status
+            - database
+            - reload
+            - agents
+            - verbose
+            - stop
+            - restart
+            - pause
+            - priority
+    get:
+      operationId: getSchedulerOptionsByOperation
+      tags:
+        - Job
+        - Admin
+      summary: get scheduler options by operation
+      description: Returns the scheduler options for a specific operation
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/GetSchedulerOption'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /jobs/{id}:
     parameters:
       - name: id
@@ -6310,6 +6352,33 @@ components:
         elapsed:
           type: string
           example: "00:01:06.961334"
+    GetSchedulerOption:
+      type: object
+      properties:
+        jobList:
+          type: array
+          description: "List of jobs"
+          items:
+            type: string
+          example: [ "scheduler" ]
+        priorityList:
+          type: array
+          description: "List of priorities"
+          items:
+            type: integer
+          example: [ -20, -19, -18 ]
+        verboseList:
+          type: array
+          description: "List of verbose levels"
+          items:
+            type: integer
+          example: [ 1, 3 ]
+        agentList:
+          type: array
+          description: "List of agents"
+          items:
+            type: string
+          example: [ "clixml", "pkgagent", "maintagent", "deciderjob" ]
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"
