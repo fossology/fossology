@@ -338,6 +338,7 @@ $app->group('/overview',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('/database/contents', OverviewController::class . ':getDatabaseContents');
     $app->get('/disk/usage', OverviewController::class . ':getDiskSpaceUsage');
+    $app->get('/info/php', OverviewController::class . ':getPhpInfo');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
