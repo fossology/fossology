@@ -104,4 +104,29 @@ class OverviewController extends RestController
     $res = $dashboardPlugin->DatabaseMetrics(true);
     return $response->withJson($res, 200);
   }
+
+  /**
+   * Get active queries
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getActiveQueries($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "Only Admin can access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $dashboardPlugin = $this->restHelper->getPlugin('dashboard');
+    global $PG_CONN;
+    $dashboardPlugin->pgVersion = pg_version($PG_CONN);
+    $res = $dashboardPlugin->DatabaseQueries(true);
+
+    foreach ($res as &$value) {
+      $value['pid'] = intval($value['pid']);
+    }
+    return $response->withJson($res, 200);
+  }
 }
