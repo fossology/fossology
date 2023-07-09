@@ -4132,6 +4132,39 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /overview/disk/usage:
+    get:
+      operationId: getDiskUsage
+      tags:
+        - Overview
+        - Admin
+      summary: Get disk usage
+      description: >
+        Get disk usage
+      responses:
+        '200':
+          description: Disk usage response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DiskUsage'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -5943,6 +5976,55 @@ components:
           type: string
           description: The date and time of the last analyze operation. If null, no analyze operation has been performed.
           example: null
+    DiskUsage:
+      type: object
+      properties:
+        data:
+          type: array
+          description: "List of filesystem information"
+          items:
+            type: object
+            properties:
+              filesystem:
+                type: string
+                description: "Filesystem path"
+                example: "/dev/nvme0n1p6"
+              capacity:
+                type: string
+                description: "Total capacity of the filesystem"
+                example: "192G"
+              used:
+                type: string
+                description: "Used space in the filesystem"
+                example: "173G"
+              available:
+                type: string
+                description: "Available space in the filesystem"
+                example: "8.8G"
+              percentFull:
+                type: string
+                description: "Percentage of the filesystem used"
+                example: "96%"
+              mountPoint:
+                type: string
+                description: "Mount point of the filesystem"
+                example: "/"
+        notes:
+          type: object
+          description: "Additional notes"
+          properties:
+            database:
+              type: string
+              description: "Database location"
+              example: "/var/lib/postgresql/12/main"
+            repository:
+              type: string
+              description: "Repository location"
+              example: "/srv/fossology/repository"
+            fossologyConfig:
+              type: string
+              description: "Fossology configuration location"
+              example: "/usr/local/etc/fossology"
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"

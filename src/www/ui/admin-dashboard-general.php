@@ -266,10 +266,12 @@ class dashboard extends FO_Plugin
   /**
    * \brief Determine amount of free disk space.
    */
-  function DiskFree()
+  function DiskFree($fromRest = false)
   {
     global $SYSCONFDIR;
     global $SysConf;
+
+    $restRes = [];
 
     $Cmd = "df -hP";
     $Buf = $this->DoCmd($Cmd);
@@ -332,6 +334,15 @@ class dashboard extends FO_Plugin
       $V .= "<td align='right' $mystyle>$List[4]</td>";
 
       $V .= "<td align='left'>" . htmlentities($List[5]) . "</td></tr>\n";
+
+      $restRes["data"][] = [
+        "filesystem" => htmlentities($List[0]),
+        "capacity" => $List[1],
+        "used" => $List[2],
+        "available" => $List[3],
+        "percentFull" => $List[4],
+        "mountPoint" => htmlentities($List[5])
+      ];
     }
     $V .= "</table>\n";
 
@@ -357,7 +368,16 @@ class dashboard extends FO_Plugin
     // FOSSology config location
     $V .= $Indent . _("FOSSology config") . ": " . $SYSCONFDIR . "<br>";
 
-    return($V);
+    $restRes["notes"] = [
+      "database" => $DargArray[0],
+      "repository" => $SysConf['FOSSOLOGY']['path'],
+      "fossologyConfig" => $SYSCONFDIR
+    ];
+
+    if ($fromRest) {
+      return $restRes;
+    }
+    return ($V);
   }
 
   public function Output()
