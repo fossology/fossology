@@ -13,7 +13,7 @@ use Fossology\Lib\Db\DbManager;
 
 class dashboard extends FO_Plugin
 {
-  protected $pgVersion;
+  public $pgVersion;
 
   /** @var DbManager */
   private $dbManager;
@@ -252,13 +252,14 @@ class dashboard extends FO_Plugin
    * \brief Database queries
    * \returns html table containing query strings, pid, and start time
    */
-  function DatabaseQueries()
+  function DatabaseQueries($fromRest = false)
   {
     $V = "<table border=1 id='databaseTable'>\n";
     $head1 = _("PID");
     $head2 = _("Query");
     $head3 = _("Started");
     $head4 = _("Elapsed");
+    $restRes = [];
     $V .= "<tr><th>$head1</th><th>$head2</th><th>$head3</th><th>$head4</th></tr>\n";
     $getCurrentVersion = explode(" ", $this->pgVersion['server']);
     $currentVersion = str_replace(".", "", $getCurrentVersion[0]);
@@ -285,6 +286,12 @@ class dashboard extends FO_Plugin
         $V .= "<td class='dashboard'>$StartTime</td>";
         $V .= "<td class='dashboard'>$row[elapsed]</td>";
         $V .= "</tr>\n";
+        $restRes[] = [
+          "pid" => $row['processid'],
+          "query" => htmlspecialchars($row[$current_query]),
+          "startTime" => $row['query_start'],
+          "elapsed" => $row['elapsed']
+        ];
       }
     } else {
       $V .= "<tr><td class='dashboard' colspan=4>There are no active FOSSology queries</td></tr>";
@@ -293,6 +300,9 @@ class dashboard extends FO_Plugin
     pg_free_result($result);
     $V .= "</table>\n";
 
+    if ($fromRest) {
+      return $restRes;
+    }
     return $V;
   }
 
