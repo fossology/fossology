@@ -240,6 +240,7 @@ $app->group('/jobs',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('[/{id:\\d+}]', JobController::class . ':getJobs');
     $app->get('/all', JobController::class . ':getAllJobs');
+    $app->get('/dashboard/statistics', JobController::class . ':getJobStatistics');
     $app->post('', JobController::class . ':createJob');
     $app->get('/history', JobController::class . ':getJobsHistory');
     $app->delete('/{id:\\d+}/{queue:\\d+}', JobController::class . ':deleteJob');

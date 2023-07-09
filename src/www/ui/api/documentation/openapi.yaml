@@ -2609,6 +2609,31 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
+  /jobs/dashboard/statistics:
+    get:
+      operationId: getJobStatistics
+      tags:
+        - Job
+      summary: Get the statistics of all the jobs
+      description: Returns the statistics of all the jobs for the Admin Dashboard
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetJobStatistics'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /jobs/{id}/{queue}:
     parameters:
       - name: id
@@ -5663,6 +5688,21 @@ components:
           type: boolean
           example: true
           description: Indicates whether the comment is enabled or not.
+    GetJobStatistics:
+      type: object
+      properties:
+        agentName:
+          type: string
+          description: "Name of the agent"
+          example: "monkbulk"
+        agentDesc:
+          type: string
+          description: "Description of the agent"
+          example: "monkbulk agent"
+        firedJobs:
+          type: integer
+          description: "Number of fired jobs"
+          example: 23
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"

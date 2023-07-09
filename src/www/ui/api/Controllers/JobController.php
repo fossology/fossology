@@ -510,4 +510,22 @@ class JobController extends RestController
   {
     return $JobsInfo2["job"]["job_pk"] - $JobsInfo1["job"]["job_pk"];
   }
+
+  /**
+   * @brief Get the summary statistics of all the jobs
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getJobStatistics($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "Only Admin can access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $statisticsPlugin = $this->restHelper->getPlugin('dashboard-statistics');
+    $res = $statisticsPlugin->CountAllJobs(true);
+    return $response->withJson($res, 200);
+  }
 }
