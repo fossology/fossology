@@ -61,7 +61,7 @@ class UploadTreeProxy extends DbViewProxy
    * @param string $uploadTreeTableName
    * @return string
    */
-  private function createUploadTreeViewQuery($options, $uploadTreeTableName)
+  public function createUploadTreeViewQuery($options, $uploadTreeTableName)
   {
     if (empty($options)) {
       return self::getDefaultUploadTreeView($this->uploadId, $uploadTreeTableName);

@@ -20,6 +20,7 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
@@ -128,7 +129,6 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    */
   private $licenseDao;
 
-
   /**
    * @var StreamFactory $streamFactory
    * Stream factory to create body streams.
@@ -156,7 +156,6 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->clearingDao = M::mock(ClearingDao::class);
     $this->licenseDao = M::mock(LicenseDao::class);
 
-
     $this->dbManager->shouldReceive('getSingleRow')
       ->withArgs([M::any(), [$this->groupId, UploadStatus::OPEN,
         Auth::PERM_READ]]);
@@ -179,6 +178,10 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       'helper.restHelper'))->andReturn($this->restHelper);
     $container->shouldReceive('get')->withArgs(array(
       'dao.agent'))->andReturn($this->agentDao);
+    $container->shouldReceive('get')->withArgs(array(
+      'dao.upload'))->andReturn($this->uploadDao);
+    $container->shouldReceive('get')->withArgs(
+      ['db.manager'])->andReturn($this->dbManager);
     $container->shouldReceive('get')->withArgs(array('dao.license'))->andReturn($this->licenseDao);
     $this->uploadController = new UploadController($container);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
@@ -1078,7 +1081,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["license_ref", "rf_pk", $licenseId])->andReturn(true);
     $this->clearingDao->shouldReceive('getMainLicenseIds')->withArgs([$uploadId, $this->groupId])->andReturn($licenseIds);
-    
+
     $this->clearingDao->shouldReceive('removeMainLicense')->withArgs([$uploadId, $this->groupId, $licenseId])->andReturn(null);
     $this->licenseDao->shouldReceive('getLicenseByShortName')
       ->withArgs([$shortName, $this->groupId])->andReturn($license);
@@ -1088,6 +1091,40 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       $info->getCode());
     $actualResponse = $this->uploadController->removeMainLicense(null,
       new ResponseHelper(), ['id' => $uploadId, 'shortName' => $shortName]);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::getClearingProgressInfo()
+   * -# Check if response status is 200 and the body matches
+   */
+  public function testGetClearingProgressInfo()
+  {
+    $uploadId = 3;
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
+    $this->uploadDao->shouldReceive("getGlobalDecisionSettingsFromInfo")->andReturn(false);
+    $this->agentDao->shouldReceive("arsTableExists")->andReturn(true);
+    $this->agentDao->shouldReceive("getSuccessfulAgentEntries")->andReturn([['agent_id' => 1, 'agent_rev' => 1]]);
+    $this->agentDao->shouldReceive("getCurrentAgentRef")->andReturn(new AgentRef(1, "agent", 1));
+    $this->dbManager->shouldReceive("getSingleRow")
+      ->withArgs([M::any(), [], 'no_license_uploadtree' . $uploadId])
+      ->andReturn(['count' => 1]);
+    $this->dbManager->shouldReceive("getSingleRow")
+      ->withArgs([M::any(), [], 'already_cleared_uploadtree' . $uploadId])
+      ->andReturn(['count' => 0]);
+    $res = [
+      "totalFilesOfInterest" => 1,
+      "totalFilesCleared" => 1,
+    ];
+    $expectedResponse = (new ResponseHelper())->withJson($res, 200);
+    $actualResponse = $this->uploadController->getClearingProgressInfo(null,
+      new ResponseHelper(), ['id' => $uploadId]);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),

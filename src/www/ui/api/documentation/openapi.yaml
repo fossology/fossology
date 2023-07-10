@@ -1140,7 +1140,6 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
-
   /uploads/{id}/licenses/main:
     parameters:
       - name: id
@@ -1316,7 +1315,6 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
-
   /uploads/{id}/item/{itemId}/clearing-history:
     parameters:
       - name: id
@@ -1360,6 +1358,42 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /uploads/{id}/clearing-progress:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getClearingProgressInfo
+      tags:
+        - Upload
+      summary: Get the clearing progress info
+      description: >
+        Get the clearing progress information for an upload
+      responses:
+        '200':
+          description: Get clearing progress info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClearingProgressInfo'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /search:
     get:
@@ -3991,6 +4025,19 @@ components:
           example: "MIT: 'MIT License\n\nCopyright (c) <year> <copyright holders>'"
         htmlElement:
           type: string
+    ClearingProgressInfo:
+      type: object
+      properties:
+        totalFilesOfInterest:
+          description: Total number of targeted files to be cleared
+          type: integer
+          example:
+            234
+        totalFilesCleared:
+          description: Total number of files cleared
+          type: integer
+          example:
+            200
     UserGroupMember:
       type: object
       properties:
