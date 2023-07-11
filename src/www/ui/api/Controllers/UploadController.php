@@ -16,6 +16,7 @@ namespace Fossology\UI\Api\Controllers;
 
 use Fossology\DelAgent\UI\DeleteMessages;
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Proxy\ScanJobProxy;
@@ -96,6 +97,11 @@ class UploadController extends RestController
    * Valid status inputs
    */
   const VALID_STATUS = ["open", "inprogress", "closed", "rejected"];
+
+  /**
+   * Agent names list
+   */
+  private $agentNames = AgentRef::AGENT_LIST;
 
   public function __construct($container)
   {
@@ -1047,5 +1053,79 @@ class UploadController extends RestController
       "totalFilesCleared" => intval($filesAlreadyCleared),
     ];
     return $response->withJson($res, 200);
+  }
+
+  /**
+   * Get all licenses histogram for the entire upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getLicensesHistogram($request, $response, $args)
+  {
+    $agentDao = $this->container->get('dao.agent');
+    $clearingDao = $this->container->get('dao.clearing');
+    $licenseDao = $this->container->get('dao.license');
+
+    $uploadId = intval($args['id']);
+    $uploadDao = $this->restHelper->getUploadDao();
+    $query = $request->getQueryParams();
+    $selectedAgentId = $query['agentId'];
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist.", InfoType::ERROR);
+    } else if ($selectedAgentId !== null && !$this->dbHelper->doesIdExist("agent", "agent_pk", $selectedAgentId)) {
+      $returnVal = new Info(404, "Agent does not exist.", InfoType::ERROR);
+    }
+    if (isset($returnVal)) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $scannerAgents = array_keys($this->agentNames);
+    $scanJobProxy = new ScanJobProxy($agentDao, $uploadId);
+    $scanJobProxy->createAgentStatus($scannerAgents);
+    $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
+    $itemTreeBounds = $uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
+    $editedLicenses = $clearingDao->getClearedLicenseIdAndMultiplicities($itemTreeBounds, $this->restHelper->getGroupId());
+    $selectedAgentIds = empty($selectedAgentId) ? $scanJobProxy->getLatestSuccessfulAgentIds() : $selectedAgentId;
+    $scannedLicenses = $licenseDao->getLicenseHistogram($itemTreeBounds, $selectedAgentIds);
+    $allScannerLicenseNames = array_keys($scannedLicenses);
+    $allEditedLicenseNames = array_keys($editedLicenses);
+    $allLicNames = array_unique(array_merge($allScannerLicenseNames, $allEditedLicenseNames));
+    $realLicNames = array_diff($allLicNames, array(LicenseDao::NO_LICENSE_FOUND));
+    $totalScannerLicenseCount = 0;
+    $editedTotalLicenseCount = 0;
+
+    $res = array();
+    foreach ($realLicNames as $licenseShortName) {
+      $count = 0;
+      if (array_key_exists($licenseShortName, $scannedLicenses)) {
+        $count = $scannedLicenses[$licenseShortName]['unique'];
+        $rfId = $scannedLicenses[$licenseShortName]['rf_pk'];
+      } else {
+        $rfId = $editedLicenses[$licenseShortName]['rf_pk'];
+      }
+      $editedCount = array_key_exists($licenseShortName, $editedLicenses) ? $editedLicenses[$licenseShortName]['count'] : 0;
+      $totalScannerLicenseCount += $count;
+      $editedTotalLicenseCount += $editedCount;
+      $scannerCountLink = $count;
+      $editedLink = $editedCount;
+
+      $res[] = array($scannerCountLink, $editedLink, array($licenseShortName, $rfId));
+    }
+
+    $outputArray = [];
+
+    foreach ($res as $item) {
+      $outputArray[] = [
+        "id" => intval($item[2][1]),
+        "name" => $item[2][0],
+        "scannerCount" => intval($item[0]),
+        "concludedCount" => intval($item[1]),
+      ];
+    }
+    return $response->withJson($outputArray, 200);
   }
 }
