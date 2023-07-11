@@ -305,17 +305,40 @@ class UploadController extends RestController
   public function getUploadSummary($request, $response, $args)
   {
     $id = intval($args['id']);
+    $query = $request->getQueryParams();
+    $selectedAgentId = $query['agentId'];
+    $agentDao = $this->container->get('dao.agent');
     $upload = $this->uploadAccessible($this->restHelper->getGroupId(), $id);
     if ($upload !== true) {
       return $response->withJson($upload->getArray(), $upload->getCode());
+    } else if ($selectedAgentId !== null && !$this->dbHelper->doesIdExist("agent", "agent_pk", $selectedAgentId)) {
+      $error = new Info(404, "Agent does not exist", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
     }
     $temp = $this->isAdj2nestDone($id, $response);
     if ($temp !== true) {
       return $temp;
     }
     $uploadHelper = new UploadHelper();
-    $uploadSummary = $uploadHelper->generateUploadSummary($id,
-      $this->restHelper->getGroupId());
+    $uploadSummary = $uploadHelper->generateUploadSummary($id, $this->restHelper->getGroupId());
+    $browseLicense = $this->restHelper->getPlugin('license');
+    $uploadDao = $this->restHelper->getUploadDao();
+    $uploadTreeTableName = $uploadDao->getUploadtreeTableName($id);
+    $itemTreeBounds = $uploadDao->getParentItemBounds($id, $uploadTreeTableName);
+    $scanJobProxy = new ScanJobProxy($agentDao, $id);
+    $scannerAgents = array_keys(AgentRef::AGENT_LIST);
+    $scanJobProxy->createAgentStatus($scannerAgents);
+    $selectedAgentIds = empty($selectedAgentId) ? $scanJobProxy->getLatestSuccessfulAgentIds() : $selectedAgentId;
+    $res = $browseLicense->createLicenseHistogram("", "", $itemTreeBounds, $selectedAgentIds, $this->restHelper->getGroupId());
+    $uploadSummary->setUniqueConcludedLicenses($res['editedUniqueLicenseCount']);
+    $uploadSummary->setTotalConcludedLicenses($res['editedLicenseCount']);
+    $uploadSummary->setTotalLicenses($res['scannerLicenseCount']);
+    $uploadSummary->setUniqueLicenses($res['uniqueLicenseCount']);
+    $uploadSummary->setConcludedNoLicenseFoundCount($res['editedNoLicenseFoundCount']);
+    $uploadSummary->setFileCount($res['fileCount']);
+    $uploadSummary->setNoScannerLicenseFoundCount($res['noScannerLicenseFoundCount']);
+    $uploadSummary->setScannerUniqueLicenseCount($res['scannerUniqueLicenseCount']);
+
     return $response->withJson($uploadSummary->getArray(), 200);
   }
 

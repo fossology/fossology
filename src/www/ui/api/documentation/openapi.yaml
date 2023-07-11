@@ -604,6 +604,12 @@ paths:
         schema:
           type: string
           description: Group name, from last login if not provided
+      - name: agentId
+        required: false
+        description: Id of the agent
+        in: query
+        schema:
+          type: integer
     get:
       operationId: getSummaryByUploadId
       tags:
@@ -3449,6 +3455,18 @@ components:
         content:
           type: string
           description: Copyright text
+        concludedNoLicenseFoundCount:
+          type: integer
+          description: No. of concluded no license found.
+        fileCount:
+          type: integer
+          description: No. of files in the upload.
+        noScannerLicenseFoundCount:
+          type: integer
+          description: No. of no scanner license found.
+        scannerUniqueLicenseCount:
+          type: integer
+          description: No. of unique licenses found by scanner.
     Job:
       type: object
       properties:
