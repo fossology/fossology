@@ -2578,7 +2578,77 @@ paths:
           content:
             application/json:
               schema:
-                  $ref: '#/components/schemas/GetSchedulerOption'
+                $ref: '#/components/schemas/GetSchedulerOption'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /jobs/scheduler/operation/run:
+    parameters:
+      - name: job
+        required: false
+        description: Name of the selected job
+        in: query
+        schema:
+          type: string
+      - name: level
+        required: false
+        description: Level of the selected verbose
+        in: query
+        schema:
+          type: string
+      - name: priority
+        required: false
+        description: Priority option selected
+        in: query
+        schema:
+          type: string
+    post:
+      operationId: handleSchedulerRun
+      tags:
+        - Job
+        - Admin
+      summary: Run the scheduler
+      description: Run the scheduler with the selected options from a specific operation
+      requestBody:
+        description: Scheduler operation
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operation:
+                  type: string
+                  description: Operation to be run by the scheduler
+                  enum:
+                    - status
+                    - database
+                    - reload
+                    - agents
+                    - verbose
+                    - stop
+                    - restart
+                    - pause
+                    - priority
+      responses:
+        '200':
+          description: Scheduler run successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         '403':
           description: Access denied
           content:

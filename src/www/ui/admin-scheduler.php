@@ -82,7 +82,7 @@ class admin_scheduler extends FO_Plugin
    * \param $operation operation name, e.g. 'status'
    * \return one operation text
    **/
-  function GetOperationText($operation)
+  public function GetOperationText($operation)
   {
     $operation_text = '';
     $job_id = GetParm('job_list', PARM_TEXT);
@@ -155,7 +155,7 @@ class admin_scheduler extends FO_Plugin
    * \param $level_id selected level id
    * \return return response from the scheduler
    **/
-  function OperationSubmit($operation, $job_id, $priority_id, $level_id)
+  public function OperationSubmit($operation, $job_id, $priority_id, $level_id)
   {
     if ("start" === $operation) {
       // start the scheduler
