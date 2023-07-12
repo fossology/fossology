@@ -578,4 +578,88 @@ class JobController extends RestController
     $res = $schedulerPlugin->handle($symfonyRequest);
     return $response->withJson($res, 200);
   }
+
+  /**
+   * Run the scheduler based on the given operation
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function handleRunSchedulerOption($request, $response, $args)
+  {
+    $body = $this->getParsedBody($request);
+    $query = $request->getQueryParams();
+
+    $operation = $body['operation'];
+    $adminSchedulerPlugin = $this->restHelper->getPlugin('admin_scheduler');
+
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "Only Admin can access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    if (!in_array($operation, array_keys($adminSchedulerPlugin->operation_array))) {
+      $allowedOperations = implode(', ', array_keys($adminSchedulerPlugin->operation_array));
+      $error = new Info(400, "Operation '$operation' not allowed. Allowed operations are: $allowedOperations", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $schedulerPlugin = $this->restHelper->getPlugin('ajax_admin_scheduler');
+    $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
+    $symfonyRequest->request->set('operation', $operation);
+    $symfonyRequest->request->set('fromRest', true);
+    $data = $schedulerPlugin->handle($symfonyRequest);
+
+    if ($operation == 'status' || $operation == 'verbose') {
+      if (!isset($query['job']) || !in_array($query['job'], $data['jobList'])) {
+        $allowedJobs = implode(', ', $data['jobList']);
+        $error = new Info(400, "Job '{$query['job']}' not allowed. Allowed jobs are: $allowedJobs", InfoType::ERROR);
+        return $response->withJson($error->getArray(), $error->getCode());
+      } else if (($operation == 'verbose') && (!isset($query['level']) || !in_array($query['level'], $data['verboseList']))) {
+        $allowedLevels = implode(', ', $data['verboseList']);
+        $error = new Info(400, "Level '{$body['level']}' not allowed. Allowed levels are: $allowedLevels", InfoType::ERROR);
+        return $response->withJson($error->getArray(), $error->getCode());
+      }
+    } else if ($operation == 'priority' && (!isset($query['priority']) || !in_array($query['priority'], $data['priorityList']))) {
+      $allowedPriorities = implode(', ', $data['priorityList']);
+      $error = new Info(400, "Priority '{$body['priority']}' not allowed. Allowed priorities are: $allowedPriorities", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    if ($operation == 'status') {
+      $query['priority'] = null;
+      $query['level'] = null;
+    } else if ($operation == 'priority') {
+      $query['job'] = null;
+      $query['level'] = null;
+    } else if ($operation == 'verbose') {
+      $query['priority'] = null;
+    } else {
+      $query['job'] = null;
+      $query['priority'] = null;
+      $query['level'] = null;
+    }
+
+    $response_from_scheduler = $adminSchedulerPlugin->OperationSubmit($operation, array_search($query['job'], $data['jobList']), $query['priority'], $query['level']);
+    $operation_text = $adminSchedulerPlugin->GetOperationText($operation);
+    $status_msg = "";
+    $report = "";
+
+    if (empty($adminSchedulerPlugin->error_info)) {
+      $text = _("successfully");
+      $status_msg .= "$operation_text $text.";
+      if (! empty($response_from_scheduler)) {
+        $report .= $response_from_scheduler;
+      }
+      $info = new Info(200, $status_msg. $report, InfoType::INFO);
+    } else {
+      $text = _("failed");
+      $status_msg .= "$operation_text $text.";
+      $info = new Info(501, $status_msg. $report, InfoType::ERROR);
+    }
+
+    return $response->withJson($info->getArray(), $info->getCode());
+  }
 }
