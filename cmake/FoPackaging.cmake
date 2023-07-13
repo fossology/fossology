@@ -429,7 +429,7 @@ set(CPACK_DEBIAN_OJO_PACKAGE_SECTION "utils")
 
 ## FOSSOLOGY-CLIXML PACKAGE
 set(CPACK_DEBIAN_CLIXML_PACKAGE_NAME "fossology-clixml")
-set(CPACK_DEBIAN_CLIXML_FILE_NAME "fossology-clixml${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_CLIXML_FILE_NAME "fossology-clixml_${FO_PACKAGE_VERSION}-1_amd64.deb")
 set(CPACK_DEBIAN_CLIXML_DESCRIPTION
 "architecture for analyzing software, XML based report generator
 ${FO_PACKAGE_COMMON_DESCRIPTION}
