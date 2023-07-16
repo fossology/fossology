@@ -64,4 +64,22 @@ class CustomiseController extends RestController
       return $response->withJson($returnVal->getArray(), $returnVal->getCode());
     }
   }
+
+  /**
+   * Update config data for the admin
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+
+  public function updateCustomiseData($request, $response, $args)
+  {
+    if (Auth::isAdmin()) {
+      $body = $this->getParsedBody($request);
+      $result = $this->sysconfigDao->UpdateConfigData($body);
+      return $response->withJson($result->getarray(), 200);
+    }
+  }
 }
