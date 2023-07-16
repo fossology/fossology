@@ -289,6 +289,7 @@ $app->group('/report',
 $app->group('/customise',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('', CustomiseController::class . ':getCustomiseData');
+    $app->put('', CustomiseController::class . ':updateCustomiseData');
   });
 
 ////////////////////////////INFO/////////////////////

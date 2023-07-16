@@ -3191,6 +3191,37 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+    put:
+      operationId: updateCustomiseData
+      tags:
+        - Admin
+      summary: Update the Admin configureation data
+      description: >
+        Updates the admin configureation data from the server
+      requestBody:
+        description: updateCopyright Payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetCustomiseInfo'
+      responses:
+        '200':
+          description: Config data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '403':
+          description: The session owner is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /groups:
     get:
       operationId: getGroups
@@ -4602,6 +4633,14 @@ components:
         reuse_info:
           type: object
           description: Reuse info of the file.
+    SetCustomiseInfo:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Key of the field to be updated
+        value:
+          type: string
     Job:
       type: object
       properties:

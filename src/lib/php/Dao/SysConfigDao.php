@@ -9,6 +9,10 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
 use Monolog\Logger;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
+
+
 
 class SysConfigDao
 {
@@ -61,5 +65,19 @@ class SysConfigDao
       );
     }
     return $finalVal;
+  }
+
+  /**
+   * \brief Update Configuration Data.
+   *  @return Info
+   */
+  public function UpdateConfigData($data)
+  {
+    $key = strval($data['key']);
+    $value = strval($data['value']);
+    $stmt = __METHOD__ . 'UpdateConfigData'.$key;
+    $sql = "UPDATE sysconfig SET conf_value = $2 WHERE variablename = $1";
+    $this->dbManager->getSingleRow($sql, array($key, $value), $stmt);
+    return (new Info(200, 'Succesfully Updated Customise data', InfoType::INFO));
   }
 }
