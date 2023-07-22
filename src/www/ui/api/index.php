@@ -205,6 +205,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/info', FileInfoController::class . ':getItemInfo');
     $app->post('/{id:\\d+}/item/{itemId:\\d+}/bulk-scan', UploadTreeController::class . ':scheduleBulkScan');
     $app->get('/{id:\\d+}/conf', ConfController::class . ':getConfInfo');
+    $app->put('/{id:\\d+}/conf', ConfController::class . ':updateConfData');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

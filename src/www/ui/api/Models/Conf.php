@@ -28,6 +28,35 @@ class Conf
   private $data;
 
   /**
+   * @var array $keyMap
+   * key mapping for conf
+   */
+  const KEY_MAP = [
+    'reviewed' => "ri_reviewed",
+    'footer' => "ri_footer",
+    'reportRel' => "ri_report_rel",
+    'community' => "ri_community",
+    'component' => "ri_component",
+    'version' => "ri_version",
+    'releaseDate' => "ri_release_date",
+    'sw360Link' => "ri_sw360_link",
+    'componentType' => "ri_component_type",
+    'componentId' => "ri_component_id",
+    'generalAssesment' => "ri_general_assesment",
+    'gaAdditional' => "ri_ga_additional",
+    'gaRisk' => "ri_ga_risk",
+    'gaCheckbox' => "ri_ga_checkbox_selection",
+    'spdxSelection' => "ri_spdx_selection",
+    'excludedObligations' => "ri_excluded_obligations",
+    'department' => "ri_department",
+    'depNotes' => "ri_depnotes",
+    'exportNotes' => "ri_exportnotes",
+    'copyrightNotes' => "ri_copyrightnotes",
+    'unifiedColumns' => "ri_unifiedcolumns",
+    'globalDecision' => "ri_globaldecision",
+  ];
+
+  /**
    * conf constructor.
    * @param object $data
    */
@@ -77,5 +106,27 @@ class Conf
       'unifiedColumns' => json_decode($this->data["ri_unifiedcolumns"], TRUE),
       'globalDecision' => boolval($this->data["ri_globaldecision"]),
     );
+  }
+
+  /**
+   * Get key name from parameter
+   * @return array
+   */
+  public function getKeyValue()
+  {
+    return self::KEY_MAP[$this->data];
+  }
+
+  /**
+   * Check key exists or not
+   * @return array
+   */
+  public function doesKeyExist()
+  {
+    if (in_array($this->data, self::KEY_MAP)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
