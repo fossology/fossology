@@ -45,4 +45,21 @@ class ConfController extends RestController
     $returnVal = new Conf($response_view);
     return $response->withJson($returnVal->getArray(), 200);
   }
+
+  /**
+   * Update config data for the admin
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateConfData($request, $response, $args)
+  {
+    $uploadPk = $args["id"];
+    $body = $this->getParsedBody($request);
+    $keyVal = new Conf($body['key']);
+    $result = $this->restHelper->getUploadDao()->updateReportInfo($uploadPk, $keyVal->getKeyValue(), $body['value']);
+    return $response->withJson($result->getarray(), 200);
+  }
 }

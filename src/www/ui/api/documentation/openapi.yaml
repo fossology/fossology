@@ -3716,6 +3716,37 @@ paths:
                   $ref: '#/components/schemas/ConfResponse'
         default:
           $ref: '#/components/responses/defaultResponse'
+    put:
+      operationId: updateConfData
+      tags:
+        - Upload
+      summary: Update the Conf page data
+      description: >
+        Updates the conf page data from the server
+      requestBody:
+        description: updateConfData Payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetConfInfo'
+      responses:
+        '200':
+          description: Config data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '403':
+          description: The session owner is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /license:
     parameters:
       - name: groupName
@@ -4859,6 +4890,14 @@ components:
         url:
           type: boolean
           description: URL(s) present in the scan code file.
+    SetConfInfo:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Key of the field to be updated
+        value:
+          type: string
     Folder:
       type: object
       properties:

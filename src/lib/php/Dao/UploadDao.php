@@ -17,6 +17,9 @@ use Fossology\Lib\Exception;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Proxy\UploadTreeViewProxy;
 use Monolog\Logger;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\Conf;
 
 require_once(dirname(dirname(__FILE__)) . "/common-dir.php");
 
@@ -719,6 +722,24 @@ ORDER BY lft asc
     }
     return $row;
   }
+
+  /* @param int $uploadId
+   * @param string $keyVal
+   * @param string $value
+   * @return array
+   */
+  public function updateReportInfo($uploadId, $keyVal, $value)
+  {
+    $stmt = __METHOD__ . "updateReportInfo" . $keyVal;
+    $keyValCheck = new Conf($keyVal);
+    if (!$keyValCheck->doesKeyExist()) {
+      return (new Info(400, 'Bad request', InfoType::ERROR));
+    }
+    $sql = "UPDATE report_info SET $keyVal = $2 WHERE upload_fk = $1";
+    $this->dbManager->getSingleRow($sql, array($uploadId, $value), $stmt);
+    return (new Info(200, 'Succesfully Updated Conf data', InfoType::INFO));
+  }
+
   /* @param int $uploadId
    * @return ri_globaldecision
    */
