@@ -39,7 +39,11 @@ class UploadSummaryTest extends \PHPUnit\Framework\TestCase
       "filesToBeCleared"        => 0,
       "filesCleared"            => 25,
       "clearingStatus"          => "Closed",
-      "copyrightCount"          => 10
+      "copyrightCount"          => 10,
+      "fileCount"               => 25,
+      "noScannerLicenseFoundCount" => 0,
+      "scannerUniqueLicenseCount" => 0,
+      'concludedNoLicenseFoundCount' => 0
     ];
 
     $actual = new UploadSummary();
@@ -55,6 +59,10 @@ class UploadSummaryTest extends \PHPUnit\Framework\TestCase
     $actual->setFilesCleared(25);
     $actual->setClearingStatus(UploadStatus::CLOSED);
     $actual->setCopyrightCount(10);
+    $actual->setFileCount(25);
+    $actual->setNoScannerLicenseFoundCount(0);
+    $actual->setScannerUniqueLicenseCount(0);
+    $actual->setConcludedNoLicenseFoundCount(0);
 
     $this->assertEquals($expected, $actual->getArray());
   }
