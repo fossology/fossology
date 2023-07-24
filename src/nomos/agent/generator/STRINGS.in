@@ -1257,6 +1257,10 @@
 %KEY% "license"
 %STR% "commercial use of =FEW= requires a license"
 #####
+%ENTRY% _LT_COMMERCIAL_7
+%KEY% "commerc"
+%STR% "Users should be careful about adopting these functions in any commercial matters"
+#####
 %ENTRY% _LT_COMMERCIAL_Intel
 %KEY% =NULL=
 %STR% "copyright =SOME= Intel Corporation =ANY= disclosed =ANY= without =FEW= prior =SOME= written permission"
@@ -4451,6 +4455,10 @@
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR% "hereby granted a non-?exclusive,? royalty-free copyright (and design patent)? licen[cs]e"
 #
+%ENTRY% _LT_NVIDIA_1
+%KEY% "licen[cs]"
+%STR% "licen[cs]ed under the NVIDIA Source Code Licen[cs]e"
+#
 %ENTRY% _LT_NVIDIA_EULA_1
 %KEY% "so(ftware|urce)"
 %STR% "NVIDIA hereby grants customer the following non-exclusive non-transferable right to use the software with the following limitations"
@@ -6307,6 +6315,10 @@ k
 %ENTRY% _LT_SEE_URL_ref2
 %KEY% =NULL=
 %STR% "licen[cs]e =FEW= (https?|ftp) =SOME= \/licen[cs]es?"
+#
+%ENTRY% _LT_SEE_URL_ref3
+%KEY% =NULL=
+%STR% "(https?|ftp) =SOME= #licen[cs]e?"
 #
 %ENTRY% _LT_SEE_COPYING_1
 %KEY% "licen[cs]"
@@ -10216,6 +10228,10 @@ k
 # Note =FEW= or =SOME= cannot be used in optional selection
 # The longesti SPDX short name is currently 30 characters.
 #####
+%ENTRY% _SPDX_CC0
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e?[: ]CC0"
+
 %ENTRY% _SPDX_0BSD
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](0BSD|(.{1,32} (AND|OR)){1,4} 0BSD)"

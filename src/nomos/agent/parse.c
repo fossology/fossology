@@ -4812,6 +4812,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_NVIDIA_EULA_1) || INFILE(_TITLE_NVIDIA)) {
     INTERESTING(lDebug ? "Nvidia(4)" : "Nvidia-EULA-b");
   }
+  else if (INFILE(_LT_NVIDIA_1)) {
+    INTERESTING(lDebug ? "Nvidia(5)" : "Nvidia");
+  }
   /*
    * ATI Corp
    */
@@ -6709,6 +6712,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_TITLE_CC0_10_1) || INFILE(_PHR_CC0_1) || INFILE(_PHR_CC0_2)) {
     INTERESTING("CC0-1.0");
   }
+  else if (INFILE(_SPDX_CC0)) {
+    INTERESTING("CC0");
+  }
   cleanLicenceBuffer();
   /*
    * PA Font License (IPA)
@@ -7189,6 +7195,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_LT_COMMERCIAL_6)) {
       INTERESTING(lDebug ? "COMM(6)" : "COMMERCIAL");
+    }
+    else if (INFILE(_LT_COMMERCIAL_7)) {
+      INTERESTING(lDebug ? "COMM(7)" : "COMMERCIAL");
     }
     if (INFILE(_LT_NONPROFIT_1)) {
       MEDINTEREST(lDebug ? "NonP(1)" : "Non-profit");
@@ -9894,7 +9903,7 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
   if(HASTEXT(_LT_SEE_COPYING_LICENSE_1, REG_EXTENDED) || HASTEXT(_LT_SEE_COPYING_LICENSE_2, REG_EXTENDED)) {
     INTERESTING("See-file");
   }
-  else if (HASTEXT(_LT_SEE_URL, REG_EXTENDED) || HASTEXT(_LT_SEE_URL_ref1, REG_EXTENDED) || HASTEXT(_LT_SEE_URL_ref2, REG_EXTENDED)) {
+  else if (HASTEXT(_LT_SEE_URL, REG_EXTENDED) || HASTEXT(_LT_SEE_URL_ref1, REG_EXTENDED) || HASTEXT(_LT_SEE_URL_ref2, REG_EXTENDED) || HASTEXT(_LT_SEE_URL_ref3, REG_EXTENDED)) {
     INTERESTING("See-URL");
   }
   return;
