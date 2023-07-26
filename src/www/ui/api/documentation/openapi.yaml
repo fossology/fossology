@@ -3222,6 +3222,42 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /folders/{id}/contents/removable:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the folder
+        schema:
+          type: integer
+    get:
+      operationId: getRemovableContents
+      tags:
+        - Folders
+      summary: Get removable contents of a folder
+      description:
+        Get removable contents of a folder by id
+      responses:
+        '200':
+          description: Removable contents of the given folder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFolderContent'
+        '403':
+          description: Folder is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Folder does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /groups:
     get:
       operationId: getGroups
@@ -4916,6 +4952,18 @@ components:
         parent:
           type: integer
           description: Id of the parent folder (if any, null otherwise).
+    GetFolderContent:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Id of the folder content.
+        content:
+          type: string
+          description: Content of the folder.
+        removable:
+          type: boolean
+          description: Is the folder removable.
     TokenRequest:
       type: object
       properties:

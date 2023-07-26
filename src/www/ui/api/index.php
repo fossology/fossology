@@ -274,6 +274,7 @@ $app->group('/folders',
     $app->delete('/{id:\\d+}', FolderController::class . ':deleteFolder');
     $app->patch('/{id:\\d+}', FolderController::class . ':editFolder');
     $app->put('/{id:\\d+}', FolderController::class . ':copyFolder');
+    $app->get('/{id:\\d+}/contents/removable', FolderController::class . ':getRemovableFolderContents');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

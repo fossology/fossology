@@ -33,7 +33,7 @@ class AjaxFolderContents extends DefaultPlugin
     $this->folderDao = $this->getObject('dao.folder');
   }
 
-  protected function handle(Request $request)
+  public function handle(Request $request)
   {
     $folderId = intval($request->get('folder'));
     $uploadName = $request->get('upload');
@@ -61,8 +61,21 @@ class AjaxFolderContents extends DefaultPlugin
     foreach ($this->folderDao->getRemovableContents($folderId) as $content) {
       $filterResults[$content] = $results[$content];
     }
+
+    $restRes = array_map(function($key, $value) {
+      return array(
+        'id' => $key,
+        'content' => $value,
+        'removable' => true
+      );
+    }, array_keys($filterResults), $filterResults);
+
     if (empty($filterResults)) {
       $filterResults["-1"] = "No removable content found";
+    }
+
+    if ($request->get('fromRest')) {
+      return $restRes;
     }
     return new JsonResponse($filterResults);
   }
