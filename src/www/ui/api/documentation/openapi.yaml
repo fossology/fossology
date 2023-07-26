@@ -639,6 +639,43 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /uploads/{id}/item/{itemId}/info:    
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        description: Upload tree Id of the file
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      operationId: getItemInfo
+      tags:
+        - Upload
+      summary: Get single file info
+      description:
+        Returns info for single file
+      responses:
+        '200':
+          description: Get info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fileinfo'
+        '404':
+          description: >
+            Item does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /uploads/{id}/licenses:
     parameters:
@@ -3648,6 +3685,24 @@ components:
         scannerUniqueLicenseCount:
           type: integer
           description: No. of unique licenses found by scanner.
+    Fileinfo:
+      type: object
+      properties:
+        view_info:
+          type: object
+          description: viewinfo of the file
+        meta_info:
+          type: object
+          description: Display display meta info of the file
+        package_info:
+          type: object
+          description: Shows package info of the file
+        tag_info:
+          type: object
+          description: Provides tag related information
+        reuse_info:
+          type: object
+          description: Reuse info of the file.
     Job:
       type: object
       properties:
