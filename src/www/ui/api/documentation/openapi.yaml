@@ -1722,6 +1722,43 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+          
+  /uploads/{id}/licenses/reuse:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getLicensesReuseSummary
+      tags:
+        - Upload
+      summary: Get the overall licenses reuse summary
+      description: >
+        Get the overall licenses reuse summary for an upload
+      responses:
+        '200':
+          description: Get licenses reuse summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetReuseReportSummary'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /search:
     get:
       operationId: searchFile
@@ -4982,6 +5019,26 @@ components:
           default: 0
           example: 3
       required: ["importerUser"]
+    GetReuseReportSummary:
+      description: Information required by Reuse Report Summary for an upload
+      type: object
+      properties:
+        declearedLicense:
+          type: string
+          description: Decleared license
+          example: "MIT"
+        clearedLicense:
+          type: string
+          description: Cleared license
+          example: "MIT, BSD-3-Clause"
+        unusedLicense:
+          type: string
+          description: Unused license
+          example: "AAL"
+        missingLicense:
+          type: string
+          description: Missing license
+          example: "MIT, BSD-3-Clause"
     SpdxRdfImport:
       description: Information required by SPDX RDF report import agent.
       type: object
