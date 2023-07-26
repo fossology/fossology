@@ -3101,6 +3101,37 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /folders/contents/{contentId}/unlink:
+    parameters:
+      - name: contentId
+        in: path
+        required: true
+        description: ID of the content
+        schema:
+          type: integer
+    put:
+      operationId: unlinkContent
+      tags:
+        - Folders
+      summary: Unlink a content from a folder
+      description:
+        Unlink a content from a folder
+      responses:
+        '200':
+          description: Content is unlinked from the folder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Folder content does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /uploads/{id}/item/{ItemId}/totalcopyrights:
     parameters:
       - name: id
