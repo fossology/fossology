@@ -1484,6 +1484,124 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+
+  /uploads/{id}/item/{itemId}/tree/view:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the itemId
+        in: path
+        schema:
+          type: integer
+      - name: agentId
+        required: false
+        description: Id of the agent
+        in: query
+        schema:
+          type: integer
+      - name: tagId
+        required: false
+        description: Id of the tag
+        in: query
+        schema:
+          type: integer
+      - name: scanLicenseFilter
+        required: false
+        description: ShortName of the selected scan license filter
+        in: query
+        schema:
+          type: integer
+      - name: editedLicenseFilter
+        required: false
+        description: ShortName of the selected edited license filter
+        in: query
+        schema:
+          type: integer
+      - name: flatten
+        required: false
+        description: Flatten the tree
+        in: query
+        schema:
+          type: boolean
+      - name: sort
+        required: false
+        description: Sort the tree
+        in: query
+        schema:
+          type: string
+          enum:
+            - asc
+            - desc
+      - name: search
+        required: false
+        description: Filter the list according to the search string
+        in: query
+        schema:
+          type: string
+      - name: showQuick
+        required: false
+        description: Show all the items of the current container
+        in: query
+        schema:
+          type: boolean
+      - name: filterOpen
+        required: false
+        description: openCBox Filter is checked
+        in: query
+        schema:
+          type: boolean
+      - name: page
+        description: Page number (starts from 1)
+        required: false
+        in: header
+        schema:
+          type: integer
+          default: 1
+          minimum: 1
+      - name: limit
+        description: Limits of responses per request
+        required: false
+        in: header
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+    get:
+      operationId: getLicenseDecisions
+      tags:
+        - Upload
+      summary: Get the license decisions list
+      description: >
+        Get the license decisions list for the given upload and item id
+      responses:
+        '200':
+          description: List of the license decisions for the upload-tree id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TreeViewModel'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /search:
     get:
       operationId: searchFile
@@ -4250,6 +4368,104 @@ components:
         isAgentRunning:
           type: boolean
           example: false
+    TreeViewModel:
+      type: object
+      properties:
+        fileDetails:
+          type: object
+          description: Details about the file.
+          properties:
+            fileName:
+              type: string
+              description: The name of the file.
+              example: "scss"
+            id:
+              type: integer
+              description: The ID of the item.
+              example: 113
+            uploadId:
+              type: integer
+              description: The ID of the upload.
+              example: 10
+            agentId:
+              type: string
+              description: The ID of the agent.
+              example: ""
+            isContainer:
+              type: boolean
+              description: Indicates if the item is a folder or file.
+              example: true
+        licenseList:
+          type: array
+          description: List of licenses.
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: The ID of the license.
+                example: 126
+              name:
+                type: string
+                description: The name of the license.
+                example: "MIT"
+              agents:
+                type: array
+                description: List of agents associated with the license.
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: The ID of the agent.
+                      example: 1
+                    name:
+                      type: string
+                      description: The name of the agent.
+                      example: "agent1"
+                    matchPercentage:
+                      type: integer
+                      description: The match percentage of the agent.
+                      example: 95
+        editedLicenseList:
+          type: array
+          description: List of edited licenses.
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: The ID of the edited license.
+                example: 126
+              name:
+                type: string
+                description: The name of the edited license.
+                example: "MIT"
+        clearingStatus:
+          type: string
+          description: The clearing status.
+          enum:
+            - green
+            - red
+            - grey
+            - yellow
+            - redGreen
+        clearingProgress:
+          type: object
+          description: The progress of clearing.
+          properties:
+            filesCleared:
+              type: integer
+              description: The number of files cleared.
+              example: 1
+            filesToBeCleared:
+              type: integer
+              description: The number of files to be cleared.
+              example: 4
+            totalFilesCount:
+              type: integer
+              description: The total count of files.
+              example: 99
     UserGroupMember:
       type: object
       properties:

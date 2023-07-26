@@ -168,6 +168,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/highlight', UploadTreeController::class . ':getHighlightEntries');
     $app->patch('/{id:\\d+}/item/{itemId:\\d+}/copyrights/{hash:.*}', CopyrightController::class . ':restoreFileCopyrights');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/totalcopyrights', CopyrightController::class . ':getTotalFileCopyrights');
+    $app->get('/{id:\\d+}/item/{itemId:\\d+}/tree/view', UploadTreeController::class . ':getTreeView');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
