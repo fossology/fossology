@@ -42,6 +42,18 @@ class SysConfigDao
   }
 
   /**
+   * \brief Fetch banner message.
+   */
+  function getBannerData()
+  {
+    global $PG_CONN;
+    $sql = "select conf_value from sysconfig where variablename = 'BannerMsg'";
+    $result = pg_query($PG_CONN, $sql);
+    $textArr = pg_fetch_all($result);
+    return ($textArr[0]['conf_value']);
+  }
+
+  /**
    * Get all customise information for admin
    * @param array $data Array of data from the sysconfig table
    * @return array

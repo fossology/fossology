@@ -292,6 +292,8 @@ $app->group('/customise',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('', CustomiseController::class . ':getCustomiseData');
     $app->put('', CustomiseController::class . ':updateCustomiseData');
+    $app->get('/banner', CustomiseController::class . ':getBannerMessage');
+    $app->any('/{params:.*}', BadRequestController::class);
   });
 
 ////////////////////////////INFO/////////////////////

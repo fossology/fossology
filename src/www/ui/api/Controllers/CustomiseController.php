@@ -92,4 +92,18 @@ class CustomiseController extends RestController
     }
     return $response->withJson($info->getArray(), $info->getCode());
   }
+
+  /**
+   * Get Banner Message
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getBannerMessage($request, $response, $args)
+  {
+    $returnVal = $this->sysconfigDao->getBannerData();
+    return $response->withJson($returnVal, 200);
+  }
 }
