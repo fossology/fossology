@@ -3132,6 +3132,43 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /folders/{id}/contents:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the folder
+        schema:
+          type: integer
+    get:
+      operationId: getAllFolderContents
+      tags:
+        - Folders
+      summary: Get all contents of a folder
+      description:
+        Get all contents of a folder by id
+      responses:
+        '200':
+          description: Contents of the given folder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFolderContent'
+        '403':
+          description: Folder is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Folder does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /uploads/{id}/item/{ItemId}/totalcopyrights:
     parameters:
       - name: id
@@ -4669,6 +4706,18 @@ components:
           nullable: true
         hash:
           $ref: '#/components/schemas/Hash'
+    GetFolderContent:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Id of the folder content.
+        content:
+          type: string
+          description: Content of the folder.
+        removable:
+          type: boolean
+          description: Is the folder removable.
     UploadSummary:
       type: object
       properties:

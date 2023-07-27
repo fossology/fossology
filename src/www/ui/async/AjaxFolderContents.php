@@ -48,12 +48,22 @@ class AjaxFolderContents extends DefaultPlugin
     $childUploads = $this->folderDao->getFolderChildUploads($folderId, Auth::getGroupId());
     foreach ($childUploads as $upload) {
       $uploadStatus = new UploadStatus();
-      $uploadDate = explode(".",$upload['upload_ts'])[0];
+      $uploadDate = explode(".", $upload['upload_ts'])[0];
       $uploadStatus = " (" . $uploadStatus->getTypeName($upload['status_fk']) . ")";
       $results[$upload['foldercontents_pk']] = $upload['upload_filename'] . _(" from ") . Convert2BrowserTime($uploadDate) . $uploadStatus;
     }
+    $restRes = array_map(function($key, $value) {
+      return array(
+        'id' => $key,
+        'content' => $value,
+        'removable' => false
+      );
+    }, array_keys($results), $results);
 
     if (!$request->get('removable')) {
+      if ($request->get('fromRest')) {
+        return $restRes;
+      }
       return new JsonResponse($results);
     }
 
