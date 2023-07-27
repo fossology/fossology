@@ -276,6 +276,7 @@ $app->group('/folders',
     $app->put('/{id:\\d+}', FolderController::class . ':copyFolder');
     $app->get('/{id:\\d+}/contents/unlinkable', FolderController::class . ':getUnlinkableFolderContents');
     $app->put('/contents/{contentId:\\d+}/unlink', FolderController::class . ':unlinkFolder');
+    $app->get('/{id:\\d+}/contents', FolderController::class . ':getAllFolderContents');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
