@@ -46,6 +46,7 @@ set(CPACK_COMPONENTS_ALL
     ununpack
     cli
     clixml
+    cyclonedx
     lib
     common
     maintagent
@@ -98,7 +99,7 @@ set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_DEPENDS
     fossology-buckets, fossology-mimetype, fossology-delagent,
     fossology-wgetagent")
 set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_RECOMMENDS
-    "fossology-monk, fossology-monkbulk, fossology-decider,
+    "fossology-cyclonedx, fossology-monk, fossology-monkbulk, fossology-decider,
     fossology-readmeoss, fossology-spdx2, fossology-reportimport,
     fossology-softwareheritage, fossology-reuser")
 set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_CONFLICTS
@@ -504,6 +505,19 @@ set(CPACK_DEBIAN_READMEOSS_PACKAGE_DEPENDS
     "fossology-common, fossology-copyright")
 
 set(CPACK_DEBIAN_READMEOSS_PACKAGE_SECTION "utils")
+
+## FOSSOLOGY-CYCLONEDX PACKAGE
+set(CPACK_DEBIAN_CYCLONEDX_PACKAGE_NAME "fossology-cyclonedx")
+set(CPACK_DEBIAN_CYCLONEDX_FILE_NAME "fossology-cyclonedx_${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_CYCLONEDX_DESCRIPTION
+"architecture for analyzing software, cyclonedx generator
+${FO_PACKAGE_COMMON_DESCRIPTION}
+This package contains the cyclonedx agent programs and their resources.")
+
+set(CPACK_DEBIAN_CYCLONEDX_PACKAGE_DEPENDS
+    "fossology-common, fossology-copyright")
+
+set(CPACK_DEBIAN_CYCLONEDX_PACKAGE_SECTION "utils")
 
 ## FOSSOLOGY-RESO PACKAGE
 set(CPACK_DEBIAN_RESO_PACKAGE_NAME "fossology-reso")
