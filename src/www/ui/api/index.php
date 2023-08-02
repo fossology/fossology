@@ -352,6 +352,7 @@ $app->group('/license',
     $app->delete('/admincandidates/{id:\\d+}',
       LicenseController::class . ':deleteAdminLicenseCandidate');
     $app->put('/adminacknowledgements', LicenseController::class . ':handleAdminLicenseAcknowledgement');
+    $app->post('/obligation/import-csv', LicenseController::class . ':importObligationsFromCSV');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
