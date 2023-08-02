@@ -14,6 +14,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <boost/program_options.hpp>
 
@@ -38,8 +39,10 @@ int queryAgentId(fo::DbManager& dbManager);
 int writeARS(const State& state, int arsId, int uploadId, int success, fo::DbManager& dbManager);
 void bail(int exitval);
 bool processUploadId(const State& state, int uploadId, ScancodeDatabaseHandler& databaseHandler, bool ignoreFilesWithMimeType);
-bool matchPFileWithLicenses(const State& state, unsigned long pFileId, ScancodeDatabaseHandler& databaseHandler);
-bool matchFileWithLicenses(const State& state, const fo::File& file, ScancodeDatabaseHandler& databaseHandler);
+void mapFileNameWithId(unsigned long pFileId, unordered_map<unsigned long, string> &fileIdsMap, unordered_map<string, unsigned long> &fileIdsMapReverse, ScancodeDatabaseHandler &databaseHandler);
+void writeFileNameToTextFile(unordered_map<unsigned long, string> &fileIdsMap, string fileLocation);
+string getScanResult(const string& line);
+bool matchFileWithLicenses(const State& state, ScancodeDatabaseHandler& databaseHandler, string scancodeResult, string& fileName, unsigned long fileId);
 bool saveLicenseMatchesToDatabase(const State& state, const vector<Match>& matches, unsigned long pFileId, ScancodeDatabaseHandler& databaseHandler);
 bool saveOtherMatchesToDatabase(const State& state, const vector<Match>& matches, unsigned long pFileId, ScancodeDatabaseHandler& databaseHandler);
 bool parseCommandLine(int argc, char** argv, string& cliOption, bool& ignoreFilesWithMimeType);

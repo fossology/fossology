@@ -62,42 +62,29 @@ unsigned getFilePointer(const string &filename, size_t start_line,
  *
  * @see https://scancode-toolkit.readthedocs.io/en/latest/cli-reference/list-options.html#all-basic-scan-options
  */
-string scanFileWithScancode(const State &state, const fo::File &file) {
-
-  FILE *in;
-  char buffer[512];
+void scanFileWithScancode(const State &state, string fileLocation, string outputFile) {
   string projectUser = fo_config_get(sysconfig, "DIRECTORIES", "PROJECTUSER",
-    NULL);
+  NULL);
   string cacheDir = fo_config_get(sysconfig, "DIRECTORIES", "CACHEDIR",
-    NULL);
+  NULL);
 
   string command =
-      "PYTHONPATH='/home/" + projectUser + "/pythondeps/' " +
-      "SCANCODE_CACHE=" + cacheDir + "/scancode " + // Use fossology's cache
-      "/home/" + projectUser + "/pythondeps/bin/scancode -" +
-      state.getCliOptions() +
-      " --custom-output - --custom-template scancode_template.html " +
-      file.getFileName() + " --quiet " +
-      ((state.getCliOptions().find('l') != string::npos) ? " --license-text --license-score " +
-      to_string(MINSCORE): "");
-  string result;
+    "PYTHONPATH='/home/" + projectUser + "/pythondeps/' " +
+    "python3 runscanonfiles.py -" + state.getCliOptions() + " " +
+    ((state.getCliOptions().find('l') != string::npos) ? "-m " +
+    to_string(MINSCORE): "") + " " + fileLocation + " " + outputFile;
 
-  if (!(in = popen(command.c_str(), "r"))) {
+  int returnvalue = system(command.c_str());
+
+  if (returnvalue != 0) {
     LOG_FATAL("could not execute scancode command: %s \n", command.c_str());
     bail(1);
   }
 
-  while (fgets(buffer, sizeof(buffer), in) != NULL) {
-    result += buffer;
+  if (unlink(fileLocation.c_str()) != 0)
+  {
+    LOG_FATAL("Unable to delete file %s \n", fileLocation.c_str());
   }
-
-  if (pclose(in) != 0) {
-    LOG_FATAL("could not execute scancode command: %s \n", command.c_str());
-    bail(1);
-  }
-  unsigned int startjson = result.find('{');
-  result = result.substr(startjson, string::npos);
-  return result;
 }
 
 /**
@@ -179,6 +166,28 @@ map<string, vector<Match>> extractDataFromScancodeResult(const string& scancodeR
         unsigned length = holdername.length();
         string type="scancode_author";
         result["scancode_author"].push_back(Match(holdername,type,start_pointer,length));
+    }
+
+    Json::Value emailarrays = scancodevalue["emails"];
+    for (auto oneresult : emailarrays) {
+        string emailname = oneresult["value"].asString();
+        unsigned long start_line=oneresult["start"].asUInt();
+        string temp_text= emailname.substr(0,emailname.find("\n"));
+        unsigned start_pointer = getFilePointer(filename, start_line, temp_text);
+        unsigned length = emailname.length();
+        string type="scancode_email";
+        result["scancode_email"].push_back(Match(emailname,type,start_pointer,length));
+    }
+
+    Json::Value urlarrays = scancodevalue["urls"];
+    for (auto oneresult : urlarrays) {
+        string urlname = oneresult["value"].asString();
+        unsigned long start_line=oneresult["start"].asUInt();
+        string temp_text= urlname.substr(0,urlname.find("\n"));
+        unsigned start_pointer = getFilePointer(filename, start_line, temp_text);
+        unsigned length = urlname.length();
+        string type="scancode_url";
+        result["scancode_url"].push_back(Match(urlname,type,start_pointer,length));
     }
   } else {
     LOG_FATAL("JSON parsing failed %s \n", errors.c_str());

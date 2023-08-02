@@ -27,8 +27,7 @@
 
 using namespace std;
 
-string scanFileWithScancode(const State& state, const fo::File& file);
-string scanFileWithScancode(string filename);
+void scanFileWithScancode(const State& state, string fileLocation, string outputFile);
 map<string, vector<Match>> extractDataFromScancodeResult( const string& scancodeResult, const string& filename);
 
 #endif // SCANCODE_AGENT_SCANCODE_WRAPPER_HPP
