@@ -55,6 +55,6 @@ install(TARGETS scancode_exec
     COMPONENT scancode)
 
 install(FILES
-    scancode_template.html
+    runscanonfiles.py
     DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent
     COMPONENT scancode)
