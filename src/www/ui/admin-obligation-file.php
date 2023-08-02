@@ -40,6 +40,14 @@ class admin_obligation_file extends FO_Plugin
     return ($topicarray);
   }
 
+  /** @brief get obligations list along with obligations id */
+  public function getObligationsList()
+  {
+    $sql = "SELECT ob_pk, ob_topic from obligation_ref";
+    $obligationsList = $this->dbManager->getRows($sql);
+    return ($obligationsList);
+  }
+
   /** @brief check if the text of this obligation is existing */
   private function isObligationTopicAndTextBlocked($obId,$topic,$text)
   {

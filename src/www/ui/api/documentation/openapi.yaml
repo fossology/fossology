@@ -240,6 +240,24 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /obligations/list:
+    get:
+      operationId: getObligationsList
+      tags:
+        - Admin
+      summary: Get the list of obligations
+      description: >
+        Get the list of obligations in the server.
+      responses:
+        '200':
+          description: The API information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObligationsList'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /uploads/{id}:
     parameters:
       - name: id
@@ -6090,6 +6108,16 @@ components:
         spdx_id:
           type: string
           example: LicenseRef-fossology-ACE
+    ObligationsList:
+      type: array
+      items:
+        properties:
+          id:
+            type: integer
+            example: 29
+          obligation_topic:
+            type: string
+            example: Obligation text
     AddMember:
       description: UserMember options
       type: object
