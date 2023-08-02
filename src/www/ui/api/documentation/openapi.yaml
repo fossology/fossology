@@ -4047,6 +4047,30 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /license/export-csv:
+    get:
+      operationId: exportLicense
+      tags:
+        - License
+      summary: Export a csv license
+      description: >
+        Export a csv license
+      responses:
+        '200':
+          description: Successfully exported
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /license/{shortname}:
     parameters:
       - name: shortname

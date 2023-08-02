@@ -336,6 +336,7 @@ $app->group('/license',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('', LicenseController::class . ':getAllLicenses');
     $app->post('/import-csv', LicenseController::class . ':handleImportLicense');
+    $app->get('/export-csv', LicenseController::class . ':exportAdminLicenseToCSV');
     $app->post('', LicenseController::class . ':createLicense');
     $app->put('/verify/{shortname:.+}', LicenseController::class . ':verifyLicense');
     $app->put('/merge/{shortname:.+}', LicenseController::class . ':mergeLicense');
