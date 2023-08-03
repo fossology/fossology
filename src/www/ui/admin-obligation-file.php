@@ -39,6 +39,30 @@ class admin_obligation_file extends FO_Plugin
     return ($topicarray);
   }
 
+  /** @brief get obligations Details along with obligations id */
+  public function getObligationsDetails($id)
+  {
+    $finVal = [];
+    $sql = "SELECT * from obligation_ref WHERE ob_pk = $1";
+    $obligationsDetails = $this->dbManager->getRows($sql, array($id));
+    foreach ($obligationsDetails as $val) {
+      $row['id'] = intval($val['ob_pk']);
+      $row['obligation_type'] = $val['ob_type'];
+      $row['obligation_topic'] = $val['ob_topic'];
+      $row['obligation_text'] = $val['ob_text'];
+      $row['obligation_classification'] = $val['ob_classification'];
+      $row['obligation_modification'] = $val['ob_modifications'];
+      $row['obligation_comment'] = $val['ob_comment'];
+      $row['obligation_active'] = $val['ob_active'];
+      $row['obligation_text_updatable'] = $val['ob_text_updatable'];
+      $row['obligation_hash'] = $val['ob_md5'];
+      $row['associated_licenses'] = $this->obligationMap->getLicenseList($val['ob_pk']);
+      $row['candidate_licenses'] = $this->obligationMap->getLicenseList($val['ob_pk'], True);
+      $finVal[] = $row;
+    }
+    return (array($finVal));
+  }
+
   /** @brief check if the text of this obligation is existing */
   private function isObligationTopicAndTextBlocked($obId,$topic,$text)
   {

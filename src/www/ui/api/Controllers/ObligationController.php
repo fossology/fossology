@@ -51,4 +51,26 @@ class ObligationController extends RestController
     }
     return $response->withJson($finVal, 200);
   }
+
+  /**
+   * Get details of obligations based on id
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+
+  function obligationsDetails($request, $response, $args)
+  {
+    $obligationId = intval($args['id']);
+    if (!$this->dbHelper->doesIdExist("obligation_ref", "ob_pk", $obligationId)) {
+      $returnVal = new Info(404, "Obligation does not exist", InfoType::ERROR);
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $listVal = $this->obligationFile->getObligationsDetails($obligationId);
+    return $response->withJson($listVal, 200);
+  }
 }
