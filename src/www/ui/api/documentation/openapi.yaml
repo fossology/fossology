@@ -257,6 +257,30 @@ paths:
                 $ref: '#/components/schemas/ObligationsList'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /obligations/{id}:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the obligation
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getObligationsData
+      tags:
+        - Admin
+      summary: Get details of a particular obligation
+      description: >
+        Get the details of a particular obligation from the server. 
+      responses:
+        '200':
+          description: The API information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObligationsDetails'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /uploads/{id}:
     parameters:
@@ -6150,6 +6174,47 @@ components:
           obligation_topic:
             type: string
             example: Obligation text
+    ObligationsDetails:
+      type: array
+      items:
+        properties:
+          id:
+            type: integer
+            example: 2
+            description: Obligation id
+          obligation_type:
+            type: string
+            description: Type of obligation
+          obligation_topic:
+            type: string
+            description: Topic of obligation
+          obligation_text:
+            type: string
+            description: Text for obligation
+          obligation_classification:
+            type: string
+            description: Obligation classification colour
+          obligation_modification:
+            type: string
+            description: Obligation modification status
+          obligation_comment:
+            type: string
+            description: Obligation comment
+          obligation_active:
+            type: string
+            description: Status of obligation active/inactive
+          obligation_text_updatable:
+            type: string
+            description: Obligation text updatable checker t/f
+          obligation_hash:
+            type: string
+            description: Obligation hash
+          associated_licenses:
+            type: string
+            description: Associated licenses with obligation
+          candidate_licenses:
+            type: string
+            description: candidate licensesfor the obligation
     AddMember:
       description: UserMember options
       type: object
