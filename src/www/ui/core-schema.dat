@@ -1805,7 +1805,7 @@
   $Schema["TABLE"]["sysconfig"]["ui_label"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"ui_label\" varchar(60)";
   $Schema["TABLE"]["sysconfig"]["ui_label"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"ui_label\" SET NOT NULL";
 
-  $Schema["TABLE"]["sysconfig"]["vartype"]["DESC"] = "COMMENT ON COLUMN \"sysconfig\".\"vartype\" IS 'variable type.  1=int, 2=text, 3=textarea, 4=password, 5=dropdown'";
+  $Schema["TABLE"]["sysconfig"]["vartype"]["DESC"] = "COMMENT ON COLUMN \"sysconfig\".\"vartype\" IS 'variable type.  1=int, 2=text, 3=textarea, 4=password, 5=dropdown, 6=boolean'";
   $Schema["TABLE"]["sysconfig"]["vartype"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"vartype\" int4";
   $Schema["TABLE"]["sysconfig"]["vartype"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"vartype\" SET NOT NULL";
 

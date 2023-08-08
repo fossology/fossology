@@ -2896,6 +2896,31 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /customise:
+    get:
+      operationId: getCustomiseData
+      tags:
+        - Admin
+      summary: Get the Admin configuration data
+      description: >
+        Returns the admin configuration data from the server
+      responses:
+        '200':
+          description: Config data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customise'
+        '403':
+          description: The session owner is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /groups:
     get:
       operationId: getGroups
@@ -4516,6 +4541,40 @@ components:
         isCandidate:
           description: Is the license a candidate?
           type: boolean
+    Customise:
+      description: Admin customise data object
+      type: object
+      properties:
+        key:
+          description: field key
+          type: string          
+        value:
+          description: field value
+          type: string
+        type:
+          description: field type
+          type: string
+          enum:
+          - int
+          - text
+          - textarea
+          - password
+          - dropdown
+          - boolean
+        label:
+          description: field label
+          type: string
+        group_name:
+          description: group name for the field
+          type: string
+        group_order:
+          description: group order of the field
+          type: integer
+        option_value:
+          description: If type is 'dropdown', provide options in format op1{val1}|op2{val2}|...
+          type: string
+
+            
     Group:
       description: Group object
       type: object
