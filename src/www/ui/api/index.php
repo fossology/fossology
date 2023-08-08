@@ -229,6 +229,7 @@ $app->group('/obligations',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('/list', ObligationController::class . ':obligationsList');
     $app->get('/{id:\\d+}', ObligationController::class . ':obligationsDetails');
+    $app->get('/', ObligationController::class . ':obligationsAllDetails');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

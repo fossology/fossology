@@ -85,4 +85,19 @@ class ObligationController extends RestController
       $associatedLicenses, $associatedCandidateLicenses);
     return $response->withJson($obligation->getArray(), 200);
   }
+
+  /**
+   * Get details of all obligations
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+
+  function obligationsAllDetails($request, $response, $args)
+  {
+    $listVal = $this->obligationFile->getAllObligationsDetails();
+    return $response->withJson($listVal, 200);
+  }
 }
