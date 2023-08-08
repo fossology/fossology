@@ -10,6 +10,7 @@
  * @brief Obligation
  */
 namespace Fossology\UI\Api\Models;
+use Fossology\Lib\BusinessRules\ObligationMap;
 
 /**
  * @class Obligation
@@ -141,6 +142,33 @@ class Obligation
       $obligation['hash'] = $this->getHash();
     }
     return $obligation;
+  }
+
+  /**
+   * Get Obligation elements as associative array
+   * @return array
+   */
+  public function getObligations($obligationsDetails)
+  {
+    $this->obligationMap = $GLOBALS['container']->get('businessrules.obligationmap');
+    foreach ($obligationsDetails as $val) {
+      $row['id'] = intval($val['ob_pk']);
+      $row['type'] = $val['ob_type'];
+      $row['topic'] = $val['ob_topic'];
+      $row['text'] = $val['ob_text'];
+      $row['classification'] = $val['ob_classification'];
+      $row['modification'] = $val['ob_modifications'];
+      $row['comment'] = $val['ob_comment'];
+      $row['active'] = ($val['ob_active'] == "t" ? true : false);
+      $row['textUpdatable'] = ($val['ob_text_updatable'] == "t" ? true : false);
+      $row['hash'] = $val['ob_md5'];
+      $associatedLicenses = explode(';', $this->obligationMap->getLicenseList($val['ob_pk']));
+      $candidateLicenses = explode(';', $this->obligationMap->getLicenseList($val['ob_pk'], True));
+      $row['associatedLicenses'] = ($associatedLicenses[0] != "" ? $associatedLicenses : []);
+      $row['candidateLicenses'] = ($candidateLicenses[0] != "" ? $candidateLicenses : []);
+      $finVal[] = $row;
+    }
+    return ($finVal);
   }
 
   /**

@@ -282,6 +282,23 @@ paths:
                 $ref: '#/components/schemas/ObligationExtended'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /obligations/:
+    get:
+      operationId: getAllObligationsData
+      tags:
+        - Admin
+      summary: Get details of a all obligations
+      description: >
+        Get the details of all obligations from the server.
+      responses:
+        '200':
+          description: The API information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObligationsDetails'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /uploads/{id}:
     parameters:
