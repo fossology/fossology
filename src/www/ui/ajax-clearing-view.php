@@ -277,7 +277,7 @@ class AjaxClearingView extends FO_Plugin
    * @param boolean $orderAscending
    * @return array
    */
-  protected function getCurrentSelectedLicensesTableData(ItemTreeBounds $itemTreeBounds, $groupId, $orderAscending)
+  public function getCurrentSelectedLicensesTableData(ItemTreeBounds $itemTreeBounds, $groupId, $orderAscending)
   {
     $uploadTreeId = $itemTreeBounds->getItemId();
     $uploadId = $itemTreeBounds->getUploadId();
