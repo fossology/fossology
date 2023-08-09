@@ -3814,6 +3814,39 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
+    put:
+      operationId: mutateAdminLicenseAcknowledgement
+      tags:
+        - License
+      summary: Add, Edit, Enable & Disable
+      description: >
+        Add, edit and toggle admin-license acknowledgement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/MutateAdminAcknowledgement'
+      responses:
+        '200':
+          description: Request is successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -5465,6 +5498,38 @@ components:
         is_enabled:
           type: boolean
           description: Indicates if the AdminAcknowledgement is enabled
+          example: true
+    MutateAdminAcknowledgement:
+      type: object
+      properties:
+        id:
+          type: integer
+          description:  |
+            The ID of the acknowledgement.
+            Required if update is TRUE.
+          example: 2
+        name:
+          type: string
+          description: |
+            The name of the acknowledgement.
+            Not required if update is TRUE and toggle is set.
+          example: ackName
+        ack:
+          type: string
+          description: |
+            The acknowledgement text.
+            Not required if update is TRUE and toggle is set.
+          example: acknowledgement text
+        toggle:
+          type: boolean
+          description: A boolean indicating the toggle state.
+          example: true
+        update:
+          type: boolean
+          description: |
+            A boolean indicating if an update is needed.
+            If true, update the given admin acknowledgement.
+            if false, add new admin acknowledgement.
           example: true
   responses:
     defaultResponse:
