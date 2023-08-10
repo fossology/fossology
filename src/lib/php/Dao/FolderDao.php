@@ -402,8 +402,8 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
   {
     $results = array();
     $stmtFolder = __METHOD__;
-    $sqlFolder = "SELECT foldercontents_pk,foldercontents_mode, folder_name FROM foldercontents,folder "
-      . "WHERE foldercontents.parent_fk=$1 AND foldercontents.child_id=folder.folder_pk"
+    $sqlFolder = "SELECT foldercontents_pk,foldercontents_mode, folder_name FROM foldercontents JOIN folder"
+      . " ON foldercontents.child_id=folder.folder_pk WHERE foldercontents.parent_fk=$1"
       . " AND foldercontents_mode=" . self::MODE_FOLDER;
     $this->dbManager->prepare($stmtFolder, $sqlFolder);
     $res = $this->dbManager->execute($stmtFolder, array($folderId));

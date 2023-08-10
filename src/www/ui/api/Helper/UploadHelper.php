@@ -631,10 +631,10 @@ class UploadHelper
    */
   private function getMainLicenses($dbManager, $uploadId, $groupId)
   {
-    $sql = "SELECT rf_shortname FROM upload_clearing_license ucl, license_ref"
-         . " WHERE ucl.group_fk=$1 AND upload_fk=$2 AND ucl.rf_fk=rf_pk;";
+    $sql = "SELECT rf_shortname FROM license_ref lf JOIN upload_clearing_license ucl"
+            . " ON lf.rf_pk=ucl.rf_fk WHERE upload_fk=$1 AND ucl.group_fk=$2";
     $stmt = __METHOD__.'.collectMainLicenses';
-    $rows = $dbManager->getRows($sql, array($groupId, $uploadId), $stmt);
+    $rows = $dbManager->getRows($sql, array($uploadId, $groupId), $stmt);
     if (empty($rows)) {
       return null;
     }
