@@ -39,6 +39,15 @@ class admin_obligation_file extends FO_Plugin
     return ($topicarray);
   }
 
+  /** @brief delete obligation using obligations id */
+  public function deleteObligations($id)
+  {
+    $sql = "DELETE from obligation_ref WHERE ob_pk = $1";
+    $this->dbManager->getRows($sql, array($id));
+    $returnVal = new Info(200, "Successfully removed Obligation.", InfoType::INFO);
+    return ($returnVal);
+  }
+
   /** @brief check if the text of this obligation is existing */
   private function isObligationTopicAndTextBlocked($obId,$topic,$text)
   {

@@ -117,4 +117,26 @@ class ObligationController extends RestController
     return Obligation::fromArray($obligationInfo, true,
       $associatedLicenses, $associatedCandidateLicenses);
   }
+
+  /**
+   * Delete obligation based on id
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+
+  function DeleteobligationsDetails($request, $response, $args)
+  {
+    $obligationId = intval($args['id']);
+    if (!$this->dbHelper->doesIdExist("obligation_ref", "ob_pk", $obligationId)) {
+      $returnVal = new Info(404, "Obligation does not exist", InfoType::ERROR);
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $returnVal = $this->obligationFile->deleteObligations($obligationId);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
 }
