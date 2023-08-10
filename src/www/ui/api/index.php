@@ -230,6 +230,7 @@ $app->group('/obligations',
     $app->get('/list', ObligationController::class . ':obligationsList');
     $app->get('/{id:\\d+}', ObligationController::class . ':obligationsDetails');
     $app->get('', ObligationController::class . ':obligationsAllDetails');
+    $app->delete('[/{id:\\d+}]', ObligationController::class . ':DeleteobligationsDetails');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
