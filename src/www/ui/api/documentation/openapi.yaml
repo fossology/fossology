@@ -7,7 +7,7 @@ openapi: 3.0.3
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.5.4
+  version: 1.5.5
   contact:
     email: fossology@fossology.org
   license:
