@@ -348,6 +348,7 @@ $app->group('/license',
     $app->get('/stdcomments', LicenseController::class . ':getAllLicenseStandardComments');
     $app->put('/stdcomments', LicenseController::class . ':handleLicenseStandardComment');
     $app->post('/suggest', LicenseController::class . ':getSuggestedLicense');
+    $app->get('/obligation/export-csv', LicenseController::class . ':exportObligationsToCSV');
     $app->get('/{shortname:.+}', LicenseController::class . ':getLicense');
     $app->patch('/{shortname:.+}', LicenseController::class . ':updateLicense');
     $app->delete('/admincandidates/{id:\\d+}',
