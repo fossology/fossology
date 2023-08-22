@@ -23,6 +23,7 @@ require_once dirname(dirname(dirname(dirname(__FILE__)))) .
 
 use Fossology\Lib\Util\TimingLogger;
 use Fossology\UI\Api\Controllers\AuthController;
+use Fossology\UI\Api\Controllers\AuthorController;
 use Fossology\UI\Api\Controllers\BadRequestController;
 use Fossology\UI\Api\Controllers\ConfController;
 use Fossology\UI\Api\Controllers\CopyrightController;
@@ -207,6 +208,11 @@ $app->group('/uploads',
     $app->post('/{id:\\d+}/item/{itemId:\\d+}/bulk-scan', UploadTreeController::class . ':scheduleBulkScan');
     $app->get('/{id:\\d+}/conf', ConfController::class . ':getConfInfo');
     $app->put('/{id:\\d+}/conf', ConfController::class . ':updateConfData');
+    $app->get('/{id:\\d+}/item/{itemId:\\d+}/author', AuthorController::class . ':getFileCopyrights');
+    $app->delete('/{id:\\d+}/item/{itemId:\\d+}/author/{hash:.*}', AuthorController::class . ':deleteFileCopyrights');
+    $app->put('/{id:\\d+}/item/{itemId:\\d+}/author/{hash:.*}', AuthorController::class . ':updateFileCopyrights');
+    $app->patch('/{id:\\d+}/item/{itemId:\\d+}/author/{hash:.*}', AuthorController::class . ':restoreFileCopyrights');
+    $app->get('/{id:\\d+}/item/{itemId:\\d+}/totalauthor', AuthorController::class . ':getTotalFileCopyrights');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
