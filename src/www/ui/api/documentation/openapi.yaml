@@ -4786,6 +4786,31 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
+  /license/obligation/export-csv:
+    get:
+      operationId: exportLicenseObligations
+      tags:
+        - License
+      summary: Export a csv obligation list
+      description: >
+        Export a csv license obligation list
+      responses:
+        '200':
+          description: Successfully exported
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 components:
   securitySchemes:
     bearerAuth:
