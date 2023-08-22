@@ -33,7 +33,7 @@ target_include_directories(test_delagent
     PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${FO_CWD}/../agent
     ${glib_INCLUDE_DIRS} ${PostgreSQL_INCLUDE_DIRS} ${FO_CWD}/Unit ${FO_CLIB_SRC})
 target_link_libraries(test_delagent
-    PRIVATE fossology ${cunit_LIBRARIES} fodbreposysconf focunit gcrypt
+    PRIVATE fossology ${cunit_LIBRARIES} fodbreposysconf focunit gcrypt crypt
         ${glib_LIBRARIES} ${PostgreSQL_LIBRARIES})
 
 # FIXME: Tests need to migrate to alternate framework for generating repo and db
