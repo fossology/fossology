@@ -11,6 +11,9 @@
  * delagent: Remove an upload from the DB and repository
  *
  */
+
+#include <crypt.h>
+
 #include "delagent.h"
 
 int Verbose = 0;
@@ -99,7 +102,7 @@ int authentication(char *user, char *password, int *userId, int *userPerm)
   char SQL[MAXSQL] = {0};
   PGresult *result;
   char user_seed[myBUFSIZ] = {0};
-  char pass_hash_valid[41] = {0};
+  char pass_hash_valid[myBUFSIZ] = {0};
   unsigned char pass_hash_actual_raw[21] = {0};
   char pass_hash_actual[41] = {0};
 
@@ -122,6 +125,11 @@ int authentication(char *user, char *password, int *userId, int *userPerm)
   *userPerm = atoi(PQgetvalue(result, 0, 2));
   *userId = atoi(PQgetvalue(result, 0, 3));
   PQclear(result);
+  if (pass_hash_valid[0] &&
+    strcmp(crypt(password, pass_hash_valid), pass_hash_valid) == 0)
+  {
+    return 0;
+  }
   if (user_seed[0] && pass_hash_valid[0])
   {
     strcat(user_seed, password);  // get the hash code on seed+pass
