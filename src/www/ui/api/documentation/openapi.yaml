@@ -3076,6 +3076,235 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /uploads/{id}/item/{itemId}/author:
+    parameters:
+      - name: id
+        required: true
+        description: Upload Id
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: UploadTree ID
+        in: path
+        schema:
+          type: integer
+      - name: status
+        required: true
+        in: query
+        description: status of the author
+        schema:
+          type: string
+          enum:
+              - active
+              - inactive
+      - name: limit
+        description: Limits of responses per request
+        required: false
+        in: header
+        schema:
+          type: integer
+          default: 100
+          minimum: 1
+          maximum: 1000
+      - name: page
+        description: Page number for responses
+        required: false
+        in: header
+        schema:
+          type: integer
+          default: 1
+          minimum: 1
+    get:
+      operationId: getFileAuthors
+      tags:
+        - Authors
+      summary: Get the authors of the mentioned upload tree ID
+      description: Returns the list of authors associated with the file
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Total-Pages:
+              description: Total number of pages which can be generated based on limit
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetFileCopyrights'
+        '400':
+          description: "Bad Request. 'upload' is a required query param"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /uploads/{id}/item/{itemId}/author/{hash}:
+    parameters:
+      - name: id
+        required: true
+        description: upload ID
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Upload tree ID
+        in: path
+        schema:
+          type: integer
+      - name: hash
+        required: true
+        description: author hash
+        in: path
+        schema:
+          type: string
+    delete:
+      operationId: deleteFileAuthors
+      tags:
+        - Authors
+      summary: Deletes a author for a file
+      description: Deletes a author entry for a particular file
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    patch:
+      operationId: restoreFileAuthors
+      tags:
+        - Authors
+      summary: Restores a Author for a file
+      description: Restores a Author entry for a particular file
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    put:
+      operationId: updateFileAuthors
+      tags:
+        - Authors
+      summary: Updates a Author for a file
+      description: Updates a Author entry for a particular file
+      requestBody:
+        description: updateAuthor Payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetCopyrightInfo'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /uploads/{id}/item/{ItemId}/totalauthor:
+    parameters:
+      - name: id
+        required: true
+        description: Upload Id
+        in: path
+        schema:
+          type: integer
+      - name: ItemId
+        required: true
+        description: Upload Tree ID
+        in: path
+        schema:
+          type: integer
+      - name: status
+        required: true
+        in: query
+        description: status of the copyright
+        schema:
+          type: string
+          enum:
+              - active
+              - inactive
+    get:
+      operationId: getTotalFileAuthors
+      tags:
+        - Authors
+      summary: Get the total authors of the mentioned upload tree ID
+      description: Returns the total number of authors associated with the file
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - type: object
+                      properties:
+                        total_authors:
+                          type: integer
+                          description: Total Number of authors for the uploadtree
+                          example:
+                            125
+        '400':
+          description: "Bad Request. 'upload' is a required query param"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Upload is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Upload does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /folders:
     parameters:
