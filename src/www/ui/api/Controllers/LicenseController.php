@@ -957,4 +957,34 @@ class LicenseController extends RestController
 
     return $response->withJson($newInfo->getArray(), $newInfo->getCode());
   }
+
+  /**
+   * Export Obligations to CSV
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function exportObligationsToCSV($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $dbManager = $this->dbHelper->getDbManager();
+    $obligationCsvExport = new \Fossology\Lib\Application\ObligationCsvExport($dbManager);
+    $content = $obligationCsvExport->createCsv(0);
+    $fileName = "fossology-obligations-export-".date("YMj-Gis");
+    $newResponse = $response->withHeader('Content-type', 'text/csv, charset=UTF-8')
+      ->withHeader('Content-Disposition', 'attachment; filename=' . $fileName . '.csv')
+      ->withHeader('Pragma', 'no-cache')
+      ->withHeader('Cache-Control', 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0')
+      ->withHeader('Expires', 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
+    $sf = new StreamFactory();
+    $newResponse = $newResponse->withBody(
+      $content ? $sf->createStream($content) : $sf->createStream('')
+    );
+    return ($newResponse);
+  }
 }
