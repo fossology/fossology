@@ -1128,6 +1128,10 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->shouldReceive("getSingleRow")
       ->withArgs([M::any(), [], 'already_cleared_uploadtree' . $uploadId])
       ->andReturn(['count' => 0]);
+    $this->licenseDao->shouldReceive('getLicenseByShortName')
+      ->withArgs(['No_license_found'])->andReturn(null);
+    $this->licenseDao->shouldReceive('getLicenseByShortName')
+      ->withArgs(['Void'])->andReturn(null);
     $res = [
       "totalFilesOfInterest" => 1,
       "totalFilesCleared" => 1,
