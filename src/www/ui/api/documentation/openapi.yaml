@@ -1139,7 +1139,57 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-  
+
+  /uploads/{id}/item/{itemId}/bulk-scan:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: itemId
+        required: true
+        description: Id of the itemId
+        in: path
+        schema:
+          type: integer
+    post:
+      operationId: scheduleBulkScan
+      tags:
+        - Upload
+      summary: Schedule the bulk scan for the item
+      description: >
+        Schedule the bulk scan for the item
+      requestBody:
+        description: ClearingInfo payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleBulkScan'
+      responses:
+        '200':
+          description: Bulk scan scheduled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /uploads/{id}/item/{itemId}/bulk-history:
     parameters:
       - name: id
@@ -5157,6 +5207,48 @@ components:
           description: Date from which to remove older log files from repository.
           nullable: true
           example: "2022-07-16"
+    ScheduleBulkScan:
+      type: object
+      properties:
+        bulkActions:
+          type: array
+          items:
+            type: object
+            properties:
+              licenseShortName:
+                type: string
+                example: MIT
+              licenseText:
+                type: string
+                example: "License text"
+              acknowledgement:
+                type: string
+                example: "Acknowledgement text"
+              comment:
+                type: string
+                example: "Comment text"
+              licenseAction:
+                type: string
+                enum:
+                  - ADD
+                  - REMOVE
+        refText:
+          type: string
+          example: "reference text"
+        bulkScope:
+          type: string
+          enum:
+            - folder
+            - upload
+        forceDecision:
+          type: boolean
+          example: false
+        ignoreIrre:
+          type: boolean
+          example: false
+        delimiters:
+          type: string
+          example: "DEFAULT"
     ScannedEditedLicense:
       type: object
       properties:
