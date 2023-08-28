@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Test\Controllers;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseAcknowledgementDao;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\LicenseStdCommentDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\LicenseController;
@@ -99,6 +100,12 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
   private $adminLicenseAckDao;
 
   /**
+   * @var LicenseStdCommentDao $licenseStdCommentDao
+   * LicenseStdCommentDao mock
+   */
+  private $licenseStdCommentDao;
+
+  /**
    * @var M\MockInterface $adminLicensePlugin
    * admin_license_from_csv mock
    */
@@ -142,6 +149,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->adminLicenseAckDao = M::mock(LicenseAcknowledgementDao::class);
     $this->adminLicensePlugin = M::mock('admin_license_from_csv');
     $this->licenseCandidatePlugin = M::mock('admin_license_candidate');
+    $this->licenseStdCommentDao = M::mock(LicenseStdCommentDao::class);
 
     $this->dbHelper->shouldReceive('getDbManager')->andReturn($this->dbManager);
 
@@ -154,7 +162,8 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->restHelper->shouldReceive('getPlugin')
       ->withArgs(array('admin_license_from_csv'))->andReturn($this->adminLicensePlugin);
-
+    $container->shouldReceive('get')->withArgs(array(
+      'dao.license.stdc'))->andReturn($this->licenseStdCommentDao);
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
     $container->shouldReceive('get')->withArgs(array(

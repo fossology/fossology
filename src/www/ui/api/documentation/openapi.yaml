@@ -3866,7 +3866,6 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-
     put:
       operationId: mutateAdminLicenseAcknowledgement
       tags:
@@ -3897,6 +3896,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /license/stdcomments:
+    get:
+      operationId: getAllStandardLicenseComments
+      tags:
+        - License
+      summary: Get all standard license comments
+      description: >
+        Get a list of all standard license comments.
+      responses:
+        '200':
+          description: Request is successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StandardComment'
         default:
           $ref: '#/components/responses/defaultResponse'
 components:
@@ -5625,6 +5644,25 @@ components:
             If true, update the given admin acknowledgement.
             if false, add new admin acknowledgement.
           example: true
+    StandardComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+          description: The primary key of the comment.
+        name:
+          type: string
+          example: firstComment
+          description: The name of the comment.
+        comment:
+          type: string
+          example: The comment's text
+          description: The text content of the comment.
+        is_enabled:
+          type: boolean
+          example: true
+          description: Indicates whether the comment is enabled or not.
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"
