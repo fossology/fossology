@@ -211,19 +211,18 @@ class AjaxBrowse extends DefaultPlugin
     $rejectableUploadId = ($this->userPerm || $row['status_fk'] < 4) ? $uploadId : 0;
     $tripleComment = array($rejectableUploadId, $row['status_fk'], htmlspecialchars($row['status_comment']));
 
-    $sql = "SELECT rf_pk, rf_shortname FROM upload_clearing_license ucl, license_ref"
-            . " WHERE ucl.group_fk=$1 AND upload_fk=$2 AND ucl.rf_fk=rf_pk";
+    $sql = "SELECT rf_pk, rf_shortname FROM license_ref lf JOIN upload_clearing_license ucl"
+            . " ON lf.rf_pk=ucl.rf_fk WHERE upload_fk=$1 AND ucl.group_fk=$2";
     $stmt = __METHOD__.'.collectMainLicenses';
-    $this->dbManager->prepare($stmt, $sql);
-    $res = $this->dbManager->execute($stmt,array(Auth::getGroupId(),$uploadId));
+    $mainParams = array($uploadId, Auth::getGroupId());
+    $lic = $this->dbManager->getRows($sql, $mainParams, $stmt);
     $mainLicenses = array();
-    while ($lic=$this->dbManager->fetchArray($res)) {
+    foreach ($lic as $mainLic) {
       $mainLicenses[] = '<a onclick="javascript:window.open(\''.Traceback_uri()
-              ."?mod=popup-license&rf=$lic[rf_pk]','License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');"
-              .'" href="javascript:;">'.$lic['rf_shortname'].'</a>'
-              ."<img onclick=\"removeMainLicense($uploadId,$lic[rf_pk]);\" class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></img>";
+              ."?mod=popup-license&rf=$mainLic[rf_pk]','License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');"
+              .'" href="javascript:;">'.$mainLic['rf_shortname'].'</a>'
+              ."<img onclick=\"removeMainLicense($uploadId,$mainLic[rf_pk]);\" class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></img>";
     }
-    $this->dbManager->freeResult($res);
 
     $output = array($nameColumn, $nameAction, $currentStatus, $tripleComment, implode(', ', $mainLicenses), $dateCol, $currentAssignee);
     return $output;
