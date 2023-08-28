@@ -16,6 +16,8 @@ info:
 servers:
   - url: http://localhost/repo/api/v1
     description: Localhost instance
+  - url: http://localhost/repo/api/v2
+    description: Localhost instance (Version 2)
 security:
   - bearerAuth: []
   - oauth: []
