@@ -208,7 +208,7 @@ resources.")
 set(CPACK_DEBIAN_FOSSOLOGY-UNUNPACK_PACKAGE_DEPENDS
     "fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit,
     genisoimage, poppler-utils, rpm, upx-ucl, unrar-free, unzip, p7zip-full,
-    p7zip")
+    p7zip, zstd")
 
 set(CPACK_DEBIAN_FOSSOLOGY-UNUNPACK_PACKAGE_SECTION "utils")
 else()

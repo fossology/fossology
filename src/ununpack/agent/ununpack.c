@@ -1,8 +1,8 @@
 /*
  Ununpack: The universal unpacker.
- 
+
  SPDX-FileCopyrightText: © 2007-2013 Hewlett-Packard Development Company, L.P.
- SPDX-FileCopyrightText: © 2015 Siemens AG
+ SPDX-FileCopyrightText: © 2015,2023 Siemens AG
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -56,6 +56,9 @@
  * | application/jar | unzip |
  * | application/java-archive | unzip |
  * | application/x-dosexec | 7z |
+ * | application/zstd | zstd |
+ * | application/x-lz4 | zstd |
+ * | application/x-lzma | zstd |
  *
  * \section ununpackactions Supported actions
  * Usage: \code ununpack [options] file [file [file...]] \endcode
@@ -282,7 +285,6 @@ int	main(int argc, char *argv[])
     }
     else
       strcpy(uploadtree_tablename, "uploadtree_a");
-
   }
 
   CheckCommands(Quiet);

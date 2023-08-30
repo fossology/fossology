@@ -95,7 +95,10 @@ cmdlist CMD[] =
 /* 31 */{ "application/java-archive","unzip","-q -P none -o","-x / >/dev/null 2>&1","unzip -Zhzv '%s' > '%s'",CMD_ARC,1,0177000,0177000, },
 /* 32 */{ "application/x-dosexec","7z","x -y -pjunk",">/dev/null 2>&1","",CMD_ARC,1,0177000,0177000, },
 /* 33 */{ "application/vnd.debian.binary-package","ar","x",">/dev/null 2>&1","dpkg -I '%s' > '%s'",CMD_AR,1,0177000,0177777, },
-/* 34 */{ "","","",">/dev/null 2>&1","",CMD_DEFAULT,1,0177000,0177000, },
+/* 34 */{ "application/zstd", "zstd", "-d", ">/dev/null 2>&1", "zstd -lv '%s' > '%s'", CMD_ZSTD, 1, 0177000, 0177000, },
+/* 35 */{ "application/x-lz4", "zstd", "-d", ">/dev/null 2>&1", "", CMD_ZSTD, 1, 0177000, 0177000, },
+/* 36 */{ "application/x-lzma", "zstd", "-d", ">/dev/null 2>&1", "", CMD_ZSTD, 1, 0177000, 0177000, },
+/* 37 */{ "","","",">/dev/null 2>&1","",CMD_DEFAULT,1,0177000,0177000, },
   { NULL,NULL,NULL,NULL,NULL,-1,-1,0177000,0177000, },
 };
 #endif

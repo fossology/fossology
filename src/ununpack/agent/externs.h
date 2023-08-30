@@ -16,7 +16,7 @@ extern int UnlinkSource;        ///< Remove recursive sources after unpacking?
 extern int UnlinkAll;           ///< Remove ALL unpacked files when done (clean up)?
 extern int ForceContinue;       ///< Force continue when unpack tool fails?
 extern int ForceDuplicate;      ///< When using db, should it process duplicates?
-extern int IgnoreSCMData;       ///< 1: Ignore SCM data, 0: dont ignore it.
+extern int IgnoreSCMData;       ///< 1: Ignore SCM data, 0: dont ignore it.
 extern int PruneFiles;          ///< Remove links? >1 hard links, zero files, etc
 extern int SetContainerArtifact;  ///< Should initial container be an artifact?
 extern FILE *ListOutFile;       ///< File to store unpack list

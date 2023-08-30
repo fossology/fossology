@@ -36,6 +36,7 @@ endforeach()
 # 		${FO_CWD}/Unit/test_RunCommand.c
 # 		${FO_CWD}/Unit/test_Traverse.c
 # 		${FO_CWD}/Unit/test_ununpack-ar.c
+# 		${FO_CWD}/Unit/test_ununpack-zstd.c
 # 		${FO_CWD}/Unit/test_TraverseChild.c
 # 		${FO_CWD}/Unit/test_TraverseStart.c
 # 		${FO_CWD}/Unit/test_ununpack-disk.c
