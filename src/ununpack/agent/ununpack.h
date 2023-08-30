@@ -4,7 +4,7 @@
  SPDX-FileCopyrightText: © 2007-2011 Hewlett-Packard Development Company, L.P.
 
  SPDX-License-Identifier: GPL-2.0-only
- 
+
  This time, it's rewritten in C for speed and multithreading.
 */
 #ifndef UNUNPACK_H
@@ -35,6 +35,7 @@
 #include "ununpack-ar.h"
 #include "ununpack-disk.h"
 #include "ununpack-iso.h"
+#include "ununpack-zstd.h"
 
 #ifdef STANDALONE
 #include "standalone.h"
@@ -61,6 +62,7 @@ enum cmdtype
   CMD_ISO,	        /** ISO9660 */
   CMD_DISK,	        /** File system disk */
   CMD_DEB,	        /** Debian source package */
+  CMD_ZSTD,         /** Zstandard compressed file */
   CMD_DEFAULT	      /** Default action */
 };
 
