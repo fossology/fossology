@@ -98,6 +98,25 @@ Password: fossy
 
 **Note:** The test instance is not up to date with the latest release. The instance will reset every night at 2 am UTC and all the user uploaded data will be lost.
 
+## Quick dev prototype with GitPod.io
+FOSSology is ready to be coded on GitPod.io. To use it, you would need to setup
+an account. You can directly use the following button to launch the project on
+GitPod.io:
+[![Link to Gitpod](https://gitpod.io/button/open-in-gitpod.svg "Open in Gitpod")](https://gitpod.io/#https://github.com/fossology/fossology)
+
+Once in, you should see 2 terminals, one running FOSSology scheduler and one
+running the installation.
+
+#### Handy scripts/aliases
+For the ease of usability, following aliases/scripts have been defined and can
+be used:
+- `conffoss`: This will reconfigure cmake with all variables
+- `buildfoss`: This will build the FOSSology using cmake
+- `installfoss`: This will install FOSSology
+- `fossrun`: Run the FOSSology scheduler
+- `pg_stop`: Stop PostgreSQL server
+- `pg_start`: Start PostgreSQL server
+
 ## Documentation
 
 We are currently migrating our documentation to Github. At this stage, you can find general documentation at:
