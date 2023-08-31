@@ -90,7 +90,7 @@ class SpashtDao
 
   /**
    * Get available coordinate in spasht where uploadId is found.
-   * @param integer $uploadId Upload to search
+   * @param integer $uploadID Upload to search
    * @return Coordinate Coordinate, if found. NULL otherwise.
    */
   public function getComponent($uploadID)

@@ -347,7 +347,6 @@ class CycloneDXAgent extends Agent
   /**
    * @brief Write the report the file and update report table
    * @param string $packageNodes
-   * @param int[] $packageIds
    * @param int $uploadId
    */
   protected function writeReport($packageNodes, $uploadId)

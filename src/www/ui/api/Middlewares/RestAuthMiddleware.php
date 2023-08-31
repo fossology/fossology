@@ -33,7 +33,7 @@ class RestAuthMiddleware
    * Check authentication for all calls, except for /auth, /tokens
    *
    * @param  Request        $request  PSR7 request
-   * @param  RequestHandler $response PSR-15 request handler
+   * @param  RequestHandler $handler  PSR-15 request handler
    *
    * @return ResponseInterface
    */

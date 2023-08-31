@@ -102,7 +102,7 @@ class Findings
   }
 
   /**
-   * @param array $copyrights
+   * @param array $copyright
    */
   public function setCopyright($copyright)
   {

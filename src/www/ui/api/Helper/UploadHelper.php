@@ -465,7 +465,7 @@ class UploadHelper
   /**
    * Generate the upload by calling handleRequest of HelperToUploadUrlPage
    * @param array   $urlData         Information from POST
-   * @param string  $folderId        ID of the folder
+   * @param string  $folderName      Name of the folder
    * @param string  $fileDescription Description of the upload
    * @param string  $isPublic        Upload is `public, private or protected`
    * @param integer $ignoreScm       1 if the SCM should be ignored.
@@ -510,7 +510,7 @@ class UploadHelper
   /**
    * Generate the upload by calling handleRequest of HelperToUploadSrvPage
    * @param array   $srvData         Information from POST
-   * @param string  $folderId        ID of the folder
+   * @param string  $folderName      Name of the folder
    * @param string  $fileDescription Description of the upload
    * @param string  $isPublic        Upload is `public, private or protected`
    * @param integer $ignoreScm       1 if the SCM should be ignored.

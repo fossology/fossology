@@ -531,7 +531,7 @@ function ckInstallLog($log) {
  * The method can be used to rename a single file, but not a directory.  It
  * cannot rename multiple files.
  *
- * @param mixed $file the file to copy (string), use an array for multiple files.
+ * @param mixed $files the files to copy (string), use an array for multiple files.
  * @param string $dest the destination path (must exist, must be writable).
  *
  * @retrun boolean

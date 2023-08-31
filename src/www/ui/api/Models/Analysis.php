@@ -76,12 +76,12 @@ class Analysis
    * @param boolean $copyright
    * @param boolean $ecc
    * @param boolean $keyword
-   * @param boolean $mime
+   * @param boolean $mimetype
    * @param boolean $monk
    * @param boolean $nomos
    * @param boolean $ojo
    * @param boolean $reso
-   * @param boolean $package
+   * @param boolean $pkgagent
    */
   public function __construct($bucket = false, $copyright = false, $ecc = false, $keyword = false,
     $mimetype = false, $monk = false, $nomos = false, $ojo = false, $reso = false, $pkgagent = false)

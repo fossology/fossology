@@ -79,7 +79,8 @@ class ui_reunpack extends FO_Plugin
    * @param int $uploadpk         Upload id
    * @param string $job_name      Job name
    * @param string $jobqueue_type Job queue type for DB
-   * @return 0 no reunpack/rewget job running;
+   * @return int
+   * - 0 no reunpack/rewget job running
    * - 1 reunpack/rewget job failed
    * - 2 reunpack/rewget job completed
    * - 3 reunpack/rewget job running

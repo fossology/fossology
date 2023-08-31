@@ -308,7 +308,7 @@ class ShowJobsDao
 
   /**
    * @brief Return total Job data with time elapsed
-   * @param $job_pk
+   * @param $jq_pk
    * @return array
    */
   public function getDataForASingleJob($jq_pk)

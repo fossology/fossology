@@ -185,7 +185,6 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
      * Prepares an SQL statement.
      *
      * @param string $sql The SQL statement with placeholders.
-     * @param array $bind An array of data to bind to the placeholders.
      * @return PDOStatement
      */
     public function prepare($sql)

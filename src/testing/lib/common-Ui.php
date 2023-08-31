@@ -96,8 +96,8 @@ function getMailSubjects() {
  *
  * Make a url from the host and query strings.
  *
- * @param $string $host the host (e.g. somehost.com, host.privatenet)
- * @param $string $query the query to append to the host.
+ * @param string $host the host (e.g. somehost.com, host.privatenet)
+ * @param string $query the query to append to the host.
  *
  * @return the http string or NULL on error
  */
@@ -111,6 +111,3 @@ function makeUrl($host, $query) {
   }
   return ("http://$host$query");
 }
-
-
-?>

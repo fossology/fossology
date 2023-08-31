@@ -42,7 +42,7 @@ class upload_properties extends FO_Plugin
    * @param $newDesc New upload description (upload.upload_desc)
    *        If null, old value is not changed.
    *
-   * @return 1 if the upload record is updated, 0 if not, 2 if no inputs
+   * @return int 1 if the upload record is updated, 0 if not, 2 if no inputs
    **/
   function UpdateUploadProperties($uploadId, $newName, $newDesc)
   {

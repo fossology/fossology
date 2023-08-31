@@ -61,7 +61,7 @@ class ObligationCsvExport
 
   /**
    * @brief Create CSV from the obligations
-   * @param int $rf Obligation id to be returned, else set 0 to get all.
+   * @param int $ob Obligation id to be returned, else set 0 to get all.
    * @return string CSV
    */
   public function createCsv($ob=0)

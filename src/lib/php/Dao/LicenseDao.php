@@ -232,7 +232,8 @@ class LicenseDao
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $selectedAgentId
-   * @param array $mask
+   * @param bool $includeSubfolders
+   * @param array $nameRange
    * @return array
    */
   public function getLicenseIdPerPfileForAgentId(ItemTreeBounds $itemTreeBounds, $selectedAgentId, $includeSubfolders=true, $nameRange=array())

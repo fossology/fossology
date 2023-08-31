@@ -27,9 +27,10 @@ class ClearingLicense
   /**
    * @param LicenseRef $licenseRef
    * @param boolean $removed
-   * @param string $reportinfo
-   * @param string $acknowledgement
+   * @param $type
+   * @param string $reportInfo
    * @param string $comment
+   * @param string $acknowledgement
    */
   public function __construct(LicenseRef $licenseRef, $removed, $type, $reportInfo = "", $comment = "", $acknowledgement = "")
   {
