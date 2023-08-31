@@ -273,7 +273,7 @@ class ui_report_conf extends FO_Plugin
 
   /**
    * @param array $listParams
-   * @return $cbSelectionList
+   * @return string
    */
   protected function getCheckBoxSelectionList($listParams)
   {
