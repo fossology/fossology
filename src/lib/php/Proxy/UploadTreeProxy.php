@@ -230,6 +230,7 @@ class UploadTreeProxy extends DbViewProxy
    * @param $uploadId
    * @param $options
    * @param $uploadTreeTableName
+   * @param bool $applyGlobal
    * @return string
    */
   private static function getUploadTreeView($uploadId, $options, $uploadTreeTableName, $applyGlobal = false)
@@ -286,6 +287,10 @@ class UploadTreeProxy extends DbViewProxy
 
   /**
    * @param $skipThese
+   * @param $options
+   * @param $groupId
+   * @param string $agentFilter
+   * @param bool $applyGlobal
    * @return string
    */
   private static function getQueryCondition($skipThese, $options, $groupId = null, $agentFilter='', $applyGlobal = false)

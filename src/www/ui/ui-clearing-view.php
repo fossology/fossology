@@ -340,8 +340,9 @@ class ClearingView extends FO_Plugin
 
   /**
    * @param int $userId
-   * @param int
+   * @param int $groupId
    * @param int $lastItem
+   * @param int $currentUploadtreeId
    * @return array
    */
   public function updateLastItem($userId, $groupId, $lastItem, $currentUploadtreeId)

@@ -323,8 +323,8 @@ class ShowJobsDao
   } /* getDataForASingleJob */
 
   /**
-   * @brief Return boolean
-   * @param $jq_pk
+   * @param $jqPk
+   * @return bool
    */
   public function getJobStatus($jqPk)
   {
@@ -342,9 +342,9 @@ class ShowJobsDao
   }
 
   /**
-   * @brief Return array
-   * @param $jobId
    * @param $jqType
+   * @param $jobId
+   * @return array
    */
   public function getItemsProcessedForDecider($jqType, $jobId)
   {

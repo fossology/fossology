@@ -77,6 +77,7 @@ class ReportSummary
    * @param int $timestamp
    * @param string $groupName
    * @param string $packageUri
+   * @param $assignedToUserName
    */
   function summaryTable(Section $section, $uploadId, $userName, $mainLicenses, $licenses, $histLicenses, $otherStatement, $timestamp, $groupName, $packageUri, $assignedToUserName)
   {

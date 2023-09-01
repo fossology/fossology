@@ -140,8 +140,9 @@ class AdviceLicense extends DefaultPlugin
   /**
    * @param Request $request
    * @param array $oldRow
-   * @throws \Exception
+   * @param $userId
    * @return array $newRow
+   * @throws \Exception
    */
   private function saveInput(Request $request, $oldRow, $userId)
   {

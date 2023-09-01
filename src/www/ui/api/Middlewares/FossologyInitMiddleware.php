@@ -29,7 +29,7 @@ class FossologyInitMiddleware
    * Clean all FOSSology plugins and load them again.
    *
    * @param  Request        $request  PSR7 request
-   * @param  RequestHandler $response PSR-15 request handler
+   * @param  RequestHandler $handler PSR-15 request handler
    *
    * @return Response
    */

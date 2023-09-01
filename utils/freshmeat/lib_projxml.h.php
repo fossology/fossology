@@ -103,7 +103,7 @@ function close_tag($handle){
  *
  * Parse the freshmeat input and return an array of tokens.
  *
- * @param string $line a string with space seperated tokens.  Some
+ * @param string $fm_string a string with space seperated tokens.  Some
  * of the tokens will be '...' or "..." with imbeded spaces.
  *
  * @return array $parms array with one token per entry
@@ -221,7 +221,7 @@ function write_pxml($file_handle, $pxml){
  * Save the name of the  FM project, in a file
  *
  * @param int $file_handle open file handle for writing.
- * @param string $pname string containing the project name.
+ * @param string $Updata string containing the project name.
  *
  * @author mark.donohoe@hp.com
  *
@@ -308,4 +308,3 @@ function read_pfile($xml_file) {
   ksort($fmprojs);
   return($fmprojs);
 }
-?>

@@ -547,14 +547,17 @@ class fossologyTestCase extends fossologyTest
    *
    * utility function for the user methods.
    *
-   * @param string $UserName
-   * @param
-   * @param
-   * @param
-   * @param
-   * @param
-   * @param
-   *
+   * @param $UserName
+   * @param $Description
+   * @param $Email
+   * @param int $Access
+   * @param int $Folder
+   * @param $Block
+   * @param $Blank
+   * @param $Password
+   * @param $EmailNotify
+   * @param int $BucketPool
+   * @param string $Ui
    * @return NULL on pass, string on failure (for now only returns NULL)
    */
   protected function setUserFields($UserName = NULL, $Description = NULL,

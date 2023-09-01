@@ -162,7 +162,6 @@ class CliXmlGeneratorUi extends DefaultPlugin
    *
    * @param int $groupId
    * @param Upload $upload
-   * @param string $outputFormat
    * @param array $addUploads
    * @return array|number[] Job id and job queue id
    * @throws Exception

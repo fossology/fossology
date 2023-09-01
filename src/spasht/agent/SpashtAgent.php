@@ -233,8 +233,8 @@ class SpashtAgent extends Agent
 
   /**
    * @brief Insert the License Details in Spasht Agent table
-   * @param $agentId Integer
-   * @param $license Array
+   * @param $body
+   * @param $agentId
    */
   protected function insertLicensesSpashtAgentRecord($body, $agentId)
   {

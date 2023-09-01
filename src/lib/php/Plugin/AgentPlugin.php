@@ -88,14 +88,15 @@ abstract class AgentPlugin implements Plugin
   /**
    * @param int $jobId
    * @param int $uploadId
-   * @param &string $errorMsg - error message on failure
+   * @param string $errorMsg - error message on failure
    * @param array $dependencies
    * @param string|null $jqargs (optional) jobqueue.jq_args
+   * @param $jq_cmd_args
    * @return
    * * jqId  Successfully queued
    * *   0   Not queued, latest version of agent has previously run successfully
    * *  -1   Not queued, error, error string in $ErrorMsg
-   **/
+   */
   protected function doAgentAdd($jobId, $uploadId, &$errorMsg, $dependencies, $jqargs = "", $jq_cmd_args = null)
   {
     $deps = array();

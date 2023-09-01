@@ -276,15 +276,14 @@ class ui_view extends FO_Plugin
    *
    * @param resource $inputFile
    * @param string $BackMod
-   * @param int $ShowMenu
    * @param int $ShowHeader
-   * @param null $ShowText
-   * @param bool $ViewOnly
-   * @param bool $DispView
+   * @param $ShowText
    * @param Highlight[] $highlightEntries
    * @param bool $insertBacklink
+   * @param bool $getPageMenuInline
    *
    * \note This function is intended to be called from other plugins.
+   * @return array|string|string[]
    */
   function getView($inputFile = null, $BackMod = "browse", $ShowHeader = 1, $ShowText = null,
     $highlightEntries = array(), $insertBacklink = false, $getPageMenuInline = false)

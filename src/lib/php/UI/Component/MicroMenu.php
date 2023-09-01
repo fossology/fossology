@@ -66,6 +66,9 @@ class MicroMenu
 
   /**
    * @param $selectedFormat
+   * @param $pageNumber
+   * @param string $menuKey
+   * @param int $hexFactor
    * @return string
    */
   public function addFormatMenuEntries($selectedFormat, $pageNumber, $menuKey = self::VIEW, $hexFactor = 10)

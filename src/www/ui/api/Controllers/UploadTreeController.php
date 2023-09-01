@@ -593,6 +593,7 @@ class UploadTreeController extends RestController
 
   /**
    * @param ClearingResult $licenseDecisionResult
+   * @return array
    */
   private function getAgentInfo(ClearingResult $licenseDecisionResult)
   {

@@ -162,7 +162,8 @@ class CopyrightDao
 
   /**
    * @param $uploadFk
-   * @param $scope
+   * @param $agentId
+   * @param int $scope
    * @return array $rows
    */
   public function getAllEventEntriesForUpload($uploadFk, $agentId, $scope=1)
@@ -289,9 +290,10 @@ ORDER BY copyright_pk, UT.uploadtree_pk, content DESC";
    * @param $uploadId
    * @param $uploadTreeTableName
    * @param $type
-   * @param $onlyCleared
+   * @param bool $onlyCleared
    * @param $decisionType
    * @param $extrawhere
+   * @param $groupId
    * @return array
    */
   public function getAllEntriesReport($tableName, $uploadId, $uploadTreeTableName, $type=null, $onlyCleared=false, $decisionType=null, $extrawhere=null, $groupId=null)

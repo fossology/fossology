@@ -32,6 +32,7 @@ class UploadVcsPage extends UploadPageBase
 
   /**
    * @param Request $request
+   * @param $vars
    * @return Response
    */
   protected function handleView(Request $request, $vars)
