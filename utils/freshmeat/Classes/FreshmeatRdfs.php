@@ -107,7 +107,7 @@ class FreshmeatRdfs
   *
   * The input file is expected to be in the FreashMeat rdf format.
   *
-  * @param string $xml_file path to xml file in FM rdf format
+  * @param string $rdf_file path to xml file in FM rdf format
   *
   * @return array of projects (see internal notes)
   *

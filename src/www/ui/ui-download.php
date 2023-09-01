@@ -220,11 +220,11 @@ class ui_download extends FO_Plugin
 
   /**
    * Get the file response for a given file path
-   * @param int $jobId
+   * @param $path
+   * @param $name
    * @return BinaryFileResponse
-   * @throws Exception
    */
-  public function getDownload($path , $name)
+  public function getDownload($path, $name)
   {
     return $this->downloadFile($path, $name);
   }

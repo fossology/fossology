@@ -297,6 +297,7 @@ class UploadDao
   /**
    * @param $uploadId
    * @param $itemId
+   * @param $options
    * @return mixed
    */
   public function getPreviousItem($uploadId, $itemId, $options = null)
@@ -313,6 +314,7 @@ class UploadDao
    * @param $uploadId
    * @param $itemId
    * @param $direction
+   * @param $options
    * @return Item|null
    */
   public function getItemByDirection($uploadId, $itemId, $direction, $options)

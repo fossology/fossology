@@ -53,6 +53,7 @@ class ReportImportSink
    * @param $userDao
    * @param $licenseDao
    * @param $clearingDao
+   * @param $copyrightDao
    * @param $dbManager
    * @param $groupId
    * @param $userId

@@ -27,7 +27,7 @@ $Plugins = array();
  * @param Plugin a
  * @param Plugin b
  *
- * @return -1, 0, 1 for plugin a being <, =, or > than b
+ * @return int -1, 0, 1 for plugin a being <, =, or > than b
  */
 function plugin_cmp($a, $b)
 {

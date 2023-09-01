@@ -61,7 +61,8 @@ function Strip2Path($RawFilePath)
  * @param $upload_pk
  * @param $FilePath
  *
- * @returns if the $FilePath was found, return the uploadtree row,
+ * @return array|false
+ *         if the $FilePath was found, return the uploadtree row,
  *          or false if the path wasn't found.
  **/
 function Path2Uploadtree($upload_pk, $FilePath)

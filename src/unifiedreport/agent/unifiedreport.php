@@ -411,6 +411,7 @@ class UnifiedReport extends Agent
    * @param Section $section
    * @param array $mainLicenses
    * @param array $titleSubHeading
+   * @param $heading
    */
   private function globalLicenseTable(Section $section, $mainLicenses, $titleSubHeading, $heading)
   {
@@ -644,6 +645,7 @@ class UnifiedReport extends Agent
    * @param Section $section
    * @param array $dataHistogram
    * @param array $titleSubHeading
+   * @param $heading
    */
   private function licenseHistogram(Section $section, $dataHistogram, $titleSubHeading, $heading)
   {

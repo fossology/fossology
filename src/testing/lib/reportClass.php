@@ -294,7 +294,7 @@ class TestReport {
 	* Parse the data and then put all the data into one big array and then let
 	* smarty display it
 	*
-	* @param array $data the data array to add to
+	* @param array $results the data array to add to
 	* @param array $moData the data array to glob onto the other array
 	*
 	* @return array the first parameter globed together with the second.
