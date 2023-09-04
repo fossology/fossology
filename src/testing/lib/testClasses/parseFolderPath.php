@@ -47,9 +47,7 @@ class parseFolderPath
    * Parse  the part of the page that has the folder path and mini menu,
    * return the count of 'Folder' items found.
    *
-   * @param string $page the xhtml page to parse
-   *
-   * @return integer $count the count of items found, can be 0.
+   * @return int the count of items found, can be 0.
    *
    */
    function countFiles()

@@ -566,6 +566,8 @@ class ReportStatic
   /**
    * @brief Generate notes
    * @param Section $section
+   * @param $heading
+   * @param $subHeading
    */
   function notes(Section $section, $heading, $subHeading)
   {

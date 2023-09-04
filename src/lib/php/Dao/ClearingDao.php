@@ -149,10 +149,11 @@ class ClearingDao
   }
 
 
-   /**
+  /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @param bool $onlyCurrent
+   * @param bool $forClearingHistory
    * @return ClearingDecision[]
    */
   function getFileClearings(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true, $forClearingHistory=false)
@@ -574,6 +575,7 @@ INSERT INTO clearing_decision (
    * @param $type
    * @param $reportInfo
    * @param string $comment
+   * @param $acknowledgement
    * @return ClearingEvent
    */
   protected function buildClearingEvent($eventId, $userId, $groupId, $licenseRef, $licenseIsRemoved, $type, $reportInfo, $comment, $acknowledgement)
@@ -788,6 +790,7 @@ INSERT INTO clearing_decision (
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @param int $userId
+   * @param $decisionMark
    */
   public function markDirectoryAsDecisionType(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $decisionMark)
   {
@@ -799,6 +802,7 @@ INSERT INTO clearing_decision (
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @param int $userId
+   * @param $decisionMark
    */
   public function deleteDecisionTypeFromDirectory(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $decisionMark)
   {
@@ -810,6 +814,8 @@ INSERT INTO clearing_decision (
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @param int $userId
+   * @param bool $removeDecision
+   * @param int $decisionMark
    */
   protected function markDirectoryAsDecisionTypeRec(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $removeDecision=false, $decisionMark=DecisionTypes::IRRELEVANT)
   {
@@ -918,6 +924,7 @@ INSERT INTO clearing_decision (
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @param bool $onlyCurrent
+   * @param string $decisionMark
    * @return ClearingDecision[]
    */
   function getFilesForDecisionTypeFolderLevel(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true, $decisionMark="")

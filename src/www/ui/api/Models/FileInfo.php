@@ -52,7 +52,11 @@ class FileInfo
 
   /**
    * FileInfo constructor.
-   * @param object $data
+   * @param $view_info
+   * @param $meta_info
+   * @param $package_info
+   * @param $tag_info
+   * @param $reuse_info
    */
   public function __construct($view_info, $meta_info, $package_info, $tag_info, $reuse_info)
   {

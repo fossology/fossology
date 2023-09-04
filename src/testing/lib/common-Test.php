@@ -560,7 +560,7 @@ class RunTest
   /**
    * \brief check the test output for cunit style failures
    *
-   * @param string $this->makeOutput the test output
+   * @param string $makeString $this->makeOutput the test output
    *
    * @return boolean
    */

@@ -52,7 +52,7 @@ class BomReportGenerator
   /**
    * Generates the report.
    *
-   * @param array $bomData The BOM data.
+   * @param array $bomdata The BOM data.
    * @return array The generated report.
    */
   public function generateReport($bomdata): array

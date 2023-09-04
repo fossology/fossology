@@ -299,10 +299,12 @@ abstract class DbManager
   }
 
   /**
-   * @param string
-   * @param string
-   * @param array
-   * @param string
+   * @param $tableName
+   * @param $keys
+   * @param $params
+   * @param string $sqlLog
+   * @param string $returning
+   * @return mixed|void
    */
   public function insertInto($tableName, $keys, $params, $sqlLog='', $returning='')
   {
@@ -325,10 +327,11 @@ abstract class DbManager
   }
 
   /**
-   * @param string
-   * @param array with keys as column names
-   * @param string
-   * @param string column that should be returned (empty string if not required)
+   * @param $tableName
+   * @param array $assocParams array with keys as column names
+   * @param string $sqlLog
+   * @param string $returning column that should be returned (empty string if not required)
+   * @return mixed|null
    */
   public function insertTableRow($tableName,$assocParams,$sqlLog='',$returning='')
   {

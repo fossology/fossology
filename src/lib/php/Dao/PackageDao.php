@@ -21,6 +21,7 @@ class PackageDao
 
   /**
    * @param DbManager $dbManager
+   * @param Logger $logger
    */
   public function __construct(DbManager $dbManager, Logger $logger)
   {
