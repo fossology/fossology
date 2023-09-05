@@ -581,6 +581,7 @@ void	CheckCommands	(int Show)
       case CMD_ARC:
       case CMD_AR:
       case CMD_PARTITION:
+      case CMD_ZSTD:
         CMD[i].Status = IsExe(CMD[i].Cmd,Quiet);
         break;
       default:

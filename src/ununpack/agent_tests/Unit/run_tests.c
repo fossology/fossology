@@ -24,6 +24,7 @@ char *DBConfFile = NULL;          ///< DB conf file location
 /* **** test suite ********************************************************** */
 /* ************************************************************************** */
 extern CU_TestInfo ExtractAR_testcases[];       ///< AR test cases
+extern CU_TestInfo ExtractZstd_testcases[];      ///< Zstd test cases
 extern CU_TestInfo ununpack_iso_testcases[];    ///< ISO test cases
 extern CU_TestInfo ununpack_disk_testcases[];   ///< Disk image test cases
 extern CU_TestInfo CopyFile_testcases[];        ///< Copy test cases
@@ -45,6 +46,9 @@ CU_SuiteInfo suites[] =
 {
   // ununpack-ar.c
   {"ExtractAR", NULL, NULL, NULL, NULL, ExtractAR_testcases},
+
+  // ununpack-zstd.c
+  {"ExtractZstd", NULL, NULL, NULL, NULL, ExtractZstd_testcases},
 
   // ununpack-iso.c
   {"ununpack-iso", NULL, NULL, NULL, NULL, ununpack_iso_testcases},

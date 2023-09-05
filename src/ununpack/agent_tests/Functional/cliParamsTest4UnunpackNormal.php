@@ -601,4 +601,76 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     /* check if the result is ok? */
     $this->assertFileExists("$TEST_RESULT_PATH/test.cpio.dir/ununpack");
   }
+
+  /**
+   * unpack ZST file
+   * @brief Check for ZST file
+   * @test
+   * -# Pass the files to the agent
+   * -# Check if the contents of files get unpacked
+   */
+  function testNormalZst(){
+    global $TEST_DATA_PATH;
+    global $TEST_RESULT_PATH;
+
+    /* archive file */
+    $command = $this->ununpack." -qCR $TEST_DATA_PATH/".
+                  "test.zst -d $TEST_RESULT_PATH";
+    exec($command);
+    /* check if the result is ok? select one file to confirm */
+    $this->assertFileExists("$TEST_RESULT_PATH/test.zst.dir/test.tar");
+
+    // delete the directory ./test_result
+    exec("/bin/rm -rf $TEST_RESULT_PATH");
+    $isDir = is_dir($TEST_RESULT_PATH);
+    $this->assertTrue(!$isDir);
+  }
+
+  /**
+   * unpack lz4 file
+   * @brief Check for lz4 file
+   * @test
+   * -# Pass the files to the agent
+   * -# Check if the contents of files get unpacked
+   */
+  function testNormalLz4(){
+    global $TEST_DATA_PATH;
+    global $TEST_RESULT_PATH;
+
+    /* archive file */
+    $command = $this->ununpack." -qCR $TEST_DATA_PATH/".
+                  "test.lz4 -d $TEST_RESULT_PATH";
+    exec($command);
+    /* check if the result is ok? select one file to confirm */
+    $this->assertFileExists("$TEST_RESULT_PATH/test.lz4.dir/test.tar");
+
+    // delete the directory ./test_result
+    exec("/bin/rm -rf $TEST_RESULT_PATH");
+    $isDir = is_dir($TEST_RESULT_PATH);
+    $this->assertTrue(!$isDir);
+  }
+
+  /**
+   * unpack lzma file
+   * @brief Check for lzma file
+   * @test
+   * -# Pass the files to the agent
+   * -# Check if the contents of files get unpacked
+   */
+  function testNormalLzma(){
+    global $TEST_DATA_PATH;
+    global $TEST_RESULT_PATH;
+
+    /* archive file */
+    $command = $this->ununpack." -qCR $TEST_DATA_PATH/".
+                  "test.lzma -d $TEST_RESULT_PATH";
+    exec($command);
+    /* check if the result is ok? select one file to confirm */
+    $this->assertFileExists("$TEST_RESULT_PATH/test.lzma.dir/test.tar");
+
+    // delete the directory ./test_result
+    exec("/bin/rm -rf $TEST_RESULT_PATH");
+    $isDir = is_dir($TEST_RESULT_PATH);
+    $this->assertTrue(!$isDir);
+  }
 }
