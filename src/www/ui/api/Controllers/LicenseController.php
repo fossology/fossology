@@ -68,6 +68,7 @@ class LicenseController extends RestController
    */
   private $licenseStdCommentDao;
 
+
   /**
    * @param ContainerInterface $container
    */
@@ -610,5 +611,108 @@ class LicenseController extends RestController
       unset($res[$key]['lsc_pk']);
     }
     return $response->withJson($res, 200);
+  }
+
+  /**
+   * Add, Edit & toggle license standard comment.
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function handleLicenseStandardComment($request, $response, $args)
+  {
+    $body = $this->getParsedBody($request);
+    $errors = [];
+    $success = [];
+
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
+      $errors[] = $error->getArray();
+    } else if (!isset($body) || empty($body)) {
+      $error = new Info(400, "Request body is missing or empty.", InfoType::ERROR);
+      $errors[] = $error->getArray();
+    } else if (!is_array($body)) {
+      $error = new Info(400, "Request body should be an array.", InfoType::ERROR);
+      $errors[] = $error->getArray();
+    } else {
+      foreach (array_keys($body) as $index) {
+        $commentReq = $body[$index];
+
+        // Check if name and comment are present if update is false
+        if ((!$commentReq['update'] && empty($commentReq['name']))) {
+          $error = new Info(400, "Comment name missing from the request #" . ($index + 1), InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        } else if ((!$commentReq['update'] && empty($commentReq['comment']))) {
+          $error = new Info(400, "Comment text missing from the request #" . ($index + 1), InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        } else if ($commentReq['update'] && empty($commentReq['name']) && empty($commentReq['comment']) && empty($commentReq['toggle'])) {
+          $error = new Info(400, "Comment name, text or toggle missing from the request #" . ($index + 1), InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        }
+
+        if ($commentReq['update']) {
+
+          if (empty($commentReq['id'])) {
+            $error = new Info(400, "Standard Comment ID missing from the request #" . ($index + 1), InfoType::ERROR);
+            $errors[] = $error->getArray();
+            continue;
+          }
+
+          $sql = "SELECT lsc_pk, name, comment FROM license_std_comment WHERE lsc_pk = $1;";
+          $existingComment = $this->dbHelper->getDbManager()->getSingleRow($sql, [$commentReq['id']]);
+
+          if (empty($existingComment)) {
+            $error = new Info(404, "Standard comment not found for the request #" . ($index + 1), InfoType::ERROR);
+            $errors[] = $error->getArray();
+            continue;
+            // check if the new name doesn't already exist
+          } else if ($existingComment["name"] != $commentReq["name"] && $this->dbHelper->doesIdExist("license_std_comment", "name", $commentReq["name"])) {
+            $error = new Info(400, "Name already exists.", InfoType::ERROR);
+            $errors[] = $error->getArray();
+            continue;
+          }
+
+          // if both fields were specified and are not empty, update the comment
+          if ($commentReq["name"] && $commentReq["comment"]) {
+            $this->licenseStdCommentDao->updateComment($commentReq["id"], $commentReq["name"], $commentReq["comment"]);
+          } else if ($commentReq["name"]) {
+            $this->licenseStdCommentDao->updateComment($commentReq["id"], $commentReq["name"], $existingComment["comment"]);
+          } else if ($commentReq["comment"]) {
+            $this->licenseStdCommentDao->updateComment($commentReq["id"], $existingComment["name"], $commentReq["comment"]);
+          }
+          // toggle the comment if the toggle field is set to true
+          if ($commentReq["toggle"]) {
+            $this->licenseStdCommentDao->toggleComment($commentReq["id"]);
+          }
+
+          $info = new Info(200, "Successfully updated standard comment", InfoType::INFO);
+          $success[] = $info->getArray();
+        } else {
+
+          if ($this->dbHelper->doesIdExist("license_std_comment", "name", $commentReq["name"])) {
+            $error = new Info(400, "Name already exists for the request #" . ($index + 1), InfoType::ERROR);
+            $errors[] = $error->getArray();
+            continue;
+          }
+          $res = $this->licenseStdCommentDao->insertComment($commentReq["name"], $commentReq["comment"]);
+          if ($res == -2) {
+            $error = new Info(500, "Error while inserting new comment.", InfoType::ERROR);
+            $errors[] = $error->getArray();
+            continue;
+          }
+          $info = new Info(201, "Comment with name '". $commentReq['name'] ."' added successfully.", InfoType::INFO);
+          $success[] = $info->getArray();
+        }
+      }
+    }
+    return $response->withJson([
+      'success' => $success,
+      'errors' => $errors
+    ], 200);
   }
 }
