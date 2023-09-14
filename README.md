@@ -52,13 +52,20 @@ docker run -p 8081:80 fossology/fossology
 
 The docker image can then be used using http://IP_OF_DOCKER_HOST:8081/repo user fossy password fossy.
 
-Execution with external database container can be done using Docker Compose, via the following command:
+
+If you want to run Fossology with an external database container, you can use Docker Compose, via the following command: 
 
 ```sh
 docker-compose up
 ```
 
-The Docker image allows the configuration of its database connection over a set of environment variables.
+Docker Compose is a tool that allows you to define and run multi-container applications using a YAML file. FOSSology provides a docker-compose.yml file that defines three services: scheduler, web, and db. 
+
+The scheduler service runs the FOSSology scheduler daemon, which handles the analysis tasks. The web service runs the FOSSology web server, which provides the web interface. The db service runs a PostgreSQL database server, which stores the FOSSology data. 
+
+The  `docker-compose up` command starts all the three services at once.
+
+The FOSSology web service allows you to configure its database connection using some environment variables. These variables are defined in the docker-compose.yml file under the environment key.
 
 - **FOSSOLOGY_DB_HOST:** Hostname of the PostgreSQL database server.
   An integrated PostgreSQL instance is used if not defined or set to `localhost`.
@@ -66,6 +73,8 @@ The Docker image allows the configuration of its database connection over a set 
 - **FOSSOLOGY_DB_USER:** User to be used for PostgreSQL connection. Defaults to `fossy`.
 - **FOSSOLOGY_DB_PASSWORD:** Password to be used for PostgreSQL connection. Defaults to `fossy`.
 
+You can change them if you want to use a different database server or credentials. 
+ 
 ## Vagrant
 
 FOSSology comes with a VagrantFile that can be used to create an isolated environment for FOSSology and its dependencies.
