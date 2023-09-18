@@ -251,7 +251,7 @@ return;
     /* If both $Child and $OtherChild are specified,
      * reassemble bucketstr and highlight the differences
      */
-    if ($OtherChild and $OtherChild)
+    if ($Child and $OtherChild)
     {
       $bucketstr = "";
       foreach ($Child['bucketarray'] as $bucket_pk)
