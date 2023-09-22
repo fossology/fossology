@@ -76,6 +76,12 @@ class DeciderAgentPlugin extends AgentPlugin
     } else {
       $checkAgentNomos = $request->get('Check_agent_nomos') ?: false;
     }
+
+    if (in_array('agent_copyright', $agents)) {
+        $checkAgentCopyright = true;
+    } else {
+      $checkAgentCopyright = $request->get('Check_agent_copyright') ?: false;
+    }
     $rulebits = 0;
 
     foreach ($rules as $rule) {
@@ -109,9 +115,15 @@ class DeciderAgentPlugin extends AgentPlugin
           $rulebits |= 0x8;
           break;
         case 'copyrightDeactivation':
+          if ($checkAgentCopyright) {
+            $dependencies[] = 'agent_copyright';
+          }
           $rulebits |= 0x20;
           break;
         case 'copyrightDeactivationClutterRemoval':
+          if ($checkAgentCopyright) {
+            $dependencies[] = 'agent_copyright';
+          }
           $rulebits |= 0x40;
           break;
       }
