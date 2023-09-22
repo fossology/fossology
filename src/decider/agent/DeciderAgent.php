@@ -584,11 +584,16 @@ class DeciderAgent extends Agent
       $cpTable = 'copyright';
       if ($deactivatedCopyright['is_copyright'] == "t") {
         $action = '';
-        $hash = '';
-        $content = $deactivatedCopyright['edited_text'];
-      } else {
         $hash = $deactivatedCopyright['hash'];
+        if (array_key_exists('decluttered_content', $deactivatedCopyright) &&
+            !empty($deactivatedCopyright['decluttered_content'])) {
+          $content = $deactivatedCopyright['decluttered_content'];
+        } else {
+          $content = $deactivatedCopyright['content'];
+        }
+      } else {
         $action = 'delete';
+        $hash = $deactivatedCopyright['hash'];
       }
       $this->copyrightDao->updateTable($itemTreeBounds, $hash, $content, $this->userId, $cpTable, $action);
       $this->heartbeat(1);
