@@ -358,21 +358,22 @@ function Populate_sysconfig()
   $variable = "CommonObligation";
   $contextNamePrompt = _("Common Obligation");
   $contextValue = "";
-  $contextDesc = _("Common Obligation Text, add line break at the end of the line");
+  $commonExObligations = _('you can add HTML line break, Also use json format for table rows');
+  $contextDesc = _("Common Obligation Text,". "$commonExObligations");
   $valueArray[$variable] = array("'$variable'", "'$contextValue'", "'$contextNamePrompt'",
     strval(CONFIG_TYPE_TEXTAREA), "'ReportText'", "2", "'$contextDesc'", "null", "null");
 
   $variable = "AdditionalObligation";
   $contextNamePrompt = _("Additional Obligation");
   $contextValue = "";
-  $contextDesc = _("Additional Obligation Text, add line break at the end of the line");
+  $contextDesc = _("Additional Obligation Text,". "$commonExObligations");
   $valueArray[$variable] = array("'$variable'", "'$contextValue'", "'$contextNamePrompt'",
     strval(CONFIG_TYPE_TEXTAREA), "'ReportText'", "3", "'$contextDesc'", "null", "null");
 
   $variable = "ObligationAndRisk";
   $contextNamePrompt = _("Obligation And Risk Assessment");
   $contextValue = "";
-  $contextDesc = _("Obligations and risk assessment, add line break at the end of the line");
+  $contextDesc = _("Obligations and risk assessment,". "$commonExObligations");
   $valueArray[$variable] = array("'$variable'", "'$contextValue'", "'$contextNamePrompt'",
     strval(CONFIG_TYPE_TEXTAREA), "'ReportText'", "4", "'$contextDesc'", "null", "null");
 

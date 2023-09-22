@@ -158,6 +158,7 @@ class ReportStatic
     return $textrun;
   }
 
+
   /**
    * @brief Generate assessment summary table
    * @param Section  $section
@@ -284,15 +285,49 @@ class ReportStatic
     return $cell;
   }
 
-
   /**
-   * @brief Get obligation text and re arrange them
-   * @param string $text
-   * @return array $texts
+   * @brief Get obligation text and arrange them to rows and columns
+   * @param string $obligationText
+   * @param string $table
+   * @param string $rowWidth
+   * @param array $firstColLen
+   * @param array $rowTextStyleLeft
+   * @param array $secondColLen
+   * @param array $rowTextStyleRight
+   * @return table columns
    */
-  protected function reArrangeObligationText($text)
+  protected function arrangeObligationsText($obligationText, $table, $rowWidth, $firstColLen, $rowTextStyleLeft, $secondColLen, $rowTextStyleRight)
   {
-    return explode(PHP_EOL, $text);
+    $jsonObligationText = json_decode($obligationText, true);
+    if (json_last_error() === JSON_ERROR_NONE) {
+      foreach ($jsonObligationText as $key => $value) {
+        $table->addRow($rowWidth);
+        $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($key), $rowTextStyleLeft, "pStyle");
+        if (strpos($value, '\n') !== false) {
+          $cell = $table->addCell($secondColLen);
+          $value = explode('\n', $value);
+          foreach ($value as $value1) {
+            $value1 = str_replace("\r", "", $value1);
+            $cell->addText(htmlspecialchars($value1), $rowTextStyleRight, "pStyle");
+          }
+        } else {
+          $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($value), $rowTextStyleRight, "pStyle");
+        }
+      }
+    } else {
+      $table->addRow($rowWidth);
+      $cell = $table->addCell($firstColLen);
+      if (strpos($obligationText, '\n') !== false) {
+        $cell = $table->addCell($secondColLen);
+        $obligationText = explode('\n', $obligationText);
+        foreach ($obligationText as $value) {
+          $value = str_replace("\r", "", $value);
+          $cell->addText(htmlspecialchars($value), $rowTextStyleRight, "pStyle");
+        }
+      } else {
+        $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($obligationText), $rowTextStyleRight, "pStyle");
+      }
+    }
   }
 
 
@@ -304,21 +339,16 @@ class ReportStatic
   function todoTable(Section $section, $heading)
   {
     global $SysConf;
-    $textCommonObligation = $this->reArrangeObligationText(
-      (array_key_exists('CommonObligation',$SysConf['SYSCONFIG'])) ? $SysConf['SYSCONFIG']["CommonObligation"] : ''
-    );
-    $textAdditionalObligation = $this->reArrangeObligationText(
-      (array_key_exists('AdditionalObligation',$SysConf['SYSCONFIG'])) ? $SysConf['SYSCONFIG']["AdditionalObligation"] : ''
-    );
-    $textObligationAndRisk = $this->reArrangeObligationText(
-      (array_key_exists('ObligationAndRisk',$SysConf['SYSCONFIG'])) ? $SysConf['SYSCONFIG']["ObligationAndRisk"] : ''
-    );
+    $textCommonObligation = (array_key_exists('CommonObligation', $SysConf['SYSCONFIG'])) ? $SysConf['SYSCONFIG']["CommonObligation"] : '';
+    $textAdditionalObligation = (array_key_exists('AdditionalObligation', $SysConf['SYSCONFIG'])) ? $SysConf['SYSCONFIG']["AdditionalObligation"] : '';
+    $textObligationAndRisk = (array_key_exists('ObligationAndRisk', $SysConf['SYSCONFIG'])) ? $SysConf['SYSCONFIG']["ObligationAndRisk"] : '';
 
     $rowStyle = array("bgColor" => "E0E0E0", "spaceBefore" => 0, "spaceAfter" => 0, "spacing" => 0);
     $secondRowColorStyle = array("color" => "008000");
     $rowTextStyleLeft = array("size" => 10, "bold" => true);
     $rowTextStyleRight = array("size" => 10, "bold" => false);
     $rowTextStyleRightBold = array("size" => 10, "bold" => true);
+    $lineStyle = array('weight' => 1, 'width' => 100, 'height' => 0, 'color' => 635552);
 
     $subHeading = "Common obligations, restrictions and risks:";
     $subHeadingInfoText = "  There is a list of common rules which was defined"
@@ -332,14 +362,14 @@ class ReportStatic
     $section->addTitle(htmlspecialchars($subHeading), 3);
     $section->addText(htmlspecialchars($subHeadingInfoText), $rowTextStyleRight);
 
-    $r1c1 = "2.1.1";
-    $r2c1 = "2.1.2";
-    $r3c1 = "2.1.3";
+    $r1c1 = "1";
+    $r2c1 = "2";
+    $r3c1 = "3";
 
     $r1c2 = "Documentation of license conditions and copyright notices in"
-      ." product documentation (License Notice File / README_OSS) is provided by this component clearing report:";
-    $r2c2 = "Additional Common Obligations:";
-    $r2c21 = "Need to be ensured by the distributing party:";
+      ." product documentation (README_OSS) is provided by this component clearing report:";
+    $r2c2 = "Modifications in Source Code:";
+    $r2c21 = "If modifications are permitted:";
     $r3c2 = "Obligations and risk assessment regarding distribution";
 
     $table = $section->addTable($this->tablestyle);
@@ -347,48 +377,19 @@ class ReportStatic
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r1c1), $rowTextStyleLeft, "pStyle");
     $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r1c2), $rowTextStyleRightBold, "pStyle");
-
-    $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen);
-    $cell = $table->addCell($secondColLen);
-    if (empty($textCommonObligation)) {
-      $cell->addText(htmlspecialchars($textCommonObligation), $secondRowColorStyle, "pStyle");
-    } else {
-      foreach ($textCommonObligation as $text) {
-        $cell->addText(htmlspecialchars($text), $secondRowColorStyle, "pStyle");
-      }
-    }
+    $this->arrangeObligationsText($textCommonObligation, $table, $rowWidth, $firstColLen, $rowTextStyleLeft, $secondColLen, $rowTextStyleRight);
 
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r2c1), $rowTextStyleLeft, "pStyle");
     $cell = $table->addCell($secondColLen, $rowStyle);
     $cell->addText(htmlspecialchars($r2c2), $rowTextStyleRightBold, "pStyle");
-    $cell->addText(htmlspecialchars($r2c21), $rowTextStyleRightBold, "pStyle");
+    $cell->addText(htmlspecialchars($r2c21), $rowTextStyleRight, "pStyle");
+    $this->arrangeObligationsText($textAdditionalObligation, $table, $rowWidth, $firstColLen, $rowTextStyleLeft, $secondColLen, $rowTextStyleRight);
 
-    $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen);
-    $cell = $table->addCell($secondColLen);
-    if (empty($textAdditionalObligation)) {
-      $cell->addText(htmlspecialchars($textAdditionalObligation), null, "pStyle");
-    } else {
-      foreach ($textAdditionalObligation as $text) {
-        $cell->addText(htmlspecialchars($text), null, "pStyle");
-      }
-    }
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r3c1), $rowTextStyleLeft, "pStyle");
     $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r3c2), $rowTextStyleRightBold, "pStyle");
-
-    $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen);
-    $cell = $table->addCell($secondColLen);
-    if (empty($textObligationAndRisk)) {
-      $cell->addText(htmlspecialchars($textObligationAndRisk), $secondRowColorStyle, "pStyle");
-    } else {
-      foreach ($textObligationAndRisk as $text) {
-        $cell->addText(htmlspecialchars($text), $secondRowColorStyle, "pStyle");
-      }
-    }
+    $this->arrangeObligationsText($textObligationAndRisk, $table, $rowWidth, $firstColLen, $rowTextStyleLeft, $secondColLen, $rowTextStyleRight);
 
     $section->addTextBreak();
   }
