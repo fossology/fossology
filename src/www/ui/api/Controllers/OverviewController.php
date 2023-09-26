@@ -66,4 +66,23 @@ class OverviewController extends RestController
     $res = $dashboardPlugin->DiskFree(true);
     return $response->withJson($res, 200);
   }
+
+  /**
+   * Get PHP info overview
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getPhpInfo($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "Only Admin can access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $dashboardPlugin = $this->restHelper->getPlugin('dashboard');
+    $res = $dashboardPlugin->GetPHPInfoTable(true);
+    return $response->withJson($res, 200);
+  }
 }

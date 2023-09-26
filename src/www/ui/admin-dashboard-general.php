@@ -122,10 +122,12 @@ class dashboard extends FO_Plugin
     return $this->GetLastAnalyzeTimeOrVacTime("last_vacuum, last_autovacuum",$TableName);
   }
 
-  function GetPHPInfoTable()
+  function GetPHPInfoTable($fromRest = false)
   {
     $PHP_VERSION = phpversion();
     $loadedModules = get_loaded_extensions();
+
+    $restRes = [];
 
     $table = "
 <table class='infoTable' border=1>
@@ -151,9 +153,16 @@ class dashboard extends FO_Plugin
       Loaded Extensions
       </td>
       <td><div class='infoTable'>";
+
+    $restRes['phpVersion'] = $PHP_VERSION;
+    $restRes['loadedExtensions'] = [];
     foreach ($loadedModules as $currentExtensionName) {
       $currentVersion = phpversion($currentExtensionName);
       $table .= $currentExtensionName . ": " . $currentVersion . "<br />";
+      $restRes['loadedExtensions'][] = [
+        'name' => $currentExtensionName,
+        'version' => $currentVersion
+      ];
     }
 
     $table .="</div></td>
@@ -162,6 +171,10 @@ class dashboard extends FO_Plugin
 </table>
 
   ";
+
+    if ($fromRest) {
+      return $restRes;
+    }
     return $table;
   }
 
