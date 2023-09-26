@@ -2611,6 +2611,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
+
   /jobs/dashboard/statistics:
     get:
       operationId: getJobStatistics
@@ -2636,6 +2637,28 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /jobs/dashboard:
+    get:
+      operationId: getAllServerJobs
+      tags:
+        - Job
+      summary: Gets all jobs server jobs with scheduler status
+      description: Returns all jobs with the scheduler status for the Admin Dashboard. This API returns a response only if the requesting user is an Admin.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllServerJobs'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /jobs/{id}/{queue}:
     parameters:
       - name: id
@@ -6002,11 +6025,11 @@ components:
         lastVacuum:
           type: string
           description: The date and time of the last vacuum operation. If null, no vacuum operation has been performed.
-          example: null
+          example: "null"
         lastAnalyze:
           type: string
           description: The date and time of the last analyze operation. If null, no analyze operation has been performed.
-          example: null
+          example: "null"
     DiskUsage:
       type: object
       properties:
@@ -6077,6 +6100,37 @@ components:
                 type: string
                 description: "Version of the loaded extension"
                 example: "7.4.3-4ubuntu2.18"
+    AllServerJobs:
+      type: object
+      properties:
+        data:
+          type: array
+          description: "List of agents"
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: "Name of the agent"
+                example: "decider"
+              running:
+                type: integer
+                description: "Number of running instances"
+                example: 0
+              pending:
+                type: integer
+                description: "Number of pending instances"
+                example: 1
+              eta:
+                type: string
+                description: "Estimated time of arrival"
+                example: "N/A"
+        scheduler:
+          type: string
+          description: "Current scheduler status"
+          enum:
+            - "Running"
+            - "Stopped"
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"

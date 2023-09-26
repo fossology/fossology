@@ -50,7 +50,7 @@ class AjaxAllJobStatus extends DefaultPlugin
    * @param Request $request
    * @return Response
    */
-  protected function handle(Request $request)
+  public function handle(Request $request)
   {
     $results = $this->showJobDao->getJobsForAll();
     $uniqueTypes = array_unique(array_column($results, 'job'));

@@ -244,6 +244,7 @@ $app->group('/jobs',
     $app->get('/dashboard/statistics', JobController::class . ':getJobStatistics');
     $app->post('', JobController::class . ':createJob');
     $app->get('/history', JobController::class . ':getJobsHistory');
+    $app->get('/dashboard', JobController::class . ':getAllServerJobsStatus');
     $app->delete('/{id:\\d+}/{queue:\\d+}', JobController::class . ':deleteJob');
     $app->any('/{params:.*}', BadRequestController::class);
   });
