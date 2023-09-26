@@ -337,7 +337,10 @@ $app->group('/license',
 $app->group('/overview',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('/database/contents', OverviewController::class . ':getDatabaseContents');
+    $app->get('/disk/usage', OverviewController::class . ':getDiskSpaceUsage');
+    $app->any('/{params:.*}', BadRequestController::class);
   });
+
 /////////////////////ERROR HANDLING/////////////////
 // Define Custom Error Handler
 $customErrorHandler = function (

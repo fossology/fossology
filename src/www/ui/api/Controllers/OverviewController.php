@@ -13,8 +13,10 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @class OverviewController
@@ -43,6 +45,25 @@ class OverviewController extends RestController
       /**** Copyright recs  ****/
       $dashboardPlugin->DatabaseContentsRow("copyright", _("Copyrights/URLs/Emails"), true)
     ];
+    return $response->withJson($res, 200);
+  }
+
+  /**
+   * Get disk space usage overview
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getDiskSpaceUsage($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "Only Admin can access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $dashboardPlugin = $this->restHelper->getPlugin('dashboard');
+    $res = $dashboardPlugin->DiskFree(true);
     return $response->withJson($res, 200);
   }
 }
