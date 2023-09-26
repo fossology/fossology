@@ -3981,6 +3981,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
   /license/verify/{shortname}:
     parameters:
       - name: shortname
@@ -4038,6 +4039,64 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
+  /license/merge/{shortname}:
+    parameters:
+      - name: shortname
+        in: path
+        required: true
+        description: Shortname of the license to be merged
+        schema:
+          type: string
+    put:
+      operationId: mergeLicense
+      tags:
+        - License
+        - Admin
+      summary: Merge a license with another
+      description: >
+        Merge a license to another existing license
+      requestBody:
+        description: The shortname of the parent license to be merged into
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                parentShortname:
+                  description: Shortname of the parent license
+                  type: string
+                  example:
+                    "MIT"
+      responses:
+        '200':
+          description: License merged successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Given License not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
 components:
   securitySchemes:
     bearerAuth:
