@@ -237,6 +237,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthInfo'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /uploads/{id}:
     parameters:
@@ -5199,21 +5201,21 @@ components:
           type: string
           description: Type of highlight
           enum:
-            - M | Match
-            - MC | Changed
-            - MA | Added
-            - MD | Deleted
-            - S | Signature
-            - K | Keyword
-            - B | Bulk
-            - C | Copyright
-            - U | Url
-            - E | Email
-            - A | Author
-            - I | IPRA
-            - X | ECC
-            - KW | Keyword others
-            - any | Undefined
+            - M  # Match
+            - MC # Changed
+            - MA # Added
+            - MD # Deleted
+            - S  # Signature
+            - K  # Keyword
+            - B  # Bulk
+            - C  # Copyright
+            - U  # Url
+            - E  # Email
+            - A  # Author
+            - I  # IPRA
+            - X  # ECC
+            - KW # Keyword others
+            - any # Undefined
         shortName:
           type: string
           description: License shortname
@@ -6214,41 +6216,7 @@ components:
         highlights:
           type: array
           items:
-            type: object
-            properties:
-              start:
-                type: integer
-                example: 0
-              end:
-                type: integer
-                example: 161
-              type:
-                type: string
-                example: M
-              licenseId:
-                type: integer
-                example: 126
-              refStart:
-                type: integer
-                example: 0
-              refEnd:
-                type: integer
-                example: 163
-              infoText:
-                type: string
-                example: MIT
-              htmlElement:
-                type: string
-                example: null
-          example:
-            - start: 0
-              end: 161
-              type: M
-              licenseId: 126
-              refStart: 0
-              refEnd: 163
-              infoText: MIT
-              htmlElement: null
+            $ref: '#/components/schemas/HighlightInfo'
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"

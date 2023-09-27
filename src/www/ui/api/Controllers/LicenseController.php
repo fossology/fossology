@@ -852,8 +852,10 @@ class LicenseController extends RestController
 
     list ($suggestIds, $rendered) = $adminLicenseCandidate->suggestLicenseId($rfText, true);
 
-    foreach ($rendered as $key => $value) {
-      $rendered[$key] = $value->getArray();
+    $highlights = [];
+
+    foreach ($rendered as $value) {
+      $highlights[] = $value->getArray();
     }
 
     if (! empty($suggestIds)) {
@@ -868,7 +870,7 @@ class LicenseController extends RestController
         'url' => $suggestLicense['rf_url'],
         'notes' => $suggestLicense['rf_notes'],
         'risk' => intval($suggestLicense['rf_risk']),
-        'highlights' => $rendered,
+        'highlights' => $highlights,
       ];
     }
     if (empty($suggestLicense)) {
