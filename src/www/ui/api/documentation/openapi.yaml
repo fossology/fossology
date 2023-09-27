@@ -4266,7 +4266,6 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
-
   /overview/database/metrics:
     get:
       operationId: getDatabaseMetrics
@@ -4300,6 +4299,38 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /overview/queries/active:
+    get:
+      operationId: getActiveQueries
+      tags:
+        - Overview
+        - Admin
+      summary: Get active queries
+      description: >
+        Get a list of active queries from the database.
+      responses:
+        '200':
+          description: List of active queries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetActiveQuery'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -6262,6 +6293,23 @@ components:
           type: string
           description: The total count associated with the metric.
           example: "36"
+    GetActiveQuery:
+      properties:
+        pid:
+          type: integer
+          example: 1831
+        query:
+          type: string
+          enum:
+            - idle
+            - active
+        startTime:
+          type: string
+          format: date-time
+          example: "023-08-31 15:04:58.162799+02"
+        elapsed:
+          type: string
+          example: "00:01:06.961334"
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"
