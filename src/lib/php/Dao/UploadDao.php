@@ -49,7 +49,25 @@ class UploadDao
     "dnufiles" => array("Do not use Files" => true),
     "changelog" => array("Clearing Protocol Change Log" => true)
   );
-
+  const CLIXML_REPORT_HEADINGS = array(
+    "mainlicensesclixml" => array("Main Licenses" => true),
+    "licensepath" => array("License File Path" => true),
+    "licensehash" => array("License File Hash" => true),
+    "copyrightsclixml" => array("Copyrights" => true),
+    "copyrightpath" => array("Copyright File Path" => true),
+    "copyrighthash" => array("Copyright File Hash" => true),
+    "exportrestrictionsclixml" => array("Export Restrictions(ECC)" => true),
+    "eccpath" => array("ECC File Path" => true),
+    "ecchash" => array("ECC File Hash" => true),
+    "intellectualPropertyclixml" => array("Identified Patent Relevant Analysis(IPRA)" => true),
+    "iprapath" => array("IPRA File Path" => true),
+    "iprahash" => array("IPRA File Hash" => true),
+    "allobligations" => array("All Obligations" => true),
+    "acknowledgementsclixml" => array("Acknowledgements" => true),
+    "irrelevantfilesclixml" => array("Irrelevant Files" => true),
+    "dnufilesclixml" => array("Do not use Files" => true),
+    "notesclixml" => array("Additional Notes" => true)
+  );
   /** @var DbManager */
   private $dbManager;
   /** @var Logger */
