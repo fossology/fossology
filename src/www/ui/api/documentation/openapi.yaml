@@ -4266,6 +4266,40 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+
+  /overview/database/metrics:
+    get:
+      operationId: getDatabaseMetrics
+      tags:
+        - Overview
+        - Admin
+      summary: Get database metrics
+      description: >
+        Get database metrics for the dashboard display.
+      responses:
+        '200':
+          description: List of the database metrics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetDatabaseMetric'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -6217,6 +6251,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/HighlightInfo'
+    GetDatabaseMetric:
+      type: object
+      properties:
+        metric:
+          type: string
+          description: The metric associated with the object.
+          example: FOSSology database size
+        total:
+          type: string
+          description: The total count associated with the metric.
+          example: "36"
   responses:
     defaultResponse:
       description: Some error occurred. Check the "message"

@@ -341,6 +341,7 @@ $app->group('/overview',
     $app->get('/database/contents', OverviewController::class . ':getDatabaseContents');
     $app->get('/disk/usage', OverviewController::class . ':getDiskSpaceUsage');
     $app->get('/info/php', OverviewController::class . ':getPhpInfo');
+    $app->get('/database/metrics', OverviewController::class . ':getDatabaseMetrics');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
