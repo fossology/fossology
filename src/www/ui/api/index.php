@@ -242,6 +242,7 @@ $app->group('/jobs',
     $app->get('[/{id:\\d+}]', JobController::class . ':getJobs');
     $app->get('/all', JobController::class . ':getAllJobs');
     $app->get('/dashboard/statistics', JobController::class . ':getJobStatistics');
+    $app->get('/scheduler/operation/{operationName:[\\w\\- \\.]+}', JobController::class . ':getSchedulerJobOptionsByOperation');
     $app->post('', JobController::class . ':createJob');
     $app->get('/history', JobController::class . ':getJobsHistory');
     $app->get('/dashboard', JobController::class . ':getAllServerJobsStatus');
