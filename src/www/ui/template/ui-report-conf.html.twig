@@ -8,7 +8,7 @@
 <form action="" name="formReportInfo" method="post">
   <div id="confTabs">
     <ul>
-      <li><a href="#reportConfTab">Unified Report Settings</a></li>
+      <li><a href="#reportConfTab">Report Settings</a></li>
       {% if tableRows is not empty %}
         <li><a href="#ObligationsConfTab">Obligations in Unified Report</a></li>
       {% endif %}
@@ -21,6 +21,18 @@
       <table border="1" align="right" style="width:20%" class="table">
         <tr>
           <th>
+            {{ "CLIXML Report Heading"|trans }}
+          </th>
+          <th>
+            {{ "Enabled"|trans }}
+          </th>
+        </tr>
+          {{ tableRowsClixmlReport }}
+      </table>
+
+      <table border="1" align="right" style="width:20%;margin-right:5%;" class="table">
+        <tr>
+          <th>
             {{ "Unified Report Heading"|trans }}
           </th>
           <th>
@@ -29,7 +41,8 @@
         </tr>
           {{ tableRowsUnifiedReport }}
       </table>
-      <table border="1" class="table" style="max-width:70%;">
+
+      <table border="1" class="table" style="max-width:50%;">
         <tr>
           <th>
             {{ "Attribute"|trans }}
