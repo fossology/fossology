@@ -78,13 +78,14 @@ class OneShot extends DefaultPlugin
     unlink($tmpFileName);
 
     $this->highlightProcessor->addReferenceTexts($highlights);
+    if ($fromRest) {
+      return array($licenseIds, $highlights);
+    }
+
     $splitPositions = $this->highlightProcessor->calculateSplitPositions($highlights);
     $textFragment = new TextFragment(0, $text);
 
     $rendered = $this->textRenderer->renderText($textFragment, $splitPositions);
-    if ( $fromRest ) {
-      return array($licenseIds, $highlights);
-    }
     return array($licenseIds, $rendered);
   }
 
