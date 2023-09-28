@@ -58,9 +58,9 @@ class Conf
 
   /**
    * conf constructor.
-   * @param object $data
+   * @param object|null $data
    */
-  public function __construct($data)
+  public function __construct($data = null)
   {
     $this->data = $data;
   }
@@ -109,24 +109,22 @@ class Conf
   }
 
   /**
-   * Get key name from parameter
-   * @return array
+   * Get the DB column name for given key
+   * @param string $key Key to get column name for
+   * @return string
    */
-  public function getKeyValue()
+  public function getKeyColumnName($key)
   {
-    return self::KEY_MAP[$this->data];
+    return self::KEY_MAP[$key];
   }
 
   /**
    * Check key exists or not
-   * @return array
+   * @param string $key Key to check
+   * @return boolean
    */
-  public function doesKeyExist()
+  public function doesKeyExist($key)
   {
-    if (in_array($this->data, self::KEY_MAP)) {
-      return true;
-    } else {
-      return false;
-    }
+    return array_key_exists($key, self::KEY_MAP);
   }
 }

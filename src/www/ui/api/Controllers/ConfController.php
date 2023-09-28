@@ -12,12 +12,9 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Helper\ResponseHelper;
-use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\Conf;
+use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -58,8 +55,29 @@ class ConfController extends RestController
   {
     $uploadPk = $args["id"];
     $body = $this->getParsedBody($request);
-    $keyVal = new Conf($body['key']);
-    $result = $this->restHelper->getUploadDao()->updateReportInfo($uploadPk, $keyVal->getKeyValue(), $body['value']);
-    return $response->withJson($result->getarray(), 200);
+    $confObj = new Conf();
+    $error = null;
+
+    if (empty($body) || !array_key_exists("key", $body) ||
+        !array_key_exists("value", $body)) {
+      $error = new Info(400, "Invalid request.", InfoType::ERROR);
+    } elseif (!$confObj->doesKeyExist($body['key'])) {
+      $error = new Info(400, "Invalid key " . $body["key"] . " sent.", InfoType::ERROR);
+    }
+    if ($error !== null) {
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $key = $body['key'];
+    $value = $body['value'];
+    $result = $this->restHelper->getUploadDao()->updateReportInfo($uploadPk,
+      $confObj->getKeyColumnName($key), $value);
+
+    if ($result) {
+      $info = new Info(200, "Successfully updated " . $key, InfoType::INFO);
+    } else {
+      $info = new Info(500, "Failed to update " . $key, InfoType::ERROR);
+    }
+    return $response->withJson($info->getarray(), $info->getCode());
   }
 }

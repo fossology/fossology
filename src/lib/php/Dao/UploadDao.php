@@ -17,9 +17,6 @@ use Fossology\Lib\Exception;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Proxy\UploadTreeViewProxy;
 use Monolog\Logger;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
-use Fossology\UI\Api\Models\Conf;
 
 require_once(dirname(dirname(__FILE__)) . "/common-dir.php");
 
@@ -723,21 +720,50 @@ ORDER BY lft asc
     return $row;
   }
 
-  /* @param int $uploadId
-   * @param string $keyVal
-   * @param string $value
-   * @return array
+  /**
+   * @brief Update report info for upload
+   * @param int $uploadId  Upload ID to update
+   * @param string $column Column to update
+   * @param string|array $value New value
+   * @return boolean True on success
    */
-  public function updateReportInfo($uploadId, $keyVal, $value)
+  public function updateReportInfo($uploadId, $column, $value)
   {
-    $stmt = __METHOD__ . "updateReportInfo" . $keyVal;
-    $keyValCheck = new Conf($keyVal);
-    if (!$keyValCheck->doesKeyExist()) {
-      return (new Info(400, 'Bad request', InfoType::ERROR));
+    if ($column === "ri_unifiedcolumns") {
+      $value = json_decode($value, true);
+      $oldValues = $this->getReportInfo($uploadId)["ri_unifiedcolumns"];
+      if (!empty($oldValues)) {
+        $oldValues = json_decode($oldValues, true);
+      } else {
+        $oldValues = self::UNIFIED_REPORT_HEADINGS;
+      }
+      foreach ($value as $key => $val) {
+        $newValText = array_keys($val)[0];
+        $newValValue = array_values($val)[0];
+        $newValValue = ($newValValue === true || $newValValue == "true") ? "on" : null;
+        $oldValues[$key] = [$newValText => $newValValue];
+      }
+      $value = json_encode($oldValues);
+    } elseif ($column === "ri_excluded_obligations") {
+      $value = json_decode($value, true);
+      $oldValues = $this->getReportInfo($uploadId)["ri_excluded_obligations"];
+      if (!empty($oldValues)) {
+        $oldValues = json_decode($oldValues, true);
+      } else {
+        $oldValues = [];
+      }
+      foreach ($value as $key => $newValue) {
+        $oldValues[$key] = $newValue;
+      }
+      $value = json_encode($oldValues);
+    } elseif ($column === "ri_globaldecision") {
+      $value = filter_var($value, FILTER_VALIDATE_BOOL);
     }
-    $sql = "UPDATE report_info SET $keyVal = $2 WHERE upload_fk = $1";
-    $this->dbManager->getSingleRow($sql, array($uploadId, $value), $stmt);
-    return (new Info(200, 'Succesfully Updated Conf data', InfoType::INFO));
+
+    $sql = "UPDATE report_info SET $column = $2 WHERE upload_fk = $1;";
+    $stmt = __METHOD__ . "updateReportInfo" . $column;
+    $this->dbManager->getSingleRow($sql, [$uploadId, $value], $stmt);
+    return true;
   }
 
   /* @param int $uploadId
