@@ -6418,7 +6418,7 @@ components:
         startTime:
           type: string
           format: date-time
-          example: "023-08-31 15:04:58.162799+02"
+          example: "2023-09-28T05:15:05.227Z"
         elapsed:
           type: string
           example: "00:01:06.961334"

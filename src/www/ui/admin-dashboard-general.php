@@ -251,6 +251,7 @@ class dashboard extends FO_Plugin
   /**
    * \brief Database queries
    * \returns html table containing query strings, pid, and start time
+   * @throws Exception
    */
   function DatabaseQueries($fromRest = false)
   {
@@ -267,7 +268,7 @@ class dashboard extends FO_Plugin
     $oldVersion = str_replace(".", "", "9.2");
     $current_query = ($currentVersion >= $oldVersion) ? "state" : "current_query";
     $procpid = ($currentVersion >= $oldVersion) ? "pid" : "procpid";
-    $sql = "SELECT $procpid processid, $current_query, query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY $procpid";
+    $sql = "SELECT $procpid processid, $current_query, query_start AT TIME ZONE 'UTC', now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY $procpid";
 
     $statementName = __METHOD__."queryFor_".$current_query."_orderBy_".$procpid;
     $this->dbManager->prepare($statementName,$sql);
@@ -286,10 +287,11 @@ class dashboard extends FO_Plugin
         $V .= "<td class='dashboard'>$StartTime</td>";
         $V .= "<td class='dashboard'>$row[elapsed]</td>";
         $V .= "</tr>\n";
+        $dt = new DateTime($row['query_start'], new DateTimeZone("UTC"));
         $restRes[] = [
           "pid" => $row['processid'],
           "query" => htmlspecialchars($row[$current_query]),
-          "startTime" => $row['query_start'],
+          "startTime" => $dt->format("Y-m-d\\TH:i:s.v\\Z"),
           "elapsed" => $row['elapsed']
         ];
       }
