@@ -9,9 +9,6 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
 use Monolog\Logger;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
-
 
 
 class SysConfigDao
@@ -68,16 +65,56 @@ class SysConfigDao
   }
 
   /**
-   * \brief Update Configuration Data.
-   *  @return Info
+   * @brief Update Configuration Data
+   *
+   * Update the sysconfig data after validating the value.
+   * @return array[bool, string] true on success, false on failure with error
+   *  message
    */
   public function UpdateConfigData($data)
   {
     $key = strval($data['key']);
     $value = strval($data['value']);
-    $stmt = __METHOD__ . 'UpdateConfigData'.$key;
-    $sql = "UPDATE sysconfig SET conf_value = $2 WHERE variablename = $1";
-    $this->dbManager->getSingleRow($sql, array($key, $value), $stmt);
-    return (new Info(200, 'Succesfully Updated Customise data', InfoType::INFO));
+
+    $sysconfigData = $this->getConfigData();
+    $oldarray = [];
+    foreach ($sysconfigData as $item) {
+      $oldarray[$item['variablename']] = $item['conf_value'];
+    }
+
+    if ($value != $oldarray[$key]) {
+      /* get validation_function row from sysconfig table */
+      $sys_array = $this->dbManager->getSingleRow("SELECT validation_function, 
+       ui_label FROM sysconfig WHERE variablename = $1", [$key],__METHOD__.'.getVarNameData');
+      $validation_function = $sys_array['validation_function'];
+      $ui_label = $sys_array['ui_label'];
+      $is_empty = empty($validation_function);
+      /*
+       * 1. the validation_function is empty
+       * 2. the validation_function is not empty, and after checking, the value
+       * is valid update sysconfig table
+       */
+      if ($is_empty || (! $is_empty && (1 == $validation_function($value)))) {
+        $this->dbManager->getSingleRow(
+          "UPDATE sysconfig SET conf_value=$1 WHERE variablename=$2",
+          [$value, $key], __METHOD__ . '.setVarNameData');
+        return [true, $key];
+      } else if (! $is_empty && (0 == $validation_function($value))) {
+        /*
+         * the validation_function is not empty, but after checking, the value
+         * is invalid
+         */
+        $warning_msg = "Error: Unable to update $key.";
+        if (! strcmp($validation_function, 'check_boolean')) {
+          $warning_msg = _(
+            "Error: You set $ui_label to $value. Valid  values are 'true' and 'false'.");
+        } else if (strpos($validation_function, "url")) {
+          $warning_msg = _(
+            "Error: $ui_label $value, is not a reachable URL.");
+        }
+        return [false, $warning_msg];
+      }
+    }
+    return [true, $key];
   }
 }

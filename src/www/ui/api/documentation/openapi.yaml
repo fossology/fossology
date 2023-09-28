@@ -3195,11 +3195,11 @@ paths:
       operationId: updateCustomiseData
       tags:
         - Admin
-      summary: Update the Admin configureation data
+      summary: Update the Admin configuration data
       description: >
-        Updates the admin configureation data from the server
+        Updates the admin configuration data.
       requestBody:
-        description: updateCopyright Payload
+        description: Key and value to update.
         required: true
         content:
           application/json:
@@ -4641,6 +4641,7 @@ components:
           description: Key of the field to be updated
         value:
           type: string
+          description: Value of the field to be updated
     Job:
       type: object
       properties:
