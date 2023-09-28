@@ -3166,7 +3166,6 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-
   /customise:
     get:
       operationId: getCustomiseData
@@ -3184,6 +3183,37 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Customise'
+        '403':
+          description: The session owner is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    put:
+      operationId: updateCustomiseData
+      tags:
+        - Admin
+      summary: Update the Admin configuration data
+      description: >
+        Updates the admin configuration data.
+      requestBody:
+        description: Key and value to update.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetCustomiseInfo'
+      responses:
+        '200':
+          description: Config data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
         '403':
           description: The session owner is not an admin
           content:
@@ -4603,6 +4633,15 @@ components:
         reuse_info:
           type: object
           description: Reuse info of the file.
+    SetCustomiseInfo:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Key of the field to be updated
+        value:
+          type: string
+          description: Value of the field to be updated
     Job:
       type: object
       properties:
@@ -5256,8 +5295,6 @@ components:
         option_value:
           description: If type is 'dropdown', provide options in format op1{val1}|op2{val2}|...
           type: string
-
-
     Group:
       description: Group object
       type: object
