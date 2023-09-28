@@ -28,10 +28,39 @@ class Conf
   private $data;
 
   /**
-   * conf constructor.
-   * @param object $data
+   * @var array $keyMap
+   * key mapping for conf
    */
-  public function __construct($data)
+  const KEY_MAP = [
+    'reviewed' => "ri_reviewed",
+    'footer' => "ri_footer",
+    'reportRel' => "ri_report_rel",
+    'community' => "ri_community",
+    'component' => "ri_component",
+    'version' => "ri_version",
+    'releaseDate' => "ri_release_date",
+    'sw360Link' => "ri_sw360_link",
+    'componentType' => "ri_component_type",
+    'componentId' => "ri_component_id",
+    'generalAssesment' => "ri_general_assesment",
+    'gaAdditional' => "ri_ga_additional",
+    'gaRisk' => "ri_ga_risk",
+    'gaCheckbox' => "ri_ga_checkbox_selection",
+    'spdxSelection' => "ri_spdx_selection",
+    'excludedObligations' => "ri_excluded_obligations",
+    'department' => "ri_department",
+    'depNotes' => "ri_depnotes",
+    'exportNotes' => "ri_exportnotes",
+    'copyrightNotes' => "ri_copyrightnotes",
+    'unifiedColumns' => "ri_unifiedcolumns",
+    'globalDecision' => "ri_globaldecision",
+  ];
+
+  /**
+   * conf constructor.
+   * @param object|null $data
+   */
+  public function __construct($data = null)
   {
     $this->data = $data;
   }
@@ -77,5 +106,25 @@ class Conf
       'unifiedColumns' => json_decode($this->data["ri_unifiedcolumns"], TRUE),
       'globalDecision' => boolval($this->data["ri_globaldecision"]),
     );
+  }
+
+  /**
+   * Get the DB column name for given key
+   * @param string $key Key to get column name for
+   * @return string
+   */
+  public function getKeyColumnName($key)
+  {
+    return self::KEY_MAP[$key];
+  }
+
+  /**
+   * Check key exists or not
+   * @param string $key Key to check
+   * @return boolean
+   */
+  public function doesKeyExist($key)
+  {
+    return array_key_exists($key, self::KEY_MAP);
   }
 }

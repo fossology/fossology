@@ -719,6 +719,53 @@ ORDER BY lft asc
     }
     return $row;
   }
+
+  /**
+   * @brief Update report info for upload
+   * @param int $uploadId  Upload ID to update
+   * @param string $column Column to update
+   * @param string|array $value New value
+   * @return boolean True on success
+   */
+  public function updateReportInfo($uploadId, $column, $value)
+  {
+    if ($column === "ri_unifiedcolumns") {
+      $value = json_decode($value, true);
+      $oldValues = $this->getReportInfo($uploadId)["ri_unifiedcolumns"];
+      if (!empty($oldValues)) {
+        $oldValues = json_decode($oldValues, true);
+      } else {
+        $oldValues = self::UNIFIED_REPORT_HEADINGS;
+      }
+      foreach ($value as $key => $val) {
+        $newValText = array_keys($val)[0];
+        $newValValue = array_values($val)[0];
+        $newValValue = ($newValValue === true || $newValValue == "true") ? "on" : null;
+        $oldValues[$key] = [$newValText => $newValValue];
+      }
+      $value = json_encode($oldValues);
+    } elseif ($column === "ri_excluded_obligations") {
+      $value = json_decode($value, true);
+      $oldValues = $this->getReportInfo($uploadId)["ri_excluded_obligations"];
+      if (!empty($oldValues)) {
+        $oldValues = json_decode($oldValues, true);
+      } else {
+        $oldValues = [];
+      }
+      foreach ($value as $key => $newValue) {
+        $oldValues[$key] = $newValue;
+      }
+      $value = json_encode($oldValues);
+    } elseif ($column === "ri_globaldecision") {
+      $value = filter_var($value, FILTER_VALIDATE_BOOL);
+    }
+
+    $sql = "UPDATE report_info SET $column = $2 WHERE upload_fk = $1;";
+    $stmt = __METHOD__ . "updateReportInfo" . $column;
+    $this->dbManager->getSingleRow($sql, [$uploadId, $value], $stmt);
+    return true;
+  }
+
   /* @param int $uploadId
    * @return ri_globaldecision
    */
