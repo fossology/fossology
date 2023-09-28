@@ -268,7 +268,7 @@ class dashboard extends FO_Plugin
     $oldVersion = str_replace(".", "", "9.2");
     $current_query = ($currentVersion >= $oldVersion) ? "state" : "current_query";
     $procpid = ($currentVersion >= $oldVersion) ? "pid" : "procpid";
-    $sql = "SELECT $procpid processid, $current_query, query_start AT TIME ZONE 'UTC', now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY $procpid";
+    $sql = "SELECT $procpid processid, $current_query, query_start AT TIME ZONE 'UTC' AS query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY $procpid";
 
     $statementName = __METHOD__."queryFor_".$current_query."_orderBy_".$procpid;
     $this->dbManager->prepare($statementName,$sql);

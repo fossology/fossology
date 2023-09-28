@@ -4898,6 +4898,9 @@ components:
           description: Key of the field to be updated
         value:
           type: string
+          description: |
+            Value of the field to be updated. If value is a JSON, it should be
+            sent as an encoded string.
     Folder:
       type: object
       properties:
