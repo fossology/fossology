@@ -14,8 +14,6 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -76,10 +74,22 @@ class CustomiseController extends RestController
 
   public function updateCustomiseData($request, $response, $args)
   {
-    if (Auth::isAdmin()) {
-      $body = $this->getParsedBody($request);
-      $result = $this->sysconfigDao->UpdateConfigData($body);
-      return $response->withJson($result->getarray(), 200);
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "Only admin can access this endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
     }
+    $body = $this->getParsedBody($request);
+    if (empty($body) || !array_key_exists("key", $body) || !array_key_exists("value", $body)) {
+      $error = new Info(400, "Invalid request body.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    list($success, $msg) = $this->sysconfigDao->UpdateConfigData($body);
+    if ($success) {
+      $info = new Info(200, "Successfully updated $msg.",
+        InfoType::INFO);
+    } else {
+      $info = new Info(400, $msg, InfoType::INFO);
+    }
+    return $response->withJson($info->getArray(), $info->getCode());
   }
 }
