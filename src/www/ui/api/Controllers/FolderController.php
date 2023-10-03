@@ -12,11 +12,12 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\UI\Ajax\AjaxFolderContents;
 use Fossology\UI\Api\Helper\ResponseHelper;
-use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Models\Folder;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @class FolderController
@@ -235,15 +236,16 @@ class FolderController extends RestController
     }
     return $response->withJson($info->getArray(), $info->getCode());
   }
+
   /**
-   * Get the removable folder contents
+   * Get the unlinkable folder contents (contents which are copied)
    *
    * @param ServerRequestInterface $request
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
    */
-  public function getRemovableFolderContents($request, $response, $args)
+  public function getUnlinkableFolderContents($request, $response, $args)
   {
     $folderId = $args['id'];
     $folderDao = $this->restHelper->getFolderDao();
@@ -258,6 +260,7 @@ class FolderController extends RestController
       return $response->withJson($error->getArray(), $error->getCode());
     }
 
+    /** @var AjaxFolderContents $folderContents */
     $folderContents = $this->restHelper->getPlugin('foldercontents');
     $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
     $symfonyRequest->request->set('folder', $folderId);
