@@ -4050,6 +4050,14 @@ paths:
   /license/export-csv:
     get:
       operationId: exportLicense
+      parameters:
+        - name: licenseId
+          description: License id to export, 0 for all
+          in: query
+          required: false
+          default: 0
+          schema:
+            type: int
       tags:
         - License
       summary: Export a csv license
@@ -4059,7 +4067,7 @@ paths:
         '200':
           description: Successfully exported
           content:
-            text/plain:
+            text/csv:
               schema:
                 type: string
                 format: binary
