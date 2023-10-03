@@ -295,4 +295,43 @@ class FolderController extends RestController
     }
     return $response->withJson($info->getArray(), $info->getCode());
   }
+
+  /**
+   * Get the all folder contents
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function getAllFolderContents($request, $response, $args)
+  {
+    $folderId = $args['id'];
+    $folderDao = $this->restHelper->getFolderDao();
+
+    if ($folderDao->getFolder($folderId) === null) {
+      $error = new Info(404, "Folder id not found!", InfoType::ERROR);
+    } else if (! $folderDao->isFolderAccessible($folderId, $this->restHelper->getUserId())) {
+      $error = new Info(403, "Folder is not accessible!", InfoType::ERROR);
+    }
+
+    if (isset($error)) {
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    /** @var AjaxFolderContents $folderContents */
+    $folderContents = $this->restHelper->getPlugin('foldercontents');
+    $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
+    $symfonyRequest->request->set('folder', $folderId);
+    $symfonyRequest->request->set('fromRest', true);
+    $contentList = $folderContents->handle($symfonyRequest);
+    $removableContents = $folderDao->getRemovableContents($folderId);
+
+    foreach ($contentList as &$value) {
+      if (in_array($value['id'], $removableContents)) {
+        $value['removable'] = true;
+      }
+    }
+    return $response->withJson($contentList, 200);
+  }
 }
