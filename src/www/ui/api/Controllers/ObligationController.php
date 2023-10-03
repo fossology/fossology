@@ -74,15 +74,7 @@ class ObligationController extends RestController
       return $response->withJson($returnVal->getArray(), $returnVal->getCode());
     }
 
-    $obligationInfo = $this->obligationMap->getObligationById($obligationId);
-    $licenses = $this->obligationMap->getLicenseList($obligationId);
-    $candidateLicenses = $this->obligationMap->getLicenseList($obligationId,
-      true);
-    $associatedLicenses = explode(";", $licenses);
-    $associatedCandidateLicenses = explode(";", $candidateLicenses);
-
-    $obligation = Obligation::fromArray($obligationInfo, true,
-      $associatedLicenses, $associatedCandidateLicenses);
+    $obligation = $this->createExtendedObligationFromId($obligationId);
     return $response->withJson($obligation->getArray(), 200);
   }
 
@@ -97,7 +89,32 @@ class ObligationController extends RestController
 
   function obligationsAllDetails($request, $response, $args)
   {
-    $listVal = $this->obligationFile->getAllObligationsDetails();
-    return $response->withJson($listVal, 200);
+    $obligationArray = [];
+    $listVal = $this->obligationMap->getObligations();
+    foreach ($listVal as $val) {
+      $obligationId = intval($val['ob_pk']);
+      $obligationArray[] = $this->createExtendedObligationFromId($obligationId)
+        ->getArray();
+    }
+    return $response->withJson($obligationArray, 200);
+  }
+
+  /**
+   * Create extended Obligation Model object for a given obligation ID.
+   *
+   * @param int $obligationId Obligation ID to get object for
+   * @return Obligation Obligation model object for given id
+   */
+  private function createExtendedObligationFromId($obligationId)
+  {
+    $obligationInfo = $this->obligationMap->getObligationById($obligationId);
+    $licenses = $this->obligationMap->getLicenseList($obligationId);
+    $candidateLicenses = $this->obligationMap->getLicenseList($obligationId,
+      true);
+    $associatedLicenses = explode(";", $licenses);
+    $associatedCandidateLicenses = explode(";", $candidateLicenses);
+
+    return Obligation::fromArray($obligationInfo, true,
+      $associatedLicenses, $associatedCandidateLicenses);
   }
 }

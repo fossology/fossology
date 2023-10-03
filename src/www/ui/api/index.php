@@ -24,24 +24,24 @@ require_once dirname(dirname(dirname(dirname(__FILE__)))) .
 use Fossology\Lib\Util\TimingLogger;
 use Fossology\UI\Api\Controllers\AuthController;
 use Fossology\UI\Api\Controllers\BadRequestController;
+use Fossology\UI\Api\Controllers\ConfController;
+use Fossology\UI\Api\Controllers\CopyrightController;
+use Fossology\UI\Api\Controllers\CustomiseController;
+use Fossology\UI\Api\Controllers\FileInfoController;
 use Fossology\UI\Api\Controllers\FileSearchController;
 use Fossology\UI\Api\Controllers\FolderController;
 use Fossology\UI\Api\Controllers\GroupController;
 use Fossology\UI\Api\Controllers\InfoController;
-use Fossology\UI\Api\Controllers\FileInfoController;
 use Fossology\UI\Api\Controllers\JobController;
-use Fossology\UI\Api\Controllers\CopyrightController;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Controllers\MaintenanceController;
-use Fossology\UI\Api\Controllers\OverviewController;
 use Fossology\UI\Api\Controllers\ObligationController;
+use Fossology\UI\Api\Controllers\OverviewController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
-use Fossology\UI\Api\Controllers\ConfController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UploadTreeController;
 use Fossology\UI\Api\Controllers\UserController;
-use Fossology\UI\Api\Controllers\CustomiseController;
 use Fossology\UI\Api\Helper\ResponseFactoryHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Middlewares\FossologyInitMiddleware;
@@ -229,7 +229,7 @@ $app->group('/obligations',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('/list', ObligationController::class . ':obligationsList');
     $app->get('/{id:\\d+}', ObligationController::class . ':obligationsDetails');
-    $app->get('/', ObligationController::class . ':obligationsAllDetails');
+    $app->get('', ObligationController::class . ':obligationsAllDetails');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
