@@ -3197,6 +3197,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
   /customise:
     get:
       operationId: getCustomiseData
@@ -3253,6 +3254,24 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /customise/banner:
+    get:
+      operationId: getBannerMessage
+      tags:
+        - info
+      summary: Get the Banner message
+      description: >
+        Returns the Banner message from the server
+      responses:
+        '200':
+          description: Banner message
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "This is a banner message"
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /folders/{id}/contents/unlinkable:
     parameters:
       - name: id
@@ -3287,24 +3306,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
-  /customise/banner:
-    get:
-      operationId: getBannerMessage
-      tags:
-        - info
-      summary: Get the Banner message data
-      description: >
-        Returns the Banner message from the server
-      responses:
-        '200':
-          description: Config data
-          content:
-            application/json:
-              schema:
-                type: string
-                example: "Banner Message"
         default:
           $ref: '#/components/responses/defaultResponse'
   /groups:
