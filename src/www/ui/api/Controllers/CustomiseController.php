@@ -14,6 +14,7 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\SysConfigDao;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -91,5 +92,19 @@ class CustomiseController extends RestController
       $info = new Info(400, $msg, InfoType::INFO);
     }
     return $response->withJson($info->getArray(), $info->getCode());
+  }
+
+  /**
+   * Get Banner Message
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getBannerMessage($request, $response, $args)
+  {
+    $returnVal = $this->sysconfigDao->getBannerData();
+    return $response->withJson($returnVal, 200);
   }
 }

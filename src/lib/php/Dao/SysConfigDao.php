@@ -42,6 +42,15 @@ class SysConfigDao
   }
 
   /**
+   * \brief Fetch banner message.
+   */
+  function getBannerData()
+  {
+    return $this->dbManager->getSingleRow("SELECT conf_value FROM sysconfig
+                  WHERE variablename = 'BannerMsg'")["conf_value"];
+  }
+
+  /**
    * Get all customise information for admin
    * @param array $data Array of data from the sysconfig table
    * @return array
