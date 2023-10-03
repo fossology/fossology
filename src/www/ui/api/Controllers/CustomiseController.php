@@ -14,6 +14,7 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\SysConfigDao;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;

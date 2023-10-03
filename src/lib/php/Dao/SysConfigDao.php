@@ -46,11 +46,8 @@ class SysConfigDao
    */
   function getBannerData()
   {
-    global $PG_CONN;
-    $sql = "select conf_value from sysconfig where variablename = 'BannerMsg'";
-    $result = pg_query($PG_CONN, $sql);
-    $textArr = pg_fetch_all($result);
-    return ($textArr[0]['conf_value']);
+    return $this->dbManager->getSingleRow("SELECT conf_value FROM sysconfig
+                  WHERE variablename = 'BannerMsg'")["conf_value"];
   }
 
   /**
