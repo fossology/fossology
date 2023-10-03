@@ -389,7 +389,9 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
     if ($this->isRemovableContent($content['child_id'], $content['foldercontents_mode'])) {
       $sql = "DELETE FROM foldercontents WHERE foldercontents_pk=$1";
       $this->dbManager->getSingleRow($sql, array($folderContentId), __METHOD__);
+      return true;
     }
+    return false;
   }
 
   public function removeContentById($uploadpk, $folderId)

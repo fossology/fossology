@@ -12,7 +12,7 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Exception;
+use Fossology\Lib\Dao\FolderDao;
 use Fossology\UI\Ajax\AjaxFolderContents;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Folder;
@@ -285,14 +285,13 @@ class FolderController extends RestController
     if (!$this->dbHelper->doesIdExist("foldercontents", "foldercontents_pk", $folderContentId)) {
       $info = new Info(404, "Folder content id not found!", InfoType::ERROR);
     } else {
-      try {
-        $folderDao = $this->container->get('dao.folder');
-        $folderDao->removeContent($folderContentId);
-      } catch (Exception $ex) {
-        $info = new Info(500, $ex->getMessage(), InfoType::ERROR);
-        return $response->withJson($info->getArray(), $info->getCode());
+      /** @var FolderDao $folderDao */
+      $folderDao = $this->container->get('dao.folder');
+      if ($folderDao->removeContent($folderContentId)) {
+        $info = new Info(200, "Folder unlinked successfully.", InfoType::INFO);
+      } else {
+        $info = new Info(400, "Content cannot be unlinked.", InfoType::ERROR);
       }
-      $info = new Info(200, "Folder unlinked successfully.", InfoType::INFO);
     }
     return $response->withJson($info->getArray(), $info->getCode());
   }
