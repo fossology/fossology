@@ -48,6 +48,41 @@ class Obligation
    * Comment on the obligation
    */
   private $comment;
+  /**
+   * @var bool $modification
+   * Applies on modified code
+   */
+  private $modification;
+  /**
+   * @var bool $active
+   * Obligation active
+   */
+  private $active;
+  /**
+   * @var bool $textUpdatable
+   * Text updatable
+   */
+  private $textUpdatable;
+  /**
+   * @var string $hash
+   * Hash of obligation text
+   */
+  private $hash;
+  /**
+   * @var array $licenses
+   * List of license shortnames associated
+   */
+  private $licenses;
+  /**
+   * @var array $candidateLicenses
+   * List of candidate license shortnames associated
+   */
+  private $candidateLicenses;
+  /**
+   * @var bool $extended
+   * Extended info on the obligation
+   */
+  private $extended;
 
   /**
    * Obligation constructor.
@@ -60,7 +95,7 @@ class Obligation
    * @param string $comment
    */
   public function __construct($id, $topic = "", $type = "", $text = "",
-    $classification = "", $comment = "")
+    $classification = "", $comment = "", $extended = false)
   {
     $this->id = intval($id);
     $this->setTopic($topic);
@@ -68,6 +103,10 @@ class Obligation
     $this->setText($text);
     $this->setClassification($classification);
     $this->setComment($comment);
+    $this->setExtended($extended);
+    $this->setHash(null);
+    $this->licenses = [];
+    $this->candidateLicenses = [];
   }
 
   /**
@@ -85,7 +124,7 @@ class Obligation
    */
   public function getArray()
   {
-    return [
+    $obligation = [
       'id' => $this->id,
       'topic' => $this->getTopic(),
       'type' => $this->getType(),
@@ -93,6 +132,15 @@ class Obligation
       'classification' => $this->getClassification(),
       'comment' => $this->getComment()
     ];
+    if ($this->getExtended()) {
+      $obligation['modification'] = $this->isModification();
+      $obligation['active'] = $this->isActive();
+      $obligation['textUpdatable'] = $this->isTextUpdatable();
+      $obligation['licenses'] = $this->getLicenses();
+      $obligation['candidateLicenses'] = $this->getCandidateLicenses();
+      $obligation['hash'] = $this->getHash();
+    }
+    return $obligation;
   }
 
   /**
@@ -156,6 +204,63 @@ class Obligation
   }
 
   /**
+   * @return bool
+   */
+  public function isModification()
+  {
+    return $this->modification == true;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isTextUpdatable()
+  {
+    return $this->textUpdatable == true;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isActive()
+  {
+    return $this->active == true;
+  }
+
+  /**
+   * @return string
+   */
+  public function getHash()
+  {
+    return $this->hash;
+  }
+
+  /**
+   * @return array
+   */
+  public function getLicenses()
+  {
+    return $this->licenses;
+  }
+
+  /**
+   * @return array
+   */
+  public function getCandidateLicenses()
+  {
+    return $this->candidateLicenses;
+  }
+
+  /**
+   * Get if extended info on obligation
+   * @return bool
+   */
+  public function getExtended()
+  {
+    return $this->extended;
+  }
+
+  /**
    * Set the topic of the obligation
    * @param string $topic
    */
@@ -198,5 +303,107 @@ class Obligation
   public function setComment($comment)
   {
     $this->comment = convertToUTF8($comment, false);
+  }
+
+  /**
+   * @param bool $modification
+   */
+  public function setModification($modification)
+  {
+    if ($modification == "t") {
+      $modification = true;
+    }
+    $this->modification = filter_var($modification, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
+   * @param bool $textUpdatable
+   */
+  public function setTextUpdatable($textUpdatable)
+  {
+    if ($textUpdatable == "t") {
+      $textUpdatable = true;
+    }
+    $this->textUpdatable = filter_var($textUpdatable, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
+   * @param bool $active
+   */
+  public function setActive($active)
+  {
+    if ($active == "t") {
+      $active = true;
+    }
+    $this->active = filter_var($active, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
+   * @param string $hash
+   */
+  public function setHash($hash)
+  {
+    $this->hash = $hash;
+  }
+
+  /**
+   * Associate another license
+   * @param string $shortname License to add
+   */
+  public function addLicense($shortname)
+  {
+    if (empty($shortname)) {
+      return;
+    }
+    $this->licenses[] = $shortname;
+  }
+
+  /**
+   * Associate another candidate license
+   * @param string $shortname Candidate license to add
+   */
+  public function addCandidateLicense($shortname)
+  {
+    if (empty($shortname)) {
+      return;
+    }
+    $this->candidateLicenses[] = $shortname;
+  }
+
+  /**
+   * Set the extended info on Obligation
+   * @param bool $extended
+   */
+  public function setExtended($extended)
+  {
+    $this->extended = filter_var($extended, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
+   * From DB array to Obligation object
+   * @param array $db         Array from DB
+   * @param boolean $extended Extended info on obligation
+   * @param array $licenses   Array of associated license shortnames
+   * @param array $candidateLicenses Array of associated candidate license
+   *              shortnames
+   * @return Obligation New obligation object
+   */
+  public static function fromArray($db, $extended, $licenses, $candidateLicenses)
+  {
+    $obligation = new Obligation($db['ob_pk'], $db['ob_topic'], $db['ob_type'],
+      $db['ob_text'], $db['ob_classification'], $db['ob_comment'], $extended);
+    if ($extended) {
+      $obligation->setModification($db['ob_modifications']);
+      $obligation->setActive($db['ob_active']);
+      $obligation->setTextUpdatable($db['ob_text_updatable']);
+      $obligation->setHash($db['ob_md5']);
+      foreach ($licenses as $license) {
+        $obligation->addLicense($license);
+      }
+      foreach ($candidateLicenses as $candidateLicense) {
+        $obligation->addCandidateLicense($candidateLicense);
+      }
+    }
+    return $obligation;
   }
 }

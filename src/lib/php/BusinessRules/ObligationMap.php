@@ -271,4 +271,15 @@ class ObligationMap
         $this->unassociateLicenseFromObligation($obligationId, $license, $candidate);
     }
   }
+
+  /**
+   * Get obligation by id
+   * @param int $ob_pk Obligation ID
+   * @return array Obligation from DB
+   */
+  public function getObligationById($ob_pk)
+  {
+    $sql = "SELECT * FROM obligation_ref WHERE ob_pk = $1;";
+    return $this->dbManager->getSingleRow($sql, [$ob_pk]);
+  }
 }
