@@ -6,7 +6,6 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
-use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\BusinessRules\ObligationMap;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\StringOperation;
@@ -38,14 +37,6 @@ class admin_obligation_file extends FO_Plugin
   {
     $topicarray = DB2ValArray("obligation_ref", "ob_topic", true, " order by ob_topic");
     return ($topicarray);
-  }
-
-  /** @brief get obligations list along with obligations id */
-  public function getObligationsList()
-  {
-    $sql = "SELECT ob_pk, ob_topic from obligation_ref";
-    $obligationsList = $this->dbManager->getRows($sql);
-    return ($obligationsList);
   }
 
   /** @brief check if the text of this obligation is existing */
