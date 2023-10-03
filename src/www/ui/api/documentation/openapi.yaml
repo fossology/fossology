@@ -282,7 +282,7 @@ paths:
                 $ref: '#/components/schemas/ObligationExtended'
         default:
           $ref: '#/components/responses/defaultResponse'
-  /obligations/:
+  /obligations:
     get:
       operationId: getAllObligationsData
       tags:
@@ -296,7 +296,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObligationsDetails'
+                type: array
+                items:
+                  $ref: '#/components/schemas/ObligationExtended'
         default:
           $ref: '#/components/responses/defaultResponse'
 

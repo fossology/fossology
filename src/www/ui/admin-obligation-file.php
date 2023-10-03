@@ -9,7 +9,6 @@
 use Fossology\Lib\BusinessRules\ObligationMap;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\StringOperation;
-use Fossology\UI\Api\Models\Obligation;
 
 define("TITLE_ADMIN_OBLIGATION_FILE", _("Obligations and Risks Administration"));
 
@@ -38,34 +37,6 @@ class admin_obligation_file extends FO_Plugin
   {
     $topicarray = DB2ValArray("obligation_ref", "ob_topic", true, " order by ob_topic");
     return ($topicarray);
-  }
-
-  /** @brief get obligations list along with obligations id */
-  public function getObligationsList()
-  {
-    $sql = "SELECT ob_pk, ob_topic from obligation_ref";
-    $obligationsList = $this->dbManager->getRows($sql);
-    return ($obligationsList);
-  }
-
-  /** @brief get obligations Details along with obligations id */
-  public function getObligationsDetails($id)
-  {
-    $sql = "SELECT * from obligation_ref WHERE ob_pk = $1";
-    $obligationsDetails = $this->dbManager->getRows($sql, array($id));
-    $obligationsArray=new Obligation($id);
-    $finVal=$obligationsArray->getObligations($obligationsDetails);
-    return ($finVal);
-  }
-
-  /** @brief get obligations Details of all obligations  */
-  public function getAllObligationsDetails()
-  {
-    $sql = "SELECT * from obligation_ref";
-    $obligationsDetails = $this->dbManager->getRows($sql);
-    $obligationsArray=new Obligation(0);
-    $finVal=$obligationsArray->getObligations($obligationsDetails);
-    return ($finVal);
   }
 
   /** @brief check if the text of this obligation is existing */
