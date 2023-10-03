@@ -295,6 +295,7 @@ class FolderController extends RestController
     }
     return $response->withJson($info->getArray(), $info->getCode());
   }
+
   /**
    * Get the all folder contents
    *
@@ -318,19 +319,19 @@ class FolderController extends RestController
       return $response->withJson($error->getArray(), $error->getCode());
     }
 
+    /** @var AjaxFolderContents $folderContents */
     $folderContents = $this->restHelper->getPlugin('foldercontents');
     $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
     $symfonyRequest->request->set('folder', $folderId);
     $symfonyRequest->request->set('fromRest', true);
-    $res = $folderContents->handle($symfonyRequest);
+    $contentList = $folderContents->handle($symfonyRequest);
+    $removableContents = $folderDao->getRemovableContents($folderId);
 
-    foreach ($folderDao->getRemovableContents($folderId) as $content) {
-      foreach ($res as &$value) {
-        if ($value['id'] == $content) {
-          $value['removable'] = true;
-        }
+    foreach ($contentList as &$value) {
+      if (in_array($value['id'], $removableContents)) {
+        $value['removable'] = true;
       }
     }
-    return $response->withJson($res, 200);
+    return $response->withJson($contentList, 200);
   }
 }

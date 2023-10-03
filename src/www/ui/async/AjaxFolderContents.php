@@ -52,17 +52,16 @@ class AjaxFolderContents extends DefaultPlugin
       $uploadStatus = " (" . $uploadStatus->getTypeName($upload['status_fk']) . ")";
       $results[$upload['foldercontents_pk']] = $upload['upload_filename'] . _(" from ") . Convert2BrowserTime($uploadDate) . $uploadStatus;
     }
-    $restRes = array_map(function($key, $value) {
-      return array(
-        'id' => $key,
-        'content' => $value,
-        'removable' => false
-      );
-    }, array_keys($results), $results);
 
     if (!$request->get('removable')) {
       if ($request->get('fromRest')) {
-        return $restRes;
+        return array_map(function($key, $value) {
+          return array(
+            'id' => $key,
+            'content' => $value,
+            'removable' => false
+          );
+        }, array_keys($results), $results);
       }
       return new JsonResponse($results);
     }
