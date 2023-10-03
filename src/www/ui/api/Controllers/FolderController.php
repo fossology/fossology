@@ -12,6 +12,7 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\Lib\Dao\FolderDao;
 use Fossology\UI\Ajax\AjaxFolderContents;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Folder;
@@ -268,5 +269,30 @@ class FolderController extends RestController
     $symfonyRequest->request->set('fromRest', true);
     $res = $folderContents->handle($symfonyRequest);
     return $response->withJson($res, 200);
+  }
+
+  /**
+   * Unlink the folder content from the parent
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function unlinkFolder($request, $response, $args)
+  {
+    $folderContentId = $args['contentId'];
+    if (!$this->dbHelper->doesIdExist("foldercontents", "foldercontents_pk", $folderContentId)) {
+      $info = new Info(404, "Folder content id not found!", InfoType::ERROR);
+    } else {
+      /** @var FolderDao $folderDao */
+      $folderDao = $this->container->get('dao.folder');
+      if ($folderDao->removeContent($folderContentId)) {
+        $info = new Info(200, "Folder unlinked successfully.", InfoType::INFO);
+      } else {
+        $info = new Info(400, "Content cannot be unlinked.", InfoType::ERROR);
+      }
+    }
+    return $response->withJson($info->getArray(), $info->getCode());
   }
 }
