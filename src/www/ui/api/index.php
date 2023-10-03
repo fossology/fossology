@@ -34,6 +34,7 @@ use Fossology\UI\Api\Controllers\CopyrightController;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\OverviewController;
+use Fossology\UI\Api\Controllers\ObligationController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\ConfController;
@@ -220,6 +221,13 @@ $app->group('/users',
     $app->get('/self', UserController::class . ':getCurrentUser');
     $app->post('/tokens', UserController::class . ':createRestApiToken');
     $app->get('/tokens/{type:\\w+}', UserController::class . ':getTokens');
+    $app->any('/{params:.*}', BadRequestController::class);
+  });
+
+////////////////////////////OBLIGATIONS/////////////////////
+$app->group('/obligations',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('/list', ObligationController::class . ':obligationsList');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

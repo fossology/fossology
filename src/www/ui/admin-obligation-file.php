@@ -6,7 +6,6 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
-use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\BusinessRules\ObligationMap;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\StringOperation;

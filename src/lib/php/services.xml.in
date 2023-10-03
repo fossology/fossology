@@ -160,8 +160,6 @@ SPDX-License-Identifier: FSFAP
             <argument type="service" id="db.manager"/>
         </service>
 
-        <service id="businessrules.obligationmap" class="Fossology\Lib\BusinessRules\ObligationMap" public="true">
-        </service>
         <service id="businessrules.obligationmap"
                  class="Fossology\Lib\BusinessRules\ObligationMap" public="true">
             <argument type="service" id="db.manager"/>
