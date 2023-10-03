@@ -2371,8 +2371,8 @@ paths:
         schema:
           type: string
           enum:
-              - active
-              - inactive
+            - active
+            - inactive
       - name: limit
         description: Limits of responses per request
         required: false
@@ -2724,7 +2724,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
-            $ref: '#/components/responses/defaultResponse'
+          $ref: '#/components/responses/defaultResponse'
 
   /jobs/dashboard/statistics:
     get:
@@ -3153,7 +3153,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetFolderContent'
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetFolderContent'
         '403':
           description: Folder is not accessible
           content:
@@ -3190,8 +3192,8 @@ paths:
         schema:
           type: string
           enum:
-              - active
-              - inactive
+            - active
+            - inactive
     get:
       operationId: getTotalFileCopyrights
       tags:
@@ -4324,7 +4326,7 @@ paths:
         Verify a license as new or variant of another license
       requestBody:
         description: The shortname of the parent license |
-           Same name if it's to be verified as a new license
+          Same name if it's to be verified as a new license
         required: true
         content:
           application/json:
@@ -4469,7 +4471,7 @@ paths:
           content:
             application/json:
               schema:
-                  $ref: '#/components/schemas/GetPHPInfo'
+                $ref: '#/components/schemas/GetPHPInfo'
         '403':
           description: Access denied
           content:
@@ -5051,18 +5053,6 @@ components:
         parent:
           type: integer
           description: Id of the parent folder (if any, null otherwise).
-    GetFolderContent:
-      type: object
-      properties:
-        id:
-          type: integer
-          description: Id of the folder content.
-        content:
-          type: string
-          description: Content of the folder.
-        removable:
-          type: boolean
-          description: Is the folder removable.
     TokenRequest:
       type: object
       properties:
@@ -5466,12 +5456,12 @@ components:
           description: field type
           type: string
           enum:
-          - int
-          - text
-          - textarea
-          - password
-          - dropdown
-          - boolean
+            - int
+            - text
+            - textarea
+            - password
+            - dropdown
+            - boolean
         label:
           description: field label
           type: string
@@ -5671,16 +5661,16 @@ components:
         successfulAgents:
           type: array
           items:
-              properties:
-                agent_id:
-                  type: integer
-                  example: 20
-                agent_rev:
-                  type: string
-                  example: "4.1.0.282-rc1.ffb851"
-                agent_name:
-                  type: string
-                  example: "reso"
+            properties:
+              agent_id:
+                type: integer
+                example: 20
+              agent_rev:
+                type: string
+                example: "4.1.0.282-rc1.ffb851"
+              agent_name:
+                type: string
+                example: "reso"
         uploadId:
           type: integer
           example: 10
