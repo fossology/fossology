@@ -258,6 +258,31 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /obligations/{id}:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the obligation
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getObligationsData
+      tags:
+        - Admin
+      summary: Get details of a particular obligation
+      description: >
+        Get the details of a particular obligation from the server.
+      responses:
+        '200':
+          description: The API information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObligationExtended'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /uploads/{id}:
     parameters:
       - name: id
@@ -6150,6 +6175,35 @@ components:
           obligation_topic:
             type: string
             example: Obligation text
+    ObligationExtended:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Obligation'
+      properties:
+        modification:
+          type: boolean
+          description: Applies on modified text?
+        active:
+          type: boolean
+          description: Obligation is active/inactive
+        textUpdatable:
+          type: boolean
+          description: Obligation text can be updated?
+        licenses:
+          type: array
+          description: List of associated licenses with obligation
+          items:
+            type: string
+            description: Shortname of license
+        candidateLicenses:
+          type: array
+          description: List of associated candidate licenses with obligation
+          items:
+            type: string
+            description: Shortname of candidate license
+        hash:
+          type: string
+          description: MD5 hash of obligation text
     AddMember:
       description: UserMember options
       type: object

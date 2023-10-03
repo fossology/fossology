@@ -14,8 +14,10 @@ namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\BusinessRules\ObligationMap;
 use Fossology\UI\Api\Helper\ResponseHelper;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\Obligation;
 use Psr\Http\Message\ServerRequestInterface;
-
 
 class ObligationController extends RestController
 {
@@ -50,5 +52,37 @@ class ObligationController extends RestController
       $finVal[] = $row;
     }
     return $response->withJson($finVal, 200);
+  }
+
+  /**
+   * Get details of obligations based on id
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+
+  function obligationsDetails($request, $response, $args)
+  {
+    $obligationId = intval($args['id']);
+    $returnVal = null;
+    if (!$this->dbHelper->doesIdExist("obligation_ref", "ob_pk", $obligationId)) {
+      $returnVal = new Info(404, "Obligation does not exist", InfoType::ERROR);
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $obligationInfo = $this->obligationMap->getObligationById($obligationId);
+    $licenses = $this->obligationMap->getLicenseList($obligationId);
+    $candidateLicenses = $this->obligationMap->getLicenseList($obligationId,
+      true);
+    $associatedLicenses = explode(";", $licenses);
+    $associatedCandidateLicenses = explode(";", $candidateLicenses);
+
+    $obligation = Obligation::fromArray($obligationInfo, true,
+      $associatedLicenses, $associatedCandidateLicenses);
+    return $response->withJson($obligation->getArray(), 200);
   }
 }
