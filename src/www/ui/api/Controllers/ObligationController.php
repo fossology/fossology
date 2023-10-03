@@ -12,34 +12,23 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\BusinessRules\ObligationMap;
 use Fossology\UI\Api\Helper\ResponseHelper;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ServerRequestInterface;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 
 class ObligationController extends RestController
 {
   /**
-   * @var ContainerInterface $container
-   * Slim container
+   * @var ObligationMap $obligationMap
+   * Obligation Map object
    */
-  protected $container;
-
-  /**
-   * @var obligationFile $obligationFile
-   * Obligation File object
-   */
-  private $obligationFile;
+  private $obligationMap;
 
   public function __construct($container)
   {
     parent::__construct($container);
-    $this->obligationFile = $this->restHelper->getPlugin('admin_obligation');
+    $this->obligationMap = $this->container->get('businessrules.obligationmap');
   }
 
   /**
@@ -54,7 +43,7 @@ class ObligationController extends RestController
   function obligationsList($request, $response, $args)
   {
     $finVal = [];
-    $listVal = $this->obligationFile->getObligationsList();
+    $listVal = $this->obligationMap->getObligations();
     foreach ($listVal as $val) {
       $row['id'] = intval($val['ob_pk']);
       $row['obligation_topic'] = $val['ob_topic'];
