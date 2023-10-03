@@ -3222,7 +3222,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-  /folders/{id}/contents/removable:
+  /folders/{id}/contents/unlinkable:
     parameters:
       - name: id
         in: path
@@ -3231,15 +3231,15 @@ paths:
         schema:
           type: integer
     get:
-      operationId: getRemovableContents
+      operationId: getUnlinkableContents
       tags:
         - Folders
-      summary: Get removable contents of a folder
+      summary: Get contents of a folder which can be unlinked
       description:
-        Get removable contents of a folder by id
+        Get unlinkable contents of a folder by id. These contents are copied.
       responses:
         '200':
-          description: Removable contents of the given folder
+          description: Unlinkable contents of the given folder
           content:
             application/json:
               schema:

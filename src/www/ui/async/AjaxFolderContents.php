@@ -62,21 +62,20 @@ class AjaxFolderContents extends DefaultPlugin
       $filterResults[$content] = $results[$content];
     }
 
-    $restRes = array_map(function($key, $value) {
-      return array(
-        'id' => $key,
-        'content' => $value,
-        'removable' => true
-      );
-    }, array_keys($filterResults), $filterResults);
+    if ($request->get('fromRest')) {
+      return array_map(function ($key, $value) {
+        return array(
+          'id' => $key,
+          'content' => $value,
+          'removable' => true
+        );
+      }, array_keys($filterResults), $filterResults);
+    }
 
     if (empty($filterResults)) {
       $filterResults["-1"] = "No removable content found";
     }
 
-    if ($request->get('fromRest')) {
-      return $restRes;
-    }
     return new JsonResponse($filterResults);
   }
 
