@@ -93,6 +93,7 @@ class Obligation
    * @param string $text
    * @param string $classification
    * @param string $comment
+   * @param boolean $extended
    */
   public function __construct($id, $topic = "", $type = "", $text = "",
     $classification = "", $comment = "", $extended = false)
