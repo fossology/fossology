@@ -12,6 +12,7 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\Lib\Application\LicenseCsvExport;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseAcknowledgementDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -27,6 +28,7 @@ use Fossology\UI\Api\Models\Obligation;
 use Fossology\UI\Page\AdminLicenseCandidate;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Psr7\Factory\StreamFactory;
 
 /**
  * @class LicenseController
@@ -877,5 +879,45 @@ class LicenseController extends RestController
       $suggestLicense = new \stdClass();
     }
     return $response->withJson($suggestLicense, 200);
+  }
+
+  /**
+   * Export licenses to CSV file
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function exportAdminLicenseToCSV($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $query = $request->getQueryParams();
+    $rf = 0;
+    if (array_key_exists('licenseId', $query)) {
+      $rf = intval($query['licenseId']);
+    }
+    if ($rf != 0 &&
+        (! $this->dbHelper->doesIdExist("license_ref", "rf_pk", $rf) &&
+         ! $this->dbHelper->doesIdExist("license_candidate", "rf_pk", $rf))) {
+      $error = new Info(404, "License not found.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $dbManager = $this->dbHelper->getDbManager();
+    $licenseCsvExport = new LicenseCsvExport($dbManager);
+    $content = $licenseCsvExport->createCsv($rf);
+    $fileName = "fossology-license-export-" . date("YMj-Gis");
+    $newResponse = $response->withHeader('Content-type', 'text/csv, charset=UTF-8')
+      ->withHeader('Content-Disposition', 'attachment; filename=' . $fileName . '.csv')
+      ->withHeader('Pragma', 'no-cache')
+      ->withHeader('Cache-Control', 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0')
+      ->withHeader('Expires', 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
+    $sf = new StreamFactory();
+    return $newResponse->withBody(
+      $content ? $sf->createStream($content) : $sf->createStream('')
+    );
   }
 }
