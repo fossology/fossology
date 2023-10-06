@@ -12,24 +12,15 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ServerRequestInterface;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 
 class CopyrightController extends RestController
 {
-  /**
-   * @var ContainerInterface $container
-   * Slim container
-   */
-  protected $container;
-
   /**
    * Get query parameter name for copyright filtering
    */
@@ -51,24 +42,7 @@ class CopyrightController extends RestController
   const COPYRIGHT_FETCH_LIMIT = 100;
 
   /**
-   * @var ClearingDao
-   */
-  private $clearingDao;
-
-  /**
-   * @var LicenseDao $licenseDao
-   * License Dao object
-   */
-  private $licenseDao;
-
-  /**
-   * @var UploadDao $uploadDao
-   * Upload Dao object
-   */
-  private $uploadDao;
-
-  /**
-   * @var copyrightHist $copyrightHist
+   * @var \CopyrightHistogram $copyrightHist
    * Copyright Histogram object
    */
   private $copyrightHist;
@@ -78,11 +52,18 @@ class CopyrightController extends RestController
    * Copyright Dao object
    */
   private $copyrightDao;
+  const TYPE_COPYRIGHT = 0x1;
+  const TYPE_EMAIL = 0x2;
+  const TYPE_URL = 0x4;
+  const TYPE_AUTHOR = 0x8;
+  const TYPE_ECC = 0x16;
+  const TYPE_KEYWORD = 0x32;
+  const TYPE_IPRA = 0x64;
 
   public function __construct($container)
   {
     parent::__construct($container);
-    $this->copyrightDao = $container->get('dao.copyright');
+    $this->copyrightDao = $this->container->get('dao.copyright');
     $this->copyrightHist = $this->restHelper->getPlugin('ajax-copyright-hist');
   }
 
@@ -96,189 +77,358 @@ class CopyrightController extends RestController
    */
   public function getFileCopyrights($request, $response, $args)
   {
-    $uploadPk = $args["id"];
-    $uploadTreeId = $args["itemId"];
-    $query = $request->getQueryParams();
-    $limit = $request->getHeaderLine(self::LIMIT_PARAM);
-    $statusVal = true;
-    $returnVal = null;
-    $finalVal = [];
-    if (!empty($limit)) {
-      $limit = filter_var($limit, FILTER_VALIDATE_INT);
-      if ($limit < 1) {
-        $info = new Info(
-          400,
-          "limit should be positive integer > 1",
-          InfoType::ERROR
-        );
-        $limit = self::COPYRIGHT_FETCH_LIMIT;
-      }
-    } else {
-      $limit = self::COPYRIGHT_FETCH_LIMIT;
-    }
-    if (!array_key_exists(self::COPYRIGHT_PARAM, $query)) {
-      $returnVal = new Info(400, "Bad Request. 'status' is a required query param with expected values 'active' or 'inactive", InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
-    $status = $query[self::COPYRIGHT_PARAM];
-    if ($status == "active") {
-      $statusVal = true;
-    } else if ($status == "inactive") {
-      $statusVal = false;
-    } else {
-      $returnVal = new Info(400, "Bad Request. Invalid query parameter, expected values 'active' or 'inactive", InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
-    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
-      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-    } else if (!$this->dbHelper->doesIdExist($this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk), "uploadtree_pk", $uploadTreeId)) {
-      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
-    }
-    if ($returnVal !== null) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
-    $agentId = $this->copyrightHist->getAgentId($uploadPk, 'copyright_ars');
-    $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk);
-    $page = $request->getHeaderLine(self::PAGE_PARAM);
-    if (empty($page) && $page != "0") {
-      $page = 1;
-    }
-    if (!empty($page) || $page == "0") {
-      $page = filter_var($page, FILTER_VALIDATE_INT);
-      if ($page <= 0) {
-        $info = new Info(
-          400,
-          "page should be positive integer > 0",
-          InfoType::ERROR
-        );
-      }
-      $offset = $limit * ($page - 1);
-      if ($info !== null) {
-        $retVal = $response->withJson($info->getArray(), $info->getCode());
-        return $retVal;
-      }
-      list($rows, $iTotalDisplayRecords, $iTotalRecords)  = $this->copyrightHist->getCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName, $agentId, 'statement', 'active', $statusVal, $offset, $limit);
-      foreach ($rows as $row) {
-        $row['copyright_count'] = intval($row['copyright_count']);
-        $finalVal[] = $row;
-      }
-      $totalPages = intval(ceil($iTotalRecords / $limit));
-      if ($page > $totalPages) {
-        $info = new Info(
-          400,
-          "Can not exceed total pages: $totalPages",
-          InfoType::ERROR
-        );
-        $errorHeader = ["X-Total-Pages", $totalPages];
-      }
-    }
-    if ($info !== null) {
-      $retVal = $response->withJson($info->getArray(), $info->getCode());
-      if ($errorHeader) {
-        $retVal = $retVal->withHeader($errorHeader[0], $errorHeader[1]);
-      }
-      return $retVal;
-    }
-    return $response->withHeader("X-Total-Pages", $totalPages)->withJson($finalVal, 200);
+    return $this->getFileCX($request, $response, $args, self::TYPE_COPYRIGHT);
   }
 
   /**
-   * Delete copyrights for a particular file
+   * Get all emails for a particular upload-tree
    *
    * @param  ServerRequestInterface $request
    * @param  ResponseHelper         $response
    * @param  array                  $args
    * @return ResponseHelper
    */
-  public function deleteFileCopyrights($request, $response, $args)
+  public function getFileEmail($request, $response, $args)
   {
-
-    $uploadDao = $this->restHelper->getUploadDao();
-    $uploadPk = intval($args['id']);
-    $uploadTreeId = intval($args['itemId']);
-    $copyrightHash = $args['hash'];
-    $userId = $this->restHelper->getUserId();
-    $cpTable = $this->copyrightHist->getTableName('statement');
-    $returnVal = null;
-
-    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
-      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-    } else if (!$this->dbHelper->doesIdExist($uploadDao->getUploadTreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
-      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
-    }
-    if ($returnVal !== null) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
-    $uploadTreeTableName = $uploadDao->getUploadTreeTableName($uploadTreeId);
-    $item = $uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
-    $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'delete');
-    $returnVal = new Info(200, "Successfully removed Copyright.", InfoType::INFO);
-    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    return $this->getFileCX($request, $response, $args, self::TYPE_EMAIL);
   }
 
   /**
-   * Update copyrights for a particular file
+   * Get all urls for a particular upload-tree
    *
    * @param  ServerRequestInterface $request
    * @param  ResponseHelper         $response
    * @param  array                  $args
    * @return ResponseHelper
    */
-  public function updateFileCopyrights($request, $response, $args)
+  public function getFileUrl($request, $response, $args)
   {
-    $uploadTreeId = intval($args["itemId"]);
-    $uploadPk = intval($args["id"]);
-    $copyrightHash = $args["hash"];
-    $userId = $this->restHelper->getUserId();
-    $cpTable = $this->copyrightHist->getTableName('statement');
-    $returnVal = null;
-    $body = $this->getParsedBody($request);
-    $content = $body['content'];
-    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
-      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-    } else if (!$this->dbHelper->doesIdExist($this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
-      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
-    }
-    if ($returnVal !== null) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
-    $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
-    $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
-    $this->copyrightDao->updateTable($item, $copyrightHash, $content, $userId, $cpTable);
-    $returnVal = new Info(200, "Successfully Updated Copyright.", InfoType::INFO);
-    return $response->withJson($returnVal->getArray(), 200);
+    return $this->getFileCX($request, $response, $args, self::TYPE_URL);
   }
 
   /**
-   * Restore copyrights for a particular file
+   * Get all authors for a particular upload-tree
    *
    * @param  ServerRequestInterface $request
    * @param  ResponseHelper         $response
    * @param  array                  $args
    * @return ResponseHelper
    */
-  public function restoreFileCopyrights($request, $response, $args)
+  public function getFileAuthor($request, $response, $args)
   {
-    $uploadPk = intval($args['id']);
-    $uploadTreeId = intval($args['itemId']);
-    $copyrightHash = ($args['hash']);
-    $userId = $this->restHelper->getUserId();
-    $cpTable = $this->copyrightHist->getTableName('statement');
-    $returnVal = null;
+    return $this->getFileCX($request, $response, $args, self::TYPE_AUTHOR);
+  }
 
-    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
-      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-    } else if (!$this->dbHelper->doesIdExist($this->restHelper->getUploadDao()->getUploadTreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
-      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
-    }
-    if ($returnVal !== null) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
-    $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
-    $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
-    $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'rollback');
-    $returnVal = new Info(200, "Successfully restored Copyright.", InfoType::INFO);
-    return $response->withJson($returnVal->getArray(), 200);
+  /**
+   * Get all ecc for a particular upload-tree
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getFileEcc($request, $response, $args)
+  {
+    return $this->getFileCX($request, $response, $args, self::TYPE_ECC);
+  }
+
+  /**
+   * Get all keywords for a particular upload-tree
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getFileKeyword($request, $response, $args)
+  {
+    return $this->getFileCX($request, $response, $args, self::TYPE_KEYWORD);
+  }
+
+  /**
+   * Get all ipra for a particular upload-tree
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getFileIpra($request, $response, $args)
+  {
+    return $this->getFileCX($request, $response, $args, self::TYPE_IPRA);
+  }
+
+  /**
+   * Delete copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileCopyright($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_COPYRIGHT);
+  }
+
+  /**
+   * Delete email for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileEmail($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_EMAIL);
+  }
+
+  /**
+   * Delete URL for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileUrl($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_URL);
+  }
+
+  /**
+   * Delete author for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileAuthor($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_AUTHOR);
+  }
+
+  /**
+   * Delete ECC for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileEcc($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_ECC);
+  }
+
+  /**
+   * Delete keyword for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileKeyword($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_KEYWORD);
+  }
+
+  /**
+   * Delete IPRA for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileIpra($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_IPRA);
+  }
+
+  /**
+   * Update copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileCopyright($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_COPYRIGHT);
+  }
+
+  /**
+   * Update email for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileEmail($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_EMAIL);
+  }
+
+  /**
+   * Update URL for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileUrl($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_URL);
+  }
+
+  /**
+   * Update author for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileAuthor($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_AUTHOR);
+  }
+
+  /**
+   * Update ECC for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileEcc($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_ECC);
+  }
+
+  /**
+   * Update keyword for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileKeyword($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_KEYWORD);
+  }
+
+  /**
+   * Update IPRA for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileIpra($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_IPRA);
+  }
+
+  /**
+   * Restore copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileCopyright($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_COPYRIGHT);
+  }
+
+  /**
+   * Restore email for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileEmail($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_EMAIL);
+  }
+
+  /**
+   * Restore URL for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileUrl($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_URL);
+  }
+
+  /**
+   * Restore author for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileAuthor($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_AUTHOR);
+  }
+
+  /**
+   * Restore ECC for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileEcc($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_ECC);
+  }
+
+  /**
+   * Restore keyword for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileKeyword($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_KEYWORD);
+  }
+
+  /**
+   * Restore IPRA for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileIpra($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_IPRA);
   }
 
   /**
@@ -322,5 +472,319 @@ class CopyrightController extends RestController
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getUploadtreeTableName($uploadPk);
     $returnVal = $this->copyrightDao->getTotalCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName, $agentId, 'statement', $statusVal);
     return $response->withJson(array("total_copyrights" => intval($returnVal)), 200);
+  }
+
+  /**
+   * Get all cx for a particular upload-tree
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @param int $cxType Type of data to fetch (self::TYPE_*)
+   * @return ResponseHelper
+   */
+  private function getFileCX($request, $response, $args, $cxType)
+  {
+    switch ($cxType) {
+      case self::TYPE_COPYRIGHT:
+        $dataType = 'statement';
+        $agentArs = 'copyright_ars';
+        break;
+      case self::TYPE_EMAIL:
+        $dataType = 'email';
+        $agentArs = 'copyright_ars';
+        break;
+      case self::TYPE_URL:
+        $dataType = 'url';
+        $agentArs = 'copyright_ars';
+        break;
+      case self::TYPE_AUTHOR:
+        $dataType = 'author';
+        $agentArs = 'copyright_ars';
+        break;
+      case self::TYPE_ECC:
+        $dataType = 'ecc';
+        $agentArs = 'ecc_ars';
+        break;
+      case self::TYPE_KEYWORD:
+        $dataType = 'keyword';
+        $agentArs = 'keyword_ars';
+        break;
+      case self::TYPE_IPRA:
+        $dataType = 'ipra';
+        $agentArs = 'ipra_ars';
+        break;
+      default:
+        $dataType = 'statement';
+        $agentArs = 'copyright_ars';
+    }
+    $uploadPk = $args["id"];
+    $uploadTreeId = $args["itemId"];
+    $query = $request->getQueryParams();
+    $limit = $request->getHeaderLine(self::LIMIT_PARAM);
+    $returnVal = null;
+    $info = null;
+    $finalVal = [];
+    if (!empty($limit)) {
+      $limit = filter_var($limit, FILTER_VALIDATE_INT);
+      if ($limit < 1) {
+        $info = new Info(
+          400,
+          "limit should be positive integer > 1",
+          InfoType::ERROR
+        );
+        $limit = self::COPYRIGHT_FETCH_LIMIT;
+      }
+    } else {
+      $limit = self::COPYRIGHT_FETCH_LIMIT;
+    }
+    if (!array_key_exists(self::COPYRIGHT_PARAM, $query)) {
+      $returnVal = new Info(400, "Bad Request. 'status' is a required query param with expected values 'active' or 'inactive", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $status = $query[self::COPYRIGHT_PARAM];
+    if ($status == "active") {
+      $statusVal = true;
+    } else if ($status == "inactive") {
+      $statusVal = false;
+    } else {
+      $returnVal = new Info(400, "Bad Request. Invalid query parameter, expected values 'active' or 'inactive", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $agentId = $this->copyrightHist->getAgentId($uploadPk, $agentArs);
+    $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk);
+    $page = $request->getHeaderLine(self::PAGE_PARAM);
+    if (empty($page) && $page != "0") {
+      $page = 1;
+    }
+    if (!empty($page) || $page == "0") {
+      $page = filter_var($page, FILTER_VALIDATE_INT);
+      if ($page <= 0) {
+        $info = new Info(
+          400,
+          "page should be positive integer > 0",
+          InfoType::ERROR
+        );
+      }
+      $offset = $limit * ($page - 1);
+      if ($info !== null) {
+        $retVal = $response->withJson($info->getArray(), $info->getCode());
+        return $retVal;
+      }
+      list($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->copyrightHist
+        ->getCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName,
+          $agentId, $dataType, 'active', $statusVal, $offset, $limit);
+      foreach ($rows as $row) {
+        $row['count'] = intval($row['copyright_count']);
+        unset($row['copyright_count']);
+        $finalVal[] = $row;
+      }
+      $totalPages = intval(ceil($iTotalRecords / $limit));
+      if ($page > $totalPages) {
+        $info = new Info(
+          400,
+          "Can not exceed total pages: $totalPages",
+          InfoType::ERROR
+        );
+        $errorHeader = ["X-Total-Pages", $totalPages];
+      }
+    }
+    if ($info !== null) {
+      $retVal = $response->withJson($info->getArray(), $info->getCode());
+      if ($errorHeader) {
+        $retVal = $retVal->withHeader($errorHeader[0], $errorHeader[1]);
+      }
+      return $retVal;
+    }
+    return $response->withHeader("X-Total-Pages", $totalPages)->withJson($finalVal, 200);
+  }
+
+  /**
+   * Delete cx for a particular file
+   *
+   * @param array $args
+   * @param ResponseHelper $response
+   * @param int $cxType Type of data to fetch (self::TYPE_*)
+   * @return ResponseHelper
+   */
+  private function deleteFileCX($args, $response, $cxType)
+  {
+    switch ($cxType) {
+      case self::TYPE_COPYRIGHT:
+        $dataType = 'statement';
+        $delName = 'copyright';
+        break;
+      case self::TYPE_EMAIL:
+        $delName = $dataType = 'email';
+        break;
+      case self::TYPE_URL:
+        $delName = $dataType = 'url';
+        break;
+      case self::TYPE_AUTHOR:
+        $delName = $dataType = 'author';
+        break;
+      case self::TYPE_ECC:
+        $delName = $dataType = 'ecc';
+        break;
+      case self::TYPE_KEYWORD:
+        $delName = $dataType = 'keyword';
+        break;
+      case self::TYPE_IPRA:
+        $delName = $dataType = 'ipra';
+        break;
+      default:
+        $dataType = 'statement';
+        $delName = 'copyright';
+    }
+
+    $uploadDao = $this->restHelper->getUploadDao();
+    $uploadPk = intval($args['id']);
+    $uploadTreeId = intval($args['itemId']);
+    $copyrightHash = $args['hash'];
+    $userId = $this->restHelper->getUserId();
+    $cpTable = $this->copyrightHist->getTableName($dataType);
+    $returnVal = null;
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($uploadDao->getUploadTreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $uploadTreeTableName = $uploadDao->getUploadTreeTableName($uploadTreeId);
+    $item = $uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+    $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'delete');
+    $returnVal = new Info(200, "Successfully removed $delName.", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Restore cx for a particular file
+   *
+   * @param array $args
+   * @param ResponseHelper $response
+   * @param int $cxType Type of data to fetch (self::TYPE_*)
+   * @return ResponseHelper
+   */
+  private function restoreFileCx($args, $response, $cxType)
+  {
+    switch ($cxType) {
+      case self::TYPE_COPYRIGHT:
+        $dataType = 'statement';
+        $resName = 'copyright';
+        break;
+      case self::TYPE_EMAIL:
+        $resName = $dataType = 'email';
+        break;
+      case self::TYPE_URL:
+        $resName = $dataType = 'url';
+        break;
+      case self::TYPE_AUTHOR:
+        $resName = $dataType = 'author';
+        break;
+      case self::TYPE_ECC:
+        $resName = $dataType = 'ecc';
+        break;
+      case self::TYPE_KEYWORD:
+        $resName = $dataType = 'keyword';
+        break;
+      case self::TYPE_IPRA:
+        $resName = $dataType = 'ipra';
+        break;
+      default:
+        $dataType = 'statement';
+        $resName = 'copyright';
+    }
+    $uploadPk = intval($args['id']);
+    $uploadTreeId = intval($args['itemId']);
+    $copyrightHash = ($args['hash']);
+    $userId = $this->restHelper->getUserId();
+    $cpTable = $this->copyrightHist->getTableName($dataType);
+    $returnVal = null;
+
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($this->restHelper->getUploadDao()->getUploadTreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
+    $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+    $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'rollback');
+    $returnVal = new Info(200, "Successfully restored $resName.", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), 200);
+  }
+
+  /**
+   * Update cx for a particular file
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @param int $cxType Type of data to fetch (self::TYPE_*)
+   * @return ResponseHelper
+   */
+  private function updateFileCx($request, $response, $args, $cxType)
+  {
+    switch ($cxType) {
+      case self::TYPE_COPYRIGHT:
+        $dataType = 'statement';
+        $resName = 'copyright';
+        break;
+      case self::TYPE_EMAIL:
+        $resName = $dataType = 'email';
+        break;
+      case self::TYPE_URL:
+        $resName = $dataType = 'url';
+        break;
+      case self::TYPE_AUTHOR:
+        $resName = $dataType = 'author';
+        break;
+      case self::TYPE_ECC:
+        $resName = $dataType = 'ecc';
+        break;
+      case self::TYPE_KEYWORD:
+        $resName = $dataType = 'keyword';
+        break;
+      case self::TYPE_IPRA:
+        $resName = $dataType = 'ipra';
+        break;
+      default:
+        $dataType = 'statement';
+        $resName = 'copyright';
+    }
+    $uploadTreeId = intval($args["itemId"]);
+    $uploadPk = intval($args["id"]);
+    $copyrightHash = $args["hash"];
+    $userId = $this->restHelper->getUserId();
+    $cpTable = $this->copyrightHist->getTableName($dataType);
+    $returnVal = null;
+    $body = $this->getParsedBody($request);
+    $content = $body['content'];
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (!$this->dbHelper->doesIdExist($this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
+      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
+    }
+    if ($returnVal !== null) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
+    $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+    $this->copyrightDao->updateTable($item, $copyrightHash, $content, $userId, $cpTable);
+    $returnVal = new Info(200, "Successfully Updated $resName.", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), 200);
   }
 }

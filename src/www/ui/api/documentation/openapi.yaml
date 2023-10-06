@@ -3,7 +3,7 @@
 
 # SPDX-License-Identifier: GPL-2.0-only
 
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
@@ -55,6 +55,110 @@ tags:
     description: Maintenance operations
   - name: Overview
     description: Overview of FOSSology operations
+
+x-reuse:
+  - &cxGetParams
+    - name: id
+      required: true
+      description: Upload Id
+      in: path
+      schema:
+        type: integer
+    - name: itemId
+      required: true
+      description: UploadTree ID
+      in: path
+      schema:
+        type: integer
+    - name: status
+      required: true
+      in: query
+      description: Status of the CX
+      schema:
+        type: string
+        enum:
+          - active
+          - inactive
+    - name: limit
+      description: Limits of responses per request
+      required: false
+      in: header
+      schema:
+        type: integer
+        default: 100
+        minimum: 1
+        maximum: 1000
+    - name: page
+      description: Page number for responses
+      required: false
+      in: header
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+  - &cxUpdateParams
+    - name: id
+      required: true
+      description: Upload ID
+      in: path
+      schema:
+        type: integer
+    - name: itemId
+      required: true
+      description: Upload tree ID
+      in: path
+      schema:
+        type: integer
+    - name: hash
+      required: true
+      description: CX hash
+      in: path
+      schema:
+        type: string
+  - &cxGetResponses
+    '200':
+      description: OK
+      headers:
+        X-Total-Pages:
+          description: Total number of pages which can be generated based on limit
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GetFileCopyrights'
+    '400':
+      description: "Bad Request. 'upload' is a required query param"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Info'
+    default:
+      $ref: '#/components/responses/defaultResponse'
+  - &cxUpdateResponses
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Info'
+    '403':
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Info'
+    default:
+      $ref: '#/components/responses/defaultResponse'
+  - &cxUpdateBody
+    description: Updated text
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/SetCopyrightInfo'
 
 paths:
   /tokens:
@@ -354,7 +458,6 @@ paths:
           description: Obligation id to export, 0 for all
           in: query
           required: false
-          default: 0
           schema:
             type: integer
       tags:
@@ -2510,73 +2613,249 @@ paths:
           $ref: '#/components/responses/defaultResponse'
 
   /uploads/{id}/item/{itemId}/copyrights:
-    parameters:
-      - name: id
-        required: true
-        description: Upload Id
-        in: path
-        schema:
-          type: integer
-      - name: itemId
-        required: true
-        description: UploadTree ID
-        in: path
-        schema:
-          type: integer
-      - name: status
-        required: true
-        in: query
-        description: status of the copyright
-        schema:
-          type: string
-          enum:
-            - active
-            - inactive
-      - name: limit
-        description: Limits of responses per request
-        required: false
-        in: header
-        schema:
-          type: integer
-          default: 100
-          minimum: 1
-          maximum: 1000
-      - name: page
-        description: Page number for responses
-        required: false
-        in: header
-        schema:
-          type: integer
-          default: 1
-          minimum: 1
+    parameters: *cxGetParams
     get:
       operationId: getFileCopyrights
       tags:
         - Copyrights
       summary: Get the copyrights of the mentioned upload tree ID
       description: Returns the list of copyrights associated with the file
-      responses:
-        '200':
-          description: OK
-          headers:
-            X-Total-Pages:
-              description: Total number of pages which can be generated based on limit
-              schema:
-                type: integer
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/GetFileCopyrights'
-        '400':
-          description: "Bad Request. 'upload' is a required query param"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
+      responses: *cxGetResponses
+
+  /uploads/{id}/item/{itemId}/copyrights/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileCopyrights
+      tags:
+        - Copyrights
+      summary: Deletes a copyright for a file
+      description: Deletes a copyright statement for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileCopyrights
+      tags:
+        - Copyrights
+      summary: Restores a copyright for a file
+      description: Restores a copyright statement for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileCopyrights
+      tags:
+        - Copyrights
+      summary: Updates a copyright for a file
+      description: Updates a copyright statement for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
+
+  /uploads/{id}/item/{itemId}/emails:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileEmails
+      tags:
+        - Copyrights
+      summary: Get the emails of the mentioned upload tree ID
+      description: Returns the list of emails associated with the file
+      responses: *cxGetResponses
+
+  /uploads/{id}/item/{itemId}/emails/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileEmails
+      tags:
+        - Copyrights
+      summary: Deletes an email for a file
+      description: Deletes an email statement for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileEmail
+      tags:
+        - Copyrights
+      summary: Restores an email for a file
+      description: Restores an email statement for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileEmail
+      tags:
+        - Copyrights
+      summary: Updates an email for a file
+      description: Updates an email statement for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
+
+  /uploads/{id}/item/{itemId}/urls:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileUrls
+      tags:
+        - Copyrights
+      summary: Get the URLs of the mentioned upload tree ID
+      description: Returns the list of URLs associated with the file
+      responses: *cxGetResponses
+
+  /uploads/{id}/item/{itemId}/urls/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileUrl
+      tags:
+        - Copyrights
+      summary: Deletes an URL for a file
+      description: Deletes an URL statement for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileUrl
+      tags:
+        - Copyrights
+      summary: Restores an URL for a file
+      description: Restores an URL statement for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileUrl
+      tags:
+        - Copyrights
+      summary: Updates an URL for a file
+      description: Updates an URL statement for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
+
+  /uploads/{id}/item/{itemId}/authors:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileAuthors
+      tags:
+        - Copyrights
+      summary: Get the authors of the mentioned upload tree ID
+      description: Returns the list of authors associated with the file
+      responses: *cxGetResponses
+
+  /uploads/{id}/item/{itemId}/authors/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileAuthor
+      tags:
+        - Copyrights
+      summary: Deletes an author for a file
+      description: Deletes an author statement for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileAuthor
+      tags:
+        - Copyrights
+      summary: Restores an author for a file
+      description: Restores an author statement for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileAuthor
+      tags:
+        - Copyrights
+      summary: Updates an author for a file
+      description: Updates an author statement for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
+
+  /uploads/{id}/item/{itemId}/eccs:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileEccs
+      tags:
+        - Copyrights
+      summary: Get the ECCs of the mentioned upload tree ID
+      description: Returns the list of ECCs associated with the file
+      responses: *cxGetResponses
+
+  /uploads/{id}/item/{itemId}/eccs/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileEcc
+      tags:
+        - Copyrights
+      summary: Deletes an ECC for a file
+      description: Deletes an ECC statement for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileEcc
+      tags:
+        - Copyrights
+      summary: Restores an ECC for a file
+      description: Restores an ECC statement for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileEcc
+      tags:
+        - Copyrights
+      summary: Updates an ECC for a file
+      description: Updates an ECC statement for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
+
+  /uploads/{id}/item/{itemId}/keywords:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileKeywords
+      tags:
+        - Copyrights
+      summary: Get the keywords of the mentioned upload tree ID
+      description: Returns the list of keywords associated with the file
+      responses: *cxGetResponses
+
+  /uploads/{id}/item/{itemId}/keywords/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileKeyword
+      tags:
+        - Copyrights
+      summary: Deletes a keyword for a file
+      description: Deletes a keyword statement for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileKeyword
+      tags:
+        - Copyrights
+      summary: Restores a keyword for a file
+      description: Restores a keyword statement for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileKeyword
+      tags:
+        - Copyrights
+      summary: Updates a keyword for a file
+      description: Updates a keyword statement for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
+
+  /uploads/{id}/item/{itemId}/ipras:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileIpras
+      tags:
+        - Copyrights
+      summary: Get the IPRAs of the mentioned upload tree ID
+      description: Returns the list of IPRAs associated with the file
+      responses: *cxGetResponses
+
+  /uploads/{id}/item/{itemId}/ipras/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileIpra
+      tags:
+        - Copyrights
+      summary: Deletes an IPRA for a file
+      description: Deletes an IPRA statement for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileIpra
+      tags:
+        - Copyrights
+      summary: Restores an IPRA for a file
+      description: Restores an IPRA statement for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileIpra
+      tags:
+        - Copyrights
+      summary: Updates an IPRA for a file
+      description: Updates an IPRA statement for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
 
   /jobs:
     parameters:
@@ -2974,331 +3253,6 @@ paths:
                 $ref: '#/components/schemas/Info'
         '500':
           description: Failed to kill job.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
-  /uploads/{id}/item/{itemId}/copyrights/{hash}:
-    parameters:
-      - name: id
-        required: true
-        description: upload ID
-        in: path
-        schema:
-          type: integer
-      - name: itemId
-        required: true
-        description: Upload tree ID
-        in: path
-        schema:
-          type: integer
-      - name: hash
-        required: true
-        description: copyright hash
-        in: path
-        schema:
-          type: string
-    delete:
-      operationId: deleteFileCopyrights
-      tags:
-        - Copyrights
-      summary: Deletes a copyright for a file
-      description: Deletes a copyright statement for a particular file
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Info'
-        '403':
-          description: Access denied
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
-    patch:
-      operationId: restoreFileCopyrights
-      tags:
-        - Copyrights
-      summary: Restores a copyright for a file
-      description: Restores a copyright statement for a particular file
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Info'
-        '403':
-          description: Access denied
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
-    put:
-      operationId: updateFileCopyrights
-      tags:
-        - Copyrights
-      summary: Updates a copyright for a file
-      description: Updates a copyright statement for a particular file
-      requestBody:
-        description: updateCopyright Payload
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SetCopyrightInfo'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Info'
-        '403':
-          description: Access denied
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
-  /uploads/{id}/item/{itemId}/author:
-    parameters:
-      - name: id
-        required: true
-        description: Upload Id
-        in: path
-        schema:
-          type: integer
-      - name: itemId
-        required: true
-        description: UploadTree ID
-        in: path
-        schema:
-          type: integer
-      - name: status
-        required: true
-        in: query
-        description: status of the author
-        schema:
-          type: string
-          enum:
-              - active
-              - inactive
-      - name: limit
-        description: Limits of responses per request
-        required: false
-        in: header
-        schema:
-          type: integer
-          default: 100
-          minimum: 1
-          maximum: 1000
-      - name: page
-        description: Page number for responses
-        required: false
-        in: header
-        schema:
-          type: integer
-          default: 1
-          minimum: 1
-    get:
-      operationId: getFileAuthors
-      tags:
-        - Authors
-      summary: Get the authors of the mentioned upload tree ID
-      description: Returns the list of authors associated with the file
-      responses:
-        '200':
-          description: OK
-          headers:
-            X-Total-Pages:
-              description: Total number of pages which can be generated based on limit
-              schema:
-                type: integer
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/GetFileCopyrights'
-        '400':
-          description: "Bad Request. 'upload' is a required query param"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
-  /uploads/{id}/item/{itemId}/author/{hash}:
-    parameters:
-      - name: id
-        required: true
-        description: upload ID
-        in: path
-        schema:
-          type: integer
-      - name: itemId
-        required: true
-        description: Upload tree ID
-        in: path
-        schema:
-          type: integer
-      - name: hash
-        required: true
-        description: author hash
-        in: path
-        schema:
-          type: string
-    delete:
-      operationId: deleteFileAuthors
-      tags:
-        - Authors
-      summary: Deletes a author for a file
-      description: Deletes a author entry for a particular file
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Info'
-        '403':
-          description: Access denied
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
-    patch:
-      operationId: restoreFileAuthors
-      tags:
-        - Authors
-      summary: Restores a Author for a file
-      description: Restores a Author entry for a particular file
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Info'
-        '403':
-          description: Access denied
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
-    put:
-      operationId: updateFileAuthors
-      tags:
-        - Authors
-      summary: Updates a Author for a file
-      description: Updates a Author entry for a particular file
-      requestBody:
-        description: updateAuthor Payload
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SetCopyrightInfo'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Info'
-        '403':
-          description: Access denied
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
-  /uploads/{id}/item/{ItemId}/totalauthor:
-    parameters:
-      - name: id
-        required: true
-        description: Upload Id
-        in: path
-        schema:
-          type: integer
-      - name: ItemId
-        required: true
-        description: Upload Tree ID
-        in: path
-        schema:
-          type: integer
-      - name: status
-        required: true
-        in: query
-        description: status of the copyright
-        schema:
-          type: string
-          enum:
-              - active
-              - inactive
-    get:
-      operationId: getTotalFileAuthors
-      tags:
-        - Authors
-      summary: Get the total authors of the mentioned upload tree ID
-      description: Returns the total number of authors associated with the file
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  allOf:
-                    - type: object
-                      properties:
-                        total_authors:
-                          type: integer
-                          description: Total Number of authors for the uploadtree
-                          example:
-                            125
-        '400':
-          description: "Bad Request. 'upload' is a required query param"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        '403':
-          description: Upload is not accessible
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        '404':
-          description: Upload does not exist
           content:
             application/json:
               schema:
@@ -4425,7 +4379,6 @@ paths:
           description: License id to export, 0 for all
           in: query
           required: false
-          default: 0
           schema:
             type: integer
       tags:
@@ -5192,18 +5145,6 @@ components:
         content:
           type: string
           description: Copyright text
-        concludedNoLicenseFoundCount:
-          type: integer
-          description: No. of concluded no license found.
-        fileCount:
-          type: integer
-          description: No. of files in the upload.
-        noScannerLicenseFoundCount:
-          type: integer
-          description: No. of no scanner license found.
-        scannerUniqueLicenseCount:
-          type: integer
-          description: No. of unique licenses found by scanner.
     Fileinfo:
       type: object
       properties:
@@ -5631,18 +5572,18 @@ components:
               description: Link to download the report
               type: string
     GetFileCopyrights:
-      description: Copyright details of a file
+      description: CX details of a file
       type: object
       properties:
         content:
           type: string
-          description: Copyright content
+          description: CX content
         hash:
           type: string
-          description: copyright hash
-        copyright_count:
+          description: CX hash
+        count:
           type: integer
-          description: count of the copyrights
+          description: Count of the CXs
     ShowJob:
       description: History of all the jobs and the job queue info
       type: object
