@@ -897,8 +897,8 @@ class LicenseController extends RestController
     }
     $query = $request->getQueryParams();
     $rf = 0;
-    if (array_key_exists('licenseId', $query)) {
-      $rf = intval($query['licenseId']);
+    if (array_key_exists('id', $query)) {
+      $rf = intval($query['id']);
     }
     if ($rf != 0 &&
         (! $this->dbHelper->doesIdExist("license_ref", "rf_pk", $rf) &&
@@ -919,72 +919,5 @@ class LicenseController extends RestController
     return $newResponse->withBody(
       $content ? $sf->createStream($content) : $sf->createStream('')
     );
-  }
-
-  /**
-   * Import Admin License Obligations from CSV
-   *
-   * @param Request $request
-   * @param ResponseHelper $response
-   * @param array $args
-   * @return ResponseHelper
-   */
-  public function importObligationsFromCSV($request, $response, $args)
-  {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
-
-    $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
-    $adminLicenseObligationFromCsv = $this->restHelper->getPlugin('admin_obligation_from_csv');
-
-    $uploadedFile = $symReq->files->get($adminLicenseObligationFromCsv->getFileInputName(),
-      null);
-
-    $requestBody = $this->getParsedBody($request);
-    $delimiter = ',';
-    $enclosure = '"';
-    if (array_key_exists("delimiter", $requestBody) && !empty($requestBody["delimiter"])) {
-      $delimiter = $requestBody["delimiter"];
-    }
-    if (array_key_exists("enclosure", $requestBody) && !empty($requestBody["enclosure"])) {
-      $enclosure = $requestBody["enclosure"];
-    }
-
-    $res = $adminLicenseObligationFromCsv->handleFileUpload($uploadedFile, $delimiter, $enclosure, true);
-    $newInfo = new Info($res[2], $res[1], $res[0] == 200 ? InfoType::INFO : InfoType::ERROR);
-
-    return $response->withJson($newInfo->getArray(), $newInfo->getCode());
-  }
-
-  /**
-   * Export Obligations to CSV
-   *
-   * @param Request $request
-   * @param ResponseHelper $response
-   * @param array $args
-   * @return ResponseHelper
-   */
-  public function exportObligationsToCSV($request, $response, $args)
-  {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
-    $dbManager = $this->dbHelper->getDbManager();
-    $obligationCsvExport = new \Fossology\Lib\Application\ObligationCsvExport($dbManager);
-    $content = $obligationCsvExport->createCsv(0);
-    $fileName = "fossology-obligations-export-".date("YMj-Gis");
-    $newResponse = $response->withHeader('Content-type', 'text/csv, charset=UTF-8')
-      ->withHeader('Content-Disposition', 'attachment; filename=' . $fileName . '.csv')
-      ->withHeader('Pragma', 'no-cache')
-      ->withHeader('Cache-Control', 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0')
-      ->withHeader('Expires', 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
-    $sf = new StreamFactory();
-    $newResponse = $newResponse->withBody(
-      $content ? $sf->createStream($content) : $sf->createStream('')
-    );
-    return ($newResponse);
   }
 }

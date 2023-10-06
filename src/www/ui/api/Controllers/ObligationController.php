@@ -12,12 +12,15 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\Lib\Application\ObligationCsvExport;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\ObligationMap;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\Obligation;
 use Psr\Http\Message\ServerRequestInterface;
+use Slim\Psr7\Factory\StreamFactory;
 
 class ObligationController extends RestController
 {
@@ -139,5 +142,82 @@ class ObligationController extends RestController
     $this->obligationMap->deleteObligation($obligationId);
     $returnVal = new Info(200, "Successfully removed Obligation.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Import Admin License Obligations from CSV
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function importObligationsFromCSV($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+    $adminLicenseObligationFromCsv = $this->restHelper->getPlugin('admin_obligation_from_csv');
+
+    $uploadedFile = $symReq->files->get($adminLicenseObligationFromCsv->getFileInputName(),
+      null);
+
+    $requestBody = $this->getParsedBody($request);
+    $delimiter = ',';
+    $enclosure = '"';
+    if (array_key_exists("delimiter", $requestBody) && !empty($requestBody["delimiter"])) {
+      $delimiter = $requestBody["delimiter"];
+    }
+    if (array_key_exists("enclosure", $requestBody) && !empty($requestBody["enclosure"])) {
+      $enclosure = $requestBody["enclosure"];
+    }
+
+    $res = $adminLicenseObligationFromCsv->handleFileUpload($uploadedFile, $delimiter, $enclosure, true);
+    $newInfo = new Info($res[2], $res[1], $res[0] == 200 ? InfoType::INFO : InfoType::ERROR);
+
+    return $response->withJson($newInfo->getArray(), $newInfo->getCode());
+  }
+
+  /**
+   * Export Obligations to CSV
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function exportObligationsToCSV($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $query = $request->getQueryParams();
+    $obPk = 0;
+    if (array_key_exists('id', $query)) {
+      $obPk = intval($query['id']);
+    }
+    if ($obPk != 0 &&
+      ! $this->dbHelper->doesIdExist("obligation_ref", "ob_pk", $obPk)) {
+      $error = new Info(404, "Obligation not found.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $dbManager = $this->dbHelper->getDbManager();
+    $obligationCsvExport = new ObligationCsvExport($dbManager);
+    $content = $obligationCsvExport->createCsv($obPk);
+    $fileName = "fossology-obligations-export-".date("YMj-Gis");
+    $newResponse = $response->withHeader('Content-type', 'text/csv, charset=UTF-8')
+      ->withHeader('Content-Disposition', 'attachment; filename=' . $fileName . '.csv')
+      ->withHeader('Pragma', 'no-cache')
+      ->withHeader('Cache-Control', 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0')
+      ->withHeader('Expires', 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
+    $sf = new StreamFactory();
+    return $newResponse->withBody(
+      $content ? $sf->createStream($content) : $sf->createStream('')
+    );
   }
 }
