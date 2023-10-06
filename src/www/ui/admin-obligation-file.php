@@ -39,15 +39,6 @@ class admin_obligation_file extends FO_Plugin
     return ($topicarray);
   }
 
-  /** @brief delete obligation using obligations id */
-  public function deleteObligations($id)
-  {
-    $sql = "DELETE from obligation_ref WHERE ob_pk = $1";
-    $this->dbManager->getRows($sql, array($id));
-    $returnVal = new Info(200, "Successfully removed Obligation.", InfoType::INFO);
-    return ($returnVal);
-  }
-
   /** @brief check if the text of this obligation is existing */
   private function isObligationTopicAndTextBlocked($obId,$topic,$text)
   {
@@ -498,13 +489,7 @@ class admin_obligation_file extends FO_Plugin
    */
   function Deldb()
   {
-    $stmt = __METHOD__.'.delob';
-    $sql = "DELETE FROM obligation_ref WHERE ob_pk=$1";
-    $this->dbManager->prepare($stmt,$sql);
-    $res = $this->dbManager->execute($stmt,array($_POST['ob_pk']));
-
-    $this->obligationMap->unassociateLicenseFromObligation($_POST['ob_pk']);
-    $this->obligationMap->unassociateLicenseFromObligation($_POST['ob_pk'], 0, true);
+    $this->obligationMap->deleteObligation($_POST['ob_pk']);
 
     return "<p>Obligation has been deleted.</p>";
   }

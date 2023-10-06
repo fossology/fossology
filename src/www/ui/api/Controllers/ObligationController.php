@@ -126,17 +126,18 @@ class ObligationController extends RestController
    * @param  array                  $args
    * @return ResponseHelper
    */
-
-  function DeleteobligationsDetails($request, $response, $args)
+  function deleteObligation($request, $response, $args)
   {
     $obligationId = intval($args['id']);
+    $returnVal = null;
     if (!$this->dbHelper->doesIdExist("obligation_ref", "ob_pk", $obligationId)) {
       $returnVal = new Info(404, "Obligation does not exist", InfoType::ERROR);
     }
     if ($returnVal !== null) {
       return $response->withJson($returnVal->getArray(), $returnVal->getCode());
     }
-    $returnVal = $this->obligationFile->deleteObligations($obligationId);
+    $this->obligationMap->deleteObligation($obligationId);
+    $returnVal = new Info(200, "Successfully removed Obligation.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 }
