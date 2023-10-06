@@ -231,6 +231,8 @@ $app->group('/obligations',
     $app->get('/{id:\\d+}', ObligationController::class . ':obligationsDetails');
     $app->get('', ObligationController::class . ':obligationsAllDetails');
     $app->delete('/{id:\\d+}', ObligationController::class . ':deleteObligation');
+    $app->get('/export-csv', ObligationController::class . ':exportObligationsToCSV');
+    $app->post('/import-csv', ObligationController::class . ':importObligationsFromCSV');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -348,13 +350,11 @@ $app->group('/license',
     $app->get('/stdcomments', LicenseController::class . ':getAllLicenseStandardComments');
     $app->put('/stdcomments', LicenseController::class . ':handleLicenseStandardComment');
     $app->post('/suggest', LicenseController::class . ':getSuggestedLicense');
-    $app->get('/obligation/export-csv', LicenseController::class . ':exportObligationsToCSV');
     $app->get('/{shortname:.+}', LicenseController::class . ':getLicense');
     $app->patch('/{shortname:.+}', LicenseController::class . ':updateLicense');
     $app->delete('/admincandidates/{id:\\d+}',
       LicenseController::class . ':deleteAdminLicenseCandidate');
     $app->put('/adminacknowledgements', LicenseController::class . ':handleAdminLicenseAcknowledgement');
-    $app->post('/obligation/import-csv', LicenseController::class . ':importObligationsFromCSV');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
