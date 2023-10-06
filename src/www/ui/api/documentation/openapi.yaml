@@ -300,6 +300,85 @@ paths:
                   $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /obligations/import-csv:
+    post:
+      operationId: importObligationCsv
+      tags:
+        - License
+      summary: Import an obligation csv file
+      description: >
+        Import an obligation csv file
+      requestBody:
+        description: Information about delimiters, inclosure and csv file.
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                enclosure:
+                  type: string
+                  description: Enclosure for string in CSV
+                  default: '"'
+                delimiter:
+                  type: string
+                  description: Delimiters for fields in CSV
+                  default: ','
+                file_input:
+                  type: string
+                  format: binary
+                  description: CSV to be imported
+              required:
+                - file_input
+      responses:
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '200':
+          description: Successfully imported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /obligations/export-csv:
+    get:
+      operationId: exportLicenseObligations
+      parameters:
+        - name: id
+          description: Obligation id to export, 0 for all
+          in: query
+          required: false
+          default: 0
+          schema:
+            type: integer
+      tags:
+        - License
+      summary: Export a csv obligation list
+      description: >
+        Export a csv license obligation list
+      responses:
+        '200':
+          description: Successfully exported
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /obligations:
     get:
       operationId: getAllObligationsData
@@ -4113,7 +4192,7 @@ paths:
     get:
       operationId: exportLicense
       parameters:
-        - name: licenseId
+        - name: id
           description: License id to export, 0 for all
           in: query
           required: false
@@ -4741,76 +4820,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-  /license/obligation/import-csv:
-    post:
-      operationId: importObligationCsv
-      tags:
-        - License
-      summary: Import an obligation csv file
-      description: >
-        Import an obligation csv file
-      requestBody:
-        description: Information about delimiters, inclosure and csv file.
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                enclosure:
-                  type: string
-                  description: Enclosure for string in CSV
-                  default: '"'
-                delimiter:
-                  type: string
-                  description: Delimiters for fields in CSV
-                  default: ','
-                file_input:
-                  type: string
-                  format: binary
-                  description: CSV to be imported
-              required:
-                - file_input
-      responses:
-        '400':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        '200':
-          description: Successfully imported
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
 
-  /license/obligation/export-csv:
-    get:
-      operationId: exportLicenseObligations
-      tags:
-        - License
-      summary: Export a csv obligation list
-      description: >
-        Export a csv license obligation list
-      responses:
-        '200':
-          description: Successfully exported
-          content:
-            text/plain:
-              schema:
-                type: string
-                format: binary
-        '403':
-          description: Route is not accessible
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
 components:
   securitySchemes:
     bearerAuth:
