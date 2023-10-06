@@ -920,4 +920,41 @@ class LicenseController extends RestController
       $content ? $sf->createStream($content) : $sf->createStream('')
     );
   }
+
+  /**
+   * Import Admin License Obligations from CSV
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function importObligationsFromCSV($request, $response, $args)
+  {
+    if (!Auth::isAdmin()) {
+      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+    $adminLicenseObligationFromCsv = $this->restHelper->getPlugin('admin_obligation_from_csv');
+
+    $uploadedFile = $symReq->files->get($adminLicenseObligationFromCsv->getFileInputName(),
+      null);
+
+    $requestBody = $this->getParsedBody($request);
+    $delimiter = ',';
+    $enclosure = '"';
+    if (array_key_exists("delimiter", $requestBody) && !empty($requestBody["delimiter"])) {
+      $delimiter = $requestBody["delimiter"];
+    }
+    if (array_key_exists("enclosure", $requestBody) && !empty($requestBody["enclosure"])) {
+      $enclosure = $requestBody["enclosure"];
+    }
+
+    $res = $adminLicenseObligationFromCsv->handleFileUpload($uploadedFile, $delimiter, $enclosure, true);
+    $newInfo = new Info($res[2], $res[1], $res[0] == 200 ? InfoType::INFO : InfoType::ERROR);
+
+    return $response->withJson($newInfo->getArray(), $newInfo->getCode());
+  }
 }

@@ -22,6 +22,7 @@ class AdminObligationFromCSV extends DefaultPlugin
 {
   const NAME = "admin_obligation_from_csv";
   const KEY_UPLOAD_MAX_FILESIZE = 'upload_max_filesize';
+  const FILE_INPUT_NAME = 'file_input';
 
   function __construct()
   {
@@ -42,7 +43,7 @@ class AdminObligationFromCSV extends DefaultPlugin
     $vars = array();
 
     if ($request->isMethod('POST')) {
-      $uploadFile = $request->files->get('file_input');
+      $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
       $delimiter = $request->get('delimiter')?:',';
       $enclosure = $request->get('enclosure')?:'"';
       $vars['message'] = $this->handleFileUpload($uploadFile,$delimiter,$enclosure);
@@ -56,9 +57,9 @@ class AdminObligationFromCSV extends DefaultPlugin
 
   /**
    * @param UploadedFile $uploadedFile
-   * @return null|string
+   * @return null|string|array
    */
-  protected function handleFileUpload($uploadedFile,$delimiter=',',$enclosure='"')
+  public function handleFileUpload($uploadedFile,$delimiter=',',$enclosure='"', $fromRest=false)
   {
     $errMsg = '';
     if (! ($uploadedFile instanceof UploadedFile)) {
@@ -71,13 +72,29 @@ class AdminObligationFromCSV extends DefaultPlugin
           $uploadedFile->getClientOriginalName();
     }
     if (! empty($errMsg)) {
+      if ($fromRest) {
+        return array(false, $errMsg, 400);
+      }
       return $errMsg;
     }
     /** @var LicenseCsvImport */
     $obligationCsvImport = $this->getObject('app.obligation_csv_import');
     $obligationCsvImport->setDelimiter($delimiter);
     $obligationCsvImport->setEnclosure($enclosure);
-    return $obligationCsvImport->handleFile($uploadedFile->getRealPath());
+
+    $res = $obligationCsvImport->handleFile($uploadedFile->getRealPath());
+    if ($fromRest) {
+      return array(true, $res, 200);
+    }
+    return $res;
+  }
+
+  /**
+   * @return string
+   */
+  public function getFileInputName()
+  {
+    return $this::FILE_INPUT_NAME;
   }
 }
 
