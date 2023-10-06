@@ -187,7 +187,7 @@ class ui_nomos_diff extends FO_Plugin
     /* If both $Child and $OtherChild are specified,
      * reassemble licstr and highlight the differences
      */
-    if ($OtherChild and $OtherChild)
+    if ($Child and $OtherChild)
     {
       $licstr = "";
       $DiffLicStyle = "style='background-color:#ffa8a8'";  // mid red pastel
