@@ -7,7 +7,6 @@
 
 namespace Fossology\Lib\Application;
 
-use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Db\DbManager;
 
 /**
@@ -68,18 +67,17 @@ class ObligationCsvExport
   {
     $csvarray = array();
     $sql = "SELECT ob_pk,ob_type,ob_topic,ob_text,ob_classification,ob_modifications,ob_comment
-            FROM obligation_ref;";
+            FROM obligation_ref";
     if ($ob>0) {
       $stmt = __METHOD__.'.ob';
-      $sql .= ' WHERE ob_pk=$'.$ob;
-      $row = $this->dbManager->getSingleRow($sql,$stmt);
-      $vars = $row ? array( $row ) : array();
+      $sql .= ' WHERE ob_pk=$1;';
+      $row = $this->dbManager->getSingleRow($sql, [$ob], $stmt);
       $liclist = $this->obligationMap->getLicenseList($ob);
       $candidatelist = $this->obligationMap->getLicenseList($ob, True);
-      array_shift($vars);
-      array_push($vars,$liclist);
-      array_push($vars,$candidatelist);
-      $csvarray = $vars;
+      array_shift($row);
+      array_push($row,$liclist);
+      array_push($row,$candidatelist);
+      array_push($csvarray,$row);
     } else {
       $stmt = __METHOD__;
       $this->dbManager->prepare($stmt,$sql);
