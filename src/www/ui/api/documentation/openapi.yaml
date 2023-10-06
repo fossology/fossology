@@ -286,12 +286,12 @@ paths:
       operationId: deleteObligationsData
       tags:
         - Admin
-      summary: Delete details of a particular obligation
+      summary: Delete a particular obligation
       description: >
         Delete a particular obligation from the server.
       responses:
         '200':
-          description: OK
+          description: Obligation deleted.
           content:
             application/json:
               schema:

@@ -282,4 +282,20 @@ class ObligationMap
     $sql = "SELECT * FROM obligation_ref WHERE ob_pk = $1;";
     return $this->dbManager->getSingleRow($sql, [$ob_pk]);
   }
+
+  /**
+   * Delete obligation and unassociate all licenses.
+   *
+   * @param int $ob_pk Obligation ID
+   * @return void
+   */
+  public function deleteObligation($ob_pk)
+  {
+    $stmt = __METHOD__ . '.deleteObligation';
+    $sql = "DELETE FROM obligation_ref WHERE ob_pk = $1";
+    $this->dbManager->getSingleRow($sql, [$ob_pk], $stmt);
+
+    $this->unassociateLicenseFromObligation($ob_pk);
+    $this->unassociateLicenseFromObligation($ob_pk, 0, true);
+  }
 }
