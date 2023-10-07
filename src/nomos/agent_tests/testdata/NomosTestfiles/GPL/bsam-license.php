@@ -563,5 +563,3 @@ function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, $Max, $Offset)
 
   return;
 } // LicenseGetAllFiles()
-
-?>

@@ -29,4 +29,3 @@ $wgAutoloadClasses += array(
     'LU_Reader' => "$dir/reader/Reader.php",
     'LU_ReaderFactory' => "$dir/reader/ReaderFactory.php"
 )
-?>

@@ -82,4 +82,3 @@ class MoveFolderTest extends fossologyTestCase
     $this->moveUpload('Basic-Testing', 'root', $this->upload2Move);
   }
 }
-?>

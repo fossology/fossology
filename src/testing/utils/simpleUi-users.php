@@ -69,4 +69,3 @@ class createSuiUsers extends fossologyTestCase {
     }
   }
 }
-?>

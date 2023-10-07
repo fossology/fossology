@@ -104,4 +104,3 @@ else
   // no output file, echo to stdout
   echo $transformed;
 }
-?>

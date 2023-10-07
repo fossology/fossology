@@ -69,6 +69,3 @@ if(array_key_exists('u',$options)) {
     exit(1);
   }
 }
-
-
-?>

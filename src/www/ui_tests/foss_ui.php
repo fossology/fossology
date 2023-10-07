@@ -162,4 +162,3 @@ class TestCreateFolder extends WebTestCase {
     $this->setField('parentid', $folder_name);
   }
 }
-?>

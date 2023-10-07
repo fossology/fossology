@@ -159,5 +159,3 @@ foreach($list as $pkg)
 
 $date=`date`;
 print "Ending at: $date";
-
-?>

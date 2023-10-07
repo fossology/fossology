@@ -1002,4 +1002,3 @@ class fossologyTestCase extends fossologyTest
     return TRUE;
   }
 }
-?>

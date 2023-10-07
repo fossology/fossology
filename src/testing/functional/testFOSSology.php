@@ -479,4 +479,3 @@ function verifyUploads($logfile) {
 		return(FALSE);
 	}
 }
-?>

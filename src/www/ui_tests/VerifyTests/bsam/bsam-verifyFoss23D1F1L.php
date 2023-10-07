@@ -131,4 +131,3 @@ class verify23D1F1L extends fossologyTestCase
     $this->assertEqual($tableCnt, 1);
   }
 }
-?>

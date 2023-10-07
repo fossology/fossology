@@ -150,4 +150,3 @@ class Build extends FoIntegration
   } // makeFossology
 
 } // build
-?>

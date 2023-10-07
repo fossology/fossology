@@ -66,4 +66,3 @@ class noEmailUserTest extends fossologyTestCase {
     }
   } //testNoEmailUser
 }
-?>

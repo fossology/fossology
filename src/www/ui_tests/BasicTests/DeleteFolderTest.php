@@ -81,5 +81,3 @@ class DeleteFolderTest extends fossologyTestCase
     //print "************ page after Folder Delete! *************\n$page\n";
   }
 }
-
-?>

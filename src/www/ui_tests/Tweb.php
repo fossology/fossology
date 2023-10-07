@@ -21,6 +21,3 @@ $test = new TestSuite('Fossology Repo UI tests');
 $test->addTestFile('AboutMenuTest.php');
 $test->addTestFile('login.php');
 exit ($test->run(new TextReporter()) ? 0 : 1);
-
-
-?>

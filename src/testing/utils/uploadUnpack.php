@@ -84,4 +84,3 @@ class uploadUnpack extends fossologyTestCase
     }
   }
 }
-?>

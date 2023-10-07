@@ -73,5 +73,3 @@ class EditFolderTest extends fossologyTestCase
                       "EditFoldeTest tearDown FAILED! Deletion of $this->newname not found\n");
   }
 }
-
-?>

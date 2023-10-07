@@ -37,4 +37,3 @@ class TestAboutMenu extends fossologyTestCase
     $this->myassertText($page, '/About FOSSology/');
   }
 }
-?>

@@ -46,5 +46,3 @@ class userEditAnyTest extends fossologyTestCase {
     $this->pass();
   }
 }
-
-?>

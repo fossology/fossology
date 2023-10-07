@@ -305,5 +305,3 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
     $this->testDb = null;
   }
 }
-
-?>

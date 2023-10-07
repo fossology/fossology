@@ -200,4 +200,3 @@ $last = exec("ln -s fo-runtests.php /usr/local/bin/fo-runtests",$tossme, $rtn);
 if($rtn != 0) {
   print "FATAL! Could create fo-runtests link, Investigate and create by hand\n";
 }
-?>

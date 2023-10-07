@@ -211,5 +211,3 @@ function createFile($suffix=NULL, $name=NULL, $license=NULL)
 
 echo "*********** starting.... *************\n";
 createFile();
-
-?>

@@ -180,5 +180,3 @@ if (empty($sysconfdir)) {
 print "Done cleaning up FOSSology test databases\n";
 
 exit(0);
-
-?>

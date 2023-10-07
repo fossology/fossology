@@ -38,4 +38,3 @@ if (array_key_exists("f", $opts)) {
 }
 
 print $sysConfDir;
-

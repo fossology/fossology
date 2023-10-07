@@ -66,4 +66,3 @@ foreach ($out as $line) {
 }
 fclose($FH);
 exit(0);
-?>

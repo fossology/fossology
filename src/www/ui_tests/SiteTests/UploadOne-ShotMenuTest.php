@@ -41,4 +41,3 @@ class UploadOneShotMenuTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
   }
 }
-?>

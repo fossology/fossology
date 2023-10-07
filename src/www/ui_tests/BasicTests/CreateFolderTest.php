@@ -75,4 +75,3 @@ class CreateFolderTest extends fossologyTestCase
                       "CreateFoldeTest tearDown FAILED! Deletion of $this->folder_name not found\n");
   }
 }
-?>

@@ -52,4 +52,3 @@ class cleanupRF extends fossologyTestCase {
     }
   }
 }
-?>

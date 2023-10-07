@@ -81,4 +81,3 @@ class DupFolderTest extends fossologyTestCase
      "DupFoldeTest tearDown FAILED! Deletion of $this->folder_name not found\n");
   }
 }
-?>
