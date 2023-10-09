@@ -17,15 +17,19 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseAcknowledgementDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\LicenseStdCommentDao;
-use Fossology\Lib\Exception;
 use Fossology\Lib\Util\StringOperation;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpConflictException;
+use Fossology\UI\Api\Exceptions\HttpErrorException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+use Fossology\UI\Api\Exceptions\HttpInternalServerErrorException;
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\License;
 use Fossology\UI\Api\Models\LicenseCandidate;
 use Fossology\UI\Api\Models\Obligation;
-use Fossology\UI\Page\AdminLicenseCandidate;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Psr7\Factory\StreamFactory;
@@ -89,30 +93,22 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getLicense($request, $response, $args)
   {
     $shortName = $args["shortname"];
 
     if (empty($shortName)) {
-      $error = new Info(
-        400,
-        "Short name missing from request.",
-        InfoType::ERROR
-      );
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpBadRequestException("Short name missing from request.");
     }
 
     $license = $this->licenseDao->getLicenseByShortName($shortName,
       $this->restHelper->getGroupId());
 
     if ($license === null) {
-      $error = new Info(
-        404,
-        "No license found with short name '{$shortName}'.",
-        InfoType::ERROR
-      );
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpNotFoundException(
+        "No license found with short name '$shortName'.");
     }
 
     $obligations = $this->licenseDao->getLicenseObligations([$license->getId()],
@@ -151,19 +147,17 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getAllLicenses($request, $response, $args)
   {
-    $info = null;
-    $errorHeader = false;
     $query = $request->getQueryParams();
     $limit = $request->getHeaderLine(self::LIMIT_PARAM);
     if (! empty($limit)) {
       $limit = filter_var($limit, FILTER_VALIDATE_INT);
       if ($limit < 1) {
-        $info = new Info(400, "limit should be positive integer > 1",
-          InfoType::ERROR);
-          $limit = self::LICENSE_FETCH_LIMIT;
+        throw new HttpBadRequestException(
+          "limit should be positive integer > 1");
       }
     } else {
       $limit = self::LICENSE_FETCH_LIMIT;
@@ -171,7 +165,7 @@ class LicenseController extends RestController
 
     $kind = "all";
     if (array_key_exists("kind", $query) && !empty($query["kind"]) &&
-      (array_search($query["kind"], ["all", "candidate", "main"]) !== false)) {
+      in_array($query["kind"], ["all", "candidate", "main"])) {
         $kind = $query["kind"];
     }
 
@@ -183,23 +177,16 @@ class LicenseController extends RestController
     if (! empty($page) || $page == "0") {
       $page = filter_var($page, FILTER_VALIDATE_INT);
       if ($page <= 0) {
-        $info = new Info(400, "page should be positive integer > 0",
-          InfoType::ERROR);
+        throw new HttpBadRequestException(
+          "page should be positive integer > 0");
       }
       if ($page > $totalPages) {
-        $info = new Info(400, "Can not exceed total pages: $totalPages",
-          InfoType::ERROR);
-        $errorHeader = ["X-Total-Pages", $totalPages];
+        throw (new HttpBadRequestException(
+          "Can not exceed total pages: $totalPages"))
+          ->setHeaders(["X-Total-Pages" => $totalPages]);
       }
     } else {
       $page = 1;
-    }
-    if ($info !== null) {
-      $retVal = $response->withJson($info->getArray(), $info->getCode());
-      if ($errorHeader) {
-        $retVal = $retVal->withHeader($errorHeader[0], $errorHeader[1]);
-      }
-      return $retVal;
     }
     $onlyActive = $request->getHeaderLine(self::ACTIVE_PARAM);
     if (! empty($onlyActive)) {
@@ -237,24 +224,22 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function createLicense($request, $response, $args)
   {
     $newLicense = $this->getParsedBody($request);
     $newLicense = License::parseFromArray($newLicense);
-    $newInfo = null;
     if ($newLicense === -1) {
-      $newInfo = new Info(400, "Input contains additional properties.",
-        InfoType::ERROR);
-    } elseif ($newLicense === -2) {
-      $newInfo = new Info(400, "Property 'shortName' is required.",
-        InfoType::ERROR);
-    } elseif (! $newLicense->getIsCandidate() && ! Auth::isAdmin()) {
-      $newInfo = new Info(403, "Need to be admin to create non-candidate " .
-        "license.", InfoType::ERROR);
+      throw new HttpBadRequestException(
+        "Input contains additional properties.");
     }
-    if ($newInfo !== null) {
-      return $response->withJson($newInfo->getArray(), $newInfo->getCode());
+    if ($newLicense === -2) {
+      throw new HttpBadRequestException("Property 'shortName' is required.");
+    }
+    if (! $newLicense->getIsCandidate() && ! Auth::isAdmin()) {
+      throw new HttpForbiddenException("Need to be admin to create " .
+        "non-candidate license.");
     }
     $tableName = "license_ref";
     $assocData = [
@@ -279,17 +264,16 @@ class LicenseController extends RestController
       $okToAdd = $this->isNewLicense($newLicense->getShortName());
     }
     if (! $okToAdd) {
-      $newInfo = new Info(409, "License with shortname '" .
-        $newLicense->getShortName() . "' already exists!", InfoType::ERROR);
-      return $response->withJson($newInfo->getArray(), $newInfo->getCode());
+      throw new HttpConflictException("License with shortname '" .
+        $newLicense->getShortName() . "' already exists!");
     }
     try {
       $rfPk = $this->dbHelper->getDbManager()->insertTableRow($tableName,
         $assocData, __METHOD__ . ".newLicense", "rf_pk");
       $newInfo = new Info(201, $rfPk, InfoType::INFO);
-    } catch (Exception $e) {
-      $newInfo = new Info(409, "License with same text already exists!",
-        InfoType::ERROR);
+    } catch (\Exception $e) {
+      throw new HttpConflictException(
+        "License with same text already exists!", $e);
     }
     return $response->withJson($newInfo->getArray(), $newInfo->getCode());
   }
@@ -301,28 +285,34 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function updateLicense($request, $response, $args)
   {
     $newParams = $this->getParsedBody($request);
     $shortName = $args["shortname"];
-    $newInfo = null;
     if (empty($shortName)) {
-      $newInfo = new Info(400, "Short name missing from request.",
-        InfoType::ERROR);
-      return $response->withJson($newInfo->getArray(), $newInfo->getCode());
+      throw new HttpBadRequestException("Short name missing from request.");
     }
 
     $license = $this->licenseDao->getLicenseByShortName($shortName,
       $this->restHelper->getGroupId());
 
     if ($license === null) {
-      $newInfo = new Info(404, "No license found with short name '$shortName'.",
-        InfoType::ERROR);
-      return $response->withJson($newInfo->getArray(), $newInfo->getCode());
+      throw new HttpNotFoundException(
+        "No license found with short name '$shortName'.");
     }
     $isCandidate = $this->restHelper->getDbHelper()->doesIdExist(
       "license_candidate", "rf_pk", $license->getId());
+    if (!$isCandidate && !Auth::isAdmin()) {
+      throw new HttpForbiddenException(
+        "Need to be admin to edit non-candidate license.");
+    }
+    if ($isCandidate && ! $this->restHelper->getUserDao()->isAdvisorOrAdmin(
+        $this->restHelper->getUserId(), $this->restHelper->getGroupId())) {
+      throw new HttpForbiddenException(
+        "Operation not permitted for this group.");
+    }
 
     $assocData = [];
     if (array_key_exists('fullName', $newParams)) {
@@ -337,30 +327,18 @@ class LicenseController extends RestController
     if (array_key_exists('risk', $newParams)) {
       $assocData['rf_risk'] = intval($newParams['risk']);
     }
-    do {
-      if (empty($assocData)) {
-        $newInfo = new Info(400, "Empty body sent.", InfoType::ERROR);
-        break;
-      }
-      if ($isCandidate && ! $this->restHelper->getUserDao()->isAdvisorOrAdmin(
-          $this->restHelper->getUserId(), $this->restHelper->getGroupId())) {
-        $newInfo = new Info(403, "Operation not permitted for this group.",
-          InfoType::ERROR);
-        break;
-      } elseif (!$isCandidate && !Auth::isAdmin()) {
-        $newInfo = new Info(403, "Only admin can edit main licenses.",
-          InfoType::ERROR);
-        break;
-      }
-      $tableName = "license_ref";
-      if ($isCandidate) {
-        $tableName = "license_candidate";
-      }
-      $this->dbHelper->getDbManager()->updateTableRow($tableName, $assocData,
-        "rf_pk", $license->getId(), __METHOD__ . ".updateLicense");
-      $newInfo = new Info(200, "License " . $license->getShortName() .
-        " updated.", InfoType::INFO);
-    } while (false);
+    if (empty($assocData)) {
+      throw new HttpBadRequestException("Empty body sent.");
+    }
+
+    $tableName = "license_ref";
+    if ($isCandidate) {
+      $tableName = "license_candidate";
+    }
+    $this->dbHelper->getDbManager()->updateTableRow($tableName, $assocData,
+      "rf_pk", $license->getId(), __METHOD__ . ".updateLicense");
+    $newInfo = new Info(200, "License " . $license->getShortName() .
+      " updated.", InfoType::INFO);
     return $response->withJson($newInfo->getArray(), $newInfo->getCode());
   }
 
@@ -396,11 +374,13 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function handleImportLicense($request, $response, $args)
   {
-
+    $this->throwNotAdminException();
     $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+    /** @var \Fossology\UI\Page\AdminLicenseFromCSV $adminLicenseFromCsv */
     $adminLicenseFromCsv = $this->restHelper->getPlugin('admin_license_from_csv');
 
     $uploadedFile = $symReq->files->get($adminLicenseFromCsv->getFileInputName(),
@@ -416,10 +396,14 @@ class LicenseController extends RestController
         $enclosure = $requestBody["enclosure"];
     }
 
-    $res = $adminLicenseFromCsv->handleFileUpload($uploadedFile,$delimiter,$enclosure);
+    $res = $adminLicenseFromCsv->handleFileUpload($uploadedFile, $delimiter,
+      $enclosure);
 
-    $newInfo = new Info($res[2], $res[1], $res[0] == 200 ? InfoType::INFO : InfoType::ERROR);
+    if (!$res[0]) {
+      throw new HttpBadRequestException($res[1]);
+    }
 
+    $newInfo = new Info($res[2], $res[1], InfoType::INFO);
     return $response->withJson($newInfo->getArray(), $newInfo->getCode());
   }
 
@@ -430,14 +414,12 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpForbiddenException
    */
   public function getCandidates($request, $response, $args)
   {
-    if (! Auth::isAdmin()) {
-      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
-    /** @var AdminLicenseCandidate $adminLicenseCandidate */
+    $this->throwNotAdminException();
+    /** @var \Fossology\UI\Page\AdminLicenseCandidate $adminLicenseCandidate */
     $adminLicenseCandidate = $this->restHelper->getPlugin("admin_license_candidate");
     $licenses = LicenseCandidate::convertDbArray($adminLicenseCandidate->getCandidateArrayData());
     return $response->withJson($licenses, 200);
@@ -450,36 +432,27 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function deleteAdminLicenseCandidate($request, $response, $args)
   {
-    $resInfo = null;
-    if (!Auth::isAdmin()) {
-      $resInfo = new Info(403, "Only admin can perform this operation.",
-        InfoType::ERROR);
-    } else {
-      $id = intval($args['id']);
-      $adminLicenseCandidate = $this->restHelper->getPlugin('admin_license_candidate');
+    $this->throwNotAdminException();
+    $id = intval($args['id']);
+    /** @var \Fossology\UI\Page\AdminLicenseCandidate $adminLicenseCandidate */
+    $adminLicenseCandidate = $this->restHelper->getPlugin('admin_license_candidate');
 
-      if ($adminLicenseCandidate->getDataRow($id)) {
-        $res = $adminLicenseCandidate->doDeleteCandidate($id,false);
-        $message = $res->getContent();
-        $infoType = InfoType::ERROR;
-        if ($res->getContent() === 'true') {
-          $message = "License candidate will be deleted.";
-          $infoType = InfoType::INFO;
-          $resCode = 202;
-        } else {
-          $message = "License used at following locations, can not delete: " .
-            $message;
-          $resCode = 409;
-        }
-        $resInfo = new Info($resCode, $message, $infoType);
-      } else {
-        $resInfo = new Info(404, "License candidate not found.",
-          InfoType::ERROR);
-      }
+    if (!$adminLicenseCandidate->getDataRow($id)) {
+      throw new HttpNotFoundException("License candidate not found.");
     }
+    $res = $adminLicenseCandidate->doDeleteCandidate($id,false);
+    $message = $res->getContent();
+    if ($res->getContent() !== 'true') {
+      throw new HttpConflictException(
+        "License used at following locations, can not delete: " .
+        $message);
+    }
+    $resInfo = new Info(202, "License candidate will be deleted.",
+      InfoType::INFO);
     return $response->withJson($resInfo->getArray(), $resInfo->getCode());
   }
 
@@ -490,13 +463,11 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getAllAdminAcknowledgements($request, $response, $args)
   {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
+    $this->throwNotAdminException();
     $res = $this->adminLicenseAckDao->getAllAcknowledgements();
 
     foreach ($res as $key => $ack) {
@@ -515,6 +486,7 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function handleAdminLicenseAcknowledgement($request, $response, $args)
   {
@@ -522,73 +494,70 @@ class LicenseController extends RestController
     $errors = [];
     $success = [];
 
-    if (!isset($body) || empty($body)) {
-      $error = new Info(400, "Request body is missing or empty.", InfoType::ERROR);
-      $errors[] = $error->getArray();
-    } else if (!is_array($body)) {
-      $error = new Info(400, "Request body should be an array.", InfoType::ERROR);
-      $errors[] = $error->getArray();
-    } else {
-      foreach (array_keys($body) as $index) {
-        $ackReq = $body[$index];
-        if ((!$ackReq['update'] && empty($ackReq['name'])) || ($ackReq['update'] && empty($ackReq['name']) && !$ackReq['toggle'])) {
-          $error = new Info(400, "Acknowledgement name missing from the request #" . ($index + 1), InfoType::ERROR);
-          $errors[] = $error->getArray();
-          continue;
-        } else if ((!$ackReq['update'] && empty($ackReq['ack'])) || ($ackReq['update'] && empty($ackReq['ack']) && !$ackReq['toggle'])) {
-          $error = new Info(400, "Acknowledgement text missing from the request #" . ($index + 1), InfoType::ERROR);
-          $errors[] = $error->getArray();
-          continue;
-        }
-
-        if ($ackReq['update']) {
-
-          if (empty($ackReq['id'])) {
-            $error = new Info(400, "Acknowledgement ID missing from the request #" . ($index + 1), InfoType::ERROR);
-            $errors[] = $error->getArray();
-            continue;
-          }
-
-          $sql = "SELECT la_pk, name FROM license_std_acknowledgement WHERE la_pk = $1;";
-          $existingAck = $this->dbHelper->getDbManager()->getSingleRow($sql, [$ackReq['id']]);
-
-          if (empty($existingAck)) {
-            $error = new Info(404, "Acknowledgement not found for the request #" . ($index + 1), InfoType::ERROR);
-            $errors[] = $error->getArray();
-            continue;
-          } else if ($existingAck["name"] != $ackReq["name"] && $this->dbHelper->doesIdExist("license_std_acknowledgement", "name", $ackReq["name"])) {
-            $error = new Info(400, "Name already exists.", InfoType::ERROR);
-            $errors[] = $error->getArray();
-            continue;
-          }
-
-          if ($ackReq["name"] && $ackReq["ack"]) {
-            $this->adminLicenseAckDao->updateAcknowledgement($ackReq["id"], $ackReq["name"], $ackReq["ack"]);
-          }
-
-          if ($ackReq["toggle"]) {
-            $this->adminLicenseAckDao->toggleAcknowledgement($ackReq["id"]);
-          }
-
-          $info = new Info(200, "Successfully updated admin license acknowledgement with name '" . $existingAck["name"] . "'", InfoType::INFO);
-          $success[] = $info->getArray();
-        } else {
-
-          if ($this->dbHelper->doesIdExist("license_std_acknowledgement", "name", $ackReq["name"])) {
-            $error = new Info(400, "Name already exists for the request #" . ($index + 1), InfoType::ERROR);
-            $errors[] = $error->getArray();
-            continue;
-          }
-          $res = $this->adminLicenseAckDao->insertAcknowledgement($ackReq["name"], $ackReq["ack"]);
-          if ($res == -2) {
-            $error = new Info(500, "Error while inserting new acknowledgement.", InfoType::ERROR);
-            $errors[] = $error->getArray();
-            continue;
-          }
-          $info = new Info(201, "Acknowledgement added successfully.", InfoType::INFO);
-          $success[] = $info->getArray();
-        }
+    if (empty($body)) {
+      throw new HttpBadRequestException("Request body is missing or empty.");
+    }
+    if (!is_array($body)) {
+      throw new HttpBadRequestException("Request body should be an array.");
+    }
+    foreach (array_keys($body) as $index) {
+      $ackReq = $body[$index];
+      if ((!$ackReq['update'] && empty($ackReq['name'])) || ($ackReq['update'] && empty($ackReq['name']) && !$ackReq['toggle'])) {
+        $error = new Info(400, "Acknowledgement name missing from the request #" . ($index + 1), InfoType::ERROR);
+        $errors[] = $error->getArray();
+        continue;
+      } else if ((!$ackReq['update'] && empty($ackReq['ack'])) || ($ackReq['update'] && empty($ackReq['ack']) && !$ackReq['toggle'])) {
+        $error = new Info(400, "Acknowledgement text missing from the request #" . ($index + 1), InfoType::ERROR);
+        $errors[] = $error->getArray();
+        continue;
       }
+
+      if ($ackReq['update']) {
+
+        if (empty($ackReq['id'])) {
+          $error = new Info(400, "Acknowledgement ID missing from the request #" . ($index + 1), InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        }
+
+        $sql = "SELECT la_pk, name FROM license_std_acknowledgement WHERE la_pk = $1;";
+        $existingAck = $this->dbHelper->getDbManager()->getSingleRow($sql, [$ackReq['id']]);
+
+        if (empty($existingAck)) {
+          $error = new Info(404, "Acknowledgement not found for the request #" . ($index + 1), InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        } else if ($existingAck["name"] != $ackReq["name"] && $this->dbHelper->doesIdExist("license_std_acknowledgement", "name", $ackReq["name"])) {
+          $error = new Info(400, "Name already exists.", InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        }
+
+        if ($ackReq["name"] && $ackReq["ack"]) {
+          $this->adminLicenseAckDao->updateAcknowledgement($ackReq["id"], $ackReq["name"], $ackReq["ack"]);
+        }
+
+        if ($ackReq["toggle"]) {
+          $this->adminLicenseAckDao->toggleAcknowledgement($ackReq["id"]);
+        }
+
+        $info = new Info(200, "Successfully updated admin license acknowledgement with name '" . $existingAck["name"] . "'", InfoType::INFO);
+      } else {
+
+        if ($this->dbHelper->doesIdExist("license_std_acknowledgement", "name", $ackReq["name"])) {
+          $error = new Info(400, "Name already exists for the request #" . ($index + 1), InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        }
+        $res = $this->adminLicenseAckDao->insertAcknowledgement($ackReq["name"], $ackReq["ack"]);
+        if ($res == -2) {
+          $error = new Info(500, "Error while inserting new acknowledgement.", InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        }
+        $info = new Info(201, "Acknowledgement added successfully.", InfoType::INFO);
+      }
+      $success[] = $info->getArray();
     }
     return $response->withJson([
       'success' => $success,
@@ -622,95 +591,92 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function handleLicenseStandardComment($request, $response, $args)
   {
+    $this->throwNotAdminException();
+
     $body = $this->getParsedBody($request);
     $errors = [];
     $success = [];
 
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
-      $errors[] = $error->getArray();
-    } else if (!isset($body) || empty($body)) {
-      $error = new Info(400, "Request body is missing or empty.", InfoType::ERROR);
-      $errors[] = $error->getArray();
-    } else if (!is_array($body)) {
-      $error = new Info(400, "Request body should be an array.", InfoType::ERROR);
-      $errors[] = $error->getArray();
-    } else {
-      foreach (array_keys($body) as $index) {
-        $commentReq = $body[$index];
+    if (empty($body)) {
+      throw new HttpBadRequestException("Request body is missing or empty.");
+    }
+    if (!is_array($body)) {
+      throw new HttpBadRequestException("Request body should be an array.");
+    }
+    foreach (array_keys($body) as $index) {
+      $commentReq = $body[$index];
 
-        // Check if name and comment are present if update is false
-        if ((!$commentReq['update'] && empty($commentReq['name']))) {
-          $error = new Info(400, "Comment name missing from the request #" . ($index + 1), InfoType::ERROR);
-          $errors[] = $error->getArray();
-          continue;
-        } else if ((!$commentReq['update'] && empty($commentReq['comment']))) {
-          $error = new Info(400, "Comment text missing from the request #" . ($index + 1), InfoType::ERROR);
-          $errors[] = $error->getArray();
-          continue;
-        } else if ($commentReq['update'] && empty($commentReq['name']) && empty($commentReq['comment']) && empty($commentReq['toggle'])) {
-          $error = new Info(400, "Comment name, text or toggle missing from the request #" . ($index + 1), InfoType::ERROR);
-          $errors[] = $error->getArray();
-          continue;
-        }
-
-        if ($commentReq['update']) {
-
-          if (empty($commentReq['id'])) {
-            $error = new Info(400, "Standard Comment ID missing from the request #" . ($index + 1), InfoType::ERROR);
-            $errors[] = $error->getArray();
-            continue;
-          }
-
-          $sql = "SELECT lsc_pk, name, comment FROM license_std_comment WHERE lsc_pk = $1;";
-          $existingComment = $this->dbHelper->getDbManager()->getSingleRow($sql, [$commentReq['id']]);
-
-          if (empty($existingComment)) {
-            $error = new Info(404, "Standard comment not found for the request #" . ($index + 1), InfoType::ERROR);
-            $errors[] = $error->getArray();
-            continue;
-            // check if the new name doesn't already exist
-          } else if ($existingComment["name"] != $commentReq["name"] && $this->dbHelper->doesIdExist("license_std_comment", "name", $commentReq["name"])) {
-            $error = new Info(400, "Name already exists.", InfoType::ERROR);
-            $errors[] = $error->getArray();
-            continue;
-          }
-
-          // if both fields were specified and are not empty, update the comment
-          if ($commentReq["name"] && $commentReq["comment"]) {
-            $this->licenseStdCommentDao->updateComment($commentReq["id"], $commentReq["name"], $commentReq["comment"]);
-          } else if ($commentReq["name"]) {
-            $this->licenseStdCommentDao->updateComment($commentReq["id"], $commentReq["name"], $existingComment["comment"]);
-          } else if ($commentReq["comment"]) {
-            $this->licenseStdCommentDao->updateComment($commentReq["id"], $existingComment["name"], $commentReq["comment"]);
-          }
-          // toggle the comment if the toggle field is set to true
-          if ($commentReq["toggle"]) {
-            $this->licenseStdCommentDao->toggleComment($commentReq["id"]);
-          }
-
-          $info = new Info(200, "Successfully updated standard comment", InfoType::INFO);
-          $success[] = $info->getArray();
-        } else {
-
-          if ($this->dbHelper->doesIdExist("license_std_comment", "name", $commentReq["name"])) {
-            $error = new Info(400, "Name already exists for the request #" . ($index + 1), InfoType::ERROR);
-            $errors[] = $error->getArray();
-            continue;
-          }
-          $res = $this->licenseStdCommentDao->insertComment($commentReq["name"], $commentReq["comment"]);
-          if ($res == -2) {
-            $error = new Info(500, "Error while inserting new comment.", InfoType::ERROR);
-            $errors[] = $error->getArray();
-            continue;
-          }
-          $info = new Info(201, "Comment with name '". $commentReq['name'] ."' added successfully.", InfoType::INFO);
-          $success[] = $info->getArray();
-        }
+      // Check if name and comment are present if update is false
+      if ((!$commentReq['update'] && empty($commentReq['name']))) {
+        $error = new Info(400, "Comment name missing from the request #" . ($index + 1), InfoType::ERROR);
+        $errors[] = $error->getArray();
+        continue;
+      } else if ((!$commentReq['update'] && empty($commentReq['comment']))) {
+        $error = new Info(400, "Comment text missing from the request #" . ($index + 1), InfoType::ERROR);
+        $errors[] = $error->getArray();
+        continue;
+      } else if ($commentReq['update'] && empty($commentReq['name']) && empty($commentReq['comment']) && empty($commentReq['toggle'])) {
+        $error = new Info(400, "Comment name, text or toggle missing from the request #" . ($index + 1), InfoType::ERROR);
+        $errors[] = $error->getArray();
+        continue;
       }
+
+      if ($commentReq['update']) {
+
+        if (empty($commentReq['id'])) {
+          $error = new Info(400, "Standard Comment ID missing from the request #" . ($index + 1), InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        }
+
+        $sql = "SELECT lsc_pk, name, comment FROM license_std_comment WHERE lsc_pk = $1;";
+        $existingComment = $this->dbHelper->getDbManager()->getSingleRow($sql, [$commentReq['id']]);
+
+        if (empty($existingComment)) {
+          $error = new Info(404, "Standard comment not found for the request #" . ($index + 1), InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+          // check if the new name doesn't already exist
+        } else if ($existingComment["name"] != $commentReq["name"] && $this->dbHelper->doesIdExist("license_std_comment", "name", $commentReq["name"])) {
+          $error = new Info(400, "Name already exists.", InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        }
+
+        // if both fields were specified and are not empty, update the comment
+        if ($commentReq["name"] && $commentReq["comment"]) {
+          $this->licenseStdCommentDao->updateComment($commentReq["id"], $commentReq["name"], $commentReq["comment"]);
+        } else if ($commentReq["name"]) {
+          $this->licenseStdCommentDao->updateComment($commentReq["id"], $commentReq["name"], $existingComment["comment"]);
+        } else if ($commentReq["comment"]) {
+          $this->licenseStdCommentDao->updateComment($commentReq["id"], $existingComment["name"], $commentReq["comment"]);
+        }
+        // toggle the comment if the toggle field is set to true
+        if ($commentReq["toggle"]) {
+          $this->licenseStdCommentDao->toggleComment($commentReq["id"]);
+        }
+
+        $info = new Info(200, "Successfully updated standard comment", InfoType::INFO);
+      } else {
+
+        if ($this->dbHelper->doesIdExist("license_std_comment", "name", $commentReq["name"])) {
+          $error = new Info(400, "Name already exists for the request #" . ($index + 1), InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        }
+        $res = $this->licenseStdCommentDao->insertComment($commentReq["name"], $commentReq["comment"]);
+        if ($res == -2) {
+          $error = new Info(500, "Error while inserting new comment.", InfoType::ERROR);
+          $errors[] = $error->getArray();
+          continue;
+        }
+        $info = new Info(201, "Comment with name '". $commentReq['name'] ."' added successfully.", InfoType::INFO);
+      }
+      $success[] = $info->getArray();
     }
     return $response->withJson([
       'success' => $success,
@@ -725,21 +691,18 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function verifyLicense($request, $response, $args)
   {
+    $this->throwNotAdminException();
     $licenseShortName = $args["shortname"];
     $body = $this->getParsedBody($request);
     $parentName = $body["parentShortname"];
 
-    if (!Auth::isAdmin()) {
-      $resInfo = new Info(403, "Only admin can perform this operation.",
-        InfoType::ERROR);
-      return $response->withJson($resInfo->getArray(), $resInfo->getCode());
-    }
     if (empty($licenseShortName) || empty($parentName)) {
-      $error = new Info(400, "License ShortName or Parent ShortName is missing.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpBadRequestException(
+        "License ShortName or Parent ShortName is missing.");
     }
 
     $license = $this->licenseDao->getLicenseByShortName($licenseShortName, $this->restHelper->getGroupId());
@@ -750,24 +713,22 @@ class LicenseController extends RestController
     }
 
     if (empty($license) || empty($parentLicense)) {
-      $error = new Info(404, "License not found.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpNotFoundException("License not found.");
     }
 
-    try{
+    try {
+      /** @var \Fossology\UI\Page\AdminLicenseCandidate $adminLicenseCandidate */
       $adminLicenseCandidate = $this->restHelper->getPlugin('admin_license_candidate');
       $ok = $adminLicenseCandidate->verifyCandidate($license->getId(), $licenseShortName, $parentLicense->getId());
     } catch (\Throwable $th) {
-      $error = new Info(400, 'The license text already exists.', InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpConflictException('The license text already exists.', $th);
     }
 
-    if ($ok) {
-      $with = $parentLicense->getId() === $license->getId() ? '' : " as variant of ($parentName).";
-      $info = new Info(200, 'Successfully verified candidate ('.$licenseShortName.')'.$with, InfoType::INFO);
-    } else {
-      $info = new Info(400, 'Short name must be unique', InfoType::ERROR);
+    if (!$ok) {
+      throw new HttpBadRequestException('Short name must be unique');
     }
+    $with = $parentLicense->getId() === $license->getId() ? '' : " as variant of ($parentName).";
+    $info = new Info(200, 'Successfully verified candidate ('.$licenseShortName.')'.$with, InfoType::INFO);
     return $response->withJson($info->getArray(), $info->getCode());
   }
 
@@ -778,54 +739,49 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function mergeLicense($request, $response, $args)
   {
+    $this->throwNotAdminException();
     $licenseShortName = $args["shortname"];
     $body = $this->getParsedBody($request);
     $parentName = $body["parentShortname"];
 
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "Only admin can perform this operation.",
-        InfoType::ERROR);
-    } else if (empty($licenseShortName) || empty($parentName)) {
-      $error = new Info(400, "License ShortName or Parent ShortName is missing.", InfoType::ERROR);
-    } else if ($licenseShortName == $parentName) {
-      $error = new Info(400, "License ShortName and Parent ShortName are same.", InfoType::ERROR);
+    if (empty($licenseShortName) || empty($parentName)) {
+      throw new HttpBadRequestException(
+        "License ShortName or Parent ShortName is missing.");
     }
-
-    if (isset($error)) {
-      return $response->withJson($error->getArray(), $error->getCode());
+    if ($licenseShortName == $parentName) {
+      throw new HttpBadRequestException(
+        "License ShortName and Parent ShortName are same.");
     }
 
     $license = $this->licenseDao->getLicenseByShortName($licenseShortName, $this->restHelper->getGroupId());
     $mergeLicense = $this->licenseDao->getLicenseByShortName($parentName, $this->restHelper->getGroupId());
 
     if (empty($license) || empty($mergeLicense)) {
-      $error = new Info(404, "License not found.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpNotFoundException("License not found.");
     }
 
+    /** @var \Fossology\UI\Page\AdminLicenseCandidate $adminLicenseCandidate */
     $adminLicenseCandidate = $this->restHelper->getPlugin('admin_license_candidate');
     $vars = $adminLicenseCandidate->getDataRow($license->getId());
-    if ($vars === false) {
-      $error = new Info(404, 'invalid license candidate', InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+    if (empty($vars)) {
+      throw new HttpNotFoundException("Candidate license not found.");
     }
 
     try {
       $vars['shortname'] = $vars['rf_shortname'];
       $ok = $adminLicenseCandidate->mergeCandidate($license->getId(), $mergeLicense->getId(), $vars);
     } catch (\Throwable $th) {
-      $error = new Info(400, 'The license text already exists.', InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpConflictException('The license text already exists.', $th);
     }
 
-    if ($ok) {
-      $info = new Info(200, "Successfully merged candidate ($parentName) into ($licenseShortName).", InfoType::INFO);
-    } else {
-      $info = new Info(501, 'Sorry, this feature is not ready yet.', InfoType::ERROR);
+    if (!$ok) {
+      throw new HttpInternalServerErrorException("Please try again later.");
     }
+    $info = new Info(200, "Successfully merged candidate ($parentName) into ($licenseShortName).", InfoType::INFO);
     return $response->withJson($info->getArray(), $info->getCode());
   }
 
@@ -836,24 +792,19 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getSuggestedLicense($request, $response, $args)
   {
+    $this->throwNotAdminException();
     $body =  $this->getParsedBody($request);
     $rfText = $body["referenceText"];
-    if (!Auth::isAdmin()) {
-      $resInfo = new Info(403, "Only admin can perform this operation.",
-        InfoType::ERROR);
-      return $response->withJson($resInfo->getArray(), $resInfo->getCode());
-    }
     if (empty($rfText)) {
-      $error = new Info(400, "Reference text is missing.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpBadRequestException("Reference text is missing.");
     }
+    /** @var \Fossology\UI\Page\AdminLicenseCandidate $adminLicenseCandidate */
     $adminLicenseCandidate = $this->restHelper->getPlugin('admin_license_candidate');
-
     list ($suggestIds, $rendered) = $adminLicenseCandidate->suggestLicenseId($rfText, true);
-
     $highlights = [];
 
     foreach ($rendered as $value) {
@@ -876,7 +827,7 @@ class LicenseController extends RestController
       ];
     }
     if (empty($suggestLicense)) {
-      $suggestLicense = new \stdClass();
+      $suggestLicense = [];
     }
     return $response->withJson($suggestLicense, 200);
   }
@@ -888,13 +839,11 @@ class LicenseController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function exportAdminLicenseToCSV($request, $response, $args)
   {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
+    $this->throwNotAdminException();
     $query = $request->getQueryParams();
     $rf = 0;
     if (array_key_exists('id', $query)) {
@@ -903,8 +852,7 @@ class LicenseController extends RestController
     if ($rf != 0 &&
         (! $this->dbHelper->doesIdExist("license_ref", "rf_pk", $rf) &&
          ! $this->dbHelper->doesIdExist("license_candidate", "rf_pk", $rf))) {
-      $error = new Info(404, "License not found.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpNotFoundException("License not found.");
     }
     $dbManager = $this->dbHelper->getDbManager();
     $licenseCsvExport = new LicenseCsvExport($dbManager);

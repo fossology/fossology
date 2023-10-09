@@ -12,15 +12,17 @@
 namespace Fossology\UI\Api\Helper;
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\UploadPermissionDao;
-use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\FolderDao;
-use Fossology\Lib\Dao\UserDao;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
-use Fossology\Lib\Plugin\Plugin;
 use Fossology\Lib\Dao\JobDao;
 use Fossology\Lib\Dao\ShowJobsDao;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UploadPermissionDao;
+use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Plugin\Plugin;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
 
 /**
  * @class RestHelper
@@ -188,40 +190,39 @@ class RestHelper
 
   /**
    * Copy/move a given upload id to a new folder id.
-   * @param integer $uploadId    Upload to copy/move
+   * @param integer $uploadId Upload to copy/move
    * @param integer $newFolderId New folder id
-   * @param boolean $isCopy      Set true to perform copy, false to move
+   * @param boolean $isCopy Set true to perform copy, false to move
    * @return Fossology::UI::Api::Models::Info
+   * @throws HttpForbiddenException If upload or folder is not accessible
+   * @throws HttpBadRequestException If folder id is not a positive integer
    */
   public function copyUpload($uploadId, $newFolderId, $isCopy)
   {
-    if (is_numeric($newFolderId) && $newFolderId > 0) {
-      if (!$this->folderDao->isFolderAccessible($newFolderId, $this->getUserId())) {
-        return new Info(403, "Folder is not accessible.",
-          InfoType::ERROR);
-      }
-      if (!$this->uploadPermissionDao->isAccessible($uploadId, $this->getGroupId())) {
-        return new Info(403, "Upload is not accessible.",
-          InfoType::ERROR);
-      }
-      $uploadContentId = $this->folderDao->getFolderContentsId($uploadId,
-        $this->folderDao::MODE_UPLOAD);
-      $contentMove = $this->getPlugin('content_move');
+    if (! is_numeric($newFolderId) || $newFolderId <= 0) {
+      throw new HttpBadRequestException("Folder id should be a positive integer");
+    }
+    if (!$this->folderDao->isFolderAccessible($newFolderId, $this->getUserId())) {
+      throw new HttpForbiddenException("Folder is not accessible.");
+    }
+    if (!$this->uploadPermissionDao->isAccessible($uploadId, $this->getGroupId())) {
+      throw new HttpForbiddenException("Upload is not accessible.");
+    }
+    $uploadContentId = $this->folderDao->getFolderContentsId($uploadId,
+      $this->folderDao::MODE_UPLOAD);
+    /** @var \AdminContentMove $contentMove */
+    $contentMove = $this->getPlugin('content_move');
 
-      $errors = $contentMove->copyContent([$uploadContentId], $newFolderId, $isCopy);
-      if (empty($errors)) {
-        $action = $isCopy ? "copied" : "moved";
-        $info = new Info(202, "Upload $uploadId will be $action to folder $newFolderId",
-          InfoType::INFO);
-      } else {
-        $info = new Info(202, "Exceptions occurred: $errors",
-          InfoType::ERROR);
-      }
-      return $info;
+    $errors = $contentMove->copyContent([$uploadContentId], $newFolderId, $isCopy);
+    if (empty($errors)) {
+      $action = $isCopy ? "copied" : "moved";
+      $info = new Info(202, "Upload $uploadId will be $action to folder $newFolderId",
+        InfoType::INFO);
     } else {
-      return new Info(400, "Bad Request. Folder id should be a positive integer",
+      $info = new Info(202, "Exceptions occurred: $errors",
         InfoType::ERROR);
     }
+    return $info;
   }
 
   /**
@@ -255,33 +256,30 @@ class RestHelper
    * - The scope of token should be valid.
    *
    * @param string $tokenExpire The expiry of token requested.
-   * @param string $tokenName   The name of the token requested.
-   * @param string $tokenScope  The scope of the token requested.
-   * @return boolean|Fossology::UI::Api::Models::Info True if all parameters
-   *         are ok, else an info.
+   * @param string $tokenName The name of the token requested.
+   * @param string $tokenScope The scope of the token requested.
+   * @return void
+   * @throws HttpBadRequestException If request is invalid.
    */
   public function validateTokenRequest($tokenExpire, $tokenName, $tokenScope)
   {
-    $requestValid = true;
     $tokenValidity = $this->authHelper->getMaxTokenValidity();
 
     if (strtotime($tokenExpire) < strtotime("tomorrow") ||
       ! preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",
         $tokenExpire) ||
       strtotime($tokenExpire) > strtotime("+$tokenValidity days")) {
-      $requestValid = new Info(400,
+      throw new HttpBadRequestException(
         "The token should have at least 1 day and max $tokenValidity days " .
-        "of validity and should follow YYYY-MM-DD format.", InfoType::ERROR);
+        "of validity and should follow YYYY-MM-DD format.");
     } elseif (! in_array($tokenScope, RestHelper::VALID_SCOPES)) {
-      $requestValid = new Info(400,
+      throw new HttpBadRequestException(
         "Invalid token scope, allowed only " .
-        join(",", RestHelper::VALID_SCOPES), InfoType::ERROR);
+        join(",", RestHelper::VALID_SCOPES));
     } elseif (empty($tokenName) || strlen($tokenName) > 40) {
-      $requestValid = new Info(400,
-        "The token name must be a valid string of max 40 character length",
-        InfoType::ERROR);
+      throw new HttpBadRequestException(
+        "The token name must be a valid string of max 40 character length");
     }
-    return $requestValid;
   }
 
   /**
@@ -292,36 +290,32 @@ class RestHelper
    * - The scope of client should be valid.
    * - Same client should not exist for the user.
    *
-   * @param integer $userId     User id
-   * @param string $clientName  The name of the new client.
+   * @param integer $userId User id
+   * @param string $clientName The name of the new client.
    * @param string $clientScope The scope of the new client.
-   * @param string $clientId    New client id.
-   * @return boolean|Fossology::UI::Api::Models::Info True if all parameters
-   *         are ok, else an info.
+   * @param string $clientId New client id.
+   * @return void
+   * @throws HttpBadRequestException If request is invalid.
    */
   public function validateNewOauthClient($userId, $clientName, $clientScope,
                                         $clientId)
   {
-    $requestValid = true;
     if (!in_array($clientScope, RestHelper::SCOPE_DB_MAP)) {
-      $requestValid = new Info(400, "Invalid client scope, allowed only " .
-          join(",", RestHelper::VALID_SCOPES), InfoType::ERROR);
-    } elseif (empty($clientName) || strlen($clientName) > 40) {
-      $requestValid = new Info(400,
-        "The client name must be a valid string of max 40 character length.",
-        InfoType::ERROR);
-    } else {
-      $sql = "SELECT 1 FROM personal_access_tokens " .
-        "WHERE user_fk = $1 AND client_id = $2;";
-      $rows = $this->dbHelper->getDbManager()->getSingleRow($sql, [
-        $userId,
-        $clientId
-      ], __METHOD__);
-      if (!empty($rows)) {
-        $requestValid = new Info(400, "Client already added for the user.",
-          InfoType::ERROR);
-      }
+      throw new HttpBadRequestException("Invalid client scope, allowed only " .
+        join(",", RestHelper::VALID_SCOPES));
     }
-    return $requestValid;
+    if (empty($clientName) || strlen($clientName) > 40) {
+      throw new HttpBadRequestException(
+        "The client name must be a valid string of max 40 character length");
+    }
+    $sql = "SELECT 1 FROM personal_access_tokens " .
+      "WHERE user_fk = $1 AND client_id = $2;";
+    $rows = $this->dbHelper->getDbManager()->getSingleRow($sql, [
+      $userId,
+      $clientId
+    ], __METHOD__);
+    if (!empty($rows)) {
+      throw new HttpBadRequestException("Client already added for the user.");
+    }
   }
 }

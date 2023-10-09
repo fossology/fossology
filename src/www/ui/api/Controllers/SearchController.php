@@ -13,9 +13,8 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Dao\SearchHelperDao;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Helper\ResponseHelper;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\SearchResult;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -25,7 +24,7 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class SearchController extends RestController
 {
-  /** @var SearchHelperDao */
+  /** @var SearchHelperDao $searchHelperDao */
   private $searchHelperDao;
 
   /**
@@ -35,6 +34,7 @@ class SearchController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpBadRequestException
    */
   public function performSearch($request, $response, $args)
   {
@@ -66,10 +66,8 @@ class SearchController extends RestController
      */
     if (empty($filename) && empty($tag) && empty($filesizeMin) &&
       empty($filesizeMax) && empty($license) && empty($copyright)) {
-      $returnVal = new Info(400,
-        "Bad Request. At least one parameter, containing a value is required",
-        InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpBadRequestException(
+        "At least one parameter, containing a value is required");
     }
 
     /*
@@ -77,10 +75,8 @@ class SearchController extends RestController
      */
     if ((! empty($filesizeMin) && (! is_numeric($filesizeMin) || $filesizeMin < 0)) ||
       (! empty($filesizeMax) && (! is_numeric($filesizeMax) || $filesizeMax < 0))) {
-      $returnVal = new Info(400,
-        "Bad Request. filesizemin and filesizemax need to be positive integers!",
-        InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpBadRequestException(
+        "filesizemin and filesizemax need to be positive integers!");
     }
 
     /*
@@ -88,10 +84,8 @@ class SearchController extends RestController
      */
     if ((! ($page==='') && (! is_numeric($page) || $page < 1)) ||
       (! ($limit==='') && (! is_numeric($limit) || $limit < 1))) {
-      $returnVal = new Info(400,
-        "Bad Request. page and limit need to be positive integers!",
-        InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpBadRequestException(
+        "page and limit need to be positive integers!");
     }
 
     // set page to 1 by default
