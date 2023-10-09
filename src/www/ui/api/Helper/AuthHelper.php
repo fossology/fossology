@@ -22,8 +22,8 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -92,10 +92,11 @@ class AuthHelper
    * Verify the JWT/oauth token sent by user.
    *
    * @param string $authHeader The "Authorization" header sent by user.
-   * @param int    $userId     The user id as per the valid token.
+   * @param int $userId The user id as per the valid token.
    * @param string $tokenScope The scope of the token presented.
-   * @return boolean|Fossology::UI::Api::Models::Info True if the token is valid,
-   *         false otherwise, Info in case of error.
+   * @return void
+   * @throws HttpBadRequestException If the header is malformed.
+   * @throws HttpForbiddenException  If the user is inactive.
    */
   public function verifyAuthToken($authHeader, &$userId, &$tokenScope)
   {
@@ -104,46 +105,42 @@ class AuthHelper
     $headerValid = preg_match(
       "/^bearer (([a-zA-Z0-9\-\_\+\/\=]+)\.([a-zA-Z0-9\-\_\+\/\=]+)\.([a-zA-Z0-9\-\_\+\/\=]+))$/i",
       $authHeader, $jwtTokenMatch);
-    $returnValue = true;
     if (! $headerValid) {
-      $returnValue = new Info(400, "Authorization header is malformed or empty.",
-        InfoType::ERROR);
-    } else {
-      $jwtToken           = $jwtTokenMatch[1];
-      $jwtTokenPayload    = $jwtTokenMatch[3];
-      $jwtTokenPayloadDecoded = JWT::jsonDecode(
-        JWT::urlsafeB64Decode($jwtTokenPayload));
-
-      $restToken = Auth::getRestTokenType();
-      if (($restToken & Auth::TOKEN_OAUTH) == Auth::TOKEN_OAUTH &&
-        property_exists($jwtTokenPayloadDecoded, 'iss') &&
-        $jwtTokenPayloadDecoded->{'iss'} == $SysConf['SYSCONFIG']['OidcIssuer']
-      ) {
-        $returnValue = $this->validateOauthLogin(
-          $jwtToken,
-          $userId,
-          $tokenScope
-        );
-      } else if (($restToken & Auth::TOKEN_TOKEN) == Auth::TOKEN_TOKEN &&
-        ! property_exists($jwtTokenPayloadDecoded, 'iss')
-      ) {
-        $returnValue = $this->validateTokenLogin(
-          $jwtToken,
-          $jwtTokenPayloadDecoded,
-          $userId,
-          $tokenScope
-        );
-      } else {
-        $returnValue = new Info(403, "Invalid token type sent.",
-          InfoType::ERROR);
-      }
-
-      $isUserActive = $this->userDao->isUserIdActive($userId);
-      if (!$isUserActive) {
-        $returnValue = new Info(403, "User inactive.", InfoType::ERROR);
-      }
+      throw new HttpBadRequestException(
+        "Authorization header is malformed or empty.");
     }
-    return $returnValue;
+    $jwtToken           = $jwtTokenMatch[1];
+    $jwtTokenPayload    = $jwtTokenMatch[3];
+    $jwtTokenPayloadDecoded = JWT::jsonDecode(
+      JWT::urlsafeB64Decode($jwtTokenPayload));
+
+    $restToken = Auth::getRestTokenType();
+    if (($restToken & Auth::TOKEN_OAUTH) == Auth::TOKEN_OAUTH &&
+      property_exists($jwtTokenPayloadDecoded, 'iss') &&
+      $jwtTokenPayloadDecoded->{'iss'} == $SysConf['SYSCONFIG']['OidcIssuer']
+    ) {
+      $this->validateOauthLogin(
+        $jwtToken,
+        $userId,
+        $tokenScope
+      );
+    } else if (($restToken & Auth::TOKEN_TOKEN) == Auth::TOKEN_TOKEN &&
+      ! property_exists($jwtTokenPayloadDecoded, 'iss')
+    ) {
+      $this->validateTokenLogin(
+        $jwtToken,
+        $jwtTokenPayloadDecoded,
+        $userId,
+        $tokenScope
+      );
+    } else {
+      throw new HttpForbiddenException("Invalid token type sent.");
+    }
+
+    $isUserActive = $this->userDao->isUserIdActive($userId);
+    if (!$isUserActive) {
+      throw new HttpForbiddenException("User inactive.");
+    }
   }
 
   /**
@@ -164,21 +161,18 @@ class AuthHelper
    * Check if the token is still active and not expired.
    *
    * @param array $valuesFromDb Values from DB.
-   * @param array $tokenId      Token id (pat_pk)
-   * @return boolean|Fossology::UI::Api::Models::Info True if values are ok
-   *         Info otherwise.
+   * @param int   $tokenId Token id (pat_pk)
+   * @throws HttpForbiddenException If the token is expired.
    */
   public function isTokenActive($valuesFromDb, $tokenId)
   {
-    $isPayloadValid = true;
     if ($valuesFromDb['active'] == "f") {
-      $isPayloadValid = new Info(403, "Token expired.", InfoType::ERROR);
+      throw new HttpForbiddenException("Token expired.");
     } elseif ($this->isDateExpired($valuesFromDb['expire_on']) &&
       $valuesFromDb['active'] == "t") {
       $this->dbHelper->invalidateToken($tokenId);
-      $isPayloadValid = new Info(403, "Token expired.", InfoType::ERROR);
+      throw new HttpForbiddenException("Token expired.");
     }
-    return $isPayloadValid;
   }
 
   /**
@@ -246,40 +240,35 @@ class AuthHelper
   /**
    * @brief Verify if given User Id has access to given Group name.
    *
-   * @param int    $userId User id from the JWT.
-   * @param string $groupName  Name of the group to verify access to.
-   * @return boolean|Fossology::UI::Api::Models::Info True if user has access to group,
-   *         Info in case of no access or not existing group.
+   * @param int $userId User id from the JWT.
+   * @param string $groupName Name of the group to verify access to.
+   * @return void
+   * @throws HttpForbiddenException If the user does not have access to group.
    */
   public function userHasGroupAccess($userId, $groupName)
   {
-    $isGroupExisting = $this->isGroupExisting($groupName);
-    if ($isGroupExisting === true) {
-      $groupMap = $this->userDao->getUserGroupMap($userId);
-      $userHasGroupAccess = in_array($groupName, $groupMap, true);
-    } else {
-      return $isGroupExisting;
-    }
+    $this->isGroupExisting($groupName);
+    $groupMap = $this->userDao->getUserGroupMap($userId);
+    $userHasGroupAccess = in_array($groupName, $groupMap, true);
 
     if (!$userHasGroupAccess) {
-        $userHasGroupAccess = new Info(403, "User has no access to " . $groupName . " group", InfoType::ERROR);
+      throw new HttpForbiddenException(
+        "User has no access to " . $groupName . " group");
     }
-    return $userHasGroupAccess;
   }
 
   /**
    * @brief Verify if given Group name exists.
    *
-   * @param string $groupName  Name of the group to update session with.
-   * @return boolean|Fossology::UI::Api::Models::Info True if group exists,
-   *         Info in case of nt existing group.
+   * @param string $groupName Name of the group to update session with.
+   * @return void
+   * @throws HttpForbiddenException If the group does not exist.
    */
   public function isGroupExisting($groupName)
   {
-    if (! empty($this->userDao->getGroupIdByName($groupName))) {
-      return true;
-    } else {
-      return new Info(403, "Provided group:" . $groupName . " does not exist", InfoType::ERROR);
+    if (empty($this->userDao->getGroupIdByName($groupName))) {
+      throw new HttpForbiddenException(
+        "Provided group:" . $groupName . " does not exist");
     }
   }
 
@@ -290,11 +279,12 @@ class AuthHelper
    * against the JWKs. If valid, then fetch the user id and token scope from the
    * DB against the `client_id` stored in the token.
    *
-   * @param      string  $jwtToken   Token from header
+   * @param string $jwtToken Token from header
    * @param[out] integer $userId     User ID from DB
    * @param[out] string  $tokenScope Token scope from DB
    *
-   * @return bool|Info True on success, Info object on failure.
+   * @return void
+   * @throws HttpForbiddenException If the token is expired.
    */
   private function validateOauthLogin($jwtToken, &$userId, &$tokenScope)
   {
@@ -316,10 +306,7 @@ class AuthHelper
       if (empty($dbRows)) {
         throw new \UnexpectedValueException("Invalid token sent.", 403);
       }
-      $isActive = $this->isTokenActive($dbRows, $tokenId);
-      if ($isActive !== true) {
-        throw new \UnexpectedValueException($isActive->getMessage(), 403);
-      }
+      $this->isTokenActive($dbRows, $tokenId);
       $userId = $dbRows['user_fk'];
       $tokenScope = $dbRows['token_scope'];
       if ($tokenScope == "w") {
@@ -328,9 +315,8 @@ class AuthHelper
         $tokenScope = "read";
       }
     } catch (\UnexpectedValueException $e) {
-      return new Info(403, $e->getMessage(), InfoType::ERROR);
+      throw new HttpForbiddenException($e->getMessage(), $e);
     }
-    return true;
   }
 
   /**
@@ -405,12 +391,13 @@ class AuthHelper
    * from the DB to validate the token. Once valid and active, the userid and
    * scope will be taken from the DB.
    *
-   * @param      string  $jwtToken   Token from header
-   * @param      object  $jwtTokenPayloadDecoded Decoded token
+   * @param string $jwtToken Token from header
+   * @param object $jwtTokenPayloadDecoded Decoded token
    * @param[out] integer $userId     User ID from DB
    * @param[out] string  $tokenScope Token scope from DB
    *
-   * @return mixed True on success, Info object on failure.
+   * @return void
+   * @throws HttpForbiddenException If the token is expired.
    */
   private function validateTokenLogin($jwtToken, $jwtTokenPayloadDecoded,
                                       &$userId, &$tokenScope)
@@ -421,21 +408,15 @@ class AuthHelper
 
     $dbRows = $this->dbHelper->getTokenKey($tokenId);
     if (empty($dbRows)) {
-      return new Info(403, "Invalid token sent.", InfoType::ERROR);
+      throw new HttpForbiddenException("Invalid token sent.");
     }
-    $isTokenActive = $this->isTokenActive($dbRows, $tokenId);
-    if ($isTokenActive !== true) {
-      $returnValue = $isTokenActive;
-    } else {
-      $returnValue = true;
-      try {
-        $jwtTokenDecoded = JWT::decode($jwtToken,
-          new Key($dbRows["token_key"], 'HS256'));
-        $tokenScope = $jwtTokenDecoded->{'scope'};
-      } catch (\UnexpectedValueException $e) {
-        $returnValue = new Info(403, $e->getMessage(), InfoType::ERROR);
-      }
+    $this->isTokenActive($dbRows, $tokenId);
+    try {
+      $jwtTokenDecoded = JWT::decode($jwtToken,
+        new Key($dbRows["token_key"], 'HS256'));
+      $tokenScope = $jwtTokenDecoded->{'scope'};
+    } catch (\UnexpectedValueException $e) {
+      throw new HttpForbiddenException($e->getMessage(), $e);
     }
-    return $returnValue;
   }
 }

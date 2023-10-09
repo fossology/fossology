@@ -12,12 +12,11 @@
 
 namespace Fossology\UI\Api\Middlewares;
 
-require_once dirname(dirname(dirname(dirname(dirname(__FILE__))))) .
-  "/lib/php/bootstrap.php";
+require_once dirname(__FILE__, 5) . "/lib/php/bootstrap.php";
 
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
-use Slim\Psr7\Response;
 
 /**
  * @class FossologyInitMiddleware
@@ -31,9 +30,9 @@ class FossologyInitMiddleware
    * @param  Request        $request  PSR7 request
    * @param  RequestHandler $handler PSR-15 request handler
    *
-   * @return Response
+   * @return ResponseInterface
    */
-  public function __invoke(Request $request, RequestHandler $handler) : Response
+  public function __invoke(Request $request, RequestHandler $handler) : ResponseInterface
   {
     global $container;
     $timingLogger = $container->get("log.timing");

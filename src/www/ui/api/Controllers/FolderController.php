@@ -14,6 +14,11 @@ namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\UI\Ajax\AjaxFolderContents;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpErrorException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+use Fossology\UI\Api\Exceptions\HttpInternalServerErrorException;
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Folder;
 use Fossology\UI\Api\Models\Info;
@@ -34,6 +39,7 @@ class FolderController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getFolders($request, $response, $args)
   {
@@ -43,17 +49,11 @@ class FolderController extends RestController
     $folderDao = $this->restHelper->getFolderDao();
     if (isset($args['id'])) {
       $id = intval($args['id']);
-      $returnVal = null;
       if (! $folderDao->isFolderAccessible($id)) {
-        $returnVal = new Info(403, "Folder id $id is not accessible",
-          InfoType::ERROR);
+        throw new HttpForbiddenException("Folder id $id is not accessible");
       }
       if ($folderDao->getFolder($id) === null) {
-        $returnVal = new Info(404, "Folder id $id does not exists",
-          InfoType::ERROR);
-      }
-      if ($returnVal !== null) {
-        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+        throw new HttpNotFoundException("Folder id $id does not exists");
       }
       $allUserFolders = [
         $id
@@ -85,34 +85,32 @@ class FolderController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function createFolder($request, $response, $args)
   {
-    $info = null;
     $parentFolder = $request->getHeaderLine('parentFolder');
     $folderName = trim($request->getHeaderLine('folderName'));
     $folderDescription = trim($request->getHeaderLine('folderDescription'));
 
     if (! is_numeric($parentFolder) || $parentFolder < 0) {
-      $info = new Info(400, "Parent folder id must be a positive integer!",
-        InfoType::ERROR);
+      throw new HttpBadRequestException(
+        "Parent folder id must be a positive integer!");
     }
     if (empty($folderName)) {
-      $info = new Info(400, "Folder name can not be empty!", InfoType::ERROR);
+      throw new HttpBadRequestException("Folder name can not be empty!");
     }
     if (! $this->restHelper->getFolderDao()->isFolderAccessible($parentFolder,
-      $this->restHelper->getUserId())) {
-      $info = new Info(403, "Parent folder can not be accessed!", InfoType::ERROR);
+        $this->restHelper->getUserId())) {
+      throw new HttpForbiddenException("Parent folder is not accessible!");
     }
-    if ($info !== null) {
-      return $response->withJson($info->getArray(), $info->getCode());
-    }
+    /** @var \folder_create $folderCreate */
     $folderCreate = $this->restHelper->getPlugin('folder_create');
     $rc = $folderCreate->create($parentFolder, $folderName, $folderDescription);
     if ($rc == 4) {
       $info = new Info(200, "Folder $folderName already exists!", InfoType::INFO);
     } elseif ($rc == 0) {
-      $info = new Info(404, "Parent folder not found!", InfoType::ERROR);
+      throw new HttpNotFoundException("Parent folder not found!");
     } else {
       $folderId = $this->restHelper->getFolderDao()->getFolderId($folderName, $parentFolder);
       $info = new Info(201, intval($folderId), InfoType::INFO);
@@ -127,6 +125,7 @@ class FolderController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function deleteFolder($request, $response, $args)
   {
@@ -135,26 +134,26 @@ class FolderController extends RestController
     $folderId = $args['id'];
 
     if (! is_numeric($folderId) || $folderId < 0) {
-      $info = new Info(400, "Folder id must be a positive integer!",
-        InfoType::ERROR);
-    } elseif ($folderDao->getFolder($folderId) === null) {
-      $info = new Info(404, "Folder id not found!", InfoType::ERROR);
-    } else {
-      $folderDelete = $this->restHelper->getPlugin('admin_folder_delete');
-      $folderName = FolderGetName($folderId);
-      $folderArray = Folder2Path($folderId);
-      $folderParent = intval($folderArray[count($folderArray) - 2]['folder_pk']);
-      $folderId = "$folderParent $folderId";
-
-      $rc = $folderDelete->Delete($folderId, $this->restHelper->getUserId());
-      if ($rc == "No access to delete this folder") {
-        $info = new Info(403, $rc, InfoType::ERROR);
-      } elseif ($rc !== null) {
-        $info = new Info(500, $rc, InfoType::ERROR);
-      } else {
-        $info = new Info(202, "Folder, \"$folderName\" deleted.", InfoType::INFO);
-      }
+      throw new HttpBadRequestException(
+        "Folder id must be a positive integer!");
     }
+    if ($folderDao->getFolder($folderId) === null) {
+      throw new HttpNotFoundException("Folder id not found!");
+    }
+    /** @var \admin_folder_delete $folderDelete */
+    $folderDelete = $this->restHelper->getPlugin('admin_folder_delete');
+    $folderName = FolderGetName($folderId);
+    $folderArray = Folder2Path($folderId);
+    $folderParent = intval($folderArray[count($folderArray) - 2]['folder_pk']);
+    $folderId = "$folderParent $folderId";
+
+    $rc = $folderDelete->Delete($folderId, $this->restHelper->getUserId());
+    if ($rc == "No access to delete this folder") {
+      throw new HttpForbiddenException($rc);
+    } elseif ($rc !== null) {
+      throw new HttpInternalServerErrorException($rc);
+    }
+    $info = new Info(202, "Folder, \"$folderName\" deleted.", InfoType::INFO);
     return $response->withJson($info->getArray(), $info->getCode());
   }
 
@@ -165,25 +164,26 @@ class FolderController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function editFolder($request, $response, $args)
   {
-    $info = null;
     $folderDao = $this->restHelper->getFolderDao();
     $folderId = $args['id'];
     $newName = $request->getHeaderLine('name');
     $newDesc = $request->getHeaderLine('description');
 
     if ($folderDao->getFolder($folderId) === null) {
-      $info = new Info(404, "Folder id not found!", InfoType::ERROR);
-    } elseif (! $folderDao->isFolderAccessible($folderId, $this->restHelper->getUserId())) {
-      $info = new Info(403, "Folder is not accessible!", InfoType::ERROR);
-    } else {
-      $folderEdit = $this->restHelper->getPlugin('folder_properties');
-      $folderName = FolderGetName($folderId);
-      $folderEdit->Edit($folderId, $newName, $newDesc);
-      $info = new Info(200, "Folder \"$folderName\" updated.", InfoType::INFO);
+      throw new HttpNotFoundException("Folder id not found!");
     }
+    if (! $folderDao->isFolderAccessible($folderId, $this->restHelper->getUserId())) {
+      throw new HttpForbiddenException("Folder is not accessible!");
+    }
+    /** @var \folder_properties $folderEdit */
+    $folderEdit = $this->restHelper->getPlugin('folder_properties');
+    $folderName = FolderGetName($folderId);
+    $folderEdit->Edit($folderId, $newName, $newDesc);
+    $info = new Info(200, "Folder \"$folderName\" updated.", InfoType::INFO);
     return $response->withJson($info->getArray(), $info->getCode());
   }
 
@@ -194,47 +194,52 @@ class FolderController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function copyFolder($request, $response, $args)
   {
-    $info = null;
     $folderDao = $this->restHelper->getFolderDao();
     $folderId = $args['id'];
     $newParent = $request->getHeaderLine('parent');
     $action = strtolower($request->getHeaderLine('action'));
 
     if (! is_numeric($newParent) || $newParent < 0) {
-      $info = new Info(400, "Parent id must be a positive integer!",
-        InfoType::ERROR);
-    } elseif ($folderDao->getFolder($folderId) === null) {
-      $info = new Info(404, "Folder id not found!", InfoType::ERROR);
-    } elseif ($folderDao->getFolder($newParent) === null) {
-      $info = new Info(404, "Parent folder not found!", InfoType::ERROR);
-    } elseif (! $folderDao->isFolderAccessible($folderId,
-      $this->restHelper->getUserId())) {
-      $info = new Info(403, "Folder is not accessible!", InfoType::ERROR);
-    } elseif (! $folderDao->isFolderAccessible($newParent,
-      $this->restHelper->getUserId())) {
-      $info = new Info(403, "Parent folder is not accessible!", InfoType::ERROR);
-    } elseif (strcmp($action, "copy") != 0 && strcmp($action, "move") != 0) {
-      $info = new Info(400, "Action can be one of [copy,move]!", InfoType::ERROR);
-    } else {
-      $folderMove = $this->restHelper->getPlugin('content_move');
-      $folderName = FolderGetName($folderId);
-      $parentFolderName = FolderGetName($newParent);
-      $isCopy = (strcmp($action, "copy") == 0);
-      $message = $folderMove->copyContent(
-        [
-          $folderDao->getFolderContentsId($folderId, $folderDao::MODE_FOLDER)
-        ], $newParent, $isCopy);
-      if (empty($message)) {
-        $info = new Info(202,
-          "Folder \"$folderName\" $action(ed) under \"$parentFolderName\".",
-          InfoType::INFO);
-      } else {
-        $info = new Info(500, $message, InfoType::ERROR);
-      }
+      throw new HttpBadRequestException(
+        "Parent id must be a positive integer!");
     }
+    if ($folderDao->getFolder($folderId) === null) {
+      throw new HttpNotFoundException("Folder id not found!");
+    }
+    if ($folderDao->getFolder($newParent) === null) {
+      throw new HttpNotFoundException("Parent folder id not found!");
+    }
+    if (! $folderDao->isFolderAccessible($folderId,
+        $this->restHelper->getUserId())) {
+      throw new HttpForbiddenException("Folder is not accessible!");
+    }
+    if (! $folderDao->isFolderAccessible($newParent,
+        $this->restHelper->getUserId())) {
+      throw new HttpForbiddenException("Parent folder is not accessible!");
+    }
+    if (strcmp($action, "copy") != 0 && strcmp($action, "move") != 0) {
+      throw new HttpBadRequestException(
+        "Action can be one of [copy,move]!");
+    }
+    /** @var \AdminContentMove $folderMove */
+    $folderMove = $this->restHelper->getPlugin('content_move');
+    $folderName = FolderGetName($folderId);
+    $parentFolderName = FolderGetName($newParent);
+    $isCopy = (strcmp($action, "copy") == 0);
+    $message = $folderMove->copyContent(
+      [
+        $folderDao->getFolderContentsId($folderId, $folderDao::MODE_FOLDER)
+      ], $newParent, $isCopy);
+    if (!empty($message)) {
+      throw new HttpInternalServerErrorException($message);
+    }
+    $info = new Info(202,
+      "Folder \"$folderName\" $action(ed) under \"$parentFolderName\".",
+      InfoType::INFO);
     return $response->withJson($info->getArray(), $info->getCode());
   }
 
@@ -245,6 +250,7 @@ class FolderController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getUnlinkableFolderContents($request, $response, $args)
   {
@@ -252,13 +258,10 @@ class FolderController extends RestController
     $folderDao = $this->restHelper->getFolderDao();
 
     if ($folderDao->getFolder($folderId) === null) {
-      $error = new Info(404, "Folder id not found!", InfoType::ERROR);
-    } else if (! $folderDao->isFolderAccessible($folderId, $this->restHelper->getUserId())) {
-      $error = new Info(403, "Folder is not accessible!", InfoType::ERROR);
+      throw new HttpNotFoundException("Folder id not found!");
     }
-
-    if (isset($error)) {
-      return $response->withJson($error->getArray(), $error->getCode());
+    if (! $folderDao->isFolderAccessible($folderId, $this->restHelper->getUserId())) {
+      throw new HttpForbiddenException("Folder is not accessible!");
     }
 
     /** @var AjaxFolderContents $folderContents */
@@ -278,21 +281,20 @@ class FolderController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function unlinkFolder($request, $response, $args)
   {
     $folderContentId = $args['contentId'];
     if (!$this->dbHelper->doesIdExist("foldercontents", "foldercontents_pk", $folderContentId)) {
-      $info = new Info(404, "Folder content id not found!", InfoType::ERROR);
-    } else {
-      /** @var FolderDao $folderDao */
-      $folderDao = $this->container->get('dao.folder');
-      if ($folderDao->removeContent($folderContentId)) {
-        $info = new Info(200, "Folder unlinked successfully.", InfoType::INFO);
-      } else {
-        $info = new Info(400, "Content cannot be unlinked.", InfoType::ERROR);
-      }
+      throw new HttpNotFoundException("Folder content id not found!");
     }
+    /** @var FolderDao $folderDao */
+    $folderDao = $this->container->get('dao.folder');
+    if (!$folderDao->removeContent($folderContentId)) {
+      throw new HttpBadRequestException("Content cannot be unlinked.");
+    }
+    $info = new Info(200, "Folder unlinked successfully.", InfoType::INFO);
     return $response->withJson($info->getArray(), $info->getCode());
   }
 
@@ -303,6 +305,7 @@ class FolderController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getAllFolderContents($request, $response, $args)
   {
@@ -310,13 +313,10 @@ class FolderController extends RestController
     $folderDao = $this->restHelper->getFolderDao();
 
     if ($folderDao->getFolder($folderId) === null) {
-      $error = new Info(404, "Folder id not found!", InfoType::ERROR);
-    } else if (! $folderDao->isFolderAccessible($folderId, $this->restHelper->getUserId())) {
-      $error = new Info(403, "Folder is not accessible!", InfoType::ERROR);
+      throw new HttpNotFoundException("Folder id not found!");
     }
-
-    if (isset($error)) {
-      return $response->withJson($error->getArray(), $error->getCode());
+    if (! $folderDao->isFolderAccessible($folderId, $this->restHelper->getUserId())) {
+      throw new HttpForbiddenException("Folder is not accessible!");
     }
 
     /** @var AjaxFolderContents $folderContents */

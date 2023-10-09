@@ -8,16 +8,16 @@
 */
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Plugin\DefaultPlugin;
-use Symfony\Component\HttpFoundation\Request;
-use Fossology\UI\Api\Helper\RestHelper;
-use Fossology\UI\Api\Helper\AuthHelper;
-use Fossology\UI\Api\Models\Info;
-use Firebase\JWT\JWT;
 use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
 use Fossology\Lib\Exceptions\DuplicateTokenNameException;
-use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Helper\AuthHelper;
+use Fossology\UI\Api\Helper\DbHelper;
+use Fossology\UI\Api\Helper\RestHelper;
+use Symfony\Component\HttpFoundation\Request;
 
 class UserEditPage extends DefaultPlugin
 {
@@ -446,9 +446,9 @@ class UserEditPage extends DefaultPlugin
    * Generate new token based on the request sent by user.
    *
    * @param Request $request
-   * @throws \UnexpectedValueException Throws an exception if the request is
-   *         not valid.
    * @return string The new token if no error occured.
+   * @throws \UnexpectedValueException Throws an exception if the request is
+   * @throws DuplicateTokenKeyException
    * @uses Fossology::UI::Api::Helper::RestHelper::validateTokenRequest()
    * @uses Fossology::UI::Api::Helper::DbHelper::insertNewTokenKey()
    */
@@ -465,36 +465,37 @@ class UserEditPage extends DefaultPlugin
       $tokenScope = $request->get('pat_scope');
     }
     $tokenScope = array_search($tokenScope, RestHelper::SCOPE_DB_MAP);
+    /** @var RestHelper $restHelper */
     $restHelper = $container->get('helper.restHelper');
-    $isTokenRequestValid = $restHelper->validateTokenRequest($tokenExpiry,
-      $tokenName, $tokenScope);
+    try {
+      $restHelper->validateTokenRequest($tokenExpiry, $tokenName, $tokenScope);
+    } catch (HttpBadRequestException $e) {
+      throw new \UnexpectedValueException($e->getMessage());
+    }
 
-    if ($isTokenRequestValid !== true) {
-      throw new \UnexpectedValueException($isTokenRequestValid->getMessage());
-    } else {
-      $restDbHelper = $container->get('helper.dbHelper');
+    /** @var DbHelper $restDbHelper */
+    $restDbHelper = $container->get('helper.dbHelper');
+    $key = bin2hex(
+      openssl_random_pseudo_bytes(RestHelper::TOKEN_KEY_LENGTH / 2));
+    try {
+      $jti = $restDbHelper->insertNewTokenKey($user_pk, $tokenExpiry,
+        RestHelper::SCOPE_DB_MAP[$tokenScope], $tokenName, $key);
+    } catch (DuplicateTokenKeyException $e) {
+      // Key already exists, try again.
       $key = bin2hex(
         openssl_random_pseudo_bytes(RestHelper::TOKEN_KEY_LENGTH / 2));
       try {
         $jti = $restDbHelper->insertNewTokenKey($user_pk, $tokenExpiry,
           RestHelper::SCOPE_DB_MAP[$tokenScope], $tokenName, $key);
       } catch (DuplicateTokenKeyException $e) {
-        // Key already exists, try again.
-        $key = bin2hex(
-          openssl_random_pseudo_bytes(RestHelper::TOKEN_KEY_LENGTH / 2));
-        try {
-          $jti = $restDbHelper->insertNewTokenKey($user_pk, $tokenExpiry,
-            RestHelper::SCOPE_DB_MAP[$tokenScope], $tokenName, $key);
-        } catch (DuplicateTokenKeyException $e) {
-          // New key also failed, give up!
-          throw new DuplicateTokenKeyException("Please try again later.");
-        }
-      } catch (DuplicateTokenNameException $e) {
-        throw new \UnexpectedValueException($e->getMessage());
+        // New key also failed, give up!
+        throw new DuplicateTokenKeyException("Please try again later.");
       }
-      return $this->authHelper->generateJwtToken($tokenExpiry,
-        $jti['created_on'], $jti['jti'], $tokenScope, $key);
+    } catch (DuplicateTokenNameException $e) {
+      throw new \UnexpectedValueException($e->getMessage());
     }
+    return $this->authHelper->generateJwtToken($tokenExpiry,
+      $jti['created_on'], $jti['jti'], $tokenScope, $key);
   }
 
   /**
@@ -601,6 +602,7 @@ class UserEditPage extends DefaultPlugin
     } else {
       $clientScope = GetParm('client_scope', PARM_STRING);
     }
+    /** @var RestHelper $restHelper */
     $restHelper = $container->get('helper.restHelper');
     $isTokenRequestValid = $restHelper->validateNewOauthClient($user_pk,
       $clientName, $clientScope, $clientId);

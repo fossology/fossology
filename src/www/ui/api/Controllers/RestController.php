@@ -14,9 +14,12 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Psr\Container\ContainerInterface;
-use Fossology\UI\Api\Helper\RestHelper;
+use Fossology\Lib\Auth\Auth;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\DbHelper;
+use Fossology\UI\Api\Helper\RestHelper;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -72,6 +75,52 @@ class RestController
     } else {
       // application/x-www-form-urlencoded or multipart/form-data
       return $request->getParsedBody();
+    }
+  }
+
+  /**
+   * Throw an HttpForbiddenException if the user is not admin.
+   *
+   * @throws HttpForbiddenException
+   */
+  protected function throwNotAdminException(): void
+  {
+    if (!Auth::isAdmin()) {
+      throw new HttpForbiddenException("Only admin can access this endpoint.");
+    }
+  }
+
+  /**
+   * Check if upload is accessible
+   *
+   * @param integer $id Upload ID
+   * @throws HttpNotFoundException Upload not found
+   * @throws HttpForbiddenException Upload not accessible
+   */
+  protected function uploadAccessible($id): void
+  {
+    if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $id)) {
+      throw new HttpNotFoundException("Upload does not exist");
+    }
+    if (! $this->restHelper->getUploadDao()->isAccessible($id,
+        $this->restHelper->getGroupId())) {
+      throw new HttpForbiddenException("Upload is not accessible");
+    }
+  }
+
+  /**
+   * Check if upload tree is accessible
+   *
+   * @param int $itemId
+   * @return void
+   * @throws HttpNotFoundException
+   */
+  protected function isItemExists(int $itemId): void
+  {
+    if (!$this->dbHelper->doesIdExist(
+      $this->restHelper->getUploadDao()->getUploadtreeTableName($itemId),
+      "uploadtree_pk", $itemId)) {
+      throw new HttpNotFoundException("Item does not exist");
     }
   }
 }

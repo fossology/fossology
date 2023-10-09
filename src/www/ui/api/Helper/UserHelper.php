@@ -83,20 +83,20 @@ class UserHelper
     $user = $userDao->getUserByPk($this->user_pk);
 
     $symfonyRequest = new Request();
-    $symfonyRequest->request->set('user_pk', isset($userDetails['id']) ? $userDetails['id'] : $this->user_pk);
-    $symfonyRequest->request->set('user_name', isset($userDetails['name']) ? $userDetails['name'] : $user['user_name']);
-    $symfonyRequest->request->set('root_folder_fk', isset($userDetails['rootFolderId']) ? $userDetails['rootFolderId'] : $user['root_folder_fk']);
-    $symfonyRequest->request->set('default_group_fk', isset($userDetails['defaultGroup']) ? $userDetails['defaultGroup'] : $user['group_fk']);
-    $symfonyRequest->request->set('public', isset($userDetails['defaultVisibility']) ? $userDetails['defaultVisibility'] : $user['upload_visibility']);
-    $symfonyRequest->request->set('default_folder_fk', isset($userDetails['defaultFolderId']) ? $userDetails['defaultFolderId'] : $user['default_folder_fk']);
-    $symfonyRequest->request->set('user_desc', isset($userDetails['description']) ? $userDetails['description'] : $user['user_desc']);
-    $symfonyRequest->request->set('_pass1', isset($userDetails['user_pass']) ? $userDetails['user_pass'] : null);
-    $symfonyRequest->request->set('_pass2', isset($userDetails['user_pass']) ? $userDetails['user_pass'] : null);
-    $symfonyRequest->request->set('_blank_pass', isset($userDetails['_blank_pass']) ? $userDetails['_blank_pass'] : "");
-    $symfonyRequest->request->set('user_status', isset($userDetails['user_status']) ? $userDetails['user_status'] : $user['user_status']);
-    $symfonyRequest->request->set('user_email', isset($userDetails['email']) ? $userDetails['email'] : $user['user_email']);
+    $symfonyRequest->request->set('user_pk', $userDetails['id'] ?? $this->user_pk);
+    $symfonyRequest->request->set('user_name', $userDetails['name'] ?? $user['user_name']);
+    $symfonyRequest->request->set('root_folder_fk', $userDetails['rootFolderId'] ?? $user['root_folder_fk']);
+    $symfonyRequest->request->set('default_group_fk', $userDetails['defaultGroup'] ?? $user['group_fk']);
+    $symfonyRequest->request->set('public', $userDetails['defaultVisibility'] ?? $user['upload_visibility']);
+    $symfonyRequest->request->set('default_folder_fk', $userDetails['defaultFolderId'] ?? $user['default_folder_fk']);
+    $symfonyRequest->request->set('user_desc', $userDetails['description'] ?? $user['user_desc']);
+    $symfonyRequest->request->set('_pass1', $userDetails['user_pass'] ?? null);
+    $symfonyRequest->request->set('_pass2', $userDetails['user_pass'] ?? null);
+    $symfonyRequest->request->set('_blank_pass', $userDetails['_blank_pass'] ?? "");
+    $symfonyRequest->request->set('user_status', $userDetails['user_status'] ?? $user['user_status']);
+    $symfonyRequest->request->set('user_email', $userDetails['email'] ?? $user['user_email']);
     $symfonyRequest->request->set('email_notify', isset($userDetails['emailNotification']) && $userDetails['emailNotification'] ? "y" : $user['email_notify']);
-    $symfonyRequest->request->set('default_bucketpool_fk', isset($userDetails['defaultBucketpool']) ? $userDetails['defaultBucketpool'] : $user['default_bucketpool_fk']);
+    $symfonyRequest->request->set('default_bucketpool_fk', $userDetails['defaultBucketpool'] ?? $user['default_bucketpool_fk']);
 
     if (isset($userDetails['accessLevel'])) {
       $user_perm = $this->getEquivalentValueForPermission($userDetails['accessLevel']);
@@ -110,7 +110,7 @@ class UserHelper
     $agentsTempVal = explode(',', $user['user_agent_list']);
     foreach ($agentsTempVal as $agent) {
       $agentsExists['Check_' . $agent] = 1;
-    };
+    }
     $newAgents = array();
     if (isset($userDetails['agents'])) {
       if (is_string($userDetails['agents'])) {
@@ -168,8 +168,6 @@ class UserHelper
   public function getEquivalentValueForPermission($perm)
   {
     switch ($perm) {
-      case 'none':
-        return Auth::PERM_NONE;
       case 'read_only':
         return Auth::PERM_READ;
       case 'read_write':

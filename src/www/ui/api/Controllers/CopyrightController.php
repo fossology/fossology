@@ -13,6 +13,8 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Dao\CopyrightDao;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -52,13 +54,13 @@ class CopyrightController extends RestController
    * Copyright Dao object
    */
   private $copyrightDao;
-  const TYPE_COPYRIGHT = 0x1;
-  const TYPE_EMAIL = 0x2;
-  const TYPE_URL = 0x4;
-  const TYPE_AUTHOR = 0x8;
-  const TYPE_ECC = 0x16;
-  const TYPE_KEYWORD = 0x32;
-  const TYPE_IPRA = 0x64;
+  const TYPE_COPYRIGHT = 1;
+  const TYPE_EMAIL = 2;
+  const TYPE_URL = 4;
+  const TYPE_AUTHOR = 8;
+  const TYPE_ECC = 16;
+  const TYPE_KEYWORD = 32;
+  const TYPE_IPRA = 64;
 
   public function __construct($container)
   {
@@ -434,10 +436,11 @@ class CopyrightController extends RestController
   /**
    * Get total number of copyrights for a particular upload-tree
    *
-   * @param  ServerRequestInterface $request
-   * @param  ResponseHelper         $response
-   * @param  array                  $args
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getTotalFileCopyrights($request, $response, $args)
   {
@@ -445,16 +448,13 @@ class CopyrightController extends RestController
     $uploadTreeId = $args["itemId"];
     $query = $request->getQueryParams();
     $statusVal = true;
-    $returnVal = null;
 
-    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
-      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-    } else if (!$this->dbHelper->doesIdExist($this->restHelper->getUploadDao()->getUploadtreeTableName($uploadPk), "uploadtree_pk", $uploadTreeId)) {
-      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
-    }
+    $this->uploadAccessible($uploadPk);
+    $this->isItemExists($uploadTreeId);
+
     if (!array_key_exists(self::COPYRIGHT_PARAM, $query)) {
-      $returnVal = new Info(400, "Bad Request. 'status' is a required query param with expected values 'active' or 'inactive", InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpBadRequestException("Bad Request. 'status' is a " .
+        "required query param with expected values 'active' or 'inactive");
     }
     $status = $query[self::COPYRIGHT_PARAM];
     if ($status == "active") {
@@ -462,11 +462,8 @@ class CopyrightController extends RestController
     } else if ($status == "inactive") {
       $statusVal = false;
     } else {
-      $returnVal = new Info(400, "Bad Request. Invalid query parameter, expected values 'active' or 'inactive", InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
-    if ($returnVal !== null) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpBadRequestException("Bad Request. Invalid query " .
+        "parameter, expected values 'active' or 'inactive");
     }
     $agentId = $this->copyrightHist->getAgentId($uploadPk, 'copyright_ars');
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getUploadtreeTableName($uploadPk);
@@ -482,6 +479,7 @@ class CopyrightController extends RestController
    * @param array $args
    * @param int $cxType Type of data to fetch (self::TYPE_*)
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   private function getFileCX($request, $response, $args, $cxType)
   {
@@ -522,25 +520,19 @@ class CopyrightController extends RestController
     $uploadTreeId = $args["itemId"];
     $query = $request->getQueryParams();
     $limit = $request->getHeaderLine(self::LIMIT_PARAM);
-    $returnVal = null;
-    $info = null;
     $finalVal = [];
     if (!empty($limit)) {
       $limit = filter_var($limit, FILTER_VALIDATE_INT);
       if ($limit < 1) {
-        $info = new Info(
-          400,
-          "limit should be positive integer > 1",
-          InfoType::ERROR
-        );
-        $limit = self::COPYRIGHT_FETCH_LIMIT;
+        throw new HttpBadRequestException(
+          "limit should be positive integer > 1");
       }
     } else {
       $limit = self::COPYRIGHT_FETCH_LIMIT;
     }
     if (!array_key_exists(self::COPYRIGHT_PARAM, $query)) {
-      $returnVal = new Info(400, "Bad Request. 'status' is a required query param with expected values 'active' or 'inactive", InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpBadRequestException("Bad Request. 'status' is a " .
+        "required query param with expected values 'active' or 'inactive");
     }
     $status = $query[self::COPYRIGHT_PARAM];
     if ($status == "active") {
@@ -548,17 +540,13 @@ class CopyrightController extends RestController
     } else if ($status == "inactive") {
       $statusVal = false;
     } else {
-      $returnVal = new Info(400, "Bad Request. Invalid query parameter, expected values 'active' or 'inactive", InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpBadRequestException("Bad Request. Invalid query " .
+        "parameter, expected values 'active' or 'inactive");
     }
-    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
-      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-    } else if (!$this->dbHelper->doesIdExist($this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk), "uploadtree_pk", $uploadTreeId)) {
-      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
-    }
-    if ($returnVal !== null) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
+
+    $this->uploadAccessible($uploadPk);
+    $this->isItemExists($uploadTreeId);
+
     $agentId = $this->copyrightHist->getAgentId($uploadPk, $agentArs);
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk);
     $page = $request->getHeaderLine(self::PAGE_PARAM);
@@ -568,41 +556,24 @@ class CopyrightController extends RestController
     if (!empty($page) || $page == "0") {
       $page = filter_var($page, FILTER_VALIDATE_INT);
       if ($page <= 0) {
-        $info = new Info(
-          400,
-          "page should be positive integer > 0",
-          InfoType::ERROR
-        );
-      }
-      $offset = $limit * ($page - 1);
-      if ($info !== null) {
-        $retVal = $response->withJson($info->getArray(), $info->getCode());
-        return $retVal;
-      }
-      list($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->copyrightHist
-        ->getCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName,
-          $agentId, $dataType, 'active', $statusVal, $offset, $limit);
-      foreach ($rows as $row) {
-        $row['count'] = intval($row['copyright_count']);
-        unset($row['copyright_count']);
-        $finalVal[] = $row;
-      }
-      $totalPages = intval(ceil($iTotalRecords / $limit));
-      if ($page > $totalPages) {
-        $info = new Info(
-          400,
-          "Can not exceed total pages: $totalPages",
-          InfoType::ERROR
-        );
-        $errorHeader = ["X-Total-Pages", $totalPages];
+        throw new HttpBadRequestException(
+          "page should be positive integer > 0");
       }
     }
-    if ($info !== null) {
-      $retVal = $response->withJson($info->getArray(), $info->getCode());
-      if ($errorHeader) {
-        $retVal = $retVal->withHeader($errorHeader[0], $errorHeader[1]);
-      }
-      return $retVal;
+    $offset = $limit * ($page - 1);
+    list($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->copyrightHist
+      ->getCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName,
+        $agentId, $dataType, 'active', $statusVal, $offset, $limit);
+    foreach ($rows as $row) {
+      $row['count'] = intval($row['copyright_count']);
+      unset($row['copyright_count']);
+      $finalVal[] = $row;
+    }
+    $totalPages = intval(ceil($iTotalRecords / $limit));
+    if ($page > $totalPages) {
+      throw (new HttpBadRequestException(
+        "Can not exceed total pages: $totalPages"))
+        ->setHeaders(["X-Total-Pages" => $totalPages]);
     }
     return $response->withHeader("X-Total-Pages", $totalPages)->withJson($finalVal, 200);
   }
@@ -614,36 +585,11 @@ class CopyrightController extends RestController
    * @param ResponseHelper $response
    * @param int $cxType Type of data to fetch (self::TYPE_*)
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   private function deleteFileCX($args, $response, $cxType)
   {
-    switch ($cxType) {
-      case self::TYPE_COPYRIGHT:
-        $dataType = 'statement';
-        $delName = 'copyright';
-        break;
-      case self::TYPE_EMAIL:
-        $delName = $dataType = 'email';
-        break;
-      case self::TYPE_URL:
-        $delName = $dataType = 'url';
-        break;
-      case self::TYPE_AUTHOR:
-        $delName = $dataType = 'author';
-        break;
-      case self::TYPE_ECC:
-        $delName = $dataType = 'ecc';
-        break;
-      case self::TYPE_KEYWORD:
-        $delName = $dataType = 'keyword';
-        break;
-      case self::TYPE_IPRA:
-        $delName = $dataType = 'ipra';
-        break;
-      default:
-        $dataType = 'statement';
-        $delName = 'copyright';
-    }
+    list($dataType, $delName) = $this->convertTypeToTable($cxType);
 
     $uploadDao = $this->restHelper->getUploadDao();
     $uploadPk = intval($args['id']);
@@ -651,16 +597,10 @@ class CopyrightController extends RestController
     $copyrightHash = $args['hash'];
     $userId = $this->restHelper->getUserId();
     $cpTable = $this->copyrightHist->getTableName($dataType);
-    $returnVal = null;
 
-    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
-      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-    } else if (!$this->dbHelper->doesIdExist($uploadDao->getUploadTreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
-      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
-    }
-    if ($returnVal !== null) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
+    $this->uploadAccessible($uploadPk);
+    $this->isItemExists($uploadTreeId);
+
     $uploadTreeTableName = $uploadDao->getUploadTreeTableName($uploadTreeId);
     $item = $uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
     $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'delete');
@@ -675,51 +615,20 @@ class CopyrightController extends RestController
    * @param ResponseHelper $response
    * @param int $cxType Type of data to fetch (self::TYPE_*)
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   private function restoreFileCx($args, $response, $cxType)
   {
-    switch ($cxType) {
-      case self::TYPE_COPYRIGHT:
-        $dataType = 'statement';
-        $resName = 'copyright';
-        break;
-      case self::TYPE_EMAIL:
-        $resName = $dataType = 'email';
-        break;
-      case self::TYPE_URL:
-        $resName = $dataType = 'url';
-        break;
-      case self::TYPE_AUTHOR:
-        $resName = $dataType = 'author';
-        break;
-      case self::TYPE_ECC:
-        $resName = $dataType = 'ecc';
-        break;
-      case self::TYPE_KEYWORD:
-        $resName = $dataType = 'keyword';
-        break;
-      case self::TYPE_IPRA:
-        $resName = $dataType = 'ipra';
-        break;
-      default:
-        $dataType = 'statement';
-        $resName = 'copyright';
-    }
+    list($dataType, $resName) = $this->convertTypeToTable($cxType);
     $uploadPk = intval($args['id']);
     $uploadTreeId = intval($args['itemId']);
     $copyrightHash = ($args['hash']);
     $userId = $this->restHelper->getUserId();
     $cpTable = $this->copyrightHist->getTableName($dataType);
-    $returnVal = null;
 
-    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
-      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-    } else if (!$this->dbHelper->doesIdExist($this->restHelper->getUploadDao()->getUploadTreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
-      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
-    }
-    if ($returnVal !== null) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
+    $this->uploadAccessible($uploadPk);
+    $this->isItemExists($uploadTreeId);
+
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
     $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
     $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'rollback');
@@ -735,56 +644,64 @@ class CopyrightController extends RestController
    * @param array $args
    * @param int $cxType Type of data to fetch (self::TYPE_*)
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   private function updateFileCx($request, $response, $args, $cxType)
   {
-    switch ($cxType) {
-      case self::TYPE_COPYRIGHT:
-        $dataType = 'statement';
-        $resName = 'copyright';
-        break;
-      case self::TYPE_EMAIL:
-        $resName = $dataType = 'email';
-        break;
-      case self::TYPE_URL:
-        $resName = $dataType = 'url';
-        break;
-      case self::TYPE_AUTHOR:
-        $resName = $dataType = 'author';
-        break;
-      case self::TYPE_ECC:
-        $resName = $dataType = 'ecc';
-        break;
-      case self::TYPE_KEYWORD:
-        $resName = $dataType = 'keyword';
-        break;
-      case self::TYPE_IPRA:
-        $resName = $dataType = 'ipra';
-        break;
-      default:
-        $dataType = 'statement';
-        $resName = 'copyright';
-    }
+    list($dataType, $resName) = $this->convertTypeToTable($cxType);
     $uploadTreeId = intval($args["itemId"]);
     $uploadPk = intval($args["id"]);
     $copyrightHash = $args["hash"];
     $userId = $this->restHelper->getUserId();
     $cpTable = $this->copyrightHist->getTableName($dataType);
-    $returnVal = null;
     $body = $this->getParsedBody($request);
     $content = $body['content'];
-    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
-      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-    } else if (!$this->dbHelper->doesIdExist($this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId), "uploadtree_pk", $uploadTreeId)) {
-      $returnVal = new Info(404, "Item does not exist", InfoType::ERROR);
-    }
-    if ($returnVal !== null) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
+
+    $this->uploadAccessible($uploadPk);
+    $this->isItemExists($uploadTreeId);
+
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
     $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
     $this->copyrightDao->updateTable($item, $copyrightHash, $content, $userId, $cpTable);
     $returnVal = new Info(200, "Successfully Updated $resName.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), 200);
+  }
+
+  /**
+   * Convert CX Type to table name and display name.
+   *
+   * @param int $cxType
+   * @return string[]
+   */
+  private function convertTypeToTable(int $cxType): array
+  {
+    switch ($cxType) {
+      case self::TYPE_COPYRIGHT:
+        $dataType = 'statement';
+        $dispName = 'copyright';
+        break;
+      case self::TYPE_EMAIL:
+        $dispName = $dataType = 'email';
+        break;
+      case self::TYPE_URL:
+        $dispName = $dataType = 'url';
+        break;
+      case self::TYPE_AUTHOR:
+        $dispName = $dataType = 'author';
+        break;
+      case self::TYPE_ECC:
+        $dispName = $dataType = 'ecc';
+        break;
+      case self::TYPE_KEYWORD:
+        $dispName = $dataType = 'keyword';
+        break;
+      case self::TYPE_IPRA:
+        $dispName = $dataType = 'ipra';
+        break;
+      default:
+        $dataType = 'statement';
+        $dispName = 'copyright';
+    }
+    return array($dataType, $dispName);
   }
 }

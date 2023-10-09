@@ -69,6 +69,7 @@ function ConfigInit($sysconfdir, &$SysConf, $exitOnDbFail=true)
   $PG_CONN = get_pg_conn($sysconfdir, $SysConf, $exitOnDbFail);
 
   populate_from_sysconfig($PG_CONN, $SysConf);
+  return $PG_CONN;
 } // ConfigInit()
 
 /**
