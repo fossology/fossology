@@ -19,6 +19,9 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadFilePage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadSrvPage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadUrlPage;
@@ -28,7 +31,6 @@ use Fossology\UI\Api\Models\Decider;
 use Fossology\UI\Api\Models\FileLicenses;
 use Fossology\UI\Api\Models\Findings;
 use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\Reuser;
 use Fossology\UI\Api\Models\Scancode;
 use Fossology\UI\Api\Models\ScanOptions;
@@ -104,6 +106,9 @@ class UploadHelper
    * @param array $scanOptionsJSON scanOptions
    * @param boolean $newUpload Request is for new upload?
    * @return Info Response
+   * @throws HttpBadRequestException If no parameters are selected for agents
+   * @throws HttpForbiddenException If the user does not have write access to the upload
+   * @throws HttpNotFoundException If the folder does not contain the upload
    */
   public function handleScheduleAnalysis($uploadId, $folderId, $scanOptionsJSON,
                                          $newUpload = false)
@@ -135,11 +140,11 @@ class UploadHelper
         $parametersSent = true;
       }
     } catch (\UnexpectedValueException $e) {
-      return new Info($e->getCode(), $e->getMessage(), InfoType::ERROR);
+      throw new HttpBadRequestException($e->getMessage(), $e);
     }
 
     if (! $parametersSent) {
-      return new Info(400, "No parameters selected for agents!", InfoType::ERROR);
+      throw new HttpBadRequestException("No parameters selected for agents!");
     }
 
     $scanOptions = new ScanOptions($analysis, $reuser, $decider, $scancode);
@@ -640,7 +645,7 @@ class UploadHelper
     }
     $mainLicenses = [];
     foreach ($rows as $row) {
-      array_push($mainLicenses, $row['rf_shortname']);
+      $mainLicenses[] = $row['rf_shortname'];
     }
     return $mainLicenses;
   }
@@ -656,16 +661,13 @@ class UploadHelper
     global $container;
     $restHelper = $container->get('helper.restHelper');
     $uploadDao = $restHelper->getUploadDao();
-    $agentDao = $container->get('dao.agent');
 
     $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
     $parent = $uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
 
-    $scanProx = new ScanJobProxy($agentDao, $uploadId);
     /** @var UIExportList $copyrightListObj
      * UIExportList object to get copyright
      */
-
     $copyrightListObj = $restHelper->getPlugin('export-list');
     $copyrightList = $copyrightListObj->getCopyrights($uploadId,
       $parent->getItemId(), $uploadTreeTableName, -1, '');

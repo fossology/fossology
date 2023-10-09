@@ -91,7 +91,7 @@ class FileSearchController extends RestController
     $existsList = array_values($existsList);
 
     foreach ($nonExistsList as $file) {
-      array_push($existsList, $file);
+      $existsList[] = $file;
     }
     return $response->withJson(array_map(function ($file) {
         return $file->getArray();

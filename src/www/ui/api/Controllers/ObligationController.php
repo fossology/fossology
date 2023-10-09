@@ -13,8 +13,10 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Application\ObligationCsvExport;
-use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\ObligationMap;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpErrorException;
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -44,7 +46,6 @@ class ObligationController extends RestController
    * @param  array                  $args
    * @return ResponseHelper
    */
-
   function obligationsList($request, $response, $args)
   {
     $finVal = [];
@@ -60,21 +61,17 @@ class ObligationController extends RestController
   /**
    * Get details of obligations based on id
    *
-   * @param  ServerRequestInterface $request
-   * @param  ResponseHelper         $response
-   * @param  array                  $args
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
    * @return ResponseHelper
+   * @throws HttpNotFoundException
    */
-
   function obligationsDetails($request, $response, $args)
   {
     $obligationId = intval($args['id']);
-    $returnVal = null;
     if (!$this->dbHelper->doesIdExist("obligation_ref", "ob_pk", $obligationId)) {
-      $returnVal = new Info(404, "Obligation does not exist", InfoType::ERROR);
-    }
-    if ($returnVal !== null) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpNotFoundException("Obligation does not exist");
     }
 
     $obligation = $this->createExtendedObligationFromId($obligationId);
@@ -89,7 +86,6 @@ class ObligationController extends RestController
    * @param  array                  $args
    * @return ResponseHelper
    */
-
   function obligationsAllDetails($request, $response, $args)
   {
     $obligationArray = [];
@@ -124,20 +120,17 @@ class ObligationController extends RestController
   /**
    * Delete obligation based on id
    *
-   * @param  ServerRequestInterface $request
-   * @param  ResponseHelper         $response
-   * @param  array                  $args
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
    * @return ResponseHelper
+   * @throws HttpNotFoundException
    */
   function deleteObligation($request, $response, $args)
   {
     $obligationId = intval($args['id']);
-    $returnVal = null;
     if (!$this->dbHelper->doesIdExist("obligation_ref", "ob_pk", $obligationId)) {
-      $returnVal = new Info(404, "Obligation does not exist", InfoType::ERROR);
-    }
-    if ($returnVal !== null) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpNotFoundException("Obligation does not exist");
     }
     $this->obligationMap->deleteObligation($obligationId);
     $returnVal = new Info(200, "Successfully removed Obligation.", InfoType::INFO);
@@ -151,15 +144,14 @@ class ObligationController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function importObligationsFromCSV($request, $response, $args)
   {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
+    $this->throwNotAdminException();
 
     $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+    /** @var \Fossology\UI\Page\AdminObligationFromCSV $adminLicenseObligationFromCsv */
     $adminLicenseObligationFromCsv = $this->restHelper->getPlugin('admin_obligation_from_csv');
 
     $uploadedFile = $symReq->files->get($adminLicenseObligationFromCsv->getFileInputName(),
@@ -176,8 +168,11 @@ class ObligationController extends RestController
     }
 
     $res = $adminLicenseObligationFromCsv->handleFileUpload($uploadedFile, $delimiter, $enclosure, true);
-    $newInfo = new Info($res[2], $res[1], $res[0] == 200 ? InfoType::INFO : InfoType::ERROR);
+    if (!$res[0]) {
+      throw new HttpBadRequestException($res[1]);
+    }
 
+    $newInfo = new Info($res[2], $res[1], InfoType::INFO);
     return $response->withJson($newInfo->getArray(), $newInfo->getCode());
   }
 
@@ -188,13 +183,11 @@ class ObligationController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function exportObligationsToCSV($request, $response, $args)
   {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "You are not allowed to access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
+    $this->throwNotAdminException();
     $query = $request->getQueryParams();
     $obPk = 0;
     if (array_key_exists('id', $query)) {
@@ -202,8 +195,7 @@ class ObligationController extends RestController
     }
     if ($obPk != 0 &&
       ! $this->dbHelper->doesIdExist("obligation_ref", "ob_pk", $obPk)) {
-      $error = new Info(404, "Obligation not found.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpNotFoundException("Obligation does not exist");
     }
 
     $dbManager = $this->dbHelper->getDbManager();

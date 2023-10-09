@@ -12,6 +12,9 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpErrorException;
+use Fossology\UI\Api\Exceptions\HttpInternalServerErrorException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Conf;
 use Fossology\UI\Api\Models\Info;
@@ -23,21 +26,17 @@ class ConfController extends RestController
   /**
    * Get all conf info for a particular upload
    *
-   * @param  ServerRequestInterface $request
-   * @param  ResponseHelper         $response
-   * @param  array                  $args
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getConfInfo($request, $response, $args)
   {
     $uploadPk = $args["id"];
-    $returnVal = null;
-    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadPk)) {
-      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-    }
-    if ($returnVal !== null) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
+    $this->uploadAccessible($uploadPk);
+
     $response_view = $this->restHelper->getUploadDao()->getReportInfo($uploadPk);
     $returnVal = new Conf($response_view);
     return $response->withJson($returnVal->getArray(), 200);
@@ -46,26 +45,26 @@ class ConfController extends RestController
   /**
    * Update config data for the admin
    *
-   * @param  ServerRequestInterface $request
-   * @param  ResponseHelper         $response
-   * @param  array                  $args
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function updateConfData($request, $response, $args)
   {
     $uploadPk = $args["id"];
     $body = $this->getParsedBody($request);
     $confObj = new Conf();
-    $error = null;
+
+    $this->uploadAccessible($uploadPk);
 
     if (empty($body) || !array_key_exists("key", $body) ||
         !array_key_exists("value", $body)) {
-      $error = new Info(400, "Invalid request.", InfoType::ERROR);
+      throw new HttpBadRequestException("Invalid request.");
     } elseif (!$confObj->doesKeyExist($body['key'])) {
-      $error = new Info(400, "Invalid key " . $body["key"] . " sent.", InfoType::ERROR);
-    }
-    if ($error !== null) {
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpBadRequestException("Invalid key " . $body["key"] .
+        " sent.");
     }
 
     $key = $body['key'];
@@ -76,7 +75,7 @@ class ConfController extends RestController
     if ($result) {
       $info = new Info(200, "Successfully updated " . $key, InfoType::INFO);
     } else {
-      $info = new Info(500, "Failed to update " . $key, InfoType::ERROR);
+      throw new HttpInternalServerErrorException("Failed to update " . $key);
     }
     return $response->withJson($info->getarray(), $info->getCode());
   }

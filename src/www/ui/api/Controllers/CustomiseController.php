@@ -13,8 +13,10 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\SysConfigDao;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpErrorException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -23,12 +25,6 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class CustomiseController extends RestController
 {
-  /**
-   * @var ContainerInterface $container
-   * Slim container
-   */
-  protected $container;
-
   /**
    * @var SysConfigDao $sysconfigDao
    * SysConfig Dao object
@@ -39,58 +35,48 @@ class CustomiseController extends RestController
   public function __construct($container)
   {
     parent::__construct($container);
-    $this->restHelper = $container->get('helper.restHelper');
-    $this->sysconfigDao = $container->get('dao.sys_config');
+    $this->sysconfigDao = $this->container->get('dao.sys_config');
   }
 
   /**
    * Get all config data for the admin
    *
-   * @param  ServerRequestInterface $request
-   * @param  ResponseHelper         $response
-   * @param  array                  $args
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
    * @return ResponseHelper
+   * @throws HttpForbiddenException
    */
-
   public function getCustomiseData($request, $response, $args)
   {
-    if (Auth::isAdmin()) {
-      $returnVal = $this->sysconfigDao->getConfigData();
-      $finalVal = $this->sysconfigDao->getCustomiseData($returnVal);
-      return $response->withJson($finalVal, 200);
-    } else {
-      $returnVal = new Info(403, 'Access Denied', InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
+    $this->throwNotAdminException();
+    $returnVal = $this->sysconfigDao->getConfigData();
+    $finalVal = $this->sysconfigDao->getCustomiseData($returnVal);
+    return $response->withJson($finalVal, 200);
   }
 
   /**
    * Update config data for the admin
    *
-   * @param  ServerRequestInterface $request
-   * @param  ResponseHelper         $response
-   * @param  array                  $args
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
-
   public function updateCustomiseData($request, $response, $args)
   {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "Only admin can access this endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
+    $this->throwNotAdminException();
     $body = $this->getParsedBody($request);
     if (empty($body) || !array_key_exists("key", $body) || !array_key_exists("value", $body)) {
-      $error = new Info(400, "Invalid request body.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpBadRequestException("Invalid request body.");
     }
     list($success, $msg) = $this->sysconfigDao->UpdateConfigData($body);
-    if ($success) {
-      $info = new Info(200, "Successfully updated $msg.",
-        InfoType::INFO);
-    } else {
-      $info = new Info(400, $msg, InfoType::INFO);
+    if (!$success) {
+      throw new HttpBadRequestException($msg);
     }
+    $info = new Info(200, "Successfully updated $msg.",
+      InfoType::INFO);
     return $response->withJson($info->getArray(), $info->getCode());
   }
 

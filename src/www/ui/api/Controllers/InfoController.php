@@ -12,9 +12,9 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\UI\Api\Exceptions\HttpErrorException;
+use Fossology\UI\Api\Exceptions\HttpInternalServerErrorException;
 use Fossology\UI\Api\Helper\ResponseHelper;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Parser;
@@ -31,6 +31,7 @@ class InfoController extends RestController
    * @param ServerRequestInterface $request
    * @param ResponseHelper $response
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getInfo($request, $response)
   {
@@ -40,7 +41,8 @@ class InfoController extends RestController
       $yamlDocArray = $yaml->parse(file_get_contents(__DIR__ ."/../documentation/openapi.yaml"));
     } catch (ParseException $exception) {
       printf("Unable to parse the YAML string: %s", $exception->getMessage());
-      return $response->withStatus(500, "Unable to read openapi.yaml");
+      throw new HttpInternalServerErrorException("Unable to read openapi.yaml",
+        $exception);
     }
     $apiTitle = $yamlDocArray["info"]["title"];
     $apiDescription = $yamlDocArray["info"]["description"];
@@ -127,6 +129,7 @@ class InfoController extends RestController
    * @param ServerRequestInterface $request
    * @param ResponseHelper $response
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getOpenApi($request, $response)
   {
@@ -147,8 +150,8 @@ class InfoController extends RestController
         $yamlDocArray = $yaml->parse(file_get_contents(dirname(__DIR__) . "/documentation/openapi.yaml"));
       } catch (ParseException $exception) {
         printf("Unable to parse the YAML string: %s", $exception->getMessage());
-        $error = new Info(500, "Unable to read openapi.yaml", InfoType::ERROR);
-        return $response->withJson($error->getArray(), $error->getCode());
+        throw new HttpInternalServerErrorException("Unable to read openapi.yaml",
+          $exception);
       }
       return $response
         ->withHeader("Content-Disposition", "inline; filename=\"openapi.json\"")
@@ -156,8 +159,7 @@ class InfoController extends RestController
     }
     $yaml = file_get_contents(dirname(__DIR__) . "/documentation/openapi.yaml");
     if (empty($yaml)) {
-      $error = new Info(500, "Unable to read openapi.yaml", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpInternalServerErrorException("Unable to read openapi.yaml");
     }
     $response->getBody()->write($yaml);
     return $response

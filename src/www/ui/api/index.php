@@ -17,9 +17,8 @@ namespace Fossology\UI\Api;
 $GLOBALS['apiCall'] = true;
 
 // setup autoloading
-require_once dirname(dirname(dirname(__DIR__))) . "/vendor/autoload.php";
-require_once dirname(dirname(dirname(dirname(__FILE__)))) .
-  "/lib/php/bootstrap.php";
+require_once dirname(__DIR__, 3) . "/vendor/autoload.php";
+require_once dirname(__FILE__, 4) . "/lib/php/bootstrap.php";
 
 use Fossology\Lib\Util\TimingLogger;
 use Fossology\UI\Api\Controllers\AuthController;
@@ -42,6 +41,8 @@ use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UploadTreeController;
 use Fossology\UI\Api\Controllers\UserController;
+use Fossology\UI\Api\Exceptions\HttpErrorException;
+use Fossology\UI\Api\Helper\CorsHelper;
 use Fossology\UI\Api\Helper\ResponseFactoryHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Middlewares\FossologyInitMiddleware;
@@ -90,7 +91,7 @@ $timingLogger->logWithStartTime("bootstrap", $startTime);
 
 /* Load UI templates */
 $loader = $container->get('twig.loader');
-$loader->addPath(dirname(dirname(__FILE__)).'/template');
+$loader->addPath(dirname(__FILE__, 2) .'/template');
 
 /* Initialize global system configuration variables $SysConfig[] */
 $timingLogger->tic();
@@ -119,7 +120,7 @@ $apiVersionMiddleware = function (Request $request, $handler) use ($apiVersion) 
   return $handler->handle($request);
 };
 
-/*./
+/*
  * To check the order of middlewares, refer
  * https://www.slimframework.com/docs/v4/concepts/middleware.html
  *
@@ -127,10 +128,11 @@ $apiVersionMiddleware = function (Request $request, $handler) use ($apiVersion) 
  *
  * 1. The call enters from Rest Auth and initialize session variables.
  * 2. It then goes to FOSSology Init and initialize all plugins
- * 3. The normal flow continues.
- * 4. The call now enters FOSSology Init again and plugins are unloaded.
- * 5. The call then enters Rest Auth and leaves as is.
- * 6. Added ApiVersion middleware to set 'apiVersion' attribute in request.
+ * 3. Added ApiVersion middleware to set 'apiVersion' attribute in request.
+ * 4. The normal flow continues.
+ * 5. The call enters ApiVersion middleware and leaves as is.
+ * 6. The call now enters FOSSology Init again and plugins are unloaded.
+ * 7. The call then enters Rest Auth and leaves as is.
  */
 if ($dbConnected) {
   // Middleware for plugin initialization
@@ -428,31 +430,55 @@ $customErrorHandler = function (
       json_encode($payload, JSON_UNESCAPED_UNICODE)
   );
 
-  return $response;
+  plugin_unload();
+  return CorsHelper::addCorsHeaders($response);
 };
 
 $errorMiddleware = $app->addErrorMiddleware(false, true, true,
   $container->get("logger"));
-$errorMiddleware->setDefaultErrorHandler($customErrorHandler);
 
 // Catch all routes
 $errorMiddleware->setErrorHandler(
   HttpNotFoundException::class,
   function (ServerRequestInterface $request, Throwable $exception, bool $displayErrorDetails) {
-      $response = new ResponseHelper();
-      $error = new Info(404, "Resource not found", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+    $response = new ResponseHelper();
+    $error = new Info(404, "Resource not found", InfoType::ERROR);
+    $response = $response->withJson($error->getArray(), $error->getCode());
+    plugin_unload();
+    return CorsHelper::addCorsHeaders($response);
   });
 
 // Set the Not Allowed Handler
 $errorMiddleware->setErrorHandler(
   HttpMethodNotAllowedException::class,
   function (ServerRequestInterface $request, Throwable $exception, bool $displayErrorDetails) {
-      $response = new Response();
-      $response->getBody()->write('405 NOT ALLOWED');
+    $response = new Response();
+    $response->getBody()->write('405 NOT ALLOWED');
 
-      return $response->withStatus(405);
+    $response = $response->withStatus(405);
+    plugin_unload();
+    return CorsHelper::addCorsHeaders($response);
   });
+
+// Set custom error handler
+$errorMiddleware->setErrorHandler(
+  HttpErrorException::class,
+  function (ServerRequestInterface $request, HttpErrorException $exception, bool $displayErrorDetails) {
+    $response = new ResponseHelper();
+    $error = new Info($exception->getCode(), $exception->getMessage(),
+      InfoType::ERROR);
+    $response = $response->withJson($error->getArray(), $error->getCode());
+    if (!empty($exception->getHeaders())) {
+      foreach ($exception->getHeaders() as $key => $value) {
+        $response = $response->withHeader($key, $value);
+      }
+    }
+    plugin_unload();
+    return CorsHelper::addCorsHeaders($response);
+  }, true
+);
+
+$errorMiddleware->setDefaultErrorHandler($customErrorHandler);
 
 $app->run();
 
