@@ -2138,6 +2138,32 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /uploads/{id}/topitem:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    get:
+      operationId: getTopItemId
+      tags:
+        - Upload
+      summary: Get the top level item id for a given upload
+      description: >
+        Get the item id for the top level item in a given upload.
+      responses:
+        '200':
+          description: Top item id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /uploads/{id}/licenses/reuse:
     parameters:
