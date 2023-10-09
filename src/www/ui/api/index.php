@@ -203,7 +203,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/conf', ConfController::class . ':getConfInfo');
     $app->put('/{id:\\d+}/conf', ConfController::class . ':updateConfData');
     $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');
-////////////////////////// BULK FOR CX OPERATIONS /////////////////////
+    ////////////////////////// BULK FOR CX OPERATIONS /////////////////////
     $app->group('/{id:\\d+}/item/{itemId:\\d+}', function (\Slim\Routing\RouteCollectorProxy $app) {
       $app->get('/copyrights', CopyrightController::class . ':getFileCopyrights');
       $app->delete('/copyrights/{hash:.*}', CopyrightController::class . ':deleteFileCopyright');
