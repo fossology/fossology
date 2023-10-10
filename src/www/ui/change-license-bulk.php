@@ -98,6 +98,7 @@ class ChangeLicenseBulk extends DefaultPlugin
     $refText = $request->get('refText');
     $actions = $request->get('bulkAction');
     $ignoreIrrelevantFiles = (intval($request->get('ignoreIrre')) == 1);
+    $scanFindingsOnly = boolval(intval($request->get('scanOnlyFindings')));
     $delimiters = $request->get('delimiters');
 
     $licenseRemovals = array();
@@ -106,7 +107,7 @@ class ChangeLicenseBulk extends DefaultPlugin
     }
     $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId,
       $uploadTreeId, $licenseRemovals, $refText, $ignoreIrrelevantFiles,
-      $delimiters);
+      $delimiters, $scanFindingsOnly);
 
     if ($bulkId <= 0) {
       throw new Exception('cannot insert bulk reference');

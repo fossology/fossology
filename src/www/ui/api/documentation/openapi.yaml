@@ -6397,6 +6397,9 @@ components:
         delimiters:
           type: string
           example: "DEFAULT"
+        scanOnlyFindings:
+          type: boolean
+          example: false
     ScannedEditedLicense:
       type: object
       properties:

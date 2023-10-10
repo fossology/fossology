@@ -137,6 +137,15 @@
                 </div>
                 <div class="col-sm-auto pr-0">
                   <div class="form-check form-check-inline">
+                    <input type="checkbox" class="form-check-input" id="scanOnlyFindings" name="scanOnlyFindings"/>
+                    <label for="scanOnlyFindings" class="form-check-label">
+                      {{ 'Scan files with findings'|trans }}
+                      <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'The bulk scan will be executed on the files where there is atleast one license finding'|trans }}" alt="" class="info-bullet"/></img>
+                    </label>
+                  </div>
+                </div>
+                <div class="col-sm-auto pr-0">
+                  <div class="form-check form-check-inline">
                     <input type="checkbox" class="form-check-input" id="bulkIgnoreIrre" checked="checked"/>
                     <label for="bulkIgnoreIrre" class="form-check-label">
                       {{ 'Ignore Irrelevant files'|trans }}

@@ -15,7 +15,7 @@
 
 PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId,
                                          long left, long right, long groupId,
-                                         bool ignoreIrre);
+                                         bool ignoreIrre, bool scanFindings);
 PGresult* queryAllLicenses(fo_dbManager* dbManager);
 char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId);
 int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId);

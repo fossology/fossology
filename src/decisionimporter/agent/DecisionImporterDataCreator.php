@@ -449,7 +449,7 @@ class DecisionImporterDataCreator
 
       $newLrbId = $this->licenseDao->insertBulkLicense($this->userId, $this->groupId, $parentItem, $licenseRemovals,
         $licenseRefBulkItem["rf_text"], $licenseRefBulkItem["ignore_irrelevant"],
-        $licenseRefBulkItem["bulk_delimiters"]);
+        $licenseRefBulkItem["bulk_delimiters"], $licenseRefBulkItem["scan_findings"]);
       $licenseRefBulkList[$oldId]["new_lrbid"] = $newLrbId;
       $jobId = $this->createMonkBulkJobs($newLrbId);
       $clearingEventList[$oldEventId]["new_lrbid"] = $newLrbId;
