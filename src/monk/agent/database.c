@@ -14,16 +14,33 @@
 
 PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId,
                                          long left, long right, long groupId,
-                                         bool ignoreIrre) {
+                                         bool ignoreIrre, bool scanFindings) {
   char* tablename = getUploadTreeTableName(dbManager, uploadId);
   gchar* stmt;
   gchar* sql;
   PGresult* result;
-  if (!ignoreIrre)
+
+  char* distinctPfile = "SELECT DISTINCT pfile_fk FROM %s"
+                        " WHERE upload_fk = $1 AND (ufile_mode&x'3C000000'::int) = 0 "
+                        " AND (lft BETWEEN $2 AND $3) AND pfile_fk != 0";
+  char* distinctPfileNoDec = "SELECT DISTINCT pfile_fk FROM ("
+                             "SELECT distinct ON(ut.uploadtree_pk, ut.pfile_fk, scopesort) ut.pfile_fk pfile_fk, ut.uploadtree_pk, decision_type,"
+                             " CASE cd.scope WHEN 1 THEN 1 ELSE 0 END AS scopesort"
+                             " FROM %s AS ut "
+                             " LEFT JOIN clearing_decision cd ON "
+                             "  ((ut.uploadtree_pk = cd.uploadtree_fk AND scope = 0 AND cd.group_fk = $5) "
+                             "  OR (ut.pfile_fk = cd.pfile_fk AND scope = 1)) "
+                             " WHERE upload_fk=$1 AND (ufile_mode&x'3C000000'::int)=0 AND (lft BETWEEN $2 AND $3) AND ut.pfile_fk != 0"
+                             " ORDER BY ut.uploadtree_pk, scopesort, ut.pfile_fk, clearing_decision_pk DESC"
+                             ") itemView WHERE decision_type!=$4 OR decision_type IS NULL";
+  char* nonVoidPfile = "SELECT pfile_fk FROM allPfileData"
+                       " WHERE pfile_fk NOT IN (SELECT pfile_fk FROM license_file WHERE rf_fk IN"
+                       " (SELECT rf_pk FROM " LICENSE_REF_TABLE
+                       " WHERE rf_shortname = ANY(VALUES('No_license_found'), ('Void'))))";
+
+  if (!ignoreIrre && !scanFindings)
   {
-    sql = g_strdup_printf("SELECT DISTINCT pfile_fk FROM %s"
-      " WHERE upload_fk = $1 AND (ufile_mode&x'3C000000'::int) = 0 "
-      " AND (lft BETWEEN $2 AND $3) AND pfile_fk != 0;", tablename);
+    sql = g_strdup_printf(distinctPfile, tablename);
     stmt = g_strdup_printf("queryFileIdsForUploadAndLimits.%s", tablename);
     result = fo_dbManager_ExecPrepared(
       fo_dbManager_PrepareStamement(
@@ -34,18 +51,39 @@ PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId,
       uploadId, left, right
     );
   }
+  else if(!ignoreIrre && scanFindings)
+  {
+    sql = g_strdup_printf(
+      g_strconcat("WITH allPfileData AS (", distinctPfile, ") ", nonVoidPfile,
+        NULL), tablename);
+    stmt = g_strdup_printf("queryFileIdsForUploadAndLimitswithlicensefinding.%s", tablename);
+    result = fo_dbManager_ExecPrepared(
+      fo_dbManager_PrepareStamement(
+        dbManager,
+        stmt,
+        sql,
+        int, long, long),
+      uploadId, left, right
+    );
+  }
+  else if(ignoreIrre && scanFindings)
+  {
+    sql = g_strdup_printf(
+      g_strconcat("WITH allPfileData AS (", distinctPfileNoDec, ") ",
+        nonVoidPfile, NULL), tablename);
+    stmt = g_strdup_printf("queryFileIdsForUploadAndLimits.%s.ignoreirreandscanFindings", tablename);
+    result = fo_dbManager_ExecPrepared(
+      fo_dbManager_PrepareStamement(
+        dbManager,
+        stmt,
+        sql,
+        int, long, long, int, long),
+      uploadId, left, right, DECISION_TYPE_FOR_IRRELEVANT, groupId
+    );
+  }
   else
   {
-    sql = g_strdup_printf("SELECT distinct (pfile_fk) FROM ("
-      "SELECT distinct ON(ut.uploadtree_pk, ut.pfile_fk, scopesort) ut.pfile_fk pfile_fk, ut.uploadtree_pk, decision_type,"
-        " CASE cd.scope WHEN 1 THEN 1 ELSE 0 END AS scopesort"
-      " FROM %s AS ut "
-      " LEFT JOIN clearing_decision cd ON "
-      "  ((ut.uploadtree_pk = cd.uploadtree_fk AND scope = 0 AND cd.group_fk = $5) "
-      "  OR (ut.pfile_fk = cd.pfile_fk AND scope = 1)) "
-      " WHERE upload_fk=$1 AND (ufile_mode&x'3C000000'::int)=0 AND (lft BETWEEN $2 AND $3) AND ut.pfile_fk != 0"
-      " ORDER BY ut.uploadtree_pk, scopesort, ut.pfile_fk, clearing_decision_pk DESC"
-    ") itemView WHERE decision_type!=$4 OR decision_type IS NULL;", tablename);
+    sql = g_strdup_printf(distinctPfileNoDec, tablename);
     stmt = g_strdup_printf("queryFileIdsForUploadAndLimits.%s.ignoreirre", tablename);
     result = fo_dbManager_ExecPrepared(
       fo_dbManager_PrepareStamement(
