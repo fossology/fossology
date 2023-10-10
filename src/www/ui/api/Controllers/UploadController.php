@@ -21,6 +21,7 @@ use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\UploadStatus;
+use Fossology\Lib\Exception;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
@@ -1323,5 +1324,32 @@ class UploadController extends RestController
       );
     }
     return $response->withJson($res, 200);
+  }
+
+  /**
+   * Get the top level item ID for an upload.
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws Exception
+   */
+  public function getTopItem($request, $response, $args)
+  {
+    $uploadId = intval($args['id']);
+    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
+      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    $uploadDao = $this->restHelper->getUploadDao();
+    $itemTreeBounds = $uploadDao->getParentItemBounds($uploadId,
+      $uploadDao->getUploadtreeTableName($uploadId));
+    if ($itemTreeBounds === false) {
+      $error = new Info(500, "Unable to get top item.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $info = new Info(200, $itemTreeBounds->getItemId(), InfoType::INFO);
+    return $response->withJson($info->getArray(), $info->getCode());
   }
 }
