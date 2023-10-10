@@ -846,7 +846,8 @@ namespace Fossology\UI\Api\Test\Controllers {
         'bulkScope' => 'folder',
         'forceDecision' => 0,
         'ignoreIrre' => 0,
-        'delimiters' => 'DEFAULT'
+        'delimiters' => 'DEFAULT',
+        'scanOnlyFindings' => 0
       ];
       $jobId = 122;
       $res = new JsonResponse(array("jqid" => $jobId));

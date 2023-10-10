@@ -74,8 +74,8 @@ class BulkReuser
        */
       $deciderPlugin = plugin_find("agent_deciderjob");
       $dependecies = array();
-      $sql = "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_text,upload_fk,uploadtree_fk,ignore_irrelevant,bulk_delimiters) "
-              . "SELECT $1 AS user_fk, $2 AS group_fk,rf_text,$3 AS upload_fk, $4 as uploadtree_fk, ignore_irrelevant, bulk_delimiters
+      $sql = "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_text,upload_fk,uploadtree_fk,ignore_irrelevant,bulk_delimiters,scan_findings) "
+              . "SELECT $1 AS user_fk, $2 AS group_fk,rf_text,$3 AS upload_fk, $4 as uploadtree_fk, ignore_irrelevant, bulk_delimiters, scan_findings
                 FROM license_ref_bulk WHERE lrb_pk=$5 RETURNING lrb_pk, $5 as lrb_origin";
       $sqlLic = "INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing, comment, reportinfo, acknowledgement) "
               ."SELECT $1 as lrb_fk, rf_fk, removing, comment, reportinfo, acknowledgement FROM license_set_bulk WHERE lrb_fk=$2";

@@ -145,6 +145,7 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
     "bulkScope": $('#bulkScope').val(),
     "uploadTreeId": $('#uploadTreeId').val(),
     "forceDecision": $('#forceDecision').is(':checked')?1:0,
+    "scanOnlyFindings": $('#scanOnlyFindings').is(':checked') ? 1 : 0,
     "ignoreIrre": $('#bulkIgnoreIrre').is(':checked') ? 1 : 0,
     "delimiters": $("#delimdrop").val()
   };

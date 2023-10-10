@@ -736,7 +736,7 @@ class UploadTreeController extends RestController
     $errors = [];
 
     // Verify if each element from $body was given in the request
-    $requiredFields = ['bulkActions', 'refText', 'bulkScope', 'forceDecision', 'ignoreIrre', 'delimiters'];
+    $requiredFields = ['bulkActions', 'refText', 'bulkScope', 'forceDecision', 'ignoreIrre', 'delimiters', 'scanOnlyFindings'];
 
     foreach ($requiredFields as $field) {
       if (!array_key_exists($field, $body)) {
@@ -752,9 +752,9 @@ class UploadTreeController extends RestController
         $errors[] = "refText should not be empty";
       }
       // Check if forceDecision and ignoreIrre are true or false
-      if (!in_array($body['forceDecision'], [true, false]) || !in_array($body['ignoreIrre'], [true, false])) {
+      if (!in_array($body['forceDecision'], [true, false]) || !in_array($body['ignoreIrre'], [true, false]) || !in_array($body['scanOnlyFindings'], [true, false])) {
         $isValid = false;
-        $errors[] = "forceDecision and ignoreIrre should be either true or false";
+        $errors[] = "forceDecision, ignoreIrre and scanOnlyFindings should be either true or false";
       }
       // Check if delimiters is a string
       if (!is_string($body['delimiters'])) {
@@ -805,6 +805,7 @@ class UploadTreeController extends RestController
     $symfonyRequest->request->set('forceDecision', $body['forceDecision'] ? 1 : 0);
     $symfonyRequest->request->set('ignoreIrre', $body['ignoreIrre'] ? 1 : 0);
     $symfonyRequest->request->set('delimiters', $body['delimiters']);
+    $symfonyRequest->request->set('scanOnlyFindings', $body['scanOnlyFindings'] ? 1 : 0);
 
     /** @var \ChangeLicenseBulk $changeLicenseBulk */
     $changeLicenseBulk = $this->restHelper->getPlugin('change-license-bulk');
