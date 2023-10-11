@@ -183,7 +183,7 @@ class ReadmeOssAgent extends Agent
    * @param string $break         Line break string
    * @return string Formated report
    */
-  private function createReadMeOSSFormat($addSeparator, $dataForReadME, $extract='text', $break)
+  private function createReadMeOSSFormat($addSeparator, $dataForReadME, $extract, $break)
   {
     $outData = "";
     foreach ($dataForReadME as $statements) {
