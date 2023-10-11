@@ -43,4 +43,3 @@ $test->run(new HtmlReporter());
 print "<pre>Ending Clean Up at: " . date('r') . "</pre>\n";
 $elapseTime = $start->TimeAgo($start->getStartTime());
 print "<pre>The Clean Up Tests took {$elapseTime}to run</pre>\n";
-?>

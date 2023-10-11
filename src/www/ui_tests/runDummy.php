@@ -17,4 +17,3 @@
  print "Would have run the tests you asked for\n";
  print "they always pass :)\n";
  return(1);
-?>

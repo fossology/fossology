@@ -78,4 +78,3 @@ function setupTestEnv($workingDir, $agent, $agentTable=true)
   }
   return array($test_name, $db_conf, $DB_NAME, $PG_CONN);
 }
-?>

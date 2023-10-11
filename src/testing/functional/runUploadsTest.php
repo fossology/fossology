@@ -62,4 +62,3 @@ if ($jobsDone != 0)
   return(FALSE);
 }
 return(TRUE);
-?>

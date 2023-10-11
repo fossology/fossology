@@ -41,4 +41,3 @@ class UploadServerMenuTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($page, '/Disable alphabetized sub-folders/'));
   }
 }
-?>

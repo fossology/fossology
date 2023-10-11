@@ -83,4 +83,3 @@ class PEAR_PackageProjector_Configure_License implements PEAR_PackageProjector_C
  * c-basic-offset: 4
  * End:
  */
-?>

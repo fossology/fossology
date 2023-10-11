@@ -32,4 +32,3 @@ if (array_key_exists("d", $opts)) {
 }
 
 $testDbFactory->purgeTestDb($sysConfDir);
-

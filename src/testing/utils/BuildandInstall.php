@@ -207,4 +207,3 @@ if($tonight->startScheduler() !== TRUE)
   reportError($error, NULL);
   exit(1);
 }
-?>

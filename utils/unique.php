@@ -22,5 +22,3 @@ $count1 = count($lines);
 $lines = array_unique($lines);
 $count2 = count($lines);
 file_put_contents($scanning_file, implode('', $lines));
-
-?>

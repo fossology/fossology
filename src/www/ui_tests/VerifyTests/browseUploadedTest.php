@@ -109,4 +109,3 @@ class browseUPloadedTest extends fossologyTestCase
     //print "************ page after Browse $nlink *************\n$page\n";
   }
 }
-?>

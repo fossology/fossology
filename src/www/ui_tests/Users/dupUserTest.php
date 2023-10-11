@@ -62,5 +62,3 @@ class DupUserTest extends fossologyTestCase {
     $this->deleteUser($this->UserName);
   }
 }
-
-?>

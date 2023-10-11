@@ -86,4 +86,3 @@ class ReadInputFile {
     return(FALSE);
   }
 };
-?>

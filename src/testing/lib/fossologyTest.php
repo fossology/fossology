@@ -696,4 +696,3 @@ class fossologyTest extends WebTestCase
   } // chopPage
 
 } // fossolgyTest
-?>

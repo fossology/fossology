@@ -58,4 +58,3 @@ $testRun = new groupFuncTests('Fossology UI Functional Tests');
 
 // run the collected tests
 $testRun->run(new JUnitXMLReporter());
-?>

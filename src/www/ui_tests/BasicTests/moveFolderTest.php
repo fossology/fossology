@@ -97,4 +97,3 @@ class MoveFolderTest extends fossologyTestCase
                       "MoveFoldeTest tearDown FAILED! Phrase 'Deletion of $this->moveFolder' not found\n");
   }
 }
-?>

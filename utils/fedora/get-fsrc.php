@@ -225,6 +225,3 @@ function save_skipped ($path, $message)
 	}
 	return(NULL);
 }
-
-
-?>

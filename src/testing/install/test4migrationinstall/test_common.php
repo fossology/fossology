@@ -192,5 +192,3 @@ function get_uploadtree_id($test_dbh, $upload_id) {
   pg_free_result($result);
   return $uploadtree_id;
 }
-
-?>

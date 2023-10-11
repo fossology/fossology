@@ -42,4 +42,3 @@ class FoldersDeleteMenuTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($page, '/THERE IS NO UNDELETE/'));
   }
 }
-?>

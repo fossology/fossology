@@ -59,4 +59,3 @@ class runMyTest extends fossologyTestCase
    		return(TRUE);
    }
 }
-?>

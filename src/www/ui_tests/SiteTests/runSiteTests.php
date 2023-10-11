@@ -56,4 +56,3 @@ if (TextReporter::inCli())
 $test->run(new HtmlReporter());
 $elapseTime = $start->TimeAgo($start->getStartTime());
 print "<pre>The Site Tests took {$elapseTime}to run</pre>\n\n";
-?>
