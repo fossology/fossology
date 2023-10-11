@@ -140,4 +140,3 @@ class verifyFossolyTest extends fossologyTestCase
     "verifyFossI16L518 FAILED! Should be 16 files based on LGPL v2.1-style got:$flist\n");
   }
 }
-?>

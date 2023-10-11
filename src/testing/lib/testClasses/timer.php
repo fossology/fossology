@@ -113,4 +113,3 @@ class timer
     return $text;
   }
 }
-?>

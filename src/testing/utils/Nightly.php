@@ -148,5 +148,3 @@ print_r($results) . "\n";
  exit(1);
  }
  */
-
-?>

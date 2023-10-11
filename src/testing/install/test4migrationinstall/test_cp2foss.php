@@ -250,5 +250,3 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
   }
 
 }
-
-?>

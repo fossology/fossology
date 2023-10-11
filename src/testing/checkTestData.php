@@ -106,4 +106,3 @@ if($errors)
   exit(1);
 }
 exit(0);
-?>

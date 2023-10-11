@@ -40,4 +40,3 @@ class FoldersMoveMenuTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($page, '/destination folder:/'));
   }
 }
-?>

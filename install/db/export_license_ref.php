@@ -51,4 +51,3 @@ system($dump_command, $return_var);
 
 if(!$return_var) exit (0);
 else exit (1);
-?>

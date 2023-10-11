@@ -382,4 +382,3 @@ class JsonMapper
     $this->logger = $logger;
   }
 }
-?>

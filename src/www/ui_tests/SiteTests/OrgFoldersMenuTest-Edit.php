@@ -38,4 +38,3 @@ class FoldersEditMenuTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($page, '/Change folder name:/'));
   }
 }
-?>

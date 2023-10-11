@@ -534,4 +534,3 @@ class TestReport {
 		return(array($suiteName,$results));
 	}
 }
-?>

@@ -70,4 +70,3 @@ class OneShotTablegplv21Test extends fossologyTestCase
            "OneShotgplv21Test-Table FAILURE! Found -partial in a non partial license file\n");
   }
 }
-?>

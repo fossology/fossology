@@ -99,5 +99,3 @@ abstract class someTest extends fossologyTestCase
      return(TRUE);
    }
 }
-
-?>

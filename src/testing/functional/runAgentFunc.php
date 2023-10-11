@@ -160,5 +160,3 @@ if($failures) {
 }
 
 exit(0);
-
-?>

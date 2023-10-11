@@ -96,4 +96,3 @@ function CreateARStable($ARStablename)
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 }
-?>

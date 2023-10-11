@@ -38,4 +38,3 @@ class SearchMenuTest extends fossologyTestCase
     $this->myassertText($page, '/Enter the filename to find/');
   }
 }
-?>

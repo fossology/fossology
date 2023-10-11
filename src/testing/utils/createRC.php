@@ -66,5 +66,3 @@ echo "DBCRC: exporting sysconf to env and globals.\n";
 $GLOBALS['SYSCONFDIR'] = $sysconf;
 putenv("SYSCONFDIR={$GLOBALS['SYSCONFDIR']}");
 $_ENV['SYSCONFDIR'] = $GLOBALS['SYSCONFDIR'];
-
-?>

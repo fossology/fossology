@@ -49,4 +49,3 @@ $test->run(new JUnitXMLReporter());
 print "<pre>Ending Upload-Prep at: " . date('r') . "</pre>\n";
 $elapseTime = $start->TimeAgo($start->getStartTime());
 print "<pre>The Upload-Prep Tests took {$elapseTime}to run</pre>\n";
-?>

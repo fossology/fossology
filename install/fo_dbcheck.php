@@ -171,4 +171,3 @@ function bootstrap($sysconfdir="")
   require_once("$MODDIR/lib/php/common.php");
   return $SysConf;
 }
-?>
