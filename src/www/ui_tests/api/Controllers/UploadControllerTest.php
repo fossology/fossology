@@ -26,6 +26,11 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\UploadController;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+use Fossology\UI\Api\Exceptions\HttpInternalServerErrorException;
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
+use Fossology\UI\Api\Exceptions\HttpServiceUnavailableException;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
@@ -328,14 +333,10 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
     $this->uploadDao->shouldReceive('isAccessible')
       ->withArgs([$uploadId, $this->groupId])->andReturn(false);
-    $expectedResponse = new Info(403, "Upload is not accessible",
-      InfoType::ERROR);
-    $actualResponse = $this->uploadController->getUploads($request,
-      new ResponseHelper(), ['id' => $uploadId]);
-    $this->assertEquals($expectedResponse->getCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($expectedResponse->getArray(),
-      $this->getResponseJson($actualResponse));
+    $this->expectException(HttpForbiddenException::class);
+
+    $this->uploadController->getUploads($request, new ResponseHelper(),
+      ['id' => $uploadId]);
   }
 
   /**
@@ -501,22 +502,10 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->uploadDao->shouldReceive('getParentItemBounds')
       ->withArgs([$uploadId])->andReturn(false);
+    $this->expectException(HttpServiceUnavailableException::class);
 
-    $expectedResponse = new ResponseHelper();
-    $returnVal = new Info(503,
-      "Ununpack job not started. Please check job status at " .
-      "/api/v1/jobs?upload=" . $uploadId, InfoType::INFO);
-    $expectedResponse = $expectedResponse->withHeader('Retry-After', '60')
-      ->withHeader('Look-at', "/api/v1/jobs?upload=" . $uploadId)
-      ->withJson($returnVal->getArray(), $returnVal->getCode());
-    $actualResponse = $this->uploadController->getUploads($request,
-      new ResponseHelper(), ['id' => $uploadId]);
-    $this->assertEquals($expectedResponse->getStatusCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
-    $this->assertEquals($expectedResponse->getHeaders(),
-      $actualResponse->getHeaders());
+    $this->uploadController->getUploads($request, new ResponseHelper(),
+      ['id' => $uploadId]);
   }
 
   /**
@@ -558,11 +547,6 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   public function testMoveUploadInvalidFolder()
   {
     $uploadId = 3;
-    $info = new Info(400, "folderId header should be an integer!",
-      InfoType::ERROR);
-
-    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
-      $info->getCode());
 
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('folderId', 'alpha');
@@ -570,14 +554,10 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $body = $this->streamFactory->createStream();
     $request = new Request("PATCH", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
+    $this->expectException(HttpBadRequestException::class);
 
-    $actualResponse = $this->uploadController->moveUpload($request,
-      new ResponseHelper(), ['id' => $uploadId]);
-
-    $this->assertEquals($expectedResponse->getStatusCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
+    $this->uploadController->moveUpload($request, new ResponseHelper(),
+      ['id' => $uploadId]);
   }
 
   /**
@@ -624,7 +604,6 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->folderDao->shouldReceive('isFolderAccessible')
       ->withArgs([$folderId])->andReturn(true);
 
-
     $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
       $info->getCode());
     $actualResponse = $this->uploadController->postUpload($request,
@@ -664,17 +643,10 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
       ->withArgs([$folderId])->andReturn(false);
+    $this->expectException(HttpForbiddenException::class);
 
-    $info = new Info(403, "folderId $folderId is not accessible!",
-      InfoType::ERROR);
-    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
-      $info->getCode());
-    $actualResponse = $this->uploadController->postUpload($request,
-      new ResponseHelper(), []);
-    $this->assertEquals($expectedResponse->getStatusCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
+    $this->uploadController->postUpload($request, new ResponseHelper(),
+      []);
   }
 
   /**
@@ -704,17 +676,10 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
+    $this->expectException(HttpNotFoundException::class);
 
-    $info = new Info(404, "folderId $folderId does not exists!",
-      InfoType::ERROR);
-    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
-      $info->getCode());
-    $actualResponse = $this->uploadController->postUpload($request,
-      new ResponseHelper(), []);
-    $this->assertEquals($expectedResponse->getStatusCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
+    $this->uploadController->postUpload($request, new ResponseHelper(),
+      []);
   }
 
   /**
@@ -754,16 +719,9 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
     ->withArgs([$folderId])->andReturn(true);
+    $this->expectException(HttpInternalServerErrorException::class);
 
-    $info = new Info(500, $errorMessage . "\n" . $errorDesc, InfoType::ERROR);
-    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
-      $info->getCode());
-    $actualResponse = $this->uploadController->postUpload($request,
-      new ResponseHelper(), []);
-    $this->assertEquals($expectedResponse->getStatusCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
+    $this->uploadController->postUpload($request, new ResponseHelper(), []);
   }
 
   /**
@@ -860,22 +818,10 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $scanJobProxy->shouldReceive('createAgentStatus')
       ->withArgs([['nomos', 'monk']])
       ->andReturn($agentsRun);
+    $this->expectException(HttpServiceUnavailableException::class);
 
-    $info = new Info(503, "Agent nomos is running. " .
-      "Please check job status at /api/v1/jobs?upload=" . $uploadId,
-      InfoType::INFO);
-    $expectedResponse = (new ResponseHelper())->withHeader('Retry-After', '60')
-      ->withHeader('Look-at', "/api/v1/jobs?upload=" . $uploadId)
-      ->withJson($info->getArray(), $info->getCode());
-
-    $actualResponse = $this->uploadController->getUploadLicenses($request,
-      new ResponseHelper(), ['id' => $uploadId]);
-    $this->assertEquals($expectedResponse->getStatusCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
-    $this->assertEquals($expectedResponse->getHeaders(),
-      $actualResponse->getHeaders());
+    $this->uploadController->getUploadLicenses($request, new ResponseHelper(),
+      ['id' => $uploadId]);
   }
 
   /**
@@ -943,17 +889,10 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->userDao->shouldReceive('isAdvisorOrAdmin')
       ->withArgs([$this->userId, $this->groupId])
       ->andReturn(false);
+    $this->expectException(HttpForbiddenException::class);
 
-    $info = new Info(403, "Not advisor or admin of current group. " .
-      "Can not update upload.", InfoType::ERROR);
-    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
-      $info->getCode());
-    $actualResponse = $this->uploadController->updateUpload($request,
-      new ResponseHelper(), ['id' => $upload]);
-    $this->assertEquals($expectedResponse->getStatusCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
+    $this->uploadController->updateUpload($request, new ResponseHelper(),
+      ['id' => $upload]);
   }
 
   /**
@@ -970,6 +909,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $license = new License($licenseId, "MIT", "MIT License", "risk", "texts", [],
       'type', false);
 
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
     $this->clearingDao->shouldReceive('getMainLicenseIds')->withArgs([$uploadId, $this->groupId])->andReturn($licenseIds);
@@ -1001,6 +942,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $license = new License(2, $shortName, "MIT License", "risk", "texts", [],
       'type', 1);
     $licenseIds[$licenseId] = $licenseId;
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
     $this->licenseDao->shouldReceive('getLicenseByShortName')
@@ -1044,6 +987,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $license = new License($licenseId, $shortName, "MIT License", "risk", "texts", [],
      'type', 1);
     $licenseIds[$licenseId] = $licenseId;
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
     $this->licenseDao->shouldReceive('getLicenseByShortName')
@@ -1052,9 +997,6 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->clearingDao->shouldReceive('makeMainLicense')
       ->withArgs([$uploadId, $this->groupId, $license->getId()])->andReturn(null);
 
-    $info = new Info(400, 'License already exists for this upload.', InfoType::ERROR);
-
-    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), $info->getCode());
     $reqBody = $this->streamFactory->createStream(json_encode(
       $rq
     ));
@@ -1062,13 +1004,9 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders->setHeader('Content-Type', 'application/json');
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $reqBody);
+    $this->expectException(HttpBadRequestException::class);
 
-    $actualResponse = $this->uploadController->setMainLicense($request, new ResponseHelper(), ['id' => $uploadId]);
-
-    $this->assertEquals($expectedResponse->getStatusCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
+    $this->uploadController->setMainLicense($request, new ResponseHelper(), ['id' => $uploadId]);
   }
 
 
@@ -1086,6 +1024,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       'type', 1);
     $licenseIds[$licenseId] = $licenseId;
 
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
@@ -1115,6 +1055,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   public function testGetClearingProgressInfo()
   {
     $uploadId = 3;
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
     $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
@@ -1159,6 +1101,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
         'unusedLicense' => "",
         'missingLicense' => "MIT, BSD-3-Clause",
       ];
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
     $this->reuseReportProcess->shouldReceive('getReuseSummary')

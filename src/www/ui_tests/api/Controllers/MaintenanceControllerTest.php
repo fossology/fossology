@@ -15,9 +15,7 @@ namespace Fossology\UI\Api\Test\Controllers;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
-use Fossology\UI\Api\Controllers\GroupController;
 use Fossology\UI\Api\Controllers\MaintenanceController;
-use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
@@ -29,8 +27,7 @@ use Slim\Psr7\Uri;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request;
 
-require_once dirname(dirname(dirname(dirname(__DIR__)))) .
-  '/lib/php/Plugin/FO_Plugin.php';
+require_once dirname(__DIR__, 4) . '/lib/php/Plugin/FO_Plugin.php';
 
 /**
  * @class MaintenanceControllerTest
@@ -133,7 +130,7 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
     $response->getBody()->seek(0);
     return json_decode($response->getBody()->getContents(), true);
   }
-  
+
   /**
    * @test
    * -# Test MaintenanceController::testCreateMaintenance() for valid create maintenance request

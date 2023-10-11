@@ -91,7 +91,7 @@ class UploadTreeController extends RestController
     $itemId = intval($args['itemId']);
 
     $this->uploadAccessible($uploadId);
-    $this->isItemExists($itemId);
+    $this->isItemExists($uploadId, $itemId);
 
     /** @var \ui_view $view */
     $view = $this->restHelper->getPlugin('view');
@@ -148,7 +148,7 @@ class UploadTreeController extends RestController
         "Decision Type should be one of the following keys: " .
         implode(", ", array_keys($this->decisionTypes->getMap())));
     }
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadId, $uploadTreeId);
 
     /** @var \ClearingView $viewLicensePlugin */
     $viewLicensePlugin = $this->restHelper->getPlugin('view-license');
@@ -177,7 +177,7 @@ class UploadTreeController extends RestController
     $selection = "";
 
     $this->uploadAccessible($uploadId);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadId, $uploadTreeId);
 
     if ($query['selection'] !== null) {
       $selection = $query['selection'];
@@ -219,7 +219,7 @@ class UploadTreeController extends RestController
     $clearingDao = $this->container->get('dao.clearing');
 
     $this->uploadAccessible($uploadId);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadId, $uploadTreeId);
 
     $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
@@ -258,7 +258,7 @@ class UploadTreeController extends RestController
     $clearingDao = $this->container->get('dao.clearing');
 
     $this->uploadAccessible($uploadId);
-    $this->isItemExists($itemId);
+    $this->isItemExists($uploadId, $itemId);
 
     $itemTreeBounds = $uploadDao->getItemTreeBoundsFromUploadId($itemId, $uploadId);
     $clearingDecWithLicenses = $clearingDao->getFileClearings($itemTreeBounds, $this->restHelper->getGroupId(), false, true);
@@ -304,7 +304,7 @@ class UploadTreeController extends RestController
     $uploadDao = $this->restHelper->getUploadDao();
 
     $this->uploadAccessible($uploadId);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadId, $uploadTreeId);
 
     $agentId = $query['agentId'] ?? null;
     $highlightId = $query['highlightId'] ?? null;
@@ -368,7 +368,7 @@ class UploadTreeController extends RestController
     $uploadDao = $this->restHelper->getUploadDao();
 
     $this->uploadAccessible($uploadId);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadId, $uploadTreeId);
 
     if ($agentId !== null && !$this->dbHelper->doesIdExist("agent", "agent_pk", $agentId)) {
       throw new HttpNotFoundException("Agent does not exist");
@@ -471,7 +471,7 @@ class UploadTreeController extends RestController
     $licenses = [];
 
     $this->uploadAccessible($uploadPk);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadPk, $uploadTreeId);
 
     $itemTreeBounds = $uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadPk);
     if ($itemTreeBounds->containsFiles()) {
@@ -610,7 +610,7 @@ class UploadTreeController extends RestController
     $success = [];
 
     $this->uploadAccessible($uploadId);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadId, $uploadTreeId);
 
     if (empty($body)) {
       throw new HttpBadRequestException("Request body is missing or empty.");
@@ -728,7 +728,7 @@ class UploadTreeController extends RestController
     $licenseDao = $this->container->get('dao.license');
 
     $this->uploadAccessible($uploadId);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadId, $uploadTreeId);
 
     $isValid = true;
 

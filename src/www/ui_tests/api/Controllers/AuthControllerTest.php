@@ -18,22 +18,22 @@
  */
 namespace Fossology\UI\Api\Test\Controllers;
 
-use Mockery as M;
-use Fossology\UI\Api\Helper\RestHelper;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Controllers\AuthController;
-use Fossology\UI\Api\Helper\DbHelper;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\AuthHelper;
+use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
-use Slim\Psr7\Request;
+use Fossology\UI\Api\Helper\RestHelper;
+use Mockery as M;
 use Slim\Psr7\Factory\StreamFactory;
-use Slim\Psr7\Uri;
 use Slim\Psr7\Headers;
+use Slim\Psr7\Request;
+use Slim\Psr7\Uri;
 
 /**
  * @class AuthControllerTest
- * @brief Test for AtuhController
+ * @brief Test for AuthController
  */
 class AuthControllerTest extends \PHPUnit\Framework\TestCase
 {
@@ -120,7 +120,7 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
       "created_on" => '2020-01-01'
     ]);
     $this->restHelper->shouldReceive('validateTokenRequest')->withArgs(array(
-      '2020-01-01', 'test_token', 'read'))->andReturn(true);
+      '2020-01-01', 'test_token', 'read'))->andReturnNull();
     $this->restHelper->shouldReceive('getAuthHelper')->andReturn($authHelper);
     $this->restHelper->shouldReceive('getUserId')->andReturn(2);
     $container->shouldReceive('get')->withArgs(array('helper.restHelper'))
@@ -152,7 +152,7 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
    * -# Mock the request to get a new token
    * -# Mock a failed response of RestHelper::validateTokenRequest()
    * -# Call AuthController::createNewJwtToken()
-   * -# Check if failed response if returned
+   * -# Check if failed response is returned
    */
   public function testCreateNewJwtTokenExpiredToken()
   {
@@ -168,9 +168,11 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
       "jti" => "2.2",
       "created_on" => '2020-01-01'
     ]);
-    $failedResponse = new Info(400, "error text", InfoType::ERROR);
     $this->restHelper->shouldReceive('validateTokenRequest') ->withArgs(array(
-      '2020-01-02', 'test_token', 'read'))->andReturn($failedResponse);
+      '2020-01-02', 'test_token', 'read'))->andThrowExceptions([
+        new HttpBadRequestException(
+          "bad req"
+        )]);
     $this->restHelper->shouldReceive('getAuthHelper')->andReturn($authHelper);
     $this->restHelper->shouldReceive('getUserId')->andReturn(2);
     $container->shouldReceive('get')->withArgs(array(
@@ -189,12 +191,11 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
       [], [], $body);
     $response = new ResponseHelper();
     $GLOBALS['SysConf'] = ['AUTHENTICATION' => ['resttoken' => 'token']];
-    $response = $this->authController->createNewJwtToken($request, $response,
-      []);
-    $response->getBody()->seek(0);
-    $this->assertEquals($failedResponse->getArray(),
-      json_decode($response->getBody()->getContents(), true));
-    $this->assertEquals($failedResponse->getCode(), $response->getStatusCode());
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionCode(400);
+
+    $this->authController->createNewJwtToken($request, $response, []);
   }
 
   /**
@@ -202,7 +203,7 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
    * -# Mock the request to get a new token
    * -# Mock a failed response of AuthHelper::checkUsernameAndPassword()
    * -# Call AuthController::createNewJwtToken()
-   * -# Check if failed response if returned
+   * -# Check if failed response is returned
    */
   public function testCreateNewJwtTokenInvalidPassword()
   {
@@ -211,7 +212,7 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
     $authHelper->shouldReceive('checkUsernameAndPassword')->withArgs([
       'foss', 'foss'])->andReturn(false);
     $this->restHelper->shouldReceive('validateTokenRequest')->withArgs(array(
-      '2020-01-03', 'test_token', 'read'))->andReturn(true);
+      '2020-01-03', 'test_token', 'read'))->andReturnNull();
     $this->restHelper->shouldReceive('getAuthHelper')->andReturn($authHelper);
     $this->restHelper->shouldReceive('getUserId')->andReturn(2);
     $container->shouldReceive('get')->withArgs(array(
@@ -229,15 +230,11 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("POST", new Uri("HTTP", "localhost"), $requestHeaders,
       [], [], $body);
     $response = new ResponseHelper();
-    $failedResponse = new Info(404, "Username or password incorrect.",
-      InfoType::ERROR);
     $GLOBALS['SysConf'] = ['AUTHENTICATION' => ['resttoken' => 'token']];
-    $response = $this->authController->createNewJwtToken($request, $response,
-      []);
-    $response->getBody()->seek(0);
-    $this->assertEquals($failedResponse->getArray(),
-      json_decode($response->getBody()->getContents(), true));
-    $this->assertEquals($failedResponse->getCode(), $response->getStatusCode());
+    $this->expectException(HttpNotFoundException::class);
+    $this->expectExceptionCode(404);
+
+    $this->authController->createNewJwtToken($request, $response, []);
   }
 
   /**
