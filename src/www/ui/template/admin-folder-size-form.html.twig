@@ -1,0 +1,43 @@
+{# SPDX-FileCopyrightText: © Fossology contributors
+
+   SPDX-License-Identifier: FSFAP
+#}
+<script src="scripts/jquery-3.6.0.min.js" type="text/javascript"></script>
+<script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
+<p>
+    {{ "NOTE: All the below details are displayed irrespective of groups."|trans }}
+</p>
+<form method='post'>
+  <table border="0" align="center" cellpadding="5">
+    <tr>
+      <td>
+        {{ "Size of folder "|trans }}
+        <select name="selectfolderid" onChange="window.location.href='{{ onchangeURI }}' + this.value" class="ui-render-select2">
+        {{ folderListOption }} FolderListOption(-1, 0, 1, $folderId);
+        </select>
+      </td>
+      <td align='center'>
+        is {{ wholeFolderSize }}
+      </td>
+    </tr>
+  </table>
+  <div style="clear:both;"></div>
+  <table border="1" align="left" id="folderWiseuploadTable" style="width:30%" class="table">
+  <thead>
+    <tr>
+      <th>
+        {{ "Upload Name"|trans }}
+      </th>
+      <th>
+        {{ "Upload Size"|trans }}
+      </th>
+    </tr>
+        </thead>
+        <tbody>
+    {{ tableVars }}
+  </tbody>
+  </table>
+</form>
+<script type="text/javascript">
+$('#folderWiseuploadTable').DataTable();
+</script>
