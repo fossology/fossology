@@ -143,7 +143,7 @@ function SetRepo($sysConfPath,$repoPath)
  * Created on Sep 15, 2011 by Mark Donohoe
  */
 
-function TestDBInit($path=NULL, $dbName)
+function TestDBInit($path, $dbName)
 {
   if(empty($path))
   {
