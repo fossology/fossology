@@ -1287,4 +1287,3 @@ function getPGhba($destPath)
   }
   return(TRUE);
 }
-?>

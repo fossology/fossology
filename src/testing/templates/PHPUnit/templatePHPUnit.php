@@ -65,4 +65,3 @@ class cli1Test extends \PHPUnit\Framework\TestCase
 		$this->assertEquals($usage, $out[1]);
 	}
 }
-?>

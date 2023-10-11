@@ -128,4 +128,3 @@ class verifySimpletest extends fossologyTestCase
 		}
 	}
 }
-?>

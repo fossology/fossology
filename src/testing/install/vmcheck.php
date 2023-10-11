@@ -158,4 +158,3 @@ foreach ($machinesReady as $host => $vms)
 
 }
 exit(0);
-?>

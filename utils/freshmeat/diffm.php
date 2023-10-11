@@ -248,5 +248,3 @@ if($diffs_found > 0){
     }
     return($p);
   }
-
-?>

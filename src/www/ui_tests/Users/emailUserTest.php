@@ -64,4 +64,3 @@ class EmailUserTest extends fossologyTestCase {
       "Fail! User UserwEmail does not have email_notify set\n");
   } //testEmailUser
 };
-?>

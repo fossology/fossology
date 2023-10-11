@@ -41,4 +41,3 @@ class UploadUrlMenuTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($page, '/Enter the URL to the file/'));
   }
 }
-?>

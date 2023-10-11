@@ -72,4 +72,3 @@ class DupUploadTest extends fossologyTestCase
     }
   }
 }
-?>

@@ -25,5 +25,3 @@ $rname = $Rdf->rdf_name;
 echo "TG: \$rname is:$rname\n";
 
 $Rdf->get_rdf($rname);
-
-?>

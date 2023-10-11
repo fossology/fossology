@@ -66,4 +66,3 @@ $testRun = new verifyUploadsTest('Fossology Upload Functional Tests');
 $testRun->run(new JUnitXMLReporter());
 
 // Need to seperate the reports in the file...
-?>

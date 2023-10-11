@@ -42,4 +42,3 @@ class UploadInstructMenuTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($page, '/On the FOSSology web server/'));
   }
 }
-?>

@@ -112,5 +112,3 @@ abstract class CodeGen_License
  * indent-tabs-mode:nil
  * End:
  */
-
-?>

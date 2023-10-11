@@ -139,5 +139,3 @@ fclose($F1);
 fclose($Output);
 
 echo "Done\n";
-
-?>

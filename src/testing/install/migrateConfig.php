@@ -767,5 +767,3 @@ function stop($application)
   }
   return(TRUE);
 } // stop
-
-?>

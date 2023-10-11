@@ -242,4 +242,3 @@ class rhelTest extends fossologyTestCase
     }
   }
 }
-?>

@@ -79,4 +79,3 @@ class myFirstTest extends fossologyTestCase
                       "FolderTest tearDown FAILED! Deletion of $this->testFolder not found\n");
    }
 }
-?>

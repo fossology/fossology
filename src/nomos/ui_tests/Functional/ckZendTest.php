@@ -118,4 +118,3 @@ class zendTest extends fossologyTestCase
     //"ckzend FAILED! the text:\n$osLicText\n was not found\n");
   }
 }
-?>

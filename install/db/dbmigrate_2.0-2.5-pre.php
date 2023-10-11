@@ -52,5 +52,3 @@ function Migrate_20_25($Verbose)
   pg_free_result($conresult);
   return 0;
 } // Migrate_20_25()
-
-?>

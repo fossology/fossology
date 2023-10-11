@@ -250,4 +250,3 @@ function get_proj_url($pdata)
   //var_dump($projects);
   return ($projects);
 }
-?>

@@ -105,4 +105,3 @@ function RunSQL($sql, $DryRun)
   }
   return $row;
 }
-

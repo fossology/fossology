@@ -78,4 +78,3 @@ class uploadTestDataTest extends fossologyTestCase
     }
   }
 }
-?>

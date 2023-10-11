@@ -152,4 +152,3 @@ class verify23D1F1L extends fossologyTestCase
 		"got:$fileCnt\n");
 	}
 }
-?>

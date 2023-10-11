@@ -80,4 +80,3 @@ else
 }
 fclose($FD);
 print "./TestEnvironment.php created sucessfully\n";
-?>

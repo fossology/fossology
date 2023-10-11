@@ -743,5 +743,3 @@ JSOUT;
 
 $NewPlugin = new ui_nomos_diff;
 $NewPlugin->Initialize();
-
-?>

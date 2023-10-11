@@ -114,4 +114,3 @@ function callConfig($sourcePath=NULL)
   }
   return(TRUE);
 }
-?>

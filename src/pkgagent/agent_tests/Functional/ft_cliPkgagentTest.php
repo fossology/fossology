@@ -215,4 +215,3 @@ class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
     $this->testInstaller->uninstall($cwd.'/..');
   }
 }
-?>

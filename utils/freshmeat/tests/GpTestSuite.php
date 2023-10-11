@@ -35,4 +35,3 @@ class GpClassTestSuite extends TestSuite
     $this->addTestFile('tfmrdf.php');
   }
 }
-?>

@@ -53,5 +53,3 @@ class AddUserTest extends fossologyTestCase
     $this->deleteUser($this->UserName);
   }
 }
-
-?>

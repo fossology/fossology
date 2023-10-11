@@ -39,4 +39,3 @@ if (TextReporter :: inCli())
   exit ($test->run(new TextReporter()) ? 0 : 1);
 }
 $test->run(new HtmlReporter());
-?>

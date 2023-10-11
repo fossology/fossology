@@ -77,4 +77,3 @@ function vmOps($host,$vm, $command)
     return(TRUE);
   }
 }
-?>
