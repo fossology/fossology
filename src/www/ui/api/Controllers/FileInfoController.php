@@ -48,7 +48,7 @@ class FileInfoController extends RestController
     $uploadTreeId = $args["itemId"];
 
     $this->uploadAccessible($uploadPk);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadPk, $uploadTreeId);
 
     $response_view = $this->viewInfo->ShowView($uploadPk, $uploadTreeId);
     $response_meta = $this->viewInfo->ShowMetaView($uploadPk, $uploadTreeId);

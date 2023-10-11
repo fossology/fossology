@@ -18,14 +18,12 @@
  */
 namespace Fossology\UI\Api\Test\Helper;
 
-use Mockery as M;
-use Fossology\UI\Api\Helper\AuthHelper;
 use Fossology\Lib\Dao\UserDao;
-use Symfony\Component\HttpFoundation\Session\Session;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+use Fossology\UI\Api\Helper\AuthHelper;
 use Fossology\UI\Api\Helper\DbHelper;
-use Firebase\JWT\JWT;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
+use Mockery as M;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * @class AuthHelperTest
@@ -98,7 +96,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
    *    and AuthHelper::isTokenActive()
    * -# Generate a JWT token using AuthHelper::generateJwtToken()
    * -# Call AuthHelper::verifyAuthToken()
-   * -# Check if the function says token is active
+   * -# Check if no exception is thrown
    * -# Check if the function updates user id and token scope.
    */
   public function testVerifyAuthToken()
@@ -129,13 +127,10 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
       ->withArgs([$expectedUser])
       ->andReturn(true);
 
-    $expectedReturn = true;
-
     $GLOBALS['SysConf'] = ['AUTHENTICATION' => ['resttoken' => 'token']];
-    $actualReturn = $this->authHelper->verifyAuthToken($authHeader, $userId,
+    $this->authHelper->verifyAuthToken($authHeader, $userId,
       $tokenScope);
 
-    $this->assertEquals($expectedReturn, $actualReturn);
     $this->assertEquals($expectedUser, $userId);
     $this->assertEquals("write", $tokenScope);
   }
@@ -145,8 +140,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
    * -# Test for AuthHelper::verifyAuthToken() with inactive user
    * -# Generate a JWT token using AuthHelper::generateJwtToken()
    * -# Call AuthHelper::verifyAuthToken()
-   * -# Check if the function says token is active
-   * -# Check if the function updates user id and token scope.
+   * -# Check if the function throws exception
    */
   public function testVerifyAuthTokenInactiveUser()
   {
@@ -176,21 +170,18 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
       ->withArgs([$expectedUser])
       ->andReturn(false);
 
-    $expectedReturn = new Info(403, "User inactive.", InfoType::ERROR);
-
     $GLOBALS['SysConf'] = ['AUTHENTICATION' => ['resttoken' => 'token']];
-    $actualReturn = $this->authHelper->verifyAuthToken($authHeader, $userId,
-      $tokenScope);
 
-    $this->assertEquals($expectedReturn->getArray(), $actualReturn->getArray());
-    $this->assertEquals($expectedUser, $userId);
+    $this->expectException(HttpForbiddenException::class);
+
+    $this->authHelper->verifyAuthToken($authHeader, $userId, $tokenScope);
   }
 
   /**
    * @test
    * -# Test for AuthHelper::isTokenActive()
    * -# Generate two DB rows with active and inactive tokens
-   * -# Call AuthHelper::isTokenActive() on both rows and check for results
+   * -# Call AuthHelper::isTokenActive() on both rows and check for exception
    */
   public function testIsTokenActive()
   {
@@ -215,13 +206,11 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
       "token_scope" => "w"
     ];
 
-    $this->assertEquals(true, $this->authHelper->isTokenActive($activeTokenRow,
-      $tokenId));
+    $this->authHelper->isTokenActive($activeTokenRow, $tokenId);
 
-    $expectedResponse = new Info(403, "Token expired.", InfoType::ERROR);
-    $actualResponse = $this->authHelper->isTokenActive($expireTokenRow,
-      $tokenId);
-    $this->assertEquals($expectedResponse, $actualResponse);
+    $this->expectException(HttpForbiddenException::class);
+
+    $this->authHelper->isTokenActive($expireTokenRow, $tokenId);
   }
 
   /**
@@ -229,7 +218,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
    * -# Test for AuthHelper::isTokenActive()
    * -# Generate DB row with expired token
    * -# Check if AuthHelper::isTokenActive() calls DbHelper::invalidateToken()
-   * -# Check if the result contains 403 status
+   * -# Check if the function throws exception
    */
   public function testIsTokenActiveExpireOldToken()
   {
@@ -248,18 +237,16 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
 
     $this->dbHelper->shouldReceive('invalidateToken')
       ->withArgs([$tokenId])->once();
+    $this->expectException(HttpForbiddenException::class);
 
-    $expectedResponse = new Info(403, "Token expired.", InfoType::ERROR);
-    $actualResponse = $this->authHelper->isTokenActive($tokenRow, $tokenId);
-    $this->assertEquals($expectedResponse->getArray(),
-      $actualResponse->getArray());
+    $this->authHelper->isTokenActive($tokenRow, $tokenId);
   }
 
   /**
    * @test
    * -# Test for AuthHelper::userHasGroupAccess()
    * -# Check if the function accepts correct group
-   * -# Check if the function returns 403 for inaccessible group
+   * -# Check if the function throws exception for inaccessible group
    */
   public function testUserHasGroupAccess()
   {
@@ -276,17 +263,14 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
     $this->userDao->shouldReceive('getUserGroupMap')
       ->withArgs([$userId])->andReturn($groupMap)->twice();
 
-    $this->assertEquals(true, $this->authHelper->userHasGroupAccess($userId,
-      $groupName));
+    $this->authHelper->userHasGroupAccess($userId, $groupName);
 
     $groupName = 'random';
     $this->userDao->shouldReceive('getGroupIdByName')
       ->withArgs([$groupName])->andReturn(['group_pk' => 6])->once();
 
-    $expectedResponse = new Info(403, "User has no access to $groupName group",
-      InfoType::ERROR);
-    $actualResponse = $this->authHelper->userHasGroupAccess($userId,
-      $groupName);
-    $this->assertEquals($expectedResponse, $actualResponse);
+    $this->expectException(HttpForbiddenException::class);
+
+    $this->authHelper->userHasGroupAccess($userId, $groupName);
   }
 }

@@ -12,19 +12,20 @@
 
 namespace Fossology\UI\Api\Test\Controllers;
 
-use Mockery as M;
-use Fossology\UI\Api\Controllers\JobController;
-use Fossology\UI\Api\Models\Job;
 use Fossology\Lib\Dao\JobDao;
 use Fossology\Lib\Dao\ShowJobsDao;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\User;
-use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Controllers\JobController;
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\ResponseHelper;
-use Slim\Psr7\Request;
+use Fossology\UI\Api\Models\Job;
+use Fossology\UI\Api\Models\User;
+use Mockery as M;
 use Slim\Psr7\Factory\StreamFactory;
-use Slim\Psr7\Uri;
 use Slim\Psr7\Headers;
+use Slim\Psr7\Request;
+use Slim\Psr7\Uri;
+
+require_once dirname(__DIR__, 4) . "/lib/php/Plugin/FO_Plugin.php";
 
 /**
  * @class JobControllerTest
@@ -154,7 +155,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testGetJobs()
   {
-    $job = new Job(11, "job_name", "01-01-2020", 4, 2, 2, 0, "Completed");    
+    $job = new Job(11, "job_name", "01-01-2020", 4, 2, 2, 0, "Completed");
     $this->jobDao->shouldReceive('getAllJobStatus')->withArgs(array(4, 2, 2))
       ->andReturn(['11' => 0]);
     $this->showJobsDao->shouldReceive('getEstimatedTime')
@@ -188,7 +189,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testGetJobsLimitPage()
   {
-    $jobTwo = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");   
+    $jobTwo = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");
     $this->jobDao->shouldReceive('getAllJobStatus')->withArgs(array(4, 2, 2))
       ->andReturn(['11' => 0]);
     $this->jobDao->shouldReceive('getAllJobStatus')->withArgs(array(5, 2, 2))
@@ -237,15 +238,10 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
       $requestHeaders, [], [], $body);
     $response = new ResponseHelper();
     $userId = 2;
-    $user = $this->getUsers([$userId]);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
-    $actualResponse = $this->jobController->getJobs($request, $response, [
-      "id" => 2]);
-    $expectedResponse = new Info(404, "Job id 2 doesn't exist", InfoType::ERROR);
-    $this->assertEquals($expectedResponse->getCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($expectedResponse->getArray(),
-      $this->getResponseJson($actualResponse));
+    $this->expectException(HttpNotFoundException::class);
+
+    $this->jobController->getJobs($request, $response, ["id" => 2]);
   }
 
   /**
