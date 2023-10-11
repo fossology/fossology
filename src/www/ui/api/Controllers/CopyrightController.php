@@ -450,7 +450,7 @@ class CopyrightController extends RestController
     $statusVal = true;
 
     $this->uploadAccessible($uploadPk);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadPk, $uploadTreeId);
 
     if (!array_key_exists(self::COPYRIGHT_PARAM, $query)) {
       throw new HttpBadRequestException("Bad Request. 'status' is a " .
@@ -545,7 +545,7 @@ class CopyrightController extends RestController
     }
 
     $this->uploadAccessible($uploadPk);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadPk, $uploadTreeId);
 
     $agentId = $this->copyrightHist->getAgentId($uploadPk, $agentArs);
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk);
@@ -599,7 +599,7 @@ class CopyrightController extends RestController
     $cpTable = $this->copyrightHist->getTableName($dataType);
 
     $this->uploadAccessible($uploadPk);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadPk, $uploadTreeId);
 
     $uploadTreeTableName = $uploadDao->getUploadTreeTableName($uploadTreeId);
     $item = $uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
@@ -627,7 +627,7 @@ class CopyrightController extends RestController
     $cpTable = $this->copyrightHist->getTableName($dataType);
 
     $this->uploadAccessible($uploadPk);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadPk, $uploadTreeId);
 
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
     $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
@@ -658,7 +658,7 @@ class CopyrightController extends RestController
     $content = $body['content'];
 
     $this->uploadAccessible($uploadPk);
-    $this->isItemExists($uploadTreeId);
+    $this->isItemExists($uploadPk, $uploadTreeId);
 
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
     $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);

@@ -13,20 +13,18 @@
 namespace Fossology\UI\Api\Helper;
 
 
-use Mockery as M;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\UI\Api\Helper\DbHelper;
-use Fossology\Lib\Dao\UploadPermissionDao;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
-use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Dao\JobDao;
 use Fossology\Lib\Dao\ShowJobsDao;
-use Fossology\UI\Api\Helper\AuthHelper;
-use Fossology\UI\Api\Helper\RestHelper;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UploadPermissionDao;
+use Fossology\Lib\Dao\UserDao;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Mockery as M;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 $GLOBALS['globalSession'] = new Session();
 $GLOBALS['globalSession']->set('t','t');
@@ -219,8 +217,8 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
 
     $this->authHelper->shouldReceive('getMaxTokenValidity')
       ->andReturn($tokenValidity);
-    $this->assertTrue($this->restHelper->validateTokenRequest($tokenExpire,
-      $tokenName, $tokenScope));
+    $this->restHelper->validateTokenRequest($tokenExpire, $tokenName,
+      $tokenScope);
   }
 
   /**
@@ -237,14 +235,10 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
 
     $this->authHelper->shouldReceive('getMaxTokenValidity')
       ->andReturn($tokenValidity);
+    $this->expectException(HttpBadRequestException::class);
 
-    $expected = new Info(400,
-      "The token should have at least 1 day and max $tokenValidity days " .
-      "of validity and should follow YYYY-MM-DD format.", InfoType::ERROR);
-    $actual = $this->restHelper->validateTokenRequest($tokenExpire, $tokenName,
+    $this->restHelper->validateTokenRequest($tokenExpire, $tokenName,
       $tokenScope);
-
-    $this->assertEquals($expected, $actual);
   }
 
   /**
@@ -261,14 +255,10 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
 
     $this->authHelper->shouldReceive('getMaxTokenValidity')
       ->andReturn($tokenValidity);
+    $this->expectException(HttpBadRequestException::class);
 
-    $expected = new Info(400,
-      "The token should have at least 1 day and max $tokenValidity days " .
-      "of validity and should follow YYYY-MM-DD format.", InfoType::ERROR);
-    $actual = $this->restHelper->validateTokenRequest($tokenExpire, $tokenName,
+    $this->restHelper->validateTokenRequest($tokenExpire, $tokenName,
       $tokenScope);
-
-    $this->assertEquals($expected, $actual);
   }
 
   /**
@@ -285,12 +275,9 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
 
     $this->authHelper->shouldReceive('getMaxTokenValidity')
       ->andReturn($tokenValidity);
+    $this->expectException(HttpBadRequestException::class);
 
-    $expected = new Info(400, "Invalid token scope, allowed only " .
-      join(",", RestHelper::VALID_SCOPES), InfoType::ERROR);
-    $actual = $this->restHelper->validateTokenRequest($tokenExpire, $tokenName,
+    $this->restHelper->validateTokenRequest($tokenExpire, $tokenName,
       $tokenScope);
-
-    $this->assertEquals($expected, $actual);
   }
 }

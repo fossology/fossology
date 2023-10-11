@@ -12,9 +12,9 @@
 
 namespace Fossology\UI\Api\Test\Controllers;
 
-require_once dirname(dirname(dirname(dirname(__DIR__)))) .
-  '/lib/php/Plugin/FO_Plugin.php';
+require_once dirname(__DIR__, 4) . '/lib/php/Plugin/FO_Plugin.php';
 
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Mockery as M;
 use Fossology\UI\Api\Controllers\UserController;
 use Fossology\UI\Api\Helper\DbHelper;
@@ -64,7 +64,7 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
     $this->restHelper->shouldReceive('getUserDao')
-      ->andReturn($this->userDao);  
+      ->andReturn($this->userDao);
 
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
@@ -152,15 +152,10 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $userId = 6;
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["users", "user_pk", $userId])->andReturn(false);
-    $error = new Info(404, "UserId doesn't exist", InfoType::ERROR);
-    $expectedResponse = (new ResponseHelper())->withJson($error->getArray(),
-      $error->getCode());
-    $actualResponse = $this->userController->getUsers(null, new ResponseHelper(),
+    $this->expectException(HttpNotFoundException::class);
+
+    $this->userController->getUsers(null, new ResponseHelper(),
       ['id' => $userId]);
-    $this->assertEquals($expectedResponse->getStatusCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
   }
 
   /**
@@ -219,15 +214,10 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $userId = 8;
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["users", "user_pk", $userId])->andReturn(false);
-    $info = new Info(404, "UserId doesn't exist", InfoType::ERROR);
-    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
-      $info->getCode());
-    $actualResponse = $this->userController->deleteUser(null, new ResponseHelper(),
+    $this->expectException(HttpNotFoundException::class);
+
+    $this->userController->deleteUser(null, new ResponseHelper(),
       ['id' => $userId]);
-    $this->assertEquals($expectedResponse->getStatusCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
   }
 
   /**

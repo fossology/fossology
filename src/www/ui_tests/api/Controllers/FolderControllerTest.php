@@ -50,19 +50,22 @@ namespace Fossology\UI\Api\Controllers
 namespace Fossology\UI\Api\Test\Controllers
 {
 
-  use Mockery as M;
-  use Fossology\UI\Api\Helper\DbHelper;
-  use Fossology\UI\Api\Helper\RestHelper;
-  use Fossology\UI\Api\Controllers\FolderController;
   use Fossology\Lib\Dao\FolderDao;
   use Fossology\Lib\Data\Folder\Folder;
+  use Fossology\UI\Api\Controllers\FolderController;
+  use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+  use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+  use Fossology\UI\Api\Exceptions\HttpNotFoundException;
+  use Fossology\UI\Api\Helper\DbHelper;
+  use Fossology\UI\Api\Helper\ResponseHelper;
+  use Fossology\UI\Api\Helper\RestHelper;
   use Fossology\UI\Api\Models\Info;
   use Fossology\UI\Api\Models\InfoType;
-  use Fossology\UI\Api\Helper\ResponseHelper;
-  use Slim\Psr7\Request;
+  use Mockery as M;
   use Slim\Psr7\Factory\StreamFactory;
-  use Slim\Psr7\Uri;
   use Slim\Psr7\Headers;
+  use Slim\Psr7\Request;
+  use Slim\Psr7\Uri;
 
   /**
    * @class FolderControllerTest
@@ -201,7 +204,7 @@ namespace Fossology\UI\Api\Test\Controllers
      * Helper function to get pseudo parent id of given folder
      *
      * @param integer $id Folder id to get parent
-     * @return NULL|number
+     * @return int|NULL
      */
     public function getFolderParent($id)
     {
@@ -284,9 +287,9 @@ namespace Fossology\UI\Api\Test\Controllers
 
     /**
      * @test
-     * -# Test to check a 404 response of invalid folder
+     * -# Test to check a 403 response of invalid folder
      * -# Call FolderController::getFolders() for invalid folder
-     * -# Check for a 404 response
+     * -# Check for a 403 response
      */
     public function testGetInvalidFolder()
     {
@@ -295,14 +298,10 @@ namespace Fossology\UI\Api\Test\Controllers
         ->withArgs(array($folderId))->andReturn(false);
       $this->folderDao->shouldReceive('getFolder')
         ->andReturnUsing([$this, 'getFolder']);
-      $expectedResponse = new Info(404, "Folder id $folderId does not exists",
-        InfoType::ERROR);
-      $actualResponse = $this->folderController->getFolders(null,
-        new ResponseHelper(), ['id' => $folderId]);
-      $this->assertEquals($expectedResponse->getCode(),
-        $actualResponse->getStatusCode());
-      $this->assertEquals($expectedResponse->getArray(),
-        $this->getResponseJson($actualResponse));
+      $this->expectException(HttpForbiddenException::class);
+
+      $this->folderController->getFolders(null, new ResponseHelper(),
+        ['id' => $folderId]);
     }
 
     /**
@@ -318,14 +317,10 @@ namespace Fossology\UI\Api\Test\Controllers
         ->withArgs(array($folderId))->andReturn(false);
       $this->folderDao->shouldReceive('getFolder')
         ->andReturnUsing([$this, 'getFolder']);
-      $expectedResponse = new Info(403, "Folder id $folderId is not accessible",
-        InfoType::ERROR);
-      $actualResponse = $this->folderController->getFolders(null,
-        new ResponseHelper(), ['id' => $folderId]);
-      $this->assertEquals($expectedResponse->getCode(),
-        $actualResponse->getStatusCode());
-      $this->assertEquals($expectedResponse->getArray(),
-        $this->getResponseJson($actualResponse));
+      $this->expectException(HttpForbiddenException::class);
+
+      $this->folderController->getFolders(null, new ResponseHelper(),
+        ['id' => $folderId]);
     }
 
     /**
@@ -383,14 +378,10 @@ namespace Fossology\UI\Api\Test\Controllers
       $request = new Request("POST", new Uri("HTTP", "localhost"),
         $requestHeaders, [], [], $body);
       $response = new ResponseHelper();
-      $actualResponse = $this->folderController->createFolder($request,
-        $response, []);
-      $expectedResponse = new Info(403, "Parent folder can not be accessed!",
-        InfoType::ERROR);
-      $this->assertEquals($expectedResponse->getCode(),
-        $actualResponse->getStatusCode());
-      $this->assertEquals($expectedResponse->getArray(),
-        $this->getResponseJson($actualResponse));
+
+      $this->expectException(HttpForbiddenException::class);
+
+      $this->folderController->createFolder($request, $response, []);
     }
 
     /**
@@ -460,14 +451,10 @@ namespace Fossology\UI\Api\Test\Controllers
       $folderId = 0;
       $this->folderDao->shouldReceive('getFolder')
         ->withArgs(array($folderId))->andReturnNull();
-      $actualResponse = $this->folderController->deleteFolder(null,
-        new ResponseHelper(), ["id" => $folderId]);
-      $expectedResponse = new Info(404, "Folder id not found!",
-        InfoType::ERROR);
-      $this->assertEquals($expectedResponse->getCode(),
-        $actualResponse->getStatusCode());
-      $this->assertEquals($expectedResponse->getArray(),
-        $this->getResponseJson($actualResponse));
+      $this->expectException(HttpNotFoundException::class);
+
+      $this->folderController->deleteFolder(null, new ResponseHelper(),
+        ["id" => $folderId]);
     }
 
     /**
@@ -484,19 +471,16 @@ namespace Fossology\UI\Api\Test\Controllers
       $this->deletePlugin->shouldReceive('Delete')
         ->withArgs(array("2 $folderId", $this->userId))
         ->andReturn($errorText);
-      $actualResponse = $this->folderController->deleteFolder(null,
-        new ResponseHelper(), ["id" => $folderId]);
-      $expectedResponse = new Info(403, $errorText, InfoType::ERROR);
-      $this->assertEquals($expectedResponse->getCode(),
-        $actualResponse->getStatusCode());
-      $this->assertEquals($expectedResponse->getArray(),
-        $this->getResponseJson($actualResponse));
+      $this->expectException(HttpForbiddenException::class);
+
+      $this->folderController->deleteFolder(null, new ResponseHelper(),
+        ["id" => $folderId]);
     }
 
     /**
      * @test
      * -# Test for FolderController::editFolder()
-     * -# Check for 200 reponse
+     * -# Check for 200 response
      */
     public function testEditFolder()
     {
@@ -544,13 +528,10 @@ namespace Fossology\UI\Api\Test\Controllers
       $request = new Request("PATCH", new Uri("HTTP", "localhost"),
         $requestHeaders, [], [], $body);
       $response = new ResponseHelper();
-      $actualResponse = $this->folderController->editFolder($request,
-        $response, ["id" => $folderId]);
-      $expectedResponse = new Info(404, "Folder id not found!", InfoType::ERROR);
-      $this->assertEquals($expectedResponse->getCode(),
-        $actualResponse->getStatusCode());
-      $this->assertEquals($expectedResponse->getArray(),
-        $this->getResponseJson($actualResponse));
+      $this->expectException(HttpNotFoundException::class);
+
+      $this->folderController->editFolder($request, $response,
+        ["id" => $folderId]);
     }
 
     /**
@@ -574,14 +555,10 @@ namespace Fossology\UI\Api\Test\Controllers
       $request = new Request("PATCH", new Uri("HTTP", "localhost"),
         $requestHeaders, [], [], $body);
       $response = new ResponseHelper();
-      $actualResponse = $this->folderController->editFolder($request,
-        $response, ["id" => $folderId]);
-      $expectedResponse = new Info(403, "Folder is not accessible!",
-        InfoType::ERROR);
-      $this->assertEquals($expectedResponse->getCode(),
-        $actualResponse->getStatusCode());
-      $this->assertEquals($expectedResponse->getArray(),
-        $this->getResponseJson($actualResponse));
+      $this->expectException(HttpForbiddenException::class);
+
+      $this->folderController->editFolder($request, $response,
+        ["id" => $folderId]);
     }
 
     /**
@@ -685,15 +662,10 @@ namespace Fossology\UI\Api\Test\Controllers
       $request = new Request("PUT", new Uri("HTTP", "localhost"),
         $requestHeaders, [], [], $body);
       $response = new ResponseHelper();
+      $this->expectException(HttpNotFoundException::class);
 
-      $actualResponse = $this->folderController->copyFolder($request,
-        $response, ["id" => $folderId]);
-      $expectedResponse = new Info(404, "Folder id not found!",
-        InfoType::ERROR);
-      $this->assertEquals($expectedResponse->getCode(),
-        $actualResponse->getStatusCode());
-      $this->assertEquals($expectedResponse->getArray(),
-        $this->getResponseJson($actualResponse));
+      $this->folderController->copyFolder($request, $response,
+        ["id" => $folderId]);
     }
 
     /**
@@ -717,15 +689,10 @@ namespace Fossology\UI\Api\Test\Controllers
       $request = new Request("PUT", new Uri("HTTP", "localhost"),
         $requestHeaders, [], [], $body);
       $response = new ResponseHelper();
+      $this->expectException(HttpNotFoundException::class);
 
-      $actualResponse = $this->folderController->copyFolder($request,
-        $response, ["id" => $folderId]);
-      $expectedResponse = new Info(404, "Parent folder not found!",
-        InfoType::ERROR);
-      $this->assertEquals($expectedResponse->getCode(),
-        $actualResponse->getStatusCode());
-      $this->assertEquals($expectedResponse->getArray(),
-        $this->getResponseJson($actualResponse));
+      $this->folderController->copyFolder($request, $response,
+        ["id" => $folderId]);
     }
 
     /**
@@ -749,15 +716,10 @@ namespace Fossology\UI\Api\Test\Controllers
       $request = new Request("PUT", new Uri("HTTP", "localhost"),
         $requestHeaders, [], [], $body);
       $response = new ResponseHelper();
+      $this->expectException(HttpForbiddenException::class);
 
-      $actualResponse = $this->folderController->copyFolder($request,
-        $response, ["id" => $folderId]);
-      $expectedResponse = new Info(403, "Folder is not accessible!",
-        InfoType::ERROR);
-      $this->assertEquals($expectedResponse->getCode(),
-        $actualResponse->getStatusCode());
-      $this->assertEquals($expectedResponse->getArray(),
-        $this->getResponseJson($actualResponse));
+      $this->folderController->copyFolder($request, $response,
+        ["id" => $folderId]);
     }
 
     /**
@@ -783,15 +745,10 @@ namespace Fossology\UI\Api\Test\Controllers
       $request = new Request("PUT", new Uri("HTTP", "localhost"),
         $requestHeaders, [], [], $body);
       $response = new ResponseHelper();
+      $this->expectException(HttpForbiddenException::class);
 
-      $actualResponse = $this->folderController->copyFolder($request,
-        $response, ["id" => $folderId]);
-      $expectedResponse = new Info(403, "Parent folder is not accessible!",
-        InfoType::ERROR);
-      $this->assertEquals($expectedResponse->getCode(),
-        $actualResponse->getStatusCode());
-      $this->assertEquals($expectedResponse->getArray(),
-        $this->getResponseJson($actualResponse));
+      $this->folderController->copyFolder($request, $response,
+        ["id" => $folderId]);
     }
 
     /**
@@ -816,15 +773,10 @@ namespace Fossology\UI\Api\Test\Controllers
       $request = new Request("PUT", new Uri("HTTP", "localhost"),
         $requestHeaders, [], [], $body);
       $response = new ResponseHelper();
+      $this->expectException(HttpBadRequestException::class);
 
-      $actualResponse = $this->folderController->copyFolder($request,
-        $response, ["id" => $folderId]);
-      $expectedResponse = new Info(400, "Action can be one of [copy,move]!",
-        InfoType::ERROR);
-      $this->assertEquals($expectedResponse->getCode(),
-        $actualResponse->getStatusCode());
-      $this->assertEquals($expectedResponse->getArray(),
-        $this->getResponseJson($actualResponse));
+      $this->folderController->copyFolder($request, $response,
+        ["id" => $folderId]);
     }
   }
 }
