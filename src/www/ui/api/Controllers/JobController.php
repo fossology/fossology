@@ -13,9 +13,13 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpErrorException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+use Fossology\UI\Api\Exceptions\HttpInternalServerErrorException;
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\UploadHelper;
 use Fossology\UI\Api\Models\Info;
@@ -59,32 +63,27 @@ class JobController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getAllJobs($request, $response, $args)
   {
-    if (Auth::isAdmin()) {
-      $id = null;
-      $limit = 0;
-      $page = 1;
-      if ($request->hasHeader('limit')) {
-        $limit = $request->getHeaderLine('limit');
-        $page = $request->getHeaderLine('page');
-        if (empty($page)) {
-          $page = 1;
-        }
-        if ((isset($limit) && (! is_numeric($limit) || $limit < 0)) ||
-            (! is_numeric($page) || $page < 1)) {
-            $returnVal = new Info(400,
-              "Limit and page cannot be smaller than 1 and has to be numeric!",
-              InfoType::ERROR);
-            return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-        }
+    $this->throwNotAdminException();
+    $id = null;
+    $limit = 0;
+    $page = 1;
+    if ($request->hasHeader('limit')) {
+      $limit = $request->getHeaderLine('limit');
+      $page = $request->getHeaderLine('page');
+      if (empty($page)) {
+        $page = 1;
       }
-      return $this->getAllResults($id, $response, $limit, $page);
-    } else {
-      $returnVal = new Info(403,'Access Denied', InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      if ((! is_numeric($limit) || $limit < 0) ||
+          (! is_numeric($page) || $page < 1)) {
+        throw new HttpBadRequestException(
+          "Limit and page cannot be smaller than 1 and has to be numeric!");
+      }
     }
+    return $this->getAllResults($id, $response, $limit, $page);
   }
 
   /**
@@ -94,6 +93,7 @@ class JobController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getJobs($request, $response, $args)
   {
@@ -107,12 +107,10 @@ class JobController extends RestController
       if (empty($page)) {
         $page = 1;
       }
-      if ((isset($limit) && (! is_numeric($limit) || $limit < 0)) ||
+      if ((! is_numeric($limit) || $limit < 0) ||
         (! is_numeric($page) || $page < 1)) {
-        $returnVal = new Info(400,
-          "Limit and page cannot be smaller than 1 and has to be numeric!",
-          InfoType::ERROR);
-        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+        throw new HttpBadRequestException(
+          "Limit and page cannot be smaller than 1 and has to be numeric!");
       }
     }
 
@@ -120,9 +118,7 @@ class JobController extends RestController
     if (isset($args['id'])) {
       $id = intval($args['id']);
       if (! $this->dbHelper->doesIdExist("job", "job_pk", $id)) {
-        $returnVal = new Info(404, "Job id " . $id . " doesn't exist",
-          InfoType::ERROR);
-        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+        throw new HttpNotFoundException("Job id " . $id . " doesn't exist");
       }
     }
 
@@ -148,6 +144,7 @@ class JobController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function createJob($request, $response, $args)
   {
@@ -156,16 +153,15 @@ class JobController extends RestController
     if (is_numeric($folder) && is_numeric($upload) && $folder > 0 && $upload > 0) {
       $scanOptionsJSON = $this->getParsedBody($request);
       if (empty($scanOptionsJSON)) {
-        $error = new Info(403, "No agents selected!", InfoType::ERROR);
-        return $response->withJson($error->getArray(), $error->getCode());
+        throw new HttpBadRequestException("No agents selected!");
       }
       $uploadHelper = new UploadHelper();
       $info = $uploadHelper->handleScheduleAnalysis($upload, $folder,
         $scanOptionsJSON);
       return $response->withJson($info->getArray(), $info->getCode());
     }
-    $error = new Info(400, "Folder id and upload id should be integers!", InfoType::ERROR);
-    return $response->withJson($error->getArray(), $error->getCode());
+    throw new HttpBadRequestException(
+      "Folder id and upload id should be integers!");
   }
 
   /**
@@ -176,6 +172,7 @@ class JobController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function deleteJob($request, $response, $args)
   {
@@ -185,17 +182,14 @@ class JobController extends RestController
     /* Check if the job exists */
     $jobId  = intval($args['id']);
     if (! $this->dbHelper->doesIdExist("job", "job_pk", $jobId)) {
-      $returnVal = new Info(404, "Job id " . $jobId . " doesn't exist",
-        InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpNotFoundException("Job id " . $jobId . " doesn't exist");
     }
 
     /* Check if user has permission to delete this job*/
     $canDeleteJob = $this->restHelper->getJobDao()->hasActionPermissionsOnJob($jobId, $userId, $this->restHelper->getGroupId());
     if (! $canDeleteJob) {
-      $returnVal = new Info(403, "You don't have permission to delete this job.",
-        InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpForbiddenException(
+        "You don't have permission to delete this job.");
     }
 
     $queueId = $args['queue'];
@@ -203,15 +197,13 @@ class JobController extends RestController
     /* Get Jobs that depend on the job to be deleted */
     $JobQueue = $this->restHelper->getShowJobDao()->getJobInfo([$jobId])[$jobId]["jobqueue"];
 
-    $dependentJobs = [];
-
-    if (array_key_exists($queueId, $JobQueue)) {
-      $dependentJobs[] = $queueId;
-    } else {
-      $returnVal = new Info(404, "Job queue " . $queueId . " doesn't exist in Job " . $jobId,
-        InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    if (!array_key_exists($queueId, $JobQueue)) {
+      throw new HttpNotFoundException(
+        "Job queue " . $queueId . " doesn't exist in Job " . $jobId);
     }
+
+    $dependentJobs = [];
+    $dependentJobs[] = $queueId;
 
     foreach ($JobQueue as $job) {
       if (in_array($queueId, $job["depends"])) {
@@ -224,9 +216,9 @@ class JobController extends RestController
       $Msg = "\"" . _("Killed by") . " " . $userName . "\"";
       $command = "kill $job $Msg";
       $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
-      if ($rv == false) {
-        $returnVal = new Info(500, "Failed to kill job $jobId", InfoType::ERROR);
-        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      if (!$rv) {
+        throw new HttpInternalServerErrorException(
+          "Failed to kill job $jobId");
       }
     }
     $returnVal = new Info(200, "Job deleted successfully", InfoType::INFO);
@@ -285,16 +277,16 @@ class JobController extends RestController
    *
    * @param integer $uploadId Upload id to be filtered
    * @param ResponseHelper $response Response object
-   * @param integer $limit    Limit of jobs per page
-   * @param integer $page     Page number required
+   * @param integer $limit Limit of jobs per page
+   * @param integer $page Page number required
    * @return ResponseHelper
+   * @throws HttpNotFoundException
    */
   private function getFilteredResults($uploadId, $response, $limit, $page)
   {
     if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
-      $returnVal = new Info(404, "Upload id " . $uploadId . " doesn't exist",
-        InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpNotFoundException("Upload id " . $uploadId .
+        " doesn't exist");
     }
     list($jobs, $count) = $this->dbHelper->getJobs(null, $limit, $page, $uploadId);
     $finalJobs = [];
@@ -314,8 +306,6 @@ class JobController extends RestController
   {
     $jobDao = $this->restHelper->getJobDao();
 
-    $eta = 0;
-    $status = "";
     $jobqueue = [];
 
     /* Check if the job has no upload like Maintenance job */
@@ -413,28 +403,17 @@ class JobController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getJobsHistory($request, $response, $args)
   {
     $query = $request->getQueryParams();
-    $returnVal = null;
     if (!array_key_exists(self::UPLOAD_PARAM, $query)) {
-      $returnVal = new Info(400, "Bad Request. 'upload' is a required query param", InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      throw new HttpBadRequestException("'upload' is a required query param");
     }
     $upload_fk = intval($query[self::UPLOAD_PARAM]);
     // checking if the upload exists and if yes, whether it is accessible
-    $res = true;
-    if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $upload_fk)) {
-      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-      $res = false;
-    } else if (! $this->restHelper->getUploadDao()->isAccessible($upload_fk, $this->restHelper->getGroupId())) {
-      $returnVal = new Info(403, "Upload is not accessible", InfoType::ERROR);
-      $res = false;
-    }
-    if ($res !== true) {
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
+    $this->uploadAccessible($upload_fk);
 
     /**
      * @var DbManager $dbManager
@@ -517,13 +496,12 @@ class JobController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpForbiddenException
    */
   public function getJobStatistics($request, $response, $args)
   {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "Only Admin can access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
+    $this->throwNotAdminException();
+    /** @var \dashboardReporting $statisticsPlugin */
     $statisticsPlugin = $this->restHelper->getPlugin('dashboard-statistics');
     $res = $statisticsPlugin->CountAllJobs(true);
     return $response->withJson($res, 200);
@@ -536,13 +514,12 @@ class JobController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpForbiddenException
    */
   public function getAllServerJobsStatus($request, $response, $args)
   {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "Only Admin can access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
+    $this->throwNotAdminException();
+    /** @var \Fossology\UI\Ajax\AjaxAllJobStatus $allJobStatusPlugin */
     $allJobStatusPlugin = $this->restHelper->getPlugin('ajax_all_job_status');
     $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
     $res = $allJobStatusPlugin->handle($symfonyRequest);
@@ -555,22 +532,22 @@ class JobController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function getSchedulerJobOptionsByOperation($request, $response, $args)
   {
+    $this->throwNotAdminException();
     $operation = $args['operationName'];
+    /** @var \admin_scheduler $adminSchedulerPlugin */
     $adminSchedulerPlugin = $this->restHelper->getPlugin('admin_scheduler');
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "Only Admin can access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
 
     if (!in_array($operation, array_keys($adminSchedulerPlugin->operation_array))) {
       $allowedOperations = implode(', ', array_keys($adminSchedulerPlugin->operation_array));
-      $error = new Info(400, "Operation '$operation' not allowed. Allowed operations are: $allowedOperations", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpBadRequestException("Operation '$operation' not allowed." .
+        " Allowed operations are: $allowedOperations");
     }
 
+    /** @var \Fossology\UI\Ajax\AjaxAdminScheduler $schedulerPlugin */
     $schedulerPlugin = $this->restHelper->getPlugin('ajax_admin_scheduler');
     $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
     $symfonyRequest->request->set('operation', $operation);
@@ -586,26 +563,25 @@ class JobController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpErrorException
    */
   public function handleRunSchedulerOption($request, $response, $args)
   {
+    $this->throwNotAdminException();
     $body = $this->getParsedBody($request);
     $query = $request->getQueryParams();
 
     $operation = $body['operation'];
+    /** @var \admin_scheduler $adminSchedulerPlugin */
     $adminSchedulerPlugin = $this->restHelper->getPlugin('admin_scheduler');
-
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "Only Admin can access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
 
     if (!in_array($operation, array_keys($adminSchedulerPlugin->operation_array))) {
       $allowedOperations = implode(', ', array_keys($adminSchedulerPlugin->operation_array));
-      $error = new Info(400, "Operation '$operation' not allowed. Allowed operations are: $allowedOperations", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpBadRequestException("Operation '$operation' not allowed." .
+        " Allowed operations are: $allowedOperations");
     }
 
+    /** @var \Fossology\UI\Ajax\AjaxAdminScheduler $schedulerPlugin */
     $schedulerPlugin = $this->restHelper->getPlugin('ajax_admin_scheduler');
     $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
     $symfonyRequest->request->set('operation', $operation);
@@ -615,17 +591,18 @@ class JobController extends RestController
     if ($operation == 'status' || $operation == 'verbose') {
       if (!isset($query['job']) || !in_array($query['job'], $data['jobList'])) {
         $allowedJobs = implode(', ', $data['jobList']);
-        $error = new Info(400, "Job '{$query['job']}' not allowed. Allowed jobs are: $allowedJobs", InfoType::ERROR);
-        return $response->withJson($error->getArray(), $error->getCode());
-      } else if (($operation == 'verbose') && (!isset($query['level']) || !in_array($query['level'], $data['verboseList']))) {
-        $allowedLevels = implode(', ', $data['verboseList']);
-        $error = new Info(400, "Level '{$body['level']}' not allowed. Allowed levels are: $allowedLevels", InfoType::ERROR);
-        return $response->withJson($error->getArray(), $error->getCode());
+        throw new HttpBadRequestException("Job '{$query['job']}' not " .
+          "allowed. Allowed jobs are: $allowedJobs");
       }
-    } else if ($operation == 'priority' && (!isset($query['priority']) || !in_array($query['priority'], $data['priorityList']))) {
+      if (($operation == 'verbose') && (!isset($query['level']) || !in_array($query['level'], $data['verboseList']))) {
+        $allowedLevels = implode(', ', $data['verboseList']);
+        throw new HttpBadRequestException("Level '{$query['level']}' not " .
+          "allowed. Allowed levels are: $allowedLevels");
+      }
+    } elseif ($operation == 'priority' && (!isset($query['priority']) || !in_array($query['priority'], $data['priorityList']))) {
       $allowedPriorities = implode(', ', $data['priorityList']);
-      $error = new Info(400, "Priority '{$body['priority']}' not allowed. Allowed priorities are: $allowedPriorities", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
+      throw new HttpBadRequestException("Priority '{$query['priority']}' not " .
+        "allowed. Allowed priorities are: $allowedPriorities");
     }
 
     if ($operation == 'status') {
@@ -642,24 +619,25 @@ class JobController extends RestController
       $query['level'] = null;
     }
 
-    $response_from_scheduler = $adminSchedulerPlugin->OperationSubmit($operation, array_search($query['job'], $data['jobList']), $query['priority'], $query['level']);
+    $response_from_scheduler = $adminSchedulerPlugin->OperationSubmit(
+      $operation, array_search($query['job'], $data['jobList']),
+      $query['priority'], $query['level']);
     $operation_text = $adminSchedulerPlugin->GetOperationText($operation);
     $status_msg = "";
     $report = "";
 
-    if (empty($adminSchedulerPlugin->error_info)) {
-      $text = _("successfully");
-      $status_msg .= "$operation_text $text.";
-      if (! empty($response_from_scheduler)) {
-        $report .= $response_from_scheduler;
-      }
-      $info = new Info(200, $status_msg. $report, InfoType::INFO);
-    } else {
+    if (!empty($adminSchedulerPlugin->error_info)) {
       $text = _("failed");
       $status_msg .= "$operation_text $text.";
-      $info = new Info(501, $status_msg. $report, InfoType::ERROR);
+      throw new HttpInternalServerErrorException($status_msg . $report);
+    }
+    $text = _("successfully");
+    $status_msg .= "$operation_text $text.";
+    if (! empty($response_from_scheduler)) {
+      $report .= $response_from_scheduler;
     }
 
+    $info = new Info(200, $status_msg. $report, InfoType::INFO);
     return $response->withJson($info->getArray(), $info->getCode());
   }
 }

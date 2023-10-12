@@ -13,9 +13,9 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\UI\Api\Helper\ResponseHelper;
-use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @class AuthController
@@ -35,7 +35,7 @@ class BadRequestController extends RestController
   public function __invoke($request, $response, $args)
   {
     $id = $args['params'];
-    $returnVal = new Info(400, "ID must be a positive integer, $id passed!",
+    $returnVal = new Info(404, "Unable to find the path '$id'.",
       InfoType::ERROR);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }

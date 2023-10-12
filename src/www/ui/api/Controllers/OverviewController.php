@@ -12,10 +12,8 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Fossology\Lib\Auth\Auth;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Helper\ResponseHelper;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -24,13 +22,14 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class OverviewController extends RestController
 {
+  /**
+   * @throws HttpForbiddenException
+   */
   public function getDatabaseContents($request, $response, $args)
   {
+    $this->throwNotAdminException();
+    /** @var \dashboard $dashboardPlugin */
     $dashboardPlugin = $this->restHelper->getPlugin('dashboard');
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "Only admin can view database contents.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
     $res = [
       /**** Users ****/
       $dashboardPlugin->DatabaseContentsRow("users", _("Users"), true),
@@ -55,13 +54,12 @@ class OverviewController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpForbiddenException
    */
   public function getDiskSpaceUsage($request, $response, $args)
   {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "Only Admin can access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
+    $this->throwNotAdminException();
+    /** @var \dashboard $dashboardPlugin */
     $dashboardPlugin = $this->restHelper->getPlugin('dashboard');
     $res = $dashboardPlugin->DiskFree(true);
     return $response->withJson($res, 200);
@@ -74,13 +72,12 @@ class OverviewController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpForbiddenException
    */
   public function getPhpInfo($request, $response, $args)
   {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "Only Admin can access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
+    $this->throwNotAdminException();
+    /** @var \dashboard $dashboardPlugin */
     $dashboardPlugin = $this->restHelper->getPlugin('dashboard');
     $res = $dashboardPlugin->GetPHPInfoTable(true);
     return $response->withJson($res, 200);
@@ -93,13 +90,12 @@ class OverviewController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpForbiddenException
    */
   public function getDatabaseMetrics($request, $response, $args)
   {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "Only admin can view database metrics.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
+    $this->throwNotAdminException();
+    /** @var \dashboard $dashboardPlugin */
     $dashboardPlugin = $this->restHelper->getPlugin('dashboard');
     $res = $dashboardPlugin->DatabaseMetrics(true);
     return $response->withJson($res, 200);
@@ -112,13 +108,12 @@ class OverviewController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
+   * @throws HttpForbiddenException
    */
   public function getActiveQueries($request, $response, $args)
   {
-    if (!Auth::isAdmin()) {
-      $error = new Info(403, "Only Admin can access the endpoint.", InfoType::ERROR);
-      return $response->withJson($error->getArray(), $error->getCode());
-    }
+    $this->throwNotAdminException();
+    /** @var \dashboard $dashboardPlugin */
     $dashboardPlugin = $this->restHelper->getPlugin('dashboard');
     global $PG_CONN;
     $dashboardPlugin->pgVersion = pg_version($PG_CONN);

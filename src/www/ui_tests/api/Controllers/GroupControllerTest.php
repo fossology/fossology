@@ -11,14 +11,15 @@
 
 namespace Fossology\UI\Api\Test\Controllers;
 
-require_once dirname(dirname(dirname(dirname(__DIR__)))) .
-  '/lib/php/Plugin/FO_Plugin.php';
+require_once dirname(__DIR__, 4) . '/lib/php/Plugin/FO_Plugin.php';
 
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\GroupController;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
@@ -318,11 +319,10 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
 
-    $expectedResponse = new Info(403, "Not advisor or admin of the group. " .
-      "Can not process request.", InfoType::ERROR);
+    $this->expectException(HttpForbiddenException::class);
 
-    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['id' => $groupId,'userId' => $newuser]);
-    $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
+    $this->groupController->addMember($request, new ResponseHelper(),
+      ['id' => $groupId,'userId' => $newuser]);
   }
 
   /**
@@ -396,11 +396,10 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
 
-    $expectedResponse =  new Info(400, "Already a member!", InfoType::ERROR);
+    $this->expectException(HttpBadRequestException::class);
 
-    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['id' => $groupId,'userId' => $newuser]);
-    $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
-    $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
+    $this->groupController->addMember($request, new ResponseHelper(),
+      ['id' => $groupId,'userId' => $newuser]);
   }
       /**
    * @test

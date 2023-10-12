@@ -13,12 +13,14 @@
 namespace Fossology\UI\Api\Models;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 
 if (!class_exists("AgentAdder", false)) {
-  require_once dirname(dirname(__DIR__)) . "/agent-add.php";
+  require_once dirname(__DIR__, 2) . "/agent-add.php";
 }
-require_once dirname(dirname(dirname(dirname(__DIR__)))) . "/lib/php/common-folders.php";
+require_once dirname(__DIR__, 4) . "/lib/php/common-folders.php";
 
 /**
  * @class ScanOptions
@@ -83,6 +85,8 @@ class ScanOptions
    * @param boolean $newUpload If true, do not check if the folder contains the
    *                           upload. Should be false for existing uploads.
    * @return \Fossology\UI\Api\Models\Info
+   * @throws HttpNotFoundException  If the folder does not contain the upload
+   * @throws HttpForbiddenException If the user does not have write access to the upload
    */
   public function scheduleAgents($folderId, $uploadId , $newUpload = true)
   {
@@ -97,8 +101,9 @@ class ScanOptions
         }
       }
       if ($found === false) {
-        return new Info(404, "Folder id $folderId does not have upload id ".
-          "$uploadId or you do not have write access to the folder.", InfoType::ERROR);
+        throw new HttpNotFoundException(
+          "Folder id $folderId does not have upload id " .
+          "$uploadId or you do not have write access to the folder.");
       }
     }
 
@@ -111,7 +116,7 @@ class ScanOptions
     if (is_numeric($returnStatus)) {
       return new Info(201, $returnStatus, InfoType::INFO);
     } else {
-      return new Info(403, $returnStatus, InfoType::ERROR);
+      throw new HttpForbiddenException($returnStatus);
     }
   }
 

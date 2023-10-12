@@ -25,27 +25,27 @@ namespace Fossology\UI\Api\Test\Controllers {
   use ChangeLicenseBulk;
   use ClearingView;
   use Fossology\Lib\Auth\Auth;
-  use Fossology\Lib\Dao\ClearingDao;
   use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
   use Fossology\Lib\BusinessRules\LicenseMap;
+  use Fossology\Lib\Dao\ClearingDao;
   use Fossology\Lib\Dao\HighlightDao;
   use Fossology\Lib\Dao\LicenseDao;
   use Fossology\Lib\Dao\UploadDao;
-  use Fossology\Lib\Data\ClearingDecision;
-  use Fossology\Lib\Data\DecisionScopes;
-  use Fossology\Lib\Data\DecisionTypes;
-  use Fossology\Lib\Data\Tree\Item;
-  use Fossology\Lib\Data\Tree\ItemTreeBounds;
-  use Fossology\Lib\Data\Highlight;
   use Fossology\Lib\Data\Clearing\ClearingEvent;
   use Fossology\Lib\Data\Clearing\ClearingEventTypes;
   use Fossology\Lib\Data\Clearing\ClearingLicense;
   use Fossology\Lib\Data\Clearing\ClearingResult;
+  use Fossology\Lib\Data\ClearingDecision;
+  use Fossology\Lib\Data\DecisionScopes;
+  use Fossology\Lib\Data\DecisionTypes;
+  use Fossology\Lib\Data\Highlight;
   use Fossology\Lib\Data\LicenseRef;
+  use Fossology\Lib\Data\Tree\Item;
+  use Fossology\Lib\Data\Tree\ItemTreeBounds;
   use Fossology\Lib\Data\UploadStatus;
   use Fossology\Lib\Db\DbManager;
-  use Symfony\Component\HttpFoundation\JsonResponse;
   use Fossology\UI\Api\Controllers\UploadTreeController;
+  use Fossology\UI\Api\Exceptions\HttpBadRequestException;
   use Fossology\UI\Api\Helper\DbHelper;
   use Fossology\UI\Api\Helper\ResponseHelper;
   use Fossology\UI\Api\Helper\RestHelper;
@@ -62,6 +62,7 @@ namespace Fossology\UI\Api\Test\Controllers {
   use Slim\Psr7\Request;
   use Slim\Psr7\Response;
   use Slim\Psr7\Uri;
+  use Symfony\Component\HttpFoundation\JsonResponse;
 
   /**
    * @class UploadControllerTest
@@ -184,7 +185,7 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->dbManager = M::mock(DbManager::class);
       $this->restHelper = M::mock(RestHelper::class);
       $this->uploadDao = M::mock(UploadDao::class);
-      $this->decisionTypes = M::mock(DecisionTypes::class);      $this->clearingDao = M::mock(ClearingDao::class);
+      $this->decisionTypes = M::mock(DecisionTypes::class);
       $this->licenseDao = M::mock(LicenseDao::class);
       $this->clearingDecisionEventProcessor = M::mock(ClearingDecisionProcessor::class);
       $this->viewFilePlugin = M::mock('ui_view');
@@ -204,7 +205,8 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->restHelper->shouldReceive('getPlugin')
         ->withArgs(array('view-license'))->andReturn($this->viewLicensePlugin);
       $this->restHelper->shouldReceive('getPlugin')
-        ->withArgs(array('conclude-license'))->andReturn($this->concludeLicensePlugin);      $this->restHelper->shouldReceive('getPlugin')
+        ->withArgs(array('conclude-license'))->andReturn($this->concludeLicensePlugin);
+      $this->restHelper->shouldReceive('getPlugin')
         ->withArgs(array('change-license-bulk'))->andReturn($this->changeLicenseBulk);
 
       $this->dbManager->shouldReceive('getSingleRow')
@@ -253,6 +255,8 @@ namespace Fossology\UI\Api\Test\Controllers {
       $item_pk = 200;
       $expectedContent = file_get_contents(dirname(__DIR__) . "/tests.xml");
 
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$upload_pk, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $upload_pk])->andReturn(true);
       $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$upload_pk])->andReturn("uploadtree");
@@ -288,7 +292,11 @@ namespace Fossology\UI\Api\Test\Controllers {
 
       $this->decisionTypes->shouldReceive('getMap')
         ->andReturn($dummyDecisionTypes);
-      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$item_pk])->andReturn("uploadtree");
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$upload_pk])->andReturn("uploadtree");
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$upload_pk, $this->groupId])->andReturn(true);
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $upload_pk])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["uploadtree", "uploadtree_pk", $item_pk])->andReturn(true);
 
@@ -332,15 +340,16 @@ namespace Fossology\UI\Api\Test\Controllers {
 
       $this->decisionTypes->shouldReceive('getMap')
         ->andReturn($dummyDecisionTypes);
-      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$item_pk])->andReturn("uploadtree");
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$upload_pk])->andReturn("uploadtree");
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$upload_pk, $this->groupId])->andReturn(true);
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $upload_pk])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["uploadtree", "uploadtree_pk", $item_pk])->andReturn(true);
 
       $this->viewLicensePlugin->shouldReceive('updateLastItem')->withArgs([2, 2, $item_pk, $item_pk]);
 
-      $info = new Info(400, "Decision Type should be one of the following keys: " . implode(", ", $dummyDecisionTypes), InfoType::ERROR);
-
-      $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), $info->getCode());
       $reqBody = $this->streamFactory->createStream(json_encode(
         $rq
       ));
@@ -348,9 +357,10 @@ namespace Fossology\UI\Api\Test\Controllers {
       $requestHeaders->setHeader('Content-Type', 'application/json');
       $request = new Request("PUT", new Uri("HTTP", "localhost"),
         $requestHeaders, [], [], $reqBody);
+      $this->expectException(HttpBadRequestException::class);
 
-      $actualResponse = $this->uploadTreeController->setClearingDecision($request, new ResponseHelper(), ['id' => $upload_pk, 'itemId' => $item_pk]);
-      $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+      $this->uploadTreeController->setClearingDecision($request,
+        new ResponseHelper(), ['id' => $upload_pk, 'itemId' => $item_pk]);
     }
     /**
      * @test
@@ -375,6 +385,8 @@ namespace Fossology\UI\Api\Test\Controllers {
       );
       $options = array('skipThese' => "", 'groupId' => $this->groupId);
 
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
@@ -415,6 +427,8 @@ namespace Fossology\UI\Api\Test\Controllers {
 
       $options = array('skipThese' => "", 'groupId' => $this->groupId);
 
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
@@ -424,18 +438,16 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->uploadDao->shouldReceive('getNextItem')->withArgs([$uploadId, $itemId, $options])->andReturn($item1);
       $this->uploadDao->shouldReceive('getPreviousItem')->withArgs([$uploadId, $itemId, $options])->andReturn($item2);
 
-      $info = new Info(400, "selection should be either 'withLicenses' or 'noClearing'", InfoType::ERROR);
-      $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), 400);
       $queryParams = ['selection' => "invalidSelection"];
       $request = $this->getMockBuilder(ServerRequestInterface::class)
         ->getMock();
       $request->expects($this->any())
         ->method('getQueryParams')
         ->willReturn($queryParams);
+      $this->expectException(HttpBadRequestException::class);
 
-      $actualResponse = $this->uploadTreeController->getNextPreviousItem($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
-      $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
-      $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
+      $this->uploadTreeController->getNextPreviousItem($request,
+      new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
     }
 
     /**
@@ -462,6 +474,8 @@ namespace Fossology\UI\Api\Test\Controllers {
       $obj = new BulkHistory(1, 1, "test", true, true, [], []);
       $updatedRes[] = $obj->getArray();
 
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
 
@@ -501,6 +515,8 @@ namespace Fossology\UI\Api\Test\Controllers {
       );
       $result[] = $obj->getArray();
 
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
 
@@ -546,6 +562,8 @@ namespace Fossology\UI\Api\Test\Controllers {
       $highlight = new Highlight($res[0]["start"], $res[0]["end"], $res[0]["type"], $res[0]["refStart"], $res[0]["refEnd"], $res[0]["infoText"]);
       $itemTreeBounds = new ItemTreeBounds($itemId, 'uploadtree', $uploadId, 1, 2);
 
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
@@ -602,6 +620,8 @@ namespace Fossology\UI\Api\Test\Controllers {
       $licenseDecisionResult = new ClearingResult($clearingEvent, []);
       $addedClearingResults[$licenseId] = $licenseDecisionResult;
 
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
 
@@ -625,6 +645,7 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
       $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
     }
+
     /**
      * @test
      * -# Test for UploadTreeController::handleAddEditAndDeleteLicenseDecision() for adding, editing, and deleting license decision
@@ -648,9 +669,11 @@ namespace Fossology\UI\Api\Test\Controllers {
 
       $existingLicenses = array(['DT_RowId' => "$itemId,400", 'DT_RowClass' => 'removed']);
 
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
-      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$itemId])->andReturn("uploadtree");
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
       $this->uploadDao->shouldReceive('getItemTreeBoundsFromUploadId')->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
@@ -705,9 +728,11 @@ namespace Fossology\UI\Api\Test\Controllers {
 
       $existingLicenses = array(['DT_RowId' => "$itemId,$licenseId", 'DT_RowClass' => 'removed']);
 
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
-      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$itemId])->andReturn("uploadtree");
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
       $this->uploadDao->shouldReceive('getItemTreeBoundsFromUploadId')->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
@@ -762,9 +787,11 @@ namespace Fossology\UI\Api\Test\Controllers {
 
       $existingLicenses = array(['DT_RowId' => "$itemId,$licenseId", 'DT_RowClass' => 'removed']);
 
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
-      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$itemId])->andReturn("uploadtree");
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
       $this->uploadDao->shouldReceive('getItemTreeBoundsFromUploadId')->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
@@ -827,6 +854,8 @@ namespace Fossology\UI\Api\Test\Controllers {
       $itemId = 1;
       $uploadId = 1;
 
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
