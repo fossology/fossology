@@ -153,9 +153,7 @@ class FreshmeatRdfs
       );
       foreach ($project->latest_release as $verdata)
       {
-        array_push(& $this->project_info["$project->projectname_short"],
-        $verdata->latest_release_version
-                   );
+        $this->project_info["$project->projectname_short"][] = $verdata->latest_release_version;
       }
     }
     ksort($this->project_info);

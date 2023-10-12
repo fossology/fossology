@@ -74,10 +74,10 @@ function get_entry($in_handle, $marker){
   while( false != ($line = fgets($in_handle, 1024))){
     // </project> is the end tag, save it and return, all done.
     if (preg_match('|</project>|', $line)){
-      array_push(&$project, $line);
+      $project[] = $line;
       return($project);
     }
-    array_push(&$project, $line);
+    $project[] = $line;
   }
 }
 
@@ -298,7 +298,7 @@ function read_pfile($xml_file) {
     );
     foreach($project->latest_release as $verdata){
       array_push(
-      &$fmprojs["$project->popularity_rank"] ["$project->projectname_short"],
+      $fmprojs["$project->popularity_rank"] ["$project->projectname_short"],
       $verdata->latest_release_version,
       $verdata->latest_release_id,
       $verdata->latest_release_date
