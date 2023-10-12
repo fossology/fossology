@@ -315,7 +315,7 @@ class TestReport {
 			//print "parsed suite name:$suiteName\n";
 
 			$pfe_results = $this->parseResults($moData[$suite +1]);
-			$pfe = split(':', $pfe_results);
+			$pfe = explode(':', $pfe_results);
 			array_push($results, $pfe[0]);
 			array_push($results, $pfe[1]);
 			array_push($results, $pfe[2]);
@@ -378,17 +378,17 @@ class TestReport {
 
 		while($line = $this->getResult($FD)){
 			//$line = getResult($FD);
-			$resultParts = split(';',$line);
-			list($lKey,$licenseType) = split('=',$resultParts[0]);
-			list($fnKey,$fileName)   = split('=',$resultParts[1]);
+			$resultParts = explode(';',$line);
+			list($lKey,$licenseType) = explode('=',$resultParts[0]);
+			list($fnKey,$fileName)   = explode('=',$resultParts[1]);
 			$FileName[] = rtrim($fileName,'.txt');
 			$LicenseType[$licenseType] = $FileName;
-			//print "PLR: before = split results is:{$resultParts[1]}\n<br>";
-			list($fnKey,$std) = split('=',$resultParts[1]);
+			//print "PLR: before = explode results is:{$resultParts[1]}\n<br>";
+			list($fnKey,$std) = explode('=',$resultParts[1]);
 			$VettedName[]     = str_replace(',',",<br>",$std);
-			list($pKey,$pass) = split('=',$resultParts[2]);
+			list($pKey,$pass) = explode('=',$resultParts[2]);
 			$results[]        = str_replace(',',",<br>",$pass);
-			list($fKey,$fail) = split('=',$resultParts[3]);
+			list($fKey,$fail) = explode('=',$resultParts[3]);
 			$results[]        = str_replace(',',",<br>",$fail);
 		}
 		$All[] = $LicenseType;
@@ -497,8 +497,8 @@ class TestReport {
 		$pat = '.+took\s(.*?)\sto\srun$';
 		$matches = preg_match("/$pat/", $string, $matched);
 		//print "the array looks like:\n"; print_r($matched) . "\n";
-		$parts = split(' ', $matched[1]);
-		//print "split array looks like:\n"; print_r($parts) . "\n";
+		$parts = explode(' ', $matched[1]);
+		//print "explode array looks like:\n"; print_r($parts) . "\n";
 		//$time = 'infinity';
 		$sizep = count($parts);
 		$etime = NULL;

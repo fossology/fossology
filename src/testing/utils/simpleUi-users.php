@@ -48,7 +48,7 @@ class createSuiUsers extends fossologyTestCase {
     foreach($Users as $user => $parms)
     {
       list($description, $email, $access, $folder,
-      $pass1, $pass2, $Enote, $Bucketpool, $Ui) = split(',',$parms);
+      $pass1, $pass2, $Enote, $Bucketpool, $Ui) = explode(',',$parms);
       $created = $this->createFolder(1, $user, $description);
       if($created == 0)
       {

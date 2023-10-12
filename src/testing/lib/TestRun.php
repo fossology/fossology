@@ -136,7 +136,7 @@ class TestRun
 		{
 		  return(NULL);
 		}
-		$parts = split(' ', $psLast);
+		$parts = explode(' ', $psLast);
 		//print "parts is:\n"; print_r($parts) . "\n";
 		return ($parts[5]);
 	}
