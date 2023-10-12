@@ -92,7 +92,7 @@ class createUIUsers extends fossologyTestCase {
     print "Using Svn Version:$Svn\n";
     foreach($Users as $user => $params) {
       list($description, $email, $access, $folder,
-      $block, $blank, $password, $Enote, $bucket, $ui ) = split(',',$Users[$user]);
+      $block, $blank, $password, $Enote, $bucket, $ui ) = explode(',',$Users[$user]);
       $added = $this->addUser($user, $description, $email, $access, $folder,
         $password, $Enote, $bucket, $ui);
       if(preg_match('/User already exists/',$added, $matches)) {

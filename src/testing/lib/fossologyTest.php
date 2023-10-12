@@ -467,7 +467,7 @@ class fossologyTest extends WebTestCase
         continue;
       }
 
-      list($upId, $file) = split(' ', $upload);
+      list($upId, $file) = explode(' ', $upload);
       if($upId == '#') {
         continue;
       }
