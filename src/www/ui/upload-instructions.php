@@ -56,12 +56,12 @@ class UploadInstructions extends DefaultPlugin
     $V .= "<td bgcolor='white'>&nbsp;</td>";
     $V .= "<td bgcolor='blue'>&nbsp;</td>";
     $text = _("Your computer");
-    $V .= "<td bgcolor='white' align='center'><a href='${Uri}?mod=upload_file'>$text</a></td>";
+    $V .= "<td bgcolor='white' align='center'><a href='{$Uri}?mod=upload_file'>$text</a></td>";
     $V .= "<td bgcolor='blue'>&nbsp;</td>";
     $V .= "<td bgcolor='white'> &rarr; </td>";
     $V .= "<td bgcolor='blue'>&nbsp;</td>";
     $text = _("FOSSology web server");
-    $V .= "<td bgcolor='white' align='center'><a href='${Uri}?mod=upload_srv_files'>$text</a></td>";
+    $V .= "<td bgcolor='white' align='center'><a href='{$Uri}?mod=upload_srv_files'>$text</a></td>";
     $V .= "<td bgcolor='blue'>&nbsp;</td>";
     $V .= "<td bgcolor='white'>&nbsp;</td>";
     $V .= "</tr><tr>";
@@ -102,7 +102,7 @@ class UploadInstructions extends DefaultPlugin
     $V .= "<td bgcolor='white'>&nbsp;</td>";
     $V .= "<td bgcolor='blue'>&nbsp;</td>";
     $text = _("Remote web or FTP server");
-    $V .= "<td bgcolor='white' align='center'><a href='${Uri}?mod=upload_url'>$text</a></td>";
+    $V .= "<td bgcolor='white' align='center'><a href='{$Uri}?mod=upload_url'>$text</a></td>";
     $V .= "<td bgcolor='blue'>&nbsp;</td>";
     $V .= "<td bgcolor='white'>&nbsp;</td>";
     $V .= "</tr><tr>";
