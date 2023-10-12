@@ -173,7 +173,7 @@ class fossologyTestCase extends fossologyTest
    * @return exists with failure or returns folder id.
    *
    */
-  public function createFolder($parent = null, $name, $description = null)
+  public function createFolder($parent, $name, $description = null)
   {
 
     global $URL;
@@ -790,7 +790,7 @@ class fossologyTestCase extends fossologyTest
   * @TODO determine if setting alpha folders is worth it.  Right now this routine
   * does not use them.....
   */
-  public function uploadServer($parentFolder = 1, $uploadPath, $description = null, $uploadName = null, $agents = null)
+  public function uploadServer($parentFolder, $uploadPath, $description = null, $uploadName = null, $agents = null)
   {
     global $URL;
     global $PROXY;
@@ -865,7 +865,7 @@ class fossologyTestCase extends fossologyTest
    *
    * @return pass or fail
    */
-  public function uploadUrl($parentFolder = 1, $url, $description = null, $uploadName = null, $agents = null)
+  public function uploadUrl($parentFolder, $url, $description = null, $uploadName = null, $agents = null)
   {
     global $URL;
     global $PROXY;
