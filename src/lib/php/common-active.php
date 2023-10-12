@@ -98,7 +98,7 @@ function ActiveHTTPscript($RequestName,$IncludeScriptTags=1)
 
   $HTML .= "var $RequestName=null;\n";
   /* Check for browser support. */
-  $HTML .= "function ${RequestName}_Get(Url)\n";
+  $HTML .= "function {$RequestName}_Get(Url)\n";
   $HTML .= "{\n";
   $HTML .= "if (window.XMLHttpRequest)\n";
   $HTML .= "  {\n";
@@ -112,7 +112,7 @@ function ActiveHTTPscript($RequestName,$IncludeScriptTags=1)
 
   $HTML .= "if ($RequestName!=null)\n";
   $HTML .= "  {\n";
-  $HTML .= "  $RequestName.onreadystatechange=${RequestName}_Reply;\n";
+  $HTML .= "  $RequestName.onreadystatechange={$RequestName}_Reply;\n";
   /*
    'true' means asynchronous request.
   Rather than waiting for the reply, the reply is
