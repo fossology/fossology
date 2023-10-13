@@ -20,9 +20,8 @@ class UrlBuilder
   {
     $uri = Traceback_uri() . '?mod=popup-license&rf=' . $licenseRef->getId();
     $title = _('License text');
-    $licenseShortNameWithLink = '<a title="'. $licenseRef->getFullName() .'" href="javascript:;" onclick="javascript:window.open(\''
+    return '<a title="'. $licenseRef->getFullName() .'" href="javascript:;" onclick="javascript:window.open(\''
         .$uri. '\',\''.$title.'\',\'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes\');">'
         .$licenseRef->getShortName(). '</a>';
-    return $licenseShortNameWithLink;
   }
 }

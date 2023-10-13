@@ -35,8 +35,7 @@ class test_common_active extends \PHPUnit\Framework\TestCase
     $html_result = ActiveHTTPscript("test");
     $script_header = "<script language='javascript'>\n<!--\n";
     $script_foot  = "\n// -->\n</script>\n";
-    $html_expect = "";
-    $html_expect .= "var test=null;\n";
+    $html_expect = "var test=null;\n";
     /* Check for browser support. */
     $html_expect .= "function test_Get(Url)\n";
     $html_expect .= "{\n";

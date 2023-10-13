@@ -586,9 +586,6 @@ function Populate_sysconfig()
     if (empty($VarRec)) {
       $sql = "INSERT INTO sysconfig (" . implode(",", $columns) . ") VALUES (" .
         implode(",", $values) . ");";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
     } else { // Values exist, update them
       $updateString = [];
       foreach ($columns as $index => $column) {
@@ -598,10 +595,10 @@ function Populate_sysconfig()
       }
       $sql = "UPDATE sysconfig SET " . implode(",", $updateString) .
         " WHERE variablename='$variable';";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
     }
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
     unset($VarRec);
   }
 }

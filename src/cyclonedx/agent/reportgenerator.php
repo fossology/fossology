@@ -57,7 +57,7 @@ class BomReportGenerator
    */
   public function generateReport($bomdata): array
   {
-    $report = [
+    return [
       'bomFormat' => 'CycloneDX',
       '$schema' => 'http://cyclonedx.org/schema/bom-1.4.schema.json',
       'specVersion' => '1.4',
@@ -76,8 +76,6 @@ class BomReportGenerator
       ],
       'components' => $bomdata['components']
     ];
-
-    return $report;
   }
 
   /**

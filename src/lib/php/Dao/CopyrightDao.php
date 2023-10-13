@@ -639,7 +639,6 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
     (CASE WHEN (ce.content IS NULL OR ce.content = '') THEN cp.content ELSE ce.content END) AS mcontent
     $unorderedQuery$grouping) as K";
     $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__, $tableName . "count.all" . ($activated ? '' : '_deactivated'));
-    $iTotalRecords = $iTotalRecordsRow['count'];
-    return $iTotalRecords;
+    return $iTotalRecordsRow['count'];
   }
 }

@@ -326,8 +326,7 @@ class dashboard extends FO_Plugin
     $Lines = explode("\n",$Buf);
 
     /* Display results */
-    $V = "";
-    $V .= "<table border=1>\n";
+    $V = "<table border=1>\n";
     $head0 = _("Filesystem");
     $head1 = _("Capacity");
     $head2 = _("Used");
@@ -429,8 +428,7 @@ class dashboard extends FO_Plugin
   public function Output()
   {
 
-    $V="";
-    $V .= "<table style='width: 100%;' border=0>\n";
+    $V = "<table style='width: 100%;' border=0>\n";
     $V .= "<tr>";
     $V .= "<td valign='top'>\n";
     $text = _("Database Contents");

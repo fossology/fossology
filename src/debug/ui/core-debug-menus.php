@@ -164,14 +164,13 @@ class core_debug_menus extends FO_Plugin
     {
       $V .= "<input type='hidden' name='fullmenu' value='1'>";
       $text = _("Disable Full Debug");
-      $V .= "<input type='submit' value='$text!'>";
     }
     else
     {
       $V .= "<input type='hidden' name='fullmenu' value='2'>";
       $text = _("Enable Full Debug");
-      $V .= "<input type='submit' value='$text!'>";
     }
+    $V .= "<input type='submit' value='$text!'>";
     $V .= "</form>\n";
     $V .= "<hr>";
     $this->Menu2HTML($MenuList);

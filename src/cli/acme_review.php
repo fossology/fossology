@@ -431,14 +431,10 @@ class acme_review extends FO_Plugin
     }
 
     switch ($this->OutputType) {
-      case "XML":
-        break;
       case "HTML":
         $this->NoHeader = 0;
         $this->OutputOpen("HTML", 1);
         $V .= $this->HTMLForm($acme_project_array, $upload_pk);
-        break;
-      case "Text":
         break;
       default:
         break;

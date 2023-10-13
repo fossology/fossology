@@ -328,14 +328,7 @@ class TextFindingsAjax
    */
   private function getTableName($type)
   {
-    switch ($type) {
-      case "copyFindings":
-        $tableName = "copyright_decision";
-        break;
-      default:
-        $tableName = "copyright_decision";
-    }
-    return $tableName;
+    return "copyright_decision";
   }
 
   /**
@@ -347,14 +340,7 @@ class TextFindingsAjax
    */
   private function getDecisionTypeName($type)
   {
-    switch ($type) {
-      case "copyFindings":
-        $typeName = "copyright";
-        break;
-      default:
-        $typeName = "copyright";
-    }
-    return $typeName;
+    return "copyright";
   }
 
   /**
@@ -366,13 +352,6 @@ class TextFindingsAjax
    */
   private function getViewName($type)
   {
-    switch ($type) {
-      case "copyFindings":
-        $viewName = "copyright-list";
-        break;
-      default:
-        $viewName = "copyright-list";
-    }
-    return $viewName;
+    return "copyright-list";
   }
 }

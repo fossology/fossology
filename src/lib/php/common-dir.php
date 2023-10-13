@@ -525,14 +525,12 @@ function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtre
   $foundChildren = array();
   foreach ($children as $key => $child) {
     if (Isartifact($child['ufile_mode'])) {
+      unset($children[$key]);
       if (Iscontainer($child['ufile_mode'])) {
-        unset($children[$key]);
         $NonAChildren = GetNonArtifactChildren($child['uploadtree_pk'], $uploadtree_tablename);
         if ($NonAChildren) {
           $foundChildren = array_merge($foundChildren, $NonAChildren);
         }
-      } else {
-        unset($children[$key]);
       }
     } else {
       $foundChildren[$key] = $child;

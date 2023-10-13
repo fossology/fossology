@@ -76,9 +76,8 @@ class ajax_filelic extends FO_Plugin
 
     $files = Level1WithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk,
       false, $uploadtree_tablename);
-    $csv = (count($files) != 0) ? rawurlencode($rf_shortname) .
+    return (count($files) != 0) ? rawurlencode($rf_shortname) .
       implode(',', array_keys($files)) : '';
-    return $csv;
   }
 }
 $NewPlugin = new ajax_filelic();
