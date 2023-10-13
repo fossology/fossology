@@ -172,8 +172,7 @@ class CliXml extends Agent
   protected function getUri($fileBase)
   {
     $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName.'_'.date("Y-m-d_H:i:s");
-    $fileName .= ".xml" ;
-    return $fileName;
+    return $fileName .".xml";
   }
 
   protected function renderPackage($uploadId, $groupId)
@@ -343,12 +342,10 @@ class CliXml extends Agent
           unset($contents["licenses"][$j]);
         }
       }
-      if ($count == 1) {
-        unset($contents["licensesMain"][$i]);
-      } else {
+      if ($count != 1) {
         $mainlic[] = $contents["licensesMain"][$i];
-        unset($contents["licensesMain"][$i]);
       }
+      unset($contents["licensesMain"][$i]);
     }
     $contents["licensesMain"] = $mainlic;
 

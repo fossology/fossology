@@ -56,8 +56,7 @@ class agent_copyright_once extends FO_Plugin
     $ui_dir = getcwd();
     $copyright_dir =  "$SYSCONFDIR/mods-enabled/copyright/agent/";
     if (!chdir($copyright_dir)) {
-      $errmsg = _("unable to change working directory to $copyright_dir\n");
-      return $errmsg;
+      return _("unable to change working directory to $copyright_dir\n");
     }
     //$Sys = "./copyright -C $tempFileName -c $SYSCONFDIR";
     $Sys = "./copyright -c $SYSCONFDIR $tempFileName";
@@ -120,8 +119,7 @@ class agent_copyright_once extends FO_Plugin
       fclose($inputFile);
     }
     if (!chdir($ui_dir)) {
-      $errmsg = _("unable to change back to working directory $ui_dir\n");
-      return $errmsg;
+      return _("unable to change back to working directory $ui_dir\n");
     }
     /* Clean up */
     return ($V);

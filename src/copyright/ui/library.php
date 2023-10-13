@@ -20,8 +20,7 @@
  */
 function hist_rowcmp_count_asc($a, $b)
 {
-  $res = $a['copyright_count'] - $b['copyright_count'];
-  return $res;
+  return $a['copyright_count'] - $b['copyright_count'];
 }
 
 /**

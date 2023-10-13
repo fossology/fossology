@@ -36,7 +36,7 @@ class UploadPermissionPage extends DefaultPlugin
         self::TITLE =>  _("Edit Uploaded File Permissions"),
         self::MENU_LIST => "Admin::Upload Permissions",
         self::PERMISSION => Auth::PERM_WRITE,
-        self::REQUIRES_LOGIN => TRUE
+        self::REQUIRES_LOGIN => true
     ));
     $this->uploadPermDao = $this->getObject('dao.upload.permission');
     $this->folderDao = $this->getObject('dao.folder');
@@ -144,7 +144,7 @@ class UploadPermissionPage extends DefaultPlugin
       }
     }
 
-    $res = array(
+    return array(
       'root_folder_pk' => $root_folder_pk,
       'upload_pk' => $upload_pk,
       'allUploadsPerm' => $allUploadsPerm,
@@ -153,8 +153,6 @@ class UploadPermissionPage extends DefaultPlugin
       'newgroup' => $newgroup,
       'UploadList' => $UploadList,
     );
-
-    return $res;
   }
 
   private function getPermNamesWithReuse($uploadId)

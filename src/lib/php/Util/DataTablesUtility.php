@@ -98,7 +98,6 @@ class DataTablesUtility
   public function getSortingString($inputArray, $columNamesInDatabase, $defaultSearch = array())
   {
     $orderArray = $this->getSortingParametersFromArray($inputArray, $columNamesInDatabase, $defaultSearch);
-    $orderString = empty($orderArray) ? "" : "ORDER BY " . implode(", ", $orderArray);
-    return $orderString;
+    return empty($orderArray) ? "" : "ORDER BY " . implode(", ", $orderArray);
   }
 }

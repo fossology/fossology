@@ -180,8 +180,7 @@ class ReuserAgent extends Agent
     if (!array_key_exists($agentName, $selectedScanners)) {
       return;
     }
-    $latestAgentId = $selectedScanners[$agentName];
-    return $latestAgentId;
+    return $selectedScanners[$agentName];
   }
 
 

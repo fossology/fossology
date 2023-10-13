@@ -117,8 +117,7 @@ function HumanSize( $bytes )
 function GetFileExt($fname)
 {
   $extpos = strrpos($fname, '.') + 1;
-  $extension = strtolower(substr($fname, $extpos));
-  return $extension;
+  return strtolower(substr($fname, $extpos));
 }
 
 
@@ -293,6 +292,5 @@ function Convert2BrowserTime($server_time)
     $tz = $_SESSION["timezone"];
     $browser_time->setTimeZone(new \DateTimeZone($tz));
   }
-  $time = $browser_time->format('Y-m-d H:i:s');
-  return $time;
+  return $browser_time->format('Y-m-d H:i:s');
 }

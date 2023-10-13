@@ -162,15 +162,14 @@ class ObligationCsvImport
    * @param array $listFromCsv List of obligations from CSV
    * @param bool $candidate    Is a candidate obligation?
    * @param array $row         Unused
-   * @return number strcmp() diff
+   * @return int strcmp() diff
    */
   private function compareLicList($exists, $listFromCsv, $candidate, $row)
   {
     $getList = $this->obligationMap->getLicenseList($exists, $candidate);
     $listFromDb = $this->reArrangeString($getList);
     $listFromCsv = $this->reArrangeString($listFromCsv);
-    $diff = strcmp($listFromDb, $listFromCsv);
-    return $diff;
+    return strcmp($listFromDb, $listFromCsv);
   }
 
   /**
@@ -183,8 +182,7 @@ class ObligationCsvImport
   {
     $string = explode(";", $string);
     sort($string);
-    $string = implode(",", $string);
-    return $string;
+    return implode(",", $string);
   }
 
   /**
