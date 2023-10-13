@@ -527,10 +527,9 @@ ORDER BY lft asc
     if (false === $row) {
       return null;
     }
-    $license = new License(intval($row['rf_pk']), $row['rf_shortname'],
+    return new License(intval($row['rf_pk']), $row['rf_shortname'],
       $row['rf_fullname'], $row['rf_risk'], $row['rf_text'], $row['rf_url'],
       $row['rf_detector_type'], $row['rf_spdx_id']);
-    return $license;
   }
 
   /**

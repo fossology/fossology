@@ -75,10 +75,8 @@ for ($i = 1; $i < $argc; $i++) {
     case '-h':
       echo $usage;
       exit(0);
-      break;
     default:
       die("ERROR: Unknown argument: $argv[$i]\n$usage");
-      break;
   }
 }
 
@@ -150,15 +148,12 @@ switch($last ) {
   case '.gz':
     echo $usage;
     exit(1);
-    break;
   case '.bz2':
     echo $usage;
     exit(1);
-    break;
   case '.zip':
     echo $usage;
     exit(1);
-    break;
 }
 
 echo "Processing Xml file $XML_input_file\n";
@@ -469,12 +464,11 @@ function wget_url($project_rank, $project_name, $ark_type, $proj_data, $mode){
       if (ereg('compressed data', $type)){
         $upload['Compressed'] =
       "'$project_rank' '$project_name' '$archive_path' '$short_desc' '$ver' '$ver_id' '$ver_date'";
-        $upload['Null'] = True;
       }
       else{
         $upload['Uncompressed'] = "'$project_name' '$archive_path'";
-        $upload['Null'] = True;
       }
+      $upload['Null'] = true;
     }
   }
   // close the file? (Suceeded and WGF), or is it faster to leave open?
@@ -536,8 +530,7 @@ function _getfmpath($path){
     return($path_wanted);
   }
   elseif (ereg('--no-check-certificate', $stat_line)){
-    echo
-	"ERROR Secure connect to sourceforge.net needed: in file $dir_entry\n";
+    echo "ERROR Secure connect to sourceforge.net needed: in file $dir_entry\n";
     echo "Line was:\n$stat_line\n";
     return($path_wanted);
   }

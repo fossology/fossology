@@ -252,7 +252,7 @@ class BrowseLicense extends DefaultPlugin
     $editedNoLicenseFoundCount = array_key_exists(LicenseDao::NO_LICENSE_FOUND, $editedLicensesHist)
             ? $editedLicensesHist[LicenseDao::NO_LICENSE_FOUND]['count'] : 0;
 
-    $vars = array('tableDataJson'=>json_encode($tableData),
+    return array('tableDataJson'=>json_encode($tableData),
         'uniqueLicenseCount'=>$uniqueLicenseCount,
         'fileCount'=>$fileCount,
         'scannerUniqueLicenseCount'=>$scannerUniqueLicenseCount,
@@ -264,8 +264,6 @@ class BrowseLicense extends DefaultPlugin
         'scannerLicenses'=>$licenseHistogram,
         'editedLicenses'=>$editedLicensesHist
         );
-
-    return $vars;
   }
 
   /**

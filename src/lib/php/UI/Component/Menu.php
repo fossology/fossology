@@ -41,8 +41,7 @@ class Menu
     if (empty($menu)) {
       return;
     }
-    $output = "";
-    $output .= "<!--[if lt IE 7]><table><tr><td><![endif]-->\n";
+    $output = "<!--[if lt IE 7]><table><tr><td><![endif]-->\n";
     $output .= "<ul id='menu-$indent'>\n";
 
     foreach ($menu as $menuEntry) {
@@ -110,9 +109,8 @@ class Menu
    */
   function OutputCSS()
   {
-    $output = "";
 
-    $output .= "<style type=\"text/css\">\n";
+    $output = "<style type=\"text/css\">\n";
     /* Depth 0 is special: position is relative, colors are blue */
     $depth = 0;
     $label = "";
@@ -269,8 +267,7 @@ class Menu
       $this->mergeUserLoginVars($vars);
     }
 
-    $out = $this->renderer->load('components/menu.html.twig')->render($vars);
-    return $out;
+    return $this->renderer->load('components/menu.html.twig')->render($vars);
   }
 
   private function mergeUserLoginVars(&$vars)

@@ -20,15 +20,13 @@ function getopt($arg1, $arg2)
     $extraOpts = array();
   }
 
-  $opts = array_merge(
+  return array_merge(
     array(
       "scheduler_start" => "",
       "userID" => $userId,
       "jobId" => $jobId,
       "groupID" => $groupId
     ), $extraOpts);
-
-  return $opts;
 }
 
 function fgets($in)

@@ -142,8 +142,7 @@ class fo_libschema
 
     $this->debug = $debug;
     if (!file_exists($filename)) {
-      $errMsg = "$filename does not exist.";
-      return $errMsg;
+      return "$filename does not exist.";
     }
     $Schema = array(); /* will be filled in next line */
     require($filename); /* this cause Fatal Error if the file does not exist. */
@@ -153,8 +152,7 @@ class fo_libschema
     if ((count($this->schema['TABLE']) < 5) || (count($this->schema['SEQUENCE']) < 5)
         || (count($this->schema['INDEX']) < 5) || (count($this->schema['CONSTRAINT']) < 5)
     ) {
-      $errMsg = "Schema from '$filename' appears invalid.";
-      return $errMsg;
+      return "Schema from '$filename' appears invalid.";
     }
 
     if (!$debug) {

@@ -361,9 +361,7 @@ count(*) AS copyright_count " .
 
     $defaultOrder = HistogramBase::returnSortOrder();
 
-    $orderString = $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase, $defaultOrder);
-
-    return $orderString;
+    return $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase, $defaultOrder);
   }
 
   /**

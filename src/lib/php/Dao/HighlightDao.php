@@ -184,8 +184,7 @@ class HighlightDao
     $highlightDiffs = $this->getHighlightDiffs($itemTreeBounds, $licenseId, $agentId, $highlightId);
     $highlightKeywords = $this->getHighlightKeywords($itemTreeBounds);
     $highlightBulk = $this->getHighlightBulk($itemTreeBounds->getItemId(), $clearingId);
-    $highlightEntries = array_merge(array_merge($highlightDiffs,$highlightKeywords),$highlightBulk);
-    return $highlightEntries;
+    return array_merge(array_merge($highlightDiffs,$highlightKeywords),$highlightBulk);
   }
 
   /**

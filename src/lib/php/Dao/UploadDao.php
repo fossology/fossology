@@ -190,8 +190,7 @@ class UploadDao
           AND ((ufile_mode & (3<<28))=0)
           AND pfile_fk != 0",
         $parameters, $stmt);
-    $fileCount = intval($row["count"]);
-    return $fileCount;
+    return intval($row["count"]);
   }
 
   private function handleUploadIdForTable($uploadTreeTableName, $uploadId, &$parameters)
@@ -380,8 +379,8 @@ class UploadDao
   }
 
   /**
-   * @var ItemTreeBounds $itemTreeBounds
-   * @param $uploadTreeView
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param UploadTreeProxy $uploadTreeView
    * @return int
    */
   public function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeProxy $uploadTreeView)
@@ -389,8 +388,7 @@ class UploadDao
     $sql = "SELECT count(*) FROM " . $uploadTreeView->getDbViewName() . " WHERE lft BETWEEN $1 AND $2";
     $result = $this->dbManager->getSingleRow($sql
         , array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight()), __METHOD__ . $uploadTreeView->asCTE());
-    $output = $result['count'];
-    return $output;
+    return $result['count'];
   }
 
   /**
@@ -465,10 +463,9 @@ class UploadDao
         intval($uploadEntry['lft']), intval($uploadEntry['rgt']));
 
     $parent = $uploadEntry['parent'];
-    $item = new Item(
+    return new Item(
         $itemTreeBounds, $parent !== null ? intval($parent) : null, intval($uploadEntry['pfile_fk']), intval($uploadEntry['ufile_mode']), $uploadEntry['ufile_name']
     );
-    return $item;
   }
 
   /**
@@ -810,7 +807,7 @@ ORDER BY lft asc
   /**
    * @param int $uploadId
    * @param int $reusedUploadId
-   * @return bolean
+   * @return bool
    */
   public function insertReportConfReuse($uploadId, $reusedUploadId)
   {

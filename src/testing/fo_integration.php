@@ -48,16 +48,15 @@ class FoIntegration
     if(is_NULL($logPath))
     {
       $this->logPath = getcwd() . "/fo_integration.log";
-      echo "DB: logpath is:$this->logPath\n";
     }
     else
     {
       $this->logPath = $logPath;
-      echo "DB: logpath is:$this->logPath\n";
     }
+    echo "DB: logpath is:$this->logPath\n";
 
     $this->LOGFD = fopen($this->logPath, 'a+');
-    if($this->LOGFD === FALSE)
+    if($this->LOGFD === false)
     {
       $error = "Error! cannot open $this->logPath" . " File: " . __FILE__ .
         " on line: " . __LINE__;
@@ -78,13 +77,13 @@ class FoIntegration
    */
   protected function log($message)
   {
-    if(fwrite($this->LOGFD, $message) === FALSE)
+    if(fwrite($this->LOGFD, $message) === false)
     {
       // remove the warning? and have caller do it?
       echo "WARNING! cannot write to log file, there may be no log messages\n";
-      return(FALSE);
+      return false;
     }
-    return(TRUE);
+    return true;
   } // log
 
 } //fo_integration

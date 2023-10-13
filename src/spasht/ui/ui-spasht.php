@@ -399,8 +399,7 @@ class ui_spasht extends FO_Plugin
   protected function isADirectory($Uploadtree_pk)
   {
     $row =  $this->uploadDao->getUploadEntry($Uploadtree_pk, $this->uploadtree_tablename);
-    $isADirectory = IsDir($row['ufile_mode']);
-    return $isADirectory;
+    return IsDir($row['ufile_mode']);
   }
 
   /**
@@ -409,11 +408,10 @@ class ui_spasht extends FO_Plugin
   */
   public function returnSortOrder ()
   {
-    $defaultOrder = array (
+    return array (
       array(0, "desc"),
       array(1, "desc"),
     );
-    return $defaultOrder;
   }
 
   /**
