@@ -1,7 +1,16 @@
-{# SPDX-FileCopyrightText: © 2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2015,2023 Siemens AG
 
    SPDX-License-Identifier: FSFAP
 #}
+{%- from "listedlicense.xml.twig" import listedLicenseFull -%}
+{% set dualLicense = false %}
+{% if fileData.concludedLicenses|length > 2 %}
+  {% for res in fileData.concludedLicenses %}
+    {% if 'Dual-license' == licenseList[res].licenseObj.shortName %}
+      {% set dualLicense = true %}
+    {% endif %}
+  {% endfor %}
+{%- endif -%}
 <spdx:hasFile>
   <spdx:File rdf:about="#SPDXRef-item{{ fileId|url_encode }}">
     <spdx:fileName>{{ fileName|e }}</spdx:fileName>
@@ -23,119 +32,101 @@
         <spdx:checksumValue>{{ md5 | lower }}</spdx:checksumValue>
       </spdx:Checksum>
     </spdx:checksum>
-{%~ if isCleared %}
-  {%~ if concludedLicenses|default is empty %}
+{%~ if fileData.isCleared() %}{# File clearing decisions #}
+  {%~ if fileData.concludedLicenses|default is empty %}
     <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#none" />
-  {%~ elseif concludedLicenses|length > 1 %}
+  {%~ elseif fileData.concludedLicenses|length > 1 %}
     <spdx:licenseConcluded>
-    {%~ if 'Dual-license' in concludedLicenses and concludedLicenses|length > 2 %}
+    {%~ if dualLicense %}
       <spdx:DisjunctiveLicenseSet>
     {%~ else %}
       <spdx:ConjunctiveLicenseSet>
     {%~ endif %}{# End dual license check #}
-    {%~ for res in concludedLicenses %}
-      {%~ if res starts with 'LicenseRef-' %}
-        <spdx:member rdf:resource="#{{ res|replace({' ': '-'})|url_encode }}" />
+    {%~ for res in fileData.concludedLicenses %}
+      {%~ if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+        {%- set licId=licenseList[res].licenseObj.spdxId %}
+        {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+          {% set licId=licenseList[res].licenseObj.shortName %}
+        {%- endif ~%}
+        <spdx:member rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
       {%~ else %}
-        {%~ if licenseInfoConcluded[res] is defined %}{# License defined first time #}
+        {%~ if not licenseList[res].isTextPrinted() %}{# License to be printed #}
         <spdx:member>
-          <spdx:ListedLicense rdf:about="http://spdx.org/licenses/{{ licenseInfoConcluded[res].id|replace({' ': '-'})|url_encode }}">
-            <spdx:name>{{ licenseInfoConcluded[res].name|e }}</spdx:name>
-            <spdx:licenseId>{{ licenseInfoConcluded[res].id|replace({' ': '-'})|e }}</spdx:licenseId>
-            <spdx:licenseText><![CDATA[
-{{ licenseInfoConcluded[res].text|replace({'\f':''})
-                                 |replace({']]>':']]]]><![CDATA[>'}) }}
-            ]]></spdx:licenseText>
-          {%~ if licenseInfoConcluded[res].url is not empty %}
-            <rdfs:seeAlso>{{ licenseInfoConcluded[res].url }}</rdfs:seeAlso>
-          {%~ endif %}
-          </spdx:ListedLicense>
+          {{ listedLicenseFull(licenseList[res].licenseObj) }}
         </spdx:member>
-        {%~ else %}
-        <spdx:member rdf:resource="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
+        {%~ else %}{# License already printed #}
+        <spdx:member rdf:resource="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}" />
         {%~ endif %}
       {%~ endif %}{# End printing license conclusion #}
     {%~ endfor %}
-    {%~ if 'Dual-license' in concludedLicenses and concludedLicenses|length > 2 %}
+    {%~ if dualLicense %}
       </spdx:DisjunctiveLicenseSet>
     {%~ else %}
       </spdx:ConjunctiveLicenseSet>
     {%~ endif %}
     </spdx:licenseConcluded>
-  {%~ elseif concludedLicenses|length == 1 %}
-    {%- set res = concludedLicenses[0] %}
-    {%- if res starts with 'LicenseRef-' %}
-    <spdx:licenseConcluded rdf:resource="#{{ res|replace({' ': '-'})|url_encode }}" />
+  {%~ elseif fileData.concludedLicenses|length == 1 %}
+    {%- set res = fileData.concludedLicenses[0] %}
+    {%- if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+      {%- set licId=licenseList[res].licenseObj.spdxId %}
+      {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+        {% set licId=licenseList[res].licenseObj.shortName %}
+      {%- endif ~%}
+    <spdx:licenseConcluded rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
     {%~ else %}
-      {%~ if licenseInfoConcluded[res] is defined %}{# License defined first time #}
+      {%~ if not licenseList[res].isTextPrinted() %}{# License to be printed #}
     <spdx:licenseConcluded>
-      <spdx:ListedLicense rdf:about="http://spdx.org/licenses/{{ licenseInfoConcluded[res].id|replace({' ': '-'})|url_encode }}">
-        <spdx:name>{{ licenseInfoConcluded[res].name|e }}</spdx:name>
-        <spdx:licenseId>{{ licenseInfoConcluded[res].id|replace({' ': '-'})|e }}</spdx:licenseId>
-        <spdx:licenseText><![CDATA[
-{{ licenseInfoConcluded[res].text|replace({'\f':''})
-          |replace({']]>':']]]]><![CDATA[>'}) }}
-        ]]></spdx:licenseText>
-        {%~ if licenseInfoConcluded[res].url is not empty %}
-        <rdfs:seeAlso>{{ licenseInfoConcluded[res].url }}</rdfs:seeAlso>
-        {%~ endif %}
-      </spdx:ListedLicense>
+      {{ listedLicenseFull(licenseList[res].licenseObj) }}
     </spdx:licenseConcluded>
       {%~ else %}
-    <spdx:licenseConcluded rdf:resource="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
+    <spdx:licenseConcluded rdf:resource="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}" />
       {%~ endif %}
     {%~ endif %}{# End printing single conclusion #}
   {%~ endif %}
-{%~ else %}
+{%~ else %}{# End file clearing decisions #}
     <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {%~ endif %}{# End license conclusion block #}
 {%~ if licenseCommentState %}{# License comments to be printed #}
-  {%~ if licenseComment is empty %}
+  {%~ if fileData.comments is empty %}
     <spdx:licenseComments rdf:resource="http://spdx.org/rdf/terms#noassertion" />
   {%~ else %}
-    <spdx:licenseComments><![CDATA[{{ licenseComment|e }}]]></spdx:licenseComments>
+    <spdx:licenseComments><![CDATA[{{ fileData.comments|join("\n")|e }}]]></spdx:licenseComments>
   {%~ endif %}
-{% endif %}
-{%~ if scannerLicenses|default is empty %}
+{%~ endif %}
+{%~ if fileData.scanners|default is empty %}
     <spdx:licenseInfoInFile rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {%~ else %}
-  {%~ for res in scannerLicenses %}
-    {%~ if res starts with 'LicenseRef-' %}
-    <spdx:licenseInfoInFile rdf:resource="#{{ res|replace({' ': '-'})|url_encode }}" />
+  {%~ for res in fileData.scanners %}
+    {%~ if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+      {%- set licId=licenseList[res].licenseObj.spdxId %}
+      {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+        {% set licId=licenseList[res].licenseObj.shortName %}
+      {%- endif ~%}
+    <spdx:licenseInfoInFile rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
     {%~ else %}
-      {%~ if licenseInfoScanner[res] is defined %}{# License defined first time #}
+      {%~ if not licenseList[res].isTextPrinted() %}{# License to be printed #}
     <spdx:licenseInfoInFile>
-      <spdx:ListedLicense rdf:about="http://spdx.org/licenses/{{ licenseInfoScanner[res].id|replace({' ': '-'})|url_encode }}">
-        <spdx:name>{{ licenseInfoScanner[res].name|e }}</spdx:name>
-        <spdx:licenseId>{{ licenseInfoScanner[res].id|replace({' ': '-'})|e }}</spdx:licenseId>
-        <spdx:licenseText><![CDATA[
-{{ licenseInfoScanner[res].text|replace({'\f':''})
-                              |replace({']]>':']]]]><![CDATA[>'}) }}
-        ]]></spdx:licenseText>
-        {%~ if licenseInfoScanner[res].url is not empty %}
-        <rdfs:seeAlso>{{ licenseInfoScanner[res].url }}</rdfs:seeAlso>
-        {%~ endif %}
-      </spdx:ListedLicense>
+      {{ listedLicenseFull(licenseList[res].licenseObj) }}
     </spdx:licenseInfoInFile>
       {%~ else %}
     <spdx:licenseInfoInFile>
-      <spdx:ListedLicense rdf:about="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
+      <spdx:ListedLicense rdf:about="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}" />
     </spdx:licenseInfoInFile>
       {%~ endif %}
     {%- endif %}
   {%- endfor %}{# End printing license infos in file #}
 {%- endif %}
-{%~ if copyrights|default is empty %}
+{%~ if fileData.copyrights|default is empty %}
     <spdx:copyrightText rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {%~ else %}
     <spdx:copyrightText><![CDATA[
-  {%~ for cp in copyrights %}
+  {%~ for cp in fileData.copyrights %}
       {{ cp|replace({'\f':''})
            |replace({']]>':']]]]><![CDATA[>'}) }}
   {%~ endfor %}
     ]]></spdx:copyrightText>
 {%~ endif %}
-{%~ for ack in acknowledgements %}
+{%~ for ack in fileData.acknowledgements %}
     <spdx:attributionText><![CDATA[{{ ack|replace({'\f':''})
             |replace({']]>':']]]]><![CDATA[>'}) }}]]></spdx:attributionText>
 {%~ endfor %}

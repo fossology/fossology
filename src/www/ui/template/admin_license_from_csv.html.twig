@@ -16,13 +16,15 @@
     </label>
     <input name="file_input" type="file"/><br/>
     {{ 'Delimiter'|trans }}: <input type="text" name="delimiter" value="," size="1" maxlength="1" /><br/>
-    {{ 'Enclosure'|trans }}: <input type="text" name="enclosure" value="&quot;" size="1" maxlength="1" /><br/>         
+    {{ 'Enclosure'|trans }}: <input type="text" name="enclosure" value="&quot;" size="1" maxlength="1" /><br/>
     <br/>
     <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="{{ 'Upload'| trans }}"/>
     </p>
+    {% if not(license_csv_import is empty) %}
     <p>
       {{ 'NOTE: Obligations will not get imported, To import go to Admin -> Obligation Admin -> CSV Import'| trans }} <br/>
     </p>
+    {% endif %}
 
   </form>
 

@@ -104,8 +104,9 @@ class ClearingEvent implements LicenseClearing
   }
 
   /**
+   * Get modified license text.
+   *
    * @return string
-   * @deprecated
    */
   public function getReportinfo()
   {
@@ -113,8 +114,9 @@ class ClearingEvent implements LicenseClearing
   }
 
   /**
+   * Get acknowledgement
+   *
    * @return string
-   * @deprecated
    */
   public function getAcknowledgement()
   {
