@@ -1,7 +1,15 @@
-{# SPDX-FileCopyrightText: © 2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2015,2023 Siemens AG
 
    SPDX-License-Identifier: FSFAP
 #}
+{%- set dualLicense = false -%}
+{% if mainLicenses|length > 2 %}
+  {% for res in mainLicenses %}
+    {% if 'Dual-license' == licenseList[res].licenseObj.shortName %}
+      {% set dualLicense = true %}
+    {% endif %}
+  {% endfor %}
+{%- endif -%}
 <spdx:relationship>
   <spdx:Relationship>
     <spdx:relationshipType rdf:resource="http://spdx.org/rdf/terms#relationshipType_describes" />
@@ -51,19 +59,23 @@
         </spdx:checksum>
 {% if mainLicenses|length > 1 %}
         <spdx:licenseConcluded>
-{% if 'Dual-license' in mainLicenses and mainLicenses|length > 2 %}
+{% if dualLicense %}
           <spdx:DisjunctiveLicenseSet>
 {% else %}
           <spdx:ConjunctiveLicenseSet>
 {% endif %}
 {% for res in mainLicenses %}
-{% if res starts with 'LicenseRef-' %}
-            <spdx:member rdf:resource="#{{ res|replace({' ': '-'})|url_encode }}" />
+{% if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' %}
+  {% set licId=licenseList[res].licenseObj.spdxId %}
+  {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+    {% set licId=licenseList[res].licenseObj.shortName %}
+  {% endif %}
+            <spdx:member rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
 {% else %}
-            <spdx:member rdf:resource="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
+            <spdx:member rdf:resource="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}" />
 {% endif %}
 {% endfor %}
-{% if 'Dual-license' in concludedLicenses and concludedLicenses|length > 2 %}
+{% if dualLicense %}
           </spdx:DisjunctiveLicenseSet>
 {% else %}
           </spdx:ConjunctiveLicenseSet>
@@ -71,10 +83,14 @@
         </spdx:licenseConcluded>
 {% elseif mainLicenses|length == 1 %}
 {% set res = mainLicenses[0] %}
-{% if res starts with 'LicenseRef-' %}
-        <spdx:licenseConcluded rdf:resource="#{{ res|replace({' ': '-'})|url_encode }}" />
+{% if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' %}
+  {% set licId=licenseList[res].licenseObj.spdxId %}
+  {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+    {% set licId=licenseList[res].licenseObj.shortName %}
+  {% endif %}
+        <spdx:licenseConcluded rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
 {% else %}
-        <spdx:licenseConcluded rdf:resource="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
+        <spdx:licenseConcluded rdf:resource="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}" />
 {% endif %}
 {% endif %}
         {% if licenseComments %}<spdx:licenseComments><![CDATA[

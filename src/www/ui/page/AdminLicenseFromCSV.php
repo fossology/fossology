@@ -52,6 +52,7 @@ class AdminLicenseFromCSV extends DefaultPlugin
 
     $vars[self::KEY_UPLOAD_MAX_FILESIZE] = ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
     $vars['baseUrl'] = $request->getBaseUrl();
+    $vars['license_csv_import'] = true;
 
     return $this->render("admin_license_from_csv.html.twig", $this->mergeWithDefault($vars));
   }

@@ -3,7 +3,7 @@
    SPDX-License-Identifier: FSFAP
 #}
 SPDXVersion: SPDX-2.3
-DataLicense: {{ dataLicense.id|replace({' ': '-'}) }}
+DataLicense: {{ licenseList[dataLicense].licenseObj.spdxId|replace({' ': '-'}) }}
 
 ##-------------------------
 ## Document Information
@@ -42,10 +42,14 @@ LicenseListVersion: 3.19
 ## License Information
 ##-------------------------
 
-{% for licenseData in licenseTexts %}{% if licenseData.id starts with 'LicenseRef-' %}
-LicenseID: {{ licenseData.id|replace({' ': '-'}) }}
-LicenseName: {{ licenseData.name }}
-ExtractedText: <text> {{ licenseData.text|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
-                                         |replace({'\f':''}) }} </text>
+{% for licenseData in licenseList %}{% if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' ~%}
+{%- set licId=licenseData.licenseObj.spdxId %}
+{% if licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
+  {% set licId=licenseData.licenseObj.shortName %}
+{%- endif ~%}
+LicenseID: {{ licId|replace({' ': '-'}) }}
+LicenseName: {{ licenseData.licenseObj.fullName }}
+ExtractedText: <text> {{ licenseData.licenseObj.text|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+    |replace({'\f':''}) }} </text>
 
 {% endif %}{% endfor %}

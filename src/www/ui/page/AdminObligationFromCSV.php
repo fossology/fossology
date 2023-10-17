@@ -8,12 +8,12 @@
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Application\LicenseCsvImport;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Fossology\Lib\Application\LicenseCsvImport;
 
 /**
  * \brief Upload a file from the users computer using the UI.
@@ -51,6 +51,7 @@ class AdminObligationFromCSV extends DefaultPlugin
 
     $vars[self::KEY_UPLOAD_MAX_FILESIZE] = ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
     $vars['baseUrl'] = $request->getBaseUrl();
+    $vars['license_csv_import'] = false;
 
     return $this->render("admin_license_from_csv.html.twig", $this->mergeWithDefault($vars));
   }
