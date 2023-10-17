@@ -3,33 +3,36 @@
    SPDX-License-Identifier: FSFAP
 #}
 {{- fileName -}},SPDXRef-item{{- fileId -}},
-{%- if isCleared -%}
-{%- if concludedLicenses|default is empty -%}
+{%- if fileData.isCleared() -%}
+{%- if fileData.concludedLicenses|default is empty -%}
 NONE,
 {%- else -%}
-"{{- concludedLicense -}}",
+"{{- concludedLicensesString -}}",
 {%- endif -%}
 {%- else -%}
 NOASSERTION,
 {%- endif -%}
-{%- if licenseComment != null -%}
-"{{ licenseComment
-                                       |replace({ '\r\n': ' ', '\n': ' ', '\r': ' ' })
-                                       |replace({'\f':''})
-                                       |replace({'"':'""'}) }}"
+{%- if fileData.comments is not empty -%}
+"{{ fileData.comments|join('\n')
+|replace({ '\r\n': ' ', '\n': ' ', '\r': ' ' })
+|replace({'\f':'', '"':'""'}) }}"
 {%- endif -%},
-{%- if scannerLicenses|default is empty -%}
+{%- if fileData.scanners|default is empty -%}
 NOASSERTION,
 {%- else -%}
-"{{- scannerLicenses|join('AND')
-                    |replace({' ':'-'})
-                    |replace({'AND':' AND '}) -}}",
+"{% for res in fileData.scanners %}
+  {%- set licId=licenseList[res].licenseObj.spdxId %}
+  {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+    {% set licId=licenseList[res].licenseObj.shortName %}
+  {%- endif ~%}
+  {{ licId }}{% if res != fileData.scanners|last %} AND {% endif %}
+{% endfor %}",
 {%- endif -%}
-{%- if copyrights|default is empty -%}
+{%- if fileData.copyrights|default is empty -%}
 NOASSERTION
 {%- else -%}
-"{{- copyrights |join(';')
+"{{- fileData.copyrights|join(';')
                 |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
                 |replace({ '\r\n': ' ', '\n': ' ', '\r': ' ' })
                 |replace({'\f':''})
-                |replace({'"':'""'}) }}" {% endif %}                                    
+                |replace({'"':'""'}) }}"{% endif %}{{ "" }}

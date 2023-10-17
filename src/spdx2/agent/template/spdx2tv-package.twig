@@ -23,8 +23,8 @@ PackageChecksum: MD5: {{ md5 | lower }}
 PackageLicenseConcluded: NOASSERTION
 PackageLicenseDeclared: NOASSERTION
 {% else %}
-PackageLicenseConcluded: {{ mainLicense }}
-PackageLicenseDeclared: {{ mainLicense }}
+PackageLicenseConcluded: {{ mainLicenseString }}
+PackageLicenseDeclared: {{ mainLicenseString }}
 {% endif %}
 {% if licenseComments %}PackageLicenseComments: <text> {{ licenseComments|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'}) }} </text>
 {% endif %}

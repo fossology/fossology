@@ -7,12 +7,19 @@
 namespace Fossology\Lib\Report;
 
 use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\Dao\CopyrightDao;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\Report\FileNode;
+use Fossology\Lib\Data\Report\SpdxLicenseInfo;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
+use Fossology\Lib\Util\StringOperation;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 
@@ -38,6 +45,10 @@ class ReportUtils
    * UploadDao object
    */
   private $uploadDao;
+  /** @var LicenseDao $licenseDao
+   * LicenseDao object
+   */
+  private $licenseDao;
 
   function __construct()
   {
@@ -46,16 +57,17 @@ class ReportUtils
 
     $this->dbManager = $this->container->get('db.manager');
     $this->uploadDao = $this->container->get('dao.upload');
+    $this->licenseDao = $this->container->get('dao.license');
     $this->licenseMap = null;
   }
 
   /**
    * @brief Add clearing status to the files
-   * @param[in,out] string &$filesWithLicenses
+   * @param FileNode[] &$filesWithLicenses
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    */
-  public function addClearingStatus(&$filesWithLicenses,ItemTreeBounds $itemTreeBounds, $groupId)
+  public function addClearingStatus(&$filesWithLicenses, ItemTreeBounds $itemTreeBounds, $groupId)
   {
     $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
         array(UploadTreeProxy::OPT_SKIP_THESE => UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED,
@@ -70,19 +82,19 @@ class ReportUtils
 
     $uploadTreeIds = array_keys($filesWithLicenses);
     foreach ($uploadTreeIds as $uploadTreeId) {
-      $filesWithLicenses[$uploadTreeId]['isCleared'] = false === array_key_exists($uploadTreeId, $filesThatShouldStillBeCleared);
+      $filesWithLicenses[$uploadTreeId]->setIsCleared(false === array_key_exists($uploadTreeId, $filesThatShouldStillBeCleared));
     }
   }
 
   /**
    * @brief Attach finding agents to the files and return names of scanners
-   * @param[in,out] string &$filesWithLicenses
+   * @param FileNode[] &$filesWithLicenses
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
-   * @param[in,out] bool &$includedLicenseIds
+   * @param SpdxLicenseInfo[] &$licensesInDocument
    * @return array Name(s) of scanners used
    */
-  public function addScannerResults(&$filesWithLicenses, ItemTreeBounds $itemTreeBounds, $groupId, &$includedLicenseIds)
+  public function addScannerResults(&$filesWithLicenses, ItemTreeBounds $itemTreeBounds, $groupId, &$licensesInDocument)
   {
     if ($this->licenseMap === null) {
       $this->licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT, true);
@@ -93,7 +105,7 @@ class ReportUtils
     $scanJobProxy->createAgentStatus($scannerAgents);
     $scannerIds = $scanJobProxy->getLatestSuccessfulAgentIds();
     if (empty($scannerIds)) {
-      return "";
+      return [];
     }
     $tableName = $itemTreeBounds->getUploadTreeTableName();
     $stmt = __METHOD__ .'.scanner_findings';
@@ -106,28 +118,34 @@ class ReportUtils
       $stmt .= $tableName;
     }
     $sql .=  " GROUP BY uploadtree_pk,rf_fk";
-    $this->dbManager->prepare($stmt, $sql);
-    $res = $this->dbManager->execute($stmt,$param);
-    while ($row=$this->dbManager->fetchArray($res)) {
+    $rows = $this->dbManager->getRows($sql, $param, $stmt);
+    foreach ($rows as $row) {
       $reportedLicenseId = $this->licenseMap->getProjectedId($row['rf_fk']);
-      $shortName = $this->licenseMap->getProjectedShortname($reportedLicenseId);
-      $spdxId = $this->licenseMap->getProjectedSpdxId($reportedLicenseId);
-      if ($shortName != 'Void') {
-        if ($shortName != 'No_license_found') {
-          $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = $spdxId;
-        } else {
-          $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = "";
+      $foundLicense = $this->licenseDao->getLicenseById($reportedLicenseId);
+      if ($foundLicense !== null && $foundLicense->getShortName() != 'Void' &&
+          $foundLicense->getShortName() != 'No_license_found') {
+        $reportLicId =  "$reportedLicenseId-" . md5($foundLicense->getText());
+        $listedLicense = !StringOperation::stringStartsWith(
+          $foundLicense->getSpdxId(), LicenseRef::SPDXREF_PREFIX);
+
+        if (!array_key_exists($row['uploadtree_pk'], $filesWithLicenses)) {
+          $filesWithLicenses[$row['uploadtree_pk']] = new FileNode();
         }
-        $includedLicenseIds[$reportedLicenseId] = true;
+        $filesWithLicenses[$row['uploadtree_pk']]->addScanner($reportLicId);
+        if (!array_key_exists($reportLicId, $licensesInDocument)) {
+          $licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
+            ->setLicenseObj($foundLicense)
+            ->setCustomText(false)
+            ->setListedLicense($listedLicense);
+        }
       }
     }
-    $this->dbManager->freeResult($res);
     return $scannerIds;
   }
 
   /**
    * @brief Add copyright results to the files
-   * @param[in,out] string &$filesWithLicenses
+   * @param FileNode[] &$filesWithLicenses
    * @param int $uploadId
    */
   public function addCopyrightResults(&$filesWithLicenses, $uploadId)
@@ -155,10 +173,16 @@ class ReportUtils
     $allScannerEntries = $copyrightDao->getScannerEntries('copyright', $uploadtreeTable, $uploadId, $type='statement', $extrawhere);
     $allEditedEntries = $copyrightDao->getEditedEntries('copyright_decision', $uploadtreeTable, $uploadId, $decisionType=null);
     foreach ($allScannerEntries as $finding) {
-      $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = \convertToUTF8($finding['content'],false);
+      if (!array_key_exists($finding['uploadtree_pk'], $filesWithLicenses)) {
+        $filesWithLicenses[$finding['uploadtree_pk']] = new FileNode();
+      }
+      $filesWithLicenses[$finding['uploadtree_pk']]->addCopyright(\convertToUTF8($finding['content'],false));
     }
     foreach ($allEditedEntries as $finding) {
-      $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = \convertToUTF8($finding['textfinding'],false);
+      if (!array_key_exists($finding['uploadtree_pk'], $filesWithLicenses)) {
+        $filesWithLicenses[$finding['uploadtree_pk']] = new FileNode();
+      }
+      $filesWithLicenses[$finding['uploadtree_pk']]->addCopyright(\convertToUTF8($finding['textfinding'],false));
     }
   }
 

@@ -76,8 +76,7 @@ class ObligationsGetter
     foreach ($licenseWithoutObligations as $licenseWithoutObligation) {
       $license = $this->licenseDao->getLicenseById($licenseWithoutObligation);
       if (!empty($license)) {
-        $whiteLists[] = LicenseRef::convertToSpdxId($license->getShortName(),
-          $license->getSpdxId());
+        $whiteLists[] = $license->getSpdxId();
       }
     }
     $newobligations = $this->groupObligations($obligations, $uploadId);
