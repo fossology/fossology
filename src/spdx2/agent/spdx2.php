@@ -1,6 +1,6 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2015-2016 Siemens AG
+ SPDX-FileCopyrightText: © 2015-2016,2023 Siemens AG
  SPDX-FileCopyrightText: © 2017 TNG Technology Consulting GmbH
 
  SPDX-License-Identifier: GPL-2.0-only
@@ -49,13 +49,11 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Package\ComponentType;
 use Fossology\Lib\Data\Report\FileNode;
 use Fossology\Lib\Data\Report\SpdxLicenseInfo;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Report\LicenseClearedGetter;
@@ -331,7 +329,9 @@ class SpdxTwoAgent extends Agent
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $this->heartbeat(0);
 
-    $filesWithLicenses = $this->getFilesWithLicensesFromClearings($itemTreeBounds);
+    $filesWithLicenses = $this->reportutils
+      ->getFilesWithLicensesFromClearings($itemTreeBounds, $this->groupId,
+        $this, $this->licensesInDocument);
     $this->heartbeat(0);
 
     $this->reportutils->addClearingStatus($filesWithLicenses,$itemTreeBounds, $this->groupId);
@@ -445,89 +445,6 @@ class SpdxTwoAgent extends Agent
       'obligations' => $obligations,
       'licenseList' => $this->licensesInDocument
     ]);
-  }
-
-  /**
-   * @brief Given an ItemTreeBounds, get the files with clearings
-   * @param ItemTreeBounds $itemTreeBounds
-   * @return FileNode[] Mapping item->FileNode
-   */
-  protected function getFilesWithLicensesFromClearings(ItemTreeBounds $itemTreeBounds)
-  {
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
-
-    $filesWithLicenses = array();
-    $clearingsProceeded = 0;
-    foreach ($clearingDecisions as $clearingDecision) {
-      $clearingsProceeded += 1;
-      if (($clearingsProceeded&2047)==0) {
-        $this->heartbeat(0);
-      }
-      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
-        continue;
-      }
-
-      foreach ($clearingDecision->getClearingEvents() as $clearingEvent) {
-        $clearingLicense = $clearingEvent->getClearingLicense();
-        if ($clearingLicense->isRemoved()) {
-          continue;
-        }
-
-        if (!array_key_exists($clearingDecision->getUploadTreeId(),
-          $filesWithLicenses)) {
-          $filesWithLicenses[$clearingDecision->getUploadTreeId()] = new FileNode();
-        }
-
-        /* ADD COMMENT */
-        $filesWithLicenses[$clearingDecision->getUploadTreeId()]
-          ->addComment($clearingLicense->getComment());
-        /* ADD Acknowledgement */
-        $filesWithLicenses[$clearingDecision->getUploadTreeId()]
-          ->addAcknowledgement($clearingLicense->getAcknowledgement());
-        if ($clearingEvent->getReportinfo()) {
-          $customLicenseText = $clearingEvent->getReportinfo();
-          $reportedLicenseShortname = $this->licenseMap->getProjectedSpdxId($this->licenseMap->getProjectedId($clearingLicense->getLicenseId())) .
-                                    '-' . md5($customLicenseText);
-          $reportedLicenseShortname = LicenseRef::convertToSpdxId($reportedLicenseShortname, "");
-
-          $reportedLicenseId = $this->licenseMap
-            ->getProjectedId($clearingLicense->getLicenseId());
-
-          $reportLicId =  "$reportedLicenseId-" . md5($customLicenseText);
-          $filesWithLicenses[$clearingDecision->getUploadTreeId()]
-            ->addConcludedLicense($reportLicId);
-          if (!array_key_exists($reportLicId, $this->licensesInDocument)) {
-            $license = $this->licenseDao->getLicenseById($reportedLicenseId);
-            $licenseObj = new License($license->getId(),
-              $reportedLicenseShortname, $license->getFullName(),
-              $license->getRisk(), $customLicenseText, $license->getUrl(),
-              $license->getDetectorType(), $license->getSpdxId());
-            $this->licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
-              ->setLicenseObj($licenseObj)
-              ->setCustomText(true)
-              ->setListedLicense(false);
-          }
-        } else {
-          $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
-          $concludedLicense = $this->licenseDao
-            ->getLicenseById($reportedLicenseId);
-          $reportLicId = $concludedLicense->getId() . "-" .
-            md5($concludedLicense->getText());
-          $filesWithLicenses[$clearingDecision->getUploadTreeId()]
-            ->addConcludedLicense($reportLicId);
-          if (!array_key_exists($reportLicId, $this->licensesInDocument)) {
-            $licenseObj = $this->licenseDao->getLicenseById($reportedLicenseId);
-            $listedLicense = stripos($licenseObj->getSpdxId(),
-                LicenseRef::SPDXREF_PREFIX) !== 0;
-            $this->licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
-              ->setLicenseObj($licenseObj)
-              ->setCustomText(false)
-              ->setListedLicense($listedLicense);
-          }
-        }
-      }
-    }
-    return $filesWithLicenses;
   }
 
   /**
