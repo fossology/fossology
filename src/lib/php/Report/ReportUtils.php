@@ -6,17 +6,20 @@
 */
 namespace Fossology\Lib\Report;
 
+use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Report\FileNode;
 use Fossology\Lib\Data\Report\SpdxLicenseInfo;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Proxy\LicenseViewProxy;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Util\StringOperation;
@@ -49,6 +52,11 @@ class ReportUtils
    * LicenseDao object
    */
   private $licenseDao;
+  /**
+   * @var ClearingDao $clearingDao
+   * ClearingDao object
+   */
+  private $clearingDao;
 
   function __construct()
   {
@@ -58,6 +66,7 @@ class ReportUtils
     $this->dbManager = $this->container->get('db.manager');
     $this->uploadDao = $this->container->get('dao.upload');
     $this->licenseDao = $this->container->get('dao.license');
+    $this->clearingDao = $this->container->get('dao.clearing');
     $this->licenseMap = null;
   }
 
@@ -82,6 +91,9 @@ class ReportUtils
 
     $uploadTreeIds = array_keys($filesWithLicenses);
     foreach ($uploadTreeIds as $uploadTreeId) {
+      if (!array_key_exists($uploadTreeId, $filesWithLicenses)) {
+        $filesWithLicenses[$uploadTreeId] = new FileNode();
+      }
       $filesWithLicenses[$uploadTreeId]->setIsCleared(false === array_key_exists($uploadTreeId, $filesThatShouldStillBeCleared));
     }
   }
@@ -187,44 +199,89 @@ class ReportUtils
   }
 
   /**
-   * @brief Get the license texts from fossology
+   * @brief Given an ItemTreeBounds, get the files with clearings
+   * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
-   * @param[in,out] bool &$includedLicenseIds
-   * @return string[] with keys being shortname
+   * @param Agent $agentObj
+   * @param SpdxLicenseInfo[] &$licensesInDocument
+   * @return FileNode[] Mapping item->FileNode
    */
-  public function getLicenseTexts($groupId, &$includedLicenseIds)
+  public function getFilesWithLicensesFromClearings(
+    ItemTreeBounds $itemTreeBounds, $groupId, $agentObj, &$licensesInDocument)
   {
-    $licenseTexts = array();
-    $licenseViewProxy = new LicenseViewProxy($groupId,
-      [LicenseViewProxy::OPT_COLUMNS => [
-        'rf_pk','rf_shortname','rf_spdx_id','rf_fullname','rf_text','rf_url'
-      ]]);
-    $this->dbManager->prepare($stmt=__METHOD__, $licenseViewProxy->getDbViewQuery());
-    $res = $this->dbManager->execute($stmt);
+    if ($this->licenseMap === null) {
+      $this->licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT, true);
+    }
 
-    while ($row = $this->dbManager->fetchArray($res)) {
-      if (array_key_exists($row['rf_pk'], $includedLicenseIds)) {
-        $shortname = $row['rf_shortname'];
-        $spdxId = LicenseRef::convertToSpdxId($shortname, $row['rf_spdx_id']);
-        $licenseTexts[$spdxId] = [
-          'text' => $row['rf_text'],
-          'name' => $row['rf_fullname'] ?: $shortname,
-          'id'   => $spdxId,
-          'url'  => $row['rf_url']
-        ];
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+
+    $filesWithLicenses = array();
+    $clearingsProceeded = 0;
+    foreach ($clearingDecisions as $clearingDecision) {
+      $clearingsProceeded += 1;
+      if (($clearingsProceeded&2047)==0) {
+        $agentObj->heartbeat(0);
+      }
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
+        continue;
+      }
+
+      foreach ($clearingDecision->getClearingEvents() as $clearingEvent) {
+        $clearingLicense = $clearingEvent->getClearingLicense();
+        if ($clearingLicense->isRemoved()) {
+          continue;
+        }
+
+        if (!array_key_exists($clearingDecision->getUploadTreeId(),
+          $filesWithLicenses)) {
+          $filesWithLicenses[$clearingDecision->getUploadTreeId()] = new FileNode();
+        }
+
+        /* ADD COMMENT */
+        $filesWithLicenses[$clearingDecision->getUploadTreeId()]
+          ->addComment($clearingLicense->getComment());
+        /* ADD Acknowledgement */
+        $filesWithLicenses[$clearingDecision->getUploadTreeId()]
+          ->addAcknowledgement($clearingLicense->getAcknowledgement());
+        $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
+        $concludedLicense = $this->licenseDao->getLicenseById($reportedLicenseId);
+        if ($clearingEvent->getReportinfo()) {
+          $customLicenseText = $clearingEvent->getReportinfo();
+          $reportedLicenseShortname = $concludedLicense->getShortName() . '-' .
+            md5($customLicenseText);
+          $reportedLicenseShortname = LicenseRef::convertToSpdxId($reportedLicenseShortname, "");
+
+          $reportLicId = "$reportedLicenseId-" . md5($customLicenseText);
+          $filesWithLicenses[$clearingDecision->getUploadTreeId()]
+            ->addConcludedLicense($reportLicId);
+          if (!array_key_exists($reportLicId, $licensesInDocument)) {
+            $licenseObj = new License($concludedLicense->getId(),
+              $reportedLicenseShortname, $concludedLicense->getFullName(),
+              $concludedLicense->getRisk(), $customLicenseText,
+              $concludedLicense->getUrl(), $concludedLicense->getDetectorType(),
+              $concludedLicense->getSpdxId());
+            $licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
+              ->setLicenseObj($licenseObj)
+              ->setCustomText(true)
+              ->setListedLicense(false);
+          }
+        } else {
+          $reportLicId = $concludedLicense->getId() . "-" .
+            md5($concludedLicense->getText());
+          $filesWithLicenses[$clearingDecision->getUploadTreeId()]
+            ->addConcludedLicense($reportLicId);
+          if (!array_key_exists($reportLicId, $licensesInDocument)) {
+            $licenseObj = $this->licenseDao->getLicenseById($reportedLicenseId);
+            $listedLicense = stripos($licenseObj->getSpdxId(),
+                LicenseRef::SPDXREF_PREFIX) !== 0;
+            $licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
+              ->setLicenseObj($licenseObj)
+              ->setCustomText(false)
+              ->setListedLicense($listedLicense);
+          }
+        }
       }
     }
-    foreach ($includedLicenseIds as $license => $customText) {
-      if (true !== $customText) {
-        $licenseTexts[$license] = [
-          'text' => $customText,
-          'name' => $license,
-          'id'   => $license,
-          'url'  => ''
-        ];
-      }
-    }
-    $this->dbManager->freeResult($res);
-    return $licenseTexts;
+    return $filesWithLicenses;
   }
 }
