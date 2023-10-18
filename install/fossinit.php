@@ -465,7 +465,7 @@ exit($errors);
  *
  * \param $tableName
  **/
-function insertInToLicenseRefTableUsingJson($tableName)
+function insertInToLicenseRefTableUsingJson($tableName): int
 {
   global $LIBEXECDIR;
   global $dbManager;
@@ -539,7 +539,7 @@ function insertInToLicenseRefTableUsingJson($tableName)
  *
  * \return 0 on success, 1 on failure
  **/
-function initLicenseRefTable($Verbose)
+function initLicenseRefTable($Verbose): int
 {
   /**
    * @var DbManager $dbManager
@@ -721,7 +721,7 @@ function isLicenseExists($dbManager, $rf_shortname, $isCandidate = true)
  * @param array $candidateLicense Shortname of the license to check
  * @return integer License ID
  */
-function mergeCandidateLicense($dbManager, $candidateLicense)
+function mergeCandidateLicense($dbManager, $candidateLicense): int
 {
   $mainLicense = isLicenseExists($dbManager, $candidateLicense['rf_shortname'],
     false);
@@ -782,7 +782,7 @@ function mergeCandidateLicense($dbManager, $candidateLicense)
  *        (required for rf_pk)
  * @return integer New license ID
  */
-function insertNewLicense($dbManager, $license, $wasCandidate = false)
+function insertNewLicense($dbManager, $license, $wasCandidate = false): int
 {
   $insertStatement = __METHOD__ . ".insertNewLicense";
   $sql = "INSERT INTO license_ref (";

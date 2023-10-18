@@ -24,7 +24,7 @@ require_once 'fossinit-common.php';
  * Check if current user is root or fossy
  * @returns True if user can access the files, false otherwise.
  */
-function checkCorrectUser()
+function checkCorrectUser(): bool
 {
   $processUser = posix_getpwuid(posix_geteuid());
   if ($processUser['uid'] !== 0 && $processUser['name'] != "@FO_PROJECTUSER@") {

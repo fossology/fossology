@@ -39,7 +39,7 @@ $GLOBALS['MIG_4041_TOTAL_RECORDS'] = 0;
  * @param DbManager $dbManager
  * @return boolean True if migration is required, false otherwise
  */
-function checkMigrate4041Required($dbManager)
+function checkMigrate4041Required($dbManager): bool
 {
   global $MIG_4041_TOTAL_RECORDS;
   if ($dbManager == NULL) {

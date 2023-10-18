@@ -20,7 +20,7 @@
  *
  * \return int 0 on success, 1 on failure
  **/
-function Migrate_20_25($Verbose)
+function Migrate_20_25($Verbose): int
 {
   global $PG_CONN;
 

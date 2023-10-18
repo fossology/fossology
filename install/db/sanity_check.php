@@ -41,7 +41,7 @@ class SanityChecker
    *
    * @return int error code; 0 on success
    */
-  public function check()
+  public function check(): int
   {
     $this->checkDecisionScopes();
     $this->checkUploadStatus();
@@ -93,7 +93,7 @@ class SanityChecker
    * @param array $map using keys
    * @return int
    */
-  private function checkDatabaseEnum($tablename,$columnname,$map)
+  private function checkDatabaseEnum($tablename,$columnname,$map): int
   {
     $errors = 0;
     $stmt = __METHOD__.".$tablename.$columnname";
@@ -121,7 +121,7 @@ class SanityChecker
    * @param string $tableName Name of table to be checked
    * @return int
    */
-  private function checkExistsTable($tableName)
+  private function checkExistsTable($tableName): int
   {
     $error = intval(!$this->dbManager->existsTable($tableName));
     if($error){
