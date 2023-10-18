@@ -50,10 +50,10 @@ use Fossology\Lib\Db\DbManager;
  * \param int $folder_pk     The folder to contain this upload
  * \param int $public_perm   The public permission on this upload
  *
- * \return upload_pk or null (failure).
+ * \return ?int upload_pk or null (failure).
  *         On failure, error is written to stdout
  */
-function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=Auth::PERM_NONE, $setGlobal=0)
+function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=Auth::PERM_NONE, $setGlobal=0): ?int
 {
   global $container;
 
@@ -61,7 +61,7 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
   /* check all required inputs */
   if (empty($userId) || empty($job_name) || empty($filename) ||
       empty($UploadMode) || empty($folder_pk)) {
-        return;
+        return null;
   }
 
   $row = $dbManager->getSingleRow("INSERT INTO upload
@@ -108,7 +108,7 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
  *
  * @return int $job_pk the job primary key
  */
-function JobAddJob($userId, $groupId, $job_name, $upload_pk=0, $priority=0)
+function JobAddJob($userId, $groupId, $job_name, $upload_pk=0, $priority=0): int
 {
   global $container;
 
@@ -371,11 +371,11 @@ function QueueUploadsOnDelagents($upload_pk_list)
  * \param int    $job_pk    The job to be checked
  * \param string $AgentName The agent name (from agent.agent_name)
  *
- * \return
+ * \return int
  * jq_pk of scheduled jobqueue
  * or 0 = not scheduled
  */
-function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
+function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk): int
 {
   global $PG_CONN;
 
@@ -425,12 +425,12 @@ function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
  *         Typically, this will just be array(agent_adj2nest).
  * \param string $jqargs (optional) jobqueue.jq_args
  *
- * \returns
+ * \returns int
  * - jq_pk Successfully queued
  * -   0   Not queued, latest version of agent has previously run successfully
  * -  -1   Not queued, error, error string in $ErrorMsg
  **/
-function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $jqargs = "", $jq_cmd_args = NULL)
+function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $jqargs = "", $jq_cmd_args = NULL): int
 {
   global $Plugins;
   $Deps = array();
@@ -495,7 +495,7 @@ function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies,
  *
  * @return int jq_pk of scheduled jobqueue or 0 = not scheduled
  */
-function isAlreadyRunning($agentName, $upload_pk)
+function isAlreadyRunning($agentName, $upload_pk): int
 {
   global $PG_CONN;
 

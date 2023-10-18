@@ -17,7 +17,7 @@ use Fossology\Lib\Db\DbManager;
  * @param int $mode File mode (as octal integer)
  * @return boolean True if is a directory, false otherwise.
  */
-function Isdir($mode)
+function Isdir($mode): bool
 {
   return (($mode & 1 << 18) + ($mode & 0040000) != 0);
 }
@@ -26,7 +26,7 @@ function Isdir($mode)
  * @param int $mode File mode (as octal integer)
  * @return boolean True if is an artifact, false otherwise.
  */
-function Isartifact($mode)
+function Isartifact($mode): bool
 {
   return (($mode & 1 << 28) != 0);
 }
@@ -35,7 +35,7 @@ function Isartifact($mode)
  * @param int $mode File mode (as octal integer)
  * @return boolean True if is a container, false otherwise.
  */
-function Iscontainer($mode)
+function Iscontainer($mode): bool
 {
   return (($mode & 1 << 29) != 0);
 }
@@ -47,7 +47,7 @@ function Iscontainer($mode)
  *
  * \return String of dir mode
  */
-function DirMode2String($Mode)
+function DirMode2String($Mode): string
 {
   $V="";
   if (Isartifact($Mode)) {
@@ -155,7 +155,7 @@ $DirGetNonArtifact_Prepared=0;
  *
  * \return The first non-artifact directory uploadtree_pk
  */
-function DirGetNonArtifact($UploadtreePk, $uploadtree_tablename='uploadtree')
+function DirGetNonArtifact($UploadtreePk, $uploadtree_tablename='uploadtree'): int
 {
   $Children = array();
 
@@ -202,7 +202,7 @@ function DirGetNonArtifact($UploadtreePk, $uploadtree_tablename='uploadtree')
  *         <0 less than \n
  *         >0 greater than
  */
-function _DirCmp($a,$b)
+function _DirCmp($a,$b): int
 {
   return(strcasecmp($a['ufile_name'],$b['ufile_name']));
 } // _DirCmp()
@@ -219,7 +219,7 @@ function _DirCmp($a,$b)
  *         $uploadtree_pk and its parents.
  *         The path begins with the uploadtree_pk record.
  */
-function Dir2Path($uploadtree_pk, $uploadtree_tablename='uploadtree')
+function Dir2Path($uploadtree_pk, $uploadtree_tablename='uploadtree'): array
 {
   global $PG_CONN;
 
@@ -261,7 +261,7 @@ function Dir2Path($uploadtree_pk, $uploadtree_tablename='uploadtree')
  * \return string of browse paths
  */
 function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
-$ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtree_tablename="uploadtree")
+$ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtree_tablename="uploadtree"): string
 {
   $V = "";
   if ($ShowBox) {
@@ -371,7 +371,7 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
  *
  * \return string of browse paths
  */
-function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMicro=NULL, $uploadtree_tablename='uploadtree')
+function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMicro=NULL, $uploadtree_tablename='uploadtree'): string
 {
   global $PG_CONN;
   /* Find the file associated with the upload */
@@ -400,7 +400,7 @@ function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMic
  *
  * \return String containing the listing.
  */
-function Dir2FileList    (&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowPhrase=0)
+function Dir2FileList    (&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowPhrase=0): string
 {
   $LastPfilePk = -1;
   $V = "";
@@ -451,7 +451,7 @@ function Dir2FileList    (&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $Sh
  *
  * \return string containing the listing.
  */
-function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowPhrase=0)
+function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowPhrase=0): string
 {
   $LastPfilePk = -1;
   $V = "";

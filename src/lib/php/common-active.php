@@ -16,7 +16,7 @@
  * The new url is url+val
  * e.g. js_url(this.value, "http:me?val=")
  **/
-function js_url()
+function js_url(): string
 {
   $script = "
     <script type=\"text/javascript\">
@@ -42,7 +42,7 @@ function js_url()
  *
  * \return The html to display (with embeded javascript)
  */
-function displayMessage($Message, $keep = null)
+function displayMessage($Message, $keep = null): string
 {
 
   $HTML = null;
@@ -88,7 +88,7 @@ function displayMessage($Message, $keep = null)
  *
  * \see References: http://www.w3schools.com/xml/xml_http.asp
  */
-function ActiveHTTPscript($RequestName,$IncludeScriptTags=1)
+function ActiveHTTPscript($RequestName,$IncludeScriptTags=1): string
 {
   $HTML="";
 

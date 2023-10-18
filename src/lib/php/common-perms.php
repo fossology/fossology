@@ -19,7 +19,7 @@ use Fossology\Lib\Auth\Auth;
    @return Array of upload_pks for all the uploads in this
            folder (and subfolders).
    ***********************************************************/
-function GetUploadsFromFolder($folder_pk)
+function GetUploadsFromFolder($folder_pk): array
 {
   $uploads = array();
   if (empty($folder_pk)) {
@@ -111,7 +111,7 @@ function AddUserToGroupArray($GroupRow, &$GroupArray)
    *  -  [group_name]
    *  -  [group_perm]
    **/
-function GetGroupUsers($user_pk, $group_pk, &$GroupArray)
+function GetGroupUsers($user_pk, $group_pk, &$GroupArray): ?array
 {
   global $PG_CONN;
   $GroupArray = array();
@@ -147,7 +147,7 @@ function GetGroupUsers($user_pk, $group_pk, &$GroupArray)
    *  -  [group_name]
    *  -  [group_perm]
    **/
-function GetUsersGroups($user_pk='')
+function GetUsersGroups($user_pk=''): array
 {
   global $PG_CONN;
 
@@ -179,7 +179,7 @@ function GetUsersGroups($user_pk='')
    * @return Array in the format {group_pk=>group_name, group_pk=>group_name, ...}
    *         Array may be empty.
    **/
-function GetGroupArray($user_pk)
+function GetGroupArray($user_pk): array
 {
   global $PG_CONN;
 
@@ -210,7 +210,7 @@ function GetGroupArray($user_pk)
    * \param int $group_pk Group to be deleted
    * \returns NULL on success, string on failure.
    */
-function DeleteGroup($group_pk)
+function DeleteGroup($group_pk): ?string
 {
   global $PG_CONN;
 

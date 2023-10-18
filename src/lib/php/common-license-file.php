@@ -27,7 +27,7 @@
  * LicArray[rf_pk] = rf_shortname if $duplicate is NULL\n
  * FATAL if neither pfile_pk or uploadtree_pk were passed in
  */
-function GetFileLicenses($agent, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree', $duplicate="")
+function GetFileLicenses($agent, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree', $duplicate=""): array
 {
   global $PG_CONN;
 
@@ -95,7 +95,7 @@ function GetFileLicenses($agent, $pfile_pk, $uploadtree_pk, $uploadtree_tablenam
  * \return Licenses string for specified file
  * \see GetFileLicenses()
  */
-function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree')
+function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree'): string
 {
   $LicStr = "";
   $LicArray = GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename);
@@ -213,7 +213,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
  *
  * \returns Array of uploadtree_pk ==> ufile_name
  */
-function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=false, $uploadtree_tablename="uploadtree")
+function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=false, $uploadtree_tablename="uploadtree"): array
 {
   $pkarray = array();
 
@@ -271,7 +271,7 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
  *
  * \returns String containing the links [View][Info][Download][Tag {tags}]
  */
-function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=True, &$UniqueTagArray = array(), $uploadtree_tablename = "uploadtree", $wantTags=true)
+function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=True, &$UniqueTagArray = array(), $uploadtree_tablename = "uploadtree", $wantTags=true): string
 {
   $LinkStr = "";
   global $SysConf;

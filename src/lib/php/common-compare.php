@@ -20,7 +20,7 @@
  *
  * \return fuzzyname string
  */
-function FuzzyCmp($Master1, $Master2)
+function FuzzyCmp($Master1, $Master2): int
 {
   $key1 = empty($Master1[1]) ? 2 : 1;
   $str1 = $Master1[$key1]['fuzzyname'];
@@ -44,7 +44,7 @@ function FuzzyCmp($Master1, $Master2)
  *
  * \return master array with aligned children
  */
-function MakeMaster($Children1, $Children2)
+function MakeMaster($Children1, $Children2): array
 {
   $Master = array();
   $row =  -1;   // Master row number
@@ -175,7 +175,7 @@ function FileList(&$Master, $agent_pk1, $agent_pk2, $filter, $plugin, $uploadtre
  *
  * \return The link for one side of a diff element
  */
-function GetDiffLink($MasterRow, $side, $agent_pk, $filter, $plugin, $ModLicView, $uploadtree_pk1, $uploadtree_pk2)
+function GetDiffLink($MasterRow, $side, $agent_pk, $filter, $plugin, $ModLicView, $uploadtree_pk1, $uploadtree_pk2): string
 {
   /* calculate opposite side number */
   if ($side == 1) {
@@ -253,7 +253,7 @@ function GetDiffLink($MasterRow, $side, $agent_pk, $filter, $plugin, $ModLicView
  *
  * @return int  New uploadtree_pk in Tree B
  */
-function NextUploadtree_pk($A_pk, $B_pk)
+function NextUploadtree_pk($A_pk, $B_pk): int
 {
   global $PG_CONN;
 
@@ -333,7 +333,7 @@ function FuzzyName(&$Children)
  * \param int    $Column Which path is being emitted, column 1 or 2
  * \param Plugin $plugin Plugin pointer of the caller ($this)
  ************************************************************/
-function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column, $plugin)
+function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column, $plugin): string
 {
   if ((count($Path1) < 1) || (count($Path2) < 1)) {
     return "No path specified";

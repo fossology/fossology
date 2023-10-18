@@ -34,9 +34,9 @@ function siteminder_check()
  * \brief Check if the external HTTP authentication is enabled.
  *  The mapping variables should be configured in fossology.conf
  *  Usernames are forced lowercase.
- * \return false if not enabled
+ * \return array|false false if not enabled
  */
-function auth_external_check()
+function auth_external_check(): array|false
 {
   $EXT_AUTH_ENABLE = false;
   if (array_key_exists('EXT_AUTH', $GLOBALS['SysConf'])) {
@@ -184,7 +184,7 @@ function account_check(&$user, &$passwd, &$group = "")
  *
  * \return 1: has the permission; 0: no permission
  */
-function read_permission($upload, $user)
+function read_permission($upload, $user): int
 {
   $ADMIN_PERMISSION = 10;
   $dbManager = $GLOBALS['container']->get('db.manager');
@@ -225,7 +225,7 @@ function read_permission($upload, $user)
  * Check if the password policy has been enabled
  * @return boolean
  */
-function passwordPolicyEnabled()
+function passwordPolicyEnabled(): bool
 {
   $sysconfig = $GLOBALS['SysConf']['SYSCONFIG'];
   if (! array_key_exists('PasswdPolicy', $sysconfig) ||
@@ -239,7 +239,7 @@ function passwordPolicyEnabled()
  * Generate the password policy regex from sysconfig
  * @return string Regex based on policy selected
  */
-function generate_password_policy()
+function generate_password_policy(): string
 {
   $sysconfig = $GLOBALS['SysConf']['SYSCONFIG'];
   if (! passwordPolicyEnabled()) {
@@ -282,7 +282,7 @@ function generate_password_policy()
  * Translate selected password policy into user understandable string
  * @return string
  */
-function generate_password_policy_string()
+function generate_password_policy_string(): string
 {
   $sysconfig = $GLOBALS['SysConf']['SYSCONFIG'];
   if (! passwordPolicyEnabled()) {

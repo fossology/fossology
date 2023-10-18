@@ -86,7 +86,7 @@ function GetParm($parameterName, $parameterType)
 /**
  * \brief Get the URI + query to this location.
  */
-function Traceback()
+function Traceback(): string
 {
   return(@$_SERVER['REQUEST_URI']);
 } // Traceback()
@@ -94,7 +94,7 @@ function Traceback()
 /**
  * \brief Get the URI without query to this location.
  */
-function Traceback_uri()
+function Traceback_uri(): string
 {
   $V = explode('?',@$_SERVER['REQUEST_URI'],2);
   return($V[0]);
@@ -106,7 +106,7 @@ function Traceback_uri()
  * If ShowMod is set, then the module name is included.
  * Else, this begins with the first parameter.
  */
-function Traceback_parm($ShowMod=1)
+function Traceback_parm($ShowMod=1): string
 {
   $V = explode('?',@$_SERVER['REQUEST_URI'],2);
   /* need to check the size to avoid accessing past the array, there are
@@ -133,7 +133,7 @@ function Traceback_parm($ShowMod=1)
  *
  * \param array $List Array of parameter names
  */
-function Traceback_parm_keep($List)
+function Traceback_parm_keep($List): string
 {
   $Opt="";
   $Max = count($List);
@@ -150,7 +150,7 @@ function Traceback_parm_keep($List)
 /**
  * \brief Get the directory of the URI without query.
  */
-function Traceback_dir()
+function Traceback_dir(): string
 {
   $V = explode('?',@$_SERVER['REQUEST_URI'],2);
   $V = $V[0];
@@ -165,7 +165,7 @@ function Traceback_dir()
 /**
  * \brief Get the total url without query
  */
-function tracebackTotalUri()
+function tracebackTotalUri(): string
 {
   if (! empty(@$_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' &&
     $_SERVER['HTTPS'] == 'on' || @$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {

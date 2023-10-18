@@ -36,7 +36,7 @@
  *                $UserCacheStat = 0;  `// default, don't know`
  */
 
-function ReportCacheGet($CacheKey)
+function ReportCacheGet($CacheKey): ?string
 {
   global $PG_CONN;
   global $UserCacheStat;
@@ -58,7 +58,7 @@ function ReportCacheGet($CacheKey)
     pg_free_result($result);
     if (! empty($row['cache_on']) && ($result['cache_on'] == 'N')) {
       $UserCacheStat = 2;
-      return; /* cache is off for this user */
+      return null; /* cache is off for this user */
     }
   }
 
@@ -76,7 +76,7 @@ function ReportCacheGet($CacheKey)
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
   if ($row == false) {
-    return;
+    return null;
   }
   $cashedvalue = $row['report_cache_value'];
   pg_free_result($result);
@@ -196,7 +196,7 @@ function ReportCachePurgeByUpload($UploadPK)
  *
  * \return Error message
  */
-function ReportCachePurgeByKey($CacheKey)
+function ReportCachePurgeByKey($CacheKey): string
 {
   global $PG_CONN;
   $ParsedURI = array();

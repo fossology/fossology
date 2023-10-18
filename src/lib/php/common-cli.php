@@ -22,7 +22,7 @@
  *
  * \return true
  */
-function cli_Init()
+function cli_Init(): bool
 {
   // every cli must perform these steps
   global $Plugins;
@@ -60,7 +60,7 @@ function cli_Init()
  *
  * \return null on success, string for failure
  */
-function cli_logger($handle, $message, $mode='a')
+function cli_logger($handle, $message, $mode='a'): ?string
 {
   $message .= "\n";
   $FR = fopen($handle, $mode) or

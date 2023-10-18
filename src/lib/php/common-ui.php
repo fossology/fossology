@@ -29,7 +29,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  * \return A string of select HTML
  */
 function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "",
-$FirstEmpty=false, $SelElt=true, $Options="", $ReturnKey=true)
+$FirstEmpty=false, $SelElt=true, $Options="", $ReturnKey=true): string
 {
   $str ="\n<select name='$SLName' $Options>\n";
   if ($FirstEmpty == true) {
@@ -96,7 +96,7 @@ function debugprint($val, $title)
  * \brief Translate a byte number to a proper type, xxx bytes to xxx B/KB/MB/GB/TB/PB
  * \param int $bytes Bytes to be converted
  */
-function HumanSize( $bytes )
+function HumanSize( $bytes ): string
 {
   foreach (array('B','KB','MB','GB','TB') as $unit) {
     if ($bytes < 1024) {
@@ -114,7 +114,7 @@ function HumanSize( $bytes )
  *
  * \return The file extension of the specified file name
  */
-function GetFileExt($fname)
+function GetFileExt($fname): string
 {
   $extpos = strrpos($fname, '.') + 1;
   $extension = strtolower(substr($fname, $extpos));
@@ -147,7 +147,7 @@ function GetArrayVal($Key, $Arr)
  *
  * \return Return HTML of the host name tree
  */
-function HostListOption()
+function HostListOption(): string
 {
   global $SysConf;
   $options = "";
@@ -169,9 +169,9 @@ function HostListOption()
  * \param string $name File name
  * \param string $contentType Download file Content-Type
  *
- * \return True on success, error message on failure.
+ * \return bool|string true on success, error message on failure.
  */
-function DownloadString2File($text, $name, $contentType)
+function DownloadString2File($text, $name, $contentType): bool|string
 {
   $connstat = connection_status();
   if ($connstat != 0) {
@@ -222,9 +222,9 @@ function GetUploadtreeTableName($upload_pk)
  *
  * \param int $upload_id Upload ID
  *
- * \return Upload name, "" if upload does not exists
+ * \return string Upload name, "" if upload does not exists
  */
-function GetUploadName($upload_pk)
+function GetUploadName($upload_pk): string
 {
   if (empty($upload_pk)) {
     return "";
@@ -285,7 +285,7 @@ function Get1stUploadtreeID($upload)
  * \brief Convert the server time to browser time
  * \param time $server_time to be converted
  */
-function Convert2BrowserTime($server_time)
+function Convert2BrowserTime($server_time): string
 {
   $server_timezone = date_default_timezone_get();
   $browser_time = new \DateTime($server_time, new \DateTimeZone($server_timezone));

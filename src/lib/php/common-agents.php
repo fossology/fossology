@@ -37,7 +37,7 @@
  *
  * \return string containing formatted checkbox list HTML
  */
-function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username = "")
+function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username = ""): string
 {
 
   global $Plugins;
@@ -118,7 +118,7 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
  * \param int $job_pk    Job ID
  * \param int $upload_pk Upload ID
  */
-function AgentCheckBoxDo($job_pk, $upload_pk)
+function AgentCheckBoxDo($job_pk, $upload_pk): ?string
 {
   $agents = checkedAgents();
   return AgentSchedule($job_pk, $upload_pk, $agents);
@@ -134,7 +134,7 @@ function AgentCheckBoxDo($job_pk, $upload_pk)
  *
  * \return null|string null on success or error message [sic]
  */
-function AgentSchedule($jobId, $uploadId, $agents)
+function AgentSchedule($jobId, $uploadId, $agents): ?string
 {
   $errorMsg = "";
   foreach ($agents as &$agent) {
@@ -154,7 +154,7 @@ function AgentSchedule($jobId, $uploadId, $agents)
  *        associated with the upload
  * \return Array of dependencies
  */
-function FindDependent($UploadPk, $list=NULL)
+function FindDependent($UploadPk, $list=NULL): array
 {
   /*
    * Find the jobs that fo_notify should depend on. fo_notify is
@@ -220,7 +220,7 @@ function FindDependent($UploadPk, $list=NULL)
  *
  * \return -1 or agent_pk
  */
-function GetAgentKey($agentName, $agentDesc)
+function GetAgentKey($agentName, $agentDesc): int
 {
   global $PG_CONN;
 
@@ -288,7 +288,7 @@ function AgentARSList($TableName, $upload_pk, $limit=1, $agent_fk=0, $ExtraWhere
  *
  * \returns Nomos agent_pk or 0 if none
  */
-function LatestAgentpk($upload_pk, $arsTableName, $arsSuccess = false)
+function LatestAgentpk($upload_pk, $arsTableName, $arsSuccess = false): int
 {
   $AgentRec = AgentARSList($arsTableName, $upload_pk, 1, 0, $arsSuccess);
 
@@ -317,7 +317,7 @@ function LatestAgentpk($upload_pk, $arsTableName, $arsSuccess = false)
  *
  * \return Agent select list, when only one data, return null
  */
-function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
+function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = ""): ?string
 {
   global $PG_CONN;
   /* get the agent recs */
@@ -330,7 +330,7 @@ function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
   $NumRows = pg_num_rows($result);
   if ($NumRows == 1) { // only one result
     pg_free_result($result);
-    return;  /* only one result */
+    return null;  /* only one result */
   }
 
   $select = "<select name='$SLName' id='$SLName' $extra>";
@@ -358,7 +358,7 @@ function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
  *
  * \return String $agentsChecked list of checked agents
  */
-function userAgents($agents=null)
+function userAgents($agents=null): string
 {
   return implode(',', array_keys(checkedAgents($agents)));
 }
@@ -369,7 +369,7 @@ function userAgents($agents=null)
  *
  * \return Plugin[] list of checked agent plugins, mapped by name
  */
-function checkedAgents($agents=null)
+function checkedAgents($agents=null): array
 {
   $agentsChecked = array();
   $agentList = listAgents();
@@ -394,7 +394,7 @@ function checkedAgents($agents=null)
  *
  * \return Plugin[] list of checked agent plugins, mapped by name
  */
-function listAgents()
+function listAgents(): array
 {
   $agents = array();
 
@@ -429,7 +429,7 @@ function listAgents()
  * - 1 = yes, from latest agent version
  * - 2 = yes, from older agent version (does not apply to adj2nest)
  */
-function CheckARS($upload_pk, $AgentName, $AgentDesc, $AgentARSTableName)
+function CheckARS($upload_pk, $AgentName, $AgentDesc, $AgentARSTableName): int
 {
   /* get the latest agent_pk */
   $Latest_agent_pk = GetAgentKey($AgentName, $AgentDesc);

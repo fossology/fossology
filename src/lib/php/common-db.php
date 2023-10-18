@@ -88,7 +88,7 @@ function DBconnect($sysconfdir, $options="", $exitOnFail=true)
        Associative array for this record.
        May be empty if no record found.
  **/
-function GetSingleRec($Table, $Where="")
+function GetSingleRec($Table, $Where=""): array|bool
 {
   global $PG_CONN;
 
@@ -118,7 +118,7 @@ function GetSingleRec($Table, $Where="")
  *  May be empty if no table rows or Where results
  *  in no rows.
  **/
-function DB2KeyValArray($Table, $KeyCol, $ValCol, $Where="")
+function DB2KeyValArray($Table, $KeyCol, $ValCol, $Where=""): array
 {
   global $PG_CONN;
 
@@ -150,7 +150,7 @@ function DB2KeyValArray($Table, $KeyCol, $ValCol, $Where="")
  *  May be empty if no table rows or Where results
  *  in no rows.
  **/
-function DB2ValArray($Table, $ValCol, $Uniq=false, $Where="")
+function DB2ValArray($Table, $ValCol, $Uniq=false, $Where=""): array
 {
   global $PG_CONN;
 
@@ -209,9 +209,9 @@ function DBCheckResult($result, $sql, $filenm, $lineno)
  *
  * \param string $tableName Table to check
  *
- * \return 1 if table exists, 0 if not.
+ * \return int 1 if table exists, 0 if not.
 **/
-function DB_TableExists($tableName)
+function DB_TableExists($tableName): int
 {
   global $PG_CONN;
   global $SysConf;
@@ -237,7 +237,7 @@ function DB_TableExists($tableName)
  *
  * \return 1 if column exists, 0 if not.
 **/
-function DB_ColExists($tableName, $colName, $DBName='fossology')
+function DB_ColExists($tableName, $colName, $DBName='fossology'): int
 {
   global $PG_CONN;
 
@@ -261,7 +261,7 @@ function DB_ColExists($tableName, $colName, $DBName='fossology')
  *
  * \return True if constraint exists, False if not.
 **/
-function DB_ConstraintExists($ConstraintName, $DBName='fossology')
+function DB_ConstraintExists($ConstraintName, $DBName='fossology'): bool
 {
   global $PG_CONN;
 
