@@ -76,10 +76,8 @@ class list_bucket_files extends FO_Plugin
    */
   function Initialize()
   {
-    $this->State=PLUGIN_STATE_VALID;
     $this->State=PLUGIN_STATE_READY;
-
-    return(true);
+    return true;
   } // Initialize()
 
 
@@ -215,13 +213,13 @@ class list_bucket_files extends FO_Plugin
         {
           $row = $file_result_temp[$i];
           if (empty($row)) continue;
-          array_push($sourted_file_result, $row);
+          $sourted_file_result[] = $row;
           for($j = $i + 1; $j < $max_num; $j++)
           {
             $row_next = $file_result_temp[$j];
             if (!empty($row_next) && ($row['pfile_fk'] == $row_next['pfile_fk']))
             {
-              array_push($sourted_file_result, $row_next);
+              $sourted_file_result[] = $row_next;
               $file_result_temp[$j] = null;
             }
           }

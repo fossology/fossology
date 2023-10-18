@@ -225,7 +225,7 @@ function menu_insert_r(&$menuItems, $path, $pathRemainder, $LastOrder, $Target, 
     if (! $menuItemsExist) {
       $menuItems = array();
     }
-    array_push($menuItems, $currentMenuItem);
+    $menuItems[] = $currentMenuItem;
     $sortItems = true;
   }
 

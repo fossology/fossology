@@ -37,7 +37,7 @@ class HighlightState
    */
   public function push(SplitPosition $splitPosition)
   {
-    array_push($this->elementStack, $splitPosition);
+    $this->elementStack[] = $splitPosition;
   }
 
   /**

@@ -141,7 +141,7 @@ class ui_buckets extends FO_Plugin
     {
       global $Plugins;
       $this->State=PLUGIN_STATE_VALID;
-      array_push($Plugins,$this);
+      $Plugins[] = $this;
     }
 
     return($this->State == PLUGIN_STATE_VALID);
@@ -400,7 +400,7 @@ return;
       $VF .= $C['ufile_name'];
       if ($IsDir) {
         $VF .= "/";
-      };
+      }
       if ($HasBold) {
         $VF .= "</b>";
       }
