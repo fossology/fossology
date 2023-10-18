@@ -28,7 +28,7 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
     $this->testDb = $testDb;
   }
 
-  public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
+  public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args=""): array
   {
     $sysConf = $this->testDb->getFossSysConf();
 

@@ -41,7 +41,7 @@ class SpdxTwoAgentPlugin extends AgentPlugin
    * @param array $uploads Array of upload ids
    * @return string
    */
-  public function uploadsAdd($uploads)
+  public function uploadsAdd($uploads): string
   {
     if (count($uploads) == 0) {
       return '';
