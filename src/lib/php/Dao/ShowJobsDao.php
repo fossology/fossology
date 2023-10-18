@@ -291,7 +291,7 @@ class ShowJobsDao
           if (!empty($filesPerSec)) {
             $timeOfCompletion = ($itemCount['jq_itemsprocessed'] - $row['jq_itemsprocessed']) / $filesPerSec;
           }
-          array_push($estimatedArray, $timeOfCompletion);
+          $estimatedArray[] = $timeOfCompletion;
         }
       }
       if (empty($estimatedArray)) {

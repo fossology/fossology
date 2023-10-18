@@ -311,18 +311,18 @@ class TestReport {
 			}
 
 			$suiteName = $this->parseSuiteName($moData[$suite]);
-			array_push($results, $suiteName);
+			$results[] = $suiteName;
 			//print "parsed suite name:$suiteName\n";
 
 			$pfe_results = $this->parseResults($moData[$suite +1]);
 			$pfe = explode(':', $pfe_results);
-			array_push($results, $pfe[0]);
-			array_push($results, $pfe[1]);
-			array_push($results, $pfe[2]);
+			$results[] = $pfe[0];
+			$results[] = $pfe[1];
+			$results[] = $pfe[2];
 			//print "<pre>BD-GD: resutlts are:</pre>\n"; print "<pre>"; print_r($results) . "</pre>\n";
 
 			$etime = $this->parseElapseTime($moData[$suite +2]);
-			array_push($results, $etime);
+			$results[] = $etime;
 			//print "The elapse time was:$etime\n\n";
 		}
 		return ($results);
@@ -359,7 +359,7 @@ class TestReport {
 	 * read the results file and parse it.
 	 *
 	 * @param resource $FD opened file resource.
-	 * @return $array array of all of the results
+	 * @return array array of all of the results
 	 *
 	 * @todo rename this to parsePassFailResults
 	 *
