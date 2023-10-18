@@ -340,7 +340,7 @@ function FolderGetFromUpload($Uploadpk, $Folder = -1, $Stop = -1)
   if (empty($List)) {
     $List = array();
   }
-  array_push($List,$V);
+  $List[] = $V;
   pg_free_result($result);
   return($List);
 } // FolderGetFromUpload()
@@ -405,7 +405,7 @@ function FolderListUploads_perm($ParentFolder, $perm)
     $New['upload_desc'] = $R['upload_desc'];
     $New['upload_ts'] = Convert2BrowserTime(substr($R['upload_ts'], 0, 19));
     $New['name'] = $R['upload_filename'];
-    array_push($List,$New);
+    $List[] = $New;
   }
   pg_free_result($result);
   return($List);
@@ -477,7 +477,7 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath = '',
     $New['upload_desc'] = $R['upload_desc'];
     $New['name'] = $R['ufile_name'];
     $New['folder'] = $FolderPath . "/" . $R['folder_name'];
-    array_push($List,$New);
+    $List[] = $New;
   }
   pg_free_result($result);
 

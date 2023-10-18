@@ -75,9 +75,9 @@ class ObligationCsvExport
       $liclist = $this->obligationMap->getLicenseList($ob);
       $candidatelist = $this->obligationMap->getLicenseList($ob, True);
       array_shift($row);
-      array_push($row,$liclist);
-      array_push($row,$candidatelist);
-      array_push($csvarray,$row);
+      $row[] = $liclist;
+      $row[] = $candidatelist;
+      $csvarray[] = $row;
     } else {
       $stmt = __METHOD__;
       $this->dbManager->prepare($stmt,$sql);
@@ -89,9 +89,9 @@ class ObligationCsvExport
         $liclist = $this->obligationMap->getLicenseList($row['ob_pk']);
         $candidatelist = $this->obligationMap->getLicenseList($row['ob_pk'], True);
         array_shift($row);
-        array_push($row,$liclist);
-        array_push($row,$candidatelist);
-        array_push($csvarray,$row);
+        $row[] = $liclist;
+        $row[] = $candidatelist;
+        $csvarray[] = $row;
       }
     }
 

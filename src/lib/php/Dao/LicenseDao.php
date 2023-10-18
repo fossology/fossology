@@ -386,8 +386,8 @@ ORDER BY lft asc
         array_pop($rgtStack);
       }
       if ($row['lft'] > $lastLft) {
-        array_push($pathStack, $row['ufile_name']);
-        array_push($rgtStack, $row['rgt']);
+        $pathStack[] = $row['ufile_name'];
+        $rgtStack[] = $row['rgt'];
         $lastLft = $row['lft'];
       }
     }

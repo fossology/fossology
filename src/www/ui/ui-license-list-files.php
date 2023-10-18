@@ -144,11 +144,11 @@ class LicenseListFiles extends FO_Plugin
         if (empty($row)) {
           continue;
         }
-        array_push($sorted_file_result, $row);
+        $sorted_file_result[] = $row;
         for ($j = $i + 1; $j < $max_num; $j ++) {
           $row_next = $file_result_temp[$j];
           if (! empty($row_next) && ($row['pfile_fk'] == $row_next['pfile_fk'])) {
-            array_push($sorted_file_result, $row_next);
+            $sorted_file_result[] = $row_next;
             $file_result_temp[$j] = null;
           }
         }

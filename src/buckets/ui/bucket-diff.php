@@ -60,7 +60,7 @@ class ui_diff_buckets extends FO_Plugin
     {
       global $Plugins;
       $this->State=PLUGIN_STATE_VALID;
-      array_push($Plugins,$this);
+      $Plugins[] = $this;
     }
 
     return($this->State == PLUGIN_STATE_VALID);

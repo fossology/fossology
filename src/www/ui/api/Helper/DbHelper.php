@@ -183,7 +183,7 @@ FROM $partialQuery $where ORDER BY upload_pk ASC LIMIT $limit OFFSET $" .
       $hash = new Hash($pfile_sha1, $pfile_md5, $pfile_sha256, $pfile_size);
       $upload = new Upload($folderId, $folderName, $uploadId,
         $row["upload_desc"], $row["upload_filename"], $row["upload_ts"], $row["assignee"], $hash);
-      array_push($uploads, $upload->getArray());
+      $uploads[] = $upload->getArray();
     }
     return [$totalResult, $uploads];
   }

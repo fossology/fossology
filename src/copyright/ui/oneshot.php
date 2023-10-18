@@ -99,7 +99,7 @@ class agent_copyright_once extends FO_Plugin
         if (!empty($match['start'])) {
           $stuff[$match['type'][0]][] = $match['content'][0];
           if ($this->NoHTML) { // For REST API
-            array_push($copyright_array, $match['content'][0]);
+            $copyright_array[] = $match['content'][0];
           } else {
             $highlights[] = new Highlight($match['start'][0], $match['end'][0], $typeToHighlightTypeMap[$match['type'][0]], -1, -1, $match['content'][0]);
           }
