@@ -29,7 +29,7 @@ function hist_rowcmp_count_asc($a, $b)
  * @param array[][] $b
  * @return int
  */
-function hist_rowcmp_count_desc($a, $b)
+function hist_rowcmp_count_desc($a, $b): int
 {
   $res = $a['copyright_count'] - $b['copyright_count'];
   return -$res;
@@ -41,7 +41,7 @@ function hist_rowcmp_count_desc($a, $b)
  * @param array[][] $rowb
  * @return int
  */
-function hist_rowcmp($rowa, $rowb)
+function hist_rowcmp($rowa, $rowb): int
 {
   return (strnatcasecmp($rowa['content'], $rowb['content']));
 }
@@ -52,7 +52,7 @@ function hist_rowcmp($rowa, $rowb)
  * @param array[][] $rowb
  * @return int
  */
-function hist_rowcmp_desc($rowa, $rowb)
+function hist_rowcmp_desc($rowa, $rowb): int
 {
   return -(strnatcasecmp($rowa['content'], $rowb['content']));
 }
@@ -63,7 +63,7 @@ function hist_rowcmp_desc($rowa, $rowb)
  * @param array[][] $rowb
  * @return int
  */
-function copyright_namecmp($rowa, $rowb)
+function copyright_namecmp($rowa, $rowb): int
 {
   return (strnatcasecmp($rowa['ufile_name'], $rowb['ufile_name']));
 }
@@ -195,7 +195,7 @@ function StmtReorder($content)
  * \param string $hash
  * \return boolean On empty row, return true, else false
  */
-function MassageContent(&$row, $hash)
+function MassageContent(&$row, $hash): bool
 {
   /* Step 1: Clean up content
    */

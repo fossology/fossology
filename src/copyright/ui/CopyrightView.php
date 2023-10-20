@@ -40,7 +40,7 @@ class CopyrightView extends Xpview
    * @copydoc Fossology::Agent::Copyright::UI::Xpview::additionalVars()
    * @see Fossology::Agent::Copyright::UI::Xpview::additionalVars()
    */
-  protected function additionalVars($uploadId, $uploadTreeId, $agentId)
+  protected function additionalVars($uploadId, $uploadTreeId, $agentId): array
   {
     if (empty($agentId)) {
       $agentMap = $this->agentDao->getLatestAgentResultForUpload($uploadId,array('copyright', 'reso'));
@@ -76,7 +76,7 @@ class CopyrightView extends Xpview
     return $vars;
   }
 
-  protected function createScriptBlock()
+  protected function createScriptBlock(): string
   {
     return "
 

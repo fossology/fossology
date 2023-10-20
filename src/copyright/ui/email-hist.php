@@ -29,7 +29,7 @@ class EmailHistogram extends HistogramBase
    * @param int    $agentId      Agent id which populate the result
    * @return array Email contents, upload tree items in result
    */
-  protected function getTableContent($upload_pk, $uploadtreeId, $filter, $agentId)
+  protected function getTableContent($upload_pk, $uploadtreeId, $filter, $agentId): array
   {
     $typeDescriptionPairs = array(
             'email' => _("Email"),
@@ -61,7 +61,7 @@ class EmailHistogram extends HistogramBase
    * @copydoc HistogramBase::fillTables()
    * @see HistogramBase::fillTables()
    */
-  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
+  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF): array
   {
     list($VEmail, $VUrl, $VAuthor, $VScanAuthor, $VScanUrl, $VScanEmail, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
@@ -102,7 +102,7 @@ class EmailHistogram extends HistogramBase
    * @see HistogramBase::createScriptBlock()
    */
 
-  protected function createScriptBlock()
+  protected function createScriptBlock(): string
   {
     return "
 

@@ -27,7 +27,7 @@ class IpraHistogram extends HistogramBase
    * @param $Agent_pk
    * @return array
    */
-  protected  function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk)
+  protected  function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk): array
   {
     $type = 'ipra';
     $decription = _("Patent Relevant");
@@ -44,9 +44,9 @@ class IpraHistogram extends HistogramBase
    * @param $filter
    * @param $agentId
    * @param $VF
-   * @return string
+   * @return array
    */
-  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
+  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF): array
   {
     list($VPatentRelevant, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
@@ -74,7 +74,7 @@ class IpraHistogram extends HistogramBase
     }
   } // RegisterMenus()
 
-  protected  function createScriptBlock()
+  protected  function createScriptBlock(): string
   {
     return "
 

@@ -33,7 +33,7 @@ class EccHistogram extends HistogramBase
    * @param int    $Agent_pk      Agent id which populate the result
    * @return array Ecc contents, upload tree items in result
    */
-  protected  function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk)
+  protected  function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk): array
   {
     $type = 'ecc';
     $decription = _("Export restriction");
@@ -48,7 +48,7 @@ class EccHistogram extends HistogramBase
    * @copydoc HistogramBase::fillTables()
    * @see HistogramBase::fillTables()
    */
-  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
+  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF): array
   {
     list($VEcc, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
@@ -84,7 +84,7 @@ class EccHistogram extends HistogramBase
    * @copydoc HistogramBase::createScriptBlock()
    * @see HistogramBase::createScriptBlock()
    */
-  protected  function createScriptBlock()
+  protected  function createScriptBlock(): string
   {
     return "
 

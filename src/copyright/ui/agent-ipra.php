@@ -18,7 +18,7 @@ class IpraAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
-  function AgentHasResults($uploadId=0)
+  function AgentHasResults($uploadId=0): int
   {
     return CheckARS($uploadId, $this->AgentName, "ipra scanner", "ipra_ars");
   }

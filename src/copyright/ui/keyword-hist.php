@@ -27,7 +27,7 @@ class KeywordHistogram extends HistogramBase
    * @param $Agent_pk
    * @return array
    */
-  protected  function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk)
+  protected  function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk): array
   {
     $type = 'keyword';
     $decription = _("Keyword Analysis");
@@ -44,9 +44,9 @@ class KeywordHistogram extends HistogramBase
    * @param $filter
    * @param $agentId
    * @param $VF
-   * @return string
+   * @return array
    */
-  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
+  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF): array
   {
     list($VKeyword, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
@@ -74,7 +74,7 @@ class KeywordHistogram extends HistogramBase
     }
   } // RegisterMenus()
 
-  protected  function createScriptBlock()
+  protected  function createScriptBlock(): string
   {
     return "
 
