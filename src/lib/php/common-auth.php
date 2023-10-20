@@ -24,8 +24,7 @@ function siteminder_check()
   // $IDEnvVar = 'HPPF_AUTH_UID';  // for example for PingIdentity
   $IDEnvVar = 'HTTP_SMUNIVERSALID';
   if (isset($_SERVER[$IDEnvVar])) {
-    $SEA = $_SERVER[$IDEnvVar];
-    return $SEA;
+    return $_SERVER[$IDEnvVar];
   }
   return(-1);
 } // siteminder_check()

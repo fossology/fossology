@@ -69,8 +69,7 @@ function DeleteUpload($uploadpk, $user_pk, $group_pk, $Depends = NULL)
     $error_msg = _("Is the scheduler running? Your jobs have been added to job queue.");
     $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
     $LinkText = _("View Jobs");
-    $msg = "$error_msg <a href=$URL>$LinkText</a>";
-    return $msg;
+    return "$error_msg <a href=$URL>$LinkText</a>";
   }
   return (null);
 } // Delete()

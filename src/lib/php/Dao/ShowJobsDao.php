@@ -233,8 +233,7 @@ class ShowJobsDao
    **/
   public function getNumItemsPerSec($itemsprocessed, $numSecs)
   {
-    $filesPerSec = ($numSecs > 0) ? $itemsprocessed/$numSecs : 0;
-    return $filesPerSec;
+    return ($numSecs > 0) ? $itemsprocessed/$numSecs : 0;
   }
 
   /**
@@ -271,13 +270,12 @@ class ShowJobsDao
         $statementName = __METHOD__."$selectCol.$removeType";
         $this->dbManager->prepare($statementName,
         "SELECT $selectCol FROM jobqueue WHERE $removeType jq_job_fk =$1 ORDER BY jq_type DESC");
-        $result = $this->dbManager->execute($statementName, array($job_pk));
       } else {
         $statementName = __METHOD__."$selectCol.$jq_Type";
         $this->dbManager->prepare($statementName,
         "SELECT $selectCol FROM jobqueue WHERE jq_type LIKE '$jq_Type' AND jq_job_fk =$1");
-        $result = $this->dbManager->execute($statementName, array($job_pk));
       }
+      $result = $this->dbManager->execute($statementName, array($job_pk));
       $estimatedArray = array(); // estimate time for each agent
 
       while ($row = $this->dbManager->fetchArray($result)) {

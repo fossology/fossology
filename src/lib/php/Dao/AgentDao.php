@@ -183,9 +183,7 @@ class AgentDao
   {
     $latestScannerProxy = new \Fossology\Lib\Proxy\LatestScannerProxy($uploadId, $agentNames, "latest_scanner$uploadId");
 
-    $agentLatestMap = $latestScannerProxy->getNameToIdMap();
-
-    return $agentLatestMap;
+    return $latestScannerProxy->getNameToIdMap();
   }
 
   /**

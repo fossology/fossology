@@ -175,7 +175,6 @@ class core_smauth extends FO_Plugin
         if (pg_num_rows($result) < 1) {
           $BucketPool = 'null';       //didn't exist in bucketpool table, set it 'null'
         }
-        pg_free_result($result);
       } else {
         /* if didn't define bucketpool from sycconf.And only a single bucketpool record, get bucketpool from bucketpool table. If more than one, set it null*/
         $sql = "SELECT bucketpool_pk FROM bucketpool;";
@@ -189,8 +188,8 @@ class core_smauth extends FO_Plugin
         } else {
           $BucketPool = 'null';
         }
-        pg_free_result($result);
       }
+      pg_free_result($result);
     } else {
       pg_free_result($result);
     }

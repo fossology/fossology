@@ -224,8 +224,7 @@ class AjaxBrowse extends DefaultPlugin
               ."<img onclick=\"removeMainLicense($uploadId,$mainLic[rf_pk]);\" class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></img>";
     }
 
-    $output = array($nameColumn, $nameAction, $currentStatus, $tripleComment, implode(', ', $mainLicenses), $dateCol, $currentAssignee);
-    return $output;
+    return array($nameColumn, $nameAction, $currentStatus, $tripleComment, implode(', ', $mainLicenses), $dateCol, $currentAssignee);
   }
 
   /**
@@ -302,9 +301,7 @@ class AjaxBrowse extends DefaultPlugin
   {
     $columnNamesInDatabase = array('upload_filename', 'upload_clearing.status_fk', 'UNUSED', 'UNUSED', 'upload_clearing.assignee', 'upload_ts', 'upload_clearing.priority');
 
-    $orderString = $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase);
-
-    return $orderString;
+    return $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase);
   }
 
   private function getSearchString($searchPattern)

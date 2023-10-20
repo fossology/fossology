@@ -25,7 +25,7 @@ error_reporting(E_NOTICE & E_STRICT);
 
 /*********************************************************
   AddReunpackjob(): Given an uploadpk, add a reunpack job.
-  Return $jobpk if Success, or return fail string 
+  Return $jobpk if Success, or return fail string
 *********************************************************/
 
 function AddReunpackjob ($uploadpk,$Depends=NULL,$priority=0)
@@ -39,17 +39,15 @@ function AddReunpackjob ($uploadpk,$Depends=NULL,$priority=0)
   $SQLInsert = "INSERT INTO job
          (job_queued,job_priority,job_name,job_upload_fk) VALUES
           (now(),'$priority','$Job_name','$uploadpk');";
-  
+
   $SQLcheck = "SELECT job_pk FROM job WHERE job_upload_fk = '$uploadpk' AND job_name = '$Job_name' AND job_user_fk is NULL;";
   $Results = $DB->Action($SQLcheck);
-  if (!empty($Results)){
-      $jobpk = $Results[0]['job_pk'];
-  } else {
+  if (empty($Results)) {
       $DB->Action($SQLInsert);
       $SQLcheck = "SELECT job_pk FROM job WHERE job_upload_fk = '$uploadpk' AND job_name = '$Job_name' AND job_user_fk is NULL;";
       $Results = $DB->Action($SQLcheck);
-      $jobpk = $Results[0]['job_pk'];
   }
+  $jobpk = $Results[0]['job_pk'];
 
   if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record! $SQLInsert"); }
   if (!empty($Depends) && !is_array($Depends)) { $Depends = array($Depends); }
@@ -60,7 +58,7 @@ function AddReunpackjob ($uploadpk,$Depends=NULL,$priority=0)
             FROM upload
             INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk
             WHERE upload.upload_pk = '$uploadpk';";
-  $jobqueuepk = JobQueueAdd($jobpk,"unpack",$jqargs,"no","pfile",$Depends,1);  
+  $jobqueuepk = JobQueueAdd($jobpk,"unpack",$jqargs,"no","pfile",$Depends,1);
   if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
 
   return ($jobqueuepk);
@@ -82,6 +80,6 @@ while(!empty($Results[$i]['job_pk'])) {
   print $jq_parent;
   $jq_child = $Results[$i]['jq_pk'];
   JobQueueAddDependency($jq_child,$jq_parent);
-  $i++;	
+  $i++;
 }
 return (0);

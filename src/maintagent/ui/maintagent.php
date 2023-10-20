@@ -103,9 +103,7 @@ class maintagent extends FO_Plugin {
   function DisplayForm()
   {
 
-    $V = "";
-
-    $V .= "<form method='post'>\n"; // no url = this url
+    $V = "<form method='post'>\n"; // no url = this url
     foreach (self::OPTIONS as $option => $description) {
       $V .= "<div class='form-group'><div class='form-check'>";
       $V .= " <input class='form-check-input' type='checkbox' name='$option' value='$option' id='men$option'>

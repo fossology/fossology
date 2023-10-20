@@ -60,7 +60,7 @@ class showjobs extends FO_Plugin
   /**
    * @brief Returns uploadname as link for geeky scan
    * @param $job_pk
-   * @return uploadname
+   * @return string uploadname
    **/
   function getUploadNameForGeekyScan($job_pk)
   {
@@ -91,8 +91,7 @@ class showjobs extends FO_Plugin
     }
 
     /* upload file name link to browse */
-    $uploadNameLink = "<a title='Click to browse this upload' href='" . Traceback_uri() . "?mod=browse&upload=" . $row['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>" . $uploadFileName . "</a>";
-    return $uploadNameLink;
+    return "<a title='Click to browse this upload' href='" . Traceback_uri() . "?mod=browse&upload=" . $row['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>" . $uploadFileName . "</a>";
   } // getUploadNameForGeekyScan()
 
   public function Output()

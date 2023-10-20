@@ -108,8 +108,7 @@ class admin_tag extends FO_Plugin
    */
   function ShowCreateTagPage()
   {
-    $VC = "";
-    $VC .= _("<h3>Create Tag:</h3>\n");
+    $VC = _("<h3>Create Tag:</h3>\n");
     $VC.= "<form name='form' method='POST' action='" . Traceback_uri() ."?mod=admin_tag'>\n";
     $VC .= "<p>";
     $text = _("Tag");

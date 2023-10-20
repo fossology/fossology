@@ -18,7 +18,7 @@
  **/
 function js_url()
 {
-  $script = "
+  return "
     <script type=\"text/javascript\">
       function js_url(val, url)
       {
@@ -26,8 +26,6 @@ function js_url()
       }
     </script>
   ";
-
-  return $script;
 }
 
 
