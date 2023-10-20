@@ -222,7 +222,7 @@ GROUP BY group_fk
 
     $allIds = array();
     for ($i=0; $i < sizeof($results); $i++) {
-      array_push($allIds, intval($results[$i]['folder_pk']));
+      $allIds[] = intval($results[$i]['folder_pk']);
     }
 
     return $allIds;
