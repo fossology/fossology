@@ -148,3 +148,12 @@ jobs:
         labels: |
           org.opencontainers.image.version=${{ steps.get_release.outputs.tag_name }}.0
         context: .
+
+    - name: Build and push runner image
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        tags: fossology/fossology:${{ steps.get_release.outputs.tag_name }}-scanner
+        file: utils/automation/Dockerfile.ci
+        labels: |
+          org.opencontainers.image.version=${{ steps.get_release.outputs.tag_name }}.0
