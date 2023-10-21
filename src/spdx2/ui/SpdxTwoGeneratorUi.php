@@ -119,7 +119,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
    * @param array $uploads List of upload IDs
    * @return string
    */
-  protected function uploadsAdd($uploads)
+  protected function uploadsAdd($uploads): string
   {
     if (count($uploads) == 0) {
       return '';
@@ -135,7 +135,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
    * @throws Exception
    * @return array JobID, JobQuqueID
    */
-  protected function getJobAndJobqueue($groupId, $upload, $addUploads)
+  protected function getJobAndJobqueue($groupId, $upload, $addUploads): array
   {
     $uploadId = $upload->getId();
     $spdxTwoAgent = plugin_find('agent_'.$this->outputFormat);
@@ -208,7 +208,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
    * @throws Exception
    */
   public function scheduleAgent($groupId, $upload,
-    $outputFormat = self::DEFAULT_OUTPUT_FORMAT, $addUploads = array())
+    $outputFormat = self::DEFAULT_OUTPUT_FORMAT, $addUploads = array()): array
   {
     $this->outputFormat = $outputFormat;
     return $this->getJobAndJobqueue($groupId, $upload, $addUploads);

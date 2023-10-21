@@ -182,7 +182,7 @@ class SpdxTwoAgent extends Agent
    * @param string[] $args Array of arguments to be parsed
    * @return array $args Parsed arguments
    */
-  protected function preWorkOnArgs($args)
+  protected function preWorkOnArgs($args): array
   {
     if ((!array_key_exists(self::OUTPUT_FORMAT_KEY, $args)
          || $args[self::OUTPUT_FORMAT_KEY] === "")
@@ -200,7 +200,7 @@ class SpdxTwoAgent extends Agent
    * @copydoc Fossology::Lib::Agent::Agent::processUploadId()
    * @see Fossology::Lib::Agent::Agent::processUploadId()
    */
-  function processUploadId($uploadId)
+  function processUploadId($uploadId): bool
   {
     $args = $this->preWorkOnArgs($this->args);
 
@@ -230,7 +230,7 @@ class SpdxTwoAgent extends Agent
    * @param string $partname copyright|document|file|package
    * @return string Template file path
    */
-  protected function getTemplateFile($partname)
+  protected function getTemplateFile($partname): string
   {
     $prefix = $this->outputFormat . "-";
     $postfix = ".twig";
@@ -255,7 +255,7 @@ class SpdxTwoAgent extends Agent
    * @param string $packageName Name of the upload
    * @return string Report file's base name
    */
-  protected function getFileBasename($packageName)
+  protected function getFileBasename($packageName): string
   {
     if ($this->filebasename == null) {
       $fileName = strtoupper($this->outputFormat)."_".$packageName.'_'.time();
@@ -283,7 +283,7 @@ class SpdxTwoAgent extends Agent
    * @param string $packageName Name of the upload
    * @return string Absolute file path for report
    */
-  protected function getFileName($packageName)
+  protected function getFileName($packageName): string
   {
     global $SysConf;
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
@@ -295,7 +295,7 @@ class SpdxTwoAgent extends Agent
    * @param string $packageName Name of the upload
    * @return string URI for the upload
    */
-  protected function getUri($packageName)
+  protected function getUri($packageName): string
   {
     global $SysConf;
     $url=$SysConf['SYSCONFIG']['FOSSologyURL'];
@@ -311,7 +311,7 @@ class SpdxTwoAgent extends Agent
    * @param int $uploadId
    * @return string Rendered report string
    */
-  protected function renderPackage($uploadId)
+  protected function renderPackage($uploadId): string
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
@@ -416,7 +416,7 @@ class SpdxTwoAgent extends Agent
    * @param ItemTreeBounds $itemTreeBounds
    * @return string[][][] Mapping item->'concluded'->(array of shortnames)
    */
-  protected function getFilesWithLicensesFromClearings(ItemTreeBounds $itemTreeBounds)
+  protected function getFilesWithLicensesFromClearings(ItemTreeBounds $itemTreeBounds): array
   {
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
 
@@ -462,7 +462,7 @@ class SpdxTwoAgent extends Agent
    * @param string[] $scannerIds
    * @return string License Comment
    */
-  protected function getLicenseComment($scannerIds)
+  protected function getLicenseComment($scannerIds): string
   {
     $agentDao = $this->agentDao;
     $func = function($scannerId) use ($agentDao)
@@ -506,7 +506,7 @@ class SpdxTwoAgent extends Agent
    * @param string $treeTableName
    * @return string[] Array of files with associated findings
    */
-  protected function toLicensesWithFiles(&$filesWithLicenses, $treeTableName)
+  protected function toLicensesWithFiles(&$filesWithLicenses, $treeTableName): array
   {
     $licensesWithFiles = array();
     $treeDao = $this->container->get('dao.tree');
@@ -617,7 +617,7 @@ class SpdxTwoAgent extends Agent
    * @param array $vars Variables for the template
    * @return string The rendered output
    */
-  protected function renderString($templateName, $vars)
+  protected function renderString($templateName, $vars): string
   {
     return $this->renderer->load($templateName)->render($vars);
   }
@@ -629,7 +629,7 @@ class SpdxTwoAgent extends Agent
    * @param int $uploadId
    * @return string Node content
    */
-  protected function generateFileNodes($filesWithLicenses, $treeTableName, $uploadId)
+  protected function generateFileNodes($filesWithLicenses, $treeTableName, $uploadId): string
   {
     if (strcmp($this->outputFormat, "dep5") !== 0) {
       return $this->generateFileNodesByFiles($filesWithLicenses, $treeTableName, $uploadId);
@@ -645,7 +645,7 @@ class SpdxTwoAgent extends Agent
    * @param int $uploadId
    * @return string Node string
    */
-  protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName, $uploadId)
+  protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName, $uploadId): string
   {
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
@@ -752,7 +752,7 @@ class SpdxTwoAgent extends Agent
    * @param string $treeTableName
    * @return string Node string
    */
-  protected function generateFileNodesByLicenses($filesWithLicenses, $treeTableName)
+  protected function generateFileNodesByLicenses($filesWithLicenses, $treeTableName): string
   {
     $licensesWithFiles = $this->toLicensesWithFiles($filesWithLicenses, $treeTableName);
 
@@ -795,7 +795,7 @@ class SpdxTwoAgent extends Agent
    * @param Upload $upload
    * @return string The unique identifier
    */
-  protected function getVerificationCode(Upload $upload)
+  protected function getVerificationCode(Upload $upload): string
   {
     $stmt = __METHOD__;
     $param = array();
@@ -820,7 +820,7 @@ class SpdxTwoAgent extends Agent
    * @param int $uploadId
    * @return bool License comment state (TRUE : show license comment, FALSE : don't show it)
    */
-  protected function getSPDXReportConf($uploadId, $key)
+  protected function getSPDXReportConf($uploadId, $key): bool
   {
     $sql = "SELECT ri_spdx_selection FROM report_info WHERE upload_fk = $1";
     $getCommentState = $this->dbManager->getSingleRow($sql, array($uploadId), __METHOD__.'.SPDX_license_comment');
@@ -861,7 +861,7 @@ class SpdxTwoAgent extends Agent
    * Get SPDX Data License `self::DATA_LICENSE`
    * @return array Associated array with 'text', 'name', 'id', 'url'
    */
-  protected function getSPDXDataLicense()
+  protected function getSPDXDataLicense(): array
   {
     $licenseViewProxy = new LicenseViewProxy(0,
       [

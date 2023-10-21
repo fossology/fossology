@@ -22,5 +22,5 @@ interface SchedulerTestRunner
    * @param string $args  Arguments for scheduler
    * @return array Success code, output, return code
    */
-  public function run($uploadId, $userId = 2, $groupId = 2, $jobId = 1, $args = "");
+  public function run($uploadId, $userId = 2, $groupId = 2, $jobId = 1, $args = ""): array;
 }

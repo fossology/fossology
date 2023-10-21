@@ -25,7 +25,7 @@ class SpdxTwoUtils
    * @param string $key2 Key2
    * @return string[] $args
    */
-  static public function preWorkOnArgsFlp($args,$key1,$key2)
+  static public function preWorkOnArgsFlp($args,$key1,$key2): array
   {
     $needle = ' --'.$key2.'=';
     if (is_array($args) &&
@@ -43,7 +43,7 @@ class SpdxTwoUtils
    * @param string $license
    * @return string
    */
-  static public function addPrefixOnDemand($license)
+  static public function addPrefixOnDemand($license): string
   {
     if (empty($license) || $license === "NOASSERTION") {
       return "NOASSERTION";
@@ -66,7 +66,7 @@ class SpdxTwoUtils
    * @param array $licenses
    * @return string[]
    */
-  static public function addPrefixOnDemandKeys($licenses)
+  static public function addPrefixOnDemandKeys($licenses): array
   {
     $ret = array();
     foreach ($licenses as $license=>$text) {
@@ -80,7 +80,7 @@ class SpdxTwoUtils
    * @param array $licenses
    * @return array
    */
-  static public function addPrefixOnDemandList($licenses)
+  static public function addPrefixOnDemandList($licenses): array
   {
     return array_map(function ($license)
     {
@@ -93,7 +93,7 @@ class SpdxTwoUtils
    * @param string[] $licenses
    * @return string
    */
-  static public function implodeLicenses($licenses)
+  static public function implodeLicenses($licenses): string
   {
     if (!$licenses || !is_array($licenses) || sizeof($licenses) == 0) {
       return "";

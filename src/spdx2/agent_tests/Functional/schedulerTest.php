@@ -128,7 +128,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Get the heart count from agent
    */
-  private function getHeartCount($output)
+  private function getHeartCount($output): int
   {
     $matches = array();
     if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches)) {
@@ -187,7 +187,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    * @param int $jobId
    * @return string
    */
-  public function getReportFilepathFromJob($uploadId, $jobId)
+  public function getReportFilepathFromJob($uploadId, $jobId): string
   {
     $row = $this->dbManager->getSingleRow("SELECT upload_fk,job_fk,filepath FROM reportgen WHERE job_fk = $1", array($jobId),
       "reportFileName");
@@ -250,7 +250,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    * -# Store only tools-java-1.1.4-jar-with-dependencies.jar
    * @return string Jar file path
    */
-  protected function pullSpdxTools()
+  protected function pullSpdxTools(): string
   {
     $this-> verifyJavaIsInstalled();
 
