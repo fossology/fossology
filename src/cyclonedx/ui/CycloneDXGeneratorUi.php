@@ -99,7 +99,7 @@ class CycloneDXGeneratorUi extends DefaultPlugin
     return $showJobsPlugin->getResponse();
   }
 
-  protected function uploadsAdd($uploads)
+  protected function uploadsAdd($uploads): string
   {
     if (count($uploads) == 0) {
       return '';
@@ -107,7 +107,7 @@ class CycloneDXGeneratorUi extends DefaultPlugin
     return '--uploadsAdd='. implode(',', array_keys($uploads));
   }
 
-  protected function getJobAndJobqueue($groupId, $upload, $addUploads)
+  protected function getJobAndJobqueue($groupId, $upload, $addUploads): array
   {
     $uploadId = $upload->getId();
     $cyclonedxAgent = plugin_find('agent_cyclonedx');
@@ -166,7 +166,7 @@ class CycloneDXGeneratorUi extends DefaultPlugin
    * @return array|number[] Job id and job queue id
    * @throws Exception
    */
-  public function scheduleAgent($groupId, $upload, $addUploads = array())
+  public function scheduleAgent($groupId, $upload, $addUploads = array()): array
   {
     return $this->getJobAndJobqueue($groupId, $upload, $addUploads);
   }

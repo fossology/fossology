@@ -28,7 +28,7 @@ class core_debug_fileloc extends FO_Plugin
    * @copydoc FO_Plugin::PostInitialize()
    * @see FO_Plugin::PostInitialize()
    */
-  function PostInitialize()
+  function PostInitialize(): int
   {
     if ($this->State != PLUGIN_STATE_VALID) {
       return(0);
@@ -49,7 +49,7 @@ class core_debug_fileloc extends FO_Plugin
    * @copydoc FO_Plugin::Output()
    * @see FO_Plugin::Output()
    */
-  public function Output()
+  public function Output(): string
   {
     global $BINDIR, $LIBDIR, $LIBEXECDIR, $INCLUDEDIR, $LOGDIR,
     $SYSCONFDIR, $PROJECTSTATEDIR, $PROJECT, $VERSION, $COMMIT_HASH;

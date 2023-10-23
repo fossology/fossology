@@ -34,7 +34,7 @@ class DeciderAgentPlugin extends AgentPlugin
    * @param array $vars Variables using in template
    * @return string HTML rendered from agent_decider.html.twig template
    */
-  public function renderContent(&$vars)
+  public function renderContent(&$vars): string
   {
     global $SysConf;
     $renderer = $GLOBALS['container']->get('twig.environment');
@@ -52,7 +52,7 @@ class DeciderAgentPlugin extends AgentPlugin
    * @param array $vars Variables using in template
    * @return string Footer HTML
    */
-  public function renderFoot(&$vars)
+  public function renderFoot(&$vars): string
   {
     return "";
   }

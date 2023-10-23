@@ -28,7 +28,7 @@ class core_debug_menus extends FO_Plugin
    * @copydoc FO_Plugin::PostInitialize()
    * @see FO_Plugin::PostInitialize()
    */
-  function PostInitialize()
+  function PostInitialize(): int
   {
     if ($this->State != PLUGIN_STATE_VALID) {
       return(0);
@@ -68,7 +68,7 @@ class core_debug_menus extends FO_Plugin
    * @param array $Menu Menu object to print
    * @return string HTML ordered list
    */
-  function Menu2HTML(&$Menu)
+  function Menu2HTML(&$Menu): string
   {
     $V = "<ol>\n";
     foreach($Menu as $M)
@@ -117,7 +117,7 @@ class core_debug_menus extends FO_Plugin
    * @brief Get the output as HTML
    * @return string HTML output
    */
-  protected function htmlContent()
+  protected function htmlContent(): string
   {
     $V = '';
     global $MenuList;

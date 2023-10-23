@@ -55,7 +55,7 @@ class core_debug extends FO_Plugin
    * @brief Display the loaded menu and plugins.
    * @return string HTML output
    */
-  protected function htmlContent()
+  protected function htmlContent(): string
   {
     $V = "";
     /** @var Plugin[] $Plugins

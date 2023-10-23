@@ -25,7 +25,7 @@ class CycloneDXAgentPlugin extends AgentPlugin
     // no AgentCheckBox
   }
 
-  public function uploadsAdd($uploads)
+  public function uploadsAdd($uploads): string
   {
     if (count($uploads) == 0) {
       return '';

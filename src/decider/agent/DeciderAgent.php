@@ -142,7 +142,7 @@ class DeciderAgent extends Agent
    * @copydoc Fossology::Lib::Agent::Agent::processUploadId()
    * @see Fossology::Lib::Agent::Agent::processUploadId()
    */
-  function processUploadId($uploadId)
+  function processUploadId($uploadId): bool
   {
     $args = $this->args;
     $this->activeRules = array_key_exists('r', $args) ? intval($args['r']) : self::RULES_ALL;
@@ -197,9 +197,9 @@ class DeciderAgent extends Agent
    * Mark new licenses as WIP.
    * Check the $activeRules and apply them on the item
    * @param Item $item Item to be processes
-   * @return boolean True if operation resulted in success, false otherwise
+   * @return int 1 if operation resulted in success, 0 otherwise
    */
-  private function processItem(Item $item)
+  private function processItem(Item $item): int
   {
     $itemTreeBounds = $item->getItemTreeBounds();
 
@@ -263,9 +263,9 @@ class DeciderAgent extends Agent
    * @brief Check if matches contains unhandled match
    * @param array $projectedScannerMatches
    * @param array[] $licensesFromDecision
-   * @return boolean True if any unhandled match exists, false otherwise
+   * @return bool True if any unhandled match exists, false otherwise
    */
-  private function existsUnhandledMatch($projectedScannerMatches, $licensesFromDecision)
+  private function existsUnhandledMatch($projectedScannerMatches, $licensesFromDecision): bool
   {
     foreach (array_keys($projectedScannerMatches) as $projectedLicenseId) {
       if (!array_key_exists($projectedLicenseId, $licensesFromDecision)) {
@@ -281,9 +281,9 @@ class DeciderAgent extends Agent
    * Get the matches which really agree and apply the decisions.
    * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
    * @param LicenseMatch[] $matches        New license matches found
-   * @return boolean True if decisions applied, false otherwise
+   * @return bool True if decisions applied, false otherwise
    */
-  private function autodecideIfOjoMatchesNoContradiction(ItemTreeBounds $itemTreeBounds, $matches)
+  private function autodecideIfOjoMatchesNoContradiction(ItemTreeBounds $itemTreeBounds, $matches): bool
   {
     $licenseMatchExists = count($matches) > 0;
     foreach ($matches as $licenseMatches) {
@@ -309,9 +309,9 @@ class DeciderAgent extends Agent
    * Get the matches which really agree and apply the decisions.
    * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
    * @param LicenseMatch[] $matches        New license matches found
-   * @return boolean True if decisions applied, false otherwise
+   * @return bool True if decisions applied, false otherwise
    */
-  private function autodecideIfResoMatchesNoContradiction(ItemTreeBounds $itemTreeBounds, $matches)
+  private function autodecideIfResoMatchesNoContradiction(ItemTreeBounds $itemTreeBounds, $matches): bool
   {
     $licenseMatchExists = count($matches) > 0;
     foreach ($matches as $licenseMatches) {
@@ -337,9 +337,9 @@ class DeciderAgent extends Agent
    * Get the matches which really agree and apply the decisions.
    * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
    * @param LicenseMatch[] $matches        New license matches found
-   * @return boolean True if decisions applied, false otherwise
+   * @return bool True if decisions applied, false otherwise
    */
-  private function autodecideNomosMonkNinka(ItemTreeBounds $itemTreeBounds, $matches)
+  private function autodecideNomosMonkNinka(ItemTreeBounds $itemTreeBounds, $matches): bool
   {
     $canDecide = (count($matches)>0);
 
@@ -362,9 +362,9 @@ class DeciderAgent extends Agent
    * Get the nomos matches which really are inside monk findings and apply the decisions.
    * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
    * @param LicenseMatch[] $matches        New license matches found
-   * @return boolean True if decisions applied, false otherwise
+   * @return bool True if decisions applied, false otherwise
    */
-  private function autodecideNomosMatchesInsideMonk(ItemTreeBounds $itemTreeBounds, $matches)
+  private function autodecideNomosMatchesInsideMonk(ItemTreeBounds $itemTreeBounds, $matches): bool
   {
     $canDecide = (count($matches)>0);
 
@@ -387,7 +387,7 @@ class DeciderAgent extends Agent
    * @param LicenseMatch[] $matches Matches to be remaped
    * @return array[][] Remaped matches
    */
-  protected function remapByProjectedId($matches)
+  protected function remapByProjectedId($matches): array
   {
     $remapped = array();
     foreach ($matches as $licenseId => $licenseMatches) {
@@ -410,9 +410,9 @@ class DeciderAgent extends Agent
    * @brief Check if the small highlight region is inside big one
    * @param int[] $small The smaller region, start at index 0, end at 1
    * @param int[] $big   The bigger region, start at index 0, end at 1
-   * @return boolean True if region is inside, else false
+   * @return bool True if region is inside, else false
    */
-  private function isRegionIncluded($small, $big)
+  private function isRegionIncluded($small, $big): bool
   {
     return ($big[0] >= 0) && ($small[0] >= $big[0]) && ($small[1] <= $big[1]);
   }
@@ -420,9 +420,9 @@ class DeciderAgent extends Agent
   /**
    * @brief Check if matches by nomos are inside monk findings
    * @param LicenseMatch[] $licenseMatches
-   * @return boolean True if matches are inside monk, false otherwise
+   * @return bool True if matches are inside monk, false otherwise
    */
-  private function areNomosMatchesInsideAMonkMatch($licenseMatches)
+  private function areNomosMatchesInsideAMonkMatch($licenseMatches): bool
   {
     if (!array_key_exists("nomos", $licenseMatches)) {
       return false;
@@ -454,9 +454,9 @@ class DeciderAgent extends Agent
   /**
    * @brief Check if findings by all agents are same or not
    * @param LicenseMatch[][] $licenseMatches
-   * @return boolean True if they match, false otherwise
+   * @return bool True if they match, false otherwise
    */
-  protected function areNomosMonkNinkaAgreed($licenseMatches)
+  protected function areNomosMonkNinkaAgreed($licenseMatches): bool
   {
     $scanners = array('nomos','monk','ninka');
     $vote = array();
@@ -484,7 +484,7 @@ class DeciderAgent extends Agent
    * @param LicenseMatch[][] $licenseMatches
    * @return int[] list of license ids
    */
-  protected function getLicenseIdsOfMatchesForScanner($scanner, $licenseMatches)
+  protected function getLicenseIdsOfMatchesForScanner($scanner, $licenseMatches): array
   {
     if (array_key_exists($scanner, $licenseMatches) === true) {
       return array_map(
@@ -498,9 +498,9 @@ class DeciderAgent extends Agent
   /**
    * @brief Check if the finding by only contains one single license and that no other scanner (nomos) has produced a contradicting statement
    * @param LicenseMatch[][] $licenseMatches
-   * @return boolean True if they match, false otherwise
+   * @return bool True if they match, false otherwise
    */
-  protected function areOtherScannerFindingsAndOJOAgreed($licenseMatches)
+  protected function areOtherScannerFindingsAndOJOAgreed($licenseMatches): bool
   {
     $findingsByOjo = $this->getLicenseIdsOfMatchesForScanner('ojo', $licenseMatches);
     if (count($findingsByOjo) == 0) {
@@ -525,9 +525,9 @@ class DeciderAgent extends Agent
   /**
    * @brief Check if the finding by only contains one single license and that no other scanner (nomos) has produced a contradicting statement
    * @param LicenseMatch[][] $licenseMatches
-   * @return boolean True if they match, false otherwise
+   * @return bool True if they match, false otherwise
    */
-  protected function areOtherScannerFindingsAndRESOAgreed($licenseMatches)
+  protected function areOtherScannerFindingsAndRESOAgreed($licenseMatches): bool
   {
     $findingsByReso = $this->getLicenseIdsOfMatchesForScanner('reso', $licenseMatches);
     if (count($findingsByReso) == 0) {

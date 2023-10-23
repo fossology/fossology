@@ -172,7 +172,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    * @param string $output Output from agent
    * @return int Heart count value, -1 on failure
    */
-  private function getHeartCount($output)
+  private function getHeartCount($output): int
   {
     $matches = array();
     if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches)) {

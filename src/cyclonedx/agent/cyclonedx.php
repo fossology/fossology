@@ -111,7 +111,7 @@ class CycloneDXAgent extends Agent
    * @copydoc Fossology::Lib::Agent::Agent::processUploadId()
    * @see Fossology::Lib::Agent::Agent::processUploadId()
    */
-  function processUploadId($uploadId)
+  function processUploadId($uploadId): bool
   {
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
 
@@ -128,7 +128,7 @@ class CycloneDXAgent extends Agent
    * @param string $fileBase Name of the upload
    * @return string URI for the upload
    */
-  protected function getUri($fileBase)
+  protected function getUri($fileBase): string
   {
     $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName.'_'.date("Y-m-d_H:i:s");
     return $fileName .".json" ;
@@ -154,7 +154,7 @@ class CycloneDXAgent extends Agent
    * @param int $uploadId
    * @return string Rendered report string
    */
-  protected function renderPackage($uploadId)
+  protected function renderPackage($uploadId): string
   {
     global $SysConf;
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
@@ -222,7 +222,7 @@ class CycloneDXAgent extends Agent
    * @param ItemTreeBounds $itemTreeBounds
    * @return string[][][] Mapping item->'concluded'->(array of shortnames)
    */
-  protected function getFilesWithLicensesFromClearings(ItemTreeBounds $itemTreeBounds)
+  protected function getFilesWithLicensesFromClearings(ItemTreeBounds $itemTreeBounds): array
   {
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
 
@@ -267,7 +267,7 @@ class CycloneDXAgent extends Agent
    * @param int $uploadId
    * @return array Components list
    */
-  protected function generateFileComponents($filesWithLicenses, $treeTableName, $uploadId, $itemTreeBounds)
+  protected function generateFileComponents($filesWithLicenses, $treeTableName, $uploadId, $itemTreeBounds): array
   {
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
@@ -383,7 +383,7 @@ class CycloneDXAgent extends Agent
    * @brief Get the mime type of the upload
    * @return string Mime type of the upload
    */
-  protected function getMimeType($uploadId)
+  protected function getMimeType($uploadId): string
   {
     $sql = "SELECT *
       FROM upload t1

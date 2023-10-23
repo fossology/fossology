@@ -39,7 +39,7 @@ function plugin_find($x)
  * @param int $uploadId
  * @return int Mock job id
  */
-function IsAlreadyScheduled($jobId, $agentName, $uploadId)
+function IsAlreadyScheduled($jobId, $agentName, $uploadId): int
 {
   return 177;
 }

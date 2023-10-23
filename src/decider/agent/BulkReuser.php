@@ -45,7 +45,7 @@ class BulkReuser
    * @throws Exception If agent cannot be added, throw exception with message as HTML
    * @return int Id of the new job
    */
-  public function rerunBulkAndDeciderOnUpload($uploadId, $groupId, $userId, $bulkId, $dependency)
+  public function rerunBulkAndDeciderOnUpload($uploadId, $groupId, $userId, $bulkId, $dependency): int
   {
     /** @var UploadDao $uploadDao
      * UploadDao from container

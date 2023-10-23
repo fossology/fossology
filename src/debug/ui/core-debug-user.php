@@ -26,7 +26,7 @@ class debug_user extends FO_Plugin
    * @copydoc FO_Plugin::Output()
    * @see FO_Plugin::Output()
    */
-  public function Output()
+  public function Output(): string
   {
     $V = "";
     global $PG_CONN;
