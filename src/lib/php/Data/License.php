@@ -62,7 +62,7 @@ class License extends LicenseRef
    */
   public function getSpdxId()
   {
-    return $this->spdxId;
+    return LicenseRef::convertToSpdxId($this->getShortName(), $this->spdxId);
   }
 
   /**

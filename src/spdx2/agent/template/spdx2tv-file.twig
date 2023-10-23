@@ -11,38 +11,43 @@ SPDXID: SPDXRef-item{{ fileId }}
 FileChecksum: SHA1: {{ sha1 | lower }}
 FileChecksum: SHA256: {{ sha256 | lower }}
 FileChecksum: MD5: {{ md5 | lower }}
-{% if isCleared %}
-{% if concludedLicenses|default is empty %}
+{% if fileData.isCleared() %}
+{% if fileData.concludedLicenses|default is empty %}
 LicenseConcluded: NONE
 {% else %}
-LicenseConcluded: {{ concludedLicense }}
+LicenseConcluded: {{ concludedLicensesString }}
 {% endif%}
 {% else %}
 LicenseConcluded: NOASSERTION
 {% endif %}
 {% if licenseCommentState %}
-{% if licenseComment is not empty %}
-LicenseComments: <text>{{ licenseComment |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
-                                         |replace({'\f':''}) }} </text>
+{% if fileData.comments is not empty %}
+LicenseComments: <text> {{ fileData.comments|join('\n')
+  |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+  |replace({'\f':''}) }} </text>
 {% endif %}
 {% endif %}
-{% if scannerLicenses|default is empty %}
+{% if fileData.scanners|default is empty %}
 LicenseInfoInFile: NOASSERTION
 {% else %}
-{% for lic in  scannerLicenses %}
-LicenseInfoInFile: {{ lic|replace({' ':'-'})}}
+{% for res in fileData.scanners %}
+{%- set licId=licenseList[res].licenseObj.spdxId %}
+{% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+  {% set licId=licenseList[res].licenseObj.shortName %}
+{%- endif ~%}
+LicenseInfoInFile: {{ licId|replace({' ':'-'})}}
 {% endfor %}
 {% endif %}
 {# FileSize: 48 Kb (49173 bytes) #}
-{% if copyrights|default is empty %}
+{% if fileData.copyrights|default is empty %}
 FileCopyrightText: NOASSERTION
 {% else %}
-FileCopyrightText: <text> {{ copyrights|join('\n')
-                                       |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
-                                       |replace({'\f':''}) }} </text>
+FileCopyrightText: <text> {{ fileData.copyrights|join('\n')
+  |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+  |replace({'\f':''}) }} </text>
 {% endif %}
-{% if acknowledgements|default is not empty %}
-FileAttributionText: <text> {{ acknowledgements|join('\n')
-                                               |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
-                                               |replace({'\f':''}) }} </text>
+{% if fileData.acknowledgements|default is not empty %}
+FileAttributionText: <text> {{ fileData.acknowledgements|join('\n')
+  |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+  |replace({'\f':''}) }} </text>
 {% endif %}

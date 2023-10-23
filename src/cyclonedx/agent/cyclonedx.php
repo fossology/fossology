@@ -22,12 +22,12 @@ namespace Fossology\CycloneDX;
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\Report\FileNode;
+use Fossology\Lib\Data\Report\SpdxLicenseInfo;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Report\ReportUtils;
 
@@ -60,6 +60,11 @@ class CycloneDXAgent extends Agent
    * ClearingDao object
    */
   private $clearingDao;
+  /**
+   * @var LicenseDao $licenseDao
+   * LicenseDao object
+   */
+  private $licenseDao;
   /** @var DbManager $dbManager
    * DbManager object
    */
@@ -72,18 +77,23 @@ class CycloneDXAgent extends Agent
    * Agent names mapping
    */
   protected $agentNames = AgentRef::AGENT_LIST;
-  /** @var array $includedLicenseIds
-   * License ids included
-   */
-  protected $includedLicenseIds = array();
   /** @var string $uri
    * URI of the file
    */
   protected $uri;
+  /**
+   * @var SpdxLicenseInfo[] $licensesInDocument
+   * List of licenses found in the document.
+   */
+  private $licensesInDocument = [];
   /** @var string $outputFormat
    * Output format of the report
    */
   protected $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
+  /**
+   * @var string $packageName
+   */
+  private $packageName;
 
   function __construct()
   {
@@ -101,6 +111,7 @@ class CycloneDXAgent extends Agent
 
     $this->uploadDao = $this->container->get('dao.upload');
     $this->clearingDao = $this->container->get('dao.clearing');
+    $this->licenseDao = $this->container->get('dao.license');
     $this->dbManager = $this->container->get('db.manager');
 
     $this->reportutils = new ReportUtils();
@@ -152,7 +163,7 @@ class CycloneDXAgent extends Agent
   /**
    * @brief Given an upload id, render the report string
    * @param int $uploadId
-   * @return string Rendered report string
+   * @return array Rendered report string
    */
   protected function renderPackage($uploadId)
   {
@@ -161,13 +172,15 @@ class CycloneDXAgent extends Agent
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
     $this->heartbeat(0);
 
-    $filesWithLicenses = $this->getFilesWithLicensesFromClearings($itemTreeBounds);
+    $filesWithLicenses = $this->reportutils
+      ->getFilesWithLicensesFromClearings($itemTreeBounds, $this->groupId,
+        $this, $this->licensesInDocument);
     $this->heartbeat(0);
 
     $this->reportutils->addClearingStatus($filesWithLicenses, $itemTreeBounds, $this->groupId);
     $this->heartbeat(0);
 
-    $this->reportutils->addScannerResults($filesWithLicenses, $itemTreeBounds, $this->groupId, $this->includedLicenseIds);
+    $this->reportutils->addScannerResults($filesWithLicenses, $itemTreeBounds, $this->groupId, $this->licensesInDocument);
     $this->heartbeat(0);
 
     $this->reportutils->addCopyrightResults($filesWithLicenses, $uploadId);
@@ -178,13 +191,19 @@ class CycloneDXAgent extends Agent
 
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     $mainLicenses = array();
-    $licenseTexts = $this->reportutils->getLicenseTexts($this->groupId, $this->includedLicenseIds);
     foreach ($mainLicenseIds as $licId) {
       $reportedLicenseId = $this->licenseMap->getProjectedId($licId);
-      $this->includedLicenseIds[$reportedLicenseId] = true;
-      $spdxId = $this->licenseMap->getProjectedSpdxId($reportedLicenseId);
-      $licensedata['id'] = $spdxId;
-      $licensedata['url'] = $licenseTexts[$spdxId]['url'];
+      $mainLicObj = $this->licenseDao->getLicenseById($reportedLicenseId);
+      $licId = $mainLicObj->getId() . "-" . md5($mainLicObj->getText());
+      if (!array_key_exists($licId, $this->licensesInDocument)) {
+        $this->licensesInDocument = (new SpdxLicenseInfo())
+          ->setLicenseObj($mainLicObj)
+          ->setCustomText(false)
+          ->setTextPrinted(true)
+          ->setListedLicense(true);
+      }
+      $licensedata['id'] = $mainLicObj->getSpdxId();
+      $licensedata['url'] = $mainLicObj->getUrl();
       $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
     }
 
@@ -218,51 +237,8 @@ class CycloneDXAgent extends Agent
   }
 
   /**
-   * @brief Given an ItemTreeBounds, get the files with clearings
-   * @param ItemTreeBounds $itemTreeBounds
-   * @return string[][][] Mapping item->'concluded'->(array of shortnames)
-   */
-  protected function getFilesWithLicensesFromClearings(ItemTreeBounds $itemTreeBounds)
-  {
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
-
-    $filesWithLicenses = array();
-    $clearingsProceeded = 0;
-    foreach ($clearingDecisions as $clearingDecision) {
-      $clearingsProceeded += 1;
-      if (($clearingsProceeded&2047)==0) {
-        $this->heartbeat(0);
-      }
-      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
-        continue;
-      }
-
-      foreach ($clearingDecision->getClearingEvents() as $clearingEvent) {
-        $clearingLicense = $clearingEvent->getClearingLicense();
-        if ($clearingLicense->isRemoved()) {
-          continue;
-        }
-
-        if ($clearingEvent->getReportinfo()) {
-          $customLicenseText = $clearingEvent->getReportinfo();
-          $reportedLicenseShortname = $this->licenseMap->getProjectedSpdxId($this->licenseMap->getProjectedId($clearingLicense->getLicenseId())) .
-                                    '-' . md5($customLicenseText);
-          $reportedLicenseShortname = LicenseRef::convertToSpdxId($reportedLicenseShortname, "");
-          $this->includedLicenseIds[$reportedLicenseShortname] = $customLicenseText;
-          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $reportedLicenseShortname;
-        } else {
-          $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
-          $this->includedLicenseIds[$reportedLicenseId] = true;
-          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $this->licenseMap->getProjectedSpdxId($reportedLicenseId);
-        }
-      }
-    }
-    return $filesWithLicenses;
-  }
-
-  /**
    * @brief Generate the components by files
-   * @param string[][][] $filesWithLicenses
+   * @param FileNode[] $filesWithLicenses
    * @param string $treeTableName
    * @param int $uploadId
    * @return array Components list
@@ -275,8 +251,7 @@ class CycloneDXAgent extends Agent
     $filesProceeded = 0;
     $lastValue = 0;
     $components = array();
-    $licenseTexts = $this->reportutils->getLicenseTexts($this->groupId, $this->includedLicenseIds);
-    foreach ($filesWithLicenses as $fileId=>$licenses) {
+    foreach ($filesWithLicenses as $fileId => $licenses) {
       $filesProceeded += 1;
       if (($filesProceeded & 2047) == 0) {
         $this->heartbeat($filesProceeded - $lastValue);
@@ -293,35 +268,26 @@ class CycloneDXAgent extends Agent
       }
 
       $fileName = $treeDao->getFullPath($fileId, $treeTableName, 0);
-      if (!array_key_exists('concluded', $licenses) || !is_array($licenses['concluded'])) {
-        $licenses['concluded'] = [];
-      }
-      if (!array_key_exists('scanner', $licenses) || !is_array($licenses['scanner'])) {
-        $licenses['scanner'] = [];
-      }
-      if (!array_key_exists('copyrights', $licenses)) {
-        $licenses['copyrights'] = [];
-      }
       $licensesfound = [];
 
-      if (!empty($licenses['concluded'])) {
-        foreach ($licenses['concluded'] as $license) {
-          if (array_key_exists($license, $licenseTexts)) {
+      if (!empty($licenses->getConcludedLicenses())) {
+        foreach ($licenses->getConcludedLicenses() as $licenseId) {
+          if (array_key_exists($licenseId, $this->licensesInDocument)) {
             $licensedata = array(
-              "id"   => $licenseTexts[$license]["id"],
-              "name" => $licenseTexts[$license]["name"],
-              "url"  => $licenseTexts[$license]["url"]
+              "id"   => $this->licensesInDocument[$licenseId]->getLicenseObj()->getSpdxId(),
+              "name" => $this->licensesInDocument[$licenseId]->getLicenseObj()->getFullName(),
+              "url"  => $this->licensesInDocument[$licenseId]->getLicenseObj()->getUrl()
             );
             $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
           }
         }
       } else {
-        foreach ($licenses['scanner'] as $license) {
-          if (array_key_exists($license, $licenseTexts)) {
+        foreach ($licenses->getScanners() as $licenseId) {
+          if (array_key_exists($licenseId, $this->licensesInDocument)) {
             $licensedata = array(
-              "id"   => $licenseTexts[$license]["id"],
-              "name" => $licenseTexts[$license]["name"],
-              "url"  => $licenseTexts[$license]["url"]
+              "id"   => $this->licensesInDocument[$licenseId]->getLicenseObj()->getSpdxId(),
+              "name" => $this->licensesInDocument[$licenseId]->getLicenseObj()->getFullName(),
+              "url"  => $this->licensesInDocument[$licenseId]->getLicenseObj()->getUrl()
             );
             $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
           }
@@ -334,7 +300,7 @@ class CycloneDXAgent extends Agent
           'name' => $fileName,
           'hashes' => $serializedhash,
           'mimeType' => 'text/plain',
-          'copyright' => implode("\n", $licenses['copyrights']),
+          'copyright' => implode("\n", $licenses->getCopyrights()),
           'licenses' => $licensesfound
         );
         $components[] = $this->reportGenerator->createComponent($componentdata);
@@ -346,7 +312,7 @@ class CycloneDXAgent extends Agent
 
   /**
    * @brief Write the report the file and update report table
-   * @param string $packageNodes
+   * @param array $packageNodes
    * @param int $uploadId
    */
   protected function writeReport($packageNodes, $uploadId)
@@ -375,7 +341,7 @@ class CycloneDXAgent extends Agent
   protected function updateReportTable($uploadId, $jobId, $fileName)
   {
     $this->dbManager->insertTableRow('reportgen',
-            array('upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$fileName),
+            ['upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$fileName],
             __METHOD__);
   }
 
@@ -385,16 +351,13 @@ class CycloneDXAgent extends Agent
    */
   protected function getMimeType($uploadId)
   {
-    $sql = "SELECT *
-      FROM upload t1
-      JOIN pfile t2 ON t1.pfile_fk = t2.pfile_pk
-      JOIN mimetype t3 ON t2.pfile_mimetypefk = t3.mimetype_pk
-      WHERE t1.upload_pk = $uploadId";
+    $sql = "SELECT mimetype_name
+      FROM upload u
+      JOIN pfile pf ON u.pfile_fk = pf.pfile_pk
+      JOIN mimetype m ON pf.pfile_mimetypefk = m.mimetype_pk
+      WHERE u.upload_pk = $1";
 
-    $this->dbManager->prepare($stmt=__METHOD__, $sql);
-    $res = $this->dbManager->execute($stmt);
-    $row = $this->dbManager->fetchArray($res);
-    $this->dbManager->freeResult($res);
+    $row = $this->dbManager->getSingleRow($sql, [$uploadId], __METHOD__);
     return $row['mimetype_name'];
   }
 }

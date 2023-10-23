@@ -1,7 +1,8 @@
-{# SPDX-FileCopyrightText: © 2015 Siemens AG
+{# SPDX-FileCopyrightText: © 2015,2023 Siemens AG
 
    SPDX-License-Identifier: FSFAP
 #}
+{%- from "listedlicense.xml.twig" import listedLicenseFull -%}
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:spdx="http://spdx.org/rdf/terms#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
@@ -9,17 +10,7 @@
 <spdx:SpdxDocument rdf:about="{{ uri }}#SPDXRef-DOCUMENT">
   <spdx:specVersion>SPDX-2.3</spdx:specVersion>
   <spdx:dataLicense>
-    <spdx:ListedLicense rdf:about="http://spdx.org/licenses/{{ dataLicense.id|replace({' ': '-'})|url_encode }}">
-      <spdx:name>{{ dataLicense.name|e }}</spdx:name>
-      <spdx:licenseId>{{ dataLicense.id|replace({' ': '-'})|e }}</spdx:licenseId>
-      <spdx:licenseText><![CDATA[
-{{ dataLicense.text|replace({'\f':''})
-                   |replace({']]>':']]]]><![CDATA[>'}) }}
-      ]]></spdx:licenseText>
-{% if dataLicense.url is not empty %}
-      <rdfs:seeAlso>{{ dataLicense.url }}</rdfs:seeAlso>
-{% endif %}
-    </spdx:ListedLicense>
+    {{ listedLicenseFull(licenseList[dataLicense].licenseObj) -}}
   </spdx:dataLicense>
   <spdx:creationInfo>
     <spdx:CreationInfo>
@@ -34,21 +25,21 @@
   <rdfs:comment>
     This document was created using license information and a generator from Fossology.
   </rdfs:comment>
-  {%- for licenseData in licenseTexts %}{% if licenseData.id starts with 'LicenseRef-' ~%}
+  {%- for licenseData in licenseList %}{% if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' ~%}
   <spdx:hasExtractedLicensingInfo>
-{% if licenseData.id starts with 'LicenseRef-' %}
-    <spdx:ExtractedLicensingInfo rdf:about="#{{ licenseData.id|replace({' ': '-'})|url_encode }}">
-{% else %}
-    <spdx:ExtractedLicensingInfo rdf:about="http://spdx.org/licenses/{{ licenseData.id|replace({' ': '-'})|url_encode }}">
-{% endif %}
-      <spdx:licenseId>{{ licenseData.id|replace({' ': '-'})|e }}</spdx:licenseId>
-      <spdx:name>{{ licenseData.name|e }}</spdx:name>
+    {%- set licId=licenseData.licenseObj.spdxId %}
+    {% if licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
+      {% set licId=licenseData.licenseObj.shortName %}
+    {%- endif ~%}
+    <spdx:ExtractedLicensingInfo rdf:about="#{{ licId|replace({' ': '-'})|url_encode }}">
+      <spdx:licenseId>{{ licenseData.licenseObj.spdxId|replace({' ': '-'})|e }}</spdx:licenseId>
+      <spdx:name>{{ licenseData.licenseObj.fullName|e }}</spdx:name>
       <spdx:extractedText><![CDATA[
-{{ licenseData.text|replace({'\f':''})
-                   |replace({']]>':']]]]><![CDATA[>'}) }}
+{{ licenseData.licenseObj.text|replace({'\f':''})
+        |replace({']]>':']]]]><![CDATA[>'}) }}
       ]]></spdx:extractedText>
-{% if licenseData.url is not empty %}
-      <rdfs:seeAlso>{{ licenseData.url }}</rdfs:seeAlso>
+{% if licenseData.licenseObj.url is not empty %}
+      <rdfs:seeAlso>{{ licenseData.licenseObj.url }}</rdfs:seeAlso>
 {% endif %}
     </spdx:ExtractedLicensingInfo>
   </spdx:hasExtractedLicensingInfo>

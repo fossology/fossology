@@ -549,6 +549,11 @@ INSERT INTO license_ref (rf_pk, rf_shortname, rf_spdx_id, rf_text, rf_url, rf_ad
 and new line.', NULL, NULL, NULL, NULL, 'License C', NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 2, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_spdx_id, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (560, 'lic Cpp', 'LicenseRef-fossology-lic-Cpp', 'License by Nomos plus plus.', NULL, NULL, NULL, NULL, 'License Cpp', NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 2, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_spdx_id, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (561, 'lic D', 'LicenseRef-fossology-lic-D', 'License by Nomos.', NULL, NULL, NULL, NULL, 'License D', NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 2, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_spdx_id, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved",
+                         rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora",
+                         marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source)
+VALUES (561, 'CC0-1.0', 'CC0-1.0', 'CC0-1.0', NULL, NULL, NULL, NULL, 'CC0 1.0', NULL, NULL, NULL, NULL, NULL, false,
+        true, false, '407014723b7e45b6ee534a20cd7542a2', 2, NULL);
 
 
 INSERT INTO monk_ars VALUES (4, 8, 1, true, NULL, '2015-05-04 11:43:17.619778+02', '2015-05-04 11:43:17.863761+02');
