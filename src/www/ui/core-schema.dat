@@ -16,7 +16,7 @@
   $Schema["TABLE"]["agent"]["agent_name"]["ALTER"] = "ALTER TABLE \"agent\" ALTER COLUMN \"agent_name\" SET NOT NULL";
 
   $Schema["TABLE"]["agent"]["agent_rev"]["DESC"] = "COMMENT ON COLUMN \"agent\".\"agent_rev\" IS 'revision string'";
-  $Schema["TABLE"]["agent"]["agent_rev"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_rev\" varchar(32)";
+  $Schema["TABLE"]["agent"]["agent_rev"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_rev\" text";
   $Schema["TABLE"]["agent"]["agent_rev"]["ALTER"] = "ALTER TABLE \"agent\" ALTER COLUMN \"agent_rev\" DROP NOT NULL";
 
   $Schema["TABLE"]["agent"]["agent_desc"]["DESC"] = "COMMENT ON COLUMN \"agent\".\"agent_desc\" IS 'short description'";
