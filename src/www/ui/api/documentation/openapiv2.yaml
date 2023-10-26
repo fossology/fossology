@@ -7,7 +7,7 @@ openapi: 3.1.0
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.6.0
+  version: 2.0.0
   contact:
     email: fossology@fossology.org
   license:
@@ -15,7 +15,7 @@ info:
     url: https://github.com/fossology/fossology/blob/master/LICENSE
 servers:
   - url: http://localhost/repo/api/v1
-    description: Localhost instance
+    description: Localhost instance (deprecated)
   - url: http://localhost/repo/api/v2
     description: Localhost instance (Version 2)
 security:
@@ -203,7 +203,7 @@ paths:
               example:
                 {"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2NhbGhvc3QiLCJhdWQiOiJsb2NhbGhvc3QiLCJleHAiOjE1NTEyOTIyMDAsIm5iZiI6MTU1MTIwNTgwMCwianRpIjoiTmk0eiIsInNjb3BlIjoicmVhZCJ9.71D6xTD2QE45t9AVCwbrQwSSae5lC4yzKCMpZWXoC2Q"}
         '404':
-          description: UserName or password incorrect
+          description: Username or password incorrect
           content:
             application/json:
               schema:
@@ -5424,26 +5424,24 @@ components:
     TokenRequest:
       type: object
       properties:
-        token_name:
+        tokenName:
           type: string
           maxLength: 40
           description: Friendly name of the token
-        token_scope:
+        tokenScope:
           type: string
           enum:
             - read
             - write
           description: The scope of the token.
-        token_expire:
+        tokenExpire:
           type: string
           format: date
           description: Date when the token must expire (default max 30 days).
       required:
-        - username
-        - password
-        - token_name
-        - token_scope
-        - token_expire
+        - tokenName
+        - tokenScope
+        - tokenExpire
     VcsUpload:
       description: To create an upload from a version control system
       type: object
@@ -6377,9 +6375,6 @@ components:
         delimiters:
           type: string
           example: "DEFAULT"
-        scanOnlyFindings:
-          type: boolean
-          example: false
     ScannedEditedLicense:
       type: object
       properties:
@@ -7082,3 +7077,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Info'
+
+  parameters:
+    groupName:
+      description: The group name to chose
+      in: query
+      name: groupName
+      schema:
+        type: string
+      required: false

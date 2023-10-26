@@ -453,9 +453,10 @@ class UserEditPage extends DefaultPlugin
    * Generate new token based on the request sent by user.
    *
    * @param Request $request
-   * @return string The new token if no error occured.
+   * @return string The new token if no error occurred.
    * @throws \UnexpectedValueException Throws an exception if the request is
-   * @throws DuplicateTokenKeyException
+   * @throws DuplicateTokenKeyException Unable to generate new key.
+   * @throws DuplicateTokenNameException Duplicate token name in DB.
    * @uses Fossology::UI::Api::Helper::RestHelper::validateTokenRequest()
    * @uses Fossology::UI::Api::Helper::DbHelper::insertNewTokenKey()
    */
@@ -504,7 +505,8 @@ class UserEditPage extends DefaultPlugin
       throw new \UnexpectedValueException($e->getMessage());
     }
     return $this->authHelper->generateJwtToken($tokenExpiry,
-      $jti['created_on'], $jti['jti'], $tokenScope, $key);
+      $jti['created_on'], $jti['jti'], RestHelper::SCOPE_DB_MAP[$tokenScope],
+      $key);
   }
 
   /**

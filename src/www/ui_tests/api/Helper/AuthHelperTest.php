@@ -109,7 +109,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
     $createdOn = strftime('%Y-%m-%d');
     $expire = strftime('%Y-%m-%d', strtotime('+3 day'));
     $authToken = $this->authHelper->generateJwtToken($expire, $createdOn, $jti,
-      "write", $key);
+      "w", $key);
     $authHeader = "Bearer " . $authToken;
     $tokenRow = [
       "token_key" => $key,
@@ -152,7 +152,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
     $createdOn = strftime('%Y-%m-%d');
     $expire = strftime('%Y-%m-%d', strtotime('+3 day'));
     $authToken = $this->authHelper->generateJwtToken($expire, $createdOn, $jti,
-      "write", $key);
+      "w", $key);
     $authHeader = "Bearer " . $authToken;
     $tokenRow = [
       "token_key" => $key,

@@ -211,12 +211,13 @@ class AuthHelper
    * @param string $expire   When the token will expire ('YYYY-MM-DD')
    * @param string $created  When the token was created ('YYYY-MM-DD')
    * @param string $jti      Token id (`pat_pk.user_pk`)
-   * @param string $scope    User friendly token scope
+   * @param string $scope    Token scope key
    * @param string $key      Token secret key
    * @return string New JWT token
    */
   public function generateJwtToken($expire, $created, $jti, $scope, $key)
   {
+    $scope = array_search($scope, RestHelper::SCOPE_DB_MAP);
     $newJwtToken = [
       "exp" => strtotime($expire . " +1 day -1 second"),  // To allow day level granularity
       "nbf" => strtotime($created),
