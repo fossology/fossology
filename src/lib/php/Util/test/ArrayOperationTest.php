@@ -79,4 +79,14 @@ class ArrayOperationTest extends \PHPUnit\Framework\TestCase
     assertThat(ArrayOperation::multiSearch(array(200),$haystack),is(false));
     assertThat(ArrayOperation::multiSearch(array(200,102),$haystack),is(2));
   }
+
+  public function testArrayKeyExists()
+  {
+    $haystack = ["Key1" => "Value1", "Key2" => "Value2", "Key3" => "Value3"];
+    $this->assertTrue(ArrayOperation::arrayKeysExists($haystack, ["Key1", "Key2", "Key3"]));
+    $this->assertTrue(ArrayOperation::arrayKeysExists($haystack, ["Key1", "Key2"]));
+    $this->assertTrue(ArrayOperation::arrayKeysExists($haystack, ["Key3"]));
+    $this->assertFalse(ArrayOperation::arrayKeysExists($haystack, ["Key11", "Key2", "Key3"]));
+    $this->assertFalse(ArrayOperation::arrayKeysExists($haystack, ["Key11"]));
+  }
 }
