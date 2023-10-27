@@ -161,7 +161,7 @@ class LicenseStdCommentDao
       }
       $sql = "UPDATE license_std_comment " .
         "SET updated = NOW(), user_fk = $2, " . join(",", $updateStatement) .
-        "WHERE lsc_pk = $1 " .
+        " WHERE lsc_pk = $1 " .
         "RETURNING 1 AS updated;";
       $retVal = $this->dbManager->getSingleRow($sql, $params, $statement);
       $updated += intval($retVal);
