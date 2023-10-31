@@ -276,6 +276,7 @@ File NomosTestfiles/CC/matching.py contains license(s) BSD,CC-BY-SA-3.0,Public-d
 File NomosTestfiles/CC/md5.js contains license(s) CCPL
 File NomosTestfiles/CC/memory_map.h contains license(s) CC-BY-NC-ND-2.0
 File NomosTestfiles/CC/netbsd.h contains license(s) CC-BY-NC-SA-3.0,Not-Free
+File NomosTestfiles/CC/perl-XML-Writer.spec contains license(s) CC0,GPL,MIT
 File NomosTestfiles/CC/README contains license(s) CC-BY-NC-SA-3.0
 File NomosTestfiles/CC/README.icons.txt contains license(s) CC-BY-SA-2.5
 File NomosTestfiles/CC/setup.h contains license(s) CC-BY-NC-SA-3.0
@@ -917,6 +918,7 @@ File NomosTestfiles/NTP/NTP-COPYRIGHT contains license(s) NTP
 File NomosTestfiles/NTP/NTP.txt contains license(s) NTP
 File NomosTestfiles/Nvidia/atom.c contains license(s) Nvidia-EULA-a
 File NomosTestfiles/Nvidia/copyright contains license(s) Nvidia
+File NomosTestfiles/Nvidia/mix_transformer.py contains license(s) Nvidia
 File NomosTestfiles/Nvidia/Nvidia-EULA.txt contains license(s) Nvidia-EULA-b
 File NomosTestfiles/OCLC/OCLC-2.0.txt contains license(s) OCLC-2.0
 File NomosTestfiles/ODbL/LICENSE.txt contains license(s) CC-BY-SA-2.0,ODbL-1.0
@@ -1447,6 +1449,7 @@ File NomosTestfiles/See-file/qlge.h contains license(s) See-file.LICENSE
 File NomosTestfiles/See-file/README.txt contains license(s) See-file.LICENSE
 File NomosTestfiles/See-file/revoco.h contains license(s) See-file
 File NomosTestfiles/See-file/rtctype.h contains license(s) See-file.COPYING
+File NomosTestfiles/See-file/segformer.py contains license(s) See-URL
 File NomosTestfiles/See-file/See-file_COPYING_a.txt contains license(s) See-file.COPYING
 File NomosTestfiles/See-file/See-file_LICENSE_a contains license(s) See-file.LICENSE
 File NomosTestfiles/See-file/See-file_LICENSE_b contains license(s) See-file.LICENSE
