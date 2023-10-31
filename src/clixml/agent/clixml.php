@@ -182,10 +182,10 @@ class CliXml extends Agent
     $otherStatement = $this->otherGetter->getReportData($uploadId);
     $this->heartbeat(empty($otherStatement) ? 0 : count($otherStatement));
 
-    if (!empty($otherStatement['ri_unifiedcolumns'])) {
-      $unifiedColumns = json_decode($otherStatement['ri_unifiedcolumns'], true);
+    if (!empty($otherStatement['ri_clixmlcolumns'])) {
+      $clixmlColumns = json_decode($otherStatement['ri_clixmlcolumns'], true);
     } else {
-      $unifiedColumns = UploadDao::UNIFIED_REPORT_HEADINGS;
+      $clixmlColumns = UploadDao::CLIXML_REPORT_HEADINGS;
     }
 
     $licenses = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, "license", false);
@@ -194,7 +194,7 @@ class CliXml extends Agent
     $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($licensesMain) ? 0 : count($licensesMain["statements"]));
 
-    if (array_values($unifiedColumns['irrelevantfiles'])[0]) {
+    if (array_values($clixmlColumns['irrelevantfilesclixml'])[0]) {
       $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $this, $groupId, true, null, false);
       $irreComments = $this->licenseIrrelevantGetterComments->getCleared($uploadId, $this, $groupId, true, null, false);
     } else {
@@ -204,7 +204,7 @@ class CliXml extends Agent
     $this->heartbeat(empty($licensesIrre) ? 0 : count($licensesIrre["statements"]));
     $this->heartbeat(empty($irreComments) ? 0 : count($irreComments["statements"]));
 
-    if (array_values($unifiedColumns['dnufiles'])[0]) {
+    if (array_values($clixmlColumns['dnufilesclixml'])[0]) {
       $licensesDNU = $this->licenseDNUGetter->getCleared($uploadId, $this, $groupId, true, null, false);
       $licensesDNUComment = $this->licenseDNUCommentGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     } else {
@@ -214,40 +214,40 @@ class CliXml extends Agent
     $this->heartbeat(empty($licensesDNU) ? 0 : count($licensesDNU["statements"]));
     $this->heartbeat(empty($licensesDNUComment) ? 0 : count($licensesDNUComment["statements"]));
 
-    if (array_values($unifiedColumns['copyrights'])[0]) {
+    if (array_values($clixmlColumns['copyrightsclixml'])[0]) {
       $copyrights = $this->cpClearedGetter->getCleared($uploadId, $this, $groupId, true, "copyright", false);
     } else {
       $copyrights = array("statements" => array());
     }
     $this->heartbeat(empty($copyrights["statements"]) ? 0 : count($copyrights["statements"]));
 
-    if (array_values($unifiedColumns['exportrestrictions'])[0]) {
+    if (array_values($clixmlColumns['exportrestrictionsclixml'])[0]) {
       $ecc = $this->eccClearedGetter->getCleared($uploadId, $this, $groupId, true, "ecc", false);
     } else {
       $ecc = array("statements" => array());
     }
     $this->heartbeat(empty($ecc) ? 0 : count($ecc["statements"]));
 
-    if (array_values($unifiedColumns['intellectualProperty'])[0]) {
+    if (array_values($clixmlColumns['intellectualPropertyclixml'])[0]) {
       $ipra = $this->ipraClearedGetter->getCleared($uploadId, $this, $groupId, true, "ipra", false);
     } else {
       $ipra = array("statements" => array());
     }
     $this->heartbeat(empty($ipra) ? 0 : count($ipra["statements"]));
 
-    if (array_values($unifiedColumns['notes'])[0]) {
+    if (array_values($clixmlColumns['notesclixml'])[0]) {
       $notes = htmlspecialchars($otherStatement['ri_ga_additional'], ENT_DISALLOWED);
     } else {
       $notes = "";
     }
 
     $countAcknowledgement = 0;
-    $includeAcknowledgements = array_values($unifiedColumns['acknowledgements'])[0];
+    $includeAcknowledgements = array_values($clixmlColumns['acknowledgementsclixml'])[0];
     $licenses["statements"] = $this->addLicenseNames($licenses["statements"]);
     $licensesWithAcknowledgement = $this->removeDuplicateAcknowledgements(
       $licenses["statements"], $countAcknowledgement, $includeAcknowledgements);
 
-    if (array_values($unifiedColumns['overviewwithwithoutobligations'])[0]) {
+    if (array_values($clixmlColumns['allobligations'])[0]) {
       $obligations = $this->obligationsGetter->getObligations(
         $licenses['statements'], $licensesMain['statements'], $uploadId, $groupId)[0];
       $obligations = array_values($obligations);
@@ -255,7 +255,7 @@ class CliXml extends Agent
       $obligations = array();
     }
 
-    if (array_values($unifiedColumns['mainlicenses'])[0]) {
+    if (array_values($clixmlColumns['mainlicensesclixml'])[0]) {
       $mainLicenses = $licensesMain["statements"];
     } else {
       $mainLicenses = array();
@@ -276,6 +276,16 @@ class CliXml extends Agent
     );
     $contents = $this->reArrangeMainLic($contents, $includeAcknowledgements);
     $contents = $this->reArrangeContent($contents);
+    $fileOperations = array(
+      "licensepath" => array_values($clixmlColumns['licensepath'])[0],
+      "licensehash" => array_values($clixmlColumns['licensehash'])[0],
+      "copyrightpath" => array_values($clixmlColumns['copyrightpath'])[0],
+      "copyrighthash" => array_values($clixmlColumns['copyrighthash'])[0],
+      "eccpath" => array_values($clixmlColumns['eccpath'])[0],
+      "ecchash" => array_values($clixmlColumns['ecchash'])[0],
+      "iprapath" => array_values($clixmlColumns['iprapath'])[0],
+      "iprahash" => array_values($clixmlColumns['iprahash'])[0]
+    );
     list($generalInformation, $assessmentSummary) = $this->getReportSummary($uploadId);
     $generalInformation['componentHash'] = $componentHash['sha1'];
     return $this->renderString($this->getTemplateFile('file'),array(
@@ -289,7 +299,8 @@ class CliXml extends Agent
       'commentAdditionalNotes' => $notes,
       'externalIdLink' => htmlspecialchars($otherStatement['ri_sw360_link']),
       'generalInformation' => $generalInformation,
-      'assessmentSummary' => $assessmentSummary
+      'assessmentSummary' => $assessmentSummary,
+      'fileOperations' => $fileOperations
     ));
   }
 

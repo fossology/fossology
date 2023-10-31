@@ -2264,6 +2264,10 @@
   $Schema["TABLE"]["report_info"]["ri_unifiedcolumns"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_unifiedcolumns\" json";
   $Schema["TABLE"]["report_info"]["ri_unifiedcolumns"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_unifiedcolumns\" DROP NOT NULL";
 
+  $Schema["TABLE"]["report_info"]["ri_clixmlcolumns"]["DESC"] = "COMMENT ON COLUMN \"report_info\".\"ri_clixmlcolumns\" IS 'to edit clixml report file hash columns'";
+  $Schema["TABLE"]["report_info"]["ri_clixmlcolumns"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_clixmlcolumns\" json";
+  $Schema["TABLE"]["report_info"]["ri_clixmlcolumns"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_clixmlcolumns\" DROP NOT NULL";
+
   $Schema["TABLE"]["report_info"]["ri_globaldecision"]["DESC"] = "";
   $Schema["TABLE"]["report_info"]["ri_globaldecision"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_globaldecision\" int2 DEFAULT 1";
   $Schema["TABLE"]["report_info"]["ri_globaldecision"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_globaldecision\" SET NOT NULL, ALTER COLUMN \"ri_globaldecision\" SET DEFAULT 1";
