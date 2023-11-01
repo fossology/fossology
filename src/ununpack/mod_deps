@@ -80,7 +80,7 @@ if [ $RUNTIME ]; then
   case "$DISTRO" in
     Debian|Ubuntu)
       apt-get $YesOpt install \
-        bzip2 cabextract cpio genisoimage p7zip poppler-utils rpm tar upx-ucl \
+        bzip2 cabextract cpio genisoimage p7zip poppler-utils rpm tar \
         unzip gzip sleuthkit p7zip-full unrar-free libgcrypt20 zstd
       ;;
     RedHatEnterprise*|CentOS)
@@ -91,7 +91,7 @@ if [ $RUNTIME ]; then
     Fedora)
       yum $YesOpt install \
         bzip2 cabextract cpio genisoimage p7zip p7zip-plugins poppler-utils rpm\
-        tar upx unzip gzip sleuthkit unrar libgcrypt zstd
+        tar unzip gzip sleuthkit unrar libgcrypt zstd
       ;;
   esac
 fi

@@ -67,7 +67,9 @@ cmdlist CMD[] =
 /* 3 */ { "application/x-compress","zcat","","> '%s' 2>/dev/null","",CMD_PACK,1,0177000,0177000, },
 /* 4 */ { "application/x-bzip","bzcat","","> '%s' 2>/dev/null","",CMD_PACK,1,0177000,0177000, },
 /* 5 */ { "application/x-bzip2","bzcat","","> '%s' 2>/dev/null","",CMD_PACK,1,0177000,0177000, },
+#if UPX_SUPPORT
 /* 6 */ { "application/x-upx","upx","-d -o'%s'",">/dev/null 2>&1","",CMD_PACK,1,0177000,0177000, },
+#endif
 /* 7 */ { "application/pdf","pdftotext","-htmlmeta","'%s' >/dev/null 2>&1","",CMD_PACK,1,0100000,0100000, },
 /* 8 */ { "application/x-pdf","pdftotext","-htmlmeta","'%s' >/dev/null 2>&1","",CMD_PACK,1,0100000,0100000, },
 /* 9 */ { "application/x-zip","unzip","-q -P none -o","-x / >/dev/null 2>&1","unzip -Zhzv '%s' > '%s'",CMD_ARC,1,0177000,0177000, },

@@ -96,7 +96,7 @@ Description: architecture for analyzing software, database
 
 Package: fossology-ununpack
 Architecture: any
-Depends: fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoimage, poppler-utils, rpm, upx-ucl, unrar-free, unzip, p7zip-full, p7zip, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoimage, poppler-utils, rpm, unrar-free, unzip, p7zip-full, p7zip, ${shlibs:Depends}, ${misc:Depends}
 Conflicts: fossology-agents-single
 Description: architecture for analyzing software, ununpack and adj2nest
  The FOSSology project is a web based framework that allows you to

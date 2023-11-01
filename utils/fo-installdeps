@@ -168,7 +168,7 @@ if [[ $RUNTIME ]]; then
             libxml2 libzstd1 \
             binutils \
             cabextract cpio sleuthkit genisoimage \
-            poppler-utils upx-ucl \
+            poppler-utils \
             unrar-free unzip p7zip-full p7zip wget \
             subversion git \
             dpkg-dev php-uuid
