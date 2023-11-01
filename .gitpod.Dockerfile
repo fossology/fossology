@@ -22,7 +22,7 @@ RUN install-packages --option Dpkg::Options::="--force-confold" \
     libssl-dev libtext-template-perl libxml2-dev lsb-release ninja-build p7zip \
     p7zip-full poppler-utils postgresql-14 postgresql-contrib-14 \
     postgresql-server-dev-all rpm sleuthkit s-nail sqlite3 subversion tar \
-    unrar-free unzip upx-ucl wget zip
+    unrar-free unzip wget zip
 
 # Fix PHP for FOSSology
 RUN PHP_PATH=$(php --ini | awk '/\/etc\/php.*\/cli$/{print $5}') \

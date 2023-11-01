@@ -5,6 +5,8 @@ SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
 
 set(FO_CWD ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FO_C_FLAGS}")
+# Set to 1 if using upx-ucl package to support .upx files
+set(UPX_INSTALLED 0)
 
 include_directories(
     ${glib_INCLUDE_DIRS}
@@ -24,6 +26,7 @@ foreach(FO_UNP_LIB ununpack ununpack_cov ununpack-sa)
         _FILE_OFFSET_BITS=64
         VERSION_S="${FO_VERSION}"
         COMMIT_HASH_S="${FO_COMMIT_HASH}"
+        UPX_SUPPORT=${UPX_INSTALLED}
     )
     target_sources(${FO_UNP_LIB}
         PRIVATE
@@ -61,6 +64,7 @@ foreach(FO_UNP_EXEC departition departition-coverage ununpack_exec ununpack-cove
         _FILE_OFFSET_BITS=64
         VERSION_S="${FO_VERSION}"
         COMMIT_HASH_S="${FO_COMMIT_HASH}"
+        UPX_SUPPORT=${UPX_INSTALLED}
     )
     if(${FO_UNP_EXEC} MATCHES "^departition")
         set(UNP_XSRC "${FO_CWD}/departition.c")
