@@ -259,21 +259,26 @@ class UserEditPage extends DefaultPlugin
       $Errors .= "<li>" . _("Passwords do not match.") . "</li>";
     }
 
-    /* Make sure email looks valid */
-    $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $UserRec['user_email']);
-    if ($Check != $UserRec['user_email']) {
-      $Errors .= "<li>" . _("Invalid email address.") . "</li>";
-    }
+    $oldEmail = $this->dbManager->getSingleRow(
+      "SELECT user_email FROM users WHERE user_pk = $1;",
+      array($UserRec['user_pk']), __METHOD__."oldEmail");
+    if (strcmp($oldEmail['user_email'],$UserRec['user_email']) != 0) {
+      /* Make sure email looks valid */
+      $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $UserRec['user_email']);
+      if ($Check != $UserRec['user_email']) {
+        $Errors .= "<li>" . _("Invalid email address.") . "</li>";
+      }
 
-    /* Make sure email is unique */
-    $email_count = 0;
-    if (!empty($UserRec['user_email'])) {
-      $email_count = $this->dbManager->getSingleRow(
-        "SELECT COUNT(*) as count FROM users WHERE user_email = $1 LIMIT 1;",
-        array($UserRec['user_email']))["count"];
-    }
-    if ($email_count > 0) {
-      $Errors .= "<li>" . _("Email address already exists.") . "</li>";
+      /* Make sure email is unique */
+      $email_count = 0;
+      if (!empty($UserRec['user_email'])) {
+        $email_count = $this->dbManager->getSingleRow(
+          "SELECT COUNT(*) as count FROM users WHERE user_email = $1 LIMIT 1;",
+          array($UserRec['user_email']), __METHOD__."email_count")["count"];
+      }
+      if ($email_count > 0) {
+        $Errors .= "<li>" . _("Email address already exists.") . "</li>";
+      }
     }
 
     /* Make sure user can't ask for blank password if policy is enabled */
