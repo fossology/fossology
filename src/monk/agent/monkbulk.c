@@ -74,7 +74,7 @@ int queryBulkArguments(MonkState* state, long bulkId) {
       state->dbManager,
       "queryBulkArguments",
       "SELECT ut.upload_fk, ut.uploadtree_pk, lrb.user_fk, lrb.group_fk, "
-      "lrb.rf_text, lrb.ignore_irrelevant, lrb.bulk_delimiters "
+      "lrb.rf_text, lrb.ignore_irrelevant, lrb.bulk_delimiters, lrb.scan_findings "
       "FROM license_ref_bulk lrb INNER JOIN uploadtree ut "
       "ON ut.uploadtree_pk = lrb.uploadtree_fk "
       "WHERE lrb_pk = $1",
@@ -103,6 +103,7 @@ int queryBulkArguments(MonkState* state, long bulkId) {
       {
         bulkArguments->delimiters = normalize_escape_string(PQgetvalue(bulkArgumentsResult, 0, column++));
       }
+      bulkArguments->scanFindings = strcmp(PQgetvalue(bulkArgumentsResult, 0, column++), "t") == 0;
       bulkArguments->bulkId = bulkId;
       bulkArguments->actions = queryBulkActions(state, bulkId);
       bulkArguments->jobId = fo_scheduler_jobId();
@@ -191,7 +192,8 @@ int bulk_identification(MonkState* state) {
     bulkArguments->uploadTreeLeft,
     bulkArguments->uploadTreeRight,
     bulkArguments->groupId,
-    bulkArguments->ignoreIrre
+    bulkArguments->ignoreIrre,
+    bulkArguments->scanFindings
   );
 
   int haveError = 1;

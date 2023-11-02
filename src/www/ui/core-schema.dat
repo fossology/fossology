@@ -1296,6 +1296,10 @@
   $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"bulk_delimiters\" text DEFAULT NULL";
   $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"bulk_delimiters\" SET DEFAULT true";
 
+  $Schema["TABLE"]["license_ref_bulk"]["scan_findings"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"scan_findings\" IS 'Should i scan only the files with license findings?'";
+  $Schema["TABLE"]["license_ref_bulk"]["scan_findings"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"scan_findings\" bool DEFAULT false";
+  $Schema["TABLE"]["license_ref_bulk"]["scan_findings"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"scan_findings\" SET NOT NULL, ALTER COLUMN \"scan_findings\" SET DEFAULT false";
+
 
   $Schema["TABLE"]["license_set_bulk"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_set_bulk\".\"rf_fk\" IS 'reference to license_ref* (not only license_ref)'";
   $Schema["TABLE"]["license_set_bulk"]["rf_fk"]["ADD"] = "ALTER TABLE \"license_set_bulk\" ADD COLUMN \"rf_fk\" int8";

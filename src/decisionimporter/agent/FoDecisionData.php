@@ -372,6 +372,7 @@ class FoDecisionData
         "old_itemid" => $licenseRefBulkItem['uploadtree_fk'],
         "ignore_irrelevant" => $licenseRefBulkItem['ignore_irrelevant'] == "t",
         "bulk_delimiters" => $licenseRefBulkItem['bulk_delimiters'],
+        "scan_findings" => $licenseRefBulkItem['scan_findings'],
       ];
     }
     return $this;

@@ -165,7 +165,7 @@ class AllDecisionsDao
    */
   public function getAllLicenseRefBulkDataForUpload($uploadId)
   {
-    $columns = "lrb_pk, rf_text, uploadtree_fk, ignore_irrelevant, bulk_delimiters";
+    $columns = "lrb_pk, rf_text, uploadtree_fk, ignore_irrelevant, bulk_delimiters, scan_findings";
     $sql = "SELECT ".$columns." FROM license_ref_bulk lrb ".
          " INNER JOIN uploadtree ut ON lrb.uploadtree_fk=ut.uploadtree_pk WHERE ut.upload_fk=$1";
     $statementName = __METHOD__ . ".allLicEntriesLicenseRefBulkForUpload";
