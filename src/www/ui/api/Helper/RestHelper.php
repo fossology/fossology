@@ -272,7 +272,7 @@ class RestHelper
       throw new HttpBadRequestException(
         "The token should have at least 1 day and max $tokenValidity days " .
         "of validity and should follow YYYY-MM-DD format.");
-    } elseif (! in_array($tokenScope, RestHelper::VALID_SCOPES)) {
+    } elseif (! in_array($tokenScope, RestHelper::SCOPE_DB_MAP)) {
       throw new HttpBadRequestException(
         "Invalid token scope, allowed only " .
         join(",", RestHelper::VALID_SCOPES));

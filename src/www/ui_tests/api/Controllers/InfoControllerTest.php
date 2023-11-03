@@ -136,7 +136,9 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
       ],
       "fossology" => $fossInfo
     ), 200);
-    $actualResponse = $this->infoController->getInfo(null,
+    $request = new Request("POST", new Uri("HTTP", "localhost"), new Headers(),
+      [], [], (new StreamFactory())->createStream());
+    $actualResponse = $this->infoController->getInfo($request,
       new ResponseHelper());
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());

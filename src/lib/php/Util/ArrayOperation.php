@@ -56,4 +56,22 @@ class ArrayOperation
     }
     return false;
   }
+
+  /**
+   * @brief Check if a list of keys exists in associative array.
+   *
+   * This function takes a list of keys which should appear in an associative
+   * array. The function flips the key array to make it as an associative array.
+   * It then uses the array_diff_key() to compare the two arrays.
+   *
+   * @param array $array Associative array to check keys against
+   * @param array $keys  Array of keys to check
+   * @return boolean True if all keys exists, false otherwise.
+   * @uses array_flip()
+   * @uses array_diff_key()
+   */
+  public static function arrayKeysExists(array $array, array $keys): bool
+  {
+    return !array_diff_key(array_flip($keys), $array);
+  }
 }

@@ -12,13 +12,21 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
+use Fossology\Lib\Exceptions\DuplicateTokenNameException;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpConflictException;
+use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Exceptions\HttpInternalServerErrorException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
+use Fossology\UI\Api\Exceptions\HttpTooManyRequestException;
 use Fossology\UI\Api\Helper\ResponseHelper;
+use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Helper\UserHelper;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\TokenRequest;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -185,35 +193,35 @@ class UserController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
-   * @throws HttpBadRequestException
+   * @throws HttpErrorException
    */
   public function createRestApiToken($request, $response, $args)
   {
     $reqBody = $this->getParsedBody($request);
-    $paramsReq = [
-      "token_name",
-      "token_scope",
-      "token_expire"
-    ];
-    if (array_diff_key(array_flip($paramsReq), $reqBody)) {
-      throw new HttpBadRequestException(
-        "Following parameters are required in the request body: " .
-      join(",", $paramsReq));
-    }
+    $tokenRequest = TokenRequest::fromArray($reqBody,
+      ApiVersion::getVersion($request));
     $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
 
     // translating values for symfony request
-    $symfonyRequest->request->set('pat_name', $reqBody['token_name']);
-    $symfonyRequest->request->set('pat_expiry', $reqBody['token_expire']);
-    $symfonyRequest->request->set('pat_scope', $reqBody['token_scope'] == "write" ? "w" : "r");
+    $symfonyRequest->request->set('pat_name', $tokenRequest->getTokenName());
+    $symfonyRequest->request->set('pat_expiry', $tokenRequest->getTokenExpire());
+    $symfonyRequest->request->set('pat_scope', $tokenRequest->getTokenScope());
 
     // initialising the user_edit plugin
     global $container;
+    /** @var RestHelper $restHelper */
     $restHelper = $container->get('helper.restHelper');
+    /** @var \UserEditPage $userEditObj */
     $userEditObj = $restHelper->getPlugin('user_edit');
 
     // creating the REST token
-    $token = $userEditObj->generateNewToken($symfonyRequest);
+    try {
+      $token = $userEditObj->generateNewToken($symfonyRequest);
+    } catch (DuplicateTokenKeyException $e) {
+      throw new HttpTooManyRequestException("Please try again later.", $e);
+    } catch (DuplicateTokenNameException $e) {
+      throw new HttpConflictException($e->getMessage(), $e);
+    }
 
     $returnVal = new Info(201, "Token created successfully", InfoType::INFO);
     $res = $returnVal->getArray();

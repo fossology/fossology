@@ -212,7 +212,7 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
   {
     $tokenExpire = strftime('%Y-%m-%d', strtotime('+3 day'));
     $tokenName = "myTok";
-    $tokenScope = "read";
+    $tokenScope = "r";
     $tokenValidity = 30;
 
     $this->authHelper->shouldReceive('getMaxTokenValidity')
@@ -270,7 +270,7 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
   {
     $tokenExpire = strftime('%Y-%m-%d', strtotime('+10 day'));
     $tokenName = "myTok";
-    $tokenScope = "r";
+    $tokenScope = "rread";
     $tokenValidity = 30;
 
     $this->authHelper->shouldReceive('getMaxTokenValidity')

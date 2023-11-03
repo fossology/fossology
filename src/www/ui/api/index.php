@@ -116,7 +116,7 @@ $app->setBasePath($BASE_PATH);
 
 // Custom middleware to set the API version as a request attribute
 $apiVersionMiddleware = function (Request $request, $handler) use ($apiVersion) {
-  $request = $request->withAttribute('apiVersion', $apiVersion);
+  $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $apiVersion);
   return $handler->handle($request);
 };
 
@@ -342,10 +342,6 @@ $app->group('/customise',
   });
 
 ////////////////////////////INFO/////////////////////
-$app->group('/version',
-  function (\Slim\Routing\RouteCollectorProxy $app) {
-    $app->get('', InfoController::class . ':getInfo');
-  });
 $app->group('/info',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->get('', InfoController::class . ':getInfo');

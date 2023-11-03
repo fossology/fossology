@@ -35,7 +35,7 @@ install(DIRECTORY ui
     PATTERN "*.html"
     PATTERN "*.ico"
     PATTERN "*.js"
-    PATTERN "*openapi.yaml"
+    PATTERN "*openapi*.yaml"
     PATTERN "*.php"
     PATTERN "*.png"
     PATTERN "*.twig"

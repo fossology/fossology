@@ -18,6 +18,7 @@
         "ext-pgsql": "*",
         "ext-curl": "*",
         "ext-uuid": "*",
+        "ext-openssl": "*",
         "composer/spdx-licenses": "1.5.7",
         "firebase/php-jwt": "v6.3.0",
         "monolog/monolog" : "2.8.0",
