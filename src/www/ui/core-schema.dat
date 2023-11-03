@@ -2099,6 +2099,19 @@
   $Schema["TABLE"]["uploadtree"]["ufile_name"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"ufile_name\" DROP NOT NULL";
 
 
+  $Schema["TABLE"]["upload_events"]["upload_fk"]["DESC"] = "COMMENT ON COLUMN \"upload_events\".\"upload_fk\" IS 'upload that generated this event'";
+  $Schema["TABLE"]["upload_events"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_events\" ADD COLUMN \"upload_fk\" int4";
+  $Schema["TABLE"]["upload_events"]["upload_fk"]["ALTER"] = "ALTER TABLE \"upload_events\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["upload_events"]["event_ts"]["DESC"] = "COMMENT ON COLUMN \"upload_events\".\"event_ts\" IS 'timestamp when event happened'";
+  $Schema["TABLE"]["upload_events"]["event_ts"]["ADD"] = "ALTER TABLE \"upload_events\" ADD COLUMN \"event_ts\" timestamptz DEFAULT now()";
+  $Schema["TABLE"]["upload_events"]["event_ts"]["ALTER"] = "ALTER TABLE \"upload_events\" ALTER COLUMN \"event_ts\" SET NOT NULL, ALTER COLUMN \"event_ts\" SET DEFAULT now()";
+
+  $Schema["TABLE"]["upload_events"]["event_type"]["DESC"] = "COMMENT ON COLUMN \"upload_events\".\"event_type\" IS 'type of event, see Fossology::Lib::Data::Upload::UploadEvents'";
+  $Schema["TABLE"]["upload_events"]["event_type"]["ADD"] = "ALTER TABLE \"upload_events\" ADD COLUMN \"event_type\" int4";
+  $Schema["TABLE"]["upload_events"]["event_type"]["ALTER"] = "ALTER TABLE \"upload_events\" ALTER COLUMN \"event_type\" SET NOT NULL";
+
+
   $Schema["TABLE"]["users"]["user_pk"]["DESC"] = "";
   $Schema["TABLE"]["users"]["user_pk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_pk\" int4 DEFAULT nextval('users_user_pk_seq'::regclass)";
   $Schema["TABLE"]["users"]["user_pk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_pk\" SET NOT NULL, ALTER COLUMN \"user_pk\" SET DEFAULT nextval('users_user_pk_seq'::regclass)";
@@ -2276,6 +2289,7 @@
   $Schema["TABLE"]["report_info"]["ri_globaldecision"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_globaldecision\" int2 DEFAULT 1";
   $Schema["TABLE"]["report_info"]["ri_globaldecision"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_globaldecision\" SET NOT NULL, ALTER COLUMN \"ri_globaldecision\" SET DEFAULT 1";
 
+
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";
 
   $Schema["VIEW"]["uploadtree_tag_file_inner"] = "CREATE VIEW \"uploadtree_tag_file_inner\" AS SELECT uploadtree.pfile_fk, uploadtree.uploadtree_pk, uploadtree.parent, uploadtree.upload_fk, uploadtree.ufile_mode, uploadtree.lft, uploadtree.rgt, uploadtree.ufile_name, tag_file.tag_file_pk, tag_file.tag_fk, tag_file.tag_file_date, tag_file.tag_file_text FROM (uploadtree JOIN tag_file USING (pfile_fk));";
@@ -2375,7 +2389,7 @@
 
   $Schema["SEQUENCE"]["license_std_acknowledgement_la_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_std_acknowledgement_la_pk_seq\"";
   $Schema["SEQUENCE"]["license_std_acknowledgement_la_pk_seq"]["UPDATE"] = "SELECT setval('license_std_acknowledgement_la_pk_seq',(SELECT greatest(1,max(la_pk)) val FROM license_std_acknowledgement))";
-  
+
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"mimetype_mimetype_pk_seq\"";
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"]["UPDATE"] = "SELECT setval('mimetype_mimetype_pk_seq',(SELECT greatest(1,max(mimetype_pk)) val FROM mimetype))";
 
@@ -2614,6 +2628,7 @@
   $Schema["CONSTRAINT"]["users_default_bucketpool_pk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_default_bucketpool_pk_fkey\" FOREIGN KEY (\"default_bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["users_group_id_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_group_id_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["users_new_upload_group_fk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_new_upload_group_fk_fkey\" FOREIGN KEY (\"new_upload_group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE CASCADE ON DELETE RESTRICT;";
+  $Schema["CONSTRAINT"]["upload_events_upload_fk_fkey"] = "ALTER TABLE \"upload_events\" ADD CONSTRAINT \"upload_events_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_event_pkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_pkey\" PRIMARY KEY (\"copyright_event_pk\");";
   $Schema["CONSTRAINT"]["copyright_event_upload_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_event_copyright_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_copyright_fk_fkey\" FOREIGN KEY (\"copyright_fk\") REFERENCES \"copyright\" (\"copyright_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2746,6 +2761,8 @@
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_fk_lft_idx"] = "CREATE INDEX uploadtree_a_upload_fk_lft_idx ON uploadtree_a USING btree (upload_fk, lft);";
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_lft_ufilemode_pfile_idx"] = "CREATE INDEX uploadtree_a_upload_lft_ufilemode_pfile_idx ON uploadtree_a USING btree (upload_fk, lft, ufile_mode, pfile_fk);";
   $Schema["INDEX"]["upload_clearing_license"]["upload_clearing_license_upload_group_idx"] = "CREATE INDEX upload_clearing_license_upload_group_idx ON upload_clearing_license USING btree (upload_fk, group_fk);";
+
+  $Schema["INDEX"]["upload_events"]["upload_events_upload_fk_event_ts_event_type_idx"] = "CREATE INDEX upload_events_upload_fk_event_ts_event_type_idx ON upload_events USING btree (upload_fk, event_ts DESC, event_type);";
 
   $Schema["INDEX"]["copyright_event"]["copyright_event_upload_fk_index"] = "CREATE INDEX copyright_event_upload_fk_index ON copyright_event USING btree (upload_fk);";
   $Schema["INDEX"]["copyright_event"]["copyright_event_uploadtree_fk_index"] = "CREATE INDEX copyright_event_uploadtree_fk_index ON copyright_event USING btree (uploadtree_fk);";

@@ -211,6 +211,7 @@ SPDX-License-Identifier: FSFAP
         <service id="helper.dbHelper" class="Fossology\UI\Api\Helper\DbHelper" public="true">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.folder"/>
+            <argument type="service" id="dao.upload"/>
         </service>
         <service id="helper.fileHelper" class="Fossology\UI\Api\Helper\FileHelper" public="true">
             <argument type="service" id="dao.pfile"/>

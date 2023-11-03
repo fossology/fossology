@@ -8,9 +8,11 @@
 
 namespace Fossology\Lib\Dao;
 
+use DateTime;
 use Exception;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\Upload\UploadEvents;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
@@ -30,7 +32,7 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
     $this->dbManager = &$this->testDb->getDbManager();
 
     $this->testDb->createPlainTables(array('upload', 'uploadtree',
-      'report_info'));
+      'report_info', 'upload_events'));
 
     $this->dbManager->prepare($stmt = 'insert.upload',
         "INSERT INTO upload (upload_pk, uploadtree_tablename) VALUES ($1, $2)");
@@ -174,7 +176,6 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @param $subentries
-   * @return array
    */
   protected function prepareModularTable($subentries = array())
   {
@@ -469,5 +470,63 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
 
     $fatM = $this->uploadDao->getFatItemId(3654, 32, 'uploadtree');
     assertThat($fatM, equalTo($itemM1a));
+  }
+
+  /**
+   * @test
+   *
+   * Test if getAssigneeDate() is giving assigning date, not closing date.
+   * -# Create an upload event with type ASSIGN_EVENT and one timestamp.
+   * -# Create another upload event with different type and different timestamp.
+   * -# Test if timestamp matches.
+   * -# Test if event does not exist, return value is null.
+   */
+  public function testGetAssigneeDate()
+  {
+    $time_now = new DateTime();
+    $time_1_day = DateTime::createFromFormat("U",
+      strtotime($time_now->format(DATE_ATOM) . " +1 day"));
+    $this->dbManager->insertTableRow("upload_events", [
+      "upload_fk" => 2,
+      "event_ts" => $time_now->format(DATE_ATOM),
+      "event_type" => UploadEvents::ASSIGNEE_EVENT
+    ]);
+    $this->dbManager->insertTableRow("upload_events", [
+      "upload_fk" => 2,
+      "event_ts" => $time_1_day->format(DATE_ATOM),
+      "event_type" => UploadEvents::UPLOAD_CLOSED_EVENT
+    ]);
+    $assigneeDate = $this->uploadDao->getAssigneeDate(2);
+    assertThat(strtotime($assigneeDate), equalTo($time_now->getTimestamp()));
+    self::assertThat($this->uploadDao->getAssigneeDate(3), self::equalTo(null));
+  }
+
+  /**
+   * @test
+   *
+   * Test if getClosedDate() is giving close date, not other date.
+   * -# Create an upload event with type UPLOAD_CLOSED_EVENT and one timestamp.
+   * -# Create another upload event with different type and different timestamp.
+   * -# Test if timestamp matches.
+   * -# Test if event does not exist, return value is null.
+   */
+  public function testGetClosedDate()
+  {
+    $time_now = new DateTime();
+    $time_1_day = DateTime::createFromFormat("U",
+      strtotime($time_now->format(DATE_ATOM) . " +1 day"));
+    $this->dbManager->insertTableRow("upload_events", [
+      "upload_fk" => 2,
+      "event_ts" => $time_now->format(DATE_ATOM),
+      "event_type" => UploadEvents::ASSIGNEE_EVENT
+    ]);
+    $this->dbManager->insertTableRow("upload_events", [
+      "upload_fk" => 2,
+      "event_ts" => $time_1_day->format(DATE_ATOM),
+      "event_type" => UploadEvents::UPLOAD_CLOSED_EVENT
+    ]);
+    $assigneeDate = $this->uploadDao->getClosedDate(2);
+    assertThat(strtotime($assigneeDate), equalTo($time_1_day->getTimestamp()));
+    self::assertThat($this->uploadDao->getClosedDate(3), self::equalTo(null));
   }
 }

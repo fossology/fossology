@@ -21,7 +21,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
   protected function setUp() : void
   {
     $this->testDb = new TestPgDb();
-    $this->testDb->createPlainTables( array('upload','upload_clearing','perm_upload') );
+    $this->testDb->createPlainTables( array('upload','upload_clearing','perm_upload','upload_events') );
     $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>1,'upload_filename'=>'for.all','user_fk'=>1,'upload_mode'=>1,'public_perm'=>Auth::PERM_READ,'pfile_fk'=>31415));
     $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>2,'upload_filename'=>'for.this','user_fk'=>1,'upload_mode'=>1,'public_perm'=>Auth::PERM_NONE));
     $this->testDb->getDbManager()->insertTableRow('perm_upload', array('perm_upload_pk'=>1, 'upload_fk'=>2,'group_fk'=>$this->groupId,'perm'=>Auth::PERM_READ));

@@ -7,7 +7,7 @@ openapi: 3.1.0
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.6.0
+  version: 1.6.1
   contact:
     email: fossology@fossology.org
   license:
@@ -5085,6 +5085,16 @@ components:
         assignee:
           type: integer
           description: assignee id of the upload.
+          nullable: true
+        assigneeDate:
+          type: string
+          format: date-time
+          description: Date, when a user was assigned to the upload.
+          nullable: true
+        closingDate:
+          type: string
+          format: date-time
+          description: Date, when the upload was closed or rejected.
           nullable: true
         hash:
           $ref: '#/components/schemas/Hash'
