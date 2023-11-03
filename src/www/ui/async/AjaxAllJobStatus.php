@@ -92,11 +92,12 @@ class AjaxAllJobStatus extends DefaultPlugin
     $output = "";
     $error_msg = "";
     $schedStatus = "Running";
+    $systemLoad = get_system_load_average();
     if (! fo_communicate_with_scheduler("status", $output, $error_msg)
       && strstr($error_msg, "Connection refused") !== false) {
       $schedStatus = "Stopped";
     }
-    return new JsonResponse(["data" => $returnData, "scheduler" => $schedStatus]);
+    return new JsonResponse(["data" => $returnData, "scheduler" => $schedStatus, "systemLoad" => $systemLoad]);
   }
 }
 
