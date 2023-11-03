@@ -207,8 +207,8 @@ resources.")
 
 set(CPACK_DEBIAN_FOSSOLOGY-UNUNPACK_PACKAGE_DEPENDS
     "fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit,
-    genisoimage, poppler-utils, rpm, upx-ucl, unrar-free, unzip, p7zip-full,
-    p7zip, zstd")
+    genisoimage, poppler-utils, rpm, unrar-free, unzip, p7zip-full, p7zip,
+    zstd")
 
 set(CPACK_DEBIAN_FOSSOLOGY-UNUNPACK_PACKAGE_SECTION "utils")
 else()
@@ -224,8 +224,7 @@ This package contains the ununpack agent program and resources.")
 
 set(CPACK_DEBIAN_UNUNPACK_PACKAGE_DEPENDS
     "fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit,
-    genisoimage, poppler-utils, rpm, upx-ucl, unrar-free, unzip, p7zip-full,
-    p7zip")
+    genisoimage, poppler-utils, rpm, unrar-free, unzip, p7zip-full, p7zip")
 
 set(CPACK_DEBIAN_UNUNPACK_PACKAGE_SECTION "utils")
 
@@ -240,8 +239,7 @@ This package contains the adj2nest agent program and resources.")
 
 set(CPACK_DEBIAN_ADJ2NEST_PACKAGE_DEPENDS
     "fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit,
-    genisoimage, poppler-utils, rpm, upx-ucl, unrar-free, unzip, p7zip-full,
-    p7zip")
+    genisoimage, poppler-utils, rpm, unrar-free, unzip, p7zip-full, p7zip")
 
 set(CPACK_DEBIAN_ADJ2NEST_PACKAGE_SECTION "utils")
 endif()

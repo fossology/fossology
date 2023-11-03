@@ -13,7 +13,6 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Util\StringOperation;
-use Fossology\Lib\Data\AgentRef;
 use Monolog\Logger;
 
 class CopyrightDao
@@ -349,7 +348,7 @@ ORDER BY copyright_pk, UT.uploadtree_pk, content DESC";
     $statementName .= ".".$joinType."Join";
 
     if ($extrawhere !== null) {
-      $whereClause .= "AND ". $extrawhere;
+      $whereClause .= " AND ". $extrawhere;
       $statementName .= "._".$extrawhere."_";
     }
     $decisionTableKey = $tableNameDecision . "_pk";
