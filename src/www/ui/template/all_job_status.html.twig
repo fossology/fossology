@@ -7,6 +7,7 @@
 {% block content %}
   <table border="0">
     <tr>
+      <td style="padding:3px 10px" id="system_status"></td>
       <th style="padding:3px 10px">{{ 'Scheduler'|trans }}</th>
       <td style="padding:3px 10px" id="scheduler_status"></td>
     </tr>
@@ -57,6 +58,7 @@
               returnval.push(newrow);
             }
             $("#scheduler_status").html(json.scheduler);
+            $("#system_status").html(json.systemLoad);
             return returnval;
           }
         },
