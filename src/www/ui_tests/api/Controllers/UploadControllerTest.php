@@ -855,6 +855,9 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->shouldReceive('getSingleRow')
       ->withArgs([M::any(), [$status, $comment, $this->groupId, $upload],
         M::any()]);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([M::any(), [$upload], M::any()])
+      ->andReturn(["exists" => ""]);
 
     $info = new Info(202, "Upload updated successfully.", InfoType::INFO);
     $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),

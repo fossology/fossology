@@ -5086,6 +5086,16 @@ components:
           type: integer
           description: assignee id of the upload.
           nullable: true
+        assigneeDate:
+          type: string
+          format: date-time
+          description: Date, when a user was assigned to the upload.
+          nullable: true
+        closingDate:
+          type: string
+          format: date-time
+          description: Date, when the upload was closed or rejected.
+          nullable: true
         hash:
           $ref: '#/components/schemas/Hash'
     GetFolderContent:
