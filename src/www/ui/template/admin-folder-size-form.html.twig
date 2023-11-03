@@ -1,4 +1,4 @@
-{# SPDX-FileCopyrightText: © Fossology contributors
+{# SPDX-FileCopyrightText: © 2023 Siemens AG
 
    SPDX-License-Identifier: FSFAP
 #}
@@ -11,13 +11,15 @@
   <table border="0" align="center" cellpadding="5">
     <tr>
       <td>
+        <label for="selectfolderid">
         {{ "Size of folder "|trans }}
-        <select name="selectfolderid" onChange="window.location.href='{{ onchangeURI }}' + this.value" class="ui-render-select2">
+        </label>
+        <select name="selectfolderid" id="selectfolderid" onChange="window.location.href='{{ onchangeURI }}' + this.value" class="ui-render-select2">
         {{ folderListOption }} FolderListOption(-1, 0, 1, $folderId);
         </select>
       </td>
       <td align='center'>
-        is {{ wholeFolderSize }}
+        {{ "is"|trans }} {{ wholeFolderSize }}
       </td>
     </tr>
   </table>
@@ -31,13 +33,16 @@
       <th>
         {{ "Upload Size"|trans }}
       </th>
+      <th>
+        {{ "Clearing Duration"|trans }}
+      </th>
     </tr>
-        </thead>
-        <tbody>
+  </thead>
+  <tbody>
     {{ tableVars }}
   </tbody>
   </table>
 </form>
 <script type="text/javascript">
-$('#folderWiseuploadTable').DataTable();
+  $('#folderWiseuploadTable').DataTable();
 </script>

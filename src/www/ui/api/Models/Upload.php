@@ -52,6 +52,16 @@ class Upload
    */
   private $assignee;
   /**
+   * @var string $assigneeDate
+   * Date when a user was assigned to the upload.
+   */
+  private $assigneeDate;
+  /**
+   * @var string $closingDate
+   * Date when the upload was closed or rejected.
+   */
+  private $closingDate;
+  /**
    * @var Hash $hash
    * Hash information of the upload
    */
@@ -77,6 +87,8 @@ class Upload
     $this->uploadName = $uploadName;
     $this->uploadDate = $uploadDate;
     $this->assignee = $assignee == 1 ? null : intval($assignee);
+    $this->assigneeDate = null;
+    $this->closingDate = null;
     $this->hash = $hash;
   }
 
@@ -103,7 +115,29 @@ class Upload
       "uploadname"  => $this->uploadName,
       "uploaddate"  => $this->uploadDate,
       "assignee"    => $this->assignee,
+      "assigneeDate" => $this->assigneeDate,
+      "closingDate" => $this->closingDate,
       "hash"        => $this->hash->getArray()
     ];
+  }
+
+  /**
+   * @param string|null $assigneeDate
+   * @return Upload
+   */
+  public function setAssigneeDate(?string $assigneeDate): Upload
+  {
+    $this->assigneeDate = $assigneeDate;
+    return $this;
+  }
+
+  /**
+   * @param string|null $closingDate
+   * @return Upload
+   */
+  public function setClosingDate(?string $closingDate): Upload
+  {
+    $this->closingDate = $closingDate;
+    return $this;
   }
 }

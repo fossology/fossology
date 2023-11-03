@@ -7,6 +7,7 @@
 
  SPDX-License-Identifier: LGPL-2.1-only
 */
+
 use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
@@ -105,6 +106,30 @@ function HumanSize( $bytes )
     $bytes /= 1024;
   }
   return(round($bytes, 2) . ' PB');
+}
+
+/**
+ * @brief Convert DateInterval to Human readable format
+ *
+ * If DateInterval is more than 1 year, then return years, else return months,
+ * else return days. If duration is less than 1 day, then return hours and
+ * minutes.
+ * @param DateInterval $duration Duration to convert
+ * @return string Formatted duration
+ */
+function HumanDuration(DateInterval $duration): string
+{
+  $humanDuration = "";
+  if ($duration->y > 0) {
+    $humanDuration .= $duration->y . " y";
+  } elseif ($duration->m > 0) {
+    $humanDuration .= $duration->m . " m";
+  } elseif ($duration->days > 0) {
+    $humanDuration .= $duration->days . " d";
+  } else {
+    $humanDuration .= $duration->h . "h " . $duration->i . "m";
+  }
+  return $humanDuration;
 }
 
 /**
