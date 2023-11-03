@@ -14,6 +14,7 @@ use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
 use Fossology\Lib\Exceptions\DuplicateTokenNameException;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Helper\AuthHelper;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\RestHelper;
@@ -61,7 +62,6 @@ class UserEditPage extends DefaultPlugin
    */
   function handle(Request $request)
   {
-    global $SysConf;
     /* Is the session owner an admin? */
     $user_pk = Auth::getUserId();
     $SessionUserRec = $this->GetUserRec($user_pk);
@@ -171,7 +171,7 @@ class UserEditPage extends DefaultPlugin
     $vars['userDescReadOnly'] = $SysConf['SYSCONFIG']['UserDescReadOnly'];
 
     /* For Admins, get the list of all users
-     * For non-admins, only show themself
+     * For non-admins, only show themselves
      */
     if ($SessionIsAdmin) {
       $stmt = __METHOD__ . '.asSessionAdmin';
@@ -300,7 +300,7 @@ class UserEditPage extends DefaultPlugin
     /* Check if the user is member of the group */
     if (!empty($UserRec['group_fk'])) {
       $group_map = $this->userDao->getUserGroupMap($UserRec['user_pk']);
-      if (array_search($UserRec['group_fk'], array_keys($group_map)) === false) {
+      if (!in_array($UserRec['group_fk'], array_keys($group_map))) {
         $Errors .= "<li>" . _("User is not member of provided group.") .
           "</li>";
       }
@@ -348,7 +348,7 @@ class UserEditPage extends DefaultPlugin
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
 
-    return (null);
+    return null;
   } // UpdateUser()
 
   /**
@@ -356,6 +356,7 @@ class UserEditPage extends DefaultPlugin
    * \param $user_pk  fetch this users db record
    *
    * \return users db record
+   * @throws Exception
    */
   function GetUserRec($user_pk)
   {
@@ -388,6 +389,7 @@ class UserEditPage extends DefaultPlugin
    *         However, there may be additional fields from the data input form that are not in the
    *         users table.  These additional fields start with an underscore (_pass1, _pass2, _blank_pass)
    *         that come from the edit form.
+   * @throws Exception
    */
   function CreateUserRec(Request $request, $user_pk="")
   {
@@ -490,6 +492,8 @@ class UserEditPage extends DefaultPlugin
       } catch (DuplicateTokenKeyException $e) {
         // New key also failed, give up!
         throw new DuplicateTokenKeyException("Please try again later.");
+      } catch (DuplicateTokenNameException $e) {
+        throw $e;
       }
     } catch (DuplicateTokenNameException $e) {
       throw new \UnexpectedValueException($e->getMessage());
@@ -515,16 +519,19 @@ class UserEditPage extends DefaultPlugin
       __METHOD__ . ".getActiveTokens");
     $response = [];
     foreach ($rows as $row) {
-      if ($this->authHelper->isTokenActive($row, $row["pat_pk"]) === true) {
-        $entry = [
-          "id" => $row["pat_pk"] . "." . $user_pk,
-          "name" => $row["token_name"],
-          "created" => $row["created_on"],
-          "expire" => $row["expire_on"],
-          "scope" => $row["token_scope"]
-        ];
-        $response[] = $entry;
+      try {
+        $this->authHelper->isTokenActive($row, $row["pat_pk"]);
+      } catch (HttpForbiddenException $_) {
+        continue;
       }
+      $entry = [
+        "id" => $row["pat_pk"] . "." . $user_pk,
+        "name" => $row["token_name"],
+        "created" => $row["created_on"],
+        "expire" => $row["expire_on"],
+        "scope" => $row["token_scope"]
+      ];
+      $response[] = $entry;
     }
     array_multisort(array_column($response, "created"), SORT_ASC, $response);
     return $response;
@@ -586,7 +593,7 @@ class UserEditPage extends DefaultPlugin
    * @param Request $request
    * @throws \UnexpectedValueException Throws an exception if the request is
    *         not valid.
-   * @return boolean True if no error occured.
+   * @return string Display message
    * @uses Fossology::UI::Api::Helper::RestHelper::validateNewOauthClient()
    * @uses Fossology::UI::Api::Helper::DbHelper::addNewClient()
    */
@@ -604,16 +611,16 @@ class UserEditPage extends DefaultPlugin
     }
     /** @var RestHelper $restHelper */
     $restHelper = $container->get('helper.restHelper');
-    $isTokenRequestValid = $restHelper->validateNewOauthClient($user_pk,
-      $clientName, $clientScope, $clientId);
-
-    if ($isTokenRequestValid !== true) {
-      throw new \UnexpectedValueException($isTokenRequestValid->getMessage());
-    } else {
-      $restHelper->getDbHelper()->addNewClient($clientName, $user_pk,
-        $clientId, $clientScope);
-      return "Client \"$clientName\" added with ID \"$clientId\"";
+    try {
+      $restHelper->validateNewOauthClient($user_pk, $clientName, $clientScope,
+        $clientId);
+    } catch (HttpBadRequestException $e) {
+      throw new \UnexpectedValueException($e->getMessage());
     }
+
+    $restHelper->getDbHelper()->addNewClient($clientName, $user_pk,
+      $clientId, $clientScope);
+    return "Client \"$clientName\" added with ID \"$clientId\"";
   }
 
   /**
