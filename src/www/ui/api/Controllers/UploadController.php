@@ -215,8 +215,9 @@ class UploadController extends RestController
         throw new HttpBadRequestException(
           "page should be positive integer > 0");
       }
+    } else {
+      $page = 1;
     }
-    $page = 1;
 
     $limit = $request->getHeaderLine(self::LIMIT_PARAM);
     if (! empty($limit)) {
@@ -225,8 +226,9 @@ class UploadController extends RestController
         throw new HttpBadRequestException(
           "limit should be positive integer > 1");
       }
+    } else {
+      $limit = self::UPLOAD_FETCH_LIMIT;
     }
-    $limit = self::UPLOAD_FETCH_LIMIT;
 
     if (isset($args['id'])) {
       $id = intval($args['id']);
