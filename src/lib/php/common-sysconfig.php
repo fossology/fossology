@@ -795,3 +795,31 @@ function set_python_path()
   putenv("PYTHONPATH=/home/" . $SysConf['DIRECTORIES']['PROJECTUSER'] .
       "/pythondeps");
 }
+/**
+ * \brief Get system load average.
+ *
+ * Get no of cores using nproc command.
+ * Get load using sys_getloadavg
+ *
+ * \return button with different colors
+ */
+function get_system_load_average()
+{
+  // Get No.of cores
+  $cores = trim(shell_exec("nproc"));
+
+  // Get CPU load
+  $load = sys_getloadavg()[1];
+
+  $percentageOfLoad = ($load / $cores);
+
+  if ($percentageOfLoad < 0.30) {
+    $class = 'btn-success';
+  } else if ($percentageOfLoad < 0.60) {
+    $class = 'btn-warning';
+  } else {
+    $class = 'btn-danger';
+  }
+
+  return '<button type="button" aria-disabled="true" disabled class="btn '.$class.'">System Load</button>';
+}
