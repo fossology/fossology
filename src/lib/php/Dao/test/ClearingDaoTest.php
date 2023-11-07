@@ -40,6 +40,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
   protected function setUp() : void
   {
     $this->uploadDao = M::mock(UploadDao::class);
+    $this->uploadDao->shouldReceive('getUploadEntry')->withAnyArgs()->andReturn(["upload_fk" => 4]);
 
     $logger = new Logger('default');
     $logger->pushHandler(new ErrorLogHandler());

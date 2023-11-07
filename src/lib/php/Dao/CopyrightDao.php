@@ -539,6 +539,7 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
    * - copyright => copyright
    * - ecc       => ecc
    * - keyword   => keyword
+   * - ipra      => ipra
    * - scancode_copyright, scancode_author => scancode
    * - others    => copyright
    * @param string $table Table name
@@ -546,7 +547,7 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
    */
   private function getAgentName($table)
   {
-    if (array_search($table, ["ecc", "keyword", "copyright"]) !== false) {
+    if (array_search($table, ["ecc", "keyword", "copyright", "ipra"]) !== false) {
       return $table;
     } else if (array_search($table, ["scancode_copyright", "scancode_author"]) !== false) {
       return "scancode";
