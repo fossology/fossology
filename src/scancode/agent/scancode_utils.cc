@@ -106,7 +106,7 @@ bool processUploadId(const State &state, int uploadId,
   std::ifstream opfile(outputFile);
   if (!opfile) {
     std::cerr << "Error opening the JSON file.\n";
-    return 1;
+    return false;
   }
 
   vector<string> scanResults;
@@ -115,23 +115,26 @@ bool processUploadId(const State &state, int uploadId,
     scanResults.push_back(getScanResult(line));
   }
 
-  #pragma omp parallel
+#pragma omp parallel default(none) \
+    shared(databaseHandler, scanResults, fileIdsMapReverse, state, errors)
   {
     ScancodeDatabaseHandler threadLocalDatabaseHandler(databaseHandler.spawn());
-  #pragma omp for
-    for (const string& scanResult : scanResults) {
+#pragma omp for
+    for (size_t i = 0; i < scanResults.size(); ++i) {
       // Process each object
       Json::CharReaderBuilder json_reader_builder;
       auto scanner = unique_ptr<Json::CharReader>(json_reader_builder.newCharReader());
       Json::Value scancodeValue;
-      string errors;
-      const bool isSuccessful = scanner->parse(scanResult.c_str(),
-          scanResult.c_str() + scanResult.length(), &scancodeValue, &errors);
+      string errs;
+      const bool isSuccessful = scanner->parse(scanResults[i].c_str(),
+          scanResults[i].c_str() + scanResults[i].length(), &scancodeValue,
+          &errs);
 
       if (isSuccessful) {
         string fileName = scancodeValue["file"].asString();
         unsigned long fileId = fileIdsMapReverse[fileName];
-        if (!matchFileWithLicenses(state, threadLocalDatabaseHandler, scanResult, fileName, fileId)) {
+        if (!matchFileWithLicenses(state, threadLocalDatabaseHandler,
+                                   scanResults[i], fileName, fileId)) {
           errors = true;
         }
       }
@@ -229,11 +232,11 @@ string getScanResult(const string& line) {
 
 /**
  * @brief match file with license
- * 
+ *
  * scan file with scancode and save result in the database
- *  
+ *
  * @param state state of the agent
- * @param file            code/binary file sent by scheduler 
+ * @param file            code/binary file sent by scheduler
  * @param databaseHandler databaseHandler Database handler object
  * @return true on saving scan result successfully, false otherwise
  */
@@ -261,11 +264,11 @@ return saveLicenseMatchesToDatabase(
 
 /**
  * @brief save license matches to database
- * 
+ *
  * insert or catch license in license_ref table
  * save license in license_file table
  * save license highlight inforamtion in highlight table
- * 
+ *
  * @param state           state of the agent
  * @param matches         vector of objects of Match class
  * @param pFileId         pfile Id
@@ -275,7 +278,7 @@ return saveLicenseMatchesToDatabase(
 bool saveLicenseMatchesToDatabase(const State &state,
                                   const vector<Match> &matches,
                                   unsigned long pFileId,
-                                  ScancodeDatabaseHandler &databaseHandler) 
+                                  ScancodeDatabaseHandler &databaseHandler)
                                   {
   for (const auto & match : matches) {
     databaseHandler.insertOrCacheLicenseIdForName(
@@ -338,7 +341,7 @@ bool saveOtherMatchesToDatabase(const State &state,
                                 const vector<Match> &matches,
                                 unsigned long pFileId,
                                 ScancodeDatabaseHandler &databaseHandler) {
-  
+
   if (!databaseHandler.begin())
     return false;
 
@@ -359,13 +362,13 @@ bool saveOtherMatchesToDatabase(const State &state,
 
 /**
  * @brief parse command line options for scancode toolkit to get required falgs for scanning
- * @param[in] argc                     command line arguments count 
- * @param[in] argv                     command line argument vector 
- * @param[out] cliOption               command line options for scancode toolkit 
+ * @param[in] argc                     command line arguments count
+ * @param[in] argv                     command line argument vector
+ * @param[out] cliOption               command line options for scancode toolkit
  * @param[out] ignoreFilesWithMimeType set this flag is user wants to ignore FilesWithMimeType
  * @return  true if parsing is successful otherwise false
  */
-bool parseCommandLine(int argc, char **argv, string &cliOption, bool &ignoreFilesWithMimeType) 
+bool parseCommandLine(int argc, char **argv, string &cliOption, bool &ignoreFilesWithMimeType)
 {
   po::options_description desc(AGENT_NAME ": available options");
   desc.add_options()
@@ -384,7 +387,7 @@ bool parseCommandLine(int argc, char **argv, string &cliOption, bool &ignoreFile
   try
   {
     po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
-    if (vm.count("help") > 0) 
+    if (vm.count("help") > 0)
     {
       cout << desc << "\n";
       exit(EXIT_SUCCESS);
@@ -396,14 +399,14 @@ bool parseCommandLine(int argc, char **argv, string &cliOption, bool &ignoreFile
     cliOption += vm.count("url") > 0 ? "u" : "";
     ignoreFilesWithMimeType =
         vm.count("ignoreFilesWithMimeType") > 0 ? true : false;
-  } 
-  catch (boost::bad_any_cast &) 
+  }
+  catch (boost::bad_any_cast &)
   {
     LOG_FATAL("wrong parameter type\n ");
     cout << desc << "\n";
     return false;
-  } 
-  catch (po::error &) 
+  }
+  catch (po::error &)
   {
     LOG_FATAL("wrong command line arguments\n");
     cout << desc << "\n";
