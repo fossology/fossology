@@ -58,6 +58,8 @@ class XpClearedGetter extends ClearedGetterCommon
     }
     $this->extrawhere .= ' agent_fk IN ('.$ids.')';
 
-    return $this->copyrightDao->getAllEntriesReport($this->tableName, $uploadId, $uploadTreeTableName, $this->type, $this->getOnlyCleared, DecisionTypes::IDENTIFIED, $this->extrawhere, $groupId);
+    $result = $this->copyrightDao->getAllEntriesReport($this->tableName, $uploadId, $uploadTreeTableName, $this->type, $this->getOnlyCleared, DecisionTypes::IDENTIFIED, $this->extrawhere, $groupId);
+    $this->extrawhere = null;
+    return $result;
   }
 }

@@ -10,12 +10,16 @@
 define("TITLE_MAINTAGENT", _("FOSSology Maintenance"));
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Db\DbManager;
 
 /**
  * \class maintagent
  * \brief Queue the maintenance agent with the requested parameters
  */
 class maintagent extends FO_Plugin {
+
+  /** @var dbManager */
+  private $dbManager;
 
    const OPTIONS = [
     "a"=>"Run all non slow maintenance operations.",
@@ -45,6 +49,10 @@ class maintagent extends FO_Plugin {
     $this->Title = TITLE_MAINTAGENT;
     $this->MenuList = "Admin::Maintenance";
     $this->DBaccess = PLUGIN_DB_ADMIN;
+
+    global $container;
+    $this->dbManager = $container->get('db.manager');
+
     parent::__construct();
   }
 
@@ -102,8 +110,16 @@ class maintagent extends FO_Plugin {
    */
   function DisplayForm()
   {
-
-    $V = "<form method='post'>\n"; // no url = this url
+    $V = "";
+    $statementName = __METHOD__."maintenanceInfo";
+    $row = $this->dbManager->getSingleRow("SELECT jq_endtime FROM jobqueue WHERE jq_type = $1 AND jq_end_bits=$2 ORDER BY jq_endtime DESC LIMIT $2",
+           array("maintagent",1), $statementName);
+    if(!empty($row['jq_endtime'])){
+      $dateLastExecuted = Convert2BrowserTime($row['jq_endtime']);
+      $text = _("Last maintenance job was executed on '$dateLastExecuted'");
+      $V.= DisplayMessage($text);
+    }
+    $V .= "<form method='post'>\n"; // no url = this url
     foreach (self::OPTIONS as $option => $description) {
       $V .= "<div class='form-group'><div class='form-check'>";
       $V .= " <input class='form-check-input' type='checkbox' name='$option' value='$option' id='men$option'>
