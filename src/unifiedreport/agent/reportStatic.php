@@ -303,9 +303,9 @@ class ReportStatic
       foreach ($jsonObligationText as $key => $value) {
         $table->addRow($rowWidth);
         $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($key), $rowTextStyleLeft, "pStyle");
-        if (strpos($value, '\n') !== false) {
+        if (strpos($value, "\n") !== false) {
           $cell = $table->addCell($secondColLen);
-          $value = explode('\n', $value);
+          $value = explode("\n", $value);
           foreach ($value as $value1) {
             $value1 = str_replace("\r", "", $value1);
             $cell->addText(htmlspecialchars($value1), $rowTextStyleRight, "pStyle");
@@ -317,9 +317,9 @@ class ReportStatic
     } else {
       $table->addRow($rowWidth);
       $cell = $table->addCell($firstColLen);
-      if (strpos($obligationText, '\n') !== false) {
+      if (strpos($obligationText, "\n") !== false) {
         $cell = $table->addCell($secondColLen);
-        $obligationText = explode('\n', $obligationText);
+        $obligationText = explode("\n", $obligationText);
         foreach ($obligationText as $value) {
           $value = str_replace("\r", "", $value);
           $cell->addText(htmlspecialchars($value), $rowTextStyleRight, "pStyle");
