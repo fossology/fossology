@@ -138,7 +138,8 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   pg_free_result($result);
 
   /* Find rf_pk for rf_shortname.  This will speed up the main query tremendously */
-  $sql = "SELECT rf_pk FROM license_ref WHERE rf_shortname='$rf_shortname'";
+  $pg_shortname = pg_escape_string($rf_shortname);
+  $sql = "SELECT rf_pk FROM license_ref WHERE rf_shortname='$pg_shortname'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
@@ -151,8 +152,6 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   if (empty($rf_pk)) {
     return array(); // if when the rf_shortname does not exist
   }
-
-  $shortname = pg_escape_string($rf_shortname);
 
   /* Optional tag restriction */
   if (empty($tag_pk)) {
