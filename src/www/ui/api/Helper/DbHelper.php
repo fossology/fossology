@@ -24,6 +24,7 @@ use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
 use Fossology\Lib\Exceptions\DuplicateTokenNameException;
 use Fossology\Lib\Proxy\LicenseViewProxy;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\Hash;
 use Fossology\UI\Api\Models\Job;
 use Fossology\UI\Api\Models\Upload;
@@ -94,7 +95,7 @@ class DbHelper
    *         value
    */
   public function getUploads($userId, $groupId, $limit, $page = 1,
-    $uploadId = null, $options = null, $recursive = true)
+    $uploadId = null, $options = null, $recursive = true, $apiVersion=ApiVersion::V1)
   {
     $uploadProxy = new UploadBrowseProxy($groupId, 0, $this->dbManager);
     $folderId = $options["folderId"];
@@ -197,7 +198,7 @@ FROM $partialQuery $where ORDER BY upload_pk ASC LIMIT $limit OFFSET $" .
         $upload->setAssigneeDate($this->uploadDao->getAssigneeDate($uploadId));
       }
       $upload->setClosingDate($this->uploadDao->getClosedDate($uploadId));
-      $uploads[] = $upload->getArray();
+      $uploads[] = $upload->getArray($apiVersion);
     }
     return [$totalResult, $uploads];
   }

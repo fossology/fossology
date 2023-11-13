@@ -9,7 +9,6 @@
  * @brief Upload model
  */
 namespace Fossology\UI\Api\Models;
-
 /**
  * @class Upload
  * @brief Model class to hold Upload info
@@ -96,29 +95,44 @@ class Upload
    * Get current upload in JSON representation
    * @return string
    */
-  public function getJSON()
+  public function getJSON($version=ApiVersion::V1)
   {
-    return json_encode($this->getArray());
+    return json_encode($this->getArray($version));
   }
 
   /**
    * Get the upload element as an associative array
    * @return array
    */
-  public function getArray()
+  public function getArray($version=ApiVersion::V1)
   {
-    return [
-      "folderid"    => $this->folderId,
-      "foldername"  => $this->folderName,
-      "id"          => $this->uploadId,
-      "description" => $this->description,
-      "uploadname"  => $this->uploadName,
-      "uploaddate"  => $this->uploadDate,
-      "assignee"    => $this->assignee,
-      "assigneeDate" => $this->assigneeDate,
-      "closingDate" => $this->closingDate,
-      "hash"        => $this->hash->getArray()
-    ];
+    if ($version==ApiVersion::V2) {
+      return [
+        "folderId"    => $this->folderId,
+        "folderName"  => $this->folderName,
+        "id"          => $this->uploadId,
+        "description" => $this->description,
+        "uploadName"  => $this->uploadName,
+        "uploadDate"  => $this->uploadDate,
+        "assignee"    => $this->assignee,
+        "assigneeDate" => $this->assigneeDate,
+        "closingDate" => $this->closingDate,
+        "hash"        => $this->hash->getArray()
+      ];
+    } else {
+      return [
+        "folderid"    => $this->folderId,
+        "foldername"  => $this->folderName,
+        "id"          => $this->uploadId,
+        "description" => $this->description,
+        "uploadname"  => $this->uploadName,
+        "uploaddate"  => $this->uploadDate,
+        "assignee"    => $this->assignee,
+        "assigneeDate" => $this->assigneeDate,
+        "closingDate" => $this->closingDate,
+        "hash"        => $this->hash->getArray()
+      ];
+    }
   }
 
   /**
