@@ -36,11 +36,15 @@ use Fossology\UI\Api\Exceptions\HttpPreconditionFailException;
 use Fossology\UI\Api\Exceptions\HttpServiceUnavailableException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\UploadHelper;
+use Fossology\UI\Api\Models\GroupPermissions;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\License;
 use Fossology\UI\Api\Models\Obligation;
 use Fossology\UI\Api\Models\ScannedLicense;
+use Fossology\UI\Api\Models\GroupPermission;
+use Fossology\UI\Api\Models\Permissions;
+use Fossology\UI\Api\Models\ApiVersion;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\StreamFactory;
 
@@ -151,6 +155,7 @@ class UploadController extends RestController
     $status = null;
     $assignee = null;
     $since = null;
+    $apiVersion = ApiVersion::getVersion($request);
 
     if (array_key_exists(self::FOLDER_PARAM, $query)) {
       $folderId = filter_var($query[self::FOLDER_PARAM], FILTER_VALIDATE_INT);
@@ -207,8 +212,13 @@ class UploadController extends RestController
         ]]);
       $since = strtotime($date);
     }
-
-    $page = $request->getHeaderLine(self::PAGE_PARAM);
+    if ($apiVersion == ApiVersion::V2) {
+      $page = $query[self::PAGE_PARAM] ?? "";
+      $limit = $query[self::LIMIT_PARAM] ?? "";
+    } else {
+      $page = $request->getHeaderLine(self::PAGE_PARAM);
+      $limit = $request->getHeaderLine(self::LIMIT_PARAM);
+    }
     if (! empty($page) || $page == "0") {
       $page = filter_var($page, FILTER_VALIDATE_INT);
       if ($page <= 0) {
@@ -218,8 +228,6 @@ class UploadController extends RestController
     } else {
       $page = 1;
     }
-
-    $limit = $request->getHeaderLine(self::LIMIT_PARAM);
     if (! empty($limit)) {
       $limit = filter_var($limit, FILTER_VALIDATE_INT);
       if ($limit < 1) {
@@ -244,7 +252,7 @@ class UploadController extends RestController
     ];
     list($pages, $uploads) = $this->dbHelper->getUploads(
       $this->restHelper->getUserId(), $this->restHelper->getGroupId(), $limit,
-      $page, $id, $options, $recursive);
+      $page, $id, $options, $recursive, $apiVersion);
     if ($id !== null && ! empty($uploads)) {
       $uploads = $uploads[0];
       $pages = 1;
@@ -376,7 +384,12 @@ class UploadController extends RestController
    */
   public function moveUpload($request, $response, $args)
   {
-    $action = $request->getHeaderLine('action');
+    if (ApiVersion::getVersion($request) == ApiVersion::V2) {
+      $queryParams = $request->getQueryParams();
+      $action = $queryParams['action'] ?? "";
+    } else {
+      $action = $request->getHeaderLine('action');
+    }
     if (strtolower($action) == "move") {
       $copy = false;
     } else {
@@ -397,10 +410,15 @@ class UploadController extends RestController
    */
   private function changeUpload($request, $response, $args, $isCopy)
   {
-    if (!$request->hasHeader('folderId') ||
-        !is_numeric($newFolderID = $request->getHeaderLine('folderId'))) {
-      throw new HttpBadRequestException("folderId header should be an integer!");
+    $queryParams = $request->getQueryParams();
+    $isApiVersionV2 = (ApiVersion::getVersion($request) == ApiVersion::V2);
+    $paramType = ($isApiVersionV2) ? 'parameter' : 'header';
+
+    if ((!$isApiVersionV2 && !$request->hasHeader('folderId') || $isApiVersionV2 && !isset($queryParams['folderId']))
+    || !is_numeric($newFolderID = ($isApiVersionV2 ? $queryParams['folderId'] : $request->getHeaderLine('folderId')))) {
+      throw new HttpBadRequestException("For API version " . ($isApiVersionV2 ? 'V2' : 'V1') . ", 'folderId' $paramType should be present and an integer.");
     }
+
     $id = intval($args['id']);
     $returnVal = $this->restHelper->copyUpload($id, $newFolderID, $isCopy);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
@@ -507,9 +525,14 @@ class UploadController extends RestController
   {
     $id = intval($args['id']);
     $query = $request->getQueryParams();
-    $page = $request->getHeaderLine("page");
-    $limit = $request->getHeaderLine("limit");
-
+    $apiVersion = ApiVersion::getVersion($request);
+    if ($apiVersion == ApiVersion::V2) {
+      $page = $query['page'] ?? "";
+      $limit = $query['limit'] ?? "";
+    } else {
+      $page = $request->getHeaderLine("page");
+      $limit = $request->getHeaderLine("limit");
+    }
     if (! array_key_exists(self::AGENT_PARAM, $query)) {
       throw new HttpBadRequestException("agent parameter missing from query.");
     }
@@ -561,7 +584,7 @@ class UploadController extends RestController
     }
 
     $uploadHelper = new UploadHelper();
-    list($licenseList, $count) = $uploadHelper->getUploadLicenseList($id, $agents, $containers, $license, $copyright, $page-1, $limit);
+    list($licenseList, $count) = $uploadHelper->getUploadLicenseList($id, $agents, $containers, $license, $copyright, $page-1, $limit, $apiVersion);
     $totalPages = intval(ceil($count / $limit));
     return $response->withHeader("X-Total-Pages", $totalPages)->withJson($licenseList, 200);
   }
@@ -801,6 +824,7 @@ class UploadController extends RestController
    */
   public function getGroupsWithPermissions($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $upload_pk = intval($args['id']);
     $this->uploadAccessible($upload_pk);
     $publicPerm = $this->restHelper->getUploadPermissionDao()->getPublicPermission($upload_pk);
@@ -809,15 +833,11 @@ class UploadController extends RestController
     // Removing the perm_upload_pk parameter in response
     $finalPermGroups = [];
     foreach ($permGroups as $value) {
-      unset($value["perm_upload_pk"]);
-      $finalPermGroups[] = $value;
+      $groupPerm = new GroupPermission($value['perm'], $value['group_pk'], $value['group_name']);
+      $finalPermGroups[] = $groupPerm->getArray($apiVersion);
     }
-
-    $res = [
-      "publicPerm" => $publicPerm,
-      "permGroups" => $finalPermGroups
-    ];
-    return $response->withJson($res, 200);
+    $res = new Permissions($publicPerm, $finalPermGroups);
+    return $response->withJson($res->getArray($apiVersion), 200);
   }
 
   /**
