@@ -733,6 +733,42 @@ paths:
                     - $ref: '#/components/schemas/ServerUpload'
                 scanOptions:
                   $ref: '#/components/schemas/ScanOptions'
+                folderId:
+                  type: integer
+                  description: Folder Id, where upload should be created
+                uploadDescription:
+                  type: string
+                  description: Visible description of the file
+                public:
+                  type: string
+                  enum:
+                    - private
+                    - protected
+                    - public
+                  default: protected
+                  description: The access level to the upload
+                applyGlobal:
+                  type: boolean
+                  default: false
+                  description: >
+                    Apply global decisions for current upload
+                ignoreScm:
+                  type: boolean
+                  default: false
+                  description: >
+                    Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype
+                uploadType:
+                  type: string
+                  enum:
+                    - file
+                    - vcs
+                    - url
+                    - server
+                  default: vcs
+                  description: Type of upload done. Choose `file` if uploading a file.
+              required:
+                - folderId
+                - uploadType
           multipart/form-data:
             schema:
               type: object
@@ -744,58 +780,6 @@ paths:
                   $ref: '#/components/schemas/ScanOptions'
               required:
                 - fileInput
-      parameters:
-        - name: folderId
-          description: Folder Id, where upload should be created
-          in: header
-          required: true
-          schema:
-            type: integer
-        - name: uploadDescription
-          description: Visible description of the file
-          in: header
-          required: false
-          schema:
-            type: string
-        - name: public
-          description: The access level to the upload
-          in: header
-          required: false
-          schema:
-            type: string
-            enum:
-              - private
-              - protected
-              - public
-            default: protected
-        - name: applyGlobal
-          description: >
-            Apply global decisions for current upload
-          in: header
-          required: false
-          schema:
-            type: boolean
-            default: false
-        - name: ignoreScm
-          description: >
-            Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype
-          in: header
-          required: false
-          schema:
-            type: boolean
-            default: false
-        - name: uploadType
-          description: Type of upload done. Choose `file` if uploading a file.
-          in: header
-          required: true
-          schema:
-            type: string
-            enum:
-              - file
-              - vcs
-              - url
-              - server
-            default: vcs
       responses:
         '201':
           description: Upload is created
@@ -847,7 +831,7 @@ paths:
           type: integer
       - name: groupName
         description: The group name to chose while accessing the package
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -2075,7 +2059,7 @@ paths:
       - name: page
         description: Page number (starts from 1)
         required: false
-        in: header
+        in: query
         schema:
           type: integer
           default: 1
@@ -2083,7 +2067,7 @@ paths:
       - name: limit
         description: Limits of responses per request
         required: false
-        in: header
+        in: query
         schema:
           type: integer
           default: 50
@@ -4131,7 +4115,7 @@ paths:
     parameters:
       - name: groupName
         description: The group name to chose while downloading specific report
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -6039,13 +6023,13 @@ components:
           type: array
           items:
             properties:
-              agent_id:
+              agentId:
                 type: integer
                 example: 20
-              agent_rev:
+              agentRev:
                 type: string
                 example: "4.1.0.282-rc1.ffb851"
-              agent_name:
+              agentName:
                 type: string
                 example: "reso"
         uploadId:
@@ -6168,7 +6152,7 @@ components:
           type: integer
           description: Id of the license
           example: 29
-        shortname:
+        shortName:
           type: string
           description: Short name of the license
           example: Apache-2.0
@@ -6464,7 +6448,7 @@ components:
         count:
           type: integer
           example: 1
-        spdx_id:
+        spdxId:
           type: string
           example: LicenseRef-fossology-ACE
     ObligationsList:
