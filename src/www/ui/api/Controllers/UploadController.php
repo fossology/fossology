@@ -36,12 +36,15 @@ use Fossology\UI\Api\Exceptions\HttpPreconditionFailException;
 use Fossology\UI\Api\Exceptions\HttpServiceUnavailableException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\UploadHelper;
-use Fossology\UI\Api\Models\GroupPermissions;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\License;
 use Fossology\UI\Api\Models\Obligation;
 use Fossology\UI\Api\Models\ScannedLicense;
+use Fossology\UI\Api\Models\EditedLicense;
+use Fossology\UI\Api\Models\SuccessfulAgent;
+use Fossology\UI\Api\Models\Agent;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\GroupPermission;
 use Fossology\UI\Api\Models\Permissions;
 use Fossology\UI\Api\Models\ApiVersion;
@@ -435,11 +438,30 @@ class UploadController extends RestController
    */
   public function postUpload($request, $response, $args)
   {
-    $uploadType = $request->getHeaderLine('uploadType');
-    if (empty($uploadType)) {
-      $uploadType = 'vcs';
-    }
     $reqBody = $this->getParsedBody($request);
+    if (ApiVersion::getVersion($request) == ApiVersion::V2) {
+      $uploadType = $reqBody['uploadType'] ?? null;
+      $folderId = $reqBody['folderId'] ?? null;
+      $description = $reqBody['uploadDescription'] ?? "";
+      $public = $reqBody['public'] ?? null;
+      $applyGlobal = filter_var($reqBody['applyGlobal'] ?? null,
+        FILTER_VALIDATE_BOOLEAN);
+      $ignoreScm = $reqBody['ignoreScm'] ?? null;
+    } else {
+      $uploadType = $request->getHeaderLine('uploadType');
+      $folderId = $request->getHeaderLine('folderId');
+      $description = $request->getHeaderLine('uploadDescription');
+      $public = $request->getHeaderLine('public');
+      $applyGlobal = filter_var($request->getHeaderLine('applyGlobal'),
+        FILTER_VALIDATE_BOOLEAN);
+      $ignoreScm = $request->getHeaderLine('ignoreScm');
+    }
+
+    $public = empty($public) ? 'protected' : $public;
+
+    if (empty($uploadType)) {
+      throw new HttpBadRequestException("Require uploadType");
+    }
     $scanOptions = [];
     if (array_key_exists('scanOptions', $reqBody)) {
       if ($uploadType == 'file') {
@@ -460,8 +482,8 @@ class UploadController extends RestController
       throw new HttpBadRequestException(
         "Require location object if uploadType != file");
     }
-    if (!$request->hasHeader('folderId') ||
-        !is_numeric($folderId = $request->getHeaderLine('folderId')) && $folderId > 0) {
+    if (empty($folderId) ||
+        !is_numeric($folderId) && $folderId > 0) {
       throw new HttpBadRequestException("folderId must be a positive integer!");
     }
 
@@ -473,17 +495,10 @@ class UploadController extends RestController
       throw new HttpForbiddenException("folderId $folderId is not accessible!");
     }
 
-    $description = $request->getHeaderLine('uploadDescription');
-    $public = $request->getHeaderLine('public');
-    $public = empty($public) ? 'protected' : $public;
-    $applyGlobal = filter_var($request->getHeaderLine('applyGlobal'),
-      FILTER_VALIDATE_BOOLEAN);
-    $ignoreScm = $request->getHeaderLine('ignoreScm');
-
     $locationObject = [];
     if (array_key_exists("location", $reqBody)) {
       $locationObject = $reqBody["location"];
-    } elseif ($request->getHeaderLine('uploadType') != 'file') {
+    } elseif ($uploadType != 'file') {
       throw new HttpBadRequestException(
         "Require location object if uploadType != file");
     }
@@ -1105,7 +1120,9 @@ class UploadController extends RestController
     $scanJobProxy = new ScanJobProxy($agentDao, $uploadId);
     $res = $scanJobProxy->createAgentStatus($scannerAgents);
 
+    $outputArray = [];
     foreach ($res as &$item) {
+      $successfulAgents = [];
       if (count($item['successfulAgents']) > 0) {
         $item['isAgentRunning'] = false;
       } else {
@@ -1113,10 +1130,13 @@ class UploadController extends RestController
         $item['currentAgentRev'] = "";
       }
       foreach ($item['successfulAgents'] as &$agent) {
-        $agent['agent_id'] = intval($agent['agent_id']);
+        $successfulAgent = new SuccessfulAgent(intval($agent['agent_id']), $agent['agent_rev'], $agent['agent_name']);
+        $successfulAgents[] = $successfulAgent->getArray(ApiVersion::getVersion($request));
       }
+      $agent = new Agent($successfulAgents, $item['uploadId'], $item['agentName'], $item['currentAgentId'], $item['currentAgentRev'], $item['isAgentRunning']);
+      $outputArray[] = $agent->getArray(ApiVersion::getVersion($request));
     }
-    return $response->withJson($res, 200);
+    return $response->withJson($outputArray, 200);
   }
 
   /**
@@ -1142,12 +1162,8 @@ class UploadController extends RestController
     $outputArray = [];
 
     foreach ($res as $key => $value) {
-      $outputArray[] = [
-        "id" => intval($value["rf_pk"]),
-        "shortName" => $key,
-        "count" =>intval($value["count"]),
-        "spdx_id" => $value["spdx_id"],
-      ];
+      $editedLicense = new EditedLicense(intval($value["rf_pk"]), $key, intval($value["count"]), $value["spdx_id"]);
+      $outputArray[] = $editedLicense->getArray(ApiVersion::getVersion($request));
     }
     return $response->withJson($outputArray, 200);
   }
@@ -1204,7 +1220,7 @@ class UploadController extends RestController
 
     foreach ($res as $key => $value) {
       $scannedLicense = new ScannedLicense($licenseDao->getLicenseByShortName($key)->getId(), $key, $value['count'], $value['unique'], $value['spdx_id']);
-      $outputArray[] = $scannedLicense->getArray();
+      $outputArray[] = $scannedLicense->getArray(ApiVersion::getVersion($request));
     }
     return $response->withJson($outputArray, 200);
   }

@@ -40,6 +40,7 @@ use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\License;
 use Fossology\UI\Api\Models\Upload;
+use Fossology\UI\Api\Models\ApiVersion;
 use Mockery as M;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
@@ -668,31 +669,69 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    * @runInSeparateProcess
    * @preserveGlobalState disabled
    * @test
-   * -# Test for UploadController::postUpload()
+   * -# Test for UploadController::postUpload() with V1 parameters
    * -# Check if response status is 201 with upload id
    */
-  public function testPostUpload()
+  public function testPostUploadV1()
+  {
+    $this->testPostUpload(ApiVersion::V1);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with V2 parameters
+   * -# Check if response status is 201 with upload id
+   */
+  public function testPostUploadV2()
+  {
+    $this->testPostUpload(ApiVersion::V2);
+  }
+
+  /**
+   * @param int $version Version to test
+   * @return void
+   */
+  private function testPostUpload(int $version)
   {
     $folderId = 2;
     $uploadId = 20;
     $uploadDescription = "Test Upload";
-    $reqBody = [
-      "location" => "data",
-      "scanOptions" => "scanOptions"
-    ];
 
     $requestHeaders = new Headers();
-    $requestHeaders->setHeader('folderId', $folderId);
-    $requestHeaders->setHeader('uploadDescription', $uploadDescription);
-    $requestHeaders->setHeader('ignoreScm', 'true');
     $requestHeaders->setHeader('Content-Type', 'application/json');
+    if ($version == ApiVersion::V2) {
+      $reqBody = [
+        "location" => "data",
+        "folderId" => $folderId,
+        "uploadDescription" => $uploadDescription,
+        "ignoreScm" => "true",
+        "scanOptions" => "scanOptions",
+        "uploadType" => "vcs"
+      ];
+    } else {
+      $reqBody = [
+        "location" => "data",
+        "scanOptions" => "scanOptions"
+      ];
+      $requestHeaders->setHeader('folderId', $folderId);
+      $requestHeaders->setHeader('uploadDescription', $uploadDescription);
+      $requestHeaders->setHeader('ignoreScm', 'true');
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $requestHeaders->setHeader('uploadType', 'vcs');
+    }
+
 
     $body = $this->streamFactory->createStream(json_encode(
       $reqBody
     ));
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
-
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+    }
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('createNewUpload')
       ->withArgs([$reqBody["location"], $folderId, $uploadDescription, 'protected', 'true',
@@ -722,25 +761,63 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    * @runInSeparateProcess
    * @preserveGlobalState disabled
    * @test
-   * -# Test for UploadController::postUpload() with inaccessible folder
+   * -# Test for UploadController::postUpload() with inaccessible folder with V1 parameters
    * -# Check if response status is 403
    */
-  public function testPostUploadFolderNotAccessible()
+  public function testPostUploadFolderNotAccessibleV1()
+  {
+    $this->testPostUploadFolderNotAccessible(ApiVersion::V1);
+  }
+
+    /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with inaccessible folder with V2 parameters
+   * -# Check if response status is 403
+   */
+  public function testPostUploadFolderNotAccessibleV2()
+  {
+    $this->testPostUploadFolderNotAccessible(ApiVersion::V2);
+  }
+
+  /**
+   * @param int $version Version to test
+   * @return void
+   */
+  private function testPostUploadFolderNotAccessible(int $version)
   {
     $folderId = 2;
     $uploadDescription = "Test Upload";
 
     $requestHeaders = new Headers();
-    $requestHeaders->setHeader('folderId', $folderId);
     $requestHeaders->setHeader('Content-type', 'application/json');
-    $requestHeaders->setHeader('uploadDescription', $uploadDescription);
-    $requestHeaders->setHeader('ignoreScm', 'true');
-    $body = $this->streamFactory->createStream(json_encode([
-      'location' => "data",
-      'scanOptions' => 'scanOptions'
-    ]));
+    if ($version == ApiVersion::V2) {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "data",
+        "folderId" => $folderId,
+        "uploadDescription" => $uploadDescription,
+        "ignoreScm" => "true",
+        "scanOptions" => "scanOptions",
+        "uploadType" => "vcs"
+      ]));
+    } else {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "data",
+        "scanOptions" => "scanOptions"
+      ]));
+      $requestHeaders->setHeader('folderId', $folderId);
+      $requestHeaders->setHeader('uploadDescription', $uploadDescription);
+      $requestHeaders->setHeader('ignoreScm', 'true');
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $requestHeaders->setHeader('uploadType', 'vcs');
+    }
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+    }
 
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
 
@@ -757,25 +834,63 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    * @runInSeparateProcess
    * @preserveGlobalState disabled
    * @test
-   * -# Test for UploadController::postUpload() with invalid folder id
+   * -# Test for UploadController::postUpload() with invalid folder id with V1 parameters
    * -# Check if response status is 404
    */
-  public function testPostUploadFolderNotFound()
+  public function testPostUploadFolderNotFoundV1()
+  {
+    $this->testPostUploadFolderNotFound(ApiVersion::V1);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with invalid folder id with V2 parameters
+   * -# Check if response status is 404
+   */
+  public function testPostUploadFolderNotFoundV2()
+  {
+    $this->testPostUploadFolderNotFound(ApiVersion::V2);
+  }
+
+  /**
+   * @param int $version Version to test
+   * @return void
+   */
+  private function testPostUploadFolderNotFound(int $version)
   {
     $folderId = 8;
     $uploadDescription = "Test Upload";
 
     $requestHeaders = new Headers();
-    $requestHeaders->setHeader('folderId', $folderId);
     $requestHeaders->setHeader('Content-type', 'application/json');
-    $requestHeaders->setHeader('uploadDescription', $uploadDescription);
-    $requestHeaders->setHeader('ignoreScm', 'true');
-    $body = $this->streamFactory->createStream(json_encode([
-      'location' => "vcsData",
-      'scanOptions' => 'scanOptions'
-    ]));
+    if ($version == ApiVersion::V2) {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData",
+        "folderId" => $folderId,
+        "uploadDescription" => $uploadDescription,
+        "ignoreScm" => "true",
+        "scanOptions" => "scanOptions",
+        "uploadType" => "vcs"
+      ]));
+    } else {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData",
+        "scanOptions" => "scanOptions"
+      ]));
+      $requestHeaders->setHeader('folderId', $folderId);
+      $requestHeaders->setHeader('uploadDescription', $uploadDescription);
+      $requestHeaders->setHeader('ignoreScm', 'true');
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $requestHeaders->setHeader('uploadType', 'vcs');
+    }
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+    }
 
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
 
@@ -790,10 +905,31 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    * @runInSeparateProcess
    * @preserveGlobalState disabled
    * @test
-   * -# Test for UploadController::postUpload() with internal error
+   * -# Test for UploadController::postUpload() with internal error with V1 parameters
    * -# Check if response status is 500 with error messages set
    */
-  public function testPostUploadInternalError()
+  public function testPostUploadInternalErrorV1()
+  {
+    $this->testPostUploadInternalError(ApiVersion::V1);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with internal error with V2 parameters
+   * -# Check if response status is 500 with error messages set
+   */
+  public function testPostUploadInternalErrorV2()
+  {
+    $this->testPostUploadInternalError(ApiVersion::V2);
+  }
+
+  /**
+   * @param int $version Version to test
+   * @return void
+    */
+  private function testPostUploadInternalError(int $version)
   {
     $folderId = 3;
     $uploadDescription = "Test Upload";
@@ -802,17 +938,34 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
 
     $requestHeaders = new Headers();
-    $requestHeaders->setHeader('folderId', $folderId);
     $requestHeaders->setHeader('Content-type', 'application/json');
-    $requestHeaders->setHeader('uploadDescription', $uploadDescription);
-    $requestHeaders->setHeader('ignoreScm', 'true');
-    $body = $this->streamFactory->createStream(json_encode([
-      'location' => "vcsData",
-      'scanOptions' => 'scanOptions'
-    ]));
+    if ($version == ApiVersion::V2) {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData",
+        "folderId" => $folderId,
+        "uploadDescription" => $uploadDescription,
+        "ignoreScm" => "true",
+        "scanOptions" => "scanOptions",
+        "uploadType" => "vcs"
+      ]));
+    } else {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData",
+        "scanOptions" => "scanOptions"
+      ]));
+      $requestHeaders->setHeader('folderId', $folderId);
+      $requestHeaders->setHeader('uploadDescription', $uploadDescription);
+      $requestHeaders->setHeader('ignoreScm', 'true');
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $requestHeaders->setHeader('uploadType', 'vcs');
+    }
 
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+    }
 
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('createNewUpload')
