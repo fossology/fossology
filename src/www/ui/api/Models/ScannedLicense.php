@@ -95,19 +95,30 @@ class ScannedLicense
 
   /**
    * JSON representation of current scannedLicense
+   * @param integer $version
    * @return string
    */
-  public function getJSON()
+  public function getJSON($version=ApiVersion::V1)
   {
-    return json_encode($this->getArray());
+    return json_encode($this->getArray($version));
   }
 
   /**
    * Get ScannedLicense element as associative array
+   * @param integer $version
    * @return array
    */
-  public function getArray()
+  public function getArray($version=ApiVersion::V1)
   {
+    if ($version == ApiVersion::V2) {
+      return [
+        'id' => $this->getId(),
+        'shortName' => $this->getShortname(),
+        'occurence' => $this->getOccurence(),
+        'unique' => $this->getUnique(),
+        'spdxName' => $this->getSpdxName()
+      ];
+    }
     return [
       'id' => $this->getId(),
       'shortname' => $this->getShortname(),
