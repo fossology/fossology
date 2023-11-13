@@ -35,6 +35,7 @@ use Fossology\UI\Api\Models\Reuser;
 use Fossology\UI\Api\Models\Scancode;
 use Fossology\UI\Api\Models\ScanOptions;
 use Fossology\UI\Api\Models\UploadSummary;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Page\BrowseLicense;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use UIExportList;
@@ -739,7 +740,7 @@ class UploadHelper
    * @return array Array containing `filePath`, `agentFindings` and
    * `conclusions` for each upload tree item
    */
-  public function getUploadLicenseList($uploadId, $agents, $printContainers, $boolLicense, $boolCopyright, $page = 0, $limit = 50)
+  public function getUploadLicenseList($uploadId, $agents, $printContainers, $boolLicense, $boolCopyright, $page = 0, $limit = 50, $apiVersion=ApiVersion::V1)
   {
     global $container;
     $restHelper = $container->get('helper.restHelper');
@@ -807,7 +808,7 @@ class UploadHelper
           $clearingDao, $groupId);
         $responseRow = new FileLicenses($license['filePath'], $findings,
           $clearingDecision);
-        $responseList[] = $responseRow->getArray();
+        $responseList[] = $responseRow->getArray($apiVersion);
       }
     } elseif (!$boolLicense && $boolCopyright) {
       foreach ($copyrightList as $copyFilepath) {
@@ -820,7 +821,7 @@ class UploadHelper
         $findings = new Findings();
         $findings->setCopyright($copyrightContent);
         $responseRow = new FileLicenses($copyFilepath['filePath'], $findings);
-        $responseList[] = $responseRow->getArray();
+        $responseList[] = $responseRow->getArray($apiVersion);
       }
     }
     $offset = $page * $limit;
