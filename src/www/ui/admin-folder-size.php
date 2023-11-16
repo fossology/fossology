@@ -5,6 +5,7 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 
 define("TITLE_SIZE_DASHBOARD", _("Folder and upload dashboard"));
@@ -15,6 +16,11 @@ class size_dashboard extends FO_Plugin
   /** @var DbManager */
   private $dbManager;
 
+  /**
+   * @var UploadDao $uploadDao
+   */
+  private $uploadDao;
+
   function __construct()
   {
     $this->Name = "size_dashboard";
@@ -24,6 +30,7 @@ class size_dashboard extends FO_Plugin
     $this->DBaccess = PLUGIN_DB_WRITE;
     parent::__construct();
     $this->dbManager = $GLOBALS['container']->get('db.manager');
+    $this->uploadDao = $GLOBALS['container']->get('dao.upload');
   }
 
   /**
@@ -42,13 +49,30 @@ class size_dashboard extends FO_Plugin
     $folderSize = HumanSize($row['sum']);
 
     $statementName = __METHOD__."GetEachUploadSize";
-    $this->dbManager->prepare($statementName, "SELECT upload_filename, pfile_size FROM pfile ".$sql);
-    $res = $this->dbManager->execute($statementName, array($folderId));
-    $results = $this->dbManager->fetchAll($res);
-    $this->dbManager->freeResult($res);
+    $dispSql = "SELECT upload_pk, upload_filename, pfile_size FROM pfile " .
+      $sql;
+    $results = $this->dbManager->getRows($dispSql, [$folderId], $statementName);
     $var = '';
     foreach ($results as $result) {
-      $var .= "<tr><td align='left'>".$result['upload_filename']."</td><td align='left' data-order='{$result['pfile_size']}'>".HumanSize($result['pfile_size'])."</td></tr>";
+      $duration = "NA";
+      $assignDate = $this->uploadDao->getAssigneeDate($result["upload_pk"]);
+      $closingDate = $this->uploadDao->getClosedDate($result["upload_pk"]);
+      $durationSort = 0;
+      if ($assignDate != null && $closingDate != null) {
+        try {
+          $closingDate = new DateTime($closingDate);
+          $assignDate = new DateTime($assignDate);
+          if ($assignDate < $closingDate) {
+            $duration = HumanDuration($closingDate->diff($assignDate));
+            $durationSort = $closingDate->getTimestamp() - $assignDate->getTimestamp();
+          }
+        } catch (Exception $_) {
+        }
+      }
+      $var .= "<tr><td align='left'>" . $result['upload_filename'] .
+        "</td><td align='left' data-order='{$result['pfile_size']}'>" .
+        HumanSize($result['pfile_size']) .
+        "</td><td align='left' data-order='{$durationSort}'>$duration</td></tr>";
     }
     return [$var, $folderSize];
   }

@@ -8,6 +8,7 @@
 namespace Fossology\Lib\Proxy;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Data\Upload\UploadEvents;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
 
@@ -41,7 +42,6 @@ class UploadBrowseProxy
     $this->dbManager->getSingleRow($sql, $params);
   }
 
-
   public function updateTable($columnName, $uploadId, $value)
   {
     if ($columnName == 'status_fk') {
@@ -49,6 +49,7 @@ class UploadBrowseProxy
     } else if ($columnName == 'assignee' && $this->userPerm) {
       $sql = "UPDATE upload_clearing SET assignee=$1 WHERE group_fk=$2 AND upload_fk=$3";
       $this->dbManager->getSingleRow($sql, array($value, $this->groupId, $uploadId), $sqlLog = __METHOD__);
+      $this->setAssigneeEvent($uploadId);
     } else {
       throw new \Exception('invalid column');
     }
@@ -68,12 +69,58 @@ class UploadBrowseProxy
       $params = array($newStatus, $this->groupId, $uploadId, UploadStatus::REJECTED);
       $this->dbManager->getSingleRow($sql, $params,  __METHOD__ . '.user');
     }
+    if ($newStatus == UploadStatus::CLOSED || $newStatus == UploadStatus::REJECTED) {
+      $this->setCloseEvent($uploadId);
+    }
   }
 
   public function setStatusAndComment($uploadId, $statusId, $commentText)
   {
     $sql = "UPDATE upload_clearing SET status_fk=$1, status_comment=$2 WHERE group_fk=$3 AND upload_fk=$4";
     $this->dbManager->getSingleRow($sql, array($statusId, $commentText, $this->groupId, $uploadId), __METHOD__);
+    if ($statusId == UploadStatus::CLOSED || $statusId == UploadStatus::REJECTED) {
+      $this->setCloseEvent($uploadId);
+    }
+  }
+
+  /**
+   * Add assignee event if not already present for the upload
+   *
+   * @param int $uploadId Upload ID
+   * @return void
+   */
+  private function setAssigneeEvent($uploadId)
+  {
+    $sql = "SELECT 1 as exists FROM upload_events WHERE upload_fk = $1 " .
+      "AND event_type = " . UploadEvents::ASSIGNEE_EVENT;
+    $row = $this->dbManager->getSingleRow($sql, [$uploadId],
+      __METHOD__ . ".exists");
+    if (empty($row) || empty($row["exists"])) {
+      $sql = "INSERT INTO upload_events (upload_fk, event_type) VALUES ($1, " .
+        UploadEvents::ASSIGNEE_EVENT . ")";
+      $this->dbManager->getSingleRow($sql, [$uploadId],
+        __METHOD__ . ".insert");
+    }
+  }
+
+  /**
+   * Add close event if not already present for the upload
+   *
+   * @param int $uploadId Upload ID
+   * @return void
+   */
+  private function setCloseEvent($uploadId)
+  {
+    $sql = "SELECT 1 as exists FROM upload_events WHERE upload_fk = $1 " .
+      "AND event_type = " . UploadEvents::UPLOAD_CLOSED_EVENT;
+    $row = $this->dbManager->getSingleRow($sql, [$uploadId],
+      __METHOD__ . ".exists");
+    if (empty($row) || empty($row["exists"])) {
+      $sql = "INSERT INTO upload_events (upload_fk, event_type) VALUES ($1, " .
+        UploadEvents::UPLOAD_CLOSED_EVENT . ")";
+      $this->dbManager->getSingleRow($sql, [$uploadId],
+        __METHOD__ . ".insert");
+    }
   }
 
   public function moveUploadToInfinity($uploadId, $top)

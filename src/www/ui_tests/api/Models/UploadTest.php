@@ -12,8 +12,8 @@
 
 namespace Fossology\UI\Api\Test\Models;
 
-use Fossology\UI\Api\Models\Upload;
 use Fossology\UI\Api\Models\Hash;
+use Fossology\UI\Api\Models\Upload;
 
 /**
  * @class UploadTest
@@ -28,7 +28,6 @@ class UploadTest extends \PHPUnit\Framework\TestCase
   public function testDataFormat()
   {
     $hash = new Hash('sha1checksum', 'md5checksum', 'sha256checksum', 123123);
-    $upload = new Upload(2, 'root', 3, '', 'my.tar.gz', '01-01-2020', 3, $hash);
     $expectedUpload = [
       "folderid"    => 2,
       "foldername"  => 'root',
@@ -37,11 +36,15 @@ class UploadTest extends \PHPUnit\Framework\TestCase
       "uploadname"  => 'my.tar.gz',
       "uploaddate"  => '01-01-2020',
       "assignee"    => 3,
+      "assigneeDate" => '01-01-2020',
+      "closingDate" => '01-01-2020',
       "hash"        => $hash->getArray()
     ];
 
     $actualUpload = new Upload(2, 'root', 3, '', 'my.tar.gz', '01-01-2020', 3,
       $hash);
+    $actualUpload->setAssigneeDate("01-01-2020");
+    $actualUpload->setClosingDate("01-01-2020");
 
     $this->assertEquals($expectedUpload, $actualUpload->getArray());
   }

@@ -19,6 +19,7 @@ if (session_status() == PHP_SESSION_NONE) {
 require_once dirname(dirname(dirname(dirname(__DIR__)))) .
   '/lib/php/Plugin/FO_Plugin.php';
 
+use Fossology\Lib\Dao\UploadDao;
 use Mockery as M;
 use Fossology\Lib\Db\ModernDbManager;
 use Fossology\UI\Api\Helper\DbHelper;
@@ -57,6 +58,12 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
   private $folderDao;
 
   /**
+   * @var UploadDao $uploadDao
+   * UploadDao object to test
+   */
+  private $uploadDao;
+
+  /**
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
@@ -64,8 +71,10 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
   {
     $this->dbManager = M::mock(ModernDbManager::class);
     $this->folderDao = M::mock(FolderDao::class);
+    $this->uploadDao = M::mock(UploadDao::class);
 
-    $this->dbHelper = new DbHelper($this->dbManager, $this->folderDao);
+    $this->dbHelper = new DbHelper($this->dbManager, $this->folderDao,
+      $this->uploadDao);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
