@@ -27,6 +27,11 @@ class SpdxLicenseInfo
    * Is a custom text license?
    */
   private $customText = false;
+  /**
+   * @var bool $textPrinted
+   * Is the license text already printed?
+   */
+  private $textPrinted = false;
 
   /**
    * @return bool
@@ -45,11 +50,6 @@ class SpdxLicenseInfo
     $this->textPrinted = $textPrinted;
     return $this;
   }
-  /**
-   * @var bool $textPrinted
-   * Is the license text already printed?
-   */
-  private $textPrinted = false;
 
   /**
    * @return License
