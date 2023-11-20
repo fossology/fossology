@@ -44,12 +44,14 @@ class FileNode
   /**
    * Add comment to file.
    *
-   * @param string $comment
+   * @param string|null $comment
    * @return FileNode
    */
-  public function addComment(string $comment): FileNode
+  public function addComment(?string $comment): FileNode
   {
-    $this->comments[] = $comment;
+    if (!empty($comment)) {
+      $this->comments[] = $comment;
+    }
     return $this;
   }
 
@@ -68,12 +70,14 @@ class FileNode
   /**
    * Add acknowledgement to file.
    *
-   * @param string $acknowledgement
+   * @param string|null $acknowledgement
    * @return FileNode
    */
-  public function addAcknowledgement(string $acknowledgement): FileNode
+  public function addAcknowledgement(?string $acknowledgement): FileNode
   {
-    $this->acknowledgements[] = $acknowledgement;
+    if (!empty($acknowledgement)) {
+      $this->acknowledgements[] = $acknowledgement;
+    }
     return $this;
   }
 
@@ -92,12 +96,14 @@ class FileNode
   /**
    * Add concluded license to file.
    *
-   * @param string $concludedLicense
+   * @param string|null $concludedLicense
    * @return FileNode
    */
-  public function addConcludedLicense(string $concludedLicense): FileNode
+  public function addConcludedLicense(?string $concludedLicense): FileNode
   {
-    $this->concludedLicenses[] = $concludedLicense;
+    if (!empty($concludedLicense)) {
+      $this->concludedLicenses[] = $concludedLicense;
+    }
     return $this;
   }
 
@@ -116,24 +122,28 @@ class FileNode
   /**
    * Add scanner finding to file.
    *
-   * @param string $scanner
+   * @param string|null $scanner
    * @return FileNode
    */
-  public function addScanner(string $scanner): FileNode
+  public function addScanner(?string $scanner): FileNode
   {
-    $this->scanners[] = $scanner;
+    if (!empty($scanner)) {
+      $this->scanners[] = $scanner;
+    }
     return $this;
   }
 
   /**
    * Add copyright to file.
    *
-   * @param string $copyright
+   * @param string|null $copyright
    * @return FileNode
    */
-  public function addCopyright(string $copyright): FileNode
+  public function addCopyright(?string $copyright): FileNode
   {
-    $this->copyrights[] = $copyright;
+    if (!empty($copyright)) {
+      $this->copyrights[] = $copyright;
+    }
     return $this;
   }
 
