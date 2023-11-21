@@ -4,6 +4,209 @@
 -->
 # Changelog of FOSSology
 
+### 4.4.0-rc1 (Nov 21st 2023)
+
+This release adds important corrections to
+[4.3.0](https://github.com/fossology/fossology/releases/tag/4.3.0)
+
+The release 4.4.0-rc1 introduces a number of corrections to
+[4.3.0](https://github.com/fossology/fossology/releases/tag/4.3.0)
+and major changes to FOSSology, including:
+
+* Major changes from GSoC contributors:
+  * During GSoC 2023, FOSSology saw a major influx in REST API endpoints. Now
+    there are endpoints for almost all information available on UI.
+  * During same operations, we also created the framework changes to allow 2
+    versions of REST API (v1 & v2). This will allow us to unify the REST API in
+    future while still supporting v1.
+  * Another big change was creation of new agent to generate
+    [CycloneDX](https://cyclonedx.org) reports.
+  * We also changed the integration mechanism with
+    [ScanCode](https://scancode-toolkit.readthedocs.io) resulting in major
+    speed improvements in the scan.
+* With this release, we also bring support for Debian Bookworm (12)
+* Support extraction of [Zstandard](https://www.zstd.net) files
+* Support GitHub Actions in the scanner image and generate SPDX reports
+* Multiple fixes in SPDX reports
+* Sync with SPDX License list v3.22
+
+#### Credits to contributors for 4.4.0-rc1
+
+From the GIT commit history, we have the following contributors since
+[4.3.0](https://github.com/fossology/fossology/releases/tag/4.3.0):
+
+```
+> dushimsam <dushsam@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Hero2323 <abdelrahmanjamal5565@gmail.com>
+> Igor Mishchuk <igor.mishchuk@carbonhealth.com>
+> Kamal Nayan @legendarykamal
+> lata <imlata1111@gmail.com>
+> Marc-Etienne Vargenau <marc-etienne.vargenau@nokia.com>
+> mayank-pathakk <mayank234pathak@gmail.com>
+> Nejc Habjan <nejc.habjan@siemens.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Simran Nigam <nigamsimran14@gmail.com>
+> soham4abc <sohambanerjee4abc@hotmail.com>
+> srideep-banerjee <banerjee.srideep@gmail.com>
+> Sushant Kumar <sushantmishra02102002@gmail.com>
+```
+
+#### Features
+
+* `7ed5f9ad9` feat(licenseRef): add new licenses from SPDX
+* `572fdaeda` feat(menu): add new button to indicate system load in banner
+* `f154bfd53` feat(upload): track assignee and closing events
+* `33a581909` feat(bulk): checkbox to select scan for findings only
+* `16f8cffce` feat(conf): support CLIXML conf for a upload
+* `2f16eef42` feat(os): add support for Debian Bookworm (12)
+* `8c28b2f72` feat(api): migrate `/tokens` endpoints to v2
+* `16331926b` feat(dashboard): add new page for upload and folder dashboard
+* `dc47e29b1` feat(unifiedreport): support json format for rows and also html break
+* `bc1cc0d24` feat(api): add 'topitem' endpoint to Upload API
+* `c217a3991` feat(schedule agent): add select2 to search for uploads with name
+* `88d04ec6d` feat(api): unify cx endpoints
+* `4e3e0bfc5` feat(api): added author API endpoints
+* `deeb79e20` feat(api): Export Obligation list as CSV
+* `54f4859e0` feat(api): delete obligation based on id
+* `697960066` feat(api): Import obligation list from CSV
+* `a5f29c38c` feat(api): get all obligations details
+* `8d8573ff8` feat(api): get details of a particular obligation using id
+* `1630e79d0` feat(api): export single license as CSV
+* `94d874dcb` feat(api): The REST API to export licenses-list as CSV
+* `e0220f921` feat(api): api to get the list of obligations
+* `7fb494c4c` feat(api): Get all contents of a specific folder
+* `be9d9cba6` feat(api): get Banner message
+* `bfff708bc` feat(api): Unlink folder contents
+* `524090aed` feat(api): Get removable folder contents
+* `4e213d350` feat(api): update conf data endpoint implemented
+* `d9223a635` feat(api): update customise endpoint
+* `1d6898920` feat(api): Get Customise page data
+* `ce3b009e2` feat(api): Run scheduler based on the given operation's option
+* `3a48ab052` feat(api): Get scheduler options for a given operation
+* `8c45508e6` feat(api): Get active queries for Dashboard overview
+* `9af03d271` feat(api): Get database metrics overview for dashboard
+* `5da361699` feat(api): Suggest license from reference text
+* `f591d2a28` feat(api): Get all server jobs for Admin Dashboard
+* `f878673df` feat(api): Get PHP-Info for the Dasbhoard Overview
+* `e19384ef3` feat(api): Get disk space usage overview
+* `1234f19e0` feat(api): Get the database contents for the overview of Foss. operations
+* `e607bcc45` feat(api): Merge a license into an existing one
+* `7e7e0ebfa` feat(api): verify license as new or variant
+* `7404e6b37` feat(ununpack): support for Zstandard
+* `7e51fed2c` feat(api): Add, Edit, toggle standard-license comment
+* `34af20910` feat(api): Get the summary statistics for all Jobs
+* `f55fed9ac` feat(SETUP-V2): Support Multiple Versions (V1 & V2)
+* `a95d77459` feat(api): get-all standard comments
+* `eccede06d` feat(api): REST API to schedule the bulk-scan
+* `01f73826a` feat(api): Get Customise page data
+* `cbee2ee97` feat(api): Add, edit & delete license decision
+* `0dd1c3e89` feat(api): Add, Edit & toggle admin license acknowledgement
+* `89e7748ae` feat(api): get all agents revisions
+* `e82a0cf8a` feat(api): conf info for upload
+* `c755ff564` feat(api): get a list of scanned licenses for an upload
+* `0bde97682` feat(CycloneDX): Add new agent cyclonedx
+* `7e181f87d` feat(api): Get licenses reuse summary API
+* `309dd70d5` feat(api): get list of license decisions for an item
+* `13d79e23e` feat(api): File info API implemented
+* `e4085b07e` feat(api): get edited licenses list
+* `bf5a8c569` feat(api): Get all licenses-admin acknowlegments
+* `33f75c7f5` feat(api): get the license tree-view of the upload and item
+* `e2370c786` feat(nomos): add more regex to nomos to identify different licenses
+* `ac1897635` feat(api): Update upload-summary API for additional info
+* `08fba9484` feat(api): get all agents for the upload
+* `707094c31` feat(api): API to return total number of copyrights for a file
+* `87e756c63` feat(api): get licenses histogram
+* `670a37de4` feat(api): Get the clearing-progress info for an upload.
+* `76d75929b` feat(api): restore deleted copyrights
+* `3bb66039b` feat(api): REST API to get keywords and hightlight-entries from content
+* `c0e6c8b00` feat(api): Get clearing-history data API
+* `ea3adb358` feat(api): Get list of bulk-history API
+* `e6b086f8d` feat(api): handle three filters to get prev & next item
+* `779e2331a` feat(scanner): generate spdx report
+* `ee2b2f703` feat(api): update file copyright api added
+* `bec422b64` feat(api): delete copyright
+* `22b4c594c` feat(api): copyright info for file
+* `b3351361c` feat(scanner): support github in scanner
+* `b8a3590f3` feat(api): Remove a particular main license from an upload
+* `c36b317cf` feat(api): add the new main license for the upload
+* `f34019cae` feat(api): set the clearing decision for a particular item
+* `9207e349a` feat(api): content negotiation on /openapi
+* `55b06cc2c` feat(api): get the contents of the file
+* `5bcb4f5a6` feat(api): openapi.yaml exposed through api
+* `3f701df9b` feat(api): add pagination to license browser
+* `f4a578b87` feat(api): get main licenses assigned on an upload
+* `992c0b2d1` feat(delete-job-endpoint): Added a delete job endpoint to the Fossology API
+
+#### Corrections
+
+* `a943cb4ad` fix(spdx2): avoid license text duplication in rdf
+* `145318a5f` fix(spdx2): accept null values for arrays
+* `19041f0d9` fix(unifiedreport): replace double quotes with single to fix line breaks
+* `ccad99efa` fix(documentation): update README.md with PHP version
+* `099fe015c` fix(ci): fix build in Debian Buster
+* `6373c574c` fix(api): default values of page and limit
+* `4160f35db` fix(user-edit): handle HttpForbiddenException
+* `249207f8b` fix(user-edit): compare old email and skip email count check
+* `e979e2782` fix(db): change agent_rev to text
+* `9af3fcf9c` fix(php): replace array_push by assignment
+* `ba6506619` fix(php): add missing semicolon
+* `2915b7534` fix(php): remove & to be compatible with PHP 8
+* `a882ff932` fix(php): Factor common code
+* `df39a6744` fix(cylonedx): update for changes in SPDX
+* `e01006b21` fix(spdx): de-duplicate licenses with same SPDX ID
+* `8682ab5c5` fix(php): replace deprecated split by explode
+* `d871f83d6` fix(php): Using ${var} in strings is deprecated
+* `f3b2e0a8b` fix(php) Optional parameter declared before required parameter
+* `7370c2bd6` fix(PSR-12): closing ?> tag MUST be omitted
+* `c10906db7` fix(test): fix REST API testcases
+* `226d38e0d` fix(api): move obligation removal code for rest
+* `0eb928490` fix(api): use ObligationMap instead of Model class
+* `7e630262f` fix(api): extend obligation model don't create new
+* `1e9ef3739` fix(api): use ObligationMap instead of modifying UI
+* `8d6ab4550` fix(dao): use DbManager in SysConfigDao
+* `cdc011348` fix(api): fix ConfController to accept diff values
+* `9ba7b468a` fix(api): fix sysconfig controller and dao
+* `b7b611ecd` fix(api): fix lint error and use UTC where possible
+* `ea4d682fe` fix(test): fix wrong test according to comment
+* `92e1eb44b` fix(cd): Fix release workflow for version
+* `7f7a5c362` fix(delagent): Use bcrypt to check password
+* `a49f6c8d6` fix(clixml): fix deb package name
+* `879e205bf` fix(api): fix linter issues
+* `70aca2a63` fix(automation): update copyright
+* `fb3a5600a` fix(eyeButtonForPasswords): removed external css usage
+* `6bc1ddd05` fix(clixml.php): Fixed the issue of PhP 8 Warning
+
+#### Infrastructure
+
+* `05bf86a9b` deps(composer): update composer/spdx-licenses
+* `c356f1b38` chore(lib): refactor code
+* `ebeeadbdb` chore(ununpack): drop upx support
+* `ce8a51553` test(nomos): add new test files
+* `82f169228` chore(ci): tag scanner image on release
+* `5a4b9b1ff` refactor(api): introduce error handling
+* `8ee16e820` chore(api)!: update minor version; breaking change
+* `f143d709d` chore(api): update API version 20231006
+* `8d44d989b` chore(api): move obligation endpoints from license
+* `7e20bd677` perf(scancode):Improve scanning speed of scancode agent
+* `5764e24c7` perf(api): performance optimization for FolderController
+* `1b16ed786` chore(dao): update FolderDao::removeContent to return bool
+* `1fffdd41b` chore(api): rename endpoint /unlinkable to be unambiguous
+* `b3df71d23` chore(api): update API version 20230929
+* `0b964c3e1` perf(api): refactor /license/suggest for optimization
+* `91a06f86a` doc(php): fix parameter docs
+* `3850bde2e` doc(php): fix parameter docs
+* `3065d249c` chore(gitpod): update gitpod scripts
+* `9847f6ef4` chore(UploadTreeProxy): optimize license file query
+* `3251d494a` chore(pythondeps): preserve proxy env with su
+* `aa7e5b4e8` chore(api): update API version 20230811
+* `b65cb4946` refactor(browse): use join to fetch data from two tables
+* `d11e08ec8` chore(api): update version 20230728
+* `880ed0114` chore(api): update api version
+* `a5afabdc3` refactor(copyright): Refactored some redundant code. Resolved declutter turning text to lowercase. Renamed some variables to be more informative.
+* `4d347d911` chore(css): change look for eye button
+* `33f123f5e` docs(README.md): adding more details about `docker-compose` cmd
+
 ### 4.3.0 (Jun 22nd 2023)
 
 This release adds important corrections to
