@@ -19,7 +19,7 @@
         "ext-curl": "*",
         "ext-uuid": "*",
         "ext-openssl": "*",
-        "composer/spdx-licenses": "1.5.7",
+        "composer/spdx-licenses": "1.5.8",
         "firebase/php-jwt": "v6.3.0",
         "monolog/monolog" : "2.8.0",
         "phpoffice/phpword" : "0.18.3",
