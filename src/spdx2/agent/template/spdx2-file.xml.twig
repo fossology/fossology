@@ -4,6 +4,7 @@
 #}
 {%- from "listedlicense.xml.twig" import listedLicenseFull -%}
 {% set dualLicense = false %}
+{% set textPrintedList = [] %}
 {% if fileData.concludedLicenses|length > 2 %}
   {% for res in fileData.concludedLicenses %}
     {% if 'Dual-license' == licenseList[res].licenseObj.shortName %}
@@ -50,7 +51,8 @@
         {%- endif ~%}
         <spdx:member rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
       {%~ else %}
-        {%~ if not licenseList[res].isTextPrinted() %}{# License to be printed #}
+        {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
+          {%~ set textPrintedList = textPrintedList|merge([res]) %}
         <spdx:member>
           {{ listedLicenseFull(licenseList[res].licenseObj) }}
         </spdx:member>
@@ -74,7 +76,8 @@
       {%- endif ~%}
     <spdx:licenseConcluded rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
     {%~ else %}
-      {%~ if not licenseList[res].isTextPrinted() %}{# License to be printed #}
+      {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
+        {%~ set textPrintedList = textPrintedList|merge([res]) %}
     <spdx:licenseConcluded>
       {{ listedLicenseFull(licenseList[res].licenseObj) }}
     </spdx:licenseConcluded>
@@ -104,7 +107,8 @@
       {%- endif ~%}
     <spdx:licenseInfoInFile rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
     {%~ else %}
-      {%~ if not licenseList[res].isTextPrinted() %}{# License to be printed #}
+      {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
+        {%~ set textPrintedList = textPrintedList|merge([res]) %}
     <spdx:licenseInfoInFile>
       {{ listedLicenseFull(licenseList[res].licenseObj) }}
     </spdx:licenseInfoInFile>
