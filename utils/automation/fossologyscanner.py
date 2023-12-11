@@ -267,7 +267,7 @@ if __name__ == "__main__":
   )
   parser.add_argument(
     "--report", type=str, help="Type of report to generate. Default 'TEXT'.",
-    choices=[member.name for member in ReportFormat], default=ReportFormat.TEXT
+    choices=[member.name for member in ReportFormat], default=ReportFormat.TEXT.name
   )
   args = parser.parse_args()
   sys.exit(main(args))
