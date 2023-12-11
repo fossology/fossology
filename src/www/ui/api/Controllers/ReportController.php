@@ -52,7 +52,8 @@ class ReportController extends RestController
     'readmeoss',
     'unifiedreport',
     'clixml',
-    'decisionexporter'
+    'decisionexporter',
+    'cyclonedx'
   );
 
   /**
@@ -121,6 +122,12 @@ class ReportController extends RestController
         /** @var FoDecisionExporter $decisionExporter */
         $decisionExporter = $this->restHelper->getPlugin('agent_fodecisionexporter');
         list($jobId, $jobQueueId) = $decisionExporter->scheduleAgent(
+          $this->restHelper->getGroupId(), $upload);
+        break;
+      case $this->reportsAllowed[7]:
+        /** @var CycloneDXGeneratorUi $cyclonedxGenerator */
+        $cyclonedxGenerator = $this->restHelper->getPlugin('ui_cyclonedx');
+        list ($jobId, $jobQueueId) = $cyclonedxGenerator->scheduleAgent(
           $this->restHelper->getGroupId(), $upload);
         break;
       default:
