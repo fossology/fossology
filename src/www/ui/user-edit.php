@@ -69,6 +69,8 @@ class UserEditPage extends DefaultPlugin
     $newToken = "";
     $newClient = "";
 
+    $vars = array('refreshUri' => Traceback_uri() . "?mod=" . self::NAME);
+
     if (GetParm('new_client', PARM_STRING)) {
       try {
         $newClient = $this->addNewClient($request);
@@ -90,8 +92,6 @@ class UserEditPage extends DefaultPlugin
       $vars['content'] = _("Your request is not valid.");
       return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
     }
-
-    $vars = array('refreshUri' => Traceback_uri() . "?mod=" . self::NAME);
 
     /*
      * If this is a POST (the submit button was clicked), then process the
@@ -473,6 +473,11 @@ class UserEditPage extends DefaultPlugin
       $tokenScope = $request->get('pat_scope');
     }
     $tokenScope = array_search($tokenScope, RestHelper::SCOPE_DB_MAP);
+    if ($tokenScope === false) {
+      throw new \UnexpectedValueException("Invalid token scope " .
+        $request->get('pat_scope') . ".");
+    }
+    $tokenScope = RestHelper::SCOPE_DB_MAP[$tokenScope];
     /** @var RestHelper $restHelper */
     $restHelper = $container->get('helper.restHelper');
     try {
@@ -487,14 +492,14 @@ class UserEditPage extends DefaultPlugin
       openssl_random_pseudo_bytes(RestHelper::TOKEN_KEY_LENGTH / 2));
     try {
       $jti = $restDbHelper->insertNewTokenKey($user_pk, $tokenExpiry,
-        RestHelper::SCOPE_DB_MAP[$tokenScope], $tokenName, $key);
+        $tokenScope, $tokenName, $key);
     } catch (DuplicateTokenKeyException $e) {
       // Key already exists, try again.
       $key = bin2hex(
         openssl_random_pseudo_bytes(RestHelper::TOKEN_KEY_LENGTH / 2));
       try {
         $jti = $restDbHelper->insertNewTokenKey($user_pk, $tokenExpiry,
-          RestHelper::SCOPE_DB_MAP[$tokenScope], $tokenName, $key);
+          $tokenScope, $tokenName, $key);
       } catch (DuplicateTokenKeyException $e) {
         // New key also failed, give up!
         throw new DuplicateTokenKeyException("Please try again later.");
@@ -505,8 +510,7 @@ class UserEditPage extends DefaultPlugin
       throw new \UnexpectedValueException($e->getMessage());
     }
     return $this->authHelper->generateJwtToken($tokenExpiry,
-      $jti['created_on'], $jti['jti'], RestHelper::SCOPE_DB_MAP[$tokenScope],
-      $key);
+      $jti['created_on'], $jti['jti'], $tokenScope, $key);
   }
 
   /**

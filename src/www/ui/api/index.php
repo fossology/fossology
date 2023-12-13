@@ -51,6 +51,7 @@ use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Psr\Log\LoggerInterface;
 use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
@@ -115,7 +116,7 @@ $app = AppFactory::create();
 $app->setBasePath($BASE_PATH);
 
 // Custom middleware to set the API version as a request attribute
-$apiVersionMiddleware = function (Request $request, $handler) use ($apiVersion) {
+$apiVersionMiddleware = function (Request $request, RequestHandler $handler) use ($apiVersion) {
   $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $apiVersion);
   return $handler->handle($request);
 };

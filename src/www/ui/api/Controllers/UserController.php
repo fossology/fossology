@@ -221,6 +221,8 @@ class UserController extends RestController
       throw new HttpTooManyRequestException("Please try again later.", $e);
     } catch (DuplicateTokenNameException $e) {
       throw new HttpConflictException($e->getMessage(), $e);
+    } catch (\UnexpectedValueException $e) {
+      throw new HttpBadRequestException($e->getMessage(), $e);
     }
 
     $returnVal = new Info(201, "Token created successfully", InfoType::INFO);

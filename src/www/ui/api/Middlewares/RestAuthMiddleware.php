@@ -57,6 +57,7 @@ class RestAuthMiddleware
     } elseif ($isPassThroughPath) {
       $response = $handler->handle($request);
     } elseif (stristr($requestUri->getPath(), "/tokens") !== false &&
+        stristr($requestUri->getPath(), "/users/tokens") === false &&
         stristr($request->getMethod(), "post") !== false) {
       $response = $handler->handle($request);
     } else {
