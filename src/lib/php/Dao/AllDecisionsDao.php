@@ -258,7 +258,7 @@ class AllDecisionsDao
       "SELECT lf.* FROM alllicense AS lf " .
       " INNER JOIN clearing_event ce ON ce.rf_fk=lf.rf_pk " .
       " INNER JOIN uploadtree ut ON ce.uploadtree_fk=ut.uploadtree_pk WHERE ut.upload_fk=$1" .
-      "UNION DISTINCT " .
+      " UNION DISTINCT " .
       "SELECT lf.* FROM alllicense AS lf " .
       " INNER JOIN upload_clearing_license ucl ON ucl.rf_fk = lf.rf_pk AND ucl.upload_fk=$1;";
     $statementName = __METHOD__ . ".allLicEntriesLicenseForUpload";
