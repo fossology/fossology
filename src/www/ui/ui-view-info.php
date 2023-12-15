@@ -8,8 +8,8 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Db\DbManager;
 
 class ui_view_info extends FO_Plugin
 {
@@ -217,14 +217,18 @@ class ui_view_info extends FO_Plugin
       }
       $this->dbManager->freeResult($result);
 
-      $sql = "select s.purl, s.matchtype, s.lineranges, s.url, s.filepath from scanoss_fileinfo s where s.pfile_fk = $1 ";
-      $this->dbManager->prepare(__METHOD__ . "GetFileMatchInfo", $sql);
-      $result = $this->dbManager->execute(
-        __METHOD__ . "GetFileMatchInfo",
-        array($row['pfile_fk'])
-      );
-      if (pg_num_rows($result)) {
-        $pmRow = pg_fetch_assoc($result);
+      $pmRow = [];
+      // Check if ScanOSS is enabled
+      $sql = "SELECT agent_enabled FROM agent WHERE agent_name ='scanoss' ORDER BY agent_ts LIMIT 1;";
+      $row = $this->dbManager->getSingleRow($sql, [],
+        __METHOD__ . "checkScanOss");
+      if (!empty($row) && $row["agent_enabled"] == 't') {
+        $sql = "SELECT s.purl, s.matchtype, s.lineranges, s.url, s.filepath " .
+          "FROM scanoss_fileinfo s WHERE s.pfile_fk = $1;";
+        $pmRow = $this->dbManager->getSingleRow($sql, [$row['pfile_fk']],
+          __METHOD__ . "GetFileMatchInfo");
+      }
+      if (!empty($pmRow)) {
         $vars['purl'] = $pmRow['purl'];
         $vars['matchType'] = $pmRow['matchtype'];
         $vars['lineRange'] = $pmRow['lineranges'];
