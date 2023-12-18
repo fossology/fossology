@@ -570,7 +570,7 @@ class CopyrightController extends RestController
       $finalVal[] = $row;
     }
     $totalPages = intval(ceil($iTotalRecords / $limit));
-    if ($page > $totalPages) {
+    if ($totalPages != 0 && $page > $totalPages) {
       throw (new HttpBadRequestException(
         "Can not exceed total pages: $totalPages"))
         ->setHeaders(["X-Total-Pages" => $totalPages]);
