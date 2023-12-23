@@ -202,6 +202,9 @@ class DecisionImporterDataCreator
       }
       foreach ($ceList as $oldCeId) {
         $newCeId = $clearingEventList[$oldCeId]["new_event"];
+        if ($newCeId === null) {
+          continue;
+        }
         $this->dbManager->insertTableRow("clearing_decision_event", [
           "clearing_decision_fk" => $newCdId,
           "clearing_event_fk" => $newCeId
