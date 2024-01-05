@@ -3979,6 +3979,7 @@ paths:
               - readmeoss
               - unifiedreport
               - clixml
+              - cyclonedx
         - name: groupName
           description: The group name to chose while generating a report
           in: header
