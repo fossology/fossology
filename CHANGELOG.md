@@ -4,6 +4,54 @@
 -->
 # Changelog of FOSSology
 
+### 4.4.0-rc2 (Jan 8th 2024)
+
+This release adds important corrections to
+[4.4.0-rc1](https://github.com/fossology/fossology/releases/tag/4.4.0-rc1)
+
+The release 4.4.0-rc2 introduces a few corrections to
+[4.4.0-rc1](https://github.com/fossology/fossology/releases/tag/4.4.0-rc1)
+and changes to FOSSology, including:
+
+* fix token generation for user.
+* fix dependencies for bookworm.
+* check if ScanOSS is installed.
+
+#### Credits to contributors for 4.4.0-rc2
+
+From the GIT commit history, we have the following contributors since
+[4.4.0-rc1](https://github.com/fossology/fossology/releases/tag/4.4.0-rc1):
+
+```
+> Devesh Negi <@DEVESH-N2>
+> Divij Sharma <divijs75@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Kgitman <@Kgitman>
+> Richard Diederen <richard.diederen@ict.nl>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+
+```
+
+#### Features
+
+* `9e9085b1e` feat(api): make cyclonedx report available via the API
+
+#### Corrections
+
+* `3f2bda48d` fix(api): do not check page for empty response
+* `c9b396dc0` fix(view): check if ScanOSS is installed
+* `e712da2c6` fix(token): fix token generation for user
+* `ad5636fdb` fix(action): Ensure proper handeling of enum values in argparse
+* `bef8ca024` fix(licenseRef): make dataype consistent
+* `01c073c89` fix(php): Fix null pointer issue in createClearingDecisions() (#2658)
+* `dff597d00` fix(deb): fix dependencies for bookworm
+* `6761de11d` style(php): Corrected the SQL syntax error in AllDecisionsDao.php
+
+#### Infrastructure
+
+* `9028e7dc8` chore(notice): update both notice and notice.spdx files to latest
+* `23be4848c` chore(notice): update third party notices 4.4.0
+
 ### 4.4.0-rc1 (Nov 21st 2023)
 
 This release adds important corrections to
