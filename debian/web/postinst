@@ -24,6 +24,9 @@ case "$1" in
     if [ -f "/etc/apache2/sites-enabled/fossology.conf" ]; then
         rm -rf  /etc/apache2/sites-enabled/fossology.conf
     fi
+    if [ -f "/etc/apache2/sites-available/fossology.conf" ]; then
+        rm -rf  /etc/apache2/sites-available/fossology.conf
+    fi
     PHP_PATH=$(php --ini | awk '/\/etc\/php.*\/cli$/{print $5}')
     phpIni="${PHP_PATH}/../apache2/php.ini"
     cp ${phpIni} ${phpIni}.bak
@@ -31,7 +34,8 @@ case "$1" in
     sed -i 's/^\(memory_limit\s*=\s*\).*$/\1702M/' ${phpIni}
     sed -i 's/^\(post_max_size\s*=\s*\).*$/\1701M/' ${phpIni}
     sed -i 's/^\(upload_max_filesize\s*=\s*\).*$/\1700M/' ${phpIni}
-    ln -s /etc/fossology/conf/fo-apache.conf /etc/apache2/sites-enabled/fossology.conf
+    ln -s /etc/fossology/conf/fo-apache.conf /etc/apache2/sites-available/fossology.conf
+    ln -s /etc/apache2/sites-available/fossology.conf /etc/apache2/sites-enabled/fossology.conf
     # need to run fo-postinstall web and agent stuff
     /usr/lib/fossology/fo-postinstall --web-only
     invoke-rc.d apache2 restart

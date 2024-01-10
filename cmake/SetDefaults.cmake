@@ -99,7 +99,9 @@ set(FO_WRAPPER "${CMAKE_BINARY_DIR}/src/cli/gen/fo_wrapper.php" CACHE PATH "fo w
 
 set(FO_APACHE_CTL "/usr/sbin/apachectl" CACHE PATH "apache ctl")
 
-set(FO_APACHE2_EN_SITE "/usr/sbin/a2ensite" CACHE PATH "apachec ensite")
+set(FO_APACHE2_EN_SITE "/usr/sbin/a2ensite" CACHE PATH "apache ensite")
+
+set(FO_APACHE2_DIS_SITE "/usr/sbin/a2dissite" CACHE PATH "apache dissite")
 
 set(FO_APACHE2SITE_DIR "/etc/apache2/sites-available" CACHE PATH "apache site dir")
 

@@ -336,6 +336,11 @@ if [[ $WEBONLY ]]; then
         echo "NOTE: enabling fossology site for apache2";
         ln -s @FO_DESTDIR@@FO_SYSCONFDIR@/conf/src-install-apache-example.conf @FO_APACHE2SITE_DIR@/fossology.conf;
         @FO_APACHE2_EN_SITE@ fossology.conf;
+        # Exit code 1, soft link points to wrong file. Fix it.
+        if [[ $? -eq 1 ]]; then
+          @FO_APACHE2_DIS_SITE@ fossology.conf;
+          @FO_APACHE2_EN_SITE@ fossology.conf;
+        fi;
         RESTART_MESSAGE=true
       fi;
     elif [[ -d @FO_HTTPD_SITE_DIR@ ]]; then
