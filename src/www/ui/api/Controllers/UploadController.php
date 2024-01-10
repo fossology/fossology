@@ -310,7 +310,7 @@ class UploadController extends RestController
   {
     $id = intval($args['id']);
     $query = $request->getQueryParams();
-    $selectedAgentId = $query['agentId'];
+    $selectedAgentId = $query['agentId'] ?? null;
     $agentDao = $this->container->get('dao.agent');
     $this->uploadAccessible($id);
     if ($selectedAgentId !== null && !$this->dbHelper->doesIdExist("agent", "agent_pk", $selectedAgentId)) {
@@ -1011,7 +1011,7 @@ class UploadController extends RestController
     $uploadId = intval($args['id']);
     $uploadDao = $this->restHelper->getUploadDao();
     $query = $request->getQueryParams();
-    $selectedAgentId = $query['agentId'];
+    $selectedAgentId = $query['agentId'] ?? null;
 
     $this->uploadAccessible($uploadId);
 
@@ -1165,7 +1165,7 @@ class UploadController extends RestController
   {
     $uploadId = intval($args['id']);
     $query = $request->getQueryParams();
-    $selectedAgentId = $query['agentId'];
+    $selectedAgentId = $query['agentId'] ?? null;
     $licenseDao = $this->container->get('dao.license');
 
     $this->uploadAccessible($uploadId);
