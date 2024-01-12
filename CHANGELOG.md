@@ -4,6 +4,64 @@
 -->
 # Changelog of FOSSology
 
+### 4.4.0 (Jan 12th 2024)
+
+This release adds important corrections to
+[4.4.0-rc2](https://github.com/fossology/fossology/releases/tag/4.4.0-rc2)
+
+The release 4.4.0 introduces a number of corrections to
+[4.3.0](https://github.com/fossology/fossology/releases/tag/4.3.0)
+and major changes to FOSSology, including:
+
+* Major changes from GSoC contributors:
+  * During GSoC 2023, FOSSology saw a major influx in REST API endpoints. Now
+    there are endpoints for almost all information available on UI.
+  * During same operations, we also created the framework changes to allow 2
+    versions of REST API (v1 & v2). This will allow us to unify the REST API in
+    future while still supporting v1.
+  * Another big change was creation of new agent to generate
+    [CycloneDX](https://cyclonedx.org) reports.
+  * We also changed the integration mechanism with
+    [ScanCode](https://scancode-toolkit.readthedocs.io) resulting in major
+    speed improvements in the scan.
+* With this release, we also bring support for Debian Bookworm (12)
+* Support extraction of [Zstandard](https://www.zstd.net) files
+* Support GitHub Actions in the scanner image and generate SPDX reports
+* Multiple fixes in SPDX reports
+* Sync with SPDX License list v3.22
+
+#### Credits to contributors for 4.4.0
+
+From the GIT commit history, we have the following contributors since
+[4.3.0](https://github.com/fossology/fossology/releases/tag/4.3.0):
+
+```
+> Abdelrahman Jamal <abdelrahmanjamal5565@gmail.com>
+> Devesh Negi
+> Divij Sharma <divijs75@gmail.com>
+> dushimsam <dushsam@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Hero2323 <abdelrahmanjamal5565@gmail.com>
+> Igor Mishchuk <igor.mishchuk@carbonhealth.com>
+> Kamal Nayan
+> Kgitman
+> lata <imlata1111@gmail.com>
+> Marc-Etienne Vargenau <marc-etienne.vargenau@nokia.com>
+> mayank-pathakk <mayank234pathak@gmail.com>
+> Nejc Habjan <nejc.habjan@siemens.com>
+> Richard Diederen <richard.diederen@ict.nl>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Simran Nigam <nigamsimran14@gmail.com>
+> soham4abc <sohambanerjee4abc@hotmail.com>
+> srideep-banerjee <banerjee.srideep@gmail.com>
+> Sushant Kumar <sushantmishra02102002@gmail.com>
+```
+
+#### Corrections
+
+* `5a70fbddf` fix(api): read optional agentId, UploadController
+* `24b0e1a67` fix(postinstall): check status of a2ensite
+
 ### 4.4.0-rc2 (Jan 8th 2024)
 
 This release adds important corrections to
