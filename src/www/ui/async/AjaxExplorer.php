@@ -360,7 +360,7 @@ class AjaxExplorer extends DefaultPlugin
       if ($request->get('fromRest')) {
         foreach ($licenseEntries as $shortName) {
           $licenseEntriesRest[] = array(
-            "id" => $this->licenseDao->getLicenseByShortName($shortName)->getId(),
+            "id" => $this->licenseDao->getLicenseByShortName($shortName, $groupId)->getId(),
             "name" => $shortName,
             "agents" => []
           );
@@ -387,7 +387,7 @@ class AjaxExplorer extends DefaultPlugin
             );
           }
           $licenseEntriesRest[] = array(
-            "id" => $this->licenseDao->getLicenseByShortName($shortName)->getId(),
+            "id" => $this->licenseDao->getLicenseByShortName($shortName, $groupId)->getId(),
             "name" => $shortName,
             "agents" => $agentEntriesRest,
           );
