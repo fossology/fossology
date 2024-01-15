@@ -4,7 +4,7 @@
 -->
 # Changelog of FOSSology
 
-### 4.4.0 (Jan 12th 2024)
+### 4.4.0 (Jan 15th 2024)
 
 This release adds important corrections to
 [4.4.0-rc2](https://github.com/fossology/fossology/releases/tag/4.4.0-rc2)
@@ -59,6 +59,8 @@ From the GIT commit history, we have the following contributors since
 
 #### Corrections
 
+* `68dbed209` fix(spdx_ref): use LicenseRef to check ref license
+* `8d990bb05` fix(ui): use group id to get shortname
 * `5a70fbddf` fix(api): read optional agentId, UploadController
 * `24b0e1a67` fix(postinstall): check status of a2ensite
 
