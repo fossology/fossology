@@ -272,8 +272,8 @@ class ReportUtils
             ->addConcludedLicense($reportLicId);
           if (!array_key_exists($reportLicId, $licensesInDocument)) {
             $licenseObj = $this->licenseDao->getLicenseById($reportedLicenseId);
-            $listedLicense = stripos($licenseObj->getSpdxId(),
-                LicenseRef::SPDXREF_PREFIX) !== 0;
+            $listedLicense = !StringOperation::stringStartsWith(
+              $licenseObj->getSpdxId(), LicenseRef::SPDXREF_PREFIX);
             $licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
               ->setLicenseObj($licenseObj)
               ->setCustomText(false)
