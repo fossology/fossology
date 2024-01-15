@@ -27,9 +27,14 @@ class LicenseRef
 
   /**
    * @var string
+   * SPDX license ref prefix
+   */
+  const SPDXREF_PREFIX = "LicenseRef-";
+  /**
+   * @var string
    * SPDX license ref prefix to use
    */
-  const SPDXREF_PREFIX = "LicenseRef-fossology-";
+  const SPDXREF_PREFIX_FOSSOLOGY = "LicenseRef-fossology-";
 
   /**
    * @param $licenseId
@@ -106,7 +111,7 @@ class LicenseRef
     } elseif (empty($spdxId)) {
       $spdxLicense = $shortname;
       if (! StringOperation::stringStartsWith($shortname, self::SPDXREF_PREFIX)) {
-        $spdxLicense = self::SPDXREF_PREFIX . $shortname;
+        $spdxLicense = self::SPDXREF_PREFIX_FOSSOLOGY . $shortname;
       }
     } else {
       $spdxLicense = $spdxId;
