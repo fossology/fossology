@@ -102,6 +102,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
 
     $csv = $licenseCsvExport->createCsv();
     ob_start();
+    fputs($out, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
     fputcsv($out, $head);
     fputcsv($out, array($licenses[1]['rf_shortname'],
         $licenses[1]['rf_fullname'],
@@ -171,6 +172,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
     $licenseCsvExport->setDelimiter($delimiter);
     $csv3 = $licenseCsvExport->createCsv(3);
     ob_start();
+    fputs($out, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
     fputcsv($out, $head, $delimiter);
     fputcsv($out, array($licenses[3]['rf_shortname'],
           $licenses[3]['rf_fullname'],

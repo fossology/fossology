@@ -65,12 +65,16 @@ class LicenseCsvExport
    * @param int $rf Set the license ID to get only one license, set 0 to get all
    * @return string csv
    */
-  public function createCsv($rf=0)
+  public function createCsv($rf=0, $allCandidates=false)
   {
+    $forAllCandidates = "WHERE marydone = true";
+    if ($allCandidates) {
+      $forAllCandidates = "";
+    }
     $forGroupBy = " GROUP BY rf.rf_shortname, rf.rf_fullname, rf.rf_spdx_id, rf.rf_text, rc.rf_shortname, rr.rf_shortname, rf.rf_url, rf.rf_notes, rf.rf_source, rf.rf_risk, gp.group_name";
     $sql = "WITH marydoneCand AS (
   SELECT * FROM license_candidate
-  WHERE marydone = true
+  $forAllCandidates
 ), allLicenses AS (
 SELECT DISTINCT ON(rf_pk) * FROM
   ONLY license_ref
@@ -111,10 +115,14 @@ WHERE rf.rf_detector_type=$1";
       'shortname', 'fullname', 'spdx_id', 'text', 'parent_shortname',
       'report_shortname', 'url', 'notes', 'source', 'risk', 'group',
       'obligations');
+    fputs($out, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
     fputcsv($out, $head, $this->delimiter, $this->enclosure);
     foreach ($vars as $row) {
       $row['rf_spdx_id'] = LicenseRef::convertToSpdxId($row['rf_shortname'],
         $row['rf_spdx_id']);
+      if (strlen($row['rf_text']) > LicenseMap::MAX_CHAR_LIMIT) {
+        $row['rf_text'] = LicenseMap::TEXT_MAX_CHAR_LIMIT;
+      }
       fputcsv($out, $row, $this->delimiter, $this->enclosure);
     }
     $content = ob_get_contents();
