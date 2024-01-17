@@ -21,6 +21,8 @@ class LicenseMap
   const TRIVIAL = 2;
   const FAMILY = 3;
   const REPORT = 4;
+  const MAX_CHAR_LIMIT = "32767";
+  const TEXT_MAX_CHAR_LIMIT = "The maximum number of characters per cell in a CSV file(32,767) exceeded, Please edit this license text in UI";
 
   /** @var DbManager */
   private $dbManager;

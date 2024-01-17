@@ -158,6 +158,7 @@ class LicenseCsvImport
   private function handleHeadCsv($row)
   {
     $headrow = array();
+    $row[0] = trim($row[0], "\xEF\xBB\xBF");  // Remove BOM
     foreach (array('shortname','fullname','text') as $needle) {
       $col = ArrayOperation::multiSearch($this->alias[$needle], $row);
       if (false === $col) {
@@ -228,7 +229,7 @@ class LicenseCsvImport
       $extraParams[] = "rf_spdx_id=$" . count($param);
       $log .= ", updated SPDX ID";
     }
-    if (!empty($row['text']) && $row['text'] != $oldLicense['rf_text']) {
+    if (!empty($row['text']) && $row['text'] != $oldLicense['rf_text'] && $row['text'] != LicenseMap::TEXT_MAX_CHAR_LIMIT) {
       $param[] = $row['text'];
       $stmt .= '.text';
       $extraParams[] = "rf_text=$" . count($param) . ",rf_md5=md5($" .

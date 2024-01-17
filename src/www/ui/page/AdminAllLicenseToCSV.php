@@ -1,6 +1,6 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2014-2017 Siemens AG
+ SPDX-FileCopyrightText: © 2024 Siemens AG
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -12,15 +12,15 @@ use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminLicenseToCSV extends DefaultPlugin
+class AdminAllLicenseToCSV extends DefaultPlugin
 {
-  const NAME = "admin_license_to_csv";
+  const NAME = "admin_all_license_to_csv";
 
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => "Admin License CSV Export",
-        self::MENU_LIST => "Admin::License Admin::CSV Export Marydone",
+        self::TITLE => "Admin All Groups License CSV Export",
+        self::MENU_LIST => "Admin::License Admin::CSV Export All",
         self::REQUIRES_LOGIN => true,
         self::PERMISSION => Auth::PERM_ADMIN
     ));
@@ -33,7 +33,7 @@ class AdminLicenseToCSV extends DefaultPlugin
   protected function handle(Request $request)
   {
     $licenseCsvExport = new \Fossology\Lib\Application\LicenseCsvExport($this->getObject('db.manager'));
-    $content = $licenseCsvExport->createCsv(intval($request->get('rf')));
+    $content = $licenseCsvExport->createCsv(intval($request->get('rf')), true);
     $fileName = "fossology-license-export-".date("YMj-Gis");
     $headers = array(
         'Content-type' => 'text/csv, charset=UTF-8',
@@ -46,4 +46,4 @@ class AdminLicenseToCSV extends DefaultPlugin
   }
 }
 
-register_plugin(new AdminLicenseToCSV());
+register_plugin(new AdminAllLicenseToCSV());
