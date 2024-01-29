@@ -96,12 +96,12 @@ class EditedLicense
   public function getArray($version=ApiVersion::V1)
   {
     if ($version == ApiVersion::V2) {
-        return [
-          'id' => $this->getId(),
-          'shortName' => $this->getShortName(),
-          'count' => $this->getCount(),
-          'spdxId' => $this->getSpdxId()
-        ];
+      return [
+        'id' => $this->getId(),
+        'shortName' => $this->getShortName(),
+        'count' => $this->getCount(),
+        'spdxId' => $this->getSpdxId()
+      ];
     }
     return [
       'id' => $this->getId(),
