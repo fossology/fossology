@@ -32,6 +32,7 @@ use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\LicenseDecision;
 use Fossology\UI\Api\Models\Obligation;
+use Fossology\UI\Api\Models\ApiVersion;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -357,8 +358,13 @@ class UploadTreeController extends RestController
     $scanFilter = $query['scanLicenseFilter'] ?? null;
     $editedFilter = $query['editedLicenseFilter'] ?? null;
     $sortDir = $query['sort'] ?? null;
-    $page = $request->getHeaderLine('page');
-    $limit = $request->getHeaderLine('limit');
+    if (ApiVersion::getVersion($request) == ApiVersion::V2) {
+      $page = $query['page'] ?? null;
+      $limit = $query['limit'] ?? null;
+    } else {
+      $page = $request->getHeaderLine('page');
+      $limit = $request->getHeaderLine('limit');
+    }
     $tagId = $query['tagId'] ?? null;
     $sSearch = $query['search'] ?? null;
     $openCBoxFilter = $query['filterOpen'] ?? null;
