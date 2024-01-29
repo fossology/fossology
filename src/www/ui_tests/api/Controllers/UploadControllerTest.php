@@ -34,13 +34,12 @@ use Fossology\UI\Api\Exceptions\HttpServiceUnavailableException;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
-use Fossology\UI\Api\Models\Hash;
 use Fossology\UI\Api\Models\ApiVersion;
+use Fossology\UI\Api\Models\Hash;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\License;
 use Fossology\UI\Api\Models\Upload;
-use Fossology\UI\Api\Models\ApiVersion;
 use Mockery as M;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
@@ -603,7 +602,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     /**
    * @param $version version to test
    * @return void
-   * -# Test the data format returned by Upload::getArray($version) model 
+   * -# Test the data format returned by Upload::getArray($version) model
    */
   private function testCopyUpload($version)
   {

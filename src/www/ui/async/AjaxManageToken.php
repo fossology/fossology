@@ -7,12 +7,13 @@
 */
 namespace Fossology\UI\Ajax;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
-use Fossology\Lib\Auth\Auth;
-use Symfony\Component\HttpFoundation\Request;
+use Fossology\UI\Api\Helper\AuthHelper;
+use Fossology\UI\Api\Helper\DbHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Fossology\UI\Api\Helper\RestHelper;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @class AjaxManageToken
@@ -84,7 +85,9 @@ class AjaxManageToken extends DefaultPlugin
   function revealToken($tokenPk, $hostname="")
   {
     global $container;
+    /** @var DbHelper $restDbHelper */
     $restDbHelper = $container->get("helper.dbHelper");
+    /** @var AuthHelper $authHelper */
     $authHelper = $container->get('helper.authHelper');
     $user_pk = Auth::getUserId();
     $jti = "$tokenPk.$user_pk";
@@ -96,7 +99,7 @@ class AjaxManageToken extends DefaultPlugin
         "token" => $tokenInfo['client_id']
       ];
     }
-    $tokenScope = array_search($tokenInfo['token_scope'], RestHelper::SCOPE_DB_MAP);
+    $tokenScope = $tokenInfo['token_scope'];
 
     $jwtToken = $authHelper->generateJwtToken($tokenInfo['expire_on'],
       $tokenInfo['created_on'], $jti, $tokenScope, $tokenInfo['token_key']);
