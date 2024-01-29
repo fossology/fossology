@@ -83,11 +83,11 @@ class SuccessfulAgent
   public function getArray($version=ApiVersion::V1)
   {
     if ($version == ApiVersion::V2) {
-        return [
-          'agentId' => $this->getAgentId(),
-          'agentRev' => $this->getAgentRev(),
-          'agentName' => $this->getAgentName()
-        ];
+      return [
+        'agentId' => $this->getAgentId(),
+        'agentRev' => $this->getAgentRev(),
+        'agentName' => $this->getAgentName()
+      ];
     }
     return [
       'agent_id' => $this->getAgentId(),
