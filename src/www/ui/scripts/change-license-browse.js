@@ -44,11 +44,14 @@ $("#textModal").on('hide.bs.modal', function (e) {
 
 function openBulkModal(uploadTreeId) {
   bulkModal = $('#bulkModal').modal('hide');
+  $('#bulkScope').val("f");
+  $('#bulkScope').attr("disabled", true);
   $('#uploadTreeId').val(uploadTreeId);
   bulkModal.toggle();
 }
 
 function closeBulkModal() {
+  $('#editFilter').val(0);
   $('#bulkModal').hide();
 }
 
@@ -73,6 +76,7 @@ function openUserModal(uploadTreeId) {
 }
 
 function closeUserModal() {
+  $('#editFilter').val(0);
   userModal.modal('hide');
 }
 
