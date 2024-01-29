@@ -18,6 +18,7 @@ use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Helper\AuthHelper;
 use Fossology\UI\Api\Helper\CorsHelper;
+use Fossology\UI\Api\Models\ApiVersion;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
@@ -80,7 +81,12 @@ class RestAuthMiddleware
          */
         throw new HttpForbiddenException("Do not have required scope.");
       }
-      $groupName = $request->getHeaderLine('groupName');
+      if (ApiVersion::getVersion($request) == ApiVersion::V2) {
+        $queryParameters = $request->getQueryParams();
+        $groupName = $queryParameters['groupName'] ?? "";
+      } else {
+        $groupName = $request->getHeaderLine('groupName');
+      }
       if (!empty($groupName)) { // if request contains groupName
         $authHelper->userHasGroupAccess($userId, $groupName);
         $authHelper->updateUserSession($userId, $tokenScope, $groupName);

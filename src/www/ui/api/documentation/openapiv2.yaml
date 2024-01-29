@@ -492,7 +492,7 @@ paths:
           type: integer
       - name: groupName
         description: The group name to chose while accessing the package
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -596,12 +596,12 @@ paths:
       parameters:
         - name: folderId
           description: Folder Id, where upload should be copied to
-          in: header
+          in: query
           required: true
           schema:
             type: integer
         - name: action
-          in: header
+          in: query
           required: true
           description: Action to be performed
           schema:
@@ -624,7 +624,7 @@ paths:
     parameters:
       - name: groupName
         description: The group name to chose while accessing the package
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -681,14 +681,14 @@ paths:
             pattern: \d{4}\-\d{2}\-\d{2}
         - name: page
           description: Page number to fetch
-          in: header
+          in: query
           required: false
           schema:
             type: integer
             default: 1
         - name: limit
           description: Limits of responses per request
-          in: header
+          in: query
           required: false
           schema:
             type: integer
@@ -976,7 +976,7 @@ paths:
       - name: page
         description: Page number (starts from 1)
         required: false
-        in: header
+        in: query
         schema:
           type: integer
           default: 1
@@ -984,7 +984,7 @@ paths:
       - name: limit
         description: Limits of responses per request
         required: false
-        in: header
+        in: query
         schema:
           type: integer
           default: 50
@@ -992,7 +992,7 @@ paths:
           maximum: 1000
       - name: groupName
         description: The group name to chose while accessing the package
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -1183,7 +1183,7 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
-  /uploads/{id}/perm-groups:
+  /uploads/{id}/groups/permission:
     parameters:
       - name: id
         required: true
@@ -5065,10 +5065,10 @@ components:
     Upload:
       type: object
       properties:
-        folderid:
+        folderId:
           type: integer
           description: The folder id, where the upload is located
-        foldername:
+        folderName:
           type: string
           description: The name of the folder where the upload is located
         id:
@@ -5077,10 +5077,10 @@ components:
         description:
           type: string
           description: Description of the upload.
-        uploadname:
+        uploadName:
           type: string
           description: Display name of the upload.
-        uploaddate:
+        uploadDate:
           type: string
           description: Date, when the file was uploaded.
         assignee:
@@ -5165,19 +5165,19 @@ components:
     Fileinfo:
       type: object
       properties:
-        view_info:
+        viewInfo:
           type: object
           description: viewinfo of the file
-        meta_info:
+        metaInfo:
           type: object
           description: Display display meta info of the file
-        package_info:
+        packageInfo:
           type: object
           description: Shows package info of the file
-        tag_info:
+        tagInfo:
           type: object
           description: Provides tag related information
-        reuse_info:
+        reuseInfo:
           type: object
           description: Reuse info of the file.
     SetCustomiseInfo:
@@ -5492,7 +5492,7 @@ components:
             example: "path/to/LICENSE"
           findings:
             $ref: '#/components/schemas/Findings'
-          clearing_status:
+          clearingStatus:
             type: string
             example: "Do not use"
     UploadCopyrights:
@@ -5527,9 +5527,9 @@ components:
             properties:
               perm:
                 type: string
-              group_pk:
+              groupPk:
                 type: string
-              group_name:
+              groupName:
                 type: string
     JobQueue:
       description: Structure of jobs queue

@@ -107,12 +107,20 @@ class FileLicenses
    *
    * @return array
    */
-  public function getArray()
+  public function getArray($apiVersion = ApiVersion::V1)
   {
-    return [
+    if ($apiVersion == ApiVersion::V2) {
+      return [
+      'filePath'         => $this->getFilePath(),
+      'findings'         => $this->getFindings()->getArray(),
+      'clearingStatus'   => $this->getClearingStatus()
+      ];
+    } else {
+      return [
       'filePath'         => $this->getFilePath(),
       'findings'         => $this->getFindings()->getArray(),
       'clearing_status'  => $this->getClearingStatus()
-    ];
+      ];
+    }
   }
 }

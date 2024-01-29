@@ -178,6 +178,7 @@ $app->group('/uploads',
     $app->post('', UploadController::class . ':postUpload');
     $app->put('/{id:\\d+}/permissions', UploadController::class . ':setUploadPermissions');
     $app->get('/{id:\\d+}/perm-groups', UploadController::class . ':getGroupsWithPermissions');
+    $app->get('/{id:\\d+}/groups/permission', UploadController::class . ':getGroupsWithPermissions');
     $app->get('/{id:\\d+}/summary', UploadController::class . ':getUploadSummary');
     $app->get('/{id:\\d+}/agents', UploadController::class . ':getAllAgents');
     $app->get('/{id:\\d+}/agents/revision', UploadController::class . ':getAgentsRevision');
