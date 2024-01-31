@@ -479,8 +479,8 @@ ORDER BY copyright_pk, UT.uploadtree_pk, content DESC";
       $latestXpAgentId[] = $selectedScanners['reso'];
     }
     $agentFilter = '';
-    if (!empty($latestAgentId)) {
-      $latestAgentIds = implode(",", $latestAgentId);
+    if (!empty($latestXpAgentId)) {
+      $latestAgentIds = implode(",", $latestXpAgentId);
       $agentFilter = ' AND cp.agent_fk IN ('. $latestAgentIds .')';
     }
 
