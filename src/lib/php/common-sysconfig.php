@@ -788,12 +788,14 @@ function check_IP($ip)
 
 /**
  * Set PYTHONPATH to appropriate location
+ * @return array<string> Return the path as an associative array.
  */
-function set_python_path()
+function set_python_path(): array
 {
   global $SysConf;
-  putenv("PYTHONPATH=/home/" . $SysConf['DIRECTORIES']['PROJECTUSER'] .
-      "/pythondeps");
+  $path = "/home/" . $SysConf['DIRECTORIES']['PROJECTUSER'] . "/pythondeps";
+  putenv("PYTHONPATH=$path");
+  return ["PYTHONPATH" => $path];
 }
 /**
  * \brief Get system load average.
