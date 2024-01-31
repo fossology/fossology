@@ -49,14 +49,14 @@ use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\HighlightDao;
+use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\Dao\ShowJobsDao;
-use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Proxy\ScanJobProxy;
 
 include_once(__DIR__ . "/version.php");
@@ -149,10 +149,10 @@ class DeciderAgent extends Agent
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $this->licenseMapUsage);
 
     if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_COPYRIGHT_FALSE_POSITIVE)== self::RULES_COPYRIGHT_FALSE_POSITIVE)) {
-      $this->getCopyrightsToDisableFalsePositivesClutter($uploadId, 0);
+      $this->getCopyrightsToDisableFalsePositivesClutter($uploadId, false);
     }
     if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_COPYRIGHT_FALSE_POSITIVE_CLUTTER)== self::RULES_COPYRIGHT_FALSE_POSITIVE_CLUTTER)) {
-      $this->getCopyrightsToDisableFalsePositivesClutter($uploadId, 1);
+      $this->getCopyrightsToDisableFalsePositivesClutter($uploadId, true);
     }
     if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE)) {
       $bulkReuser = new BulkReuser();
@@ -549,10 +549,17 @@ class DeciderAgent extends Agent
     return true;
   }
 
-  private function getCopyrightsToDisableFalsePositivesClutter($uploadId, $clutter_flag)
+  /**
+   * Use the copyright deactivation script to remove false positive copyrights.
+   * @param int $uploadId      Upload to process
+   * @param bool $clutter_flag Remove clutter as well?
+   * @return void
+   */
+  private function getCopyrightsToDisableFalsePositivesClutter($uploadId,
+                                                               $clutter_flag): void
   {
     if (empty($uploadId)) {
-      return array();
+      return;
     }
     $agentName = 'copyright';
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
@@ -560,7 +567,7 @@ class DeciderAgent extends Agent
     $scanJobProxy->createAgentStatus(array($agentName));
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     if (!array_key_exists($agentName, $selectedScanners)) {
-      return array();
+      return;
     }
     $latestXpAgentId = $selectedScanners[$agentName];
     $extrawhere = ' agent_fk='.$latestXpAgentId;
@@ -573,7 +580,8 @@ class DeciderAgent extends Agent
     fwrite($tmpFile, $copyrightJSON);
     $deactivatedCopyrightData = $this->callCopyrightDeactivationClutterRemovalScript($tmpFilePath, $clutter_flag);
     if (empty($deactivatedCopyrightData)) {
-      return array();
+      fclose($tmpFile);
+      return;
     }
     $deactivatedCopyrights = json_decode($deactivatedCopyrightData, true);
     foreach ($deactivatedCopyrights as $deactivatedCopyright) {
@@ -584,27 +592,38 @@ class DeciderAgent extends Agent
       $cpTable = 'copyright';
       if ($deactivatedCopyright['is_copyright'] == "t") {
         $action = '';
-        $hash = $deactivatedCopyright['hash'];
         if (array_key_exists('decluttered_content', $deactivatedCopyright) &&
             !empty($deactivatedCopyright['decluttered_content'])) {
           $content = $deactivatedCopyright['decluttered_content'];
         } else {
-          $content = $deactivatedCopyright['content'];
+          // No text update. Nothing to do.
+          $this->heartbeat(1);
+          continue;
         }
       } else {
         $action = 'delete';
-        $hash = $deactivatedCopyright['hash'];
       }
       $this->copyrightDao->updateTable($itemTreeBounds, $hash, $content, $this->userId, $cpTable, $action);
       $this->heartbeat(1);
     }
     fclose($tmpFile);
   }
-  private function callCopyrightDeactivationClutterRemovalScript($tmpFilePath, $clutter_flag)
+
+  /**
+   * Run the Python script with required parameters and return the output.
+   * @param string $tmpFilePath Path to temp file with input JSON
+   * @param bool $clutter_flag  Remove clutter as well?
+   * @return false|string|null Return from script.
+   */
+  private function callCopyrightDeactivationClutterRemovalScript($tmpFilePath,
+                                                                 $clutter_flag)
   {
     $script = "copyrightDeactivationClutterRemovalScript.py";
-    $path_to_file =  __DIR__ . "/$script";
-    $command = "python3 " . $path_to_file . " -f" . $tmpFilePath . " -c" . $clutter_flag;
+    $absPathToScript =  __DIR__ . "/$script";
+    $command = "python3 $absPathToScript --file $tmpFilePath";
+    if ($clutter_flag) {
+      $command .= " --clutter";
+    }
     set_python_path();
     $output = shell_exec($command);
     $this->heartbeat(0);

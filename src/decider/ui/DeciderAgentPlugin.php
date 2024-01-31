@@ -78,7 +78,7 @@ class DeciderAgentPlugin extends AgentPlugin
     }
 
     if (in_array('agent_copyright', $agents)) {
-        $checkAgentCopyright = true;
+      $checkAgentCopyright = true;
     } else {
       $checkAgentCopyright = $request->get('Check_agent_copyright') ?: false;
     }
