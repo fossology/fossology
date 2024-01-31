@@ -58,6 +58,7 @@ use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Proxy\ScanJobProxy;
+use Symfony\Component\Process\Process;
 
 include_once(__DIR__ . "/version.php");
 
@@ -613,20 +614,35 @@ class DeciderAgent extends Agent
    * Run the Python script with required parameters and return the output.
    * @param string $tmpFilePath Path to temp file with input JSON
    * @param bool $clutter_flag  Remove clutter as well?
-   * @return false|string|null Return from script.
+   * @return string Return from script.
    */
   private function callCopyrightDeactivationClutterRemovalScript($tmpFilePath,
-                                                                 $clutter_flag)
+                                                                 $clutter_flag): string
   {
     $script = "copyrightDeactivationClutterRemovalScript.py";
-    $absPathToScript =  __DIR__ . "/$script";
-    $command = "python3 $absPathToScript --file $tmpFilePath";
+    $args = ["python3", __DIR__ . "/$script", "--file", $tmpFilePath];
     if ($clutter_flag) {
-      $command .= " --clutter";
+      $args[] = "--clutter";
     }
-    set_python_path();
-    $output = shell_exec($command);
-    $this->heartbeat(0);
-    return $output;
+
+    $sleepTime = 5;
+    $maxSleepTime = 25;
+
+    $process = new Process($args);
+    $process->setTimeout(null); // Remove timeout to run indefinitely.
+    $process->setEnv(set_python_path());
+    $process->start();
+
+    do {
+      $this->heartbeat(0);
+      sleep($sleepTime);
+      if ($sleepTime < $maxSleepTime) {
+        $sleepTime += 5;
+      }
+    } while ($process->isRunning());
+
+    echo $process->getErrorOutput();
+
+    return $process->getOutput();
   }
 }
