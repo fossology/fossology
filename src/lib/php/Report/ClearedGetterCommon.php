@@ -107,6 +107,32 @@ abstract class ClearedGetterCommon
     unset($statement);
   }
 
+  /**
+   * @brief Group the content inside a array
+   * @param array $findings
+   * @return array
+   */
+  protected function groupUserFindings($findings)
+  {
+    $uniqueArray = array();
+    foreach ($findings as $item) {
+      $contentKey = $item['content'];
+      if (!isset($uniqueArray[$contentKey])) {
+        $uniqueArray[$contentKey] = array(
+          "licenseId" => $item["licenseId"],
+          "content" => $item["content"],
+          "text" => $item["text"],
+          "files" => array(),
+          "hash" => array(),
+          "comments" => $item["comments"]
+          );
+      }
+      $uniqueArray[$contentKey]['files'] = array_merge($uniqueArray[$contentKey]['files'], $item['files']);
+      $uniqueArray[$contentKey]['hash'] = array_merge($uniqueArray[$contentKey]['hash'], $item['hash']);
+    }
+    return array_values($uniqueArray);
+  }
+
   protected function groupStatements($ungrupedStatements, $extended, $agentCall, $isUnifiedReport, $objectAgent)
   {
     $statements = array();
@@ -160,12 +186,12 @@ abstract class ClearedGetterCommon
         }
       } else {
         $singleStatement = array(
-            "licenseId" => $licenseId,
-            "content" => convertToUTF8($content, false),
-            "text" => convertToUTF8($text, false),
-            "files" => array($fileName),
-            "hash" => array($fileHash),
-            "acknowledgement" => array($acknowledgement)
+          "licenseId" => $licenseId,
+          "content" => convertToUTF8($content, false),
+          "text" => convertToUTF8($text, false),
+          "files" => array($fileName),
+          "hash" => array($fileHash),
+          "acknowledgement" => array($acknowledgement)
           );
         if ($extended) {
           $singleStatement["licenseId"] = $licenseId;
@@ -182,11 +208,11 @@ abstract class ClearedGetterCommon
 
       if (!empty($statement['textfinding']) && !empty($agentCall) && $agentCall != "license") {
         $findings[] = array(
-            "licenseId" => $licenseId,
-            "content" => convertToUTF8($statement['textfinding'], false),
-            "text" => convertToUTF8($text, false),
-            "files" => array($fileName),
-            "hash" => array($fileHash)
+          "licenseId" => $licenseId,
+          "content" => convertToUTF8($statement['textfinding'], false),
+          "text" => convertToUTF8($text, false),
+          "files" => array($fileName),
+          "hash" => array($fileHash)
           );
         if ($extended) {
           $key = array_search($statement['textfinding'], array_column($findings, 'content'));
@@ -207,11 +233,14 @@ abstract class ClearedGetterCommon
         $actualHeartbeat = (count($statements) + count($findings));
         $objectAgent->heartbeat($actualHeartbeat);
       }
-      return array("userFindings" => $findings, "scannerFindings" => $statements);
+      return array("userFindings" => $this->groupUserFindings($findings), "scannerFindings" => $statements);
     } else {
       $statements = array_merge($findings, $statements);
       if (!empty($objectAgent)) {
         $objectAgent->heartbeat(count($statements));
+      }
+      if ($agentCall != "license") {
+        return array("statements" => $this->groupUserFindings(array_values($statements)));
       }
       return array("statements" => array_values($statements));
     }
