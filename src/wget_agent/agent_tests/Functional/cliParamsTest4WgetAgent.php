@@ -60,7 +60,7 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
       $message = 'FATAL: cannot find executable file, stop testing\n');
     }
     // run it
-    $WGET_PATH = $WGET_PATH." -C -c $db_conf";
+    $WGET_PATH .= " -C -c $db_conf";
     $last = exec("$WGET_PATH -h 2>&1", $out, $rtn);
     $this->assertEquals($usage, $out[0]); // check if executable file wget_agent is exited
   }

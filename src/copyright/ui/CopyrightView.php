@@ -47,7 +47,7 @@ class CopyrightView extends Xpview
       $agentId = array_key_exists('copyright',$agentMap) ? $agentMap['copyright'] : 0;
       if (array_key_exists('reso',$agentMap)) {
         $ResoagentId = $agentMap['reso'];
-        $agentId = $agentId . "," . $ResoagentId;
+        $agentId .= "," . $ResoagentId;
       }
     }
     $typeDescriptionPairs = array(

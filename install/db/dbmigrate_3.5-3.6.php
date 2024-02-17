@@ -123,7 +123,7 @@ function updateHash($dbManager, $tableName)
     $dbManager->queryOnce($sql, __METHOD__ . ".update.$tableName.hash");
     $dbManager->commit();
 
-    $totalCount = $totalCount + $numberOfRecords;
+    $totalCount += $numberOfRecords;
     $numberOfRecords = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, "hash");
     $numberOfRecords = $numberOfRecords[0];
   }
@@ -182,7 +182,7 @@ function updateSHA256($dbManager, $tableName)
     $dbManager->queryOnce($sql, __METHOD__ . ".updatePfile_SHA256");
     $dbManager->commit();
 
-    $totalCount = $totalCount + $numberOfRecords;
+    $totalCount += $numberOfRecords;
     echo "* $totalCount pfile records updated *\n";
 
     $records = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, $tableName."_sha256");
