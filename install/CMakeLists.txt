@@ -3,6 +3,8 @@ SPDX-License-Identifier: GPL-2.0-only
 SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
 #]=======================================================================]
 
+option(FORCE_CONF_OVERWRITE "Force overwrite of configuration files" OFF)
+
 set(FO_CWD ${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE FO_INSTALL_CONFS ${FO_CWD}/*.in)
@@ -35,28 +37,44 @@ add_custom_target(BUILD_version ALL
         BYPRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/VERSION")
 
 
-install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
+function(install_config_files FILES DEST_DIR COMPONENT_NAME)
+    foreach(FILE_NAME ${FILES})
+        get_filename_component(FILE_BASE ${FILE_NAME} NAME)
+        if (NOT EXISTS "${DEST_DIR}/${FILE_BASE}" OR FORCE_CONF_OVERWRITE)
+            message(STATUS "Installing ${FILE_BASE}")
+            install(FILES ${FILE_NAME}
+                    COMPONENT ${COMPONENT_NAME}
+                    DESTINATION ${DEST_DIR})
+        else()
+            message(STATUS "${FILE_BASE} already exists. Not overwriting, use the FORCE_CONF_OVERWRITE option to overwrite.")
+        endif()
+    endforeach()
+endfunction()
+
+set(FO_CONFIG_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/gen/Db.conf
     ${CMAKE_CURRENT_BINARY_DIR}/gen/fossology.conf
+)
+install_config_files("${FO_CONFIG_FILES}" "${FO_SYSCONFDIR}" "common")
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
+    DESTINATION ${FO_SYSCONFDIR}
     COMPONENT common
-    DESTINATION ${FO_SYSCONFDIR})
+)
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
     DESTINATION ${FO_MODDIR}
     COMPONENT common
 )
 
-
-install(DIRECTORY
-    ${CMAKE_CURRENT_SOURCE_DIR}/defconf/
-    ${CMAKE_CURRENT_SOURCE_DIR}/fossdash/
-    COMPONENT common
-    DESTINATION ${FO_SYSCONFDIR}
-    FILES_MATCHING
-    PATTERN *.txt
-    PATTERN *.yml
+file(GLOB FO_DIR_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/defconf/*.txt
+    ${CMAKE_CURRENT_SOURCE_DIR}/defconf/*.yml
+    ${CMAKE_CURRENT_SOURCE_DIR}/fossdash/*.txt
+    ${CMAKE_CURRENT_SOURCE_DIR}/fossdash/*.yml
 )
+
+install_config_files("${FO_DIR_FILES}" "${FO_SYSCONFDIR}" "common")
 
 install(DIRECTORY ${FO_CWD}/db/
     ${CMAKE_CURRENT_BINARY_DIR}/gen/
@@ -83,12 +101,12 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/gen/dbcreate
     COMPONENT db
 )
 
-install(FILES
+set(FO_APACHE_FILES
     ${FO_CWD}/fo-apache.conf
     ${FO_CWD}/src-install-apache-example.conf
-    COMPONENT common
-    DESTINATION ${FO_SYSCONFDIR}/conf
 )
+
+install_config_files("${FO_APACHE_FILES}" "${FO_SYSCONFDIR}/conf" "common")
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/gen/db.cron
     DESTINATION ${FO_INITDIR}/cron.d
