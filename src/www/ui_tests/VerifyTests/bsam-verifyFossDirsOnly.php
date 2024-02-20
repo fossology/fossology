@@ -172,4 +172,3 @@ class verifyDirsOnly extends fossologyTestCase
     return(TRUE);
    }
 }
-?>

@@ -82,4 +82,3 @@ class agent_wget_agent extends FO_Plugin {
 
 };
 $NewPlugin = new agent_wget_agent;
-?>

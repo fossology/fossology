@@ -198,4 +198,3 @@ class verifyFossolyTest extends fossologyTestCase
 		}
 	}
 }
-?>

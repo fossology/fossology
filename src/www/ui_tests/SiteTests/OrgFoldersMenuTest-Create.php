@@ -44,4 +44,3 @@ class FoldersCreateMenuTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
   }
 }
-?>

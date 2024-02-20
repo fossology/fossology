@@ -85,4 +85,3 @@ while(!empty($Results[$i]['job_pk'])) {
   $i++;	
 }
 return (0);
-?>

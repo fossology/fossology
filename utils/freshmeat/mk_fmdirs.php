@@ -105,6 +105,3 @@ $folder_pk = createfolder(
 
 $fold_cont_pk = createfoldercontents($fm_pk, $folder_pk, 1);
 }
-
-
-?>

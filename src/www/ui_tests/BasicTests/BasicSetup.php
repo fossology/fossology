@@ -39,4 +39,3 @@ class BasicFolderTest extends fossologyTestCase
     $this->createFolder(null, 'Basic-Testing', null);
   }
 }
-?>

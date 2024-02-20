@@ -258,5 +258,3 @@ class ui_reunpack extends FO_Plugin
   }
 }
 $NewPlugin = new ui_reunpack;
-
-?>

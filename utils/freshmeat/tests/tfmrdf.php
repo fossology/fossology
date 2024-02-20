@@ -50,4 +50,3 @@ class TestFreshmeatRdfs extends fossologyUnitTestCase
     print_r($info);
   }
 }
-?>

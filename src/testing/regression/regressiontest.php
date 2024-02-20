@@ -177,5 +177,3 @@ function Usage($argc, $argv)
   echo "         -w Web Host. Optional.\n";
   echo 'e.g.: ./regressiontest.php -w "http://bobg.fc.hp.com/trunk"\n';
 }
-
-?>

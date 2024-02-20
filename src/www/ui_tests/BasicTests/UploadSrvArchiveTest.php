@@ -69,4 +69,3 @@ class UploadSrvTest extends fossologyTestCase {
     //print "************ page after Upload! *************\n$page\n";
   }
 }
-?>

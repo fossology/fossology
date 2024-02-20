@@ -168,4 +168,3 @@ $Runtest->run(new HtmlReporter());
 print "<pre>Ending $suite at: " . date('r') . "</pre>\n";
 $elapseTime = $start->TimeAgo($start->getStartTime());
 print "<pre>The suite $suite took {$elapseTime}to run</pre>\n";
-?>

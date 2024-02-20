@@ -137,4 +137,3 @@ function cdStart()
     // ?? analyze the path and act accordingly?
   }
 } // cdStart
-?>

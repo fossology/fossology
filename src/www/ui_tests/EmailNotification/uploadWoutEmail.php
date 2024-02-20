@@ -84,4 +84,3 @@ class uploadWoutEMailTest extends fossologyTestCase {
     }
   }
 };
-?>

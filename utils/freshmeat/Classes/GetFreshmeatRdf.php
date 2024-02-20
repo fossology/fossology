@@ -63,4 +63,3 @@ class GetFreshMeatRdf
     $this->error_out  = $output;
   }
 }
-?>

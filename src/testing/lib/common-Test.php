@@ -769,4 +769,3 @@ function MakeCover($unitTest)
   }
   return(NULL);
 }
-?>

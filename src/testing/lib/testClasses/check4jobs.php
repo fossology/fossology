@@ -79,4 +79,3 @@ class check4jobs {
     return($this->jobCount);
   }
 } // check4jobs
-?>

@@ -189,5 +189,3 @@ for ($i = 1;$i < $argc;$i++) {
 # useful but let's skip it for now
 #  system("svn commit /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/debian.ini /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/ubuntu.ini /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/redhat.ini /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/fedora.ini -m 'New $Version changes to conf files for package testing'");
   return (0);
-?>
-

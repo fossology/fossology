@@ -553,5 +553,3 @@ function _getfmpath($path){
 
   return($path_wanted);
 }
-
-?>

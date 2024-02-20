@@ -59,4 +59,3 @@ class cleanupTestData extends fossologyTestCase {
     //print "DB: results are:\n";print_r($dummy) . "\n";
   }
 }
-?>

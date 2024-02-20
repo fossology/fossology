@@ -36,5 +36,3 @@ class TestRepoLogin extends fossologyTestCase{
     $this->assertTrue($matches);
   }
 }
-
-?>

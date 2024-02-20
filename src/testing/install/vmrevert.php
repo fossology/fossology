@@ -51,4 +51,3 @@ foreach($toRevert as $host => $vms)
     }
   } // foreach
 } // foreach
-?>

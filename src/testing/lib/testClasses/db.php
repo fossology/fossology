@@ -176,4 +176,3 @@ class db {
     return $rows;
   } // dbQuery
 } // class db
-?>

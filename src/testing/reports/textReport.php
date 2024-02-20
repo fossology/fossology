@@ -176,4 +176,3 @@ printf("%'-37s\n", '');
 printByType('Exceptions', $suiteExceptions);
 
 exit(0);
-?>
