@@ -27,10 +27,11 @@
  * @brief Regex to filter license names from list of license list
  *
  * -# License names will consist of words, digits, dots and hyphens.
- * -# Length of license names greater than 3 (based on
+ * -# Length of license names greater than 2 (based on
  * https://github.com/spdx/license-list-data/tree/master/html)
+ * -# License name should end with a word, digit or +
  */
-#define SPDX_LICENSE_NAMES "(?: and | or | with )?\\(?([\\w\\d\\.\\+\\-]{3,})\\)?"
+#define SPDX_LICENSE_NAMES "(?: and | or | with )?\\(?([\\w\\d\\.\\+\\-]{1,}[\\w\\d\\+])\\)?"
 /**
  * @def SPDX_DUAL_LICENSE
  * @brief Regex to check if Dual-license
