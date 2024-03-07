@@ -1,138 +1,112 @@
 <?php
-/*
- SPDX-FileCopyrightText: © 2011 Hewlett-Packard Development Company, L.P.
 
- SPDX-License-Identifier: GPL-2.0-only
-*/
+namespace YourNamespace\Tests;
 
-/**
- * \file test_common_menu.php
- * \brief unit tests for common-menu.php
- */
-
-use PHPUnit\Runner\Version as PHPUnitVersion;
+use PHPUnit\Framework\TestCase;
 
 require_once(dirname(__FILE__) . '/../common-menu.php');
 require_once(dirname(__FILE__) . '/../common-parm.php');
 
 /**
- * \class test_common_menu
+ * Test suite for common-menu.php
  */
-class test_common_menu extends \PHPUnit\Framework\TestCase
+class CommonMenuTest extends TestCase
 {
-  /* initialization */
-  protected function setUp() : void
-  {
-  }
+    /**
+     * Test for MenuPage() function
+     */
+    public function testMenuPage()
+    {
+        $page = 10;
+        $totalPage = 15;
+        $uri = "http://fossology.org/repo/";
+        $expected = "<a class='page-link' href='http:\/\/fossology.org\/repo\/&page=9'>Prev<\/a>";
+        $result = MenuPage($page, $totalPage, $uri);
 
-  /**
-   * \brief test for MenuPage()
-   */
-  function test_MenuPage()
-  {
-    print "Starting unit test for common-menu.php\n";
-    print "test function MenuPage()\n";
-
-    $Page = 10;
-    $TotalPage = 15;
-    $Uri = "http://fossology.org/repo/";
-    $expected = "<a class='page-link' href='http:\/\/fossology.org\/repo\/&page=9'>Prev<\/a>";
-    $result = MenuPage($Page, $TotalPage, $Uri);
-    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
-      $this->assertMatchesRegularExpression("/<a class='page-link' href='#'>11<\/a>/", $result);
-      $this->assertMatchesRegularExpression("/$expected/", $result);
-    } else {
-      $this->assertRegExp("/<a class='page-link' href='#'>11<\/a>/", $result);
-      $this->assertRegExp("/$expected/", $result);
-    }
-  }
-
-  /**
-   * \brief test for MenuEndlessPage()
-   */
-  function test_MenuEndlessPage()
-  {
-    print "test function MenuEndlessPage()\n";
-
-    $Page = 10;
-    $Uri = "http://fossology.org/repo/";
-    $expected = "<a class='page-link' href='http:\/\/fossology.org\/repo\/&page=9'>Prev<\/a>";
-    $result = MenuEndlessPage($Page, 1, $Uri);
-    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
-      $this->assertMatchesRegularExpression("/<a class='page-link' href='#'>11<\/a>/", $result);
-      $this->assertMatchesRegularExpression("/$expected/", $result);
-    } else {
-      $this->assertRegExp("/<a class='page-link' href='#'>11<\/a>/", $result);
-      $this->assertRegExp("/$expected/", $result);
-    }
-  }
-
-  /**
-   * \brief test for menu_cmp()
-   */
-  function test_menu_cmp()
-  {
-    print "test function menu_cmp()\n";
-
-    $menua = new menu;
-    $menub = new menu;
-    $menua->Name = 'menua';
-    $menub->Name = 'menua';
-    $result = menu_cmp($menua, $menub);
-    $this->assertEquals(0,$result);
-    $menua->Order = 1;
-    $menub->Order = 2;
-    $result = menu_cmp($menua, $menub);
-    $this->assertEquals(1,$result);
-  }
-  /**
-   * \brief test for menu_functions()
-   */
-  function test_menu_functions()
-  {
-    print "test function menu_insert()\n";
-
-    global $MenuList;
-
-    $Path = "TestMenu::Test1::Test2";
-    $LastOrder = 0;
-    $URI = "TestURI";
-    $Title = "TestTitle";
-    $Target = "TestTarget";
-    $HTML = "TestHTML";
-    $countMenuListBefore = count($MenuList);
-    $result = menu_insert($Path, $LastOrder, $URI, $Title, $Target, $HTML);
-    $this->assertEquals($Path,
-      $MenuList[$countMenuListBefore]->SubMenu[0]->SubMenu[0]->FullName);
-
-    print "test function menu_find)\n";
-    $depth = 2;
-    $result = menu_find("Test1", $depth);
-
-    print "test function menu_to_1html)\n";
-    $result = menu_to_1html($MenuList);
-    $pattern = "/TestMenu/";
-    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
-      $this->assertMatchesRegularExpression($pattern, $result);
-    } else {
-      $this->assertRegExp($pattern, $result);
+        // Assert that the result contains the expected output
+        $this->assertStringContainsString("<a class='page-link' href='#'>11<\/a>", $result);
+        $this->assertStringContainsString($expected, $result);
     }
 
-    print "test function menu_to_1list)\n";
-    $Parm = "";
-    $result = menu_to_1list($MenuList, $Parm, "", "");
-    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
-      $this->assertMatchesRegularExpression($pattern, $result);
-    } else {
-      $this->assertRegExp($pattern, $result);
-    }
-    print "Ending unit test for common-menu.php\n";
-  }
+    /**
+     * Test for MenuEndlessPage() function
+     */
+    public function testMenuEndlessPage()
+    {
+        $page = 10;
+        $uri = "http://fossology.org/repo/";
+        $expected = "<a class='page-link' href='http:\/\/fossology.org\/repo\/&page=9'>Prev<\/a>";
+        $result = MenuEndlessPage($page, 1, $uri);
 
-  /**
-   * \brief clean the env
-   */
-  protected function tearDown() : void
-  {
-  }
+        // Assert that the result contains the expected output
+        $this->assertStringContainsString("<a class='page-link' href='#'>11<\/a>", $result);
+        $this->assertStringContainsString($expected, $result);
+    }
+
+    /**
+     * Test for menu_cmp() function
+     */
+    public function testMenuCmp()
+    {
+        $menua = new menu;
+        $menub = new menu;
+        $menua->Name = 'menua';
+        $menub->Name = 'menua';
+        
+        // Assert that menu_cmp returns 0 for identical menus
+        $this->assertEquals(0, menu_cmp($menua, $menub));
+        
+        $menua->Order = 1;
+        $menub->Order = 2;
+
+        // Assert that menu_cmp returns 1 when menua has higher order than menub
+        $this->assertEquals(1, menu_cmp($menua, $menub));
+    }
+
+    /**
+     * Test for menu_functions() function
+     */
+    public function testMenuFunctions()
+    {
+        global $MenuList;
+
+        $path = "TestMenu::Test1::Test2";
+        $lastOrder = 0;
+        $uri = "TestURI";
+        $title = "TestTitle";
+        $target = "TestTarget";
+        $html = "TestHTML";
+        $countMenuListBefore = count($MenuList);
+        $result = menu_insert($path, $lastOrder, $uri, $title, $target, $html);
+
+        // Assert that menu_insert correctly inserts the menu item
+        $this->assertEquals($path, $MenuList[$countMenuListBefore]->SubMenu[0]->SubMenu[0]->FullName);
+
+        $depth = 2;
+        $result = menu_find("Test1", $depth);
+
+        // Assert any necessary conditions for menu_find function
+
+        $result = menu_to_1html($MenuList);
+        $pattern = "/TestMenu/";
+
+        // Assert that the generated HTML contains the expected pattern
+        $this->assertStringMatchesFormat($pattern, $result);
+
+        $parm = "";
+        $result = menu_to_1list($MenuList, $parm, "", "");
+
+        // Assert any necessary conditions for menu_to_1list function
+
+        // Assert that the generated list contains the expected pattern
+        $this->assertStringMatchesFormat($pattern, $result);
+    }
+
+    /**
+     * Tear down after each test method
+     */
+    protected function tearDown(): void
+    {
+        // Additional teardown code, if needed
+    }
 }
