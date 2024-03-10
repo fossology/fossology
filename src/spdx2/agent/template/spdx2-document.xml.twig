@@ -39,7 +39,11 @@
         |replace({']]>':']]]]><![CDATA[>'}) }}
       ]]></spdx:extractedText>
 {% if licenseData.licenseObj.url is not empty %}
+  {%~ if '&' in licenseData.licenseObj.url %}
+      <rdfs:seeAlso>{{ licenseData.licenseObj.url|url_encode }}</rdfs:seeAlso>
+  {%~ else %}
       <rdfs:seeAlso>{{ licenseData.licenseObj.url }}</rdfs:seeAlso>
+  {%~ endif %}
 {% endif %}
     </spdx:ExtractedLicensingInfo>
   </spdx:hasExtractedLicensingInfo>
