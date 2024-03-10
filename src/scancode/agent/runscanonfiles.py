@@ -6,8 +6,14 @@ Copyright (C) 2023  Sushant Kumar (sushantmishra02102002@gmail.com)
 SPDX-License-Identifier: GPL-2.0-only
 """
 
+import os
 import json
 import argparse
+
+# Set SCANCODE_CACHE environment variable
+script_directory = os.path.dirname(os.path.abspath(__file__))
+os.environ["SCANCODE_CACHE"] = os.path.join(script_directory, '.cache')
+
 from scancode import api
 
 def update_license(licenses):
