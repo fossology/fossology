@@ -21,9 +21,9 @@ use Fossology\Lib\Dao\UploadDao;
  * \param bool $Recurse To recurse or not
  * \param string $uploadtree_tablename
  *
- * \return An array of: tag_pk and tag_name; return empty array: disable tagging on this upload
+ * \return array An array of: tag_pk and tag_name; return empty array: disable tagging on this upload
  */
-function GetAllTags($Item, $Recurse=true, $uploadtree_tablename="uploadtree")
+function GetAllTags($Item, $Recurse=true, $uploadtree_tablename="uploadtree"): array
 {
   if (empty($Item)) {
     return array();
@@ -83,7 +83,7 @@ function GetAllTags($Item, $Recurse=true, $uploadtree_tablename="uploadtree")
  *\return String of HTML select
  */
 function Array2SingleSelectTag($KeyValArray, $SLName="unnamed", $SelectedVal= "",
-$FirstEmpty=false, $SelElt=true, $Options="")
+$FirstEmpty=false, $SelElt=true, $Options=""): string
 {
   $str ="\n<select name='$SLName' $Options>\n";
   if ($FirstEmpty) {
@@ -117,7 +117,7 @@ $FirstEmpty=false, $SelElt=true, $Options="")
  *\return String of html select
  */
 function TagSelect($SLName="unnamed", $SelectedVal= "",
-                   $FirstEmpty=false, $SelElt=true)
+                   $FirstEmpty=false, $SelElt=true): string
 {
   /* Find all the tag namespaces for this user */
   /*  UNUSED
@@ -182,7 +182,7 @@ function TagFilter(&$UploadtreeRows, $tag_pk, $uploadtree_tablename)
  *
  * \return 1: enabled; 0: disabled, or no write permission
  */
-function TagStatus($upload_id)
+function TagStatus($upload_id): int
 {
   global $PG_CONN, $container;
   /** @var UploadDao $uploadDao */

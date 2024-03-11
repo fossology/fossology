@@ -175,17 +175,17 @@ function GetFolderFromItem($upload_pk="", $uploadtree_pk = "")
  *
  * \return HTML of the folder tree
  */
-function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1, $linkParent=false, $OldParent=0)
+function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1, $linkParent=false, $OldParent=0): ?string
 {
   if ($ParentFolder == "-1") {
     $ParentFolder = FolderGetTop();
   }
   if (empty($ParentFolder)) {
-    return;
+    return null;
   }
   global $PG_CONN;
   if (empty($PG_CONN)) {
-    return;
+    return null;
   }
   $V = "";
 
@@ -260,7 +260,7 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1, $li
  *
  * \return string full path of this folder
  */
-function FolderGetName($FolderPk,$Top=-1)
+function FolderGetName($FolderPk,$Top=-1): string
 {
   global $PG_CONN;
   if ($Top == -1) {
@@ -426,7 +426,7 @@ function FolderListUploads_perm($ParentFolder, $perm)
  * @return array of `{upload_pk, upload_desc, name, folder}`
  */
 function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath = '',
-  $perm = Auth::PERM_READ)
+  $perm = Auth::PERM_READ): array
 {
   global $PG_CONN;
   if (empty($PG_CONN)) {
@@ -570,7 +570,7 @@ function GetFolderArray($RootFolder, &$FolderArray)
  *
  * \return 1: include, 0: not include
  */
-function ContainExcludeString($FilePath, $ExcludingText)
+function ContainExcludeString($FilePath, $ExcludingText): int
 {
   $excluding_length = 0;
   $excluding_flag = 0; // 1: exclude 0: not exclude

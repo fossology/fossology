@@ -31,7 +31,7 @@
  *         If there are only 1 row, an empty string is returned, and $ars_pk is
  *         set to that row.
  */
-function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $extra="")
+function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $extra=""): string
 {
   global $PG_CONN;
 
@@ -118,7 +118,7 @@ function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $e
  * \note list uses static element id="default_bucketpool_fk"
  *       the element name is the same as the id.
  */
-function SelectBucketPool($selected, $active='Y')
+function SelectBucketPool($selected, $active='Y'): string
 {
   global $PG_CONN;
 
@@ -159,7 +159,7 @@ function SelectBucketPool($selected, $active='Y')
  * \return Array of unique bucket_pk's, may be empty if no buckets.
  *   \b FATAL if any input is missing
  */
-function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucketpool_pk)
+function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucketpool_pk): array
 {
   global $PG_CONN;
   $BuckArray = array();
@@ -224,7 +224,7 @@ function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucket
  * \return string of $delimiter delimited bucket names for the given inputs.
  */
 function GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $uploadtree_pk,
-                               $bucketDefArray, $delimiter, $color)
+                               $bucketDefArray, $delimiter, $color): string
 {
   $outstr = "";
   $defrec = current($bucketDefArray);
@@ -276,7 +276,7 @@ function GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $uploadtree_pk,
  * \return True if bucket_pk is found in the tree,
  *   false if not
  */
-function BucketInTree($bucket_pk, $uploadtree_pk)
+function BucketInTree($bucket_pk, $uploadtree_pk): bool
 {
   global $PG_CONN;
   $BuckArray = array();
@@ -327,7 +327,7 @@ function BucketInTree($bucket_pk, $uploadtree_pk)
  *
  * \return List of bucket def records.
  */
-function initBucketDefArray($bucketpool_pk)
+function initBucketDefArray($bucketpool_pk): array
 {
   global $PG_CONN;
 

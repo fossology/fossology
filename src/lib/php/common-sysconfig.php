@@ -152,7 +152,7 @@ function populate_from_sysconfig($conn, &$SysConf)
 /**
  * \brief Populate the sysconfig table with core variables.
  */
-function Populate_sysconfig()
+function Populate_sysconfig(): void
 {
   global $PG_CONN;
 
@@ -614,7 +614,7 @@ function Populate_sysconfig()
  *
  * \return 1, if the value is valid, or 0
  */
-function check_boolean($value)
+function check_boolean($value): int
 {
   if (! strcmp($value, 'true') || ! strcmp($value, 'false')) {
     return 1;
@@ -632,7 +632,7 @@ function check_boolean($value)
  *
  * \return  1: valid, 0: invalid
  */
-function check_fossology_url($url)
+function check_fossology_url($url): int
 {
   $url_array = explode("/", $url, 2);
   $name = $url_array[0];
@@ -668,7 +668,7 @@ function check_fossology_url($url)
  *
  * \return 1: available, 0: unavailable
  */
-function check_logo_url($url)
+function check_logo_url($url): int
 {
   if (empty($url)) {
     return 1; /* logo url can be null, with the default */
@@ -691,7 +691,7 @@ function check_logo_url($url)
  *
  * \return 1: the url is available, 0: unavailable
  */
-function check_logo_image_url($url)
+function check_logo_image_url($url): int
 {
   global $SysConf;
 
@@ -718,7 +718,7 @@ function check_logo_image_url($url)
  *
  * \return 1: valid, 0: invalid
  */
-function check_email_address($email_address)
+function check_email_address($email_address): int
 {
   return 1;
 }
@@ -732,7 +732,7 @@ function check_email_address($email_address)
  *
  * \return 1: available, 0: unavailable
  */
-function is_available($url, $timeout = 2, $tries = 2)
+function is_available($url, $timeout = 2, $tries = 2): int
 {
   global $SysConf;
 
@@ -764,7 +764,7 @@ function is_available($url, $timeout = 2, $tries = 2)
  * \param string $url The url which will be checked
  * \return 1: the url is valid, 0: invalid
  */
-function check_url($url)
+function check_url($url): int
 {
   if (empty($url) ||
     preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $url) != 1 ||
@@ -778,9 +778,9 @@ function check_url($url)
 /**
  * \brief Check if the ip address is valid
  * \param string $ip IP address
- * \return 1: yes
+ * \return int 1: yes
  */
-function check_IP($ip)
+function check_IP($ip): int
 {
   $e = "([0-9]|1[0-9]{2}|[1-9][0-9]|2[0-4][0-9]|25[0-5])";
   return preg_match("/^$e\.$e\.$e\.$e$/", $ip);
@@ -789,7 +789,7 @@ function check_IP($ip)
 /**
  * Set PYTHONPATH to appropriate location
  */
-function set_python_path()
+function set_python_path(): void
 {
   global $SysConf;
   putenv("PYTHONPATH=/home/" . $SysConf['DIRECTORIES']['PROJECTUSER'] .

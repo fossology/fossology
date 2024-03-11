@@ -29,7 +29,7 @@ $Plugins = array();
  *
  * @return int -1, 0, 1 for plugin a being <, =, or > than b
  */
-function plugin_cmp($a, $b)
+function plugin_cmp($a, $b): int
 {
   /* Sort by plugin version only when the name is the same */
   if (0 == strcmp($a->Name, $b->Name)) {
@@ -172,7 +172,7 @@ function plugin_sort()
  * \param $Name Plugin name
  * \return -1 if the plugin $Name is not found.
  **/
-function plugin_find_id($pluginName)
+function plugin_find_id($pluginName): strint|int
 {
   /** \todo has to be removed */
   /** @var Plugin[] $Plugins */
@@ -194,7 +194,7 @@ function plugin_find_id($pluginName)
  * @param string $pluginName Name of the required plugin
  * @return Plugin|NULL The plugin or NULL if the plugin name isn't found.
  */
-function plugin_find($pluginName)
+function plugin_find($pluginName): ?Plugin
 {
   global $Plugins;
   return array_key_exists($pluginName, $Plugins) ? $Plugins[$pluginName] : null;
@@ -315,7 +315,7 @@ function register_plugin(Plugin $plugin)
  * @param string $classname Name of the class of the object being represented
  * @return string String representation of the object
  */
-function getStringRepresentation($vars, $classname)
+function getStringRepresentation($vars, $classname): string
 {
   $output = $classname . " {\n";
   foreach ($vars as $name => $value) {

@@ -30,7 +30,7 @@
  * \return error: exit (1)
  */
 function add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify, $Upload_visibility,
-                  $agentList, $Folder, $default_bucketpool_fk='')
+                  $agentList, $Folder, $default_bucketpool_fk=''): string
 {
   global $container;
   $dbManager = $container->get('db.manager');
@@ -83,7 +83,7 @@ function add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify, $Upload_vis
  *
  * \return error: exit (1)
  */
-function update_password_hash($User, $Hash)
+function update_password_hash($User, $Hash): string
 {
   global $container;
   $dbManager = $container->get('db.manager');

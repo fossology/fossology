@@ -19,7 +19,7 @@
  *   -# application/x-debian-package
  *   -# application/x-debian-source
  */
-function GetPkgMimetypes()
+function GetPkgMimetypes(): array
 {
   global $PG_CONN;
 

@@ -22,7 +22,7 @@ if (! defined('ENT_SUBSTITUTE')) {
  * @param bool   $toHTML  True to return HTML compatible strings
  * @return string UTF8 converted string
  */
-function convertToUTF8($content, $toHTML=true)
+function convertToUTF8($content, $toHTML=true): string
 {
   if (strlen($content) == 0) {
     return '';
@@ -47,7 +47,7 @@ function convertToUTF8($content, $toHTML=true)
  * @param string $content String to check
  * @return boolean True if encoded in UTF-8, false otherwise
  */
-function checkUTF8($content)
+function checkUTF8($content): bool
 {
   return mb_check_encoding($content, "UTF-8");
 }
@@ -55,9 +55,9 @@ function checkUTF8($content)
 /**
  * Try to convert a string to UTF-8 encoded string
  * @param string $content String to be converted
- * @return boolean|string UTF-8 converted string, false if cannot be converted
+ * @return string|false UTF-8 converted string, false if cannot be converted
  */
-function tryConvertToUTF8($content)
+function tryConvertToUTF8($content): string|false
 {
   $inCharset = mb_detect_encoding($content, mb_detect_order(), true);
   $output1 = false;

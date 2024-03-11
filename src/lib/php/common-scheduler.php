@@ -59,7 +59,7 @@ function fo_scheduler_connect($IPaddr='', $Port='', &$ErrorMsg="")
 
   \return Message from scheduler
  **/
-function fo_scheduler_read($SchedObj, $MaxSize=2048)
+function fo_scheduler_read($SchedObj, $MaxSize=2048): string|false
 {
   return socket_read($SchedObj, $MaxSize, PHP_NORMAL_READ);
 } // fo_scheduler_read()
@@ -71,11 +71,12 @@ function fo_scheduler_read($SchedObj, $MaxSize=2048)
   \param resource $SchedObj Scheduler object (currently the socket)
   \param string   $msg      Message to write to scheduler
 
-  \return Number of bytes successfully written or false on failure.
+  \return int|false
+          Number of bytes successfully written or false on failure.
           The error code can be retrieved with socket_last_error()
           and passed to socket_strerror() for a text explanation.
  **/
-function fo_scheduler_write($SchedObj, $msg)
+function fo_scheduler_write($SchedObj, $msg): int|false
 {
   return socket_write($SchedObj, $msg, strlen($msg));
 } // fo_scheduler_write()
@@ -117,7 +118,7 @@ function fo_scheduler_close($SchedObj)
 
   \return True on success, false on failure
  **/
-function fo_communicate_with_scheduler($input, &$output, &$error_msg)
+function fo_communicate_with_scheduler($input, &$output, &$error_msg): bool
 {
   global $SysConf;
 
@@ -165,10 +166,10 @@ function fo_communicate_with_scheduler($input, &$output, &$error_msg)
    -# Retrieve the job list
    -# Return the job list
 
- * \return An array, the runnable job list
+ * \return array the runnable job list
            the array is like: Array(1, 2, 3, .., i), sorted, if no jobs, return nothing
  */
-function GetRunnableJobList()
+function GetRunnableJobList(): ?array
 {
   /* get the raw job list from scheduler
      send command 'status' to the scheduler, get the all status of runnable jobs and scheduler
@@ -181,7 +182,7 @@ function GetRunnableJobList()
   $command_status = fo_communicate_with_scheduler($command, $status_info, $error_msg);
   /* can not get status info from the scheduler, so can not get runnable jobs, probably the scheduler is not running */
   if (false === $command_status) {
-    return ;
+    return null;
   }
   $pattern = '/job:(\d+) /';
   preg_match_all($pattern, $status_info, $matches);

@@ -68,7 +68,7 @@ function FossdashConfigInit($sysconfdir, &$SysConf)
  * \return 0 if table already exists.
  * 1 if it was created
  */
-function Create_fossdashconfig()
+function Create_fossdashconfig(): int
 {
   global $PG_CONN;
 
@@ -243,7 +243,7 @@ function Populate_fossdashconfig()
  * \param string $url The url which will be checked
  * \return 1: the url is valid, 0: invalid
  */
-function check_fossdash_url($url)
+function check_fossdash_url($url): int
 {
   if (filter_var($url, FILTER_VALIDATE_URL) && preg_match("#^((http)|(https)|(ftp)|(www)|(localhost))://(.*)#", $url) == 1) {
     return 1;
@@ -255,9 +255,9 @@ function check_fossdash_url($url)
 /**
  * \brief Check if the cron job schedule interval is valid
  * \param string $cron_interval cron job interval
- * \return 1: yes , 0: no
+ * \return int 1: yes, 0: no
  */
-function check_cron_job_inteval($cron_interval)
+function check_cron_job_inteval($cron_interval): int
 {
   $cron_regex = "#^((@(annually|yearly|monthly|weekly|daily|hourly|reboot))|(@every (\d+(ns|us|µs|ms|s|m|h))+)|((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*|\*\/\d+) ?){5}))$#";
   return preg_match($cron_regex, $cron_interval);
@@ -267,9 +267,9 @@ function check_cron_job_inteval($cron_interval)
 /**
  * \brief Check if the fossology instance name is valid
  * \param string $instance_name fossology instance name
- * \return 1: yes , 0: no
+ * \return int 1: yes, 0: no
  */
-function check_fossology_instance_name($instance_name)
+function check_fossology_instance_name($instance_name): int
 {
   $instance_UUID_regex = "#^([a-zA-Z0-9_-]+)$#";
   return preg_match($instance_UUID_regex, $instance_name);
@@ -278,9 +278,9 @@ function check_fossology_instance_name($instance_name)
 /**
  * \brief Check if cleaning_days is valid or not
  * \param string $cleaning_days Number of days after which successfully pushed metrics are cleaned up
- * \return 1: yes , 0: no
+ * \return int 1: yes, 0: no
  */
-function check_fossdash_cleaning($cleaning_days)
+function check_fossdash_cleaning($cleaning_days): int
 {
   $numeric_day_regex = "#^[0-9]*$#";
   return preg_match($numeric_day_regex, $cleaning_days);
@@ -289,9 +289,9 @@ function check_fossdash_cleaning($cleaning_days)
 /**
  * \brief Check if given uname is valid or not
  * \param string $uname username for influxDB
- * \return 1: yes , 0: no
+ * \return int 1: yes, 0: no
  */
-function check_username($uname)
+function check_username($uname): int
 {
   $uname_regex = "#^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$#";
   return preg_match($uname_regex, $uname);
@@ -300,9 +300,9 @@ function check_username($uname)
 /**
  * \brief Check if given password is valid or not
  * \param string $uname password for influxDB
- * \return 1: yes , 0: no
+ * \return int 1: yes, 0: no
  */
-function check_password($password)
+function check_password($password): int
 {
   $password_regex = "#^(?=.*[A-Za-z])[A-Za-z\d]{3,}$#";
   return preg_match($password_regex, $password);
@@ -313,7 +313,7 @@ function check_password($password)
  * \param string $config_str config for fossdash metrics
  * \return 1: yes , 0: no
  */
-function check_fossdash_config($config_str)
+function check_fossdash_config($config_str): int
 {
   $lower_config_str = strtolower($config_str);
   $db_update_command_list = array("drop", "insert", "update", "alter", "truncate", "delete");

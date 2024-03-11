@@ -33,7 +33,7 @@ class menu
    * return Name
    * @return string
    */
-  public function getName($showFullName=false)
+  public function getName($showFullName=false): string
   {
     if ($showFullName) {
       return $this->FullName . "(" . $this->Order . ")";
@@ -57,7 +57,7 @@ $MenuMaxDepth = 0;    ///< How deep is the tree (for UI display)
  *
  * \return String containing menu HTML
  */
-function MenuPage($Page, $TotalPage, $Uri = '')
+function MenuPage($Page, $TotalPage, $Uri = ''): string
 {
   $V = "<ul class='pagination pagination-sm justify-content-center'>";
   if (empty($Uri)) {
@@ -106,9 +106,9 @@ function MenuPage($Page, $TotalPage, $Uri = '')
  * \param bool $Next  True display "Next" and false don't display
  * \param string $Uri URL of the page being displayed. "&page=" will be appended to the URL
  *
- * \return String containing menu HTML
+ * \return string String containing menu HTML
  */
-function MenuEndlessPage($Page, $Next = 1, $Uri = '')
+function MenuEndlessPage($Page, $Next = 1, $Uri = ''): string
 {
   $V = "<center><ul class='pagination pagination-sm justify-content-center'>";
   if (empty($Uri)) {
@@ -154,7 +154,7 @@ function MenuEndlessPage($Page, $Next = 1, $Uri = '')
  *         1  a < b\n
  *         0  a->Order = b->Order and a->Name = b->Name
  */
-function menu_cmp($a, $b)
+function menu_cmp($a, $b): int
 {
   if ($a->Order > $b->Order) {
     return (-1);
@@ -184,7 +184,7 @@ function menu_cmp($a, $b)
  * @param string &$Title  Title of the menu
  * @return int The max depth of menu
  */
-function menu_insert_r(&$menuItems, $path, $pathRemainder, $LastOrder, $Target, $URI, $HTML, &$Title)
+function menu_insert_r(&$menuItems, $path, $pathRemainder, $LastOrder, $Target, $URI, $HTML, &$Title): int
 {
   $splitPath = explode(MENU_PATH_SEPARATOR, $pathRemainder, 2);
   $pathElement = count($splitPath) > 0 ? $splitPath[0] : null;
@@ -326,7 +326,7 @@ $menu_to_1html_counter = 0;  ///< Counter used by menu_to_1html()
  *
  * \return HTML string
  */
-function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1)
+function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1): string
 {
   $showFullName = isset($_SESSION) && array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
 
@@ -413,7 +413,7 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
  * @param menu $menu menu
  * @return string
  */
-function getFullNameAddition(menu $menu)
+function getFullNameAddition(menu $menu): string
 {
   return "(" . $menu->Order . ")";
 } // menu_to_1html()
@@ -434,7 +434,7 @@ function getFullNameAddition(menu $menu)
  *
  * \return one HTML line with items in a "[name]" list
  */
-function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $upload_id  = "")
+function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $upload_id  = ""): string
 {
   if (empty($Menu)) {
     return '';
@@ -531,7 +531,7 @@ function menu_print(&$Menu, $Indent)
  *
  * \return A new menu list without $RmName
  */
-function menu_remove($Menu, $RmName)
+function menu_remove($Menu, $RmName): array
 {
   $NewArray = array();
   foreach ($Menu as $MenuObj) {
