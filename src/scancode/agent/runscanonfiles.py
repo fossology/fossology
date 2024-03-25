@@ -25,7 +25,7 @@ def update_license(licenses):
     list: A list of dictionaries containing relevant license information.
   """
   updated_licenses = []
-  keys_to_extract_from_licenses = ['key', 'score', 'name', 'text_url', 'start_line', 'matched_text']
+  keys_to_extract_from_licenses = ['spdx_license_key', 'score', 'name', 'text_url', 'start_line', 'matched_text']
 
   for key, value in licenses.items():
     if key == 'licenses':

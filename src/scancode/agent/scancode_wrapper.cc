@@ -91,7 +91,7 @@ void scanFileWithScancode(const State &state, string fileLocation, string output
  * @brief extract data from scancode scanned result
  *
  * In licenses array:
- * key-> license spdx key
+ * spdx_license_key-> license spdx key
  * score-> score of a rule to matched with the output licenes
  * name-> license full name
  * text_url-> license text reference url
@@ -133,7 +133,7 @@ map<string, vector<Match>> extractDataFromScancodeResult(const string& scancodeR
     {
       for (auto oneresult : licensearrays)
       {
-          string licensename = oneresult["key"].asString();
+          string licensename = oneresult["spdx_license_key"].asString();
           int percentage = (int)oneresult["score"].asFloat();
           string full_name=oneresult["name"].asString();
           string text_url=oneresult["text_url"].asString();
