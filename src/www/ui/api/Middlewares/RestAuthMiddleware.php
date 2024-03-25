@@ -43,11 +43,14 @@ class RestAuthMiddleware
   {
     $requestUri = $request->getUri();
     $requestPath = strtolower($requestUri->getPath());
-    $authFreePaths = ["/version", "/info", "/openapi", "/health"];
+    $authFreePaths = ["/info", "/openapi", "/health"];
 
     $isPassThroughPath = false;
+    // path is /repo/api/v2/<endpoint>, we need to get only the endpoint part
+    $parts = explode("/", $requestPath, 5);
+    $endpoint = "/".end($parts);
     foreach ($authFreePaths as $authFreePath) {
-      if (strpos($requestPath, $authFreePath) !== false) {
+      if ( $endpoint === $authFreePath ) {
         $isPassThroughPath = true;
         break;
       }
