@@ -725,59 +725,23 @@ paths:
           application/json:
             schema:
               type: object
+              allOf:
+                - $ref: '#/components/schemas/UploadOptions'
               properties:
                 location:
                   oneOf:
                     - $ref: '#/components/schemas/VcsUpload'
                     - $ref: '#/components/schemas/UrlUpload'
                     - $ref: '#/components/schemas/ServerUpload'
-                scanOptions:
-                  $ref: '#/components/schemas/ScanOptions'
-                folderId:
-                  type: integer
-                  description: Folder Id, where upload should be created
-                uploadDescription:
-                  type: string
-                  description: Visible description of the file
-                public:
-                  type: string
-                  enum:
-                    - private
-                    - protected
-                    - public
-                  default: protected
-                  description: The access level to the upload
-                applyGlobal:
-                  type: boolean
-                  default: false
-                  description: >
-                    Apply global decisions for current upload
-                ignoreScm:
-                  type: boolean
-                  default: false
-                  description: >
-                    Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype
-                uploadType:
-                  type: string
-                  enum:
-                    - file
-                    - vcs
-                    - url
-                    - server
-                  default: vcs
-                  description: Type of upload done. Choose `file` if uploading a file.
-              required:
-                - folderId
-                - uploadType
           multipart/form-data:
             schema:
               type: object
+              allOf:
+                - $ref: '#/components/schemas/UploadOptions'
               properties:
                 fileInput:
                   type: string
                   format: binary
-                scanOptions:
-                  $ref: '#/components/schemas/ScanOptions'
               required:
                 - fileInput
       responses:
@@ -5046,6 +5010,47 @@ components:
           $ref: '#/components/schemas/Reuser'
         scancode:
           $ref: '#/components/schemas/Scancode'
+    UploadOptions:
+      type: object
+      properties:
+        folderId:
+          type: integer
+          description: Folder Id, where upload should be created
+        uploadDescription:
+          type: string
+          description: Visible description of the file
+        public:
+          type: string
+          enum:
+            - private
+            - protected
+            - public
+          default: protected
+          description: The access level to the upload
+        applyGlobal:
+          type: boolean
+          default: false
+          description: >
+            Apply global decisions for current upload
+        ignoreScm:
+          type: boolean
+          default: false
+          description: >
+            Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype
+        uploadType:
+          type: string
+          enum:
+            - file
+            - vcs
+            - url
+            - server
+          default: vcs
+          description: Type of upload done. Choose `file` if uploading a file.
+        scanOptions:
+          $ref: '#/components/schemas/ScanOptions'
+      required:
+        - folderId
+        - uploadType
     Upload:
       type: object
       properties:
