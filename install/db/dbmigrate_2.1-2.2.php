@@ -27,7 +27,7 @@ use Fossology\Lib\Auth\Auth;
  *
  * \return int 0 on success, 1 on failure
  **/
-function Migrate_21_22($Verbose)
+function Migrate_21_22($Verbose): int
 {
   global $PG_CONN;
 

@@ -58,7 +58,7 @@ function setActiveGroup($verbose)
  * @param boolean $verbose tell about decisions
  * @return int number of inserted decisions
  */
-function blowAudit($verbose)
+function blowAudit($verbose): int
 {
   global $dbManager;
   
@@ -121,7 +121,7 @@ function blowAudit($verbose)
  * @param boolean $verbose tell about decisions
  * @return int number of inserted decisions
  */
-function migrate_25_26($verbose)
+function migrate_25_26($verbose): int
 {
   setActiveGroup($verbose);
   //$nInsertedDecisions = blowAudit($verbose);

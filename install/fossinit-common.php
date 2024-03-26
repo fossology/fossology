@@ -118,7 +118,7 @@ function bootstrap($sysconfdir="")
  * @param string  $default Default value to return (in case of timeout)
  * @return string The input read from STDIN or default value.
  */
-function readlineTimeout($seconds, $default)
+function readlineTimeout($seconds, $default): string
 {
   return trim(shell_exec('bash -c ' .
     escapeshellarg('fossstdin=' . escapeshellarg($default) .

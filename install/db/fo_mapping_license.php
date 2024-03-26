@@ -522,7 +522,7 @@ function check_shortname($shortname)
  * 
  * \return int 0 on sucess 
  */
-function update_license($old_rf_pk, $new_rf_pk)
+function update_license($old_rf_pk, $new_rf_pk): int
 {
   global $PG_CONN;
 
@@ -574,7 +574,7 @@ function update_license($old_rf_pk, $new_rf_pk)
  * 
  * \return int 0 on sucess
  */
-function change_license_name($old_shortname, $new_shortname)
+function change_license_name($old_shortname, $new_shortname): int
 {
   global $PG_CONN;
 

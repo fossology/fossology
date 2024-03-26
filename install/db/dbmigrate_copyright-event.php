@@ -109,7 +109,7 @@ function insertDataInToEventTables($dbManager)
  * @param DbManager $dbManager
  * @return boolean True if migration is possible, false otherwise
  */
-function checkIfMigratePossible($dbManager)
+function checkIfMigratePossible($dbManager): bool
 {
   if ($dbManager == NULL){
     echo "No connection object passed!\n";

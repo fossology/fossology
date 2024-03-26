@@ -23,7 +23,7 @@ require_once 'fossinit-common.php';
  * Check if current user is root
  * @returns True if user is root, false otherwise.
  */
-function checkCorrectUser()
+function checkCorrectUser(): bool
 {
   $processUser = posix_getpwuid(posix_geteuid());
   if ($processUser['uid'] !== 0) {

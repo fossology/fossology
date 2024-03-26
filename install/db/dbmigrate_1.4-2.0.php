@@ -22,7 +22,7 @@
  *
  * \return int 0 on success, 1 on failure
  **/
-function Migrate_14_20($DryRun)
+function Migrate_14_20($DryRun): int
 {
   global $PG_CONN;
 

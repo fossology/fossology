@@ -21,7 +21,7 @@
  *
  * \return int 0 on success, 1 on failure
  **/
-function Migrate_20_21($DryRun)
+function Migrate_20_21($DryRun): int
 {
   // Check if uploadtree_a already inherits from uploadtree.  If so, we are done.
   $sql = "SELECT EXISTS (SELECT 1 FROM pg_catalog.pg_inherits WHERE inhrelid = 'public.uploadtree_a'::regclass::oid);";

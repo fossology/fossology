@@ -67,7 +67,7 @@ function moveCandidateLicenseMap($dbManager, $obPk, $verbose)
  * @param DbManager $dbManager
  * @return boolean True if migration is required, false otherwise
  */
-function checkMigrate3637Required($dbManager)
+function checkMigrate3637Required($dbManager): bool
 {
   if($dbManager == NULL){
     echo "No connection object passed!\n";
@@ -152,7 +152,7 @@ function moveObligation($dbManager, $verbose)
  * @param DbManager $dbManager
  * @return boolean True value 8 exist, false otherwise
  */
-function migrateReuseValueForEnhanceWithMainLicense($dbManager)
+function migrateReuseValueForEnhanceWithMainLicense($dbManager): bool
 {
   if ($dbManager === NULL) {
     echo "No connection object passed!\n";

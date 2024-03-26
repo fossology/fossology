@@ -24,7 +24,7 @@ use Fossology\Lib\Db\DbManager;
  * @param DbManager $dbManager
  * @param string $tableName
  */
-function calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, $columnName)
+function calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, $columnName): array
 {
   $sql = "SELECT count(*) AS cnt FROM $tableName WHERE $tableName.$columnName is NULL;";
   $totalPfile = $dbManager->getSingleRow($sql, [], __METHOD__ .
@@ -205,7 +205,7 @@ function updateSHA256($dbManager, $tableName)
  * @param $colName   Column of the table to check
  * @param $where     Additional where clause conditions
  */
-function isColumnUpperCase($dbManager, $tableName, $colName, $where)
+function isColumnUpperCase($dbManager, $tableName, $colName, $where): bool
 {
   if (!empty($where)) {
     $where = "AND $where";

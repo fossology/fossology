@@ -34,7 +34,7 @@ const ENCODE_TABLES = array(
  * Calculate the total number of records in concerned tables
  * @param DbManager $dbManager
  */
-function calculateNumberOfRecordsToRecode($dbManager)
+function calculateNumberOfRecordsToRecode($dbManager): int
 {
   $selectSql = "SELECT count(*) AS cnt FROM ";
   $where = " WHERE (content IS NOT NULL AND content != '')";
@@ -55,7 +55,7 @@ function calculateNumberOfRecordsToRecode($dbManager)
  * @param array $rows   Rows with ID and recoded values
  * @return int Count of updated rows
  */
-function updateRecodedValues($dbManager, $table, $rows)
+function updateRecodedValues($dbManager, $table, $rows): int
 {
   if (empty($rows)) {
     return 0;
@@ -204,7 +204,7 @@ function startRecodingTables($dbManager, $MODDIR)
  * @param DbManager $dbManager
  * @return string Encoding of current DB
  */
-function getDbEncoding($dbManager)
+function getDbEncoding($dbManager): string
 {
   $dbName = $GLOBALS["SysConf"]["DBCONF"]["dbname"];
   $sql = "SELECT pg_encoding_to_char(encoding) AS encoding " .
@@ -234,7 +234,7 @@ function updateDbEncoding($dbManager)
  * @param DbManager $dbManager
  * @return boolean True if migration is required, false otherwise
  */
-function checkMigrate3738Required($dbManager)
+function checkMigrate3738Required($dbManager): bool
 {
   if ($dbManager == NULL){
     echo "No connection object passed!\n";
@@ -265,7 +265,7 @@ function checkMigrate3738Required($dbManager)
  * @param boolean $force True to force the process
  * @return number Return code
  */
-function recodeTables($dbManager, $MODDIR, $force = false)
+function recodeTables($dbManager, $MODDIR, $force = false): int
 {
   if (! checkMigrate3738Required($dbManager)) {
     // Migration not required
