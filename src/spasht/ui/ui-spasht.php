@@ -130,6 +130,12 @@ class ui_spasht extends FO_Plugin
     $typeName = trim(GetParm("typeName", PARM_STRING));
     $providerName = trim(GetParm("providerName", PARM_STRING));
 
+    // Reading contribution data
+    $coordinatesInfo = trim(GetParm("jsonStringCoordinates", PARM_STRING));
+    $contributionInfo = trim(GetParm("jsonStringContributionInfo", PARM_STRING));
+    $contributionRevision = trim(GetParm("hiddenRevision", PARM_STRING));
+    $contributionDataValid = trim(GetParm("contributionDataValid", PARM_STRING));
+
     $this->vars['storeStatus'] = "false";
     $this->vars['pageNo'] = "definition_not_found";
 
@@ -333,9 +339,74 @@ class ui_spasht extends FO_Plugin
     $this->vars['fileList'] = $this->getFileListing($uploadtree_pk, $uri,
       $uploadtree_tablename, $agentId, $uploadId);
 
+    if ($contributionDataValid === "true" && !empty($coordinatesInfo) && !empty($contributionInfo)) {
+      $contributionJsonPacket = $this->handleContributionToClearlyDefined($coordinatesInfo ,$contributionInfo, $contributionRevision);
+
+      try {
+        // Point to curations section in the api
+        $res = $client->request('PATCH', 'curations', [
+          'data' => [$contributionJsonPacket], //send data to the api
+          'proxy' => $proxy
+        ]);
+      } catch (RequestException $e) {
+        $this->vars['message'] = "Unable to reach " .
+          $SysConf['SYSCONFIG']["ClearlyDefinedURL"] . ". Code: " .
+          $e->getCode();
+        return $this->render('agent_spasht.html.twig', $this->vars);
+      } catch (ClientException $e) {
+        $this->vars['message'] = "Request failed. Status: " .
+          $e->getCode();
+        return $this->render('agent_spasht.html.twig', $this->vars);
+      } catch (ServerException $e) {
+        $this->vars['message'] = "Request failed. Status: " .
+          $e->getCode();
+        return $this->render('agent_spasht.html.twig', $this->vars);
+      }
+    }
+
     $out = $this->render('agent_spasht.html.twig', $this->vars);
 
     return($out);
+  }
+
+
+  /**
+    * @param string  $coordinatesInfo       coordinates from selected definition
+    * @param string  $contributionInfo      PR information filled by user
+    * @param string  $contributionRevision  Revision of selected definition
+    * @return array
+    */
+  protected function handleContributionToClearlyDefined($coordinatesInfo, $contributionInfo, $contributionRevision)
+  {
+    $contributionPacket = array();
+
+    $coordinatesInfo = json_decode($coordinatesInfo);
+    $contributionInfo = json_decode($contributionInfo);
+
+    $contributionPacket["contributionInfo"] = $contributionInfo;
+        $patches =array();
+
+          $patch = array();
+          $patch["coordinates"] = $coordinatesInfo;
+            $revision = array();
+              $contributionFiles = array();
+                $file = array();
+                $file["path"] = "";
+                $file["license"] = "";
+                $file["attributions"] = "";
+
+              array_push($contributionFiles, $file);
+
+            $revision[$contributionRevision]["files"] = $contributionFiles;
+          $patch["revisions"] = $revision;
+
+        array_push($patches, $patch);
+        $contributionPacket["patches"] = $patches;
+
+    if (!empty($contributionPacket)) {
+      $jsonPacket = json_encode($contributionPacket);
+      return $jsonPacket;
+    }
   }
 
   /**
