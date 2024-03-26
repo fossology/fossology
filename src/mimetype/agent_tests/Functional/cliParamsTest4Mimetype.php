@@ -85,7 +85,7 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
       $message = 'FATAL: cannot find executable file, stop testing\n');
     }
     // run it
-    $EXE_PATH = $EXE_PATH." -C -c $DB_CONF";
+    $EXE_PATH .= " -C -c $DB_CONF";
     $last = exec("$EXE_PATH -h 2>&1", $out, $rtn);
     $this->assertEquals($usage, $out[0]); // check if executable file mimetype is exited
   }

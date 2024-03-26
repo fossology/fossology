@@ -396,7 +396,7 @@ function writeacme_project($project, $Verbose)
    * Watch out for time stamps in milliseconds
    */
   if ($projectDate > 20000000000) {
-    $projectDate = $projectDate / 1000; // convert to seconds if necessary
+    $projectDate /= 1000; // convert to seconds if necessary
   }
   $releasedate = date("Ymd", $projectDate);
 
