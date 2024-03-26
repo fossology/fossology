@@ -90,7 +90,7 @@ class TextFindingsAjax
    *         records
    */
   private function getTableData($upload, $item, $type, $listPage, $filter,
-    $activated = true)
+    $activated = true): array
   {
     list ($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->getTextFindings(
       $upload, $item, $type, $this->uploadtree_tablename, $filter, $activated);
@@ -121,7 +121,7 @@ class TextFindingsAjax
    * @return array[][] Array of table records, filtered records, total records
    */
   protected function getTextFindings($upload_pk, $item, $type,
-    $uploadTreeTableName, $filter, $activated = true)
+    $uploadTreeTableName, $filter, $activated = true): array
   {
     $offset = GetParm('iDisplayStart', PARM_INTEGER);
     $limit = GetParm('iDisplayLength', PARM_INTEGER);
@@ -206,7 +206,7 @@ class TextFindingsAjax
    * @brief Create sorting string for database query
    * @return string Sorting string
    */
-  private function getOrderString()
+  private function getOrderString(): string
   {
     $columnNamesInDatabase = array(
       'textfinding_count',
@@ -224,7 +224,7 @@ class TextFindingsAjax
    * @param[out] array $filterParams Parameters list for database query
    * @return string Filter string for query
    */
-  private function addSearchFilter(&$filterParams)
+  private function addSearchFilter(&$filterParams): string
   {
     $searchPattern = GetParm('sSearch', PARM_STRING);
     if (empty($searchPattern)) {
@@ -244,7 +244,7 @@ class TextFindingsAjax
    * @return string
    */
   private function getTableRowAction($hash, $upload, $type, $activated = true,
-    $rw = true)
+    $rw = true): string
   {
     $ajaxType = $this->getDecisionTypeName($type);
     if ($rw) {
@@ -283,7 +283,7 @@ class TextFindingsAjax
    * @internal param boolean $normalizeString
    */
   private function fillTableRow($row, $upload, $item, $type, $listPage,
-    $activated = true, $rw = true)
+    $activated = true, $rw = true): array
   {
     $hash = $row['hash'];
     $sql = "SELECT pfile_fk FROM " . $this->getTableName($type) .
@@ -326,7 +326,7 @@ class TextFindingsAjax
    * @param string $type Result type
    * @return string Table name
    */
-  private function getTableName($type)
+  private function getTableName($type): string
   {
     return "copyright_decision";
   }
@@ -338,7 +338,7 @@ class TextFindingsAjax
    * @param string $type Result type
    * @return string Table name
    */
-  private function getDecisionTypeName($type)
+  private function getDecisionTypeName($type): string
   {
     return "copyright";
   }
@@ -350,7 +350,7 @@ class TextFindingsAjax
    * @param string $type Result type
    * @return string View name
    */
-  private function getViewName($type)
+  private function getViewName($type): string
   {
     return "copyright-list";
   }

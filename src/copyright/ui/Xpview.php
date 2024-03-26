@@ -205,7 +205,7 @@ class Xpview extends DefaultPlugin
    * @return array
    * @todo Not implemented
    */
-  protected function additionalVars($uploadId, $uploadTreeId, $agentId)
+  protected function additionalVars($uploadId, $uploadTreeId, $agentId): array
   {
     return array();
   }
@@ -214,7 +214,7 @@ class Xpview extends DefaultPlugin
    * @copydoc Fossology::Lib::Plugin::DefaultPlugin::mergeWithDefault()
    * @see Fossology::Lib::Plugin::DefaultPlugin::mergeWithDefault()
    */
-  protected function mergeWithDefault($vars)
+  protected function mergeWithDefault($vars): array
   {
     $allVars = array_merge($this->getDefaultVars(), $vars);
     $allVars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
@@ -236,7 +236,7 @@ class Xpview extends DefaultPlugin
    * @brief Create legend box
    * @return string rendered legend box
    */
-  function legendBox()
+  function legendBox(): string
   {
     $output = _("file text");
     foreach ($this->highlightTypeToStringMap as $colorKey => $txt) {

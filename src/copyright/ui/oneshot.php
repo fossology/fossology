@@ -56,7 +56,7 @@ class agent_copyright_once extends FO_Plugin
     $ui_dir = getcwd();
     $copyright_dir =  "$SYSCONFDIR/mods-enabled/copyright/agent/";
     if (!chdir($copyright_dir)) {
-      return _("unable to change working directory to $copyright_dir\n");
+      return_("unable to change working directory to $copyright_dir\n");
     }
     //$Sys = "./copyright -C $tempFileName -c $SYSCONFDIR";
     $Sys = "./copyright -c $SYSCONFDIR $tempFileName";
@@ -235,7 +235,7 @@ class agent_copyright_once extends FO_Plugin
    * @brief Form and help content for plugin
    * @return string The HTML content
    */
-  protected function htmlContent()
+  protected function htmlContent(): string
   {
     $V = _("This analyzer allows you to upload a single file for copyright/email/url analysis.\n");
     $V.= "<ul>\n";

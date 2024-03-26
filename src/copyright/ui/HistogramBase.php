@@ -57,7 +57,7 @@ abstract class HistogramBase extends FO_Plugin
    * @return array
    * @todo Template this! For now I just template the js
    */
-  public function getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId)
+  public function getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId): array
   {
     $sorting = json_encode($this->returnSortOrder());
 
@@ -142,7 +142,7 @@ abstract class HistogramBase extends FO_Plugin
    * @param array  $VF
    * @return array Output, table variables
    */
-  abstract protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF);
+  abstract protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF): array;
 
   /**
    * @brief Given an $Uploadtree_pk, display: \n
@@ -309,7 +309,7 @@ abstract class HistogramBase extends FO_Plugin
    * @param int    $upload_pk            Upload id
    * @return array
    */
-  protected function getFileListing($Uploadtree_pk, $Uri, $uploadtree_tablename, $Agent_pk, $upload_pk)
+  protected function getFileListing($Uploadtree_pk, $Uri, $uploadtree_tablename, $Agent_pk, $upload_pk): array
   {
     $VF=""; // return values for file listing
     /*******    File Listing     ************/
@@ -379,7 +379,7 @@ abstract class HistogramBase extends FO_Plugin
    * @param int $Uploadtree_pk Uploadtree id of the element
    * @return boolean True if it is a directory, false otherwise
    */
-  protected function isADirectory($Uploadtree_pk)
+  protected function isADirectory($Uploadtree_pk): bool
   {
     $row =  $this->uploadDao->getUploadEntry($Uploadtree_pk, $this->uploadtree_tablename);
     $isADirectory = IsDir($row['ufile_mode']);
@@ -390,7 +390,7 @@ abstract class HistogramBase extends FO_Plugin
    * @brief Get sorting orders
    * @return string[][]
    */
-  public static function returnSortOrder ()
+  public static function returnSortOrder (): array
   {
     $defaultOrder = array (
         array(0, "desc"),
@@ -403,7 +403,7 @@ abstract class HistogramBase extends FO_Plugin
    * @copydoc FO_Plugin::getTemplateName()
    * @see FO_Plugin::getTemplateName()
    */
-  public function getTemplateName()
+  public function getTemplateName(): string
   {
     return "copyrighthist.html.twig";
   }
@@ -412,5 +412,5 @@ abstract class HistogramBase extends FO_Plugin
    * @brief Create JavaScript block for histogram
    * @return string JavaScript block
    */
-  abstract protected function createScriptBlock();
+  abstract protected function createScriptBlock(): string;
 }

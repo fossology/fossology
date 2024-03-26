@@ -200,7 +200,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
    * @param boolean $activated True to get activated copyrights, else false
    * @return array[][] Array of table data, total records in database, filtered records
    */
-  private function getTableData($upload, $item, $agent_pk, $type, $listPage, $filter, $activated = true)
+  private function getTableData($upload, $item, $agent_pk, $type, $listPage, $filter, $activated = true): array
   {
     $offset = GetParm('iDisplayStart', PARM_INTEGER);
     $limit = GetParm('iDisplayLength', PARM_INTEGER);
@@ -228,7 +228,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
    * @param boolean $activated           True to get activated copyrights, else false
    * @return array[][] Array of table records, filtered records, total records
    */
-  public function getCopyrights($upload_pk, $item, $uploadTreeTableName, $agentId, $type, $filter, $activated = true, $offset = null , $limit = null)
+  public function getCopyrights($upload_pk, $item, $uploadTreeTableName, $agentId, $type, $filter, $activated = true, $offset = null , $limit = null): array
   {
     $tableName = $this->getTableName($type);
     $tableNameEvent = $tableName.'_event';
@@ -321,7 +321,7 @@ count(*) AS copyright_count " .
    * @param string $type Result type
    * @return string Table name
    */
-  public function getTableName($type)
+  public function getTableName($type): string
   {
     switch ($type) {
       case "ipra" :
@@ -355,7 +355,7 @@ count(*) AS copyright_count " .
    * @brief Create sorting string for database query
    * @return string Sorting string
    */
-  private function getOrderString()
+  private function getOrderString(): string
   {
     $columnNamesInDatabase = array('copyright_count', 'content');
 
@@ -370,7 +370,7 @@ count(*) AS copyright_count " .
    * @param string $copyrightType Copyright Type
    * @return integer Agent ID
    */
-  public function getAgentId($upload_pk,$copyrightType)
+  public function getAgentId($upload_pk,$copyrightType): int
   {
     return (LatestAgentpk($upload_pk, $copyrightType));
   }
@@ -380,7 +380,7 @@ count(*) AS copyright_count " .
    * @param[out] array $filterParams Parameters list for database query
    * @return string Filter string for query
    */
-  private function addSearchFilter(&$filterParams)
+  private function addSearchFilter(&$filterParams): string
   {
     $searchPattern = GetParm('sSearch', PARM_STRING);
     $isInverseSearch = GetParm('isInverse', PARM_STRING);
@@ -404,7 +404,7 @@ count(*) AS copyright_count " .
    * @param boolean $rw           true if content is editable
    * @return string
    */
-  private function getTableRowAction($hash, $uploadTreeId, $upload, $type, $activated = true, $rw = true)
+  private function getTableRowAction($hash, $uploadTreeId, $upload, $type, $activated = true, $rw = true): string
   {
     if ($rw) {
       $act = "<img";
@@ -438,7 +438,7 @@ count(*) AS copyright_count " .
    * @return string[]
    * @internal param boolean $normalizeString
    */
-  private function fillTableRow($row, $uploadTreeId, $upload, $agentId, $type,$listPage, $filter = "", $activated = true, $rw = true)
+  private function fillTableRow($row, $uploadTreeId, $upload, $agentId, $type,$listPage, $filter = "", $activated = true, $rw = true): array
   {
     $hash = $row['hash'];
     $output = array('DT_RowId' => "$upload,$uploadTreeId,$hash,$type", "DT_RowClass" => "row$hash");

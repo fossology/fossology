@@ -33,7 +33,7 @@ class CopyrightHistogram extends HistogramBase
    * @param string $agentId      Agent id which populate the result
    * @return array Copyright contents, upload tree items in result
    */
-  protected function getTableContent($upload_pk, $uploadtreeId, $filter, $agentId)
+  protected function getTableContent($upload_pk, $uploadtreeId, $filter, $agentId): array
   {
     $typeDescriptionPairs = array(
       'statement' => _("FOSSology Findings"),
@@ -62,7 +62,7 @@ class CopyrightHistogram extends HistogramBase
    * @copydoc HistogramBase::fillTables()
    * @see HistogramBase::fillTables()
    */
-  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
+  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF): array
   {
     list ($vCopyright, $vScancode, $vTextFindings, $tableVars) = $this->getTableContent(
       $upload_pk, $Uploadtree_pk, $filter, $agentId);
@@ -102,7 +102,7 @@ class CopyrightHistogram extends HistogramBase
    * @copydoc HistogramBase::createScriptBlock()
    * @see HistogramBase::createScriptBlock()
    */
-  protected function createScriptBlock()
+  protected function createScriptBlock(): string
   {
     return "
 

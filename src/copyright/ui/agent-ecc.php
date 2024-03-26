@@ -26,7 +26,7 @@ class EccAgentPlugin extends AgentPlugin
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
    * @see Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
    */
-  function AgentHasResults($uploadId=0)
+  function AgentHasResults($uploadId=0): int
   {
     return CheckARS($uploadId, $this->AgentName, "ecc scanner", "ecc_ars");
   }
@@ -61,7 +61,7 @@ class EccAgentPlugin extends AgentPlugin
    * @param string $agentName    Name of the agent to be checked for
    * @return boolean true if agent already in dependency list else false
    */
-  protected function isAgentIncluded($dependencies, $agentName)
+  protected function isAgentIncluded($dependencies, $agentName): bool
   {
     foreach ($dependencies as $dependency) {
       if ($dependency == $agentName) {

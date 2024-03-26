@@ -84,7 +84,7 @@ class copyright_list extends FO_Plugin
    * @throws Exception
    * @return array Rows to process, and $upload_pk
    */
-  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type, $tableName, $filter="")
+  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type, $tableName, $filter=""): array
   {
     /*******  Get license names and counts  ******/
     $row = $this->uploadDao->getUploadEntry($Uploadtree_pk);
@@ -153,7 +153,7 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
    * \param string $hash
    * \return array new array and $NumRows
    */
-  function GetRequestedRows($rows, $excl, &$NumRows, $filter, $hash)
+  function GetRequestedRows($rows, $excl, &$NumRows, $filter, $hash): array
   {
     $NumRows = count($rows);
     $prev = 0;
@@ -422,7 +422,7 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
    * @copydoc FO_Plugin::getTemplateName()
    * @see FO_Plugin::getTemplateName()
    */
-  function getTemplateName()
+  function getTemplateName(): string
   {
     return 'copyrightlist.html.twig';
   }
@@ -432,7 +432,7 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
    * @param string $type Type of content
    * @return string[] Table name, mod, and view
    */
-  private function getTableName($type)
+  private function getTableName($type): array
   {
 
     switch ($type) {
