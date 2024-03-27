@@ -244,7 +244,7 @@ class ReportUtils
         $filesWithLicenses[$clearingDecision->getUploadTreeId()]
           ->addAcknowledgement($clearingLicense->getAcknowledgement());
         $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
-        $concludedLicense = $this->licenseDao->getLicenseById($reportedLicenseId);
+        $concludedLicense = $this->licenseDao->getLicenseById($reportedLicenseId, $groupId);
         if ($clearingEvent->getReportinfo()) {
           $customLicenseText = $clearingEvent->getReportinfo();
           $reportedLicenseShortname = $concludedLicense->getShortName() . '-' .
