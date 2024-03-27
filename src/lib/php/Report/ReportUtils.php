@@ -244,7 +244,7 @@ class ReportUtils
         $filesWithLicenses[$clearingDecision->getUploadTreeId()]
           ->addAcknowledgement($clearingLicense->getAcknowledgement());
         $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
-        $concludedLicense = $this->licenseDao->getLicenseById($reportedLicenseId);
+        $concludedLicense = $this->licenseDao->getLicenseById($reportedLicenseId, $groupId);
         if ($clearingEvent->getReportinfo()) {
           $customLicenseText = $clearingEvent->getReportinfo();
           $reportedLicenseShortname = $concludedLicense->getShortName() . '-' .
@@ -271,7 +271,7 @@ class ReportUtils
           $filesWithLicenses[$clearingDecision->getUploadTreeId()]
             ->addConcludedLicense($reportLicId);
           if (!array_key_exists($reportLicId, $licensesInDocument)) {
-            $licenseObj = $this->licenseDao->getLicenseById($reportedLicenseId);
+            $licenseObj = $this->licenseDao->getLicenseById($reportedLicenseId, $groupId);
             $listedLicense = !StringOperation::stringStartsWith(
               $licenseObj->getSpdxId(), LicenseRef::SPDXREF_PREFIX);
             $licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
