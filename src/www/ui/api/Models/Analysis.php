@@ -103,14 +103,14 @@ class Analysis
    * @param array $analysisArray Associative boolean array
    * @return Analysis Current object
    */
-  public function setUsingArray($analysisArray)
+  public function setUsingArray($analysisArray, $version = ApiVersion::V1)
   {
     if (array_key_exists("bucket", $analysisArray)) {
       $this->bucket = filter_var($analysisArray["bucket"],
         FILTER_VALIDATE_BOOLEAN);
     }
-    if (array_key_exists("copyright_email_author", $analysisArray)) {
-      $this->copyright = filter_var($analysisArray["copyright_email_author"],
+    if (array_key_exists(($version == ApiVersion::V1? "copyright_email_author" : "copyrightEmailAuthor"), $analysisArray)) {
+      $this->copyright = filter_var($analysisArray[$version == ApiVersion::V1? "copyright_email_author" : "copyrightEmailAuthor"],
         FILTER_VALIDATE_BOOLEAN);
     }
     if (array_key_exists("ecc", $analysisArray)) {
@@ -349,19 +349,34 @@ class Analysis
    * Get the object as an associative array
    * @return array
    */
-  public function getArray()
+  public function getArray($version = ApiVersion::V1)
   {
-    return [
-      "bucket"    => $this->bucket,
-      "copyright_email_author" => $this->copyright,
-      "ecc"       => $this->ecc,
-      "keyword"   => $this->keyword,
-      "mimetype"  => $this->mimetype,
-      "monk"      => $this->monk,
-      "nomos"     => $this->nomos,
-      "ojo"       => $this->ojo,
-      "reso"       => $this->reso,
-      "package"   => $this->pkgagent
-    ];
+    if ($version == ApiVersion::V2) {
+      return [
+        "bucket"    => $this->bucket,
+        "copyrightEmailAuthor" => $this->copyright,
+        "ecc"       => $this->ecc,
+        "keyword"   => $this->keyword,
+        "mimetype"  => $this->mimetype,
+        "monk"      => $this->monk,
+        "nomos"     => $this->nomos,
+        "ojo"       => $this->ojo,
+        "reso"       => $this->reso,
+        "package"   => $this->pkgagent
+      ];
+    } else {
+      return [
+        "bucket"    => $this->bucket,
+        "copyright_email_author" => $this->copyright,
+        "ecc"       => $this->ecc,
+        "keyword"   => $this->keyword,
+        "mimetype"  => $this->mimetype,
+        "monk"      => $this->monk,
+        "nomos"     => $this->nomos,
+        "ojo"       => $this->ojo,
+        "reso"       => $this->reso,
+        "package"   => $this->pkgagent
+      ];
+    }
   }
 }
