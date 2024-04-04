@@ -408,12 +408,12 @@ paths:
                   type: string
                   description: Delimiters for fields in CSV
                   default: ','
-                file_input:
+                fileInput:
                   type: string
                   format: binary
                   description: CSV to be imported
               required:
-                - file_input
+                - fileInput
       responses:
         '400':
           description: Validation Error
@@ -3218,7 +3218,7 @@ paths:
     parameters:
       - name: groupName
         description: The group name to chose while accessing folders
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -3252,19 +3252,19 @@ paths:
         Create a new child folder with optional description
       parameters:
         - name: parentFolder
-          in: header
+          in: query
           required: true
           description: Parent folder for the new folder
           schema:
             type: integer
         - name: folderName
-          in: header
+          in: query
           required: true
           description: Name of the new folder
           schema:
             type: string
         - name: folderDescription
-          in: header
+          in: query
           required: false
           description: Description of the new folder
           schema:
@@ -3294,7 +3294,7 @@ paths:
           type: integer
       - name: groupName
         description: The group name to chose while accessing the folder
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -3340,13 +3340,13 @@ paths:
         - Folders
       parameters:
         - name: name
-          in: header
+          in: query
           required: false
           description: New name of the folder
           schema:
             type: string
         - name: description
-          in: header
+          in: query
           required: false
           description: New description of the folder
           schema:
@@ -3370,13 +3370,13 @@ paths:
         - Folders
       parameters:
         - name: parent
-          in: header
+          in: query
           required: true
           description: New parent folder id
           schema:
             type: integer
         - name: action
-          in: header
+          in: query
           required: true
           description: Action to be performed
           schema:
@@ -4173,7 +4173,7 @@ paths:
     parameters:
       - name: groupName
         description: The group name to chose
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -4185,14 +4185,14 @@ paths:
       parameters:
         - name: page
           description: Page number to fetch
-          in: header
+          in: query
           required: false
           schema:
             type: integer
             default: 1
         - name: limit
           description: Limits of responses per request
-          in: header
+          in: query
           required: false
           schema:
             type: integer
@@ -4200,7 +4200,7 @@ paths:
             default: 100
         - name: active
           description: Get only active licenses
-          in: header
+          in: query
           required: false
           schema:
             type: boolean
@@ -4305,12 +4305,12 @@ paths:
                   type: string
                   description: Delimiters for fields in CSV
                   default: ','
-                file_input:
+                fileInput:
                   type: string
                   format: binary
                   description: CSV to be imported
               required:
-                - file_input
+                - fileInput
       responses:
         '400':
           description: Validation Error
@@ -4367,7 +4367,7 @@ paths:
           type: string
       - name: groupName
         description: The group name to chose
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -5273,10 +5273,10 @@ components:
         text:
           type: string
           description: text of the license-candidate.
-        group_name:
+        groupName:
           type: string
           description: group_name of the license-candidate.
-        group_id:
+        groupId:
           type: integer
           description: group_id of the license-candidate.
     User:
@@ -6463,7 +6463,7 @@ components:
           id:
             type: integer
             example: 29
-          obligation_topic:
+          obligationTopic:
             type: string
             example: Obligation text
     ObligationExtended:
@@ -6754,7 +6754,7 @@ components:
           type: string
           description: The acknowledgement text of the AdminAcknowledgement
           example: updated Ack text
-        is_enabled:
+        isEnabled:
           type: boolean
           description: Indicates if the AdminAcknowledgement is enabled
           example: true
@@ -6805,7 +6805,7 @@ components:
           type: string
           example: The comment's text
           description: The text content of the comment.
-        is_enabled:
+        isEnabled:
           type: boolean
           example: true
           description: Indicates whether the comment is enabled or not.

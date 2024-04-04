@@ -13,6 +13,8 @@
 
 namespace Fossology\UI\Api\Models;
 
+use Fossology\UI\Api\Models\ApiVersion;
+
 class LicenseCandidate
 {
   /**
@@ -190,17 +192,29 @@ class LicenseCandidate
     $this->group_id = $group_id;
   }
 
-  public function getArray()
+  public function getArray($apiVersion = ApiVersion::V1)
   {
-    return [
-      "id"         => $this->getId(),
-      "shortname"  => $this->getShortname(),
-      "spdxid"     => $this->getSpdxid(),
-      "fullname"   => $this->getFullname(),
-      "text"       => $this->getText(),
-      "group_name" => $this->getGroupName(),
-      "group_id"   => $this->getGroupId()
-    ];
+    if ($apiVersion == ApiVersion::V2) {
+      return [
+        "id"         => $this->getId(),
+        "shortname"  => $this->getShortname(),
+        "spdxid"     => $this->getSpdxid(),
+        "fullname"   => $this->getFullname(),
+        "text"       => $this->getText(),
+        "groupName" => $this->getGroupName(),
+        "groupId"   => $this->getGroupId()
+      ];
+    } else {
+      return [
+        "id"         => $this->getId(),
+        "shortname"  => $this->getShortname(),
+        "spdxid"     => $this->getSpdxid(),
+        "fullname"   => $this->getFullname(),
+        "text"       => $this->getText(),
+        "group_name" => $this->getGroupName(),
+        "group_id"   => $this->getGroupId()
+      ];
+    }
   }
 
   /**
@@ -222,14 +236,14 @@ class LicenseCandidate
    * @param array $rows Rows from database
    * @return array
    */
-  public static function convertDbArray($rows)
+  public static function convertDbArray($rows , $version = ApiVersion::V1)
   {
     $candidates = [];
     if (empty($rows)) {
       return $candidates;
     }
     foreach ($rows as $row) {
-      $candidates[] = self::createFromArray($row)->getArray();
+      $candidates[] = self::createFromArray($row)->getArray($version);
     }
     return $candidates;
   }
