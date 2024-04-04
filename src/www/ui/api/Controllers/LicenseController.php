@@ -27,9 +27,12 @@ use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\License;
 use Fossology\UI\Api\Models\LicenseCandidate;
 use Fossology\UI\Api\Models\Obligation;
+use Fossology\UI\Api\Models\AdminAcknowledgement;
+use Fossology\UI\Api\Models\LicenseStandardComment;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Psr7\Factory\StreamFactory;
@@ -151,8 +154,17 @@ class LicenseController extends RestController
    */
   public function getAllLicenses($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $query = $request->getQueryParams();
-    $limit = $request->getHeaderLine(self::LIMIT_PARAM);
+    if ($apiVersion == ApiVersion::V2) {
+      $page = $query[self::PAGE_PARAM] ?? "";
+      $limit = $query[self::LIMIT_PARAM] ?? "";
+      $onlyActive = $query[self::ACTIVE_PARAM] ?? "";
+    } else {
+      $page = $request->getHeaderLine(self::PAGE_PARAM);
+      $limit = $request->getHeaderLine(self::LIMIT_PARAM);
+      $onlyActive = $request->getHeaderLine(self::ACTIVE_PARAM);
+    }
     if (! empty($limit)) {
       $limit = filter_var($limit, FILTER_VALIDATE_INT);
       if ($limit < 1) {
@@ -173,7 +185,6 @@ class LicenseController extends RestController
       $this->restHelper->getGroupId());
     $totalPages = intval(ceil($totalPages / $limit));
 
-    $page = $request->getHeaderLine(self::PAGE_PARAM);
     if (! empty($page) || $page == "0") {
       $page = filter_var($page, FILTER_VALIDATE_INT);
       if ($page <= 0) {
@@ -188,7 +199,6 @@ class LicenseController extends RestController
     } else {
       $page = 1;
     }
-    $onlyActive = $request->getHeaderLine(self::ACTIVE_PARAM);
     if (! empty($onlyActive)) {
       $onlyActive = filter_var($onlyActive, FILTER_VALIDATE_BOOLEAN);
     } else {
@@ -378,12 +388,13 @@ class LicenseController extends RestController
    */
   public function handleImportLicense($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $this->throwNotAdminException();
     $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
     /** @var \Fossology\UI\Page\AdminLicenseFromCSV $adminLicenseFromCsv */
     $adminLicenseFromCsv = $this->restHelper->getPlugin('admin_license_from_csv');
 
-    $uploadedFile = $symReq->files->get($adminLicenseFromCsv->getFileInputName(),
+    $uploadedFile = $symReq->files->get($adminLicenseFromCsv->getFileInputName($apiVersion),
       null);
 
     $requestBody =  $this->getParsedBody($request);
@@ -418,10 +429,11 @@ class LicenseController extends RestController
    */
   public function getCandidates($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $this->throwNotAdminException();
     /** @var \Fossology\UI\Page\AdminLicenseCandidate $adminLicenseCandidate */
     $adminLicenseCandidate = $this->restHelper->getPlugin("admin_license_candidate");
-    $licenses = LicenseCandidate::convertDbArray($adminLicenseCandidate->getCandidateArrayData());
+    $licenses = LicenseCandidate::convertDbArray($adminLicenseCandidate->getCandidateArrayData(), $apiVersion);
     return $response->withJson($licenses, 200);
   }
 
@@ -467,15 +479,16 @@ class LicenseController extends RestController
    */
   public function getAllAdminAcknowledgements($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $this->throwNotAdminException();
-    $res = $this->adminLicenseAckDao->getAllAcknowledgements();
+    $rawData = $this->adminLicenseAckDao->getAllAcknowledgements();
 
-    foreach ($res as $key => $ack) {
-      $res[$key]['id'] = intval($ack['la_pk']);
-      unset($res[$key]['la_pk']);
-      $res[$key]['is_enabled'] = $ack['is_enabled'] == "t";
+    $acknowledgements = [];
+    foreach ($rawData as $ack) {
+        $acknowledgements[] = new AdminAcknowledgement(intval($ack['la_pk']), $ack['name'], $ack['acknowledgement'], $ack['is_enabled'] == "t");
     }
 
+    $res = array_map(fn($acknowledgement) => $acknowledgement->getArray($apiVersion), $acknowledgements);
     return $response->withJson($res, 200);
   }
 
@@ -575,12 +588,13 @@ class LicenseController extends RestController
    */
   public function getAllLicenseStandardComments($request, $response, $args)
   {
-    $res = $this->licenseStdCommentDao->getAllComments();
-    foreach ($res as $key => $ack) {
-      $res[$key]['id'] = intval($ack['lsc_pk']);
-      $res[$key]['is_enabled'] = $ack['is_enabled'] == "t";
-      unset($res[$key]['lsc_pk']);
+    $apiVersion = ApiVersion::getVersion($request);
+    $rawData = $this->licenseStdCommentDao->getAllComments();
+    $comments = [];
+    foreach ($rawData as $cmt) {
+      $comments[] = new LicenseStandardComment(intval($cmt['lsc_pk']), $cmt['name'], $cmt['comment'], $cmt['is_enabled'] == "t");
     }
+    $res = array_map(fn($comment) => $comment->getArray($apiVersion), $comments);
     return $response->withJson($res, 200);
   }
 

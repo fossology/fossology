@@ -23,6 +23,7 @@ use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Folder;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\ApiVersion;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -89,9 +90,16 @@ class FolderController extends RestController
    */
   public function createFolder($request, $response, $args)
   {
-    $parentFolder = $request->getHeaderLine('parentFolder');
-    $folderName = trim($request->getHeaderLine('folderName'));
-    $folderDescription = trim($request->getHeaderLine('folderDescription'));
+    if (ApiVersion::getVersion($request) == ApiVersion::V2) {
+      $queryParams = $request->getQueryParams();
+      $parentFolder = $queryParams['parentFolder'];
+      $folderName = trim($queryParams['folderName']);
+      $folderDescription = trim($queryParams['folderDescription']);
+    } else {
+      $parentFolder = $request->getHeaderLine('parentFolder');
+      $folderName = trim($request->getHeaderLine('folderName'));
+      $folderDescription = trim($request->getHeaderLine('folderDescription'));
+    }
 
     if (! is_numeric($parentFolder) || $parentFolder < 0) {
       throw new HttpBadRequestException(
@@ -170,8 +178,14 @@ class FolderController extends RestController
   {
     $folderDao = $this->restHelper->getFolderDao();
     $folderId = $args['id'];
-    $newName = $request->getHeaderLine('name');
-    $newDesc = $request->getHeaderLine('description');
+    if (ApiVersion::getVersion($request) == ApiVersion::V2) {
+      $queryParams = $request->getQueryParams();
+      $newName = $queryParams['name'];
+      $newDesc = $queryParams['description'];
+    } else {
+      $newName = $request->getHeaderLine('name');
+      $newDesc = $request->getHeaderLine('description');
+    }
 
     if ($folderDao->getFolder($folderId) === null) {
       throw new HttpNotFoundException("Folder id not found!");
@@ -200,8 +214,14 @@ class FolderController extends RestController
   {
     $folderDao = $this->restHelper->getFolderDao();
     $folderId = $args['id'];
-    $newParent = $request->getHeaderLine('parent');
-    $action = strtolower($request->getHeaderLine('action'));
+    if (ApiVersion::getVersion($request) == ApiVersion::V2) {
+      $queryParams = $request->getQueryParams();
+      $newParent = $queryParams['parent'];
+      $action = strtolower($queryParams['action']);
+    } else {
+      $newParent = $request->getHeaderLine('parent');
+      $action = strtolower($request->getHeaderLine('action'));
+    }
 
     if (! is_numeric($newParent) || $newParent < 0) {
       throw new HttpBadRequestException(
