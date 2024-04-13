@@ -62,6 +62,7 @@ class CopyrightController extends RestController
   const TYPE_ECC = 16;
   const TYPE_KEYWORD = 32;
   const TYPE_IPRA = 64;
+  const TYPE_COPYRIGHT_USERFINDINGS = 128;
 
   public function __construct($container)
   {
@@ -81,6 +82,19 @@ class CopyrightController extends RestController
   public function getFileCopyrights($request, $response, $args)
   {
     return $this->getFileCX($request, $response, $args, self::TYPE_COPYRIGHT);
+  }
+
+  /**
+   * Get all user copyright findings for a particular upload-tree
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getFileUserCopyrights($request, $response, $args)
+  {
+    return $this->getFileCX($request, $response, $args, self::TYPE_COPYRIGHT_USERFINDINGS);
   }
 
   /**
@@ -489,6 +503,10 @@ class CopyrightController extends RestController
         $dataType = 'statement';
         $agentArs = 'copyright_ars';
         break;
+      case self::TYPE_COPYRIGHT_USERFINDINGS:
+        $dataType = 'userfindingcopyright';
+        $agentArs = 'copyright_ars';
+        break;
       case self::TYPE_EMAIL:
         $dataType = 'email';
         $agentArs = 'copyright_ars';
@@ -571,9 +589,15 @@ class CopyrightController extends RestController
       }
     }
     $offset = $limit * ($page - 1);
-    list($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->copyrightHist
-      ->getCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName,
-        $agentId, $dataType, 'active', $statusVal, $offset, $limit);
+    if (self::TYPE_COPYRIGHT_USERFINDINGS == $cxType) {
+      list($rows, $iTotalRecords) = $this->copyrightDao
+        ->getUserCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName,
+          $dataType, $statusVal, $offset, $limit);
+    } else {
+      list($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->copyrightHist
+        ->getCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName,
+          $agentId, $dataType, 'active', $statusVal, $offset, $limit);
+    }
     foreach ($rows as $row) {
       $row['count'] = intval($row['copyright_count']);
       unset($row['copyright_count']);
