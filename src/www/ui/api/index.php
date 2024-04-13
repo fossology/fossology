@@ -214,6 +214,7 @@ $app->group('/uploads',
       $app->delete('/copyrights/{hash:.*}', CopyrightController::class . ':deleteFileCopyright');
       $app->patch('/copyrights/{hash:.*}', CopyrightController::class . ':restoreFileCopyright');
       $app->put('/copyrights/{hash:.*}', CopyrightController::class . ':updateFileCopyright');
+      $app->get('/user-copyrights', CopyrightController::class . ':getFileUserCopyrights');
       $app->get('/emails', CopyrightController::class . ':getFileEmail');
       $app->delete('/emails/{hash:.*}', CopyrightController::class . ':deleteFileEmail');
       $app->patch('/emails/{hash:.*}', CopyrightController::class . ':restoreFileEmail');

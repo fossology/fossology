@@ -2601,6 +2601,16 @@ paths:
       requestBody: *cxUpdateBody
       responses: *cxUpdateResponses
 
+  /uploads/{id}/item/{itemId}/user-copyrights:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileUserCopyrights
+      tags:
+        - Copyrights
+      summary: Get the user copyright findings of the mentioned upload tree ID
+      description: Returns the list of user copyright findings associated with the file
+      responses: *cxGetResponses
+
   /uploads/{id}/item/{itemId}/emails:
     parameters: *cxGetParams
     get:
