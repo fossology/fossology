@@ -96,6 +96,11 @@ class ObligationsGetter
     $bulkHistory = $this->clearingDao->getBulkHistory($parentTreeBounds, $groupId, false);
     $licenseId = [];
     if (!empty($bulkHistory)) {
+      foreach ($bulkHistory as $key => $value) {
+        if (empty($value['id'])) {
+          unset($bulkHistory[$key]);
+        }
+      }
       $licenseLists = array_column($bulkHistory, 'addedLicenses');
       $allLicenses = array();
       foreach ($licenseLists as $licenseList) {
