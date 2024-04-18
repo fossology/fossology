@@ -11,6 +11,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Data\Package\ComponentType;
@@ -277,16 +278,18 @@ class ui_report_conf extends FO_Plugin
     $groupedObligations = array();
     foreach ($allObligations as $obligations) {
       $groupBy = $obligations['ob_topic'];
+      $licenseName = LicenseRef::convertToSpdxId($obligations['rf_shortname'],
+        $obligations['rf_spdx_id']);
       if (array_key_exists($groupBy, $groupedObligations)) {
         $currentLicenses = &$groupedObligations[$groupBy]['license'];
-        if (!in_array($obligations['rf_shortname'], $currentLicenses)) {
-          $currentLicenses[] = $obligations['rf_shortname'];
+        if (!in_array($licenseName, $currentLicenses)) {
+          $currentLicenses[] = $licenseName;
         }
       } else {
         $groupedObligations[$groupBy] = array(
          "topic" => $obligations['ob_topic'],
          "text" => $obligations['ob_text'],
-         "license" => array($obligations['rf_shortname'])
+         "license" => array($licenseName)
         );
       }
     }
