@@ -21,14 +21,14 @@ interface ImportSource
   public function parse();
 
   /**
-   * @param $fileid
+   * @param $fileId
    * @return array
    */
-  public function getHashesMap($fileid);
+  public function getHashesMap($fileId);
 
   /**
    * @param $fileid
-   * @return array
+   * @return array|ReportImportData
    */
   public function getDataForFile($fileid);
 }

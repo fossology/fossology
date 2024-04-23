@@ -9,6 +9,7 @@ namespace Fossology\ReportImport;
 
 
 use Symfony\Component\DependencyInjection\SimpleXMLElement;
+
 require_once 'ImportSource.php';
 
 class XmlImportSource implements ImportSource
@@ -130,10 +131,10 @@ class XmlImportSource implements ImportSource
   }
 
   /**
-   * @param $fileid
+   * @param $fileId
    * @return array
    */
-  public function getHashesMap($fileid)
+  public function getHashesMap($fileId)
   {
     return array();
   }
