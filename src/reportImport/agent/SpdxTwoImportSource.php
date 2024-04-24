@@ -302,7 +302,8 @@ class SpdxTwoImportSource implements ImportSource
         return array($item);
       }
     }
-    elseif ($this->isPropertyOfType($license, 'License'))
+    elseif ($this->isPropertyOfType($license, 'License') ||
+            $this->isPropertyOfType($license, 'ListedLicense'))
     {
       $licenseId = $this->stripLicenseRefPrefix($this->getValue($license,'licenseId'));
       $item = new ReportImportDataItem($licenseId);
