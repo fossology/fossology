@@ -139,6 +139,10 @@ class ReportImportSink
     $licenseShortName = $dataItem->getLicenseId();
     if ($this->configuration->shouldMatchLicenseNameWithSPDX()) {
       $license = $this->licenseDao->getLicenseBySpdxId($licenseShortName, $groupId);
+      if ($license == null) {
+        echo "WARNING: Can not match by SPDX ID, trying Shortname=\"$licenseShortName\"\n";
+        $license = $this->licenseDao->getLicenseByShortName($licenseShortName, $groupId);
+      }
     } else {
       $license = $this->licenseDao->getLicenseByShortName($licenseShortName, $groupId);
     }
