@@ -65,7 +65,7 @@ class LicenseCsvExport
    * @param int $rf Set the license ID to get only one license, set 0 to get all
    * @return string csv
    */
-  public function createCsv($rf=0, $allCandidates=false)
+  public function createCsv($rf=0, $allCandidates=false, $generateJson=false)
   {
     $forAllCandidates = "WHERE marydone = true";
     if ($allCandidates) {
@@ -80,9 +80,9 @@ SELECT DISTINCT ON(rf_pk) * FROM
   ONLY license_ref
   NATURAL FULL JOIN marydoneCand)
 SELECT
-  rf.rf_shortname, rf.rf_fullname, rf.rf_spdx_id, rf.rf_text,
-  rc.rf_shortname parent_shortname, rr.rf_shortname report_shortname, rf.rf_url,
-  rf.rf_notes, rf.rf_source, rf.rf_risk, gp.group_name,
+  rf.rf_shortname AS shortname, rf.rf_fullname AS fullname, rf.rf_spdx_id AS spdx_id, rf.rf_text AS text,
+  rc.rf_shortname parent_shortname, rr.rf_shortname report_shortname, rf.rf_url AS url,
+  rf.rf_notes AS notes, rf.rf_source AS source, rf.rf_risk AS risk, gp.group_name AS group,
   string_agg(ob_topic, ', ') obligations
 FROM allLicenses AS rf
   LEFT OUTER JOIN obligation_map om ON om.rf_fk = rf.rf_pk
@@ -109,24 +109,28 @@ WHERE rf.rf_detector_type=$1";
       $vars = $this->dbManager->fetchAll( $res );
       $this->dbManager->freeResult($res);
     }
-    $out = fopen('php://output', 'w');
-    ob_start();
-    $head = array(
-      'shortname', 'fullname', 'spdx_id', 'text', 'parent_shortname',
-      'report_shortname', 'url', 'notes', 'source', 'risk', 'group',
-      'obligations');
-    fputs($out, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
-    fputcsv($out, $head, $this->delimiter, $this->enclosure);
-    foreach ($vars as $row) {
-      $row['rf_spdx_id'] = LicenseRef::convertToSpdxId($row['rf_shortname'],
-        $row['rf_spdx_id']);
-      if (strlen($row['rf_text']) > LicenseMap::MAX_CHAR_LIMIT) {
-        $row['rf_text'] = LicenseMap::TEXT_MAX_CHAR_LIMIT;
+    if ($generateJson) {
+      return json_encode($vars, JSON_PRETTY_PRINT);
+    } else {
+      $out = fopen('php://output', 'w');
+      ob_start();
+      $head = array(
+        'shortname', 'fullname', 'spdx_id', 'text', 'parent_shortname',
+        'report_shortname', 'url', 'notes', 'source', 'risk', 'group',
+        'obligations');
+      fputs($out, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+      fputcsv($out, $head, $this->delimiter, $this->enclosure);
+      foreach ($vars as $row) {
+        $row['spdx_id'] = LicenseRef::convertToSpdxId($row['shortname'],
+          $row['spdx_id']);
+        if (strlen($row['text']) > LicenseMap::MAX_CHAR_LIMIT) {
+          $row['text'] = LicenseMap::TEXT_MAX_CHAR_LIMIT;
+        }
+        fputcsv($out, $row, $this->delimiter, $this->enclosure);
       }
-      fputcsv($out, $row, $this->delimiter, $this->enclosure);
+      $content = ob_get_contents();
+      ob_end_clean();
+      return $content;
     }
-    $content = ob_get_contents();
-    ob_end_clean();
-    return $content;
   }
 }
