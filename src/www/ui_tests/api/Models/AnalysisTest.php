@@ -54,10 +54,10 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
    */
   private function testSetUsingArray($version)
   {
-    if($version==ApiVersion::V1){
+    if ($version == ApiVersion::V2) {
       $analysisArray = [
         "bucket" => true,
-        "copyright_email_author" => "true",
+        "copyrightEmailAuthor" => "true",
         "ecc" => 1,
         "keyword" => (1==1),
         "mime" => false,
@@ -65,10 +65,10 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
         "nomos" => 0,
         "ojo" => (1==2)
       ];
-    } else{
+    } else {
       $analysisArray = [
         "bucket" => true,
-        "copyrightEmailAuthor" => "true",
+        "copyright_email_author" => "true",
         "ecc" => 1,
         "keyword" => (1==1),
         "mime" => false,
@@ -147,10 +147,10 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
    */
   private function testDataFormat($version)
   {
-    if($version==ApiVersion::V1){
+    if($version==ApiVersion::V2){
       $expectedArray = [
         "bucket"    => true,
-        "copyright_email_author" => true,
+        "copyrightEmailAuthor" => true,
         "ecc"       => false,
         "keyword"   => false,
         "mimetype"  => true,
@@ -163,7 +163,7 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
     } else{
       $expectedArray = [
         "bucket"    => true,
-        "copyrightEmailAuthor" => true,
+        "copyright_email_author" => true,
         "ecc"       => false,
         "keyword"   => false,
         "mimetype"  => true,
