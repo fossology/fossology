@@ -26,7 +26,7 @@ class ReportImportDataItem
 
   public function setCustomText($customText)
   {
-    $this->customText = $customText;
+    $this->customText = trim($customText);
     return $this;
   }
 
@@ -34,9 +34,10 @@ class ReportImportDataItem
    * @param $name
    * @param $text
    * @param bool $spdxCompatible
+   * @param string $url
    * @return $this
    */
-  public function setLicenseCandidate($name, $text, $spdxCompatible)
+  public function setLicenseCandidate($name, $text, $spdxCompatible, $url = "")
   {
     $spdxCompatible = $spdxCompatible == true;
     $this->licenseCandidate = new License(
@@ -44,8 +45,8 @@ class ReportImportDataItem
       $this->licenseId,
       $name,
       "",
-      $text,
-      "", // TODO: $this->getValue($license,'seeAlso'),
+      trim($text),
+      $url,
       "", // TODO
       $spdxCompatible);
     return $this;
