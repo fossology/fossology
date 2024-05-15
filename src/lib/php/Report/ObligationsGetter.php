@@ -79,8 +79,8 @@ class ObligationsGetter
         $whiteLists[] = $license->getSpdxId();
       }
     }
-    $newobligations = $this->groupObligations($obligations, $uploadId);
-    return array($newobligations, $whiteLists);
+    list($newobligations, $newWhiteList) = $this->groupObligations($obligations, $uploadId);
+    return array($newobligations, array_unique(array_merge($whiteLists, $newWhiteList)));
   }
 
   /**
@@ -124,6 +124,7 @@ class ObligationsGetter
   function groupObligations($obligations, $uploadId)
   {
     $groupedOb = array();
+    $whiteList = [];
     $row = $this->uploadDao->getReportInfo($uploadId);
     $excludedObligations = (array) json_decode($row['ri_excluded_obligations'], true);
     foreach ($obligations as $obligation ) {
@@ -151,9 +152,19 @@ class ObligationsGetter
           );
           $groupedOb[$groupBy] = $singleOb;
         }
+      } else {
+        if (!in_array($licenseName, $whiteList)) {
+          $whiteList[] = $licenseName;
+        }
       }
     }
-    return $groupedOb;
+
+    // Make sure whitelist contains only licenses which are not in any
+    // obligations
+    foreach ($groupedOb as $obli) {
+      $whiteList = array_diff($whiteList, $obli['license']);
+    }
+    return [$groupedOb, $whiteList];
   }
 
   /**
