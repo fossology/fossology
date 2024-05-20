@@ -153,7 +153,6 @@ int main (int argc, char *argv[])
   int  c;
   int  listProj=0, listFolder=0;
   long delUpload=0, delFolder=0, delFolderParent=0;
-  int  scheduler=0; /* should it run from the scheduler? */
   int  gotArg=0;
   char *agentDesc = "Deletes upload.  Other list/delete options available from the command line.";
   char *commitHash;
@@ -202,7 +201,7 @@ int main (int argc, char *argv[])
         gotArg=1;
         break;
       case 's':
-        scheduler=1;
+        Scheduler=1;
         gotArg=1;
         break;
       case 'T':
@@ -238,7 +237,7 @@ int main (int argc, char *argv[])
     exitNow(-1);
   }
 
-  if (scheduler != 1)
+  if (Scheduler != 1)
   {
     if (0 != authentication(userName, password, &userId, &userPerm))
     {

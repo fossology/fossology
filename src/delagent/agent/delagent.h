@@ -32,6 +32,11 @@ extern int Verbose;
  * Set if working in test mode else 0
  */
 extern int Test;
+/**
+ * \var int Scheduler
+ * Set if working in scheduler mode else 0
+ */
+extern int Scheduler;
 
 /* for DB */
 extern PGconn* pgConn;
