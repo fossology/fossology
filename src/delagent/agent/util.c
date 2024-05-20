@@ -18,6 +18,7 @@
 
 int Verbose = 0;
 int Test = 0;
+int Scheduler = 0;
 PGconn* pgConn = NULL;        // the connection to Database
 
 /**
@@ -41,7 +42,8 @@ int printfInCaseOfVerbosity (const char *format, ...)
 }
 
 /**
- * \brief simple wrapper which includes PQexec and fo_checkPQcommand
+ * \brief simple wrapper which includes PQexec and fo_checkPQcommand for queries
+ *        without result
  * \param desc description for the SQL command, else NULL
  * \param SQL  SQL command executed
  * \param file source file name
@@ -64,6 +66,37 @@ PGresult * PQexecCheck(const char *desc, char *SQL, char *file, const int line)
 
   result = PQexec(pgConn, SQL);
   if (fo_checkPQcommand(pgConn, result, SQL, file, line))
+  {
+    exitNow(-1);
+  }
+  return result;
+}
+
+/**
+ * \brief simple wrapper which includes PQexec and fo_checkPQresult for queries
+ *        with result
+ * \param desc description for the SQL command, else NULL
+ * \param SQL  SQL command executed
+ * \param file source file name
+ * \param line source line number
+ * \return PQexec query result
+ * \see PQexec()
+ */
+PGresult * PQexecCheckResult(const char *desc, char *SQL, char *file, const int line)
+{
+  PGresult *result;
+
+  if(desc == NULL)
+  {
+    printfInCaseOfVerbosity("# %s:%i: %s\n", file, line, SQL);
+  }
+  else
+  {
+    printfInCaseOfVerbosity("# %s:%i: %s (%s)\n", file, line, desc, SQL);
+  }
+
+  result = PQexec(pgConn, SQL);
+  if (fo_checkPQresult(pgConn, result, SQL, file, line))
   {
     exitNow(-1);
   }
@@ -333,8 +366,10 @@ int deleteUpload (long uploadId, int userId, int userPerm)
   /* Now to delete the actual pfiles from the repository before remove the DB. */
   /* Get the file listing -- needed for deleting pfiles from the repository. */
   snprintf(SQL,MAXSQL,"SELECT pfile FROM %s ORDER BY pfile_pk;",tempTable);
-  pfileResult = PQexec(pgConn, SQL);
-  if (fo_checkPQresult(pgConn, pfileResult, SQL, __FILE__, __LINE__)) {
+  pfileResult = PQexecCheckResult("Get pfiles to delete from repo", SQL,
+                                  __FILE__, __LINE__);
+  if (fo_checkPQresult(pgConn, pfileResult, SQL, __FILE__, __LINE__))
+  {
     return -1;
   }
 
@@ -356,7 +391,10 @@ int deleteUpload (long uploadId, int userId, int userPerm)
           fo_RepRemove("gold",S);
         }
       }
-      fo_scheduler_heart(1);
+      if (Scheduler == 1)
+      {
+        fo_scheduler_heart(1);
+      }
     }
   }
   PQclear(pfileResult);
@@ -384,14 +422,20 @@ int deleteUpload (long uploadId, int userId, int userPerm)
 
   char uploadtree_tablename[1000];
   snprintf(SQL,MAXSQL,"SELECT uploadtree_tablename FROM upload WHERE upload_pk = %ld;",uploadId);
-  result = PQexec(pgConn, SQL);
+  result = PQexecCheckResult("Get uploadtree table name", SQL, __FILE__,
+                             __LINE__);
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) {
     return -1;
   }
   if (PQntuples(result)) {
     strcpy(uploadtree_tablename, PQgetvalue(result, 0, 0));
-    PQclear(result);
   }
+  else
+  {
+    // This should never happen, but upload table does not contain uploadId
+    strcpy(uploadtree_tablename, "uploadtree");
+  }
+  PQclear(result);
 
   printfInCaseOfVerbosity("Deleting local license decisions for upload %ld\n",
     uploadId);
@@ -442,7 +486,9 @@ int deleteUpload (long uploadId, int userId, int userPerm)
   PQexecCheckClear("Deleting from uploadtree", SQL, __FILE__, __LINE__);
 
   /* Delete uploadtree_nnn table */
-  if (strcasecmp(uploadtree_tablename,"uploadtree_a")) {
+  if (strcasecmp(uploadtree_tablename, "uploadtree_a") != 0 &&
+    strcasecmp(uploadtree_tablename, "uploadtree") != 0)
+  {
     snprintf(SQL,MAXSQL,"DROP TABLE %s;", uploadtree_tablename);
     PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
   }
