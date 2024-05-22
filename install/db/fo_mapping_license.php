@@ -526,17 +526,26 @@ function update_license($old_rf_pk, $new_rf_pk)
 {
   global $PG_CONN;
 
+  $updateTables = array(
+    "clearing_event",
+    "license_file",
+    "license_set_bulk",
+    "upload_clearing_license"
+  );
+
   /** transaction begin */
   $sql = "BEGIN;";
   $result_begin = pg_query($PG_CONN, $sql);
   DBCheckResult($result_begin, $sql, __FILE__, __LINE__);
   pg_free_result($result_begin);
 
-  /* Update license_file table, substituting the old_rf_id  with the new_rf_id */
-  $sql = "update license_file set rf_fk = $new_rf_pk where rf_fk = $old_rf_pk;";
-  $result_license_file = pg_query($PG_CONN, $sql);
-  DBCheckResult($result_license_file, $sql, __FILE__, __LINE__);
-  pg_free_result($result_license_file);
+  /* Update all relevant tables, substituting the old_rf_id with the new_rf_id */
+  foreach ($updateTables as $table) {
+    $sql = "update $table set rf_fk = $new_rf_pk where rf_fk = $old_rf_pk;";
+    $result_license_file = pg_query($PG_CONN, $sql);
+    DBCheckResult($result_license_file, $sql, __FILE__, __LINE__);
+    pg_free_result($result_license_file);
+  }
 
   /* Check if license_file_audit table exists */
   $sql = "select count(tablename) from pg_tables where tablename like 'license_file_audit';";
