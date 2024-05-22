@@ -82,7 +82,7 @@ x-reuse:
     - name: limit
       description: Limits of responses per request
       required: false
-      in: header
+      in: query
       schema:
         type: integer
         default: 100
@@ -91,7 +91,7 @@ x-reuse:
     - name: page
       description: Page number for responses
       required: false
-      in: header
+      in: query
       schema:
         type: integer
         default: 1
@@ -2178,7 +2178,7 @@ paths:
       parameters:
         - name: groupName
           description: The group name to chose while performing search
-          in: header
+          in: query
           required: false
           schema:
             type: string
@@ -2187,7 +2187,7 @@ paths:
           # use 'allfiles', if not given
           required: false
           description: Limit search to
-          in: header
+          in: query
           schema:
             type: string
             enum:
@@ -2196,7 +2196,7 @@ paths:
               - allfiles
             default: allfiles
         - name: uploadId
-          in: header
+          in: query
           required: false
           description: Id of the upload to search files into
           schema:
@@ -2204,19 +2204,19 @@ paths:
         - name: filename
           description: Filename to find, can contain % as wild-card
           required: false
-          in: header
+          in: query
           schema:
             type: string
         - name: tag
           description: Tag to find
           required: false
-          in: header
+          in: query
           schema:
             type: string
         - name: page
           description: Page number (starts from 1)
           required: false
-          in: header
+          in: query
           schema:
             type: integer
             default: 1
@@ -2224,7 +2224,7 @@ paths:
         - name: limit
           description: Limits of responses per request
           required: false
-          in: header
+          in: query
           schema:
             type: integer
             default: 50
@@ -2233,27 +2233,27 @@ paths:
         - name: filesizemin
           description: Min filesize in bytes
           required: false
-          in: header
+          in: query
           schema:
             type: integer
             minimum: 0
         - name: filesizemax
           description: Max filesize in bytes
           required: false
-          in: header
+          in: query
           schema:
             type: integer
             minimum: 0
         - name: license
           description: License search filter
           required: false
-          in: header
+          in: query
           schema:
             type: string
         - name: copyright
           description: Copyright search filter
           required: false
-          in: header
+          in: query
           schema:
             type: string
       responses:
@@ -5831,13 +5831,13 @@ components:
         label:
           description: field label
           type: string
-        group_name:
+        groupName:
           description: group name for the field
           type: string
-        group_order:
+        groupOrder:
           description: group order of the field
           type: integer
-        option_value:
+        optionValue:
           description: If type is 'dropdown', provide options in format op1{val1}|op2{val2}|...
           type: string
     Group:
