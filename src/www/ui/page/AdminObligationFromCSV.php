@@ -11,6 +11,7 @@ namespace Fossology\UI\Page;
 use Fossology\Lib\Application\LicenseCsvImport;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\UI\Api\Models\ApiVersion;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +24,7 @@ class AdminObligationFromCSV extends DefaultPlugin
   const NAME = "admin_obligation_from_csv";
   const KEY_UPLOAD_MAX_FILESIZE = 'upload_max_filesize';
   const FILE_INPUT_NAME = 'file_input';
+  const FILE_INPUT_NAME_V2 = 'fileInput';
 
   function __construct()
   {
@@ -93,9 +95,13 @@ class AdminObligationFromCSV extends DefaultPlugin
   /**
    * @return string
    */
-  public function getFileInputName()
+  public function getFileInputName($apiVersion = ApiVersion::V1)
   {
-    return $this::FILE_INPUT_NAME;
+    if ($apiVersion == ApiVersion::V2) {
+      return $this::FILE_INPUT_NAME_V2;
+    } else {
+      return $this::FILE_INPUT_NAME;
+    }
   }
 }
 

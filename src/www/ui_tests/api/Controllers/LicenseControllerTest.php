@@ -28,6 +28,7 @@ use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\License;
 use Fossology\UI\Api\Models\Obligation;
 use Mockery as M;
@@ -896,11 +897,13 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testGetCandidates()
   {
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $this->licenseCandidatePlugin->shouldReceive('getCandidateArrayData')->andReturn([]);
 
     $expectedResponse = (new ResponseHelper())->withJson([], 200);
-    $actualResponse = $this->licenseController->getCandidates(null,
+    $actualResponse = $this->licenseController->getCandidates($request,
       new ResponseHelper(), null);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
@@ -914,12 +917,14 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    * -# Check if status is 403
    */
   public function testGetCandidatesNoAdmin()
-  {
+  { 
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_READ;
 
     $this->expectException(HttpForbiddenException::class);
 
-    $this->licenseController->getCandidates(null,
+    $this->licenseController->getCandidates($request,
       new ResponseHelper(), null);
   }
 }

@@ -21,6 +21,7 @@ use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\Obligation;
+use Fossology\UI\Api\Models\ApiVersion;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\StreamFactory;
 
@@ -48,11 +49,12 @@ class ObligationController extends RestController
    */
   function obligationsList($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $finVal = [];
     $listVal = $this->obligationMap->getObligations();
     foreach ($listVal as $val) {
       $row['id'] = intval($val['ob_pk']);
-      $row['obligation_topic'] = $val['ob_topic'];
+      $row[$apiVersion == ApiVersion::V2 ? 'obligationTopic' : 'obligation_topic'] = $val['ob_topic'];
       $finVal[] = $row;
     }
     return $response->withJson($finVal, 200);
@@ -149,12 +151,13 @@ class ObligationController extends RestController
   public function importObligationsFromCSV($request, $response, $args)
   {
     $this->throwNotAdminException();
+    $apiVersion = ApiVersion::getVersion($request);
 
     $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
     /** @var \Fossology\UI\Page\AdminObligationFromCSV $adminLicenseObligationFromCsv */
     $adminLicenseObligationFromCsv = $this->restHelper->getPlugin('admin_obligation_from_csv');
 
-    $uploadedFile = $symReq->files->get($adminLicenseObligationFromCsv->getFileInputName(),
+    $uploadedFile = $symReq->files->get($adminLicenseObligationFromCsv->getFileInputName($apiVersion),
       null);
 
     $requestBody = $this->getParsedBody($request);
