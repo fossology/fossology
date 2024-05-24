@@ -134,8 +134,7 @@ class ReportUtils
     foreach ($rows as $row) {
       $reportedLicenseId = $this->licenseMap->getProjectedId($row['rf_fk']);
       $foundLicense = $this->licenseDao->getLicenseById($reportedLicenseId);
-      if ($foundLicense !== null && $foundLicense->getShortName() != 'Void' &&
-          $foundLicense->getShortName() != 'No_license_found') {
+      if ($foundLicense !== null && $foundLicense->getShortName() != 'Void') {
         $reportLicId =  "$reportedLicenseId-" . md5($foundLicense->getText());
         $listedLicense = !StringOperation::stringStartsWith(
           $foundLicense->getSpdxId(), LicenseRef::SPDXREF_PREFIX);
@@ -143,7 +142,11 @@ class ReportUtils
         if (!array_key_exists($row['uploadtree_pk'], $filesWithLicenses)) {
           $filesWithLicenses[$row['uploadtree_pk']] = new FileNode();
         }
-        $filesWithLicenses[$row['uploadtree_pk']]->addScanner($reportLicId);
+        if ($foundLicense->getShortName() != 'No_license_found') {
+          $filesWithLicenses[$row['uploadtree_pk']]->addScanner($reportLicId);
+        } else {
+          $filesWithLicenses[$row['uploadtree_pk']]->addScanner("");
+        }
         if (!array_key_exists($reportLicId, $licensesInDocument)) {
           $licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
             ->setLicenseObj($foundLicense)
