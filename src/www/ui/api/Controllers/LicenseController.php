@@ -354,7 +354,6 @@ class LicenseController extends RestController
 
   /**
    * Check if the given shortname already exists in DB.
-   *
    * @param string  $shortName Shortname to check
    * @param integer $groupId   Group ID if candidate license
    */
@@ -482,7 +481,6 @@ class LicenseController extends RestController
     $apiVersion = ApiVersion::getVersion($request);
     $this->throwNotAdminException();
     $rawData = $this->adminLicenseAckDao->getAllAcknowledgements();
-
     $acknowledgements = [];
     foreach ($rawData as $ack) {
         $acknowledgements[] = new AdminAcknowledgement(intval($ack['la_pk']), $ack['name'], $ack['acknowledgement'], $ack['is_enabled'] == "t");

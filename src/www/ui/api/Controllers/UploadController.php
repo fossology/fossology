@@ -329,6 +329,7 @@ class UploadController extends RestController
     $this->isAdj2nestDone($id);
     $uploadHelper = new UploadHelper();
     $uploadSummary = $uploadHelper->generateUploadSummary($id, $this->restHelper->getGroupId());
+
     $browseLicense = $this->restHelper->getPlugin('license');
     $uploadDao = $this->restHelper->getUploadDao();
     $uploadTreeTableName = $uploadDao->getUploadtreeTableName($id);
@@ -338,6 +339,7 @@ class UploadController extends RestController
     $scanJobProxy->createAgentStatus($scannerAgents);
     $selectedAgentIds = empty($selectedAgentId) ? $scanJobProxy->getLatestSuccessfulAgentIds() : $selectedAgentId;
     $res = $browseLicense->createLicenseHistogram("", "", $itemTreeBounds, $selectedAgentIds, $this->restHelper->getGroupId());
+
     $uploadSummary->setUniqueConcludedLicenses($res['editedUniqueLicenseCount']);
     $uploadSummary->setTotalConcludedLicenses($res['editedLicenseCount']);
     $uploadSummary->setTotalLicenses($res['scannerLicenseCount']);
@@ -1125,7 +1127,7 @@ class UploadController extends RestController
       if (count($item['successfulAgents']) > 0) {
         $item['isAgentRunning'] = false;
       } else {
-        $item['currentAgentId'] = $agentDao->getCurrentAgentRef($item["agentName"])->getAgentId();
+        $item['currentAgentId'] = $agentDao->getCurrentAgentRef($item["agentName"])->getCurrentAgentId();
         $item['currentAgentRev'] = "";
       }
       foreach ($item['successfulAgents'] as &$agent) {
