@@ -345,7 +345,7 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->withArgs([$upload_pk, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $upload_pk])->andReturn(true);
-      $this->dbHelper->shouldReceive('doesIdExist')
+      $this->dbHelper->shouldReceive( 'doesIdExist')
         ->withArgs(["uploadtree", "uploadtree_pk", $item_pk])->andReturn(true);
 
       $this->viewLicensePlugin->shouldReceive('updateLastItem')->withArgs([2, 2, $item_pk, $item_pk]);

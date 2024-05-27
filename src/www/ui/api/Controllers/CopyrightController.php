@@ -18,6 +18,7 @@ use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\ApiVersion;
 use Psr\Http\Message\ServerRequestInterface;
 
 
@@ -66,7 +67,7 @@ class CopyrightController extends RestController
   {
     parent::__construct($container);
     $this->copyrightDao = $this->container->get('dao.copyright');
-    $this->copyrightHist = $this->restHelper->getPlugin('ajax-copyright-hist');
+    $this->copyrightHist = $this->restHelper->getPlugin('ajax_copyright_hist');
   }
 
   /**
@@ -516,10 +517,15 @@ class CopyrightController extends RestController
         $dataType = 'statement';
         $agentArs = 'copyright_ars';
     }
+    $apiVersion = ApiVersion::getVersion($request);
     $uploadPk = $args["id"];
     $uploadTreeId = $args["itemId"];
     $query = $request->getQueryParams();
-    $limit = $request->getHeaderLine(self::LIMIT_PARAM);
+    if ($apiVersion == ApiVersion::V2) {
+      $limit = $query[self::LIMIT_PARAM] ?? "";
+    } else {
+      $limit = $request->getHeaderLine(self::LIMIT_PARAM);
+    }
     $finalVal = [];
     if (!empty($limit)) {
       $limit = filter_var($limit, FILTER_VALIDATE_INT);
@@ -549,7 +555,11 @@ class CopyrightController extends RestController
 
     $agentId = $this->copyrightHist->getAgentId($uploadPk, $agentArs);
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk);
-    $page = $request->getHeaderLine(self::PAGE_PARAM);
+    if ($apiVersion == ApiVersion::V2) {
+      $page = $query[self::PAGE_PARAM] ?? "";
+    } else {
+      $page = $request->getHeaderLine(self::PAGE_PARAM);
+    }
     if (empty($page) && $page != "0") {
       $page = 1;
     }
@@ -564,6 +574,7 @@ class CopyrightController extends RestController
     list($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->copyrightHist
       ->getCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName,
         $agentId, $dataType, 'active', $statusVal, $offset, $limit);
+
     foreach ($rows as $row) {
       $row['count'] = intval($row['copyright_count']);
       unset($row['copyright_count']);
@@ -597,6 +608,8 @@ class CopyrightController extends RestController
     $copyrightHash = $args['hash'];
     $userId = $this->restHelper->getUserId();
     $cpTable = $this->copyrightHist->getTableName($dataType);
+
+    echo $uploadTreeId;
 
     $this->uploadAccessible($uploadPk);
     $this->isItemExists($uploadPk, $uploadTreeId);

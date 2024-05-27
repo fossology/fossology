@@ -83,11 +83,6 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-
-  /**
-   * @brief Setup test objects
-   * @see PHPUnit_Framework_TestCase::setUp()
-   */
   protected function setUp() : void
   {
     global $container;
