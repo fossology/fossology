@@ -21,6 +21,28 @@ version="2.2.6"
 
 pushd "$( dirname "${BASH_SOURCE[0]}" )/.."
 
+# Line Encoding
+required_utils=("curl" "dos2unix")
+for util in "${required_utils[@]}"; do
+    if ! command -v $util &> /dev/null; then
+        echo "$util is not installed. Attempting to install..."
+        if [[ $EUID -ne 0 ]]; then
+            echo "Unable to install $util Aborting..."
+            exit 1
+        else
+            case $(uname) in
+                Linux) apt-get install -y $util ;;
+                Darwin) brew install $util ;;
+                *) echo "Unsuported OS." ; exit 1 ;;
+            esac
+        fi
+    fi
+done
+
+if grep -qEi "(Microsoft|WSL)" /proc/version; then 
+    find . -type f -print0 | xargs -0 dos2unix
+fi
+
 if [[ $1 == '-h' ]]; then
     cat <<EOF
 This script is used to install composer in version=${version}.
