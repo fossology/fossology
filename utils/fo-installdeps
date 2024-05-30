@@ -107,6 +107,31 @@ CODENAME=$(lsb_release --codename --short)
 
 echo "install core dependencies"
 
+# Darwin
+if [[ $BUILDTIME && "$(uname)" == "Darwin" ]]; then
+   echo "*** Installing buildtime dependencies ***";
+   brew install curl libxml2 icu4c cmake ninja boost postgresql composer
+   brew install mxml cunit libmagic glib libpq cppunit
+
+   case "$CODENAME" in
+       stretch|buster|bullseye|bookworm|sid|focal|jammy)
+           brew install php@7.4
+           brew link --force php@7.4
+           ;;
+       *)
+           echo "ERROR: Unsupported $CODENAME for macOS. Please check available versions."
+           exit 1
+           ;;
+   esac
+
+   # Check if PostgreSQL development headers are needed
+   if ! brew list | grep -q postgresql; then
+       brew install postgresql
+   fi
+
+fi
+
+# wsl & linux 
 if [[ $BUILDTIME ]]; then
    echo "*** Installing $DISTRO buildtime dependencies ***";
    case "$DISTRO" in
@@ -177,6 +202,34 @@ fi
 
 ########################################################################
 
+# Darwin
+if [[ $RUNTIME && "$(uname)" == "Darwin" ]]; then
+    echo "*** Installing runtime dependencies ***"
+    # Basic Homebrew installations
+    brew install httpd php@7.4 postgresql libxml2 p7zip wget git svn unrar libboost
+
+    case "$CODENAME" in
+        stretch|buster|bullseye|bookworm|sid|focal|jammy)
+            # PHP version mapping
+            brew install php@7.4
+            brew link --force php@7.4
+            ;;
+        *)
+            echo "ERROR: Unsupported $CODENAME for macOS. Please check available versions."
+            exit 1
+            ;;
+    esac
+
+    # Service management 
+    brew services start httpd
+    brew services start postgresql
+
+    # Optional: Install Mail Transport Agent for email notifications
+    echo "*** Try 'brew install msmtp' or another preferred MTA ***"
+
+fi
+
+# wsl & linux 
 if [[ $RUNTIME ]]; then
    echo "*** Installing $DISTRO runtime dependencies ***";
    echo "*** For optional email notifications a Mail Transport Agent Must be ***";
