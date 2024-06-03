@@ -1,0 +1,145 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+
+{
+  {% include 'content.twig' %}
+
+  "@graph":[
+    {% if toolVersion is not empty %} 
+    { 
+            "@type": "Tool",
+            "@id": "{{ uri }}#SPDXRef-Actor-{{ toolVersion }}",
+            "creationInfo": {
+                "@type": "CreationInfo",
+                "specVersion": "3.0.0",
+                "created": "{{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}",
+                "createdBy": [
+                "{{ uri }}#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}"
+                ],
+                "profile": ["core", "software", "licensing"],
+                "dataLicense": "https://spdx.org/licenses/{{ licenseList[dataLicense].licenseObj.spdxId|replace({' ': '-'}) }}",
+                "createdUsing": [
+                "{{ uri }}#SPDXRef-Actor-{{ toolVersion }}"
+                ]
+            },
+            "name": "{{ toolVersion }}"
+    },
+    {% endif %}
+    {% if userName is not empty %}
+    {
+            "@type": "Person",
+            "@id": "{{ uri }}#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}",
+            "creationInfo": {
+                "@type": "CreationInfo",
+                "specVersion": "3.0.0",
+                "created": "{{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}",
+                "createdBy": [
+                "{{ uri }}#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}"
+                ],
+                "profile": ["core", "software", "licensing"],
+                "dataLicense": "https://spdx.org/licenses/{{ licenseList[dataLicense].licenseObj.spdxId|replace({' ': '-'}) }}",
+                "createdUsing": [
+                "{{ uri }}#SPDXRef-Actor-{{ toolVersion }}"
+                ]
+            },
+            "name": "{{ userName | split(' ')[0] }}",
+            "externalIdentifier": [
+                {
+                "@type": "ExternalIdentifier",
+                "externalIdentifierType": "email",
+                "identifier": "{{ userName | split(' (')[1] | split(')')[0]}}"
+                }
+            ]
+      
+    },
+    {% endif %}
+    {% if organization is not empty %}
+    {
+      
+            "@type": "Organization",
+            "@id": "{{ uri }}#SPDXRef-Actor-{{ organization }}",
+            "creationInfo": {
+                "@type": "CreationInfo",
+                "specVersion": "3.0.0",
+                "created": "{{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}",
+                "createdBy": [
+                "{{ uri }}#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}"
+                ],
+                "profile": ["core", "software", "licensing"],
+                "dataLicense": "https://spdx.org/licenses/{{ licenseList[dataLicense].licenseObj.spdxId|replace({' ': '-'}) }}",
+                "createdUsing": [
+                "{{ uri }}#SPDXRef-Actor-{{ toolVersion }}"
+                ]
+            },
+            "name": "{{ userName | split(' ')[0] }}",
+            "externalIdentifier": [
+                {
+                "@type": "ExternalIdentifier",
+                "externalIdentifierType": "email",
+                "identifier": "{{ userName | split(' ')[1] }}"
+                }
+            ]
+    },
+    {% endif %}
+
+    {
+    "@type": "SpdxDocument",
+    "@id": "{{ uri }}#SPDXRef-DOCUMENT",
+    "creationInfo": {
+        "@type": "CreationInfo",
+        "specVersion": "3.0.0",
+        "created": "{{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}",
+        "createdBy": [
+        "{{ uri }}#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}"
+        ],
+        "profile": ["core", "software", "licensing"],
+        "dataLicense": "https://spdx.org/licenses/{{ licenseList[dataLicense].licenseObj.spdxId|replace({' ': '-'}) }}",
+        "createdUsing": [
+        "{{ uri }}#SPDXRef-Actor-{{ toolVersion }}"
+        ]
+    },
+    "name": "{{ documentName }}",
+    "element": [
+        "{{ uri }}#SPDXRef-Actor-{{ toolVersion }}",
+        "{{ uri }}#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}",
+        {% for packageId in packageIds%}
+        "{{ uri }}#SPDXRef-upload{{ packageId }}",
+        {% endfor %}
+        {% for fileId in fileIds%}
+        "{{ uri }}#SPDXRef-item{{ fileId }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ],
+    "rootElement": [
+        {% for packageId in packageIds%}
+        "{{ uri }}#SPDXRef-upload{{ packageId }}"
+        {% endfor %}
+    ]
+    },
+    {{packageNodes}}
+    {
+    "@type": "Relationship",
+    "@id": "{{ uri }}#SPDXRef-Relationship-0",
+    "from": "{{ uri }}#SPDXRef-DOCUMENT",
+    "to": [
+        {% for packageId in packageIds%}
+        "{{ uri }}#SPDXRef-upload{{ packageId }}"
+        {% endfor %}
+    ],
+    "relationshipType": "describes"
+    },
+    {
+    "@type": "Relationship",
+    "@id": "{{ uri }}#SPDXRef-Relationship-{{ fileIds | length }}",
+    "from":{% for packageId in packageIds%}"{{ uri }}#SPDXRef-upload{{ packageId }}",{% endfor %}
+    "to": [
+        {% for fileId in fileIds%}
+        "{{ uri }}#SPDXRef-item{{ fileId }}"
+        {% if not loop.last %},{% endif %}
+        {% endfor %}
+    ],
+    "relationshipType": "contains"
+    }
+  ]
+}

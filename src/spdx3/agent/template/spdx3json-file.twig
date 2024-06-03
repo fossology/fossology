@@ -1,0 +1,30 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+
+{
+  "@type": "File",
+  "@id": "{{ uri }}#SPDXRef-item{{ fileId }}",
+  "name": "{{ fileName }}",
+  "verifiedUsing": [
+    {
+      "@type": "Hash",
+      "algorithm": "sha1",
+      "hashValue": "{{ sha1 | lower }}"
+    },
+    {
+      "@type": "Hash",
+      "algorithm": "sha256",
+      "hashValue": "{{ sha256 | lower }}"
+    },
+    {
+      "@type": "Hash",
+      "algorithm": "md5",
+      "hashValue": "{{ md5 | lower }}"
+    }
+  ],
+  "copyrightText": "<text> {{ fileData.copyrights|join('')
+  |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+  |replace({'\f':'','"':"'"}) }} </text>"
+},
