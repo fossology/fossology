@@ -157,6 +157,62 @@ class Scanners:
       return copyright_list
     return False
 
+  def get_copyright_whole(self, all_results: bool = False) \
+      -> Union[List[ScanResult], bool]:
+    """
+    Get the formatted results from copyright scanner
+
+    :param all_results: Get all results even excluded files?
+    :type all_results: bool
+    :return: list of findings
+    :rtype: list[ScanResult]
+    """
+    copyright_results = self.__get_copyright_results()
+    copyright_list = list()
+    for result in copyright_results:
+      path = self.__normalize_path(result['file'])
+      if self.cli_options.repo is True and all_results is False and \
+          self.is_excluded_path(path) is True:
+        continue
+      if result['results'] is not None and result['results'] != "Unable to " \
+                                                                "read file":
+        # contents = set() # Giving error with set
+        contents = list()
+
+        for finding in result['results']:
+          if finding is not None and finding['type'] == "statement":
+            contents.append(finding)
+        if len(contents) > 0:
+          copyright_list.append(ScanResult(path, result['file'], contents))
+    if len(copyright_list) > 0:
+      return copyright_list
+    return False
+
+  def get_keyword_whole(self) -> Union[List[ScanResult], bool]:
+    """
+    Get the formatted results from keyword scanner
+
+    :return: list of findings
+    """
+    keyword_results = self.__get_keyword_results()
+    keyword_list = list()
+    for result in keyword_results:
+      path = self.__normalize_path(result['file'])
+      if self.cli_options.repo is True and self.is_excluded_path(path) is \
+          True:
+        continue
+      if result['results'] is not None and result['results'] != "Unable to " \
+                                                                "read file":
+        contents = list()
+        for finding in result['results']:
+          if finding is not None:
+            contents.append(finding)
+        if len(contents) > 0:
+          keyword_list.append(ScanResult(path, result['file'], contents))
+    if len(keyword_list) > 0:
+      return keyword_list
+    return False
+  
   def get_keyword_list(self) -> Union[List[ScanResult], bool]:
     """
     Get the formatted results from keyword scanner

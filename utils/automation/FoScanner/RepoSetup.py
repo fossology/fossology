@@ -111,7 +111,7 @@ class RepoSetup:
     else:
       changes = change_response
 
-    remove_diff_regex = re.compile(r"^([ +-])(.*)$", re.MULTILINE)
+    # remove_diff_regex = re.compile(r"^([ +-])(.*)$", re.MULTILINE)
 
     for change in changes:
       if path_key in change and change_key in change:
@@ -122,7 +122,8 @@ class RepoSetup:
           if curr_dir != self.temp_dir.name:
             os.makedirs(name=curr_dir, exist_ok=True)
           curr_file = open(file=curr_file, mode='w+', encoding='UTF-8')
-          print(re.sub(remove_diff_regex, r"\2", change[change_key]),
-                file=curr_file)
+        #   print(re.sub(remove_diff_regex, r"\2", change[change_key]),
+        #         file=curr_file)
+          print(change[change_key],file=curr_file)
 
     return self.temp_dir.name
