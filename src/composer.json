@@ -45,7 +45,7 @@
         "ext-sqlite3" : "*",
         "ext-zip": "*",
         "hamcrest/hamcrest-php" : "v2.0.1",
-        "mockery/mockery" : "v1.3.6",
+        "mockery/mockery" : "^1.6",
         "myclabs/deep-copy" : "1.11.0",
         "php-coveralls/php-coveralls" : "v2.5.3",
         "phpunit/phpunit" : "8.5.30",

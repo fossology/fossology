@@ -43,7 +43,7 @@ class FolderDao
   }
 
   /**
-   * @return boolean
+   * @return booleanzzzz
    */
   public function hasTopLevelFolder()
   {
@@ -61,6 +61,7 @@ class FolderDao
       "INSERT INTO folder (folder_name, folder_desc) VALUES ($1, $2) returning folder_pk");
     $res = $this->dbManager->execute($statementName, array($folderName, $folderDescription));
     $folderRow = $this->dbManager->fetchArray($res);
+    var_dump($folderRow);
     $folderId = $folderRow["folder_pk"];
     $this->dbManager->freeResult($res);
     $this->insertFolderContents($parentFolderId, self::MODE_FOLDER, $folderId);
@@ -263,7 +264,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
 
   public function createFolder($folderName, $folderDescription, $parentId)
   {
-    $folderId = $this->dbManager->insertTableRow("folder", array("folder_name" => $folderName, "user_fk" => Auth::getUserId(), "folder_desc" => $folderDescription), null, 'folder_pk');
+    $folderId = $this->dbManager->insertTableRow("folder", array("folder_pk" => 5,"folder_name" => $folderName, "user_fk" => Auth::getUserId(), "folder_desc" => $folderDescription), null,'folder_pk');
     $this->insertFolderContents($parentId, self::MODE_FOLDER, $folderId);
     return $folderId;
   }

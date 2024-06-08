@@ -29,6 +29,7 @@ class cliTest extends \PHPUnit\Framework\TestCase
   protected function setUp() : void
   {
     $this->testDataDir = dirname(__DIR__)."/testlicenses";
+    echo dirname(__DIR__)."/testlicenses";
     $this->testDb = new TestPgDb("monkCli".time());
     $this->dbManager = $this->testDb->getDbManager();
   }

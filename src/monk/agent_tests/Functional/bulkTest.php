@@ -36,7 +36,7 @@ class bulkTest extends \PHPUnit\Framework\TestCase
 
   protected function setUp() : void
   {
-    $this->testDb = new TestPgDb("monkBulk");
+    $this->testDb = new TestPgDb("");
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
