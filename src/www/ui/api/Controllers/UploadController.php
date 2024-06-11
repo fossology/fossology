@@ -1125,7 +1125,7 @@ class UploadController extends RestController
       if (count($item['successfulAgents']) > 0) {
         $item['isAgentRunning'] = false;
       } else {
-        $item['currentAgentId'] = $agentDao->getCurrentAgentRef($item["agentName"])->getAgentId();
+        $item['currentAgentId'] = $agentDao->getCurrentAgentRef($item["agentName"])->getCurrentAgentId();
         $item['currentAgentRev'] = "";
       }
       foreach ($item['successfulAgents'] as &$agent) {

@@ -62,6 +62,7 @@ namespace Fossology\UI\Api\Test\Controllers
   use Fossology\UI\Api\Models\Info;
   use Fossology\UI\Api\Models\InfoType;
   use Mockery as M;
+  use Psr\Container\ContainerInterface;
   use Slim\Psr7\Factory\StreamFactory;
   use Slim\Psr7\Headers;
   use Slim\Psr7\Request;
@@ -127,10 +128,16 @@ namespace Fossology\UI\Api\Test\Controllers
     private $assertCountBefore;
 
     /**
+     *
      * @var StreamFactory $streamFactory
      * Stream factory to create body streams.
      */
     private $streamFactory;
+    /**
+     * @var M\MockInterface $adminPlugin
+     */
+    private $folderContents;
+    private $container;
 
     /**
      * @brief Setup test objects
@@ -148,6 +155,8 @@ namespace Fossology\UI\Api\Test\Controllers
       $this->deletePlugin = M::mock('admin_folder_delete');
       $this->folderPropertiesPlugin = M::mock('folder_properties');
       $this->folderContentPlugin = M::mock('content_move');
+      $this->folderContents = M::mock('foldercontents');
+      $this->container = M::mock(ContainerInterface::class);
 
       $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
       $this->restHelper->shouldReceive('getFolderDao')->andReturn($this->folderDao);
@@ -159,6 +168,9 @@ namespace Fossology\UI\Api\Test\Controllers
       $this->restHelper->shouldReceive('getPlugin')
         ->withArgs(array('folder_properties'))
         ->andReturn($this->folderPropertiesPlugin);
+      $this->restHelper->shouldReceive("getPlugin")
+        ->withArgs(array("foldercontents"))
+        ->andReturn($this->folderContentPlugin);
       $this->restHelper->shouldReceive('getPlugin')
         ->withArgs(array('content_move'))
         ->andReturn($this->folderContentPlugin);
@@ -261,6 +273,29 @@ namespace Fossology\UI\Api\Test\Controllers
 
     /**
      * @test
+     *    FolderController::getFolders()
+     * -# Check if the response is an HttpNotFoundException
+     */
+    public function testGetAllFoldersNotFound()
+    {
+      $folderId = 1;
+      $rootFolder = new Folder(2, "root", "", 2);
+      $this->folderDao->shouldReceive('getRootFolder')->withArgs(array(2))
+        ->andReturn($rootFolder);
+      $this->folderDao->shouldReceive('getFolder')
+        ->andReturnUsing([$this, 'getFolder']);
+      $this->folderDao->shouldReceive('isFolderAccessible')->withArgs([$folderId])->andReturn(false);
+      $this->folderDao->shouldReceive('getFolderParentId')
+        ->andReturnUsing([$this, 'getFolderParent']);
+      $this->expectException(HttpForbiddenException::class);
+      $this->folderController->getFolders(null,
+        new ResponseHelper(), ["id"=>1]);
+    }
+
+
+
+    /**
+     * @test
      * -# Test to get specific folder from FolderController::getFolders()
      * -# Check if the response is a single object of Folder
      */
@@ -284,6 +319,7 @@ namespace Fossology\UI\Api\Test\Controllers
       $this->assertEquals($expectedFoldersList,
         $this->getResponseJson($actualResponse));
     }
+
 
     /**
      * @test
@@ -356,7 +392,27 @@ namespace Fossology\UI\Api\Test\Controllers
         $actualResponse->getStatusCode());
       $this->assertEquals($expectedResponse->getArray(),
         $this->getResponseJson($actualResponse));
+      $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
     }
+
+    /**
+     * @test
+     * -# check for Bad request exception.
+     */
+
+    public function testCreateFolderInvalidBody()
+    {
+      $requestHeaders = new Headers();
+      $body = $this->streamFactory->createStream("invalid_json"); // Simulate invalid JSON
+      $request = new Request("POST", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+      $response = new ResponseHelper();
+
+      $this->expectException(HttpBadRequestException::class);
+
+      $this->folderController->createFolder($request, $response, []);
+    }
+
 
     /**
      * @test
@@ -760,6 +816,8 @@ namespace Fossology\UI\Api\Test\Controllers
     {
       $folderId = 3;
       $parentId = 2;
+      $contentId = 1;
+      $this->folderDao->shouldReceive('removeContent')->withArgs(array($contentId))->andReturn(false);
 
       $this->folderDao->shouldReceive('getFolder')
         ->andReturnUsing([$this, 'getFolder']);
@@ -777,6 +835,152 @@ namespace Fossology\UI\Api\Test\Controllers
 
       $this->folderController->copyFolder($request, $response,
         ["id" => $folderId]);
+    }
+
+    /**
+     * @test
+     * -# Test for invalid action on FolderController::unlinkFolder()
+     * -# Check if the HttpNotFoundException is thrown
+     */
+
+    public function testUnlinkFolderFolderNotFound()
+    {
+      $contentId = 4;
+      $this->dbHelper->shouldReceive("doesIdExist")->withArgs(array("foldercontents","foldercontents_pk", $contentId))->andReturn(false);
+
+      $requestHeaders = new Headers();
+      $body = $this->streamFactory->createStream();
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),$requestHeaders, [],[],$body);
+      $this->expectException(HttpNotFoundException::class);
+      $this->folderController->unlinkFolder($request, new ResponseHelper(),['contentId' => $contentId]);
+
+    }
+
+    /**
+     * @test
+     * -# Test for invalid action on FolderController::unlinkFolder()
+     * -# Check if the HttpNotFoundException is thrown
+     */
+    public function testUnlinkUnExistingFolder()
+    {
+      $contentId = 4;
+      $this->dbHelper->shouldReceive("doesIdExist")->withArgs(array("foldercontents","foldercontents_pk", $contentId))->andReturn(false);
+
+      $requestHeaders = new Headers();
+      $body = $this->streamFactory->createStream();
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),$requestHeaders, [],[],$body);
+      $this->expectException(HttpNotFoundException::class);
+      $this->folderController->unlinkFolder(null, new ResponseHelper(),['contentId' => $contentId]);
+
+    }
+
+    /**
+     * @test
+     * -# Test for invalid action on FolderController::getAllFolderContents()
+     * -# Check if the statusCode is 200
+     */
+    public  function testGetAllFolderContents()
+    {
+      $folderId = 2;
+      $folder = new Folder($folderId,"Data","Folding for testing",1);
+      $this->restHelper->shouldReceive('getUserId')->andReturn($this->userId);
+      $this->folderDao->shouldReceive('isFolderAccessible')->andReturn(true);
+      $this->folderDao->shouldReceive('getFolder')->andReturn($folder);
+      $this->folderContentPlugin->shouldReceive('handle')->andReturn([]);
+      $this->folderDao->shouldReceive('getRemovableContents')->withArgs(array($folderId))->andReturn([]);
+
+      $actualResponse = $this->folderController->getAllFolderContents(null,new ResponseHelper(),['id' => $folderId]);
+      $this->assertEquals(200, $actualResponse->getStatusCode());
+    }
+
+    /**
+     * @test
+     * -# Test for invalid action on FolderController::getAllFolderContents()
+     * -# Check if the HttpNotFoundException is thrown
+     */
+    public  function testGetAllFolderContentsNotFound()
+    {
+      $folderId = 2;
+      $this->folderDao->shouldReceive('getFolder')->andReturn(null);
+
+      $this->expectException(HttpNotFoundException::class);
+      $this->folderController->getAllFolderContents(null,new ResponseHelper(),['id' => $folderId]);
+    }
+
+    /**
+     * @test
+     * -# Test for invalid action on FolderController::getAllFolderContents()
+     * -# Check if the HttpForbiddenException is thrown
+     */
+    public  function testGetAllInAccessibleFolderContents()
+    {
+
+      $folderId = 2;
+      $folder = new Folder($folderId,"Data","Folding for testing",1);
+      $this->folderDao->shouldReceive('isFolderAccessible')->andReturn(false);
+      $this->folderDao->shouldReceive('getFolder')->andReturn($folder);
+
+      $this->expectException(HttpForbiddenException::class);
+      $this->folderController->getAllFolderContents(null,new ResponseHelper(),['id' => $folderId]);
+    }
+
+    /**
+     * @test
+     * -# Test for invalid action on FolderController::getUnlinkableFolderContents()
+     * -# Check if the statusCode is 200
+     */
+    public function testGetUnlinkableFolderContents()
+    {
+      $folderId = 3;
+      $id = 3;
+      $userId = 2;
+      $folder = new Folder($folderId,"Data","Folding for testing",1);
+      $this->folderDao->shouldReceive('getFolder')->withArgs(array($folderId))->andReturn($folder);
+      $this->restHelper->shouldReceive("getUserId")->andReturn($userId);
+      $this->folderDao->shouldReceive('isFolderAccessible')->withArgs(array($folderId, $this->restHelper->getUserId()))->andReturn(true);
+      $this->restHelper->shouldReceive('getFolderDao')->andReturn($this->folderDao);
+      $this->folderContentPlugin->shouldReceive('handle');
+
+      $actualResponse = $this->folderController->getUnlinkableFolderContents(null,new ResponseHelper(),["id" => $id]);
+      var_dump($actualResponse);
+      $this->assertEquals(200,$actualResponse->getStatusCode());
+    }
+
+    /**
+     * @test
+     * -# Test for invalid action on FolderController::getUnlinkableFolderContents()
+     * -# Check if the HttpForbiddenException is thrown
+     */
+    public function testGetUnlinkableInaccessibleFolderContents()
+    {
+      $folderId = 3;
+      $id = 3;
+      $folder = new Folder($folderId,"Data","Folding for testing",1);
+      $this->folderDao->shouldReceive('getFolder')->withArgs(array($folderId))->andReturn($folder);
+      $this->folderDao->shouldReceive('isFolderAccessible')->withArgs(array($folderId, $this->restHelper->getUserId()))->andReturn(false);
+      $this->restHelper->shouldReceive('getFolderDao')->andReturn($this->folderDao);
+      $this->folderContentPlugin->shouldReceive('handle');
+
+      $this->expectException(HttpForbiddenException::class);
+      $this->folderController->getUnlinkableFolderContents(null,new ResponseHelper(),["id" => $id]);
+    }
+
+    /**
+     * @test
+     * -# Test for invalid action on FolderController::getUnlinkableFolderContents()
+     * -# Check if the HttpNotFoundException is thrown
+     */
+    public function testGetUnlinkableFolderContentsBadRequest()
+    {
+      $folderId = 3;
+      $id = 3;
+      $this->folderDao->shouldReceive('getFolder')->withArgs(array($folderId))->andReturn(null);
+      $this->folderDao->shouldReceive('isFolderAccessible')->withArgs(array($folderId, $this->restHelper->getUserId()))->andReturn(false);
+      $this->restHelper->shouldReceive('getFolderDao')->andReturn($this->folderDao);
+
+      $this->expectException(HttpNotFoundException::class);
+      $this->folderController->getUnlinkableFolderContents(null,new ResponseHelper(),["id" => $id]);
+
     }
   }
 }

@@ -243,7 +243,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    * @return License
    */
   private function getLicense($shortname, $obligations=false,
-    $emptyObligation=true)
+                              $emptyObligation=true)
   {
     $obligationList = [
       $this->getObligation(123),
@@ -888,6 +888,50 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
       new ResponseHelper(), ["id" => $id]);
   }
 
+  public function testDeleteAdminAcknowledgements()
+  {
+
+    $this->adminLicenseAckDao->shouldReceive('getAllAcknowledgements')->andReturn([]);
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("DELETE", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $actualResponse = $this->licenseController->getAllAdminAcknowledgements($request,$response,[]);
+    $this->assertEquals(200,$actualResponse->getStatusCode());
+  }
+
+
+
+  /**
+   *  -# Test for LicenseController::exportAdminLicenseToCSV() to export license to CSV.
+   *  -# Check if the status code is 200
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportAdminLicenseToCSV()
+  {
+    $id = 1;
+    $this->dbHelper->shouldReceive("doesIdExist")->withArgs(array("license_ref","rf_pk",$id))->andReturn(true);
+    $this->dbHelper->shouldReceive("doesIdExist")->withArgs(array("license_candidate","rf_pk",$id))->andReturn(true);
+    $this->dbManager->shouldReceive('prepare');
+    $this->dbManager->shouldReceive('fetchAll')->andReturn([]);;
+    $this->dbManager->shouldReceive('freeResult')->andReturn([]);
+    $this->dbManager->shouldReceive('execute');
+    $this->dbManager->shouldReceive("getSingleRow")->withAnyArgs()->andReturn([]);
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream(json_encode(["referenceText" =>"rftext"]));
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $actualResponse = $this->licenseController->exportAdminLicenseToCSV($request,new ResponseHelper(), []);
+    $this->assertEquals(200,$actualResponse->getStatusCode());
+
+  }
 
   /**
    * @test
@@ -917,7 +961,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    * -# Check if status is 403
    */
   public function testGetCandidatesNoAdmin()
-  { 
+  {
     $request = M::mock(Request::class);
     $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_READ;
