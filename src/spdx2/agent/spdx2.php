@@ -354,7 +354,7 @@ class SpdxTwoAgent extends Agent
     $mainLicenses = array();
     foreach ($mainLicenseIds as $licId) {
       $reportedLicenseId = $this->licenseMap->getProjectedId($licId);
-      $mainLicense = $this->licenseDao->getLicenseById($reportedLicenseId);
+      $mainLicense = $this->licenseDao->getLicenseById($reportedLicenseId, $this->groupId);
       $reportLicId = $mainLicense->getId() . "-" . md5($mainLicense->getText());
       $mainLicenses[] = $reportLicId;
       if (!array_key_exists($reportLicId, $this->licensesInDocument)) {
