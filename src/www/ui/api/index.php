@@ -167,6 +167,8 @@ $app->options('/{routes:.+}', AuthController::class . ':optionsVerification');
 
 //////////////////////////AUTH/////////////////////
 $app->post('/tokens', AuthController::class . ':createNewJwtToken');
+$app->get('/oauth/login', AuthController::class . ':getAuthUrl');
+$app->post('/oauth/callback', AuthController::class . ':getOauthToken');
 
 //////////////////////////UPLOADS/////////////////////
 $app->group('/uploads',
@@ -253,6 +255,8 @@ $app->group('/users',
     $app->get('/self', UserController::class . ':getCurrentUser');
     $app->post('/tokens', UserController::class . ':createRestApiToken');
     $app->get('/tokens/{type:\\w+}', UserController::class . ':getTokens');
+    $app->post('/oauthclient', UserController::class . ':createNewOauthClient');
+    $app->get('/oauthclient/{type:\\w+}', UserController::class . ':getOAuthClients');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
