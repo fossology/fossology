@@ -354,6 +354,8 @@ std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int a
 bool CopyrightDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
 {
   std::string tableName = IDENTITY;
+  std::string content;
+  entry.content.toUTF8String(content);
 
   if("author" == entry.type ||
      "email" == entry.type ||
@@ -371,7 +373,7 @@ bool CopyrightDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
         long, long, char*, char*, int, int
     ),
     entry.agent_fk, entry.pfile_fk,
-    entry.content.c_str(),
+    content.c_str(),
     entry.type.c_str(),
     entry.copy_startbyte, entry.copy_endbyte
   );
@@ -396,6 +398,9 @@ bool CopyrightDatabaseHandler::insertDeactivatedEvents(const DatabaseEntry& entr
     "WHERE cp.hash = md5($1) AND cp.agent_fk = $2 "
     "  AND cp.pfile_fk = $3 AND ut.upload_fk = $4";
 
+  std::string contentUtf8;
+  entry.content.toUTF8String(contentUtf8);
+
   return dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
@@ -403,7 +408,7 @@ bool CopyrightDatabaseHandler::insertDeactivatedEvents(const DatabaseEntry& entr
       sql.c_str(),
       char*, long, long, int
     ),
-    entry.content.c_str(),
+    contentUtf8.c_str(),
     entry.agent_fk,
     entry.pfile_fk,
     uploadId

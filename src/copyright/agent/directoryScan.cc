@@ -48,7 +48,7 @@ void scanDirectory(const CopyrightState& state, const bool json,
     for (unsigned int i = 0; i < filePathsSize; i++)
     {
       string fileName = filePaths[i];
-      pair<string, list<match>> scanResult = processSingleFile(state, fileName);
+      pair<icu::UnicodeString, list<match>> scanResult = processSingleFile(state, fileName);
       if (json)
       {
         appendToJson(fileName, scanResult, printComma);

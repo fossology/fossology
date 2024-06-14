@@ -38,7 +38,7 @@ struct CleanupResult {
 class hCopyrightScanner : public scanner
 {
 public:
-  void ScanString(const string& s, list<match>& results) const;
+  void ScanString(const icu::UnicodeString& s, list<match>& results) const override;
   hCopyrightScanner();
   CleanupResult Cleanup(const string &raw) const;
   void TrimPunctuation(string &text) const;
@@ -58,8 +58,11 @@ private:
    * \var rx::regex regSpdxCopyright
    * Regex for SPDX-FileCopyrightText
    */
-  rx::regex regCopyright, regException, regExceptionCopy, regNonBlank, regSimpleCopyright,
-  regSpdxCopyright, regRemoveFileStmt, regStripLicenseTrail, regStripTrademarkTrail, regStripAllRightReserveTrail, regExceptionVerbFollow, regExceptionAdjectivePrefix, regExceptionTemplate, regExceptionPassive, regStripCopySymNonYear, regExceptionBinaryNoise, regExceptionMeta, regExceptionCharNameRun;
+  rx::u32regex regCopyright, regException, regNonBlank, regSimpleCopyright, regSpdxCopyright;
+  rx::regex regExceptionCopy, regRemoveFileStmt, regStripLicenseTrail, regStripTrademarkTrail,
+  regStripAllRightReserveTrail, regExceptionVerbFollow, regExceptionAdjectivePrefix,
+  regExceptionTemplate, regExceptionPassive, regStripCopySymNonYear, regExceptionBinaryNoise,
+  regExceptionMeta, regExceptionCharNameRun;
 } ;
 
 #endif
