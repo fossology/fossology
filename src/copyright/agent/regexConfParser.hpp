@@ -11,6 +11,7 @@
 #include <map>
 #include <sstream>
 #include <fstream>
+#include <unicode/unistr.h>
 
 extern "C" {
 #include "libfossology.h"
@@ -20,19 +21,19 @@ extern "C" {
  * \typedef
  * Key value pair regex name in key and pattern in value
  */
-typedef std::map<std::string, std::string> RegexMap;
+typedef std::map<std::string, icu::UnicodeString> RegexMap;
 
-RegexMap readConfStreamToMap(std::istringstream& stream,
-                               const bool isVerbosityDebug = false);
+RegexMap readConfStreamToMap(std::wistringstream& stream,
+                             const bool isVerbosityDebug = false);
 
-RegexMap readConfStreamToMap(std::ifstream& stream,
-                               const bool isVerbosityDebug = false);
+RegexMap readConfStreamToMap(std::wifstream& stream,
+                             const bool isVerbosityDebug = false);
 
 void addRegexToMap(/*in and out*/ RegexMap& oldMap,
-                    const std::string& regexDesc,
+                    const std::wstring& regexDesc,
                     const bool isVerbosityDebug = false);
 
-std::string replaceTokens(/*in*/ RegexMap& dict,
-                          const std::string& constInput);
+icu::UnicodeString replaceTokens(/*in*/ RegexMap& dict,
+                                 const std::wstring& constInput);
 
 #endif /* REGEXCONFPARSER_HPP_ */

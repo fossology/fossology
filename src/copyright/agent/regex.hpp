@@ -12,6 +12,7 @@
 #ifdef USEBOOST
 
 #include <boost/regex.hpp>
+#include <boost/regex/icu.hpp>
 
 /**
  * \namespace rx
@@ -22,8 +23,7 @@
 namespace rx = boost;
 #else
   #include <regex>
-  namespace rx  = std;
+  namespace rx = std;
 #endif
-
 
 #endif /* REGEX_HPP_ */

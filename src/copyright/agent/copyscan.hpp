@@ -17,7 +17,7 @@
 class hCopyrightScanner : public scanner
 {
 public:
-  void ScanString(const string& s, list<match>& results) const;
+  void ScanString(const icu::UnicodeString& s, list<match>& results) const override;
   hCopyrightScanner();
 private:
   /**
@@ -32,7 +32,7 @@ private:
    * \var rx::regex regSpdxCopyright
    * Regex for SPDX-FileCopyrightText
    */
-  rx::regex regCopyright, regException, regNonBlank, regSimpleCopyright, regSpdxCopyright;
+  rx::u32regex regCopyright, regException, regNonBlank, regSimpleCopyright, regSpdxCopyright;
 } ;
 
 #endif

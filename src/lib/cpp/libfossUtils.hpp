@@ -17,6 +17,7 @@ namespace fo
 {
   unsigned long stringToUnsignedLong(const char* string);
   icu::UnicodeString recodeToUnicode(const std::string &input);
+  icu::UnicodeString recodeToUnicode(const icu::UnicodeString &input);
 }
 
 #endif

@@ -33,7 +33,7 @@ private:
    * \param testString String to check result against
    * \param testKey    Key to check result against
    */
-  void regexConfProviderTest (istringstream& testStream,
+  void regexConfProviderTest (wistringstream& testStream,
                     const string& testString,
                     const string& testKey)
   {
@@ -44,10 +44,13 @@ private:
     // load parse test-stream
     rcp.maybeLoad(testIdentity,testStream);
 
+    std::string currentString;
+    rcp.getRegexValue(testIdentity,testKey).toUTF8String(currentString);
+
     // test RegexConfProvider
     CPPUNIT_ASSERT_MESSAGE("The generated string should match the expected string",
                            0 == strcmp(testString.c_str(),
-                                       rcp.getRegexValue(testIdentity,testKey)));
+                                       currentString.c_str()));
   }
 
 protected:
@@ -61,7 +64,7 @@ protected:
     string testString = "Lorem Ipsum";
     string testKey = "TEST";
     string testLine = testKey + "=" + testString + "\n";
-    istringstream testStream(testLine);
+    wistringstream testStream(std::wstring(testLine.begin(), testLine.end()));
 
     regexConfProviderTest(testStream,testString,testKey);
   }
@@ -78,7 +81,7 @@ protected:
     string testLine =
       testKey + "=" + "Lorem \n" +
       testKey + "=__" + testKey + "__Ipsum\n";
-    istringstream testStream(testLine);
+    wistringstream testStream(std::wstring(testLine.begin(), testLine.end()));
 
     regexConfProviderTest(testStream,testString,testKey);
   }
@@ -97,7 +100,7 @@ protected:
       "INFIX2=su\n" +
       "INFIX1=rem__SPACE__I\n" +
       testKey + "=Lo__INFIX1__p__INFIX2__m\n";
-    istringstream testStream(testLine);
+    wistringstream testStream(std::wstring(testLine.begin(), testLine.end()));
 
     regexConfProviderTest(testStream,testString,testKey);
   }
@@ -115,7 +118,7 @@ protected:
     string testLine =
       string("LOREM=Lorem__LOREM__ \n") +
       testKey + "=__LOREM__Ipsum\n";
-    istringstream testStream(testLine);
+    wistringstream testStream(std::wstring(testLine.begin(), testLine.end()));
 
     string testIdentity("testIdentity");
 
@@ -126,7 +129,7 @@ protected:
 
     // evaluate and verify, that recursion does not appear
     CPPUNIT_ASSERT_MESSAGE("This should just terminate (the return value is not specified)",
-                           rcp.getRegexValue(testIdentity,testKey));
+                           !rcp.getRegexValue(testIdentity,testKey).isEmpty());
   }
 };
 
