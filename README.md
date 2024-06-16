@@ -19,7 +19,7 @@ FOSSology is an open source license compliance software system and toolkit. As a
 
 [Check out Who Uses FOSSology!](https://www.fossology.org)
 
-FOSSology does not give legal advice.
+FOSSology does not give legal advice.   
 https://fossology.org/
 
 ## Requirements

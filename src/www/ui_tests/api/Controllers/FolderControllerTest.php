@@ -520,6 +520,7 @@ namespace Fossology\UI\Api\Test\Controllers
      */
     public function testDeleteFolderNoAccess()
     {
+
       $folderId = 3;
       $errorText = "No access to delete this folder";
       $this->folderDao->shouldReceive('getFolder')
@@ -639,6 +640,7 @@ namespace Fossology\UI\Api\Test\Controllers
         ->withArgs(array($folderId, 1))->andReturn($folderContentPk);
       $this->folderContentPlugin->shouldReceive('copyContent')
         ->withArgs(array([$folderContentPk], $parentId, true))->andReturn("");
+
       $requestHeaders = new Headers();
       $requestHeaders->setHeader('parent', $parentId);
       $requestHeaders->setHeader('action', "copy");
