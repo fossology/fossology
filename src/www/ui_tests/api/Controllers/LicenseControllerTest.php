@@ -1010,10 +1010,17 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->expectException(HttpBadRequestException::class);
 
     $this->licenseController->handleAdminLicenseAcknowledgement($request,$response,[]);
-
   }
 
 
+  /**
+   * @test
+   *  - # Test LicenseController::handleAdminLicenseAcknowledgement
+   *  - # Check if the response status is 200 after updating an admin license acknowledgement.
+   *  - # Check if actual and expected objects match.
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
 
   public function testHandleAdminLicenseAcknowledgementWithUpdate()
   {
@@ -1045,6 +1052,14 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   }
 
+  /**
+   * @test
+   *  - # Test LicenseController::handleAdminLicenseAcknowledgement
+   *  - # Check if creation of new admin license acknowledgement when it already exists.
+   *  - # Check if the response status is 400
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
   public function testHandleAdminLicenseAcknowledgementLicenseExists()
   {
 
@@ -1072,6 +1087,14 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals([],$this->getResponseJson($actualResponse)["success"]);
   }
 
+  /**
+   * @test
+   * - # Test LicenseController::handleAdminLicenseAcknowledgement
+   * - # Check if new ackonowledgement is created with response code 2021
+   * - # Check of expected and actual object match
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
   public function testHandleAdminLicenseAcknowledgementCreateNew()
   {
 
@@ -1105,6 +1128,13 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($expectedResponse->getBody()->getContents(),$actualResponse->getBody()->getContents());
   }
 
+  /**
+   * @test
+   *  - # Test LicenseController::handleAdminLicenseAcknowledgement
+   *  - # Check the error code is 500 for users without admin permission
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
   public function testHandleAdminLicenseAcknowledgementWithNoPermission()
   {
 
@@ -1138,6 +1168,14 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($expectedResponse->getBody()->getContents(),$actualResponse->getBody()->getContents());
   }
 
+  /**
+   * @test
+   *  - # Test LicenseController::handleLicenseStandardComment
+   *  - # Check if the array of licenseStdComments is retrieved
+   *  - # Check if the response code is 200
+   *  - # Check if no errors along the procedure.
+   * @return void
+   */
   public function testGetAllLicenseStandardComments()
   {
     $dbLicenseStdComments = [
@@ -1170,7 +1208,13 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   }
 
-
+  /**
+   * @test
+   *  - # Test LicenseController::handleLicenseStandardComment
+   *  - # Check if HttpForbiddenException for non admin users
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
   public function testHandleLicenseStandardComment()
   {
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
@@ -1207,6 +1251,11 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->licenseController->handleLicenseStandardComment($request,$response,[]);
   }
+
+  /**
+   * - # Function helping to store more data and provide a single point of access without repeating ourselves.
+   * @return array
+   */
   public function getDummyVars()
   {
     $bodyContent = [
@@ -1253,6 +1302,13 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   }
 
+  /**
+   * @test
+   *  - # Test LicenseController::handleLicenseStandardComment
+   *  - # Check if the response is 200 after updating the license standard comment.
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
   public function testHandleLicenseStandardCommentWithUpdate()
   {
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
@@ -1288,7 +1344,14 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   }
 
-
+  /**
+   * @test
+   *  - # Test LicenseController::handleLicenseStandardComment
+   *  - # Check if creation of new comment fails if there exists the same comment in the database
+   *  - # Check if the response code is 400
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
   public function testHandleLicenseStandardCommentExists()
   {
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
@@ -1311,6 +1374,14 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
   }
 
 
+  /**
+   * @test
+   *  - # Test LicenseController::handleLicenseStandardComment
+   *  - # Check if the status is 201 after creating new LicenseStdComment
+   *  - # Check if object matches
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
   public function testHandleLicenseStandardCommentCreateNew()
   {
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
@@ -1341,6 +1412,13 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($expectedResponse->getBody()->getContents(),$actualResponse->getBody()->getContents());
   }
 
+  /**
+   * @test
+   *  - # Test LicenseController::handleLicenseStandardComment
+   *  - # Check is the status is 500 for users who are not admins
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
 
   public function testHandleLicenseStandardCommentNoPermission()
   {
