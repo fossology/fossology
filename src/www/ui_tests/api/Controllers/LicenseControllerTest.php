@@ -888,19 +888,488 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
       new ResponseHelper(), ["id" => $id]);
   }
 
-  public function testDeleteAdminAcknowledgements()
+  /**
+   * @test
+   *  - # Test LicenseController::getAllAdminAcknowledgements
+   *  - # Check if the response status is 200
+   *  - # Check if output acknowledgements match the expected
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testGetAllAdminAcknowledgements()
   {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $dummyLicenseAcknowledgments = [
+      array(
+        "la_pk" => 1,
+        "name" => "MIT license",
+        "acknowledgement" => "Permission is hereby granted, free of charge",
+        "updated" => "2024-06-16 15:02:22.245855+02",
+        "user_fk" =>  2,
+        "is_enabled" => false,
+      ),
+      array(
+        "la_pk" => 2,
+        "name" => "GPL-2.0-or-later",
+        "acknowledgement" => "Permission is hereby granted, free of charge",
+        "updated" => "2024-08-16 15:02:22.245855+02",
+        "user_fk" =>  4,
+        "is_enabled" => true,
+      )
+    ];
 
-    $this->adminLicenseAckDao->shouldReceive('getAllAcknowledgements')->andReturn([]);
+    $expectedInfo = [
+      Array (
+        'name' => $dummyLicenseAcknowledgments[0]["name"],
+        'acknowledgement' => $dummyLicenseAcknowledgments[0]["acknowledgement"],
+        'is_enabled' => false,
+        'id' => 1,
+    ),
+     Array (
+        'name' => $dummyLicenseAcknowledgments[1]["name"],
+        'acknowledgement' => $dummyLicenseAcknowledgments[1]['acknowledgement'],
+        'is_enabled' => true,
+        'id' => 2
+    )
+    ];
 
+    $this->adminLicenseAckDao->shouldReceive('getAllAcknowledgements')->andReturn($dummyLicenseAcknowledgments);
     $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
     $body = $this->streamFactory->createStream();
-    $request = new Request("DELETE", new Uri("HTTP", "localhost"),
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
     $response = new ResponseHelper();
-    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $expectedResponse = (new ResponseHelper())->withJson($expectedInfo, 200);
     $actualResponse = $this->licenseController->getAllAdminAcknowledgements($request,$response,[]);
+
     $this->assertEquals(200,$actualResponse->getStatusCode());
+    $this->assertEquals($expectedResponse->getBody()->getContents(),$actualResponse->getBody()->getContents());
+    $this->assertEquals($this->getResponseJson($expectedResponse),$this->getResponseJson($actualResponse));
+
+  }
+
+  /**
+   * @test
+   *  - # Test LicenseController::getAllAdminAcknowledgements
+   *  - # Check if the response status is 403
+   *  - # Check if HttpForbiddenException is thrown for non admin user
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testGetAllAdminAcknowledgementsNotAdmin()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_NONE;
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+    $this->expectException(HttpForbiddenException::class);
+    $this->licenseController->getAllAdminAcknowledgements($request,$response,[]);
+  }
+
+  /**
+   * @test LicenseController::handleAdminLicenseAcknowledgement
+   *  - # Check if the status is 400
+   *  - # Check if HttpBadRequestException is thrown with empty body
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testHandleAdminLicenseAcknowledgementBadRequest()
+  {
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+    $this->expectException(HttpBadRequestException::class);
+
+    $this->licenseController->handleAdminLicenseAcknowledgement($request,$response,[]);
+
+  }
+
+  /**
+   * @test LicenseController::handleAdminLicenseAcknowledgement
+   *  - # Check if the status is 400
+   *  - # Check if HttpBadRequestException is thrown with invalid  body
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testHandleAdminLicenseAcknowledgementInvalidBody()
+  {
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream(json_encode([]));
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+    $this->expectException(HttpBadRequestException::class);
+
+    $this->licenseController->handleAdminLicenseAcknowledgement($request,$response,[]);
+
+  }
+
+
+
+  public function testHandleAdminLicenseAcknowledgementWithUpdate()
+  {
+
+    $this->dbHelper->shouldReceive("doesIdExist")
+      ->withArgs(["license_std_acknowledgement","name", $this->getDummyVars()["bodyContent"][0]["name"]])->andReturn(true);
+    $this->dbManager->shouldReceive("getSingleRow")
+      ->withAnyArgs()->andReturn($this->getDummyVars()["dummyExistingAck"]);
+    $this->adminLicenseAckDao->shouldReceive('updateAcknowledgement')->withArgs([$this->getDummyVars()["bodyContent"][0]["id"], $this->getDummyVars()["bodyContent"][0]["name"], $this->getDummyVars()["bodyContent"][0]["ack"]]);
+    $this->adminLicenseAckDao->shouldReceive('toggleAcknowledgement')->withArgs([$this->getDummyVars()["bodyContent"][0]["id"]]);
+
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream(json_encode($this->getDummyVars()["bodyContent"]));
+    $request = new Request("PUT", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+
+    $expectedInfo = new Info(200, "Successfully updated admin license acknowledgement with name '" . $this->getDummyVars()["dummyExistingAck"]["name"] . "'", InfoType::INFO);
+    $success [] =$expectedInfo->getArray();
+    $expectedResponse = (new ResponseHelper())->withJson(["success" => $success, "errors" => []], 200);
+
+    $actualResponse = $this->licenseController->handleAdminLicenseAcknowledgement($request,$response,[]);
+
+    $this->assertEquals(200,$actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),$this->getResponseJson($actualResponse));
+    $this->assertEquals($expectedResponse->getBody()->getContents(),$actualResponse->getBody()->getContents());
+
+  }
+
+  public function testHandleAdminLicenseAcknowledgementLicenseExists()
+  {
+
+    $bodyContent = $this->getDummyVars()["bodyContent"];
+    $bodyContent[0]["update"] = false;
+
+    $this->dbHelper->shouldReceive("doesIdExist")
+      ->withArgs(["license_std_acknowledgement","name", $this->getDummyVars()["bodyContent"][0]["name"]])->andReturn(true);
+    $this->dbManager->shouldReceive("getSingleRow")
+      ->withAnyArgs()->andReturn($this->getDummyVars()["dummyExistingAck"]);
+    $this->adminLicenseAckDao->shouldReceive('updateAcknowledgement')->withArgs([$this->getDummyVars()["bodyContent"][0]["id"], $this->getDummyVars()["bodyContent"][0]["name"], $this->getDummyVars()["bodyContent"][0]["ack"]]);
+    $this->adminLicenseAckDao->shouldReceive('toggleAcknowledgement')->withArgs([$this->getDummyVars()["bodyContent"][0]["id"]]);
+
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream(json_encode($bodyContent));
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+
+
+    $actualResponse = $this->licenseController->handleAdminLicenseAcknowledgement($request,$response,[]);
+    $this->assertEquals(400,$this->getResponseJson($actualResponse)["errors"][0]["code"]);
+    $this->assertEquals([],$this->getResponseJson($actualResponse)["success"]);
+  }
+
+  public function testHandleAdminLicenseAcknowledgementCreateNew()
+  {
+
+    $bodyContent = $this->getDummyVars()["bodyContent"];
+    $bodyContent[0]["update"] = false;
+
+    $this->dbHelper->shouldReceive("doesIdExist")
+      ->withArgs(["license_std_acknowledgement","name", $this->getDummyVars()["bodyContent"][0]["name"]])->andReturn(false);
+    $this->dbManager->shouldReceive("getSingleRow")
+      ->withAnyArgs()->andReturn($this->getDummyVars()["dummyExistingAck"]);
+    $this->adminLicenseAckDao->shouldReceive('updateAcknowledgement')->withArgs([$this->getDummyVars()["bodyContent"][0]["id"], $this->getDummyVars()["bodyContent"][0]["name"], $this->getDummyVars()["bodyContent"][0]["ack"]]);
+    $this->adminLicenseAckDao->shouldReceive('toggleAcknowledgement')->withArgs([$this->getDummyVars()["bodyContent"][0]["id"]]);
+    $this->adminLicenseAckDao->shouldReceive("insertAcknowledgement")
+      ->withArgs([$bodyContent[0]['name'], $bodyContent[0]['ack']])->andReturn(-1);
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream(json_encode($bodyContent));
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+
+    $info = new Info(201, "Acknowledgement added successfully.", InfoType::INFO);
+    $success [] = $info->getArray();
+
+    $expectedResponse = (new ResponseHelper())->withJson(["success" => $success, "errors" => []], 200);
+    $actualResponse = $this->licenseController->handleAdminLicenseAcknowledgement($request,$response,[]);
+    $this->assertEquals(201,$this->getResponseJson($actualResponse)["success"][0]["code"]);
+    $this->assertEmpty($this->getResponseJson($actualResponse)["errors"]);
+    $this->assertEquals($this->getResponseJson($expectedResponse),$this->getResponseJson($actualResponse));
+    $this->assertEquals($expectedResponse->getBody()->getContents(),$actualResponse->getBody()->getContents());
+  }
+
+  public function testHandleAdminLicenseAcknowledgementWithNoPermission()
+  {
+
+    $bodyContent = $this->getDummyVars()["bodyContent"];
+    $bodyContent[0]["update"] = false;
+
+    $this->dbHelper->shouldReceive("doesIdExist")
+      ->withArgs(["license_std_acknowledgement","name", $this->getDummyVars()["bodyContent"][0]["name"]])->andReturn(false);
+    $this->dbManager->shouldReceive("getSingleRow")
+      ->withAnyArgs()->andReturn($this->getDummyVars()["dummyExistingAck"]);
+    $this->adminLicenseAckDao->shouldReceive('updateAcknowledgement')->withArgs([$this->getDummyVars()["bodyContent"][0]["id"], $this->getDummyVars()["bodyContent"][0]["name"], $this->getDummyVars()["bodyContent"][0]["ack"]]);
+    $this->adminLicenseAckDao->shouldReceive('toggleAcknowledgement')->withArgs([$this->getDummyVars()["bodyContent"][0]["id"]]);
+    $this->adminLicenseAckDao->shouldReceive("insertAcknowledgement")
+      ->withArgs([$bodyContent[0]['name'], $bodyContent[0]['ack']])->andReturn(-2);
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream(json_encode($bodyContent));
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+
+    $expectedError = new Info(500, "Error while inserting new acknowledgement.", InfoType::ERROR);
+    $errors [] = $expectedError->getArray();
+
+    $expectedResponse = (new ResponseHelper())->withJson(["success" => [], "errors" => $errors], 200);
+    $actualResponse = $this->licenseController->handleAdminLicenseAcknowledgement($request,$response,[]);
+    $this->assertEquals(500,$this->getResponseJson($actualResponse)["errors"][0]["code"]);
+    $this->assertEmpty($this->getResponseJson($actualResponse)["success"]);
+    $this->assertEquals($this->getResponseJson($expectedResponse),$this->getResponseJson($actualResponse));
+    $this->assertEquals($expectedResponse->getBody()->getContents(),$actualResponse->getBody()->getContents());
+  }
+
+  public function testGetAllLicenseStandardComments()
+  {
+    $dbLicenseStdComments = [
+      array(
+        "lsc_pk" => 1,
+        "name" => "Test License Standard",
+        "comment" => "MIT License Standard",
+        "updated" => "2024-06-16 15:04:08.07613+02",
+        "user_fk" => 3,
+        "is_enabled" => true
+      ),
+    ];
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+
+    $this->licenseStdCommentDao->shouldReceive('getAllComments')
+      ->andReturn($dbLicenseStdComments);
+    $actualResponse = $this->licenseController->getAllLicenseStandardComments($request, $response,[]);
+
+    $this->assertEquals(200,intval($actualResponse->getStatusCode()));
+    $this->assertEquals($dbLicenseStdComments[0]['lsc_pk'], $this->getResponseJson($actualResponse)[0]['id']);
+    $this->assertEquals($dbLicenseStdComments[0]['name'], $this->getResponseJson($actualResponse)[0]['name']);
+    $this->assertEquals($dbLicenseStdComments[0]['comment'], $this->getResponseJson($actualResponse)[0]['comment']);
+    $this->assertEquals($dbLicenseStdComments[0]['is_enabled'], $this->getResponseJson($actualResponse)[0]['is_enabled']);
+
+  }
+
+
+  public function testHandleLicenseStandardComment()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream();
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->licenseController->handleLicenseStandardComment($request, $response,[]);
+
+  }
+
+  /**
+   * @test LicenseController::handleLicenseStandardComment
+   *  - # Check if the status is 400
+   *  - # Check if HttpBadRequestException is thrown with invalid  body
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testHandleLicenseStandardCommentWithInvalidBody()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream(json_encode([]));
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+    $this->expectException(HttpBadRequestException::class);
+
+    $this->licenseController->handleLicenseStandardComment($request,$response,[]);
+  }
+  public function getDummyVars()
+  {
+    $bodyContent = [
+      array(
+        "update" => true,
+        "ack" => "acknowledgement",
+        "name" => "MIT license",
+        "toggle" => "toggle license",
+        "id" => 3
+      )
+    ];
+    $dummyExistingAck = [
+      "la_pk" => 1,
+      "name" => "MIT license",
+      "acknowledgement" => "Permission is hereby granted, free of charge",
+      "updated" => "2024-06-16 15:02:22.245855+02",
+      "user_fk" =>  2,
+      "is_enabled" => false
+    ];
+    $licenseStdComments = [
+      array(
+        "id" =>5,
+        "name" => "Test License Standard",
+        "comment" => "MIT License Standard",
+        "update" => true,
+        "toggle" => true
+      ),
+    ];
+    $existingLicenseStdComment = [
+      "name" => "Test License Standard",
+      "comment" => "MIT License Standard",
+      "update" => true,
+    ];
+
+    $tableName = "license_std_acknowledgement";
+
+    return [
+      "bodyContent" => $bodyContent,
+      "dummyExistingAck" => $dummyExistingAck,
+      "tableName" => $tableName,
+      "licenseStdComments" => $licenseStdComments,
+      "existingLicenseStdComment" => $existingLicenseStdComment
+    ];
+
+  }
+
+  public function testHandleLicenseStandardCommentWithUpdate()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $bodyContent = $this->getDummyVars()['licenseStdComments'];
+    $existingLicenseStdComments = [
+        "name" => "Test License Standard",
+        "comment" => "MIT License Standard",
+        "update" => true,
+    ];
+
+    $this->dbManager->shouldReceive("getSingleRow")
+      ->withAnyArgs()->andReturn($existingLicenseStdComments);
+    $this->licenseStdCommentDao->shouldReceive('updateComment')->withArgs([$bodyContent[0]["id"], $bodyContent[0]["name"], $bodyContent[0]["comment"]]);
+    $this->licenseStdCommentDao->shouldReceive('toggleComment')->withArgs([$bodyContent[0]["id"]]);
+
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream(json_encode($bodyContent));
+    $request = new Request("PUT", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+
+    $expectedInfo = new Info(200, "Successfully updated standard comment", InfoType::INFO);
+    $success [] =$expectedInfo->getArray();
+    $expectedResponse = (new ResponseHelper())->withJson(["success" => $success, "errors" => []], 200);
+
+    $actualResponse = $this->licenseController->handleLicenseStandardComment($request,$response,[]);
+
+    $this->assertEquals(200,$actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),$this->getResponseJson($actualResponse));
+    $this->assertEquals($expectedResponse->getBody()->getContents(),$actualResponse->getBody()->getContents());
+
+  }
+
+
+  public function testHandleLicenseStandardCommentExists()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $bodyContent = $this->getDummyVars()['licenseStdComments'];
+    $bodyContent[0]["update"] = false;
+
+    $this->dbHelper->shouldReceive("doesIdExist")
+      ->withArgs(["license_std_comment","name", $bodyContent[0]['name']])->andReturn(true);
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream(json_encode($bodyContent));
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+
+    $actualResponse = $this->licenseController->handleAdminLicenseAcknowledgement($request,$response,[]);
+    $this->assertEquals(400,$this->getResponseJson($actualResponse)["errors"][0]["code"]);
+    $this->assertEquals([],$this->getResponseJson($actualResponse)["success"]);
+  }
+
+
+  public function testHandleLicenseStandardCommentCreateNew()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $bodyContent = $this->getDummyVars()['licenseStdComments'];
+    $bodyContent[0]["update"] = false;
+
+    $this->dbHelper->shouldReceive("doesIdExist")
+      ->withArgs(["license_std_comment","name", $bodyContent[0]["name"]])->andReturn(false);
+    $this->licenseStdCommentDao->shouldReceive("insertComment")
+      ->withArgs([$bodyContent[0]['name'], $bodyContent[0]['comment']])->andReturn(-1);
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream(json_encode($bodyContent));
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+
+    $info = new Info(201, "Comment with name '". $bodyContent[0]['name'] ."' added successfully.", InfoType::INFO);
+    $success [] = $info->getArray();
+
+    $expectedResponse = (new ResponseHelper())->withJson(["success" => $success, "errors" => []], 200);
+    $actualResponse = $this->licenseController->handleLicenseStandardComment($request,$response,[]);
+
+    $this->assertEquals(201,$this->getResponseJson($actualResponse)["success"][0]["code"]);
+    $this->assertEmpty($this->getResponseJson($actualResponse)["errors"]);
+    $this->assertEquals($this->getResponseJson($expectedResponse),$this->getResponseJson($actualResponse));
+    $this->assertEquals($expectedResponse->getBody()->getContents(),$actualResponse->getBody()->getContents());
+  }
+
+
+  public function testHandleLicenseStandardCommentNoPermission()
+  {
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $bodyContent = $this->getDummyVars()['licenseStdComments'];
+    $bodyContent[0]["update"] = false;
+
+    $this->dbHelper->shouldReceive("doesIdExist")
+      ->withArgs(["license_std_comment","name", $bodyContent[0]["name"]])->andReturn(false);
+    $this->licenseStdCommentDao->shouldReceive("insertComment")
+      ->withArgs([$bodyContent[0]['name'], $bodyContent[0]['comment']])->andReturn(-2);
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream(json_encode($bodyContent));
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+
+    $expectedError = new Info(500, "Error while inserting new comment.", InfoType::ERROR);
+    $errors [] = $expectedError->getArray();
+
+    $expectedResponse = (new ResponseHelper())->withJson(["success" => [], "errors" => $errors], 200);
+    $actualResponse = $this->licenseController->handleLicenseStandardComment($request,$response,[]);
+    $this->assertEquals(500,$this->getResponseJson($actualResponse)["errors"][0]["code"]);
+    $this->assertEmpty($this->getResponseJson($actualResponse)["success"]);
+    $this->assertEquals($this->getResponseJson($expectedResponse),$this->getResponseJson($actualResponse));
+    $this->assertEquals($expectedResponse->getBody()->getContents(),$actualResponse->getBody()->getContents());
   }
 
 
