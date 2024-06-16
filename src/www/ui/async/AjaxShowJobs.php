@@ -205,11 +205,12 @@ class AjaxShowJobs extends \FO_Plugin
   } /* getGeekyScanDetailsForJob() */
 
   /**
-   * @brief Returns an upload job status in array
+   * @brief Returns an upload job status in array for API or browser
    * @param array $jobData
-   * @return Returns an upload job status in array
+   * @param bool $forApi
+   * @return Returns an upload job status in array for API or browser
    **/
-  public function getShowJobsForEachJob($jobData)
+  public function getShowJobsForEachJob($jobData, $forApi = false)
   {
     if (count($jobData) == 0) {
       return array('showJobsData' => "There are no jobs to display");
@@ -222,13 +223,15 @@ class AjaxShowJobs extends \FO_Plugin
         'jobQueue' => $jobs['jobqueue']
       );
       foreach ($jobArr['jobQueue'] as $key => $singleJobQueue) {
-        if (! empty($jobArr['jobQueue'][$key]['jq_starttime'])) {
-          $jobArr['jobQueue'][$key]['jq_starttime'] = Convert2BrowserTime(
-            $jobArr['jobQueue'][$key]['jq_starttime']);
-        }
-        if (! empty($jobArr['jobQueue'][$key]['jq_endtime'])) {
-          $jobArr['jobQueue'][$key]['jq_endtime'] = Convert2BrowserTime(
-            $jobArr['jobQueue'][$key]['jq_endtime']) ;
+        if (! $forApi) {
+          if (! empty($jobArr['jobQueue'][$key]['jq_starttime'])) {
+            $jobArr['jobQueue'][$key]['jq_starttime'] = Convert2BrowserTime(
+              $jobArr['jobQueue'][$key]['jq_starttime']);
+          }
+          if (! empty($jobArr['jobQueue'][$key]['jq_endtime'])) {
+            $jobArr['jobQueue'][$key]['jq_endtime'] = Convert2BrowserTime(
+              $jobArr['jobQueue'][$key]['jq_endtime']) ;
+          }
         }
         if (! empty($singleJobQueue["jq_endtime"])) {
           $numSecs = strtotime($singleJobQueue['jq_endtime']) -
@@ -426,7 +429,7 @@ class AjaxShowJobs extends \FO_Plugin
 
     $pagination = ($totalPages > 1 ? MenuPage($page, $totalPages, $uri) : "");
 
-    $showJobData = $this->getShowJobsForEachJob($jobsInfo);
+    $showJobData = $this->getShowJobsForEachJob($jobsInfo, false);
     return new JsonResponse(
       array(
         'showJobsData' => $showJobData,

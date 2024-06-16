@@ -14,10 +14,13 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class CopyrightAgentPlugin extends AgentPlugin
 {
+  /** @var copyrightDesc */
+  private $copyrightDesc = "Performs file scanning to find text fragments that could be relevant to copyrights, emails, and URLs";
+
   public function __construct()
   {
     $this->Name = "agent_copyright";
-    $this->Title =  _("Copyright/Email/URL/Author Analysis");
+    $this->Title =  _("Copyright/Email/URL/Author Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->copyrightDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "copyright";
 
     parent::__construct();

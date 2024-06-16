@@ -9,10 +9,13 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class OjosAgentPlugin extends AgentPlugin
 {
+  /** @var ojoDesc */
+  private $ojoDesc = "Scan files for licenses using SPDX-License-Identifier";
+
   public function __construct()
   {
     $this->Name = "agent_ojo";
-    $this->Title =  _("Ojo License Analysis, scanning for licenses using SPDX-License-Identifier");
+    $this->Title =  _("Ojo License Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->ojoDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "ojo";
 
     parent::__construct();

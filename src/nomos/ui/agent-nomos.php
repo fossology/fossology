@@ -17,12 +17,14 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class NomosAgentPlugin extends AgentPlugin
 {
+  /** @var nomosDesc */
+  private $nomosDesc = "Scan files for licenses using regular expressions";
 
   public function __construct()
   {
     $this->Name = "agent_nomos";
     $this->Title = _(
-      "Nomos License Analysis, scanning for licenses using regular expressions");
+      "Nomos License Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->nomosDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "nomos";
 
     parent::__construct();
