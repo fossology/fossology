@@ -12,8 +12,14 @@ jobs:
     name: Check license
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
-      - run: |
+      - name: Checkout this repository
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Run Scanners
+        run: |
           docker run --rm --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo \
             -e GITHUB_TOKEN=${{ github.token }} \
             -e GITHUB_PULL_REQUEST=${{ github.event.number }} \
@@ -28,8 +34,30 @@ jobs:
     name: Check copyright
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
-      - run: |
+      - name: Checkout this repository
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Run Scanners (with custom keywords)
+        if: ${{ vars.KEYWORD_CONF_FILE_PATH != '' }}
+        run: |
+          docker run --rm --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo \
+            -v ${{ github.workspace }}/${{ vars.KEYWORD_CONF_FILE_PATH }}:/bin/${{ vars.KEYWORD_CONF_FILE_PATH }} \
+            -e GITHUB_TOKEN=${{ github.token }} \
+            -e GITHUB_PULL_REQUEST=${{ github.event.number }} \
+            -e GITHUB_REPOSITORY=${{ github.repository }} \
+            -e GITHUB_API=${{ github.api_url }} \
+            -e GITHUB_REPO_URL=${{ github.repositoryUrl }} \
+            -e GITHUB_REPO_OWNER=${{ github.repository_owner }} \
+            -e GITHUB_ACTIONS \
+            fossology/fossology:scanner "/bin/fossologyscanner" copyright keyword \
+            --keyword-conf ${{ vars.KEYWORD_CONF_FILE_PATH }}
+      
+      - name: Run Scanners
+        if: ${{ vars.KEYWORD_CONF_FILE_PATH == '' }}
+        run: |
           docker run --rm --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo \
             -e GITHUB_TOKEN=${{ github.token }} \
             -e GITHUB_PULL_REQUEST=${{ github.event.number }} \
