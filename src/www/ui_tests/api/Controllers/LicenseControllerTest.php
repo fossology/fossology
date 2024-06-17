@@ -1130,7 +1130,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   *  - # Test LicenseController::handleAdminLicenseAcknowledgement
+   *  - # Test LicenseController::handleAdminLicenseAcknowledgement()
    *  - # Check the error code is 500 for users without admin permission
    * @return void
    * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
@@ -1170,7 +1170,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   *  - # Test LicenseController::handleLicenseStandardComment
+   *  - # Test LicenseController::handleLicenseStandardComment()
    *  - # Check if the array of licenseStdComments is retrieved
    *  - # Check if the response code is 200
    *  - # Check if no errors along the procedure.
@@ -1210,7 +1210,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   *  - # Test LicenseController::handleLicenseStandardComment
+   *  - # Test LicenseController::handleLicenseStandardComment()
    *  - # Check if HttpForbiddenException for non admin users
    * @return void
    * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
@@ -1232,7 +1232,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
-   * @test LicenseController::handleLicenseStandardComment
+   * @test LicenseController::handleLicenseStandardComment()
    *  - # Check if the status is 400
    *  - # Check if HttpBadRequestException is thrown with invalid  body
    * @return void
@@ -1250,6 +1250,30 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->expectException(HttpBadRequestException::class);
 
     $this->licenseController->handleLicenseStandardComment($request,$response,[]);
+  }
+
+  /**
+   * @return License[]
+   */
+
+  public function getLicenseArgs()
+  {
+    $license = new License(1,
+      "MIT",
+      "MIT License",
+      "GNU GENERAL PUBLIC LICENSE Copyright (C) 1989 Free Software ",
+    );
+
+    $parentLicense = new License(3,
+      "MPL-2.0",
+      "MPL-2.0 License",
+      "GNU GENERAL PUBLIC LICENSE Copyright (C) 1989 Free Software ",
+    );
+
+    return [
+      "license" => $license,
+      "parentLicense" => $parentLicense
+    ];
   }
 
   /**
@@ -1304,7 +1328,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   *  - # Test LicenseController::handleLicenseStandardComment
+   *  - # Test LicenseController::handleLicenseStandardComment()
    *  - # Check if the response is 200 after updating the license standard comment.
    * @return void
    * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
@@ -1346,7 +1370,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   *  - # Test LicenseController::handleLicenseStandardComment
+   *  - # Test LicenseController::handleLicenseStandardComment()
    *  - # Check if creation of new comment fails if there exists the same comment in the database
    *  - # Check if the response code is 400
    * @return void
@@ -1376,7 +1400,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   *  - # Test LicenseController::handleLicenseStandardComment
+   *  - # Test LicenseController::handleLicenseStandardComment()
    *  - # Check if the status is 201 after creating new LicenseStdComment
    *  - # Check if object matches
    * @return void
@@ -1414,7 +1438,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   *  - # Test LicenseController::handleLicenseStandardComment
+   *  - # Test LicenseController::handleLicenseStandardComment()
    *  - # Check is the status is 500 for users who are not admins
    * @return void
    * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
@@ -1479,6 +1503,202 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals(200,$actualResponse->getStatusCode());
 
   }
+
+
+  /**
+   *  -# Test for LicenseController::exportAdminLicenseToCSV() to export license to CSV.
+   *  -# Check if the status code is 403 with HttpForbiddenException
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportAdminLicenseToCSVNotAdmin()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $request = $this->getEmptyRequest("GET");
+    $this->expectException(HttpForbiddenException::class);
+    $actualResponse = $this->licenseController->exportAdminLicenseToCSV($request,new ResponseHelper(), []);
+    $this->assertEquals(200,$actualResponse->getStatusCode());
+
+  }
+
+  /**\
+   * @test
+   * @return Request
+   */
+  public function getEmptyRequest($method)
+  {
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request($method, new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    return $request;
+  }
+
+  /**
+   * @return Request
+   */
+  public function getEmptyRequestWithBody($method, $body)
+  {
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+
+    $request = new Request($method, new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    return $request;
+  }
+
+  /**
+   * @test
+   *  - # Test LicenseController::verifyLicense()
+   *  - # Check if HttpForbiddenException is thrown for unauthorized users
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testVerifyLicenseNotAdmin()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $request = $this->getEmptyRequest("POST");
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->licenseController->verifyLicense($request, new ResponseHelper(),[]);
+
+  }
+
+
+  /**
+   * @test
+   *  - # Test LicenseController::verifyLicense()
+   *  - # Check if HttpBadRequestException is thrown for invalid body
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testVerifyLicenseWithBadRequest()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+
+    $license = $this->getLicenseArgs()["license"];
+    $parentLicense = $this->getLicenseArgs()["parentLicense"];
+    $body = $this->streamFactory->createStream(json_encode([
+      "parentShortname" => $parentLicense->getShortName(),
+    ]));
+    $request = $this->getEmptyRequestWithBody("POST", $body);
+    $this->expectException(HttpBadRequestException::class);
+    $this->licenseController->verifyLicense($request, new ResponseHelper(), [
+      "shortname" => ""
+    ]);
+  }
+
+
+
+  /**
+   * @test
+   *  - # Test LicenseController::verifyLicense()
+   *  - # Check if status code is 400 for License whose shortName is not unique
+   *  - # Check if HttpBadRequestException is thrown
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testVerifyLicenseWithNonUniqueName()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $license = $this->getLicenseArgs()["license"];
+    $parentLicense = $this->getLicenseArgs()["parentLicense"];
+
+    $body = $this->streamFactory->createStream(json_encode([
+      "parentShortname" => $parentLicense->getShortName(),
+    ]));
+
+    $this->licenseDao->shouldReceive("getLicenseByShortName")
+      ->withArgs([$license->getShortName(),$this->groupId])->andReturn($license);
+    $this->licenseDao->shouldReceive("getLicenseByShortName")
+      ->withArgs([$parentLicense->getShortName(), $this->groupId])->andReturn($parentLicense);
+
+    $this->licenseCandidatePlugin->shouldReceive("verifyCandidate")
+      ->withArgs([$license->getId(),$license->getShortName(), $parentLicense->getId()])
+      ->andReturn(false);
+    $request = $this->getEmptyRequestWithBody("POST", $body);
+
+    $this->expectException(HttpBadRequestException::class);
+   $this->licenseController->verifyLicense($request, new ResponseHelper(), ["shortname" => $license->getShortName()]);
+
+  }
+
+
+  /**
+   * @test
+   *  - # Test LicenseController::verifyLicense()
+   *  - # Check if status code is 404 for License which is not found
+   *  - # Check if HttpBadRequestException is thrown
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testVerifyNotFoundLicense()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $license = $this->getLicenseArgs()["license"];
+    $parentLicense = $this->getLicenseArgs()["parentLicense"];
+
+    $body = $this->streamFactory->createStream(json_encode([
+      "parentShortname" => $parentLicense->getShortName(),
+    ]));
+
+    $this->licenseDao->shouldReceive("getLicenseByShortName")
+      ->withArgs([$license->getShortName(),$this->groupId])->andReturn([]);
+    $this->licenseDao->shouldReceive("getLicenseByShortName")
+      ->withArgs([$parentLicense->getShortName(), $this->groupId])->andReturn($parentLicense);
+
+    $request = $this->getEmptyRequestWithBody("POST", $body);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->licenseController->verifyLicense($request, new ResponseHelper(), ["shortname" => $license->getShortName()]);
+
+  }
+
+  /**
+   * @test
+   *  - # Test LicenseController::verifyLicense()
+   *  - # Check if status codes match
+   *  - # Check of expected and actual response bodies match
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testVerifyLicense()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $license = $this->getLicenseArgs()["license"];
+    $parentLicense = $this->getLicenseArgs()["parentLicense"];
+
+    $body = $this->streamFactory->createStream(json_encode([
+      "parentShortname" => $parentLicense->getShortName(),
+    ]));
+
+    $this->licenseDao->shouldReceive("getLicenseByShortName")
+      ->withArgs([$license->getShortName(),$this->groupId])->andReturn($license);
+    $this->licenseDao->shouldReceive("getLicenseByShortName")
+      ->withArgs([$parentLicense->getShortName(), $this->groupId])->andReturn($parentLicense);
+
+    $this->licenseCandidatePlugin->shouldReceive("verifyCandidate")
+      ->withArgs([$license->getId(),$license->getShortName(), $parentLicense->getId()])
+      ->andReturn(true);
+    $request = $this->getEmptyRequestWithBody("POST", $body);
+
+    $info = new Info(200, 'Successfully verified candidate ('.$license->getShortName().')'.' as variant of ('.$parentLicense->getShortName().').', InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson([
+      "code" => $info->getCode(),
+      "message" => $info->getMessage(),
+      "type" => $info->getType()
+    ]);
+
+    $actualResponse = $this->licenseController->verifyLicense($request, new ResponseHelper(), ["shortname" => $license->getShortName()]);
+
+    $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
+
+  }
+
+
+
+
 
   /**
    * @test
