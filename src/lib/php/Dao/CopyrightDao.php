@@ -159,6 +159,17 @@ class CopyrightDao
     $this->dbManager->execute(__METHOD__, array($decisionId, $pfileId));
   }
 
+  public function updateDecision($tableName,$pfileId, $decisionId, $content)
+  {
+    $primaryColumn = $tableName . '_pk';
+    $this->dbManager->prepare(__METHOD__,
+      "UPDATE $tableName
+        SET textfinding = $1
+      WHERE $primaryColumn = $2
+        AND pfile_fk = $3");
+    $this->dbManager->execute(__METHOD__, array($content, $decisionId, $pfileId));
+  }
+
   /**
    * @param $uploadFk
    * @param $agentId
