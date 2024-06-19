@@ -188,6 +188,19 @@ class CopyrightController extends RestController
   }
 
   /**
+   * Delete user copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileUserCopyright($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_COPYRIGHT_USERFINDINGS);
+  }
+
+  /**
    * Delete email for a particular file
    *
    * @param  ServerRequestInterface $request
@@ -276,6 +289,19 @@ class CopyrightController extends RestController
   public function updateFileCopyright($request, $response, $args)
   {
     return $this->updateFileCx($request, $response, $args, self::TYPE_COPYRIGHT);
+  }
+
+  /**
+   * Update user copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileUserCopyright($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_COPYRIGHT_USERFINDINGS);
   }
 
   /**
@@ -370,6 +396,19 @@ class CopyrightController extends RestController
   }
 
   /**
+   * Restore user copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileUserCopyright($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_COPYRIGHT_USERFINDINGS);
+  }
+
+  /**
    * Restore email for a particular file
    *
    * @param  ServerRequestInterface $request
@@ -448,7 +487,7 @@ class CopyrightController extends RestController
   }
 
   /**
-   * Get total number of copyrights for a particular upload-tree
+   * Get total number of scanner copyrights
    *
    * @param ServerRequestInterface $request
    * @param ResponseHelper $response
@@ -458,6 +497,35 @@ class CopyrightController extends RestController
    */
   public function getTotalFileCopyrights($request, $response, $args)
   {
+    return $this->getTotalCX($request, $response, $args, self::TYPE_COPYRIGHT);
+  }
+
+  /**
+   * Get total number of user copyright findings
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function getTotalFileUserCopyrights($request, $response, $args)
+  {
+    return $this->getTotalCX($request, $response, $args, self::TYPE_COPYRIGHT_USERFINDINGS);
+  }
+
+  /**
+   * Get total number of copyrights for a particular upload-tree
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  private function getTotalCX($request, $response, $args, $cxType)
+  {
+    $version = ApiVersion::getVersion($request);
     $uploadPk = $args["id"];
     $uploadTreeId = $args["itemId"];
     $query = $request->getQueryParams();
@@ -479,10 +547,16 @@ class CopyrightController extends RestController
       throw new HttpBadRequestException("Bad Request. Invalid query " .
         "parameter, expected values 'active' or 'inactive");
     }
-    $agentId = $this->copyrightHist->getAgentId($uploadPk, 'copyright_ars');
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getUploadtreeTableName($uploadPk);
-    $returnVal = $this->copyrightDao->getTotalCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName, $agentId, 'statement', $statusVal);
-    return $response->withJson(array("total_copyrights" => intval($returnVal)), 200);
+
+    if ($cxType == self::TYPE_COPYRIGHT) {
+      $agentId = $this->copyrightHist->getAgentId($uploadPk, 'copyright_ars');
+      $returnVal = $this->copyrightDao->getTotalCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName, $agentId, 'statement', $statusVal);
+    } else if ($cxType == self::TYPE_COPYRIGHT_USERFINDINGS) {
+      $copyrightData = $this->copyrightDao->getUserCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName, 'userfindingcopyright', $statusVal);
+      $returnVal = $copyrightData[1];
+    }
+    return $response->withJson(array($version == ApiVersion::V2 ? "totalCopyrights" : "total_copyrights" => $returnVal), 200);
   }
 
   /**
@@ -626,8 +700,18 @@ class CopyrightController extends RestController
     $this->isItemExists($uploadPk, $uploadTreeId);
 
     $uploadTreeTableName = $uploadDao->getUploadTreeTableName($uploadTreeId);
-    $item = $uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
-    $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'delete');
+    if (self::TYPE_COPYRIGHT_USERFINDINGS == $cxType) {
+      $tableName = $cpTable."_decision";
+      $decisions = $this->copyrightDao->getDecisionsFromHash($tableName, $copyrightHash,
+        $uploadPk, $uploadTreeTableName);
+      foreach ($decisions as $decision) {
+        $this->copyrightDao->removeDecision($tableName, $decision['pfile_fk'],
+          $decision[$tableName . '_pk']);
+      }
+    } else {
+      $item = $uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+      $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'delete');
+    }
     $returnVal = new Info(200, "Successfully removed $delName.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
@@ -654,8 +738,18 @@ class CopyrightController extends RestController
     $this->isItemExists($uploadPk, $uploadTreeId);
 
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
-    $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
-    $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'rollback');
+    if (self::TYPE_COPYRIGHT_USERFINDINGS == $cxType) {
+      $tableName = $cpTable."_decision";
+      $decisions = $this->copyrightDao->getDecisionsFromHash($tableName, $copyrightHash,
+        $uploadPk, $uploadTreeTableName);
+      foreach ($decisions as $decision) {
+        $this->copyrightDao->undoDecision($tableName, $decision['pfile_fk'],
+          $decision[$tableName . '_pk']);
+      }
+    } else {
+      $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+      $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'rollback');
+    }
     $returnVal = new Info(200, "Successfully restored $resName.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), 200);
   }
@@ -685,8 +779,19 @@ class CopyrightController extends RestController
     $this->isItemExists($uploadPk, $uploadTreeId);
 
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
-    $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
-    $this->copyrightDao->updateTable($item, $copyrightHash, $content, $userId, $cpTable);
+    if (self::TYPE_COPYRIGHT_USERFINDINGS == $cxType) {
+      $tableName = $cpTable."_decision";
+      $decisions = $this->copyrightDao->getDecisionsFromHash($tableName, $copyrightHash,
+        $uploadPk, $uploadTreeTableName);
+      foreach ($decisions as $decision) {
+        $this->copyrightDao->saveDecision($tableName, $decision['pfile_fk'], $decision['user_fk'],
+          $decision['clearing_decision_type_fk'], $decision['description'],
+          $content, $decision['comment'], $decision[$tableName . '_pk']);
+      }
+    } else {
+      $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+      $this->copyrightDao->updateTable($item, $copyrightHash, $content, $userId, $cpTable);
+    }
     $returnVal = new Info(200, "Successfully Updated $resName.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), 200);
   }
@@ -703,6 +808,10 @@ class CopyrightController extends RestController
       case self::TYPE_COPYRIGHT:
         $dataType = 'statement';
         $dispName = 'copyright';
+        break;
+      case self::TYPE_COPYRIGHT_USERFINDINGS:
+        $dataType = 'statement';
+        $dispName = 'user-copyright';
         break;
       case self::TYPE_EMAIL:
         $dispName = $dataType = 'email';
