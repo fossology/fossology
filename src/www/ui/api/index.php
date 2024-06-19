@@ -204,7 +204,6 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/bulk-history', UploadTreeController::class . ':getBulkHistory');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/clearing-history', UploadTreeController::class . ':getClearingHistory');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/highlight', UploadTreeController::class . ':getHighlightEntries');
-    $app->get('/{id:\\d+}/item/{itemId:\\d+}/totalcopyrights', CopyrightController::class . ':getTotalFileCopyrights');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/tree/view', UploadTreeController::class . ':getTreeView');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/info', FileInfoController::class . ':getItemInfo');
     $app->post('/{id:\\d+}/item/{itemId:\\d+}/bulk-scan', UploadTreeController::class . ':scheduleBulkScan');
@@ -217,7 +216,12 @@ $app->group('/uploads',
       $app->delete('/copyrights/{hash:.*}', CopyrightController::class . ':deleteFileCopyright');
       $app->patch('/copyrights/{hash:.*}', CopyrightController::class . ':restoreFileCopyright');
       $app->put('/copyrights/{hash:.*}', CopyrightController::class . ':updateFileCopyright');
+      $app->get('/totalcopyrights', CopyrightController::class . ':getTotalFileCopyrights');
       $app->get('/user-copyrights', CopyrightController::class . ':getFileUserCopyrights');
+      $app->delete('/user-copyrights/{hash:.*}', CopyrightController::class . ':deleteFileUserCopyright');
+      $app->patch('/user-copyrights/{hash:.*}', CopyrightController::class . ':restoreFileUserCopyright');
+      $app->put('/user-copyrights/{hash:.*}', CopyrightController::class . ':updateFileUserCopyright');
+      $app->get('/totalusercopyrights', CopyrightController::class . ':getTotalFileUserCopyrights');
       $app->get('/emails', CopyrightController::class . ':getFileEmail');
       $app->delete('/emails/{hash:.*}', CopyrightController::class . ':deleteFileEmail');
       $app->patch('/emails/{hash:.*}', CopyrightController::class . ':restoreFileEmail');
