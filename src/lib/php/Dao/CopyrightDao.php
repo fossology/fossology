@@ -665,6 +665,7 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
     }
 
     $params = array($left, $right, $upload_pk);
+    $orderString = 'ORDER BY copyright_count desc, textfinding desc';
 
     $activatedClause = "cd.is_enabled = 'false'";
     if ($activated) {
@@ -683,7 +684,7 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
     $countAllQuery = "SELECT count(*) FROM (SELECT
     (CASE WHEN (cd.textfinding IS NULL OR cd.textfinding = '') THEN '' ELSE cd.textfinding END) AS mcontent
     $unorderedQuery GROUP BY cd.textfinding) as K;";
-    $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__,$tableName . "count.all" . ($activated ? '' : '_deactivated'));
+    $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__ . $tableName . "count.all" . ($activated ? '' : '_deactivated'));
     $iTotalRecords = $iTotalRecordsRow['count'];
 
     $range = "";
@@ -692,8 +693,8 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
     $params[] = $limit;
     $range .= ' LIMIT $' . count($params);
 
-    $sql = "SELECT cd.textfinding AS content, cd.hash AS hash, COUNT(DISTINCT cd.copyright_decision_pk) AS copyright_count " .
-    "$unorderedQuery $grouping $range";
+    $sql = "SELECT cd.textfinding AS content, cd.hash AS hash, COUNT(*) AS copyright_count " .
+    "$unorderedQuery $grouping $orderString $range";
     $statement = __METHOD__ . $tableName . $uploadTreeTableName . ($activated ? '' : '_deactivated');
     $rows = $this->dbManager->getRows($sql, $params, $statement);
 
