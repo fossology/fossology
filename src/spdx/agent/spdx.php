@@ -917,7 +917,7 @@ class SpdxAgent extends Agent
           $localList[$i + 1]->getLicenseObj()->getSpdxId()) {
         $newShortName = $localList[$i + 1]->getLicenseObj()->getShortName();
         if (! StringOperation::stringStartsWith(
-            $localList[$i + 1]->getLicenseObj()->getSpdxId(),
+            $localList[$i + 1]->getLicenseObj()->getShortName(),
             LicenseRef::SPDXREF_PREFIX)) {
           $newShortName = LicenseRef::SPDXREF_PREFIX .
             $localList[$i + 1]->getLicenseObj()->getShortName();
