@@ -202,12 +202,12 @@ class Highlight
   public function getArray()
   {
     return array(
-      "start" => $this->start,
-      "end" => $this->end,
-      "type" => $this->type,
+      "start" => intval($this->start),
+      "end" => intval($this->end),
+      "type" => $this->type == null ? Highlight::UNDEFINED : $this->type,
       "licenseId" => $this->licenseId,
-      "refStart" => $this->refStart,
-      "refEnd" => $this->refEnd,
+      "refStart" => $this->refStart == -1 ? 0 : $this->refStart,
+      "refEnd" => $this->refEnd == -1 ? 0 : $this->refEnd,
       "infoText" => $this->infoText,
       "htmlElement" => $this->htmlElement
     );
