@@ -44,9 +44,9 @@ class agent_nomos_once extends FO_Plugin
   /**
    * @brief Analyze one uploaded file.
    * @param string $FilePath the filepath to the file to analyze.
-   * @return string $V, html to display the results.
+   * @return mixed If $getHighlightInfo is true, returns an array with display html, keyword highlights, and license highlights. If false, returns only display html
    */
-  function AnalyzeFile($FilePath)
+  public function AnalyzeFile($FilePath, $getHighlightInfo = false)
   {
     global $SYSCONFDIR;
 
@@ -61,6 +61,9 @@ class agent_nomos_once extends FO_Plugin
       '/License #(?P<name>[^#]*)# at (?P<position>\d+), length (?P<length>\d+),/',
       $licenses[1], $this->HighlightInfoLicenses);
 
+    if ($getHighlightInfo) {
+      return array($licenses[0], $this->HighlightInfoKeywords, $this->HighlightInfoLicenses);
+    }
     return ($licenses[0]);
   }
 
