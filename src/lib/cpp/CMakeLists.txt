@@ -40,7 +40,8 @@ target_sources(fossologyCPP
 target_link_libraries(fossologyCPP
     PRIVATE
         fossology
-        ${icu-uc_LIBRARIES}
+        ICU::uc
+        ICU::i18n
 )
 
 target_include_directories(fossologyCPP
