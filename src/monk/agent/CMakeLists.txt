@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
 #]=======================================================================]
 
 set(FO_CWD ${CMAKE_CURRENT_SOURCE_DIR})
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FO_C_FLAGS} -std=c99 -Wextra -fopenmp")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FO_C_FLAGS} -std=c99 -Wextra")
 
 include_directories(
     ${glib_INCLUDE_DIRS}
@@ -18,7 +18,7 @@ add_executable(squareBuilder EXCLUDE_FROM_ALL buildSquareVisitor.c)
 target_link_libraries(squareBuilder PRIVATE fossology m magic)
 add_custom_command(
     OUTPUT _squareVisitor.c _squareVisitor.h
-    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${FO_CWD}/generator $<TARGET_FILE_DIR:squareBuilder>
     COMMAND $<TARGET_FILE_DIR:squareBuilder>/genSquareVisitor
     WORKING_DIRECTORY $<TARGET_FILE_DIR:squareBuilder>
@@ -51,12 +51,12 @@ foreach(FO_MONK_TARGET monk monk_exec monk_cov monkbulk)
         ${FO_CWD}/serialize.c
         ${FO_CWD}/${MONK_XSRC}
         $<TARGET_FILE_DIR:squareBuilder>/_squareVisitor.c)
-    target_link_libraries(${FO_MONK_TARGET} PRIVATE fossology magic)
-    target_compile_definitions(${FO_MONK_TARGET} 
+    target_link_libraries(${FO_MONK_TARGET} PRIVATE fossology magic OpenMP::OpenMP_C)
+    target_compile_definitions(${FO_MONK_TARGET}
         PRIVATE _FILE_OFFSET_BITS=64
         VERSION_S="${FO_VERSION}"
         COMMIT_HASH_S="${FO_COMMIT_HASH}")
-    target_include_directories(${FO_MONK_TARGET} 
+    target_include_directories(${FO_MONK_TARGET}
         PRIVATE $<TARGET_FILE_DIR:squareBuilder>)
 endforeach()
 
@@ -64,10 +64,10 @@ set_target_properties(monk_exec PROPERTIES OUTPUT_NAME monk)
 
 install(TARGETS monk_exec
     RUNTIME
-    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent 
+    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent
     COMPONENT monk)
 
 install(TARGETS monkbulk
     RUNTIME
-    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}bulk/agent 
+    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}bulk/agent
     COMPONENT monkbulk)

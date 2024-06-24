@@ -17,11 +17,11 @@ if(NOT TARGET phpunit)
     prepare_phpunit()
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FO_C_FLAGS} -std=c99 -Wextra -fopenmp")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FO_C_FLAGS} -std=c99 -Wextra")
 
 add_executable(test_monk "")
-target_sources(test_monk 
-    PRIVATE 
+target_sources(test_monk
+    PRIVATE
     ${FO_CWD}/Unit/run_tests.c
     ${FO_CWD}/Unit/test_string_operations.c
     ${FO_CWD}/Unit/test_file_operations.c
@@ -33,9 +33,9 @@ target_sources(test_monk
     ${FO_CWD}/Unit/test_database.c
     ${FO_CWD}/Unit/test_encoding.c
     ${FO_CWD}/Unit/test_serialize.c)
-target_compile_definitions(test_monk 
+target_compile_definitions(test_monk
     PRIVATE _FILE_OFFSET_BITS=64 AGENT_DIR="${CMAKE_CURRENT_BINARY_DIR}/..")
-target_include_directories(test_monk 
+target_include_directories(test_monk
     PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${glib_INCLUDE_DIRS}
         ${PostgreSQL_INCLUDE_DIRS} ${FO_CLIB_SRC} ${FO_CWD}/../agent)
 target_link_libraries(test_monk
@@ -48,6 +48,6 @@ add_test(NAME monk_functional_scheduler_test
 
 add_test(NAME monk_functional_cli_test
     COMMAND ${PHPUNIT} --log-junit monk-Xunit2.xml --bootstrap ${PHPUNIT_BOOTSTRAP} ${CMAKE_CURRENT_LIST_DIR}/Functional/cliTest.php)
-    
+
 add_test(NAME monk_functional_bulk_test
     COMMAND ${PHPUNIT} --log-junit monk-Xunit3.xml --bootstrap ${PHPUNIT_BOOTSTRAP} ${CMAKE_CURRENT_LIST_DIR}/Functional/bulkTest.php)

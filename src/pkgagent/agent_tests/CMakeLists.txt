@@ -19,11 +19,11 @@ endif()
 
 file(COPY ${FO_CWD}/testdata DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FO_C_FLAGS} -Wextra -fopenmp")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FO_C_FLAGS} -Wextra")
 
 add_executable(test_pkgagent "")
-target_sources(test_pkgagent 
-    PRIVATE 
+target_sources(test_pkgagent
+    PRIVATE
     ${FO_CWD}/Unit/testRun.c
     ${FO_CWD}/Unit/testGetFieldValue.c
     ${FO_CWD}/Unit/testGetMetadata.c
@@ -33,13 +33,13 @@ target_sources(test_pkgagent
     ${FO_CWD}/Unit/testGetMetadataDebBinary.c
     ${FO_CWD}/../agent/pkgagent.c)
 target_compile_definitions(test_pkgagent PRIVATE _FILE_OFFSET_BITS=64)
-target_include_directories(test_pkgagent 
+target_include_directories(test_pkgagent
     PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${glib_INCLUDE_DIRS}
         ${PostgreSQL_INCLUDE_DIRS} ${FO_CLIB_SRC} ${FO_CWD}/../agent
         ${rpm_INCLUDE_DIRS})
-target_link_libraries(test_pkgagent 
+target_link_libraries(test_pkgagent
     PRIVATE fossology cunit focunit ${rpm_LIBRARIES} fodbreposysconf pthread
-        ${rpm_LIBRARIES})
+        ${rpm_LIBRARIES} OpenMP::OpenMP_C)
 
 add_test(pkgagent_unit_test test_pkgagent)
 
