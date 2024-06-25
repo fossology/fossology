@@ -30,11 +30,26 @@ jobs:
             -e GITHUB_ACTIONS \
             fossology/fossology:scanner "/bin/fossologyscanner" nomos ojo
 
+      - name: Run fossology scanner in differential mode
+        if: ${{ vars.FROM_TAG != '' }} && ${{ vars.TO_TAG != '' }}
+        run : |
+          docker run --rm --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo \
+            -e GITHUB_TOKEN=${{ github.token }} \
+            -e GITHUB_PULL_REQUEST=${{ github.event.number }} \
+            -e GITHUB_REPOSITORY=${{ github.repository }} \
+            -e GITHUB_API=${{ github.api_url }} \
+            -e GITHUB_REPO_URL=${{ github.repositoryUrl }} \
+            -e GITHUB_REPO_OWNER=${{ github.repository_owner }} \
+            -e GITHUB_ACTIONS \
+            fossology/fossology:scanner "/bin/fossologyscanner" nomos ojo \
+            differential --tags ${{ vars.FROM_TAG }} ${{ vars.TO_TAG }}
+
   check-copyright:
     name: Check copyright
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout this repository
+
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Set up QEMU
@@ -67,3 +82,17 @@ jobs:
             -e GITHUB_REPO_OWNER=${{ github.repository_owner }} \
             -e GITHUB_ACTIONS \
             fossology/fossology:scanner "/bin/fossologyscanner" copyright keyword
+
+      - name: Run fossology scanner in differential mode
+        if: ${{ vars.FROM_TAG != '' }} && ${{ vars.TO_TAG != '' }}
+        run : |
+          docker run --rm --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo \
+            -e GITHUB_TOKEN=${{ github.token }} \
+            -e GITHUB_PULL_REQUEST=${{ github.event.number }} \
+            -e GITHUB_REPOSITORY=${{ github.repository }} \
+            -e GITHUB_API=${{ github.api_url }} \
+            -e GITHUB_REPO_URL=${{ github.repositoryUrl }} \
+            -e GITHUB_REPO_OWNER=${{ github.repository_owner }} \
+            -e GITHUB_ACTIONS \
+            fossology/fossology:scanner "/bin/fossologyscanner" copyright keyword \
+            differential --tags ${{ vars.FROM_TAG }} ${{ vars.TO_TAG }}
