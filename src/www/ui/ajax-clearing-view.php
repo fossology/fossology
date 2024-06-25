@@ -90,14 +90,18 @@ class AjaxClearingView extends FO_Plugin
   {
     $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
 
-    $clearingDecWithLicenses = $this->clearingDao->getFileClearings($itemTreeBounds, $groupId, false, true);
+    $clearingDecWithLicenses = $this->clearingDao->getFileClearings($itemTreeBounds, $groupId, false, true, true);
 
     $table = array();
     $scope = new DecisionScopes();
     foreach ($clearingDecWithLicenses as $clearingDecision) {
       $licenseOutputs = array();
       foreach ($clearingDecision->getClearingLicenses() as $lic) {
-        $shortName = $lic->getShortName();
+        if ($lic->getShortName()==='License Expression') {
+          $shortName = $lic->getLicenseRef()->getExpression($this->licenseDao, $groupId);
+        } else {
+          $shortName = $lic->getShortName();
+        }
         $licenseOutputs[$shortName] = $lic->isRemoved() ? "<span style=\"color:red\">$shortName</span>" : $shortName;
       }
       ksort($licenseOutputs, SORT_STRING);
@@ -133,11 +137,16 @@ class AjaxClearingView extends FO_Plugin
 
     list ($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId);
 
-    $licenseRefs = $this->licenseDao->getConclusionLicenseRefs(Auth::getGroupId(), $_GET['sSearch'], $orderAscending, array_keys($licenseDecisions));
+    $licenseRefs = $this->licenseDao->getConclusionLicenseRefs(Auth::getGroupId(), $_GET['sSearch'], $orderAscending, array_keys($licenseDecisions), true);
     $licenses = array();
     foreach ($licenseRefs as $licenseRef) {
       $licenseId = $licenseRef->getId();
-      $shortNameWithFullTextLink = $this->urlBuilder->getLicenseTextUrl($licenseRef);
+      if ($licenseRef->getShortName() == "License Expression") {
+        $fullName = $licenseRef->getFullName();
+        $shortNameWithFullTextLink = "<p>$fullName</p>";
+      } else {
+        $shortNameWithFullTextLink = $this->urlBuilder->getLicenseTextUrl($licenseRef);
+      }
       $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\">"
                   . "<img src=\"images/space_16.png\" class=\"add\"/></a>";
 
@@ -162,7 +171,7 @@ class AjaxClearingView extends FO_Plugin
   {
     $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
     $aaData = $this->getCurrentSelectedLicensesTableData($itemTreeBounds,
-      $groupId, $orderAscending);
+      $groupId, $orderAscending, true);
 
     return array(
       'sEcho' => intval($_GET['sEcho']),
@@ -184,6 +193,9 @@ class AjaxClearingView extends FO_Plugin
     $uploadTreeId = GetParm("item", PARM_INTEGER);
     $licenseId = GetParm("licenseId", PARM_INTEGER);
     $sort0 = GetParm("sSortDir_0", PARM_STRING);
+    $ast = GetParm("ast", PARM_STRING);
+    $expressionId = GetParm("astId", PARM_INTEGER);
+    $bulk = filter_var(GetParm("bulk", PARM_STRING), FILTER_VALIDATE_BOOL);
 
     $orderAscending = isset($sort0) ? $sort0 === "asc" : true;
 
@@ -196,6 +208,11 @@ class AjaxClearingView extends FO_Plugin
         return new JsonResponse(
           $this->doClearings($orderAscending, $groupId, $uploadId, $uploadTreeId));
 
+      case "licenseDecisionsData":
+        return new JsonResponse(
+          $this->getCurrentSelectedLicensesTableData($this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId), $groupId, $orderAscending, false, false)
+        );
+
       case "addLicense":
         $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId,
           $licenseId, false, ClearingEventTypes::USER);
@@ -205,6 +222,9 @@ class AjaxClearingView extends FO_Plugin
         $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId,
           $licenseId, true, ClearingEventTypes::USER);
         return new JsonResponse();
+
+      case "saveExpression":
+        return new JsonResponse($this->saveExpression($uploadId, $uploadTreeId, $userId, $groupId, $ast, $expressionId, $bulk));
 
       case "makeMainLicense":
         $this->clearingDao->makeMainLicense($uploadId, $groupId, $licenseId);
@@ -248,6 +268,10 @@ class AjaxClearingView extends FO_Plugin
         }
         return $this->createPlainResponse("success");
 
+      case "getLicense":
+        $license = $this->licenseDao->getLicenseById($licenseId, $groupId);
+        return new JsonResponse($license->getArray());
+
       default:
         return $this->createPlainResponse("fail");
     }
@@ -275,9 +299,11 @@ class AjaxClearingView extends FO_Plugin
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @param boolean $orderAscending
+   * @param boolean $includeExpressions
+   * @param boolean $tableData
    * @return array
    */
-  public function getCurrentSelectedLicensesTableData(ItemTreeBounds $itemTreeBounds, $groupId, $orderAscending)
+  public function getCurrentSelectedLicensesTableData(ItemTreeBounds $itemTreeBounds, $groupId, $orderAscending, $includeExpressions = false, $tableData=true)
   {
     $uploadTreeId = $itemTreeBounds->getItemId();
     $uploadId = $itemTreeBounds->getUploadId();
@@ -287,12 +313,14 @@ class AjaxClearingView extends FO_Plugin
       ));
 
     list ($addedClearingResults, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentClearings(
-      $itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
+      $itemTreeBounds, $groupId, LicenseMap::CONCLUSION, $includeExpressions);
     $licenseEventTypes = new ClearingEventTypes();
 
     $mainLicIds = $this->clearingDao->getMainLicenseIds($uploadId, $groupId);
 
     $table = array();
+    $expressionTable = array();
+    $data = array();
     /* @var $clearingResult ClearingResult */
     foreach ($addedClearingResults as $licenseShortName => $clearingResult) {
       $licenseId = $clearingResult->getLicenseId();
@@ -316,16 +344,32 @@ class AjaxClearingView extends FO_Plugin
       $actionLink = "<a href=\"javascript:;\" onclick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></a>";
       if (in_array($clearingResult->getLicenseId(), $mainLicIds)) {
         $tooltip = _('This is a main license for the upload. Click to discard selection.');
-        $actionLink .= " <a href=\"javascript:;\" onclick=\"removeMainLicense($uploadId, $licenseId);\"><img src=\"images/icons/star_filled_16.png\" alt=\"mainLicense\" title=\"$tooltip\" border=\"0\"/></a>";
+        $mainLicenseLink = " <a href=\"javascript:;\" onclick=\"removeMainLicense($uploadId, $licenseId);\"><img src=\"images/icons/star_filled_16.png\" alt=\"mainLicense\" title=\"$tooltip\" border=\"0\"/></a>";
       } else {
         $tooltip = _('Click to select this as a main license for the upload.');
-        $actionLink .= " <a href=\"javascript:;\" onclick=\"makeMainLicense($uploadId, $licenseId);\"><img src=\"images/icons/star_16.png\" alt=\"noMainLicense\" title=\"$tooltip\" border=\"0\"/></a>";
+        $mainLicenseLink = " <a href=\"javascript:;\" onclick=\"makeMainLicense($uploadId, $licenseId);\"><img src=\"images/icons/star_16.png\" alt=\"noMainLicense\" title=\"$tooltip\" border=\"0\"/></a>";
       }
+      $actionLink .= $mainLicenseLink;
       $detectorType = $this->licenseDao->getLicenseById($clearingResult->getLicenseId(), $groupId)->getDetectorType();
       $id = "$uploadTreeId,$licenseId";
       $reportInfoField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $reportInfo, 2, $detectorType);
       $acknowledgementField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $acknowledgement, 3);
       $commentField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $comment, 4);
+      if ($includeExpressions && $clearingResult->getLicenseRef()->getShortName() === 'License Expression') {
+        $actionLink = $mainLicenseLink . " <a href=\"javascript:;\" onclick=\"editExpression($licenseId);\"><img src=\"images/button_edit.png\" alt=\"editExpression\" title=\"Edit Expression\" border=\"0\"/></a><a href=\"javascript:;\" onclick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></a>";
+        $expression = $clearingResult->getLicenseRef()->getFullName();
+        $ast = json_decode($expression, true);
+        $expression = $this->buildExpression($ast, $groupId);
+        $expressionTable[$licenseShortName] = array('DT_RowId' => $id,
+          '0' => $actionLink,
+          '1' => $expression,
+          '2' => "",
+          '3' => "",
+          '4' => $acknowledgementField,
+          '5' => "");
+        $data[] = $clearingResult->getLicenseRef()->getArray();
+        continue;
+      }
 
       $table[$licenseShortName] = array('DT_RowId' => $id,
           '0' => $actionLink,
@@ -334,10 +378,11 @@ class AjaxClearingView extends FO_Plugin
           '3' => $reportInfoField,
           '4' => $acknowledgementField,
           '5' => $commentField);
+      $data[] = $clearingResult->getLicenseRef()->getArray();
     }
 
     foreach ($removedLicenses as $licenseShortName => $clearingResult) {
-      if ($clearingResult->getAgentDecisionEvents()) {
+      if ($clearingResult->getAgentDecisionEvents() && $clearingResult->getLicenseRef()->getShortName() != 'License Expression') {
         $agents = $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId);
         $licenseShortNameWithLink = $this->urlBuilder->getLicenseTextUrl($clearingResult->getLicenseRef());
         $licenseId = $clearingResult->getLicenseId();
@@ -358,7 +403,10 @@ class AjaxClearingView extends FO_Plugin
       }
     }
 
-    return array_values($this->sortByKeys($table, $orderAscending));
+    if ($tableData) {
+      return array_values(array_merge($expressionTable, $this->sortByKeys($table, $orderAscending)));
+    }
+    return $data;
   }
 
   /**
@@ -403,6 +451,50 @@ class AjaxClearingView extends FO_Plugin
       $results[] = $agentName . (empty($matchTexts) ? "" : ": $matchTexts");
     }
     return $results;
+  }
+
+  /**
+   * @param $node
+   * @param int $groupId
+   * @return string
+   */
+  protected function buildExpression($node, $groupId)
+  {
+    if ($node['type'] === 'License') {
+      return $this->licenseDao->getLicenseById($node['value'], $groupId)->getShortName();
+    }
+    $left = $this->buildExpression($node['left'], $groupId);
+    $right = $this->buildExpression($node['right'], $groupId);
+    $operator = $node['value'];
+    return "($left $operator $right)";
+  }
+
+  /**
+   * @param int $uploadId
+   * @param int $uploadTreeId
+   * @param int $userId
+   * @param int $groupId
+   * @param $ast
+   * @param int $expressionId
+   */
+  protected function saveExpression($uploadId, $uploadTreeId, $userId, $groupId, $ast, $expressionId=0, $bulk=false)
+  {
+    $expression = $this->licenseDao->getExpressionByAST($ast);
+    if (is_null($expression)) {
+      $rf_pk = $this->licenseDao->insertExpression($ast);
+    } else {
+      $rf_pk = $expression->getId();
+    }
+    if ($bulk) {
+      return array('expressionId' => $rf_pk);
+    }
+    if ($expressionId>0) {
+      $this->clearingDao->removeMainLicense($uploadId, $groupId, $expressionId);
+      $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId,
+            $expressionId, true, ClearingEventTypes::USER);
+    }
+    $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId,
+          $rf_pk, false, ClearingEventTypes::USER);
   }
 
   /**

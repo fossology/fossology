@@ -26,7 +26,7 @@ struct ojomatch
    * License ref of the match if found
    */
   long int start, end, len, license_fk;
-
+  bool isExpression;
   /**
    * @var
    * Matched string
@@ -44,6 +44,7 @@ struct ojomatch
     start(s), end(e), len(l), content(c)
   {
     license_fk = -1;
+    isExpression = false;
   }
   /**
    * Default constructor for ojomatch structure
