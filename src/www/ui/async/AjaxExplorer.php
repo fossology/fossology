@@ -29,6 +29,7 @@ use Fossology\Lib\Proxy\UploadTreeProxy;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Hamcrest\Type\IsNumeric;
 
 /**
  * \file ui-browse-license.php
@@ -246,7 +247,7 @@ class AjaxExplorer extends DefaultPlugin
       $nameRange = array();
     }
 
-    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, $isFlat);
+    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, $isFlat, true, true);
     $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
 
     $pfileLicenses = $this->updateTheFindingsAndDecisions($selectedScanners,
@@ -359,8 +360,13 @@ class AjaxExplorer extends DefaultPlugin
     if ($isContainer) {
       $fileDetails["isContainer"] = true;
       $agentFilter = $selectedAgentId ? array($selectedAgentId) : $latestSuccessfulAgentIds;
-      $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array());
-      $editedLicenses = $this->clearingDao->getClearedLicenses($childItemTreeBounds, $groupId);
+      [$licenseEntries, $expressionsEntries] = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array(), true);
+      $editedLicenses = $this->clearingDao->getClearedLicenses($childItemTreeBounds, $groupId, true);
+
+      foreach ($expressionsEntries as $expression) {
+        $expression = json_decode($expression);
+        $licenseEntries[] = $this->licenseDao->buildExpression($expression, $groupId);
+      }
 
       if ($request->get('fromRest')) {
         foreach ($licenseEntries as $shortName) {
@@ -431,8 +437,13 @@ class AjaxExplorer extends DefaultPlugin
     $concludedLicenses = array();
     /** @var LicenseRef $licenseRef */
     foreach ($editedLicenses as $licenseRef) {
-      $projectedId = $this->licenseProjector->getProjectedId($licenseRef->getId());
-      $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(),$licenseRef->getShortName());
+      if ($licenseRef->getShortName() === 'License Expression') {
+        $projectedId = $licenseRef->getId();
+        $projectedName = $licenseRef->getExpression($this->licenseDao, $groupId);
+      } else {
+        $projectedId = $this->licenseProjector->getProjectedId($licenseRef->getId());
+        $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(),$licenseRef->getShortName());
+      }
       $concludedLicenses[$projectedId] = $projectedName;
       $concludedLicensesRest[] = array('id' => $projectedId, 'name' => $projectedName);
     }
@@ -513,10 +524,17 @@ class AjaxExplorer extends DefaultPlugin
     $pfileLicenses = [];
     foreach ($agentIds as $agentName => $agentId) {
       $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId(
-        $itemTreeBounds, $agentId, $isFlat, $nameRange);
+        $itemTreeBounds, $agentId, $isFlat, $nameRange, true);
       foreach ($licensePerPfile as $pfile => $licenseRow) {
         foreach ($licenseRow as $licId => $row) {
           $lic = $this->licenseProjector->getProjectedShortname($licId);
+          if ($lic == null) {
+            // error_log(var_export($licId, true));
+            if ($licId != '') {
+              $expression = $this->licenseDao->getLicenseById($licId);
+              $lic = $expression->getExpression($this->licenseDao, $groupId);
+            }
+          }
           $pfileLicenses[$pfile][$lic][$agentName] = $row;
         }
       }
@@ -553,7 +571,7 @@ class AjaxExplorer extends DefaultPlugin
 
     $this->updateFilesToBeCleared($isFlat, $itemTreeBounds);
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds,
-      $groupId, $isFlat);
+      $groupId, $isFlat, true, true);
     $editedMappedLicenses = array_replace($editedMappedLicenses,
       $this->clearingFilter->filterCurrentClearingDecisions($allDecisions));
     return $pfileLicenses;

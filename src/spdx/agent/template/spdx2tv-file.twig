@@ -45,7 +45,9 @@ LicenseInfoInFile: NOASSERTION
 {% if EnableOsselotExport and not (licId starts with 'LicenseRef-') -%}
   {% set licId = 'LicenseRef-' ~ licId -%}
 {% endif -%}
+{% if licenseList[res].licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' %}
 LicenseInfoInFile: {{ licId|replace({' ':'-'})}}
+{%- endif ~%}
 {% endfor -%}
 {% endif -%}
 {# FileSize: 48 Kb (49173 bytes) #}

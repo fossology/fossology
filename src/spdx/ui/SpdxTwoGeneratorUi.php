@@ -67,7 +67,6 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
-
     $groupId = Auth::getGroupId();
     $uploadIds = $request->get('uploads') ?: array();
     $uploadIds[] = intval($request->get('upload'));

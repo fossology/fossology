@@ -1268,6 +1268,15 @@
   $Schema["TABLE"]["license_ref"]["rf_flag"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_flag\" SET NOT NULL, ALTER COLUMN \"rf_flag\" SET DEFAULT 1";
 
 
+  $Schema["TABLE"]["license_expression"]["rf_pk"]["DESC"] = "COMMENT ON COLUMN \"license_expression\".\"rf_pk\" IS 'Primary Key'";
+  $Schema["TABLE"]["license_expression"]["rf_pk"]["ADD"] = "ALTER TABLE \"license_expression\" ADD COLUMN \"rf_pk\" int8 DEFAULT nextval('license_ref_rf_pk_seq'::regclass)";
+  $Schema["TABLE"]["license_expression"]["rf_pk"]["ALTER"] = "ALTER TABLE \"license_expression\" ALTER COLUMN \"rf_pk\" SET NOT NULL, ALTER COLUMN \"rf_pk\" SET DEFAULT nextval('license_ref_rf_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["license_expression"]["rf_expression"]["DESC"] = "COMMENT ON COLUMN \"license_expression\".\"rf_expression\" IS 'License Expression AST in JSON format'";
+  $Schema["TABLE"]["license_expression"]["rf_expression"]["ADD"] = "ALTER TABLE \"license_expression\" ADD COLUMN \"rf_expression\" jsonb";
+  $Schema["TABLE"]["license_expression"]["rf_expression"]["ALTER"] = "ALTER TABLE \"license_expression\" ALTER COLUMN \"rf_expression\" SET NOT NULL";
+
+
   $Schema["TABLE"]["license_candidate"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"group_fk\" IS 'group seeing this candidate'";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"group_fk\" int8";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"group_fk\" DROP NOT NULL";

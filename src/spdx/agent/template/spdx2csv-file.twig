@@ -25,7 +25,9 @@ NOASSERTION,
   {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
     {% set licId=licenseList[res].licenseObj.shortName %}
   {%- endif ~%}
+  {% if licenseList[res].licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' %}
   {{ licId }}{% if res != fileData.scanners|last %} AND {% endif %}
+  {% endif %}
 {% endfor %}",
 {%- endif -%}
 {%- if fileData.copyrights|default is empty -%}
