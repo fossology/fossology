@@ -274,7 +274,11 @@ if __name__ == "__main__":
   )
   parser.add_argument(
     "operation", type=str, help="Operations to run.", nargs='*',
-    choices=["nomos", "copyright", "keyword", "ojo", "repo"]
+    choices=["nomos", "copyright", "keyword", "ojo", "repo", "differential"]
+  )
+  parser.add_argument(
+    "--tags", type=str, nargs=2, help="Tags for differential scan. Required if 'differential'" \
+     "is specified."
   )
   parser.add_argument(
     "--report", type=str, help="Type of report to generate. Default 'TEXT'.",
