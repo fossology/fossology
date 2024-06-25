@@ -2808,7 +2808,7 @@ paths:
     parameters:
       - name: groupName
         description: The group name to chose while accessing jobs
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -2825,13 +2825,13 @@ paths:
           schema:
             type: integer
             minimum: 1
-          in: header
+          in: query
         - name: page
           required: false
           schema:
             type: integer
             minimum: 1
-          in: header
+          in: query
         - name: upload
           required: false
           schema:
@@ -2863,12 +2863,12 @@ paths:
       parameters:
         # This could also be omitted, because there are no real folders
         - name: folderId
-          in: header
+          in: query
           required: true
           schema:
             type: integer
         - name: uploadId
-          in: header
+          in: query
           required: true
           schema:
             type: integer
@@ -2902,13 +2902,13 @@ paths:
           schema:
             type: integer
             minimum: 1
-          in: header
+          in: query
         - name: page
           required: false
           schema:
             type: integer
             minimum: 1
-          in: header
+          in: query
       responses:
         '200':
           description: OK
@@ -3902,13 +3902,13 @@ paths:
         List all reports available for a given upload
       parameters:
         - name: uploadId
-          in: header
+          in: query
           required: true
           description: Id of the upload to generate the report for
           schema:
             type: integer
         - name: reportFormat
-          in: header
+          in: query
           required: true
           description: Which report to be genereated
           schema:
@@ -3923,7 +3923,7 @@ paths:
               - cyclonedx
         - name: groupName
           description: The group name to chose while generating a report
-          in: header
+          in: query
           required: false
           schema:
             type: string
@@ -3947,7 +3947,7 @@ paths:
           type: integer
       - name: groupName
         description: The group name to chose while downloading specific report
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -3994,7 +3994,7 @@ paths:
     parameters:
       - name: groupName
         description: The group name to chose while uploading report
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -4980,16 +4980,16 @@ components:
     LicenseDecider:
       type: object
       properties:
-        nomos_monk:
+        nomosMonk:
           type: boolean
           description: Scanners matches if all Nomos findings are within the Monk findings.
-        bulk_reused:
+        bulkReused:
           type: boolean
           description: Bulk phrases from reused packages.
-        new_scanner:
+        newScanner:
           type: boolean
           description: New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses.
-        ojo_decider:
+        ojoDecider:
           type: boolean
           description: Scanners matches if Ojo or REUSE.Software findings are no contradiction with other findings.
     ScanOptions:
@@ -5352,22 +5352,22 @@ components:
     Reuser:
       type: object
       properties:
-        reuse_upload:
+        reuseUpload:
           type: integer
           description: The UploadID to reuse.
-        reuse_group:
+        reuseGroup:
           type: string
           description: The group of the reused upload
-        reuse_main:
+        reuseMain:
           type: boolean
           description: Copy the main license from reused package?
-        reuse_enhanced:
+        reuseEnhanced:
           type: boolean
           description: Run enhanced reuser with diff tool (slow)
-        reuse_report:
+        reuseReport:
           type: boolean
           description: Copy all report configuration from conf page.
-        reuse_copyright:
+        reuseCopyright:
           type: boolean
           description: Copy the copyright deactivation and edits.
       required:

@@ -26,6 +26,7 @@ use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\JobQueue;
 use Fossology\UI\Api\Models\ShowJob;
+use Fossology\UI\Api\Models\ApiVersion;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Request;
 
@@ -67,22 +68,28 @@ class JobController extends RestController
    */
   public function getAllJobs($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $this->throwNotAdminException();
     $id = null;
     $limit = 0;
     $page = 1;
-    if ($request->hasHeader('limit')) {
-      $limit = $request->getHeaderLine('limit');
-      $page = $request->getHeaderLine('page');
-      if (empty($page)) {
-        $page = 1;
-      }
-      if ((! is_numeric($limit) || $limit < 0) ||
-          (! is_numeric($page) || $page < 1)) {
-        throw new HttpBadRequestException(
-          "Limit and page cannot be smaller than 1 and has to be numeric!");
-      }
+    if ($apiVersion == ApiVersion::V2) {
+      $query = $request->getQueryParams();
+      $limit = $query['limit'] ?? 0;
+      $page = $query['page'] ?? 1;
+    } else {
+      $limit = $request->hasHeader('limit') ? $request->getHeaderLine('limit') : 0;
+      $page = $request->hasHeader('page') ? $request->getHeaderLine('page') : 1;
     }
+    if (empty($page)) {
+      $page = 1;
+    }
+    if ((! is_numeric($limit) || $limit < 0) ||
+      (! is_numeric($page) || $page < 1)) {
+      throw new HttpBadRequestException(
+        "Limit and page cannot be smaller than 1 and has to be numeric!");
+    }
+
     return $this->getAllResults($id, $response, $limit, $page);
   }
 
@@ -97,21 +104,25 @@ class JobController extends RestController
    */
   public function getJobs($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $query = $request->getQueryParams();
     $userId = $this->restHelper->getUserId();
     $limit = 0;
     $page = 1;
-    if ($request->hasHeader('limit')) {
-      $limit = $request->getHeaderLine('limit');
-      $page = $request->getHeaderLine('page');
-      if (empty($page)) {
-        $page = 1;
-      }
-      if ((! is_numeric($limit) || $limit < 0) ||
-        (! is_numeric($page) || $page < 1)) {
-        throw new HttpBadRequestException(
-          "Limit and page cannot be smaller than 1 and has to be numeric!");
-      }
+    if ($apiVersion == ApiVersion::V2) {
+      $limit = $query['limit'] ?? 0;
+      $page = $query['page'] ?? 1;
+    } else {
+      $limit = $request->hasHeader('limit') ? $request->getHeaderLine('limit') : 0;
+      $page = $request->hasHeader('page') ? $request->getHeaderLine('page') : 1;
+    }
+    if (empty($page)) {
+      $page = 1;
+    }
+    if ((! is_numeric($limit) || $limit < 0) ||
+      (! is_numeric($page) || $page < 1)) {
+      throw new HttpBadRequestException(
+        "Limit and page cannot be smaller than 1 and has to be numeric!");
     }
 
     $id = null;
@@ -148,8 +159,17 @@ class JobController extends RestController
    */
   public function createJob($request, $response, $args)
   {
-    $folder = $request->getHeaderLine("folderId");
-    $upload = $request->getHeaderLine("uploadId");
+    $apiVersion = ApiVersion::getVersion($request);
+    $folder = null;
+    $upload = null;
+    if ($apiVersion == ApiVersion::V2) {
+      $query = $request->getQueryParams();
+      $folder = $query["folderId"] ?? null;
+      $upload = $query["uploadId"] ?? null;
+    } else {
+      $folder = $request->hasHeader('folderId') ? $request->getHeaderLine('folderId') : null;
+      $upload = $request->hasHeader('uploadId') ? $request->getHeaderLine('uploadId') : null;
+    }
     if (is_numeric($folder) && is_numeric($upload) && $folder > 0 && $upload > 0) {
       $scanOptionsJSON = $this->getParsedBody($request);
       if (empty($scanOptionsJSON)) {
@@ -157,7 +177,7 @@ class JobController extends RestController
       }
       $uploadHelper = new UploadHelper();
       $info = $uploadHelper->handleScheduleAnalysis($upload, $folder,
-        $scanOptionsJSON);
+        $scanOptionsJSON, false, $apiVersion);
       return $response->withJson($info->getArray(), $info->getCode());
     }
     throw new HttpBadRequestException(

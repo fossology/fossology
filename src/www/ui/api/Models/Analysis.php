@@ -109,8 +109,8 @@ class Analysis
       $this->bucket = filter_var($analysisArray["bucket"],
         FILTER_VALIDATE_BOOLEAN);
     }
-    if (array_key_exists(($version == ApiVersion::V1? "copyright_email_author" : "copyrightEmailAuthor"), $analysisArray)) {
-      $this->copyright = filter_var($analysisArray[$version == ApiVersion::V1? "copyright_email_author" : "copyrightEmailAuthor"],
+    if (array_key_exists(($version == ApiVersion::V2? "copyrightEmailAuthor" : "copyright_email_author"), $analysisArray)) {
+      $this->copyright = filter_var($analysisArray[$version == ApiVersion::V2? "copyrightEmailAuthor" : "copyright_email_author"],
         FILTER_VALIDATE_BOOLEAN);
     }
     if (array_key_exists("ecc", $analysisArray)) {
