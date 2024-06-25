@@ -22,8 +22,10 @@ use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\User;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\Lib\Dao\UserDao;
+use Slim\Psr7\Request;
 
 /**
  * @class UserControllerTest
@@ -128,14 +130,20 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
   public function testGetSpecificUser()
   {
     $userId = 2;
+    $userName = 'fossy';
+    $userArray = ['user_pk' => $userId];
     $user = $this->getUsers([$userId]);
+    $request = M::mock(Request::class);
+    $this->restHelper->getUserDao()->shouldReceive('getUserByName')
+      ->withArgs([$userName])->andReturn($userArray);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["users", "user_pk", $userId])->andReturn(true);
     $this->dbHelper->shouldReceive('getUsers')->withArgs([$userId])
       ->andReturn($user);
     $expectedResponse = (new ResponseHelper())->withJson($user[0]->getArray(), 200);
-    $actualResponse = $this->userController->getUsers(null, new ResponseHelper(),
-      ['id' => $userId]);
+    $actualResponse = $this->userController->getUsers($request, new ResponseHelper(),
+      ['pathParam' => $userId]);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
@@ -150,12 +158,14 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
   public function testGetSpecificUserNotFound()
   {
     $userId = 6;
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["users", "user_pk", $userId])->andReturn(false);
     $this->expectException(HttpNotFoundException::class);
 
-    $this->userController->getUsers(null, new ResponseHelper(),
-      ['id' => $userId]);
+    $this->userController->getUsers($request, new ResponseHelper(),
+      ['pathParam' => $userId]);
   }
 
   /**
@@ -166,6 +176,8 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
   public function testGetAllUsers()
   {
     $users = $this->getUsers([2, 3, 4]);
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
     $this->dbHelper->shouldReceive('getUsers')->withArgs([null])
       ->andReturn($users);
 
@@ -175,7 +187,7 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     }
 
     $expectedResponse = (new ResponseHelper())->withJson($allUsers, 200);
-    $actualResponse = $this->userController->getUsers(null, new ResponseHelper(), []);
+    $actualResponse = $this->userController->getUsers($request, new ResponseHelper(), []);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
@@ -190,14 +202,20 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
   public function testDeleteUser()
   {
     $userId = 4;
+    $userName = 'fossy';
+    $userArray = ['user_pk' => $userId];
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
+    $this->restHelper->getUserDao()->shouldReceive('getUserByName')
+      ->withArgs([$userName])->andReturn($userArray);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["users", "user_pk", $userId])->andReturn(true);
     $this->dbHelper->shouldReceive('deleteUser')->withArgs([$userId]);
     $info = new Info(202, "User will be deleted", InfoType::INFO);
     $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
       $info->getCode());
-    $actualResponse = $this->userController->deleteUser(null, new ResponseHelper(),
-      ['id' => $userId]);
+    $actualResponse = $this->userController->deleteUser($request, new ResponseHelper(),
+    ['pathParam' => $userId]);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
@@ -212,12 +230,18 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
   public function testDeleteUserDoesNotExists()
   {
     $userId = 8;
+    $userName = 'fossy';
+    $userArray = ['user_pk' => $userId];
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
+    $this->restHelper->getUserDao()->shouldReceive('getUserByName')
+      ->withArgs([$userName])->andReturn($userArray);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["users", "user_pk", $userId])->andReturn(false);
     $this->expectException(HttpNotFoundException::class);
 
-    $this->userController->deleteUser(null, new ResponseHelper(),
-      ['id' => $userId]);
+    $this->userController->deleteUser($request, new ResponseHelper(),
+      ['pathParam' => $userId]);
   }
 
   /**
@@ -229,7 +253,8 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
   {
     $userId = 2;
     $user = $this->getUsers([$userId]);
-
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->dbHelper->shouldReceive('getUsers')->withArgs([$userId])
       ->andReturn($user);
@@ -241,7 +266,7 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
 
     $expectedResponse = (new ResponseHelper())->withJson($expectedUser, 200);
 
-    $actualResponse = $this->userController->getCurrentUser(null,
+    $actualResponse = $this->userController->getCurrentUser($request,
       new ResponseHelper(), []);
 
     $this->assertEquals($expectedResponse->getStatusCode(),

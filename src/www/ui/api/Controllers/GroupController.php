@@ -23,6 +23,7 @@ use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Group;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\UserGroupMember;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -69,8 +70,14 @@ class GroupController extends RestController
    */
   public function createGroup($request, $response, $args)
   {
-    $groupName = $request->getHeaderLine("name");
-    if (empty($request->getHeaderLine("name"))) {
+    $groupName = '';
+    if (ApiVersion::getVersion($request) == ApiVersion::V2) {
+      $queryParams = $request->getQueryParams();
+      $groupName = $queryParams['name'] ?? '';
+    } else {
+      $groupName = $request->getHeaderLine('name') ?: '';
+    }
+    if (empty($groupName)) {
       throw new HttpBadRequestException("ERROR - no group name provided");
     }
     $userDao = $this->restHelper->getUserDao();
@@ -91,8 +98,9 @@ class GroupController extends RestController
    */
   public function deleteGroup($request, $response, $args)
   {
-    if (empty($args['id'])) {
-      throw new HttpBadRequestException("ERROR - no group id provided");
+    $apiVerison = ApiVersion::getVersion($request);
+    if (empty($args['pathParam'])) {
+      throw new HttpBadRequestException("ERROR - No group name or id provided");
     }
     $userId = $this->restHelper->getUserId();
 
@@ -100,7 +108,13 @@ class GroupController extends RestController
     $userDao = $this->restHelper->getUserDao();
     $groupMap = $userDao->getDeletableAdminGroupMap($userId,
       $_SESSION[Auth::USER_LEVEL]);
-    $groupId = intval($args['id']);
+    $groupId = null;
+    if ($apiVerison == ApiVersion::V2) {
+      $groupName = $args['pathParam'];
+      $groupId = intval($userDao->getGroupIdByName($groupName));
+    } else {
+      $groupId = intval($args['pathParam']);
+    }
 
     if (!$this->dbHelper->doesIdExist("groups", "group_pk", $groupId)) {
       throw new HttpNotFoundException("Group id not found!");
@@ -126,10 +140,18 @@ class GroupController extends RestController
    */
   public function deleteGroupMember($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $dbManager = $this->dbHelper->getDbManager();
 
-    $group_pk = intval($args['id']);
-    $user_pk = intval($args['userId']);
+    $user_pk = null;
+    $group_pk = null;
+    if ($apiVersion == ApiVersion::V2) {
+      $user_pk = intval($this->restHelper->getUserDao()->getUserByName($args['userPathParam'])['user_pk']);
+      $group_pk = intval($this->restHelper->getUserDao()->getGroupIdByName($args['pathParam']));
+    } else {
+      $user_pk = intval($args['userPathParam']);
+      $group_pk = intval($args['pathParam']);
+    }
 
     $userIsAdmin = Auth::isAdmin();
     $userHasGroupAccess = $this->restHelper->getUserDao()->isAdvisorOrAdmin(
@@ -195,6 +217,7 @@ class GroupController extends RestController
    */
   public function getGroupMembers($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $userId = $this->restHelper->getUserId();
     $userDao = $this->restHelper->getUserDao();
     $groupMap = $userDao->getAdminGroupMap($userId, $_SESSION[Auth::USER_LEVEL]);
@@ -203,8 +226,8 @@ class GroupController extends RestController
       throw new HttpForbiddenException("You have no permission to manage any group.");
     }
 
-    // Get the group id from the params
-    $groupId = intval($args['id']);
+    // Get the group name/id form the params and then the group Id
+    $groupId = $apiVersion == ApiVersion::V2 ? intval($this->restHelper->getUserDao()->getGroupIdByName($args['pathParam'])) : intval($args['pathParam']);
 
     // The query to get the list of users with corresponding roles from the group.
     $dbManager = $this->dbHelper->getDbManager();
@@ -221,7 +244,7 @@ class GroupController extends RestController
     foreach ($usersWithGroup as $record) {
       $user = $this->dbHelper->getUsers($record['user_pk']);
       $userGroupMember = new UserGroupMember($user[0],$record["group_perm"]);
-      $memberList[] = $userGroupMember->getArray();
+      $memberList[] = $userGroupMember->getArray(ApiVersion::getVersion($request));
     }
     $dbManager->freeResult($result);
 
@@ -240,12 +263,19 @@ class GroupController extends RestController
    */
   public function addMember($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $dbManager = $this->dbHelper->getDbManager();
 
     $body = $this->getParsedBody($request);
-
-    $group_pk = intval($args['id']);
-    $newuser = intval($args['userId']);
+    $newuser = null;
+    $group_pk = null;
+    if ($apiVersion == ApiVersion::V2) {
+      $newuser = intval($this->restHelper->getUserDao()->getUserByName($args['userPathParam'])['user_pk']);
+      $group_pk = intval($this->restHelper->getUserDao()->getGroupIdByName($args['pathParam']));
+    } else {
+      $group_pk = intval($args['pathParam']);
+      $newuser = intval($args['userPathParam']);
+    }
     $newperm = intval($body['perm']);
 
     $userIsAdmin = Auth::isAdmin();
@@ -297,10 +327,20 @@ class GroupController extends RestController
   public function changeUserPermission($request, $response, $args)
   {
     // Extract all  prerequisites (dbManager , user_pk , new_permission , group_pk ) for this functionality
+    $apiVersion = ApiVersion::getVersion($request);
     $dbManager = $this->dbHelper->getDbManager();
-    $user_pk = intval($args['userId']);
+
+    $user_pk = null;
+    $group_pk = null;
+    if ($apiVersion == ApiVersion::V2) {
+      $user_pk = intval($this->restHelper->getUserDao()->getUserByName($args['userPathParam'])['user_pk']);
+      $group_pk = intval($this->restHelper->getUserDao()->getGroupIdByName($args['pathParam']));
+    } else {
+      $user_pk = intval($args['userPathParam']);
+      $group_pk = intval($args['pathParam']);
+    }
+
     $newperm = intval($this->getParsedBody($request)['perm']);
-    $group_pk = intval($args['id']);
     $userIsAdmin = Auth::isAdmin();
     $userHasGroupAccess = $this->restHelper->getUserDao()->isAdvisorOrAdmin(
       $this->restHelper->getUserId(), $group_pk);

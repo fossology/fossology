@@ -46,9 +46,10 @@ class UserController extends RestController
    */
   public function getUsers($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $id = null;
-    if (isset($args['id'])) {
-      $id = intval($args['id']);
+    if (isset($args['pathParam'])) {
+      $id = $apiVersion == ApiVersion::V2 ? intval($this->restHelper->getUserDao()->getUserByName($args['pathParam'])['user_pk']) : intval($args['pathParam']);
       if (! $this->dbHelper->doesIdExist("users", "user_pk", $id)) {
         throw new HttpNotFoundException("UserId doesn't exist");
       }
@@ -57,7 +58,7 @@ class UserController extends RestController
 
     $allUsers = array();
     foreach ($users as $user) {
-      $allUsers[] = $user->getArray();
+      $allUsers[] = $user->getArray($apiVersion);
     }
     if ($id !== null) {
       $allUsers = $allUsers[0];
@@ -76,13 +77,14 @@ class UserController extends RestController
    */
   public function addUser($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $userDetails = $this->getParsedBody($request);
     $userHelper = new UserHelper();
     // creating symphony request
     $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
     $symfonyRequest->request->set('username', $userDetails['name']);
-    $symfonyRequest->request->set('pass1', $userDetails['user_pass']);
-    $symfonyRequest->request->set('pass2', $userDetails['user_pass']);
+    $symfonyRequest->request->set('pass1', $userDetails[$apiVersion == ApiVersion::V2 ? 'userPass' : 'user_pass']);
+    $symfonyRequest->request->set('pass2', $userDetails[$apiVersion == ApiVersion::V2 ? 'userPass' : 'user_pass']);
     $symfonyRequest->request->set('description', $userDetails['description']);
     $symfonyRequest->request->set('permission', $userHelper->getEquivalentValueForPermission($userDetails['accessLevel']));
     $symfonyRequest->request->set('folder', $userDetails['rootFolderId']);
@@ -100,7 +102,7 @@ class UserController extends RestController
       $agents['Check_agent_monk'] = isset($userDetails['agents']['monk']) && $userDetails['agents']['monk'] ? 1 : 0;
       $agents['Check_agent_ojo'] = isset($userDetails['agents']['ojo']) && $userDetails['agents']['ojo'] ? 1 : 0;
       $agents['Check_agent_bucket'] = isset($userDetails['agents']['bucket']) && $userDetails['agents']['bucket'] ? 1 : 0 ;
-      $agents['Check_agent_copyright'] = isset($userDetails['agents']['copyright_email_author']) && $userDetails['agents']['copyright_email_author'] ? 1 : 0;
+      $agents['Check_agent_copyright'] = isset($userDetails['agents'][$apiVersion == ApiVersion::V2 ? 'copyrightEmailAuthor' : 'copyright_email_author']) && $userDetails['agents'][$apiVersion == ApiVersion::V2 ? 'copyrightEmailAuthor' : 'copyright_email_author'] ? 1 : 0;
       $agents['Check_agent_ecc'] = isset($userDetails['agents']['ecc']) && $userDetails['agents']['ecc'] ? 1 : 0;
       $agents['Check_agent_keyword'] = isset($userDetails['agents']['keyword']) && $userDetails['agents']['keyword'] ? 1 : 0;
       $agents['Check_agent_nomos'] = isset($userDetails['agents']['nomos']) && $userDetails['agents']['nomos'] ? 1 : 0;
@@ -138,7 +140,8 @@ class UserController extends RestController
    */
   public function deleteUser($request, $response, $args)
   {
-    $id = intval($args['id']);
+    $apiVersion = ApiVersion::getVersion($request);
+    $id = $apiVersion == ApiVersion::V2 ? intval($this->restHelper->getUserDao()->getUserByName($args['pathParam'])['user_pk']) : intval($args['pathParam']);
     if (!$this->dbHelper->doesIdExist("users","user_pk", $id)) {
       throw new HttpNotFoundException("UserId doesn't exist");
     }
@@ -158,10 +161,14 @@ class UserController extends RestController
    */
   public function getCurrentUser($request, $response, $args)
   {
-    $user = $this->dbHelper->getUsers($this->restHelper->getUserId())[0]->getArray();
+    $apiVersion = ApiVersion::getVersion($request);
+    $user = $this->dbHelper->getUsers($this->restHelper->getUserId())[0]->getArray($apiVersion);
+    if ($apiVersion == ApiVersion::V2) {
+      return $response->withJson($user, 200);
+    }
     $userDao = $this->restHelper->getUserDao();
     $defaultGroup = $userDao->getUserAndDefaultGroupByUserName($user["name"])["group_name"];
-    $user["default_group"] = $defaultGroup;
+    $user['default_group'] = $defaultGroup;
     return $response->withJson($user, 200);
   }
 
@@ -176,13 +183,14 @@ class UserController extends RestController
    */
   public function updateUser($request, $response, $args)
   {
-    $id = intval($args['id']);
-    if ($this->dbHelper->doesIdExist("users","user_pk", $id)) {
+    $apiVersion = ApiVersion::getVersion($request);
+    $id = $apiVersion == ApiVersion::V2 ? intval($this->restHelper->getUserDao()->getUserByName($args['pathParam'])['user_pk']) : intval($args['pathParam']);
+    if (!$this->dbHelper->doesIdExist("users","user_pk", $id)) {
       throw new HttpNotFoundException("UserId doesn't exist");
     }
     $reqBody = $this->getParsedBody($request);
     $userHelper = new UserHelper($id);
-    $returnVal = $userHelper->modifyUserDetails($reqBody);
+    $returnVal = $userHelper->modifyUserDetails($reqBody, $apiVersion);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 
@@ -242,6 +250,7 @@ class UserController extends RestController
    */
   public function getTokens($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $tokenType = $args['type'];
     if ($tokenType != "active" && $tokenType != "expired") {
       throw new HttpBadRequestException("Invalid request!");
@@ -264,7 +273,7 @@ class UserController extends RestController
 
     $returnVal = new Info(200, "Success", InfoType::INFO);
     $res = $returnVal->getArray();
-    $res[$tokenType . '_tokens'] = $finalTokens;
+    $res[$tokenType . ($apiVersion == ApiVersion::V2 ? 'Tokens' : '_tokens')] = $finalTokens;
     return $response->withJson($res, $returnVal->getCode());
   }
 }

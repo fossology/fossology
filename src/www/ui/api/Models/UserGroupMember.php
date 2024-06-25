@@ -87,11 +87,18 @@ class UserGroupMember
    *
    * @return array
    */
-  public function getArray()
+  public function getArray($version=ApiVersion::V1)
   {
-    return [
-      'user' => $this->user->getArray(),
-      'group_perm' => intval($this->group_perm)
-    ];
+    if ($version==ApiVersion::V2) {
+      return [
+        'user' => $this->user->getArray($version),
+        'groupPerm' => intval($this->group_perm)
+      ];
+    } else {
+      return [
+        'user' => $this->user->getArray($version),
+        'group_perm' => intval($this->group_perm)
+      ];
+    }
   }
 }
