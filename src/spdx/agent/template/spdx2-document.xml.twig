@@ -26,7 +26,7 @@
     This document was created using license information and a generator from Fossology.
   </rdfs:comment>
   {%- for licenseData in licenseList -%}
-  {%- if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' or (EnableOsselotExport and licenseData.licenseObj.shortName != 'No_license_found') -%}
+  {%- if (licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' or (EnableOsselotExport and licenseData.licenseObj.shortName != 'No_license_found')) and licenseData.licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' -%}
   <spdx:hasExtractedLicensingInfo>
     {%- set licId=licenseData.licenseObj.spdxId -%}
     {% if licenseData.licenseObj.shortName starts with 'LicenseRef-' -%}

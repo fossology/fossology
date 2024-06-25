@@ -137,6 +137,12 @@
       {{ 'Clearing History ...'| trans }}
     </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'View the clearing history for this file: The table will show which user added or removed license results for this particular file in order to create a clearing decision. Clearing decisions are created when the user clicks on the button "Submit" or on the go next and go previous buttons'|trans }}" alt="" class="info-bullet"/>
     &nbsp;
+    {% if hasExpression == false %}
+    <button type="button" class="btn btn-default btn-sm" id="newExpressionbtn" onclick="editExpression();">
+      {{ 'Conclude Expression ...'| trans }}
+    </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Conclude a license expression for this file'|trans }}" alt="" class="info-bullet"/>
+    &nbsp;
+    {% endif %}
     <br/>
     <span id="bulkIdResult" name="bulkIdResult"></span>
     <div style="padding-top: 10px;">
@@ -181,6 +187,74 @@
         </div>
       </div>
     </div>
+
+  <!-- The license expression Modal -->
+  <div class="modal" style="z-index: 1055" id="editExpressionModal" tabindex="-1" role="dialog" aria-labelledby="editExpressionModalLabel" aria-hidden="true" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Edit License Expression</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <!-- Modal body -->
+        <div class="modal-body">
+          <div id="ast-viewer"></div>
+          <button class="btn btn-success" id="addLicenseInExpression" onclick="addLicenseInExpression();">Add License</button>
+          <button class="btn btn-info" id="addGroup" onclick="addGroup();">Add Group</button>
+        </div>
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="saveExpression" onclick="saveExpression();">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- The edit node Modal -->
+  <div class="modal" style="z-index: 1055" id="editNodeModal" tabindex="-1" role="dialog" aria-labelledby="editNodeModalLabel" aria-hidden="true" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Edit Node</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <!-- Modal body -->
+        <div class="modal-body">
+          <div class="form-group" id="licenseValueGroup">
+            <label for="licenseValue">License Value</label>
+            <select id="licenseValue" class="form-control">
+              {% for license in licenseDecisionsArray %}
+              <option value="{{ license.id }}" title="{{ license.fullname|e }}">{{ license.shortname|e }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="operatorValue">Type</label>
+            <select class="form-control" id="operatorValue">
+              <option value="NONE">NONE</option>
+              <option value="AND">AND</option>
+              <option value="OR">OR</option>
+              <option value="WITH">WITH</option>
+              <option value="ADD LICENSE">ADD LICENSE</option>
+              <option value="ADD GROUP">ADD GROUP</option>
+            </select>
+          </div>
+        </div>
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="saveExpression" onclick="saveNodeChanges();">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
       {% include 'ui-clearing-view_bulk.html.twig' %}
     </div>
