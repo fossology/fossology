@@ -10,6 +10,11 @@ var magicNumberNoLicenseFoundInt = 507;
 var magicNumberNoLicenseFound = "507";
 var noLicenseString = "No_license_found";
 var bulkModalOpened = 0;
+var currentAST = null;
+var currentNode = null;
+var currentASTId = 0;
+var editExpressionTrigger = "Clearing";
+var firstLicense = -1;
 
 
 function jsArrayFromHtmlOptions(pListBox) {
@@ -612,4 +617,264 @@ function scheduledBootstrapSuccess (data, resultEntity, callbackSuccess) {
     errorSpan.text("bad response from server");
   }
   resultEntity.show();
+}
+
+function getLicense(licenseId, callback) {
+  $.ajax({
+    type: "GET",
+    url: "?mod=conclude-license&do=getLicense" + "&licenseId=" + licenseId,
+    data: {},
+    success: function(data) {
+      callback(data);
+    },
+    error: function(data) {
+      callback(data.error);
+    }
+  });
+}
+
+function editExpression(id=0, byBulk=false) {
+  if (byBulk) {
+    editExpressionTrigger = "Bulk";
+    var content = bulkFormTableContent[3]();
+    for (i = 0; i < content.length; ++i) {
+      if (!content[i].isExpression){
+        firstLicense =content[i].licenseId;
+      }
+    }
+  } else {
+    editExpressionTrigger = "Clearing";
+    firstLicense = licenseDecisionsArray[0].id;
+  }
+  if (id==0)
+  {
+    console.log('clicked');
+    currentAST = null;
+    displayAST(currentAST, $('#ast-viewer'));
+    $('#editExpressionModal').modal('show');
+  }
+  else
+  {
+    currentASTId = id;
+    getLicense(id, function(license) {
+      currentAST = JSON.parse(license.fullName);
+      $('#licenseValue').empty();
+      $.getJSON("?mod=conclude-license&do=licenseDecisionsData" + "&upload=" + uploadId + "&item=" + $('#uploadTreeId').val())
+      .done(function (data) {
+        if(data) {
+          console.log(data);
+          data.forEach(function (license) {
+            $('#licenseValue').append($('<option></option>').attr('value', license.id).attr('title', license.fullName).text(license.shortName));
+          });
+          displayAST(currentAST, $('#ast-viewer'));
+          $('#editExpressionModal').modal('show');
+      }})
+      .fail(failed);
+    });
+  }
+}
+
+function concludeExpressionBulk() {
+  var content = bulkFormTableContent[3]();
+  for (i = 0; i < content.length; ++i) {
+    if (content[i].isExpression){
+      console.log(content[i]);
+      editExpression(content[i].licenseId, true);
+      return;
+    }
+  }
+  editExpression(0, true);
+}
+
+function displayAST(node, container) {
+  if (node === null) {
+    container.empty();
+    return;
+  }
+  container.empty();
+  let content = $('<div class="node p-2 mb-2 border border-secondary"></div>');
+
+  if (node.type === 'License') {
+    getLicense(node.value, function(license) {
+      content.append(`<span>${license.shortName}</span>`);
+    });
+  } else {
+    let leftContainer = $('<div class="child ml-3"></div>');
+    let rightContainer = $('<div class="child ml-3"></div>');
+    displayAST(node.left, leftContainer);
+    displayAST(node.right, rightContainer);
+    content.append(leftContainer);
+    content.append(`<span class="ml-2 mr-2">${node.value}</span>`);
+    content.append(rightContainer);
+  }
+
+  content.click(function(event) {
+    event.stopPropagation();
+    editNode(node);
+  });
+
+  container.append(content);
+}
+
+async function getExpressionString(node) {
+  if (node === null) {
+    return "";
+  }
+  if (node.type === 'License') {
+    return new Promise((resolve, reject) => {
+      getLicense(node.value, function(license) {
+        if (license && license.shortName) {
+          resolve(license.shortName);
+        } else {
+          reject("License not found");
+        }
+      });
+    });
+  } else {
+    let left=await getExpressionString(node.left);
+    console.log(left);
+    let right=await getExpressionString(node.right);
+    return `(${left} ${node.value} ${right})`
+  }
+}
+
+function addLicenseInExpression() {
+  let newLicense = { type: 'License', value: firstLicense };
+  if (currentAST === null)
+  {
+    currentAST = newLicense;
+  }
+  else
+  {
+    currentAST = {
+      type: 'Expression',
+      value: 'AND',
+      left: currentAST,
+      right: newLicense
+    };
+  }
+  displayAST(currentAST, $('#ast-viewer'));
+}
+
+function addGroup() {
+  let newGroup = {
+    type: 'Expression',
+    value: 'AND',
+    left: { type: 'License', value: firstLicense },
+    right: { type: 'License', value: firstLicense }
+  };
+  if (currentAST === null) {
+    currentAST = newGroup;
+  }
+  else
+  {
+    currentAST = {
+      type: 'Expression',
+      value: 'AND',
+      left: currentAST,
+      right: newGroup
+    };
+  }
+  displayAST(currentAST, $('#ast-viewer'));
+}
+
+function editNode(node) {
+  currentNode = node;
+  $('#licenseValue').val(node.value || '').parent().toggle(node.type === 'License');
+  $('#operatorValue').val(node.value || '').parent().toggle(node.type === 'Expression');
+  if (editExpressionTrigger === "Bulk") {
+    var licenseSelect = $('#licenseValue');
+    console.log("bulk");
+
+    // Clear previous options
+    licenseSelect.empty();
+    // Use licenses from bulkFormTableContent
+    var bulkContent = bulkFormTableContent[3](); // Get content array
+    bulkContent.forEach(function(lic) {
+      if (lic.action === "Add") {
+        licenseSelect.append(new Option(lic.licenseName, lic.licenseId, false, node.value == lic.licenseId));
+      }
+    });
+  }
+  $('#editNodeModal').modal('show');
+}
+
+function saveNodeChanges() {
+  if (currentNode.type === 'License') {
+    currentNode.value = $('#licenseValue').val();
+  } else {
+    let operator = $('#operatorValue').val();
+    if (operator === 'NONE') {
+      currentNode.type = currentNode.left.type;
+      if (currentNode.left.type === 'License')
+      {
+        currentNode.value = currentNode.left.value;
+        delete currentNode.left;
+        delete currentNode.right;
+      }
+      else
+      {
+        let leftNode = currentNode.left;
+        currentNode.value = leftNode.value;
+        currentNode.left = leftNode.left;
+        currentNode.right = leftNode.right;
+      }
+    }
+    else if (operator === 'ADD LICENSE') {
+      let newLicense = { type: 'License', value: firstLicense };
+      let leftNode = JSON.parse(JSON.stringify(currentNode));
+      currentNode.left = leftNode;
+      currentNode.type = 'Expression';
+      currentNode.value = 'AND';
+      currentNode.right = newLicense;
+      console.log(currentNode);
+      console.log(currentAST);
+    }
+    else if (operator === 'ADD GROUP')
+    {
+      let newGroup = {
+        type: 'Expression',
+        value: 'AND',
+        left: { type: 'License', value: firstLicense },
+        right: { type: 'License', value: firstLicense }
+      };
+      let leftNode = JSON.parse(JSON.stringify(currentNode));
+      currentNode.left = leftNode;
+      currentNode.type = 'Expression';
+      currentNode.value = 'AND';
+      currentNode.right = newGroup;
+    }
+    else {
+      currentNode.value = $('#operatorValue').val();
+    }
+  }
+  $('#editNodeModal').modal('hide');
+  $('#editExpressionModal').modal('hide').modal('show');
+  displayAST(currentAST, $('#ast-viewer'));
+}
+
+async function saveExpression() {
+  if (currentAST != null) {
+    if (editExpressionTrigger === 'Bulk') {
+      let exp = await getExpressionString(currentAST);
+      console.log(exp);
+      $('#editExpressionModal').modal('hide');
+      $.getJSON("?mod=conclude-license&do=saveExpression" + "&upload=" + uploadId + "&item=" + $('#uploadTreeId').val() + "&ast=" + JSON.stringify(currentAST) + "&astId=" + currentASTId + "&bulk=true")
+        .done(function (data) {
+          console.log(data);
+          currentASTId = data.expressionId;
+          bulkFormTableContent[4](currentASTId, exp);
+        })
+    } else {
+      $.getJSON("?mod=conclude-license&do=saveExpression" + "&upload=" + uploadId + "&item=" + $('#uploadTreeId').val() + "&ast=" + JSON.stringify(currentAST) + "&astId=" + currentASTId + "&bulk=false")
+        .done(function (data) {
+          $('#editExpressionModal').modal('hide');
+          $('#newExpressionbtn').hide();
+          $('#decTypeSet').addClass('border-danger');
+          var table = createClearingTable();
+          table.fnDraw(false);
+        })
+        .fail(failed);
+    }
+  }
 }

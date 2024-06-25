@@ -13,6 +13,7 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
+use Fossology\Lib\BusinessRules\LicenseExpressionParser;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
@@ -255,6 +256,8 @@ class UploadTreeController extends RestController
   {
     $itemId = intval($args['itemId']);
     $uploadId = intval($args['id']);
+    $query = $request->getQueryParams();
+    $includeExpressions = isset($query['includeExpressions']) && $query['includeExpressions'] === 'true';
     $uploadDao = $this->restHelper->getUploadDao();
     $clearingDao = $this->container->get('dao.clearing');
 
@@ -262,7 +265,7 @@ class UploadTreeController extends RestController
     $this->isItemExists($uploadId, $itemId);
 
     $itemTreeBounds = $uploadDao->getItemTreeBoundsFromUploadId($itemId, $uploadId);
-    $clearingDecWithLicenses = $clearingDao->getFileClearings($itemTreeBounds, $this->restHelper->getGroupId(), false, true);
+    $clearingDecWithLicenses = $clearingDao->getFileClearings($itemTreeBounds, $this->restHelper->getGroupId(), false, true, $includeExpressions);
 
     $data = [];
     $scope = new DecisionScopes();
@@ -272,7 +275,11 @@ class UploadTreeController extends RestController
       $addedLicenses = [];
 
       foreach ($clearingDecision->getClearingLicenses() as $lic) {
-        $shortName = $lic->getShortName();
+        if ($lic->getSpdxId() == "LicenseRef-fossology-License-Expression") {
+          $shortName = $lic->getLicenseRef()->getExpression($this->licenseDao, $this->restHelper->getGroupId());
+        } else {
+          $shortName = $lic->getShortName();
+        }
         $lic->isRemoved() ? $removedLicenses[] = $shortName : $addedLicenses[] = $shortName;
       }
       ksort($removedLicenses, SORT_STRING);
@@ -477,6 +484,8 @@ class UploadTreeController extends RestController
     $uploadPk = intval($args['id']);
     $uploadDao = $this->restHelper->getUploadDao();
     $licenses = [];
+    $query = $request->getQueryParams();
+    $includeExpressions = isset($query['includeExpressions']) && $query['includeExpressions'] === 'true';
 
     $this->uploadAccessible($uploadPk);
     $this->isItemExists($uploadPk, $uploadTreeId);
@@ -487,7 +496,7 @@ class UploadTreeController extends RestController
     }
 
     list ($addedClearingResults, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentClearings(
-      $itemTreeBounds, $this->restHelper->getGroupId(), LicenseMap::CONCLUSION);
+      $itemTreeBounds, $this->restHelper->getGroupId(), LicenseMap::CONCLUSION, $includeExpressions);
     $licenseEventTypes = new ClearingEventTypes();
 
     $mergedArray = [];
@@ -533,22 +542,35 @@ class UploadTreeController extends RestController
           $obligation['ob_comment']
         );
       }
-      $license = $this->licenseDao->getLicenseById($licenseId);
-      $licenseObj = new LicenseDecision(
-        $license->getId(),
-        $licenseShortName,
-        $license->getFullName(),
-        $item['isRemoved'] ? '-' : (!empty($reportInfo) ? $reportInfo : $license->getText()),
-        $license->getUrl(),
-        $types,
-        $item['isRemoved'] ? '-' : $acknowledgement,
-        $item['isRemoved'] ? '-' : $comment,
-        in_array($license->getId(), $mainLicIds),
-        $obligationList,
-        $license->getRisk(),
-        $item['isRemoved']
-      );
-      $licenses[] = $licenseObj->getArray();
+      $license = $this->licenseDao->getLicenseById($licenseId, $this->restHelper->getGroupId());
+      if ($license->getShortName() == "License Expression") {
+        if ($includeExpressions) {
+          $licenses[] = [
+            "id" => $license->getId(),
+            "expression" => $license->getExpression($this->licenseDao, $this->restHelper->getGroupId()),
+            "sources" => $types,
+            "acknowledgement" => ($item['isRemoved'] ? '' : $acknowledgement),
+            "isMainLicense" => in_array($license->getId(), $mainLicIds),
+            "isRemoved" => $item['isRemoved']
+          ];
+        }
+      } else {
+        $licenseObj = new LicenseDecision(
+          $license->getId(),
+          $licenseShortName,
+          $license->getFullName(),
+          $item['isRemoved'] ? '-' : (!empty($reportInfo) ? $reportInfo : $license->getText()),
+          $license->getUrl(),
+          $types,
+          $item['isRemoved'] ? '-' : $acknowledgement,
+          $item['isRemoved'] ? '-' : $comment,
+          in_array($license->getId(), $mainLicIds),
+          $obligationList,
+          $license->getRisk(),
+          $item['isRemoved']
+        );
+        $licenses[] = $licenseObj->getArray();
+      }
     }
     return $response->withJson($licenses, 200);
   }
@@ -717,6 +739,63 @@ class UploadTreeController extends RestController
       'success' => $success,
       'errors' => $errors
     ], 200);
+  }
+
+  /**
+   * Set License Expression Decision
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function setLicenseExpressionDecision($request, $response, $args)
+  {
+    $body = $this->getParsedBody($request);
+    $expression = $body['expression'];
+    $acknowledgement = $body['acknowledgement'] ?? "";
+    $uploadTreeId = intval($args['itemId']);
+    $uploadId = intval($args['id']);
+    $uploadDao = $this->restHelper->getUploadDao();
+
+    $this->uploadAccessible($uploadId);
+    $this->isItemExists($uploadId, $uploadTreeId);
+
+    if (empty($expression)) {
+      throw new HttpBadRequestException("License Expression missing from request.");
+    }
+    /** @var \AjaxClearingView $concludeLicensePlugin */
+    $concludeLicensePlugin = $this->restHelper->getPlugin('conclude-license');
+    $res = $concludeLicensePlugin->getCurrentSelectedLicensesTableData($uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId), $this->restHelper->getGroupId(), true, true);
+
+    $existingExpressionIds = [];
+    foreach ($res as $license) {
+      $currId = $license['DT_RowId'];
+      $currId = explode(',', $currId)[1];
+      if (!$license['2'] && !$license['3'] && !$license['5']) {
+        $existingExpressionIds[] = intval($currId);
+      }
+    }
+
+    $parser = new LicenseExpressionParser($expression, $this->restHelper->getGroupId(), $this->restHelper->getUserId());
+    $parser->parse();
+    $license = $this->licenseDao->getExpressionByAST(json_encode($parser->getAST()));
+    if ($license === null) {
+      $newExpressionId = $this->licenseDao->insertExpression(json_encode($parser->getAST()));
+    } else {
+      $newExpressionId = $license->getId();
+    }
+
+    foreach ($existingExpressionIds as $existingExpressionId) {
+      if ($existingExpressionId != $newExpressionId) {
+        $this->clearingDao->insertClearingEvent($uploadTreeId, $this->restHelper->getUserId(), $this->restHelper->getGroupId(), $existingExpressionId, true);
+      }
+    }
+
+    $this->clearingDao->updateClearingEvent($uploadTreeId, $this->restHelper->getUserId(), $this->restHelper->getGroupId(), $newExpressionId, 'acknowledgement', $acknowledgement);
+    $returnVal = new Info(200, "Successfully updated license expression decision", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 
   /**
