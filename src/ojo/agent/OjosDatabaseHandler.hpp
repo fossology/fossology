@@ -72,6 +72,7 @@ class OjosDatabaseHandler: public fo::AgentDatabaseHandler
                                                      bool ignoreFilesWithMimeType);
     unsigned long saveLicenseToDatabase(OjoDatabaseEntry &entry) const;
     bool insertNoResultInDatabase(OjoDatabaseEntry &entry) const;
+    unsigned long saveLicenseExpressionToDatabase(const ojomatch &match) const;
     bool saveHighlightToDatabase(const ojomatch &match,
       const unsigned long fl_fk) const;
 
