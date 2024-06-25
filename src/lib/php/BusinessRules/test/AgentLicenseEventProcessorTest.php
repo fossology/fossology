@@ -69,7 +69,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
 
     $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
     $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()
-            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
+            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL,false))
             ->andReturn($licenseMatches);
     $scannerDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenses($this->itemTreeBounds);
 
@@ -91,7 +91,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
 
     $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
     $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()
-            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
+            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL, false))
             ->andReturn($licenseMatches);
 
     // $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
@@ -119,7 +119,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
 
     $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
     $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()
-            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
+            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL,false))
             ->andReturn($licenseMatches);
 
     // $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
@@ -146,7 +146,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
 
     $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
     $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()
-            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
+            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL,false))
             ->andReturn($licenseMatches);
 
     // $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
@@ -166,7 +166,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
 
     $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
     $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()
-            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
+            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL,false))
             ->andReturn($licenseMatches);
 
     // $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);

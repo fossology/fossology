@@ -34,57 +34,67 @@
       </spdx:Checksum>
     </spdx:checksum>
 {%~ if fileData.isCleared() %}{# File clearing decisions #}
-  {%~ if fileData.concludedLicenses|default is empty %}
-    <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#none" />
-  {%~ elseif fileData.concludedLicenses|length > 1 %}
-    <spdx:licenseConcluded>
-    {%~ if dualLicense %}
-      <spdx:DisjunctiveLicenseSet>
+  {% if concludedLicensesString %}
+    {% if concludedLicensesString starts with '<spdx:licenseConcluded' %}
+      {{concludedLicensesString}}
     {%~ else %}
-      <spdx:ConjunctiveLicenseSet>
-    {%~ endif %}{# End dual license check #}
-    {%~ for res in fileData.concludedLicenses %}
-      {%~ if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+      <spdx:licenseConcluded>
+        {{concludedLicensesString}}
+      </spdx:licenseConcluded>
+    {%~ endif %}
+  {%~ else %}
+    {%~ if fileData.concludedLicenses|default is empty %}
+      <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#none" />
+    {%~ elseif fileData.concludedLicenses|length > 1 %}
+      <spdx:licenseConcluded>
+      {%~ if dualLicense %}
+        <spdx:DisjunctiveLicenseSet>
+      {%~ else %}
+        <spdx:ConjunctiveLicenseSet>
+      {%~ endif %}{# End dual license check #}
+      {%~ for res in fileData.concludedLicenses %}
+        {%~ if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+          {%- set licId=licenseList[res].licenseObj.spdxId %}
+          {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+            {% set licId=licenseList[res].licenseObj.shortName %}
+          {%- endif ~%}
+          <spdx:member rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
+        {%~ else %}
+          {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
+            {%~ set textPrintedList = textPrintedList|merge([res]) %}
+          <spdx:member>
+            {{ listedLicenseFull(licenseList[res].licenseObj) }}
+          </spdx:member>
+          {%~ else %}{# License already printed #}
+          <spdx:member rdf:resource="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}" />
+          {%~ endif %}
+        {%~ endif %}{# End printing license conclusion #}
+      {%~ endfor %}
+      {%~ if dualLicense %}
+        </spdx:DisjunctiveLicenseSet>
+      {%~ else %}
+        </spdx:ConjunctiveLicenseSet>
+      {%~ endif %}
+      </spdx:licenseConcluded>
+    {%~ elseif fileData.concludedLicenses|length == 1 %}
+      {%- set res = fileData.concludedLicenses[0] %}
+      {%- if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
         {%- set licId=licenseList[res].licenseObj.spdxId %}
         {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
           {% set licId=licenseList[res].licenseObj.shortName %}
         {%- endif ~%}
-        <spdx:member rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
+      <spdx:licenseConcluded rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
       {%~ else %}
         {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
           {%~ set textPrintedList = textPrintedList|merge([res]) %}
-        <spdx:member>
-          {{ listedLicenseFull(licenseList[res].licenseObj) }}
-        </spdx:member>
-        {%~ else %}{# License already printed #}
-        <spdx:member rdf:resource="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}" />
+      <spdx:licenseConcluded>
+        {{ listedLicenseFull(licenseList[res].licenseObj) }}
+      </spdx:licenseConcluded>
+        {%~ else %}
+      <spdx:licenseConcluded rdf:resource="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}" />
         {%~ endif %}
-      {%~ endif %}{# End printing license conclusion #}
-    {%~ endfor %}
-    {%~ if dualLicense %}
-      </spdx:DisjunctiveLicenseSet>
-    {%~ else %}
-      </spdx:ConjunctiveLicenseSet>
+      {%~ endif %}{# End printing single conclusion #}
     {%~ endif %}
-    </spdx:licenseConcluded>
-  {%~ elseif fileData.concludedLicenses|length == 1 %}
-    {%- set res = fileData.concludedLicenses[0] %}
-    {%- if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
-      {%- set licId=licenseList[res].licenseObj.spdxId %}
-      {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
-        {% set licId=licenseList[res].licenseObj.shortName %}
-      {%- endif ~%}
-    <spdx:licenseConcluded rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
-    {%~ else %}
-      {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
-        {%~ set textPrintedList = textPrintedList|merge([res]) %}
-    <spdx:licenseConcluded>
-      {{ listedLicenseFull(licenseList[res].licenseObj) }}
-    </spdx:licenseConcluded>
-      {%~ else %}
-    <spdx:licenseConcluded rdf:resource="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}" />
-      {%~ endif %}
-    {%~ endif %}{# End printing single conclusion #}
   {%~ endif %}
 {%~ else %}{# End file clearing decisions #}
     <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#noassertion" />
@@ -101,11 +111,13 @@
 {%~ else %}
   {%~ for res in fileData.scanners %}
     {%~ if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
-      {%- set licId=licenseList[res].licenseObj.spdxId %}
-      {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
-        {% set licId=licenseList[res].licenseObj.shortName %}
-      {%- endif ~%}
+      {%~ if licenseList[res].licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' %}
+        {%- set licId=licenseList[res].licenseObj.spdxId %}
+        {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+          {% set licId=licenseList[res].licenseObj.shortName %}
+        {%- endif ~%}
     <spdx:licenseInfoInFile rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
+      {%- endif ~%}
     {%~ else %}
       {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
         {%~ set textPrintedList = textPrintedList|merge([res]) %}

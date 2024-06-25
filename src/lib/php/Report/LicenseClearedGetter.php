@@ -49,7 +49,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
   protected function getStatements($uploadId, $uploadTreeTableName, $groupId = null)
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, true, true, true);
     $dbManager = $GLOBALS['container']->get('db.manager');
     $licenseMap = new LicenseMap($dbManager, $groupId, LicenseMap::REPORT);
     $ungroupedStatements = array();
@@ -59,7 +59,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
       }
       /** @var ClearingDecision $clearingDecision */
       foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
-        if ($clearingLicense->isRemoved()) {
+        if ($clearingLicense->isRemoved() || $clearingLicense->getSpdxId() === 'LicenseRef-fossology-License-Expression') {
           continue;
         }
 
