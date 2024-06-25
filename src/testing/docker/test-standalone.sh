@@ -6,7 +6,7 @@
 set -o errexit -o nounset -o xtrace
 
 #### build image
-docker-compose build web
+docker compose build web
 
 #### start container
 readonly CONTAINER_ID="$(docker run --rm -p 127.0.0.1::80 -d fossology)"

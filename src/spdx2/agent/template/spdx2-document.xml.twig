@@ -25,7 +25,7 @@
   <rdfs:comment>
     This document was created using license information and a generator from Fossology.
   </rdfs:comment>
-  {%- for licenseData in licenseList %}{% if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' ~%}
+  {%- for licenseData in licenseList %}{% if (licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-') and licenseData.licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' ~%}
   <spdx:hasExtractedLicensingInfo>
     {%- set licId=licenseData.licenseObj.spdxId %}
     {% if licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
