@@ -214,10 +214,10 @@ class CliXml extends Agent
       $clixmlColumns = UploadDao::CLIXML_REPORT_HEADINGS;
     }
 
-    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, "license", false);
+    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, "license", false, true);
     $this->heartbeat(empty($licenses) ? 0 : count($licenses["statements"]));
 
-    $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $this, $groupId, true, null, false);
+    $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $this, $groupId, true, null, false, true);
     $this->heartbeat(empty($licensesMain) ? 0 : count($licensesMain["statements"]));
 
     if (array_values($clixmlColumns['irrelevantfilesclixml'])[0]) {
@@ -634,6 +634,9 @@ class CliXml extends Agent
       $allLicenseCols = $this->licenseDao->getLicenseById($license["licenseId"],
         $this->groupId);
       $license["name"] = $allLicenseCols->getShortName();
+      if ($license["name"] == 'License Expression') {
+        $license['name'] = $allLicenseCols->getExpression($this->licenseDao, $this->groupId);
+      }
       $statementsWithNames[] = $license;
     }
     return $statementsWithNames;

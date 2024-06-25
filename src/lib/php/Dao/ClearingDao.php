@@ -112,7 +112,7 @@ class ClearingDao
    * @param int $groupId
    * @return LicenseRef[]
    */
-  function getClearedLicenses(ItemTreeBounds $itemTreeBounds, $groupId)
+  function getClearedLicenses(ItemTreeBounds $itemTreeBounds, $groupId, $includeExpressions=false)
   {
     $statementName = __METHOD__;
 
@@ -123,16 +123,22 @@ class ClearingDao
     $params[] = DecisionTypes::IRRELEVANT;
     $sql = "$decisionsCte
             SELECT
-              lr.rf_pk AS license_id,
+              " . ($includeExpressions ?
+              " COALESCE(le.rf_fk, lr.rf_pk) AS license_id,
+              COALESCE(lr.rf_shortname, 'License Expression') AS shortname,
+              COALESCE(lr.rf_spdx_id, '') AS spdx_id,
+              COALESCE(le.rf_expression::text, lr.rf_fullname) AS fullname " :
+              " lr.rf_pk AS license_id,
               lr.rf_shortname AS shortname,
               lr.rf_spdx_id AS spdx_id,
-              lr.rf_fullname AS fullname
-            FROM decision
+              lr.rf_fullname AS fullname ") .
+            "FROM decision
               INNER JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
               INNER JOIN clearing_event ce ON
                 (ce.clearing_event_pk = cde.clearing_event_fk AND NOT ce.removed)
-              INNER JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
-            WHERE type_id != $".count($params)."
+              INNER JOIN license_ref lr ON lr.rf_pk = ce.rf_fk".
+              ($includeExpressions ? " INNER JOIN license_expression le ON le.rf_pk = ce.rf_fk " : " ") .
+            "WHERE type_id != $".count($params)."
             GROUP BY license_id,shortname,fullname,spdx_id";
 
     $this->dbManager->prepare($statementName, $sql);
@@ -154,9 +160,10 @@ class ClearingDao
    * @param int $groupId
    * @param bool $onlyCurrent
    * @param bool $forClearingHistory
+   * @param bool $includeExpressions
    * @return ClearingDecision[]
    */
-  function getFileClearings(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true, $forClearingHistory=false)
+  function getFileClearings(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true, $forClearingHistory=false, $includeExpressions=false)
   {
     $this->dbManager->begin();
 
@@ -167,7 +174,7 @@ class ClearingDao
 
     $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent, $statementName, $params, $condition);
 
-    $clearingsWithLicensesArray = $this->getDecisionsFromCte($decisionsCte, $statementName, $params, $forClearingHistory);
+    $clearingsWithLicensesArray = $this->getDecisionsFromCte($decisionsCte, $statementName, $params, $forClearingHistory, $includeExpressions);
 
     $this->dbManager->commit();
     return $clearingsWithLicensesArray;
@@ -178,9 +185,10 @@ class ClearingDao
    * @param int $groupId
    * @param bool $includeSubFolders
    * @param bool $onlyCurrent
+   * @param bool $includeExpressions
    * @return ClearingDecision[]
    */
-  function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds, $groupId, $includeSubFolders=true, $onlyCurrent=true)
+  function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds, $groupId, $includeSubFolders=true, $onlyCurrent=true, $includeExpressions=false)
   {
     $this->dbManager->begin();
 
@@ -196,7 +204,7 @@ class ClearingDao
 
     $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent, $statementName, $params, $condition);
 
-    $clearingsWithLicensesArray = $this->getDecisionsFromCte($decisionsCte, $statementName, $params);
+    $clearingsWithLicensesArray = $this->getDecisionsFromCte($decisionsCte, $statementName, $params, false, $includeExpressions);
 
     $this->dbManager->commit();
     return $clearingsWithLicensesArray;
@@ -206,9 +214,11 @@ class ClearingDao
    * @param string $decisionsCte
    * @param string $statementName
    * @param array $params
+   * @param bool $forClearingHistory
+   * @param bool $includeExpressions
    * @return ClearingDecision[]
    */
-  private function getDecisionsFromCte($decisionsCte, $statementName, $params, $forClearingHistory=false)
+  private function getDecisionsFromCte($decisionsCte, $statementName, $params, $forClearingHistory=false, $includeExpressions = false)
   {
     $sql = "$decisionsCte
             SELECT
@@ -217,10 +227,13 @@ class ClearingDao
               ce.clearing_event_pk as event_id,
               ce.user_fk as event_user_id,
               ce.group_fk as event_group_id,
-              lr.rf_pk AS license_id,
-              lr.rf_spdx_id AS spdx_id,
-              lr.rf_shortname AS shortname,
-              lr.rf_fullname AS fullname,
+              " . ($includeExpressions ? "COALESCE(le.rf_pk, lr.rf_pk) AS license_id,
+          COALESCE(lr.rf_shortname, 'License Expression') AS shortname,
+          COALESCE(le.rf_expression::text, lr.rf_fullname) AS fullname,
+          COALESCE(lr.rf_spdx_id, '') AS spdx_id," : "lr.rf_pk AS license_id,
+          lr.rf_spdx_id AS spdx_id,
+          lr.rf_shortname AS shortname,
+          lr.rf_fullname AS fullname,") . "
               ce.removed AS removed,
               ce.type_fk AS event_type_id,
               ce.reportinfo AS reportinfo,
@@ -230,7 +243,8 @@ class ClearingDao
             LEFT JOIN users ON decision.user_id = users.user_pk
             LEFT JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
             LEFT JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
-            LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
+            LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk " .
+            ($includeExpressions ? "LEFT JOIN license_expression le ON le.rf_pk = ce.rf_fk " : "") . "
             ORDER BY decision.id DESC, event_id ASC";
 
     $this->dbManager->prepare($statementName, $sql);
@@ -399,11 +413,13 @@ INSERT INTO clearing_decision (
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
+   * @param bool $includeSubFolders
+   * @param bool $includeExpressions
    * @return ClearingEvent[] sorted by ts_added
    */
-  public function getRelevantClearingEvents($itemTreeBounds, $groupId, $includeSubFolders=true)
+  public function getRelevantClearingEvents($itemTreeBounds, $groupId, $includeSubFolders=true, $includeExpressions=false)
   {
-    $decision = $this->getFileClearingsFolder($itemTreeBounds, $groupId, $includeSubFolders, $onlyCurrent=true);
+    $decision = $this->getFileClearingsFolder($itemTreeBounds, $groupId, $includeSubFolders, true, $includeExpressions);
     $events = array();
     $date = 0;
 
@@ -424,6 +440,29 @@ INSERT INTO clearing_decision (
 
     while ($row = $this->dbManager->fetchArray($res)) {
       $licenseRef = new LicenseRef($row['rf_fk'],$row['rf_shortname'],$row['rf_fullname'],$row['rf_spdx_id']);
+      $events[$row['rf_fk']] = ClearingEventBuilder::create()
+              ->setEventId($row['clearing_event_pk'])
+              ->setComment($row['comment'])
+              ->setTimeStamp($row['ts_added'])
+              ->setEventType($row['type_fk'])
+              ->setLicenseRef($licenseRef)
+              ->setRemoved($this->dbManager->booleanFromDb($row['removed']))
+              ->setReportinfo($row['reportinfo'])
+              ->setAcknowledgement($row['acknowledgement'])
+              ->setUploadTreeId($itemTreeBounds->getItemId())
+              ->build();
+    }
+    $this->dbManager->freeResult($res);
+    $stmt = __METHOD__.'expression';
+    $sql = 'SELECT rf_fk,rf_expression,clearing_event_pk,comment,type_fk,removed,reportinfo,acknowledgement, EXTRACT(EPOCH FROM date_added) AS ts_added
+             FROM clearing_event JOIN license_expression ON rf_fk=rf_pk
+             WHERE uploadtree_fk=$1 AND group_fk=$2 AND date_added>to_timestamp($3)
+             ORDER BY clearing_event_pk ASC';
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getItemId(),$groupId,$date));
+
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $licenseRef = new LicenseRef($row['rf_fk'],'License Expression',$row['rf_expression'],'');
       $events[$row['rf_fk']] = ClearingEventBuilder::create()
               ->setEventId($row['clearing_event_pk'])
               ->setComment($row['comment'])

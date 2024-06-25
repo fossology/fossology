@@ -24,6 +24,8 @@ class LicenseClearedGetter extends ClearedGetterCommon
   private $onlyComments = false;
   /** @var Boolean */
   private $onlyAcknowledgements = false;
+  /** @var Boolean */
+  private $onlyExpressions = false;
   /** @var ClearingDao */
   private $clearingDao;
   /** @var LicenseDao */
@@ -46,10 +48,10 @@ class LicenseClearedGetter extends ClearedGetterCommon
     parent::__construct($groupBy = 'text');
   }
 
-  protected function getStatements($uploadId, $uploadTreeTableName, $groupId = null)
+  protected function getStatements($uploadId, $uploadTreeTableName, $groupId = null, $includeExpressions=false)
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, true, true, true);
     $dbManager = $GLOBALS['container']->get('db.manager');
     $licenseMap = new LicenseMap($dbManager, $groupId, LicenseMap::REPORT);
     $ungroupedStatements = array();
@@ -88,16 +90,33 @@ class LicenseClearedGetter extends ClearedGetterCommon
           $risk = $this->getCachedLicenseRisk($licenseId, $groupId);
           $acknowledgement = $clearingLicense->getAcknowledgement();
         }
-
-        $ungroupedStatements[] = array(
-          'licenseId' => $licenseId,
-          'risk' => $risk,
-          'content' => $licenseMap->getProjectedSpdxId(
-              $originLicenseId, $clearingLicense->getSpdxId()),
-          'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
-          'text' => $text,
-          'acknowledgement' => $acknowledgement
-        );
+        if ($clearingLicense->getSpdxId() === 'LicenseRef-fossology-License-Expression') {
+          if ($includeExpressions) {
+            if (empty($text)) {
+              $text = 'License Expression';
+            }
+            $ungroupedStatements[] = array(
+              'licenseId' => $originLicenseId,
+              'risk' => $risk,
+              'content' => $clearingLicense->getLicenseRef()->getExpression($this->licenseDao, $groupId),
+              'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
+              'text' => $text,
+              'acknowledgement' => $acknowledgement
+            );
+          }
+          continue;
+        }
+        if (!$this->onlyExpressions) {
+          $ungroupedStatements[] = array(
+            'licenseId' => $licenseId,
+            'risk' => $risk,
+            'content' => $licenseMap->getProjectedSpdxId(
+                $originLicenseId, $clearingLicense->getSpdxId()),
+            'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
+            'text' => $text,
+            'acknowledgement' => $acknowledgement
+          );
+        }
       }
     }
 
@@ -110,14 +129,14 @@ class LicenseClearedGetter extends ClearedGetterCommon
    * @see Fossology::Lib::Report::ClearedGetterCommon::getCleared()
    */
   public function getCleared($uploadId, $objectAgent, $groupId=null,
-    $extended=true, $agentCall=null, $isUnifiedReport=false)
+    $extended=true, $agentCall=null, $isUnifiedReport=false, $includeExpressions=false)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $ungroupedStatements = $this->getStatements($uploadId, $uploadTreeTableName,
-      $groupId);
+      $groupId, $includeExpressions);
     $this->changeTreeIdsToPaths($ungroupedStatements, $uploadTreeTableName,
       $uploadId);
-    if ($this->onlyAcknowledgements || $this->onlyComments) {
+    if ($this->onlyAcknowledgements || $this->onlyComments || $this->onlyExpressions) {
       return $this->groupStatementsSpecial($ungroupedStatements, $objectAgent);
     }
     return $this->groupStatements($ungroupedStatements, $extended, $agentCall,
@@ -188,6 +207,14 @@ class LicenseClearedGetter extends ClearedGetterCommon
   {
     $this->onlyComments = false;
     $this->onlyAcknowledgements = $displayOnlyAcknowledgements;
+  }
+
+  /**
+   * @param boolean $displayOnlyAcknowledgements
+   */
+  public function setOnlyExpressions($displayOnlyExpressions)
+  {
+    $this->onlyExpressions = $displayOnlyExpressions;
   }
 
   /**

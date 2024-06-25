@@ -2,6 +2,7 @@
 
    SPDX-License-Identifier: FSFAP
 #}
+var licenseDecisionsArray = {{ licenseDecisionsArray|json_encode|raw }};
 selectedLicensesTableColumns = [
   {"sTitle": "{{ 'Action'| trans }}<img src='images/info_16.png' data-toggle='tooltip' title='{{ "Current actions are: 1. Cross: remove (or add again) the license from a clearing result. Note that the license finding stays in the table, but it is not considered for a clearing result 2. Star: mark this license as main license as the package. A main license will appear in the listing of the browse view as well in the reporting"|trans }}' alt='' class='info-bullet'/>", "sClass": "center nobreaktext", "bSortable": false, "sWidth" : "1%"},
   {"sTitle": "{{ 'License'| trans }}<img src='images/info_16.png' data-toggle='tooltip' title='{{ "Short ID (or SPDX ID) of the license. Clicking the license short ID will reveal the  license text"|trans }}' alt='' class='info-bullet'/>", "sClass": "left nobreaktext"},
@@ -27,6 +28,22 @@ selectedLicensesTableConfig = {
       if (nRow.className.match(/(^| )removed($| )/g)  ) {
           $('td', nRow).addClass('read_only');
       }
+      // Customize cell merging
+    var $row = $(nRow);
+
+    // Check if specific cells are empty and merge them
+    if (!aData[5])
+    {
+      $row.find('td:eq(5)').remove();
+      $row.find('td:eq(4)').attr('colspan', 3);
+    }
+    if (!aData[2] && !aData[3]) {
+      console.log(aData);
+      // Merge cells 3, 4, and 5
+      $row.find('td:eq(3)').remove();
+      $row.find('td:eq(2)').remove();
+      $row.find('td:eq(1)').attr('colspan', 3);
+    }
   },
   "aoColumns": selectedLicensesTableColumns,
   "iDisplayLength": 25,

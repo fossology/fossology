@@ -35,7 +35,9 @@ LicenseInfoInFile: NOASSERTION
 {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
   {% set licId=licenseList[res].licenseObj.shortName %}
 {%- endif ~%}
+{% if licenseList[res].licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' %}
 LicenseInfoInFile: {{ licId|replace({' ':'-'})}}
+{%- endif ~%}
 {% endfor %}
 {% endif %}
 {# FileSize: 48 Kb (49173 bytes) #}

@@ -253,8 +253,9 @@ class AllDecisionsDao
   {
     $columns = "rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_notes, rf_md5, rf_risk";
     $sql = "WITH alllicense AS (" .
-      "SELECT $columns, false AS is_candidate FROM ONLY license_ref UNION " .
-      "SELECT $columns, true AS is_candidate FROM ONLY license_candidate) " .
+      "SELECT $columns, false AS is_candidate, false AS is_expression FROM ONLY license_ref UNION " .
+      "SELECT $columns, true AS is_candidate, false AS is_expression FROM ONLY license_candidate UNION " .
+      "SELECT rf_pk, 'License Expression' AS rf_shortname, rf_expression::text AS rf_fullname, null AS rf_text, null AS rf_url, null AS rf_notes, null AS rf_md5, null AS rf_risk, false AS is_candidate, true AS is_expression FROM license_expression) " .
       "SELECT lf.* FROM alllicense AS lf " .
       " INNER JOIN clearing_event ce ON ce.rf_fk=lf.rf_pk " .
       " INNER JOIN uploadtree ut ON ce.uploadtree_fk=ut.uploadtree_pk WHERE ut.upload_fk=$1" .

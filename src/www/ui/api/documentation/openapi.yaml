@@ -1580,6 +1580,13 @@ paths:
       summary: Get the license decisions list
       description: >
         Get the license decisions list for the given upload and item id
+      parameters:
+        - name: includeExpressions
+          in: query
+          required: false
+          description: Optionally include expressions in the response
+          schema:
+            type: boolean
       responses:
         '200':
           description: List of the license decisions for the upload-tree id
@@ -1588,7 +1595,9 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/LicenseDecision'
+                  oneOf:
+                    - $ref: '#/components/schemas/LicenseDecision'
+                    - $ref: '#/components/schemas/LicenseExpressionDecision'
         '404':
           description: Resource Not Found
           content:
@@ -1657,6 +1666,71 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+          
+  /uploads/{id}/item/{itemId}/expression:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Id of the upload
+        schema:
+          type: integer
+      - name: itemId
+        in: path
+        required: true
+        description: Id of the item within the upload
+        schema:
+          type: integer
+    put:
+      operationId: setLicenseExpressionDecision
+      tags:
+        - Upload
+      summary: Set License Expression Decision for an item in the upload
+      description: >
+        Set or update the license expression decision for a specific item within an upload. This involves specifying a license expression and an optional   acknowledgement.
+      requestBody:
+        description: License expression decision payload
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expression:
+                  type: string
+                  description: License expression to be set
+                  example: "(MIT AND (GPL-2.0-only OR BSD-2-Clause))"
+                acknowledgement:
+                  type: string
+                  description: Optional license acknowledgement
+                  example: "Acknowledgement text"
+      responses:
+        '200':
+          description: License expression decision updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: License expression missing from request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Item or upload not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /uploads/{id}/licenses/main:
     parameters:
@@ -1673,6 +1747,13 @@ paths:
       summary: Get main licenses on the upload
       description: >
         Get main licenses assigned on a particular upload
+      parameters:
+        - name: includeExpressions
+          in: query
+          required: false
+          description: Optionally include expressions in the response
+          schema:
+            type: boolean
       responses:
         '200':
           description: All main licenses from an upload
@@ -1681,7 +1762,9 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/License'
+                  oneOf:
+                    - $ref: '#/components/schemas/License'
+                    - $ref: '#/components/schemas/LicenseExpression'
         '404':
           description: Upload not found.
           content:
@@ -1781,6 +1864,103 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /uploads/{id}/expression/main:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Id of the upload
+        schema:
+          type: integer
+    post:
+      operationId: setMainExpression
+      tags:
+        - Upload
+      summary: Set the main license expression for the upload
+      description: >
+        Set the main license expression for a particular upload.
+      requestBody:
+        description: Main license expression payload
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expression:
+                  type: string
+                  description: License expression
+                  example: "(MIT AND (GPL-2.0-only OR BSD-2-Clause))"
+      responses:
+        '200':
+          description: Main license expression set successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: License expression missing or already exists for this upload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: No license with the given expression found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    delete:
+      operationId: removeMainExpression
+      tags:
+        - Upload
+      summary: Remove the main license expression from the upload
+      description: >
+        Remove the main license expression from a particular upload.
+      parameters:
+        - name: expression
+          in: query
+          required: true
+          description: License expression to be removed
+          schema:
+            type: string
+            example: "(MIT AND (GPL-2.0-only OR BSD-2-Clause))"
+      responses:
+        '200':
+          description: Main license expression removed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: License expression is missing or is not a main license for this upload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: No license with the given expression found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  
   /uploads/{id}/item/{itemId}/prev-next:
     parameters:
       - name: id
@@ -1854,6 +2034,13 @@ paths:
       summary: Get the clearing history
       description: >
         Get the clearing history for a specific upload item
+      parameters:
+        - name: includeExpressions
+          in: query
+          required: false
+          description: Optionally include expressions in the response
+          schema:
+            type: boolean
       responses:
         '200':
           description: List of the data about clearing history
@@ -6318,6 +6505,58 @@ components:
           description: Is the license removed?
           type: boolean
           example: false
+    LicenseExpressionDecision:
+      description: Extended LicenseExpression model with additional fields
+      allOf:
+        - $ref: '#/components/schemas/LicenseExpression'
+      properties:
+        sources:
+          description: Array of sources
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the agent or source.
+                example: "User decision"
+              clearingId:
+                type: integer
+                nullable: true
+                description: The clearing ID.
+                example: null
+              agentId:
+                type: integer
+                nullable: true
+                description: The agent ID.
+                example: null
+              highlightId:
+                type: integer
+                nullable: true
+                description: The highlight ID.
+                example: null
+              page:
+                type: integer
+                nullable: true
+                description: The page number.
+                example: null
+              percentage:
+                type: integer
+                nullable: true
+                description: The percentage value.
+                example: null
+        acknowledgement:
+          description: License acknowledgement
+          type: string
+          example: ""
+        isMainLicense:
+          description: Is the license the main license?
+          type: boolean
+          example: false
+        isRemoved:
+          description: Is the license removed?
+          type: boolean
+          example: false
     License:
       description: License from the database
       type: object
@@ -6351,6 +6590,18 @@ components:
         isCandidate:
           description: Is the license a candidate?
           type: boolean
+    LicenseExpression:
+      description: License expression object
+      type: object
+      properties:
+        id:
+          description: ID of the license expression
+          type: integer
+          example: 785
+        expression:
+          description: License expression in a logical format
+          type: string
+          example: "(MIT AND (GPL-2.0-only OR BSD-2-Clause))"
     Customise:
       description: Admin customise data object
       type: object
@@ -6481,12 +6732,19 @@ components:
           items:
             type: string
             example: "MIT"
+          example:
+            - "MIT"
+            - "BSD-2-Clause"
+            - "(BSD-2-Clause OR MIT)"
         removedLicenses:
           type: array
           description: List of license shortnames removed from the decision
           items:
             type: string
             example: "GPL-2.0"
+          example:
+            - "GPL-2.0-only"
+            - "(BSD-2-Clause AND MIT)"
 
     HighlightInfo:
       type: object

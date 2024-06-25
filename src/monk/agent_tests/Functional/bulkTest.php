@@ -106,11 +106,11 @@ class bulkTest extends \PHPUnit\Framework\TestCase
   private function setUpTables()
   {
     $this->testDb->createPlainTables(array('upload','uploadtree','license_ref','license_ref_bulk', 'license_set_bulk',
-        'clearing_event','clearing_decision','report_info','clearing_decision_event','license_file','highlight','highlight_bulk','agent','pfile','ars_master','users'),false);
+        'clearing_event','clearing_decision','report_info','clearing_decision_event','license_file','highlight','highlight_bulk','agent','pfile','ars_master','users', 'license_expression'),false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_event_clearing_event_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey', 'license_ref_bulk_pkey', 'license_set_bulk_fkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_ref','license_set_bulk','clearing_event','license_file','highlight'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_ref','license_set_bulk','clearing_event','license_file','highlight', 'license_expression'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->insertData(array('pfile','upload','uploadtree_a','users'), false);
     $this->testDb->insertData_license_ref();
