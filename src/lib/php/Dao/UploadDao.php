@@ -117,6 +117,17 @@ class UploadDao
     return intval($uploadEntry['uploadtree_pk']);
   }
 
+  public function getPfileFromUploadtreeId($uploadFk, $uploadTreeId)
+  {
+    $uploadTreeTableName = $this->getUploadtreeTableName($uploadFk);
+    $stmt = __METHOD__ . ".$uploadTreeTableName";
+    $uploadEntry = $this->dbManager->getSingleRow("SELECT pfile_fk " .
+      "FROM $uploadTreeTableName " .
+      "WHERE upload_fk = $1 AND uploadtree_pk = $2",
+      array($uploadFk, $uploadTreeId), $stmt);
+    return intval($uploadEntry['pfile_fk']);
+  }
+
   /**
    * @param int $uploadId
    * @return Upload|null

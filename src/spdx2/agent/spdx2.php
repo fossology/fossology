@@ -206,6 +206,7 @@ class SpdxTwoAgent extends Agent
    */
   function processUploadId($uploadId)
   {
+    error_log("Processing Upload");
     $args = $this->preWorkOnArgs($this->args);
 
     if (array_key_exists(self::OUTPUT_FORMAT_KEY,$args)) {
@@ -668,27 +669,46 @@ class SpdxTwoAgent extends Agent
           $textToBePrinted[] = $license;
         }
       }
+      $fhandle = fopen("abcdebug.txt", "a");
+      $txt = var_export($fileData->getScanners(), true);
+      $txt .= var_export($this->licensesInDocument, true);
+      fwrite($fhandle, "$fileName -> ".$txt);
+      fclose($fhandle);
+      $concludedLicensesString = [];
       foreach ($fileData->getScanners() as $license) {
+        if ($this->licensesInDocument[$license]->getLicenseObj()->getSpdxId() === "LicenseRef-fossology-License-Expression") {
+          $ast = json_decode($this->licensesInDocument[$license]->getLicenseObj()->getFullName(), true);
+          $concludedLicensesString[] = $this->buildExpression($ast, $this->groupId);
+          continue;
+        }
         if (! $this->licensesInDocument[$license]->isTextPrinted()) {
           $textToBePrinted[] = $license;
         }
       }
-      $concludedLicensesString = [];
+      if (!empty($concludedLicensesString)) {
+        $concludedLicensesString = $concludedLicensesString[0];
+        if (stripos($concludedLicensesString, "<spdx:member") === 0)
+        {
+          $concludedLicensesString = str_replace("<spdx:member", "<spdx:licenseConcluded", $concludedLicensesString);
+        }
+      }
       if ($this->outputFormat == "spdx2tv" ||
           $this->outputFormat == "spdx2csv") {
-        foreach ($fileData->getConcludedLicenses() as $license) {
-          $shortName = $this->licensesInDocument[$license]
-            ->getLicenseObj()->getShortName();
-          if (StringOperation::stringStartsWith($shortName,
-            LicenseRef::SPDXREF_PREFIX)) {
-            $concludedLicensesString[] = $shortName;
-          } else {
-            $concludedLicensesString[] = $this->licensesInDocument[$license]
-              ->getLicenseObj()->getSpdxId();
+        if (empty($concludedLicensesString)) {
+          foreach ($fileData->getConcludedLicenses() as $license) {
+            $shortName = $this->licensesInDocument[$license]
+              ->getLicenseObj()->getShortName();
+            if (StringOperation::stringStartsWith($shortName,
+              LicenseRef::SPDXREF_PREFIX)) {
+              $concludedLicensesString[] = $shortName;
+            } else {
+              $concludedLicensesString[] = $this->licensesInDocument[$license]
+                ->getLicenseObj()->getSpdxId();
+            }
           }
+          $concludedLicensesString = SpdxTwoUtils::implodeLicenses(
+            SpdxTwoUtils::removeEmptyLicenses($concludedLicensesString));
         }
-        $concludedLicensesString = SpdxTwoUtils::implodeLicenses(
-          SpdxTwoUtils::removeEmptyLicenses($concludedLicensesString));
       }
       if (!$stateWoInfos ||
           ($stateWoInfos && (!empty($fileData->getConcludedLicenses()) ||
@@ -887,6 +907,59 @@ class SpdxTwoAgent extends Agent
             $oldLicObj->getDetectorType(), $oldLicObj->getSpdxId()));
       }
     }
+  }
+
+  protected function buildExpression($node, $groupId)
+  {
+    if ($node['type'] === 'License') {
+      $licenseNode = $this->licenseDao->getLicenseById($node['value'], $groupId);
+      if ($this->outputFormat == self::DEFAULT_OUTPUT_FORMAT)
+      {
+        if (StringOperation::stringStartsWith($licenseNode->getShortName(), LicenseRef::SPDXREF_PREFIX) || StringOperation::stringStartsWith($licenseNode->getSpdxId(), LicenseRef::SPDXREF_PREFIX))
+        {
+          if (StringOperation::stringStartsWith($licenseNode->getShortName(), LicenseRef::SPDXREF_PREFIX)) {
+            return '<spdx:member rdf:resource="#'.$licenseNode->getShortName().'" />';
+          }
+          return '<spdx:member rdf:resource="#'.$licenseNode->getSpdxId().'" />';
+        }
+        if (stripos($licenseNode->getSpdxId(), "exception") !== false)
+        {
+          return $this->renderString('licenseexception.xml.twig', ['licenseObj' => $licenseNode]);
+        }
+        return $this->renderString('listedlicense.xml.twig', ['licenseObj' => $licenseNode]);
+      }
+      if (StringOperation::stringStartsWith($licenseNode->getShortName(),
+        LicenseRef::SPDXREF_PREFIX)) {
+        return $licenseNode->getShortName();
+      }
+      return $licenseNode->getSpdxId();
+    }
+    $left = $this->buildExpression($node['left'], $groupId);
+    $right = $this->buildExpression($node['right'], $groupId);
+    $operator = $node['value'];
+    if ($this->outputFormat == self::DEFAULT_OUTPUT_FORMAT) {
+      if ((stripos($left, '<spdx:member') === false || stripos($left, '<spdx:member') != 0) && (stripos($left, "<spdx:licenseException") === false || stripos($left, "<spdx:licenseException") != 0))
+      {
+        $left = "<spdx:member>\n".$left."\n</spdx:member>\n";
+      }
+      if ((stripos($right, '<spdx:member') === false || stripos($right, '<spdx:member') != 0) && (stripos($right, "<spdx:licenseException") === false || stripos($right, "<spdx:licenseException") != 0))
+      {
+        $right = "<spdx:member>\n".$right."\n</spdx:member>\n";
+      }
+      if ($operator === 'AND')
+      {
+        return "<spdx:ConjunctiveLicenseSet>\n".$left.$right."</spdx:ConjunctiveLicenseSet>\n";
+      }
+      else if ($operator === 'OR')
+      {
+        return "<spdx:DisjunctiveLicenseSet>\n".$left.$right."\n</spdx:DisjunctiveLicenseSet>\n";
+      }
+      else if ($operator == 'WITH')
+      {
+        return "<spdx:WithExceptionOperator>\n".$left.$right."\n</spdx:WithExceptionOperator>";
+      }
+    }
+    return "($left $operator $right)";
   }
 }
 
