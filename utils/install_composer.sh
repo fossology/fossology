@@ -21,8 +21,9 @@ version="2.2.6"
 
 pushd "$( dirname "${BASH_SOURCE[0]}" )/.."
 
-# Line Encoding
-required_utils=("curl" "dos2unix")
+# Installing Package Manager for different Enviornment 
+required_utils=("dos2unix")
+
 for util in "${required_utils[@]}"; do
     if ! command -v $util &> /dev/null; then
         echo "$util is not installed. Attempting to install..."
@@ -30,18 +31,41 @@ for util in "${required_utils[@]}"; do
             echo "Unable to install $util Aborting..."
             exit 1
         else
-            case $(uname) in
-                Linux) apt-get install -y $util ;;
-                Darwin) brew install $util ;;
-                *) echo "Unsuported OS." ; exit 1 ;;
+            case $(uname -s) in
+                Linux)
+                    # Detecting Package Manager based on Enviornment
+                    if command -v apt-get &> /dev/null; then
+                        sudo apt-get install -y $util
+                    elif command -v yum &> /dev/null; then
+                        sudo yum install -y $util
+                    elif command -v dnf &> /dev/null; then
+                        sudo dnf install -y $util
+                    elif command -v pacman &> /dev/null; then
+                        sudo pacman -S --noconfirm $util
+                    else
+                        echo "No compatible package manager found. Aborting..."
+                        exit 1
+                    fi
+                    ;;
+                Darwin)
+                    if command -v brew &> /dev/null; then
+                        brew install $util
+                    else
+                        echo "Homebrew is not installed. Please install Homebrew to proceed."
+                        exit 1
+                    fi
+                    ;;
+                *)
+                    echo "Unsupported OS."
+                    exit 1
+                    ;;
             esac
         fi
     fi
 done
 
-if grep -qEi "(Microsoft|WSL)" /proc/version; then 
-    find . -type f -print0 | xargs -0 dos2unix
-fi
+# Line Encoding
+find . -type f -print0 | parallel -0 'grep -Iql $'\r'' {} && dos2unix {}'
 
 if [[ $1 == '-h' ]]; then
     cat <<EOF

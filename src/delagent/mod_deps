@@ -5,6 +5,51 @@
 # SPDX-FileCopyrightText: © 2011-2012 Hewlett-Packard Development Company, L.P.
 
 # SPDX-License-Identifier: GPL-2.0-only
+# Installing Package Manager for different Enviornment  
+required_utils=("dos2unix")
+
+for util in "${required_utils[@]}"; do
+    if ! command -v $util &> /dev/null; then
+        echo "$util is not installed. Attempting to install..."
+        if [[ $EUID -ne 0 ]]; then
+            echo "Unable to install $util Aborting..."
+            exit 1
+        else
+            case $DISTRO in
+                Linux)
+                    # Detecting Package Manager based on Enviornment
+                    if command -v apt-get &> /dev/null; then
+                        sudo apt-get install -y $util
+                    elif command -v yum &> /dev/null; then
+                        sudo yum install -y $util
+                    elif command -v dnf &> /dev/null; then
+                        sudo dnf install -y $util
+                    elif command -v pacman &> /dev/null; then
+                        sudo pacman -S --noconfirm $util
+                    else
+                        echo "No compatible package manager found. Aborting..."
+                        exit 1
+                    fi
+                    ;;
+                Darwin)
+                    if command -v brew &> /dev/null; then
+                        brew install $util
+                    else
+                        echo "Homebrew is not installed. Please install Homebrew to proceed."
+                        exit 1
+                    fi
+                    ;;
+                *)
+                    echo "Unsupported OS."
+                    exit 1
+                    ;;
+            esac
+        fi
+    fi
+done
+
+# Line Encoding
+find . -type f -print0 | parallel -0 'grep -Iql $'\r'' {} && dos2unix {}'
 
 source "$(dirname ${BASH_SOURCE[0]})/../../utils/utils.sh"
 
@@ -57,13 +102,19 @@ if [[ $EVERYTHING ]]; then
 fi
 
 # figure out what distro we're on
-DISTRO=$(lsb_release --id --short)
+DISTRO=$(uname -s || lsb_release --id --short)
+CODENAME=$(sw_vers -productVersion 2>/dev/null || lsb_release --codename --short 2>/dev/null)
+ARCH=$(uname -m) 
+
 
 ########################################################################
 
 if [[ $BUILDTIME ]]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
+    Darwin)
+      brew install libgcrypt
+      ;;
     Debian|Ubuntu)
       apt-get $YesOpt install \
         libgcrypt20-dev libcrypt-dev
@@ -78,6 +129,8 @@ fi
 if [[ $RUNTIME ]]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
+    Darwin)
+      brew install libgcrypt
     Debian|Ubuntu)
       apt-get $YesOpt install \
         libgcrypt20 libcrypt1
