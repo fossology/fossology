@@ -217,6 +217,10 @@ $app->group('/uploads',
       $app->patch('/copyrights/{hash:.*}', CopyrightController::class . ':restoreFileCopyright');
       $app->put('/copyrights/{hash:.*}', CopyrightController::class . ':updateFileCopyright');
       $app->get('/totalcopyrights', CopyrightController::class . ':getTotalFileCopyrights');
+      $app->get('/scancode-copyrights', CopyrightController::class . ':getFileScanCodeCopyrights');
+      $app->delete('/scancode-copyrights/{hash:.*}', CopyrightController::class . ':deleteFileScanCodeCopyright');
+      $app->patch('/scancode-copyrights/{hash:.*}', CopyrightController::class . ':restoreFileScanCodeCopyright');
+      $app->put('/scancode-copyrights/{hash:.*}', CopyrightController::class . ':updateFileScanCodeCopyright');
       $app->get('/user-copyrights', CopyrightController::class . ':getFileUserCopyrights');
       $app->delete('/user-copyrights/{hash:.*}', CopyrightController::class . ':deleteFileUserCopyright');
       $app->patch('/user-copyrights/{hash:.*}', CopyrightController::class . ':restoreFileUserCopyright');

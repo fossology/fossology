@@ -2688,6 +2688,41 @@ paths:
       requestBody: *cxUpdateBody
       responses: *cxUpdateResponses
 
+  /uploads/{id}/item/{itemId}/scancode-copyrights:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileScanCodeCopyrights
+      tags:
+        - Copyrights
+      summary: Get the scancode copyright findings of the mentioned upload tree ID
+      description: Returns the list of scancode copyright findings associated with the file
+      responses: *cxGetResponses
+  
+  /uploads/{id}/item/{itemId}/scancode-copyrights/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileScanCodeCopyright
+      tags:
+        - Copyrights
+      summary: Deletes scancode copyright for a file
+      description: Deletes scancode copyright statement for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileScanCodeCopyright
+      tags:
+        - Copyrights
+      summary: Restores scancode copyright for a file
+      description: Restores scancode copyright statement for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileScanCodeCopyright
+      tags:
+        - Copyrights
+      summary: Updates scancode copyright for a file
+      description: Updates scancode copyright statement for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
+
   /uploads/{id}/item/{itemId}/emails:
     parameters: *cxGetParams
     get:
