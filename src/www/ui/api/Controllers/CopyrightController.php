@@ -62,6 +62,7 @@ class CopyrightController extends RestController
   const TYPE_KEYWORD = 32;
   const TYPE_IPRA = 64;
   const TYPE_COPYRIGHT_USERFINDINGS = 128;
+  const TYPE_COPYRIGHT_SCANCODE = 256;
 
   public function __construct($container)
   {
@@ -94,6 +95,19 @@ class CopyrightController extends RestController
   public function getFileUserCopyrights($request, $response, $args)
   {
     return $this->getFileCX($request, $response, $args, self::TYPE_COPYRIGHT_USERFINDINGS);
+  }
+
+  /**
+   * Get all scancode copyright findings for a particular upload-tree
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getFileScanCodeCopyrights($request, $response, $args)
+  {
+    return $this->getFileCX($request, $response, $args, self::TYPE_COPYRIGHT_SCANCODE);
   }
 
   /**
@@ -201,6 +215,19 @@ class CopyrightController extends RestController
   }
 
   /**
+   * Delete scancode copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileScanCodeCopyright($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_COPYRIGHT_SCANCODE);
+  }
+
+  /**
    * Delete email for a particular file
    *
    * @param  ServerRequestInterface $request
@@ -305,6 +332,19 @@ class CopyrightController extends RestController
   }
 
   /**
+   * Update scancode copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileScanCodeCopyright($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_COPYRIGHT_SCANCODE);
+  }
+
+  /**
    * Update email for a particular file
    *
    * @param  ServerRequestInterface $request
@@ -406,6 +446,19 @@ class CopyrightController extends RestController
   public function restoreFileUserCopyright($request, $response, $args)
   {
     return $this->restoreFileCx($args, $response, self::TYPE_COPYRIGHT_USERFINDINGS);
+  }
+
+  /**
+   * Restore scancode copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileScanCodeCopyright($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_COPYRIGHT_SCANCODE);
   }
 
   /**
@@ -578,6 +631,10 @@ class CopyrightController extends RestController
       case self::TYPE_COPYRIGHT_USERFINDINGS:
         $dataType = 'userfindingcopyright';
         $agentArs = 'copyright_ars';
+        break;
+      case self::TYPE_COPYRIGHT_SCANCODE:
+        $dataType = 'scancode_statement';
+        $agentArs = 'scancode_ars';
         break;
       case self::TYPE_EMAIL:
         $dataType = 'email';
@@ -810,6 +867,10 @@ class CopyrightController extends RestController
       case self::TYPE_COPYRIGHT_USERFINDINGS:
         $dataType = 'statement';
         $dispName = 'user-copyright';
+        break;
+      case self::TYPE_COPYRIGHT_SCANCODE:
+        $dataType = 'scancode_statement';
+        $dispName = 'scancode-copyright';
         break;
       case self::TYPE_EMAIL:
         $dispName = $dataType = 'email';
