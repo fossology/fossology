@@ -111,6 +111,8 @@ if [[ $BUILDTIME ]]; then
              apt-get $YesOpt install php-mbstring php-cli php-xml php-zip php-gd php-pgsql php-curl php-uuid php-sqlite3;;
            jammy)
              apt-get $YesOpt install php-mbstring php-cli php-xml php-zip php-gd php-pgsql php-curl php-uuid php-sqlite3;;
+           noble)
+             apt-get $YesOpt install php-mbstring php-cli php-xml php-zip php-gd php-pgsql php-curl php-uuid php-sqlite3;;
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
@@ -128,6 +130,8 @@ if [[ $BUILDTIME ]]; then
                 apt-get $YesOpt install postgresql-server-dev-12;;
               jammy)
                 apt-get $YesOpt install postgresql-server-dev-14;;
+              noble)
+                apt-get $YesOpt install postgresql-server-dev-16;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
            esac
          fi
@@ -202,6 +206,11 @@ if [[ $RUNTIME ]]; then
                libapache2-mod-php8.1 php8.1-pgsql php8.1-cli php8.1-curl \
                php8.1-xml php8.1-zip php8.1-mbstring php8.1-uuid php-php-gettext s-nail \
                libboost-program-options1.74.0 libboost-regex1.74.0 libicu70;;
+            noble)
+               apt-get $YesOpt install postgresql-16 php8.3 php8.3-pgsql \
+               libapache2-mod-php8.3 php8.3-pgsql php8.3-cli php8.3-curl \
+               php8.3-xml php8.3-zip php8.3-mbstring php8.3-uuid php-php-gettext s-nail \
+               libboost-program-options1.74.0 libboost-regex1.74.0 libicu74;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
          esac
          ;;

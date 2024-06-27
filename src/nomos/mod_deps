@@ -91,6 +91,8 @@ if [[ $RUNTIME ]]; then
           apt-get $YesOpt install libjson-c4;;
         jammy)
           apt-get $YesOpt install libjson-c5;;
+        noble)
+          apt-get $YesOpt install libjson-c5;;
         *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
       esac;;
     Fedora|RedHatEnterprise*|CentOS)
