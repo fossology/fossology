@@ -218,8 +218,10 @@ class User
    * Get user element as an associative array
    * @return array
    */
-  public function getArray()
+  public function getArray($version = ApiVersion::V1)
   {
+    global $container;
+    $restHelper = $container->get('helper.restHelper');
     $returnUser = array();
     $returnUser["id"] = $this->id;
     $returnUser["name"] = $this->name;
@@ -232,13 +234,13 @@ class User
       $returnUser["rootFolderId"] = $this->rootFolderId;
     }
     if ($this->defaultGroup !== null) {
-      $returnUser["defaultGroup"] = $this->defaultGroup;
+      $returnUser["defaultGroup"] = $version == ApiVersion::V2 ? $restHelper->getUserDao()->getGroupNameById($this->defaultGroup) : $this->defaultGroup;
     }
     if ($this->emailNotification !== null) {
       $returnUser["emailNotification"] = $this->emailNotification;
     }
     if ($this->agents !== null) {
-      $returnUser["agents"] = $this->analysis->getArray();
+      $returnUser["agents"] = $this->analysis->getArray($version);
     }
     if ($this->defaultBucketPool !== null) {
       $returnUser["defaultBucketpool"] = $this->defaultBucketPool;

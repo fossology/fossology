@@ -17,6 +17,7 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\ApiVersion;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -40,7 +41,7 @@ class UserHelper
     $this->user_pk = $user_pk;
   }
 
-  public function modifyUserDetails($reqBody)
+  public function modifyUserDetails($reqBody, $version = ApiVersion::V1)
   {
     global $container;
     $restHelper = $container->get('helper.restHelper');
@@ -50,7 +51,7 @@ class UserHelper
     $SessionUserRec = $userEditObj->GetUserRec($sessionOwnerUser_pk);
     $SessionIsAdmin = $userEditObj->IsSessionAdmin($SessionUserRec);
 
-    $symReq = $this->createSymRequest($reqBody);
+    $symReq = $this->createSymRequest($reqBody, $version);
     if (!$SessionIsAdmin) {
       $returnVal = new Info(403, "The session owner is not an admin!", InfoType::INFO);
     } else {
@@ -70,7 +71,7 @@ class UserHelper
    * @param array $userDetails parsed from request body
    * @return Request $symfonyRequest
    */
-  public function createSymRequest($userDetails)
+  public function createSymRequest($userDetails, $version = ApiVersion::V1)
   {
     global $container;
     $restHelper = $container->get('helper.restHelper');
@@ -90,8 +91,8 @@ class UserHelper
     $symfonyRequest->request->set('public', $userDetails['defaultVisibility'] ?? $user['upload_visibility']);
     $symfonyRequest->request->set('default_folder_fk', $userDetails['defaultFolderId'] ?? $user['default_folder_fk']);
     $symfonyRequest->request->set('user_desc', $userDetails['description'] ?? $user['user_desc']);
-    $symfonyRequest->request->set('_pass1', $userDetails['user_pass'] ?? null);
-    $symfonyRequest->request->set('_pass2', $userDetails['user_pass'] ?? null);
+    $symfonyRequest->request->set('_pass1', $userDetails[$version == ApiVersion::V2 ? 'userPass' : 'user_pass'] ?? null);
+    $symfonyRequest->request->set('_pass2', $userDetails[$version == ApiVersion::V2 ? 'userPass' : 'user_pass'] ?? null);
     $symfonyRequest->request->set('_blank_pass', $userDetails['_blank_pass'] ?? "");
     $symfonyRequest->request->set('user_status', $userDetails['user_status'] ?? $user['user_status']);
     $symfonyRequest->request->set('user_email', $userDetails['email'] ?? $user['user_email']);
@@ -125,8 +126,8 @@ class UserHelper
       if (isset($userDetails['agents']['ojo'])) {
         $newAgents['Check_agent_ojo'] = $userDetails['agents']['ojo'] ? 1 : 0;
       }
-      if (isset($userDetails['agents']['copyright_email_author'])) {
-        $newAgents['Check_agent_copyright'] = $userDetails['agents']['copyright_email_author'] ? 1 : 0;
+      if (isset($userDetails['agents'][$version == ApiVersion::V2 ? 'copyrightEmailAuthor' : 'copyright_email_author'])) {
+        $newAgents['Check_agent_copyright'] = $userDetails['agents'][$version == ApiVersion::V2 ? 'copyrightEmailAuthor' : 'copyright_email_author'] ? 1 : 0;
       }
       if (isset($userDetails['agents']['ecc'])) {
         $newAgents['Check_agent_ecc'] = $userDetails['agents']['ecc'] ? 1 : 0;

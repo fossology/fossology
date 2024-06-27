@@ -112,19 +112,19 @@ class UploadHelper
    * @throws HttpNotFoundException If the folder does not contain the upload
    */
   public function handleScheduleAnalysis($uploadId, $folderId, $scanOptionsJSON,
-                                         $newUpload = false)
+                                         $newUpload = false, $apiVersion = ApiVersion::V1)
   {
     $parametersSent = false;
     $analysis = new Analysis();
 
     if (array_key_exists("analysis", $scanOptionsJSON) && ! empty($scanOptionsJSON["analysis"])) {
-      $analysis->setUsingArray($scanOptionsJSON["analysis"]);
+      $analysis->setUsingArray($scanOptionsJSON["analysis"], $apiVersion);
       $parametersSent = true;
     }
 
     $decider = new Decider();
     if (array_key_exists("decider", $scanOptionsJSON) && ! empty($scanOptionsJSON["decider"])) {
-      $decider->setUsingArray($scanOptionsJSON["decider"]);
+      $decider->setUsingArray($scanOptionsJSON["decider"], $apiVersion);
       $parametersSent = true;
     }
 
@@ -137,7 +137,7 @@ class UploadHelper
     $reuser = new Reuser(0, 'groupName', false, false);
     try {
       if (array_key_exists("reuse", $scanOptionsJSON) && ! empty($scanOptionsJSON["reuse"])) {
-        $reuser->setUsingArray($scanOptionsJSON["reuse"]);
+        $reuser->setUsingArray($scanOptionsJSON["reuse"], $apiVersion);
         $parametersSent = true;
       }
     } catch (\UnexpectedValueException $e) {

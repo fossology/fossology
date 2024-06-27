@@ -82,7 +82,7 @@ x-reuse:
     - name: limit
       description: Limits of responses per request
       required: false
-      in: header
+      in: query
       schema:
         type: integer
         default: 100
@@ -91,7 +91,7 @@ x-reuse:
     - name: page
       description: Page number for responses
       required: false
-      in: header
+      in: query
       schema:
         type: integer
         default: 1
@@ -2178,7 +2178,7 @@ paths:
       parameters:
         - name: groupName
           description: The group name to chose while performing search
-          in: header
+          in: query
           required: false
           schema:
             type: string
@@ -2187,7 +2187,7 @@ paths:
           # use 'allfiles', if not given
           required: false
           description: Limit search to
-          in: header
+          in: query
           schema:
             type: string
             enum:
@@ -2196,7 +2196,7 @@ paths:
               - allfiles
             default: allfiles
         - name: uploadId
-          in: header
+          in: query
           required: false
           description: Id of the upload to search files into
           schema:
@@ -2204,19 +2204,19 @@ paths:
         - name: filename
           description: Filename to find, can contain % as wild-card
           required: false
-          in: header
+          in: query
           schema:
             type: string
         - name: tag
           description: Tag to find
           required: false
-          in: header
+          in: query
           schema:
             type: string
         - name: page
           description: Page number (starts from 1)
           required: false
-          in: header
+          in: query
           schema:
             type: integer
             default: 1
@@ -2224,7 +2224,7 @@ paths:
         - name: limit
           description: Limits of responses per request
           required: false
-          in: header
+          in: query
           schema:
             type: integer
             default: 50
@@ -2233,27 +2233,27 @@ paths:
         - name: filesizemin
           description: Min filesize in bytes
           required: false
-          in: header
+          in: query
           schema:
             type: integer
             minimum: 0
         - name: filesizemax
           description: Max filesize in bytes
           required: false
-          in: header
+          in: query
           schema:
             type: integer
             minimum: 0
         - name: license
           description: License search filter
           required: false
-          in: header
+          in: query
           schema:
             type: string
         - name: copyright
           description: Copyright search filter
           required: false
-          in: header
+          in: query
           schema:
             type: string
       responses:
@@ -2290,7 +2290,7 @@ paths:
                 - $ref: '#/components/schemas/User'
                 - type: object
                   properties:
-                    user_pass:
+                    userPass:
                       type: string
                     defaultVisibility:
                       type: string
@@ -2306,7 +2306,7 @@ paths:
                 - $ref: '#/components/schemas/User'
                 - type: object
                   properties:
-                    user_pass:
+                    userPass:
                       type: string
                     defaultVisibility:
                       type: string
@@ -2354,24 +2354,24 @@ paths:
                   $ref: '#/components/schemas/User'
         default:
           $ref: '#/components/responses/defaultResponse'
-  /users/{id}:
+  /users/{name}:
     parameters:
-      - name: id
+      - name: name
         required: true
         in: path
         schema:
-          type: integer
+          type: string
     get:
-      operationId: getUserById
+      operationId: getUserByName
       tags:
         - User
         - Admin
-      summary: Get user by id
+      summary: Get user by name
       description: >
-        Get one single user by id
+        Get one single user by name
       responses:
         '200':
-          description: User with the given id
+          description: User with the given name
           content:
             application/json:
               schema:
@@ -2379,13 +2379,13 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     put:
-      operationId: modifyUserById
+      operationId: modifyUserByName
       tags:
         - User
         - Admin
-      summary: Edit user details by id
+      summary: Edit user details by name
       description: >
-        Edit user details by id
+        Edit user details by name
       requestBody:
         required: true
         content:
@@ -2395,7 +2395,7 @@ paths:
                 - $ref: '#/components/schemas/User'
                 - type: object
                   properties:
-                    user_pass:
+                    userPass:
                       type: string
                     defaultFolderId:
                       type: integer
@@ -2411,7 +2411,7 @@ paths:
                 - $ref: '#/components/schemas/User'
                 - type: object
                   properties:
-                    user_pass:
+                    userPass:
                       type: string
                     defaultFolderId:
                       type: integer
@@ -2450,13 +2450,13 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     delete:
-      operationId: deleteUserById
+      operationId: deleteUserByName
       tags:
         - User
         - Admin
-      summary: Delete user by id
+      summary: Delete user by name
       description: >
-        Delete a single user by id
+        Delete a single user by name
       responses:
         '202':
           description: User will be deleted
@@ -2480,13 +2480,6 @@ paths:
               schema:
                 allOf:
                   - $ref: '#/components/schemas/User'
-                  - type: object
-                    properties:
-                      default_group:
-                        type: string
-                        description: Default group of the user
-                        example:
-                          "fossy"
         default:
           $ref: '#/components/responses/defaultResponse'
   /users/tokens:
@@ -2554,7 +2547,7 @@ paths:
                   - $ref: '#/components/schemas/Info'
                   - type: object
                     properties:
-                      active_tokens:
+                      activeTokens:
                         $ref: '#/components/schemas/Token'
         '400':
           description: Invalid request
@@ -2815,7 +2808,7 @@ paths:
     parameters:
       - name: groupName
         description: The group name to chose while accessing jobs
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -2832,13 +2825,13 @@ paths:
           schema:
             type: integer
             minimum: 1
-          in: header
+          in: query
         - name: page
           required: false
           schema:
             type: integer
             minimum: 1
-          in: header
+          in: query
         - name: upload
           required: false
           schema:
@@ -2870,12 +2863,12 @@ paths:
       parameters:
         # This could also be omitted, because there are no real folders
         - name: folderId
-          in: header
+          in: query
           required: true
           schema:
             type: integer
         - name: uploadId
-          in: header
+          in: query
           required: true
           schema:
             type: integer
@@ -2909,13 +2902,13 @@ paths:
           schema:
             type: integer
             minimum: 1
-          in: header
+          in: query
         - name: page
           required: false
           schema:
             type: integer
             minimum: 1
-          in: header
+          in: query
       responses:
         '200':
           description: OK
@@ -3673,7 +3666,7 @@ paths:
         Create a new user group
       parameters:
         - name: name
-          in: header
+          in: query
           required: true
           description: Name of the new group
           schema:
@@ -3699,21 +3692,21 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-  /groups/{id}:
+  /groups/{name}:
     parameters:
-      - name: id
+      - name: name
         required: true
-        description: Id of the group
+        description: Name of the group
         in: path
         schema:
-          type: integer
+          type: string
     delete:
-      operationId: deleteGroupById
+      operationId: deleteGroupByName
       tags:
         - Groups
-      summary: Delete group by id
+      summary: Delete group by name
       description: >
-        Deletes a single group by id.
+        Deletes a single group by name.
       responses:
         '202':
           description: User group will be deleted
@@ -3723,27 +3716,27 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
-  /groups/{id}/user/{userId}:
+  /groups/{name}/user/{userName}:
     parameters:
-      - name: id
+      - name: name
         required: true
-        description: Id of the group
+        description: Name of the group
         in: path
         schema:
-          type: integer
-      - name: userId
+          type: string
+      - name: userName
         required: true
-        description: user id of the member
+        description: user name of the member
         in: path
         schema:
-          type: integer
+          type: string
     delete:
-      operationId: deleteGroupMemberByGroupIdAndUserId
+      operationId: deleteGroupMemberByGroupNameAndUserName
       tags:
         - Groups
-      summary: Delete group member by groupId and userId
+      summary: Delete group member by groupName and userName
       description: >
-        Deletes a single group member by groupId and userId
+        Deletes a single group member by groupName and userName
       responses:
         '200':
           description: User will be removed from group.
@@ -3808,7 +3801,7 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     put:
-      operationId: updatePermissionByGroupIdAndUserId
+      operationId: updatePermissionByGroupNameAndUserName
       tags:
         - User
         - Groups
@@ -3872,14 +3865,14 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
-  /groups/{id}/members:
+  /groups/{name}/members:
     parameters:
-      - name: id
+      - name: name
         in: path
         required: true
-        description: ID of the group
+        description: Name of the group
         schema:
-          type: integer
+          type: string
     get:
       operationId: getGroupUsersWithRoles
       tags:
@@ -3909,13 +3902,13 @@ paths:
         List all reports available for a given upload
       parameters:
         - name: uploadId
-          in: header
+          in: query
           required: true
           description: Id of the upload to generate the report for
           schema:
             type: integer
         - name: reportFormat
-          in: header
+          in: query
           required: true
           description: Which report to be genereated
           schema:
@@ -3930,7 +3923,7 @@ paths:
               - cyclonedx
         - name: groupName
           description: The group name to chose while generating a report
-          in: header
+          in: query
           required: false
           schema:
             type: string
@@ -3954,7 +3947,7 @@ paths:
           type: integer
       - name: groupName
         description: The group name to chose while downloading specific report
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -4001,7 +3994,7 @@ paths:
     parameters:
       - name: groupName
         description: The group name to chose while uploading report
-        in: header
+        in: query
         required: false
         schema:
           type: string
@@ -4987,16 +4980,16 @@ components:
     LicenseDecider:
       type: object
       properties:
-        nomos_monk:
+        nomosMonk:
           type: boolean
           description: Scanners matches if all Nomos findings are within the Monk findings.
-        bulk_reused:
+        bulkReused:
           type: boolean
           description: Bulk phrases from reused packages.
-        new_scanner:
+        newScanner:
           type: boolean
           description: New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses.
-        ojo_decider:
+        ojoDecider:
           type: boolean
           description: Scanners matches if Ojo or REUSE.Software findings are no contradiction with other findings.
     ScanOptions:
@@ -5232,7 +5225,7 @@ components:
         id:
           type: string
           description: Token Id
-        token_name:
+        name:
           type: string
           description: Name of the Token
         created:
@@ -5240,7 +5233,7 @@ components:
           format: date
           description: Denotes when the token was created
           example: 2022-07-11
-        token_expire:
+        expire:
           type: string
           format: date
           description: Denotes when the token was created
@@ -5310,8 +5303,8 @@ components:
           type: boolean
           description: enable email notification when upload scan completes
         defaultGroup:
-          type: integer
-          description: Default group id of the user
+          type: string
+          description: Default group name of the user
         agents:
           $ref: '#/components/schemas/Analysis'
         defaultBucketpool:
@@ -5326,7 +5319,7 @@ components:
         bucket:
           type: boolean
           description: Should bucket analysis be run on this upload
-        copyright_email_author:
+        copyrightEmailAuthor:
           type: boolean
           description: Should Copyright/Email/URL/Author Analysis be run on this upload.
         ecc:
@@ -5359,22 +5352,22 @@ components:
     Reuser:
       type: object
       properties:
-        reuse_upload:
+        reuseUpload:
           type: integer
           description: The UploadID to reuse.
-        reuse_group:
+        reuseGroup:
           type: string
           description: The group of the reused upload
-        reuse_main:
+        reuseMain:
           type: boolean
           description: Copy the main license from reused package?
-        reuse_enhanced:
+        reuseEnhanced:
           type: boolean
           description: Run enhanced reuser with diff tool (slow)
-        reuse_report:
+        reuseReport:
           type: boolean
           description: Copy all report configuration from conf page.
-        reuse_copyright:
+        reuseCopyright:
           type: boolean
           description: Copy the copyright deactivation and edits.
       required:
@@ -5831,13 +5824,13 @@ components:
         label:
           description: field label
           type: string
-        group_name:
+        groupName:
           description: group name for the field
           type: string
-        group_order:
+        groupOrder:
           description: group order of the field
           type: integer
-        option_value:
+        optionValue:
           description: If type is 'dropdown', provide options in format op1{val1}|op2{val2}|...
           type: string
     Group:
@@ -6190,7 +6183,7 @@ components:
       properties:
         user:
           $ref: '#/components/schemas/User'
-        group_perm:
+        groupPerm:
           type: integer
           description: Permission of the user in the group.
           example: 1

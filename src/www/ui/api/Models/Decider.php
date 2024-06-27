@@ -60,22 +60,22 @@ class Decider
    * @param array $deciderArray Associative boolean array
    * @return Decider Current object
    */
-  public function setUsingArray($deciderArray)
+  public function setUsingArray($deciderArray, $version = ApiVersion::V1)
   {
-    if (array_key_exists("nomos_monk", $deciderArray)) {
-      $this->nomosMonk = filter_var($deciderArray["nomos_monk"],
+    if (array_key_exists(($version == ApiVersion::V2? "nomosMonk" : "nomos_monk"), $deciderArray)) {
+      $this->nomosMonk = filter_var($deciderArray[$version == ApiVersion::V2? "nomosMonk" : "nomos_monk"],
         FILTER_VALIDATE_BOOLEAN);
     }
-    if (array_key_exists("bulk_reused", $deciderArray)) {
-      $this->bulkReused = filter_var($deciderArray["bulk_reused"],
+    if (array_key_exists(($version == ApiVersion::V2? "bulkReused" : "bulk_reused"), $deciderArray)) {
+      $this->bulkReused = filter_var($deciderArray[$version == ApiVersion::V2? "bulkReused" : "bulk_reused"],
         FILTER_VALIDATE_BOOLEAN);
     }
-    if (array_key_exists("new_scanner", $deciderArray)) {
-      $this->newScanner = filter_var($deciderArray["new_scanner"],
+    if (array_key_exists(($version == ApiVersion::V2? "newScanner" : "new_scanner"), $deciderArray)) {
+      $this->newScanner = filter_var($deciderArray[$version == ApiVersion::V2? "newScanner" : "new_scanner"],
         FILTER_VALIDATE_BOOLEAN);
     }
-    if (array_key_exists("ojo_decider", $deciderArray)) {
-      $this->ojoDecider = filter_var($deciderArray["ojo_decider"],
+    if (array_key_exists(($version == ApiVersion::V2? "ojoDecider" : "ojo_decider"), $deciderArray)) {
+      $this->ojoDecider = filter_var($deciderArray[$version == ApiVersion::V2? "ojoDecider" : "ojo_decider"],
         FILTER_VALIDATE_BOOLEAN);
     }
     return $this;
@@ -151,13 +151,22 @@ class Decider
    * Get decider as an array
    * @return array
    */
-  public function getArray()
+  public function getArray($version = ApiVersion::V1)
   {
-    return [
-      "nomos_monk"  => $this->nomosMonk,
-      "bulk_reused" => $this->bulkReused,
-      "new_scanner" => $this->newScanner,
-      "ojo_decider" => $this->ojoDecider
-    ];
+    if ($version == ApiVersion::V2) {
+      return [
+        "nomosMonk"  => $this->nomosMonk,
+        "bulkReused" => $this->bulkReused,
+        "newScanner" => $this->newScanner,
+        "ojoDecider" => $this->ojoDecider
+      ];
+    } else {
+      return [
+        "nomos_monk"  => $this->nomosMonk,
+        "bulk_reused" => $this->bulkReused,
+        "new_scanner" => $this->newScanner,
+        "ojo_decider" => $this->ojoDecider
+      ];
+    }
   }
 }

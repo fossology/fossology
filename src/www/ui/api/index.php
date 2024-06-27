@@ -162,6 +162,9 @@ if ($dbConnected) {
   return 0;
 }
 
+// Regex for matching a valid path parameter
+$pattern = "[\\w\\d\\-\\.@_]+}";
+
 //////////////////////////OPTIONS/////////////////////
 $app->options('/{routes:.+}', AuthController::class . ':optionsVerification');
 
@@ -245,12 +248,12 @@ $app->group('/uploads',
 
 ////////////////////////////ADMIN-USERS/////////////////////
 $app->group('/users',
-  function (\Slim\Routing\RouteCollectorProxy $app) {
-    $app->get('[/{id:\\d+}]', UserController::class . ':getUsers');
-    $app->put('[/{id:\\d+}]', UserController::class . ':updateUser');
-    $app->post('', UserController::class . ':addUser');
-    $app->delete('/{id:\\d+}', UserController::class . ':deleteUser');
+  function (\Slim\Routing\RouteCollectorProxy $app) use ($pattern) {
     $app->get('/self', UserController::class . ':getCurrentUser');
+    $app->get("[/{pathParam:$pattern]", UserController::class . ':getUsers');
+    $app->put("/{pathParam:$pattern", UserController::class . ':updateUser');
+    $app->post('', UserController::class . ':addUser');
+    $app->delete("/{pathParam:$pattern", UserController::class . ':deleteUser');
     $app->post('/tokens', UserController::class . ':createRestApiToken');
     $app->get('/tokens/{type:\\w+}', UserController::class . ':getTokens');
     $app->any('/{params:.*}', BadRequestController::class);
@@ -270,15 +273,15 @@ $app->group('/obligations',
 
 ////////////////////////////GROUPS/////////////////////
 $app->group('/groups',
-  function (\Slim\Routing\RouteCollectorProxy $app) {
+  function (\Slim\Routing\RouteCollectorProxy $app) use ($pattern) {
     $app->get('', GroupController::class . ':getGroups');
     $app->post('', GroupController::class . ':createGroup');
-    $app->post('/{id:\\d+}/user/{userId:\\d+}', GroupController::class . ':addMember');
-    $app->delete('/{id:\\d+}', GroupController::class . ':deleteGroup');
-    $app->delete('/{id:\\d+}/user/{userId:\\d+}', GroupController::class . ':deleteGroupMember');
+    $app->post("/{pathParam:$pattern/user/{userPathParam:$pattern", GroupController::class . ':addMember');
+    $app->delete("/{pathParam:$pattern", GroupController::class . ':deleteGroup');
+    $app->delete("/{pathParam:$pattern/user/{userPathParam:$pattern", GroupController::class . ':deleteGroupMember');
     $app->get('/deletable', GroupController::class . ':getDeletableGroups');
-    $app->get('/{id:\\d+}/members', GroupController::class . ':getGroupMembers');
-    $app->put('/{id:\\d+}/user/{userId:\\d+}', GroupController::class . ':changeUserPermission');
+    $app->get("/{pathParam:$pattern/members", GroupController::class . ':getGroupMembers');
+    $app->put("/{pathParam:$pattern/user/{userPathParam:$pattern", GroupController::class . ':changeUserPermission');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

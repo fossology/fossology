@@ -26,6 +26,7 @@ use Fossology\UI\Api\Exceptions\HttpServiceUnavailableException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UnifiedReport\UI\FoUnifiedReportGenerator;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\StreamFactory;
@@ -76,8 +77,17 @@ class ReportController extends RestController
    */
   public function getReport($request, $response, $args)
   {
-    $uploadId = $request->getHeaderLine('uploadId');
-    $reportFormat = $request->getHeaderLine('reportFormat');
+    $apiVersion = ApiVersion::getVersion($request);
+    $uploadId = null;
+    $reportFormat = null;
+    if ($apiVersion == ApiVersion::V2) {
+      $query = $request->getQueryParams();
+      $uploadId = $query['uploadId'];
+      $reportFormat = $query['reportFormat'];
+    } else {
+      $uploadId = $request->getHeaderLine('uploadId');
+      $reportFormat = $request->getHeaderLine('reportFormat');
+    }
 
     if (! in_array($reportFormat, $this->reportsAllowed)) {
       throw new HttpBadRequestException(

@@ -16,6 +16,7 @@ use Fossology\Lib\Dao\SearchHelperDao;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\SearchResult;
+use Fossology\UI\Api\Models\ApiVersion;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -39,17 +40,32 @@ class SearchController extends RestController
   public function performSearch($request, $response, $args)
   {
     $this->searchHelperDao = $this->container->get('dao.searchhelperdao');
+    $apiVersion = ApiVersion::getVersion($request);
 
-    $searchType = $request->getHeaderLine("searchType");
-    $filename = $request->getHeaderLine("filename");
-    $tag = $request->getHeaderLine("tag");
-    $filesizeMin = $request->getHeaderLine("filesizemin");
-    $filesizeMax = $request->getHeaderLine("filesizemax");
-    $license = $request->getHeaderLine("license");
-    $copyright = $request->getHeaderLine("copyright");
-    $uploadId = $request->getHeaderLine("uploadId");
-    $page = $request->getHeaderLine("page");
-    $limit = $request->getHeaderLine("limit");
+    if ($apiVersion == ApiVersion::V2) {
+      $query = $request->getQueryParams();
+      $searchType = $query["searchType"] ?? "";
+      $filename = $query["filename"] ?? "";
+      $tag = $query["tag"] ?? "";
+      $filesizeMin = $query["filesizemin"] ?? "";
+      $filesizeMax = $query["filesizemax"] ?? "";
+      $license = $query["license"] ?? "";
+      $copyright = $query["copyright"] ?? "";
+      $uploadId = $query["uploadId"] ?? "";
+      $page = $query["page"] ?? "";
+      $limit = $query["limit"] ?? "";
+    } else {
+      $searchType = $request->getHeaderLine("searchType");
+      $filename = $request->getHeaderLine("filename");
+      $tag = $request->getHeaderLine("tag");
+      $filesizeMin = $request->getHeaderLine("filesizemin");
+      $filesizeMax = $request->getHeaderLine("filesizemax");
+      $license = $request->getHeaderLine("license");
+      $copyright = $request->getHeaderLine("copyright");
+      $uploadId = $request->getHeaderLine("uploadId");
+      $page = $request->getHeaderLine("page");
+      $limit = $request->getHeaderLine("limit");
+    }
 
     // set searchtype to search allfiles by default
     if (empty($searchType)) {
