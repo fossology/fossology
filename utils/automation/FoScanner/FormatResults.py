@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2024 Rajul Jha <rajuljha49@gmail.com>
+# SPDX-FileContributor: © Rajul Jha <rajuljha49@gmail.com>
 
 # SPDX-License-Identifier: GPL-2.0-only
 
 import re
 import os
-import binascii
 
 from .CliOptions import CliOptions
 
 class FormatResult:
     """
     For formatting the results from scanners with line number information
+
+    :ivar cli_options: CliOptions object
     """
 
     def __init__(self,cli_options:CliOptions):
@@ -105,10 +106,13 @@ class FormatResult:
       for root, dirs, files in os.walk(root_dir):
         for file_name in files:
           file_path = os.path.join(root, file_name)
-          with open(file_path, 'r') as file:
+          with open(file_path, 'r', encoding='UTF-8') as file:
             file_contents = file.read()
-            normal_string = file_contents.encode().decode('unicode_escape')
+            try:
+              normal_string = file_contents.encode().decode('unicode_escape')
+            except UnicodeDecodeError:
+              normal_string = file_contents
             formatted_diff = self.format_diff(normal_string)
-          with open(file_path, 'w') as file:
+          with open(file_path, 'w', encoding='utf-8') as file:
             file.write(formatted_diff)
       return None
