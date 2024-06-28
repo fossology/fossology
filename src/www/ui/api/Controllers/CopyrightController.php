@@ -62,6 +62,11 @@ class CopyrightController extends RestController
   const TYPE_ECC = 16;
   const TYPE_KEYWORD = 32;
   const TYPE_IPRA = 64;
+  const TYPE_COPYRIGHT_USERFINDINGS = 128;
+  const TYPE_COPYRIGHT_SCANCODE = 256;
+  const TYPE_EMAIL_SCANCODE = 512;
+  const TYPE_URL_SCANCODE = 1024;
+  const TYPE_AUTHOR_SCANCODE = 2048;
 
   public function __construct($container)
   {
@@ -84,6 +89,32 @@ class CopyrightController extends RestController
   }
 
   /**
+   * Get all user copyright findings for a particular upload-tree
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getFileUserCopyrights($request, $response, $args)
+  {
+    return $this->getFileCX($request, $response, $args, self::TYPE_COPYRIGHT_USERFINDINGS);
+  }
+
+  /**
+   * Get all scancode copyright findings for a particular upload-tree
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getFileScanCodeCopyrights($request, $response, $args)
+  {
+    return $this->getFileCX($request, $response, $args, self::TYPE_COPYRIGHT_SCANCODE);
+  }
+
+  /**
    * Get all emails for a particular upload-tree
    *
    * @param  ServerRequestInterface $request
@@ -94,6 +125,19 @@ class CopyrightController extends RestController
   public function getFileEmail($request, $response, $args)
   {
     return $this->getFileCX($request, $response, $args, self::TYPE_EMAIL);
+  }
+
+  /**
+   * Get all scancode email findings for a particular upload-tree
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getFileScanCodeEmail($request, $response, $args)
+  {
+    return $this->getFileCX($request, $response, $args, self::TYPE_EMAIL_SCANCODE);
   }
 
   /**
@@ -110,6 +154,19 @@ class CopyrightController extends RestController
   }
 
   /**
+   * Get all scancode url findings for a particular upload-tree
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getFileScanCodeUrl($request, $response, $args)
+  {
+    return $this->getFileCX($request, $response, $args, self::TYPE_URL_SCANCODE);
+  }
+
+  /**
    * Get all authors for a particular upload-tree
    *
    * @param  ServerRequestInterface $request
@@ -120,6 +177,19 @@ class CopyrightController extends RestController
   public function getFileAuthor($request, $response, $args)
   {
     return $this->getFileCX($request, $response, $args, self::TYPE_AUTHOR);
+  }
+
+  /**
+   * Get all scancode author findings for a particular upload-tree
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function getFileScanCodeAuthor($request, $response, $args)
+  {
+    return $this->getFileCX($request, $response, $args, self::TYPE_AUTHOR_SCANCODE);
   }
 
   /**
@@ -175,6 +245,32 @@ class CopyrightController extends RestController
   }
 
   /**
+   * Delete user copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileUserCopyright($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_COPYRIGHT_USERFINDINGS);
+  }
+
+  /**
+   * Delete scancode copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileScanCodeCopyright($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_COPYRIGHT_SCANCODE);
+  }
+
+  /**
    * Delete email for a particular file
    *
    * @param  ServerRequestInterface $request
@@ -187,6 +283,18 @@ class CopyrightController extends RestController
     return $this->deleteFileCX($args, $response, self::TYPE_EMAIL);
   }
 
+  /**
+   * Delete scancode email findings for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileScanCodeEmail($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_EMAIL_SCANCODE);
+  }
   /**
    * Delete URL for a particular file
    *
@@ -201,6 +309,19 @@ class CopyrightController extends RestController
   }
 
   /**
+   * Delete scancode URL findings for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileScanCodeUrl($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_URL_SCANCODE);
+  }
+
+  /**
    * Delete author for a particular file
    *
    * @param  ServerRequestInterface $request
@@ -211,6 +332,19 @@ class CopyrightController extends RestController
   public function deleteFileAuthor($request, $response, $args)
   {
     return $this->deleteFileCX($args, $response, self::TYPE_AUTHOR);
+  }
+
+  /**
+   * Delete scancode author findings for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function deleteFileScanCodeAuthor($request, $response, $args)
+  {
+    return $this->deleteFileCX($args, $response, self::TYPE_AUTHOR_SCANCODE);
   }
 
   /**
@@ -266,6 +400,32 @@ class CopyrightController extends RestController
   }
 
   /**
+   * Update user copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileUserCopyright($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_COPYRIGHT_USERFINDINGS);
+  }
+
+  /**
+   * Update scancode copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileScanCodeCopyright($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_COPYRIGHT_SCANCODE);
+  }
+
+  /**
    * Update email for a particular file
    *
    * @param  ServerRequestInterface $request
@@ -276,6 +436,19 @@ class CopyrightController extends RestController
   public function updateFileEmail($request, $response, $args)
   {
     return $this->updateFileCx($request, $response, $args, self::TYPE_EMAIL);
+  }
+
+  /**
+   * Update scancode email findings for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileScanCodeEmail($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_EMAIL_SCANCODE);
   }
 
   /**
@@ -292,6 +465,19 @@ class CopyrightController extends RestController
   }
 
   /**
+   * Update scancode URL findings for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileScanCodeUrl($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_URL_SCANCODE);
+  }
+
+  /**
    * Update author for a particular file
    *
    * @param  ServerRequestInterface $request
@@ -302,6 +488,19 @@ class CopyrightController extends RestController
   public function updateFileAuthor($request, $response, $args)
   {
     return $this->updateFileCx($request, $response, $args, self::TYPE_AUTHOR);
+  }
+
+  /**
+   * Update scancode author findings for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function updateFileScanCodeAuthor($request, $response, $args)
+  {
+    return $this->updateFileCx($request, $response, $args, self::TYPE_AUTHOR_SCANCODE);
   }
 
   /**
@@ -357,6 +556,32 @@ class CopyrightController extends RestController
   }
 
   /**
+   * Restore user copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileUserCopyright($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_COPYRIGHT_USERFINDINGS);
+  }
+
+  /**
+   * Restore scancode copyright for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileScanCodeCopyright($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_COPYRIGHT_SCANCODE);
+  }
+
+  /**
    * Restore email for a particular file
    *
    * @param  ServerRequestInterface $request
@@ -367,6 +592,19 @@ class CopyrightController extends RestController
   public function restoreFileEmail($request, $response, $args)
   {
     return $this->restoreFileCx($args, $response, self::TYPE_EMAIL);
+  }
+
+  /**
+   * Restore scancode email findings for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileScanCodeEmail($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_EMAIL_SCANCODE);
   }
 
   /**
@@ -383,6 +621,19 @@ class CopyrightController extends RestController
   }
 
   /**
+   * Restore scancode URL findings for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileScanCodeUrl($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_URL_SCANCODE);
+  }
+
+  /**
    * Restore author for a particular file
    *
    * @param  ServerRequestInterface $request
@@ -393,6 +644,19 @@ class CopyrightController extends RestController
   public function restoreFileAuthor($request, $response, $args)
   {
     return $this->restoreFileCx($args, $response, self::TYPE_AUTHOR);
+  }
+
+  /**
+   * Restore scancode author findings for a particular file
+   *
+   * @param  ServerRequestInterface $request
+   * @param  ResponseHelper         $response
+   * @param  array                  $args
+   * @return ResponseHelper
+   */
+  public function restoreFileScanCodeAuthor($request, $response, $args)
+  {
+    return $this->restoreFileCx($args, $response, self::TYPE_AUTHOR_SCANCODE);
   }
 
   /**
@@ -435,7 +699,7 @@ class CopyrightController extends RestController
   }
 
   /**
-   * Get total number of copyrights for a particular upload-tree
+   * Get total number of scanner copyrights
    *
    * @param ServerRequestInterface $request
    * @param ResponseHelper $response
@@ -444,6 +708,34 @@ class CopyrightController extends RestController
    * @throws HttpErrorException
    */
   public function getTotalFileCopyrights($request, $response, $args)
+  {
+    return $this->getTotalCX($request, $response, $args, self::TYPE_COPYRIGHT);
+  }
+
+  /**
+   * Get total number of user copyright findings
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function getTotalFileUserCopyrights($request, $response, $args)
+  {
+    return $this->getTotalCX($request, $response, $args, self::TYPE_COPYRIGHT_USERFINDINGS);
+  }
+
+  /**
+   * Get total number of copyrights for a particular upload-tree
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  private function getTotalCX($request, $response, $args, $cxType)
   {
     $uploadPk = $args["id"];
     $uploadTreeId = $args["itemId"];
@@ -466,9 +758,15 @@ class CopyrightController extends RestController
       throw new HttpBadRequestException("Bad Request. Invalid query " .
         "parameter, expected values 'active' or 'inactive");
     }
-    $agentId = $this->copyrightHist->getAgentId($uploadPk, 'copyright_ars');
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getUploadtreeTableName($uploadPk);
-    $returnVal = $this->copyrightDao->getTotalCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName, $agentId, 'statement', $statusVal);
+
+    if ($cxType == self::TYPE_COPYRIGHT) {
+      $agentId = $this->copyrightHist->getAgentId($uploadPk, 'copyright_ars');
+      $returnVal = $this->copyrightDao->getTotalCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName, $agentId, 'statement', $statusVal);
+    } else if ($cxType == self::TYPE_COPYRIGHT_USERFINDINGS) {
+      $copyrightData = $this->copyrightDao->getUserCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName, 'userfindingcopyright', $statusVal);
+      $returnVal = $copyrightData[1];
+    }
     return $response->withJson(array("total_copyrights" => intval($returnVal)), 200);
   }
 
@@ -489,17 +787,37 @@ class CopyrightController extends RestController
         $dataType = 'statement';
         $agentArs = 'copyright_ars';
         break;
+      case self::TYPE_COPYRIGHT_USERFINDINGS:
+        $dataType = 'userfindingcopyright';
+        $agentArs = 'copyright_ars';
+        break;
+      case self::TYPE_COPYRIGHT_SCANCODE:
+        $dataType = 'scancode_statement';
+        $agentArs = 'scancode_ars';
+        break;
       case self::TYPE_EMAIL:
         $dataType = 'email';
         $agentArs = 'copyright_ars';
+        break;
+      case self::TYPE_EMAIL_SCANCODE:
+        $dataType = 'scancode_email';
+        $agentArs = 'scancode_ars';
         break;
       case self::TYPE_URL:
         $dataType = 'url';
         $agentArs = 'copyright_ars';
         break;
+      case self::TYPE_URL_SCANCODE:
+        $dataType = 'scancode_url';
+        $agentArs = 'scancode_ars';
+        break;
       case self::TYPE_AUTHOR:
         $dataType = 'author';
         $agentArs = 'copyright_ars';
+        break;
+      case self::TYPE_AUTHOR_SCANCODE:
+        $dataType = 'scancode_author';
+        $agentArs = 'scancode_ars';
         break;
       case self::TYPE_ECC:
         $dataType = 'ecc';
@@ -571,9 +889,15 @@ class CopyrightController extends RestController
       }
     }
     $offset = $limit * ($page - 1);
-    list($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->copyrightHist
-      ->getCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName,
-        $agentId, $dataType, 'active', $statusVal, $offset, $limit);
+    if (self::TYPE_COPYRIGHT_USERFINDINGS == $cxType) {
+      list($rows, $iTotalRecords) = $this->copyrightDao
+        ->getUserCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName,
+          $dataType, $statusVal, $offset, $limit);
+    } else {
+      list($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->copyrightHist
+        ->getCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName,
+          $agentId, $dataType, 'active', $statusVal, $offset, $limit);
+    }
     foreach ($rows as $row) {
       $row['count'] = intval($row['copyright_count']);
       unset($row['copyright_count']);
@@ -612,8 +936,18 @@ class CopyrightController extends RestController
     $this->isItemExists($uploadPk, $uploadTreeId);
 
     $uploadTreeTableName = $uploadDao->getUploadTreeTableName($uploadTreeId);
-    $item = $uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
-    $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'delete');
+    if (self::TYPE_COPYRIGHT_USERFINDINGS == $cxType) {
+      $tableName = $cpTable."_decision";
+      $decisions = $this->copyrightDao->getDecisionsFromHash($tableName, $copyrightHash,
+        $uploadPk, $uploadTreeTableName);
+      foreach ($decisions as $decision) {
+        $this->copyrightDao->removeDecision($tableName, $decision['pfile_fk'],
+          $decision[$tableName . '_pk']);
+      }
+    } else {
+      $item = $uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+      $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'delete');
+    }
     $returnVal = new Info(200, "Successfully removed $delName.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
@@ -640,8 +974,18 @@ class CopyrightController extends RestController
     $this->isItemExists($uploadPk, $uploadTreeId);
 
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
-    $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
-    $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'rollback');
+    if (self::TYPE_COPYRIGHT_USERFINDINGS == $cxType) {
+      $tableName = $cpTable."_decision";
+      $decisions = $this->copyrightDao->getDecisionsFromHash($tableName, $copyrightHash,
+        $uploadPk, $uploadTreeTableName);
+      foreach ($decisions as $decision) {
+        $this->copyrightDao->undoDecision($tableName, $decision['pfile_fk'],
+          $decision[$tableName . '_pk']);
+      }
+    } else {
+      $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+      $this->copyrightDao->updateTable($item, $copyrightHash, '', $userId, $cpTable, 'rollback');
+    }
     $returnVal = new Info(200, "Successfully restored $resName.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), 200);
   }
@@ -671,8 +1015,18 @@ class CopyrightController extends RestController
     $this->isItemExists($uploadPk, $uploadTreeId);
 
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
-    $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
-    $this->copyrightDao->updateTable($item, $copyrightHash, $content, $userId, $cpTable);
+    if (self::TYPE_COPYRIGHT_USERFINDINGS == $cxType) {
+      $tableName = $cpTable."_decision";
+      $decisions = $this->copyrightDao->getDecisionsFromHash($tableName, $copyrightHash,
+        $uploadPk, $uploadTreeTableName);
+      foreach ($decisions as $decision) {
+        $this->copyrightDao->updateDecision($tableName, $decision['pfile_fk'],
+          $decision[$tableName . '_pk'], $content);
+      }
+    } else {
+      $item = $this->restHelper->getUploadDao()->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+      $this->copyrightDao->updateTable($item, $copyrightHash, $content, $userId, $cpTable);
+    }
     $returnVal = new Info(200, "Successfully Updated $resName.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), 200);
   }
@@ -690,14 +1044,34 @@ class CopyrightController extends RestController
         $dataType = 'statement';
         $dispName = 'copyright';
         break;
+      case self::TYPE_COPYRIGHT_USERFINDINGS:
+        $dataType = 'statement';
+        $dispName = 'user-copyright';
+        break;
+      case self::TYPE_COPYRIGHT_SCANCODE:
+        $dataType = 'scancode_statement';
+        $dispName = 'scancode-copyright';
+        break;
       case self::TYPE_EMAIL:
         $dispName = $dataType = 'email';
+        break;
+      case self::TYPE_EMAIL_SCANCODE:
+        $dataType = 'scancode_email';
+        $dispName = 'scancode-email';
         break;
       case self::TYPE_URL:
         $dispName = $dataType = 'url';
         break;
+      case self::TYPE_URL_SCANCODE:
+        $dataType = 'scancode_url';
+        $dispName = 'scancode-url';
+        break;
       case self::TYPE_AUTHOR:
         $dispName = $dataType = 'author';
+        break;
+      case self::TYPE_AUTHOR_SCANCODE:
+        $dataType = 'scancode_author';
+        $dispName = 'scancode-author';
         break;
       case self::TYPE_ECC:
         $dispName = $dataType = 'ecc';
