@@ -12,7 +12,6 @@
 
 namespace Fossology\UI\Api\Test\Controllers;
 
-use _PHPStan_acbb55bae\React\Dns\BadServerException;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
@@ -30,7 +29,6 @@ use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Uri;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 require_once dirname(__DIR__, 4) . '/lib/php/Plugin/FO_Plugin.php';
 
@@ -319,13 +317,15 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
   {
     $_SESSION['UserLevel'] = 10;
 
-    $this->rq["goldDate"] = "";
+    $req = $this->rq;
+    $req["goldDate"] = "";
+
 
     $alteredOptions = array();
-    foreach ($this->rq['options'] as $key) {
+    foreach ($req['options'] as $key) {
       $alteredOptions[$key] = $key;
     }
-    $body = $this->rq;
+    $body = $req;
     $body['options']  = $alteredOptions;
 
     $this->maintagentPlugin->shouldReceive('getOptions')->andReturn($this->OPTIONS);
@@ -334,7 +334,7 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->maintagentPlugin->shouldReceive('handle')->withArgs([$body])->andReturn($mess);
     $reqBody = $this->streamFactory->createStream(json_encode(
-      $this->rq
+      $req
     ));
 
     $requestHeaders = new Headers();
@@ -356,12 +356,13 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
   {
     $_SESSION['UserLevel'] = 10;
 
-    $this->rq["logsDate"] = "";
+    $req = $this->rq;
+    $req["logsDate"] = "";
     $alteredOptions = array();
-    foreach ($this->rq['options'] as $key) {
+    foreach ($req['options'] as $key) {
       $alteredOptions[$key] = $key;
     }
-    $body = $this->rq;
+    $body = $req;
     $body['options']  = $alteredOptions;
 
     $this->maintagentPlugin->shouldReceive('getOptions')->andReturn($this->OPTIONS);
@@ -370,7 +371,7 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->maintagentPlugin->shouldReceive('handle')->withArgs([$body])->andReturn($mess);
     $reqBody = $this->streamFactory->createStream(json_encode(
-      $this->rq
+      $req
     ));
 
     $requestHeaders = new Headers();
