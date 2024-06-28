@@ -26,6 +26,7 @@ use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\TokenRequest;
 use Psr\Http\Message\ServerRequestInterface;
+use League\OAuth2\Client\Provider\GenericProvider;
 
 /**
  * @class AuthController
@@ -108,5 +109,72 @@ class AuthController extends RestController
       ], 201);
     }
     throw new HttpInternalServerErrorException("Please try again later.");
+  }
+
+  /**
+   * Get the OAuth2 autherization URL for the user
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpInternalServerErrorException
+   */
+  public function getAuthUrl($request, $response, $args)
+  {
+    global $SysConf;
+
+    $proxy = "";
+    if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
+      $proxy = $SysConf['FOSSOLOGY']['http_proxy'];
+    }
+    if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['https_proxy'])) {
+      $proxy = $SysConf['FOSSOLOGY']['https_proxy'];
+    }
+    $provider = new GenericProvider([
+      "clientId"                => $SysConf['SYSCONFIG']['OidcAppId'],
+      "clientSecret"            => $SysConf['SYSCONFIG']['OidcSecret'],
+      "redirectUri"             => $SysConf['SYSCONFIG']['OidcRedirectURL'],
+      "urlAuthorize"            => $SysConf['SYSCONFIG']['OidcAuthorizeURL'],
+      "urlAccessToken"          => $SysConf['SYSCONFIG']['OidcAccessTokenURL'],
+      "urlResourceOwnerDetails" => $SysConf['SYSCONFIG']['OidcResourceURL'],
+      "proxy"                   => $proxy
+    ]);
+    try {
+      $authorizationUrl = $provider->getAuthorizationUrl([
+        "scope" => ['email openid']
+      ]);
+    } catch (\Exception $e) {
+      throw new HttpInternalServerErrorException($e->getMessage());
+    }
+    $_SESSION['oauth2state'] = $provider->getState();
+
+    return $response->withJson(["authorizationUrl" => $authorizationUrl],200);
+  }
+
+  /**
+   * Get the OAuth2 token for the user
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpBadRequestException
+   */
+  public function getOauthToken($request, $response, $args)
+  {
+    $ReqBody = $this->getParsedBody($request);
+    $code = $ReqBody['code'];
+    $state = $ReqBody['state'];
+
+    if (empty($code) || empty($state)) {
+      throw new HttpBadRequestException("both code and state are required");
+    }
+    $OAuthToken = $this->restHelper->getAuthHelper()->getTokenFromCode($code, $state);
+    return $response->withJson([
+      "Authorization" => "Bearer " . $OAuthToken
+    ], 200);
   }
 }

@@ -28,6 +28,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\HttpFoundation\Session\Session;
+use League\OAuth2\Client\Provider\GenericProvider;
 use UnexpectedValueException;
 
 /**
@@ -419,5 +420,54 @@ class AuthHelper
     } catch (\UnexpectedValueException $e) {
       throw new HttpForbiddenException($e->getMessage(), $e);
     }
+  }
+
+  /**
+   * @brief Exchange the authorization code for an access token from the OAuth2
+   *
+   * @param string $cod  Authorization code to pass to the OAuth2 server
+   * @param string $state State to pass to the OAuth2 server
+   * @return string $accessToken Recieved access token
+   * @throws UnexpectedValueException if parameters are invalid
+   */
+  public function getTokenFromCode($code, $state)
+  {
+    global $SysConf;
+    if (empty($state) ||
+        (isset($_SESSION['oauth2state']) &&
+        $state !== $_SESSION['oauth2state'])) {
+      // Check given state against previously stored one to mitigate CSRF attack
+      if (isset($_SESSION['oauth2state'])) {
+        unset($_SESSION['oauth2state']);
+      }
+      throw new \UnexpectedValueException('Invalid state');
+    }
+    $proxy = "";
+    if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
+      $proxy = $SysConf['FOSSOLOGY']['http_proxy'];
+    }
+    if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['https_proxy'])) {
+      $proxy = $SysConf['FOSSOLOGY']['https_proxy'];
+    }
+
+    $provider = new GenericProvider([
+      "clientId"                => $SysConf['SYSCONFIG']['OidcAppId'],
+      "clientSecret"            => $SysConf['SYSCONFIG']['OidcSecret'],
+      "redirectUri"             => $SysConf['SYSCONFIG']['OidcRedirectURL'],
+      "urlAuthorize"            => $SysConf['SYSCONFIG']['OidcAuthorizeURL'],
+      "urlAccessToken"          => $SysConf['SYSCONFIG']['OidcAccessTokenURL'],
+      "urlResourceOwnerDetails" => $SysConf['SYSCONFIG']['OidcResourceURL'],
+      "responseResourceOwnerId" => $SysConf['SYSCONFIG']['OidcResourceOwnerId'],
+      "proxy"                   => $proxy
+    ]);
+    try {
+      $accessToken = $provider->getAccessToken('authorization_code',
+        ['code' => $code]);
+    } catch (\Exception $e) {
+      throw new \UnexpectedValueException($e->getMessage());
+    }
+    return $accessToken->getToken();
   }
 }
