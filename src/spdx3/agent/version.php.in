@@ -1,0 +1,8 @@
+<?php
+/*
+ SPDX-FileCopyrightText: © 2015 Siemens AG
+
+ SPDX-License-Identifier: FSFAP
+ */
+defined("AGENT_VERSION") or define("AGENT_VERSION", "@FO_VERSION@");
+defined("AGENT_REV") or define("AGENT_REV", "@FO_COMMIT_HASH@");

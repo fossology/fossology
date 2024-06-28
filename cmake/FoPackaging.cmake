@@ -78,6 +78,7 @@ set(CPACK_COMPONENTS_ALL
     softwareHeritage
     spasht
     spdx2
+    spdx3
     reportImport
     wget_agent
     www)
@@ -100,7 +101,7 @@ set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_DEPENDS
     fossology-wgetagent")
 set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_RECOMMENDS
     "fossology-cyclonedx, fossology-monk, fossology-monkbulk, fossology-decider,
-    fossology-readmeoss, fossology-spdx2, fossology-reportimport,
+    fossology-readmeoss, fossology-spdx2, fossology-spdx3, fossology-reportimport,
     fossology-softwareheritage, fossology-reuser")
 set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_CONFLICTS
     "fossology-db (<= 1.4.1), fossology-common (<= 1.4.1)")
@@ -571,6 +572,19 @@ set(CPACK_DEBIAN_SPDX2_PACKAGE_DEPENDS
     "fossology-common")
 
 set(CPACK_DEBIAN_SPDX2_PACKAGE_SECTION "utils")
+
+## FOSSOLOGY-SPDX3 PACKAGE
+set(CPACK_DEBIAN_SPDX3_PACKAGE_NAME "fossology-spdx3")
+set(CPACK_DEBIAN_SPDX3_FILE_NAME "fossology-spdx3_${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_SPDX3_DESCRIPTION
+"architecture for analyzing software, SPDX v3.0 generator
+${FO_PACKAGE_COMMON_DESCRIPTION}
+This package contains the spdx3 agent programs and their resources.")
+
+set(CPACK_DEBIAN_SPDX3_PACKAGE_DEPENDS
+    "fossology-common")
+
+set(CPACK_DEBIAN_SPDX3_PACKAGE_SECTION "utils")
 
 ## FOSSOLOGY-REPORTIMPORT PACKAGE
 set(CPACK_DEBIAN_REPORTIMPORT_PACKAGE_NAME "fossology-reportimport")
