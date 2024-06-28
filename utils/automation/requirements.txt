@@ -3,4 +3,4 @@
 
 # SPDX-License-Identifier: FSFAP
 # Description: Dependencies used by the CI scanner script
-spdx-tools==0.8.0a2
+spdx-tools==0.8.2
