@@ -18,6 +18,7 @@ from FoScanner.CliOptions import (CliOptions, ReportFormat)
 from FoScanner.RepoSetup import RepoSetup
 from FoScanner.Scanners import (Scanners, ScanResult)
 from FoScanner.SpdxReport import SpdxReport
+from FoScanner.Utils import (validate_keyword_conf_file, copy_keyword_file_to_destination)
 
 
 def get_api_config() -> ApiConfig:
@@ -238,6 +239,16 @@ def main(parsed_args):
     print("Unable to find allowlist.json in current dir\n"
           "Continuing without it.", file=sys.stderr)
 
+  if cli_options.keyword and cli_options.keyword_conf_file_path:
+    keyword_conf_file_path = cli_options.keyword_conf_file_path
+    destination_path = '/usr/local/share/fossology/keyword/agent/keyword.conf'  
+    is_valid,message = validate_keyword_conf_file(keyword_conf_file_path)
+    if is_valid:
+      print(f"Validation of keyword file successful: {message}")
+      copy_keyword_file_to_destination(keyword_conf_file_path,destination_path)
+    else:
+      print(f"Could not validate keyword file: {message}")   
+
   repo_setup = RepoSetup(cli_options, api_config)
   if cli_options.repo is False:
     cli_options.diff_dir = repo_setup.get_diff_dir()
@@ -269,6 +280,7 @@ if __name__ == "__main__":
     "--report", type=str, help="Type of report to generate. Default 'TEXT'.",
     choices=[member.name for member in ReportFormat], default=ReportFormat.TEXT.name
   )
+  parser.add_argument('--keyword-conf', type=str, help='Path to the keyword configuration file. Use only when keyword argument is true')
   args = parser.parse_args()
   sys.exit(main(args))
 

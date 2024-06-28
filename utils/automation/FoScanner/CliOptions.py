@@ -31,6 +31,7 @@ class CliOptions(object):
   :ivar keyword: run keyword scanner
   :ivar repo: scan whole repo or just diff
   :ivar diff_dir: directory to scan
+  :ivar keyword_conf_file_path: path to custom keyword.conf file passed by user
   :ivar allowlist: information from allowlist.json
   :ivar report_format: Report format to use
   """
@@ -40,6 +41,7 @@ class CliOptions(object):
   keyword: bool = False
   repo: bool = False
   diff_dir: str = os.getcwd()
+  keyword_conf_file_path : str = ''
   allowlist: dict[str, list[str]] = {
     'licenses': [],
     'exclude': []
@@ -69,3 +71,5 @@ class CliOptions(object):
       self.copyright = True
       self.keyword = True
     self.report_format = ReportFormat[args.report]
+    if self.keyword and args.keyword_conf:
+      self.keyword_conf_file_path = args.keyword_conf
