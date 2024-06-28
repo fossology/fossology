@@ -176,7 +176,6 @@ class Scanners:
         continue
       if result['results'] is not None and result['results'] != "Unable to " \
                                                                 "read file":
-        # contents = set() # Giving error with set
         contents = list()
 
         for finding in result['results']:
