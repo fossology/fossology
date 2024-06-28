@@ -92,7 +92,8 @@ def get_allow_list(path: str = '') -> dict:
   return data
 
 
-def print_results(name: str, failed_results: List[ScanResult],scan_results_with_line_number:List[dict],
+def print_results(name: str, failed_results: List[ScanResult], 
+                  scan_results_with_line_number:List[dict],
                   result_file: IO):
   """
   Print the formatted scanner results
@@ -173,8 +174,8 @@ def format_keyword_results_with_line_numbers(scanner:Scanners,format_results:For
   formatted_list_of_keyword_line_numbers = list()
   for keyword_result in keyword_results:
     list_of_scan_results = list(keyword_result.result)
-    words_to_search = [list_of_scan_results[i] for i in range(0,len(list_of_scan_results))]
-    words_with_line_numbers = format_results.find_word_line_numbers(keyword_result.path,words_to_search)
+    words_with_line_numbers = format_results.find_word_line_numbers(keyword_result.path,
+    list_of_scan_results)
     formatted_list_of_keyword_line_numbers.append(words_with_line_numbers)
   return formatted_list_of_keyword_line_numbers
 
@@ -190,8 +191,7 @@ def format_copyright_results_with_line_numbers(scanner:Scanners,format_results:F
   formatted_list_of_copyright_line_numbers = list()
   for copyright_result in copyright_results:
     list_of_scan_results = list(copyright_result.result)
-    words_to_search = [list_of_scan_results[i] for i in range(0,len(list_of_scan_results))]
-    words_with_line_numbers = format_results.find_word_line_numbers(copyright_result.path,words_to_search)
+    words_with_line_numbers = format_results.find_word_line_numbers(copyright_result.path,list_of_scan_results)
     formatted_list_of_copyright_line_numbers.append(words_with_line_numbers)
   return formatted_list_of_copyright_line_numbers
 
@@ -207,13 +207,13 @@ def format_license_results_with_line_numbers(scanner:Scanners,format_results:For
   formatted_list_of_license_line_numbers = list()
   for license_result in license_results:
     list_of_scan_results = list(license_result.result)
-    words_to_search = [list_of_scan_results[i] for i in range(0,len(list_of_scan_results))]
-    words_with_line_numbers = format_results.find_word_line_numbers_without_bytes(license_result.path,words_to_search)
+    words_with_line_numbers = format_results.find_word_line_numbers_without_bytes(
+      license_result.path,list_of_scan_results)
     formatted_list_of_license_line_numbers.append(words_with_line_numbers)
   return formatted_list_of_license_line_numbers
 
 def text_report(cli_options: CliOptions, result_dir: str, return_val: int,
-                scanner: Scanners, format_results = FormatResult) -> int:
+                scanner: Scanners, format_results : FormatResult) -> int:
   """
   Run scanners and print results in text format.
 
@@ -229,7 +229,8 @@ def text_report(cli_options: CliOptions, result_dir: str, return_val: int,
     scan_results_with_line_number = []
     print_log_message(f"{result_dir}/licenses.txt", failed_licenses, True,
                       "Following licenses found which are not allow listed",
-                      "No license violation found", "License", return_val, scan_results_with_line_number)
+                      "No license violation found", "License", return_val, 
+                      scan_results_with_line_number)
   if cli_options.copyright:
     copyright_results = scanner.get_copyright_list()
     scan_results_with_line_number = format_copyright_results_with_line_numbers(scanner=scanner, format_results=format_results)
@@ -241,7 +242,8 @@ def text_report(cli_options: CliOptions, result_dir: str, return_val: int,
     scan_results_with_line_number = format_keyword_results_with_line_numbers(scanner=scanner, format_results=format_results)
     print_log_message(f"{result_dir}/keywords.txt", keyword_results, False,
                       "Following keywords found",
-                      "No keyword violation found", "Keyword", return_val, scan_results_with_line_number)
+                      "No keyword violation found", "Keyword", return_val, 
+                      scan_results_with_line_number)
   return return_val
 
 
@@ -341,16 +343,17 @@ def main(parsed_args):
   # Populate tmp dir in unified diff format
   format_results = FormatResult(cli_options)
   format_results.process_files(scanner.cli_options.diff_dir)
-     
+
   # Create result dir
   result_dir = "results"
   os.makedirs(name=result_dir, exist_ok=True)
 
   if cli_options.report_format == ReportFormat.TEXT:
-    return_val = text_report(cli_options, result_dir, return_val, scanner,format_results)
+    return_val = text_report(cli_options, result_dir, return_val, scanner,
+                            format_results)
   else:
     return_val = bom_report(cli_options, result_dir, return_val, scanner,
-                            api_config,format_results)                      
+                            api_config, format_results)
   return return_val
 
 
