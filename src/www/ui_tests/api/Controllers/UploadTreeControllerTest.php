@@ -46,6 +46,8 @@ namespace Fossology\UI\Api\Test\Controllers {
   use Fossology\Lib\Db\DbManager;
   use Fossology\UI\Api\Controllers\UploadTreeController;
   use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+  use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+  use Fossology\UI\Api\Exceptions\HttpNotFoundException;
   use Fossology\UI\Api\Helper\DbHelper;
   use Fossology\UI\Api\Helper\ResponseHelper;
   use Fossology\UI\Api\Helper\RestHelper;
@@ -175,11 +177,35 @@ namespace Fossology\UI\Api\Test\Controllers {
      * @brief Setup test objects
      * @see PHPUnit_Framework_TestCase::setUp()
      */
+
+    /**
+     * @var integer $groupId
+     * Group ID to mock
+     */
+    private $groupId;
+
+    /**
+     * @var integer $uploadId
+     */
+    private $uploadId;
+    /**
+     * @var integer $agentId
+     */
+    private $agentId;
+
+    /**
+     * @var string $tagId
+     */
+    private $tagId;
+
     protected function setUp(): void
     {
       global $container;
       $this->userId = 2;
       $this->groupId = 2;
+      $this->uploadId = 3;
+      $this->agentId = 5;
+      $this->tagId = 7;
       $container = M::mock('ContainerBuilder');
       $this->dbHelper = M::mock(DbHelper::class);
       $this->dbManager = M::mock(DbManager::class);
@@ -584,6 +610,147 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
       $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
     }
+
+    /**@test
+     *  -# Test for UploadTreeController::getTreeView()
+     *  -# Check if the HttpNotFoundException is thrown
+     * @return void
+     * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+     */
+      public function testGetTreeViewUploadNotFound(){
+        $sort = "sortDir";
+
+        $this->dbHelper->shouldReceive('doesIdExist')
+          ->withArgs(["upload", "upload_pk", $this->uploadId])->andReturn(false);
+
+
+        $reqBody = $this->streamFactory->createStream();
+        $requestHeaders = new Headers();
+
+        $queryParams = [
+          "agentId" => $this->agentId,
+          'sort' => $sort,
+          "showQuick" => false
+        ];
+        $uri = (new Uri('HTTP', 'localhost'))
+          ->withQuery(http_build_query($queryParams));
+
+        $requestHeaders->setHeader('Content-Type', 'application/json');
+        $request = new Request("POST", $uri,
+        $requestHeaders, [], [], $reqBody);
+
+        $this->expectException(HttpNotFoundException::class);
+        $this->uploadTreeController->getTreeView($request, new ResponseHelper(), ["id" => $this->uploadId, "itemId"=> 10]);
+
+      }
+
+    /**
+     * @test
+     *   - # Test UploadTreeController::getTreeView
+     *   - # Check if HttpNotFound Exception is thrown for unavailable agent.
+     * @return void
+     * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+     */
+    public function testGetTreeViewAgentNotFound(){
+      $sort = "sortDir";
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $this->uploadId])->andReturn(false);
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["agent", "agent_pk", $this->agentId])->andReturn(false);
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$this->uploadId, $this->groupId])->andReturn(true);
+
+      $reqBody = $this->streamFactory->createStream();
+      $requestHeaders = new Headers();
+
+      $queryParams = [
+        "agentId" => $this->agentId,
+        'sort' => $sort,
+        "showQuick" => false
+      ];
+      $uri = (new Uri('HTTP', 'localhost'))
+        ->withQuery(http_build_query($queryParams));
+
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("POST", $uri,
+        $requestHeaders, [], [], $reqBody);
+
+      $this->expectException(HttpNotFoundException::class);
+      $this->uploadTreeController->getTreeView($request, new ResponseHelper(), ["id" => $this->uploadId, "itemId"=> 10]);
+
+    }
+
+    /**
+     * @test
+     *   - # Test UploadTreeController::getTreeView
+     *   - # Check if HttpNotFound Exception is thrown for unavailable tag.
+     * @return void
+     * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+     */
+    public function testGetTreeViewTagNotFound(){
+      $sort = "sortDir";
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $this->uploadId])->andReturn(false);
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["tag", "tag_pk", $this->tagId])->andReturn(false);
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$this->uploadId, $this->groupId])->andReturn(true);
+
+      $reqBody = $this->streamFactory->createStream();
+      $requestHeaders = new Headers();
+
+      $queryParams = [
+        "agentId" => $this->agentId,
+        'sort' => $sort,
+        "showQuick" => false
+      ];
+      $uri = (new Uri('HTTP', 'localhost'))
+        ->withQuery(http_build_query($queryParams));
+
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("POST", $uri,
+        $requestHeaders, [], [], $reqBody);
+
+      $this->expectException(HttpNotFoundException::class);
+      $this->uploadTreeController->getTreeView($request, new ResponseHelper(), ["id" => $this->uploadId, "itemId"=> 10]);
+
+    }
+
+    /**
+     * @test
+     *   - # Test UploadTreeController::getTreeView
+     *   - # Check if HttpForbiden exception is thrown for unaccessible upload
+     * @return void
+     * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+     */
+    public function testGetTreeViewUploadNotAccessible(){
+      $sort = "sortDir";
+
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $this->uploadId])->andReturn(true);
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$this->uploadId, $this->groupId])->andReturn(false);
+
+      $reqBody = $this->streamFactory->createStream();
+      $requestHeaders = new Headers();
+
+      $queryParams = [
+        "agentId" => $this->agentId,
+        'sort' => $sort,
+        "showQuick" => false
+      ];
+      $uri = (new Uri('HTTP', 'localhost'))
+        ->withQuery(http_build_query($queryParams));
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("POST", $uri,
+        $requestHeaders, [], [], $reqBody);
+      $this->expectException(HttpForbiddenException::class);
+      $this->uploadTreeController->getTreeView($request, new ResponseHelper(), ["id" => $this->uploadId, "itemId"=> 10]);
+    }
+
+
 
     /**
      * @test

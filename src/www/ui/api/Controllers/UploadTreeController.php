@@ -355,6 +355,7 @@ class UploadTreeController extends RestController
     $query = $request->getQueryParams();
     $agentId = $query['agentId'] ?? null;
     $flatten = $query['flatten'] ?? null;
+
     $scanFilter = $query['scanLicenseFilter'] ?? null;
     $editedFilter = $query['editedLicenseFilter'] ?? null;
     $sortDir = $query['sort'] ?? null;
