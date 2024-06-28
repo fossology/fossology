@@ -19,13 +19,14 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\GroupController;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\User;
 use Fossology\UI\Api\Models\UserGroupMember;
 use Mockery as M;
@@ -33,6 +34,7 @@ use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request;
 use Slim\Psr7\Uri;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 
 /**
@@ -67,10 +69,30 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
   private $restHelper;
 
   /**
+   * @var Auth $auth
+   * Auth mock
+   */
+  private $auth;
+
+  /**
    * @var M\MockInterface $adminPlugin
    * AdminGroupUsersPlugin mock
    */
   private $adminPlugin;
+  /**
+   * @var \AdminGroupUsers|(\AdminGroupUsers&M\LegacyMockInterface)|(\AdminGroupUsers&M\MockInterface)|M\LegacyMockInterface|M\MockInterface|AdminGroupUsers|(AdminGroupUsers&\Mockery\LegacyMockInterface)|(AdminGroupUsers&\Mockery\MockInterface)
+   */
+  private $adminGroupUsers;
+
+  /**
+   * @var int $newuser;
+   */
+  private $newuser;
+  /**
+   * @var int[] $groupIds
+   */
+
+  private $groupIds;
 
   /**
    * @brief Setup test objects
@@ -84,6 +106,8 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper = M::mock(RestHelper::class);
     $this->userDao = M::mock(UserDao::class);
     $this->adminPlugin = M::mock('AdminGroupUsers');
+    $this->adminGroupUsers = M::mock("AdminGroupUsers");
+    $this->groupIds = [1,2,3,4,5,6];
 
     $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
     $this->restHelper->shouldReceive('getUserDao')
@@ -170,7 +194,133 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     return $usersWithGroup;
   }
 
+  /**
+   * @test
+   *  -# Test GroupController::createGroup() for valid create request
+   *  -# Check if response status is 200
+   * -# Check if the response matches the expected
+   * -# Check if the result code matches the expected
+   */
+  public function testCreateGroup()
+  {
+    $groupId = 4;
+    $userId = 1;
+    $newPerm = 2;
+    $groupName = "Default User";
 
+    $body = $this->streamFactory->createStream(json_encode([
+      "perm" => $newPerm
+    ]));
+    $this->userDao->shouldReceive('addGroup')->withArgs([$groupName])
+      ->andReturn($groupId);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('addGroupMembership')->withAnyArgs()->andReturn(null);
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader("name",$groupName);
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $info = new Info(200,'Group Default User added.',InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->groupController->createGroup($request,new ResponseHelper(),["id"=>1]);
+
+    $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+    $this->assertEquals($info->getArray(),$this->getResponseJson($actualResponse));
+    $this->assertEquals($info->getArray()['code'], $this->getResponseJson($actualResponse)['code']);
+    $this->assertEquals($this->getResponseJson($expectedResponse),$this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   *  -# Test GroupController::createGroup() for valid create request
+   *  -# Check if response status is 200
+   * -# Check if the response matches the expected
+   * -# Check if the result code matches the expected
+   */
+  public function testCreateGroupHttpBadRequest()
+  {
+
+    $groupId = 4;
+    $userId = 1;
+    $newPerm = 2;
+    $groupName = "Default User";
+
+    $body = $this->streamFactory->createStream(json_encode([
+      "perm" => $newPerm
+    ]));
+
+    $this->userDao->shouldReceive('addGroup')->withArgs([$groupName])
+      ->andReturn($groupId);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('addGroupMembership')->withAnyArgs()->andReturn(null);
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->groupController->createGroup($request,new ResponseHelper(),["id"=>1]);
+
+  }
+
+  /**
+   * @test
+   *  -# Test GroupController::deleteGroupMember() for valid delete request
+   *  -# Check if response status is 200
+   *  -# check of the response matches the expected one
+   * @throws HttpErrorException
+   */
+  public function testDeleteGroupMember()
+  {
+    $id = 13;
+    $userPk = 2;
+    $group_user_member_pk = 1;
+    $newPerm = 2;
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(true);
+    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$this->groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userPk);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withAnyArgs()->andReturn(true);
+    $this->adminPlugin->shouldReceive('updateGUMPermission')->withAnyArgs();
+
+    $info = new Info(200,'User will be removed from group.',InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $actualResponse = $this->groupController->deleteGroupMember(null,new ResponseHelper(),["id"=>$id ,"userId"=>$userPk]);
+    $this->assertEquals($info->getArray(),$this->getResponseJson($actualResponse));
+    $this->assertEquals($expectedResponse->getStatusCode(),$actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+
+  }
+
+  /**
+   * @test
+   *  -# Test GroupController::deleteGroupMember() for valid delete request
+   *  -# Check if response the HttpNotFound exception was thrown.
+   */
+  public function testDeleteGroupMemberHttpNotFoundException()
+  {
+    $id = 13;
+    $userPk = 2;
+    $group_user_member_pk = 1;
+    $newPerm = 2;
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(false);
+
+    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$this->groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userPk);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withAnyArgs()->andReturn(true);
+    $this->adminPlugin->shouldReceive('updateGUMPermission')->withAnyArgs();
+
+    $this->expectException(HttpNotFoundException::class);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->groupController->deleteGroupMember(null,new ResponseHelper(),["id"=>$id ,"userId"=>$userPk]);
+
+  }
 
   /**
    * @test
@@ -179,12 +329,8 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testDeleteGroup()
   {
-    $groupName = 'fossy';
     $groupId = 4;
     $userId = 1;
-    $request = M::mock(Request::class);
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
-    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
@@ -195,14 +341,39 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $info = new Info(202, "User Group will be deleted", InfoType::INFO);
     $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
       $info->getCode());
-    $actualResponse = $this->groupController->deleteGroup($request, new ResponseHelper(),
-      ['pathParam' => $groupId]);
+    $actualResponse = $this->groupController->deleteGroup(null, new ResponseHelper(),
+      ['id' => $groupId]);
 
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
   }
+
+
+  /**
+   * @test
+   * -# Test GroupController::deleteGroup() for valid delete request
+   * -# Check if response HttpNotFound exception is thrown
+   */
+  public function testDeleteGroupNotFoundException()
+  {
+    $groupId = 4;
+    $userId = 1;
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(false);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(false);
+    $this->userDao->shouldReceive('getDeletableAdminGroupMap')->withArgs([$userId,$_SESSION[Auth::USER_LEVEL]]);
+    $this->userDao->shouldReceive('deleteGroup')->withArgs([$groupId]);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->groupController->deleteGroup(null, new ResponseHelper(),
+      ['id' => $groupId]);
+  }
+
 
   /**
    * @test
@@ -222,7 +393,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
   }
-    /**
+  /**
    * @test
    * -# Test GroupController::getGroupMembers() for all groups
    * -# Check if the response is list of group members
@@ -230,12 +401,8 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
   public function testGetGroupMembers()
   {
     $userIds = [2];
-    $groupName = 'fossy';
     $groupId = 1;
     $memberList = $this->getGroupMembers($userIds);
-    $request = M::mock(Request::class);
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
-    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userIds[0]);
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
     $this->userDao->shouldReceive('getAdminGroupMap')->withArgs([$userIds[0],$_SESSION[Auth::USER_LEVEL]])->andReturn([1]);
@@ -250,15 +417,14 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $users[] = new User($user["user_pk"], $user["user_name"], $user["user_desc"],
       null, null, null, null, null);
     $this->dbHelper->shouldReceive("getUsers")->withArgs([$user['user_pk']])->andReturn($users);
-
     $expectedResponse = (new ResponseHelper())->withJson($memberList, 200);
 
-    $actualResponse = $this->groupController->getGroupMembers($request, new ResponseHelper(), ['pathParam' => $groupId]);
+    $actualResponse = $this->groupController->getGroupMembers(null, new ResponseHelper(), ['id' => $groupId]);
     $this->assertEquals($expectedResponse->getStatusCode(),$actualResponse->getStatusCode());
   }
 
 
- /**
+  /**
    * @test
    * -# Test GroupController::addMember()
    * -# The user already a member
@@ -268,25 +434,21 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testAddMemberUserNotMember()
   {
-    $groupName = "fossy";
-    $userName = "user";
     $groupId = 1;
-    $newuser = 1;
-    $userArray = ['user_pk' => $newuser];
+    $this->newuser = 1;
     $newPerm = 2;
     $emptyArr=[];
     $userId = 1;
+
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
-    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
-    $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userName])->andReturn($userArray);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
-    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$this->newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn($emptyArr);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(true);
 
     $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
-    $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $newuser,$newPerm)])->andReturn(1);
+    $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $this->newuser,$newPerm)])->andReturn(1);
     $this->dbManager->shouldReceive('freeResult')->withArgs([1]);
 
 
@@ -300,7 +462,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
 
     $expectedResponse =  new Info(200, "User will be added to group.", InfoType::INFO);
 
-    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['pathParam' => $groupId,'userPathParam' => $newuser]);
+    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['id' => $groupId,'userId' => $this->newuser]);
     $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
     $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
   }
@@ -313,19 +475,14 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testAddMemberUserNotAdmin()
   {
-    $groupName = "fossy";
-    $userName = "user";
     $groupId = 1;
-    $newuser = 1;
-    $userArray = ['user_pk' => $newuser];
+    $this->newuser = 1;
     $newPerm = 2;
     $userId = 1;
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
-    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
-    $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userName])->andReturn($userArray);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
-    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$this->newuser])->andReturn(true);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(false);
 
@@ -340,7 +497,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->expectException(HttpForbiddenException::class);
 
     $this->groupController->addMember($request, new ResponseHelper(),
-    ['pathParam' => $groupId,'userPathParam' => $newuser]);
+      ['id' => $groupId,'userId' => $this->newuser]);
   }
 
   /**
@@ -351,26 +508,21 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testAddMemberUserGroupAdmin()
   {
-    $groupName = "fossy";
-    $userName = "user";
     $groupId = 1;
-    $newuser = 1;
-    $userArray = ['user_pk' => $newuser];
+    $this->newuser = 1;
     $newPerm = 2;
     $emptyArr=[];
     $userId = 1;
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
-    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
-    $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userName])->andReturn($userArray);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
-    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$this->newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn($emptyArr);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(true);
 
     $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
-    $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $newuser,$newPerm)])->andReturn(1);
+    $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $this->newuser,$newPerm)])->andReturn(1);
     $this->dbManager->shouldReceive('freeResult')->withArgs([1]);
 
     $body = $this->streamFactory->createStream(json_encode([
@@ -383,7 +535,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
 
     $expectedResponse =  new Info(200, "User will be added to group.", InfoType::INFO);
 
-    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['pathParam' => $groupId,'userPathParam' => $newuser]);
+    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['id' => $groupId,'userId' => $this->newuser]);
     $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
     $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
   }
@@ -399,19 +551,14 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testAddMemberUserAlreadyMember()
   {
-    $groupName = "fossy";
-    $userName = "user";
     $groupId = 1;
-    $newuser = 1;
-    $userArray = ['user_pk' => $newuser];
+    $this->newuser = 1;
     $newPerm = 2;
     $userId = 1;
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
-    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
-    $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userName])->andReturn($userArray);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
-    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$this->newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(true);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(true);
@@ -427,33 +574,26 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->expectException(HttpBadRequestException::class);
 
     $this->groupController->addMember($request, new ResponseHelper(),
-    ['pathParam' => $groupId,'userPathParam' => $newuser]);
+      ['id' => $groupId,'userId' => $this->newuser]);
   }
-      /**
+  /**
    * @test
    * -# Test GroupController::getGroupMembers() for all groups
    * -# Check if the response is list of group members
    */
   public function testChangeUserPermission()
   {
-    $groupIds = [1,2,3,4,5,6];
-    $groupName = "fossy";
-    $userName = "user";
     $userId = 1;
     $group_user_member_pk = 1;
     $newPerm = 2;
     $userPk = 1;
-    $userArray = ['user_pk' => $userId];
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
-    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupIds[0]);
-    $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userName])->andReturn($userArray);
-    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupIds[0]])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $this->groupIds[0]])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$userId])->andReturn(true);
-    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
+    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$this->groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userPk);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userPk, $groupIds[0]])->andReturn(true);
-
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userPk, $this->groupIds[0]])->andReturn(true);
     $this->adminPlugin->shouldReceive('updateGUMPermission')->withArgs([$group_user_member_pk,$newPerm, $this->dbManager ]);
 
     $body = $this->streamFactory->createStream(json_encode([
@@ -467,7 +607,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
     $expectedResponse = new Info(202, "Permission updated successfully.", InfoType::INFO);
 
-    $actualResponse = $this->groupController->changeUserPermission($request, new ResponseHelper(), ['pathParam' => $groupIds[0],'userPathParam' => $userId]);
+    $actualResponse = $this->groupController->changeUserPermission($request, new ResponseHelper(), ['id' => $this->groupIds[0],'userId' => $userId]);
     $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
     $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
   }
