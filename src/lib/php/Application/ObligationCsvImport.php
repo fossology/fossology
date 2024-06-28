@@ -80,7 +80,7 @@ class ObligationCsvImport
    * @return string message Error message, if any. Otherwise
    *         `Read csv: <count> licenses` on success.
    */
-  public function handleFile($filename)
+  public function handleFile($filename, $fileExtension)
   {
     if (!is_file($filename) || ($handle = fopen($filename, 'r')) === false) {
       return _('Internal error');
@@ -88,20 +88,57 @@ class ObligationCsvImport
     $cnt = -1;
     $msg = '';
     try {
-      while (($row = fgetcsv($handle,0,$this->delimiter,$this->enclosure)) !== false) {
-        $log = $this->handleCsv($row);
-        if (!empty($log)) {
-          $msg .= "$log\n";
+      if ($fileExtension == 'csv') {
+        while (($row = fgetcsv($handle,0,$this->delimiter,$this->enclosure)) !== false) {
+          $log = $this->handleCsv($row);
+          if (!empty($log)) {
+            $msg .= "$log\n";
+          }
+          $cnt++;
         }
-        $cnt++;
+        $msg .= _('Read csv').(": $cnt ")._('obligations');
+      } else {
+        $jsonContent = fread($handle, filesize($filename));
+        $data = json_decode($jsonContent, true);
+        if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
+          $msg .= "Error decoding JSON: " . json_last_error_msg()."\n";
+        }
+        foreach ($data as $row) {
+          $log = $this->handleCsvObligation($this->handleRowJson($row));
+          if (!empty($log)) {
+            $msg .= "$log\n";
+          }
+        }
+        $msg .= _('Read json').(":". count($data) ." ")._('obligations');
       }
-      $msg .= _('Read csv').(": $cnt ")._('obligations');
     } catch(\Exception $e) {
       fclose($handle);
       return $msg .= _('Error while parsing file').': '.$e->getMessage();
     }
     fclose($handle);
     return $msg;
+  }
+
+  /**
+   * Handle a single row read from the JSON.
+   * If the key matches values from alias array then replace it with key
+   * @param array $row
+   * @return array $newArray
+   */
+  function handleRowJson($row)
+  {
+    $newArray = array();
+    foreach ($row as $key => $value) {
+      $newKey = $key;
+      foreach ($this->alias as $aliasKey => $aliasValues) {
+        if (in_array($key, $aliasValues)) {
+          $newKey = $aliasKey;
+          break;
+        }
+      }
+      $newArray[$newKey] = $value;
+    }
+    return $newArray;
   }
 
   /**

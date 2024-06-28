@@ -29,8 +29,8 @@ class AdminLicenseFromCSV extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => "Admin License CSV Import",
-        self::MENU_LIST => "Admin::License Admin::CSV Import",
+        self::TITLE => "Admin License Import",
+        self::MENU_LIST => "Admin::License Admin::License Import",
         self::REQUIRES_LOGIN => true,
         self::PERMISSION => Auth::PERM_ADMIN
     ));
@@ -74,8 +74,9 @@ class AdminLicenseFromCSV extends DefaultPlugin
     } elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
       $errMsg = _("Larger than upload_max_filesize ") .
         ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
-    } elseif ($uploadedFile->getClientOriginalExtension() != 'csv') {
-      $errMsg = _('Invalid extension ') .
+    } elseif ($uploadedFile->getClientOriginalExtension() != 'csv'
+           && $uploadedFile->getClientOriginalExtension() != 'json') {
+      $errMsg = _('Invalid file extension ') .
         $uploadedFile->getClientOriginalExtension() . ' of file ' .
         $uploadedFile->getClientOriginalName();
     }
@@ -87,7 +88,7 @@ class AdminLicenseFromCSV extends DefaultPlugin
     $licenseCsvImport->setDelimiter($delimiter);
     $licenseCsvImport->setEnclosure($enclosure);
 
-    return array(true,$licenseCsvImport->handleFile($uploadedFile->getRealPath()),200);
+    return array(true,$licenseCsvImport->handleFile($uploadedFile->getRealPath(), $uploadedFile->getClientOriginalExtension()),200);
   }
 
   /**

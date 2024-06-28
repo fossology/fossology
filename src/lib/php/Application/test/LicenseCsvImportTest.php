@@ -576,7 +576,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $dbManager = M::mock(DbManager::class);
     $userDao = M::mock(UserDao::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
-    $msg = $licenseCsvImport->handleFile('/tmp/thisFileNameShouldNotExists');
+    $msg = $licenseCsvImport->handleFile('/tmp/thisFileNameShouldNotExists', 'csv');
     assertThat($msg, is(equalTo(_('Internal error'))));
   }
 
@@ -591,7 +591,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $dbManager = M::mock(DbManager::class);
     $userDao = M::mock(UserDao::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
-    $msg = $licenseCsvImport->handleFile(__FILE__);
+    $msg = $licenseCsvImport->handleFile(__FILE__, 'csv');
     assertThat($msg, startsWith( _('Error while parsing file')));
   }
 
@@ -611,7 +611,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $handle = fopen($filename, 'w');
     fwrite($handle, "shortname,fullname,text,spdx_id");
     fclose($handle);
-    $msg = $licenseCsvImport->handleFile($filename);
+    $msg = $licenseCsvImport->handleFile($filename, 'csv');
     assertThat($msg, startsWith( _('head okay')));
     unlink($filename);
   }

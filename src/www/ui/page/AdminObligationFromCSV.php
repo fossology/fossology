@@ -29,8 +29,8 @@ class AdminObligationFromCSV extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => "Admin Obligation CSV Import",
-        self::MENU_LIST => "Admin::Obligation Admin::CSV Import",
+        self::TITLE => "Admin Obligation Import",
+        self::MENU_LIST => "Admin::Obligation Admin::Obligation Import",
         self::REQUIRES_LOGIN => true,
         self::PERMISSION => Auth::PERM_ADMIN
     ));
@@ -69,7 +69,8 @@ class AdminObligationFromCSV extends DefaultPlugin
       $errMsg = _("No file selected");
     } elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
       $errMsg = _("Larger than upload_max_filesize ") . ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
-    } elseif ($uploadedFile->getClientOriginalExtension()!='csv') {
+    } elseif ($uploadedFile->getClientOriginalExtension() != 'csv'
+           && $uploadedFile->getClientOriginalExtension() != 'json') {
       $errMsg = _('Invalid extension ') .
           $uploadedFile->getClientOriginalExtension() . ' of file ' .
           $uploadedFile->getClientOriginalName();
@@ -85,7 +86,7 @@ class AdminObligationFromCSV extends DefaultPlugin
     $obligationCsvImport->setDelimiter($delimiter);
     $obligationCsvImport->setEnclosure($enclosure);
 
-    $res = $obligationCsvImport->handleFile($uploadedFile->getRealPath());
+    $res = $obligationCsvImport->handleFile($uploadedFile->getRealPath(), $uploadedFile->getClientOriginalExtension());
     if ($fromRest) {
       return array(true, $res, 200);
     }
