@@ -25,6 +25,7 @@ class RepoSetup:
   :ivar temp_dir: Temporary directory location for storing MR changes.
   :ivar allowlist: Allow list from JSON
   :ivar api_config: ApiConfig
+  :ivar cli_options: CliOptions object
   """
 
   def __init__(self, cli_options: CliOptions, api_config: ApiConfig):
@@ -38,6 +39,7 @@ class RepoSetup:
       = TemporaryDirectory()
     self.allowlist: dict[str, list[str]] = cli_options.allowlist
     self.api_config: ApiConfig = api_config
+    self.cli_options: CliOptions = cli_options
 
   def __del__(self):
     """
@@ -67,36 +69,49 @@ class RepoSetup:
 
     :return: temp dir path
     """
+
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+
     if self.api_config.running_on == Runner.GITLAB:
-      api_req_url = f"{self.api_config.api_url}/projects/" \
-                    f"{self.api_config.project_id}/merge_requests/" \
-                    f"{self.api_config.mr_iid}/changes"
       headers = {'Private-Token': self.api_config.api_token}
       path_key = "new_path"
       change_key = "diff"
+      api_req_url = f"{self.api_config.api_url}/projects/" \
+                    f"{self.api_config.project_id}/merge_requests/" \
+                    f"{self.api_config.mr_iid}/changes"
+      if self.cli_options.differential and self.cli_options.tags != ('',''):
+        tags = (self.cli_options.tags)
+        api_req_url = f"{self.api_config.api_url}/projects/" \
+                      f"{self.api_config.project_id}/repository/compare?" + \
+                      f"from={tags[0]}&to={tags[1]}"
+      
     elif self.api_config.running_on == Runner.GITHUB:
-      api_req_url = f"{self.api_config.api_url}/repos/" \
-                    f"{self.api_config.github_repo_slug}/pulls/" + \
-                    f"{self.api_config.github_pull_request}/files"
       headers = {
         "Authorization": f"Bearer {self.api_config.api_token}",
         "X-GitHub-Api-Version": "2022-11-28",
         "Accept": "application/vnd.github+json"
       }
+      api_req_url = f"{self.api_config.api_url}/repos/" \
+                    f"{self.api_config.github_repo_slug}/pulls/" + \
+                    f"{self.api_config.github_pull_request}/files"
+      if self.cli_options.differential and self.cli_options.tags != ('',''):
+        tags = self.cli_options.tags
+        api_req_url = f"{self.api_config.api_url}/repos/" \
+                      f"{self.api_config.github_repo_slug}/compare/" + \
+                      f"{tags[0]}...{tags[1]}"
       path_key = "filename"
       change_key = "patch"
+    
     else:
       api_req_url = "https://api.github.com/repos/" \
                     f"{self.api_config.travis_repo_slug}/pulls/" \
                     f"{self.api_config.travis_pull_request}/files"
       headers = {}
       path_key = "filename"
-      change_key = "patch"
-
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
-
+      change_key = "patch"  
+    
     req = urllib.request.Request(api_req_url, headers=headers)
     try:
       with urllib.request.urlopen(req, context=context) as response:
@@ -107,11 +122,17 @@ class RepoSetup:
 
     change_response = json.loads(change_response)
     if self.api_config.running_on == Runner.GITLAB:
-      changes = change_response['changes']
+      if self.cli_options.differential and self.cli_options.tags != ('',''):
+        changes = change_response['diffs']
+      else:
+        changes = change_response['changes']
+    elif self.api_config.running_on == Runner.GITHUB:
+      if self.cli_options.differential and self.cli_options.tags != ('',''):
+        changes = change_response['files']
+      else:
+        changes = change_response
     else:
       changes = change_response
-
-    remove_diff_regex = re.compile(r"^([ +-])(.*)$", re.MULTILINE)
 
     for change in changes:
       if path_key in change and change_key in change:
@@ -122,7 +143,5 @@ class RepoSetup:
           if curr_dir != self.temp_dir.name:
             os.makedirs(name=curr_dir, exist_ok=True)
           curr_file = open(file=curr_file, mode='w+', encoding='UTF-8')
-          print(re.sub(remove_diff_regex, r"\2", change[change_key]),
-                file=curr_file)
-
+          print(change[change_key],file=curr_file)
     return self.temp_dir.name

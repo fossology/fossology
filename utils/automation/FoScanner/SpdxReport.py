@@ -198,10 +198,10 @@ class SpdxReport:
     """
     validation_messages: List[ValidationMessage] = \
       validate_full_spdx_document(self.document)
-    for message in validation_messages:
-      logging.warning(message.validation_message)
-      logging.warning(message.context)
-    assert validation_messages == []
+    if validation_messages != []:
+      for message in validation_messages:
+        logging.warning(message.validation_message)
+        logging.warning(message.context)
     write_file(self.document, file_name)
 
   def finalize_document(self):

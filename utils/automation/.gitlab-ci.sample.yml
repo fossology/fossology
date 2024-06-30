@@ -54,3 +54,17 @@ repo_sbom:
     - results
     expire_in: 1 week
     when: always
+
+differential_scan:
+  stage: license
+  image: fossology/fossology:scanner
+  script:
+    - /bin/fossologyscanner copyright keyword nomos ojo differential --tags $FROM_TAG $TO_TAG --report SPDX_JSON
+  only:
+    - tags
+    - merge_requests
+  artifacts:
+    paths:
+    - results
+    expire_in: 1 week
+    when: always
