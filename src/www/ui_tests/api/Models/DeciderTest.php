@@ -21,6 +21,12 @@ use Fossology\UI\Api\Models\ApiVersion;
  */
 class DeciderTest extends \PHPUnit\Framework\TestCase
 {
+
+  private $decider;
+  public function setUp(): void
+  {
+    $this->decider = new Decider();
+  }
   /**
    * @test
    * -# Test for Decider::setUsingArray() when $version is V1
@@ -122,5 +128,29 @@ class DeciderTest extends \PHPUnit\Framework\TestCase
     $actualObject->setOjoDecider(true);
 
     $this->assertEquals($expectedArray, $actualObject->getArray($version));
+  }
+
+  public function testSetNomosMonk()
+  {
+    $this->decider->setNomosMonk(true);
+    $this->assertTrue($this->decider->getNomosMonk());
+  }
+
+  public function testSetBulkReused()
+  {
+    $this->decider->setBulkReused(true);
+    $this->assertTrue($this->decider->getBulkReused());
+  }
+
+  public function testSetNewScanner()
+  {
+    $this->decider->setNewScanner(true);
+    $this->assertTrue($this->decider->getNewScanner());
+  }
+
+  public function testSetOjoDecider()
+  {
+    $this->decider->setOjoDecider(true);
+    $this->assertTrue($this->decider->getOjoDecider());
   }
 }
