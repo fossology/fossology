@@ -193,7 +193,7 @@ class CycloneDXAgent extends Agent
     $mainLicenses = array();
     foreach ($mainLicenseIds as $licId) {
       $reportedLicenseId = $this->licenseMap->getProjectedId($licId);
-      $mainLicObj = $this->licenseDao->getLicenseById($reportedLicenseId);
+      $mainLicObj = $this->licenseDao->getLicenseById($reportedLicenseId, $this->groupId);
       $licId = $mainLicObj->getId() . "-" . md5($mainLicObj->getText());
       if (!array_key_exists($licId, $this->licensesInDocument)) {
         $this->licensesInDocument = (new SpdxLicenseInfo())

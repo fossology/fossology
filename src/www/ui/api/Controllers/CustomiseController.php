@@ -20,6 +20,7 @@ use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\ApiVersion;
 use Psr\Http\Message\ServerRequestInterface;
 
 
@@ -50,8 +51,9 @@ class CustomiseController extends RestController
   public function getCustomiseData($request, $response, $args)
   {
     $this->throwNotAdminException();
+    $apiVersion = ApiVersion::getVersion($request);
     $returnVal = $this->sysconfigDao->getConfigData();
-    $finalVal = $this->sysconfigDao->getCustomiseData($returnVal);
+    $finalVal = $this->sysconfigDao->getCustomiseData($returnVal, $apiVersion);
     return $response->withJson($finalVal, 200);
   }
 

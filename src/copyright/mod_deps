@@ -150,6 +150,8 @@ if [[ $RUNTIME ]]; then
           apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.71.0;;
         jammy)
           apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0;;
+        noble)
+          apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0;;
         *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
       esac;;
     RedHatEnterprise*|CentOS| Fedora)
