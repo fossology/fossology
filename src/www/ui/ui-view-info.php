@@ -180,6 +180,7 @@ class ui_view_info extends FO_Plugin
    */
   function ShowMetaView($Upload, $Item)
   {
+    $groupId = Auth::getGroupId();
     $vars = [];
     if (empty($Item) || empty($Upload)) {
       return $vars;
@@ -269,6 +270,11 @@ class ui_view_info extends FO_Plugin
     $row = $this->dbManager->getSingleRow($sql, array($Upload), __METHOD__ . "getUploadOwner");
 
     $vars['fileUploadUser'] = $row['user_name'];
+    $userId = $this->uploadDao->getAssignee($Upload, $groupId);
+    $vars['fileAssigneeUser'] = ($userId == 1) ? 'Unassigned' : $this->userDao->getUserName($userId);
+    $assignedDate = $this->uploadDao->getAssigneeDate($Upload);
+    $vars['fileAssigneeUserOn'] = empty($assignedDate) ? 'NA' : substr($assignedDate, 0, strrpos($assignedDate, '.'));
+    $vars['fileClearingDuration'] = $this->uploadDao->getClearingDuration($Upload)[0];
 
     return $vars;
   } // ShowMetaView()
