@@ -116,6 +116,24 @@
         <td>{{ "Added by"|trans }}</td>
         <td>{{ fileUploadUser|e }}</td>
       </tr>
+        {% set count = count + 1 %}
+      <tr>
+        <td align="right">{{ count }}</td>
+        <td>{{ "Assigned to"|trans }}</td>
+        <td>{{ fileAssigneeUser|e }}</td>
+      </tr>
+        {% set count = count + 1 %}
+      <tr>
+        <td align="right">{{ count }}</td>
+        <td>{{ "Assigned on"|trans }}</td>
+        <td>{{ fileAssigneeUserOn|e }}</td>
+      </tr>
+        {% set count = count + 1 %}
+      <tr>
+        <td align="right">{{ count }}</td>
+        <td>{{ "Clearing Duration"|trans }}</td>
+        <td>{{ fileClearingDuration|e }}</td>
+      </tr>
     {% else %}
       <tr><td colspan="3">{{ "File does not exist in database"|trans }}</td></tr>
     {% endif %}
