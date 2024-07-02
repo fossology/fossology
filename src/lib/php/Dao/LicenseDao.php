@@ -42,9 +42,10 @@ class LicenseDao
    *
    * @param ItemTreeBounds $itemTreeBounds
    * @param int
+   * @param bool $includeExpressions
    * @return LicenseMatch[]
    */
-  function getAgentFileLicenseMatches(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
+  function getAgentFileLicenseMatches(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL, $includeExpressions=false)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . ".$uploadTreeTableName.$usageId";
@@ -81,6 +82,34 @@ class LicenseDao
       $licenseRef = new LicenseRef(intval($row['license_id']), $row['license_shortname'], $row['license_fullname'], $row['spdx_id']);
       $agentRef = new AgentRef(intval($row['agent_id']), $row['agent_name'], $row['agent_revision']);
       $matches[] = new LicenseMatch(intval($row['file_id']), $licenseRef, $agentRef, intval($row['license_file_id']), intval($row['percent_match']));
+    }
+    if ($includeExpressions) {
+      $statementName .= "withExpressions";
+      $params = array_slice($params, 0, 3);
+
+      $this->dbManager->freeResult($result);
+      $this->dbManager->prepare($statementName,
+          "SELECT   LFR.rf_pk AS license_id,
+                    LFR.rf_expression AS expression,
+                    LFR.fl_pk AS license_file_id,
+                    LFR.pfile_fk as file_id,
+                    LFR.rf_match_pct AS percent_match,
+                    AG.agent_name AS agent_name,
+                    AG.agent_pk AS agent_id,
+                    AG.agent_rev AS agent_revision
+            FROM ( SELECT le.rf_pk, le.rf_expression, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk, license_file.rf_match_pct
+                FROM license_file JOIN license_expression le ON license_file.rf_fk = le.rf_pk) as LFR
+            INNER JOIN $uploadTreeTableName as UT ON UT.pfile_fk = LFR.pfile_fk
+            INNER JOIN agent as AG ON AG.agent_pk = LFR.agent_fk
+            WHERE AG.agent_enabled='true' and
+            UT.upload_fk=$1 AND UT.lft BETWEEN $2 and $3
+            ORDER BY percent_match DESC");
+      $result = $this->dbManager->execute($statementName, $params);
+      while ($row = $this->dbManager->fetchArray($result)) {
+        $licenseRef = new LicenseRef(intval($row['license_id']), 'License Expression', $row['expression'], 'License Expression');
+        $agentRef = new AgentRef(intval($row['agent_id']), $row['agent_name'], $row['agent_revision']);
+        $matches[] = new LicenseMatch(intval($row['file_id']), $licenseRef, $agentRef, intval($row['license_file_id']), intval($row['percent_match']));
+      }
     }
 
     $this->dbManager->freeResult($result);
@@ -539,6 +568,18 @@ ORDER BY lft asc
    */
   public function getLicenseById($licenseId, $groupId=null)
   {
+    $license = $this->getLicenseByCondition('rf_pk=$1', array($licenseId), $groupId);
+    if (is_null($license)) {
+      $row = $this->dbManager->getSingleRow(
+        "SELECT rf_pk, rf_expression FROM license_expression WHERE rf_pk=$1",
+        array($licenseId), __METHOD__ . ".rf_pk=$1.expression");
+      if (false === $row) {
+        return null;
+      }
+      return new License(intval($row['rf_pk']), 'License Expression',
+      $row['rf_expression'], '', '', '',
+      '', '');
+    }
     return $this->getLicenseByCondition('rf_pk=$1', array($licenseId), $groupId);
   }
 
@@ -695,6 +736,37 @@ ORDER BY lft asc
     $this->dbManager->getSingleRow($sql, $params, $statement);
   }
 
+  /**
+   * @param string $expression The license expression to insert.
+   * @return int The primary key (rf_pk) of the inserted license expression.
+  */
+  public function insertExpression($expression)
+  {
+    $sql = 'INSERT INTO license_expression (rf_expression) VALUES ($1) RETURNING rf_pk';
+    $params = array($expression);
+    $statement = __METHOD__;
+    $result = $this->dbManager->getSingleRow($sql, $params, $statement.'insertExpression');
+    $rf_pk = $result['rf_pk'];
+    return intval($rf_pk);
+  }
+
+  public function updateExpression($rf_pk, $expression)
+  {
+    $sql = 'UPDATE license_expression SET ' .
+      'rf_expression=$2 WHERE rf_pk=$1';
+    $statement = __METHOD__."expression";
+    $params = array($rf_pk, $expression);
+    $this->dbManager->getSingleRow($sql, $params, $statement);
+  }
+
+  public function saveLicenseIntoFile($rf_fk, $pfile_fk, $agent_fk=15)
+  {
+    $sql = 'INSERT INTO license_file (rf_fk, pfile_fk, agent_fk) VALUES ($1, $2, $3) RETURNING fl_pk';
+    $params = array($rf_fk, $pfile_fk, $agent_fk);
+    $result = $this->dbManager->getSingleRow($sql, $params, __METHOD__);
+    $fl_pk = $result['fl_pk'];
+    return intval($fl_pk);
+  }
   /**
    * @param int $licenseId
    * @param int $groupId

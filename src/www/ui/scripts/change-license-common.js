@@ -10,6 +10,9 @@ var magicNumberNoLicenseFoundInt = 507;
 var magicNumberNoLicenseFound = "507";
 var noLicenseString = "No_license_found";
 var bulkModalOpened = 0;
+var currentAST = null;
+var currentNode = null;
+var currentASTId = 0;
 
 
 function jsArrayFromHtmlOptions(pListBox) {
@@ -611,4 +614,196 @@ function scheduledBootstrapSuccess (data, resultEntity, callbackSuccess, callbac
     errorSpan.text("bad response from server");
   }
   resultEntity.show();
+}
+
+function getLicense(licenseId, callback) {
+  $.ajax({
+    type: "GET",
+    url: "?mod=conclude-license&do=getLicense" + "&licenseId=" + licenseId,
+    data: {},
+    success: function(data) {
+      callback(data);
+    },
+    error: function(data) {
+      callback(data.error);
+    }
+  });
+}
+
+function editExpression(id=-1) {
+  if (id==-1)
+  {
+    currentAST = null;
+    displayAST(currentAST, $('#ast-viewer'));
+    $('#editExpressionModal').modal('show');
+  }
+  else
+  {
+    currentASTId = id;
+    getLicense(id, function(license) {
+      currentAST = JSON.parse(license.fullName);
+      $('#licenseValue').empty();
+      $.getJSON("?mod=conclude-license&do=licenseDecisionsData" + "&upload=" + uploadId + "&item=" + $('#uploadTreeId').val())
+      .done(function (data) {
+        if(data) {
+          console.log(data);
+          data.forEach(function (license) {
+            $('#licenseValue').append($('<option></option>').attr('value', license.id).attr('title', license.fullName).text(license.shortName));
+          });
+          displayAST(currentAST, $('#ast-viewer'));
+          $('#editExpressionModal').modal('show');
+      }})
+      .fail(failed);
+    });
+  }
+}
+
+function displayAST(node, container) {
+  if (node === null) {
+    container.empty();
+    return;
+  }
+  container.empty();
+  let content = $('<div class="node p-2 mb-2 border border-secondary"></div>');
+
+  if (node.type === 'License') {
+    getLicense(node.value, function(license) {
+      content.append(`<span>${license.shortName}</span>`);
+    });
+  } else {
+    let leftContainer = $('<div class="child ml-3"></div>');
+    let rightContainer = $('<div class="child ml-3"></div>');
+    displayAST(node.left, leftContainer);
+    displayAST(node.right, rightContainer);
+    content.append(leftContainer);
+    content.append(`<span class="ml-2 mr-2">${node.value}</span>`);
+    content.append(rightContainer);
+  }
+
+  content.click(function(event) {
+    event.stopPropagation();
+    editNode(node);
+  });
+
+  container.append(content);
+}
+
+function addLicenseInExpression() {
+  let newLicense = { type: 'License', value: licenseDecisionsArray[0].id };
+  if (currentAST === null)
+  {
+    currentAST = newLicense;
+  }
+  else
+  {
+    currentAST = {
+      type: 'Expression',
+      value: 'AND',
+      left: currentAST,
+      right: newLicense
+    };
+  }
+  displayAST(currentAST, $('#ast-viewer'));
+}
+
+function addGroup() {
+  let newGroup = {
+    type: 'Expression',
+    value: 'AND',
+    left: { type: 'License', value: licenseDecisionsArray[0].id },
+    right: { type: 'License', value: licenseDecisionsArray[0].id }
+  };
+  if (currentAST === null) {
+    currentAST = newGroup;
+  }
+  else
+  {
+    currentAST = {
+      type: 'Expression',
+      value: 'AND',
+      left: currentAST,
+      right: newGroup
+    };
+  }
+  displayAST(currentAST, $('#ast-viewer'));
+}
+
+function editNode(node) {
+  currentNode = node;
+  $('#licenseValue').val(node.value || '').parent().toggle(node.type === 'License');
+  $('#operatorValue').val(node.value || '').parent().toggle(node.type === 'Expression');
+  $('#editNodeModal').modal('show');
+}
+
+function saveNodeChanges() {
+  if (currentNode.type === 'License') {
+    currentNode.value = $('#licenseValue').val();
+  } else {
+    let operator = $('#operatorValue').val();
+    if (operator === 'NONE') {
+      currentNode.type = currentNode.left.type;
+      if (currentNode.left.type === 'License')
+      {
+        currentNode.value = currentNode.left.value;
+        delete currentNode.left;
+        delete currentNode.right;
+      }
+      else
+      {
+        let leftNode = currentNode.left;
+        currentNode.value = leftNode.value;
+        currentNode.left = leftNode.left;
+        currentNode.right = leftNode.right;
+      }
+    }
+    else if (operator === 'ADD LICENSE') {
+      let newLicense = { type: 'License', value: licenseDecisionsArray[0].id };
+      let leftNode = JSON.parse(JSON.stringify(currentNode));
+      currentNode.left = leftNode;
+      currentNode.type = 'Expression';
+      currentNode.value = 'AND';
+      currentNode.right = newLicense;
+      console.log(currentNode);
+      console.log(currentAST);
+    }
+    else if (operator === 'ADD GROUP')
+    {
+      let newGroup = {
+        type: 'Expression',
+        value: 'AND',
+        left: { type: 'License', value: licenseDecisionsArray[0].id },
+        right: { type: 'License', value: licenseDecisionsArray[0].id }
+      };
+      let leftNode = JSON.parse(JSON.stringify(currentNode));
+      currentNode.left = leftNode;
+      currentNode.type = 'Expression';
+      currentNode.value = 'AND';
+      currentNode.right = newGroup;
+    }
+    else {
+      currentNode.value = $('#operatorValue').val();
+    }
+  }
+  $('#editNodeModal').modal('hide');
+  $('#editExpressionModal').modal('hide').modal('show');
+  displayAST(currentAST, $('#ast-viewer'));
+}
+
+function saveExpression() {
+  if (currentASTId<=0 && currentAST != null) {
+    $.getJSON("?mod=conclude-license&do=saveExpression" + "&upload=" + uploadId + "&item=" + $('#uploadTreeId').val() + "&ast=" + JSON.stringify(currentAST))
+      .done(function (data) {
+        $('#editExpressionModal').modal('hide');
+        var table = createClearingTable();
+        table.fnDraw(false);
+      })
+      .fail(failed);
+  }
+  $.getJSON("?mod=conclude-license&do=updateExpression" + "&licenseId=" + currentASTId + "&ast=" + JSON.stringify(currentAST))
+    .done(function (data) {
+      $('#editExpressionModal').modal('hide');
+      var table = createClearingTable();
+      table.fnDraw(false);
+    })
+    .fail(failed);
 }

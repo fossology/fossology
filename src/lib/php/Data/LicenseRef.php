@@ -92,6 +92,16 @@ class LicenseRef
     .')';
   }
 
+  public function getArray()
+  {
+    return array(
+      'id' => $this->id,
+      'spdxId' => $this->spdxId,
+      'shortName' => $this->shortName,
+      'fullName' => $this->fullName
+    );
+  }
+
   /**
    * @brief Given a license's shortname and spdx id, give out spdx id to use in
    *        reports.
