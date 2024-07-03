@@ -3189,50 +3189,6 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
-  /jobs/history:
-    parameters:
-      - name: upload
-        required: true
-        in: query
-        description: Return jobs for the given upload id
-        schema:
-          type: integer
-    get:
-      operationId: getJobsHistoryPerUpload
-      tags:
-        - Job
-      summary: Get the history of all the jobs queued based on an upload
-      description: Returns the history of all the jobs queued based on an upload
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ShowJob'
-        '400':
-          description: "Bad Request. 'upload' is a required query param"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        '403':
-          description: Upload is not accessible
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        '404':
-          description: Upload does not exist
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
-
   /jobs/dashboard/statistics:
     get:
       operationId: getJobStatistics
@@ -5391,6 +5347,11 @@ components:
             - Queued
             - Processing
           description: Denotes the current status of the job in the queue
+        jobQueue:
+          type: array
+          description: List of child jobs
+          items:
+            $ref: '#/components/schemas/JobQueue'
     Info:
       type: object
       properties:
