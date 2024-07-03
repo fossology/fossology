@@ -13,10 +13,13 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class EccAgentPlugin extends AgentPlugin
 {
+  /** @var ECCDesc */
+  private $ECCDesc = "Performs file scanning to find text fragments that could be relevant for export control. Note: More keywords related to export control can be included using the configuration file.";
+
   public function __construct()
   {
     $this->Name = "agent_ecc";
-    $this->Title = _("ECC Analysis, scanning for text fragments potentially relevant for export control");
+    $this->Title = _("ECC Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->ECCDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "ecc";
 
     parent::__construct();
