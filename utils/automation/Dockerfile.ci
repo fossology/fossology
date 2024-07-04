@@ -6,9 +6,9 @@
 # SPDX-License-Identifier: FSFAP
 #
 # Description: Gitlab CI runner image recipie
-# Using Debian 11
+# Using Debian 12
 
-FROM debian:bullseye-slim as builder
+FROM debian:bookworm-slim as builder
 
 WORKDIR /fossology
 
@@ -52,7 +52,7 @@ RUN dpkg-shlibdeps -Orun-deps -ebuild/src/nomos/agent/nomossa \
                               -ebuild/src/ojo/agent/ojo \
  && sed -E -i -e 's/(shlibs:Depends=)|(\(>=?[ 0-9\:\.\~\-]*\))|(,)//g' run-deps
 
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 LABEL org.opencontainers.image.authors="Fossology <fossology@fossology.org>"
 LABEL org.opencontainers.image.url="https://fossology.org"
