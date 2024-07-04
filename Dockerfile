@@ -9,7 +9,7 @@
 #
 # Description: Docker container image recipe
 
-FROM debian:bullseye-slim as builder
+FROM debian:bookworm-slim as builder
 LABEL org.opencontainers.image.authors="Fossology <fossology@fossology.org>"
 LABEL org.opencontainers.image.source="https://github.com/fossology/fossology"
 LABEL org.opencontainers.image.vendor="FOSSology"
@@ -21,7 +21,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       git \
       lsb-release \
-      php7.4-cli \
+      php8.2-cli \
       sudo \
       cmake \
       ninja-build \
@@ -56,7 +56,7 @@ RUN cmake -DCMAKE_BUILD_TYPE=MinSizeRel -S. -B./build -G Ninja \
  && cmake --build ./build --parallel \
  && cmake --install build
 
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 LABEL org.opencontainers.image.authors="Fossology <fossology@fossology.org>"
 LABEL org.opencontainers.image.url="https://fossology.org"
@@ -82,13 +82,11 @@ RUN mkdir -p /usr/share/man/man1 /usr/share/man/man7 \
       lsb-release \
       sudo \
       cron \
-      python \
       python3 \
       python3-yaml \
       python3-psycopg2 \
       python3-requests \
       python3-pip \
- && python3 -m pip install pip==21.2.2 \
  && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --offline --runtime -y \
  && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
 

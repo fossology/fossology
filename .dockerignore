@@ -18,6 +18,9 @@ utils/automation/Dockerfile.ci
 
 Vagrantfile
 
+# Include README as required by CMake Debian packages.
+!README.md
+
 # omit rebuilding after changing the docker tests.
 src/testing/docker
 
@@ -156,7 +159,6 @@ variable.list
 /src/readmeoss/agent/version.php
 /src/reuser/agent/reuser
 /src/reuser/agent/version.php
-/src/reuser/agent/reuser
 /src/copyright/agent/ecc
 /src/copyright/VERSION-ecc
 /src/copyright/VERSION-keyword
