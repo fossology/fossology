@@ -13,6 +13,7 @@
 namespace Fossology\UI\Api\Test\Models;
 
 use Fossology\UI\Api\Models\Reuser;
+use Fossology\UI\Api\Models\ApiVersion;
 
 /**
  * @class ReuserTest
@@ -55,24 +56,56 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for Reuser::setUsingArray()
+   * -# Test for Reuser::setUsingArray() when $version is V1
+   * -# Check if the Reuser object is updated with actual array values
    */
-  public function testSetUsingArray()
+  public function testSetUsingArrayV1()
   {
-    $expectedArray = [
-      "reuse_upload"   => 2,
-      "reuse_group"    => 'fossy',
-      "reuse_main"     => 'true',
-      "reuse_enhanced" => false,
-      "reuse_copyright" => false,
-      "reuse_report"   => false
-    ];
+    $this->testSetUsingArray(ApiVersion::V1);
+  }
+
+  /**
+   * @test
+   * -# Test for Reuser::setUsingArray() when $version is V2
+   * -# Check if the Reuser object is updated with actual array values
+   */
+  public function testSetUsingArrayV2()
+  {
+    $this->testSetUsingArray(ApiVersion::V2);
+  }
+  
+  /**
+   * @param $version version to test
+   * @return void
+   * -# Test for Reuser::setUsingArray() to check if the Reuser object is updated with actual array values
+   */
+  private function testSetUsingArray($version)
+  {
+    if ($version == ApiVersion::V1) {
+      $expectedArray = [
+        "reuse_upload"   => 2,
+        "reuse_group"    => 'fossy',
+        "reuse_main"     => 'true',
+        "reuse_enhanced" => false,
+        "reuse_copyright" => false,
+        "reuse_report"   => false
+      ];
+    } else {
+      $expectedArray = [
+        "reuseUpload"   => 2,
+        "reuseGroup"    => 'fossy',
+        "reuseMain"     => 'true',
+        "reuseEnhanced" => false,
+        "reuseCopyright" => false,
+        "reuseReport"   => false
+      ];
+    }
 
     $actualReuser = new Reuser(1, 'fossy');
-    $actualReuser->setUsingArray($expectedArray);
+    $actualReuser->setUsingArray($expectedArray, $version);
 
-    $expectedArray["reuse_main"] = true;
-    $this->assertEquals($expectedArray, $actualReuser->getArray());
+    $expectedArray[$version == ApiVersion::V1? "reuse_main" : "reuseMain"] = true;
+    $this->assertEquals($expectedArray, $actualReuser->getArray($version));
   }
 
   /**

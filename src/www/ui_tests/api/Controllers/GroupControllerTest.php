@@ -28,6 +28,7 @@ use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\User;
 use Fossology\UI\Api\Models\UserGroupMember;
 use Mockery as M;
@@ -338,8 +339,12 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testDeleteGroup()
   {
+    $groupName = 'fossy';
     $groupId = 4;
     $userId = 1;
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
+    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
@@ -416,8 +421,12 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
   public function testGetGroupMembers()
   {
     $userIds = [2];
+    $groupName = 'fossy';
     $groupId = 1;
     $memberList = $this->getGroupMembers($userIds);
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
+    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userIds[0]);
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
     $request = $this->request;
@@ -449,12 +458,12 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testAddMemberUserNotMember()
   {
+    $groupName = "fossy";
+    $userName = "user";
     $groupId = 1;
-    $this->newuser = 1;
     $newPerm = 2;
     $emptyArr=[];
     $userId = 1;
-
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $request = $this->request;
     $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
@@ -492,8 +501,9 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testAddMemberUserNotAdmin()
   {
+    $groupName = "fossy";
+    $userName = "user";
     $groupId = 1;
-    $this->newuser = 1;
     $newPerm = 2;
     $userId = 1;
 
@@ -527,6 +537,8 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testAddMemberUserGroupAdmin()
   {
+    $groupName = "fossy";
+    $userName = "user";
     $groupId = 1;
     $this->newuser = 1;
     $newPerm = 2;
@@ -534,6 +546,8 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $userId = 1;
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
+    $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userName])->andReturn($userArray);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$this->newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn($emptyArr);
@@ -570,12 +584,15 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testAddMemberUserAlreadyMember()
   {
+    $groupName = "fossy";
+    $userName = "user";
     $groupId = 1;
-    $this->newuser = 1;
     $newPerm = 2;
     $userId = 1;
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
+    $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userName])->andReturn($userArray);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$this->newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(true);
@@ -606,6 +623,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $group_user_member_pk = 1;
     $newPerm = 2;
     $userPk = 1;
+    $userArray = ['user_pk' => $userId];
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $this->groupIds[0]])->andReturn(true);
