@@ -28,7 +28,6 @@ use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\User;
 use Fossology\UI\Api\Models\UserGroupMember;
 use Mockery as M;
@@ -538,7 +537,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
   public function testAddMemberUserGroupAdmin()
   {
     $groupName = "fossy";
-    $userName = "user";
     $groupId = 1;
     $this->newuser = 1;
     $newPerm = 2;
@@ -546,8 +544,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $userId = 1;
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
-    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
-    $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userName])->andReturn($userArray);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$this->newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn($emptyArr);
@@ -584,15 +580,11 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testAddMemberUserAlreadyMember()
   {
-    $groupName = "fossy";
-    $userName = "user";
     $groupId = 1;
     $newPerm = 2;
     $userId = 1;
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
-    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
-    $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userName])->andReturn($userArray);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$this->newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(true);
