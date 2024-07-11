@@ -1,0 +1,59 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{
+  "type": "software_Package",
+  "spdxId": "https://spdx.org/rdf/3.0.0/terms/Software/Package#SPDXRef-upload{{ packageId }}",
+  "creationInfo":"https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1",
+  "name": "{{ packageName }}",
+  {% if licenseComments %}
+  "comment": "<text> {{ licenseComments|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})| replace({'\f':'','"':"'", '\n':''})}} </text>",
+  {% endif %}
+  "software_downloadLocation": "NOASSERTION",
+  {% if packageVersion is not empty %}
+  "software_packageVersion": "{{ packageVersion }}",
+  {% endif %}
+  {% if releaseDate is not empty %}
+  "releaseTime":"{{ releaseDate }}",
+  {% endif %}
+  "software_copyrightText": "NOASSERTION",
+  {% if obligations|default is not empty %}
+  "software_attributionText": ["<text> {{ obligations|join('\n')
+                                             |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                                             |replace({'\f':''}) }} </text>"],
+  {% endif %}
+  "verifiedUsing": [
+    {
+      "type": "Hash",
+      "algorithm": "sha1",
+      "hashValue": "{{ sha1 | lower }}"
+    },
+    {
+      "type": "Hash",
+      "algorithm": "sha256",
+      "hashValue": "{{ sha256 | lower }}"
+    },
+    {
+      "type": "Hash",
+      "algorithm": "md5",
+      "hashValue": "{{ md5 | lower }}"
+    }
+  ]
+},
+{
+  "type": "PackageVerificationCode",
+  "algorithm": "sha1",
+  "hashValue": "{{verificationCode}}"
+},
+{
+    "type": "Relationship",
+    "spdxId": "{{ uri }}:SPDXRef-Relationship-0",
+    "from": "https://spdx.org/rdf/3.0.0/terms/Core/SpdxDocument#SpdxRef-DOCUMENT",
+    "to": [
+        "https://spdx.org/rdf/3.0.0/terms/Software/Package#SPDXRef-upload{{ packageId }}"
+    ],
+    "relationshipType": "hasConcludedLicense",
+    "creationInfo":"https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"
+},
+{{ fileNodes }}

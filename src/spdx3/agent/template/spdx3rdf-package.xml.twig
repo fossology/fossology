@@ -1,0 +1,49 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+<!-- Package -->
+<spdx:Package rdf:about="https://spdx.org/rdf/3.0.0/terms/Software/Package#SPDXRef-upload{{ packageId }}">
+   <spdx:spdxId>SPDXRef-upload{{ packageId }}</spdx:spdxId>
+   <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+   <spdx:name>{{ packageName }}</spdx:name>
+   {% if licenseComments %}
+   <rdfs:comment>&lt;text&gt;{{ licenseComments|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;','\f':'','"':"'", '\n':''}) }}&lt;/text&gt;</rdfs:comment>
+   {% endif %}
+   <spdx:software_downloadLocation>NOASSERTION</spdx:software_downloadLocation>
+   {% if packageVersion is not empty %}
+   <spdx:software_packageVersion>{{ packageVersion }}</spdx:software_packageVersion>
+   {% endif %}
+   {% if releaseDate is not empty %}
+   <spdx:releaseTime>{{ releaseDate }}</spdx:releaseTime>
+   {% endif %}
+   <spdx:software_copyrightText>NOASSERTION</spdx:software_copyrightText>
+   {% if obligations|default is not empty %}
+   <spdx:software_attributionText><text>{{ obligations|join('\n')|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;','\f':''}) }}</text>></spdx:software_attributionText>
+   {% endif %}
+   <spdx:verifiedUsing>
+      <spdx:Hash>
+         <spdx:algorithm>sha1</spdx:algorithm>
+         <spdx:hashValue>{{ sha1 | lower }}</spdx:hashValue>
+         <spdx:algorithm>sha256</spdx:algorithm>
+         <spdx:hashValue>{{ sha256 | lower }}</spdx:hashValue>
+         <spdx:algorithm>md5</spdx:algorithm>
+         <spdx:hashValue>{{ md5 | lower }}</spdx:hashValue>
+      </spdx:Hash>
+   </spdx:verifiedUsing>
+</spdx:Package>
+
+<spdx:PackageVerificationCode>
+   <spdx:algorithm>sha1</spdx:algorithm>
+   <spdx:hashValue>{{ verificationCode }}</spdx:hashValue>
+</spdx:PackageVerificationCode>
+
+<spdx:Relationship>
+   <spdx:spdxId>URI:SPDXRef-Relationship-0</spdx:spdxId>
+   <spdx:relationshipType>hasConcludedLicense</spdx:relationshipType>
+   <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+   <spdx:from>https://spdx.org/rdf/3.0.0/terms/Core/SpdxDocument#SPDXRef-DOCUMENT</spdx:from>
+   <spdx:to>https://spdx.org/rdf/3.0.0/terms/Software/Package#SPDXRef-upload{{ packageId }}</spdx:to>
+</spdx:Relationship>
+
+{{ fileNodes }}

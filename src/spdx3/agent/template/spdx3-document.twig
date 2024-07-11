@@ -1,0 +1,95 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{
+"@context": "https://spdx.org/rdf/3.0.0/spdx-context.jsonld",
+"@graph":[
+  {
+      "type":"NamespaceMap",
+      "namespace":"{{ uri }}",
+      "prefix":"URI"
+  },
+  {
+    "@id": "creationInfo:creationInfo1",
+    "type": "CreationInfo",
+    "specVersion": "3.0.0",
+    "created": "{{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}",
+    "createdBy": [
+    "Person:SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}"
+    ],
+    "createdUsing": [
+    "Tool:SPDXRef-Actor-{{ toolVersion }}"
+    ],
+    "comment":"<text>This document was created using license information and a generator from Fossology.</text>"
+  },
+  {
+    "type":"SpdxDocument",
+    "spdxId":"SpdxDocument:SpdxRef-DOCUMENT",
+    "creationInfo":"creationInfo:creationInfo1",
+    "name": "{{ documentName }}",
+    "profileConformance": ["core", "software", "simpleLicensing", "expandedLicensing"],
+    "element": [
+        "Tool:SPDXRef-Actor-{{ toolVersion }}",
+        "Person:SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}",
+        {% for packageId in packageIds%}
+        "Package:SPDXRef-upload{{ packageId }}",
+        {% endfor %}
+        {% for fileId in fileIds%}
+        "File:SPDXRef-item{{ fileId }}"{% if not loop.last %},{{ "\n" }}{% endif %}
+        {% endfor %}
+    ],
+    "rootElement": [
+        {% for packageId in packageIds%}
+        "Package:SPDXRef-upload{{ packageId }}"{% if not loop.last %},{{ "\n" }}{% endif %}
+        {% endfor %}
+    ]
+  },
+  {% if toolVersion is not empty %} 
+  {
+    "type":"Tool",
+    "spdxId":"Tool:SPDXRef-Actor-{{ toolVersion }}",
+    "creationInfo":"creationInfo:creationInfo1",
+    "name": "{{ toolVersion }}"
+  },
+  {% endif %}
+  {% if userName is not empty %}
+  {
+    "type": "Person",
+    "spdxId": "Person:SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}",
+    "creationInfo":"creationInfo:creationInfo1",
+    "name": "{{ userName | split(' ')[0] }}",
+    "externalIdentifier": [
+      {
+        "type": "ExternalIdentifier",
+        "externalIdentifierType": "email",
+        "identifier": "{{ userName | split(' (')[1] | split(')')[0]}}"
+      }   
+    ]
+  },
+  {% endif %}
+  {% if organization is not empty %}
+  {
+    "type":"Organization",
+    "spdxId":"Organization:SPDXRef-Actor-{{ organization }}",
+    "creationInfo":"creationInfo:creationInfo1",
+    "name": "{{ userName | split(' ')[0] }}"
+  },
+  {% endif %}
+  {{packageNodes}}
+  {% for packageId in packageIds%}
+  {
+    "type": "Relationship",
+    "spdxId": "URI:SPDXRef-Relationship-{{ fileIds | length }}",
+    "from":"Package:SPDXRef-upload{{ packageId }}",
+    "to": [
+        {% for fileId in fileIds%}
+        "File:SPDXRef-item{{ fileId }}"{% if not loop.last %},{{ "\n" }}{% endif %}
+        {% endfor %}
+    ],
+    "relationshipType": "hasConcludedLicense",
+    "creationInfo":"creationInfo:creationInfo1"
+  }
+  {% endfor %}
+  ]
+}

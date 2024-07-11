@@ -1,0 +1,48 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{
+  "type": "software_File",
+  "spdxId": "https://spdx.org/rdf/3.0.0/terms/Software/File#SPDXRef-item{{ fileId }}",
+  "creationInfo":"https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1",
+  "name": "{{ fileName }}",
+  {% if licenseCommentState %}
+  {% if fileData.comments is not empty %}
+  "comment": "<text> {{ fileData.comments|join('\n')
+  |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+  |replace({'\f':''}) }} </text>"
+  {% endif %}
+  {% endif %}
+  {% if fileData.copyrights|default is empty %}
+  "software_copyrightText": "NOASSERTION",
+  {% else %}
+  "software_copyrightText": "<text> {{ fileData.copyrights|join('\n')
+    |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+    |replace({'\f':'','"':"'", '\n':''}) }} </text>",
+  {% endif %}
+  {% if fileData.acknowledgements|default is not empty %}
+  "software_attributionText": "<text> {{ fileData.acknowledgements|join('\n')
+  |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+  |replace({'\f':'','"':"'", '\n':''}) }} </text>"
+  {% endif %}
+  "verifiedUsing": [
+    {
+      "type": "Hash",
+      "algorithm": "sha1",
+      "hashValue": "{{ sha1 | lower }}"
+    },
+    {
+      "type": "Hash",
+      "algorithm": "sha256",
+      "hashValue": "{{ sha256 | lower }}"
+    },
+    {
+      "type": "Hash",
+      "algorithm": "md5",
+      "hashValue": "{{ md5 | lower }}"
+    }
+  ]
+},
+
+

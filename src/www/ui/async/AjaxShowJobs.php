@@ -287,6 +287,15 @@ class AjaxShowJobs extends \FO_Plugin
           case 'dep5':
             $jobArr['jobQueue'][$key]['download'] = "DEP5 copyright file";
             break;
+          case 'spdx3':
+            $jobArr['jobQueue'][$key]['download'] = "SPDX3 JSON-LD report";
+            break;
+          case 'spdx3json':
+            $jobArr['jobQueue'][$key]['download'] = "SPDX3 JSON report";
+            break;
+          case 'spdx3rdf':
+            $jobArr['jobQueue'][$key]['download'] = "SPDX3 RDF report";
+            break;
           case 'reportImport':
             $jobArr['jobQueue'][$key]['download'] = "uploaded SPDX2 report";
             break;

@@ -1,0 +1,89 @@
+{# SPDX-FileCopyrightText: © 2015,2023 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:spdx="https://spdx.org/rdf/3.0.0/spdx-context.jsonld#">
+
+  <!-- Creation Info -->  
+  <spdx:CreationInfo rdf:about="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1">
+    <spdx:specVersion>3.0.0</spdx:specVersion>
+    <spdx:created>{{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}</spdx:created>
+    <spdx:createdBy rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/Person#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}"/>
+    <spdx:createdUsing rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/Tool#SPDXRef-Actor-{{ toolVersion }}"/>
+    <rdfs:comment><text>This document was created using license information and a generator from Fossology.</text></rdfs:comment>
+  </spdx:CreationInfo>
+  
+  <!-- SPDX Document -->
+  <spdx:SpdxDocument rdf:about="https://spdx.org/rdf/3.0.0/terms/Core/SpdxDocument#SpdxRef-DOCUMENT">
+    <spdx:spdxId>SpdxRef-DOCUMENT</spdx:spdxId>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:name>{{ documentName }}</spdx:name>
+    <spdx:profileConformance>core</spdx:profileConformance>
+    <spdx:profileConformance>software</spdx:profileConformance>
+    <spdx:profileConformance>simpleLicensing</spdx:profileConformance>
+    <spdx:profileConformance>expandedLicensing</spdx:profileConformance>
+    <spdx:element rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/Tool#SPDXRef-Actor-{{ toolVersion }}"/>
+    <spdx:element rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/Person#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}"/>
+    {% for packageId in packageIds %}
+    <spdx:element rdf:resource="https://spdx.org/rdf/3.0.0/terms/Software/Package#SPDXRef-upload{{ packageId }}"/>
+    {% endfor %}
+    {% for fileId in fileIds %}
+    <spdx:element rdf:resource="https://spdx.org/rdf/3.0.0/terms/Software/File#SPDXRef-item{{ fileId }}"/>
+    {% endfor %}
+    {% for packageId in packageIds %}
+    <spdx:rootElement rdf:resource="https://spdx.org/rdf/3.0.0/terms/Software/Package#SPDXRef-upload{{ packageId }}"/>
+    {% endfor %}
+  </spdx:SpdxDocument>
+
+  {% if toolVersion is not empty %}
+  <!-- Tool -->
+  <spdx:Tool rdf:about="https://spdx.org/rdf/3.0.0/terms/Core/Tool#SPDXRef-Actor-{{ toolVersion }}">
+    <spdx:spdxId>SPDXRef-Actor-{{ toolVersion }}</spdx:spdxId>
+    <spdx:creationInfo rdf:resource="#creationInfo:creationInfo1"/>
+    <spdx:name>{{ toolVersion }}</spdx:name>
+  </spdx:Tool>
+  {% endif %}
+
+  {% if userName is not empty %}
+  <!-- Person -->
+  <spdx:Person rdf:about="https://spdx.org/rdf/3.0.0/terms/Core/Person#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}">
+    <spdx:spdxId>SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}</spdx:spdxId>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:name>{{ userName | split(' ')[0] }}</spdx:name>
+    <spdx:externalIdentifier>
+      <rdf:Description>
+        <spdx:externalIdentifierType>email</spdx:externalIdentifierType>
+        <spdx:identifier>{{ userName | split(' (')[1] | split(')')[0] }}</spdx:identifier>
+      </rdf:Description>
+    </spdx:externalIdentifier>
+  </spdx:Person>
+  {% endif %}
+
+  {% if organization is not empty %}
+  <!-- Organization -->
+  <spdx:Organization rdf:about="https://spdx.org/rdf/3.0.0/terms/Core/Organization#SPDXRef-Actor-{{ organization }}">
+    <spdx:spdxId>SPDXRef-Actor-{{ organization }}</spdx:spdxId>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:name>{{ userName | split(' ')[0] }}</spdx:name>
+  </spdx:Tool>
+  {% endif %}
+
+  {{ packageNodes }}
+  
+  {% for packageId in packageIds%}
+  <spdx:Relationship>
+    <spdx:spdxId>SPDXRef-Relationship-{{ fileIds | length }}</spdx:spdxId>
+    <spdx:relationshipType>hasConcludedLicense</spdx:relationshipType>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:from>https://spdx.org/rdf/3.0.0/terms/Software/Package#SPDXRef-upload{{ packageId }}</spdx:from>
+    {% for fileId in fileIds%}
+    <spdx:to>https://spdx.org/rdf/3.0.0/terms/Software/File#SPDXRef-upload{{ fileId }}</spdx:to>
+    {% endfor %}
+  </spdx:Relationship>
+  {% endfor %}
+
+</rdf:RDF>

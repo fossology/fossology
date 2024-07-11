@@ -1,0 +1,41 @@
+{# SPDX-FileCopyrightText: © 2015,2023 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+
+<!-- File -->
+  <spdx:File rdf:about="https://spdx.org/rdf/3.0.0/terms/Software/File#SPDXRef-item{{ fileId }}">
+    <spdx:spdxId>SPDXRef-item{{ fileId }}</spdx:spdxId>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:name>{{ fileName }}</spdx:name>
+    {% if licenseCommentState %}
+    {% if fileData.comments is not empty %}
+    <rdfs:comment><text>{{ fileData.comments|join('\n')|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;','\f':''}) }}</text></rdfs:comment>
+    {% endif %}
+    {% endif %}
+    {%~ if fileData.copyrights|default is empty %}
+    <spdx:software_copyrightText rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+    {%~ else %}
+    <spdx:software_copyrightText><![CDATA[
+    {%~ for cp in fileData.copyrights %}
+      {{ cp|replace({'\f':''})
+           |replace({']]>':']]]]><![CDATA[>'}) }}
+    {%~ endfor %}
+    ]]></spdx:software_copyrightText>
+    {%~ endif %}
+    {% if fileData.acknowledgements|default is not empty %}
+    <spdx:software_attributionText>&lt;text&gt;{{ fileData.acknowledgements|join('\n')|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;','\f':'','"':"'", '\n':''}) }}&lt;/text&gt;</spdx:software_attributionText>
+    {% endif %}
+    <spdx:verifiedUsing>
+      <spdx:Hash>
+        <spdx:algorithm>sha1</spdx:algorithm>
+        <spdx:hashValue>{{ sha1 | lower }}</spdx:hashValue>
+        <spdx:algorithm>sha256</spdx:algorithm>
+        <spdx:hashValue>{{ sha256 | lower }}</spdx:hashValue>
+        <spdx:algorithm>md5</spdx:algorithm>
+        <spdx:hashValue>{{ md5 | lower }}</spdx:hashValue>
+      </spdx:Hash>
+    </spdx:verifiedUsing>
+  </spdx:File>
+
+
