@@ -25,12 +25,12 @@
     {% if isSpacyInstalled %}
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="copyrightDeactivation" />
     {{ ' False Positive Copyright Deactivation'|trans }}
-    <span style="color:red;font-weight:bold;">({{ 'experimental'|trans }})</span>
-    <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Do not run on production, can result in data loss.'|trans }}" alt="" class="info-bullet"/></br>
+    <span class="font-weight-bold text-warning">({{ 'experimental'|trans }})</span>
+    <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Use this feature to deactivate false positive copyrights. Warning: Using this may cause data loss.'|trans }}" alt="" class="info-bullet"/></br>
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="copyrightDeactivationClutterRemoval" />
     {{ ' False Positive Copyright Deactivation and clutter removal'|trans }}
-    <span style="color:red;font-weight:bold;">({{ 'experimental'|trans }})</span>
-    <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Do not run on production, can result in data loss.'|trans }}" alt="" class="info-bullet"/>
+    <span class="font-weight-bold text-warning">({{ 'experimental'|trans }})</span>
+    <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Use this feature to deactivate false positive copyrights and clean up extra content. Warning: Using this may cause data loss.'|trans }}" alt="" class="info-bullet"/>
     {% endif %}
   </div>
 </li>

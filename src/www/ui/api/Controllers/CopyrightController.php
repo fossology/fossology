@@ -18,6 +18,7 @@ use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\ApiVersion;
 use Psr\Http\Message\ServerRequestInterface;
 
 
@@ -516,10 +517,15 @@ class CopyrightController extends RestController
         $dataType = 'statement';
         $agentArs = 'copyright_ars';
     }
+    $apiVersion = ApiVersion::getVersion($request);
     $uploadPk = $args["id"];
     $uploadTreeId = $args["itemId"];
     $query = $request->getQueryParams();
-    $limit = $request->getHeaderLine(self::LIMIT_PARAM);
+    if ($apiVersion == ApiVersion::V2) {
+      $limit = $query[self::LIMIT_PARAM] ?? "";
+    } else {
+      $limit = $request->getHeaderLine(self::LIMIT_PARAM);
+    }
     $finalVal = [];
     if (!empty($limit)) {
       $limit = filter_var($limit, FILTER_VALIDATE_INT);
@@ -549,7 +555,11 @@ class CopyrightController extends RestController
 
     $agentId = $this->copyrightHist->getAgentId($uploadPk, $agentArs);
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk);
-    $page = $request->getHeaderLine(self::PAGE_PARAM);
+    if ($apiVersion == ApiVersion::V2) {
+      $page = $query[self::PAGE_PARAM] ?? "";
+    } else {
+      $page = $request->getHeaderLine(self::PAGE_PARAM);
+    }
     if (empty($page) && $page != "0") {
       $page = 1;
     }

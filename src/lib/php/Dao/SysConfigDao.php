@@ -8,6 +8,7 @@
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
+use Fossology\UI\Api\Models\ApiVersion;
 use Monolog\Logger;
 
 
@@ -55,20 +56,32 @@ class SysConfigDao
    * @param array $data Array of data from the sysconfig table
    * @return array
    */
-  public function getCustomiseData($data)
+  public function getCustomiseData($data, $apiVersion = ApiVersion::V1)
   {
     $finalVal = [];
     foreach ($data as $row) {
       $type = self::TYPE_MAP[$row['vartype']];
-      $finalVal[] = array(
-        "key" => $row['variablename'],
-        "value" => $row['conf_value'],
-        "type" => $type,
-        "label" => $row['ui_label'],
-        "group_name" => $row['group_name'],
-        "group_order" => intval($row['group_order']),
-        "option_value" => $row["option_value"]
-      );
+      if ($apiVersion == ApiVersion::V2) {
+        $finalVal[] = array(
+          "key" => $row['variablename'],
+          "value" => $row['conf_value'],
+          "type" => $type,
+          "label" => $row['ui_label'],
+          "groupName" => $row['group_name'],
+          "groupOrder" => intval($row['group_order']),
+          "optionValue" => $row["option_value"]
+        );
+      } else {
+        $finalVal[] = array(
+          "key" => $row['variablename'],
+          "value" => $row['conf_value'],
+          "type" => $type,
+          "label" => $row['ui_label'],
+          "group_name" => $row['group_name'],
+          "group_order" => intval($row['group_order']),
+          "option_value" => $row["option_value"]
+        );
+      }
     }
     return $finalVal;
   }

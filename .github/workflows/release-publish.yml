@@ -23,6 +23,7 @@ jobs:
           - 'debian:bookworm'
           - 'ubuntu:focal'
           - 'ubuntu:jammy'
+          - 'ubuntu:noble'
 
     runs-on: ubuntu-latest
     container: ${{ matrix.os }}
