@@ -157,8 +157,7 @@ class LicenseController extends RestController
     $apiVersion = ApiVersion::getVersion($request);
     $query = $request->getQueryParams();
     if ($apiVersion == ApiVersion::V2) {
-      $page = $query[self::PAGE_PARAM] ??
-        "";
+      $page = $query[self::PAGE_PARAM] ?? "";
       $limit = $query[self::LIMIT_PARAM] ?? "";
       $onlyActive = $query[self::ACTIVE_PARAM] ?? "";
     } else {
