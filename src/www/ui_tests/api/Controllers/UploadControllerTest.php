@@ -645,10 +645,27 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for UploadController::moveUpload() with invalid folder id
+   * -# Test for UploadController::moveUpload() with invalid folder id with version 1
    * -# Check if response status is 400
    */
-  public function testMoveUploadInvalidFolder()
+  public function testMoveUploadInvalidFolderV1()
+  {
+    $this->testMoveUploadInvalidFolder(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for UploadController::moveUpload() with invalid folder id with version 2
+   * -# Check if response status is 400
+   */
+  public function testMoveUploadInvalidFolderV2()
+  {
+    $this->testMoveUploadInvalidFolder();
+  }
+  /**
+   * @param $version
+   * @return void
+   */
+  private function testMoveUploadInvalidFolder($version = ApiVersion::V2)
   {
     $uploadId = 3;
 
@@ -658,6 +675,13 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $body = $this->streamFactory->createStream();
     $request = new Request("PATCH", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
+    if ($version==ApiVersion::V2) {
+      $request = $request->withQueryParams(['folderId' => 'alpha', 'action' => 'move']);
+    } else {
+      $request = $request->withHeader("folderId", "alpha")
+      ->withHeader("action", "move");
+    }
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
     $this->expectException(HttpBadRequestException::class);
 
     $this->uploadController->moveUpload($request, new ResponseHelper(),
@@ -1060,11 +1084,31 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    * @runInSeparateProcess
    * @preserveGlobalState disabled
    * @test
-   * -# Test for UploadController::getUploadLicenses() when agents pending
+   * -# Test for UploadController::getUploadLicenses() when agents pending with version 1 params
    * -# Check if response status is 503
    * -# Check if response headers `Retry-After` and `Look-at` set
    */
-  public function testGetUploadLicensesPendingScan()
+  public function testGetUploadLicensesPendingScanV1()
+  {
+    $this->testGetUploadLicensesPendingScan(ApiVersion::V1);
+  }
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::getUploadLicenses() when agents pending with version 2 params
+   * -# Check if response status is 503
+   * -# Check if response headers `Retry-After` and `Look-at` set
+   */
+  public function testGetUploadLicensesPendingScanV2()
+  {
+    $this->testGetUploadLicensesPendingScan();
+  }
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testGetUploadLicensesPendingScan($version = ApiVersion::V2)
   {
     $uploadId = 3;
     $agentsRun = [
@@ -1078,6 +1122,13 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
         "/uploads/$uploadId/licenses", UploadController::AGENT_PARAM .
         "=nomos,monk&containers=false"),
       $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withQueryParams(['page' => 1, 'limit' => 2, "agent" =>"nomos,monk" ]);
+    } else {
+      $request = $request->withHeader("limit",2)
+        ->withHeader("page",1);
+    }
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
 
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
