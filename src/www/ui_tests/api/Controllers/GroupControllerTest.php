@@ -181,7 +181,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     return $usersWithGroup;
   }
 
-
   /**
    * @test
    *  -# Test GroupController::createGroup() for valid create request in version 2
