@@ -19,7 +19,6 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\GroupController;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
-use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\DbHelper;
@@ -35,7 +34,6 @@ use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request;
 use Slim\Psr7\Uri;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 
 /**
@@ -70,38 +68,23 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
   private $restHelper;
 
   /**
-   * @var Auth $auth
-   * Auth mock
-   */
-  private $auth;
-
-  /**
    * @var M\MockInterface $adminPlugin
    * AdminGroupUsersPlugin mock
    */
   private $adminPlugin;
   /**
-   * @var M\MockInterface
-   */
-  private $adminGroupUsers;
-
-  /**
-   * @var int $newuser;
-   */
-  private $newuser;
-  /**
-   * @var int[] $groupIds
-   */
-
-  private $groupIds;
-  /**
    * @var Request $request
    */
   private $request;
   /**
+   * @var int[] $groupIds
+   */
+  private $groupIds;
+  /**
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
+
   protected function setUp() : void
   {
     global $container;
@@ -111,7 +94,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->userDao = M::mock(UserDao::class);
     $this->adminPlugin = M::mock('AdminGroupUsers');
     $this->request = M::mock(Request::class);
-    $this->adminGroupUsers = M::mock("AdminGroupUsers");
     $this->groupIds = [1,2,3,4,5,6];
 
     $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
@@ -199,14 +181,253 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     return $usersWithGroup;
   }
 
+
   /**
    * @test
-   *  -# Test GroupController::createGroup() for valid create request
+   *  -# Test GroupController::createGroup() for valid create request in version 2
    *  -# Check if response status is 200
    * -# Check if the response matches the expected
    * -# Check if the result code matches the expected
    */
-  public function testCreateGroup()
+  public function testCreateGroupV2()
+  {
+    $this->testCreateGroup();
+  }
+  /**
+   * @test
+   *  -# Test GroupController::createGroup() for valid create request in version 1
+   *  -# Check if response status is 200
+   * -# Check if the response matches the expected
+   * -# Check if the result code matches the expected
+   */
+  public function testCreateGroupV1()
+  {
+    $this->testCreateGroup(ApiVersion::V1);
+  }
+  /**
+   * @test
+   *  -# Test GroupController::createGroup() for valid create request in version 1
+   *  -# Check if response status is 200
+   * -# Check if the response matches the expected
+   * -# Check if the result code matches the expected
+   */
+  public function testCreateGroupHttpBadRequestV1()
+  {
+    $this->testCreateGroupHttpBadRequest(ApiVersion::V1);
+  }
+  /**
+   * @test
+   *  -# Test GroupController::createGroup() for valid create request in version 2
+   *  -# Check if response status is 200
+   * -# Check if the response matches the expected
+   * -# Check if the result code matches the expected
+   */
+  public function testCreateGroupHttpBadRequestV2()
+  {
+    $this->testCreateGroupHttpBadRequest();
+  }
+  /**
+   * @test
+   * -# Test GroupController::deleteGroup() for valid delete request in version 1
+   * -# Check if response status is 202
+   */
+  public function testDeleteGroupV1()
+  {
+    $this->testDeleteGroup(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test GroupController::deleteGroup() for valid delete request in version 2
+   * -# Check if response status is 202
+   */
+  public function testDeleteGroupV2()
+  {
+    $this->testDeleteGroup();
+  }
+  /**
+   * @test
+   * -# Test GroupController::getDeletableGroups() for version 1
+   * -# Check if the response is a list of groups.
+   */
+  public function testGetDeletableGroupsV1()
+  {
+    $this->testGetDeletableGroups(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test GroupController::getDeletableGroups() for version 2
+   * -# Check if the response is a list of groups.
+   */
+  public function testGetDeletableGroupsV2()
+  {
+    $this->testGetDeletableGroups();
+  }
+  /**
+   * @test
+   * -# Test GroupController::getGroupMembers() for all groups in version 2
+   * -# Check if the response is list of group members
+   */
+  public function testGetGroupMembersV2()
+  {
+    $this->testGetGroupMembers();
+  }
+  /**
+   * @test
+   * -# Test GroupController::getGroupMembers() for all groups in version 1
+   * -# Check if the response is list of group members
+   */
+  public function testGetGroupMembersV1()
+  {
+    $this->testGetGroupMembers(APiVersion::V1);
+  }
+  /**
+   * @test
+   *  -# Test GroupController::deleteGroupMember() for valid delete request in version 1
+   *  -# Check if response status is 200
+   *  -# check of the response matches the expected one
+   * @throws HttpErrorException
+   */
+  public function testDeleteGroupMemberV1()
+  {
+    $this->testDeleteGroupMember(ApiVersion::V1);
+  }
+  /**
+   * @test
+   *  -# Test GroupController::deleteGroupMember() for valid delete request in version 2
+   *  -# Check if response status is 200
+   *  -# check of the response matches the expected one
+   * @throws HttpErrorException
+   */
+  public function testDeleteGroupMemberV2()
+  {
+    $this->testDeleteGroupMember();
+  }
+  /**
+   * @test
+   *  -# Test GroupController::deleteGroupMember() for valid delete request in version 1
+   *  -# Check if response the HttpNotFound exception was thrown.
+   */
+  public function testDeleteGroupMemberHttpNotFoundExceptionV1()
+  {
+    $this->testDeleteGroupMemberHttpNotFoundException(ApiVersion::V1);
+  }
+  /**
+   * @test
+   *  -# Test GroupController::deleteGroupMember() for valid delete request in version 2
+   *  -# Check if response the HttpNotFound exception was thrown.
+   */
+  public function testDeleteGroupMemberHttpNotFoundExceptionV2()
+  {
+    $this->testDeleteGroupMemberHttpNotFoundException();
+  }
+  /**
+   * @test
+   * -# Test GroupController::addMember() for version 1
+   * -# The user already a member
+   * -# Test if the response body matches
+   * -# Test if the response status is 200
+   *
+   */
+  public function testAddMemberUserNotMemberV1()
+  {
+    $this->testAddMemberUserNotMember(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test GroupController::addMember() for version 2
+   * -# The user already a member
+   * -# Test if the response body matches
+   * -# Test if the response status is 200
+   *
+   */
+  public function testAddMemberUserNotMemberV2()
+  {
+    $this->testAddMemberUserNotMember();
+  }
+  /**
+   * @test
+   * -# Test GroupController::addMember() for version 2
+   * -# The user is not an admin
+   * -# Test if the response status is 403
+   */
+  public function testAddMemberUserNotAdminV2()
+  {
+    $this->testAddMemberUserNotAdmin();
+  }
+  /**
+   * @test
+   * -# Test GroupController::addMember() for version 1
+   * -# The user is not an admin
+   * -# Test if the response status is 403
+   */
+  public function testAddMemberUserNotAdminV1()
+  {
+    $this->testAddMemberUserNotAdmin(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test GroupController::addMember() for version 1
+   * -# The user is not an admin but group admin
+   * -# Test if the response status is 200
+   */
+  public function testAddMemberUserGroupAdminV1()
+  {
+    $this->testAddMemberUserGroupAdmin(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test GroupController::addMember() for version 2
+   * -# The user is not an admin but group admin
+   * -# Test if the response status is 200
+   */
+  public function testAddMemberUserGroupAdminV2()
+  {
+    $this->testAddMemberUserGroupAdmin();
+  }
+  /**
+   * @test
+   * -# Test GroupController::changeUserPermission() in version 2
+   * -# Check if the response is list of group members
+   */
+  public function testChangeUserPermissionV2()
+  {
+    $this->testChangeUserPermission();
+  }
+  /**
+   * @test
+   * -# Test GroupController::changeUserPermission() in version 1
+   * -# Check if the response is list of group members
+   */
+  public function testChangeUserPermissionV1()
+  {
+    $this->testChangeUserPermission(ApiVersion::V1);
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::addMember() for version 2
+   * -# The user already a member
+   * -# Test if the response body matches
+   * -# Test if the response status is 400
+   *
+   */
+  public function testAddMemberUserAlreadyMemberV2()
+  {
+    $this->testAddMemberUserAlreadyMember();
+  }
+  /**
+   * @test
+   * -# Test GroupController::addMember() for version 1
+   * -# The user already a member
+   * -# Test if the response body matches
+   * -# Test if the response status is 400
+   *
+   */
+  public function testAddMemberUserAlreadyMemberV1()
+  {
+    $this->testAddMemberUserAlreadyMember(ApiVersion::V1);
+  }
+  private function testCreateGroup($version = ApiVersion::V2)
   {
     $groupId = 4;
     $userId = 1;
@@ -225,7 +446,10 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders->setHeader('Content-Type', 'application/json');
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
-
+    if ($version == ApiVersion::V2) {
+      $request = $request->withQueryParams(['name' => $groupName]);
+    }
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
     $info = new Info(200,'Group Default User added.',InfoType::INFO);
     $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
       $info->getCode());
@@ -236,17 +460,8 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($info->getArray()['code'], $this->getResponseJson($actualResponse)['code']);
     $this->assertEquals($this->getResponseJson($expectedResponse),$this->getResponseJson($actualResponse));
   }
-
-  /**
-   * @test
-   *  -# Test GroupController::createGroup() for valid create request
-   *  -# Check if response status is 200
-   * -# Check if the response matches the expected
-   * -# Check if the result code matches the expected
-   */
-  public function testCreateGroupHttpBadRequest()
+  private function testCreateGroupHttpBadRequest($version = ApiVersion::V2)
   {
-
     $groupId = 4;
     $userId = 1;
     $newPerm = 2;
@@ -264,92 +479,30 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders->setHeader('Content-Type', 'application/json');
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
 
     $this->expectException(HttpBadRequestException::class);
     $this->groupController->createGroup($request,new ResponseHelper(),["id"=>1]);
-
   }
-
-  /**
-   * @test
-   *  -# Test GroupController::deleteGroupMember() for valid delete request
-   *  -# Check if response status is 200
-   *  -# check of the response matches the expected one
-   * @throws HttpErrorException
-   */
-  public function testDeleteGroupMember()
+  private function testDeleteGroup($version = ApiVersion::V2)
   {
-    $id = 13;
-    $userPk = 2;
-    $group_user_member_pk = 1;
-    $newPerm = 2;
-    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
-    $request = $this->request;
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
-
-    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(true);
-    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$this->groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
-    $this->restHelper->shouldReceive('getUserId')->andReturn($userPk);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withAnyArgs()->andReturn(true);
-    $this->adminPlugin->shouldReceive('updateGUMPermission')->withAnyArgs();
-
-    $info = new Info(200,'User will be removed from group.',InfoType::INFO);
-    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
-      $info->getCode());
-    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
-    $actualResponse = $this->groupController->deleteGroupMember($request,new ResponseHelper(),["pathParam"=>$id ,"userPathParam"=>$userPk]);
-    $this->assertEquals($info->getArray(),$this->getResponseJson($actualResponse));
-    $this->assertEquals($expectedResponse->getStatusCode(),$actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
-
-  }
-
-  /**
-   * @test
-   *  -# Test GroupController::deleteGroupMember() for valid delete request
-   *  -# Check if response the HttpNotFound exception was thrown.
-   */
-  public function testDeleteGroupMemberHttpNotFoundException()
-  {
-    $id = 13;
-    $userPk = 2;
-    $group_user_member_pk = 1;
-    $newPerm = 2;
-    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
-    $request = $this->request;
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
-    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(false);
-    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$this->groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
-    $this->restHelper->shouldReceive('getUserId')->andReturn($userPk);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withAnyArgs()->andReturn(true);
-    $this->adminPlugin->shouldReceive('updateGUMPermission')->withAnyArgs();
-
-    $this->expectException(HttpNotFoundException::class);
-    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
-    $this->groupController->deleteGroupMember($request,new ResponseHelper(),["pathParam"=>$id ,"userPathParam"=>$userPk]);
-
-  }
-
-  /**
-   * @test
-   * -# Test GroupController::deleteGroup() for valid delete request
-   * -# Check if response status is 202
-   */
-  public function testDeleteGroup()
-  {
-    $groupName = 'fossy';
     $groupId = 4;
     $userId = 1;
+    $userPk = 1;
+    $newUser = 2;
     $request = M::mock(Request::class);
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
-    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
+    $userArray = ['user_pk' => $newUser];
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    if ($version == ApiVersion::V2) {
+      $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupId])->andReturn($groupId);
+      $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userPk])->andReturn($userArray);
+    }
+    $request->shouldReceive('getAttribute')->andReturn($version);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
-    $request = $this->request;
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
     $this->userDao->shouldReceive('getDeletableAdminGroupMap')->withArgs([$userId,$_SESSION[Auth::USER_LEVEL]]);
     $this->userDao->shouldReceive('deleteGroup')->withArgs([$groupId]);
 
@@ -364,73 +517,41 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
   }
-
-
-  /**
-   * @test
-   * -# Test GroupController::deleteGroup() for valid delete request
-   * -# Check if response HttpNotFound exception is thrown
-   */
-  public function testDeleteGroupNotFoundException()
-  {
-    $groupId = 4;
-    $userId = 1;
-
-    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
-    $request = $this->request;
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
-    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
-    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(false);
-    $this->dbHelper->shouldReceive('doesIdExist')
-      ->withArgs(["groups", "group_pk", $groupId])->andReturn(false);
-    $this->userDao->shouldReceive('getDeletableAdminGroupMap')->withArgs([$userId,$_SESSION[Auth::USER_LEVEL]]);
-    $this->userDao->shouldReceive('deleteGroup')->withArgs([$groupId]);
-
-    $this->expectException(HttpNotFoundException::class);
-    $this->groupController->deleteGroup($request, new ResponseHelper(),
-      ['pathParam' => $groupId]);
-  }
-
-
-  /**
-   * @test
-   * -# Test GroupController::getDeletableGroups()
-   * -# Check if the response is a list of groups.
-   */
-  public function testGetDeletableGroups()
+  private function testGetDeletableGroups($version = ApiVersion::V2)
   {
     $userId = 2;
     $groupList = array();
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
-    $request = $this->request;
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
     $this->userDao->shouldReceive('getDeletableAdminGroupMap')->withArgs([$userId,
       $_SESSION[Auth::USER_LEVEL]])->andReturn([]);
     $expectedResponse = (new ResponseHelper())->withJson($groupList, 200);
-    $actualResponse = $this->groupController->getDeletableGroups($request, new ResponseHelper(), []);
+    $actualResponse = $this->groupController->getDeletableGroups(null, new ResponseHelper(), []);
     $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
   }
-  /**
-   * @test
-   * -# Test GroupController::getGroupMembers() for all groups
-   * -# Check if the response is list of group members
-   */
-  public function testGetGroupMembers()
+  private function testGetGroupMembers($version = ApiVersion::V2)
   {
     $userIds = [2];
     $groupName = 'fossy';
     $groupId = 1;
+    $newuser = 3;
+    $userPk = 2;
     $memberList = $this->getGroupMembers($userIds);
     $request = M::mock(Request::class);
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
+    $groupIds = [1,2,3,4,5,6];
+    $userArray = ['user_pk' => $newuser];
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    if ($version == ApiVersion::V2) {
+      $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupIds[0]])->andReturn($groupIds[0]);
+      $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userPk])->andReturn($userArray);
+    }
+    $request->shouldReceive('getAttribute')->andReturn($version);
     $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userIds[0]);
-    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
-    $request = $this->request;
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
     $this->userDao->shouldReceive('getAdminGroupMap')->withArgs([$userIds[0],$_SESSION[Auth::USER_LEVEL]])->andReturn([1]);
+
     $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
     $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId)])->andReturn(1);
     $this->dbManager->shouldReceive('fetchAll')->withArgs([1])->andReturn($this->getUsersWithGroup($userIds));
@@ -441,41 +562,96 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $users[] = new User($user["user_pk"], $user["user_name"], $user["user_desc"],
       null, null, null, null, null);
     $this->dbHelper->shouldReceive("getUsers")->withArgs([$user['user_pk']])->andReturn($users);
+
     $expectedResponse = (new ResponseHelper())->withJson($memberList, 200);
 
     $actualResponse = $this->groupController->getGroupMembers($request, new ResponseHelper(), ['pathParam' => $groupId]);
     $this->assertEquals($expectedResponse->getStatusCode(),$actualResponse->getStatusCode());
   }
-
-  /**
-   * @test
-   * -# Test GroupController::addMember()
-   * -# The user already a member
-   * -# Test if the response body matches
-   * -# Test if the response status is 200
-   *
-   */
-  public function testAddMemberUserNotMember()
+  private function testDeleteGroupMember($version = ApiVersion::V2)
   {
-    $groupName = "fossy";
-    $userName = "user";
-    $groupId = 1;
+    $userPk = 2;
+    $group_user_member_pk = 1;
     $newPerm = 2;
-    $emptyArr=[];
-    $userId = 1;
+    $newuser = 1;
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $request = $this->request;
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
+    $groupIds = [1,2,3,4,5,6];
+    $userArray = ['user_pk' => $newuser];
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    if ($version == ApiVersion::V2) {
+      $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupIds[0]])->andReturn($groupIds[0]);
+      $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userPk])->andReturn($userArray);
+    }
+    $request->shouldReceive('getAttribute')->andReturn($version);
+    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(true);
+    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$this->groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userPk);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withAnyArgs()->andReturn(true);
+    $this->adminPlugin->shouldReceive('updateGUMPermission')->withAnyArgs();
+
+    $info = new Info(200,'User will be removed from group.',InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $actualResponse = $this->groupController->deleteGroupMember($request,new ResponseHelper(),["pathParam"=>$groupIds[0] ,"userPathParam"=>$userPk]);
+    $this->assertEquals($info->getArray(),$this->getResponseJson($actualResponse));
+    $this->assertEquals($expectedResponse->getStatusCode(),$actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+  private function testDeleteGroupMemberHttpNotFoundException($version = ApiVersion::V2)
+  {
+    $userPk = 2;
+    $group_user_member_pk = 1;
+    $newPerm = 2;
+    $newuser = 1;
+    $groupId = 2;
+    $request = $this->request;
+    $groupIds = [1,2,3,4,5,6];
+    $userArray = ['user_pk' => $newuser];
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    if ($version == ApiVersion::V2) {
+      $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupIds[0]])->andReturn($groupId);
+      $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userPk])->andReturn($userArray);
+    }
+    $request->shouldReceive('getAttribute')->andReturn($version);
+    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(false);
+    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$this->groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userPk);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withAnyArgs()->andReturn(true);
+    $this->adminPlugin->shouldReceive('updateGUMPermission')->withAnyArgs();
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->groupController->deleteGroupMember($request,new ResponseHelper(),["pathParam"=>$groupIds[0] ,"userPathParam"=>$userPk]);
+
+  }
+  public function testAddMemberUserNotMember($version = ApiVersion::V2)
+  {
+    $groupId = 1;
+    $newuser = 1;
+    $newPerm = 2;
+    $emptyArr=[];
+    $groupIds = [1,2,3,4,5,6];
+    $userArray = ['user_pk' => $newuser];
+    $userId = 1;
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    if ($version == ApiVersion::V2) {
+      $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupIds[0]])->andReturn($groupId);
+      $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userId])->andReturn($userArray);
+    }
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
-    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$this->newuser])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn($emptyArr);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(true);
 
     $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
-    $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $this->newuser,$newPerm)])->andReturn(1);
+    $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $newuser,$newPerm)])->andReturn(1);
     $this->dbManager->shouldReceive('freeResult')->withArgs([1]);
-
 
     $body = $this->streamFactory->createStream(json_encode([
       "perm" => $newPerm
@@ -484,33 +660,29 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders->setHeader('Content-Type', 'application/json');
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
-
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
     $expectedResponse =  new Info(200, "User will be added to group.", InfoType::INFO);
 
-    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['pathParam' => $groupId,'userPathParam' => $this->newuser]);
+    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['pathParam' => $groupId,'userPathParam' => $newuser]);
     $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
     $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
   }
-
-  /**
-   * @test
-   * -# Test GroupController::addMember()
-   * -# The user is not an admin
-   * -# Test if the response status is 403
-   */
-  public function testAddMemberUserNotAdmin()
+  private function testAddMemberUserNotAdmin($version = ApiVersion::V2)
   {
-    $groupName = "fossy";
-    $userName = "user";
     $groupId = 1;
+    $newuser = 1;
     $newPerm = 2;
+    $groupIds = [1,2,3,4,5,6];
+    $userArray = ['user_pk' => $newuser];
     $userId = 1;
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
-    $request = $this->request;
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
+    if ($version == ApiVersion::V2) {
+      $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupIds[0]])->andReturn($groupId);
+      $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userId])->andReturn($userArray);
+    }
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
-    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$this->newuser])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(false);
 
@@ -521,37 +693,36 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders->setHeader('Content-Type', 'application/json');
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
-
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
     $this->expectException(HttpForbiddenException::class);
 
     $this->groupController->addMember($request, new ResponseHelper(),
-      ['pathParam' => $groupId,'userPathParam' => $this->newuser]);
+      ['pathParam' => $groupId,'userPathParam' => $newuser]);
   }
 
-  /**
-   * @test
-   * -# Test GroupController::addMember()
-   * -# The user is not an admin but group admin
-   * -# Test if the response status is 200
-   */
-  public function testAddMemberUserGroupAdmin()
+  private  function testAddMemberUserGroupAdmin($version = ApiVersion::V2)
   {
-    $groupName = "fossy";
     $groupId = 1;
-    $this->newuser = 1;
+    $newuser = 1;
     $newPerm = 2;
     $emptyArr=[];
+    $groupIds = [1,2,3,4,5,6];
+    $userArray = ['user_pk' => $newuser];
     $userId = 1;
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    if ($version == ApiVersion::V2) {
+      $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupIds[0]])->andReturn($groupId);
+      $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userId])->andReturn($userArray);
+    }
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
-    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$this->newuser])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn($emptyArr);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(true);
 
     $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
-    $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $this->newuser,$newPerm)])->andReturn(1);
+    $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $newuser,$newPerm)])->andReturn(1);
     $this->dbManager->shouldReceive('freeResult')->withArgs([1]);
 
     $body = $this->streamFactory->createStream(json_encode([
@@ -561,32 +732,29 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders->setHeader('Content-Type', 'application/json');
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
-
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
     $expectedResponse =  new Info(200, "User will be added to group.", InfoType::INFO);
 
-    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['pathParam' => $groupId,'userPathParam' => $this->newuser]);
+    $actualResponse = $this->groupController->addMember($request, new ResponseHelper(), ['pathParam' => $groupId,'userPathParam' => $newuser]);
     $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
     $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
   }
-
-
-  /**
-   * @test
-   * -# Test GroupController::addMember()
-   * -# The user already a member
-   * -# Test if the response body matches
-   * -# Test if the response status is 400
-   *
-   */
-  public function testAddMemberUserAlreadyMember()
+  private function testAddMemberUserAlreadyMember($version = ApiVersion::V2)
   {
     $groupId = 1;
+    $newuser = 1;
     $newPerm = 2;
+    $groupIds = [1,2,3,4,5,6];
+    $userArray = ['user_pk' => $newuser];
     $userId = 1;
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    if ($version == ApiVersion::V2) {
+      $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupIds[0]])->andReturn($groupId);
+      $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userId])->andReturn($userArray);
+    }
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
-    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$this->newuser])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(true);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(true);
@@ -598,31 +766,34 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders->setHeader('Content-Type', 'application/json');
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
-
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
     $this->expectException(HttpBadRequestException::class);
 
     $this->groupController->addMember($request, new ResponseHelper(),
-      ['pathParam' => $groupId,'userPathParam' => $this->newuser]);
+      ['pathParam' => $groupId,'userPathParam' => $newuser]);
   }
-  /**
-   * @test
-   * -# Test GroupController::getGroupMembers() for all groups
-   * -# Check if the response is list of group members
-   */
-  public function testChangeUserPermission()
+  private function testChangeUserPermission($version = ApiVersion::V2)
   {
-    $userId = 1;
     $group_user_member_pk = 1;
     $newPerm = 2;
     $userPk = 1;
-    $userArray = ['user_pk' => $userId];
+    $groupId = 1;
+    $groupIds = [1,2,3,4,5,6];
+    $userArray = ['user_pk' => $userPk];
+    $userId = 1;
 
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
-    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $this->groupIds[0]])->andReturn(true);
-    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$userId])->andReturn(true);
-    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$this->groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
-    $this->restHelper->shouldReceive('getUserId')->andReturn($userPk);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userPk, $this->groupIds[0]])->andReturn(true);
+    if ($version == ApiVersion::V2) {
+      $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupIds[0]])->andReturn($groupId);
+      $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userId])->andReturn($userArray);
+    }
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupIds[0]])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$userPk])->andReturn(true);
+    $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userPk, $groupIds[0]])->andReturn(true);
+    $this->userDao->shouldReceive('getUserByName')->withArgs([M::any(),M::any()]);
+
     $this->adminPlugin->shouldReceive('updateGUMPermission')->withArgs([$group_user_member_pk,$newPerm, $this->dbManager ]);
 
     $body = $this->streamFactory->createStream(json_encode([
@@ -632,11 +803,10 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders->setHeader('Content-Type', 'application/json');
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
-
-    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
     $expectedResponse = new Info(202, "Permission updated successfully.", InfoType::INFO);
 
-    $actualResponse = $this->groupController->changeUserPermission($request, new ResponseHelper(), ['pathParam' => $this->groupIds[0],'userPathParam' => $userId]);
+    $actualResponse = $this->groupController->changeUserPermission($request, new ResponseHelper(), ['pathParam' => $groupIds[0],'userPathParam' => $userId]);
     $this->assertEquals($expectedResponse->getCode(),$actualResponse->getStatusCode());
     $this->assertEquals($expectedResponse->getArray(),$this->getResponseJson($actualResponse));
   }
