@@ -101,7 +101,7 @@ class FolderController extends RestController
       $folderDescription = trim($request->getHeaderLine('folderDescription'));
     }
 
-    if (!is_numeric($parentFolder) || $parentFolder < 0) {
+    if (! is_numeric($parentFolder) || $parentFolder < 0) {
       throw new HttpBadRequestException(
         "Parent folder id must be a positive integer!");
     }
