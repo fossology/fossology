@@ -2221,6 +2221,93 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /uploads/oneshot/nomos:
+    post:
+      operationId: runOneShotNomos
+      tags:
+        - Upload
+      summary: Run one-shot nomos analysis
+      description: >
+        Run one-shot nomos analysis on the upload without storing the results.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileInput:
+                  type: string
+                  format: binary
+              required:
+                - fileInput
+      responses:
+        '200':
+          description: Scanner result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OneShotInfo'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /uploads/oneshot/monk:
+    post:
+      operationId: runOneShotMonk
+      tags:
+        - Upload
+      summary: Run one-shot monk analysis
+      description: >
+        Run one-shot monk analysis on the upload without storing the results.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileInput:
+                  type: string
+                  format: binary
+              required:
+                - fileInput
+      responses:
+        '200':
+          description: Scanner result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OneShotInfo'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /uploads/oneshot/ceu:
+    post:
+      operationId: runOneShotCEU
+      tags:
+        - Upload
+      summary: Run one-shot Copyright/Email/URL analysis
+      description: >
+        Run one-shot Copyright/Email/URL analysis on the upload without storing the results.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileInput:
+                  type: string
+                  format: binary
+              required:
+                - fileInput
+      responses:
+        '200':
+          description: Scanner result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OneShotInfo'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /search:
     get:
       operationId: searchFile
@@ -6107,6 +6194,16 @@ components:
           example: "MIT: 'MIT License\n\nCopyright (c) <year> <copyright holders>'"
         htmlElement:
           type: string
+    OneShotInfo:
+      type: object
+      properties:
+        data:
+          description: Data found during scan, e.g. Licenses, Copyrights
+          type: array
+        highlights:
+          type: array
+          items:
+            $ref: '#/components/schemas/HighlightInfo'
     ClearingProgressInfo:
       type: object
       properties:

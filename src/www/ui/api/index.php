@@ -35,6 +35,7 @@ use Fossology\UI\Api\Controllers\JobController;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\ObligationController;
+use Fossology\UI\Api\Controllers\OneShotController;
 use Fossology\UI\Api\Controllers\OverviewController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
@@ -179,6 +180,9 @@ $app->group('/uploads',
     $app->patch('/{id:\\d+}', UploadController::class . ':updateUpload');
     $app->put('/{id:\\d+}', UploadController::class . ':moveUpload');
     $app->post('', UploadController::class . ':postUpload');
+    $app->post('/oneshot/nomos', OneShotController::class . ':runOneShotNomos');
+    $app->post('/oneshot/monk', OneShotController::class . ':runOneShotMonk');
+    $app->post('/oneshot/ceu', OneShotController::class . ':runOneShotCEU');
     $app->put('/{id:\\d+}/permissions', UploadController::class . ':setUploadPermissions');
     $app->get('/{id:\\d+}/perm-groups', UploadController::class . ':getGroupsWithPermissions');
     $app->get('/{id:\\d+}/groups/permission', UploadController::class . ':getGroupsWithPermissions');
