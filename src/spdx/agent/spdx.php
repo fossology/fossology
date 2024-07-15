@@ -258,7 +258,7 @@ class SpdxAgent extends Agent
       case "spdx2tv":
         break;
       case "dep5":
-        $prefix = $prefix . "copyright-";
+        $prefix .= "copyright-";
         break;
       case "spdx3jsonld":
         break;
@@ -286,16 +286,16 @@ class SpdxAgent extends Agent
       $fileName = strtoupper($this->outputFormat)."_".$packageName.'_'.time();
       switch ($this->outputFormat) {
         case "spdx2":
-          $fileName = $fileName .".spdx.rdf";
+          $fileName .= ".spdx.rdf";
           break;
         case "spdx2tv":
-          $fileName = $fileName .".spdx";
+          $fileName .= ".spdx";
           break;
         case "spdx2csv":
-          $fileName = $fileName .".csv";
+          $fileName .= ".csv";
           break;
         case "dep5":
-          $fileName = $fileName .".txt";
+          $fileName .= ".txt";
           break;
         case "spdx3jsonld":
           $fileName = $fileName .".jsonld";

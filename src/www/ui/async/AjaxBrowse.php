@@ -171,7 +171,7 @@ class AjaxBrowse extends DefaultPlugin
         if (strlen($value) > 3 && $key > 0) {
           $fileName .= "<br/>".$value;
         } else {
-          $fileName = $fileName.$value;
+          $fileName .= $value;
         }
       }
     }

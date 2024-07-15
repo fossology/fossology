@@ -20,4 +20,5 @@ $mailTo = "mark.donohoe@hp.com mary.laser@hp.com ";
 $others = "bob.gobeille@hp.com dong.ma@hp.com alex.dav.norton@hp.com  yao-bin.shi@hp.com";
 
 // the whole team, comment out as needed
+
 $mailTo = $mailTo . $others;
