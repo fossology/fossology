@@ -6,7 +6,6 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 import os
-import sys
 from argparse import Namespace
 from enum import Enum
 
@@ -35,6 +34,7 @@ class CliOptions(object):
   :ivar tags: tuple of length 2: (from_tag , to_tag) to scan
   :ivar diff_dir: directory to scan
   :ivar keyword_conf_file_path: path to custom keyword.conf file passed by user
+  :ivar allowlist_path: path to allowlist.json file
   :ivar allowlist: information from allowlist.json
   :ivar report_format: Report format to use
   """
@@ -47,6 +47,7 @@ class CliOptions(object):
   tags: tuple = ('','')
   diff_dir: str = os.getcwd()
   keyword_conf_file_path : str = ''
+  allowlist_path: str = None
   allowlist: dict[str, list[str]] = {
     'licenses': [],
     'exclude': []
@@ -75,6 +76,8 @@ class CliOptions(object):
       self.differential = True
     if args.tags is not None and self.differential and len(args.tags) == 2:
       self.tags = (args.tags[0],args.tags[1])
+    if args.allowlist_path:
+      self.allowlist_path = args.allowlist_path
     if self.nomos is False and self.ojo is False and self.copyright is False \
         and self.keyword is False:
       self.nomos = True
