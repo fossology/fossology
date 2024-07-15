@@ -91,7 +91,7 @@ function insertDataInToEventTables($dbManager)
       } else {
         $i = $j;
       }
-      $j = $j + MAX_SIZE_OF_ROW;
+      $j += MAX_SIZE_OF_ROW;
       $dbManager->commit();
       $endTime = microtime(true);
       $totalTime = ($endTime - $startTime);

@@ -16,6 +16,9 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\MaintenanceController;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
@@ -78,6 +81,15 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
   private $maintagentPlugin;
 
   /**
+   * @var $rq
+   */
+  private $rq;
+
+  /**
+   * @var array $OPTIONS
+   */
+  private $OPTIONS =[];
+  /**
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
@@ -89,6 +101,19 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
   protected function setUp() : void
   {
     global $container;
+    $this->rq = [
+      "options" => ["A","F","g","l","o"],
+      "logsDate"=>"2021-08-19",
+      "goldDate"=>"2022-07-16"
+    ];
+
+    $this->OPTIONS =[
+      "A"=>"Run all maintenance operations.",
+      "F"=>"Validate folder contents.",
+      "g"=>"Remove orphaned gold files.",
+      "o"=>"Remove older gold files from repository.",
+      "l"=>"Remove older log files from repository."
+    ];
     $container = M::mock('ContainerBuilder');
     $this->dbHelper = M::mock(DbHelper::class);
     $this->restHelper = M::mock(RestHelper::class);
@@ -186,6 +211,174 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test MaintenanceController::testCreateMaintenance() for valid create maintenance
+   * -# Check if access is denied with HttpForbiddenException  for non admin users
+   */
+  public function testCreateMaintenanceUserNotAdmin()
+  {
+    $_SESSION['UserLevel'] = 0;
+
+    $alteredOptions = array();
+    foreach ($this->rq['options'] as $key) {
+      $alteredOptions[$key] = $key;
+    }
+    $body = $this->rq;
+    $body['options']  = $alteredOptions;
+
+    $this->maintagentPlugin->shouldReceive('getOptions')->andReturn($this->OPTIONS);
+
+    $mess = _("The maintenance job has been queued");
+
+    $this->maintagentPlugin->shouldReceive('handle')->withArgs([$body])->andReturn($mess);
+    $reqBody = $this->streamFactory->createStream(json_encode(
+      $this->rq
+    ));
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $reqBody);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->maintenanceController->createMaintenance($request, new ResponseHelper(), null);
+  }
+
+  /**
+   * @test
+   * -# Test MaintenanceController::testCreateMaintenance() for valid create maintenance
+   * -# Check if access is denied with HttpForbiddenException  for non admin users
+   */
+  public function testCreateMaintenanceWithBadRequest()
+  {
+    $_SESSION['UserLevel'] = 10;
+
+    $this->rq["options"] = [];
+
+    $reqBody = $this->streamFactory->createStream(json_encode(
+      $this->rq
+    ));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $reqBody);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->maintenanceController->createMaintenance($request, new ResponseHelper(), null);
+  }
+
+
+  /**
+   * @test
+   * -# Test MaintenanceController::testCreateMaintenance() for valid create maintenance
+   * -# Check if  HttpNotFoundException is thrown when unknown key is encountered
+   */
+  public function testCreateMaintenanceOptionKeyNotFound()
+  {
+    $_SESSION['UserLevel'] = 10;
+
+    array_push($this->rq["options"],"M");
+    $alteredOptions = array();
+    foreach ($this->rq['options'] as $key) {
+      $alteredOptions[$key] = $key;
+    }
+    $body = $this->rq;
+    $body['options']  = $alteredOptions;
+
+    $this->maintagentPlugin->shouldReceive('getOptions')->andReturn($this->OPTIONS);
+
+    $mess = _("The maintenance job has been queued");
+
+    $this->maintagentPlugin->shouldReceive('handle')->withArgs([$body])->andReturn($mess);
+    $reqBody = $this->streamFactory->createStream(json_encode(
+      $this->rq
+    ));
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $reqBody);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->maintenanceController->createMaintenance($request, new ResponseHelper(), null);
+  }
+
+  /**
+   * @test
+   * -# Test MaintenanceController::testCreateMaintenance() for valid create maintenance
+   * -# Check if  HttBadRequestException is thrown when GoldDate is not provided
+   */
+  public function testCreateMaintenanceInvalidGoldDate()
+  {
+    $_SESSION['UserLevel'] = 10;
+
+    $req = $this->rq;
+    $req["goldDate"] = "";
+
+
+    $alteredOptions = array();
+    foreach ($req['options'] as $key) {
+      $alteredOptions[$key] = $key;
+    }
+    $body = $req;
+    $body['options']  = $alteredOptions;
+
+    $this->maintagentPlugin->shouldReceive('getOptions')->andReturn($this->OPTIONS);
+
+    $mess = _("The maintenance job has been queued");
+
+    $this->maintagentPlugin->shouldReceive('handle')->withArgs([$body])->andReturn($mess);
+    $reqBody = $this->streamFactory->createStream(json_encode(
+      $req
+    ));
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $reqBody);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->maintenanceController->createMaintenance($request, new ResponseHelper(), null);
+  }
+
+
+  /**
+   * @test
+   * -# Test MaintenanceController::testCreateMaintenance() for valid create maintenance
+   * -# Check if  HttBadRequestException is thrown when LogsDate is not provided
+   */
+  public function testCreateMaintenanceInvalidLogsDate()
+  {
+    $_SESSION['UserLevel'] = 10;
+
+    $req = $this->rq;
+    $req["logsDate"] = "";
+    $alteredOptions = array();
+    foreach ($req['options'] as $key) {
+      $alteredOptions[$key] = $key;
+    }
+    $body = $req;
+    $body['options']  = $alteredOptions;
+
+    $this->maintagentPlugin->shouldReceive('getOptions')->andReturn($this->OPTIONS);
+
+    $mess = _("The maintenance job has been queued");
+
+    $this->maintagentPlugin->shouldReceive('handle')->withArgs([$body])->andReturn($mess);
+    $reqBody = $this->streamFactory->createStream(json_encode(
+      $req
+    ));
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $reqBody);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->maintenanceController->createMaintenance($request, new ResponseHelper(), null);
   }
 
 }

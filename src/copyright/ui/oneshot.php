@@ -42,7 +42,7 @@ class agent_copyright_once extends FO_Plugin
    * \brief Analyze one uploaded file.
    * \return string
    */
-  function AnalyzeOne()
+  function AnalyzeOne($getHighlightInfo = false, $tempFileName = null)
   {
     global $Plugins;
     global $SYSCONFDIR;
@@ -52,7 +52,7 @@ class agent_copyright_once extends FO_Plugin
 
     /** @var ui_view $view */
     $view = & $Plugins[plugin_find_id("view") ];
-    $tempFileName = $_FILES['licfile']['tmp_name'];
+    $tempFileName = $getHighlightInfo ? $tempFileName : $_FILES['licfile']['tmp_name'];
     $ui_dir = getcwd();
     $copyright_dir =  "$SYSCONFDIR/mods-enabled/copyright/agent/";
     if (!chdir($copyright_dir)) {
@@ -109,6 +109,9 @@ class agent_copyright_once extends FO_Plugin
     }
     pclose($inputFile);
 
+    if ($getHighlightInfo) {
+      return array($copyright_array, $highlights);
+    }
     if ($this->NoHTML) { // For REST API:
       return $copyright_array;
     }
