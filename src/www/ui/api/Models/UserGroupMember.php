@@ -77,9 +77,9 @@ class UserGroupMember
   /**
    * @return string json
    */
-  public function getJSON()
+  public function getJSON($version = APiVersion::V2)
   {
-    return json_encode($this->getArray());
+    return json_encode($this->getArray($version));
   }
 
   /**
