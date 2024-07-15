@@ -49,7 +49,7 @@ class ft_cliDelagentTest extends \PHPUnit\Framework\TestCase {
       $message = 'FATAL: cannot find executable file, stop testing\n');
     }
     // run it
-    $EXE_PATH = $EXE_PATH." -c $DB_CONF";
+    $EXE_PATH .= " -c $DB_CONF";
     $last = exec("$EXE_PATH -h 2>&1", $out, $rtn);
     $this->assertEquals($usage, $out[0]); // check if executable file delagent is exited
     $this->assertEquals($usageL, $out[6]); // check if the option -L removed
