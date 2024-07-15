@@ -75,7 +75,7 @@ foreach my $filename (glob "bn*.c") {
              if (!($list =~ /$a/)) {
                 print CLASS "   #define $a\n";
              }
-             $list .= "," . $a;
+             $list = $list . "," . $a;
           }
       }
    }
@@ -105,7 +105,7 @@ sub draw_func()
    if ($list =~ /@funcs[0]/) {
       return;
    } else {
-      $list .= @funcs[0];
+      $list = $list . @funcs[0];
    }
    if ($indent == 0) { }
    elsif ($indent >= 1) { print OUT "|   " x ($indent - 1) . "+--->"; }

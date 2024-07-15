@@ -63,7 +63,7 @@ class Bitcoin {
       $dv = (string) bcdiv($dec, "16", 0);
       $rem = (integer) bcmod($dec, "16");
       $dec = $dv;
-      $return .= self::$hexchars[$rem];
+      $return = $return . self::$hexchars[$rem];
     }
     return strrev($return);
   }
@@ -118,7 +118,7 @@ class Bitcoin {
       $dv = (string) bcdiv($hex, "58", 0);
       $rem = (integer) bcmod($hex, "58");
       $hex = $dv;
-      $return .= self::$base58chars[$rem];
+      $return = $return . self::$base58chars[$rem];
     }
     $return = strrev($return);
 

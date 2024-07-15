@@ -673,7 +673,7 @@ elsif($TypeAttr{"Type"} eq "Array")
 ($TypeAttr{"BaseType"}{"Tid"}, $TypeAttr{"BaseType"}{"TDid"}, $BaseTypeSpec) = selectBaseType($TypeDeclId, $TypeId);
 my %BaseTypeAttr = getTypeAttr($TypeAttr{"BaseType"}{"TDid"}, $TypeAttr{"BaseType"}{"Tid"});
 my $ArrayElemNum = getSize($TypeId)/8;
-$ArrayElemNum /= $BaseTypeAttr{"Size"} if($BaseTypeAttr{"Size"});
+$ArrayElemNum = $ArrayElemNum/$BaseTypeAttr{"Size"} if($BaseTypeAttr{"Size"});
 $TypeAttr{"Size"} = $ArrayElemNum;
 if($ArrayElemNum)
 {
@@ -1218,7 +1218,7 @@ my $ParamType_Id = $FuncDescr{$Version}{$FuncInfoId}{"Param"}{$ParamPos}{"type"}
 my $ParamType_Name = uncover_typedefs($TypeDescr{$Version}{getTypeDeclId($ParamType_Id)}{$ParamType_Id}{"Name"});
 @ParamTypes = (@ParamTypes, $ParamType_Name);
 }
-$PureSignature .= "(".join(", ", @ParamTypes).")";
+$PureSignature = $PureSignature."(".join(", ", @ParamTypes).")";
 $PureSignature = delete_keywords($PureSignature);
 return correctName($PureSignature);
 }
