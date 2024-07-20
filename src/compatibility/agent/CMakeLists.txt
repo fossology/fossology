@@ -12,7 +12,8 @@ include_directories(
         ${FO_CLIB_SRC}
         ${jsoncpp_INCLUDE_DIRS}
         ${yamlcpp_INCLUDE_DIRS}
-        ${FO_CXXLIB_SRC})
+        ${FO_CXXLIB_SRC}
+)
 
 if (NOT TARGET fossologyCPP)
     add_subdirectory(${FO_CXXLIB_SRC} buildcxx EXCLUDE_FROM_ALL)

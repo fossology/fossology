@@ -16,7 +16,8 @@
 #include "libfossologyCPP.hpp"
 
 #include <boost/program_options.hpp>
-#include <json/json.h>
+#include "yaml-cpp/yaml.h"
+#include "json/json.h"
 #include <utility>
 #include <vector>
 
@@ -46,5 +47,12 @@ void printResultToStdout(
     const std::vector<tuple<string, string, bool>>& resultPair,
     const std::string& fileName);
 std::set<std::string> mainLicenseToSet(const string& mainLicense);
+bool are_licenses_compatible(const string& first_name, const string& first_type,
+    const string& second_name, const string& second_type,
+    const map<tuple<string, string, string, string>, bool>& rule_list);
+map<tuple<string, string, string, string>, bool> initialize_rule_list(
+    const string& file_location);
+unordered_map<string, string> initialize_license_map(
+    const string& file_location);
 
 #endif // COMPATIBILITY_AGENT_UTILS_HPP
