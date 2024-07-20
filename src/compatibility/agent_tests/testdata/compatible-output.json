@@ -1,0 +1,21 @@
+{
+  "results":[
+    {
+      "file":"gpl.c",
+      "licenses":[
+        "GPL-2.0-only"
+      ]
+    },{
+      "file":"mit.c",
+      "licenses":[
+        "MIT"
+      ]
+    },{
+      "file":"mix.c",
+      "licenses":[
+        "0BSD",
+        "GPL-2.0-only"
+      ]
+    }
+  ]
+}

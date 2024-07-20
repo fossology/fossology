@@ -1,0 +1,9 @@
+shortname,licensetype
+0BSD,Permissive
+AGPL-2.0-only,Strong Copyleft
+Apache-2.0,Weak Copyleft
+BSD-3-Clause,Permissive
+GPL-2.0-only,Strong Copyleft
+LGPL-2.1-or-later,Weak Copyleft
+MIT,Permissive
+Sleepycat,Strong Copyleft

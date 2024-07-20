@@ -398,8 +398,222 @@ std::set<std::string> mainLicenseToSet(const string& mainLicense)
     licenses.insert(s.substr(0, pos));
     s.erase(0, pos + delimiter.length());
   }
-  if (licenses.empty()) {
+  if (licenses.empty() && !s.empty()) {
     licenses.insert(mainLicense);
   }
+  else if (! s.empty())
+  {
+    // Insert the last element from list
+    licenses.insert(s.substr(0, s.length()));
+  }
   return licenses;
+}
+
+/**
+ * \brief Check the licenses against rules and get the compatibility result.
+ * \param first_name  Name of the license 1
+ * \param first_type  Type of the license 1
+ * \param second_name Name of the license 2
+ * \param second_type Type of the license 2
+ * \param rule_list Map of the compatibility rules
+ * \return True or False based on rule list or default value.
+ */
+bool are_licenses_compatible(const string& first_name,
+    const string& first_type, const string& second_name,
+    const string& second_type,
+    const map<tuple<string, string, string, string>, bool>& rule_list)
+{
+  auto result_check =
+      rule_list.find(make_tuple(first_name, "", second_name, ""));
+  if (result_check == rule_list.end())
+  {
+    result_check = rule_list.find(make_tuple(second_name, "", first_name, ""));
+  }
+  if (result_check != rule_list.end())
+  {
+    return result_check->second;
+  }
+  result_check = rule_list.find(make_tuple("", first_type, "", second_type));
+  if (result_check == rule_list.end())
+  {
+    result_check = rule_list.find(make_tuple("", second_type, "", first_type));
+  }
+  if (result_check != rule_list.end())
+  {
+    return result_check->second;
+  }
+  result_check = rule_list.find(make_tuple(first_name, "", "", second_type));
+  if (result_check == rule_list.end())
+  {
+    result_check = rule_list.find(make_tuple(second_name, "", "", first_type));
+  }
+  if (result_check == rule_list.end())
+  {
+    result_check = rule_list.find(make_tuple("", first_type, second_name, ""));
+  }
+  if (result_check == rule_list.end())
+  {
+    result_check = rule_list.find(make_tuple("", second_type, first_name, ""));
+  }
+  if (result_check != rule_list.end())
+  {
+    return result_check->second;
+  }
+  auto default_value = rule_list.find(make_tuple("~", "~", "~", "~"));
+  if (default_value == rule_list.end())
+  {
+    return false;
+  }
+  else
+  {
+    return default_value->second;
+  }
+}
+
+/**
+ * \brief Get the column index for shortname and licensetype columns from CSV
+ * header.
+ * \param header        String containing CSV header
+ * \param[out] name_col Index of shortname column
+ * \param[out] type_col Index of licensetype column
+ * \return -1 if shortname not found, -2 if licensetype not found, 0 if both
+ * found.
+ */
+int get_column_ids(const string& header, int& name_col, int& type_col)
+{
+  stringstream lineStream(header);
+  string cell;
+  int i = 0;
+  while(getline(lineStream, cell, ','))
+  {
+    string::size_type start = cell.find_first_not_of(' ');
+    string::size_type end = cell.find_last_not_of(' ');
+
+    cell = cell.substr(start, end - start + 1);
+
+    if (cell == "shortname")
+    {
+      name_col = i;
+    }
+    else if (cell == "licensetype")
+    {
+      type_col = i;
+    }
+    i++;
+  }
+  if (name_col == -1)
+  {
+    return -1;
+  }
+  else if (type_col == -1)
+  {
+    return -2;
+  }
+  return 1;
+}
+
+/**
+ * \brief Parse license type CSV and create a map
+ * \param file_location Location of the CSV file
+ * \return Map with license name as key and type as value
+ * \throws invalid_argument If CSV is missing required headers
+ */
+unordered_map<string, string> initialize_license_map(
+    const string& file_location)
+{
+  std::ifstream ip(file_location);
+  string line, name, type;
+  unordered_map<string, string> license_type_map;
+  int name_column = -1, type_column = -1;
+  getline(ip, line);
+  int retval = get_column_ids(line, name_column, type_column);
+  if (retval != 1)
+  {
+    throw invalid_argument("missing header `shortname` and/or `licensetype` "
+      "from CSV file.");
+  }
+  while (getline(ip, line)) // parsing the csv file
+  {
+    stringstream ss(line);
+    string cell;
+    int i = 0;
+    while (getline(ss, cell, ','))
+    {
+      if (i == name_column)
+      {
+        name = cell;
+      }
+      if (i == type_column)
+      {
+        type = cell;
+      }
+      i++;
+    }
+    license_type_map[name] = type;
+  }
+  return license_type_map;
+}
+
+/**
+ * \brief Read YAML file of rules and parse it as map.
+ *
+ * The map has key of tuple (first name, first type, second name, second
+ * type) and value as boolean of compatibility result.
+ *
+ * A special key with tuple (~, ~, ~, ~) holds the default value.
+ * \param file_location Location to rule YAML
+ * \return Map of rules
+ */
+map<tuple<string, string, string, string>, bool> initialize_rule_list(
+    const string& file_location)
+{
+  YAML::Node root = YAML::LoadFile(file_location);
+  map<tuple<string, string, string, string>, bool> rule_map;
+
+  for (const auto& yml_rule : root["rules"]) // iterating the yml.rules
+  {
+    string first_type, second_type, first_name, second_name;
+    bool ans = false;
+    for (const auto& tag : yml_rule)
+    {
+      string first = tag.first.as<string>();
+      if (first == "comment")
+      {
+        continue;
+      }
+      string second;
+      if (tag.second.IsNull())
+      {
+        second = "~";
+      }
+      else
+      {
+        second = tag.second.as<string>();
+      }
+      if (first == "compatibility")
+      {
+        ans = second == "true";
+      }
+      else if (first == "firsttype" && (second != "~"))
+      {
+        first_type = second;
+      }
+      else if (first == "secondtype" && (second != "~"))
+      {
+        second_type = second;
+      }
+      else if (first == "firstname" && (second != "~"))
+      {
+        first_name = second;
+      }
+      else if (first == "secondname" && (second != "~"))
+      {
+        second_name = second;
+      }
+    }
+    rule_map[make_tuple(first_name, first_type, second_name, second_type)] = ans;
+  }
+  rule_map[make_tuple("~", "~", "~", "~")] =
+      root["default"].as<string>() == "true";
+  return rule_map;
 }
