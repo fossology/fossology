@@ -35,6 +35,7 @@ use Fossology\UI\Api\Controllers\JobController;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\ObligationController;
+use Fossology\UI\Api\Controllers\OneShotController;
 use Fossology\UI\Api\Controllers\OverviewController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
@@ -179,6 +180,9 @@ $app->group('/uploads',
     $app->patch('/{id:\\d+}', UploadController::class . ':updateUpload');
     $app->put('/{id:\\d+}', UploadController::class . ':moveUpload');
     $app->post('', UploadController::class . ':postUpload');
+    $app->post('/oneshot/nomos', OneShotController::class . ':runOneShotNomos');
+    $app->post('/oneshot/monk', OneShotController::class . ':runOneShotMonk');
+    $app->post('/oneshot/ceu', OneShotController::class . ':runOneShotCEU');
     $app->put('/{id:\\d+}/permissions', UploadController::class . ':setUploadPermissions');
     $app->get('/{id:\\d+}/perm-groups', UploadController::class . ':getGroupsWithPermissions');
     $app->get('/{id:\\d+}/groups/permission', UploadController::class . ':getGroupsWithPermissions');
@@ -204,7 +208,6 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/bulk-history', UploadTreeController::class . ':getBulkHistory');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/clearing-history', UploadTreeController::class . ':getClearingHistory');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/highlight', UploadTreeController::class . ':getHighlightEntries');
-    $app->get('/{id:\\d+}/item/{itemId:\\d+}/totalcopyrights', CopyrightController::class . ':getTotalFileCopyrights');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/tree/view', UploadTreeController::class . ':getTreeView');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/info', FileInfoController::class . ':getItemInfo');
     $app->post('/{id:\\d+}/item/{itemId:\\d+}/bulk-scan', UploadTreeController::class . ':scheduleBulkScan');
@@ -217,6 +220,12 @@ $app->group('/uploads',
       $app->delete('/copyrights/{hash:.*}', CopyrightController::class . ':deleteFileCopyright');
       $app->patch('/copyrights/{hash:.*}', CopyrightController::class . ':restoreFileCopyright');
       $app->put('/copyrights/{hash:.*}', CopyrightController::class . ':updateFileCopyright');
+      $app->get('/totalcopyrights', CopyrightController::class . ':getTotalFileCopyrights');
+      $app->get('/user-copyrights', CopyrightController::class . ':getFileUserCopyrights');
+      $app->delete('/user-copyrights/{hash:.*}', CopyrightController::class . ':deleteFileUserCopyright');
+      $app->patch('/user-copyrights/{hash:.*}', CopyrightController::class . ':restoreFileUserCopyright');
+      $app->put('/user-copyrights/{hash:.*}', CopyrightController::class . ':updateFileUserCopyright');
+      $app->get('/totalusercopyrights', CopyrightController::class . ':getTotalFileUserCopyrights');
       $app->get('/emails', CopyrightController::class . ':getFileEmail');
       $app->delete('/emails/{hash:.*}', CopyrightController::class . ':deleteFileEmail');
       $app->patch('/emails/{hash:.*}', CopyrightController::class . ':restoreFileEmail');

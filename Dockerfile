@@ -9,7 +9,7 @@
 #
 # Description: Docker container image recipe
 
-FROM debian:bookworm-slim as builder
+FROM debian:bookworm-slim AS builder
 LABEL org.opencontainers.image.authors="Fossology <fossology@fossology.org>"
 LABEL org.opencontainers.image.source="https://github.com/fossology/fossology"
 LABEL org.opencontainers.image.vendor="FOSSology"

@@ -2169,6 +2169,93 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /uploads/oneshot/nomos:
+    post:
+      operationId: runOneShotNomos
+      tags:
+        - Upload
+      summary: Run one-shot nomos analysis
+      description: >
+        Run one-shot nomos analysis on the upload without storing the results.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileInput:
+                  type: string
+                  format: binary
+              required:
+                - fileInput
+      responses:
+        '200':
+          description: Scanner result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OneShotInfo'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /uploads/oneshot/monk:
+    post:
+      operationId: runOneShotMonk
+      tags:
+        - Upload
+      summary: Run one-shot monk analysis
+      description: >
+        Run one-shot monk analysis on the upload without storing the results.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileInput:
+                  type: string
+                  format: binary
+              required:
+                - fileInput
+      responses:
+        '200':
+          description: Scanner result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OneShotInfo'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /uploads/oneshot/ceu:
+    post:
+      operationId: runOneShotCEU
+      tags:
+        - Upload
+      summary: Run one-shot Copyright/Email/URL analysis
+      description: >
+        Run one-shot Copyright/Email/URL analysis on the upload without storing the results.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileInput:
+                  type: string
+                  format: binary
+              required:
+                - fileInput
+      responses:
+        '200':
+          description: Scanner result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OneShotInfo'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /search:
     get:
       operationId: searchFile
@@ -2591,6 +2678,41 @@ paths:
         - Copyrights
       summary: Updates a copyright for a file
       description: Updates a copyright statement for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
+
+  /uploads/{id}/item/{itemId}/user-copyrights:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileUserCopyrights
+      tags:
+        - Copyrights
+      summary: Get the user copyright findings of the mentioned upload tree ID
+      description: Returns the list of user copyright findings associated with the file
+      responses: *cxGetResponses
+  
+  /uploads/{id}/item/{itemId}/user-copyrights/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileUserCopyright
+      tags:
+        - Copyrights
+      summary: Deletes user copyright for a file
+      description: Deletes user copyright statement for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileUserCopyright
+      tags:
+        - Copyrights
+      summary: Restores user copyright for a file
+      description: Restores user copyright statement for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileUserCopyright
+      tags:
+        - Copyrights
+      summary: Updates user copyright for a file
+      description: Updates user copyright statement for a particular file
       requestBody: *cxUpdateBody
       responses: *cxUpdateResponses
 
@@ -3500,9 +3622,75 @@ paths:
                   allOf:
                     - type: object
                       properties:
-                        total_copyrights:
+                        totalCopyrights:
                           type: integer
                           description: Total Number of copyrights for the uploadtree
+                          example:
+                            125
+        '400':
+          description: "Bad Request. 'upload' is a required query param"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Upload is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Upload does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/item/{ItemId}/totalusercopyrights:
+    parameters:
+      - name: id
+        required: true
+        description: Upload Id
+        in: path
+        schema:
+          type: integer
+      - name: ItemId
+        required: true
+        description: Upload Tree ID
+        in: path
+        schema:
+          type: integer
+      - name: status
+        required: true
+        in: query
+        description: status of the copyright
+        schema:
+          type: string
+          enum:
+            - active
+            - inactive
+    get:
+      operationId: getTotalFileUserCopyrights
+      tags:
+        - Copyrights
+      summary: Get the total user copyright findings of the mentioned upload tree ID
+      description: Returns the total number of user copyright findings associated with the file
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - type: object
+                      properties:
+                        totalCopyrights:
+                          type: integer
+                          description: Total Number of user copyright findings for the uploadtree
                           example:
                             125
         '400':
@@ -5986,6 +6174,16 @@ components:
           example: "MIT: 'MIT License\n\nCopyright (c) <year> <copyright holders>'"
         htmlElement:
           type: string
+    OneShotInfo:
+      type: object
+      properties:
+        data:
+          description: Data found during scan, e.g. Licenses, Copyrights
+          type: array
+        highlights:
+          type: array
+          items:
+            $ref: '#/components/schemas/HighlightInfo'
     ClearingProgressInfo:
       type: object
       properties:

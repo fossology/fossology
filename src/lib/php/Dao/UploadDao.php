@@ -18,6 +18,7 @@ use Fossology\Lib\Exception;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Proxy\UploadTreeViewProxy;
 use Monolog\Logger;
+use DateTime;
 
 require_once(dirname(dirname(__FILE__)) . "/common-dir.php");
 
@@ -312,6 +313,31 @@ class UploadDao
     return $row["event_ts"];
   }
 
+  /**
+   * Get the clearing duration of a upload.
+   * @param int $uploadId Upload to get clearing duration
+   * @return array with duration and durationSort when upload was closed
+   *                   or rejected.
+   */
+  public function getClearingDuration(int $uploadId): ?array
+  {
+    $duration = "NA";
+    $assignDate = $this->getAssigneeDate($uploadId);
+    $closingDate = $this->getClosedDate($uploadId);
+    $durationSort = 0;
+    if ($assignDate != null && $closingDate != null) {
+      try {
+        $closingDate = new DateTime($closingDate);
+        $assignDate = new DateTime($assignDate);
+        if ($assignDate < $closingDate) {
+          $duration = HumanDuration($closingDate->diff($assignDate));
+          $durationSort = $closingDate->getTimestamp() - $assignDate->getTimestamp();
+        }
+      } catch (Exception $_) {
+      }
+    }
+    return array($duration, $durationSort);
+  }
   /**
    * \brief Get the uploadtree table name for this upload_pk
    *        If upload_pk does not exist, return "uploadtree".

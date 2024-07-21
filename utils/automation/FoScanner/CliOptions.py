@@ -30,7 +30,11 @@ class CliOptions(object):
   :ivar copyright: run copyright scanner
   :ivar keyword: run keyword scanner
   :ivar repo: scan whole repo or just diff
+  :ivar differential: scan between two versions of a repo
+  :ivar tags: tuple of length 2: (from_tag , to_tag) to scan
   :ivar diff_dir: directory to scan
+  :ivar keyword_conf_file_path: path to custom keyword.conf file passed by user
+  :ivar allowlist_path: path to allowlist.json file
   :ivar allowlist: information from allowlist.json
   :ivar report_format: Report format to use
   """
@@ -39,7 +43,11 @@ class CliOptions(object):
   copyright: bool = False
   keyword: bool = False
   repo: bool = False
+  differential: bool = False
+  tags: tuple = ('','')
   diff_dir: str = os.getcwd()
+  keyword_conf_file_path : str = ''
+  allowlist_path: str = None
   allowlist: dict[str, list[str]] = {
     'licenses': [],
     'exclude': []
@@ -60,8 +68,16 @@ class CliOptions(object):
       self.keyword = True
     if "ojo" in args.operation:
       self.ojo = True
+    if 'repo' in args.operation and 'differential' in args.operation:
+      raise ValueError("You can only specify either 'repo' or 'differential' scans at a time.")
     if "repo" in args.operation:
       self.repo = True
+    if "differential" in args.operation:
+      self.differential = True
+    if args.tags is not None and self.differential and len(args.tags) == 2:
+      self.tags = (args.tags[0],args.tags[1])
+    if args.allowlist_path:
+      self.allowlist_path = args.allowlist_path
     if self.nomos is False and self.ojo is False and self.copyright is False \
         and self.keyword is False:
       self.nomos = True
@@ -69,3 +85,5 @@ class CliOptions(object):
       self.copyright = True
       self.keyword = True
     self.report_format = ReportFormat[args.report]
+    if self.keyword and args.keyword_conf:
+      self.keyword_conf_file_path = args.keyword_conf
