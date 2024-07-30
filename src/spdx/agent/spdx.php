@@ -258,7 +258,16 @@ class SpdxAgent extends Agent
       case "spdx2tv":
         break;
       case "dep5":
-        $prefix .= "copyright-";
+        $prefix = $prefix . "copyright-";
+        break;
+      case "spdx3jsonld":
+        break;
+      case "spdx3rdf":
+        $postfix = ".xml" . $postfix;
+        break;
+      case "spdx3json":
+        break;
+      case "spdx3tv":
         break;
       case "spdx3jsonld":
         break;
@@ -286,16 +295,16 @@ class SpdxAgent extends Agent
       $fileName = strtoupper($this->outputFormat)."_".$packageName.'_'.time();
       switch ($this->outputFormat) {
         case "spdx2":
-          $fileName .= ".spdx.rdf";
+          $fileName = $fileName .".spdx.rdf";
           break;
         case "spdx2tv":
-          $fileName .= ".spdx";
+          $fileName = $fileName .".spdx";
           break;
         case "spdx2csv":
-          $fileName .= ".csv";
+          $fileName = $fileName .".csv";
           break;
         case "dep5":
-          $fileName .= ".txt";
+          $fileName = $fileName .".txt";
           break;
         case "spdx3jsonld":
           $fileName = $fileName .".jsonld";
@@ -917,7 +926,7 @@ class SpdxAgent extends Agent
           $localList[$i + 1]->getLicenseObj()->getSpdxId()) {
         $newShortName = $localList[$i + 1]->getLicenseObj()->getShortName();
         if (! StringOperation::stringStartsWith(
-            $localList[$i + 1]->getLicenseObj()->getShortName(),
+            $localList[$i + 1]->getLicenseObj()->getSpdxId(),
             LicenseRef::SPDXREF_PREFIX)) {
           $newShortName = LicenseRef::SPDXREF_PREFIX .
             $localList[$i + 1]->getLicenseObj()->getShortName();
