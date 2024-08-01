@@ -153,7 +153,7 @@ class ReportImportAgent extends Agent
   {
     $pfilesByFilename = self::getEntriesForFilename($fileName, $pfilePerFileName);
 
-    if (($pfilesByFilename !== null || sizeof($pfilesByFilename) === 0))
+    if (($pfilesByFilename !== null && sizeof($pfilesByFilename) > 0))
     {
       if ( $hashMap !== null && sizeof($hashMap) > 0 )
       {
