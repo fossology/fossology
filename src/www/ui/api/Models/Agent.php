@@ -106,7 +106,6 @@ class Agent
     return $this->isAgentRunning;
   }
 
-
   /**
    * JSON representation of current scannedLicense
    * @param integer $version
@@ -122,16 +121,16 @@ class Agent
    * @param integer $version
    * @return array
    */
-  public function getArray($version=ApiVersion::V1)
+  public function getArray($version=ApiVersion::V2)
   {
-    return [
-      'successfulAgents' => $this->getSuccessfulAgents(),
-      'uploadId' => $this->getUploadId(),
-      'agentName' => $this->getAgentName(),
-      'currentAgentId' => $this->getCurrentAgentId(),
-      'currentAgentRev' => $this->getCurrentAgentRev(),
-      'isAgentRunning' => $this->getIsAgentRunning()
-    ];
+      return [
+        'successfulAgents' => $this->getSuccessfulAgents(),
+        'uploadId' => $this->getUploadId(),
+        'agentName' => $this->getAgentName(),
+        'currentAgentId' => $this->getCurrentAgentId(),
+        'currentAgentRev' => $this->getCurrentAgentRev(),
+        'isAgentRunning' => $this->getIsAgentRunning()
+      ];
   }
 
   /**

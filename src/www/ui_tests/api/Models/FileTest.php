@@ -1,7 +1,6 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2020 Siemens AG
- Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+ SPDX-FileCopyrightText: © 2024 Valens Niyonsenga <valensniyonsenga2003@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */

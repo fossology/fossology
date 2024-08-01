@@ -8,7 +8,7 @@
 # Description: Gitlab CI runner image recipie
 # Using Debian 12
 
-FROM debian:bookworm-slim AS builder
+FROM debian:bookworm-slim as builder
 
 WORKDIR /fossology
 

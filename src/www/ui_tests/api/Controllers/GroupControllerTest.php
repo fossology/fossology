@@ -108,7 +108,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
    */
   protected function tearDown() : void
   {
-    $this->addToAssertionCount(
+    $this->addToAssertionCount(   
       \Hamcrest\MatcherAssert::getCount() - $this->assertCountBefore);
     M::close();
   }
@@ -169,8 +169,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     }
     return $usersWithGroup;
   }
-
-
 
   /**
    * @test

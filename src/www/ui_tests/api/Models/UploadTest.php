@@ -40,14 +40,14 @@ class UploadTest extends \PHPUnit\Framework\TestCase
     $this->testDataFormat(ApiVersion::V2);
   }
   /**
-   * @param $version version to test
+   * @param $version to test
    * @return void
    * -# Test the data format returned by Upload::getArray($version) model 
    */
   private function testDataFormat($version)
   {
     $hash = new Hash('sha1checksum', 'md5checksum', 'sha256checksum', 123123);
-    if($version==ApiVersion::V1){
+    if ($version==ApiVersion::V1) {
       $expectedUpload = [
         "folderid"    => 2,
         "foldername"  => 'root',
@@ -60,7 +60,7 @@ class UploadTest extends \PHPUnit\Framework\TestCase
         "closingDate" => '01-01-2020',
         "hash"        => $hash->getArray()
       ];
-    } else{
+    } else {
       $expectedUpload = [
         "folderId"    => 2,
         "folderName"  => 'root',

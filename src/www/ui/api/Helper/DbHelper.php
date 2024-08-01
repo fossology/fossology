@@ -491,7 +491,7 @@ FROM $tableName WHERE $idRowName = $1", [$id],
    * Adds new oauth client to the user.
    *
    * @param string  $name     Name of the new client
-   * @param integer $userId   User PK
+   * @param integer￼$userId   User PK
    * @param string  $clientId New client ID
    * @param string  $scope    Token scope
    */
