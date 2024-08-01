@@ -14,10 +14,13 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class ResoAgentPlugin extends AgentPlugin
 {
+  /** @var resoDesc */
+  private $resoDesc = "REUSE.Software agent marks licensed files with a license found in the .license files (outside of the licensed files), Note: forces *Ojo License Analysis*";
+
   public function __construct()
   {
     $this->Name = "agent_reso";
-    $this->Title =  ("REUSE.Software Analysis (forces *Ojo License Analysis*)");
+    $this->Title =  ("REUSE.Software Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->resoDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "reso";
 
     parent::__construct();
