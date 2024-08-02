@@ -2716,6 +2716,41 @@ paths:
       requestBody: *cxUpdateBody
       responses: *cxUpdateResponses
 
+  /uploads/{id}/item/{itemId}/scancode-copyrights:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileScanCodeCopyrights
+      tags:
+        - Copyrights
+      summary: Get the scancode copyright findings of the mentioned upload tree ID
+      description: Returns the list of scancode copyright findings associated with the file
+      responses: *cxGetResponses
+  
+  /uploads/{id}/item/{itemId}/scancode-copyrights/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileScanCodeCopyright
+      tags:
+        - Copyrights
+      summary: Deletes scancode copyright for a file
+      description: Deletes scancode copyright statement for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileScanCodeCopyright
+      tags:
+        - Copyrights
+      summary: Restores scancode copyright for a file
+      description: Restores scancode copyright statement for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileScanCodeCopyright
+      tags:
+        - Copyrights
+      summary: Updates scancode copyright for a file
+      description: Updates scancode copyright statement for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
+
   /uploads/{id}/item/{itemId}/emails:
     parameters: *cxGetParams
     get:
@@ -2748,6 +2783,41 @@ paths:
         - Copyrights
       summary: Updates an email for a file
       description: Updates an email statement for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
+
+  /uploads/{id}/item/{itemId}/scancode-emails:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileScanCodeEmail
+      tags:
+        - Copyrights
+      summary: Get the scancode email findings of the mentioned upload tree ID
+      description: Returns the list of scancode email findings associated with the file
+      responses: *cxGetResponses
+
+  /uploads/{id}/item/{itemId}/scancode-emails/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileScanCodeEmail
+      tags:
+        - Copyrights
+      summary: Deletes scancode email finding for a file
+      description: Deletes scancode email finding for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileScanCodeEmail
+      tags:
+        - Copyrights
+      summary: Restores scancode email finding for a file
+      description: Restores scancode email finding for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileScanCodeEmail
+      tags:
+        - Copyrights
+      summary: Updates scancode email finding for a file
+      description: Updates scancode email finding for a particular file
       requestBody: *cxUpdateBody
       responses: *cxUpdateResponses
 
@@ -2786,6 +2856,41 @@ paths:
       requestBody: *cxUpdateBody
       responses: *cxUpdateResponses
 
+  /uploads/{id}/item/{itemId}/scancode-urls:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileScanCodeUrl
+      tags:
+        - Copyrights
+      summary: Get the scancode url findings of the mentioned upload tree ID
+      description: Returns the list of scancode url findings associated with the file
+      responses: *cxGetResponses
+
+  /uploads/{id}/item/{itemId}/scancode-urls/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileScanCodeUrl
+      tags:
+        - Copyrights
+      summary: Deletes scancode url finding for a file
+      description: Deletes scancode url finding for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileScanCodeUrl
+      tags:
+        - Copyrights
+      summary: Restores scancode url finding for a file
+      description: Restores scancode url finding for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileScanCodeUrl
+      tags:
+        - Copyrights
+      summary: Updates scancode url finding for a file
+      description: Updates scancode url finding for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
+
   /uploads/{id}/item/{itemId}/authors:
     parameters: *cxGetParams
     get:
@@ -2818,6 +2923,41 @@ paths:
         - Copyrights
       summary: Updates an author for a file
       description: Updates an author statement for a particular file
+      requestBody: *cxUpdateBody
+      responses: *cxUpdateResponses
+
+  /uploads/{id}/item/{itemId}/scancode-authors:
+    parameters: *cxGetParams
+    get:
+      operationId: getFileScanCodeAuthor
+      tags:
+        - Copyrights
+      summary: Get the scancode author findings of the mentioned upload tree ID
+      description: Returns the list of scancode author findings associated with the file
+      responses: *cxGetResponses
+
+  /uploads/{id}/item/{itemId}/scancode-authors/{hash}:
+    parameters: *cxUpdateParams
+    delete:
+      operationId: deleteFileScanCodeAuthor
+      tags:
+        - Copyrights
+      summary: Deletes scancode author finding for a file
+      description: Deletes scancode author finding for a particular file
+      responses: *cxUpdateResponses
+    patch:
+      operationId: restoreFileScanCodeAuthor
+      tags:
+        - Copyrights
+      summary: Restores scancode author finding for a file
+      description: Restores scancode author finding for a particular file
+      responses: *cxUpdateResponses
+    put:
+      operationId: updateFileScanCodeAuthor
+      tags:
+        - Copyrights
+      summary: Updates scancode author finding for a file
+      description: Updates scancode author finding for a particular file
       requestBody: *cxUpdateBody
       responses: *cxUpdateResponses
 
