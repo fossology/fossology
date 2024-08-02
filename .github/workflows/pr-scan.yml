@@ -1,6 +1,9 @@
 name: License scan on PR
 
-on: [pull_request]
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
 
 jobs:
   compliance_check:
@@ -9,34 +12,30 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+
     - name: License check
       id: compliance
-      uses: GMishx/fossology-scan@main
+      uses: GMishx/fossology-action@main
       with:
-        scan-mode: 'diff'
+        scan_mode: 'repo'
         scanners: 'nomos ojo'
-    - name: 'Upload report'
-      uses: actions/upload-artifact@v2
-      if: ${{ failure() }}
-      with:
-        name: Scan results
-        path: results
+        report_format: 'SPDX_JSON'
   copyright_check:
     runs-on: ubuntu-latest
     name: Perform copyright scan
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: License check
       id: compliance
-      uses: GMishx/fossology-scan@main
+      uses: GMishx/fossology-action@main
       with:
-        scan-mode: 'diff'
+        scan_mode: ''
         scanners: 'copyright keyword'
+        report_format: 'SPDX_YAML'
     - name: 'Upload report'
       uses: actions/upload-artifact@v2
       if: ${{ failure() }}
       with:
         name: Scan results
         path: results
-
