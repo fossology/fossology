@@ -617,16 +617,14 @@ namespace Fossology\UI\Api\Test\Controllers {
      * @return void
      * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
      */
-      public function testGetTreeViewUploadNotFound(){
+      public function testGetTreeViewUploadNotFound()
+      {
         $sort = "sortDir";
 
         $this->dbHelper->shouldReceive('doesIdExist')
           ->withArgs(["upload", "upload_pk", $this->uploadId])->andReturn(false);
-
-
         $reqBody = $this->streamFactory->createStream();
         $requestHeaders = new Headers();
-
         $queryParams = [
           "agentId" => $this->agentId,
           'sort' => $sort,
@@ -641,7 +639,6 @@ namespace Fossology\UI\Api\Test\Controllers {
 
         $this->expectException(HttpNotFoundException::class);
         $this->uploadTreeController->getTreeView($request, new ResponseHelper(), ["id" => $this->uploadId, "itemId"=> 10]);
-
       }
 
     /**
@@ -651,7 +648,8 @@ namespace Fossology\UI\Api\Test\Controllers {
      * @return void
      * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
      */
-    public function testGetTreeViewAgentNotFound(){
+    public function testGetTreeViewAgentNotFound()
+    {
       $sort = "sortDir";
 
       $this->dbHelper->shouldReceive('doesIdExist')
@@ -688,7 +686,8 @@ namespace Fossology\UI\Api\Test\Controllers {
      * @return void
      * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
      */
-    public function testGetTreeViewTagNotFound(){
+    public function testGetTreeViewTagNotFound()
+    {
       $sort = "sortDir";
 
       $this->dbHelper->shouldReceive('doesIdExist')
@@ -725,7 +724,8 @@ namespace Fossology\UI\Api\Test\Controllers {
      * @return void
      * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
      */
-    public function testGetTreeViewUploadNotAccessible(){
+    public function testGetTreeViewUploadNotAccessible()
+    {
       $sort = "sortDir";
 
       $this->dbHelper->shouldReceive('doesIdExist')

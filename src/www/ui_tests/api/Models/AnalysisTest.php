@@ -27,6 +27,10 @@ use Fossology\UI\Api\Models\ApiVersion;
  */
 class AnalysisTest extends \PHPUnit\Framework\TestCase
 {
+  private function getAnalysis()
+  {
+
+  }
   /**
    * @test
    * -# Test for Analysis::setUsingArray() when $version is V1
