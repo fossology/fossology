@@ -14,10 +14,16 @@ define("AGENT_COMPATIBILITY_NAME", "compatibility");
 
 class CompatibilityAgentPlugin extends AgentPlugin
 {
+  /** @var compDesc */
+  private $compDesc = "Checks licenses found in a file and main license and " .
+    "adds red highlight to tree view if licenses fail compatibility rules";
+
   public function __construct()
   {
     $this->Name = "agent_compatibility";
-    $this->Title = _("Compatibility License Analysis, scanning for licenses compatibility");
+    $this->Title = _("Compatibility License Analysis, scanning for licenses " .
+      "compatibility <img src=\"images/info_16.png\" data-toggle=\"tooltip\"" .
+      " title=\"".$this->compDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = AGENT_COMPATIBILITY_NAME;
 
     parent::__construct();

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 #  SPDX-FileCopyrightText: © 2024 Siemens AG
 #  SPDX-FileContributor: Gaurav Mishra <mishra.gaurav@siemens.com>
 #
