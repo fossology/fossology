@@ -131,6 +131,7 @@ namespace Fossology\UI\Api\Test\Models
       $decider = new Decider();
       $decider->setOjoDecider(true);
       $decider->setNomosMonk(true);
+      $decider->setConcludeLicenseType("Permissive");
 
       $scancode = new Scancode();
 

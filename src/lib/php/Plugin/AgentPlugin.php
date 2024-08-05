@@ -7,6 +7,8 @@
 
 namespace Fossology\Lib\Plugin;
 
+use Symfony\Component\HttpFoundation\Request;
+
 abstract class AgentPlugin implements Plugin
 {
   const PRE_JOB_QUEUE = 'preJq';
@@ -61,15 +63,18 @@ abstract class AgentPlugin implements Plugin
   /**
    * @param int $jobId
    * @param int $uploadId
-   * @param &string $errorMsg - error message on failure
+   * @param string $errorMsg - error message on failure
    * @param array $dependencies - array of plugin names representing dependencies.
    * @param mixed $arguments (ignored if not a string)
+   * @param Request|null $request Symfony request
+   * @param string $unpackArgs Ununpack args from adj2nest
    * @returns int
    * * jqId  Successfully queued
    * *   0   Not queued, latest version of agent has previously run successfully
    * *  -1   Not queued, error, error string in $ErrorMsg
-   **/
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+   */
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
+      $arguments=null, $request=null, $unpackArgs=null)
   {
     $dependencies[] = "agent_adj2nest";
     if ($this->AgentHasResults($uploadId) == 1) {
@@ -82,7 +87,8 @@ abstract class AgentPlugin implements Plugin
     }
 
     $args = is_array($arguments) ? '' : $arguments;
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $args);
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies,
+        $uploadId, $args, $request);
   }
 
   /**
@@ -92,16 +98,19 @@ abstract class AgentPlugin implements Plugin
    * @param array $dependencies
    * @param string|null $jqargs (optional) jobqueue.jq_args
    * @param $jq_cmd_args
+   * @param Request|null $request
    * @return
    * * jqId  Successfully queued
    * *   0   Not queued, latest version of agent has previously run successfully
    * *  -1   Not queued, error, error string in $ErrorMsg
    */
-  protected function doAgentAdd($jobId, $uploadId, &$errorMsg, $dependencies, $jqargs = "", $jq_cmd_args = null)
+  protected function doAgentAdd($jobId, $uploadId, &$errorMsg, $dependencies,
+      $jqargs = "", $jq_cmd_args = null, $request = null)
   {
     $deps = array();
     foreach ($dependencies as $dependency) {
-      $dep = $this->implicitAgentAdd($jobId, $uploadId, $errorMsg, $dependency);
+      $dep = $this->implicitAgentAdd($jobId, $uploadId, $errorMsg,
+          $dependency, $request);
       if ($dep == - 1) {
         return -1;
       }
@@ -129,9 +138,11 @@ abstract class AgentPlugin implements Plugin
    * @param int $uploadId
    * @param &string $errorMsg
    * @param mixed $dependency
+   * @param Request|null $request
    * @return int
    */
-  protected function implicitAgentAdd($jobId, $uploadId, &$errorMsg, $dependency)
+  protected function implicitAgentAdd($jobId, $uploadId, &$errorMsg,
+                                      $dependency, $request)
   {
     if (is_array($dependency)) {
       $pluginName = $dependency['name'];
@@ -148,7 +159,8 @@ abstract class AgentPlugin implements Plugin
       return -1;
     }
 
-    return $depPlugin->AgentAdd($jobId, $uploadId, $errorMsg, $preJq, $depArgs);
+    return $depPlugin->AgentAdd($jobId, $uploadId, $errorMsg, $preJq,
+        $depArgs, $request);
   }
 
   function __toString()

@@ -31,6 +31,7 @@ COPY ./utils/fo-installdeps ./utils/fo-installdeps
 COPY ./install/fo-install-pythondeps ./install/fo-install-pythondeps
 COPY ./utils/utils.sh ./utils/utils.sh
 COPY ./src/copyright/mod_deps ./src/copyright/
+COPY ./src/compatibility/mod_deps ./src/compatibility/
 COPY ./src/delagent/mod_deps ./src/delagent/
 COPY ./src/mimetype/mod_deps ./src/mimetype/
 COPY ./src/nomos/mod_deps ./src/nomos/

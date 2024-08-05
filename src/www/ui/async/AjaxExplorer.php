@@ -14,19 +14,21 @@ use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CompatibilityDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Exceptions\InvalidAgentStageException;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
-use Fossology\Lib\Data\DecisionTypes;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Fossology\Lib\Data\AgentRef;
 
 /**
  * \file ui-browse-license.php
@@ -40,6 +42,8 @@ class AjaxExplorer extends DefaultPlugin
   private $uploadtree_tablename = "";
   /** @var UploadDao */
   private $uploadDao;
+  /** @var CompatibilityDao */
+  private $compatibilityDao;
   /** @var LicenseDao */
   private $licenseDao;
   /** @var ClearingDao */
@@ -76,6 +80,7 @@ class AjaxExplorer extends DefaultPlugin
     ));
 
     $this->uploadDao = $this->getObject('dao.upload');
+    $this->compatibilityDao = $this->getObject('dao.compatibility');
     $this->licenseDao = $this->getObject('dao.license');
     $this->clearingDao = $this->getObject('dao.clearing');
     $this->agentDao = $this->getObject('dao.agent');
@@ -399,7 +404,19 @@ class AjaxExplorer extends DefaultPlugin
             );
           }
 
-          $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
+          //call that function----file_id,upload_id,shortname
+          try {
+            $compatible = $this->compatibilityDao->getCompatibilityForFile($childItemTreeBounds, $shortName);
+          } catch (InvalidAgentStageException) {
+            $compatible = true;
+          }
+          $licenseHtml = "";
+          if (!$compatible) {
+            $licenseHtml = "<span class='text-danger font-weight-bold'>$shortName</span>";
+          } else {
+            $licenseHtml = $shortName;
+          }
+          $licenseEntries[] = "$licenseHtml [" . implode("][", $agentEntries) . "]";
         }
       }
 

@@ -112,6 +112,13 @@ SPDX-License-Identifier: FSFAP
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>
         </service>
+        <service id="dao.compatibility" class="Fossology\Lib\Dao\CompatibilityDao" public="true">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="dao.license"/>
+            <argument type="service" id="dao.agent"/>
+        </service>
+
         <service id="dao.searchhelperdao" class="Fossology\Lib\Dao\SearchHelperDao" public="true">
             <argument type="service" id="db.manager"/>
         </service>
@@ -151,9 +158,9 @@ SPDX-License-Identifier: FSFAP
         <service id="businessrules.clearing_event_processor"
                  class="Fossology\Lib\BusinessRules\ClearingEventProcessor" public="true">
         </service>
+
         <service id="businessrules.clearing_decision_processor"
                  class="Fossology\Lib\BusinessRules\ClearingDecisionProcessor" public="true">
-
             <argument type="service" id="dao.clearing"/>
             <argument type="service" id="businessrules.agent_license_event_processor"/>
             <argument type="service" id="businessrules.clearing_event_processor"/>
@@ -176,6 +183,13 @@ SPDX-License-Identifier: FSFAP
         <service id="app.license_csv_import" class="Fossology\Lib\Application\LicenseCsvImport" public="true">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.user"/>
+        </service>
+
+        <service id="app.license_yaml_import" class="Fossology\Lib\Application\LicenseCompatibilityRulesYamlImport" public="true">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.user"/>
+            <argument type="service" id="dao.license"/>
+            <argument type="service" id="dao.compatibility"/>
         </service>
 
         <service id="app.obligation_csv_import" class="Fossology\Lib\Application\ObligationCsvImport" public="true">

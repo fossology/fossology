@@ -112,7 +112,7 @@ class UserTest extends \PHPUnit\Framework\TestCase
   /**
    * @param $version version to test
    * @return void
-   * -# Test the data format returned by User::getArray($version) model 
+   * -# Test the data format returned by User::getArray($version) model
    */
   private function testDataFormat($version)
   {
@@ -136,7 +136,8 @@ class UserTest extends \PHPUnit\Framework\TestCase
           "nomos"     => true,
           "ojo"       => true,
           "package"   => false,
-          "reso"      => false
+          "reso"      => false,
+          "compatibility" => false
         ]
       ];
     } else{
@@ -159,7 +160,8 @@ class UserTest extends \PHPUnit\Framework\TestCase
           "nomos"     => true,
           "ojo"       => true,
           "package"   => false,
-          "reso"      => false
+          "reso"      => false,
+          "compatibility" => false
         ]
       ];
     }
