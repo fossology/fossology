@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
 #]=======================================================================]
 
 set(FO_CWD ${CMAKE_CURRENT_SOURCE_DIR})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FO_CXX_FLAGS} -fopenmp")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FO_CXX_FLAGS}")
 
 include_directories(
     ${glib_INCLUDE_DIRS}
@@ -42,7 +42,8 @@ foreach(FO_OJO_TARGET ojo ojo_exec ojo_cov ojo_cov_exec)
         target_compile_options(${FO_OJO_TARGET} PRIVATE ${FO_COV_FLAGS})
     endif()
     target_link_libraries(${FO_OJO_TARGET}
-        PRIVATE fossologyCPP ${icu-uc_LIBRARIES} ${Boost_LIBRARIES} jsoncpp_lib)
+        PRIVATE fossologyCPP ICU::uc ICU::i18n ${Boost_LIBRARIES} jsoncpp_lib
+            OpenMP::OpenMP_CXX)
     if(${FO_OJO_TARGET} MATCHES "_exec$")
         string(REPLACE "_exec" "" FO_OJO_TARGET_R ${FO_OJO_TARGET})
         set_target_properties(${FO_OJO_TARGET}
