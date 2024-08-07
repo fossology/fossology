@@ -215,4 +215,70 @@ class ObligationController extends RestController
       $content ? $sf->createStream($content) : $sf->createStream('')
     );
   }
+
+  /**
+   * Import Admin License Obligations from JSON
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function importObligationsFromJSON($request, $response, $args)
+  {
+    $this->throwNotAdminException();
+    $apiVersion = ApiVersion::getVersion($request);
+
+    $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+    /** @var \Fossology\UI\Page\AdminObligationFromCSV $adminLicenseObligationFromCsv */
+    $adminLicenseObligationFromCsv = $this->restHelper->getPlugin('admin_obligation_from_csv');
+
+    $uploadedFile = $symReq->files->get($adminLicenseObligationFromCsv->getFileInputName($apiVersion),
+      null);
+
+    $res = $adminLicenseObligationFromCsv->handleFileUpload($uploadedFile, ',', '"', true);
+    if (!$res[0]) {
+      throw new HttpBadRequestException($res[1]);
+    }
+
+    $newInfo = new Info($res[2], $res[1], InfoType::INFO);
+    return $response->withJson($newInfo->getArray(), $newInfo->getCode());
+  }
+  /**
+   * Export Obligations to JSON
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function exportObligationsToJSON($request, $response, $args)
+  {
+    $this->throwNotAdminException();
+    $query = $request->getQueryParams();
+    $obPk = 0;
+    if (array_key_exists('id', $query)) {
+      $obPk = intval($query['id']);
+    }
+    if ($obPk != 0 &&
+      ! $this->dbHelper->doesIdExist("obligation_ref", "ob_pk", $obPk)) {
+      throw new HttpNotFoundException("Obligation does not exist");
+    }
+
+    $dbManager = $this->dbHelper->getDbManager();
+    $obligationCsvExport = new ObligationCsvExport($dbManager);
+    $content = $obligationCsvExport->createCsv($obPk, true);
+    $fileName = "fossology-obligations-export-".date("YMj-Gis");
+    $newResponse = $response->withHeader('Content-type', 'text/json; charset=UTF-8')
+      ->withHeader('Content-Disposition', 'attachment; filename=' . $fileName . '.json')
+      ->withHeader('Pragma', 'no-cache')
+      ->withHeader('Cache-Control', 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0')
+      ->withHeader('Expires', 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
+    $sf = new StreamFactory();
+    return $newResponse->withBody(
+      $content ? $sf->createStream($content) : $sf->createStream('')
+    );
+  }
 }
