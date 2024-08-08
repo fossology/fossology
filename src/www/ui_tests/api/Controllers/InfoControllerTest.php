@@ -16,6 +16,7 @@ use Fossology\UI\Api\Controllers\InfoController;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
+use Fossology\UI\Api\Models\ApiVersion;
 use Mockery as M;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
@@ -95,7 +96,19 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
     return json_decode($response->getBody()->getContents(), true);
   }
 
-  public function testGetInfo()
+  public function testGetInfoV1()
+  {
+    $this->testGetInfo(ApiVersion::V1);
+  }
+  public function testGetInfoV2()
+  {
+    $this->testGetInfo();
+  }
+  /**
+   * @param $version
+   * @return void
+   */
+  private function testGetInfo($version = ApiVersion::V2)
   {
     $yaml = new Parser();
     $yamlDocArray = $yaml->parseFile(self::YAML_LOC);
@@ -127,7 +140,7 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
     $expectedResponse = (new ResponseHelper())->withJson(array(
       "name" => $apiTitle,
       "description" => $apiDescription,
-      "version" => $apiVersion,
+      "version" => $version == APiVersion::V1 ? $apiVersion : "2.0.0",
       "security" => $security,
       "contact" => $apiContact,
       "license" => [
@@ -138,6 +151,7 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
     ), 200);
     $request = new Request("POST", new Uri("HTTP", "localhost"), new Headers(),
       [], [], (new StreamFactory())->createStream());
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
     $actualResponse = $this->infoController->getInfo($request,
       new ResponseHelper());
     $this->assertEquals($expectedResponse->getStatusCode(),

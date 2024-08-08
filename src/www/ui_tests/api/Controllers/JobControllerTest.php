@@ -254,10 +254,23 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test JobController::getJobs() with single job id
+   * -# Test JobController::getJobs() with single job id with version 1 param
    * -# Check if response is 200
    */
-  public function testGetJobFromId()
+  public function testGetJobFromIdV1()
+  {
+    $this->testGetJobFromId(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test JobController::getJobs() with single job id with version 2 param
+   * -# Check if response is 200
+   */
+  public function testGetJobFromIdV2()
+  {
+    $this->testGetJobFromId();
+  }
+  private function testGetJobFromId($version = ApiVersion::V2)
   {
     $job = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");
     $jobTwoQueue = new JobQueue(45, 'readmeoss', '2020-01-01 20:41:49', '2020-01-01 20:41:50',
@@ -278,6 +291,13 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $body = $this->streamFactory->createStream();
     $request = new Request("GET", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withQueryParams(['page' => 1, 'limit'=> 0]);
+    } else {
+      $request = $request->withHeader('limit', '0')
+        ->withHeader('page', '1');
+    }
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
     $response = new ResponseHelper();
     $userId = 2;
     $user = $this->getUsers([$userId]);
@@ -291,13 +311,29 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals('1',
       $actualResponse->getHeaderLine('X-Total-Pages'));
   }
-
   /**
    * @test
-   * -# Test JobController::getJobs() with single upload
+   * -# Test JobController::getJobs() with single upload with version 1 params
    * -# Check if response is 200
    */
-  public function testGetJobsFromUpload()
+  public function testGetJobsFromUploadV1()
+  {
+    $this->testGetJobsFromUpload(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test JobController::getJobs() with single upload with version 2 params
+   * -# Check if response is 200
+   */
+  public function testGetJobsFromUploadV2()
+  {
+    $this->testGetJobsFromUpload();
+  }
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testGetJobsFromUpload($version = ApiVersion::V2)
   {
     $job = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");
     $jobTwoQueue = new JobQueue(45, 'readmeoss', '2020-01-01 20:41:49', '2020-01-01 20:41:50',
@@ -320,7 +356,14 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $body = $this->streamFactory->createStream();
     $request = new Request("GET", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
-    $request = $request->withQueryParams([JobController::UPLOAD_PARAM => 5]);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withQueryParams([JobController::UPLOAD_PARAM => 5,'page' => 1, 'limit'=> 0]);
+    } else {
+      $request = $request->withQueryParams([JobController::UPLOAD_PARAM => 5]);
+      $request = $request->withHeader('limit', '0')
+        ->withHeader('page', '1');
+    }
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
     $response = new ResponseHelper();
     $userId = 2;
     $user = $this->getUsers([$userId]);
