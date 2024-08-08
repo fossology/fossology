@@ -20,6 +20,7 @@ use Fossology\UI\Api\Models\ApiVersion;
  * @brief Tests for Reuser model
  */
 class ReuserTest extends \PHPUnit\Framework\TestCase
+
 {
   /**
    * @test
