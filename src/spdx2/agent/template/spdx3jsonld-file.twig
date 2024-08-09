@@ -1,0 +1,126 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% set dualLicense = false %}
+{% set textPrintedList = [] %}
+{% if fileData.concludedLicenses|length > 2 %}
+  {% for res in fileData.concludedLicenses %}
+    {% if 'Dual-license' == licenseList[res].licenseObj.shortName %}
+      {% set dualLicense = true %}
+    {% endif %}
+  {% endfor %}
+{%- endif -%}
+{
+  "type": "software_File",
+  "spdxId": "File:SPDXRef-item{{ fileId }}",
+  "creationInfo":"creationInfo:creationInfo1",
+  "name": "{{ fileName }}",
+  {% if licenseCommentState %}
+  {% if fileData.comments is empty %}
+  "comment": "NOASSERTION",
+  {%~ else %}
+  "comment": "<text> {{ fileData.comments|join('\n')
+  |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+  |replace({'\f':''}) }} </text>",
+  {% endif %}
+  {% endif %}
+  {% if fileData.copyrights|default is empty %}
+  "software_copyrightText": "NOASSERTION",
+  {% else %}
+  "software_copyrightText": "<text> {{ fileData.copyrights|join('\n')
+    |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+    |replace({'\f':'','"':"'", '\n':''}) }} </text>",
+  {% endif %}
+  {% if fileData.acknowledgements|default is not empty %}
+  "software_attributionText": "<text> {{ fileData.acknowledgements|join('\n')
+  |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+  |replace({'\f':'','"':"'", '\n':''}) }} </text>"
+  {% endif %}
+  "verifiedUsing": [
+    {
+      "type": "Hash",
+      "algorithm": "sha1",
+      "hashValue": "{{ sha1 | lower }}"
+    },
+    {
+      "type": "Hash",
+      "algorithm": "sha256",
+      "hashValue": "{{ sha256 | lower }}"
+    },
+    {
+      "type": "Hash",
+      "algorithm": "md5",
+      "hashValue": "{{ md5 | lower }}"
+    }
+  ]
+},
+{%~ if fileData.isCleared() %}
+  {# File clearing decisions #}
+  {%~ if fileData.concludedLicenses|default is empty %}
+    {
+      "type": "expandedlicensing_IndividualLicensingInfo",
+      "spdxId": "File:SPDXRef-item{{ fileId }}#NoneLicense",
+      "creationInfo": "creationInfo:creationInfo1"
+    },
+  {%~ elseif fileData.concludedLicenses|length > 1 %}
+    {
+      {% if dualLicense %}
+        "type": "expandedlicensing_DisjunctiveLicenseSet",
+      {% else %}
+        "type": "expandedlicensing_ConjunctiveLicenseSet",
+      {% endif %} {# End dual license check #}
+      "spdxId": "File:SPDXRef-item{{ fileId }}",
+      "creationInfo": "creationInfo:creationInfo1",
+      "expandedlicensing_member": [
+        {%~ for res in fileData.concludedLicenses %}
+          {%~ if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+            {%- set licId = licenseList[res].licenseObj.spdxId %}
+            {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+              {% set licId = licenseList[res].licenseObj.shortName %}
+            {%- endif %}
+            {
+              "type": "simplelicensing_AnyLicenseInfo",
+              "creationInfo": "creationInfo:creationInfo1",
+              "spdxId": "URI:#{{ licId|replace({' ': '-'})|url_encode }}"
+            }{% if not loop.last %},{{ "\n" }}{% endif %}
+          {% else %}
+            {
+              "type": "simplelicensing_AnyLicenseInfo",
+              "creationInfo": "creationInfo:creationInfo1",
+              "spdxId": "URI:#{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}",
+              "name": "{{ licenseList[res].licenseObj.fullName|e }}"
+            }{% if not loop.last %},{{ "\n" }}{% endif %}
+          {% endif %}
+        {% endfor %}
+      ]
+    },
+  {%~ elseif fileData.concludedLicenses|length == 1 %}
+    {%- set res = fileData.concludedLicenses[0] %}
+    {%- if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+      {%- set licId = licenseList[res].licenseObj.spdxId %}
+      {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+        {% set licId = licenseList[res].licenseObj.shortName %}
+      {%- endif %}
+      {
+        "type": "simplelicensing_AnyLicenseInfo",
+        "creationInfo": "creationInfo:creationInfo1",
+        "spdxId": "File:SPDXRef-item{{ fileId }}#{{ licId|replace({' ': '-'})|url_encode }}"
+      },
+    {% else %}
+      {
+        "type": "simplelicensing_AnyLicenseInfo",
+        "creationInfo": "creationInfo:creationInfo1",
+        "spdxId": "File:SPDXRef-item{{ fileId }}#{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}",
+        "name": "{{ licenseList[res].licenseObj.fullName|e }}"
+      },
+    {% endif %} 
+  {%~ endif %}{# End printing single conclusion #}
+  {%~ else %}
+    {# No concluded licenses #}
+    {
+      "type": "expandedlicensing_IndividualLicensingInfo",
+      "spdxId": "File:SPDXRef-item{{ fileId }}#NoAssertionLicense",
+      "creationInfo": "creationInfo:creationInfo1"
+    },
+{% endif %}

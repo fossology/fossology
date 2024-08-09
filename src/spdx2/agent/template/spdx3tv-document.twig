@@ -1,0 +1,128 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+type: NamespaceMap
+namespace: {{ uri }}
+prefix: URI
+
+##-------------------------
+## Creation Information
+##-------------------------
+
+type: CreationInfo
+spdxId: creationInfo:creationInfo1
+specVersion: 3.0.0
+created: {{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}
+createdBy: Person:SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}
+createdUsing: Tool:SPDXRef-Actor-{{ toolVersion }}
+comment: <text>This document was created using license information and a generator from Fossology.</text>
+
+##-------------------------
+## Document Information
+##-------------------------
+
+type: SpdxDocument
+spdxId: SpdxDocument:SPDXRef-DOCUMENT
+creationInfo: creationInfo:creationInfo1
+name: {{ documentName }}
+profileConformance: core, software, simpleLicensing, expandedLicensing
+element: Tool:SPDXRef-Actor-{{ toolVersion }}, Person:SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}
+{% for packageId in packageIds %}
+element: Package:SPDXRef-upload{{ packageId }}
+{% endfor %}
+{% for fileId in fileIds %}
+element: File:SPDXRef-item{{ fileId }}{% if not loop.last %},{{ "\n" }}{% endif %}
+{% endfor %}
+rootElement: 
+{% for packageId in packageIds %}
+rootElement: Package:SPDXRef-upload{{ packageId }}{% if not loop.last %},{{ "\n" }}{% endif %}
+{% endfor %}
+dataLicense.type: simplelicensing_AnyLicenseInfo
+dataLicense.creationInfo: creationInfo:creationInfo1
+dataLicense.description: {{ licenseList[dataLicense].licenseObj.spdxId|replace({' ': '-'}) }}
+
+
+{%- if toolVersion is not empty %}
+
+##-------------------------
+## Tool Information
+##-------------------------
+
+type: Tool
+spdxId: Tool:SPDXRef-Actor-{{ toolVersion }}
+creationInfo: creationInfo:creationInfo1
+name: {{ toolVersion }}
+{%- endif %}
+
+{%- if userName is not empty %}
+
+##-------------------------
+## Person Information
+##-------------------------
+
+type: Person
+spdxId: Person:SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}
+creationInfo: creationInfo:creationInfo1
+name: {{ userName | split(' ')[0] }}
+externalIdentifier.type: ExternalIdentifier
+externalIdentifier.externalIdentifierType: email
+externalIdentifier.identifier: {{ userName | split(' (')[1] | split(')')[0] }}
+{%- endif %}
+
+{%- if organization is not empty %}
+
+##--------------------------
+## Organization Information
+##--------------------------
+
+type: Organization
+spdxId: Organization:SPDXRef-Actor-{{ organization }}
+creationInfo: creationInfo:creationInfo1
+name: {{ userName | split(' ')[0] }}
+{%- endif %}
+
+##-------------------------
+## License Information
+##-------------------------
+
+{% for licenseData in licenseList %}
+{%- if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
+{%- set licId = licenseData.licenseObj.spdxId %}
+{%- if licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
+{%- set licId = licenseData.licenseObj.shortName %}
+{%- endif %}
+type: expandedlicensing_CustomLicense
+spdxId: URI:{{ licId|replace({' ': '-'}) }}
+creationInfo: creationInfo:creationInfo1
+name: {{ licenseData.licenseObj.fullName }}
+simplelicensing_licenseText: <text> {{ licenseData.licenseObj.text|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})|replace({'\f':'','"':"'", '\n':''}) }} </text>
+{%- if licenseData.licenseObj.url is not empty %}
+{%- if '&' in licenseData.licenseObj.url %}
+
+expandedlicensing_seeAlso: {{ licenseData.licenseObj.url|url_encode }}
+{%- else %}
+
+expandedlicensing_seeAlso: {{ licenseData.licenseObj.url }}
+{%- endif %}
+{%- endif %}
+{%- endif %}
+{% endfor %}
+
+{{ packageNodes }}
+
+##---------------------------------------
+## File-Package Relationship Information
+##---------------------------------------
+
+{% for packageId in packageIds %}
+type: Relationship
+spdxId: URI:SPDXRef-Relationship-{{ fileIds | length }}
+from: Package:SPDXRef-upload{{ packageId }}
+{% for fileId in fileIds %}
+to: File:SPDXRef-item{{ fileId }}{% if not loop.last %},{{ "\n" }}{% endif %}
+{% endfor %}
+
+relationshipType: describes
+creationInfo: creationInfo:creationInfo1
+{% endfor %}
