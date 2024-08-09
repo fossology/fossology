@@ -20,6 +20,10 @@ install(DIRECTORY ui
     PATTERN "DepFiveAgentPlugin.php" EXCLUDE
     PATTERN "SpdxTwoTagValueAgentPlugin.php" EXCLUDE
     PATTERN "SpdxTwoCommaSeparatedValuesAgentPlugin.php" EXCLUDE
+    PATTERN "SpdxThreeJsonldAgentPlugin.php" EXCLUDE
+    PATTERN "SpdxThreeJsonAgentPlugin.php" EXCLUDE
+    PATTERN "SpdxThreeRDFAgentPlugin.php" EXCLUDE
+    PATTERN "SpdxThreeTagValueAgentPlugin.php" EXCLUDE
 )
 
 install(FILES ui/DepFiveAgentPlugin.php
@@ -34,7 +38,23 @@ install(FILES ui/SpdxTwoCommaSeparatedValuesAgentPlugin.php
     DESTINATION ${FO_MODDIR}/spdx2csv/ui
     COMPONENT spdx2)
 
-foreach(SPDX_INSTALL spdx2 spdx2tv dep5 spdx2csv)
+install(FILES ui/SpdxThreeJsonldAgentPlugin.php
+    DESTINATION ${FO_MODDIR}/spdx3jsonld/ui
+    COMPONENT spdx2)
+
+install(FILES ui/SpdxThreeJsonAgentPlugin.php
+    DESTINATION ${FO_MODDIR}/spdx3json/ui
+    COMPONENT spdx2)
+
+install(FILES ui/SpdxThreeRDFAgentPlugin.php
+    DESTINATION ${FO_MODDIR}/spdx3rdf/ui
+    COMPONENT spdx2)
+
+install(FILES ui/SpdxThreeTagValueAgentPlugin.php
+    DESTINATION ${FO_MODDIR}/spdx3tv/ui
+    COMPONENT spdx2)
+
+foreach(SPDX_INSTALL spdx2 spdx2tv dep5 spdx2csv spdx3jsonld spdx3json spdx3rdf spdx3tv)
     install(FILES ${SPDX_INSTALL}.conf "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
         DESTINATION ${FO_MODDIR}/${SPDX_INSTALL}
         COMPONENT spdx2)
