@@ -77,7 +77,7 @@ class SpdxTwoAgent extends Agent
 
   const OUTPUT_FORMAT_KEY = "outputFormat";               ///< Argument key for output format
   const DEFAULT_OUTPUT_FORMAT = "spdx2";                  ///< Default output format
-  const AVAILABLE_OUTPUT_FORMATS = "spdx2,spdx2tv,dep5,spdx2csv";  ///< Output formats available
+  const AVAILABLE_OUTPUT_FORMATS = "spdx2,spdx2tv,dep5,spdx2csv,spdx3jsonld,spdx3json,spdx3rdf,spdx3tv";  ///< Output formats available
   const UPLOAD_ADDS = "uploadsAdd";                       ///< Argument for additional uploads
   const DATA_LICENSE = "CC0-1.0";                         ///< Data license for SPDX reports
 
@@ -150,6 +150,10 @@ class SpdxTwoAgent extends Agent
    * Output format of the report
    */
   protected $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
+  /** @var array[] $fileIds
+   * List of fileids in the document
+   */
+  protected $fileIds=[];
 
   function __construct()
   {
@@ -256,6 +260,15 @@ class SpdxTwoAgent extends Agent
       case "dep5":
         $prefix .= "copyright-";
         break;
+      case "spdx3jsonld":
+        break;
+      case "spdx3rdf":
+        $postfix = ".xml" . $postfix;
+        break;
+      case "spdx3json":
+        break;
+      case "spdx3tv":
+        break;
     }
     return $prefix . $partname . $postfix;
   }
@@ -283,6 +296,18 @@ class SpdxTwoAgent extends Agent
           break;
         case "dep5":
           $fileName .= ".txt";
+          break;
+        case "spdx3jsonld":
+          $fileName = $fileName .".jsonld";
+          break;
+        case "spdx3json":
+          $fileName = $fileName .".json";
+          break;
+        case "spdx3rdf":
+          $fileName = $fileName .".spdx.rdf";
+          break;
+        case "spdx3tv":
+          $fileName = $fileName .".spdx";
           break;
       }
       $this->filebasename = $fileName;
@@ -575,11 +600,23 @@ class SpdxTwoAgent extends Agent
     $organizationName = $SysConf['SYSCONFIG']["ReportHeaderText"];
     $version = $SysConf['BUILD']['VERSION'];
 
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
+    $this->heartbeat(0);
+
+    $filesWithLicenses = $this->reportutils
+      ->getFilesWithLicensesFromClearings($itemTreeBounds, $this->groupId,
+        $this, $this->licensesInDocument);
+    $this->heartbeat(0);
+    $upload = $this->uploadDao->getUpload($uploadId);
+    $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName(), $uploadId);
+
     $message = $this->renderString($this->getTemplateFile('document'),array(
         'documentName' => $fileBase,
         'uri' => $this->uri,
         'userName' => $this->container->get('dao.user')->getUserName($this->userId) . " (" . $this->container->get('dao.user')->getUserEmail($this->userId) . ")",
         'organisation' => $organizationName,
+        'fileIds'=>$this->fileIds,
         'toolVersion' => 'fossology-' . $version,
         'packageNodes' => $packageNodes,
         'packageIds' => $packageIds,
@@ -659,6 +696,7 @@ class SpdxTwoAgent extends Agent
         $this->heartbeat($filesProceeded - $lastValue);
         $lastValue = $filesProceeded;
       }
+      $this->fileIds[]=$fileId;
       $hashes = $treeDao->getItemHashes($fileId);
       $fileName = $treeDao->getFullPath($fileId, $treeTableName, 0);
       $stateComment = $this->getSPDXReportConf($uploadId, 0);

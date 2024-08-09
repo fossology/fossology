@@ -22,7 +22,7 @@ install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen/
     PATTERN *.twig
 )
 
-foreach(SPDX_INSTALL spdx2 spdx2tv dep5 spdx2csv)
+foreach(SPDX_INSTALL spdx2 spdx2tv dep5 spdx2csv spdx3jsonld spdx3json spdx3rdf spdx3tv)
     install(PROGRAMS agent.sh
         DESTINATION ${FO_MODDIR}/${SPDX_INSTALL}/agent
         RENAME ${SPDX_INSTALL}.sh
