@@ -116,10 +116,15 @@ AppFactory::setResponseFactory(new ResponseFactoryHelper());
 $app = AppFactory::create();
 $app->setBasePath($BASE_PATH);
 
-// Custom middleware to set the API version as a request attribute
+// Custom middleware to set the API version as a request attribute and add deprecation headers
 $apiVersionMiddleware = function (Request $request, RequestHandler $handler) use ($apiVersion) {
   $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $apiVersion);
-  return $handler->handle($request);
+  $response = $handler->handle($request);
+  if ($apiVersion == ApiVersion::V1) {
+    $response = $response->withHeader('Deprecation', 'true')
+    ->withHeader('Sunset', '2024-12-31T23:59:59Z');
+  }
+  return $response;
 };
 
 /*
