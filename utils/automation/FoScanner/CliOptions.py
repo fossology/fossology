@@ -37,6 +37,8 @@ class CliOptions(object):
   :ivar allowlist_path: path to allowlist.json file
   :ivar allowlist: information from allowlist.json
   :ivar report_format: Report format to use
+  :ivar scan_only_deps: Scan only dependencies
+  :ivar sbom_path: Path to sbom file
   """
   nomos: bool = False
   ojo: bool = False
@@ -53,6 +55,8 @@ class CliOptions(object):
     'exclude': []
   }
   report_format: ReportFormat = ReportFormat.TEXT
+  scan_only_deps: bool = False
+  sbom_path : str = ''
 
   def update_args(self, args: Namespace):
     """
@@ -74,6 +78,8 @@ class CliOptions(object):
       self.repo = True
     if "differential" in args.operation:
       self.differential = True
+    if 'scan-only-deps' in args.operation:
+      self.scan_only_deps = True
     if args.tags is not None and self.differential and len(args.tags) == 2:
       self.tags = (args.tags[0],args.tags[1])
     if args.allowlist_path:
@@ -87,3 +93,5 @@ class CliOptions(object):
     self.report_format = ReportFormat[args.report]
     if self.keyword and args.keyword_conf:
       self.keyword_conf_file_path = args.keyword_conf
+    if (self.scan_only_deps or self.repo) and args.sbom_path:
+      self.sbom_path = args.sbom_path
