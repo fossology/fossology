@@ -196,11 +196,14 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/licenses/scanned', UploadController::class . ':getScannedLicenses');
     $app->get('/{id:\\d+}/licenses/main', UploadController::class . ':getMainLicenses');
     $app->post('/{id:\\d+}/licenses/main', UploadController::class . ':setMainLicense');
+    $app->post('/{id:\\d+}/expression/main', UploadController::class . ':setMainExpression');
     $app->get('/{id:\\d+}/download', UploadController::class . ':uploadDownload');
     $app->get('/{id:\\d+}/clearing-progress', UploadController::class . ':getClearingProgressInfo');
     $app->delete('/{id:\\d+}/licenses/{shortName:[\\w\\- \\.]+}/main', UploadController::class . ':removeMainLicense');
+    $app->delete('/{id:\\d+}/expression/main', UploadController::class . ':removeMainExpression');
     $app->get('/{id:\\d+}/topitem', UploadController::class . ':getTopItem');
     $app->put('/{id:\\d+}/item/{itemId:\\d+}/licenses', UploadTreeController::class . ':handleAddEditAndDeleteLicenseDecision');
+    $app->put('/{id:\\d+}/item/{itemId:\\d+}/expression', UploadTreeController::class . ':setLicenseExpressionDecision');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/view', UploadTreeController::class. ':viewLicenseFile');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/prev-next', UploadTreeController::class . ':getNextPreviousItem');
     $app->get('/{id:\\d+}/item/{itemId:\\d+}/licenses', UploadTreeController::class . ':getLicenseDecisions');
