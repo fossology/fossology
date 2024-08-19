@@ -12,6 +12,7 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
 use Fossology\Lib\Exceptions\DuplicateTokenNameException;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
@@ -274,6 +275,61 @@ class UserController extends RestController
     $returnVal = new Info(200, "Success", InfoType::INFO);
     $res = $returnVal->getArray();
     $res[$tokenType . ($apiVersion == ApiVersion::V2 ? 'Tokens' : '_tokens')] = $finalTokens;
+    return $response->withJson($res, $returnVal->getCode());
+  }
+
+  /**
+   * Add new OAuth client for the user
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function createNewOauthClient($request, $response, $args)
+  {
+    $requestBody = $this->getParsedBody($request);
+    $clientName = $requestBody['clientName'];
+    $clientId =$requestBody['clientId'];
+    $clientScope = $requestBody['clientScope'];
+
+    $userId = $this->restHelper->getUserId();
+    try {
+      $this->restHelper->validateNewOauthClient($userId, $clientName,
+        $clientScope, $clientId);
+    } catch (HttpBadRequestException $e) {
+      throw new HttpBadRequestException($e->getMessage(), $e);
+    }
+
+    $this->restHelper->getDbHelper()->addNewClient($clientName, $userId,
+      $clientId, $clientScope);
+    $returnVal = new Info(201, "Client added successfully", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Get all the OAuth Clients (active | expired)
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpBadRequestException
+   */
+  public function getOAuthClients($request, $response, $args)
+  {
+    $clientType = $args['type'];
+    if ($clientType != "active" && $clientType != "expired") {
+      throw new HttpBadRequestException("Invalid request!");
+    }
+
+    $userEditObj = $this->restHelper->getPlugin('user_edit');
+    $clients = $clientType == "active" ? $userEditObj->getListOfActiveClients() : $userEditObj->getListOfExpiredClients();
+
+    $returnVal = new Info(200, "Success", InfoType::INFO);
+    $res = $returnVal->getArray();
+    $res[$clientType . 'Clients'] = $clients;
     return $response->withJson($res, $returnVal->getCode());
   }
 }
