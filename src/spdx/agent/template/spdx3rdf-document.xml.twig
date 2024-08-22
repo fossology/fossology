@@ -1,0 +1,92 @@
+{# SPDX-FileCopyrightText: © 2015,2023 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% set fileIds = concludedLicenseFileIds | merge(declaredLicenseFileIds) %}
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:spdx="https://spdx.org/rdf/3.0.0/terms#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xml:base="{{ uri }}">
+  <spdx:CreationInfo rdf:about="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1">
+    <spdx:specVersion>3.0.0</spdx:specVersion>
+    <spdx:created>{{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}</spdx:created>
+    <spdx:createdBy rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/Person#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}"/>
+    <spdx:createdUsing rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/Tool#SPDXRef-Actor-{{ toolVersion }}"/>
+    <spdx:comment>This document was created using license information and a generator from Fossology.</spdx:comment>
+  </spdx:CreationInfo>
+  <spdx:SpdxDocument rdf:about="{{ uri }}#SpdxRef-DOCUMENT">
+    <spdx:spdxId>SpdxRef-DOCUMENT</spdx:spdxId>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:name>{{ documentName }}</spdx:name>
+    <spdx:profileConformance>core</spdx:profileConformance>
+    <spdx:profileConformance>software</spdx:profileConformance>
+    <spdx:profileConformance>simpleLicensing</spdx:profileConformance>
+    <spdx:profileConformance>expandedLicensing</spdx:profileConformance>
+    <spdx:element rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/Tool#SPDXRef-Actor-{{ toolVersion }}"/>
+    <spdx:element rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/Person#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}"/>{% for packageId in packageIds %}
+    <spdx:element rdf:resource="#SPDXRef-upload{{ packageId }}"/>{% endfor %}{% for fileId in fileIds %}
+    <spdx:element rdf:resource="#SPDXRef-item{{ fileId }}"/>{{ "\n" }}{% endfor %}{% for packageId in packageIds %}
+    <spdx:rootElement rdf:resource="#SPDXRef-upload{{ packageId }}"/>{% endfor %}
+    <spdx:dataLicense>
+      <spdx:simplelicensing_AnyLicenseInfo>
+        <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+        <spdx:description>{{ licenseList[dataLicense].licenseObj.spdxId|replace({' ': '-'}) }}</spdx:description>
+        <spdx:simplelicensing_licenseText><![CDATA[
+            {{ licenseList[dataLicense].licenseObj.text|replace({'\f':''})
+                |replace({']]>':']]]]><![CDATA[>'})|e }}
+              ]]></spdx:simplelicensing_licenseText>
+      </spdx:simplelicensing_AnyLicenseInfo>
+    </spdx:dataLicense>
+  </spdx:SpdxDocument>{% if toolVersion is not empty %}
+  <spdx:Tool>
+    <spdx:spdxId>SPDXRef-Actor-{{ toolVersion }}</spdx:spdxId>
+    <spdx:creationInfo rdf:resource="#creationInfo:creationInfo1"/>
+    <spdx:name>{{ toolVersion }}</spdx:name>
+  </spdx:Tool>{% endif %}{% if userName is not empty %}
+  <spdx:Person>
+    <spdx:spdxId>SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}</spdx:spdxId>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:name>{{ userName | split(' ')[0] }}</spdx:name>
+    <spdx:externalIdentifier>
+      <spdx:ExternalIdentifier>
+        <spdx:externalIdentifierType>email</spdx:externalIdentifierType>
+        <spdx:identifier>{{ userName | split(' (')[1] | split(')')[0] }}</spdx:identifier>
+      </spdx:ExternalIdentifier>
+    </spdx:externalIdentifier>
+  </spdx:Person>{% endif %}{% if organization is not empty %}
+  <spdx:Organization>
+    <spdx:spdxId>SPDXRef-Actor-{{ organization }}</spdx:spdxId>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:name>{{ userName | split(' ')[0] }}</spdx:name>
+  </spdx:Organization>{% endif %}{% for licenseData in licenseList %}{% if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' ~%}{%- set licId=licenseData.licenseObj.spdxId %}{% if licenseData.licenseObj.shortName starts with 'LicenseRef-' %}{% set licId=licenseData.licenseObj.shortName %}{%- endif ~%}
+  <spdx:expandedlicensing_CustomLicense rdf:about="#{{ licId|replace({' ': '-'})|url_encode }}">
+    <spdx:spdxId>{{ licenseData.licenseObj.spdxId|replace({' ': '-'})|e }}</spdx:spdxId>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:name>{{ licenseData.licenseObj.fullName|e }}</spdx:name>
+    <spdx:simplelicensing_licenseText><![CDATA[
+{{ licenseData.licenseObj.text|replace({'\f':''})
+      |replace({']]>':']]]]><![CDATA[>'})|e }}
+    ]]></spdx:simplelicensing_licenseText>{% if licenseData.licenseObj.url is not empty %}{%~ if '&' in licenseData.licenseObj.url %}
+    <spdx:expandedlicensing_seeAlso>{{ licenseData.licenseObj.url|url_encode }}</spdx:expandedlicensing_seeAlso>{%~ else %}
+    <spdx:expandedlicensing_seeAlso>{{ licenseData.licenseObj.url }}</spdx:expandedlicensing_seeAlso>{%~ endif %}{% endif %}
+  </spdx:expandedlicensing_CustomLicense>{% endif %}{% endfor %}
+
+  {{ packageNodes }}
+  {% if concludedLicenseFileIds is not empty %}{% for packageId in packageIds%}
+  <spdx:Relationship rdf:about="{{ uri }}#SPDXRef-Relationship-{{ concludedLicenseFileIds | length }}">
+    <spdx:spdxId>SPDXRef-Relationship-{{ concludedLicenseFileIds | length }}</spdx:spdxId>
+    <spdx:relationshipType>hasConcludedLicense</spdx:relationshipType>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:from rdf:resource="#SPDXRef-upload{{ packageId }}"/>{% for concludedLicenseFileId in concludedLicenseFileIds %}
+    <spdx:to rdf:resource="#SPDXRef-item{{ concludedLicenseFileId }}"/>{{ "\n" }}{% endfor %}
+  </spdx:Relationship>{% endfor %}{% endif %}
+  {% if declaredLicenseFileIds is not empty %}{% for packageId in packageIds%}
+  <spdx:Relationship rdf:about="{{ uri }}#SPDXRef-Relationship-{{ declaredLicenseFileIds | length }}">
+    <spdx:spdxId>SPDXRef-Relationship-{{ declaredLicenseFileIds | length }}</spdx:spdxId>
+    <spdx:relationshipType>hasDeclaredLicense</spdx:relationshipType>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:from rdf:resource="#SPDXRef-upload{{ packageId }}"/>{% for declaredLicenseFileId in declaredLicenseFileIds %}
+    <spdx:to rdf:resource="#SPDXRef-item{{ declaredLicenseFileId }}"/>{{ "\n" }}{% endfor %}
+  </spdx:Relationship>{% endfor %}{% endif %}
+</rdf:RDF>

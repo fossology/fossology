@@ -1,0 +1,132 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{%- set dualLicense = false -%}
+{% if mainLicenses|length > 2 %}
+  {% for res in mainLicenses %}
+    {% if 'Dual-license' == licenseList[res].licenseObj.shortName %}
+      {% set dualLicense = true %}
+    {% endif %}
+  {% endfor %}
+{%- endif -%}
+  <spdx:Package rdf:about="#SPDXRef-upload{{ packageId }}">
+    <spdx:spdxId>SPDXRef-upload{{ packageId }}</spdx:spdxId>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:name>{{ packageName }}</spdx:name>
+    {% if licenseComments %}
+    <spdx:comment><![CDATA[
+            {{ licenseComments|replace({']]>':']]><![CDATA[>'}) }}
+          ]]></spdx:comment>
+    {% endif %}
+    <spdx:software_downloadLocation rdf:resource="https://spdx.org/rdf/3.0.0/terms#NoAssertion"/>
+    {% if packageVersion is not empty %}
+    <spdx:software_packageVersion>{{ packageVersion }}</spdx:software_packageVersion>
+    {% endif %}
+    {% if releaseDate is not empty %}
+    <spdx:releaseTime>{{ releaseDate }}</spdx:releaseTime>
+    {% endif %}
+    {%- if componentId is not empty ~%}
+    <spdx:externalRef>
+        <spdx:ExternalRef>
+          <spdx:comment>Package-Manager</spdx:comment>
+          <spdx:externalRefType>{{ componentType }}</spdx:externalRefType>
+          <spdx:locator>{{ componentId|trim }}</spdx:locator>
+        </spdx:ExternalRef>
+      </spdx:externalRef>
+    {%- endif ~%}
+    <spdx:software_copyrightText rdf:resource="https://spdx.org/rdf/3.0.0/terms#NoAssertion"/>
+    {% if obligations|default is not empty %}
+    <spdx:software_attributionText><![CDATA[{{ obligations|join('\n')|replace({'\f':''})
+                  |replace({']]>':']]]]><![CDATA[>'}) }}]]></spdx:software_attributionText>
+    {% endif %}
+    <spdx:verifiedUsing>
+        <spdx:Hash>
+          <spdx:algorithm rdf:resource="https://spdx.org/rdf/3.0.0/terms#checksumAlgorithm_sha1"/>
+          <spdx:hashValue>{{ sha1 | lower }}</spdx:hashValue>
+          <spdx:algorithm rdf:resource="https://spdx.org/rdf/3.0.0/terms#checksumAlgorithm_sha256"/>
+          <spdx:hashValue>{{ sha256 | lower }}</spdx:hashValue>
+          <spdx:algorithm rdf:resource="https://spdx.org/rdf/3.0.0/terms#checksumAlgorithm_md5"/>
+          <spdx:hashValue>{{ md5 | lower }}</spdx:hashValue>
+        </spdx:Hash>
+    </spdx:verifiedUsing>
+  </spdx:Package>
+
+  <spdx:PackageVerificationCode>
+    <spdx:algorithm rdf:resource="https://spdx.org/rdf/3.0.0/terms#checksumAlgorithm_sha1"/>
+    <spdx:hashValue>{{ verificationCode }}</spdx:hashValue>
+  </spdx:PackageVerificationCode>
+
+{% if mainLicenses|length > 1 %}
+{% if dualLicense %}
+  <spdx:expandedlicensing_DisjunctiveLicenseSet>
+      {% else %}
+  <spdx:expandedlicensing_ConjunctiveLicenseSet>
+      {% endif %} {# End dual license check #}
+    <spdx:spdxId rdf:resource="#SPDXRef-upload{{ packageId }}"/>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    {% for res in mainLicenses %}
+      {% if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' %}
+        {% set licId = licenseList[res].licenseObj.spdxId %}
+        {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+          {% set licId = licenseList[res].licenseObj.shortName %}
+        {% endif %}
+    <spdx:expandedlicensing_member>
+      <spdx:simplelicensing_AnyLicenseInfo rdf:about="#{{ licId|replace({' ': '-'})|url_encode }}">
+        <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+        <spdx:spdxId rdf:resource="#SPDXRef-upload{{ packageId }}"/>
+      </spdx:simplelicensing_AnyLicenseInfo>
+    </spdx:expandedlicensing_member>
+      {% else %}
+    <spdx:expandedlicensing_member>
+      <spdx:simplelicensing_AnyLicenseInfo rdf:about="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}">
+        <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+        <spdx:spdxId rdf:resource="#SPDXRef-upload{{ packageId }}"/>
+      </spdx:simplelicensing_AnyLicenseInfo>
+    </spdx:expandedlicensing_member>
+      {% endif %}
+    {% endfor %}
+{% if dualLicense %}
+  </spdx:expandedlicensing_DisjunctiveLicenseSet>
+      {% else %}
+  </spdx:expandedlicensing_ConjunctiveLicenseSet>
+      {% endif %} {# End dual license check #}
+{% elseif mainLicenses|length == 1 %}
+  {% set res = mainLicenses[0] %}
+  {% if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' %}
+    {% set licId = licenseList[res].licenseObj.spdxId %}
+    {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+      {% set licId = licenseList[res].licenseObj.shortName %}
+    {% endif %}
+  <spdx:simplelicensing_AnyLicenseInfo rdf:about="#{{ licId|replace({' ': '-'})|url_encode }}">
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:spdxId rdf:resource="#SPDXRef-upload{{ packageId }}"/>
+  </spdx:simplelicensing_AnyLicenseInfo>
+  {% else %}
+  <spdx:simplelicensing_AnyLicenseInfo rdf:about="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}">
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:spdxId rdf:resource="#SPDXRef-upload{{ packageId }}"/>
+  </spdx:simplelicensing_AnyLicenseInfo>
+  {% endif %}
+{% endif %}
+  <spdx:Annotation rdf:about="https://spdx.org/rdf/3.0.0/terms#NoAssertionLicense">
+    <spdx:spdxId rdf:resource="#SPDXRef-upload{{ packageId }}"/>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:annotationType> other </spdx:annotationType>
+    <spdx:subject> Package:SPDXRef-upload{{ packageId }} </spdx:subject>
+    <spdx:statement> SPDX 2.X LicenseInfoInFiles </spdx:statement>
+    {%- if generalAssessment is not empty ~%}
+    <spdx:comment> <![CDATA[
+          {{ generalAssessment|replace({']]>':']]><![CDATA[>'}) }}
+        ]]></spdx:comment>
+    {%- endif ~%}
+  </spdx:Annotation>
+  <spdx:Relationship rdf:about="{{ uri }}#SPDXRef-Relationship-0">
+    <spdx:spdxId>SPDXRef-Relationship-0</spdx:spdxId>
+    <spdx:relationshipType>describes</spdx:relationshipType>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:from rdf:resource="#SPDXRef-DOCUMENT"/>
+    <spdx:to rdf:resource="#SPDXRef-upload{{ packageId }}"/>
+  </spdx:Relationship>
+
+{{ fileNodes }}

@@ -1,0 +1,206 @@
+{# SPDX-FileCopyrightText: © 2015,2023 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% set dualLicense = false %}
+{% set textPrintedList = [] %}
+{% if fileData.concludedLicenses|length > 2 %}
+  {% for res in fileData.concludedLicenses %}
+    {% if 'Dual-license' == licenseList[res].licenseObj.shortName %}
+      {% set dualLicense = true %}
+    {% endif %}
+  {% endfor %}
+{%- endif -%}
+  <spdx:File rdf:about="#SPDXRef-item{{ fileId|url_encode }}">
+    <spdx:spdxId>SPDXRef-item{{ fileId }}</spdx:spdxId>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:name>{{ fileName|e }}</spdx:name>
+    {% if licenseCommentState %}
+    {% if fileData.comments is empty %}
+    <spdx:comment rdf:resource="https://spdx.org/rdf/3.0.0/terms#NoAssertion"/>
+    {%~ else %}
+    <spdx:comment><![CDATA[{{ fileData.comments|join("\n")|e }}]]></spdx:comment>
+    {% endif %}
+    {% endif %}
+    {%~ if fileData.copyrights|default is empty %}
+    <spdx:software_copyrightText rdf:resource="https://spdx.org/rdf/3.0.0/terms#NoAssertion" />
+    {%~ else %}
+    <spdx:software_copyrightText><![CDATA[
+    {%~ for cp in fileData.copyrights %}
+      {{ cp|replace({'\f':''})
+           |replace({']]>':']]]]><![CDATA[>'}) }}
+    {%~ endfor %}
+    ]]></spdx:software_copyrightText>
+    {%~ endif %}
+    {% if fileData.acknowledgements|default is not empty %}
+    <spdx:software_attributionText><![CDATA[{{ fileData.acknowledgements|join('\n')|replace({'\f':''})
+            |replace({']]>':']]]]><![CDATA[>'}) }}]]></spdx:software_attributionText>
+    {% endif %}
+    <spdx:verifiedUsing>
+      <spdx:Hash>
+        <spdx:algorithm rdf:resource="https://spdx.org/rdf/3.0.0/terms#checksumAlgorithm_sha1"/>
+        <spdx:hashValue>{{ sha1 | lower }}</spdx:hashValue>
+        <spdx:algorithm rdf:resource="https://spdx.org/rdf/3.0.0/terms#checksumAlgorithm_sha256"/>
+        <spdx:hashValue>{{ sha256 | lower }}</spdx:hashValue>
+        <spdx:algorithm rdf:resource="https://spdx.org/rdf/3.0.0/terms#checksumAlgorithm_md5"/>
+        <spdx:hashValue>{{ md5 | lower }}</spdx:hashValue>
+      </spdx:Hash>
+    </spdx:verifiedUsing>
+  </spdx:File>
+{%~ if fileData.isCleared() %}{# File clearing decisions #}
+  {%~ if fileData.concludedLicenses|default is empty %}
+  <spdx:expandedlicensing_IndividualLicensingInfo rdf:about="https://spdx.org/rdf/3.0.0/terms#NoneLicense">
+      <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+      <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+  </spdx:expandedlicensing_IndividualLicensingInfo>
+  {%~ elseif fileData.concludedLicenses|length > 1 %}
+  {% if dualLicense %}
+  <spdx:expandedlicensing_DisjunctiveLicenseSet>
+  {% else %}
+  <spdx:expandedlicensing_ConjunctiveLicenseSet>
+  {% endif %} {# End dual license check #}
+      <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+      <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    {%~ for res in fileData.concludedLicenses %}
+      {%~ if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+        {%- set licId = licenseList[res].licenseObj.spdxId %}
+        {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+          {% set licId = licenseList[res].licenseObj.shortName %}
+        {%- endif %}
+    <spdx:expandedlicensing_member>
+      <spdx:simplelicensing_AnyLicenseInfo rdf:about="#{{ licId|replace({' ': '-'})|url_encode }}">
+        <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+        <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+      </spdx:simplelicensing_AnyLicenseInfo>
+    </spdx:expandedlicensing_member>
+      {%~ else %}
+      {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
+        {%~ set textPrintedList = textPrintedList|merge([res]) %}
+    <spdx:expandedlicensing_member>
+      <spdx:expandedlicensing_ListedLicense rdf:about="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}">
+        <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+        <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+      {% if licenseList[res].licenseObj.url is not empty %}
+        {% if '&' in licenseList[res].licenseObj.url %}
+        <spdx:expandedlicensing_seeAlso> {{ licenseList[res].licenseObj.url|url_encode }} </spdx:expandedlicensing_seeAlso>
+        {% else %}
+        <spdx:expandedlicensing_seeAlso> {{ licenseList[res].licenseObj.url }} </spdx:expandedlicensing_seeAlso>
+        {% endif %}
+      {% endif %}
+        <spdx:simplelicensing_licenseText> <![CDATA[
+        {{ licenseList[res].licenseObj.text|replace({'\f':''})
+            |replace({']]>':']]]]><![CDATA[>'}) }}
+          ]]></spdx:simplelicensing_licenseText>
+        <spdx:name> {{ licenseList[res].licenseObj.fullName|e }} </spdx:name>
+      </spdx:expandedlicensing_ListedLicense>
+    </spdx:expandedlicensing_member>
+      {%~ else %}{# License already printed #}
+    <spdx:expandedlicensing_member>
+      <spdx:simplelicensing_AnyLicenseInfo rdf:about="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}">
+        <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+        <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+        <spdx:name> {{ licenseList[res].licenseObj.fullName|e }} </spdx:name>
+      </spdx:simplelicensing_AnyLicenseInfo>
+    </spdx:expandedlicensing_member>
+      {%~ endif %}
+  {%~ endif %}{# End printing license conclusion #}
+{%~ endfor %}
+{% if dualLicense %}
+  </spdx:expandedlicensing_DisjunctiveLicenseSet>
+  {% else %}
+  </spdx:expandedlicensing_ConjunctiveLicenseSet>
+  {% endif %} {# End dual license check #}
+  {%~ elseif fileData.concludedLicenses|length == 1 %}
+    {%- set res = fileData.concludedLicenses[0] %}
+    {%- if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+      {%- set licId = licenseList[res].licenseObj.spdxId %}
+      {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+        {% set licId = licenseList[res].licenseObj.shortName %}
+      {%- endif %}
+  <spdx:simplelicensing_AnyLicenseInfo rdf:about="#{{ licId|replace({' ': '-'})|url_encode }}">
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+  </spdx:simplelicensing_AnyLicenseInfo>
+    {%~ else %}
+      {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
+        {%~ set textPrintedList = textPrintedList|merge([res]) %}
+  <spdx:expandedlicensing_ListedLicense rdf:about="#{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|e }}">
+      <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+      <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+    {% if licenseList[res].licenseObj.url is not empty %}
+      {% if '&' in licenseList[res].licenseObj.url %}
+      <spdx:expandedlicensing_seeAlso> {{ licenseList[res].licenseObj.url|url_encode }} </spdx:expandedlicensing_seeAlso>
+      {% else %}
+      <spdx:expandedlicensing_seeAlso> {{ licenseList[res].licenseObj.url }} </spdx:expandedlicensing_seeAlso>
+      {% endif %}
+    {% endif %}
+    <spdx:simplelicensing_licenseText><![CDATA[
+        {{ licenseList[res].licenseObj.text|replace({'\f':''})
+            |replace({']]>':']]]]><![CDATA[>'}) }}
+          ]]></spdx:simplelicensing_licenseText>
+    <spdx:name> {{ licenseList[res].licenseObj.fullName|e }} </spdx:name>
+  </spdx:expandedlicensing_ListedLicense>
+      {%~ else %}
+  <spdx:simplelicensing_AnyLicenseInfo rdf:about="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}">
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+    <spdx:name>{{ licenseList[res].licenseObj.fullName|e }}</spdx:name>
+  </spdx:simplelicensing_AnyLicenseInfo>
+    {% endif %} 
+  {%~ endif %}{# End printing single conclusion #}
+    {% endif %} 
+  {%~ else %}{# No concluded licenses #}
+  <spdx:expandedlicensing_IndividualLicensingInfo rdf:about="https://spdx.org/rdf/3.0.0/terms#NoAssertionLicense">
+    <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+  </spdx:expandedlicensing_IndividualLicensingInfo>
+{% endif %}{# End license conclusion block #}
+{%~ if fileData.scanners|default is empty %}
+  <spdx:Annotation rdf:about="https://spdx.org/rdf/3.0.0/terms#NoAssertionLicense">
+    <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:annotationType> other </spdx:annotationType>
+    <spdx:subject> File:SPDXRef-item{{ fileId }} </spdx:subject>
+    <spdx:statement> SPDX 2.X LicenseInfoInFiles </spdx:statement>
+  </spdx:Annotation>
+{%~ else %}
+{%~ for res in fileData.scanners %}
+  {%~ if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+    {%- set licId=licenseList[res].licenseObj.spdxId %}
+    {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+      {% set licId=licenseList[res].licenseObj.shortName %}
+    {%- endif ~%}
+  <spdx:Annotation rdf:about="#{{ licId|replace({' ': '-'}) }}">
+    <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:annotationType> other </spdx:annotationType>
+    <spdx:subject> File:SPDXRef-item{{ fileId }} </spdx:subject>
+    <spdx:statement> SPDX 2.X LicenseInfoInFiles </spdx:statement>
+  </spdx:Annotation>
+  {%~ else %}
+    {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
+      {%~ set textPrintedList = textPrintedList|merge([res]) %}
+  <spdx:Annotation rdf:about="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|e }}">
+    <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:annotationType> other </spdx:annotationType>
+    <spdx:subject> File:SPDXRef-item{{ fileId }} </spdx:subject>
+    <spdx:name>{{ licenseList[res].licenseObj.fullName|e }}</spdx:name>
+    <spdx:statement> SPDX 2.X LicenseInfoInFiles <![CDATA[
+            {{ licenseList[res].licenseObj.text|replace({'\f':''})
+                |replace({']]>':']]]]><![CDATA[>'}) }}
+              ]]>
+    </spdx:statement>
+  </spdx:Annotation>
+    {%~ else %}
+  <spdx:Annotation rdf:about="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'}) }}">
+    <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:annotationType> other </spdx:annotationType>
+    <spdx:subject> File:SPDXRef-item{{ fileId }} </spdx:subject>
+    <spdx:statement> SPDX 2.X LicenseInfoInFiles </spdx:statement>
+  </spdx:Annotation>
+    {%~ endif %}
+  {%- endif %}
+{%- endfor %}{# End printing license infos in file #}
+{%- endif %}

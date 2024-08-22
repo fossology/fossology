@@ -1,0 +1,90 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+
+##--------------------------
+## Package Information
+##--------------------------
+
+type: software_Package
+spdxId: SPDXRef-upload{{ packageId }}
+creationInfo: creationInfo:creationInfo1
+name: {{ packageName }}
+filename: {{ uploadName }}
+{%- if licenseComments is not empty %}
+
+comment: <text> {{ licenseComments|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})|replace({'\f':'','"':"'", '\n':''}) }} </text>
+{%- endif %}
+
+software_downloadLocation: NOASSERTION
+
+{%- if packageVersion is not empty %}
+
+software_packageVersion: {{ packageVersion|e }}
+{%- endif %}
+
+{%- if releaseDate is not empty %}
+
+releaseTime: {{ releaseDate }}
+{%- endif %}
+
+{%- if componentId is not empty %}
+
+externalRef.type: ExternalRef
+externalRef.comment: Package-Manager
+externalRef.externalRefType: {{ componentType }}
+externalRef.locator: {{ componentId|trim }}
+{%- endif %}
+
+software_copyrightText: NOASSERTION
+
+{%- if obligations|default is not empty %}
+
+  software_attributionText: <text> {{ obligations|join('\n')|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})|replace({'\f':''}) }} </text>
+{%- endif %}
+
+verifiedUsing.type: Hash
+verifiedUsing.algorithm: sha1
+verifiedUsing.hashValue: {{ sha1 | lower }}
+
+verifiedUsing.type: Hash
+verifiedUsing.algorithm: sha256
+verifiedUsing.hashValue: {{ sha256 | lower }}
+
+verifiedUsing.type: Hash
+verifiedUsing.algorithm: md5
+verifiedUsing.hashValue: {{ md5 | lower }}
+
+type: PackageVerificationCode
+algorithm: sha1
+hashValue: {{ verificationCode }}
+
+{% if mainLicenses|default is empty %}
+type: simplelicensing_AnyLicenseInfo
+creationInfo: creationInfo:creationInfo1
+spdxId: SPDXRef-upload{{ packageId }}#NoAssertionLicense
+{% else %}
+type: simplelicensing_AnyLicenseInfo
+creationInfo: creationInfo:creationInfo1
+spdxId: SPDXRef-upload{{ packageId }}#{{ mainLicenseString }}
+{% endif %}
+
+type: Annotation
+spdxId: SPDXRef-upload{{ packageId }}#NoAssertionLicense
+creationInfo: creationInfo1
+annotationType: other
+subject: SPDXRef-item{{ fileId }}
+statement: SPDX 2.X LicenseInfoFromFiles
+##-------------------------------------------
+## Document-Package Relationship Information
+##-------------------------------------------
+
+type: Relationship
+spdxId: SPDXRef-Relationship-0
+from: SPDXRef-DOCUMENT
+to: SPDXRef-upload{{ packageId }}
+relationshipType: describes
+creationInfo: creationInfo:creationInfo1
+
+{{ fileNodes }}

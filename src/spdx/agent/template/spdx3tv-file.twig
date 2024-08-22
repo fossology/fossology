@@ -1,0 +1,92 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+
+##--------------------------
+## File
+##--------------------------
+
+type: software_File
+spdxId: SPDXRef-item{{ fileId }}
+creationInfo: creationInfo1
+name: {{ fileName }}
+
+verifiedUsing.type: Hash
+verifiedUsing.algorithm: sha1
+verifiedUsing.hashValue: {{ sha1 | lower }}
+
+verifiedUsing.type: Hash
+verifiedUsing.algorithm: sha256
+verifiedUsing.hashValue: {{ sha256 | lower }}
+
+verifiedUsing.type: Hash
+verifiedUsing.algorithm: md5
+verifiedUsing.hashValue: {{ md5 | lower }}
+
+{%- if fileData.isCleared() %}
+{%- if fileData.concludedLicenses|default is empty %}
+
+type: expandedlicensing_IndividualLicensingInfo
+spdxId: SPDXRef-item{{ fileId }}#NoneLicense
+creationInfo: creationInfo1
+{%- else %}
+
+type: simplelicensing_AnyLicenseInfo
+spdxId: SPDXRef-item{{ fileId }}#{{ concludedLicensesString }}
+creationInfo: creationInfo1
+
+{% endif%}
+{% else %}
+
+type: expandedlicensing_IndividualLicensingInfo
+spdxId: SPDXRef-item{{ fileId }}#NoAssertionLicense
+creationInfo: creationInfo1
+{% endif %}
+
+
+{%- if licenseCommentState %}
+{%- if fileData.comments is empty %}
+
+comment: NOASSERTION
+{%- else %}
+
+comment: <text>{{ fileData.comments|join('\n')|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})|replace({'\f':''}) }}</text>
+{%- endif %}
+{%- endif %}
+{% if fileData.scanners|default is empty %}
+type: Annotation
+spdxId: SPDXRef-item{{ fileId }}#NoAssertionLicense
+creationInfo: creationInfo1
+annotationType: other
+subject: SPDXRef-item{{ fileId }}
+statement: SPDX 2.X LicenseInfoInFiles
+{% else %}
+{% for res in fileData.scanners %}
+{%- set licId=licenseList[res].licenseObj.spdxId %}
+{% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+  {% set licId=licenseList[res].licenseObj.shortName %}
+{%- endif ~%}
+type: Annotation
+spdxId: SPDXRef-item{{ fileId }}#{{ licId|replace({' ':'-'})}}
+creationInfo: creationInfo1
+annotationType: other
+subject: SPDXRef-item{{ fileId }}
+statement: SPDX 2.X LicenseInfoInFiles
+{% endfor %}
+{% endif %}
+
+{%- if fileData.copyrights|default is empty %}
+
+software_copyrightText: NOASSERTION
+{%- else %}
+
+software_copyrightText: <text> {{ fileData.copyrights|join('\n')|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})|replace({'\f':'','"':"'", '\n':''}) }} </text>
+{%- endif %}
+
+{%- if fileData.acknowledgements|default is not empty %}
+
+software_attributionText: <text> {{ fileData.acknowledgements|join('\n')|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})|replace({'\f':'','"':"'", '\n':''}) }} </text>
+{%- endif %}
+
+
