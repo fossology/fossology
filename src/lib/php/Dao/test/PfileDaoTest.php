@@ -17,7 +17,7 @@ use Monolog\Logger;
  * Location of test data from SPDX for license conclusions
  */
 define("SPDX_TEST_DATA", dirname(dirname(dirname(dirname(__DIR__)))) .
-  "/spdx2/agent_tests/Functional/fo_report.sql");
+  "/spdx/agent_tests/Functional/fo_report.sql");
 
 /**
  * @class PfileDaoTest
