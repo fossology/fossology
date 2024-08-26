@@ -10,10 +10,13 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class MonkAgentPlugin extends AgentPlugin
 {
+  /** @var monkDesc */
+  private $monkDesc = "Scan files for licenses using text comparison method";
+
   public function __construct()
   {
     $this->Name = "agent_monk";
-    $this->Title = _("Monk License Analysis, scanning for licenses performing a text comparison");
+    $this->Title = _("Monk License Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->monkDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "monk";
 
     parent::__construct();

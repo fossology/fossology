@@ -63,10 +63,11 @@ class ObligationCsvExport
    * @param int $ob Obligation id to be returned, else set 0 to get all.
    * @return string CSV
    */
-  public function createCsv($ob=0)
+  public function createCsv($ob=0, $generateJson=false)
   {
     $csvarray = array();
-    $sql = "SELECT ob_pk,ob_type,ob_topic,ob_text,ob_classification,ob_modifications,ob_comment
+    $sql = "SELECT ob_pk,ob_type AS Type,ob_topic AS \"Obligation or Risk topic\",ob_text AS \"Full Text\",
+            ob_classification AS Classification,ob_modifications AS \"Apply on modified source code\",ob_comment AS Comment
             FROM obligation_ref";
     if ($ob>0) {
       $stmt = __METHOD__.'.ob';
@@ -75,8 +76,8 @@ class ObligationCsvExport
       $liclist = $this->obligationMap->getLicenseList($ob);
       $candidatelist = $this->obligationMap->getLicenseList($ob, True);
       array_shift($row);
-      $row[] = $liclist;
-      $row[] = $candidatelist;
+      $row["Associated Licenses"] = $liclist;
+      $row["Associated candidate Licenses"] = $candidatelist;
       $csvarray[] = $row;
     } else {
       $stmt = __METHOD__;
@@ -89,21 +90,24 @@ class ObligationCsvExport
         $liclist = $this->obligationMap->getLicenseList($row['ob_pk']);
         $candidatelist = $this->obligationMap->getLicenseList($row['ob_pk'], True);
         array_shift($row);
-        $row[] = $liclist;
-        $row[] = $candidatelist;
+        $row["Associated Licenses"] = $liclist;
+        $row["Associated candidate Licenses/"] = $candidatelist;
         $csvarray[] = $row;
       }
     }
-
-    $out = fopen('php://output', 'w');
-    ob_start();
-    $head = array('Type','Obligation or Risk topic','Full Text','Classification','Apply on modified source code','Comment','Associated Licenses','Associated candidate Licenses');
-    fputcsv($out, $head, $this->delimiter, $this->enclosure);
-    foreach ($csvarray as $row) {
-      fputcsv($out, $row, $this->delimiter, $this->enclosure);
+    if ($generateJson) {
+      return json_encode($csvarray, JSON_PRETTY_PRINT);
+    } else {
+      $out = fopen('php://output', 'w');
+      ob_start();
+      $head = array('Type','Obligation or Risk topic','Full Text','Classification','Apply on modified source code','Comment','Associated Licenses','Associated candidate Licenses');
+      fputcsv($out, $head, $this->delimiter, $this->enclosure);
+      foreach ($csvarray as $row) {
+        fputcsv($out, $row, $this->delimiter, $this->enclosure);
+      }
+      $content = ob_get_contents();
+      ob_end_clean();
+      return $content;
     }
-    $content = ob_get_contents();
-    ob_end_clean();
-    return $content;
   }
 }

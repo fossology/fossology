@@ -19,6 +19,7 @@ use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\Job;
+use Fossology\UI\Api\Models\JobQueue;
 use Fossology\UI\Api\Models\User;
 use Mockery as M;
 use Slim\Psr7\Factory\StreamFactory;
@@ -157,12 +158,15 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
   public function testGetJobs()
   {
     $job = new Job(11, "job_name", "01-01-2020", 4, 2, 2, 0, "Completed");
-    $this->jobDao->shouldReceive('getAllJobStatus')->withArgs(array(4, 2, 2))
-      ->andReturn(['11' => 0]);
+    $jobQueue = new JobQueue(44, 'readmeoss', '2020-01-01 20:41:49', '2020-01-01 20:41:50',
+      'Completed', 0, null, [], 0, true, false, true,
+      ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']);
+    $this->jobDao->shouldReceive('getChlidJobStatus')->withArgs(array(11))
+      ->andReturn(['44' => 0]);
     $this->showJobsDao->shouldReceive('getEstimatedTime')
       ->withArgs(array(11, '', 0, 4))->andReturn("0");
     $this->showJobsDao->shouldReceive('getDataForASingleJob')
-      ->withArgs(array(11))->andReturn(["jq_endtext"=>'Completed']);
+      ->withArgs(array(44))->andReturn(["jq_endtext"=>'Completed']);
 
     $requestHeaders = new Headers();
     $body = $this->streamFactory->createStream();
@@ -175,7 +179,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('getUserJobs')->withArgs(array(null, 2, 0, 1))
       ->andReturn([[$job], 1]);
     $actualResponse = $this->jobController->getJobs($request, $response, []);
-    $expectedResponse = $job->getArray();
+    $expectedResponse = $job->getArray(ApiVersion::V1);
     $this->assertEquals(200, $actualResponse->getStatusCode());
     $this->assertEquals($expectedResponse,
       $this->getResponseJson($actualResponse)[0]);
@@ -191,14 +195,17 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
   public function testGetJobsLimitPage()
   {
     $jobTwo = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");
-    $this->jobDao->shouldReceive('getAllJobStatus')->withArgs(array(4, 2, 2))
-      ->andReturn(['11' => 0]);
-    $this->jobDao->shouldReceive('getAllJobStatus')->withArgs(array(5, 2, 2))
-      ->andReturn(['12' => 0]);
+    $jobTwoQueue = new JobQueue(45, 'readmeoss', '2020-01-01 20:41:49', '2020-01-01 20:41:50',
+    'Completed', 0, null, [], 0, true, false, true,
+    ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']);
+    $this->jobDao->shouldReceive('getChlidJobStatus')->withArgs(array(11))
+      ->andReturn(['44' => 0]);
+    $this->jobDao->shouldReceive('getChlidJobStatus')->withArgs(array(12))
+      ->andReturn(['45' => 0]);
     $this->showJobsDao->shouldReceive('getEstimatedTime')
       ->withArgs(array(M::anyOf(11, 12), '', 0, M::anyOf(4, 5)))->andReturn("0");
     $this->showJobsDao->shouldReceive('getDataForASingleJob')
-      ->withArgs([M::anyOf(11, 12)])->andReturn(["jq_endtext"=>'Completed']);
+      ->withArgs([M::anyOf(44, 45)])->andReturn(["jq_endtext"=>'Completed']);
 
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('limit', '1');
@@ -213,7 +220,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('getUserJobs')->withArgs(array(null, 2, 1, 2))
     ->andReturn([[$jobTwo], 2]);
     $actualResponse = $this->jobController->getJobs($request, $response, []);
-    $expectedResponse = $jobTwo->getArray();
+    $expectedResponse = $jobTwo->getArray(ApiVersion::V1);
     $this->assertEquals(200, $actualResponse->getStatusCode());
     $this->assertEquals($expectedResponse,
       $this->getResponseJson($actualResponse)[0]);
@@ -266,16 +273,19 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
   private function testGetJobFromId($version = ApiVersion::V2)
   {
     $job = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");
+    $jobTwoQueue = new JobQueue(45, 'readmeoss', '2020-01-01 20:41:49', '2020-01-01 20:41:50',
+    'Completed', 0, null, [], 0, true, false, true,
+    ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["job", "job_pk", 12])->andReturn(true);
     $this->dbHelper->shouldReceive('getJobs')->withArgs(array(12, 0, 1))
       ->andReturn([[$job], 1]);
-    $this->jobDao->shouldReceive('getAllJobStatus')->withArgs(array(5, 2, 2))
-      ->andReturn(['12' => 0]);
+    $this->jobDao->shouldReceive('getChlidJobStatus')->withArgs(array(12))
+      ->andReturn(['45' => 0]);
     $this->showJobsDao->shouldReceive('getEstimatedTime')
       ->withArgs(array(12, '', 0, 5))->andReturn("0");
     $this->showJobsDao->shouldReceive('getDataForASingleJob')
-      ->withArgs([12])->andReturn(["jq_endtext"=>'Completed']);
+      ->withArgs([45])->andReturn(["jq_endtext"=>'Completed']);
 
     $requestHeaders = new Headers();
     $body = $this->streamFactory->createStream();
@@ -294,7 +304,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $actualResponse = $this->jobController->getJobs($request, $response, [
       "id" => 12]);
-    $expectedResponse = $job->getArray();
+    $expectedResponse = $job->getArray(ApiVersion::V1);
     $this->assertEquals(200, $actualResponse->getStatusCode());
     $this->assertEquals($expectedResponse,
       $this->getResponseJson($actualResponse));
@@ -326,18 +336,21 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
   private function testGetJobsFromUpload($version = ApiVersion::V2)
   {
     $job = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");
+    $jobTwoQueue = new JobQueue(45, 'readmeoss', '2020-01-01 20:41:49', '2020-01-01 20:41:50',
+    'Completed', 0, null, [], 0, true, false, true,
+    ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", 5])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(['job', 'job_pk', 12])->andReturn(true);
     $this->dbHelper->shouldReceive('getJobs')->withArgs(array(null, 0, 1, 5))
       ->andReturn([[$job], 1]);
-    $this->jobDao->shouldReceive('getAllJobStatus')->withArgs(array(5, 2, 2))
-      ->andReturn(['12' => 0]);
+    $this->jobDao->shouldReceive('getChlidJobStatus')->withArgs(array(12))
+      ->andReturn(['45' => 0]);
     $this->showJobsDao->shouldReceive('getEstimatedTime')
       ->withArgs(array(12, '', 0, 5))->andReturn("0");
     $this->showJobsDao->shouldReceive('getDataForASingleJob')
-      ->withArgs([12])->andReturn(["jq_endtext"=>'Completed']);
+      ->withArgs([45])->andReturn(["jq_endtext"=>'Completed']);
 
     $requestHeaders = new Headers();
     $body = $this->streamFactory->createStream();
@@ -356,7 +369,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $user = $this->getUsers([$userId]);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $actualResponse = $this->jobController->getJobs($request, $response, []);
-    $expectedResponse = $job->getArray();
+    $expectedResponse = $job->getArray(ApiVersion::V1);
     $this->assertEquals(200, $actualResponse->getStatusCode());
     $this->assertEquals($expectedResponse,
       $this->getResponseJson($actualResponse)[0]);
