@@ -8,7 +8,7 @@
 # Description: Gitlab CI runner image recipie
 # Using Debian 12
 
-FROM debian:bookworm-slim as builder
+FROM debian:bookworm-slim AS builder
 
 WORKDIR /fossology
 
@@ -44,13 +44,13 @@ RUN chown $(whoami):$(whoami) -R .
 RUN cmake -DCMAKE_BUILD_TYPE=MinSizeRel \
     -DAGENTS="nomos;copyright;ojo" \
     -S. -B./build -G Ninja \
- && ninja -C ./build nomossa copyright keyword ojo
+ && ninja -C ./build nomossa copyright keyword ojo_exec
 
 RUN dpkg-shlibdeps -Orun-deps -ebuild/src/nomos/agent/nomossa \
                               -ebuild/src/copyright/agent/copyright \
                               -ebuild/src/copyright/agent/keyword \
                               -ebuild/src/ojo/agent/ojo \
- && sed -E -i -e 's/(shlibs:Depends=)|(\(>=?[ 0-9\:\.\~\-]*\))|(,)//g' run-deps
+ && sed -E -i -e 's/(shlibs:Depends=)|(\(>=?[ 0-9a-z:.~+-]*\))|(,)//ig' run-deps
 
 FROM debian:bookworm-slim
 
@@ -77,7 +77,7 @@ RUN echo 'APT::Install-Recommends "0" ; APT::Install-Suggests "0" ;' >> /etc/apt
  && DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install --yes \
  --no-install-recommends $(cat /opt/run-deps) python3 python3-pip \
- && python3 -m pip install -r /bin/requirements.txt \
+ && python3 -m pip install --break-system-packages -r /bin/requirements.txt \
  && DEBIAN_FRONTEND=noninteractive apt-get autoremove --yes \
  && rm -rf /var/lib/apt/lists/* /opt/run-deps /bin/requirements.txt
 

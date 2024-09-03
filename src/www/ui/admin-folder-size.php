@@ -54,25 +54,11 @@ class size_dashboard extends FO_Plugin
     $results = $this->dbManager->getRows($dispSql, [$folderId], $statementName);
     $var = '';
     foreach ($results as $result) {
-      $duration = "NA";
-      $assignDate = $this->uploadDao->getAssigneeDate($result["upload_pk"]);
-      $closingDate = $this->uploadDao->getClosedDate($result["upload_pk"]);
-      $durationSort = 0;
-      if ($assignDate != null && $closingDate != null) {
-        try {
-          $closingDate = new DateTime($closingDate);
-          $assignDate = new DateTime($assignDate);
-          if ($assignDate < $closingDate) {
-            $duration = HumanDuration($closingDate->diff($assignDate));
-            $durationSort = $closingDate->getTimestamp() - $assignDate->getTimestamp();
-          }
-        } catch (Exception $_) {
-        }
-      }
+      $clearingDuration = $this->uploadDao->getClearingDuration($result["upload_pk"]);
       $var .= "<tr><td align='left'>" . $result['upload_filename'] .
         "</td><td align='left' data-order='{$result['pfile_size']}'>" .
         HumanSize($result['pfile_size']) .
-        "</td><td align='left' data-order='{$durationSort}'>$duration</td></tr>";
+        "</td><td align='left' data-order='{$clearingDuration[1]}'>$clearingDuration[0]</td></tr>";
     }
     return [$var, $folderSize];
   }

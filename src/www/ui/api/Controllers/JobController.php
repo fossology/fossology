@@ -90,7 +90,7 @@ class JobController extends RestController
         "Limit and page cannot be smaller than 1 and has to be numeric!");
     }
 
-    return $this->getAllResults($id, $response, $limit, $page);
+    return $this->getAllResults($id, $request, $response, $limit, $page, $apiVersion);
   }
 
   /**
@@ -135,16 +135,16 @@ class JobController extends RestController
 
     if ($id !== null) {
       /* If the ID is passed, don't check for upload */
-      return $this->getAllResults($id, $response, $limit, $page);
+      return $this->getAllResults($id, $request, $response, $limit, $page, $apiVersion);
     }
 
     if (array_key_exists(self::UPLOAD_PARAM, $query)) {
       /* If the upload is passed, filter accordingly */
       return $this->getFilteredResults(intval($query[self::UPLOAD_PARAM]),
-        $response, $limit, $page);
+        $request, $response, $limit, $page, $apiVersion);
     } else {
       $id = null;
-      return $this->getAllUserResults($id,$userId, $response, $limit, $page);
+      return $this->getAllUserResults($id, $userId, $request, $response, $limit, $page, $apiVersion);
     }
   }
 
@@ -250,21 +250,28 @@ class JobController extends RestController
    *
    * @param integer|null $id Specific job id or null for all jobs
    * @param integer $uid Specific user id
+   * @param Request $request Request object
    * @param ResponseHelper $response Response object
    * @param integer $limit   Limit of jobs per page
    * @param integer $page    Page number required
+   * @param integer $apiVersion API version
    * @return ResponseHelper
    */
-  private function getAllUserResults($id, $uid, $response, $limit, $page)
+  private function getAllUserResults($id, $uid, $request, $response, $limit, $page, $apiVersion)
   {
     list($jobs, $count) = $this->dbHelper->getUserJobs($id, $uid, $limit, $page);
     $finalJobs = [];
     foreach ($jobs as $job) {
       $this->updateEtaAndStatus($job);
-      $finalJobs[] = $job->getArray();
+      if ($apiVersion == ApiVersion::V2) {
+        $this->addJobQueue($job, $request);
+      }
+      $finalJobs[] = $job->getArray($apiVersion);
     }
     if ($id !== null) {
       $finalJobs = $finalJobs[0];
+    } else {
+      usort($finalJobs, [$this, "sortJobsByDate"]);
     }
     return $response->withHeader("X-Total-Pages", $count)->withJson($finalJobs, 200);
   }
@@ -273,21 +280,28 @@ class JobController extends RestController
    * Get all jobs for the current user.
    *
    * @param integer|null $id Specific job id or null for all jobs
+   * @param Request $request Request object
    * @param ResponseHelper $response Response object
    * @param integer $limit   Limit of jobs per page
    * @param integer $page    Page number required
+   * @param integer $apiVersion API version
    * @return ResponseHelper
    */
-  private function getAllResults($id, $response, $limit, $page)
+  private function getAllResults($id, $request, $response, $limit, $page, $apiVersion)
   {
     list($jobs, $count) = $this->dbHelper->getJobs($id, $limit, $page);
     $finalJobs = [];
     foreach ($jobs as $job) {
       $this->updateEtaAndStatus($job);
-      $finalJobs[] = $job->getArray();
+      if ($apiVersion == ApiVersion::V2) {
+        $this->addJobQueue($job, $request);
+      }
+      $finalJobs[] = $job->getArray($apiVersion);
     }
     if ($id !== null) {
       $finalJobs = $finalJobs[0];
+    } else {
+      usort($finalJobs, [$this, "sortJobsByDate"]);
     }
     return $response->withHeader("X-Total-Pages", $count)->withJson($finalJobs, 200);
   }
@@ -296,13 +310,15 @@ class JobController extends RestController
    * Get all jobs for the given upload.
    *
    * @param integer $uploadId Upload id to be filtered
+   * @param Request $request Request object
    * @param ResponseHelper $response Response object
    * @param integer $limit Limit of jobs per page
    * @param integer $page Page number required
+   * @param integer $apiVersion API version
    * @return ResponseHelper
    * @throws HttpNotFoundException
    */
-  private function getFilteredResults($uploadId, $response, $limit, $page)
+  private function getFilteredResults($uploadId, $request, $response, $limit, $page, $apiVersion)
   {
     if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
       throw new HttpNotFoundException("Upload id " . $uploadId .
@@ -312,8 +328,12 @@ class JobController extends RestController
     $finalJobs = [];
     foreach ($jobs as $job) {
       $this->updateEtaAndStatus($job);
-      $finalJobs[] = $job->getArray();
+      if ($apiVersion == ApiVersion::V2) {
+        $this->addJobQueue($job, $request);
+      }
+      $finalJobs[] = $job->getArray($apiVersion);
     }
+    usort($finalJobs, [$this, "sortJobsByDate"]);
     return $response->withHeader("X-Total-Pages", $count)->withJson($finalJobs, 200);
   }
 
@@ -327,20 +347,7 @@ class JobController extends RestController
     $jobDao = $this->restHelper->getJobDao();
 
     $jobqueue = [];
-
-    /* Check if the job has no upload like Maintenance job */
-    if (empty($job->getUploadId())) {
-      $sql = "SELECT jq_pk, jq_end_bits from jobqueue WHERE jq_job_fk = $1;";
-      $statement = __METHOD__ . ".getJqpk";
-      $rows = $this->dbHelper->getDbManager()->getRows($sql, [$job->getId()],
-        $statement);
-      if (count($rows) > 0) {
-        $jobqueue[$rows[0]['jq_pk']] = $rows[0]['jq_end_bits'];
-      }
-    } else {
-      $jobqueue = $jobDao->getAllJobStatus($job->getUploadId(),
-        $job->getUserId(), $job->getGroupId());
-    }
+    $jobqueue = $jobDao->getChlidJobStatus($job->getId());
 
     $job->setEta($this->getUploadEtaInSeconds($job->getId(),
       $job->getUploadId()));
@@ -449,23 +456,8 @@ class JobController extends RestController
     // creating a list of all the job_pks
     $allJobPks = array_column($result, 'job_pk');
 
-    /**
-     * @var ShowJobsDao $showJobsDao
-     * initialising the show jobs Dao
-     */
-    $showJobsDao = $this->container->get('dao.show_jobs');
-
-    $jobsInfo = $showJobsDao->getJobInfo($allJobPks);
-    usort($jobsInfo, [$this, "compareJobsInfo"]);
-
-    /**
-     * @var \Fossology\UI\Ajax\AjaxShowJobs $ajaxShowJobs
-     * initialising the show jobs ajax plugin
-     */
-    $ajaxShowJobs = $this->restHelper->getPlugin('ajaxShowJobs');
-
     // getting the show jobs data for each job
-    $showJobData = $ajaxShowJobs->getShowJobsForEachJob($jobsInfo);
+    $showJobData = $this->getJobQueue($allJobPks);
 
     // creating the response structure
     $allJobsHistory = array();
@@ -500,6 +492,61 @@ class JobController extends RestController
   }
 
   /**
+   * Get the jobqueue form job_pk
+   *
+   * @param array $jobqueue The job queue with job id as values
+   * @return \Fossology\UI\Ajax\Returns the job queue data
+   */
+  private function getJobQueue($allJobPks)
+  {
+    $showJobsDao = $this->restHelper->getShowJobDao();
+    $jobsInfo = $showJobsDao->getJobInfo($allJobPks);
+    usort($jobsInfo, [$this, "compareJobsInfo"]);
+
+    /**
+     * @var \Fossology\UI\Ajax\AjaxShowJobs $ajaxShowJobs
+     * initialising the show jobs ajax plugin
+     */
+    $ajaxShowJobs = $this->restHelper->getPlugin('ajaxShowJobs');
+    $showJobData = $ajaxShowJobs->getShowJobsForEachJob($jobsInfo, true);
+
+    return $showJobData;
+  }
+
+  /**
+   * Add the job queue to the job object
+   *
+   * @param[in,out] Job $job The job to be updated
+   * @param Request $request The request object
+   */
+  private function addJobQueue(&$job, $request = null)
+  {
+    $jobQueue = $this->getJobQueue([$job->getId()]);
+    $finalJobqueue = array();
+    foreach ($jobQueue[0]['job']['jobQueue'] as $jqVal) {
+      $depends = [];
+      if ($jqVal['depends'][0] != null) {
+        $depends = $jqVal['depends'];
+      }
+      $download = null;
+      if (!empty($jqVal['download'])) {
+        $download = [
+          "text" => $jqVal["download"],
+          "link" => ReportController::buildDownloadPath($request,
+            $jqVal['jq_job_fk'])
+        ];
+      }
+      $singleJobQueue = new JobQueue($jqVal['jq_pk'], $jqVal['jq_type'],
+        $jqVal['jq_starttime'], $jqVal['jq_endtime'], $jqVal['jq_endtext'],
+        $jqVal['jq_itemsprocessed'], $jqVal['jq_log'], $depends,
+        $jqVal['itemsPerSec'], $jqVal['canDoActions'], $jqVal['isInProgress'],
+        $jqVal['isReady'], $download);
+      $finalJobqueue[] = $singleJobQueue->getArray();
+    }
+    $job->setJobQueue($finalJobqueue);
+  }
+
+  /**
    * @brief Sort compare function to order $JobsInfo by job_pk
    * @param array $JobsInfo1 Result from GetJobInfo
    * @param array $JobsInfo2 Result from GetJobInfo
@@ -508,6 +555,17 @@ class JobController extends RestController
   private function compareJobsInfo($JobsInfo1, $JobsInfo2)
   {
     return $JobsInfo2["job"]["job_pk"] - $JobsInfo1["job"]["job_pk"];
+  }
+
+  /**
+   * @brief Sort compare function to order $JobsInfo by jobqueue start time
+   * @param array $job1 Result from finalJobs
+   * @param array $job2 Result from finalJobs
+   * @return int
+   */
+  private function sortJobsByDate($job1, $job2)
+  {
+    return strtotime($job2['queueDate']) - strtotime($job1['queueDate']);
   }
 
   /**
