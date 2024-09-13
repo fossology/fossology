@@ -23,6 +23,7 @@ use Fossology\UI\Api\Models\ApiVersion;
  */
 class UploadTest extends \PHPUnit\Framework\TestCase
 {
+
   /**
    * @test
    * -# Test the data format returned by Upload::getArray($version) model when $version is V1
@@ -42,7 +43,7 @@ class UploadTest extends \PHPUnit\Framework\TestCase
   /**
    * @param $version version to test
    * @return void
-   * -# Test the data format returned by Upload::getArray($version) model 
+   * -# Test the data format returned by Upload::getArray($version) model
    */
   private function testDataFormat($version)
   {
