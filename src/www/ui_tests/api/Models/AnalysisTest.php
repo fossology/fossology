@@ -143,7 +143,7 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
   /**
    * @param $version version to test
    * @return void
-   * -# Test the data format returned by Upload::getArray($version) model
+   * -# Test the data format returned by Upload::getArray($version) model 
    */
   private function testDataFormat($version)
   {
