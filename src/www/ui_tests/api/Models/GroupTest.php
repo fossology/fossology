@@ -6,13 +6,12 @@
 
 /**
  * @file
- * @brief Tests for GroupTest model
+ * @brief Tests for Group model
  */
 namespace Fossology\UI\Api\Test\Models;
 
-
 use Fossology\UI\Api\Models\Group;
-use PHPUnit\Framework\TestCase;
+use Monolog\Test\TestCase;
 
 class GroupTest extends TestCase
 {
@@ -26,10 +25,10 @@ class GroupTest extends TestCase
   private function getGroupInfo()
   {
     $expectedArray = [
-      "id"  => 4,
-      "name" => "fossy",
+      'id' => 1,
+      'name' => 'TestGroup'
     ];
-    $obj = new Group(4,"fossy");
+    $obj = new Group(1, 'TestGroup');
     return [
       'expectedArray' => $expectedArray,
       'obj' => $obj
@@ -37,60 +36,75 @@ class GroupTest extends TestCase
   }
 
   /**
-   * Tests Group::getArray() method.
-   *
-   * This method validates that the `getArray` method returns the correct data structure.
+   * @test
+   * -# Test data model returned by Group::getArray()
    */
   public function testDataFormat()
   {
-    $expectedArray = $this->getGroupInfo()['expectedArray'];
-    $group = $this->getGroupInfo()['obj'];
+    $info = $this->getGroupInfo();
+    $expectedArray = $info['expectedArray'];
+    $group = $info['obj'];
     $this->assertEquals($expectedArray, $group->getArray());
   }
 
   /**
    * Tests Group::getId() method.
    *
-   * This method validates that the `getId` method returns the correct ID value.
+   * This method validates that the `getId` method returns the correct group ID.
    */
   public function testGetId()
   {
-    $group = new Group(4, "fossy");
-    $this->assertEquals(4, $group->getId());
+    $group = $this->getGroupInfo()['obj'];
+    $this->assertEquals(1, $group->getId());
   }
 
   /**
    * Tests Group::setId() method.
    *
-   * This method validates that the `setId` method correctly updates the ID value.
+   * This method validates that the `setId` method correctly updates the group ID.
    */
   public function testSetId()
   {
-    $group = new Group(4, "fossy");
-    $group->setId(10);
-    $this->assertEquals(10, $group->getId());
+    $group = $this->getGroupInfo()['obj'];
+    $group->setId(2);
+    $this->assertEquals(2, $group->getId());
   }
 
   /**
    * Tests Group::getName() method.
    *
-   * This method validates that the `getName` method returns the correct name value.
+   * This method validates that the `getName` method returns the correct group name.
    */
   public function testGetName()
   {
-    $group = new Group(4, "fossy");
-    $this->assertEquals("fossy", $group->getName());
+    $group = $this->getGroupInfo()['obj'];
+    $this->assertEquals('TestGroup', $group->getName());
   }
 
   /**
    * Tests Group::setName() method.
    *
-   * This method validates that the `setName` method correctly updates the name value.
+   * This method validates that the `setName` method correctly updates the group name.
    */
   public function testSetName()
   {
-    $group = new Group(4, "fossy");
-    $group->setName("newName");
-    $this->assertEquals("newName", $group->getName());
+    $group = $this->getGroupInfo()['obj'];
+    $group->setName('NewGroupName');
+    $this->assertEquals('NewGroupName', $group->getName());
+  }
+
+  /**
+   * Tests Group::getJSON() method.
+   *
+   * This method validates that the `getJSON` method returns the correct JSON representation of the group.
+   */
+  public function testGetJSON()
+  {
+    $group = $this->getGroupInfo()['obj'];
+    $expectedJson = json_encode([
+      'id' => 1,
+      'name' => 'TestGroup'
+    ]);
+    $this->assertEquals($expectedJson, $group->getJSON());
   }
 }
