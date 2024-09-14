@@ -25,6 +25,8 @@ class ModernDbManager extends DbManager
   public function prepare($statementName, $sqlStatement)
   {
     if (array_key_exists($statementName, $this->preparedStatements)) {
+      echo $this->preparedStatements[$statementName] . "\n";
+      echo $sqlStatement;
       if ($this->preparedStatements[$statementName] !== $sqlStatement) {
         throw new \Exception("Existing Statement mismatch: $statementName");
       }
