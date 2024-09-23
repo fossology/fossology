@@ -293,6 +293,8 @@ $app->group('/obligations',
     $app->delete('/{id:\\d+}', ObligationController::class . ':deleteObligation');
     $app->get('/export-csv', ObligationController::class . ':exportObligationsToCSV');
     $app->post('/import-csv', ObligationController::class . ':importObligationsFromCSV');
+    $app->get('/export-json', ObligationController::class . ':exportObligationsToJSON');
+    $app->post('/import-json', ObligationController::class . ':importObligationsFromJSON');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -398,6 +400,8 @@ $app->group('/license',
     $app->get('', LicenseController::class . ':getAllLicenses');
     $app->post('/import-csv', LicenseController::class . ':handleImportLicense');
     $app->get('/export-csv', LicenseController::class . ':exportAdminLicenseToCSV');
+    $app->post('/import-json', LicenseController::class . ':handleImportLicense');
+    $app->get('/export-json', LicenseController::class . ':exportAdminLicenseToJSON');
     $app->post('', LicenseController::class . ':createLicense');
     $app->put('/verify/{shortname:.+}', LicenseController::class . ':verifyLicense');
     $app->put('/merge/{shortname:.+}', LicenseController::class . ':mergeLicense');
