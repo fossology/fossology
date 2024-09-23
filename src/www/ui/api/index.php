@@ -122,7 +122,7 @@ $apiVersionMiddleware = function (Request $request, RequestHandler $handler) use
   $response = $handler->handle($request);
   if ($apiVersion == ApiVersion::V1) {
     $response = $response->withHeader('Deprecation', 'true')
-    ->withHeader('Sunset', '2024-12-31T23:59:59Z');
+    ->withHeader('Sunset', '2025-03-31T23:59:59Z');
   }
   return $response;
 };
