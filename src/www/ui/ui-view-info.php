@@ -175,6 +175,8 @@ class ui_view_info extends FO_Plugin
     return $vars;
   } //ShowSightings()
 
+
+
   /**
    * \brief Display the meta data associated with the file.
    */
@@ -217,16 +219,16 @@ class ui_view_info extends FO_Plugin
         $vars['getMimeTypeName'] = $pmRow['mimetype_name'];
       }
       $this->dbManager->freeResult($result);
-
+    }
       $pmRow = [];
       // Check if ScanOSS is enabled
       $sql = "SELECT agent_enabled FROM agent WHERE agent_name ='scanoss' ORDER BY agent_ts LIMIT 1;";
       $row = $this->dbManager->getSingleRow($sql, [],
         __METHOD__ . "checkScanOss");
       if (!empty($row) && $row["agent_enabled"] == 't') {
-        $sql = "SELECT s.purl, s.matchtype, s.lineranges, s.url, s.filepath " .
-          "FROM scanoss_fileinfo s WHERE s.pfile_fk = $1;";
-        $pmRow = $this->dbManager->getSingleRow($sql, [$row['pfile_fk']],
+        $sql = "SELECT s.purl, s.matchtype, s.lineranges, s.url, s.filepath " . 
+               "FROM scanoss_fileinfo s, uploadtree u where u.uploadtree_pk = $1 and  s.pfile_fk = u.pfile_fk;";
+        $pmRow = $this->dbManager->getSingleRow($sql, [$Item],
           __METHOD__ . "GetFileMatchInfo");
       }
       if (!empty($pmRow)) {
@@ -239,7 +241,6 @@ class ui_view_info extends FO_Plugin
       } else {
         $vars['scanossInfo'] = 0;
       }
-    }
     /* display upload origin */
     $sql = "select * from upload where upload_pk=$1";
     $row = $this->dbManager->getSingleRow(
