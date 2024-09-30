@@ -95,7 +95,7 @@ jobs:
           export COMPOSER_HOME="$HOME/.composer/"
           composer install --prefer-dist --working-dir=src
           sudo phpdismod -v ALL -s ALL xdebug
-          phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/ || echo -e "\033[0;31mDuplication detected: Task Failed"
+          phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx/ src/www/ || echo -e "\033[0;31mDuplication detected: Task Failed"
 
   openapi-lint:
     runs-on: ubuntu-22.04

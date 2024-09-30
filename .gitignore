@@ -176,11 +176,12 @@ variable.list
 /src/copyright/VERSION-keyword
 /src/copyright/VERSION-copyright
 /src/copyright/VERSION-ipra
-/src/spdx2/agent_tests/Functional/tools-java-*-jar-with-dependencies.jar
-/src/spdx2/agent/version.php
+/src/spdx/agent_tests/Functional/tools-java-*-jar-with-dependencies.jar
+/src/spdx/agent/version.php
 /src/unifiedreport/agent/unifiedreport
 /src/unifiedreport/agent/version.php
-/src/spdx2/agent/spdx2
+/src/spdx/agent/spdx
+/src/spdx/agent/spdx2
 src/reportImport/agent/spdx2Import
 src/reportImport/agent/version.php
 src/reportImport/agent/reportImport
