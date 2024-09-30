@@ -164,6 +164,7 @@
  * \tableofcontents
  * -# \subpage adj2nest
  * -# \subpage buckets
+ * -# \subpage compatibility
  * -# \subpage copyright
  * -# \subpage decider
  * -# \subpage deciderjob

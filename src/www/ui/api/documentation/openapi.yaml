@@ -7,7 +7,7 @@ openapi: 3.1.0
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.6.1
+  version: 1.6.2
   contact:
     email: fossology@fossology.org
   license:
@@ -803,6 +803,10 @@ paths:
                     - $ref: '#/components/schemas/ServerUpload'
                 scanOptions:
                   $ref: '#/components/schemas/ScanOptions'
+                mainLicense:
+                  type: string
+                  description: Main license shortname for the upload.
+                  example: MIT
           multipart/form-data:
             schema:
               type: object
@@ -812,6 +816,10 @@ paths:
                   format: binary
                 scanOptions:
                   $ref: '#/components/schemas/ScanOptions'
+                mainLicense:
+                  type: string
+                  description: Main license shortname for the upload.
+                  example: MIT
               required:
                 - fileInput
       parameters:
@@ -5517,6 +5525,12 @@ components:
         ojo_decider:
           type: boolean
           description: Scanners matches if Ojo or REUSE.Software findings are no contradiction with other findings.
+        conclude_license_type:
+          type: string
+          description: |
+            Auto conclude license if they are of provided type.
+            Omit the field or keep as empty string to not use this option.
+          example: Permissive
     ScanOptions:
       type: object
       properties:
@@ -5833,6 +5847,9 @@ components:
         heritage:
           type: boolean
           description: Should Software Heritage Analysis be run on this upload.
+        compatibility:
+          type: boolean
+          description: Should Compatibility Analysis be run on this upload.
     Reuser:
       type: object
       properties:

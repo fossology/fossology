@@ -288,8 +288,8 @@ class LicenseDao
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param array(int) $selectedAgentIds
-   * @param bool $includeSubFolders
+   * @param int[] $selectedAgentIds
+   * @param bool $includeSubfolders
    * @param String $excluding
    * @param bool $ignore ignore files without license
    * @param bool $includeTreeId Include tree id in the response array?
@@ -745,5 +745,21 @@ ORDER BY lft asc
       $this->dbManager->freeResult($result);
       return $ObligationRef;
     }
+  }
+
+  /**
+   * Get type of license.
+   * @param int $licenseId License to get type for
+   * @return string|null License Type if found, null otherwise.
+   */
+  public function getLicenseType($licenseId)
+  {
+    $sql = "SELECT rf_licensetype FROM license_ref WHERE rf_pk = $1;";
+    $result = $this->dbManager->getSingleRow($sql, [$licenseId],
+      __METHOD__ . ".getLicenseType");
+    if (!empty($result)) {
+      return $result["rf_licensetype"];
+    }
+    return null;
   }
 }

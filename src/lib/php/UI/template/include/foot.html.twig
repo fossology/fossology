@@ -10,7 +10,7 @@
 <script src="scripts/jquery.cookie.js" type="text/javascript"></script>
 <script type="text/javascript">
   function renderSelect2() {
-    if(!$('.ui-render-select2').attr("size") > 0) {
+    if($('.ui-render-select2').length > 0) {
       $('.ui-render-select2').each(function() {
         var dropdownParent = $(document.body);
         if ($(this).parents('.modal').length !== 0) {

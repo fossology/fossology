@@ -63,7 +63,7 @@ class ScancodesAgentPlugin extends AgentPlugin
   {
     $dependencies = array();
     $flags = $request->get('scancodeFlags') ?: array();
-    $unpackArgs = intval(@$_POST['scm']) == 1 ? 'I' : '';
+    $unpackArgs = intval($request->get('scm', 0)) == 1 ? 'I' : '';
     $args = $this->getScanCodeArgs($flags, $unpackArgs);
     if ($args === null) {
       return 0;

@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# FOSSology mod_deps script
+# This script helps you install dependencies on a system. for a module
+#
+# SPDX-FileCopyrightText: © 2024 Siemens AG
+
+# SPDX-License-Identifier: GPL-2.0-only
+
+source "$(dirname ${BASH_SOURCE[0]})/../../utils/utils.sh"
+
+#
+# Don't show the -y option.  Should only be used for install testing, as using
+# it without being careful can destroy your system.
+#
+YesOpt=''
+
+EVERYTHING=''
+RUNTIME=''
+BUILDTIME=''
+
+## Options parsing and setup
+# parse options
+OPTS=$(getopt -o rbehy --long runtime,buildtime,everything,help -n 'mod_deps' -- "$@")
+
+if [[ $? -ne 0 ]]; then
+  OPTS='--help'
+fi
+
+eval set -- "$OPTS"
+
+# if no options or just -y then do everything
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
+  EVERYTHING=true
+fi
+
+while true; do
+  case "$1" in
+    -r|--runtime)     RUNTIME=true; shift;;
+    -b|--buildtime)   BUILDTIME=true; shift;;
+    -e|--everything)  EVERYTHING=true; shift;;
+    -y)               YesOpt='-y'; shift;;
+    -h|--help)        show_help_for_mod_deps; exit;;
+    --)               shift; break;;
+    *)                echo "ERROR: option $1 not recognised"; exit 1;;
+  esac
+done
+
+set -o errexit -o nounset -o pipefail
+
+must_run_as_root
+need_lsb_release
+
+if [[ $EVERYTHING ]]; then
+  echo "*** Installing both runtime and buildtime dependencies ***"
+  RUNTIME=true
+  BUILDTIME=true
+fi
+
+# figure out what distro we're on
+DISTRO=$(lsb_release --id --short)
+CODENAME=$(lsb_release --codename --short)
+
+########################################################################
+
+if [[ $BUILDTIME ]]; then
+  echo "*** Installing $DISTRO buildtime dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu)
+      apt-get $YesOpt install \
+        libjsoncpp-dev libboost-system-dev libboost-filesystem-dev \
+        libboost-program-options-dev libboost-regex-dev libyaml-cpp-dev
+      ;;
+    Fedora)
+      yum $YesOpt install \
+        jsoncpp-devel boost-devel libyaml-cpp-devel
+      ;;
+    RedHatEnterprise*|CentOS)
+      yum $YesOpt install epel-release;
+      yum $YesOpt install \
+        jsoncpp-devel boost-devel libyaml-cpp-devel
+      ;;
+    *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
+  esac
+fi
+
+if [[ $RUNTIME ]]; then
+  echo "*** Installing $DISTRO runtime dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu)
+      case "$CODENAME" in
+        stretch)
+          apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.62.0 libboost-program-options1.62.0 libboost-regex1.62.0 libyaml-cpp0.5v5;;
+        buster)
+          apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.67.0 libboost-program-options1.67.0 libboost-regex1.67.0 libyaml-cpp0.6;;
+        bullseye)
+          apt-get $YesOpt install libjsoncpp24 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0 libyaml-cpp0.6;;
+        bookworm)
+          apt-get $YesOpt install libjsoncpp24 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0 libyaml-cpp0.7;;
+        sid)
+          apt-get $YesOpt install libjsoncpp24 libboost-filesystem1.83.0 libboost-program-options1.83.0 libboost-regex1.83.0 libyaml-cpp0.8;;
+        focal)
+          apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.71.0 libboost-program-options1.71.0 libboost-regex1.71.0 libyaml-cpp0.6;;
+        jammy)
+          apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0 libyaml-cpp0.7;;
+        noble)
+          apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0 libyaml-cpp0.8;;
+        *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
+      esac;;
+    Fedora)
+      yum $YesOpt install \
+        jsoncpp boost yaml-cpp
+      ;;
+    RedHatEnterprise*|CentOS)
+      yum $YesOpt install epel-release;
+      yum $YesOpt install \
+        jsoncpp boost yaml-cpp
+      ;;
+    *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
+  esac
+fi
+
+#######################################################################

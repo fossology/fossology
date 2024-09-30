@@ -1,0 +1,15 @@
+{
+  "results":[
+    {
+      "file":"gpl.c",
+      "licenses":[
+        "GPL-2.0-only"
+      ]
+    },{
+      "file":"apache.c",
+      "licenses":[
+        "Apache-2.0-only"
+      ]
+    }
+  ]
+}

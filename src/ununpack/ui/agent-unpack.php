@@ -11,6 +11,7 @@
  * @file
  * @brief UI plugin for ununpack agent
  */
+
 use Fossology\Lib\Plugin\AgentPlugin;
 
 /**
@@ -40,7 +41,8 @@ class UnpackAgentPlugin extends AgentPlugin
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
    * @see Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
    */
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
+      $arguments=null, $request=null, $unpackArgs=null)
   {
 
     $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
@@ -49,7 +51,7 @@ class UnpackAgentPlugin extends AgentPlugin
        return $jobQueueId;
     }
 
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $arguments);
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $arguments, $request);
   }
 }
 

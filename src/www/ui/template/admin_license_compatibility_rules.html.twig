@@ -1,0 +1,90 @@
+{# SPDX-FileCopyrightText: © 2024 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+  <p id="messageSpace"></p>
+  <form name="adminLicenseRulesForm" id="adminLicenseRulesForm">
+    <table id="adminLicenseRulesTable" class="simpleTable" cellpadding="3">
+      <thead>
+        <tr>
+          <th>Rule No.</th>
+          <th>First License Name</th>
+		  <th>Second License Name</th>
+		  <th>First License Type</th>
+		  <th>Second License Type</th>
+		  <th>Compatible</th>
+		  <th>Rule Description</th>
+		  <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% import 'include/macros.html.twig' as macro %}
+      {% for rule in ruleArray %}
+        <tr>
+          <td style="text-align:center">{{ loop.index }}</td>
+          <td id="Lic">
+          {{ macro.select("#{firstLicNameParam}[#{rule.lr_pk}]", licenseArray, "#{firstLicNameParam}_#{rule.lr_pk}", rule.first_rf_fk, 'class="ui-render-select2" style="width:100%"') }}
+          </td>
+          <td id="Lic2">
+          {{ macro.select("#{secondLicNameParam}[#{rule.lr_pk}]", licenseArray, "#{secondLicNameParam}_#{rule.lr_pk}", rule.second_rf_fk, 'class="ui-render-select2" style="width:100%"') }}
+          </td>
+          <td>
+          {{ macro.select("#{firstLicTypeParam}[#{rule.lr_pk}]", licenseTypes, "#{firstLicTypeParam}_#{rule.lr_pk}", rule.first_type, 'class="ui-render-select2" style="width:100%"') }}
+          </td>
+          <td>
+          {{ macro.select("#{secondLicTypeParam}[#{rule.lr_pk}]", licenseTypes, "#{secondLicTypeParam}_#{rule.lr_pk}", rule.second_type, 'class="ui-render-select2" style="width:100%"') }}
+          </td>
+          <td>
+            <input type="checkbox" name="{{ resultParam }}[{{ rule.lr_pk }}]"
+              id="ruleyes{{ rule.lr_pk }}" value="t"
+              {% if rule.compatibility starts with 't' %}checked{% endif %} />
+            <label for="ruleyes{{ rule.lr_pk }}"> yes</label><br>
+            <input type="checkbox" name="{{ resultParam }}[{{ rule.lr_pk }}]"
+              id="ruleno{{ rule.lr_pk }}" value="f"
+              {% if rule.compatibility starts with 'f' %}checked{% endif %} />
+            <label for="ruleno{{ rule.lr_pk }}"> no</label><br>
+          </td>
+          <td>
+            <textarea rows="5" cols="40" name="{{ textParam }}[{{ rule.lr_pk }}]"
+              style="width:100%" required="required"
+              placeholder="{{ "Please enter rule description"|trans }}">{{
+              rule.comment }}</textarea>
+          </td>
+          <td>
+            <span class="basicActions">
+              <img class="delete" src="images/space_16.png"
+                onclick="deleteCompRule({{ rule.lr_pk }});" alt="delete">
+            </span>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="8">
+            <button id="addLicRule" title="{{ "Add a new Rule"|trans }}"
+              style="width:100%" type="button">
+              <img src="images/icons/add_16.png" alt="add" />
+              {{ "Add a new Rule"|trans }}
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="8"><input type="submit" value="Save" style="width:auto" /></td>
+        </tr>
+      </tfoot>
+    </table>
+  </form>
+
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript" src="scripts/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="scripts/jquery.dataTables.select.js"></script>
+  {% include 'admin_license_compatibility_rules.js.twig' %}
+{% endblock %}
