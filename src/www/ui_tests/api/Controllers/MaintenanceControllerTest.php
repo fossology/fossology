@@ -38,8 +38,6 @@ require_once dirname(__DIR__, 4) . '/lib/php/Plugin/FO_Plugin.php';
  */
 class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
 {
-
-
   /**
    * @var string YAML_LOC
    * Location of openapi.yaml file
@@ -171,7 +169,7 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
       "goldDate"=>"2022-07-16"
     ];
 
-     $OPTIONS =[
+    $OPTIONS =[
       "A"=>"Run all maintenance operations.",
       "F"=>"Validate folder contents.",
       "g"=>"Remove orphaned gold files.",

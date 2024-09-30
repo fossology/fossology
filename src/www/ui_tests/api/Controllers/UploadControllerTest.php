@@ -289,7 +289,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   {
     $this->testGetSingleUpload(ApiVersion::V1);
   }
-   /**
+  /**
    * @test
    * -# Test for UploadController::getUploads() to fetch single upload when version is V2
    * -# Check if response is 200
@@ -325,7 +325,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs([$uploadId])->andReturn($this->getUploadBounds($uploadId));
     $this->dbHelper->shouldReceive('getUploads')
       ->withArgs([$this->userId, $this->groupId, 100, 1, $uploadId, $options,
-      true, $version])->andReturn([1, [$upload->getArray()]]);
+        true, $version])->andReturn([1, [$upload->getArray()]]);
     $expectedResponse = (new ResponseHelper())->withJson($upload->getArray(), 200);
     $actualResponse = $this->uploadController->getUploads($request,
       new ResponseHelper(), ['id' => $uploadId]);
@@ -407,7 +407,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs([$folderId, $this->userId])->andReturn(true)->once();
     $this->dbHelper->shouldReceive('getUploads')
       ->withArgs([$this->userId, $this->groupId, 100, 1, null, $folderOptions,
-      true, $version])->andReturn([1, []])->once();
+        true, $version])->andReturn([1, []])->once();
     $this->uploadController->getUploads($request, new ResponseHelper(), []);
 
     // Test for name filter
@@ -425,7 +425,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     }
     $this->dbHelper->shouldReceive('getUploads')
       ->withArgs([$this->userId, $this->groupId, 100, 1, null, $nameOptions,
-      true, $version])->andReturn([1, []])->once();
+        true, $version])->andReturn([1, []])->once();
     $this->uploadController->getUploads($request, new ResponseHelper(), []);
 
     // Test for status filter
@@ -444,7 +444,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     }
     $this->dbHelper->shouldReceive('getUploads')
       ->withArgs([$this->userId, $this->groupId, 100, 1, null, $statusOptions,
-      true, $version])->andReturn([1, []])->once();
+        true, $version])->andReturn([1, []])->once();
     $this->uploadController->getUploads($request, new ResponseHelper(), []);
 
     // Test for assignee filter
@@ -462,7 +462,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     }
     $this->dbHelper->shouldReceive('getUploads')
       ->withArgs([$this->userId, $this->groupId, 100, 1, null, $assigneeOptions,
-      true, $version])->andReturn([1, []])->once();
+        true, $version])->andReturn([1, []])->once();
     $this->uploadController->getUploads($request, new ResponseHelper(), []);
 
     // Test for since filter
@@ -480,7 +480,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     }
     $this->dbHelper->shouldReceive('getUploads')
       ->withArgs([$this->userId, $this->groupId, 100, 1, null, $sinceOptions,
-      true, $version])->andReturn([1, []])->once();
+        true, $version])->andReturn([1, []])->once();
     $this->uploadController->getUploads($request, new ResponseHelper(), []);
 
     // Test for status and since filter
@@ -502,7 +502,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     }
     $this->dbHelper->shouldReceive('getUploads')
       ->withArgs([$this->userId, $this->groupId, 100, 1, null, $combOptions,
-      true, $version])->andReturn([1, []])->once();
+        true, $version])->andReturn([1, []])->once();
     $this->uploadController->getUploads($request, new ResponseHelper(), []);
   }
 
@@ -514,7 +514,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   public function testGetUploadsV1(){
     $this->testGetUploads(ApiVersion::V1);
   }
-   /**
+  /**
    * @test
    * -# Test UploadController::getUploads() for all uploads when version is V2
    * -# Check if the response is array with status 200
@@ -599,7 +599,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   {
     $this->testCopyUpload(ApiVersion::V2);
   }
-    /**
+  /**
    * @param $version version to test
    * @return void
    * -# Test the data format returned by Upload::getArray($version) model
@@ -623,13 +623,13 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       $requestHeaders->setHeader('folderId', $folderId);
       $requestHeaders->setHeader('action', 'copy');
       $request = new Request("PUT", new Uri("HTTP", "localhost"),
-      $requestHeaders, [], [], $body);
+        $requestHeaders, [], [], $body);
       $actualResponse = $this->uploadController->moveUpload($request,
         new ResponseHelper(), ['id' => $uploadId]);
     }
     else{
       $request = new Request("PUT", new Uri("HTTP", "localhost"),
-      $requestHeaders, [], [], $body);
+        $requestHeaders, [], [], $body);
       if ($version == ApiVersion::V2) {
         $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
           ApiVersion::V2);
@@ -645,10 +645,27 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for UploadController::moveUpload() with invalid folder id
+   * -# Test for UploadController::moveUpload() with invalid folder id with version 1
    * -# Check if response status is 400
    */
-  public function testMoveUploadInvalidFolder()
+  public function testMoveUploadInvalidFolderV1()
+  {
+    $this->testMoveUploadInvalidFolder(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for UploadController::moveUpload() with invalid folder id with version 2
+   * -# Check if response status is 400
+   */
+  public function testMoveUploadInvalidFolderV2()
+  {
+    $this->testMoveUploadInvalidFolder();
+  }
+  /**
+   * @param $version
+   * @return void
+   */
+  private function testMoveUploadInvalidFolder($version = ApiVersion::V2)
   {
     $uploadId = 3;
 
@@ -658,6 +675,13 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $body = $this->streamFactory->createStream();
     $request = new Request("PATCH", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
+    if ($version==ApiVersion::V2) {
+      $request = $request->withQueryParams(['folderId' => 'alpha', 'action' => 'move']);
+    } else {
+      $request = $request->withHeader("folderId", "alpha")
+        ->withHeader("action", "move");
+    }
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
     $this->expectException(HttpBadRequestException::class);
 
     $this->uploadController->moveUpload($request, new ResponseHelper(),
@@ -740,7 +764,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $info = new Info(201, intval(20), InfoType::INFO);
 
     $uploadHelper->shouldReceive('handleScheduleAnalysis')->withArgs([$uploadId,$folderId,$reqBody["scanOptions"],false])
-    ->andReturn($info);
+      ->andReturn($info);
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
@@ -768,7 +792,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->testPostUploadFolderNotAccessible(ApiVersion::V1);
   }
 
-    /**
+  /**
    * @runInSeparateProcess
    * @preserveGlobalState disabled
    * @test
@@ -927,7 +951,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   /**
    * @param int $version Version to test
    * @return void
-    */
+   */
   private function testPostUploadInternalError(int $version)
   {
     $folderId = 3;
@@ -974,7 +998,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
-    ->withArgs([$folderId])->andReturn(true);
+      ->withArgs([$folderId])->andReturn(true);
     $this->expectException(HttpInternalServerErrorException::class);
 
     $this->uploadController->postUpload($request, new ResponseHelper(), []);
@@ -1018,8 +1042,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders = new Headers();
     $body = $this->streamFactory->createStream();
     $request = new Request("POST", new Uri("HTTP", "localhost", 80,
-        "/uploads/$uploadId/licenses", UploadController::AGENT_PARAM .
-        "=nomos,monk&containers=false"),
+      "/uploads/$uploadId/licenses", UploadController::AGENT_PARAM .
+      "=nomos,monk&containers=false"),
       $requestHeaders, [], [], $body);
     if ($version == ApiVersion::V2) {
       $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
@@ -1060,11 +1084,31 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    * @runInSeparateProcess
    * @preserveGlobalState disabled
    * @test
-   * -# Test for UploadController::getUploadLicenses() when agents pending
+   * -# Test for UploadController::getUploadLicenses() when agents pending with version 1 params
    * -# Check if response status is 503
    * -# Check if response headers `Retry-After` and `Look-at` set
    */
-  public function testGetUploadLicensesPendingScan()
+  public function testGetUploadLicensesPendingScanV1()
+  {
+    $this->testGetUploadLicensesPendingScan(ApiVersion::V1);
+  }
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::getUploadLicenses() when agents pending with version 2 params
+   * -# Check if response status is 503
+   * -# Check if response headers `Retry-After` and `Look-at` set
+   */
+  public function testGetUploadLicensesPendingScanV2()
+  {
+    $this->testGetUploadLicensesPendingScan();
+  }
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testGetUploadLicensesPendingScan($version = ApiVersion::V2)
   {
     $uploadId = 3;
     $agentsRun = [
@@ -1075,9 +1119,16 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $requestHeaders = new Headers();
     $body = $this->streamFactory->createStream();
     $request = new Request("POST", new Uri("HTTP", "localhost", 80,
-        "/uploads/$uploadId/licenses", UploadController::AGENT_PARAM .
-        "=nomos,monk&containers=false"),
+      "/uploads/$uploadId/licenses", UploadController::AGENT_PARAM .
+      "=nomos,monk&containers=false"),
       $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withQueryParams(['page' => 1, 'limit' => 2, "agent" =>"nomos,monk" ]);
+    } else {
+      $request = $request->withHeader("limit",2)
+        ->withHeader("page",1);
+    }
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
 
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
@@ -1262,7 +1313,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       "shortName" => $shortName,
     ];
     $license = new License($licenseId, $shortName, "MIT License", "risk", "texts", [],
-     'type', 1);
+      'type', 1);
     $licenseIds[$licenseId] = $licenseId;
     $this->uploadDao->shouldReceive('isAccessible')
       ->withArgs([$uploadId, $this->groupId])->andReturn(true);
@@ -1372,12 +1423,12 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   {
     $uploadId = 2;
     $reuseReportSummary = [
-        'declearedLicense' => "",
-        'clearedLicense' => "MIT, BSD-3-Clause",
-        'usedLicense' => "",
-        'unusedLicense' => "",
-        'missingLicense' => "MIT, BSD-3-Clause",
-      ];
+      'declearedLicense' => "",
+      'clearedLicense' => "MIT, BSD-3-Clause",
+      'usedLicense' => "",
+      'unusedLicense' => "",
+      'missingLicense' => "MIT, BSD-3-Clause",
+    ];
     $this->uploadDao->shouldReceive('isAccessible')
       ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
