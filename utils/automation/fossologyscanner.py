@@ -21,7 +21,8 @@ from FoScanner.Scanners import (Scanners, ScanResult)
 from FoScanner.SpdxReport import SpdxReport
 from FoScanner.FormatResults import FormatResult
 from FoScanner.Utils import (validate_keyword_conf_file, copy_keyword_file_to_destination)
-
+from ScanDeps.Parsers import Parser, PythonParser
+from ScanDeps.Downloader import Downloader
 
 def get_api_config() -> ApiConfig:
   """
@@ -350,9 +351,36 @@ def main(parsed_args):
     else:
       print(f"Could not validate keyword file: {message}")   
 
+  if (cli_options.scan_only_deps or cli_options.repo) and cli_options.sbom_path != '':
+    download_list = []
+    save_dir = 'pkg_downloads'
+    sbom_file_path = cli_options.sbom_path
+    parser = Parser(sbom_file_path)
+    parser.classify_components()
+
+    python_comps = parser.python_components
+    unsupported_comps = parser.unsupported_components
+
+    if len(python_comps) != 0:
+      python_parser = PythonParser()
+      python_list = python_parser.parse_components(python_comps)
+      download_list += python_list
+
+    if len(unsupported_comps) != 0:
+      for comp in unsupported_comps:
+        print(f'The purl {comp["purl"]} is not supported. Package will not be downloaded.')
+
+    try:
+      downloader = Downloader()
+      downloader.download_concurrently(download_list, save_dir)
+    except Exception as e:
+      print("Something went wrong while downloading the dependencies..")
+
   repo_setup = RepoSetup(cli_options, api_config)
   if cli_options.repo is False:
     cli_options.diff_dir = repo_setup.get_diff_dir()
+    if cli_options.scan_only_deps:
+      cli_options.diff_dir = save_dir
 
   scanner = Scanners(cli_options)
   return_val = 0
@@ -380,7 +408,7 @@ if __name__ == "__main__":
   )
   parser.add_argument(
     "operation", type=str, help="Operations to run.", nargs='*',
-    choices=["nomos", "copyright", "keyword", "ojo", "repo", "differential"]
+    choices=["nomos", "copyright", "keyword", "ojo", "repo", "differential", "scan-only-deps"]
   )
   parser.add_argument(
     "--tags", type=str, nargs=2, help="Tags for differential scan. Required if 'differential'" \
@@ -397,6 +425,10 @@ if __name__ == "__main__":
   parser.add_argument(
     "--allowlist-path", type=str, help="Pass allowlist.json to allowlist dependencies."
   )
+  parser.add_argument(
+    "--sbom-path", type=str, help="Path to SBOM file for downloading dependencies."
+  )
+
   args = parser.parse_args()
   sys.exit(main(args))
 
