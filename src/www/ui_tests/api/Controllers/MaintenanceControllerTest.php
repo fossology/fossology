@@ -95,11 +95,6 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-
-  /**
-   * @brief Setup test objects
-   * @see PHPUnit_Framework_TestCase::setUp()
-   */
   protected function setUp() : void
   {
     global $container;
@@ -171,7 +166,7 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
       "goldDate"=>"2022-07-16"
     ];
 
-     $OPTIONS =[
+    $OPTIONS =[
       "A"=>"Run all maintenance operations.",
       "F"=>"Validate folder contents.",
       "g"=>"Remove orphaned gold files.",
