@@ -230,8 +230,6 @@ int main(int argc, char *argv[])
       char  tempFolder[512];
       sprintf(tempFolder,"%s/%d",baseTMP,upload_pk);
       mkdir(tempFolder, 0700);
-      char aux[100];
-      sprintf(aux,"ready to process %d",upload_pk );
       if (RebuildUpload(upload_pk,tempFolder) != 0) /* process the upload_pk code */{
           LOG_ERROR("Error processing upload\n");
       } else {
@@ -240,8 +238,8 @@ int main(int argc, char *argv[])
         char cmdRemove[600];
         memset(cmdRemove,0,600);
         sprintf(cmdRemove,"rm  -r %s",tempFolder);
-     //   FILE *removes = popen(cmdRemove, "r");  /* Run the command */
-  //      pclose(removes);
+        FILE *removes = popen(cmdRemove, "r");  /* Run the command */
+        pclose(removes);
       }
       ars_pk = fo_WriteARS(db_conn, ars_pk, upload_pk, Agent_pk, AgentARSName, NULL, 1);
     }
