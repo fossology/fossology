@@ -641,7 +641,7 @@ class UserEditPage extends DefaultPlugin
    * template.
    * @return array
    */
-  private function getListOfActiveClients()
+  public function getListOfActiveClients()
   {
     $user_pk = Auth::getUserId();
     $sql = "SELECT pat_pk, user_fk, token_scope, token_name, " .
@@ -669,7 +669,7 @@ class UserEditPage extends DefaultPlugin
    * Get a list of revoked clients for current user.
    * @return array
    */
-  private function getListOfExpiredClients()
+  public function getListOfExpiredClients()
   {
     $user_pk = Auth::getUserId();
     $sql = "SELECT pat_pk, user_fk, token_scope, token_name, " .
