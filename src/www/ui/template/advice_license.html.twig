@@ -13,7 +13,8 @@
       <th width="10%"></th>
       <th width="10%"></th>
       <th width="10%"></th>
-      <th width="{% if canEdit %}55{% else %}50{% endif %}%"></th>
+      <th width="{% if canEdit %}45{% else %}40{% endif %}%"></th>
+      <th width="10%"></th>
       <th width="10%"></th>
       <th width="5%"></th></tr>
   </thead>
@@ -42,6 +43,7 @@
       {"sTitle": "{{ "Fullname"|trans }}", "sClass": "center", "bSearchable": true},
       {"sTitle": "{{ "Text"|trans }}", "sClass": "left", "bSearchable": true},
       {"sTitle": "{{ "URL"|trans }}", "sClass": "center", "bSearchable": false},
+      {"sTitle": "{{ "Created By"|trans }}", "sClass": "center", "bSearchable": true},
       {"sTitle": "{{ "Merge Request"|trans }}", "sClass": "center", "bSearchable": false}
     ];
 
