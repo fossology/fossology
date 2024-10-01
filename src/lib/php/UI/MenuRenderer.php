@@ -55,6 +55,6 @@ class MenuRenderer
       $optionsOut .= '<option value="' . Traceback_uri() . '?mod=showjobs&upload='.$uploadId.'" title="' . _("Scan History") . '" >'._("History").'</option>';
     }
 
-    return '<select class="goto-active-option form-control-sm"><option disabled selected>-- select action --</option>'.$optionsOut.'</select>';
+    return '<select class="goto-active-option form-select-sm"><option disabled selected>-- select action --</option>'.$optionsOut.'</select>';
   }
 }

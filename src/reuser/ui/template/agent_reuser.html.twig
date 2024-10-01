@@ -5,32 +5,32 @@
 {% import "include/macros.html.twig" as macro %}
 
 <li>
-  <div class="form-group">
+  <div class="mb-3">
     <label for="reuse">
       ({{ 'Optional'|trans }}) {{ 'Reuse'|trans }}
       <span style="display:none" id="reusedisable">
         ; {{ 'Disabled as multiple files being uploaded'|trans }}
       </span>
     </label>
-    <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Copy clearing decisions if there is the same file hash between two files'|trans }}" alt="" class="info-bullet"/><br/>
+    <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{ 'Copy clearing decisions if there is the same file hash between two files'|trans }}" alt="" class="info-bullet"/><br/>
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" id="searchInFolder"/> {{ 'Select an already uploaded package for reuse in specific folder ' | trans }}
     {% include 'reuse-folder.html.twig' with {'name': reuseFolderSelectorName, 'id': reuseFolderSelectorName} %}
     <br/>
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseEnhanced"/>
     {{ 'Enhanced reuse (slower)'|trans }}
-    <img src="images/info_16.png" data-toggle="tooltip" title="{{'Will copy a clearing decision if the two files differ by one line determined by a diff tool'|trans}}" alt="" class="info-bullet"/><br/>
+    <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{'Will copy a clearing decision if the two files differ by one line determined by a diff tool'|trans}}" alt="" class="info-bullet"/><br/>
 
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseMain"/>
     {{ 'Reuse main license/s'|trans }}
-    <img src="images/info_16.png" data-toggle="tooltip" title="{{'Will copy a main license decision(if any)'|trans}}" alt="" class="info-bullet"/><br/>
+    <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{'Will copy a main license decision(if any)'|trans}}" alt="" class="info-bullet"/><br/>
 
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseConf"/>
     {{ 'Reuse report configuration settings'|trans }}
-    <img src="images/info_16.png" data-toggle="tooltip" title="{{'Use to copy all the information from conf page(if any)'|trans}}" alt="" class="info-bullet"/><br/>
+    <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{'Use to copy all the information from conf page(if any)'|trans}}" alt="" class="info-bullet"/><br/>
 
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseCopyright"/>
     {{ 'Reuse deactivated copyrights'|trans }}
-    <img src="images/info_16.png" data-toggle="tooltip" title="{{'Use to copy edited and deactivated copyrights from the reused package'|trans}}" alt="" class="info-bullet"/><br/>
+    <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{'Use to copy edited and deactivated copyrights from the reused package'|trans}}" alt="" class="info-bullet"/><br/>
 
     <label for="uploadReuse">{{ 'Upload to reuse'|trans }}:</label><br/>
     {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width:420px;"', 5) }}

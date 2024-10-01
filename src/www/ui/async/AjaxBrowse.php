@@ -175,7 +175,7 @@ class AjaxBrowse extends DefaultPlugin
         }
       }
     }
-    $nameColumn = "<strong class='btn btn-sm font-weight-bold' style='margin-left:10px;font-size:11pt;'>$fileName</strong>";
+    $nameColumn = "<strong class='btn btn-sm fw-bold' style='margin-left:10px;font-size:11pt;'>$fileName</strong>";
     if (IsContainer($row['ufile_mode'])) {
       $nameColumn = "<a href='$uri&upload=$uploadId&folder=$folder&item=$itemId&show=$show'>$nameColumn</a>";
     }
@@ -245,7 +245,7 @@ class AjaxBrowse extends DefaultPlugin
 
   private function createSelect($id,$options,$select='',$action='')
   {
-    $html = "<select class='form-control-sm' style=\"max-width:250px;\" name=\"$id\" id=\"$id\" $action class=\"ui-render-select2\">";
+    $html = "<select class=\"form-select-sm\" style=\"max-width:250px;\" name=\"$id\" id=\"$id\" $action class=\"ui-render-select2\">";
     foreach ($options as $key=>$disp) {
       $html .= '<option value="'.$key.'"';
       if ($key == $select) {

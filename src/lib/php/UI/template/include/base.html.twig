@@ -39,7 +39,7 @@
         </div>
       {% else %}
         <div id="dmessage" style="border-bottom: 1px dashed gray;">
-          <button name="eraseme" class="btn btn-default btn-sm" value="close" onclick="rmMsg();">{{ 'Close'| trans }}</button>
+          <button name="eraseme" class="btn btn-light btn-sm" value="close" onclick="rmMsg();">{{ 'Close'| trans }}</button>
           {% if message %}  {{ message|raw|nl2br }} {% endif %}
         </div>
       {% endif %}

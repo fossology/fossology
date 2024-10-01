@@ -39,10 +39,10 @@
     </fieldset>
     <br/>
     <input type="number" name="decision_pk" value="-1" hidden>
-    {{ 'Description'| trans }}<img data-toggle="tooltip" src="images/info_16.png" title="{{ 'Classification of the finding, such as copyright statement or TSU number or ECC warning or author but no copyright statement'|trans }}" alt="" class="info-bullet"/>: <br/>
-    <textarea rows="2" name="description" data-toggle="tooltip" style="width:90%" class="supervised form-control-sm">{{ description }}</textarea><br/>
+    {{ 'Description'| trans }}<img data-bs-toggle="tooltip" src="images/info_16.png" title="{{ 'Classification of the finding, such as copyright statement or TSU number or ECC warning or author but no copyright statement'|trans }}" alt="" class="info-bullet"/>: <br/>
+    <textarea rows="2" name="description" data-bs-toggle="tooltip" style="width:90%" class="supervised form-control-sm">{{ description }}</textarea><br/>
     {{ 'Text finding'| trans }}<img src="images/info_16.png" title="{{ 'Exact text finding, if the regular expression match is wrong not matching everything, too much'|trans }}" alt="" class="info-bullet"/>: <br/>
-    <textarea rows="2" name="textFinding" data-toggle="tooltip" style="width:90%" class="supervised form-control-sm">{{ textFinding }}</textarea><br/>
+    <textarea rows="2" name="textFinding" data-bs-toggle="tooltip" style="width:90%" class="supervised form-control-sm">{{ textFinding }}</textarea><br/>
     {{ 'Comment'| trans }}<img src="images/info_16.png" title="{{ 'A user can place comment for leaving a notice that ma be viewed by other users on Fossology'|trans }}" alt="" class="info-bullet"/>: <br/>
     <textarea rows="2" name="comment" style="width:90%" class="supervised form-control-sm">{{ comment }}</textarea><br/>
   </div>

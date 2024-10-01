@@ -57,8 +57,8 @@ function createDirlistTable() {
       renderSelect2();
     },
     "oLanguage":{"sInfo":"Showing _START_ to _END_ of _TOTAL_ files" ,
-      "sSearch":'_INPUT_<button class="btn btn-default btn-sm" style="vertical-align:top;margin:1px;" onclick="clearSearchFiles();" title=\"{{ 'Clear file filter'|trans }}\" >Clear<\/button>',
-      "sLengthMenu":'Display <select class="form-control-sm"><option value="10">10<\/option><option value="25">25<\/option><option value="50">50<\/option><option value="100">100<\/option><option value="{{ iTotalRecords }}">ALL<\/option><\/select> {#
+      "sSearch":'_INPUT_<button class="btn btn-light btn-sm" style="vertical-align:top;margin:1px;" onclick="clearSearchFiles();" title=\"{{ 'Clear file filter'|trans }}\" >Clear<\/button>',
+      "sLengthMenu":'Display <select class="form-select-sm"><option value="10">10<\/option><option value="25">25<\/option><option value="50">50<\/option><option value="100">100<\/option><option value="{{ iTotalRecords }}">ALL<\/option><\/select> {#
        #}   {{ 'files'|trans }} ({% if isFlat %}<a href="{{ fileSwitch }}">{{ 'tree view'|trans }}</a> {{ 'or'|trans }} <b>{{ 'flat'|trans }}</b>{#
        #}{% else %}<b>{{ 'tree view'|trans }}</b> {{ 'or'|trans }} <a href="{{ fileSwitch }}">{{ 'flat'|trans }}</a>{% endif %})'
       }
