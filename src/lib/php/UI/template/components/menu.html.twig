@@ -3,8 +3,8 @@
    SPDX-License-Identifier: FSFAP
 #}
 {% if bannerMsg %}
-  <div class="alert alert-danger" id="topBanner">
-    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <div class="alert alert-danger alert-dismissible" id="topBanner">
+    <a href="#" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></a>
   {{ systemLoad }}
   {{ bannerMsg }}
   </div>

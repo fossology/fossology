@@ -423,7 +423,7 @@ $(document).ready(function () {
     data: []
   });
 
-  $('[data-toggle="tooltip"]').tooltip();
+  $('[data-bs-toggle="tooltip"]').tooltip();
   textModal = $('#textModal').modal('hide');
   $('#textModal, #ClearingHistoryDataModal, #userModal, #bulkHistoryModal').draggable({
     stop: function(){

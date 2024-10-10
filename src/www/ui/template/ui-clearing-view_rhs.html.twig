@@ -10,50 +10,55 @@
   <table>
     <tr>
       <td style="vertical-align:top;">
-        <button type="submit" name="update" class="btn btn-default btn-sm" id="prev" disabled>&lt;</button>
-        <button type="submit" name="update" class="btn btn-default btn-sm" onclick="form.action = '{{ uri }}&item={{ itemId }}';">{{ 'Submit'|trans }}</button>
-        <button type="submit" name="update" class="btn btn-default btn-sm" id="next" disabled>&gt;</button>
+        <button type="submit" name="update" class="btn btn-light btn-sm" id="prev" disabled>&lt;</button>
+        <button type="submit" name="update" class="btn btn-light btn-sm" onclick="form.action = '{{ uri }}&item={{ itemId }}';">{{ 'Submit'|trans }}</button>
+        <button type="submit" name="update" class="btn btn-light btn-sm" id="next" disabled>&gt;</button>
       </td>
       <td>
         <input type="radio" class="info-bullet view-license-rc-size" name="FileSelection" value="none">
         {{ "Go through all files"|trans }}
-        <img data-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Back and forward browsing through every file of the upload'|trans }}" alt="" class="info-bullet"/></img>
+        <img data-bs-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Back and forward browsing through every file of the upload'|trans }}" alt="" class="info-bullet"/></img>
         <br/>
         <input type="radio" class="info-bullet view-license-rc-size" name="FileSelection" value="noLicense">
         {{ "Go through all files with licenses"|trans }}
-        <img data-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Back and forward browsing going through files only with a license found by a scanner agent, regardless of an existing clearing result or not'|trans }}" alt="" class="info-bullet"/></img>
+        <img data-bs-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Back and forward browsing going through files only with a license found by a scanner agent, regardless of an existing clearing result or not'|trans }}" alt="" class="info-bullet"/></img>
         <br/>
         <input type="radio" class="info-bullet view-license-rc-size" name="FileSelection" value="alreadyCleared">
         {{ "Go through all files with licenses and no clearing result"|trans }}
-        <img data-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Back and forward browsing going through files only with a license found by a scanner agent only where no clearing result was created. This setting is useful for just browsing to “remaining work”'|trans }}" alt="" class="info-bullet"/>
+        <img data-bs-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Back and forward browsing going through files only with a license found by a scanner agent only where no clearing result was created. This setting is useful for just browsing to “remaining work”'|trans }}" alt="" class="info-bullet"/>
       </td>
     </tr>
   </table>
 
   <div class="groupBox">
-    <fieldset class="border p-2" style="display:inline">
-      <legend style="width:auto;">
+    <fieldset class="border p-2" style="display:inline-block;">
+      <legend class="w-auto">
         {{ 'Clearing decision scope'| trans }}
       </legend>
-      <input type="checkbox" class="info-bullet view-license-rc-size" name="globalDecision" id="globalDecision"  onclick="checkIfEligibleForGlobalDecision()" {% if selectedClearingScope==1 %}checked{% endif %}/>
-      {{ 'Apply decision to all future occurrences of this file'|trans }}
-      <img data-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Based on a hash computation of the file contents, Fossology will determine a future occurrence of the same file. Then, if  the same file is part of a subsequent upload, this clearing decision will apply there as well.  Consider that this decision will impact also upload of other users. It should be checked with much care'|trans }}" alt="" class="info-bullet"/ >
+      <div class="form-check">
+        <input type="checkbox" class="info-bullet view-license-rc-size" name="globalDecision" id="globalDecision"  onclick="checkIfEligibleForGlobalDecision()" {% if selectedClearingScope==1 %}checked{% endif %}/>
+        <label class="form-check-label" for="globalDecision">
+          {{ 'Apply decision to all future occurrences of this file'|trans }}
+        </label>
+        <img data-bs-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Based on a hash computation of the file contents, Fossology will determine a future occurrence of the same file. Then, if  the same file is part of a subsequent upload, this clearing decision will apply there as well.  Consider that this decision will impact also upload of other users. It should be checked with much care'|trans }}" alt="" class="info-bullet"/ >
+      </div>
     </fieldset>
     <br/>
     <br/>
-    <fieldset class="border p-2" style="display: inline;" {% if tmpClearingType %}class="border-danger"{% endif %} id="decTypeSet">
-      <legend style="width:auto;">
+    <fieldset class="border p-2" style="display:inline-block;" {% if tmpClearingType %}class="border-danger"{% endif %} id="decTypeSet">
+      <legend class="w-auto">
         {{ 'Clearing decision type'| trans }}
       </legend>
-      <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="2" id="clearingType0" />
-      <label for="clearingType0">{{ 'No license known'| trans }}</label>
-      <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Even after review, no license relevant information can be determined'|trans }}" alt="" class="info-bullet"/>
+      <div class="form-check">
+        <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="2" id="clearingType0" />
+        <label class="form-check-label" for="clearingType0">{{ 'No license known'| trans }}</label>
+        <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{ 'Even after review, no license relevant information can be determined'|trans }}" alt="" class="info-bullet"/>
       {% for typeKey,typeText in clearingTypes %}
         <br />
         <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="{{ typeKey }}" id="clearingType{{ typeKey }}"
         {% if typeKey == selectedClearingType %}checked="checked"{% endif %}/>
-        <label for="clearingType{{ typeKey }}">{{ typeText }}</label>
-        <img src="images/info_16.png" data-toggle="tooltip"
+        <label class="form-check-label" for="clearingType{{ typeKey }}">{{ typeText }}</label>
+        <img src="images/info_16.png" data-bs-toggle="tooltip"
           {%- if typeKey == 3 ~%}
             title="{{ 'Mark the file for having had a look at it, but a clearing result cannot be determined at the current time'|trans }}"
           {%- elseif typeKey == 4 ~%}
@@ -66,6 +71,7 @@
             title="{{ 'There may be license relevant information but this particular file is not distributed but used by source (for example, build config, documentation, unit test, example files).'|trans}}"
           {%- endif %} alt="" class="info-bullet"/>
       {% endfor %}
+     </div>
     </fieldset>
   </div>
 </form>
@@ -81,17 +87,17 @@
     file.
     '| trans }}
   {% else %}
-    <button type="button" data-toggle="modal" data-target="#userModal" class="btn btn-default btn-sm" onclick="openUserDecisionModal();">
+    <button type="button" data-bs-toggle="modal" data-target="#userModal" class="btn btn-light btn-sm" onclick="openUserDecisionModal();">
       {{ 'User Decision ...'| trans }}
-    </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Add manually a license that is not found by scanners or bulk'|trans }}" alt="" class="info-bullet"/>
+    </button><img src="images/info_16.png" data-bs-toggle="tooltip" title="{{ 'Add manually a license that is not found by scanners or bulk'|trans }}" alt="" class="info-bullet"/>
     &nbsp;
-    <button type="button" data-toggle="modal" data-backdrop="false" data-target="#bulkModal" class="btn btn-default btn-sm" onclick="openBulkModal();">
+    <button type="button" data-bs-toggle="modal" data-backdrop="false" data-target="#bulkModal" class="btn btn-light btn-sm" onclick="openBulkModal();">
       {{ 'Bulk Recognition ...'| trans }}
-    </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Adding or removing a license based on a text fragment that is searched for across the relevant files'|trans }}" alt="" class="info-bullet"/>
+    </button><img src="images/info_16.png" data-bs-toggle="tooltip" title="{{ 'Adding or removing a license based on a text fragment that is searched for across the relevant files'|trans }}" alt="" class="info-bullet"/>
     &nbsp;
-    <button type="button" data-toggle="modal" data-target="#ClearingHistoryDataModal" class="btn btn-default btn-sm" onclick="openClearingHistoryDataModal();">
+    <button type="button" data-bs-toggle="modal" data-target="#ClearingHistoryDataModal" class="btn btn-light btn-sm" onclick="openClearingHistoryDataModal();">
       {{ 'Clearing History ...'| trans }}
-    </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'View the clearing history for this file: The table will show which user added or removed license results for this particular file in order to create a clearing decision. Clearing decisions are created when the user clicks on the button "Submit" or on the go next and go previous buttons'|trans }}" alt="" class="info-bullet"/>
+    </button><img src="images/info_16.png" data-bs-toggle="tooltip" title="{{ 'View the clearing history for this file: The table will show which user added or removed license results for this particular file in order to create a clearing decision. Clearing decisions are created when the user clicks on the button "Submit" or on the go next and go previous buttons'|trans }}" alt="" class="info-bullet"/>
     &nbsp;
     <br/>
     <span id="bulkIdResult" name="bulkIdResult"></span>
@@ -103,9 +109,7 @@
           <!-- Modal Header -->
           <div class="modal-header">
             <h4 class="modal-title">Add a New License</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <!-- Modal body -->
           <div class="modal-body" style="max-height:300px;overflow:auto;">
@@ -124,9 +128,7 @@
           <!-- Modal Header -->
           <div class="modal-header">
             <h4 class="modal-title">Clearing History</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <!-- Modal body -->
           <div class="modal-body">

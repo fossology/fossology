@@ -10,7 +10,7 @@
   {{ 'Only one revision of'|trans }} <b>{{ agentMap|first }}</b> {{ 'ran for this upload'|trans }}. <br/>
 {% else %}
   <form action="{{ agentShowURI }}" method="post">
-    <select class="form-control-sm" name="agentId" id="agentId">
+    <select class="form-select-sm" name="agentId" id="agentId">
       <option value="0">{{ 'Latest run of all available agents'|trans }}</option>
     {% for key, value in agentMap %}
       <option value="{{ key }}"{% if agentId == key %} selected="selected"{% endif %}>
@@ -18,7 +18,7 @@
       </option>
     {% endfor %}
     </select>
-    <input type="submit" class="btn btn-default btn-sm" name="s" value="{{'Show'|trans}}"/>
+    <input type="submit" class="btn btn-light btn-sm" name="s" value="{{'Show'|trans}}"/>
   </form>
 {% endif %}
 

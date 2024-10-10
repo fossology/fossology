@@ -14,9 +14,7 @@
       <!-- Modal Header -->
       <div class="modal-header">
         <h4 class="modal-title">Edit Decisions</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <!-- Modal body -->
@@ -30,7 +28,7 @@
               <label for="licenseLeft">{{ 'Available licenses'| trans }}: <img src='images/info_16.png'
                 title="{{ 'Double-click on license opens a popup with the full text.'| trans }}" alt="{{ 'Double-click on license opens a popup with the full text.'| trans }}" class='info-bullet'/></label>
               <br/>
-              <select name="licenseLeft" class="form-control w-100 h-100"
+              <select name="licenseLeft" class="form-control w-30 h-30"
                 id="licenseLeft" size="20" multiple="multiple">
                 {%  for opt in licenseArray  %}
                 <option value= {{ opt.id }} title='{{ opt.fullname | e }}'
@@ -42,27 +40,27 @@
               </select>
             </div>
             <div class="col-xs-1 my-auto px-0 text-center">
-              <input type="button" value="&gt;" class="btn btn-default btn-sm" onclick="moveLicense(this.form.licenseLeft, this.form.licenseRight);" />
+              <input type="button" value="&gt;" class="btn btn-light btn-sm" onclick="moveLicense(this.form.licenseLeft, this.form.licenseRight);" />
               <br><br>
-              <input type="button" value="&lt;" class="btn btn-default btn-sm" onclick="moveLicense(this.form.licenseRight, this.form.licenseLeft);" />
+              <input type="button" value="&lt;" class="btn btn-light btn-sm" onclick="moveLicense(this.form.licenseRight, this.form.licenseLeft);" />
             </div>
             <div class="col">
               <label for="licenseRight">{{ 'Selected licenses'|trans }}:</label>
               <br/>
-              <select name="licenseRight" class="form-control w-100 h-100" id="licenseRight" size="20" multiple="multiple">
+              <select name="licenseRight" class="form-control w-30 h-30" id="licenseRight" size="20" multiple="multiple">
               </select>
             </div>
           </div>
           <div class="row justify-content-md-center pt-3">
             <div class="col text-center">
-              <button type="button" class="btn btn-default"
+              <button type="button" class="btn btn-light"
                   onclick="performPostRequest(false);">
                 {{ 'Add selected licenses'|trans }}
               </button>
             </div>
             <div class="col-xs-1 my-auto px-0 text-center"></div>
             <div class="col text-center">
-              <button type="button" class="btn btn-default"
+              <button type="button" class="btn btn-light"
                   onclick="performPostRequest(true);">
                 {{ 'Remove selected licenses'|trans }}
               </button>
@@ -80,7 +78,7 @@
                 <span class="w-100">
                   Mark decisions as&nbsp;
                 </span>
-                <select class="custom-select w-100" id="markDecision">
+                <select class="form-select w-100" id="markDecision">
                   <option value="irrelevant">{{ 'Irrelevant'|trans }}</option>
                   <option value="doNotUse">{{ 'Do not use'|trans }}</option>
                   <option value="nonFunctional">{{ 'Non-Functional'|trans }}</option>
@@ -95,7 +93,7 @@
                 <span class="w-100">
                   Remove decision&nbsp;
                 </span>
-                <select class="custom-select w-100" id="removeDecision">
+                <select class="form-select w-100" id="removeDecision">
                   <option value="irrelevant">{{ 'Irrelevant'|trans }}</option>
                   <option value="doNotUse">{{ 'Do not use'|trans }}</option>
                   <option value="nonFunctional">{{ 'Non-Functional'|trans }}</option>

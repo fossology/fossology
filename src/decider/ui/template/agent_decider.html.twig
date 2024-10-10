@@ -6,17 +6,14 @@
 {% import "include/macros.html.twig" as macro %}
 
 <li>
-  <div class="form-group">
+  <div class="mb-3">
     <label for="decider">{{ 'Automatic Concluded License Decider'|trans }}</label>
-    <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'only for relevant files'|trans }}" alt="" class="info-bullet"/>
-    {{ ', based on'|trans }}
-    <br/>
-    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="nomosInMonk" id="nomosInMonk" />
-    <label for="nomosInMonk">{{ ' Scanners matches if all Nomos findings are within the Monk findings'|trans }}</label>
-    <br />
-    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="ojoNoContradiction" id="ojoNoContradiction" />
-    <label for="ojoNoContradiction">{{ ' Scanners matches if Ojo or REUSE.Software findings are no contradiction with other findings'|trans }}</label>
-    <br />
+    <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{ 'only for relevant files'|trans }}" alt="" class="info-bullet"/>
+    {{ ', based on'|trans }}<br/>
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="nomosInMonk" />
+    {{ ' Scanners matches if all Nomos findings are within the Monk findings'|trans }}<br />
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="ojoNoContradiction" />
+    {{ ' Scanners matches if Ojo or REUSE.Software findings are no contradiction with other findings'|trans }}<br />
     {% if isNinkaInstalled %}
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="nomosMonkNinka" id="nomosMonkNinka" />
     <label for="nomosMonkNinka">{{ ' Scanners matches if Nomos, Monk and Ninka find the same license'|trans }}</label>
@@ -38,15 +35,14 @@
       "licenseTypeConcDrop") }}
     <br />
     {% if isSpacyInstalled %}
-    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="copyrightDeactivation" id="copyrightDeactivation" />
-    <label for="copyrightDeactivation">{{ ' False Positive Copyright Deactivation'|trans }}
-    <span class="font-weight-bold text-warning">({{ 'experimental'|trans }})</span>
-    <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Use this feature to deactivate false positive copyrights. Warning: Using this may cause data loss.'|trans }}" alt="" class="info-bullet"/></label>
-    <br />
-    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="copyrightDeactivationClutterRemoval" id="copyrightDeactivationClutterRemoval" />
-    <label for="copyrightDeactivationClutterRemoval">{{ ' False Positive Copyright Deactivation and clutter removal'|trans }}
-    <span class="font-weight-bold text-warning">({{ 'experimental'|trans }})</span>
-    <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Use this feature to deactivate false positive copyrights and clean up extra content. Warning: Using this may cause data loss.'|trans }}" alt="" class="info-bullet"/></label>
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="copyrightDeactivation" />
+    {{ ' False Positive Copyright Deactivation'|trans }}
+    <span class="fw-bold text-warning">({{ 'experimental'|trans }})</span>
+    <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{ 'Use this feature to deactivate false positive copyrights. Warning: Using this may cause data loss.'|trans }}" alt="" class="info-bullet"/></br>
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="copyrightDeactivationClutterRemoval" />
+    {{ ' False Positive Copyright Deactivation and clutter removal'|trans }}
+    <span class="fw-bold text-warning">({{ 'experimental'|trans }})</span>
+    <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{ 'Use this feature to deactivate false positive copyrights and clean up extra content. Warning: Using this may cause data loss.'|trans }}" alt="" class="info-bullet"/>
     {% endif %}
   </div>
 </li>

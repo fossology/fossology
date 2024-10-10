@@ -3,12 +3,12 @@
    SPDX-License-Identifier: FSFAP
 #}
 selectedLicensesTableColumns = [
-  {"sTitle": "{{ 'Action'| trans }}<img src='images/info_16.png' data-toggle='tooltip' title='{{ "Current actions are: 1. Cross: remove (or add again) the license from a clearing result. Note that the license finding stays in the table, but it is not considered for a clearing result 2. Star: mark this license as main license as the package. A main license will appear in the listing of the browse view as well in the reporting"|trans }}' alt='' class='info-bullet'/>", "sClass": "center nobreaktext", "bSortable": false, "sWidth" : "1%"},
-  {"sTitle": "{{ 'License'| trans }}<img src='images/info_16.png' data-toggle='tooltip' title='{{ "Short ID (or SPDX ID) of the license. Clicking the license short ID will reveal the  license text"|trans }}' alt='' class='info-bullet'/>", "sClass": "left nobreaktext"},
-  {"sTitle": "{{ 'Source'| trans }}<img src='images/info_16.png' data-toggle='tooltip' title='{{ "Showing the agent or user action which yielded this finding"|trans }}' alt='' class='info-bullet'/>", "sClass": "left nobreaktext", "bSortable": false},
-  {"sTitle": "{{ 'License Text'| trans }}<img src='images/info_16.png' data-toggle='tooltip' title='{{ "The license text will normally appear in the reporting. If the text from the database should be overridden, because the license text is customized, then the custom license text for reporting can be pasted here"|trans }}' alt='' class='info-bullet'/>", "sClass": "left nobreaktext", "bSortable": false},
-  {"sTitle": "{{ 'Acknowledgement'| trans }}<img src='images/info_16.png' data-toggle='tooltip' title='{{ "Special acknowledgement text found or determined for a particular license can be placed into the according row of this column"|trans }}' alt='' class='info-bullet'/>", "sClass": "left nobreaktext", "bSortable": false},
-  {"sTitle": "{{ 'Comment'| trans }}<img src='images/info_16.png' data-toggle='tooltip' title='{{ "Showing a comment in the reporting for this particular license finding in this file can be shown here. Could be useful for - to be discussed"|trans }}' alt='' class='info-bullet'/>", "sClass": "left nobreaktext", "bSortable": false}
+  {"sTitle": "{{ 'Action'| trans }}<img src='images/info_16.png' data-bs-toggle='tooltip' title='{{ "Current actions are: 1. Cross: remove (or add again) the license from a clearing result. Note that the license finding stays in the table, but it is not considered for a clearing result 2. Star: mark this license as main license as the package. A main license will appear in the listing of the browse view as well in the reporting"|trans }}' alt='' class='info-bullet'/>", "sClass": "center nobreaktext", "bSortable": false, "sWidth" : "1%"},
+  {"sTitle": "{{ 'License'| trans }}<img src='images/info_16.png' data-bs-toggle='tooltip' title='{{ "Short ID (or SPDX ID) of the license. Clicking the license short ID will reveal the  license text"|trans }}' alt='' class='info-bullet'/>", "sClass": "left nobreaktext"},
+  {"sTitle": "{{ 'Source'| trans }}<img src='images/info_16.png' data-bs-toggle='tooltip' title='{{ "Showing the agent or user action which yielded this finding"|trans }}' alt='' class='info-bullet'/>", "sClass": "left nobreaktext", "bSortable": false},
+  {"sTitle": "{{ 'License Text'| trans }}<img src='images/info_16.png' data-bs-toggle='tooltip' title='{{ "The license text will normally appear in the reporting. If the text from the database should be overridden, because the license text is customized, then the custom license text for reporting can be pasted here"|trans }}' alt='' class='info-bullet'/>", "sClass": "left nobreaktext", "bSortable": false},
+  {"sTitle": "{{ 'Acknowledgement'| trans }}<img src='images/info_16.png' data-bs-toggle='tooltip' title='{{ "Special acknowledgement text found or determined for a particular license can be placed into the according row of this column"|trans }}' alt='' class='info-bullet'/>", "sClass": "left nobreaktext", "bSortable": false},
+  {"sTitle": "{{ 'Comment'| trans }}<img src='images/info_16.png' data-bs-toggle='tooltip' title='{{ "Showing a comment in the reporting for this particular license finding in this file can be shown here. Could be useful for - to be discussed"|trans }}' alt='' class='info-bullet'/>", "sClass": "left nobreaktext", "bSortable": false}
 ];
 
 uploadId = {{ uploadId }};
@@ -113,6 +113,6 @@ function createClearingHistoryDataTable() {
 $(document).ready(function () {
   createClearingTable();
   createLicenseSelectionTable();
-  $('[data-toggle="tooltip"]').tooltip();
+  $('[data-bs-toggle="tooltip"]').tooltip();
 });
 

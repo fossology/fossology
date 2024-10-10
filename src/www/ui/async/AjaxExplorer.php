@@ -447,7 +447,7 @@ class AjaxExplorer extends DefaultPlugin
 
     if ($isContainer) {
       $getTextEditBulk = _("Bulk");
-      $fileListLinks .= "[<a href='#' data-toggle='modal' data-target='#bulkModal' onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
+      $fileListLinks .= "[<a href='#' data-bs-toggle='modal' data-bs-target='#bulkModal' onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
     }
     $fileListLinks .= "<input type='checkbox' class='selectedForIrrelevant' class='info-bullet view-license-rc-size' value='".$childUploadTreeId."'>";
     $filesThatShouldStillBeCleared = array_key_exists($childItemTreeBounds->getItemId()

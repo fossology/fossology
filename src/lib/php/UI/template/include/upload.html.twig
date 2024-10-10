@@ -21,7 +21,7 @@
       <input type="hidden" name="{{ uploadFormBuildParameterName }}" value="{{ uploadFormBuild }}"/>
     <ol>
       <li>
-        <div class="form-group">
+        <div class="mb-3">
           <label for="{{ folderParameterName }}">{{ 'Select the folder for storing the uploaded files'| trans }}:</label>
             <br/>
             {% include 'components/select-folder.html.twig' with {'name': folderParameterName, 'id': 'uploadFolderSelector'} %}
@@ -31,44 +31,44 @@
       {% endblock %}
       {% block filedescription %}
       <li>
-        <div class="form-group">
+        <div class="mb-3">
           <label for="{{ fileInputName }}">({{ 'Optional'|trans }}) {{ 'Enter a description of this file'| trans }}:</label>
           <input type="text" class="form-control" style="width:40%;" name="{{ descriptionInputName }}" value="{{ descriptionInputValue }}">
         </div>
       </li>
       {% endblock %}
       <li>
-        <div class="form-group">
+        <div class="mb-3">
           <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="globalDecisions" value="1"/>
           {{ 'Apply global decisions for current upload'| trans }}
-          <img src="images/info_16.png" data-toggle="tooltip" title="{{'Apply results of concluded files marked as global from previous uploads'|trans}}" alt="" class="info-bullet"/>
+          <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{'Apply results of concluded files marked as global from previous uploads'|trans}}" alt="" class="info-bullet"/>
         </div>
       </li>
       <li>
-        <div class="form-group">
+        <div class="mb-3">
           <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="scm" value="1"/>
           {{ 'Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype'| trans }}
-          <img src="images/info_16.png" data-toggle="tooltip" title="{{'Configure mimetypes from Admin-Customize-Skip MimeTypes from scanning'|trans}}" alt="" class="info-bullet"/>
+          <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{'Configure mimetypes from Admin-Customize-Skip MimeTypes from scanning'|trans}}" alt="" class="info-bullet"/>
         </div>
       </li>
       <li>
-        <div class="form-group">
+        <div class="mb-3">
           <input type="radio" class="browse-upload-checkbox view-license-rc-size" name="public" value="private" {% if uploadVisibility == "private" %} checked="checked" {% endif %}/>
           {{ 'Visible only for active group'| trans }}
-          <img src="images/info_16.png" data-toggle="tooltip" title="{{'which is the currently selected group'|trans}}" alt="" class="info-bullet"/><br/>
+          <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{'which is the currently selected group'|trans}}" alt="" class="info-bullet"/><br/>
 
           <input type="radio" class="browse-upload-checkbox view-license-rc-size" name="public" value="protected" checked="checked" {% if uploadVisibility == "protected" %} checked="checked" {% endif %}/>
           {{ 'Visible for all groups'| trans }}
-          <img src="images/info_16.png" data-toggle="tooltip" title="{{'which are accessible by you now'|trans}}" alt="" class="info-bullet"/><br/>
+          <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{'which are accessible by you now'|trans}}" alt="" class="info-bullet"/><br/>
 
           <input type="radio" class="browse-upload-checkbox view-license-rc-size" name="public" value="public" {% if uploadVisibility == "public" %} checked="checked" {% endif %}/>
           {{ 'Make Public'| trans }}
-          <img src="images/info_16.png" data-toggle="tooltip" title="{{'visible for all users'|trans}}" alt="" class="info-bullet"/><br/>
+          <img src="images/info_16.png" data-bs-toggle="tooltip" title="{{'visible for all users'|trans}}" alt="" class="info-bullet"/><br/>
         </div>
       </li>
       {% if agentCheckBoxMake %}
       <li>
-        <div class="form-group">
+        <div class="mb-3">
           <label for="agentCheckboxes">{{ 'Select optional analysis'| trans }}:</label>
           <br/>
           {{ agentCheckBoxMake }}
@@ -84,7 +84,7 @@
       {% endblock %}
     </p>
 
-    <input type="submit" class="btn btn-default btn-sm" value="{{ 'Upload'| trans }}"/>
+    <input type="submit" class="btn btn-light btn-sm" value="{{ 'Upload'| trans }}"/>
     </div>
   </form>
 
@@ -95,7 +95,7 @@
   <script src="scripts/tools.js" type="text/javascript"></script>
   <script type="text/javascript">
     $(document).ready(function () {
-      $('[data-toggle="tooltip"]').tooltip();
+      $('[data-bs-toggle="tooltip"]').tooltip();
       $('#uploadToReuse').select2({
           "placeholder": "Select upload to reuse"
       });
