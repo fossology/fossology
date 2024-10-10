@@ -25,11 +25,13 @@ $(document).ready(function () {
 
   $("#markDecisionAdd").click(function() {
     var decision = $("#markDecision").val();
+    $('#loader').show();
     return markDecisions(decision, false);
   });
 
   $("#markDecisionRemove").click(function() {
     var decision = $("#removeDecision").val();
+    $('#loader').show();
     return markDecisions(decision, true);
   });
 });
@@ -92,6 +94,7 @@ function scheduleBulkScan() {
 }
 
 function performPostRequest(doRemove) {
+  $('#loader').show();
   removed = doRemove;
   performPostRequestCommon($('#bulkIdResult'), function () {
     location.reload();
@@ -102,6 +105,7 @@ function markDecisions(decisionToBeApplied, isRemoval) {
   if (isRemoval == true) {
     var pleaseConfirm = confirm("You are about to delete recent decisions. Please confirm!");
     if (pleaseConfirm == false) {
+      $('#loader').hide();
       return false;
     }
   }

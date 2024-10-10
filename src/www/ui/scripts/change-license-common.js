@@ -178,7 +178,7 @@ function performPostRequestCommon(resultEntity, callbackSuccess) {
     type: "POST",
     url: "?mod=change-license-processPost",
     data: data,
-    success: function (data) { scheduledBootstrapSuccess(data, resultEntity, callbackSuccess, closeUserModal); },
+    success: function (data) { scheduledBootstrapSuccess(data, resultEntity, callbackSuccess); },
     error: function(responseobject) { bootstrapAlertError(responseobject, resultEntity); }
   });
 
@@ -597,17 +597,18 @@ function bootstrapAlertError(responseobject, resultEntity) {
   resultEntity.show();
 }
 
-function scheduledBootstrapSuccess (data, resultEntity, callbackSuccess, callbackCloseModal) {
+function scheduledBootstrapSuccess (data, resultEntity, callbackSuccess) {
   var jqPk = data.jqid;
   var errorSpan = resultEntity.find("span:first");
   if (jqPk) {
+    resultEntity.removeClass("alert-danger").addClass("alert-success");
     errorSpan.html("scan scheduled as " + linkToJob(jqPk));
     if (callbackSuccess) {
       resultEntity.show();
       queueUpdateCheck(jqPk, callbackSuccess);
     }
-    callbackCloseModal();
   } else {
+    resultEntity.removeClass("alert-success").addClass("alert-danger");
     errorSpan.text("bad response from server");
   }
   resultEntity.show();
