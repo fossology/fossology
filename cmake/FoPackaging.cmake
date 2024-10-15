@@ -46,6 +46,7 @@ set(CPACK_COMPONENTS_ALL
     ununpack
     cli
     clixml
+    compatibility
     cyclonedx
     lib
     common
@@ -101,7 +102,7 @@ set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_DEPENDS
 set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_RECOMMENDS
     "fossology-cyclonedx, fossology-monk, fossology-monkbulk, fossology-decider,
     fossology-readmeoss, fossology-spdx2, fossology-reportimport,
-    fossology-softwareheritage, fossology-reuser")
+    fossology-softwareheritage, fossology-reuser, fossology-compatibility")
 set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_CONFLICTS
     "fossology-db (<= 1.4.1), fossology-common (<= 1.4.1)")
 
@@ -506,6 +507,19 @@ set(CPACK_DEBIAN_READMEOSS_PACKAGE_DEPENDS
     "fossology-common, fossology-copyright")
 
 set(CPACK_DEBIAN_READMEOSS_PACKAGE_SECTION "utils")
+
+## FOSSOLOGY-COMPATIBILITY PACKAGE
+set(CPACK_DEBIAN_COMPATIBILITY_PACKAGE_NAME "fossology-compatibility")
+set(CPACK_DEBIAN_COMPATIBILITY_FILE_NAME "fossology-compatibility_${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_COMPATIBILITY_DESCRIPTION
+        "architecture for analyzing software, compatibility decider agent
+${FO_PACKAGE_COMMON_DESCRIPTION}
+This package contains the compatibility agent programs and their resources.")
+
+set(CPACK_DEBIAN_COMPATIBILITY_PACKAGE_DEPENDS
+        "fossology-common, fossology-decider, fossology-deciderjob")
+
+set(CPACK_DEBIAN_COMPATIBILITY_PACKAGE_SECTION "utils")
 
 ## FOSSOLOGY-CYCLONEDX PACKAGE
 set(CPACK_DEBIAN_CYCLONEDX_PACKAGE_NAME "fossology-cyclonedx")
