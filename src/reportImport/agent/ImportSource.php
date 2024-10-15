@@ -21,6 +21,11 @@ interface ImportSource
   public function parse();
 
   /**
+   * @return $specVersion
+   */
+  public function getVersion();
+  
+  /**
    * @param $fileId
    * @return array
    */

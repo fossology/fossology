@@ -1,0 +1,129 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+type: NamespaceMap
+namespace: {{ uri }}
+prefix: URI
+
+##-------------------------
+## Creation Information
+##-------------------------
+
+type: CreationInfo
+spdxId: creationInfo:creationInfo1
+specVersion: 3.0.0
+created: {{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}
+createdBy: Person:SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}
+createdUsing: Tool:SPDXRef-Actor-{{ toolVersion }}
+comment: <text>This document was created using license information and a generator from Fossology.</text>
+
+##-------------------------
+## Document Information
+##-------------------------
+
+type: SpdxDocument
+spdxId: SPDXRef-DOCUMENT
+creationInfo: creationInfo1
+name: {{ documentName }}
+profileConformance: core, software, simpleLicensing, expandedLicensing
+element: SPDXRef-Actor-{{ toolVersion }}, SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}
+{% for packageId in packageIds %}
+element: SPDXRef-upload{{ packageId }}
+{% endfor %}
+{% for fileId in fileIds %}
+element: SPDXRef-item{{ fileId }}{% if not loop.last %},{{ "\n" }}{% endif %}
+{% endfor %}
+rootElement: 
+{% for packageId in packageIds %}
+rootElement: SPDXRef-upload{{ packageId }}{% if not loop.last %},{{ "\n" }}{% endif %}
+{% endfor %}
+dataLicense.type: simplelicensing_AnyLicenseInfo
+dataLicense.creationInfo: creationInfo1
+dataLicense.description: {{ licenseList[dataLicense].licenseObj.spdxId|replace({' ': '-'}) }}
+
+
+{%- if toolVersion is not empty %}
+
+##-------------------------
+## Tool Information
+##-------------------------
+
+type: Tool
+spdxId: SPDXRef-Actor-{{ toolVersion }}
+creationInfo: creationInfo1
+name: {{ toolVersion }}
+{%- endif %}
+
+{%- if userName is not empty %}
+
+##-------------------------
+## Person Information
+##-------------------------
+
+type: Person
+spdxId: SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}
+creationInfo: creationInfo1
+name: {{ userName | split(' ')[0] }}
+externalIdentifier.type: ExternalIdentifier
+externalIdentifier.externalIdentifierType: email
+externalIdentifier.identifier: {{ userName | split(' (')[1] | split(')')[0] }}
+{%- endif %}
+
+{%- if organization is not empty %}
+
+##--------------------------
+## Organization Information
+##--------------------------
+
+type: Organization
+spdxId: SPDXRef-Actor-{{ organization }}
+creationInfo: creationInfo1
+name: {{ userName | split(' ')[0] }}
+{%- endif %}
+
+
+##-------------------------
+## License Information
+##-------------------------
+{% for licenseData in licenseList %}
+{%- if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
+{%- set licId = licenseData.licenseObj.spdxId %}
+{%- if licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
+{%- set licId = licenseData.licenseObj.shortName %}
+{%- endif %}
+
+
+type: expandedlicensing_CustomLicense
+spdxId: {{ licId|replace({' ': '-'}) }}
+creationInfo: creationInfo1
+name: {{ licenseData.licenseObj.fullName }}
+simplelicensing_licenseText: <text> {{ licenseData.licenseObj.text|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})|replace({'\f':'','"':"'", '\n':''}) }} </text>
+{%- if licenseData.licenseObj.url is not empty %}
+{%- if '&' in licenseData.licenseObj.url %}
+
+expandedlicensing_seeAlso: {{ licenseData.licenseObj.url|url_encode }}
+{%- else %}
+expandedlicensing_seeAlso: {{ licenseData.licenseObj.url }}
+{%- endif %}
+{%- endif %}
+{%- endif %}
+{% endfor %}
+
+{{ packageNodes }}
+
+##---------------------------------------
+## Package-File Relationship Information
+##---------------------------------------
+
+{% for packageId in packageIds %}
+type: Relationship
+spdxId: SPDXRef-Relationship-{{ fileIds | length }}
+from: SPDXRef-upload{{ packageId }}
+{% for fileId in fileIds %}
+to: SPDXRef-item{{ fileId }}{% if not loop.last %},{{ "\n" }}{% endif %}
+{% endfor %}
+
+relationshipType: describes
+creationInfo: creationInfo:creationInfo1
+{% endfor %}

@@ -1,0 +1,107 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% set fileIds = concludedLicenseFileIds | merge(declaredLicenseFileIds) %}
+[
+  {
+    "type": "NamespaceMap",
+    "namespace": "{{ uri }}",
+    "prefix": "URI"
+  },
+  {
+    "@id": "https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1",
+    "type": "CreationInfo",
+    "specVersion": "3.0.0",
+    "created": "{{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}",
+    "createdBy": [
+      "https://spdx.org/rdf/3.0.0/terms/Core/Person#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}"
+    ],
+    "createdUsing": [
+      "https://spdx.org/rdf/3.0.0/terms/Core/Tool#SPDXRef-Actor-{{ toolVersion }}"
+    ],
+    "comment": "<text>This document was created using license information and a generator from Fossology.</text>"
+  },
+  {
+    "type": "SpdxDocument",
+    "spdxId": "https://spdx.org/rdf/3.0.0/terms/Core/SpdxDocument#SpdxRef-DOCUMENT",
+    "creationInfo": "https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1",
+    "name": "{{ documentName|e}}",
+    "profileConformance": [
+      "core",
+      "software",
+      "simpleLicensing",
+      "expandedLicensing"
+    ],
+    "element": [
+      "https://spdx.org/rdf/3.0.0/terms/Core/Tool#SPDXRef-Actor-{{ toolVersion }}",
+      "https://spdx.org/rdf/3.0.0/terms/Core/Person#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}",{{"\n"}}{% for packageId in packageIds %}
+      "https://spdx.org/rdf/3.0.0/terms/Software/Package#SPDXRef-upload{{ packageId }}",{{"\n"}}{% endfor %}{% for fileId in fileIds %}
+      "https://spdx.org/rdf/3.0.0/terms/Software/File#SPDXRef-item{{ fileId }}"{% if not loop.last %},{% endif %}{{"\n"}}{% endfor %}
+    ],
+    "rootElement": [{{"\n"}}{% for packageId in packageIds %}
+      "https://spdx.org/rdf/3.0.0/terms/Software/Package#SPDXRef-upload{{ packageId }}"{% if not loop.last %},{% endif %}{{ "\n" }}{% endfor %}
+    ],
+    "dataLicense": {
+      "type": "simplelicensing_AnyLicenseInfo",
+      "creationInfo": "https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1",
+      "description": "{{ licenseList[dataLicense].licenseObj.spdxId|replace({' ': '-'}) }}"
+    }
+  },{{ "\n" }}{% if toolVersion is not empty %}
+  {
+    "type": "Tool",
+    "spdxId": "https://spdx.org/rdf/3.0.0/terms/Core/Tool#SPDXRef-Actor-{{ toolVersion }}",
+    "creationInfo": "https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1",
+    "name": "{{ toolVersion }}"
+  },{% endif %}{{ "\n" }}{% if userName is not empty %}
+  {
+    "type": "Person",
+    "spdxId": "https://spdx.org/rdf/3.0.0/terms/Core/Person#SPDXRef-Actor-{{ userName | replace({' (': '-', ')': ''}) }}",
+    "creationInfo": "https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1",
+    "name": "{{ userName | split(' ')[0] }}",
+    "externalIdentifier": [
+      {
+        "type": "ExternalIdentifier",
+        "externalIdentifierType": "email",
+        "identifier": "{{ userName | split(' (')[1] | split(')')[0] }}"
+      }
+    ]
+  },{% endif %}{{ "\n" }}{% if organization is not empty %}
+  {
+    "type": "Organization",
+    "spdxId": "https://spdx.org/rdf/3.0.0/terms/Core/Organization#SPDXRef-Actor-{{ organization }}",
+    "creationInfo": "https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1",
+    "name": "{{ userName | split(' ')[0] }}"
+  },{% endif %}{% for licenseData in licenseList %}{% if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
+  {
+    "type": "expandedlicensing_CustomLicense",
+    "spdxId": "{{ uri }}#{{ licenseData.licenseObj.spdxId|replace({' ': '-'})|e }}",
+    "creationInfo": "https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1",
+    "name": "{{ licenseData.licenseObj.fullName|e }}",{{ "\n" }}{% if licenseData.licenseObj.url is not empty %}
+    "expandedlicensing_seeAlso": [
+      "{{ licenseData.licenseObj.url }}"
+    ],{{ "\n" }}{% endif %}
+    "simplelicensing_licenseText": "<text>{{ licenseData.licenseObj.text|replace({'<text>':'&lt;text&gt;', '</text>':'&lt;/text&gt;'})|replace({'\f':'','"':"'", '\n':''}) }}</text>"
+  },{{ "\n" }}{% endif %}{% endfor %}
+  {{ packageNodes }}{% if concludedLicenseFileIds is not empty %}{% for packageId in packageIds %}
+  {
+    "type": "Relationship",
+    "spdxId": "{{ uri }}:SPDXRef-Relationship-{{ concludedLicenseFileIds | length }}",
+    "from": "https://spdx.org/rdf/3.0.0/terms/Software/Package#SPDXRef-upload{{ packageId }}",
+    "to": [{{ "\n" }}{% for concludedLicenseFileId in concludedLicenseFileIds %}
+      "https://spdx.org/rdf/3.0.0/terms/Software/File#SPDXRef-item{{ concludedLicenseFileId }}"{% if not loop.last %},{% endif %}{{ "\n" }}{% endfor %}
+    ],
+    "relationshipType": "hasConcludedLicense",
+    "creationInfo": "https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"
+  }{% if not loop.last %},{{"\n"}}{% else %}{% if declaredLicenseFileIds is not empty %},{% endif %}{% endif %}{% endfor %}{{"\n"}}{% endif %}{% if declaredLicenseFileIds is not empty %}{% for packageId in packageIds %}{% endfor %}{% endif %}{% if declaredLicenseFileIds is not empty %}{% for packageId in packageIds %}
+  {
+    "type": "Relationship",
+    "spdxId": "{{ uri }}:SPDXRef-Relationship-{{ declaredLicenseFileIds | length }}",
+    "from": "https://spdx.org/rdf/3.0.0/terms/Software/Package#SPDXRef-upload{{ packageId }}",
+    "to": [{{"\n"}}{% for declaredLicenseFileId in declaredLicenseFileIds %}
+      "https://spdx.org/rdf/3.0.0/terms/Software/File#SPDXRef-item{{ declaredLicenseFileId }}"{% if not loop.last %},{% endif %}{{"\n"}}{% endfor %}
+    ],
+    "relationshipType": "hasDeclaredLicense",
+    "creationInfo": "https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"
+  }{% if not loop.last %},{% endif %}{{"\n"}}{% endfor %}{% endif %}
+]

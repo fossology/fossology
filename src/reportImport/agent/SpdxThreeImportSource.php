@@ -19,9 +19,9 @@ require_once 'ReportImportData.php';
 require_once 'ReportImportDataItem.php';
 require_once 'ImportSource.php';
 
-class SpdxTwoImportSource implements ImportSource
+class SpdxThreeImportSource implements ImportSource
 {
-  const TERMS = 'http://spdx.org/rdf/terms#';
+  const TERMS = 'https://spdx.org/rdf/3.0.0/terms#';
   const SPDX_URL = 'http://spdx.org/licenses/';
   const SPDX_FILE = 'spdx:File';
 
@@ -50,17 +50,11 @@ class SpdxTwoImportSource implements ImportSource
     $this->spdxDoc = $this->getSpdxDoc();
     return $this->graph !== null && $this->spdxDoc !== null;
   }
-
+  /**
+   * @return null
+   */
   public function getVersion(){
-    RdfNamespace::set('spdx', self::TERMS);
-    $this->graph = $this->loadGraph($this->filename, $this->uri);
-    $this->spdxDoc = (count($docs = $this->graph->allOfType("spdx:SpdxDocument"))) == 1 ? $docs[0] : null;
-    if ($this->spdxDoc !== null){
-      $specVersion = explode('-', $this->spdxDoc->getLiteral("spdx:specVersion"))[1];
-      return $specVersion;
-    } else {
-      return null;
-    }
+    return null;
   }
 
   private function loadGraph($filename, $uri = null)
@@ -76,6 +70,7 @@ class SpdxTwoImportSource implements ImportSource
     }
     return $graph;
   }
+
 
   private function getSpdxDoc()
   {
@@ -93,39 +88,12 @@ class SpdxTwoImportSource implements ImportSource
    */
   public function getAllFiles()
   {
-    $relationship = $this->spdxDoc->getResource("spdx:relationship");
-    $element = $relationship->getResource("spdx:relatedSpdxElement");
-    /* @var $files Resource[] */
-    $files = $element->allResources("spdx:hasFile");
-    if (count($files) < 1) {
-      $files = $this->getNestedFiles($element);
-    }
-    $fileIds = array();
-    foreach ($files as $file) {
-      $fileIds[$file->getUri()] = trim($file->getLiteral("spdx:fileName")->getValue());
+      $files = $this->graph->allOfType("spdx:File");
+      $fileIds = array();
+      foreach ($files as $file) {
+        $fileIds[$file->getUri()] = trim($file->getLiteral("spdx:name")->getValue());
     }
     return $fileIds;
-  }
-
-  /**
-   * @param Resource $element Package element
-   * @return Resource[] Nested files
-   */
-  private function getNestedFiles($element): array
-  {
-    $nestedFiles = [];
-    /** @var Resource[] $nestedRelations */
-    $nestedRelations = $element->allResources("spdx:relationship");
-    foreach ($nestedRelations as $nestedRelation) {
-      $relationType = $nestedRelation->getResource("spdx:relationshipType");
-      if (StringOperation::stringEndsWith($relationType->getUri(), "contains")) {
-        $fileResource = $nestedRelation->getResource("spdx:relatedSpdxElement");
-        if ($fileResource !== null) {
-          $nestedFiles[] = $fileResource;
-        }
-      }
-    }
-    return $nestedFiles;
   }
 
   /**
@@ -134,30 +102,25 @@ class SpdxTwoImportSource implements ImportSource
    */
   public function getHashesMap($fileId)
   {
-    $fileNode = $this->graph->resource($fileId, self::SPDX_FILE);
-    if ($fileNode->getLiteral("spdx:fileName") == null) {
-      return [];
-    }
-
-    $hashes = [];
-
-    $algoKeyPrefix = self::TERMS . 'checksumAlgorithm_';
-
-    /* @var $checksums Resource[] */
-    $checksums = $fileNode->allResources("spdx:checksum");
-    foreach ($checksums as $checksum) {
-      $algorithm = $checksum->getResource("spdx:algorithm");
-      $value = $checksum->getLiteral("spdx:checksumValue");
-      if ($algorithm != null && $value != null) {
-        if (StringOperation::stringStartsWith($algorithm->getUri(), $algoKeyPrefix)) {
-          $algo = substr($algorithm->getUri(), strlen($algoKeyPrefix));
-        } else {
-          $algo = $algorithm->getUri();
-        }
-        $hashes[$algo] = trim($value->getValue());
+      $fileNode = $this->graph->resource($fileId, self::SPDX_FILE);
+      if ($fileNode->getLiteral("spdx:name") == null) {
+        return [];
       }
-    }
-    return $hashes;
+      $hashes = [];
+      $algoKeyPrefix = self::TERMS . 'checksumAlgorithm_';
+      /* @var $checksums Resource[] */
+      $checksums = $fileNode->getResource("spdx:verifiedUsing");
+      $algorithm = $checksums->allResources("spdx:algorithm");
+      $value = $checksums->allLiterals("spdx:hashValue");
+      for ($i=0;$i<count($algorithm);$i++){
+        if (StringOperation::stringStartsWith($algorithm[$i]->getUri(), $algoKeyPrefix)) {
+          $algo = substr($algorithm[$i]->getUri(), strlen($algoKeyPrefix));
+        } else {
+          $algo = $algorithm[$i]->getUri();
+        }
+        $hashes[$algo] = trim($value[$i]);
+      }
+      return $hashes;
   }
 
   /**
@@ -177,7 +140,7 @@ class SpdxTwoImportSource implements ImportSource
    */
   public function getLicenseInfoInFileForFile($propertyId)
   {
-    return $this->getLicenseInfoForFile($propertyId, 'licenseInfoInFile');
+    return $this->getLicenseInfoForFile($propertyId, 'Annotation');
   }
 
   /**
@@ -187,18 +150,19 @@ class SpdxTwoImportSource implements ImportSource
    */
   private function getLicenseInfoForFile($fileId, $kind)
   {
-    $fileNode = $this->graph->resource($fileId, self::SPDX_FILE);
-    /* @var $licenses Resource[] */
-    $licenses = $fileNode->allResources("spdx:$kind");
-
+    $licenses = $this->graph->allOfType("spdx:$kind");
     $output = [];
     foreach ($licenses as $license) {
-      if (!$this->isNotNoassertion($license->getUri())) {
-        continue;
-      }
-      $innerOutput = $this->parseLicense($license);
-      foreach ($innerOutput as $innerItem) {
-        $output[] = $innerItem;
+      $spdxIds = $license->allResources('spdx:spdxId');
+      foreach ($spdxIds as $spdxId)
+      if ($spdxId == $fileId) {
+        if (!$this->isNotNoassertion($license->getUri())) {
+          continue;
+        }
+        $innerOutput = $this->parseLicense($license);
+        foreach ($innerOutput as $innerItem) {
+          $output[] = $innerItem;
+        }
       }
     }
     return $output;
@@ -206,16 +170,15 @@ class SpdxTwoImportSource implements ImportSource
 
   private function isNotNoassertion($str)
   {
-    return !(strtolower($str) === self::TERMS . "noassertion" ||
-      strtolower($str) === "http://spdx.org/licenses/noassertion");
+    return !(strtolower($str) === self::TERMS . "NoAssertionLicense" ||
+      strtolower($str) === "http://spdx.org/licenses/NoAssertionLicense");
   }
 
   /**
    * Parse license info. Element can be:
    * -# License ID (string)
-   * -# License resource (ExtractedLicensingInfo, License, ListedLicense)
-   * -# License set (DisjunctiveLicenseSet, ConjunctiveLicenseSet)
-   * -# OrLaterOperator
+   * -# License resource (expandedlicensing_CustomLicense, Annotation, expandedlicensing_ListedLicense)
+   * -# License set (expandedlicensing_DisjunctiveLicenseSet, expandedlicensing_ConjunctiveLicenseSet)
    * -# Old-style license ID (Resource)
    * @param Resource|string $license
    * @return array|ReportImportDataItem[]
@@ -224,16 +187,14 @@ class SpdxTwoImportSource implements ImportSource
   {
     if (is_string($license)) {
       return $this->parseLicenseId($license);
-    } elseif ($license->isA('spdx:ExtractedLicensingInfo') ||
-      $license->isA('spdx:License') ||
-      $license->isA('spdx:ListedLicense')) {
+    } elseif ($license->isA('spdx:expandedlicensing_CustomLicense') ||
+      $license->isA('spdx:expandedlicensing_ListedLicense') ||
+      $license->isA('spdx:Annotation')){
       return $this->handleLicenseInfo($license);
-    } elseif ($license->isA('spdx:DisjunctiveLicenseSet') ||
-      $license->isA('spdx:ConjunctiveLicenseSet')) {
+    } elseif ($license->isA('spdx:expandedlicensing_DisjunctiveLicenseSet') ||
+      $license->isA('spdx:expandedlicensing_ConjunctiveLicenseSet')) {
       return $this->handleLicenseSet($license);
-    } elseif ($license->isA('spdx:OrLaterOperator')) {
-      return $this->handleOrLaterOperator($license);
-    }
+    } 
     if ($license instanceof Resource || $license instanceof Graph) {
       return $this->parseLicenseId($license->getUri());
     } else {
@@ -272,20 +233,20 @@ class SpdxTwoImportSource implements ImportSource
    */
   private function handleLicenseInfo($license)
   {
-    $licenseIdLiteral = $license->getLiteral("spdx:licenseId");
-    $licenseNameLiteral = $license->getLiteral("spdx:name");
-    if ($license->isA('spdx:ExtractedLicensingInfo')) {
-      $licenseTextLiteral = $license->getLiteral("spdx:extractedText");
+    if ($license->isA('spdx:expandedlicensing_CustomLicense')) {
+    $licenseIdLiteral = $license->getLiteral("spdx:spdxId");
     } else {
-      $licenseTextLiteral = $license->getLiteral("spdx:licenseText");
+      $licenseIdLiteral = $license->getUri();
     }
+    $licenseNameLiteral = $license->getLiteral("spdx:name");
+    $licenseTextLiteral = $license->getLiteral("spdx:simplelicensing_licenseText");
     if ($licenseIdLiteral != null && $licenseNameLiteral != null &&
       $licenseTextLiteral != null) {
-      $seeAlsoLiteral = $license->getLiteral("rdfs:seeAlso");
+      $seeAlsoLiteral = $license->getLiteral("spdx:expandedlicensing_seeAlso");
       $rawLicenseId = $licenseIdLiteral->getValue();
       $licenseId = $this->stripLicenseRefPrefix($rawLicenseId);
 
-      if ($license->isA('spdx:ExtractedLicensingInfo') &&
+      if ($license->isA('spdx:expandedlicensing_CustomLicense') &&
         (strlen($licenseId) > 33 &&
           substr($licenseId, -33, 1) === "-" &&
           ctype_alnum(substr($licenseId, -32))
@@ -321,35 +282,13 @@ class SpdxTwoImportSource implements ImportSource
   private function handleLicenseSet($license)
   {
     $output = [];
-    $subLicenses = $license->allResources("spdx:member");
-    if (sizeof($subLicenses) > 1 && $license->isA('spdx:DisjunctiveLicenseSet')) {
+    $subLicenses = $license->allResources("spdx:expandedlicensing_member");
+    if (sizeof($subLicenses) > 1 && $license->isA('spdx:expandedlicensing_DisjunctiveLicenseSet')) {
       $output[] = new ReportImportDataItem("Dual-license");
     }
     foreach ($subLicenses as $subLicense) {
       $innerOutput = $this->parseLicense($subLicense);
       $output = array_merge($output, $innerOutput);
-    }
-    return $output;
-  }
-
-  private function handleOrLaterOperator($license)
-  {
-    $output = [];
-    $subLicenses = $license->allResources("spdx:member");
-    foreach ($subLicenses as $subLicense) {
-      /** @var ReportImportDataItem[] $innerOutput */
-      $innerOutput = $this->parseLicense($subLicense);
-      foreach ($innerOutput as $innerItem) {
-        /** @var License $innerLicenseCandidate */
-        $item = new ReportImportDataItem($innerItem->getLicenseId() . "-or-later");
-
-        $innerLicenseCandidate = $innerItem->getLicenseCandidate();
-        $item->setLicenseCandidate($innerLicenseCandidate->getFullName() . " or later",
-          $innerLicenseCandidate->getText(), false,
-          $innerLicenseCandidate->getUrl()
-        );
-        $output[] = $item;
-      }
     }
     return $output;
   }
@@ -360,7 +299,7 @@ class SpdxTwoImportSource implements ImportSource
    */
   public function getConcludedLicenseInfoForFile($propertyId)
   {
-    return $this->getLicenseInfoForFile($propertyId, 'licenseConcluded');
+    return $this->getLicenseInfoForFile($propertyId, 'simplelicensing_AnyLicenseInfo');
   }
 
   /**
@@ -371,7 +310,7 @@ class SpdxTwoImportSource implements ImportSource
   {
     $fileNode = $this->graph->resource($fileId, self::SPDX_FILE);
     /* @var $licenses Literal[] */
-    $copyrights = $fileNode->allLiterals("spdx:copyrightText");
+    $copyrights = $fileNode->allLiterals("spdx:software_copyrightText");
     if (count($copyrights) == 1 && $copyrights[0] instanceof Literal) {
       # There should be only 1 copyright element containing 1 copyright per line
       $copyrights = explode("\n", trim($copyrights[0]->getValue()));

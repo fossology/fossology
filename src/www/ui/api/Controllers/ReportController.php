@@ -16,7 +16,7 @@ use Fossology\CliXml\UI\CliXmlGeneratorUi;
 use Fossology\DecisionExporter\UI\FoDecisionExporter;
 use Fossology\DecisionImporter\UI\AgentDecisionImporterPlugin;
 use Fossology\ReadmeOSS\UI\ReadMeOssPlugin;
-use Fossology\SpdxTwo\UI\SpdxTwoGeneratorUi;
+use Fossology\Spdx\UI\SpdxTwoGeneratorUi;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;

@@ -30,7 +30,7 @@
       <directory suffix="Test.php">monk/agent_tests/Functional</directory>
       <directory suffix="Test.php">ojo/agent_tests/Functional</directory>
       <directory suffix="Test.php">reuser/agent_tests/Functional</directory>
-      <directory suffix="Test.php">spdx2/agent_tests</directory>
+      <directory suffix="Test.php">spdx/agent_tests</directory>
       <directory suffix="Test.php">clixml/agent_tests</directory>
     </testsuite>
   </testsuites>
