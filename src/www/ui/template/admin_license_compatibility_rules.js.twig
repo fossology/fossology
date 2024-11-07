@@ -2,7 +2,6 @@
 
    SPDX-License-Identifier: FSFAP
 #}
-
 <script type="text/javascript">
 {% import 'include/macros.html.twig' as macro %}
 
@@ -16,8 +15,8 @@ $(document).ready(function() {
 
   var t = $("#adminLicenseRulesTable").DataTable({
     "processing": true,
-    "paginationType": "listbox",
-    "order": [[ 0, 'asc' ]],
+    "paging": false,                   
+    "order": [[ 0, 'asc' ]],           
     "autoWidth": false,
     "columnDefs": [{
       "createdCell": function (cell) {
