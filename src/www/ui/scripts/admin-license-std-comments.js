@@ -102,7 +102,7 @@ $(document).ready(function() {
         'placeholder="Please enter a comment statement" ' +
         'class="newCommentInputs"></textarea>',
       '<input type="checkbox" checked disabled />'
-    ]).draw(false);
+    ]).draw(false).page("last").draw(false);
   });
 
   $(".licStdCommentToggle").change(function(){

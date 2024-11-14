@@ -295,11 +295,10 @@ class DecisionImporterDataCreator
 
     if (!$this->agentDao->arsTableExists($agentName)) {
       // FIXME This requires the user to manually run the respective agent to get past this point
-      throw new UnexpectedValueException("No agent '$agentName' exists on server.");               
-    }                                                                                              
+      throw new UnexpectedValueException("No agent '$agentName' exists on server.");
+    }
     $latestAgentId = $this->agentDao->getCurrentAgentId($agentName);
     $this->createCxJobs($agentName, $jobId, $latestAgentId);
-                                                                                                   
     $cxExistSql = "SELECT " . $agentName . "_pk FROM $agentName WHERE pfile_fk = $1 AND agent_fk = $2 AND hash = $3;";
     $cxExistStatement = __METHOD__ . ".$agentName" . "Exist";
 
