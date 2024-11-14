@@ -26,8 +26,8 @@
         </div>
         <!-- Modal footer -->
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger" onclick="closeCommentModal();" data-dismiss="modal">{{ 'Cancel'|trans }}</button>
-          <button type="button" class="btn btn-success" onclick="submitComment();" data-dismiss="modal">{{ 'Ok'|trans }}</button>
+          <button type="button" class="btn btn-danger" onclick="closeCommentModal();" data-bs-dismiss="modal">{{ 'Cancel'|trans }}</button>
+          <button type="button" class="btn btn-success" onclick="submitComment();" data-bs-dismiss="modal">{{ 'Ok'|trans }}</button>
         </div>
       </div>
     </div>
@@ -79,11 +79,16 @@
         {% if multiUploadAgents is not empty %}
           <input type="hidden" name="mod" id="mod" value=""/>
           {{ 'Select'|trans }}
-          <input type="checkbox" name="folder" checked="checked" id="browse-upload-all" value="{{ folderId }}" data-toggle="toggle" data-on="Whole folder" data-off="Marked uploads" data-onstyle="outline-success" data-offstyle="outline-success">
+          <div class="form-check form-switch">
+            <input type="checkbox" class="form-check-input" name="folder" id="browse-upload-all" value="{{ folderId }}" checked>
+              <label class="form-check-label" for="browse-upload-all">
+                <span id="toggle-label">Whole folder</span>
+              </label>
           {{ 'to run'|trans }}:
           {% for muAgent,muDesc in multiUploadAgents %}
-            <input type="submit" value="{{ muDesc }}" name="{{ muAgent }}" class="multi-upload-agent btn btn-default"/>
+            <input type="submit" value="{{ muDesc }}" name="{{ muAgent }}" class="multi-upload-agent btn btn-light"/>
           {% endfor %}
+          </div>
         {% endif %}
         </form>
       </td>
@@ -98,7 +103,5 @@
   <script src="scripts/browse.js" type="text/javascript"></script>
   <script src="scripts/tools.js" type="text/javascript"></script>
   <script src="scripts/jquery.treeview.js" type="text/javascript"></script>
-  <script src="scripts/bootstrap4-toggle.min.js"></script>
-  <link href="css/bootstrap4-toggle.min.css" rel="stylesheet">
   <script type="text/javascript"> {% include 'ui-browse.js.twig' %}</script>
 {% endblock %}

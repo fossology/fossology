@@ -23,7 +23,7 @@
 
 {% if successfulAgents|length <1 or latestSuccess.agent_id != currentAgentId %}
   <span id="{{ agentName }}_span"><br/>
-    <button class="btn btn-default btn-sm" type="button" id="{{ agentName }}" name="{{ agentName }}"
+    <button class="btn btn-light btn-sm" type="button" id="{{ agentName }}" name="{{ agentName }}"
             onclick="scheduleScan({{ uploadId }}, 'agent_{{ agentName }}','#job{{ agentName }}IdResult');">
       {% if isAgentRunning %}{{ "Reschedule %s scan"|trans|format(agentName) }}
       {% else %}{{ "Schedule %s scan"|trans|format(agentName) }}
