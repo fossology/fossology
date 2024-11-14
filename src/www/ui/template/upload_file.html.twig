@@ -37,8 +37,54 @@
 {% endblock %}
 
 {% block uploadText %}
-  <div class="form-group" style="margin-left:2%	;">
+  <div class="form-group" style="margin-left:2%">
     <label for="pText">{{ 'After you press Upload, please be patient while your file is transferring.'| trans }}</label>
+  </div>
+{% endblock %}
+
+{% block popup %}
+  <div class="modal fade" id="reuseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width:1140px">
+        <div class="modal-content">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">{{ 'Reuse configuration'|trans }}</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-3">
+                  <div style="max-height:70vh;overflow:hidden;overflow-y:auto">
+                    <div class="nav nav-pills flex-column text-truncate" id="reuse-name-tab" role="tablist" aria-orientation="vertical">
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="tab-content" id="reuse-tab-content">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+  </div>
+  <div id="hiddenFormHolder" style="display:none">
+    {% for agent in hiddenAgentContents %}
+      {{ agent }}
+    {% endfor %}
+  </div>
 {% endblock %}
 
 {% block foot %}
@@ -47,9 +93,9 @@
     function checkDuplicateUploadWarning(e) {
       const allFiles = e.target.files;
       const folderId = $("#uploadFolderSelector").val();
-      var messages = new Array();
-      var ajaxList = new Array();
-      var ajaxCall;
+      let messages = [];
+      let ajaxList = [];
+      let ajaxCall;
       for (let i = 0; i < allFiles.length; i++) {
         const uploadName = allFiles[i].name;
         ajaxCall = $.ajax({
@@ -81,25 +127,54 @@
         }
       });
     }
-    function disableReuserOptions() {
-      if ($('#searchInFolder').length < 1) {
-        return;
-      }
-      var reuserdiv = $("#searchInFolder").parent();
-      reuserdiv.find("input").attr("disabled", true);
-      reuserdiv.find("select[id=uploadToReuse]").attr("disabled", true);
-      reuserdiv.addClass("text-muted");
-      $("#reusedisable").show();
+
+    function updateReuseIds(index, name, element, navContentDom) {
+      element.find("#reuseSearchInFolder").attr('id', `reuseSearchInFolder${index}`);
+      element.find("label[for='reuseSearchInFolder']").attr('for', `reuseSearchInFolder${index}`);
+      element.find("#reuseFolderSelectorName").attr('id', `reuseFolderSelectorName${index}`);
+      element.find("label[for='reuseFolderSelectorName']").attr('for', `reuseFolderSelectorName${index}`);
+      element.find("#uploadToReuse").attr('id', `uploadToReuse${index}`);
+      element.find("label[for='uploadToReuse']").attr('for', `uploadToReuse${index}`);
+      element.find("input,select").each(function (){
+        let fieldName = $(this).attr('name');
+        if (fieldName) {
+          if (fieldName.endsWith("[]")) {
+            $(this).attr('name', fieldName.replace("[]", `[${name}][]`));
+          } else {
+            $(this).attr('name', `${fieldName}[${name}]`)
+          }
+        }
+      });
+      element.find(`#reuseFolderSelectorName${index}`).select2({
+        width: 'style',
+        dropdownAutoWidth : true,
+        dropdownParent: navContentDom
+      });
+      element.find(`#uploadToReuse${index}`).select2({
+        "placeholder": "Select upload to reuse",
+        width: 'style',
+        dropdownAutoWidth : true,
+        dropdownParent: navContentDom
+      });
     }
-    function enableReuserOptions() {
-      if ($('#searchInFolder').length < 1) {
-        return;
+    function addNavItems(index, name, navItemDom, navContentDom) {
+      const navItem = $(`<a class='nav-link flex-sm-fill text-truncate' id='reuse-name-${index}' data-toggle='pill' href='#reuse-content-${index}' role='tab' aria-controls='reuse-content-${index}' aria-selected='false'>`);
+      navItem.append(name);
+
+      const panelContentProvider = $("#hiddenFormHolder").find("div.form-group");
+      const clonedPanel = panelContentProvider.clone();
+      updateReuseIds(index, name, clonedPanel, navContentDom);
+      const navPanel = $("<div class='container-fluid'>");
+      navPanel.append(clonedPanel);
+
+      const navContent = $(`<div class='tab-pane fade' id='reuse-content-${index}' role='tabpanel' aria-labelledby='reuse-name-${index}'>`);
+      navContent.append(navPanel);
+      if (index === 0) {
+        navItem.addClass("active").attr('aria-selected', true);
+        navContent.addClass("show active");
       }
-      var reuserdiv = $("#searchInFolder").parent();
-      reuserdiv.find("input").attr("disabled", false);
-      reuserdiv.find("select[id=uploadToReuse]").attr("disabled", false);
-      reuserdiv.removeClass("text-muted");
-      $("#reusedisable").hide();
+      navItemDom.append(navItem);
+      navContentDom.append(navContent);
     }
     $("#fileUploader").on("change", function(e) {
       checkDuplicateUploadWarning(e);
@@ -111,23 +186,24 @@
         $("#collapseDescription").show();
         $("#uploaddescriptions").collapse('hide');
       }
-      if (allFiles.length > 1) { // Disable reuser for multi file upload
-        disableReuserOptions();
-      } else {
-        enableReuserOptions();
-      }
+      const reuseNameTab = $("#reuse-name-tab");
+      const reuseTabContent = $("#reuse-tab-content");
+      reuseNameTab.html("");
+      reuseTabContent.html("");
       for (let i = 0; i < allFiles.length; i++) {
         const val = allFiles[i];
-        var tt = $("<h6 class='card-title'>").append(val.name);
-        var formg = $("<div class='form-group'>");
-        var ll = $(`<label for='desc${i}' class='card-text'>`).append("({{ 'Optional'|trans }}) {{ 'Enter a description of this file'| trans }}:");
+        const tt = $("<h6 class='card-title'>").append(val.name);
+        let formg = $("<div class='form-group'>");
+        const ll = $(`<label for='desc${i}' class='card-text'>`).append("({{ 'Optional'|trans }}) {{ 'Enter a description of this file'| trans }}:");
         formg.append(ll).append(`<input type='text' class='form-control' name='{{ descriptionInputName }}[${i}]' id='desc${i}'>`);
-        var body = $("<div class='card-body'>");
+        let body = $("<div class='card-body'>");
         body.append(tt).append(formg);
-        var html = $("<div class='card'>");
+        let html = $("<div class='card'>");
         html.append(body);
         holder.append(html);
-      };
+        addNavItems(i, val.name, reuseNameTab, reuseTabContent);
+      }
+      toggleDisabled();
     });
     $('#uploaddescriptions').on('hidden.bs.collapse', function () {
       $('#collapseDescription').find('button').text('+ expand');

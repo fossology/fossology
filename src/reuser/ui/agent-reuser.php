@@ -30,6 +30,7 @@ include_once(dirname(__DIR__) . "/agent/version.php");
 class ReuserAgentPlugin extends AgentPlugin
 {
   const UPLOAD_TO_REUSE_SELECTOR_NAME = 'uploadToReuse';  ///< Form element name for main license to reuse
+  const REUSE_MODE = 'reuseMode';  ///< Form element name for main license to reuse
 
   /** @var UploadDao $uploadDao
    * Upload Dao object
@@ -98,7 +99,7 @@ class ReuserAgentPlugin extends AgentPlugin
     }
     $groupId = $request->get('groupId', Auth::getGroupId());
 
-    $getReuseValue = $request->get('reuseMode') ?: array();
+    $getReuseValue = $request->get(self::REUSE_MODE) ?: array();
     $reuserDependencies = array("agent_adj2nest");
 
     $reuseMode = UploadDao::REUSE_NONE;

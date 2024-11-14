@@ -5,7 +5,7 @@
 {% if selected is not defined %}
   {% set selected = -1 %}
 {% endif %}
-<select class="ui-render-select2" disabled name="{{ name }}"{% if id is defined %} id="{{ id }}"{% endif %}>
+<select class="reuseGroupSelectorFolder" disabled name="{{ name }}"{% if id is defined %} id="{{ id }}"{% endif %}>
   {% for entry in folderStructure %}
     {% for entryReuse in entry.reuse %}
       <option value="{{ entry.folder.id }},{{ entryReuse.group_id }}"{% if selected == entry.folder.id %} selected="selected"{% endif %}>
