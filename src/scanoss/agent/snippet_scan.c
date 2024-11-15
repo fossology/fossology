@@ -385,8 +385,9 @@ int RebuildUpload(long upload_pk, char *tempFolder)
   char *realName;
   /*  for each record, get it name and real parent */
   for (i = 0; i < numrows; i++)
-  { // fo_scheduler_heart(1);
+  {
 
+    fo_scheduler_heart(1);
     parent = atoi(PQgetvalue(result, i, 1));
     realParent = atoi(PQgetvalue(result, i, 2));
     fileMode = atol(PQgetvalue(result, i, 5));
