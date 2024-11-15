@@ -23,11 +23,15 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
   private $testDb;
   /** @var DbManager */
   private $dbManager;
+  /** @var LicenseDao */
+  private $licenseDao;
 
   protected function setUp() : void
   {
     $this->testDb = new TestPgDb();
+    $this->testDb->createPlainTables(array('obligation_ref','obligation_map','obligation_candidate_map'));
     $this->dbManager = $this->testDb->getDbManager();
+    $this->licenseDao = new LicenseDao($this->dbManager);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
@@ -87,7 +91,6 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($matches[0], is(anInstanceOf(LicenseMatch::class)) );
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
-
 
   public function testGetLicenseByShortName()
   {
