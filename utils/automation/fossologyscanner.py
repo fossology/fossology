@@ -353,6 +353,8 @@ def main(parsed_args):
   repo_setup = RepoSetup(cli_options, api_config)
   if cli_options.repo is False:
     cli_options.diff_dir = repo_setup.get_diff_dir()
+    if cli_options.scan_dir:
+      cli_options.diff_dir = cli_options.dir_path
 
   scanner = Scanners(cli_options)
   return_val = 0
@@ -380,7 +382,7 @@ if __name__ == "__main__":
   )
   parser.add_argument(
     "operation", type=str, help="Operations to run.", nargs='*',
-    choices=["nomos", "copyright", "keyword", "ojo", "repo", "differential"]
+    choices=["nomos", "copyright", "keyword", "ojo", "repo", "differential", "scan-dir"]
   )
   parser.add_argument(
     "--tags", type=str, nargs=2, help="Tags for differential scan. Required if 'differential'" \
@@ -393,7 +395,8 @@ if __name__ == "__main__":
   parser.add_argument('--keyword-conf', type=str, help='Path to the keyword configuration file.' \
   'Use only when keyword argument is true'
   )
-
+  parser.add_argument('--dir-path', type=str, help='Path to directory for scanning.')
+  
   parser.add_argument(
     "--allowlist-path", type=str, help="Pass allowlist.json to allowlist dependencies."
   )
