@@ -13,7 +13,6 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Exceptions\HttpErrorException;
@@ -70,27 +69,22 @@ class JobController extends RestController
   {
     $apiVersion = ApiVersion::getVersion($request);
     $this->throwNotAdminException();
-    $id = null;
-    $limit = 0;
-    $page = 1;
-    if ($apiVersion == ApiVersion::V2) {
-      $query = $request->getQueryParams();
-      $limit = $query['limit'] ?? 0;
-      $page = $query['page'] ?? 1;
-    } else {
-      $limit = $request->hasHeader('limit') ? $request->getHeaderLine('limit') : 0;
-      $page = $request->hasHeader('page') ? $request->getHeaderLine('page') : 1;
-    }
-    if (empty($page)) {
-      $page = 1;
-    }
-    if ((! is_numeric($limit) || $limit < 0) ||
-      (! is_numeric($page) || $page < 1)) {
-      throw new HttpBadRequestException(
-        "Limit and page cannot be smaller than 1 and has to be numeric!");
+
+    $queryParams = $request->getQueryParams();
+    $query = $apiVersion == ApiVersion::V2 ? $queryParams : array_map(function($header) {
+      return implode(",", $header);
+    }, $request->getHeaders());
+
+    $limit = isset($query['limit']) ? intval($query['limit']) : 0;
+    $page = isset($query['page']) ? intval($query['page']) : 1;
+    $sort = $queryParams['sort'] ?? "ASC";
+    $status = $queryParams['status'] ?? null;
+
+    if ($limit < 0 || $page < 1) {
+      throw new HttpBadRequestException("Limit and page cannot be smaller than 1 and has to be numeric!");
     }
 
-    return $this->getAllResults($id, $request, $response, $limit, $page, $apiVersion);
+    return $this->getAllResults(null, $status, $request, $response, $sort, $limit, $page, $apiVersion);
   }
 
   /**
@@ -105,47 +99,40 @@ class JobController extends RestController
   public function getJobs($request, $response, $args)
   {
     $apiVersion = ApiVersion::getVersion($request);
-    $query = $request->getQueryParams();
     $userId = $this->restHelper->getUserId();
-    $limit = 0;
-    $page = 1;
-    if ($apiVersion == ApiVersion::V2) {
-      $limit = $query['limit'] ?? 0;
-      $page = $query['page'] ?? 1;
-    } else {
-      $limit = $request->hasHeader('limit') ? $request->getHeaderLine('limit') : 0;
-      $page = $request->hasHeader('page') ? $request->getHeaderLine('page') : 1;
-    }
-    if (empty($page)) {
-      $page = 1;
-    }
-    if ((! is_numeric($limit) || $limit < 0) ||
-      (! is_numeric($page) || $page < 1)) {
-      throw new HttpBadRequestException(
-        "Limit and page cannot be smaller than 1 and has to be numeric!");
+
+    $queryParams = $request->getQueryParams();
+    $query = $apiVersion == ApiVersion::V2 ? $queryParams : array_map(function($header) {
+      return implode(",", $header);
+    }, $request->getHeaders());
+
+    $limit = isset($query['limit']) ? intval($query['limit']) : 0;
+    $page = isset($query['page']) ? intval($query['page']) : 1;
+    $sort = $queryParams['sort'] ?? "ASC";
+    $status = $queryParams['status'] ?? null;
+
+    if ($limit < 0 || $page < 1) {
+      throw new HttpBadRequestException("Limit and page cannot be smaller than 1 and has to be numeric!");
     }
 
-    $id = null;
-    if (isset($args['id'])) {
-      $id = intval($args['id']);
-      if (! $this->dbHelper->doesIdExist("job", "job_pk", $id)) {
-        throw new HttpNotFoundException("Job id " . $id . " doesn't exist");
-      }
+    $id = isset($args['id']) ? intval($args['id']) : null;
+    if ($id !== null && !$this->dbHelper->doesIdExist("job", "job_pk", $id)) {
+      throw new HttpNotFoundException("Job id " . $id . " doesn't exist");
     }
 
     if ($id !== null) {
       /* If the ID is passed, don't check for upload */
-      return $this->getAllResults($id, $request, $response, $limit, $page, $apiVersion);
+      return $this->getAllResults($id, $status, $request, $response, $sort, $limit, $page, $apiVersion);
     }
 
-    if (array_key_exists(self::UPLOAD_PARAM, $query)) {
+    if (array_key_exists(self::UPLOAD_PARAM, $queryParams)) {
       /* If the upload is passed, filter accordingly */
-      return $this->getFilteredResults(intval($query[self::UPLOAD_PARAM]),
-        $request, $response, $limit, $page, $apiVersion);
-    } else {
-      $id = null;
-      return $this->getAllUserResults($id, $userId, $request, $response, $limit, $page, $apiVersion);
+      return $this->getFilteredResults(intval($queryParams[self::UPLOAD_PARAM]),
+        $status, $request, $response, $sort, $limit, $page, $apiVersion);
     }
+
+    /* Otherwise return all jobs for the current user */
+    return $this->getAllUserResults($userId, $status, $request, $response, $sort, $limit, $page, $apiVersion);
   }
 
   /**
@@ -248,30 +235,26 @@ class JobController extends RestController
   /**
    * Get all jobs created by the current user.
    *
-   * @param integer|null $id Specific job id or null for all jobs
-   * @param integer $uid Specific user id
+   * @param integer $userId Specific user id
+   * @param string|null $status Status of the jobs to return
    * @param Request $request Request object
    * @param ResponseHelper $response Response object
+   * @param string  $sort    Sorting order for the results
    * @param integer $limit   Limit of jobs per page
    * @param integer $page    Page number required
    * @param integer $apiVersion API version
    * @return ResponseHelper
    */
-  private function getAllUserResults($id, $uid, $request, $response, $limit, $page, $apiVersion)
+  private function getAllUserResults($userId, $status, $request, $response, $sort, $limit, $page, $apiVersion)
   {
-    list($jobs, $count) = $this->dbHelper->getUserJobs($id, $uid, $limit, $page);
+    list($jobs, $count) = $this->dbHelper->getUserJobs($userId, $status, $sort, $limit, $page);
     $finalJobs = [];
     foreach ($jobs as $job) {
-      $this->updateEtaAndStatus($job);
+      $this->updateEta($job);
       if ($apiVersion == ApiVersion::V2) {
         $this->addJobQueue($job, $request);
       }
       $finalJobs[] = $job->getArray($apiVersion);
-    }
-    if ($id !== null) {
-      $finalJobs = $finalJobs[0];
-    } else {
-      usort($finalJobs, [$this, "sortJobsByDate"]);
     }
     return $response->withHeader("X-Total-Pages", $count)->withJson($finalJobs, 200);
   }
@@ -280,19 +263,21 @@ class JobController extends RestController
    * Get all jobs for the current user.
    *
    * @param integer|null $id Specific job id or null for all jobs
+   * @param string|null $status Status of the jobs to return
    * @param Request $request Request object
    * @param ResponseHelper $response Response object
+   * @param string  $sort    Sorting order for the results
    * @param integer $limit   Limit of jobs per page
    * @param integer $page    Page number required
    * @param integer $apiVersion API version
    * @return ResponseHelper
    */
-  private function getAllResults($id, $request, $response, $limit, $page, $apiVersion)
+  private function getAllResults($id, $status, $request, $response, $sort, $limit, $page, $apiVersion)
   {
-    list($jobs, $count) = $this->dbHelper->getJobs($id, $limit, $page);
+    list($jobs, $count) = $this->dbHelper->getJobs($id, $status, $sort, $limit, $page, null);
     $finalJobs = [];
     foreach ($jobs as $job) {
-      $this->updateEtaAndStatus($job);
+      $this->updateEta($job);
       if ($apiVersion == ApiVersion::V2) {
         $this->addJobQueue($job, $request);
       }
@@ -300,8 +285,6 @@ class JobController extends RestController
     }
     if ($id !== null) {
       $finalJobs = $finalJobs[0];
-    } else {
-      usort($finalJobs, [$this, "sortJobsByDate"]);
     }
     return $response->withHeader("X-Total-Pages", $count)->withJson($finalJobs, 200);
   }
@@ -310,30 +293,31 @@ class JobController extends RestController
    * Get all jobs for the given upload.
    *
    * @param integer $uploadId Upload id to be filtered
+   * @param string|null $status Status of the jobs to return
    * @param Request $request Request object
    * @param ResponseHelper $response Response object
+   * @param string  $sort Sorting order for the results
    * @param integer $limit Limit of jobs per page
    * @param integer $page Page number required
    * @param integer $apiVersion API version
    * @return ResponseHelper
    * @throws HttpNotFoundException
    */
-  private function getFilteredResults($uploadId, $request, $response, $limit, $page, $apiVersion)
+  private function getFilteredResults($uploadId, $status, $request, $response, $sort, $limit, $page, $apiVersion)
   {
     if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
       throw new HttpNotFoundException("Upload id " . $uploadId .
         " doesn't exist");
     }
-    list($jobs, $count) = $this->dbHelper->getJobs(null, $limit, $page, $uploadId);
+    list($jobs, $count) = $this->dbHelper->getJobs(null, $status, $sort, $limit, $page, $uploadId);
     $finalJobs = [];
     foreach ($jobs as $job) {
-      $this->updateEtaAndStatus($job);
+      $this->updateEta($job);
       if ($apiVersion == ApiVersion::V2) {
         $this->addJobQueue($job, $request);
       }
       $finalJobs[] = $job->getArray($apiVersion);
     }
-    usort($finalJobs, [$this, "sortJobsByDate"]);
     return $response->withHeader("X-Total-Pages", $count)->withJson($finalJobs, 200);
   }
 
@@ -342,17 +326,10 @@ class JobController extends RestController
    *
    * @param[in,out] Job $job The job to be updated
    */
-  private function updateEtaAndStatus(&$job)
+  private function updateEta(&$job)
   {
-    $jobDao = $this->restHelper->getJobDao();
-
-    $jobqueue = [];
-    $jobqueue = $jobDao->getChlidJobStatus($job->getId());
-
     $job->setEta($this->getUploadEtaInSeconds($job->getId(),
       $job->getUploadId()));
-
-    $job->setStatus($this->getJobStatus(array_keys($jobqueue)));
   }
 
   /**
@@ -373,54 +350,6 @@ class JobController extends RestController
       $eta = 0;
     }
     return $eta;
-  }
-
-  /**
-   * Get the job status based on jobqueue.
-   *
-   * @param array $jobqueue The job queue with job id as values
-   * @return string Job status (Completed, Processing, Queued or Failed)
-   */
-  private function getJobStatus($jobqueue)
-  {
-    $showJobDao = $this->restHelper->getShowJobDao();
-    $jobStatus = 0;
-    /* Check each job in queue */
-    foreach ($jobqueue as $jobId) {
-      $jobInfo = $showJobDao->getDataForASingleJob($jobId);
-      $endtext = $jobInfo['jq_endtext'];
-      switch ($endtext) {
-        case 'Completed':
-          $jobStatus |= self::JOB_COMPLETED;
-          break;
-        case 'Started':
-        case 'Restarted':
-        case 'Paused':
-          $jobStatus |= self::JOB_STARTED;
-          break;
-        default:
-          if (empty($jobInfo['jq_endtime'])) {
-            $jobStatus |= self::JOB_QUEUED;
-          } else {
-            $jobStatus |= self::JOB_FAILED;
-          }
-      }
-    }
-
-    $jobStatusString = "";
-    if ($jobStatus & self::JOB_FAILED) {
-      /* If at least one job is failed, set status as failed */
-      $jobStatusString = "Failed";
-    } else if ($jobStatus & self::JOB_STARTED) {
-      /* If at least one job is started, set status as processing */
-      $jobStatusString = "Processing";
-    } else if ($jobStatus & self::JOB_QUEUED) {
-      $jobStatusString = "Queued";
-    } else {
-      /* If everything completed successfully, set status as completed */
-      $jobStatusString = "Completed";
-    }
-    return $jobStatusString;
   }
 
   /**
@@ -555,17 +484,6 @@ class JobController extends RestController
   private function compareJobsInfo($JobsInfo1, $JobsInfo2)
   {
     return $JobsInfo2["job"]["job_pk"] - $JobsInfo1["job"]["job_pk"];
-  }
-
-  /**
-   * @brief Sort compare function to order $JobsInfo by jobqueue start time
-   * @param array $job1 Result from finalJobs
-   * @param array $job2 Result from finalJobs
-   * @return int
-   */
-  private function sortJobsByDate($job1, $job2)
-  {
-    return strtotime($job2['queueDate']) - strtotime($job1['queueDate']);
   }
 
   /**
