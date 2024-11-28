@@ -175,7 +175,7 @@ class DecisionImporterIdFetcher
       $hashList = explode(".", $item["hash"]);
       $pfile = $this->pfileDao->getPfile($hashList[0], $hashList[1], null, $hashList[2]);
       if ($pfile == null) {
-        throw new UnexpectedValueException("Can't find pfile with hash '$hash' in DB");
+        echo "Can't find pfile with hash '$hash' in DB";
       }
       $pfileList[$oldId]["new_pfile"] = $pfile['pfile_pk'];
     }

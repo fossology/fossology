@@ -313,7 +313,7 @@ class DecisionImporterDataCreator
         $latestAgentId,
         $cItem["hash"]
       ], $cxExistStatement);
-      if (empty($newCp)) {
+      if (empty($newCp) && !empty($cItem["new_pfile"]) && !empty($cItem["hash"])) {
         $newCp = $this->dbManager->insertTableRow($agentName, [
           "agent_fk" => $latestAgentId,
           "pfile_fk" => $cItem["new_pfile"],
