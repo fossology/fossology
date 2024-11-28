@@ -63,7 +63,27 @@ addLicenseTableConfig = {
   "fnServerData": function (sSource, aoData, fnCallback) {
     aoData.push({"name": "upload", "value": uploadId});
     aoData.push({"name": "item", "value": itemId});
-    $.getJSON(sSource, aoData, fnCallback).fail(failed);
+    $.getJSON(sSource, aoData, function (data) {
+      const searchTerm = $('#licenseSelectionTable_filter input').val();
+      if (searchTerm) {
+        if (searchTerm.startsWith('=')) {
+          const exactMatchTerm = searchTerm.substring(1).trim().toLowerCase();
+
+          data.aaData = data.aaData.filter(function (row) {
+            const licenseName = $(row[0]).text().toLowerCase();
+            return licenseName === exactMatchTerm;
+          });
+        } else {
+          const partialMatchTerm = searchTerm.trim().toLowerCase();
+
+          data.aaData = data.aaData.filter(function (row) {
+            const licenseName = $(row[0]).text().toLowerCase();
+            return licenseName.includes(partialMatchTerm);
+          });
+        }
+      }
+      fnCallback(data);
+    }).fail(failed);
   },
   "aoColumns": addLicenseTableColumns,
   "iDisplayLength": 25,
@@ -71,7 +91,8 @@ addLicenseTableConfig = {
   "bStateSave": true,
   "bRetrieve": true,
   "bPaginate": false,
-  "bFilter": true
+  "bFilter": true,
+  "oSearch": true,
 };
 
 addClearingHistoryColumns = [
