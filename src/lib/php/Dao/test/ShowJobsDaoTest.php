@@ -78,38 +78,53 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
 
   public function testUploads2Jobs()
   {
+    $groupId = 2;
+    $GLOBALS['SysConf']['auth'][Auth::GROUP_ID] = $groupId;
+    $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 1;
+    $this->uploadPermissionDao->shouldReceive('isAccessible')->withArgs(array(anything(),$groupId))
+            ->andReturnUsing(function($upload,$group)
+            {
+              return ($upload==1 || $upload==2 || $upload==3 || $upload==4 || $upload==5);
+            });
+
     $jobs = array(3=>2, 4=>3, 5=>5, 6=>8%6, 7=>13%6, 8=>21%6);
     foreach ($jobs as $jobId => $jobUpload) {
       $this->dbManager->insertTableRow('job', array('job_pk' => $jobId, 'job_upload_fk' => $jobUpload));
     }
-    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
-    $showJobDao = new ShowJobsDao($this->dbManager,$uploadDao);
-    $jobsWithoutUpload = $showJobDao->uploads2Jobs(array());
+    $jobsWithoutUpload = $this->showJobsDao->uploads2Jobs(array());
     assertThat($jobsWithoutUpload, is(emptyArray()));
-    $jobsWithUploadIdOne = $showJobDao->uploads2Jobs(array(1));
+    $jobsWithUploadIdOne = $this->showJobsDao->uploads2Jobs(array(1));
     assertThat($jobsWithUploadIdOne, equalTo(array(array(1,7),0)));
-    $jobsAtAll = $showJobDao->uploads2Jobs(array(1,2,3,4,5));
+    $jobsAtAll = $this->showJobsDao->uploads2Jobs(array(1,2,3,4,5));
     assertThat($jobsAtAll, equalTo(array(array(1,7, 2,3,6, 4,8, 5),0)));
-    $jobsWithUploadFour = $showJobDao->uploads2Jobs(array(4));
+    $jobsWithUploadFour = $this->showJobsDao->uploads2Jobs(array(4));
     assertThat($jobsWithUploadFour[0], is(emptyArray()));
   }
 
   public function testUploads2JobsPaged()
   {
+    $groupId = 2;
+    $GLOBALS['SysConf']['auth'][Auth::GROUP_ID] = $groupId;
+    $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 1;
+
+    $this->uploadPermissionDao->shouldReceive('isAccessible')->withArgs(array(anything(),$groupId))
+            ->andReturnUsing(function($upload,$group)
+            {
+              return range(1, 17);
+            });
+
     $jobs = array_combine(range(3,13),range(3,13));
     foreach ($jobs as $jobId => $jobUpload) {
       $this->dbManager->insertTableRow('job', array('job_pk' => $jobId, 'job_upload_fk' => $jobUpload));
     }
-    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
-    $showJobDao = new ShowJobsDao($this->dbManager,$uploadDao);
 
-    $jobsPage1 = $showJobDao->uploads2Jobs(range(1,17),0);
+    $jobsPage1 = $this->showJobsDao->uploads2Jobs(range(1,17),0);
     assertThat($jobsPage1[0], arrayWithSize(10));
     assertThat($jobsPage1[1], is(1));
-    $jobsPage2 = $showJobDao->uploads2Jobs(array_combine(range(10,16),range(11,17)),1);
+    $jobsPage2 = $this->showJobsDao->uploads2Jobs(array_combine(range(10,16),range(11,17)),1);
     assertThat($jobsPage2[0], arrayWithSize(3));
     assertThat($jobsPage2[1], is(0));
-    $jobsPage3 = $showJobDao->uploads2Jobs(array(),2);
+    $jobsPage3 = $this->showJobsDao->uploads2Jobs(array(),2);
     assertThat($jobsPage3, arrayWithSize(0));
   }
 
