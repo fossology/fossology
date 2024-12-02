@@ -51,7 +51,13 @@
               </th>
               <th><input type="checkbox" class="info-bullet view-license-rc-size" id="openCBoxFilter"/>{{ ' Open'|trans }}</th>
               <th></th>
-              <th><button class="btn btn-default btn-sm" id="markDecisions">Edit Decisions</button></th>
+              <th>
+                <select id="editFilter" class="form-control-sm">
+                 <option value="0">-select option-</option>
+                 <option value="1">Edit Decisions</option>
+                 <option value="2">Bulk Recognition</option>
+                </select>
+              </th>
             </tr>
             <tr><th></th><th></th><th></th><th></th><th></th><th></th></tr>
           </thead>
