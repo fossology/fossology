@@ -85,9 +85,9 @@
     </p>
 
     <input type="submit" class="btn btn-default btn-sm" value="{{ 'Upload'| trans }}"/>
-    </div>
+  {% block popup %}
+  {% endblock %}
   </form>
-
 {% endblock %}
 
 {% block foot %}
@@ -96,9 +96,6 @@
   <script type="text/javascript">
     $(document).ready(function () {
       $('[data-toggle="tooltip"]').tooltip();
-      $('#uploadToReuse').select2({
-          "placeholder": "Select upload to reuse"
-      });
     });
   </script>
   {% for aFoot in parmAgentFoots %}
