@@ -8,14 +8,13 @@
   {% include 'change_license_modal.html.twig' %}
   {% include 'ui-clearing-view_bulk.html.twig' %}
   <!-- The bulk history Modal -->
-  <div class="modal" id="bulkHistoryModal" tabindex="-1" role="dialog" aria-labelledby="bulkHistoryModalLabel" aria-hidden="true" data-backdrop="false">
+  <div class="modal" id="bulkHistoryModal" tabindex="-1" role="dialog" aria-labelledby="bulkHistoryModalLabel" aria-hidden="true" data-bs-backdrop="false">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <!-- Modal Header -->
         <div class="modal-header">
           <h4 class="modal-title">Bulk History</h4>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> 
           </button>
         </div>
         <!-- Modal body -->
@@ -34,7 +33,7 @@
             <tr>
               <th></th>
               <th>
-                <select id="scanFilter" class="ui-render-select2 form-control-sm">
+                <select id="scanFilter" class="ui-render-select2 form-select-sm">
                   <option value="0">-- {{'filter for scan results'|trans}} --</option>
                   {% for shortname,row in scannerLicenses %}
                     <option value="{{row.rf_pk}}">{{ shortname }}</option>
@@ -42,7 +41,7 @@
                 </select>
               </th>
               <th>
-                <select id="conFilter" class="ui-render-select2 form-control-sm">
+                <select id="conFilter" class="ui-render-select2 form-select-sm">
                   <option value="0">-- {{'filter for edited results'|trans}} --</option>
                   {% for shortname,row in editedLicenses %}
                     <option value="{{row.rf_pk}}">{{ shortname }}</option>
@@ -51,7 +50,7 @@
               </th>
               <th><input type="checkbox" class="info-bullet view-license-rc-size" id="openCBoxFilter"/>{{ ' Open'|trans }}</th>
               <th></th>
-              <th><button class="btn btn-default btn-sm" id="markDecisions">Edit Decisions</button></th>
+              <th><button class="btn btn-light btn-sm" id="markDecisions">Edit Decisions</button></th>
             </tr>
             <tr><th></th><th></th><th></th><th></th><th></th><th></th></tr>
           </thead>
@@ -68,7 +67,7 @@
         {% include 'browse_license-summary.html.twig' %}
       {% endif %}
       {% include 'browse_license-agent_selector.html.twig' %}
-        <button data-toggle='modal' data-target='#bulkHistoryModal' class="btn btn-default btn-sm" onclick="loadBulkHistoryModal();">{{ "Show bulk history"|trans }}</button>
+        <button data-bs-toggle='modal' data-bs-target='#bulkHistoryModal' class="btn btn-light btn-sm" onclick="loadBulkHistoryModal();">{{ "Show bulk history"|trans }}</button>
         <br/>
         <span id="bulkIdResult" hidden></span>
       </td>

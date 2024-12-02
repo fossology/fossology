@@ -23,8 +23,8 @@
         <div class="modal-footer">
           <button type="button" class="btn" id="selectFromNoticeFile" style="display:none;width:96%;" onclick="openAckInputModal();">Select from Notice File</button>
           <button type="button" class="btn" id="clearText" style="display:none;width:96%;" onclick="cleanText( $('#referenceText') );">{{ 'Clean Text'|trans }}</button>
-          <button type="button" class="btn btn-danger" onclick="closeTextModal();" data-dismiss="modal">{{ 'Cancel'|trans }}</button>
-          <button type="button" class="btn btn-success" onclick="submitTextModal();" data-dismiss="modal">{{ 'Ok'|trans }}</button>
+          <button type="button" class="btn btn-danger" onclick="closeTextModal();" data-bs-dismiss="modal">{{ 'Cancel'|trans }}</button>
+          <button type="button" class="btn btn-success" onclick="submitTextModal();" data-bs-dismiss="modal">{{ 'Ok'|trans }}</button>
         </div>
       </div>
     </div>
@@ -48,7 +48,7 @@
         </div>
         <!-- Modal footer -->
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger" onclick="closeAckInputModal();" data-dismiss="modal">{{ 'Cancel'|trans }}</button>
+          <button type="button" class="btn btn-danger" onclick="closeAckInputModal();" data-bs-dismiss="modal">{{ 'Cancel'|trans }}</button>
         </div>
       </div>
     </div>
@@ -61,9 +61,7 @@
         <!-- Modal Header -->
         <div class="modal-header">
           <h4 class="modal-title">Bulk Recognition</h4>
-          <button type="button" class="close" onclick="closeBulkModal();" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+          <button type="button" class="btn-close" onclick="closeBulkModal();" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <!-- Modal body -->
         <div class="modal-body">
@@ -82,7 +80,8 @@
                   </select>
                 </td>
                 <td>
-                  <img src="images/info_16.png" data-toggle="tooltip" style="vertical-align:middle !important;" title="{{ 'The user can select an according license'|trans }}" alt="" class="info-bullet"/>
+                  <img src="images/info_16.png" data-bs-toggle="tooltip" style="vertical-align:middle !important;" title="{{ 'The user can select an according license'|trans }}" alt="" class="info-bullet"/>
+                  <i class="bi bi-info-circle-fill" data-bs-toggle="tooltip" style="vertical-align:middle !important;" title="{{ 'The user can select an according license'|trans }}"></i>
                 </td>
                 <td class="px-1">
                   <a href="#" id="bulkFormAddLicense" style="font-size:20px;"><img src="images/icons/add_16.png" title="append job to add selected license" alt="+"/></a>
@@ -91,10 +90,10 @@
                   <a href="#" id="bulkFormRmLicense" style="font-size:20px;"><img src="images/icons/remove_16.png" title="append job to remove selected license" alt="-"/></a>
                 </td>
                 <td>
-                  <img src="images/info_16.png" data-toggle="tooltip" style="vertical-align:middle !important;" title="{{ 'Adding or removing a license is possible. Removing a license will pull the scanner found license off from the potential clearing decisions. This can be used to correct a scanner finding'|trans }}" alt="" class="info-bullet"/>
+                  <img src="images/info_16.png" data-bs-toggle="tooltip" style="vertical-align:middle !important;" title="{{ 'Adding or removing a license is possible. Removing a license will pull the scanner found license off from the potential clearing decisions. This can be used to correct a scanner finding'|trans }}" alt="" class="info-bullet"/>
                 </td>
                 <td>
-                  <button type="button" class="btn btn-default btn-sm" onclick="popUpLicenseText('{{ bulkUri }}&rf=', '{{ 'License Text'| trans }}');">{{ 'Show license'| trans }}</button>
+                  <button type="button" class="btn btn-light btn-sm" onclick="popUpLicenseText('{{ bulkUri }}&rf=', '{{ 'License Text'| trans }}');">{{ 'Show license'| trans }}</button>
                 </td>
               </tr>
             </table>
@@ -124,14 +123,14 @@
                     <option value="u">{{ 'scan whole Upload'| trans }}</option>
                     <option value="f">{{ 'scan only current Folder'| trans }}</option>
                   </select>
-                  <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'Scan whole upload or this folder determines the scope of files where the text phrase is searched for. If “scan whole upload” is selected, the text phrase is searched in all files of the entire upload'|trans }}" alt="" class="info-bullet"/></img>
+                  <img src="images/info_16.png" data-bs-toggle="tooltip" data-placement="left" title="{{ 'Scan whole upload or this folder determines the scope of files where the text phrase is searched for. If “scan whole upload” is selected, the text phrase is searched in all files of the entire upload'|trans }}" alt="" class="info-bullet"/></img>
                 </div>
                 <div class="col-sm-auto pr-0">
                   <div class="form-check form-check-inline">
                     <input type="checkbox" class="form-check-input" id="forceDecision"/>
                     <label for="forceDecision" class="form-check-label">
                       {{ 'Ignore conflicts'|trans }}
-                      <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'The bulk scan will create a clearing result, if the resulting list of licenses does not show conflicts. A conflict would be two different license ids for example. Imagine Nomos has found “Apache-1.0” and a bulk scan finds a text phrase with Apache-2.0 set, this represents a conflict. Otherwise if Nomos found Apache-2.0 and the bulk scan find a text phrase with “Apache-2.0” set, this is free from conflicts and a clearing result is set. Normally conflicts prevent clearing results. Checking the “ignore conflicts” will set a clearing decision in any case'|trans }}" alt="" class="info-bullet"/></img>
+                      <img src="images/info_16.png" data-bs-toggle="tooltip" data-placement="left" title="{{ 'The bulk scan will create a clearing result, if the resulting list of licenses does not show conflicts. A conflict would be two different license ids for example. Imagine Nomos has found “Apache-1.0” and a bulk scan finds a text phrase with Apache-2.0 set, this represents a conflict. Otherwise if Nomos found Apache-2.0 and the bulk scan find a text phrase with “Apache-2.0” set, this is free from conflicts and a clearing result is set. Normally conflicts prevent clearing results. Checking the “ignore conflicts” will set a clearing decision in any case'|trans }}" alt="" class="info-bullet"/></img>
                     </label>
                   </div>
                 </div>
@@ -140,7 +139,7 @@
                     <input type="checkbox" class="form-check-input" id="scanOnlyFindings" name="scanOnlyFindings" checked="checked"/>
                     <label for="scanOnlyFindings" class="form-check-label">
                       {{ 'Scan files with findings'|trans }}
-                      <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'The bulk scan will be executed on the files where there is atleast one license finding'|trans }}" alt="" class="info-bullet"/></img>
+                      <img src="images/info_16.png" data-bs-toggle="tooltip" data-placement="left" title="{{ 'The bulk scan will be executed on the files where there is atleast one license finding'|trans }}" alt="" class="info-bullet"/></img>
                     </label>
                   </div>
                 </div>
@@ -149,7 +148,7 @@
                     <input type="checkbox" class="form-check-input" id="bulkIgnoreIrre" checked="checked"/>
                     <label for="bulkIgnoreIrre" class="form-check-label">
                       {{ 'Ignore Irrelevant files'|trans }}
-                      <img src="images/info_16.png" data-toggle="tooltip"
+                      <img src="images/info_16.png" data-bs-toggle="tooltip"
                       data-placement="left" style="vertical-align:middle !important;"
                       title="{{ 'Do not include files marked as irrevelant for this scan.'|trans }}" alt="" class="info-bullet"/>
                     </label>
@@ -160,7 +159,7 @@
                     <input type="checkbox" class="form-check-input" id="custDelim"/>
                     <label for="custDelim" class="form-check-label">
                       {{ 'Custom delimiters'|trans }}
-                      <img src="images/info_16.png" data-toggle="tooltip"
+                      <img src="images/info_16.png" data-bs-toggle="tooltip"
                       data-placement="left" style="vertical-align:middle !important;"
                       title="{{ 'Provide custom list of characters for spliting tokens for scan. Note, the characters will be ignored.'|trans }}"
                       alt="" class="info-bullet"/>
@@ -173,7 +172,7 @@
                   <label for="delimdrop" class="col-form-label">
                     Delimiters:
                   </label>&nbsp;<img src="images/info_16.png"
-                    data-toggle="tooltip"
+                    data-bs-toggle="tooltip"
                     data-placement="left"
                     title="{{ 'Use default list of delimiters (\' \\t\\n\\r\\f#^%,*\') or type your own in the box. Currently limited to single characters only and space is always a delimiter.'|trans }}"
                     alt="" class="info-bullet"/>
@@ -193,10 +192,10 @@
         </div>
         <!-- Modal footer -->
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger" onclick="closeBulkModal();" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" onclick="closeBulkModal();" data-bs-dismiss="modal">Cancel</button>
           <button type="button" class="btn btn-success" onclick="cleanText( $('#bulkRefText') );">{{ 'Clean text'|trans }}</button>
-          <img src="images/info_16.png" data-toggle="tooltip" style="vertical-align:middle;" title="{{ 'The matching process ignores comment symbols, e.g. double-slashes. Hence, these symbols can be remove from bulk text.'|trans }}" alt="" class="info-bullet"/></img>
-          <button type="button" class="btn btn-success" onclick="scheduleBulkScan();" data-dismiss="modal">{{ 'Schedule Bulk scan'|trans }}</button>
+          <img src="images/info_16.png" data-bs-toggle="tooltip" style="vertical-align:middle;" title="{{ 'The matching process ignores comment symbols, e.g. double-slashes. Hence, these symbols can be remove from bulk text.'|trans }}" alt="" class="info-bullet"/></img>
+          <button type="button" class="btn btn-success" onclick="scheduleBulkScan();" data-bs-dismiss="modal">{{ 'Schedule Bulk scan'|trans }}</button>
         </div>
       </div>
     </div>

@@ -69,7 +69,7 @@ abstract class HistogramBase extends FO_Plugin
     }
     $output = "<h4>Activated $typeDescriptor statements:</h4>
 <div>
-  <div class='btn btn-default' style='float:right; padding:5px; margin:5px;'>
+  <div class='btn btn-light' style='float:right; padding:5px; margin:5px;'>
     <input type='checkbox' style='padding:2px;' id='inverseSearchActivated".$type."' name='inverseSearch'/> 
     <label class='control-label' for='inverseSearchActivated".$type."'>Inverse Search</label>
   </div>
@@ -79,7 +79,7 @@ abstract class HistogramBase extends FO_Plugin
   <table border=0 width='100%' id='searchReplaceTable".$type."'>
   <tr>
     <td style='width:80%'>
-      <div class='form-group'>
+      <div class='mb-3'>
         <label class='control-label col-sm-2'>Advance search:<img src='images/info_16.png' title='Use \"(*)\" to match any thing.\nExample: \"Copyright (*) All rights reserved(*)\" will match \"Copyright 2012-2020 Company ABC. All rights reserved {and some garbage here}\"' alt='' class='info-bullet'></label>
         <div class='col-sm-10'>
           <input id='advSearchText".$type."' type='text' class='form-control advSearch'>
@@ -87,16 +87,16 @@ abstract class HistogramBase extends FO_Plugin
       </div>
     </td>
     <td rowspan='2'>
-      <div class='form-group'>
+      <div class='mb-3'>
         <div class='col-sm-offset-2 col-sm-10'>
-          <button class='btn btn-default' style='margin-top:25px;padding:15%;' onClick='createReplacementText(\"".$type."\")' title='Create a replacement text with all placeholders.'>Create replacement text</button>
+          <button class='btn btn-light' style='margin-top:25px;padding:15%;' onClick='createReplacementText(\"".$type."\")' title='Create a replacement text with all placeholders.'>Create replacement text</button>
         </div>
       </div>
     </td>
   </tr>
   <tr>
     <td>
-      <div class='form-group'>
+      <div class='mb-3'>
         <label class='control-label col-sm-2'>Replace:<img src='images/info_16.png' title='Use \"$1 $2\" as placeholder for corresponding (*) values.\nExample: \"Copyright $1 All rights reserved\" will result in \"Copyright 2012-2020 Company ABC. All rights reserved\" from example above' alt='' class='info-bullet'></label>
         <div class='col-sm-10'>
           <input id='replaceText".$type."' type='text' class='form-control'>
@@ -104,11 +104,11 @@ abstract class HistogramBase extends FO_Plugin
     </div>
   </td>
   </tr></table>
-    <div class='form-group'>
+    <div class='mb-3'>
       <div class='col-sm-offset-2 col-sm-10'>
-        <button class='btn btn-default' id='testReplacement".$type."'>Test replacement</button>
-        <button class='btn btn-default' id='replaceSelected".$type."'>Replace selected rows</button>
-        <button class='btn btn-default' id='deleteSelected".$type."'>Deactivate selected rows</button>
+        <button class='btn btn-light' id='testReplacement".$type."'>Test replacement</button>
+        <button class='btn btn-light' id='replaceSelected".$type."'>Replace selected rows</button>
+        <button class='btn btn-light' id='deleteSelected".$type."'>Deactivate selected rows</button>
       </div>
     </div>
   <br /><br />
@@ -118,7 +118,7 @@ abstract class HistogramBase extends FO_Plugin
   </table>
   <br/><br/>
   <h4>Deactivated $typeDescriptor statements:</h4>
-  <div class='btn btn-default' style='float:right; padding:5px; margin:5px;'>
+  <div class='btn btn-light' style='float:right; padding:5px; margin:5px;'>
   <input type='checkbox' id='inverseSearchDeactivated".$type."' name='inverseSearch'/> 
   <label class='control-label' for='inverseSearchDeactivated".$type."'>Inverse Search</label>
   </div>
@@ -254,7 +254,7 @@ abstract class HistogramBase extends FO_Plugin
       $OutBuf .= "<form name='formy' method='post'>\n";
       $OutBuf .= "<div id='msgdiv'>\n";
       $OutBuf .= _("No data available.");
-      $OutBuf .= "<input type='button' class='btn btn-default btn-sm' name='scheduleAgent' value='Schedule Agent'";
+      $OutBuf .= "<input type='button' class='btn btn-light btn-sm' name='scheduleAgent' value='Schedule Agent'";
       $OutBuf .= "onClick=\"Schedule_Get('" . Traceback_uri() . "?mod=schedule_agent&upload=$uploadId&agent=agent_{$this->agentName}')\">\n";
       $OutBuf .= "</input>";
       $OutBuf .= "</div> \n";
@@ -285,7 +285,7 @@ abstract class HistogramBase extends FO_Plugin
     }
 
     $selectKey = $filter == 'nolic' ? 'nolic' : 'all';
-    $OutBuf .= "<select name='view_filter' class='form-control-sm' id='view_filter' onchange='ChangeFilter(this,$uploadId, $item);'>";
+    $OutBuf .= "<select name='view_filter' class='form-select-sm' id='view_filter' onchange='ChangeFilter(this,$uploadId, $item);'>";
     foreach (array('all'=>_("Show all"), 'nolic'=> _("Show files without licenses")) as $key=>$text) {
       $selected = ($selectKey == $key) ? "selected" : "";
       $OutBuf .= "<option $selected value=\"$key\">$text</option>";
