@@ -3151,6 +3151,17 @@ paths:
       summary: Gets all jobs created by the logged in user
       description: Returns all jobs with their status created by the logged in user
       parameters:
+        - name: status
+          description: Returns only jobs with the selected status.
+          required: false
+          schema:
+            type: string
+            enum:
+              - Processing
+              - Queued
+              - Completed
+              - Failed
+          in: query
         - name: limit
           required: false
           schema:
@@ -3162,6 +3173,14 @@ paths:
           schema:
             type: integer
             minimum: 1
+          in: query
+        - name: sort
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
           in: query
         - name: upload
           required: false
@@ -3228,6 +3247,17 @@ paths:
       summary: Gets all jobs created by all users
       description: Returns all jobs with their status created by every user. This API returns a response only if the requesting user is an Admin.
       parameters:
+        - name: status
+          description: Returns only jobs with the selected status.
+          required: false
+          schema:
+            type: string
+            enum:
+              - Processing
+              - Queued
+              - Completed
+              - Failed
+          in: query
         - name: limit
           required: false
           schema:
@@ -3239,6 +3269,14 @@ paths:
           schema:
             type: integer
             minimum: 1
+          in: query
+        - name: sort
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
           in: query
       responses:
         '200':
