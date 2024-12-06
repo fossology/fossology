@@ -243,7 +243,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    * @return License
    */
   private function getLicense($shortname, $obligations=false,
-    $emptyObligation=true)
+                              $emptyObligation=true)
   {
     $obligationList = [
       $this->getObligation(123),
@@ -397,11 +397,25 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for LicenseController::getAllLicenses() to fetch all licenses
+   * -# Test for LicenseController::getAllLicenses() to fetch all licenses with version 1 params
    * -# Check if response is 200
    * -# Check if pagination headers are set
    */
-  public function testGetAllLicense()
+  public function testGetAllLicenseV1()
+  {
+    $this->testGetAllLicense(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for LicenseController::getAllLicenses() to fetch all licenses with version 2 params
+   * -# Check if response is 200
+   * -# Check if pagination headers are set
+   */
+  public function testGetAllLicenseV2()
+  {
+    $this->testGetAllLicense();
+  }
+  private function testGetAllLicense($version = ApiVersion::V2)
   {
     $licenses = [
       $this->getLicense("MIT"),
@@ -414,6 +428,13 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $body = $this->streamFactory->createStream();
     $request = new Request("GET", new Uri("HTTP", "localhost", 80,
       "/license"), $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withQueryParams(["page"=>1, "limit"=>100]);
+    } else {
+      $request = $request->withHeader('limit', 100)
+        ->withHeader('page', 1);
+    }
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
     $this->dbHelper->shouldReceive('getLicenseCount')
       ->withArgs(["all", $this->groupId])->andReturn(4);
     $this->dbHelper->shouldReceive('getLicensesPaginated')
@@ -439,19 +460,43 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for LicenseController::getAllLicenses() to fetch all licenses
+   * -# Test for LicenseController::getAllLicenses() to fetch all licenses with version 1 params
    * -# The page requested is out of bounds
    * -# Check if response is 400
    * -# Check if pagination headers are set
    */
-  public function testGetAllLicenseBounds()
+  public function testGetAllLicenseBoundsV1()
+  {
+    $this->testGetAllLicenseBounds(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for LicenseController::getAllLicenses() to fetch all licenses with version 2 params
+   * -# The page requested is out of bounds
+   * -# Check if response is 400
+   * -# Check if pagination headers are set
+   */
+  public function testGetAllLicenseBoundsV2()
+  {
+    $this->testGetAllLicenseBounds();
+  }
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testGetAllLicenseBounds($version = ApiVersion::V2)
   {
     $requestHeaders = new Headers();
-    $requestHeaders->setHeader('limit', 5);
-    $requestHeaders->setHeader('page', 2);
     $body = $this->streamFactory->createStream();
     $request = new Request("GET", new Uri("HTTP", "localhost", 80,
       "/license"), $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withQueryParams(["page"=>2, "limit"=>5]);
+    } else {
+      $request = $request->withHeader('limit', 5)
+        ->withHeader('page', 2);
+    }
+    $request = $request->withAttribute(Apiversion::ATTRIBUTE_NAME,$version);
     $this->dbHelper->shouldReceive('getLicenseCount')
       ->withArgs(["all", $this->groupId])->andReturn(4);
     $this->expectException(HttpBadRequestException::class);
@@ -461,10 +506,27 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for LicenseController::getAllLicenses() with kind filter
+   * -# Test for LicenseController::getAllLicenses() with kind filter for version 1
    * -# Check if proper parameters are passed to DbHelper
    */
-  public function testGetAllLicenseFilters()
+  public function testGetAllLicenseFiltersV1()
+  {
+    $this->testGetAllLicenseFilters(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for LicenseController::getAllLicenses() with kind filter for version 2
+   * -# Check if proper parameters are passed to DbHelper
+   */
+  public function testGetAllLicenseFiltersV2()
+  {
+    $this->testGetAllLicenseFilters();
+  }
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testGetAllLicenseFilters($version = ApiVersion::V2)
   {
     // All licenses
     $requestHeaders = new Headers();
@@ -493,6 +555,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     // Candidate licenses
     $request = new Request("GET", new Uri("HTTP", "localhost", 80,
       "/license", "kind=candidate"), $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
     $this->dbHelper->shouldReceive('getLicenseCount')
       ->withArgs(["candidate", $this->groupId])->andReturn(4)->once();
     $this->dbHelper->shouldReceive('getLicensesPaginated')
@@ -622,11 +685,29 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for LicenseController::createLicense() to create new license
+   * -# Test for LicenseController::createLicense() to create new license for version 1
    * -# Simulate duplicate license name
    * -# Check if response is 409
    */
-  public function testCreateDuplicateLicense()
+  public function testCreateDuplicateLicenseV1()
+  {
+    $this->testCreateDuplicateLicense(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for LicenseController::createLicense() to create new license for version 2
+   * -# Simulate duplicate license name
+   * -# Check if response is 409
+   */
+  public function testCreateDuplicateLicenseV2()
+  {
+    $this->testCreateDuplicateLicense();
+  }
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testCreateDuplicateLicense($version = ApiVersion::V2)
   {
     $license = $this->getLicense("MIT");
     $requestBody = $license->getArray();
@@ -640,7 +721,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $body->seek(0);
     $request = new Request("POST", new Uri("HTTP", "localhost", 80,
       "/license"), $requestHeaders, [], [], $body);
-
+    $request = $request->withAttribute(Apiversion::class, $version);
     $tableName = "license_candidate";
 
     $sql = "SELECT count(*) cnt FROM ".
@@ -656,10 +737,27 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for LicenseController::updateLicense() to edit a license
+   * -# Test for LicenseController::updateLicense() to edit a license for version 1
    * -# Check if response is 200
    */
-  public function testUpdateLicense()
+  public function testUpdateLicenseV1()
+  {
+    $this->testUpdateLicense(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for LicenseController::updateLicense() to edit a license for version 2
+   * -# Check if response is 200
+   */
+  public function testUpdateLicenseV2()
+  {
+    $this->testUpdateLicense();
+  }
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testUpdateLicense($version = ApiVersion::V2)
   {
     $license = $this->getDaoLicense("Exotic");
     $requestBody = [
@@ -674,6 +772,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $body->seek(0);
     $request = new Request("PATCH", new Uri("HTTP", "localhost", 80,
       "/license/" . $license->getShortName()), $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
 
     $tableName = "license_candidate";
     $assocData = [
@@ -707,11 +806,29 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for LicenseController::updateLicense() to edit a license
+   * -# Test for LicenseController::updateLicense() to edit a license for version 1
    * -# User is not admin/advisor of the group
    * -# Check if response is 403
    */
-  public function testUpdateLicenseNonAdvisor()
+  public function testUpdateLicenseNonAdvisorV1()
+  {
+    $this->testUpdateLicenseNonAdvisor(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for LicenseController::updateLicense() to edit a license for version 2
+   * -# User is not admin/advisor of the group
+   * -# Check if response is 403
+   */
+  public function testUpdateLicenseNonAdvisorV2()
+  {
+    $this->testUpdateLicenseNonAdvisor();
+  }
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testUpdateLicenseNonAdvisor($version = ApiVersion::V2)
   {
     $license = $this->getDaoLicense("Exotic");
     $requestBody = [
@@ -726,7 +843,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $body->seek(0);
     $request = new Request("PATCH", new Uri("HTTP", "localhost", 80,
       "/license/" . $license->getShortName()), $requestHeaders, [], [], $body);
-
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
     $this->userDao->shouldReceive('isAdvisorOrAdmin')
       ->withArgs([$this->userId, $this->groupId])->andReturn(false);
     $this->licenseDao->shouldReceive('getLicenseByShortName')
@@ -743,11 +860,29 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for LicenseController::updateLicense() to edit a license
+   * -# Test for LicenseController::updateLicense() to edit a license for version 1
    * -# User is not admin
    * -# Check if response is 403
    */
-  public function testUpdateLicenseNonAdmin()
+  public function testUpdateLicenseNonAdminV1()
+  {
+    $this->testUpdateLicenseNonAdmin(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for LicenseController::updateLicense() to edit a license for version 2
+   * -# User is not admin
+   * -# Check if response is 403
+   */
+  public function testUpdateLicenseNonAdminV2()
+  {
+    $this->testUpdateLicenseNonAdmin();
+  }
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testUpdateLicenseNonAdmin($version = ApiVersion::V2)
   {
     $license = $this->getDaoLicense("MIT");
     $requestBody = [
@@ -763,6 +898,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("PATCH", new Uri("HTTP", "localhost", 80,
       "/license/" . $license->getShortName()), $requestHeaders, [], [], $body);
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
 
     $this->userDao->shouldReceive('isAdvisorOrAdmin')
       ->withArgs([$this->userId, $this->groupId])->andReturn(true);
@@ -783,11 +919,31 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    * @runInSeparateProcess
    * @preserveGlobalState disabled
    * @test
-   * -# Test for LicenseController::handleImportLicense()
+   * -# Test for LicenseController::handleImportLicense() for version 1
    * -# Check if response status is 200
    * -# Check if response body is matches the expected response body
    */
-  public function testImportLicense()
+  public function testImportLicenseV1()
+  {
+    $this->testImportLicense(ApiVersion::V1);
+  }
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for LicenseController::handleImportLicense() for version 2
+   * -# Check if response status is 200
+   * -# Check if response body is matches the expected response body
+   */
+  public function testImportLicenseV2()
+  {
+    $this->testImportLicense();
+  }
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testImportLicense($version = ApiVersion::V2)
   {
 
     $delimiter =  ',';
@@ -800,6 +956,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
 
     $FILE_INPUT_NAME = "file_input";
 
@@ -891,14 +1048,28 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for LicenseController::getCandidates()
+   * -# Test for LicenseController::getCandidates() for version 1
    * -# Check if status is 200
    * -# Check if response-body matches
    */
-  public function testGetCandidates()
+  public function testGetCandidatesV1()
+  {
+    $this->testGetCandidates(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for LicenseController::getCandidates() for version 2
+   * -# Check if status is 200
+   * -# Check if response-body matches
+   */
+  public function testGetCandidatesV2()
+  {
+    $this->testGetCandidates();
+  }
+  private function testGetCandidates($version = ApiVersion::V2)
   {
     $request = M::mock(Request::class);
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
+    $request->shouldReceive('getAttribute')->andReturn($version);
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $this->licenseCandidatePlugin->shouldReceive('getCandidateArrayData')->andReturn([]);
 
@@ -913,13 +1084,31 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for LicenseController::getCandidates() as a non-admin user
+   * -# Test for LicenseController::getCandidates() as a non-admin user with version 1 attributes
    * -# Check if status is 403
    */
-  public function testGetCandidatesNoAdmin()
-  { 
+  public function testGetCandidatesNoAdminV1()
+  {
+    $this->testGetCandidatesNoAdmin(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for LicenseController::getCandidates() as a non-admin user with version 2 attributes
+   * -# Check if status is 403
+   */
+  public function testGetCandidatesNoAdminV2()
+  {
+    $this->testGetCandidatesNoAdmin();
+  }
+
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testGetCandidatesNoAdmin($version = ApiVersion::V2)
+  {
     $request = M::mock(Request::class);
-    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
+    $request->shouldReceive('getAttribute')->andReturn($version);
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_READ;
 
     $this->expectException(HttpForbiddenException::class);
