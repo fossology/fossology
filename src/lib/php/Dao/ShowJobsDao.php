@@ -43,6 +43,13 @@ class ShowJobsDao
   function uploads2Jobs($upload_pks, $page = 0)
   {
     $jobArray = array();
+
+    // only use the uploads the user / group has access to
+    $upload_pks = array_filter($upload_pks, function($upload_pk) {
+      return $upload_pk !== null && $this->uploadDao->isAccessible($upload_pk, Auth::getGroupId());
+    });
+
+    // get count of upload pks, return empty array if count equals 0
     $jobCount = count($upload_pks);
     if ($jobCount == 0) {
       return $jobArray;
@@ -101,19 +108,12 @@ class ShowJobsDao
     $allusers_str = ($allusers == 0) ? "job_user_fk='" . Auth::getUserId() .
       "' and " : "";
 
-    $statementName = __METHOD__ . ".countJobs." . $allusers_str;
-    $sql = "SELECT count(*) AS cnt FROM job WHERE $allusers_str " .
-    "job_queued >= (now() - interval '" . $this->nhours . " hours');";
-
-    $countJobs = $this->dbManager->getSingleRow($sql, [], $statementName)['cnt'];
-    $totalPages = floor($countJobs / $this->maxJobsPerPage);
-
     $statementName = __METHOD__ . "." . $allusers_str;
     $this->dbManager->prepare($statementName,
       "SELECT job_pk, job_upload_fk FROM job " . "WHERE $allusers_str " .
       "job_queued >= (now() - interval '" . $this->nhours . " hours') " .
-      "ORDER BY job_queued DESC OFFSET $1 LIMIT " . $this->maxJobsPerPage);
-    $result = $this->dbManager->execute($statementName, [$offset]);
+      "ORDER BY job_queued DESC");
+    $result = $this->dbManager->execute($statementName);
     while ($row = $this->dbManager->fetchArray($result)) {
       if (! empty($row['job_upload_fk'])) {
         $uploadIsAccessible = $this->uploadDao->isAccessible(
@@ -124,9 +124,16 @@ class ShowJobsDao
       }
       $jobArray[] = $row['job_pk'];
     }
+
+    // calculate total pages for jobs accessible to current group
+    $totalPages = floor(count($jobArray) / $this->maxJobsPerPage);
+
+    // get jobs for current page only
+    $pageJobs = array_slice($jobArray, $offset, $this->maxJobsPerPage);
+
     $this->dbManager->freeResult($result);
 
-    return array($jobArray, $totalPages);
+    return array($pageJobs, $totalPages);
   }  /* myJobs() */
 
   /**
