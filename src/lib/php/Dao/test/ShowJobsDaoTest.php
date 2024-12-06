@@ -5,7 +5,6 @@
 
  SPDX-License-Identifier: GPL-2.0-only
 */
-
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Auth\Auth;
@@ -244,5 +243,86 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
 
     $estimated = $showJobsDaoMock->getEstimatedTime($jobId, $jqType);
     assertThat($estimated,  equalTo('0:00:00'));
+  }
+  private function insertJobQue($jobQueueEndBits = 2)
+  {
+    $jobs = array(3=>2, 4=>3, 5=>5, 6=>8%6, 7=>13%6, 8=>21%6);
+    foreach ($jobs as $jobId => $jobUpload) {
+      $this->dbManager->insertTableRow('job', array('job_pk' => $jobId, 'job_upload_fk' => $jobUpload));
+    }
+    $this->dbManager->prepare($stmt = 'insert.jobqueue',
+      "INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed)"
+      . "VALUES ($1, $2, $3, $4,$5, $6,$7,$8,$9,$10)");
+
+    $nowTime = time();
+    $diffTime = 2345;
+    $nomosTime = date('Y-m-d H:i:sO',$nowTime-$diffTime);
+    $uploadArrayQue = array(array(8, $jobId=1, $jqType="nomos", 1,$nomosTime,null ,"Started", 0,"localhost.5963", $itemNomos=147),
+      array(1, $jobId, "ununpack", 1, "2015-04-21 18:29:19.23825+05:30", "2015-04-21 18:29:26.396562+05:30", "Completed",$jobQueueEndBits,null,$itemCount=646 ));
+    foreach ($uploadArrayQue as $uploadEntry) {
+      $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
+    }
+  }
+  public function testGetJobsForAll()
+  {
+    $this->insertJobQue();
+    $result = $this->showJobsDao->getJobsForAll();
+    $this->assertNotNull($result);
+    $this->assertEquals(array(array('job' => 'nomos', 'jq_job_fk' => "1","upload_fk" => "1", "status" => "running")),$result);
+  }
+  public function testGetItemsProcessedForDecider()
+  {
+    $this->insertJobQue();
+    $result = $this->showJobsDao->getItemsProcessedForDecider("nomos",1);
+    $expectedArray = array("147","1");
+    $this->assertNotNull($result);
+    $this->assertEquals($expectedArray,$result);
+  }
+  public function testGetJobStatusFalse()
+  {
+    $this->insertJobQue();
+    $jobStatus = $this->showJobsDao->getJobStatus(1);
+    $this->assertNotNull($jobStatus);
+    $this->assertFalse($jobStatus);
+  }
+  public function testGetJobStatusTrue()
+  {
+    $this->insertJobQue(4);
+    $jobStatus = $this->showJobsDao->getJobStatus(1);
+    $this->assertNotNull($jobStatus);
+    $this->assertTrue($jobStatus);
+  }
+  public function testGetDataASingleJob()
+  {
+    $this->insertJobQue();
+    $result = $this->showJobsDao->getDataForASingleJob(1);
+    $this->assertNotNull($result);
+    $expectedData = array(
+      'jq_pk' => "1",
+      'jq_job_fk' => "1",
+      'jq_type' => "ununpack",
+      'jq_args' => "1",
+      'jq_starttime' => $result['jq_starttime'],
+      'jq_endtime' => $result['jq_endtime'],
+      'jq_endtext' => "Completed",
+      'jq_end_bits' => "2",
+      'jq_schedinfo' => NULL,
+      'jq_itemsprocessed' => "646",
+      'jq_log' => NULL,
+      'jq_runonpfile' => NULL,
+      'jq_host' => NULL,
+      'jq_cmd_args' => NULL,
+      'job_pk' => "1",
+      'job_queued' => $result['job_queued'],
+      'job_priority' => NULL,
+      'job_email_notify' => NULL,
+      'job_name' => "FCKeditor_2.6.4.zip",
+      'job_upload_fk' => "1",
+      'job_folder_fk' => NULL,
+      'job_user_fk' => "1",
+      'job_group_fk' => NULL,
+      'elapsed' => "00:00:07.158312"
+    );
+    $this->assertEquals($expectedData,$result);
   }
 }

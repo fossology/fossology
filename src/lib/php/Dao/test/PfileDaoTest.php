@@ -131,6 +131,8 @@ class PfileDaoTest extends \PHPUnit\Framework\TestCase
    */
   public function testGetScannerFindings()
   {
+    echo dirname(dirname(dirname(dirname(__DIR__)))) .
+      "/spdx2/agent_tests/Functional/fo_report.sql";
     $this->testDb->createPlainTables(['license_ref', 'license_file']);
     $this->testDb->insertData(['license_ref', 'license_file']);
 
@@ -254,5 +256,31 @@ reserved. permission is hereby granted to copy and distribute this
     $this->assertEquals($expectedSecondFinding, $actualSecondFinding);
     $this->assertEquals($expectedThirdFinding, $actualThirdFinding);
     $this->assertEquals($expectedNoFinding, $actualNoFinding);
+  }
+  /**
+   * @test
+   *    AgentsDao::haveConclusions()
+   * -# Ensure a clearing_decision is created before.
+   * -# Verify that the boolean returned is true.
+   */
+  public function testHaveConclusionsTrue()
+  {
+    $this->testDb->createPlainTables(['clearing_decision']);
+    $this->testDb->insertData(['clearing_decision'], false, SPDX_TEST_DATA);
+    $result = $this->pfileDao->haveConclusions(2, 2);
+    $this->assertTrue($result);
+  }
+  /**
+   * @test
+   *    AgentsDao::haveConclusions()
+   * -# Ensure a clearing_decision is created before.
+   * -# Verify that the boolean returned is false.
+   */
+  public function testHaveConclusionsFalse()
+  {
+    $this->testDb->createPlainTables(['clearing_decision']);
+    $this->testDb->insertData(['clearing_decision'], false, SPDX_TEST_DATA);
+    $result = $this->pfileDao->haveConclusions(100, 100);
+    $this->assertFalse($result);
   }
 }
