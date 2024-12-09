@@ -376,4 +376,19 @@ class ShowJobsDao
     $statement = __METHOD__ . ".getAllUnFinishedJobs";
     return $this->dbManager->getRows($sql, [], $statement);
   }
+
+  /**
+   * @param $jobId
+   * @return bool
+   */
+  public function isJobIdPresentInReportGen($jobId)
+  {
+    $statementName = __METHOD__ . "forJobIdCheck";
+    $row = $this->dbManager->getSingleRow(
+      "SELECT 1 FROM reportgen WHERE job_fk = $1",
+      array($jobId),
+      $statementName
+    );
+    return !empty($row);
+  }
 }

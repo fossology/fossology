@@ -18,6 +18,7 @@ use Fossology\Lib\Report\LicenseMainGetter;
 use Fossology\Lib\Report\ObligationsGetter;
 use Fossology\Lib\Report\OtherGetter;
 use Fossology\Lib\Report\XpClearedGetter;
+use Fossology\Lib\Report\ReportUtils;
 use Twig\Environment;
 
 include_once(__DIR__ . "/version.php");
@@ -68,6 +69,11 @@ class CliXml extends Agent
    */
   private $licenseDNUGetter;
 
+  /** @var ReportUtils $reportutils
+   * ReportUtils object
+   */
+  private $reportutils;
+
   /** @var string */
   protected $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
 
@@ -92,6 +98,7 @@ class CliXml extends Agent
     $this->licenseMainGetter = new LicenseMainGetter();
     $this->obligationsGetter = new ObligationsGetter();
     $this->otherGetter = new OtherGetter();
+    $this->reportutils = new ReportUtils();
     $this->agentSpecifLongOptions[] = self::UPLOAD_ADDS.':';
     $this->agentSpecifLongOptions[] = self::OUTPUT_FORMAT_KEY.':';
   }
@@ -171,7 +178,7 @@ class CliXml extends Agent
 
   protected function getUri($fileBase)
   {
-    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName.'_'.date("Y-m-d_H:i:s");
+    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
     return $fileName .".xml";
   }
 
@@ -492,9 +499,7 @@ class CliXml extends Agent
 
   protected function updateReportTable($uploadId, $jobId, $fileName)
   {
-    $this->dbManager->insertTableRow('reportgen',
-            array('upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$fileName),
-            __METHOD__);
+    $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $fileName);
   }
 
   /**

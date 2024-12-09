@@ -287,4 +287,32 @@ class ReportUtils
     }
     return $filesWithLicenses;
   }
+
+  /**
+   * Update or insert an entry in the reportgen table.
+   *
+   * This function checks if an entry with the specified upload_fk and filepath
+   * exists in the reportgen table. If it exists, it updates the job_fk for that row.
+   * If it does not exist, a new row is inserted with the provided values.
+   *
+   * @param int $upload_fk  Foreign key for the upload.
+   * @param int $job_fk     ID of the job to be updated or inserted.
+   * @param string $filepath  Filepath associated with the entry.
+   */
+  public function updateOrInsertReportgenEntry($upload_fk, $job_fk, $filepath)
+  {
+    $sqlCheck = "SELECT 1 FROM reportgen WHERE upload_fk = $1 AND filepath = $2";
+    $row = $this->dbManager->getSingleRow($sqlCheck, [$upload_fk, $filepath],
+      __METHOD__.'.checkReportgenEntry');
+
+    if (!empty($row)) {
+      $sqlUpdate = "UPDATE reportgen SET job_fk = $1 WHERE upload_fk = $2 AND filepath = $3";
+      $this->dbManager->getSingleRow($sqlUpdate, [$job_fk, $upload_fk, $filepath],
+        __METHOD__.'.updateReportgen');
+    } else {
+      $this->dbManager->insertTableRow('reportgen',
+        ['upload_fk' => $upload_fk, 'job_fk' => $job_fk, 'filepath' => $filepath],
+        __METHOD__);
+    }
+  }
 }
