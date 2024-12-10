@@ -64,16 +64,17 @@ class SearchHelperDao
       }
     }
 
-    /* Start the result select stmt */
-    $SQL = "SELECT DISTINCT uploadtree_pk, parent, upload_fk, uploadtree.pfile_fk, ufile_mode, ufile_name FROM uploadtree";
+    $SQLBase = "SELECT DISTINCT uploadtree_pk, parent, upload_fk, uploadtree.pfile_fk, ufile_mode, ufile_name FROM uploadtree";
+    $SQLWhere = " ";
+    $SQLOrderLimitOffset = "";
 
     if ($searchtype != "directory") {
       if (!empty($License)) {
-        $SQL .= ", ( SELECT license_ref.rf_shortname, license_file.rf_fk, license_file.pfile_fk
+        $SQLWhere .= ", ( SELECT license_ref.rf_shortname, license_file.rf_fk, license_file.pfile_fk
                   FROM license_file JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref";
       }
       if (!empty($Copyright)) {
-        $SQL .= ",copyright";
+        $SQLWhere .= ",copyright";
       }
     }
 
@@ -94,7 +95,7 @@ class SearchHelperDao
         /* tag_file didn't have data, don't add the tag_file table for tag query */
         $NeedTagfileTable = false;
       } else {
-        $SQL .= ", tag_file";
+        $SQLWhere .= ", tag_file";
       }
 
       /* add the tables needed for the tag query */
@@ -104,106 +105,106 @@ class SearchHelperDao
         /* tag_uploadtree didn't have data, don't add the tag_uploadtree table for tag query */
         $NeedTaguploadtreeTable = false;
       } else {
-        $SQL .= ", tag_uploadtree";
+        $SQLWhere .= ", tag_uploadtree";
       }
 
       if (!$NeedTagfileTable && !$NeedTaguploadtreeTable) {
-        $SQL .= ", tag_file, tag_uploadtree";
+        $SQLWhere .= ", tag_file, tag_uploadtree";
       }
     }
 
     /* do we need the pfile table? Yes, if any of these are a search critieria.  */
     if (!empty($SizeMin) or !empty($SizeMax)) {
-      $SQL .= ", pfile where pfile_pk=uploadtree.pfile_fk ";
+      $SQLWhere .= ", pfile where pfile_pk=uploadtree.pfile_fk ";
       $NeedAnd = true;
     } else {
-      $SQL .= " where ";
+      $SQLWhere .= " where ";
       $NeedAnd = false;
     }
 
     /* add the tag conditions */
     if (!empty($tag)) {
       if ($NeedAnd) {
-        $SQL .= " AND";
+        $SQLWhere .= " AND";
       }
-      $SQL .= "(";
+      $SQLWhere .= "(";
       $NeedOr = false;
       foreach ($tag_pk_array as $tagRec) {
         if ($NeedOr) {
-          $SQL .= " OR";
+          $SQLWhere .= " OR";
         }
-        $SQL .= "(";
+        $SQLWhere .= "(";
         $tag_pk = $tagRec['tag_pk'];
         if ($NeedTagfileTable && $NeedTaguploadtreeTable) {
-          $SQL .= "(uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk) or (uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk) ";
+          $SQLWhere .= "(uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk) or (uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk) ";
         } else if ($NeedTaguploadtreeTable) {
-          $SQL .= "uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk";
+          $SQLWhere .= "uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk";
         } else if ($NeedTagfileTable) {
-          $SQL .= "uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk";
+          $SQLWhere .= "uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk";
         } else {
-          $SQL .= "(uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk) or (uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk) ";
+          $SQLWhere .= "(uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk) or (uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk) ";
         }
-        $SQL .= ")";
+        $SQLWhere .= ")";
         $NeedOr = 1;
       }
       $NeedAnd = 1;
-      $SQL .= ")";
+      $SQLWhere .= ")";
     }
 
     if ($Filename) {
       if ($NeedAnd) {
-        $SQL .= " AND";
+        $SQLWhere .= " AND";
       }
-      $SQL .= " ufile_name ilike '" . $Filename . "'";
+      $SQLWhere .= " ufile_name ilike '" . $Filename . "'";
       $NeedAnd = 1;
     }
 
     if ($Upload != 0) {
       if ($NeedAnd) {
-        $SQL .= " AND";
+        $SQLWhere .= " AND";
       }
-      $SQL .= " upload_fk = " . $Upload . "";
+      $SQLWhere .= " upload_fk = " . $Upload . "";
       $NeedAnd = 1;
     }
 
     if (!empty($SizeMin) && is_numeric($SizeMin)) {
       if ($NeedAnd) {
-        $SQL .= " AND";
+        $SQLWhere .= " AND";
       }
-      $SQL .= " pfile.pfile_size >= " . $SizeMin;
+      $SQLWhere .= " pfile.pfile_size >= " . $SizeMin;
       $NeedAnd = 1;
     }
 
     if (!empty($SizeMax) && is_numeric($SizeMax)) {
       if ($NeedAnd) {
-        $SQL .= " AND";
+        $SQLWhere .= " AND";
       }
-      $SQL .= " pfile.pfile_size <= " . $SizeMax;
+      $SQLWhere .= " pfile.pfile_size <= " . $SizeMax;
       $NeedAnd = 1;
     }
 
     if ($Item) {
       if ($NeedAnd) {
-        $SQL .= " AND";
+        $SQLWhere .= " AND";
       }
-      $SQL .= "  upload_fk = $upload_pk AND lft >= $lft AND rgt <= $rgt";
+      $SQLWhere .= "  upload_fk = $upload_pk AND lft >= $lft AND rgt <= $rgt";
       $NeedAnd = 1;
     }
 
     /* search only containers */
     if ($searchtype == 'containers') {
       if ($NeedAnd) {
-        $SQL .= " AND";
+        $SQLWhere .= " AND";
       }
-      $SQL .= " ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0)";
+      $SQLWhere .= " ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0)";
       $NeedAnd = 1;
     }
     $dir_ufile_mode = 536888320;
     if ($searchtype == 'directory') {
       if ($NeedAnd) {
-        $SQL .= " AND";
+        $SQLWhere .= " AND";
       }
-      $SQL .= " ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0) AND (ufile_mode != $dir_ufile_mode) and pfile_fk != 0";
+      $SQLWhere .= " ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0) AND (ufile_mode != $dir_ufile_mode) and pfile_fk != 0";
       $NeedAnd = 1;
     }
 
@@ -211,26 +212,35 @@ class SearchHelperDao
     if ($searchtype != "directory") {
       if (!empty($License)) {
         if ($NeedAnd) {
-          $SQL .= " AND";
+          $SQLWhere .= " AND";
         }
 
-        $SQL .= " uploadtree.pfile_fk=pfile_ref.pfile_fk and pfile_ref.rf_shortname ilike '" .
+        $SQLWhere .= " uploadtree.pfile_fk=pfile_ref.pfile_fk and pfile_ref.rf_shortname ilike '" .
           pg_escape_string($License) . "'";
         $NeedAnd = 1;
       }
       if (!empty($Copyright)) {
         if ($NeedAnd) {
-          $SQL .= " AND";
+          $SQLWhere .= " AND";
         }
-        $SQL .= " uploadtree.pfile_fk=copyright.pfile_fk and copyright.content ilike '%" .
+        $SQLWhere .= " uploadtree.pfile_fk=copyright.pfile_fk and copyright.content ilike '%" .
           pg_escape_string($Copyright) . "%'";
       }
     }
 
     $Offset = $Page * $Limit;
-    $stmt = __METHOD__.$Filename;
-    $SQL .= " ORDER BY ufile_name, uploadtree.pfile_fk";
-    $rows = $this->dbManager->getRows($SQL, [], $stmt);
+
+    $SQLOrderLimitOffset = " ORDER BY ufile_name, uploadtree.pfile_fk LIMIT $Limit OFFSET $Offset";
+    $PaginatedSQL = $SQLBase . $SQLWhere . $SQLOrderLimitOffset;
+
+    $CountSQL = "SELECT COUNT(DISTINCT uploadtree_pk) FROM uploadtree" . $SQLWhere;
+
+    $stmt = __METHOD__ . "_count";
+    $countRow = $this->dbManager->getSingleRow($CountSQL, [], $stmt);
+    $totalUploadtreeRecsCount = $countRow ? reset($countRow) : 0;
+
+    $stmt = __METHOD__ . "_paginated";
+    $rows = $this->dbManager->getRows($PaginatedSQL, [], $stmt);
     if (!empty($rows)) {
       foreach ($rows as $row) {
         if (!$uploadDao->isAccessible($row['upload_fk'], $groupID)) {
@@ -239,8 +249,6 @@ class SearchHelperDao
         $totalUploadtreeRecs[] = $row;
       }
     }
-    $UploadtreeRecs = array_slice($totalUploadtreeRecs, $Offset, $Limit);
-    $totalUploadtreeRecsCount = sizeof($totalUploadtreeRecs);
-    return array($UploadtreeRecs, $totalUploadtreeRecsCount);
+    return array($totalUploadtreeRecs, $totalUploadtreeRecsCount);
   }
 }
