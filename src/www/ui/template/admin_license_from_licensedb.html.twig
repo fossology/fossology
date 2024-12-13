@@ -1,0 +1,40 @@
+{# SPDX-FileCopyrightText: © 2024 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  {% set isConfigMissing = not baseURL or not exportEndpoint or not authToken %}
+  {% macro renderMissingConfigItem(textstring) %}
+    <p>{{ textstring|trans }}</p>
+  {% endmacro %}
+
+  {% if isConfigMissing %}
+    <p><b>{{ 'Warning' }}</b>{{ ': Issues detected with the configuration.'|trans }}</p>
+
+    {% if not baseURL %}
+      {{ _self.renderMissingConfigItem('BaseURL configuration for LicenseDB is missing.') }}
+    {% endif %}
+    {% if not exportEndpoint %}
+      {{ _self.renderMissingConfigItem('Export Endpoint is missing.') }}
+    {% endif %}
+    {% if not authToken %}
+      {{ _self.renderMissingConfigItem('Auth Token for LicenseDB is missing.') }}
+    {% endif %}
+
+    <button type="submit" class="btn btn-default" disabled>{{ 'Import'|trans }}</button>
+  {% else %}
+    {% if licenseDBHealth is defined and not licenseDBHealth %}
+      <p><b>{{ 'Warning' }}</b>{{ ': Connection to LicenseDB was not successful. Please check the settings and try again.'|trans }}</p>
+      <button type="submit" class="btn btn-default" disabled>{{ 'Import'|trans }}</button>
+    {% else %}
+      <p><b>{{ 'License Import from LicenseDB is ready. Press Import to Begin.'|trans }}</b></p>
+      <form method="post">
+        <input type="hidden" name="importFrom" value="licensedb" />
+        <button type="submit" class="btn btn-default">{{ 'Import'|trans }}</button>
+      </form>
+    {% endif %}
+  {% endif %}
+{% endblock %}
+

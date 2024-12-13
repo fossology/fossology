@@ -581,6 +581,33 @@ function Populate_sysconfig()
     "''", "'$prompt'",
     strval(CONFIG_TYPE_TEXT), "'SSS'", "2", "'$desc'", "null", "null");
 
+  /* LicenseDB config */
+  $variable = "LicenseDBURL";
+  $prompt = _('LicenseDB URL');
+  $desc = _('URL to LicenseDB Server');
+  $valueArray[$variable] = array("'$variable'",
+    "''", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "1", "'$desc'", "'check_url'", "null");
+
+  $variable = "LicenseDBBaseURL";
+  $prompt = _('LicenseDB API base URI');
+  $desc = _('Base URI for API calls e.g. /api/v1');
+  $valueArray[$variable] = array("'$variable'", "'/api/v1'",
+    "'$prompt'", strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "2", "'$desc'", "null",
+    "null");
+
+  $variable = "LicenseDBContent";
+  $prompt = _('Export endpoint');
+  $desc = _('Endpoint to Export licenses in JSON e.g. /licenses/export');
+  $valueArray[$variable] = array("'$variable'", "'/licenses/export'", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "3", "'$desc'", "null", "null");
+
+  $variable = "LicenseDBToken";
+  $prompt = _('Auth token For LicenseDB');
+  $desc = _('');
+  $valueArray[$variable] = array("'$variable'", "''", "'$prompt'",
+    strval(CONFIG_TYPE_PASSWORD), "'LicenseDB'", "5", "'$desc'", "null", "null");
+
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.
   */
