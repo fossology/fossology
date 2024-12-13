@@ -106,12 +106,15 @@ class AdminUploadDelete extends DefaultPlugin
     foreach ($folderList as $L) {
       if (!empty($L['is_editable']) && $L['is_editable']) {
         $desc = $L['name'];
+
         if (!empty($L['upload_desc'])) {
             $desc .= " (" . $L['upload_desc'] . ")";
         }
+
         if (!empty($L['upload_ts'])) {
             $desc .= " :: " . substr($L['upload_ts'], 0, 19);
         }
+        
         $uploadList[$L['upload_pk']] = $desc;
     }
     }
