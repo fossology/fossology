@@ -147,14 +147,22 @@ class AdminLicenseCompatibilityRules extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
+    if ($request->get('action') === 'fetchLicenseData') {
+      return $this->fetchLicenseData();
+    }
+    if ($request->get("action", "") === "fetchRules") {
+      return $this->fetchRules($request);
+    }
+
     if ($request->get(self::UPDATE_PARAM_NAME, 0) == 1) {
       return new JsonResponse($this->updateRules($request),
         JsonResponse::HTTP_OK);
     } elseif ($request->get("action", 0) === "deleterule") {
       return new JsonResponse($this->deleteRules($request),
         JsonResponse::HTTP_OK);
+    } elseif ($request->get("action", 0) === "addrule") {
+      return $this->addRule();
     }
-    global $SysConf;
     $vars = [];
     $vars["firstTypeParam"] = self::INSERT_FIRST_LIC_TYPE_PARAM_NAME;
     $vars["secondTypeParam"] = self::INSERT_SECOND_LIC_TYPE_PARAM_NAME;
@@ -172,22 +180,73 @@ class AdminLicenseCompatibilityRules extends DefaultPlugin
     $vars["textParam"] = self::TEXT_PARAM_NAME;
     $vars["resultParam"] = self::RESULT_PARAM_NAME;
 
-    $licenseType = $SysConf['SYSCONFIG']['LicenseTypes'];
-    $licenseType = explode(',', $licenseType);
-    $licenseType = array_map('trim', $licenseType);
-    $licenseType = ["---", ...$licenseType];
-    $vars['licenseTypes'] = array_combine($licenseType, $licenseType);
+    return $this->render('admin_license_compatibility_rules.html.twig',
+      $this->mergeWithDefault($vars));
+  }
 
-    $vars['ruleArray'] = $this->compatibilityDao->getAllRules();
+  /**
+   * @brief Fetch the available license data
+   * @return JsonResponse
+   */
+  private function fetchLicenseData()
+  {
+    global $SysConf;
 
     $licenseArray = $this->licenseDao->getLicenseArray(0);
     $licenseArray = array_column($licenseArray, 'shortname', 'id');
-
     $licenseList = [0 => "---"];
     $licenseList += $licenseArray;
-    $vars['licenseArray'] = $licenseList;
-    return $this->render('admin_license_compatibility_rules.html.twig',
-      $this->mergeWithDefault($vars));
+
+    $licenseTypes = $SysConf['SYSCONFIG']['LicenseTypes'];
+    $licenseTypes = explode(',', $licenseTypes);
+    $licenseTypes = array_map('trim', $licenseTypes);
+    $licenseTypes = ["---", ...$licenseTypes];
+    $licenseTypeList = array_combine($licenseTypes, $licenseTypes);
+
+    return new JsonResponse([
+      'licenseArray' => $licenseList,
+      'licenseTypes' => $licenseTypeList,
+    ], JsonResponse::HTTP_OK);
+  }
+
+  /**
+   * @brief Fetch the compatibility rules based on search query and pagination
+   * @param Request $request The request containing query parameters for pagination and search
+   * @return JsonResponse
+   */
+  private function fetchRules(Request $request)
+  {
+    $offset = intval($request->query->get('start', 0));
+    $limit = intval($request->query->get('length', 10));
+    $draw = intval($request->query->get('draw', 1));
+    $searchQuery = $_GET['search']['value'] ?? '';
+
+    if (!empty($searchQuery)) {
+      $searchQuery = '%' . $searchQuery . '%';
+    }
+
+    $totalCount = $this->compatibilityDao->getTotalRulesCount($searchQuery);
+    $ruleArray = $this->compatibilityDao->getAllRules($limit, $offset, $searchQuery);
+
+    return new JsonResponse([
+      "draw" => $draw,
+      "recordsTotal" => $totalCount,
+      "recordsFiltered" => $totalCount,
+      "data" => $ruleArray,
+    ], JsonResponse::HTTP_OK);
+  }
+
+  /**
+   * @brief Add a new empty compatibility rule
+   * @return JsonResponse
+   */
+  private function addRule()
+  {
+    $result = $this->compatibilityDao->insertEmptyRule();
+    if ($result > 0) {
+      return new JsonResponse(["lr_pk" => $result], JsonResponse::HTTP_OK);
+    }
+    return new JsonResponse(["error" => "Failed to add rule."], JsonResponse::HTTP_BAD_REQUEST);
   }
 
   /**
