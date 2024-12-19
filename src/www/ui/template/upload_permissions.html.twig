@@ -7,8 +7,11 @@
 {% extends "include/base.html.twig" %}
 
 {% block content %}
-  
-      
+
+  <div id="loader" class="dataTables_processing" style="display:none;">
+    Loading...
+  </div>
+
   {{ 'Select the folder that contains the upload'|trans }}: 
   {% include 'components/select-folder.html.twig' with {'name':'folderselect','id':'folderselect','selected':folderId} %}
   <br/><br/>
@@ -28,7 +31,7 @@
     {% import 'include/macros.html.twig' as macro %}
     {{ "Public Permission"|trans }}:
     {{ macro.select('publicpermselect',permNames,'publicpermselect',publicPerm) }}
-    
+
     <p><table border="1">
       <tr><th>{{ 'Group'|trans }}</th><th>{{ 'Permission'|trans }}</th></tr>
       {% for permGroup in permGroups %}
@@ -54,7 +57,7 @@
       </tr>
       {% endif %}
     </table>    
-    
+
     {{ "All upload permissions take place immediately when a value is changed. There is no submit button."|trans }}<br/>
     {% if additableGroups is not empty %}
       {{ "Add new groups on the last line."|trans }}
@@ -71,7 +74,7 @@
   </select>
   <table id="tblUsers">
   </table>
-    
+ 
 {% endblock %}
 
 {% block foot %}
@@ -92,40 +95,44 @@
     var oTable = $('#tblUsers').dataTable(dataTableConfig);
     $('#groupsForGum').change( function() { oTable.fnFilter( $(this).val(), 1 ); } );
     $('#groupsForGum').trigger('change');
-    
-    $('#folderselect').change(function(){
-      window.location.assign('{{ baseUri }}&folder='+$(this).val());
-    });
-    
-    $('#uploadselect').change(function(){
-      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload='+$(this).val());
+
+    function redirectWithLoader(url) {
+      $('#loader').show();
+      window.location.assign(url);
+    }
+
+    $('#folderselect').change(function() {
+      redirectWithLoader('{{ baseUri }}&folder=' + $(this).val());
     });
 
-    $('#alluploadsperm').change(function(){
+    $('#uploadselect').change(function() {
+      redirectWithLoader('{{ baseUri }}&folder={{ folderId }}&upload=' + $(this).val());
+    });
+
+    $('#alluploadsperm').change(function() {
       var allUploads = document.getElementById("alluploadsperm");
       if (allUploads.checked == true) {
-        window.location.assign('{{ baseUri }}&folder={{ folderId }}&alluploadsperm='+$(this).val());
-      } 
-     if (allUploads.checked == false) {
-        window.location.assign('{{ baseUri }}&folder={{ folderId }}&alluploadsperm=0');
+        redirectWithLoader('{{ baseUri }}&folder={{ folderId }}&alluploadsperm=' + $(this).val());
+      } else {
+        redirectWithLoader('{{ baseUri }}&folder={{ folderId }}&alluploadsperm=0');
       }
     });
-    
-    $('#publicpermselect').change(function(){
-      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&alluploadsperm={{ allUploadsPerm }}&public='+$(this).val());
-    });
-    
-    $('#groupselectnew').change(function(){
-      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&alluploadsperm={{ allUploadsPerm }}&newperm={{ newPerm }}&newgroup='+$(this).val());
+
+    $('#publicpermselect').change(function() {
+      redirectWithLoader('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&alluploadsperm={{ allUploadsPerm }}&public=' + $(this).val());
     });
 
-    $('#permselectnew').change(function(){
-      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&alluploadsperm={{ allUploadsPerm }}&newgroup={{ newGroup }}&newperm='+$(this).val());
+    $('#groupselectnew').change(function() {
+      redirectWithLoader('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&alluploadsperm={{ allUploadsPerm }}&newperm={{ newPerm }}&newgroup=' + $(this).val());
     });
-    
-    $('select[name=permselect]').change(function(){
-      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&permupk='+$(this).attr('data-puid')+'&perm='+$(this).val());
+
+    $('#permselectnew').change(function() {
+      redirectWithLoader('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&alluploadsperm={{ allUploadsPerm }}&newgroup={{ newGroup }}&newperm=' + $(this).val());
     });
-    
+
+    $('select[name=permselect]').change(function() {
+      redirectWithLoader('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&permupk=' + $(this).attr('data-puid') + '&perm=' + $(this).val());
+    });
+
   </script>
 {% endblock %}

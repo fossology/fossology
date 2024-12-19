@@ -102,7 +102,7 @@ $(document).ready(function() {
         'placeholder="Please enter a acknowledgement statement" ' +
         'class="newAcknowledgementInputs"></textarea>',
       '<input type="checkbox" checked disabled />'
-    ]).draw(false);
+    ]).draw(false).page("last").draw(false);
   });
 
   $(".licStdAckToggle").change(function(){

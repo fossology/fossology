@@ -69,6 +69,11 @@ class Analysis
    * Whether to schedule package agent or not
    */
   private $pkgagent;
+  /**
+   * @var boolean $compatibility
+   * Whether to schedule compatibility agent or not
+   */
+  private $compatibility;
 
   /**
    * Analysis constructor.
@@ -79,12 +84,14 @@ class Analysis
    * @param boolean $mimetype
    * @param boolean $monk
    * @param boolean $nomos
+   * @param boolean $pkgagent
    * @param boolean $ojo
    * @param boolean $reso
    * @param boolean $pkgagent
+   * @param boolean $compatibility
    */
   public function __construct($bucket = false, $copyright = false, $ecc = false, $keyword = false,
-    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $reso = false, $pkgagent = false)
+    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $reso = false, $pkgagent = false, $compatibility = false)
   {
     $this->bucket = $bucket;
     $this->copyright = $copyright;
@@ -96,6 +103,7 @@ class Analysis
     $this->ojo = $ojo;
     $this->reso = $reso;
     $this->pkgagent = $pkgagent;
+    $this->compatibility = $compatibility;
   }
 
   /**
@@ -140,12 +148,16 @@ class Analysis
       $this->pkgagent = filter_var($analysisArray["package"],
         FILTER_VALIDATE_BOOLEAN);
     }
+    if (array_key_exists("compatibility", $analysisArray)) {
+      $this->compatibility = filter_var($analysisArray["compatibility"],
+          FILTER_VALIDATE_BOOLEAN);
+    }
     return $this;
   }
 
   /**
    * Set the values of Analysis based on string from DB
-   * @param array $analysisString String from DB settings
+   * @param string $analysisString String from DB settings
    * @return Analysis Current object
    */
   public function setUsingString($analysisString)
@@ -179,6 +191,9 @@ class Analysis
     }
     if (stristr($analysisString, "pkgagent")) {
       $this->pkgagent = true;
+    }
+    if (stristr($analysisString, "compatibility")) {
+      $this->compatibility = true;
     }
     return $this;
   }
@@ -264,6 +279,14 @@ class Analysis
     return $this->pkgagent;
   }
 
+  /**
+   * @return bool
+   */
+  public function getCompatibility()
+  {
+    return $this->compatibility;
+  }
+
   ////// Setters //////
   /**
    * @param boolean $bucket
@@ -346,6 +369,14 @@ class Analysis
   }
 
   /**
+   * @param bool $compatibility
+   */
+  public function setCompatibility($compatibility)
+  {
+    $this->compatibility = filter_var($compatibility, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
    * Get the object as an associative array
    * @return array
    */
@@ -361,8 +392,9 @@ class Analysis
         "monk"      => $this->monk,
         "nomos"     => $this->nomos,
         "ojo"       => $this->ojo,
-        "reso"       => $this->reso,
-        "package"   => $this->pkgagent
+        "reso"      => $this->reso,
+        "package"   => $this->pkgagent,
+        "compatibility" => $this->compatibility
       ];
     } else {
       return [
@@ -374,8 +406,9 @@ class Analysis
         "monk"      => $this->monk,
         "nomos"     => $this->nomos,
         "ojo"       => $this->ojo,
-        "reso"       => $this->reso,
-        "package"   => $this->pkgagent
+        "reso"      => $this->reso,
+        "package"   => $this->pkgagent,
+        "compatibility" => $this->compatibility
       ];
     }
   }

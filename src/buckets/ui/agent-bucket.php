@@ -96,7 +96,8 @@ class BucketAgentPlugin extends AgentPlugin
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
    * @see Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
    */
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
+      $arguments=null, $request=null, $unpackArgs=null)
   {
     $default_bucketpool_fk = $this->getDefaultBucketPool();
     if (!$default_bucketpool_fk)
@@ -108,7 +109,8 @@ class BucketAgentPlugin extends AgentPlugin
     $dependencies[] = "agent_nomos";
     $dependencies[] = "agent_pkgagent";
     $jqargs = "bppk=$default_bucketpool_fk, upk=$uploadId";
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $jqargs);
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies,
+        $jqargs, null, $request);
   }
 }
 

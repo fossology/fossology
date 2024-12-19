@@ -1,0 +1,66 @@
+# SPDX-FileCopyrightText: © FOSSology contributors
+# SPDX-License-Identifier: FSFAP
+---
+default: f
+rules:
+- firstname: ~
+  secondname: ~
+  firsttype: ~
+  secondtype: ~
+  compatibility: "false"
+  comment: Default rule is false
+- firstname: ~
+  secondname: ~
+  firsttype: Permissive
+  secondtype: Permissive
+  compatibility: "true"
+  comment: All permissive licenses can be used together.
+- firstname: ~
+  secondname: ~
+  firsttype: Strong Copyleft
+  secondtype: Weak Copyleft
+  compatibility: "false"
+  comment: Strong copyleft cannot be used with weak copyleft.
+- firstname: GPL-2.0-only
+  secondname: Apache-2.0
+  firsttype: ~
+  secondtype: ~
+  compatibility: "false"
+  comment: No GPL and Apache
+- firstname: GPL-2.0-or-later
+  secondname: Apache-2.0
+  firsttype: ~
+  secondtype: ~
+  compatibility: "false"
+  comment: No GPL and Apache
+- firstname: GPL-2.0-only
+  secondname: MIT
+  firsttype: ~
+  secondtype: ~
+  compatibility: "true"
+  comment: GPL with MIT is fine
+- firstname: GPL-2.0-only
+  secondname: LGPL-2.1-or-later
+  firsttype: ~
+  secondtype: ~
+  compatibility: "true"
+  comment: GPLs
+- firstname: ~
+  secondname: ~
+  firsttype: Weak Copyleft
+  secondtype: Permissive
+  compatibility: "true"
+  comment: Weak copyleft and permissive licenses are okay.
+- firstname: Sleepycat
+  secondname: ~
+  firsttype: ~
+  secondtype: Permissive
+  compatibility: "false"
+  comment: Sleepycat is not compatible even with permissive
+- firstname: GPL-2.0-only
+  secondname: ~
+  firsttype: ~
+  secondtype: Permissive
+  compatibility: "true"
+  comment: GPL-2.0 should be compatible with permissive licenses
+...

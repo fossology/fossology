@@ -108,7 +108,7 @@ class ScanOptions
     }
 
     $paramAgentRequest = new Request();
-    $agentsToAdd = $this->prepareAgents();
+    $agentsToAdd = $this->prepareAgents($paramAgentRequest);
     $this->prepareReuser($paramAgentRequest);
     $this->prepareDecider($paramAgentRequest);
     $this->prepareScancode($paramAgentRequest);
@@ -122,17 +122,26 @@ class ScanOptions
 
   /**
    * Prepare agentsToAdd string based on Analysis settings.
+   * @param Request $request Request object to manipulate
    * @return string[]
    */
-  private function prepareAgents()
+  private function prepareAgents(Request &$request)
   {
     $agentsToAdd = [];
     foreach ($this->analysis->getArray() as $agent => $set) {
       if ($set === true) {
         if ($agent == "copyright_email_author") {
           $agentsToAdd[] = "agent_copyright";
+          $request->request->set("Check_agent_copyright", 1);
+        } elseif ($agent == "patent") {
+          $agentsToAdd[] = "agent_ipra";
+          $request->request->set("Check_agent_ipra", 1);
+        } elseif ($agent == "package") {
+          $agentsToAdd[] = "agent_pkgagent";
+          $request->request->set("Check_agent_pkgagent", 1);
         } else {
           $agentsToAdd[] = "agent_$agent";
+          $request->request->set("Check_agent_$agent", 1);
         }
       }
     }
@@ -186,6 +195,11 @@ class ScanOptions
     }
     if ($this->decider->getOjoDecider() === true) {
       $deciderRules[] = 'ojoNoContradiction';
+    }
+    if (! empty($this->decider->getConcludeLicenseType())) {
+      $deciderRules[] = 'licenseTypeConc';
+      $request->request->set('licenseTypeConc',
+          $this->decider->getConcludeLicenseType());
     }
     $request->request->set('deciderRules', $deciderRules);
     if ($this->analysis->getNomos()) {

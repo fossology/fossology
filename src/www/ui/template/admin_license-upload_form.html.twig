@@ -58,6 +58,10 @@
       <td align="left">{{ macro.select('rf_detector_type',detectorTypes,'rf_detector_type',rf_detector_type) }}</td>
     </tr>
     <tr>
+      <td align="right"><label for="rf_licensetype">{{ 'License Type'|trans }}</label></td>
+      <td align="left">{{ macro.select('rf_licensetype',licenseTypes,'rf_licensetype',rf_licensetype) }}</td>
+    </tr>
+    <tr>
       <td align=right>
         <label for="rf_url">{{ 'URL'|trans }}</label>
         {% if rf_url %}<a href="{{ rf_url }}"><img border="0" src="images/right-point-bullet.gif"/></a>{% endif %}

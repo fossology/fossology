@@ -34,7 +34,8 @@ foreach(FO_CLIB_TARGET fossology fossology_cov)
             ${FO_CWD}/libfossrepo.c
             ${FO_CWD}/libfossdbmanager.c
             ${FO_CWD}/fossconfig.c
-            ${FO_CWD}/sqlCopy.c)
+            ${FO_CWD}/sqlCopy.c
+            ${FO_CWD}/libfossagentref.h)
     target_link_libraries(${FO_CLIB_TARGET}
         PRIVATE ${glib_LIBRARIES} ${PostgreSQL_LIBRARIES})
 endforeach()

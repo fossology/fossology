@@ -42,7 +42,6 @@ class AgentDao
   public function createArsTable($agentName)
   {
     $tableName = $this->getArsTableName($agentName);
-
     $this->dbManager->queryOnce("CREATE TABLE ".$tableName."() INHERITS(ars_master);
     ALTER TABLE ONLY ".$tableName." ADD CONSTRAINT ".$tableName."_agent_fk_fkc FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);
     ALTER TABLE ONLY ".$tableName." ADD CONSTRAINT ".$tableName."_upload_fk_fkc FOREIGN KEY (upload_fk) REFERENCES upload(upload_pk) ON DELETE CASCADE", __METHOD__);
@@ -152,7 +151,6 @@ class AgentDao
     $this->dbManager->freeResult($result);
     return $resultArray;
   }
-
 
   /**
    * @brief Returns the list of running or failed agent_pk s. Before latest successful run

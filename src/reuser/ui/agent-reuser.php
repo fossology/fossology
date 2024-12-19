@@ -30,6 +30,7 @@ include_once(dirname(__DIR__) . "/agent/version.php");
 class ReuserAgentPlugin extends AgentPlugin
 {
   const UPLOAD_TO_REUSE_SELECTOR_NAME = 'uploadToReuse';  ///< Form element name for main license to reuse
+  const REUSE_MODE = 'reuseMode';  ///< Form element name for main license to reuse
 
   /** @var UploadDao $uploadDao
    * Upload Dao object
@@ -98,7 +99,7 @@ class ReuserAgentPlugin extends AgentPlugin
     }
     $groupId = $request->get('groupId', Auth::getGroupId());
 
-    $getReuseValue = $request->get('reuseMode') ?: array();
+    $getReuseValue = $request->get(self::REUSE_MODE) ?: array();
     $reuserDependencies = array("agent_adj2nest");
 
     $reuseMode = UploadDao::REUSE_NONE;
@@ -119,14 +120,17 @@ class ReuserAgentPlugin extends AgentPlugin
       }
     }
 
-    $reuserDependencies = array_merge($reuserDependencies,
-      $this->getReuserDependencies($request));
+    list($agentDeps, $scancodeDeps) = $this->getReuserDependencies($request);
+    $reuserDependencies = array_unique(array_merge($reuserDependencies, $agentDeps));
+    if (!empty($scancodeDeps)) {
+      $reuserDependencies[] = $scancodeDeps;
+    }
 
     $this->createPackageLink($uploadId, $reuseUploadId, $groupId, $reuseGroupId,
       $reuseMode);
 
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg,
-      array_unique($reuserDependencies), $uploadId);
+      $reuserDependencies, $uploadId, null, $request);
   }
 
   /**
@@ -165,6 +169,7 @@ class ReuserAgentPlugin extends AgentPlugin
   private function getReuserDependencies($request)
   {
     $dependencies = array();
+    $scancodeDeps = [];
     if ($request->get("Check_agent_nomos", false)) {
       $dependencies[] = "agent_nomos";
     }
@@ -187,12 +192,12 @@ class ReuserAgentPlugin extends AgentPlugin
       $agentScanCode = plugin_find('agent_scancode');
       $flags = $request->get('scancodeFlags');
       $unpackArgs = intval($request->get('scm', 0)) == 1 ? 'I' : '';
-      $dependencies[] = [
+      $scancodeDeps = [
         "name" => "agent_scancode",
         "args" => $agentScanCode->getScanCodeArgs($flags, $unpackArgs)
       ];
     }
-    return $dependencies;
+    return [$dependencies, $scancodeDeps];
   }
 }
 

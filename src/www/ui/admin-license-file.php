@@ -239,6 +239,7 @@ class admin_license_file extends FO_Plugin
    */
   function getUpdatefmData($rf_pk)
   {
+    global $SysConf;
     $vars = array();
 
     $rf_pk_update = "";
@@ -261,6 +262,7 @@ class admin_license_file extends FO_Plugin
     $vars['rf_shortname'] = array_key_exists('rf_shortname', $_POST) ? $_POST['rf_shortname'] : '';
     $vars['rf_fullname'] = array_key_exists('rf_fullname', $_POST) ? $_POST['rf_fullname'] : '';
     $vars['rf_text'] = array_key_exists('rf_text', $_POST) ? $_POST['rf_text'] : '';
+    $vars['rf_licensetype'] = array_key_exists('rf_licensetype', $_POST) ? $_POST['rf_licensetype'] : '---';
     $selectedObligations = array_key_exists($this->obligationSelectorName,
       $_POST) ? $_POST[$this->obligationSelectorName] : [];
 
@@ -315,7 +317,8 @@ class admin_license_file extends FO_Plugin
         'rf_risk' => 0,
         'rf_url' => '',
         'rf_detector_type' => 1,
-        'rf_notes' => ''
+        'rf_notes' => '',
+        'rf_licensetype' => 'Permissive'
       );
     }
 
@@ -332,7 +335,10 @@ class admin_license_file extends FO_Plugin
     $vars['risk_level'] = array_key_exists('risk_level', $_POST) ? intval($_POST['risk_level']) : $row['rf_risk'];
     $vars['isReadOnly'] = !(empty($rf_pk) || $row['rf_text_updatable']=='true');
     $vars['detectorTypes'] = array("1"=>"Reference License", "2"=>"Nomos", "3"=>"Unconcrete License");
-
+    $licenseType = $SysConf['SYSCONFIG']['LicenseTypes'];
+    $licenseType = explode(',', $licenseType);
+    $licenseType = array_map('trim', $licenseType);
+    $vars['licenseTypes'] = array_combine($licenseType, $licenseType);
     $vars['rfId'] = $rf_pk?:$rf_pk_update;
 
     return array_merge($vars,$row);
@@ -397,6 +403,7 @@ class admin_license_file extends FO_Plugin
     $spdxId = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_spdx_id']));
     $parent = $_POST['rf_parent'];
     $report = $_POST['rf_report'];
+    $licensetype = trim($_POST['rf_licensetype']);
     $riskLvl = intval($_POST['risk_level']);
     $selectedObligations = array_key_exists($this->obligationSelectorName,
       $_POST) ? $_POST[$this->obligationSelectorName] : [];
@@ -429,12 +436,12 @@ class admin_license_file extends FO_Plugin
     $sql = "UPDATE license_ref SET
         rf_active=$2, marydone=$3,  rf_shortname=$4, rf_fullname=$5,
         rf_url=$6,  rf_notes=$7,  rf_text_updatable=$8,   rf_detector_type=$9,  rf_text=$10,
-        rf_md5=$md5term, rf_risk=$11, rf_spdx_id=$12, rf_flag=$13
+        rf_md5=$md5term, rf_risk=$11, rf_spdx_id=$12, rf_flag=$13, rf_licensetype=$14
           WHERE rf_pk=$1";
     $params = array($rfId,
       $_POST['rf_active'],$_POST['marydone'],$shortname,$fullname,
       $url,$notes,$_POST['rf_text_updatable'],$_POST['rf_detector_type'],$text,
-      $riskLvl,$spdxId,2);
+      $riskLvl,$spdxId,2, $licensetype);
     $statement = __METHOD__ . ".updateLicense";
     if ($md5term == "null") {
       $statement .= ".nullMD5";
@@ -509,6 +516,7 @@ class admin_license_file extends FO_Plugin
     $rf_url = $_POST['rf_url'];
     $rf_notes = $_POST['rf_notes'];
     $rf_text = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_text']));
+    $rf_licensetype = trim($_POST['rf_licensetype']);
     $parent = $_POST['rf_parent'];
     $report = $_POST['rf_report'];
     $riskLvl = intval($_POST['risk_level']);
@@ -543,9 +551,9 @@ class admin_license_file extends FO_Plugin
     $sql = "INSERT into license_ref (
         rf_active, marydone, rf_shortname, rf_fullname,
         rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable,
-        rf_detector_type, rf_risk, rf_spdx_id)
+        rf_detector_type, rf_risk, rf_spdx_id, rf_licensetype)
           VALUES (
-              $1, $2, $3, $4, $5, $6, $md5term, $7, $8, $9, $10, $11) RETURNING rf_pk";
+              $1, $2, $3, $4, $5, $6, $md5term, $7, $8, $9, $10, $11, $12) RETURNING rf_pk";
     $this->dbManager->prepare($stmt,$sql);
     $res = $this->dbManager->execute($stmt,
       array(
@@ -559,7 +567,8 @@ class admin_license_file extends FO_Plugin
         $_POST['rf_text_updatable'],
         $_POST['rf_detector_type'],
         $riskLvl,
-        $rf_spdx_id
+        $rf_spdx_id,
+        $rf_licensetype
       ));
     $row = $this->dbManager->fetchArray($res);
     $rfId = $row['rf_pk'];
