@@ -40,8 +40,8 @@
         <div style="text-align:center;" class="btn"><strong><u>{{ 'Folder Navigation'|trans }}</u></strong></div>
         {{ folderNav }}
       </td>
-      <td valign="top" style="background: #efefef; width:1px; font-family:monospace; word-break:break-all;" id="nav-shower" hidden>
-          &raquo;&nbsp;{{ 'Folder Navigation'|trans|replace({' ':'&nbsp;'}) }}&nbsp;&raquo;
+      <td valign="top" style="background:#efefef; width:100%; height:100%; font-family:monospace; display:none; cursor:pointer; justify-content:center; align-items:center; " id="nav-shower">
+          <span style="font-size:36px; ">&raquo;</span>
       </td>
       <td valign="top">
         <div style="text-align:center;font-size:large;"><strong><u>{{ 'Uploads'|trans }} {{ 'in'|trans }} <span id="current-folder">{{ folderName }}</span></u></strong></div>
