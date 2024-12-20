@@ -27,7 +27,7 @@
         "slim/psr7": "1.4.1",
         "symfony/cache": "v5.4.13",
         "symfony/config" : "v5.4.11",
-        "symfony/http-foundation" : "v5.4.13",
+        "symfony/http-foundation" : "v5.4.46",
         "symfony/dependency-injection" : "v5.4.13",
         "symfony/process" : "v5.4.35",
         "symfony/translation" : "v5.4.12",
