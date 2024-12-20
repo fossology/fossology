@@ -68,7 +68,7 @@ jobs:
         rm -rf src/vendor
 
     - name: Get CMake v3.23.0
-      uses: lukka/get-cmake@v3.23.0
+      uses: lukka/get-cmake@v3.31.2
 
     - name: Fetch tags
       run: |
