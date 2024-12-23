@@ -44,7 +44,7 @@ jobs:
         echo VERSION=$(git describe --tags > /dev/null 2>&1 && git describe --tags | head -1 | sed -re "s/${VERSION_PATTERN}/\\1.\\3\\2/" | sed -re 's/\.$/.0/') >> $GITHUB_ENV
 
     - name: Build and push main image
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v6
       with:
         push: true
         tags: fossology/fossology:latest
@@ -55,7 +55,7 @@ jobs:
           org.opencontainers.image.version=${VERSION}
 
     - name: Build and push runner image
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v6
       with:
         push: true
         tags: fossology/fossology:scanner

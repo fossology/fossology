@@ -145,7 +145,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push main image
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v6
       with:
         push: true
         tags: fossology/fossology:${{ steps.get_release.outputs.tag_name }}
@@ -154,7 +154,7 @@ jobs:
         context: .
 
     - name: Build and push runner image
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v6
       with:
         push: true
         tags: fossology/fossology:${{ steps.get_release.outputs.tag_name }}-scanner
