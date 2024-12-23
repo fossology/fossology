@@ -81,10 +81,10 @@ $(document).ready(function() {
 
 $('#nav-hider').click(function() {
   $('#nav-cell').hide('slow');
-  $('#nav-shower').show('slow');  
+  $('#nav-shower').css("display", "flex");  
 });
 $('#nav-shower').click(function() {
-  $('#nav-shower').hide('slow');
+  $('#nav-shower').hide();
   $('#nav-cell').show('slow');
 });
 
