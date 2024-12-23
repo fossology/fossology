@@ -118,14 +118,9 @@ class LicenseCsvImport
         $jsonContent = fread($handle, filesize($filename));
         $data = json_decode($jsonContent, true);
         if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
-          $msg .= "Error decoding JSON: " . json_last_error_msg()."\n";
+          $msg .= "Error decoding JSON: " . json_last_error_msg() . "\n";
         }
-        foreach ($data as $row) {
-          $log = $this->handleCsvLicense($this->handleRowJson($row));
-          if (!empty($log)) {
-            $msg .= "$log\n";
-          }
-        }
+        $msg = $this->importJsonData($data, $msg);
         $msg .= _('Read json').(":". count($data) ." ")._('licenses');
       }
     } catch(\Exception $e) {
@@ -537,5 +532,21 @@ class LicenseCsvImport
       $return .= " reporting '$row[report_shortname]'";
     }
     return $return;
+  }
+
+  /**
+   * @param $data
+   * @param string $msg
+   * @return string
+   */
+  public function importJsonData($data, string $msg): string
+  {
+    foreach ($data as $row) {
+      $log = $this->handleCsvLicense($this->handleRowJson($row));
+      if (!empty($log)) {
+        $msg .= "$log\n";
+      }
+    }
+    return $msg;
   }
 }

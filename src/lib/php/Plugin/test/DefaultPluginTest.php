@@ -89,6 +89,12 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
 
   protected function setUp() : void
   {
+    global $SysConf;
+    $SysConf = [
+      'DIRECTORIES' => [
+        'LOGDIR' => sys_get_temp_dir()
+      ]
+    ];
     $this->session = M::mock('Symfony\Component\HttpFoundation\Session\SessionInterface');
 
     global $container;
