@@ -22,7 +22,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y git doxygen graphviz
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 50
 
