@@ -86,7 +86,7 @@ class FormatResult:
                 it is found.
       """
       found_words_with_line_number = {}
-      if self.cli_options.repo is True:
+      if self.cli_options.repo is True or self.cli_options.scan_only_deps is True:
         try:
           with open(file_path, 'rb') as file:
             binary_data = file.read()
@@ -121,7 +121,7 @@ class FormatResult:
       :param: root_dir : str Path of the temp dir root to format the files
       :return: None
       """
-      if self.cli_options.repo is True:
+      if self.cli_options.repo is True or self.cli_options.scan_only_deps is True:
         return None
       for root, dirs, files in os.walk(root_dir):
         for file_name in files:
