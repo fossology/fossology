@@ -94,15 +94,67 @@ class CompatibilityDao
   }
 
   /**
-   * @brief Get all the existing rules present in the database
-   * @return array
+   * @brief Get all the existing license compatibility rules from the database
+   * @param int $limit The maximum number of rules to retrieve (default is 10)
+   * @param int $offset The number of rules to skip (default is 0)
+   * @param string $searchTerm The search term to filter rules by (default is an empty string)
+   * @return array An array of license compatibility rules
    */
-  public function getAllRules()
+  public function getAllRules($limit = 10, $offset = 0, $searchTerm = '')
   {
     $sql = "SELECT lr_pk, first_rf_fk, second_rf_fk, first_type, second_type,
       comment, compatibility
-      FROM license_rules ORDER BY lr_pk;";
-      return $this->dbManager->getRows($sql);
+      FROM license_rules";
+    if (!empty($searchTerm)) {
+      $sql .= " WHERE comment ILIKE '$searchTerm'";
+    }
+    $sql .= " ORDER BY lr_pk LIMIT $limit OFFSET $offset;";
+    return $this->dbManager->getRows($sql);
+  }
+
+  /**
+   * @brief Get the total count of license compatibility rules
+   * @param string $searchTerm The search term to filter rules by (default is an empty string)
+   * @return int The total count of rules that match the search term
+   */
+  public function getTotalRulesCount($searchTerm = '')
+  {
+    $query = "SELECT COUNT(*) as count FROM license_rules";
+    if (!empty($searchTerm)) {
+      $query .= " WHERE comment ILIKE '$searchTerm'";
+    }
+    $count = $this->dbManager->getSingleRow($query);
+    return $count ? reset($count) : 0;
+  }
+
+  /**
+   * @brief Insert a new empty rule in the database
+   * @return int
+   */
+  public function insertEmptyRule()
+  {
+    if (!Auth::isAdmin()) {
+      return -1;
+    }
+    $params = [
+      'first_rf_fk' => null,
+      'second_rf_fk' => null,
+      'first_type' => null,
+      'second_type' => null,
+      'comment' => '',
+      'compatibility' => false
+    ];
+
+    $statement = __METHOD__ . ".insertEmptyLicCompatibilityRule";
+    $returning = "lr_pk";
+    $returnVal = -1;
+
+    try {
+      $returnVal = $this->dbManager->insertTableRow("license_rules", $params, $statement, $returning);
+    } catch (\Exception $_) {
+      $returnVal = -2;
+    }
+    return $returnVal;
   }
 
   /**
