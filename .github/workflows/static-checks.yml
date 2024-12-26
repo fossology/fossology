@@ -24,7 +24,7 @@ jobs:
           sudo apt-get update
           echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
           echo COMPOSER_HOME="$HOME/.composer/" >> $GITHUB_ENV
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 50
       - name: Syntax Check
@@ -54,7 +54,7 @@ jobs:
           sudo apt-get install -y cppcheck
           echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 50
       - name: Static Code Analysis
@@ -68,7 +68,7 @@ jobs:
         with:
           php-version: '8.1'
           extensions: gettext, mbstring, gd, json, xml, zip, pgsql, curl, uuid, posix, sqlite3
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 50
       - name: PHP Codesniffer
@@ -87,7 +87,7 @@ jobs:
           php-version: '8.1'
           extensions: gettext, mbstring, gd, json, xml, zip, pgsql, curl, uuid, posix, sqlite3, dom
           tools: sebastian/phpcpd:6.0.3
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 50
       - name: Copy/Paste detector
@@ -100,18 +100,18 @@ jobs:
   openapi-lint:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup default rules
         run: |
           echo '{"extends": ["spectral:oas"]}' > .spectral.json
       - name: Run spectral
-        uses: stoplightio/spectral-action@v0.8.10
+        uses: stoplightio/spectral-action@v0.8.11
         with:
           file_glob: src/www/ui/api/documentation/openapi.yaml
 
   REUSE-Compliance-Check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: REUSE Compliance Check
-      uses: fsfe/reuse-action@v1
+      uses: fsfe/reuse-action@v5

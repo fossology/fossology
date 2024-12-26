@@ -176,7 +176,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $userId = 2;
     $user = $this->getUsers([$userId]);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
-    $this->dbHelper->shouldReceive('getUserJobs')->withArgs(array(null, 2, 0, 1))
+    $this->dbHelper->shouldReceive('getUserJobs')->withArgs(array(2, NULL, 'ASC', 0, 1))
       ->andReturn([[$job], 1]);
     $actualResponse = $this->jobController->getJobs($request, $response, []);
     $expectedResponse = $job->getArray(ApiVersion::V1);
@@ -217,7 +217,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $userId = 2;
     $user = $this->getUsers([$userId]);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
-    $this->dbHelper->shouldReceive('getUserJobs')->withArgs(array(null, 2, 1, 2))
+    $this->dbHelper->shouldReceive('getUserJobs')->withArgs(array(2, null, "ASC", 1, 2))
     ->andReturn([[$jobTwo], 2]);
     $actualResponse = $this->jobController->getJobs($request, $response, []);
     $expectedResponse = $jobTwo->getArray(ApiVersion::V1);
@@ -265,7 +265,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["job", "job_pk", 12])->andReturn(true);
-    $this->dbHelper->shouldReceive('getJobs')->withArgs(array(12, 0, 1))
+    $this->dbHelper->shouldReceive('getJobs')->withArgs(array(12, NULL, 'ASC', 0, 1, NULL))
       ->andReturn([[$job], 1]);
     $this->jobDao->shouldReceive('getChlidJobStatus')->withArgs(array(12))
       ->andReturn(['45' => 0]);
@@ -307,7 +307,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs(["upload", "upload_pk", 5])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(['job', 'job_pk', 12])->andReturn(true);
-    $this->dbHelper->shouldReceive('getJobs')->withArgs(array(null, 0, 1, 5))
+    $this->dbHelper->shouldReceive('getJobs')->withArgs(array(null, null, "ASC", 0, 1, 5))
       ->andReturn([[$job], 1]);
     $this->jobDao->shouldReceive('getChlidJobStatus')->withArgs(array(12))
       ->andReturn(['45' => 0]);
@@ -364,42 +364,4 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals(0, $result);
   }
 
-  /**
-   * @test
-   * -# Test JobController::getJobStatus()
-   * -# Setup one job with two complete children => result Completed
-   * -# Setup one job with one child processing and other in queue => result
-   *    Processing
-   * -# Setup one job with one child completed and one failed => result Failed
-   */
-  public function testGetJobStatus()
-  {
-    $jobCompleted = [1, 2];
-    $jobQueued = [3, 4];
-    $jobFailed = [5, 6];
-    $this->showJobsDao->shouldReceive('getDataForASingleJob')
-      ->withArgs([M::anyof(1, 2, 5)])
-      ->andReturn(["jq_endtext" => "Completed"]);
-    $this->showJobsDao->shouldReceive('getDataForASingleJob')
-      ->withArgs([3])->andReturn(["jq_endtext" => "Started"]);
-    $this->showJobsDao->shouldReceive('getDataForASingleJob')
-      ->withArgs([4])->andReturn(["jq_endtext" => "Processing",
-        "jq_endtime" => ""]);
-    $this->showJobsDao->shouldReceive('getDataForASingleJob')
-      ->withArgs([6])->andReturn(["jq_endtext" => "Failed",
-        "jq_endtime" => "01-01-2020 00:00:00"]);
-
-    $reflection = new \ReflectionClass(get_class($this->jobController));
-    $method = $reflection->getMethod('getJobStatus');
-    $method->setAccessible(true);
-
-    $result = $method->invokeArgs($this->jobController, [$jobCompleted]);
-    $this->assertEquals("Completed", $result);
-
-    $result = $method->invokeArgs($this->jobController, [$jobQueued]);
-    $this->assertEquals("Processing", $result);
-
-    $result = $method->invokeArgs($this->jobController, [$jobFailed]);
-    $this->assertEquals("Failed", $result);
-  }
 }

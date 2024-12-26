@@ -286,6 +286,29 @@ FROM $tableName WHERE $idRowName = $1", [$id],
     return $users;
   }
 
+
+  /**
+   * Generates the SQL statement for the Common Table Expression (CTE)
+   * that retrieves the jobs including their status received by the jobqueue table.
+   *
+   * @return string The SQL statement for the job status CTE.
+   */
+  private function getJobStatusCteSQLStatement()
+  {
+    return "WITH job_with_status_cte AS (
+      SELECT j.job_pk, j.job_queued, j.job_name, j.job_upload_fk, j.job_user_fk, j.job_group_fk,
+        CASE
+          WHEN COUNT(CASE WHEN jq.jq_endtext = 'Failed' THEN 1 END) > 0 THEN 'Failed'
+          WHEN COUNT(CASE WHEN jq.jq_endtext in ('Started', 'Restarted', 'Paused') THEN 1 END) > 0 THEN 'Processing'
+          WHEN COUNT(CASE WHEN jq.jq_endtext IS NULL THEN 1 END) > 0 THEN 'Queued'
+          ELSE 'Completed'
+        END AS job_status
+      FROM job j
+      LEFT JOIN jobqueue jq ON j.job_pk=jq.jq_job_fk
+      GROUP BY j.job_pk, j.job_queued, j.job_name, j.job_upload_fk, j.job_user_fk, j.job_group_fk
+    )";
+  }
+
   /**
    * @brief Get the recent jobs.
    *
@@ -293,42 +316,61 @@ FROM $tableName WHERE $idRowName = $1", [$id],
    * information for the given id is only retrieved.
    *
    * @param integer $id       Set to get information of only given job id
+   * @param integer $status   Set to get information of only jobs with given status
+   * @param string  $sort     Set to sort the results asc or desc
    * @param integer $limit    Set to limit the result length
    * @param integer $page     Page number required
    * @param integer $uploadId Upload ID to be filtered
+   * @param integer $userId      Set to get information of only given user's ID
    * @return array[] List of jobs at first index and total number of pages at
    *         second.
    */
-  public function getJobs($id = null, $limit = 0, $page = 1, $uploadId = null)
+  public function getJobs($id = null, $status = null, $sort = "ASC", $limit = 0, $page = 1, $uploadId = null, $userId = null)
   {
-    $jobSQL = "SELECT job_pk, job_queued, job_name, job_upload_fk," .
-      " job_user_fk, job_group_fk FROM job";
-    $totalJobSql = "SELECT count(*) AS cnt FROM job";
+    $jobsWithStatusCteSQL = $this->getJobStatusCteSQLStatement();
+    $jobSQL = "$jobsWithStatusCteSQL SELECT * FROM job_with_status_cte";
+    $totalJobSql = "$jobsWithStatusCteSQL SELECT count(*) AS cnt FROM job_with_status_cte";
 
-    $filter = "";
     $pagination = "";
-
     $params = [];
-    $statement = __METHOD__ . ".getJobs";
+    $filter = [];
+    $statement = $userId !== null ? __METHOD__ . ".getUserJobs" : __METHOD__ . ".getJobs";
     $countStatement = __METHOD__ . ".getJobCount";
-    if ($id == null) {
-      if ($uploadId !== null) {
-        $params[] = $uploadId;
-        $filter = "WHERE job_upload_fk = $" . count($params);
-        $statement .= ".withUploadFilter";
-        $countStatement .= ".withUploadFilter";
-      }
-    } else {
+
+    if ($id !== null) {
       $params[] = $id;
-      $filter = "WHERE job_pk = $" . count($params);
+      $filter[] = "job_pk = $" . count($params);
       $statement .= ".withJobFilter";
       $countStatement .= ".withJobFilter";
+    } elseif ($uploadId !== null) {
+      $params[] = $uploadId;
+      $filter[] = "job_upload_fk = $" . count($params);
+      $statement .= ".withUploadFilter";
+      $countStatement .= ".withUploadFilter";
     }
 
-    $result = $this->dbManager->getSingleRow("$totalJobSql $filter;", $params,
-      $countStatement);
+    // if userId was given, add it to the where filter
+    if ($userId !== null) {
+      $params[] = $userId;
+      $filter[] = "job_user_fk = $" . count($params);
+    }
 
+    // if status was given, add it to the where filter
+    if ($status !== null && in_array($status, ["Failed", "Processing", "Queued", "Completed"])) {
+      $params[] = $status;
+      $filter[] = "job_status = $" . count($params);
+    }
+    // build where filter query
+    $filterSQL = $filter ? "WHERE " . implode(" AND ", $filter) : "";
+
+    // get result for total count
+    $result = $this->dbManager->getSingleRow("$totalJobSql $filterSQL;", $params,
+      $countStatement);
     $totalResult = $result['cnt'];
+
+    // sort results in given order, make sure only "ASC" and "DESC" are accepted
+    $sort = strtoupper($sort);
+    $orderBy = in_array($sort, ["ASC", "DESC"]) ? "ORDER BY job_queued $sort" : "";
 
     $offset = ($page - 1) * $limit;
     if ($limit > 0) {
@@ -342,8 +384,9 @@ FROM $tableName WHERE $idRowName = $1", [$id],
       $totalResult = 1;
     }
 
+    // get result for jobs
     $jobs = [];
-    $result = $this->dbManager->getRows("$jobSQL $filter $pagination;", $params,
+    $result = $this->dbManager->getRows("$jobSQL $filterSQL $orderBy $pagination;", $params,
       $statement);
     foreach ($result as $row) {
       $job = new Job($row["job_pk"]);
@@ -352,6 +395,7 @@ FROM $tableName WHERE $idRowName = $1", [$id],
       $job->setUploadId($row["job_upload_fk"]);
       $job->setUserId($row["job_user_fk"]);
       $job->setGroupId($row["job_group_fk"]);
+      $job->setStatus($row["job_status"]);
       $jobs[] = $job;
     }
     return [$jobs, $totalResult];
@@ -360,72 +404,19 @@ FROM $tableName WHERE $idRowName = $1", [$id],
   /**
    * @brief Get the recent jobs created by an user.
    *
-   * If a limit is passed, the results are trimmed. If an ID is passed, the
-   * information for the given id is only retrieved.
+   * If a limit is passed, the results are trimmed.
    *
-   * @param integer $id       Set to get information of only given job id
-   * @param integer $uid      Set to get information of only given user's ID
+   * @param integer $userId      Set to get information of only given user's ID
+   * @param integer $status   Set to get information of only jobs with given status
+   * @param string  $sort     Set to sort the results asc or desc
    * @param integer $limit    Set to limit the result length
    * @param integer $page     Page number required
-   * @param integer $uploadId Upload ID to be filtered
    * @return array[] List of jobs at first index and total number of pages at
    *         second.
    */
-  public function getUserJobs($id = null, $uid=null, $limit = 0, $page = 1, $uploadId = null)
+  public function getUserJobs($userId = null, $status = null, $sort = "ASC", $limit = 0, $page = 1)
   {
-    $jobSQL = "SELECT job_pk, job_queued, job_name, job_upload_fk," .
-      " job_user_fk, job_group_fk FROM job WHERE job_user_fk=$1";
-    $totalJobSql = "SELECT count(*) AS cnt FROM job WHERE job_user_fk=$1";
-    $filter = "";
-    $pagination = "";
-    $params = [];
-    $params[] = $uid;
-    $statement = __METHOD__ . ".getUserJobs";
-    $countStatement = __METHOD__ . ".getJobCount";
-    if ($id == null) {
-      if ($uploadId !== null) {
-        $params[] = $uploadId;
-        $filter = "WHERE job_upload_fk = $" . count($params);
-        $statement .= ".withUploadFilter";
-        $countStatement .= ".withUploadFilter";
-      }
-    } else {
-      $params[] = $id;
-      $filter = "WHERE job_pk = $" . count($params);
-      $statement .= ".withJobFilter";
-      $countStatement .= ".withJobFilter";
-    }
-
-    $result = $this->dbManager->getSingleRow("$totalJobSql $filter;", $params,
-      $countStatement);
-
-    $totalResult = $result['cnt'];
-
-    $offset = ($page - 1) * $limit;
-    if ($limit > 0) {
-      $params[] = $limit;
-      $pagination = "LIMIT $" . count($params);
-      $params[] = $offset;
-      $pagination .= " OFFSET $" . count($params);
-      $statement .= ".withLimit";
-      $totalResult = ceil($totalResult / $limit);
-    } else {
-      $totalResult = 1;
-    }
-
-    $jobs = [];
-    $result = $this->dbManager->getRows("$jobSQL $filter $pagination;", $params,
-      $statement);
-    foreach ($result as $row) {
-      $job = new Job($row["job_pk"]);
-      $job->setName($row["job_name"]);
-      $job->setQueueDate($row["job_queued"]);
-      $job->setUploadId($row["job_upload_fk"]);
-      $job->setUserId($row["job_user_fk"]);
-      $job->setGroupId($row["job_group_fk"]);
-      $jobs[] = $job;
-    }
-    return [$jobs, $totalResult];
+    return $this->getJobs(null, $status, $sort, $limit, $page, null, $userId);
   }
 
   /**

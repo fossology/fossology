@@ -186,4 +186,121 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
 
     $this->assertEquals($expectedArray, $actualObject->getArray($version));
   }
+
+  ////// New Getter and Setter Tests //////
+
+  /**
+   * @test
+   * -# Test getter for bucket
+   */
+  public function testGetBucket()
+  {
+    $analysis = new Analysis(true);
+    $this->assertTrue($analysis->getBucket());
+  }
+
+  /**
+   * @test
+   * -# Test setter for bucket
+   */
+  public function testSetBucket()
+  {
+    $analysis = new Analysis();
+    $analysis->setBucket(true);
+    $this->assertTrue($analysis->getBucket());
+  }
+
+  /**
+   * @test
+   * -# Test getter for copyright
+   */
+  public function testGetCopyright()
+  {
+    $analysis = new Analysis(false, true);
+    $this->assertTrue($analysis->getCopyright());
+  }
+
+  /**
+   * @test
+   * -# Test setter for copyright
+   */
+  public function testSetCopyright()
+  {
+    $analysis = new Analysis();
+    $analysis->setCopyright(true);
+    $this->assertTrue($analysis->getCopyright());
+  }
+
+  /**
+   * @test
+   * -# Test getter for ecc
+   */
+  public function testGetEcc()
+  {
+    $analysis = new Analysis(false, false, true);
+    $this->assertTrue($analysis->getEcc());
+  }
+
+  /**
+   * @test
+   * -# Test setter for ecc
+   */
+  public function testSetEcc()
+  {
+    $analysis = new Analysis();
+    $analysis->setEcc(true);
+    $this->assertTrue($analysis->getEcc());
+  }
+
+  /**
+   * @test
+   * -# Test getter for keyword
+   */
+  public function testGetKeyword()
+  {
+    $analysis = new Analysis(false, false, false, true);
+    $this->assertTrue($analysis->getKeyword());
+  }
+
+  /**
+   * @test
+   * -# Test setter for keyword
+   */
+  public function testSetKeyword()
+  {
+    $analysis = new Analysis();
+    $analysis->setKeyword(true);
+    $this->assertTrue($analysis->getKeyword());
+  }
+
+  /**
+   * @test
+   * -# Test getter for mimetype
+   */
+  public function testGetMime()
+  {
+    $analysis = new Analysis(false, false, false, false, true);
+    $this->assertTrue($analysis->getMime());
+  }
+
+  /**
+   * @test
+   * -# Test setter for mimetype
+   */
+  public function testSetMime()
+  {
+    $analysis = new Analysis();
+    $analysis->setMime(true);
+    $this->assertTrue($analysis->getMime());
+  }
+
+  /**
+   * @test
+   * -# Test getter for monk
+   */
+  public function testGetMonk()
+  {
+    $analysis = new Analysis(false, false, false, false, false, true);
+    $this->assertTrue($analysis->getMonk());
+  }
 }
