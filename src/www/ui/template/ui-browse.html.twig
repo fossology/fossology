@@ -32,6 +32,7 @@
       </div>
     </div>
   </div>
+  
 
   <table border="1" width="100%">
     <tr>
@@ -53,11 +54,11 @@
            <th></th>
            <th>
              <select id="statusSelector" class="form-control-sm" onchange="filterStatus();">
-               <option value="0" selected> </option>
+              <option value="0">All</option>
             {% for key,disp in statusOptions %}
               <option value="{{ key }}">{{ disp }}</option>
             {% endfor %}
-             </select>
+            </select>
            </th>
            <th></th>
            <th></th>
