@@ -594,7 +594,34 @@ static void shell_parse(char* confdir, int user_id, int group_id, char* input, c
   (*argv)[idx++] = g_strdup_printf("--groupID=%d", group_id);
   (*argv)[idx++] = "--scheduler_start";
   if (jq_cmd_args)
-    (*argv)[idx++] = jq_cmd_args;
+  {
+    const char *start = jq_cmd_args;
+    const char *current = jq_cmd_args;
+    gboolean in_quotes = FALSE;
+
+    while (*current != '\0')
+    {
+      if (*current == '\'' || *current == '"')
+        in_quotes = !in_quotes;
+      else if (*current == ' ' && !in_quotes)
+      {
+        if (current > start)
+        {
+          int len = current - start;
+          char *arg = g_strndup(start, len);
+          (*argv)[idx++] = arg;
+        }
+        start = current + 1;
+      }
+      current++;
+    }
+
+    if (current > start)
+    {
+      char *arg = g_strndup(start, current - start);
+      (*argv)[idx++] = arg;
+    }
+  }
   (*argc) = idx;
 }
 
