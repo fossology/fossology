@@ -81,14 +81,6 @@ jobs:
         run: |
           git fetch --tags
           
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v4
-        with:
-          php-version: '8.0'
-          
       - name: Get composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
@@ -112,10 +104,7 @@ jobs:
           sudo ./utils/fo-installdeps --everything -y
           echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
           echo COMPOSER_HOME="$HOME/.composer/" >> $GITHUB_ENV
-          
-      - name: Run build/test
-        run: ./build-or-test-script.sh
-        
+
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
