@@ -80,9 +80,30 @@ jobs:
       - name: Fetch tags
         run: |
           git fetch --tags
-
+          
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v4
+        with:
+          php-version: '8.0'
+          
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+    
       - name: Install Dependencies
         run: |
+          composer install --no-progress --prefer-dist
           sudo apt update
           sudo apt install -y libboost-system-dev libboost-filesystem-dev \
               libcppunit-dev libcunit1-dev libdbd-sqlite3-perl libjsoncpp-dev \
@@ -91,7 +112,10 @@ jobs:
           sudo ./utils/fo-installdeps --everything -y
           echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
           echo COMPOSER_HOME="$HOME/.composer/" >> $GITHUB_ENV
-
+          
+      - name: Run build/test
+        run: ./build-or-test-script.sh
+        
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
