@@ -89,6 +89,8 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
 
   protected function setUp() : void
   {
+    global $SysConf;
+    $SysConf = [];
     $this->session = M::mock('Symfony\Component\HttpFoundation\Session\SessionInterface');
 
     global $container;
