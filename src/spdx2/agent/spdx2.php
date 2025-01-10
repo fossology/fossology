@@ -270,7 +270,7 @@ class SpdxTwoAgent extends Agent
   protected function getFileBasename($packageName)
   {
     if ($this->filebasename == null) {
-      $fileName = strtoupper($this->outputFormat)."_".$packageName.'_'.time();
+      $fileName = strtoupper($this->outputFormat)."_".$packageName;
       switch ($this->outputFormat) {
         case "spdx2":
           $fileName .= ".spdx.rdf";
@@ -604,9 +604,7 @@ class SpdxTwoAgent extends Agent
    */
   protected function updateReportTable($uploadId, $jobId, $fileName)
   {
-    $this->dbManager->insertTableRow('reportgen',
-            array('upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$fileName),
-            __METHOD__);
+    $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $fileName);
   }
 
   /**

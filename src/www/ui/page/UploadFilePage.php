@@ -97,12 +97,12 @@ class UploadFilePage extends UploadPageBase
     );
 
     $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
-    $descriptions = $request->get(self::DESCRIPTION_INPUT_NAME);
+    $descriptions = $request->get(self::DESCRIPTION_INPUT_NAME, []);
     for ($i = 0; $i < count($descriptions); $i++) {
       $descriptions[$i] = stripslashes($descriptions[$i]);
       $descriptions[$i] = $this->basicShEscaping($descriptions[$i]);
     }
-    $uploadedFiles = $request->files->get(self::FILE_INPUT_NAME);
+    $uploadedFiles = $request->files->get(self::FILE_INPUT_NAME, []);
     $uploadFiles = [];
     for ($i = 0; $i < count($uploadedFiles); $i++) {
       $uploadFiles[] = [

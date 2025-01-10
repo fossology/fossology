@@ -40,6 +40,7 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\XpClearedGetter;
 use Fossology\Lib\Report\LicenseMainGetter;
+use Fossology\Lib\Report\ReportUtils;
 
 include_once(__DIR__ . "/version.php");
 
@@ -67,6 +68,11 @@ class ReadmeOssAgent extends Agent
    */
   private $licenseMainGetter;
 
+  /** @var ReportUtils $reportutils
+   * ReportUtils object
+   */
+  private $reportutils;
+
   /** @var UploadDao $uploadDao
    * UploadDao object
    */
@@ -82,6 +88,7 @@ class ReadmeOssAgent extends Agent
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement");
     $this->licenseClearedGetter = new LicenseClearedGetter();
     $this->licenseMainGetter = new LicenseMainGetter();
+    $this->reportutils = new ReportUtils();
 
     parent::__construct(README_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
@@ -147,7 +154,7 @@ class ReadmeOssAgent extends Agent
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
 
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
-    $fileName = $fileBase. "ReadMe_OSS_".$packageName.'_'.time().".txt" ;
+    $fileName = $fileBase. "ReadMe_OSS_".$packageName.".txt" ;
 
     foreach ($this->additionalUploadIds as $addUploadId) {
       $packageName .= ', ' . $this->uploadDao->getUpload($addUploadId)->getFilename();
@@ -172,7 +179,7 @@ class ReadmeOssAgent extends Agent
    */
   private function updateReportTable($uploadId, $jobId, $filename)
   {
-    $this->dbManager->insertTableRow('reportgen', array('upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$filename), __METHOD__);
+    $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $filename);
   }
 
   /**

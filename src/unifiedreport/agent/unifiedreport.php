@@ -104,6 +104,7 @@ use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\SimpleType\JcTable;
 use PhpOffice\PhpWord\Style\Table;
+use Fossology\Lib\Report\ReportUtils;
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/reportStatic.php");
@@ -170,6 +171,11 @@ class UnifiedReport extends Agent
    * obligationsGetter object
    */
   private $obligationsGetter;
+
+  /** @var ReportUtils $reportutils
+   * ReportUtils object
+   */
+  private $reportutils;
 
   /** @var OtherGetter $otherGetter
    * otherGetter object
@@ -253,6 +259,7 @@ class UnifiedReport extends Agent
     $this->licenseNonFunctionalCommentGetter = new LicenseNonFunctionalGetter(false);
     $this->otherGetter = new OtherGetter();
     $this->obligationsGetter = new ObligationsGetter();
+    $this->reportutils = new ReportUtils();
 
     parent::__construct(REPORT_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
@@ -947,7 +954,7 @@ class UnifiedReport extends Agent
       mkdir($fileBase, 0777, true);
     }
     umask(0022);
-    $fileName = $fileBase. "$packageName"."_clearing_report_".date("D_M_d_m_Y_h_i_s").".docx";
+    $fileName = $fileBase. "Clearing_Report_".$packageName.".docx";
     $objWriter = IOFactory::createWriter($phpWord, "Word2007");
     $objWriter->save($fileName);
 
@@ -963,8 +970,7 @@ class UnifiedReport extends Agent
    */
   private function updateReportTable($uploadId, $jobId, $filename)
   {
-    $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",
-      array($uploadId, $jobId, $filename), __METHOD__);
+    $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $filename);
   }
 }
 

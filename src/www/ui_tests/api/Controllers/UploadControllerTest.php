@@ -20,6 +20,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -34,6 +35,7 @@ use Fossology\UI\Api\Exceptions\HttpServiceUnavailableException;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
+use Fossology\UI\Api\Models\Agent;
 use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\Hash;
 use Fossology\UI\Api\Models\Info;
@@ -113,6 +115,12 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   private $uploadDao;
 
   /**
+   * @var UploadPermissionDao $uploadPermissionDao
+   * UploadPermissionDao mock
+   */
+  private $uploadPermissionDao;
+
+  /**
    * @var FolderDao $folderDao
    * FolderDao mock
    */
@@ -149,6 +157,16 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   private $streamFactory;
 
   /**
+   * @var M\MockInterface $copyrightPlugin
+   */
+  private $copyrightPlugin;
+
+  /**
+   * @var M\MockInterface $downloadPlugin
+   */
+  private $downloadPlugin;
+
+  /**
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
@@ -169,6 +187,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->clearingDao = M::mock(ClearingDao::class);
     $this->licenseDao = M::mock(LicenseDao::class);
     $this->reuseReportProcess = M::mock(ReuseReportProcessor::class);
+    $this->uploadPermissionDao = M::mock(UploadPermissionDao::class);
+    $this->downloadPlugin = M::mock("download");
 
     $this->dbManager->shouldReceive('getSingleRow')
       ->withArgs([M::any(), [$this->groupId, UploadStatus::OPEN,
@@ -178,6 +198,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
     $this->restHelper->shouldReceive('getGroupId')->andReturn($this->groupId);
     $this->restHelper->shouldReceive('getUserId')->andReturn($this->userId);
+    $this->restHelper->shouldReceive('getPlugin')->withArgs(array("download"))->andReturn($this->downloadPlugin);
     $this->restHelper->shouldReceive('getUploadDao')
       ->andReturn($this->uploadDao);
     $this->restHelper->shouldReceive('getFolderDao')
@@ -298,6 +319,12 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   {
     $this->testGetSingleUpload(ApiVersion::V2);
   }
+
+  /**
+   * @param $version
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
   private function testGetSingleUpload($version)
   {
     $uploadId = 3;
@@ -642,6 +669,9 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
   }
+  /**
+   * getUploadSummary, getLicensesHistogram, setUploadPermissions, getUploadCopyrights,deleteUpload
+   */
 
   /**
    * @test
@@ -1130,6 +1160,10 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     }
     $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
 
+    $this->agentDao->shouldReceive("arsTableExists")->withAnyArgs()->andReturn(true);
+    $this->agentDao->shouldReceive("getRunningAgentIds")->withAnyArgs()->andReturn([$agentsRun]);
+    $this->agentDao->shouldReceive("getSuccessfulAgentEntries")->withAnyArgs()->andReturn([]);
+    $scanJobProxy = M::mock('overload:Fossology\Lib\Proxy\ScanJobProxy');
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
     $this->uploadDao->shouldReceive('isAccessible')
@@ -1139,7 +1173,6 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->agentDao->shouldReceive('arsTableExists')
       ->withArgs([M::anyOf('nomos', 'monk')])->andReturn(true);
 
-    $scanJobProxy = M::mock('overload:Fossology\Lib\Proxy\ScanJobProxy');
     $scanJobProxy->shouldReceive('createAgentStatus')
       ->withArgs([['nomos', 'monk']])
       ->andReturn($agentsRun);
@@ -1444,5 +1477,380 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
+  }
+
+
+  /**
+   * @test
+   *   -# Test UploadController::setGroupsWithPermissions()
+   *   -# Check if the statusCode is 200
+   * /
+   */
+
+  public function testSetGroupsWithPermissions()
+  {
+    $publicPerm = 0;
+    $uploadId = 2;
+
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+
+    $this->restHelper->shouldReceive('getUploadPermissionDao')->andReturn($this->uploadPermissionDao);
+    $this->uploadPermissionDao->shouldReceive("getPublicPermission")->withAnyArgs()->andReturn($publicPerm);
+    $this->uploadPermissionDao->shouldReceive("getPermissionGroups")->withAnyArgs()->andReturn([]);
+    $this->restHelper->shouldReceive("getGroupId")->andReturn($this->groupId);
+    $this->restHelper->shouldReceive("getUserId")->andReturn($this->userId);
+    $this->restHelper->shouldReceive("getUploadDao")->andReturn($this->uploadDao);
+
+    $body = $this->streamFactory->createStream();
+    $requestHeaders = new Headers();
+    $request = new Request("PATCH", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+    $actualResponse = $this->uploadController->getGroupsWithPermissions($request,$response,["id"=>$this->groupId]);
+    $this->assertEquals(200,$actualResponse->getStatusCode());
+
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::setGroupsWithPermissions()
+   *   -# Check if  the HttpNotFoundException is thrown
+   * /
+   */
+  public function testSetGroupsWithPermissionsNotFound()
+  {
+    $uploadId = 2;
+    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(false);
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(false);
+    $body = $this->streamFactory->createStream();
+    $requestHeaders = new Headers();
+    $request = new Request("PATCH", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+    $this->expectException(HttpNotFoundException::class);
+    $this->uploadController->getGroupsWithPermissions($request,$response,["id"=>$this->groupId]);
+
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::setGroupsWithPermissions()
+   *   -# Check if the HttpForbiddenException is thrown
+   * /
+   */
+  public function testSetGroupsWithPermissionsUploadNotAccessible()
+  {
+    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')->withAnyArgs()->andReturn(false);
+
+    $body = $this->streamFactory->createStream();
+    $requestHeaders = new Headers();
+    $request = new Request("PATCH", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+    $this->expectException(HttpForbiddenException::class);
+    $this->uploadController->getGroupsWithPermissions($request,$response,["id"=>$this->groupId]);
+
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   */
+  public function testGetAllAgents()
+  {
+    $groupId = 2;
+    $uploadId = 3;
+    $agentsRun = [
+      ["uploadId" => $uploadId, 'agentName' => 'nomos', 'successfulAgents'=> [], 'currentAgentId' => 2, 'isAgentRunning' => false],
+      ["uploadId" => $uploadId,'agentName' => 'monk',  "successfulAgents" => [], 'currentAgentId' => 3, 'isAgentRunning' => false]
+    ];
+
+    $this->restHelper->shouldReceive("getGroupId")->andReturn($groupId);
+    $this->agentDao->shouldReceive("getCurrentAgentRef")->withAnyArgs()->andReturn(new AgentRef($uploadId,"momoa",45));
+
+    $this->uploadDao->shouldReceive("isAccessible")->withAnyArgs()->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(true);
+    $scanJobProxy = M::mock('overload:Fossology\Lib\Proxy\ScanJobProxy');
+    $scanJobProxy->shouldReceive('createAgentStatus')
+      ->withAnyArgs()
+      ->andReturn($agentsRun);
+    $this->agentDao->shouldReceive("arsTableExists")->withAnyArgs()->andReturn(true);
+    $this->agentDao->shouldReceive("getRunningAgentIds")->withAnyArgs()->andReturn([$agentsRun]);
+    $this->agentDao->shouldReceive("getSuccessfulAgentEntries")->withAnyArgs()->andReturn([]);
+
+    $body = $this->streamFactory->createStream();
+    $requestHeaders = new Headers();
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $actualResponse = $this->uploadController->getAllAgents($request, new ResponseHelper(),["id"=>$uploadId]);
+    $this->assertEquals(200,$actualResponse->getStatusCode());
+
+  }
+  /**
+   * @test
+   *   -# Test UploadController::getAllAgentsUpload()
+   *   -# Check if the HttpNotFoundException is thrown
+   * /
+   */
+  public function testGetAllAgentsUploadNotFound()
+  {
+    $uploadId = 3;
+    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(false);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(false);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->uploadController->getAllAgents(null, new ResponseHelper(),["id"=>$uploadId]);
+
+  }
+  /**
+   * @test
+   *   -# Test UploadController::getAllAgentsUpload()
+   *   -# Check if the HttpForbiddenException is thrown
+   * /
+   */
+  public function testGetAllAgentsUploadNotAccessible()
+  {
+    $uploadId = 3;
+
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(false);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->uploadController->getAllAgents(null, new ResponseHelper(),["id"=>$uploadId]);
+
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::getEditedLicense()
+   *   -# Check if  the statusCode is 200.
+   * /
+   */
+  public function testGetEditedLicenses()
+  {
+    $groupId = 2;
+    $uploadId = 3;
+    $uploadName = "Testing name";
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withAnyArgs()->andReturn($this->getUploadBounds($uploadId));
+    $this->uploadDao->shouldReceive("isAccessible")->withAnyArgs()->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(true);
+    $this->restHelper->shouldReceive('getUploadDao')->andReturn($this->uploadDao);
+    $this->uploadDao->shouldReceive("getUploadtreeTableName")->withAnyArgs()->andReturn($uploadName);
+    $this->clearingDao->shouldReceive("getClearedLicenseIdAndMultiplicities")->withAnyArgs()->andReturn([]);
+
+    $actualResponse = $this->uploadController->getEditedLicenses(null,new ResponseHelper(),["id"=>$groupId]);
+    $this->assertEquals(200,$actualResponse->getStatusCode());
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::getEditedLicense()
+   *   -# Check if HttpNotFoundException is thrown.
+   * /
+   */
+  public function testGetEditedLicensesNotFound()
+  {
+    $groupId = 2;
+    $uploadId = 3;
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withAnyArgs()->andReturn($this->getUploadBounds($uploadId));
+    $this->uploadDao->shouldReceive("isAccessible")->withAnyArgs()->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(false);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->uploadController->getEditedLicenses(null,new ResponseHelper(),["id"=>$groupId]);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::getEditedLicense()
+   *   -# Check if HttpForbiddenException is thrown.
+   * /
+   */
+  public function testGetEditedLicensesForbidden()
+  {
+    $groupId = 2;
+    $uploadId = 3;
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withAnyArgs()->andReturn($this->getUploadBounds($uploadId));
+    $this->uploadDao->shouldReceive("isAccessible")->withAnyArgs()->andReturn(false);
+    $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(true);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->uploadController->getEditedLicenses(null,new ResponseHelper(),["id"=>$groupId]);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::getScannedLicense()
+   *   -# Check if HttpNotFoundException is thrown.
+   * /
+   */
+  public function testGetScannedLicensesNotFound()
+  {
+    $uploadId = 3;
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(false);
+
+    $body = $this->streamFactory->createStream();
+    $requestHeaders = new Headers();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->uploadController->getScannedLicenses($request,new ResponseHelper(),["id"=>$uploadId]);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::agentsRevision()
+   *   -# Check if is the statusCode is 200.
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   */
+  public function testAgentsRevision()
+  {
+    $uploadId = 3;
+    $agentsRun = [
+      ["uploadId" => $uploadId, 'agentName' => 'nomos', 'successfulAgents'=> [], 'currentAgentId' => 2, 'isAgentRunning' => false],
+      ["uploadId" => $uploadId,'agentName' => 'monk',  "successfulAgents" => [], 'currentAgentId' => 3, 'isAgentRunning' => false]
+    ];
+    $agent = new Agent([],$uploadId,"MOMO agent",45,"4.4.0.37.072417",false,"");
+
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $scanJobProxy = M::mock('overload:Fossology\Lib\Proxy\ScanJobProxy');
+
+    $scanJobProxy->shouldReceive('createAgentStatus')
+      ->withAnyArgs()
+      ->andReturn($agentsRun);
+    $scanJobProxy->shouldReceive("getSuccessfulAgents")->andReturn($agent);
+    $this->agentDao->shouldReceive("arsTableExists")->withAnyArgs()->andReturn(true);
+    $this->agentDao->shouldReceive("getSuccessfulAgentEntries")->withAnyArgs()->andReturn([]);
+    $this->agentDao->shouldReceive("getRunningAgentIds")->withAnyArgs()->andReturn([$agent]);
+
+    $actualResponse = $this->uploadController->getAgentsRevision(null,new ResponseHelper(),["id"=>$uploadId]);
+    $this->assertEquals(200,$actualResponse->getStatusCode());
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::agentsRevision()
+   *   -# Check if HttpNotFoundException is thrown.
+   * /
+   */
+  public function testAgentsRevisionNotFound()
+  {
+    $uploadId = 3;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(false);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->uploadController->getAgentsRevision(null,new ResponseHelper(),["id"=>$uploadId]);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::agentsRevision()
+   *   -# Check if HttpForbiddenException  is thrown.
+   * /
+   */
+  public function testAgentsRevisionForbidden()
+  {
+    $uploadId = 3;
+
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(false);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->uploadController->getAgentsRevision(null,new ResponseHelper(),["id"=>$uploadId]);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::getTopItem()
+   *   -# Check if response status is 404
+   * /
+   */
+  public function testGetTopItem()
+  {
+    $uploadId = 2;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withAnyArgs()->andReturn($this->getUploadBounds($uploadId));
+    $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
+
+    $actualResponse = $this->uploadController->getTopItem(null,new ResponseHelper(),["id"=>$uploadId]);
+    $itemTreeBounds = $this->getUploadBounds($uploadId);
+    $info = new Info(200, $itemTreeBounds->getItemId(), InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), $info->getCode());
+
+    $this->assertEquals($expectedResponse->getStatusCode(),$actualResponse->getStatusCode());
+
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::getTopItem()
+   *   -# Check if response status is 404
+   * /
+   */
+  public function testGetTopItemUploadNotFound()
+  {
+    $uploadId = 2;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(false);
+
+    $actualResponse = $this->uploadController->getTopItem(null,new ResponseHelper(),["id"=>$uploadId]);
+    $info = new Info(404, "Upload does not exist", InfoType::ERROR);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), $info->getCode());
+    $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+
+  }
+
+
+  /**
+   * @test
+   *   -# Test UploadController::getTopItem()
+   *   -# Check if response status is 500
+   * /
+   */
+
+  public function testGetTopItemInternalServerError()
+  {
+    $uploadId = 12;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withAnyArgs()->andReturn($this->getUploadBounds($uploadId));
+    $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
+
+    $actualResponse = $this->uploadController->getTopItem(null,new ResponseHelper(),["id"=>$uploadId]);
+
+
+    $this->assertEquals(500,$actualResponse->getStatusCode());
+
   }
 }

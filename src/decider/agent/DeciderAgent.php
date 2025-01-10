@@ -175,7 +175,7 @@ class DeciderAgent extends Agent
     $args = $this->args;
     $this->activeRules = array_key_exists('r', $args) ? intval($args['r']) : self::RULES_ALL;
     $this->licenseType = array_key_exists('t', $args) ?
-        $this->getLicenseType(trim($args['t'])) : "";
+        $this->getLicenseType(str_replace(["'", '"'], "", $args['t'])) : "";
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $this->licenseMapUsage);
 
     if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_COPYRIGHT_FALSE_POSITIVE)== self::RULES_COPYRIGHT_FALSE_POSITIVE)) {

@@ -141,7 +141,7 @@ class CycloneDXAgent extends Agent
    */
   protected function getUri($fileBase)
   {
-    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName.'_'.date("Y-m-d_H:i:s");
+    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
     return $fileName .".json" ;
   }
 
@@ -340,9 +340,7 @@ class CycloneDXAgent extends Agent
    */
   protected function updateReportTable($uploadId, $jobId, $fileName)
   {
-    $this->dbManager->insertTableRow('reportgen',
-            ['upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$fileName],
-            __METHOD__);
+    $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $fileName);
   }
 
   /**
