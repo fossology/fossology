@@ -55,7 +55,6 @@ class AdminLicenseFromCSV extends DefaultPlugin
       'url' => trim($this->sysconfig['LicenseDBURL']),
       'uri' => trim($this->sysconfig['LicenseDBBaseURL']),
       'content' => trim($this->sysconfig['LicenseDBContent']),
-      'maxtime' => intval($this->sysconfig['LicenseDBSleep']),
       'token' => trim($this->sysconfig['LicenseDBToken'])
     ];
 
