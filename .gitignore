@@ -218,3 +218,6 @@ ubuntu-*
 **/build-clang
 cmake-build-release
 cmake-build-debug
+
+#pycache
+**/__pycache__/
