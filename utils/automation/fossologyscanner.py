@@ -21,7 +21,7 @@ from FoScanner.Scanners import (Scanners, ScanResult)
 from FoScanner.SpdxReport import SpdxReport
 from FoScanner.FormatResults import FormatResult
 from FoScanner.Utils import (validate_keyword_conf_file, copy_keyword_file_to_destination)
-from ScanDeps.Parsers import Parser, PythonParser
+from ScanDeps.Parsers import Parser, PythonParser, NPMParser
 from ScanDeps.Downloader import Downloader
 
 def get_api_config() -> ApiConfig:
@@ -362,16 +362,18 @@ def main(parsed_args):
                         parser.php_components != [] or
                         parser.npm_components != [] )
 
-    python_comps = parser.python_components
-    unsupported_comps = parser.unsupported_components
-
-    if len(python_comps) != 0:
+    if parser.python_components:
       python_parser = PythonParser()
-      python_list = python_parser.parse_components(python_comps)
+      python_list = python_parser.parse_components(parser.python_components)
       download_list += python_list
 
-    if len(unsupported_comps) != 0:
-      for comp in unsupported_comps:
+    if parser.npm_components:
+      npm_parser = NPMParser()
+      npm_list = npm_parser.parse_components(parser.npm_components)
+      download_list += npm_list
+
+    if parser.unsupported_components:
+      for comp in parser.unsupported_components:
         print(f'The purl {comp["purl"]} is not supported. Package will not be downloaded.')
 
     try:
