@@ -92,6 +92,24 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
+            
+      - name: Install PHP_CodeSniffer
+        run: |
+          curl -sS https://getcomposer.org/installer | php
+          php composer.phar require --dev squizlabs/php_codesniffer
+          
+      - name: Run PHP_CodeSniffer
+        run: |
+          ./vendor/bin/phpcs --standard=PSR12 src/ --ignore=*/tests/*
+
+      - name: Install PHPStan
+        run: |
+          curl -sS https://getcomposer.org/installer | php
+          php composer.phar require --dev phpstan/phpstan
+          
+      - name: Run PHPStan
+        run: |
+          ./vendor/bin/phpstan analyse src --level=max
     
       - name: Install Dependencies
         run: |
