@@ -1,0 +1,125 @@
+{# SPDX-FileCopyrightText: © 2024 Abhishek Kumar
+   Author: Abhishek Kumar <akumar17871@gmail.com>
+
+   SPDX-License-Identifier: FSFAP
+#}
+{%- set dualLicense = false -%}
+{% if mainLicenses|length > 2 %}
+  {% for res in mainLicenses %}
+    {% if 'Dual-license' == licenseList[res].licenseObj.shortName %}
+      {% set dualLicense = true %}
+    {% endif %}
+  {% endfor %}
+{%- endif -%}
+    {
+      "type": "software_Package",
+      "spdxId": "Package:SPDXRef-upload{{ packageId }}",
+      "creationInfo":"creationInfo:creationInfo1",
+      "name": "{{ packageName }}",{{ "\n" }}{%- if licenseComments is not empty ~%}
+      "comment": "<text> {{ licenseComments|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})| replace({'\f':'','"':"'", '\n':''})}} </text>",{{ "\n" }}{% endif %}
+      "software_downloadLocation": "NOASSERTION",{% if packageVersion is not empty %}
+      "software_packageVersion": "{{ packageVersion|e }}",{{ "\n" }}{% endif %}{% if releaseDate is not empty %}
+      "releaseTime":"{{ releaseDate }}",{{ "\n" }}{% endif %}{%- if componentId is not empty ~%}
+      "externalRef": [
+            {
+              "type": "ExternalRef",
+              "comment":"Package-Manager"
+              "externalRefType": "{{ componentType }}",
+              "locator":["{{ componentId|trim }}"]
+            }
+          ],{{ "\n" }}{%- endif ~%}
+      "software_copyrightText": "NOASSERTION",{{ "\n" }}{% if obligations|default is not empty %}
+      "software_attributionText": ["<text> {{ obligations|join('\n')
+                                                |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                                                |replace({'\f':''}) }} </text>"
+                        ],{{ "\n" }}{% endif %}
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha1",
+          "hashValue": "{{ sha1 | lower }}"
+        },
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "{{ sha256 | lower }}"
+        },
+        {
+          "type": "Hash",
+          "algorithm": "md5",
+          "hashValue": "{{ md5 | lower }}"
+        }
+      ]
+    },
+    {
+      "type": "PackageVerificationCode",
+      "algorithm": "sha1",
+      "hashValue": "{{verificationCode}}"
+    },{{ "\n" }}{% if mainLicenses|length > 1 %}
+    {  {{ "\n" }} {% if dualLicense %}
+      "type": "expandedlicensing_DisjunctiveLicenseSet",{% else %}
+      "type": "expandedlicensing_ConjunctiveLicenseSet",{% endif %}{{ "\n" }}
+      "spdxId": "Package:SPDXRef-upload{{ packageId }}",
+      "creationInfo": "creationInfo:creationInfo1",
+      "expandedlicensing_member": [
+        {% for res in mainLicenses %}
+          {% if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' %}
+            {% set licId = licenseList[res].licenseObj.spdxId %}
+            {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+              {% set licId = licenseList[res].licenseObj.shortName %}
+            {% endif %}
+            {
+              "type": "simplelicensing_AnyLicenseInfo",
+              "creationInfo": "creationInfo:creationInfo1",
+              "spdxId": "Package:SPDXRef-upload{{ packageId }}#{{ licId|replace({' ': '-'})|url_encode }}"
+            }{% if not loop.last %},{{ "\n" }}{% endif %}
+          {% else %}
+            {
+              "type": "simplelicensing_AnyLicenseInfo",
+              "creationInfo": "creationInfo:creationInfo1",
+              "spdxId": "Package:SPDXRef-upload{{ packageId }}#{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}"
+            }{% if not loop.last %},{{ "\n" }}{% endif %}
+          {% endif %}
+        {% endfor %}
+      ]
+    },
+    {% elseif mainLicenses|length == 1 %}
+    {% set res = mainLicenses[0] %}
+    {% if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' %}
+      {% set licId = licenseList[res].licenseObj.spdxId %}
+      {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+        {% set licId = licenseList[res].licenseObj.shortName %}
+      {% endif %}
+    {
+      "type": "simplelicensing_AnyLicenseInfo",
+      "creationInfo": "creationInfo:creationInfo1",
+      "spdxId": "Package:SPDXRef-upload{{ packageId }}#{{ licId|replace({' ': '-'})|url_encode }}"
+    },
+    {% else %}
+    {
+      "type": "simplelicensing_AnyLicenseInfo",
+      "creationInfo": "creationInfo:creationInfo1",
+      "spdxId": "Package:SPDXRef-upload{{ packageId }}#{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}"
+    },{{ "\n" }}{% endif %}{% endif %}
+    {
+      "type": "Annotation",
+      "spdxId": "Package:SPDXRef-upload{{ packageId }}#NoAssertionLicense",
+      "creationInfo": "creationInfo:creationInfo1",
+      "annotationType": "other",
+      "subject": "Package:SPDXRef-upload{{ packageId }}",
+      {%- if generalAssessment is not empty ~%}
+      "comment":"<text> {{ generalAssessment|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})| replace({'\f':'','"':"'", '\n':''})}} </text>",
+      {%- endif ~%}
+      "statement": "SPDX 2.X LicenseInfoFromFiles"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "URI:SPDXRef-Relationship-0",
+      "from": "SpdxDocument:SpdxRef-DOCUMENT",
+      "to": [
+          "Package:SPDXRef-upload{{ packageId }}"
+      ],
+      "relationshipType": "describes",
+      "creationInfo":"creationInfo:creationInfo1"
+    },
+    {{ fileNodes }}

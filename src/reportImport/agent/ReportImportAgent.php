@@ -18,6 +18,7 @@ use Fossology\Lib\Exception;
 use Fossology\Lib\Util\StringOperation;
 
 require_once 'SpdxTwoImportSource.php';
+require_once 'SpdxThreeImportSource.php';
 require_once 'XmlImportSource.php';
 require_once 'ReportImportSink.php';
 require_once 'ReportImportHelper.php';
@@ -226,18 +227,32 @@ class ReportImportAgent extends Agent
 
   /**
    * @param string $reportFilename
-   * @return SpdxTwoImportSource|XmlImportSource
+   * @return SpdxTwoImportSource|SpdxThreeImportSource|XmlImportSource
    * @throws \Exception
    */
   private function getImportSource($reportFilename)
   {
 
-    if (StringOperation::stringEndsWith($reportFilename, ".rdf") ||
+    if(StringOperation::stringEndsWith($reportFilename, ".rdf") ||
       StringOperation::stringEndsWith($reportFilename, ".rdf.xml") ||
-      StringOperation::stringEndsWith($reportFilename, ".ttl")) {
-      $importSource = new SpdxTwoImportSource($reportFilename);
-      if($importSource->parse()) {
-        return $importSource;
+      StringOperation::stringEndsWith($reportFilename, ".ttl")){
+    /**
+     * @param string $version
+     * @return specVersion for RDF report parsing
+     */
+      $parse = new SpdxTwoImportSource($reportFilename);
+      $version = $parse->getVersion();
+      if($version == "2.3"){
+        $importSource = new SpdxTwoImportSource($reportFilename);
+        if($importSource->parse()) {
+          return $importSource;
+        }
+      }
+      else{
+        $importSource = new SpdxThreeImportSource($reportFilename);
+        if($importSource->parse()) {
+          return $importSource;
+        }
       }
     }
 

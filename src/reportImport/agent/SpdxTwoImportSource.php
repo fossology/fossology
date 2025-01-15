@@ -51,6 +51,18 @@ class SpdxTwoImportSource implements ImportSource
     return $this->graph !== null && $this->spdxDoc !== null;
   }
 
+  public function getVersion(){
+    RdfNamespace::set('spdx', self::TERMS);
+    $this->graph = $this->loadGraph($this->filename, $this->uri);
+    $this->spdxDoc = (count($docs = $this->graph->allOfType("spdx:SpdxDocument"))) == 1 ? $docs[0] : null;
+    if ($this->spdxDoc !== null){
+      $specVersion = explode('-', $this->spdxDoc->getLiteral("spdx:specVersion"))[1];
+      return $specVersion;
+    } else {
+      return null;
+    }
+  }
+
   private function loadGraph($filename, $uri = null)
   {
     /** @var Graph $graph */
