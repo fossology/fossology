@@ -70,8 +70,11 @@
       <li>
         <div class="form-group">
           <label for="agentCheckboxes">{{ 'Select optional analysis'| trans }}:</label>
+          <button type="button" id="selectAllAgents" class="btn btn-default btn-sm">{{ 'Select All'|trans }}</button>
           <br/>
-          {{ agentCheckBoxMake }}
+          <div id="agentCheckboxContainer">
+            {{ agentCheckBoxMake }}
+          </div>
         </div>
       </li>
       {% endif %}
@@ -96,6 +99,14 @@
   <script type="text/javascript">
     $(document).ready(function () {
       $('[data-toggle="tooltip"]').tooltip();
+      
+      // Add select all functionality
+      $('#selectAllAgents').click(function() {
+        var isAllChecked = $(this).data('checked') || false;
+        $('#agentCheckboxContainer input[type="checkbox"]').prop('checked', !isAllChecked);
+        $(this).data('checked', !isAllChecked);
+        $(this).text((!isAllChecked ? '{{ 'Deselect All'|trans }}' : '{{ 'Select All'|trans }}'));
+      });
     });
   </script>
   {% for aFoot in parmAgentFoots %}
