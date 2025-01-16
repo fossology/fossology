@@ -11,6 +11,7 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class AdminAllLicenseToCSV extends DefaultPlugin
 {
@@ -32,6 +33,39 @@ class AdminAllLicenseToCSV extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
+    $confirmed = $request->get('confirmed', false);
+    $referer = $request->headers->get('referer');
+    
+    if (empty($referer)) {
+      $referer = "?mod=browse";
+    }
+    
+    if (!$confirmed) {
+      return new Response(
+        '<script>
+          if (confirm("Do you want to download the license CSV file?")) {
+            fetch("?mod=' . self::NAME . '&rf=' . $request->get('rf') . '&confirmed=true")
+              .then(response => response.blob())
+              .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "fossology-license-export-' . date("YMj-Gis") . '.csv";
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                window.location.href = "' . $referer . '";
+              });
+          } else {
+            window.location.href = "' . $referer . '";
+          }
+        </script>',
+        Response::HTTP_OK,
+        ['Content-Type' => 'text/html']
+      );
+    }
+    
     $licenseCsvExport = new \Fossology\Lib\Application\LicenseCsvExport($this->getObject('db.manager'));
     $content = $licenseCsvExport->createCsv(intval($request->get('rf')), true);
     $fileName = "fossology-license-export-".date("YMj-Gis");
