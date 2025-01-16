@@ -63,7 +63,7 @@
             "Fossology\\DecisionImporter\\UI\\" : "decisionimporter/ui",
             "Fossology\\DelAgent\\UI\\" : "delagent/ui",
             "Fossology\\ReadmeOSS\\UI\\" : "readmeoss/ui",
-            "Fossology\\SpdxTwo\\UI\\" : "spdx2/ui",
+            "Fossology\\Spdx\\UI\\" : "spdx/ui",
             "Fossology\\UnifiedReport\\UI\\" : "unifiedreport/ui",
             "Fossology\\UI\\Page\\" : "www/ui/page",
             "Fossology\\UI\\Api\\" : "www/ui/api"
