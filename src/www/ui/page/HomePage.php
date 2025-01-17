@@ -103,44 +103,42 @@ class HomePage extends DefaultPlugin
    * @return NULL|string Email from OAuth if success
    */
   private function getEmailFromOAuth()
-  {
+{
     global $SysConf;
     if (empty(GetParm("state", PARM_TEXT)) ||
         (isset($_SESSION['oauth2state']) &&
         GetParm("state", PARM_TEXT) !== $_SESSION['oauth2state'])) {
-      // Check given state against previously stored one to mitigate CSRF attack
-      if (isset($_SESSION['oauth2state'])) {
-        unset($_SESSION['oauth2state']);
-      }
-      throw new \UnexpectedValueException('Invalid state');
+        // Check given state against previously stored one to mitigate CSRF attack
+        if (isset($_SESSION['oauth2state'])) {
+            unset($_SESSION['oauth2state']);
+        }
+        throw new \UnexpectedValueException('Invalid state');
     }
     $proxy = "";
     if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
         ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
-      $proxy = $SysConf['FOSSOLOGY']['http_proxy'];
+        $proxy = $SysConf['FOSSOLOGY']['http_proxy'];
     }
     if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
         ! empty($SysConf['FOSSOLOGY']['https_proxy'])) {
-      $proxy = $SysConf['FOSSOLOGY']['https_proxy'];
+        $proxy = $SysConf['FOSSOLOGY']['https_proxy'];
     }
 
     $provider = new GenericProvider([
-      "clientId"                => $SysConf['SYSCONFIG']['OidcAppId'],
-      "clientSecret"            => $SysConf['SYSCONFIG']['OidcSecret'],
-      "redirectUri"             => $SysConf['SYSCONFIG']['OidcRedirectURL'],
-      "urlAuthorize"            => $SysConf['SYSCONFIG']['OidcAuthorizeURL'],
-      "urlAccessToken"          => $SysConf['SYSCONFIG']['OidcAccessTokenURL'],
-      "urlResourceOwnerDetails" => $SysConf['SYSCONFIG']['OidcResourceURL'],
-      "responseResourceOwnerId" => $SysConf['SYSCONFIG']['OidcResourceOwnerId'],
-      "proxy"                   => $proxy
+        "clientId"                => $SysConf['SYSCONFIG']['OidcAppId'],
+        "clientSecret"            => $SysConf['SYSCONFIG']['OidcSecret'],
+        "redirectUri"             => $SysConf['SYSCONFIG']['OidcRedirectURL'],
+        "urlAuthorize"            => $SysConf['SYSCONFIG']['OidcAuthorizeURL'],
+        "urlAccessToken"          => $SysConf['SYSCONFIG']['OidcAccessTokenURL'],
+        "urlResourceOwnerDetails" => $SysConf['SYSCONFIG']['OidcResourceURL'],
+        "responseResourceOwnerId" => $SysConf['SYSCONFIG']['OidcResourceOwnerId'],
+        "proxy"                   => $proxy
     ]);
     $accessToken = $provider->getAccessToken('authorization_code',
       ['code' => GetParm("code", PARM_TEXT)]);
 
-    $this->validateAccessToken($accessToken);
-
-    return $this->getEmailFromResource($provider, $accessToken);
-  }
+    return $this->getResourceFromToken($accessToken);
+}
 
   /**
    * Validate JWT access token from OIDC

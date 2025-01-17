@@ -243,7 +243,8 @@ class core_auth extends FO_Plugin
         "proxy"                   => $proxy
       ]);
       $authorizationUrl = $provider->getAuthorizationUrl([
-        "scope" => ['email openid']
+        "scope" => ['openid profile email']
+
       ]);
       $_SESSION['oauth2state'] = $provider->getState();
       $_SESSION['HTTP_REFERER'] = $referrer;
