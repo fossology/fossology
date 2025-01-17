@@ -16,7 +16,7 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\SoftwareHeritageDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
-use \GuzzleHttp\Client;
+use Fossology\Lib\Util\HttpUtils;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
 
@@ -86,32 +86,7 @@ class softwareHeritageAgent extends Agent
       'token' => trim($sysconfig['SwhToken'])
     ];
 
-    $proxy = [];
-    if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
-      ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
-      $proxy['http'] = $SysConf['FOSSOLOGY']['http_proxy'];
-    }
-    if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
-      ! empty($SysConf['FOSSOLOGY']['https_proxy'])) {
-      $proxy['https'] = $SysConf['FOSSOLOGY']['https_proxy'];
-    }
-    if (array_key_exists('no_proxy', $SysConf['FOSSOLOGY']) &&
-      ! empty($SysConf['FOSSOLOGY']['no_proxy'])) {
-      $proxy['no'] = explode(',', $SysConf['FOSSOLOGY']['no_proxy']);
-    }
-
-    $version = $SysConf['BUILD']['VERSION'];
-    $headers = ['User-Agent' => "fossology/$version"];
-    if (!empty($this->configuration['token'])) {
-      $headers['Authorization'] = 'Bearer ' . $this->configuration['token'];
-    }
-
-    $this->guzzleClient = new Client([
-      'http_errors' => false,
-      'proxy' => $proxy,
-      'base_uri' => $this->configuration['url'],
-      'headers' => $headers
-    ]);
+    $this->guzzleClient = HttpUtils::getGuzzleClient($SysConf, $this->configuration['url'], $this->configuration['token']);
   }
 
   /**
