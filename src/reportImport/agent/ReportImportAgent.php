@@ -242,7 +242,7 @@ class ReportImportAgent extends Agent
      */
       $parse = new SpdxTwoImportSource($reportFilename);
       $version = $parse->getVersion();
-      if($version == "2.3"){
+      if($version == "2.2" || $version == "2.3"){
         $importSource = new SpdxTwoImportSource($reportFilename);
         if($importSource->parse()) {
           return $importSource;

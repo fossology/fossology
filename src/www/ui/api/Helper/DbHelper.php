@@ -304,7 +304,7 @@ FROM $tableName WHERE $idRowName = $1", [$id],
           ELSE 'Completed'
         END AS job_status
       FROM job j
-      LEFT JOIN jobqueue jq ON j.job_pk=jq.jq_job_fk
+      RIGHT JOIN jobqueue jq ON j.job_pk=jq.jq_job_fk
       GROUP BY j.job_pk, j.job_queued, j.job_name, j.job_upload_fk, j.job_user_fk, j.job_group_fk
     )";
   }
