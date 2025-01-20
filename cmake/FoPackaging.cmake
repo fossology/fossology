@@ -126,7 +126,8 @@ set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_DEPENDS
     php-mbstring, php7.2-json | php7.3-json | php7.4-json | php-json,
     php-zip, php-xml,
     php7.2-curl | php7.3-curl | php7.4-curl | php8.1-curl | php8.2-curl | php8.3-curl, php-uuid,
-    php7.2-gd | php7.3-gd | php7.4-gd | php8.1-gd | php8.2-gd | php8.3-gd")
+    php7.2-gd | php7.3-gd | php7.4-gd | php8.1-gd | php8.2-gd | php8.3-gd,
+    php7.2-yaml | php7.3-yaml | php7.4-yaml | php8.1-yaml | php8.2-yaml | php8.3-yaml | php-yaml")
 
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_CONTROL_EXTRA
