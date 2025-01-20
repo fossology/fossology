@@ -72,7 +72,7 @@ class CopyrightController extends RestController
   {
     parent::__construct($container);
     $this->copyrightDao = $this->container->get('dao.copyright');
-    $this->copyrightHist = $this->restHelper->getPlugin('ajax_copyright_hist');
+    $this->copyrightHist = $this->restHelper->getPlugin('ajax-copyright-hist');
   }
 
   /**
