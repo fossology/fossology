@@ -9,9 +9,9 @@ namespace Fossology\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Util\DownloadUtil;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class AdminAllLicenseToCSV extends DefaultPlugin
 {
@@ -20,10 +20,10 @@ class AdminAllLicenseToCSV extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => "Admin All Groups License CSV Export",
-        self::MENU_LIST => "Admin::License Admin::CSV Export All",
-        self::REQUIRES_LOGIN => true,
-        self::PERMISSION => Auth::PERM_ADMIN
+      self::TITLE => "Admin All Groups License CSV Export",
+      self::MENU_LIST => "Admin::License Admin::CSV Export All",
+      self::REQUIRES_LOGIN => true,
+      self::PERMISSION => Auth::PERM_ADMIN
     ));
   }
 
@@ -35,48 +35,17 @@ class AdminAllLicenseToCSV extends DefaultPlugin
   {
     $confirmed = $request->get('confirmed', false);
     $referer = $request->headers->get('referer');
-    
-    if (empty($referer)) {
-      $referer = "?mod=browse";
-    }
-    
+    $fileName = "fossology-license-export-" . date("YMj-Gis") . '.csv';
+
     if (!$confirmed) {
-      return new Response(
-        '<script>
-          if (confirm("Do you want to download the license CSV file?")) {
-            fetch("?mod=' . self::NAME . '&rf=' . $request->get('rf') . '&confirmed=true")
-              .then(response => response.blob())
-              .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "fossology-license-export-' . date("YMj-Gis") . '.csv";
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                window.location.href = "' . $referer . '";
-              });
-          } else {
-            window.location.href = "' . $referer . '";
-          }
-        </script>',
-        Response::HTTP_OK,
-        ['Content-Type' => 'text/html']
-      );
+      $downloadUrl = "?mod=" . self::NAME . "&rf=" . $request->get('rf') . "&confirmed=true";
+      return DownloadUtil::getDownloadConfirmationResponse($downloadUrl, $fileName, $referer);
     }
-    
+
     $licenseCsvExport = new \Fossology\Lib\Application\LicenseCsvExport($this->getObject('db.manager'));
     $content = $licenseCsvExport->createCsv(intval($request->get('rf')), true);
-    $fileName = "fossology-license-export-".date("YMj-Gis");
-    $headers = array(
-        'Content-type' => 'text/csv, charset=UTF-8',
-        'Content-Disposition' => 'attachment; filename='.$fileName.'.csv',
-        'Pragma' => 'no-cache',
-        'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
-        'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
-
-    return new Response($content, Response::HTTP_OK, $headers);
+    
+    return DownloadUtil::getDownloadResponse($content, $fileName);
   }
 }
 
