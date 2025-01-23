@@ -35,8 +35,8 @@
         "symfony/mime" : "v5.4.13",
         "twig/twig" : "v3.11.2",
         "guzzlehttp/guzzle": "v7.5.0",
-        "phpoffice/phpspreadsheet": "1.29.7",
-        "twbs/bootstrap": "v4.1.0",
+        "phpoffice/phpspreadsheet": "1.29.8",
+        "twbs/bootstrap": "v5.0.0",
         "league/oauth2-client": "2.6.1"
     },
     "require-dev" : {
