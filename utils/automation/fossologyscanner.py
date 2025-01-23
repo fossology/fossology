@@ -351,12 +351,16 @@ def main(parsed_args):
     else:
       print(f"Could not validate keyword file: {message}")   
 
+  valid_comps_exist = False
   if (cli_options.scan_only_deps or cli_options.repo) and cli_options.sbom_path != '':
     download_list = []
     save_dir = 'pkg_downloads'
     sbom_file_path = cli_options.sbom_path
     parser = Parser(sbom_file_path)
     parser.classify_components()
+    valid_comps_exist = ( parser.python_components != [] or
+                        parser.php_components != [] or
+                        parser.npm_components != [] )
 
     python_comps = parser.python_components
     unsupported_comps = parser.unsupported_components
@@ -380,9 +384,6 @@ def main(parsed_args):
   if cli_options.repo is False:
     cli_options.diff_dir = repo_setup.get_diff_dir()
 
-    valid_comps_exist = ( parser.python_components != [] or
-                  parser.php_components != [] or
-                  parser.npm_components != [] )
     if cli_options.scan_only_deps and valid_comps_exist:
       cli_options.diff_dir = save_dir
     if cli_options.scan_dir:
