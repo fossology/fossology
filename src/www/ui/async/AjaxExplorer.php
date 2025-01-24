@@ -407,7 +407,7 @@ class AjaxExplorer extends DefaultPlugin
           //call that function----file_id,upload_id,shortname
           try {
             $compatible = $this->compatibilityDao->getCompatibilityForFile($childItemTreeBounds, $shortName);
-          } catch (InvalidAgentStageException) {
+          } catch (InvalidAgentStageException $ex) {
             $compatible = true;
           }
           $licenseHtml = "";
