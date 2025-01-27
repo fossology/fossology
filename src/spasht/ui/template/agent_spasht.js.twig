@@ -49,6 +49,50 @@ function StoreIntoDb() {
   }
 }
 
+function submitCuration() {
+  var namespace = $.trim($("#contributeNamespace").text());
+  var name = $.trim($("#contributeName").text());
+  var revision = $.trim($("#contributeRevision").text());
+  var type = $.trim($("#contributeType").text());
+  var provider = $.trim($("#contributeProvider").text()); 
+
+  var coordinates = { "type": type, "provider": provider, "namespace": namespace, "name": name, "revision": revision};
+
+  var jsonStringCoordinates = JSON.stringify(coordinates);
+
+  $("#jsonStringCoordinates").val(jsonStringCoordinates);
+
+  var ContributionType = $.trim($("#ContributionType").val());
+  var ContributionTitle = $.trim($("#ContributionTitle").val());
+  var ContributionDetails = $.trim($("#ContributionDetails").val());
+  var ContributionResolution = $.trim($("#ContributionResolution").val());
+  var contributionBox = false;
+
+  if ($('#contributionBox').is(":checked")) 
+  {
+    var contributionBox = true;
+  }
+
+  var contributionInfo = { "summary": ContributionTitle,
+    "details": ContributionDetails,
+    "resolution": ContributionResolution,
+    "type": ContributionType,
+    "removeDefinitions": contributionBox
+  }
+
+  var jsonStringContributionInfo = JSON.stringify(contributionInfo);
+  $("#jsonStringContributionInfo").val(jsonStringContributionInfo);
+  $("#hiddenRevision").val(revision);
+
+  if(ContributionType !== "" && ContributionTitle !== "" && ContributionDetails !== "" && ContributionResolution !== "") {
+    $("#contributionDataValid").val("true");
+    $("#contributtionSubmitButton").submit();
+  } else {
+    $("#contributionDataValid").val("false");
+  }
+
+}
+
 function showDetails(key) {
   var modalId = "#detailsModal" + key;
   var rowId = "#definitionsRow" + key;
