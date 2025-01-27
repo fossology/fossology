@@ -17,21 +17,21 @@ if(NOT TARGET phpunit)
     prepare_phpunit()
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FO_C_FLAGS} -std=c99 -Wextra -fopenmp")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FO_C_FLAGS} -std=c99 -Wextra")
 
 add_executable(test_nomos "")
-target_sources(test_nomos 
-    PRIVATE 
+target_sources(test_nomos
+    PRIVATE
     ${FO_CWD}/Unit/run_tests.c
     ${FO_CWD}/Unit/test_DoctoredBuffer.c
     ${FO_CWD}/Unit/test_nomos_gap.c)
-target_compile_definitions(test_nomos 
+target_compile_definitions(test_nomos
     PRIVATE _FILE_OFFSET_BITS=64
         TESTDATADIR="${FO_SOURCEDIR}/nomos/agent_tests/testdata")
-target_include_directories(test_nomos 
-    PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${glib_INCLUDE_DIRS} 
+target_include_directories(test_nomos
+    PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${glib_INCLUDE_DIRS}
         $<TARGET_FILE_DIR:encode> ${PostgreSQL_INCLUDE_DIRS} ${FO_CLIB_SRC} ${FO_CWD}/../agent)
-target_link_libraries(test_nomos PRIVATE ${cunit_LIBRARIES} focunit nomos)
+target_link_libraries(test_nomos PRIVATE ${cunit_LIBRARIES} focunit nomos OpenMP::OpenMP_C)
 
 add_test(nomos_unit_test test_nomos)
 
