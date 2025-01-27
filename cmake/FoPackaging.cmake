@@ -586,6 +586,11 @@ This package contains the spdx agent programs and their resources.")
 set(CPACK_DEBIAN_SPDX_PACKAGE_DEPENDS
     "fossology-common")
 
+set(CPACK_DEBIAN_SPDX_PACKAGE_CONFLICTS
+    "fossology-spdx2 (< 4.5.0)")
+set(CPACK_DEBIAN_SPDX_PACKAGE_REPLACES
+    "fossology-spdx2")
+
 set(CPACK_DEBIAN_SPDX_PACKAGE_SECTION "utils")
 
 ## FOSSOLOGY-REPORTIMPORT PACKAGE
