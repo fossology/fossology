@@ -5789,6 +5789,9 @@ components:
         ecc:
           type: boolean
           description: Should ECC Analysis be run on this upload.
+        ipra:
+          type: boolean
+          description: Should IPRA Analysis be run on this upload.
         keyword:
           type: boolean
           description: Should keyword Analysis be run on this upload.
@@ -5804,13 +5807,13 @@ components:
         ojo:
           type: boolean
           description: Should OJO Analysis be run on this upload.
-        package:
+        pkgagent:
           type: boolean
           description: Should Package Analysis be run on this upload.
         reso:
           type: boolean
           description: Should REUSE.Software Analysis be run on this upload.
-        heritage:
+        softwareHeritage:
           type: boolean
           description: Should Software Heritage Analysis be run on this upload.
     Reuser:

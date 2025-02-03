@@ -129,26 +129,19 @@ class ScanOptions
   {
     $agentsToAdd = [];
 
-    $uri = $_SERVER['REQUEST_URI'];
-    $apiVersion = ApiVersion::V1;
-
-    if (strpos($uri, '/api/v2/') !== false) {
-      $apiVersion = ApiVersion::V2;
-    }
-
-    if($apiVersion == ApiVersion::V2) {
+    if (ApiVersion::getVersion($request) == ApiVersion::V2) {
       foreach ($this->analysis->getArray($apiVersion) as $agent => $set) {
         if ($set === true) {
           if ($agent == "copyrightEmailAuthor") {
             $agentsToAdd[] = "agent_copyright";
             $request->request->set("Check_agent_copyright", 1);
-          } elseif ($agent == "patent") {
+          } elseif ($agent == "ipra") {
             $agentsToAdd[] = "agent_ipra";
             $request->request->set("Check_agent_ipra", 1);
-          } elseif ($agent == "package") {
+          } elseif ($agent == "pkgagent") {
             $agentsToAdd[] = "agent_pkgagent";
             $request->request->set("Check_agent_pkgagent", 1);
-          } elseif ($agent == "heritage") {
+          } elseif ($agent == "softwareHeritage") {
             $agentsToAdd[] = "agent_shagent";
             $request->request->set("Check_agent_shagent", 1);
           } else {
@@ -163,13 +156,13 @@ class ScanOptions
           if ($agent == "copyright_email_author") {
             $agentsToAdd[] = "agent_copyright";
             $request->request->set("Check_agent_copyright", 1);
-          } elseif ($agent == "patent") {
+          } elseif ($agent == "ipra") {
             $agentsToAdd[] = "agent_ipra";
             $request->request->set("Check_agent_ipra", 1);
-          } elseif ($agent == "package") {
+          } elseif ($agent == "pkgagent") {
             $agentsToAdd[] = "agent_pkgagent";
             $request->request->set("Check_agent_pkgagent", 1);
-          } elseif ($agent == "heritage") {
+          } elseif ($agent == "softwareHeritage") {
             $agentsToAdd[] = "agent_shagent";
             $request->request->set("Check_agent_shagent", 1);
           } else {

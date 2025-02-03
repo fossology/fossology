@@ -101,15 +101,14 @@ class Analysis
    * @param boolean $nomos
    * @param boolean $pkgagent
    * @param boolean $ojo
-   * @param boolean $scanoss
    * @param boolean $reso
-   * @param boolean $pkgagent
+   * @param boolean $compatibility
+   * @param boolean $scanoss
    * @param boolean $ipra
    * @param boolean $softwareHeritage
-   * @param boolean $compatibility
    */
   public function __construct($bucket = false, $copyright = false, $ecc = false, $keyword = false,
-    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $scanoss = false, $reso = false, $pkgagent = false, $ipra = false, $compatibility = false)
+    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $reso = false, $pkgagent = false, $compatibility = false, $scanoss = false, $ipra = false, $softwareHeritage = false)
   {
     $this->bucket = $bucket;
     $this->copyright = $copyright;
@@ -168,16 +167,16 @@ class Analysis
     if (array_key_exists("reso", $analysisArray)) {
       $this->reso = filter_var($analysisArray["reso"], FILTER_VALIDATE_BOOLEAN);
     }
-    if (array_key_exists("package", $analysisArray)) {
-      $this->pkgagent = filter_var($analysisArray["package"],
+    if (array_key_exists("pkgagent", $analysisArray)) {
+      $this->pkgagent = filter_var($analysisArray["pkgagent"],
         FILTER_VALIDATE_BOOLEAN);
     }
-    if (array_key_exists("patent", $analysisArray)) {
-      $this->ipra = filter_var($analysisArray["patent"],
+    if (array_key_exists("ipra", $analysisArray)) {
+      $this->ipra = filter_var($analysisArray["ipra"],
         FILTER_VALIDATE_BOOLEAN);
     }
-    if (array_key_exists("heritage", $analysisArray)) {
-      $this->softwareHeritage = filter_var($analysisArray["heritage"],
+    if (array_key_exists("softwareHeritage", $analysisArray)) {
+      $this->softwareHeritage = filter_var($analysisArray["softwareHeritage"],
         FILTER_VALIDATE_BOOLEAN);
     }
     if (array_key_exists("compatibility", $analysisArray)) {
@@ -227,10 +226,10 @@ class Analysis
     if (stristr($analysisString, "pkgagent")) {
       $this->pkgagent = true;
     }
-    if(stristr($analysisString, "ipra")) {
+    if (stristr($analysisString, "ipra")) {
       $this->ipra = true;
     }
-    if(stristr($analysisString, "softwareHeritage")) {
+    if (stristr($analysisString, "softwareHeritage")) {
       $this->softwareHeritage = true;
     }
     if (stristr($analysisString, "compatibility")) {
@@ -339,7 +338,7 @@ class Analysis
   /**
    * @return boolean
    */
-  public function getSoftwareHeritage() 
+  public function getSoftwareHeritage()
   {
     return $this->softwareHeritage;
   }
@@ -420,7 +419,7 @@ class Analysis
   /**
    * @param boolean $scanoss
    */
-  public function setScanoss($scanoss) 
+  public function setScanoss($scanoss)
   {
     $this->scanoss = filter_var($scanoss, FILTER_VALIDATE_BOOLEAN);
   }
@@ -444,12 +443,15 @@ class Analysis
   /**
    * @param boolean $ipra
    */
-  public function setIpra($ipra) 
+  public function setIpra($ipra)
   {
     $this->ipra = filter_var($ipra, FILTER_VALIDATE_BOOLEAN);
   }
 
-  public function setSoftwareHeritage($softwareHeritage) 
+  /**
+   * @param boolean $softwareHeritage
+   */
+  public function setSoftwareHeritage($softwareHeritage)
   {
     $this->softwareHeritage = filter_var($softwareHeritage, FILTER_VALIDATE_BOOLEAN);
   }
@@ -480,9 +482,9 @@ class Analysis
         "ojo"       => $this->ojo,
         "scanoss"   => $this->scanoss,
         "reso"      => $this->reso,
-        "package"   => $this->pkgagent,
-        "patent"    => $this->ipra,
-        "heritage" => $this->softwareHeritage,
+        "pkgagent"   => $this->pkgagent,
+        "ipra"    => $this->ipra,
+        "softwareHeritage" => $this->softwareHeritage,
         "compatibility" => $this->compatibility
       ];
     } else {
@@ -497,9 +499,9 @@ class Analysis
         "ojo"       => $this->ojo,
         "scanoss"   => $this->scanoss,
         "reso"      => $this->reso,
-        "package"   => $this->pkgagent,
-        "patent"    => $this->ipra,
-        "heritage" => $this->softwareHeritage,
+        "pkgagent"   => $this->pkgagent,
+        "ipra"    => $this->ipra,
+        "softwareHeritage" => $this->softwareHeritage,
         "compatibility" => $this->compatibility
       ];
     }
