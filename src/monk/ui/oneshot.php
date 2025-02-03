@@ -5,7 +5,6 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
-
 namespace Fossology\Monk\UI;
 
 use Fossology\Lib\Auth\Auth;
@@ -60,8 +59,28 @@ class OneShot extends DefaultPlugin
     $fullpath = $uploadFile->getPath().'/'.$uploadFile->getFilename();
 
     list($licenseIds, $rendered) = $this->scanMonkFileRendered($fullpath);
-    $vars = $this->mergeWithDefault(array('content' => $this->renderLicenseList($licenseIds).$rendered));
+    $closeButton = "<button id='closeAnalysis' style='margin: 10px; padding: 5px;'>Close</button>";
+    $vars = $this->mergeWithDefault(array(
+      'content' => $closeButton . $this->renderLicenseList($licenseIds) . $rendered
+    ));
     $vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
+    $vars['scripts'] .= "
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          const closeButton = document.getElementById('closeAnalysis');
+          let abortController = new AbortController();
+          const existingFetch = window.fetch;
+          window.fetch = function(url, options = {}) {
+            options.signal = abortController.signal;
+            return existingFetch(url, options);
+ };
+          closeButton.addEventListener('click', function() {
+            abortController.abort();
+            window.location.href = '?mod=oneshot-monk';
+          });
+        });
+      </script>
+    ";
     return $this->render('include/base.html.twig', $vars);
   }
 
@@ -89,7 +108,6 @@ class OneShot extends DefaultPlugin
     return array($licenseIds, $rendered);
   }
 
-
   public function scanMonkFileRendered($tmpfname)
   {
     list($licenseIds, $highlights) = $this->scanMonk($tmpfname);
@@ -104,7 +122,6 @@ class OneShot extends DefaultPlugin
 
     return array($licenseIds, $rendered);
   }
-
 
   public function scanMonk($fileName)
   {
@@ -147,7 +164,6 @@ class OneShot extends DefaultPlugin
   private function addDiffsToHighlights($licenseId, $lineMatches, &$highlights)
   {
     foreach (explode(',', $lineMatches['diff']) as $diff) {
-      // t[0+4798] M0 s[0+4834]
       if (preg_match('/t\[(?P<start>[0-9]*)\+?(?P<len>[0-9]*)?\] M(?P<type>.?) s\[(?P<rf_start>[0-9]*)\+?(?P<rf_len>[0-9]*)?\]/', $diff, $diffMatches)) {
         $start = intval($diffMatches['start']);
         $end = $start + intval($diffMatches['len']);
@@ -179,7 +195,6 @@ class OneShot extends DefaultPlugin
       }
     }
   }
-
 
   public function renderLicenseList($licenseIds)
   {
