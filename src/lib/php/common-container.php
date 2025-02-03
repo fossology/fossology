@@ -47,7 +47,7 @@ if ($cached) {
   $container->setParameter('application_root', dirname(dirname(__DIR__)));
 
   $loader = new XmlFileLoader($container, new FileLocator(__DIR__));
-  $loader->load('services.xml');
+  $loader->load('services.xml.in');
 
   $container->compile();
 
