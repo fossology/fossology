@@ -135,7 +135,10 @@ class UserTest extends \PHPUnit\Framework\TestCase
           "monk"      => false,
           "nomos"     => true,
           "ojo"       => true,
-          "package"   => false,
+          "pkgagent"   => false,
+          "softwareHeritage" => false,
+          "ipra" => false,
+          "scanoss" => false,
           "reso"      => false,
           "compatibility" => false
         ]
@@ -159,7 +162,10 @@ class UserTest extends \PHPUnit\Framework\TestCase
           "monk"      => false,
           "nomos"     => true,
           "ojo"       => true,
-          "package"   => false,
+          "pkgagent"   => false,
+          "ipra" => false,
+          "softwareHeritage" => false,
+          "scanoss" => false,
           "reso"      => false,
           "compatibility" => false
         ]

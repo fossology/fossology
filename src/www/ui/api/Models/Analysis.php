@@ -60,6 +60,11 @@ class Analysis
    */
   private $ojo;
   /**
+   * @var boolean $scanoss
+   * Whether to schedule scanoss agent or not
+   */
+  private $scanoss;
+  /**
    * @var boolean $pkgagent
    * Whether to schedule reso agent or not
    */
@@ -69,6 +74,16 @@ class Analysis
    * Whether to schedule package agent or not
    */
   private $pkgagent;
+  /**
+   * @var boolean $ipra
+   * Whether to schedule ipra agent or not
+   */
+  private $ipra;
+  /**
+   * @var boolean $softwareHeritage
+   * Whether to schedule software heritage agent or not
+   */
+  private $softwareHeritage;
   /**
    * @var boolean $compatibility
    * Whether to schedule compatibility agent or not
@@ -87,11 +102,13 @@ class Analysis
    * @param boolean $pkgagent
    * @param boolean $ojo
    * @param boolean $reso
-   * @param boolean $pkgagent
    * @param boolean $compatibility
+   * @param boolean $scanoss
+   * @param boolean $ipra
+   * @param boolean $softwareHeritage
    */
   public function __construct($bucket = false, $copyright = false, $ecc = false, $keyword = false,
-    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $reso = false, $pkgagent = false, $compatibility = false)
+    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $reso = false, $pkgagent = false, $compatibility = false, $scanoss = false, $ipra = false, $softwareHeritage = false)
   {
     $this->bucket = $bucket;
     $this->copyright = $copyright;
@@ -101,8 +118,11 @@ class Analysis
     $this->monk = $monk;
     $this->nomos = $nomos;
     $this->ojo = $ojo;
+    $this->scanoss = $scanoss;
     $this->reso = $reso;
     $this->pkgagent = $pkgagent;
+    $this->ipra = $ipra;
+    $this->softwareHeritage = $softwareHeritage;
     $this->compatibility = $compatibility;
   }
 
@@ -141,11 +161,22 @@ class Analysis
     if (array_key_exists("ojo", $analysisArray)) {
       $this->ojo = filter_var($analysisArray["ojo"], FILTER_VALIDATE_BOOLEAN);
     }
+    if (array_key_exists("scanoss", $analysisArray)) {
+      $this->scanoss = filter_var($analysisArray["scanoss"], FILTER_VALIDATE_BOOLEAN);
+    }
     if (array_key_exists("reso", $analysisArray)) {
       $this->reso = filter_var($analysisArray["reso"], FILTER_VALIDATE_BOOLEAN);
     }
-    if (array_key_exists("package", $analysisArray)) {
-      $this->pkgagent = filter_var($analysisArray["package"],
+    if (array_key_exists("pkgagent", $analysisArray)) {
+      $this->pkgagent = filter_var($analysisArray["pkgagent"],
+        FILTER_VALIDATE_BOOLEAN);
+    }
+    if (array_key_exists("ipra", $analysisArray)) {
+      $this->ipra = filter_var($analysisArray["ipra"],
+        FILTER_VALIDATE_BOOLEAN);
+    }
+    if (array_key_exists("softwareHeritage", $analysisArray)) {
+      $this->softwareHeritage = filter_var($analysisArray["softwareHeritage"],
         FILTER_VALIDATE_BOOLEAN);
     }
     if (array_key_exists("compatibility", $analysisArray)) {
@@ -186,11 +217,20 @@ class Analysis
     if (stristr($analysisString, "ojo")) {
       $this->ojo = true;
     }
+    if (stristr($analysisString, "scanoss")) {
+      $this->scanoss = true;
+    }
     if (stristr($analysisString, "reso")) {
       $this->reso = true;
     }
     if (stristr($analysisString, "pkgagent")) {
       $this->pkgagent = true;
+    }
+    if (stristr($analysisString, "ipra")) {
+      $this->ipra = true;
+    }
+    if (stristr($analysisString, "softwareHeritage")) {
+      $this->softwareHeritage = true;
     }
     if (stristr($analysisString, "compatibility")) {
       $this->compatibility = true;
@@ -266,6 +306,14 @@ class Analysis
   /**
    * @return boolean
    */
+  public function getScanoss()
+  {
+    return $this->scanoss;
+  }
+
+  /**
+   * @return boolean
+   */
   public function getReso()
   {
     return $this->reso;
@@ -274,9 +322,25 @@ class Analysis
   /**
    * @return boolean
    */
-  public function getPackage()
+  public function getPkgagent()
   {
     return $this->pkgagent;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getIpra()
+  {
+    return $this->ipra;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getSoftwareHeritage()
+  {
+    return $this->softwareHeritage;
   }
 
   /**
@@ -353,6 +417,14 @@ class Analysis
   }
 
   /**
+   * @param boolean $scanoss
+   */
+  public function setScanoss($scanoss)
+  {
+    $this->scanoss = filter_var($scanoss, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
    * @param boolean $reso
    */
   public function setReso($reso)
@@ -363,9 +435,25 @@ class Analysis
   /**
    * @param boolean $package
    */
-  public function setPackage($package)
+  public function setPkgagent($pkgagent)
   {
-    $this->pkgagent = filter_var($package, FILTER_VALIDATE_BOOLEAN);
+    $this->pkgagent = filter_var($pkgagent, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
+   * @param boolean $ipra
+   */
+  public function setIpra($ipra)
+  {
+    $this->ipra = filter_var($ipra, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
+   * @param boolean $softwareHeritage
+   */
+  public function setSoftwareHeritage($softwareHeritage)
+  {
+    $this->softwareHeritage = filter_var($softwareHeritage, FILTER_VALIDATE_BOOLEAN);
   }
 
   /**
@@ -392,8 +480,11 @@ class Analysis
         "monk"      => $this->monk,
         "nomos"     => $this->nomos,
         "ojo"       => $this->ojo,
+        "scanoss"   => $this->scanoss,
         "reso"      => $this->reso,
-        "package"   => $this->pkgagent,
+        "pkgagent"   => $this->pkgagent,
+        "ipra"    => $this->ipra,
+        "softwareHeritage" => $this->softwareHeritage,
         "compatibility" => $this->compatibility
       ];
     } else {
@@ -406,8 +497,11 @@ class Analysis
         "monk"      => $this->monk,
         "nomos"     => $this->nomos,
         "ojo"       => $this->ojo,
+        "scanoss"   => $this->scanoss,
         "reso"      => $this->reso,
-        "package"   => $this->pkgagent,
+        "pkgagent"   => $this->pkgagent,
+        "ipra"    => $this->ipra,
+        "softwareHeritage" => $this->softwareHeritage,
         "compatibility" => $this->compatibility
       ];
     }
