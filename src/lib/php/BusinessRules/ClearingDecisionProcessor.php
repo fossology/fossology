@@ -145,7 +145,7 @@ class ClearingDecisionProcessor
    * @param boolean $global
    * @param array Additional event ids to include, indexed by licenseId
    */
-  public function makeDecisionFromLastEvents(ItemTreeBounds $itemBounds, $userId, $groupId, $type, $global, $additionalEventIds = array())
+  public function makeDecisionFromLastEvents(ItemTreeBounds $itemBounds, $userId, $groupId, $type, $global, $additionalEventIds = array(), $autoConclude = false)
   {
     if ($type < self::NO_LICENSE_KNOWN_DECISION_TYPE) {
       return;
@@ -169,7 +169,8 @@ class ClearingDecisionProcessor
         }
       }
     } else {
-      $clearingEventIds = $this->insertClearingEventsForAgentFindings($itemBounds, $userId, $groupId, false, ClearingEventTypes::AGENT, $previousEvents);
+      $clearingEventIds = $this->insertClearingEventsForAgentFindings($itemBounds, $userId, $groupId, false,
+        $autoConclude ? ClearingEventTypes::AUTO : ClearingEventTypes::AGENT, $previousEvents);
       foreach ($previousEvents as $clearingEvent) {
         $clearingEventIds[$clearingEvent->getLicenseId()] = $clearingEvent->getEventId();
       }

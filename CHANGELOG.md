@@ -4,6 +4,185 @@
 -->
 # Changelog of FOSSology
 
+### 4.5.0-rc1 (Jan 9th 2025)
+
+This release adds important corrections to
+[4.4.0](https://github.com/fossology/fossology/releases/tag/4.4.0-rc1)
+
+The release 4.5.0-rc1 introduces a number of corrections to
+[4.4.0](https://github.com/fossology/fossology/releases/tag/4.4.0-rc1)
+and changes to FOSSology, including:
+
+* Support SPDX v3.0 Reports
+  - SPDX3.0 report in JSON format.
+  - SPDX3.0 report in JSON-LD format.
+  - SPDX3.0 report in RDF format.
+  - SPDX3.0 report in tag/value format.
+* New Compatibility Agent with auto-conclusion feature using license_type
+  - Users can create new license type from admin > customize
+  - By default all the licenses are of type 'permissive'.
+  - One can change license type by editing a license.
+  - For importing OSADL compatibility matrix refer (documentation.)[https://github.com/fossology/fossology/blob/master/utils/OSADL_CONVERTOR.md]
+  - Create/update compatibility rules from admin.
+* JSON format export and import of licenses and obligations.
+* Import licenses from licenseDb.
+* Multi upload reuse support.
+* Improved ML based copyright false positive deactivation and clutter.
+* Number of API endpoints & test cases for existing features.
+
+#### Credits to contributors for 4.5.0-rc1
+
+From the GIT commit history, we have the following contributors since
+[4.4.0](https://github.com/fossology/fossology/releases/tag/4.4.0):
+
+```
+> Abhishek Kumar <akumar17871@gmail.com>
+> abhishekrj02 <abhishekbokaro442@gmail.com>
+> Akash Kumar Sah <akashsah2003@gmail.com>
+> Alberto Pianon <alberto@pianon.eu>
+> Andreas Menzl <Andreas.Menzl@magna.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> deo002 <oberoidearsh@gmail.com>
+> Dinesh Ravi <dineshr93@gmail.com>
+> Divij Sharma <divijs75@gmail.com>
+> Florian Greinacher <florian@greinacher.de>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Grigory Balashov <g.balashov@omp.ru>
+> Hero2323 <abdelrahmanjamal5565@gmail.com>
+> Ibrahim-Muhammad13 <ibrahimmuhammad13720@gmail.com>
+> Jan Altenberg <jan.altenberg@osadl.org>
+> Jeronimo Ortiz <jeronimo.ortiz@scanoss.com>
+> Kaushlendra Pratap Singh <kaushlendra-pratap.singh@siemens.com>
+> martyone <martin.kampas@seafarix.com>
+> Rajul Jha <rajuljha49@gmail.com>
+> scanoss-qg <quique.goni@scanoss.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Sushant Kumar <sushant.kumar@siemens-healthineers.com>
+> valens200 <valensniyonsenga2003@gmail.com>
+```
+
+#### Features
+
+* 'b35ba4784' feat(spdx): Support SPDX v3.0 Reports
+* 'e3297b8e6' enhancement(ui): add server side pagination to compatibility rule page
+* 'f42555771' doc(compatiblity): add docs to compatibility agent
+* 'c90827b83' test(compatibility): add unit and functional tests
+* 'c0cff0dd0' feat(compatibility): convert OSADL matrix to yaml
+* '09b4f2582' feat(automation): Add custom allowlist.json
+* 'c978bd4a8' feat(differential scans): Add differntial scans to CI Scanner
+* '009f1df15' feat(automation) : Add custom keyword.conf file
+* 'ed7ada3a2' feat(api): New endpoints to get/delete/restore/update scancode email, author, url findings
+* '00bdea4ef' feat(api): New endpoints to get/delete/restore/update scancode copyright findings
+* '66302bdb1' feat(api): Added OneShot analysis endpoints for Nomos, Monk and Copyright scanners
+* '632073271' feat(api): New endpoints to delete/restore/update/count user copyright findings
+* '7cf8ab759' feat(api): New endpoint to retrieve user copyright findings
+* '909b6ac72' test(api): added more unit test cases for maintenance and upload tree APIs
+* 'fe4d8f20e' feat(treeview): make the bulk option availible for multiple folders
+* 'baa4db049' feat(api): sort and status filter options to jobs endpoint
+* '75b6e6c67' feat(ui): multi upload support for reuse In case of multi file upload, provide a modal to select reuse options for each upload. Multi file upload modal data and the mapping.
+* 'eaaea7257' feat(newAgent/Compatibility): compatibility agent
+* '8ca3cbc6c' test(api): added unit test cases for api including folder,upload,license,maintenance andd overview
+* 'bfea384ad' test(api): upgraded controller test cases to support v2 standards
+* 'c01458e8d' test(models): added more unit tests for group,job,scancode.etc
+* '2adcd36d7' feat(api): modify /jobs and related endpoints
+* '6eef93663' feat(nomos): Add start, end, len to nomos JSON output.
+* '9664b00ce' feat(automation) : Add line numbers to copryright and keyword
+* '682f56006' feat(automation) : Add line number to copyright and keyword scans for diff scans
+* '6d4d08c78' feat(info): add assignee, assigned data and clearing duration in info page
+* '60da85491' feat(import): introduce json format to import licenses and obligations via json
+* '69773a089' feat(experimental): change color and tooltip information
+* 'a1d5f914d' feat(api): Upgrade Jobs & Report APIs to Version 2
+* 'a871f3cfb' feat(api): Upgrade User & Group APIs to Version 2
+* 'dfd3a1a53' feat(decider): send heartbeat
+* '9a2cc13cc' feat(copyright): integerate safaa for copyright
+* '7a2caa8c0' feat(api): Completed tasks 7, 8, 12, 14, 15, 16, 17 and changed unit tests, models and documentation
+* '7a53e741d' feat(api): task 1,3,4,5,6,9,10,11 done, unit-tess, models and documentation changed accordingly.
+* 'cc4c95873' feat(userFindings): club unique user findings of copyright ecc and ipra for report
+* '4337ea4cb' feat(buildsystem): Introduce FORCE_CONF_OVERWRITE option
+* '0a104650a' feat(licenses): introduce JSON format export for licenses and obligations
+* '0f43cfa88' feat(api): Upgrade Folder, License & Obligation APIs to Version 2
+* '52cf30d3b' feat(api): JSON format export and import of licenses and obligations via APIs
+* '2e11f5e01' feat(line_numbers) : Add line numbers to CI Scanners output
+* '02972d94b' feat(upload): add tooltips and description to individual agents
+* 'c6c757d5f' feat(api): Upgrade Search, Copyright & Admin APIs to Version 2
+
+#### Corrections
+
+* 'bca013ddc' fix(licensedb): remove redundant usage of LicenseDBSleep
+* 'deeb8464f' fix(reportImport): Adding a fallback to ShortName for RDF imports.
+* 'f3f5b1286' fix(reportImport): Parse for ListedLicense when importing an RDF report
+* 'f543afa1e' fix(reports): remove additional licenses in obligation section
+* 'bed7627bc' fix(conf): unify license names to match in reports
+* '2c126e86d' fix(ui): 'Ignore SCM files' option is always disabled when use 'Upload' - 'From Server' page
+* '56dedaa49' fix(reportutils): use groupId to get concludedlicense
+* 'ada8c0d12' fix(api): Modified openapiv2.yaml to accommodate V2 post upload requests with multipart/form-data content type
+* '8d2e68777' fix internal server error
+* '3debd2f65' fix(monk): filter bulk scan files by agent for current upload
+* '8feee2853' fix(composer): update phpoffice/phpspreadsheet without XSS vulnerability
+* 'c251676a8' fix(decisionimporter): fix agent to handle missing pfile
+* '1d6aed3ba' fix(ui): wrong pagination for 'show jobs' page & missing upload accessible check
+* '82ac4b9bf' fix(ui): Add exactmatch to license search
+* 'bfdb34d63' fix(ecc): Update conf file to satisfy specific use cases for ecc
+* 'd059c57e0' fix(scanoss): Add heartbeat to scanoss agent
+* '37a3b52c3' fix(ui): Add loader to upload per and edit dec page
+* '833a93a69' fix(created_by): Add created by column to candidate license table
+* '3dc1ee285' fix(scanoss): Fix row number out of range. Restore Snippet match UI. Delete temp folders
+* '3c221e245' fix(ui): DataTable Showing last addition
+* '02f403a1d' fix(report): use groupId to get candidate licenses which are main license
+* '75efafafc' fix(Report): Check the return value of getLicenseById()
+* 'e45d4a9f7' fix(AjaxExplorer): Check the return value of getLicenseByShortName()
+* '9bf69d4df' fix(ReportUtils): Include files with 'No_license_found' as well
+* '2f09bfc15' fix(scancode): Use spdx_license_key instead of key
+* '2a604b8c8' fix(scancode): Fixed failing scancode agent in Docker
+* '95260a6ca' fix(spdx): encode <rdfs:seeAlso> uri if contains &
+* '31ac4128d' fix(RestAuthMiddleware): exclude from auth only the right endpoints
+* '3ec401409' fix(ojo): ignore extra symbols at end
+* '0f821c075' fix(fo_mapping_license.php): Fix update_license()
+* '1f01b5a49' fix(delagent): use uploadtree as default table name
+* '7175642f1' fix(unifiedreport): excluded obligation license
+* '2f02bf561' fix(ui): implemented search in software heritage page and search and filter in file browser page
+* '48b76d5b9' fix(doc): Update UploadTree Description
+* 'acc545c8e' fix(import): Do not require an agent if the report has no related data
+* 'd4046f949' fix issue 1868: SPDX import does not conclude licenses based on hash values but on file name
+* '192b0091e' fix(licenseExport): add all licenses to csv and fix cells
+* 'ebd05d4e1' fix(spdx2): Mark duplicates correctly with LicenseRef prefix
+* 'dc7cb7c90' hotfix(scanner): fix scanner image build
+* '51817c752' hotfix(docker tests): Migrate to docker compose from docker-compose
+* 'df2fde3e5' hotfix(docker_test): Use docker compose (v2) instead of docker-compose (v1)
+* '7aa37b778' refactor(php): used expressions with combined operators (#2685)
+* '04ec5efa7' refactor(automation): Upgrade spdx_tools package from 0.8.0a2 to 0.8.2(latest) in requirements.txt
+* '3f7440edb' refactor(search): refactor search page
+* '51df904b4' refactor(report): remove datetime from report names
+* '6be8f6e24' refactor(reportImport): use EasyRdf to read report
+* '0233f5e53' feat(ubuntu): support ubuntu noble 24.04 for fossology
+* '574b7b635' refact(models): renamed services.xml to services.xml.in file
+
+#### Infrastructure
+
+* '1102c20e7' build(deps): bump lukka/get-cmake from 3.31.3 to 3.31.4
+* 'c30a578fe' build(deps): bump the composer group across 1 directory with 3 updates
+* '5424418e5' build(deps): bump docker/login-action from 2 to 3
+* '66669d54a' build(deps): bump docker/build-push-action from 3 to 6
+* 'dd7f9dd7f' build(deps): bump lukka/get-cmake from 3.31.2 to 3.31.3
+* '0add9d3ca' build(deps): bump peaceiris/actions-gh-pages from 3 to 4
+* 'c13187372' build(deps): bump stoplightio/spectral-action from 0.8.10 to 0.8.11
+* '7e3662efd' build(deps): bump docker/setup-buildx-action from 2 to 3
+* '00d95772f' build(deps): bump actions/checkout from 2 to 4
+* 'b7802ee13' build(deps): bump lukka/get-cmake from 3.23.0 to 3.31.2
+* '9d2e909e7' build(deps): bump fsfe/reuse-action from 1 to 5
+* '3c2f25a8f' build(deps): bump docker/setup-qemu-action from 2 to 3
+* '1f15c5763' build(deps): bump twig/twig from 3.4.3 to 3.11.1 in /src
+* '0b0337563' build(deps): bump twig/twig from 3.11.1 to 3.11.2 in /src
+* '7d7dbf61c' chore(cmake): ignore anaconda paths
+* '98b3ab24a' chore(package): add compatibility agent deb package
+* 'c7cc8ce8c' chore(compatibility): optimize agent
+* '46db9cd7c' chore(dependabot): add dependabot.yml
+* '68ef02021' chore(decider): fix indent
+* '51188fe34' chore(model): fix indent
+* '76ebce114' deps(docker)!: update docker base to Debian 12
+* 'ea9a54467' ci: define permissions for conflict check workflow
+* '842f3dd3c' docs(scanoss): updated documentation for the SCANOSS agent
+
 ### 4.4.0 (Jan 15th 2024)
 
 This release adds important corrections to

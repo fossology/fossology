@@ -91,7 +91,7 @@ class CopyrightController extends RestController
   /**
    * Get all user copyright findings for a particular upload-tree
    *
-   * @param  ServerRequestInterface $request
+   * @param  S  erverRequestInterface $request
    * @param  ResponseHelper         $response
    * @param  array                  $args
    * @return ResponseHelper
@@ -890,6 +890,7 @@ class CopyrightController extends RestController
       }
     }
     $offset = $limit * ($page - 1);
+
     if (self::TYPE_COPYRIGHT_USERFINDINGS == $cxType) {
       list($rows, $iTotalRecords) = $this->copyrightDao
         ->getUserCopyrights($uploadPk, $uploadTreeId, $uploadTreeTableName,
@@ -932,6 +933,8 @@ class CopyrightController extends RestController
     $copyrightHash = $args['hash'];
     $userId = $this->restHelper->getUserId();
     $cpTable = $this->copyrightHist->getTableName($dataType);
+
+    echo $uploadTreeId;
 
     $this->uploadAccessible($uploadPk);
     $this->isItemExists($uploadPk, $uploadTreeId);

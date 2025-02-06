@@ -164,6 +164,8 @@ class fo_libschema
     $this->applyOrEchoOnce('BEGIN');
     $this->getCurrSchema();
     $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
+    $this->dropViews($catalog);
+    $this->dropConstraints();
     $this->applySequences();
     $this->applyTables();
     $this->applyInheritedRelations();
