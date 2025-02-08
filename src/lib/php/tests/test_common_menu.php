@@ -1,138 +1,116 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2011 Hewlett-Packard Development Company, L.P.
-
  SPDX-License-Identifier: GPL-2.0-only
 */
 
 /**
  * \file test_common_menu.php
- * \brief unit tests for common-menu.php
+ * \brief Unit tests for common-menu.php
  */
 
-use PHPUnit\Runner\Version as PHPUnitVersion;
+namespace Fossology\Tests;
+
+use PHPUnit\Framework\TestCase;
 
 require_once(dirname(__FILE__) . '/../common-menu.php');
 require_once(dirname(__FILE__) . '/../common-parm.php');
 
 /**
- * \class test_common_menu
+ * \class CommonMenuTest
+ * \brief Unit test for common-menu.php
  */
-class test_common_menu extends \PHPUnit\Framework\TestCase
+class CommonMenuTest extends TestCase
 {
-  /* initialization */
-  protected function setUp() : void
+  /**
+   * Test for MenuPage() function
+   */
+  public function testMenuPage()
   {
+    $page = 10;
+    $totalPage = 15;
+    $uri = "http://fossology.org/repo/";
+    $expected = "<a class='page-link' href='http://fossology.org/repo/&page=9'>Prev</a>";
+    $result = MenuPage($page, $totalPage, $uri);
+    
+    // Assert that the result contains the expected output
+    $this->assertStringContainsString("<a class='page-link' href='#'>11</a>", $result);
+    $this->assertStringContainsString($expected, $result);
   }
 
   /**
-   * \brief test for MenuPage()
+   * Test for MenuEndlessPage() function
    */
-  function test_MenuPage()
+  public function testMenuEndlessPage()
   {
-    print "Starting unit test for common-menu.php\n";
-    print "test function MenuPage()\n";
-
-    $Page = 10;
-    $TotalPage = 15;
-    $Uri = "http://fossology.org/repo/";
-    $expected = "<a class='page-link' href='http:\/\/fossology.org\/repo\/&page=9'>Prev<\/a>";
-    $result = MenuPage($Page, $TotalPage, $Uri);
-    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
-      $this->assertMatchesRegularExpression("/<a class='page-link' href='#'>11<\/a>/", $result);
-      $this->assertMatchesRegularExpression("/$expected/", $result);
-    } else {
-      $this->assertRegExp("/<a class='page-link' href='#'>11<\/a>/", $result);
-      $this->assertRegExp("/$expected/", $result);
-    }
+    $page = 10;
+    $uri = "http://fossology.org/repo/";
+    $expected = "<a class='page-link' href='http://fossology.org/repo/&page=9'>Prev</a>";
+    $result = MenuEndlessPage($page, 1, $uri);
+    
+    // Assert that the result contains the expected output
+    $this->assertStringContainsString("<a class='page-link' href='#'>11</a>", $result);
+    $this->assertStringContainsString($expected, $result);
   }
 
   /**
-   * \brief test for MenuEndlessPage()
+   * Test for menu_cmp() function
    */
-  function test_MenuEndlessPage()
+  public function testMenuCmp()
   {
-    print "test function MenuEndlessPage()\n";
-
-    $Page = 10;
-    $Uri = "http://fossology.org/repo/";
-    $expected = "<a class='page-link' href='http:\/\/fossology.org\/repo\/&page=9'>Prev<\/a>";
-    $result = MenuEndlessPage($Page, 1, $Uri);
-    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
-      $this->assertMatchesRegularExpression("/<a class='page-link' href='#'>11<\/a>/", $result);
-      $this->assertMatchesRegularExpression("/$expected/", $result);
-    } else {
-      $this->assertRegExp("/<a class='page-link' href='#'>11<\/a>/", $result);
-      $this->assertRegExp("/$expected/", $result);
-    }
-  }
-
-  /**
-   * \brief test for menu_cmp()
-   */
-  function test_menu_cmp()
-  {
-    print "test function menu_cmp()\n";
-
-    $menua = new menu;
-    $menub = new menu;
+    $menua = new \menu();
+    $menub = new \menu();
     $menua->Name = 'menua';
     $menub->Name = 'menua';
-    $result = menu_cmp($menua, $menub);
-    $this->assertEquals(0,$result);
+    
+    // Assert that menu_cmp returns 0 for identical menus
+    $this->assertEquals(0, menu_cmp($menua, $menub));
+    
     $menua->Order = 1;
     $menub->Order = 2;
-    $result = menu_cmp($menua, $menub);
-    $this->assertEquals(1,$result);
+    // Assert that menu_cmp returns 1 when menua has a higher order than menub
+    $this->assertEquals(1, menu_cmp($menua, $menub));
   }
+
   /**
-   * \brief test for menu_functions()
+   * Test for menu functions
    */
-  function test_menu_functions()
+  public function testMenuFunctions()
   {
-    print "test function menu_insert()\n";
-
     global $MenuList;
-
-    $Path = "TestMenu::Test1::Test2";
-    $LastOrder = 0;
-    $URI = "TestURI";
-    $Title = "TestTitle";
-    $Target = "TestTarget";
-    $HTML = "TestHTML";
+    
+    $path = "TestMenu::Test1::Test2";
+    $lastOrder = 0;
+    $uri = "TestURI";
+    $title = "TestTitle";
+    $target = "TestTarget";
+    $html = "TestHTML";
     $countMenuListBefore = count($MenuList);
-    $result = menu_insert($Path, $LastOrder, $URI, $Title, $Target, $HTML);
-    $this->assertEquals($Path,
-      $MenuList[$countMenuListBefore]->SubMenu[0]->SubMenu[0]->FullName);
-
-    print "test function menu_find)\n";
+    
+    menu_insert($path, $lastOrder, $uri, $title, $target, $html);
+    
+    // Assert that menu_insert correctly inserts the menu item
+    $this->assertEquals($path, $MenuList[$countMenuListBefore]->SubMenu[0]->SubMenu[0]->FullName);
+    
     $depth = 2;
     $result = menu_find("Test1", $depth);
-
-    print "test function menu_to_1html)\n";
+    
+    // Assert that menu_to_1html() generates correct output
     $result = menu_to_1html($MenuList);
     $pattern = "/TestMenu/";
-    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
-      $this->assertMatchesRegularExpression($pattern, $result);
-    } else {
-      $this->assertRegExp($pattern, $result);
-    }
-
-    print "test function menu_to_1list)\n";
-    $Parm = "";
-    $result = menu_to_1list($MenuList, $Parm, "", "");
-    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
-      $this->assertMatchesRegularExpression($pattern, $result);
-    } else {
-      $this->assertRegExp($pattern, $result);
-    }
-    print "Ending unit test for common-menu.php\n";
+    $this->assertRegExp($pattern, $result);
+    
+    $parm = "";
+    $result = menu_to_1list($MenuList, $parm, "", "");
+    // Assert that menu_to_1list() generates correct output
+    $this->assertRegExp($pattern, $result);
   }
 
   /**
-   * \brief clean the env
+   * Tear down after each test method
    */
-  protected function tearDown() : void
+  protected function tearDown(): void
   {
+    // Additional teardown code, if needed
   }
 }
