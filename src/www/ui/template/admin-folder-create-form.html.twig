@@ -1,27 +1,55 @@
-{# SPDX-FileCopyrightText: © 2016 Siemens AG
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
 
    SPDX-License-Identifier: FSFAP
 #}
-<form method='POST'>
-    <ol>
-        <li>
+{% extends "include/base.html.twig" %}
+
+{% block styles %}
+  {{ parent() }}
+  <link rel="stylesheet" href="css/jquery.treeview.css"/>
+{% endblock %}
+      
+
+{% block content %}
+{{ 'Only folders or uploads that can be accessed via a different path can be deleted'| trans }}
+<table>
+  <tr style="vertical-align:top;">
+    <td id="sidetree">
+      <div id="sidetreecontrol" style="display:inline;"><a href="?#">{{ 'Collapse All'|trans }}</a> | <a href="?#">{{ 'Expand All'|trans }}</a></div>
+      {{ folderTree }}
+    </td>
+    <td style="padding-left:20px;">
+      <form method='POST'>
+        <ol>
+          <li>
             {{ "Select the parent folder:"|trans }}
             <select name='parentid' class="ui-render-select2">
-                {{ folderOptions }}
+              {{ folderOptions }}
             </select>
             <P />
-        </li>
-        <li>
+          </li>
+          <li>
             {{ "Enter the new folder name:"|trans }}
             <br/>
             <INPUT type='text' name='newname' size=40 />
             <P />
-        </li>
-        <li>
+          </li>
+          <li>
             {{ "Enter a meaningful description:"|trans }}
             <br/>
             <INPUT type='text' name='description' size=80 />
-        </li>
-    </ol>
-    <input type='submit' value='{{ "Create"|trans }}'>
-</form>
+          </li>
+        </ol>
+        <input type='submit' value='{{ "Create"|trans }}'>
+      </form>
+    </td>
+  </tr>
+</table>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script src="scripts/tools.js" type="text/javascript"></script>
+  <script src="scripts/jquery.treeview.js" type="text/javascript"></script>
+  <script type="text/javascript">{% include 'admin_content_move.js.twig' with {'removable':1} %}</script>
+{% endblock %}

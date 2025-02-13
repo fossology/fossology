@@ -5,17 +5,23 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\UI\FolderNav;
 
 class folder_create extends FO_Plugin
 {
+  /** @var FolderDao */
+  private $folderDao;
+  
   function __construct()
   {
     $this->Name = "folder_create";
     $this->Title = _("Create a new Fossology folder");
     $this->MenuList = "Organize::Folders::Create";
-    $this->Dependency = array ();
+    $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
     parent::__construct();
+    $this->folderDao = $GLOBALS['container']->get('dao.folder');
   }
 
   /**
@@ -37,20 +43,17 @@ class folder_create extends FO_Plugin
       return (0);
     }
 
-    /* @var $folderDao FolderDao*/
-    $folderDao = $GLOBALS['container']->get('dao.folder');
-
-    $parentExists = $folderDao->getFolder($parentId);
+    $parentExists = $this->folderDao->getFolder($parentId);
     if (! $parentExists) {
       return (0);
     }
 
-    $folderWithSameNameUnderParent = $folderDao->getFolderId($folderName, $parentId);
+    $folderWithSameNameUnderParent = $this->folderDao->getFolderId($folderName, $parentId);
     if (! empty($folderWithSameNameUnderParent)) {
       return 4;
     }
 
-    $folderDao->createFolder($folderName, $desc, $parentId);
+    $this->folderDao->createFolder($folderName, $desc, $parentId);
     return (1);
   }
 
@@ -59,6 +62,8 @@ class folder_create extends FO_Plugin
    */
   public function Output()
   {
+    $vars = array();
+    
     /* If this is a POST, then process the request. */
     $ParentId = GetParm('parentid', PARM_INTEGER);
     $NewFolder = GetParm('newname', PARM_TEXT);
@@ -69,18 +74,23 @@ class folder_create extends FO_Plugin
         /* Need to refresh the screen */
         $text = _("Folder");
         $text1 = _("Created");
-        $this->vars['message'] = "$text " . htmlentities($NewFolder) . " $text1";
+        $vars['message'] = "$text " . htmlentities($NewFolder) . " $text1";
       } else if ($rc == 4) {
         $text = _("Folder");
         $text1 = _("Exists");
-        $this->vars['message'] = "$text " . htmlentities($NewFolder) . " $text1";
+        $vars['message'] = "$text " . htmlentities($NewFolder) . " $text1";
       }
     }
 
-    $root_folder_pk = GetUserRootFolder();
-    $formVars["folderOptions"] = FolderListOption($root_folder_pk, 0);
+    $userId = Auth::getUserId();
+    $rootFolderId = $this->folderDao->getRootFolder($userId)->getId();
+    
+    /* @var $uiFolderNav FolderNav */
+    $uiFolderNav = $GLOBALS['container']->get('ui.folder.nav');
+    $vars['folderTree'] = $uiFolderNav->showFolderTree($rootFolderId);
+    $vars['folderOptions'] = FolderListOption($rootFolderId, 0);
 
-    return $this->renderString("admin-folder-create-form.html.twig",$formVars);
+    return $this->renderString("admin-folder-create-form.html.twig", $vars);
   }
 }
 
