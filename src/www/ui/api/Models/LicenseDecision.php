@@ -109,6 +109,7 @@ class LicenseDecision extends License
     $data = parent::getArray();
     $data['sources'] = $this->getSources();
     $data['acknowledgement'] = $this->getAcknowledgement();
+    $data['obligations'] = $this->getObligations();
     $data['comment'] = $this->getComment();
     $data['isMainLicense'] = $this->getIsMainLicense();
     $data['isRemoved'] = $this->getIsRemoved();

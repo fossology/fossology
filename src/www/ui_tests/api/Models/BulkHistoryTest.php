@@ -16,6 +16,28 @@ use PHPUnit\Framework\TestCase;
 
 class BulkHistoryTest extends TestCase
 {
+
+  ////// Constructor Tests //////
+
+   /**
+   * Tests that the BulkHistory constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $bulkHistory = new BulkHistory(
+      101,               
+      202,               
+      'Scan reference text',
+      true,               
+      false,             
+      ['License A', 'License B'], 
+      ['License C']      
+  );
+    $this->assertInstanceOf(BulkHistory::class, $bulkHistory);
+  }
+
   /**
    * Provides test data and an instance of the BulkHistory class.
    *

@@ -27,6 +27,29 @@ use PHPUnit\Framework\TestCase;
  */
 class JobTest extends TestCase
 {
+  ////// Constructor Tests //////
+
+  /**
+   * Tests that the Job constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $job = new Job(
+      1,                          
+      "Data Processing Job",      
+      "2025-02-18 10:00:00",     
+      123,                     
+      456,                     
+      789,                     
+      3600,                    
+      "Queued",               
+      []                      
+  );
+    $this->assertInstanceOf(Job::class, $job);
+  }
+
   /**
    * @test
    * -# Test data model returned by Job::getArray($version) when API version is V1

@@ -38,6 +38,21 @@ class UserGroupMemberTest extends TestCase
       'helper.restHelper'))->andReturn($this->restHelper);
     $this->restHelper->shouldReceive('getUserDao')->andReturn($this->userDao);
   }
+
+  ////// Constructor Tests //////
+  
+  /**
+   * Tests that the UserGroupMember constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $user = new User(1, "fossy", "Admin user", "fossy@gmail.com", "admin", 4, "fossy@gmail.com", "monk", 3, null);
+    $userGroupMember = new UserGroupMember($user, 3);
+    $this->assertInstanceOf(UserGroupMember::class, $userGroupMember);
+  }
+
   /**
    * Provides test data and an instance of the UserGroupMember class.
    *

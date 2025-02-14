@@ -15,12 +15,27 @@ namespace Fossology\UI\Api\Test\Models;
 use Fossology\UI\Api\Models\UploadSummary;
 use Fossology\Lib\Data\UploadStatus;
 
+use \PHPUnit\Framework\TestCase;
+
 /**
  * @class UploadSummaryTest
  * @brief Test cases for UploadSummary model
  */
-class UploadSummaryTest extends \PHPUnit\Framework\TestCase
+class UploadSummaryTest extends TestCase
 {
+  ////// Constructor Tests //////
+
+  /**
+   * Tests that the UploadSummary constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $uploadSummary = new UploadSummary();
+    $this->assertInstanceOf(UploadSummary::class, $uploadSummary);
+  }
+
   /**
    * @test
    * -# Test the data format returned by UploadSummary::getArray() model

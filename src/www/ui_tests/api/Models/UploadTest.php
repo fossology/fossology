@@ -16,13 +16,30 @@ use Fossology\UI\Api\Models\Hash;
 use Fossology\UI\Api\Models\Upload;
 use Fossology\UI\Api\Models\ApiVersion;
 
+use \PHPUnit\Framework\TestCase;
+
 
 /**
  * @class UploadTest
  * @brief Test for Upload model
  */
-class UploadTest extends \PHPUnit\Framework\TestCase
+class UploadTest extends TestCase
 {
+
+  ////// Constructor Tests //////
+  
+  /**
+   * Tests that the Upload constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $hash = new Hash('sha1checksum', 'md5checksum', 'sha256checksum', 123123);
+    $upload = new Upload(2, 'root', 3, '', 'my.tar.gz', '01-01-2020', 3,
+    $hash);
+    $this->assertInstanceOf(Upload::class, $upload);
+  }
 
   /**
    * @test

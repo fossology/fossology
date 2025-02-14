@@ -27,6 +27,19 @@ use Fossology\UI\Api\Models\ApiVersion;
  */
 class AnalysisTest extends \PHPUnit\Framework\TestCase
 {
+  ////// Constructor Tests //////
+
+   /**
+   * Tests that the Analysis constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $analysis = new Analysis();
+    $this->assertInstanceOf(Analysis::class, $analysis);
+  }
+
   /**
    * @test
    * -# Test for Analysis::setUsingArray() when $version is V1

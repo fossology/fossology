@@ -22,6 +22,21 @@ use Fossology\UI\Api\Models\Findings;
  */
 class FileTest extends \PHPUnit\Framework\TestCase
 {
+  ////// Constructor Tests //////
+
+  /**
+   * Tests that the File constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $hash = new Hash();  
+    $file = new File($hash);  
+
+    $this->assertInstanceOf(File::class, $file);
+  }
+
   /**
    * @test
    * -# Test for keys in File model
