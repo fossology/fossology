@@ -16,6 +16,19 @@ use PHPUnit\Framework\TestCase;
 
 class GroupTest extends TestCase
 {
+  ////// Constructor Tests //////
+
+  /**
+   * Tests that the Group constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $group = new Group(4, "fossy");
+    $this->assertInstanceOf(Group::class, $group);
+  }
+
   /**
    * Provides test data and an instance of the Group class.
    *

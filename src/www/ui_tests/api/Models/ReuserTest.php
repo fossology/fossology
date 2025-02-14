@@ -21,6 +21,19 @@ use Fossology\UI\Api\Models\ApiVersion;
  */
 class ReuserTest extends \PHPUnit\Framework\TestCase
 {
+  ////// Constructor Tests //////
+
+  /**
+   * Tests that the Reuser constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $reuser = new Reuser(2, 'fossy', true);
+    $this->assertInstanceOf(Reuser::class, $reuser);
+  }
+
   /**
    * @test
    * -# Test constructor and Reuser::getArray()

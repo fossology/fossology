@@ -13,13 +13,28 @@
 namespace Fossology\UI\Api\Test\Models;
 
 use Fossology\UI\Api\Models\Obligation;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @class ObligationTest
  * @brief Test for Obligation model
  */
-class ObligationTest extends \PHPUnit\Framework\TestCase
+class ObligationTest extends TestCase
 {
+  ////// Constructor Tests //////
+
+  /**
+   * Tests that the Obligation constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $obligation = new Obligation("123", 'My obligation', 'Obligation',
+      'This should represent some valid obligation text.', 'yellow');
+    $this->assertInstanceOf(Obligation::class, $obligation);
+  }
+
   /**
    * @test
    * -# Test data model returned by Obligation::getArray() is correct

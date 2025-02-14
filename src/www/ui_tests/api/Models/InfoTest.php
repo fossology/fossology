@@ -21,6 +21,19 @@ use Fossology\UI\Api\Models\InfoType;
  */
 class InfoTest extends \PHPUnit\Framework\TestCase
 {
+  ////// Constructor Tests //////
+
+  /**
+   * Tests that the Info constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $info = new Info(200, "All good", InfoType::INFO);
+    $this->assertInstanceOf(Info::class, $info);
+  }
+
   /**
    * @test
    * -# Test the data format returned by Info::getArray() model
