@@ -20,7 +20,11 @@
       <li>
         {{"Select the upload to analyze"|trans}}:<br/>
         <div id="uploaddiv">
-          <select size="10" name="upload" id="uploadToAnalyze" onChange="Agents_Get('{{ baseUri }}?mod=upload_agent_options&upload=' + this.value);">
+          <select size="10" name="upload" id="uploadToAnalyze" class="ui-render-select2"
+              style="width: auto; min-width: 200px; max-width: 100%;"
+              onChange="Agents_Get('{{ baseUri }}?mod=upload_agent_options&upload=' + this.value);">
+
+
             {% for foliup in folderListUploads %}
               <option value="{{ foliup.upload_pk }}" {% if uploadId==foliup.upload_pk %}selected="selected"{% endif %}>
                {{ foliup.name|e }} {% if foliup.upload_desc is not empty %}({{ foliup.upload_desc|e }}){% endif %}
@@ -48,11 +52,14 @@
   <script type="text/javascript">
     const select2f = {
       select2Search: function() {
-        $('#uploadToAnalyze').select2({
-        "placeholder": "Select upload to analyze"
+        $('#uploadToAnalyze, #folder').select2({
+          width: 'style', // Ensures both take the same width
+          dropdownAutoWidth: true,
+        placeholder: "Select upload to analyze"
         });
       }
     }
+
     $(document).ready(function () {
       $('img').tooltip();
       select2f.select2Search();
