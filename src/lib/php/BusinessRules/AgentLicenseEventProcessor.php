@@ -18,7 +18,7 @@ use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Proxy\LatestScannerProxy;
-use Monolog\Logger;
+
 /**
  * @class AgentLicenseEventProcessor
  * @brief Handle events related to license findings
@@ -34,9 +34,6 @@ class AgentLicenseEventProcessor
   /** @var AgentDao $agentDao
    * Agent DAO object */
   private $agentDao;
-  /** @var Logger Logger instance */
-private $logger;
-
 
   /**
    * Constructor for the event processor
@@ -92,10 +89,6 @@ private $logger;
       $licenseRef = $licenseMatch->getLicenseRef();
       $licenseId = $licenseRef->getId();
       if ($licenseRef->getShortName() === "No_license_found") {
-        $this->logger->warning("No license match found", [
-          'file' => $itemTreeBounds->getUploadId()
-      ]);
-      
         continue;
       }
       $agentRef = $licenseMatch->getAgentRef();
