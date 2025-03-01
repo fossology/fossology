@@ -65,8 +65,12 @@ class SearchHelperDao
     }
 
     $SQLBase = "SELECT DISTINCT uploadtree_pk, parent, upload_fk, uploadtree.pfile_fk, ufile_mode, ufile_name FROM uploadtree";
-    $SQLWhere = " ";
+    $SQLWhere = " WHERE 1=1";
     $SQLOrderLimitOffset = "";
+    $Filename = trim($Filename);
+    $tag = trim($tag);
+    $License = trim($License);
+    $Copyright = trim($Copyright);
 
     if ($searchtype != "directory") {
       if (!empty($License)) {
