@@ -14,25 +14,23 @@
 <table>
   <tr style="vertical-align:top;">
     <td id="sidetree">
-      <div id="sidetreecontrol" style="display:inline;"><a href="?#">{{ 'Collapse All'|trans }}</a> | <a href="?#">{{ 'Expand All'|trans }}</div>
+      <div id="sidetreecontrol" style="display:inline;"><a href="?#">{{ 'Collapse All'|trans }}</a> | <a href="?#">{{ 'Expand All'|trans }}</a></div>
       {{ folderTree }}
     </td>
     <td style="padding-left:20px;">
       <form name="formy" method="post">
         <input type="hidden" name="fromFolder" id="fromFolder" value="-1"/>
 
-        <label for="foldercontent">{{ 'Select uploads or folders you wish to move'|trans }}:<br/>
+        <label for="foldercontent">{{ 'Select uploads or folders you wish to move'|trans }}:
           <select name="foldercontent[]" id="foldercontent" multiple="multiple" size="20">
           </select>
         </label>
-        <br/>
-        <br/>
+       
 
-        <label for="toFolder">{{ 'Select the folder where the content shall be placed'| trans }}:<br/>
+        <label for="toFolder">{{ 'Select the folder where the content shall be placed'| trans }}:
           {% include 'components/select-folder.html.twig' with {'name':'toFolder', 'id': 'toFolder'}  %}
         </label>
-        <br/>
-        <br/>
+     
 
         <input type="submit" name="move" value="{{ 'Move'|trans }}"/> &nbsp; <input type="submit" name="copy" value="{{ 'Copy'|trans }}"/>
       </form>
