@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Models;
 use Fossology\Lib\Auth\Auth;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
+use Fossology\UI\Api\Models\ApiVersion;
 use Symfony\Component\HttpFoundation\Request;
 
 if (!class_exists("AgentAdder", false)) {
@@ -128,20 +129,49 @@ class ScanOptions
   private function prepareAgents(Request &$request)
   {
     $agentsToAdd = [];
-    foreach ($this->analysis->getArray() as $agent => $set) {
-      if ($set === true) {
-        if ($agent == "copyright_email_author") {
-          $agentsToAdd[] = "agent_copyright";
-          $request->request->set("Check_agent_copyright", 1);
-        } elseif ($agent == "patent") {
-          $agentsToAdd[] = "agent_ipra";
-          $request->request->set("Check_agent_ipra", 1);
-        } elseif ($agent == "package") {
-          $agentsToAdd[] = "agent_pkgagent";
-          $request->request->set("Check_agent_pkgagent", 1);
-        } else {
-          $agentsToAdd[] = "agent_$agent";
-          $request->request->set("Check_agent_$agent", 1);
+
+    $apiVersion = ApiVersion::getVersionFromUri();
+
+    if ($apiVersion == ApiVersion::V2) {
+      foreach ($this->analysis->getArray($apiVersion) as $agent => $set) {
+        if ($set === true) {
+          if ($agent == "copyrightEmailAuthor") {
+            $agentsToAdd[] = "agent_copyright";
+            $request->request->set("Check_agent_copyright", 1);
+          } elseif ($agent == "ipra") {
+            $agentsToAdd[] = "agent_ipra";
+            $request->request->set("Check_agent_ipra", 1);
+          } elseif ($agent == "pkgagent") {
+            $agentsToAdd[] = "agent_pkgagent";
+            $request->request->set("Check_agent_pkgagent", 1);
+          } elseif ($agent == "softwareHeritage") {
+            $agentsToAdd[] = "agent_shagent";
+            $request->request->set("Check_agent_shagent", 1);
+          } else {
+            $agentsToAdd[] = "agent_$agent";
+            $request->request->set("Check_agent_$agent", 1);
+          }
+        }
+      }
+    } else {
+      foreach ($this->analysis->getArray($apiVersion) as $agent => $set) {
+        if ($set === true) {
+          if ($agent == "copyright_email_author") {
+            $agentsToAdd[] = "agent_copyright";
+            $request->request->set("Check_agent_copyright", 1);
+          } elseif ($agent == "patent") {
+            $agentsToAdd[] = "agent_ipra";
+            $request->request->set("Check_agent_ipra", 1);
+          } elseif ($agent == "package") {
+            $agentsToAdd[] = "agent_pkgagent";
+            $request->request->set("Check_agent_pkgagent", 1);
+          } elseif ($agent == "heritage") {
+            $agentsToAdd[] = "agent_shagent";
+            $request->request->set("Check_agent_shagent", 1);
+          } else {
+            $agentsToAdd[] = "agent_$agent";
+            $request->request->set("Check_agent_$agent", 1);
+          }
         }
       }
     }

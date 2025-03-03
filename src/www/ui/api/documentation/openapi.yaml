@@ -5861,6 +5861,9 @@ components:
         ecc:
           type: boolean
           description: Should ECC Analysis be run on this upload.
+        patent:
+          type: boolean
+          description: Should IPRA Analysis be run on this upload.
         keyword:
           type: boolean
           description: Should keyword Analysis be run on this upload.
