@@ -505,21 +505,21 @@ class fo_libschema
    */
   function dropViews($catalog)
   {
-    $sql = "SELECT view_name,table_name,column_name
-        FROM information_schema.view_column_usage
-        WHERE table_catalog='$catalog'
-        ORDER BY view_name,table_name,column_name";
+    $sql = "SELECT view_name,vcs.table_name,column_name
+            FROM information_schema.view_column_usage AS vcs
+            INNER JOIN information_schema.views AS v
+              ON vcs.view_name = v.table_name
+            WHERE vcs.table_catalog='$catalog'
+              AND v.table_schema = 'public'
+            ORDER BY view_name,vcs.table_name,column_name;";
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
     while ($row = $this->dbman->fetchArray($result)) {
       $View = $row['view_name'];
       $table = $row['table_name'];
-      if (empty($this->schema['TABLE'][$table])) {
-        continue;
-      }
       $column = $row['column_name'];
-      if (empty($this->schema['TABLE'][$table][$column])) {
+      if (empty($this->schema['TABLE'][$table]) || empty($this->schema['TABLE'][$table][$column])) {
         $sql = "DROP VIEW \"$View\";";
         $this->applyOrEchoOnce($sql);
       }
