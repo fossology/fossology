@@ -7,11 +7,11 @@
   {{ parent() }}
   <link rel="stylesheet" href="css/jquery.treeview.css"/>
   <link rel="stylesheet" href="css/select2.min.css"/>
-  <link rel="stylesheet" href="css/custom.css"/> 
+  <link rel="stylesheet" href="css/custom.css">
 {% endblock %}
 
 {% block content %}
-{{ 'Select a folder on the left hand side to move or copy content to a different folder hi'|trans }}
+{{ 'Select a folder on the left hand side to move or copy content to a different folder'|trans }}
 <table>
   <tr style="vertical-align:top;">
     <td id="sidetree">
@@ -22,17 +22,9 @@
       <form name="formy" method="post">
         <input type="hidden" name="fromFolder" id="fromFolder" value="-1"/>
 
-        <label id="folderselectText" for="foldercontent">{{ 'Select or folders you wish to move'|trans }}:<br/>
-        <select name="foldercontent[]" id="foldercontent" multiple="multiple" size="20">
-          {% if folderContent is not empty %}
-        {% for file in folderContent %}
-      <option value="{{ file.id }}">{{ file.name }}</option>
-    {% endfor %}
-  {% else %}
-    <option disabled>{{ 'No files to move'|trans }}</option>
-  {% endif %}
-</select>
-
+        <label for="foldercontent">{{ 'Select uploads or folders you wish to move'|trans }}:<br/>
+          <select name="foldercontent[]" id="foldercontent" multiple="multiple" size="20">
+          </select>
         </label>
         <br/>
         <br/>

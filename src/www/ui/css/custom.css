@@ -1,9 +1,6 @@
-label, select {
+#folderselectText, #foldercontent {
     display: block;
     width: 100%;
-  }
-  
-  #foldercontent {
-    min-height: 150px;
+    min-width: 100%;
   }
   
