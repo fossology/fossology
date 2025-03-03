@@ -20,8 +20,8 @@ regexScanner::regexScanner(const string& type,
 {
   RegexConfProvider rcp;
   rcp.maybeLoad(_identity);
-  _reg = rx::regex(rcp.getRegexValue(_identity, _type),
-                   rx::regex_constants::icase);
+  _reg = rx::make_u32regex(rcp.getRegexValue(_identity, _type),
+                           rx::regex_constants::icase);
 }
 
 /**
@@ -31,7 +31,7 @@ regexScanner::regexScanner(const string& type,
  *                                   std::istringstream& stream)
  */
 regexScanner::regexScanner(const string& type,
-                           std::istringstream& stream,
+                           std::wistringstream& stream,
                            int index)
   : _type(type),
     _identity(type),
@@ -39,8 +39,8 @@ regexScanner::regexScanner(const string& type,
 {
   RegexConfProvider rcp;
   rcp.maybeLoad(_identity,stream);
-  _reg = rx::regex(rcp.getRegexValue(_identity, _type),
-                   rx::regex_constants::icase);
+  _reg = rx::make_u32regex(rcp.getRegexValue(_identity, _type),
+                           rx::regex_constants::icase);
 }
 
 /**
@@ -48,18 +48,18 @@ regexScanner::regexScanner(const string& type,
  * \param[in]  s       String to scan
  * \param[out] results List of match results
  */
-void regexScanner::ScanString(const string& s, list<match>& results) const
+void regexScanner::ScanString(const icu::UnicodeString& s, list<match>& results) const
 {
   // Read file into one string
-  string::const_iterator end = s.end();
-  string::const_iterator pos = s.begin();
+  auto pos = s.getBuffer();
+  auto const end = pos + s.length();
   unsigned int intPos = 0;
 
   while (pos != end)
   {
     // Find next match
-    rx::smatch res;
-    if (rx::regex_search(pos, end, res, _reg))
+    rx::u16match res;
+    if (rx::u32regex_search(pos, end, res, _reg))
     {
       // Found match
       results.push_back(match(intPos + res.position(_index),
@@ -73,4 +73,3 @@ void regexScanner::ScanString(const string& s, list<match>& results) const
       break;
   }
 }
-
