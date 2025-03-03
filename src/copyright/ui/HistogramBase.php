@@ -45,6 +45,7 @@ abstract class HistogramBase extends FO_Plugin
     $this->renderer = $container->get('twig.environment');
 
     $this->vars['name']=$this->Name;
+    $this->additionalAgentName = "scancode";
   }
 
   /**
@@ -229,9 +230,11 @@ abstract class HistogramBase extends FO_Plugin
     /* advanced interface allowing user to select dataset (agent version) */
     $dataset = $this->agentName."_dataset";
     $arsCopyrighttable = $this->agentName."_ars";
+    $additionalArsCopyrighttable = $this->additionalAgentName."_ars";
     /* get proper agent_id */
 
     $agentId[] = LatestAgentpk($uploadId, $arsCopyrighttable);
+    $additionalAgentId[] = LatestAgentpk($uploadId, $additionalArsCopyrighttable);
     if ($this->agentName == "copyright") {
       $arsResotable = "reso_ars";
       // $agentId[] = LatestAgentpk($uploadId, $arsResotable);
@@ -240,7 +243,7 @@ abstract class HistogramBase extends FO_Plugin
       }
     }
 
-    if (empty($agentId) || $agentId[0] == 0) {
+    if ((empty($agentId) || $agentId[0] == 0) && (empty($additionalAgentId) || $additionalAgentId[0] == 0)) {
       /* schedule copyright */
       $OutBuf .= ActiveHTTPscript("Schedule");
       $OutBuf .= "<script language='javascript'>\n";
