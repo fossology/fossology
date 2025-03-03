@@ -1,0 +1,9 @@
+label, select {
+    display: block;
+    width: 100%;
+  }
+  
+  #foldercontent {
+    min-height: 150px;
+  }
+  
