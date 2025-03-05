@@ -21,6 +21,25 @@
       <td align='center'>
         {{ "is"|trans }} {{ wholeFolderSize }}
       </td>
+      <td>
+        <form method="GET" action="{{ traceback }}" style="display: inline-block;">
+          <input type="hidden" name="mod" value="{{ pluginName }}">
+          <input type="hidden" name="export" value="csv">
+          <input type="hidden" name="folder" value="{{ currentFolderId }}">
+          <button type="submit" class="btn btn-default btn-sm">
+            <i class="fa fa-file-csv"></i> {{ "Export CSV"|trans }}
+          </button>
+        </form>
+
+        <form method="GET" action="{{ traceback }}" style="display: inline-block; margin-left: 8px;">
+          <input type="hidden" name="mod" value="{{ pluginName }}">
+          <input type="hidden" name="export" value="json">
+          <input type="hidden" name="folder" value="{{ currentFolderId }}">
+          <button type="submit" class="btn btn-default btn-sm">
+            <i class="fa fa-file-code"></i> {{ "Export JSON"|trans }}
+          </button>
+        </form>
+      </td>
     </tr>
   </table>
   <div style="clear:both;"></div>
@@ -35,6 +54,9 @@
       </th>
       <th>
         {{ "Clearing Duration"|trans }}
+      </th>
+      <th>
+        {{ "Upload date"|trans }}
       </th>
     </tr>
   </thead>
