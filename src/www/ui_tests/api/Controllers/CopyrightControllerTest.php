@@ -92,11 +92,11 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
     $this->uploadDao = M::mock(UploadDao::class);
     $this->auth = M::mock(Auth::class);
     $this->copyrightDao = M::mock(CopyrightDao::class);
-    $this->copyrightHist = M::mock('ajax_copyright_hist');
+    $this->copyrightHist = M::mock('CopyrightHistogramProcessPost');
 
     $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
     $this->restHelper->shouldReceive('getPlugin')
-      ->withArgs(['ajax_copyright_hist'])->andReturn($this->copyrightHist);
+      ->withArgs(['ajax-copyright-hist'])->andReturn($this->copyrightHist);
     $this->restHelper->shouldReceive('getUploadDao')
       ->andReturn($this->uploadDao);
     $container->shouldReceive('get')->withArgs(array(

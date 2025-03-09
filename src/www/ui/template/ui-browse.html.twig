@@ -41,10 +41,11 @@
         <div style="text-align:center;" class="btn"><strong><u>{{ 'Folder Navigation'|trans }}</u></strong></div>
         {{ folderNav }}
       </td>
-      <td valign="top" style="background: #efefef; width:1px; font-family:monospace; word-break:break-all;" id="nav-shower" hidden>
+      {# <td valign="top" style="background: #efefef; width:1px; font-family:monospace; word-break:break-all;" id="nav-shower" hidden>
           &raquo;&nbsp;{{ 'Folder Navigation'|trans|replace({' ':'&nbsp;'}) }}&nbsp;&raquo;
-      </td>
+      </td> #}
       <td valign="top">
+        <span class="btn btn-outline-info" id="nav-shower" hidden style="float:left; transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;">></span>
         <div style="text-align:center;font-size:large;"><strong><u>{{ 'Uploads'|trans }} {{ 'in'|trans }} <span id="current-folder">{{ folderName }}</span></u></strong></div>
         <form name="uploadMultiSelect">
         <table class="semibordered" id="browsetbl" width="100%" cellpadding="0">

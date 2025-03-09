@@ -78,7 +78,7 @@ set(CPACK_COMPONENTS_ALL
     scheduler
     softwareHeritage
     spasht
-    spdx2
+    spdx
     reportImport
     wget_agent
     www)
@@ -101,8 +101,9 @@ set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_DEPENDS
     fossology-wgetagent")
 set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_RECOMMENDS
     "fossology-cyclonedx, fossology-monk, fossology-monkbulk, fossology-decider,
-    fossology-readmeoss, fossology-spdx2, fossology-reportimport,
+    fossology-readmeoss, fossology-spdx, fossology-reportimport,
     fossology-softwareheritage, fossology-reuser, fossology-compatibility")
+
 set(CPACK_DEBIAN_FOSSOLOGY_PACKAGE_CONFLICTS
     "fossology-db (<= 1.4.1), fossology-common (<= 1.4.1)")
 
@@ -125,7 +126,8 @@ set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_DEPENDS
     php-mbstring, php7.2-json | php7.3-json | php7.4-json | php-json,
     php-zip, php-xml,
     php7.2-curl | php7.3-curl | php7.4-curl | php8.1-curl | php8.2-curl | php8.3-curl, php-uuid,
-    php7.2-gd | php7.3-gd | php7.4-gd | php8.1-gd | php8.2-gd | php8.3-gd")
+    php7.2-gd | php7.3-gd | php7.4-gd | php8.1-gd | php8.2-gd | php8.3-gd,
+    php7.2-yaml | php7.3-yaml | php7.4-yaml | php8.1-yaml | php8.2-yaml | php8.3-yaml | php-yaml")
 
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_CONTROL_EXTRA
@@ -573,18 +575,23 @@ set(CPACK_DEBIAN_REUSER_PACKAGE_DEPENDS
 
 set(CPACK_DEBIAN_REUSER_PACKAGE_SECTION "utils")
 
-## FOSSOLOGY-SPDX2 PACKAGE
-set(CPACK_DEBIAN_SPDX2_PACKAGE_NAME "fossology-spdx2")
-set(CPACK_DEBIAN_SPDX2_FILE_NAME "fossology-spdx2_${FO_PACKAGE_VERSION}-1_amd64.deb")
-set(CPACK_DEBIAN_SPDX2_DESCRIPTION
-"architecture for analyzing software, SPDX v2.0 generator
+## FOSSOLOGY-SPDX PACKAGE
+set(CPACK_DEBIAN_SPDX_PACKAGE_NAME "fossology-spdx")
+set(CPACK_DEBIAN_SPDX_FILE_NAME "fossology-spdx_${FO_PACKAGE_VERSION}-1_amd64.deb")
+set(CPACK_DEBIAN_SPDX_DESCRIPTION
+"architecture for analyzing software, SPDX v2.0 and v3.0 generator
 ${FO_PACKAGE_COMMON_DESCRIPTION}
-This package contains the spdx2 agent programs and their resources.")
+This package contains the spdx agent programs and their resources.")
 
-set(CPACK_DEBIAN_SPDX2_PACKAGE_DEPENDS
+set(CPACK_DEBIAN_SPDX_PACKAGE_DEPENDS
     "fossology-common")
 
-set(CPACK_DEBIAN_SPDX2_PACKAGE_SECTION "utils")
+set(CPACK_DEBIAN_SPDX_PACKAGE_CONFLICTS
+    "fossology-spdx2 (< 4.5.0)")
+set(CPACK_DEBIAN_SPDX_PACKAGE_REPLACES
+    "fossology-spdx2")
+
+set(CPACK_DEBIAN_SPDX_PACKAGE_SECTION "utils")
 
 ## FOSSOLOGY-REPORTIMPORT PACKAGE
 set(CPACK_DEBIAN_REPORTIMPORT_PACKAGE_NAME "fossology-reportimport")

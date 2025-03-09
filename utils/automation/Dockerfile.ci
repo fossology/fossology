@@ -71,6 +71,7 @@ COPY --from=builder /fossology/run-deps /opt/run-deps
 
 COPY ./utils/automation/fossologyscanner.py /bin/fossologyscanner
 COPY ./utils/automation/FoScanner /bin/FoScanner
+COPY ./utils/automation/ScanDeps /bin/ScanDeps
 COPY ./utils/automation/requirements.txt /bin/
 
 RUN echo 'APT::Install-Recommends "0" ; APT::Install-Suggests "0" ;' >> /etc/apt/apt.conf \

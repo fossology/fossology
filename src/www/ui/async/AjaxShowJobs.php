@@ -289,6 +289,18 @@ class AjaxShowJobs extends \FO_Plugin
             case 'spdx2csv':
               $reportName = "SPDX2 CSV report";
               break;
+            case 'spdx3jsonld':
+              $reportName = "SPDX3 JSON-LD report";
+              break;
+            case 'spdx3json':
+              $reportName = "SPDX3 JSON report";
+              break;
+            case 'spdx3rdf':
+              $reportName = "SPDX3 RDF report";
+              break;
+            case 'spdx3tv':
+              $reportName = "SPDX3 tag/value report";
+              break;
             case 'dep5':
               $reportName = "DEP5 copyright file";
               break;
