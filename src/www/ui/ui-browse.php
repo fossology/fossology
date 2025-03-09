@@ -363,7 +363,7 @@ class ui_browse extends FO_Plugin
     $assigneeArray = $userDao->getUserChoices();
     $assigneeArray[Auth::getUserId()] = _('-- Me --');
     $assigneeArray[1] = _('Unassigned');
-    $assigneeArray[0] = '';
+    $assigneeArray[0] = _('None');
     return $assigneeArray;
   }
 }
