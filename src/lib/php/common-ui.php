@@ -311,11 +311,35 @@ function Get1stUploadtreeID($upload)
  */
 function Convert2BrowserTime($server_time)
 {
-  $server_timezone = date_default_timezone_get();
-  $browser_time = new \DateTime($server_time, new \DateTimeZone($server_timezone));
-  if (array_key_exists("timezone", $_SESSION)) {
-    $tz = $_SESSION["timezone"];
-    $browser_time->setTimeZone(new \DateTimeZone($tz));
+  if (empty($server_time)) {
+    throw new \InvalidArgumentException('Server time cannot be empty');
   }
-  return $browser_time->format('Y-m-d H:i:s');
+
+  $server_timezone = date_default_timezone_get();
+
+  try {
+    $browser_time = new \DateTime($server_time, new \DateTimeZone($server_timezone));
+
+    if (session_status() === PHP_SESSION_ACTIVE && !empty($_SESSION['timezone'])) {
+      $tz = $_SESSION['timezone'];
+      if (in_array($tz, timezone_identifiers_list(), true)) {
+        $browser_time->setTimezone(new \DateTimeZone($tz));
+      } else {
+        throw new \UnexpectedValueException("Invalid timezone in session: {$tz}");
+      }
+    }
+
+    return $browser_time->format('Y-m-d H:i:s');
+  } catch (\Exception $e) {
+    $ts = strtotime($server_time);
+    if ($ts === false) {
+      throw new \InvalidArgumentException(
+        "Unparseable server time: {$server_time}",
+        0,
+        $e
+      );
+    }
+
+    return date('Y-m-d H:i:s', $ts);
+  }
 }
