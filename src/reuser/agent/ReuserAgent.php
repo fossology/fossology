@@ -130,7 +130,7 @@ class ReuserAgent extends Agent
   protected function reuseConfSettings($uploadId, $reusedUploadId)
   {
     if (!$this->uploadDao->insertReportConfReuse($uploadId, $reusedUploadId)) {
-      echo "INFO :: Report configuration for select upload doesn't exists. Unable to copy!!!";
+      
     }
     $this->heartbeat(1);
     return true;
