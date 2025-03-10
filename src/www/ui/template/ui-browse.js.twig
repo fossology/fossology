@@ -1,5 +1,4 @@
 {# SPDX-FileCopyrightText: © 2014-2018 Siemens AG
-
    SPDX-License-Identifier: FSFAP
 #}
 tableColumns = [
@@ -21,28 +20,82 @@ tableSorting = [
 var folder = {{ folder }};
 var browseTable;
 
-dataTableConfig =
-    {
-      "bServerSide": true,
-      "sAjaxSource": "?mod=browse-processPost",
-      "fnServerData": function (sSource, aoData, fnCallback) {
-          aoData.push({"name": "folder", "value": folder});
-          aoData.push({"name": "show", "value": "{{ show }}"});
-        aoData.push({"name": "assigneeSelected", "value": assigneeSelected});
-        aoData.push({"name": "statusSelected", "value": statusSelected});
-        $.getJSON(sSource, aoData, fnCallback).fail(failed);
-      },
-      "sPaginationType": "listbox",
-      "aoColumns": tableColumns,
-      "aaSorting": tableSorting,
-      "iDisplayLength": 50,
-      "bProcessing": true,
-      "bStateSave": true,
-      "bRetrieve": true
-    };
+// Function to truncate comments and apply tooltip styling
+function truncateComments() {
+  $('#browsetbl tbody tr').each(function() {
+    var commentCell = $(this).find('td:nth-child(4)'); // Adjust as needed
+    var descriptionCell = $(this).find('td:nth-child(1)');
+
+    // Truncate Comment Column (4th column)
+    var originalText = commentCell.text().trim();
+
+    if (originalText) {
+      var parts = originalText.split(',');
+      var commentText = parts[parts.length - 1].trim();
+
+      if (commentText.length > 40) {
+        commentCell.html('<span class="comment-tooltip" title="' +
+          commentText.replace(/"/g, '&quot;') + '">' +
+          commentText.substring(0, 40) + '...</span>');
+      } else {
+        commentCell.text(commentText);
+      }
+    } else {
+      commentCell.text('');
+    }
+
+    // Truncate <i> Tag inside First Column (1st column)
+    var iconTag = descriptionCell.find('i');
+    if (iconTag.length) {
+      var iconText = iconTag.text().trim();
+      if (iconText.length > 30) {
+        iconTag.html('<span class="comment-tooltip" title="' +
+          iconText.replace(/"/g, '&quot;') + '">' +
+          iconText.substring(0, 30) + '...</span>');
+      }
+    }
+  });
+
+  // Add tooltip styling
+  $('<style>')
+    .prop('type', 'text/css')
+    .html(`
+      .comment-tooltip {
+        cursor: help;
+        text-decoration: underline dotted;
+      }
+    `)
+    .appendTo('head');
+}
+
+
+// DataTable configuration
+var dataTableConfig = {
+  "bServerSide": true,
+  "sAjaxSource": "?mod=browse-processPost",
+  "fnServerData": function (sSource, aoData, fnCallback) {
+    // Append additional parameters to the AJAX request
+    aoData.push({"name": "folder", "value": folder});
+    aoData.push({"name": "show", "value": "{{ show }}"});
+    aoData.push({"name": "assigneeSelected", "value": assigneeSelected});
+    aoData.push({"name": "statusSelected", "value": statusSelected});
+    $.getJSON(sSource, aoData, fnCallback).fail(failed);
+  },
+  "sPaginationType": "listbox",
+  "aoColumns": tableColumns,
+  "aaSorting": tableSorting,
+  "iDisplayLength": 50,
+  "bProcessing": true,
+  "bStateSave": true,
+  "bRetrieve": true,
+  "fnDrawCallback": function() {
+    truncateComments(); // Call the truncation function after drawing the table
+  }
+};
 
 function createBrowseTable() {
   var otable = $('#browsetbl').DataTable(dataTableConfig);
+  truncateComments(); // Initial truncation after table creation
   return otable;
 }
 
