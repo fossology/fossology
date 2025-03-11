@@ -88,6 +88,7 @@ RUN mkdir -p /usr/share/man/man1 /usr/share/man/man7 \
       python3-psycopg2 \
       python3-requests \
       python3-pip \
+      libyaml-cpp0.7 \
  && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --offline --runtime -y \
  && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
 
