@@ -39,13 +39,17 @@ class LicenseMainGetter extends ClearedGetterCommon
     $allStatements = array();
     foreach ($mainLicIds as $originLicenseId) {
       $allLicenseCols = $this->licenseDao->getLicenseById($originLicenseId, $groupId);
+      // Null-check: if the license is missing, log and skip this ID.
+      if ($allLicenseCols === null) {
+        error_log("Error: License ID " . $originLicenseId . " not found in the database.");
+        exit;
+      }
       $allStatements[] = array(
         'licenseId' => $originLicenseId,
         'risk' => $allLicenseCols->getRisk(),
         'content' => $licenseMap->getProjectedSpdxId($originLicenseId),
         'text' => $allLicenseCols->getText(),
-        'name' => $licenseMap->getProjectedShortname($originLicenseId,
-            $allLicenseCols->getShortName())
+        'name' => $licenseMap->getProjectedShortname($originLicenseId, $allLicenseCols->getShortName())
       );
     }
     return $allStatements;
