@@ -394,7 +394,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _($key);
-          $entry['value'] = htmlentities($R["$value"]);
+          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES, 'UTF-8');
           $Count++;
           $vars['packageEntries'][] = $entry;
         }
@@ -407,7 +407,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Requires");
-          $entry['value'] = htmlentities($R['req_value']);
+          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES, 'UTF-8');
           $Count++;
           $vars['packageRequires'][] = $entry;
         }
@@ -429,7 +429,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _($key);
-          $entry['value'] = htmlentities($R["$value"]);
+          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES, 'UTF-8');
           $Count++;
           $vars['packageEntries'][] = $entry;
         }
@@ -443,7 +443,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Depends");
-          $entry['value'] = htmlentities($R['req_value']);
+          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES, 'UTF-8');
           $Count++;
           $vars['packageRequires'][] = $entry;
         }
@@ -466,7 +466,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _($key);
-          $entry['value'] = htmlentities($R["$value"]);
+          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES, 'UTF-8');
           $Count++;
           $vars['packageEntries'][] = $entry;
         }
@@ -480,7 +480,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Build-Depends");
-          $entry['value'] = htmlentities($R['req_value']);
+          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES, 'UTF-8');
           $Count++;
           $vars['packageRequires'][] = $entry;
         }
