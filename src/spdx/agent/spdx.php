@@ -224,15 +224,17 @@ class SpdxAgent extends Agent
     }
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
     $this->computeUri($uploadId);
-
     $docLicense = $this->licenseDao->getLicenseByShortName(self::DATA_LICENSE);
+    if ($docLicense === null) {
+      error_log("Warning: License with short name " . self::DATA_LICENSE . " not found in the database. Using fallback license.");
+      $docLicense = new License(0, self::DATA_LICENSE, "Fallback License", "Unknown", "No license text available", "", "", "");
+    }
     $docLicenseId = $docLicense->getId() . "-" . md5($docLicense->getText());
     $this->licensesInDocument[$docLicenseId] = (new SpdxLicenseInfo())
       ->setLicenseObj($docLicense)
       ->setListedLicense(true)
       ->setCustomText(false)
       ->setTextPrinted(true);
-
     $packageNodes = $this->renderPackage($uploadId);
     $additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
     $packageIds = array($uploadId);
@@ -240,7 +242,6 @@ class SpdxAgent extends Agent
       $packageNodes .= $this->renderPackage($additionalId);
       $packageIds[] = $additionalId;
     }
-
     $this->writeReport($packageNodes, $packageIds, $uploadId);
     return true;
   }
