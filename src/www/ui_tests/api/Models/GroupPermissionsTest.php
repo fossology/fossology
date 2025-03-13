@@ -17,6 +17,19 @@ use Monolog\Test\TestCase;
 
 class GroupPermissionsTest extends TestCase
 {
+  ////// Constructor Tests //////
+
+  /**
+   * Tests that the GroupPermissions constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $groupPermission = new GroupPermission("GroupPerm", 4, "fossy");
+    $this->assertInstanceOf(GroupPermission::class, $groupPermission);
+  }
+
   /**
    * Provides test data and an instance of the GroupPermission class.
    *

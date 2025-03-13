@@ -56,6 +56,7 @@ class Agent
     $this->agentName = $agentName;
     $this->currentAgentId = $currentAgentId;
     $this->currentAgentRev = $currentAgentRev;
+    $this->isAgentRunning = $isAgentRunning;
   }
 
   /**
