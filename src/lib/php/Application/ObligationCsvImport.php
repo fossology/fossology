@@ -101,14 +101,9 @@ class ObligationCsvImport
         $jsonContent = fread($handle, filesize($filename));
         $data = json_decode($jsonContent, true);
         if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
-          $msg .= "Error decoding JSON: " . json_last_error_msg()."\n";
+          $msg .= "Error decoding JSON: " . json_last_error_msg() . "\n";
         }
-        foreach ($data as $row) {
-          $log = $this->handleCsvObligation($this->handleRowJson($row));
-          if (!empty($log)) {
-            $msg .= "$log\n";
-          }
-        }
+        $msg = $this->importJsonData($data, $msg);
         $msg .= _('Read json').(":". count($data) ." ")._('obligations');
       }
     } catch(\Exception $e) {
@@ -353,5 +348,21 @@ class ObligationCsvImport
     $this->dbManager->getSingleRow('UPDATE obligation_ref SET ob_classification=$2, ob_modifications=$3, ob_comment=$4 where ob_pk=$1',
       array($exists, $row['classification'], $row['modifications'], $row['comment']),
       __METHOD__ . '.updateOtherOb');
+  }
+
+  /**
+   * @param $data
+   * @param string $msg
+   * @return string
+   */
+  public function importJsonData($data, string $msg): string
+  {
+    foreach ($data as $row) {
+      $log = $this->handleCsvObligation($this->handleRowJson($row));
+      if (!empty($log)) {
+        $msg .= "$log\n";
+      }
+    }
+    return $msg;
   }
 }

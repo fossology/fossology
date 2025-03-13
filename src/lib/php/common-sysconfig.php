@@ -597,10 +597,16 @@ function Populate_sysconfig()
     "null");
 
   $variable = "LicenseDBContent";
-  $prompt = _('Export endpoint');
+  $prompt = _('Export endpoint Licenses');
   $desc = _('Endpoint to Export licenses in JSON e.g. /licenses/export');
   $valueArray[$variable] = array("'$variable'", "'/licenses/export'", "'$prompt'",
     strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "3", "'$desc'", "null", "null");
+
+  $variable = "LicenseDBContentObligations";
+  $prompt = _('Export endpoint Obligations');
+  $desc = _('Endpoint to Export Obligations in JSON e.g. /obligations/export');
+  $valueArray[$variable] = array("'$variable'", "'/obligations/export'", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "4", "'$desc'", "null", "null");
 
   $variable = "LicenseDBToken";
   $prompt = _('Auth token For LicenseDB');
