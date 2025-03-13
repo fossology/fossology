@@ -311,11 +311,34 @@ function Get1stUploadtreeID($upload)
  */
 function Convert2BrowserTime($server_time)
 {
-  $server_timezone = date_default_timezone_get();
-  $browser_time = new \DateTime($server_time, new \DateTimeZone($server_timezone));
-  if (array_key_exists("timezone", $_SESSION)) {
-    $tz = $_SESSION["timezone"];
-    $browser_time->setTimeZone(new \DateTimeZone($tz));
+  try {
+    if (empty($server_time)) {
+      throw new \InvalidArgumentException('Server time cannot be empty');
+    }
+    $server_timezone = date_default_timezone_get();
+
+    try {
+      $browser_time = new \DateTime($server_time, new \DateTimeZone($server_timezone));
+    } catch (\Exception $e) {
+      error_log("Invalid server time format: $server_time");
+      return false;
+    }
+
+    if (session_status() === PHP_SESSION_ACTIVE &&
+        isset($_SESSION["timezone"])) {
+      $tz = $_SESSION["timezone"];
+
+      if (in_array($tz, timezone_identifiers_list())) {
+        $browser_time->setTimeZone(new \DateTimeZone($tz));
+      } else {
+        error_log("Invalid timezone in session: $tz. Falling back to server timezone.");
+        $browser_time->setTimeZone(new \DateTimeZone($server_timezone));
+      }
+    }
+
+    return $browser_time->format('Y-m-d H:i:s');
+  } catch (\Exception $e) {
+    error_log("Error in Convert2BrowserTime: " . $e->getMessage());
+    return false;
   }
-  return $browser_time->format('Y-m-d H:i:s');
 }
