@@ -4,6 +4,7 @@
 # SPDX-FileCopyrightText: © mishra.gaurav@siemens.com
 # SPDX-FileCopyrightText: © 2016-2017 TNG Technology Consulting GmbH
 # SPDX-FileCopyrightText: © maximilian.huber@tngtech.com
+# SPDX-FileCopyrightText: © kaushlendra-pratap.singh@siemens.com
 #
 # SPDX-License-Identifier: FSFAP
 #
@@ -47,8 +48,8 @@ RUN mkdir -p /fossology/dependencies-for-runtime \
  && cp -R /fossology/src /fossology/utils /fossology/dependencies-for-runtime/
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
- && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --build -y \
- && DEBIAN_FRONTEND=noninteractive /fossology/install/fo-install-pythondeps --build -y \
+ && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --buildtime -y \
+ && DEBIAN_FRONTEND=noninteractive /fossology/install/fo-install-pythondeps --buildtime -y \
  && rm -rf /var/lib/apt/lists/*
 
 COPY . .
@@ -88,7 +89,6 @@ RUN mkdir -p /usr/share/man/man1 /usr/share/man/man7 \
       python3-psycopg2 \
       python3-requests \
       python3-pip \
-      libyaml-cpp0.7 \
  && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --offline --runtime -y \
  && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
 

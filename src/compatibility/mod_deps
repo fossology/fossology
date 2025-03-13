@@ -95,9 +95,9 @@ if [[ $RUNTIME ]]; then
         bullseye)
           apt-get $YesOpt install libjsoncpp24 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0 libyaml-cpp0.6;;
         bookworm)
-          apt-get $YesOpt install libjsoncpp24 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0 libyaml-cpp0.7;;
+          apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0 libyaml-cpp0.7;;
         sid)
-          apt-get $YesOpt install libjsoncpp24 libboost-filesystem1.83.0 libboost-program-options1.83.0 libboost-regex1.83.0 libyaml-cpp0.8;;
+          apt-get $YesOpt install libjsoncpp26 libboost-filesystem1.83.0 libboost-program-options1.83.0 libboost-regex1.83.0 libyaml-cpp0.8;;
         focal)
           apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.71.0 libboost-program-options1.71.0 libboost-regex1.71.0 libyaml-cpp0.6;;
         jammy)
