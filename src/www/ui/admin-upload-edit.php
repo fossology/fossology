@@ -74,10 +74,15 @@ class upload_properties extends FO_Plugin
         __METHOD__ . '.updateUpload.name');
     }
 
-    if (! empty($newDesc)) {
-      $trimNewDesc = trim($newDesc);
-      $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=$2 WHERE upload_pk=$1",
-        array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
+    if ($newDesc !== null) { 
+      if (empty($newDesc)) {
+        $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=NULL WHERE upload_pk=$1",
+            array($uploadId), __METHOD__ . '.updateUpload.desc');
+      } else {
+        $trimNewDesc = trim($newDesc);
+        $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=$2 WHERE upload_pk=$1",
+          array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
+      }
     }
     return 1;
   }

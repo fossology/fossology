@@ -88,7 +88,7 @@ class AjaxBrowse extends DefaultPlugin
     } else if (! empty($uploadId) && ! empty($direction)) {
       $uploadBrowseProxy = new UploadBrowseProxy($groupId, $this->userPerm, $this->dbManager);
       $uploadBrowseProxy->moveUploadToInfinity($uploadId, $direction == 'top');
-    } else if (!empty($uploadId) && !empty($commentText) && !empty($statusId)) {
+    } else if (!empty($uploadId) && !empty($statusId)) {
       $uploadBrowseProxy = new UploadBrowseProxy($groupId, $this->userPerm, $this->dbManager);
       $uploadBrowseProxy->setStatusAndComment($uploadId, $statusId, $commentText);
     } else {
