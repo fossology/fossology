@@ -42,6 +42,12 @@ class CycloneDXAgent extends Agent
 {
   const OUTPUT_FORMAT_KEY = "outputFormat";               ///< Argument key for output format
   const DEFAULT_OUTPUT_FORMAT = "cyclonedx_json";                  ///< Default output format
+  const UPLOADS_ADD_KEY = "uploadsAdd";
+
+  /** @var array $addtionalUploads
+   * Array of addtional uploads
+   */
+  private $additionalUploads = [];
 
   /** @var BomReportGenerator $reportGenerator
    * UploadDao object
@@ -98,13 +104,22 @@ class CycloneDXAgent extends Agent
   function __construct()
   {
     // deduce the agent name from the command line arguments
-    $args = getopt("", array(self::OUTPUT_FORMAT_KEY.'::'));
+    $args = getopt("", array(
+      self::OUTPUT_FORMAT_KEY.'::',
+      self::UPLOADS_ADD_KEY.'::'
+    ));
     $agentName = "";
     if (array_key_exists(self::OUTPUT_FORMAT_KEY, $args)) {
       $agentName = trim($args[self::OUTPUT_FORMAT_KEY]);
     }
     if (empty($agentName)) {
         $agentName = self::DEFAULT_OUTPUT_FORMAT;
+    }
+    if (array_key_exists(self::UPLOADS_ADD_KEY, $args)) {
+      $uploadsString = $args[self::UPLOADS_ADD_KEY];
+      if (!empty($uploadsString)) {
+          $this->additionalUploads = explode(',', $uploadsString);
+      }
     }
 
     parent::__construct($agentName, AGENT_VERSION, AGENT_REV);
@@ -141,7 +156,12 @@ class CycloneDXAgent extends Agent
    */
   protected function getUri($fileBase)
   {
-    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+    if (count($this->additionalUploads) > 0) {
+      $fileName = $fileBase . "multifile" . "_" . strtoupper($this->outputFormat);
+    } else {
+      $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+    }
+
     return $fileName .".json" ;
   }
 
