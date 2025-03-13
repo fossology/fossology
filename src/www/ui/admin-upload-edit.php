@@ -74,7 +74,7 @@ class upload_properties extends FO_Plugin
         __METHOD__ . '.updateUpload.name');
     }
 
-    if ($newDesc !== null) { 
+    if ($newDesc !== null) {
       if (empty($newDesc)) {
         $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=NULL WHERE upload_pk=$1",
             array($uploadId), __METHOD__ . '.updateUpload.desc');
