@@ -17,22 +17,37 @@ $(document).ready(function() {
   var t = $("#adminLicenseCommentTable").DataTable({
     "processing": true,
     "paginationType": "listbox",
-    "order": [[ 1, 'asc' ]],
+    "order": [[1, 'asc']],  
     "autoWidth": false,
-    "columnDefs": [{
-      "createdCell": function (cell) {
-        $(cell).attr("style", "text-align:center");
-      },
-      "searchable": false,
-      "targets": [0]
-    },{
-      "orderable": false,
-      "targets": [0,2,3]
-    },{
-      "orderable": true,
-      "targets": [1]
-    }],
-  });
+    "columnDefs": [
+        {
+            "createdCell": function (cell) {
+                $(cell).attr("style", "text-align:center");
+            },
+            "searchable": false, 
+            "targets": [0]
+        },
+        {
+            "orderable": false,
+            "targets": [0, 2, 3]
+        },
+        {
+            "searchable": true,
+            "orderable" : true,
+            "targets": [1],
+            "render": function (data, type, row) {
+              if (type === 'filter' || type === 'search') {
+                  return $(data).val(); 
+              }
+              return data; 
+            }
+        },
+        {
+            "searchable": true,
+            "targets": [2],
+        }
+    ]
+});
 
   t.on('order.dt search.dt', function () {
     t.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
