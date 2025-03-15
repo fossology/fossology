@@ -8,7 +8,6 @@
 #
 # Description: Recipe for setting up a multi container FOSSology
 #              Docker setup with separate Database instance
-version: '3.5'
 services:
   scheduler:
     build:
