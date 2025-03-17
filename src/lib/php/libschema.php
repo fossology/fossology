@@ -520,7 +520,7 @@ class fo_libschema
       $table = $row['table_name'];
       $column = $row['column_name'];
       if (empty($this->schema['TABLE'][$table]) || empty($this->schema['TABLE'][$table][$column])) {
-        $sql = "DROP VIEW \"$View\";";
+        $sql = "DROP VIEW IF EXISTS \"$View\";";
         $this->applyOrEchoOnce($sql);
       }
     }

@@ -81,7 +81,8 @@ class AdminLicenseFromCSV extends DefaultPlugin
   {
     $vars = array();
     if (!$request->isMethod('POST')) {
-      $vars['licenseDBHealth'] = $this->checkLicenseDBHealth();
+      $getHealth = $this->configuration['url'] . $this->configuration['uri'] . "/health";
+      $vars['licenseDBHealth'] = HttpUtils::checkLicenseDBHealth($getHealth, $this->guzzleClient);
     }
     if ($request->isMethod('POST')) {
       if ($request->get('importFrom') === 'licensedb') {
@@ -135,11 +136,16 @@ class AdminLicenseFromCSV extends DefaultPlugin
         $data = json_decode($response->getBody()->getContents());
       }
 
-      if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
-        return $msg . "Error decoding JSON: " . json_last_error_msg() . "\n";
-      } else {
-        return $this->licenseCsvImport->importJsonData($data, $msg);
+      if ($data === null) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
+          return $msg . "Error decoding JSON: " . json_last_error_msg() . "\n";
+        }
+        return $msg . "No Licenses Found";
       }
+      if (empty($data)) {
+        return $msg . "There are no Licenses Present in LicenseDB";
+      }
+      return $this->licenseCsvImport->importJsonData($data, $msg);
     } catch (RequestException|GuzzleException $e) {
       return $msg . _('Something Went Wrong, check if host is accessible') . ': ' . $e->getMessage();
     }
@@ -172,30 +178,6 @@ class AdminLicenseFromCSV extends DefaultPlugin
     $this->licenseCsvImport->setEnclosure($enclosure);
 
     return array(true, $this->licenseCsvImport->handleFile($uploadedFile->getRealPath(), $uploadedFile->getClientOriginalExtension()), 200);
-  }
-
-
-  /**
-   * Checks the health status of the license database by sending a GET request to a specified health endpoint.
-   * Returns a boolean result indicating whether the database is reachable and healthy.
-   * Implements error handling for HTTP request failures.
-   *
-   * @return bool True if the database health check succeeds with an HTTP 200 response, false otherwise.
-   */
-  public function checkLicenseDBHealth()
-  {
-
-    $getHealth = $this->configuration['url'] . $this->configuration['uri'] . "/health";
-    try {
-      $response = $this->guzzleClient->get($getHealth);
-      if ($response->getStatusCode() === 200) {
-        return true;
-      }
-    } catch (RequestException|GuzzleException $e) {
-      return false;
-    }
-
-    return false;
   }
 }
 
