@@ -4,6 +4,82 @@
 -->
 # Changelog of FOSSology
 
+### 4.5.0 (Mar 18th 2025)
+
+This release adds important corrections to
+[4.4.0](https://github.com/fossology/fossology/releases/tag/4.4.0)
+
+The release 4.5.0 introduces a number of corrections to
+[4.4.0](https://github.com/fossology/fossology/releases/tag/4.4.0)
+and changes to FOSSology, including:
+
+* Support SPDX v3.0 Reports
+  - SPDX3.0 report in JSON format.
+  - SPDX3.0 report in JSON-LD format.
+  - SPDX3.0 report in RDF format.
+  - SPDX3.0 report in tag/value format.
+* New Compatibility Agent with auto-conclusion feature using license_type
+  - Users can create new license type from admin > customize
+  - By default all the licenses are of type 'permissive'.
+  - One can change license type by editing a license.
+  - For importing OSADL compatibility matrix refer (documentation.)[https://github.com/fossology/fossology/blob/master/utils/OSADL_CONVERTOR.md]
+  - Create/update compatibility rules from admin.
+* JSON format export and import of licenses and obligations.
+* Import licenses from licenseDb.
+* Multi upload reuse support.
+* Improved ML based copyright false positive deactivation and clutter.
+  - Execute `fo-postinstall --python-experimental` to install this feature.
+* Number of API endpoints & test cases for existing features.
+
+#### Credits to contributors for 4.5.0
+
+From the GIT commit history, we have the following contributors since
+[4.4.0](https://github.com/fossology/fossology/releases/tag/4.4.0):
+
+```
+> abhi-kumar17871 <akumar17871@gmail.com>
+> abhishekrj02 <abhishekbokaro442@gmail.com>
+> Akash Kumar Sah <akashsah2003@gmail.com>
+> Alberto Pianon <alberto@pianon.eu>
+> Andreas Menzl <Andreas.Menzl@magna.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> deo002 <oberoidearsh@gmail.com>
+> Dinesh Ravi <dineshr93@gmail.com>
+> Divij Sharma <divijs75@gmail.com>
+> Florian Greinacher <florian@greinacher.de>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Grigory Balashov <g.balashov@omp.ru>
+> Harshit Gandhi <gandhiharshit716@gmail.com>
+> Hero2323 <abdelrahmanjamal5565@gmail.com>
+> Ibrahim-Muhammad13 <ibrahimmuhammad13720@gmail.com>
+> its-sushant <sushant.kumar@siemens-healthineers.com>
+> Jan Altenberg <jan.altenberg@osadl.org>
+> Jeronimo Ortiz <jeronimo.ortiz@scanoss.com>
+> Kaushlendra Pratap Singh <kaushlendra-pratap.singh@siemens.com>
+> martyone <martin.kampas@seafarix.com>
+> Rajul Jha <rajuljha49@gmail.com>
+> scanoss-qg <quique.goni@scanoss.com>
+> Shaheem Azmal M MD <shaheem.azmal@gmail.com>
+> Sourav Bhowmik <sourav.bhowmik@siemens.com>
+> Sushant Kumar <sushant.kumar@siemens-healthineers.com>
+> valens200 <valensniyonsenga2003@gmail.com>
+
+```
+
+#### Features
+
+* `8a34040b8` feat(import): Import Obligations From LicenseDB
+
+#### Corrections
+
+* `551899e62` fix(db): check on drop view if exists
+* `f705e3e65` fix(docker): Runtime dependency not found for compatibility
+* `ed9403d28` fix(docker): add missing dependency
+
+#### Infrastructure
+
+* `cd3ea88c0` chore(docker): Removed version from docker-compose.yml
+
 ### 4.5.0-rc2 (Mar 3rd 2025)
 
 This release adds important corrections to
