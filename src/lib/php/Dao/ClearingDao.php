@@ -843,6 +843,13 @@ INSERT INTO clearing_decision (
       }
     } else {
       $this->dbManager->begin();
+      
+      $sql = $uploadTreeProxy->asCTE() .
+        ' SELECT uploadtree_pk FROM UploadTreeView;';
+      $itemRows = $this->dbManager->getRows($sql, $params,
+        __METHOD__ . ".getItemsForReset");
+      $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
+      
       $params[] = $decisionMark;
       $sql = $uploadTreeProxy->asCTE() .
         ' DELETE FROM clearing_decision WHERE clearing_decision_pk IN (
@@ -873,12 +880,49 @@ INSERT INTO clearing_decision (
         "clearing_decision_fk = ANY($1::int[]);";
       $this->dbManager->getSingleRow($delCdEventSql, array($clearingDecisions),
         __METHOD__ . ".deleteCdEvent");
+      
+      /** @var ClearingDecisionProcessor $clearingDecisionEventProcessor */
+      $clearingDecisionEventProcessor = $GLOBALS['container']->get(
+        'businessrules.clearing_decision_processor');
+      
+      foreach ($itemRows as $itemRow) {
+        $itemBounds = $this->uploadDao->getItemTreeBounds(
+          $itemRow['uploadtree_pk'], $uploadTreeTableName);
+        
+        $this->insertNullDecision($itemBounds, $userId, $groupId);
+      }
+      
       $this->dbManager->commit();
       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId,
         'copyright', 'rollback');
     }
   }
 
+/**
+ * @param ItemTreeBounds $itemBounds
+ * @param int $userId
+ * @param int $groupId
+ */
+  protected function insertNullDecision(ItemTreeBounds $itemBounds, $userId, $groupId)
+  {
+    $uploadTreeId = $itemBounds->getItemId();
+    $uploadId = $itemBounds->getUploadId();
+    
+    /** @var ClearingDecisionProcessor $clearingDecisionProcessor */
+    $clearingDecisionProcessor = $GLOBALS['container']->get(
+      'businessrules.clearing_decision_processor');
+      
+    $noDecisionType = $clearingDecisionProcessor::NO_LICENSE_KNOWN_DECISION_TYPE;
+    
+    $sql = "INSERT INTO clearing_decision 
+            (uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) 
+            SELECT $1, pfile_fk, $2, $3, $4, " . DecisionScopes::ITEM . ", now() 
+            FROM uploadtree 
+            WHERE uploadtree_pk = $1;";
+    
+    $this->dbManager->getSingleRow($sql, array($uploadTreeId, $userId, $groupId, $noDecisionType),
+      __METHOD__ . ".insertNullDecision");
+  }
   /**
    * @param int $uploadId
    * @param int $groupId
