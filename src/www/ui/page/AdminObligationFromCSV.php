@@ -55,7 +55,6 @@ class AdminObligationFromCSV extends DefaultPlugin
       'url' => trim($this->sysconfig['LicenseDBURL']),
       'uri' => trim($this->sysconfig['LicenseDBBaseURL']),
       'content' => trim($this->sysconfig['LicenseDBContentObligations']),
-      'maxtime' => intval($this->sysconfig['LicenseDBSleep']),
       'token' => trim($this->sysconfig['LicenseDBToken'])
     ];
 
