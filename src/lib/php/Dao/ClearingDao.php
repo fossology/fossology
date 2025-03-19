@@ -817,39 +817,34 @@ INSERT INTO clearing_decision (
    * @param bool $removeDecision
    * @param int $decisionMark
    */
-  protected function markDirectoryAsDecisionTypeRec(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $removeDecision=false, $decisionMark=DecisionTypes::IRRELEVANT)
+  protected function markDirectoryAsDecisionTypeRec(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $removeDecision = false, $decisionMark = DecisionTypes::IRRELEVANT)
   {
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $params[] = $groupId;
     $a = count($params);
-    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>'noLicense',
-                     UploadTreeProxy::OPT_ITEM_FILTER=>' AND (lft BETWEEN $1 AND $2)',
-                     UploadTreeProxy::OPT_GROUP_ID=>'$'.$a);
+    $options = array(
+      UploadTreeProxy::OPT_SKIP_THESE => 'noLicense',
+      UploadTreeProxy::OPT_ITEM_FILTER => ' AND (lft BETWEEN $1 AND $2)',
+      UploadTreeProxy::OPT_GROUP_ID => '$' . $a
+    );
     $uploadTreeProxy = new UploadTreeProxy($itemTreeBounds->getUploadId(), $options, $itemTreeBounds->getUploadTreeTableName());
     if (!$removeDecision) {
-      $sql = $uploadTreeProxy->asCTE() .
-        ' SELECT uploadtree_pk FROM UploadTreeView;';
-      $itemRows = $this->dbManager->getRows($sql, $params,
-        __METHOD__ . ".getRevelantItems");
+      $sql = $uploadTreeProxy->asCTE() . ' SELECT uploadtree_pk FROM UploadTreeView;';
+      $itemRows = $this->dbManager->getRows($sql, $params, __METHOD__ . ".getRevelantItems");
       $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
       /** @var ClearingDecisionProcessor $clearingDecisionEventProcessor */
-      $clearingDecisionEventProcessor = $GLOBALS['container']->get(
-        'businessrules.clearing_decision_processor');
+      $clearingDecisionEventProcessor = $GLOBALS['container']->get('businessrules.clearing_decision_processor');
       foreach ($itemRows as $itemRow) {
-        $itemBounds = $this->uploadDao->getItemTreeBounds(
-          $itemRow['uploadtree_pk'], $uploadTreeTableName);
-        $clearingDecisionEventProcessor->makeDecisionFromLastEvents(
-          $itemBounds, $userId, $groupId, $decisionMark, DecisionScopes::ITEM);
+        $itemBounds = $this->uploadDao->getItemTreeBounds($itemRow['uploadtree_pk'], $uploadTreeTableName);
+        $clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $groupId, $decisionMark, DecisionScopes::ITEM);
       }
     } else {
       $this->dbManager->begin();
-      
-      $sql = $uploadTreeProxy->asCTE() .
-        ' SELECT uploadtree_pk FROM UploadTreeView;';
-      $itemRows = $this->dbManager->getRows($sql, $params,
-        __METHOD__ . ".getItemsForReset");
+
+      $sql = $uploadTreeProxy->asCTE() . ' SELECT uploadtree_pk FROM UploadTreeView;';
+      $itemRows = $this->dbManager->getRows($sql, $params, __METHOD__ . ".getItemsForReset");
       $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
-      
+
       $params[] = $decisionMark;
       $sql = $uploadTreeProxy->asCTE() .
         ' DELETE FROM clearing_decision WHERE clearing_decision_pk IN (
@@ -863,9 +858,8 @@ INSERT INTO clearing_decision (
             AND cd.date_added = cd2.date_added
             AND decision_type = $' . ($a + 1) . ')
          RETURNING clearing_decision_pk;';
-      $clearingDecisionRows = $this->dbManager->getRows($sql, $params,
-        __METHOD__ . ".getRelevantDecisions");
-      $clearingDecisions = array_map(function($x) {
+      $clearingDecisionRows = $this->dbManager->getRows($sql, $params, __METHOD__ . ".getRelevantDecisions");
+      $clearingDecisions = array_map(function ($x) {
         return $x['clearing_decision_pk'];
       }, $clearingDecisionRows);
       $clearingDecisions = "{" . join(",", $clearingDecisions) . "}";
@@ -873,55 +867,48 @@ INSERT INTO clearing_decision (
       $delEventSql = "DELETE FROM clearing_event WHERE clearing_event_pk IN (" .
         "SELECT clearing_event_fk FROM clearing_decision_event " .
         "WHERE clearing_decision_fk = ANY($1::int[]));";
-      $this->dbManager->getSingleRow($delEventSql, array($clearingDecisions),
-        __METHOD__ . ".deleteEvent");
+      $this->dbManager->getSingleRow($delEventSql, array($clearingDecisions), __METHOD__ . ".deleteEvent");
 
       $delCdEventSql = "DELETE FROM clearing_decision_event WHERE " .
         "clearing_decision_fk = ANY($1::int[]);";
-      $this->dbManager->getSingleRow($delCdEventSql, array($clearingDecisions),
-        __METHOD__ . ".deleteCdEvent");
-      
+      $this->dbManager->getSingleRow($delCdEventSql, array($clearingDecisions), __METHOD__ . ".deleteCdEvent");
+
       /** @var ClearingDecisionProcessor $clearingDecisionEventProcessor */
-      $clearingDecisionEventProcessor = $GLOBALS['container']->get(
-        'businessrules.clearing_decision_processor');
-      
+      $clearingDecisionEventProcessor = $GLOBALS['container']->get('businessrules.clearing_decision_processor');
+
       foreach ($itemRows as $itemRow) {
-        $itemBounds = $this->uploadDao->getItemTreeBounds(
-          $itemRow['uploadtree_pk'], $uploadTreeTableName);
-        
+        $itemBounds = $this->uploadDao->getItemTreeBounds($itemRow['uploadtree_pk'], $uploadTreeTableName);
+
         $this->insertNullDecision($itemBounds, $userId, $groupId);
       }
-      
+
       $this->dbManager->commit();
-      $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId,
-        'copyright', 'rollback');
+      $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'rollback');
     }
   }
 
-/**
- * @param ItemTreeBounds $itemBounds
- * @param int $userId
- * @param int $groupId
- */
+  /**
+   * @param ItemTreeBounds $itemBounds
+   * @param int $userId
+   * @param int $groupId
+   */
   protected function insertNullDecision(ItemTreeBounds $itemBounds, $userId, $groupId)
   {
     $uploadTreeId = $itemBounds->getItemId();
     $uploadId = $itemBounds->getUploadId();
-    
+
     /** @var ClearingDecisionProcessor $clearingDecisionProcessor */
-    $clearingDecisionProcessor = $GLOBALS['container']->get(
-      'businessrules.clearing_decision_processor');
-      
+    $clearingDecisionProcessor = $GLOBALS['container']->get('businessrules.clearing_decision_processor');
+
     $noDecisionType = $clearingDecisionProcessor::NO_LICENSE_KNOWN_DECISION_TYPE;
-    
+
     $sql = "INSERT INTO clearing_decision 
             (uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) 
             SELECT $1, pfile_fk, $2, $3, $4, " . DecisionScopes::ITEM . ", now() 
             FROM uploadtree 
             WHERE uploadtree_pk = $1;";
-    
-    $this->dbManager->getSingleRow($sql, array($uploadTreeId, $userId, $groupId, $noDecisionType),
-      __METHOD__ . ".insertNullDecision");
+
+    $this->dbManager->getSingleRow($sql, array($uploadTreeId, $userId, $groupId, $noDecisionType), __METHOD__ . ".insertNullDecision");
   }
   /**
    * @param int $uploadId
