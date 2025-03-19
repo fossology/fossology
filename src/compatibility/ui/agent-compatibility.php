@@ -37,12 +37,7 @@ class CompatibilityAgentPlugin extends AgentPlugin
     }
 
     $compatibilityDependencies = array("agent_adj2nest");
-
-    if ($request instanceof Request) {
-       $request = $request->request->all();
-    } elseif (!is_array($request)) {
-       $request = [];
-    }
+    $request = $this->normalizeRequest($request);
 
     $compatibilityDependencies = array_merge($compatibilityDependencies,
         $this->getCompatibilityDependencies($request));
