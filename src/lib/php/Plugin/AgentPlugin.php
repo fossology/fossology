@@ -73,6 +73,23 @@ abstract class AgentPlugin implements Plugin
    * *   0   Not queued, latest version of agent has previously run successfully
    * *  -1   Not queued, error, error string in $ErrorMsg
    */
+  /**
+ * Standardizes request handling for all agent plugins.
+ * Ensures `Request` objects are converted to arrays.
+ *
+ * @param Request|array|null $request
+ * @return array
+ */
+protected function normalizeRequest($request)
+{
+    if ($request instanceof Request) {
+        return $request->request->all(); 
+    } elseif (!is_array($request)) {
+        return [];
+    }
+    return $request;
+}
+
   public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
       $arguments=null, $request=null, $unpackArgs=null)
   {
@@ -80,6 +97,8 @@ abstract class AgentPlugin implements Plugin
     if ($this->AgentHasResults($uploadId) == 1) {
       return 0;
     }
+
+    $request = $this->normalizeRequest($request);
 
     $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
     if ($jobQueueId != 0) {
