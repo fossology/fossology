@@ -225,13 +225,20 @@ class SpdxAgent extends Agent
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
     $this->computeUri($uploadId);
 
+  
     $docLicense = $this->licenseDao->getLicenseByShortName(self::DATA_LICENSE);
+    if ($docLicense === null) {
+      error_log("Warning: License with short name " . self::DATA_LICENSE . " not found in the database. Using fallback license.");
+   
+      $docLicense = new License(0, self::DATA_LICENSE, "Fallback License", "Unknown", "No license text available", "", "", "");
+    }
     $docLicenseId = $docLicense->getId() . "-" . md5($docLicense->getText());
     $this->licensesInDocument[$docLicenseId] = (new SpdxLicenseInfo())
       ->setLicenseObj($docLicense)
       ->setListedLicense(true)
       ->setCustomText(false)
       ->setTextPrinted(true);
+    
 
     $packageNodes = $this->renderPackage($uploadId);
     $additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
@@ -531,7 +538,7 @@ class SpdxAgent extends Agent
     foreach ($filesWithLicenses as $fileId => $fileNode) {
       $filesProceeded += 1;
       if (($filesProceeded&2047)==0) {
-        $this->heartbeat(0);
+        $this->heartbeat($filesProceeded - 0);
       }
       $fullPath = $treeDao->getFullPath($fileId, $treeTableName, 0);
       if (! empty($fileNode->getConcludedLicenses())) {
