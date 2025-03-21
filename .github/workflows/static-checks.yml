@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
+# SPDX-FileCopyrightText: © 2025 kaushlendra-pratap.singh@siemens.com
 
 # SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
 
@@ -115,3 +116,26 @@ jobs:
     - uses: actions/checkout@v4
     - name: REUSE Compliance Check
       uses: fsfe/reuse-action@v5
+
+  lint-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure Commit-Lint Config Exists
+        run: |
+          if [ ! -f "commitlint.config.mjs" ]; then
+            echo "module.exports = { extends: ['@commitlint/config-conventional'] };" > commitlint.config.mjs
+          fi
+
+      - name: Run Commit Lint
+        uses: wagoid/commitlint-github-action@v6
+        with:
+          configFile: ./commitlint.config.mjs
+
+      - name: DCO Check
+        uses: tisonkun/actions-dco@v1.1
+
