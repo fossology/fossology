@@ -17,28 +17,50 @@ $(document).ready(function() {
   var t = $("#adminLicenseCommentTable").DataTable({
     "processing": true,
     "paginationType": "listbox",
-    "order": [[ 1, 'asc' ]],
+    "order": [[1, 'asc']],  
     "autoWidth": false,
-    "columnDefs": [{
-      "createdCell": function (cell) {
-        $(cell).attr("style", "text-align:center");
-      },
-      "searchable": false,
-      "targets": [0]
-    },{
-      "orderable": false,
-      "targets": [0,2,3]
-    },{
-      "orderable": true,
-      "targets": [1]
+    "columnDefs": [
+        {
+            "createdCell": function (cell) {
+                $(cell).attr("style", "text-align:center");
+            },
+            "searchable": false, 
+            "orderable": false,
+            "targets": [0]  
+        },
+        {
+            "orderable": true,
+            "searchable": true,
+            "targets": [1],
+            "render": function (data, type, row) {
+                if (type === 'display') {
+                    return data;  
+                }
+                return $(data).val();  
+            }
+        },
+        {
+            "searchable": true,
+            "targets": [2]
     }],
   });
 
   t.on('order.dt search.dt', function () {
-    t.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
-      cell.innerHTML = i+1;
+    let rows = t.rows({ search: 'applied', order: 'applied' }).nodes();
+    let lastIndex = 1;
+    
+    $(rows).each(function (index, row) {
+        if ($(row).find(".newCommentInputs").length === 0) {
+            $(row).find("td:first").html(lastIndex++);
+        }
     });
-  }).draw();
+
+    let newRow = $("#adminLicenseCommentTable tbody tr").last();
+    if (newRow.find(".newCommentInputs").length > 0) {
+        newRow.find("td:first").html(lastIndex);
+    }
+}).draw();
+
 
   form.find("input[type=text],textarea").on("change", function(){
     $(this).addClass("inputChanged");
@@ -93,17 +115,24 @@ $(document).ready(function() {
   });
 
   $("#addStdLicComment").on('click', function(){
-    t.row.add([
-      null,
-      '<input type="text" name="insertStdLicNames[]" ' +
-        'placeholder="Please enter a name for the comment" ' +
-        'class="newCommentInputs" />',
-      '<textarea rows="7" cols="80" name="insertStdLicComments[]" ' +
-        'placeholder="Please enter a comment statement" ' +
-        'class="newCommentInputs"></textarea>',
-      '<input type="checkbox" checked disabled />'
-    ]).draw(false).page("last").draw(false);
-  });
+    
+    var lastIndex = t.rows().count() + 1;
+
+    var rowNode = t.row.add([
+        lastIndex,  
+        '<input type="text" name="insertStdLicNames[]" ' +
+          'placeholder="Please enter a name for the comment" ' +
+          'class="newCommentInputs" />',
+        '<textarea rows="7" cols="80" name="insertStdLicComments[]" ' +
+          'placeholder="Please enter a comment statement" ' +
+          'class="newCommentInputs"></textarea>',
+        '<input type="checkbox" checked disabled />'
+    ]).draw(false).node();
+
+    $(rowNode).appendTo("#adminLicenseCommentTable tbody");
+
+    $(rowNode).find("input, textarea").first().focus();
+});
 
   $(".licStdCommentToggle").change(function(){
     var changedBox = $(this);
