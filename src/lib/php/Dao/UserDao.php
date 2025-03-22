@@ -236,6 +236,15 @@ class UserDao
   }
 
   /**
+   * @param $userEmail
+   * @return array
+   */
+  public function getUserByEmail($userEmail)
+  {
+    return $this->dbManager->getSingleRow("SELECT * FROM users WHERE user_email = $1", array($userEmail), __FUNCTION__);
+  }
+
+  /**
    * @param $userPk
    * @return array
    */
