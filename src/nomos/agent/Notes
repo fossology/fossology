@@ -9,24 +9,27 @@ To Whom it May Concern:
 What This Is and How to Work It
 -------------------------------
 
-This directory in the FOSSology source tree
-(agents/nomos) contains work for a new license analysis agent. This
-code originated from a standalone license-scanning tool called Nomos.
 
-At this point in time, the code is not integrated with the rest of FOSSology. 
-It uses it's own non-standard Makefile to build a single standalone 
-executable.
+This directory in the FOSSology source tree (`agents/nomos`) contains the source code for the `nomos` license analysis agent. The code originated as a standalone license-scanning tool but is now fully integrated with the FOSSology framework.
 
-To try it out...
+The build process for `nomos` has been migrated to the standard FOSSology CMake-based system.
 
-   % make
-   % ./nomos <file_to_be_scanned>
 
-The file to be scanned should be a regular file (binary or text). In
-particular, it should not be an archive. No unpacking is done; the file
-is scanned as is.
 
-There are currently no command-line options.
+## PostgreSQL Dependency
+To build the `nomos` agent, PostgreSQL development headers must be installed. Ensure the PostgreSQL development package (`libpq-dev`) is available on your system:
+
+- For Ubuntu/Debian:
+  ```bash
+  sudo apt-get install libpq-dev
+  ```
+
+To build and run `nomos`:
+
+1. Navigate to the `nomos` directory:
+   ```bash
+   cd agents/nomos
+
 
 
 Note About the Source Code and Impending Changes
@@ -109,4 +112,3 @@ Changes made from my nomos_experimental version
 -----------------------------------------------
 
 Remove all code #ifdef'd by USE_MMAP 
-
