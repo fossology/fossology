@@ -128,7 +128,7 @@ class DecisionImporterAgent extends Agent
 
     $this->decisionImporterUtils->getOrCreateIds($this->reportData, $this);
 
-    $this->decisionImporterDataCreator->setUserId($this->setUserId);
+    $this->decisionImporterDataCreator->setUserId($userId);
     $this->decisionImporterDataCreator->setGroupId($groupId);
     $this->decisionImporterDataCreator->setUploadId($uploadId);
 
