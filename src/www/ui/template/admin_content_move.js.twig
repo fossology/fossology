@@ -14,22 +14,36 @@ $("#tree").treeview({
 $(document).ready(function() {
   $('.clickable-folder').click(function(event){
     folder = $(this).attr('data-folder');
+    var folderName = $(this).text().trim();
     $('#fromFolder').val(folder);
+
+    var folderchild = $('#foldercontent');
+    folderchild.empty(); // Clear previous options
+
+    // Add the selected folder as the first option
+
+    var selectedOption = document.createElement("option");
+    selectedOption.innerHTML = folderName;
+    selectedOption.disabled = true; 
+    folderchild.append(selectedOption); // Append selected folder first
+
+    // Get child folders and append to dropdown
+
     $.getJSON("?mod=foldercontents&folder=" + folder{% if removable is defined %} + "&removable=1"{% endif %})
-        .done(function (data) {
-          var folderchild = $('#foldercontent');
-          folderchild.empty();
-          $.each(data, function (key, value) {
-            var option = document.createElement("option");
-            option.innerHTML = value;
-            option.value = key;
-            folderchild.append(option);
-          });
-          sortList('#foldercontent option');
-        })
-        .fail(failed);
+      .done(function (data) {
+        $.each(data, function (key, value) {
+          var option = document.createElement("option");
+          option.innerHTML = '&nbsp;&nbsp;' + value; // Add spce to separate parent and childs
+          option.value = key;
+          folderchild.append(option); 
+        });
+         sortList('#foldercontent option'); 
+      })
+      .fail(failed);
+
     return false;
   });
+
   $('#foldercontent').click(function(event){
     if (this.value == -1) {
       $('#movebutton').attr('disabled',true);
@@ -41,4 +55,3 @@ $(document).ready(function() {
 
   $('.clickable-folder').first().trigger('click');
 });
-
