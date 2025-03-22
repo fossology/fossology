@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
 #]=======================================================================]
 
 set(FO_CWD ${CMAKE_CURRENT_SOURCE_DIR})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FO_CXX_FLAGS} -fopenmp -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FO_CXX_FLAGS} -Wextra")
 
 include_directories(
     ${glib_INCLUDE_DIRS}
@@ -21,8 +21,8 @@ foreach(COMMON_OBJ copyright regscan scanners cleanEntries regexConfProvider
     add_library(${COMMON_OBJ}.cc.o OBJECT EXCLUDE_FROM_ALL
         ${FO_CWD}/${COMMON_OBJ}.cc)
     target_link_libraries(${COMMON_OBJ}.cc.o
-        PRIVATE fossologyCPP m ${icu-uc_LIBRARIES} stdc++
-        ${Boost_LIBRARIES} jsoncpp_lib)
+        PRIVATE fossologyCPP m ICU::uc ICU::i18n stdc++
+        ${Boost_LIBRARIES} jsoncpp_lib OpenMP::OpenMP_CXX)
     list(APPEND COMMON_COPY_OBJECTS ${COMMON_OBJ}.cc.o)
 endforeach()
 
@@ -69,8 +69,9 @@ foreach(FO_COPY_TARGET copyright_lib copyright copyright_cov_lib copyright_cov
         set(COPY_LIBS "")
     endif()
     target_link_libraries(${FO_COPY_TARGET}
-        PRIVATE fossologyCPP m ${icu-uc_LIBRARIES} stdc++
-        ${Boost_LIBRARIES} jsoncpp_lib ${COPY_LIBS})
+        PRIVATE fossologyCPP m ICU::uc ICU::i18n stdc++
+        ${Boost_LIBRARIES} jsoncpp_lib ${COPY_LIBS}
+        OpenMP::OpenMP_CXX)
 endforeach()
 target_compile_options(copyright_cov PRIVATE ${FO_COV_FLAGS})
 set_target_properties(copyright_lib PROPERTIES OUTPUT_NAME copyright)
