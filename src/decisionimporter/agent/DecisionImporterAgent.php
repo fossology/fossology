@@ -149,14 +149,12 @@ class DecisionImporterAgent extends Agent
    */
   private function processArgs(): void
   {
-    $args = explode(" --", $this->args[self::REPORT_KEY]);
-    $this->report = $args[0];
-    $args = array_slice($args, 1);
-    foreach ($args as $arg) {
-      list($key, $value) = explode("=", $arg);
-      if ($key == self::LONG_OPT_KEYS[0]) {
-        $this->setUserId = intval($value);
-      }
+    if (isset($this->args[self::REPORT_KEY])) {
+      $this->report = $this->args[self::REPORT_KEY];
+    }
+
+    if (isset($this->args[self::LONG_OPT_KEYS[0]])) {
+      $this->setUserId = intval($this->args[self::LONG_OPT_KEYS[0]]);
     }
   }
 }
