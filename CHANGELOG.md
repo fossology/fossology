@@ -4,6 +4,33 @@
 -->
 # Changelog of FOSSology
 
+### 4.5.1 (Mar 25th 2025)
+
+This release is for the quick hot-fix on [4.5.0](https://github.com/fossology/fossology/releases/tag/4.5.0).
+
+This release applies fix for decisionimporter agent user issue
+and also fixes PHP Errors and Notices.
+
+#### Credits to contributors for 4.5.1
+
+From the GIT commit history, we have the following contributors since
+[4.5.0](https://github.com/fossology/fossology/releases/tag/4.5.0):
+
+```
+> its-sushant <sushant.kumar@siemens-healthineers.com>
+> Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
+```
+
+#### Features
+
+* `bfac55322` feat(workflow): lint commit step in commit check added
+
+#### Corrections
+
+* `51a495b66` fix(ci): dco check not running on push event on main
+* `60b7ca5f4` fix(decisionimport): fix incorrect parsing of argument
+* `95f1fba31` fix(adminObligationsImport): undefined variable throwing warning
+
 ### 4.5.0 (Mar 18th 2025)
 
 This release adds important corrections to
