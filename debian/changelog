@@ -1,3 +1,10 @@
+fossology (4.5.1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.5.1 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Tue, 25 Mar 2025 16:06:43 +0530
+
 fossology (4.5.0-1) unstable; urgency=low
 
   * New upstream release
