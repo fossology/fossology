@@ -6,11 +6,45 @@ tableColumns = [
   {"sTitle": "{{ "Upload Name and Description"|trans }}", "sClass": "left"},
   {"sTitle": "{{ "Action"|trans }}", "sClass": "center", "bSortable": false, "bSearchable": false},
   {"sTitle": "{{ "Status"|trans }}", "sClass": "center", "bSortable": false, "bSearchable": false},
-  {"sTitle": "{{ "Comment"|trans }}", "sClass": "center cc", "bSortable": false, "bSearchable": false, "mRender": 2},
+  {"sTitle": "{{ "Comment"|trans }}", "sClass": "center cc", "bSortable": false, "bSearchable": false, "mRender": function(data) {
+    if (data && data.length > 40) {
+      return '<span class="comment-tooltip" title="' + data.replace(/"/g, '&quot;') + '">' + 
+             data.substring(0, 40) + '...</span>';
+    }
+    return data || '';
+  }},
   {"sTitle": "{{ "Main licenses"|trans }}", "sClass": "center", "bSearchable": false, "bSortable": false},
   {"sTitle": "{{ "Upload Date"|trans }}", "sClass": "center", "sType": "string", "bSearchable": false},
   {"sTitle": "{{ "Assigned to"|trans }}", "sClass": "center", "bSearchable": false}
 ];
+
+function truncateComments() {
+  $('#browsetbl tbody tr').each(function() {
+    var commentCell = $(this).find('td:nth-child(4)');
+    var originalText = commentCell.text();
+    
+    var commentText = originalText;
+    var idPrefixMatch = originalText.match(/^\d+,\d+,\s*/);
+    
+    if (idPrefixMatch) {
+      commentText = originalText.substring(idPrefixMatch[0].length);
+    }
+
+    if (commentText && commentText !== '') {
+      if (commentText.length > 40) {
+        commentCell.html('<span data-toggle="tooltip" data-placement="top" title="' + 
+          commentText.replace(/"/g, '&quot;') + '">' + 
+          commentText.substring(0, 40) + '...</span>');
+      } else {
+        commentCell.text(commentText);
+      }
+    } else {
+      commentCell.text('');
+    }
+  });
+
+  $('[data-toggle="tooltip"]').tooltip();
+}
 
 tableSorting = [
   [5, "desc"],
@@ -38,11 +72,15 @@ dataTableConfig =
       "iDisplayLength": 50,
       "bProcessing": true,
       "bStateSave": true,
-      "bRetrieve": true
+      "bRetrieve": true,
+      "fnDrawCallback": function() {
+        truncateComments();
+      }
     };
 
 function createBrowseTable() {
   var otable = $('#browsetbl').DataTable(dataTableConfig);
+  truncateComments();
   return otable;
 }
 
