@@ -14,7 +14,7 @@ function createTableBase{{ table.type }}(activated) {
     var action = 'getData'
     aoColumns = aoColumns.concat([
       { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false },
-      { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
+      { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:47.5%'>", "sClass": "center read_only", "sWidth": "10%", "bSortable": false }
     ]);
   }
   else
@@ -23,7 +23,7 @@ function createTableBase{{ table.type }}(activated) {
     var action = 'getDeactivatedData'
     aoColumns = aoColumns.concat([
       { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false },
-      { "sTitle": "<input type='checkbox' name='selectUndo{{ table.type }}' id='selectUndo{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
+      { "sTitle": "<input type='checkbox' name='selectUndo{{ table.type }}' id='selectUndo{{ table.type }}' style='margin-left:47.5%'>", "sClass": "center read_only", "sWidth": "10%", "bSortable": false }
     ]);
   }
 
@@ -139,6 +139,32 @@ function createTable{{ table.type }}() {
         location.reload(true)
       });
     }
+  });
+
+  $('#copyright{{ table.type }} tbody').on('click', 'tr td:nth-child(3)', function (event) {
+    if ($(this).find('img:visible').length > 0) {
+      if ($(event.target).is('img')) {
+        return;
+      }
+      var currentValue = $(this).closest('tr').attr('id');
+      var currUploadData = currentValue.split(',');
+      delete{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3]);
+    } else if ($(this).find('span[id^="update"]:visible').length > 0) {
+      if ($(event.target).closest('a').length > 0) {
+        return;
+      }
+      var currentValue = $(this).closest('tr').attr('id');
+      var currUploadData = currentValue.split(',');
+      undo{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3]);
+    }
+  });
+
+  $('#copyright{{ table.type }} tbody').on('click', 'tr td:nth-child(4)', function (event) {
+    if ($(event.target).is('input')) {
+      return;
+    }
+    var $checkbox = $(this).find('input[type="checkbox"]');
+    $checkbox.prop('checked', !$checkbox.prop('checked')).trigger('change');
   });
 
   return enabledTable;
