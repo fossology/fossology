@@ -15,7 +15,7 @@
 
 #include "libfossUtils.hpp"
 
-string cleanMatch(const string& sText, const match& m);
+icu::UnicodeString cleanMatch(const icu::UnicodeString& sText, const match& m);
 
 
 #endif /* CLEANENTRIES_HPP_ */

@@ -13,10 +13,6 @@
  * \todo skip "dnl "
 */
 #include "cleanEntries.hpp"
-#include <sstream>
-#include <iterator>
-using std::stringstream;
-using std::ostream_iterator;
 
 /**
  * \brief Trim space at beginning and end
@@ -26,25 +22,14 @@ using std::ostream_iterator;
  * \param sEnd   String end
  * \return string Trimmed string
  */
-string cleanGeneral(string::const_iterator sBegin, string::const_iterator sEnd)
+icu::UnicodeString cleanGeneral(const UChar* sBegin, const UChar* sEnd)
 {
-  stringstream ss;
-  rx::regex_replace(ostream_iterator<char>(ss), sBegin, sEnd, rx::regex("[[:space:]\\x0-\\x1f]{2,}"), " ");
-  string s = ss.str();
-  string::size_type len = s.length();
-  if (len > 1)
-  {
-    char cBegin = s[0];
-    char cEnd = s[len - 1];
-    if (cBegin == ' ' && cEnd == ' ')
-      return s.substr(1, len - 2);
-    else if (cBegin == ' ')
-      return s.substr(1);
-    else if (cEnd == ' ')
-      return s.substr(0, len - 1);
-  }
-  // Only one character/space??? Should not be possible
-  return s == " " ? "" : s;
+  icu::UnicodeString s = rx::u32regex_replace(
+    icu::UnicodeString(sBegin, sEnd - sBegin),
+    rx::make_u32regex("[[:space:]\\x0-\\x1f]{2,}"),
+    " ");
+
+  return s.trim();
 }
 
 /**
@@ -53,12 +38,17 @@ string cleanGeneral(string::const_iterator sBegin, string::const_iterator sEnd)
  * \param sEnd   String end
  * \return string Clean spdx statements
  */
-string cleanSpdxStatement(string::const_iterator sBegin, string::const_iterator sEnd)
+icu::UnicodeString cleanSpdxStatement(const UChar* sBegin, const UChar* sEnd)
 {
-  stringstream ss;
-  rx::regex_replace(ostream_iterator<char>(ss), sBegin, sEnd, rx::regex("spdx-filecopyrighttext:", rx::regex_constants::icase), " ");
-  string s = ss.str();
-  return cleanGeneral(s.begin(), s.end());
+  icu::UnicodeString const s = rx::u32regex_replace(
+    icu::UnicodeString(sBegin, sEnd - sBegin),
+    rx::make_u32regex("spdx-filecopyrighttext:", rx::regex_constants::icase),
+    " ");
+
+  auto const begin = s.getBuffer();
+  auto const end = begin + s.length();
+
+  return cleanGeneral(begin, end);
 }
 
 /**
@@ -68,54 +58,16 @@ string cleanSpdxStatement(string::const_iterator sBegin, string::const_iterator 
  * \param sEnd   String end
  * \return string Clean statements
  */
-string cleanStatement(string::const_iterator sBegin, string::const_iterator sEnd)
+icu::UnicodeString cleanStatement(const UChar* sBegin, const UChar* sEnd)
 {
-  stringstream ss;
-  rx::regex_replace(ostream_iterator<char>(ss), sBegin, sEnd, rx::regex("\n[[:space:][:punct:]]*"), " ");
-  string s = ss.str();
-  return cleanSpdxStatement(s.begin(), s.end());
-}
+  icu::UnicodeString const s = rx::u32regex_replace(
+    icu::UnicodeString(sBegin, sEnd - sBegin),
+    rx::make_u32regex("\n[[:space:][:punct:]]*"), " ");
 
-/**
- * \brief Clean non unicode characters (binary data).
- *
- * Uses ICU library to check if the characters are unicode or not and append
- * only unicode characters to the result string.
- * \param sBegin String begin
- * \param sEnd   String end
- * \return string Clean statements
- */
-string cleanNonPrint(string::const_iterator sBegin, string::const_iterator sEnd)
-{
-  string s(sBegin, sEnd);
-  const unsigned char *in = reinterpret_cast<const unsigned char*>(s.c_str());
-  int len = s.length();
+  auto const begin = s.getBuffer();
+  auto const end = begin + s.length();
 
-  icu::UnicodeString out;
-  for (int i = 0; i < len;)
-  {
-    UChar32 uniChar;
-    size_t lastPos = i;
-    U8_NEXT(in, i, len, uniChar);   // Get next UTF-8 char
-    if (uniChar > 0)
-    {
-      out.append(uniChar);
-    }
-    else
-    {
-      i = lastPos;  // Rest pointer
-      U16_NEXT(in, i, len, uniChar); // Try to get failed input as UTF-16
-      if (U_IS_UNICODE_CHAR(uniChar) && uniChar > 0)
-      {
-        out.append(uniChar);
-      }
-    }
-  }
-  out.trim();
-
-  string ret;
-  out.toUTF8String(ret);
-  return ret;
+  return cleanSpdxStatement(begin, end);
 }
 
 /**
@@ -126,18 +78,16 @@ string cleanNonPrint(string::const_iterator sBegin, string::const_iterator sEnd)
  * \param m     Matches to be cleaned
  * \return string Cleaned text
  */
-string cleanMatch(const string& sText, const match& m)
+icu::UnicodeString cleanMatch(const icu::UnicodeString& sText, const match& m)
 {
-  string::const_iterator it = sText.begin();
-  icu::UnicodeString unicodeStr = fo::recodeToUnicode(string(it + m.start,
-    it + m.end));
-  string utfCompatibleText;
+  auto const unicodeStr = fo::recodeToUnicode(
+    sText.tempSubString(m.start, m.end - m.start));
 
-  unicodeStr.toUTF8String(utfCompatibleText);
+  auto const begin = unicodeStr.getBuffer();
+  auto const end = begin + unicodeStr.length();
 
   if (m.type == "statement")
-    return cleanStatement(utfCompatibleText.begin(), utfCompatibleText.end());
+    return cleanStatement(begin, end);
   else
-    return cleanGeneral(utfCompatibleText.begin(), utfCompatibleText.end());
+    return cleanGeneral(begin, end);
 }
-
