@@ -7,6 +7,7 @@
 import requests
 import json
 from typing import Dict, Union
+from packageurl.contrib import purl2url
 
 
 class Parser:
@@ -40,8 +41,8 @@ class Parser:
 
             if type == 'pypi':
                 self.python_components.append(component)
-            # elif type == 'npm':
-            #     self.npm_components.append(component)
+            elif type == 'npm':
+                self.npm_components.append(component)
             # elif type == 'composer':
             #     self.php_components.append(component)
             else:
@@ -130,4 +131,41 @@ class PythonParser:
             else:
                 print(f"Failed to retrieve data for {package_name} {version}")
 
+        return download_urls if download_urls else None
+
+
+class NPMParser:
+    """
+    NPM Parser to parse the python sboms to generate download urls from
+    cyclonedx format sbom files.
+    """
+
+    def __get_download_url(self, purl: str):
+        """
+        Get download url from purl for NPM Packages
+        Args:
+            purl: str
+        Return:
+            download_url: str
+        """
+        return purl2url.get_download_url(purl)
+    
+    def parse_components(self, components: list[Dict]) -> Union[list[tuple[str,str]],None]:
+        """
+        Parse the components to extract the tuple of (<package_name>, <download_url>)
+        Args:
+            components: list[Dict]
+        Return:
+            List[tuple(str,str)] (<package_name>, <download_url>)
+        """
+        download_urls = []
+        for comp in components:
+            name = comp['name']
+            purl = comp['purl']
+            try:
+                download_url = self.__get_download_url(purl)
+                download_urls.append((name, download_url))
+            except Exception as e:
+                print(f"Invalid Download URL for NPM package: {name} :: {e}")
+        
         return download_urls if download_urls else None
