@@ -34,8 +34,18 @@
      </li>
       <li> {{ "Select additional analysis."|trans }}<br/>
         <div id="agentsdiv">
-          <select multiple size="10" id="agents" name="agents[]"></select>
+          <select multiple size="10" id="agents" name="agents[]" disabled>
+            {% if availableAgents is not empty %}
+              {% for agent in availableAgents %}
+                <option value="{{ agent.id }}" disabled>{{ agent.name }}</option>
+              {% endfor %}
+            {% else %}
+              <option value="" disabled>{{ "No additional analysis available" | trans }}</option>
+            {% endif %}
+          </select>
         </div>
+
+
         {{ out }}
       </li> 
     </ol>
@@ -78,13 +88,26 @@
 
   {{ agentScript }}
   <script language="javascript">
-    function Agents_Reply()
-    {
-      if ((Agents.readyState==4) && (Agents.status==200))
-      {
-        document.getElementById('agentsdiv').innerHTML = Agents.responseText;
+    function Agents_Reply() {
+      if (Agents.readyState == 4 && Agents.status == 200) {
+        let responseText = Agents.responseText.trim();
+        let agentsDropdown = document.getElementById('agentsdiv');
+
+        if (responseText === '') {
+          agentsDropdown.innerHTML = `
+            <select multiple size="10" id="agents" name="agents[]" disabled>
+              <option value="" disabled>No additional analysis available</option>
+            </select>`;
+        } else {
+          agentsDropdown.innerHTML = `
+            <select multiple size="10" id="agents" name="agents[]" disabled>
+              ${responseText}
+            </select>`;
+        }
       }
     }
+
+
   </script>
   {{ outFoot }}
 {% endblock %}
