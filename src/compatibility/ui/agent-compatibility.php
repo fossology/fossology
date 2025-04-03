@@ -37,10 +37,8 @@ class CompatibilityAgentPlugin extends AgentPlugin
     }
 
     $compatibilityDependencies = array("agent_adj2nest");
+    $request = $this->normalizeRequest($request);
 
-    if ($request == null) {
-      $request = $_POST;
-    }
     $compatibilityDependencies = array_merge($compatibilityDependencies,
         $this->getCompatibilityDependencies($request));
 
