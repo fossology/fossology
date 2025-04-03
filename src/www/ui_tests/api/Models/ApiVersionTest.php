@@ -43,4 +43,22 @@ class ApiVersionTest extends TestCase
 
     $this->assertEquals(ApiVersion::V1, ApiVersion::getVersion($requestMock));
   }
+
+  /**
+   * Test that getVersionFromUri returns V2 when URI contains /api/v2
+   */
+  public function testGetVersionFromUriV2()
+  {
+    $_SERVER['REQUEST_URI'] = '/api/v2/someEndpoint';
+    $this->assertEquals(ApiVersion::V2, ApiVersion::getVersionFromUri());
+  }
+
+  /**
+   * Test that getVersionFromUri returns V1 when URI contains /api/v2
+   */
+  public function testGetVersionFromUriV1()
+  {
+    $_SERVER['REQUEST_URI'] = '/api/v1/someEndpoint';
+    $this->assertEquals(ApiVersion::V1, ApiVersion::getVersionFromUri());
+  }
 }

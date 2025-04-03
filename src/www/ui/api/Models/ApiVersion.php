@@ -30,4 +30,16 @@ class ApiVersion
   {
     return $request->getAttribute(self::ATTRIBUTE_NAME, self::V1);
   }
+
+  public static function getVersionFromUri(): int
+  {
+    $uri = $_SERVER['REQUEST_URI'];
+    $apiVersion = ApiVersion::V1;
+
+    if (strpos($uri, '/api/v2/') !== false) {
+      $apiVersion = ApiVersion::V2;
+    }
+
+    return $apiVersion;
+  }
 }
