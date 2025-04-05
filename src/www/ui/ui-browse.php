@@ -24,7 +24,20 @@ class ui_browse extends FO_Plugin
   private $uploadDao;
   /** @var FolderDao */
   private $folderDao;
-
+  /**
+     * Truncate a string to a specified length and append ellipsis if necessary.
+     *
+     * @param string $text The text to truncate.
+     * @param int $maxChars The maximum allowed length of the string.
+     * @return string The truncated string.
+     */
+  private function truncateText($text, $maxChars = 100)
+    {
+        if (strlen($text) > $maxChars) {
+            return substr($text, 0, $maxChars) . '...';
+        }
+        return $text;
+    }
   function __construct()
   {
     $this->Name = "browse";
@@ -105,11 +118,13 @@ class ui_browse extends FO_Plugin
       }
       $ShowSomething = 1;
       $Name = $Row['ufile_name'];
+      $truncatedDescription = $this->truncateText($Row['description'], 100);
 
+            
       /* Set alternating row background color - repeats every $ColorSpanRows rows */
       $RowStyle = (($RowNum++ % (2 * $ColorSpanRows)) < $ColorSpanRows) ? $RowStyle1 : $RowStyle2;
       $V .= "<tr $RowStyle>";
-
+      
       /* Check for children so we know if the file should by hyperlinked */
       $result = $dbManager->execute($stmtGetFirstChild,array($Row['uploadtree_pk']));
       $HasChildren = $dbManager->fetchArray($result);
@@ -117,7 +132,7 @@ class ui_browse extends FO_Plugin
 
       $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
       $Link = $HasChildren ? "$Uri&show=$Show&upload=$Upload&item=$Row[uploadtree_pk]" : NULL;
-
+      $V .= "<td>$truncatedDescription</td>";
       if ($Show == 'detail') {
         $V .= "<td class='mono'>" . DirMode2String($Row['ufile_mode']) . "</td>";
         if (!Isdir($Row['ufile_mode'])) {
