@@ -571,13 +571,29 @@ paths:
       requestBody:
         description: >
           Comment on the status, required for Closed and Rejected states.
-          Ignored for others.
+          Use the application/json for advanced usage.
         content:
           text/plain:
             schema:
               description: The comment for new status
               type: string
               example: "The upload cleared for use."
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+                  description: The comment for new status
+                  example: "The upload cleared for use."
+                name:
+                  type: string
+                  description: New name of the upload.
+                  example: my_edited_upload.zip
+                uploadDescription:
+                  type: string
+                  description: Updated description for the upload.
+                  example: This is updated description.
       responses:
         '202':
           description: Upload will be updated

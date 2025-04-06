@@ -44,7 +44,7 @@ class upload_properties extends FO_Plugin
    *
    * @return int 1 if the upload record is updated, 0 if not, 2 if no inputs
    **/
-  function UpdateUploadProperties($uploadId, $newName, $newDesc)
+  public function UpdateUploadProperties($uploadId, $newName, $newDesc)
   {
     if (empty($newName) and empty($newDesc)) {
       return 2;

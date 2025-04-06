@@ -68,8 +68,7 @@ class RestController
    */
   protected function getParsedBody(ServerRequestInterface $request)
   {
-    if (strcasecmp($request->getHeaderLine('Content-Type'),
-        "application/json") === 0) {
+    if ($this->isJsonRequest($request)) {
       $content = $request->getBody()->getContents();
       return json_decode($content, true);
     } else {
@@ -123,5 +122,16 @@ class RestController
       "uploadtree_pk", $itemId)) {
       throw new HttpNotFoundException("Item does not exist");
     }
+  }
+
+  /**
+   * Check if request contains header "Content-Type: application/json
+   * @param ServerRequestInterface $request
+   * @return bool
+   */
+  public function isJsonRequest($request)
+  {
+    return strcasecmp($request->getHeaderLine('Content-Type'),
+        "application/json") === 0;
   }
 }
