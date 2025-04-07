@@ -27,6 +27,7 @@ use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadSrvPage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadUrlPage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadVcsPage;
 use Fossology\UI\Api\Models\Analysis;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\Decider;
 use Fossology\UI\Api\Models\FileLicenses;
 use Fossology\UI\Api\Models\Findings;
@@ -35,7 +36,6 @@ use Fossology\UI\Api\Models\Reuser;
 use Fossology\UI\Api\Models\Scancode;
 use Fossology\UI\Api\Models\ScanOptions;
 use Fossology\UI\Api\Models\UploadSummary;
-use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Page\BrowseLicense;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use UIExportList;
@@ -114,6 +114,9 @@ class UploadHelper
   public function handleScheduleAnalysis($uploadId, $folderId, $scanOptionsJSON,
                                          $newUpload = false, $apiVersion = ApiVersion::V1)
   {
+    global $container;
+    $restHelper = $container->get('helper.restHelper');
+
     $parametersSent = false;
     $analysis = new Analysis();
 
@@ -123,6 +126,7 @@ class UploadHelper
     }
 
     $decider = new Decider();
+    $decider->setDeciderAgentPlugin($restHelper->getPlugin('agent_decider'));
     if (array_key_exists("decider", $scanOptionsJSON) && ! empty($scanOptionsJSON["decider"])) {
       $decider->setUsingArray($scanOptionsJSON["decider"], $apiVersion);
       $parametersSent = true;
