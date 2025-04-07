@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2017 Siemens AG
+ SPDX-FileCopyrightText: © 2025 Tiyasa Kundu <tiyasakundu20@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -43,6 +44,21 @@ class Decider
    * Use this license type to create conclusions.
    */
   private $concludeLicenseType;
+  /**
+   * @var bool $copyrightDeactivation
+   * Run the copyright deactivation?
+   */
+  private $copyrightDeactivation;
+  /**
+   * @var bool $copyrightClutterRemoval
+   * Run the copyright clutter removal
+   */
+  private $copyrightClutterRemoval;
+
+  /**
+   * @var DeciderAgentPlugin $deciderAgentPlugin
+   */
+  private $deciderAgentPlugin;
 
   /**
    * Decider constructor.
@@ -52,16 +68,22 @@ class Decider
    * @param boolean $newScanner
    * @param boolean $ojoDecider
    * @param string  $concludeLicenseType
+   * @param boolean $copyrightDeactivation
+   * @param boolean $copyrightClutterRemoval
    */
   public function __construct($nomosMonk = false, $bulkReused = false,
                               $newScanner = false, $ojoDecider = false,
-                              $concludeLicenseType = "")
+                              $concludeLicenseType = "",
+                              $copyrightDeactivation = false,
+                              $copyrightClutterRemoval = false)
   {
     $this->setNomosMonk($nomosMonk);
     $this->setBulkReused($bulkReused);
     $this->setNewScanner($newScanner);
     $this->setOjoDecider($ojoDecider);
     $this->setConcludeLicenseType($concludeLicenseType);
+    $this->setCopyrightDeactivation($copyrightDeactivation);
+    $this->setCopyrightClutterRemoval($copyrightClutterRemoval);
   }
 
   /**
@@ -85,6 +107,12 @@ class Decider
     }
     if (array_key_exists(($version == ApiVersion::V2? "concludeLicenseType" : "conclude_license_type"), $deciderArray)) {
       $this->setConcludeLicenseType($deciderArray[$version == ApiVersion::V2? "concludeLicenseType" : "conclude_license_type"]);
+    }
+    if (array_key_exists(($version == ApiVersion::V2? "copyrightDeactivation" : "copyright_deactivation"), $deciderArray)) {
+      $this->setCopyrightDeactivation($deciderArray[$version == ApiVersion::V2? "copyrightDeactivation" : "copyright_deactivation"]);
+    }
+    if (array_key_exists(($version == ApiVersion::V2? "copyrightClutterRemoval" : "copyright_clutter_removal"), $deciderArray)) {
+      $this->setCopyrightClutterRemoval($deciderArray[$version == ApiVersion::V2? "copyrightClutterRemoval" : "copyright_clutter_removal"]);
     }
     return $this;
   }
@@ -128,6 +156,22 @@ class Decider
   public function getConcludeLicenseType()
   {
     return $this->concludeLicenseType;
+  }
+
+  /**
+   * @return bool
+   */
+  public function getCopyrightDeactivation()
+  {
+    return $this->copyrightDeactivation;
+  }
+
+  /**
+   * @return bool
+   */
+  public function getCopyrightClutterRemoval()
+  {
+    return $this->copyrightClutterRemoval;
   }
 
   ////// Setters //////
@@ -176,6 +220,38 @@ class Decider
   }
 
   /**
+   * @param DeciderAgentPlugin $deciderAgentPlugin
+   */
+  public function setDeciderAgentPlugin($deciderAgentPlugin)
+  {
+    $this->deciderAgentPlugin = $deciderAgentPlugin;
+  }
+
+  /**
+   * @param bool $copyrightDeactivation
+   */
+  public function setCopyrightDeactivation($copyrightDeactivation)
+  {
+    if ($this->deciderAgentPlugin && $this->deciderAgentPlugin->isSpacyInstalled()) {
+      $this->copyrightDeactivation = filter_var($copyrightDeactivation, FILTER_VALIDATE_BOOLEAN);
+    } else {
+      $this->copyrightDeactivation = false;
+    }
+  }
+
+  /**
+   * @param bool $copyrightClutterRemoval
+   */
+  public function setCopyrightClutterRemoval($copyrightClutterRemoval)
+  {
+    if ($this->deciderAgentPlugin && $this->deciderAgentPlugin->isSpacyInstalled()) {
+      $this->copyrightClutterRemoval = filter_var($copyrightClutterRemoval, FILTER_VALIDATE_BOOLEAN);
+    } else {
+      $this->copyrightClutterRemoval = false;
+    }
+  }
+
+  /**
    * Get decider as an array
    * @return array
    */
@@ -187,7 +263,9 @@ class Decider
         "bulkReused" => $this->bulkReused,
         "newScanner" => $this->newScanner,
         "ojoDecider" => $this->ojoDecider,
-        "concludeLicenseType" => $this->concludeLicenseType
+        "concludeLicenseType" => $this->concludeLicenseType,
+        "copyrightDeactivation" => $this->copyrightDeactivation,
+        "copyrightClutterRemoval" => $this->copyrightClutterRemoval
       ];
     } else {
       return [
@@ -195,7 +273,9 @@ class Decider
         "bulk_reused" => $this->bulkReused,
         "new_scanner" => $this->newScanner,
         "ojo_decider" => $this->ojoDecider,
-        "conclude_license_type" => $this->concludeLicenseType
+        "conclude_license_type" => $this->concludeLicenseType,
+        "copyright_deactivation" => $this->copyrightDeactivation,
+        "copyright_clutter_removal" => $this->copyrightClutterRemoval
       ];
     }
   }

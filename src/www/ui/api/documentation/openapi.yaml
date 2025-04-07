@@ -5569,6 +5569,12 @@ components:
             Auto conclude license if they are of provided type.
             Omit the field or keep as empty string to not use this option.
           example: Permissive
+        copyright_deactivation:
+          type: boolean
+          description: Deactivate false positive copyrights (experimental).
+        copyright_clutter_removal:
+          type: boolean
+          description: Deactivate false positive copyrights and remove clutter from them (experimental).
     ScanOptions:
       type: object
       properties:
