@@ -353,6 +353,14 @@ class UploadTreeController extends RestController
     $uploadTreeId = intval($args['itemId']);
     $uploadId = intval($args['id']);
     $query = $request->getQueryParams();
+
+    $queryKeys = array_keys($query);
+    $allowedKeys = ['showQuick', 'agentId', 'flatten', 'scanLicenseFilter', 'editedLicenseFilter', 'sort', 'page', 'limit', 'tagId', 'search', 'filterOpen'];
+    $diff = array_diff($queryKeys, $allowedKeys);
+    if (count($diff) > 0) {
+      throw new HttpBadRequestException("Invalid query parameter(s) : " . implode(",", $diff));
+    }
+
     $agentId = $query['agentId'] ?? null;
     $flatten = $query['flatten'] ?? null;
     $scanFilter = $query['scanLicenseFilter'] ?? null;
@@ -399,12 +407,6 @@ class UploadTreeController extends RestController
     }
     if ($limit != null && (!is_numeric($limit) || intval($limit) < 1)) {
       throw new HttpBadRequestException("limit should be positive integer Greater or Equal to 1");
-    }
-    $queryKeys = array_keys($query);
-    $allowedKeys = ['showQuick', 'agentId', 'flatten', 'scanLicenseFilter', 'editedLicenseFilter', 'sort', 'tagId', 'search', 'filterOpen'];
-    $diff = array_diff($queryKeys, $allowedKeys);
-    if (count($diff) > 0) {
-      throw new HttpBadRequestException("Invalid query parameter(s) : " . implode(",", $diff));
     }
 
     if ($editedFilter !== null) {
