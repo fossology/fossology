@@ -43,8 +43,7 @@ class DeciderAgentPlugin extends AgentPlugin
     if ($ninkaUi=plugin_find('agent_ninka')) {
       $vars['isNinkaInstalled'] = $ninkaUi->isNinkaInstalled();
     }
-    $vars['isSpacyInstalled'] = file_exists("/home/" .
-      $SysConf['DIRECTORIES']['PROJECTUSER'] . "/pythondeps/bin/spacy");
+    $vars['isSpacyInstalled'] = $this->isSpacyInstalled();
     $licenseTypes = array_map('trim', explode(',',
         $SysConf['SYSCONFIG']['LicenseTypes']));
     $vars['licenseTypes'] = array_combine($licenseTypes, $licenseTypes);
@@ -200,6 +199,17 @@ class DeciderAgentPlugin extends AgentPlugin
       return $licenseType;
     }
     return "";
+  }
+
+  /**
+   * Check if spacy is installed?
+   * @return bool True if installed, false otherwise
+   */
+  public function isSpacyInstalled()
+  {
+    global $SysConf;
+    return file_exists("/home/" .
+      $SysConf['DIRECTORIES']['PROJECTUSER'] . "/pythondeps/bin/spacy");
   }
 }
 
