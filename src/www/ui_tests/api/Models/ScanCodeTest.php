@@ -15,6 +15,19 @@ use Monolog\Test\TestCase;
 
 class ScanCodeTest extends TestCase
 {
+  ////// Constructor Tests //////
+
+  /**
+   * Tests that the ScanCode constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $scanCode = new ScanCode();
+    $this->assertInstanceOf(ScanCode::class, $scanCode);
+  }
+
   /**
    * Provides test data and an instance of the ScanCode class.
    *
