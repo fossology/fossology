@@ -30,42 +30,86 @@
     </tr>
   </table>
 
-  <div class="groupBox">
-    <fieldset class="border p-2" style="display:inline">
+  <div class="groupBox" style="display: flex; gap: 20px; align-items: flex-start;">
+    <fieldset class="border p-2" style="display: inline;" {% if tmpClearingType %}class="border-danger"{% endif %} id="decTypeSet">
+      <legend style="width:auto;">
+        {{ 'Clearing decision type'| trans }}
+      </legend>
+
+      {% for typeKey, typeText in clearingTypes %}
+        {% if typeKey == 5 %}
+          <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="{{ typeKey }}" id="clearingType{{ typeKey }}"
+          {% if typeKey == selectedClearingType %}checked="checked"{% endif %}/>
+          <label for="clearingType{{ typeKey }}">{{ typeText }}</label>
+          <img src="images/info_16.png" data-toggle="tooltip"
+            title="{{ 'This setting considers the selection of the licenses shown in the table below to create a clearing result.'|trans }}"
+            alt="" class="info-bullet"/>
+        {% endif %}
+      {% endfor %}
+
+      {% for typeKey, typeText in clearingTypes %}
+        {% if typeKey == 4 %}
+          <br />
+          <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="{{ typeKey }}" id="clearingType{{ typeKey }}"
+          {% if typeKey == selectedClearingType %}checked="checked"{% endif %}/>
+          <label for="clearingType{{ typeKey }}">{{ typeText }}</label>
+          <img src="images/info_16.png" data-toggle="tooltip"
+            title="{{ 'There is license relevant information, but this is not relevant information for the clearing of this file (for example, files that are not used at all and also not distributed)'|trans }}"
+            alt="" class="info-bullet"/>
+        {% endif %}
+      {% endfor %}
+
+      {% for typeKey, typeText in clearingTypes %}
+        {% if typeKey == 6 %}
+          <br />
+          <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="{{ typeKey }}" id="clearingType{{ typeKey }}"
+          {% if typeKey == selectedClearingType %}checked="checked"{% endif %}/>
+          <label for="clearingType{{ typeKey }}">{{ typeText }}</label>
+          <img src="images/info_16.png" data-toggle="tooltip"
+            title="{{ 'There may be license relevant information but this particular file should not be considered as part of actual source code (for example, transient binary files, .dll).'|trans}}"
+            alt="" class="info-bullet"/>
+        {% endif %}
+      {% endfor %}
+
+
+      <button type="button" id="toggleMoreOptions" class="btn btn-default btn-sm" style="float: right;">
+        <img src="images/icons/chevron-down.png" id="toggleIcon" alt="More Options" width="12" height="12">
+      </button>
+      <br>
+
+      <!-- Hidden Additional Options -->
+      <div id="moreOptions" style="display: none;">
+        <br>
+        <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="2" id="clearingType0" />
+        <label for="clearingType0">{{ 'No license known'| trans }}</label>
+        <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Even after review, no license relevant information can be determined'|trans }}" alt="" class="info-bullet"/>
+        
+        {% for typeKey, typeText in clearingTypes %}
+          {% if typeKey not in [4, 5, 6] %}
+            <div>
+              <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="{{ typeKey }}" id="clearingType{{ typeKey }}"
+              {% if typeKey == selectedClearingType %}checked="checked"{% endif %}/>
+              <label for="clearingType{{ typeKey }}">{{ typeText }}</label>
+              <img src="images/info_16.png" data-toggle="tooltip"
+                {%- if typeKey == 3 ~%}
+                    title="{{ 'Mark the file for having had a look at it, but a clearing result cannot be determined at the current time'|trans }}"
+                {%- elseif typeKey == 7 ~%}
+                    title="{{ 'There may be license relevant information but this particular file is not distributed but used by source (for example, build config, documentation, unit test, example files).'|trans}}"
+                {%- endif %}
+                alt="" class="info-bullet"/>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <fieldset class="border p-2">
       <legend style="width:auto;">
         {{ 'Clearing decision scope'| trans }}
       </legend>
       <input type="checkbox" class="info-bullet view-license-rc-size" name="globalDecision" id="globalDecision"  onclick="checkIfEligibleForGlobalDecision()" {% if selectedClearingScope==1 %}checked{% endif %}/>
       {{ 'Apply decision to all future occurrences of this file'|trans }}
       <img data-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Based on a hash computation of the file contents, Fossology will determine a future occurrence of the same file. Then, if  the same file is part of a subsequent upload, this clearing decision will apply there as well.  Consider that this decision will impact also upload of other users. It should be checked with much care'|trans }}" alt="" class="info-bullet"/ >
-    </fieldset>
-    <br/>
-    <br/>
-    <fieldset class="border p-2" style="display: inline;" {% if tmpClearingType %}class="border-danger"{% endif %} id="decTypeSet">
-      <legend style="width:auto;">
-        {{ 'Clearing decision type'| trans }}
-      </legend>
-      <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="2" id="clearingType0" />
-      <label for="clearingType0">{{ 'No license known'| trans }}</label>
-      <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Even after review, no license relevant information can be determined'|trans }}" alt="" class="info-bullet"/>
-      {% for typeKey,typeText in clearingTypes %}
-        <br />
-        <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="{{ typeKey }}" id="clearingType{{ typeKey }}"
-        {% if typeKey == selectedClearingType %}checked="checked"{% endif %}/>
-        <label for="clearingType{{ typeKey }}">{{ typeText }}</label>
-        <img src="images/info_16.png" data-toggle="tooltip"
-          {%- if typeKey == 3 ~%}
-            title="{{ 'Mark the file for having had a look at it, but a clearing result cannot be determined at the current time'|trans }}"
-          {%- elseif typeKey == 4 ~%}
-            title="{{ 'There is license relevant information, but this is not relevant information for the clearing of this file (for example, files that are not used at all and also not distributed)'|trans }}"
-          {%- elseif typeKey == 5 ~%}
-            title="{{ 'This setting considers the selection of the licenses shown in the table below to create a clearing result.'|trans }}"
-          {%- elseif typeKey == 6 ~%}
-            title="{{ 'There may be license relevant information but this particular file should not be considered as part of actual source code (for example, transient binary files, .dll).'|trans}}"
-          {%- elseif typeKey == 7 ~%}
-            title="{{ 'There may be license relevant information but this particular file is not distributed but used by source (for example, build config, documentation, unit test, example files).'|trans}}"
-          {%- endif %} alt="" class="info-bullet"/>
-      {% endfor %}
     </fieldset>
   </div>
 </form>
@@ -153,3 +197,29 @@
 {% include 'bulk-history.html.twig' %}
 </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var moreOptions = document.getElementById("moreOptions");
+    var icon = document.getElementById("toggleIcon");
+
+    var hiddenOptionSelected = moreOptions.querySelector('input[type="radio"]:checked');
+    if (hiddenOptionSelected) {
+      moreOptions.style.display = "block"; // or "unset" if that suits your layout
+      icon.style.transform = "rotate(180deg)";
+    } else {
+      moreOptions.style.display = "none";
+      icon.style.transform = "rotate(0deg)";
+    }
+
+    document.getElementById("toggleMoreOptions").addEventListener("click", function () {
+        if (moreOptions.style.display === "none" || moreOptions.style.display === "") {
+            moreOptions.style.display = "unset";
+            icon.style.transform = "rotate(180deg)";
+        } else {
+            moreOptions.style.display = "none";
+            icon.style.transform = "rotate(0deg)";
+        }
+    });
+});
+</script>
