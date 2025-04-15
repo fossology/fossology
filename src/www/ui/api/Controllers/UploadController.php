@@ -652,6 +652,7 @@ class UploadController extends RestController
     $userDao = $this->restHelper->getUserDao();
     $userId = $this->restHelper->getUserId();
     $groupId = $this->restHelper->getGroupId();
+    $isJsonRequest = $this->isJsonRequest($request);
 
     $perm = $userDao->isAdvisorOrAdmin($userId, $groupId);
     if (!$perm) {
@@ -667,6 +668,16 @@ class UploadController extends RestController
     $assignee = null;
     $status = null;
     $comment = null;
+    $newName = null;
+    $newDescription = null;
+
+    if ($isJsonRequest) {
+      $bodyContent = $this->getParsedBody($request);
+    } else {
+      $body = $request->getBody();
+      $bodyContent = $body->getContents();
+      $body->close();
+    }
 
     // Handle assignee info
     if (array_key_exists(self::FILTER_ASSIGNEE, $query)) {
@@ -674,7 +685,7 @@ class UploadController extends RestController
       $userList = $userDao->getUserChoices($groupId);
       if (!array_key_exists($assignee, $userList)) {
         throw new HttpNotFoundException(
-          "New assignee does not have permisison on upload.");
+          "New assignee does not have permission on upload.");
       }
       $uploadBrowseProxy->updateTable("assignee", $id, $assignee);
     }
@@ -686,9 +697,11 @@ class UploadController extends RestController
       $newStatus = strtolower($query[self::FILTER_STATUS]);
       $comment = '';
       if (in_array($newStatus, ["closed", "rejected"])) {
-        $body = $request->getBody();
-        $comment = $body->getContents();
-        $body->close();
+        if ($isJsonRequest && array_key_exists("comment", $bodyContent)) {
+          $comment = $bodyContent["comment"];
+        } else {
+          $comment = $bodyContent;
+        }
       }
       $status = 0;
       if ($newStatus == self::VALID_STATUS[1]) {
@@ -701,6 +714,30 @@ class UploadController extends RestController
         $status = UploadStatus::OPEN;
       }
       $uploadBrowseProxy->setStatusAndComment($id, $status, $comment);
+    }
+    // Handle update of name
+    if (
+      $isJsonRequest &&
+      array_key_exists(self::FILTER_NAME, $bodyContent) &&
+      strlen(trim($bodyContent[self::FILTER_NAME])) > 0
+    ) {
+      $newName = trim($bodyContent[self::FILTER_NAME]);
+    }
+    // Handle update of description
+    if (
+      $isJsonRequest &&
+      array_key_exists("uploadDescription", $bodyContent) &&
+      strlen(trim($bodyContent["uploadDescription"])) > 0
+    ) {
+      $newDescription = trim($bodyContent["uploadDescription"]);
+    }
+    if ($newName != null || $newDescription != null) {
+      /** @var \upload_properties $uploadProperties */
+      $uploadProperties = $this->restHelper->getPlugin('upload_properties');
+      $updated = $uploadProperties->UpdateUploadProperties($id, $newName, $newDescription);
+      if ($updated == 2) {
+        throw new HttpBadRequestException("Invalid request to update upload name and description.");
+      }
     }
 
     $returnVal = new Info(202, "Upload updated successfully.", InfoType::INFO);
