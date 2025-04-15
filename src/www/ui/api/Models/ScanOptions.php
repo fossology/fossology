@@ -2,6 +2,7 @@
 /*
  SPDX-FileCopyrightText: © 2017 Siemens AG
  SPDX-FileCopyrightText: © 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
+ SPDX-FileCopyrightText: © 2025 Tiyasa Kundu <tiyasakundu20@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -225,6 +226,12 @@ class ScanOptions
     }
     if ($this->decider->getOjoDecider() === true) {
       $deciderRules[] = 'ojoNoContradiction';
+    }
+    if ($this->decider->getCopyrightDeactivation() === true) {
+      $deciderRules[] = 'copyrightDeactivation';
+    }
+    if ($this->decider->getCopyrightClutterRemoval() === true) {
+      $deciderRules[] = 'copyrightDeactivationClutterRemoval';
     }
     if (! empty($this->decider->getConcludeLicenseType())) {
       $deciderRules[] = 'licenseTypeConc';
