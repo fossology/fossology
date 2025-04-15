@@ -41,7 +41,7 @@ foreach(FO_SCANCODE_TARGET scancode scancode_exec scancode_cov scancode_cov_exec
         target_compile_options(${FO_SCANCODE_TARGET} PRIVATE ${FO_COV_FLAGS})
     endif()
     target_link_libraries(${FO_SCANCODE_TARGET}
-        PRIVATE fossologyCPP ${icu-uc_LIBRARIES} ${Boost_LIBRARIES} jsoncpp_lib)
+        PRIVATE fossologyCPP ICU::uc ICU::i18n ${Boost_LIBRARIES} jsoncpp_lib)
     if(${FO_SCANCODE_TARGET} MATCHES "_exec$")
         string(REPLACE "_exec" "" FO_SCANCODE_TARGET_R ${FO_SCANCODE_TARGET})
         set_target_properties(${FO_SCANCODE_TARGET}

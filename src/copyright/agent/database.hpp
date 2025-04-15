@@ -28,7 +28,7 @@ public:
 
   long agent_fk;                    /**< Id of agent performed the scan */
   long pfile_fk;                    /**< Id of pfile on which the scan was performed */
-  std::string content;              /**< Statement found during the scan */
+  icu::UnicodeString content;       /**< Statement found during the scan */
   std::string hash;                 /**< MD5 hash of the statement */
   /**
    * \brief Type of statement found.

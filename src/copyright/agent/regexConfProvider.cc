@@ -9,6 +9,8 @@
  */
 #include "regexConfProvider.hpp"
 
+#include <codecvt>
+
 using namespace std;
 
 /**
@@ -80,13 +82,15 @@ RegexConfProvider::RegexConfProvider(const bool isVerbosityDebug)
  * \return True on success, false otherwise
  */
 bool RegexConfProvider::getRegexConfStream(const string& identity,
-                                           /*out*/ ifstream& stream)
+                                           /*out*/ wifstream& stream)
 {
   string confFile = getRegexConfFile(identity);
 
   if (_isVerbosityDebug)
     cout << "try to open conf: " << confFile << endl;
   stream.open(confFile.c_str());
+
+  stream.imbue(std::locale(stream.getloc(), new codecvt_utf8_utf16<wchar_t>));
 
   return stream.is_open();
 }
@@ -105,7 +109,7 @@ void RegexConfProvider::maybeLoad(const std::string& identity)
     {
       if (rmm.find(identity) == rmm.end())
       {
-        ifstream stream;
+        wifstream stream;
         if (getRegexConfStream(identity, stream))
         {
           rmm[identity] = readConfStreamToMap(stream, _isVerbosityDebug);
@@ -129,7 +133,7 @@ void RegexConfProvider::maybeLoad(const std::string& identity)
  * \param stream   Stream to read from
  */
 void RegexConfProvider::maybeLoad(const string& identity,
-                                  istringstream& stream)
+                                  wistringstream& stream)
 {
   map<string,RegexMap>& rmm = RegexConfProvider::_regexMapMap;
   if (rmm.find(identity) == rmm.end())
@@ -150,17 +154,17 @@ void RegexConfProvider::maybeLoad(const string& identity,
 
 /**
  * \brief Get the regex as string from the RegexMap
- * \param identity Identity from which the map was loaded
- * \param key      Key of the regex value required
+ * \param name Identity from which the map was loaded
+ * \param key  Key of the regex value required
  * \return Regex value as a null terminated string
  */
-const char* RegexConfProvider::getRegexValue(const string& identity,
-                                             const string& key)
+const icu::UnicodeString RegexConfProvider::getRegexValue(const string& name,
+                                                const string& key)
 {
-  const string* rv;
+  icu::UnicodeString rv;
 #pragma omp critical(rmm)
   {
-    rv = &(RegexConfProvider::_regexMapMap[identity][key]);
+    rv = RegexConfProvider::_regexMapMap[name][key];
   }
-  return (*rv).c_str();
+  return rv;
 }

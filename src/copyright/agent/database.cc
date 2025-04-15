@@ -353,6 +353,8 @@ std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int a
 bool CopyrightDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
 {
   std::string tableName = IDENTITY;
+  std::string content;
+  entry.content.toUTF8String(content);
 
   if("author" == entry.type ||
      "email" == entry.type ||
@@ -370,7 +372,7 @@ bool CopyrightDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
         long, long, char*, char*, int, int
     ),
     entry.agent_fk, entry.pfile_fk,
-    entry.content.c_str(),
+    content.c_str(),
     entry.type.c_str(),
     entry.copy_startbyte, entry.copy_endbyte
   );

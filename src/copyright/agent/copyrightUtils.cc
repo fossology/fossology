@@ -247,26 +247,28 @@ static void addDefaultScanners(CopyrightState& state)
  */
 scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defaultType) {
   #define RGX_FMT_SEPARATOR "@@"
-  auto fmtRegex = rx::regex(
+  auto fmtRegex = rx::make_u32regex(
     "(?:([[:alpha:]]+)" RGX_FMT_SEPARATOR ")?(?:([[:digit:]]+)" RGX_FMT_SEPARATOR ")?(.*)",
     rx::regex_constants::icase
   );
 
   rx::match_results<std::string::const_iterator> match;
-  if (rx::regex_match(regexDesc.begin(), regexDesc.end(), match, fmtRegex))
+  if (rx::u32regex_match(regexDesc.begin(), regexDesc.end(), match, fmtRegex))
   {
-    std::string type(match.length(1) > 0 ? match.str(1) : defaultType.c_str());
+    std::string const type(match.length(1) > 0 ? match.str(1) : defaultType);
 
     int regId = match.length(2) > 0 ? std::stoi(std::string(match.str(2))) : 0;
 
     if (match.length(3) == 0)
-      return 0; // nullptr
+      return nullptr;
 
-    std::istringstream stream;
-    stream.str(type + "=" + match.str(3));
+    std::string streamContent = type + "=" + match.str(3);
+
+    std::wistringstream stream;
+    stream.str(std::wstring(streamContent.begin(), streamContent.end()));
     return new regexScanner(type, stream, regId);
   }
-  return 0; // nullptr
+  return nullptr;
 }
 
 /**
@@ -293,7 +295,9 @@ CopyrightState getState(CliOptions&& cliOptions)
  * \param copyrightDatabaseHandler Database handler object
  * \return True of successful insertion, false otherwise
  */
-bool saveToDatabase(const string& s, const list<match>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler)
+bool saveToDatabase(const icu::UnicodeString& s, const list<match>& matches,
+  unsigned long pFileId, int agentId,
+  const CopyrightDatabaseHandler& copyrightDatabaseHandler)
 {
   if (!copyrightDatabaseHandler.begin())
   {
@@ -301,18 +305,18 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
   }
 
   size_t count = 0;
-  for (auto m = matches.begin(); m != matches.end(); ++m)
+  for (auto matche : matches)
   {
 
     DatabaseEntry entry;
     entry.agent_fk = agentId;
-    entry.content = cleanMatch(s, *m);
-    entry.copy_endbyte = m->end;
-    entry.copy_startbyte = m->start;
+    entry.content = cleanMatch(s, matche);
+    entry.copy_endbyte = matche.end;
+    entry.copy_startbyte = matche.start;
     entry.pfile_fk = pFileId;
-    entry.type = m->type;
+    entry.type = matche.type;
 
-    if (entry.content.length() != 0)
+    if (!entry.content.isEmpty())
     {
       ++count;
       if (!copyrightDatabaseHandler.insertInDatabase(entry))
@@ -334,13 +338,15 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
  * \param agentId         Agent id
  * \param databaseHandler Database handler used by agent
  */
-void matchFileWithLicenses(const string& sContent, unsigned long pFileId, CopyrightState const& state, int agentId, CopyrightDatabaseHandler& databaseHandler)
+void matchFileWithLicenses(const icu::UnicodeString& sContent,
+  unsigned long pFileId, CopyrightState const& state, int agentId,
+  CopyrightDatabaseHandler& databaseHandler)
 {
   list<match> l;
   const list<unptr::shared_ptr<scanner>>& scanners = state.getScanners();
-  for (auto sc = scanners.begin(); sc != scanners.end(); ++sc)
+  for (const auto & scanner : scanners)
   {
-    (*sc)->ScanString(sContent, l);
+    scanner->ScanString(sContent, l);
   }
   saveToDatabase(sContent, l, pFileId, agentId, databaseHandler);
 }
@@ -368,14 +374,14 @@ void matchPFileWithLicenses(CopyrightState const& state, int agentId, unsigned l
     bail(8);
   }
 
-  char* fileName = NULL;
+  char* fileName = nullptr;
   {
 #pragma omp critical (repo_mk_path)
     fileName = fo_RepMkPath("files", pFile);
   }
   if (fileName)
   {
-    string s;
+    icu::UnicodeString s;
     ReadFileToString(fileName, s);
 
     matchFileWithLicenses(s, pFileId, state, agentId, databaseHandler);
@@ -436,24 +442,24 @@ bool processUploadId(const CopyrightState& state, int agentId, int uploadId, Cop
  * @param fileName Location of the file to be scanned
  * @return A pair of file scanned and list of matches found.
  */
-pair<string, list<match>> processSingleFile(const CopyrightState& state,
+pair<icu::UnicodeString, list<match>> processSingleFile(const CopyrightState& state,
   const string fileName)
 {
   const list<unptr::shared_ptr<scanner>>& scanners = state.getScanners();
   list<match> matchList;
 
   // Read file into one string
-  string s;
+  icu::UnicodeString s;
   if (!ReadFileToString(fileName, s))
   {
     // File error
-    s = "";
+    s = u"";
   }
   else
   {
-    for (auto sc = scanners.begin(); sc != scanners.end(); ++sc)
+    for (const auto & scanner : scanners)
     {
-      (*sc)->ScanString(s, matchList);
+      scanner->ScanString(s, matchList);
     }
   }
   return make_pair(s, matchList);
@@ -466,8 +472,8 @@ pair<string, list<match>> processSingleFile(const CopyrightState& state,
  * @param printComma Set true to print comma. Will be set true after first
  *                   data is printed
  */
-void appendToJson(const std::string fileName,
-    const std::pair<string, list<match>> resultPair, bool &printComma)
+void appendToJson(const std::string& fileName,
+    const std::pair<icu::UnicodeString, list<match>>& resultPair, bool &printComma)
 {
   Json::Value result;
 #if JSONCPP_VERSION_HEXA < ((1 << 24) | (4 << 16))
@@ -481,7 +487,7 @@ void appendToJson(const std::string fileName,
   jsonWriter["indentation"] = "";
 #endif
 
-  if (resultPair.first.empty())
+  if (resultPair.first.length() == 0)
   {
     result["file"] = fileName;
     result["results"] = "Unable to read file";
@@ -493,10 +499,12 @@ void appendToJson(const std::string fileName,
     for (auto m : resultList)
     {
       Json::Value j;
+      std::string utf8Content;
+      cleanMatch(resultPair.first, m).toUTF8String(utf8Content);
       j["start"] = m.start;
       j["end"] = m.end;
       j["type"] = m.type;
-      j["content"] = cleanMatch(resultPair.first, m);
+      j["content"] = utf8Content;
       results.append(j);
     }
     result["file"] = fileName;
@@ -532,10 +540,10 @@ void appendToJson(const std::string fileName,
  * @param fileName   File which was scanned
  * @param resultPair Result pair from scanSingleFile()
  */
-void printResultToStdout(const std::string fileName,
-    const std::pair<string, list<match>> resultPair)
+void printResultToStdout(const std::string& fileName,
+    const std::pair<icu::UnicodeString, list<match>>& resultPair)
 {
-  if (resultPair.first.empty())
+  if (resultPair.first.length() == 0)
   {
     cout << fileName << " :: Unable to read file" << endl;
     return;
@@ -544,10 +552,12 @@ void printResultToStdout(const std::string fileName,
   ss << fileName << " ::" << endl;
   // Output matches
   list<match> resultList = resultPair.second;
-  for (auto m = resultList.begin();  m != resultList.end(); ++m)
+  for (auto & m : resultList)
   {
-    ss << "\t[" << m->start << ':' << m->end << ':' << m->type << "] '"
-       << cleanMatch(resultPair.first, *m)
+    std::string utf8Content;
+    cleanMatch(resultPair.first, m).toUTF8String(utf8Content);
+    ss << "\t[" << m.start << ':' << m.end << ':' << m.type << "] '"
+       << utf8Content
        << "'" << endl;
   }
   // Thread-Safety: output all matches (collected in ss) at once to cout
