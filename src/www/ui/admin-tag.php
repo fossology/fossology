@@ -108,21 +108,38 @@ class admin_tag extends FO_Plugin
    */
   function ShowCreateTagPage()
   {
-    $VC = _("<h3>Create Tag:</h3>\n");
-    $VC.= "<form name='form' method='POST' action='" . Traceback_uri() ."?mod=admin_tag'>\n";
-    $VC .= "<p>";
-    $text = _("Tag");
-    $VC .= "$text: <input type='text' id='tag_name' name='tag_name' maxlength='32' utocomplete='off'/> ";
-    $VC .= "</p>";
-    $text = _("Tag description:");
-    $VC .= "<p>$text <input type='text' name='tag_desc'/></p>";
-    $text = _("Create");
-    $VC .= "<input type='hidden' name='action' value='add'/>\n";
-    $VC .= "<input type='submit' value='$text'>\n";
-    $VC .= "</form>\n";
-    return $VC;
+      $VC = _("<h3>Create Tag:</h3>\n");
+      $VC .= "<form name='form' method='POST' action='" . Traceback_uri() . "?mod=admin_tag' >\n";
+  
+      $VC .= "<div style='width: 100%; max-width: 500px; margin-top: 20px;'>";
+  
+      // Tag name input
+      $VC .= "<div style='margin-bottom: 20px;'>";
+      $VC .= "<label for='tag_name' style='display: block; font-weight: bold;'>" . _("1. Enter the new tag name:") . "</label>";
+      $VC .= "<input type='text' id='tag_name' name='tag_name' maxlength='32' autocomplete='off' 
+                  style='width: calc(50% - 25px); margin-left: 20px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;' />";
+      $VC .= "</div>";
+  
+      // Tag description input
+      $VC .= "<div style='margin-bottom: 20px;'>";
+      $VC .= "<label for='tag_desc' style='display: block; font-weight: bold;'>" . _("2. Enter a meaningful description:") . "</label>";
+      $VC .= "<input type='text' id='tag_desc' name='tag_desc' 
+                  style='width: calc(100% - 20px); margin-left: 20px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;' />";
+      $VC .= "</div>";
+  
+      // Submit button
+      $text = _("Create");
+      $VC .= "<input type='hidden' name='action' value='add'/>\n";
+      $VC .= "<input type='submit' value='$text' 
+                  style='margin-top: 10px; padding: 8px 16px;border-radius: 4px; cursor: pointer;' />\n";
+  
+      $VC .= "</div>";
+      $VC .= "</form>\n";
+  
+      return $VC;
   }
-
+  
+  
 
   public function Output()
   {
