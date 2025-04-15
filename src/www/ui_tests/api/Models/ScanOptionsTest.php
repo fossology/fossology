@@ -21,6 +21,7 @@ namespace Fossology\UI\Api\Test\Models
   use Fossology\Lib\Dao\UserDao;
   use Fossology\Lib\Auth\Auth;
   use Symfony\Component\HttpFoundation\Request;
+  use Fossology\UI\Api\Models\ApiVersion;
 
   /**
    * @class ScanOptionsTest
@@ -103,7 +104,7 @@ namespace Fossology\UI\Api\Test\Models
      * -# Prepare Request and call ScanOptions::scheduleAgents()
      * -# Function should call AgentAdder::scheduleAgents()
      */
-    public function testScheduleAgents()
+    public function testScheduleAgentsApiVersionV1()
     {
       $reuseUploadId = 2;
       $uploadId = 4;
@@ -120,6 +121,61 @@ namespace Fossology\UI\Api\Test\Models
         'nomosInMonk',
         'ojoNoContradiction'
       ];
+
+      $_SERVER['REQUEST_URI'] = "/api/v1/";
+
+      $mockApiVersion = $this->createMock(ApiVersion::class);
+      $mockApiVersion->method("getVersionFromUri")->willReturn(ApiVersion::V1);
+
+      $request = new Request();
+      $request = $this->prepareRequest($request, $reuserOpts, $deciderOpts);
+
+      $analysis = new Analysis();
+      $analysis->setUsingString("nomos,ojo,monk");
+
+      $reuse = new Reuser($reuseUploadId, $groupName);
+
+      $decider = new Decider();
+      $decider->setOjoDecider(true);
+      $decider->setNomosMonk(true);
+      $decider->setConcludeLicenseType("Permissive");
+
+      $scancode = new Scancode();
+
+      $scanOption = new ScanOptions($analysis, $reuse, $decider, $scancode);
+
+      $this->userDao->shouldReceive('getGroupIdByName')
+        ->withArgs([$groupName])->andReturn($groupId);
+      $this->agentAdderMock->shouldReceive('scheduleAgents')
+        ->once()
+        ->andReturn(25);
+
+      $scanOption->scheduleAgents($folderId, $uploadId);
+    }
+
+    public function testScheduleAgentsApiVersionV2()
+    {
+      $reuseUploadId = 2;
+      $uploadId = 4;
+      $folderId = 2;
+      $groupId = 2;
+      $groupName = "fossy";
+      $agentsToAdd = ['agent_nomos', 'agent_ojo', 'agent_monk'];
+      $reuserOpts = [
+        'upload' => $reuseUploadId,
+        'group' => $groupId,
+        'rules' => []
+      ];
+      $deciderOpts = [
+        'nomosInMonk',
+        'ojoNoContradiction'
+      ];
+
+      $_SERVER['REQUEST_URI'] = "/api/v2/";
+
+      $mockApiVersion = $this->createMock(ApiVersion::class);
+      $mockApiVersion->method("getVersionFromUri")->willReturn(ApiVersion::V2);
+
       $request = new Request();
       $request = $this->prepareRequest($request, $reuserOpts, $deciderOpts);
 
