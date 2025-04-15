@@ -32,6 +32,11 @@ class CliXml extends Agent
   const AVAILABLE_OUTPUT_FORMATS = "xml";
   const UPLOAD_ADDS = "uploadsAdd";
 
+  /** @var array $additionalUploads
+   * Array of addtional uploads
+   */
+  private $additionalUploads = [];
+
   /** @var UploadDao */
   private $uploadDao;
 
@@ -79,6 +84,15 @@ class CliXml extends Agent
 
   function __construct()
   {
+    $args = getopt("", array(self::UPLOAD_ADDS.'::'));
+
+    if (array_key_exists(self::UPLOAD_ADDS, $args)) {
+      $uploadsString = $args[self::UPLOAD_ADDS];
+      if (!empty($uploadsString)) {
+          $this->additionalUploads = explode(',', $uploadsString);
+      }
+    }
+
     parent::__construct('clixml', AGENT_VERSION, AGENT_REV);
 
     $this->uploadDao = $this->container->get('dao.upload');
@@ -178,7 +192,12 @@ class CliXml extends Agent
 
   protected function getUri($fileBase)
   {
-    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+    if (count($this->additionalUploads) > 0) {
+      $fileName = $fileBase . "multifile" . "_" . strtoupper($this->outputFormat);
+    } else {
+      $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+    }
+
     return $fileName .".xml";
   }
 
