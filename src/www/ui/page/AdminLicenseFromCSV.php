@@ -132,20 +132,32 @@ class AdminLicenseFromCSV extends DefaultPlugin
       $response = $this->guzzleClient->get($finalURL);
       $fetchLicenseTimeReq = microtime(true) - $startTimeReq;
       $this->fileLogger->debug("LicenseDB req:' took " . sprintf("%0.3fms", 1000 * $fetchLicenseTimeReq));
-      if ($response->getStatusCode() == 200) {
-        $data = json_decode($response->getBody()->getContents());
-      }
+      $statusCode = $response->getStatusCode();
 
-      if ($data === null) {
-        if (json_last_error() !== JSON_ERROR_NONE) {
-          return $msg . "Error decoding JSON: " . json_last_error_msg() . "\n";
-        }
-        return $msg . "No Licenses Found";
+      switch($statusCode){
+        case 200:
+          $data = json_decode($response->getBody()->getContents());
+          if ($data === null) {
+            if (json_last_error() !== JSON_ERROR_NONE) {
+              return $msg . "Error decoding JSON: " . json_last_error_msg() . "\n";
+            }
+            return $msg . "No Licenses Data Found";
+          }
+          if (empty($data)) {
+            return $msg . "There are no Licenses Present in LicenseDB";
+          }
+          return $this->licenseCsvImport->importJsonData($data, $msg);
+        case 401:
+          return $msg . "Unauthorized access. Please check your credentials or token.";
+        case 403:
+          return $msg . "Access forbidden. You may not have the necessary permissions.";
+        case 404:
+          return $msg . "Resource not found. The requested URL may be incorrect.";
+        case 500:
+          return $msg . "Internal Server Error. Please try again later.";
+        default:
+          return $msg . "Unexpected status code: $statusCode";
       }
-      if (empty($data)) {
-        return $msg . "There are no Licenses Present in LicenseDB";
-      }
-      return $this->licenseCsvImport->importJsonData($data, $msg);
     } catch (RequestException|GuzzleException $e) {
       return $msg . _('Something Went Wrong, check if host is accessible') . ': ' . $e->getMessage();
     }
