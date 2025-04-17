@@ -10,6 +10,7 @@ namespace Fossology\UI\Page;
 
 use Fossology\Lib\Application\LicenseCsvImport;
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Exceptions\HttpClientException;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Util\HttpUtils;
 use Fossology\UI\Api\Models\ApiVersion;
@@ -132,20 +133,11 @@ class AdminLicenseFromCSV extends DefaultPlugin
       $response = $this->guzzleClient->get($finalURL);
       $fetchLicenseTimeReq = microtime(true) - $startTimeReq;
       $this->fileLogger->debug("LicenseDB req:' took " . sprintf("%0.3fms", 1000 * $fetchLicenseTimeReq));
-      if ($response->getStatusCode() == 200) {
-        $data = json_decode($response->getBody()->getContents());
-      }
 
-      if ($data === null) {
-        if (json_last_error() !== JSON_ERROR_NONE) {
-          return $msg . "Error decoding JSON: " . json_last_error_msg() . "\n";
-        }
-        return $msg . "No Licenses Found";
-      }
-      if (empty($data)) {
-        return $msg . "There are no Licenses Present in LicenseDB";
-      }
+      $data = HttpUtils::processHttpResponse($response);
       return $this->licenseCsvImport->importJsonData($data, $msg);
+    } catch (HttpClientException $e) {
+      return $msg . $e->getMessage();
     } catch (RequestException|GuzzleException $e) {
       return $msg . _('Something Went Wrong, check if host is accessible') . ': ' . $e->getMessage();
     }
