@@ -20,6 +20,19 @@ use Fossology\UI\Api\Models\Folder;
  */
 class FolderTest extends \PHPUnit\Framework\TestCase
 {
+  ////// Constructor Tests //////
+
+  /**
+   * Tests that the Folder constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $folder = new Folder(1, "Documents", "My important documents folder", 0);
+    $this->assertInstanceOf(Folder::class, $folder);
+  }
+
   /**
    * @test
    * -# Test for keys in Folder model
