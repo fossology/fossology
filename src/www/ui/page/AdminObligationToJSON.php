@@ -9,6 +9,7 @@ namespace Fossology\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Util\DownloadUtil;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -32,17 +33,18 @@ class AdminObligationToJSON extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
+    $confirmed = $request->get('confirmed', false);
+    $referer = $request->headers->get('referer');
+    $fileName = "fossology-obligations-export-" . date("YMj-Gis") . '.json';
+
+    if (!$confirmed) {
+      $downloadUrl = "?mod=" . self::NAME . "&rf=" . $request->get('rf') . "&confirmed=true";
+      return DownloadUtil::getDownloadConfirmationResponse($downloadUrl, $fileName, $referer);
+    }
+
     $obligationCsvExport = new \Fossology\Lib\Application\ObligationCsvExport($this->getObject('db.manager'));
     $content = $obligationCsvExport->createCsv(intval($request->get('rf')), true);
-    $fileName = "fossology-obligations-export-".date("YMj-Gis");
-    $headers = array(
-        'Content-type' => 'text/json, charset=UTF-8',
-        'Content-Disposition' => 'attachment; filename='.$fileName.'.json',
-        'Pragma' => 'no-cache',
-        'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
-        'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
-
-    return new Response($content, Response::HTTP_OK, $headers);
+    return DownloadUtil::getDownloadResponse($content, $fileName, 'text/json');
   }
 }
 

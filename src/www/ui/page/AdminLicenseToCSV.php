@@ -9,6 +9,7 @@ namespace Fossology\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Util\DownloadUtil;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,10 +20,10 @@ class AdminLicenseToCSV extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => "Admin License CSV Export",
-        self::MENU_LIST => "Admin::License Admin::CSV Export Marydone",
-        self::REQUIRES_LOGIN => true,
-        self::PERMISSION => Auth::PERM_ADMIN
+      self::TITLE => "Admin License CSV Export",
+      self::MENU_LIST => "Admin::License Admin::CSV Export Marydone",
+      self::REQUIRES_LOGIN => true,
+      self::PERMISSION => Auth::PERM_ADMIN
     ));
   }
 
@@ -32,17 +33,18 @@ class AdminLicenseToCSV extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
+    $confirmed = $request->get('confirmed', false);
+    $referer = $request->headers->get('referer');
+    $fileName = "fossology-license-export-" . date("YMj-Gis") . '.csv';
+
+    if (!$confirmed) {
+      $downloadUrl = "?mod=" . self::NAME . "&rf=" . $request->get('rf') . "&confirmed=true";
+      return DownloadUtil::getDownloadConfirmationResponse($downloadUrl, $fileName, $referer);
+    }
+
     $licenseCsvExport = new \Fossology\Lib\Application\LicenseCsvExport($this->getObject('db.manager'));
     $content = $licenseCsvExport->createCsv(intval($request->get('rf')));
-    $fileName = "fossology-license-export-".date("YMj-Gis");
-    $headers = array(
-        'Content-type' => 'text/csv, charset=UTF-8',
-        'Content-Disposition' => 'attachment; filename='.$fileName.'.csv',
-        'Pragma' => 'no-cache',
-        'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
-        'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
-
-    return new Response($content, Response::HTTP_OK, $headers);
+    return DownloadUtil::getDownloadResponse($content, $fileName);
   }
 }
 

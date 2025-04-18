@@ -12,6 +12,7 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\CompatibilityDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Util\DownloadUtil;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -35,6 +36,15 @@ class AdminLicenseToYAML extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
+    $confirmed = $request->get('confirmed', false);
+    $referer = $request->headers->get('referer');
+    $fileName = "fossology-license-comp-rules-export-" . date("YMj-Gis") . '.yaml';
+
+    if (!$confirmed) {
+      $downloadUrl = "?mod=" . self::NAME . "&confirmed=true";
+      return DownloadUtil::getDownloadConfirmationResponse($downloadUrl, $fileName, $referer);
+    }
+
     /** @var DbManager $dbManager */
     $dbManager = $this->getObject('db.manager');
     /** @var CompatibilityDao $compatibilityDao */
@@ -42,15 +52,7 @@ class AdminLicenseToYAML extends DefaultPlugin
     $licenseYamlExport = new LicenseCompatibilityRulesYamlExport($dbManager,
         $compatibilityDao);
     $content = $licenseYamlExport->createYaml(0);
-    $fileName = "fossology-license-comp-rules-export-".date("YMj-Gis");
-    $headers = array(
-        'Content-type' => 'text/x-yaml, charset=UTF-8',
-        'Content-Disposition' => 'attachment; filename='.$fileName.'.yaml',
-        'Pragma' => 'no-cache',
-        'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
-        'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
-
-    return new Response($content, Response::HTTP_OK, $headers);
+    return DownloadUtil::getDownloadResponse($content, $fileName, 'text/x-yaml');
   }
 }
 
