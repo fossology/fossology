@@ -7,6 +7,7 @@
 import requests
 import json
 from typing import Dict, Union
+from packageurl.contrib import purl2url
 
 
 class Parser:
@@ -40,8 +41,8 @@ class Parser:
 
             if type == 'pypi':
                 self.python_components.append(component)
-            # elif type == 'npm':
-            #     self.npm_components.append(component)
+            elif type == 'npm':
+                self.npm_components.append(component)
             # elif type == 'composer':
             #     self.php_components.append(component)
             else:
@@ -63,8 +64,8 @@ class Parser:
                 purl_type = purl.split(':')[1].split('/')[0]
                 return purl_type
             return None
-        except Exception as e:
-            return None, str(e)
+        except Exception:
+            return None
 
 
 class PythonParser:
@@ -73,7 +74,7 @@ class PythonParser:
     cyclonedx format sbom files.
     """
 
-    def __process_components(self, components : list[Dict]) -> list[str,str]:
+    def _process_components(self, components : list[Dict]) -> list[str,str]:
         """
         Returns list of package name and version from SBOM component.
         Args:
@@ -83,7 +84,7 @@ class PythonParser:
         """
         return [(comp['name'], comp['version']) for comp in components]
 
-    def __generate_api_endpoint(self, package_name: str, version: str) -> str:
+    def _generate_api_endpoint(self, package_name: str, version: str) -> str:
         """
         Generate JSON REST API Endpoint to fetch download url.
         Args:
@@ -103,10 +104,10 @@ class PythonParser:
             list of tuples with package_name and download_url of that package
         """
         download_urls = []
-        packages = self.__process_components(components)
+        packages = self._process_components(components)
         
         for package_name, version in packages:
-            api_endpoint = self.__generate_api_endpoint(package_name, version)
+            api_endpoint = self._generate_api_endpoint(package_name, version)
             print(f"API endpoint for {package_name} : {api_endpoint}")            
             response = requests.get(api_endpoint)
             
@@ -130,4 +131,41 @@ class PythonParser:
             else:
                 print(f"Failed to retrieve data for {package_name} {version}")
 
+        return download_urls if download_urls else None
+
+
+class NPMParser:
+    """
+    NPM Parser to parse the python sboms to generate download urls from
+    cyclonedx format sbom files.
+    """
+
+    def _get_download_url(self, purl: str):
+        """
+        Get download url from purl for NPM Packages
+        Args:
+            purl: str
+        Return:
+            download_url: str
+        """
+        return purl2url.get_download_url(purl)
+    
+    def parse_components(self, components: list[Dict]) -> Union[list[tuple[str,str]],None]:
+        """
+        Parse the components to extract the tuple of (<package_name>, <download_url>)
+        Args:
+            components: list[Dict]
+        Return:
+            List[tuple(str,str)] (<package_name>, <download_url>)
+        """
+        download_urls = []
+        for comp in components:
+            name = comp['name']
+            purl = comp['purl']
+            try:
+                download_url = self._get_download_url(purl)
+                download_urls.append((name, download_url))
+            except Exception as e:
+                print(f"Invalid Download URL for NPM package: {name} :: {e}")
+        
         return download_urls if download_urls else None
