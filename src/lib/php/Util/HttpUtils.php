@@ -8,6 +8,7 @@
 
 namespace Fossology\Lib\Util;
 
+use Fossology\Lib\Exceptions\HttpClientException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
@@ -70,5 +71,47 @@ class HttpUtils
     }
 
     return false;
+  }
+
+  /**
+   * Processes an HTTP response and handles it based on the status code.
+   *
+   * This function evaluates the HTTP response status code and performs the following:
+   * - For a 200 status code, it decodes the JSON response body and validates the data.
+   * - For other status codes, it throws exceptions with appropriate error messages.
+   *
+   * @param \Psr\Http\Message\ResponseInterface $response The HTTP response object to process.
+   *
+   * @return mixed Decoded JSON data from the response body if the status code is 200.
+   *
+   * @throws HttpClientException If the response contains errors, invalid JSON, or unexpected status codes.
+   */
+  public static function processHttpResponse($response)
+  {
+    $statusCode = $response->getStatusCode();
+    switch ($statusCode) {
+      case 200:
+        $data = json_decode($response->getBody()->getContents());
+        if ($data === null) {
+          if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new HttpClientException("Error decoding JSON: " . json_last_error_msg());
+          }
+          throw new HttpClientException("No Data Found");
+        }
+        if (empty($data)) {
+            throw new HttpClientException("There is no Data Present in the Database");
+        }
+        return $data;
+      case 401:
+        throw new HttpClientException("Unauthorized access. Please check your credentials or token.");
+      case 403:
+        throw new HttpClientException("Access forbidden. You may not have the necessary permissions.");
+      case 404:
+        throw new HttpClientException("Resource not found. The requested URL may be incorrect.");
+      case 500:
+        throw new HttpClientException("Internal Server Error. Please try again later.");
+      default:
+        throw new HttpClientException("Unexpected status code: $statusCode");
+    }
   }
 }
