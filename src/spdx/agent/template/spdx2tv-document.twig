@@ -28,6 +28,8 @@ Creator: Organization: {{ organisation }}
 {% endif %}
 CreatorComment: <text>
 This document was created using license information and a generator from Fossology.
+{% if licenseInfo %}License count: {{ licenseInfo.count }}, Last updated: {{ licenseInfo.lastUpdated }}{% endif %}
+{% if obligationInfo %}Obligation count: {{ obligationInfo.count }}, Last updated: {{ obligationInfo.lastUpdated }}{% endif %}
 </text>
 Created: {{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}
 LicenseListVersion: 3.22

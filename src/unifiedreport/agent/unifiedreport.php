@@ -105,6 +105,7 @@ use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\SimpleType\JcTable;
 use PhpOffice\PhpWord\Style\Table;
 use Fossology\Lib\Report\ReportUtils;
+use Fossology\Lib\Report\LicenseObligationUtility;
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/reportStatic.php");
@@ -243,6 +244,9 @@ class UnifiedReport extends Agent
    */
   private $groupBy;
 
+  /** @var LicenseObligationUtility */
+  private $licenseObligationUtility;
+
   function __construct()
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement");
@@ -260,6 +264,8 @@ class UnifiedReport extends Agent
     $this->otherGetter = new OtherGetter();
     $this->obligationsGetter = new ObligationsGetter();
     $this->reportutils = new ReportUtils();
+
+    $this->licenseObligationUtility = new LicenseObligationUtility($this->dbManager);
 
     parent::__construct(REPORT_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
@@ -355,6 +361,25 @@ class UnifiedReport extends Agent
   }
 
   /**
+   * @brief Get license and obligation information
+   * @return array Array with license and obligation information
+   */
+  private function getLicenseAndObligationInfo()
+  {
+    return $this->licenseObligationUtility->getLicenseAndObligationInfo();
+  }
+
+  /**
+   * @brief Get the last update time for a table
+   * @param string $tableName Table name to check
+   * @return string Formatted date string
+   */
+  private function getLastUpdateTime($tableName)
+  {
+    return $this->licenseObligationUtility->getLastUpdateTime($tableName);
+  }
+
+  /**
    * @brief Setting default heading styles and paragraph styles
    * @param[in,out] PhpWord &$phpWord PhpWord object
    * @param int $timestamp            Report gen timestamp
@@ -362,6 +387,20 @@ class UnifiedReport extends Agent
    */
   private function documentSettingsAndStyles(PhpWord &$phpWord, $timestamp, $userName)
   {
+    global $SysConf;
+    
+    // Get license and obligation information
+    list($licenseInfo, $obligationInfo) = $this->getLicenseAndObligationInfo();
+    $licenseInfoStr = "";
+    $obligationInfoStr = "";
+    
+    if ($licenseInfo) {
+      $licenseInfoStr = sprintf("Licenses: %d (last updated: %s)", $licenseInfo['count'], $licenseInfo['lastUpdated']);
+    }
+    
+    if ($obligationInfo) {
+      $obligationInfoStr = sprintf("Obligations: %d (last updated: %s)", $obligationInfo['count'], $obligationInfo['lastUpdated']);
+    }
 
     $topHeading = array("size" => 22,
                         "bold" => true,
@@ -409,7 +448,21 @@ class UnifiedReport extends Agent
     $properties->setCreator($userName);
     $properties->setCompany("Your Organisation");
     $properties->setTitle("Clearing Report");
-    $properties->setDescription("OSS clearing report by Fossology tool");
+    
+    // Set version and build information with license and obligation info
+    $versionInfo = "Version: " . $SysConf['BUILD']['VERSION'] . 
+                   ", Branch: " . $SysConf['BUILD']['BRANCH'] . 
+                   ", Commit: #" . $SysConf['BUILD']['COMMIT_HASH'];
+    
+    if (!empty($licenseInfoStr)) {
+      $versionInfo .= ", " . $licenseInfoStr;
+    }
+    
+    if (!empty($obligationInfoStr)) {
+      $versionInfo .= ", " . $obligationInfoStr;
+    }
+    
+    $properties->setDescription("OSS clearing report by Fossology tool. " . $versionInfo);
     $properties->setSubject("Copyright (C) ".date("Y", $timestamp).", Your Organisation");
   }
 

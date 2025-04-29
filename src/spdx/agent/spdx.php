@@ -62,6 +62,7 @@ use Fossology\Lib\Report\ObligationsGetter;
 use Fossology\Lib\Report\ReportUtils;
 use Fossology\Lib\Util\StringOperation;
 use Twig\Environment;
+use Fossology\Lib\Report\LicenseObligationUtility;
 
 include_once(__DIR__ . "/spdxutils.php");
 
@@ -158,6 +159,8 @@ class SpdxAgent extends Agent
    * List of Declared License FileIds in the document
    */
   protected $declaredLicenseFileIds=[];
+  /** @var LicenseObligationUtility */
+  private $licenseObligationUtility;
 
   function __construct()
   {
@@ -187,6 +190,7 @@ class SpdxAgent extends Agent
     $this->licenseMainGetter = new LicenseMainGetter();
     $this->obligationsGetter = new ObligationsGetter();
     $this->reportutils = new ReportUtils();
+    $this->licenseObligationUtility = new LicenseObligationUtility($this->dbManager);
   }
 
   /**
@@ -354,8 +358,65 @@ class SpdxAgent extends Agent
    */
   protected function renderPackage($uploadId)
   {
+    global $SysConf;
+    $upload = $this->uploadDao->getUpload($uploadId);
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
+    $this->heartbeat(0);
+
+    $agent_pk = $this->agentDao->getCurrentAgentId("copyright");
+    $copyright = $this->copyrightDao->getAllEntries("copyright", $agent_pk, $uploadId, $type='skipcontent', false, 0, "C.{content} as content", true);
+    $this->heartbeat(0);
+
+    if ($this->outputFormat == "spdx2") {
+      $tag_copy = $this->copyrightDao->getAllEntries("copyright", $agent_pk, $uploadId, $type='skipcontent', false, 0, "C.{content} as content", false);
+      $this->heartbeat(0);
+    }
+
+    $text = $this->clearingDao->getCleared($uploadId, $this->groupId,
+      $this->isOutOfSync, false, true, $itemTreeBounds);
+    $licenseAcknowledgement = array();
+    foreach($text as $licenseStatement) {
+      $licenseAcknowledgement[] = $licenseStatement["content"];
+    }
+    
+    $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
+    $uploadName = $this->getFileBasename($packageName);
+    $licenseCommentState = $this->getSPDXReportConf($uploadId, 0);
+    $fileCommentState = $this->getSPDXReportConf($uploadId, 1);
+    
+    // Get license and obligation information
+    list($licenseInfo, $obligationInfo) = $this->getLicenseAndObligationInfo();
+    
+    $mainLicStr = $this->reportutils->getMainLicenseString($uploadId, $this->groupId, $this->uploadDao, $this->licenseDao, $this, false);
+
+    $templateVars =  array(
+      'licensesInDocument' => $this->licensesInDocument,
+      'documentName' => $uploadName,
+      'uri' => $this->uri,
+      'userName' => $this->userName,
+      'organisation' => '',
+      'mainLicense' => $mainLicStr !== null ? $mainLicStr : 'NOASSERTION',
+      'packageName' => $packageName,
+      'packageId' => $this->packageIds[$uploadId],
+      'uploadId' => $uploadId,
+      'listedLicense'=>array(),
+      'verificationCode' => $this->getVerificationCode($upload),
+      'dataLicense' => $this->getSPDXDataLicense(),
+      'fileNodes' => $this->packageNodes[$uploadId],
+      'obligationText' => $this->getObligations($uploadId, $this->groupId),
+      'copyrightText' => array_unique(array_column($copyright, 'content')),
+      'licenseAcknowledgements' => $licenseAcknowledgement,
+      'isOutOfSync' => $this->isOutOfSync,
+      'licenseCommentState' => $licenseCommentState,
+      'fileCommentState' => $fileCommentState,
+      'sysconfs' => $SysConf,
+      'tag_copyright' => isset($tag_copy) ? $tag_copy : null,
+      'licenseInfo' => $licenseInfo,
+      'obligationInfo' => $obligationInfo
+    );
+
     $this->heartbeat(0);
 
     $filesWithLicenses = $this->reportutils
@@ -454,27 +515,16 @@ class SpdxAgent extends Agent
     }
     $obligations = $this->getObligations($uploadId, $this->groupId);
 
-    return $this->renderString($this->getTemplateFile('package'), [
-      'packageId' => $uploadId,
-      'uri' => $this->uri,
-      'packageName' => $upload->getFilename(),
-      'packageVersion' => $componentVersion,
-      'releaseDate' => $releaseDate,
-      'generalAssessment' => $generalAssessment,
-      'uploadName' => $upload->getFilename(),
-      'componentType' => $componentType,
-      'componentId' => htmlspecialchars($componentId),
-      'sha1' => $hashes['sha1'],
-      'md5' => $hashes['md5'],
-      'sha256' => $hashes['sha256'],
-      'verificationCode' => $this->getVerificationCode($upload),
-      'mainLicenses' => $mainLicenses,
-      'mainLicenseString' => $mainLicenseString,
-      'licenseComments' => $licenseComment,
-      'fileNodes' => $fileNodes,
-      'obligations' => $obligations,
-      'licenseList' => $this->licensesInDocument
-    ]);
+    $templateVars['packageNodes'] = $fileNodes;
+    $templateVars['mainLicenses'] = $mainLicenses;
+    $templateVars['mainLicenseString'] = $mainLicenseString;
+    $templateVars['licenseComments'] = $licenseComment;
+    $templateVars['obligations'] = $obligations;
+    $templateVars['licenseList'] = $this->licensesInDocument;
+
+    $this->heartbeat(0);
+
+    return $this->renderString($this->getTemplateFile('package'), $templateVars);
   }
 
   /**
@@ -931,6 +981,25 @@ class SpdxAgent extends Agent
             $oldLicObj->getDetectorType(), $oldLicObj->getSpdxId()));
       }
     }
+  }
+
+  /**
+   * Get license and obligation counts and last updated info
+   * @return array Array with license and obligation information
+   */
+  private function getLicenseAndObligationInfo()
+  {
+    return $this->licenseObligationUtility->getLicenseAndObligationInfo();
+  }
+
+  /**
+   * Get the last update time for a table
+   * @param string $tableName Table name to check
+   * @return string Formatted date string
+   */
+  private function getLastUpdateTime($tableName)
+  {
+    return $this->licenseObligationUtility->getLastUpdateTime($tableName);
   }
 }
 
