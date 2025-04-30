@@ -549,59 +549,60 @@ paths:
       tags:
         - Upload
         - Organize
-      description: Update an upload information
+      description: Update an upload information (status, assignee, name, description)
       parameters:
-        - name: status
-          description: New status of the upload
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - Open
-              - InProgress
-              - Closed
-              - Rejected
-          example: Closed
-        - name: assignee
-          description: New assignee for the project
-          in: query
-          required: false
+        - name: id
+          in: path
+          description: Upload ID to update
+          required: true
           schema:
             type: integer
       requestBody:
-        description: >
-          Comment on the status, required for Closed and Rejected states.
-          Use the application/json for advanced usage.
+        description: Upload update parameters
+        required: true
         content:
-          text/plain:
-            schema:
-              description: The comment for new status
-              type: string
-              example: "The upload cleared for use."
           application/json:
             schema:
               type: object
               properties:
+                status:
+                  type: string
+                  enum:
+                    - Open
+                    - InProgress
+                    - Closed
+                    - Rejected
+                  description: New status of the upload
+                  example: Closed
+                assignee:
+                  type: integer
+                  description: ID of new assignee for the upload
+                  example: 3
                 comment:
                   type: string
-                  description: The comment for new status
+                  description: Required when status is 'Closed' or 'Rejected'.
                   example: "The upload cleared for use."
                 name:
                   type: string
-                  description: New name of the upload.
+                  description: New name for the upload
                   example: my_edited_upload.zip
                 uploadDescription:
                   type: string
-                  description: Updated description for the upload.
+                  description: New description for the upload
                   example: This is updated description.
       responses:
         '202':
-          description: Upload will be updated
+          description: Upload updated successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        '400':
+          description: Bad request when invalid name/description provided
+        '403':
+          description: Forbidden when user is not admin/advisor
+        '404':
+          description: Not found when assignee doesn't have permission
         default:
           $ref: '#/components/responses/defaultResponse'
     put:
