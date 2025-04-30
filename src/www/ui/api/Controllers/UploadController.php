@@ -648,7 +648,6 @@ class UploadController extends RestController
   public function updateUpload($request, $response, $args)
   {
     $id = intval($args['id']);
-    $query = $request->getQueryParams();
     $userDao = $this->restHelper->getUserDao();
     $userId = $this->restHelper->getUserId();
     $groupId = $this->restHelper->getGroupId();
@@ -660,9 +659,9 @@ class UploadController extends RestController
         "Can not update upload.");
     }
     $uploadBrowseProxy = new UploadBrowseProxy(
-      $groupId,
-      $perm,
-      $this->dbHelper->getDbManager()
+        $groupId,
+        $perm,
+        $this->dbHelper->getDbManager()
     );
 
     $assignee = null;
@@ -679,30 +678,25 @@ class UploadController extends RestController
       $body->close();
     }
 
-    // Handle assignee info
-    if (array_key_exists(self::FILTER_ASSIGNEE, $query)) {
-      $assignee = filter_var($query[self::FILTER_ASSIGNEE], FILTER_VALIDATE_INT);
+    if (array_key_exists(self::FILTER_ASSIGNEE, $bodyContent)) {
+      $assignee = filter_var($bodyContent[self::FILTER_ASSIGNEE], FILTER_VALIDATE_INT);
       $userList = $userDao->getUserChoices($groupId);
-      if (!array_key_exists($assignee, $userList)) {
-        throw new HttpNotFoundException(
-          "New assignee does not have permission on upload.");
+    if (!array_key_exists($assignee, $userList)) {
+      throw new HttpNotFoundException(
+        "New assignee does not have permission on upload.");
       }
       $uploadBrowseProxy->updateTable("assignee", $id, $assignee);
     }
-    // Handle new status
+
+    if (array_key_exists("comment", $bodyContent)) {
+      $comment = trim($bodyContent["comment"]);
+    }
+
     if (
-      array_key_exists(self::FILTER_STATUS, $query) &&
-      in_array(strtolower($query[self::FILTER_STATUS]), self::VALID_STATUS)
-    ) {
-      $newStatus = strtolower($query[self::FILTER_STATUS]);
-      $comment = '';
-      if (in_array($newStatus, ["closed", "rejected"])) {
-        if ($isJsonRequest && array_key_exists("comment", $bodyContent)) {
-          $comment = $bodyContent["comment"];
-        } else {
-          $comment = $bodyContent;
-        }
-      }
+      array_key_exists(self::FILTER_STATUS, $bodyContent) &&
+      in_array(strtolower($bodyContent[self::FILTER_STATUS]), self::VALID_STATUS)
+      ) {
+      $newStatus = strtolower($bodyContent[self::FILTER_STATUS]);
       $status = 0;
       if ($newStatus == self::VALID_STATUS[1]) {
         $status = UploadStatus::IN_PROGRESS;
@@ -713,24 +707,23 @@ class UploadController extends RestController
       } else {
         $status = UploadStatus::OPEN;
       }
-      $uploadBrowseProxy->setStatusAndComment($id, $status, $comment);
+        $uploadBrowseProxy->setStatusAndComment($id, $status, $comment);
     }
-    // Handle update of name
+
     if (
-      $isJsonRequest &&
       array_key_exists(self::FILTER_NAME, $bodyContent) &&
       strlen(trim($bodyContent[self::FILTER_NAME])) > 0
     ) {
       $newName = trim($bodyContent[self::FILTER_NAME]);
     }
-    // Handle update of description
+
     if (
-      $isJsonRequest &&
       array_key_exists("uploadDescription", $bodyContent) &&
       strlen(trim($bodyContent["uploadDescription"])) > 0
-    ) {
+      ) {
       $newDescription = trim($bodyContent["uploadDescription"]);
     }
+
     if ($newName != null || $newDescription != null) {
       /** @var \upload_properties $uploadProperties */
       $uploadProperties = $this->restHelper->getPlugin('upload_properties');
