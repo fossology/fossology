@@ -726,8 +726,7 @@ class UploadController extends RestController
     // Handle update of description
     if (
       $isJsonRequest &&
-      array_key_exists("uploadDescription", $bodyContent) &&
-      strlen(trim($bodyContent["uploadDescription"])) > 0
+      array_key_exists("uploadDescription", $bodyContent)
     ) {
       $newDescription = trim($bodyContent["uploadDescription"]);
     }
