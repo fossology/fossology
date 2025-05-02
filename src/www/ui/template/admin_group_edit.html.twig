@@ -1,0 +1,29 @@
+{# SPDX-FileCopyrightText: © 2025 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  
+ <h1 style="font-size:large;">{{ 'Edit a group'| trans  }}</h1>
+ <form name="formEditGroup" method="post" action="{{ uri }}">
+   <ol>
+     <li> {{ "Select the group to edit"|trans }}:
+       {% import "include/macros.html.twig" as macro %}
+       {{ macro.select('grouppk',groupMap,'grouppk','','class="ui-render-select2"') }}
+     </li>
+     <br/>
+     <li>
+       {{ "Change group name:"|trans }}
+        <input type="text" name="newgroupname" size=40 value="{{ folder_name|e }}" />
+     </li>
+    </ol>
+    <br/>
+    <input type="submit" name="editExGroup" value="{{ 'Update'|trans }}"/>
+  </form>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+{% endblock %}
