@@ -22,7 +22,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y git doxygen graphviz
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 50
 
@@ -34,7 +34,7 @@ jobs:
           GH_REPO_REF: ${{ secrets.GH_REPO_REF }}
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           personal_token: ${{ secrets.GH_TOKEN }}
           external_repository: ${{ secrets.GH_REPO_REF }}

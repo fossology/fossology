@@ -6,9 +6,6 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
-use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\AgentDao;
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\AgentPlugin;
 
 include_once(dirname(__DIR__) . "/agent/version.php");
@@ -43,7 +40,8 @@ class SpashtAgentPlugin extends AgentPlugin
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
    * @see Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
    */
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
+      $arguments=null, $request=null, $unpackArgs=null)
   {
     $dependencies[] = "agent_adj2nest";
 
@@ -53,7 +51,7 @@ class SpashtAgentPlugin extends AgentPlugin
     }
 
     $args = is_array($arguments) ? '' : $arguments;
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $args);
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $args, $request);
   }
 
 

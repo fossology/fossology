@@ -1,0 +1,57 @@
+{# SPDX-FileCopyrightText: © 2015 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+SPDXVersion: SPDX-2.3
+DataLicense: {{ licenseList[dataLicense].licenseObj.spdxId|replace({' ': '-'}) }}
+
+##-------------------------
+## Document Information
+##-------------------------
+
+DocumentNamespace: {{ uri }}
+DocumentName: {{ documentName }}
+SPDXID: SPDXRef-DOCUMENT
+
+##-------------------------
+## Creation Information
+##-------------------------
+
+{% if toolVersion is not empty %}
+Creator: Tool: {{ toolVersion }}
+{% endif %}
+{% if userName is not empty %}
+Creator: Person: {{ userName }}
+{% endif %}
+{% if organization is not empty %}
+Creator: Organization: {{ organisation }}
+{% endif %}
+CreatorComment: <text>
+This document was created using license information and a generator from Fossology.
+</text>
+Created: {{ 'now'|date('Y-m-d\\TH:i:s\\Z', 'UTC') }}
+LicenseListVersion: 3.22
+
+##-------------------------
+## Package Information
+##-------------------------
+
+{{ packageNodes }}
+
+##-------------------------
+## License Information
+##-------------------------
+
+{% for licenseData in licenseList %}{% if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' ~%}
+{%- set licId=licenseData.licenseObj.spdxId %}
+{% if licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
+  {% set licId=licenseData.licenseObj.shortName %}
+{%- endif ~%}
+{% if licenseData.licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' %}
+LicenseID: {{ licId|replace({' ': '-'}) }}
+LicenseName: {{ licenseData.licenseObj.fullName }}
+ExtractedText: <text> {{ licenseData.licenseObj.text|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+    |replace({'\f':''}) }} </text>
+{%- endif ~%}
+
+{% endif %}{% endfor %}

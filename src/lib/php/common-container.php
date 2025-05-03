@@ -7,7 +7,7 @@
 
 /**
  * @file
- * @brief Setup the dependency injection container for Symfony from services.xml
+ * @brief Setup the dependency injection container for Symfony from services.xml.in
  */
 use Monolog\Handler\BrowserConsoleHandler;
 use Monolog\Handler\ErrorLogHandler;

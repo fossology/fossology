@@ -119,7 +119,8 @@ abstract class UploadPageBase extends DefaultPlugin
       $adj2nestDependencies = array(array('name'=>'agent_unpack','args'=>$unpackArgs,AgentPlugin::PRE_JOB_QUEUE=>array('wget_agent')));
     }
     $adj2nestplugin = \plugin_find('agent_adj2nest');
-    $adj2nestplugin->AgentAdd($jobId, $uploadId, $dummy, $adj2nestDependencies, null, (empty($adj2nestDependencies) ? $unpackArgs : ''));
+    $adj2nestplugin->AgentAdd($jobId, $uploadId, $dummy, $adj2nestDependencies,
+        null, null, (empty($adj2nestDependencies) ? $unpackArgs : ''));
 
     $checkedAgents = checkedAgents();
     AgentSchedule($jobId, $uploadId, $checkedAgents);

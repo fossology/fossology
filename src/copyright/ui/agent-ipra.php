@@ -9,10 +9,13 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class IpraAgentPlugin extends AgentPlugin
 {
+  /** @var IPRADesc */
+  private $IPRADesc = "Performs file scanning to find text fragments that could be relevant for patent issues. Note: More keywords related to patents can be included using the configuration file.";
+
   public function __construct()
   {
     $this->Name = "agent_ipra";
-    $this->Title = _("IPRA Analysis, scanning for text fragments potentially relevant for patent issues");
+    $this->Title = _("IPRA Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->IPRADesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "ipra";
 
     parent::__construct();

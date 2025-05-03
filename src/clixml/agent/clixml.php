@@ -18,6 +18,7 @@ use Fossology\Lib\Report\LicenseMainGetter;
 use Fossology\Lib\Report\ObligationsGetter;
 use Fossology\Lib\Report\OtherGetter;
 use Fossology\Lib\Report\XpClearedGetter;
+use Fossology\Lib\Report\ReportUtils;
 use Twig\Environment;
 
 include_once(__DIR__ . "/version.php");
@@ -30,6 +31,11 @@ class CliXml extends Agent
   const DEFAULT_OUTPUT_FORMAT = "clixml";
   const AVAILABLE_OUTPUT_FORMATS = "xml";
   const UPLOAD_ADDS = "uploadsAdd";
+
+  /** @var array $additionalUploads
+   * Array of addtional uploads
+   */
+  private $additionalUploads = [];
 
   /** @var UploadDao */
   private $uploadDao;
@@ -68,11 +74,25 @@ class CliXml extends Agent
    */
   private $licenseDNUGetter;
 
+  /** @var ReportUtils $reportutils
+   * ReportUtils object
+   */
+  private $reportutils;
+
   /** @var string */
   protected $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
 
   function __construct()
   {
+    $args = getopt("", array(self::UPLOAD_ADDS.'::'));
+
+    if (array_key_exists(self::UPLOAD_ADDS, $args)) {
+      $uploadsString = $args[self::UPLOAD_ADDS];
+      if (!empty($uploadsString)) {
+          $this->additionalUploads = explode(',', $uploadsString);
+      }
+    }
+
     parent::__construct('clixml', AGENT_VERSION, AGENT_REV);
 
     $this->uploadDao = $this->container->get('dao.upload');
@@ -92,6 +112,7 @@ class CliXml extends Agent
     $this->licenseMainGetter = new LicenseMainGetter();
     $this->obligationsGetter = new ObligationsGetter();
     $this->otherGetter = new OtherGetter();
+    $this->reportutils = new ReportUtils();
     $this->agentSpecifLongOptions[] = self::UPLOAD_ADDS.':';
     $this->agentSpecifLongOptions[] = self::OUTPUT_FORMAT_KEY.':';
   }
@@ -171,7 +192,12 @@ class CliXml extends Agent
 
   protected function getUri($fileBase)
   {
-    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName.'_'.date("Y-m-d_H:i:s");
+    if (count($this->additionalUploads) > 0) {
+      $fileName = $fileBase . "multifile" . "_" . strtoupper($this->outputFormat);
+    } else {
+      $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+    }
+
     return $fileName .".xml";
   }
 
@@ -188,10 +214,10 @@ class CliXml extends Agent
       $clixmlColumns = UploadDao::CLIXML_REPORT_HEADINGS;
     }
 
-    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, "license", false);
+    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, "license", false, true);
     $this->heartbeat(empty($licenses) ? 0 : count($licenses["statements"]));
 
-    $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $this, $groupId, true, null, false);
+    $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $this, $groupId, true, null, false, true);
     $this->heartbeat(empty($licensesMain) ? 0 : count($licensesMain["statements"]));
 
     if (array_values($clixmlColumns['irrelevantfilesclixml'])[0]) {
@@ -492,9 +518,7 @@ class CliXml extends Agent
 
   protected function updateReportTable($uploadId, $jobId, $fileName)
   {
-    $this->dbManager->insertTableRow('reportgen',
-            array('upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$fileName),
-            __METHOD__);
+    $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $fileName);
   }
 
   /**
@@ -610,6 +634,9 @@ class CliXml extends Agent
       $allLicenseCols = $this->licenseDao->getLicenseById($license["licenseId"],
         $this->groupId);
       $license["name"] = $allLicenseCols->getShortName();
+      if ($license["name"] == 'License Expression') {
+        $license['name'] = $allLicenseCols->getExpression($this->licenseDao, $this->groupId);
+      }
       $statementsWithNames[] = $license;
     }
     return $statementsWithNames;

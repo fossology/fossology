@@ -1,0 +1,48 @@
+{# SPDX-FileCopyrightText: © 2024 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+  <p id="messageSpace"></p>
+  <form name="adminLicenseRulesForm" id="adminLicenseRulesForm">
+    <table id="adminLicenseRulesTable" class="simpleTable" cellpadding="3">
+      <thead>
+        <tr>
+          <th>Rule No.</th>
+          <th>First License Name</th>
+          <th>Second License Name</th>
+          <th>First License Type</th>
+          <th>Second License Type</th>
+          <th>Compatible</th>
+          <th>Rule Description</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tfoot>
+        <tr>
+          <td colspan="8">
+            <button id="addLicRule" title="{{ "Add a new Rule"|trans }}"
+              style="width:100%" type="button">
+              <img src="images/icons/add_16.png" alt="add" />
+              {{ "Add a new Rule"|trans }}
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="8"><input type="submit" value="Save" style="width:auto" /></td>
+        </tr>
+      </tfoot>
+    </table>
+  </form>
+
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript" src="scripts/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="scripts/jquery.dataTables.select.js"></script>
+  {% include 'admin_license_compatibility_rules.js.twig' %}
+{% endblock %}

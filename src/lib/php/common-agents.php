@@ -95,7 +95,7 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
       }
       if ($rc != 1) {
         $Name = htmlentities($Agent->Name);
-        $Desc = htmlentities($AgentItem->Name);
+        $Desc = $AgentItem->Name;
 
         // display user agent preferences
 

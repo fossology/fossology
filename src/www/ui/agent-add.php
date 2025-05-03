@@ -119,9 +119,11 @@ class AgentAdder extends DefaultPlugin
 
     foreach ($agents as &$agent) {
       if (!empty($mimetypeIgnore)) {
-        $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array("agent_mimetype"), $mimetypeIgnore);
+        $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg,
+            array("agent_mimetype"), $mimetypeIgnore, $request);
       } else {
-        $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
+        $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array(), null,
+            $request);
       }
       if ($rv == -1) {
         return $errorMsg;

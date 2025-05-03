@@ -1,0 +1,237 @@
+{# SPDX-FileCopyrightText: © 2024 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+
+<script type="text/javascript">
+
+function showTheMessage(message) {
+  $("html, body").animate({ scrollTop: 0}, "slow");
+  $("#messageSpace").html(message + "<hr />").fadeIn(500).delay(5000).fadeOut(500);
+}
+
+let licenseArray = [];
+let licenseTypes = [];
+$(document).ready(function() {
+  $.ajax({
+      url: '?mod=admin_license_compatibility_rules&action=fetchLicenseData',
+      type: 'GET',
+      dataType: 'json',
+      success: function(data) {
+        licenseArray = Object.entries(data.licenseArray).map(([id, name]) => ({ id, name }));
+        licenseTypes = Object.entries(data.licenseTypes).map(([id, name]) => ({ id, name }));
+      },
+      error: function() {
+        console.error("Error fetching license data");
+      }
+    });
+
+  var form = $('form#adminLicenseRulesForm');
+
+  var t = $("#adminLicenseRulesTable").DataTable({
+    "processing": true,
+    "serverSide": true,
+    "paginationType": "listbox",
+    "ajax": {
+      "url": "?mod=admin_license_compatibility_rules&action=fetchRules",
+      "type": "GET"
+    },
+    "columns": [
+      { 
+        "data": null,
+        "render": function(data, type, row, meta) {
+          var page = meta.settings._iDisplayStart;
+          var rowNumber = page + meta.row + 1;
+          return rowNumber;
+        },
+        "orderable": false
+      },
+      { 
+        "data": "first_rf_fk",
+        "render": function(data, type, row) {
+          return `<select name="firstLicenseName[${row.lr_pk}]" class="ui-render-select2" style="width:100%">
+                    ${licenseArray.map(license => 
+                      `<option value="${license.id}" ${license.id === data ? 'selected' : ''}>
+                        ${license.name}
+                      </option>`).join('')}
+                  </select>`;
+        }
+      },
+      { 
+        "data": "second_rf_fk",
+        "render": function(data, type, row) {
+          return `<select name="secondLicenseName[${row.lr_pk}]" class="ui-render-select2" style="width:100%">
+                    ${licenseArray.map(license => 
+                      `<option value="${license.id}" ${license.id === data ? 'selected' : ''}>
+                        ${license.name}
+                      </option>`).join('')}
+                  </select>`;
+        }
+      },
+      { 
+        "data": "first_type",
+        "render": function(data, type, row) {
+          return `<select name="firstLicenseType[${row.lr_pk}]" class="ui-render-select2" style="width:100%">
+                    ${licenseTypes.map(type => 
+                      `<option value="${type.id}" ${type.id === data ? 'selected' : ''}>
+                        ${type.name}
+                      </option>`).join('')}
+                  </select>`;
+        }
+      },
+      { 
+        "data": "second_type",
+        "render": function(data, type, row) {
+          return `<select name="secondLicenseType[${row.lr_pk}]" class="ui-render-select2" style="width:100%">
+                    ${licenseTypes.map(type => 
+                      `<option value="${type.id}" ${type.id === data ? 'selected' : ''}>
+                        ${type.name}
+                      </option>`).join('')}
+                  </select>`;
+        }
+      },
+      { 
+        "data": "compatibility",
+        "render": function(data, type, row) {
+          return `
+            <input type="radio" name="licCompatibilityResult[${row.lr_pk}]" value="t" ${data.startsWith('t') ? 'checked' : ''} /> Yes<br>
+            <input type="radio" name="licCompatibilityResult[${row.lr_pk}]" value="f" ${data.startsWith('f') ? 'checked' : ''} /> No
+          `;
+        }
+      },
+      { 
+        "data": "comment",
+        "render": function(data, type, row) {
+          return `<textarea rows="5" cols="40" name="licenseRuleText[${row.lr_pk}]" style="width:100%" required>${data}</textarea>`;
+        }
+      },
+      { 
+        "data": null,
+        "orderable": false,
+        "render": function(data, type, row) {
+          return `<img class="delete" src="images/space_16.png" onclick="deleteCompRule(${row.lr_pk});" alt="delete">`;
+        }
+      }
+    ],
+    "order": [[ 0, 'asc' ]],
+    "autoWidth": false,
+    "columnDefs": [{
+      "createdCell": function (cell) {
+        $(cell).attr("style", "text-align:center");
+      },
+      "searchable": false,
+      "targets": [0]
+    },{
+      "orderable": false,
+      "searchable": false,
+      "targets": [0,1,2,3,4,5,7]
+    },{
+      "orderable": false,
+      "searchable": true,
+      "targets": [6]
+    }],
+  });
+
+  t.on('order.dt search.dt', function () {
+    t.column(0, { search: 'applied', order: 'applied' }).nodes().each(function (cell, i) {
+      cell.innerHTML = t.page.info().start + i + 1;
+    });
+  }).draw();
+
+  t.on('draw', function () {
+    form.find("input[type=radio],textarea,select").on("change", function(){
+      $(this).addClass("inputChanged");
+    });
+  });
+
+  form.find("input[type=radio],textarea,select").on("change", function(){
+    $(this).addClass("inputChanged");
+  });
+
+  form.submit(function(event) {
+    var updatedFields = form.find(".inputChanged").serializeArray();
+    if (updatedFields.length > 0) {
+      var itemsToSend = updatedFields;
+      itemsToSend.push({"name": "formUpdated", "value": 1});
+      $.ajax({
+        url : '?mod=admin_license_compatibility_rules',
+        type : 'post',
+        dataType : 'json',
+        data : itemsToSend,
+        success : function(data) {
+          var message = "";
+          if (data.updated == -1) {
+            message = "No rules updated";
+          } else if (data.updated > 0) {
+            form.find(".inputChanged").removeClass("inputChanged");
+            message = "Rules updated succesfully";
+          } else {
+            message = data.updated;
+          }
+          showTheMessage(message + ".<br />");
+          t.ajax.reload(null, false);
+        },
+        error : function(data) {
+          showTheMessage(data);
+        }
+      });
+    }
+    event.preventDefault();
+  });
+
+  $("#addLicRule").on('click', function () {
+    $.ajax({
+      type: 'POST',
+      url: '?mod=admin_license_compatibility_rules&action=addrule',
+      success: function (result) {
+        t.ajax.reload(null, false);
+
+        t.one('xhr', function () {
+          const pageInfo = t.page.info();
+          const totalPages = pageInfo.pages;
+          if (pageInfo.recordsTotal % pageInfo.length === 0) {
+            t.page(totalPages).draw(false);
+          } else {
+            t.page(totalPages - 1).draw(false);
+          }
+        });
+
+        t.ajax.reload(null, false);
+      },
+      error: function (xhr, status, error) {
+        showTheMessage("Error adding rule: " + error);
+      }
+    });
+  });
+
+  $("input:checkbox").on('click', function() {
+    var $box = $(this);
+    if ($box.is(":checked")) {
+      var group = "input:checkbox[name='" + $box.attr("name") + "']";
+      $(group).prop("checked", false);
+      $box.prop("checked", true);
+    } else {
+      $box.prop("checked", false);
+    }
+  });
+});
+
+function deleteCompRule(pk) {
+  $.ajax({
+    type: 'POST',
+    dataType: 'json',
+    url: '?mod=admin_license_compatibility_rules&action=deleterule',
+    data: { rule : pk },
+    success: function(data) {
+      if (data.status == 1) {
+        $("#adminLicenseRulesTable").DataTable().ajax.reload(null, false);
+      } else {
+        showTheMessage("Unable to delete");
+      }
+    },
+    error : function(data) {
+      showTheMessage("Unable to delete");
+    }
+  });
+}
+</script>

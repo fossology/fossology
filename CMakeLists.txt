@@ -6,6 +6,16 @@ SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 project(FOSSOLOGY)
 
+# ignore Anaconda compilers, which are typically not compatible with the system
+# Taken from: https://www.scivision.dev/cmake-ignore-anaconda-libs/
+if(DEFINED ENV{CONDA_PREFIX})
+    set(CMAKE_IGNORE_PATH $ENV{CONDA_PREFIX}/bin)
+    list(APPEND CMAKE_IGNORE_PREFIX_PATH $ENV{CONDA_PREFIX})
+    list(APPEND CMAKE_IGNORE_PATH $ENV{CONDA_PREFIX}/bin)
+    # need CMAKE_IGNORE_PATH to ensure system env var PATH
+    # doesn't interfere despite CMAKE_IGNORE_PREFIX_PATH
+endif()
+
 # set defaults for the project
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/SetDefaults.cmake)
 

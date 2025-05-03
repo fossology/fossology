@@ -112,54 +112,62 @@ class UserTest extends \PHPUnit\Framework\TestCase
   /**
    * @param $version version to test
    * @return void
-   * -# Test the data format returned by User::getArray($version) model 
+   * -# Test the data format returned by User::getArray($version) model
    */
   private function testDataFormat($version)
   {
     if($version==ApiVersion::V1){
       $expectedCurrentUser = [
-        "id"           => 2,
-        "name"         => 'fossy',
-        "description"  => 'super user',
-        "email"        => 'fossy@localhost',
-        "accessLevel"  => 'admin',
-        "rootFolderId" => 2,
-        "defaultGroup" => 0,
-        "emailNotification" => true,
-        "agents"       => [
-          "bucket"    => true,
+        "id"                       => 2,
+        "name"                     => 'fossy',
+        "description"              => 'super user',
+        "email"                    => 'fossy@localhost',
+        "accessLevel"              => 'admin',
+        "rootFolderId"             => 2,
+        "defaultGroup"             => 0,
+        "emailNotification"        => true,
+        "agents"                   => [
+          "bucket"                 => true,
           "copyright_email_author" => true,
-          "ecc"       => false,
-          "keyword"   => false,
-          "mimetype"  => false,
-          "monk"      => false,
-          "nomos"     => true,
-          "ojo"       => true,
-          "package"   => false,
-          "reso"      => false
+          "ecc"                    => false,
+          "keyword"                => false,
+          "mimetype"               => false,
+          "monk"                   => false,
+          "nomos"                  => true,
+          "ojo"                    => true,
+          "package"                => false,
+          "heritage"               => false,
+          "patent"                 => false,
+          "scanoss"                => false,
+          "reso"                   => false,
+          "compatibility"          => false
         ]
       ];
     } else{
       $expectedCurrentUser = [
-        "id"           => 2,
-        "name"         => 'fossy',
-        "description"  => 'super user',
-        "email"        => 'fossy@localhost',
-        "accessLevel"  => 'admin',
-        "rootFolderId" => 2,
-        "defaultGroup" => "fossy",
-        "emailNotification" => true,
-        "agents"       => [
-          "bucket"    => true,
+        "id"                     => 2,
+        "name"                   => 'fossy',
+        "description"            => 'super user',
+        "email"                  => 'fossy@localhost',
+        "accessLevel"            => 'admin',
+        "rootFolderId"           => 2,
+        "defaultGroup"           => "fossy",
+        "emailNotification"      => true,
+        "agents"                            => [
+          "bucket"               => true,
           "copyrightEmailAuthor" => true,
-          "ecc"       => false,
-          "keyword"   => false,
-          "mimetype"  => false,
-          "monk"      => false,
-          "nomos"     => true,
-          "ojo"       => true,
-          "package"   => false,
-          "reso"      => false
+          "ecc"                  => false,
+          "keyword"              => false,
+          "mimetype"             => false,
+          "monk"                 => false,
+          "nomos"                => true,
+          "ojo"                  => true,
+          "pkgagent"             => false,
+          "ipra"                 => false,
+          "softwareHeritage"     => false,
+          "scanoss"              => false,
+          "reso"                 => false,
+          "compatibility"        => false
         ]
       ];
     }

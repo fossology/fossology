@@ -61,7 +61,7 @@ print "importing\n";
 $licenseCsvImport = $GLOBALS['container']->get('app.license_csv_import');
 $licenseCsvImport->setDelimiter($delimiter);
 $licenseCsvImport->setEnclosure($enclosure);
-$import = $licenseCsvImport->handleFile($filename);
+$import = $licenseCsvImport->handleFile($filename, 'csv');
 
 if ($import !== null) {
   print $import;

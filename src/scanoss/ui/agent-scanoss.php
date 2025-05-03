@@ -31,9 +31,12 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class ScanossAgentPlugin extends AgentPlugin
 {
+  /** @var scanOssDesc */
+  private $scanOssDesc = "Enables detection of both declared and undeclared open source components. SCANOSS Toolkit tracks new software versions and components in real time.";
+
   public function __construct() {
     $this->Name = "agent_scanoss";
-    $this->Title = _("SCANOSS Toolkit");
+    $this->Title = _("SCANOSS Toolkit <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->scanOssDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "scanoss";
 
     parent::__construct();
@@ -49,8 +52,6 @@ class ScanossAgentPlugin extends AgentPlugin
     $renderer = $GLOBALS['container']->get('twig.environment');
     return $renderer->load('scanoss.html.twig')->render($vars);
   }
-
-
 
   /**
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()

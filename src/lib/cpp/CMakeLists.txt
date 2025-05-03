@@ -37,7 +37,11 @@ target_sources(fossologyCPP
         ${FO_CWD}/libfossdbQueryResult.cc
         ${FO_CWD}/libfossUtils.cc)
 
-target_link_libraries(fossologyCPP PRIVATE fossology)
+target_link_libraries(fossologyCPP
+    PRIVATE
+        fossology
+        ${icu-uc_LIBRARIES}
+)
 
 target_include_directories(fossologyCPP
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)

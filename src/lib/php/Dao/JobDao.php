@@ -48,6 +48,25 @@ class JobDao
     return $result;
   }
 
+  public function getChlidJobStatus($jobId)
+  {
+    $result = array();
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt,
+      "SELECT jobqueue.jq_pk as jq_pk,
+              jobqueue.jq_end_bits as end_bits
+      FROM jobqueue
+      WHERE jq_job_fk = $1");
+
+    $res = $this->dbManager->execute($stmt, array($jobId));
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $result[$row['jq_pk']] = $row['end_bits'];
+    }
+    $this->dbManager->freeResult($res);
+
+    return $result;
+  }
+
   public function hasActionPermissionsOnJob($jobId, $userId, $groupId)
   {
     $result = array();

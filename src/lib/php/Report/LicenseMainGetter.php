@@ -14,6 +14,9 @@ use Fossology\Lib\Dao\LicenseDao;
 
 class LicenseMainGetter extends ClearedGetterCommon
 {
+  /** @var Boolean */
+  private $onlyExpressions = false;
+
   /** @var ClearingDao */
   private $clearingDao;
 
@@ -30,7 +33,7 @@ class LicenseMainGetter extends ClearedGetterCommon
     parent::__construct($groupBy = 'text');
   }
 
-  protected function getStatements($uploadId, $uploadTreeTableName, $groupId = null)
+  protected function getStatements($uploadId, $uploadTreeTableName, $groupId = null, $includeExpressions = false)
   {
     $dbManager = $GLOBALS['container']->get('db.manager');
     $licenseMap = new LicenseMap($dbManager, $groupId, LicenseMap::REPORT, true);
@@ -39,22 +42,37 @@ class LicenseMainGetter extends ClearedGetterCommon
     $allStatements = array();
     foreach ($mainLicIds as $originLicenseId) {
       $allLicenseCols = $this->licenseDao->getLicenseById($originLicenseId, $groupId);
-      $allStatements[] = array(
-        'licenseId' => $originLicenseId,
-        'risk' => $allLicenseCols->getRisk(),
-        'content' => $licenseMap->getProjectedSpdxId($originLicenseId),
-        'text' => $allLicenseCols->getText(),
-        'name' => $licenseMap->getProjectedShortname($originLicenseId,
-            $allLicenseCols->getShortName())
-      );
+      if ($allLicenseCols->getSpdxId() == 'LicenseRef-fossology-License-Expression') {
+        if ($includeExpressions) {
+          $expression = $allLicenseCols->getExpression($this->licenseDao, $groupId);
+          $allStatements[] = array(
+            'licenseId' => $originLicenseId,
+            'risk' => $allLicenseCols->getRisk(),
+            'content' => $expression,
+            'text' => 'License Expression',
+            'name' => $expression
+          );
+        }
+        continue;
+      }
+      if (!$this->onlyExpressions) {
+        $allStatements[] = array(
+          'licenseId' => $originLicenseId,
+          'risk' => $allLicenseCols->getRisk(),
+          'content' => $licenseMap->getProjectedSpdxId($originLicenseId),
+          'text' => $allLicenseCols->getText(),
+          'name' => $licenseMap->getProjectedShortname($originLicenseId,
+              $allLicenseCols->getShortName())
+        );
+      }
     }
     return $allStatements;
   }
 
-  public function getCleared($uploadId, $objectAgent, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false)
+  public function getCleared($uploadId, $objectAgent, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false, $includeExpressions=false)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $statements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
+    $statements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId, $includeExpressions);
     if (!$extended) {
       for ($i=0; $i<=count($statements); $i++) {
         unset($statements[$i]['risk']);
@@ -62,5 +80,13 @@ class LicenseMainGetter extends ClearedGetterCommon
       }
     }
     return array("statements" => array_values($statements));
+  }
+
+  /**
+   * @param boolean $displayOnlyAcknowledgements
+   */
+  public function setOnlyExpressions($displayOnlyExpressions)
+  {
+    $this->onlyExpressions = $displayOnlyExpressions;
   }
 }

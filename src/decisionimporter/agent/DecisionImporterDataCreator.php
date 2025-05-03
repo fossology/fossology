@@ -276,12 +276,6 @@ class DecisionImporterDataCreator
                                       DecisionImporterAgent &$agentObj,
                                       string $agentName, int $jobId): void
   {
-    if (!$this->agentDao->arsTableExists($agentName)) {
-      throw new UnexpectedValueException("No agent '$agentName' exists on server.");
-    }
-    $latestAgentId = $this->agentDao->getCurrentAgentId($agentName);
-    $this->createCxJobs($agentName, $jobId, $latestAgentId);
-
     $type = $agentName;
     if ($agentName == "copyright") {
       $type = "statement";
@@ -294,6 +288,17 @@ class DecisionImporterDataCreator
     $decisionList = $reportData->$decisionListMethod();
     $eventList = $reportData->$eventListMethod();
 
+    if (!$cxList and !$decisionList and !$eventList) {
+      // No relevant data in the report - nothing to do
+      return;
+    }
+
+    if (!$this->agentDao->arsTableExists($agentName)) {
+      // FIXME This requires the user to manually run the respective agent to get past this point
+      throw new UnexpectedValueException("No agent '$agentName' exists on server.");
+    }
+    $latestAgentId = $this->agentDao->getCurrentAgentId($agentName);
+    $this->createCxJobs($agentName, $jobId, $latestAgentId);
     $cxExistSql = "SELECT " . $agentName . "_pk FROM $agentName WHERE pfile_fk = $1 AND agent_fk = $2 AND hash = $3;";
     $cxExistStatement = __METHOD__ . ".$agentName" . "Exist";
 
@@ -308,7 +313,7 @@ class DecisionImporterDataCreator
         $latestAgentId,
         $cItem["hash"]
       ], $cxExistStatement);
-      if (empty($newCp)) {
+      if (empty($newCp) && !empty($cItem["new_pfile"]) && !empty($cItem["hash"])) {
         $newCp = $this->dbManager->insertTableRow($agentName, [
           "agent_fk" => $latestAgentId,
           "pfile_fk" => $cItem["new_pfile"],

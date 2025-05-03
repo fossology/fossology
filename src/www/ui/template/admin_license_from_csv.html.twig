@@ -6,15 +6,19 @@
 
 {% block content %}
   <p>
-    {{ 'This option permits uploading a CSV file from your computer to FOSSology.'| trans }} <br/>
+    {{ 'This option permits uploading a CSV or JSON file from your computer to FOSSology.'| trans }} <br/>
     {{ 'Your FOSSology server has imposed a maximum upload file size of'| trans }}
     {{ upload_max_filesize }}bytes.
   </p>
   <form enctype="multipart/form-data" method="post">
     <label for="file_input">
-      {{ 'Select the CSV-file to upload'| trans }}:
+      {{ 'Select the CSV-file or JSON-file to upload'| trans }}:
     </label>
     <input name="file_input" type="file"/><br/>
+    <label for="delimiterandenclosure">
+      {{ 'Use for CSV-file uploads only'| trans }}:
+    </label>
+    <br/>
     {{ 'Delimiter'|trans }}: <input type="text" name="delimiter" value="," size="1" maxlength="1" /><br/>
     {{ 'Enclosure'|trans }}: <input type="text" name="enclosure" value="&quot;" size="1" maxlength="1" /><br/>
     <br/>
@@ -22,7 +26,7 @@
     </p>
     {% if not(license_csv_import is empty) %}
     <p>
-      {{ 'NOTE: Obligations will not get imported, To import go to Admin -> Obligation Admin -> CSV Import'| trans }} <br/>
+      {{ 'NOTE: Obligations will not get imported, To import go to Admin -> Obligation Admin -> Obligation Import'| trans }} <br/>
     </p>
     {% endif %}
 

@@ -18,10 +18,12 @@ namespace Fossology\UI\Api\Controllers;
 use Fossology\DelAgent\UI\DeleteMessages;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\ReuseReportProcessor;
+use Fossology\Lib\BusinessRules\LicenseExpressionParser;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Proxy\ScanJobProxy;
@@ -49,6 +51,8 @@ use Fossology\UI\Api\Models\ScannedLicense;
 use Fossology\UI\Api\Models\SuccessfulAgent;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\StreamFactory;
+
+use function FastRoute\TestFixtures\empty_options_cached;
 
 /**
  * @class UploadController
@@ -523,6 +527,20 @@ class UploadController extends RestController
     } else {
       $info = new Info(201, intval($uploadId), InfoType::INFO);
     }
+    if (array_key_exists("mainLicense", $reqBody) &&
+        ! empty($reqBody["mainLicense"])) {
+      global $container;
+      /** @var LicenseDao $licenseDao */
+      $licenseDao = $container->get('dao.license');
+      $mainLicense = $licenseDao
+        ->getLicenseByShortName($reqBody["mainLicense"]);
+      if ($mainLicense !== null) {
+        /** @var ClearingDao $clearingDao */
+        $clearingDao = $container->get('dao.clearing');
+        $clearingDao->makeMainLicense($uploadId,
+          $this->restHelper->getGroupId(), $mainLicense->getId());
+      }
+    }
     return $response->withJson($info->getArray(), $info->getCode());
   }
 
@@ -638,6 +656,7 @@ class UploadController extends RestController
     $userDao = $this->restHelper->getUserDao();
     $userId = $this->restHelper->getUserId();
     $groupId = $this->restHelper->getGroupId();
+    $isJsonRequest = $this->isJsonRequest($request);
 
     $perm = $userDao->isAdvisorOrAdmin($userId, $groupId);
     if (!$perm) {
@@ -653,6 +672,16 @@ class UploadController extends RestController
     $assignee = null;
     $status = null;
     $comment = null;
+    $newName = null;
+    $newDescription = null;
+
+    if ($isJsonRequest) {
+      $bodyContent = $this->getParsedBody($request);
+    } else {
+      $body = $request->getBody();
+      $bodyContent = $body->getContents();
+      $body->close();
+    }
 
     // Handle assignee info
     if (array_key_exists(self::FILTER_ASSIGNEE, $query)) {
@@ -660,7 +689,7 @@ class UploadController extends RestController
       $userList = $userDao->getUserChoices($groupId);
       if (!array_key_exists($assignee, $userList)) {
         throw new HttpNotFoundException(
-          "New assignee does not have permisison on upload.");
+          "New assignee does not have permission on upload.");
       }
       $uploadBrowseProxy->updateTable("assignee", $id, $assignee);
     }
@@ -672,9 +701,11 @@ class UploadController extends RestController
       $newStatus = strtolower($query[self::FILTER_STATUS]);
       $comment = '';
       if (in_array($newStatus, ["closed", "rejected"])) {
-        $body = $request->getBody();
-        $comment = $body->getContents();
-        $body->close();
+        if ($isJsonRequest && array_key_exists("comment", $bodyContent)) {
+          $comment = $bodyContent["comment"];
+        } else {
+          $comment = $bodyContent;
+        }
       }
       $status = 0;
       if ($newStatus == self::VALID_STATUS[1]) {
@@ -687,6 +718,30 @@ class UploadController extends RestController
         $status = UploadStatus::OPEN;
       }
       $uploadBrowseProxy->setStatusAndComment($id, $status, $comment);
+    }
+    // Handle update of name
+    if (
+      $isJsonRequest &&
+      array_key_exists(self::FILTER_NAME, $bodyContent) &&
+      strlen(trim($bodyContent[self::FILTER_NAME])) > 0
+    ) {
+      $newName = trim($bodyContent[self::FILTER_NAME]);
+    }
+    // Handle update of description
+    if (
+      $isJsonRequest &&
+      array_key_exists("uploadDescription", $bodyContent) &&
+      strlen(trim($bodyContent["uploadDescription"])) > 0
+    ) {
+      $newDescription = trim($bodyContent["uploadDescription"]);
+    }
+    if ($newName != null || $newDescription != null) {
+      /** @var \upload_properties $uploadProperties */
+      $uploadProperties = $this->restHelper->getPlugin('upload_properties');
+      $updated = $uploadProperties->UpdateUploadProperties($id, $newName, $newDescription);
+      if ($updated == 2) {
+        throw new HttpBadRequestException("Invalid request to update upload name and description.");
+      }
     }
 
     $returnVal = new Info(202, "Upload updated successfully.", InfoType::INFO);
@@ -866,6 +921,8 @@ class UploadController extends RestController
   public function getMainLicenses($request, $response, $args)
   {
     $uploadId = intval($args['id']);
+    $query = $request->getQueryParams();
+    $includeExpressions = isset($query['includeExpressions']) && $query['includeExpressions'] === 'true';
     $this->uploadAccessible($uploadId);
 
     /** @var ClearingDao $clearingDao */
@@ -891,17 +948,26 @@ class UploadController extends RestController
           $obligation['ob_comment']
         );
       }
-      $license = $licenseDao->getLicenseById($licenseId);
-      $licenseObj = new License(
-        $license->getId(),
-        $license->getShortName(),
-        $license->getFullName(),
-        $license->getText(),
-        $license->getUrl(),
-        $obligationList,
-        $license->getRisk()
-      );
-      $licenses[] = $licenseObj->getArray();
+      $license = $licenseDao->getLicenseById($licenseId, $this->restHelper->getGroupId());
+      if ($license->getShortName() == 'License Expression') {
+        if ($includeExpressions) {
+          $licenses[] = [
+            "id" => $license->getId(),
+            "expression" => $license->getExpression($licenseDao, $this->restHelper->getGroupId())
+          ];
+        }
+      } else {
+        $licenseObj = new License(
+          $license->getId(),
+          $license->getShortName(),
+          $license->getFullName(),
+          $license->getText(),
+          $license->getUrl(),
+          $obligationList,
+          $license->getRisk()
+        );
+        $licenses[] = $licenseObj->getArray();
+      }
     }
     return $response->withJson($licenses, 200);
   }
@@ -949,6 +1015,74 @@ class UploadController extends RestController
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 
+  /**
+   * Set the main license expression for the upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function setMainExpression($request, $response, $args)
+  {
+    $uploadId = intval($args['id']);
+    $body = $this->getParsedBody($request);
+    $expression = $body['expression'];
+    $licenseDao = $this->container->get('dao.license');
+    $clearingDao = $this->container->get('dao.clearing');
+    $uploadDao = $this->container->get('dao.upload');
+
+    $this->uploadAccessible($uploadId);
+
+    if (empty($expression)) {
+      throw new HttpBadRequestException("License Expression missing from request.");
+    }
+    $parser = new LicenseExpressionParser($expression, $this->restHelper->getGroupId(), $this->restHelper->getUserId());
+    $parser->parse();
+    $license = $licenseDao->getExpressionByAST(json_encode($parser->getAST()));
+
+    if ($license === null) {
+      throw new HttpNotFoundException(
+        "No license with  expression '$expression' found.");
+    }
+
+    $licenseIds = $clearingDao->getMainLicenseIds($uploadId, $this->restHelper->getGroupId());
+    if (in_array($license->getId(), $licenseIds)) {
+      throw new HttpBadRequestException(
+        "License Expression already exists for this upload.");
+    }
+
+    $clearedExpression = false;
+    $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
+    $parent = $uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
+    $itemTreeBounds = $uploadDao->getItemTreeBounds($parent->getItemId(), $uploadTreeTableName);
+    $clearingDecisions = $clearingDao->getFileClearingsFolder($itemTreeBounds, $this->restHelper->getGroupId(), true, true, true);
+    error_log(var_export($clearingDecisions, true));
+    foreach ($clearingDecisions as $clearingDecision) {
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
+        continue;
+      }
+      /** @var ClearingDecision $clearingDecision */
+      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+        if ($clearingLicense->isRemoved()) {
+          continue;
+        }
+        if ($clearingLicense->getLicenseId() == $license->getId()) {
+          $clearedExpression = true;
+        }
+      }
+    }
+    if ($clearedExpression) {
+      $clearingDao->makeMainLicense($uploadId, $this->restHelper->getGroupId(), $license->getId());
+    } else {
+      throw new HttpNotFoundException(
+        "No cleared license with  expression '$expression' found.");
+    }
+    $returnVal = new Info(200, "Successfully added new main license", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
   /***
    * Remove the main license from the upload
    *
@@ -981,6 +1115,51 @@ class UploadController extends RestController
     $clearingDao = $this->container->get('dao.clearing');
     $clearingDao->removeMainLicense($uploadId, $this->restHelper->getGroupId(), $license->getId());
     $returnVal = new Info(200, "Main license removed successfully.", InfoType::INFO);
+
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+    /***
+   * Remove the main license expression from the upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function removeMainExpression($request, $response, $args)
+  {
+    $uploadId = intval($args['id']);
+    $query = $request->getQueryParams();
+    $expression = $query['expression'];
+    $licenseDao = $this->container->get('dao.license');
+    $clearingDao = $this->container->get('dao.clearing');
+
+    $this->uploadAccessible($uploadId);
+
+    if (empty($expression)) {
+      throw new HttpBadRequestException("License Expression missing from request.");
+    }
+
+    $parser = new LicenseExpressionParser($expression, $this->restHelper->getGroupId(), $this->restHelper->getUserId());
+    $parser->parse();
+    $license = $licenseDao->getExpressionByAst(json_encode($parser->getAST()));
+    $this->uploadAccessible($uploadId);
+
+    if ($license === null) {
+      throw new HttpNotFoundException(
+        "No license with expression '$expression' found.");
+    }
+    $licenseIds = $clearingDao->getMainLicenseIds($uploadId, $this->restHelper->getGroupId());
+    if (!in_array($license->getId(), $licenseIds)) {
+      throw new HttpBadRequestException(
+        "License Expression '$expression' is not a main license for this upload.");
+    }
+
+    $clearingDao = $this->container->get('dao.clearing');
+    $clearingDao->removeMainLicense($uploadId, $this->restHelper->getGroupId(), $license->getId());
+    $returnVal = new Info(200, "Main license expression removed successfully.", InfoType::INFO);
 
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }

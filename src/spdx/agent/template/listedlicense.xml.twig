@@ -1,0 +1,22 @@
+{# SPDX-FileCopyrightText: © 2023 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% macro listedLicenseFull(licenseObj) %}
+<spdx:ListedLicense rdf:about="http://spdx.org/licenses/{{ licenseObj.spdxId|replace({' ': '-'})|url_encode }}">
+  <spdx:name>{{ licenseObj.fullName|e }}</spdx:name>
+  <spdx:licenseId>{{ licenseObj.spdxId|replace({' ': '-'})|e }}</spdx:licenseId>
+  <spdx:licenseText><![CDATA[
+{{ licenseObj.text|replace({'\f':''})
+    |replace({']]>':']]]]><![CDATA[>'}) }}
+  ]]></spdx:licenseText>
+{%~ if licenseObj.url is not empty %}
+  {%~ if '&' in licenseObj.url %}
+  <rdfs:seeAlso>{{ licenseObj.url|url_encode }}</rdfs:seeAlso>
+  {%~ else %}
+  <rdfs:seeAlso>{{ licenseObj.url }}</rdfs:seeAlso>
+  {%~ endif %}
+{%~ endif %}
+</spdx:ListedLicense>
+{% endmacro %}
+{{ _self.listedLicenseFull(licenseObj)}}

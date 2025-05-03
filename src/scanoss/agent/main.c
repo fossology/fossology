@@ -230,18 +230,30 @@ int main(int argc, char *argv[])
       char  tempFolder[512];
       sprintf(tempFolder,"%s/%d",baseTMP,upload_pk);
       mkdir(tempFolder, 0700);
-      char aux[100];
-      sprintf(aux,"ready to process %d",upload_pk );
       if (RebuildUpload(upload_pk,tempFolder) != 0) /* process the upload_pk code */{
           LOG_ERROR("Error processing upload\n");
       } else {
+        char *proxy_url;
+        proxy_url=NULL;
+        proxy_url= fo_config_get(sysconfig, "FOSSOLOGY", "https_proxy", NULL); 
+        if (proxy_url==NULL) {
+            proxy_url= fo_config_get(sysconfig, "FOSSOLOGY", "http_proxy", NULL); 
+        }
+        
+        if (proxy_url!=NULL) { 
+          if (setenv("https_proxy", proxy_url, 1) != 0) {
+            perror("Error setting https_proxy env-var");
+            return 1;
+          }
+          LOG_NOTICE("Using proxy configuration:%s\n", proxy_url)
+        }
         ScanFolder(tempFolder);
         ParseResults(tempFolder);
         char cmdRemove[600];
         memset(cmdRemove,0,600);
         sprintf(cmdRemove,"rm  -r %s",tempFolder);
-     //   FILE *removes = popen(cmdRemove, "r");  /* Run the command */
-  //      pclose(removes);
+        FILE *removes = popen(cmdRemove, "r");  /* Run the command */
+        pclose(removes);
       }
       ars_pk = fo_WriteARS(db_conn, ars_pk, upload_pk, Agent_pk, AgentARSName, NULL, 1);
     }

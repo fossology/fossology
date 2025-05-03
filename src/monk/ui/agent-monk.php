@@ -10,10 +10,13 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class MonkAgentPlugin extends AgentPlugin
 {
+  /** @var monkDesc */
+  private $monkDesc = "Scan files for licenses using text comparison method";
+
   public function __construct()
   {
     $this->Name = "agent_monk";
-    $this->Title = _("Monk License Analysis, scanning for licenses performing a text comparison");
+    $this->Title = _("Monk License Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->monkDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "monk";
 
     parent::__construct();
@@ -28,9 +31,14 @@ class MonkAgentPlugin extends AgentPlugin
    * @copydoc Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    * @see \Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    */
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
+      $arguments=null, $request=null, $unpackArgs=null)
   {
-    $unpackArgs = intval(@$_POST['scm']) == 1 ? '-I' : '';
+    if ($request != null && !is_array($request)) {
+      $unpackArgs = intval($request->get('scm', 0)) == 1 ? '-I' : '';
+    } else {
+      $unpackArgs = intval(@$_POST['scm']) == 1 ? '-I' : '';
+    }
     if ($this->AgentHasResults($uploadId) == 1) {
       return 0;
     }
@@ -42,9 +50,9 @@ class MonkAgentPlugin extends AgentPlugin
 
     $args = $unpackArgs;
     if (!empty($unpackArgs)) {
-      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_mimetype"),$uploadId,$args);
+      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_mimetype"),$uploadId,$args,$request);
     } else {
-      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId);
+      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId, null, $request);
     }
   }
 

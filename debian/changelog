@@ -1,3 +1,31 @@
+fossology (4.5.1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.5.1 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Tue, 25 Mar 2025 16:06:43 +0530
+
+fossology (4.5.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.5.0 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Tue, 18 Mar 2025 11:01:33 +0530
+
+fossology (4.5.0~rc2-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.5.0-rc2 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Mon, 3 Mar 2025 14:54:23 +0530
+
+fossology (4.5.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.5.0-rc1 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Thu, 9 Jan 2025 18:07:02 +0530
+
 fossology (4.4.0-1) unstable; urgency=low
 
   * New upstream release

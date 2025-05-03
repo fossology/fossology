@@ -13,10 +13,13 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class EccAgentPlugin extends AgentPlugin
 {
+  /** @var ECCDesc */
+  private $ECCDesc = "Performs file scanning to find text fragments that could be relevant for export control. Note: More keywords related to export control can be included using the configuration file.";
+
   public function __construct()
   {
     $this->Name = "agent_ecc";
-    $this->Title = _("ECC Analysis, scanning for text fragments potentially relevant for export control");
+    $this->Title = _("ECC Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->ECCDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "ecc";
 
     parent::__construct();
@@ -35,9 +38,14 @@ class EccAgentPlugin extends AgentPlugin
    * @copydoc Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    * @see \Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    */
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
+     $arguments=null, $request=null, $unpackArgs=null)
   {
-    $unpackArgs = intval(@$_POST['scm']) == 1 ? '-I' : '';
+    if ($request != null && !is_array($request)) {
+      $unpackArgs = intval($request->get('scm', 0)) == 1 ? '-I' : '';
+    } else {
+      $unpackArgs = intval(@$_POST['scm']) == 1 ? '-I' : '';
+    }
     if ($this->AgentHasResults($uploadId) == 1) {
       return 0;
     }
@@ -49,9 +57,9 @@ class EccAgentPlugin extends AgentPlugin
 
     $args = $unpackArgs;
     if (!empty($unpackArgs)) {
-      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_mimetype"),$uploadId,$args);
+      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_mimetype"),$uploadId,$args,$request);
     } else {
-      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId);
+      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId, null, $request);
     }
   }
 

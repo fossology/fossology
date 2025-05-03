@@ -1,0 +1,23 @@
+# Dependabot configuration for FOSSology
+# SPDX-License-Identifier: FSFAP
+# SPDX-FileCopyrightText: © FOSSology contributors
+
+version: 2
+updates:
+  # Update Docker dependencies weekly
+  - package-ecosystem: "docker"
+    directories:
+      - "/"
+      - "/utils/automation"
+    groups:
+      docker:
+        applies-to: security-updates
+        patterns: ["*"]
+    schedule:
+      interval: daily
+
+  # Update GitHub Actions daily
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: daily

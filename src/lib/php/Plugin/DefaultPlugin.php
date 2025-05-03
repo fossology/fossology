@@ -11,6 +11,7 @@ namespace Fossology\Lib\Plugin;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\UI\Component\Menu;
 use Fossology\Lib\UI\Component\MicroMenu;
+use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,6 +40,8 @@ abstract class DefaultPlugin implements Plugin
   private $session;
   /** @var Logger */
   private $logger;
+  /** @var Logger */
+  public $fileLogger;
   /** @var Menu */
   private $menu;
   /** @var MicroMenu */
@@ -62,6 +65,10 @@ abstract class DefaultPlugin implements Plugin
   private $MenuList = NULL;
   private $MenuOrder = 0;
   private $MenuTarget = NULL;
+  /**
+   * @var string
+   */
+  private $logdir;
 
   public function __construct($name, $parameters = array())
   {
@@ -72,12 +79,19 @@ abstract class DefaultPlugin implements Plugin
     foreach ($parameters as $key => $value) {
       $this->setParameter($key, $value);
     }
-
+    global $SysConf;
+    if (array_key_exists('DIRECTORIES', $SysConf) && array_key_exists('LOGDIR', $SysConf['DIRECTORIES'])) {
+      $this->logdir = $SysConf['DIRECTORIES']['LOGDIR'];
+    } else {
+      $this->logdir = sys_get_temp_dir();
+    }
     global $container;
     $this->container = $container;
     $this->session = $this->getObject('session');
     $this->renderer = $this->getObject('twig.environment');
     $this->logger = $this->getObject('logger');
+    $this->fileLogger = new Logger(get_called_class());
+    $this->fileLogger->pushHandler(new StreamHandler($this->logdir . DIRECTORY_SEPARATOR . 'plugin.log', Logger::DEBUG));
     $this->menu = $this->getObject('ui.component.menu');
     $this->microMenu = $this->getObject('ui.component.micromenu');
   }

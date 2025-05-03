@@ -54,17 +54,23 @@ class DeciderTest extends \PHPUnit\Framework\TestCase
       $deciderArray = [
         "nomos_monk" => true,
         "bulk_reused" => false,
-        "ojo_decider" => (1==1)
+        "ojo_decider" => (1==1),
+        "conclude_license_type" => "   Permissive ",
+        "copyright_deactivation" => false,
+        "copyright_clutter_removal" => true
       ];
     } else {
       $deciderArray = [
         "nomosMonk" => true,
         "bulkReused" => false,
-        "ojoDecider" => (1==1)
+        "ojoDecider" => (1==1),
+        "concludeLicenseType" => "   Permissive ",
+        "copyrightDeactivation" => false,
+        "copyrightClutterRemoval" => true
       ];
     }
 
-    $expectedObject = new Decider(true, false, false, true);
+    $expectedObject = new Decider(true, false, false, true, "Permissive", false, true);
 
     $actualObject = new Decider();
     $actualObject->setUsingArray($deciderArray, $version);
@@ -106,20 +112,27 @@ class DeciderTest extends \PHPUnit\Framework\TestCase
         "nomos_monk"  => true,
         "bulk_reused" => false,
         "new_scanner" => false,
-        "ojo_decider" => true
+        "ojo_decider" => true,
+        "conclude_license_type" => "Permissive",
+        "copyright_deactivation" => false,
+        "copyright_clutter_removal" => false
       ];
     } else {
       $expectedArray = [
         "nomosMonk"  => true,
         "bulkReused" => false,
         "newScanner" => false,
-        "ojoDecider" => true
+        "ojoDecider" => true,
+        "concludeLicenseType" => "Permissive",
+        "copyrightDeactivation" => false,
+        "copyrightClutterRemoval" => false
       ];
     }
 
     $actualObject = new Decider();
     $actualObject->setNomosMonk(true);
     $actualObject->setOjoDecider(true);
+    $actualObject->setConcludeLicenseType(" Permissive ");
 
     $this->assertEquals($expectedArray, $actualObject->getArray($version));
   }

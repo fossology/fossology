@@ -4,6 +4,7 @@
 # SPDX-FileCopyrightText: © mishra.gaurav@siemens.com
 # SPDX-FileCopyrightText: © 2016-2017 TNG Technology Consulting GmbH
 # SPDX-FileCopyrightText: © maximilian.huber@tngtech.com
+# SPDX-FileCopyrightText: © kaushlendra-pratap.singh@siemens.com
 #
 # SPDX-License-Identifier: FSFAP
 #
@@ -31,6 +32,7 @@ COPY ./utils/fo-installdeps ./utils/fo-installdeps
 COPY ./install/fo-install-pythondeps ./install/fo-install-pythondeps
 COPY ./utils/utils.sh ./utils/utils.sh
 COPY ./src/copyright/mod_deps ./src/copyright/
+COPY ./src/compatibility/mod_deps ./src/compatibility/
 COPY ./src/delagent/mod_deps ./src/delagent/
 COPY ./src/mimetype/mod_deps ./src/mimetype/
 COPY ./src/nomos/mod_deps ./src/nomos/
@@ -46,8 +48,8 @@ RUN mkdir -p /fossology/dependencies-for-runtime \
  && cp -R /fossology/src /fossology/utils /fossology/dependencies-for-runtime/
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
- && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --build -y \
- && DEBIAN_FRONTEND=noninteractive /fossology/install/fo-install-pythondeps --build -y \
+ && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --buildtime -y \
+ && DEBIAN_FRONTEND=noninteractive /fossology/install/fo-install-pythondeps --buildtime -y \
  && rm -rf /var/lib/apt/lists/*
 
 COPY . .

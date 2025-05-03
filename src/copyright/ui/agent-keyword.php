@@ -9,10 +9,13 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class KeywordAgentPlugin extends AgentPlugin
 {
+  /** @var keywordDesc */
+  private $keywordDesc = "Performs file scanning to find text fragments that could be relevant for given keywords. Note: More keywords can be included using the configuration file.";
+
   public function __construct()
   {
     $this->Name = "agent_keyword";
-    $this->Title = _("Keyword Analysis");
+    $this->Title = _("Keyword Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->keywordDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "keyword";
 
     parent::__construct();
@@ -32,9 +35,14 @@ class KeywordAgentPlugin extends AgentPlugin
    * @copydoc Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    * @see \Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    */
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
+      $arguments=null, $request=null, $unpackArgs=null)
   {
-    $unpackArgs = intval(@$_POST['scm']) == 1 ? '-I' : '';
+    if ($request != null && !is_array($request)) {
+      $unpackArgs = intval($request->get('scm', 0)) == 1 ? '-I' : '';
+    } else {
+      $unpackArgs = intval(@$_POST['scm']) == 1 ? '-I' : '';
+    }
     if ($this->AgentHasResults($uploadId) == 1) {
       return 0;
     }
@@ -46,9 +54,9 @@ class KeywordAgentPlugin extends AgentPlugin
 
     $args = $unpackArgs;
     if (!empty($unpackArgs)) {
-      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_mimetype"),$uploadId,$args);
+      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_mimetype"),$uploadId,$args,$request);
     } else {
-      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId);
+      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId, null, $request);
     }
   }
 

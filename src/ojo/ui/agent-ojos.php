@@ -9,10 +9,13 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class OjosAgentPlugin extends AgentPlugin
 {
+  /** @var ojoDesc */
+  private $ojoDesc = "Scan files for licenses using SPDX-License-Identifier";
+
   public function __construct()
   {
     $this->Name = "agent_ojo";
-    $this->Title =  _("Ojo License Analysis, scanning for licenses using SPDX-License-Identifier");
+    $this->Title =  _("Ojo License Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->ojoDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "ojo";
 
     parent::__construct();
@@ -27,9 +30,14 @@ class OjosAgentPlugin extends AgentPlugin
    * @copydoc Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    * @see \Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    */
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
+      $arguments=null, $request=null, $unpackArgs=null)
   {
-    $unpackArgs = intval(@$_POST['scm']) == 1 ? '-I' : '';
+    if ($request != null && !is_array($request)) {
+      $unpackArgs = intval($request->get('scm', 0)) == 1 ? '-I' : '';
+    } else {
+      $unpackArgs = intval(@$_POST['scm']) == 1 ? '-I' : '';
+    }
     if ($this->AgentHasResults($uploadId) == 1) {
       return 0;
     }
@@ -41,9 +49,9 @@ class OjosAgentPlugin extends AgentPlugin
 
     $args = $unpackArgs;
     if (!empty($unpackArgs)) {
-      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_mimetype"),$uploadId,$args);
+      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_mimetype"),$uploadId,$args,$request);
     } else {
-      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId);
+      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId, null, $request);
     }
   }
 

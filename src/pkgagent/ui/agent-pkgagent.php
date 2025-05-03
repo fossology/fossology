@@ -18,9 +18,12 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class PkgAgentPlugin extends AgentPlugin
 {
+  /** @var pkgagentDesc */
+  private $pkgagentDesc = "Parse package headers. for example if files are rpm package listed, display their package information";
+
   public function __construct() {
     $this->Name = "agent_pkgagent";
-    $this->Title = _("Package Analysis (Parse package headers)");
+    $this->Title = _("Package Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->pkgagentDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "pkgagent";
 
     parent::__construct();

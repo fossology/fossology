@@ -1,0 +1,40 @@
+{# SPDX-FileCopyrightText: © 2021 Orange
+
+   SPDX-License-Identifier: FSFAP
+#}
+{{- fileName -}},SPDXRef-item{{- fileId -}},
+{%- if fileData.isCleared() -%}
+{%- if fileData.concludedLicenses|default is empty -%}
+NONE,
+{%- else -%}
+"{{- concludedLicensesString -}}",
+{%- endif -%}
+{%- else -%}
+NOASSERTION,
+{%- endif -%}
+{%- if fileData.comments is not empty -%}
+"{{ fileData.comments|join('\n')
+|replace({ '\r\n': ' ', '\n': ' ', '\r': ' ' })
+|replace({'\f':'', '"':'""'}) }}"
+{%- endif -%},
+{%- if fileData.scanners|default is empty -%}
+NOASSERTION,
+{%- else -%}
+"{% for res in fileData.scanners %}
+  {%- set licId=licenseList[res].licenseObj.spdxId %}
+  {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+    {% set licId=licenseList[res].licenseObj.shortName %}
+  {%- endif ~%}
+  {% if licenseList[res].licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' %}
+  {{ licId }}{% if res != fileData.scanners|last %} AND {% endif %}
+  {% endif %}
+{% endfor %}",
+{%- endif -%}
+{%- if fileData.copyrights|default is empty -%}
+NOASSERTION
+{%- else -%}
+"{{- fileData.copyrights|join(';')
+                |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                |replace({ '\r\n': ' ', '\n': ' ', '\r': ' ' })
+                |replace({'\f':''})
+                |replace({'"':'""'}) }}"{% endif %}{{ "" }}

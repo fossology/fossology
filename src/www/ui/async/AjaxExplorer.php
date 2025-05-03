@@ -14,19 +14,22 @@ use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CompatibilityDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Exceptions\InvalidAgentStageException;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
-use Fossology\Lib\Data\DecisionTypes;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Fossology\Lib\Data\AgentRef;
+use Hamcrest\Type\IsNumeric;
 
 /**
  * \file ui-browse-license.php
@@ -40,6 +43,8 @@ class AjaxExplorer extends DefaultPlugin
   private $uploadtree_tablename = "";
   /** @var UploadDao */
   private $uploadDao;
+  /** @var CompatibilityDao */
+  private $compatibilityDao;
   /** @var LicenseDao */
   private $licenseDao;
   /** @var ClearingDao */
@@ -76,6 +81,7 @@ class AjaxExplorer extends DefaultPlugin
     ));
 
     $this->uploadDao = $this->getObject('dao.upload');
+    $this->compatibilityDao = $this->getObject('dao.compatibility');
     $this->licenseDao = $this->getObject('dao.license');
     $this->clearingDao = $this->getObject('dao.clearing');
     $this->agentDao = $this->getObject('dao.agent');
@@ -241,7 +247,7 @@ class AjaxExplorer extends DefaultPlugin
       $nameRange = array();
     }
 
-    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, $isFlat);
+    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, $isFlat, true, true);
     $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
 
     $pfileLicenses = $this->updateTheFindingsAndDecisions($selectedScanners,
@@ -354,8 +360,13 @@ class AjaxExplorer extends DefaultPlugin
     if ($isContainer) {
       $fileDetails["isContainer"] = true;
       $agentFilter = $selectedAgentId ? array($selectedAgentId) : $latestSuccessfulAgentIds;
-      $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array());
-      $editedLicenses = $this->clearingDao->getClearedLicenses($childItemTreeBounds, $groupId);
+      [$licenseEntries, $expressionsEntries] = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array(), true);
+      $editedLicenses = $this->clearingDao->getClearedLicenses($childItemTreeBounds, $groupId, true);
+
+      foreach ($expressionsEntries as $expression) {
+        $expression = json_decode($expression);
+        $licenseEntries[] = $this->licenseDao->buildExpression($expression, $groupId);
+      }
 
       if ($request->get('fromRest')) {
         foreach ($licenseEntries as $shortName) {
@@ -399,7 +410,19 @@ class AjaxExplorer extends DefaultPlugin
             );
           }
 
-          $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
+          //call that function----file_id,upload_id,shortname
+          try {
+            $compatible = $this->compatibilityDao->getCompatibilityForFile($childItemTreeBounds, $shortName);
+          } catch (InvalidAgentStageException $ex) {
+            $compatible = true;
+          }
+          $licenseHtml = "";
+          if (!$compatible) {
+            $licenseHtml = "<span class='text-danger font-weight-bold'>$shortName</span>";
+          } else {
+            $licenseHtml = $shortName;
+          }
+          $licenseEntries[] = "$licenseHtml [" . implode("][", $agentEntries) . "]";
         }
       }
 
@@ -414,8 +437,13 @@ class AjaxExplorer extends DefaultPlugin
     $concludedLicenses = array();
     /** @var LicenseRef $licenseRef */
     foreach ($editedLicenses as $licenseRef) {
-      $projectedId = $this->licenseProjector->getProjectedId($licenseRef->getId());
-      $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(),$licenseRef->getShortName());
+      if ($licenseRef->getShortName() === 'License Expression') {
+        $projectedId = $licenseRef->getId();
+        $projectedName = $licenseRef->getExpression($this->licenseDao, $groupId);
+      } else {
+        $projectedId = $this->licenseProjector->getProjectedId($licenseRef->getId());
+        $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(),$licenseRef->getShortName());
+      }
       $concludedLicenses[$projectedId] = $projectedName;
       $concludedLicensesRest[] = array('id' => $projectedId, 'name' => $projectedName);
     }
@@ -496,10 +524,17 @@ class AjaxExplorer extends DefaultPlugin
     $pfileLicenses = [];
     foreach ($agentIds as $agentName => $agentId) {
       $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId(
-        $itemTreeBounds, $agentId, $isFlat, $nameRange);
+        $itemTreeBounds, $agentId, $isFlat, $nameRange, true);
       foreach ($licensePerPfile as $pfile => $licenseRow) {
         foreach ($licenseRow as $licId => $row) {
           $lic = $this->licenseProjector->getProjectedShortname($licId);
+          if ($lic == null) {
+            // error_log(var_export($licId, true));
+            if ($licId != '') {
+              $expression = $this->licenseDao->getLicenseById($licId);
+              $lic = $expression->getExpression($this->licenseDao, $groupId);
+            }
+          }
           $pfileLicenses[$pfile][$lic][$agentName] = $row;
         }
       }
@@ -536,7 +571,7 @@ class AjaxExplorer extends DefaultPlugin
 
     $this->updateFilesToBeCleared($isFlat, $itemTreeBounds);
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds,
-      $groupId, $isFlat);
+      $groupId, $isFlat, true, true);
     $editedMappedLicenses = array_replace($editedMappedLicenses,
       $this->clearingFilter->filterCurrentClearingDecisions($allDecisions));
     return $pfileLicenses;

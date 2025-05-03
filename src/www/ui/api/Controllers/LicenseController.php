@@ -882,4 +882,41 @@ class LicenseController extends RestController
       $content ? $sf->createStream($content) : $sf->createStream('')
     );
   }
+
+  /**
+   * Export licenses to JSON file
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function exportAdminLicenseToJSON($request, $response, $args)
+  {
+    $this->throwNotAdminException();
+    $query = $request->getQueryParams();
+    $rf = 0;
+    if (array_key_exists('id', $query)) {
+      $rf = intval($query['id']);
+    }
+    if ($rf != 0 &&
+        (! $this->dbHelper->doesIdExist("license_ref", "rf_pk", $rf) &&
+         ! $this->dbHelper->doesIdExist("license_candidate", "rf_pk", $rf))) {
+      throw new HttpNotFoundException("License not found.");
+    }
+    $dbManager = $this->dbHelper->getDbManager();
+    $licenseCsvExport = new LicenseCsvExport($dbManager);
+    $content = $licenseCsvExport->createCsv($rf, false, true);
+    $fileName = "fossology-license-export-" . date("YMj-Gis");
+    $newResponse = $response->withHeader('Content-type', 'text/json, charset=UTF-8')
+      ->withHeader('Content-Disposition', 'attachment; filename=' . $fileName . '.json')
+      ->withHeader('Pragma', 'no-cache')
+      ->withHeader('Cache-Control', 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0')
+      ->withHeader('Expires', 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
+    $sf = new StreamFactory();
+    return $newResponse->withBody(
+      $content ? $sf->createStream($content) : $sf->createStream('')
+    );
+  }
 }

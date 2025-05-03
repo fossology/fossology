@@ -63,7 +63,13 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
         "mime" => false,
         "monk" => "false",
         "nomos" => 0,
-        "ojo" => (1==2)
+        "ojo" => (1==2),
+        "scanoss" => true,
+        "reso" => true,
+        "pkgagent" => false,
+        "ipra" => true,
+        "softwareHeritage" => true,
+        "compatibility" => false
       ];
     } else {
       $analysisArray = [
@@ -74,11 +80,17 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
         "mime" => false,
         "monk" => "false",
         "nomos" => 0,
-        "ojo" => (1==2)
+        "ojo" => (1==2),
+        "scanoss" => true,
+        "reso" => true,
+        "package" => false,
+        "patent" => true,
+        "heritage" => true,
+        "compatibility" => false
       ];
     }
 
-    $expectedObject = new Analysis(true, true, true, true);
+    $expectedObject = new Analysis(true, true, true, true, false, false, false, false, true, false, false, true, true, true);
 
     $actualObject = new Analysis();
     $actualObject->setUsingArray($analysisArray, $version);
@@ -94,26 +106,20 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
    */
   public function testSetUsingString()
   {
-    $analysisStringComma = "bucket, ecc, keyword";
-    $analysisStringSemi = "bucket;ecc;monk";
+    $analysisString = "bucket, ecc, keyword, scanoss, ipra, softwareHeritage";
 
-    $expectedObjectComma = new Analysis();
-    $expectedObjectComma->setBucket(true);
-    $expectedObjectComma->setEcc(true);
-    $expectedObjectComma->setKeyword(true);
+    $expectedObject = new Analysis();
+    $expectedObject->setBucket(true);
+    $expectedObject->setEcc(true);
+    $expectedObject->setKeyword(true);
+    $expectedObject->setScanoss(true);
+    $expectedObject->setIpra(true);
+    $expectedObject->setSoftwareHeritage(true);
 
-    $expectedObjectSemi = new Analysis();
-    $expectedObjectSemi->setBucket(true);
-    $expectedObjectSemi->setEcc(true);
-    $expectedObjectSemi->setMonk(true);
+    $actualObject = new Analysis();
+    $actualObject->setUsingString($analysisString);
 
-    $actualObjectComma = new Analysis();
-    $actualObjectComma->setUsingString($analysisStringComma);
-    $actualObjectSemi = new Analysis();
-    $actualObjectSemi->setUsingString($analysisStringSemi);
-
-    $this->assertEquals($expectedObjectComma, $actualObjectComma);
-    $this->assertEquals($expectedObjectSemi, $actualObjectSemi);
+    $this->assertEquals($expectedObject, $actualObject);
   }
 
   /**
@@ -143,45 +149,200 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
   /**
    * @param $version version to test
    * @return void
-   * -# Test the data format returned by Upload::getArray($version) model 
+   * -# Test the data format returned by Upload::getArray($version) model
    */
   private function testDataFormat($version)
   {
     if($version==ApiVersion::V2){
       $expectedArray = [
-        "bucket"    => true,
+        "bucket"               => true,
         "copyrightEmailAuthor" => true,
-        "ecc"       => false,
-        "keyword"   => false,
-        "mimetype"  => true,
-        "monk"      => false,
-        "nomos"     => true,
-        "ojo"       => true,
-        "package"   => false,
-        "reso"      => true
+        "ecc"                  => true,
+        "keyword"              => true,
+        "mimetype"             => true,
+        "monk"                 => true,
+        "nomos"                => true,
+        "ojo"                  => true,
+        "scanoss"              => true,
+        "reso"                 => true,
+        "pkgagent"             => true,
+        "ipra"                 => true,
+        "softwareHeritage"     => true,
+        "compatibility"        => true
       ];
-    } else{
+    } else {
       $expectedArray = [
-        "bucket"    => true,
+        "bucket"                 => true,
         "copyright_email_author" => true,
-        "ecc"       => false,
-        "keyword"   => false,
-        "mimetype"  => true,
-        "monk"      => false,
-        "nomos"     => true,
-        "ojo"       => true,
-        "package"   => false,
-        "reso"      => true
+        "ecc"                    => true,
+        "keyword"                => true,
+        "mimetype"               => true,
+        "monk"                   => true,
+        "nomos"                  => true,
+        "ojo"                    => true,
+        "scanoss"                => true,
+        "reso"                   => true,
+        "package"                => true,
+        "patent"                 => true,
+        "heritage"               => true,
+        "compatibility"          => true
       ];
     }
-    $actualObject = new Analysis();
-    $actualObject->setBucket(true);
-    $actualObject->setCopyright(true);
-    $actualObject->setMime(true);
-    $actualObject->setNomos(true);
-    $actualObject->setOjo(true);
-    $actualObject->setReso(true);
+
+    $actualObject = new Analysis(true, true, true, true, true, true, true, true, true, true, true, true, true, true);
 
     $this->assertEquals($expectedArray, $actualObject->getArray($version));
+  }
+
+  ////// New Getter and Setter Tests //////
+
+  /**
+   * @test
+   * -# Test getter for bucket
+   */
+  public function testGetBucket()
+  {
+    $analysis = new Analysis(true);
+    $this->assertTrue($analysis->getBucket());
+  }
+
+  /**
+   * @test
+   * -# Test setter for bucket
+   */
+  public function testSetBucket()
+  {
+    $analysis = new Analysis();
+    $analysis->setBucket(true);
+    $this->assertTrue($analysis->getBucket());
+  }
+
+  /**
+   * @test
+   * -# Test getter for copyright
+   */
+  public function testGetCopyright()
+  {
+    $analysis = new Analysis(false, true);
+    $this->assertTrue($analysis->getCopyright());
+  }
+
+  /**
+   * @test
+   * -# Test setter for copyright
+   */
+  public function testSetCopyright()
+  {
+    $analysis = new Analysis();
+    $analysis->setCopyright(true);
+    $this->assertTrue($analysis->getCopyright());
+  }
+
+  /**
+   * @test
+   * -# Test getter for ecc
+   */
+  public function testGetEcc()
+  {
+    $analysis = new Analysis(false, false, true);
+    $this->assertTrue($analysis->getEcc());
+  }
+
+  /**
+   * @test
+   * -# Test setter for ecc
+   */
+  public function testSetEcc()
+  {
+    $analysis = new Analysis();
+    $analysis->setEcc(true);
+    $this->assertTrue($analysis->getEcc());
+  }
+
+  /**
+   * @test
+   * -# Test getter for keyword
+   */
+  public function testGetKeyword()
+  {
+    $analysis = new Analysis(false, false, false, true);
+    $this->assertTrue($analysis->getKeyword());
+  }
+
+  /**
+   * @test
+   * -# Test setter for keyword
+   */
+  public function testSetKeyword()
+  {
+    $analysis = new Analysis();
+    $analysis->setKeyword(true);
+    $this->assertTrue($analysis->getKeyword());
+  }
+
+  /**
+   * @test
+   * -# Test getter for mimetype
+   */
+  public function testGetMime()
+  {
+    $analysis = new Analysis(false, false, false, false, true);
+    $this->assertTrue($analysis->getMime());
+  }
+
+  /**
+   * @test
+   * -# Test setter for mimetype
+   */
+  public function testSetMime()
+  {
+    $analysis = new Analysis();
+    $analysis->setMime(true);
+    $this->assertTrue($analysis->getMime());
+  }
+
+  /**
+   * @test
+   * -# Test getter for monk
+   */
+  public function testGetMonk()
+  {
+    $analysis = new Analysis(false, false, false, false, false, true);
+    $this->assertTrue($analysis->getMonk());
+  }
+
+  public function testScanoss()
+  {
+    $analysis = new Analysis();
+    $analysis->setScanoss(true);
+    $this->assertTrue($analysis->getScanoss());
+  }
+
+  public function testIpra()
+  {
+    $analysis = new Analysis();
+    $analysis->setIpra(true);
+    $this->assertTrue($analysis->getIpra());
+  }
+
+  public function testSoftwareHeritage()
+  {
+    $analysis = new Analysis();
+    $analysis->setSoftwareHeritage(true);
+    $this->assertTrue($analysis->getSoftwareHeritage());
+  }
+
+  public function testPkgagent()
+  {
+    $analysis = new Analysis();
+    $analysis->setPkgagent(true);
+    $this->assertTrue($analysis->getPkgagent());
+  }
+
+  public function testCompatibility()
+  {
+    $analysis = new Analysis();
+    $analysis->setCompatibility(true);
+    $this->assertTrue($analysis->getCompatibility());
   }
 }

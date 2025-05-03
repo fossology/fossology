@@ -13,9 +13,13 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class BucketAgentPlugin extends AgentPlugin
 {
+  /** @var bucketDesc */
+  private $bucketDesc = "Performs grouping based on different needs. you can group licenses as 'Good Licenses', 'Academic Licenses', 'Copyleft Licenses' etc. One can also group files by copyright holder, or by file-type, or files without my copyright.
+  Note: There is no FOSSology UI to create bucket pools, bucket definitions, scripts, or anything else you need.";
+
   public function __construct() {
     $this->Name = "agent_bucket";
-    $this->Title = _("Bucket Analysis");
+    $this->Title = _("Bucket Analysis <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->bucketDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "buckets";
 
     parent::__construct();
@@ -92,7 +96,8 @@ class BucketAgentPlugin extends AgentPlugin
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
    * @see Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
    */
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
+      $arguments=null, $request=null, $unpackArgs=null)
   {
     $default_bucketpool_fk = $this->getDefaultBucketPool();
     if (!$default_bucketpool_fk)
@@ -104,7 +109,8 @@ class BucketAgentPlugin extends AgentPlugin
     $dependencies[] = "agent_nomos";
     $dependencies[] = "agent_pkgagent";
     $jqargs = "bppk=$default_bucketpool_fk, upk=$uploadId";
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $jqargs);
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies,
+        $jqargs, null, $request);
   }
 }
 

@@ -69,7 +69,12 @@ class AjaxUploadAgents extends DefaultPlugin
       if (($plugin->AgentHasResults($uploadId) != 1) &&
         $this->jobNotYetScheduled($plugin->AgentName, $uploadId)) {
         $out .= "<option value='" . $agent . "'>";
-        $out .= htmlentities($plugin->Title);
+        $position = strpos($plugin->Title, '<');
+        if ($position !== false) {
+          $out .= htmlentities(substr($plugin->Title, 0, $position));
+        } else {
+          $out .= htmlentities($plugin->Title);
+        }
         $out .= "</option>\n";
         $relevantAgents[$agent] = $plugin->Title;
       }

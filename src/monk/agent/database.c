@@ -34,9 +34,12 @@ PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId,
                              " ORDER BY ut.uploadtree_pk, scopesort, ut.pfile_fk, clearing_decision_pk DESC"
                              ") itemView WHERE decision_type!=$4 OR decision_type IS NULL";
   char* nonVoidPfile = "SELECT pfile_fk FROM allPfileData"
-                       " WHERE pfile_fk NOT IN (SELECT pfile_fk FROM license_file WHERE rf_fk IN"
-                       " (SELECT rf_pk FROM " LICENSE_REF_TABLE
-                       " WHERE rf_shortname = ANY(VALUES('No_license_found'), ('Void'))))";
+                       " WHERE pfile_fk NOT IN (SELECT lf.pfile_fk"
+                       " FROM license_file lf"
+                       " JOIN ars_master am ON lf.agent_fk = am.agent_fk"
+                       " JOIN " LICENSE_REF_TABLE " lr ON lf.rf_fk = lr.rf_pk"
+                       " WHERE am.upload_fk = $1"
+                       " AND lr.rf_shortname = ANY(VALUES('No_license_found'), ('Void')))";
 
   if (!ignoreIrre && !scanFindings)
   {

@@ -48,6 +48,13 @@ class XmlImportSource implements ImportSource
 
     return true;
   }
+  
+  /**
+   * @return null
+   */
+  public function getVersion(){
+    return null;
+  }
 
   /**
    * @param SimpleXMLElement $filesNode

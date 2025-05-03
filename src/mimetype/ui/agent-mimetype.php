@@ -16,9 +16,12 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class MimetypeAgentPlugin extends AgentPlugin
 {
+  /** @var mimetypeDesc */
+  private $mimetypeDesc = "Determine mimetype of every file. Not needed for licenses or buckets";
+
   public function __construct() {
     $this->Name = "agent_mimetype";
-    $this->Title =  _("MIME-type Analysis (Determine mimetype of every file.  Not needed for licenses or buckets)");
+    $this->Title =  _("MIME-type Analysis  <img src=\"images/info_16.png\" data-toggle=\"tooltip\" title=\"".$this->mimetypeDesc."\" class=\"info-bullet\"/>");
     $this->AgentName = "mimetype";
 
     parent::__construct();
