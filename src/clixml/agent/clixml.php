@@ -373,7 +373,7 @@ class CliXml extends Agent
     for ($i=0; $i<$lenMainLics; $i++) {
       $count = 0 ;
       for ($j=0; $j<$lenTotalLics; $j++) {
-        if (!strcmp($contents["licenses"][$j]["content"], $contents["licensesMain"][$i]["content"])) {
+        if (!strcmp($contents["licenses"][$j]["licenseId"], $contents["licensesMain"][$i]["licenseId"])) {
           $count = 1;
           $mainlic[] =  $contents["licenses"][$j];
           unset($contents["licenses"][$j]);
