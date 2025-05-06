@@ -233,5 +233,8 @@
     $('#uploaddescriptions').on('shown.bs.collapse', function () {
       $('#collapseDescription').find('button').text('- collapse');
     });
+    $('#reuseModal').on('shown.bs.modal', function () {
+      $(this).find('[data-toggle="tooltip"]').tooltip();
+    });
   </script>
 {% endblock %}
