@@ -156,6 +156,16 @@ class ReuserPlugin extends DefaultPlugin
   }
 
   /**
+   * @brief Render JS inclues
+   * @param array $vars
+   * @return string
+   */
+  public function getScriptIncludes(&$vars)
+  {
+    return '<script src="scripts/tools.js" type="text/javascript"></script>';
+  }
+
+  /**
    * @brief For a given folder id, collect all uploads
    *
    * Creates an array of uploads with `<upload_id,group_id>` as the key and

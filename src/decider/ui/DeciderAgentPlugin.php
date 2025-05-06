@@ -60,6 +60,11 @@ class DeciderAgentPlugin extends AgentPlugin
     return "";
   }
 
+  public function getScriptIncludes(&$vars)
+  {
+    return "";
+  }
+
   /**
    * @brief Schedule decider agent
    * @param int $jobId

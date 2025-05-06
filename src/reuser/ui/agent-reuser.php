@@ -71,6 +71,17 @@ class ReuserAgentPlugin extends AgentPlugin
   }
 
   /**
+   * @brief Get script tags to include before rendering foot
+   * @param array $vars Variables for twig template
+   * @return string Rendered JS includes
+   */
+  public function getScriptIncludes(&$vars)
+  {
+    $reuserPlugin = plugin_find('plugin_reuser');
+    return $reuserPlugin->getScriptIncludes($vars);
+  }
+
+  /**
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::preInstall()
    * @see Fossology::Lib::Plugin::AgentPlugin::preInstall()
    */

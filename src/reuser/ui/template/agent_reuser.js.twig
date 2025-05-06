@@ -2,57 +2,48 @@
 
    SPDX-License-Identifier: GPL-2.0-only
 #}
-$.getScript("scripts/tools.js")
-  .done(function () {
-    console.log("Failure handler loaded.");
-
-    function registerFolderSelectorChange() {
-      $('[id^={{ reuseFolderSelectorName }}]').change(function () {
-        const groupIndex = $(this).attr('id').replace('{{ reuseFolderSelectorName }}', '');
-        const folderGroupPair = this.selectedOptions[0].value;
-        reloadUploads('&{{ folderParameterName }}=' + folderGroupPair, groupIndex);
-      });
-    }
-
-    function reloadUploads(folderGroupPair, groupIndex) {
-      $.getJSON("?mod=plugin_reuser&do=getUploads" + folderGroupPair)
-        .done(function (data) {
-          const packageForReuse = $(`#{{ uploadToReuseSelectorName }}${groupIndex}`);
-          packageForReuse.empty();
-          $.each(data, function (key, value) {
-            const option = document.createElement("option");
-            option.innerHTML = value;
-            option.value = key;
-            packageForReuse.append(option);
-          });
-          sortList(`#{{ uploadToReuseSelectorName }}${groupIndex} option`);
-        })
-        .fail(failed);
-    }
-
-    function toggleDisabled() {
-      $('.reuseSearchInFolder').click(function () {
-        const groupIndex = $(this).attr('id').replace('reuseSearchInFolder', '');
-        const folderSelector = $(`#{{ reuseFolderSelectorName }}${groupIndex}`);
-        folderSelector.prop('disabled', !$(this).prop('checked'));
-
-        if ($(this).prop('checked')) {
-          folderSelector.trigger('change');
-        } else {
-          reloadUploads("", "");
-        }
-      });
-
-      reloadUploads("", "");
-      registerFolderSelectorChange();
-    }
-
-    $(document).ready(function () {
-      toggleDisabled();
-    });
-
-  })
-  .fail(function () {
-    console.error("Failed to load tools.js");
+function registerFolderSelectorChange() {
+  $('[id^={{ reuseFolderSelectorName }}]').change(function () {
+    const groupIndex = $(this).attr('id').replace('{{ reuseFolderSelectorName }}', '');
+    const folderGroupPair = this.selectedOptions[0].value;
+    reloadUploads('&{{ folderParameterName }}=' + folderGroupPair, groupIndex);
   });
+}
+
+function reloadUploads(folderGroupPair, groupIndex) {
+  $.getJSON("?mod=plugin_reuser&do=getUploads" + folderGroupPair)
+    .done(function (data) {
+      const packageForReuse = $(`#{{ uploadToReuseSelectorName }}${groupIndex}`);
+      packageForReuse.empty();
+      $.each(data, function (key, value) {
+        const option = document.createElement("option");
+        option.innerHTML = value;
+        option.value = key;
+        packageForReuse.append(option);
+      });
+      sortList(`#{{ uploadToReuseSelectorName }}${groupIndex} option`);
+    })
+    .fail(failed);
+}
+
+function toggleDisabled() {
+  $('.reuseSearchInFolder').click(function () {
+    const groupIndex = $(this).attr('id').replace('reuseSearchInFolder', '');
+    const folderSelector = $(`#{{ reuseFolderSelectorName }}${groupIndex}`);
+    folderSelector.prop('disabled', !$(this).prop('checked'));
+
+    if ($(this).prop('checked')) {
+      folderSelector.trigger('change');
+    } else {
+      reloadUploads("", "");
+    }
+  });
+
+  reloadUploads("", "");
+  registerFolderSelectorChange();
+}
+
+$(document).ready(function () {
+  toggleDisabled();
+});
 
