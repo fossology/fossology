@@ -432,7 +432,6 @@ class ui_view_info extends FO_Plugin
           $Count++;
           $vars['packageEntries'][] = $entry;
         }
-        pg_free_result($result);
 
         $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $1;";
         $this->dbManager->prepare(__METHOD__ . "getPkg_rpm_req", $sql);
@@ -469,7 +468,6 @@ class ui_view_info extends FO_Plugin
           $Count++;
           $vars['packageEntries'][] = $entry;
         }
-        pg_free_result($result);
 
         $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $1;";
         $this->dbManager->prepare(__METHOD__ . "getPkg_rpm_req", $sql);

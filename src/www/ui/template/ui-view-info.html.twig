@@ -228,9 +228,9 @@
     </table>
   {% endif %}
 {% endblock %}
-{% block javascripts %}
+{% block foot %}
   {{ parent() }}
-  <script>
+  <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('.pkg-value').forEach(el => {
         const encoded = el.getAttribute('data-encoded');
