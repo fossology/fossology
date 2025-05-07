@@ -71,10 +71,12 @@ class AgentAdder extends DefaultPlugin
       $out .= "<br/><b>".$agent->AgentName.":</b><br/>";
       $out .= $agent->renderContent($vars);
       $parmAgentFoots .= $agent->renderFoot($vars);
+      $paramAgentIncludes .= $agent->getScriptIncludes($vars);
     }
     $out .= '</ol>';
     $vars['out'] = $out;
     $vars['outFoot'] = '<script language="javascript"> '.$parmAgentFoots.'</script>';
+    $vars['paramIncludes'] = $paramAgentIncludes;
 
     return $this->render('agent_adder.html.twig', $this->mergeWithDefault($vars));
   }

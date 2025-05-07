@@ -44,6 +44,11 @@ class ScancodesAgentPlugin extends AgentPlugin
     return "";
   }
 
+  public function getScriptIncludes(&$vars)
+  {
+    return "";
+  }
+
   /**
    * @brief Schedule scancode agent
    *
