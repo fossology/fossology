@@ -443,4 +443,14 @@ class UserDao
   {
     return $this->dbManager->getRows("SELECT * FROM users ORDER BY user_name;");
   }
+
+  /**
+   * @param int $groupId
+   * @param string $newGroupName
+   */
+  function editGroup($groupId, $newGroupName)
+  {
+    $this->dbManager->getSingleRow('UPDATE groups SET group_name=$2 WHERE group_pk=$1;',
+            array($groupId, $newGroupName),__METHOD__.'.UpdateEditGroup');
+  }
 }
