@@ -58,14 +58,14 @@
           <tr>
             <td align="right">{{ entry.count|e }}</td>
             <td>{{ entry.type|e }}</td>
-            <td>{{ entry.value|e }}</td>
+            <td class="pkg-value" data-encoded="{{ entry.value|e }}"></td>
           </tr>
         {% endfor %}
         {% for require in packageRequires %}
           <tr>
             <td align="right">{{ require.count|e }}</td>
             <td>{{ require.type|e }}</td>
-            <td><a href="{{ require.value|e }}">{{ require.value|e }}</a></td>
+            <td><a href="{{ require.value|e }}" class="pkg-value" data-encoded="{{ require.value|e }}"></a></td>
           </tr>
         {% endfor %}
       </table>
@@ -227,4 +227,17 @@
       </tr>
     </table>
   {% endif %}
+{% endblock %}
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.pkg-value').forEach(el => {
+        const encoded = el.getAttribute('data-encoded');
+        const txt = document.createElement('textarea');
+        txt.innerHTML = encoded;
+        el.textContent = txt.value;
+      });
+    });
+  </script>
 {% endblock %}
