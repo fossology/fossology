@@ -9,6 +9,7 @@
 namespace Fossology\Lib\UI\Component;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Report\LicenseObligationUtility;
 use Twig\Environment;
 
 class Menu
@@ -21,6 +22,9 @@ class Menu
   const BANNER_COOKIE = 'close_banner';
   var $MenuTarget = "treenav";
   protected $renderer;
+  
+  /** @var LicenseObligationUtility */
+  private $licenseObligationUtility;
 
   public function __construct(Environment $renderer)
   {
@@ -31,6 +35,10 @@ class Menu
     menu_insert("Main::Help", -1);
     menu_insert("Main::Help::Documentation", 0, NULL, NULL, NULL, "<a href='https://github.com/fossology/fossology/wiki'>Documentation</a>");
     $this->renderer = $renderer;
+    
+    global $container;
+    $dbManager = $container->get("db.manager");
+    $this->licenseObligationUtility = new LicenseObligationUtility($dbManager);
   }
 
   /**
@@ -263,6 +271,11 @@ class Menu
           'commitDate' => $SysConf['BUILD']['COMMIT_DATE'],
           'branchName' => $SysConf['BUILD']['BRANCH']
       );
+      
+      // Get license and obligation information
+      list($licenseInfo, $obligationInfo) = $this->getLicenseAndObligationInfo();
+      $vars['licenseInfo'] = $licenseInfo;
+      $vars['obligationInfo'] = $obligationInfo;
     }
 
     if (!$vars['isLoggedOut']) {
@@ -296,5 +309,24 @@ class Menu
     } else {
       $vars['singleGroup'] = @$_SESSION['GroupName'];
     }
+  }
+
+  /**
+   * @brief Get license and obligation information
+   * @return array Array with license and obligation information
+   */
+  private function getLicenseAndObligationInfo()
+  {
+    return $this->licenseObligationUtility->getLicenseAndObligationInfo();
+  }
+
+  /**
+   * @brief Get the last update time for a table
+   * @param string $tableName Table name to check
+   * @return string Formatted date string
+   */
+  private function getLastUpdateTime($tableName)
+  {
+    return $this->licenseObligationUtility->getLastUpdateTime($tableName);
   }
 }

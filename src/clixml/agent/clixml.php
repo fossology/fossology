@@ -19,6 +19,7 @@ use Fossology\Lib\Report\ObligationsGetter;
 use Fossology\Lib\Report\OtherGetter;
 use Fossology\Lib\Report\XpClearedGetter;
 use Fossology\Lib\Report\ReportUtils;
+use Fossology\Lib\Report\LicenseObligationUtility;
 use Twig\Environment;
 
 include_once(__DIR__ . "/version.php");
@@ -79,6 +80,9 @@ class CliXml extends Agent
    */
   private $reportutils;
 
+  /** @var LicenseObligationUtility */
+  private $licenseObligationUtility;
+
   /** @var string */
   protected $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
 
@@ -113,6 +117,7 @@ class CliXml extends Agent
     $this->obligationsGetter = new ObligationsGetter();
     $this->otherGetter = new OtherGetter();
     $this->reportutils = new ReportUtils();
+    $this->licenseObligationUtility = new LicenseObligationUtility($this->dbManager);
     $this->agentSpecifLongOptions[] = self::UPLOAD_ADDS.':';
     $this->agentSpecifLongOptions[] = self::OUTPUT_FORMAT_KEY.':';
   }
@@ -532,6 +537,25 @@ class CliXml extends Agent
   }
 
   /**
+   * @brief Get license and obligation counts and last updated info
+   * @return array Array with license and obligation information
+   */
+  private function getLicenseAndObligationInfo()
+  {
+    return $this->licenseObligationUtility->getLicenseAndObligationInfo();
+  }
+
+  /**
+   * @brief Get the last update time for a table
+   * @param string $tableName Table name to check
+   * @return string Formatted date string
+   */
+  private function getLastUpdateTime($tableName)
+  {
+    return $this->licenseObligationUtility->getLastUpdateTime($tableName);
+  }
+
+  /**
    * Generate the GeneralInformation and AssessmentSummary components for the
    * report.
    * @param int $uploadId Upload ID
@@ -599,6 +623,25 @@ class CliXml extends Agent
       $uploadLink = "http://" . $uploadLink;
     }
     $uploadLink .= "?mod=browse&upload=$uploadId&item=$parentItem";
+    
+    // Get license and obligation information
+    list($licenseInfo, $obligationInfo) = $this->getLicenseAndObligationInfo();
+    
+    // Build version information string
+    $versionInfo = "";
+    if (array_key_exists('BUILD', $SysConf)) {
+      $versionInfo = "Version: " . $SysConf['BUILD']['VERSION'] . 
+                     ", Branch: " . $SysConf['BUILD']['BRANCH'] . 
+                     ", Commit: #" . $SysConf['BUILD']['COMMIT_HASH'];
+    }
+    if ($licenseInfo) {
+      $versionInfo .= ", Licenses: " . $licenseInfo['count'] . 
+                      " (last updated: " . $licenseInfo['lastUpdated'] . ")";
+    }
+    if ($obligationInfo) {
+      $versionInfo .= ", Obligations: " . $obligationInfo['count'] . 
+                      " (last updated: " . $obligationInfo['lastUpdated'] . ")";
+    }
 
     return [[
       'reportId' => uuid_create(UUID_TYPE_TIME),
@@ -611,7 +654,10 @@ class CliXml extends Agent
       'linkComponentManagement' => htmlspecialchars($row['ri_sw360_link']),
       'linkScanTool' => $uploadLink,
       'componentType' => htmlspecialchars($componentType),
-      'componentId' => htmlspecialchars($componentId)
+      'componentId' => htmlspecialchars($componentId),
+      'fossologyVersion' => $versionInfo,
+      'licenseInfo' => $licenseInfo,
+      'obligationInfo' => $obligationInfo
     ], [
       'generalAssessment' => $row['ri_general_assesment'],
       'criticalFilesFound' => $critical,
