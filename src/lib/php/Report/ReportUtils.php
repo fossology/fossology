@@ -248,6 +248,12 @@ class ReportUtils
           ->addAcknowledgement($clearingLicense->getAcknowledgement());
         $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
         $concludedLicense = $this->licenseDao->getLicenseById($reportedLicenseId, $groupId);
+        if ($concludedLicense === null) {
+          error_log(
+              "ReportUtils: warning: clearing-license {$reportedLicenseId} not found; skipping event."
+          );
+          continue;
+        }
         if ($clearingEvent->getReportinfo()) {
           $customLicenseText = $clearingEvent->getReportinfo();
           $reportedLicenseShortname = $concludedLicense->getShortName() . '-' .

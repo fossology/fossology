@@ -224,7 +224,6 @@ class SpdxAgent extends Agent
     }
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
     $this->computeUri($uploadId);
-
     $docLicense = $this->licenseDao->getLicenseByShortName(self::DATA_LICENSE);
     $docLicenseId = $docLicense->getId() . "-" . md5($docLicense->getText());
     $this->licensesInDocument[$docLicenseId] = (new SpdxLicenseInfo())
@@ -232,7 +231,6 @@ class SpdxAgent extends Agent
       ->setListedLicense(true)
       ->setCustomText(false)
       ->setTextPrinted(true);
-
     $packageNodes = $this->renderPackage($uploadId);
     $additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
     $packageIds = array($uploadId);
@@ -240,7 +238,6 @@ class SpdxAgent extends Agent
       $packageNodes .= $this->renderPackage($additionalId);
       $packageIds[] = $additionalId;
     }
-
     $this->writeReport($packageNodes, $packageIds, $uploadId);
     return true;
   }
@@ -384,6 +381,12 @@ class SpdxAgent extends Agent
     foreach ($mainLicenseIds as $licId) {
       $reportedLicenseId = $this->licenseMap->getProjectedId($licId);
       $mainLicense = $this->licenseDao->getLicenseById($reportedLicenseId, $this->groupId);
+      if ($mainLicense === null) {
+        error_log(
+            "spdx: Error: main license ID {$reportedLicenseId} not found; skipping."
+        );
+        exit;
+      }
       $reportLicId = $mainLicense->getId() . "-" . md5($mainLicense->getText());
       $mainLicenses[] = $reportLicId;
       if (!array_key_exists($reportLicId, $this->licensesInDocument)) {
