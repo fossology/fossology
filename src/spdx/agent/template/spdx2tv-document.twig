@@ -42,11 +42,18 @@ LicenseListVersion: 3.22
 ## License Information
 ##-------------------------
 
-{% for licenseData in licenseList %}{% if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' ~%}
-{%- set licId=licenseData.licenseObj.spdxId %}
-{% if licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
-  {% set licId=licenseData.licenseObj.shortName %}
-{%- endif ~%}
+{% for licenseData in licenseList -%}
+{%- if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' or (EnableOsselotExport and licenseData.licenseObj.shortName != 'No_license_found') -%}
+{%- set licId=licenseData.licenseObj.spdxId -%}
+{% if licenseData.licenseObj.shortName starts with 'LicenseRef-' -%}
+  {% set licId=licenseData.licenseObj.shortName -%}
+{%- endif -%}
+{% if EnableOsselotExport and licId starts with 'LicenseRef-fossology-' -%}
+  {% set licId = licId|replace({'LicenseRef-fossology-':'LicenseRef-'}) -%}
+{% endif -%}
+{% if EnableOsselotExport and not (licId starts with 'LicenseRef-') -%}
+  {% set licId = 'LicenseRef-' ~ licId -%}
+{% endif -%}
 LicenseID: {{ licId|replace({' ': '-'}) }}
 LicenseName: {{ licenseData.licenseObj.fullName }}
 ExtractedText: <text> {{ licenseData.licenseObj.text|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})

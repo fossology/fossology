@@ -2243,6 +2243,10 @@
   $Schema["TABLE"]["users"]["group_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"group_fk\" int4";
   $Schema["TABLE"]["users"]["group_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
 
+  $Schema["TABLE"]["users"]["spdx_settings"]["DESC"] = "COMMENT ON COLUMN \"users\".\"spdx_settings\" IS 'Comma-separated SPDX export settings: osselot_export,spdx_license_comment,ignore_files_wo_info as checked/unchecked values'";
+  $Schema["TABLE"]["users"]["spdx_settings"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"spdx_settings\" text DEFAULT 'unchecked,unchecked,unchecked'";
+  $Schema["TABLE"]["users"]["spdx_settings"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"spdx_settings\" DROP NOT NULL, ALTER COLUMN \"spdx_settings\" SET DEFAULT 'unchecked,unchecked,unchecked'";
+
   $Schema["TABLE"]["report_info"]["ri_pk"]["DESC"] = "";
   $Schema["TABLE"]["report_info"]["ri_pk"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_pk\" int4 DEFAULT nextval('report_info_pk_seq'::regclass)";
   $Schema["TABLE"]["report_info"]["ri_pk"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_pk\" SET NOT NULL, ALTER COLUMN \"ri_pk\" SET DEFAULT nextval('report_info_pk_seq'::regclass)";

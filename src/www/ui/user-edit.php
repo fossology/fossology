@@ -190,6 +190,13 @@ class UserEditPage extends DefaultPlugin
     $vars['userDescription'] = $UserRec['user_desc'];
     $vars['userEMail'] = $UserRec["user_email"];
     $vars['eMailNotification'] = ($UserRec['email_notify'] == 'y');
+    $spdxSettings = isset($UserRec['spdx_settings']) ? explode(',', $UserRec['spdx_settings']) : ['unchecked', 'unchecked', 'unchecked'];
+    if (count($spdxSettings) < 3) {
+      $spdxSettings = array_pad($spdxSettings, 3, 'unchecked');
+    }
+    $vars['osselotExportEnabled'] = ($spdxSettings[0] === 'checked');
+    $vars['spdxLicenseCommentDefault'] = ($spdxSettings[1] === 'checked');
+    $vars['ignoreFilesWOInfoDefault'] = ($spdxSettings[2] === 'checked');
 
     if ($SessionIsAdmin) {
       $vars['allAccessLevels'] = array(
@@ -445,6 +452,14 @@ class UserEditPage extends DefaultPlugin
       }
       $UserRec['user_agent_list'] = is_null($request->get('user_agent_list')) ? userAgents() : $request->get('user_agent_list');
       $UserRec['default_bucketpool_fk'] = intval($request->get("default_bucketpool_fk"));
+
+      if ($this->dbManager->existsColumn('users', 'spdx_settings')) {
+        $osselotEnabled = !empty($request->get('osselot_export_enabled')) ? 'checked' : 'unchecked';
+        $spdxCommentEnabled = !empty($request->get('spdx_license_comment_default')) ? 'checked' : 'unchecked';
+        $ignoreFilesEnabled = !empty($request->get('ignore_files_wo_info_default')) ? 'checked' : 'unchecked';
+
+        $UserRec['spdx_settings'] = "$osselotEnabled,$spdxCommentEnabled,$ignoreFilesEnabled";
+      }
     }
     return $UserRec;
   }

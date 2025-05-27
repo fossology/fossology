@@ -797,6 +797,45 @@ ORDER BY lft asc
   }
 
   /**
+   * Get user SPDX defaults for a specific upload (based on upload owner)
+   * @param int $uploadId
+   * @return string Comma-separated checkbox values
+   */
+  private function getUserSPDXDefaultsForUpload($uploadId)
+  {
+    $stmt = __METHOD__ . '.getOwner';
+    $sql = "SELECT user_fk FROM upload WHERE upload_pk = $1";
+    $uploadOwner = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
+
+    if (empty($uploadOwner)) {
+      return "unchecked,unchecked,unchecked";
+    }
+
+    $userId = $uploadOwner['user_fk'];
+
+    $stmt = __METHOD__ . '.getUserDefaults';
+    $sql = "SELECT spdx_settings FROM users WHERE user_pk = $1";
+    $userDefaults = $this->dbManager->getSingleRow($sql, array($userId), $stmt);
+
+    if (empty($userDefaults) || empty($userDefaults['spdx_settings'])) {
+      return "unchecked,unchecked,unchecked";
+    }
+
+    $settings = explode(',', $userDefaults['spdx_settings']);
+    if (count($settings) < 3) {
+      $settings = array_pad($settings, 3, 'unchecked');
+    }
+
+    $osselotExport = $settings[0];
+    $spdxLicenseComment = $settings[1];
+    $ignoreFilesWOInfo = $settings[2];
+
+    $result = "$spdxLicenseComment,$ignoreFilesWOInfo,$osselotExport";
+
+    return $result;
+  }
+
+  /**
    * @brief Update report info for upload
    * @param int $uploadId  Upload ID to update
    * @param string $column Column to update
@@ -848,7 +887,7 @@ ORDER BY lft asc
   public function getGlobalDecisionSettingsFromInfo($uploadId, $setGlobal=null)
   {
     $stmt = __METHOD__ . 'get';
-    $sql = "SELECT ri_globaldecision FROM report_info WHERE upload_fk = $1";
+    $sql = "SELECT ri_globaldecision, ri_spdx_selection FROM report_info WHERE upload_fk = $1";
     $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
     if (empty($row)) {
       if ($setGlobal === null) {
@@ -856,8 +895,10 @@ ORDER BY lft asc
         $setGlobal = 1;
       }
       $stmt = __METHOD__ . 'ifempty';
-      $sql = "INSERT INTO report_info (upload_fk, ri_globaldecision) VALUES ($1, $2) RETURNING ri_globaldecision";
-      $row = $this->dbManager->getSingleRow($sql, array($uploadId, $setGlobal), $stmt);
+      $userSPDXDefaults = $this->getUserSPDXDefaultsForUpload($uploadId);
+      $sql = "INSERT INTO report_info (upload_fk, ri_globaldecision, ri_spdx_selection) VALUES ($1, $2, $3) RETURNING ri_globaldecision";
+      $row = $this->dbManager->getSingleRow($sql, array($uploadId, $setGlobal, $userSPDXDefaults), $stmt);
+
     }
 
     if (!empty($setGlobal)) {

@@ -25,14 +25,21 @@
   <rdfs:comment>
     This document was created using license information and a generator from Fossology.
   </rdfs:comment>
-  {%- for licenseData in licenseList %}{% if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' ~%}
+  {%- for licenseData in licenseList -%}
+  {%- if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' or (EnableOsselotExport and licenseData.licenseObj.shortName != 'No_license_found') -%}
   <spdx:hasExtractedLicensingInfo>
-    {%- set licId=licenseData.licenseObj.spdxId %}
-    {% if licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
-      {% set licId=licenseData.licenseObj.shortName %}
-    {%- endif ~%}
+    {%- set licId=licenseData.licenseObj.spdxId -%}
+    {% if licenseData.licenseObj.shortName starts with 'LicenseRef-' -%}
+      {% set licId=licenseData.licenseObj.shortName -%}
+    {%- endif -%}
+    {% if EnableOsselotExport and licId starts with 'LicenseRef-fossology-' -%}
+      {% set licId = licId | replace({'LicenseRef-fossology-':'LicenseRef-'}) -%}
+    {% endif -%}
+    {% if EnableOsselotExport and not (licId starts with 'LicenseRef-') -%}
+      {% set licId = 'LicenseRef-' ~ licId -%}
+    {% endif -%}
     <spdx:ExtractedLicensingInfo rdf:about="#{{ licId|replace({' ': '-'})|url_encode }}">
-      <spdx:licenseId>{{ licenseData.licenseObj.spdxId|replace({' ': '-'})|e }}</spdx:licenseId>
+      <spdx:licenseId>{{ licId|replace({' ': '-'})|e }}</spdx:licenseId>
       <spdx:name>{{ licenseData.licenseObj.fullName|e }}</spdx:name>
       <spdx:extractedText><![CDATA[
 {{ licenseData.licenseObj.text|replace({'\f':''})
