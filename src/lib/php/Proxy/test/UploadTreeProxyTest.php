@@ -19,7 +19,7 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
   protected function setUp() : void
   {
     $this->testDb = new TestPgDb();
-    $this->testDb->createPlainTables( array('uploadtree', 'report_info') );
+    $this->testDb->createPlainTables( array('uploadtree', 'report_info', 'upload') );
     $this->dbManager = $this->testDb->getDbManager();
     $this->dbManager->queryOnce('ALTER TABLE uploadtree RENAME TO uploadtree_a');
     $this->testDb->insertData(array('uploadtree_a'));
