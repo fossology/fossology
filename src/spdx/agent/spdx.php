@@ -352,6 +352,7 @@ class SpdxAgent extends Agent
   protected function renderPackage($uploadId)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $stateOsselot = $this->getSPDXReportConf($uploadId, 2);
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $this->heartbeat(0);
 
@@ -411,6 +412,18 @@ class SpdxAgent extends Agent
         } else {
           $mainLicenseString[] = $this->licensesInDocument[$mainLicense]
             ->getLicenseObj()->getSpdxId();
+        }
+      }
+      if ($this->outputFormat == "spdx2tv") {
+        if ($stateOsselot) {
+            $mainLicenseString = SpdxUtils::removeEmptyLicenses($mainLicenseString);
+          foreach ($mainLicenseString as $i => $licId) {
+            if (StringOperation::stringStartsWith($licId, LicenseRef::SPDXREF_PREFIX)
+                  || StringOperation::stringStartsWith($licId, "Dual-license")) {
+                continue;
+            }
+              $mainLicenseString[$i] = "LicenseRef-$licId";
+          }
         }
       }
       $mainLicenseString = SpdxUtils::implodeLicenses(
@@ -476,7 +489,8 @@ class SpdxAgent extends Agent
       'licenseComments' => $licenseComment,
       'fileNodes' => $fileNodes,
       'obligations' => $obligations,
-      'licenseList' => $this->licensesInDocument
+      'licenseList' => $this->licensesInDocument,
+      'EnableOsselotExport' => $stateOsselot
     ]);
   }
 
@@ -597,7 +611,7 @@ class SpdxAgent extends Agent
   protected function writeReport(&$packageNodes, $packageIds, $uploadId)
   {
     global $SysConf;
-
+    $stateOsselot = $this->getSPDXReportConf($uploadId, 2);
     $fileBase = dirname($this->filename);
 
     if (!is_dir($fileBase)) {
@@ -631,7 +645,8 @@ class SpdxAgent extends Agent
         'packageNodes' => $packageNodes,
         'packageIds' => $packageIds,
         'dataLicense' => $this->getSPDXDataLicense(),
-        'licenseList' => $this->licensesInDocument
+        'licenseList' => $this->licensesInDocument,
+        'EnableOsselotExport' => $stateOsselot,
       )
     );
 
@@ -705,8 +720,9 @@ class SpdxAgent extends Agent
       }
       $hashes = $treeDao->getItemHashes($fileId);
       $fileName = $treeDao->getFullPath($fileId, $treeTableName, 0);
-      $stateComment = $this->getSPDXReportConf($uploadId, 0);
       $stateWoInfos = $this->getSPDXReportConf($uploadId, 1);
+      $stateOsselot = $this->getSPDXReportConf($uploadId, 2);
+      $stateComment = $this->getSPDXReportConf($uploadId, 0);
       foreach ($fileData->getConcludedLicenses() as $license) {
         $this->concludedLicenseFileIds[] = $fileId;
         if (! $this->licensesInDocument[$license]->isTextPrinted()) {
@@ -734,8 +750,23 @@ class SpdxAgent extends Agent
               ->getLicenseObj()->getSpdxId();
           }
         }
-        $concludedLicensesString = SpdxUtils::implodeLicenses(
-          SpdxUtils::removeEmptyLicenses($concludedLicensesString));
+        if ($this->outputFormat == "spdx2tv") {
+          if ($stateOsselot) {
+            foreach ($concludedLicensesString as $j => $licId) {
+              if (StringOperation::stringStartsWith($licId, LicenseRef::SPDXREF_PREFIX)
+                    || StringOperation::stringStartsWith($licId, "Dual-license")) {
+                  continue;
+              }
+                $concludedLicensesString[$j] = "LicenseRef-$licId";
+            }
+          }
+          $concludedLicensesString = SpdxUtils::implodeLicenses(
+              SpdxUtils::removeEmptyLicenses($concludedLicensesString)
+          );
+        } else {
+          $concludedLicensesString = SpdxUtils::implodeLicenses(
+            SpdxUtils::removeEmptyLicenses($concludedLicensesString));
+        }
       }
       if (!$stateWoInfos ||
           ($stateWoInfos && (!empty($fileData->getConcludedLicenses()) ||
@@ -756,7 +787,8 @@ class SpdxAgent extends Agent
           'fileData' => $fileData,
           'licenseList' => $this->licensesInDocument,
           'concludedLicensesString' => $concludedLicensesString,
-          'licenseCommentState' => $stateComment
+          'licenseCommentState' => $stateComment,
+          'EnableOsselotExport' =>$stateOsselot,
         );
         $content .= $this->renderString($this->getTemplateFile('file'),
           $dataTemplate);
