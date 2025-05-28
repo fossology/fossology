@@ -41,7 +41,6 @@ class LicenseDecisionTest extends TestCase
       'acknowledgement' => 'Sample acknowledgement',
       'comment' => 'Sample comment',
       'isMainLicense' => true,
-      'obligations' => null,
       'risk' => null,
       'isRemoved' => false,
       'isCandidate' => false
