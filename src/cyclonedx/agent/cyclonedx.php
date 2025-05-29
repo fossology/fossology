@@ -222,6 +222,13 @@ class CycloneDXAgent extends Agent
           ->setTextPrinted(true)
           ->setListedLicense(true);
       }
+      if ($mainLicObj->getSpdxId() === "LicenseRef-fossology-License-Expression") {
+        $licensedata = array(
+          "expression" => $mainLicObj->getExpression($this->licenseDao, $this->groupId)
+        );
+        $mainLicenses[] = $licensedata;
+        continue;
+      }
       $licensedata['id'] = $mainLicObj->getSpdxId();
       $licensedata['url'] = $mainLicObj->getUrl();
       $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
@@ -293,6 +300,13 @@ class CycloneDXAgent extends Agent
       if (!empty($licenses->getConcludedLicenses())) {
         foreach ($licenses->getConcludedLicenses() as $licenseId) {
           if (array_key_exists($licenseId, $this->licensesInDocument)) {
+            if ($this->licensesInDocument[$licenseId]->getLicenseObj()->getSpdxId() === "LicenseRef-fossology-License-Expression") {
+              $licensedata = array(
+                "expression" => $this->licensesInDocument[$licenseId]->getLicenseObj()->getExpression($this->licenseDao, $this->groupId)
+              );
+              $licensesfound[] = $licensedata;
+              continue;
+            }
             $licensedata = array(
               "id"   => $this->licensesInDocument[$licenseId]->getLicenseObj()->getSpdxId(),
               "name" => $this->licensesInDocument[$licenseId]->getLicenseObj()->getFullName(),
@@ -304,6 +318,13 @@ class CycloneDXAgent extends Agent
       } else {
         foreach ($licenses->getScanners() as $licenseId) {
           if (array_key_exists($licenseId, $this->licensesInDocument)) {
+            if ($this->licensesInDocument[$licenseId]->getLicenseObj()->getSpdxId() === "LicenseRef-fossology-License-Expression") {
+              $licensedata = array(
+                "expression" => $this->licensesInDocument[$licenseId]->getLicenseObj()->getExpression($this->licenseDao, $this->groupId)
+              );
+              $licensesfound[] = $licensedata;
+              continue;
+            }
             $licensedata = array(
               "id"   => $this->licensesInDocument[$licenseId]->getLicenseObj()->getSpdxId(),
               "name" => $this->licensesInDocument[$licenseId]->getLicenseObj()->getFullName(),

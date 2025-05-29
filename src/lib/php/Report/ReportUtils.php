@@ -215,8 +215,7 @@ class ReportUtils
     if ($this->licenseMap === null) {
       $this->licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT, true);
     }
-
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, true, true, true);
 
     $filesWithLicenses = array();
     $clearingsProceeded = 0;

@@ -133,11 +133,11 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
       'uploadtree_a','license_ref','license_ref_bulk','clearing_decision',
       'clearing_decision_event','clearing_event','license_file','highlight',
       'highlight_bulk','agent','pfile','ars_master','users','group_user_member',
-      'license_map','report_info'),false);
+      'license_map','report_info', 'license_expression'),false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','clearing_event_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_ref','clearing_event','clearing_decision','license_file','highlight'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_ref','clearing_event','clearing_decision','license_file','highlight', 'license_expression'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('nomos','monk'));
 

@@ -37,6 +37,7 @@ foreach(FO_OJO_TARGET ojo ojo_exec ojo_cov ojo_cov_exec)
         ${FO_CWD}/OjoAgent.cc
         ${FO_CWD}/OjoState.cc
         ${FO_CWD}/directoryScan.cc
+        ${FO_CWD}/licenseExpression.cc
         ${FO_CWD}/OjoUtils.cc)
     if(${FO_OJO_TARGET} MATCHES "^ojo_cov")
         target_compile_options(${FO_OJO_TARGET} PRIVATE ${FO_COV_FLAGS})

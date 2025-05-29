@@ -254,19 +254,30 @@ class ClearingView extends FO_Plugin
 
     if ($isSingleFile && $hasWritePermission) {
       $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
+      $this->vars['hasExpression'] = false;
       $licenseArray = $this->licenseDao->getLicenseArray($groupId);
-      list($addedResults, $removedResults) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
+      $licenseDecisionsArray = array();
+      list($addedResults, $removedResults) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION, true);
       if (count($addedResults)+count($removedResults)>0) {
         array_unshift($licenseArray, array('id'=>0,'fullname'=>'','shortname'=>'------'));
       }
       /** @var ClearingResult $result */
       foreach ($removedResults as $result) {
+        if ($result->getLicenseShortName() === 'License Expression') {
+          continue;
+        }
         array_unshift($licenseArray, array( 'id'=>$result->getLicenseId() ,'fullname'=>$result->getLicenseFullName() ,'shortname'=>$result->getLicenseShortName()));
       }
       /** @var ClearingResult $result */
       foreach ($addedResults as $result) {
+        if ($result->getLicenseShortName() === 'License Expression') {
+          $this->vars['hasExpression'] = true;
+          continue;
+        }
+        array_unshift($licenseDecisionsArray, array( 'id'=>$result->getLicenseId() ,'fullname'=>$result->getLicenseFullName() ,'shortname'=>$result->getLicenseShortName()));
         array_unshift($licenseArray, array( 'id'=>$result->getLicenseId() ,'fullname'=>$result->getLicenseFullName() ,'shortname'=>$result->getLicenseShortName()));
       }
+      $this->vars['licenseDecisionsArray'] = $licenseDecisionsArray;
       $this->vars['licenseArray'] = $licenseArray;
     } elseif ($isSingleFile) {
       $this->vars['auditDenied'] = true;

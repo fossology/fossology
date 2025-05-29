@@ -3973,14 +3973,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if (INFILE(_LT_PERL_1)) {
     INTERESTING(lDebug ? "Artistic(Perl#1)" : "Artistic-1.0-Perl");
     if (!lmem[_mGPL]) {
-      INTERESTING("Dual-license");
       INTERESTING(lDebug ? "GPL(Perl#1)" : "GPL-1.0-or-later");
     }
   }
   else if (INFILE(_LT_PERL_2)) {
     INTERESTING(lDebug ? "Artistic(Perl#2)" : "Artistic-1.0-Perl");
     if (!lmem[_mGPL]) {
-      INTERESTING("Dual-license");
       INTERESTING(lDebug ? "GPL(Perl#2)" : "GPL-1.0-or-later");
     }
   }
@@ -4001,35 +3999,30 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_PERLref1)) {
     INTERESTING(lDebug ? "Artistic(Perl-ref1)" : "Artistic-1.0-Perl");
     if (!lmem[_mGPL]) {
-      INTERESTING("Dual-license");
       INTERESTING(lDebug ? "GPL(Perl-ref1)" : "GPL-1.0-or-later");
     }
   }
   else if (PERL_INFILE(_LT_PERLref2)) {
     INTERESTING(lDebug ? "Artistic(Perl-ref2)" : "Artistic-1.0-Perl");
     if (!lmem[_mGPL]) {
-      INTERESTING("Dual-license");
       INTERESTING(lDebug ? "GPL(Perl-ref2)" : "GPL-1.0-or-later");
     }
   }
   else if (INFILE(_LT_PERLref3)) {
     INTERESTING(lDebug ? "Artistic(Perl-ref3)" : "Artistic-1.0-Perl");
     if (!lmem[_mGPL]) {
-      INTERESTING("Dual-license");
       INTERESTING(lDebug ? "GPL(Perl-ref3)" : "GPL-1.0-or-later");
     }
   }
   else if (INFILE(_LT_PERLref4)) {
     INTERESTING(lDebug ? "Artistic(Perl-ref4)" : "Artistic-1.0-Perl");
     if (!lmem[_mGPL]) {
-      INTERESTING("Dual-license");
       INTERESTING(lDebug ? "GPL(Perl-ref4)" : "GPL-1.0-or-later");
     }
   }
   else if (INFILE(_LT_PERLref5)) {
     INTERESTING(lDebug ? "Artistic(Perl-ref5)" : "Artistic-1.0-Perl");
     if (!lmem[_mGPL]) {
-      INTERESTING("Dual-license");
       INTERESTING(lDebug ? "GPL(Perl-ref5)" : "GPL-1.0-or-later");
     }
   }
@@ -6498,181 +6491,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "IP(3)" : "IP-claim");
   }
   cleanLicenceBuffer();
-  /*
-   * Dual licenses
-   */
-  if (INFILE(_LT_DUAL_LICENSE_0) && NOT_INFILE(_TITLE_NOSL)) {
-    MEDINTEREST(lDebug ? "Dual-license(0)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_22)) {
-    MEDINTEREST(lDebug ? "Dual-license(22)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_1) && NOT_INFILE(_TITLE_NOSL)) {
-    MEDINTEREST(lDebug ? "Dual-license(1)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_2)) {
-    MEDINTEREST(lDebug ? "Dual-license(2)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_3) && NOT_INFILE(_LT_DUAL_LICENSE_3_EXHIBIT)) {
-    MEDINTEREST(lDebug ? "Dual-license(3)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_4)) {
-    MEDINTEREST(lDebug ? "Dual-license(4)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_5)) {
-    MEDINTEREST(lDebug ? "Dual-license(5)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_6)) {
-    MEDINTEREST(lDebug ? "Dual-license(6)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_7)) {
-    MEDINTEREST(lDebug ? "Dual-license(7)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_8)) {
-    MEDINTEREST(lDebug ? "Dual-license(8)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_9)) {
-    MEDINTEREST(lDebug ? "Dual-license(9)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_10)) {
-    MEDINTEREST(lDebug ? "Dual-license(10)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_11)) {
-    MEDINTEREST(lDebug ? "Dual-license(11)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_12)) {
-    MEDINTEREST(lDebug ? "Dual-license(12)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_13)) {
-    INTERESTING(lDebug ? "Dual-license(13)" : "Dual-license");
-    INTERESTING("BSD");
-    INTERESTING("MIT");
-    /*
-     * A special case for NomosTestfiles/Dual-license/respond.js
-     * that has two dual-license statements.
-     */
-    if (!lmem[_mGPL]) {
-      if (INFILE(_LT_DUAL_LICENSE_16)) {
-        INTERESTING(lDebug ? "GPLV2(Dual-license(16))" : "GPL-2.0-only");
-      }
-    }
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_14)) {
-    INTERESTING(lDebug ? "Dual-license(14)" : "Dual-license");
-    INTERESTING("BSD");
-    if (!lmem[_mGPL]) {
-      INTERESTING("GPL");
-    }
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_15)) {
-    MEDINTEREST(lDebug ? "Dual-license(15)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_16)) {
-    INTERESTING(lDebug ? "Dual-license(16)" : "Dual-license");
-    INTERESTING("MIT");
-    INTERESTING(lDebug ? "GPLV2(Dual-license(16))" : "GPL-2.0-only");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_17)) {
-    MEDINTEREST(lDebug ? "Dual-license(17)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_18)) {
-    MEDINTEREST(lDebug ? "Dual-license(18)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_19)) {
-    MEDINTEREST(lDebug ? "Dual-license(19)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_20)) {
-    MEDINTEREST(lDebug ? "Dual-license(20)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_21)) {
-    MEDINTEREST(lDebug ? "Dual-license(21)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_23)) {
-    MEDINTEREST(lDebug ? "Dual-license(23)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_24)) {
-    MEDINTEREST(lDebug ? "Dual-license(24)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_25)) {
-    MEDINTEREST(lDebug ? "Dual-license(25)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_26)) {
-    MEDINTEREST(lDebug ? "Dual-license(26)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_27)) {
-    MEDINTEREST(lDebug ? "Dual-license(27)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_28)) {
-    MEDINTEREST(lDebug ? "Dual-license(28)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_29) && NOT_INFILE(_LT_MPL_SECONDARY_LICENSE)) {
-    MEDINTEREST(lDebug ? "Dual-license(29)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_30)) {
-    MEDINTEREST(lDebug ? "Dual-license(30)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_31)) {
-    MEDINTEREST(lDebug ? "Dual-license(31)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_32)) {
-    MEDINTEREST(lDebug ? "Dual-license(32)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_33)) {
-    MEDINTEREST(lDebug ? "Dual-license(33)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_34)) {
-    MEDINTEREST(lDebug ? "Dual-license(34)" : "Dual-license");
-  }
-  else if (HASTEXT(_LT_DUAL_LICENSE_35, 0)) {
-    MEDINTEREST(lDebug ? "Dual-license(35)" : "Dual-license");
-    /*
-     * GPL is not detected correctly in this case, therefore it is set here.
-     */
-    INTERESTING("GPL");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_36)) {
-    MEDINTEREST(lDebug ? "Dual-license(36)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_37)) {
-    MEDINTEREST(lDebug ? "Dual-license(37)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_38)) {
-    MEDINTEREST(lDebug ? "Dual-license(38)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_39)) {
-    MEDINTEREST(lDebug ? "Dual-license(39)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_40)) {
-    MEDINTEREST(lDebug ? "Dual-license(40)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_41)) {
-    MEDINTEREST(lDebug ? "Dual-license(41)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_42)) {
-    MEDINTEREST(lDebug ? "Dual-license(42)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_43)) {
-    MEDINTEREST(lDebug ? "Dual-license(43)" : "Dual-license");
-  }
-  else if (HASTEXT(_LT_DUAL_LICENSE_44, 0)) {
-    MEDINTEREST(lDebug ? "Dual-license(44)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_45)) {
-    MEDINTEREST(lDebug ? "Dual-license(45)" : "Dual-license");
-    INTERESTING("MIT");
-  }
-  else if (HASTEXT(_LT_DUAL_LICENSE_46, REG_EXTENDED)) {
-    MEDINTEREST(lDebug ? "Dual-license(46)" : "Dual-license");
-  }
-  else if (HASTEXT(_LT_DUAL_LICENSE_47, REG_EXTENDED) && NOT_INFILE(_LT_MPL_SECONDARY_LICENSE)) {
-    MEDINTEREST(lDebug ? "Dual-license(47)" : "Dual-license");
-  }
-  else if (INFILE(_LT_DUAL_LICENSE_48)) {
-    MEDINTEREST(lDebug ? "Dual-license(48)" : "Dual-license");
-  }
-  else if (HASTEXT(_LT_DUAL_LICENSE_49, REG_EXTENDED)) {
-    MEDINTEREST(lDebug ? "Dual-license(49)" : "Dual-license");
-  }
   cleanLicenceBuffer();
   /*
    * The Beer-ware license(!)

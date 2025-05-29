@@ -92,6 +92,16 @@ class LicenseRef
     .')';
   }
 
+  public function getArray()
+  {
+    return array(
+      'id' => $this->id,
+      'spdxId' => $this->spdxId,
+      'shortName' => $this->shortName,
+      'fullName' => $this->fullName
+    );
+  }
+
   /**
    * @brief Given a license's shortname and spdx id, give out spdx id to use in
    *        reports.
@@ -133,5 +143,76 @@ class LicenseRef
   {
     $licenseName = str_replace(' ', '-', $licenseName);
     return preg_replace('/-(OR|AND|WITH)-(?!later)/i', ' $1 ', $licenseName);
+  }
+
+  /**
+   * Combine two license expressions
+   * @param $expression License Expression to be combined
+   */
+  public function combineExpression($expression)
+  {
+    $left = [];
+    if ($this->spdxId === 'LicenseRef-fossology-License-Expression') {
+      $left = json_decode($this->fullName, true);
+    } else {
+      $left = array(
+        'type' => 'License',
+        'value' => $this->id
+      );
+    }
+    $right = [];
+    if ($expression->getSpdxId() === 'LicenseRef-fossology-License-Expression') {
+      $right = json_decode($expression->getFullName(), true);
+    } else {
+      $right = array(
+        'type' => 'License',
+        'value' => $expression->getId()
+      );
+    }
+    if ($left !== $right) {
+      $combinedExpression = array(
+        'type' => 'Expression',
+        'value' => 'AND',
+        'left' => $left,
+        'right' => $right
+      );
+      $this->id = -1;
+      $this->shortName = 'License Expression';
+      $this->fullName = json_encode($combinedExpression);
+      $this->spdxId = self::convertToSpdxId($this->shortName, '');
+    }
+  }
+
+  /**
+   * @param $licenseDao
+   * @param $groupId
+   * @return string License Expression
+   */
+  public function getExpression($licenseDao, $groupId)
+  {
+    $ast = json_decode($this->fullName, true);
+    return $this->buildExpression($ast, $licenseDao, $groupId);
+  }
+
+  /**
+   * @param $node
+   * @param $licenseDao
+   * @param $groupId
+   * @return string License Expression
+   */
+  protected function buildExpression($node, $licenseDao, $groupId)
+  {
+    if ($node['type'] === 'License') {
+      $licenseNode = $licenseDao->getLicenseById($node['value'], $groupId);
+      if (StringOperation::stringStartsWith($licenseNode->getShortName(),
+        LicenseRef::SPDXREF_PREFIX)) {
+        return $licenseNode->getShortName();
+      }
+      return $licenseNode->getSpdxId();
+    }
+    $left = $this->buildExpression($node['left'], $licenseDao, $groupId);
+    $right = $this->buildExpression($node['right'], $licenseDao, $groupId);
+    $operator = $node['value'];
+    return "($left $operator $right)";
   }
 }
