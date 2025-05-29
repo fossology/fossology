@@ -10,6 +10,7 @@
 #include "standalone.h"
 
 int result = 0;
+int should_connect_to_db = 0;
 
 void  fo_scheduler_heart(int i){}
 void  fo_scheduler_connect(int* argc, char** argv, PGconn** db_conn){}

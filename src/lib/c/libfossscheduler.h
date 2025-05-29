@@ -51,6 +51,7 @@ enum job_status
 * by the scheduler to enable different levels of verbose.
 */
 extern int agent_verbose;
+extern int should_connect_to_db;
 
 extern fo_conf* sysconfig;
 extern char* sysconfigdir;

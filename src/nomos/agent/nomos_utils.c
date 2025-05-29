@@ -690,9 +690,6 @@ FUNCTION int updateLicenseHighlighting(cacheroot_t *pcroot){
   }
   PGresult *result;
 
-
-
-
 #ifdef GLOBAL_DEBUG
   printf("%s %s %i \n", cur.filePath,cur.compLic , cur.theMatches->len);
 #endif
@@ -714,9 +711,13 @@ FUNCTION int updateLicenseHighlighting(cacheroot_t *pcroot){
   for (i = 0; i < cur.keywordPositions->len; ++i)
   {
     MatchPositionAndType* ourMatchv = getMatchfromHighlightInfo(cur.keywordPositions, i);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+    // If uninitialized, the loop will not start
     result = fo_dbManager_ExecPrepared(
                 preparedKeywords,
                 cur.pFileFk, ourMatchv->start, ourMatchv->end - ourMatchv->start);
+#pragma GCC diagnostic pop
     if (result)
     {
       PQclear(result);
@@ -750,11 +751,15 @@ FUNCTION int updateLicenseHighlighting(cacheroot_t *pcroot){
         //! the license File ID was never set and we should not insert it in the database
         continue;
       }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+      // If uninitialized, the loop will not start
       result = fo_dbManager_ExecPrepared(
                   preparedLicenses,
         ourLicence->licenseFileId,
         ourMatchv->start, ourMatchv->end - ourMatchv->start
       );
+#pragma GCC diagnostic pop
       if (result == NULL)
       {
         return (FALSE);
