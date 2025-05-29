@@ -11,6 +11,8 @@
 #include "nomos_utils.h"
 #include "nomos.h"
 
+extern int should_connect_to_db;  /* Global variable to control DB connection */
+
 #define FUNCTION
 
 /**
@@ -508,6 +510,8 @@ FUNCTION void parseLicenseList()
  */
 FUNCTION void Usage(char *Name)
 {
+  /* Disable database connection when showing usage */
+  should_connect_to_db = 0;
   printf("Usage: %s [options] [file [file [...]]\n", Name);
   printf("  -h   :: help (print this message), then exit.\n");
   printf("  -i   :: initialize the database, then exit.\n");
@@ -1016,7 +1020,3 @@ inline bool clearLastElementOfLicenceBuffer(){
     g_array_remove_index(cur.indexList, cur.indexList->len -1);
   return true;
 }
-
-
-
-

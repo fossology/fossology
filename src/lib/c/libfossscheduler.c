@@ -34,6 +34,7 @@ int userID;          ///< The id of the user that created the job
 int groupID;         ///< The id of the group of the user that created the job
 int jobId;           ///< The id of the job
 char* module_name = NULL;   ///< The name of the agent
+int should_connect_to_db = 1; /// Default: connect to DB unless explicitly disabled
 
 /** Check for an agent in DB */
 const static char* sql_check = "\
@@ -252,8 +253,8 @@ void fo_scheduler_connect_conf(int* argc, char** argv, PGconn** db_conn, char** 
     fo_config_free(version);
   }
 
-  /* create the database connection */
-  if (db_conn)
+  /* create the database connection only if needed */
+  if (db_conn && should_connect_to_db)  // Add a condition
   {
     db_config = g_strdup_printf("%s/Db.conf", sysconfigdir);
     (*db_conn) = fo_dbconnect(db_config, &db_error);
