@@ -6,12 +6,19 @@
 <phpunit
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   bootstrap="./phpunit-bootstrap.php"
-  colors="true"
-  backupGlobals="true"
+  colors="true" backupGlobals="true"
   beStrictAboutTestsThatDoNotTestAnything="false"
-  failOnWarning="false"
-  stopOnFailure="false"
-  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd">
+  failOnWarning="false" stopOnFailure="false"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+  cacheDirectory=".phpunit.cache">
+  <coverage>
+    <include>
+      <directory suffix=".php">.</directory>
+    </include>
+    <report>
+      <clover outputFile="../clover.xml"/>
+    </report>
+  </coverage>
   <php>
     <env name="SYSCONFDIR" value="src/lib/php/tests/sysconfigDirTest"/>
   </php>
@@ -34,22 +41,4 @@
       <directory suffix="Test.php">clixml/agent_tests</directory>
     </testsuite>
   </testsuites>
-  <coverage includeUncoveredFiles="true">
-    <include>
-      <directory suffix=".php">.</directory>
-    </include>
-    <exclude>
-      <directory suffix="Test.php">.</directory>
-      <directory>lib/php/tests</directory>
-      <directory>lib/c</directory>
-      <directory>*/*tests</directory>
-      <directory>testing</directory>
-      <directory>tutorials</directory>
-      <directory>vendor</directory>
-      <file>./phpunit-bootstrap.php</file>
-    </exclude>
-    <report>
-      <clover outputFile="../clover.xml"/>
-    </report>
-  </coverage>
 </phpunit>

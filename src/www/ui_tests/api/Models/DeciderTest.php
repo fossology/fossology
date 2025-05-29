@@ -21,6 +21,25 @@ use Fossology\UI\Api\Models\ApiVersion;
  */
 class DeciderTest extends \PHPUnit\Framework\TestCase
 {
+  ////// Constructor Tests //////
+
+  /**
+   * Tests that the Decider constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $decider = new Decider(
+      true,       
+      false,   
+      true,      
+      false,       
+      'GPL-3.0'    
+  );
+    $this->assertInstanceOf(Decider::class, $decider);
+  }
+
   /**
    * @test
    * -# Test for Decider::setUsingArray() when $version is V1

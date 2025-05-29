@@ -215,6 +215,10 @@ class License
    */
   public function getObligations()
   {
+    if ($this->obligations === null) {
+      return null;
+    }
+
     $obligationList = [];
     foreach ($this->obligations as $obligation) {
       $obligationList[] = $obligation->getArray();

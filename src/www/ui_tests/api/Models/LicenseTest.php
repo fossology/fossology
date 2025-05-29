@@ -20,6 +20,21 @@ use Fossology\UI\Api\Models\License;
  */
 class LicenseTest extends \PHPUnit\Framework\TestCase
 {
+  ////// Constructor Tests //////
+
+  /**
+   * Tests that the License constructor initializes an instance correctly.
+   *
+   * @return void
+   */
+  public function testConstructor()
+  {
+    $license = new License(22, "MIT", "MIT License",
+      "MIT License Copyright (c) <year> <copyright holders> ...",
+      "https://opensource.org/licenses/MIT", [], 3, false);
+    $this->assertInstanceOf(License::class, $license);
+  }
+
   /**
    * @test
    * -# Test data model returned by License::getArray() is correct
