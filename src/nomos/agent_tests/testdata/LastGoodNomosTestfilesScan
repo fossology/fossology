@@ -1993,6 +1993,8 @@ File NomosTestfiles/Tapjoy/Tapjoy.txt contains license(s) Tapjoy
 File NomosTestfiles/TCL/TCL_a.txt contains license(s) TCL
 File NomosTestfiles/TCL/TCL_b.txt contains license(s) TCL
 File NomosTestfiles/TCL/TCL_c.txt contains license(s) TCL
+File NomosTestfiles/TI/TI-TFL.txt contains license(s) TI-TFL
+File NomosTestfiles/TI/TI-TSPA.txt contains license(s) Public-domain,TI-TSPA
 File NomosTestfiles/TMate/TMate_a.txt contains license(s) TMate
 File NomosTestfiles/TMate/TMate.txt contains license(s) TMate
 File NomosTestfiles/Toolbar/Toolbar2000_or_GPL.txt contains license(s) Dual-license,GPL,Toolbar2000

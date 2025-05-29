@@ -7017,6 +7017,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("OZPLB-1.0");
   }
   cleanLicenceBuffer();
+  /* Texas Instruments license */
+  if (INFILE(_LT_TI_BASE)) {
+    if (INFILE(_LT_TI_TSPA)) {
+      INTERESTING("TI-TSPA");
+    } else if (INFILE(_LT_TI_TFL)) {
+      INTERESTING("TI-TFL");
+    }
+  }
+  cleanLicenceBuffer();
 
   /*
    * Some licenses say "licensed under the same terms as FOO".

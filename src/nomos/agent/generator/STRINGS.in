@@ -6742,6 +6742,18 @@ k
 ##%ENTRY% _LT_SEEK_3
 ##%KEY% "distribut"
 ##%STR% "r?e?-?distribution and/?o?r? use in source and binary"
+#
+%ENTRY% _LT_TI_BASE
+%KEY% "instrument"
+%STR% "Texas Instruments"
+#
+%ENTRY% _LT_TI_TFL
+%KEY% "instrument"
+%STR% "TEXAS INSTRUMENTS TEXT FILE LICENSE"
+#
+%ENTRY% _LT_TI_TSPA
+%KEY% "instrument"
+%STR% "Texas Instruments Incorporated Technology and Software Publicly Available"
 #####
 # NOTE about copyrights: they all _used_ to include "copyright =SOME="
 # prepended to them.  As a performance optimization, that text was cut.
