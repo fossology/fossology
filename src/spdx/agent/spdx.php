@@ -383,9 +383,9 @@ class SpdxAgent extends Agent
       $mainLicense = $this->licenseDao->getLicenseById($reportedLicenseId, $this->groupId);
       if ($mainLicense === null) {
         error_log(
-            "spdx: Error: main license ID {$reportedLicenseId} not found; skipping."
+            "spdx: Warning: main license ID {$reportedLicenseId} not found; skipping."
         );
-        exit;
+        continue; // Skip this license and continue with the next one
       }
       $reportLicId = $mainLicense->getId() . "-" . md5($mainLicense->getText());
       $mainLicenses[] = $reportLicId;
