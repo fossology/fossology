@@ -1,13 +1,10 @@
 {# SPDX-FileCopyrightText: © 2014-2015 Siemens AG
-
    SPDX-License-Identifier: FSFAP
 #}
 {% extends "include/base.html.twig" %}
-
 {% block content %}
 <link rel="stylesheet" type="text/css" href="css/select2.min.css"/>
 <link rel="stylesheet" type="text/css" href="css/select2.custom.css"/>
-
   <form name="formy" method="post">
     {{ "Select an uploaded file for additional analysis."|trans }}
     <ol>
@@ -34,7 +31,9 @@
      </li>
       <li> {{ "Select additional analysis."|trans }}<br/>
         <div id="agentsdiv">
-          <select multiple size="10" id="agents" name="agents[]"></select>
+          <div class="no-agents-message" style="border: 1px solid #ccc; padding: 5px; text-align: center; background-color: #f9f9f9; width: 510px; height: 180px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
+            {{ 'No additional analysis available'|trans }}
+          </div>
         </div>
         {{ out }}
       </li> 
@@ -42,7 +41,6 @@
     <input type="submit" value="{{ 'Analyze'|trans}}"/>
   </form>
 {% endblock %}
-
 {% block foot %}
   {{ parent() }}
   <script type="text/javascript">
@@ -70,19 +68,23 @@
       if ((Uploads.readyState==4) && (Uploads.status==200))
       {
         document.getElementById('uploaddiv').innerHTML = '<select size="10" name="upload" id="uploadToAnalyze" onChange="Agents_Get(\'{{ baseUri }}?mod=upload_agent_options&upload=\' + this.value)">' + Uploads.responseText + '</select><p/>';
-        document.getElementById('agentsdiv').innerHTML = '';
+        // Reset agents div to show no analysis message
+        document.getElementById('agentsdiv').innerHTML = '<div class="no-agents-message" style="border: 1px solid #ccc; padding: 5px; text-align: center; background-color: #f9f9f9; width: 510px; height: 180px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">{{ "No additional analysis available"|trans }}</div>';
       }
       select2f.select2Search();
     }
   </script>
-
   {{ agentScript }}
   <script language="javascript">
     function Agents_Reply()
     {
       if ((Agents.readyState==4) && (Agents.status==200))
       {
-        document.getElementById('agentsdiv').innerHTML = Agents.responseText;
+        if (Agents.responseText.trim() === '' || Agents.responseText.indexOf('<option') === -1) {
+          document.getElementById('agentsdiv').innerHTML = '<div class="no-agents-message" style="border: 1px solid #ccc; padding: 5px; text-align: center; background-color: #f9f9f9; width: 510px; height: 180px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">{{ "No additional analysis available"|trans }}</div>';
+        } else {
+          document.getElementById('agentsdiv').innerHTML = Agents.responseText;
+        }
       }
     }
   </script>
