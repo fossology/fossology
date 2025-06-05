@@ -1140,7 +1140,7 @@
 #
 %ENTRY% _LT_CC_ref
 %KEY% =NULL=
-%STR% "(distribu|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used?|see) =SOME= \<creative ?commons\>"
+%STR% "(distribu|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used?|see) =SOME= \<creative ?commons\>|http[s]?://creativecommons\.org/[a-z0-9/_\-\.]+"
 #
 # _LT_CC_BY_SA is for v 2.5
 %ENTRY% _LT_CC_BY_SA_25
@@ -3766,6 +3766,10 @@
 %ENTRY% _LT_LGPLrefFSF
 %KEY% "\<under\>"
 %STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (fsf|free software foundatio(n|n s)) (lesser|library) (gpl|(general p|p)ublic licen[cs]e)"
+#
+%ENTRY% _LT_LGPL21_OR_LATER_GENERAL
+%KEY% "lesser"
+%STR% "general lesser public"
 #
 %ENTRY% _LT_LGPL_1
 %KEY% "distribut"
@@ -9930,7 +9934,7 @@ k
 #
 %ENTRY% _PHR_LGPL21_OR_LATER_1
 %KEY% "(\<gnu|free\>|l?gpl)"
-%STR% "(lgp(l|l licen[cs]e)|gnu (lesser|library|lesser lesser) (general p|p)ublic licen[cs]e) =SOME= (v|[^_-]version )2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR% "(lgp(l|l licen[cs]e)|gnu (lesser|library|lesser lesser) (general p|p)ublic licen[cs]e|gnu general (lesser|library) public licen[cs]e) =SOME= (v|[^_-]version )2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY% _PHR_LGPL21_OR_LATER_2
 %KEY% "licen[cs]"
