@@ -4795,6 +4795,10 @@
 %KEY% "licen[cs]"
 %STR% "this =SOME= the php licen[cs]e"
 #
+%ENTRY% _LT_PHP_V301_1
+%KEY% "licen[cs]"
+%STR% "(under|subject to) the php licen[cs]e (v|version )?3\.?0\.?1"
+#
 %ENTRY% _LT_PHP_V30_1
 %KEY% "licen[cs]"
 %STR% "(under|subject to) the php licen[cs]e (v|version )?3\.?0"
@@ -4855,6 +4859,10 @@
 %ENTRY% _LT_PNG_ZLIBref4_EXHIBIT
 %KEY% "licen[cs]" 
 %STR% "exhibit [abc] =ANY= licen[cs]e zlib" 
+#
+%ENTRY% _LT_AOM_Patent
+%KEY% "licen[cs]"
+%STR% "(alliance for open media|aom|aomedia) patent licen[cs]e"
 #
 %ENTRY% _LT_WORDNET
 %KEY% "licen[cs]e"
@@ -9485,6 +9493,10 @@ k
 %ENTRY% _PHR_BSD_2_CLAUSE_6
 %KEY% "licen[cs]"
 %STR% "under =FEW= simplified BSD licen[cs]e"
+#
+%ENTRY% _PHR_BSD_2_CLAUSE_7
+%KEY% "licen[cs]"
+%STR% "BSD[ -]?2[ -]?Clause licen[cs]e"
 #
 %ENTRY% _PHR_BSD_CLEAR_1
 %KEY% "licen[cs]"
