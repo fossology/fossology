@@ -62,7 +62,7 @@ CODENAME=$(lsb_release --codename --short)
 if [[ $BUILDTIME ]]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu)
+    Debian|Ubuntu|Tuxedo)
       apt-get $YesOpt install \
         libboost-program-options-dev libjsoncpp-dev \
         libbz2-1.0 xz-utils zlib1g libxml2-dev libxslt1-dev libpopt0
@@ -85,7 +85,7 @@ fi
 if [[ $RUNTIME ]]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu)
+    Debian|Ubuntu|Tuxedo)
       apt-get $YesOpt install \
         libbz2-1.0 xz-utils zlib1g libxml2-dev libxslt1-dev libpopt0 \
         python3 python3-pip

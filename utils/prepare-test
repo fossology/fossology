@@ -130,7 +130,7 @@ if echo ${WarnAccept} | grep -q -e "^[yY]$" ; then
     chmod 0600 ~/.pgpass
   fi
   case "${DISTRO}" in
-    Debian|Ubuntu|LinuxMint)
+    Debian|Ubuntu|LinuxMint|Tuxedo)
       if dpkg-query --show --showformat='${db:Status-Status}' cppcheck | grep -q 'not-installed' ; then
         sudo apt-get install -q $YesOpt cppcheck
       else

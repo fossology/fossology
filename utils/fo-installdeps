@@ -88,7 +88,7 @@ echo "install core dependencies"
 if [[ $BUILDTIME ]]; then
    echo "*** Installing $DISTRO buildtime dependencies ***";
    case "$DISTRO" in
-      Debian|Ubuntu)
+      Debian|Ubuntu|Tuxedo)
          echo "DB: Installing build essential....."
          apt-get $YesOpt install \
             libmxml-dev curl libxml2-dev libcunit1-dev libicu-dev \
@@ -165,7 +165,7 @@ if [[ $RUNTIME ]]; then
    echo "*** installed. Consult with your system administrator. Or try ***";
    echo "*** apt-get install mail-transport-agent, pick one and install it***";
    case "$DISTRO" in
-      Debian|Ubuntu)
+      Debian|Ubuntu|Tuxedo)
         echo "doing runtime"
          apt-get $YesOpt install apache2
          apt-get $YesOpt install php-pear \
