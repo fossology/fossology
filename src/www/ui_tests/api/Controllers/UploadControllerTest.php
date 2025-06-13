@@ -1183,50 +1183,69 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
-   * @test
-   * -# Test for UploadController::updateUpload()
-   * -# Check if response status is 202
-   */
-  public function testUpdateUpload()
-  {
-    $upload = 2;
-    $assignee = 4;
-    $status = UploadStatus::REJECTED;
-    $comment = "Not helpful";
-
-    $resource = fopen('data://text/plain;base64,' .
-      base64_encode($comment), 'r+');
-    $body = $this->streamFactory->createStreamFromResource($resource);
-    $request = new Request("POST", new Uri("HTTP", "localhost", 80,
-      "/uploads/$upload", UploadController::FILTER_STATUS . "=Rejected&" .
-      UploadController::FILTER_ASSIGNEE . "=$assignee"),
-      new Headers(), [], [], $body);
-
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')
-      ->withArgs([$this->userId, $this->groupId])
-      ->andReturn(true);
-    $this->userDao->shouldReceive('getUserChoices')
-      ->withArgs([$this->groupId])
-      ->andReturn([$this->userId => "fossy", $assignee => "friendly-fossy"]);
-    $this->dbManager->shouldReceive('getSingleRow')
-      ->withArgs([M::any(), [$assignee, $this->groupId, $upload], M::any()]);
-    $this->dbManager->shouldReceive('getSingleRow')
-      ->withArgs([M::any(), [$status, $comment, $this->groupId, $upload],
-        M::any()]);
-    $this->dbManager->shouldReceive('getSingleRow')
-      ->withArgs([M::any(), [$upload], M::any()])
-      ->andReturn(["exists" => ""]);
-
-    $info = new Info(202, "Upload updated successfully.", InfoType::INFO);
-    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
-      $info->getCode());
-    $actualResponse = $this->uploadController->updateUpload($request,
-      new ResponseHelper(), ['id' => $upload]);
-    $this->assertEquals($expectedResponse->getStatusCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
-  }
+ * @test
+ * -# Test for UploadController::updateUpload()
+ * -# Check if response status is 202
+ */
+public function testUpdateUpload()
+{
+  $upload = 2;
+  $assignee = 4;
+  $status = UploadStatus::REJECTED;
+  $comment = "Not helpful";
+  
+  $requestBody = [
+    UploadController::FILTER_STATUS => "Rejected",
+    UploadController::FILTER_ASSIGNEE => $assignee,
+    "comment" => $comment
+  ];
+  $jsonBody = json_encode($requestBody);
+  
+  $resource = fopen('data://text/plain;base64,' . base64_encode($jsonBody), 'r+');
+  $body = $this->streamFactory->createStreamFromResource($resource);
+  
+  $headers = new Headers();
+  $headers->setHeader('Content-Type', 'application/json');
+  
+  $request = new Request(
+    "POST",
+    new Uri("HTTP", "localhost", 80, "/uploads/$upload"),
+    $headers,
+    [],
+    [],
+    $body
+  );
+  
+  $this->userDao->shouldReceive('isAdvisorOrAdmin')
+    ->withArgs([$this->userId, $this->groupId])
+    ->andReturn(true);
+    
+  $this->userDao->shouldReceive('getUserChoices')
+    ->withArgs([$this->groupId])
+    ->andReturn([$this->userId => "fossy", $assignee => "friendly-fossy"]);
+    
+  $this->dbManager->shouldReceive('getSingleRow')
+    ->withArgs([M::any(), [$assignee, $this->groupId, $upload], M::any()]);
+    
+  $this->dbManager->shouldReceive('getSingleRow')
+    ->withArgs([M::any(), [$status, $comment, $this->groupId, $upload], M::any()]);
+    
+  $this->dbManager->shouldReceive('getSingleRow')
+    ->withArgs([M::any(), [$upload], M::any()])
+    ->andReturn(["exists" => ""]);
+    
+  $info = new Info(202, "Upload updated successfully.", InfoType::INFO);
+  $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), $info->getCode());
+  
+  $actualResponse = $this->uploadController->updateUpload(
+    $request,
+    new ResponseHelper(),
+    ['id' => $upload]
+  );
+  
+  $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+  $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
+}
 
   /**
    * @test
