@@ -959,7 +959,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         || INFILE(_PHR_BSD_2_CLAUSE_3)
         || INFILE(_PHR_BSD_2_CLAUSE_4)
         || INFILE(_PHR_BSD_2_CLAUSE_5)
-        || INFILE(_PHR_BSD_2_CLAUSE_6)) {
+        || INFILE(_PHR_BSD_2_CLAUSE_6)
+        || INFILE(_PHR_BSD_2_CLAUSE_7)) {
     INTERESTING(lDebug ? "BSD(phr1/2/3/4/5/6)" : "BSD-2-Clause");
   }
   else if (INFILE(_SPDX_BSD_4_Clause_UC)) {
@@ -1093,6 +1094,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else {
       INTERESTING("PHP-style");
     }
+    lmem[_mPHP] = 1;
+  }
+  else if (!lmem[_mPHP] && INFILE(_LT_PHP_V301_1)) {
+    INTERESTING("PHP-3.01");
     lmem[_mPHP] = 1;
   }
   else if (!lmem[_mPHP] && INFILE(_LT_PHP_V30_1)) {
@@ -4874,6 +4879,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else {
       INTERESTING("Tektronix-style");
     }
+  }
+  cleanLicenceBuffer();
+  /*
+   * Alliance for Open Media Patent License
+   */
+  if (INFILE(_LT_AOM_Patent)) {
+    INTERESTING("Alliance for Open Media Patent License 1.0");
   }
   cleanLicenceBuffer();
   /*
