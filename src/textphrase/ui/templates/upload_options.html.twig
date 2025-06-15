@@ -1,0 +1,34 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+<div class="form-group">
+  <div class="custom-control custom-checkbox">
+    <input type="checkbox" class="custom-control-input" id="textphrase_scan" name="textphrase_scan" value="1">
+    <label class="custom-control-label" for="textphrase_scan">Enable Text Phrase Scanning</label>
+  </div>
+  
+  <div id="textphrase_options" class="ml-4 mt-2" style="display: none;">
+    <div class="form-group">
+      <label>Scanning Options</label>
+      <div class="custom-control custom-checkbox">
+        <input type="checkbox" class="custom-control-input" id="textphrase_case_sensitive" name="textphrase_case_sensitive" value="1">
+        <label class="custom-control-label" for="textphrase_case_sensitive">Case Sensitive</label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>Conclusion Options</label>
+      <div class="custom-control custom-checkbox">
+        <input type="checkbox" class="custom-control-input" id="textphrase_auto_conclude" name="textphrase_auto_conclude" value="1">
+        <label class="custom-control-label" for="textphrase_auto_conclude">Auto-conclude from findings</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('textphrase_scan').addEventListener('change', function() {
+  document.getElementById('textphrase_options').style.display = this.checked ? 'block' : 'none';
+});
+</script>
+{% endblock %} 
