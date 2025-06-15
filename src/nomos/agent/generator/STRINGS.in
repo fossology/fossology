@@ -1140,7 +1140,7 @@
 #
 %ENTRY% _LT_CC_ref
 %KEY% =NULL=
-%STR% "(distribu|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used?|see) =SOME= \<creative ?commons\>"
+%STR% "(distribu|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used?|see) =SOME= \<creative ?commons\>|http[s]?://creativecommons\.org/[a-z0-9/_\-\.]+"
 #
 # _LT_CC_BY_SA is for v 2.5
 %ENTRY% _LT_CC_BY_SA_25
@@ -3767,6 +3767,10 @@
 %KEY% "\<under\>"
 %STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (fsf|free software foundatio(n|n s)) (lesser|library) (gpl|(general p|p)ublic licen[cs]e)"
 #
+%ENTRY% _LT_LGPL21_OR_LATER_GENERAL
+%KEY% "lesser"
+%STR% "general lesser public"
+#
 %ENTRY% _LT_LGPL_1
 %KEY% "distribut"
 %STR% "example if you distribute copies of the library whether gratis or for a fee you must give the recipients all the rights"
@@ -4791,6 +4795,10 @@
 %KEY% "licen[cs]"
 %STR% "this =SOME= the php licen[cs]e"
 #
+%ENTRY% _LT_PHP_V301_1
+%KEY% "licen[cs]"
+%STR% "(under|subject to) the php licen[cs]e (v|version )?3\.?0\.?1"
+#
 %ENTRY% _LT_PHP_V30_1
 %KEY% "licen[cs]"
 %STR% "(under|subject to) the php licen[cs]e (v|version )?3\.?0"
@@ -4851,6 +4859,10 @@
 %ENTRY% _LT_PNG_ZLIBref4_EXHIBIT
 %KEY% "licen[cs]" 
 %STR% "exhibit [abc] =ANY= licen[cs]e zlib" 
+#
+%ENTRY% _LT_AOM_Patent
+%KEY% "licen[cs]"
+%STR% "(alliance for open media|aom|aomedia) patent licen[cs]e"
 #
 %ENTRY% _LT_WORDNET
 %KEY% "licen[cs]e"
@@ -9482,6 +9494,10 @@ k
 %KEY% "licen[cs]"
 %STR% "under =FEW= simplified BSD licen[cs]e"
 #
+%ENTRY% _PHR_BSD_2_CLAUSE_7
+%KEY% "licen[cs]"
+%STR% "BSD[ -]?2[ -]?Clause licen[cs]e"
+#
 %ENTRY% _PHR_BSD_CLEAR_1
 %KEY% "licen[cs]"
 %STR% "licen[cs]ed under the Clear BSD"
@@ -9930,7 +9946,7 @@ k
 #
 %ENTRY% _PHR_LGPL21_OR_LATER_1
 %KEY% "(\<gnu|free\>|l?gpl)"
-%STR% "(lgp(l|l licen[cs]e)|gnu (lesser|library|lesser lesser) (general p|p)ublic licen[cs]e) =SOME= (v|[^_-]version )2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR% "(lgp(l|l licen[cs]e)|gnu (lesser|library|lesser lesser) (general p|p)ublic licen[cs]e|gnu general (lesser|library) public licen[cs]e) =SOME= (v|[^_-]version )2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY% _PHR_LGPL21_OR_LATER_2
 %KEY% "licen[cs]"
