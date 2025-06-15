@@ -48,6 +48,7 @@ else()
     add_subdirectory(unifiedreport)
     add_subdirectory(wget_agent)
     add_subdirectory(www)
+    add_subdirectory(textphrase)
 
     if(NOT OFFLINE)
         add_subdirectory(genvendor)

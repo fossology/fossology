@@ -1,0 +1,60 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+<div class="container">
+  <h2>Text Phrase Management</h2>
+  
+  <div class="row mb-3">
+    <div class="col">
+      <a href="?mod=textphrase&action=add" class="btn btn-primary">
+        <i class="fa fa-plus"></i> Add New Phrase
+      </a>
+      <a href="?mod=textphrase&action=bulk_import" class="btn btn-secondary">
+        <i class="fa fa-upload"></i> Bulk Import
+      </a>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>License</th>
+          <th>Text Phrase</th>
+          <th>Acknowledgement</th>
+          <th>Comments</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for phrase in phrases %}
+        <tr>
+          <td>{{ phrase.rf_shortname }}</td>
+          <td>{{ phrase.text }}</td>
+          <td>{{ phrase.acknowledgement }}</td>
+          <td>{{ phrase.comments }}</td>
+          <td>
+            {% if phrase.is_active %}
+              <span class="badge badge-success">Active</span>
+            {% else %}
+              <span class="badge badge-danger">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="?mod=textphrase&action=edit&id={{ phrase.id }}" class="btn btn-sm btn-primary">
+              <i class="fa fa-edit"></i>
+            </a>
+            <a href="?mod=textphrase&action=delete&id={{ phrase.id }}" 
+               class="btn btn-sm btn-danger"
+               onclick="return confirm('Are you sure you want to delete this phrase?')">
+              <i class="fa fa-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %} 

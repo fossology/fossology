@@ -1,0 +1,58 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+<div class="container">
+  <h2>Bulk Import Text Phrases</h2>
+  
+  <div class="alert alert-info">
+    <h4 class="alert-heading">Instructions</h4>
+    <p>Upload a JSON file containing text phrases in the following format:</p>
+    <pre>
+[
+  {
+    "text": "Text phrase to match",
+    "license_id": 123,
+    "acknowledgement": "Optional acknowledgement",
+    "comments": "Optional comments"
+  },
+  ...
+]
+    </pre>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+    <div class="form-group">
+      <label for="bulk_file">JSON File</label>
+      <input type="file" class="form-control-file" id="bulk_file" name="bulk_file" 
+             accept=".json" required>
+      <div class="invalid-feedback">
+        Please select a JSON file.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary">Import</button>
+      <a href="?mod=textphrase" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<script>
+// Form validation
+(function() {
+  'use strict';
+  window.addEventListener('load', function() {
+    var forms = document.getElementsByClassName('needs-validation');
+    Array.prototype.filter.call(forms, function(form) {
+      form.addEventListener('submit', function(event) {
+        if (form.checkValidity() === false) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  }, false);
+})();
+</script>
+{% endblock %} 
