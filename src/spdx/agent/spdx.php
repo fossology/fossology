@@ -385,7 +385,7 @@ class SpdxAgent extends Agent
         error_log(
             "spdx: Error: main license ID {$reportedLicenseId} not found; skipping."
         );
-        exit;
+        throw new \Exception("Main license ID {$reportedLicenseId} not found in the database.");
       }
       $reportLicId = $mainLicense->getId() . "-" . md5($mainLicense->getText());
       $mainLicenses[] = $reportLicId;
