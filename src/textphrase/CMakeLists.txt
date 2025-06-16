@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: © 2022 Siemens AG
+# SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
+
 cmake_minimum_required(VERSION 3.5)
 
 set(AGENT_NAME "textphrase")

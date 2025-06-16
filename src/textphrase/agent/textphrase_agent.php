@@ -1,4 +1,9 @@
 <?php
+/**
+ * SPDX-FileCopyrightText: © 2022 Siemens AG
+ * SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
+ */
+
 /***************************************************************
  Copyright (C) 2024 FOSSology Team
 

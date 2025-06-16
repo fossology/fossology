@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: © 2022 Siemens AG
+-- SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
+
 -- Text Phrases Table
 CREATE TABLE IF NOT EXISTS text_phrases (
   id SERIAL PRIMARY KEY,
