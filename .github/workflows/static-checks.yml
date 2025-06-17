@@ -141,5 +141,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: "--exclude-pattern '.*@github.com|.*dependabot.*@users.noreply.github.com'"
+          args: "--exclude-pattern '.*dependabot\[bot\]@users.noreply.github.com'"
 
