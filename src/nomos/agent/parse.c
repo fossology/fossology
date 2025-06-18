@@ -1435,7 +1435,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("GPL-3.0-only");
       lmem[_mGPL] = 1;
     }
-    if (INFILE(_LT_LGPL_1) || INFILE(_LT_LGPL_2)) {
+    if (INFILE(_LT_LGPL_1) || INFILE(_LT_LGPL_2) || INFILE(_LT_LGPL21_OR_LATER_GENERAL)) {
       if (INFILE(_PHR_LGPL21_OR_LATER_1) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
       {
         INTERESTING("LGPL-2.1-or-later");
