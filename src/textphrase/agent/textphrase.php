@@ -21,11 +21,14 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
 
-require_once(__DIR__ . '/TextPhrasePlugin.php');
-require_once(__DIR__ . '/TextPhraseAgentPlugin.php');
+/**
+ * @file textphrase.php
+ * @brief Create new TextPhraseAgent object and inform scheduler
+**/
 
-$textPhrasePlugin = new TextPhrasePlugin();
-$textPhrasePlugin->register();
+include_once(__DIR__ . "/textphrase_agent.php");
 
-$textPhraseAgentPlugin = new TextPhraseAgentPlugin();
-$textPhraseAgentPlugin->register(); 
+$agent = new TextPhraseAgent();
+$agent->scheduler_connect();
+$agent->run_scheduler_event_loop();
+$agent->scheduler_disconnect(0); 

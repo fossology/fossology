@@ -1,6 +1,11 @@
 -- SPDX-FileCopyrightText: © 2022 Siemens AG
 -- SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
 
+-- Register the textphrase agent
+INSERT INTO agent (agent_name, agent_rev, agent_desc, agent_enabled, agent_parms, agent_ts) 
+VALUES ('textphrase', '1.0.0', 'Text Phrase Scanner', true, NULL, CURRENT_TIMESTAMP)
+ON CONFLICT (agent_name) DO NOTHING;
+
 -- Text Phrases Table
 CREATE TABLE IF NOT EXISTS text_phrases (
   id SERIAL PRIMARY KEY,

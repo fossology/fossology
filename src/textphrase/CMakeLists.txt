@@ -8,16 +8,21 @@ set(AGENT_VERSION "1.0.0")
 
 # Agent source files
 set(AGENT_SOURCES
+  agent/textphrase.php
   agent/textphrase_agent.php
+  agent/TextPhraseDecider.php
 )
 
 # UI source files
 set(UI_SOURCES
   ui/TextPhrasePlugin.php
+  ui/TextPhraseAgentPlugin.php
   ui/plugin.php
   ui/templates/list.html.twig
   ui/templates/add.html.twig
   ui/templates/bulk_import.html.twig
+  ui/templates/upload_options.html.twig
+  ui/templates/edit.html.twig
 )
 
 # Install agent files

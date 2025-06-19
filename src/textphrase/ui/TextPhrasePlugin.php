@@ -24,6 +24,9 @@
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Auth\Auth;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class TextPhrasePlugin extends DefaultPlugin
 {
@@ -38,11 +41,9 @@ class TextPhrasePlugin extends DefaultPlugin
   public function __construct()
   {
     parent::__construct(self::NAME, array(
-      self::TITLE => _("Text Phrase Management"),
-      self::MENU_LIST => "Admin::License::Text Phrases",
-      self::REQUIRES_LOGIN => true,
-      self::PERMISSION => Auth::PERM_ADMIN,
-      self::PLUGIN_LEVEL => 1
+      self::TITLE => _("Text Phrases"),
+      self::MENU_LIST => "Browse::Text Phrases",
+      self::REQUIRES_LOGIN => false
     ));
     
     $this->licenseDao = $GLOBALS['container']->get('dao.license');
@@ -51,34 +52,33 @@ class TextPhrasePlugin extends DefaultPlugin
 
   /**
    * @brief Display the plugin content
-   * @param array $vars
+   * @param Request $request
+   * @return Response
    */
-  protected function handle($vars)
+  protected function handle(Request $request)
   {
     $action = GetParm('action', PARM_STRING);
     
     switch ($action) {
       case 'add':
-        $this->handleAdd();
-        break;
+        return $this->handleAdd($request);
       case 'edit':
-        $this->handleEdit();
-        break;
+        return $this->handleEdit($request);
       case 'delete':
-        $this->handleDelete();
-        break;
+        return $this->handleDelete($request);
       case 'bulk_import':
-        $this->handleBulkImport();
-        break;
+        return $this->handleBulkImport($request);
       default:
-        $this->displayList();
+        return $this->displayList($request);
     }
   }
 
   /**
    * @brief Display the list of text phrases
+   * @param Request $request
+   * @return Response
    */
-  private function displayList()
+  private function displayList(Request $request)
   {
     $vars = array();
     
@@ -92,15 +92,17 @@ class TextPhrasePlugin extends DefaultPlugin
     // Get all licenses for the dropdown
     $vars['licenses'] = $this->licenseDao->getAllLicenseRefs();
     
-    $this->render('list.html.twig', $vars);
+    return $this->render('list.html.twig', $vars);
   }
 
   /**
    * @brief Handle adding a new text phrase
+   * @param Request $request
+   * @return Response
    */
-  private function handleAdd()
+  private function handleAdd(Request $request)
   {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($request->isMethod('POST')) {
       $text = GetParm('text', PARM_TEXT);
       $licenseId = GetParm('license_id', PARM_INTEGER);
       $acknowledgement = GetParm('acknowledgement', PARM_TEXT);
@@ -120,24 +122,26 @@ class TextPhrasePlugin extends DefaultPlugin
       $this->dbManager->prepare($sql, __METHOD__);
       $this->dbManager->execute($sql, $params);
       
-      $this->redirect(self::NAME);
+      return $this->redirect(self::NAME);
     }
     
     $vars = array(
       'licenses' => $this->licenseDao->getAllLicenseRefs()
     );
     
-    $this->render('add.html.twig', $vars);
+    return $this->render('add.html.twig', $vars);
   }
 
   /**
    * @brief Handle editing a text phrase
+   * @param Request $request
+   * @return Response
    */
-  private function handleEdit()
+  private function handleEdit(Request $request)
   {
     $id = GetParm('id', PARM_INTEGER);
     
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($request->isMethod('POST')) {
       $text = GetParm('text', PARM_TEXT);
       $licenseId = GetParm('license_id', PARM_INTEGER);
       $acknowledgement = GetParm('acknowledgement', PARM_TEXT);
@@ -162,7 +166,7 @@ class TextPhrasePlugin extends DefaultPlugin
       $this->dbManager->prepare($sql, __METHOD__);
       $this->dbManager->execute($sql, $params);
       
-      $this->redirect(self::NAME);
+      return $this->redirect(self::NAME);
     }
     
     $sql = "SELECT * FROM text_phrases WHERE id = $1";
@@ -173,13 +177,15 @@ class TextPhrasePlugin extends DefaultPlugin
       'licenses' => $this->licenseDao->getAllLicenseRefs()
     );
     
-    $this->render('edit.html.twig', $vars);
+    return $this->render('edit.html.twig', $vars);
   }
 
   /**
    * @brief Handle deleting a text phrase
+   * @param Request $request
+   * @return Response
    */
-  private function handleDelete()
+  private function handleDelete(Request $request)
   {
     $id = GetParm('id', PARM_INTEGER);
     
@@ -187,15 +193,17 @@ class TextPhrasePlugin extends DefaultPlugin
     $this->dbManager->prepare($sql, __METHOD__);
     $this->dbManager->execute($sql, array($id));
     
-    $this->redirect(self::NAME);
+    return $this->redirect(self::NAME);
   }
 
   /**
    * @brief Handle bulk import of text phrases
+   * @param Request $request
+   * @return Response
    */
-  private function handleBulkImport()
+  private function handleBulkImport(Request $request)
   {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($request->isMethod('POST')) {
       $file = $_FILES['bulk_file'];
       
       if ($file['error'] === UPLOAD_ERR_OK) {
@@ -221,9 +229,9 @@ class TextPhrasePlugin extends DefaultPlugin
         }
       }
       
-      $this->redirect(self::NAME);
+      return $this->redirect(self::NAME);
     }
     
-    $this->render('bulk_import.html.twig');
+    return $this->render('bulk_import.html.twig');
   }
 } 

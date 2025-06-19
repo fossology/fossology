@@ -26,6 +26,7 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\TextFragment;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Data\AgentRef;
 
 class TextPhraseAgent extends Agent
 {
@@ -69,17 +70,26 @@ class TextPhraseAgent extends Agent
   }
 
   /**
-   * @brief Process the upload
+   * @brief Process the upload ID (required by Agent base class)
    * @param int $uploadId
    * @return boolean
    */
-  public function processUpload($uploadId)
+  protected function processUploadId($uploadId)
   {
+    $this->initialize();
+    
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $files = $this->uploadDao->getNonArtifactDescendants($uploadId, $uploadTreeTableName);
 
+    $processed = 0;
     foreach ($files as $file) {
       $this->processFile($file);
+      $processed++;
+      
+      // Send heartbeat every 10 files
+      if ($processed % 10 == 0) {
+        $this->heartbeat($processed);
+      }
     }
 
     return true;
@@ -102,6 +112,28 @@ class TextPhraseAgent extends Agent
         $this->saveFindings($file['pfile_fk'], $phrase, $matches);
       }
     }
+  }
+
+  /**
+   * @brief Get file content
+   * @param int $pfileId
+   * @return string
+   */
+  private function getFileContent($pfileId)
+  {
+    $sql = "SELECT filepath FROM pfile WHERE pfile_pk = $1";
+    $result = $this->dbManager->getSingleRow($sql, array($pfileId));
+    
+    if (!$result) {
+      return '';
+    }
+    
+    $filepath = $result['filepath'];
+    if (!file_exists($filepath)) {
+      return '';
+    }
+    
+    return file_get_contents($filepath);
   }
 
   /**
@@ -161,5 +193,14 @@ class TextPhraseAgent extends Agent
       $pattern = '(?i)' . $pattern;
     }
     return '/' . $pattern . '/';
+  }
+
+  /**
+   * @brief Get agent reference
+   * @return AgentRef
+   */
+  public function getAgentRef()
+  {
+    return new AgentRef($this->agentName, $this->agentRev, $this->agentDesc);
   }
 } 
