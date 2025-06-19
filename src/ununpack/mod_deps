@@ -64,7 +64,7 @@ DISTRO=$(lsb_release --id --short)
 if [ $BUILDTIME ]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu)
+    Debian|Ubuntu|Tuxedo)
       apt-get $YesOpt install \
         libgcrypt20-dev
       ;;
@@ -78,7 +78,7 @@ fi
 if [ $RUNTIME ]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu)
+    Debian|Ubuntu|Tuxedo)
       apt-get $YesOpt install \
         bzip2 cabextract cpio genisoimage p7zip poppler-utils rpm tar \
         unzip gzip sleuthkit p7zip-full unrar-free libgcrypt20 zstd

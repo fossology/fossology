@@ -64,7 +64,7 @@ CODENAME=$(lsb_release --codename --short)
 if [[ $BUILDTIME ]]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu)
+    Debian|Ubuntu|Tuxedo)
       apt-get $YesOpt install \
         libjson-c-dev
       ;;
@@ -79,7 +79,7 @@ fi
 if [[ $RUNTIME ]]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu)
+    Debian|Ubuntu|Tuxedo)
       case "$CODENAME" in
         stretch|buster|cosmic)
           apt-get $YesOpt install libjson-c3;;
