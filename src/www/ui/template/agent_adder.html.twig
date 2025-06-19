@@ -34,7 +34,9 @@
      </li>
       <li> {{ "Select additional analysis."|trans }}<br/>
         <div id="agentsdiv">
-          <select multiple size="10" id="agents" name="agents[]"></select>
+          <div class="no-agents-message">
+            {{ 'No additional analysis available'|trans }}
+          </div>
         </div>
         {{ out }}
       </li> 
@@ -70,7 +72,7 @@
       if ((Uploads.readyState==4) && (Uploads.status==200))
       {
         document.getElementById('uploaddiv').innerHTML = '<select size="10" name="upload" id="uploadToAnalyze" onChange="Agents_Get(\'{{ baseUri }}?mod=upload_agent_options&upload=\' + this.value)">' + Uploads.responseText + '</select><p/>';
-        document.getElementById('agentsdiv').innerHTML = '';
+        document.getElementById('agentsdiv').innerHTML = '<div class="no-agents-message">{{ "No additional analysis available"|trans }}</div>';
       }
       select2f.select2Search();
     }
@@ -82,7 +84,11 @@
     {
       if ((Agents.readyState==4) && (Agents.status==200))
       {
-        document.getElementById('agentsdiv').innerHTML = Agents.responseText;
+        if (Agents.responseText.trim() === '' || Agents.responseText.indexOf('<option') === -1) {
+          document.getElementById('agentsdiv').innerHTML = '<div class="no-agents-message">{{ "No additional analysis available"|trans }}</div>';
+        } else {
+          document.getElementById('agentsdiv').innerHTML = Agents.responseText;
+        }
       }
     }
   </script>
