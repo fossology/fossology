@@ -45,7 +45,10 @@ function auth_external_check()
   }
   if ($EXT_AUTH_ENABLE) {
     $EXT_AUTH_USER_KW = $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_ENV_USER'];
-    $EXT_AUTH_USER = $GLOBALS['_SERVER']["{$EXT_AUTH_USER_KW}"];
+    $EXT_AUTH_USER = null;
+    if (isset($GLOBALS['_SERVER']["{$EXT_AUTH_USER_KW}"])) {
+      $EXT_AUTH_USER = $GLOBALS['_SERVER']["{$EXT_AUTH_USER_KW}"];
+    }
     if (isset($EXT_AUTH_USER) && !empty($EXT_AUTH_USER)) {
       if ($GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_LOWERCASE_USER']) {
           $EXT_AUTH_USER = strtolower($EXT_AUTH_USER);
@@ -54,9 +57,9 @@ function auth_external_check()
       $out['loginAuthExternal']       = $EXT_AUTH_USER;
       $out['passwordAuthExternal']    = sha1($EXT_AUTH_USER);
       $EXT_AUTH_MAIL_KW = $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_ENV_MAIL'];
-      $out['emailAuthExternal']       = $GLOBALS['_SERVER']["{$EXT_AUTH_MAIL_KW}"];
+      $out['emailAuthExternal']       = isset($GLOBALS['_SERVER']["{$EXT_AUTH_MAIL_KW}"]) ? $GLOBALS['_SERVER']["{$EXT_AUTH_MAIL_KW}"] : '';
       $EXT_AUTH_DESC_KW = $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_ENV_DESC'];
-      $out['descriptionAuthExternal'] = $GLOBALS['_SERVER']["{$EXT_AUTH_DESC_KW}"];
+      $out['descriptionAuthExternal'] = isset($GLOBALS['_SERVER']["{$EXT_AUTH_DESC_KW}"]) ? $GLOBALS['_SERVER']["{$EXT_AUTH_DESC_KW}"] : '';
       return $out;
     }
   }
