@@ -5714,6 +5714,9 @@ components:
         softwareHeritage:
           type: boolean
           description: Should Software Heritage Analysis be run on this upload.
+        kotoba:
+          type: boolean
+          description: Should Kotoba Bulk Analysis be run on this upload.
     Reuser:
       type: object
       properties:
