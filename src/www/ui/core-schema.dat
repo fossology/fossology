@@ -479,6 +479,43 @@
   $Schema["TABLE"]["copyright_spasht"]["is_enabled"]["ALTER"] = "ALTER TABLE \"copyright_spasht\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
+  $Schema["TABLE"]["custom_phrase"]["cp_pk"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"cp_pk\" IS 'Primary key'";
+  $Schema["TABLE"]["custom_phrase"]["cp_pk"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"cp_pk\" int4 DEFAULT nextval('custom_phrase_cp_pk_seq'::regclass)";
+  $Schema["TABLE"]["custom_phrase"]["cp_pk"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"cp_pk\" SET NOT NULL, ALTER COLUMN \"cp_pk\" SET DEFAULT nextval('custom_phrase_cp_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["custom_phrase"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"rf_fk\" IS 'Foreign key to license_ref table'";
+  $Schema["TABLE"]["custom_phrase"]["rf_fk"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"rf_fk\" int4";
+  $Schema["TABLE"]["custom_phrase"]["rf_fk"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"rf_fk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["custom_phrase"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"user_fk\" IS 'User who created this phrase'";
+  $Schema["TABLE"]["custom_phrase"]["user_fk"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"user_fk\" int4";
+  $Schema["TABLE"]["custom_phrase"]["user_fk"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"user_fk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["custom_phrase"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"group_fk\" IS 'Group that owns this phrase'";
+  $Schema["TABLE"]["custom_phrase"]["group_fk"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"group_fk\" int4";
+  $Schema["TABLE"]["custom_phrase"]["group_fk"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["custom_phrase"]["text"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"text\" IS 'The custom text content'";
+  $Schema["TABLE"]["custom_phrase"]["text"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"text\" text";
+  $Schema["TABLE"]["custom_phrase"]["text"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"text\" SET NOT NULL";
+
+  $Schema["TABLE"]["custom_phrase"]["acknowledgement"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"acknowledgement\" IS 'Acknowledgement text for the license'";
+  $Schema["TABLE"]["custom_phrase"]["acknowledgement"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"acknowledgement\" text";
+  $Schema["TABLE"]["custom_phrase"]["acknowledgement"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"acknowledgement\" DROP NOT NULL";
+
+  $Schema["TABLE"]["custom_phrase"]["created_date"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"created_date\" IS 'When this phrase was created'";
+  $Schema["TABLE"]["custom_phrase"]["created_date"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"created_date\" timestamptz DEFAULT CURRENT_TIMESTAMP";
+  $Schema["TABLE"]["custom_phrase"]["created_date"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"created_date\" DROP NOT NULL, ALTER COLUMN \"created_date\" SET DEFAULT CURRENT_TIMESTAMP";
+
+  $Schema["TABLE"]["custom_phrase"]["is_active"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"is_active\" IS 'Whether this phrase is active'";
+  $Schema["TABLE"]["custom_phrase"]["is_active"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"is_active\" bool DEFAULT true";
+  $Schema["TABLE"]["custom_phrase"]["is_active"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"is_active\" DROP NOT NULL, ALTER COLUMN \"is_active\" SET DEFAULT true";
+
+  $Schema["TABLE"]["custom_phrase"]["comments"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"comments\" IS 'Comments for the custom text'";
+  $Schema["TABLE"]["custom_phrase"]["comments"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"comments\" text";
+  $Schema["TABLE"]["custom_phrase"]["comments"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"comments\" DROP NOT NULL";
+
+
   $Schema["TABLE"]["author"]["author_pk"]["DESC"] = "";
   $Schema["TABLE"]["author"]["author_pk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"author_pk\" int8 DEFAULT nextval('author_pk_seq'::regclass)";
   $Schema["TABLE"]["author"]["author_pk"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"author_pk\" SET NOT NULL, ALTER COLUMN \"author_pk\" SET DEFAULT nextval('author_pk_seq'::regclass)";
@@ -2393,6 +2430,9 @@
   $Schema["SEQUENCE"]["copyright_event_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_event_pk_seq\"";
   $Schema["SEQUENCE"]["copyright_event_pk_seq"]["UPDATE"] = "SELECT setval('copyright_event_pk_seq',(SELECT greatest(1,max(copyright_event_pk)) val FROM copyright_event))";
 
+  $Schema["SEQUENCE"]["custom_phrase_cp_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"custom_phrase_cp_pk_seq\"";
+  $Schema["SEQUENCE"]["custom_phrase_cp_pk_seq"]["UPDATE"] = "SELECT setval('custom_phrase_cp_pk_seq',(SELECT greatest(1,max(cp_pk)) val FROM custom_phrase))";
+
   $Schema["SEQUENCE"]["author_event_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"author_event_pk_seq\"";
   $Schema["SEQUENCE"]["author_event_pk_seq"]["UPDATE"] = "SELECT setval('author_event_pk_seq',(SELECT greatest(1,max(author_event_pk)) val FROM author_event))";
 
@@ -2689,6 +2729,8 @@
   $Schema["CONSTRAINT"]["copyright_event_pkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_pkey\" PRIMARY KEY (\"copyright_event_pk\");";
   $Schema["CONSTRAINT"]["copyright_event_upload_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_event_copyright_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_copyright_fk_fkey\" FOREIGN KEY (\"copyright_fk\") REFERENCES \"copyright\" (\"copyright_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["custom_phrase_pkey"] = "ALTER TABLE \"custom_phrase\" ADD CONSTRAINT \"custom_phrase_pkey\" PRIMARY KEY (\"cp_pk\");";
+  $Schema["CONSTRAINT"]["custom_phrase_rf_fk_fkey"] = "ALTER TABLE \"custom_phrase\" ADD CONSTRAINT \"custom_phrase_rf_fk_fkey\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["author_event_pkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_pkey\" PRIMARY KEY (\"author_event_pk\");";
   $Schema["CONSTRAINT"]["author_event_upload_fk_fkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["author_event_author_fk_fkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_author_fk_fkey\" FOREIGN KEY (\"author_fk\") REFERENCES \"author\" (\"author_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2734,6 +2776,9 @@
   $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_agent_fk_idx"] = "CREATE INDEX copyright_spasht_agent_fk_idx ON copyright_spasht USING btree (agent_fk);";
   $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_pfile_fk_index"] = "CREATE INDEX copyright_spasht_pfile_fk_index ON copyright_spasht USING btree (pfile_fk);";
   $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_pfile_hash_index"] = "CREATE INDEX copyright_spasht_pfile_hash_index ON copyright_spasht USING btree (hash, pfile_fk);";
+
+  $Schema["INDEX"]["custom_phrase"]["cp_rf_fk_idx"] = "CREATE INDEX cp_rf_fk_idx ON custom_phrase USING btree (rf_fk);";
+  $Schema["INDEX"]["custom_phrase"]["cp_user_group_idx"] = "CREATE INDEX cp_user_group_idx ON custom_phrase USING btree (user_fk, group_fk);";
 
   $Schema["INDEX"]["author"]["author_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX author_pfile_fk_is_enabled_false_idx ON author USING btree (pfile_fk, is_enabled) WHERE (is_enabled = false);";
   $Schema["INDEX"]["author"]["author_agent_fk_idx"] = "CREATE INDEX author_agent_fk_idx ON author USING btree (agent_fk);";
