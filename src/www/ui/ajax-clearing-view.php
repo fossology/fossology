@@ -482,6 +482,9 @@ class AjaxClearingView extends FO_Plugin
     if ($licenseDecisionEvent->getEventType() == ClearingEventTypes::BULK) {
       $eventId = $licenseDecisionEvent->getEventId();
       $type .= ': <a href="'.$uberUri."&item=$uploadTreeId&clearingId=".$eventId.'#highlight">#'.$eventId.'</a>';
+    } else if ($licenseDecisionEvent->getEventType() == ClearingEventTypes::KOTOBA) {
+      $eventId = $licenseDecisionEvent->getEventId();
+      $type .= ': <a href="'.$uberUri."&item=$uploadTreeId&clearingId=".$eventId.'#highlight">#'.$eventId.'</a>';
     }
     return $type;
   }
