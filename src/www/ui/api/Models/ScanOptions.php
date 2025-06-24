@@ -148,6 +148,9 @@ class ScanOptions
           } elseif ($agent == "softwareHeritage") {
             $agentsToAdd[] = "agent_shagent";
             $request->request->set("Check_agent_shagent", 1);
+          } elseif ($agent == "kotoba") {
+            $agentsToAdd[] = "agent_kotoba";
+            $request->request->set("Check_agent_kotoba", 1);
           } else {
             $agentsToAdd[] = "agent_$agent";
             $request->request->set("Check_agent_$agent", 1);
@@ -169,6 +172,9 @@ class ScanOptions
           } elseif ($agent == "heritage") {
             $agentsToAdd[] = "agent_shagent";
             $request->request->set("Check_agent_shagent", 1);
+          } elseif ($agent == "kotoba_bulk") {
+            $agentsToAdd[] = "agent_kotoba";
+            $request->request->set("Check_agent_kotoba", 1);
           } else {
             $agentsToAdd[] = "agent_$agent";
             $request->request->set("Check_agent_$agent", 1);

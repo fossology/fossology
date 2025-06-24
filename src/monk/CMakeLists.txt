@@ -15,13 +15,18 @@ install(DIRECTORY ui
     COMPONENT monk
     FILES_MATCHING
     PATTERN *.php
-    PATTERN "agent-monk-bulk.php" EXCLUDE)
+    PATTERN "agent-monk-bulk.php" EXCLUDE
+    PATTERN "agent-kotoba.php" EXCLUDE)
 
-install(FILES ui/agent-monk-bulk.php 
+install(FILES ui/agent-monk-bulk.php
     DESTINATION ${FO_MODDIR}/monkbulk/ui
     COMPONENT monkbulk)
 
-foreach(MONK_INSTALL monkbulk monk)
+install(FILES ui/agent-kotoba.php
+    DESTINATION ${FO_MODDIR}/kotoba/ui
+    COMPONENT kotoba)
+
+foreach(MONK_INSTALL monkbulk kotoba monk)
     set(PROJECT_NAME ${MONK_INSTALL})
     generate_version(${MONK_INSTALL} "VERSION-${MONK_INSTALL}")
     

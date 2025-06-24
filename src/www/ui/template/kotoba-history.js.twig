@@ -1,0 +1,14 @@
+{# SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+
+   SPDX-License-Identifier: FSFAP
+#}
+function refreshKotobaHistory(callbacksuccess) {
+  $.ajax({
+    url: "{{ baseuri }}?mod=kotoba-history&upload={{ uploadId }}&item={{ itemId }}{{ kotobaHistoryOptions }}",
+    success: function(data) {
+      $('#kotobaHistoryTable').html(data);
+      callbacksuccess(data);
+    }
+  });
+}
+

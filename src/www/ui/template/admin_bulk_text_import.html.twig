@@ -1,0 +1,116 @@
+{# SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+<h2>{{ 'Import Bulk Text Export into Custom Phrases'|trans }}</h2>
+
+<p>{{ 'Use this form to import CSV or JSON files exported from the Bulk Text Export feature (Admin → Bulk → Bulk Text Export) directly into the custom phrases table.'|trans }}</p>
+
+{% if message is defined %}
+  <div class="message" style="white-space: pre-line;">{{ message|e }}</div>
+{% endif %}
+
+<form enctype="multipart/form-data" method="post">
+  <table border="0">
+    <tr>
+      <td>{{ 'Select file to upload'|trans }}:</td>
+      <td>
+        <input type="file" name="file_input" accept=".csv,.json" required>
+        <br/>
+        <small>{{ 'Supported formats: CSV, JSON (exported from Bulk Text Export)'|trans }}</small>
+      </td>
+    </tr>
+    <tr>
+      <td>{{ 'CSV Delimiter'|trans }}:</td>
+      <td>
+        <select name="delimiter">
+          <option value="," selected>, (comma)</option>
+          <option value=";">; (semicolon)</option>
+          <option value="|">| (pipe)</option>
+          <option value="&#9;">Tab</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>{{ 'CSV Enclosure'|trans }}:</td>
+      <td>
+        <select name="enclosure">
+          <option value='"' selected>" (double quote)</option>
+          <option value="'">' (single quote)</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <input type="submit" value="{{ 'Upload'|trans }}" class="buttonLink">
+        <a href="{{ baseUrl }}/?mod=admin_custom_text_list" class="buttonLink">{{ 'Back to Text Management'|trans }}</a>
+      </td>
+    </tr>
+  </table>
+</form>
+
+<h3>{{ 'Expected File Format (Bulk Text Export)'|trans }}</h3>
+<div style="margin: 10px 0;">
+  <h4>{{ 'CSV Format'|trans }}:</h4>
+  <p>{{ 'The CSV file should have the following columns (as produced by Admin → Bulk → Bulk Text Export):'|trans }}</p>
+  <table class="semibordered" style="max-width: 800px;" cellpadding="5">
+    <thead>
+      <tr>
+        <th>{{ 'Column'|trans }}</th>
+        <th>{{ 'Required'|trans }}</th>
+        <th>{{ 'Description'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>text</code></td>
+        <td>{{ 'Yes'|trans }}</td>
+        <td>{{ 'The bulk reference text. Newlines are encoded as \\n and will be restored on import.'|trans }}</td>
+      </tr>
+      <tr>
+        <td><code>licenses_to_add</code></td>
+        <td>{{ 'No'|trans }}</td>
+        <td>{{ 'Pipe-separated (|) list of license shortnames to associate as "add" licenses.'|trans }}</td>
+      </tr>
+      <tr>
+        <td><code>licenses_to_remove</code></td>
+        <td>{{ 'No'|trans }}</td>
+        <td>{{ 'Pipe-separated (|) list of license shortnames to associate as "remove" licenses.'|trans }}</td>
+      </tr>
+      <tr>
+        <td><code>comments</code></td>
+        <td>{{ 'No'|trans }}</td>
+        <td>{{ 'Pipe-separated (|) comment values. Multiple values will be joined with semicolons.'|trans }}</td>
+      </tr>
+      <tr>
+        <td><code>acknowledgements</code></td>
+        <td>{{ 'No'|trans }}</td>
+        <td>{{ 'Pipe-separated (|) acknowledgement values. Multiple values will be joined with semicolons.'|trans }}</td>
+      </tr>
+      <tr>
+        <td><code>is_active</code></td>
+        <td>{{ 'No'|trans }}</td>
+        <td>{{ 'true/false — whether the phrase is active. Defaults to true.'|trans }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4 style="margin-top: 15px;">{{ 'JSON Format'|trans }}:</h4>
+  <p>{{ 'Array of objects with the same field names as above. Licenses, comments, and acknowledgements should be arrays of strings.'|trans }}</p>
+  <pre style="background: #f4f4f4; padding: 10px; border: 1px solid #ddd; max-width: 800px; overflow-x: auto;">[
+  {
+    "text": "Some license text...",
+    "licenses_to_add": ["MIT", "Apache-2.0"],
+    "licenses_to_remove": [],
+    "comments": ["A comment"],
+    "acknowledgements": ["An acknowledgement"],
+    "is_active": true
+  }
+]</pre>
+</div>
+
+{% endblock %}
