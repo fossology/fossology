@@ -58,7 +58,7 @@ class AjaxUploadAgents extends DefaultPlugin
     $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
     $plainAgentList = MenuHook::getAgentPluginNames("Agents");
     $agentList = array_merge($plainAgentList, $parmAgentList);
-    $skipAgents = array("agent_unpack", "wget_agent");
+    $skipAgents = array("agent_unpack", "wget_agent", "agent_kotoba");
     $out = "";
     $relevantAgents = array();
     foreach ($agentList as $agent) {

@@ -732,6 +732,114 @@ INSERT INTO clearing_decision (
   }
 
   /**
+   * @param ItemTreeBounds $itemTreeBound
+   * @param int $groupId
+   * @return boolean True if file has kotoba findings, false otherwise
+   */
+  public function hasKotobaFindings(ItemTreeBounds $itemTreeBound, $groupId)
+  {
+    $uploadTreeTableName = $itemTreeBound->getUploadTreeTableName();
+    $uploadId = $itemTreeBound->getUploadId();
+    $left = $itemTreeBound->getLeft();
+    $right = $itemTreeBound->getRight();
+
+    $stmt = __METHOD__ . "." . $uploadTreeTableName;
+    $sql = "SELECT COUNT(*) FROM clearing_event ce
+            INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
+            WHERE ce.type_fk = 6
+            AND ce.group_fk = $1
+            AND ut.upload_fk = $2
+            AND ut.lft BETWEEN $3 AND $4";
+
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, array($groupId, $uploadId, $left, $right));
+    $row = $this->dbManager->fetchArray($res);
+    $this->dbManager->freeResult($res);
+
+    return ($row && intval($row['count']) > 0);
+  }
+
+  /**
+   * @param ItemTreeBounds $itemTreeBound
+   * @param int $groupId
+   * @param boolean $onlyTried
+   * @return array[] where array has keys ("phraseId","id","text","matched","tried","removedLicenses","addedLicenses")
+   */
+  public function getKotobaHistory(ItemTreeBounds $itemTreeBound, $groupId, $onlyTried = true)
+  {
+    $uploadTreeTableName = $itemTreeBound->getUploadTreeTableName();
+    $itemId = $itemTreeBound->getItemId();
+    $uploadId = $itemTreeBound->getUploadId();
+    $left = $itemTreeBound->getLeft();
+    $right = $itemTreeBound->getRight();
+
+    $params = array($uploadId, $itemId, $left, $right, $groupId);
+    $stmt = __METHOD__ . "." . $uploadTreeTableName;
+
+    $triedExpr = "ut2.lft BETWEEN $3 AND $4";
+    $triedFilter = "";
+    if ($onlyTried) {
+      $triedFilter = "AND " . $triedExpr;
+      $stmt .= ".tried";
+    }
+
+    $sql = "WITH alltried AS (
+            SELECT ce.reportinfo, ce.clearing_event_pk ce_pk, ce.uploadtree_fk,
+              $triedExpr AS tried
+            FROM clearing_event ce
+              INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
+              INNER JOIN $uploadTreeTableName ut2 ON ut2.uploadtree_pk = ce.uploadtree_fk
+            WHERE ce.type_fk = 6
+            AND ce.group_fk = $5
+            AND ut.upload_fk = $1
+            AND ce.reportinfo IS NOT NULL
+            AND ce.reportinfo != ''
+            $triedFilter
+            ORDER BY ce.reportinfo, ce.clearing_event_pk
+            ), aggregated_tried AS (
+            SELECT DISTINCT ON(reportinfo) reportinfo AS text, ce_pk, tried, matched
+            FROM (
+              SELECT DISTINCT ON(reportinfo) reportinfo, ce_pk, tried, true AS matched FROM alltried WHERE uploadtree_fk = $2
+              UNION ALL
+              SELECT DISTINCT ON(reportinfo) reportinfo, ce_pk, tried, false AS matched FROM alltried WHERE uploadtree_fk != $2 OR uploadtree_fk IS NULL
+            ) AS result ORDER BY reportinfo, matched DESC)
+            SELECT aggregated_tried.text, lrf.rf_shortname, ce.removed, aggregated_tried.tried, aggregated_tried.ce_pk, aggregated_tried.matched
+            FROM aggregated_tried
+              INNER JOIN clearing_event ce ON ce.reportinfo = aggregated_tried.text AND ce.type_fk = 6 AND ce.group_fk = $5
+              INNER JOIN license_ref lrf ON ce.rf_fk = lrf.rf_pk
+              INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
+            WHERE ut.upload_fk = $1
+            ORDER BY aggregated_tried.text, ce.clearing_event_pk";
+
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, $params);
+
+    $phrases = array();
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $phraseText = $row['text'];
+      $phraseId = md5($phraseText); // Use hash of phrase text as ID
+
+      if (!array_key_exists($phraseId, $phrases)) {
+        $phrases[$phraseId] = array(
+            "phraseId" => $phraseId,
+            "id" => $row['ce_pk'],
+            "text" => $phraseText,
+            "matched" => $this->dbManager->booleanFromDb($row['matched']),
+            "tried" => $this->dbManager->booleanFromDb($row['tried']),
+            "removedLicenses" => array(),
+            "addedLicenses" => array());
+      }
+      $key = $this->dbManager->booleanFromDb($row['removed']) ? 'removedLicenses' : 'addedLicenses';
+      if (!in_array($row['rf_shortname'], $phrases[$phraseId][$key])) {
+        $phrases[$phraseId][$key][] = $row['rf_shortname'];
+      }
+    }
+
+    $this->dbManager->freeResult($res);
+    return $phrases;
+  }
+
+  /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @return array mapping 'shortname'=>'count'

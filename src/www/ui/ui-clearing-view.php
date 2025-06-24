@@ -279,6 +279,11 @@ class ClearingView extends FO_Plugin
       $selectedClearingScope = $clearingDecisions[0]->getScope();
     }
     $bulkHistory = $this->clearingDao->getBulkHistory($itemTreeBounds, $groupId);
+    $hasKotobaFindings = $this->clearingDao->hasKotobaFindings($itemTreeBounds, $groupId);
+    $kotobaHistory = array();
+    if ($hasKotobaFindings) {
+      $kotobaHistory = $this->clearingDao->getKotobaHistory($itemTreeBounds, $groupId);
+    }
 
     $ModBack = GetParm("modback", PARM_STRING) ?: "license";
     list($pageMenu, $textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
@@ -293,6 +298,8 @@ class ClearingView extends FO_Plugin
     $this->vars['selectedClearingScope'] = $selectedClearingScope;
     $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionCheck($uploadTreeId, $groupId, DecisionTypes::WIP);
     $this->vars['bulkHistory'] = $bulkHistory;
+    $this->vars['hasKotobaFindings'] = $hasKotobaFindings;
+    $this->vars['kotobaHistory'] = $kotobaHistory;
 
     $noLicenseUploadTreeView = new UploadTreeProxy($uploadId,
       array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",

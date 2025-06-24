@@ -138,11 +138,28 @@ class DeciderAgentPlugin extends AgentPlugin
           $dependencies[] = 'agent_compatibility';
           $rulebits |= 0x80;
           break;
+        case 'kotobaAgent':
+          $rulebits |= 0x100;
+          break;
       }
     }
 
     if (empty($rulebits)) {
       return 0;
+    }
+
+    // If only kotobaAgent is selected, schedule kotoba_bulk agent directly without scheduling decider
+    if ($rulebits == 0x100) {
+      $kotobaPlugin = \plugin_find("agent_kotoba");
+      if ($kotobaPlugin !== null) {
+        return $kotobaPlugin->AgentAdd($jobId, $uploadId, $errorMsg, array(), null, $request);
+      }
+      return 0;
+    }
+
+    // If kotobaAgent is selected along with other rules, add kotoba_bulk as dependency
+    if ($rulebits & 0x100) {
+      $dependencies[] = 'agent_kotoba';
     }
 
     $args = self::RULES_FLAG . $rulebits;
