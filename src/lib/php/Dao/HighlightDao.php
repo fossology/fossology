@@ -172,6 +172,40 @@ class HighlightDao
   }
 
   /**
+   * @param int $uploadTreeId
+   * @param int|null $clearingId
+   * @return Highlight[]
+   */
+  public function getHighlightKotoba($uploadTreeId, $clearingId = null)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT h.clearing_event_fk, h.start, h.len, ce.rf_fk, cp.text
+            FROM clearing_event ce
+              INNER JOIN highlight_kotoba h ON ce.clearing_event_pk = h.clearing_event_fk
+              INNER JOIN custom_phrase cp ON cp.cp_pk = h.cp_fk
+            WHERE ce.uploadtree_fk = $1";
+    $params = array($uploadTreeId);
+    if (!empty($clearingId)) {
+      $stmt .= ".clearingId";
+      $params[] = $clearingId;
+      $sql .= " AND h.clearing_event_fk = $" . count($params);
+    }
+    $this->dbManager->prepare($stmt, $sql);
+    $result = $this->dbManager->execute($stmt, $params);
+    $highlightEntries = array();
+    while ($row = $this->dbManager->fetchArray($result)) {
+      $newHighlight = new Highlight(
+          intval($row['start']), intval($row['start'] + $row['len']),
+          Highlight::BULK, 0, 0);
+      $newHighlight->setLicenseId($row['rf_fk']);
+      $newHighlight->setInfoText($row['text']);
+      $highlightEntries[] = $newHighlight;
+    }
+    $this->dbManager->freeResult($result);
+    return $highlightEntries;
+  }
+
+  /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int|null $licenseId
    * @param int|null $agentId
@@ -184,7 +218,8 @@ class HighlightDao
     $highlightDiffs = $this->getHighlightDiffs($itemTreeBounds, $licenseId, $agentId, $highlightId);
     $highlightKeywords = $this->getHighlightKeywords($itemTreeBounds);
     $highlightBulk = $this->getHighlightBulk($itemTreeBounds->getItemId(), $clearingId);
-    return array_merge(array_merge($highlightDiffs,$highlightKeywords),$highlightBulk);
+    $highlightKotoba = $this->getHighlightKotoba($itemTreeBounds->getItemId(), $clearingId);
+    return array_merge(array_merge(array_merge($highlightDiffs,$highlightKeywords),$highlightBulk),$highlightKotoba);
   }
 
   /**
