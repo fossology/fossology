@@ -1,0 +1,65 @@
+{# SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+<form method="post">
+  <input type="hidden" name="{{ updateParam }}" value="1">
+  {% if cp_pk %}
+    <input type="hidden" name="cp_pk" value="{{ cp_pk }}">
+  {% endif %}
+  
+  <table>
+    {% if isEdit and created_date is not empty %}
+      <tr>
+        <td>{{ 'Created Date'|trans }}:</td>
+        <td><span>{{ created_date|e }}</span></td>
+      </tr>    
+    {% endif %}
+    
+    <tr>
+      <td>{{ 'Associated License'|trans }}:</td>
+      <td>
+        {% import 'include/macros.html.twig' as macro %}
+        {{ macro.select(rfFkParam, licenseOptions, rfFkParam, rf_fk) }}
+      </td>
+    </tr>
+    
+    <tr>
+      <td valign="top">{{ 'Text'|trans }}:</td>
+      <td><textarea name="{{ textParam }}" cols="120" rows="10" required>{{ text|e }}</textarea></td>
+    </tr>
+    
+    <tr>
+      <td valign="top">{{ 'Acknowledgement'|trans }}:</td>
+      <td><textarea name="{{ acknowledgementParam }}" cols="120" rows="6">{{ acknowledgement|e }}</textarea></td>
+    </tr>
+    
+    <tr>
+      <td valign="top">{{ 'Comments'|trans }}:</td>
+      <td><textarea name="{{ commentsParam }}" cols="120" rows="6">{{ comments|e }}</textarea></td>
+    </tr>
+    
+    <tr>
+      <td>{{ 'User ID'|trans }}:</td>
+      <td><input type="input" name="{{ userFkParam }}" value="{{ user_fk|e }}"/></td>
+    </tr>
+    
+    <tr>
+      <td>{{ 'Group ID'|trans }}:</td>
+      <td><input type="input" name="{{ groupFkParam }}" value="{{ group_fk|e }}"/></td>
+    </tr>
+    
+    <tr>
+      <td>{{ 'Active'|trans }}:</td>
+      <td><input type="checkbox" name="{{ isActiveParam }}"{% if is_active is not defined or is_active %} checked="checked"{% endif %}/></td>
+    </tr>
+  </table>
+  
+  <input type="submit" value="{{ isEdit ? 'Update'|trans : 'Save'|trans }}"/>
+</form>  
+
+{% endblock %}
