@@ -47,7 +47,6 @@ function Migrate_43_44(bool $verbose): void
   $createTableSQL = "
     CREATE TABLE custom_phrase (
       cp_pk SERIAL PRIMARY KEY,
-      rf_fk INTEGER REFERENCES license_ref(rf_pk),
       user_fk INTEGER,
       group_fk INTEGER,
       text TEXT NOT NULL,
@@ -64,10 +63,26 @@ function Migrate_43_44(bool $verbose): void
     return;
   }
 
+  // Create the junction table for custom_phrase-license mapping
+  $createJunctionTableSQL = "
+    CREATE TABLE custom_phrase_license_map (
+      cp_pk INTEGER NOT NULL REFERENCES custom_phrase(cp_pk) ON DELETE CASCADE,
+      rf_pk INTEGER NOT NULL REFERENCES license_ref(rf_pk) ON DELETE CASCADE,
+      PRIMARY KEY (cp_pk, rf_pk)
+    );
+  ";
+
+  $result = pg_query($PG_CONN, $createJunctionTableSQL);
+  if (!$result) {
+    echo "ERROR: Failed to create custom_phrase_license_map table: " . pg_last_error($PG_CONN) . "\n";
+    return;
+  }
+
   // Create indexes
   $indexSQL = [
-    "CREATE INDEX cp_rf_fk_idx ON custom_phrase(rf_fk);",
-    "CREATE INDEX cp_user_group_idx ON custom_phrase(user_fk, group_fk);"
+    "CREATE INDEX cp_user_group_idx ON custom_phrase(user_fk, group_fk);",
+    "CREATE INDEX cplm_cp_pk_idx ON custom_phrase_license_map(cp_pk);",
+    "CREATE INDEX cplm_rf_pk_idx ON custom_phrase_license_map(rf_pk);"
   ];
 
   foreach ($indexSQL as $sql) {
@@ -81,7 +96,8 @@ function Migrate_43_44(bool $verbose): void
   // Grant permissions to all current users
   $permissionSQL = [
     "GRANT SELECT, INSERT, UPDATE, DELETE ON custom_phrase TO PUBLIC;",
-    "GRANT USAGE, SELECT ON SEQUENCE custom_phrase_cp_pk_seq TO PUBLIC;"
+    "GRANT USAGE, SELECT ON SEQUENCE custom_phrase_cp_pk_seq TO PUBLIC;",
+    "GRANT SELECT, INSERT, UPDATE, DELETE ON custom_phrase_license_map TO PUBLIC;"
   ];
 
   foreach ($permissionSQL as $sql) {

@@ -483,9 +483,7 @@
   $Schema["TABLE"]["custom_phrase"]["cp_pk"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"cp_pk\" int4 DEFAULT nextval('custom_phrase_cp_pk_seq'::regclass)";
   $Schema["TABLE"]["custom_phrase"]["cp_pk"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"cp_pk\" SET NOT NULL, ALTER COLUMN \"cp_pk\" SET DEFAULT nextval('custom_phrase_cp_pk_seq'::regclass)";
 
-  $Schema["TABLE"]["custom_phrase"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"rf_fk\" IS 'Foreign key to license_ref table'";
-  $Schema["TABLE"]["custom_phrase"]["rf_fk"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"rf_fk\" int4";
-  $Schema["TABLE"]["custom_phrase"]["rf_fk"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"rf_fk\" DROP NOT NULL";
+  // Note: rf_fk column removed in favor of custom_phrase_license_map junction table
 
   $Schema["TABLE"]["custom_phrase"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"user_fk\" IS 'User who created this phrase'";
   $Schema["TABLE"]["custom_phrase"]["user_fk"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"user_fk\" int4";
@@ -514,6 +512,15 @@
   $Schema["TABLE"]["custom_phrase"]["comments"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"comments\" IS 'Comments for the custom text'";
   $Schema["TABLE"]["custom_phrase"]["comments"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"comments\" text";
   $Schema["TABLE"]["custom_phrase"]["comments"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"comments\" DROP NOT NULL";
+
+  // Junction table for custom_phrase to license_ref many-to-many relationship
+  $Schema["TABLE"]["custom_phrase_license_map"]["cp_pk"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase_license_map\".\"cp_pk\" IS 'Foreign key to custom_phrase table'";
+  $Schema["TABLE"]["custom_phrase_license_map"]["cp_pk"]["ADD"] = "ALTER TABLE \"custom_phrase_license_map\" ADD COLUMN \"cp_pk\" int4";
+  $Schema["TABLE"]["custom_phrase_license_map"]["cp_pk"]["ALTER"] = "ALTER TABLE \"custom_phrase_license_map\" ALTER COLUMN \"cp_pk\" SET NOT NULL";
+
+  $Schema["TABLE"]["custom_phrase_license_map"]["rf_pk"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase_license_map\".\"rf_pk\" IS 'Foreign key to license_ref table'";
+  $Schema["TABLE"]["custom_phrase_license_map"]["rf_pk"]["ADD"] = "ALTER TABLE \"custom_phrase_license_map\" ADD COLUMN \"rf_pk\" int4";
+  $Schema["TABLE"]["custom_phrase_license_map"]["rf_pk"]["ALTER"] = "ALTER TABLE \"custom_phrase_license_map\" ALTER COLUMN \"rf_pk\" SET NOT NULL";
 
 
   $Schema["TABLE"]["author"]["author_pk"]["DESC"] = "";
@@ -2730,7 +2737,10 @@
   $Schema["CONSTRAINT"]["copyright_event_upload_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_event_copyright_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_copyright_fk_fkey\" FOREIGN KEY (\"copyright_fk\") REFERENCES \"copyright\" (\"copyright_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["custom_phrase_pkey"] = "ALTER TABLE \"custom_phrase\" ADD CONSTRAINT \"custom_phrase_pkey\" PRIMARY KEY (\"cp_pk\");";
-  $Schema["CONSTRAINT"]["custom_phrase_rf_fk_fkey"] = "ALTER TABLE \"custom_phrase\" ADD CONSTRAINT \"custom_phrase_rf_fk_fkey\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  // Old rf_fk constraint removed - using junction table instead
+  $Schema["CONSTRAINT"]["custom_phrase_license_map_cp_fk_fkey"] = "ALTER TABLE \"custom_phrase_license_map\" ADD CONSTRAINT \"custom_phrase_license_map_cp_fk_fkey\" FOREIGN KEY (\"cp_pk\") REFERENCES \"custom_phrase\" (\"cp_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["custom_phrase_license_map_rf_fk_fkey"] = "ALTER TABLE \"custom_phrase_license_map\" ADD CONSTRAINT \"custom_phrase_license_map_rf_fk_fkey\" FOREIGN KEY (\"rf_pk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["custom_phrase_license_map_pk"] = "ALTER TABLE \"custom_phrase_license_map\" ADD CONSTRAINT \"custom_phrase_license_map_pk\" PRIMARY KEY (\"cp_pk\", \"rf_pk\");";
   $Schema["CONSTRAINT"]["author_event_pkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_pkey\" PRIMARY KEY (\"author_event_pk\");";
   $Schema["CONSTRAINT"]["author_event_upload_fk_fkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["author_event_author_fk_fkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_author_fk_fkey\" FOREIGN KEY (\"author_fk\") REFERENCES \"author\" (\"author_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2777,8 +2787,11 @@
   $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_pfile_fk_index"] = "CREATE INDEX copyright_spasht_pfile_fk_index ON copyright_spasht USING btree (pfile_fk);";
   $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_pfile_hash_index"] = "CREATE INDEX copyright_spasht_pfile_hash_index ON copyright_spasht USING btree (hash, pfile_fk);";
 
-  $Schema["INDEX"]["custom_phrase"]["cp_rf_fk_idx"] = "CREATE INDEX cp_rf_fk_idx ON custom_phrase USING btree (rf_fk);";
   $Schema["INDEX"]["custom_phrase"]["cp_user_group_idx"] = "CREATE INDEX cp_user_group_idx ON custom_phrase USING btree (user_fk, group_fk);";
+  
+  // Junction table indexes for custom_phrase_license_map
+  $Schema["INDEX"]["custom_phrase_license_map"]["cplm_cp_pk_idx"] = "CREATE INDEX cplm_cp_pk_idx ON custom_phrase_license_map USING btree (cp_pk);";
+  $Schema["INDEX"]["custom_phrase_license_map"]["cplm_rf_pk_idx"] = "CREATE INDEX cplm_rf_pk_idx ON custom_phrase_license_map USING btree (rf_pk);";
 
   $Schema["INDEX"]["author"]["author_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX author_pfile_fk_is_enabled_false_idx ON author USING btree (pfile_fk, is_enabled) WHERE (is_enabled = false);";
   $Schema["INDEX"]["author"]["author_agent_fk_idx"] = "CREATE INDEX author_agent_fk_idx ON author USING btree (agent_fk);";
