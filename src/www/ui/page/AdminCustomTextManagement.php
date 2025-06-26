@@ -96,7 +96,7 @@ class AdminCustomTextManagement extends DefaultPlugin
   /**
    * Get variables for the edit form
    */
-  private function getEditFormVars($cp_pk = 0)
+  private function getEditFormVars($cp_pk)
   {
     $vars = array();
     
@@ -106,11 +106,14 @@ class AdminCustomTextManagement extends DefaultPlugin
       if ($phraseData) {
         $vars = array_merge($vars, $phraseData);
         $vars['isEdit'] = true;
+        // Get associated licenses for this phrase
+        $vars['selectedLicenses'] = $this->getAssociatedLicenses($cp_pk);
       }
     } else {
       // Add new phrase
       $vars['isEdit'] = false;
       $vars['cp_pk'] = 0;
+      $vars['selectedLicenses'] = array();
     }
 
     $vars['formAction'] = Traceback_uri() . '?mod=' . self::NAME;
@@ -120,7 +123,7 @@ class AdminCustomTextManagement extends DefaultPlugin
     $vars['commentsParam'] = 'comments';
     $vars['userFkParam'] = 'user_fk';
     $vars['groupFkParam'] = 'group_fk';
-    $vars['rfFkParam'] = 'rf_fk';
+    $vars['licensesParam'] = 'licenses';
     $vars['isActiveParam'] = 'is_active';
     
     // Get license options for dropdown
@@ -138,11 +141,15 @@ class AdminCustomTextManagement extends DefaultPlugin
     $dbManager = $this->getObject('db.manager');
     
     $sql = "SELECT cp.cp_pk, cp.text, cp.acknowledgement, cp.comments, 
-                   cp.user_fk, cp.group_fk, cp.rf_fk, cp.created_date, cp.is_active,
-                   u.user_name, lr.rf_shortname
+                   cp.user_fk, cp.group_fk, cp.created_date, cp.is_active,
+                   u.user_name,
+                   STRING_AGG(lr.rf_shortname, ', ' ORDER BY lr.rf_shortname) as license_names
             FROM custom_phrase cp
             LEFT JOIN users u ON cp.user_fk = u.user_pk
-            LEFT JOIN license_ref lr ON cp.rf_fk = lr.rf_pk
+            LEFT JOIN custom_phrase_license_map cplm ON cp.cp_pk = cplm.cp_pk
+            LEFT JOIN license_ref lr ON cplm.rf_pk = lr.rf_pk
+            GROUP BY cp.cp_pk, cp.text, cp.acknowledgement, cp.comments, 
+                     cp.user_fk, cp.group_fk, cp.created_date, cp.is_active, u.user_name
             ORDER BY cp.created_date DESC";
     
     $result = $dbManager->getRows($sql);
@@ -169,12 +176,14 @@ class AdminCustomTextManagement extends DefaultPlugin
       
       $deleteBtn = '<a href="javascript:void(0)" onclick="deletePhrase(' . $row['cp_pk'] . ')"><img border="0" src="images/button_delete.png"></a>';
       
+      $licenses = $row['license_names'] ?: 'N/A';
+      
       $aaData[] = array(
         $editLink,
         '<div style="overflow-y:scroll;max-height:100px;margin:0;">' . nl2br(htmlentities($text)) . '</div>',
         htmlentities($acknowledgement),
         htmlentities($comments),
-        htmlentities($row['rf_shortname'] ?: 'N/A'),
+        htmlentities($licenses),
         htmlentities($row['user_name'] ?: 'N/A'),
         $row['created_date'],
         $statusToggle,
@@ -209,15 +218,28 @@ class AdminCustomTextManagement extends DefaultPlugin
       /** @var DbManager */
       $dbManager = $this->getObject('db.manager');
       
+      // Start transaction
+      $dbManager->begin();
+      
+      // Delete license associations first (though CASCADE should handle this)
+      $deleteLicensesSql = "DELETE FROM custom_phrase_license_map WHERE cp_pk = $1";
+      $dbManager->prepare($deleteLicensesStmt = __METHOD__ . ".delete_licenses", $deleteLicensesSql);
+      $dbManager->freeResult($dbManager->execute($deleteLicensesStmt, array($phraseId)));
+      
+      // Delete the phrase itself
       $sql = "DELETE FROM custom_phrase WHERE cp_pk = $1";
       $dbManager->prepare($stmt = __METHOD__ . ".delete", $sql);
       $dbManager->freeResult($dbManager->execute($stmt, array($phraseId)));
+      
+      // Commit transaction
+      $dbManager->commit();
       
       return new JsonResponse(array(
         'success' => true,
         'message' => 'Custom text deleted successfully'
       ));
     } catch (\Exception $e) {
+      $dbManager->rollback();
       return new JsonResponse(array('error' => 'Failed to delete phrase: ' . $e->getMessage()), 500);
     }
   }
@@ -270,6 +292,33 @@ class AdminCustomTextManagement extends DefaultPlugin
   }
 
   /**
+   * Get associated licenses for a custom phrase
+   */
+  private function getAssociatedLicenses($cp_pk)
+  {
+    /** @var DbManager */
+    $dbManager = $this->getObject('db.manager');
+    
+    $sql = "SELECT lr.rf_pk, lr.rf_shortname 
+            FROM custom_phrase_license_map cplm
+            JOIN license_ref lr ON cplm.rf_pk = lr.rf_pk
+            WHERE cplm.cp_pk = $1
+            ORDER BY lr.rf_shortname";
+    
+    $result = $dbManager->getRows($sql, array($cp_pk));
+    
+    $licenses = array();
+    foreach ($result as $row) {
+      $licenses[] = array(
+        'rf_pk' => $row['rf_pk'],
+        'rf_shortname' => $row['rf_shortname']
+      );
+    }
+    
+    return $licenses;
+  }
+
+  /**
    * Save phrase data (add or update)
    */
   private function savePhrase(Request $request, $userId, $groupId)
@@ -280,7 +329,7 @@ class AdminCustomTextManagement extends DefaultPlugin
     $comments = StringOperation::replaceUnicodeControlChar(trim($request->get('comments')));
     $user_fk = intval($request->get('user_fk'));
     $group_fk = intval($request->get('group_fk'));
-    $rf_fk = intval($request->get('rf_fk'));
+    $selectedLicenses = $request->get('licenses', array());
     $is_active = $request->get('is_active') == 'on' ? 'true' : 'false';
     
     if (empty($text)) {
@@ -295,39 +344,73 @@ class AdminCustomTextManagement extends DefaultPlugin
       $group_fk = $groupId;
     }
     
-    // Convert empty rf_fk to null
-    if (empty($rf_fk)) {
-      $rf_fk = null;
+    // Convert to array if single value
+    if (!is_array($selectedLicenses)) {
+      $selectedLicenses = array($selectedLicenses);
     }
+    
+    // Filter out empty values
+    $selectedLicenses = array_filter($selectedLicenses, function($license) {
+      return !empty($license);
+    });
     
     try {
       /** @var DbManager */
       $dbManager = $this->getObject('db.manager');
       
+      // Start transaction
+      $dbManager->begin();
+      
       if ($cp_pk > 0) {
         // Update existing phrase
         $sql = "UPDATE custom_phrase SET 
                 text = $2, acknowledgement = $3, comments = $4, 
-                user_fk = $5, group_fk = $6, rf_fk = $7, is_active = $8
+                user_fk = $5, group_fk = $6, is_active = $7
                 WHERE cp_pk = $1";
         $params = array($cp_pk, $text, $acknowledgement, $comments, 
-                       $user_fk, $group_fk, $rf_fk, $is_active);
+                       $user_fk, $group_fk, $is_active);
+        $dbManager->prepare($stmt = __METHOD__ . ".update", $sql);
+        $dbManager->freeResult($dbManager->execute($stmt, $params));
+        
+        // Delete existing license associations
+        $deleteSql = "DELETE FROM custom_phrase_license_map WHERE cp_pk = $1";
+        $dbManager->prepare($deleteStmt = __METHOD__ . ".delete_licenses", $deleteSql);
+        $dbManager->freeResult($dbManager->execute($deleteStmt, array($cp_pk)));
+        
       } else {
         // Insert new phrase
         $sql = "INSERT INTO custom_phrase 
-                (text, acknowledgement, comments, user_fk, group_fk, rf_fk, is_active, created_date)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)";
+                (text, acknowledgement, comments, user_fk, group_fk, is_active, created_date)
+                VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP) RETURNING cp_pk";
         $params = array($text, $acknowledgement, $comments, 
-                       $user_fk, $group_fk, $rf_fk, $is_active);
+                       $user_fk, $group_fk, $is_active);
+        $dbManager->prepare($stmt = __METHOD__ . ".insert", $sql);
+        $result = $dbManager->execute($stmt, $params);
+        $row = $dbManager->fetchArray($result);
+        $cp_pk = $row['cp_pk'];
+        $dbManager->freeResult($result);
       }
       
-      $dbManager->prepare($stmt = __METHOD__ . ($cp_pk > 0 ? ".update" : ".insert"), $sql);
-      $dbManager->freeResult($dbManager->execute($stmt, $params));
+      // Insert license associations
+      if (!empty($selectedLicenses)) {
+        $insertLicenseSql = "INSERT INTO custom_phrase_license_map (cp_pk, rf_pk) VALUES ($1, $2)";
+        $dbManager->prepare($insertLicenseStmt = __METHOD__ . ".insert_license", $insertLicenseSql);
+        
+        foreach ($selectedLicenses as $licenseId) {
+          if (!empty($licenseId)) {
+            $dbManager->freeResult($dbManager->execute($insertLicenseStmt, array($cp_pk, intval($licenseId))));
+          }
+        }
+      }
+      
+      // Commit transaction
+      $dbManager->commit();
       
       return $cp_pk > 0 ? _("Custom text updated successfully.") : 
                          _("Custom text added successfully.");
       
     } catch (\Exception $e) {
+      $dbManager->rollback();
       return _("ERROR: Failed to save custom text: ") . $e->getMessage();
     }
   }
