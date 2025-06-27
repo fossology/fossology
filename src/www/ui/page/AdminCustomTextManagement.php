@@ -56,6 +56,10 @@ class AdminCustomTextManagement extends DefaultPlugin
       return $this->getPhrasesAjax();
     }
     
+    if ($action == 'get_bulk_data') {
+      return $this->getBulkDataAjax();
+    }
+    
     if ($action == 'delete' && $request->getMethod() == 'POST') {
       return $this->deletePhraseAjax($request);
     }
@@ -434,6 +438,136 @@ class AdminCustomTextManagement extends DefaultPlugin
     }
     
     return $options;
+  }
+
+  /**
+   * AJAX endpoint to get bulk data from license_ref_bulk table with associated licenses
+   */
+  private function getBulkDataAjax()
+  {
+    /** @var DbManager */
+    $dbManager = $this->getObject('db.manager');
+    
+    $sql = "SELECT 
+                lrb.lrb_pk,
+                lrb.rf_text as bulk_reference_text,
+                lrb.ignore_irrelevant,
+                lrb.bulk_delimiters,
+                lrb.scan_findings,
+                
+                lr.rf_pk as license_id,
+                lr.rf_shortname as license_shortname,
+                lr.rf_fullname as license_fullname,
+                lr.rf_spdx_id as license_spdx_id,
+                
+                lsb.removing as is_removing_license,
+                lsb.comment as license_comment,
+                lsb.reportinfo as license_reportinfo,
+                lsb.acknowledgement as license_acknowledgement,
+                
+                u.user_name as created_by_user,
+                up.upload_filename as upload_file,
+                
+                lrb.user_fk,
+                lrb.group_fk,
+                lrb.upload_fk,
+                lrb.uploadtree_fk
+
+            FROM license_ref_bulk lrb
+                INNER JOIN license_set_bulk lsb ON lrb.lrb_pk = lsb.lrb_fk
+                INNER JOIN license_ref lr ON lsb.rf_fk = lr.rf_pk
+                LEFT JOIN users u ON lrb.user_fk = u.user_pk
+                LEFT JOIN upload up ON lrb.upload_fk = up.upload_pk
+            WHERE lrb.rf_text IS NOT NULL AND lrb.rf_text != ''
+            ORDER BY lrb.lrb_pk DESC, lr.rf_shortname
+            LIMIT 200";
+    
+    $result = $dbManager->getRows($sql);
+    $bulkData = array();
+    
+    // Group results by lrb_pk to handle multiple licenses per bulk entry
+    $groupedData = array();
+    foreach ($result as $row) {
+      $lrbPk = $row['lrb_pk'];
+      
+      if (!isset($groupedData[$lrbPk])) {
+        $text = strlen($row['bulk_reference_text']) > 200 ? 
+                      substr($row['bulk_reference_text'], 0, 200) . '...' : 
+                      $row['bulk_reference_text'];
+        
+        $ignoreIrrelevant = $dbManager->booleanFromDb($row['ignore_irrelevant']);
+        $scanFindings = $dbManager->booleanFromDb($row['scan_findings']);
+        $isRemoving = $dbManager->booleanFromDb($row['is_removing_license']);
+        
+        $groupedData[$lrbPk] = array(
+          'lrb_pk' => $lrbPk,
+          'user_fk' => $row['user_fk'],
+          'group_fk' => $row['group_fk'],
+          'bulk_reference_text' => $row['bulk_reference_text'],
+          'text_preview' => $text,
+          'upload_fk' => $row['upload_fk'],
+          'uploadtree_fk' => $row['uploadtree_fk'],
+          'ignore_irrelevant' => $ignoreIrrelevant,
+          'bulk_delimiters' => $row['bulk_delimiters'],
+          'scan_findings' => $scanFindings,
+          'created_by_user' => $row['created_by_user'] ?: 'Unknown',
+          'upload_file' => $row['upload_file'] ?: 'Unknown',
+          'licenses' => array(),
+          'all_acknowledgements' => array(),
+          'all_comments' => array()
+        );
+      }
+      
+      // Add license information
+      $isRemoving = $dbManager->booleanFromDb($row['is_removing_license']);
+      $licenseInfo = array(
+        'license_id' => $row['license_id'],
+        'license_shortname' => $row['license_shortname'],
+        'license_fullname' => $row['license_fullname'],
+        'license_spdx_id' => $row['license_spdx_id'],
+        'is_removing_license' => $isRemoving,
+        'license_comment' => $row['license_comment'],
+        'license_reportinfo' => $row['license_reportinfo'],
+        'license_acknowledgement' => $row['license_acknowledgement']
+      );
+      
+      $groupedData[$lrbPk]['licenses'][] = $licenseInfo;
+      
+      // Collect unique acknowledgements and comments
+      if (!empty($row['license_acknowledgement'])) {
+        $groupedData[$lrbPk]['all_acknowledgements'][] = $row['license_acknowledgement'];
+      }
+      if (!empty($row['license_comment'])) {
+        $groupedData[$lrbPk]['all_comments'][] = $row['license_comment'];
+      }
+    }
+    
+    // Convert grouped data to final format
+    foreach ($groupedData as $entry) {
+      $licenseNames = array();
+      $addedLicenses = array();
+      $removedLicenses = array();
+      
+      foreach ($entry['licenses'] as $license) {
+        $licenseNames[] = $license['license_shortname'];
+        if ($license['is_removing_license']) {
+          $removedLicenses[] = $license['license_shortname'];
+        } else {
+          $addedLicenses[] = $license['license_shortname'];
+        }
+      }
+      
+      // Create summary strings
+      $entry['license_summary'] = implode(', ', $licenseNames);
+      $entry['added_licenses'] = implode(', ', $addedLicenses);
+      $entry['removed_licenses'] = implode(', ', $removedLicenses);
+      $entry['acknowledgement_summary'] = implode('; ', array_unique($entry['all_acknowledgements']));
+      $entry['comment_summary'] = implode('; ', array_unique($entry['all_comments']));
+      
+      $bulkData[] = $entry;
+    }
+    
+    return new JsonResponse(array('data' => $bulkData));
   }
 }
 
