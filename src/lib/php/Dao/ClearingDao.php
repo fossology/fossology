@@ -341,7 +341,7 @@ class ClearingDao
   public function createDecisionFromEvents($uploadTreeId, $userId, $groupId, $decType, $scope, $eventIds)
   {
     if ( ($scope == DecisionScopes::REPO) &&
-         !empty($this->getCandidateLicenseCountForCurrentDecisions($uploadTreeId))) {
+      !empty($this->getCandidateLicenseCountForCurrentDecisions($uploadTreeId))) {
       throw new \Exception( _("Cannot add candidate license as global decision\n") );
     }
 
@@ -360,6 +360,16 @@ class ClearingDao
 
     $this->removeWipClearingDecision($uploadTreeId, $groupId);
 
+    // NEW: Fetch pfile_fk and check validity
+    $pfileFkRow = $this->dbManager->getSingleRow(
+        "SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1",
+        array($uploadTreeId)
+    );
+    if (!$pfileFkRow || !$pfileFkRow['pfile_fk'] || $pfileFkRow['pfile_fk'] == 0) {
+        $this->dbManager->rollback();
+        throw new \Exception("Invalid pfile_fk for uploadtree_pk=$uploadTreeId, cannot create clearing_decision.");
+    }
+
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         "
@@ -372,14 +382,14 @@ INSERT INTO clearing_decision (
   scope
 ) VALUES (
   $1,
-  (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1),
   $2,
   $3,
   $4,
-  $5) RETURNING clearing_decision_pk
-  ");
+  $5,
+  $6) RETURNING clearing_decision_pk
+");
     $res = $this->dbManager->execute($statementName,
-        array($uploadTreeId, $userId,  $groupId, $decType, $scope));
+        array($uploadTreeId, $pfileFkRow['pfile_fk'], $userId, $groupId, $decType, $scope));
     $result = $this->dbManager->fetchArray($res);
     $clearingDecisionId = $result['clearing_decision_pk'];
     $this->dbManager->freeResult($res);
@@ -604,11 +614,18 @@ INSERT INTO clearing_decision (
   {
     $statementName = __METHOD__;
 
+    $pfileFkRow = $this->dbManager->getSingleRow(
+        "SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1",
+        array($uploadTreeId)
+    );
+    if (empty($pfileFkRow) || empty($pfileFkRow['pfile_fk'])) {
+        throw new \Exception("Cannot create WIP clearing_decision: uploadtree_pk $uploadTreeId has no valid pfile_fk.");
+    }
     $this->dbManager->prepare($statementName,
         "INSERT INTO clearing_decision (uploadtree_fk,pfile_fk,user_fk,group_fk,decision_type,scope) VALUES (
-            $1, (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1), $2, $3, $4, $5)");
+            $1, $2, $3, $4, $5, $6)");
     $res = $this->dbManager->execute($statementName,
-        array($uploadTreeId, $userId, $groupId, DecisionTypes::WIP, DecisionScopes::ITEM));
+        array($uploadTreeId, $pfileFkRow['pfile_fk'], $userId, $groupId, DecisionTypes::WIP, DecisionScopes::ITEM));
     $this->dbManager->freeResult($res);
   }
 
