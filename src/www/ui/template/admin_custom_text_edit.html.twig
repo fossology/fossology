@@ -72,7 +72,47 @@
   </table>
   
   <input type="submit" value="{{ isEdit ? 'Update'|trans : 'Save'|trans }}"/>
-</form>  
+  {% if not isEdit %}
+    <input type="button" value="{{ 'Pull from Bulk Data'|trans }}" onclick="showBulkDataModal()" style="margin-left: 10px;"/>
+  {% endif %}
+</form>
+
+<!-- Bulk Data Modal -->
+<div id="bulkDataModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+  <div style="background-color: #fefefe; margin: 2% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 1200px; border-radius: 5px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3>{{ 'Select Bulk Data to Import'|trans }}</h3>
+      <span onclick="closeBulkDataModal()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+    </div>
+    
+    <div style="margin-bottom: 10px;">
+      <input type="text" id="bulkDataSearch" placeholder="{{ 'Search bulk data...'|trans }}" style="width: 300px; padding: 5px;">
+    </div>
+    
+    <div style="max-height: 500px; overflow-y: auto;">
+      <table id="bulkDataTable" class="semibordered" width="100%" cellpadding="5">
+        <thead>
+          <tr>
+            <th width="8%">{{ 'ID'|trans }}</th>
+            <th width="27%">{{ 'Text Preview'|trans }}</th>
+            <th width="17%">{{ 'Associated Licenses'|trans }}</th>
+            <th width="17%">{{ 'Acknowledgement'|trans }}</th>
+            <th width="17%">{{ 'Comments'|trans }}</th>
+            <th width="8%">{{ 'User'|trans }}</th>
+            <th width="6%">{{ 'Actions'|trans }}</th>
+          </tr>
+        </thead>
+        <tbody id="bulkDataTableBody">
+          <!-- Data will be loaded via AJAX -->
+        </tbody>
+      </table>
+    </div>
+    
+    <div style="margin-top: 20px; text-align: center;">
+      <button onclick="closeBulkDataModal()" style="padding: 8px 20px;">{{ 'Cancel'|trans }}</button>
+    </div>
+  </div>
+</div>  
 
 {% endblock %}
 
@@ -82,6 +122,8 @@
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   
   <script type="text/javascript">
+    var bulkDataCache = [];
+    
     $(document).ready(function() {
       $('#licenseSelect').select2({
         placeholder: '{{ "Select licenses..."|trans }}',
@@ -109,6 +151,173 @@
           return null;
         }
       });
+      
+      // Search functionality for bulk data
+      $('#bulkDataSearch').on('keyup', function() {
+        var searchTerm = $(this).val().toLowerCase();
+        filterBulkData(searchTerm);
+      });
+    });
+    
+    function showBulkDataModal() {
+      $('#bulkDataModal').show();
+      loadBulkData();
+    }
+    
+    function closeBulkDataModal() {
+      $('#bulkDataModal').hide();
+      $('#bulkDataSearch').val('');
+    }
+    
+    function loadBulkData() {
+      $.ajax({
+        url: "?mod=admin_custom_text_management&action=get_bulk_data",
+        type: "GET",
+        dataType: "json",
+        success: function (response) {
+          if (response.data) {
+            bulkDataCache = response.data;
+            displayBulkData(response.data);
+          } else {
+            alert("{{ 'Error loading bulk data'|trans }}");
+          }
+        },
+        error: function (xhr, status, error) {
+          alert("{{ 'Error loading bulk data:'|trans }} " + error);
+        }
+      });
+    }
+    
+    function displayBulkData(data) {
+      var tbody = $('#bulkDataTableBody');
+      tbody.empty();
+      
+      if (data.length === 0) {
+        tbody.append('<tr><td colspan="7" style="text-align: center;">{{ "No bulk data found"|trans }}</td></tr>');
+        return;
+      }
+      
+      $.each(data, function(index, item) {
+        var licenseSummary = item.license_summary || '';
+        var acknowledgementSummary = item.acknowledgement_summary || '';
+        var commentSummary = item.comment_summary || '';
+        
+        // Truncate long text for display
+        var displayLicenses = licenseSummary.length > 30 ? licenseSummary.substring(0, 30) + '...' : licenseSummary;
+        var displayAcknowledgement = acknowledgementSummary.length > 40 ? acknowledgementSummary.substring(0, 40) + '...' : acknowledgementSummary;
+        var displayComment = commentSummary.length > 40 ? commentSummary.substring(0, 40) + '...' : commentSummary;
+        
+        var row = '<tr>' +
+          '<td>' + item.lrb_pk + '</td>' +
+          '<td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">' + 
+            '<div title="' + (item.bulk_reference_text || '').replace(/"/g, '&quot;') + '">' + (item.text_preview || '') + '</div>' +
+          '</td>' +
+          '<td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis;">' +
+            '<div title="' + licenseSummary.replace(/"/g, '&quot;') + '">' + displayLicenses + '</div>' +
+          '</td>' +
+          '<td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis;">' +
+            '<div title="' + acknowledgementSummary.replace(/"/g, '&quot;') + '">' + displayAcknowledgement + '</div>' +
+          '</td>' +
+          '<td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis;">' +
+            '<div title="' + commentSummary.replace(/"/g, '&quot;') + '">' + displayComment + '</div>' +
+          '</td>' +
+          '<td>' + (item.created_by_user || '') + '</td>' +
+          '<td>' +
+            '<button type="button" onclick="importBulkData(' + item.lrb_pk + ')" style="padding: 2px 8px;">{{ "Import"|trans }}</button>' +
+          '</td>' +
+        '</tr>';
+        tbody.append(row);
+      });
+    }
+    
+    function filterBulkData(searchTerm) {
+      if (!searchTerm) {
+        displayBulkData(bulkDataCache);
+        return;
+      }
+      
+      var filteredData = bulkDataCache.filter(function(item) {
+        return (item.bulk_reference_text || '').toLowerCase().indexOf(searchTerm) > -1 ||
+               (item.created_by_user || '').toLowerCase().indexOf(searchTerm) > -1 ||
+               (item.upload_file || '').toLowerCase().indexOf(searchTerm) > -1 ||
+               (item.license_summary || '').toLowerCase().indexOf(searchTerm) > -1 ||
+               (item.acknowledgement_summary || '').toLowerCase().indexOf(searchTerm) > -1 ||
+               (item.comment_summary || '').toLowerCase().indexOf(searchTerm) > -1;
+      });
+      
+      displayBulkData(filteredData);
+    }
+    
+
+    
+    function importBulkData(lrbPk) {
+      var selectedData = bulkDataCache.find(function(item) {
+        return item.lrb_pk == lrbPk;
+      });
+      
+      if (!selectedData) {
+        alert("{{ 'Selected data not found'|trans }}");
+        return;
+      }
+      
+      // Populate basic form fields
+      $('textarea[name="{{ textParam }}"]').val(selectedData.bulk_reference_text || '');
+      $('input[name="{{ userFkParam }}"]').val(selectedData.user_fk || '');
+      $('input[name="{{ groupFkParam }}"]').val(selectedData.group_fk || '');
+      
+      // Populate acknowledgement field with all unique acknowledgements
+      var acknowledgementText = selectedData.acknowledgement_summary || '';
+      $('textarea[name="{{ acknowledgementParam }}"]').val(acknowledgementText);
+      
+      // Populate comments field with only the actual license comments
+      var commentsText = selectedData.comment_summary || '';
+      $('textarea[name="{{ commentsParam }}"]').val(commentsText);
+      
+      // Populate associated licenses
+      if (selectedData.licenses && selectedData.licenses.length > 0) {
+        // Clear existing selections
+        $('#licenseSelect').val(null).trigger('change');
+        
+        // Get license IDs from the bulk data
+        var licenseIds = [];
+        selectedData.licenses.forEach(function(license) {
+          if (!license.is_removing_license) { // Only include licenses that are being added
+            licenseIds.push(license.license_id.toString());
+          }
+        });
+        
+        // Set the selected licenses
+        $('#licenseSelect').val(licenseIds).trigger('change');
+      }
+      
+      closeBulkDataModal();
+      
+      // Show detailed success message
+      var importedInfo = "{{ 'Bulk data imported successfully!'|trans }}\n\n";
+      importedInfo += "{{ 'Imported:'|trans }}\n";
+      importedInfo += "- {{ 'Text from bulk reference'|trans }}\n";
+      if (selectedData.licenses && selectedData.licenses.length > 0) {
+        var addedLicenses = selectedData.licenses.filter(function(l) { return !l.is_removing_license; });
+        if (addedLicenses.length > 0) {
+          importedInfo += "- " + addedLicenses.length + " {{ 'associated license(s)'|trans }}\n";
+        }
+      }
+      if (acknowledgementText) {
+        importedInfo += "- {{ 'Acknowledgement text'|trans }}\n";
+      }
+      if (selectedData.comment_summary) {
+        importedInfo += "- {{ 'Comments'|trans }}\n";
+      }
+      importedInfo += "\n{{ 'Please review and modify the fields as needed before saving.'|trans }}";
+      
+      alert(importedInfo);
+    }
+    
+    // Close modal when clicking outside of it
+    $(window).click(function(event) {
+      if (event.target.id === 'bulkDataModal') {
+        closeBulkDataModal();
+      }
     });
   </script>
 {% endblock %}
