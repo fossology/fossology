@@ -56,16 +56,6 @@
     </tr>
     
     <tr>
-      <td>{{ 'User ID'|trans }}:</td>
-      <td><input type="input" name="{{ userFkParam }}" value="{{ user_fk|e }}"/></td>
-    </tr>
-    
-    <tr>
-      <td>{{ 'Group ID'|trans }}:</td>
-      <td><input type="input" name="{{ groupFkParam }}" value="{{ group_fk|e }}"/></td>
-    </tr>
-    
-    <tr>
       <td>{{ 'Active'|trans }}:</td>
       <td><input type="checkbox" name="{{ isActiveParam }}"{% if is_active is not defined or is_active %} checked="checked"{% endif %}/></td>
     </tr>
