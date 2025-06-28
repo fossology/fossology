@@ -84,7 +84,8 @@ class ui_report_conf extends FO_Plugin
    */
   private $checkBoxListSPDX = array(
     "spdxLicenseComment" => "spdxLicenseComment",
-    "ignoreFilesWOInfo" => "ignoreFilesWOInfo"
+    "ignoreFilesWOInfo" => "ignoreFilesWOInfo",
+    "enableOsselotExport"  => "enableOsselotExport"
   );
 
 
@@ -464,6 +465,14 @@ class ui_report_conf extends FO_Plugin
           $('#copyrightRestrictionText').css('display', 'block');
         }
       });
+      
+     $(\"input[name='enableOsselotExport']\").change(function(){
+        if ($(this).is(':checked')) {
+          $(\"input[name='spdxLicenseComment']\").prop('checked', true);
+        }
+      });
+      
+      $('[data-toggle=\"tooltip\"]').tooltip();
     });
     ";
   }

@@ -37,6 +37,7 @@
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\XpClearedGetter;
 use Fossology\Lib\Report\LicenseMainGetter;
@@ -164,7 +165,7 @@ class ReadmeOssAgent extends Agent
       mkdir($fileBase, 0777, true);
     }
     umask(0133);
-    $message = $this->generateReport($contents, $packageName);
+    $message = $this->generateReport($contents, $packageName, $uploadId);
 
     file_put_contents($fileName, $message);
 
@@ -190,12 +191,26 @@ class ReadmeOssAgent extends Agent
    * @param string $break         Line break string
    * @return string Formated report
    */
-  private function createReadMeOSSFormat($addSeparator, $dataForReadME, $extract, $break)
+  private function createReadMeOSSFormat($addSeparator, $dataForReadME, $extract, $break, $uploadId)
   {
     $outData = "";
+    $row = $this->uploadDao->getReportInfo($uploadId);
+    $selections = [];
+    if (!empty($row['ri_spdx_selection'])) {
+        $selections = explode(',', $row['ri_spdx_selection']);
+    }
+    $osselotEnabled = (
+    isset($selections[2]) &&
+    trim($selections[2]) === 'checked'
+    );
     foreach ($dataForReadME as $statements) {
       if ($extract == 'text') {
-        $outData .= $statements["content"] . $break;
+        $licenseLine = $statements["content"];
+        if ($osselotEnabled) {
+            $licenseLine = str_replace(LicenseRef::SPDXREF_PREFIX_FOSSOLOGY, "", $licenseLine);
+            $licenseLine = str_replace(LicenseRef::SPDXREF_PREFIX, "", $licenseLine);
+        }
+        $outData .= $licenseLine . $break;
       }
       $outData .= str_replace("\n", "\r\n", $statements[$extract]) . $break;
       if (!empty($addSeparator)) {
@@ -212,7 +227,7 @@ class ReadmeOssAgent extends Agent
    * @param string $packageName Package for which the report is generated
    * @return string ReadmeOSS report
    */
-  private function generateReport($contents, $packageName)
+  private function generateReport($contents, $packageName, $uploadId)
   {
     $separator1 = str_repeat("=", 120);
     $separator2 = str_repeat("-", 120);
@@ -220,17 +235,17 @@ class ReadmeOssAgent extends Agent
     $output = $separator1 . $break . $packageName . $break . $separator2 . $break;
     if (!empty($contents['licensesMain'])) {
       $output .= $separator1 . $break . " MAIN LICENSES " . $break . $separator2 . $break;
-      $output .= $this->createReadMeOSSFormat($separator2, $contents['licensesMain'], 'text', $break);
+      $output .= $this->createReadMeOSSFormat($separator2, $contents['licensesMain'], 'text', $break, $uploadId);
     }
     if (!empty($contents['licenses'])) {
       $output .= $separator1 . $break . " OTHER LICENSES " . $break . $separator2 . $break;
-      $output .= $this->createReadMeOSSFormat($separator2, $contents['licenses'], 'text', $break);
+      $output .= $this->createReadMeOSSFormat($separator2, $contents['licenses'], 'text', $break, $uploadId);
     }
     if (!empty($contents['licenseAcknowledgements'])) {
       $output .= $separator1 . $break . " ACKNOWLEDGEMENTS " . $break . $separator2 . $break;
-      $output .= $this->createReadMeOSSFormat($separator2, $contents['licenseAcknowledgements'], 'text', $break);
+      $output .= $this->createReadMeOSSFormat($separator2, $contents['licenseAcknowledgements'], 'text', $break, $uploadId);
     }
-    $copyrights = $this->createReadMeOSSFormat("", $contents['copyrights'], 'content', "\r\n");
+    $copyrights = $this->createReadMeOSSFormat("", $contents['copyrights'], 'content', "\r\n", $uploadId);
     if (empty($copyrights)) {
       $output .= "<Copyright notices>";
       $output .= $break;
