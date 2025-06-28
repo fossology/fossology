@@ -18,6 +18,7 @@ use Fossology\Lib\Dao\PackageDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Plugin\AgentPlugin;
 use Fossology\Lib\Util\StringOperation;
+use Fossology\Lib\Util\OsselotLookupHelper;
 use Fossology\Scancode\Ui\ScancodesAgentPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -100,16 +101,18 @@ class ReuserAgentPlugin extends AgentPlugin
    */
   public function scheduleAgent($jobId, $uploadId, &$errorMsg, $request)
   {
-    $reuseUploadPair = explode(',',
-      $request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME), 2);
+    if ($request->get('reuseSource') === 'osselot') {
+        return $this->scheduleOsselotImportDirect($jobId, $uploadId, $errorMsg, $request);
+    }
+
+    $reuseUploadPair = explode(',', $request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME), 2);
     if (count($reuseUploadPair) == 2) {
       list($reuseUploadId, $reuseGroupId) = $reuseUploadPair;
     } else {
       $errorMsg .= 'no reuse upload id given';
-      return - 1;
+      return -1;
     }
     $groupId = $request->get('groupId', Auth::getGroupId());
-
     $getReuseValue = $request->get(self::REUSE_MODE) ?: array();
     $reuserDependencies = array("agent_adj2nest");
 
@@ -142,6 +145,101 @@ class ReuserAgentPlugin extends AgentPlugin
 
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg,
       $reuserDependencies, $uploadId, null, $request);
+  }
+
+  private function scheduleOsselotImportDirect(int $jobId, int $uploadId, string &$errorMsg, Request $request): int
+  {
+    $pkg = trim((string) $request->get('osselotPackage'));
+    $ver = trim((string) $request->get('osselotVersions'));
+    if (empty($pkg) || empty($ver)) {
+        $errorMsg .= 'Package name and version are required';
+        return -1;
+    }
+    try {
+        $helper = new OsselotLookupHelper();
+        $cachedPath = $helper->fetchSpdxFile($pkg, $ver);
+
+      if (!$cachedPath || !is_file($cachedPath) || !is_readable($cachedPath)) {
+          throw new \RuntimeException("Could not fetch or read SPDX file for {$pkg}:{$ver}");
+      }
+
+        global $SysConf;
+        $fileBase = $SysConf['FOSSOLOGY']['path'] . "/ReportImport/";
+
+      if (!is_dir($fileBase) && !mkdir($fileBase, 0755, true)) {
+          throw new \RuntimeException('Failed to create ReportImport directory');
+      }
+
+        $originalName = basename($cachedPath);
+      if (!str_ends_with($originalName, '.rdf.xml')) {
+          $baseName = pathinfo($originalName, PATHINFO_FILENAME);
+          $originalName = str_ends_with($originalName, '.rdf') ?
+              $baseName . '.rdf.xml' : $originalName . '.rdf.xml';
+      }
+
+        $targetFile = time() . '_' . random_int(0, getrandmax()) . '_' . $originalName;
+        $targetPath = $fileBase . $targetFile;
+
+      if (!copy($cachedPath, $targetPath)) {
+          throw new \RuntimeException('Failed to copy SPDX file');
+      }
+
+        $reportImportAgent = plugin_find('agent_reportImport');
+      if (!$reportImportAgent || !method_exists($reportImportAgent, 'addReport') ||
+            !method_exists($reportImportAgent, 'setAdditionalJqCmdArgs') ||
+            !method_exists($reportImportAgent, 'AgentAdd')) {
+          throw new \RuntimeException('agent_reportImport plugin not available or missing methods');
+      }
+
+        $importReq = new Request();
+
+        $addNewLicensesAs = $request->get('osselotAddNewLicensesAs', 'candidate');
+      if (!in_array($addNewLicensesAs, ['candidate', 'approved', 'rejected'], true)) {
+          $addNewLicensesAs = 'candidate';
+      }
+        $importReq->request->set('addNewLicensesAs', $addNewLicensesAs);
+
+        $booleanOptions = [
+            'addLicenseInfoFromInfoInFile', 'addLicenseInfoFromConcluded',
+            'addConcludedAsDecisions', 'addConcludedAsDecisionsOverwrite',
+            'addConcludedAsDecisionsTBD', 'addCopyrights'
+        ];
+
+        foreach ($booleanOptions as $key) {
+            $fullKey = 'osselot' . ucfirst($key);
+            $rawValue = $request->get($fullKey);
+            $finalValue = $rawValue ? 'true' : 'false';
+            $importReq->request->set($key, $finalValue);
+        }
+
+        $licenseMatch = $request->get('osselotLicenseMatch', 'spdxid');
+        if (!in_array($licenseMatch, ['spdxid', 'name', 'text'], true)) {
+            $licenseMatch = 'spdxid';
+        }
+        $importReq->request->set('licenseMatch', $licenseMatch);
+
+        $jqCmdArgs = $reportImportAgent->addReport($targetFile);
+        $additionalArgs = $reportImportAgent->setAdditionalJqCmdArgs($importReq);
+        $jqCmdArgs .= $additionalArgs;
+
+        $error = "";
+        $dependencies = array();
+        $jobQueueId = $reportImportAgent->AgentAdd($jobId, $uploadId, $error, $dependencies, $jqCmdArgs);
+
+        if ($jobQueueId < 0) {
+            throw new \RuntimeException("Cannot schedule job: " . $error);
+        }
+
+        return intval($jobQueueId);
+
+    } catch (\Throwable $e) {
+      if (isset($targetPath) && file_exists($targetPath)) {
+          unlink($targetPath);
+      }
+        $errorMsg .= $e->getMessage();
+        error_log("OSSelot import error: " . $e->getMessage());
+        return -1;
+    }
   }
 
   /**

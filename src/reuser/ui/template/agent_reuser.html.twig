@@ -13,40 +13,178 @@
       </span>
     </label>
     <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Copy clearing decisions if there is the same file hash between two files'|trans }}" alt="" class="info-bullet"/><br/>
-    <label>
-      <input type="checkbox" class="browse-upload-checkbox view-license-rc-size reuseSearchInFolder" id="reuseSearchInFolder" />
-      {{ 'Select an already uploaded package for reuse in specific folder ' | trans }}
-    </label>
-    {% include 'reuse-folder.html.twig' with {
-      'name': reuseFolderSelectorName,
-      'id': reuseFolderSelectorName
-    } %}
-    <br/>
-    <label>
-      <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseEnhanced"/>
-      {{ 'Enhanced reuse (slower)'|trans }}
-      <img src="images/info_16.png" data-toggle="tooltip" title="{{'Will copy a clearing decision if the two files differ by one line determined by a diff tool'|trans}}" alt="" class="info-bullet"/>
-    </label><br/>
+    
+    <div class="form-group">
+      <label for="reuse-source">{{ 'Reuse source'|trans }}:</label>
+      <select id="reuse-source" name="reuseSource" class="form-control"
+              style="width: 200px; display:inline-block;">
+        <option value="local">{{ 'Local'|trans }}</option>
+        {% if osselotAvailable %}
+          <option value="osselot">{{ 'OSSelot SPDX2'|trans }}</option>
+        {% endif %}
+      </select>
+      {% if osselotAvailable %}
+        <img src="images/info_16.png"
+             data-toggle="tooltip"
+             title="{{ 'Fetch curated license analysis from OSSelot database for this package'|trans }}"
+             alt=""
+             class="info-bullet"/>
+      {% endif %}
+    </div>
 
-    <label>
-      <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseMain"/>
-      {{ 'Reuse main license/s'|trans }}
-      <img src="images/info_16.png" data-toggle="tooltip" title="{{'Will copy a main license decision(if any)'|trans}}" alt="" class="info-bullet"/>
-    </label><br/>
+    <div id="local-reuse-section">
+      <label>
+        <input type="checkbox" class="browse-upload-checkbox view-license-rc-size reuseSearchInFolder" id="reuseSearchInFolder" />
+        {{ 'Select an already uploaded package for reuse in specific folder ' | trans }}
+      </label>
+      {% include 'reuse-folder.html.twig' with {
+        'name': reuseFolderSelectorName,
+        'id': reuseFolderSelectorName
+      } %}
+      <br/>
+      <label>
+        <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseEnhanced"/>
+        {{ 'Enhanced reuse (slower)'|trans }}
+        <img src="images/info_16.png" data-toggle="tooltip" title="{{'Will copy a clearing decision if the two files differ by one line determined by a diff tool'|trans}}" alt="" class="info-bullet"/>
+      </label><br/>
+      
+      <label>
+        <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseMain"/>
+        {{ 'Reuse main license/s'|trans }}
+        <img src="images/info_16.png" data-toggle="tooltip" title="{{'Will copy a main license decision(if any)'|trans}}" alt="" class="info-bullet"/>
+      </label><br/>
+      
+      <label>
+        <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseConf"/>
+        {{ 'Reuse report configuration settings'|trans }}
+        <img src="images/info_16.png" data-toggle="tooltip" title="{{'Use to copy all the information from conf page(if any)'|trans}}" alt="" class="info-bullet"/>
+      </label><br/>
+      
+      <label>
+        <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseCopyright"/>
+        {{ 'Reuse deactivated copyrights'|trans }}
+        <img src="images/info_16.png" data-toggle="tooltip" title="{{'Use to copy edited and deactivated copyrights from the reused package'|trans}}" alt="" class="info-bullet"/>
+      </label><br/>
+      
+      <label for="{{ uploadToReuseSelectorName }}">{{ 'Upload to reuse'|trans }}:</label><br/>
+      {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width:420px;"', 5) }}
+    </div>
 
-    <label>
-      <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseConf"/>
-      {{ 'Reuse report configuration settings'|trans }}
-      <img src="images/info_16.png" data-toggle="tooltip" title="{{'Use to copy all the information from conf page(if any)'|trans}}" alt="" class="info-bullet"/>
-    </label><br/>
+    {% if osselotAvailable %}
+    <div id="osselot-reuse-section" style="display:none;">
+      <div class="form-group">
+        <label for="osselot-package">{{ 'Package name'|trans }}:</label>
+        <input type="text"
+               id="osselot-package"
+               name="osselotPackage"
+               class="form-control"
+               style="width: 300px; display:inline-block;"
+               placeholder="{{ 'Enter package name and press Enter'|trans }}"
+               value="{{ defaultPkgName|default('') }}"/>
+        <button type="button"
+                id="osselot-fetch-versions"
+                class="btn btn-secondary btn-sm"
+                style="margin-left: .5em;">
+          {{ 'Fetch Versions'|trans }}
+        </button>
+        <img src="images/info_16.png"
+             data-toggle="tooltip"
+             title="{{ 'Enter the package name as it appears in OSSelot database'|trans }}"
+             alt=""
+             class="info-bullet"/>
+      </div>
 
-    <label>
-      <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseCopyright"/>
-      {{ 'Reuse deactivated copyrights'|trans }}
-      <img src="images/info_16.png" data-toggle="tooltip" title="{{'Use to copy edited and deactivated copyrights from the reused package'|trans}}" alt="" class="info-bullet"/>
-    </label><br/>
+      <div class="form-group">
+        <label>{{ 'Versions'|trans }}:</label>
+        <span id="osselot-version-loading" style="display:none;">
+          <img src="images/ajax-loader.gif" alt="Loading…"/>
+          {{ 'Loading versions…'|trans }}
+        </span>
 
-    <label for="{{ uploadToReuseSelectorName }}">{{ 'Upload to reuse'|trans }}:</label><br/>
-    {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width:420px;"', 5) }}
+        <div id="osselot-version-checkboxes"
+             class="osselot-version-list"
+             style="max-height:160px; overflow:auto; border:1px solid #ced4da;
+                    border-radius:.25rem; padding:.5em;">
+          <em>{{ 'Enter package name first'|trans }}</em>
+        </div>
+
+        <input type="hidden" name="osselotVersions" id="osselot-versions-hidden" value=""/>
+      </div>
+      
+      <div class="form-group">
+        <strong>{{ 'Import options'|trans }}:</strong>
+        
+        <div style="margin-left: 20px; margin-top: 10px;">
+          <div>
+            <strong>{{ 'Create new licenses as'|trans }}:</strong>
+            <div style="margin-left: 20px;">
+              <label>
+                <input type="radio" id="osselot-addNewLicensesAs-candidate" name="osselotAddNewLicensesAs" value="candidate" checked="checked">
+                {{ 'License candidate'|trans }}
+              </label><br/>
+              {% if userIsAdmin %}
+              <label>
+                <input type="radio" id="osselot-addNewLicensesAs-license" name="osselotAddNewLicensesAs" value="license">
+                {{ 'New license'|trans }}
+              </label>
+              {% endif %}
+            </div>
+          </div>
+
+          <div style="margin-top: 10px;">
+            <strong>{{ 'Match license using'|trans }}:</strong>
+            <div style="margin-left: 20px;">
+              <label>
+                <input type="radio" id="osselot-licenseMatch-shortname" name="osselotLicenseMatch" value="shortname">
+                {{ 'Shortname'|trans }}
+              </label><br/>
+              <label>
+                <input type="radio" id="osselot-licenseMatch-spdxid" name="osselotLicenseMatch" value="spdxid" checked="checked">
+                {{ 'SPDX ID'|trans }}
+              </label>
+            </div>
+          </div>
+
+          <div style="margin-top: 10px;">
+            <strong>{{ 'Add the License Info as findings from'|trans }}:</strong>
+            <div style="margin-left: 20px;">
+              <label>
+                <input type="checkbox" name="osselotAddLicenseInfoFromInfoInFile" value="true" checked="checked"/>
+                {{ 'SPDX tag of type licenseInfoInFile'|trans }}
+              </label><br/>
+              <label>
+                <input type="checkbox" name="osselotAddLicenseInfoFromConcluded" value="true" />
+                {{ 'SPDX tag of type licenseConcluded'|trans }}
+              </label>
+            </div>
+          </div>
+
+          <div style="margin-top: 10px;">
+            <label>
+              <input type="checkbox" name="osselotAddConcludedAsDecisions" value="true" checked="checked"/>
+              {{ 'Add concluded licenses as decisions'|trans }}
+            </label>
+            <div style="margin-left: 20px;">
+              <label style="color: gray;">
+                <input type="checkbox" name="osselotAddConcludedAsDecisionsOverwrite" value="true" checked="checked" onclick="return false;"/>
+                {{ 'Also overwrite existing decisions'|trans }}
+              </label><br/>
+              <label>
+                <input type="checkbox" name="osselotAddConcludedAsDecisionsTBD" value="true"/>
+                {{ 'Import as "to be discussed"'|trans }}
+              </label>
+            </div>
+          </div>
+
+          <div style="margin-top: 10px;">
+            <label>
+              <input type="checkbox" name="osselotAddCopyrights" value="true"/>
+              {{ 'Add the copyright information as textfindings'|trans }}
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
   </div>
 </li>

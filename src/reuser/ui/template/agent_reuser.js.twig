@@ -2,6 +2,8 @@
 
    SPDX-License-Identifier: GPL-2.0-only
 #}
+let osselotVersions = [];
+let lastUploadedFiles = []; 
 function registerFolderSelectorChange() {
   $('[id^={{ reuseFolderSelectorName }}]').change(function () {
     const groupIndex = $(this).attr('id').replace('{{ reuseFolderSelectorName }}', '');
@@ -28,22 +30,305 @@ function reloadUploads(folderGroupPair, groupIndex) {
 
 function toggleDisabled() {
   $('.reuseSearchInFolder').click(function () {
-    const groupIndex = $(this).attr('id').replace('reuseSearchInFolder', '');
-    const folderSelector = $(`#{{ reuseFolderSelectorName }}${groupIndex}`);
-    folderSelector.prop('disabled', !$(this).prop('checked'));
-
-    if ($(this).prop('checked')) {
-      folderSelector.trigger('change');
-    } else {
-      reloadUploads("", "");
-    }
+    const gi = $(this).attr('id').replace('reuseSearchInFolder', '');
+    const fs = $(`#{{ reuseFolderSelectorName }}${gi}`);
+    fs.prop('disabled', !this.checked);
+    this.checked ? fs.trigger('change') : reloadUploads('', '');
   });
 
-  reloadUploads("", "");
+  reloadUploads('', '');
   registerFolderSelectorChange();
+}
+
+window.osselotInitialized = window.osselotInitialized || {};
+
+function autoSuggestPackageName(index = '') {
+  const packageFieldId = index === '' ? '#osselot-package' : `#osselot-package${index}`;
+  const $packageField = $(packageFieldId);
+  
+  if ($packageField.val().trim()) {
+    return;
+  }
+  
+  if (!lastUploadedFiles || lastUploadedFiles.length === 0) {
+    return;
+  }
+  
+  const indexNum = index === '' ? 0 : parseInt(index);
+  const filename = lastUploadedFiles[indexNum] ? lastUploadedFiles[indexNum].name : lastUploadedFiles[0].name;
+  
+  if (!filename) {
+    return;
+  }
+  
+  $.ajax({
+    url: '?mod=plugin_reuser&do=extractPackageName',
+    method: 'GET',
+    data: { filename: filename },
+    dataType: 'json',
+    success: function(data) {
+      const packageName = data.packageName || '';
+      
+      if (packageName) {
+        $packageField.val(packageName).trigger('change').trigger('input');
+      }
+    },
+    error: function() {
+    }
+  });
+}
+
+function initializeOsselotFields() {
+
+  function clearOsselotState(index = '') {
+    const suffix = index !== '' ? index : '';
+    
+    $(`#osselot-package${suffix}`).val('');
+    
+    $(`#osselot-versions-hidden${suffix}`).val('');
+    
+    $(`#osselot-version-checkboxes${suffix}`).html('<em>Enter package name first</em>');
+    
+    $(`input[name="osselotVersionRadio${suffix ? '[' + suffix + ']' : ''}"]`).prop('checked', false);
+    $(`#osselot-addNewLicensesAs-candidate${suffix}`).prop('checked', true);
+    $(`#osselot-licenseMatch-spdxid${suffix}`).prop('checked', true);
+    
+    $(`input[name="osselotAddLicenseInfoFromInfoInFile${suffix}"]`).prop('checked', true);
+    $(`input[name="osselotAddLicenseInfoFromConcluded${suffix}"]`).prop('checked', false);
+    $(`input[name="osselotAddConcludedAsDecisions${suffix}"]`).prop('checked', true);
+    $(`input[name="osselotAddConcludedAsDecisionsOverwrite${suffix}"]`).prop('checked', true);
+    $(`input[name="osselotAddConcludedAsDecisionsTBD${suffix}"]`).prop('checked', false);
+    $(`input[name="osselotAddCopyrights${suffix}"]`).prop('checked', false);
+  }
+
+  function toggleReuseSource(index = '') {
+    const reuseSourceId = index !== '' ? `#reuse-source${index}` : '#reuse-source';
+    const localSectionId = index !== '' ? `#local-reuse-section${index}` : '#local-reuse-section';
+    const osselotSectionId = index !== '' ? `#osselot-reuse-section${index}` : '#osselot-reuse-section';
+    
+    const $reuseSource = $(reuseSourceId);
+    if ($reuseSource.length === 0) return;
+    
+    const selectedValue = $reuseSource.val();
+    const $osselotSection = $(osselotSectionId);
+    const $localSection = $(localSectionId);
+    
+    $localSection.hide();
+    $osselotSection.hide();
+    
+    if (selectedValue === 'osselot') {
+      if ($osselotSection.length > 0) {
+        $osselotSection.show().css('display', 'block');
+        autoSuggestPackageName(index);
+      }
+    } else {
+      clearOsselotState(index);
+      
+      if ($localSection.length > 0) {
+        $localSection.show().css('display', 'block');
+        setTimeout(() => {
+          registerFolderSelectorChange();
+          const groupIndex = index || '';
+          reloadUploads('', groupIndex);
+          
+          const checkboxId = groupIndex ? `#reuseSearchInFolder${groupIndex}` : '#reuseSearchInFolder';
+          const $checkbox = $(checkboxId);
+          if ($checkbox.length > 0 && $checkbox.is(':checked')) {
+            $checkbox.trigger('click').trigger('click');
+          }
+        }, 100);
+      }
+    }
+  }
+
+  function renderVersionRadioButtons(versions, index = '') {
+    const containerId = index !== '' ? `#osselot-version-checkboxes${index}` : '#osselot-version-checkboxes';
+    const $box = $(containerId);
+    
+    if ($box.length === 0) return;
+    
+    $box.empty();
+    
+    if (!versions.length) {
+      $box.append(`<em>No versions found for this package</em>`);
+      return;
+    }
+    
+    let html = '';
+    const radioName = index !== '' ? `osselotVersionRadio[${index}]` : 'osselotVersionRadio';
+    
+    versions.forEach((version, versionIndex) => {
+      const radioId = `osselot-version-${versionIndex}${index ? '-' + index : ''}`;
+      const isChecked = versionIndex === 0 ? 'checked' : '';
+      html += `<label style="display:block; margin-bottom:5px;">
+                 <input type="radio" id="${radioId}" 
+                        name="${radioName}" value="${version}" 
+                        class="osselot-version-radio" data-index="${index}"
+                        ${isChecked}> 
+                 ${version}
+               </label>`;
+    });
+    
+    $box.html(html);
+    syncHiddenField(index);
+  }
+
+  function syncHiddenField(index = '') {
+    const hiddenId = index !== '' ? `#osselot-versions-hidden${index}` : '#osselot-versions-hidden';
+    const radioName = index !== '' ? `osselotVersionRadio[${index}]` : 'osselotVersionRadio';
+    
+    const selected = $(`input[name="${radioName}"]:checked`).val() || '';
+    $(hiddenId).val(selected);
+  }
+
+  function fetchOsselotVersions(index = '') {
+    const packageId = index !== '' ? `#osselot-package${index}` : '#osselot-package';
+    const loadingId = index !== '' ? `#osselot-version-loading${index}` : '#osselot-version-loading';
+    
+    const pkg = $(packageId).val().trim();
+    const $load = $(loadingId);
+
+    if (!pkg) return;
+
+    $load.show();
+    const containerId = index !== '' ? `#osselot-version-checkboxes${index}` : '#osselot-version-checkboxes';
+    $(containerId).html('<em>Loading...</em>');
+
+    $.ajax({
+      url: '?mod=plugin_reuser&do=getOsselotVersions',
+      method: 'GET',
+      data: { pkg: pkg },
+      dataType: 'json',
+      success: function(data) {
+        const versions = Array.isArray(data) ? data : [];
+        renderVersionRadioButtons(versions, index);
+        setTimeout(() => {
+          syncHiddenField(index);
+        }, 100);
+      },
+      error: function() {
+        $(containerId).html('<em>Error loading versions</em>');
+      },
+      complete: function() {
+        $load.hide();
+      }
+    });
+  }
+
+  function setupOsselotEvents(index = '') {
+    const indexStr = String(index);
+    const reuseSourceId = indexStr !== '' ? `reuse-source${indexStr}` : 'reuse-source';
+    const packageId = indexStr !== '' ? `osselot-package${indexStr}` : 'osselot-package';
+    const fetchButtonId = indexStr !== '' ? `osselot-fetch-versions${indexStr}` : 'osselot-fetch-versions';
+
+    const namespace = indexStr !== '' ? `.osselot${indexStr}` : '.osselot';
+    $(document).off(namespace);
+    
+    const $reuseSource = $(`#${reuseSourceId}`);
+    if ($reuseSource.length === 0) return;
+    
+    $(document).on(`change${namespace}`, `#${reuseSourceId}`, function() {
+        toggleReuseSource(indexStr);
+    });
+    
+    $(document).on(`input${namespace} change${namespace}`, `#${packageId}`, function(e) {
+        const value = $(this).val();
+        setTimeout(function() {
+            $(`[id^="osselot-package"]:not(#${packageId})`).val(value);
+        }, 10);
+    });
+    
+    $(document).on(`click${namespace} keypress${namespace}`, `#${packageId}, #${fetchButtonId}`, function(e) {
+        if (e.type === 'click' || e.which === 13) {
+            e.preventDefault();
+            fetchOsselotVersions(indexStr);
+        }
+    });
+  }
+
+  $(document).on('change', '.osselot-version-radio', function () {
+    const idx = $(this).data('index') ?? '';
+    syncHiddenField(idx);
+  });
+
+  if (!window.osselotInitialized['']) {
+    setupOsselotEvents();
+    window.osselotInitialized[''] = true;
+  }
+  
+  window.initializeOsselotForIndex = function(index) {
+    const indexStr = String(index);
+    
+    if (window.osselotInitialized[indexStr]) return;
+    
+    setupOsselotEvents(indexStr);
+    
+    setTimeout(() => {
+      const reuseSourceId = indexStr !== '' ? `#reuse-source${indexStr}` : '#reuse-source';
+      $(reuseSourceId).trigger('change');
+    }, 150);
+    
+    window.osselotInitialized[indexStr] = true;
+  };
+
+  window.resetOsselotInitialization = function(index = null) {
+    if (index !== null) {
+      delete window.osselotInitialized[index];
+    } else {
+      window.osselotInitialized = {};
+    }
+  };
 }
 
 $(document).ready(function () {
   toggleDisabled();
+  initializeOsselotFields();
+  
+  window.osselotInitialized = {};
+  
+  $("#fileUploader").on("change", function(e) {
+    window.osselotInitialized = {};
+    
+    const allFiles = e.target.files;
+    lastUploadedFiles = Array.from(allFiles);
+    
+    var holder = $("#uploaddescriptions");
+    holder.html("");
+    
+    if (allFiles.length > 10) {
+      $("#collapseDescription").show();
+      $("#uploaddescriptions").collapse('hide');
+    }
+    
+    const reuseNameTab = $("#reuse-name-tab");
+    const reuseTabContent = $("#reuse-tab-content");
+    reuseNameTab.html("");
+    reuseTabContent.html("");
+    
+    for (let i = 0; i < allFiles.length; i++) {
+      const val = allFiles[i];
+      
+      const tt = $("<h6 class='card-title'>").append(val.name);
+      let formg = $("<div class='form-group'>");
+      const ll = $(`<label for='desc${i}' class='card-text'>`).append("(Optional) Enter a description of this file:");
+      formg.append(ll).append(`<input type='text' class='form-control' name='descriptionInputName[${i}]' id='desc${i}'>`);
+      let body = $("<div class='card-body'>");
+      body.append(tt).append(formg);
+      let html = $("<div class='card'>");
+      html.append(body);
+      holder.append(html);
+      
+      addNavItems(i, val.name, reuseNameTab, reuseTabContent);
+    }
+    
+    setTimeout(function() {
+      for (let i = 0; i < allFiles.length; i++) {
+        if (typeof window.initializeOsselotForIndex === 'function') {
+          window.initializeOsselotForIndex(i);
+        }
+      }
+    }, 300);
+    
+    toggleDisabled();
+  });
 });
-

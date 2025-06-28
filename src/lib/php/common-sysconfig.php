@@ -383,6 +383,40 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "'$contextValue'", "'$contextNamePrompt'",
     strval(CONFIG_TYPE_TEXTAREA), "'ReportText'", "4", "'$contextDesc'", "null", "null");
 
+  $variable         = "EnableOsselotReuse";
+  $prompt           = ("Enable OSSelot Reuse");
+  $desc             = ("When enabled, shows the OSSelot-based reuse option in the Reuser plugin");
+  $valueArray[$variable] = array("'$variable'","true","'$prompt'",
+      strval(CONFIG_TYPE_BOOL),"'ReportText'","5","'$desc'","'check_boolean'","null");
+
+  $variable = "OsselotCuratedUrl";
+  $osselotCuratedPrompt = _('OSSelot Curated API URL');
+  $osselotCuratedValid = "check_url";
+  $osselotCuratedDesc = _('URL for OSSelot curated package information API.');
+  $valueArray[$variable] = array("'$variable'", "'https://www.osselot.org/curated.php'", "'$osselotCuratedPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OSSelot'", "1", "'$osselotCuratedDesc'", "'$osselotCuratedValid'", "null");
+
+  $variable = "OsselotPackageAnalysisUrl";
+  $osselotPackagePrompt = _('OSSelot Package Analysis Base URL');
+  $osselotPackageValid = "check_url";
+  $osselotPackageDesc = _('Base URL for OSSelot package analysis repository.');
+  $valueArray[$variable] = array("'$variable'", "'https://raw.githubusercontent.com/Open-Source-Compliance/package-analysis/main/analysed-packages'", "'$osselotPackagePrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OSSelot'", "2", "'$osselotPackageDesc'", "'$osselotPackageValid'", "null");
+
+  $variable = "OsselotPrimaryDomain";
+  $osselotPrimaryPrompt = _('OSSelot Primary Domain');
+  $osselotPrimaryValid = "check_domain";
+  $osselotPrimaryDesc = _('Primary domain used in OSSelot package analysis URLs (e.g., raw.githubusercontent.com).');
+  $valueArray[$variable] = array("'$variable'", "'raw.githubusercontent.com'", "'$osselotPrimaryPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OSSelot'", "3", "'$osselotPrimaryDesc'", "'$osselotPrimaryValid'", "null");
+
+  $variable = "OsselotFallbackDomain";
+  $osselotFallbackPrompt = _('OSSelot Fallback Domain');
+  $osselotFallbackValid = "check_domain";
+  $osselotFallbackDesc = _('Fallback domain used when primary domain fails (e.g., osselot.org).');
+  $valueArray[$variable] = array("'$variable'", "'osselot.org'", "'$osselotFallbackPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OSSelot'", "4", "'$osselotFallbackDesc'", "'$osselotFallbackValid'", "null");
+
   /*  "Upload from server"-configuration  */
   $variable = "UploadFromServerWhitelist";
   $contextNamePrompt = _("Whitelist for serverupload");
