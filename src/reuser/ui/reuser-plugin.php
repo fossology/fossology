@@ -15,6 +15,7 @@ use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Fossology\Lib\Util\OsselotLookupHelper;
 
 include_once(__DIR__ . "/../agent/version.php");
 
@@ -76,17 +77,28 @@ class ReuserPlugin extends DefaultPlugin
   protected function handle(Request $request)
   {
     $this->folderDao->ensureTopLevelFolder();
-    list($folderId, $trustGroupId) = $this->getFolderIdAndTrustGroup($request->get(self::FOLDER_PARAMETER_NAME));
-    $ajaxMethodName = $request->get('do');
+    $ajax = $request->get('do');
 
-    if ($ajaxMethodName == "getUploads") {
-      $uploadsById = "";
-      if (empty($folderId) || empty($trustGroupId)) {
-        $uploadsById = $this->getAllUploads();
-      } else {
-        $uploadsById = $this->prepareFolderUploads($folderId, $trustGroupId);
+    if ($ajax === 'getUploads') {
+        list($fid, $tgid) = $this->getFolderIdAndTrustGroup($request->get(self::FOLDER_PARAMETER_NAME, ''));
+        $uploads = (empty($fid) || empty($tgid))
+            ? $this->getAllUploads()
+            : $this->prepareFolderUploads($fid, $tgid);
+        return new JsonResponse($uploads, JsonResponse::HTTP_OK);
+    }
+
+    if ($ajax === 'getOsselotVersions') {
+        $pkg = trim($request->get('pkg', $request->get('osselotPackage', '')));
+      if ($pkg === '') {
+          return new JsonResponse([], JsonResponse::HTTP_OK);
       }
-      return new JsonResponse($uploadsById, JsonResponse::HTTP_OK);
+        $helper = new OsselotLookupHelper();
+      try {
+          $versions = $helper->getVersions($pkg);
+      } catch (\Exception $e) {
+          $versions = [];
+      }
+        return new JsonResponse($versions, JsonResponse::HTTP_OK);
     }
 
     return new Response('called without valid method', Response::HTTP_METHOD_NOT_ALLOWED);
@@ -118,6 +130,8 @@ class ReuserPlugin extends DefaultPlugin
    */
   public function renderContent(&$vars)
   {
+    global $SysConf;
+    $osselotAvailable = (array_key_exists('EnableOsselotReuse', $SysConf['SYSCONFIG'])) ? $SysConf['SYSCONFIG']["EnableOsselotReuse"] : '';
     if (!array_key_exists('folderStructure', $vars)) {
       $rootFolderId = $this->folderDao->getRootFolder(Auth::getUserId())->getId();
       $vars['folderStructure'] = $this->folderDao->getFolderStructure($rootFolderId);
@@ -136,6 +150,9 @@ class ReuserPlugin extends DefaultPlugin
     $vars['folderParameterName'] = self::FOLDER_PARAMETER_NAME;
     $vars['uploadToReuseSelectorName'] = self::UPLOAD_TO_REUSE_SELECTOR_NAME;
     $vars['folderUploads'] = $this->prepareFolderUploads($folderId, $trustGroupId);
+    $vars['osselotAvailable'] = $osselotAvailable;
+    $vars['defaultPkgName']  = '';
+    $vars['userIsAdmin']     = Auth::isAdmin();
 
     $renderer = $this->getObject('twig.environment');
     return $renderer->load('agent_reuser.html.twig')->render($vars);
@@ -148,9 +165,13 @@ class ReuserPlugin extends DefaultPlugin
    */
   public function renderFoot(&$vars)
   {
+    global $SysConf;
+    $osselotAvailable = (array_key_exists('EnableOsselotReuse', $SysConf['SYSCONFIG'])) ? $SysConf['SYSCONFIG']["EnableOsselotReuse"] : '';
     $vars['reuseFolderSelectorName'] = self::REUSE_FOLDER_SELECTOR_NAME;
     $vars['folderParameterName'] = self::FOLDER_PARAMETER_NAME;
     $vars['uploadToReuseSelectorName'] = self::UPLOAD_TO_REUSE_SELECTOR_NAME;
+    $vars['osselotAvailable']           = $osselotAvailable;
+
     $renderer = $this->getObject('twig.environment');
     return $renderer->load('agent_reuser.js.twig')->render($vars);
   }
