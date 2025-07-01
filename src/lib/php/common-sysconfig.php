@@ -279,6 +279,12 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
     strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "15", "'$oidcDesc'", "null", "null");
 
+  $variable = "OidcScope";
+  $prompt = _('OIDC Scope');
+  $desc = _('Scope of OIDC for client_credential grant. Used with LicenseDB.');
+  $valueArray[$variable] = array("'$variable'", "''", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "16", "'$oidcDesc'", "null", "null");
+
   /*  Banner Message */
   $variable = "BannerMsg";
   $bannerMsgPrompt = _('Banner message');
@@ -582,19 +588,18 @@ function Populate_sysconfig()
     strval(CONFIG_TYPE_TEXT), "'SSS'", "2", "'$desc'", "null", "null");
 
   /* LicenseDB config */
-  $variable = "LicenseDBURL";
-  $prompt = _('LicenseDB URL');
-  $desc = _('URL to LicenseDB Server');
-  $valueArray[$variable] = array("'$variable'",
-    "''", "'$prompt'",
-    strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "1", "'$desc'", "'check_url'", "null");
-
   $variable = "LicenseDBBaseURL";
   $prompt = _('LicenseDB API base URI');
   $desc = _('Base URI for API calls e.g. /api/v1');
-  $valueArray[$variable] = array("'$variable'", "'/api/v1'",
-    "'$prompt'", strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "2", "'$desc'", "null",
+  $valueArray[$variable] = array("'$variable'", "'http://localhost:8080/api/v1'",
+    "'$prompt'", strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "1", "'$desc'", "null",
     "null");
+
+  $variable = "LicenseDBHealth";
+  $prompt = _('Health check');
+  $desc = _('Endpoint to check health of LicenseDB service');
+  $valueArray[$variable] = array("'$variable'", "'/health'", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "2", "'$desc'", "null", "null");
 
   $variable = "LicenseDBContent";
   $prompt = _('Export endpoint Licenses');
@@ -610,7 +615,7 @@ function Populate_sysconfig()
 
   $variable = "LicenseDBToken";
   $prompt = _('Auth token For LicenseDB');
-  $desc = _('');
+  $desc = _("Token from LicenseDB. Do not set if using OIDC for LicenseDB and FOSSology communication.");
   $valueArray[$variable] = array("'$variable'", "''", "'$prompt'",
     strval(CONFIG_TYPE_PASSWORD), "'LicenseDB'", "5", "'$desc'", "null", "null");
 
