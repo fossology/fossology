@@ -377,6 +377,12 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "'$contextValue'", "'$contextNamePrompt'",
     strval(CONFIG_TYPE_TEXTAREA), "'ReportText'", "4", "'$contextDesc'", "null", "null");
 
+  $variable         = "EnableOsselotReuse";
+  $prompt           = ("Enable OSSelot Reuse");
+  $desc             = ("When enabled, shows the OSSelot-based reuse option in the Reuser plugin");
+  $valueArray[$variable] = array("'$variable'","true","'$prompt'",
+      strval(CONFIG_TYPE_BOOL),"'ReportText'","5","'$desc'","'check_boolean'","null");
+
   /*  "Upload from server"-configuration  */
   $variable = "UploadFromServerWhitelist";
   $contextNamePrompt = _("Whitelist for serverupload");
