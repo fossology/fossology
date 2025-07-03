@@ -257,6 +257,15 @@
             <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="ignoreFilesWOInfo" value="ignoreFilesWOInfo" {{ ignoreFilesWOInfo }} />
           </td>
         </tr>
+        <tr>
+          <td align="left">
+            {{ "Enable OSSelot export"|trans }}
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'When enabled, this upload’s SPDX and ReadMeOSS exports will be OSSelot-compatible: custom licenses will be emitted as LicenseRef-<ShortName> (dropping “-fossology-”), ReadMeOSS will strip all LicenseRef- prefixes, and every license’s full text will be included.'|trans }}" alt="" class="info-bullet"/>
+          </td>
+          <td align="left">
+            <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="enableOsselotExport" value="enableOsselotExport" {{ enableOsselotExport }} />
+          </td>
+        </tr>
       </table>
     </div>
     {% if globalClearingAvailable is not empty %}
