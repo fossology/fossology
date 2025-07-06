@@ -858,8 +858,88 @@ int	FindCmd	(char *Filename)
   if (!MagicCookie) InitMagic();
   TypeBuf[0] = 0;
 
+  /* Filter out system directories that should never be unpacked */
+  if (strstr(Filename, "/sys/") || strstr(Filename, "/proc/") || 
+      strstr(Filename, "/dev/") || strstr(Filename, "/run/") ||
+      strstr(Filename, "/var/run/") || strstr(Filename, "/tmp/"))
+  {
+    if (Verbose > 1)
+    {
+      LOG_DEBUG("SKIP: System directory file: %s", Filename);
+    }
+    return(-1);
+  }
+
+  /* Filter out files in system directories by checking if path contains known system paths */
+  if (strstr(Filename, "/sys/firmware/") || strstr(Filename, "/sys/devices/") ||
+      strstr(Filename, "/sys/class/") || strstr(Filename, "/sys/kernel/"))
+  {
+    if (Verbose > 1)
+    {
+      LOG_DEBUG("SKIP: System path file: %s", Filename);
+    }
+    return(-1);
+  }
+
+  /* Filter out specific problematic file patterns that caused the original issue */
+  if (strstr(Filename, "/sys/firmware/dmi/entries/") ||
+      strstr(Filename, "/sys/devices/virtual/dmi/id/") ||
+      strstr(Filename, "/sys/devices/system/"))
+  {
+    if (Verbose > 1)
+    {
+      LOG_DEBUG("SKIP: DMI/system file: %s", Filename);
+    }
+    return(-1);
+  }
+
+  /* Filter out files with specific extensions or patterns that should never be archives */
+  char *basename_file = basename(Filename);
+  if (strstr(basename_file, "raw") || strstr(basename_file, "asset_tag") ||
+      strstr(basename_file, "board_") || strstr(basename_file, "chassis_") ||
+      strstr(basename_file, "product_") || strstr(basename_file, "has_cpu"))
+  {
+    if (Verbose > 1)
+    {
+      LOG_DEBUG("SKIP: System file pattern: %s", Filename);
+    }
+    return(-1);
+  }
+
   Type = (char *)magic_file(MagicCookie,Filename);
   if (Type == NULL) return(-1);
+
+  /* Filter out specific file types that should never be treated as archives */
+  if (strstr(Type, "text/") || strstr(Type, "inode/") || 
+      strstr(Type, "message/") || strstr(Type, "image/") ||
+      strstr(Type, "audio/") || strstr(Type, "video/"))
+  {
+    if (Verbose > 1)
+    {
+      LOG_DEBUG("SKIP: Non-archive file type: %s (type: %s)", Filename, Type);
+    }
+    return(-1);
+  }
+
+  /* Filter out files that are clearly data files, not archives */
+  if (strstr(Type, "data") && !strstr(Type, "compressed"))
+  {
+    if (Verbose > 1)
+    {
+      LOG_DEBUG("SKIP: Data file, not archive: %s (type: %s)", Filename, Type);
+    }
+    return(-1);
+  }
+
+  /* Filter out empty files */
+  if (strstr(Type, "empty"))
+  {
+    if (Verbose > 1)
+    {
+      LOG_DEBUG("SKIP: Empty file: %s (type: %s)", Filename, Type);
+    }
+    return(-1);
+  }
 
   /* Windows executables look like archives and 7z will attempt to unpack them.
    * If that happens there will be a .bss file representing the .bss segment.
