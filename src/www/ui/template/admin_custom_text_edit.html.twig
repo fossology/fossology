@@ -42,7 +42,12 @@
     
     <tr>
       <td valign="top">{{ 'Text'|trans }}:</td>
-      <td><textarea name="{{ textParam }}" cols="120" rows="10" required>{{ text|e }}</textarea></td>
+      <td>
+        <textarea name="{{ textParam }}" id="textField" cols="120" rows="10" required>{{ text|e }}</textarea>
+        <div id="duplicateWarning" style="color: red; font-weight: bold; display: none; margin-top: 5px;">
+          {{ 'Warning: This text content may already exist in the database.'|trans }}
+        </div>
+      </td>
     </tr>
     
     <tr>
@@ -65,6 +70,7 @@
   {% if not isEdit %}
     <input type="button" value="{{ 'Pull from Bulk Data'|trans }}" onclick="showBulkDataModal()" style="margin-left: 10px;"/>
   {% endif %}
+  <input type="button" value="{{ 'Cancel'|trans }}" onclick="window.location.href='{{ formAction }}'" style="margin-left: 10px;"/>
 </form>
 
 <!-- Bulk Data Modal -->
@@ -110,9 +116,11 @@
   {{ parent() }}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   
   <script type="text/javascript">
     var bulkDataCache = [];
+    var duplicateCheckTimeout = null;
     
     $(document).ready(function() {
       $('#licenseSelect').select2({
@@ -146,6 +154,14 @@
       $('#bulkDataSearch').on('keyup', function() {
         var searchTerm = $(this).val().toLowerCase();
         filterBulkData(searchTerm);
+      });
+
+      // Add duplicate text checking
+      $('#textField').on('input', function() {
+        clearTimeout(duplicateCheckTimeout);
+        duplicateCheckTimeout = setTimeout(function() {
+          checkForDuplicateText();
+        }, 500); // Check after 500ms of no typing
       });
     });
     
@@ -282,6 +298,11 @@
       
       closeBulkDataModal();
       
+      // Trigger duplicate checking for the imported text
+      setTimeout(function() {
+        checkForDuplicateText();
+      }, 100);
+      
       // Show detailed success message
       var importedInfo = "{{ 'Bulk data imported successfully!'|trans }}\n\n";
       importedInfo += "{{ 'Imported:'|trans }}\n";
@@ -303,6 +324,40 @@
       alert(importedInfo);
     }
     
+    function checkForDuplicateText() {
+      var textContent = $('#textField').val().trim();
+      var currentCpPk = $('input[name="cp_pk"]').val() || 0;
+      
+      if (textContent.length === 0) {
+        $('#duplicateWarning').hide();
+        return;
+      }
+      
+      // Calculate MD5 hash of the text content
+      var textMd5 = CryptoJS.MD5(textContent).toString();
+      
+      $.ajax({
+        url: "?mod=admin_custom_text_management&action=check_duplicate",
+        type: "POST",
+        data: { 
+          text_md5: textMd5,
+          cp_pk: currentCpPk
+        },
+        dataType: "json",
+        success: function (response) {
+          if (response.duplicate) {
+            $('#duplicateWarning').show();
+          } else {
+            $('#duplicateWarning').hide();
+          }
+        },
+        error: function (xhr, status, error) {
+          // Silently ignore errors for real-time checking
+          console.log("{{ 'Error checking for duplicate text:'|trans }} " + error);
+        }
+      });
+    }
+
     // Close modal when clicking outside of it
     $(window).click(function(event) {
       if (event.target.id === 'bulkDataModal') {

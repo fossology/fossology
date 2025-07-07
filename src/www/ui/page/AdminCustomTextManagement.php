@@ -67,6 +67,10 @@ class AdminCustomTextManagement extends DefaultPlugin
     if ($action == 'toggle' && $request->getMethod() == 'POST') {
       return $this->togglePhraseStatusAjax($request);
     }
+    
+    if ($action == 'check_duplicate' && $request->getMethod() == 'POST') {
+      return $this->checkDuplicateAjax($request);
+    }
 
     // Handle form submissions  
     if ($request->get('updateit') || $request->get('addit')) {
@@ -144,7 +148,7 @@ class AdminCustomTextManagement extends DefaultPlugin
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
     
-    $sql = "SELECT cp.cp_pk, cp.text, cp.acknowledgement, cp.comments, 
+    $sql = "SELECT cp.cp_pk, cp.text, cp.text_md5, cp.acknowledgement, cp.comments, 
                    cp.user_fk, cp.group_fk, cp.created_date, cp.is_active,
                    u.user_name,
                    STRING_AGG(lr.rf_shortname, ', ' ORDER BY lr.rf_shortname) as license_names
@@ -152,7 +156,7 @@ class AdminCustomTextManagement extends DefaultPlugin
             LEFT JOIN users u ON cp.user_fk = u.user_pk
             LEFT JOIN custom_phrase_license_map cplm ON cp.cp_pk = cplm.cp_pk
             LEFT JOIN license_ref lr ON cplm.rf_pk = lr.rf_pk
-            GROUP BY cp.cp_pk, cp.text, cp.acknowledgement, cp.comments, 
+            GROUP BY cp.cp_pk, cp.text, cp.text_md5, cp.acknowledgement, cp.comments, 
                      cp.user_fk, cp.group_fk, cp.created_date, cp.is_active, u.user_name
             ORDER BY cp.created_date DESC";
     
@@ -178,16 +182,16 @@ class AdminCustomTextManagement extends DefaultPlugin
       $statusToggle = '<input type="checkbox" ' . ($isActiveFlag ? 'checked' : '') . 
                       ' onchange="togglePhraseStatus(' . $row['cp_pk'] . ', ' . ($isActiveFlag ? 'true' : 'false') . ')"/>';
       
-      $deleteBtn = '<a href="javascript:void(0)" onclick="deletePhrase(' . $row['cp_pk'] . ')"><img border="0" src="images/button_delete.png"></a>';
+      $deleteBtn = '<a href="javascript:;" onclick="deletePhrase(' . $row['cp_pk'] . ')"><img class="delete" src="images/space_16.png" alt="Delete"/></a>';
       
       $licenses = $row['license_names'] ?: 'N/A';
       
       $aaData[] = array(
         $editLink,
+        htmlentities($licenses),
         '<div style="overflow-y:scroll;max-height:100px;margin:0;">' . nl2br(htmlentities($text)) . '</div>',
         htmlentities($acknowledgement),
         htmlentities($comments),
-        htmlentities($licenses),
         htmlentities($row['user_name'] ?: 'N/A'),
         $row['created_date'],
         $statusToggle,
@@ -249,6 +253,23 @@ class AdminCustomTextManagement extends DefaultPlugin
   }
 
   /**
+   * AJAX endpoint to check for duplicate text
+   */
+  private function checkDuplicateAjax(Request $request)
+  {
+    $textMd5 = trim($request->get('text_md5'));
+    $currentCpPk = intval($request->get('cp_pk'));
+    
+    if (empty($textMd5)) {
+      return new JsonResponse(array('duplicate' => false));
+    }
+    
+    $isDuplicate = $this->checkDuplicateTextMd5($textMd5, $currentCpPk > 0 ? $currentCpPk : null);
+    
+    return new JsonResponse(array('duplicate' => $isDuplicate));
+  }
+
+  /**
    * AJAX endpoint to toggle phrase status
    */
   private function togglePhraseStatusAjax(Request $request)
@@ -275,6 +296,27 @@ class AdminCustomTextManagement extends DefaultPlugin
     } catch (\Exception $e) {
       return new JsonResponse(array('error' => 'Failed to toggle status: ' . $e->getMessage()), 500);
     }
+  }
+
+  /**
+   * Check if a text MD5 hash already exists in the database
+   */
+  private function checkDuplicateTextMd5($textMd5, $excludeCpPk = null)
+  {
+    /** @var DbManager */
+    $dbManager = $this->getObject('db.manager');
+    
+    $sql = "SELECT cp_pk FROM custom_phrase WHERE text_md5 = $1";
+    $params = array($textMd5);
+    
+    if ($excludeCpPk) {
+      $sql .= " AND cp_pk != $2";
+      $params[] = $excludeCpPk;
+    }
+    
+    $result = $dbManager->getSingleRow($sql, $params, __METHOD__);
+    
+    return $result !== false;
   }
 
   /**
@@ -340,6 +382,14 @@ class AdminCustomTextManagement extends DefaultPlugin
       return _("ERROR: The text field cannot be empty.");
     }
     
+    // Generate MD5 hash of the text
+    $textMd5 = md5($text);
+    
+    // Check for duplicate text (exclude current record when updating)
+    if ($this->checkDuplicateTextMd5($textMd5, $cp_pk > 0 ? $cp_pk : null)) {
+      return _("ERROR: A custom text with the same content already exists in the database. Please modify the text or use the existing entry.");
+    }
+    
     // Set defaults for user and group if not provided
     if (empty($user_fk)) {
       $user_fk = $userId;
@@ -368,10 +418,10 @@ class AdminCustomTextManagement extends DefaultPlugin
       if ($cp_pk > 0) {
         // Update existing phrase
         $sql = "UPDATE custom_phrase SET 
-                text = $2, acknowledgement = $3, comments = $4, 
-                user_fk = $5, group_fk = $6, is_active = $7
+                text = $2, text_md5 = $3, acknowledgement = $4, comments = $5, 
+                user_fk = $6, group_fk = $7, is_active = $8
                 WHERE cp_pk = $1";
-        $params = array($cp_pk, $text, $acknowledgement, $comments, 
+        $params = array($cp_pk, $text, $textMd5, $acknowledgement, $comments, 
                        $user_fk, $group_fk, $is_active);
         $dbManager->prepare($stmt = __METHOD__ . ".update", $sql);
         $dbManager->freeResult($dbManager->execute($stmt, $params));
@@ -384,9 +434,9 @@ class AdminCustomTextManagement extends DefaultPlugin
       } else {
         // Insert new phrase
         $sql = "INSERT INTO custom_phrase 
-                (text, acknowledgement, comments, user_fk, group_fk, is_active, created_date)
-                VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP) RETURNING cp_pk";
-        $params = array($text, $acknowledgement, $comments, 
+                (text, text_md5, acknowledgement, comments, user_fk, group_fk, is_active, created_date)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING cp_pk";
+        $params = array($text, $textMd5, $acknowledgement, $comments, 
                        $user_fk, $group_fk, $is_active);
         $dbManager->prepare($stmt = __METHOD__ . ".insert", $sql);
         $result = $dbManager->execute($stmt, $params);

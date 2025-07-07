@@ -483,8 +483,6 @@
   $Schema["TABLE"]["custom_phrase"]["cp_pk"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"cp_pk\" int4 DEFAULT nextval('custom_phrase_cp_pk_seq'::regclass)";
   $Schema["TABLE"]["custom_phrase"]["cp_pk"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"cp_pk\" SET NOT NULL, ALTER COLUMN \"cp_pk\" SET DEFAULT nextval('custom_phrase_cp_pk_seq'::regclass)";
 
-  // Note: rf_fk column removed in favor of custom_phrase_license_map junction table
-
   $Schema["TABLE"]["custom_phrase"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"user_fk\" IS 'User who created this phrase'";
   $Schema["TABLE"]["custom_phrase"]["user_fk"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"user_fk\" int4";
   $Schema["TABLE"]["custom_phrase"]["user_fk"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"user_fk\" DROP NOT NULL";
@@ -496,6 +494,10 @@
   $Schema["TABLE"]["custom_phrase"]["text"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"text\" IS 'The custom text content'";
   $Schema["TABLE"]["custom_phrase"]["text"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"text\" text";
   $Schema["TABLE"]["custom_phrase"]["text"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"text\" SET NOT NULL";
+
+  $Schema["TABLE"]["custom_phrase"]["text_md5"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"text_md5\" IS 'MD5 hash of the text content for duplicate detection'";
+  $Schema["TABLE"]["custom_phrase"]["text_md5"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"text_md5\" varchar(32)";
+  $Schema["TABLE"]["custom_phrase"]["text_md5"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"text_md5\" SET NOT NULL";
 
   $Schema["TABLE"]["custom_phrase"]["acknowledgement"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase\".\"acknowledgement\" IS 'Acknowledgement text for the license'";
   $Schema["TABLE"]["custom_phrase"]["acknowledgement"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"acknowledgement\" text";
@@ -513,7 +515,6 @@
   $Schema["TABLE"]["custom_phrase"]["comments"]["ADD"] = "ALTER TABLE \"custom_phrase\" ADD COLUMN \"comments\" text";
   $Schema["TABLE"]["custom_phrase"]["comments"]["ALTER"] = "ALTER TABLE \"custom_phrase\" ALTER COLUMN \"comments\" DROP NOT NULL";
 
-  // Junction table for custom_phrase to license_ref many-to-many relationship
   $Schema["TABLE"]["custom_phrase_license_map"]["cp_pk"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase_license_map\".\"cp_pk\" IS 'Foreign key to custom_phrase table'";
   $Schema["TABLE"]["custom_phrase_license_map"]["cp_pk"]["ADD"] = "ALTER TABLE \"custom_phrase_license_map\" ADD COLUMN \"cp_pk\" int4";
   $Schema["TABLE"]["custom_phrase_license_map"]["cp_pk"]["ALTER"] = "ALTER TABLE \"custom_phrase_license_map\" ALTER COLUMN \"cp_pk\" SET NOT NULL";
@@ -2737,7 +2738,6 @@
   $Schema["CONSTRAINT"]["copyright_event_upload_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_event_copyright_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_copyright_fk_fkey\" FOREIGN KEY (\"copyright_fk\") REFERENCES \"copyright\" (\"copyright_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["custom_phrase_pkey"] = "ALTER TABLE \"custom_phrase\" ADD CONSTRAINT \"custom_phrase_pkey\" PRIMARY KEY (\"cp_pk\");";
-  // Old rf_fk constraint removed - using junction table instead
   $Schema["CONSTRAINT"]["custom_phrase_license_map_cp_fk_fkey"] = "ALTER TABLE \"custom_phrase_license_map\" ADD CONSTRAINT \"custom_phrase_license_map_cp_fk_fkey\" FOREIGN KEY (\"cp_pk\") REFERENCES \"custom_phrase\" (\"cp_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["custom_phrase_license_map_rf_fk_fkey"] = "ALTER TABLE \"custom_phrase_license_map\" ADD CONSTRAINT \"custom_phrase_license_map_rf_fk_fkey\" FOREIGN KEY (\"rf_pk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["custom_phrase_license_map_pk"] = "ALTER TABLE \"custom_phrase_license_map\" ADD CONSTRAINT \"custom_phrase_license_map_pk\" PRIMARY KEY (\"cp_pk\", \"rf_pk\");";
@@ -2788,8 +2788,8 @@
   $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_pfile_hash_index"] = "CREATE INDEX copyright_spasht_pfile_hash_index ON copyright_spasht USING btree (hash, pfile_fk);";
 
   $Schema["INDEX"]["custom_phrase"]["cp_user_group_idx"] = "CREATE INDEX cp_user_group_idx ON custom_phrase USING btree (user_fk, group_fk);";
+  $Schema["INDEX"]["custom_phrase"]["cp_text_md5_unique_idx"] = "CREATE UNIQUE INDEX cp_text_md5_unique_idx ON custom_phrase USING btree (text_md5);";
   
-  // Junction table indexes for custom_phrase_license_map
   $Schema["INDEX"]["custom_phrase_license_map"]["cplm_cp_pk_idx"] = "CREATE INDEX cplm_cp_pk_idx ON custom_phrase_license_map USING btree (cp_pk);";
   $Schema["INDEX"]["custom_phrase_license_map"]["cplm_rf_pk_idx"] = "CREATE INDEX cplm_rf_pk_idx ON custom_phrase_license_map USING btree (rf_pk);";
 

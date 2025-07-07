@@ -50,6 +50,7 @@ function Migrate_43_44(bool $verbose): void
       user_fk INTEGER,
       group_fk INTEGER,
       text TEXT NOT NULL,
+      text_md5 VARCHAR(32) NOT NULL,
       acknowledgement TEXT,
       comments TEXT,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -81,6 +82,7 @@ function Migrate_43_44(bool $verbose): void
   // Create indexes
   $indexSQL = [
     "CREATE INDEX cp_user_group_idx ON custom_phrase(user_fk, group_fk);",
+    "CREATE UNIQUE INDEX cp_text_md5_unique_idx ON custom_phrase(text_md5);",
     "CREATE INDEX cplm_cp_pk_idx ON custom_phrase_license_map(cp_pk);",
     "CREATE INDEX cplm_rf_pk_idx ON custom_phrase_license_map(rf_pk);"
   ];
