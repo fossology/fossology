@@ -113,7 +113,18 @@ abstract class UploadPageBase extends DefaultPlugin
       $jobId = JobAddJob($userId, $groupId, $fileName, $uploadId);
     }
     $dummy = "";
-    $unpackArgs = intval($request->get('scm')) == 1 ? '-I' : '';
+
+    global $SysConf;
+    $unpackArgs = intval($request->get('scm')) === 1 ? '-I' : '';
+
+    if (intval($request->get('excludefolder'))) {
+      $rawExclude = $SysConf['SYSCONFIG']['ExcludeFolders'] ?? '';
+      if (trim($rawExclude) !== '') {
+        $excludeFolders = $this->sanitizeExcludePatterns($this->basicShEscaping($rawExclude));
+        $excludeArgs = '-E ' . $excludeFolders;
+        $unpackArgs .= ' ' . $excludeArgs;
+      }
+    }
     $adj2nestDependencies = array();
     if ($wgetDependency) {
       $adj2nestDependencies = array(array('name'=>'agent_unpack','args'=>$unpackArgs,AgentPlugin::PRE_JOB_QUEUE=>array('wget_agent')));
@@ -273,5 +284,19 @@ abstract class UploadPageBase extends DefaultPlugin
       $parmList[$deciderKey] = $parmList[$reuserKey];
       $parmList[$reuserKey] = $temp;
     }
+  }
+  private function sanitizeExcludePatterns($patternStr)
+  {
+    $patterns = explode(',', $patternStr);
+    $sanitized = [];
+
+    foreach ($patterns as $pattern) {
+      $trimmed = trim($pattern); // remove spaces
+      if ($trimmed !== '') {
+        $sanitized[] = $trimmed;
+      }
+    }
+
+    return implode(',', $sanitized);
   }
 }

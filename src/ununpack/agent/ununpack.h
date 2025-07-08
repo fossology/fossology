@@ -187,12 +187,13 @@ char *PathCheck(char *DirPath);
 void Usage (char *Name, char *Version);
 void deleteTmpFiles(char *dir);
 void SQLNoticeProcessor(void *arg, const char *message);
+int ShouldExclude(char *Filename, const char *ExcludePatterns);
+
 
 /* traverse.c */
-void TraverseStart (char *Filename, char *Label, char *NewDir, int Recurse);
+void TraverseStart (char *Filename, char *Label, char *NewDir, int Recurse, char *ExcludePatterns);
 void TraverseChild (int Index, ContainerInfo *CI, char *NewDir);
-int  Traverse (char *Filename, char *Basename, char *Label, char *NewDir,
-              int Recurse, ParentInfo *PI);
+int Traverse (char *Filename, char *Basename, char *Label, char *NewDir, int Recurse, ParentInfo *PI, char *ExcludePatterns);
 
 #endif
 

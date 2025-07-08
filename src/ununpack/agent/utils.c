@@ -1772,3 +1772,34 @@ void	Usage	(char *Name, char *Version)
  void SQLNoticeProcessor(void *arg, const char *message)
  {
  }
+
+/**
+ * \brief Determines if a file or folder should be excluded.
+ *
+ * This function checks whether the supplied file name, `Filename`, contains any of the
+ * substrings listed in the comma-separated string `ExcludePatterns`. Each pattern is matched
+ * directly as a substring; no wildcard or directory-specific matching is performed.
+ *
+ * \param Filename The name of the file or folder to be examined.
+ * \param ExcludePatterns A comma-separated list of substrings used for determining exclusion.
+ * \returns 1 if a substring match is found (file/folder is to be excluded), or 0 otherwise.
+ */
+ int ShouldExclude(char *Filename, const char *ExcludePatterns)
+ {
+   if (!ExcludePatterns || !Filename) return 0;
+
+   char *patternsCopy = strdup(ExcludePatterns);
+   if (!patternsCopy) return 0;
+
+   char *pattern = strtok(patternsCopy, ",");
+   while (pattern != NULL) {
+     if (strstr(Filename, pattern)) {
+       if (Verbose) LOG_DEBUG("Excluding: %s (matched substring: %s)", Filename, pattern);
+       free(patternsCopy);
+       return 1;
+     }
+     pattern = strtok(NULL, ",");
+   }
+   free(patternsCopy);
+   return 0;
+ }
