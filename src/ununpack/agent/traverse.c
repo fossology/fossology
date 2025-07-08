@@ -19,9 +19,9 @@
  * \param Label String displayed by debug messages
  * \param NewDir Optional, specifies an alternate directory to extract to.
  * \param Recurse >0 to recurse
+ * \param ExcludePatterns Patterns to exclude directories.
  **/
-void	TraverseStart	(char *Filename, char *Label, char *NewDir,
-    int Recurse)
+void TraverseStart(char *Filename, char *Label, char *NewDir, int Recurse, char *ExcludePatterns)
 {
   dirlist *DLhead, *DLentry;
   char Name[FILENAME_MAX];
@@ -40,7 +40,7 @@ void	TraverseStart	(char *Filename, char *Label, char *NewDir,
   {
     memset(Name,'\0',sizeof(Name));
     strcpy(Name,Filename);
-    Traverse(Filename,Basename,Label,NewDir,Recurse,&PI);
+    Traverse(Filename,Basename,Label,NewDir,Recurse,&PI,ExcludePatterns);
   }
   else /* process directory */
   {
@@ -52,7 +52,7 @@ void	TraverseStart	(char *Filename, char *Label, char *NewDir,
       strcpy(Name,Filename);
       if (Last(Name) != '/') strcat(Name,"/");
       strcat(Name,DLentry->Name);
-      TraverseStart(Name,Label,NewDir,Recurse);
+      TraverseStart(Name,Label,NewDir,Recurse, ExcludePatterns);
     }
     FreeDirList(DLhead);
   }
@@ -273,8 +273,12 @@ int CountFilename(char *Pathname, char *Dirname)
  *        (The return value is really only used by TraverseStart().)
  **/
 int	Traverse	(char *Filename, char *Basename,
-    char *Label, char *NewDir, int Recurse, ParentInfo *PI)
+    char *Label, char *NewDir, int Recurse, ParentInfo *PI, char *ExcludePatterns)
 {
+  if (ShouldExclude(Filename, ExcludePatterns)) {
+    if (Verbose) LOG_DEBUG("Skipping excluded file or folder: %s", Filename);
+    return 0;
+  }
   int rc;
   PGresult *result;
   int i;
@@ -394,7 +398,7 @@ int	Traverse	(char *Filename, char *Basename,
         TmpPk = CI.PI.uploadtree_pk;
         CI.PI.uploadtree_pk = CI.uploadtree_pk;
         /* don't decrement just because it is a directory */
-        Traverse(CI.Partdir,NULL,"Called by dir",NULL,Recurse,&(CI.PI));
+        Traverse(CI.Partdir,NULL,"Called by dir",NULL,Recurse,&(CI.PI), ExcludePatterns);
         CI.PI.uploadtree_pk = TmpPk;
       }
     }
@@ -613,9 +617,9 @@ int	Traverse	(char *Filename, char *Basename,
             Queue[Index].PI.uploadtree_pk = CI.uploadtree_pk;
 #endif
             if (Recurse > 0)
-              Traverse(Queue[Index].ChildRecurse,NULL,"Called by dir/wait",NULL,Recurse-1,&Queue[Index].PI);
+              Traverse(Queue[Index].ChildRecurse,NULL,"Called by dir/wait",NULL,Recurse-1,&Queue[Index].PI, ExcludePatterns);
             else if (Recurse < 0)
-              Traverse(Queue[Index].ChildRecurse,NULL,"Called by dir/wait",NULL,Recurse,&Queue[Index].PI);
+              Traverse(Queue[Index].ChildRecurse,NULL,"Called by dir/wait",NULL,Recurse,&Queue[Index].PI, ExcludePatterns);
             if (ListOutFile)
             {
               fputs("</item>\n",ListOutFile);

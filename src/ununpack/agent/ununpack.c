@@ -3,6 +3,8 @@
 
  SPDX-FileCopyrightText: © 2007-2013 Hewlett-Packard Development Company, L.P.
  SPDX-FileCopyrightText: © 2015,2023 Siemens AG
+ SPDX-FileContributor: Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
+
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -90,6 +92,7 @@
  * | -U upload_pk | Upload to unpack (implies -RQ). Writes to db |
  * | -v     | Verbose (-vv = more verbose) |
  * | -V     | Print the version info, then exit |
+ * | -E patterns | Exclude files matching patterns |
  * \section ununpacksource Agent source
  *   - \link src/ununpack/agent \endlink
  *   - \link src/ununpack/ui \endlink
@@ -129,11 +132,12 @@ int	main(int argc, char *argv[])
   char *VERSION;
   char agent_rev[PATH_MAX];
   struct stat Stat;
+  char *ExcludePatterns = NULL;
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
 
-  while((c = getopt(argc,argv,"ACc:d:FfHhL:m:PQiIqRr:T:t:U:VvXx")) != -1)
+  while((c = getopt(argc,argv,"ACc:d:FfHhL:m:PQiIqRr:T:t:U:VvXxE:")) != -1)
   {
     switch(c)
     {
@@ -186,10 +190,18 @@ int	main(int argc, char *argv[])
       case 'v':	Verbose++; break;
       case 'X':	UnlinkSource=1; break;
       case 'x':	UnlinkAll=1; break;
+      case 'E': ExcludePatterns = optarg; break;
       default:
         Usage(argv[0], BuildVersion);
         SafeExit(25);
     }
+  }
+
+  // Only print exclude patterns if actually set and not empty
+  if (ExcludePatterns && strlen(ExcludePatterns) > 0) {
+    if (Verbose) LOG_DEBUG("Excluding patterns: %s", ExcludePatterns);
+  } else {
+    ExcludePatterns = NULL;
   }
 
   /* Initialize gcrypt and disable security memory */
@@ -442,8 +454,8 @@ int	main(int argc, char *argv[])
       } /* else no CF */
       fprintf(ListOutFile,">\n"); /* end source XML */
     }
-    if (Fname)	TraverseStart(Fname,"called by main via args",NewDir,Recurse);
-    else		TraverseStart(argv[optind],"called by main",NewDir,Recurse);
+    if (Fname)	TraverseStart(Fname,"called by main via args",NewDir,Recurse,ExcludePatterns);
+    else		TraverseStart(argv[optind],"called by main",NewDir,Recurse,ExcludePatterns);
     if (ListOutName != NULL) fprintf(ListOutFile,"</source>\n");
   } /* end for */
 
@@ -468,7 +480,7 @@ int	main(int argc, char *argv[])
     }
     if (Fname)
     {
-      TraverseStart(Fname,"called by main via env",NewDir,Recurse);
+      TraverseStart(Fname,"called by main via env",NewDir,Recurse,ExcludePatterns);
       free(Fname);
       Fname=NULL;
     }
@@ -500,9 +512,9 @@ int	main(int argc, char *argv[])
       {
         /* copy over data */
         if (Recurse > 0)
-          Traverse(Queue[Pid].ChildRecurse,NULL,"called by wait",NULL,Recurse-1,&Queue[Pid].PI);
+          Traverse(Queue[Pid].ChildRecurse,NULL,"called by wait",NULL,Recurse-1,&Queue[Pid].PI,ExcludePatterns);
         else if (Recurse < 0)
-          Traverse(Queue[Pid].ChildRecurse,NULL,"called by wait",NULL,Recurse,&Queue[Pid].PI);
+          Traverse(Queue[Pid].ChildRecurse,NULL,"called by wait",NULL,Recurse,&Queue[Pid].PI,ExcludePatterns);
       }
     }
   } while(Pid >= 0);
