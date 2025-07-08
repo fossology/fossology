@@ -173,6 +173,19 @@ html, body
   font-weight: bold;
 }
 
+.no-agents-message {
+    border: 1px solid #ccc;
+    padding: 5px;
+    text-align: center;
+    background-color: #f9f9f9;
+    width: 510px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
 img.delete, img.add, img.deleted, img.added {
   background-size: 100% 100%;
   height: 16px;
