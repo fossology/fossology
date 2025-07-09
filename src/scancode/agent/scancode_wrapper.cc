@@ -57,22 +57,45 @@ unsigned getFilePointer(const string &filename, size_t start_line,
  * --quiet helps to remove summary and/or progress message
  *
  * @param state  an object of class State which can provide agent Id and CliOptions
- * @param file  code/binary file sent by scheduler
+ * @param fileLocation  location of the file containing list of files to scan
+ * @param outputFile    location where the output will be written
+ * @param parallelParams array of parallel processing parameters
+ *                      [0] = parallel processes
+ *                      [1] = nice level
+ *                      [2] = max tasks per worker
+ *                      [3] = heartbeat interval
+ *                      [4] = verbose flag 
  * @return scanned data output on success, null otherwise
- *
- * @see https://scancode-toolkit.readthedocs.io/en/latest/cli-reference/list-options.html#all-basic-scan-options
  */
-void scanFileWithScancode(const State &state, string fileLocation, string outputFile) {
+void scanFileWithScancode(const State& state, string fileLocation,
+                          string outputFile, 
+                          int parallelParams[5])
+{
   string projectUser = fo_config_get(sysconfig, "DIRECTORIES", "PROJECTUSER",
   NULL);
   string cacheDir = fo_config_get(sysconfig, "DIRECTORIES", "CACHEDIR",
   NULL);
 
-  string command =
-    "PYTHONPATH='/home/" + projectUser + "/pythondeps/' " +
-    "python3 runscanonfiles.py -" + state.getCliOptions() + " " +
-    ((state.getCliOptions().find('l') != string::npos) ? "-m " +
-    to_string(MINSCORE): "") + " " + fileLocation + " " + outputFile;
+  string logDir = fo_config_get(sysconfig, "DIRECTORIES", "LOGDIR", NULL);
+  string logFile = logDir + "/scancode_" + to_string(time(NULL)) + ".log";
+
+  string command = "PYTHONPATH='/home/" + projectUser + "/pythondeps/' "
+      + "python3 runscanonfiles.py -" + state.getCliOptions() + " "
+      + ((state.getCliOptions().find('l') != string::npos)
+             ? "-m " + to_string(MINSCORE)
+             : "");
+
+  command += " --parallel " + to_string(parallelParams[0]);
+  command += " --nice-level " + to_string(parallelParams[1]);
+  command += " --max-tasks " + to_string(parallelParams[2]);
+  command += " --heartbeat-interval " + to_string(parallelParams[3]);
+  command += " --log-file " + logFile;
+  if (parallelParams[4] == 1) {
+    command += " --verbose";
+  }
+  command += " " + fileLocation + " " + outputFile;
+
+  LOG_NOTICE("Executing command: %s\n", command.c_str());
 
   int returnvalue = system(command.c_str());
 

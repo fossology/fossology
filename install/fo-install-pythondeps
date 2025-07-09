@@ -161,14 +161,14 @@ if [[ $RUNTIME ]]; then
       # Include experimental dependencies
       su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install \
         --target=$HOME/pythondeps --no-input --upgrade \
-        scancode-toolkit==32.4.1 scanoss==1.5.1 safaa==0.0.3'
+        scancode-toolkit==32.4.1 scanoss==1.5.1 psutil==5.9.5 safaa==0.0.3'
       su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m spacy \
         download en_core_web_sm --target=$HOME/pythondeps'
     else
       # Only non-experimental dependencies
       su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install\
         --target=$HOME/pythondeps --no-input --upgrade \
-        scancode-toolkit==32.4.1 scanoss==1.5.1'
+        scancode-toolkit==32.4.1 scanoss==1.5.1 psutil==5.9.5'
     fi
     ###########################################################################
   else

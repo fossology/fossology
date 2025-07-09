@@ -73,10 +73,15 @@ int writeARS(const State &state, int arsId, int uploadId, int success,
  * @param state           State of the agent
  * @param uploadId        Upload id to be processed
  * @param databaseHandler Database handler object
+ * @param ignoreFilesWithMimeType Ignore files with specific mime types
+ * @param parallelParams  Array of parallel processing parameters
  * @return True when upload is successful
  */
 bool processUploadId(const State &state, int uploadId,
-                     ScancodeDatabaseHandler &databaseHandler, bool ignoreFilesWithMimeType) {
+                     ScancodeDatabaseHandler &databaseHandler,
+                     bool ignoreFilesWithMimeType,
+                     int parallelParams[5])
+{
   vector<unsigned long> fileIds =
       databaseHandler.queryFileIdsForUpload(uploadId,ignoreFilesWithMimeType);
 
@@ -101,7 +106,7 @@ bool processUploadId(const State &state, int uploadId,
   }
 
   writeFileNameToTextFile(fileIdsMap, fileLocation);
-  scanFileWithScancode(state, fileLocation, outputFile);
+  scanFileWithScancode(state, fileLocation, outputFile, parallelParams);
 
   std::ifstream opfile(outputFile);
   if (!opfile) {
@@ -361,19 +366,53 @@ bool saveOtherMatchesToDatabase(const State &state,
 // clueI add in this command line parser
 
 /**
- * @brief parse command line options for scancode toolkit to get required falgs for scanning
+ * @brief parse command line options for scancode toolkit to get required flags for scanning
  * @param[in] argc                     command line arguments count
  * @param[in] argv                     command line argument vector
  * @param[out] cliOption               command line options for scancode toolkit
  * @param[out] ignoreFilesWithMimeType set this flag is user wants to ignore FilesWithMimeType
+ * @param[out] parallelParams           array of parallel processing parameters
+ *                                      [0] = parallel processes
+ *                                      [1] = nice level
+ *                                      [2] = max tasks per worker
+ *                                      [3] = heartbeat interval
+ *                                      [4] = verbose flag (0 or 1)
  * @return  true if parsing is successful otherwise false
  */
-bool parseCommandLine(int argc, char **argv, string &cliOption, bool &ignoreFilesWithMimeType)
+bool parseCommandLine(int argc, char **argv, string &cliOption,
+                      bool &ignoreFilesWithMimeType,
+                      int parallelParams[5])
 {
+  char* confValue;
+  
+  if (!sysconfig) {
+    LOG_WARNING("Configuration not loaded yet\n");
+    parallelParams[0] = 1;   
+    parallelParams[1] = 10;  
+    parallelParams[2] = 1000;  
+    parallelParams[3] = 60;   
+    parallelParams[4] = 0;    
+  } else {
+    confValue = fo_config_get(sysconfig, "performance", "parallel_processes", NULL);
+    parallelParams[0] = confValue ? atoi(confValue) : 1;
+
+    confValue = fo_config_get(sysconfig, "performance", "nice_level", NULL);
+    parallelParams[1] = confValue ? atoi(confValue) : 10;
+    
+    confValue = fo_config_get(sysconfig, "performance", "max_tasks_per_worker", NULL);
+    parallelParams[2] = confValue ? atoi(confValue) : 1000;
+    
+    confValue = fo_config_get(sysconfig, "performance", "heartbeat_interval", NULL);
+    parallelParams[3] = confValue ? atoi(confValue) : 60;
+    
+    confValue = fo_config_get(sysconfig, "scanning", "verbose", NULL);
+    parallelParams[4] = (confValue && (strcmp(confValue, "true") == 0)) ? 1 : 0;
+  }
+  
   po::options_description desc(AGENT_NAME ": available options");
   desc.add_options()
   ("help,h", "show this help")
-  ("ignoreFilesWithMimeType,I","ignoreFilesWithMimeType")
+  ("ignoreFilesWithMimeType,I", "ignoreFilesWithMimeType")
   ("license,l", "scancode license")
   ("copyright,r", "scancode copyright")
   ("email,e", "scancode email")
@@ -382,7 +421,13 @@ bool parseCommandLine(int argc, char **argv, string &cliOption, bool &ignoreFile
   ("scheduler_start", "specifies, that the command was called by the scheduler")
   ("userID", po::value<int>(), "the id of the user that created the job (only in combination with --scheduler_start)")
   ("groupID", po::value<int>(), "the id of the group of the user that created the job (only in combination with --scheduler_start)")
-  ("jobId", po::value<int>(), "the id of the job (only in combination with --scheduler_start)");
+  ("jobId", po::value<int>(), "the id of the job (only in combination with --scheduler_start)")
+  ("parallel", po::value<int>(), "number of parallel processes to use")
+  ("nice-level", po::value<int>(), "process nice level (0-19)")
+  ("max-tasks", po::value<int>(), "maximum tasks per worker process")
+  ("heartbeat-interval", po::value<int>(), "heartbeat interval in seconds")
+  ("verbose,v", "enable verbose logging output");
+
   po::variables_map vm;
   try
   {
@@ -399,6 +444,27 @@ bool parseCommandLine(int argc, char **argv, string &cliOption, bool &ignoreFile
     cliOption += vm.count("url") > 0 ? "u" : "";
     ignoreFilesWithMimeType =
         vm.count("ignoreFilesWithMimeType") > 0 ? true : false;
+    
+    if (vm.count("parallel"))
+    {
+      parallelParams[0] = vm["parallel"].as<int>();
+    }
+    if (vm.count("nice-level"))
+    {
+      parallelParams[1] = vm["nice-level"].as<int>();
+    }
+    if (vm.count("max-tasks"))
+    {
+      parallelParams[2] = vm["max-tasks"].as<int>();
+    }
+    if (vm.count("heartbeat-interval"))
+    {
+      parallelParams[3] = vm["heartbeat-interval"].as<int>();
+    }
+    if (vm.count("verbose"))
+    {
+      parallelParams[4] = 1;
+    }
   }
   catch (boost::bad_any_cast &)
   {
