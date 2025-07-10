@@ -9,15 +9,15 @@
 <table class="semibordered" id="customPhrasesTable" width="100%" cellpadding="0">
   <thead>
     <tr>
-      <th width="5%"></th>
-      <th width="25%"></th>
-      <th width="15%"></th>
-      <th width="15%"></th>
-      <th width="10%"></th>
-      <th width="10%"></th>
-      <th width="10%"></th>
-      <th width="5%"></th>
-      <th width="5%"></th>
+      <th width="5%">{{ "Edit"|trans }}</th>
+      <th width="25%">{{ "Licenses"|trans }}</th>
+      <th width="15%">{{ "Text"|trans }}</th>
+      <th width="15%">{{ "Acknowledgement"|trans }}</th>
+      <th width="10%">{{ "Comments"|trans }}</th>
+      <th width="10%">{{ "Created By"|trans }}</th>
+      <th width="10%">{{ "Created Date"|trans }}</th>
+      <th width="5%">{{ "Status"|trans }}</th>
+      <th width="5%">{{ "Actions"|trans }}</th>
     </tr>
   </thead>
 </table>
@@ -36,31 +36,52 @@
   <script type="text/javascript">
     function createBrowseTable() {
 
-    tableColumns = [
-      {"sTitle": "{{ "Edit"|trans }}", "sClass": "center", "bSearchable": false},
-      {"sTitle": "{{ "Licenses"|trans }}", "sClass": "center", "bSearchable": true},
-      {"sTitle": "{{ "Text"|trans }}", "sClass": "left", "bSearchable": true},
-      {"sTitle": "{{ "Acknowledgement"|trans }}", "sClass": "left", "bSearchable": true},
-      {"sTitle": "{{ "Comments"|trans }}", "sClass": "left", "bSearchable": true},
-      {"sTitle": "{{ "Created By"|trans }}", "sClass": "center", "bSearchable": true},
-      {"sTitle": "{{ "Created Date"|trans }}", "sClass": "center", "bSearchable": false},
-      {"sTitle": "{{ "Status"|trans }}", "sClass": "center", "bSearchable": false},
-      {"sTitle": "{{ "Actions"|trans }}", "sClass": "center", "bSearchable": false}
-    ];
-
-    tableSorting = [ [6, "descu"] ]; // Sort by created date descending
-
     dataTableConfig =
         {
-          "aoColumns": tableColumns,
-          "aaSorting": tableSorting,
-          "iDisplayLength": 20,
-          "aaData": {{ aaData }},
-          "sPaginationType": "listbox",
-          "bStateSave": true
+          "processing": true,
+          "serverSide": true,
+          "paginationType": "listbox",
+          "ajax": {
+            "url": "?mod=admin_custom_text_management&action=fetchData",
+            "type": "GET"
+          },
+          "columns": [
+            { "data": 0, "orderable": false },
+            { "data": 1, "orderable": false },
+            { "data": 2, "orderable": false },
+            { "data": 3, "orderable": false },
+            { "data": 4, "orderable": false },
+            { "data": 5, "orderable": false },
+            { "data": 6, "orderable": true },
+            { "data": 7, "orderable": false },
+            { "data": 8, "orderable": false }
+          ],
+          "order": [[ 6, "desc" ]],
+          "autoWidth": false,
+          "columnDefs": [{
+            "createdCell": function (cell) {
+              $(cell).attr("style", "text-align:center");
+            },
+            "searchable": false,
+            "targets": [0, 6, 7, 8]
+          },{
+            "orderable": false,
+            "searchable": false,
+            "targets": [0, 7, 8]
+          },{
+            "orderable": false,
+            "searchable": true,
+            "targets": [1, 2, 3, 4, 5]
+          },{
+            "orderable": true,
+            "searchable": false,
+            "targets": [6]
+          }],
+          "pageLength": 20,
+          "stateSave": true
         };
 
-      var otable = $('#customPhrasesTable').dataTable(dataTableConfig);
+      var otable = $('#customPhrasesTable').DataTable(dataTableConfig);
       return otable;
     }
 
@@ -76,7 +97,7 @@
               alert("Error: " + data.error);
             } else {
               alert(data.message || "{{ 'Custom text deleted successfully!'|trans }}");
-              window.location.reload();
+              $('#customPhrasesTable').DataTable().ajax.reload(null, false);
             }
           },
           error: function (xhr, status, error) {
@@ -96,7 +117,7 @@
           if (data.error) {
             alert("Error: " + data.error);
           } else {
-            window.location.reload();
+            $('#customPhrasesTable').DataTable().ajax.reload(null, false);
           }
         },
         error: function (xhr, status, error) {
