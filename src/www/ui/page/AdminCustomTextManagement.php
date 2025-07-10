@@ -56,6 +56,10 @@ class AdminCustomTextManagement extends DefaultPlugin
       return $this->getPhrasesAjax();
     }
     
+    if ($action == 'fetchData') {
+      return $this->fetchDataServerSide($request);
+    }
+    
     if ($action == 'get_bulk_data') {
       return $this->getBulkDataAjax();
     }
@@ -95,7 +99,6 @@ class AdminCustomTextManagement extends DefaultPlugin
 
     // Default to table view
     $vars = array(
-      'aaData' => json_encode($this->getPhrasesTableData()),
       'formAction' => Traceback_uri() . '?mod=' . self::NAME
     );
     return $this->render('admin_custom_text_management.html.twig', $this->mergeWithDefault($vars));
@@ -209,6 +212,31 @@ class AdminCustomTextManagement extends DefaultPlugin
   {
     $data = $this->getPhrasesTableData();
     return new JsonResponse(array('data' => $data));
+  }
+
+  /**
+   * AJAX endpoint for server-side pagination
+   */
+  private function fetchDataServerSide(Request $request)
+  {
+    $offset = intval($request->query->get('start', 0));
+    $limit = intval($request->query->get('length', 10));
+    $draw = intval($request->query->get('draw', 1));
+    $searchQuery = $_GET['search']['value'] ?? '';
+
+    if (!empty($searchQuery)) {
+      $searchQuery = '%' . $searchQuery . '%';
+    }
+
+    $totalCount = $this->getTotalPhrasesCount($searchQuery);
+    $phraseArray = $this->getPhrasesServerSide($limit, $offset, $searchQuery);
+
+    return new JsonResponse([
+      "draw" => $draw,
+      "recordsTotal" => $totalCount,
+      "recordsFiltered" => $totalCount,
+      "data" => $phraseArray,
+    ], JsonResponse::HTTP_OK);
   }
 
   /**
@@ -335,6 +363,108 @@ class AdminCustomTextManagement extends DefaultPlugin
     }
     
     return $row;
+  }
+
+  /**
+   * Get total count of custom phrases for server-side pagination
+   */
+  private function getTotalPhrasesCount($searchQuery = '')
+  {
+    /** @var DbManager */
+    $dbManager = $this->getObject('db.manager');
+    
+    $sql = "SELECT COUNT(*) as count FROM custom_phrase cp
+            LEFT JOIN users u ON cp.user_fk = u.user_pk
+            LEFT JOIN custom_phrase_license_map cplm ON cp.cp_pk = cplm.cp_pk
+            LEFT JOIN license_ref lr ON cplm.rf_pk = lr.rf_pk";
+    
+    $params = array();
+    
+    if (!empty($searchQuery)) {
+      $sql .= " WHERE (cp.text ILIKE $1 OR cp.acknowledgement ILIKE $1 OR cp.comments ILIKE $1 OR u.user_name ILIKE $1 OR lr.rf_shortname ILIKE $1)";
+      $params[] = $searchQuery;
+    }
+    
+    $sql .= " GROUP BY cp.cp_pk";
+    
+    $countSql = "SELECT COUNT(*) as count FROM (" . $sql . ") as subquery";
+    
+    $result = $dbManager->getSingleRow($countSql, $params, __METHOD__);
+    return $result ? intval($result['count']) : 0;
+  }
+
+  /**
+   * Get phrases data for server-side pagination
+   */
+  private function getPhrasesServerSide($limit, $offset, $searchQuery = '')
+  {
+    /** @var DbManager */
+    $dbManager = $this->getObject('db.manager');
+    
+    $sql = "SELECT cp.cp_pk, cp.text, cp.text_md5, cp.acknowledgement, cp.comments, 
+                   cp.user_fk, cp.group_fk, cp.created_date, cp.is_active,
+                   u.user_name,
+                   STRING_AGG(lr.rf_shortname, ', ' ORDER BY lr.rf_shortname) as license_names
+            FROM custom_phrase cp
+            LEFT JOIN users u ON cp.user_fk = u.user_pk
+            LEFT JOIN custom_phrase_license_map cplm ON cp.cp_pk = cplm.cp_pk
+            LEFT JOIN license_ref lr ON cplm.rf_pk = lr.rf_pk";
+    
+    $params = array();
+    
+    if (!empty($searchQuery)) {
+      $sql .= " WHERE (cp.text ILIKE $1 OR cp.acknowledgement ILIKE $1 OR cp.comments ILIKE $1 OR u.user_name ILIKE $1 OR lr.rf_shortname ILIKE $1)";
+      $params[] = $searchQuery;
+    }
+    
+    $sql .= " GROUP BY cp.cp_pk, cp.text, cp.text_md5, cp.acknowledgement, cp.comments, 
+                      cp.user_fk, cp.group_fk, cp.created_date, cp.is_active, u.user_name
+              ORDER BY cp.created_date DESC";
+    
+    $sql .= " LIMIT $" . (count($params) + 1) . " OFFSET $" . (count($params) + 2);
+    $params[] = $limit;
+    $params[] = $offset;
+    
+    $result = $dbManager->getRows($sql, $params, __METHOD__);
+    $aaData = array();
+    
+    foreach ($result as $row) {
+      $editLink = '<a href="?mod=' . self::NAME . '&edit=' . $row['cp_pk'] . '"><img border="0" src="images/button_edit.png"></a>';
+      
+      $text = strlen($row['text']) > 100 ? 
+                    substr($row['text'], 0, 100) . '...' : 
+                    $row['text'];
+      
+      $acknowledgement = strlen($row['acknowledgement'] ?: '') > 50 ? 
+                         substr($row['acknowledgement'], 0, 50) . '...' : 
+                         ($row['acknowledgement'] ?: 'N/A');
+      
+      $comments = strlen($row['comments'] ?: '') > 50 ? 
+                  substr($row['comments'], 0, 50) . '...' : 
+                  ($row['comments'] ?: 'N/A');
+      
+      $isActiveFlag = $dbManager->booleanFromDb($row['is_active']);
+      $statusToggle = '<input type="checkbox" ' . ($isActiveFlag ? 'checked' : '') . 
+                      ' onchange="togglePhraseStatus(' . $row['cp_pk'] . ', ' . ($isActiveFlag ? 'true' : 'false') . ')"/>';
+      
+      $deleteBtn = '<a href="javascript:;" onclick="deletePhrase(' . $row['cp_pk'] . ')"><img class="delete" src="images/space_16.png" alt="Delete"/></a>';
+      
+      $licenses = $row['license_names'] ?: 'N/A';
+      
+      $aaData[] = array(
+        $editLink,
+        htmlentities($licenses),
+        '<div style="overflow-y:scroll;max-height:100px;margin:0;">' . nl2br(htmlentities($text)) . '</div>',
+        htmlentities($acknowledgement),
+        htmlentities($comments),
+        htmlentities($row['user_name'] ?: 'N/A'),
+        $row['created_date'],
+        $statusToggle,
+        $deleteBtn
+      );
+    }
+    
+    return $aaData;
   }
 
   /**

@@ -16,7 +16,7 @@ use Fossology\Lib\Plugin\AgentPlugin;
 class KotobaAgentPlugin extends AgentPlugin
 {
   /** @var string Agent description */
-  private $kotobaDesc = "Japanese text analysis agent";
+  private $kotobaDesc = "Custom phrase analysis agent";
 
   public function __construct()
   {
