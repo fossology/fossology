@@ -22,6 +22,19 @@ FOSSology is an open source license compliance software system and toolkit. As a
 FOSSology does not give legal advice.
 https://fossology.org/
 
+## Latest Features (v4.5.x)
+
+The latest version of FOSSology includes several major improvements:
+
+* **SPDX v3.0 Support**: Generate SPDX reports in multiple formats (JSON, JSON-LD, RDF, tag/value)
+* **Compatibility Agent**: New agent with auto-conclusion feature using license types for license compatibility analysis
+* **LicenseDB Integration**: Import licenses and obligations directly from LicenseDB
+* **Enhanced ML Features**: Improved machine learning based copyright false positive deactivation and clutter removal
+* **Multi-upload Reuse Support**: Enhanced support for reusing uploads across multiple files
+* **JSON Import/Export**: License and obligation data can now be imported and exported in JSON format
+
+For experimental features like ML-based copyright deactivation, run `fo-postinstall --python-experimental` after installation.
+
 ## Requirements
 
 The PHP versions 7.3 and later are supported to work for FOSSology. FOSSology requires Postgresql as the database server and apache httpd 2.6 as the web server. These and more dependencies are installed by `utils/fo-installdeps`.
@@ -51,6 +64,8 @@ docker run -p 8081:80 fossology/fossology
 ```
 
 The docker image can then be used using http://IP_OF_DOCKER_HOST:8081/repo user fossy password fossy.
+
+**Note:** The Docker image is based on Debian 12 and includes all the latest features from version 4.5.x.
 
 
 If you want to run Fossology with an external database container, you can use Docker Compose, via the following command: 
@@ -121,7 +136,7 @@ For the ease of usability, following aliases/scripts have been defined and can
 be used:
 - `conffoss`: This will reconfigure cmake with all variables
 - `buildfoss`: This will build the FOSSology using cmake
-- `installfoss`: This will install FOSSology
+- `installfoss`: This will install FOSSology (includes experimental Python features)
 - `fossrun`: Run the FOSSology scheduler
 - `pg_stop`: Stop PostgreSQL server
 - `pg_start`: Start PostgreSQL server
@@ -131,6 +146,8 @@ be used:
 We are currently migrating our documentation to Github. At this stage, you can find general documentation at:
 https://www.fossology.org/get-started/basic-workflow/
 and developer docs on [Github Wiki](https://github.com/fossology/fossology/wiki) and https://fossology.github.io/
+
+For information about the new Compatibility Agent and LicenseDB integration, see the [OSADL Converter documentation](https://github.com/fossology/fossology/blob/master/utils/OSADL_CONVERTOR.md).
 
 ## Support
 
