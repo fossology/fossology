@@ -52,6 +52,8 @@ docker run -p 8081:80 fossology/fossology
 
 The docker image can then be used using http://IP_OF_DOCKER_HOST:8081/repo user fossy password fossy.
 
+**Note:** The Docker image is based on Debian 12 and includes all the latest features from version 4.5.x.
+
 
 If you want to run Fossology with an external database container, you can use Docker Compose, via the following command: 
 
@@ -121,7 +123,7 @@ For the ease of usability, following aliases/scripts have been defined and can
 be used:
 - `conffoss`: This will reconfigure cmake with all variables
 - `buildfoss`: This will build the FOSSology using cmake
-- `installfoss`: This will install FOSSology
+- `installfoss`: This will install FOSSology (includes experimental Python features)
 - `fossrun`: Run the FOSSology scheduler
 - `pg_stop`: Stop PostgreSQL server
 - `pg_start`: Start PostgreSQL server
@@ -131,6 +133,8 @@ be used:
 We are currently migrating our documentation to Github. At this stage, you can find general documentation at:
 https://www.fossology.org/get-started/basic-workflow/
 and developer docs on [Github Wiki](https://github.com/fossology/fossology/wiki) and https://fossology.github.io/
+
+For information about the new Compatibility Agent and LicenseDB integration, see the [OSADL Converter documentation](https://github.com/fossology/fossology/blob/master/utils/OSADL_CONVERTOR.md).
 
 ## Support
 
