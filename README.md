@@ -22,19 +22,6 @@ FOSSology is an open source license compliance software system and toolkit. As a
 FOSSology does not give legal advice.
 https://fossology.org/
 
-## Latest Features (v4.5.x)
-
-The latest version of FOSSology includes several major improvements:
-
-* **SPDX v3.0 Support**: Generate SPDX reports in multiple formats (JSON, JSON-LD, RDF, tag/value)
-* **Compatibility Agent**: New agent with auto-conclusion feature using license types for license compatibility analysis
-* **LicenseDB Integration**: Import licenses and obligations directly from LicenseDB
-* **Enhanced ML Features**: Improved machine learning based copyright false positive deactivation and clutter removal
-* **Multi-upload Reuse Support**: Enhanced support for reusing uploads across multiple files
-* **JSON Import/Export**: License and obligation data can now be imported and exported in JSON format
-
-For experimental features like ML-based copyright deactivation, run `fo-postinstall --python-experimental` after installation.
-
 ## Requirements
 
 The PHP versions 7.3 and later are supported to work for FOSSology. FOSSology requires Postgresql as the database server and apache httpd 2.6 as the web server. These and more dependencies are installed by `utils/fo-installdeps`.
