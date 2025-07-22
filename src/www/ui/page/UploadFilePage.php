@@ -11,6 +11,7 @@ namespace Fossology\UI\Page;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\UI\MenuHook;
 use Fossology\Reuser\ReuserAgentPlugin;
+use Fossology\Lib\Util\OsselotLookupHelper;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -226,6 +227,73 @@ class UploadFilePage extends UploadPageBase
   private function getRequestForReuse(Request $request, string $originalFileName)
   {
     $reuseRequest = clone $request;
+
+    $reuseSourceRaw = $request->get('reuseSource', 'local');
+    $reuseSource = is_array($reuseSourceRaw) ? reset($reuseSourceRaw) : $reuseSourceRaw;
+
+    $osselotPackageRaw = $request->get('osselotPackage');
+    $osselotPackage = is_array($osselotPackageRaw) ? reset($osselotPackageRaw) : $osselotPackageRaw;
+
+    if ($reuseSource === 'osselot') {
+        $reuseRequest->request->set('osselotPackage', $osselotPackage);
+
+        $versionRadio = $request->get('osselotVersionRadio', []);
+        $selectedVersion = '';
+
+      if (is_array($versionRadio)) {
+          $selectedVersion = reset($versionRadio);
+      } elseif (is_string($versionRadio)) {
+          $selectedVersion = $versionRadio;
+      }
+
+      if (empty($selectedVersion)) {
+          $hiddenVersions = $request->get('osselotVersions', '');
+        if (!empty($hiddenVersions)) {
+            $selectedVersion = is_array($hiddenVersions) ? reset($hiddenVersions) : $hiddenVersions;
+        }
+      }
+
+        $reuseRequest->request->set('osselotVersions', $selectedVersion);
+
+        $osselotScalarFields = [
+            'osselotAddNewLicensesAs',
+            'osselotLicenseMatch'
+        ];
+
+        foreach ($osselotScalarFields as $field) {
+            $value = $request->get($field);
+            $finalValue = is_array($value) ? reset($value) : $value;
+            $reuseRequest->request->set($field, $finalValue);
+        }
+
+        $osselotCheckboxFields = [
+            'osselotAddLicenseInfoFromInfoInFile',
+            'osselotAddLicenseInfoFromConcluded',
+            'osselotAddConcludedAsDecisions',
+            'osselotAddConcludedAsDecisionsOverwrite',
+            'osselotAddConcludedAsDecisionsTBD',
+            'osselotAddCopyrights'
+        ];
+
+        foreach ($osselotCheckboxFields as $field) {
+            $value = $request->get($field);
+            $finalValue = null;
+
+          if (is_array($value)) {
+              $firstValue = reset($value);
+              $finalValue = ($firstValue === 'true' || $firstValue === true) ? 'true' : null;
+          } else {
+              $finalValue = ($value === 'true' || $value === true) ? 'true' : null;
+          }
+
+            $reuseRequest->request->set($field, $finalValue);
+        }
+
+        $reuseRequest->request->set('reuseSource', 'osselot');
+
+        return $reuseRequest;
+    }
+
     $reuseSelector = $reuseRequest->get(ReuserAgentPlugin::UPLOAD_TO_REUSE_SELECTOR_NAME);
     $reuseMode = $reuseRequest->get(ReuserAgentPlugin::REUSE_MODE);
 
