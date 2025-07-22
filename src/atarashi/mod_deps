@@ -1,20 +1,8 @@
 #!/usr/bin/env bash
-# FOSSology mod_deps script
-# This script helps you install dependencies on a system. for a module
-#
-# Copyright (C) 2018 Siemens AG
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# version 2 as published by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# SPDX-FileCopyrightText: © 2025 Rajul Jha <rajuljha49@gmail.com>
+
+# SPDX-License-Identifier: GPL-2.0-only
 
 source "$(dirname ${BASH_SOURCE[0]})/../../utils/utils.sh"
 
@@ -23,7 +11,6 @@ source "$(dirname ${BASH_SOURCE[0]})/../../utils/utils.sh"
 # it without being careful can destroy your system.
 #
 YesOpt=''
-
 EVERYTHING=''
 RUNTIME=''
 BUILDTIME=''
@@ -75,45 +62,67 @@ CODENAME=$(lsb_release --codename --short)
 if [[ $BUILDTIME ]]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu)
+    Debian|Ubuntu|Tuxedo)
       apt-get $YesOpt install \
-        python3 python3-pip
+        libboost-program-options-dev libjsoncpp-dev \
+        libbz2-1.0 xz-utils zlib1g libxml2-dev libxslt1-dev libpopt0
       ;;
     Fedora)
       yum $YesOpt install \
-        python3 python3-pip
+        boost-devel jsoncpp-devel \
+        xz-libs zlib libxml2-devel libxslt-devel bzip2-libs libpopt0
       ;;
     RedHatEnterprise*|CentOS)
       yum $YesOpt install epel-release;
       yum $YesOpt install \
-        rh-python3 python3-pip
+        boost-devel jsoncpp-devel \
+        zlib bzip2-libs xz-libs libxml2-devel libxslt-devel libpopt0
       ;;
     *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
-  esac ;;
-  pip3 install --upgrade pip \
-  pip3 install -i https://test.pypi.org/simple/ atarashi
+  esac
 fi
 
 if [[ $RUNTIME ]]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu)
+    Debian|Ubuntu|Tuxedo)
       apt-get $YesOpt install \
+        libbz2-1.0 xz-utils zlib1g libxml2-dev libxslt1-dev libpopt0 \
         python3 python3-pip
-        ;;
+      case "$CODENAME" in
+        stretch)
+          apt-get $YesOpt install libjsoncpp1 libboost-program-options1.62.0;;
+        buster)
+          apt-get $YesOpt install libjsoncpp1 libboost-program-options1.67.0;;
+        bullseye)
+          apt-get $YesOpt install libjsoncpp24 libboost-program-options1.74.0;;
+        bookworm)
+          apt-get $YesOpt install libjsoncpp25 libboost-program-options1.74.0;;
+        sid)
+          apt-get $YesOpt install libjsoncpp1 libboost-program-options1.74.0;;
+        focal)
+          apt-get $YesOpt install libjsoncpp1 libboost-program-options1.71.0;;
+        jammy)
+          apt-get $YesOpt install libjsoncpp25 libboost-program-options1.74.0;;
+        noble)
+          apt-get $YesOpt install libjsoncpp25 libboost-program-options1.74.0;;
+        *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
+      esac;;
     Fedora)
       yum $YesOpt install \
+        jsoncpp boost \
+        xz-libs zlib libxml2-devel libxslt-devel bzip2-libs libpopt0 \
         python3 python3-pip
       ;;
     RedHatEnterprise*|CentOS)
       yum $YesOpt install epel-release;
       yum $YesOpt install \
-        rh-python3 python3-pip
+        jsoncpp boost \
+        zlib bzip2-libs xz-libs libxml2-devel libxslt-devel libpopt0 \
+        python3 python3-pip
       ;;
     *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
-  esac ;;
-  pip3 install --upgrade pip \
-  pip3 install atarashi
+  esac
 fi
 
 #######################################################################
