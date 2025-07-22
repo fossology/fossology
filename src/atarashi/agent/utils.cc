@@ -126,11 +126,11 @@ bool matchPFileWithLicenses(const State& state, unsigned long pFileId, AtarashiD
   return true;
 }
 
-vector<LicenseMatch> createMatches(std::string liscenceName, unsigned percentage)
+vector<LicenseMatch> createMatches(std::string licenceName, unsigned percentage)
 {
   vector<LicenseMatch> matches;
 
-  std::string fossologyLicenseName = liscenceName;
+  std::string fossologyLicenseName = licenceName;
   unsigned score = percentage;
   LicenseMatch match = LicenseMatch(fossologyLicenseName, score);
 

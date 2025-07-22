@@ -30,7 +30,10 @@ AtarashiDatabaseHandler::AtarashiDatabaseHandler(DbManager dbManager) :
 
 vector<unsigned long> AtarashiDatabaseHandler::queryFileIdsForUpload(int uploadId)
 {
-  return queryFileIdsVectorForUpload(uploadId);
+  // The signature for this function in libfossAgentDatabaseHandler.hpp's is:
+  // std::vector<unsigned long> queryFileIdsVectorForUpload(int uploadId, bool ignoreFilesWithMimeType) const;
+  // std::vector<unsigned long> queryFileIdsVectorForUpload(int uploadId, int fileType, bool ignoreFilesWithMimeType) const;
+  return queryFileIdsVectorForUpload(uploadId, false);
 }
 
 // TODO: see function saveToDb() from src/monk/agent/database.c
