@@ -2711,6 +2711,7 @@
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_uploadtree_fk_idx"] = "CREATE INDEX clearing_decision_uploadtree_fk_idx ON clearing_decision USING btree (uploadtree_fk);";
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_group_fk_idx"] = "CREATE INDEX clearing_decision_group_fk_idx ON clearing_decision USING btree (group_fk);";
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_uploadtree_group_pfile_idx"] = "CREATE INDEX clearing_decision_uploadtree_group_pfile_idx ON clearing_decision USING btree (uploadtree_fk, group_fk, pfile_fk);";
+  $Schema["INDEX"]["clearing_decision"]["clearing_decision_type_idx"] = "CREATE INDEX clearing_decision_type_idx ON clearing_decision USING btree (decision_type) WHERE decision_type IN (4,5,6,7);";
 
   $Schema["INDEX"]["clearing_decision_event"]["clearing_decision_event_idx"] = "CREATE INDEX clearing_decision_event_idx ON clearing_decision_event USING btree (clearing_decision_fk, clearing_event_fk);";
 
@@ -2805,6 +2806,8 @@
   $Schema["INDEX"]["pfile"]["pfile_sha256_idx"] = "CREATE INDEX pfile_sha256_idx ON pfile USING btree (pfile_sha256);";
 
   $Schema["INDEX"]["report_cache"]["report_cache_createdts"] = "CREATE INDEX report_cache_createdts ON report_cache USING btree (report_cache_tla);";
+
+  $Schema["INDEX"]["report_info"]["report_info_upload_fk_globaldecision_idx"] = "CREATE INDEX report_info_upload_fk_globaldecision_idx ON report_info USING btree (upload_fk, ri_globaldecision);";
 
   $Schema["INDEX"]["spasht"]["spasht_upload_fk_idx"] = "CREATE INDEX spasht_upload_fk_idx ON spasht USING btree (upload_fk);";
 
