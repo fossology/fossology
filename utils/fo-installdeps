@@ -170,7 +170,7 @@ if [[ $RUNTIME ]]; then
          apt-get $YesOpt install apache2
          apt-get $YesOpt install php-pear \
             libxml2 libzstd1 \
-            binutils \
+            binutils pkg-config libicu-dev \
             cabextract cpio sleuthkit genisoimage \
             poppler-utils \
             unrar-free unzip p7zip-full p7zip wget \
