@@ -93,7 +93,7 @@ def get_allow_list(path: str = '') -> dict:
   return data
 
 
-def print_results(name: str, failed_results: List[ScanResult], 
+def print_results(name: str, failed_results: List[ScanResult],
                   scan_results_with_line_number:List[dict],
                   result_file: IO):
   """
@@ -241,7 +241,7 @@ def text_report(cli_options: CliOptions, result_dir: str, return_val: int,
     scanner=scanner,format_results=format_results)
     print_log_message(f"{result_dir}/licenses.txt", failed_licenses, True,
                       "Following licenses found which are not allow listed",
-                      "No license violation found", "License", return_val, 
+                      "No license violation found", "License", return_val,
                       scan_results_with_line_number)
   if cli_options.copyright:
     copyright_results = scanner.get_copyright_list()
@@ -257,7 +257,7 @@ def text_report(cli_options: CliOptions, result_dir: str, return_val: int,
     scanner=scanner, format_results=format_results)
     print_log_message(f"{result_dir}/keywords.txt", keyword_results, False,
                       "Following keywords found",
-                      "No keyword violation found", "Keyword", return_val, 
+                      "No keyword violation found", "Keyword", return_val,
                       scan_results_with_line_number)
   return return_val
 
@@ -343,13 +343,13 @@ def main(parsed_args):
 
   if cli_options.keyword and cli_options.keyword_conf_file_path:
     keyword_conf_file_path = cli_options.keyword_conf_file_path
-    destination_path = '/usr/local/share/fossology/keyword/agent/keyword.conf'  
+    destination_path = '/usr/local/share/fossology/keyword/agent/keyword.conf'
     is_valid,message = validate_keyword_conf_file(keyword_conf_file_path)
     if is_valid:
       print(f"Validation of keyword file successful: {message}")
       copy_keyword_file_to_destination(keyword_conf_file_path,destination_path)
     else:
-      print(f"Could not validate keyword file: {message}")   
+      print(f"Could not validate keyword file: {message}")
 
   valid_comps_exist = False
   if (cli_options.scan_only_deps or cli_options.repo) and cli_options.sbom_path != '':
@@ -383,13 +383,13 @@ def main(parsed_args):
       print("Something went wrong while downloading the dependencies..")
 
   repo_setup = RepoSetup(cli_options, api_config)
-  if cli_options.repo is False:
-    cli_options.diff_dir = repo_setup.get_diff_dir()
 
-    if cli_options.scan_only_deps and valid_comps_exist:
-      cli_options.diff_dir = save_dir
-    if cli_options.scan_dir:
-      cli_options.diff_dir = cli_options.dir_path
+  if cli_options.scan_only_deps and valid_comps_exist:
+    cli_options.diff_dir = save_dir
+  elif cli_options.scan_dir:
+    cli_options.diff_dir = cli_options.dir_path
+  elif cli_options.repo is False:
+    cli_options.diff_dir = repo_setup.get_diff_dir()
 
   scanner = Scanners(cli_options)
   return_val = 0
@@ -432,7 +432,7 @@ if __name__ == "__main__":
   'Use only when keyword argument is true'
   )
   parser.add_argument('--dir-path', type=str, help='Path to directory for scanning.')
-  
+
   parser.add_argument(
     "--allowlist-path", type=str, help="Pass allowlist.json to allowlist dependencies."
   )
