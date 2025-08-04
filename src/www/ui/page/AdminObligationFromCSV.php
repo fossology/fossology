@@ -116,7 +116,8 @@ class AdminObligationFromCSV extends DefaultPlugin
         $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
         $delimiter = $request->get('delimiter') ?: ',';
         $enclosure = $request->get('enclosure') ?: '"';
-        $vars['message'] = $this->handleFileUpload($uploadFile, $delimiter, $enclosure);
+        $result = $this->handleFileUpload($uploadFile, $delimiter, $enclosure);
+        $vars['message'] = is_array($result) ? $result[1] : $result;
       }
     }
 
