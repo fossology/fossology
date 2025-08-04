@@ -5,7 +5,7 @@
 {% extends "include/base.html.twig" %}
 
 {% block content %}
-  {% set isConfigMissing = not baseURL or not exportEndpoint or not authToken %}
+  {% set isConfigMissing = not baseURL or not exportEndpoint or not tokenConfig %}
   {% macro renderMissingConfigItem(textstring) %}
     <p>{{ textstring|trans }}</p>
   {% endmacro %}
@@ -19,8 +19,8 @@
     {% if not exportEndpoint %}
       {{ _self.renderMissingConfigItem('Export Endpoint is missing.') }}
     {% endif %}
-    {% if not authToken %}
-      {{ _self.renderMissingConfigItem('Auth Token for LicenseDB is missing.') }}
+    {% if not tokenConfig %}
+      {{ _self.renderMissingConfigItem('Auth Token for LicenseDB and OIDC Config is missing. At least one is required.') }}
     {% endif %}
 
     <button type="submit" class="btn btn-default" disabled>{{ 'Import'|trans }}</button>
