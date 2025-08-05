@@ -285,6 +285,30 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "''", "'$prompt'",
     strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "16", "'$oidcDesc'", "null", "null");
 
+  $variable = "ScancodeParallelProcesses";
+  $scancodeParallelPrompt = _('ScanCode Parallel Processes');
+  $scancodeParallelDesc = _('Number of parallel worker processes for ScanCode scanning (1-32). Higher values increase speed but use more memory. Default: 24');
+  $valueArray[$variable] = array("'$variable'", "'24'", "'$scancodeParallelPrompt'",
+    strval(CONFIG_TYPE_INT), "'ScanCode'", "1", "'$scancodeParallelDesc'", "null", "null");
+
+  $variable = "ScancodeNiceLevel";
+  $scancodeNicePrompt = _('ScanCode Nice Level');
+  $scancodeNiceDesc = _('Process priority (0-19, higher = lower priority). Controls how much CPU time ScanCode gets. Default: 15');
+  $valueArray[$variable] = array("'$variable'", "'15'", "'$scancodeNicePrompt'",
+    strval(CONFIG_TYPE_INT), "'ScanCode'", "3", "'$scancodeNiceDesc'", "null", "null");
+
+  $variable = "ScancodeMaxTasks";
+  $scancodeTasksPrompt = _('ScanCode Max Tasks per Worker');
+  $scancodeTasksDesc = _('Maximum number of files a worker process handles before recycling (100-10000). Helps prevent memory leaks. Default: 1000');
+  $valueArray[$variable] = array("'$variable'", "'1000'", "'$scancodeTasksPrompt'",
+    strval(CONFIG_TYPE_INT), "'ScanCode'", "4", "'$scancodeTasksDesc'", "null", "null");
+
+  $variable = "ScancodeHeartbeatInterval";
+  $scancodeHeartbeatPrompt = _('ScanCode Heartbeat Interval (seconds)');
+  $scancodeHeartbeatDesc = _('How often ScanCode sends progress updates to scheduler (10-300 seconds). Default: 60');
+  $valueArray[$variable] = array("'$variable'", "'60'", "'$scancodeHeartbeatPrompt'",
+    strval(CONFIG_TYPE_INT), "'ScanCode'", "5", "'$scancodeHeartbeatDesc'", "null", "null");
+
   /*  Banner Message */
   $variable = "BannerMsg";
   $bannerMsgPrompt = _('Banner message');

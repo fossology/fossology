@@ -23,7 +23,8 @@ int main(int argc, char* argv[])
   ScancodeDatabaseHandler databaseHandler(dbManager);
   string scanFlags;
   bool ignoreFilesWithMimeType;
-  if(!parseCommandLine(argc, argv, scanFlags, ignoreFilesWithMimeType)){
+  int parallelParams[5]; 
+  if(!parseCommandLine(argc, argv, scanFlags, ignoreFilesWithMimeType, parallelParams)){
     return_sched(1);
   }
 
@@ -45,8 +46,7 @@ int main(int argc, char* argv[])
 
     if (arsId <= 0)
       bail(5);
-
-    if (!processUploadId(state, uploadId, databaseHandler,ignoreFilesWithMimeType))
+    if (!processUploadId(state, uploadId, databaseHandler,ignoreFilesWithMimeType, parallelParams))
       bail(2);
 
     fo_scheduler_heart(0);

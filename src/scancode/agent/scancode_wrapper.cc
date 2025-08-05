@@ -57,22 +57,41 @@ unsigned getFilePointer(const string &filename, size_t start_line,
  * --quiet helps to remove summary and/or progress message
  *
  * @param state  an object of class State which can provide agent Id and CliOptions
- * @param file  code/binary file sent by scheduler
+ * @param fileLocation  location of the file containing list of files to scan
+ * @param outputFile    location where the output will be written
+ * @param parallelParams array of parallel processing parameters
+ *                      [0] = parallel processes
+ *                      [1] = max memory MB
+ *                      [2] = nice level
+ *                      [3] = max tasks per worker
+ *                      [4] = heartbeat interval
  * @return scanned data output on success, null otherwise
- *
- * @see https://scancode-toolkit.readthedocs.io/en/latest/cli-reference/list-options.html#all-basic-scan-options
  */
-void scanFileWithScancode(const State &state, string fileLocation, string outputFile) {
+void scanFileWithScancode(const State& state, string fileLocation,
+                          string outputFile, 
+                          int parallelParams[5])
+{
   string projectUser = fo_config_get(sysconfig, "DIRECTORIES", "PROJECTUSER",
   NULL);
   string cacheDir = fo_config_get(sysconfig, "DIRECTORIES", "CACHEDIR",
   NULL);
+  string command = "PYTHONPATH='/home/" + projectUser + "/pythondeps/' "
+      + "python3 runscanonfiles.py -" + state.getCliOptions() + " "
+      + ((state.getCliOptions().find('l') != string::npos)
+             ? "-m " + to_string(MINSCORE)
+             : "");
+  
+  if (parallelParams[0] > 1) 
+  {
+    command += " --parallel " + to_string(parallelParams[0]);
+  }
+  command += " --nice-level " + to_string(parallelParams[2]);
+  command += " --max-tasks " + to_string(parallelParams[3]);
+  command += " --heartbeat-interval " + to_string(parallelParams[4]);
+  
+  command += " " + fileLocation + " " + outputFile;
 
-  string command =
-    "PYTHONPATH='/home/" + projectUser + "/pythondeps/' " +
-    "python3 runscanonfiles.py -" + state.getCliOptions() + " " +
-    ((state.getCliOptions().find('l') != string::npos) ? "-m " +
-    to_string(MINSCORE): "") + " " + fileLocation + " " + outputFile;
+  LOG_NOTICE("Executing command: %s\n", command.c_str());
 
   int returnvalue = system(command.c_str());
 
