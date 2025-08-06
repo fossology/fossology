@@ -4,6 +4,7 @@
  SPDX-FileContributor: Gaurav Mishra <mishra.gaurav@siemens.com>
  SPDX-FileCopyrightText: © 2022 Soham Banerjee <sohambanerjee4abc@hotmail.com>
  SPDX-FileCopyrightText: © 2022, 2023 Samuel Dushimimana <dushsam100@gmail.com>
+ SPDX-FileContributor: Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -446,6 +447,7 @@ class UploadController extends RestController
       $applyGlobal = filter_var($reqBody['applyGlobal'] ?? null,
         FILTER_VALIDATE_BOOLEAN);
       $ignoreScm = $reqBody['ignoreScm'] ?? null;
+      $excludefolder = $reqBody['excludefolder'] ?? false;
     } else {
       $uploadType = $request->getHeaderLine('uploadType');
       $folderId = $request->getHeaderLine('folderId');
@@ -502,9 +504,15 @@ class UploadController extends RestController
         "Require location object if uploadType != file");
     }
 
-    $uploadResponse = $uploadHelper->createNewUpload($locationObject,
-      $folderId, $description, $public, $ignoreScm, $uploadType,
-      $applyGlobal);
+    if (ApiVersion::getVersion($request) == ApiVersion::V2) {
+      $uploadResponse = $uploadHelper->createNewUpload($locationObject,
+        $folderId, $description, $public, $ignoreScm, $uploadType,
+        $applyGlobal, $excludefolder);
+    } else {
+      $uploadResponse = $uploadHelper->createNewUpload($locationObject,
+        $folderId, $description, $public, $ignoreScm, $uploadType,
+        $applyGlobal);
+    }
     $status = $uploadResponse[0];
     $message = $uploadResponse[1];
     $statusDescription = $uploadResponse[2];

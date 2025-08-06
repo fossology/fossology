@@ -619,6 +619,12 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "''", "'$prompt'",
     strval(CONFIG_TYPE_PASSWORD), "'LicenseDB'", "5", "'$desc'", "null", "null");
 
+  $variable = "ExcludeFolders";
+  $mimeTypeToSkip = _("Exclude Folders from scanning");
+  $mimeTypeDesc = _("Add comma (,) separated folder patterns to exclude from unpacking");
+  $valueArray[$variable] = array("'$variable'", "null", "'$mimeTypeToSkip'",
+    strval(CONFIG_TYPE_TEXT), "'Skip'", "1", "'$mimeTypeDesc'", "null", "null");
+
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.
   */
@@ -870,3 +876,4 @@ function get_system_load_average()
 
   return '<button type="button" aria-disabled="true" disabled class="btn '.$class.'">System Load</button>';
 }
+

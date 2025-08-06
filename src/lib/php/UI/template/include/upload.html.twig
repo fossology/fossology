@@ -53,6 +53,13 @@
       </li>
       <li>
         <div class="form-group">
+          <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="excludefolder" value="1"/>
+          {{ 'Ignore Configured Folders:'|trans }} {{ configureExcludeFolders|join(', ') }}
+          <img src="images/info_16.png" data-toggle="tooltip" title="{{'Configure folders from Admin-Customize-Exclude-Files from scanning'|trans}}" alt="" class="info-bullet"/>
+        </div>
+      </li>
+      <li>
+        <div class="form-group">
           <input type="radio" class="browse-upload-checkbox view-license-rc-size" name="public" value="private" {% if uploadVisibility == "private" %} checked="checked" {% endif %}/>
           {{ 'Visible only for active group'| trans }}
           <img src="images/info_16.png" data-toggle="tooltip" title="{{'which is the currently selected group'|trans}}" alt="" class="info-bullet"/><br/>
