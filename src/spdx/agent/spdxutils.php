@@ -108,6 +108,9 @@ class SpdxUtils
     } elseif (count($licenses) == 3 &&
         ($index = array_search(LicenseRef::SPDXREF_PREFIX . "Dual-license", $licenses)) !== false) {
       return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
+    } elseif (count($licenses) == 3 &&
+        ($index = array_search(LicenseRef::SPDXREF_PREFIX_FOSSOLOGY . "Dual-license", $licenses)) !== false) {
+      return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
     } else {
       // Add prefixes where needed, enclose statements containing ' OR ' with parentheses
       return implode(" AND ", $licenses);
