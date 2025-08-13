@@ -42,6 +42,7 @@ class size_dashboard extends FO_Plugin
   {
     $sql = 'INNER JOIN upload ON upload.pfile_fk=pfile.pfile_pk '.
            'INNER JOIN foldercontents ON upload.upload_pk=foldercontents.child_id '.
+           'INNER JOIN upload_clearing ON upload.upload_pk=upload_clearing.upload_fk '.
            'WHERE parent_fk=$1;';
     $statementName = __METHOD__."GetFolderSize";
     $folderSizesql = 'SELECT SUM(pfile_size) FROM pfile '.$sql;
@@ -50,16 +51,18 @@ class size_dashboard extends FO_Plugin
 
     $statementName = __METHOD__."GetEachUploadSize";
     $dispSql = "SELECT upload_pk, upload_filename, pfile_size, " .
-      "to_char(upload_ts, 'YYYY-MM-DD HH24:MI:SS') AS upload_ts FROM pfile " . $sql;
+      "to_char(upload_ts, 'YYYY-MM-DD HH24:MI:SS') AS upload_ts, status_fk FROM pfile " . $sql;
     $results = $this->dbManager->getRows($dispSql, [$folderId], $statementName);
     $var = '';
     foreach ($results as $result) {
       $clearingDuration = $this->uploadDao->getClearingDuration($result["upload_pk"]);
-      $var .= "<tr><td align='left'>" . $result['upload_filename'] .
+      $var .= "<tr><td align='left'>" . $result['upload_pk'] .
+        "</td><td align='left'>" . $result['upload_filename'] .
         "</td><td align='left' data-order='{$result['pfile_size']}'>" .
         HumanSize($result['pfile_size']) .
         "</td><td align='left' data-order='{$clearingDuration[1]}'>$clearingDuration[0]</td>
-        <td align='left'>{$result['upload_ts']}</td></tr>";
+        <td align='left'>{$result['upload_ts']}</td><td align='left'>" . $this->ConvertStatusToString($result['status_fk']) .
+        "</td></tr>";
     }
     return [$var, $folderSize];
   }
@@ -76,6 +79,7 @@ class size_dashboard extends FO_Plugin
       "FROM pfile " .
       "INNER JOIN upload ON upload.pfile_fk=pfile.pfile_pk " .
       "INNER JOIN foldercontents ON upload.upload_pk=foldercontents.child_id " .
+      "INNER JOIN upload_clearing ON upload.upload_pk=upload_clearing.upload_fk ".
       "WHERE parent_fk=$1",
       [$folderId],
       __METHOD__."ExportData"
@@ -85,10 +89,12 @@ class size_dashboard extends FO_Plugin
     foreach ($results as $row) {
       $clearingDuration = $this->uploadDao->getClearingDuration($row["upload_pk"]);
       $data[] = [
+        'uploadid' => $row['upload_pk'],
         'name' => $row['upload_filename'],
         'size' => $row['pfile_size'],
         'duration' => $clearingDuration[1],
-        'date' => $row['upload_ts']
+        'date' => $row['upload_ts'],
+        'status' => $this->ConvertStatusToString($row['status_fk'])
       ];
     }
 
@@ -103,6 +109,24 @@ class size_dashboard extends FO_Plugin
   }
 
   /**
+   * \brief convert numaric status into string.
+   * \param status
+   */
+  private function ConvertStatusToString($status)
+  {
+    $statusString = 'Open';
+    if ($status == 2) {
+      $statusString = 'In progress';
+    } else if ($status == 3) {
+      $statusString = 'Closed';
+    } else if ($status == 4) {
+      $statusString = 'Rejected';
+    }
+
+    return $statusString;
+  }
+
+  /**
    * \brief Outputs data in CSV format.
    * \param data The data array to be converted into CSV.
    */
@@ -112,14 +136,16 @@ class size_dashboard extends FO_Plugin
     header('Content-Disposition: attachment; filename="folder_export.csv"');
 
     $output = fopen('php://output', 'w');
-    fputcsv($output, ['Upload Name', 'Size (bytes)', 'Clearing Duration (seconds)', 'Upload Date']);
+    fputcsv($output, ['Upload id', 'Upload name', 'Size (bytes)', 'Clearing duration (seconds)', 'Upload date', 'Upload status']);
 
     foreach ($data as $row) {
       fputcsv($output, [
+        $row['uploadid'],
         $row['name'],
         $row['size'],
         $row['duration'],
-        $row['date']
+        $row['date'],
+        $row['status']
       ]);
     }
     fclose($output);
