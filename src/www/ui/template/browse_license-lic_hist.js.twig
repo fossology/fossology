@@ -53,3 +53,31 @@ function createReuseReportTable() {
   };
   return $('#reuseTable').dataTable(reuseReportTableConfig);
 }
+
+function dressContents(data, type, full) {
+  if (type === 'display') {
+    // data = [licenseShortName, rfId, isMain]
+    var licenseName = data[0];
+    var licenseId = data[1];
+    var isMain = data[2];
+    var uploadId = {{ uploadId }};
+
+    var nameLink = '<a href="#" onclick="filterScan(' + licenseId + ',\'scan\')">' +
+                     licenseName +
+                   '</a>';
+
+    if (isMain) {
+      var tooltip = "This is a main license for the upload. Click to discard selection.";
+      var star = ' <a href="javascript:;" onclick="removeMainLicenseHist(' + uploadId + ',' + licenseId + ');">' +
+                   '<img src="images/icons/star_filled_16.png" alt="mainLicense" title="' + tooltip + '" border="0"/>' +
+                 '</a>';
+    } else {
+      var tooltip = "Click to select this as a main license for the upload.";
+      var star = ' <a href="javascript:;" onclick="makeMainLicenseHist(' + uploadId + ',' + licenseId + ');">' +
+                   '<img src="images/icons/star_16.png" alt="noMainLicense" title="' + tooltip + '" border="0"/>' +
+                 '</a>';
+    }
+    return nameLink + star;
+  }
+  return data;
+}
