@@ -31,6 +31,13 @@ class ReportImportAgent extends Agent
 {
   const REPORT_KEY = "report";
   const ACLA_KEY = "addConcludedAsDecisions";
+  const ACLAO_KEY = "addConcludedAsDecisionsOverwrite";
+  const ACLATBD_KEY = "addConcludedAsDecisionsTBD";
+  const ALIFI_KEY = "addLicenseInfoFromInfoInFile";
+  const ALFC_KEY = "addLicenseInfoFromConcluded";
+  const ANLA_KEY = "addNewLicensesAs";
+  const LMATCH_KEY = "licenseMatch";
+  const COPYRIGHTS_KEY = "addCopyrights";
 
   /** @var UploadDao */
   private $uploadDao;
@@ -56,8 +63,16 @@ class ReportImportAgent extends Agent
     $this->licenseDao = $this->container->get('dao.license');
     $this->clearingDao = $this->container->get('dao.clearing');
     $this->copyrightDao = $this->container->get('dao.copyright');
+    
     $this->agentSpecifLongOptions[] = self::REPORT_KEY.':';
     $this->agentSpecifLongOptions[] = self::ACLA_KEY.':';
+    $this->agentSpecifLongOptions[] = self::ACLAO_KEY.':';
+    $this->agentSpecifLongOptions[] = self::ACLATBD_KEY.':';
+    $this->agentSpecifLongOptions[] = self::ALIFI_KEY.':';
+    $this->agentSpecifLongOptions[] = self::ALFC_KEY.':';
+    $this->agentSpecifLongOptions[] = self::ANLA_KEY.':';
+    $this->agentSpecifLongOptions[] = self::LMATCH_KEY.':';
+    $this->agentSpecifLongOptions[] = self::COPYRIGHTS_KEY.':';
 
     $this->setAgent_PK();
   }
@@ -79,44 +94,12 @@ class ReportImportAgent extends Agent
     $this->agent_pk = intval($row['agent_pk']);
   }
 
-  /**
-   * @param string[] $args
-   * @param string $longArgsKey
-   *
-   * Duplicate of function in file ../../spdx2/agent/spdx2utils.php
-   */
-  static private function preWorkOnArgsFlp(&$args,$longArgsKey)
-  {
-    if (is_array($args) &&
-      array_key_exists($longArgsKey, $args)){
-      echo "DEBUG: unrefined \$longArgs are: ".$args[$longArgsKey]."\n";
-      $chunks = explode(" --", $args[$longArgsKey]);
-      if(sizeof($chunks) > 1)
-      {
-        $args[$longArgsKey] = $chunks[0];
-        foreach(array_slice($chunks, 1) as $chunk)
-        {
-          if (strpos($chunk, '=') !== false)
-          {
-            list($key, $value) = explode('=', $chunk, 2);
-            $args[$key] = $value;
-          }
-          else
-          {
-            $args[$chunk] = true;
-          }
-        }
-      }
-    }
-  }
-
   function processUploadId($uploadId)
   {
     $this->heartbeat(0);
 
-    self::preWorkOnArgsFlp($this->args, self::REPORT_KEY);
-
     $reportPre = array_key_exists(self::REPORT_KEY,$this->args) ? $this->args[self::REPORT_KEY] : "";
+    $reportPre = trim($reportPre, "\"'");
     global $SysConf;
     $fileBase = $SysConf['FOSSOLOGY']['path'] . "/ReportImport/";
     $report = $fileBase . $reportPre;
