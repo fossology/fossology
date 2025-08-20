@@ -24,8 +24,8 @@ class AgentRef
     'scancode' => 'Sc',
     'spasht' => 'Sp',
     'reso' => 'Rs',
-    'scanoss' => 'So'
-    'atarashi' => 'A'
+    'scanoss' => 'So',
+    'atarashi' => 'A',
   );
   /**
    * @var int

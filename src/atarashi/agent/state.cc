@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2019-2020, Siemens AG
+ * Copyright (C) 2025, Rajul Jha (rajuljha49@gmail.com)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,13 +18,15 @@
 
 #include "state.hpp"
 
-State::State(int agentId) :
-  agentId(agentId)
-{
-}
+State::State(int agentId) : agentId(agentId), verbose(false) {}
 
-int State::getAgentId() const
-{
-  return agentId;
-};
+int State::getAgentId() const { return agentId; }
+string State::getAgentName() const { return agentName; }
+string State::getSimilarityMethod() const { return similarityMethod; }
+// string State::getFilePath() const { return filePath; }
+bool State::isVerbose() const { return verbose; }
 
+void State::setAgentName(const string& name) { agentName = name; }
+void State::setSimilarityMethod(const string& method) { similarityMethod = method; }
+// void State::setFilePath(const string& path) { filePath = path; }
+void State::setVerbose(bool flag) { verbose = flag; }

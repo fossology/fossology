@@ -19,6 +19,8 @@
 #define ATARASHI_AGENT_ATARASHI_HPP
 
 #include "utils.hpp"
+#include "atarashiwrapper.hpp"
+#include "confighelper.hpp"
 
 extern "C" {
 #include "libfossagent.h"

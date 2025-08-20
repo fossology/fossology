@@ -25,13 +25,27 @@ using namespace std;
 
 class State
 {
-public:
-  State(int agentId);
-
-  int getAgentId() const;
-
 private:
   int agentId;
+  string agentName;
+  string similarityMethod;
+  // string filePath;
+  bool verbose;
+
+public:
+  State(int agentId);
+  // Getters
+  int getAgentId() const;
+  string getAgentName() const;
+  string getSimilarityMethod() const;
+  // string getFilePath() const;
+  bool isVerbose() const;
+
+  // Setters
+  void setAgentName(const string& name);
+  void setSimilarityMethod(const string& method);
+  // void setFilePath(const string& path);
+  void setVerbose(bool flag);
 };
 
 #endif // ATARASHI_AGENT_STATE_HPP
