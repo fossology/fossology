@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: © 2023 Siemens AG
+# SPDX-FileCopyrightText: © 2023,2025 Siemens AG
 # SPDX-FileContributor: Gaurav Mishra <mishra.gaurav@siemens.com>
 
 # SPDX-License-Identifier: GPL-2.0-only
@@ -8,7 +8,6 @@
 import fnmatch
 import json
 import os
-import re
 import ssl
 import urllib.request
 from tempfile import TemporaryDirectory
