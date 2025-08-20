@@ -34,6 +34,7 @@ foreach(FO_ATARASHI_TARGET atarashi atarashi_exec atarashi_cov atarashi_cov_exec
         PRIVATE
         ${FO_CWD}/atarashi.cc
         ${FO_CWD}/atarashiwrapper.cc
+        ${FO_CWD}/confighelper.cc
         ${FO_CWD}/databasehandler.cc
         ${FO_CWD}/licensematch.cc
         ${FO_CWD}/state.cc

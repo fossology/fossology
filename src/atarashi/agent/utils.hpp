@@ -28,6 +28,7 @@
 #include "licensematch.hpp"
 #include "state.hpp"
 
+#include <boost/program_options.hpp>
 
 extern "C" {
 #include "libfossology.h"
@@ -39,9 +40,10 @@ State getState(fo::DbManager& dbManager);
 int queryAgentId(fo::DbManager& dbManager);
 int writeARS(const State& state, int arsId, int uploadId, int success, fo::DbManager& dbManager);
 void bail(int exitval);
-bool processUploadId(const State& state, int uploadId, AtarashiDatabaseHandler& databaseHandler);
+bool processUploadId(const State& state, int uploadId, AtarashiDatabaseHandler& databaseHandler, bool ignoreFilesWithMimeType);
 bool matchPFileWithLicenses(const State& state, unsigned long pFileId, AtarashiDatabaseHandler& databaseHandler);
 bool matchFileWithLicenses(const State& state, const fo::File& file, AtarashiDatabaseHandler& databaseHandler);
 bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>& matches, unsigned long pFileId, AtarashiDatabaseHandler& databaseHandler);
+bool parseCommandLine(int argc, char **argv, string &agentName, string &similarityMethod, bool &verboseMode);
 
 #endif // ATARASHI_AGENT_UTILS_HPP

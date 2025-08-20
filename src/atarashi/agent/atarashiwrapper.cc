@@ -24,15 +24,29 @@ string scanFileWithAtarashi(const State& state, const fo::File& file)
 {
   FILE* in;
   char buffer[512];
-  string command = "atarashi -a DLD " + file.getFileName();   //Testing only for DLD Now
   string result;
+  string projectUser = fo_config_get(sysconfig, "DIRECTORIES", "PROJECTUSER", NULL);
+  
+  string command = "PYTHONWARNINGS=\"ignore::UserWarning\" PYTHONPATH='/home/" + projectUser + "/pythondeps/' /home/fossy/pythondeps/bin/atarashi";
+  command += " -a " + state.getAgentName();
+  if (!state.getSimilarityMethod().empty())
+  {
+    command += " -s " + state.getSimilarityMethod();
+  }
+  if (state.isVerbose())
+  {
+    command += " -v";
+    std::cout << "[Atarashi] Verbose: running on file: " << file.getFileName() << "\n";
+    std::cout << "[Atarashi] Executing command: " << command << " " << file.getFileName() << "\n";
+  }
+  command += " " + file.getFileName();
 
+  // cout << "Executing [in scanFileWithAtarashi] Command: " << command << endl;
   if (!(in = popen(command.c_str(), "r")))
   {
     cout << "could not execute atarashi command: " << command << endl;
     bail(1);
   }
-
   while (fgets(buffer, sizeof(buffer), in) != NULL)
   {
     result += buffer;
@@ -43,6 +57,7 @@ string scanFileWithAtarashi(const State& state, const fo::File& file)
     cout << "could not execute atarashi command: " << command << endl;
     bail(1);
   }
+  // cout << "Result: " << result << endl;
 
   int jsonStart = result.find("{");
   return result.substr(jsonStart, string::npos);

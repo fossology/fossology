@@ -31,7 +31,7 @@ public:
   AtarashiDatabaseHandler(AtarashiDatabaseHandler&& other) : fo::AgentDatabaseHandler(std::move(other)) {};
   AtarashiDatabaseHandler spawn() const;
 
-  std::vector<unsigned long> queryFileIdsForUpload(int uploadId);
+  std::vector<unsigned long> queryFileIdsForUpload(int uploadId, bool ignoreFilesWithMimeType);
   bool saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch);
 
   void insertOrCacheLicenseIdForName(std::string const& rfShortName);

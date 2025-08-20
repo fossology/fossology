@@ -22,10 +22,15 @@ install(DIRECTORY ui
     DESTINATION ${FO_MODDIR}/${PROJECT_NAME}
     COMPONENT atarashi
     FILES_MATCHING
-    PATTERN *.php)
+    PATTERN *.php
+    PATTERN *.twig)
 
 install(FILES atarashi.conf "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
     DESTINATION ${FO_MODDIR}/${PROJECT_NAME}
+    COMPONENT atarashi)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/agent/atarashi.conf
+    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent
     COMPONENT atarashi)
 
 add_symlink()
