@@ -341,7 +341,7 @@ class ClearingDao
   public function createDecisionFromEvents($uploadTreeId, $userId, $groupId, $decType, $scope, $eventIds)
   {
     if ( ($scope == DecisionScopes::REPO) &&
-         !empty($this->getCandidateLicenseCountForCurrentDecisions($uploadTreeId))) {
+      !empty($this->getCandidateLicenseCountForCurrentDecisions($uploadTreeId))) {
       throw new \Exception( _("Cannot add candidate license as global decision\n") );
     }
 
@@ -360,7 +360,15 @@ class ClearingDao
 
     $this->removeWipClearingDecision($uploadTreeId, $groupId);
 
-    $statementName = __METHOD__;
+    $pfileFkRow = $this->dbManager->getSingleRow(
+        "SELECT pfile_fk FROM $uploadTreeTable WHERE uploadtree_pk = $1",
+        array($uploadTreeId)
+    );
+    if (!$pfileFkRow || !isset($pfileFkRow['pfile_fk']) || $pfileFkRow['pfile_fk'] <= 0) {
+        $this->dbManager->rollback();
+        throw new \Exception("Invalid or missing pfile_fk for uploadtree_pk=$uploadTreeId, cannot create clearing_decision.");
+    }
+    $statementName = __METHOD__ . '_' . uniqid('', true);
     $this->dbManager->prepare($statementName,
         "
 INSERT INTO clearing_decision (
@@ -372,19 +380,19 @@ INSERT INTO clearing_decision (
   scope
 ) VALUES (
   $1,
-  (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1),
   $2,
   $3,
   $4,
-  $5) RETURNING clearing_decision_pk
-  ");
+  $5,
+  $6) RETURNING clearing_decision_pk
+");
     $res = $this->dbManager->execute($statementName,
-        array($uploadTreeId, $userId,  $groupId, $decType, $scope));
+        array($uploadTreeId, $pfileFkRow['pfile_fk'], $userId, $groupId, $decType, $scope));
     $result = $this->dbManager->fetchArray($res);
     $clearingDecisionId = $result['clearing_decision_pk'];
     $this->dbManager->freeResult($res);
 
-    $statementNameClearingDecisionEventInsert = __METHOD__ . ".insertClearingDecisionEvent";
+    $statementNameClearingDecisionEventInsert = __METHOD__ . '.insertClearingDecisionEvent_' . uniqid('', true);
     $this->dbManager->prepare($statementNameClearingDecisionEventInsert,
       "INSERT INTO clearing_decision_event (clearing_decision_fk, clearing_event_fk) VALUES($1, $2)"
     );
@@ -516,7 +524,11 @@ INSERT INTO clearing_decision (
     $comment = StringOperation::replaceUnicodeControlChar($comment);
     $acknowledgement = StringOperation::replaceUnicodeControlChar($acknowledgement);
 
-    $stmt = __METHOD__;
+    if ($uploadTreeId === null || $userId === null || $groupId === null || $licenseId === null) {
+        error_log("ClearingDao::insertClearingEvent - Null values detected");
+        return false;
+    }
+    $stmt = __METHOD__ . '_' . uniqid('', true);
     $params = array($uploadTreeId, $userId, $groupId, $type, $licenseId, $insertIsRemoved, $reportInfo, $comment, $acknowledgement);
     $columns = "uploadtree_fk, user_fk, group_fk, type_fk, rf_fk, removed, reportinfo, comment, acknowledgement";
     $values = "$1,$2,$3,$4,$5,$6,$7,$8,$9";
@@ -602,15 +614,46 @@ INSERT INTO clearing_decision (
    */
   public function markDecisionAsWip($uploadTreeId, $userId, $groupId)
   {
-    $statementName = __METHOD__;
+    if ($uploadTreeId === null || $userId === null || $groupId === null) {
+        error_log("ClearingDao::markDecisionAsWip - Null values detected");
+        return;
+    }
+    $statementName = __METHOD__ . '_' . uniqid('', true);
+
+    $pfileFk = $this->getValidPfileFk($uploadTreeId);
+    if ($pfileFk === null) {
+        return;
+    }
 
     $this->dbManager->prepare($statementName,
         "INSERT INTO clearing_decision (uploadtree_fk,pfile_fk,user_fk,group_fk,decision_type,scope) VALUES (
-            $1, (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1), $2, $3, $4, $5)");
+            $1, $2, $3, $4, $5, $6)");
     $res = $this->dbManager->execute($statementName,
-        array($uploadTreeId, $userId, $groupId, DecisionTypes::WIP, DecisionScopes::ITEM));
+        array($uploadTreeId, $pfileFk, $userId, $groupId, DecisionTypes::WIP, DecisionScopes::ITEM));
     $this->dbManager->freeResult($res);
   }
+
+  /**
+ * Safely get a valid pfile_fk for a given uploadtree_pk
+ *
+ * @param int $uploadTreeId
+ * @return int|null Returns a valid pfile_fk or null if not found/invalid
+ */
+  private function getValidPfileFk($uploadTreeId)
+  {
+    $pfileFkRow = $this->dbManager->getSingleRow(
+        "SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1",
+        array($uploadTreeId)
+    );
+
+    if (!isset($pfileFkRow['pfile_fk']) || $pfileFkRow['pfile_fk'] <= 0) {
+        error_log("Warning: pfile_fk is missing or invalid for uploadtree_pk=$uploadTreeId");
+        return null;
+    }
+
+    return $pfileFkRow['pfile_fk'];
+  }
+
 
   /**
    * @param int $uploadTreeId

@@ -28,9 +28,10 @@ class TestDbFactory
     $this->ensurePgPassFileEntry();
 
     $sys_conf = sys_get_temp_dir() . "/$dbName" . time() . $sub;
-    if (!mkdir($sys_conf, $mode = 0755))
-    {
-      throw new \Exception("FATAL! Cannot create test repository at " . $sys_conf);
+    if (!is_dir($sys_conf)) {
+        if (!mkdir($sys_conf, 0755, true) && !is_dir($sys_conf)) {
+            throw new \Exception("FATAL! Cannot create test repository at " . $sys_conf);
+        }
     }
     if (chmod($sys_conf, 0755) === FALSE)
     {
