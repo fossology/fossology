@@ -41,6 +41,7 @@ class CliOptions(object):
   :ivar report_format: Report format to use
   :ivar scan_only_deps: Scan only dependencies
   :ivar sbom_path: Path to sbom file
+  :ivar parser: Parser instance to hold list of parsed components
   """
   nomos: bool = False
   ojo: bool = False
@@ -49,10 +50,10 @@ class CliOptions(object):
   repo: bool = False
   differential: bool = False
   scan_dir: bool = False
-  tags: tuple = ('','')
+  tags: tuple = ('', '')
   diff_dir: str = os.getcwd()
   dir_path: str = ''
-  keyword_conf_file_path : str = ''
+  keyword_conf_file_path: str = ''
   allowlist_path: str = None
   allowlist: dict[str, list[str]] = {
     'licenses': [],
@@ -60,7 +61,8 @@ class CliOptions(object):
   }
   report_format: ReportFormat = ReportFormat.TEXT
   scan_only_deps: bool = False
-  sbom_path : str = ''
+  sbom_path: str = ''
+  parser = None
 
   def update_args(self, args: Namespace):
     """
@@ -77,7 +79,9 @@ class CliOptions(object):
     if "ojo" in args.operation:
       self.ojo = True
     if 'repo' in args.operation and 'differential' in args.operation:
-      raise ValueError("You can only specify either 'repo' or 'differential' scans at a time.")
+      raise ValueError(
+        "You can only specify either 'repo' or 'differential' scans at a time."
+        )
     if "repo" in args.operation:
       self.repo = True
     if "differential" in args.operation:
@@ -89,11 +93,11 @@ class CliOptions(object):
     if self.scan_dir and args.dir_path != '':
       self.dir_path = args.dir_path
     if args.tags is not None and self.differential and len(args.tags) == 2:
-      self.tags = (args.tags[0],args.tags[1])
+      self.tags = (args.tags[0], args.tags[1])
     if args.allowlist_path:
       self.allowlist_path = args.allowlist_path
     if self.nomos is False and self.ojo is False and self.copyright is False \
-        and self.keyword is False:
+      and self.keyword is False:
       self.nomos = True
       self.ojo = True
       self.copyright = True

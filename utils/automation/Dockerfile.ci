@@ -82,4 +82,8 @@ RUN echo 'APT::Install-Recommends "0" ; APT::Install-Suggests "0" ;' >> /etc/apt
  && DEBIAN_FRONTEND=noninteractive apt-get autoremove --yes \
  && rm -rf /var/lib/apt/lists/* /opt/run-deps /bin/requirements.txt
 
-CMD ["bash"]
+ENV PYTHONUNBUFFERED=1
+
+CMD [ "bash", "-c" ]
+
+ENTRYPOINT [ "bash", "-c" ]
