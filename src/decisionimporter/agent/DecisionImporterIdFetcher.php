@@ -182,7 +182,9 @@ class DecisionImporterIdFetcher
   }
 
   /**
-   * Update upload tree ids using pfile, lft and rgt
+   * Update upload tree ids using content-centric matching.
+   * Files are matched by content (pfile) - find single file with matching content.
+   *
    * @param array $uploadTreeList
    * @param array $pfileList
    * @param DecisionImporterAgent $agentObj Agent object to send heartbeats
@@ -193,42 +195,55 @@ class DecisionImporterIdFetcher
     $sqlAllTree = "SELECT * FROM uploadtree WHERE upload_fk = $1 AND ufile_mode & (1<<28) = 0;";
     $statementAllTree = __METHOD__ . ".allTree";
     $allUploadTree = $this->dbManager->getRows($sqlAllTree, [$this->uploadId], $statementAllTree);
+
+    $pfileToUploadTree = [];
+    foreach ($allUploadTree as $uploadTreeItem) {
+      $pfileFk = $uploadTreeItem["pfile_fk"];
+      if (!isset($pfileToUploadTree[$pfileFk])) {
+        $pfileToUploadTree[$pfileFk] = [];
+      }
+      $pfileToUploadTree[$pfileFk][] = $uploadTreeItem;
+    }
+
     $i = 0;
     foreach ($uploadTreeList as $oldItemId => $item) {
       $new_pfile = $pfileList[$item["old_pfile"]]["new_pfile"];
-      $matchIndex = -INF;
-      $j = 0;
-      foreach ($allUploadTree as $index => $uploadTreeItem) {
-        if ($uploadTreeItem["pfile_fk"] == $new_pfile) {
-          if (array_key_exists("path", $item)) {
-            $newpath = Dir2Path($uploadTreeItem["uploadtree_pk"]);
-            $newpath = implode("/", array_column($newpath, "ufile_name"));
-            if ($newpath == $item["path"]) {
-              $matchIndex = $index;
-              break;
-            }
-          } elseif ($uploadTreeItem["lft"] == $item["lft"] && $uploadTreeItem["rgt"] == $item["rgt"]) {
-            $matchIndex = $index;
-            break;
-          }
-        }
-        $j++;
-        if ($j == DecisionImporterAgent::$UPDATE_COUNT) {
-          $agentObj->heartbeat(0);
-          $j = 0;
-        }
-      }
-      if ($matchIndex == -INF) {
+
+      if (!isset($pfileToUploadTree[$new_pfile]) || empty($pfileToUploadTree[$new_pfile])) {
         $path = $oldItemId;
         if (array_key_exists("path", $item)) {
           $path = $item["path"];
         }
-        echo "Can't find item with pfile '$new_pfile' in upload " .
-          "'$this->uploadId'.\nIgnoring: $path";
+        echo "Warning: No file with matching content (pfile: $new_pfile) found in upload $this->uploadId.\n";
+        echo "Original path was: $path\n";
         $uploadTreeList[$oldItemId]["new_itemid"] = null;
-      } else {
-        $uploadTreeList[$oldItemId]["new_itemid"] = $allUploadTree[$matchIndex]["uploadtree_pk"];
+        continue;
       }
+
+      $matchingItems = $pfileToUploadTree[$new_pfile];
+
+      if (count($matchingItems) > 1) {
+        echo "Warning: Multiple files (" . count($matchingItems) . ") have identical content (pfile: $new_pfile).\n";
+        if (array_key_exists("path", $item)) {
+          echo "Original path was: " . $item["path"] . "\n";
+        }
+        $uploadTreeList[$oldItemId]["new_itemid"] = null;
+        continue;
+      }
+
+      $matchingItem = $matchingItems[0];
+      $uploadTreeList[$oldItemId]["new_itemid"] = $matchingItem["uploadtree_pk"];
+
+      if (array_key_exists("path", $item)) {
+        $newpath = Dir2Path($matchingItem["uploadtree_pk"]);
+        $newpath = implode("/", array_column($newpath, "ufile_name"));
+        if ($newpath != $item["path"]) {
+          echo "  Old path: " . $item["path"] . "\n";
+          echo "  New path: " . $newpath . "\n";
+          echo "  Decision will be applied based on content match.\n";
+        }
+      }
+
       $i++;
       if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
         $agentObj->heartbeat(0);
