@@ -11,7 +11,6 @@ import os
 import ssl
 import urllib.request
 from tempfile import TemporaryDirectory
-from typing import Union
 
 from .ApiConfig import ApiConfig, Runner
 from .CliOptions import CliOptions
@@ -34,7 +33,7 @@ class RepoSetup:
     :param cli_options: CliOptions object to get allow list from
     :param api_config: API configuration for the CI
     """
-    self.temp_dir: Union[TemporaryDirectory[str], TemporaryDirectory[bytes]] \
+    self.temp_dir: TemporaryDirectory[str] | TemporaryDirectory[bytes] \
       = TemporaryDirectory()
     self.allowlist: dict[str, list[str]] = cli_options.allowlist
     self.api_config: ApiConfig = api_config
@@ -55,12 +54,10 @@ class RepoSetup:
     :param path: path to check
     :return: True if the path is in allow list, False otherwise
     """
-    path_is_excluded = False
-    for pattern in self.allowlist['exclude']:
+    for pattern in self.allowlist.get('exclude', []):
       if fnmatch.fnmatchcase(path, pattern):
-        path_is_excluded = True
-        break
-    return path_is_excluded
+        return True
+    return False
 
   def get_diff_dir(self) -> str:
     """
@@ -77,40 +74,53 @@ class RepoSetup:
       headers = {'Private-Token': self.api_config.api_token}
       path_key = "new_path"
       change_key = "diff"
-      api_req_url = f"{self.api_config.api_url}/projects/" \
-                    f"{self.api_config.project_id}/merge_requests/" \
-                    f"{self.api_config.mr_iid}/changes"
+      api_req_url = (
+        f"{self.api_config.api_url}/projects/"
+        f"{self.api_config.project_id}/merge_requests/"
+        f"{self.api_config.mr_iid}/changes"
+      )
       if self.cli_options.differential and self.cli_options.tags != ('',''):
-        tags = (self.cli_options.tags)
-        api_req_url = f"{self.api_config.api_url}/projects/" \
-                      f"{self.api_config.project_id}/repository/compare?" + \
-                      f"from={tags[0]}&to={tags[1]}"
-      
+        tags = self.cli_options.tags
+        api_req_url = (
+          f"{self.api_config.api_url}/projects/"
+          f"{self.api_config.project_id}/repository/compare?"
+          f"from={tags[0]}&to={tags[1]}"
+        )
+
     elif self.api_config.running_on == Runner.GITHUB:
       headers = {
         "Authorization": f"Bearer {self.api_config.api_token}",
         "X-GitHub-Api-Version": "2022-11-28",
         "Accept": "application/vnd.github+json"
       }
-      api_req_url = f"{self.api_config.api_url}/repos/" \
-                    f"{self.api_config.github_repo_slug}/pulls/" + \
-                    f"{self.api_config.github_pull_request}/files"
-      if self.cli_options.differential and self.cli_options.tags != ('',''):
-        tags = self.cli_options.tags
-        api_req_url = f"{self.api_config.api_url}/repos/" \
-                      f"{self.api_config.github_repo_slug}/compare/" + \
-                      f"{tags[0]}...{tags[1]}"
       path_key = "filename"
       change_key = "patch"
-    
-    else:
-      api_req_url = "https://api.github.com/repos/" \
-                    f"{self.api_config.travis_repo_slug}/pulls/" \
-                    f"{self.api_config.travis_pull_request}/files"
+      api_req_url = (
+        f"{self.api_config.api_url}/repos/"
+        f"{self.api_config.github_repo_slug}/pulls/"
+        f"{self.api_config.github_pull_request}/files"
+      )
+      if self.cli_options.differential and self.cli_options.tags != ('',''):
+        tags = self.cli_options.tags
+        api_req_url = (
+          f"{self.api_config.api_url}/repos/"
+          f"{self.api_config.github_repo_slug}/compare/"
+          f"{tags[0]}...{tags[1]}"
+        )
+
+    else: # Default to Travis/GitHub behavior if runner is not explicitly GitLab or GitHub
+      api_req_url = (
+        "https://api.github.com/repos/"
+        f"{self.api_config.travis_repo_slug}/pulls/"
+        f"{self.api_config.travis_pull_request}/files"
+      )
       headers = {}
       path_key = "filename"
-      change_key = "patch"  
-    
+      change_key = "patch"
+
+    if not api_req_url:
+      raise ValueError("API request URL could not be constructed. Check ApiConfig and runner type.")
+
     req = urllib.request.Request(api_req_url, headers=headers)
     try:
       with urllib.request.urlopen(req, context=context) as response:
@@ -122,25 +132,31 @@ class RepoSetup:
     change_response = json.loads(change_response)
     if self.api_config.running_on == Runner.GITLAB:
       if self.cli_options.differential and self.cli_options.tags != ('',''):
-        changes = change_response['diffs']
+        changes = change_response.get('diffs', [])
       else:
-        changes = change_response['changes']
+        changes = change_response.get('changes', [])
     elif self.api_config.running_on == Runner.GITHUB:
       if self.cli_options.differential and self.cli_options.tags != ('',''):
-        changes = change_response['files']
+        changes = change_response.get('files', [])
       else:
         changes = change_response
-    else:
+    else: # TRAVIS (or other unspecified runners)
       changes = change_response
 
     for change in changes:
       if path_key in change and change_key in change:
-        path_to_be_excluded = self.__is_excluded_path(change[path_key])
-        if path_to_be_excluded is False:
-          curr_file = os.path.join(self.temp_dir.name, change[path_key])
-          curr_dir = os.path.dirname(curr_file)
-          if curr_dir != self.temp_dir.name:
-            os.makedirs(name=curr_dir, exist_ok=True)
-          curr_file = open(file=curr_file, mode='w+', encoding='UTF-8')
-          print(change[change_key],file=curr_file)
+        file_path_in_repo = change[path_key]
+        if not self.__is_excluded_path(file_path_in_repo):
+          full_temp_file_path = os.path.join(self.temp_dir.name, file_path_in_repo)
+          target_dir = os.path.dirname(full_temp_file_path)
+          if target_dir and not os.path.exists(target_dir):
+            os.makedirs(name=target_dir, exist_ok=True)
+
+          try:
+            with open(file=full_temp_file_path, mode='w+', encoding='UTF-8') as f:
+              f.write(change[change_key])
+          except IOError as e:
+            print(f"Error writing file {full_temp_file_path}: {e}")
+            raise e
+
     return self.temp_dir.name
