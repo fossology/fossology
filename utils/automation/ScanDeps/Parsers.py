@@ -7,8 +7,9 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 import json
+import logging
 import os
-from typing import Union
+from typing import Any
 
 import requests
 from packageurl import PackageURL
@@ -31,10 +32,23 @@ class Parser:
     Args:
         sbom_file: str | Path to sbom file
     """
-    with open(sbom_file, 'r') as file:
-      self.sbom_data = json.load(file)
+    try:
+      with open(sbom_file, 'r', encoding='utf-8') as file:
+        self.sbom_data = json.load(file)
+    except FileNotFoundError as e:
+      logging.error(f"SBOM file not found: {sbom_file}")
+      raise e
+    except json.JSONDecodeError as e:
+      logging.error(f"Invalid JSON in SBOM file: {sbom_file}")
+      raise e
+    except Exception as e:
+      logging.error(
+        f"An unexpected error occurred while reading SBOM file {sbom_file}: {e}"
+      )
+      raise e
+
     self.root_component_name = None
-    self.parsed_components = {}
+    self.parsed_components: dict[str, dict[str, Any]] = {}
 
   def classify_components(self, root_download_dir: str):
     """
@@ -43,20 +57,26 @@ class Parser:
     :param root_download_dir: Download dir prefix. Will be used to create
     download dir.
     """
-    self.root_component_name = (self.sbom_data.get('metadata', {})
-                                .get('component', {}).get('name', None))
+    self.root_component_name = (
+      self.sbom_data.get('metadata', {})
+      .get('component', {}).get('name', None))
     for component in self.sbom_data.get('components', []):
       purl = component.get('purl', '')
-      if not purl or len(purl) == 0:
+      if not purl:
         continue
       comp_type = self._extract_type(purl)
+
+      # Ensure component has 'name' and 'version' for path construction
+      comp_name = component.get('name', 'unknown_name')
+      comp_version = component.get('version', 'unknown_version')
+
       component['download_dir'] = os.path.join(
-        root_download_dir, comp_type, component['name'], component['version']
-        )
+        root_download_dir, comp_type or 'unclassified', comp_name, comp_version
+      )
       component[COMPONENT_TYPE_KEY] = comp_type
       self.parsed_components[purl] = component
 
-  def _extract_type(self, purl: str) -> Union[str, None]:
+  def _extract_type(self, purl: str) -> str | None:
     """
     Extracts the package type from the purl.
     Example purl: pkg:pypi/django@1.11.1
@@ -72,28 +92,35 @@ class Parser:
         parsed_purl = PackageURL.from_string(purl)
         return parsed_purl.type
       return None
-    except Exception:
+    except ValueError as e:
+      logging.warning(f"Could not parse PURL '{purl}': {e}")
+      return None
+    except Exception as e:
+      logging.error(
+        "An unexpected error occurred while extracting PURL type for '"
+        f"{purl}': {e}"
+      )
       return None
 
   @property
-  def python_components(self):
+  def python_components(self) -> list[dict[str, Any]]:
     return [comp for comp in self.parsed_components.values() if
-            comp[COMPONENT_TYPE_KEY] == 'pypi']
+            comp.get(COMPONENT_TYPE_KEY) == 'pypi']
 
   @property
-  def npm_components(self):
+  def npm_components(self) -> list[dict[str, Any]]:
     return [comp for comp in self.parsed_components.values() if
-            comp[COMPONENT_TYPE_KEY] == 'npm']
+            comp.get(COMPONENT_TYPE_KEY) == 'npm']
 
   @property
-  def php_components(self):
+  def php_components(self) -> list[dict[str, Any]]:
     return [comp for comp in self.parsed_components.values() if
-            comp[COMPONENT_TYPE_KEY] == 'composer']
+            comp.get(COMPONENT_TYPE_KEY) == 'composer']
 
   @property
-  def unsupported_components(self):
+  def unsupported_components(self) -> list[dict[str, Any]]:
     return [comp for comp in self.parsed_components.values() if
-            comp[COMPONENT_TYPE_KEY] not in ['pypi', 'npm', 'composer']]
+            comp.get(COMPONENT_TYPE_KEY) not in ['pypi', 'npm', 'composer']]
 
 
 class PythonParser:
@@ -116,22 +143,44 @@ class PythonParser:
     """
     return f"https://pypi.org/pypi/{package_name}/{version}/json"
 
-  def parse_components(self, parser: Parser) -> Union[
-    list[tuple[dict, str]], None]:
+  def parse_components(self, parser: Parser) -> None:
     """
     Parse SBOM file for package name and download url of package.
     Return:
         None
     """
     for comp in parser.python_components:
-      component = parser.parsed_components[comp.get('purl')]
-      package_name = component['name']
-      version = component['version']
-      api_endpoint = self._generate_api_endpoint(package_name, version)
-      print(f"API endpoint for {package_name} : {api_endpoint}")
-      response = requests.get(api_endpoint)
+      purl = comp.get('purl')
+      if not purl:
+        logging.warning(f"Python component missing PURL: {comp}. Skipping.")
+        continue
 
-      if response.status_code == 200:
+      component = parser.parsed_components.get(purl)
+      if not component:
+        logging.warning(
+          f"Component with PURL {purl} not found in parsed_components. "
+          "Skipping."
+        )
+        continue
+
+      package_name = component.get('name')
+      version = component.get('version')
+      if not package_name or not version:
+        logging.warning(
+          f"Python component {purl} missing name or version. Skipping."
+        )
+        continue
+
+      api_endpoint = self._generate_api_endpoint(package_name, version)
+      logging.info(f"API endpoint for {package_name} : {api_endpoint}")
+
+      try:
+        response = requests.get(
+          api_endpoint, timeout=10
+        )
+        response.raise_for_status()  # Raise an exception for HTTP errors (
+        # 4xx or 5xx)
+
         data = response.json()
         sdist_url = None
         wheel_url = None
@@ -147,14 +196,33 @@ class PythonParser:
         if download_url:
           component[DOWNLOAD_URL_KEY] = download_url
         else:
-          print(f"No suitable download URL found for {package_name} {version}")
-        for key, value in data.get('info', {}).get('project_urls', {}).items():
+          logging.warning(
+            f"No suitable download URL found for {package_name} {version}"
+          )
+
+        # Extract VCS and homepage URLs
+        project_urls = data.get('info', {}).get('project_urls', {})
+        for key, value in project_urls.items():
           if "source" in key.lower():
             component['vcs_url'] = value
           if "homepage" in key.lower():
             component['homepage_url'] = value
-      else:
-        print(f"Failed to retrieve data for {package_name} {version}")
+
+      except requests.exceptions.RequestException as e:
+        logging.error(
+          f"Failed to retrieve data for {package_name} {version} from "
+          f"{api_endpoint}: {e}"
+        )
+      except json.JSONDecodeError:
+        logging.error(
+          f"Failed to decode JSON response from {api_endpoint} for "
+          f"{package_name} {version}."
+        )
+      except Exception as e:
+        logging.error(
+          f"An unexpected error occurred while parsing Python component "
+          f"{purl}: {e}"
+        )
 
 
 class NPMParser:
@@ -163,7 +231,7 @@ class NPMParser:
   cyclonedx format sbom files.
   """
 
-  def _get_download_url(self, purl: str):
+  def _get_download_url(self, purl: str) -> str:
     """
     Get download url from purl for NPM Packages
     Args:
@@ -173,8 +241,7 @@ class NPMParser:
     """
     return purl2url.get_download_url(purl)
 
-  def parse_components(self, parser: Parser) -> Union[
-    list[tuple[dict, str]], None]:
+  def parse_components(self, parser: Parser) -> None:
     """
     Parse the components to extract the tuple of (<package_name>,
     <download_url>)
@@ -182,11 +249,24 @@ class NPMParser:
         None
     """
     for comp in parser.npm_components:
-      component = parser.parsed_components[comp.get('purl')]
-      name = component['name']
-      purl = component['purl']
+      purl = comp.get('purl')
+      if not purl:
+        logging.warning(f"NPM component missing PURL: {comp}. Skipping.")
+        continue
+
+      component = parser.parsed_components.get(purl)
+      if not component:
+        logging.warning(
+          f"Component with PURL {purl} not found in parsed_components. "
+          f"Skipping."
+        )
+        continue
+
+      name = component.get('name', 'unknown_name')
       try:
         download_url = self._get_download_url(purl)
         component[DOWNLOAD_URL_KEY] = download_url
       except Exception as e:
-        print(f"Invalid Download URL for NPM package: {name} :: {e}")
+        logging.error(
+          f"Invalid Download URL for NPM package: {name} ({purl}) :: {e}"
+        )
