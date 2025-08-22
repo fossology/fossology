@@ -9,7 +9,9 @@ project(kotoba)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/SetDefaults.cmake)
 
 # Create a dummy target for now to satisfy version generation requirements
-add_custom_target(kotoba COMMENT "Dummy kotoba target for UI-only setup")
+# add_custom_target(kotoba COMMENT "Dummy kotoba target for UI-only setup")
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/agent)
 
 generate_version()
 
@@ -19,7 +21,7 @@ install(DIRECTORY ui
     FILES_MATCHING
     PATTERN *.php)
 
-install(FILES kotoba.conf "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
+install(FILES kotoba.conf kotobabulk.conf "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
     DESTINATION ${FO_MODDIR}/${PROJECT_NAME}
     COMPONENT kotoba)
 
