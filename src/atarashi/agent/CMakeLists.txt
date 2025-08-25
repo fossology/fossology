@@ -55,3 +55,8 @@ install(TARGETS atarashi_exec
     RUNTIME
     DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent
     COMPONENT atarashi)
+
+install(FILES
+    run_atarashi_scan_on_files.py
+    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent
+    COMPONENT atarashi)

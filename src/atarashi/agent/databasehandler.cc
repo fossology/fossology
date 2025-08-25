@@ -36,11 +36,25 @@ vector<unsigned long> AtarashiDatabaseHandler::queryFileIdsForUpload(int uploadI
 // TODO: see function saveToDb() from src/monk/agent/database.c
 bool AtarashiDatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch)
 {
-  return dbManager.execPrepared(
+  QueryResult result = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
       "saveLicenseMatch",
-      "INSERT INTO license_file (agent_fk, pfile_fk, rf_fk, rf_match_pct) VALUES ($1, $2, $3, $4)",
+      "WITH "
+          "selectExisting AS ("
+          "SELECT fl_pk FROM ONLY license_file"
+          " WHERE (agent_fk = $1 AND pfile_fk = $2 AND rf_fk = $3)"
+          "),"
+          "insertNew AS ("
+          "INSERT INTO license_file"
+          "(agent_fk, pfile_fk, rf_fk, rf_match_pct)"
+          " SELECT $1, $2, $3, $4"
+          " WHERE NOT EXISTS(SELECT * FROM license_file WHERE (agent_fk = $1 AND pfile_fk = $2 AND rf_fk = $3))"
+          " RETURNING fl_pk"
+          ") "
+          "SELECT fl_pk FROM insertNew "
+          "UNION "
+          "SELECT fl_pk FROM selectExisting",
       int, long, long, unsigned
     ),
     agentId,
@@ -48,6 +62,16 @@ bool AtarashiDatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long l
     licenseId,
     percentMatch
   );
+
+  long licenseFilePK= -1;
+  if(!result.isFailed()){
+    
+    vector<unsigned long> res = result.getSimpleResults<unsigned long>(0,
+    fo::stringToUnsignedLong);
+
+    licenseFilePK = res.at(0);
+  }
+  return licenseFilePK;
 }
 
 unsigned long AtarashiDatabaseHandler::selectOrInsertLicenseIdForName(string rfShortName)

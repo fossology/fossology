@@ -22,8 +22,11 @@
 #define AGENT_DESC "atarashi agent"
 #define AGENT_ARS  "atarashi_ars"
 
+#include <iostream>
 #include <string>
 #include <vector>
+#include <unordered_map>
+
 #include "files.hpp"
 #include "licensematch.hpp"
 #include "state.hpp"
@@ -41,8 +44,10 @@ int queryAgentId(fo::DbManager& dbManager);
 int writeARS(const State& state, int arsId, int uploadId, int success, fo::DbManager& dbManager);
 void bail(int exitval);
 bool processUploadId(const State& state, int uploadId, AtarashiDatabaseHandler& databaseHandler, bool ignoreFilesWithMimeType);
-bool matchPFileWithLicenses(const State& state, unsigned long pFileId, AtarashiDatabaseHandler& databaseHandler);
-bool matchFileWithLicenses(const State& state, const fo::File& file, AtarashiDatabaseHandler& databaseHandler);
+void mapFileNameWithId(unsigned long pFileId, unordered_map<unsigned long, string> &fileIdsMap, unordered_map<string, unsigned long> &fileIdsMapReverse, AtarashiDatabaseHandler &databaseHandler);
+void writeFileNameToTextFile(unordered_map<unsigned long, string> &fileIdsMap, string fileLocation);
+string getScanResult(const string& line);
+bool matchFileWithLicenses(const State& state, const string& atarashiResult, const string& filename, unsigned long fileId, AtarashiDatabaseHandler& databaseHandler);
 bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>& matches, unsigned long pFileId, AtarashiDatabaseHandler& databaseHandler);
 bool parseCommandLine(int argc, char **argv, string &agentName, string &similarityMethod, bool &verboseMode);
 

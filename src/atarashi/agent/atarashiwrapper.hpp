@@ -18,15 +18,22 @@
 #ifndef ATARASHI_AGENT_ATARASHI_WRAPPER_HPP
 #define ATARASHI_AGENT_ATARASHI_WRAPPER_HPP
 
+#include <fstream>
+#include <iostream>
+#include <map>
 #include <string>
 #include <vector>
+
 #include <jsoncpp/json/json.h>
+#include <boost/tokenizer.hpp>
+
 #include "files.hpp"
 #include "licensematch.hpp"
 #include "state.hpp"
+#include "utils.hpp"
 
 using namespace std;
 
-string scanFileWithAtarashi(const State& state, const fo::File& file);
-vector<LicenseMatch> extractLicensesFromAtarashiResult(string atarashiResult);
+bool scanFileWithAtarashi(const State& state, const std::string& filePath, const std::string& outputFile);
+vector<LicenseMatch> extractLicensesFromAtarashiResult(const string& atarashiResultFile);
 #endif // ATARASHI_AGENT_ATARASHI_WRAPPER_HPP
