@@ -64,91 +64,170 @@ void bail(int exitval)
 bool processUploadId(const State& state, int uploadId, AtarashiDatabaseHandler& databaseHandler, bool ignoreFilesWithMimeType)
 {
   vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(uploadId,ignoreFilesWithMimeType);
+  unordered_map<unsigned long, string> fileIdsMap;
+  unordered_map<string, unsigned long> fileIdsMapReverse;
+
+  size_t pFileCount = fileIds.size();
+  for (size_t it = 0; it < pFileCount; ++it) {
+    unsigned long pFileId = fileIds[it];
+    if (pFileId == 0) continue;
+
+    mapFileNameWithId(pFileId, fileIdsMap, fileIdsMapReverse, databaseHandler);
+
+    fo_scheduler_heart(1);
+  }
+
+  string fileLocation = tmpnam(nullptr);
+  string outputFile   = tmpnam(nullptr);
+
+  writeFileNameToTextFile(fileIdsMap, fileLocation);
+
+  scanFileWithAtarashi(state, fileLocation, outputFile);
+
+  std::ifstream opfile(outputFile);
+  if (!opfile) {
+    std::cerr << "Error opening the Atarashi JSON file.\n";
+    return false;
+  }
+  vector<string> atarashiResults;
+  string line;
+  while (getline(opfile, line)) {
+    atarashiResults.push_back(getScanResult(line));
+  }
 
   bool errors = false;
-#pragma omp parallel
+
+#pragma omp parallel default(none) \
+    shared(databaseHandler, atarashiResults, fileIdsMapReverse, state, errors)
   {
     AtarashiDatabaseHandler threadLocalDatabaseHandler(databaseHandler.spawn());
-
-    size_t pFileCount = fileIds.size();
 #pragma omp for
-    for (size_t it = 0; it < pFileCount; ++it)
-    {
-      if (errors)
-        continue;
+    for (size_t i = 0; i < atarashiResults.size(); ++i) {
+      string result = atarashiResults[i];
 
-      unsigned long pFileId = fileIds[it];
+      Json::CharReaderBuilder json_reader_builder;
+      auto scanner = std::unique_ptr<Json::CharReader>(json_reader_builder.newCharReader());
+      Json::Value atarashiValue;
+      string errs;
+      const bool isSuccessful = scanner->parse(
+          result.c_str(),
+          result.c_str() + result.length(),
+          &atarashiValue,
+          &errs);
 
-      if (pFileId == 0)
-        continue;
+      if (isSuccessful) {
+        string fileName = atarashiValue["file"].asString();
+        unsigned long fileId = fileIdsMapReverse[fileName];
 
-      if (!matchPFileWithLicenses(state, pFileId, threadLocalDatabaseHandler))
-      {
-        errors = true;
+        if (!matchFileWithLicenses(state, result, fileName, fileId, threadLocalDatabaseHandler)) {
+          errors = true;
+        }
       }
-
-      fo_scheduler_heart(1);
     }
   }
 
+  if (unlink(outputFile.c_str()) != 0) {
+    LOG_FATAL("Unable to delete file %s \n", outputFile.c_str());
+  }
   return !errors;
 }
 
-bool matchPFileWithLicenses(const State& state, unsigned long pFileId, AtarashiDatabaseHandler& databaseHandler)
-{
-  char* pFile = databaseHandler.getPFileNameForFileId(pFileId);
-
-  if (!pFile)
-  {
-    cout << "File not found " << pFileId << endl;
+/**
+ * @brief Map file name with file id
+ * @param pFileId          File id
+ * @param fileIdsMap       Map of file id → file name
+ * @param fileIdsMapReverse Map of file name → file id
+ * @param databaseHandler  Database handler object
+ */
+void mapFileNameWithId(unsigned long pFileId,
+                      unordered_map<unsigned long, string> &fileIdsMap,
+                      unordered_map<string, unsigned long> &fileIdsMapReverse,
+                      AtarashiDatabaseHandler &databaseHandler) {
+  char *pFile = databaseHandler.getPFileNameForFileId(pFileId);
+  if (!pFile) {
+    LOG_FATAL("File not found %lu \n", pFileId);
     bail(8);
   }
 
-  char* fileName = NULL;
-  {
-#pragma omp critical (repo_mk_path)
-    fileName = fo_RepMkPath("files", pFile);
-  }
-  if (fileName)
-  {
+  char *fileName = fo_RepMkPath("files", pFile);
+  if (fileName) {
     fo::File file(pFileId, fileName);
 
-    if (!matchFileWithLicenses(state, file, databaseHandler))
-      return false;
+    fileIdsMap[file.getId()] = file.getFileName();
+    fileIdsMapReverse[file.getFileName()] = file.getId();
 
     free(fileName);
     free(pFile);
-  }
-  else
-  {
-    cout << "PFile not found in repo " << pFileId << endl;
+  } else {
+    LOG_FATAL("PFile not found in repo %lu \n", pFileId);
     bail(7);
   }
-
-  return true;
 }
 
-vector<LicenseMatch> createMatches(std::string licenceName, unsigned percentage)
+/**
+ * @brief Match file with licenses (from parsed Atarashi result)
+ * @param state           State of the agent
+ * @param atarashiResult  Raw JSON result string for the file
+ * @param filename        File name
+ * @param fileId          File ID
+ * @param databaseHandler Database handler
+ */
+bool matchFileWithLicenses(const State& state,
+                          const string& atarashiResult,
+                          const string& filename,
+                          unsigned long fileId,
+                          AtarashiDatabaseHandler& databaseHandler)
 {
-  vector<LicenseMatch> matches;
-
-  std::string fossologyLicenseName = licenceName;
-  unsigned score = percentage;
-  LicenseMatch match = LicenseMatch(fossologyLicenseName, score);
-
-  matches.push_back(match);
-  return matches;
-}
-
-bool matchFileWithLicenses(const State& state, const fo::File& file, AtarashiDatabaseHandler& databaseHandler)
-{
-  string atarashiResult = scanFileWithAtarashi(state, file);
   vector<LicenseMatch> matches = extractLicensesFromAtarashiResult(atarashiResult);
   for (const auto& match : matches) {
     cout << "\nLicense: " << match.getLicenseName()
-    << ", Similarity: " << match.getPercentage() << "%" << endl;
+        << ", Similarity: " << match.getPercentage() << "%" << endl;
   }
-  return saveLicenseMatchesToDatabase(state, matches, file.getId(), databaseHandler);
+  return saveLicenseMatchesToDatabase(state, matches, fileId, databaseHandler);
+}
+
+/**
+ * @brief Write filenames to a text file
+ */
+void writeFileNameToTextFile(unordered_map<unsigned long, string>& fileIdsMap,
+                            string fileLocation)
+{
+  std::ofstream outputFile(fileLocation, std::ios::app);
+  if (!outputFile.is_open()) {
+    LOG_FATAL("Unable to open file");
+  }
+
+  for (auto const& x : fileIdsMap) {
+    outputFile << x.second << "\n";
+  }
+
+  outputFile.close();
+}
+
+/**
+ * @brief Extract JSON object from line
+ */
+string getScanResult(const string& line) {
+  string scanResult;
+  size_t startIndex = 0;
+  size_t braceCount = 0;
+
+  for (size_t i = 0; i < line.length(); ++i) {
+    char c = line[i];
+    if (c == '{') {
+      if (braceCount == 0) {
+        startIndex = i;
+      }
+      braceCount++;
+    } else if (c == '}') {
+      braceCount--;
+      if (braceCount == 0) {
+        scanResult = line.substr(startIndex, i - startIndex + 1);
+        break;
+      }
+    }
+  }
+  return scanResult;
 }
 
 bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>& matches, unsigned long pFileId, AtarashiDatabaseHandler& databaseHandler)

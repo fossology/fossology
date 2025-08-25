@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2020, Siemens AG
- *
+* Copyright (C) 2019-2020, Siemens AG
+*
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * version 2 as published by the Free Software Foundation.
@@ -15,73 +15,73 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <iostream>
-#include <boost/tokenizer.hpp>
 #include "atarashiwrapper.hpp"
-#include "utils.hpp"
 
-string scanFileWithAtarashi(const State& state, const fo::File& file)
+bool scanFileWithAtarashi(const State& state, const std::string &fileLocation, const std::string& outputFile)
 {
-  FILE* in;
-  char buffer[512];
-  string result;
   string projectUser = fo_config_get(sysconfig, "DIRECTORIES", "PROJECTUSER", NULL);
-  
-  string command = "PYTHONWARNINGS=\"ignore::UserWarning\" PYTHONPATH='/home/" + projectUser + "/pythondeps/' /home/fossy/pythondeps/bin/atarashi";
-  command += " -a " + state.getAgentName();
-  if (!state.getSimilarityMethod().empty())
-  {
-    command += " -s " + state.getSimilarityMethod();
-  }
-  if (state.isVerbose())
-  {
-    command += " -v";
-    std::cout << "[Atarashi] Verbose: running on file: " << file.getFileName() << "\n";
-    std::cout << "[Atarashi] Executing command: " << command << " " << file.getFileName() << "\n";
-  }
-  command += " " + file.getFileName();
 
-  // cout << "Executing [in scanFileWithAtarashi] Command: " << command << endl;
-  if (!(in = popen(command.c_str(), "r")))
-  {
-    cout << "could not execute atarashi command: " << command << endl;
+  string command = "PYTHONPATH='/home/" + projectUser + "/pythondeps/' ";
+  command += "python3 run_atarashi_scan_on_files.py";
+
+  command += " --agent " + state.getAgentName();
+  if (!state.getSimilarityMethod().empty()) {
+    command += " --similarity " + state.getSimilarityMethod();
+  }
+  if (state.isVerbose()) {
+    command += " --verbose";
+    std::cout << "[Atarashi] Verbose: running on file list: " << fileLocation << "\n";
+    std::cout << "[Atarashi] Executing command: " << command 
+              << " " << fileLocation << " " << outputFile << "\n";
+  }
+
+  command += " " + fileLocation + " " + outputFile + " 2>/tmp/atarashi_err.log";
+
+  int returnValue = system(command.c_str());
+  char cwd[1024]; // Buffer to store the directory path
+
+  if (getcwd(cwd, sizeof(cwd)) != NULL) {
+      std::cout << "Current working directory: " << cwd << std::endl;
+  } else {
+      perror("getcwd() error"); // Prints error if getcwd() fails
+  }
+
+  if (returnValue != 0) {
+    std::cerr << "[Atarashi] Could not execute command: " << command << std::endl;
     bail(1);
-  }
-  while (fgets(buffer, sizeof(buffer), in) != NULL)
-  {
-    result += buffer;
+    return false;
   }
 
-  if (pclose(in) != 0)
-  {
-    cout << "could not execute atarashi command: " << command << endl;
-    bail(1);
-  }
-  // cout << "Result: " << result << endl;
-
-  int jsonStart = result.find("{");
-  return result.substr(jsonStart, string::npos);
+  return true;
 }
 
-vector<LicenseMatch> extractLicensesFromAtarashiResult(string atarashiResult)
-{
-  Json::Reader reader;
-  Json::Value atarashiResultobj;
-  bool parseSuccess = reader.parse(atarashiResult, atarashiResultobj);
+vector<LicenseMatch> extractLicensesFromAtarashiResult(const string& atarashiResultFile) {
+  // Read the file written by scanFileWithAtarashi
+  ifstream inFile(atarashiResultFile);
+  if (!inFile.is_open()) {
+    LOG_FATAL("Unable to open Atarashi result file: %s \n", atarashiResultFile.c_str());
+    bail(-1);
+  }
 
-  if (!parseSuccess)
-  {
-    cout << "Failed to parse" << reader.getFormattedErrorMessages();
+  stringstream buffer;
+  buffer << inFile.rdbuf();
+  string jsonContent = buffer.str();
+
+  Json::Reader reader;
+  Json::Value atarashiResultObj;
+  bool parseSuccess = reader.parse(jsonContent, atarashiResultObj);
+
+  if (!parseSuccess) {
+    LOG_FATAL("Failed to parse Atarashi result JSON: %s \n", jsonContent.c_str());
     bail(-30);
   }
 
   vector<LicenseMatch> matches;
-  Json::Value resultArray = atarashiResultobj["results"];
-  for (unsigned int index = 0; index < resultArray.size(); ++index)
-  {
+  Json::Value resultArray = atarashiResultObj["results"];
+  for (unsigned int index = 0; index < resultArray.size(); ++index) {
     Json::Value resultObject = resultArray[index];
     LicenseMatch m(resultObject["shortname"].asString(),
-        (unsigned)(resultObject["sim_score"].asDouble() * 100.0));
+                   static_cast<unsigned>(resultObject["sim_score"].asDouble() * 100.0));
     matches.push_back(m);
   }
   return matches;

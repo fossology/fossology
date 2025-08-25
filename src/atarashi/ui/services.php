@@ -1,6 +1,6 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2021 Sarita Singh <saritasingh.0425@gmail.com>
+ SPDX-FileCopyrightText: © 2025 Rajul Jha <rajuljha49@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
