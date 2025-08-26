@@ -8,6 +8,7 @@
 
 import os
 import re
+from bisect import bisect_right
 from typing import Any
 
 from .CliOptions import CliOptions
@@ -21,6 +22,10 @@ class FormatResult:
   """
   cli_options: CliOptions = None
 
+  _RE_DIFF_HEADER = re.compile(r'^@@ -([0-9]+),([0-9]+) [+]([0-9]+),([0-9]+) @@')
+  _RE_NON_CONTENT_LINE = re.compile(r'^(---|\+\+\+|[^-+ ])')
+
+
   def __init__(self, cli_options: CliOptions):
     self.cli_options = cli_options
 
@@ -28,17 +33,15 @@ class FormatResult:
     """
     Format the diff content in a particular format with corrected line numbers.
 
-    :param: diff_content: String to format
-    :type diff_content: str
+    :param diff_content: String to format
     :return: formatted_string
-    :rtype: str
     """
     formatted_diff = []
     diff_lines = diff_content.splitlines()
     left = right = 0
     left_num_len = right_num_len = 0
     for line in diff_lines:
-      match = re.match(r'^@@ -([0-9]+),([0-9]+) [+]([0-9]+),([0-9]+) @@', line)
+      match = self._RE_DIFF_HEADER.match(line)
       if match:
         left = int(match.group(1))
         left_num_len = len(match.group(2))
@@ -47,9 +50,11 @@ class FormatResult:
         formatted_diff.append(line)
         continue
 
-      if re.match(r'^(---|\+\+\+|[^-+ ])', line):
+      if self._RE_NON_CONTENT_LINE.match(line):
         formatted_diff.append(line)
         continue
+
+      # Remove the leading '+', '-', or ' '
       line_content = line[1:]
       if line.startswith('-'):
         padding = ' ' * right_num_len
@@ -73,14 +78,14 @@ class FormatResult:
     return "\n".join(formatted_diff)
 
   def find_line_numbers(
-    self, diff_string: str, word_start_byte: int, word_end_byte: int) -> list[
-    Any]:
+    self, diff_string: str, word_start_byte: int, word_end_byte: int
+  ) -> list[Any]:
     """
     Find line numbers from formatted diff data
 
-    :param: diff_string: Formatted diff string
-    :param: word_start_byte: Start byte of scanner result
-    :param: word_end_byte: End byte of scanner result
+    :param diff_string: Formatted diff string
+    :param word_start_byte: Start byte of scanner result
+    :param word_end_byte: End byte of scanner result
     :return: List of line_numbers found for a given word
     """
     escaped_word = re.escape(diff_string[word_start_byte:word_end_byte])
@@ -89,37 +94,42 @@ class FormatResult:
     return matches
 
   def find_word_line_numbers(
-    self, file_path: str, words: list, key: str) -> dict:
+    self, file_path: str, words: list, key: str
+  ) -> dict[str, set[str]] | None:
     """
     Find the line number of each word found for a given file path
 
-    :param: file_path: Path of the file to scan
-    :param: words: List of words(ScanResult Objects) to be scanned for
-    :param: Key to scan: 'contents' for copyright and keyword and 'license'
+    :param file_path: Path of the file to scan
+    :param words: List of words(ScanResult Objects) to be scanned for
+    :param key: Key to scan: 'contents' for copyright and keyword and 'license'
     for nomos and ojo
     :return: found_words_with_line_number : dict Dictionary of scanned results
               with key as scanned word and value as list of line_numbers where
               it is found.
     """
-    found_words_with_line_number = {}
+    found_words_with_line_number: dict[str, set[str]] = {}
     if (self.cli_options.repo or self.cli_options.scan_only_deps or
       self.cli_options.scan_dir):
       try:
         with open(file_path, 'rb') as file:
           binary_data = file.read()
         string_data = binary_data.decode('utf-8', errors='ignore')
-        for i in range(0, len(words)):
-          line_numbers_list = []
-          line_number = string_data[0:words[i]['start']].count("\n") + 1
-          line_numbers_list.append(str(line_number))
-          found_words_with_line_number[words[i][f'{key}']] = line_numbers_list
+
+        # line_start_offsets will store the byte offset of the first character of each line.
+        # Example: "Hello\nWorld" -> [0, 6]
+        line_start_offsets = [0]
+        for i, char in enumerate(string_data):
+          if char == '\n':
+            line_start_offsets.append(i + 1)
+
+        for word_info in words:
+          word_start_byte = word_info['start']
+          word_key_value = word_info[key]
+          line_number = bisect_right(line_start_offsets, word_start_byte)
+          found_words_with_line_number.setdefault(word_key_value,
+                                                  set()).add(str(line_number))
+
         return found_words_with_line_number
-      except FileNotFoundError:
-        print(f"The file {file_path} does not exist.")
-        return None
-      except IOError as e:
-        print(f"An I/O error occurred: {e}")
-        return None
       except Exception as e:
         print(f"An error occurred: {e}")
         return None
@@ -130,14 +140,14 @@ class FormatResult:
           line_numbers = self.find_line_numbers(
             content, words[i]['start'], words[i]['end']
           )
-          found_words_with_line_number[words[i][f'{key}']] = line_numbers
+          found_words_with_line_number[words[i][f'{key}']] = set(line_numbers)
     return found_words_with_line_number
 
   def process_files(self, root_dir: str) -> None:
     """
     Format the files according to unified diff format
 
-    :param: root_dir: Path of the temp dir root to format the files
+    :param root_dir: Path of the temp dir root to format the files
     :return: None
     """
     if (self.cli_options.repo or self.cli_options.scan_only_deps or
