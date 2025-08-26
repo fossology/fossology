@@ -55,21 +55,16 @@ bool scanFileWithAtarashi(const State& state, const std::string &fileLocation, c
   return true;
 }
 
-vector<LicenseMatch> extractLicensesFromAtarashiResult(const string& atarashiResultFile) {
-  // Read the file written by scanFileWithAtarashi
-  ifstream inFile(atarashiResultFile);
-  if (!inFile.is_open()) {
-    LOG_FATAL("Unable to open Atarashi result file: %s \n", atarashiResultFile.c_str());
-    bail(-1);
-  }
-
-  stringstream buffer;
-  buffer << inFile.rdbuf();
-  string jsonContent = buffer.str();
-
-  Json::Reader reader;
+vector<LicenseMatch> extractLicensesFromAtarashiResult(const string& jsonContent) {
+  Json::CharReaderBuilder json_reader_builder;
+  auto scanner = std::unique_ptr<Json::CharReader>(json_reader_builder.newCharReader());
   Json::Value atarashiResultObj;
-  bool parseSuccess = reader.parse(jsonContent, atarashiResultObj);
+  string errs;
+  bool parseSuccess = scanner->parse(
+      jsonContent.c_str(),
+      jsonContent.c_str() + jsonContent.size(),
+      &atarashiResultObj,
+      &errs);
 
   if (!parseSuccess) {
     LOG_FATAL("Failed to parse Atarashi result JSON: %s \n", jsonContent.c_str());

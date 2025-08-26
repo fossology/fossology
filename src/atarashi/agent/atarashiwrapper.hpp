@@ -35,5 +35,5 @@
 using namespace std;
 
 bool scanFileWithAtarashi(const State& state, const std::string& filePath, const std::string& outputFile);
-vector<LicenseMatch> extractLicensesFromAtarashiResult(const string& atarashiResultFile);
+vector<LicenseMatch> extractLicensesFromAtarashiResult(const string& jsonContent);
 #endif // ATARASHI_AGENT_ATARASHI_WRAPPER_HPP

@@ -17,7 +17,7 @@ def run_atarashi(file_path, agent, similarity, verbose):
     """
     env = os.environ.copy()
     env["PYTHONWARNINGS"] = "ignore::UserWarning"
-    env["PYTHONPATH"] = "/home/{}/pythondeps/".format(os.environ.get("USER", "fossy"))
+    env["PYTHONPATH"] = "/home/fossy/pythondeps/"
 
     command = [
         os.path.expanduser("~/pythondeps/bin/atarashi"),
@@ -70,7 +70,7 @@ def process_files(file_location, outputFile, agent, similarity, verbose):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Atarashi scanner on multiple files")
     parser.add_argument("--agent", required=True, choices=["tfidf", "Ngram", "DLD", "wordFrequencySimilarity"], help="Atarashi agent to use")
-    parser.add_argument("--similarity", choices=["cosineSim", "scoreSim", "DiceSim", "BigramCosineSim"],
+    parser.add_argument("--similarity", choices=["CosineSim", "scoreSim", "DiceSim", "BigramCosineSim"],
                         help="Similarity function (only for tfidf/ngram)")
     parser.add_argument("--verbose", type=int, help="Set output as verbose")
     parser.add_argument("file_location", type=str, help="File containing list of files to scan")
