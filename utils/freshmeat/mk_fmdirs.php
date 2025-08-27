@@ -44,7 +44,7 @@
  * associate folders with each other....
  */
 
-require_once("FIXMETOBERELATIVE/pathinclude.php");
+require_once("/usr/share/fossology/php/pathinclude.php");
 /* the items below no longer exist, my this code is old.... */
 require_once("$PHPDIR/webcommon.h.php");
 require_once("$PHPDIR/jobs.h.php");

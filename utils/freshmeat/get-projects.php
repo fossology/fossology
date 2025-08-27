@@ -46,7 +46,7 @@
  *    for that case.
  */
 // pathinclude below is dependent on having fossology installed.
-require_once "FIXMETOBERELATIVE/pathinclude.php";       // brings in global $PROJECTSTATEDIR +
+require_once "/usr/share/fossology/php/pathinclude.php";       // brings in global $PROJECTSTATEDIR +
 global $LIBDIR;
 global $INCLUDEDIR;
 require_once("$LIBDIR/lib_projxml.h.php");
