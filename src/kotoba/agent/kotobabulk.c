@@ -1,8 +1,8 @@
 /*
- Author: Harshit Gandhi
- SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+Author: Harshit Gandhi
+SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
 
- SPDX-License-Identifier: GPL-2.0-only
+SPDX-License-Identifier: GPL-2.0-only
 */
 
 #include <stdlib.h>
@@ -15,230 +15,246 @@
 #include "match.h"
 #include "common.h"
 #include "kotoba.h"
+#include "string_operations.h"
 
-int bulk_onAllMatches(KotobaState* state, const File* file, const GArray* matches);
+// Global hash table to map License refId (cpId) back to Phrase*
+static GHashTable* phraseByCpId = NULL;
 
-MatchCallbacks bulkCallbacks = {.onAll = bulk_onAllMatches};
+int phrase_onAllMatches(KotobaState* state, const File* file, const GArray* matches);
 
-int setLeftAndRight(KotobaState* state) {
-  BulkArguments* bulkArguments = state->ptr;
+MatchCallbacks phraseCallbacks = {.onAll = phrase_onAllMatches};
 
-  gchar* tableName = getUploadTreeTableName(state->dbManager, bulkArguments->uploadId);
+/**
+ * \brief Build a Licenses* index from phrases for matching
+ * \param phrases GArray* of Phrase* structures
+ * \param delimiters Token delimiters to use
+ * \return Licenses* structure for matching (caller must free)
+ */
+Licenses* buildLicenseIndexFromPhrases(GArray* phrases, const char* delimiters) {
+  GArray* licenseArray = g_array_new(FALSE, FALSE, sizeof(License));
+  
+  // Initialize global phrase mapping
+  if (phraseByCpId) {
+    g_hash_table_destroy(phraseByCpId);
+  }
+  phraseByCpId = g_hash_table_new(g_direct_hash, g_direct_equal);
+  
+  for (guint i = 0; i < phrases->len; i++) {
+    Phrase* phrase = g_array_index(phrases, Phrase*, i);
+    
+    // Skip phrases with no mapped licenses
+    if (!phrase->licenseIds || phrase->licenseIds->len == 0) {
+      continue;
+    }
+    
+    License license = {0};
+    license.refId = phrase->cpId;  // Use cpId as refId for lookup
+    license.shortname = g_strdup_printf("phrase_%ld", phrase->cpId);
+    license.tokens = tokenize(phrase->text, delimiters);
+    
+    g_array_append_val(licenseArray, license);
+    
+    // Store phrase mapping for callback lookup
+    g_hash_table_insert(phraseByCpId, GINT_TO_POINTER((int)phrase->cpId), phrase);
+  }
+  
+  return buildLicenseIndexes(licenseArray, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
+}
 
-  if (!tableName)
+/**
+ * \brief Callback for phrase matches - writes clearing decisions
+ */
+int phrase_onAllMatches(KotobaState* state, const File* file, const GArray* matches) {
+  int haveAFullMatch = 0;
+  for (guint j = 0; j < matches->len; j++) {
+    Match* match = match_array_index(matches, j);
+    if (match->type == MATCH_TYPE_FULL) {
+      haveAFullMatch = 1;
+      break;
+    }
+  }
+
+  if (!haveAFullMatch)
+    return 1;
+
+  PhraseModeArgs* args = (PhraseModeArgs*)state->ptr;
+
+  if (!fo_dbManager_begin(state->dbManager))
     return 0;
 
-  gchar* sql = g_strdup_printf("SELECT lft, rgt FROM %s WHERE uploadtree_pk = $1", tableName);
-  gchar* stmt = g_strdup_printf("setLeftAndRight.%s", tableName);
+  // Process each full match
+  for (guint j = 0; j < matches->len; j++) {
+    Match* match = match_array_index(matches, j);
+    if (match->type != MATCH_TYPE_FULL)
+      continue;
 
-  if ((!sql) || (!stmt))
-    return 0;
-
-  PGresult* leftAndRightResult = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      state->dbManager,
-      stmt,
-      sql,
-      long
-    ),
-    bulkArguments->uploadTreeId
-  );
-
-  g_free(stmt);
-  g_free(sql);
-
-  int result = 0;
-
-  if (leftAndRightResult) {
-    if (PQntuples(leftAndRightResult)==1) {
-      int i = 0;
-      bulkArguments->uploadTreeLeft = atol(PQgetvalue(leftAndRightResult, 0, i++));
-      bulkArguments->uploadTreeRight = atol(PQgetvalue(leftAndRightResult, 0, i));
-
-      result = 1;
+    // Get the phrase from the license refId (cpId)
+    Phrase* phrase = g_hash_table_lookup(phraseByCpId, GINT_TO_POINTER((int)match->license->refId));
+    if (!phrase) {
+      continue;
     }
-    PQclear(leftAndRightResult);
-  }
-  return result;
-}
 
-void bulkArguments_contents_free(BulkArguments* bulkArguments);
-
-BulkAction** queryBulkActions(KotobaState* state, long bulkId);
-
-int queryBulkArguments(KotobaState* state, long bulkId) {
-  int result = 0;
-
-  PGresult* bulkArgumentsResult = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      state->dbManager,
-      "queryBulkArguments",
-      "SELECT ut.upload_fk, ut.uploadtree_pk, lrb.user_fk, lrb.group_fk, "
-      "lrb.rf_text, lrb.ignore_irrelevant, lrb.bulk_delimiters, lrb.scan_findings "
-      "FROM license_ref_bulk lrb INNER JOIN uploadtree ut "
-      "ON ut.uploadtree_pk = lrb.uploadtree_fk "
-      "WHERE lrb_pk = $1",
-      long
-    ),
-    bulkId
-  );
-
-  if (bulkArgumentsResult) {
-    if (PQntuples(bulkArgumentsResult)==1) {
-      BulkArguments* bulkArguments = (BulkArguments*)malloc(sizeof(BulkArguments));
-
-      int column = 0;
-      bulkArguments->uploadId = atoi(PQgetvalue(bulkArgumentsResult, 0, column++));
-      bulkArguments->uploadTreeId = atol(PQgetvalue(bulkArgumentsResult, 0, column++));
-      bulkArguments->userId = atoi(PQgetvalue(bulkArgumentsResult, 0, column++));
-      bulkArguments->groupId = atoi(PQgetvalue(bulkArgumentsResult, 0, column++));
-      bulkArguments->refText = g_strdup(PQgetvalue(bulkArgumentsResult, 0, column++));
-      bulkArguments->ignoreIrre = strcmp(PQgetvalue(bulkArgumentsResult, 0, column++), "t") == 0;
-      if (PQgetisnull(bulkArgumentsResult, 0, column) == 1)
-      {
-        bulkArguments->delimiters = g_strdup(DELIMITERS);
-        column++;
+    // Create clearing decisions for each mapped license
+    for (guint k = 0; k < phrase->licenseIds->len; k++) {
+      long rfPk = g_array_index(phrase->licenseIds, long, k);
+      
+      char* uploadTreeTableName = getUploadTreeTableName(state->dbManager, args->uploadId);
+      if (!uploadTreeTableName) {
+        fo_dbManager_rollback(state->dbManager);
+        return 0;
       }
-      else
-      {
-        bulkArguments->delimiters = normalize_escape_string(PQgetvalue(bulkArgumentsResult, 0, column++));
+      
+      gchar* insertSql = g_strdup_printf(
+        "INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, job_fk, type_fk, rf_fk, removed, comment, reportinfo, acknowledgement) "
+        "SELECT uploadtree_pk, $2, $3, $4, $5, $6, $7, $8, $9, $10 "
+        "FROM %s WHERE upload_fk = $11 AND pfile_fk = $1 "
+        "RETURNING clearing_event_pk",
+        uploadTreeTableName
+      );
+      
+      gchar* stmt = g_strdup_printf("phrase_decision.%s.%ld", uploadTreeTableName, phrase->cpId);
+      
+      PGresult* result = fo_dbManager_ExecPrepared(
+        fo_dbManager_PrepareStamement(
+          state->dbManager,
+          stmt,
+          insertSql,
+          long, int, int, int, int, long, int, char*, char*, char*, int
+        ),
+        file->id,
+        args->userId,
+        args->groupId,
+        args->jobId,
+        BULK_DECISION_TYPE,
+        rfPk,
+        0, // removed = false
+        phrase->comments,
+        NULL, // reportinfo
+        phrase->acknowledgement,
+        args->uploadId
+      );
+      
+      g_free(uploadTreeTableName);
+      g_free(insertSql);
+      g_free(stmt);
+      
+      if (!result) {
+        fo_dbManager_rollback(state->dbManager);
+        return 0;
       }
-      bulkArguments->scanFindings = strcmp(PQgetvalue(bulkArgumentsResult, 0, column++), "t") == 0;
-      bulkArguments->bulkId = bulkId;
-      bulkArguments->actions = queryBulkActions(state, bulkId);
-      bulkArguments->jobId = fo_scheduler_jobId();
-
-      state->ptr = bulkArguments;
-
-      if (!setLeftAndRight(state)) {
-        printf("FATAL: could not retrieve left and right for bulk id=%ld\n", bulkId);
-        bulkArguments_contents_free(state->ptr);
-      } else {
-        result = 1;
-      }
-    } else {
-      printf("FATAL: could not retrieve arguments for bulk scan with id=%ld\n", bulkId);
+      
+      PQclear(result);
     }
-    PQclear(bulkArgumentsResult);
   }
-  return result;
+
+  return fo_dbManager_commit(state->dbManager);
 }
 
-BulkAction** queryBulkActions(KotobaState* state, long bulkId) {
-
-  PGresult* bulkActionsResult = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      state->dbManager,
-      "queryBulkActions",
-      "SELECT rf_fk, removing, comment, reportinfo, acknowledgement FROM license_set_bulk WHERE lrb_fk = $1",
-  long
-  ),
-  bulkId
-  );
-
-  int numberOfRows = bulkActionsResult ? PQntuples(bulkActionsResult) : 0;
-  BulkAction** bulkActions = (BulkAction**)malloc((numberOfRows + 1) * sizeof(BulkAction*));
-
-  int row;
-  for (row = 0; row < numberOfRows; row++) {
-    int column = 0;
-    BulkAction *action = (BulkAction *) malloc(sizeof(BulkAction));
-    action->licenseId = atoi(PQgetvalue(bulkActionsResult, row, column++));
-    action->removing = (strcmp(PQgetvalue(bulkActionsResult, row, column++), "t") == 0);
-    action->comment = g_strdup(PQgetvalue(bulkActionsResult, row, column++));
-    action->reportinfo = g_strdup(PQgetvalue(bulkActionsResult, row, column++));
-    action->acknowledgement = g_strdup(PQgetvalue(bulkActionsResult, row, column++));
-    bulkActions[row] = action;
+/**
+ * \brief Process a single upload with phrase-mode scanning
+ */
+int processUploadWithPhrases(KotobaState* state, int uploadId) {
+  // Get scheduler context
+  int userId = fo_scheduler_userID();
+  int groupId = fo_scheduler_groupID();
+  int jobId = fo_scheduler_jobId();
+  
+  // Load active phrases and their license mappings
+  GArray* phrases = queryActiveCustomPhrases(state->dbManager);
+  if (!phrases || phrases->len == 0) {
+    // No active phrases - complete successfully with no work
+    if (phrases) {
+      phrases_free(phrases);
+    }
+    return 1;
   }
-  bulkActions[row] = NULL;
-
-  if (bulkActionsResult) {
-    PQclear(bulkActionsResult);
-  }
-
-  return bulkActions;
-}
-
-void bulkArguments_contents_free(BulkArguments* bulkArguments) {
-
-  BulkAction **bulkActions = bulkArguments->actions;
-  for (int i=0; bulkActions[i] != NULL; i++) {
-    free(bulkActions[i]);
-  }
-  free(bulkActions);
-
-  g_free(bulkArguments->refText);
-  g_free(bulkArguments->delimiters);
-
-  free(bulkArguments);
-}
-
-int bulk_identification(KotobaState* state) {
-  BulkArguments* bulkArguments = state->ptr;
-
-  License license = (License){
-    .refId = bulkArguments->licenseId,
+  
+  // Set up phrase mode arguments
+  PhraseModeArgs args = {
+    .uploadId = uploadId,
+    .userId = userId,
+    .groupId = groupId,
+    .jobId = jobId,
+    .phrases = phrases,
+    .delimiters = g_strdup(DELIMITERS)
   };
-  license.tokens = tokenize(bulkArguments->refText, bulkArguments->delimiters);
-
-  GArray* licenseArray = g_array_new(FALSE, FALSE, sizeof (License));
-  g_array_append_val(licenseArray, license);
-
-  Licenses* licenses = buildLicenseIndexes(licenseArray, MIN_ADJACENT_MATCHES, 0);
-
-  PGresult* filesResult = queryFileIdsForUploadAndLimits(
-    state->dbManager,
-    bulkArguments->uploadId,
-    bulkArguments->uploadTreeLeft,
-    bulkArguments->uploadTreeRight,
-    bulkArguments->groupId,
-    bulkArguments->ignoreIrre,
-    bulkArguments->scanFindings
-  );
-
-  int haveError = 1;
-  if (filesResult != NULL) {
-    int resultsCount = PQntuples(filesResult);
-    haveError = 0;
-#ifdef KOTOBA_MULTI_THREAD
-    #pragma omp parallel
-#endif
-    {
-      KotobaState threadLocalStateStore = *state;
-      KotobaState* threadLocalState = &threadLocalStateStore;
-
-      threadLocalState->dbManager = fo_dbManager_fork(state->dbManager);
-      if (threadLocalState->dbManager) {
-#ifdef KOTOBA_MULTI_THREAD
-        #pragma omp for schedule(dynamic)
-#endif
-        for (int i = 0; i<resultsCount; i++) {
-          if (haveError)
-            continue;
-
-          long fileId = atol(PQgetvalue(filesResult, i, 0));
-
-          if (matchPFileWithLicenses(threadLocalState, fileId, licenses,
-            &bulkCallbacks, bulkArguments->delimiters)) {
-            fo_scheduler_heart(1);
-          } else {
-            fo_scheduler_heart(0);
-            haveError = 1;
-          }
-        }
-        fo_dbManager_finish(threadLocalState->dbManager);
-      } else {
-        haveError = 1;
-      }
-    }
-    PQclear(filesResult);
+  
+  state->ptr = &args;
+  
+  // Build license index from phrases
+  Licenses* licenses = buildLicenseIndexFromPhrases(phrases, args.delimiters);
+  if (!licenses) {
+    phrases_free(phrases);
+    g_free(args.delimiters);
+    return 0;
   }
-
+  
+  // Get all file IDs for the entire upload
+  PGresult* fileIdResult = queryFileIdsForUpload(state->dbManager, uploadId, false);
+  if (!fileIdResult) {
+    licenses_free(licenses);
+    phrases_free(phrases);
+    g_free(args.delimiters);
+    return 0;
+  }
+  
+  if (PQntuples(fileIdResult) == 0) {
+    PQclear(fileIdResult);
+    licenses_free(licenses);
+    phrases_free(phrases);
+    g_free(args.delimiters);
+    fo_scheduler_heart(0);
+    return 1;
+  }
+  
+  // Process files in parallel
+  int haveError = 0;
+  int resultsCount = PQntuples(fileIdResult);
+  
+#ifdef KOTOBA_MULTI_THREAD
+  #pragma omp parallel
+#endif
+  {
+    KotobaState threadLocalStateStore = *state;
+    KotobaState* threadLocalState = &threadLocalStateStore;
+    threadLocalState->ptr = &args;  // Ensure each thread has the args
+    
+    threadLocalState->dbManager = fo_dbManager_fork(state->dbManager);
+    if (threadLocalState->dbManager) {
+#ifdef KOTOBA_MULTI_THREAD
+      #pragma omp for schedule(dynamic)
+#endif
+      for (int i = 0; i < resultsCount; i++) {
+        if (haveError)
+          continue;
+          
+        long fileId = atol(PQgetvalue(fileIdResult, i, 0));
+        
+        if (matchPFileWithLicenses(threadLocalState, fileId, licenses,
+                                   &phraseCallbacks, args.delimiters)) {
+          fo_scheduler_heart(1);
+        } else {
+          fo_scheduler_heart(0);
+          haveError = 1;
+        }
+      }
+      fo_dbManager_finish(threadLocalState->dbManager);
+    } else {
+      haveError = 1;
+    }
+  }
+  
+  PQclear(fileIdResult);
   licenses_free(licenses);
-
+  phrases_free(phrases);
+  g_free(args.delimiters);
+  
   return !haveError;
 }
 
+/**
+ * \brief Main function - phrase-driven bulk scanning
+ */
 int main(int argc, char** argv) {
   KotobaState stateStore;
   KotobaState* state = &stateStore;
@@ -252,160 +268,31 @@ int main(int argc, char** argv) {
   while (fo_scheduler_next() != NULL) {
     const char* schedulerCurrent = fo_scheduler_current();
 
-    long bulkId = atol(schedulerCurrent);
+    int uploadId = atoi(schedulerCurrent);
 
-    if (bulkId == 0) continue;
-
-    if (!queryBulkArguments(state, bulkId)) {
-      bail(state, 1);
-    }
-
-    BulkArguments* bulkArguments = state->ptr;
+    if (uploadId == 0) continue;
 
     int arsId = fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
-      0, bulkArguments->uploadId, state->agentId, AGENT_BULK_ARS, NULL, 0);
+                           0, uploadId, state->agentId, AGENT_BULK_ARS, NULL, 0);
 
-    if (arsId<=0)
+    if (arsId <= 0)
       bail(state, 2);
 
-    if (!bulk_identification(state))
+    if (!processUploadWithPhrases(state, uploadId))
       bail(state, 3);
 
     fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
-      arsId, bulkArguments->uploadId, state->agentId, AGENT_BULK_ARS, NULL, 1);
+                arsId, uploadId, state->agentId, AGENT_BULK_ARS, NULL, 1);
 
-    bulkArguments_contents_free(bulkArguments);
     fo_scheduler_heart(0);
+  }
+
+  // Clean up global hash table
+  if (phraseByCpId) {
+    g_hash_table_destroy(phraseByCpId);
+    phraseByCpId = NULL;
   }
 
   scheduler_disconnect(state, 0);
   return 0;
-}
-
-int bulk_onAllMatches(KotobaState* state, const File* file, const GArray* matches) {
-  int haveAFullMatch = 0;
-  for (guint j=0; j<matches->len; j++) {
-    Match* match = match_array_index(matches, j);
-
-    if (match->type == MATCH_TYPE_FULL) {
-      haveAFullMatch = 1;
-      break;
-    }
-  }
-
-  if (!haveAFullMatch)
-    return 1;
-
-  BulkArguments* bulkArguments = state->ptr;
-
-  if (!fo_dbManager_begin(state->dbManager))
-    return 0;
-
-  BulkAction **actions = bulkArguments->actions;
-  gchar* insertSql;
-  char* uploadtreeTableName = getUploadTreeTableName(state->dbManager,
-                                                     bulkArguments->uploadId);
-  gchar* stmt = g_strdup_printf("saveBulkResult:decision.%s",
-                                uploadtreeTableName);
-  if (bulkArguments->ignoreIrre)
-  {
-    insertSql = g_strdup_printf("INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, "
-      "job_fk, type_fk, rf_fk, removed, comment, reportinfo, acknowledgement) "
-      "SELECT uploadtree_pk, $2, $3, $4, $5, $6, $7, $8, $9, $10 "
-      "FROM ("
-        "SELECT DISTINCT ON(ut.uploadtree_pk, ut.pfile_fk, scopesort) "
-          "ut.pfile_fk pfile_fk, ut.uploadtree_pk, decision_type, "
-          "CASE cd.scope WHEN 1 THEN 1 ELSE 0 END AS scopesort"
-        " FROM %s AS ut "
-        " LEFT JOIN clearing_decision cd ON "
-        "  ((ut.uploadtree_pk = cd.uploadtree_fk AND scope = 0 AND cd.group_fk = $3) "
-        "  OR (ut.pfile_fk = cd.pfile_fk AND scope = 1)) "
-        " WHERE upload_fk = $11 AND (lft BETWEEN $12 AND $13) AND ut.pfile_fk = $1"
-        " ORDER BY ut.uploadtree_pk, scopesort, ut.pfile_fk, clearing_decision_pk DESC"
-      ") itemView WHERE decision_type != %d OR decision_type IS NULL"
-      " RETURNING clearing_event_pk;", uploadtreeTableName, DECISION_TYPE_FOR_IRRELEVANT);
-    stmt = g_strconcat(stmt, ".ignoreirre", NULL);
-  }
-  else
-  {
-    insertSql = g_strdup_printf("INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, "
-      "job_fk, type_fk, rf_fk, removed, comment, reportinfo, acknowledgement)"
-      "SELECT uploadtree_pk, $2, $3, $4, $5, $6, $7, $8, $9, $10 "
-      "FROM %s "
-      " WHERE upload_fk = $11 AND (lft BETWEEN $12 AND $13) AND pfile_fk = $1"
-      " RETURNING clearing_event_pk;", uploadtreeTableName);
-  }
-  for (int i = 0; actions[i] != NULL; i++) {
-    BulkAction* action = actions[i];
-
-    PGresult* licenseDecisionIds = fo_dbManager_ExecPrepared(
-            fo_dbManager_PrepareStamement(
-                    state->dbManager,
-                    stmt,
-                    insertSql,
-    long, int, int, int, int, long, int, char*, char*, char*,
-    int, long, long
-    ),
-    file->id,
-
-            bulkArguments->userId,
-            bulkArguments->groupId,
-            bulkArguments->jobId,
-            BULK_DECISION_TYPE,
-            action->licenseId,
-            action->removing ? 1 : 0,
-            action->comment,
-            action->reportinfo,
-            action->acknowledgement,
-
-            bulkArguments->uploadId,
-            bulkArguments->uploadTreeLeft,
-            bulkArguments->uploadTreeRight
-    );
-
-    if (licenseDecisionIds) {
-      for (int i=0; i<PQntuples(licenseDecisionIds);i++) {
-        long licenseDecisionEventId = atol(PQgetvalue(licenseDecisionIds,i,0));
-
-        for (guint j=0; j<matches->len; j++) {
-          Match* match = match_array_index(matches, j);
-
-          if (match->type != MATCH_TYPE_FULL)
-            continue;
-
-          DiffPoint* highlightTokens = match->ptr.full;
-          DiffPoint highlight = getFullHighlightFor(file->tokens, highlightTokens->start, highlightTokens->length);
-
-          PGresult* highlightResult = fo_dbManager_ExecPrepared(
-                  fo_dbManager_PrepareStamement(
-                          state->dbManager,
-                          "saveBulkResult:highlight",
-                          "INSERT INTO highlight_bulk(clearing_event_fk, lrb_fk, start, len) VALUES($1,$2,$3,$4)",
-          long, long, size_t, size_t
-          ),
-          licenseDecisionEventId,
-                  bulkArguments->bulkId,
-                  highlight.start,
-                  highlight.length
-          );
-
-          if (highlightResult) {
-            PQclear(highlightResult);
-          } else {
-            fo_dbManager_rollback(state->dbManager);
-            return 0;
-          }
-        }
-      }
-      PQclear(licenseDecisionIds);
-    } else {
-      fo_dbManager_rollback(state->dbManager);
-      return 0;
-    }
-  }
-  g_free(stmt);
-  g_free(insertSql);
-
-
-  return fo_dbManager_commit(state->dbManager);
 }

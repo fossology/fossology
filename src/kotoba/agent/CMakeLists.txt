@@ -70,5 +70,5 @@ install(TARGETS kotoba_exec
 
 install(TARGETS kotobabulk
     RUNTIME
-    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}bulk/agent 
+    DESTINATION ${FO_MODDIR}/kotobabulk/agent 
     COMPONENT kotobabulk)

@@ -1,8 +1,8 @@
 /*
- Author: Harshit Gandhi
- SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+Author: Harshit Gandhi
+SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
 
- SPDX-License-Identifier: GPL-2.0-only
+SPDX-License-Identifier: GPL-2.0-only
 */
 
 #ifndef KOTOBA_AGENT_BULK_H
@@ -13,34 +13,33 @@
 #define AGENT_BULK_ARS  "kotobabulk_ars"
 
 #include "kotoba.h"
+#include <glib.h>
 
 #define BULK_DECISION_TYPE_MEANING "bulk"
 #define BULK_DECISION_TYPE 2
 #define BULK_DECISION_SCOPE "upload"
 
+/**
+ * @brief Structure to hold a custom phrase and its mapped licenses
+ */
 typedef struct {
-    long licenseId;
-    int removing;
-    char* comment;
-    char* reportinfo;
-    char* acknowledgement;
-} BulkAction;
+    long cpId;                ///< cp_pk from custom_phrase table
+    char* text;              ///< phrase text to match
+    char* acknowledgement;    ///< acknowledgement text (nullable)
+    char* comments;          ///< comments (nullable)
+    GArray* licenseIds;      ///< array of rf_pk values from custom_phrase_license_map
+} Phrase;
 
+/**
+ * @brief Arguments for phrase-mode bulk scanning
+ */
 typedef struct {
-  long bulkId;
-  long uploadTreeId;
-  long uploadTreeLeft;
-  long uploadTreeRight;
-  long licenseId;
-  int uploadId;
-  int jobId;
-  int userId;
-  int groupId;
-  char* refText;
-  bool ignoreIrre;
-  bool scanFindings;
-  char* delimiters;
-  BulkAction** actions;
-} BulkArguments;
+    int uploadId;            ///< upload ID to scan
+    int userId;              ///< user ID from scheduler
+    int groupId;             ///< group ID from scheduler  
+    int jobId;               ///< job ID from scheduler
+    GArray* phrases;         ///< array of Phrase* structures
+    char* delimiters;        ///< token delimiters
+} PhraseModeArgs;
 
 #endif // KOTOBA_AGENT_BULK_H

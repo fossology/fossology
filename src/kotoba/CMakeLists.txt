@@ -21,11 +21,29 @@ install(DIRECTORY ui
     FILES_MATCHING
     PATTERN *.php)
 
-install(FILES kotoba.conf kotobabulk.conf "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
+# Install kotoba main agent files
+install(FILES kotoba.conf "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
     DESTINATION ${FO_MODDIR}/${PROJECT_NAME}
     COMPONENT kotoba)
 
+# Install kotobabulk as separate module
+generate_version(kotobabulk "VERSION-kotobabulk")
+install(FILES kotobabulk.conf
+    DESTINATION ${FO_MODDIR}/kotobabulk
+    COMPONENT kotobabulk)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION-kotobabulk"
+    DESTINATION ${FO_MODDIR}/kotobabulk
+    RENAME "VERSION"
+    COMPONENT kotobabulk)
+
+# Install kotobabulk UI files
+install(FILES ui/agent-kotoba-bulk.php
+    DESTINATION ${FO_MODDIR}/kotobabulk/ui
+    COMPONENT kotobabulk)
+
 add_symlink()
+add_symlink(kotobabulk)
 
 if(TESTING)
     enable_testing()

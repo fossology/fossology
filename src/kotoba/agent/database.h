@@ -10,6 +10,7 @@
 
 #include <libfossology.h>
 #include "highlight.h"
+#include "kotobabulk.h"
 
 #define DECISION_TYPE_FOR_IRRELEVANT 4
 
@@ -23,5 +24,11 @@ long saveToDb(fo_dbManager* dbManager, int agentId, long int refId, long int pFi
 int saveNoResultToDb(fo_dbManager* dbManager, int agentId, long pFileId);
 int saveDiffHighlightToDb(fo_dbManager* dbManager, const DiffMatchInfo* diffInfo, long licenseFileId);
 int saveDiffHighlightsToDb(fo_dbManager* dbManager, const GArray* matchedInfo, long licenseFileId);
+
+// Phrase-mode database functions
+GArray* queryActiveCustomPhrases(fo_dbManager* dbManager);
+GArray* queryMappedLicensesForPhrase(fo_dbManager* dbManager, long cpId);
+void phrase_free(Phrase* phrase);
+void phrases_free(GArray* phrases);
 
 #endif // KOTOBA_AGENT_DATABASE_H
