@@ -4,48 +4,42 @@ SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
 #]=======================================================================]
 
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
-project(kotoba)
+project(kotoba LANGUAGES C)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/SetDefaults.cmake)
 
-# Create a dummy target for now to satisfy version generation requirements
-# add_custom_target(kotoba COMMENT "Dummy kotoba target for UI-only setup")
-
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/agent)
-
-generate_version()
 
 install(DIRECTORY ui
     DESTINATION ${FO_MODDIR}/${PROJECT_NAME}
     COMPONENT kotoba
     FILES_MATCHING
-    PATTERN *.php)
+    PATTERN *.php
+    PATTERN "agent-kotoba-bulk.php" EXCLUDE)
 
-# Install kotoba main agent files
-install(FILES kotoba.conf "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
-    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}
-    COMPONENT kotoba)
-
-# Install kotobabulk as separate module
-generate_version(kotobabulk "VERSION-kotobabulk")
-install(FILES kotobabulk.conf
-    DESTINATION ${FO_MODDIR}/kotobabulk
-    COMPONENT kotobabulk)
-
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION-kotobabulk"
-    DESTINATION ${FO_MODDIR}/kotobabulk
-    RENAME "VERSION"
-    COMPONENT kotobabulk)
-
-# Install kotobabulk UI files
-install(FILES ui/agent-kotoba-bulk.php
+install(FILES ui/agent-kotoba-bulk.php 
     DESTINATION ${FO_MODDIR}/kotobabulk/ui
     COMPONENT kotobabulk)
 
-add_symlink()
-add_symlink(kotobabulk)
+foreach(KOTOBA_INSTALL kotobabulk kotoba)
+    set(PROJECT_NAME ${KOTOBA_INSTALL})
+    generate_version(${KOTOBA_INSTALL} "VERSION-${KOTOBA_INSTALL}")
+    
+    install(FILES ${KOTOBA_INSTALL}.conf
+        DESTINATION ${FO_MODDIR}/${KOTOBA_INSTALL}
+        COMPONENT ${KOTOBA_INSTALL})
 
-if(TESTING)
-    enable_testing()
-    # add_subdirectory(agent_tests)
-endif()
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION-${KOTOBA_INSTALL}"
+        DESTINATION ${FO_MODDIR}/${KOTOBA_INSTALL}
+        RENAME "VERSION"
+        COMPONENT ${KOTOBA_INSTALL})
+    add_symlink(${KOTOBA_INSTALL})
+endforeach()
+
+# To be uncommented when test cases are written
+# if(TESTING)
+#     set(VERSIONFILE "VERSION-kotoba")
+#     configure_file(${FO_CMAKEDIR}/TestInstall.make.in ${CMAKE_CURRENT_BINARY_DIR}/TestInstall.make NEWLINE_STYLE LF @ONLY)
+#    enable_testing()
+#     add_subdirectory(agent_tests)
+# endif(TESTING)
