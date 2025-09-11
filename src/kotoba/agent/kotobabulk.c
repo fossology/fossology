@@ -129,7 +129,7 @@ int phrase_onAllMatches(KotobaState* state, const File* file, const GArray* matc
         rfPk,
         0, // removed = false
         phrase->comments,
-        NULL, // reportinfo
+        phrase->text, // reportinfo
         phrase->acknowledgement,
         args->uploadId
       );
