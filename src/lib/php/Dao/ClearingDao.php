@@ -350,9 +350,10 @@ class ClearingDao
     $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTable);
 
-    if ($this->isDecisionCheck($uploadTreeId, $groupId, DecisionTypes::IRRELEVANT)) {
+    $currentDecision = $this->isDecisionCheck($uploadTreeId, $groupId, '');
+    if ($currentDecision && in_array($currentDecision['decision_type'], [DecisionTypes::IRRELEVANT, DecisionTypes::DO_NOT_USE, DecisionTypes::NON_FUNCTIONAL])) {
       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'rollback');
-    } else if ($decType == DecisionTypes::IRRELEVANT) {
+    } else if (in_array($decType, [DecisionTypes::IRRELEVANT, DecisionTypes::DO_NOT_USE, DecisionTypes::NON_FUNCTIONAL])) {
       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'delete', '2');
     }
 
@@ -822,7 +823,15 @@ INSERT INTO clearing_decision (
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $params[] = $groupId;
     $a = count($params);
-    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>'noLicense',
+    
+    // For decision types that should affect files without licenses (IRRELEVANT, DO_NOT_USE, NON_FUNCTIONAL),
+    // don't skip files that have no license findings
+    $skipOption = 'noLicense';
+    if (in_array($decisionMark, [DecisionTypes::IRRELEVANT, DecisionTypes::DO_NOT_USE, DecisionTypes::NON_FUNCTIONAL])) {
+      $skipOption = 'none';
+    }
+    
+    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>$skipOption,
                      UploadTreeProxy::OPT_ITEM_FILTER=>' AND (lft BETWEEN $1 AND $2)',
                      UploadTreeProxy::OPT_GROUP_ID=>'$'.$a);
     $uploadTreeProxy = new UploadTreeProxy($itemTreeBounds->getUploadId(), $options, $itemTreeBounds->getUploadTreeTableName());
