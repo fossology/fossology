@@ -89,7 +89,16 @@ class BulkReuser
       $upload = $uploadDao->getUpload($uploadId);
       $uploadName = $upload->getFilename();
       $job_pk = \JobAddJob($userId, $groupId, $uploadName, $uploadId);
+      
+      // Start with monk bulk as the primary dependency
       $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk']));
+      
+      // Check if kotoba agent has results for this upload and add to dependencies if so
+      $kotobaHasResults = \CheckARS($uploadId, "kotobabulk", "kotoba scanner", "kotobabulk_ars");
+      if ($kotobaHasResults == 1 || $kotobaHasResults == 2) {
+        $dependecies[] = array('name' => 'agent_kotoba', 'args' => $row['lrb_pk']);
+      }
+      
       $errorMsg = '';
       $jqId = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies);
 
