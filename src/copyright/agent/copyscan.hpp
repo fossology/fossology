@@ -10,6 +10,9 @@
 #include "scanners.hpp"
 #include "regex.hpp"
 
+using std::vector;
+using std::pair;
+
 /**
  * \class hCopyrightScanner
  * \brief Implementation of scanner class for copyright
@@ -19,6 +22,11 @@ class hCopyrightScanner : public scanner
 public:
   void ScanString(const string& s, list<match>& results) const;
   hCopyrightScanner();
+  string Cleanup(const string &raw) const;
+  void TrimPunctuation(string &text) const;
+  void RemoveNoisePatterns(string& text) const;
+  void NormalizeCopyright(string& text) const;
+  void StripSuffixes(string& text) const;
 private:
   /**
    * \var rx::regex regCopyright
@@ -32,7 +40,8 @@ private:
    * \var rx::regex regSpdxCopyright
    * Regex for SPDX-FileCopyrightText
    */
-  rx::regex regCopyright, regException, regNonBlank, regSimpleCopyright, regSpdxCopyright;
+  rx::regex regCopyright, regException, regExceptionCopy, regNonBlank, regSimpleCopyright,
+  regSpdxCopyright, regRemoveFileStmt, regStripLicenseTrail, regStripTrademarkTrail, regStripAllRightReserveTrail;
 } ;
 
 #endif
