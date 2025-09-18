@@ -111,8 +111,8 @@ class SpdxUtils
           return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
         }
       }
-      return implode(" AND ", $licenses);
     }
+    return implode(" AND ", $licenses);
   }
 
   /**
