@@ -141,7 +141,7 @@ class ClearingDecisionFilter
     foreach ($clearingDecisions as $clearingDecision) {
       $itemId = $clearingDecision->getUploadTreeId();
       $clearingDecisionsForCopyList[$itemId] = array();
-      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
+      if (in_array($clearingDecision->getType(), [DecisionTypes::IRRELEVANT, DecisionTypes::DO_NOT_USE, DecisionTypes::NON_FUNCTIONAL])) {
         $clearingDecisionsForCopyList[$itemId][] = "Void";
         continue;
       }
