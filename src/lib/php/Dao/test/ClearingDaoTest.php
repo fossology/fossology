@@ -470,4 +470,280 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($rowFuture['comment'],equalTo($changeCom));
     assertThat($rowFuture['reportinfo'],equalTo($changeRep));
   }
+
+  public function testMarkDirectoryAsDecisionTypeIrrelevantAffectsFilesWithoutLicenses()
+  {
+    // Test for Issue #3103 - Edit Decisions Not Affecting Files Without Licenses
+    $this->testDb->createPlainTables(array('uploadtree', 'license_file'));
+    $this->testDb->createInheritedTables(array('clearing_decision', 'clearing_event', 'clearing_decision_event'));
+
+    $uploadId = 1;
+    $groupId = 2;
+    $userId = 3;
+    
+    // Create a directory structure with files with and without licenses
+    $rootItem = 100;
+    $fileWithLicense = 101;
+    $fileWithoutLicense = 102;
+    
+    // Insert uploadtree items
+    $this->dbManager->insertInto('uploadtree',
+        'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
+        array($rootItem, null, $uploadId, 1, 33188, 1, 6, 'root'));
+    $this->dbManager->insertInto('uploadtree',
+        'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
+        array($fileWithLicense, $rootItem, $uploadId, 2, 33188, 2, 3, 'file_with_license'));
+    $this->dbManager->insertInto('uploadtree',
+        'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
+        array($fileWithoutLicense, $rootItem, $uploadId, 3, 33188, 4, 5, 'file_without_license'));
+
+    // Add license to one file only
+    $this->dbManager->insertInto('license_file',
+        'rf_fk, pfile_fk, agent_fk',
+        array(1, 2, 1)); // file_with_license has a license
+
+    // Mock uploadDao
+    $this->uploadDao->shouldReceive('getItemTreeBounds')
+        ->with($rootItem, 'uploadtree')->andReturn(new ItemTreeBounds($rootItem, 'uploadtree', $uploadId, 1, 6));
+    $this->uploadDao->shouldReceive('getItemTreeBounds')
+        ->with($fileWithLicense, 'uploadtree')->andReturn(new ItemTreeBounds($fileWithLicense, 'uploadtree', $uploadId, 2, 3));
+    $this->uploadDao->shouldReceive('getItemTreeBounds')
+        ->with($fileWithoutLicense, 'uploadtree')->andReturn(new ItemTreeBounds($fileWithoutLicense, 'uploadtree', $uploadId, 4, 5));
+
+    // Mock ClearingDecisionProcessor
+    $clearingDecisionProcessor = M::mock('Fossology\Lib\BusinessRules\ClearingDecisionProcessor');
+    $clearingDecisionProcessor->shouldReceive('makeDecisionFromLastEvents')->withAnyArgs()->andReturn(null);
+    
+    // Mock CopyrightDao
+    $copyrightDao = M::mock('Fossology\Lib\Dao\CopyrightDao');
+    $copyrightDao->shouldReceive('updateTable')->withAnyArgs()->andReturn(null);
+    
+    // Set up container mock
+    $container = M::mock('Symfony\Component\DependencyInjection\ContainerBuilder');
+    $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($clearingDecisionProcessor);
+    $GLOBALS['container'] = $container;
+
+    // Inject the mocked CopyrightDao into ClearingDao using reflection
+    $reflection = new \ReflectionClass($this->clearingDao);
+    $copyrightDaoProperty = $reflection->getProperty('copyrightDao');
+    $copyrightDaoProperty->setAccessible(true);
+    $copyrightDaoProperty->setValue($this->clearingDao, $copyrightDao);
+
+    $treeBounds = new ItemTreeBounds($rootItem, 'uploadtree', $uploadId, 1, 6);
+
+    // Before the fix, only files with licenses would be processed.
+    // After the fix, both files should be processed when marking as IRRELEVANT
+    
+    // Verify that makeDecisionFromLastEvents is called for both files (including file without license)
+    $clearingDecisionProcessor->shouldReceive('makeDecisionFromLastEvents')
+        ->with(M::on(function($bounds) use ($fileWithLicense) {
+            return $bounds->getItemId() === $fileWithLicense;
+        }), $userId, $groupId, DecisionTypes::IRRELEVANT, DecisionScopes::ITEM)
+        ->once();
+        
+    $clearingDecisionProcessor->shouldReceive('makeDecisionFromLastEvents')
+        ->with(M::on(function($bounds) use ($fileWithoutLicense) {
+            return $bounds->getItemId() === $fileWithoutLicense;
+        }), $userId, $groupId, DecisionTypes::IRRELEVANT, DecisionScopes::ITEM)
+        ->once();
+
+    // Verify that copyright entries are deactivated for both files
+    $copyrightDao->shouldReceive('updateTable')
+        ->with(M::on(function($bounds) use ($fileWithLicense) {
+            return $bounds->getItemId() === $fileWithLicense;
+        }), '', '', $userId, 'copyright', 'delete', '2')
+        ->once();
+        
+    $copyrightDao->shouldReceive('updateTable')
+        ->with(M::on(function($bounds) use ($fileWithoutLicense) {
+            return $bounds->getItemId() === $fileWithoutLicense;
+        }), '', '', $userId, 'copyright', 'delete', '2')
+        ->once();
+
+    // Execute the fix
+    $this->clearingDao->markDirectoryAsDecisionType($treeBounds, $groupId, $userId, 'irrelevant');
+  }
+
+  public function testMarkDirectoryAsDecisionTypeDoNotUseAffectsFilesWithoutLicenses()
+  {
+    // Similar test for DO_NOT_USE decision type
+    $this->testDb->createPlainTables(array('uploadtree', 'license_file'));
+    $this->testDb->createInheritedTables(array('clearing_decision', 'clearing_event', 'clearing_decision_event'));
+
+    $uploadId = 1;
+    $groupId = 2;
+    $userId = 3;
+    
+    $rootItem = 100;
+    $fileWithoutLicense = 102;
+    
+    $this->dbManager->insertInto('uploadtree',
+        'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
+        array($rootItem, null, $uploadId, 1, 33188, 1, 4, 'root'));
+    $this->dbManager->insertInto('uploadtree',
+        'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
+        array($fileWithoutLicense, $rootItem, $uploadId, 3, 33188, 2, 3, 'file_without_license'));
+
+    // No license_file entries - file has no licenses
+
+    $this->uploadDao->shouldReceive('getItemTreeBounds')
+        ->with($rootItem, 'uploadtree')->andReturn(new ItemTreeBounds($rootItem, 'uploadtree', $uploadId, 1, 4));
+    $this->uploadDao->shouldReceive('getItemTreeBounds')
+        ->with($fileWithoutLicense, 'uploadtree')->andReturn(new ItemTreeBounds($fileWithoutLicense, 'uploadtree', $uploadId, 2, 3));
+
+    $clearingDecisionProcessor = M::mock('Fossology\Lib\BusinessRules\ClearingDecisionProcessor');
+    $copyrightDao = M::mock('Fossology\Lib\Dao\CopyrightDao');
+    
+    $container = M::mock('Symfony\Component\DependencyInjection\ContainerBuilder');
+    $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($clearingDecisionProcessor);
+    $GLOBALS['container'] = $container;
+
+    $reflection = new \ReflectionClass($this->clearingDao);
+    $copyrightDaoProperty = $reflection->getProperty('copyrightDao');
+    $copyrightDaoProperty->setAccessible(true);
+    $copyrightDaoProperty->setValue($this->clearingDao, $copyrightDao);
+
+    $treeBounds = new ItemTreeBounds($rootItem, 'uploadtree', $uploadId, 1, 4);
+
+    // Verify that the file without license is processed for DO_NOT_USE decision
+    $clearingDecisionProcessor->shouldReceive('makeDecisionFromLastEvents')
+        ->with(M::on(function($bounds) use ($fileWithoutLicense) {
+            return $bounds->getItemId() === $fileWithoutLicense;
+        }), $userId, $groupId, DecisionTypes::DO_NOT_USE, DecisionScopes::ITEM)
+        ->once();
+
+    $copyrightDao->shouldReceive('updateTable')
+        ->with(M::on(function($bounds) use ($fileWithoutLicense) {
+            return $bounds->getItemId() === $fileWithoutLicense;
+        }), '', '', $userId, 'copyright', 'delete', '2')
+        ->once();
+
+    // Execute the test
+    $this->clearingDao->markDirectoryAsDecisionType($treeBounds, $groupId, $userId, 'doNotUse');
+  }
+
+  public function testMarkDirectoryAsDecisionTypeNonFunctionalAffectsFilesWithoutLicenses()
+  {
+    // Similar test for NON_FUNCTIONAL decision type
+    $this->testDb->createPlainTables(array('uploadtree', 'license_file'));
+    $this->testDb->createInheritedTables(array('clearing_decision', 'clearing_event', 'clearing_decision_event'));
+
+    $uploadId = 1;
+    $groupId = 2;
+    $userId = 3;
+    
+    $rootItem = 100;
+    $fileWithoutLicense = 102;
+    
+    $this->dbManager->insertInto('uploadtree',
+        'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
+        array($rootItem, null, $uploadId, 1, 33188, 1, 4, 'root'));
+    $this->dbManager->insertInto('uploadtree',
+        'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
+        array($fileWithoutLicense, $rootItem, $uploadId, 3, 33188, 2, 3, 'file_without_license'));
+
+    $this->uploadDao->shouldReceive('getItemTreeBounds')
+        ->with($rootItem, 'uploadtree')->andReturn(new ItemTreeBounds($rootItem, 'uploadtree', $uploadId, 1, 4));
+    $this->uploadDao->shouldReceive('getItemTreeBounds')
+        ->with($fileWithoutLicense, 'uploadtree')->andReturn(new ItemTreeBounds($fileWithoutLicense, 'uploadtree', $uploadId, 2, 3));
+
+    $clearingDecisionProcessor = M::mock('Fossology\Lib\BusinessRules\ClearingDecisionProcessor');
+    $copyrightDao = M::mock('Fossology\Lib\Dao\CopyrightDao');
+    
+    $container = M::mock('Symfony\Component\DependencyInjection\ContainerBuilder');
+    $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($clearingDecisionProcessor);
+    $GLOBALS['container'] = $container;
+
+    $reflection = new \ReflectionClass($this->clearingDao);
+    $copyrightDaoProperty = $reflection->getProperty('copyrightDao');
+    $copyrightDaoProperty->setAccessible(true);
+    $copyrightDaoProperty->setValue($this->clearingDao, $copyrightDao);
+
+    $treeBounds = new ItemTreeBounds($rootItem, 'uploadtree', $uploadId, 1, 4);
+
+    // Verify that the file without license is processed for NON_FUNCTIONAL decision
+    $clearingDecisionProcessor->shouldReceive('makeDecisionFromLastEvents')
+        ->with(M::on(function($bounds) use ($fileWithoutLicense) {
+            return $bounds->getItemId() === $fileWithoutLicense;
+        }), $userId, $groupId, DecisionTypes::NON_FUNCTIONAL, DecisionScopes::ITEM)
+        ->once();
+
+    $copyrightDao->shouldReceive('updateTable')
+        ->with(M::on(function($bounds) use ($fileWithoutLicense) {
+            return $bounds->getItemId() === $fileWithoutLicense;
+        }), '', '', $userId, 'copyright', 'delete', '2')
+        ->once();
+
+    // Execute the test
+    $this->clearingDao->markDirectoryAsDecisionType($treeBounds, $groupId, $userId, 'nonFunctional');
+  }
+
+  public function testMarkDirectoryAsDecisionTypeIdentifiedStillSkipsFilesWithoutLicenses()
+  {
+    // Test that IDENTIFIED decisions still skip files without licenses (current behavior should be preserved)
+    $this->testDb->createPlainTables(array('uploadtree', 'license_file'));
+    $this->testDb->createInheritedTables(array('clearing_decision', 'clearing_event', 'clearing_decision_event'));
+
+    $uploadId = 1;
+    $groupId = 2;
+    $userId = 3;
+    
+    $rootItem = 100;
+    $fileWithLicense = 101;
+    $fileWithoutLicense = 102;
+    
+    $this->dbManager->insertInto('uploadtree',
+        'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
+        array($rootItem, null, $uploadId, 1, 33188, 1, 6, 'root'));
+    $this->dbManager->insertInto('uploadtree',
+        'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
+        array($fileWithLicense, $rootItem, $uploadId, 2, 33188, 2, 3, 'file_with_license'));
+    $this->dbManager->insertInto('uploadtree',
+        'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
+        array($fileWithoutLicense, $rootItem, $uploadId, 3, 33188, 4, 5, 'file_without_license'));
+
+    // Add license to one file only
+    $this->dbManager->insertInto('license_file',
+        'rf_fk, pfile_fk, agent_fk',
+        array(1, 2, 1));
+
+    $this->uploadDao->shouldReceive('getItemTreeBounds')
+        ->with($rootItem, 'uploadtree')->andReturn(new ItemTreeBounds($rootItem, 'uploadtree', $uploadId, 1, 6));
+    $this->uploadDao->shouldReceive('getItemTreeBounds')
+        ->with($fileWithLicense, 'uploadtree')->andReturn(new ItemTreeBounds($fileWithLicense, 'uploadtree', $uploadId, 2, 3));
+
+    $clearingDecisionProcessor = M::mock('Fossology\Lib\BusinessRules\ClearingDecisionProcessor');
+    $copyrightDao = M::mock('Fossology\Lib\Dao\CopyrightDao');
+    
+    $container = M::mock('Symfony\Component\DependencyInjection\ContainerBuilder');
+    $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($clearingDecisionProcessor);
+    $GLOBALS['container'] = $container;
+
+    $reflection = new \ReflectionClass($this->clearingDao);
+    $copyrightDaoProperty = $reflection->getProperty('copyrightDao');
+    $copyrightDaoProperty->setAccessible(true);
+    $copyrightDaoProperty->setValue($this->clearingDao, $copyrightDao);
+
+    $treeBounds = new ItemTreeBounds($rootItem, 'uploadtree', $uploadId, 1, 6);
+
+    // For IDENTIFIED decisions, only files with licenses should be processed (existing behavior)
+    $clearingDecisionProcessor->shouldReceive('makeDecisionFromLastEvents')
+        ->with(M::on(function($bounds) use ($fileWithLicense) {
+            return $bounds->getItemId() === $fileWithLicense;
+        }), $userId, $groupId, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM)
+        ->once();
+    
+    // File without license should NOT be processed for IDENTIFIED decisions
+    $clearingDecisionProcessor->shouldReceive('makeDecisionFromLastEvents')
+        ->with(M::on(function($bounds) use ($fileWithoutLicense) {
+            return $bounds->getItemId() === $fileWithoutLicense;
+        }), $userId, $groupId, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM)
+        ->never();
+
+    // No copyright updates should happen for IDENTIFIED decisions
+    $copyrightDao->shouldReceive('updateTable')->never();
+
+    // Execute the test
+    $this->clearingDao->markDirectoryAsDecisionType($treeBounds, $groupId, $userId, 'identified');
+  }
 }
