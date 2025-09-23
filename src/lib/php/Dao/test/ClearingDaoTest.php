@@ -480,12 +480,12 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $uploadId = 1;
     $groupId = 2;
     $userId = 3;
-    
+
     // Create a directory structure with files with and without licenses
     $rootItem = 100;
     $fileWithLicense = 101;
     $fileWithoutLicense = 102;
-    
+
     // Insert uploadtree items
     $this->dbManager->insertInto('uploadtree',
         'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
@@ -513,11 +513,11 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     // Mock ClearingDecisionProcessor
     $clearingDecisionProcessor = M::mock('Fossology\Lib\BusinessRules\ClearingDecisionProcessor');
     $clearingDecisionProcessor->shouldReceive('makeDecisionFromLastEvents')->withAnyArgs()->andReturn(null);
-    
+
     // Mock CopyrightDao
     $copyrightDao = M::mock('Fossology\Lib\Dao\CopyrightDao');
     $copyrightDao->shouldReceive('updateTable')->withAnyArgs()->andReturn(null);
-    
+
     // Set up container mock
     $container = M::mock('Symfony\Component\DependencyInjection\ContainerBuilder');
     $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($clearingDecisionProcessor);
@@ -533,14 +533,14 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
 
     // Before the fix, only files with licenses would be processed.
     // After the fix, both files should be processed when marking as IRRELEVANT
-    
+
     // Verify that makeDecisionFromLastEvents is called for both files (including file without license)
     $clearingDecisionProcessor->shouldReceive('makeDecisionFromLastEvents')
         ->with(M::on(function($bounds) use ($fileWithLicense) {
             return $bounds->getItemId() === $fileWithLicense;
         }), $userId, $groupId, DecisionTypes::IRRELEVANT, DecisionScopes::ITEM)
         ->once();
-        
+
     $clearingDecisionProcessor->shouldReceive('makeDecisionFromLastEvents')
         ->with(M::on(function($bounds) use ($fileWithoutLicense) {
             return $bounds->getItemId() === $fileWithoutLicense;
@@ -553,7 +553,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
             return $bounds->getItemId() === $fileWithLicense;
         }), '', '', $userId, 'copyright', 'delete', '2')
         ->once();
-        
+
     $copyrightDao->shouldReceive('updateTable')
         ->with(M::on(function($bounds) use ($fileWithoutLicense) {
             return $bounds->getItemId() === $fileWithoutLicense;
@@ -573,10 +573,10 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $uploadId = 1;
     $groupId = 2;
     $userId = 3;
-    
+
     $rootItem = 100;
     $fileWithoutLicense = 102;
-    
+
     $this->dbManager->insertInto('uploadtree',
         'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
         array($rootItem, null, $uploadId, 1, 33188, 1, 4, 'root'));
@@ -593,7 +593,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
 
     $clearingDecisionProcessor = M::mock('Fossology\Lib\BusinessRules\ClearingDecisionProcessor');
     $copyrightDao = M::mock('Fossology\Lib\Dao\CopyrightDao');
-    
+
     $container = M::mock('Symfony\Component\DependencyInjection\ContainerBuilder');
     $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($clearingDecisionProcessor);
     $GLOBALS['container'] = $container;
@@ -631,10 +631,10 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $uploadId = 1;
     $groupId = 2;
     $userId = 3;
-    
+
     $rootItem = 100;
     $fileWithoutLicense = 102;
-    
+
     $this->dbManager->insertInto('uploadtree',
         'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
         array($rootItem, null, $uploadId, 1, 33188, 1, 4, 'root'));
@@ -649,7 +649,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
 
     $clearingDecisionProcessor = M::mock('Fossology\Lib\BusinessRules\ClearingDecisionProcessor');
     $copyrightDao = M::mock('Fossology\Lib\Dao\CopyrightDao');
-    
+
     $container = M::mock('Symfony\Component\DependencyInjection\ContainerBuilder');
     $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($clearingDecisionProcessor);
     $GLOBALS['container'] = $container;
@@ -687,11 +687,11 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $uploadId = 1;
     $groupId = 2;
     $userId = 3;
-    
+
     $rootItem = 100;
     $fileWithLicense = 101;
     $fileWithoutLicense = 102;
-    
+
     $this->dbManager->insertInto('uploadtree',
         'uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name',
         array($rootItem, null, $uploadId, 1, 33188, 1, 6, 'root'));
@@ -714,7 +714,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
 
     $clearingDecisionProcessor = M::mock('Fossology\Lib\BusinessRules\ClearingDecisionProcessor');
     $copyrightDao = M::mock('Fossology\Lib\Dao\CopyrightDao');
-    
+
     $container = M::mock('Symfony\Component\DependencyInjection\ContainerBuilder');
     $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($clearingDecisionProcessor);
     $GLOBALS['container'] = $container;
@@ -732,7 +732,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
             return $bounds->getItemId() === $fileWithLicense;
         }), $userId, $groupId, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM)
         ->once();
-    
+
     // File without license should NOT be processed for IDENTIFIED decisions
     $clearingDecisionProcessor->shouldReceive('makeDecisionFromLastEvents')
         ->with(M::on(function($bounds) use ($fileWithoutLicense) {
@@ -745,5 +745,29 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
 
     // Execute the test
     $this->clearingDao->markDirectoryAsDecisionType($treeBounds, $groupId, $userId, 'identified');
+  }
+
+  /**
+   * Test getDecisionType function behavior with empty and invalid inputs
+   * This addresses previous reviewer feedback about empty decision type handling
+   */
+  public function testGetDecisionType_EmptyAndInvalidInputs()
+  {
+    // Test empty string defaults to NON_FUNCTIONAL
+    $result = $this->clearingDao->getDecisionType('');
+    $this->assertEquals(DecisionTypes::NON_FUNCTIONAL, $result, 'Empty string should default to NON_FUNCTIONAL');
+
+    // Test null defaults to NON_FUNCTIONAL
+    $result = $this->clearingDao->getDecisionType(null);
+    $this->assertEquals(DecisionTypes::NON_FUNCTIONAL, $result, 'Null should default to NON_FUNCTIONAL');
+
+    // Test invalid string defaults to NON_FUNCTIONAL
+    $result = $this->clearingDao->getDecisionType('invalid');
+    $this->assertEquals(DecisionTypes::NON_FUNCTIONAL, $result, 'Invalid string should default to NON_FUNCTIONAL');
+
+    // Test valid inputs work correctly
+    $this->assertEquals(DecisionTypes::IRRELEVANT, $this->clearingDao->getDecisionType('irrelevant'));
+    $this->assertEquals(DecisionTypes::DO_NOT_USE, $this->clearingDao->getDecisionType('doNotUse'));
+    $this->assertEquals(DecisionTypes::NON_FUNCTIONAL, $this->clearingDao->getDecisionType('nonFunctional'));
   }
 }
