@@ -105,6 +105,10 @@ class softwareHeritageAgent extends Agent
     $maxTime = $this->configuration['maxtime'];
     $maxTime = ($maxTime < 2) ? 2 : $maxTime;
     foreach ($pfileFileDetails as $pfileDetail) {
+      // Skip files without valid pfile_pk to avoid NULL constraint violation
+      if (empty($pfileDetail['pfile_pk']) || $pfileDetail['pfile_pk'] === null) {
+        continue;
+      }
       if (!in_array($pfileDetail['pfile_pk'], array_column($pfileFks, 'pfile_fk'))) {
         $this->processEachPfileForSWH($pfileDetail, $agentId, $maxTime);
       }
@@ -190,6 +194,12 @@ class softwareHeritageAgent extends Agent
    */
   protected function insertSoftwareHeritageRecord($pfileId, $licenses, $agentId, $status)
   {
+    // Safety check: ensure pfileId is valid before inserting
+    if (empty($pfileId) || $pfileId === null) {
+      echo "WARNING: Skipping Software Heritage record insertion for NULL pfile_pk\n";
+      return false;
+    }
+
     $licenseString = !empty($licenses) ? implode(", ", $licenses) : '';
     $this->softwareHeritageDao->setSoftwareHeritageDetails($pfileId,
                                   $licenseString, $status);
