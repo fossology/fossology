@@ -127,6 +127,10 @@ abstract class UploadPageBase extends DefaultPlugin
         $unpackArgs .= ' ' . $excludeArgs;
       }
     }
+    if ($request->get('excludefolderSpecific')) {
+      $excludeFolders_specific = $this->sanitizeExcludePatterns($request->get('excludefolderSpecific')) ?? '';
+      $unpackArgs .= ',' . $excludeFolders_specific;
+    }
     $adj2nestDependencies = array();
     if ($wgetDependency) {
       $adj2nestDependencies = array(array('name'=>'agent_unpack','args'=>$unpackArgs,AgentPlugin::PRE_JOB_QUEUE=>array('wget_agent')));

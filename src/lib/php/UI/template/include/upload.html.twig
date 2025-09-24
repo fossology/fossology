@@ -60,6 +60,19 @@
       </li>
       <li>
         <div class="form-group">
+          <label for="excludefolderSpecificInput">
+            Folder/s to ignore for this upload:
+          </label>
+          <input type="text" class="browse-upload-checkbox" id="excludefolderSpecificInput"/>
+          <button type="button" class="btn btn-default btn-sm" onclick="addSpecificFolder()">Add</button>
+          <input type="hidden" name="excludefolderSpecific" id="excludefolderSpecific" />
+          <div id="specificFoldersList" style="margin-top:8px;">
+            <strong>Added Folders:</strong> <span id="addedFolders"></span>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="form-group">
           <input type="radio" class="browse-upload-checkbox view-license-rc-size" name="public" value="private" {% if uploadVisibility == "private" %} checked="checked" {% endif %}/>
           {{ 'Visible only for active group'| trans }}
           <img src="images/info_16.png" data-toggle="tooltip" title="{{'which is the currently selected group'|trans}}" alt="" class="info-bullet"/><br/>
@@ -104,6 +117,20 @@
     $(document).ready(function () {
       $('[data-toggle="tooltip"]').tooltip();
     });
+  </script>
+  <script>
+    let specificFolders = [];
+
+    function addSpecificFolder() {
+      const input = document.getElementById('excludefolderSpecificInput');
+      const value = input.value.trim();
+      if (value) {
+        specificFolders.push(value);
+        document.getElementById('excludefolderSpecific').value = specificFolders.join(',');
+        document.getElementById('addedFolders').innerText = specificFolders.join(', ');
+        input.value = '';
+      }
+    }
   </script>
   {% for aFoot in parmAgentFoots %}
     <script type="text/javascript">{{ aFoot }}  </script>
