@@ -117,14 +117,17 @@ abstract class UploadPageBase extends DefaultPlugin
     $dummy = "";
 
     global $SysConf;
+    xdebug_break();
     $unpackArgs = intval($request->get('scm')) === 1 ? '-I' : '';
 
-    if (intval($request->get('excludefolder'))) {
-      $rawExclude = $SysConf['SYSCONFIG']['ExcludeFolders'] ?? '';
-      if (trim($rawExclude) !== '') {
-        $excludeFolders = $this->sanitizeExcludePatterns($rawExclude);
-        $excludeArgs = '-E ' . $excludeFolders;
-        $unpackArgs .= ' ' . $excludeArgs;
+    // Only process exclude folders if checkbox is checked
+    if (intval($request->get('excludefolder')) === 1) {
+      $userExclude = $request->get('excludefolderSpecific');
+      if ($userExclude) {
+        $sanitized = $this->sanitizeExcludePatterns($userExclude);
+        if ($sanitized !== '') {
+          $unpackArgs .= ' -E ' . $sanitized;
+        }
       }
     }
     if ($request->get('excludefolderSpecific')) {
