@@ -37,7 +37,7 @@
 // FIXME: $path = '/usr/local/fossology/agents';
 set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
-require_once("FIXMETOBERELATIVE/pathinclude.php");
+require_once("/usr/share/fossology/php/pathinclude.php");
 global $WEBDIR;
 require_once("$WEBDIR/common/common-cli.php");
 
