@@ -11,42 +11,52 @@ SPDXID: SPDXRef-item{{ fileId }}
 FileChecksum: SHA1: {{ sha1 | lower }}
 FileChecksum: SHA256: {{ sha256 | lower }}
 FileChecksum: MD5: {{ md5 | lower }}
-{% if fileData.isCleared() %}
-{% if fileData.concludedLicenses|default is empty %}
+{% if fileData.isCleared() -%}
+{% if fileData.concludedLicenses|default is empty -%}
 LicenseConcluded: NONE
-{% else %}
+{% else -%}
+{% if EnableOsselotExport -%}
+{% set concludedLicensesString = concludedLicensesString
+    |replace({'LicenseRef-fossology-':'LicenseRef-'}) -%}
+{% endif -%}
 LicenseConcluded: {{ concludedLicensesString }}
-{% endif%}
-{% else %}
+{% endif -%}
+{% else -%}
 LicenseConcluded: NOASSERTION
-{% endif %}
-{% if licenseCommentState %}
-{% if fileData.comments is not empty %}
+{% endif -%}
+{% if licenseCommentState -%}
+{% if fileData.comments is not empty -%}
 LicenseComments: <text> {{ fileData.comments|join('\n')
   |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
   |replace({'\f':''}) }} </text>
-{% endif %}
-{% endif %}
-{% if fileData.scanners|default is empty %}
+{% endif -%}
+{% endif -%}
+{% if fileData.scanners|default is empty -%}
 LicenseInfoInFile: NOASSERTION
-{% else %}
-{% for res in fileData.scanners %}
-{%- set licId=licenseList[res].licenseObj.spdxId %}
-{% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
-  {% set licId=licenseList[res].licenseObj.shortName %}
-{%- endif ~%}
+{% else -%}
+{% for res in fileData.scanners -%}
+{%- set licId=licenseList[res].licenseObj.spdxId -%}
+{% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' -%}
+  {% set licId=licenseList[res].licenseObj.shortName -%}
+{% endif -%}
+{% if EnableOsselotExport and licId starts with 'LicenseRef-fossology-' -%}
+  {% set licId = licId|replace({'LicenseRef-fossology-':'LicenseRef-'}) -%}
+{% endif -%}
+{% if EnableOsselotExport and not (licId starts with 'LicenseRef-') -%}
+  {% set licId = 'LicenseRef-' ~ licId -%}
+{% endif -%}
 LicenseInfoInFile: {{ licId|replace({' ':'-'})}}
-{% endfor %}
-{% endif %}
+{% endfor -%}
+{% endif -%}
 {# FileSize: 48 Kb (49173 bytes) #}
-{% if fileData.copyrights|default is empty %}
+{% if fileData.copyrights|default is empty -%}
 FileCopyrightText: NOASSERTION
-{% else %}
+{% else -%}
 FileCopyrightText: <text> {{ fileData.copyrights|join('\n')
   |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
   |replace({'\f':''}) }} </text>
-{% endif %}
-{% if fileData.acknowledgements|default is not empty %}
+{% endif -%}
+{% if fileData.acknowledgements|default is not empty -%}
 FileAttributionText: <text> {{ fileData.acknowledgements|join('\n')
   |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
   |replace({'\f':''}) }} </text>
