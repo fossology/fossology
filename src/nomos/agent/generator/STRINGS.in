@@ -6900,6 +6900,10 @@ k
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR% "(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= regents of the university of california"
 #
+%ENTRY% _CR_BSD_PERSONAL
+%KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR% "(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR=,? =SOME= BSD( |$)"
+#
 %ENTRY% _CR_CADENCE
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR% "(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= cadence research systems"
@@ -12281,6 +12285,10 @@ k
 %ENTRY% _TEXT_MPLV2
 %KEY% "licen[cs]"
 %STR% "MPL.?([\/ -])?2(\.?0)?"
+#
+%ENTRY% _TEXT_MPL20_UNDER
+%KEY% "under"
+%STR% "(is|are) under( the)? (MPL|Mozilla Public License)[ _-]?(Version[ _-]?)?2\.?0"
 #
 %ENTRY% _TEXT_LICSET
 %KEY% "licen[cs]"
