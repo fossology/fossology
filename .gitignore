@@ -206,6 +206,8 @@ src/reso/agent/version.php
 src/reso/agent/reso
 src/www/ui/css/bootstrap/
 src/www/ui/scripts/bootstrap/
+/src/atarashi/agent/atarashiWrapper
+/src/atarashi/agent_tests/Functional/atarashiWrapper
 
 # Add all the Ubuntu consol log file
 ubuntu-*
