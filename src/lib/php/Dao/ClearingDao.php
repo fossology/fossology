@@ -826,12 +826,11 @@ INSERT INTO clearing_decision (
                      UploadTreeProxy::OPT_ITEM_FILTER=>' AND (lft BETWEEN $1 AND $2)',
                      UploadTreeProxy::OPT_GROUP_ID=>'$'.$a);
     $uploadTreeProxy = new UploadTreeProxy($itemTreeBounds->getUploadId(), $options, $itemTreeBounds->getUploadTreeTableName());
+    $methodSuffix = $removeDecision ? ".getItemsForReset" : ".getRevelantItems";
+    $sql = $uploadTreeProxy->asCTE() . ' SELECT uploadtree_pk FROM UploadTreeView;';
+    $itemRows = $this->dbManager->getRows($sql, $params, __METHOD__ . $methodSuffix);
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     if (!$removeDecision) {
-      $sql = $uploadTreeProxy->asCTE() .
-        ' SELECT uploadtree_pk FROM UploadTreeView;';
-      $itemRows = $this->dbManager->getRows($sql, $params,
-        __METHOD__ . ".getRevelantItems");
-      $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
       /** @var ClearingDecisionProcessor $clearingDecisionEventProcessor */
       $clearingDecisionEventProcessor = $GLOBALS['container']->get(
         'businessrules.clearing_decision_processor');
@@ -843,6 +842,7 @@ INSERT INTO clearing_decision (
       }
     } else {
       $this->dbManager->begin();
+
       $params[] = $decisionMark;
       $sql = $uploadTreeProxy->asCTE() .
         ' DELETE FROM clearing_decision WHERE clearing_decision_pk IN (
@@ -873,12 +873,55 @@ INSERT INTO clearing_decision (
         "clearing_decision_fk = ANY($1::int[]);";
       $this->dbManager->getSingleRow($delCdEventSql, array($clearingDecisions),
         __METHOD__ . ".deleteCdEvent");
+      foreach ($itemRows as $itemRow) {
+        $itemBounds = $this->uploadDao->getItemTreeBounds($itemRow['uploadtree_pk'], $uploadTreeTableName);
+
+        $this->insertNullDecision($itemBounds, $userId, $groupId);
+      }
+
       $this->dbManager->commit();
       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId,
         'copyright', 'rollback');
     }
   }
 
+  /**
+   * @param ItemTreeBounds $itemBounds
+   * @param int $userId
+   * @param int $groupId
+   */
+  protected function insertNullDecision(ItemTreeBounds $itemBounds, $userId, $groupId)
+  {
+    $id = $itemBounds->getItemId();
+    $scope = DecisionScopes::ITEM;
+    $processor = $GLOBALS['container']->get('businessrules.clearing_decision_processor');
+    $noType = ClearingDecisionProcessor::NO_LICENSE_KNOWN_DECISION_TYPE;
+
+    $deleteSql = "
+      DELETE FROM clearing_decision
+      WHERE uploadtree_fk = \$1
+        AND user_fk = \$2
+        AND group_fk = \$3
+        AND decision_type = \$4
+        AND scope = \$5
+    ";
+
+    $this->dbManager->getSingleRow(
+      $deleteSql,
+      array($id, $userId, $groupId, $noType, $scope),
+      __METHOD__ . '.deleteOldNullDecisions'
+    );
+    $insertSql = "INSERT INTO clearing_decision 
+                  (uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) 
+                  SELECT $1, pfile_fk, $2, $3, $4, $5, now() 
+                  FROM uploadtree 
+                  WHERE uploadtree_pk = $1";
+    $this->dbManager->getSingleRow(
+      $insertSql,
+      array($id, $userId, $groupId, $noType, $scope),
+      __METHOD__ . '.insertNullDecision'
+    );
+  }
   /**
    * @param int $uploadId
    * @param int $groupId
