@@ -135,6 +135,37 @@ function scheduleScan(upload, agentName, resultEntityKey) {
   });
 }
 
+function makeMainLicenseHist(uploadId, licenseId) {
+  $.getJSON("?mod=conclude-license&do=makeMainLicense&upload=" + uploadId + "&licenseId=" + licenseId)
+    .done(function () {
+      setHistogramRowIsMain(licenseId, true);
+    })
+    .fail(failed);
+}
+
+function removeMainLicenseHist(uploadId, licenseId) {
+  if (!confirm("Remove this license from the main license list?")) return;
+  $.getJSON("?mod=conclude-license&do=removeMainLicense&upload=" + uploadId + "&licenseId=" + licenseId)
+    .done(function () {
+      setHistogramRowIsMain(licenseId, false);
+    })
+    .fail(failed);
+}
+
+function setHistogramRowIsMain(licenseId, isMain) {
+  if (!window.dTable) return;
+  var rows = dTable.fnGetData();
+  for (var i = 0; i < rows.length; i++) {
+    var cell = rows[i][2];
+    if (cell && String(cell[1]) === String(licenseId)) {
+      cell[2] = !!isMain;
+      dTable.fnUpdate(cell, i, 2, false, false);
+      dTable.fnDraw(false);
+      break;
+    }
+  }
+}
+
 function dressContents(data, type, full) {
   if (type === 'display') {
     return '<a href=\'#\' onclick=\'filterScan(' + data[1] + ',\"scan\")\'>' + data[0] + '</a>';
