@@ -143,6 +143,12 @@ class ChangeLicenseBulk extends DefaultPlugin
     // Start with monk bulk as the primary dependency
     $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => $bulkId));
     
+    // If there are active custom phrases, add kotoba bulk as dependency (uses uploadId)
+    $activeKotobaPhrases = $this->dbManager->getSingleRow("SELECT COUNT(*) AS cnt FROM custom_phrase WHERE is_active = true");
+    if (intval($activeKotobaPhrases['cnt']) > 0) {
+      $dependecies[] = array('name' => 'agent_kotoba_bulk', 'args' => $uploadId);
+    }
+    
     $conflictStrategyId = intval($request->get('forceDecision'));
     $errorMsg = '';
     $jqId = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies, $conflictStrategyId);

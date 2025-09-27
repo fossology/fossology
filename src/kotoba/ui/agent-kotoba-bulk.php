@@ -60,11 +60,23 @@ class KotobaBulkAgentPlugin extends AgentPlugin
     // Set dependencies and arguments - pass uploadId directly to agent
     $args = $unpackArgs;
     if (!empty($unpackArgs)) {
-      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, 
+      $kotobaJqId = $this->doAgentAdd($jobId, $uploadId, $errorMsg, 
           array("agent_mimetype"), $uploadId, $args, $request);
+      // Schedule deciderjob to run after kotobabulk completes
+      $deciderPlugin = plugin_find("agent_deciderjob");
+      $deciderError = '';
+      $deciderDeps = array(array('name' => 'agent_kotoba_bulk', 'args' => $uploadId));
+      $deciderPlugin->AgentAdd($jobId, $uploadId, $deciderError, $deciderDeps);
+      return $kotobaJqId;
     } else {
-      return $this->doAgentAdd($jobId, $uploadId, $errorMsg, 
+      $kotobaJqId = $this->doAgentAdd($jobId, $uploadId, $errorMsg, 
           array("agent_adj2nest"), $uploadId, null, $request);
+      // Schedule deciderjob to run after kotobabulk completes
+      $deciderPlugin = plugin_find("agent_deciderjob");
+      $deciderError = '';
+      $deciderDeps = array(array('name' => 'agent_kotoba_bulk', 'args' => $uploadId));
+      $deciderPlugin->AgentAdd($jobId, $uploadId, $deciderError, $deciderDeps);
+      return $kotobaJqId;
     }
   }
 

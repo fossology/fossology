@@ -549,14 +549,12 @@ class DecisionImporterDataCreator
     $monkbulkJobId = JobQueueAdd($jobId, "monkbulk", $bulkId, "no", null);
     $dependencies = [$monkbulkJobId];
 
-    // Check if kotoba agent has results and create kotoba bulk job if so
-    $kotobaHasResults = \CheckARS($this->uploadId, "kotobabulk", "kotoba scanner", "kotobabulk_ars");
-    if ($kotobaHasResults == 1 || $kotobaHasResults == 2) {
+    // If there are active custom phrases, create kotoba bulk job (scans entire upload)
+    $activeKotobaPhrases = $this->dbManager->getSingleRow("SELECT COUNT(*) AS cnt FROM custom_phrase WHERE is_active = true");
+    if (intval($activeKotobaPhrases['cnt']) > 0) {
       $latestKotobaBulkAgentId = $this->agentDao->getCurrentAgentId("kotobabulk");
-      $kotobaBulkJobId = JobQueueAdd($jobId, "kotobabulk", $bulkId, "no", null);
+      $kotobaBulkJobId = JobQueueAdd($jobId, "kotobabulk", $this->uploadId, "no", null);
       $dependencies[] = $kotobaBulkJobId;
-      
-      // Create kotoba bulk ARS records
       $kotobaBulkArsId = $this->agentDao->writeArsRecord("kotobabulk", $latestKotobaBulkAgentId, $this->uploadId);
       $this->agentDao->writeArsRecord("kotobabulk", $latestKotobaBulkAgentId, $this->uploadId, $kotobaBulkArsId, true);
       $this->dbManager->getSingleRow($markJobCompletedSql, [$kotobaBulkJobId], $markJobCompletedStatement);

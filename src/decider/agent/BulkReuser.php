@@ -93,10 +93,10 @@ class BulkReuser
       // Start with monk bulk as the primary dependency
       $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk']));
       
-      // Check if kotoba agent has results for this upload and add to dependencies if so
-      $kotobaHasResults = \CheckARS($uploadId, "kotobabulk", "kotoba scanner", "kotobabulk_ars");
-      if ($kotobaHasResults == 1 || $kotobaHasResults == 2) {
-        $dependecies[] = array('name' => 'agent_kotoba', 'args' => $row['lrb_pk']);
+      // If there are active custom phrases, add kotoba bulk as dependency (uses uploadId)
+      $activeKotobaPhrases = $this->dbManager->getSingleRow("SELECT COUNT(*) AS cnt FROM custom_phrase WHERE is_active = true");
+      if (intval($activeKotobaPhrases['cnt']) > 0) {
+        $dependecies[] = array('name' => 'agent_kotoba_bulk', 'args' => $uploadId);
       }
       
       $errorMsg = '';
