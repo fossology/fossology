@@ -24,6 +24,9 @@
 #include "rpm/rpmts.h"
 #include "rpm/rpmlog.h"
 #include "rpm/rpmmacro.h"
+#ifdef HAVE_RPM_CRYPTO_H
+#include "rpm/rpmcrypto.h"
+#endif
 
 #include <libfossology.h>
 
