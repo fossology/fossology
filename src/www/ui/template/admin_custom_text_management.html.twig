@@ -6,6 +6,10 @@
 
 {% block content %}
 
+<div style="margin-bottom: 20px;">
+  <h2>{{ 'Text Management'|trans }}</h2>
+</div>
+
 <table class="semibordered" id="customPhrasesTable" width="100%" cellpadding="0">
   <thead>
     <tr>
@@ -78,7 +82,18 @@
             "targets": [6]
           }],
           "pageLength": 20,
-          "stateSave": true
+          "stateSave": true,
+          "dom": '<"top"lf>rt<"bottom"ip><"clear">',
+          "initComplete": function() {
+            var buttonsHtml = '<div style="float: right; margin-left: 20px; margin-right: 10px;">' +
+              '<a href="?mod=admin_custom_text_to_csv" class="buttonLink">Export CSV</a> ' +
+              '<a href="?mod=admin_custom_text_to_json" class="buttonLink">Export JSON</a> ' +
+              '<a href="?mod=admin_custom_text_from_csv" class="buttonLink">Import CSV/JSON</a>' +
+              '</div>';
+            
+            // Insert buttons before the search input
+            $('.dataTables_filter').before(buttonsHtml);
+          }
         };
 
       var otable = $('#customPhrasesTable').DataTable(dataTableConfig);
@@ -131,4 +146,4 @@
     });
     
   </script>
-{% endblock %} 
+{% endblock %}
