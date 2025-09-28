@@ -33,6 +33,11 @@ target_sources(test_pkgagent
     ${FO_CWD}/Unit/testGetMetadataDebBinary.c
     ${FO_CWD}/../agent/pkgagent.c)
 target_compile_definitions(test_pkgagent PRIVATE _FILE_OFFSET_BITS=64)
+
+if(FO_RPM_CRYPTO_H_HEADER)
+  target_compile_definitions(test_pkgagent PRIVATE HAVE_RPM_CRYPTO_H=1)
+endif()
+
 target_include_directories(test_pkgagent 
     PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${glib_INCLUDE_DIRS}
         ${PostgreSQL_INCLUDE_DIRS} ${FO_CLIB_SRC} ${FO_CWD}/../agent
