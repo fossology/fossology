@@ -5,6 +5,8 @@ SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
 
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 project(FOSSOLOGY)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ignore Anaconda compilers, which are typically not compatible with the system
 # Taken from: https://www.scivision.dev/cmake-ignore-anaconda-libs/

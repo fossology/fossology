@@ -85,7 +85,7 @@ if [[ $RUNTIME ]]; then
           apt-get $YesOpt install libjson-c3;;
         bullseye)
           apt-get $YesOpt install libjson-c5;;
-        bookworm|sid)
+        bookworm|trixie|sid)
           apt-get $YesOpt install libjson-c5;;
         focal)
           apt-get $YesOpt install libjson-c4;;
