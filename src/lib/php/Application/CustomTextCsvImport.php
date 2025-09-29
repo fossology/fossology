@@ -11,6 +11,7 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ArrayOperation;
+use Exception;
 
 /**
  * @file
@@ -47,7 +48,7 @@ class CustomTextCsvImport
       'is_active'=>array('is_active','Is Active','active'),
       'created_by'=>array('created_by','Created By','user_name'),
       'group'=>array('group','Group','group_name'),
-      'associated_licenses'=>array('associated_licenses','Associated Licenses','license_names','licenses')
+      'associated_licenses'=>array('associated_licenses','Associated Licenses','license_names','licenses','Associated Licenses')
       );
 
   /**
@@ -207,7 +208,7 @@ class CustomTextCsvImport
     // Check for duplicate text
     $textMd5 = md5($mappedData['text']);
     $existingSql = "SELECT cp_pk FROM custom_phrase WHERE text_md5 = $1";
-    $existing = $this->dbManager->getSingleRow($existingSql, array($textMd5));
+    $existing = $this->dbManager->getSingleRow($existingSql, array($textMd5), __METHOD__ . '.duplicateCheck');
     
     if ($existing) {
       return array('success' => false, 'message' => _("Duplicate text already exists"));
@@ -215,7 +216,7 @@ class CustomTextCsvImport
 
     // Insert the phrase
     $insertSql = "INSERT INTO custom_phrase (text, text_md5, acknowledgement, comments, user_fk, group_fk, is_active) 
-                  VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING cp_pk";
+                  VALUES ($1, $2, $3, $4, $5, $6, $7)";
     
     $params = array(
       $mappedData['text'],
@@ -227,15 +228,27 @@ class CustomTextCsvImport
       $this->parseBoolean($mappedData['is_active'])
     );
 
-    $result = $this->dbManager->getSingleRow($insertSql, $params);
-    $cpPk = $result['cp_pk'];
+    try {
+      $cpPk = $this->dbManager->insertPreparedAndReturn(__METHOD__ . '.insertPhrase', $insertSql, $params, 'cp_pk');
+      $message = _("Phrase imported successfully");
+      
+      // Handle associated licenses
+      if (!empty($mappedData['associated_licenses'])) {
+        error_log("Processing licenses for phrase $cpPk: " . $mappedData['associated_licenses']);
+        $licenseResult = $this->associateLicenses($cpPk, $mappedData['associated_licenses']);
+        if (!empty($licenseResult['failed'])) {
+          $message .= ". " . sprintf(_("Warning: Could not find licenses: %s"), implode(', ', $licenseResult['failed']));
+        }
+        if ($licenseResult['associated'] > 0) {
+          $message .= ". " . sprintf(_("Associated %d licenses"), $licenseResult['associated']);
+        }
+      }
 
-    // Handle associated licenses
-    if (!empty($mappedData['associated_licenses'])) {
-      $this->associateLicenses($cpPk, $mappedData['associated_licenses']);
+      return array('success' => true, 'message' => $message);
+    } catch (Exception $e) {
+      error_log("Failed to import phrase: " . $e->getMessage());
+      return array('success' => false, 'message' => _("Failed to import phrase: ") . $e->getMessage());
     }
-
-    return array('success' => true, 'message' => _("Phrase imported successfully"));
   }
 
   /**
@@ -254,6 +267,11 @@ class CustomTextCsvImport
           break;
         }
       }
+    }
+    
+    // Debug logging for license data
+    if (!empty($mapped['associated_licenses'])) {
+      error_log("Processing associated licenses: " . $mapped['associated_licenses']);
     }
     
     return $mapped;
@@ -275,36 +293,112 @@ class CustomTextCsvImport
   }
 
   /**
-   * @brief Associate licenses with a phrase
-   * @param int $cpPk Custom phrase ID
-   * @param string $licenseNames Comma-separated license names
+   * @brief Normalize license name for lookup
+   * @param string $licenseName License name to normalize
+   * @return string Normalized license name
    */
+  private function normalizeLicenseName($licenseName)
+  {
+    // Trim whitespace
+    $licenseName = trim($licenseName);
+    
+    // Handle common variations
+    $variations = array(
+      'GPL-2.0' => array('GPL-2.0-only', 'GPL-2.0+', 'GPL-2.0-or-later'),
+      'GPL-3.0' => array('GPL-3.0-only', 'GPL-3.0+', 'GPL-3.0-or-later'),
+      'LGPL-2.1' => array('LGPL-2.1-only', 'LGPL-2.1+', 'LGPL-2.1-or-later'),
+      'LGPL-3.0' => array('LGPL-3.0-only', 'LGPL-3.0+', 'LGPL-3.0-or-later'),
+      'MIT' => array('MIT License', 'MIT-License'),
+      'Apache-2.0' => array('Apache License 2.0', 'Apache-2.0-only'),
+      'BSD-3-Clause' => array('BSD-3-Clause License', 'BSD-3-Clause-only'),
+      'MPL-2.0' => array('Mozilla Public License 2.0', 'MPL-2.0-only'),
+      'EPL-1.0' => array('Eclipse Public License 1.0', 'EPL-1.0-only'),
+      'AGPL-3.0' => array('AGPL-3.0-only', 'AGPL-3.0+', 'AGPL-3.0-or-later')
+    );
+    
+    // Check if the license name matches any variations
+    foreach ($variations as $standard => $variants) {
+      if (in_array($licenseName, $variants)) {
+        return $standard;
+      }
+    }
+    
+    return $licenseName;
+  }
+
+
   private function associateLicenses($cpPk, $licenseNames)
   {
     if (is_array($licenseNames)) {
       $licenseArray = $licenseNames;
     } else {
-      $licenseArray = array_map('trim', explode(',', $licenseNames));
+      // Handle multiple possible separators: comma-space, comma, semicolon, pipe
+      $separators = array(', ', ',', ';', '|');
+      $licenseArray = array($licenseNames); // Default to single license
+      
+      foreach ($separators as $separator) {
+        if (strpos($licenseNames, $separator) !== false) {
+          $licenseArray = array_map('trim', explode($separator, $licenseNames));
+          break;
+        }
+      }
     }
+
+    $associatedCount = 0;
+    $failedLicenses = array();
+
+    // Get LicenseDao for proper license lookups
+    $licenseDao = $GLOBALS['container']->get('dao.license');
 
     foreach ($licenseArray as $licenseName) {
       if (empty($licenseName)) continue;
       
-      // Find license by shortname
-      $licenseSql = "SELECT rf_pk FROM license_ref WHERE rf_shortname = $1";
-      $license = $this->dbManager->getSingleRow($licenseSql, array($licenseName));
+      // Normalize license name
+      $normalizedLicenseName = $this->normalizeLicenseName($licenseName);
+      
+      // Find license using LicenseDao to avoid prepared statement conflicts
+      $license = $licenseDao->getLicenseByShortName($normalizedLicenseName);
       
       if ($license) {
+        $licenseId = $license->getId();
+        
         // Check if association already exists
-        $checkSql = "SELECT cp_pk FROM custom_phrase_license_map WHERE cp_pk = $1 AND rf_pk = $2";
-        $existing = $this->dbManager->getSingleRow($checkSql, array($cpPk, $license['rf_pk']));
+        $checkSql = "SELECT 1 FROM custom_phrase_license_map WHERE cp_pk = $1 AND rf_pk = $2 LIMIT 1";
+        $existing = $this->dbManager->getSingleRow($checkSql, array($cpPk, $licenseId), 
+                                                  __METHOD__ . '.check.' . $cpPk . '.' . $licenseId);
         
         if (!$existing) {
-          $insertSql = "INSERT INTO custom_phrase_license_map (cp_pk, rf_pk) VALUES ($1, $2)";
-          $this->dbManager->getSingleRow($insertSql, array($cpPk, $license['rf_pk']));
+          // Insert the license association using DbManager's insertTableRow method
+          $insertData = array(
+            'cp_pk' => $cpPk,
+            'rf_pk' => $licenseId
+          );
+          
+          try {
+            $this->dbManager->insertTableRow('custom_phrase_license_map', $insertData);
+            $associatedCount++;
+          } catch (Exception $e) {
+            error_log("Failed to insert license association: " . $e->getMessage());
+            $failedLicenses[] = $licenseName . " (insert failed)";
+          }
+        } else {
+          $associatedCount++; // Already exists, count as successful
         }
+      } else {
+        // License not found - add to failed list
+        $failedLicenses[] = $licenseName;
       }
     }
+
+    // Log results for debugging
+    if (!empty($failedLicenses)) {
+      error_log("Failed to find licenses during import for phrase ID $cpPk: " . implode(', ', $failedLicenses));
+    }
+    if ($associatedCount > 0) {
+      error_log("Successfully associated $associatedCount licenses for phrase ID $cpPk");
+    }
+    
+    return array('associated' => $associatedCount, 'failed' => $failedLicenses);
   }
 
   /**
@@ -318,3 +412,4 @@ class CustomTextCsvImport
     return $this->importPhrases($data);
   }
 }
+
