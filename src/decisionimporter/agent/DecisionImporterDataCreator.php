@@ -545,8 +545,22 @@ class DecisionImporterDataCreator
     $latestMonkBulkAgentId = $this->agentDao->getCurrentAgentId("monkbulk");
     $jobId = JobAddJob($this->userId, $this->groupId, $uploadName, $this->uploadId);
 
+    // Create monk bulk job
     $monkbulkJobId = JobQueueAdd($jobId, "monkbulk", $bulkId, "no", null);
-    $deciderJobId = JobQueueAdd($jobId, "deciderjob", $this->uploadId, "no", [$monkbulkJobId]);
+    $dependencies = [$monkbulkJobId];
+
+    // If there are active custom phrases, create kotoba bulk job (scans entire upload)
+    $activeKotobaPhrases = $this->dbManager->getSingleRow("SELECT COUNT(*) AS cnt FROM custom_phrase WHERE is_active = true");
+    if (intval($activeKotobaPhrases['cnt']) > 0) {
+      $latestKotobaBulkAgentId = $this->agentDao->getCurrentAgentId("kotobabulk");
+      $kotobaBulkJobId = JobQueueAdd($jobId, "kotobabulk", $this->uploadId, "no", null);
+      $dependencies[] = $kotobaBulkJobId;
+      $kotobaBulkArsId = $this->agentDao->writeArsRecord("kotobabulk", $latestKotobaBulkAgentId, $this->uploadId);
+      $this->agentDao->writeArsRecord("kotobabulk", $latestKotobaBulkAgentId, $this->uploadId, $kotobaBulkArsId, true);
+      $this->dbManager->getSingleRow($markJobCompletedSql, [$kotobaBulkJobId], $markJobCompletedStatement);
+    }
+
+    $deciderJobId = JobQueueAdd($jobId, "deciderjob", $this->uploadId, "no", $dependencies);
 
     $monkbulkArsId = $this->agentDao->writeArsRecord("monkbulk", $latestMonkBulkAgentId, $this->uploadId);
     $this->agentDao->writeArsRecord("monkbulk", $latestDeciderAgentId, $this->uploadId, $monkbulkArsId, true);
