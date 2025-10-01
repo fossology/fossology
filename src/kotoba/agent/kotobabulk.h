@@ -16,7 +16,7 @@ SPDX-License-Identifier: GPL-2.0-only
 #include <glib.h>
 
 #define BULK_DECISION_TYPE_MEANING "bulk"
-#define BULK_DECISION_TYPE 2
+#define BULK_DECISION_TYPE 6
 #define BULK_DECISION_SCOPE "upload"
 
 /**
