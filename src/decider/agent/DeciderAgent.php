@@ -84,9 +84,10 @@ class DeciderAgent extends Agent
   const RULES_COPYRIGHT_FALSE_POSITIVE = 0x20;
   const RULES_COPYRIGHT_FALSE_POSITIVE_CLUTTER = 0x40;
   const RULES_LICENSE_TYPE_CONCLUSION = 0x80;
+  const RULES_KOTOBA_BULK_PRIORITY = 0x100;
   const RULES_ALL = self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA |
     self::RULES_BULK_REUSE | self::RULES_WIP_SCANNER_UPDATES |
-    self::RULES_OJO_NO_CONTRADICTION | self::RULES_LICENSE_TYPE_CONCLUSION;
+    self::RULES_OJO_NO_CONTRADICTION | self::RULES_LICENSE_TYPE_CONCLUSION | self::RULES_KOTOBA_BULK_PRIORITY;
 
   /** @var int $activeRules
    * Rules active for upload (nomos in monk; ninka in monk; nomos, ninka and monk)
@@ -266,7 +267,12 @@ class DeciderAgent extends Agent
 
     $haveDecided = false;
 
-    if (($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
+    // Check kotobabulk priority first
+    if (($this->activeRules&self::RULES_KOTOBA_BULK_PRIORITY) == self::RULES_KOTOBA_BULK_PRIORITY) {
+      $haveDecided = $this->autodecideKotobabulkPriority($itemTreeBounds, $projectedScannerMatches);
+    }
+
+    if (!$haveDecided && ($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
       $haveDecided = $this->autodecideIfOjoMatchesNoContradiction($itemTreeBounds, $projectedScannerMatches);
     }
 
@@ -309,6 +315,57 @@ class DeciderAgent extends Agent
         return true;
       }
     }
+    return false;
+  }
+
+
+  /**
+   * @brief Check if kotobabulk findings exist and filter other agent findings
+   * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
+   * @param array $projectedScannerMatches Scanner matches from all agents
+   * @return array Filtered scanner matches (only kotobabulk if available)
+   */
+  private function filterMatchesForKotobabulkPriority(ItemTreeBounds $itemTreeBounds, $projectedScannerMatches)
+  {
+    // Check if kotobabulk findings exist
+    $kotobabulkMatches = array();
+    $otherMatches = array();
+    
+    foreach ($projectedScannerMatches as $licenseId => $agentMatches) {
+      if (array_key_exists('kotobabulk', $agentMatches)) {
+        $kotobabulkMatches[$licenseId] = $agentMatches;
+      } else {
+        $otherMatches[$licenseId] = $agentMatches;
+      }
+    }
+    
+    // If kotobabulk findings exist, return only those; otherwise return all
+    if (!empty($kotobabulkMatches)) {
+      return $kotobabulkMatches;
+    }
+    
+    return $projectedScannerMatches;
+  }
+
+  /**
+   * @brief Auto decide matches based on kotobabulk priority
+   * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
+   * @param array $projectedScannerMatches Scanner matches from all agents
+   * @return boolean True if decisions applied, false otherwise
+   */
+  private function autodecideKotobabulkPriority(ItemTreeBounds $itemTreeBounds, $projectedScannerMatches)
+  {
+    $filteredMatches = $this->filterMatchesForKotobabulkPriority($itemTreeBounds, $projectedScannerMatches);
+    
+    // If we have kotobabulk findings, auto-conclude them
+    if ($filteredMatches !== $projectedScannerMatches) {
+      // We have kotobabulk findings, so auto-conclude them
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents(
+        $itemTreeBounds, $this->userId, $this->groupId,
+        DecisionTypes::IDENTIFIED, false);
+      return true;
+    }
+    
     return false;
   }
 
