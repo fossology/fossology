@@ -822,7 +822,14 @@ INSERT INTO clearing_decision (
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $params[] = $groupId;
     $a = count($params);
-    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>'noLicense',
+
+    // For IRRELEVANT, DO_NOT_USE, and NON_FUNCTIONAL decisions, do not skip files without licenses
+    $skipOption = 'noLicense';
+    if (in_array($decisionMark, [DecisionTypes::IRRELEVANT, DecisionTypes::DO_NOT_USE, DecisionTypes::NON_FUNCTIONAL])) {
+      $skipOption = '';
+    }
+
+    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>$skipOption,
                      UploadTreeProxy::OPT_ITEM_FILTER=>' AND (lft BETWEEN $1 AND $2)',
                      UploadTreeProxy::OPT_GROUP_ID=>'$'.$a);
     $uploadTreeProxy = new UploadTreeProxy($itemTreeBounds->getUploadId(), $options, $itemTreeBounds->getUploadTreeTableName());
@@ -840,6 +847,11 @@ INSERT INTO clearing_decision (
           $itemRow['uploadtree_pk'], $uploadTreeTableName);
         $clearingDecisionEventProcessor->makeDecisionFromLastEvents(
           $itemBounds, $userId, $groupId, $decisionMark, DecisionScopes::ITEM);
+
+        // Handle copyright entries for IRRELEVANT, DO_NOT_USE, and NON_FUNCTIONAL decisions
+        if (in_array($decisionMark, [DecisionTypes::IRRELEVANT, DecisionTypes::DO_NOT_USE, DecisionTypes::NON_FUNCTIONAL])) {
+          $this->copyrightDao->updateTable($itemBounds, '', '', $userId, 'copyright', 'delete', '2');
+        }
       }
     } else {
       $this->dbManager->begin();
