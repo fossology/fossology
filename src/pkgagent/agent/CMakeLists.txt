@@ -16,6 +16,13 @@ if(NOT TARGET fossology)
     add_subdirectory(${FO_CLIB_SRC} buildc EXCLUDE_FROM_ALL)
 endif()
 
+find_file(HAVE_RPM_CRYPTO_H_HEADER 
+    NAMES rpmcrypto.h
+    PATHS ${rpm_INCLUDE_DIRS}
+    PATH_SUFFIXES rpm
+    NO_DEFAULT_PATH
+)
+
 add_executable(pkgagent "")
 target_sources(pkgagent
     PRIVATE ${FO_CWD}/main.c ${FO_CWD}/pkgagent.c)
@@ -24,6 +31,11 @@ target_compile_definitions(pkgagent
     _FILE_OFFSET_BITS=64
     VERSION_S="${FO_VERSION}"
     COMMIT_HASH_S="${FO_COMMIT_HASH}")
+
+if(HAVE_RPM_CRYPTO_H_HEADER)
+    target_compile_definitions(pkgagent PRIVATE HAVE_RPM_CRYPTO_H=1)
+endif()
+
 target_link_libraries(pkgagent PRIVATE fossology ${rpm_LIBRARIES})
 
 install(TARGETS pkgagent
