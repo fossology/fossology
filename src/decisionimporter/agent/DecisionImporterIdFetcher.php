@@ -182,7 +182,10 @@ class DecisionImporterIdFetcher
   }
 
   /**
-   * Update upload tree ids using pfile, lft and rgt
+   * Update upload tree ids using content-centric matching.
+   * Files are matched by content (pfile) - applies decisions to all files with matching content.
+   * When multiple files have identical content, decisions are applied to all of them.
+   *
    * @param array $uploadTreeList
    * @param array $pfileList
    * @param DecisionImporterAgent $agentObj Agent object to send heartbeats
@@ -193,42 +196,62 @@ class DecisionImporterIdFetcher
     $sqlAllTree = "SELECT * FROM uploadtree WHERE upload_fk = $1 AND ufile_mode & (1<<28) = 0;";
     $statementAllTree = __METHOD__ . ".allTree";
     $allUploadTree = $this->dbManager->getRows($sqlAllTree, [$this->uploadId], $statementAllTree);
+
+    $pfileToUploadTree = [];
+    foreach ($allUploadTree as $uploadTreeItem) {
+      $pfileFk = $uploadTreeItem["pfile_fk"];
+      if (!isset($pfileToUploadTree[$pfileFk])) {
+        $pfileToUploadTree[$pfileFk] = [];
+      }
+      $pfileToUploadTree[$pfileFk][] = $uploadTreeItem;
+    }
+
     $i = 0;
     foreach ($uploadTreeList as $oldItemId => $item) {
       $new_pfile = $pfileList[$item["old_pfile"]]["new_pfile"];
-      $matchIndex = -INF;
-      $j = 0;
-      foreach ($allUploadTree as $index => $uploadTreeItem) {
-        if ($uploadTreeItem["pfile_fk"] == $new_pfile) {
-          if (array_key_exists("path", $item)) {
-            $newpath = Dir2Path($uploadTreeItem["uploadtree_pk"]);
-            $newpath = implode("/", array_column($newpath, "ufile_name"));
-            if ($newpath == $item["path"]) {
-              $matchIndex = $index;
-              break;
-            }
-          } elseif ($uploadTreeItem["lft"] == $item["lft"] && $uploadTreeItem["rgt"] == $item["rgt"]) {
-            $matchIndex = $index;
-            break;
-          }
-        }
-        $j++;
-        if ($j == DecisionImporterAgent::$UPDATE_COUNT) {
-          $agentObj->heartbeat(0);
-          $j = 0;
-        }
-      }
-      if ($matchIndex == -INF) {
+
+      if (!isset($pfileToUploadTree[$new_pfile]) || empty($pfileToUploadTree[$new_pfile])) {
         $path = $oldItemId;
         if (array_key_exists("path", $item)) {
           $path = $item["path"];
         }
-        echo "Can't find item with pfile '$new_pfile' in upload " .
-          "'$this->uploadId'.\nIgnoring: $path";
+        echo "No file with matching content (pfile: $new_pfile) found in upload $this->uploadId.\n";
+        echo "Original path was: $path\n";
         $uploadTreeList[$oldItemId]["new_itemid"] = null;
-      } else {
-        $uploadTreeList[$oldItemId]["new_itemid"] = $allUploadTree[$matchIndex]["uploadtree_pk"];
+        continue;
       }
+
+      $matchingItems = $pfileToUploadTree[$new_pfile];
+
+      if (count($matchingItems) > 1) {
+        echo "Multiple files (" . count($matchingItems) . ") have identical content (pfile: $new_pfile).\n";
+        if (array_key_exists("path", $item)) {
+          echo "Original path was: " . $item["path"] . "\n";
+        }
+        echo "Applying decisions to all matching files.\n";
+
+        $matchingItemIds = [];
+        foreach ($matchingItems as $matchingItem) {
+          $matchingItemIds[] = $matchingItem["uploadtree_pk"];
+        }
+        $uploadTreeList[$oldItemId]["new_itemid"] = $matchingItemIds;
+      } else {
+        $matchingItem = $matchingItems[0];
+        $uploadTreeList[$oldItemId]["new_itemid"] = $matchingItem["uploadtree_pk"];
+      }
+
+      if (count($matchingItems) == 1 && array_key_exists("path", $item)) {
+        $matchingItem = $matchingItems[0];
+        $newpath = Dir2Path($matchingItem["uploadtree_pk"]);
+        $newpath = implode("/", array_column($newpath, "ufile_name"));
+        if ($newpath != $item["path"]) {
+          echo "Info: File content matched but path changed.\n";
+          echo "  Old path: " . $item["path"] . "\n";
+          echo "  New path: " . $newpath . "\n";
+          echo "  Decision will be applied based on content match.\n";
+        }
+      }
+
       $i++;
       if ($i == DecisionImporterAgent::$UPDATE_COUNT) {
         $agentObj->heartbeat(0);
@@ -245,12 +268,25 @@ class DecisionImporterIdFetcher
    */
   private function updateClearingDecision(array &$clearingDecisionList, array $uploadTreeList, array $pfileList): void
   {
+    $expandedDecisions = [];
     foreach ($clearingDecisionList as $index => $item) {
       $newItemId = $uploadTreeList[$item["old_itemid"]]["new_itemid"];
       $newPfileId = $pfileList[$item["old_pfile"]]["new_pfile"];
-      $clearingDecisionList[$index]["new_itemid"] = $newItemId;
-      $clearingDecisionList[$index]["new_pfile"] = $newPfileId;
+
+      if (is_array($newItemId)) {
+        foreach ($newItemId as $itemId) {
+          $expandedDecision = $item;
+          $expandedDecision["new_itemid"] = $itemId;
+          $expandedDecision["new_pfile"] = $newPfileId;
+          $expandedDecisions[] = $expandedDecision;
+        }
+      } else {
+        $clearingDecisionList[$index]["new_itemid"] = $newItemId;
+        $clearingDecisionList[$index]["new_pfile"] = $newPfileId;
+        $expandedDecisions[] = $clearingDecisionList[$index];
+      }
     }
+    $clearingDecisionList = $expandedDecisions;
   }
 
   /**
@@ -286,15 +322,29 @@ class DecisionImporterIdFetcher
    */
   private function updateEventList(array &$eventList, array $uploadtreeList): void
   {
+    $expandedEvents = [];
     foreach ($eventList as $index => $eventItem) {
       if (!array_key_exists($eventItem["old_itemid"], $uploadtreeList)) {
         echo "Unable to find item id for old_id: " . $eventItem["old_itemid"] . "\n";
         $newItemId = null;
+        $eventList[$index]["new_itemid"] = $newItemId;
+        $expandedEvents[] = $eventList[$index];
       } else {
         $newItemId = $uploadtreeList[$eventItem["old_itemid"]]["new_itemid"];
+
+        if (is_array($newItemId)) {
+          foreach ($newItemId as $itemId) {
+            $expandedEvent = $eventItem;
+            $expandedEvent["new_itemid"] = $itemId;
+            $expandedEvents[] = $expandedEvent;
+          }
+        } else {
+          $eventList[$index]["new_itemid"] = $newItemId;
+          $expandedEvents[] = $eventList[$index];
+        }
       }
-      $eventList[$index]["new_itemid"] = $newItemId;
     }
+    $eventList = $expandedEvents;
   }
 
   /**
@@ -336,12 +386,25 @@ class DecisionImporterIdFetcher
    */
   private function updateClearingEvent(array &$clearingEventList, array $uploadTreeList, array $licenseList): void
   {
+    $expandedEvents = [];
     foreach ($clearingEventList as $index => $item) {
       $newItemId = $uploadTreeList[$item["old_itemid"]]["new_itemid"];
       $newLicenseId = $licenseList[$item["old_rfid"]]["new_rfid"];
-      $clearingEventList[$index]["new_itemid"] = $newItemId;
-      $clearingEventList[$index]["new_rfid"] = $newLicenseId;
+
+      if (is_array($newItemId)) {
+        foreach ($newItemId as $itemId) {
+          $expandedEvent = $item;
+          $expandedEvent["new_itemid"] = $itemId;
+          $expandedEvent["new_rfid"] = $newLicenseId;
+          $expandedEvents[] = $expandedEvent;
+        }
+      } else {
+        $clearingEventList[$index]["new_itemid"] = $newItemId;
+        $clearingEventList[$index]["new_rfid"] = $newLicenseId;
+        $expandedEvents[] = $clearingEventList[$index];
+      }
     }
+    $clearingEventList = $expandedEvents;
   }
 
   /**
