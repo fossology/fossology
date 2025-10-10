@@ -6840,7 +6840,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /* Mozilla Public License possibility */
-  if (!lmem[_mMPL] && INFILE(_TEXT_MPLV2) && INFILE(_URL_MPL20)) {
+  if (!lmem[_mMPL] && (INFILE(_TEXT_MPLV2) || INFILE(_URL_MPL20))) {
       INTERESTING("MPL-2.0");
       lmem[_mMPL] = 1;
   }
