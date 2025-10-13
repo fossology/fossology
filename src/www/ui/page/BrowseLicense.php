@@ -230,6 +230,7 @@ class BrowseLicense extends DefaultPlugin
     $fileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $agentIds);
     $editedLicensesHist = $this->clearingDao->getClearedLicenseIdAndMultiplicities($itemTreeBounds, $groupId);
+    $mainLicenseIds = $this->clearingDao->getMainLicenseIds($itemTreeBounds->getUploadId(), $groupId);
 
     $agentId = GetParm('agentId', PARM_INTEGER);
     $licListUri = Traceback_uri()."?mod=license_list_files&item=$uploadTreeId";
@@ -242,7 +243,7 @@ class BrowseLicense extends DefaultPlugin
 
     /* Write license histogram to $VLic  */
     list($tableData, $totalScannerLicenseCount, $editedTotalLicenseCount)
-        = $this->createLicenseHistogramJSarray($licenseHistogram, $editedLicensesHist, $licListUri);
+        = $this->createLicenseHistogramJSarray($licenseHistogram, $editedLicensesHist, $licListUri, $mainLicenseIds);
 
     $uniqueLicenseCount = count($tableData);
     $scannerUniqueLicenseCount = count( $licenseHistogram );
@@ -273,7 +274,7 @@ class BrowseLicense extends DefaultPlugin
    * @return array
    * @todo convert to template
    */
-  protected function createLicenseHistogramJSarray($scannerLics, $editedLics, $licListUri)
+  protected function createLicenseHistogramJSarray($scannerLics, $editedLics, $licListUri, $mainLicenseIds)
   {
     $allScannerLicenseNames = array_keys($scannerLics);
     $allEditedLicenseNames = array_keys($editedLics);
@@ -302,7 +303,8 @@ class BrowseLicense extends DefaultPlugin
           urlencode($licenseShortName) . "'>$count</a>": "0";
       $editedLink = ($editedCount > 0) ? $editedCount : "0";
 
-      $tableData[] = array($scannerCountLink, $editedLink, array($licenseShortName,$rfId));
+      $isMain = in_array($rfId, $mainLicenseIds);
+      $tableData[] = array($scannerCountLink, $editedLink, array($licenseShortName,$rfId,$isMain));
     }
 
     return array($tableData, $totalScannerLicenseCount, $editedTotalLicenseCount);
