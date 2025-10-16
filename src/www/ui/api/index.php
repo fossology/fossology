@@ -37,6 +37,7 @@ use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\ObligationController;
 use Fossology\UI\Api\Controllers\OneShotController;
 use Fossology\UI\Api\Controllers\OverviewController;
+use Fossology\UI\Api\Controllers\OsselotController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
@@ -172,6 +173,13 @@ $app->options('/{routes:.+}', AuthController::class . ':optionsVerification');
 //////////////////////////AUTH/////////////////////
 $app->post('/tokens', AuthController::class . ':createNewJwtToken');
 
+//////////////////////////OSSELOT/////////////////////
+$app->group('/osselot',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('/packages/{package:[\\w\\d\\-\\.@_]+}/versions', OsselotController::class . ':getPackageVersions');
+    $app->any('/{params:.*}', BadRequestController::class);
+  });
+
 //////////////////////////UPLOADS/////////////////////
 $app->group('/uploads',
   function (\Slim\Routing\RouteCollectorProxy $app) {
@@ -214,6 +222,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/conf', ConfController::class . ':getConfInfo');
     $app->put('/{id:\\d+}/conf', ConfController::class . ':updateConfData');
     $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');
+    $app->post('/{id:\\d+}/osselot/import', OsselotController::class . ':importOsselotReport');
     ////////////////////////// BULK FOR CX OPERATIONS /////////////////////
     $app->group('/{id:\\d+}/item/{itemId:\\d+}', function (\Slim\Routing\RouteCollectorProxy $app) {
       $app->get('/copyrights', CopyrightController::class . ':getFileCopyrights');
