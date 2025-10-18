@@ -189,7 +189,6 @@ src/reportImport/agent/reportImport
 /src/ninka/agent_tests/Unit/test_ninka
 /src/ninka/agent/ninka
 /src/cli/fo_monk_license_list
-/src/cli/fo_ninka_license_list
 /install/scripts/php.ini
 /install/scripts/php.ini.orig
 /install/db/dbmigrate_pfile_calculate_sha256.php
