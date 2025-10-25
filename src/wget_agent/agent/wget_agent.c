@@ -112,10 +112,22 @@ void DBLoadGold()
     SafeExit(56);
   }
 
+  // MODIFIED: Added FOSSOLOGY_SKIP_CHOWN environment variable check
   if ((int)ForceGroup > 0)
   {
     rc = chown(GlobalTempFile,-1,ForceGroup);
-    if (rc) LOG_ERROR("chown failed on %s, error: %s", GlobalTempFile, strerror(errno));
+    if (rc) 
+    {
+      if (getenv("FOSSOLOGY_SKIP_CHOWN") != NULL)
+      {
+        LOG_WARNING("chown failed on %s (ignored due to FOSSOLOGY_SKIP_CHOWN): %s", 
+                    GlobalTempFile, strerror(errno));
+      }
+      else
+      {
+        LOG_ERROR("chown failed on %s, error: %s", GlobalTempFile, strerror(errno));
+      }
+    }
   }
 
   if (!Sum)
@@ -147,10 +159,23 @@ void DBLoadGold()
     }
     /* Put the file in the "files" repository too */
     Path = fo_RepMkPath("gold",Unique);
+    
+    // MODIFIED: Added FOSSOLOGY_SKIP_CHOWN environment variable check
     if ((int)ForceGroup >= 0)
     {
       rc = chown(Path,-1,ForceGroup);
-      if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno));
+      if (rc) 
+      {
+        if (getenv("FOSSOLOGY_SKIP_CHOWN") != NULL)
+        {
+          LOG_WARNING("chown failed on %s (ignored due to FOSSOLOGY_SKIP_CHOWN): %s", 
+                      Path, strerror(errno));
+        }
+        else
+        {
+          LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno));
+        }
+      }
     }
   } /* if GlobalImportGold */
   else /* if !GlobalImportGold */
@@ -176,10 +201,22 @@ void DBLoadGold()
     SafeExit(6);
   }
 
+  // MODIFIED: Added FOSSOLOGY_SKIP_CHOWN environment variable check
   if ((int)ForceGroup >= 0)
   {
     rc = chown(Path,-1,ForceGroup);
-    if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno));
+    if (rc) 
+    {
+      if (getenv("FOSSOLOGY_SKIP_CHOWN") != NULL)
+      {
+        LOG_WARNING("chown failed on %s (ignored due to FOSSOLOGY_SKIP_CHOWN): %s", 
+                    Path, strerror(errno));
+      }
+      else
+      {
+        LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno));
+      }
+    }
   }
 
   if (Path != GlobalTempFile)

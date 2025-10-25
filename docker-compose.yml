@@ -7,16 +7,16 @@
 # SPDX-License-Identifier: FSFAP
 #
 # Description: Recipe for setting up a multi container FOSSology
-#              Docker setup with separate Database instance
+# Docker setup with separate Database instance
 services:
   scheduler:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-      - http_proxy
-      - https_proxy
-      - no_proxy
+        - http_proxy
+        - https_proxy
+        - no_proxy
     image: fossology
     restart: unless-stopped
     environment:
@@ -24,6 +24,7 @@ services:
       - FOSSOLOGY_DB_NAME=fossology
       - FOSSOLOGY_DB_USER=fossy
       - FOSSOLOGY_DB_PASSWORD=fossy
+      - FOSSOLOGY_SKIP_CHOWN=true
     command: scheduler
     depends_on:
       - db
@@ -39,9 +40,9 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-      - http_proxy
-      - https_proxy
-      - no_proxy
+        - http_proxy
+        - https_proxy
+        - no_proxy
     image: fossology
     restart: unless-stopped
     environment:
@@ -50,6 +51,7 @@ services:
       - FOSSOLOGY_DB_USER=fossy
       - FOSSOLOGY_DB_PASSWORD=fossy
       - FOSSOLOGY_SCHEDULER_HOST=scheduler
+      - FOSSOLOGY_SKIP_CHOWN=true
     command: web
     ports:
       - "8081:80"
@@ -80,6 +82,9 @@ services:
       retries: 5
       # start-period: 10s
 
+
 volumes:
   database:
   repository:
+
+  
