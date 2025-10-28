@@ -45,7 +45,7 @@ foreach (FO_COMP_TARGET compatibility compatibility_exec compatibility_cov
     endif ()
     target_link_libraries(${FO_COMP_TARGET}
             PRIVATE fossologyCPP ${icu-uc_LIBRARIES} ${Boost_LIBRARIES}
-            jsoncpp_lib yaml-cpp)
+            ${jsoncpp_LIBRARIES} yaml-cpp)
     if (${FO_COMP_TARGET} MATCHES "_exec$")
         string(REPLACE "_exec" "" FO_COMP_TARGET_R ${FO_COMP_TARGET})
         set_target_properties(${FO_COMP_TARGET}
