@@ -121,13 +121,13 @@ This package contains the resources needed by all of the other
 fossology components. This includes admin tools for maintenance.")
 
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_DEPENDS
-    "php7.2-pgsql | php7.3-pgsql | php7.4-pgsql | php8.1-pgsql | php8.2-pgsql | php8.3-pgsql,
-    php-pear, php7.2-cli | php7.3-cli | php7.4-cli | php8.1-cli | php8.2-cli | php8.3-cli,
+    "php7.2-pgsql | php7.3-pgsql | php7.4-pgsql | php8.1-pgsql | php8.2-pgsql | php8.3-pgsql | php8.4-pgsql,
+    php-pear, php7.2-cli | php7.3-cli | php7.4-cli | php8.1-cli | php8.2-cli | php8.3-cli | php8.4-cli,
     php-mbstring, php7.2-json | php7.3-json | php7.4-json | php-json,
     php-zip, php-xml,
-    php7.2-curl | php7.3-curl | php7.4-curl | php8.1-curl | php8.2-curl | php8.3-curl, php-uuid,
-    php7.2-gd | php7.3-gd | php7.4-gd | php8.1-gd | php8.2-gd | php8.3-gd,
-    php7.2-yaml | php7.3-yaml | php7.4-yaml | php8.1-yaml | php8.2-yaml | php8.3-yaml | php-yaml")
+    php7.2-curl | php7.3-curl | php7.4-curl | php8.1-curl | php8.2-curl | php8.3-curl | php8.4-curl | php-uuid,
+    php7.2-gd | php7.3-gd | php7.4-gd | php8.1-gd | php8.2-gd | php8.3-gd | php8.4-gd,
+    php7.2-yaml | php7.3-yaml | php7.4-yaml | php8.1-yaml | php8.2-yaml | php8.3-yaml | php8.4-yaml | php-yaml")
 
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_CONTROL_EXTRA
@@ -142,8 +142,8 @@ ${FO_PACKAGE_COMMON_DESCRIPTION}
 This package depends on the packages for the web interface.")
 
 set(CPACK_DEBIAN_WWW_PACKAGE_DEPENDS
-    "fossology-common, apache2, php7.2-gd|php7.3-gd|php7.4-gd|php8.1-gd|php8.2-gd|php8.3-gd,
-    libapache2-mod-php7.2|libapache2-mod-php7.3|libapache2-mod-php7.4|libapache2-mod-php8.1|libapache2-mod-php8.2|libapache2-mod-php8.3")
+    "fossology-common, apache2, php7.2-gd|php7.3-gd|php7.4-gd|php8.1-gd|php8.2-gd|php8.3-gd|php8.4-gd,
+    libapache2-mod-php7.2|libapache2-mod-php7.3|libapache2-mod-php7.4|libapache2-mod-php8.1|libapache2-mod-php8.2|libapache2-mod-php8.3|libapache2-mod-php8.4")
 
 set(CPACK_DEBIAN_WWW_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_WWW_PACKAGE_RECOMMENDS "fossology-db")
@@ -257,7 +257,7 @@ ${FO_PACKAGE_COMMON_DESCRIPTION}
 This package contains the copyright agent programs and their resources.")
 
 set(CPACK_DEBIAN_COPYRIGHT_PACKAGE_DEPENDS
-    "fossology-common, libpcre3")
+    "fossology-common, libpcre3 | pcre2-utils")
 
 set(CPACK_DEBIAN_COPYRIGHT_PACKAGE_SECTION "utils")
 
@@ -270,7 +270,7 @@ ${FO_PACKAGE_COMMON_DESCRIPTION}
 This package contains the ecc agent programs and their resources.")
 
 set(CPACK_DEBIAN_ECC_PACKAGE_DEPENDS
-    "fossology-common, fossology-copyright, libpcre3")
+    "fossology-common, fossology-copyright, libpcre3 | pcre2-utils")
 
 set(CPACK_DEBIAN_ECC_PACKAGE_SECTION "utils")
 
@@ -283,7 +283,7 @@ ${FO_PACKAGE_COMMON_DESCRIPTION}
 This package contains the keyword agent programs and their resources.")
 
 set(CPACK_DEBIAN_KEYWORD_PACKAGE_DEPENDS
-    "fossology-common, fossology-copyright, libpcre3")
+    "fossology-common, fossology-copyright, libpcre3 | pcre2-utils")
 set(CPACK_DEBIAN_KEYWORD_PACKAGE_SECTION "utils")
 
 ## FOSSOLOGY-IPRA
@@ -295,7 +295,7 @@ ${FO_PACKAGE_COMMON_DESCRIPTION}
 This package contains the ipra agent programs and their resources.")
 
 set(CPACK_DEBIAN_IPRA_PACKAGE_DEPENDS
-    "fossology-common, fossology-copyright, libpcre3")
+    "fossology-common, fossology-copyright, libpcre3 | pcre2-utils")
 
 set(CPACK_DEBIAN_IPRA_PACKAGE_SECTION "utils")
 

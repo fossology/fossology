@@ -24,6 +24,11 @@ target_compile_definitions(pkgagent
     _FILE_OFFSET_BITS=64
     VERSION_S="${FO_VERSION}"
     COMMIT_HASH_S="${FO_COMMIT_HASH}")
+
+if(FO_RPM_CRYPTO_H_HEADER)
+  target_compile_definitions(pkgagent PRIVATE HAVE_RPM_CRYPTO_H=1)
+endif()
+
 target_link_libraries(pkgagent PRIVATE fossology ${rpm_LIBRARIES})
 
 install(TARGETS pkgagent
