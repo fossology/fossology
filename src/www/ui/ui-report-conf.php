@@ -475,6 +475,12 @@ class ui_report_conf extends FO_Plugin
           $('#spdxLicenseCommentCheckbox').prop('checked', true);
         }
       });
+      $(\"[data-toggle='tooltip']\").tooltip();
+      $('#spdxLicenseCommentCheckbox').change(function() {
+        if (!this.checked) {
+          $('#osselotExportCheckbox').prop('checked', false);
+        }
+      });
     });
     ";
   }
