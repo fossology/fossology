@@ -61,6 +61,12 @@ class SoftwareHeritageDao
   */
   public function setSoftwareHeritageDetails($pfileId, $licenseDetails, $status)
   {
+    // Validate that pfileId is not null to prevent constraint violation
+    if (empty($pfileId) || $pfileId === null) {
+      $this->logger->warning("Attempted to insert Software Heritage record with NULL pfile_fk");
+      return false;
+    }
+
     if (!empty($this->dbManager->insertTableRow('software_heritage',['pfile_fk' => $pfileId, 'swh_shortnames' => $licenseDetails, 'swh_status' => $status]))) {
         return true;
     }
