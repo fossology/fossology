@@ -9,8 +9,7 @@
   colors="true" backupGlobals="true"
   beStrictAboutTestsThatDoNotTestAnything="false"
   failOnWarning="false" stopOnFailure="false"
-  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
-  cacheDirectory=".phpunit.cache">
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd">
   <coverage>
     <include>
       <directory suffix=".php">.</directory>
