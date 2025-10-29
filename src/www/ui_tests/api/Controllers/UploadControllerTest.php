@@ -1198,50 +1198,69 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
-   * @test
-   * -# Test for UploadController::updateUpload()
-   * -# Check if response status is 202
-   */
-  public function testUpdateUpload()
-  {
-    $upload = 2;
-    $assignee = 4;
-    $status = UploadStatus::REJECTED;
-    $comment = "Not helpful";
-
-    $resource = fopen('data://text/plain;base64,' .
-      base64_encode($comment), 'r+');
-    $body = $this->streamFactory->createStreamFromResource($resource);
-    $request = new Request("POST", new Uri("HTTP", "localhost", 80,
-      "/uploads/$upload", UploadController::FILTER_STATUS . "=Rejected&" .
-      UploadController::FILTER_ASSIGNEE . "=$assignee"),
-      new Headers(), [], [], $body);
-
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')
-      ->withArgs([$this->userId, $this->groupId])
-      ->andReturn(true);
-    $this->userDao->shouldReceive('getUserChoices')
-      ->withArgs([$this->groupId])
-      ->andReturn([$this->userId => "fossy", $assignee => "friendly-fossy"]);
-    $this->dbManager->shouldReceive('getSingleRow')
-      ->withArgs([M::any(), [$assignee, $this->groupId, $upload], M::any()]);
-    $this->dbManager->shouldReceive('getSingleRow')
-      ->withArgs([M::any(), [$status, $comment, $this->groupId, $upload],
-        M::any()]);
-    $this->dbManager->shouldReceive('getSingleRow')
-      ->withArgs([M::any(), [$upload], M::any()])
-      ->andReturn(["exists" => ""]);
-
-    $info = new Info(202, "Upload updated successfully.", InfoType::INFO);
-    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
-      $info->getCode());
-    $actualResponse = $this->uploadController->updateUpload($request,
-      new ResponseHelper(), ['id' => $upload]);
-    $this->assertEquals($expectedResponse->getStatusCode(),
-      $actualResponse->getStatusCode());
-    $this->assertEquals($this->getResponseJson($expectedResponse),
-      $this->getResponseJson($actualResponse));
-  }
+ * @test
+ * -# Test for UploadController::updateUpload()
+ * -# Check if response status is 202
+ */
+public function testUpdateUpload()
+{
+  $upload = 2;
+  $assignee = 4;
+  $status = UploadStatus::REJECTED;
+  $comment = "Not helpful";
+  
+  $requestBody = [
+    UploadController::FILTER_STATUS => "Rejected",
+    UploadController::FILTER_ASSIGNEE => $assignee,
+    "comment" => $comment
+  ];
+  $jsonBody = json_encode($requestBody);
+  
+  $resource = fopen('data://text/plain;base64,' . base64_encode($jsonBody), 'r+');
+  $body = $this->streamFactory->createStreamFromResource($resource);
+  
+  $headers = new Headers();
+  $headers->setHeader('Content-Type', 'application/json');
+  
+  $request = new Request(
+    "POST",
+    new Uri("HTTP", "localhost", 80, "/uploads/$upload"),
+    $headers,
+    [],
+    [],
+    $body
+  );
+  
+  $this->userDao->shouldReceive('isAdvisorOrAdmin')
+    ->withArgs([$this->userId, $this->groupId])
+    ->andReturn(true);
+    
+  $this->userDao->shouldReceive('getUserChoices')
+    ->withArgs([$this->groupId])
+    ->andReturn([$this->userId => "fossy", $assignee => "friendly-fossy"]);
+    
+  $this->dbManager->shouldReceive('getSingleRow')
+    ->withArgs([M::any(), [$assignee, $this->groupId, $upload], M::any()]);
+    
+  $this->dbManager->shouldReceive('getSingleRow')
+    ->withArgs([M::any(), [$status, $comment, $this->groupId, $upload], M::any()]);
+    
+  $this->dbManager->shouldReceive('getSingleRow')
+    ->withArgs([M::any(), [$upload], M::any()])
+    ->andReturn(["exists" => ""]);
+    
+  $info = new Info(202, "Upload updated successfully.", InfoType::INFO);
+  $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), $info->getCode());
+  
+  $actualResponse = $this->uploadController->updateUpload(
+    $request,
+    new ResponseHelper(),
+    ['id' => $upload]
+  );
+  
+  $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+  $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
+}
 
   /**
    * @test
@@ -1266,6 +1285,282 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs([$this->userId, $this->groupId])
       ->andReturn(false);
     $this->expectException(HttpForbiddenException::class);
+
+    $this->uploadController->updateUpload($request, new ResponseHelper(),
+      ['id' => $upload]);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::updateUpload() with invalid status
+   * -# Check if response status is 400
+   */
+  public function testUpdateUploadInvalidStatus()
+  {
+    $upload = 2;
+    $requestBody = [
+      UploadController::FILTER_STATUS => "invalid_status"
+    ];
+    $jsonBody = json_encode($requestBody);
+    
+    $resource = fopen('data://text/plain;base64,' . base64_encode($jsonBody), 'r+');
+    $body = $this->streamFactory->createStreamFromResource($resource);
+    
+    $headers = new Headers();
+    $headers->setHeader('Content-Type', 'application/json');
+    
+    $request = new Request(
+      "POST",
+      new Uri("HTTP", "localhost", 80, "/uploads/$upload"),
+      $headers,
+      [],
+      [],
+      $body
+    );
+    
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(true);
+      
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("Invalid status type. Status must be one of: open, inprogress, closed, rejected");
+
+    $this->uploadController->updateUpload($request, new ResponseHelper(),
+      ['id' => $upload]);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::updateUpload() with closed status but missing comment
+   * -# Check if response status is 400
+   */
+  public function testUpdateUploadClosedStatusMissingComment()
+  {
+    $upload = 2;
+    $requestBody = [
+      UploadController::FILTER_STATUS => "closed"
+    ];
+    $jsonBody = json_encode($requestBody);
+    
+    $resource = fopen('data://text/plain;base64,' . base64_encode($jsonBody), 'r+');
+    $body = $this->streamFactory->createStreamFromResource($resource);
+    
+    $headers = new Headers();
+    $headers->setHeader('Content-Type', 'application/json');
+    
+    $request = new Request(
+      "POST",
+      new Uri("HTTP", "localhost", 80, "/uploads/$upload"),
+      $headers,
+      [],
+      [],
+      $body
+    );
+    
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(true);
+      
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("Comment is required for 'closed' status.");
+
+    $this->uploadController->updateUpload($request, new ResponseHelper(),
+      ['id' => $upload]);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::updateUpload() with rejected status but missing comment
+   * -# Check if response status is 400
+   */
+  public function testUpdateUploadRejectedStatusMissingComment()
+  {
+    $upload = 2;
+    $requestBody = [
+      UploadController::FILTER_STATUS => "rejected"
+    ];
+    $jsonBody = json_encode($requestBody);
+    
+    $resource = fopen('data://text/plain;base64,' . base64_encode($jsonBody), 'r+');
+    $body = $this->streamFactory->createStreamFromResource($resource);
+    
+    $headers = new Headers();
+    $headers->setHeader('Content-Type', 'application/json');
+    
+    $request = new Request(
+      "POST",
+      new Uri("HTTP", "localhost", 80, "/uploads/$upload"),
+      $headers,
+      [],
+      [],
+      $body
+    );
+    
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(true);
+      
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("Comment is required for 'rejected' status.");
+
+    $this->uploadController->updateUpload($request, new ResponseHelper(),
+      ['id' => $upload]);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::updateUpload() with closed status but empty comment
+   * -# Check if response status is 400
+   */
+  public function testUpdateUploadClosedStatusEmptyComment()
+  {
+    $upload = 2;
+    $requestBody = [
+      UploadController::FILTER_STATUS => "closed",
+      "comment" => "   "  // Empty/whitespace comment
+    ];
+    $jsonBody = json_encode($requestBody);
+    
+    $resource = fopen('data://text/plain;base64,' . base64_encode($jsonBody), 'r+');
+    $body = $this->streamFactory->createStreamFromResource($resource);
+    
+    $headers = new Headers();
+    $headers->setHeader('Content-Type', 'application/json');
+    
+    $request = new Request(
+      "POST",
+      new Uri("HTTP", "localhost", 80, "/uploads/$upload"),
+      $headers,
+      [],
+      [],
+      $body
+    );
+    
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(true);
+      
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("Comment cannot be empty for 'closed' status.");
+
+    $this->uploadController->updateUpload($request, new ResponseHelper(),
+      ['id' => $upload]);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::updateUpload() with rejected status but empty comment
+   * -# Check if response status is 400
+   */
+  public function testUpdateUploadRejectedStatusEmptyComment()
+  {
+    $upload = 2;
+    $requestBody = [
+      UploadController::FILTER_STATUS => "rejected",
+      "comment" => ""  // Empty comment
+    ];
+    $jsonBody = json_encode($requestBody);
+    
+    $resource = fopen('data://text/plain;base64,' . base64_encode($jsonBody), 'r+');
+    $body = $this->streamFactory->createStreamFromResource($resource);
+    
+    $headers = new Headers();
+    $headers->setHeader('Content-Type', 'application/json');
+    
+    $request = new Request(
+      "POST",
+      new Uri("HTTP", "localhost", 80, "/uploads/$upload"),
+      $headers,
+      [],
+      [],
+      $body
+    );
+    
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(true);
+      
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("Comment cannot be empty for 'rejected' status.");
+
+    $this->uploadController->updateUpload($request, new ResponseHelper(),
+      ['id' => $upload]);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::updateUpload() with comment that's not a string
+   * -# Check if response status is 400
+   */
+  public function testUpdateUploadCommentNotString()
+  {
+    $upload = 2;
+    $requestBody = [
+      UploadController::FILTER_STATUS => "closed",
+      "comment" => 123  // Non-string comment
+    ];
+    $jsonBody = json_encode($requestBody);
+    
+    $resource = fopen('data://text/plain;base64,' . base64_encode($jsonBody), 'r+');
+    $body = $this->streamFactory->createStreamFromResource($resource);
+    
+    $headers = new Headers();
+    $headers->setHeader('Content-Type', 'application/json');
+    
+    $request = new Request(
+      "POST",
+      new Uri("HTTP", "localhost", 80, "/uploads/$upload"),
+      $headers,
+      [],
+      [],
+      $body
+    );
+    
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(true);
+      
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("Comment must be a string.");
+
+    $this->uploadController->updateUpload($request, new ResponseHelper(),
+      ['id' => $upload]);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::updateUpload() with comment that's not a string in general case
+   * -# Check if response status is 400
+   */
+  public function testUpdateUploadGeneralCommentNotString()
+  {
+    $upload = 2;
+    $requestBody = [
+      "comment" => ["not", "a", "string"]  // Non-string comment
+    ];
+    $jsonBody = json_encode($requestBody);
+    
+    $resource = fopen('data://text/plain;base64,' . base64_encode($jsonBody), 'r+');
+    $body = $this->streamFactory->createStreamFromResource($resource);
+    
+    $headers = new Headers();
+    $headers->setHeader('Content-Type', 'application/json');
+    
+    $request = new Request(
+      "POST",
+      new Uri("HTTP", "localhost", 80, "/uploads/$upload"),
+      $headers,
+      [],
+      [],
+      $body
+    );
+    
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(true);
+      
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("Comment must be a string.");
 
     $this->uploadController->updateUpload($request, new ResponseHelper(),
       ['id' => $upload]);
