@@ -6685,6 +6685,17 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (HASTEXT(_LT_DUAL_LICENSE_49, REG_EXTENDED)) {
     MEDINTEREST(lDebug ? "Dual-license(49)" : "Dual-license");
   }
+  else if (INFILE(_LT_DUAL_LICENSE_50)) {
+    INTERESTING(lDebug ? "Dual-license(50)" : "Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_50_BSD_MIT)) {
+    INTERESTING("BSD");
+    INTERESTING(lDebug ? "Dual-license(50)" : "Dual-license");
+    INTERESTING("MIT");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_51)) {
+    INTERESTING(lDebug ? "Dual-license(51)" : "Dual-license");
+  }
   cleanLicenceBuffer();
   /*
    * The Beer-ware license(!)
