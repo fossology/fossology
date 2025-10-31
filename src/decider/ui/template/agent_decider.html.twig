@@ -17,6 +17,9 @@
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="ojoNoContradiction" id="ojoNoContradiction" />
     <label for="ojoNoContradiction">{{ ' Scanners matches if Ojo or REUSE.Software findings are no contradiction with other findings'|trans }}</label>
     <br />
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="kotobaNoContradiction" id="kotobaNoContradiction" />
+    <label for="kotobaNoContradiction">{{ ' Kotoba Analysis (schedule kotoba bulk agent and auto-conclude the kotoba findings regardless of contradiction)'|trans }}</label>
+    <br />
     {% if isNinkaInstalled %}
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="nomosMonkNinka" id="nomosMonkNinka" />
     <label for="nomosMonkNinka">{{ ' Scanners matches if Nomos, Monk and Ninka find the same license'|trans }}</label>

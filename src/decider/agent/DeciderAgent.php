@@ -84,9 +84,10 @@ class DeciderAgent extends Agent
   const RULES_COPYRIGHT_FALSE_POSITIVE = 0x20;
   const RULES_COPYRIGHT_FALSE_POSITIVE_CLUTTER = 0x40;
   const RULES_LICENSE_TYPE_CONCLUSION = 0x80;
+  const RULES_KOTOBA_NO_CONTRADICTION = 0x100;
   const RULES_ALL = self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA |
     self::RULES_BULK_REUSE | self::RULES_WIP_SCANNER_UPDATES |
-    self::RULES_OJO_NO_CONTRADICTION | self::RULES_LICENSE_TYPE_CONCLUSION;
+    self::RULES_OJO_NO_CONTRADICTION | self::RULES_LICENSE_TYPE_CONCLUSION | self::RULES_KOTOBA_NO_CONTRADICTION;
 
   /** @var int $activeRules
    * Rules active for upload (nomos in monk; ninka in monk; nomos, ninka and monk)
@@ -266,7 +267,12 @@ class DeciderAgent extends Agent
 
     $haveDecided = false;
 
-    if (($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
+    // Check kotobabulk no contradiction first
+    if (($this->activeRules&self::RULES_KOTOBA_NO_CONTRADICTION) == self::RULES_KOTOBA_NO_CONTRADICTION) {
+      $haveDecided = $this->autodecideKotobaNoContradiction($itemTreeBounds, $projectedScannerMatches);
+    }
+
+    if (!$haveDecided && ($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
       $haveDecided = $this->autodecideIfOjoMatchesNoContradiction($itemTreeBounds, $projectedScannerMatches);
     }
 
@@ -309,6 +315,109 @@ class DeciderAgent extends Agent
         return true;
       }
     }
+    return false;
+  }
+
+
+  /**
+   * @brief Check if kotobabulk findings exist and verify no contradictions with other scanners
+   * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
+   * @param array $projectedScannerMatches Scanner matches from all agents
+   * @return array Filtered scanner matches (kotobabulk if no contradictions, all if contradictions exist)
+   */
+  private function filterMatchesForKotobaNoContradiction(ItemTreeBounds $itemTreeBounds, $projectedScannerMatches)
+  {
+    // Check if kotobabulk findings exist
+    $kotobabulkMatches = array();
+    $otherMatches = array();
+
+    foreach ($projectedScannerMatches as $licenseId => $agentMatches) {
+      if (array_key_exists('kotobabulk', $agentMatches)) {
+        $kotobabulkMatches[$licenseId] = $agentMatches;
+      } else {
+        $otherMatches[$licenseId] = $agentMatches;
+      }
+    }
+
+    // If no kotobabulk findings exist, return all matches
+    if (empty($kotobabulkMatches)) {
+      return $projectedScannerMatches;
+    }
+
+    // Check for contradictions between kotobabulk and other scanner findings
+    $hasContradictions = $this->checkKotobaContradictions($kotobabulkMatches, $otherMatches);
+
+    // Even if contradictions exist, return kotobabulk matches for auto-conclusion
+    return $kotobabulkMatches;
+  }
+
+  /**
+   * @brief Check for contradictions between kotobabulk findings and other scanner findings
+   * @param array $kotobabulkMatches Kotobabulk scanner matches
+   * @param array $otherMatches Other scanner matches
+   * @return boolean True if contradictions exist, false otherwise
+   */
+  private function checkKotobaContradictions($kotobabulkMatches, $otherMatches)
+  {
+    // For each license found by kotobabulk, check if other scanners found conflicting licenses
+    foreach ($kotobabulkMatches as $licenseId => $agentMatches) {
+      // Check if other scanners found different licenses for the same files
+      foreach ($otherMatches as $otherLicenseId => $otherAgentMatches) {
+        if ($licenseId != $otherLicenseId) {
+          // Check if the same files are involved in both findings
+          $kotobaFiles = $this->getFilesFromMatches($agentMatches);
+          $otherFiles = $this->getFilesFromMatches($otherAgentMatches);
+
+          // If there's overlap in files, it's a contradiction
+          if (!empty(array_intersect($kotobaFiles, $otherFiles))) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @brief Extract file IDs from scanner matches
+   * @param array $agentMatches Scanner matches from an agent
+   * @return array Array of file IDs
+   */
+  private function getFilesFromMatches($agentMatches)
+  {
+    $files = array();
+    foreach ($agentMatches as $agentName => $matches) {
+      if (is_array($matches)) {
+        foreach ($matches as $match) {
+          if (isset($match['fileId'])) {
+            $files[] = $match['fileId'];
+          }
+        }
+      }
+    }
+    return array_unique($files);
+  }
+
+  /**
+   * @brief Auto decide matches based on kotobabulk findings with no contradictions
+   * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
+   * @param array $projectedScannerMatches Scanner matches from all agents
+   * @return boolean True if decisions applied, false otherwise
+   */
+  private function autodecideKotobaNoContradiction(ItemTreeBounds $itemTreeBounds, $projectedScannerMatches)
+  {
+    $filteredMatches = $this->filterMatchesForKotobaNoContradiction($itemTreeBounds, $projectedScannerMatches);
+
+    // If we have kotobabulk findings, auto-conclude them
+    if ($filteredMatches !== $projectedScannerMatches) {
+      // We have kotobabulk findings, so auto-conclude them
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents(
+        $itemTreeBounds, $this->userId, $this->groupId,
+        DecisionTypes::IDENTIFIED, false);
+      return true;
+    }
+
     return false;
   }
 

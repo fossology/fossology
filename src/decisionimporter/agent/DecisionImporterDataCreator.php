@@ -545,8 +545,11 @@ class DecisionImporterDataCreator
     $latestMonkBulkAgentId = $this->agentDao->getCurrentAgentId("monkbulk");
     $jobId = JobAddJob($this->userId, $this->groupId, $uploadName, $this->uploadId);
 
+    // Create monk bulk job
     $monkbulkJobId = JobQueueAdd($jobId, "monkbulk", $bulkId, "no", null);
-    $deciderJobId = JobQueueAdd($jobId, "deciderjob", $this->uploadId, "no", [$monkbulkJobId]);
+    $dependencies = [$monkbulkJobId];
+
+    $deciderJobId = JobQueueAdd($jobId, "deciderjob", $this->uploadId, "no", $dependencies);
 
     $monkbulkArsId = $this->agentDao->writeArsRecord("monkbulk", $latestMonkBulkAgentId, $this->uploadId);
     $this->agentDao->writeArsRecord("monkbulk", $latestDeciderAgentId, $this->uploadId, $monkbulkArsId, true);

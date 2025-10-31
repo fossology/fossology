@@ -138,6 +138,10 @@ class DeciderAgentPlugin extends AgentPlugin
           $dependencies[] = 'agent_compatibility';
           $rulebits |= 0x80;
           break;
+        case 'kotobaNoContradiction':
+          $dependencies[] = 'agent_kotoba_bulk';
+          $rulebits |= 0x100;
+          break;
       }
     }
 

@@ -139,7 +139,10 @@ class ChangeLicenseBulk extends DefaultPlugin
     $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
     /** @var DeciderJobAgentPlugin $deciderPlugin */
     $deciderPlugin = plugin_find("agent_deciderjob");
+
+    // Start with monk bulk as the primary dependency
     $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => $bulkId));
+
     $conflictStrategyId = intval($request->get('forceDecision'));
     $errorMsg = '';
     $jqId = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies, $conflictStrategyId);
