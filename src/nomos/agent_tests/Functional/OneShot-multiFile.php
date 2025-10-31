@@ -75,6 +75,7 @@ class OneShotMultiFileTest extends CommonCliTest
   	'Oracle-Berkeley-DB.java' => 'Oracle-Berkeley-DB',
   	'sleepycat.php' => 'Sleepycat',
   	'jslint.js' => 'JSON',
+  	'modernizr-dual-license.js' => 'BSD,Dual-license,MIT',
   );
 
   /**
