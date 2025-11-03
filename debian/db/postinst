@@ -42,3 +42,137 @@ esac
 exit 0
 
 
+
+
+#!/bin/sh
+# postinst script for fossology-db
+#
+# see: dh_installdeb(1)
+
+set -e
+
+# summary of how this script can be called:
+#        * <postinst> `configure' <most-recently-configured-version>
+#        * <old-postinst> `abort-upgrade' <new version>
+#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
+#          <new-version>
+#        * <postinst> `abort-remove'
+#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
+#          <failed-install-package> <version> `removing'
+#          <conflicting-package> <version>
+# for details, see http://www.debian.org/doc/debian-policy/ or
+# the debian-policy package
+
+
+case "$1" in
+    configure)
+    # call the dbcreate utility specifically so we don't have to use
+    # fo-postinstall which is in fossology-common
+    /usr/lib/fossology/dbcreate
+
+    #
+    # Fossology DB Schema Migration: Ensure 'groups.group_name' column integrity
+    #
+    # This section applies database schema modifications to the 'groups' table.
+    # It addresses an issue where group name updates could fail due to:
+    # 1. Insufficient length of the 'group_name' column.
+    # 2. Attempts to create duplicate group names, violating data integrity.
+    #
+    # Changes include:
+    # - Extending 'group_name' to VARCHAR(255) to accommodate longer names.
+    # - Adding a UNIQUE constraint to 'group_name' to prevent duplicates.
+    #
+    # Before applying the UNIQUE constraint, a check for existing duplicates
+    # is performed. If duplicates are found, the process will halt, providing
+    # an error message and instructions for manual resolution to prevent
+    # database upgrade failures.
+    #
+    echo "Applying database schema updates for 'groups' table (group_name column)..."
+
+    DB_TYPE=$(/usr/bin/fo-db-type)
+
+    if [ "$DB_TYPE" = "pgsql" ]; then
+        echo "Detected PostgreSQL. Applying schema changes for 'groups.group_name'..."
+
+        # Check for existing duplicate group names before enforcing unique constraint
+        DUPLICATES=$(/usr/bin/fo-db-exec -s -q "SELECT COUNT(*) FROM (SELECT group_name FROM groups GROUP BY group_name HAVING COUNT(*) > 1) AS duplicate_group_names_subquery;")
+        if [ "$DUPLICATES" -gt 0 ]; then
+            echo "ERROR: PostgreSQL: Cannot enforce UNIQUE constraint on 'groups.group_name' due to $DUPLICATES existing duplicate group names." >&2
+            echo "Please manually resolve these duplicates before retrying the package installation/upgrade." >&2
+            echo "You can find duplicates with: SELECT group_name, COUNT(*) FROM groups GROUP BY group_name HAVING COUNT(*) > 1 ORDER BY COUNT(*) DESC;" >&2
+            exit 1
+        fi
+
+        # Ensure group_name column has sufficient length (VARCHAR(255))
+        echo "  - Altering 'group_name' column type to VARCHAR(255)..."
+        /usr/bin/fo-db-exec -s -q "ALTER TABLE groups ALTER COLUMN group_name TYPE VARCHAR(255);" || {
+            echo "ERROR: Failed to alter 'groups.group_name' column type in PostgreSQL." >&2
+            exit 1
+        }
+
+        # Add unique constraint (IF NOT EXISTS makes it idempotent)
+        echo "  - Adding UNIQUE index 'ix_groups_group_name' if not exists..."
+        /usr/bin/fo-db-exec -s -q "CREATE UNIQUE INDEX IF NOT EXISTS ix_groups_group_name ON groups (group_name);" || {
+            echo "ERROR: Failed to create unique index 'ix_groups_group_name' in PostgreSQL." >&2
+            exit 1
+        }
+        echo "PostgreSQL schema changes for 'groups.group_name' applied successfully."
+
+    elif [ "$DB_TYPE" = "mysql" ]; then
+        echo "Detected MySQL. Applying schema changes for 'groups.group_name'..."
+
+        # Check for existing duplicate group names before enforcing unique constraint
+        DUPLICATES=$(/usr/bin/fo-db-exec -s -q "SELECT COUNT(*) FROM (SELECT group_name FROM groups GROUP BY group_name HAVING COUNT(*) > 1) AS duplicate_group_names_subquery;")
+        if [ "$DUPLICATES" -gt 0 ]; then
+            echo "ERROR: MySQL: Cannot enforce UNIQUE constraint on 'groups.group_name' due to $DUPLICATES existing duplicate group names." >&2
+            echo "Please manually resolve these duplicates before retrying the package installation/upgrade." >&2
+            echo "You can find duplicates with: SELECT group_name, COUNT(*) FROM groups GROUP BY group_name HAVING COUNT(*) > 1 ORDER BY COUNT(*) DESC;" >&2
+            exit 1
+        fi
+
+        # Ensure group_name column has sufficient length (VARCHAR(255))
+        echo "  - Altering 'group_name' column type to VARCHAR(255)..."
+        /usr/bin/fo-db-exec -s -q "ALTER TABLE groups MODIFY COLUMN group_name VARCHAR(255);" || {
+            echo "ERROR: Failed to alter 'groups.group_name' column type in MySQL." >&2
+            exit 1
+        }
+
+        # Check if a unique index/constraint already exists on the column (for idempotency)
+        echo "  - Checking for existing unique constraint on 'groups.group_name'..."
+        CONSTRAINT_EXISTS=$(/usr/bin/fo-db-exec -s -q "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema = DATABASE() AND table_name = 'groups' AND column_name = 'group_name' AND Non_unique = 0;")
+        if [ "$CONSTRAINT_EXISTS" -eq 0 ]; then
+            echo "  - Adding UNIQUE index 'ix_groups_group_name'..."
+            /usr/bin/fo-db-exec -s -q "ALTER TABLE groups ADD UNIQUE INDEX ix_groups_group_name (group_name);" || {
+                echo "ERROR: Failed to create unique index 'ix_groups_group_name' in MySQL." >&2
+                exit 1
+            }
+        else
+            echo "  - A unique constraint on 'groups.group_name' already exists. Skipping creation."
+        fi
+        echo "MySQL schema changes for 'groups.group_name' applied successfully."
+
+    else
+        echo "WARNING: Unknown database type '$DB_TYPE'. Skipping 'groups' table schema updates." >&2
+    fi
+    echo "Finished applying database schema updates for 'groups' table."
+    #
+    # End of Fossology DB Schema Migration
+    #
+
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+# dh_installdeb will replace this with shell code automatically
+# generated by other debhelper scripts.
+
+#DEBHELPER#
+
+exit 0
