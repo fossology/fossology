@@ -173,7 +173,7 @@ class ReportImportSink
           $this->userId,
           false,
           0,
-          $licenseCandidate->getShortName()
+          null
         );
         return $licenseId;
       }
