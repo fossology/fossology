@@ -379,6 +379,14 @@ class SpdxAgent extends Agent
     $fileNodes = $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName(), $uploadId);
 
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
+    $customMainLicenseTexts = $this->clearingDao->getMainLicenseReportInfos($uploadId, $this->groupId);
+    $customMainLicenseTextsByProjected = array();
+    foreach ($customMainLicenseTexts as $rawLicenseId => $customText) {
+      $projectedId = $this->licenseMap->getProjectedId($rawLicenseId);
+      if (!array_key_exists($projectedId, $customMainLicenseTextsByProjected)) {
+        $customMainLicenseTextsByProjected[$projectedId] = $customText;
+      }
+    }
     $mainLicenses = array();
     foreach ($mainLicenseIds as $licId) {
       $reportedLicenseId = $this->licenseMap->getProjectedId($licId);
@@ -388,6 +396,36 @@ class SpdxAgent extends Agent
             "spdx: Warning: main license ID {$reportedLicenseId} not found; skipping."
         );
         continue; // Skip this license and continue with the next one
+      }
+      $customText = null;
+      if (array_key_exists($licId, $customMainLicenseTexts)) {
+        $customText = $customMainLicenseTexts[$licId];
+      } elseif (array_key_exists($reportedLicenseId, $customMainLicenseTextsByProjected)) {
+        $customText = $customMainLicenseTextsByProjected[$reportedLicenseId];
+      }
+      if ($customText !== null && $customText !== '') {
+        $reportLicId = $mainLicense->getId() . "-" . md5($customText);
+        $mainLicenses[] = $reportLicId;
+        if (!array_key_exists($reportLicId, $this->licensesInDocument)) {
+          $customShortName = $mainLicense->getShortName() . "-" . md5($customText);
+          $customShortName = LicenseRef::convertToSpdxId($customShortName, "");
+          $customLicense = new License(
+            $mainLicense->getId(),
+            $customShortName,
+            $mainLicense->getFullName(),
+            $mainLicense->getRisk(),
+            $customText,
+            $mainLicense->getUrl(),
+            $mainLicense->getDetectorType(),
+            '');
+          $this->licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
+            ->setLicenseObj($customLicense)
+            ->setCustomText(true)
+            ->setListedLicense(false);
+        } else {
+          $this->licensesInDocument[$reportLicId]->setCustomText(true);
+        }
+        continue;
       }
       $reportLicId = $mainLicense->getId() . "-" . md5($mainLicense->getText());
       $mainLicenses[] = $reportLicId;

@@ -26,6 +26,7 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\UploadStatus;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
@@ -1290,15 +1291,68 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
     $this->clearingDao->shouldReceive('getMainLicenseIds')->withArgs([$uploadId, $this->groupId])->andReturn($licenseIds);
+    $this->clearingDao->shouldReceive('getMainLicenseReportInfos')->withArgs([$uploadId, $this->groupId])->andReturn([]);
     $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], false])->andReturn([]);
     $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], true])->andReturn([]);
-    $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId])->andReturn($license);
+    $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId, $this->groupId])->andReturn($license);
 
     $licenses[] = $license->getArray();
     $expectedResponse = (new ResponseHelper())->withJson($licenses, 200);
     $actualResponse = $this->uploadController->getMainLicenses(null, new ResponseHelper(), ['id' => $uploadId]);
     $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Ensure custom text is reflected in main license response
+   */
+  public function testGetMainLicensesCustomText()
+  {
+    $uploadId = 5;
+    $licenseId = 321;
+    $customText = 'Custom license text';
+    $licenseIds = array($licenseId => $licenseId);
+    $license = new License(
+      $licenseId,
+      "BSD-2-Clause",
+      "BSD 2-Clause",
+      "Base text",
+      "http://example.com",
+      [],
+      10,
+      false
+    );
+
+    $expectedShortName = LicenseRef::convertToSpdxId(
+      $license->getShortName() . '-' . md5($customText),
+      ''
+    );
+
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->clearingDao->shouldReceive('getMainLicenseIds')
+      ->withArgs([$uploadId, $this->groupId])->andReturn($licenseIds);
+    $this->clearingDao->shouldReceive('getMainLicenseReportInfos')
+      ->withArgs([$uploadId, $this->groupId])->andReturn([$licenseId => $customText]);
+    $this->licenseDao->shouldReceive('getLicenseObligations')
+      ->withArgs([[$licenseId], false])->andReturn([]);
+    $this->licenseDao->shouldReceive('getLicenseObligations')
+      ->withArgs([[$licenseId], true])->andReturn([]);
+    $this->licenseDao->shouldReceive('getLicenseById')
+      ->withArgs([$licenseId, $this->groupId])->andReturn($license);
+
+    $response = $this->uploadController->getMainLicenses(
+      null,
+      new ResponseHelper(),
+      ['id' => $uploadId]
+    );
+
+    $responseData = $this->getResponseJson($response);
+    $this->assertSame($expectedShortName, $responseData[0]['shortName']);
+    $this->assertSame($customText, $responseData[0]['text']);
   }
 
 

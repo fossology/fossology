@@ -101,8 +101,8 @@ jobs:
           fail-fast: true
 
       - name: Install additional Dependencies
-        if: ${{ matrix.config.cc == 'gcc-8' }}
-        run: sudo apt install -y gcc-8 g++-8
+        if: ${{ matrix.config.cc == 'gcc-8' || matrix.config.cc == 'gcc-9' }}
+        run: sudo apt install -y ${{ matrix.config.cc }} ${{ matrix.config.cxx }}
 
       - name: Configure and Generate CMake Project
         run: |

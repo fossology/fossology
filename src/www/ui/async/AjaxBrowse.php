@@ -8,6 +8,10 @@
 
 namespace Fossology\UI\Ajax;
 
+use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
@@ -33,6 +37,15 @@ class AjaxBrowse extends DefaultPlugin
   private $dbManager;
   /** @var DataTablesUtility $dataTablesUtility */
   private $dataTablesUtility;
+  /** @var ClearingDao */
+  private $clearingDao;
+  /** @var LicenseDao */
+  private $licenseDao;
+  /** @var LicenseMap|null */
+  private $licenseMap;
+  /** @var array */
+  private $customMainLicenseCache = array();
+
   /** @var array */
   private $filterParams;
   /** @var int */
@@ -51,6 +64,9 @@ class AjaxBrowse extends DefaultPlugin
     $this->userDao = $container->get('dao.user');
     $this->dbManager = $container->get('db.manager');
     $this->dataTablesUtility = $container->get('utils.data_tables_utility');
+    $this->clearingDao = $container->get('dao.clearing');
+    $this->licenseDao = $container->get('dao.license');
+    $this->licenseMap = null;
   }
 
   /**
@@ -150,6 +166,41 @@ class AjaxBrowse extends DefaultPlugin
    * @param string (unique)
    * @return array
    */
+  /**
+   * @param int $uploadId
+   * @return array<int,array{display:string,text:string}>
+   */
+  private function getCustomMainLicenseDetails($uploadId)
+  {
+    if (array_key_exists($uploadId, $this->customMainLicenseCache)) {
+      return $this->customMainLicenseCache[$uploadId];
+    }
+    $details = array();
+    $groupId = Auth::getGroupId();
+    if ($this->licenseMap === null) {
+      $this->licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT, true);
+    }
+    $customTexts = $this->clearingDao->getMainLicenseReportInfos($uploadId, $groupId);
+    foreach ($customTexts as $licenseId => $customText) {
+      if ($customText === null || $customText === '') {
+        continue;
+      }
+      $projectedId = $this->licenseMap->getProjectedId($licenseId);
+      $baseLicense = $this->licenseDao->getLicenseById($projectedId, $groupId);
+      if ($baseLicense === null) {
+        continue;
+      }
+      $customShortName = $baseLicense->getShortName() . '-' . md5($customText);
+      $customShortName = LicenseRef::convertToSpdxId($customShortName, '');
+      $details[$licenseId] = array('display' => $customShortName, 'text' => $customText);
+      if (!array_key_exists($projectedId, $details)) {
+        $details[$projectedId] = array('display' => $customShortName, 'text' => $customText);
+      }
+    }
+    $this->customMainLicenseCache[$uploadId] = $details;
+    return $details;
+  }
+
   private function showRow($row,Request $request, $uri, $menuPfile, $menuPfileNoCompare, $statusTypesAvailable, $users, $rowCounter)
   {
     $show = $request->get('show');
@@ -217,11 +268,33 @@ class AjaxBrowse extends DefaultPlugin
     $mainParams = array($uploadId, Auth::getGroupId());
     $lic = $this->dbManager->getRows($sql, $mainParams, $stmt);
     $mainLicenses = array();
+    $customLicenseDetails = $this->getCustomMainLicenseDetails($uploadId);
     foreach ($lic as $mainLic) {
-      $mainLicenses[] = '<a onclick="javascript:window.open(\''.Traceback_uri()
-              ."?mod=popup-license&rf=$mainLic[rf_pk]','License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');"
-              .'" href="javascript:;">'.$mainLic['rf_shortname'].'</a>'
-              ."<img onclick=\"removeMainLicense($uploadId,$mainLic[rf_pk]);\" class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></img>";
+      $licenseId = intval($mainLic['rf_pk']);
+      if ($this->licenseMap === null) {
+        $this->licenseMap = new LicenseMap($this->dbManager, Auth::getGroupId(), LicenseMap::REPORT, true);
+      }
+      $displayName = $mainLic['rf_shortname'];
+      $tooltip = '';
+      $projectedId = $this->licenseMap->getProjectedId($licenseId);
+      if (array_key_exists($licenseId, $customLicenseDetails)) {
+        $displayName = $customLicenseDetails[$licenseId]['display'];
+        $tooltip = $customLicenseDetails[$licenseId]['text'];
+      } elseif (array_key_exists($projectedId, $customLicenseDetails)) {
+        $displayName = $customLicenseDetails[$projectedId]['display'];
+        $tooltip = $customLicenseDetails[$projectedId]['text'];
+      }
+      $safeDisplayName = htmlspecialchars($displayName, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+      $titleAttribute = '';
+      if ($tooltip !== '') {
+        $titleAttribute = ' title="' . htmlspecialchars($tooltip, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"';
+      }
+      $popupUrl = Traceback_uri() . "?mod=popup-license&rf={$mainLic['rf_pk']}";
+      $mainLicenses[] = '<a onclick="javascript:window.open(\'' . $popupUrl
+              . '\',\'License text\',\'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes\');"'
+              . $titleAttribute . ' href="javascript:;">' . $safeDisplayName . '</a>'
+              . '<img onclick="removeMainLicense(' . $uploadId . ',' . $mainLic['rf_pk']
+              . ');" class="delete" src="images/space_16.png" alt=""/></img>' ;
     }
 
     return array($nameColumn, $nameAction, $currentStatus, $tripleComment, implode(', ', $mainLicenses), $dateCol, $currentAssignee);
