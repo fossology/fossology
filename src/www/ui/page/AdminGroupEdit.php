@@ -82,9 +82,9 @@ class AdminGroupEdit extends DefaultPlugin
    */
   function validateGroupName($groupName)
   {
-    if (empty($groupName)) {
+    if (empty(trim($groupName))) {
       return _("Invalid: Group name cannot be whitespace only");
-    } else if (preg_match('/^[\s\w_-]$/', $groupName) !== 1) {
+    } else if (preg_match('/^[\s\w_-]+$/', $groupName) !== 1) {
       return _("Invalid: Group name can only contain letters, numbers, hyphens and underscores");
     } else if (is_numeric($groupName)) {
       return _("Invalid: Group name cannot be numeric-only");
@@ -92,6 +92,7 @@ class AdminGroupEdit extends DefaultPlugin
       return "";
     }
   }
+
 }
 
 register_plugin(new AdminGroupEdit());
