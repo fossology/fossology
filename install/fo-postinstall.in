@@ -263,7 +263,7 @@ if [[ $AGENT ]]; then
    chown --silent @FO_PROJECTUSER@:$PROJECTGROUP @FO_MAN1DIR@/cp2foss.1{,.gz} @FO_MAN1DIR@/fossjobs.1{,.gz} || echo
    # Install Python dependencies for source install only
    if [[ "@FO_DESTDIR@" != *"debian"* ]]; then
-     @FO_LIBEXECDIR@/fo-install-pythondeps -y --runtime --user @FO_PROJECTUSER@ $PYTHONEXPERI $DEBIAN
+     @FO_LIBEXECDIR@/fo-install-pythondeps -y --runtime --user @FO_PROJECTUSER@ --experimental $DEBIAN
    fi
 fi
 
