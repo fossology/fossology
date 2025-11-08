@@ -128,6 +128,8 @@ class TestPgDb extends TestAbstractDb
       if ($invert^!in_array($tableName, $tableList) || array_key_exists($tableName, $Schema['INHERITS'])) {
         continue;
       }
+      // Drop the table first if it exists to avoid "relation already exists" errors
+      $this->dbManager->queryOnce("DROP TABLE IF EXISTS \"$tableName\" CASCADE");
       $this->dbManager->queryOnce("CREATE TABLE \"$tableName\" ()");
       $sqlAddArray = array();
       foreach ($tableCols as $attributes) {
