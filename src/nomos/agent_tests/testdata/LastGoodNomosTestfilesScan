@@ -100,6 +100,7 @@ File NomosTestfiles/Authorship-inference/setup contains license(s) No_license_fo
 File NomosTestfiles/Beerware/hash_md5prime.c contains license(s) Beerware,RSA-MD
 File NomosTestfiles/Bittorrent/bittorrent.nsi contains license(s) BitTorrent-1.0
 File NomosTestfiles/Bittorrent/bittorrent.py contains license(s) BitTorrent-1.1
+File NomosTestfiles/BSD/BSD.txt contains license(s) BSD
 File NomosTestfiles/BSD/0BSD.txt contains license(s) 0BSD
 File NomosTestfiles/BSD/access.c contains license(s) BSD-style
 File NomosTestfiles/BSD/AMPAS.txt contains license(s) AMPAS
@@ -850,6 +851,7 @@ File NomosTestfiles/MPL/mozilla.xhtml contains license(s) Dual-license,GPL-2.0-o
 File NomosTestfiles/MPL/MPL-1.0.txt contains license(s) MPL-1.0
 File NomosTestfiles/MPL/MPL-1.1.txt contains license(s) MPL-1.1
 File NomosTestfiles/MPL/MPL-2.0_and_BSD-2-Clause.txt contains license(s) BSD-2-Clause,MPL-2.0
+File NomosTestfiles/MPL/MPL-2.0_and_LGPL-3.0-only_and_Apache-2.0.txt contains license(s) Apache-2.0,LGPL-3.0-only,MPL-2.0
 File NomosTestfiles/MPL/MPL-2.0_not_MPL.txt contains license(s) MPL-2.0
 File NomosTestfiles/MPL/MPL-2.0.txt contains license(s) MPL-2.0-no-copyleft-exception
 File NomosTestfiles/MPL/MPL-2.0-with-copyleft-exception.txt contains license(s) MPL-2.0

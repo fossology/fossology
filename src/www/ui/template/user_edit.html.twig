@@ -96,7 +96,7 @@
     <tr class="classic">
       <th width="25%">
         {{ "Enable OSSelot export by default"|trans }}
-        <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'When enabled, SPDX and ReadMeOSS exports will be OSSelot-compatible by default: custom licenses will be emitted as LicenseRef-<ShortName> (dropping "-fossology-"), ReadMeOSS will strip all LicenseRef- prefixes, and every license\'s full text will be included.'|trans }}" alt="" class="info-bullet"/>
+        <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'When enabled, SPDX and ReadMeOSS exports will be OSSelot-compatible: custom licenses will be emitted as LicenseRef-<ShortName> (dropping &quot;-fossology-&quot;), ReadMeOSS will strip all LicenseRef- prefixes, and every license&apos;s full text will be included.'|trans }}" alt="" class="info-bullet"/>
       </th>
       <td><input type="checkbox" name="osselot_export_enabled" id="osselotExportEnabledCheckbox" {% if osselotExportEnabled %}checked{% endif %}></td>
     </tr>
@@ -513,6 +513,7 @@
     {% endif %}
 
     $(function() {
+      $('[data-toggle="tooltip"]').tooltip();
       $("#pat_expiry").datepicker({
         minDate : 0,
         maxDate : "+{{ maxTokenDate }}D",
@@ -525,6 +526,11 @@
       $('#osselotExportEnabledCheckbox').change(function() {
         if ($(this).is(':checked')) {
           $('#spdxLicenseCommentDefaultCheckbox').prop('checked', true);
+        }
+      });
+      $('#spdxLicenseCommentDefaultCheckbox').change(function() {
+        if (!$(this).is(':checked')) {
+          $('#osselotExportEnabledCheckbox').prop('checked', false);
         }
       });
     });

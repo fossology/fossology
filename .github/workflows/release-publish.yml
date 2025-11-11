@@ -18,9 +18,9 @@ jobs:
     strategy:
       matrix:
         os:
-          - 'debian:buster'
           - 'debian:bullseye'
           - 'debian:bookworm'
+          - 'debian:trixie'
           - 'ubuntu:focal'
           - 'ubuntu:jammy'
           - 'ubuntu:noble'
@@ -35,18 +35,14 @@ jobs:
         apt-get update
         apt-get install -y lsb-release sudo gpg ca-certificates
         ## Add repo for latest git
-        if case "${{ matrix.os }}" in debian*) true;; *) false;; esac; then
-          echo "deb http://deb.debian.org/debian $(lsb_release -cs)-backports main" > /etc/apt/sources.list.d/backport.list
-        else
+        if case "${{ matrix.os }}" in ubuntu*) true;; *) false;; esac; then
           apt-get install -y software-properties-common
           add-apt-repository $GIT_REPO -y
         fi
         apt-get update
         apt-get install git -y
         # Remove added repos
-        if case "${{ matrix.os }}" in debian*) true;; *) false;; esac; then
-          rm /etc/apt/sources.list.d/backport.list
-        else
+        if case "${{ matrix.os }}" in ubuntu*) true;; *) false;; esac; then
           add-apt-repository --remove $GIT_REPO -y
         fi
         apt-get update

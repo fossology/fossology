@@ -349,3 +349,11 @@ div.infoTable {
 #passcheck, #pass2 {
   margin: 4px;
 }
+
+img[src*="ajax-loader.gif"] {
+  width: 16px !important;
+  height: 16px !important;
+  vertical-align: middle !important;
+  max-width: 16px !important;
+  max-height: 16px !important;
+}

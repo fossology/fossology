@@ -22,7 +22,7 @@ foreach(COMMON_OBJ copyright regscan scanners cleanEntries regexConfProvider
         ${FO_CWD}/${COMMON_OBJ}.cc)
     target_link_libraries(${COMMON_OBJ}.cc.o
         PRIVATE fossologyCPP m ${icu-uc_LIBRARIES} stdc++
-        ${Boost_LIBRARIES} jsoncpp_lib)
+        ${Boost_LIBRARIES} ${jsoncpp_LIBRARIES})
     list(APPEND COMMON_COPY_OBJECTS ${COMMON_OBJ}.cc.o)
 endforeach()
 
@@ -70,7 +70,7 @@ foreach(FO_COPY_TARGET copyright_lib copyright copyright_cov_lib copyright_cov
     endif()
     target_link_libraries(${FO_COPY_TARGET}
         PRIVATE fossologyCPP m ${icu-uc_LIBRARIES} stdc++
-        ${Boost_LIBRARIES} jsoncpp_lib ${COPY_LIBS})
+        ${Boost_LIBRARIES} ${jsoncpp_LIBRARIES} ${COPY_LIBS})
 endforeach()
 target_compile_options(copyright_cov PRIVATE ${FO_COV_FLAGS})
 set_target_properties(copyright_lib PROPERTIES OUTPUT_NAME copyright)

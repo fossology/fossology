@@ -6,7 +6,7 @@ set(FO_CWD ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FO_C_FLAGS}")
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 
 include_directories(
     ${glib_INCLUDE_DIRS}

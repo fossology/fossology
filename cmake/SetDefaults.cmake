@@ -42,7 +42,7 @@ set(FO_TESTDIR "${FO_SOURCEDIR}/testing" CACHE PATH "testing directory of fossol
 # common flags and options (always use list for flags)
 set(FO_C_FLAGS "-Wall" CACHE INTERNAL "default fossology c flags")
 
-set(FO_CXX_FLAGS "${FO_C_FLAGS} --std=c++0x" CACHE INTERNAL "default fossology c++ flags")
+set(FO_CXX_FLAGS "${FO_C_FLAGS} --std=c++17" CACHE INTERNAL "default fossology c++ flags")
 
 set(FO_COV_FLAGS "-O0;-fprofile-arcs;-ftest-coverage" CACHE INTERNAL "coverage flags for fossology")
 
@@ -115,7 +115,7 @@ endif(NOT DEFINED ARE_DEFAULTS_SET)
 
 find_package(PostgreSQL REQUIRED)
 if(DEFINED CMAKE_CXX_COMPILER)
-    find_package(Boost REQUIRED regex system filesystem program_options)
+    find_package(Boost REQUIRED COMPONENTS regex system filesystem program_options NO_MODULE)
 endif()
 find_package(Git REQUIRED)
 
@@ -128,6 +128,13 @@ foreach(SCHE_LIBS
     string(REPLACE "-2.0" "" LIB_NAME ${SCHE_LIBS})
     pkg_check_modules(${LIB_NAME} REQUIRED ${SCHE_LIBS})
 endforeach()
+
+find_file(FO_RPM_CRYPTO_H_HEADER 
+    NAMES rpmcrypto.h
+    PATHS ${rpm_INCLUDE_DIRS}
+    PATH_SUFFIXES rpm
+    NO_DEFAULT_PATH
+)
 
 if(TESTING)
     foreach(TEST_LIBS

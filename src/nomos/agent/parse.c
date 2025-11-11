@@ -1061,6 +1061,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_FILE_BSD1) || INFILE(_FILE_BSD2)) {
     INTERESTING(lDebug ? "BSD(deb)" : "BSD");
   }
+  else if (INFILE(_CR_BSD_PERSONAL)) {
+    INTERESTING("BSD");
+  }
   cleanLicenceBuffer();
   /*
    * Aptana public license (based on MPL)
@@ -6840,12 +6843,19 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /* Mozilla Public License possibility */
-  if (!lmem[_mMPL] && INFILE(_TEXT_MPLV2) && INFILE(_URL_MPL20)) {
+  if (!lmem[_mMPL]) {
+    if (INFILE(_TEXT_MPLV2) && INFILE(_URL_MPL20)) {
       INTERESTING("MPL-2.0");
       lmem[_mMPL] = 1;
-  }
-  else if (!lmem[_mMPL] && URL_INFILE(_URL_MPL_LATEST)) {
-    INTERESTING(lDebug ? "MPL(latest)" : "MPL");
+    }
+    else if (INFILE(_TEXT_MPL20_UNDER)) {
+      INTERESTING("MPL-2.0");
+      lmem[_mMPL] = 1;
+    }
+    else if (URL_INFILE(_URL_MPL_LATEST)) {
+      INTERESTING(lDebug ? "MPL(latest)" : "MPL");
+      lmem[_mMPL] = 1;
+    }
   }
   cleanLicenceBuffer();
   /* Citrix License */
