@@ -3,3 +3,21 @@ host=localhost;
 user=@FO_PROJECTUSER@;
 password=@FO_PROJECTUSER@;
 client_encoding=utf8;
+
+# SSL Connection Parameters (optional)
+# Uncomment and configure these for SSL/TLS encrypted connections
+# Required for Azure Database for PostgreSQL and other managed database services
+#
+# sslmode values: disable, allow, prefer, require, verify-ca, verify-full
+# For Azure Database: use 'require' or 'verify-full'
+#sslmode=require;
+#
+# Path to client certificate file (optional, for certificate-based auth)
+#sslcert=/path/to/client-cert.pem;
+#
+# Path to client key file (optional, for certificate-based auth)
+#sslkey=/path/to/client-key.pem;
+#
+# Path to root certificate file (optional, for verifying server certificate)
+# For Azure Database, download from Azure portal
+#sslrootcert=/path/to/root-ca.pem;

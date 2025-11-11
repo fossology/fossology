@@ -18,6 +18,11 @@
 /*!
  \brief Connect to a database. The default is Db.conf.
 
+ All key=value; pairs from the Db.conf file are passed to libpq's PQconnectdb().
+ This includes standard parameters (dbname, host, user, password) and SSL parameters
+ (sslmode, sslcert, sslkey, sslrootcert) for secure connections to databases like
+ Azure Database for PostgreSQL.
+
  \param DBConfFile File path of the Db.conf file to use.  If NULL, use the default Db.conf
  \param ErrorBuf   Address of pointer to error buffer.  fo_dbconnect will allocate this
                    if needed.  The caller should free it.

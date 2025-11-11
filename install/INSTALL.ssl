@@ -1,0 +1,134 @@
+/*
+ SPDX-FileCopyrightText: © 2025 FOSSology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
+================================================================================
+  FOSSology SSL Database Connection Configuration
+================================================================================
+
+This document explains how to configure FOSSology to connect to PostgreSQL
+databases using SSL/TLS encryption. This is particularly useful for:
+- Azure Database for PostgreSQL
+- Amazon RDS for PostgreSQL
+- Google Cloud SQL for PostgreSQL
+- Self-hosted PostgreSQL with SSL enabled
+
+================================================================================
+  Configuration Steps
+================================================================================
+
+1. Locate your Db.conf file
+   The file is typically located at: /usr/local/etc/fossology/Db.conf
+   
+2. Edit Db.conf to add SSL parameters
+   Example configuration for Azure Database for PostgreSQL:
+   
+   dbname=fossology;
+   host=myserver.postgres.database.azure.com;
+   user=myuser@myserver;
+   password=mypassword;
+   client_encoding=utf8;
+   sslmode=require;
+
+3. SSL Mode Options
+   - disable: No SSL connection will be attempted
+   - allow: Try non-SSL first, then SSL if that fails
+   - prefer (default): Try SSL first, then non-SSL if that fails
+   - require: Only try an SSL connection
+   - verify-ca: Only try SSL, and verify server certificate
+   - verify-full: Only try SSL, verify server cert and hostname
+
+================================================================================
+  Azure Database for PostgreSQL Configuration
+================================================================================
+
+For Azure Database for PostgreSQL, the minimum configuration is:
+
+  dbname=fossology;
+  host=myserver.postgres.database.azure.com;
+  user=myuser@myserver;
+  password=mypassword;
+  client_encoding=utf8;
+  sslmode=require;
+
+Note: Azure Database for PostgreSQL requires SSL by default. The 'require'
+sslmode is sufficient for most cases.
+
+For additional security with certificate verification:
+
+1. Download the root certificate from Azure Portal:
+   https://learn.microsoft.com/en-us/azure/postgresql/
+
+2. Add to Db.conf:
+   sslmode=verify-full;
+   sslrootcert=/path/to/azure-root-ca.pem;
+
+================================================================================
+  Certificate-Based Authentication
+================================================================================
+
+For environments requiring client certificate authentication:
+
+  dbname=fossology;
+  host=myserver.example.com;
+  user=myuser;
+  password=mypassword;
+  client_encoding=utf8;
+  sslmode=verify-full;
+  sslcert=/path/to/client-cert.pem;
+  sslkey=/path/to/client-key.pem;
+  sslrootcert=/path/to/root-ca.pem;
+
+Ensure proper file permissions:
+  chmod 600 /path/to/client-key.pem
+  chmod 644 /path/to/client-cert.pem
+  chmod 644 /path/to/root-ca.pem
+
+================================================================================
+  Troubleshooting
+================================================================================
+
+If connection fails:
+
+1. Verify SSL mode is supported:
+   psql "host=myserver.postgres.database.azure.com user=myuser@myserver \
+         dbname=fossology sslmode=require"
+
+2. Check certificate paths are correct and accessible
+
+3. Verify firewall rules allow connections from your FOSSology server
+
+4. Check PostgreSQL server logs for connection errors
+
+5. For Azure Database, ensure:
+   - "Enforce SSL connection" is enabled (default)
+   - Firewall rules allow your IP address
+   - User format is correct: username@servername
+
+================================================================================
+  Testing the Connection
+================================================================================
+
+Test the connection using psql before starting FOSSology:
+
+  psql "host=myserver.postgres.database.azure.com \
+        dbname=fossology \
+        user=myuser@myserver \
+        sslmode=require"
+
+If this succeeds, your Db.conf configuration should work.
+
+================================================================================
+  Security Best Practices
+================================================================================
+
+1. Always use 'require' or stronger SSL mode for production
+2. Protect client key files with appropriate permissions (600)
+3. Store certificates in a secure location
+4. Use certificate verification (verify-ca or verify-full) when possible
+5. Keep root certificates updated
+6. Use strong passwords or certificate-based authentication
+
+================================================================================

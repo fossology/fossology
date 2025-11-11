@@ -20,7 +20,9 @@
  *             Db.conf)
  * \param string $options an optional list of attributes for
  *             connecting to the database. E.g.:
- *   `"dbname=text host=text user=text password=text"`
+ *   `"dbname=text host=text user=text password=text sslmode=require"`
+ *   All PostgreSQL connection parameters are supported, including SSL parameters
+ *   (sslmode, sslcert, sslkey, sslrootcert) for secure connections.
  * \param bool   $exitOnFail true (default) to print error and call exit on
  *                  failure false to return $PG_CONN === false on failure
  *
