@@ -100,7 +100,6 @@ File NomosTestfiles/Authorship-inference/setup contains license(s) No_license_fo
 File NomosTestfiles/Beerware/hash_md5prime.c contains license(s) Beerware,RSA-MD
 File NomosTestfiles/Bittorrent/bittorrent.nsi contains license(s) BitTorrent-1.0
 File NomosTestfiles/Bittorrent/bittorrent.py contains license(s) BitTorrent-1.1
-File NomosTestfiles/BSD/BSD.txt contains license(s) BSD
 File NomosTestfiles/BSD/0BSD.txt contains license(s) 0BSD
 File NomosTestfiles/BSD/access.c contains license(s) BSD-style
 File NomosTestfiles/BSD/AMPAS.txt contains license(s) AMPAS
@@ -149,6 +148,7 @@ File NomosTestfiles/BSD/BSD-4-Clause-UC_and_ISC.txt contains license(s) BSD-4-Cl
 File NomosTestfiles/BSD/BSD-4-Clause-UC.txt contains license(s) BSD-4-Clause-UC
 File NomosTestfiles/BSD/BSD_ref_a.txt contains license(s) BSD
 File NomosTestfiles/BSD/BSD_ref_b.txt contains license(s) BSD
+File NomosTestfiles/BSD/BSD_ref_c.txt contains license(s) BSD
 File NomosTestfiles/BSD/BSD_style_aa.txt contains license(s) BSD-style
 File NomosTestfiles/BSD/BSD_style_ab.txt contains license(s) BSD
 File NomosTestfiles/BSD/BSD_style_a.txt contains license(s) BSD-style
