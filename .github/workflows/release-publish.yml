@@ -21,7 +21,6 @@ jobs:
           - 'debian:bullseye'
           - 'debian:bookworm'
           - 'debian:trixie'
-          - 'ubuntu:focal'
           - 'ubuntu:jammy'
           - 'ubuntu:noble'
 
@@ -63,7 +62,7 @@ jobs:
         ./install/scripts/install-spdx-tools.sh
         rm -rf src/vendor
 
-    - name: Get CMake v3.23.0
+    - name: Get CMake
       uses: lukka/get-cmake@v4.1.2
 
     - name: Fetch tags

@@ -148,6 +148,7 @@ File NomosTestfiles/BSD/BSD-4-Clause-UC_and_ISC.txt contains license(s) BSD-4-Cl
 File NomosTestfiles/BSD/BSD-4-Clause-UC.txt contains license(s) BSD-4-Clause-UC
 File NomosTestfiles/BSD/BSD_ref_a.txt contains license(s) BSD
 File NomosTestfiles/BSD/BSD_ref_b.txt contains license(s) BSD
+File NomosTestfiles/BSD/BSD_ref_c.txt contains license(s) BSD
 File NomosTestfiles/BSD/BSD_style_aa.txt contains license(s) BSD-style
 File NomosTestfiles/BSD/BSD_style_ab.txt contains license(s) BSD
 File NomosTestfiles/BSD/BSD_style_a.txt contains license(s) BSD-style
@@ -850,6 +851,7 @@ File NomosTestfiles/MPL/mozilla.xhtml contains license(s) Dual-license,GPL-2.0-o
 File NomosTestfiles/MPL/MPL-1.0.txt contains license(s) MPL-1.0
 File NomosTestfiles/MPL/MPL-1.1.txt contains license(s) MPL-1.1
 File NomosTestfiles/MPL/MPL-2.0_and_BSD-2-Clause.txt contains license(s) BSD-2-Clause,MPL-2.0
+File NomosTestfiles/MPL/MPL-2.0_and_LGPL-3.0-only_and_Apache-2.0.txt contains license(s) Apache-2.0,LGPL-3.0-only,MPL-2.0
 File NomosTestfiles/MPL/MPL-2.0_not_MPL.txt contains license(s) MPL-2.0
 File NomosTestfiles/MPL/MPL-2.0.txt contains license(s) MPL-2.0-no-copyleft-exception
 File NomosTestfiles/MPL/MPL-2.0-with-copyleft-exception.txt contains license(s) MPL-2.0
