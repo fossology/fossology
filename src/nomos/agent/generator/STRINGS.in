@@ -1423,6 +1423,10 @@
 %ENTRY% _LT_DARPA_COUGAAR_2
 %KEY% "so(ftware|urce)"
 %STR% "this product includes software developed in part by support from the defense advanced research project agency"
+#
+%ENTRY% _LT_DATABRICKS_RESTRICTED
+%KEY% "databricks"
+%STR% "you may not use this software except in connection with your use of the databricks services"
 #####
 # DELETED: ... any party from selling or giving away the software
 # as a component of an aggregate software distribution containing
