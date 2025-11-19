@@ -1703,6 +1703,18 @@
 %KEY% "licen[cs]"
 %STR% "spdx-license-identifier[-_:\+\.\(\)[:alnum:][:blank:]]+[[:blank:]]OR[[:blank:]]"
 #
+%ENTRY% _LT_DUAL_LICENSE_50
+%KEY% "licen[cs]"
+%STR% "available (under|via) =FEW= \<and\> =FEW= licenses?"
+#
+%ENTRY% _LT_DUAL_LICENSE_50_BSD_MIT
+%KEY% "licen[cs]"
+%STR% "available under (the )?bsd (and|or) mit licen[cs]es?"
+#
+%ENTRY% _LT_DUAL_LICENSE_51
+%KEY% "licen[cs]"
+%STR% "\<is\> dual licen[cs]e =FEW= \<and\>"
+#
 %ENTRY% _LT_SUBSEQUENT_VERSION
 %KEY% "licen[cs]"
 %STR% "under the terms of either =SOME= license =FEW= or =FEW= (subsequent|later|new) version =FEW= license"
