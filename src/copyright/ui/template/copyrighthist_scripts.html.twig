@@ -46,7 +46,7 @@
 
   function advanceSearchToRegex(search) {
     var val = $.fn.dataTable.util.escapeRegex(search.trim());
-    return val.replace(/\\\(\\\*\\\)/g, "(.*)");
+    return val.replace(/\\\(\\\*\\\)/g, "(.+)");
   }
 
   function testReplacement(table, type) {
