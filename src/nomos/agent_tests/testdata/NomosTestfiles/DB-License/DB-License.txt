@@ -1,0 +1,25 @@
+DB license
+
+Copyright (2022) Databricks, Inc.
+
+Definitions.
+
+Agreement: The agreement between Databricks, Inc., and you governing the use of the Databricks Services, which shall be, with respect to Databricks, the Databricks Terms of Service located at www.databricks.com/termsofservice, and with respect to Databricks Community Edition, the Community Edition Terms of Service located at www.databricks.com/ce-termsofuse, in each case unless you have entered into a separate written agreement with Databricks governing the use of the applicable Databricks Services.
+
+Software: The source code and object code to which this license applies.
+
+Scope of Use. You may not use this Software except in connection with your use of the Databricks Services pursuant to the Agreement. Your use of the Software must comply at all times with any restrictions applicable to the Databricks Services, generally, and must be used in accordance with any applicable documentation. You may view, use, copy, modify, publish, and/or distribute the Software solely for the purposes of using the code within or connecting to the Databricks Services. If you do not agree to these terms, you may not view, use, copy, modify, publish, and/or distribute the Software.
+
+Redistribution. You may redistribute and sublicense the Software so long as all use is in compliance with these terms. In addition:
+
+You must give any other recipients a copy of this License;
+You must cause any modified files to carry prominent notices stating that you changed the files;
+You must retain, in the source code form of any derivative works that you distribute, all copyright, patent, trademark, and attribution notices from the source code form, excluding those notices that do not pertain to any part of the derivative works; and
+If the source code form includes a "NOTICE" text file as part of its distribution, then any derivative works that you distribute must include a readable copy of the attribution notices contained within such NOTICE file, excluding those notices that do not pertain to any part of the derivative works.
+You may add your own copyright statement to your modifications and may provide additional license terms and conditions for use, reproduction, or distribution of your modifications, or for any such derivative works as a whole, provided your use, reproduction, and distribution of the Software otherwise complies with the conditions stated in this License.
+
+Termination. This license terminates automatically upon your breach of these terms or upon the termination of your Agreement. Additionally, Databricks may terminate this license at any time on notice. Upon termination, you must permanently delete the Software and all copies thereof.
+
+DISCLAIMER; LIMITATION OF LIABILITY.
+
+THE SOFTWARE IS PROVIDED “AS-IS” AND WITH ALL FAULTS. DATABRICKS, ON BEHALF OF ITSELF AND ITS LICENSORS, SPECIFICALLY DISCLAIMS ALL WARRANTIES RELATING TO THE SOURCE CODE, EXPRESS AND IMPLIED, INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES, CONDITIONS AND OTHER TERMS OF MERCHANTABILITY, SATISFACTORY QUALITY OR FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. DATABRICKS AND ITS LICENSORS TOTAL AGGREGATE LIABILITY RELATING TO OR ARISING OUT OF YOUR USE OF OR DATABRICKS’ PROVISIONING OF THE SOURCE CODE SHALL BE LIMITED TO ONE THOUSAND ($1,000) DOLLARS. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

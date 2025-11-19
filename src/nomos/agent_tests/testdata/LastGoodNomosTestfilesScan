@@ -346,6 +346,7 @@ File NomosTestfiles/curl/curl.txt contains license(s) curl
 File NomosTestfiles/Debian-SPI/Debian-SPI.txt contains license(s) Debian-SPI
 File NomosTestfiles/D-FSL-1.0/D-FSL-1.0.txt contains license(s) D-FSL-1.0,GPL
 File NomosTestfiles/D-FSL/D-FSL-1.0.txt contains license(s) D-FSL-1.0
+File NomosTestfiles/DB-License/DB-License.txt contains license(s) Databricks-DB-License
 File NomosTestfiles/DPTC/dpt_osdutil.h contains license(s) DPTC
 File NomosTestfiles/Dual-license/004.phpt.GPLv2+-PHP contains license(s) GPL-2.0-or-later,PHP
 File NomosTestfiles/Dual-license/7-zip_GPL-2.1+-unRARrestriction contains license(s) LGPL-2.1-or-later,unRAR restriction
