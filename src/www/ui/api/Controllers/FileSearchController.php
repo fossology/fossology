@@ -14,6 +14,7 @@ namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\UI\Api\Helper\FileHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\File;
@@ -214,11 +215,27 @@ class FileSearchController extends RestController
     foreach ($uploads as $upload) {
       $licenses = $this->clearingDao->getMainLicenseIds($upload,
         $this->restHelper->getGroupId());
+      if (empty($licenses)) {
+        continue;
+      }
+      $customTexts = $this->clearingDao->getMainLicenseReportInfos($upload,
+        $this->restHelper->getGroupId());
       foreach ($licenses as $licenseId) {
         $license = $this->licenseDao->getLicenseById($licenseId,
           $this->restHelper->getGroupId());
         if ($license !== null) {
-          $mainLicenses[$license->getId()] = $license->getShortName();
+          $shortName = $license->getShortName();
+          $customText = array_key_exists($licenseId, $customTexts)
+            ? $customTexts[$licenseId]
+            : '';
+          if (!empty($customText)) {
+            $shortName = LicenseRef::convertToSpdxId(
+              $license->getShortName() . '-' . md5($customText),
+              ''
+            );
+          }
+          $key = $license->getId() . ':' . ($customText !== '' ? md5($customText) : '');
+          $mainLicenses[$key] = $shortName;
         }
       }
     }
