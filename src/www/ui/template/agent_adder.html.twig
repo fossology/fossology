@@ -11,12 +11,14 @@
   <form name="formy" method="post">
     {{ "Select an uploaded file for additional analysis."|trans }}
     <ol>
+      <br/>
       <li>{{"Select the folder containing the upload you wish to analyze"|trans}}:<br/>
         <select name="folder" onLoad="Uploads_Get('{{ baseUri }}?mod=upload_options&folder={{ folderId }}');"
                 onChange="Uploads_Get('{{ baseUri }}?mod=upload_options&folder=' + this.value);" class="ui-render-select2">
           {{ folderListOptions }}
         </select>
       </li>
+      <br/>
       <li>
         {{"Select the upload to analyze"|trans}}:<br/>
         <div id="uploaddiv">
@@ -29,9 +31,11 @@
           </select>
         </div>
       </li>
+      <br/>
       <li>
          <input type="checkbox" name="scm" value="1"/> {{ 'Ignore files with particular Mimetype'| trans }}<img src="images/info_16.png" title="{{'Configure mimetypes from Admin-Customize-Skip MimeTypes from scanning'|trans}}" alt="" class="info-bullet"/><br/>
      </li>
+     <br/>
       <li> {{ "Select additional analysis."|trans }}<br/>
         <div id="agentsdiv">
           <div class="no-agents-message">
