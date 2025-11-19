@@ -98,7 +98,7 @@ function createTableForJob(job) {
   var uploadLink = "";
   if (job.upload !== null && job.upload.uploadItem != -1) {
     uploadLink = '<a title="{{ "Click to browse"|trans }}" ' +
-    'href="?mod=browse&upload=' + job.upload.uploadId + '&item=' +
+    'href="?mod=fileBrowse&upload=' + job.upload.uploadId + '&show=quick' +'&item=' +
     job.upload.uploadItem + '">' + job.upload.uploadName + '</a>';
   } else if (job.upload !== null && job.job.jobName == "Delete") {
     uploadLink = '<span style="color:black">' + job.upload.uploadName +
