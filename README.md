@@ -52,6 +52,8 @@ docker run -p 8081:80 fossology/fossology
 
 The docker image can then be used using http://IP_OF_DOCKER_HOST:8081/repo user fossy password fossy.
 
+**Note:** Local URLs use HTTP for development purposes.
+
 
 If you want to run Fossology with an external database container, you can use Docker Compose, via the following command: 
 
@@ -137,7 +139,7 @@ and developer docs on [Github Wiki](https://github.com/fossology/fossology/wiki)
 Mailing lists, FAQs, Release Notes, and other useful info are available
 by clicking the documentation tab on the project website. We encourage
 all users to join the mailing list and participate in discussions.
-There is also a #fossology IRC channel on the freenode IRC network if
+There is also a #fossology IRC channel on the Libera.Chat IRC network if
 you'd like to talk to other FOSSology users and developers.
 See [Contact Us](https://www.fossology.org/about/contact/)
 
