@@ -4,6 +4,65 @@
 -->
 # Changelog of FOSSology
 
+### 4.6.0 (Nov 25th 2025)
+
+This release [4.6.0](https://github.com/fossology/fossology/releases/tag/4.6.0)
+includes important fixes to
+[4.5.1](https://github.com/fossology/fossology/releases/tag/4.5.1)
+and introduces several enhancements to FOSSology, including:
+
+* Support added for Debian 13 (Trixie) and Tuxedo.
+* New [OSSelot-based](https://www.osselot.org/) reuse.
+  - Ability to enable/disable OSSelot export from user settings and configuration pages.
+  - OSSelot import is enabled by default and can be toggled from the Customize page.
+  - Added feature to read a component name and fetch if available [versions](https://github.com/Open-Source-Compliance/package-analysis/tree/main/analysed-packages) from OSSelot.
+* New folder-exclusion feature for skipping test or other specific folders during scanning.
+* Upload information export supported in JSON and CSV formats from the Admin > Folder Proportions page.
+* New REST API endpoints to schedule copyright false-positive cleanup/decluttering.
+* Expanded copyright cleanup rules in the copyright agent to further reduce false positives.
+* Added new license footprints and various fixes.
+* For more check [4.6.0-rc1](https://github.com/fossology/fossology/releases/tag/4.6.0-rc1)
+
+#### Credits to contributors for 4.6.0
+
+From the GIT commit history, we have the following contributors since
+[4.5.1](https://github.com/fossology/fossology/releases/tag/4.5.1):
+
+```
+> deo002 <oberoidearsh@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> harshitg927 <gandhiharshit716@gmail.com>
+> Ishaan Aggrawal <ishaanaggrawal101@gmail.com>
+> its-sushant <sushant.kumar@siemens-healthineers.com>
+> Jan Altenberg <jan.altenberg@osadl.org>
+> Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
+> laky241 <lakshay.kapoor.3333@gmail.com>
+> Muhammad Salman <chsalmanramzan422@gmail.com>
+> OliverFendt <ofendt@googlemail.com>
+> Prakash Mishra <prakashmishra9921@gmail.com>
+> Rajul Jha <rajuljha49@gmail.com>
+> Ritankar Saha <ritankar.saha786@gmail.com>
+> Saksham Mishra <sakshammishra112@gmail.com>
+> SalmanDeveloperz <chsalmanramzan422@gmail.com>
+> scanoss-qg <quique.goni@scanoss.com>
+> Shaheem Azmal M MD <shaheem.azmal@gmail.com>
+> Tiyasa Kundu <tiyasakundu20@gmail.com>
+> Vaibhav <sahusv4527@gmail.com>
+```
+
+#### Corrections
+
+* `5635d2f89` fix(copyright): advance search behaving erratically due to newline
+* `13264baba` fix(ui): fix edit in group edit page
+* `e6e256ddc` fix(nomos): fix mpl identification
+* `09f5d01b7` fix(postinstall): update postinstall to accomodate release for multi OS versions
+* `1b86e3522` fix(spdx): ensure valid SPDX ID generation for license candidates during RDF import
+
+#### Infrastructure
+
+* `02db05722` refactor(scheduleAgents): refactor breaking alignment of lists
+* `19a594487` chore(ci): remove eol image and update dependency installation
+
 ### 4.6.0-rc1 (Oct 29th 2025)
 
 This release [4.6.0-rc1](https://github.com/fossology/fossology/releases/tag/4.6.0-rc1)
