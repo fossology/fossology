@@ -2,8 +2,7 @@
 
      SPDX-License-Identifier: GPL-2.0-only
 -->
-Introduction
---------------
+## Introduction
 
 Ojo license identification agent, identifies the license(s) with the below format
 <!-- REUSE-IgnoreStart -->
