@@ -73,6 +73,9 @@ class BulkReuser
        * DeciderJobAgentPlugin object to add deciderjob
        */
       $deciderPlugin = plugin_find("agent_deciderjob");
+      if ($deciderPlugin === null) {
+        return 0;
+      }
       $dependecies = array();
       $sql = "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_text,upload_fk,uploadtree_fk,ignore_irrelevant,bulk_delimiters,scan_findings) "
               . "SELECT $1 AS user_fk, $2 AS group_fk,rf_text,$3 AS upload_fk, $4 as uploadtree_fk, ignore_irrelevant, bulk_delimiters, scan_findings
@@ -89,7 +92,9 @@ class BulkReuser
       $upload = $uploadDao->getUpload($uploadId);
       $uploadName = $upload->getFilename();
       $job_pk = \JobAddJob($userId, $groupId, $uploadName, $uploadId);
+
       $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk']));
+
       $errorMsg = '';
       $jqId = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies);
 
