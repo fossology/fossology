@@ -1172,6 +1172,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /*
+   * DB License
+   */
+  if (INFILE(_LT_DATABRICKS_RESTRICTED)) {
+    INTERESTING("Databricks-DB-License");
+  }
+  cleanLicenceBuffer();
+  /*
    * CeCILL
    * According to digikam-0.9.4/digikam/libs/greycstoration/CImg.h:
    * The CeCILL-C (C_V1) license is close to the GNU LGPL
