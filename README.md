@@ -74,6 +74,45 @@ The FOSSology web service allows you to configure its database connection using 
 - **FOSSOLOGY_DB_PASSWORD:** Password to be used for PostgreSQL connection. Defaults to `fossy`.
 
 You can change them if you want to use a different database server or credentials. 
+
+### Upgrading PostgreSQL 15 → 16 (Docker)
+
+When upgrading a Docker-based FOSSology setup from PostgreSQL 15 to 16, it is important to mount the database volume to the generic Postgres data directory, not a version-specific path.
+
+**Wrong (can cause data loss on restart):**
+
+```yaml
+volumes:
+  - database16:/var/lib/postgresql/16/data
+```
+
+**Correct:**
+
+```yaml
+volumes:
+  - database:/var/lib/postgresql/data
+```
+
+If you restore a SQL dump into a container that uses a version-specific path like `/var/lib/postgresql/16/data`, the data may be written only into the container filesystem. After `docker compose down` and `docker compose up -d`, Postgres will create a fresh empty data directory and the restored data will be gone.
+
+A safe restore procedure looks like this:
+
+```bash
+# copy the dump into the container (inside the mounted volume)
+docker cp pg15_dump.sql fossology_db_1:/var/lib/postgresql/data/pg15_dump.sql
+
+# restore from inside the container
+docker exec -it fossology_db_1 psql -U fossy fossology < /var/lib/postgresql/data/pg15_dump.sql
+```
+
+After that, you can run:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+and the restored data should persist.
  
 ## Vagrant
 
