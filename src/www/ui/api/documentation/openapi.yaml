@@ -5897,6 +5897,9 @@ components:
         compatibility:
           type: boolean
           description: Should Compatibility Analysis be run on this upload.
+        kotoba_bulk:
+          type: boolean
+          description: Should Kotoba Bulk Analysis be run on this upload.
     Reuser:
       type: object
       properties:
