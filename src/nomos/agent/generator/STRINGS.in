@@ -1423,6 +1423,10 @@
 %ENTRY% _LT_DARPA_COUGAAR_2
 %KEY% "so(ftware|urce)"
 %STR% "this product includes software developed in part by support from the defense advanced research project agency"
+#
+%ENTRY% _LT_DATABRICKS_RESTRICTED
+%KEY% "databricks"
+%STR% "you may not use this software except in connection with your use of the databricks services"
 #####
 # DELETED: ... any party from selling or giving away the software
 # as a component of an aggregate software distribution containing
@@ -3715,7 +3719,7 @@
 #####
 %ENTRY% _LT_LGPLref1
 %KEY% "distribut"
-%STR% "you (can|may) r?e?-?distribute (it a|a)nd/or modify it under the terms =SOME= (lgpl|lesser GNU general public licen[cs]e|GNU (lesser|library|lesser lesser) (gpl|(general p|p)ublic licen[cs]e))"
+%STR% "you (can|may) r?e?-?distribute (it a|a)nd/or modify it under the terms =SOME= (lgpl|lesser GNU general public( l|l)icen[cs]e|GNU (lesser|library|lesser lesser) (gpl|(general p|p)ublic( l|l)icen[cs]e))"
 #####
 # Don't make the obvious string-search optimization here.  There really ARE
 # references to "GPL General Lesser Public License".
@@ -9950,7 +9954,7 @@ k
 #
 %ENTRY% _PHR_LGPL21_OR_LATER_1
 %KEY% "(\<gnu|free\>|l?gpl)"
-%STR% "(lgp(l|l licen[cs]e)|gnu (lesser|library|lesser lesser) (general p|p)ublic licen[cs]e|gnu general (lesser|library) public licen[cs]e) =SOME= (v|[^_-]version )2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR% "(lgp(l|l licen[cs]e)|gnu (lesser|library|lesser lesser) (general p|p)ublic( l|l)icen[cs]e|gnu general (lesser|library) public( l|l)icen[cs]e) =SOME= (v|[^_-]version )2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY% _PHR_LGPL21_OR_LATER_2
 %KEY% "licen[cs]"

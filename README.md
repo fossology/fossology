@@ -136,9 +136,9 @@ and developer docs on [Github Wiki](https://github.com/fossology/fossology/wiki)
 
 Mailing lists, FAQs, Release Notes, and other useful info are available
 by clicking the documentation tab on the project website. We encourage
-all users to join the mailing list and participate in discussions.
-There is also a #fossology IRC channel on the freenode IRC network if
-you'd like to talk to other FOSSology users and developers.
+all users to join the mailing list and participate in discussions. You can also join FOSSOlogy's official space on Slack: [Join Slack](https://join.slack.com/t/fossology/shared_invite/enQtNzI0OTEzMTk0MjYzLTYyZWQxNDc0N2JiZGU2YmI3YmI1NjE4NDVjOGYxMTVjNGY3Y2MzZmM1OGZmMWI5NTRjMzJlNjExZGU2N2I5NGY)
+
+If you'd like to talk to other FOSSology users and developers.
 See [Contact Us](https://www.fossology.org/about/contact/)
 
 ## Contributing
