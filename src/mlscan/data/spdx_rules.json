@@ -1,0 +1,410 @@
+[
+    {
+        "id": "MIT",
+        "name": "MIT License",
+        "keywords": [
+            "permission is hereby granted",
+            "free of charge",
+            "to any person obtaining a copy",
+            "mit license",
+            "without restriction"
+        ],
+        "regex": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+    },
+    {
+        "id": "Apache-2.0",
+        "name": "Apache License 2.0",
+        "keywords": [
+            "apache license",
+            "version 2.0",
+            "licensed under the apache license",
+            "apache software foundation"
+        ],
+        "regex": "Licensed under the Apache License, Version 2\\.0"
+    },
+    {
+        "id": "GPL-3.0",
+        "name": "GNU General Public License v3.0",
+        "keywords": [
+            "gnu general public license",
+            "version 3",
+            "either version 3 of the license",
+            "gpl",
+            "free software foundation"
+        ],
+        "regex": "GNU General Public License as published by the Free Software Foundation"
+    },
+    {
+        "id": "GPL-2.0",
+        "name": "GNU General Public License v2.0",
+        "keywords": [
+            "gnu general public license",
+            "version 2",
+            "gpl",
+            "free software foundation",
+            "either version 2"
+        ],
+        "regex": "GNU General Public License.*version 2"
+    },
+    {
+        "id": "BSD-3-Clause",
+        "name": "BSD 3-Clause License",
+        "keywords": [
+            "redistribution and use in source and binary forms",
+            "with or without modification",
+            "are permitted provided",
+            "bsd"
+        ],
+        "regex": "Redistribution and use in source and binary forms, with or without modification"
+    },
+    {
+        "id": "BSD-2-Clause",
+        "name": "BSD 2-Clause License",
+        "keywords": [
+            "redistribution and use in source and binary forms",
+            "with or without modification",
+            "are permitted provided",
+            "bsd",
+            "simplified bsd"
+        ],
+        "regex": "Redistribution and use in source and binary forms.*provided that"
+    },
+    {
+        "id": "LGPL-3.0",
+        "name": "GNU Lesser General Public License v3.0",
+        "keywords": [
+            "gnu lesser general public license",
+            "version 3",
+            "lgpl",
+            "free software foundation"
+        ],
+        "regex": "GNU Lesser General Public License.*version 3"
+    },
+    {
+        "id": "LGPL-2.1",
+        "name": "GNU Lesser General Public License v2.1",
+        "keywords": [
+            "gnu lesser general public license",
+            "version 2.1",
+            "lgpl",
+            "library"
+        ],
+        "regex": "GNU Lesser General Public License.*version 2\\.1"
+    },
+    {
+        "id": "MPL-2.0",
+        "name": "Mozilla Public License 2.0",
+        "keywords": [
+            "mozilla public license",
+            "version 2.0",
+            "mpl",
+            "mozilla"
+        ],
+        "regex": "Mozilla Public License.*Version 2\\.0"
+    },
+    {
+        "id": "AGPL-3.0",
+        "name": "GNU Affero General Public License v3.0",
+        "keywords": [
+            "gnu affero general public license",
+            "version 3",
+            "agpl",
+            "network"
+        ],
+        "regex": "GNU Affero General Public License"
+    },
+    {
+        "id": "ISC",
+        "name": "ISC License",
+        "keywords": [
+            "isc license",
+            "permission to use",
+            "copy",
+            "modify",
+            "distribute"
+        ],
+        "regex": "Permission to use, copy, modify.*distribute this software"
+    },
+    {
+        "id": "Unlicense",
+        "name": "The Unlicense",
+        "keywords": [
+            "unlicense",
+            "public domain",
+            "no copyright"
+        ],
+        "regex": "This is free and unencumbered software released into the public domain"
+    },
+    {
+        "id": "CC0-1.0",
+        "name": "Creative Commons Zero v1.0 Universal",
+        "keywords": [
+            "creative commons",
+            "cc0",
+            "public domain",
+            "waiver"
+        ],
+        "regex": "CC0 1\\.0 Universal"
+    },
+    {
+        "id": "CC-BY-4.0",
+        "name": "Creative Commons Attribution 4.0",
+        "keywords": [
+            "creative commons",
+            "attribution",
+            "cc by"
+        ],
+        "regex": "Creative Commons Attribution 4\\.0"
+    },
+    {
+        "id": "CC-BY-SA-4.0",
+        "name": "Creative Commons Attribution Share Alike 4.0",
+        "keywords": [
+            "creative commons",
+            "attribution",
+            "share alike",
+            "cc by-sa"
+        ],
+        "regex": "Creative Commons Attribution-ShareAlike 4\\.0"
+    },
+    {
+        "id": "Artistic-2.0",
+        "name": "Artistic License 2.0",
+        "keywords": [
+            "artistic license",
+            "version 2.0",
+            "perl"
+        ],
+        "regex": "Artistic License 2\\.0"
+    },
+    {
+        "id": "EPL-2.0",
+        "name": "Eclipse Public License 2.0",
+        "keywords": [
+            "eclipse public license",
+            "version 2.0",
+            "epl"
+        ],
+        "regex": "Eclipse Public License.*Version 2\\.0"
+    },
+    {
+        "id": "EPL-1.0",
+        "name": "Eclipse Public License 1.0",
+        "keywords": [
+            "eclipse public license",
+            "version 1.0",
+            "epl"
+        ],
+        "regex": "Eclipse Public License.*Version 1\\.0"
+    },
+    {
+        "id": "CDDL-1.0",
+        "name": "Common Development and Distribution License 1.0",
+        "keywords": [
+            "common development and distribution license",
+            "cddl"
+        ],
+        "regex": "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE"
+    },
+    {
+        "id": "Zlib",
+        "name": "zlib License",
+        "keywords": [
+            "zlib",
+            "altered source versions",
+            "must be plainly marked"
+        ],
+        "regex": "This software is provided 'as-is'.*zlib"
+    },
+    {
+        "id": "PostgreSQL",
+        "name": "PostgreSQL License",
+        "keywords": [
+            "postgresql",
+            "permission to use",
+            "copy",
+            "modify",
+            "distribute"
+        ],
+        "regex": "Permission to use, copy, modify.*PostgreSQL"
+    },
+    {
+        "id": "BSL-1.0",
+        "name": "Boost Software License 1.0",
+        "keywords": [
+            "boost software license",
+            "version 1.0",
+            "boost"
+        ],
+        "regex": "Boost Software License.*Version 1\\.0"
+    },
+    {
+        "id": "Python-2.0",
+        "name": "Python License 2.0",
+        "keywords": [
+            "python software foundation license",
+            "psf",
+            "python"
+        ],
+        "regex": "PYTHON SOFTWARE FOUNDATION LICENSE"
+    },
+    {
+        "id": "Ruby",
+        "name": "Ruby License",
+        "keywords": [
+            "ruby license",
+            "ruby programming language"
+        ],
+        "regex": "Ruby License"
+    },
+    {
+        "id": "PHP-3.01",
+        "name": "PHP License v3.01",
+        "keywords": [
+            "php license",
+            "version 3.01"
+        ],
+        "regex": "The PHP License, version 3\\.01"
+    },
+    {
+        "id": "OFL-1.1",
+        "name": "SIL Open Font License 1.1",
+        "keywords": [
+            "sil open font license",
+            "ofl",
+            "font"
+        ],
+        "regex": "SIL OPEN FONT LICENSE Version 1\\.1"
+    },
+    {
+        "id": "WTFPL",
+        "name": "Do What The F*ck You Want To Public License",
+        "keywords": [
+            "wtfpl",
+            "do what the fuck you want"
+        ],
+        "regex": "DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE"
+    },
+    {
+        "id": "NCSA",
+        "name": "University of Illinois/NCSA Open Source License",
+        "keywords": [
+            "ncsa",
+            "university of illinois",
+            "open source license"
+        ],
+        "regex": "University of Illinois.*NCSA.*Open Source License"
+    },
+    {
+        "id": "MS-PL",
+        "name": "Microsoft Public License",
+        "keywords": [
+            "microsoft public license",
+            "ms-pl"
+        ],
+        "regex": "Microsoft Public License"
+    },
+    {
+        "id": "MS-RL",
+        "name": "Microsoft Reciprocal License",
+        "keywords": [
+            "microsoft reciprocal license",
+            "ms-rl"
+        ],
+        "regex": "Microsoft Reciprocal License"
+    },
+    {
+        "id": "AFL-3.0",
+        "name": "Academic Free License v3.0",
+        "keywords": [
+            "academic free license",
+            "version 3.0",
+            "afl"
+        ],
+        "regex": "Academic Free License.*version 3\\.0"
+    },
+    {
+        "id": "OSL-3.0",
+        "name": "Open Software License 3.0",
+        "keywords": [
+            "open software license",
+            "version 3.0",
+            "osl"
+        ],
+        "regex": "Open Software License.*version 3\\.0"
+    },
+    {
+        "id": "0BSD",
+        "name": "BSD Zero Clause License",
+        "keywords": [
+            "bsd",
+            "zero clause",
+            "permission to use"
+        ],
+        "regex": "Permission to use, copy, modify.*without fee is hereby granted"
+    },
+    {
+        "id": "JSON",
+        "name": "JSON License",
+        "keywords": [
+            "json",
+            "shall be used for good",
+            "not evil"
+        ],
+        "regex": "The Software shall be used for Good, not Evil"
+    },
+    {
+        "id": "EUPL-1.2",
+        "name": "European Union Public License 1.2",
+        "keywords": [
+            "european union public license",
+            "eupl"
+        ],
+        "regex": "European Union Public License.*1\\.2"
+    },
+    {
+        "id": "CECILL-2.1",
+        "name": "CeCILL Free Software License Agreement v2.1",
+        "keywords": [
+            "cecill",
+            "free software license agreement"
+        ],
+        "regex": "CeCILL.*version 2\\.1"
+    },
+    {
+        "id": "IPL-1.0",
+        "name": "IBM Public License v1.0",
+        "keywords": [
+            "ibm public license",
+            "ipl"
+        ],
+        "regex": "IBM Public License Version 1\\.0"
+    },
+    {
+        "id": "CPL-1.0",
+        "name": "Common Public License 1.0",
+        "keywords": [
+            "common public license",
+            "cpl"
+        ],
+        "regex": "Common Public License Version 1\\.0"
+    },
+    {
+        "id": "SPL-1.0",
+        "name": "Sun Public License v1.0",
+        "keywords": [
+            "sun public license",
+            "spl"
+        ],
+        "regex": "SUN PUBLIC LICENSE Version 1\\.0"
+    },
+    {
+        "id": "APSL-2.0",
+        "name": "Apple Public Source License 2.0",
+        "keywords": [
+            "apple public source license",
+            "apsl"
+        ],
+        "regex": "APPLE PUBLIC SOURCE LICENSE.*Version 2\\.0"
+    }
+]

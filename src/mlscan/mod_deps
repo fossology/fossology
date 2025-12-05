@@ -1,0 +1,17 @@
+# Module dependencies for mlscan agent
+# SPDX-FileCopyrightText: © Fossology contributors
+# SPDX-License-Identifier: GPL-2.0-only
+
+# System dependencies
+python3
+python3-pip
+
+# Python packages (installed via pip)
+# See agent/ml/requirements.txt for Python dependencies
+
+# Build dependencies
+libjsoncpp-dev
+cmake
+
+# Runtime dependencies
+libjsoncpp1

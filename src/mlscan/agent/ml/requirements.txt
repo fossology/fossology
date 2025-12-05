@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+python-multipart
+scikit-learn
+transformers
+torch
+spdx-tools
+requests
+pytest
+httpx
+numpy
+pandas
+sentence-transformers
+aiofiles
+pydantic[email]

@@ -1,0 +1,22 @@
+{
+  "file": "test_license.txt",
+  "licenses": [
+    {
+      "license_name": "MIT",
+      "confidence": 0.9327129921713281,
+      "method": "hybrid-rule"
+    },
+    {
+      "license_name": "ISC",
+      "confidence": 0.3880859327316284,
+      "method": "hybrid-rule"
+    },
+    {
+      "license_name": "PostgreSQL",
+      "confidence": 0.24,
+      "method": "hybrid-rule"
+    }
+  ],
+  "conflict_detected": false,
+  "message": "High confidence detection: MIT (confidence: 0.93)"
+}
