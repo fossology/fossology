@@ -975,6 +975,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_PHR_BSD_CLEAR_1)) {
     INTERESTING(lDebug ? "BSD-Clear(phr1)" : "BSD-3-Clause-Clear");
   }
+  else if (INFILE(_LT_BSD_NUMPY_TERMS)) {
+    INTERESTING("BSD-3-Clause");
+  }
   else if (INFILE(_PHR_BSD_3_CLAUSE_LBNL)) {
     INTERESTING("BSD-3-Clause-LBNL");
   }

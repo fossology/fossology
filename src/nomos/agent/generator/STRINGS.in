@@ -930,6 +930,10 @@
 %ENTRY% _LT_BSD_HTMLAREA_2
 %KEY% "distribut"
 %STR% "distributed under the same terms as htmlArea itself"
+#
+%ENTRY% _LT_BSD_NUMPY_TERMS
+%KEY% "licen[cs]"
+%STR% "permission to use modify and distribute this software is given under the terms of the numpy licen[cs]e"
 #####
 # ORIGINAL with those EXPENSIVE wild-cards:
 # re-?distribution -and use in source and binary forms =ANY= (is|are)
