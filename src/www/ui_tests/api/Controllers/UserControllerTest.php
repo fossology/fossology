@@ -390,4 +390,19 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
   }
+  /**
+   * @test
+   * -# Test UserController::getTokens() with invalid type
+   * -# Check if response status is 400
+   */
+  public function testGetTokensInvalidType()
+  {
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
+    
+    $this->expectException(\Fossology\UI\Api\Exceptions\HttpBadRequestException::class);
+
+    // We pass "wrong_type" instead of "active" or "expired"
+    $this->userController->getTokens($request, new ResponseHelper(), ['type' => 'wrong_type']);
+  }
 }
