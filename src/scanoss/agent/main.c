@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
       if (upload_pk == 0)
         continue;
       char  tempFolder[512];
-      sprintf(tempFolder,"%s/%d",baseTMP,upload_pk);
+      sprintf(tempFolder, "%s/%d-%d", baseTMP, upload_pk, getpid());
       mkdir(tempFolder, 0700);
       if (RebuildUpload(upload_pk,tempFolder) != 0) /* process the upload_pk code */{
           LOG_ERROR("Error processing upload\n");
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
     }
 
     char tempFolder[512];
-    sprintf(tempFolder, "%s/%ld", baseTMP, time(NULL));
+    sprintf(tempFolder, "%s/%ld-%d", baseTMP, time(NULL), getpid());
     mkdir(tempFolder, 0700);
     sprintf(outputFile, "%s/result.json", tempFolder);
 
