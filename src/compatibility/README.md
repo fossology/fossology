@@ -59,7 +59,8 @@ src/compatibility/
 ### Scheduler Mode (Integrated with FOSSology)
 
 The agent runs automatically as part of FOSSology analysis jobs. It:
-1. Depends on `agent_adj2nest` to ensure license information is available
+1. Depends on license detection agents (e.g. `nomos`, `monk`, `ojo`, and `agent_adj2nest`)
+   to ensure license information is available.
 2. Processes each upload and compares found licenses
 3. Stores results in the `compatibility_ars` table
 4. Displays results in the FOSSology UI with red highlights for incompatible licenses
@@ -326,16 +327,6 @@ Enable verbose output for detailed logging:
 Check FOSSology logs for scheduler mode issues:
 - `/var/log/fossology/fossology.log`
 - Agent-specific logs in scheduler output
-
-## Contributing
-
-When contributing to the compatibility agent:
-
-1. Add unit tests for new functionality in `agent_tests/Unit/`
-2. Add functional tests for integration scenarios in `agent_tests/Functional/`
-3. Update test data in `agent_tests/testdata/` as needed
-4. Follow the existing code style and documentation patterns
-5. Test both CLI and scheduler modes
 
 ## Related Documentation
 
