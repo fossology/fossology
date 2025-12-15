@@ -20,6 +20,7 @@ use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use League\OAuth2\Client\Provider\GenericProvider;
 
 /**
  * \brief Upload a file from the users computer using the UI.
@@ -32,9 +33,10 @@ class AdminLicenseFromCSV extends DefaultPlugin
   const FILE_INPUT_NAME_V2 = 'fileInput';
 
   /**
-   * @var Client $guzzleClient
+   * @var GenericProvider $oidcProvider
    */
-  private $guzzleClient;
+  private $oidcProvider;
+
   /**
    * @var array
    */
@@ -51,15 +53,30 @@ class AdminLicenseFromCSV extends DefaultPlugin
     ));
     /** @var LicenseCsvImport $licenseCsvImport */
     $this->licenseCsvImport = $GLOBALS['container']->get('app.license_csv_import');
-    $this->sysconfig = $SysConf['SYSCONFIG'];
+    $this->sysconfig = $SysConf;
     $this->configuration = [
-      'url' => trim($this->sysconfig['LicenseDBURL']),
-      'uri' => trim($this->sysconfig['LicenseDBBaseURL']),
-      'content' => trim($this->sysconfig['LicenseDBContent']),
-      'token' => trim($this->sysconfig['LicenseDBToken'])
+      'uri' => trim($this->sysconfig['SYSCONFIG']['LicenseDBBaseURL']),
+      'content' => trim($this->sysconfig['SYSCONFIG']['LicenseDBContent']),
+      'health' => trim($this->sysconfig['SYSCONFIG']['LicenseDBHealth']),
+      'token' => empty(trim($this->sysconfig['SYSCONFIG']['LicenseDBToken'])) ? null : trim($this->sysconfig['SYSCONFIG']['LicenseDBToken']),
     ];
 
-    $this->guzzleClient = HttpUtils::getGuzzleClient($SysConf, $this->configuration['uri'], $this->configuration['token']);
+    if ($this->configuration['token'] == null) {
+      $this->oidcProvider = new GenericProvider([
+        "clientId" => trim($this->sysconfig['SYSCONFIG']['OidcAppId']),
+        "clientSecret" => trim($this->sysconfig['SYSCONFIG']['OidcSecret']),
+        "redirectUri" => trim($this->sysconfig['SYSCONFIG']['OidcRedirectURL']),
+        "urlAuthorize" => trim($this->sysconfig['SYSCONFIG']['OidcAuthorizeURL']),
+        "urlAccessToken" => trim($this->sysconfig['SYSCONFIG']['OidcAccessTokenURL']),
+        "urlResourceOwnerDetails" => trim($this->sysconfig['SYSCONFIG']['OidcResourceURL']),
+      ]);
+
+      if (isset($this->sysconfig['SYSCONFIG']['OidcScope'])) {
+        $this->configuration['scope'] = trim($this->sysconfig['SYSCONFIG']['OidcScope']);
+      }
+    } else {
+      $this->oidcProvider = null;
+    }
   }
 
   /**
@@ -82,8 +99,9 @@ class AdminLicenseFromCSV extends DefaultPlugin
   {
     $vars = array();
     if (!$request->isMethod('POST')) {
-      $getHealth = $this->configuration['url'] . $this->configuration['uri'] . "/health";
-      $vars['licenseDBHealth'] = HttpUtils::checkLicenseDBHealth($getHealth, $this->guzzleClient);
+      $getHealth = $this->configuration['uri'] . $this->configuration['health'];
+      $guzzleClient = HttpUtils::getGuzzleClient($this->sysconfig, $this->configuration['uri']);
+      $vars['licenseDBHealth'] = HttpUtils::checkLicenseDBHealth($getHealth, $guzzleClient);
     }
     if ($request->isMethod('POST')) {
       if ($request->get('importFrom') === 'licensedb') {
@@ -98,17 +116,20 @@ class AdminLicenseFromCSV extends DefaultPlugin
         $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
         $delimiter = $request->get('delimiter') ?: ',';
         $enclosure = $request->get('enclosure') ?: '"';
-        $vars['message'] = $this->handleFileUpload($uploadFile, $delimiter,
-          $enclosure)[1];
+        $vars['message'] = $this->handleFileUpload(
+          $uploadFile,
+          $delimiter,
+          $enclosure
+        )[1];
       }
     }
     $vars[self::KEY_UPLOAD_MAX_FILESIZE] = ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
     $vars['baseUrl'] = $request->getBaseUrl();
     $vars['license_csv_import'] = true;
 
-    if (!empty(trim($this->configuration['url']))) {
+    if (!empty(trim($this->configuration['uri']))) {
       $vars['baseURL'] = !empty($this->configuration['uri']);
-      $vars['authToken'] = !empty($this->configuration['token']);
+      $vars['tokenConfig'] = !empty($this->configuration['token']) || $this->oidcProvider != null;
       $vars['exportEndpoint'] = !empty($this->configuration['content']);
       return $this->render("admin_license_from_licensedb.html.twig", $this->mergeWithDefault($vars));
     } else {
@@ -127,18 +148,30 @@ class AdminLicenseFromCSV extends DefaultPlugin
   {
     $msg = '<br>';
     $data = null;
-    $finalURL = $this->configuration['url'] . $this->configuration['uri'] . $this->configuration['content'];
+    $finalURL = $this->configuration['uri'] . $this->configuration['content'];
     try {
       $startTimeReq = microtime(true);
-      $response = $this->guzzleClient->get($finalURL);
-      $fetchLicenseTimeReq = microtime(true) - $startTimeReq;
-      $this->fileLogger->debug("LicenseDB req:' took " . sprintf("%0.3fms", 1000 * $fetchLicenseTimeReq));
 
+      $accessToken = null;
+      if ($this->configuration['token'] != null) {
+        $accessToken = $this->configuration['token'];
+      } else {
+        $options = [];
+        if (isset($this->configuration['scope'])) {
+          $options['scope'] = $this->configuration['scope'];
+        }
+        $accessToken = $this->oidcProvider->getAccessToken('client_credentials', $options);
+      }
+      $guzzleClient = HttpUtils::getGuzzleClient($this->sysconfig, $this->configuration['uri'], $accessToken);
+      $response = $guzzleClient->get($finalURL);
+      $fetchLicenseTimeReq = microtime(true) - $startTimeReq;
+
+      $this->fileLogger->debug("LicenseDB req:' took " . sprintf("%0.3fms", 1000 * $fetchLicenseTimeReq));
       $data = HttpUtils::processHttpResponse($response);
       return $this->licenseCsvImport->importJsonData($data, $msg);
     } catch (HttpClientException $e) {
       return $msg . $e->getMessage();
-    } catch (RequestException|GuzzleException $e) {
+    } catch (RequestException | GuzzleException $e) {
       return $msg . _('Something Went Wrong, check if host is accessible') . ': ' . $e->getMessage();
     }
   }
@@ -157,8 +190,10 @@ class AdminLicenseFromCSV extends DefaultPlugin
     } elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
       $errMsg = _("Larger than upload_max_filesize ") .
         ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
-    } elseif ($uploadedFile->getClientOriginalExtension() != 'csv'
-      && $uploadedFile->getClientOriginalExtension() != 'json') {
+    } elseif (
+      $uploadedFile->getClientOriginalExtension() != 'csv'
+      && $uploadedFile->getClientOriginalExtension() != 'json'
+    ) {
       $errMsg = _('Invalid file extension ') .
         $uploadedFile->getClientOriginalExtension() . ' of file ' .
         $uploadedFile->getClientOriginalName();

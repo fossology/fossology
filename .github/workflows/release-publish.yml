@@ -18,10 +18,9 @@ jobs:
     strategy:
       matrix:
         os:
-          - 'debian:buster'
           - 'debian:bullseye'
           - 'debian:bookworm'
-          - 'ubuntu:focal'
+          - 'debian:trixie'
           - 'ubuntu:jammy'
           - 'ubuntu:noble'
 
@@ -35,25 +34,21 @@ jobs:
         apt-get update
         apt-get install -y lsb-release sudo gpg ca-certificates
         ## Add repo for latest git
-        if case "${{ matrix.os }}" in debian*) true;; *) false;; esac; then
-          echo "deb http://deb.debian.org/debian $(lsb_release -cs)-backports main" > /etc/apt/sources.list.d/backport.list
-        else
+        if case "${{ matrix.os }}" in ubuntu*) true;; *) false;; esac; then
           apt-get install -y software-properties-common
           add-apt-repository $GIT_REPO -y
         fi
         apt-get update
         apt-get install git -y
         # Remove added repos
-        if case "${{ matrix.os }}" in debian*) true;; *) false;; esac; then
-          rm /etc/apt/sources.list.d/backport.list
-        else
+        if case "${{ matrix.os }}" in ubuntu*) true;; *) false;; esac; then
           add-apt-repository --remove $GIT_REPO -y
         fi
         apt-get update
       env:
         GIT_REPO: "ppa:git-core/ppa"
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
 
@@ -67,8 +62,8 @@ jobs:
         ./install/scripts/install-spdx-tools.sh
         rm -rf src/vendor
 
-    - name: Get CMake v3.23.0
-      uses: lukka/get-cmake@v4.0.3
+    - name: Get CMake
+      uses: lukka/get-cmake@v4.1.2
 
     - name: Fetch tags
       run: |
@@ -122,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
 
@@ -161,3 +156,41 @@ jobs:
         file: utils/automation/Dockerfile.ci
         labels: |
           org.opencontainers.image.version=${{ steps.get_release.outputs.tag_name }}.0
+
+  nomossa-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y build-essential pkg-config libglib2.0-dev \
+          libjson-c-dev librpm-dev libboost-all-dev libxslt1-dev
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@v4.1.2
+
+      - name: Build Nomossa
+        run: |
+          mkdir -p nomossa-build
+          cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DAGENTS="nomos" -DBUILD_SHARED_LIBS="off" -DCMAKE_EXE_LINKER_FLAGS="-static" -B nomossa-build -S . -G Ninja
+          ninja -C ./nomossa-build/ nomossa
+
+      - name: Get release info
+        id: get_release
+        uses: bruceadams/get-release@v1.3.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Nomossa Binary
+        uses: shogo82148/actions-upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: nomossa-build/src/nomos/agent/nomossa
+          asset_name: FOSSology-nomossa
+          asset_content_type: application/octet-stream
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          overwrite: true

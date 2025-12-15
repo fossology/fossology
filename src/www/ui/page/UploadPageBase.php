@@ -101,6 +101,8 @@ abstract class UploadPageBase extends DefaultPlugin
       $skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
       $vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $skip);
     }
+    $vars['configureExcludeFolders'] = ($exclude = $this->sanitizeExcludePatterns($SysConf['SYSCONFIG']['ExcludeFolders'] ?? '')) ? $exclude : "No Folder Configured";
+
     return $this->handleView($request, $vars);
   }
 
@@ -113,7 +115,20 @@ abstract class UploadPageBase extends DefaultPlugin
       $jobId = JobAddJob($userId, $groupId, $fileName, $uploadId);
     }
     $dummy = "";
-    $unpackArgs = intval($request->get('scm')) == 1 ? '-I' : '';
+
+    global $SysConf;
+    $unpackArgs = intval($request->get('scm')) === 1 ? '-I' : '';
+
+    // Only process exclude folders if checkbox is checked
+    if (intval($request->get('excludefolder')) === 1) {
+      $userExclude = $request->get('excludefolderSpecific');
+      if ($userExclude) {
+        $sanitized = $this->sanitizeExcludePatterns($userExclude);
+        if ($sanitized !== '') {
+          $unpackArgs .= ' -E ' . $sanitized;
+        }
+      }
+    }
     $adj2nestDependencies = array();
     if ($wgetDependency) {
       $adj2nestDependencies = array(array('name'=>'agent_unpack','args'=>$unpackArgs,AgentPlugin::PRE_JOB_QUEUE=>array('wget_agent')));
@@ -273,5 +288,48 @@ abstract class UploadPageBase extends DefaultPlugin
       $parmList[$deciderKey] = $parmList[$reuserKey];
       $parmList[$reuserKey] = $temp;
     }
+  }
+  /**
+   * Sanitize a comma-separated list of exclude path patterns.
+   *
+   * This function processes a string of comma-separated path patterns and returns
+   * a sanitized list as a comma-separated string. It:
+   *   - Trims whitespace from each pattern.
+   *   - Skips empty patterns, relative paths (e.g., '.', '..', './', '../'),
+   *     and patterns containing special characters: ?, ", ,, {, }, :.
+   *   - Ensures that each valid pattern ends with a forward slash ('/').
+   *
+   * Examples:
+   *   Input:  "folder1, ./temp, ../secret, folder2, file?, folder3/"
+   *   Output: "folder1/,folder2/,folder3/"
+   *
+   * @param string $patternStr Comma-separated path patterns to sanitize.
+   *
+   * @return string Comma-separated string of valid, sanitized, and normalized patterns,
+   *                each ending with a trailing slash ('/').
+   */
+  private function sanitizeExcludePatterns($patternStr)
+  {
+    $patterns = explode(',', $patternStr);
+    $sanitized = [];
+
+    foreach ($patterns as $pattern) {
+      $trimmed = trim($pattern);
+      // Skip empty strings, relative paths (./, ../), or ones with special characters
+      if (
+        $trimmed === '' ||
+        preg_match('#(^|/)(\.\.?)(/|$)|^[/.?]+$|[?,"{}:]#', $trimmed)
+      ) {
+        continue;
+      }
+
+      // Ensure the pattern ends with "/"
+      if (substr($trimmed, -1) !== '/') {
+        $trimmed .= '/';
+      }
+
+      $sanitized[] = $trimmed;
+    }
+    return implode(',', $sanitized);
   }
 }

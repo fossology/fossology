@@ -185,6 +185,7 @@ if [[ $COMMON ]]; then
       fi
    elif useradd --comment "@FO_PROJECT@" --gid $PROJECTGROUP --create-home --shell /bin/bash --system @FO_PROJECTUSER@; then
       echo "NOTE: user '@FO_PROJECTUSER@' created"
+      USERHOME="/home/@FO_PROJECTUSER@"
    else
       echo >&2 "ERROR: Unable to create user '@FO_PROJECTUSER@'"
       exit 1
@@ -218,6 +219,9 @@ if [[ $COMMON ]]; then
      chown --recursive @FO_PROJECTUSER@:$PROJECTGROUP ${REPO%/*} $REPO
    fi
    chmod 2770 ${REPO%/*} $REPO
+
+   # make sure group can traverse user home dir
+   chmod 750 "$USERHOME"
 
    # make install sets Db.conf's mode to 660, but can't chgrp it because
    # the group doesn't exist until we create it above. So chgrp now
@@ -259,7 +263,7 @@ if [[ $AGENT ]]; then
    chown --silent @FO_PROJECTUSER@:$PROJECTGROUP @FO_MAN1DIR@/cp2foss.1{,.gz} @FO_MAN1DIR@/fossjobs.1{,.gz} || echo
    # Install Python dependencies for source install only
    if [[ "@FO_DESTDIR@" != *"debian"* ]]; then
-     @FO_LIBEXECDIR@/fo-install-pythondeps -y --runtime --user @FO_PROJECTUSER@ $PYTHONEXPERI $DEBIAN
+     @FO_LIBEXECDIR@/fo-install-pythondeps -y --runtime --user @FO_PROJECTUSER@ --experimental $DEBIAN
    fi
 fi
 

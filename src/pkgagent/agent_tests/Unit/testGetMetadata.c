@@ -107,7 +107,7 @@ void test_GetMetadata_no_testfile()
   //printf("test_GetMetadata Result is:%d\n", Result);
   PQfinish(db_conn);
   rpmFreeCrypto();
-  /* free memroy */
+  /* free memory */
   int i;
   for(i=0; i< pi->req_size;i++)
     free(pi->requires[i]);

@@ -148,6 +148,7 @@ File NomosTestfiles/BSD/BSD-4-Clause-UC_and_ISC.txt contains license(s) BSD-4-Cl
 File NomosTestfiles/BSD/BSD-4-Clause-UC.txt contains license(s) BSD-4-Clause-UC
 File NomosTestfiles/BSD/BSD_ref_a.txt contains license(s) BSD
 File NomosTestfiles/BSD/BSD_ref_b.txt contains license(s) BSD
+File NomosTestfiles/BSD/BSD_ref_c.txt contains license(s) BSD
 File NomosTestfiles/BSD/BSD_style_aa.txt contains license(s) BSD-style
 File NomosTestfiles/BSD/BSD_style_ab.txt contains license(s) BSD
 File NomosTestfiles/BSD/BSD_style_a.txt contains license(s) BSD-style
@@ -345,6 +346,7 @@ File NomosTestfiles/curl/curl.txt contains license(s) curl
 File NomosTestfiles/Debian-SPI/Debian-SPI.txt contains license(s) Debian-SPI
 File NomosTestfiles/D-FSL-1.0/D-FSL-1.0.txt contains license(s) D-FSL-1.0,GPL
 File NomosTestfiles/D-FSL/D-FSL-1.0.txt contains license(s) D-FSL-1.0
+File NomosTestfiles/DB-License/DB-License.txt contains license(s) Databricks-DB-License
 File NomosTestfiles/DPTC/dpt_osdutil.h contains license(s) DPTC
 File NomosTestfiles/Dual-license/004.phpt.GPLv2+-PHP contains license(s) GPL-2.0-or-later,PHP
 File NomosTestfiles/Dual-license/7-zip_GPL-2.1+-unRARrestriction contains license(s) LGPL-2.1-or-later,unRAR restriction
@@ -376,6 +378,7 @@ File NomosTestfiles/Dual-license/BSL-1.0_or_MIT.txt contains license(s) BSL-1.0,
 File NomosTestfiles/Dual-license/CDDL_or_GPL-2.0-with-classpath-exception.txt contains license(s) CDDL,Classpath-exception-2.0,Dual-license,GPL-2.0-only
 File NomosTestfiles/Dual-license/ClearBSD_or_GPL-2.0+.txt contains license(s) BSD-3-Clause-Clear,Dual-license,GPL-2.0-or-later
 File NomosTestfiles/Dual-license/CRYPTOGAMS.txt contains license(s) Cryptogams,Dual-license,GPL
+File NomosTestfiles/Dual-license/dual_doc_intro.txt contains license(s) BSL-1.0,Dual-license,MIT
 File NomosTestfiles/Dual-license/EPL-1.0_or_MPL-2.0_1.txt contains license(s) Dual-license,EPL-1.0,MPL-2.0
 File NomosTestfiles/Dual-license/EPL-1.0_or_MPL-2.0_2.txt contains license(s) Dual-license,EPL-1.0,MPL-2.0
 File NomosTestfiles/Dual-license/EPL-2.0_or_GPL-2.0_or_LGPL-2.1.txt contains license(s) Dual-license,EPL-2.0,GPL-2.0-or-later,LGPL-2.1-or-later
@@ -850,6 +853,7 @@ File NomosTestfiles/MPL/mozilla.xhtml contains license(s) Dual-license,GPL-2.0-o
 File NomosTestfiles/MPL/MPL-1.0.txt contains license(s) MPL-1.0
 File NomosTestfiles/MPL/MPL-1.1.txt contains license(s) MPL-1.1
 File NomosTestfiles/MPL/MPL-2.0_and_BSD-2-Clause.txt contains license(s) BSD-2-Clause,MPL-2.0
+File NomosTestfiles/MPL/MPL-2.0_and_LGPL-3.0-only_and_Apache-2.0.txt contains license(s) Apache-2.0,LGPL-3.0-only,MPL-2.0
 File NomosTestfiles/MPL/MPL-2.0_not_MPL.txt contains license(s) MPL-2.0
 File NomosTestfiles/MPL/MPL-2.0.txt contains license(s) MPL-2.0-no-copyleft-exception
 File NomosTestfiles/MPL/MPL-2.0-with-copyleft-exception.txt contains license(s) MPL-2.0

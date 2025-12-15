@@ -150,54 +150,286 @@
       });
     }
 
-    function updateReuseIds(index, name, element, navContentDom) {
-      element.find("#reuseSearchInFolder").attr('id', `reuseSearchInFolder${index}`);
-      element.find("label[for='reuseSearchInFolder']").attr('for', `reuseSearchInFolder${index}`);
-      element.find("#reuseFolderSelectorName").attr('id', `reuseFolderSelectorName${index}`);
-      element.find("label[for='reuseFolderSelectorName']").attr('for', `reuseFolderSelectorName${index}`);
-      element.find("#uploadToReuse").attr('id', `uploadToReuse${index}`);
-      element.find("label[for='uploadToReuse']").attr('for', `uploadToReuse${index}`);
-      element.find("input,select").each(function (){
-        let fieldName = $(this).attr('name');
-        if (fieldName) {
-          if (fieldName.endsWith("[]")) {
-            $(this).attr('name', fieldName.replace("[]", `[${name}][]`));
-          } else {
-            $(this).attr('name', `${fieldName}[${name}]`)
-          }
+function updateReuseIds(index, name, element, navContentDom) {
+    const originalValues = {};
+    
+    element.find('input, select').each(function() {
+        const $el = $(this);
+        const id = $el.attr('id');
+        const fieldName = $el.attr('name');
+        
+        if (id) {
+            if ($el.is(':radio')) {
+                originalValues[id] = $el.is(':checked');
+            } else if ($el.is(':checkbox')) {
+                originalValues[id] = $el.is(':checked');
+                if (fieldName) {
+                    originalValues[fieldName] = $el.is(':checked');
+                }
+            } else {
+                originalValues[id] = $el.val();
+            }
         }
-      });
-      element.find(`#reuseFolderSelectorName${index}`).select2({
-        width: 'style',
-        dropdownAutoWidth : true,
-        dropdownParent: navContentDom
-      });
-      element.find(`#uploadToReuse${index}`).select2({
-        "placeholder": "Select upload to reuse",
-        width: 'style',
-        dropdownAutoWidth : true,
-        dropdownParent: navContentDom
-      });
-    }
-    function addNavItems(index, name, navItemDom, navContentDom) {
-      const navItem = $(`<a class='nav-link flex-sm-fill text-truncate' id='reuse-name-${index}' data-toggle='pill' href='#reuse-content-${index}' role='tab' aria-controls='reuse-content-${index}' aria-selected='false'>`);
-      navItem.append(name);
+    });
+    
+    element.find("#reuseSearchInFolder").attr('id', `reuseSearchInFolder${index}`);
+    element.find("label[for='reuseSearchInFolder']").attr('for', `reuseSearchInFolder${index}`);
+    element.find("#reuseFolderSelectorName").attr('id', `reuseFolderSelectorName${index}`);
+    element.find("label[for='reuseFolderSelectorName']").attr('for', `reuseFolderSelectorName${index}`);
+    element.find("#uploadToReuse").attr('id', `uploadToReuse${index}`);
+    element.find("label[for='uploadToReuse']").attr('for', `uploadToReuse${index}`);
+    
+    element.find("#osselot-download-report").attr("id", `osselot-download-report${index}`);
+    element.find("#osselot-download-confirm").attr("id", `osselot-download-confirm${index}`);
 
-      const panelContentProvider = $("#hiddenFormHolder").find("div.form-group");
-      const clonedPanel = panelContentProvider.clone();
-      updateReuseIds(index, name, clonedPanel, navContentDom);
-      const navPanel = $("<div class='container-fluid'>");
-      navPanel.append(clonedPanel);
-
-      const navContent = $(`<div class='tab-pane fade' id='reuse-content-${index}' role='tabpanel' aria-labelledby='reuse-name-${index}'>`);
-      navContent.append(navPanel);
-      if (index === 0) {
-        navItem.addClass("active").attr('aria-selected', true);
-        navContent.addClass("show active");
-      }
-      navItemDom.append(navItem);
-      navContentDom.append(navContent);
+    const reuseSource = element.find("#reuse-source");
+    if (reuseSource.length > 0) {
+        const currentValue = reuseSource.val();
+        reuseSource.attr('id', `reuse-source${index}`);
+        reuseSource.val(currentValue);
     }
+    
+    const osselotPackage = element.find("#osselot-package");
+    if (osselotPackage.length > 0) {
+        const originalValue = osselotPackage.val() || '';
+        osselotPackage.attr('id', `osselot-package${index}`);
+        osselotPackage.val(originalValue);
+    }
+    
+    element.find("#osselot-fetch-versions").attr('id', `osselot-fetch-versions${index}`);
+    element.find("#osselot-version-checkboxes").attr('id', `osselot-version-checkboxes${index}`);
+    element.find("#osselot-versions-hidden").attr('id', `osselot-versions-hidden${index}`);
+    element.find("#osselot-version-loading").attr('id', `osselot-version-loading${index}`);
+    element.find("#local-reuse-section").attr('id', `local-reuse-section${index}`);
+    element.find("#osselot-reuse-section").attr('id', `osselot-reuse-section${index}`);
+    
+    element.find("#osselot-addNewLicensesAs-candidate").attr('id', `osselot-addNewLicensesAs-candidate${index}`);
+    element.find("#osselot-addNewLicensesAs-license").attr('id', `osselot-addNewLicensesAs-license${index}`);
+    element.find("#osselot-licenseMatch-shortname").attr('id', `osselot-licenseMatch-shortname${index}`);
+    element.find("#osselot-licenseMatch-spdxid").attr('id', `osselot-licenseMatch-spdxid${index}`);
+    
+    element.find("label[for='osselot-addNewLicensesAs-candidate']").attr('for', `osselot-addNewLicensesAs-candidate${index}`);
+    element.find("label[for='osselot-addNewLicensesAs-license']").attr('for', `osselot-addNewLicensesAs-license${index}`);
+    element.find("label[for='osselot-licenseMatch-shortname']").attr('for', `osselot-licenseMatch-shortname${index}`);
+    element.find("label[for='osselot-licenseMatch-spdxid']").attr('for', `osselot-licenseMatch-spdxid${index}`);
+    
+    if (index === 0) {
+        const $addAsCandidate = element.find('input[name="osselotAddNewLicensesAs"][value="candidate"]');
+        if ($addAsCandidate.length && !element.find('input[name="osselotAddNewLicensesAs"]:checked').length) {
+            $addAsCandidate.prop('checked', true);
+        }
+        
+        const $matchBySpdxId = element.find('input[name="osselotLicenseMatch"][value="spdxid"]');
+        if ($matchBySpdxId.length && !element.find('input[name="osselotLicenseMatch"]:checked').length) {
+            $matchBySpdxId.prop('checked', true);
+        }
+    } else {
+        element.find("input,select").each(function() {
+            let fieldName = $(this).attr('name');
+            if (fieldName && !fieldName.includes('[')) {
+                if (fieldName === 'descriptionInputName') {
+                    return;
+                }
+                
+                if (fieldName === 'osselotVersionRadio') {
+                    $(this).attr('name', `${fieldName}[${index}]`);
+                    return;
+                }
+                
+                if (fieldName.endsWith('[]')) {
+                    const baseFieldName = fieldName.replace('[]', '');
+                    $(this).attr('name', `${baseFieldName}[${index}][]`);
+                } else {
+                    $(this).attr('name', `${fieldName}[${index}]`);
+                    
+                    if ($(this).is(':radio')) {
+                        const originalId = $(this).attr('id')?.replace(index, '');
+                        if (originalValues[originalId]) {
+                            $(this).prop('checked', true);
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    element.find(':checkbox').each(function() {
+        const $checkbox = $(this);
+        const currentId = $checkbox.attr('id');
+        const currentName = $checkbox.attr('name');
+        let shouldCheck = false;
+        
+        if (currentId) {
+            const originalId = currentId.replace(new RegExp(index + '$'), '');
+            if (originalValues[originalId] !== undefined) {
+                shouldCheck = originalValues[originalId];
+            }
+        }
+        
+        if (!shouldCheck && currentName) {
+            let baseName = currentName.replace(/\[\d+\]$/, '');
+            if (originalValues[baseName] !== undefined) {
+                shouldCheck = originalValues[baseName];
+            }
+        }
+        
+        if (currentName) {
+            const osselotDefaultChecked = [
+                'osselotAddLicenseInfoFromInfoInFile',
+                'osselotAddConcludedAsDecisions',
+                'osselotAddConcludedAsDecisionsOverwrite'
+            ];
+            
+            let baseName = currentName.replace(/\[\d+\]$/, '');
+            if (osselotDefaultChecked.includes(baseName) && originalValues[baseName] === undefined) {
+                shouldCheck = true;
+            }
+        }
+        
+        $checkbox.prop('checked', shouldCheck);
+    });
+    
+    const folderSelector = element.find(`#reuseFolderSelectorName${index}`);
+    if (folderSelector.length > 0) {
+        folderSelector.select2({
+            width: 'style',
+            dropdownAutoWidth: true,
+            dropdownParent: navContentDom
+        });
+    }
+    
+    const uploadSelector = element.find(`#uploadToReuse${index}`);
+    if (uploadSelector.length > 0) {
+        uploadSelector.select2({
+            "placeholder": "Select upload to reuse",
+            width: 'style',
+            dropdownAutoWidth: true,
+            dropdownParent: navContentDom
+        });
+    }
+}
+
+function addNavItems(index, name, navItemDom, navContentDom) {
+  const navItem = $(`<a class='nav-link flex-sm-fill text-truncate' id='reuse-name-${index}' data-toggle='pill' href='#reuse-content-${index}' role='tab' aria-controls='reuse-content-${index}' aria-selected='false'>`);
+  navItem.append(name);
+
+  const panelContentProvider = $("#hiddenFormHolder").find("li").first();
+  
+  if (panelContentProvider.length === 0) {
+    return;
+  }
+  
+  const clonedPanel = panelContentProvider.clone();
+  updateReuseIds(index, name, clonedPanel, navContentDom);
+  
+  const navPanel = $("<div class='container-fluid'>");
+  navPanel.append(clonedPanel);
+
+  const navContent = $(`<div class='tab-pane fade' id='reuse-content-${index}' role='tabpanel' aria-labelledby='reuse-name-${index}'>`);
+  navContent.append(navPanel);
+  
+  if (index === 0) {
+    navItem.addClass("active").attr('aria-selected', true);
+    navContent.addClass("show active");
+  }
+  
+  navItemDom.append(navItem);
+  navContentDom.append(navContent);
+  
+  if (typeof window.initializeOsselotForIndex === 'function') {
+    window.initializeOsselotForIndex(index);
+  }
+}
+
+$(document).ready(function() {
+    window.currentReuseSource = 'local';
+    
+    $(document).on('change', 'input[type="checkbox"][name*="osselot"]', function() {
+        const $checkbox = $(this);
+        const name = $checkbox.attr('name');
+        const checked = $checkbox.is(':checked');
+        const baseName = name.replace(/\[\d+\]$/, '');
+        $(`input[type="checkbox"][name="${baseName}"], input[type="checkbox"][name^="${baseName}["]`).each(function() {
+            if (this !== $checkbox[0]) {
+                $(this).prop('checked', checked);
+            }
+        });
+    });
+    
+    $(document).on('change', 'select[id^="reuse-source"]', function() {
+        const newValue = $(this).val();
+        window.currentReuseSource = newValue;
+        
+        $('select[id^="reuse-source"]').each(function() {
+            if ($(this).val() !== newValue) {
+                $(this).val(newValue).trigger('change.select2');
+            }
+        });
+        
+        $('input[name="reuseSource"][type="hidden"]').val(newValue);
+    });
+    
+    $('form').on('submit', function(e) {
+        const $form = $(this);
+        const $reuseSelects = $form.find('select[id^="reuse-source"]');
+        
+        if ($reuseSelects.length > 0) {
+            const reuseValue = $reuseSelects.first().val() || window.currentReuseSource;
+            
+            const hasOsselotPackage = $form.find('input[id^="osselot-package"]').filter(function() {
+                return $(this).val() && $(this).val().trim() !== '';
+            }).length > 0;
+            
+            if (reuseValue === 'osselot' && hasOsselotPackage) {
+                $reuseSelects.val('osselot');
+                
+                if (!$form.find('input[name="reuseSource"][type="hidden"]').length) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'reuseSource',
+                        value: 'osselot'
+                    }).appendTo($form);
+                } else {
+                    $form.find('input[name="reuseSource"][type="hidden"]').val('osselot');
+                }
+                
+                $form.find('select[name="reuseSource"]').val('osselot');
+                
+                const osselotFields = [
+                    'osselotAddLicenseInfoFromInfoInFile',
+                    'osselotAddLicenseInfoFromConcluded', 
+                    'osselotAddConcludedAsDecisions',
+                    'osselotAddConcludedAsDecisionsOverwrite',
+                    'osselotAddConcludedAsDecisionsTBD',
+                    'osselotAddCopyrights'
+                ];
+                
+                const checkedOptions = [];
+                osselotFields.forEach(function(fieldName) {
+                    const $checkbox = $form.find(`input[name="${fieldName}"], input[name^="${fieldName}["]`);
+                    if ($checkbox.length > 0) {
+                        const isChecked = $checkbox.is(':checked');
+                        if (isChecked) {
+                            checkedOptions.push(fieldName);
+                        }
+                    }
+                });
+                
+                const packageValue = $form.find('input[id^="osselot-package"]').val();
+                const versionValue = $form.find('input[name^="osselotVersionRadio"]:checked').val() || 
+                                  $form.find('input[id^="osselot-versions-hidden"]').val();
+            }
+        }
+    });
+    
+    $("#fileUploader").on("change", function(e) {
+        setTimeout(function() {
+            if (window.currentReuseSource && window.currentReuseSource !== 'local') {
+                $('select[id^="reuse-source"]').val(window.currentReuseSource).trigger('change');
+            }
+        }, 500);
+    });
+
     $("#fileUploader").on("change", function(e) {
       checkDuplicateUploadWarning(e);
 
@@ -236,5 +468,6 @@
     $('#reuseModal').on('shown.bs.modal', function () {
       $(this).find('[data-toggle="tooltip"]').tooltip();
     });
+});
   </script>
 {% endblock %}

@@ -48,7 +48,13 @@
         {%- set licId=licenseList[res].licenseObj.spdxId %}
         {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
           {% set licId=licenseList[res].licenseObj.shortName %}
-        {%- endif ~%}
+        {%- endif %}
+        {% if EnableOsselotExport and licId starts with 'LicenseRef-fossology-' -%}
+          {% set licId = licId|replace({'LicenseRef-fossology-':'LicenseRef-'}) -%}
+        {% endif -%}
+        {% if EnableOsselotExport and not (licId starts with 'LicenseRef-') -%}
+          {% set licId = 'LicenseRef-' ~ licId -%}
+        {% endif %}
         <spdx:member rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
       {%~ else %}
         {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
@@ -73,7 +79,13 @@
       {%- set licId=licenseList[res].licenseObj.spdxId %}
       {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
         {% set licId=licenseList[res].licenseObj.shortName %}
-      {%- endif ~%}
+      {%- endif %}
+      {% if EnableOsselotExport and licId starts with 'LicenseRef-fossology-' -%}
+        {% set licId = licId|replace({'LicenseRef-fossology-':'LicenseRef-'}) -%}
+      {% endif -%}
+      {% if EnableOsselotExport and not (licId starts with 'LicenseRef-') -%}
+        {% set licId = 'LicenseRef-' ~ licId -%}
+      {% endif -%}
     <spdx:licenseConcluded rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
     {%~ else %}
       {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
@@ -104,7 +116,13 @@
       {%- set licId=licenseList[res].licenseObj.spdxId %}
       {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
         {% set licId=licenseList[res].licenseObj.shortName %}
-      {%- endif ~%}
+      {%- endif %}
+      {% if EnableOsselotExport and licId starts with 'LicenseRef-fossology-' -%}
+        {% set licId = licId|replace({'LicenseRef-fossology-':'LicenseRef-'}) -%}
+      {% endif -%}
+      {% if EnableOsselotExport and not (licId starts with 'LicenseRef-') -%}
+        {% set licId = 'LicenseRef-' ~ licId -%}
+      {% endif -%}
     <spdx:licenseInfoInFile rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
     {%~ else %}
       {%~ if res not in textPrintedList and not licenseList[res].isTextPrinted() ~%}{# License to be printed #}
@@ -136,3 +154,4 @@
 {%~ endfor %}
   </spdx:File>
 </spdx:hasFile>
+{{ "\n" }}

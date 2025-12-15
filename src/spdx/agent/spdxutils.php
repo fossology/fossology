@@ -8,6 +8,7 @@
 namespace Fossology\Spdx;
 
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Util\StringOperation;
 
 /**
  * @class SpdxUtils
@@ -102,16 +103,16 @@ class SpdxUtils
     $licenses = self::addPrefixOnDemandList($licenses);
     sort($licenses, SORT_NATURAL | SORT_FLAG_CASE);
 
-    if (count($licenses) == 3 &&
-       ($index = array_search("Dual-license",$licenses)) !== false) {
-      return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
-    } elseif (count($licenses) == 3 &&
-        ($index = array_search(LicenseRef::SPDXREF_PREFIX . "Dual-license", $licenses)) !== false) {
-      return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
-    } else {
-      // Add prefixes where needed, enclose statements containing ' OR ' with parentheses
-      return implode(" AND ", $licenses);
+    if (count($licenses) == 3) {
+      foreach ($licenses as $index => $lic) {
+        if (StringOperation::stringStartsWith($lic, "Dual-license") ||
+            StringOperation::stringStartsWith($lic, LicenseRef::SPDXREF_PREFIX . "Dual-license") ||
+            StringOperation::stringStartsWith($lic, LicenseRef::SPDXREF_PREFIX_FOSSOLOGY . "Dual-license")) {
+          return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
+        }
+      }
     }
+    return implode(" AND ", $licenses);
   }
 
   /**
