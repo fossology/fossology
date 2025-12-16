@@ -65,8 +65,8 @@ class ReportImportAgentPlugin extends AgentPlugin
       {
         mkdir($fileBase,0755,true);
       }
-      // TODO: validate filename
-      $targetFile = time().'_'.random_int(0, getrandmax()).'_'.$report['name'];
+      $reportName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $report['name']);
+      $targetFile = time().'_'.random_int(0, getrandmax()).'_'.$reportName;
       if (move_uploaded_file($report['tmp_name'], $fileBase.$targetFile))
       {
         return '--report=' . escapeshellarg($targetFile);
