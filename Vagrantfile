@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
 $post_up_message = <<WELCOME
 Use your FOSSology at http://localhost:8081/repo/
-  user: fossy , password: fossy
+  Default user: fossy (see documentation for password)
 
 Or do a 'vagrant ssh' and look at '/fossology' for your source tree.
 

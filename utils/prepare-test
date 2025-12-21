@@ -42,6 +42,10 @@ CreateFossyTest="N"
 PG_USER="postgres"
 PG_PASS=""
 
+FOSSY_USER=${FOSSY_USER:-fossy}
+FOSSY_PASS=${FOSSY_PASS:-fossy}
+TEST_DBUSER=${TEST_DBUSER:-fossologytest}
+
 # Use localhost as default host
 if [[ -z "${PGHOST}" ]]; then
   PGHOST="localhost"
@@ -110,23 +114,27 @@ if echo ${WarnAccept} | grep -q -e "^[yY]$" ; then
   fi
   if [[ "${CreateFossy}" == "Y" ]]; then
     if [[ -z "${PG_PASS}" ]]; then
-      sudo --preserve-env su --whitelist-environment="PGHOST" postgres -c "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true >/dev/null
-      sudo --preserve-env su --whitelist-environment="PGHOST" postgres -c "echo 'CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;'|psql" || true
+      sudo --preserve-env su --whitelist-environment="PGHOST" postgres -c "echo \"CREATE USER ${FOSSY_USER} WITH PASSWORD '${FOSSY_PASS}' CREATEDB;\"|psql" || true >/dev/null
+      sudo --preserve-env su --whitelist-environment="PGHOST" postgres -c "echo \"CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO ${FOSSY_USER};\"|psql" || true
     else
-      echo "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;"|PGPASSWORD="${PG_PASS}" psql -U ${PG_USER} || true >/dev/null
-      echo 'CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;'|PGPASSWORD="${PG_PASS}" psql -U ${PG_USER} || true
+      echo "CREATE USER ${FOSSY_USER} WITH PASSWORD '${FOSSY_PASS}' CREATEDB;"|PGPASSWORD="${PG_PASS}" psql -U ${PG_USER} || true >/dev/null
+      echo "CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO ${FOSSY_USER};"|PGPASSWORD="${PG_PASS}" psql -U ${PG_USER} || true
     fi
-    echo "${PGHOST}:*:*:fossy:fossy" >> ~/.pgpass
+    echo "${PGHOST}:*:*:${FOSSY_USER}:${FOSSY_PASS}" >> ~/.pgpass
     chmod 0600 ~/.pgpass
   fi
   if [[ "${CreateFossyTest}" == "Y" ]]; then
-    testDbPassword=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13)
-    if [[ -z "${PG_PASS}" ]]; then
-      sudo --preserve-env su --whitelist-environment="PGHOST" postgres -c "echo \"CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';\"|psql" || true >/dev/null
+    if [[ -z "${TEST_DBPASS}" ]]; then
+      testDbPassword=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13)
     else
-      echo "CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';"|PGPASSWORD="${PG_PASS}" psql -U ${PG_USER} || true >/dev/null
+      testDbPassword="${TEST_DBPASS}"
     fi
-    echo "${PGHOST}:*:*:fossologytest:${testDbPassword}" >> ~/.pgpass
+    if [[ -z "${PG_PASS}" ]]; then
+      sudo --preserve-env su --whitelist-environment="PGHOST" postgres -c "echo \"CREATE USER ${TEST_DBUSER} WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';\"|psql" || true >/dev/null
+    else
+      echo "CREATE USER ${TEST_DBUSER} WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';"|PGPASSWORD="${PG_PASS}" psql -U ${PG_USER} || true >/dev/null
+    fi
+    echo "${PGHOST}:*:*:${TEST_DBUSER}:${testDbPassword}" >> ~/.pgpass
     chmod 0600 ~/.pgpass
   fi
   case "${DISTRO}" in

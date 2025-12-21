@@ -16,7 +16,9 @@ class TestRepoLogin extends WebTestCase{
     $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     $this->assertTrue($this->get('http://repo.fossology.org/'));
     $this->assertAuthentication('Basic');
-    $this->authenticate('fossology', 'xxxxxxxx');
+    $testUser = getenv('TEST_USER') ?: 'fossology';
+    $testPassword = getenv('TEST_PASSWORD') ?: '';
+    $this->authenticate($testUser, $testPassword);
     $this->assertText('Software Repository Viewer');
   }
 }
@@ -26,7 +28,9 @@ class TestAboutMenu extends WebTestCase {
     $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     $this->assertTrue($this->get('http://repo.fossology.org/'));
     $this->assertAuthentication('Basic');
-    $this->authenticate('fossology', 'xxxxxxx');
+    $testUser = getenv('TEST_USER') ?: 'fossology';
+    $testPassword = getenv('TEST_PASSWORD') ?: '';
+    $this->authenticate($testUser, $testPassword);
     $this->assertText('Software Repository');
 
     $this->click('About');
