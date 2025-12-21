@@ -3,10 +3,12 @@
 
 # SPDX-License-Identifier: FSFAP
 #
-# cron script for running schemaspy.  NOTE you must supply the db, 
-# user and password. They are xxxxx for now.
+# cron script for running schemaspy
 #
+SCHEMSPY_DB_USER=${SCHEMSPY_DB_USER:-fossy}
+SCHEMSPY_DB_PASS=${SCHEMSPY_DB_PASS:-fossy}
+
 java -jar /usr/local/bin/schemaSpy_4.1.1.jar -t pgsql \
 -cp /usr/local/share/postgresql-8.4-701.jdbc3.jar \
--db fossology -s public -host localhost -u xxxx -p xxxx -o /var/www/schemaspy
+-db fossology -s public -host localhost -u "${SCHEMSPY_DB_USER}" -p "${SCHEMSPY_DB_PASS}" -o /var/www/schemaspy
 

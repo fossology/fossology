@@ -222,3 +222,6 @@ cmake-build-debug
 
 #pycache
 **/__pycache__/
+
+# Environment variables file (contains sensitive credentials)
+.env
