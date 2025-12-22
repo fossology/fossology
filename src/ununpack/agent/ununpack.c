@@ -537,10 +537,35 @@ int	main(int argc, char *argv[])
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(113);
       PQclear(result);
 
-      snprintf(SQL,MAXSQL,"UPDATE %s SET realparent = getItemParent(uploadtree_pk) WHERE upload_fk = '%s'",uploadtree_tablename, Upload_Pk);
-      result =  PQexec(pgConn, SQL); /* UPDATE uploadtree */
-      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(114);
-      PQclear(result);
+      int batch_size = 5000;
+      long last_pk = 0;
+      int rows_affected = 0;
+      do {
+    snprintf(SQL, MAXSQL,
+      "UPDATE %s "
+      "SET realparent = getItemParent(uploadtree_pk) "
+      "WHERE upload_fk = '%s' "
+      "AND uploadtree_pk > %ld "
+      "ORDER BY uploadtree_pk "
+      "LIMIT %d",
+      uploadtree_tablename,
+      Upload_Pk,
+      last_pk,
+      batch_size);
+
+    result = PQexec(pgConn, SQL);
+    if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
+        SafeExit(114);
+
+    rows_affected = atoi(PQcmdTuples(result));
+    PQclear(result);
+
+    if (rows_affected > 0) {
+        last_pk += batch_size;
+        printf("ununpack: processed batch, rows=%d\n", rows_affected);
+    }
+    } while (rows_affected > 0);
+
     }
 
     if (ars_pk) fo_WriteARS(pgConn, ars_pk, atoi(Upload_Pk), agent_pk, AgentARSName, 0, 1);
