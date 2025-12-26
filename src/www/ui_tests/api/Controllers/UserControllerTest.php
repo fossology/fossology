@@ -406,9 +406,9 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $apiVersion = ApiVersion::V2;
 
     $reqBody = [
-      'pat_name' => $tokenName,
-      'pat_expiry' => $tokenExpiry,
-      'pat_scope' => $tokenScope
+      'tokenName' => $tokenName,
+      'tokenScope' => $tokenScope,
+      'tokenExpire' => $tokenExpiry
     ];
 
     $request = M::mock(Request::class);
