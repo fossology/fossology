@@ -542,16 +542,23 @@ int	main(int argc, char *argv[])
       int rows_affected = 0;
       do {
     snprintf(SQL, MAXSQL,
-      "UPDATE %s "
-      "SET realparent = getItemParent(uploadtree_pk) "
-      "WHERE upload_fk = '%s' "
-      "AND uploadtree_pk > %ld "
-      "ORDER BY uploadtree_pk "
-      "LIMIT %d",
-      uploadtree_tablename,
-      Upload_Pk,
-      last_pk,
-      batch_size);
+          "UPDATE %s AS t1 "
+          "SET realparent = getItemParent(t1.uploadtree_pk, %s) "
+          "FROM ( "
+          "    SELECT uploadtree_pk "
+          "    FROM %s "
+          "    WHERE upload_fk = '%s' "
+          "    AND uploadtree_pk > %ld "
+          "    ORDER BY uploadtree_pk ASC "
+          "    LIMIT %d "
+          ") AS t2 "
+          "WHERE t1.uploadtree_pk = t2.uploadtree_pk",
+          uploadtree_tablename,
+          Upload_Pk,
+          uploadtree_tablename,
+          Upload_Pk,
+          last_pk,
+          batch_size);
 
     result = PQexec(pgConn, SQL);
     if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))

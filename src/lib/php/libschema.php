@@ -1032,31 +1032,48 @@ class fo_libschema
      * drop and recreate to change the return type.
      */
     $sql = 'drop function if exists getItemParent(integer);';
-    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getItemParent.drop');
+    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getItemParent.drop_old');
+
+    $sql = 'drop function if exists getItemParent(integer, integer);';
+    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getItemParent.drop_new');
 
     $sql = '
-    CREATE OR REPLACE FUNCTION getItemParent(itemId Integer) RETURNS Integer AS $$
-    WITH RECURSIVE file_tree(uploadtree_pk, parent, jump, path, cycle) AS (
-        SELECT ut.uploadtree_pk, ut.parent,
-          true,
-          ARRAY[ut.uploadtree_pk],
-          false
-        FROM uploadtree ut
-        WHERE ut.uploadtree_pk = $1
-      UNION ALL
-        SELECT ut.uploadtree_pk, ut.parent,
-          ut.ufile_mode & (1<<28) != 0,
-          path || ut.uploadtree_pk,
-        ut.uploadtree_pk = ANY(path)
-        FROM uploadtree ut, file_tree ft
-        WHERE ut.uploadtree_pk = ft.parent AND jump AND NOT cycle
-      )
-   SELECT uploadtree_pk from file_tree ft WHERE NOT jump
-   $$
-   LANGUAGE SQL
-   STABLE
-   RETURNS NULL ON NULL INPUT
-      ';
+      CREATE OR REPLACE FUNCTION getItemParent(itemId Integer, uploadId Integer)
+      RETURNS Integer AS $$
+      DECLARE
+          target_table text;
+          query_sql text;
+          result_id integer;
+      BEGIN
+          target_table := \'uploadtree_\' || uploadId;
+          query_sql := format(\'
+              WITH RECURSIVE file_tree(uploadtree_pk, parent, jump, path, cycle) AS (
+                  SELECT ut.uploadtree_pk, ut.parent,
+                    true,
+                    ARRAY[ut.uploadtree_pk],
+                    false
+                  FROM %I ut
+                  WHERE ut.uploadtree_pk = %L
+                UNION ALL
+                  SELECT ut.uploadtree_pk, ut.parent,
+                    ut.ufile_mode & (1<<28) != 0,
+                    path || ut.uploadtree_pk,
+                  ut.uploadtree_pk = ANY(path)
+                  FROM %I ut, file_tree ft
+                  WHERE ut.uploadtree_pk = ft.parent
+                    AND jump AND NOT cycle
+                )
+            SELECT uploadtree_pk from file_tree ft WHERE NOT jump
+          \', target_table, itemId, target_table);
+          BEGIN
+              EXECUTE query_sql INTO result_id;
+          EXCEPTION WHEN undefined_table THEN
+              RETURN NULL;
+          END;
+          RETURN result_id;
+      END;
+      $$ LANGUAGE plpgsql STABLE STRICT;
+    ';
     $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getItemParent.create');
     return;
   }
