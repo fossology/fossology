@@ -414,6 +414,9 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $request = M::mock(Request::class);
     $request->shouldReceive('getHeaderLine')->with('Content-Type')
       ->andReturn('application/json');
+    $body = M::mock('Psr\Http\Message\StreamInterface');
+    $body->shouldReceive('getContents')->andReturn(json_encode($reqBody));
+    $request->shouldReceive('getBody')->andReturn($body);
     $request->shouldReceive('getParsedBody')->andReturn($reqBody);
     $request->shouldReceive('getAttribute')
       ->with('apiVersion')->andReturn($apiVersion);
