@@ -15,6 +15,8 @@ namespace Fossology\UI\Api\Test\Controllers;
 require_once dirname(__DIR__, 4) . '/lib/php/Plugin/FO_Plugin.php';
 
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
+use Fossology\UI\Api\Exceptions\HttpConflictException;
+use Fossology\Lib\Exceptions\DuplicateTokenNameException;
 use Mockery as M;
 use Fossology\UI\Api\Controllers\UserController;
 use Fossology\UI\Api\Helper\DbHelper;
@@ -389,5 +391,40 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test UserController::createRestApiToken() for duplicate token name
+   * -# Check if response status is 409
+   */
+  public function testCreateRestApiTokenDuplicateName()
+  {
+    $tokenName = 'testToken';
+    $tokenExpiry = '2022-12-12';
+    $tokenScope = 'read';
+    $apiVersion = ApiVersion::V2;
+
+    $reqBody = [
+      'pat_name' => $tokenName,
+      'pat_expiry' => $tokenExpiry,
+      'pat_scope' => $tokenScope
+    ];
+
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getParsedBody')->andReturn($reqBody);
+    $request->shouldReceive('getAttribute')
+      ->with('apiVersion')->andReturn($apiVersion);
+    $request->shouldReceive('getAttribute')->andReturn($apiVersion);
+
+    $userEditObj = M::mock('UserEditPage');
+    $this->restHelper->shouldReceive('getPlugin')->with('user_edit')
+      ->andReturn($userEditObj);
+
+    $userEditObj->shouldReceive('generateNewToken')
+      ->andThrow(new DuplicateTokenNameException("Token name already exists"));
+
+    $this->expectException(HttpConflictException::class);
+    $this->userController->createRestApiToken($request, new ResponseHelper(), []);
   }
 }
