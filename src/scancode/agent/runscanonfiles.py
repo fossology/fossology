@@ -9,6 +9,7 @@ SPDX-License-Identifier: GPL-2.0-only
 import os
 import json
 import argparse
+import sys
 
 # Set SCANCODE_CACHE environment variable
 script_directory = os.path.dirname(os.path.abspath(__file__))
@@ -16,11 +17,16 @@ os.environ["SCANCODE_CACHE"] = os.path.join(script_directory, '.cache')
 
 from scancode import api
 
-def update_license(licenses):
+# File size threshold (1GB) for switching to memory-efficient scanning mode
+# Files larger than this will skip loading full license text to prevent memory bloat
+FILE_SIZE_THRESHOLD_BYTES = 1073741824  # 1 GB
+
+def update_license(licenses, include_matched_text=True):
   """
   Extracts relevant information from the 'licenses' data.
   Parameters:
     licenses (dict): A dictionary containing license information.
+    include_matched_text (bool): Whether matched_text should be included in output.
   Returns:
     list: A list of dictionaries containing relevant license information.
   """
@@ -29,9 +35,14 @@ def update_license(licenses):
 
   for license in licenses:
     for matches in license.get("matches", []):
-      updated_licenses.append({
+      license_entry = {
         key: matches[key] for key in keys_to_extract_from_licenses if key in matches
-      })
+      }
+      # Ensure matched_text field is always present for consistency
+      if 'matched_text' not in license_entry and include_matched_text:
+        license_entry['matched_text'] = None
+      
+      updated_licenses.append(license_entry)
 
   return updated_licenses
 
@@ -131,8 +142,24 @@ def scan(line, scan_copyrights, scan_licenses, scan_emails, scan_urls, min_score
     result['holders'] = updated_holders
 
   if scan_licenses:
-    licenses = api.get_licenses(result['file'], include_text=True, min_score=min_score)
-    updated_licenses = update_license(licenses.get("license_detections", []))
+    # Check file size to avoid memory bloat on large files
+    # For files larger than FILE_SIZE_THRESHOLD_BYTES, skip including matched_text to reduce memory usage
+    include_license_text = True
+    try:
+      file_size = os.path.getsize(result['file'])
+      include_license_text = file_size < FILE_SIZE_THRESHOLD_BYTES
+      if not include_license_text:
+        print(f"Info: File '{result['file']}' is {file_size} bytes (>{FILE_SIZE_THRESHOLD_BYTES}). "
+              f"Skipping license text to reduce memory usage.", file=sys.stderr)
+    except OSError as e:
+      # If we can't get file size (file doesn't exist or is inaccessible),
+      # log the issue and continue with default behavior (include text).
+      # The subsequent api.get_licenses() call will likely fail with a clearer error.
+      print(f"Warning: Unable to get file size for '{result['file']}': {e}. "
+            f"Proceeding with default behavior.", file=sys.stderr)
+    
+    licenses = api.get_licenses(result['file'], include_text=include_license_text, min_score=min_score)
+    updated_licenses = update_license(licenses.get("license_detections", []), include_matched_text=include_license_text)
     result['licenses'] = updated_licenses
 
   if scan_emails:
