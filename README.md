@@ -28,6 +28,23 @@ The PHP versions 7.3 and later are supported to work for FOSSology. FOSSology re
 
 To install Python dependencies, run `install/fo-install-pythondeps`.
 
+### ⚠️ Important: PHP Configuration Required
+
+**Before using FOSSology, you MUST configure PHP settings.** Default PHP settings are insufficient for FOSSology and will cause upload failures.
+
+After installation, run:
+```bash
+sudo install/scripts/php-conf-fix.sh --overwrite
+sudo systemctl restart apache2
+```
+
+To verify configuration:
+```bash
+install/scripts/check-fossology-config.sh
+```
+
+See [INSTALL_REQUIREMENTS.md](INSTALL_REQUIREMENTS.md) for detailed requirements and troubleshooting.
+
 ## Installation
 
 FOSSology should work with many Linux distributions.
@@ -36,6 +53,11 @@ See https://github.com/fossology/fossology/releases for source code download of 
 
 For installation instructions see [Install from Source](https://github.com/fossology/fossology/wiki/Install-from-Source)
 page in [Github Wiki](https://github.com/fossology/fossology/wiki)
+
+**📋 Required Post-Installation Steps:**
+1. Configure PHP settings (see above)
+2. Verify configuration with the check script
+3. Restart your web server
 
 ## Docker
 
