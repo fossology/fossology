@@ -88,7 +88,7 @@ echo "install core dependencies"
 if [[ $BUILDTIME ]]; then
    echo "*** Installing $DISTRO buildtime dependencies ***";
    case "$DISTRO" in
-      Debian|Ubuntu|Tuxedo)
+      Debian|Ubuntu|Tuxedo|Linuxmint)
          echo "DB: Installing build essential....."
          apt-get $YesOpt install \
             libmxml-dev curl libxml2-dev libcunit1-dev libicu-dev \
@@ -113,7 +113,7 @@ if [[ $BUILDTIME ]]; then
              apt-get $YesOpt install php-mbstring php-cli php-xml php-zip php-gd php-pgsql php-curl php-uuid php-sqlite3 php-yaml;;
            jammy)
              apt-get $YesOpt install php-mbstring php-cli php-xml php-zip php-gd php-pgsql php-curl php-uuid php-sqlite3 php-yaml;;
-           noble)
+           noble|wilma|zara)
              apt-get $YesOpt install php-mbstring php-cli php-xml php-zip php-gd php-pgsql php-curl php-uuid php-sqlite3 php-yaml;;
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
