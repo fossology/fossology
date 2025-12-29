@@ -55,6 +55,7 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Package\ComponentType;
 use Fossology\Lib\Data\Report\FileNode;
 use Fossology\Lib\Data\Report\SpdxLicenseInfo;
+use Fossology\Lib\Data\SpdxLicenseValidator;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Report\LicenseClearedGetter;
@@ -635,6 +636,7 @@ class SpdxAgent extends Agent
     $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName(), $uploadId);
     $this->declaredLicenseFileIds = array_unique(array_diff($this->declaredLicenseFileIds, $this->concludedLicenseFileIds));
     $this->concludedLicenseFileIds = array_unique($this->concludedLicenseFileIds);
+    $this->validateLicenseIdentifiers();
     $message = $this->renderString($this->getTemplateFile('document'),array(
         'documentName' => $fileBase,
         'uri' => $this->uri,
@@ -668,6 +670,42 @@ class SpdxAgent extends Agent
   protected function updateReportTable($uploadId, $jobId, $fileName)
   {
     $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $fileName);
+  }
+
+  protected function validateLicenseIdentifiers()
+  {
+    $validationErrors = [];
+    foreach ($this->licensesInDocument as $licenseInfo) {
+      $license = $licenseInfo->getLicenseObj();
+      $spdxId = $license->getSpdxId();
+      $shortName = $license->getShortName();
+
+      if (SpdxLicenseValidator::isLicenseRef($spdxId)) {
+        if (!SpdxLicenseValidator::isValidLicenseRef($spdxId)) {
+          $errors = SpdxLicenseValidator::getValidationErrors($spdxId);
+          $suggestion = SpdxLicenseValidator::getSuggestion($spdxId);
+          $validationErrors[] = [
+            'license' => $shortName,
+            'spdxId' => $spdxId,
+            'errors' => $errors,
+            'suggestion' => $suggestion
+          ];
+        }
+      }
+    }
+
+    if (!empty($validationErrors)) {
+      $errorMsg = "SPDX Validation Issues Found:\n";
+      foreach ($validationErrors as $error) {
+        $errorMsg .= sprintf(
+          "License: \"%s\"\nIssue: %s\nSuggestion: Use \"%s\"\n\n",
+          $error['license'],
+          implode(', ', $error['errors']),
+          $error['suggestion']
+        );
+      }
+      error_log("spdx: " . $errorMsg);
+    }
   }
 
   /**
