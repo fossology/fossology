@@ -113,15 +113,8 @@ if (empty($return_value)) {
   return 1;
 }
 
-
 /**
  * @brief get nomos license list of one specified uploadtree_id
- *
- * @param int $uploadtree_pk - uploadtree id
- * @param int $upload_pk - upload id
- * @param int $showContainer - include container or not, 1: yes, 0: no
- * @param string $excluding
- * @param bool $ignore ignore files without license
  */
 function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, $ignore)
 {
@@ -148,15 +141,17 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, 
   $agent_pk = $AgentRec[0]["agent_fk"];
 
   $uploadtreeTablename = getUploadtreeTableName($upload_pk);
-  /** @var ItemTreeBounds */
   $itemTreeBounds = $uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtreeTablename);
   $licensesPerFileName = $licenseDao->getLicensesPerFileNameForAgentId(
     $itemTreeBounds, array($agent_pk), true, $excluding, $ignore);
 
+  // Prepare CSV output
+  $csvLines = [];
   foreach ($licensesPerFileName as $fileName => $licenseData) {
     if ($licenseData == false) {
       if ($showContainer) {
         print($fileName."\n");
+        $csvLines[] = [$fileName, ""];
       }
       continue;
     }
@@ -171,16 +166,21 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, 
     }
 
     print($fileName .': '.implode($licenseNames,', ')."\n");
+    $csvLines[] = [$fileName, implode(',', $licenseNames)];
+  }
+
+  // Write CSV
+  if (!empty($csvLines)) {
+    $fp = fopen("license_export.csv", "w");
+    foreach ($csvLines as $line) {
+      fputcsv($fp, $line);
+    }
+    fclose($fp);
   }
 }
 
 /**
  * @brief get copyright list of one specified uploadtree_id
- *
- * @param int $uploadtree_pk - uploadtree id
- * @param int $upload_pk - upload id
- * @param string $exclude - Files to be excluded
- * @param bool $ignore Files with licenses to be excluded
  */
 function GetCopyrightList($uploadtree_pk, $upload_pk, $exclude, $ignore)
 {
@@ -214,6 +214,7 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $exclude, $ignore)
   $itemTreeBounds->getRight();
 
   $lines = [];
+  $csvLines = [];
   $copyrights = $copyrightDao->getScannerEntries($agentName, $uploadtreeTablename, $upload_pk, null, $extrawhere . $agentFilter);
   foreach ($copyrights as $copyright) {
     $row = [];
@@ -252,25 +253,25 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $exclude, $ignore)
       continue;
     } else {
       print($row['filePath'] . ": " . ($row['content']) . "\n");
+      $csvLines[] = [$row['filePath'], $row['content']]; // store for CSV
     }
+  }
+
+  // Write CSV
+  if (!empty($csvLines)) {
+    $fp = fopen("copyright_export.csv", "w");
+    foreach ($csvLines as $line) {
+      fputcsv($fp, $line);
+    }
+    fclose($fp);
   }
 }
 
-/**
-* Remove all files which either have license findings and not removed, or
-* have at least one license as conclusion
-* @param array[in,out] $lines            Lines to be filtered
-* @param ItemTreeBounds $itemTreeBounds  Item bounds
-* @param array $agentList                List of agent IDs
-* @param string $exclude                 Files to be excluded
-*/
+// Remove all files which either have license findings or concluded licenses
 function removeCopyrightWithLicense(&$lines, $itemTreeBounds, $agentList, $exclude)
 {
-  /* @var $clearingDao ClearingDao */
   $clearingDao = $GLOBALS['container']->get("dao.clearing");
-  /* @var $clearingFilter ClearingFilter */
   $clearingFilter = $GLOBALS['container']->get("businessrules.clearing_decision_filter");
-  /* @var $licenseDao LicenseDao */
   $licenseDao = $GLOBALS['container']->get("dao.license");
 
   $licensesPerFileName = array();
@@ -286,10 +287,8 @@ function removeCopyrightWithLicense(&$lines, $itemTreeBounds, $agentList, $exclu
         }
         $conclusions = array_unique($consolidatedConclusions);
         if (in_array("Void", $conclusions)) {
-            // File has all licenses removed or irrelevant decision
             continue;
         }
-        // File has license conclusions
         foreach (array_keys($lines) as $file) {
           if (strpos($file, $fileName) !== false) {
             unset($lines[$file]);
