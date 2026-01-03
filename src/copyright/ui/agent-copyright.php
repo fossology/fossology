@@ -30,10 +30,28 @@ class CopyrightAgentPlugin extends AgentPlugin
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
    * @see Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
    */
+  
   function AgentHasResults($uploadId=0)
-  {
+{
+    // Check if table exists first
+    global $pdo; // Assuming PDO object is available
+
+    try {
+        $stmt = $pdo->query("SELECT to_regclass('public.copyright_ars') AS tbl");
+        $result = $stmt->fetch();
+        if (!$result['tbl']) {
+            // Table does not exist yet
+            return false;
+        }
+    } catch (\Exception $e) {
+        // Something went wrong with DB, fail safely
+        return false;
+    }
+
+    // Table exists, call original CheckARS
     return CheckARS($uploadId, $this->AgentName, "copyright scanner", "copyright_ars");
-  }
+}
+
 
   /**
    * @copydoc Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
