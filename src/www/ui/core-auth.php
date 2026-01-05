@@ -291,7 +291,8 @@ class core_auth extends FO_Plugin
       $this->vars['info'] = $Plugins[$initPluginId]->infoFirstTimeUsage();
     }
 
-    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off") {
+    $protocolScheme = getProtocolScheme();
+    if ($protocolScheme === 'https://') {
       $this->vars['protocol'] = "HTTPS";
     } else {
       $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
