@@ -169,6 +169,7 @@ class fo_libschema
     $this->applySequences();
     $this->applyTables();
     $this->applyInheritedRelations();
+    $this->ensureArsTables();
     $this->getCurrSchema(); /* New tables created, recheck */
     $this->applyTables(true);
     $this->updateSequences();
@@ -1081,6 +1082,21 @@ class fo_libschema
   }
 
   // MakeFunctions()
+  private function ensureArsTables()
+  {
+    // 1. Create the table with plain INTEGER columns (no REFERENCES yet)
+    $sql = "CREATE TABLE IF NOT EXISTS copyright_ars (
+              ars_pk SERIAL PRIMARY KEY,
+              upload_fk INTEGER,
+              agent_fk INTEGER,
+              ars_success BOOLEAN DEFAULT FALSE,
+              ars_processed BOOLEAN DEFAULT FALSE
+            );";
+    $this->dbman->queryOnce($sql, __METHOD__ . ".create");
+
+    // 2. Add the index for performance
+    $this->dbman->queryOnce("CREATE INDEX IF NOT EXISTS copyright_ars_upload_fk ON copyright_ars(upload_fk);", __METHOD__ . ".index");
+  }
 }
 
 if (empty($dbManager) || !($dbManager instanceof DbManager)) {

@@ -32,6 +32,14 @@ class CopyrightAgentPlugin extends AgentPlugin
    */
   function AgentHasResults($uploadId=0)
   {
+    // Get the database manager from the global container
+    $dbManager = $GLOBALS['container']->get('db.manager');
+
+    // Safety check: if the table doesn't exist, return 0 (no results)
+    // This prevents the PostgreSQL "relation does not exist" error
+    if (!$dbManager->existsTable("copyright_ars")) {
+      return 0;
+    }
     return CheckARS($uploadId, $this->AgentName, "copyright scanner", "copyright_ars");
   }
 
