@@ -1632,7 +1632,7 @@
 #
 %ENTRY% _LT_DUAL_LICENSE_30
 %KEY% "licen[cs]"
-%STR% "this (code|program|file) (may|can) be (used|r?e?distributed) under either of the following two licences"
+%STR% "this (code|program|file|documentation|software) (may|can) be (used|r?e?distributed) under either of the following two licences"
 #
 %ENTRY% _LT_DUAL_LICENSE_31
 %KEY% "licen[cs]"
