@@ -4424,6 +4424,9 @@ paths:
               - unifiedreport
               - clixml
               - cyclonedx
+              - spdx3json
+              - spdx3rdf
+              - spdx3jsonld
         - name: groupName
           description: The group name to chose while generating a report
           in: header

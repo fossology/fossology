@@ -74,6 +74,20 @@ The FOSSology web service allows you to configure its database connection using 
 - **FOSSOLOGY_DB_PASSWORD:** Password to be used for PostgreSQL connection. Defaults to `fossy`.
 
 You can change them if you want to use a different database server or credentials. 
+
+### Notes on PostgreSQL volume mounts (Docker)
+
+When running FOSSology using Docker, the PostgreSQL data directory should follow the mount path recommended by the official Postgres container documentation:
+
+https://hub.docker.com/_/postgres
+
+Avoid using version-specific internal paths such as:
+
+```
+/var/lib/postgresql/16/data
+```
+
+These directories may not be persisted as expected when containers are recreated. Always reply on the directory structure defined by the Postgres image.
  
 ## Vagrant
 

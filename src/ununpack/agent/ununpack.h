@@ -34,6 +34,7 @@
 #include "checksum.h"
 #include "ununpack-ar.h"
 #include "ununpack-disk.h"
+#include "ununpack-lzip.h"
 #include "ununpack-iso.h"
 #include "ununpack-zstd.h"
 
@@ -63,6 +64,7 @@ enum cmdtype
   CMD_DISK,	        /** File system disk */
   CMD_DEB,	        /** Debian source package */
   CMD_ZSTD,         /** Zstandard compressed file */
+  CMD_LZIP,         /** Lzip compressed file */
   CMD_DEFAULT	      /** Default action */
 };
 

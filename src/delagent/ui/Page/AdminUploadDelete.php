@@ -159,7 +159,7 @@ class AdminUploadDelete extends DefaultPlugin
 
     $displayMessage .= "Deletion of " .
             (sizeof($uploadpks) - sizeof($errorMessages)) . " projects queued";
-    return DisplayMessage($displayMessage);
+    return $displayMessage;
   }
 
   /**

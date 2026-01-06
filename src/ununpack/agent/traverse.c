@@ -189,6 +189,10 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
       /* unpack a ZSTD: source file, source name and destination directory */
       rc = ExtractZstd(CI->Source, CI->Partname, Queue[Index].ChildRecurse);
       break;
+    case CMD_LZIP:
+      /* unpack an LZIP: source file and destination directory */
+      rc = ExtractLzip(CI->Source, CI->Partname, Queue[Index].ChildRecurse);
+      break;
     case CMD_DEFAULT:
     default:
       /* use the original name */
@@ -464,6 +468,7 @@ int	Traverse	(char *Filename, char *Basename,
       case CMD_PARTITION:
       case CMD_PACK:
       case CMD_ZSTD:
+      case CMD_LZIP:
         CI.HasChild=1;
         IsContainer=1;
         strcat(Queue[Index].ChildRecurse,".dir");

@@ -81,17 +81,17 @@ if [ $RUNTIME ]; then
     Debian|Ubuntu|Tuxedo)
       apt-get $YesOpt install \
         bzip2 cabextract cpio genisoimage p7zip poppler-utils rpm tar \
-        unzip gzip sleuthkit p7zip-full unrar-free libgcrypt20 zstd
+        unzip gzip sleuthkit p7zip-full unrar-free libgcrypt20 zstd lzip
       ;;
     RedHatEnterprise*|CentOS)
       yum $YesOpt install \
         bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip p7zip-plugins\
-        sleuthkit unrar libgcrypt zstd
+        sleuthkit unrar libgcrypt zstd lzip
       ;;
     Fedora)
       yum $YesOpt install \
         bzip2 cabextract cpio genisoimage p7zip p7zip-plugins poppler-utils rpm\
-        tar unzip gzip sleuthkit unrar libgcrypt zstd
+        tar unzip gzip sleuthkit unrar libgcrypt zstd lzip
       ;;
   esac
 fi
