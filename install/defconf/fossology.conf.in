@@ -136,17 +136,14 @@ resttoken = token
 
 
 ; -----------------------------------------------------------------------------
-; SYSCONFIG overrides (config-as-code)
+; OIDC overrides (config-as-code)
 ; Values in this section override the sysconfig table values at runtime.
 ; This allows configuration without using the web UI, e.g. for Docker/K8s.
 ;
 ; NOTE: Only non-empty values override DB sysconfig values.
 ; -----------------------------------------------------------------------------
-[SYSCONFIG]
+[OIDC]
 
-; -------------------------
-; OpenID Connect (OIDC)
-; -------------------------
 ; If OidcAppName is set, the OIDC login option will be displayed on the login page.
 ; Example:
 ;OidcAppName = "My SSO"

@@ -136,12 +136,11 @@ function get_pg_conn($sysconfdir, &$SysConf, $exitOnDbFail=true)
  * \param resource $conn Connection to Postgres
  * \param[in,out] array $SysConf Configuration variable array
  */
+
 function populate_from_sysconfig($conn, &$SysConf)
 {
-  /* populate the global $SysConf array with variable/value pairs */
-
-  // Keep whatever was already loaded from fossology.conf
-  $existing = $SysConf['SYSCONFIG'] ?? [];
+  // Only OIDC overrides should be taken from fossology.conf
+  $oidcOverrides = $SysConf['OIDC'] ?? [];
 
   $sql = "SELECT variablename, conf_value FROM sysconfig;";
   $result = pg_query($conn, $sql);
@@ -150,16 +149,23 @@ function populate_from_sysconfig($conn, &$SysConf)
   while ($row = pg_fetch_assoc($result)) {
     $key = $row['variablename'];
 
-    // If fossology.conf already provides a non-empty value, do NOT overwrite it
-    if (array_key_exists($key, $existing) && $existing[$key] !== '' && $existing[$key] !== null) {
+    // Only block overwrite if this key exists in [OIDC] AND is non-empty
+    if (array_key_exists($key, $oidcOverrides) &&
+        $oidcOverrides[$key] !== '' &&
+        $oidcOverrides[$key] !== null) {
+
+      // Keep the fossology.conf value (OIDC overrides)
+      $SysConf['SYSCONFIG'][$key] = $oidcOverrides[$key];
       continue;
     }
 
+    // Default: use DB sysconfig value
     $SysConf['SYSCONFIG'][$key] = $row['conf_value'];
   }
 
   pg_free_result($result);
 }
+
 
 
 /**
