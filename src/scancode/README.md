@@ -3,13 +3,63 @@
      SPDX-License-Identifier: GPL-2.0-only
 -->
 
-## ScanCode Toolkit
-ScanCode Toolkit is a very established license scanner. It is a simple python based command line scanner that runs on Windows, Linux, and Mac. It implements a number of different approaches and integrates these into one application for identifying and classifying license-relevant content in packages.
+# ScanCode Agent for FOSSology
 
-A wrapper has been used to wrap ScanCode around FOSSology.
+This agent integrates ScanCode Toolkit into FOSSology for comprehensive license, copyright, email, and URL detection.
 
-See Integrating scancode blog: https://fossology.github.io/gsoc/docs/2021/scancode/
+## Features
 
-Read more about ScanCode here: [scancode-toolkit.readthedocs.io](https://scancode-toolkit.readthedocs.io/en/latest/)
+- **License Detection**: Detects licenses in source files and stores them with full text and reference URLs
+- **Copyright Detection**: Identifies copyright statements and authorship information
+- **Email Detection**: Extracts email addresses from source files
+- **URL Detection**: Finds URLs referenced in code and documentation
+- **Report Integration**: Copyright findings from ScanCode are included in generated reports (SPDX, Unified Report, etc.)
 
-Check out the code at https://github.com/nexB/scancode-toolkit
+## Usage
+
+The agent can be scheduled from the FOSSology UI with the following options:
+- License scanning (`-l`)
+- Copyright scanning (`-r`)  
+- Email scanning (`-e`)
+- URL scanning (`-u`)
+
+Multiple options can be combined in a single scan.
+
+## Testing
+
+The agent includes comprehensive unit and functional tests:
+
+### Running Unit Tests
+```bash
+cd /path/to/fossology/build
+make test_scancode
+./src/scancode/agent_tests/test_scancode
+```
+
+### Running Functional Tests
+```bash
+# CLI tests
+cd src/scancode/agent_tests/Functional
+bash shunit2 cli_test.sh
+
+# Scheduler tests
+phpunit --bootstrap /path/to/phpunit_bootstrap.php schedulerTest.php
+```
+
+### Running All Tests
+```bash
+cd /path/to/fossology/build
+ctest -R scancode
+```
+
+## Database Tables
+
+The agent creates and populates the following tables:
+- `scancode_copyright`: Stores copyright statements
+- `scancode_author`: Stores author information
+- `scancode_email`: Stores extracted email addresses
+- `scancode_url`: Stores found URLs
+
+## Copyright Reports
+
+ScanCode copyright findings are automatically included in generated copyright reports alongside findings from the standard copyright agent. This ensures comprehensive copyright coverage in compliance documentation.

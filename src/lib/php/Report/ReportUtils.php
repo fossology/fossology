@@ -165,7 +165,7 @@ class ReportUtils
    */
   public function addCopyrightResults(&$filesWithLicenses, $uploadId)
   {
-    $agentName = array('copyright', 'reso');
+    $agentName = array('copyright', 'reso', 'scancode');
     /** @var CopyrightDao $copyrightDao */
     $copyrightDao = $this->container->get('dao.copyright');
     /** @var ScanJobProxy $scanJobProxy */
@@ -174,19 +174,40 @@ class ReportUtils
 
     $scanJobProxy->createAgentStatus($agentName);
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
-    if (!array_key_exists($agentName[0], $selectedScanners)) {
+    if (!array_key_exists($agentName[0], $selectedScanners) &&
+        !array_key_exists($agentName[2], $selectedScanners)) {
       return;
     }
-    $latestAgentId[] = $selectedScanners[$agentName[0]];
+
+    $latestAgentId = array();
+    if (array_key_exists($agentName[0], $selectedScanners)) {
+      $latestAgentId[] = $selectedScanners[$agentName[0]];
+    }
     if (array_key_exists($agentName[1], $selectedScanners)) {
       $latestAgentId[] = $selectedScanners[$agentName[1]];
     }
+    if (array_key_exists($agentName[2], $selectedScanners)) {
+      $latestAgentId[] = $selectedScanners[$agentName[2]];
+    }
+
     $ids = implode(',', $latestAgentId);
     $extrawhere = ' agent_fk IN ('.$ids.')';
 
     $uploadtreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
+
+    // Get copyright agent findings
     $allScannerEntries = $copyrightDao->getScannerEntries('copyright', $uploadtreeTable, $uploadId, $type='statement', $extrawhere);
     $allEditedEntries = $copyrightDao->getEditedEntries('copyright_decision', $uploadtreeTable, $uploadId, $decisionType=null);
+
+    // Get SCANCODE copyright findings
+    if (array_key_exists($agentName[2], $selectedScanners)) {
+      $scancodeAgentId = $selectedScanners[$agentName[2]];
+      $scancodeExtrawhere = ' agent_fk = '.$scancodeAgentId;
+      $scancodeCopyrights = $copyrightDao->getScannerEntries('scancode_copyright',
+        $uploadtreeTable, $uploadId, $type='statement', $scancodeExtrawhere);
+      $allScannerEntries = array_merge($allScannerEntries, $scancodeCopyrights);
+    }
+
     foreach ($allScannerEntries as $finding) {
       if (!array_key_exists($finding['uploadtree_pk'], $filesWithLicenses)) {
         $filesWithLicenses[$finding['uploadtree_pk']] = new FileNode();

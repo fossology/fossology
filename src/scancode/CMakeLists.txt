@@ -26,7 +26,8 @@ install(FILES scancode.conf "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
 
 add_symlink()
 
-# if(TESTING)
-#     enable_testing()
-#     add_subdirectory(agent_tests)
-# endif()
+if(TESTING)
+    enable_testing()
+    add_subdirectory(agent_tests)
+endif()
+
