@@ -51,7 +51,11 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     'readmeoss',
     'unifiedreport',
     'clixml',
-    'decisionexporter'
+    'decisionexporter',
+    'cyclonedx',
+    'spdx3json',
+    'spdx3rdf',
+    'spdx3jsonld'
   );
 
   /**
@@ -115,6 +119,18 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
   private $decisionExporterPlugin;
 
   /**
+   * @var M\MockInterface $cyclonedxPlugin
+   * CycloneDXGeneratorUi mock
+   */
+  private $cyclonedxPlugin;
+
+  /**
+   * @var M\MockInterface $spdx3Plugin
+   * SpdxThreeGeneratorUi mock
+   */
+  private $spdx3Plugin;
+
+  /**
    * @var DbManager $dbManager
    * DbManager mock
    */
@@ -151,6 +167,8 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $this->clixmlPlugin = M::mock('CliXmlGeneratorUi');
     $this->unifiedPlugin = M::mock('FoUnifiedReportGenerator');
     $this->decisionExporterPlugin = M::mock('DecisionExporterAgentPlugin');
+    $this->cyclonedxPlugin = M::mock('CycloneDXGeneratorUi');
+    $this->spdx3Plugin = M::mock('SpdxThreeGeneratorUi');
     $this->downloadPlugin = M::mock('ui_download');
 
     $this->dbHelper->shouldReceive('getDbManager')->andReturn($this->dbManager);
@@ -172,6 +190,10 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
       ->andReturn($this->unifiedPlugin);
     $this->restHelper->shouldReceive('getPlugin')
       ->withArgs(['agent_fodecisionexporter'])->andReturn($this->decisionExporterPlugin);
+    $this->restHelper->shouldReceive('getPlugin')
+      ->withArgs(array('ui_cyclonedx'))->andReturn($this->cyclonedxPlugin);
+    $this->restHelper->shouldReceive('getPlugin')
+      ->withArgs(array('ui_spdx3'))->andReturn($this->spdx3Plugin);
 
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
@@ -278,6 +300,12 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs([$this->groupId, $upload])->andReturn([32, 33, ""]);
     $this->decisionExporterPlugin->shouldReceive('scheduleAgent')
       ->withArgs([$this->groupId, $upload])->andReturn([32, 33]);
+    $this->cyclonedxPlugin->shouldReceive('scheduleAgent')
+      ->withArgs([$this->groupId, $upload])->andReturn([32, 33]);
+    $this->spdx3Plugin->shouldReceive('scheduleAgent')
+      ->withArgs([$this->groupId, $upload, M::anyOf($this->reportsAllowed[8],
+        $this->reportsAllowed[9], $this->reportsAllowed[10])])
+      ->andReturn([32, 33, ""]);
 
     $expectedResponse = new Info(201, "http://localhost/repo/api/v1/report/32",
       InfoType::INFO);
