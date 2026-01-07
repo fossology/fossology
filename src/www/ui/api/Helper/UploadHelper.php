@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Helper;
 
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
@@ -658,16 +659,33 @@ class UploadHelper
    */
   private function getMainLicenses($dbManager, $uploadId, $groupId)
   {
-    $sql = "SELECT rf_shortname FROM license_ref lf JOIN upload_clearing_license ucl"
-            . " ON lf.rf_pk=ucl.rf_fk WHERE upload_fk=$1 AND ucl.group_fk=$2";
-    $stmt = __METHOD__.'.collectMainLicenses';
-    $rows = $dbManager->getRows($sql, array($uploadId, $groupId), $stmt);
-    if (empty($rows)) {
+    global $container;
+    /** @var ClearingDao $clearingDao */
+    $clearingDao = $container->get('dao.clearing');
+    $licenseDao = $container->get('dao.license');
+
+    $licenseIds = $clearingDao->getMainLicenseIds($uploadId, $groupId);
+    if (empty($licenseIds)) {
       return null;
     }
+    $customTexts = $clearingDao->getMainLicenseReportInfos($uploadId, $groupId);
     $mainLicenses = [];
-    foreach ($rows as $row) {
-      $mainLicenses[] = $row['rf_shortname'];
+    foreach ($licenseIds as $licenseId) {
+      $license = $licenseDao->getLicenseById($licenseId, $groupId);
+      if ($license === null) {
+        continue;
+      }
+      $shortName = $license->getShortName();
+      if (array_key_exists($licenseId, $customTexts)) {
+        $customText = $customTexts[$licenseId];
+        if (!empty($customText)) {
+          $shortName = LicenseRef::convertToSpdxId(
+            $license->getShortName() . '-' . md5($customText),
+            ''
+          );
+        }
+      }
+      $mainLicenses[] = $shortName;
     }
     return $mainLicenses;
   }
