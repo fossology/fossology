@@ -302,3 +302,41 @@ function GetLastSeq($seqname, $tablename)
   pg_free_result($result);
   return($mykey);
 }
+
+/**
+ * \brief Get constraints on a specific column.
+ *
+ * \param string $table  Table name
+ * \param string $column Column name
+ *
+ * \return array of constraint names
+ */
+function DB_ColumnConstraints($table, $column)
+{
+  global $PG_CONN;
+  $sql = "
+    SELECT con.conname
+    FROM pg_constraint con
+    JOIN pg_class rel ON rel.oid = con.conrelid
+    JOIN pg_namespace nsp ON nsp.oid = rel.relnamespace
+    JOIN unnest(con.conkey) AS colnum(attnum) ON true
+    JOIN pg_attribute att
+      ON att.attrelid = rel.oid
+     AND att.attnum   = colnum.attnum
+    WHERE nsp.nspname = 'public'
+      AND rel.relname = $1
+      AND att.attname = $2
+  ";
+
+  $result = pg_query_params($PG_CONN, $sql, [$table, $column]);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+  $constraints = [];
+  while ($row = pg_fetch_assoc($result)) {
+    $constraints[] = $row['conname'];
+  }
+
+  pg_free_result($result);
+  return $constraints;
+}
+
