@@ -1,0 +1,119 @@
+<!--
+SPDX-FileCopyrightText: 2026 FOSSology contributors
+SPDX-License-Identifier: GPL-2.0-only
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FOSSology REST API - Swagger UI</title>
+
+    <!-- Swagger UI CSS (SRI enabled) -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css"
+      integrity="sha384-KX9Rx9vM1AmUNAn07bPAiZhFD4C8jdNgG6f5MRNvR+EfAxs2PmMFtUUazui7ryZQ"
+      crossorigin="anonymous"
+    />
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      .topbar {
+        display: none;
+      }
+
+      #swagger-ui-warning {
+        margin: 0;
+        padding: 12px 16px;
+        background: #fff3cd;
+        color: #856404;
+        font-family: sans-serif;
+        font-size: 14px;
+        border-bottom: 1px solid #ffeeba;
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="swagger-ui-warning"></div>
+    <main id="swagger-ui"></main>
+
+    <!-- Swagger UI JS Bundle (SRI enabled) -->
+    <script
+      src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"
+      integrity="sha384-cxafBeQ+zYR0eFaFGFxtFbnp1ICqeS9mG7+f0WWSHzhrrnUvwg9Za5CCw6wgrHA7K"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      (function () {
+        const DEFAULT_SPEC_URL =
+          "https://raw.githubusercontent.com/fossology/fossology/master/src/www/ui/api/documentation/openapi.yaml";
+
+        const TRUSTED_HOSTS = new Set([
+          "raw.githubusercontent.com",
+          "raw.github.com",
+          "githubusercontent.com",
+          "petstore.swagger.io",
+        ]);
+
+        function showWarning(message) {
+          const el = document.getElementById("swagger-ui-warning");
+          el.textContent = message;
+          el.style.display = "block";
+        }
+
+        function isTrustedUrl(urlString) {
+          try {
+            const url = new URL(urlString, window.location.href);
+
+            // Allow same-origin relative URLs
+            if (url.origin === window.location.origin) return true;
+
+            // Allow trusted external hosts
+            return TRUSTED_HOSTS.has(url.hostname);
+          } catch {
+            return false;
+          }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const requestedUrl = params.get("url");
+        let specUrl = DEFAULT_SPEC_URL;
+
+        if (requestedUrl) {
+          if (isTrustedUrl(requestedUrl)) {
+            specUrl = requestedUrl;
+          } else {
+            showWarning(
+              `Untrusted spec URL blocked: "${requestedUrl}". Falling back to the default FOSSology OpenAPI spec.`
+            );
+          }
+        }
+
+        if (typeof SwaggerUIBundle === "undefined") {
+          showWarning(
+            "Swagger UI bundle failed to load. Please check your network connection."
+          );
+          return;
+        }
+
+        window.ui = SwaggerUIBundle({
+          url: specUrl,
+          dom_id: "#swagger-ui",
+          deepLinking: true,
+          presets: [SwaggerUIBundle.presets.apis],
+          layout: "BaseLayout",
+        });
+      })();
+    </script>
+  </body>
+</html>
