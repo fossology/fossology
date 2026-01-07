@@ -659,6 +659,13 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "null", "'$mimeTypeToSkip'",
     strval(CONFIG_TYPE_TEXT), "'Skip'", "1", "'$mimeTypeDesc'", "null", "null");
 
+  /* kotoba Agent */
+  $variable = "KotobaDelimiters";
+  $prompt = _('Kotoba Agent Delimiters');
+  $desc = _('Comma-separated list of additional delimiter characters for kotoba agent. Space, comma, tab, newline, carriage return, and form feed are always included as delimiters. Leave empty to use only the default delimiters. Example: "#,^,%,*" to add special characters');
+  $valueArray[$variable] = array("'$variable'", "' '", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'Kotoba'", "1", "'$desc'", "null", "null");
+
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.
   */
