@@ -16,6 +16,11 @@
 #define ASPRINTF_MEM_ERROR_LOG LOG_FATAL("Not enough memory for asprintf before line %d", __LINE__)
 
 #include "wget_agent.h"
+#include <sys/vfs.h>
+
+#ifndef NFS_SUPER_MAGIC
+#define NFS_SUPER_MAGIC 0x6969
+#endif
 
 char SQL[STRMAX];
 
@@ -45,6 +50,86 @@ int IsFile(char *Fname, int Link)
   if (rc != 0) return(0); /* bad name */
   return(S_ISREG(Stat.st_mode));
 } /* IsFile() */
+
+/**
+ * \brief Check if a path is on an NFS filesystem
+ * \param path Path to check
+ * \return int 1=NFS, 0=not NFS or error
+ */
+int IsNFSMount(const char *path)
+{
+  struct statfs buf;
+  if (!path || path[0] == '\0') return 0;
+  
+  if (statfs(path, &buf) == 0)
+  {
+    return (buf.f_type == NFS_SUPER_MAGIC);
+  }
+  
+  /* statfs() failed - log for debugging */
+  LOG_WARNING("Failed to check filesystem type for %s: %s. Treating as non-NFS.",
+              path, strerror(errno));
+  return 0;
+} /* IsNFSMount() */
+
+/**
+ * \brief Validate file access permissions (read/write)
+ * \param path Path to check
+ * \return int 0=OK, -1=error
+ */
+int ValidateFileAccess(const char *path)
+{
+  if (!path || path[0] == '\0') return -1;
+  
+  /* Check if file is readable and writable by current user */
+  if (access(path, R_OK | W_OK) == 0)
+  {
+    return 0;
+  }
+  
+  LOG_ERROR("File %s is not readable/writable by current user (uid=%d, gid=%d). "
+            "For NFS mounts, ensure: 1) NFS export has correct UID/GID mapping, "
+            "2) Mount options include 'rw', 3) File ownership matches container user",
+            path, getuid(), getgid());
+  return -1;
+} /* ValidateFileAccess() */
+
+/**
+ * \brief Smart chown: skip on NFS, validate permissions instead
+ * \param path Path to chown
+ * \param group Group ID
+ * \return int 0=success, -1=error
+ */
+int SmartChown(const char *path, gid_t group)
+{
+  int rc;
+  
+  if (!path || path[0] == '\0') return -1;
+  
+  /* Check if on NFS */
+  if (IsNFSMount(path))
+  {
+    LOG_NOTICE("Skipping chown on NFS mount: %s. Validating permissions instead...", path);
+    rc = ValidateFileAccess(path);
+    if (rc != 0)
+    {
+      LOG_ERROR("Permission validation failed for %s on NFS mount", path);
+      return -1;
+    }
+    LOG_VERBOSE0("Permission validation passed for %s", path);
+    return 0;
+  }
+  
+  /* Not NFS - do normal chown */
+  rc = chown(path, -1, group);
+  if (rc != 0)
+  {
+    LOG_ERROR("chown failed on %s, error: %s", path, strerror(errno));
+    return -1;
+  }
+  
+  return 0;
+} /* SmartChown() */
 
 /**
  * \brief Closes the connection to the server, free the database connection, and exit.
@@ -114,8 +199,11 @@ void DBLoadGold()
 
   if ((int)ForceGroup > 0)
   {
-    rc = chown(GlobalTempFile,-1,ForceGroup);
-    if (rc) LOG_ERROR("chown failed on %s, error: %s", GlobalTempFile, strerror(errno));
+    if (SmartChown(GlobalTempFile, ForceGroup) != 0)
+    {
+      LOG_FATAL("Failed to set permissions on %s", GlobalTempFile);
+      SafeExit(10);
+    }
   }
 
   if (!Sum)
@@ -149,8 +237,11 @@ void DBLoadGold()
     Path = fo_RepMkPath("gold",Unique);
     if ((int)ForceGroup >= 0)
     {
-      rc = chown(Path,-1,ForceGroup);
-      if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno));
+      if (SmartChown(Path, ForceGroup) != 0)
+      {
+        LOG_FATAL("Failed to set permissions on %s", Path);
+        SafeExit(11);
+      }
     }
   } /* if GlobalImportGold */
   else /* if !GlobalImportGold */
@@ -176,10 +267,22 @@ void DBLoadGold()
     SafeExit(6);
   }
 
+  /* Set permissions on the files repository copy (not the gold repo) */
   if ((int)ForceGroup >= 0)
   {
-    rc = chown(Path,-1,ForceGroup);
-    if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno));
+    char *filesPath = fo_RepMkPath("files", Unique);
+    if (filesPath == NULL)
+    {
+      LOG_FATAL("Failed to determine repository location for %s in files", Unique);
+      SafeExit(12);
+    }
+    if (SmartChown(filesPath, ForceGroup) != 0)
+    {
+      LOG_FATAL("Failed to set permissions on %s", filesPath);
+      free(filesPath);
+      SafeExit(12);
+    }
+    free(filesPath);
   }
 
   if (Path != GlobalTempFile)
