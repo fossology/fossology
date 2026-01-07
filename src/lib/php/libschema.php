@@ -310,6 +310,15 @@ class fo_libschema
             $rename = $column . '_old';
             $sql = "ALTER TABLE \"$table\" RENAME COLUMN \"$column\" TO \"$rename\"";
             $this->applyOrEchoOnce($sql);
+            // Check constraints on the renamed column
+            $constraints_on_column = DB_ColumnConstraints($table, $rename);
+            if (!empty($constraints_on_column)) {
+              // Drop constraints on the renamed column
+              foreach ($constraints_on_column as $conname) {
+                $sql = "ALTER TABLE \"$table\" DROP CONSTRAINT \"$conname\"";
+                $this->applyOrEchoOnce($sql);
+              }
+            }
           }
 
           $sql = $modification['ADD'];
@@ -354,6 +363,7 @@ class fo_libschema
     $newViews = !array_key_exists('VIEW', $this->currSchema);
     foreach ($this->schema['VIEW'] as $name => $sql) {
       if (empty($name) || (!$newViews &&
+          array_key_exists($name, $this->currSchema['VIEW']) &&
           $this->currSchema['VIEW'][$name] == $sql)) {
         continue;
       }
@@ -990,7 +1000,6 @@ class fo_libschema
     fclose($fout);
     return false;
   }
-
 
   /**
    * \brief Create any required DB functions.
