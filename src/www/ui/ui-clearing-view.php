@@ -12,6 +12,7 @@ use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
@@ -41,6 +42,8 @@ class ClearingView extends FO_Plugin
   private $licenseDao;
   /** @var ClearingDao */
   private $clearingDao;
+  /** @var CopyrightDao */
+  private $copyrightDao;
   /** @var AgentDao */
   private $agentsDao;
   /** @var Logger */
@@ -74,6 +77,7 @@ class ClearingView extends FO_Plugin
     $this->licenseDao = $container->get('dao.license');
     $this->uploadDao = $container->get('dao.upload');
     $this->clearingDao = $container->get('dao.clearing');
+    $this->copyrightDao = $container->get('dao.copyright');
     $this->agentsDao = $container->get('dao.agent');
     $this->logger = $container->get("logger");
     $this->highlightDao = $container->get("dao.highlight");
@@ -108,6 +112,11 @@ class ClearingView extends FO_Plugin
     }
     $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds,
       $licenseId, $unmaskAgents, $highlightId, $clearingId);
+
+    $agentIds = is_array($unmaskAgents) ? $unmaskAgents : array($unmaskAgents);
+    $copyrightHighlights = $this->copyrightDao->getHighlights($itemTreeBounds->getItemId(), "copyright", $agentIds);
+    $highlightEntries = array_merge($highlightEntries, $copyrightHighlights);
+
     $groupId = Auth::getGroupId();
     if (($selectedAgentId > 0) || ($clearingId > 0)) {
       $this->highlightProcessor->addReferenceTexts($highlightEntries, $groupId);
