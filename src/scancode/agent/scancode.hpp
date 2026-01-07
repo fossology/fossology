@@ -14,6 +14,7 @@
 
 extern "C" {
 #include "libfossagent.h"
+#include "fossconfig.h"
 }
 
 using namespace std;
