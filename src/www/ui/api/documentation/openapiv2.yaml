@@ -4659,6 +4659,8 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
+  
   /license/export-csv:
     get:
       operationId: exportLicense
@@ -4671,9 +4673,10 @@ paths:
             type: integer
       tags:
         - License
-      summary: Export a csv license
+      summary: Export a CSV including license and copyright information
       description: >
-        Export a csv license
+        Export a CSV file containing license details along with associated
+        copyright information for each license. Use id=0 to export all licenses.
       responses:
         '200':
           description: Successfully exported
@@ -4690,6 +4693,7 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
   /license/{shortname}:
     parameters:
       - name: shortname
