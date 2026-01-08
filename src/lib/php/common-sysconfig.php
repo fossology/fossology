@@ -148,24 +148,23 @@ function populate_from_sysconfig($conn, &$SysConf)
 
   while ($row = pg_fetch_assoc($result)) {
     $key = $row['variablename'];
+    $dbValue = $row['conf_value'];
 
-    // Only block overwrite if this key exists in [OIDC] AND is non-empty
+    // If a non-empty override exists in fossology.conf [OIDC], use it
     if (array_key_exists($key, $oidcOverrides) &&
         $oidcOverrides[$key] !== '' &&
         $oidcOverrides[$key] !== null) {
 
-      // Keep the fossology.conf value (OIDC overrides)
       $SysConf['SYSCONFIG'][$key] = $oidcOverrides[$key];
       continue;
     }
 
-    // Default: use DB sysconfig value
-    $SysConf['SYSCONFIG'][$key] = $row['conf_value'];
+    // Otherwise, fall back to DB sysconfig value
+    $SysConf['SYSCONFIG'][$key] = $dbValue;
   }
 
   pg_free_result($result);
 }
-
 
 
 /**
