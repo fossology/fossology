@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: © Fossology contributors
+# SPDX-License-Identifier: GPL-2.0-only
+
+source "$(dirname ${BASH_SOURCE[0]})/../../utils/utils.sh"
+
+YesOpt=''
+EVERYTHING=''
+RUNTIME=''
+BUILDTIME=''
+
+## Options parsing and setup
+OPTS=$(getopt -o rbehy --long runtime,buildtime,everything,help -n 'mod_deps' -- "$@")
+
+if [[ $? -ne 0 ]]; then
+  OPTS='--help'
+fi
+
+eval set -- "$OPTS"
+
+# if no options or just -y then do everything
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
+  EVERYTHING=true
+fi
+
+while true; do
+  case "$1" in
+    -r|--runtime)     RUNTIME=true; shift;;
+    -b|--buildtime)   BUILDTIME=true; shift;;
+    -e|--everything)  EVERYTHING=true; shift;;
+    -y)               YesOpt='-y'; shift;;
+    -h|--help)        show_help_for_mod_deps; exit;;
+    --)               shift; break;;
+    *)                echo "ERROR: option $1 not recognised"; exit 1;;
+  esac
+done
+
+set -o errexit -o nounset -o pipefail
+
+must_run_as_root
+need_lsb_release
+
+if [[ $EVERYTHING ]]; then
+  echo "*** Installing both runtime and buildtime dependencies ***"
+  RUNTIME=true
+  BUILDTIME=true
+fi
+
+# figure out what distro we're on
+DISTRO=$(lsb_release --id --short)
+CODENAME=$(lsb_release --codename --short)
+
+########################################################################
+
+if [[ $BUILDTIME ]]; then
+  echo "*** Installing $DISTRO buildtime dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu|Tuxedo)
+      apt-get $YesOpt install \
+        libboost-program-options-dev libjsoncpp-dev
+      ;;
+    Fedora)
+      yum $YesOpt install \
+        boost-devel jsoncpp-devel
+      ;;
+    RedHatEnterprise*|CentOS)
+      yum $YesOpt install epel-release;
+      yum $YesOpt install \
+        boost-devel jsoncpp-devel
+      ;;
+    *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release"; exit 1;;
+  esac
+fi
+
+if [[ $RUNTIME ]]; then
+  echo "*** Installing $DISTRO runtime dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu|Tuxedo)
+      apt-get $YesOpt install \
+        python3 python3-pip
+      case "$CODENAME" in
+        stretch)
+          apt-get $YesOpt install libjsoncpp1 libboost-program-options1.62.0;;
+        buster)
+          apt-get $YesOpt install libjsoncpp1 libboost-program-options1.67.0;;
+        bullseye)
+          apt-get $YesOpt install libjsoncpp24 libboost-program-options1.74.0;;
+        bookworm)
+          apt-get $YesOpt install libjsoncpp25 libboost-program-options1.74.0;;
+        trixie)
+          apt-get $YesOpt install libjsoncpp26 libboost-program-options1.83.0;;
+        sid)
+          apt-get $YesOpt install libjsoncpp1 libboost-program-options1.74.0;;
+        focal)
+          apt-get $YesOpt install libjsoncpp1 libboost-program-options1.71.0;;
+        jammy)
+          apt-get $YesOpt install libjsoncpp25 libboost-program-options1.74.0;;
+        noble)
+          apt-get $YesOpt install libjsoncpp25 libboost-program-options1.74.0;;
+        *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release"; exit 1;;
+      esac;;
+    Fedora)
+      yum $YesOpt install \
+        jsoncpp boost \
+        python3 python3-pip
+      ;;
+    RedHatEnterprise*|CentOS)
+      yum $YesOpt install epel-release;
+      yum $YesOpt install \
+        jsoncpp boost \
+        python3 python3-pip
+      ;;
+    *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release"; exit 1;;
+  esac
+  
+  # Install Python dependencies for metadata parsing
+  pip3 install xmltodict pyyaml toml
+fi
+
+#######################################################################

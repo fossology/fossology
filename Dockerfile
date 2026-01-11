@@ -19,14 +19,14 @@ LABEL org.opencontainers.image.licenses="GPL-2.0-only AND LGPL-2.1-only"
 WORKDIR /fossology
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      git \
-      lsb-release \
-      php8.2-cli \
-      sudo \
-      cmake \
-      ninja-build \
- && rm -rf /var/lib/apt/lists/*
+     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+     git \
+     lsb-release \
+     php8.2-cli \
+     sudo \
+     cmake \
+     ninja-build \
+     && rm -rf /var/lib/apt/lists/*
 
 COPY ./utils/fo-installdeps ./utils/fo-installdeps
 COPY ./install/fo-install-pythondeps ./install/fo-install-pythondeps
@@ -43,20 +43,21 @@ COPY ./src/scheduler/mod_deps ./src/scheduler/
 COPY ./src/ununpack/mod_deps ./src/ununpack/
 COPY ./src/wget_agent/mod_deps ./src/wget_agent/
 COPY ./src/scanoss/mod_deps ./src/scanoss/
+COPY ./src/ossdetect/mod_deps ./src/ossdetect/
 
 RUN mkdir -p /fossology/dependencies-for-runtime \
- && cp -R /fossology/src /fossology/utils /fossology/dependencies-for-runtime/
+     && cp -R /fossology/src /fossology/utils /fossology/dependencies-for-runtime/
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
- && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --buildtime -y \
- && DEBIAN_FRONTEND=noninteractive /fossology/install/fo-install-pythondeps --buildtime -y \
- && rm -rf /var/lib/apt/lists/*
+     && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --buildtime -y \
+     && DEBIAN_FRONTEND=noninteractive /fossology/install/fo-install-pythondeps --buildtime -y \
+     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
 
 RUN cmake -DCMAKE_BUILD_TYPE=MinSizeRel -S. -B./build -G Ninja \
- && cmake --build ./build --parallel \
- && cmake --install build
+     && cmake --build ./build --parallel \
+     && cmake --install build
 
 FROM debian:bookworm-slim
 
@@ -77,20 +78,20 @@ WORKDIR /fossology
 # Note: cron, python, python-psycopg2 are installed
 #       specifically for metrics reporting
 RUN mkdir -p /usr/share/man/man1 /usr/share/man/man7 \
- && DEBIAN_FRONTEND=noninteractive apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      curl \
-      lsb-release \
-      sudo \
-      cron \
-      python3 \
-      python3-yaml \
-      python3-psycopg2 \
-      python3-requests \
-      python3-pip \
- && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --offline --runtime -y \
- && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
+     && DEBIAN_FRONTEND=noninteractive apt-get update \
+     && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
+     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+     curl \
+     lsb-release \
+     sudo \
+     cron \
+     python3 \
+     python3-yaml \
+     python3-psycopg2 \
+     python3-requests \
+     python3-pip \
+     && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --offline --runtime -y \
+     && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
 
 # configure php
 COPY ./install/scripts/php-conf-fix.sh ./install/scripts/php-conf-fix.sh
@@ -98,8 +99,8 @@ RUN /fossology/install/scripts/php-conf-fix.sh --overwrite
 
 # configure apache
 RUN mkdir -p /var/log/apache2/ \
- && ln -sf /proc/self/fd/1 /var/log/apache2/access.log \
- && ln -sf /proc/self/fd/1 /var/log/apache2/error.log
+     && ln -sf /proc/self/fd/1 /var/log/apache2/access.log \
+     && ln -sf /proc/self/fd/1 /var/log/apache2/error.log
 
 COPY ./docker-entrypoint.sh /fossology/docker-entrypoint.sh
 RUN chmod +x /fossology/docker-entrypoint.sh
@@ -112,4 +113,4 @@ COPY --from=builder /usr/local/ /usr/local/
 # the database is filled in the entrypoint
 RUN /usr/local/lib/fossology/fo-postinstall --agent --common --scheduler-only \
      --web-only --no-running-database --python-experimental \
- && rm -rf /var/lib/apt/lists/*
+     && rm -rf /var/lib/apt/lists/*
