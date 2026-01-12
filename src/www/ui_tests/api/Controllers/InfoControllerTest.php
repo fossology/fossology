@@ -251,6 +251,3 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals("OK", $json["scheduler"]["status"]);
   }
 }
-
-
-
