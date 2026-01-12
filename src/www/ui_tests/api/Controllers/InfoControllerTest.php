@@ -10,6 +10,19 @@
  * @brief Tests for InfoController
  */
 
+/**
+ * Stub scheduler communication for getHealth() tests.
+ * InfoController calls fo_communicate_with_scheduler() from its namespace.
+ */
+namespace Fossology\UI\Api\Controllers;
+
+function fo_communicate_with_scheduler($cmd, &$output, &$error_msg)
+{
+  $output = "";
+  $error_msg = "";
+  return true; // scheduler OK
+}
+
 namespace Fossology\UI\Api\Test\Controllers;
 
 use Fossology\UI\Api\Controllers\InfoController;
@@ -100,10 +113,12 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
   {
     $this->testGetInfo(ApiVersion::V1);
   }
+
   public function testGetInfoV2()
   {
     $this->testGetInfo();
   }
+
   /**
    * @param $version
    * @return void
@@ -140,7 +155,7 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
     $expectedResponse = (new ResponseHelper())->withJson(array(
       "name" => $apiTitle,
       "description" => $apiDescription,
-      "version" => $version == APiVersion::V1 ? $apiVersion : "2.0.0",
+      "version" => $version == ApiVersion::V1 ? $apiVersion : "2.0.0",
       "security" => $security,
       "contact" => $apiContact,
       "license" => [
@@ -151,7 +166,7 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
     ), 200);
     $request = new Request("POST", new Uri("HTTP", "localhost"), new Headers(),
       [], [], (new StreamFactory())->createStream());
-    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
     $actualResponse = $this->infoController->getInfo($request,
       new ResponseHelper());
     $this->assertEquals($expectedResponse->getStatusCode(),
@@ -203,4 +218,39 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals(["application/vnd.oai.openapi;charset=utf-8"],
       $actualResponseYaml->getHeader("Content-Type"));
   }
+
+  public function testGetHealthOk()
+  {
+    $request = new Request("GET", new Uri("HTTP", "localhost"), new Headers(),
+      [], [], (new StreamFactory())->createStream());
+
+    $actualResponse = $this->infoController->getHealth($request,
+      new ResponseHelper(), 0);
+
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $json = $this->getResponseJson($actualResponse);
+
+    $this->assertEquals("OK", $json["status"]);
+    $this->assertEquals("OK", $json["db"]["status"]);
+    $this->assertEquals("OK", $json["scheduler"]["status"]);
+  }
+
+  public function testGetHealthDbError()
+  {
+    $request = new Request("GET", new Uri("HTTP", "localhost"), new Headers(),
+      [], [], (new StreamFactory())->createStream());
+
+    $actualResponse = $this->infoController->getHealth($request,
+      new ResponseHelper(), -1);
+
+    $this->assertEquals(503, $actualResponse->getStatusCode());
+    $json = $this->getResponseJson($actualResponse);
+
+    $this->assertEquals("ERROR", $json["status"]);
+    $this->assertEquals("ERROR", $json["db"]["status"]);
+    $this->assertEquals("OK", $json["scheduler"]["status"]);
+  }
 }
+
+
+
