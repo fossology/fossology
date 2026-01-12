@@ -9,20 +9,10 @@
   colors="true" backupGlobals="true"
   beStrictAboutTestsThatDoNotTestAnything="false"
   failOnWarning="false" stopOnFailure="false"
-  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
-  cacheDirectory=".phpunit.cache">
-  <coverage>
-    <include>
-      <directory suffix=".php">.</directory>
-    </include>
-    <report>
-      <clover outputFile="../clover.xml"/>
-    </report>
-  </coverage>
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd">
   <php>
     <env name="SYSCONFDIR" value="src/lib/php/tests/sysconfigDirTest"/>
   </php>
-  <logging/>
   <testsuites>
     <testsuite name="Fossology PhpUnit Test Suite">
       <directory suffix="Test.php">lib/php</directory>
@@ -42,3 +32,5 @@
     </testsuite>
   </testsuites>
 </phpunit>
+
+
