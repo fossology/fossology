@@ -22,7 +22,9 @@ pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 include_directories(
     ${FO_CWD}
     ${JSONCPP_INCLUDE_DIRS}
-    ${PROJECT_SOURCE_DIR}/../lib/cpp
+    ${FO_CLIB_SRC}
+    ${FO_CXXLIB_SRC}
+    ${PostgreSQL_INCLUDE_DIRS}
 )
 
 # Build executable
@@ -30,7 +32,7 @@ add_executable(ossdetect ${SOURCES})
 
 # Link libraries
 target_link_libraries(ossdetect
-    fossology
+    PRIVATE fossologyCPP
     ${JSONCPP_LIBRARIES}
 )
 

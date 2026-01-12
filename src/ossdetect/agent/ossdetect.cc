@@ -12,13 +12,16 @@
  */
 
 #include "ossdetect_dbhandler.hpp"
-#include <libfossology.h>
 #include <json/json.h>
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
 #include <unistd.h>
 #include <sys/wait.h>
+
+extern "C" {
+#include "libfossagent.h"
+}
 
 using namespace ossdetect;
 
@@ -169,20 +172,16 @@ bool processMetadataFile(const std::string& filePath, long uploadId, long pfileI
  * Main entry point
  */
 int main(int argc, char** argv) {
-    // Initialize Fossology libraries
-    DbManager dbManager;
-    
-    if (!dbManager.connect()) {
-        std::cerr << "Failed to connect to database" << std::endl;
-        return 1;
-    }
+    // Initialize database manager
+    fo::DbManager dbManager(&argc, argv);
     
     // Create database handler
-    OssDetectDatabaseHandler dbHandler(dbManager);
+    OssDetectDatabaseHandler databaseHandler(dbManager);
     
     // Create tables if needed
-    if (!dbHandler.createTables()) {
+    if (!databaseHandler.createTables()) {
         std::cerr << "Failed to create database tables" << std::endl;
+        fo_scheduler_disconnect(1);
         return 1;
     }
     
@@ -198,25 +197,52 @@ int main(int argc, char** argv) {
     
     std::string parserScript = scriptDir + "/metadata_parser.py";
     
-    // Simple test mode if run with a file path
-    if (argc > 1) {
-        std::string testFile = argv[1];
+    // Get agent ID
+    int agentId = fo_scheduler_agentId();
+    
+    // Process each upload from the scheduler
+    while (fo_scheduler_next() != NULL) {
+        int uploadId = atoi(fo_scheduler_current());
         
-        std::cout << "Test mode: processing " << testFile << std::endl;
-        
-        if (!isMetadataFile(testFile)) {
-            std::cout << "Note: file does not appear to be a known metadata format" << std::endl;
+        if (uploadId <= 0) {
+            continue;
         }
         
-        // Process with dummy IDs for testing
-        processMetadataFile(testFile, 1, 1, parserScript, dbHandler);
-    } else {
-        std::cout << "OSS Detection Agent" << std::endl;
-        std::cout << "Usage: " << argv[0] << " <metadata-file>" << std::endl;
-        std::cout << std::endl;
-        std::cout << "In production, this agent would be invoked by the scheduler" << std::endl;
-        std::cout << "to process metadata files found in uploaded packages." << std::endl;
+        // Process all files in the upload
+        std::vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(uploadId, false);
+        
+        for (unsigned long pfileId : fileIds) {
+            // Get file info from database
+            char* uploadTreeTableName = nullptr;
+            long uploadTreeId = fo_GetOneUploadTree(uploadId, pfileId, &uploadTreeTableName);
+            
+            if (uploadTreeId <= 0) {
+                continue;
+            }
+            
+            // Get file path
+            char* filePath = fo_RepMkPath("files", fo_GetPfileName(pfileId));
+            if (!filePath) {
+                continue;
+            }
+            
+            // Check if file has analysis data (process all metadata files)
+            std::string filePathStr(filePath);
+            size_t lastSlash = filePathStr.find_last_of('/');
+            std::string filename = (lastSlash != std::string::npos) 
+                                  ? filePathStr.substr(lastSlash + 1) 
+                                  : filePathStr;
+            
+            if (isMetadataFile(filename)) {
+                processMetadataFile(filePath, uploadId, pfileId, parserScript, databaseHandler);
+            }
+            
+            free(filePath);
+            fo_scheduler_heart(1);
+        }
     }
     
+    fo_scheduler_heart(0);
+    fo_scheduler_disconnect(0);
     return 0;
 }

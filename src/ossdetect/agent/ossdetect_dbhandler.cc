@@ -9,35 +9,17 @@
 
 namespace ossdetect {
 
-OssDetectDatabaseHandler::OssDetectDatabaseHandler(DbManager& dbMgr)
-    : dbManager(dbMgr) {
+OssDetectDatabaseHandler::OssDetectDatabaseHandler(fo::DbManager dbManager) 
+    : fo::AgentDatabaseHandler(dbManager) {
 }
 
-OssDetectDatabaseHandler::~OssDetectDatabaseHandler() {
+bool OssDetectDatabaseHandler::createTables() const {
+    return createDependenciesTable() && 
+           createMatchesTable() && 
+           createAgentResultsTable();
 }
 
-bool OssDetectDatabaseHandler::createTables() {
-    // Create all required tables
-    if (!createDependenciesTable()) {
-        std::cerr << "Failed to create dependencies table" << std::endl;
-        return false;
-    }
-    
-    if (!createMatchesTable()) {
-        std::cerr << "Failed to create matches table" << std::endl;
-        return false;
-    }
-    
-    if (!createAgentResultsTable()) {
-        std::cerr << "Failed to create agent results table" << std::endl;
-        return false;
-    }
-    
-    return true;
-}
-
-bool OssDetectDatabaseHandler::createDependenciesTable() {
-    // Simple table creation - in production this would check if exists first
+bool OssDetectDatabaseHandler::createDependenciesTable() const {
     const char* createQuery = 
         "CREATE TABLE IF NOT EXISTS ossdetect_dependency ("
         "od_pk SERIAL PRIMARY KEY,"
@@ -49,20 +31,19 @@ bool OssDetectDatabaseHandler::createDependenciesTable() {
         "source_line INTEGER"
         ")";
     
-    if (!dbManager.queryPrintf(createQuery)) {
+    if (!getDbManager().queryPrintf(createQuery)) {
         return false;
     }
     
-    // Create index for faster lookups
     const char* indexQuery = 
         "CREATE INDEX IF NOT EXISTS ossdetect_dependency_pfile_idx "
         "ON ossdetect_dependency(pfile_fk)";
-    dbManager.queryPrintf(indexQuery);
+    getDbManager().queryPrintf(indexQuery);
     
     return true;
 }
 
-bool OssDetectDatabaseHandler::createMatchesTable() {
+bool OssDetectDatabaseHandler::createMatchesTable() const {
     const char* createQuery = 
         "CREATE TABLE IF NOT EXISTS ossdetect_match ("
         "om_pk SERIAL PRIMARY KEY,"
@@ -75,19 +56,19 @@ bool OssDetectDatabaseHandler::createMatchesTable() {
         "match_type TEXT"
         ")";
     
-    if (!dbManager.queryPrintf(createQuery)) {
+    if (!getDbManager().queryPrintf(createQuery)) {
         return false;
     }
     
     const char* indexQuery = 
         "CREATE INDEX IF NOT EXISTS ossdetect_match_pfile_idx "
         "ON ossdetect_match(pfile_fk)";
-    dbManager.queryPrintf(indexQuery);
+    getDbManager().queryPrintf(indexQuery);
     
     return true;
 }
 
-bool OssDetectDatabaseHandler::createAgentResultsTable() {
+bool OssDetectDatabaseHandler::createAgentResultsTable() const {
     const char* createQuery = 
         "CREATE TABLE IF NOT EXISTS ossdetect_ars ("
         "ars_pk SERIAL PRIMARY KEY,"
@@ -98,12 +79,11 @@ bool OssDetectDatabaseHandler::createAgentResultsTable() {
         "ars_endtime TIMESTAMP"
         ")";
     
-    return dbManager.queryPrintf(createQuery);
+    return getDbManager().queryPrintf(createQuery);
 }
 
 bool OssDetectDatabaseHandler::storeDependency(long uploadId, long pfileId, 
-                                               const Dependency& dependency) {
-    // Use direct query for simplicity - in production would use prepared statements
+                                                const Dependency& dependency) const {
     char query[4096];
     snprintf(query, sizeof(query),
         "INSERT INTO ossdetect_dependency "
@@ -115,12 +95,12 @@ bool OssDetectDatabaseHandler::storeDependency(long uploadId, long pfileId,
         dependency.scope.c_str(), 
         dependency.sourceLine);
     
-    return dbManager.queryPrintf(query);
+    return getDbManager().queryPrintf(query);
 }
 
 bool OssDetectDatabaseHandler::storeSimilarityMatch(long uploadId, long pfileId,
-                                                    const std::string& dependencyName,
-                                                    const SimilarityMatch& match) {
+                                                     const std::string& dependencyName,
+                                                     const SimilarityMatch& match) const {
     char query[4096];
     snprintf(query, sizeof(query),
         "INSERT INTO ossdetect_match "
@@ -133,26 +113,7 @@ bool OssDetectDatabaseHandler::storeSimilarityMatch(long uploadId, long pfileId,
         match.score,
         match.matchType.c_str());
     
-    return dbManager.queryPrintf(query);
-}
-
-bool OssDetectDatabaseHandler::isFileAnalyzed(long agentId, long pfileId) {
-    // Check if dependencies already exist for this file
-    char query[512];
-    snprintf(query, sizeof(query),
-        "SELECT COUNT(*) FROM ossdetect_dependency WHERE pfile_fk = %ld",
-        pfileId);
-    
-    // For now, just return false to allow re-analysis
-    // In production, this would properly check the database
-    return false;
-}
-
-bool OssDetectDatabaseHandler::markFileAnalyzed(long agentId, long pfileId) {
-    // In a full implementation, this would update the ars table
-    // For now, we'll just return true as the existence of dependencies
-    // in the DB serves as our marker
-    return true;
+    return getDbManager().queryPrintf(query);
 }
 
 } // namespace ossdetect

@@ -56,7 +56,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
 COPY . .
 
 RUN cmake -DCMAKE_BUILD_TYPE=MinSizeRel -S. -B./build -G Ninja \
-     && cmake --build ./build --parallel \
+     && cmake --build ./build --parallel -- -k 0 \
      && cmake --install build
 
 FROM debian:bookworm-slim

@@ -9,7 +9,17 @@
 #include <string>
 #include <vector>
 #include <memory>
+
+#include "libfossAgentDatabaseHandler.hpp"
+#include "libfossUtils.hpp"
+#include "libfossdbmanagerclass.hpp"
+
+extern "C" {
 #include "libfossology.h"
+}
+
+using namespace std;
+using namespace fo;
 
 namespace ossdetect {
 
@@ -43,78 +53,23 @@ struct SimilarityMatch {
 
 /**
  * Database handler for OSS detection agent
- * 
- * Manages database operations including creating tables, storing dependencies,
- * and recording similarity matches.
  */
-class OssDetectDatabaseHandler {
+class OssDetectDatabaseHandler : public fo::AgentDatabaseHandler {
 public:
-    OssDetectDatabaseHandler(DbManager& dbManager);
-    ~OssDetectDatabaseHandler();
+    OssDetectDatabaseHandler(fo::DbManager dbManager);
+    OssDetectDatabaseHandler(OssDetectDatabaseHandler&& other) 
+        : fo::AgentDatabaseHandler(std::move(other)) {}
     
-    /**
-     * Create necessary database tables if they don't exist
-     */
-    bool createTables();
-    
-    /**
-     * Store a detected dependency in the database
-     * 
-     * @param uploadId ID of the upload
-     * @param pfileId ID of the metadata file
-     * @param dependency Dependency information to store
-     * @return true on success
-     */
-    bool storeDependency(long uploadId, long pfileId, const Dependency& dependency);
-    
-    /**
-     * Store a similarity match result
-     * 
-     * @param uploadId ID of the upload
-     * @param pfileId ID of the metadata file
-     * @param dependencyName Name of the dependency
-     * @param match Match information to store
-     * @return true on success
-     */
+    bool createTables() const;
+    bool storeDependency(long uploadId, long pfileId, const Dependency& dependency) const;
     bool storeSimilarityMatch(long uploadId, long pfileId, 
-                             const std::string& dependencyName,
-                             const SimilarityMatch& match);
-    
-    /**
-     * Check if a file has already been analyzed
-     * 
-     * @param agentId ID of the agent
-     * @param pfileId ID of the file
-     * @return true if already analyzed
-     */
-    bool isFileAnalyzed(long agentId, long pfileId);
-    
-    /**
-     * Mark file as analyzed
-     * 
-     * @param agentId ID of the agent
-     * @param pfileId ID of the file
-     * @return true on success
-     */
-    bool markFileAnalyzed(long agentId, long pfileId);
+                              const std::string& dependencyName,
+                              const SimilarityMatch& match) const;
     
 private:
-    DbManager& dbManager;
-    
-    /**
-     * Create the dependencies table
-     */
-    bool createDependenciesTable();
-    
-    /**
-     * Create the similarity matches table
-     */
-    bool createMatchesTable();
-    
-    /**
-     * Create the agent results table
-     */
-    bool createAgentResultsTable();
+    bool createDependenciesTable() const;
+    bool createMatchesTable() const;
+    bool createAgentResultsTable() const;
 };
 
 } // namespace ossdetect

@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Similarity matcher for OSS components.
+similarity_matcher.py - OSS Component Similarity Matching
 
-Compares extracted dependencies against a database of known OSS components
-and calculates similarity scores based on various factors.
+This module provides the core functionality for matching extracted dependencies
+against known OSS components using fuzzy string matching algorithms. It's invoked
+by the C++ agent (ossdetect.cc) to calculate similarity scores between dependency
+names/versions and database entries.
+
+The matching algorithm uses a weighted combination of:
+- Name similarity (70%): Using difflib's SequenceMatcher for fuzzy string comparison
+- Version similarity (30%): Comparing version numbers for proximity
+
+This is NOT a test file - it's a production component of the OSS detection agent.
+"""
 
 Copyright (C) 2026 Fossology contributors
 SPDX-License-Identifier: GPL-2.0-only
