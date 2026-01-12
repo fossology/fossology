@@ -16,11 +16,23 @@
  */
 namespace Fossology\UI\Api\Controllers;
 
+/**
+ * Control variables for the stubbed scheduler behavior.
+ * Tests in Fossology\UI\Api\Test\Controllers will set these globals.
+ */
+$GLOBALS['FO_SCHEDULER_STUB_OK'] = true;
+
 function fo_communicate_with_scheduler($cmd, &$output, &$error_msg)
 {
+  if (!empty($GLOBALS['FO_SCHEDULER_STUB_OK'])) {
+    $output = "";
+    $error_msg = "";
+    return true; // scheduler OK
+  }
+
   $output = "";
-  $error_msg = "";
-  return true; // scheduler OK
+  $error_msg = "scheduler error";
+  return false; // scheduler ERROR
 }
 
 namespace Fossology\UI\Api\Test\Controllers;
@@ -84,6 +96,9 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
       'helper.restHelper'))->andReturn($this->restHelper);
     $this->infoController = new InfoController($container);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
+
+    // Default scheduler behavior for tests: OK
+    $GLOBALS['FO_SCHEDULER_STUB_OK'] = true;
   }
 
   /**
@@ -221,6 +236,8 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
 
   public function testGetHealthOk()
   {
+    $GLOBALS['FO_SCHEDULER_STUB_OK'] = true;
+
     $request = new Request("GET", new Uri("HTTP", "localhost"), new Headers(),
       [], [], (new StreamFactory())->createStream());
 
@@ -237,6 +254,8 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
 
   public function testGetHealthDbError()
   {
+    $GLOBALS['FO_SCHEDULER_STUB_OK'] = true;
+
     $request = new Request("GET", new Uri("HTTP", "localhost"), new Headers(),
       [], [], (new StreamFactory())->createStream());
 
@@ -250,4 +269,5 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals("ERROR", $json["db"]["status"]);
     $this->assertEquals("OK", $json["scheduler"]["status"]);
   }
+
 }
