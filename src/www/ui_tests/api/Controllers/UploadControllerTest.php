@@ -744,6 +744,64 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with V1 file upload where scanOptions
+   *    are provided as an array (multipart/form-data style).
+   * -# This should not throw and should schedule analysis.
+   */
+  public function testPostUploadFileScanOptionsArrayV1()
+  {
+    $folderId = 2;
+    $uploadId = 21;
+    $uploadDescription = "Test Upload";
+    $scanOptions = [
+      "analysis" => [
+        "nomos" => true
+      ]
+    ];
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'multipart/form-data');
+    $requestHeaders->setHeader('folderId', $folderId);
+    $requestHeaders->setHeader('uploadDescription', $uploadDescription);
+    $requestHeaders->setHeader('uploadType', 'file');
+
+    $body = $this->streamFactory->createStream();
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withParsedBody([
+      "scanOptions" => $scanOptions
+    ]);
+
+    $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
+    $uploadHelper->shouldReceive('createNewUpload')
+      ->withArgs([[], $folderId, $uploadDescription, 'protected', '', 'file',
+        false])
+      ->andReturn([true, '', '', $uploadId]);
+
+    $info = new Info(201, intval($uploadId), InfoType::INFO);
+    $uploadHelper->shouldReceive('handleScheduleAnalysis')
+      ->withArgs([$uploadId, $folderId, $scanOptions, true])
+      ->andReturn($info);
+
+    $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
+    $this->folderDao->shouldReceive('isFolderAccessible')
+      ->withArgs([$folderId])->andReturn(true);
+
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->uploadController->postUpload($request,
+      new ResponseHelper(), []);
+
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
    * @param int $version Version to test
    * @return void
    */
@@ -752,6 +810,11 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $folderId = 2;
     $uploadId = 20;
     $uploadDescription = "Test Upload";
+    $scanOptions = [
+      "analysis" => [
+        "nomos" => true
+      ]
+    ];
 
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('Content-Type', 'application/json');
@@ -761,14 +824,14 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
         "folderId" => $folderId,
         "uploadDescription" => $uploadDescription,
         "ignoreScm" => "true",
-        "scanOptions" => "scanOptions",
+        "scanOptions" => $scanOptions,
         "uploadType" => "vcs",
-        "excludeFolder" => "false"
+        "excludefolder" => false
       ];
     } else {
       $reqBody = [
         "location" => "data",
-        "scanOptions" => "scanOptions"
+        "scanOptions" => $scanOptions
       ];
       $requestHeaders->setHeader('folderId', $folderId);
       $requestHeaders->setHeader('uploadDescription', $uploadDescription);
@@ -801,7 +864,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $info = new Info(201, intval(20), InfoType::INFO);
 
-    $uploadHelper->shouldReceive('handleScheduleAnalysis')->withArgs([$uploadId,$folderId,$reqBody["scanOptions"],false])
+    $uploadHelper->shouldReceive('handleScheduleAnalysis')->withArgs([$uploadId,$folderId,$reqBody["scanOptions"],true])
       ->andReturn($info);
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
@@ -850,6 +913,11 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   {
     $folderId = 2;
     $uploadDescription = "Test Upload";
+    $scanOptions = [
+      "analysis" => [
+        "nomos" => true
+      ]
+    ];
 
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('Content-type', 'application/json');
@@ -859,13 +927,13 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
         "folderId" => $folderId,
         "uploadDescription" => $uploadDescription,
         "ignoreScm" => "true",
-        "scanOptions" => "scanOptions",
+        "scanOptions" => $scanOptions,
         "uploadType" => "vcs"
       ]));
     } else {
       $body = $this->streamFactory->createStream(json_encode([
         "location" => "data",
-        "scanOptions" => "scanOptions"
+        "scanOptions" => $scanOptions
       ]));
       $requestHeaders->setHeader('folderId', $folderId);
       $requestHeaders->setHeader('uploadDescription', $uploadDescription);
@@ -923,6 +991,11 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   {
     $folderId = 8;
     $uploadDescription = "Test Upload";
+    $scanOptions = [
+      "analysis" => [
+        "nomos" => true
+      ]
+    ];
 
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('Content-type', 'application/json');
@@ -932,13 +1005,13 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
         "folderId" => $folderId,
         "uploadDescription" => $uploadDescription,
         "ignoreScm" => "true",
-        "scanOptions" => "scanOptions",
+        "scanOptions" => $scanOptions,
         "uploadType" => "vcs"
       ]));
     } else {
       $body = $this->streamFactory->createStream(json_encode([
         "location" => "vcsData",
-        "scanOptions" => "scanOptions"
+        "scanOptions" => $scanOptions
       ]));
       $requestHeaders->setHeader('folderId', $folderId);
       $requestHeaders->setHeader('uploadDescription', $uploadDescription);
@@ -996,6 +1069,11 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $uploadDescription = "Test Upload";
     $errorMessage = "Failed to insert upload record";
     $errorDesc = "";
+    $scanOptions = [
+      "analysis" => [
+        "nomos" => true
+      ]
+    ];
 
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('Content-type', 'application/json');
@@ -1005,14 +1083,14 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
         "folderId" => $folderId,
         "uploadDescription" => $uploadDescription,
         "ignoreScm" => "true",
-        "scanOptions" => "scanOptions",
+        "scanOptions" => $scanOptions,
         "uploadType" => "vcs",
-        "excludeFolder" => "false"
+        "excludefolder" => false
       ]));
     } else {
       $body = $this->streamFactory->createStream(json_encode([
         "location" => "vcsData",
-        "scanOptions" => "scanOptions"
+        "scanOptions" => $scanOptions
       ]));
       $requestHeaders->setHeader('folderId', $folderId);
       $requestHeaders->setHeader('uploadDescription', $uploadDescription);

@@ -439,6 +439,9 @@ class UploadController extends RestController
   public function postUpload($request, $response, $args)
   {
     $reqBody = $this->getParsedBody($request);
+    if (! is_array($reqBody)) {
+      $reqBody = [];
+    }
     if (ApiVersion::getVersion($request) == ApiVersion::V2) {
       $uploadType = $reqBody['uploadType'] ?? null;
       $folderId = $reqBody['folderId'] ?? null;
@@ -465,10 +468,17 @@ class UploadController extends RestController
     }
     $scanOptions = [];
     if (array_key_exists('scanOptions', $reqBody)) {
-      if ($uploadType == 'file') {
-        $scanOptions = json_decode($reqBody['scanOptions'], true);
-      } else {
-        $scanOptions = $reqBody['scanOptions'];
+      $scanOptionsRaw = $reqBody['scanOptions'];
+      if (is_array($scanOptionsRaw)) {
+        // multipart/form-data can provide scanOptions as nested arrays:
+        // e.g. scanOptions[analysis][nomos]=true
+        $scanOptions = $scanOptionsRaw;
+      } elseif (is_string($scanOptionsRaw)) {
+        // allow JSON string as well (some clients send scanOptions as JSON)
+        $decoded = json_decode($scanOptionsRaw, true);
+        if (is_array($decoded)) {
+          $scanOptions = $decoded;
+        }
       }
     }
 
