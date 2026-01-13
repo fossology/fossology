@@ -74,6 +74,20 @@ The FOSSology web service allows you to configure its database connection using 
 - **FOSSOLOGY_DB_PASSWORD:** Password to be used for PostgreSQL connection. Defaults to `fossy`.
 
 You can change them if you want to use a different database server or credentials. 
+
+### Notes on PostgreSQL volume mounts (Docker)
+
+When running FOSSology using Docker, the PostgreSQL data directory should follow the mount path recommended by the official Postgres container documentation:
+
+https://hub.docker.com/_/postgres
+
+Avoid using version-specific internal paths such as:
+
+```
+/var/lib/postgresql/16/data
+```
+
+These directories may not be persisted as expected when containers are recreated. Always reply on the directory structure defined by the Postgres image.
  
 ## Vagrant
 
@@ -197,3 +211,6 @@ the GNU Lesser General Public License version 2.1, [LGPL-2.1](<https://tldrlegal
 
 Please see the LICENSE file included with this software for the full texts of
 these licenses.
+
+**Note:** Regardless of the installation type, ensure you increase `upload_max_filesize` and `memory_limit` in your `php.ini` configuration to handle large uploads.
+ See [Configuring PHP](https://github.com/fossology/fossology/wiki/Configuring-PHP) in the wiki for details.

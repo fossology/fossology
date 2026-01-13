@@ -35,6 +35,7 @@ foreach(FO_UNP_LIB ununpack ununpack_cov ununpack-sa)
         ${FO_CWD}/ununpack-ar.c
         ${FO_CWD}/ununpack-disk.c
         ${FO_CWD}/ununpack-zstd.c
+        ${FO_CWD}/ununpack-lzip.c
         ${FO_CWD}/utils.c
         ${FO_CWD}/checksum.c)
     if(${FO_UNP_LIB} STREQUAL "ununpack-sa")
