@@ -14,4 +14,4 @@
  **/
 
 echo "Adding link to real parent in uploadtree table\n";
-$dbManager->queryOnce('UPDATE uploadtree SET realparent = getItemParent(uploadtree_pk) WHERE realparent IS NULL');
+$dbManager->queryOnce('UPDATE uploadtree SET realparent = getItemParent(uploadtree_pk,\'uploadtree\') WHERE realparent IS NULL');
