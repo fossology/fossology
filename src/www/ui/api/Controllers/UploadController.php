@@ -494,7 +494,7 @@ class UploadController extends RestController
         "Require location object if uploadType != file");
     }
     if (empty($folderId) ||
-        !is_numeric($folderId) && $folderId > 0) {
+        !is_numeric($folderId) || intval($folderId) <= 0) {
       throw new HttpBadRequestException("folderId must be a positive integer!");
     }
 

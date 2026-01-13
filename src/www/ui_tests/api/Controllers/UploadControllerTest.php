@@ -1063,6 +1063,174 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    * @param int $version Version to test
    * @return void
    */
+  /**
+   * @test
+   * -# Test for UploadController::postUpload() with invalid folderId (non-numeric) for V1
+   * -# Check if response status is 400
+   */
+  public function testPostUploadInvalidFolderIdNonNumericV1()
+  {
+    $this->testPostUploadInvalidFolderIdNonNumeric(ApiVersion::V1);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::postUpload() with invalid folderId (non-numeric) for V2
+   * -# Check if response status is 400
+   */
+  public function testPostUploadInvalidFolderIdNonNumericV2()
+  {
+    $this->testPostUploadInvalidFolderIdNonNumeric(ApiVersion::V2);
+  }
+
+  /**
+   * @param int $version API version to test
+   * @return void
+   */
+  private function testPostUploadInvalidFolderIdNonNumeric(int $version)
+  {
+    $folderId = "abc";
+    $uploadDescription = "Test Upload";
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+      $request = $request->withParsedBody([
+        "folderId" => $folderId,
+        "uploadDescription" => $uploadDescription,
+        "uploadType" => "file"
+      ]);
+    } else {
+      $requestHeaders->setHeader('folderId', $folderId);
+      $requestHeaders->setHeader('uploadDescription', $uploadDescription);
+      $requestHeaders->setHeader('uploadType', 'file');
+      $request = new Request("POST", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+    }
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("folderId must be a positive integer!");
+
+    $this->uploadController->postUpload($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::postUpload() with invalid folderId (zero) for V1
+   * -# Check if response status is 400
+   */
+  public function testPostUploadInvalidFolderIdZeroV1()
+  {
+    $this->testPostUploadInvalidFolderIdZero(ApiVersion::V1);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::postUpload() with invalid folderId (zero) for V2
+   * -# Check if response status is 400
+   */
+  public function testPostUploadInvalidFolderIdZeroV2()
+  {
+    $this->testPostUploadInvalidFolderIdZero(ApiVersion::V2);
+  }
+
+  /**
+   * @param int $version API version to test
+   * @return void
+   */
+  private function testPostUploadInvalidFolderIdZero(int $version)
+  {
+    $folderId = "0";
+    $uploadDescription = "Test Upload";
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+      $request = $request->withParsedBody([
+        "folderId" => $folderId,
+        "uploadDescription" => $uploadDescription,
+        "uploadType" => "file"
+      ]);
+    } else {
+      $requestHeaders->setHeader('folderId', $folderId);
+      $requestHeaders->setHeader('uploadDescription', $uploadDescription);
+      $requestHeaders->setHeader('uploadType', 'file');
+      $request = new Request("POST", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+    }
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("folderId must be a positive integer!");
+
+    $this->uploadController->postUpload($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::postUpload() with invalid folderId (negative) for V1
+   * -# Check if response status is 400
+   */
+  public function testPostUploadInvalidFolderIdNegativeV1()
+  {
+    $this->testPostUploadInvalidFolderIdNegative(ApiVersion::V1);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::postUpload() with invalid folderId (negative) for V2
+   * -# Check if response status is 400
+   */
+  public function testPostUploadInvalidFolderIdNegativeV2()
+  {
+    $this->testPostUploadInvalidFolderIdNegative(ApiVersion::V2);
+  }
+
+  /**
+   * @param int $version API version to test
+   * @return void
+   */
+  private function testPostUploadInvalidFolderIdNegative(int $version)
+  {
+    $folderId = "-1";
+    $uploadDescription = "Test Upload";
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+      $request = $request->withParsedBody([
+        "folderId" => $folderId,
+        "uploadDescription" => $uploadDescription,
+        "uploadType" => "file"
+      ]);
+    } else {
+      $requestHeaders->setHeader('folderId', $folderId);
+      $requestHeaders->setHeader('uploadDescription', $uploadDescription);
+      $requestHeaders->setHeader('uploadType', 'file');
+      $request = new Request("POST", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+    }
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("folderId must be a positive integer!");
+
+    $this->uploadController->postUpload($request, new ResponseHelper(), []);
+  }
+
   private function testPostUploadInternalError(int $version)
   {
     $folderId = 3;
