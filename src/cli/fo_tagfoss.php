@@ -72,7 +72,7 @@ while ($row = pg_fetch_assoc($result)) {
     $ToAntelink = array();
   }
 }
-exit;
+
 if (count($ToAntelink)) {
   $TaggedFileCount += QueryTag($ToAntelink, $tag_pk, $PrintOnly);
 }
