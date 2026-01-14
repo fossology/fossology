@@ -14,6 +14,7 @@ namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Helper\FileHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\File;
@@ -68,6 +69,9 @@ class FileSearchController extends RestController
   public function getFiles($request, $response, $args)
   {
     $fileListJSON = $this->getParsedBody($request);
+    if ($fileListJSON === null || !is_array($fileListJSON)) {
+      throw new HttpBadRequestException("Request body is missing or invalid. Expected a JSON array of file hashes.");
+    }
     $inputFileList = File::parseFromArray($fileListJSON);
     $existsList = [];
     $nonExistsList = [];
