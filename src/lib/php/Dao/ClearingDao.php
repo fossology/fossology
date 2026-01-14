@@ -479,7 +479,32 @@ INSERT INTO clearing_decision (
       $comment = $row['comment'];
       $acknowledgement = $changeTo;
     }
-    $this->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, false, $row['type_fk'], $reportInfo, $comment, $acknowledgement);
+    $newEventId = $this->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, false, $row['type_fk'], $reportInfo, $comment, $acknowledgement);
+
+    // Check if this license is part of an existing clearing decision and link the new event to it
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
+    $existingDecision = $this->getRelevantClearingDecision($itemTreeBounds, $groupId);
+    
+    if ($existingDecision !== null && $existingDecision->getType() != DecisionTypes::WIP) {
+      // Check if this license is part of the existing decision
+      $licenseIsInDecision = false;
+      foreach ($existingDecision->getClearingEvents() as $event) {
+        if ($event->getLicenseId() == $licenseId) {
+          $licenseIsInDecision = true;
+          break;
+        }
+      }
+      
+      // If the license is part of the decision, link the new event to preserve the decision status
+      if ($licenseIsInDecision) {
+        $stmt = __METHOD__ . '.linkToDecision';
+        $sql = "INSERT INTO clearing_decision_event (clearing_decision_fk, clearing_event_fk) VALUES($1, $2)";
+        $this->dbManager->prepare($stmt, $sql);
+        $this->dbManager->freeResult(
+          $this->dbManager->execute($stmt, array($existingDecision->getClearingId(), $newEventId))
+        );
+      }
+    }
 
     $this->dbManager->commit();
 
