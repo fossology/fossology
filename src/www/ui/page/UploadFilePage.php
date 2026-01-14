@@ -313,4 +313,8 @@ class UploadFilePage extends UploadPageBase
   }
 }
 
-register_plugin(new UploadFilePage());
+// register_plugin is part of the legacy plugin bootstrap. Guard the call so tests
+// and environments without the legacy function do not fatal out.
+if (function_exists('register_plugin')) {
+    register_plugin(new UploadFilePage());
+}

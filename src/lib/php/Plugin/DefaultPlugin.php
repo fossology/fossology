@@ -80,7 +80,9 @@ abstract class DefaultPlugin implements Plugin
       $this->setParameter($key, $value);
     }
     global $SysConf;
-    if (array_key_exists('DIRECTORIES', $SysConf) && array_key_exists('LOGDIR', $SysConf['DIRECTORIES'])) {
+    // Some test environments do not populate $SysConf. Avoid passing null to
+    // array_key_exists() (which causes a TypeError). Use safe checks / empty().
+    if (!empty($SysConf['DIRECTORIES']['LOGDIR'])) {
       $this->logdir = $SysConf['DIRECTORIES']['LOGDIR'];
     } else {
       $this->logdir = sys_get_temp_dir();
