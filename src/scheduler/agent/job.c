@@ -178,6 +178,7 @@ job_t* job_init(GTree* job_list, GSequence* job_queue,
   job->lock            = NULL;
   job->idx             = 0;
   job->message         = NULL;
+  job->upload_name     = NULL;
   job->priority        = priority;
   job->verbose         = 0;
   job->parent_id       = parent_id;
@@ -223,6 +224,7 @@ void job_destroy(job_t* job)
   g_list_free(job->finished_agents);
   g_list_free(job->failed_agents);
   g_free(job->message);
+  g_free(job->upload_name);
   g_free(job->agent_type);
   g_free(job->required_host);
   g_free(job->data);

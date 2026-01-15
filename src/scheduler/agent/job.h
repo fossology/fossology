@@ -66,13 +66,14 @@ typedef struct
     uint32_t   idx;       ///< The current index into the sql results
 
     /* information about job status */
-    gchar*   message;   ///< Message that will be sent with job notification email
-    int32_t  priority;  ///< Importance of the job, maps directory to unix priority
-    int32_t  verbose;   ///< The verbose level for all of the agents in this job
-    int32_t  parent_id; ///< The identifier for the parent of this job (its queue id)
-    int32_t  id;        ///< The identifier for this job
-    int32_t  user_id;   ///< The id of the user that created the job
-    int32_t  group_id;  ///< The id of the group that created the job
+    gchar*   message;      ///< Message that will be sent with job notification email
+    gchar*   upload_name;  ///< Name of the upload associated with this job (used for delagent)
+    int32_t  priority;     ///< Importance of the job, maps directory to unix priority
+    int32_t  verbose;      ///< The verbose level for all of the agents in this job
+    int32_t  parent_id;    ///< The identifier for the parent of this job (its queue id)
+    int32_t  id;           ///< The identifier for this job
+    int32_t  user_id;      ///< The id of the user that created the job
+    int32_t  group_id;     ///< The id of the group that created the job
 } job_t;
 
 /* ************************************************************************** */
