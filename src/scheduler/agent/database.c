@@ -111,8 +111,13 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
     else if(PQntuples(db_result) == 0)
     {
       if(strcmp(job->agent_type, "delagent") == 0)
-        g_string_append_printf(ret,
-          "[File has been deleted by job %d]", job->id);
+      {
+        if(job->upload_name != NULL)
+          g_string_append_printf(ret, "[Upload \"%s\" has been deleted successfully]", job->upload_name);
+        else
+          g_string_append_printf(ret,
+            "[File has been deleted by job %d]", job->id);
+      }
       else
         g_string_append_printf(ret,
           "[ERROR: file has not been uploaded or unpacked yet for job %d]", job->id);
@@ -144,8 +149,13 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
     else if(PQntuples(db_result) == 0)
     {
       if(strcmp(job->agent_type, "delagent") == 0)
-        g_string_append_printf(ret,
-          "[File has been deleted by job %d]", job->id);
+      {
+        if(job->upload_name != NULL)
+          g_string_append_printf(ret, "[Upload \"%s\" has been deleted successfully]", job->upload_name);
+        else
+          g_string_append_printf(ret,
+            "[File has been deleted by job %d]", job->id);
+      }
       else
         g_string_append_printf(ret,
           "[ERROR: file has not been uploaded or unpacked yet for job %d]", job->id);
@@ -915,6 +925,22 @@ void database_update_event(scheduler_t* scheduler, void* unused)
         atoi(PQget(pri_result, 0, "group_pk")),
         atoi(PQget(pri_result, 0, "job_priority")), jq_cmd_args);
     job_set_data(scheduler, job,  value, (pfile && pfile[0] != '\0'));
+
+    /* For delagent, fetch and store the upload name before deletion */
+    if(strcmp(type, "delagent") == 0 && value != NULL && strlen(value) > 0)
+    {
+      char upload_sql[512];
+      PGresult* upload_result;
+      snprintf(upload_sql, sizeof(upload_sql),
+          "SELECT upload_filename FROM upload WHERE upload_pk='%s'", value);
+      upload_result = database_exec(scheduler, upload_sql);
+      if(PQresultStatus(upload_result) == PGRES_TUPLES_OK && PQntuples(upload_result) > 0)
+      {
+        job->upload_name = g_strdup(PQgetvalue(upload_result, 0, 0));
+        V_DATABASE("DB: Stored upload name '%s' for delagent job %d\n", job->upload_name, j_id);
+      }
+      SafePQclear(upload_result);
+    }
 
     SafePQclear(pri_result);
   }
