@@ -59,10 +59,26 @@ class search extends FO_Plugin
    */
   function RegisterMenus()
   {
-    menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+    menu_insert("Main::" . $this->MenuList, $this->MenuOrder, $this->Name, $this->MenuTarget);
 
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array( "page", "item",));
+    $fromMod = GetParm("mod", PARM_STRING);
+
+    // Always keep paging
+    $keep = array("page");
+
+    // Keep upload context when coming from other views (license browser, etc.)
+    $keep[] = "upload";
+    $keep[] = "folder";
+    $keep[] = "show";
+
+    // Only keep item when coming from Browse (tree-scoped)
+    if ($fromMod === "browse") {
+      $keep[] = "item";
+    }
+
+    $URI = $this->Name . Traceback_parm_keep($keep);
+
     $Item = GetParm("item", PARM_INTEGER);
     if (! empty($Item)) {
       if (GetParm("mod", PARM_STRING) == $this->Name) {
@@ -96,14 +112,13 @@ class search extends FO_Plugin
     } else {
       $PageChoices = "";
     }
-    $Outbuf .= UploadtreeFileList($UploadtreeRecs, "browse","view",$Page*$this->MaxPerPage + 1);
+    $Outbuf .= UploadtreeFileList($UploadtreeRecs, "browse", "view", $Page * $this->MaxPerPage + 1);
 
     /* put page menu at the bottom, too */
     $Outbuf .= $PageChoices;
 
     return $Outbuf;
   }
-
 
   /**
    * \brief Display the loaded menu and plugins.
@@ -120,13 +135,13 @@ class search extends FO_Plugin
 
     $this->vars['baseuri'] = Traceback_uri();
     $CriteriaCount = 0;
-    $GETvars="";
+    $GETvars = "";
 
     // loads list of all uploads to put in Search filter select field
     $uploadsArray = $this->loadUploads();
     $this->vars['uploadsArray'] = $uploadsArray;
 
-    $Item = GetParm("item",PARM_INTEGER);
+    $Item = GetParm("item", PARM_INTEGER);
     /* Show path if searching an item tree (don't show on global searches) */
     if ($Item) {
       $this->vars['pathOfItem'] = Dir2Browse($this->Name, $Item, NULL, 1, NULL) .
@@ -134,7 +149,7 @@ class search extends FO_Plugin
       $GETvars .= "&item=$Item";
     }
 
-    $searchtype = GetParm("searchtype",PARM_STRING);
+    $searchtype = GetParm("searchtype", PARM_STRING);
     $GETvars .= "&searchtype=" . urlencode($searchtype);
     if ($searchtype == 'containers') {
       $this->vars["ContainersChecked"] = "checked=\"checked\"";
@@ -151,22 +166,28 @@ class search extends FO_Plugin
       $this->vars["Filename"] = $Filename;
     }
 
-    $Upload = GetParm("upload",PARM_INTEGER);
+    /**
+     * Preserve upload context when opening the search page from a scoped view
+     * (e.g. License Browser / Browse views). This fixes #1853 where clicking
+     * Search would lose the current upload scope and default back to “All uploads”.
+     */
+    $Upload = GetParm("upload", PARM_INTEGER);
+    $this->vars["Upload"] = (empty($Upload) ? 0 : $Upload);
+
     $SelectedUploadName = "All uploads";
     if ($Upload != 0) {
       $CriteriaCount++;
       $GETvars .= "&upload=" . urlencode($Upload);
-      $this->vars["Upload"] = $Upload;
       foreach ($uploadsArray as $row) {
         if ($row->getId() == $Upload) {
-          $SelectedUploadName = $row->getFilename() . " from " .  Convert2BrowserTime(date("Y-m-d H:i:s",$row->getTimestamp()));
+          $SelectedUploadName = $row->getFilename() . " from " .
+            Convert2BrowserTime(date("Y-m-d H:i:s", $row->getTimestamp()));
+          break;
         }
       }
-    } else {
-      $this->vars["Upload"] = 0;
     }
 
-    $tag = GetParm("tag",PARM_RAW);
+    $tag = GetParm("tag", PARM_RAW);
     if (!empty($tag)) {
       $CriteriaCount++;
       $GETvars .= "&tag=" . urlencode($tag);
@@ -220,15 +241,26 @@ class search extends FO_Plugin
       if (empty($Page)) {
         $Page = 0;
       }
-      $UploadtreeRecsResult = $this->searchHelperDao->GetResults($Item, $Filename, $Upload, $tag, $Page, $Limit, $SizeMin,
-        $SizeMax, $searchtype, $License, $Copyright, $this->uploadDao,
-        Auth::getGroupId());
+      $UploadtreeRecsResult = $this->searchHelperDao->GetResults(
+        $Item,
+        $Filename,
+        $Upload,
+        $tag,
+        $Page,
+        $Limit,
+        $SizeMin,
+        $SizeMax,
+        $searchtype,
+        $License,
+        $Copyright,
+        $this->uploadDao,
+        Auth::getGroupId()
+      );
       $html = "<hr>\n";
-      $message = _(
-        "The indented search results are same files in different folders");
+      $message = _("The indented search results are same files in different folders");
       $html .= "<H4>$message</H4>\n";
       $text = $UploadtreeRecsResult[1] . " " . _("Files matching");
-      $html .= "<H2>$text " . htmlentities($Filename) . " in ". htmlentities($SelectedUploadName) . "</H2>\n";
+      $html .= "<H2>$text " . htmlentities($Filename) . " in " . htmlentities($SelectedUploadName) . "</H2>\n";
       $html .= $this->HTMLResults($UploadtreeRecsResult[0], $Page, $GETvars);
       $this->vars["result"] = $html;
     }
