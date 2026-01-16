@@ -46,7 +46,7 @@ class upload_properties extends FO_Plugin
    **/
   public function UpdateUploadProperties($uploadId, $newName, $newDesc)
   {
-    if (empty($newName) and empty($newDesc)) {
+    if (is_null($newName) && is_null($newDesc)) {
       return 2;
     }
 
@@ -74,7 +74,7 @@ class upload_properties extends FO_Plugin
         __METHOD__ . '.updateUpload.name');
     }
 
-    if (! empty($newDesc)) {
+    if (!is_null($newDesc)) {
       $trimNewDesc = trim($newDesc);
       $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=$2 WHERE upload_pk=$1",
         array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
@@ -94,9 +94,9 @@ class upload_properties extends FO_Plugin
       $folder_pk = $rootFolder->getId();
     }
 
-    $NewName = GetArrayVal("newname", $_POST);
-    $NewDesc = GetArrayVal("newdesc", $_POST);
-    $upload_pk = GetArrayVal("upload_pk", $_POST);
+    $NewName = GetParm("newname", PARM_TEXT);
+    $NewDesc = GetParm("newdesc", PARM_TEXT);
+    $upload_pk = GetParm("upload_pk", PARM_INTEGER);
     if (empty($upload_pk)) {
       $upload_pk = GetParm('upload', PARM_INTEGER);
     }
