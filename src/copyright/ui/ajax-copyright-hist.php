@@ -245,13 +245,16 @@ class CopyrightHistogramProcessPost extends FO_Plugin
       $sql_upload = " AND UT.upload_fk=$5 ";
     }
 
+    // Define constant for fallback license text (for potential future localization)
+    $noLicenseFoundText = "No_license_found";
+    
     $join = "";
     $filterQuery = "";
     if (($type == 'statement' || $type == 'scancode_statement') && $filter == "nolic") {
-      $noLicStr = "No_license_found";
+      $noLicStr = $noLicenseFoundText;
       $voidLicStr = "Void";
-      $join = " INNER JOIN license_file AS LF on cp.pfile_fk=LF.pfile_fk ";
-      $filterQuery = " AND LF.rf_fk IN (SELECT rf_pk FROM license_ref WHERE rf_shortname IN ('$noLicStr','$voidLicStr')) ";
+      $join = " INNER JOIN license_file AS lf ON cp.pfile_fk=lf.pfile_fk ";
+      $filterQuery = " AND lf.rf_fk IN (SELECT rf_pk FROM license_ref WHERE rf_shortname IN ('$noLicStr','$voidLicStr')) ";
     } else {
       // No filter, nothing to do
     }
@@ -297,11 +300,21 @@ $unorderedQuery$grouping) as K";
     $filterParms[] = $limit;
     $range .= ' LIMIT $' . count($filterParms);
 
-    $sql = "SELECT mcontent AS content, mhash AS hash, copyright_count FROM (SELECT
+    // Note: COUNT(DISTINCT cp.hash) counts unique copyright entries even when
+    // a single copyright has multiple license associations from the LEFT JOIN
+    $sql = "SELECT mcontent AS content, mhash AS hash, copyright_count, associated_licenses FROM (SELECT
 (CASE WHEN (ce.content IS NULL OR ce.content = '') THEN cp.content ELSE ce.content END) AS mcontent,
 (CASE WHEN (ce.hash IS NULL OR ce.hash = '') THEN cp.hash ELSE ce.hash END) AS mhash,
-count(*) AS copyright_count " .
-      "$unorderedQuery $filterQuery GROUP BY mcontent, mhash) AS k $searchFilter $orderString $range";
+COUNT(DISTINCT cp.hash) AS copyright_count,
+string_agg(DISTINCT COALESCE(lr.rf_shortname, '$noLicenseFoundText'), ', ') AS associated_licenses
+FROM $tableName AS cp
+INNER JOIN $uploadTreeTableName AS UT ON cp.pfile_fk = UT.pfile_fk
+LEFT JOIN $tableNameEvent AS ce ON ce.".$tableName."_fk = cp.".$tableName."_pk AND ce.upload_fk = $5 AND ce.uploadtree_fk = UT.uploadtree_pk
+LEFT JOIN license_file AS lf ON cp.pfile_fk = lf.pfile_fk
+LEFT JOIN license_ref AS lr ON lf.rf_fk = lr.rf_pk
+$join
+WHERE cp.content!='' AND ( UT.lft  BETWEEN  $1 AND  $2 ) AND cp.type = $3 AND cp.agent_fk = ANY($4::int[]) AND ($activatedClause)$sql_upload
+$filterQuery GROUP BY mcontent, mhash) AS k $searchFilter $orderString $range";
     $statement = __METHOD__ . $filter.$tableName . $uploadTreeTableName . ($activated ? '' : '_deactivated');
     $rows = $this->dbManager->getRows($sql, $filterParms, $statement);
 
@@ -462,11 +475,12 @@ count(*) AS copyright_count " .
     $link .= $urlArgs . "'>" . $row['copyright_count'] . "</a>";
     $output['0'] = $link;
     $output['1'] = convertToUTF8($row['content']);
-    $output['2'] = $this->getTableRowAction($hash, $uploadTreeId, $upload, $type, $activated, $rw);
+    $output['2'] = isset($row['associated_licenses']) ? convertToUTF8($row['associated_licenses']) : _("N/A");
+    $output['3'] = $this->getTableRowAction($hash, $uploadTreeId, $upload, $type, $activated, $rw);
     if ($rw && $activated) {
-      $output['3'] = "<input type='checkbox' class='deleteBySelect$type' id='deleteBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
+      $output['4'] = "<input type='checkbox' class='deleteBySelect$type' id='deleteBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
     } else {
-        $output['3'] = "<input type='checkbox' class='undoBySelect$type' id='undoBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
+        $output['4'] = "<input type='checkbox' class='undoBySelect$type' id='undoBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
     }
     return $output;
   }

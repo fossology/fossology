@@ -6,7 +6,8 @@
 function createTableBase{{ table.type }}(activated) {
   var aoColumns = [
       { "sTitle": "{{ 'Count'| trans }}", "sClass": "right read_only", "sWidth": "5%" },
-      { "sTitle": "{{ table.description }}", "sClass": "left"}
+      { "sTitle": "{{ table.description }}", "sClass": "left"},
+      { "sTitle": "{{ 'Associated Licenses'| trans }}", "sClass": "left", "sWidth": "15%" }
     ]
   if (activated)
   {
@@ -141,7 +142,7 @@ function createTable{{ table.type }}() {
     }
   });
 
-  $('#copyright{{ table.type }} tbody').on('click', 'tr td:nth-child(3)', function (event) {
+  $('#copyright{{ table.type }} tbody').on('click', 'tr td:nth-child(4)', function (event) {
     if ($(this).find('img:visible').length > 0) {
       if ($(event.target).is('img')) {
         return;
@@ -159,7 +160,7 @@ function createTable{{ table.type }}() {
     }
   });
 
-  $('#copyright{{ table.type }} tbody').on('click', 'tr td:nth-child(4)', function (event) {
+  $('#copyright{{ table.type }} tbody').on('click', 'tr td:nth-child(5)', function (event) {
     if ($(event.target).is('input')) {
       return;
     }
@@ -174,6 +175,7 @@ function createPlaneTableBase{{ table.type }}(activated) {
   var aoColumns = [
       { "sTitle": "{{ 'Count'| trans }}", "sClass": "right read_only", "sWidth": "5%" },
       { "sTitle": "{{ table.description }}", "sClass": "left"},
+      { "sTitle": "{{ 'Associated Licenses'| trans }}", "sClass": "left", "sWidth": "15%" },
       { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false }
     ];
   if (activated)
