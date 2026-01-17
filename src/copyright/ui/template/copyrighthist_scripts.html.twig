@@ -23,7 +23,17 @@
         $("#deleteHashDecision" + type + hash).hide();
         $("#undoDeleteHashDecision" + type + hash).attr("style","display:inline !important;");
       },
-      error: function() { alert('error'); }
+      error: function(xhr, status, error) {
+        var errorMessage = 'Failed to delete hash decision';
+        if (xhr.responseJSON && xhr.responseJSON.error) {
+          errorMessage += ': ' + xhr.responseJSON.error;
+        } else if (xhr.responseText) {
+          errorMessage += ': ' + xhr.responseText;
+        } else {
+          errorMessage += ': ' + error;
+        }
+        alert(errorMessage);
+      }
     });
   }
 
@@ -40,7 +50,17 @@
         $("#undoDeleteHashDecision" + type + hash).hide();
         $("#deleteHashDecision" + type + hash).attr("style","display:inline !important;");
       },
-      error: function() { alert('error'); }
+      error: function(xhr, status, error) {
+        var errorMessage = 'Failed to undo hash decision';
+        if (xhr.responseJSON && xhr.responseJSON.error) {
+          errorMessage += ': ' + xhr.responseJSON.error;
+        } else if (xhr.responseText) {
+          errorMessage += ': ' + xhr.responseText;
+        } else {
+          errorMessage += ': ' + error;
+        }
+        alert(errorMessage);
+      }
     });
   }
 

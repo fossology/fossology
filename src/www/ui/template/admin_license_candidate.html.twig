@@ -92,7 +92,17 @@
                 });
               }
             },
-            error: function() { alert('error'); }
+            error: function(xhr, status, error) {
+              var errorMessage = 'Failed to load license text';
+              if (xhr.responseJSON && xhr.responseJSON.error) {
+                errorMessage += ': ' + xhr.responseJSON.error;
+              } else if (xhr.responseText) {
+                errorMessage += ': ' + xhr.responseText;
+              } else {
+                errorMessage += ': ' + error;
+              }
+              alert(errorMessage);
+            }
           });
           },
         Cancel: function() {

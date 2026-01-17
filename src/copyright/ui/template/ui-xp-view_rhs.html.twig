@@ -115,7 +115,17 @@
           $("#actionsOf" + pk + " .basicActions").hide();
           $("#actionsOf" + pk + " .undoActions").attr("style","display:inline !important;");
         },
-        error: function() { alert('error'); }
+        error: function(xhr, status, error) {
+          var errorMessage = 'Failed to delete decision';
+          if (xhr.responseJSON && xhr.responseJSON.error) {
+            errorMessage += ': ' + xhr.responseJSON.error;
+          } else if (xhr.responseText) {
+            errorMessage += ': ' + xhr.responseText;
+          } else {
+            errorMessage += ': ' + error;
+          }
+          alert(errorMessage);
+        }
       });
     }
 
@@ -132,7 +142,17 @@
           $("#actionsOf" + pk + " .basicActions").attr("style","display:inline !important;");
           $("#actionsOf" + pk + " .undoActions").hide();
         },
-        error: function() { alert('error'); }
+        error: function(xhr, status, error) {
+          var errorMessage = 'Failed to undo decision';
+          if (xhr.responseJSON && xhr.responseJSON.error) {
+            errorMessage += ': ' + xhr.responseJSON.error;
+          } else if (xhr.responseText) {
+            errorMessage += ': ' + xhr.responseText;
+          } else {
+            errorMessage += ': ' + error;
+          }
+          alert(errorMessage);
+        }
       });
     }
   </script>
