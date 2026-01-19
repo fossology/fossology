@@ -1,4 +1,7 @@
 <?php
+// SPDX-FileCopyrightText: © 2024 Fossology contributors
+//
+// SPDX-License-Identifier: GPL-2.0-only
 
 /**
  * @param int|string $existingFlag Current rf_flag value in DB.

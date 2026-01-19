@@ -1,4 +1,7 @@
 <?php
+// SPDX-FileCopyrightText: © 2024 Fossology contributors
+//
+// SPDX-License-Identifier: GPL-2.0-only
 
 require_once dirname(__FILE__) . '/../../../../install/license_ref_utils.php';
 
