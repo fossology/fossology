@@ -1262,9 +1262,11 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     ];
 
     $body = $this->streamFactory->createStream(json_encode($reqBody));
+    $body->rewind();
     $request = new Request("POST", new Uri("HTTP", "localhost", 80,
       "/uploads/$uploadId"),
-      new Headers(['Content-Type' => 'application/json']), [], [], $body);
+      new Headers(), [], [], $body);
+    $request = $request->withHeader('Content-Type', 'application/json');
 
     $this->userDao->shouldReceive('isAdvisorOrAdmin')
       ->withArgs([$this->userId, $this->groupId])
