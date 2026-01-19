@@ -37,4 +37,24 @@ class TestLiteDbTest extends \PHPUnit\Framework\TestCase
     assertThat($tag1,hasKey('perm'));
     assertThat($tag1['perm'],is(10));
   }
+
+  /**
+   * Test existsColumn functionality
+   */
+  public function testExistsColumn()
+  {
+    $testDb = new TestLiteDb();
+    // Use existing helper to create the standard 'tag' table
+    $testDb->createPlainTables(array('tag'));
+    $dbManager = $testDb->getDbManager();
+
+    // Check 1: 'tag_pk' column should exist in 'tag' table
+    $this->assertTrue($dbManager->existsColumn('tag', 'tag_pk'), "Column 'tag_pk' should exist");
+
+    // Check 2: 'tag_desc' column should exist in 'tag' table
+    $this->assertTrue($dbManager->existsColumn('tag', 'tag_desc'), "Column 'tag_desc' should exist");
+
+    // Check 3: 'dummy' column should NOT exist
+    $this->assertFalse($dbManager->existsColumn('tag', 'dummy'), "Column 'dummy' should NOT exist");
+  }
 }
