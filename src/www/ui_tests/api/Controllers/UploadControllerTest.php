@@ -1039,6 +1039,286 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    * @runInSeparateProcess
    * @preserveGlobalState disabled
    * @test
+   * -# Test for UploadController::postUpload() with null folderId with V1 parameters
+   * -# Check if response status is 400
+   */
+  public function testPostUploadNullFolderIdV1()
+  {
+    $this->testPostUploadNullFolderId(ApiVersion::V1);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with null folderId with V2 parameters
+   * -# Check if response status is 400
+   */
+  public function testPostUploadNullFolderIdV2()
+  {
+    $this->testPostUploadNullFolderId(ApiVersion::V2);
+  }
+
+  /**
+   * @param int $version Version to test
+   * @return void
+   */
+  private function testPostUploadNullFolderId(int $version)
+  {
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-type', 'application/json');
+    if ($version == ApiVersion::V2) {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData",
+        "folderId" => null,
+        "uploadType" => "vcs"
+      ]));
+    } else {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData"
+      ]));
+      $requestHeaders->setHeader('uploadType', 'vcs');
+    }
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+    }
+    $this->expectException(HttpBadRequestException::class);
+    $this->uploadController->postUpload($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with empty folderId with V1 parameters
+   * -# Check if response status is 400
+   */
+  public function testPostUploadEmptyFolderIdV1()
+  {
+    $this->testPostUploadEmptyFolderId(ApiVersion::V1);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with empty folderId with V2 parameters
+   * -# Check if response status is 400
+   */
+  public function testPostUploadEmptyFolderIdV2()
+  {
+    $this->testPostUploadEmptyFolderId(ApiVersion::V2);
+  }
+
+  /**
+   * @param int $version Version to test
+   * @return void
+   */
+  private function testPostUploadEmptyFolderId(int $version)
+  {
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-type', 'application/json');
+    if ($version == ApiVersion::V2) {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData",
+        "folderId" => "",
+        "uploadType" => "vcs"
+      ]));
+    } else {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData"
+      ]));
+      $requestHeaders->setHeader('folderId', '');
+      $requestHeaders->setHeader('uploadType', 'vcs');
+    }
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+    }
+    $this->expectException(HttpBadRequestException::class);
+    $this->uploadController->postUpload($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with non-numeric folderId with V1 parameters
+   * -# Check if response status is 400
+   */
+  public function testPostUploadNonNumericFolderIdV1()
+  {
+    $this->testPostUploadNonNumericFolderId(ApiVersion::V1);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with non-numeric folderId with V2 parameters
+   * -# Check if response status is 400
+   */
+  public function testPostUploadNonNumericFolderIdV2()
+  {
+    $this->testPostUploadNonNumericFolderId(ApiVersion::V2);
+  }
+
+  /**
+   * @param int $version Version to test
+   * @return void
+   */
+  private function testPostUploadNonNumericFolderId(int $version)
+  {
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-type', 'application/json');
+    if ($version == ApiVersion::V2) {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData",
+        "folderId" => "abc",
+        "uploadType" => "vcs"
+      ]));
+    } else {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData"
+      ]));
+      $requestHeaders->setHeader('folderId', 'abc');
+      $requestHeaders->setHeader('uploadType', 'vcs');
+    }
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+    }
+    $this->expectException(HttpBadRequestException::class);
+    $this->uploadController->postUpload($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with zero folderId with V1 parameters
+   * -# Check if response status is 400
+   */
+  public function testPostUploadZeroFolderIdV1()
+  {
+    $this->testPostUploadZeroFolderId(ApiVersion::V1);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with zero folderId with V2 parameters
+   * -# Check if response status is 400
+   */
+  public function testPostUploadZeroFolderIdV2()
+  {
+    $this->testPostUploadZeroFolderId(ApiVersion::V2);
+  }
+
+  /**
+   * @param int $version Version to test
+   * @return void
+   */
+  private function testPostUploadZeroFolderId(int $version)
+  {
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-type', 'application/json');
+    if ($version == ApiVersion::V2) {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData",
+        "folderId" => 0,
+        "uploadType" => "vcs"
+      ]));
+    } else {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData"
+      ]));
+      $requestHeaders->setHeader('folderId', '0');
+      $requestHeaders->setHeader('uploadType', 'vcs');
+    }
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+    }
+    $this->expectException(HttpBadRequestException::class);
+    $this->uploadController->postUpload($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with array folderId (multipart) with V2 parameters
+   * -# Check if response status is 400 when array is empty or invalid
+   */
+  public function testPostUploadArrayFolderIdV2()
+  {
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'multipart/form-data');
+    $body = $this->streamFactory->createStream();
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2);
+    $request = $request->withParsedBody([
+      "folderId" => [1, 2],  // Array from multipart/form-data
+      "uploadType" => "vcs",
+      "location" => "vcsData"
+    ]);
+    // Should extract first element and validate it
+    $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([1, 2, 3, 4]);
+    $this->folderDao->shouldReceive('isFolderAccessible')
+      ->withArgs([1])->andReturn(true);
+    $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
+    $uploadHelper->shouldReceive('createNewUpload')
+      ->withArgs(['vcsData', 1, '', 'protected', '', 'vcs', false, false])
+      ->andReturn([true, '', '', 20]);
+    $info = new Info(201, 20, InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->uploadController->postUpload($request,
+      new ResponseHelper(), []);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with empty array folderId with V2 parameters
+   * -# Check if response status is 400
+   */
+  public function testPostUploadEmptyArrayFolderIdV2()
+  {
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'multipart/form-data');
+    $body = $this->streamFactory->createStream();
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2);
+    $request = $request->withParsedBody([
+      "folderId" => [],  // Empty array
+      "uploadType" => "vcs",
+      "location" => "vcsData"
+    ]);
+    $this->expectException(HttpBadRequestException::class);
+    $this->uploadController->postUpload($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
    * -# Test for UploadController::postUpload() with internal error with V1 parameters
    * -# Check if response status is 500 with error messages set
    */
