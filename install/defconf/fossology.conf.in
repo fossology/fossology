@@ -127,8 +127,43 @@ CONF_EXT_AUTH_NEW_USER_AGENT_LIST=
 ; password : to allow passwords for login
 ; external : passwords are not allowed
 provider = password
+
 ; REST API token should be one of
 ; token : to allow FOSSology tokens for use
 ; oauth : to allow only oauth tokens
 ; both  : to allow both FOSSology and oauth tokens
 resttoken = token
+
+
+; -----------------------------------------------------------------------------
+; OIDC overrides (config-as-code)
+; Values in this section override the sysconfig table values at runtime.
+; This allows configuration without using the web UI, e.g. for Docker/K8s.
+;
+; NOTE: Only non-empty values override DB sysconfig values.
+; -----------------------------------------------------------------------------
+[OIDC]
+
+; If OidcAppName is set, the OIDC login option will be displayed on the login page.
+; Example:
+;OidcAppName = "My SSO"
+;OidcIssuer = "https://idp.example.com/"
+;OidcAuthorizeURL = "https://idp.example.com/oauth2/v1/authorize"
+;OidcAccessTokenURL = "https://idp.example.com/oauth2/v1/token"
+;OidcResourceURL = "https://idp.example.com/oauth2/v1/userinfo"
+;OidcJwksURL = "https://idp.example.com/oauth2/v1/keys"
+;OidcLogoutURL = "https://idp.example.com/logout"
+;OidcResourceOwnerId = "email"
+;OidcClientIdClaim = "client_id"
+;OidcClientId = "xxxxx"
+;OidcSecret = "yyyyy"
+;OidcScope = "openid email profile"
+;OidcRedirectURL = "https://fossology.example.com/oauth/callback"
+;OidcDiscoveryURL = "https://idp.example.com/.well-known/openid-configuration"
+;OidcPrompt = "login"
+;OidcTokenType = "Bearer"
+;OidcAppId = ""
+;OidcDesc = "OIDC Login"
+;OidcJwkAlgInject = "false"
+;OidcOverrides = ""
+
