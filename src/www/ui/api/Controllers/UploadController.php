@@ -493,10 +493,15 @@ class UploadController extends RestController
       throw new HttpBadRequestException(
         "Require location object if uploadType != file");
     }
-    if (empty($folderId) ||
-        !is_numeric($folderId) && $folderId > 0) {
+    // Handle array case (multipart/form-data can send folderId as array)
+    if (is_array($folderId)) {
+      $folderId = !empty($folderId) ? $folderId[0] : null;
+    }
+    // Validate folderId: must be present, numeric, and positive
+    if (empty($folderId) || !is_numeric($folderId) || intval($folderId) <= 0) {
       throw new HttpBadRequestException("folderId must be a positive integer!");
     }
+    $folderId = intval($folderId);
 
     $allFolderIds = $this->restHelper->getFolderDao()->getAllFolderIds();
     if (!in_array($folderId, $allFolderIds)) {
