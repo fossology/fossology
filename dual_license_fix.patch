@@ -1,0 +1,79 @@
+--- a/src/nomos/agent/parse.c
++++ b/src/nomos/agent/parse.c
+@@ -4500,6 +4500,45 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
+   }
+   cleanLicenceBuffer();
+   /*
++   * Enhanced Dual License Detection
++   * This section improves detection of dual license scenarios
++   */
++  if (HASTEXT("dual.{0,10}licens", REG_EXTENDED | REG_ICASE)) {
++    MEDINTEREST("Dual-license");
++    
++    // Check for common dual license patterns
++    if (HASTEXT("(GPL|GNU).{0,50}(MIT|BSD)", REG_EXTENDED | REG_ICASE)) {
++      if (!lmem[_mGPL]) {
++        INTERESTING("GPL");
++        lmem[_mGPL] = 1;
++      }
++      if (HASTEXT("MIT", REG_EXTENDED | REG_ICASE)) {
++        INTERESTING("MIT");
++        lmem[_mMIT] = 1;
++      }
++      if (HASTEXT("BSD", REG_EXTENDED | REG_ICASE)) {
++        INTERESTING("BSD");
++        lmem[_fBSD] = 1;
++      }
++    }
++    
++    // Check for Apache/MIT dual licensing
++    if (HASTEXT("(Apache|ASL).{0,50}MIT", REG_EXTENDED | REG_ICASE)) {
++      INTERESTING("Apache");
++      INTERESTING("MIT");
++      lmem[_mMIT] = 1;
++    }
++    
++    // Check for MPL dual licensing
++    if (HASTEXT("(MPL|Mozilla).{0,50}(GPL|MIT|BSD)", REG_EXTENDED | REG_ICASE)) {
++      if (!lmem[_mMPL]) {
++        INTERESTING("MPL");
++        lmem[_mMPL] = 1;
++      }
++    }
++  }
++  cleanLicenceBuffer();
++  /*
+    * Dual licenses
+    */
+   if (INFILE(_LT_DUAL_LICENSE_0) && NOT_INFILE(_TITLE_NOSL)) {
+@@ -4700,6 +4739,30 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
+   else if (HASTEXT(_LT_DUAL_LICENSE_49, REG_EXTENDED)) {
+     MEDINTEREST(lDebug ? "Dual-license(49)" : "Dual-license");
+   }
++  // Additional dual license patterns
++  else if (HASTEXT("licens.{0,20}under.{0,20}(either|both|dual)", REG_EXTENDED | REG_ICASE)) {
++    MEDINTEREST("Dual-license");
++  }
++  else if (HASTEXT("(either|both).{0,30}licens", REG_EXTENDED | REG_ICASE)) {
++    MEDINTEREST("Dual-license");
++  }
++  else if (HASTEXT("choice.{0,20}licens", REG_EXTENDED | REG_ICASE)) {
++    MEDINTEREST("Dual-license");
++  }
++  else if (HASTEXT("alternative.{0,20}licens", REG_EXTENDED | REG_ICASE)) {
++    MEDINTEREST("Dual-license");
++  }
++  else if (HASTEXT("multiple.{0,20}licens", REG_EXTENDED | REG_ICASE)) {
++    MEDINTEREST("Dual-license");
++  }
++  else if (HASTEXT("licens.{0,20}(or|and).{0,20}licens", REG_EXTENDED | REG_ICASE)) {
++    MEDINTEREST("Dual-license");
++  }
++  else if (HASTEXT("(GPL|MIT|BSD|Apache|MPL).{0,50}(or|and).{0,50}(GPL|MIT|BSD|Apache|MPL)", REG_EXTENDED | REG_ICASE)) {
++    MEDINTEREST("Dual-license");
++    // This pattern will be caught by individual license detectors
++  }
++  
+   cleanLicenceBuffer();
+   /*
+    * The Beer-ware license(!)
