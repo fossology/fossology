@@ -60,10 +60,10 @@ class ReuserPlugin extends DefaultPlugin
 
   public function __construct()
   {
-    parent::__construct(self::NAME, array(
-        self::TITLE => _("Automatic Clearing Decision Reuser"),
-        self::PERMISSION => Auth::PERM_WRITE
-    ));
+    parent::__construct(self::NAME, [
+    self::TITLE => _("Automatic Clearing Decision Reuser"),
+    self::PERMISSION => Auth::PERM_WRITE
+    ]);
 
     $this->folderDao = $this->getObject('dao.folder');
   }
@@ -78,7 +78,7 @@ class ReuserPlugin extends DefaultPlugin
   function getAllUploads()
   {
     $allFolder = $this->folderDao->getAllFolderIds();
-    $result = array();
+    $result = [];
     for ($i=0; $i < sizeof($allFolder); $i++) {
       $listObject = $this->prepareFolderUploads($allFolder[$i]);
       foreach ($listObject as $key => $value) {
@@ -148,7 +148,7 @@ class ReuserPlugin extends DefaultPlugin
       $trustGroupId = Auth::getGroupId();
       $folderId = 0;
     }
-    return array($folderId, $trustGroupId);
+    return [$folderId, $trustGroupId];
   }
 
   /**
@@ -230,7 +230,7 @@ class ReuserPlugin extends DefaultPlugin
     }
     $folderUploads = $this->folderDao->getFolderUploads($folderId, $trustGroupId);
 
-    $uploadsById = array();
+    $uploadsById = [];
     foreach ($folderUploads as $uploadProgress) {
       $key = $uploadProgress->getId().','.$uploadProgress->getGroupId();
       $display = $uploadProgress->getFilename() . _(" from ")
