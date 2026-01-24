@@ -17,6 +17,7 @@ use Fossology\DecisionExporter\UI\FoDecisionExporter;
 use Fossology\DecisionImporter\UI\AgentDecisionImporterPlugin;
 use Fossology\ReadmeOSS\UI\ReadMeOssPlugin;
 use Fossology\Spdx\UI\SpdxTwoGeneratorUi;
+use Fossology\Spdx\UI\SpdxThreeGeneratorUi;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
@@ -54,7 +55,10 @@ class ReportController extends RestController
     'unifiedreport',
     'clixml',
     'decisionexporter',
-    'cyclonedx'
+    'cyclonedx',
+    'spdx3json',
+    'spdx3rdf',
+    'spdx3jsonld'
   );
 
   /**
@@ -139,6 +143,14 @@ class ReportController extends RestController
         $cyclonedxGenerator = $this->restHelper->getPlugin('ui_cyclonedx');
         list ($jobId, $jobQueueId) = $cyclonedxGenerator->scheduleAgent(
           $this->restHelper->getGroupId(), $upload);
+        break;
+      case $this->reportsAllowed[8]:
+      case $this->reportsAllowed[9]:
+      case $this->reportsAllowed[10]:
+        /** @var SpdxThreeGeneratorUi $spdx3Generator */
+        $spdx3Generator = $this->restHelper->getPlugin('ui_spdx3');
+        list ($jobId, $jobQueueId, $error) = $spdx3Generator->scheduleAgent(
+          $this->restHelper->getGroupId(), $upload, $reportFormat);
         break;
       default:
         throw new HttpInternalServerErrorException("Some error occured!");
