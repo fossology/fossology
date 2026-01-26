@@ -266,6 +266,15 @@
             <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="osselotExport" value="osselotExport" {{ osselotExport }} id="osselotExportCheckbox" />
           </td>
         </tr>
+        <tr>
+          <td align="left">
+            {{ "Exclude irrelevant files from reports"|trans }}
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'When enabled, files marked as irrelevant will be excluded from all report formats (SPDX, ReadmeOSS, etc.). When disabled, irrelevant files will be included in the reports with their clearing decisions.'|trans }}" alt="" class="info-bullet"/>
+          </td>
+          <td align="left">
+            <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="excludeIrrelevant" value="excludeIrrelevant" {{ excludeIrrelevant }} id="excludeIrrelevantCheckbox" />
+          </td>
+        </tr>
       </table>
     </div>
     {% if globalClearingAvailable is not empty %}

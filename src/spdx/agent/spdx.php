@@ -354,12 +354,13 @@ class SpdxAgent extends Agent
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $stateOsselot = $this->getSPDXReportConf($uploadId, 2);
+    $excludeIrrelevant = $this->getSPDXReportConf($uploadId, 3);
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $this->heartbeat(0);
 
     $filesWithLicenses = $this->reportutils
       ->getFilesWithLicensesFromClearings($itemTreeBounds, $this->groupId,
-        $this, $this->licensesInDocument);
+        $this, $this->licensesInDocument, $excludeIrrelevant);
     $this->heartbeat(0);
 
     $this->reportutils->addClearingStatus($filesWithLicenses,$itemTreeBounds, $this->groupId);
@@ -613,6 +614,7 @@ class SpdxAgent extends Agent
   {
     global $SysConf;
     $stateOsselot = $this->getSPDXReportConf($uploadId, 2);
+    $excludeIrrelevant = $this->getSPDXReportConf($uploadId, 3);
     $fileBase = dirname($this->filename);
 
     if (!is_dir($fileBase)) {
@@ -629,7 +631,7 @@ class SpdxAgent extends Agent
 
     $filesWithLicenses = $this->reportutils
       ->getFilesWithLicensesFromClearings($itemTreeBounds, $this->groupId,
-        $this, $this->licensesInDocument);
+        $this, $this->licensesInDocument, $excludeIrrelevant);
     $this->heartbeat(0);
     $upload = $this->uploadDao->getUpload($uploadId);
     $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName(), $uploadId);
@@ -874,7 +876,7 @@ class SpdxAgent extends Agent
    * @brief Get spdx license comment state for a given upload
    *
    * @param int $uploadId
-   * @param int $key Array key (0=spdxLicenseComment, 1=ignoreFilesWOInfo, 2=osselotExport)
+   * @param int $key Array key (0=spdxLicenseComment, 1=ignoreFilesWOInfo, 2=osselotExport, 3=excludeIrrelevant)
    * @return bool Configuration state (TRUE/FALSE)
    */
   protected function getSPDXReportConf($uploadId, $key)
@@ -883,9 +885,17 @@ class SpdxAgent extends Agent
     $getCommentState = $this->dbManager->getSingleRow($sql, array($uploadId), __METHOD__.'.SPDX_license_comment');
     if (!empty($getCommentState['ri_spdx_selection'])) {
       $getCommentStateSingle = explode(',', $getCommentState['ri_spdx_selection']);
-      if ($getCommentStateSingle[$key] === "checked") {
+      if (isset($getCommentStateSingle[$key]) && $getCommentStateSingle[$key] === "checked") {
         return true;
       }
+      // If the key exists but is not checked, return false
+      if (isset($getCommentStateSingle[$key])) {
+        return false;
+      }
+    }
+    // Default behavior: for excludeIrrelevant (key 3), return true for backward compatibility
+    if ($key === 3) {
+      return true;
     }
     return false;
   }

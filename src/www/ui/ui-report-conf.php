@@ -85,7 +85,8 @@ class ui_report_conf extends FO_Plugin
   private $checkBoxListSPDX = array(
     "spdxLicenseComment" => "spdxLicenseComment",
     "ignoreFilesWOInfo" => "ignoreFilesWOInfo",
-    "osselotExport" => "osselotExport"
+    "osselotExport" => "osselotExport",
+    "excludeIrrelevant" => "excludeIrrelevant"
   );
 
 

@@ -38,6 +38,7 @@
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\XpClearedGetter;
 use Fossology\Lib\Report\LicenseMainGetter;
@@ -79,6 +80,11 @@ class ReadmeOssAgent extends Agent
    */
   private $uploadDao;
 
+  /** @var DbManager $dbManager
+   * DbManager object
+   */
+  private $dbManager;
+
   /** @var int $additionalUploadIds
    * Additional Uploads to be included in report
    */
@@ -94,8 +100,34 @@ class ReadmeOssAgent extends Agent
     parent::__construct(README_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
     $this->uploadDao = $this->container->get('dao.upload');
+    $this->dbManager = $this->container->get('db.manager');
 
     $this->agentSpecifLongOptions[] = self::UPLOAD_ADDS.':';
+  }
+
+  /**
+   * @brief Get the excludeIrrelevant configuration for a given upload
+   *
+   * @param int $uploadId
+   * @return bool Whether to exclude irrelevant files (default: true)
+   */
+  protected function getExcludeIrrelevantConf($uploadId)
+  {
+    $sql = "SELECT ri_spdx_selection FROM report_info WHERE upload_fk = $1";
+    $row = $this->dbManager->getSingleRow($sql, array($uploadId), __METHOD__.'.excludeIrrelevant');
+    if (!empty($row['ri_spdx_selection'])) {
+      $selections = explode(',', $row['ri_spdx_selection']);
+      // Index 3 is excludeIrrelevant
+      if (isset($selections[3]) && $selections[3] === "checked") {
+        return true;
+      }
+      // If the setting exists but is unchecked, return false
+      if (isset($selections[3])) {
+        return false;
+      }
+    }
+    // Default to true (exclude irrelevant files) for backward compatibility
+    return true;
   }
 
   /**
@@ -117,6 +149,10 @@ class ReadmeOssAgent extends Agent
     $copyrightStmts = array();
     $licenseStmtsMain = array();
     $licenseAcknowledgements = array();
+
+    // Get the excludeIrrelevant configuration for the main upload
+    $excludeIrrelevant = $this->getExcludeIrrelevantConf($uploadId);
+    $this->licenseClearedGetter->setExcludeIrrelevant($excludeIrrelevant);
 
     foreach ($uploadIds as $addUploadId) {
       if (!$this->uploadDao->isAccessible($addUploadId, $groupId)) {
