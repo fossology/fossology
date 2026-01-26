@@ -48,6 +48,18 @@ class LicenseRefTest extends \PHPUnit\Framework\TestCase
   public function testDefaultSpdxId()
   {
     $licenseRef = new LicenseRef($this->id, $this->shortName, $this->fullName, "");
-    assertThat($licenseRef->getSpdxId(), is(LicenseRef::SPDXREF_PREFIX_FOSSOLOGY . $this->shortName));
+    assertThat($licenseRef->getSpdxId(), is("LicenseRef-fossology-shortName"));
+  }
+
+  public function testMidStringPlusConvertedToOrLater()
+  {
+    $licenseRef = new LicenseRef($this->id, "GPL-2.0+-with-bison-exception", $this->fullName, "");
+    assertThat($licenseRef->getSpdxId(), is("LicenseRef-fossology-GPL-2.0-or-later-with-bison-exception"));
+  }
+
+  public function testTrailingPlusStillConvertedToOrLater()
+  {
+    $licenseRef = new LicenseRef($this->id, "GPL-2.0+", $this->fullName, "");
+    assertThat($licenseRef->getSpdxId(), is("LicenseRef-fossology-GPL-2.0-or-later"));
   }
 }
