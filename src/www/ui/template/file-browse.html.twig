@@ -8,22 +8,57 @@
   <table border="0" style="padding:2px; width:100%">
     <tr>
       <td style="padding-left:18px; vertical-align:top; height:100%; width:75%">
-        <table border="0" id="dirlist" class="semibordered">
-          <thead>
-            {% if scannerLicenses is not empty %}
-            <tr>
-              <th></th>
-              <th>
-                <select id="scanFilter" class="ui-render-select2">
-                  <option value="0">-- {{'filter for scan results'|trans}} --</option>
+        {# Multi-filter toolbar #}
+        <div id="multiFilterToolbar" class="mb-2 p-2" style="background-color: #f8f9fa; border-radius: 4px;">
+          <div class="row align-items-center">
+            {# License filter #}
+            <div class="col-auto">
+              <label class="form-label mb-0 me-1"><small>{{ 'License'|trans }}:</small></label>
+              <select id="scanFilter" class="ui-render-select2 form-select-sm" style="width: 180px;">
+                <option value="0">-- {{ 'All'|trans }} --</option>
+                {% if scannerLicenses is not empty %}
                   {% for shortname,row in scannerLicenses %}
                     <option value="{{row.rf_pk}}">{{ shortname }}</option>
                   {% endfor %}
-                </select>
-              </th>
-              <th></th>
-            </tr>
-            {% endif %}
+                {% endif %}
+              </select>
+            </div>
+            {# Clearing status filter #}
+            <div class="col-auto">
+              <label class="form-label mb-0 me-1"><small>{{ 'Status'|trans }}:</small></label>
+              <select id="statusFilter" class="form-select form-select-sm" style="width: 150px;">
+                <option value="0">-- {{ 'All'|trans }} --</option>
+                <option value="uncleared">{{ 'Uncleared'|trans }}</option>
+                <option value="identified">{{ 'Identified'|trans }}</option>
+                <option value="irrelevant">{{ 'Irrelevant'|trans }}</option>
+                <option value="tbd">{{ 'To be discussed'|trans }}</option>
+              </select>
+            </div>
+            {# Evidence type filter #}
+            <div class="col-auto">
+              <label class="form-label mb-0 me-1"><small>{{ 'Evidence'|trans }}:</small></label>
+              <select id="evidenceFilter" class="form-select form-select-sm" style="width: 150px;">
+                <option value="0">-- {{ 'All'|trans }} --</option>
+                <option value="noLicense">{{ 'With License Findings'|trans }}</option>
+                <option value="noCopyright">{{ 'With Copyright'|trans }}</option>
+                <option value="noEcc">{{ 'With ECC'|trans }}</option>
+                <option value="noKeyword">{{ 'With Keyword'|trans }}</option>
+              </select>
+            </div>
+            {# Apply/Clear buttons #}
+            <div class="col-auto">
+              <button id="applyFilters" class="btn btn-primary btn-sm" title="{{ 'Apply filters'|trans }}">
+                <i class="fas fa-filter"></i> {{ 'Apply'|trans }}
+              </button>
+              <button id="clearFilters" class="btn btn-secondary btn-sm" title="{{ 'Clear all filters'|trans }}">
+                <i class="fas fa-times"></i> {{ 'Clear'|trans }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <table border="0" id="dirlist" class="semibordered">
+          <thead>
             <tr><th></th><th></th><th></th></tr>
           </thead>
           <tbody></tbody>
@@ -34,6 +69,55 @@
       </td>
     </tr>
   </table>
+  
+  {# Context menu for right-click actions #}
+  <div id="fileContextMenu" class="dropdown-menu" style="display:none; position:absolute; z-index:1000;">
+    <h6 class="dropdown-header">{{ 'File Actions'|trans }}</h6>
+    <a class="dropdown-item" href="#" id="ctxMarkIdentified">
+      <i class="fas fa-check text-success"></i> {{ 'Mark as Identified'|trans }}
+    </a>
+    <a class="dropdown-item" href="#" id="ctxMarkIrrelevant">
+      <i class="fas fa-ban text-secondary"></i> {{ 'Mark as Irrelevant'|trans }}
+    </a>
+    <a class="dropdown-item" href="#" id="ctxMarkTBD">
+      <i class="fas fa-question text-warning"></i> {{ 'Mark as To Be Discussed'|trans }}
+    </a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" href="#" id="ctxRemoveDecision">
+      <i class="fas fa-undo text-danger"></i> {{ 'Remove Decision'|trans }}
+    </a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" href="#" id="ctxDisassociateLicense">
+      <i class="fas fa-unlink text-info"></i> {{ 'Disassociate License'|trans }}
+    </a>
+  </div>
+
+  {# Modal for license selection when marking as identified #}
+  <div class="modal fade" id="identifyLicenseModal" tabindex="-1" aria-labelledby="identifyLicenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="identifyLicenseModalLabel">{{ 'Select License for Identification'|trans }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>{{ 'Select one or more licenses to associate with this file:'|trans }}</p>
+          <select id="identifyLicenseSelect" class="form-select ui-render-select2" multiple="multiple" style="width:100%;">
+            {% if scannerLicenses is not empty %}
+              {% for shortname,row in scannerLicenses %}
+                <option value="{{row.rf_pk}}">{{ shortname }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+          <input type="hidden" id="identifyUploadTreeId" value="">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ 'Cancel'|trans }}</button>
+          <button type="button" class="btn btn-primary" id="confirmIdentifyLicense">{{ 'Confirm'|trans }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block foot %}

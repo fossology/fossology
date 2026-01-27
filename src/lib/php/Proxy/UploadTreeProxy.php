@@ -28,6 +28,7 @@ class UploadTreeProxy extends DbViewProxy
   const OPT_SCAN_REF = 'scanRef';
   const OPT_CONCLUDE_REF = 'conRef';
   const OPT_SKIP_ALREADY_CLEARED = 'alreadyCleared';
+  const OPT_STATUS_FILTER = 'statusFilter'; // Multi-filter support
 
   /** @var string */
   private $uploadTreeTableName;
@@ -125,6 +126,11 @@ class UploadTreeProxy extends DbViewProxy
       }
     }
 
+    //Status filter support for multi-filter
+    if (array_key_exists(self::OPT_STATUS_FILTER, $options) && array_key_exists(self::OPT_GROUP_ID, $options)) {
+      $filter .= $this->addStatusFilter($options);
+    }
+
     if (array_key_exists(self::OPT_ITEM_FILTER, $options)) {
       $filter .= ' '.$options[self::OPT_ITEM_FILTER];
       $this->dbViewName .= "_".md5($options[self::OPT_ITEM_FILTER]);
@@ -164,6 +170,71 @@ class UploadTreeProxy extends DbViewProxy
       return " AND EXISTS(SELECT * FROM " . $this->subqueryLicenseFileMatchWhere($options)
               . " ut.pfile_fk=license_file.pfile_fk)";
     }
+  }
+
+  /**
+   * Add status filter for clearing decision status
+   * @param array $options
+   * @return string SQL filter condition
+   */
+  private function addStatusFilter($options)
+  {
+    $statusFilter = $options[self::OPT_STATUS_FILTER];
+    $groupId = $options[self::OPT_GROUP_ID];
+    $this->dbViewName .= "_status_" . $statusFilter;
+
+    /* @var $uploadDao UploadDao */
+    $uploadDao = $GLOBALS['container']->get('dao.upload');
+    $applyGlobal = $uploadDao->getGlobalDecisionSettingsFromInfo($this->uploadId);
+    $applyGlobal = ($applyGlobal == 1);
+
+    // Build the condition for matching decisions (uploadtree-scoped or global)
+    $groupIdParam = $this->addParamAndGetExpr('statusGroupId', $groupId);
+    $scopeCondition = "(cd.uploadtree_fk = ut.uploadtree_pk AND cd.group_fk = $groupIdParam)";
+    if ($applyGlobal) {
+      $scopeCondition = "(" . $scopeCondition . " OR (cd.scope = " . DecisionScopes::REPO . " AND cd.pfile_fk = ut.pfile_fk))";
+    }
+
+    // Map status filter values to Decisiontypes
+    $statusToDecisionType = array(
+      'identified' => DecisionTypes::IDENTIFIED,
+      'irrelevant' => DecisionTypes::IRRELEVANT,
+      'tbd' => DecisionTypes::TO_BE_DISCUSSED,
+      'donotuse' => DecisionTypes::DO_NOT_USE,
+      'nonfunctional' => DecisionTypes::NON_FUNCTIONAL
+    );
+
+    if ($statusFilter === 'uncleared') {
+      // Files without any clearing decision (considering global scope if enabled)
+      return " AND NOT EXISTS (
+        SELECT 1 FROM clearing_decision cd
+        WHERE $scopeCondition
+        AND cd.decision_type NOT IN (" . DecisionTypes::WIP . ")
+      )";
+    } elseif (array_key_exists($statusFilter, $statusToDecisionType)) {
+      $decisionType = $statusToDecisionType[$statusFilter];
+      $decisionTypeParam = $this->addParamAndGetExpr('statusDecisionType', $decisionType);
+
+      // Build the MAX subquery with same scope condition
+      $groupIdParam2 = $this->addParamAndGetExpr('statusGroupId2', $groupId);
+      $scopeCondition2 = "(cd2.uploadtree_fk = ut.uploadtree_pk AND cd2.group_fk = $groupIdParam2)";
+      if ($applyGlobal) {
+        $scopeCondition2 = "(" . $scopeCondition2 . " OR (cd2.scope = " . DecisionScopes::REPO . " AND cd2.pfile_fk = ut.pfile_fk))";
+      }
+
+      // Files with specific clearing decision type
+      return " AND EXISTS (
+        SELECT 1 FROM clearing_decision cd
+        WHERE $scopeCondition
+        AND cd.decision_type = $decisionTypeParam
+        AND cd.clearing_decision_pk = (
+          SELECT MAX(cd2.clearing_decision_pk) FROM clearing_decision cd2
+          WHERE $scopeCondition2
+        )
+      )";
+    }
+
+    return '';
   }
 
   private function subqueryLicenseFileMatchWhere($options)

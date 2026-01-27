@@ -3,6 +3,8 @@
    SPDX-License-Identifier: FSFAP
 #}
 
+var otable;
+
 function createDirlistTable() {
   var dirlistTableConfig = {
     "bServerSide": true,
@@ -12,7 +14,10 @@ function createDirlistTable() {
       aoData.push({"name": "item", "value": {{ itemId }} });
       aoData.push({"name": "totalRecords", "value": {{ iTotalRecords }} });
       aoData.push({"name": "agentId", "value": {{ agentId|default(0) }} });
-      aoData.push({"name": "scanFilter", "value": $('#scanFilter').val() });
+      // Multi-filter support
+      aoData.push({"name": "scanFilter", "value": $('#scanFilter').val() || '0' });
+      aoData.push({"name": "statusFilter", "value": $('#statusFilter').val() || '0' });
+      aoData.push({"name": "evidenceFilter", "value": $('#evidenceFilter').val() || '0' });
       {% if isFlat %}aoData.push({"name": "flatten", "value": "yes" });{% endif %}
       $.getJSON(sSource, aoData, fnCallback)
         .fail(failed)
@@ -45,10 +50,228 @@ function createDirlistTable() {
   otable = $('#dirlist').dataTable(dirlistTableConfig);
 }
 
+// Multi-filter functions
+function applyMultiFilters() {
+  if (otable) {
+    otable.fnDraw();
+  }
+}
+
+function clearMultiFilters() {
+  $('#scanFilter').val('0').trigger('change');
+  $('#statusFilter').val('0');
+  $('#evidenceFilter').val('0');
+  if (otable) {
+    otable.fnDraw();
+  }
+}
+
+// Context menu variables 
+var currentContextItem = null;
+
+// Show context menu on right click 
+function showContextMenu(e, uploadTreeId) {
+  e.preventDefault();
+  currentContextItem = uploadTreeId;
+  var $menu = $('#fileContextMenu');
+  $menu.css({
+    display: 'block',
+    left: e.pageX,
+    top: e.pageY
+  });
+  return false;
+}
+
+// Hide context menu
+function hideContextMenu() {
+  $('#fileContextMenu').hide();
+  currentContextItem = null;
+}
+
+// Added CSRF token and improved error handling
+function markFileDecision(decisionMark, isRemoval) {
+  if (!currentContextItem) return;
+  
+  var data = {
+    "uploadTreeId": currentContextItem,
+    "decisionMark": decisionMark,
+    "isRemoval": isRemoval || false
+  };
+  
+  // Add CSRF token if available
+  var csrfToken = $('meta[name="csrf-token"]').attr('content') || '';
+  if (csrfToken) {
+    data['csrf_token'] = csrfToken;
+  }
+  
+  $.ajax({
+    type: "POST",
+    url: "?mod=change-license-processPost",
+    data: data,
+    headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
+    success: function(response) {
+      hideContextMenu();
+      if (otable && typeof otable.fnDraw === 'function') {
+        otable.fnDraw();
+      }
+    },
+    error: function(xhr) {
+      console.error("Error marking file:", xhr.responseText);
+      alert("{{ 'An error occurred while processing your request. Please try again.'|trans }}");
+      hideContextMenu();
+    }
+  });
+}
+
+// Show license selection modal for identified
+function showIdentifyModal(uploadTreeId) {
+  $('#identifyUploadTreeId').val(uploadTreeId);
+  $('#identifyLicenseSelect').val(null).trigger('change');
+  $('#confirmIdentifyLicense').prop('disabled', false); // Re-enable button
+  $('#identifyLicenseModal').modal('show');
+  hideContextMenu();
+}
+
+// Flag to prevent double submissions
+var identifySubmitting = false;
+
+// Confirm license identification and Consolidated into single AJAX call with double submit protection
+function confirmIdentifyWithLicense() {
+  if (identifySubmitting) return; // Prevent double submission
+  
+  var uploadTreeId = $('#identifyUploadTreeId').val();
+  var licenses = $('#identifyLicenseSelect').val();
+  
+  if (!licenses || licenses.length === 0) {
+    alert("{{ 'Please select at least one license'|trans }}");
+    return;
+  }
+  
+  // Disable submit button and set flag
+  identifySubmitting = true;
+  $('#confirmIdentifyLicense').prop('disabled', true);
+  
+  // Add CSRF token if available
+  var csrfToken = $('meta[name="csrf-token"]').attr('content') || '';
+  
+  // Single consolidated request - add licenses and mark as identified atomically
+  var data = {
+    "uploadTreeId": uploadTreeId,
+    "licenseNumbersToBeSubmitted": licenses,
+    "decisionMark": "identified",
+    "removed": false,
+    "atomicIdentify": true  // Flag for server to handle atomically
+  };
+  
+  if (csrfToken) {
+    data['csrf_token'] = csrfToken;
+  }
+  
+  $.ajax({
+    type: "POST",
+    url: "?mod=change-license-processPost",
+    data: data,
+    headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
+    success: function(response) {
+      $('#identifyLicenseModal').modal('hide');
+      if (otable && typeof otable.fnDraw === 'function') {
+        otable.fnDraw();
+      }
+    },
+    error: function(xhr) {
+      console.error("Error during identification:", xhr.responseText);
+      alert("{{ 'An error occurred while identifying the file. Please try again.'|trans }}");
+    },
+    complete: function() {
+      // Re-enable submission
+      identifySubmitting = false;
+      $('#confirmIdentifyLicense').prop('disabled', false);
+    }
+  });
+}
+
 $(document).ready(function () {
   createDirlistTable();
   $('img').tooltip();
   $("#lichistogram_length select").css('text-align','right');
   $("#dirlist_length select").css('text-align','right');
+  
+  // Multi filter event handlers
+  $('#applyFilters').on('click', function() {
+    applyMultiFilters();
+  });
+  
+  $('#clearFilters').on('click', function() {
+    clearMultiFilters();
+  });
+  
+  // Auto apply on filter change for better UX
+  $('#scanFilter, #statusFilter, #evidenceFilter').on('change', function() {
+    applyMultiFilters();
+  });
+  
+  // Context menu event handlers
+  $(document).on('contextmenu', '#dirlist tbody tr', function(e) {
+    // Guard: ensure otable is initialized before accessing fnGetData
+    if (!otable || typeof otable.fnGetData !== 'function') {
+      return;
+    }
+    
+    var rowData = otable.fnGetData(this);
+    if (rowData) {
+      // Extract uploadTreeId from the row's first column link
+      var $firstCell = $(rowData[0]);
+      var href = $firstCell.attr('href') || $(this).find('a').first().attr('href');
+      if (href) {
+        var match = href.match(/item=(\d+)/);
+        if (match) {
+          showContextMenu(e, match[1]);
+          return false;
+        }
+      }
+    }
+  });
+  
+  // Hide context menu on click elsewhere
+  $(document).on('click', function() {
+    hideContextMenu();
+  });
+  
+  // Context menu action handlers
+  $('#ctxMarkIdentified').on('click', function(e) {
+    e.preventDefault();
+    if (currentContextItem) {
+      showIdentifyModal(currentContextItem);
+    }
+  });
+  
+  $('#ctxMarkIrrelevant').on('click', function(e) {
+    e.preventDefault();
+    markFileDecision('irrelevant', false);
+  });
+  
+  $('#ctxMarkTBD').on('click', function(e) {
+    e.preventDefault();
+    markFileDecision('toBeDiscussed', false);
+  });
+  
+  $('#ctxRemoveDecision').on('click', function(e) {
+    e.preventDefault();
+    if (confirm("{{ 'Are you sure you want to remove the decision?'|trans }}")) {
+      markFileDecision('irrelevant', true);
+    }
+  });
+  
+  $('#ctxDisassociateLicense').on('click', function(e) {
+    e.preventDefault();
+    // TODO: Implement license disassociation modal
+    alert("{{ 'License disassociation coming soon'|trans }}");
+    hideContextMenu();
+  });
+  
+  // Confirm identify license button
+  $('#confirmIdentifyLicense').on('click', function() {
+    confirmIdentifyWithLicense();
+  });
 });
 

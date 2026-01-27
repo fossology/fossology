@@ -145,6 +145,22 @@ class AjaxFileBrowser extends DefaultPlugin
       $options[UploadTreeProxy::OPT_SCAN_REF] = $rfId;
     }
 
+    // Multi-filter support
+    $statusFilter = $request->get('statusFilter');
+    if (!empty($statusFilter) && $statusFilter !== '0') {
+      $options[UploadTreeProxy::OPT_STATUS_FILTER] = $statusFilter;
+      $options[UploadTreeProxy::OPT_GROUP_ID] = $groupId;
+    }
+
+    $evidenceFilter = $request->get('evidenceFilter');
+    if (!empty($evidenceFilter) && $evidenceFilter !== '0') {
+      $options[UploadTreeProxy::OPT_SKIP_THESE] = $evidenceFilter;
+      $options[UploadTreeProxy::OPT_GROUP_ID] = $groupId;
+      if (!isset($options[UploadTreeProxy::OPT_AGENT_SET])) {
+        $options[UploadTreeProxy::OPT_AGENT_SET] = $selectedScanners;
+      }
+    }
+
     $descendantView = new UploadTreeProxy($uploadId, $options, $itemTreeBounds->getUploadTreeTableName(), 'uberItems');
 
     $vars['iTotalDisplayRecords'] = $descendantView->count();
