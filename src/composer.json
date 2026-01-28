@@ -10,7 +10,7 @@
         "without any warranty."
     ],
     "require" : {
-        "easyrdf/easyrdf" : "1.1.1",
+        "sweetrdf/easyrdf" : "1.18.2",
         "ext-gettext": "*",
         "ext-mbstring": "*",
         "ext-json" : "*",
@@ -71,7 +71,7 @@
     },
     "config" : {
         "platform" : {
-            "php" : "7.4.3"
+            "php" : "8.0.30"
         }
     },
     "homepage" : "https://www.fossology.org/",
