@@ -1078,6 +1078,11 @@ class fo_libschema
         $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . $table);
       }
     }
+    // Prevent issue #3218: ensure copyright_ars exists
+    if (!$this->dbman->existsTable("copyright_ars") && $this->dbman->existsTable("ars_master")) {
+      $sql = "CREATE TABLE \"copyright_ars\" () INHERITS (\"ars_master\")";
+      $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . "copyright_ars_fix");
+    }
   }
 
   // MakeFunctions()
