@@ -32,6 +32,13 @@ class CopyrightAgentPlugin extends AgentPlugin
    */
   function AgentHasResults($uploadId=0)
   {
+    global $container;
+    /** @var AgentDao $agentDao */
+    $agentDao = $container->get('dao.agent');
+    if (!$agentDao->arsTableExists($this->AgentName)) {
+      return 0;
+    }
+
     return CheckARS($uploadId, $this->AgentName, "copyright scanner", "copyright_ars");
   }
 

@@ -29,13 +29,39 @@ class LatestScannerProxy extends DbViewProxy
       throw new \Exception('empty set of scanners');
     }
     $this->uploadId = $uploadId;
+    global $container;
+    $dbManager = $container->get('db.manager');
+    
+    $tableMap = array();
+    foreach ($agentNames as $name) {
+      $tableMap[strtolower($name . self::ARS_SUFFIX)] = $name;
+    }
+
+    $existingTables = $dbManager->getRows(
+      "SELECT table_name FROM information_schema.tables 
+       WHERE table_catalog = current_database() 
+       AND table_schema = 'public' 
+       AND table_name = ANY($1::text[])",
+      array('{' . implode(',', array_keys($tableMap)) . '}'),
+      __METHOD__ . ".checkTables"
+    );
+
+    $existingTableNames = array_column($existingTables, 'table_name');
+    
     $subqueries = array();
     foreach ($agentNames as $name) {
-      // NOTE: this query fails if the ars-table is not yet created.
-      $subqueries[] = "SELECT * FROM (SELECT $this->columns FROM $name".self::ARS_SUFFIX.", agent
-        WHERE agent_fk=agent_pk AND upload_fk=$uploadId $andEnabled ORDER BY agent_fk DESC limit 1) latest_$name";
+      $tableName = strtolower($name . self::ARS_SUFFIX);
+      if (in_array($tableName, $existingTableNames)) {
+        $subqueries[] = "SELECT * FROM (SELECT $this->columns FROM $tableName, agent
+          WHERE agent_fk=agent_pk AND upload_fk=$uploadId $andEnabled ORDER BY agent_fk DESC limit 1) latest_$name";
+      }
     }
-    $dbViewQuery = implode(' UNION ',$subqueries);
+    
+    if (empty($subqueries)) {
+      $dbViewQuery = "SELECT NULL::int as agent_pk, NULL::text as agent_name WHERE 1=0";
+    } else {
+      $dbViewQuery = implode(' UNION ',$subqueries);
+    }
     parent::__construct($dbViewQuery, $dbViewName."_".implode("_",$agentNames));
   }
 
