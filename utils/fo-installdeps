@@ -97,10 +97,6 @@ if [[ $BUILDTIME ]]; then
             libboost-program-options-dev libpq-dev composer patch devscripts \
             libdistro-info-perl libcppunit-dev libomp-dev cmake ninja-build
          case "$CODENAME" in
-           stretch)
-             apt-get $YesOpt install php-mbstring php7.0-cli php7.0-xml php7.0-zip php7.0-gd php7.0-pgsql php7.0-curl php7.0-uuid php7.0-sqlite3 php7.0-yaml;;
-           buster)
-             apt-get $YesOpt install php-mbstring php7.3-cli php7.3-xml php7.3-zip php7.3-gd php7.3-pgsql php7.3-curl php7.3-uuid php7.3-sqlite3 php7.3-yaml;;
            bullseye)
              apt-get $YesOpt install php7.4-mbstring php7.4-cli php7.4-xml php7.4-zip php7.4-gd php7.4-pgsql php7.4-curl php7.4-uuid php7.4-sqlite3 php7.4-yaml;;
            bookworm)
@@ -118,10 +114,6 @@ if [[ $BUILDTIME ]]; then
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
-              stretch)
-                apt-get $YesOpt install postgresql-server-dev-9.6;;
-              buster)
-                apt-get $YesOpt install postgresql-server-dev-11;;
               bullseye)
                 apt-get $YesOpt install postgresql-server-dev-13;;
               bookworm)
@@ -181,14 +173,6 @@ if [[ $RUNTIME ]]; then
             subversion git \
             dpkg-dev php-uuid php-yaml
          case "$CODENAME" in
-            stretch)
-               apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql libapache2-mod-php7.0 php7.0-pgsql \
-                 php7.0-cli php7.0-curl php7.0-xml php7.0-zip php7.0-mbstring php7.0-uuid php-gettext s-nail libboost-program-options1.62.0 \
-                 libboost-regex1.62.0 libicu57;;
-            buster)
-               apt-get $YesOpt install postgresql-11 php7.3 php7.3-pgsql libapache2-mod-php7.3 php7.3-pgsql \
-                 php7.3-cli php7.3-curl php7.3-xml php7.3-zip php7.3-mbstring php7.3-uuid php-gettext s-nail libboost-program-options1.67.0 \
-                 libboost-regex1.67.0 libicu63;;
             bullseye)
                apt-get $YesOpt install postgresql-13 php7.4 php7.4-pgsql \
                libapache2-mod-php7.4 php7.4-pgsql php7.4-cli php7.4-curl \
