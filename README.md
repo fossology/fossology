@@ -24,7 +24,7 @@ https://fossology.org/
 
 ## Requirements
 
-The PHP versions 7.3 and later are supported to work for FOSSology. FOSSology requires Postgresql as the database server and apache httpd 2.6 as the web server. These and more dependencies are installed by `utils/fo-installdeps`.
+The PHP versions 7.3 and later are supported to work for FOSSology. FOSSology requires PostgreSQL as the database server and Apache HTTP Server 2.4+ as the web server. These and more dependencies are installed by `utils/fo-installdeps`.
 
 To install Python dependencies, run `install/fo-install-pythondeps`.
 
@@ -35,14 +35,14 @@ FOSSology should work with many Linux distributions.
 See https://github.com/fossology/fossology/releases for source code download of the releases.
 
 For installation instructions see [Install from Source](https://github.com/fossology/fossology/wiki/Install-from-Source)
-page in [Github Wiki](https://github.com/fossology/fossology/wiki)
+page in [GitHub Wiki](https://github.com/fossology/fossology/wiki)
 
 ## Docker
 
 FOSSology comes with a Dockerfile allowing the containerized execution
 both as a single instance or in combination with an external PostgreSQL database.
 **Note:** It is strongly recommended to use an external database for production
-use since the standalone image does not take care of data persistency.
+use since the standalone image does not take care of data persistence.
 
 A pre-built Docker image is available from [Docker Hub](https://hub.docker.com/r/fossology/fossology/) and can be run using the following command:
 
@@ -87,13 +87,13 @@ Avoid using version-specific internal paths such as:
 /var/lib/postgresql/16/data
 ```
 
-These directories may not be persisted as expected when containers are recreated. Always reply on the directory structure defined by the Postgres image.
+These directories may not be persisted as expected when containers are recreated. Always rely on the directory structure defined by the Postgres image.
  
 ## Vagrant
 
-FOSSology comes with a VagrantFile that can be used to create an isolated environment for FOSSology and its dependencies.
+FOSSology comes with a Vagrantfile that can be used to create an isolated environment for FOSSology and its dependencies.
 
-**Pre-requisites:** Vagrant >= 2.x and Virtualbox >= 5.2.x
+**Pre-requisites:** Vagrant >= 2.x and VirtualBox >= 5.2.x
 
 **Steps:**
 
@@ -112,7 +112,7 @@ pass: fossy
 
 ## Test Instance
 
-For trying out FOSSology quickly, a test instance is also available at [https://fossology.osuosl.org/](https://fossology.osuosl.org/). **This instance can be deleted or reinstalled at any time, thus it is not suitable for serving as your productive version**. The login credentials are as follows:
+For trying out FOSSology quickly, a test instance is also available at [https://fossology.osuosl.org/](https://fossology.osuosl.org/). **This instance can be deleted or reinstalled at any time, thus it is not suitable for production use**. The login credentials are as follows:
 
 ```
 Username: fossy
@@ -142,15 +142,15 @@ be used:
 
 ## Documentation
 
-We are currently migrating our documentation to Github. At this stage, you can find general documentation at:
+We are currently migrating our documentation to GitHub. At this stage, you can find general documentation at:
 https://www.fossology.org/get-started/basic-workflow/
-and developer docs on [Github Wiki](https://github.com/fossology/fossology/wiki) and https://fossology.github.io/
+and developer docs on [GitHub Wiki](https://github.com/fossology/fossology/wiki) and https://fossology.github.io/
 
 ## Support
 
 Mailing lists, FAQs, Release Notes, and other useful info are available
 by clicking the documentation tab on the project website. We encourage
-all users to join the mailing list and participate in discussions. You can also join FOSSOlogy's official space on Slack: [Join Slack](https://join.slack.com/t/fossology/shared_invite/enQtNzI0OTEzMTk0MjYzLTYyZWQxNDc0N2JiZGU2YmI3YmI1NjE4NDVjOGYxMTVjNGY3Y2MzZmM1OGZmMWI5NTRjMzJlNjExZGU2N2I5NGY)
+all users to join the mailing list and participate in discussions. You can also join FOSSology's official space on Slack: [Join Slack](https://join.slack.com/t/fossology/shared_invite/enQtNzI0OTEzMTk0MjYzLTYyZWQxNDc0N2JiZGU2YmI3YmI1NjE4NDVjOGYxMTVjNGY3Y2MzZmM1OGZmMWI5NTRjMzJlNjExZGU2N2I5NGY)
 
 If you'd like to talk to other FOSSology users and developers.
 See [Contact Us](https://www.fossology.org/about/contact/)
