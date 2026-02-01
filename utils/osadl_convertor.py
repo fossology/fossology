@@ -8,6 +8,7 @@
 import argparse
 import json
 import logging
+import os
 import textwrap
 import time
 from typing import Union, Optional
@@ -262,7 +263,7 @@ class LicenseHandler:
     resp: list[tuple[Optional[str]]] = cur.fetchall()
     type_list: list[Optional[str]] = []
     for row in resp:
-      if row is not None:
+      if row[0] is not None:
         type_list.append(row[0])
     return type_list
 
@@ -403,6 +404,8 @@ def convert_json_to_matrix(license_handler: LicenseHandler, json_loc: str) \
   matrix: Union[dict[str, dict[str, str]], None] = None
   compatibility_matrix: list[MatrixItem] = []
   type_dict: dict[tuple[str, str, bool], int] = dict()
+  if not os.path.isfile(json_loc):
+    raise FileNotFoundError(f"Input JSON file '{json_loc}' not found.")
   with open(json_loc, "r") as jsoninput:
     matrix = json.load(jsoninput)
   if matrix is None:
