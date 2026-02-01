@@ -13,5 +13,6 @@ class Packages(object):
   :ivar parent_package: Parent package during the scan
   :ivar dependencies: List of dependencies of the parent package
   """
-  parent_package: dict = None
-  dependencies: dict[str, dict] = {}
+  def __init__(self):
+    self.parent_package = None
+    self.dependencies: dict[str, dict] = {}
