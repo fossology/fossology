@@ -25,7 +25,26 @@
  */
 
 // FIXME: this should bet a global from pathinclude? $LIBDIR = '/usr/local/lib';
-require_once("FIXMETOBERELATIVE/pathinclude.php");
+// Try common locations for pathinclude.php and fail with helpful message if not found.
+$__path_candidates = array(
+  dirname(__FILE__) . '/../../src/lib/php/pathinclude.php',
+  dirname(__FILE__) . '/../../src/php/pathinclude.php',
+  dirname(__FILE__) . '/../php/pathinclude.php',
+  '/usr/local/share/fossology/php/pathinclude.php',
+  '/usr/share/fossology/php/pathinclude.php'
+);
+$__found = false;
+foreach ($__path_candidates as $__p) {
+  if (file_exists($__p)) {
+    require_once $__p;
+    $__found = true;
+    break;
+  }
+}
+if (! $__found) {
+  fwrite(STDERR, "FATAL: cannot find pathinclude.php. Please install Fossology or add pathinclude.php to your include path.\n");
+  exit(1);
+}
 require_once("$LIBDIR/lib_projxml.h.php");
 //require_once("./lib_projxml.h.php");            // dev copy
 
