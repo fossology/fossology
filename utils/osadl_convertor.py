@@ -406,8 +406,11 @@ def convert_json_to_matrix(license_handler: LicenseHandler, json_loc: str) \
   type_dict: dict[tuple[str, str, bool], int] = dict()
   if not os.path.isfile(json_loc):
     raise FileNotFoundError(f"Input JSON file '{json_loc}' not found.")
-  with open(json_loc, "r") as jsoninput:
-    matrix = json.load(jsoninput)
+  try:
+    with open(json_loc, "r") as jsoninput:
+      matrix = json.load(jsoninput)
+  except json.JSONDecodeError as exc:
+    raise ValueError(f"Input JSON file '{json_loc}' is not valid JSON: {exc}") from exc
   if matrix is None:
     raise Exception("Unable to read JSON")
   for first_license, comp_list in matrix.items():
