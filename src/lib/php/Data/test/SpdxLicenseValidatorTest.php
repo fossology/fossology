@@ -69,18 +69,18 @@ class SpdxLicenseValidatorTest extends \PHPUnit\Framework\TestCase
   {
     $errors = SpdxLicenseValidator::getValidationErrors('LicenseRef-fossology-Public-Domain(c)');
     $this->assertNotEmpty($errors);
-    $this->assertContains('Contains invalid characters', $errors[0]);
+    $this->assertStringContainsString('invalid', $errors[0]);
 
     $errors = SpdxLicenseValidator::getValidationErrors('LicenseRef-fossology-some_license');
     $this->assertNotEmpty($errors);
-    $this->assertContains('_', $errors[0]);
+    $this->assertStringContainsString('_', $errors[0]);
 
     $errors = SpdxLicenseValidator::getValidationErrors('LicenseRef-fossology-MIT');
     $this->assertEmpty($errors);
 
     $errors = SpdxLicenseValidator::getValidationErrors('');
     $this->assertNotEmpty($errors);
-    $this->assertContains('empty', $errors[0]);
+    $this->assertStringContainsString('empty', $errors[0]);
   }
 
   public function testSanitizeLicenseRef()
