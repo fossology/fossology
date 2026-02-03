@@ -2,6 +2,7 @@
 /*
  SPDX-FileCopyrightText: © 2014-2015 Siemens AG
  Author: Steffen Weber
+ * Converted to Integration Test by Fossology Contributors
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -10,12 +11,13 @@ namespace Fossology\Lib\Dao;
 
 use Exception;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Test\TestLiteDb;
+use Fossology\Lib\Test\TestPgDb;
+use Mockery as M;
 use Monolog\Logger;
 
 class UserDaoTest extends \PHPUnit\Framework\TestCase
 {
-  /** @var TestLiteDb */
+  /** @var TestPgDb */
   private $testDb;
   /** @var DbManager */
   private $dbManager;
@@ -23,28 +25,38 @@ class UserDaoTest extends \PHPUnit\Framework\TestCase
   private $logger;
   /** @var UserDao */
   private $userDao;
-  /** @var assertCountBefore */
+  /** @var integer */
   private $assertCountBefore;
 
   protected function setUp() : void
   {
-    $this->testDb = new TestLiteDb();
+    $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
     $this->logger = new Logger("test");
+
+    global $container;
+    $container = M::mock('ContainerBuilder');
+    $session = M::mock('Symfony\Component\HttpFoundation\Session\Session');
+    $container->shouldReceive('get')->with('session')->andReturn($session);
+
     $this->userDao = new UserDao($this->dbManager, $this->logger);
+
+    $this->testDb->createPlainTables(array('users', 'groups', 'group_user_member'));
+
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
   protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
+    $this->testDb->fullDestruct();
     $this->testDb = null;
     $this->dbManager = null;
+    M::close();
   }
 
   public function testGetUserGroupMap()
   {
-    $this->testDb->createPlainTables(array('groups','group_user_member'));
     $this->testDb->insertData(array('groups','group_user_member'));
 
     $defaultGroups = $this->userDao->getUserGroupMap($userId=1);
@@ -53,7 +65,6 @@ class UserDaoTest extends \PHPUnit\Framework\TestCase
 
   public function testGetAdminGroupMap()
   {
-    $this->testDb->createPlainTables(array('groups','group_user_member'));
     $this->testDb->insertData(array('groups','group_user_member'));
     defined('PLUGIN_DB_ADMIN') or define('PLUGIN_DB_ADMIN',10);
 
@@ -64,7 +75,6 @@ class UserDaoTest extends \PHPUnit\Framework\TestCase
 
   public function testGetDeletableAdminGroupMap()
   {
-    $this->testDb->createPlainTables(array('groups','group_user_member','users'));
     $username = 'testi';
     $userId = 101;
     $this->dbManager->insertTableRow('users',array('user_pk'=>$userId,'user_name'=>$username));
@@ -137,7 +147,6 @@ class UserDaoTest extends \PHPUnit\Framework\TestCase
 
   public function testAddGroupMembership()
   {
-    $this->testDb->createPlainTables(array('users','groups','group_user_member'));
     $this->testDb->insertData(array('users','groups','group_user_member'));
     $this->userDao->addGroupMembership($groupId=2,$userId=1);
     $map = $this->userDao->getUserGroupMap($userId);
