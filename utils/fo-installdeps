@@ -97,8 +97,6 @@ if [[ $BUILDTIME ]]; then
             libboost-program-options-dev libpq-dev composer patch devscripts \
             libdistro-info-perl libcppunit-dev libomp-dev cmake ninja-build
          case "$CODENAME" in
-           bullseye)
-             apt-get $YesOpt install php7.4-mbstring php7.4-cli php7.4-xml php7.4-zip php7.4-gd php7.4-pgsql php7.4-curl php7.4-uuid php7.4-sqlite3 php7.4-yaml;;
            bookworm)
              apt-get $YesOpt install php8.2-mbstring php8.2-cli php8.2-xml php8.2-zip php8.2-gd php8.2-pgsql php8.2-curl php8.2-uuid php8.2-sqlite3 php8.2-yaml;;
            trixie)
@@ -114,8 +112,6 @@ if [[ $BUILDTIME ]]; then
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
-              bullseye)
-                apt-get $YesOpt install postgresql-server-dev-13;;
               bookworm)
                 apt-get $YesOpt install postgresql-server-dev-15;;
               trixie)
@@ -173,11 +169,6 @@ if [[ $RUNTIME ]]; then
             subversion git \
             dpkg-dev php-uuid php-yaml
          case "$CODENAME" in
-            bullseye)
-               apt-get $YesOpt install postgresql-13 php7.4 php7.4-pgsql \
-               libapache2-mod-php7.4 php7.4-pgsql php7.4-cli php7.4-curl \
-               php7.4-xml php7.4-zip php7.4-mbstring php7.4-uuid php-php-gettext s-nail \
-               libboost-program-options1.74.0 libboost-regex1.74.0 libicu67;;
             bookworm)
                apt-get $YesOpt install postgresql-15 php8.2 php8.2-pgsql \
                libapache2-mod-php8.2 php8.2-pgsql php8.2-cli php8.2-curl \

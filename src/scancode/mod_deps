@@ -90,8 +90,6 @@ if [[ $RUNTIME ]]; then
         libbz2-1.0 xz-utils zlib1g libxml2-dev libxslt1-dev libpopt0 \
         python3 python3-pip
       case "$CODENAME" in
-        bullseye)
-          apt-get $YesOpt install libjsoncpp24 libboost-program-options1.74.0;;
         bookworm)
           apt-get $YesOpt install libjsoncpp25 libboost-program-options1.74.0;;
         trixie)

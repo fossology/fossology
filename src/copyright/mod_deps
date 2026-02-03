@@ -87,8 +87,6 @@ if [[ $RUNTIME ]]; then
   case "$DISTRO" in
     Debian|Ubuntu|Tuxedo)
       case "$CODENAME" in
-        bullseye)
-          apt-get $YesOpt install libjsoncpp24 libboost-filesystem1.74.0;;
         bookworm)
           apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0;;
         trixie)
