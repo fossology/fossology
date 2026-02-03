@@ -147,20 +147,38 @@ function Traceback_parm_keep($List)
   return($Opt);
 } // Traceback_parm_keep()
 
-/**
- * \brief Get the directory of the URI without query.
- */
-function Traceback_dir()
-{
-  $V = explode('?',@$_SERVER['REQUEST_URI'],2);
-  $V = $V[0];
-  $i = strlen($V);
-  while (($i > 0) && ($V[$i - 1] != '/')) {
-    $i --;
-  }
-  $V = substr($V,0,$i);
   return($V);
 } // Traceback_uri()
+
+/**
+ * \brief Get the protocol scheme (http or https)
+ *
+ * @return string
+ */
+function getProtocolScheme()
+{
+  if (!empty(@$_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+    return strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']);
+  }
+
+  if ((!empty(@$_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+      (@$_SERVER['SERVER_PORT'] == 443)) {
+    return 'https';
+  }
+
+  return 'http';
+}
+
+/**
+ * \brief Get the total url without query
+ */
+function tracebackTotalUri()
+{
+  $protoUri = getProtocolScheme() . '://';
+  $portUri = (@$_SERVER["SERVER_PORT"] == "80" || @$_SERVER["SERVER_PORT"] == "443") ? "" : (":" . @$_SERVER["SERVER_PORT"]);
+  $V = $protoUri . @$_SERVER['SERVER_NAME'] . $portUri . Traceback_uri();
+  return($V);
+} // tracebackTotalUri()
 
 /**
  * \brief Get the total url without query

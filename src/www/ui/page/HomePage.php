@@ -48,14 +48,12 @@ class HomePage extends DefaultPlugin
       array_key_exists('provider', $SysConf['AUTHENTICATION'])) {
         $vars['loginProvider'] = $SysConf['AUTHENTICATION']['provider'];
     }
+    // Protocol detection: prefer X-Forwarded-Proto header
+    $vars['protocol'] = strtoupper(getProtocolScheme());
+
     if (array_key_exists('User', $_SESSION) && $_SESSION['User'] ==
       "Default User" && plugin_find_id("auth") >= 0) {
-      if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off") {
-        $vars['protocol'] = "HTTPS";
-      } else {
-        $vars['protocol'] = preg_replace("@/.*@", "",
-          @$_SERVER['SERVER_PROTOCOL']);
-      }
+      $vars['protocol'] = strtoupper(getProtocolScheme());
 
       $vars['referrer'] = "?mod=browse";
       $vars['authUrl'] = "?mod=auth";
