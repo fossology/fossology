@@ -80,7 +80,6 @@ class ui_tag extends FO_Plugin
     global $container;
     /** @var DbManager $dbManager */
     $dbManager = $container->get('db.manager');
-    $dbManager->begin();
 
     /* See if the tag already exists */
     $sql = "SELECT * FROM tag WHERE tag = $1";
@@ -147,7 +146,6 @@ class ui_tag extends FO_Plugin
         $dbManager->freeResult($dbManager->execute($insertTagUploadTreeStmt, array($tag_pk, $Item, $tag_notes)));
       } else {
         $text = _("This Tag already associated with this Directory!");
-        $dbManager->rollback();
         return ($text);
       }
     } else {
@@ -161,12 +159,10 @@ class ui_tag extends FO_Plugin
           $dbManager->freeResult($dbManager->execute($insertTagFileStmt, array($tag_pk, $pfile, $tag_notes)));
         } else {
           $text = _("This Tag already associated with this File!");
-          $dbManager->rollback();
           return ($text);
         }
       }
     }
-    $dbManager->commit();
     return (null);
   }
 
@@ -224,7 +220,6 @@ class ui_tag extends FO_Plugin
         }
       }
     }
-    $dbManager->begin();
     /* Update the tag table */
     $updateTagStmt = __FUNCTION__ . ".updateTag";
     $dbManager->prepare($updateTagStmt, "UPDATE tag SET tag = $1, tag_desc = $2 WHERE tag_pk = $3;");
@@ -243,7 +238,6 @@ class ui_tag extends FO_Plugin
       $dbManager->prepare($updateTagFileStmt, $sql);
       $dbManager->freeResult($dbManager->execute($updateTagFileStmt, array($tag_notes, $tag_file_pk)));
     }
-    $dbManager->commit();
     return (null);
   }
 
