@@ -24,17 +24,23 @@ case "$1" in
     ENABLED="/etc/apache2/sites-enabled/fossology.conf"
     AVAILABLE="/etc/apache2/sites-available/fossology.conf"
 
-    # Fix legacy Apache layout from FOSSology 3.x upgrades
+    # Clean legacy symlink if it exists
     if [ -L "$ENABLED" ] && [ ! -e "$AVAILABLE" ]; then
-        TARGET=$(readlink "$ENABLED")
+        echo "Removing legacy Apache symlink..."
 
-        echo "Fixing legacy Apache symlink for FOSSology..."
+        rm -f "$ENABLED"
+    fi
 
-        ln -s "$TARGET" "$AVAILABLE"
+    # Enable site properly using a2ensite
+    if [ -e "$AVAILABLE" ]; then
+        echo "Enabling FOSSology site with a2ensite..."
+
+        a2ensite fossology.conf >/dev/null 2>&1 || true
     fi
 
     /usr/lib/fossology/fo-postinstall --agent --debian
     ;;
+
 
 
     abort-upgrade|abort-remove|abort-deconfigure)
