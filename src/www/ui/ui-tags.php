@@ -306,7 +306,7 @@ class ui_tag extends FO_Plugin
       $text3 = _("Tag Date");
       $VE .= "<tr><th>$text1</th><th>$text2</th><th>$text3</th><th></th></tr>\n";
       foreach ($rows as $row) {
-        $VE .= "<tr><td align='center'>" . $row['tag'] . "</td><td align='center'>" . $row['tag_desc'] . "</td><td align='center'>" . substr($row['tag_file_date'],0,19) . "</td>";
+        $VE .= "<tr><td align='center'>" . htmlspecialchars($row['tag']) . "</td><td align='center'>" . htmlspecialchars($row['tag_desc']) . "</td><td align='center'>" . substr($row['tag_file_date'],0,19) . "</td>";
         if ($this->uploadDao->isEditable($Upload, Auth::getGroupId())) {
           $VE .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>View/Edit</a>|<a href='" . Traceback_uri() . "?mod=tag&action=delete&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Delete</a></td></tr>\n";
         } else {
@@ -494,11 +494,11 @@ class ui_tag extends FO_Plugin
     $VEd.= "<form name='form' method='POST' action='" . Traceback_uri() ."?mod=tag&upload=$Upload&item=$Item'>\n";
     $VEd .= "<p>";
     $text = _("Tag");
-    $VEd .= "$text: <input type='text' id='tag_name' name='tag_name' autocomplete='off' onclick='Tags_Get(\"". Traceback_uri() . "?mod=tag_get&uploadtree_pk=$Item\")' value=\"$tag\"/> ";
+    $VEd .= "$text: <input type='text' id='tag_name' name='tag_name' autocomplete='off' onclick='Tags_Get(\"". Traceback_uri() . "?mod=tag_get&uploadtree_pk=$Item\")' value=\"" . htmlspecialchars($tag) . "\"/> ";
     $text = _("Tag description:");
-    $VEd .= "<p>$text <input type='text' name='tag_desc' value=\"$tag_desc\"/></p>";
+    $VEd .= "<p>$text <input type='text' name='tag_desc' value=\"" . htmlspecialchars($tag_desc) . "\"/></p>";
     $VEd .= _("<p>Notes:</p>");
-    $VEd .= "<p><textarea rows='10' cols='80' name='tag_notes'>$tag_notes</textarea></p>";
+    $VEd .= "<p><textarea rows='10' cols='80' name='tag_notes'>" . htmlspecialchars($tag_notes) . "</textarea></p>";
 
     if (Isdir($ufile_mode)) {
       $VEd .= "<p><input type='hidden' name='tag_dir' value='1'/></p>";
@@ -550,7 +550,7 @@ class ui_tag extends FO_Plugin
       $VD .= "<form name='form' method='POST' action='" . Traceback_uri() ."?mod=tag&upload=$Upload&item=$Item'>\n";
       $VD .= "<select multiple size='10' name='tag_file_pk[]'>\n";
       foreach ($rows as $row) {
-        $VD .= "<option value='" . $row['tag_file_pk'] . "'>" . "-" . $row['tag'] . "</option>\n";
+        $VD .= "<option value='" . $row['tag_file_pk'] . "'>" . "-" . htmlspecialchars($row['tag']) . "</option>\n";
       }
       $VD .= "</select>\n";
       if (Iscontainer($ufile_mode)) {
