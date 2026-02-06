@@ -46,15 +46,12 @@ class upload_properties extends FO_Plugin
    **/
   public function UpdateUploadProperties($uploadId, $newName, $newDesc)
   {
-    if (empty($newName) and empty($newDesc)) {
+    // MR ROGERS WAS HERE - FIX 2
+    if (empty($newName) and !isset($newDesc)) {
       return 2;
     }
 
     if (!empty($newName)) {
-      /*
-       * Use pfile_fk to select the correct entry in the upload tree, artifacts
-       * (e.g. directories of the upload do not have pfiles).
-       */
       $row = $this->dbManager->getSingleRow(
         "SELECT pfile_fk FROM upload WHERE upload_pk=$1",array($uploadId),__METHOD__.'.getPfileId');
       if (empty($row)) {
@@ -63,7 +60,6 @@ class upload_properties extends FO_Plugin
       $pfileFk = $row['pfile_fk'];
       $trimNewName = trim($newName);
 
-      /* Always keep uploadtree.ufile_name and upload.upload_filename in sync */
       $this->dbManager->getSingleRow(
         "UPDATE uploadtree SET ufile_name=$3 WHERE upload_fk=$1 AND pfile_fk=$2",
         array($uploadId, $pfileFk, $trimNewName),
@@ -74,14 +70,14 @@ class upload_properties extends FO_Plugin
         __METHOD__ . '.updateUpload.name');
     }
 
-    if (! empty($newDesc)) {
+    // Fix: Allow empty description
+    if (isset($newDesc)) {
       $trimNewDesc = trim($newDesc);
       $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=$2 WHERE upload_pk=$1",
         array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
     }
     return 1;
   }
-
   public function Output()
   {
     $groupId = Auth::getGroupId();
