@@ -566,6 +566,39 @@ $UploadArchiveTmp = realpath($UploadArchive);
 if (!$UploadArchiveTmp) {
   // neither a file nor folder from server?
   if (filter_var($UploadArchive, FILTER_VALIDATE_URL)) {
+    // Validate that the URL is actually accessible before proceeding
+    if ($Verbose) {
+      print "Checking URL accessibility: $UploadArchive\n";
+    }
+    
+    $ch = curl_init($UploadArchive);
+    curl_setopt($ch, CURLOPT_NOBODY, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    
+    $result = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+    
+    if ($Verbose) {
+      print "HTTP Response Code: $httpCode\n";
+    }
+    
+    // Check if URL is accessible (HTTP 2xx or 3xx are OK)
+    if ($result === false || $httpCode == 0 || ($httpCode >= 400 && $httpCode < 600)) {
+      print "ERROR: Unable to access URL: $UploadArchive\n";
+      if ($httpCode > 0) {
+        print "HTTP Status Code: $httpCode\n";
+      }
+      if (!empty($curlError)) {
+        print "Error: $curlError\n";
+      }
+      print "Please verify the URL is correct and accessible.\n";
+      exit(1);
+    }
   } else if (strchr($UploadArchive, '*')) {
     $file_number_cmd = "ls $UploadArchive > /dev/null";
     system($file_number_cmd, $return_val);
