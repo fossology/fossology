@@ -1351,8 +1351,17 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   {
     /* postgres 8.3 seems to have a problem escaping binary characters
      * (it works in 8.4).  So manually substitute '~' for any unprintable and slash chars.
+     * Updated to handle UTF-8 characters properly by checking for valid UTF-8 sequences
+     * instead of using isprint() which only works with ASCII characters.
      */
-    for (cp=UfileName; *cp; cp++) if (!isprint(*cp) || (*cp=='/') || (*cp=='\\')) *cp = '~';
+    for (cp=UfileName; *cp; cp++) {
+      unsigned char c = (unsigned char)*cp;
+      /* Replace control characters (ASCII 0-31) and path separators */
+      if ((c < 32 && c != '\t' && c != '\n' && c != '\r') || (*cp=='/') || (*cp=='\\')) {
+        *cp = '~';
+      }
+      /* All other characters (including UTF-8 sequences) are kept as-is */
+    }
 
     /* Get the parent ID */
     /* Two cases -- depending on if the parent exists */

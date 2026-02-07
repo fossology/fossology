@@ -285,7 +285,14 @@ class SpdxAgent extends Agent
   protected function getFileBasename($packageName)
   {
     if ($this->filebasename == null) {
-      $fileName = strtoupper($this->outputFormat)."_".$packageName;
+      // Check if packageName contains non-ASCII characters and create ASCII-safe fallback
+      if (preg_match('/[^\x20-\x7E]/', $packageName)) {
+        $safeName = "upload_" . time() . "_" . $this->outputFormat;
+        $fileName = strtoupper($this->outputFormat)."_".$safeName;
+      } else {
+        $fileName = strtoupper($this->outputFormat)."_".$packageName;
+      }
+      
       switch ($this->outputFormat) {
         case "spdx2":
           $fileName .= ".spdx.rdf";
@@ -653,8 +660,13 @@ class SpdxAgent extends Agent
 
     // To ensure the file is valid, replace any non-printable characters with a question mark.
     // 'Non-printable' is ASCII < 0x20 (excluding \r, \n and tab) and 0x7F (delete).
-    $message = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/','?',$message);
+    // Use UTF-8 aware pattern to avoid corrupting multi-byte characters
+    $message = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u','?',$message);
 
+    // Add UTF-8 BOM for proper CSV encoding when content contains non-ASCII characters (CSV only)
+    if ($this->outputFormat === 'spdx2csv' && preg_match('/[^\x20-\x7E]/', $message)) {
+      $message = "\xEF\xBB\xBF" . $message;
+    }
     file_put_contents($this->filename, $message);
     $this->updateReportTable($uploadId, $this->jobId, $this->filename);
   }

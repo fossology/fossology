@@ -159,7 +159,13 @@ class CycloneDXAgent extends Agent
     if (count($this->additionalUploads) > 0) {
       $fileName = $fileBase . "multifile" . "_" . strtoupper($this->outputFormat);
     } else {
-      $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+      // Check if packageName contains non-ASCII characters and create ASCII-safe fallback
+      if (preg_match('/[^\x20-\x7E]/', $this->packageName)) {
+        $safeName = "upload_" . time() . "_cyclonedx";
+        $fileName = $fileBase. strtoupper($this->outputFormat)."_".$safeName;
+      } else {
+        $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+      }
     }
 
     return $fileName .".json" ;
@@ -344,10 +350,11 @@ class CycloneDXAgent extends Agent
     }
     umask(0133);
 
-    $contents = json_encode($packageNodes, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    $contents = json_encode($packageNodes, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     // To ensure the file is valid, replace any non-printable characters with a question mark.
-    // 'Non-printable' is ASCII < 0x20 (excluding \r, \n and tab) and 0x7F - 0x9F.
-    $contents = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/u','?',$contents);
+    // 'Non-printable' is ASCII < 0x20 (excluding \r, \n and tab) and 0x7F (delete).
+    // Use UTF-8 aware pattern to avoid corrupting multi-byte characters
+    $contents = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u','?',$contents);
     file_put_contents($this->uri, $contents);
     $this->updateReportTable($uploadId, $this->jobId, $this->uri);
   }

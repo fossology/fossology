@@ -155,7 +155,14 @@ class ReadmeOssAgent extends Agent
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
 
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
-    $fileName = $fileBase. "ReadMe_OSS_".$packageName.".txt" ;
+    
+    // Check if packageName contains non-ASCII characters and create ASCII-safe fallback
+    if (preg_match('/[^\x20-\x7E]/', $packageName)) {
+      $safeName = "upload_" . time() . "_readmeoss";
+      $fileName = $fileBase. "ReadMe_OSS_".$safeName.".txt";
+    } else {
+      $fileName = $fileBase. "ReadMe_OSS_".$packageName.".txt";
+    }
 
     foreach ($this->additionalUploadIds as $addUploadId) {
       $packageName .= ', ' . $this->uploadDao->getUpload($addUploadId)->getFilename();

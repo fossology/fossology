@@ -954,7 +954,14 @@ class UnifiedReport extends Agent
       mkdir($fileBase, 0777, true);
     }
     umask(0022);
-    $fileName = $fileBase. "Clearing_Report_".$packageName.".docx";
+    
+    // Check if packageName contains non-ASCII characters and create ASCII-safe fallback
+    if (preg_match('/[^\x20-\x7E]/', $packageName)) {
+      $safeName = "upload_" . time() . "_unified_report";
+      $fileName = $fileBase. "Clearing_Report_".$safeName.".docx";
+    } else {
+      $fileName = $fileBase. "Clearing_Report_".$packageName.".docx";
+    }
     $objWriter = IOFactory::createWriter($phpWord, "Word2007");
     $objWriter->save($fileName);
 

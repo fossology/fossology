@@ -55,9 +55,18 @@ class DownloadUtil
    */
   public static function getDownloadResponse($content, $fileName, $contentType = 'text/csv')
   {
+    // Check if filename contains non-ASCII characters and encode accordingly
+    if (preg_match('/[^\x20-\x7E]/', $fileName)) {
+      // Contains non-ASCII characters, use RFC 2231 encoding
+      $encodedFileName = 'filename*=UTF-8\'\'' . rawurlencode($fileName);
+    } else {
+      // ASCII only filename, use simple format
+      $encodedFileName = 'filename="' . $fileName . '"';
+    }
+
     $headers = array(
       'Content-type' => $contentType . ', charset=UTF-8',
-      'Content-Disposition' => 'attachment; filename=' . $fileName,
+      'Content-Disposition' => 'attachment; ' . $encodedFileName,
       'Pragma' => 'no-cache',
       'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
       'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT'

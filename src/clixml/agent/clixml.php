@@ -195,7 +195,13 @@ class CliXml extends Agent
     if (count($this->additionalUploads) > 0) {
       $fileName = $fileBase . "multifile" . "_" . strtoupper($this->outputFormat);
     } else {
-      $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+      // Check if packageName contains non-ASCII characters and create ASCII-safe fallback
+      if (preg_match('/[^\x20-\x7E]/', $this->packageName)) {
+        $safeName = "upload_" . time() . "_clixml";
+        $fileName = $fileBase. strtoupper($this->outputFormat)."_".$safeName;
+      } else {
+        $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+      }
     }
 
     return $fileName .".xml";

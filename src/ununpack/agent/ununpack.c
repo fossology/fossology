@@ -137,6 +137,15 @@ int	main(int argc, char *argv[])
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
 
+  /* Set UTF-8 client encoding to properly handle non-ASCII characters */
+  if (pgConn != NULL) {
+    PGresult *result = PQexec(pgConn, "SET client_encoding TO 'UTF8'");
+    if (PQresultStatus(result) != PGRES_COMMAND_OK) {
+      LOG_WARNING("Failed to set UTF-8 client encoding: %s", PQerrorMessage(pgConn));
+    }
+    PQclear(result);
+  }
+
   while((c = getopt(argc,argv,"ACc:d:FfHhL:m:PQiIqRr:T:t:U:VvXxE:")) != -1)
   {
     switch(c)
