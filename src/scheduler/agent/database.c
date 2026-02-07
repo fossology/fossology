@@ -43,7 +43,7 @@
 #define DEFAULT_HEADER  "FOSSology scan complete\nmessage:\"" ///< Default email header
 #define DEFAULT_FOOTER  "\""                  ///< Default email footer
 #define DEFAULT_SUBJECT "FOSSology scan complete\n" ///< Default email subject
-#define DEFAULT_COMMAND "/usr/bin/mailx"      ///< Default email command to use
+#define DEFAULT_COMMAND "/usr/bin/s-nail"     ///< Default email command to use
 
 #define min(x, y) (x < y ? x : y)     ///< Return the minimum of x, y
 

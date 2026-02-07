@@ -347,7 +347,7 @@ if (array_key_exists("a", $options)) {
 
 		if(array_key_exists('e', $options)) {
 			$last = exec("./textReport.php -f $reportHome |
-    mailx -s \"test results\" $mailTo ",$tossme, $rptGen);
+    s-nail -s \"test results\" $mailTo ",$tossme, $rptGen);
 		}
 		$last = system("./textReport.php -f $reportHome", $rtn);
 		if($last === FALSE) {
