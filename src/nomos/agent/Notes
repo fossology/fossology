@@ -3,110 +3,56 @@
      SPDX-License-Identifier: GPL-2.0-only
 -->
 
-To Whom it May Concern: 
-
+Nomos Developer Notes
+=====================
 
 What This Is and How to Work It
 -------------------------------
 
-This directory in the FOSSology source tree
-(agents/nomos) contains work for a new license analysis agent. This
-code originated from a standalone license-scanning tool called Nomos.
+This directory in the FOSSology source tree (`agents/nomos`) contains the source code for the `nomos` license analysis agent. The code originated as a standalone license-scanning tool but is now fully integrated with the FOSSology framework.
 
-At this point in time, the code is not integrated with the rest of FOSSology. 
-It uses it's own non-standard Makefile to build a single standalone 
-executable.
+The build process for `nomos` has been migrated to the standard FOSSology CMake-based system.
 
-To try it out...
+Build Instructions (IMPORTANT)
+------------------------------
 
-   % make
-   % ./nomos <file_to_be_scanned>
+Do **NOT** attempt to build Nomos from within this directory (`src/nomos/agent`). There is no Makefile here.
 
-The file to be scanned should be a regular file (binary or text). In
-particular, it should not be an archive. No unpacking is done; the file
-is scanned as is.
+To build Nomos, you must build the entire Fossology project from the root directory:
 
-There are currently no command-line options.
+    mkdir build
+    cd build
+    cmake ..
+    make
 
+Dependencies
+------------
 
-Note About the Source Code and Impending Changes
-------------------------------------------------
+### PostgreSQL
+Building Nomos requires PostgreSQL development headers (e.g. `libpq-dev` or `postgresql-devel`).
 
-Because this code came from another tool similar to FOSSology, but with
-different structure and conventions, the process of converting it into 
-a full-fledged FOSSology agent is ongoing.
+### Runtime Configuration
+Nomos is **not designed to be run standalone**. It expects a Fossology runtime environment and configuration file (`fossology.conf`) at predefined locations (e.g. `/usr/local/etc/fossology/`).
 
-With that in mind, comments with "CDB" in them are bread crumbs I've 
-left in places where I was unsure about a change I made or to note a potential
-refinement (CDB == my initials).
-
-
-
-To Do's
--------
-
-- Change all trace calls at beginning of functions to use traceFunc()
-  (defined in util.c)
- 
-- Either add a command-line option to set gl.ptswitch or remove all the
-  PROC_TRACE_SWITCH #ifdefs
-
-- Go back and edit CFLAGS options in Makefile to document and accurately
-  represent what is still operable.
-
-- Document all Makefile targets
-
-- Remove all HP_INTERNAL and CUSTOMER_VERSION references.
-
-- Check and remove all unused field of the gl global variable structure.
-
-- Migrate to standard FOSSology makefile structure and system.
- 
-
-
-Changes
--------
-
-[This is not at all complete. There have been a lot of changes.]
-
-- Changed ls_t to licSpec_t.
-- Changed lic_t to licText_t.
-
-
-Questions
----------
-
-- Where the hell is checkstrings script? Do we want it?
-- COMMIT_HASH #ifdef stolen from other agent code. Where does this get
-  #defined?
-- Why does nomos set the LANG environment variable?
-- Implications of removing custom magic file?
-- May want to re-add function validateTools someplace?
-- Do we want to keep the Log functionality, but just have the logfile
-  be in another place? (Right now, the log stuff has been removed.)
-- Do we really need the PROC_TRACE_SWITCH compile #define?
-
+Running `./nomos` directly without this environment will likely fail or misbehave (e.g., segfaults or configuration errors), even if all shared libraries are resolved.
 
 #defines Used
 -------------
 
-[Also incomplete.]
+[Incomplete List]
 
 BRIEF_LIST
-SHOW_LOCATION		Extra code to pinpoint license location. Should
-			always be true.
+SHOW_LOCATION       Extra code to pinpoint license location. Should always be true.
 PROC_TRACE
-PROC_TRACE_SWITCH	Gives command option for tracing on/off
+PROC_TRACE_SWITCH   Gives command option for tracing on/off
 DEBUG
-GLOBAL_DEBUG		Debug access to global variable structure
-MEMORY_TRACING		Use Debug Malloc wrapper
-STOPWATCH		Performance Measurement
-TIMING			Performance Measurement (code has to be added to
-places where you want to measure).
+GLOBAL_DEBUG        Debug access to global variable structure
+MEMORY_TRACING      Use Debug Malloc wrapper
+STOPWATCH           Performance Measurement
+TIMING              Performance Measurement (code has to be added to places where you want to measure).
 
 
 Changes made from my nomos_experimental version
 -----------------------------------------------
 
 Remove all code #ifdef'd by USE_MMAP 
-
