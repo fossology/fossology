@@ -45,6 +45,9 @@ class ReportImportSink
   /** @var ReportImportConfiguration */
   protected $configuration;
 
+  /** @var array Cache for license ID lookups to avoid redundant DB queries */
+  private $licenseCreationCache = array();
+
   /**
    * ReportImportSink constructor.
    * @param $agent_pk
@@ -135,6 +138,13 @@ class ReportImportSink
   public function getIdForDataItemOrCreateLicense($dataItem, $groupId)
   {
     $licenseShortName = $dataItem->getLicenseId();
+    
+    // Check cache first to avoid redundant DB queries
+    if (isset($this->licenseCreationCache[$licenseShortName])) {
+      return $this->licenseCreationCache[$licenseShortName];
+    }
+    
+    // Try to find existing license
     if ($this->configuration->shouldMatchLicenseNameWithSPDX()) {
       $license = $this->licenseDao->getLicenseBySpdxId($licenseShortName, $groupId);
       if ($license === null) {
@@ -144,9 +154,12 @@ class ReportImportSink
     } else {
       $license = $this->licenseDao->getLicenseByShortName($licenseShortName, $groupId);
     }
+    
     if ($license !== null)
     {
-      return $license->getId();
+      $licenseId = $license->getId();
+      $this->licenseCreationCache[$licenseShortName] = $licenseId;
+      return $licenseId;
     }
     elseif (! $this->licenseDao->isNewLicense($licenseShortName, $groupId))
     {
@@ -175,15 +188,64 @@ class ReportImportSink
           0,
           null
         );
+        $this->licenseCreationCache[$licenseShortName] = $licenseId;
         return $licenseId;
       }
       else
       {
         echo "creating it as license ...\n";
         $licenseText = trim($licenseCandidate->getText());
-        return $this->licenseDao->insertLicense($licenseCandidate->getShortName(), $licenseText, $licenseCandidate->getShortName());
+        $licenseId = $this->licenseDao->insertLicense($licenseCandidate->getShortName(), $licenseText, $licenseCandidate->getShortName());
+        $this->licenseCreationCache[$licenseShortName] = $licenseId;
+        return $licenseId;
       }
     }
+    elseif ($dataItem->isSetCustomText())
+    {
+      // NEW: Auto-create license from custom text when candidate is not set
+      echo "INFO: No license candidate set for \"$licenseShortName\", attempting auto-creation from custom text ... ";
+      
+      // Infer license name from shortname (convert dashes/underscores to spaces, capitalize)
+      $inferredName = ucwords(str_replace(array('-', '_'), ' ', $licenseShortName));
+      $customText = $dataItem->getCustomText();
+      
+      if($this->configuration->isCreateLicensesAsCandidate() || !$this->userIsAdmin)
+      {
+        echo "Creating as license candidate ...\n";
+        $licenseId = $this->licenseDao->insertUploadLicense(
+          $licenseShortName,
+          $customText,
+          $groupId,
+          $this->userId
+        );
+        
+        $this->licenseDao->updateCandidate(
+          $licenseId,
+          $licenseShortName,
+          $inferredName,
+          $customText,
+          "",
+          "Auto-created from SPDX import custom text (Job: {$this->jobId})",
+          date(DATE_ATOM),
+          $this->userId,
+          false,
+          0,
+          null
+        );
+        
+        $this->licenseCreationCache[$licenseShortName] = $licenseId;
+        return $licenseId;
+      }
+      else
+      {
+        echo "Creating as full license ...\n";
+        $licenseId = $this->licenseDao->insertLicense($licenseShortName, $customText, $licenseShortName);
+        $this->licenseCreationCache[$licenseShortName] = $licenseId;
+        return $licenseId;
+      }
+    }
+    
+    echo "WARNING: Could not resolve or create license \"$licenseShortName\" (no candidate or custom text available)\n";
     return -1;
   }
 
