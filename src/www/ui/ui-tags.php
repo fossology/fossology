@@ -83,7 +83,7 @@ class ui_tag extends FO_Plugin
 
     /* See if the tag already exists */
     $sql = "SELECT * FROM tag WHERE tag = $1";
-    $result = $dbManager->getSingleRow($sql, array($tag_name));
+    $result = $dbManager->getSingleRow($sql, array($tag_name), __METHOD__ . ".checkExist");
 
     if (empty($result)) {
       $insertTagStmt = __FUNCTION__ . ".insertTag";
@@ -93,7 +93,7 @@ class ui_tag extends FO_Plugin
 
     /* Make sure it was added */
     $sql = "SELECT * FROM tag WHERE tag = $1 LIMIT 1;";
-    $row = $dbManager->getSingleRow($sql, array($tag_name));
+    $row = $dbManager->getSingleRow($sql, array($tag_name), __METHOD__ . ".checkAdded");
 
     if (empty($row)) {
       $text = _("Failed to create tag.");
@@ -109,7 +109,7 @@ class ui_tag extends FO_Plugin
       /* Get pfile_fk from uploadtree_pk */
       $sql = "SELECT pfile_fk FROM uploadtree
               WHERE uploadtree_pk = $1 LIMIT 1";
-      $row = $dbManager->getSingleRow($sql, array($Item));
+      $row = $dbManager->getSingleRow($sql, array($Item), __METHOD__ . ".getPfile");
       if (!empty($row)) {
         $pfileArray[$i] = $row['pfile_fk'];
         $i ++;
@@ -121,7 +121,7 @@ class ui_tag extends FO_Plugin
       $MimetypeArray = GetPkgMimetypes();
       $sql = "SELECT distinct pfile.pfile_pk FROM uploadtree, pfile WHERE uploadtree.pfile_fk = pfile.pfile_pk AND (pfile.pfile_mimetypefk = $1 OR pfile.pfile_mimetypefk = $2 OR pfile.pfile_mimetypefk = $3) AND uploadtree.upload_fk = $4 AND uploadtree.lft >= (SELECT lft FROM uploadtree WHERE uploadtree_pk = $5) AND uploadtree.rgt <= (SELECT rgt FROM uploadtree WHERE uploadtree_pk = $6);";
 
-      $rows = $dbManager->getRows($sql, array($MimetypeArray[0], $MimetypeArray[1], $MimetypeArray[2], $Upload, $Item, $Item));
+      $rows = $dbManager->getRows($sql, array($MimetypeArray[0], $MimetypeArray[1], $MimetypeArray[2], $Upload, $Item, $Item), __METHOD__ . ".getPackagePfiles");
       foreach ($rows as $row) {
         $pfileArray[$i] = $row['pfile_pk'];
         $i ++;
@@ -129,7 +129,7 @@ class ui_tag extends FO_Plugin
     }
     if (! empty($tag_container)) {
       $sql = "SELECT distinct pfile_fk FROM uploadtree WHERE upload_fk = $1 AND lft >= (SELECT lft FROM uploadtree WHERE uploadtree_pk = $2) AND rgt <= (SELECT rgt FROM uploadtree WHERE uploadtree_pk = $3) AND ((ufile_mode & (1<<28))=0) AND pfile_fk!=0;";
-      $rows = $dbManager->getRows($sql, array($Upload, $Item, $Item));
+      $rows = $dbManager->getRows($sql, array($Upload, $Item, $Item), __METHOD__ . ".getContainerPfiles");
       foreach ($rows as $row) {
         $pfileArray[$i] = $row['pfile_fk'];
         $i ++;
@@ -138,7 +138,7 @@ class ui_tag extends FO_Plugin
 
     if (! empty($tag_dir)) {
       $sql = "SELECT tag_uploadtree_pk FROM tag_uploadtree WHERE tag_fk = $1 AND uploadtree_fk = $2;";
-      $row = $dbManager->getSingleRow($sql, array($tag_pk, $Item));
+      $row = $dbManager->getSingleRow($sql, array($tag_pk, $Item), __METHOD__ . ".checkDirTagExist");
       if (empty($row)) {
         /* Add record to tag_uploadtree table */
         $insertTagUploadTreeStmt = __FUNCTION__ . ".insertTagUploadTree";
@@ -151,7 +151,7 @@ class ui_tag extends FO_Plugin
     } else {
       foreach ($pfileArray as $pfile) {
         $sql = "SELECT tag_file_pk FROM tag_file WHERE tag_fk = $1 AND pfile_fk = $2;";
-        $row = $dbManager->getSingleRow($sql, array($tag_pk, $pfile));
+        $row = $dbManager->getSingleRow($sql, array($tag_pk, $pfile), __METHOD__ . ".checkFileTagExist");
         if (empty($row)) {
           /* Add record to tag_file table */
           $insertTagFileStmt = __FUNCTION__ . ".insertTagFile";
@@ -199,12 +199,12 @@ class ui_tag extends FO_Plugin
       $dbManager = $container->get('db.manager');
       /* Check if tag_name has changed and if the new name is already in use */
       $sql = "SELECT tag FROM tag WHERE tag_pk = $1;";
-      $row = $dbManager->getSingleRow($sql, array($tag_pk));
+      $row = $dbManager->getSingleRow($sql, array($tag_pk), __METHOD__ . ".getTagName");
 
       /* Is Tag name changed */
       if ($row['tag'] <> $tag_name) {
         $sql = "SELECT * FROM tag WHERE tag = $1";
-        $result = $dbManager->getSingleRow($sql, array($tag_name));
+        $result = $dbManager->getSingleRow($sql, array($tag_name), __METHOD__ . ".checkNewNameExist");
         /* Is new Tag name defined in name space */
         if (!empty($result)) {
           /* Delete old tag association */
@@ -262,7 +262,7 @@ class ui_tag extends FO_Plugin
 
     $sql = "SELECT ufile_name, ufile_mode FROM uploadtree
               WHERE uploadtree_pk = $1";
-    $row = $dbManager->getSingleRow($sql, array($Item));
+    $row = $dbManager->getSingleRow($sql, array($Item), __METHOD__ . ".getUfileMode");
     $ufile_mode = $row["ufile_mode"];
 
     if (Isdir($ufile_mode)) {
@@ -289,9 +289,9 @@ class ui_tag extends FO_Plugin
 
     $VE = "";
     $VE = _("<h3>Current Tags:</h3>\n");
-    $sql = "SELECT tag_pk, tag, tag_desc, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $1 UNION SELECT tag_pk, tag, tag_desc, tag_uploadtree_pk AS tag_file_pk, tag_uploadtree_date AS tag_file_date, tag_uploadtree_text AS tag_file_text FROM tag, tag_uploadtree WHERE tag.tag_pk = tag_uploadtree.tag_fk AND tag_uploadtree.uploadtree_fk = $2;";
+    $sql = "SELECT t.tag_pk, t.tag, t.tag_desc, tf.tag_file_pk, tf.tag_file_date, tf.tag_file_text FROM tag t JOIN tag_file tf ON t.tag_pk = tf.tag_fk JOIN uploadtree ut ON tf.pfile_fk = ut.pfile_fk WHERE ut.uploadtree_pk = $1 UNION SELECT t.tag_pk, t.tag, t.tag_desc, tut.tag_uploadtree_pk AS tag_file_pk, tut.tag_uploadtree_date AS tag_file_date, tut.tag_uploadtree_text AS tag_file_text FROM tag t JOIN tag_uploadtree tut ON t.tag_pk = tut.tag_fk WHERE tut.uploadtree_fk = $2;";
 
-    $rows = $dbManager->getRows($sql, array($Uploadtree_pk, $Uploadtree_pk));
+    $rows = $dbManager->getRows($sql, array($Uploadtree_pk, $Uploadtree_pk), __METHOD__ . ".getBoundTags");
 
     if (!empty($rows)) {
       $VE .= "<table border=1>\n";
@@ -404,7 +404,7 @@ class ui_tag extends FO_Plugin
     /* Get ufile_name from uploadtree_pk */
     $sql = "SELECT ufile_name, ufile_mode FROM uploadtree
               WHERE uploadtree_pk = $1";
-    $row = $dbManager->getSingleRow($sql, array($Item));
+    $row = $dbManager->getSingleRow($sql, array($Item), __METHOD__ . ".getUfileInfo");
     $ufile_name = $row["ufile_name"];
     $ufile_mode = $row["ufile_mode"];
 
@@ -465,7 +465,7 @@ class ui_tag extends FO_Plugin
     /* Get ufile_name from uploadtree_pk */
     $sql = "SELECT ufile_name, ufile_mode FROM uploadtree
               WHERE uploadtree_pk = $1";
-    $row = $dbManager->getSingleRow($sql, array($Item));
+    $row = $dbManager->getSingleRow($sql, array($Item), __METHOD__ . ".getUfileInfo");
     $ufile_name = $row["ufile_name"];
     $ufile_mode = $row["ufile_mode"];
 
@@ -475,7 +475,7 @@ class ui_tag extends FO_Plugin
     } else {
       $sql = "SELECT tag_pk, tag_file_text, tag, tag_desc FROM tag_file, tag WHERE tag_file_pk=$1 AND tag_file.tag_fk = tag.tag_pk";
     }
-    $row = $dbManager->getSingleRow($sql, array($tag_file_pk));
+    $row = $dbManager->getSingleRow($sql, array($tag_file_pk), __METHOD__ . ".getTagInfo");
     $tag_pk = $row['tag_pk'];
     $tag = $row['tag'];
     if (Isdir($ufile_mode)) {
@@ -533,12 +533,12 @@ class ui_tag extends FO_Plugin
     /* Get ufile_name from uploadtree_pk */
     $sql = "SELECT ufile_name, ufile_mode FROM uploadtree
               WHERE uploadtree_pk = $1";
-    $row = $dbManager->getSingleRow($sql, array($Item));
+    $row = $dbManager->getSingleRow($sql, array($Item), __METHOD__ . ".getUfileInfo");
     $ufile_name = $row["ufile_name"];
     $ufile_mode = $row["ufile_mode"];
 
     $sql = "SELECT tag_pk, tag, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $1;";
-    $rows = $dbManager->getRows($sql, array($Item));
+    $rows = $dbManager->getRows($sql, array($Item), __METHOD__ . ".getTags");
 
     if (!empty($rows)) {
       $VD .= "<form name='form' method='POST' action='" . Traceback_uri() ."?mod=tag&upload=$Upload&item=$Item'>\n";

@@ -50,7 +50,7 @@ class admin_tag extends FO_Plugin
 
     /* See if the tag already exists */
     $sql = "SELECT * FROM tag WHERE tag = $1";
-    $result = $dbManager->getSingleRow($sql, array($tag_name));
+    $result = $dbManager->getSingleRow($sql, array($tag_name), __METHOD__ . ".checkExist");
 
     if (empty($result)) {
       $insertTagStmt = __FUNCTION__ . ".insertTag";
@@ -60,7 +60,7 @@ class admin_tag extends FO_Plugin
 
     /* Make sure it was added */
     $sql = "SELECT * FROM tag WHERE tag = $1 LIMIT 1;";
-    $row = $dbManager->getSingleRow($sql, array($tag_name));
+    $row = $dbManager->getSingleRow($sql, array($tag_name), __METHOD__ . ".checkAdded");
 
     if (empty($row)) {
       $text = _("Failed to create tag.");
@@ -81,7 +81,7 @@ class admin_tag extends FO_Plugin
 
     $VE = _("<h3>Current Tags:</h3>\n");
     $sql = "SELECT tag_pk, tag, tag_desc FROM tag ORDER BY tag_pk desc;";
-    $rows = $dbManager->getRows($sql);
+    $rows = $dbManager->getRows($sql, array(), __METHOD__);
 
     if (count($rows) > 0) {
       $VE .= "<table border=1>\n";
