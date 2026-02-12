@@ -439,6 +439,9 @@ class UploadController extends RestController
   public function postUpload($request, $response, $args)
   {
     $reqBody = $this->getParsedBody($request);
+    if (! is_array($reqBody)) {
+      $reqBody = [];
+    }
     if (ApiVersion::getVersion($request) == ApiVersion::V2) {
       $uploadType = $reqBody['uploadType'] ?? null;
       $folderId = $reqBody['folderId'] ?? null;
@@ -465,10 +468,17 @@ class UploadController extends RestController
     }
     $scanOptions = [];
     if (array_key_exists('scanOptions', $reqBody)) {
-      if ($uploadType == 'file') {
-        $scanOptions = json_decode($reqBody['scanOptions'], true);
-      } else {
-        $scanOptions = $reqBody['scanOptions'];
+      $scanOptionsRaw = $reqBody['scanOptions'];
+      if (is_array($scanOptionsRaw)) {
+        // multipart/form-data can provide scanOptions as nested arrays:
+        // e.g. scanOptions[analysis][nomos]=true
+        $scanOptions = $scanOptionsRaw;
+      } elseif (is_string($scanOptionsRaw)) {
+        // allow JSON string as well (some clients send scanOptions as JSON)
+        $decoded = json_decode($scanOptionsRaw, true);
+        if (is_array($decoded)) {
+          $scanOptions = $decoded;
+        }
       }
     }
 
@@ -483,10 +493,15 @@ class UploadController extends RestController
       throw new HttpBadRequestException(
         "Require location object if uploadType != file");
     }
-    if (empty($folderId) ||
-        !is_numeric($folderId) && $folderId > 0) {
+    // Handle array case (multipart/form-data can send folderId as array)
+    if (is_array($folderId)) {
+      $folderId = !empty($folderId) ? $folderId[0] : null;
+    }
+    // Validate folderId: must be present, numeric, and positive
+    if (empty($folderId) || !is_numeric($folderId) || intval($folderId) <= 0) {
       throw new HttpBadRequestException("folderId must be a positive integer!");
     }
+    $folderId = intval($folderId);
 
     $allFolderIds = $this->restHelper->getFolderDao()->getAllFolderIds();
     if (!in_array($folderId, $allFolderIds)) {
