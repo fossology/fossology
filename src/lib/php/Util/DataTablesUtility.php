@@ -60,7 +60,7 @@ class DataTablesUtility
       $colNumber = $inputArray[$whichCol];
       $sortedCols[] = intval($colNumber);
 
-      $isSortable = $inputArray['bSortable_' . $i];
+      $isSortable = $inputArray['bSortable_' . $colNumber];
       if ($isSortable !== "true") {
         continue;
       }
