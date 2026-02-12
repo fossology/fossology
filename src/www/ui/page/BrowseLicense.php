@@ -120,6 +120,9 @@ class BrowseLicense extends DefaultPlugin
     }
 
     $item = intval($request->get("item"));
+    if ($item <= 0) {
+      return $this->flushContent("Invalid item parameter: item='$item'. License Browser requires valid uploadtree ID.");
+    }
     $this->uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload);
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
     $left = $itemTreeBounds->getLeft();
