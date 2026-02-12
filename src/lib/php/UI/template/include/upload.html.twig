@@ -84,9 +84,10 @@
       {% if agentCheckBoxMake %}
       <li>
         <div class="form-group">
-          <label for="agentCheckboxes">{{ 'Select optional analysis'| trans }}:</label>
-          <br/>
-          {{ agentCheckBoxMake }}
+          <fieldset>
+            <legend style="width:auto; font-size: inherit; font-weight: bold;">{{ 'Select optional analysis'| trans }}:</legend>
+            {{ agentCheckBoxMake|raw }}
+          </fieldset>
         </div>
       </li>
       {% endif %}
