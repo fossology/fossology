@@ -1198,7 +1198,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("CECILL-C");
   }
   else if (INFILE(_LT_CECILL_DUALref)) {
-    INTERESTING("CECILL(dual)");
+    INTERESTING("LicenseRef-CECILL-dual");
     lmem[_mGPL] = lmem[_mLGPL] = 1;
   }
   else if (INFILE(_SPDX_CECILL_10)) {
@@ -5668,7 +5668,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("ImageMagick");
     }
     else {
-      INTERESTING("ImageMagick-style");
+      INTERESTING("LicenseRef-ImageMagick-style");
     }
   }
   else if (URL_INFILE(_URL_IMAGEMAGICK)) {
@@ -7468,7 +7468,7 @@ char *aslVersion(char *filetext, int size, int isML, int isPS)
     lmem[_mAPACHE] = 1;
   }
   else if (INFILE(_CR_IMAGEMAGICK)) {
-    lstr = "ImageMagick(Apache)";
+    lstr = "ImageMagick";
     lmem[_mAPACHE] = 1;
   }
   /*
