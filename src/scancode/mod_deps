@@ -98,8 +98,6 @@ if [[ $RUNTIME ]]; then
           apt-get $YesOpt install libjsoncpp26 libboost-program-options1.83.0;;
         sid)
           apt-get $YesOpt install libjsoncpp1 libboost-program-options1.74.0;;
-        focal)
-          apt-get $YesOpt install libjsoncpp1 libboost-program-options1.71.0;;
         jammy)
           apt-get $YesOpt install libjsoncpp25 libboost-program-options1.74.0;;
         noble)
