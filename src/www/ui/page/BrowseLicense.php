@@ -193,7 +193,10 @@ class BrowseLicense extends DefaultPlugin
      * $ChildCount can also be zero if the directory is empty.
      * **************************************/
     if ($childCount == 0) {
-      return new RedirectResponse("?mod=view-license" . Traceback_parm_keep(array("upload", "item")));
+      $itemEntry = $this->uploadDao->getUploadEntry($itemTreeBounds->getItemId(), $this->uploadtree_tablename);
+      if ($itemEntry && !Isdir($itemEntry['ufile_mode'])) {
+        return new RedirectResponse("?mod=view-license" . Traceback_parm_keep(array("upload", "item")));
+      }
     }
 
     $vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&rf=";
