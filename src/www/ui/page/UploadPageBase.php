@@ -98,7 +98,7 @@ abstract class UploadPageBase extends DefaultPlugin
     $vars['uploadFormBuildParameterName'] = self::UPLOAD_FORM_BUILD_PARAMETER_NAME;
 
     if (@$_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
-      $skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+      $skip = array("agent_unpack", "agent_adj2nest", "wget_agent", "agent_kotoba");
       $vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $skip);
     }
     $vars['configureExcludeFolders'] = ($exclude = $this->sanitizeExcludePatterns($SysConf['SYSCONFIG']['ExcludeFolders'] ?? '')) ? $exclude : "No Folder Configured";
