@@ -119,8 +119,6 @@ if(DEFINED CMAKE_CXX_COMPILER)
 endif()
 find_package(Git REQUIRED)
 
-# libmagic, libgcrypt does not have pc module on Debian buster
-# json-c does not have cmake aware packages on Debian buster
 foreach(SCHE_LIBS
         glib-2.0 gthread-2.0 gio-2.0 gobject-2.0 rpm libxml-2.0 libxslt icu-uc
         json-c
