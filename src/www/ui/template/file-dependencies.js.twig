@@ -1,0 +1,53 @@
+{# SPDX-FileCopyrightText: © 2026 Contribution for GSoC
+
+   SPDX-License-Identifier: FSFAP
+#}
+
+function createDepListTable() {
+  var depListTableConfig = {
+    "bServerSide": true,
+    "sAjaxSource": "?mod=ajax_file_dependencies",
+    "fnServerData": function (sSource, aoData, fnCallback) {
+      aoData.push({"name": "upload", "value": {{ uploadId }} });
+      aoData.push({"name": "item", "value": {{ itemId }} });
+      aoData.push({"name": "totalRecords", "value": {{ iTotalRecords }} });
+      {% if isFlat %}aoData.push({"name": "flatten", "value": "yes" });{% endif %}
+      $.getJSON(sSource, aoData, fnCallback)
+        .fail(function(jqXHR, textStatus, errorThrown) {
+          console.error("Failed to load dependencies:", textStatus, errorThrown);
+        });
+    },
+    "aoColumns": [
+      {"sTitle":"File","sClass":"left"},
+      {"sTitle":"Dependencies/Includers","sClass":"left","bSortable":false}
+    ],
+    "sPaginationType": "listbox",
+    "iDisplayLength": 50,
+    "bProcessing": true,
+    "bStateSave": true,
+    "bRetrieve": true,
+    "bPaginate": true,
+    "bFilter": true,
+    "bAutoWidth": true,
+    "oLanguage": {
+      "sInfo":"Showing _START_ to _END_ of _TOTAL_ files",
+      "sSearch":'_INPUT_<button class="btn btn-default btn-sm" onclick="clearSearchFiles();" title="{{ 'Clear file filter'|trans }}" >Clear</button>',
+      "sLengthMenu":'Display <select class="form-control-sm"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> {#
+       #}   {{ 'files'|trans }} ({% if isFlat %}<a href="{{ fileSwitch }}">{{ 'tree view'|trans }}</a> {{ 'or'|trans }} <b>{{ 'flat'|trans }}</b>{#
+       #}{% else %}<b>{{ 'tree view'|trans }}</b> {{ 'or'|trans }} <a href="{{ fileSwitch }}">{{ 'flat'|trans }}</a>{% endif %})'
+      }
+  };
+
+  otable = $('#deplist').dataTable(depListTableConfig);
+}
+
+function clearSearchFiles() {
+  var table = $('#deplist').DataTable();
+  table.search('').draw();
+}
+
+$(document).ready(function () {
+  createDepListTable();
+  $('img').tooltip();
+  $("#deplist_length select").css('text-align','right');
+});
