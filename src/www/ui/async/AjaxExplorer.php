@@ -58,9 +58,14 @@ class AjaxExplorer extends DefaultPlugin
   private $filesThatShouldStillBeCleared;
   /** @var array [uploadtree_id]=>cnt */
   private $filesToBeCleared;
+  /** @var array [uploadtree_id]=>cnt */
+  private $filesTBD;
   /** @var UploadTreeProxy $alreadyClearedUploadTreeView
    * DB proxy view to hold upload tree entries for already cleared files */
   private $alreadyClearedUploadTreeView;
+  /** @var UploadTreeProxy $tbdUploadTreeView
+   * DB proxy view to hold upload tree entries for TBD files */
+  private $tbdUploadTreeView;
   /** @var UploadTreeProxy $noLicenseUploadTreeView
    * DB proxy view to hold upload tree entries for files with no license */
   private $noLicenseUploadTreeView;
@@ -87,7 +92,9 @@ class AjaxExplorer extends DefaultPlugin
     $this->clearingFilter = $this->getObject('businessrules.clearing_decision_filter');
     $this->filesThatShouldStillBeCleared = [];
     $this->filesToBeCleared = [];
+    $this->filesTBD = [];
     $this->alreadyClearedUploadTreeView = NULL;
+    $this->tbdUploadTreeView = NULL;
     $this->noLicenseUploadTreeView = NULL;
     $this->cacheClearedCounter = [];
   }
@@ -97,6 +104,9 @@ class AjaxExplorer extends DefaultPlugin
     // Destruct the proxy views before exiting
     if ($this->alreadyClearedUploadTreeView !== NULL) {
       $this->alreadyClearedUploadTreeView->unmaterialize();
+    }
+    if ($this->tbdUploadTreeView !== NULL) {
+      $this->tbdUploadTreeView->unmaterialize();
     }
     if ($this->noLicenseUploadTreeView !== NULL) {
       $this->noLicenseUploadTreeView->unmaterialize();
@@ -458,7 +468,14 @@ class AjaxExplorer extends DefaultPlugin
 
     $filesCleared = $filesToBeCleared - $filesThatShouldStillBeCleared;
 
-    $img = ($filesCleared == $filesToBeCleared) ? 'green' : 'red';
+    $filesTBD = array_key_exists($childItemTreeBounds->getItemId()
+        , $this->filesTBD) ? $this->filesTBD[$childItemTreeBounds->getItemId()] : 0;
+
+    if ($filesThatShouldStillBeCleared > 0) {
+      $img = ($filesThatShouldStillBeCleared == $filesTBD) ? 'yellow' : 'red';
+    } else {
+      $img = 'green';
+    }
 
     // override green/red flag with grey flag in case of no_license_found scanner finding
     if (!empty($licenseList) && empty($editedLicenseList)) {
@@ -551,6 +568,21 @@ class AjaxExplorer extends DefaultPlugin
       $this->noLicenseUploadTreeView->materialize();
     }
 
+    if ($this->tbdUploadTreeView === NULL) {
+      // Initialize the proxy view only once for the complete table
+      $this->tbdUploadTreeView = new UploadTreeProxy(
+        $itemTreeBounds->getUploadId(),
+        $options = array(
+          UploadTreeProxy::OPT_SKIP_THESE => UploadTreeProxy::OPT_ONLY_TBD,
+          UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN " .
+          $itemTreeBounds->getLeft() . " AND " . $itemTreeBounds->getRight() . ")",
+          UploadTreeProxy::OPT_GROUP_ID => $groupId,
+          UploadTreeProxy::OPT_AGENT_SET => $agentIds
+        ), $itemTreeBounds->getUploadTreeTableName(),
+        $viewName = 'tbd_uploadtree' . $itemTreeBounds->getUploadId());
+      $this->tbdUploadTreeView->materialize();
+    }
+
     $this->updateFilesToBeCleared($isFlat, $itemTreeBounds);
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds,
       $groupId, $isFlat);
@@ -581,6 +613,9 @@ class AjaxExplorer extends DefaultPlugin
       $this->filesToBeCleared = array_replace($this->filesToBeCleared,
         $this->noLicenseUploadTreeView->countMaskedNonArtifactChildren(
           $itemId));
+      $this->filesTBD = array_replace($this->filesTBD,
+        $this->tbdUploadTreeView->countMaskedNonArtifactChildren(
+          $itemId));
     } else {
       $this->filesThatShouldStillBeCleared = array_replace(
         $this->filesThatShouldStillBeCleared,
@@ -588,6 +623,8 @@ class AjaxExplorer extends DefaultPlugin
           $itemTreeBounds));
       $this->filesToBeCleared = array_replace($this->filesToBeCleared,
         $this->noLicenseUploadTreeView->getNonArtifactDescendants($itemTreeBounds));
+      $this->filesTBD = array_replace($this->filesTBD,
+        $this->tbdUploadTreeView->getNonArtifactDescendants($itemTreeBounds));
     }
   }
 }
