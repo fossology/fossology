@@ -899,6 +899,38 @@ INSERT INTO clearing_decision (
   }
 
   /**
+   * Fetch custom main license texts (reportinfo) for an upload.
+   *
+   * @param int $uploadId
+   * @param int $groupId
+   * @return array<int,string> license_id => reportinfo text
+   */
+  public function getMainLicenseReportInfos($uploadId, $groupId)
+  {
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $statementName = __METHOD__;
+    $sql = "SELECT DISTINCT ON (ce.rf_fk)
+              ce.rf_fk AS license_id,
+              ce.reportinfo AS reportinfo
+            FROM $uploadTreeTableName ut
+            INNER JOIN clearing_event ce ON ce.uploadtree_fk = ut.uploadtree_pk
+            WHERE ut.upload_fk = $1
+              AND ce.group_fk = $2
+              AND NOT ce.removed
+              AND ce.reportinfo IS NOT NULL
+              AND ce.reportinfo <> ''
+            ORDER BY ce.rf_fk, ce.date_added DESC, ce.clearing_event_pk DESC";
+    $this->dbManager->prepare($statementName, $sql);
+    $result = $this->dbManager->execute($statementName, array($uploadId, $groupId));
+    $reportInfos = array();
+    while ($row = $this->dbManager->fetchArray($result)) {
+      $reportInfos[intval($row['license_id'])] = $row['reportinfo'];
+    }
+    $this->dbManager->freeResult($result);
+    return $reportInfos;
+  }
+
+  /**
    * @param $uploadId
    * @param int $groupId
    * @param int $licenseId
