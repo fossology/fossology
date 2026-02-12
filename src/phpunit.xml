@@ -11,7 +11,7 @@
   failOnWarning="false" stopOnFailure="false"
   xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
   cacheDirectory=".phpunit.cache">
-  <coverage>
+  <coverage processUncoveredFiles="false">
     <include>
       <directory suffix=".php">.</directory>
     </include>
@@ -19,6 +19,15 @@
       <clover outputFile="../clover.xml"/>
     </report>
   </coverage>
+
+  <!-- Legacy filter/whitelist for PHPUnit 9 compatibility. PHPUnit 10+ uses the
+       <coverage> include above, but keeping this whitelist ensures older
+       PHPUnit releases still have coverage/filter information available. -->
+  <filter>
+    <whitelist processUncoveredFilesFromWhitelist="false">
+      <directory suffix=".php">.</directory>
+    </whitelist>
+  </filter>
   <php>
     <env name="SYSCONFDIR" value="src/lib/php/tests/sysconfigDirTest"/>
   </php>
