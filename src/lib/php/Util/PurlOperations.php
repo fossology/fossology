@@ -31,7 +31,7 @@ class PurlOperations
       $subpaths = explode("/", $subpath);
       $subpath = [];
       foreach ($subpaths as $sp) {
-        if ($sp != "." || $sp != "..") {
+        if ($sp != "." && $sp != "..") {
           $subpath[] = urldecode($sp);
         }
       }
