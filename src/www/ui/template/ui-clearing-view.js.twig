@@ -13,6 +13,8 @@ selectedLicensesTableColumns = [
 
 uploadId = {{ uploadId }};
 itemId = {{ itemId }};
+searchMatches = {{ searchMatches|json_encode|raw }};
+searchQuery = "{{ searchQuery }}";
 
 selectedLicensesTableConfig = {
   "bServerSide": true,
@@ -131,9 +133,162 @@ function createClearingHistoryDataTable() {
   otable = $('#ClearingHistoryDataModalTable').dataTable(addClearingHistoryTableConfig);
   return otable;
 }
+
+var searchMatches = searchMatches || [];
+var currentMatchIndex = -1;
+var currentPage = {{ currentPage }};
+
+const getMatchesOnPage = () => searchMatches.reduce((acc, m, i) => (m.page === currentPage ? [...acc, i] : acc), []);
+
+function initSearchNavigation() {
+  if (!searchMatches.length) return;
+  $("#btnNextMatch, #btnPrevMatch").prop("disabled", false);
+
+  const matchesOnPage = getMatchesOnPage();
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialMatchIndex = parseInt(urlParams.get('matchIndex'));
+
+  if (matchesOnPage.length > 0) {
+    const target = (initialMatchIndex >= 0 && searchMatches[initialMatchIndex]?.page === currentPage) 
+                   ? initialMatchIndex : matchesOnPage[0];
+    navigateToMatch(target);
+  } else {
+    $("#searchCountInfo").text(`0 / ${searchMatches.length} (page ${currentPage + 1})`);
+  }
+}
+
+function navigateToMatch(index) {
+  if (!searchMatches.length) return;
+
+  currentMatchIndex = (index + searchMatches.length) % searchMatches.length;
+  const match = searchMatches[currentMatchIndex];
+
+  if (match.page !== currentPage) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', match.page);
+    url.searchParams.set('search', searchQuery);
+    url.searchParams.set('matchIndex', currentMatchIndex);
+    window.location.href = url.href;
+    return;
+  }
+
+  const localIndex = getMatchesOnPage().indexOf(currentMatchIndex);
+
+  if (localIndex >= 0) {
+    $(".hi-search-match").removeClass("active-match");
+    const currentElements = $(`.hi-search-match[data-match-index='${localIndex}']`);
+
+    if (currentElements.length) {
+      currentElements.addClass("active-match");
+      const container = $("#fileTextView");
+      const scrollTop = currentElements.first().offset().top - container.offset().top + container.scrollTop() - (container.height() / 2);
+      container.animate({scrollTop}, 300);
+    }
+    $("#searchCountInfo").text(`${currentMatchIndex + 1} / ${searchMatches.length}`);
+  }
+}
+
+function performSearch() {
+  const term = $("#textSearchInput").val().trim();
+  if (term.length > 0 && term.length < 3) {
+    alert("Search term too short (min 3 chars)");
+    return;
+  }
+  if (term.length === 0) {
+    clearSearch();
+    return;
+  }
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('search', term);
+  url.searchParams.set('page', '0');
+  url.searchParams.delete('matchIndex');
+  window.location.href = url.href;
+}
+
+function clearSearch() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('search');
+  url.searchParams.delete('matchIndex');
+  url.searchParams.set('page', '0');
+  window.location.href = url.href;
+}
+
+function highlightSearchMatches() {
+  const container = document.getElementById("fileTextView");
+  const searchText = "{{ searchQuery|e('js') }}";
+  if (!container || !searchText) return;
+
+  let allText = "";
+  const nodeMap = []; 
+  const treeWalker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+
+  while (treeWalker.nextNode()) {
+    const node = treeWalker.currentNode;
+    if (node.parentNode.classList.contains("hi-search-match")) continue;
+
+    [...node.nodeValue].forEach((char, i) => {
+      nodeMap.push({ node, index: i });
+      allText += char;
+    });
+  }
+
+  const regex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "gi");
+  let match;
+  const matches = [];
+  while ((match = regex.exec(allText)) !== null) {
+    matches.push({ start: match.index, end: match.index + searchText.length });
+  }
+
+  matches.reverse().forEach((m, matchIdx) => {
+    const rangesToWrap = [];
+    let currentRange = null;
+
+    for (let i = m.start; i < m.end; i++) {
+      const map = nodeMap[i];
+      if (!currentRange || map.node !== currentRange.node) {
+        if (currentRange) rangesToWrap.push(currentRange);
+        currentRange = { node: map.node, start: map.index, end: map.index + 1 };
+      } else {
+        currentRange.end = map.index + 1;
+      }
+    }
+    if (currentRange) rangesToWrap.push(currentRange);
+
+    rangesToWrap.forEach(r => {
+      const range = document.createRange();
+      range.setStart(r.node, r.start);
+      range.setEnd(r.node, r.end);
+      const span = document.createElement('span');
+      span.className = "hi-search-match";
+      span.setAttribute("data-match-index", matches.length - 1 - matchIdx); 
+      range.surroundContents(span);
+    });
+  });
+}
+
 $(document).ready(function () {
   createClearingTable();
   createLicenseSelectionTable();
   $('[data-toggle="tooltip"]').tooltip();
-});
 
+  {% if searchQuery %}
+    highlightSearchMatches(); 
+  {% endif %}
+  initSearchNavigation();
+
+  $("#btnTriggerSearch").click(performSearch);
+  $("#textSearchInput").keypress(function(e) {
+    if(e.which == 13) { performSearch(); }
+  });
+  
+  $("#btnClearSearch").click(clearSearch);
+
+  $("#btnNextMatch").click(function() {
+    navigateToMatch(currentMatchIndex + 1);
+  });
+
+  $("#btnPrevMatch").click(function() {
+    navigateToMatch(currentMatchIndex - 1);
+  });
+});
