@@ -1,0 +1,86 @@
+# FOSSology Docker Compose file
+# SPDX-FileCopyrightText: © 2016 Siemens AG
+# SPDX-FileCopyrightText: © fabio.huser@siemens.com
+# SPDX-FileCopyrightText: © 2016-2017 TNG Technology Consulting GmbH
+# SPDX-FileCopyrightText: © maximilian.huber@tngtech.com
+#
+# SPDX-License-Identifier: FSFAP
+#
+# Description: Recipe for setting up a multi container FOSSology
+#              Docker setup with separate Database instance
+services:
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: fossology
+    restart: unless-stopped
+    environment:
+      - FOSSOLOGY_DB_HOST=db
+      - FOSSOLOGY_DB_NAME=fossology
+      - FOSSOLOGY_DB_USER=fossy
+      - FOSSOLOGY_DB_PASSWORD=fossy
+    command: scheduler
+    depends_on:
+      - db
+    volumes:
+      - repository:/srv/fossology/repository/
+    healthcheck:
+      test: [ "CMD-SHELL", "true" ]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: fossology
+    restart: unless-stopped
+    environment:
+      - FOSSOLOGY_DB_HOST=db
+      - FOSSOLOGY_DB_NAME=fossology
+      - FOSSOLOGY_DB_USER=fossy
+      - FOSSOLOGY_DB_PASSWORD=fossy
+      - FOSSOLOGY_SCHEDULER_HOST=scheduler
+    command: web
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+      - scheduler
+    volumes:
+      - repository:/srv/fossology/repository/
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -sSf localhost/repo/api/v1/health | grep -q '{\"status\":\"OK\",' || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  db:
+    # postgres:16 is multi-arch and will use native ARM64 on Apple Silicon
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=fossology
+      - POSTGRES_USER=fossy
+      - POSTGRES_PASSWORD=fossy
+      - POSTGRES_INITDB_ARGS='-E SQL_ASCII'
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready --dbname $$POSTGRES_DB --username $$POSTGRES_USER" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      # start-period: 10s
+
+volumes:
+  database:
+  repository:
