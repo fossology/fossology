@@ -526,10 +526,10 @@ class UploadController extends RestController
       $info =  $uploadHelper->handleScheduleAnalysis(intval($uploadId),
         intval($folderId), $scanOptions, true);
       if ($info->getCode() == 201) {
-        $info = new Info($info->getCode(), intval($uploadId), $info->getType());
+        $info = new Info($info->getCode(), (string)($uploadId), $info->getType());
       }
     } else {
-      $info = new Info(201, intval($uploadId), InfoType::INFO);
+      $info = new Info(201, (string)($uploadId), InfoType::INFO);
     }
     if (array_key_exists("mainLicense", $reqBody) &&
         ! empty($reqBody["mainLicense"])) {
