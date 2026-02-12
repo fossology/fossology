@@ -822,9 +822,24 @@ INSERT INTO clearing_decision (
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $params[] = $groupId;
     $a = count($params);
-    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>'noLicense',
-                     UploadTreeProxy::OPT_ITEM_FILTER=>' AND (lft BETWEEN $1 AND $2)',
-                     UploadTreeProxy::OPT_GROUP_ID=>'$'.$a);
+
+    // Fix for #3103: Allow bulk edit for files without licenses if the decision is valid for them
+    $skipThese = 'noLicense';
+    $validTypes = array(
+      DecisionTypes::IRRELEVANT,
+      DecisionTypes::DO_NOT_USE,
+      DecisionTypes::NON_FUNCTIONAL
+    );
+
+    if (in_array($decisionMark, $validTypes)) {
+      $skipThese = '';
+    }
+
+    $options = array(
+      UploadTreeProxy::OPT_SKIP_THESE => $skipThese,
+      UploadTreeProxy::OPT_ITEM_FILTER => ' AND (lft BETWEEN $1 AND $2)',
+      UploadTreeProxy::OPT_GROUP_ID => '$' . $a
+    );
     $uploadTreeProxy = new UploadTreeProxy($itemTreeBounds->getUploadId(), $options, $itemTreeBounds->getUploadTreeTableName());
     if (!$removeDecision) {
       $sql = $uploadTreeProxy->asCTE() .
