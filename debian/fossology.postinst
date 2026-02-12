@@ -20,9 +20,28 @@ set -e
 
 case "$1" in
     configure)
-    # need to run fo-postinstall agent stuff
+
+    ENABLED="/etc/apache2/sites-enabled/fossology.conf"
+    AVAILABLE="/etc/apache2/sites-available/fossology.conf"
+
+    # Clean legacy symlink if it exists
+    if [ -L "$ENABLED" ] && [ ! -e "$AVAILABLE" ]; then
+        echo "Removing legacy Apache symlink..."
+
+        rm -f "$ENABLED"
+    fi
+
+    # Enable site properly using a2ensite
+    if [ -e "$AVAILABLE" ]; then
+        echo "Enabling FOSSology site with a2ensite..."
+
+        a2ensite fossology.conf >/dev/null 2>&1 || true
+    fi
+
     /usr/lib/fossology/fo-postinstall --agent --debian
     ;;
+
+
 
     abort-upgrade|abort-remove|abort-deconfigure)
     ;;
