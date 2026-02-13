@@ -16,6 +16,7 @@ use Fossology\Lib\Dao\JobDao;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\UI\Api\Controllers\JobController;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\Job;
@@ -362,6 +363,28 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $result = $method->invokeArgs($this->jobController,
       [$completedJob, $completedUpload]);
     $this->assertEquals(0, $result);
+  }
+
+    /**
+   * @test
+   * -# Test JobController::getJobs() with invalid limit/page
+   * -# Check if response is 400
+   */
+  public function testGetJobsInvalidLimitOrPage()
+  {
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('limit', '-1');
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $response = new ResponseHelper();
+
+    $userId = 2;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->jobController->getJobs($request, $response, []);
   }
 
 }
