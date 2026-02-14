@@ -55,6 +55,7 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Package\ComponentType;
 use Fossology\Lib\Data\Report\FileNode;
 use Fossology\Lib\Data\Report\SpdxLicenseInfo;
+use Fossology\Lib\Data\SpdxLicenseValidator;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Report\LicenseClearedGetter;
@@ -635,6 +636,7 @@ class SpdxAgent extends Agent
     $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName(), $uploadId);
     $this->declaredLicenseFileIds = array_unique(array_diff($this->declaredLicenseFileIds, $this->concludedLicenseFileIds));
     $this->concludedLicenseFileIds = array_unique($this->concludedLicenseFileIds);
+    $this->validateLicenseIdentifiers();
     $message = $this->renderString($this->getTemplateFile('document'),array(
         'documentName' => $fileBase,
         'uri' => $this->uri,
@@ -668,6 +670,29 @@ class SpdxAgent extends Agent
   protected function updateReportTable($uploadId, $jobId, $fileName)
   {
     $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $fileName);
+  }
+
+  protected function validateLicenseIdentifiers()
+  {
+    $issues = [];
+    foreach ($this->licensesInDocument as $licenseInfo) {
+      $license = $licenseInfo->getLicenseObj();
+      $spdxId = $license->getSpdxId();
+      $shortName = $license->getShortName();
+
+      if (!SpdxLicenseValidator::isLicenseRef($spdxId)) {
+        continue;
+      }
+      if (preg_match('/[^a-zA-Z0-9.\-\s+]/', $shortName)) {
+        $issues[] = sprintf("  \"%s\" -> sanitized to \"%s\"",
+          $shortName, $spdxId);
+      }
+    }
+
+    if (!empty($issues)) {
+      error_log("spdx: License shortnames with invalid SPDX characters were sanitized:\n"
+        . implode("\n", $issues));
+    }
   }
 
   /**
