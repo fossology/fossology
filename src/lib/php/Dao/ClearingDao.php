@@ -349,7 +349,7 @@ class ClearingDao
     $uploadId = $itemTreeBounds->getUploadId();
     $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTable);
-    // Check for identical global decision to prevent duplicates
+
     if ($scope == DecisionScopes::REPO) {
       $stmt = "SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1";
       $this->dbManager->prepare($stmt, $stmt);

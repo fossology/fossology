@@ -147,7 +147,6 @@ class changeLicenseProcessPost extends FO_Plugin
             return $this->errorJson("bad license");
           }
 
-          // Only insert event if no identical event exists or status differs
           if (!isset($existingEvents[$licenseId]) || $existingEvents[$licenseId]->isRemoved() !== $removed) {
             $this->clearingDao->insertClearingEvent($itemId, $userId, $groupId,
               $licenseId, $removed, ClearingEventTypes::USER, $reportInfo = '',
