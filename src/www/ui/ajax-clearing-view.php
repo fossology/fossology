@@ -197,13 +197,17 @@ class AjaxClearingView extends FO_Plugin
           $this->doClearings($orderAscending, $groupId, $uploadId, $uploadTreeId));
 
       case "addLicense":
-        $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId,
-          $licenseId, false, ClearingEventTypes::USER);
-        return new JsonResponse();
-
       case "removeLicense":
-        $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId,
-          $licenseId, true, ClearingEventTypes::USER);
+        $isRemoved = ($action === "removeLicense");
+        $existingEvents = $this->clearingDao->getRelevantClearingEvents(
+          $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId), 
+          $groupId, false
+        );
+        
+        if (!isset($existingEvents[$licenseId]) || $existingEvents[$licenseId]->isRemoved() !== $isRemoved) {
+          $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId,
+            $licenseId, $isRemoved, ClearingEventTypes::USER);
+        }
         return new JsonResponse();
 
       case "makeMainLicense":

@@ -137,14 +137,22 @@ class changeLicenseProcessPost extends FO_Plugin
         if (! is_array($licenses)) {
           return $this->errorJson("bad license array");
         }
+        
+        // Check for existing events to prevent duplicates
+        $itemBounds = $this->uploadDao->getItemTreeBounds($itemId);
+        $existingEvents = $this->clearingDao->getRelevantClearingEvents($itemBounds, $groupId, false);
+        
         foreach ($licenses as $licenseId) {
           if (intval($licenseId) <= 0) {
             return $this->errorJson("bad license");
           }
 
-          $this->clearingDao->insertClearingEvent($itemId, $userId, $groupId,
-            $licenseId, $removed, ClearingEventTypes::USER, $reportInfo = '',
-            $comment = '', $acknowledgement = '', $jobId);
+          // Only insert event if no identical event exists or status differs
+          if (!isset($existingEvents[$licenseId]) || $existingEvents[$licenseId]->isRemoved() !== $removed) {
+            $this->clearingDao->insertClearingEvent($itemId, $userId, $groupId,
+              $licenseId, $removed, ClearingEventTypes::USER, $reportInfo = '',
+              $comment = '', $acknowledgement = '', $jobId);
+          }
         }
       }
     }

@@ -349,6 +349,18 @@ class ClearingDao
     $uploadId = $itemTreeBounds->getUploadId();
     $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTable);
+    // Check for identical global decision to prevent duplicates
+    if ($scope == DecisionScopes::REPO) {
+      $stmt = "SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1";
+      $this->dbManager->prepare($stmt, $stmt);
+      $res = $this->dbManager->execute($stmt, array($uploadTreeId));
+      $row = $this->dbManager->fetchArray($res);
+      $this->dbManager->freeResult($res);
+      
+      if ($row && $this->hasIdenticalGlobalDecision($row['pfile_fk'], $groupId, $decType, $eventIds)) {
+        return;
+      }
+    }
 
     if ($this->isDecisionCheck($uploadTreeId, $groupId, DecisionTypes::IRRELEVANT)) {
       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'rollback');
@@ -438,6 +450,47 @@ INSERT INTO clearing_decision (
     }
     $this->dbManager->freeResult($res);
     return $events;
+  }
+
+  /**
+   * @param int $pfileId
+   * @param int $groupId
+   * @param int $decisionType
+   * @param array $eventIds Array of clearing event IDs to compare
+   * @return bool True if identical global decision exists
+   */
+  public function hasIdenticalGlobalDecision($pfileId, $groupId, $decisionType, $eventIds = null)
+  {
+    $stmt = __METHOD__;
+    
+    $sql = "SELECT COUNT(*) as count FROM clearing_decision cd
+            LEFT JOIN clearing_decision_event cde ON cd.clearing_decision_pk = cde.clearing_decision_fk
+            WHERE cd.pfile_fk = $1 AND cd.group_fk = $2 AND cd.scope = $3 AND cd.decision_type = $4 
+            AND cd.decision_type != $5";
+    
+    $params = array(
+      $pfileId, 
+      $groupId, 
+      DecisionScopes::REPO, 
+      $decisionType,
+      DecisionTypes::WIP
+    );
+
+    if ($eventIds !== null && !empty($eventIds)) {
+      $eventIdList = implode(',', array_map('intval', $eventIds));
+      $sql .= " AND cde.clearing_event_fk IN ($eventIdList)
+                GROUP BY cd.clearing_decision_pk
+                HAVING COUNT(DISTINCT cde.clearing_event_fk) = $6";
+      $params[] = count($eventIds);
+    }
+    
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, $params);
+    
+    $row = $this->dbManager->fetchArray($res);
+    $this->dbManager->freeResult($res);
+    
+    return $row['count'] > 0;
   }
 
   /**
