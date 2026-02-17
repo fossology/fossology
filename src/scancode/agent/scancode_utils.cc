@@ -132,7 +132,12 @@ bool processUploadId(const State &state, int uploadId,
 
       if (isSuccessful) {
         string fileName = scancodeValue["file"].asString();
-        unsigned long fileId = fileIdsMapReverse[fileName];
+        unsigned long fileId = 0;  // preserve old behavior
+
+        auto it = fileIdsMapReverse.find(fileName);
+        if (it != fileIdsMapReverse.end()) {
+            fileId = it->second;
+        }
         if (!matchFileWithLicenses(state, threadLocalDatabaseHandler,
                                    scanResults[i], fileName, fileId)) {
           errors = true;
