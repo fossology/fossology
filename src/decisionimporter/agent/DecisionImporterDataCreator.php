@@ -294,14 +294,20 @@ class DecisionImporterDataCreator
     }
 
     if (!$this->agentDao->arsTableExists($agentName)) {
-      // FIXME This requires the user to manually run the respective agent to get past this point
-      throw new UnexpectedValueException("No agent '$agentName' exists on server.");
+      // Automating the agent trigger to remove manual burden
+      $latestAgentId = $this->agentDao->getCurrentAgentId($agentName);
+      $this->createCxJobs($agentName, $jobId, $latestAgentId);
+      echo "Notice: Required agent '$agentName' was not found. Triggering scan job automatically.\n";
+    } else {
+      // Ensure the job is scheduled and ID is fetched if table exists
+      $latestAgentId = $this->agentDao->getCurrentAgentId($agentName);
+      $this->createCxJobs($agentName, $jobId, $latestAgentId);
     }
-    $latestAgentId = $this->agentDao->getCurrentAgentId($agentName);
-    $this->createCxJobs($agentName, $jobId, $latestAgentId);
+
+    
     $cxExistSql = "SELECT " . $agentName . "_pk FROM $agentName WHERE pfile_fk = $1 AND agent_fk = $2 AND hash = $3;";
     $cxExistStatement = __METHOD__ . ".$agentName" . "Exist";
-
+    
     $ceExistSql = "SELECT " . $agentName . "_event_pk FROM " . $agentName .
       "_event WHERE uploadtree_fk = $1 AND hash = $2 AND is_enabled = $3;";
     $ceExistStatement = __METHOD__ . ".$agentName" . "EventExist";
