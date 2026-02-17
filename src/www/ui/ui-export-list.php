@@ -435,7 +435,7 @@ class UIExportList extends FO_Plugin
   {
     foreach ($newCopyrights as $copyright) {
       if ($NomostListNum > -1 && count($list) >= $NomostListNum) {
-        $lines["warn"] = _("<br><b>Warning: Only the first $NomostListNum lines
+        $list["warn"] = _("<br><b>Warning: Only the first $NomostListNum lines
  are displayed. To see the whole list, run fo_nomos_license_list from the
  command line.</b><br>");
         break;
