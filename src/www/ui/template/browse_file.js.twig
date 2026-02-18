@@ -16,6 +16,12 @@ function createDirlistTable() {
       aoData.push({"name": "conFilter", "value": $('#conFilter').val() });
       aoData.push({"name": "openCBoxFilter", "value": $('#openCBoxFilter').prop('checked')});
       {% if isFlat %}aoData.push({"name": "flatten", "value": "yes" });{% endif %}
+
+      var displayStart = $.grep(aoData, function(o) { return o.name === "iDisplayStart"; })[0];
+      if (displayStart && {{ iTotalRecords }} > 0 && displayStart.value >= {{ iTotalRecords }}) {
+        displayStart.value = 0;
+        this.fnSettings()._iDisplayStart = 0;
+      }
       $.getJSON(sSource, aoData, fnCallback)
         .fail(failed)
     },
