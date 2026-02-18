@@ -232,11 +232,10 @@ class Menu
     $vars['title'] = empty($title) ? _("Welcome to FOSSology") : $title;
     if ($hide_banner) {
       $vars['bannerMsg'] = "";
-      $vars['systemLoad'] = "";
     } else {
       $vars['bannerMsg'] = @$sysConfig['BannerMsg'];
-      $vars['systemLoad'] = get_system_load_average().'<br/>';
     }
+    $vars['systemLoad'] = get_system_load_average().'<br/>';
     $vars['logoLink'] =  $sysConfig['LogoLink']?: 'http://fossology.org';
     $vars['logoImg'] =  $sysConfig['LogoImage']?: 'images/fossology-logo.gif';
 
