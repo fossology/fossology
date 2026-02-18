@@ -341,7 +341,7 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
 
   if (! empty($ShowMicro)) {
     $MenuDepth = 0; /* unused: depth of micro menu */
-    $V .= menu_to_1html(menu_find($ShowMicro,$MenuDepth),1);
+    $V .= menu_to_1html(menu_find($ShowMicro,$MenuDepth),0);
   }
 
   if ($Enumerate >= 0) {
