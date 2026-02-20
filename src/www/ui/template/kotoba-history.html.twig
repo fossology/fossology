@@ -1,0 +1,41 @@
+{# SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+
+   SPDX-License-Identifier: FSFAP
+#}
+<table class="dataTable" border="1" cellpadding="5px" id="kotobaHistoryTable" name="kotobaHistoryTable">
+  <tr>
+    <th>{{ 'License'| trans }}</th>
+    <th>{{ 'Text'| trans }}</th>
+  </tr>
+  {% if kotobaHistory %}
+  {% for row in kotobaHistory %}
+    <tr class="{{ cycle(['odd','even'], loop.index0) }}{% if row.matched %} match{% endif %}{% if not row.tried %} inactive{% endif %}">
+      <td>
+          <table>
+            {% if row.addedLicenses is not empty %}
+            <tr>
+              <td><img class='added' src='images/space_16.png'></td>
+              <td>{{ row.addedLicenses|join(', ')|e }}</td>
+            </tr>
+            {% endif %}
+            {% if row.removedLicenses is not empty %}
+            <tr>
+              <td><img class='deleted' src='images/space_16.png'></td>
+              <td>{{ row.removedLicenses|join(', ')|e }}</td>
+            </tr>
+            {% endif %}
+          </table>
+      </td>
+      <td>
+      {{ row.text|e }}
+      </td>
+    </tr>
+  {% endfor %}
+  {% else %}
+    <tr class="even">
+      <td>&lt;no entries&gt;</td>
+      <td>&lt;no entries&gt;</td>
+    </tr>
+  {% endif%}
+</table>
+
