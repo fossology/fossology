@@ -11,6 +11,13 @@
 
 set -o errexit -o nounset -o pipefail
 
+# Ensure repository directory permissions (setgid for group inheritance)
+# Do not hardcode or create REPODIR here; only adjust permissions if it is configured and exists.
+if [ -n "${FOSSOLOGY_REPO_PATH:-}" ] && [ -d "$FOSSOLOGY_REPO_PATH" ]; then
+  chgrp fossy "$FOSSOLOGY_REPO_PATH" 2>/dev/null || true
+  chmod 2770 "$FOSSOLOGY_REPO_PATH" 2>/dev/null || true
+fi
+
 db_host="${FOSSOLOGY_DB_HOST:-localhost}"
 db_name="${FOSSOLOGY_DB_NAME:-fossology}"
 db_user="${FOSSOLOGY_DB_USER:-fossy}"
