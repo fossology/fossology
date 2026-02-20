@@ -109,6 +109,7 @@ jobs:
         uses: stoplightio/spectral-action@v0.8.12
         with:
           file_glob: src/www/ui/api/documentation/openapi.yaml
+          repo_token: ''
 
   REUSE-Compliance-Check:
     runs-on: ubuntu-latest
