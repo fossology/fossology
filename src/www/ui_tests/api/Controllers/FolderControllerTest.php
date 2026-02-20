@@ -1234,7 +1234,6 @@ namespace Fossology\UI\Api\Test\Controllers
       $this->folderContentPlugin->shouldReceive('handle');
 
       $actualResponse = $this->folderController->getUnlinkableFolderContents(null,new ResponseHelper(),["id" => $id]);
-      var_dump($actualResponse);
       $this->assertEquals(200,$actualResponse->getStatusCode());
     }
 
