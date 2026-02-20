@@ -120,7 +120,13 @@ class LicenseRef
       // License ref can not end with a '+'
       $spdxLicense = preg_replace('/\+$/', '-or-later', $spdxLicense);
     }
-    return self::replaceSpaces($spdxLicense);
+    $spdxLicense = self::replaceSpaces($spdxLicense);
+
+    if (StringOperation::stringStartsWith($spdxLicense, self::SPDXREF_PREFIX)) {
+      $spdxLicense = SpdxLicenseValidator::sanitizeLicenseRef($spdxLicense);
+    }
+
+    return $spdxLicense;
   }
 
   /**

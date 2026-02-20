@@ -48,6 +48,6 @@ class LicenseRefTest extends \PHPUnit\Framework\TestCase
   public function testDefaultSpdxId()
   {
     $licenseRef = new LicenseRef($this->id, $this->shortName, $this->fullName, "");
-    assertThat($licenseRef->getSpdxId(), is(LicenseRef::SPDXREF_PREFIX_FOSSOLOGY . $this->shortName));
+    assertThat($licenseRef->getSpdxId(), is("LicenseRef-fossology-shortName"));
   }
 }
