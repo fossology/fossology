@@ -2833,6 +2833,8 @@
 
   $Schema["INDEX"]["upload_events"]["upload_events_upload_fk_event_ts_event_type_idx"] = "CREATE INDEX upload_events_upload_fk_event_ts_event_type_idx ON upload_events USING btree (upload_fk, event_ts DESC, event_type);";
 
+  $Schema["INDEX"]["upload_packages"]["upload_packages_package_fk_upload_fk_idx"] = "CREATE INDEX upload_packages_package_fk_upload_fk_idx ON upload_packages USING btree (package_fk, upload_fk);";
+
   $Schema["INDEX"]["copyright_event"]["copyright_event_upload_fk_index"] = "CREATE INDEX copyright_event_upload_fk_index ON copyright_event USING btree (upload_fk);";
   $Schema["INDEX"]["copyright_event"]["copyright_event_uploadtree_fk_index"] = "CREATE INDEX copyright_event_uploadtree_fk_index ON copyright_event USING btree (uploadtree_fk);";
   $Schema["INDEX"]["copyright_event"]["copyright_event_copyright_fk_index"] = "CREATE INDEX copyright_event_copyright_fk_index ON copyright_event USING btree (copyright_fk);";
