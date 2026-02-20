@@ -300,16 +300,16 @@ class SpdxAgent extends Agent
           $fileName .= ".txt";
           break;
         case "spdx3jsonld":
-          $fileName = $fileName .".jsonld";
+          $fileName .= ".jsonld";
           break;
         case "spdx3json":
-          $fileName = $fileName .".json";
+          $fileName .= ".json";
           break;
         case "spdx3rdf":
-          $fileName = $fileName .".spdx.rdf";
+          $fileName .= ".spdx.rdf";
           break;
         case "spdx3tv":
-          $fileName = $fileName .".spdx";
+          $fileName .= ".spdx";
           break;
       }
       $this->filebasename = $fileName;
