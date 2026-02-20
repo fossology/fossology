@@ -20,9 +20,14 @@ function updateCheckSuccess(data) {
       return null;
     }
     else if ((data[jqId]) && (data[jqId].end_bits > 1)) {
-      callbackfail(jqId);
+      if (typeof callbackfail === "function") {
+        callbackfail(jqId);
+      } else {
+        console.warn("Job failed but no failure callback provided. Job ID: ", jqId);
+      }
       return null;
     }
+    
     else {
       return val;
     }
