@@ -211,3 +211,6 @@ the GNU Lesser General Public License version 2.1, [LGPL-2.1](<https://tldrlegal
 
 Please see the LICENSE file included with this software for the full texts of
 these licenses.
+
+**Note:** Regardless of the installation type, ensure you increase `upload_max_filesize` and `memory_limit` in your `php.ini` configuration to handle large uploads.
+ See [Configuring PHP](https://github.com/fossology/fossology/wiki/Configuring-PHP) in the wiki for details.
