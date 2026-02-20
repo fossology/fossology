@@ -94,7 +94,7 @@ class SqliteE implements Driver
    */
   public function getLastError()
   {
-    return SQLite3::lastErrorMsg();
+    return $this->dbConnection->lastErrorMsg();
   }
 
   /**
@@ -189,7 +189,7 @@ class SqliteE implements Driver
   public function existsTable($tableName)
   {
     $sql = "SELECT count(*) cnt FROM sqlite_master WHERE type='table' AND name='$tableName'";
-    $row = SQLite3::querySingle($sql);
+    $row = $this->dbConnection->querySingle($sql, true);
     if (! $row && $this->isConnected()) {
       throw new \Exception($this->getLastError());
     } else if (!$row) {
@@ -205,8 +205,18 @@ class SqliteE implements Driver
    */
   public function existsColumn($tableName, $columnName)
   {
-    // TODO: Implement existsColumn() method.
-    throw new \Exception("Method not implemented yet!");
+    $sql = "PRAGMA table_info($tableName)";
+    $result = $this->query($sql);
+
+    while ($row = $this->fetchArray($result)) {
+      if ($row['name'] === $columnName) {
+        $this->freeResult($result);
+        return true;
+      }
+    }
+
+    $this->freeResult($result);
+    return false;
   }
 
   /**
@@ -220,6 +230,6 @@ class SqliteE implements Driver
     $this->prepare($stmt,$sql);
     $res = $this->execute($stmt,$params);
     $this->freeResult($res);
-    return SQLiteDatabase::lastInsertRowid();
+    return $this->dbConnection->lastInsertRowid();
   }
 }
