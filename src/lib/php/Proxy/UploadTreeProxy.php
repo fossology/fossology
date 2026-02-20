@@ -242,6 +242,7 @@ class UploadTreeProxy extends DbViewProxy
 
     switch ($skipThese) {
       case "noLicense":
+      case "nolicensenocopyright":
       case self::OPT_SKIP_ALREADY_CLEARED:
       case "noCopyright":
       case "noIpra":
@@ -328,6 +329,10 @@ class UploadTreeProxy extends DbViewProxy
     switch ($skipThese) {
       case "noLicense":
         return $conditionQueryHasLicense;
+      case "nolicensenocopyright":
+        return "(" . $conditionQueryHasLicense . " OR " .
+               "EXISTS (SELECT 1 FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk)) OR " .
+               "EXISTS (SELECT 1 FROM copyright_decision AS cd WHERE ut.pfile_fk = cd.pfile_fk)";
       case self::OPT_SKIP_ALREADY_CLEARED:
         $decisionQuery = "
 SELECT cd.decision_type
@@ -337,7 +342,7 @@ ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
         return " $conditionQueryHasLicense
             AND NOT EXISTS (SELECT 1 FROM ($decisionQuery) AS latest_decision WHERE latest_decision.decision_type IN (".DecisionTypes::IRRELEVANT.",".DecisionTypes::IDENTIFIED.",".DecisionTypes::DO_NOT_USE.",".DecisionTypes::NON_FUNCTIONAL."))";
       case "noCopyright":
-        return "(EXISTS (SELECT copyright_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )".
+        return "(EXISTS (SELECT 1 FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk)" .
               " OR EXISTS (SELECT 1 FROM copyright_decision AS cd WHERE ut.pfile_fk = cd.pfile_fk))";
       case "noIpra":
         return "EXISTS (SELECT ipra_pk FROM ipra cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )".
