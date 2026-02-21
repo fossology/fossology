@@ -59,6 +59,10 @@ class ClearingView extends FO_Plugin
   private $invalidParm = false;
   /** @var DecisionTypes */
   private $decisionTypes;
+  /** @var int */
+  private $searchChunkSize = 1048576;
+  /** @var int */
+  private $searchBlockSize = 81920;
 
   function __construct()
   {
@@ -228,6 +232,11 @@ class ClearingView extends FO_Plugin
     $highlightId = GetParm("highlightId", PARM_INTEGER);
     $clearingId = GetParm("clearingId", PARM_INTEGER);
 
+    $searchQuery = GetParm("search", PARM_STRING);
+    $this->vars['searchQuery'] = $searchQuery;
+    $this->vars['searchMatches'] = [];
+    $this->vars['currentPage'] = GetParm("page", PARM_INTEGER) ?: 0;
+
     if ($clearingId !== null) {
       $highlightId = -1;
     } else if ($highlightId !== null) {
@@ -243,6 +252,27 @@ class ClearingView extends FO_Plugin
     $this->vars['ajaxAction'] = "setNextPrev";
     $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId,
       $selectedAgentId, $highlightId, $clearingId, $uploadId);
+    if (empty($searchQuery)) {
+      $request = $this->getRequest();
+      if ($request) {
+        $searchQuery = $request->query->get('search', '');
+      }
+    }
+    if (!empty($searchQuery)) {
+      $searchQuery = trim($searchQuery);
+      if (strlen($searchQuery) < 3) {
+        $this->vars['searchMatches'] = [];
+      } else {
+        $item = GetParm("item", PARM_INTEGER);
+        $filePath = RepPathItem($item);
+
+        if ($filePath && file_exists($filePath)) {
+          $this->vars['searchMatches'] = $this->getSearchMatches($filePath, $searchQuery, $this->searchBlockSize);
+        } else {
+          $this->vars['searchMatches'] = [];
+        }
+      }
+    }
 
     $isSingleFile = !$itemTreeBounds->containsFiles();
     $hasWritePermission = $this->uploadDao->isEditable($uploadId, $groupId);
@@ -366,6 +396,52 @@ class ClearingView extends FO_Plugin
     } else {
       $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $groupId, $type, $global);
     }
+  }
+
+  /**
+   * @param string $filePath
+   * @param string $searchQuery
+   * @param int $blockSize
+   * @return array
+   */
+  private function getSearchMatches($filePath, $searchQuery, $blockSize = 81920)
+  {
+    $handle = fopen($filePath, "rb");
+    if (!$handle) {
+      return [];
+    }
+
+    $searchMatches = [];
+    $searchLen = strlen($searchQuery);
+    $currentFilePos = 0;
+    $overlapBuffer = '';
+
+    $pattern = '/' . preg_quote($searchQuery, '/') . '/i';
+
+    while (!feof($handle)) {
+      $chunk = fread($handle, $this->searchChunkSize);
+      $haystack = $overlapBuffer . $chunk;
+
+      if (preg_match_all($pattern, $haystack, $matches, PREG_OFFSET_CAPTURE)) {
+        foreach ($matches[0] as $match) {
+          $posInHaystack = $match[1];
+          $absolutePos = $currentFilePos - strlen($overlapBuffer) + $posInHaystack;
+
+          if (empty($searchMatches) || end($searchMatches)['position'] !== $absolutePos) {
+            $searchMatches[] = [
+              'position' => $absolutePos,
+              'page' => (int)floor($absolutePos / $blockSize)
+            ];
+          }
+        }
+      }
+
+      $overlapBuffer = ($searchLen > 1) ? substr($haystack, -($searchLen - 1)) : '';
+      $currentFilePos += strlen($chunk);
+    }
+
+    fclose($handle);
+    return $searchMatches;
   }
 }
 

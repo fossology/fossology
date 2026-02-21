@@ -139,7 +139,7 @@
   {%- endfor %}{# End printing license infos in file #}
 {%- endif %}
 {%~ if fileData.copyrights|default is empty %}
-    <spdx:copyrightText rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+    <spdx:copyrightText>NOASSERTION</spdx:copyrightText>
 {%~ else %}
     <spdx:copyrightText><![CDATA[
   {%~ for cp in fileData.copyrights %}

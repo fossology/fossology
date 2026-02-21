@@ -1,0 +1,36 @@
+/*
+ SPDX-FileCopyrightText: © 2026 Siemens Healthineers AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
+.clearing-search-bar {
+  background-color: #f5f5f5;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+}
+
+.clearing-search-bar__input {
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  width: 250px;
+}
+
+.hi-search-match {
+  background-color: #ffcc00;
+  display: inline-block;
+  line-height: 1.1;
+  box-shadow: 0 0 0 2px #ffcc00, 0 0 5px rgba(0,0,0,0.5);
+  position: relative;
+  z-index: 999;
+  font-weight: bold;
+}
+
+.hi-search-match.active-match {
+  background-color: #ff6600;
+  box-shadow: 0 0 0 2px #ff6600, 0 0 5px rgba(0,0,0,0.5);
+}

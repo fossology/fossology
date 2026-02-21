@@ -436,16 +436,11 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
    */
   public function isFolderAccessible($folderId, $userId = null)
   {
-    $allUserFolders = array();
     if ($userId == null) {
       $userId = Auth::getUserId();
     }
     $rootFolder = $this->getRootFolder($userId)->getId();
-    GetFolderArray($rootFolder, $allUserFolders);
-    if (in_array($folderId, array_keys($allUserFolders))) {
-      return true;
-    }
-    return false;
+    return $this->isInFolderTree($rootFolder, $folderId);
   }
 
   /**

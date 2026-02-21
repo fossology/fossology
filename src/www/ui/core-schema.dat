@@ -2716,6 +2716,7 @@
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_group_fk_idx"] = "CREATE INDEX clearing_decision_group_fk_idx ON clearing_decision USING btree (group_fk);";
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_uploadtree_group_pfile_idx"] = "CREATE INDEX clearing_decision_uploadtree_group_pfile_idx ON clearing_decision USING btree (uploadtree_fk, group_fk, pfile_fk);";
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_type_idx"] = "CREATE INDEX clearing_decision_type_idx ON clearing_decision USING btree (decision_type) WHERE decision_type IN (4,5,6,7);";
+  $Schema["INDEX"]["clearing_decision"]["clearing_decision_up_grp_pk_desc_type_idx"] = "CREATE INDEX clearing_decision_up_grp_pk_desc_type_idx ON clearing_decision USING btree (uploadtree_fk, group_fk, clearing_decision_pk DESC, decision_type);";
 
   $Schema["INDEX"]["clearing_decision_event"]["clearing_decision_event_idx"] = "CREATE INDEX clearing_decision_event_idx ON clearing_decision_event USING btree (clearing_decision_fk, clearing_event_fk);";
 

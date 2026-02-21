@@ -5,7 +5,6 @@
 {% if bannerMsg %}
   <div class="alert alert-danger" id="topBanner">
     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-  {{ systemLoad }}
   {{ bannerMsg }}
   </div>
 {% endif %}
@@ -32,6 +31,7 @@
         <small><a href="{{ logOutUrl }}"><b>logout</b></a></small>
         <table style="text-align: left;">
           <tr>
+            <th rowspan="2" style="background:none;padding-right:5px;">{{ systemLoad }}</th>
             <td align="right"><small>{{ 'User'|trans }}:</small></td>
             <td>{{ userName }}</td>
           </tr>
