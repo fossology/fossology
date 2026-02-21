@@ -274,6 +274,10 @@ class DeciderAgent extends Agent
       $haveDecided = $this->autodecideIfResoMatchesNoContradiction($itemTreeBounds, $projectedScannerMatches);
     }
 
+    if (!$haveDecided && ($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
+      $haveDecided = $this->autodecideIfOjoLicenseRefFoundAndNoContradiction($itemTreeBounds, $projectedScannerMatches);
+    }
+
     if (!$haveDecided && ($this->activeRules&self::RULES_NOMOS_IN_MONK) == self::RULES_NOMOS_IN_MONK) {
       $haveDecided = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $projectedScannerMatches);
     }
@@ -609,6 +613,113 @@ class DeciderAgent extends Agent
       }
     }
     return true;
+  }
+
+  /**
+   * @brief Auto decide based on OJO findings when Nomos reports no license found
+   *
+   * Special case fallback: when Nomos doesn't find any license, OJO finds a LicenseRef-*
+   * that exists in the main Fossology license list, and no other scanners contradict it,
+   * we can safely conclude the license based on the OJO finding.
+   *
+   * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
+   * @param LicenseMatch[][][] $matches    New license matches found
+   * @return boolean True if decisions applied, false otherwise
+   */
+  private function autodecideIfOjoLicenseRefFoundAndNoContradiction(ItemTreeBounds $itemTreeBounds, $matches)
+  {
+    $licenseMatchExists = count($matches) > 0;
+    foreach ($matches as $licenseMatches) {
+      $licenseMatchExists = $licenseMatchExists && $this->areOjoLicenseRefsWithoutNomosContradiction($licenseMatches);
+    }
+
+    if ($licenseMatchExists) {
+      try {
+        $this->clearingDecisionProcessor->makeDecisionFromLastEvents(
+          $itemTreeBounds, $this->userId, $this->groupId,
+          DecisionTypes::IDENTIFIED, false);
+      } catch (\Exception $e) {
+        echo "Can not auto decide as file '" .
+          $itemTreeBounds->getItemId() . "' contains candidate license.\n";
+      }
+    }
+    return $licenseMatchExists;
+  }
+
+  /**
+   * @brief Check if OJO finding is a valid LicenseRef and Nomos didn't find anything
+   *
+   * This handles the case where:
+   * - Nomos reports "No_license_found" or has no findings
+   * - OJO reports a LicenseRef-* 
+   * - The LicenseRef exists in the main Fossology license list
+   * - No other scanners have contradicting findings
+   *
+   * @param LicenseMatch[][] $licenseMatches
+   * @return boolean True if conditions are met, false otherwise
+   */
+  protected function areOjoLicenseRefsWithoutNomosContradiction($licenseMatches)
+  {
+    // Check if OJO has findings
+    if (!array_key_exists('ojo', $licenseMatches) || count($licenseMatches['ojo']) == 0) {
+      return false;
+    }
+
+    $ojoMatches = $licenseMatches['ojo'];
+    
+    // Get Nomos findings, excluding "No_license_found"
+    $nomosMatches = array_key_exists('nomos', $licenseMatches) ? $licenseMatches['nomos'] : [];
+    $nomosLicenseIds = array_map(function($match) {
+      return $match->getLicenseId();
+    }, $nomosMatches);
+    
+    // Filter out "No_license_found"
+    $nomosLicenseIds = array_filter($nomosLicenseIds, function($licId) {
+      return $licId !== \Fossology\Lib\Dao\LicenseDao::NO_LICENSE_FOUND;
+    });
+
+    // If Nomos found licenses, check if they contradict with OJO
+    if (count($nomosLicenseIds) > 0) {
+      $ojoLicenseIds = array_map(function($match) {
+        return $match->getLicenseId();
+      }, $ojoMatches);
+      
+      // If Nomos found licenses that OJO didn't find, it's a contradiction
+      foreach ($nomosLicenseIds as $nomosLicId) {
+        if (!in_array($nomosLicId, $ojoLicenseIds)) {
+          return false;
+        }
+      }
+    }
+
+    // Check if all OJO findings are valid LicenseRefs in the main list
+    foreach ($ojoMatches as $ojoMatch) {
+      $shortName = $ojoMatch->getLicenseRef()->getShortName();
+      if (!$this->isValidLicenseRefInMainList($shortName)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * @brief Check if a license identifier is a valid LicenseRef in the main Fossology license list
+   *
+   * @param string $licenseShortname The license short name/identifier
+   * @return boolean True if it's a valid LicenseRef in the main license list, false otherwise
+   */
+  protected function isValidLicenseRefInMainList($licenseShortname)
+  {
+    try {
+      $license = $this->licenseDao->getLicenseByShortName($licenseShortname);
+      if ($license !== null) {
+        return true;
+      }
+    } catch (\Exception $e) {
+      // Log if needed, but continue
+    }
+    return false;
   }
 
   /**
