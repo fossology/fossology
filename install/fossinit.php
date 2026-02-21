@@ -102,6 +102,7 @@ foreach($Options as $optKey => $optVal)
 }
 
 require_once 'fossinit-common.php';
+require_once __DIR__ . '/license_ref_utils.php';
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap($sysconfdir);
@@ -598,13 +599,18 @@ function initLicenseRefTable($Verbose)
 
       $statement = __METHOD__ . ".updateLicenseRef";
       $sql = "UPDATE license_ref SET ";
-      if (($rf_flag_check == 1 && $rf_flag == 1) &&
-          ($rf_text_check != $rf_text && !empty($rf_text) &&
-          !(stristr($rf_text, 'License by Nomos')))) {
-        $params[] = $rf_text;
+      $textUpdate = buildLicenseTextUpdate($rf_flag_check, $rf_flag,
+        $rf_text_check, $rf_text);
+      if ($textUpdate !== null) {
+        $params[] = $textUpdate['text'];
         $position = "$" . count($params);
-        $sql .= "rf_text=$position,rf_md5=md5($position),rf_flag=1,";
+        $sql .= "rf_text=$position,rf_md5=md5($position),";
         $statement .= ".insertT";
+
+        $params[] = $textUpdate['rf_flag'];
+        $position = "$" . count($params);
+        $sql .= "rf_flag=$position,";
+        $statement .= ".flag";
       }
       if ($rf_url_check != $rf_url && !empty($rf_url)) {
         $params[] = $rf_url;
