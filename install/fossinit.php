@@ -293,6 +293,9 @@ if (version_compare($release, '4.3.0', '<')) {
   Migrate_42_43($Verbose);
 }
 
+require_once("$LIBEXECDIR/dbmigrate_cmu-mach.php");
+Migrate_Cmu_Mach($dbManager, $Verbose);
+
 /* initialize the license_ref table */
 if ($UpdateLiceneseRef)
 {
