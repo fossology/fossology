@@ -59,7 +59,7 @@ class BomReportGenerator
   {
     return [
       'bomFormat' => 'CycloneDX',
-      '$schema' => 'http://cyclonedx.org/schema/bom-1.4.schema.json',
+      '$schema' => 'https://cyclonedx.org/schema/bom-1.4.schema.json',
       'specVersion' => '1.4',
       'version' => 1.0,
       'serialNumber' => 'urn:uuid:'. uuid_create(UUID_TYPE_TIME),
