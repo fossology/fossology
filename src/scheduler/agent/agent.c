@@ -1106,6 +1106,15 @@ void agent_ready_event(scheduler_t* scheduler, agent_t* agent)
   int ret;
 
   TEST_NULV(agent);
+  // If the agent has no job (owner is NULL), it shouldn't be here.
+  // This prevents the "job passed is NULL
+  if (agent->owner == NULL)
+  {
+      ERROR("Agent ready event received but agent has no owner. Terminating agent to prevent scheduler crash.");
+      agent_kill(agent);
+      return;
+  }
+
   if (agent->status == AG_SPAWNED)
   {
     agent_transition(agent, AG_RUNNING);
