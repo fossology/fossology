@@ -463,23 +463,28 @@ INSERT INTO clearing_decision (
       $row['comment'] = "";
       $row['reportinfo'] = "";
       $row['acknowledgement'] = "";
-    }
-
-    $changeTo = StringOperation::replaceUnicodeControlChar($changeTo, false);
-    if ($what == 'reportinfo') {
-      $reportInfo = $changeTo;
-      $comment = $row['comment'];
-      $acknowledgement = $row['acknowledgement'];
-    } elseif ($what == 'comment') {
-      $reportInfo = $row['reportinfo'];
-      $comment = $changeTo;
-      $acknowledgement = $row['acknowledgement'];
+      $changeTo = StringOperation::replaceUnicodeControlChar($changeTo, false);
+      if ($what == 'reportinfo') {
+        $row['reportinfo'] = $changeTo;
+      } elseif ($what == 'comment') {
+        $row['comment'] = $changeTo;
+      } else {
+        $row['acknowledgement'] = $changeTo;
+      }
+      $this->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, false, $row['type_fk'], $row['reportinfo'], $row['comment'], $row['acknowledgement']);
     } else {
-      $reportInfo = $row['reportinfo'];
-      $comment = $row['comment'];
-      $acknowledgement = $changeTo;
+      $changeTo = StringOperation::replaceUnicodeControlChar($changeTo, false);
+      $updateStatement = __METHOD__ . '.update';
+      $updateParams = array($changeTo, $row['clearing_event_pk']);
+      if ($what == 'reportinfo') {
+        $this->dbManager->prepare($updateStatement, "UPDATE clearing_event SET reportinfo = $1 WHERE clearing_event_pk = $2");
+      } elseif ($what == 'comment') {
+        $this->dbManager->prepare($updateStatement, "UPDATE clearing_event SET comment = $1 WHERE clearing_event_pk = $2");
+      } else {
+        $this->dbManager->prepare($updateStatement, "UPDATE clearing_event SET acknowledgement = $1 WHERE clearing_event_pk = $2");
+      }
+      $this->dbManager->execute($updateStatement, $updateParams);
     }
-    $this->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, false, $row['type_fk'], $reportInfo, $comment, $acknowledgement);
 
     $this->dbManager->commit();
 
