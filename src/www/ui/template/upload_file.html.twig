@@ -423,14 +423,7 @@ $(document).ready(function() {
     });
     
     $("#fileUploader").on("change", function(e) {
-        setTimeout(function() {
-            if (window.currentReuseSource && window.currentReuseSource !== 'local') {
-                $('select[id^="reuse-source"]').val(window.currentReuseSource).trigger('change');
-            }
-        }, 500);
-    });
-
-    $("#fileUploader").on("change", function(e) {
+      $('#uploadWarningModal').modal('hide');
       checkDuplicateUploadWarning(e);
 
       var holder = $("#uploaddescriptions");
@@ -458,6 +451,9 @@ $(document).ready(function() {
         addNavItems(i, val.name, reuseNameTab, reuseTabContent);
       }
       toggleDisabled();
+      if (window.currentReuseSource && window.currentReuseSource !== 'local') {
+        $('select[id^="reuse-source"]').val(window.currentReuseSource);
+      }
     });
     $('#uploaddescriptions').on('hidden.bs.collapse', function () {
       $('#collapseDescription').find('button').text('+ expand');
