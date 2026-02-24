@@ -7,6 +7,7 @@
   {{ parent() }}
   <link rel="stylesheet" href="css/highlights.css"/>
   <link rel="stylesheet" href="css/spasht.css"/>
+  <link rel="stylesheet" href="css/search.css"/>
 {% endblock %}
 
 {% block content %}
@@ -16,6 +17,24 @@
         <td style="padding:0px; position:relative; height: 100%; width:50%">
           <div class="centered" style='padding:2px;'>
             {{ pageMenu }}
+            
+            <div class="clearing-search-bar" style="display:inline-flex;">
+                <input type="text" id="textSearchInput" class="clearing-search-bar__input" placeholder="Search in file..." value="{{ searchQuery }}">
+                <button class="btn btn-default btn-sm" id="btnTriggerSearch" title="Search">
+                     Search
+                </button>
+                <button class="btn btn-default btn-sm" id="btnPrevMatch" title="Previous Match" disabled>
+                    &uarr;
+                </button>
+                <button class="btn btn-default btn-sm" id="btnNextMatch" title="Next Match" disabled>
+                    &darr;
+                </button>
+                <span id="searchCountInfo" style="font-size: 0.9em; margin-left: 5px;"></span>
+                {% if searchQuery %}
+                   <button class="btn btn-xs btn-warning" id="btnClearSearch" title="Clear Search">X</button>
+                {% endif %}
+            </div>
+
             <button class="legendHider btn btn-default btn-sm">
               {{ 'Hide Legend'| trans }}
             </button>
@@ -23,12 +42,15 @@
               {{ 'Show Legend'| trans }}
             </button>
           </div>
-          <div class="boxnew" style="overflow:scroll;">{{ textView }}</div>
+          <div class="boxnew" id="fileTextView" style="overflow:scroll;">{{ textView }}</div>
           <div id="legendBox" name="legendBox" style="background-color:white; padding:2px; border:1px outset #222222; width:150px; position:absolute; right:17px; bottom:17px; ">
             <u><b>{{ 'Legend:'| trans }}</b></u><br/>
               {% for entry in legendData %}
                 <span style="{{ entry.style }}" class="{{ entry.class }}">{{ entry.text }}</span><br/>
               {% endfor %}
+              {% if searchQuery %}
+                <span class="hi-search-match" style="padding:0 3px;">Search Match</span><br/>
+              {% endif %}
           </div>
         </td>
         <td class="headerBox" style="min-width:100%;min-height:100%;">
