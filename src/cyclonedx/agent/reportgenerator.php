@@ -15,6 +15,9 @@ use Fossology\Lib\Data\LicenseRef;
 
 class BomReportGenerator
 {
+  private const SPEC_VERSION = '1.4';
+  private const SCHEMA_URL =
+    'https://cyclonedx.org/schema/bom-' . self::SPEC_VERSION . '.schema.json';
   /**
    * Creates a component.
    *
@@ -59,8 +62,8 @@ class BomReportGenerator
   {
     return [
       'bomFormat' => 'CycloneDX',
-      '$schema' => 'https://cyclonedx.org/schema/bom-1.4.schema.json',
-      'specVersion' => '1.4',
+      '$schema' => self::SCHEMA_URL,
+      'specVersion' => self::SPEC_VERSION,
       'version' => 1.0,
       'serialNumber' => 'urn:uuid:'. uuid_create(UUID_TYPE_TIME),
       'metadata' => [
