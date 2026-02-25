@@ -52,7 +52,8 @@ class UserHelper
     $SessionIsAdmin = $userEditObj->IsSessionAdmin($SessionUserRec);
 
     $symReq = $this->createSymRequest($reqBody, $version);
-    if (!$SessionIsAdmin) {
+    $isSelfEdit = intval($sessionOwnerUser_pk) === intval($this->user_pk);
+    if (!$SessionIsAdmin && !$isSelfEdit) {
       $returnVal = new Info(403, "The session owner is not an admin!", InfoType::INFO);
     } else {
       $userRec = $userEditObj->CreateUserRec($symReq);
