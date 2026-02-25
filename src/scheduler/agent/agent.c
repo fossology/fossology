@@ -135,19 +135,20 @@ const char* agent_status_strings[] =
  * @param pid_ptr   the key that was used to store this agent
  * @param agent     the agent that is being closed
  * @param excepted  this is an agent we don't want to close, this is it
- * @return always returns 0 to indicate that the traversal should continue
+ * @return true or false
  */
-static int agent_close_fd(int* pid_ptr, agent_t* agent, agent_t* excepted)
+static gboolean agent_close_fd(int* pid_ptr, agent_t* agent, agent_t* excepted)
 {
-  TEST_NULL(agent, 0);
+  TEST_NULL(agent, FALSE);
   if (agent != excepted)
   {
+    // Use raw close(): fclose() would flush stdio buffers into the parent's pipes.
     close(agent->from_child);
     close(agent->to_child);
-    fclose(agent->read);
-    fclose(agent->write);
+    close(agent->from_parent);
+    close(agent->to_parent);
   }
-  return 0;
+  return FALSE;
 }
 
 /**
@@ -271,6 +272,56 @@ static int agent_test(const gchar* name, meta_agent_t* ma, scheduler_t* schedule
   return 0;
 }
 
+/* Protects meta_agent_t::version and version_source - held by both the
+ * agent_listen spawn thread and the event-loop thread (agent_meta_version_reset). */
+#if GLIB_CHECK_VERSION(2, 32, 0)
+static GMutex version_lock;
+#else
+static GStaticMutex version_lock = G_STATIC_MUTEX_INIT;
+#endif
+
+/**
+ * @brief Reset a meta_agent's cached version fields under version_lock.
+ *
+ * Called by version_refresh_kill_agent (event loop thread) so that the free
+ * and NULL-assignment are mutually exclusive with agent_listen (spawn thread)
+ * reading the same fields under the same lock.
+ */
+void agent_meta_version_reset(meta_agent_t* ma)
+{
+  if (ma == NULL) return;
+#if GLIB_CHECK_VERSION(2, 32, 0)
+  g_mutex_lock(&version_lock);
+#else
+  g_static_mutex_lock(&version_lock);
+#endif
+  /* Log the old version while holding the lock so the read and free are atomic. */
+  if (ma->version != NULL)
+    log_printf("NOTE: version refresh: resetting cached version for agent "
+        "type \"%s\" (was \"%s\")\n", ma->name, ma->version);
+  g_free(ma->version);
+  ma->version = NULL;
+  ma->version_source = NULL;
+  ma->valid = TRUE;
+#if GLIB_CHECK_VERSION(2, 32, 0)
+  g_mutex_unlock(&version_lock);
+#else
+  g_static_mutex_unlock(&version_lock);
+#endif
+}
+
+/**
+ * @brief Argument for agent_fail_event_pid().
+ *
+ * Holds the pid and agent pointer so the deferred handler can check it is the
+ * same agent before failing it.
+ */
+typedef struct
+{
+  pid_t    pid;    ///< pid of the agent that reported failure
+  agent_t* agent;  ///< expected agent pointer, only compared
+} fail_pid_arg;
+
 /**
  * Main function used for agent communication. This is where the communication
  * thread will spend the majority of its time.
@@ -280,13 +331,6 @@ static int agent_test(const gchar* name, meta_agent_t* ma, scheduler_t* schedule
  */
 static void agent_listen(scheduler_t* scheduler, agent_t* agent)
 {
-  /* static locals */
-#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
-  static GMutex version_lock;
-#else
-  static GStaticMutex version_lock = G_STATIC_MUTEX_INIT;
-#endif
-
   /* locals */
   char buffer[1024]; // buffer to store c strings read from agent
   GMatchInfo* match; // regex match information
@@ -332,36 +376,69 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
   }
 
   /* check that the VERSION information is correct */
-#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+#if GLIB_CHECK_VERSION(2, 32, 0)
   g_mutex_lock(&version_lock);
 #else
   g_static_mutex_lock(&version_lock);
 #endif
-  strcpy(buffer, &buffer[9]);
+  /* skip the "VERSION: " prefix */
+  const char* version_str = buffer + 9;
   if (agent->type->version == NULL && agent->type->valid)
   {
     agent->type->version_source = agent->host->name;
-    agent->type->version = g_strdup(buffer);
+    agent->type->version = g_strdup(version_str);
     if (TVERB_AGENT)
       con_printf(main_log, "META_AGENT[%s.%s] version is: \"%s\"\n", agent->host->name, agent->type->name,
           agent->type->version);
   }
-  else if (strcmp(agent->type->version, buffer) != 0)
+  else if (strcmp(agent->type->version, version_str) != 0)
   {
-    con_printf(job_log(agent->owner), "ERROR %s.%d: META_DATA[%s] invalid agent spawn check\n", __FILE__, __LINE__,
-        agent->type->name);
-    con_printf(job_log(agent->owner), "ERROR: versions don't match: %s(%s) != received: %s(%s)\n",
-        agent->type->version_source, agent->type->version, agent->host->name, buffer);
-    agent->type->valid = 0;
-    agent_kill(agent);
-#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+    /* Version mismatch: hard-fail during startup tests (id<0); adopt new version at runtime. */
+    if (agent->owner != NULL && agent->owner->id < 0)
+    {
+      /* Startup test: hard-fail so version skew is caught at boot. */
+      con_printf(job_log(agent->owner),
+          "ERROR %s.%d: META_DATA[%s] invalid agent spawn check (startup)\n",
+          __FILE__, __LINE__, agent->type->name);
+      con_printf(job_log(agent->owner),
+          "ERROR: versions don't match: %s(\"%s\") != received: %s(\"%s\")\n",
+          agent->type->version_source, agent->type->version,
+          agent->host->name, version_str);
+      agent->type->valid = 0;
+      /* non-zero return_code so the startup-test job is marked failed */
+      agent->return_code = -1;
+      kill(-agent->pid, SIGKILL);
+#if GLIB_CHECK_VERSION(2, 32, 0)
+      g_mutex_unlock(&version_lock);
+#else
+      g_static_mutex_unlock(&version_lock);
+#endif
+      return;
+    }
+
+    /* Runtime: adopt new version and respawn cleanly. */
+    con_printf(main_log,
+        "WARNING %s.%d: META_AGENT[%s] version changed: \"%s\" -> \"%s\" "
+        "(was reported by: %s, now: %s). Adopting new version; agent will respawn.\n",
+        __FILE__, __LINE__, agent->type->name,
+        agent->type->version, version_str,
+        agent->type->version_source, agent->host->name);
+
+    g_free(agent->type->version);
+    agent->type->version = g_strdup(version_str);
+    agent->type->version_source = agent->host->name;
+    /* return_code=0 so the death event respawns cleanly instead of failing the job.
+     * Kill the process group so child processes die too. */
+    agent->return_code = 0;
+    kill(-agent->pid, SIGKILL);
+#if GLIB_CHECK_VERSION(2, 32, 0)
     g_mutex_unlock(&version_lock);
 #else
     g_static_mutex_unlock(&version_lock);
 #endif
     return;
   }
-#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+#if GLIB_CHECK_VERSION(2, 32, 0)
   g_mutex_unlock(&version_lock);
 #else
   g_static_mutex_unlock(&version_lock);
@@ -402,7 +479,12 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
       if ((agent->return_code = atoi(&(buffer[4]))) != 0)
       {
         AGENT_CONCURRENT_PRINT("agent failed with error code %d\n", agent->return_code);
-        event_signal(agent_fail_event, agent);
+        /* Pass the pid, not the agent pointer: agent_death_event() can join this
+         * thread and free the agent before the queued event runs. */
+        fail_pid_arg* fail_arg = g_new0(fail_pid_arg, 1);
+        fail_arg->pid = agent->pid;
+        fail_arg->agent = agent;
+        event_signal(agent_fail_event_pid, fail_arg);
       }
       break;
     }
@@ -481,6 +563,7 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
      */
     else if (strncmp(buffer, "EMAIL", 5) == 0)
     {
+      g_free(agent->owner->message);
       agent->owner->message = g_strdup(buffer + 6);
     }
 
@@ -675,6 +758,7 @@ static void* agent_spawn(agent_spawn_args* pass)
   /* locals */
   scheduler_t* scheduler = pass->scheduler;
   agent_t* agent = pass->agent;
+  g_free(pass);  /* all values extracted; free before fork so g_thread_exit can't leak it */
   gchar* tmp;                 // pointer to temporary string
   gchar** args;               // the arguments that will be passed to the child
   int argc;                   // the number of arguments parsed
@@ -694,9 +778,7 @@ static void* agent_spawn(agent_spawn_args* pass)
     if (agent->from_parent >= 0) { close(agent->from_parent); agent->from_parent = -1; }
     if (agent->to_parent >= 0)   { close(agent->to_parent);   agent->to_parent   = -1; }
 
-    /* Mark failed and free the spawn args to avoid leaking the heap allocation */
     agent->status = AG_FAILED;
-    g_free(pass);
     return NULL;
   }
 
@@ -706,6 +788,9 @@ static void* agent_spawn(agent_spawn_args* pass)
   /* we are in the child */
   if (agent->pid == 0)
   {
+    /* Own process group so kill(-pid) reaches all child processes. */
+    setpgid(0, 0);
+
     /* set the child's stdin and stdout to use the pipes */
     dup2(agent->from_parent, fileno(stdin));
     dup2(agent->to_parent, fileno(stdout));
@@ -776,6 +861,9 @@ static void* agent_spawn(agent_spawn_args* pass)
   /* we are in the parent */
   else
   {
+    /* Mirror child's setpgid to close the race between fork and exec. */
+    setpgid(agent->pid, agent->pid);
+
     event_signal(agent_create_event, agent);
     agent_listen(scheduler, agent);
   }
@@ -878,7 +966,8 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   }
 
   /* check that the agent type exists */
-  if (g_tree_lookup(scheduler->meta_agents, job->agent_type) == NULL)
+  meta_agent_t* ma = g_tree_lookup(scheduler->meta_agents, job->agent_type);
+  if (ma == NULL)
   {
     log_printf("ERROR %s.%d: jq_pk %d jq_type %s does not match any module in mods-enabled\n", __FILE__, __LINE__,
         job->id, job->agent_type);
@@ -890,20 +979,19 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
 
   /* allocate memory and do trivial assignments */
   agent = g_new(agent_t, 1);
-  agent->type = g_tree_lookup(scheduler->meta_agents, job->agent_type);
+  agent->type = ma;
   agent->status = AG_CREATED;
-
-  /* make sure that there is a metaagent for the job */
-  if (agent->type == NULL)
-  {
-    ERROR("meta agent %s does not exist", job->agent_type);
-    return NULL;
-  }
 
   /* check if the agent is valid */
   if (!agent->type->valid)
   {
     ERROR("agent %s has been invalidated by version information", job->agent_type);
+    /* Job will never get an agent; fail and remove it to avoid a leak. */
+    g_free(agent);
+    g_free(job->message);
+    job->message = g_strdup("agent type has been invalidated");
+    job_fail_event(scheduler, job);
+    job_remove_agent(job, scheduler->job_list, NULL);
     return NULL;
   }
 
@@ -917,6 +1005,8 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   if (pipe(child_to_parent) != 0)
   {
     ERROR("JOB[%d.%s] failed to create child to parent pipe", job->id, job->agent_type);
+    close(parent_to_child[0]);
+    close(parent_to_child[1]);
     g_free(agent);
     return NULL;
   }
@@ -936,17 +1026,26 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   agent->return_code = -1;
   agent->total_analyzed = 0;
   agent->special = 0;
+  agent->accounted = FALSE;
 
   /* open the relevant file pointers */
   if ((agent->read = fdopen(agent->from_child, "r")) == NULL)
   {
     ERROR("JOB[%d.%s] failed to initialize read file", job->id, job->agent_type);
+    close(agent->from_child);
+    close(agent->to_child);
+    close(agent->from_parent);
+    close(agent->to_parent);
     g_free(agent);
     return NULL;
   }
   if ((agent->write = fdopen(agent->to_child, "w")) == NULL)
   {
     ERROR("JOB[%d.%s] failed to initialize write file", job->id, job->agent_type);
+    fclose(agent->read); /* closes from_child */
+    close(agent->from_parent);
+    close(agent->to_parent);
+    close(agent->to_child);
     g_free(agent);
     return NULL;
   }
@@ -956,6 +1055,9 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   {
     host_increase_load(agent->host);
     meta_agent_increase_count(agent->type);
+    /* mark that this agent holds a slot, so it can be released even if the job
+     * is removed before the death event runs */
+    agent->accounted = TRUE;
   }
 
   /* spawn the listen thread */
@@ -963,7 +1065,7 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
   pass->scheduler = scheduler;
   pass->agent = agent;
 
-#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+#if GLIB_CHECK_VERSION(2, 32, 0)
   agent->thread = g_thread_new(agent->type->name, (GThreadFunc) agent_spawn, pass);
 #else
   agent->thread = g_thread_create((GThreadFunc)agent_spawn, pass, 1, NULL);
@@ -987,13 +1089,17 @@ void agent_destroy(agent_t* agent)
 {
   TEST_NULV(agent);
 
-  /* close all of the files still open for this agent */
-  close(agent->from_child);
-  close(agent->to_child);
+  // from_child/to_child are owned by the FILE* wrappers; fclose closes them.
   close(agent->from_parent);
   close(agent->to_parent);
-  fclose(agent->write);
-  fclose(agent->read);
+  if (agent->write)
+  {
+    fclose(agent->write);
+  }
+  if (agent->read)
+  {
+    fclose(agent->read);
+  }
 
   /* release the child process */
   g_free(agent);
@@ -1018,18 +1124,56 @@ void agent_death_event(scheduler_t* scheduler, pid_t* pid)
 
   if ((agent = g_tree_lookup(scheduler->agents, &pid[0])) == NULL)
   {
+    // SIGCHLD can race ahead of agent_create_event; retry up to 3 times.
+    if (pid[2]++ < 3)
+    {
+      event_signal(agent_death_event, pid);
+      return;
+    }
     ERROR("invalid agent death event: pid[%d]", pid[0]);
+    g_free(pid);
+    return;
+  }
+
+  /* Ownerless agent: job_remove_agent already removed and freed the job, so the
+   * usual decrement paths never ran. Unblock and join the thread, release the slot
+   * this agent still holds, then drop it. */
+  if (agent->owner == NULL)
+  {
+    log_printf("ERROR %s.%d: agent_death_event for ownerless agent pid %d - cleaning up\n",
+        __FILE__, __LINE__, (int)pid[0]);
+    if (write(agent->to_parent, "@@@1\n", 5) != 5)
+    {
+      AGENT_SEQUENTIAL_PRINT("write to ownerless agent unsuccessful: %s\n", strerror(errno));
+    }
+    g_thread_join(agent->thread);
+    /* Release the slot if this agent was counted and still holds it (AG_PAUSED
+     * agents already released theirs when they paused). */
+    if (agent->accounted && agent->status != AG_PAUSED)
+    {
+      host_decrease_load(agent->host);
+      meta_agent_decrease_count(agent->type);
+      agent->accounted = FALSE;
+    }
+    g_tree_remove(scheduler->agents, &agent->pid);
+    g_free(pid);
     return;
   }
 
   if (agent->owner->id >= 0)
+  {
     event_signal(database_update_event, NULL);
+  }
 
   if (write(agent->to_parent, "@@@1\n", 5) != 5)
+  {
     AGENT_SEQUENTIAL_PRINT("write to agent unsuccessful: %s\n", strerror(errno));
+  }
   g_thread_join(agent->thread);
 
-  if (agent->return_code != 0)
+  /* Skip if the agent was already failed (the "BYE n" path may have run first);
+   * calling it twice would add the agent to failed_agents twice. */
+  if (agent->return_code != 0 && agent->status != AG_FAILED)
   {
     if (WIFEXITED(status))
     {
@@ -1039,7 +1183,9 @@ void agent_death_event(scheduler_t* scheduler, pid_t* pid)
     {
       AGENT_CONCURRENT_PRINT("agent was killed by signal: %d.%s\n", WTERMSIG(status), strsignal(WTERMSIG(status)));
       if (WCOREDUMP(status))
+      {
         AGENT_CONCURRENT_PRINT("agent produced core dump\n");
+      }
     }
     else
     {
@@ -1049,10 +1195,49 @@ void agent_death_event(scheduler_t* scheduler, pid_t* pid)
     agent_fail_event(scheduler, agent);
   }
 
-  if (agent->status != AG_PAUSED && agent->status != AG_FAILED)
+  /* Decrement run_count and host load once per death:
+   *   AG_FAILED: agent_fail_event skipped it, so do it here.
+   *   AG_PAUSED: already done at the PAUSED transition.
+   *   otherwise: do it through agent_transition(AG_PAUSED). */
+  if (agent->status == AG_FAILED)
+  {
+    if (agent->owner != NULL && agent->owner->id > 0)
+    {
+      host_decrease_load(agent->host);
+      meta_agent_decrease_count(agent->type);
+    }
+  }
+  else if (agent->status != AG_PAUSED)
+  {
     agent_transition(agent, AG_PAUSED);
+  }
 
-  job_update(scheduler, agent->owner);
+  /* Move the dying agent to finished_agents so job_remove_agent can clean up.
+   * If the job is still JB_CHECKEDOUT the agent died before it got any data
+   * (e.g. version-mismatch respawn), so re-queue the job for a fresh dispatch
+   * instead of completing it. */
+  if (agent->owner != NULL &&
+      g_list_find(agent->owner->running_agents, agent) != NULL)
+  {
+    if (agent->owner->status == JB_CHECKEDOUT)
+    {
+      agent->owner->running_agents = g_list_remove(
+          agent->owner->running_agents, agent);
+      /* reset the timer so the stale reaper gives it a fresh grace period */
+      agent->owner->checkedout_at = time(NULL);
+      g_sequence_insert_sorted(scheduler->job_queue, agent->owner,
+          job_compare, NULL);
+    }
+    else
+    {
+      job_finish_agent(agent->owner, agent);
+      job_update(scheduler, agent->owner);
+    }
+  }
+  else if (agent->owner != NULL)
+  {
+    job_update(scheduler, agent->owner);
+  }
   if (agent->status == AG_FAILED && agent->owner->id < 0)
   {
     log_printf("ERROR %s.%d: agent %s.%s has failed scheduler startup test\n", __FILE__, __LINE__, agent->host->name,
@@ -1130,7 +1315,13 @@ void agent_ready_event(scheduler_t* scheduler, agent_t* agent)
   }
   else if (ret < 0)
   {
-    agent_transition(agent, AG_FAILED);
+    /* DB lookup failed (connection lost or OOM). Fail the job and kill the agent:
+     * the watchdog ignores AG_FAILED agents, so we must SIGKILL it ourselves or it
+     * would run forever. agent_fail_event has already set AG_FAILED, so the later
+     * agent_death_event will not fail it again. */
+    agent_fail_event(scheduler, agent);
+    job_update(scheduler, agent->owner);
+    agent_kill(agent);
     return;
   }
   else
@@ -1147,10 +1338,51 @@ void agent_ready_event(scheduler_t* scheduler, agent_t* agent)
 }
 
 /**
+ * @brief Context passed to collect_zombie_agents().
+ */
+typedef struct {
+  GList* list; ///< Accumulates zombie agent_t pointers
+  time_t now;  ///< Current-time snapshot for the traversal
+} zombie_ctx;
+
+/**
+ * @brief GTraverseFunc: collect agents in FAILED jobs silent for >3×agent_death_timer.
+ * Targets D-state processes that SIGKILL cannot reap (SIGCHLD never fires,
+ * leaking listen threads and job_t until scheduler restarts).
+ */
+static gboolean collect_zombie_agents(int* pid_ptr, agent_t* agent, zombie_ctx* ctx)
+{
+  if (agent == NULL || agent->owner == NULL)
+  {
+    return FALSE;
+  }
+  // Job must be FAILED with agent still in running/spawned state.
+  if (agent->owner->status != JB_FAILED)
+  {
+    return FALSE;
+  }
+  if (agent->status != AG_SPAWNED && agent->status != AG_RUNNING)
+  {
+    return FALSE;
+  }
+  // 3× timer guarantees the normal watchdog already attempted SIGKILL.
+  if (ctx->now - agent->check_in <= (time_t)(3 * CONF_agent_death_timer))
+  {
+    return FALSE;
+  }
+
+  ctx->list = g_list_prepend(ctx->list, agent);
+  return FALSE;
+}
+
+/**
  * Event created when the scheduler receives a SIGALRM. This will loop over
  * every agent and call the update function on it. This will kill any agents
  * that are hung without heart beat or any agents that have stopped updating
  * the number of item processed.
+ *
+ * A second pass reaps D-state zombie agents stuck in FAILED jobs by queuing
+ * a synthetic agent_death_event for each.
  *
  * @param scheduler the scheduler reference to inform
  * @param unused needed since this an event, but should be NULL
@@ -1158,6 +1390,35 @@ void agent_ready_event(scheduler_t* scheduler, agent_t* agent)
 void agent_update_event(scheduler_t* scheduler, void* unused)
 {
   g_tree_foreach(scheduler->agents, (GTraverseFunc) update, NULL);
+
+  // Second pass: force-reap D-state zombie agents stuck in FAILED jobs.
+  zombie_ctx zctx = { NULL, time(NULL) };
+  g_tree_foreach(scheduler->agents, (GTraverseFunc) collect_zombie_agents, &zctx);
+
+  GList* iter;
+  for (iter = zctx.list; iter != NULL; iter = iter->next)
+  {
+    agent_t* zombie = (agent_t*)iter->data;
+
+    log_printf("WARNING %s.%d: JOB[%d].%s[%d.%s]: agent unresponsive for %ld s"
+               " in a FAILED job - forcing death-event cleanup\n",
+               __FILE__, __LINE__,
+               zombie->owner ? zombie->owner->id  : -1,
+               zombie->type  ? zombie->type->name : "unknown",
+               (int)zombie->pid,
+               zombie->host  ? zombie->host->name : "unknown",
+               (long)(zctx.now - zombie->check_in));
+
+    /* Queue it rather than calling directly, which would block on g_thread_join.
+     * This is a synthetic death (no real waitpid status), so pass status 0;
+     * agent_death_event uses return_code, not pids[1], to decide the fail path. */
+    pid_t* pids = g_new0(pid_t, 3);  /* [0]=pid [1]=status [2]=retry */
+    pids[0] = zombie->pid;
+    pids[1] = 0;
+    event_signal(agent_death_event, pids);
+  }
+
+  g_list_free(zctx.list);
 }
 
 /**
@@ -1173,10 +1434,50 @@ void agent_update_event(scheduler_t* scheduler, void* unused)
 void agent_fail_event(scheduler_t* scheduler, agent_t* agent)
 {
   TEST_NULV(agent);
+
+  // Ownerless agent: job already removed; transition and unblock thread to avoid NULL deref.
+  if (agent->owner == NULL)
+  {
+    AGENT_ERROR("agent_fail_event called on ownerless agent (pid=%d), killing cleanly", agent->pid);
+    agent_transition(agent, AG_FAILED);
+    if (write(agent->to_parent, "@@@1\n", 5) != 5)
+    {
+      AGENT_ERROR("Failed to kill ownerless agent thread cleanly");
+    }
+    return;
+  }
+
   agent_transition(agent, AG_FAILED);
   job_fail_agent(agent->owner, agent);
   if (write(agent->to_parent, "@@@1\n", 5) != 5)
+  {
     AGENT_ERROR("Failed to kill agent thread cleanly");
+  }
+}
+
+/**
+ * @brief Deferred agent_fail_event() that is safe against a freed agent.
+ *
+ * The listen thread cannot queue agent_fail_event() with a raw agent_t*: the
+ * agent may be joined and freed by agent_death_event() before the queued event
+ * runs. Instead we look the agent up by pid on the event-loop thread and check
+ * the pointer still matches (catches pid reuse) before failing it. A miss is a
+ * safe no-op.
+ *
+ * @param scheduler the scheduler the agent is attached to
+ * @param arg       heap-allocated fail_pid_arg*, freed here
+ */
+void agent_fail_event_pid(scheduler_t* scheduler, void* arg)
+{
+  fail_pid_arg* fa = (fail_pid_arg*) arg;
+  agent_t* agent = g_tree_lookup(scheduler->agents, &fa->pid);
+
+  if (agent != NULL && agent == fa->agent && agent->status != AG_FAILED)
+  {
+    agent_fail_event(scheduler, agent);
+  }
+
+  g_free(fa);
 }
 
 /**
@@ -1209,7 +1510,7 @@ void agent_transition(agent_t* agent, agent_status new_status)
   AGENT_SEQUENTIAL_PRINT("agent status change: %s -> %s\n", agent_status_strings[agent->status],
       agent_status_strings[new_status]);
 
-  if (agent->owner->id > 0)
+  if (agent->owner != NULL && agent->owner->id > 0)
   {
     if (agent->status == AG_PAUSED)
     {
@@ -1284,18 +1585,25 @@ void agent_print_status(agent_t* agent, GOutputStream* ostr)
 }
 
 /**
- * @brief Unclean kill of an agent.
+ * @brief Unclean kill of an agent whose job should fail.
  *
- * This simply sends a SIGKILL to the agent and lets
- * everything else get cleaned up normally.
+ * For scheduler-initiated kills that are failures: heartbeat timeout, no
+ * progress, broken comms, forced shutdown. return_code is left non-zero so
+ * agent_death_event takes the fail path and marks the job FAILED; run_count and
+ * host load are decremented once there.
+ *
+ * Callers that want a clean respawn, or have already accounted the agent
+ * (version refresh, version mismatch, finished agents in job_fail_event), set
+ * return_code = 0 and call kill() themselves instead of using this.
  *
  * @param agent the agent to kill
  */
 void agent_kill(agent_t* agent)
 {
   AGENT_SEQUENTIAL_PRINT("KILL: sending SIGKILL to pid %d\n", agent->pid);
-  meta_agent_decrease_count(agent->type);
-  kill(agent->pid, SIGKILL);
+  /* kill the process group so child processes (e.g. sh/python3) die too.
+   * Leave return_code alone: a non-zero value makes the job fail, not complete. */
+  kill(-agent->pid, SIGKILL);
 }
 
 /**

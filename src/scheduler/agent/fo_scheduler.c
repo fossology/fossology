@@ -51,10 +51,10 @@ int main(int argc, char** argv)
 
   /* get this done first */
   srand(time(NULL));
-#if !(GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32)
+#if !GLIB_CHECK_VERSION(2, 32, 0)
   g_thread_init(NULL);
 #endif
-#if !(GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 36)
+#if !GLIB_CHECK_VERSION(2, 36, 0)
   g_type_init();
 #endif
 
@@ -133,6 +133,7 @@ int main(int argc, char** argv)
   signal(SIGTERM, scheduler_sig_handle);
   signal(SIGQUIT, scheduler_sig_handle);
   signal(SIGHUP,  scheduler_sig_handle);
+  signal(SIGPIPE, SIG_IGN); /* writes to dead agent pipes must not kill the daemon */
 
   /* ***************************************************** */
   /* *** we have finished initialization without error *** */
