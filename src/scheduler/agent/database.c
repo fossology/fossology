@@ -515,6 +515,7 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
     final_cmd = get_email_command(scheduler, PQget(db_result, 0, "user_email"));
     if(final_cmd == NULL)
     {
+      job->status = curr_status;
       if(scheduler->parse_db_email != NULL)
         g_free(val);
       g_string_free(email_txt, TRUE);
@@ -640,7 +641,7 @@ typedef struct
 {
     char* table;        ///< The name of the table to check columns in
     uint8_t ncols;      ///< The number of columns in the table that the scheduler uses
-    char* columns[13];  ///< The columns that the scheduler uses for this table
+    char* columns[14];  ///< The columns that the scheduler uses for this table
 } reqcols;
 
 /**
@@ -670,10 +671,10 @@ static void check_tables(scheduler_t* scheduler)
    */
   reqcols cols[] =
   {
-      {"jobqueue",  13, {
-          "jq_args", "jq_end_bits", "jq_endtext", "jq_endtime", "jq_host",
-          "jq_itemsprocessed", "jq_job_fk", "jq_log", "jq_pk", "jq_runonpfile",
-          "jq_schedinfo", "jq_starttime", "jq_type"                                  }},
+      {"jobqueue",  14, {
+          "jq_args", "jq_cmd_args", "jq_end_bits", "jq_endtext", "jq_endtime",
+          "jq_host", "jq_itemsprocessed", "jq_job_fk", "jq_log", "jq_pk",
+          "jq_runonpfile", "jq_schedinfo", "jq_starttime", "jq_type"               }},
       {"sysconfig",      2, {"conf_value", "variablename"                            }},
       {"job",            2, {"job_pk",  "job_upload_fk"                              }},
       {"folder",         2, {"folder_name",  "folder_pk"                             }},
@@ -828,7 +829,11 @@ void database_exec_event(scheduler_t* scheduler, char* sql)
 {
   PGresult* db_result = database_exec(scheduler, sql);
   if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
+  {
     PQ_ERROR(db_result, "failed to perform database exec: %s", sql);
+  }
+  else
+    SafePQclear(db_result);
   g_free(sql);
 }
 
@@ -842,10 +847,8 @@ void database_update_event(scheduler_t* scheduler, void* unused)
 {
   /* locals */
   PGresult* db_result;
-  PGresult* pri_result;
   int i, j_id;
-  char sql[512];
-  char* value, * type, * host, * pfile, * parent, *jq_cmd_args;
+  char* value, * type, * host, * pfile, * jq_cmd_args;
   job_t* job;
 
   if(closing)
@@ -854,7 +857,9 @@ void database_update_event(scheduler_t* scheduler, void* unused)
     return;
   }
 
-  /* make the database query */
+  /* Single query returns job-queue rows joined with job priority and user
+   * info.  This replaces the old pattern of one basic_checkout followed by
+   * one jobsql_information per row (up to 11 round trips per cycle → 1). */
   db_result = database_exec(scheduler, basic_checkout);
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {
@@ -866,18 +871,16 @@ void database_update_event(scheduler_t* scheduler, void* unused)
       PQntuples(db_result));
   for(i = 0; i < PQntuples(db_result); i++)
   {
-    /* start by checking that the job hasn't already been grabbed */
+    /* skip jobs already held in memory */
     j_id = atoi(PQget(db_result, i, "jq_pk"));
     if(g_tree_lookup(scheduler->job_list, &j_id) != NULL)
       continue;
 
-    /* get relevant values out of the job queue */
-    parent =      PQget(db_result, i, "jq_job_fk");
-    host   =      PQget(db_result, i, "jq_host");
-    type   =      PQget(db_result, i, "jq_type");
-    pfile  =      PQget(db_result, i, "jq_runonpfile");
-    value  =      PQget(db_result, i, "jq_args");
-    jq_cmd_args  =PQget(db_result, i, "jq_cmd_args");
+    host        = PQget(db_result, i, "jq_host");
+    type        = PQget(db_result, i, "jq_type");
+    pfile       = PQget(db_result, i, "jq_runonpfile");
+    value       = PQget(db_result, i, "jq_args");
+    jq_cmd_args = PQget(db_result, i, "jq_cmd_args");
 
     if(host != NULL)
       host = (strlen(host) == 0) ? NULL : host;
@@ -888,7 +891,6 @@ void database_update_event(scheduler_t* scheduler, void* unused)
         "jq_runonpfile = %d\n   jq_args = %s\n  jq_cmd_args = %s\n",
         j_id, type, host, (pfile != NULL && pfile[0] != '\0'), value, jq_cmd_args);
 
-    /* check if this is a command */
     if(strcmp(type, "command") == 0)
     {
       WARNING("DB: commands in the job queue not implemented,"
@@ -896,27 +898,14 @@ void database_update_event(scheduler_t* scheduler, void* unused)
       continue;
     }
 
-    sprintf(sql, jobsql_information, parent);
-    pri_result = database_exec(scheduler, sql);
-    if(PQresultStatus(pri_result) != PGRES_TUPLES_OK)
-    {
-      PQ_ERROR(pri_result, "database update failed on call to PQexec");
-      continue;
-    }
-    if(PQntuples(pri_result)==0)
-    {
-      WARNING("can not find the user information of job_pk %s\n", parent);
-      SafePQclear(pri_result);
-      continue;
-    }
+    /* user_pk, group_pk and job_priority come from the merged query. */
     job = job_init(scheduler->job_list, scheduler->job_queue, type, host, j_id,
-        atoi(parent),
-        atoi(PQget(pri_result, 0, "user_pk")),
-        atoi(PQget(pri_result, 0, "group_pk")),
-        atoi(PQget(pri_result, 0, "job_priority")), jq_cmd_args);
-    job_set_data(scheduler, job,  value, (pfile && pfile[0] != '\0'));
-
-    SafePQclear(pri_result);
+        atoi(PQget(db_result, i, "jq_job_fk")),
+        atoi(PQget(db_result, i, "user_pk")),
+        atoi(PQget(db_result, i, "group_pk")),
+        atoi(PQget(db_result, i, "job_priority")),
+        jq_cmd_args);
+    job_set_data(scheduler, job, value, (pfile && pfile[0] != '\0'));
   }
 
   SafePQclear(db_result);
@@ -932,7 +921,11 @@ void database_reset_queue(scheduler_t* scheduler)
 {
   PGresult* db_result = database_exec(scheduler, jobsql_resetqueue);
   if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
+  {
     PQ_ERROR(db_result, "failed to reset job queue");
+  }
+  else
+    SafePQclear(db_result);
 }
 
 /**
@@ -973,14 +966,20 @@ void database_update_job(scheduler_t* scheduler, job_t* job, job_status status)
   }
 
   /* update the database job queue */
-  db_result = database_exec(scheduler, sql);
-  if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
-    PQ_ERROR(db_result, "failed to update job status in job queue");
+  if(sql != NULL)
+  {
+    db_result = database_exec(scheduler, sql);
+    if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
+    {
+      PQ_ERROR(db_result, "failed to update job status in job queue");
+    }
+    else
+      SafePQclear(db_result);
+    g_free(sql);
+  }
 
   if(status == JB_COMPLETE || status == JB_FAILED)
     email_notification(scheduler, job);
-
-  g_free(sql);
 }
 
 /**
@@ -1025,9 +1024,12 @@ void database_job_priority(scheduler_t* scheduler, job_t* job, int priority)
 
   sql = g_strdup_printf(jobsql_priority, priority, job->id);
   db_result = database_exec(scheduler, sql);
-  if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
+  if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
+  {
     PQ_ERROR(db_result, "failed to change job queue entry priority");
-
+  }
+  else
+    SafePQclear(db_result);
   g_free(sql);
 }
 
@@ -1183,8 +1185,12 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
   }
   else
   {
-    NOTIFY("Unable to send email. SMTP host or port not found in the configuration.\n"
-        "Please check Configuration Variables.");
+    // SMTPHostName has no installer default; its presence means the admin intended to use SMTP.
+    if (g_hash_table_contains(smtpvariables, "SMTPHostName"))
+    {
+      NOTIFY("Unable to send email. SMTP host or port not found in the configuration.\n"
+          "Please check Configuration Variables.");
+    }
     final_command = NULL;
   }
   g_hash_table_destroy(smtpvariables);

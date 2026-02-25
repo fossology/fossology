@@ -134,6 +134,7 @@ typedef struct
 /* meta agent */
 meta_agent_t* meta_agent_init(char* name, char* cmd, int max, int spc);
 void meta_agent_destroy(meta_agent_t* meta_agent);
+void agent_meta_version_reset(meta_agent_t* ma);
 
 /* agent */
 agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* owner);

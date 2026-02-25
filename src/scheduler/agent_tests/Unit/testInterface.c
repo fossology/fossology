@@ -504,7 +504,11 @@ void test_sending_reload()
   event = g_async_queue_pop(event_loop_get()->queue);
   FO_ASSERT_EQUAL((int)result, 1);
   FO_ASSERT_PTR_EQUAL((void*)event->func, (void*)scheduler_config_event);
-  FO_ASSERT_STRING_EQUAL(event->source_name, "interface.c");
+  {
+    const char* bname = strrchr(event->source_name, '/');
+    bname = bname ? bname + 1 : event->source_name;
+    FO_ASSERT_STRING_EQUAL(bname, "interface.c");
+  }
 
   close(soc);
   interface_destroy(scheduler);
