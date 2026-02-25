@@ -656,6 +656,7 @@ int job_is_open(scheduler_t* scheduler, job_t* job)
       return -1;
     }
 
+
     retval = PQntuples(job->db_result) != 0;
   }
 

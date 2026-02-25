@@ -595,6 +595,7 @@ void scheduler_update(scheduler_t* scheduler)
      * the loop, so a blocked high-priority job doesn't starve the rest */
     GList* skipped_jobs = NULL;
 
+
     while((job = peek_job(scheduler->job_queue)) != NULL)
     {
       // Check the max limit of running agents
@@ -1140,6 +1141,7 @@ void scheduler_foss_config(scheduler_t* scheduler)
     }
   }
 
+
   fo_config_free(version);
 
   /* This will create the load and the print command for the special
@@ -1318,6 +1320,7 @@ void scheduler_version_refresh(scheduler_t* scheduler, void* unused)
   log_printf("NOTE: scheduler_version_refresh: sent SIGKILL to %d agent(s); "
       "they will respawn automatically\n", ctx.count);
 }
+
 
 /**
  * @brief Checks if a string is entirely composed of numeric characters
