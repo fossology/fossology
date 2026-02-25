@@ -133,6 +133,10 @@ jobs:
       matrix:
         config:
           - {
+            php: "8.2",
+            phpunit: "^11.5.55",
+          }
+          - {
             php: "8.1",
             phpunit: "^10.0.12",
           }
@@ -194,15 +198,24 @@ jobs:
           ./utils/prepare-test -afty
           composer install --working-dir=src
           mkdir coverage
+      - name: Determine PHPUnit config based on PHP version
+        run: |
+          if [ "${{ matrix.config.php }}" = "8.2" ]; then
+            echo "MIGRATED_CONFIG=src/phpunit.82.xml" >> $GITHUB_ENV
+            echo "Using src/phpunit.82.xml for PHP 8.2"
+          else
+            echo "MIGRATED_CONFIG=src/phpunit.xml" >> $GITHUB_ENV
+            echo "Using src/phpunit.xml for PHP ${{ matrix.config.php }}"
+          fi
       - name: PHPUnit test suit
         env:
           PGHOST: 127.0.0.1
           PGPORT: 5432
         run: |
-          phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite" --colors=always --coverage-clover ./coverage/unit-clover.xml
+          phpunit -c ${MIGRATED_CONFIG} --testsuite="Fossology PhpUnit Test Suite" --colors=always --coverage-clover ./coverage/unit-clover.xml
       - name: PHPUnit agent test suit
         env:
           PGHOST: 127.0.0.1
           PGPORT: 5432
         run: |
-          phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Agent Test Suite" --colors=always --coverage-clover ./coverage/agent-clover.xml
+          phpunit -c ${MIGRATED_CONFIG} --testsuite="Fossology PhpUnit Agent Test Suite" --colors=always --coverage-clover ./coverage/agent-clover.xml
