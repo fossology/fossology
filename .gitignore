@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: FSFAP
 /.idea
 /.phpstorm
-/.vscode
 /.phpstorm
 *iml
 _*.c
@@ -222,3 +221,7 @@ cmake-build-debug
 
 #pycache
 **/__pycache__/
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore
