@@ -9,7 +9,7 @@
   colors="true" backupGlobals="true"
   beStrictAboutTestsThatDoNotTestAnything="false"
   failOnWarning="false" stopOnFailure="false"
-  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.0/phpunit.xsd"
   cacheDirectory=".phpunit.cache">
   <coverage>
     <report>
