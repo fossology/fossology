@@ -23,3 +23,4 @@ install(FILES cyclonedx.conf "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
     COMPONENT cyclonedx)
 
 add_symlink()
+add_subdirectory(agent_tests)
