@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: © Fossology contributors
+
+# SPDX-License-Identifier: GPL-2.0-only
+
+# Wrapper to invoke the PHP-based spdx agent in the same directory.
+php "$(dirname "$0")/spdx.php" "$@"

@@ -11,6 +11,7 @@
  */
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use PHPUnit\Framework\TestCase;
 use Fossology\Lib\Test\TestPgDb;
@@ -22,6 +23,8 @@ use PHPUnit\Runner\Version as PHPUnitVersion;
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
  */
+#[\PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses]
+#[\PHPUnit\Framework\Attributes\PreserveGlobalState(false)]
 class LicenseStdCommentDaoTest extends TestCase
 {
 
@@ -45,8 +48,6 @@ class LicenseStdCommentDaoTest extends TestCase
   /** @var int $assertCountBefore */
   private $assertCountBefore;
 
-  private $authClass;
-
   protected function setUp() : void
   {
     $this->testDb = new TestPgDb("licensestdcommentdao");
@@ -57,8 +58,8 @@ class LicenseStdCommentDaoTest extends TestCase
     $this->testDb->createSequences(["license_std_comment_lsc_pk_seq"]);
     $this->testDb->alterTables(["license_std_comment"]);
     $this->testDb->insertData(["users", "license_std_comment"]);
-    $this->authClass = \Mockery::mock('alias:Fossology\Lib\Auth\Auth');
-    $this->authClass->expects('getUserId')->andReturn(2);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 2;
   }
 
   protected function tearDown() : void
@@ -67,6 +68,7 @@ class LicenseStdCommentDaoTest extends TestCase
       \Hamcrest\MatcherAssert::getCount() - $this->assertCountBefore);
     $this->testDb = null;
     $this->dbManager = null;
+    \Mockery::close();
   }
 
   /**
@@ -136,7 +138,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testUpdateCommentAsAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+      $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $returnVal = $this->licenseStdCommentDao->updateComment(2,
       "Updated comment #1", "This comment is updated!");
@@ -164,7 +166,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testUpdateCommentAsNonAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(false);
+      $_SESSION[Auth::USER_LEVEL] = Auth::PERM_NONE;
 
     $returnVal = $this->licenseStdCommentDao->updateComment(3,
       "Updated comment #2", "This comment is updated!");
@@ -183,7 +185,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testUpdateCommentAsAdminInvalidId()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $this->expectException(\UnexpectedValueException::class);
     $this->licenseStdCommentDao->updateComment(- 1, "Invalid comment #1",
@@ -200,7 +202,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testUpdateCommentFromArrayAsAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+       $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $newValues = [];
     $newValues[3]['name'] = "Updated comment #2";
@@ -237,7 +239,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testUpdateCommentFromArrayAsNonAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(false);
+       $_SESSION[Auth::USER_LEVEL] = Auth::PERM_NONE;
 
     $newValues = [];
     $newValues[5]['name'] = "Updated comment #4";
@@ -258,7 +260,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testUpdateCommentFromArrayInvalidId()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $newValues = [];
     $newValues[-1]['name'] = "Updated comment #4";
@@ -279,7 +281,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testUpdateCommentFromArrayInvalidFields()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $newValues = [];
     $newValues[5]['naaaaame'] = "Updated comment #4";
@@ -300,7 +302,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testUpdateCommentFromArrayEmptyArray()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $newValues = [];
 
@@ -318,7 +320,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testUpdateCommentFromArrayEmptyValues()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $newValues = [3 => []];
 
@@ -368,7 +370,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testInsertCommentAsAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $returnVal = $this->licenseStdCommentDao->insertComment("Inserted comment #1",
       "This first inserted comment!");
@@ -396,7 +398,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testInsertCommentAsNonAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(false);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_NONE;
 
     $returnVal = $this->licenseStdCommentDao->insertComment("Inserted comment #1",
       "This first inserted comment!");
@@ -411,7 +413,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testInsertCommentEmptyValues()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $returnVal = $this->licenseStdCommentDao->insertComment("",
       "       ");
@@ -427,7 +429,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testToggleCommentAsAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $returnVal = $this->licenseStdCommentDao->toggleComment(5);
     $this->assertTrue($returnVal);
@@ -444,7 +446,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testToggleCommentAsNonAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(false);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_NONE;
 
     $returnVal = $this->licenseStdCommentDao->toggleComment(5);
     $this->assertFalse($returnVal);
@@ -458,7 +460,7 @@ class LicenseStdCommentDaoTest extends TestCase
    */
   public function testToggleCommentInvalidId()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $this->expectException(\UnexpectedValueException::class);
 
