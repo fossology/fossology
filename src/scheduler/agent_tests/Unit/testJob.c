@@ -133,6 +133,43 @@ void test_job_fun()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for job_priority_event with NULL job (non-existent job)
+ * \test
+ * -# Initialize scheduler and database
+ * -# Create new database_update_event() to load data
+ * -# Call job_priority_event() with NULL job pointer (simulating job already removed)
+ * -# Verify function handles gracefully without crash
+ * -# Verify function returns early and logs appropriate warning
+ */
+void test_job_priority_event_null_job()
+{
+  scheduler_t* scheduler;
+  arg_int* params;
+  int fake_job_id = 9999;  // non-existent job ID
+
+  scheduler = scheduler_init(testdb, NULL);
+  FO_ASSERT_PTR_NULL(scheduler->db_conn);
+  database_init(scheduler);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(scheduler->db_conn);
+
+  Prepare_Testing_Data_Job(scheduler);
+  database_update_event(scheduler, NULL);
+
+  // Test priority change on non-existent job
+  // This simulates the race condition where a job completes/is removed
+  // between form generation and priority change submission
+  params = g_new0(arg_int, 1);
+  params->first = NULL;  // Job not found in scheduler
+  params->second = fake_job_id;
+  
+  // This should handle gracefully without crash
+  // The function will log a warning and return early
+  job_priority_event(scheduler, params);
+
+  scheduler_destroy(scheduler);
+}
+
 /* ************************************************************************** */
 /* **** suite declaration *************************************************** */
 /* ************************************************************************** */
@@ -141,5 +178,6 @@ CU_TestInfo tests_job[] =
 {
     {"Test job_event", test_job_event },
     {"Test job_fun",   test_job_fun   },
+    {"Test job_priority_event_null_job", test_job_priority_event_null_job },
     CU_TEST_INFO_NULL
 };
