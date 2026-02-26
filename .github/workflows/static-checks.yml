@@ -52,6 +52,20 @@ jobs:
           extensions: gettext, mbstring, json, xml, pgsql, curl, uuid, posix, sqlite3
       - name: Composer check on PHP 8.2
         run: composer validate --no-check-all --working-dir=src --strict
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gettext, mbstring, json, xml, pgsql, curl, uuid, posix, sqlite3
+      - name: Composer check on PHP 8.3
+        run: composer validate --no-check-all --working-dir=src --strict
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gettext, mbstring, json, xml, pgsql, curl, uuid, posix, sqlite3
+      - name: Composer check on PHP 8.4
+        run: composer validate --no-check-all --working-dir=src --strict
 
   code-analysis:
     runs-on: ubuntu-22.04
@@ -89,7 +103,7 @@ jobs:
     runs-on: ubuntu-22.04
     continue-on-error: true
     steps:
-      - name: Setup PHP
+      - name: Setup PHP 8.1
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
@@ -149,4 +163,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: --exclude-pattern '.*dependabot\[bot\]@users\.noreply\.github\.com'
-

@@ -133,6 +133,14 @@ jobs:
       matrix:
         config:
           - {
+            php: "8.4",
+            phpunit: "^13.0.5",
+          }
+          - {
+            php: "8.3",
+            phpunit: "^12.5.14",
+          }
+          - {
             php: "8.2",
             phpunit: "^11.5.55",
           }
@@ -200,12 +208,12 @@ jobs:
           mkdir coverage
       - name: Determine PHPUnit config based on PHP version
         run: |
-          if [ "${{ matrix.config.php }}" = "8.2" ]; then
-            echo "MIGRATED_CONFIG=src/phpunit.82.xml" >> $GITHUB_ENV
-            echo "Using src/phpunit.82.xml for PHP 8.2"
-          else
+          if [ "${{ matrix.config.php }}" = "8.1" ] || [ "${{ matrix.config.php }}" = "7.4" ]; then
             echo "MIGRATED_CONFIG=src/phpunit.xml" >> $GITHUB_ENV
             echo "Using src/phpunit.xml for PHP ${{ matrix.config.php }}"
+          else
+            echo "MIGRATED_CONFIG=src/phpunit.82.xml" >> $GITHUB_ENV
+            echo "Using legacy src/phpunit.82.xml for PHP ${{ matrix.config.php }}"
           fi
       - name: PHPUnit test suit
         env:
