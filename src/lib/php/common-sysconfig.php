@@ -136,18 +136,47 @@ function get_pg_conn($sysconfdir, &$SysConf, $exitOnDbFail=true)
  * \param resource $conn Connection to Postgres
  * \param[in,out] array $SysConf Configuration variable array
  */
+
 function populate_from_sysconfig($conn, &$SysConf)
 {
-  /* populate the global $SysConf array with variable/value pairs */
+  // OIDC overrides from fossology.conf
+  $oidcOverrides = $SysConf['OIDC'] ?? [];
+
   $sql = "SELECT variablename, conf_value FROM sysconfig;";
   $result = pg_query($conn, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
   while ($row = pg_fetch_assoc($result)) {
-    $SysConf['SYSCONFIG'][$row['variablename']] = $row['conf_value'];
+    $key = $row['variablename'];
+    $dbValue = $row['conf_value'];
+
+    if (array_key_exists($key, $oidcOverrides) &&
+        $oidcOverrides[$key] !== '' &&
+        $oidcOverrides[$key] !== null &&
+        $oidcOverrides[$key] !== $dbValue) {
+
+      // Update DB so DB & config stay in sync
+      $newValue = pg_escape_string($conn, $oidcOverrides[$key]);
+      $escKey   = pg_escape_string($conn, $key);
+
+      $updateSql = "UPDATE sysconfig
+                    SET conf_value = '{$newValue}'
+                    WHERE variablename = '{$escKey}';";
+
+      $updateResult = pg_query($conn, $updateSql);
+      DBCheckResult($updateResult, $updateSql, __FILE__, __LINE__);
+
+      // Use override value at runtime too
+      $SysConf['SYSCONFIG'][$key] = $oidcOverrides[$key];
+    } else {
+      $SysConf['SYSCONFIG'][$key] = $dbValue;
+    }
   }
+
   pg_free_result($result);
 }
+
+
 
 /**
  * \brief Populate the sysconfig table with core variables.
