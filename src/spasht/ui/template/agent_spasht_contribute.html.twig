@@ -1,0 +1,102 @@
+{% if pageNo == "show_upload_table" %}
+  <div class="spasht-full-row">
+    <table id="detailsTable" class="simpleTable detailsTable left-align-cells">
+      <tbody>
+        <tr class="detailsRow">
+          <th>Namespace</th>
+          <td>
+            <span id="contributeNamespace">{{ body.namespace }}</span>
+          </td>
+        </tr>
+        <tr class="detailsRow">
+          <th>Name</th>
+          <td>
+            <span id="contributeName">{{ body.name }}</span>
+          </td>
+        </tr>
+        <tr class="detailsRow">
+          <th>Revision</th>
+          <td>
+            <span id="contributeRevision">{{ body.revision }}</span>
+          </td>
+        </tr>
+        <tr class="detailsRow">
+          <th>Type</th>
+          <td>
+            <span id="contributeType"> {{ body.type }}</span>
+          </td>
+        </tr>
+        <tr class="detailsRow">
+          <th>Provider</th>
+          <td>
+            <span id="contributeProvider">{{ body.provider }}</span>
+          </td>
+        </tr>
+        <tr class="detailsRow">
+          <th>status</th>
+          <td>
+            <span>{{ body_menu }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  {# contribution details form #}
+  <div class="spasht-full-row">
+    <form name="contributeForm" id="contributeForm" method="post" action="">
+      <table>
+        <tr>
+          <td>
+            <p style="text-align:left">Type</p>
+            <select id="ContributionType" style="width:100%">
+              <option value="select" disabled selected>Select</option>
+              <option value="Missing">Missing</option>
+              <option value="Incorrect">Incorrect</option>
+              <option value="Incomplete">Incomplete</option>
+              <option value="Ambigious">Ambigious</option>
+              <option value="Other">Other</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p style="text-align:left">Title</p>
+            <input type="text" id="ContributionTitle" style="width:100%"/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p style="text-align:left">Details</p>
+            <textarea id="ContributionDetails" style="width:100%"></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p style="text-align:left">Resolution</p>
+            <textarea id="ContributionResolution" style="width:100%"></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="checkbox" id="contributionBox"/> Remove contributed definitions from the list
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <br>
+            <button id="contributtionSubmitButton" onclick="submitCuration()">Submit</button>
+          </td>
+        </tr>
+      </table>
+      <input id="jsonStringCoordinates" type="hidden" name="jsonStringCoordinates" value="" />
+      <input id="jsonStringContributionInfo" type="hidden" name="jsonStringContributionInfo" value="" />
+      <input id="hiddenRevision" type="hidden" name="hiddenRevision" value="" />
+      <input id="contributionDataValid" type="hidden" name="contributionDataValid" value="false" />
+    </form>
+  </div>
+{% else %}
+  <div class="spasht-full-row">
+    <b>Please Search and Select Revision</b>
+  </div>
+{% endif %}
