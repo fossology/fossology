@@ -215,17 +215,12 @@ GROUP BY group_fk
   public function getAllFolderIds()
   {
     $statementName = __METHOD__;
-    $this->dbManager->prepare($statementName, "SELECT DISTINCT folder_pk FROM folder");
+    $this->dbManager->prepare($statementName, "SELECT folder_pk FROM folder");
     $res = $this->dbManager->execute($statementName);
     $results = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
 
-    $allIds = array();
-    for ($i=0; $i < sizeof($results); $i++) {
-      $allIds[] = intval($results[$i]['folder_pk']);
-    }
-
-    return $allIds;
+    return array_map('intval', array_column($results, 'folder_pk'));
   }
 
   public function getFolderChildUploads($parentId, $trustGroupId)
@@ -234,10 +229,10 @@ GROUP BY group_fk
     $parameters = array($parentId, $trustGroupId);
 
     $this->dbManager->prepare($statementName, $sql = "
-SELECT u.*,uc.*,fc.foldercontents_pk FROM foldercontents fc
-  INNER JOIN upload u ON u.upload_pk = fc.child_id
-  INNER JOIN upload_clearing uc ON u.upload_pk=uc.upload_fk AND uc.group_fk=$2
-WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " AND (u.upload_mode = 100 OR u.upload_mode = 104);");
+SELECT u.*, uc.*, fc.foldercontents_pk FROM foldercontents fc
+  INNER JOIN upload u ON u.upload_pk = fc.child_id AND u.upload_mode IN (100, 104)
+  INNER JOIN upload_clearing uc ON uc.upload_fk = u.upload_pk AND uc.group_fk = $2
+WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . ";");
     $res = $this->dbManager->execute($statementName, $parameters);
     $results = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);

@@ -78,13 +78,14 @@ class ReuserPlugin extends DefaultPlugin
   function getAllUploads()
   {
     $allFolder = $this->folderDao->getAllFolderIds();
-    $result = array();
-    for ($i=0; $i < sizeof($allFolder); $i++) {
-      $listObject = $this->prepareFolderUploads($allFolder[$i]);
-      foreach ($listObject as $key => $value) {
-        $result[explode(",",$key)[0]] = $value;
+    $result = [];
+
+    foreach ($allFolder as $folderId) {
+      foreach ($this->prepareFolderUploads($folderId) as $key => $value) {
+        $result[strstr($key, ',', true) ?: $key] = $value;
       }
     }
+
     return $result;
   }
 
