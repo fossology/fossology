@@ -134,12 +134,20 @@ class ChangeLicenseBulk extends DefaultPlugin
     if ($bulkId <= 0) {
       throw new Exception('cannot insert bulk reference');
     }
+
+    // Handle adding text phrase to custom_phrase table if checkbox is checked
+    $addToCustomPhrase = intval($request->get('addToCustomPhrase'));
+    if ($addToCustomPhrase == 1) {
+      $this->importBulkDataToCustomPhrase($bulkId, $userId, $groupId);
+    }
     $upload = $this->uploadDao->getUpload($uploadId);
     $uploadName = $upload->getFilename();
     $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
     /** @var DeciderJobAgentPlugin $deciderPlugin */
     $deciderPlugin = plugin_find("agent_deciderjob");
+
     $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => $bulkId));
+
     $conflictStrategyId = intval($request->get('forceDecision'));
     $errorMsg = '';
     $jqId = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies, $conflictStrategyId);
@@ -148,6 +156,101 @@ class ChangeLicenseBulk extends DefaultPlugin
       throw new Exception(str_replace('<br>', "\n", $errorMsg));
     }
     return $jqId;
+  }
+
+  /**
+   * Import bulk data from license_ref_bulk to custom_phrase table
+   * This reuses the data that was just inserted into license_ref_bulk
+   *
+   * @param int $bulkId The lrb_pk from license_ref_bulk table
+   * @param int $userId User ID
+   * @param int $groupId Group ID
+   * @return void
+   */
+  private function importBulkDataToCustomPhrase($bulkId, $userId, $groupId)
+  {
+    // Fetch the bulk reference text from license_ref_bulk
+    $bulkDataSql = "SELECT rf_text FROM license_ref_bulk WHERE lrb_pk = $1";
+    $this->dbManager->prepare($bulkStmt = __METHOD__ . ".getBulkData", $bulkDataSql);
+    $bulkResult = $this->dbManager->execute($bulkStmt, array($bulkId));
+    $bulkRow = $this->dbManager->fetchArray($bulkResult);
+    $this->dbManager->freeResult($bulkResult);
+
+    if ($bulkRow === false) {
+      error_log("Failed to fetch bulk data for lrb_pk: $bulkId");
+      return;
+    }
+
+    $refText = $bulkRow['rf_text'];
+    $textMd5 = md5($refText);
+
+    // Check if duplicate exists
+    $checkSql = "SELECT cp_pk FROM custom_phrase WHERE text_md5 = $1";
+    $this->dbManager->prepare($checkStmt = __METHOD__ . ".checkDuplicate", $checkSql);
+    $checkResult = $this->dbManager->execute($checkStmt, array($textMd5));
+    $existingPhrase = $this->dbManager->fetchArray($checkResult);
+    $this->dbManager->freeResult($checkResult);
+
+    if ($existingPhrase !== false) {
+      // Duplicate exists, skip insertion
+      error_log("Custom phrase with MD5 hash $textMd5 already exists. Skipping insertion.");
+      return;
+    }
+
+    // Fetch associated licenses from license_set_bulk (both adding and removing licenses)
+    $licensesSql = "SELECT rf_fk, COALESCE(removing, false) as removing FROM license_set_bulk
+                    WHERE lrb_fk = $1";
+    $this->dbManager->prepare($licenseStmt = __METHOD__ . ".getLicenses", $licensesSql);
+    $licensesResult = $this->dbManager->execute($licenseStmt, array($bulkId));
+
+    $licenses = array();
+    while ($licenseRow = $this->dbManager->fetchArray($licensesResult)) {
+      $licenses[] = array(
+        'rf_fk' => intval($licenseRow['rf_fk']),
+        'removing' => $licenseRow['removing'] === 't' || $licenseRow['removing'] === true
+      );
+    }
+    $this->dbManager->freeResult($licensesResult);
+
+    // Start transaction to insert into custom_phrase
+    $this->dbManager->begin();
+    try {
+      // Insert into custom_phrase table
+      $insertSql = "INSERT INTO custom_phrase
+                    (text, text_md5, acknowledgement, comments, user_fk, group_fk, is_active, created_date)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING cp_pk";
+      $params = array($refText, $textMd5, '', '', $userId, $groupId, 'true');
+      $this->dbManager->prepare($insertStmt = __METHOD__ . ".insertPhrase", $insertSql);
+      $result = $this->dbManager->execute($insertStmt, $params);
+      $row = $this->dbManager->fetchArray($result);
+
+      if ($row === false) {
+        $this->dbManager->freeResult($result);
+        throw new Exception('Failed to insert custom phrase');
+      }
+
+      $cpPk = $row['cp_pk'];
+      $this->dbManager->freeResult($result);
+
+      // Insert license associations into custom_phrase_license_map
+      if (!empty($licenses)) {
+        $mapSql = "INSERT INTO custom_phrase_license_map (cp_fk, rf_fk, removing) VALUES ($1, $2, $3)";
+        $this->dbManager->prepare($mapStmt = __METHOD__ . ".insertLicenseMap", $mapSql);
+
+        foreach ($licenses as $license) {
+          $mapResult = $this->dbManager->execute($mapStmt, array($cpPk, $license['rf_fk'], $license['removing'] ? 'true' : 'false'));
+          $this->dbManager->freeResult($mapResult);
+        }
+      }
+
+      $this->dbManager->commit();
+      error_log("Custom phrase imported successfully from bulk data. cp_pk: $cpPk, lrb_pk: $bulkId");
+    } catch (Exception $e) {
+      $this->dbManager->rollback();
+      error_log("Error importing bulk data to custom phrase: " . $e->getMessage());
+      // Don't throw exception to avoid breaking the bulk scan
+      // Just log the error and continue
+    }
   }
 }
 

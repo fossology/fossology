@@ -198,6 +198,17 @@
 </div>
 </div>
 
+<div class="groupBox" id="kotobaHistory" {% if not (hasKotobaFindings and kotobaHistory) %}hidden{% endif %}>
+
+<h3>
+{{ 'Kotoba History'| trans }}
+</h3>
+
+<div class="scrollable2">
+{% include 'kotoba-history.html.twig' %}
+</div>
+</div>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     var moreOptions = document.getElementById("moreOptions");

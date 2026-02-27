@@ -196,6 +196,11 @@ SPDX-License-Identifier: FSFAP
             <argument type="service" id="db.manager"/>
         </service>
 
+        <service id="app.custom_text_csv_import" class="Fossology\Lib\Application\CustomTextCsvImport" public="true">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.user"/>
+        </service>
+
         <service id="ui.component.menu" class="Fossology\Lib\UI\Component\Menu" public="true">
             <argument type="service" id="twig.environment"/>
         </service>

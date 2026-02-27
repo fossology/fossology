@@ -181,7 +181,8 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
         "pkgagent"             => true,
         "ipra"                 => true,
         "softwareHeritage"     => true,
-        "compatibility"        => true
+        "compatibility"        => true,
+        "kotoba"           => true
       ];
     } else {
       $expectedArray = [
@@ -198,11 +199,12 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
         "package"                => true,
         "patent"                 => true,
         "heritage"               => true,
-        "compatibility"          => true
+        "compatibility"          => true,
+        "kotoba_bulk"            => true
       ];
     }
 
-    $actualObject = new Analysis(true, true, true, true, true, true, true, true, true, true, true, true, true, true);
+    $actualObject = new Analysis(true, true, true, true, true, true, true, true, true, true, true, true, true, true, true);
 
     $this->assertEquals($expectedArray, $actualObject->getArray($version));
   }

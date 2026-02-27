@@ -119,6 +119,13 @@ class AgentAdder extends DefaultPlugin
       $agent->scheduleAgent($jobId, $uploadId, $errorMsg, $request);
     }
 
+    $deciderRules = $request->get('deciderRules', []);
+    if (count($deciderRules) == 1 && in_array('kotobaAgent', $deciderRules)) {
+      if (isset($agents['agent_decider'])) {
+        unset($agents['agent_decider']);
+      }
+    }
+
     foreach ($agents as &$agent) {
       if (!empty($mimetypeIgnore)) {
         $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg,

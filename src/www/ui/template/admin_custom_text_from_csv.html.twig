@@ -1,0 +1,63 @@
+{# SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+<h2>{{ 'Import Custom Text Phrases'|trans }}</h2>
+
+{% if message is defined %}
+  <div class="message">{{ message|e }}</div>
+{% endif %}
+
+<form enctype="multipart/form-data" method="post">
+  <table border="0">
+    <tr>
+      <td>{{ 'Select file to upload'|trans }}:</td>
+      <td>
+        <input type="file" name="file_input" accept=".csv,.json" required>
+        <br/>
+        <small>{{ 'Supported formats: CSV, JSON'|trans }}</small>
+      </td>
+    </tr>
+    <tr>
+      <td>{{ 'CSV Delimiter'|trans }}:</td>
+      <td>
+        <select name="delimiter">
+          <option value="," selected>, (comma)</option>
+          <option value=";"> (semicolon)</option>
+          <option value="\t">\t (tab)</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>{{ 'CSV Enclosure'|trans }}:</td>
+      <td>
+        <select name="enclosure">
+          <option value='"' selected>" (double quote)</option>
+          <option value="'">' (single quote)</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <input type="submit" value="{{ 'Upload'|trans }}" class="buttonLink">
+        <a href="{{ baseUrl }}/?mod=admin_custom_text_list" class="buttonLink">{{ 'Back to Text Management'|trans }}</a>
+      </td>
+    </tr>
+  </table>
+</form>
+
+<h3>{{ 'File Format Requirements'|trans }}</h3>
+<div style="margin: 10px 0;">
+  <h4>{{ 'CSV Format'|trans }}:</h4>
+  <p>{{ 'Required columns: Text'|trans }}</p>
+  <p>{{ 'Optional columns: Acknowledgement, Comments, Is Active, Created By, Group, Associated Licenses'|trans }}</p>
+  
+  <h4>{{ 'JSON Format'|trans }}:</h4>
+  <p>{{ 'Array of objects with fields: text (required), acknowledgement, comments, is_active, created_by, group, associated_licenses'|trans }}</p>
+</div>
+
+{% endblock %}

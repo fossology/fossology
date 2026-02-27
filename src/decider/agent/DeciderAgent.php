@@ -84,9 +84,10 @@ class DeciderAgent extends Agent
   const RULES_COPYRIGHT_FALSE_POSITIVE = 0x20;
   const RULES_COPYRIGHT_FALSE_POSITIVE_CLUTTER = 0x40;
   const RULES_LICENSE_TYPE_CONCLUSION = 0x80;
+  const RULES_KOTOBA_NO_CONTRADICTION = 0x100;
   const RULES_ALL = self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA |
     self::RULES_BULK_REUSE | self::RULES_WIP_SCANNER_UPDATES |
-    self::RULES_OJO_NO_CONTRADICTION | self::RULES_LICENSE_TYPE_CONCLUSION;
+    self::RULES_OJO_NO_CONTRADICTION | self::RULES_LICENSE_TYPE_CONCLUSION | self::RULES_KOTOBA_NO_CONTRADICTION;
 
   /** @var int $activeRules
    * Rules active for upload (nomos in monk; ninka in monk; nomos, ninka and monk)
@@ -266,7 +267,7 @@ class DeciderAgent extends Agent
 
     $haveDecided = false;
 
-    if (($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
+    if (!$haveDecided && ($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
       $haveDecided = $this->autodecideIfOjoMatchesNoContradiction($itemTreeBounds, $projectedScannerMatches);
     }
 
