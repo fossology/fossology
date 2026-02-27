@@ -656,7 +656,6 @@ class UploadController extends RestController
   public function updateUpload($request, $response, $args)
   {
     $id = intval($args['id']);
-    $query = $request->getQueryParams();
     $userDao = $this->restHelper->getUserDao();
     $userId = $this->restHelper->getUserId();
     $groupId = $this->restHelper->getGroupId();
@@ -675,7 +674,7 @@ class UploadController extends RestController
 
     $assignee = null;
     $status = null;
-    $comment = null;
+    $comment = '';
     $newName = null;
     $newDescription = null;
 
@@ -688,8 +687,8 @@ class UploadController extends RestController
     }
 
     // Handle assignee info
-    if (array_key_exists(self::FILTER_ASSIGNEE, $query)) {
-      $assignee = filter_var($query[self::FILTER_ASSIGNEE], FILTER_VALIDATE_INT);
+    if (array_key_exists(self::FILTER_ASSIGNEE, $bodyContent)) {
+      $assignee = filter_var($bodyContent[self::FILTER_ASSIGNEE], FILTER_VALIDATE_INT);
       $userList = $userDao->getUserChoices($groupId);
       if (!array_key_exists($assignee, $userList)) {
         throw new HttpNotFoundException(
@@ -697,20 +696,38 @@ class UploadController extends RestController
       }
       $uploadBrowseProxy->updateTable("assignee", $id, $assignee);
     }
-    // Handle new status
-    if (
-      array_key_exists(self::FILTER_STATUS, $query) &&
-      in_array(strtolower($query[self::FILTER_STATUS]), self::VALID_STATUS)
-    ) {
-      $newStatus = strtolower($query[self::FILTER_STATUS]);
-      $comment = '';
+
+    // Handle comment validation
+    if (array_key_exists("comment", $bodyContent)) {
+      if (!is_string($bodyContent["comment"])) {
+        throw new HttpBadRequestException("Comment must be a string.");
+      }
+      $comment = trim($bodyContent["comment"]);
+    }
+
+    // Handle update of new status
+    if (array_key_exists(self::FILTER_STATUS, $bodyContent)) {
+      $newStatus = strtolower($bodyContent[self::FILTER_STATUS]);
+
+      // Validate status type
+      if (!in_array($newStatus, self::VALID_STATUS)) {
+        throw new HttpBadRequestException("Invalid status type. Status must be one of: " . implode(", ", self::VALID_STATUS));
+      }
+
+      // For closed or rejected status, comment is mandatory
       if (in_array($newStatus, ["closed", "rejected"])) {
-        if ($isJsonRequest && array_key_exists("comment", $bodyContent)) {
-          $comment = $bodyContent["comment"];
-        } else {
-          $comment = $bodyContent;
+        if (!array_key_exists("comment", $bodyContent)) {
+          throw new HttpBadRequestException("Comment is required for '$newStatus' status.");
+        }
+        if (!is_string($bodyContent["comment"])) {
+          throw new HttpBadRequestException("Comment must be a string.");
+        }
+        $comment = trim($bodyContent["comment"]);
+        if (empty($comment)) {
+          throw new HttpBadRequestException("Comment cannot be empty for '$newStatus' status.");
         }
       }
+
       $status = 0;
       if ($newStatus == self::VALID_STATUS[1]) {
         $status = UploadStatus::IN_PROGRESS;
@@ -723,22 +740,23 @@ class UploadController extends RestController
       }
       $uploadBrowseProxy->setStatusAndComment($id, $status, $comment);
     }
+
     // Handle update of name
     if (
-      $isJsonRequest &&
       array_key_exists(self::FILTER_NAME, $bodyContent) &&
       strlen(trim($bodyContent[self::FILTER_NAME])) > 0
     ) {
       $newName = trim($bodyContent[self::FILTER_NAME]);
     }
+
     // Handle update of description
     if (
-      $isJsonRequest &&
       array_key_exists("uploadDescription", $bodyContent) &&
       strlen(trim($bodyContent["uploadDescription"])) > 0
     ) {
       $newDescription = trim($bodyContent["uploadDescription"]);
     }
+
     if ($newName != null || $newDescription != null) {
       /** @var \upload_properties $uploadProperties */
       $uploadProperties = $this->restHelper->getPlugin('upload_properties');
