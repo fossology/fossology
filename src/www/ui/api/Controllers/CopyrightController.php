@@ -934,12 +934,10 @@ class CopyrightController extends RestController
     $userId = $this->restHelper->getUserId();
     $cpTable = $this->copyrightHist->getTableName($dataType);
 
-    echo $uploadTreeId;
-
     $this->uploadAccessible($uploadPk);
     $this->isItemExists($uploadPk, $uploadTreeId);
 
-    $uploadTreeTableName = $uploadDao->getUploadTreeTableName($uploadTreeId);
+    $uploadTreeTableName = $uploadDao->getUploadTreeTableName($uploadPk);
     if (self::TYPE_COPYRIGHT_USERFINDINGS == $cxType) {
       $tableName = $cpTable."_decision";
       $decisions = $this->copyrightDao->getDecisionsFromHash($tableName, $copyrightHash,
@@ -977,7 +975,7 @@ class CopyrightController extends RestController
     $this->uploadAccessible($uploadPk);
     $this->isItemExists($uploadPk, $uploadTreeId);
 
-    $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
+    $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk);
     if (self::TYPE_COPYRIGHT_USERFINDINGS == $cxType) {
       $tableName = $cpTable."_decision";
       $decisions = $this->copyrightDao->getDecisionsFromHash($tableName, $copyrightHash,
@@ -1018,7 +1016,7 @@ class CopyrightController extends RestController
     $this->uploadAccessible($uploadPk);
     $this->isItemExists($uploadPk, $uploadTreeId);
 
-    $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadTreeId);
+    $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk);
     if (self::TYPE_COPYRIGHT_USERFINDINGS == $cxType) {
       $tableName = $cpTable."_decision";
       $decisions = $this->copyrightDao->getDecisionsFromHash($tableName, $copyrightHash,
