@@ -1245,6 +1245,58 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
+   * -# Test for UploadController::updateUpload() for name and description
+   * -# Verifies that sending 'name' and 'uploadDescription' in JSON body updates the upload via upload_properties plugin
+   * -# Check if response status is 202
+   * @see https://github.com/fossology/fossology/issues/3041
+   */
+  public function testUpdateUploadNameAndDescription()
+  {
+    $uploadId = 2;
+    $newName = "new_name.zip";
+    $newDesc = "New Description";
+
+    $reqBody = [
+      "name" => $newName,
+      "uploadDescription" => $newDesc
+    ];
+
+    $body = $this->streamFactory->createStream(json_encode($reqBody));
+    $body->rewind();
+    $request = new Request("POST", new Uri("HTTP", "localhost", 80,
+      "/uploads/$uploadId"),
+      new Headers(), [], [], $body);
+    $request = $request->withHeader('Content-Type', 'application/json');
+
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(true);
+
+    $uploadPropertiesMock = M::mock('stdClass');
+    $uploadPropertiesMock->shouldReceive('UpdateUploadProperties')
+        ->withArgs([$uploadId, $newName, $newDesc])
+        ->andReturn(1)
+        ->once();
+
+    $this->restHelper->shouldReceive('getPlugin')
+        ->withArgs(['upload_properties'])
+        ->andReturn($uploadPropertiesMock);
+
+    $info = new Info(202, "Upload updated successfully.", InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+
+    $actualResponse = $this->uploadController->updateUpload($request,
+      new ResponseHelper(), ['id' => $uploadId]);
+
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
    * -# Test for UploadController::updateUpload() without permission
    * -# Check if response status is 403
    */
@@ -1869,3 +1921,4 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
   }
 }
+
