@@ -10,7 +10,7 @@
  * @file
  * @brief CycloneDX report generation
  *
- * Generates reports according to CycloneDX standards.
+ * Generates CycloneDX SBOM reports compliant with CycloneDX specification v1.4.
  */
 
 /**
@@ -35,8 +35,8 @@ include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/reportgenerator.php");
 
 /**
- * @class cyclonedxAgent
- * @brief cyclonedxAgent agent generates SBOM in cyclonedx format
+ * @class CycloneDXAgent
+ * @brief Generates an SBOM in CycloneDX format
  */
 class CycloneDXAgent extends Agent
 {
