@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Wrapper to invoke the PHP-based spdx agent in the same directory.
+php "$(dirname "$0")/spdx.php" "$@"
