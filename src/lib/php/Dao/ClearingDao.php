@@ -822,9 +822,21 @@ INSERT INTO clearing_decision (
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $params[] = $groupId;
     $a = count($params);
-    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>'noLicense',
-                     UploadTreeProxy::OPT_ITEM_FILTER=>' AND (lft BETWEEN $1 AND $2)',
-                     UploadTreeProxy::OPT_GROUP_ID=>'$'.$a);
+
+    // Allow bulk edit for files without licenses if the decision is valid for them
+    if ($decisionMark == DecisionTypes::IRRELEVANT ||
+        $decisionMark == DecisionTypes::DO_NOT_USE ||
+        $decisionMark == DecisionTypes::NON_FUNCTIONAL) {
+        $skipThese = 'nolicensenocopyright';
+    } else {
+        $skipThese = 'noLicense';
+    }
+
+    $options = array(
+      UploadTreeProxy::OPT_SKIP_THESE => $skipThese,
+      UploadTreeProxy::OPT_ITEM_FILTER => ' AND (lft BETWEEN $1 AND $2)',
+      UploadTreeProxy::OPT_GROUP_ID => '$' . $a
+    );
     $uploadTreeProxy = new UploadTreeProxy($itemTreeBounds->getUploadId(), $options, $itemTreeBounds->getUploadTreeTableName());
     if (!$removeDecision) {
       $sql = $uploadTreeProxy->asCTE() .
