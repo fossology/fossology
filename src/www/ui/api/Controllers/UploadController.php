@@ -23,6 +23,7 @@ use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Proxy\ScanJobProxy;
@@ -930,11 +931,30 @@ class UploadController extends RestController
     /** @var ClearingDao $clearingDao */
     $clearingDao = $this->container->get('dao.clearing');
     $licenseIds = $clearingDao->getMainLicenseIds($uploadId, $this->restHelper->getGroupId());
+    $customTexts = $clearingDao->getMainLicenseReportInfos($uploadId,
+      $this->restHelper->getGroupId());
     $licenseDao = $this->container->get('dao.license');
     $licenses = array();
 
     foreach ($licenseIds as $value) {
       $licenseId = intval($value);
+      $license = $licenseDao->getLicenseById($licenseId,
+        $this->restHelper->getGroupId());
+      if ($license === null) {
+        continue;
+      }
+      $text = $license->getText();
+      $shortName = $license->getShortName();
+      if (array_key_exists($licenseId, $customTexts)) {
+        $customText = $customTexts[$licenseId];
+        if (!empty($customText)) {
+          $shortName = LicenseRef::convertToSpdxId(
+            $license->getShortName() . '-' . md5($customText),
+            ''
+          );
+          $text = $customText;
+        }
+      }
       $obligations = $licenseDao->getLicenseObligations([$licenseId],
         false);
       $obligations = array_merge($obligations,
@@ -950,15 +970,15 @@ class UploadController extends RestController
           $obligation['ob_comment']
         );
       }
-      $license = $licenseDao->getLicenseById($licenseId);
       $licenseObj = new License(
-        $license->getId(),
-        $license->getShortName(),
+        $licenseId,
+        $shortName,
         $license->getFullName(),
-        $license->getText(),
+        $text,
         $license->getUrl(),
         $obligationList,
-        $license->getRisk()
+        $license->getRisk(),
+        false
       );
       $licenses[] = $licenseObj->getArray();
     }
