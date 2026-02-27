@@ -2578,6 +2578,8 @@
   $Schema["CONSTRAINT"]["copyright_decision_pkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pkey\" PRIMARY KEY (\"copyright_decision_pk\");";
   $Schema["CONSTRAINT"]["copyright_decision_pfile_fk_fkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_decision_pfile_hash_ukey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\",\"hash\");";
+  $Schema["CONSTRAINT"]["obligation_map_pkey"] = "ALTER TABLE \"obligation_map\" ADD CONSTRAINT \"obligation_map_pkey\" PRIMARY KEY (\"om_pk\");";
+  $Schema["CONSTRAINT"]["obligation_candidate_map_pkey"] = "ALTER TABLE \"obligation_candidate_map\" ADD CONSTRAINT \"obligation_candidate_map_pkey\" PRIMARY KEY (\"om_pk\");";
   $Schema["CONSTRAINT"]["copyright_spasht_pkey"] = "ALTER TABLE \"copyright_spasht\" ADD CONSTRAINT \"copyright_spasht_pkey\" PRIMARY KEY (\"copyright_spasht_pk\");";
   $Schema["CONSTRAINT"]["copyright_spasht_pfile_fk_fkey"] = "ALTER TABLE \"copyright_spasht\" ADD CONSTRAINT \"copyright_spasht_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_spasht_agent_fk_fkey"] = "ALTER TABLE \"copyright_spasht\" ADD CONSTRAINT \"copyright_spasht_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2830,6 +2832,8 @@
   $Schema["INDEX"]["upload_clearing_license"]["upload_clearing_license_upload_group_idx"] = "CREATE INDEX upload_clearing_license_upload_group_idx ON upload_clearing_license USING btree (upload_fk, group_fk);";
 
   $Schema["INDEX"]["upload_events"]["upload_events_upload_fk_event_ts_event_type_idx"] = "CREATE INDEX upload_events_upload_fk_event_ts_event_type_idx ON upload_events USING btree (upload_fk, event_ts DESC, event_type);";
+
+  $Schema["INDEX"]["upload_packages"]["upload_packages_package_fk_upload_fk_idx"] = "CREATE INDEX upload_packages_package_fk_upload_fk_idx ON upload_packages USING btree (package_fk, upload_fk);";
 
   $Schema["INDEX"]["copyright_event"]["copyright_event_upload_fk_index"] = "CREATE INDEX copyright_event_upload_fk_index ON copyright_event USING btree (upload_fk);";
   $Schema["INDEX"]["copyright_event"]["copyright_event_uploadtree_fk_index"] = "CREATE INDEX copyright_event_uploadtree_fk_index ON copyright_event USING btree (uploadtree_fk);";

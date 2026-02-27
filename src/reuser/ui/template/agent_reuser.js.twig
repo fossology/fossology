@@ -35,8 +35,6 @@ function toggleDisabled() {
     fs.prop('disabled', !this.checked);
     this.checked ? fs.trigger('change') : reloadUploads('', '');
   });
-
-  reloadUploads('', '');
   registerFolderSelectorChange();
 }
 
@@ -126,17 +124,15 @@ function initializeOsselotFields() {
       
       if ($localSection.length > 0) {
         $localSection.show().css('display', 'block');
-        setTimeout(() => {
-          registerFolderSelectorChange();
-          const groupIndex = index || '';
-          reloadUploads('', groupIndex);
-          
-          const checkboxId = groupIndex ? `#reuseSearchInFolder${groupIndex}` : '#reuseSearchInFolder';
-          const $checkbox = $(checkboxId);
-          if ($checkbox.length > 0 && $checkbox.is(':checked')) {
-            $checkbox.trigger('click').trigger('click');
-          }
-        }, 100);
+        registerFolderSelectorChange();
+        const groupIndex = index || '';
+        reloadUploads('', groupIndex);
+        
+        const checkboxId = groupIndex ? `#reuseSearchInFolder${groupIndex}` : '#reuseSearchInFolder';
+        const $checkbox = $(checkboxId);
+        if ($checkbox.length > 0 && $checkbox.is(':checked')) {
+          $checkbox.trigger('click').trigger('click');
+        }
       }
     }
   }
@@ -202,9 +198,6 @@ function initializeOsselotFields() {
       success: function(data) {
         const versions = Array.isArray(data) ? data : [];
         renderVersionRadioButtons(versions, index);
-        setTimeout(() => {
-          syncHiddenField(index);
-        }, 100);
       },
       error: function() {
         $(containerId).html('<em>Error loading versions</em>');
@@ -233,9 +226,7 @@ function initializeOsselotFields() {
     
     $(document).on(`input${namespace} change${namespace}`, `#${packageId}`, function(e) {
         const value = $(this).val();
-        setTimeout(function() {
-            $(`[id^="osselot-package"]:not(#${packageId})`).val(value);
-        }, 10);
+        $(`[id^="osselot-package"]:not(#${packageId})`).val(value);
     });
     
     $(document).on(`click${namespace} keypress${namespace}`, `#${packageId}, #${fetchButtonId}`, function(e) {
@@ -263,10 +254,8 @@ function initializeOsselotFields() {
     
     setupOsselotEvents(indexStr);
     
-    setTimeout(() => {
-      const reuseSourceId = indexStr !== '' ? `#reuse-source${indexStr}` : '#reuse-source';
-      $(reuseSourceId).trigger('change');
-    }, 150);
+    const reuseSourceId = indexStr !== '' ? `#reuse-source${indexStr}` : '#reuse-source';
+    $(reuseSourceId).trigger('change');
     
     window.osselotInitialized[indexStr] = true;
   };
@@ -320,14 +309,6 @@ $(document).ready(function () {
       
       addNavItems(i, val.name, reuseNameTab, reuseTabContent);
     }
-    
-    setTimeout(function() {
-      for (let i = 0; i < allFiles.length; i++) {
-        if (typeof window.initializeOsselotForIndex === 'function') {
-          window.initializeOsselotForIndex(i);
-        }
-      }
-    }, 300);
     
     toggleDisabled();
   });
