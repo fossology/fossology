@@ -20,10 +20,34 @@
 int main(int argc, char* argv[])
 {
   DbManager dbManager(&argc, argv);
+  
+  fo_conf* agentConfig = NULL;
+  GError* error = NULL;
+  char agentConfigPath[FILENAME_MAX];
+  
+  snprintf(agentConfigPath, FILENAME_MAX, "%s/mods-enabled/scancode/scancode.conf", sysconfigdir ? sysconfigdir : "/usr/local/etc/fossology");
+  agentConfig = fo_config_load(agentConfigPath, &error);
+  
+  if (!error && agentConfig) {
+    fo_config_join(sysconfig, agentConfig, &error);
+    if (error) {
+      g_error_free(error);
+    } else {
+      LOG_NOTICE("Loaded conf from %s\n", agentConfigPath);
+    }
+    fo_config_free(agentConfig);
+  } else {
+    if (error) {
+      LOG_WARNING("Error: %s\n", error->message);
+      g_error_free(error);
+    }
+  }
+  
   ScancodeDatabaseHandler databaseHandler(dbManager);
   string scanFlags;
   bool ignoreFilesWithMimeType;
-  if(!parseCommandLine(argc, argv, scanFlags, ignoreFilesWithMimeType)){
+  int parallelParams[5]; 
+  if(!parseCommandLine(argc, argv, scanFlags, ignoreFilesWithMimeType, parallelParams)){
     return_sched(1);
   }
 
@@ -45,8 +69,7 @@ int main(int argc, char* argv[])
 
     if (arsId <= 0)
       bail(5);
-
-    if (!processUploadId(state, uploadId, databaseHandler,ignoreFilesWithMimeType))
+    if (!processUploadId(state, uploadId, databaseHandler,ignoreFilesWithMimeType, parallelParams))
       bail(2);
 
     fo_scheduler_heart(0);
