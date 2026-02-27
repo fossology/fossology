@@ -17,15 +17,37 @@ class StringOperation
    */
   public static function getCommonHead($a, $b)
   {
+
+    if (function_exists('mb_strlen')) {
+      $encoding = 'UTF-8';
+      $headLength = 0;
+
+      $maxNumberOfCharsToCompare = min(
+        mb_strlen($a, $encoding),
+        mb_strlen($b, $encoding)
+      );
+
+      while ($headLength < $maxNumberOfCharsToCompare &&
+        mb_substr($a, $headLength, 1, $encoding) === mb_substr($b, $headLength, 1, $encoding)
+      ) {
+        $headLength++;
+      }
+
+      return mb_substr($a, 0, $headLength, $encoding);
+    }
+
     $headLength = 0;
     $maxNumberOfCharsToCompare = min(strlen($a), strlen($b));
-    while ($headLength < $maxNumberOfCharsToCompare &&
-      $a[$headLength] === $b[$headLength]) {
-      $headLength += 1;
-    }
-    return substr($a,0,$headLength);
-  }
 
+    while (
+      $headLength < $maxNumberOfCharsToCompare &&
+      $a[$headLength] === $b[$headLength]
+    ) {
+      $headLength++;
+    }
+
+    return substr($a, 0, $headLength);
+  }
   /**
    * Replace any non-printable characters with a given character
    * @param string $input   String to clean
