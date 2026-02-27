@@ -160,19 +160,40 @@ function Traceback_dir()
   }
   $V = substr($V,0,$i);
   return($V);
-} // Traceback_uri()
+} // Traceback_dir()
+
+/**
+ * \brief Check if current request is HTTPS.
+ *
+ * Checks X-Forwarded-Proto header first (for reverse proxies),
+ * then falls back to HTTPS server variable.
+ *
+ * \return bool true if HTTPS, false otherwise
+ */
+function isHttps()
+{
+  // Check proxy header first
+  if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+      $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+    return true;
+  }
+
+  // Check direct HTTPS
+  if (!empty($_SERVER['HTTPS']) &&
+      $_SERVER['HTTPS'] !== 'off' &&
+      $_SERVER['HTTPS'] === 'on') {
+    return true;
+  }
+
+  return false;
+}
 
 /**
  * \brief Get the total url without query
  */
 function tracebackTotalUri()
 {
-  if (! empty(@$_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' &&
-    $_SERVER['HTTPS'] == 'on' || @$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
-    $protoUri = 'https://';
-  } else {
-    $protoUri = 'http://';
-  }
+  $protoUri = isHttps() ? 'https://' : 'http://';
   $portUri = (@$_SERVER["SERVER_PORT"] == "80") ? "" : (":" . @$_SERVER["SERVER_PORT"]);
   $V = $protoUri . @$_SERVER['SERVER_NAME'] . $portUri . Traceback_uri();
   return($V);
