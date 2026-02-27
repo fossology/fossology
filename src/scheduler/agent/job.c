@@ -384,11 +384,22 @@ void job_restart_event(scheduler_t* scheduler, arg_int* params)
  */
 void job_priority_event(scheduler_t* scheduler, arg_int* params)
 {
+  job_t* job = params->first;
   GList* iter;
 
-  database_job_priority(scheduler, params->first, params->second);
-  ((job_t*)params->first)->priority = params->second;
-  for(iter = ((job_t*)params->first)->running_agents; iter; iter = iter->next)
+  // Handle case where job is not found in scheduler (likely already completed/removed)
+  if(job == NULL)
+  {
+    WARNING("Job priority change requested for non-existent job (ID: %d). "
+        "Job may have completed or been removed from scheduler.",
+        params->second);
+    g_free(params);
+    return;
+  }
+
+  database_job_priority(scheduler, job, params->second);
+  job->priority = params->second;
+  for(iter = job->running_agents; iter; iter = iter->next)
     setpriority(PRIO_PROCESS, ((agent_t*)iter->data)->pid, params->second);
   g_free(params);
 }
