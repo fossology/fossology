@@ -5,6 +5,8 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
+namespace Fossology\Monk\Test;
+
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -19,7 +21,7 @@ use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
 use Monolog\Logger;
 
-class MonkScheduledTest extends \PHPUnit\Framework\TestCase
+class SchedulerTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;
