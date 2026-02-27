@@ -1,0 +1,133 @@
+.ossdetect-container {
+    padding: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.ossdetect-header {
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.ossdetect-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.no-dependencies {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.dependency-item {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    background-color: #fff;
+}
+
+.dependency-header {
+    margin-bottom: 10px;
+}
+
+.dependency-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0066cc;
+}
+
+.dependency-meta {
+    font-size: 13px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.dependency-meta span {
+    margin-right: 15px;
+}
+
+.matches-section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+}
+
+.matches-header {
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 8px;
+}
+
+.match-item {
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border-left: 3px solid #ccc;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.match-info {
+    flex: 1;
+}
+
+.match-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.match-version {
+    color: #666;
+    font-size: 13px;
+    margin-left: 8px;
+}
+
+.match-score {
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+.score-high {
+    background-color: #d4edda;
+    color: #155724;
+    border-left-color: #28a745;
+}
+
+.score-medium {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left-color: #ffc107;
+}
+
+.score-low {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left-color: #dc3545;
+}
+
+.no-matches {
+    font-style: italic;
+    color: #999;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 3px;
+}
+
+.match-type-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 11px;
+    background-color: #6c757d;
+    color: white;
+    border-radius: 3px;
+    margin-left: 6px;
+    text-transform: uppercase;
+}
