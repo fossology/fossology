@@ -210,7 +210,60 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /oauth/login:
+    get:
+      operationId: getAuthUrl
+      tags:
+        - auth
+      security: []
+      summary: Get Authorization redirect URL
+      description: >
+        Get Authorization redirect URL from the Auth server
+      responses:
+        '200':
+          description: URL Fetched
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                    type: string
+              example:
+                {"authorizationUrl": "https://fossology.auth0.com/authorize?scope=email%20openid&state=89c360480d6e4305d7dcae7f9c838264&response_type=code&approval_prompt=auto&redirect_uri=http%3A%2F%2Flocalhost%3A5123%2F&client_id=ANTKlv4EbSrwS39oyjw6ucLsNwf8mZSj"}
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
+  /oauth/callback:
+    post:
+      operationId: getOauthToken
+      tags:
+        - auth
+      security: []
+      summary: Swap authorization code with access token
+      description: >
+        Get an access token by authenticating user using authorization code
+      requestBody:
+        description: Required details for swapping
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OauthCallback'
+      responses:
+        '201':
+          description: Token generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                    type: string
+              example:
+                {"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2NhbGhvc3QiLCJhdWQiOiJsb2NhbGhvc3QiLCJleHAiOjE1NTEyOTIyMDAsIm5iZiI6MTU1MTIwNTgwMCwianRpIjoiTmk0eiIsInNjb3BlIjoicmVhZCJ9.71D6xTD2QE45t9AVCwbrQwSSae5lC4yzKCMpZWXoC2Q"}
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /info:
     get:
       operationId: getInfo
@@ -2782,7 +2835,80 @@ paths:
 
         default:
           $ref: '#/components/responses/defaultResponse'
-
+  /users/oauthclient:
+    post:
+      operationId: createNewOauthClient
+      tags:
+        - User
+        - Admin
+      summary: Create a new OAuth Client
+      description: >
+        Create a new OAuth Client
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OAuthClientRequest'
+      responses:
+        '201':
+          description: Client added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Following parameters are required in the request body -- clientName, clientId, clientScope 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /users/oauthclient/{type}:
+    parameters:
+      - name: type
+        required: true
+        in: path
+        schema:
+          type: string
+          enum:
+            - active
+            - expired
+    get:
+      operationId: getOAuthClients
+      tags:
+        - User
+        - Admin
+      summary: Get all the OAuth Clients (active | expired)
+      description: >
+        Get all the OAuth Clients  (active | expired)
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Info'
+                  - type: object
+                    properties:
+                      activeClients:
+                        $ref: '#/components/schemas/OAuthClient'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /uploads/{id}/item/{itemId}/copyrights:
     parameters: *cxGetParams
     get:
@@ -5793,6 +5919,42 @@ components:
           type: string
           description: Scope of the token
           example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTg5NDY1OTksIm5iZiI6MTY1NzkwOTgwMCwianRpIjoiTnk0eiIsInNjb3BlIjoid3JpdGUifQ.Yqwdt7Fzx-Qw3megYix_OYu1mqBOoz4Rrc1cgJasmJA
+    OAuthClient:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Client Id (by FOSSology)
+        clientName:
+          type: string
+          description: Name of the Client
+        created:
+          type: string
+          format: date
+          description: Denotes when the client was created
+          example: 2024-06-14
+        clientId:
+          type: string
+          description: Client Id of the client
+          example: d8moh8yI5tLHq6e3wMNPbFpKnwpr8uDc
+        scope:
+          type: string
+          enum:
+            - read
+            - write
+          description: Scope of the token
+    OauthCallback:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Authorization code
+        state:
+          type: string
+          description: State value from Auth server
+      required:
+        - code
+        - state
     LicenseCandidate:
       type: object
       properties:
@@ -5988,6 +6150,26 @@ components:
         - token_name
         - token_scope
         - token_expire
+    OAuthClientRequest:
+      type: object
+      properties:
+        clientName:
+          type: string
+          maxLength: 40
+          description: Friendly name of the client.
+        clientId:
+          type: string
+          description: Client ID of the client.
+        clientScope:
+          type: string
+          enum:
+            - r
+            - w
+          description: The scope of the client- r for read, w for write.
+      required:
+        - clientName
+        - clientId
+        - clientScope
     VcsUpload:
       description: To create an upload from a version control system
       type: object
