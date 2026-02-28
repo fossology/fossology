@@ -1036,12 +1036,17 @@ void database_job_priority(scheduler_t* scheduler, job_t* job, int priority)
  *
  * \return 1 if mta is supported, 0 if not
  */
+/**
+ * @brief Find s-nail version to check if mta is supported 
+ *
+ * \return 1 if mta is supported, 0 if not
+ */
 int check_mta_support()
 {
-  char cmd[] = "dpkg -s s-nail | grep -i 'Version' | awk '{print$2}' | cut -c -4";
-  char version_str[128];
+  char cmd[] = "mailx -V 2>&1 | grep -i 'v' | awk '{print$2}' | cut -c -4";
+  char version_str[128] = {0};
   char buf[128];
-  float version_float;
+  float version_float = 0.0;
   FILE *fp;
 
   fp = popen(cmd, "r");
@@ -1050,11 +1055,16 @@ int check_mta_support()
     WARNING("Unable to run the command '%s'.\n", cmd);
     return 0;
   }
-  while(fgets(buf, sizeof(buf), fp) != NULL)
+  if(fgets(buf, sizeof(buf), fp) != NULL)
   {
-    strcpy(version_str,buf);
+    strncpy(version_str, buf, sizeof(version_str) - 1);
   }
   pclose(fp);
+
+  if (version_str[0] == '\0') {
+    return 0;
+  }
+
   sscanf(version_str, "%f", &version_float);
 
   if(version_float - 14.8 > 0.0001)
