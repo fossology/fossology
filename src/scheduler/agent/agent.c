@@ -57,15 +57,26 @@
 #define TEST_NULL(a, ret) if(!a) { \
   errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return ret; }
 
-/** Prints the credential of the agent */
-#define AGENT_CREDENTIAL                                                 \
-  log_printf("JOB[%d].%s[%d.%s]: ", agent->owner->id, agent->type->name, \
-      agent->pid, agent->host->name)
+/** Prints the credential of the agent (null-safe) */
+#define AGENT_CREDENTIAL do {                               \
+  if(agent && agent->owner)                                 \
+    log_printf("JOB[%d].%s[%d.%s]: ", agent->owner->id,     \
+        agent->type ? agent->type->name : "?",              \
+        agent->pid, agent->host ? agent->host->name : "?"); \
+  else                                                      \
+    log_printf("AGENT[%s][pid=%d][host=%s]: ",              \
+        agent && agent->type ? agent->type->name : "?",     \
+        agent ? agent->pid : -1,                            \
+        agent && agent->host ? agent->host->name : "?");    \
+} while(0)
 
-/** Prints the credential to the agent log */
-#define AGENT_LOG_CREDENTIAL                                              \
-  con_printf(job_log(agent->owner), "JOB[%d].%s[%d.%s]: ",                \
-      agent->owner->id, agent->type->name, agent->pid, agent->host->name)
+/** Prints the credential to the agent log (null-safe) */
+#define AGENT_LOG_CREDENTIAL do {                                \
+  if(agent && agent->owner)                                      \
+    con_printf(job_log(agent->owner), "JOB[%d].%s[%d.%s]: ",     \
+        agent->owner->id, agent->type ? agent->type->name : "?", \
+        agent->pid, agent->host ? agent->host->name : "?");      \
+} while(0)
 
 /** ERROR macro specifically for agents */
 #define AGENT_ERROR(...) do {                       \
@@ -152,6 +163,12 @@ static int agent_close_fd(int* pid_ptr, agent_t* agent, agent_t* excepted)
 static int update(int* pid_ptr, agent_t* agent, gpointer unused)
 {
   TEST_NULL(agent, 0);
+  if (agent->owner == NULL)
+  {
+    log_printf("ERROR %s.%d: Agent pid %d has no owner; killing to prevent NULL deref\n", __FILE__, __LINE__, agent->pid);
+    agent_kill(agent);
+    return 0;
+  }
   int nokill = is_agent_special(agent, SAG_NOKILL) || is_meta_special(agent->type, SAG_NOKILL);
 
   if (agent->status == AG_SPAWNED || agent->status == AG_RUNNING || agent->status == AG_PAUSED)
@@ -665,6 +682,24 @@ static void* agent_spawn(agent_spawn_args* pass)
   char buffer[2048];          // character buffer
 
   /* spawn the new process */
+  if (agent->owner == NULL)
+  {
+    log_printf("ERROR %s.%d: Agent spawn requested but agent has no owner; aborting spawn.\n", __FILE__, __LINE__);
+
+    /* Close FILE* streams if they were opened by agent_init(). */
+    if (agent->read)  { fclose(agent->read);  agent->read = NULL; agent->from_child = -1; }
+    if (agent->write) { fclose(agent->write); agent->write = NULL; agent->to_child   = -1; }
+
+    /* from_child/to_child were already closed via fclose() above. */
+    if (agent->from_parent >= 0) { close(agent->from_parent); agent->from_parent = -1; }
+    if (agent->to_parent >= 0)   { close(agent->to_parent);   agent->to_parent   = -1; }
+
+    /* Mark failed and free the spawn args to avoid leaking the heap allocation */
+    agent->status = AG_FAILED;
+    g_free(pass);
+    return NULL;
+  }
+
   while ((agent->pid = fork()) < 0)
     sleep(rand() % CONF_fork_backoff_time);
 
@@ -1071,6 +1106,15 @@ void agent_ready_event(scheduler_t* scheduler, agent_t* agent)
   int ret;
 
   TEST_NULV(agent);
+  // If the agent has no job (owner is NULL), it shouldn't be here.
+  // This prevents the "job passed is NULL
+  if (agent->owner == NULL)
+  {
+      ERROR("Agent ready event received but agent has no owner. Terminating agent to prevent scheduler crash.");
+      agent_kill(agent);
+      return;
+  }
+
   if (agent->status == AG_SPAWNED)
   {
     agent_transition(agent, AG_RUNNING);

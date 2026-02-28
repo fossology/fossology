@@ -17,7 +17,7 @@
       <spdx:Package rdf:about="#SPDXRef-upload{{ packageId|url_encode }}">
         <spdx:name>{{ packageName }}</spdx:name>
         <spdx:packageFileName>{{ uploadName }}</spdx:packageFileName>
-        <spdx:downloadLocation rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+        <spdx:downloadLocation>http://spdx.org/rdf/terms#noassertion</spdx:downloadLocation>
         <spdx:versionInfo>{{ packageVersion|e }}</spdx:versionInfo>
         {%- if releaseDate is not empty ~%}
         <spdx:releaseDate>{{ releaseDate }}</spdx:releaseDate>
@@ -98,7 +98,7 @@
         ]]></spdx:licenseComments>
         {% endif %}<spdx:licenseDeclared rdf:resource="http://spdx.org/rdf/terms#noassertion" />
         <spdx:licenseInfoFromFiles rdf:resource="http://spdx.org/rdf/terms#noassertion" />
-        <spdx:copyrightText rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+        <spdx:copyrightText>NOASSERTION</spdx:copyrightText>
         {%- if generalAssessment is not empty ~%}
         <rdfs:comment><![CDATA[
           {{ generalAssessment|replace({']]>':']]><![CDATA[>'}) }}
