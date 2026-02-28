@@ -45,8 +45,8 @@ class UploadTreeProxy extends DbViewProxy
   {
     $this->uploadId = $uploadId;
     $this->uploadTreeTableName = $uploadTreeTableName;
-    $dbViewName = $uploadTreeViewName ?: 'UploadTreeView'.(isset($this->dbViewName) ?: '');
     $dbViewQuery = $this->createUploadTreeViewQuery($options, $uploadTreeTableName);
+    $dbViewName = $uploadTreeViewName ?: 'UploadTreeView' . (empty($this->dbViewName) ? '' : $this->dbViewName);
     parent::__construct($dbViewQuery, $dbViewName);
   }
 
@@ -363,7 +363,7 @@ ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
     if (array_key_exists('uploadId', $params)) {
       $uploadExpr = '$'.(1+array_search('uploadId', array_keys($params)));
     } else {
-      $params[] = $this->uploadId;
+      $params['uploadId'] = $this->uploadId;
       $uploadExpr = '$'.count($params);
     }
     $params[] = $parent;
@@ -447,7 +447,7 @@ ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
       return '$' . (1 + array_search($key, array_keys($this->params)));
     }
 
-    $this->params[] = $value;
+    $this->params[$key] = $value;
     return '$'.count($this->params);
   }
 
