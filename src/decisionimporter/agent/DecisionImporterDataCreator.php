@@ -293,15 +293,9 @@ class DecisionImporterDataCreator
       return;
     }
 
-    if (!$this->agentDao->arsTableExists($agentName)) {
-      // Automating the agent trigger to remove manual burden
-      $latestAgentId = $this->agentDao->getCurrentAgentId($agentName);
-      $this->createCxJobs($agentName, $jobId, $latestAgentId);
-    } else {
-      // Ensure the job is scheduled if table exists
-      $latestAgentId = $this->agentDao->getCurrentAgentId($agentName);
-      $this->createCxJobs($agentName, $jobId, $latestAgentId);
-    }
+    // Automation trigger without redundant checks
+    $latestAgentId = $this->agentDao->getCurrentAgentId($agentName);
+    $this->createCxJobs($agentName, $jobId, $latestAgentId);
 
     $cxExistSql = "SELECT " . $agentName . "_pk FROM $agentName WHERE pfile_fk = $1 AND agent_fk = $2 AND hash = $3;";
     $cxExistStatement = __METHOD__ . ".$agentName" . "Exist";
