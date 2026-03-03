@@ -817,7 +817,48 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
   }
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with negative folderId (V2)
+   * -# Negative folderId is invalid input and should return 400
+   */
+  public function testPostUploadNegativeFolderIdV2()
+  {
+    $folderId = -1;
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
 
+    $body = $this->streamFactory->createStream(json_encode([
+      "location" => "vcsData",
+      "folderId" => $folderId,
+      "uploadDescription" => "Test Upload",
+      "ignoreScm" => "true",
+      "scanOptions" => "scanOptions",
+      "uploadType" => "vcs"
+    ]));
+
+    $request = new Request(
+      "POST",
+      new Uri("HTTP", "localhost"),
+      $requestHeaders,
+      [],
+      [],
+      $body
+    );
+
+    $request = $request->withAttribute(
+      ApiVersion::ATTRIBUTE_NAME,
+      ApiVersion::V2
+    );
+
+    M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
+
+    $this->expectException(HttpBadRequestException::class);
+
+    $this->uploadController->postUpload($request, new ResponseHelper(), []);
+  }
   /**
    * @runInSeparateProcess
    * @preserveGlobalState disabled
