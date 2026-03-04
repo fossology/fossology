@@ -665,29 +665,30 @@ INSERT INTO clearing_decision (
       $stmt .= ".tried";
     }
 
-    $sql = "WITH alltried AS (
-            SELECT lr.lrb_pk, ce.clearing_event_pk ce_pk, lr.rf_text, ce.uploadtree_fk,
-              $triedExpr AS tried
+    $sql = "WITH relevant_bulks AS MATERIALIZED (
+            SELECT lr.lrb_pk, $triedExpr AS tried
             FROM license_ref_bulk lr
-              LEFT JOIN highlight_bulk h ON lrb_fk = lrb_pk
-              LEFT JOIN clearing_event ce ON ce.clearing_event_pk = h.clearing_event_fk
-              LEFT JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
               INNER JOIN $uploadTreeTableName ut2 ON ut2.uploadtree_pk = lr.uploadtree_fk
             WHERE ut2.upload_fk = $1 AND lr.group_fk = $4
               $triedFilter
-              ORDER BY lr.lrb_pk
+            ), alltried AS (
+            SELECT rb.lrb_pk, ce.clearing_event_pk ce_pk, ce.uploadtree_fk, rb.tried
+            FROM relevant_bulks rb
+              LEFT JOIN highlight_bulk h ON h.lrb_fk = rb.lrb_pk
+              LEFT JOIN clearing_event ce ON ce.clearing_event_pk = h.clearing_event_fk
             ), aggregated_tried AS (
-            SELECT DISTINCT ON(lrb_pk) lrb_pk, ce_pk, rf_text AS text, tried, matched
+            SELECT DISTINCT ON(lrb_pk) lrb_pk, ce_pk, tried, matched
             FROM (
-              SELECT DISTINCT ON(lrb_pk) lrb_pk, ce_pk, rf_text, tried, true AS matched FROM alltried WHERE uploadtree_fk = $2
+              SELECT DISTINCT ON(lrb_pk) lrb_pk, ce_pk, tried, true AS matched FROM alltried WHERE uploadtree_fk = $2
               UNION ALL
-              SELECT DISTINCT ON(lrb_pk) lrb_pk, ce_pk, rf_text, tried, false AS matched FROM alltried WHERE uploadtree_fk != $2 OR uploadtree_fk IS NULL
+              SELECT DISTINCT ON(lrb_pk) lrb_pk, ce_pk, tried, false AS matched FROM alltried WHERE uploadtree_fk != $2 OR uploadtree_fk IS NULL
             ) AS result ORDER BY lrb_pk, matched DESC)
-            SELECT lrb_pk, text, rf_shortname, removing, tried, ce_pk, matched
-            FROM aggregated_tried
-              INNER JOIN license_set_bulk lsb ON lsb.lrb_fk = lrb_pk
+            SELECT a.lrb_pk, lr.rf_text AS text, lrf.rf_shortname, lsb.removing, a.tried, a.ce_pk, a.matched
+            FROM aggregated_tried a
+              INNER JOIN license_set_bulk lsb ON lsb.lrb_fk = a.lrb_pk
               INNER JOIN license_ref lrf ON lsb.rf_fk = lrf.rf_pk
-            ORDER BY lrb_pk";
+              INNER JOIN license_ref_bulk lr ON lr.lrb_pk = a.lrb_pk
+            ORDER BY a.lrb_pk";
 
     $this->dbManager->prepare($stmt, $sql);
     $res = $this->dbManager->execute($stmt, $params);
