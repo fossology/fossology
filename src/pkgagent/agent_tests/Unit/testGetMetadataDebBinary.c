@@ -70,6 +70,16 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
     return (-1);
   }
   PQclear(result);
+  memset(SQL,'\0',MAXSQL);
+  snprintf(SQL,MAXSQL,"INSERT INTO mimetype (mimetype_name) VALUES ('application/vnd.debian.binary-package');");
+  result =  PQexec(db_conn, SQL);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
+  {
+    printf("Perpare modern debian mimetype information ERROR!\n");
+    PQclear(result);
+    return (-1);
+  }
+  PQclear(result);
 
   /* insert pfile: fossology-web_1.4.1_all.deb */
   memset(SQL,'\0',MAXSQL);
