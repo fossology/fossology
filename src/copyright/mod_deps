@@ -65,7 +65,7 @@ CODENAME=$(lsb_release --codename --short)
 if [[ $BUILDTIME ]]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu)
+    Debian|Ubuntu|Tuxedo)
       apt-get $YesOpt install \
         libjsoncpp-dev libboost-system-dev libboost-filesystem-dev
       ;;
@@ -85,18 +85,16 @@ fi
 if [[ $RUNTIME ]]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu)
+    Debian|Ubuntu|Tuxedo)
       case "$CODENAME" in
-        stretch)
-          apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.62.0;;
-        buster)
-          apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.67.0;;
         bullseye)
           apt-get $YesOpt install libjsoncpp24 libboost-filesystem1.74.0;;
-        bookworm|sid)
+        bookworm)
           apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0;;
-        focal)
-          apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.71.0;;
+        trixie)
+          apt-get $YesOpt install libjsoncpp26 libboost-filesystem1.83.0;;
+        sid)
+          apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0;;
         jammy)
           apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0;;
         noble)

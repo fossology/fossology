@@ -3,6 +3,7 @@
  SPDX-FileCopyrightText: © 2020 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
  SPDX-FileCopyrightText: © 2022 Samuel Dushimimana <dushsam100@gmail.com>
+ SPDX-FileContributor: Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -761,7 +762,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
         "uploadDescription" => $uploadDescription,
         "ignoreScm" => "true",
         "scanOptions" => "scanOptions",
-        "uploadType" => "vcs"
+        "uploadType" => "vcs",
+        "excludeFolder" => "false"
       ];
     } else {
       $reqBody = [
@@ -775,7 +777,6 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       $requestHeaders->setHeader('uploadType', 'vcs');
     }
 
-
     $body = $this->streamFactory->createStream(json_encode(
       $reqBody
     ));
@@ -786,10 +787,17 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
         ApiVersion::V2);
     }
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
-    $uploadHelper->shouldReceive('createNewUpload')
-      ->withArgs([$reqBody["location"], $folderId, $uploadDescription, 'protected', 'true',
-        'vcs', false])
-      ->andReturn([true, '', '', $uploadId]);
+    if ($version == ApiVersion::V2) {
+      $uploadHelper->shouldReceive('createNewUpload')
+        ->withArgs([$reqBody["location"], $folderId, $uploadDescription, 'protected', 'true',
+          'vcs', false, false])
+        ->andReturn([true, '', '', $uploadId]);
+    } else {
+      $uploadHelper->shouldReceive('createNewUpload')
+        ->withArgs([$reqBody["location"], $folderId, $uploadDescription, 'protected', 'true',
+          'vcs', false])
+        ->andReturn([true, '', '', $uploadId]);
+    }
 
     $info = new Info(201, intval(20), InfoType::INFO);
 
@@ -989,7 +997,6 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $errorMessage = "Failed to insert upload record";
     $errorDesc = "";
 
-
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('Content-type', 'application/json');
     if ($version == ApiVersion::V2) {
@@ -999,7 +1006,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
         "uploadDescription" => $uploadDescription,
         "ignoreScm" => "true",
         "scanOptions" => "scanOptions",
-        "uploadType" => "vcs"
+        "uploadType" => "vcs",
+        "excludeFolder" => "false"
       ]));
     } else {
       $body = $this->streamFactory->createStream(json_encode([
@@ -1021,10 +1029,17 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     }
 
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
-    $uploadHelper->shouldReceive('createNewUpload')
-      ->withArgs(['vcsData', $folderId, $uploadDescription, 'protected', 'true',
-        'vcs', false])
-      ->andReturn([false, $errorMessage, $errorDesc, [-1]]);
+    if ($version == ApiVersion::V2) {
+      $uploadHelper->shouldReceive('createNewUpload')
+        ->withArgs(['vcsData', $folderId, $uploadDescription, 'protected', 'true',
+          'vcs', false, false])
+        ->andReturn([false, $errorMessage, $errorDesc, [-1]]);
+    } else {
+      $uploadHelper->shouldReceive('createNewUpload')
+        ->withArgs(['vcsData', $folderId, $uploadDescription, 'protected', 'true',
+          'vcs', false])
+        ->andReturn([false, $errorMessage, $errorDesc, [-1]]);
+    }
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
@@ -1646,10 +1661,10 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->uploadDao->shouldReceive("isAccessible")->withAnyArgs()->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')->withAnyArgs()->andReturn(true);
     $this->restHelper->shouldReceive('getUploadDao')->andReturn($this->uploadDao);
-    $this->uploadDao->shouldReceive("getUploadtreeTableName")->withAnyArgs()->andReturn($uploadName);
+    $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn($uploadName);
     $this->clearingDao->shouldReceive("getClearedLicenseIdAndMultiplicities")->withAnyArgs()->andReturn([]);
 
-    $actualResponse = $this->uploadController->getEditedLicenses(null,new ResponseHelper(),["id"=>$groupId]);
+    $actualResponse = $this->uploadController->getEditedLicenses(null,new ResponseHelper(),["id"=>$uploadId]);
     $this->assertEquals(200,$actualResponse->getStatusCode());
   }
 

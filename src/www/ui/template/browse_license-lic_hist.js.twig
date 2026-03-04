@@ -6,7 +6,7 @@ function createLicHistTable() {
 
   tableColumns = [
       {"sTitle": "{{ "Scanner Count"|trans }}", "sClass": "right", "sWidth": "5%", "bSearchable": false, "sType": "num-html"},
-      {"sTitle": "{{ "Concluded License Count"|trans }}", "sClass": "right", "sWidth": "5%", "bSearchable": false, "sType": "num-html"},
+      {"sTitle": "{{ "Concluded Count"|trans }}", "sClass": "right", "sWidth": "5%", "bSearchable": false, "sType": "num-html"},
       {"sTitle": "{{ "License Name"|trans }} <img src='images/info_16.png' title='{{ "Click on the license name to search for where the license is found in the file listing."|trans}}' alt='' class='info-bullet'/>", "sClass": "left", "mRender": dressContents}
   ];
 
@@ -52,4 +52,36 @@ function createReuseReportTable() {
     "searching": false
   };
   return $('#reuseTable').dataTable(reuseReportTableConfig);
+}
+
+function dressContents(data, type, full) {
+  if (type === 'display') {
+    // data = [licenseShortName, rfId, isMain]
+    var licenseName = data[0];
+    var licenseId = data[1];
+    var isMain = data[2];
+    var uploadId = {{ uploadId }};
+
+    var nameLink = '<a href="#" onclick="filterScan(' + licenseId + ',\'scan\')">' +
+                     licenseName +
+                   '</a>';
+
+    if (full[1] > 0) {
+      if (isMain) {
+        var tooltip = "This is a main license for the upload. Click to discard selection.";
+        var star = ' <a href="javascript:;" onclick="removeMainLicenseHist(' + uploadId + ',' + licenseId + ');">' +
+                    '<img src="images/icons/star_filled_16.png" alt="mainLicense" title="' + tooltip + '" border="0"/>' +
+                  '</a>';
+      } else {
+        var tooltip = "Click to select this concluded license as a main license for the upload.";
+        var star = ' <a href="javascript:;" onclick="makeMainLicenseHist(' + uploadId + ',' + licenseId + ');">' +
+                    '<img src="images/icons/star_16.png" alt="noMainLicense" title="' + tooltip + '" border="0"/>' +
+                  '</a>';
+      }
+      return nameLink + star;
+    } else {
+      return nameLink;
+    }
+  }
+  return data;
 }

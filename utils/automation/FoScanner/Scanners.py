@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: © 2023 Siemens AG
+# SPDX-FileCopyrightText: © 2023,2025 Siemens AG
 # SPDX-FileContributor: Gaurav Mishra <mishra.gaurav@siemens.com>
 
 # SPDX-License-Identifier: GPL-2.0-only
@@ -8,10 +8,12 @@
 import fnmatch
 import json
 import multiprocessing
+import os
 from subprocess import Popen, PIPE
-from typing import List, Set, Union
+from typing import Any
 
 from .CliOptions import CliOptions
+from .Packages import Packages
 
 
 class ScanResult:
@@ -24,9 +26,9 @@ class ScanResult:
   """
   file: str = None
   path: str = None
-  result: Set[str] = None
+  result: set[str] = None
 
-  def __init__(self, file: str, path: str, result: Set[str]):
+  def __init__(self, file: str, path: str, result: set[str]):
     self.file = file
     self.path = path
     self.result = result
@@ -42,9 +44,9 @@ class ScanResultList(ScanResult):
   """
   file: str = None
   path: str = None
-  result: List[dict] = None
+  result: list[dict] = None
 
-  def __init__(self, file: str, path: str, result: List[dict]):
+  def __init__(self, file: str, path: str, result: list[dict]):
     self.file = file
     self.path = path
     self.result = result
@@ -65,14 +67,23 @@ class Scanners:
   keyword_path: str = '/bin/keyword'
   ojo_path: str = '/bin/ojo'
 
-  def __init__(self, cli_options: CliOptions):
+  def __init__(self, cli_options: CliOptions, scan_packages: Packages):
     """
     Initialize the cli_options
 
     :param cli_options: CliOptions object to use
     :type cli_options: CliOptions
+    :param scan_packages: ScanPackages for references
+    :type scan_packages: Packages
     """
     self.cli_options: CliOptions = cli_options
+    self.scan_packages: Packages = scan_packages
+    self._allowlist_licenses_set = set(
+      self.cli_options.allowlist.get('licenses', [])
+    )
+
+  def get_scan_packages(self) -> Packages:
+    return self.scan_packages
 
   def is_excluded_path(self, path: str) -> bool:
     """
@@ -83,347 +94,433 @@ class Scanners:
     :param path: path to check
     :return: True if the path is in allow list, False otherwise
     """
-    path_is_excluded = False
-    for pattern in self.cli_options.allowlist['exclude']:
+    for pattern in self.cli_options.allowlist.get('exclude', []):
       if fnmatch.fnmatchcase(path, pattern):
-        path_is_excluded = True
-        break
-    return path_is_excluded
+        return True
+    return False
 
-  def __normalize_path(self, path: str) -> str:
+  def __normalize_path(self, path: str, against: str) -> str:
     """
-    Normalize the given path to repository root
+    Normalize the given path against the given directory.
 
     :param path: path to normalize
+    :param against: directory to normalize against
     :return: Normalized path
     """
-    return path.replace(f"{self.cli_options.diff_dir}/", '')
+    if not against.endswith(os.sep):
+      against += os.sep
+    start_index_of_prefix = path.find(against)
+    if start_index_of_prefix == -1:
+      return path
 
-  def __get_nomos_result(self) -> dict:
+    relative_path_start_index = start_index_of_prefix + len(against)
+    return path[relative_path_start_index:]
+
+  def _execute_scanner_command(
+      self, scanner_path: str, dir_to_scan: str, extra_args: list[str] = None
+  ) -> dict:
+    """
+    Helper to execute a scanner command and return its JSON output.
+    """
+    command = [scanner_path, "-J", "-d", dir_to_scan]
+    if extra_args:
+      command.extend(extra_args)
+
+    try:
+      # Use text=True for universal newlines and automatic decoding
+      process = Popen(command, stdout=PIPE, text=True, encoding='UTF-8')
+      stdout, stderr = process.communicate()
+
+      if process.returncode != 0:
+        msg = (f"Scanner {scanner_path} exited with error code "
+               f"{process.returncode}. Stderr: {stderr}")
+        print(msg)
+        raise RuntimeError(msg)
+
+      # Handle potential empty or malformed JSON output
+      if not stdout.strip():
+        return {}
+
+      return json.loads(stdout.strip())
+    except FileNotFoundError as e:
+      print(f"Error: Scanner executable not found at {scanner_path}")
+      raise e
+    except json.JSONDecodeError as e:
+      print(f"Error: Failed to decode JSON from scanner {scanner_path} output.")
+      print(f"Raw output: {stdout}")
+      raise e
+    except Exception as e:
+      print(f"An unexpected error occurred while running {scanner_path}: {e}")
+      raise e
+
+  def __get_nomos_result(self, dir_to_scan: str) -> dict:
     """
     Get the raw results from nomos scanner
 
     :return: raw json from nomos
     """
-    nomossa_process = Popen([self.nomos_path, "-S", "-J", "-l", "-d",
-                             self.cli_options.diff_dir, "-n",
-                             str(multiprocessing.cpu_count() - 1)], stdout=PIPE)
-    result = nomossa_process.communicate()[0]
-    return json.loads(result.decode('UTF-8').strip())
+    extra_args = ["-S", "-l", "-n", str(multiprocessing.cpu_count() - 1)]
+    return self._execute_scanner_command(
+      self.nomos_path, dir_to_scan, extra_args
+    )
 
-  def __get_ojo_result(self) -> dict:
+  def __get_ojo_result(self, dir_to_scan: str) -> dict:
     """
     Get the raw results from ojo scanner
 
     :return: raw json from ojo
     """
-    ojo_process = Popen([self.ojo_path, "-J", "-d", self.cli_options.diff_dir],
-                        stdout=PIPE)
-    result = ojo_process.communicate()[0]
-    return json.loads(result.decode('UTF-8').strip())
+    return self._execute_scanner_command(self.ojo_path, dir_to_scan)
 
-  def __get_copyright_results(self) -> dict:
+  def __get_copyright_results(self, dir_to_scan: str) -> dict:
     """
     Get the raw results from copyright scanner
 
     :return: raw json from copyright
     """
-    copyright_process = Popen([self.copyright_path, "-J", "-d",
-                               self.cli_options.diff_dir], stdout=PIPE)
-    result = copyright_process.communicate()[0]
-    return json.loads(result.decode('UTF-8').strip())
+    return self._execute_scanner_command(self.copyright_path, dir_to_scan)
 
-  def __get_keyword_results(self) -> dict:
+  def __get_keyword_results(self, dir_to_scan: str) -> dict:
     """
     Get the raw results from keyword scanner
 
     :return: raw json from keyword
     """
-    keyword_process = Popen([self.keyword_path, "-J", "-d",
-                             self.cli_options.diff_dir], stdout=PIPE)
-    result = keyword_process.communicate()[0]
-    return json.loads(result.decode('UTF-8').strip())
+    return self._execute_scanner_command(self.keyword_path, dir_to_scan)
 
-  def get_copyright_list(self, all_results: bool = False, whole: bool = False) \
-    -> Union[List[ScanResult],List[ScanResultList],bool]:
+  def _process_single_scanner_package(
+      self, component: dict, is_parent: bool, scanner_func: callable,
+      result_key: str, whole: bool = False, all_results: bool = False
+  ) -> list[ScanResult] | list[ScanResultList]:
     """
-    Get the formatted results from copyright scanner
+    Generalized function to process results from a single scanner for a given
+    component. Set `result_key` to 'results' for copyrights and 'licenses' for
+    license scanning.
+    """
+    dir_to_scan = self.cli_options.diff_dir if is_parent else os.path.join(
+      component['download_dir'], component['base_dir']
+    )
 
-    :param all_results: Get all results even excluded files?
-    :type all_results: bool
-    :param: whole: return whole content from scanner
-    :return: list of findings
-    :rtype: List[ScanResult] | List[ScanResultList]
-    """
-    copyright_results = self.__get_copyright_results()
-    copyright_list = list()
-    for result in copyright_results:
-      path = self.__normalize_path(result['file'])
-      if self.cli_options.repo is True and all_results is False and \
-          self.is_excluded_path(path) is True:
+    raw_results = scanner_func(dir_to_scan)
+    processed_list: list[ScanResult] | list[ScanResultList] = []
+    raw_results_list: list[
+      dict[str, str | list[dict[str, str | int]] | None]] = []
+
+    if isinstance(raw_results, dict):
+      if 'results' in raw_results:
+        raw_results_list = raw_results['results']
+    elif isinstance(raw_results, list):
+      raw_results_list = raw_results
+
+    if not raw_results_list:
+      return processed_list
+
+    for result_entry in raw_results_list:
+      # Skip if 'file' or 'results'/'licenses' key is missing or malformed
+      if (
+          'file' not in result_entry
+          or result_key not in result_entry
+          or result_entry.get(result_key) == "Unable to read file"
+      ):
         continue
-      if result['results'] is not None and result['results'] != "Unable to " \
-                                                                "read file":
-        contents = set()
-        json_copyright_info = list()
-        for finding in result['results']:
-          if whole:
-            if finding is not None and finding['type'] == "statement" and finding['content'] != "":
-              json_copyright_info.append(finding)              
-          else:
-            if finding is not None and finding['type'] == "statement":
-              content = finding['content'].strip()
-              if content != "":
-                contents.add(content)
-        if whole and len(json_copyright_info) > 0:
-          copyright_list.append(ScanResultList(path, result['file'], json_copyright_info))
-        elif not whole and len(contents) > 0:
-          copyright_list.append(ScanResult(path, result['file'], contents))
-    if len(copyright_list) > 0:
-      return copyright_list
-    return False
-  
-  def get_keyword_list(self, whole:bool = False) -> Union[List[ScanResult],List[ScanResultList],bool]:
+
+      file_path = self.__normalize_path(result_entry['file'], dir_to_scan)
+
+      if self.cli_options.repo and not all_results and self.is_excluded_path(
+          file_path
+      ):
+        continue
+
+      current_findings: set[str] | list[dict[str, Any]] = set() if not whole \
+        else []
+
+      findings_list = result_entry.get(result_key, None)
+      if findings_list is None:
+        continue
+
+      for finding in findings_list:
+        if finding is None:
+          continue
+
+        if whole:
+          # Need whole JSON for ScanResultList
+          if (
+              result_key == 'results'
+              and 'type' in finding
+              and finding['type'] == 'statement'
+              and finding.get('content')
+          ):
+            current_findings.append(finding)
+          elif (
+              result_key == 'licenses'
+              and finding.get('license') != "No_license_found"
+          ):
+            current_findings.append(finding)
+        else:
+          # Need set of string for ScanResult
+          content = finding.get('content') or finding.get('license')
+          content = content.strip()
+          if (
+            result_key == 'results'
+            and 'type' in finding
+            and finding['type'] != 'statement'
+          ):
+            continue
+
+          if content and content != "No_license_found":
+            current_findings.add(content)
+
+      if (whole and current_findings) or (not whole and current_findings):
+        if whole:
+          processed_list.append(
+            ScanResultList(file_path, result_entry['file'], current_findings)
+          )
+        else:
+          processed_list.append(
+            ScanResult(file_path, result_entry['file'], current_findings)
+          )
+
+    return processed_list
+
+  def set_copyright_list(
+      self, all_results: bool = False, whole: bool = False
+  ) -> None:
+    """
+    Set the formatted results from copyright scanner for the components.
+    """
+    if not self.cli_options.scan_only_deps:
+      self.scan_packages.parent_package[
+        'COPYRIGHT_RESULT'] = self._process_single_scanner_package(
+        component=self.scan_packages.parent_package, is_parent=True,
+        scanner_func=self.__get_copyright_results, result_key='results',
+        whole=whole, all_results=all_results
+      )
+    for purl in self.scan_packages.dependencies.keys():
+      component = self.scan_packages.dependencies[purl]
+      component['COPYRIGHT_RESULT'] = self._process_single_scanner_package(
+        component=component, is_parent=False,
+        scanner_func=self.__get_copyright_results, result_key='results',
+        whole=whole, all_results=all_results
+      )
+
+  def set_keyword_list(self, whole: bool = False) -> None:
     """
     Get the formatted results from keyword scanner
-
-    :param: whole: return whole content from scanner
-    :return: List of findings
-    :rtype: List[ScanResult] | List[ScanResultList] | bool
     """
-    keyword_results = self.__get_keyword_results()
-    keyword_list = list()
-    for result in keyword_results:
-      path = self.__normalize_path(result['file'])
-      if self.cli_options.repo is True and self.is_excluded_path(path) is \
-          True:
-        continue
-      if result['results'] is not None and result['results'] != "Unable to " \
-                                                                "read file":
-        contents = set()
-        json_keyword_info = list()
-        for finding in result['results']:
-          if whole:
-            if finding is not None and finding['content'] != "":
-              json_keyword_info.append(finding)
-          else:
-            if finding is not None:
-              content = finding['content'].strip()
-              if content != "":
-                contents.add(content)
-        if whole and len(json_keyword_info) > 0:
-          keyword_list.append(ScanResultList(path, result['file'], json_keyword_info))
-        elif not whole and len(contents) > 0:
-          keyword_list.append(ScanResult(path, result['file'], contents))
-    if len(keyword_list) > 0:
-      return keyword_list
-    return False
+    if not self.cli_options.scan_only_deps:
+      self.scan_packages.parent_package[
+        'KEYWORD_RESULT'] = self._process_single_scanner_package(
+        component=self.scan_packages.parent_package, is_parent=True,
+        scanner_func=self.__get_keyword_results, result_key='results',
+        whole=whole
+      )
+    for purl in self.scan_packages.dependencies.keys():
+      component = self.scan_packages.dependencies[purl]
+      component['KEYWORD_RESULT'] = self._process_single_scanner_package(
+        component=component, is_parent=False,
+        scanner_func=self.__get_keyword_results, result_key='results',
+        whole=whole
+      )
 
-  def __get_license_nomos(self, whole: bool = False) -> Union[List[ScanResult],List[ScanResultList]]:
+  def __set_license_nomos(self, whole: bool = False) -> None:
     """
-    Get the formatted results from nomos scanner
-
-    :param: whole: return whole content from scanner
-    :return: list of findings
-    :rtype: List[ScanResult] | List[ScanResultList]
+    Update the packages with formatted results of nomos scanner
     """
-    
-    nomos_result = self.__get_nomos_result()
-    scan_result = list()
-    for result in nomos_result['results']: # result is an item of list and is a dict
-      path = self.__normalize_path(result['file'])
-      licenses = set()
-      json_license_info = list()
-      for scan_license in result['licenses']:
-        if whole:
-          if scan_license['license'] != "No_license_found":
-            json_license_info.append(scan_license)
-        else:
-          if scan_license['license'] != 'No_license_found':
-            licenses.add(scan_license['license'])
-      if whole and len(json_license_info) > 0:
-        scan_result.append(ScanResultList(path,result['file'], json_license_info))
-      elif not whole and len(licenses) > 0:
-        scan_result.append(ScanResult(path, result['file'], licenses))
-    return scan_result
+    if not self.cli_options.scan_only_deps:
+      self.scan_packages.parent_package[
+        'NOMOS_RESULT'] = self._process_single_scanner_package(
+        component=self.scan_packages.parent_package, is_parent=True,
+        scanner_func=self.__get_nomos_result, result_key='licenses', whole=whole
+      )
+    for purl in self.scan_packages.dependencies.keys():
+      component = self.scan_packages.dependencies[purl]
+      component['NOMOS_RESULT'] = self._process_single_scanner_package(
+        component=component, is_parent=False,
+        scanner_func=self.__get_nomos_result, result_key='licenses', whole=whole
+      )
 
-  def __get_license_ojo(self, whole:bool = False) -> Union[List[ScanResult],List[ScanResultList]]:
+  def __set_license_ojo(self, whole: bool = False) -> None:
     """
-    Get the formatted results from ojo scanner
-
-    :param: whole: return whole content from scanner
-    :return: list of findings
-    :rtype: List[ScanResult] | List[ScanResultList]
+    Update the packages with formatted results of ojo scanner
     """
-    ojo_result = self.__get_ojo_result()
-    scan_result = list()
-    for result in ojo_result:
-      path = self.__normalize_path(result['file'])
-      if result['results'] is not None and result['results'] != 'Unable to ' \
-                                                                'read file':
-        licenses = set()
-        json_license_info = list()
-        for finding in result['results']:
-          if whole:
-            if finding['license'] is not None:
-              json_license_info.append(finding)
-          else:
-            if finding['license'] is not None:
-              licenses.add(finding['license'].strip())
-        if len(licenses) > 0:
-          scan_result.append(ScanResult(path, result['file'], licenses))
-        elif len(json_license_info) > 0:
-          scan_result.append(ScanResultList(path, result['file'], json_license_info))
-    return scan_result
+    if not self.cli_options.scan_only_deps:
+      self.scan_packages.parent_package[
+        'OJO_RESULT'] = self._process_single_scanner_package(
+        component=self.scan_packages.parent_package, is_parent=True,
+        scanner_func=self.__get_ojo_result, result_key='licenses', whole=whole
+      )
+    for purl in self.scan_packages.dependencies.keys():
+      component = self.scan_packages.dependencies[purl]
+      component['OJO_RESULT'] = self._process_single_scanner_package(
+        component=component, is_parent=False,
+        scanner_func=self.__get_ojo_result, result_key='licenses', whole=whole
+      )
 
-  def __merge_nomos_ojo(self, nomos_licenses: List[ScanResult],
-                        ojo_licenses: List[ScanResult]) -> List[ScanResult]:
+  def __merge_nomos_ojo(
+      self, nomos_licenses: list[ScanResult], ojo_licenses: list[ScanResult]
+  ) -> list[ScanResult]:
     """
     Merge the results from nomos and ojo based on file name
-
-    :param nomos_licenses: formatted result form nomos
-    :param ojo_licenses: formatted result form ojo
-
-    :return: merged list of scanner findings
     """
+    nomos_dict = {entry.file: entry for entry in nomos_licenses}
+
     for ojo_entry in ojo_licenses:
-      for nomos_entry in nomos_licenses:
-        if ojo_entry.file == nomos_entry.file:
-          nomos_entry.result.update(ojo_entry.result)
-          break
+      if ojo_entry.file in nomos_dict:
+        nomos_dict[ojo_entry.file].result.update(ojo_entry.result)
       else:
+        # If an ojo entry doesn't have a corresponding nomos entry, add it
         nomos_licenses.append(ojo_entry)
     return nomos_licenses
 
-  def get_non_allow_listed_results(self, scan_results: List[ScanResult]= None, \
-                                  scan_results_whole: List[ScanResultList]= None, \
-                                  whole:bool = False) \
-                                  -> Union[List[ScanResult],List[ScanResultList]]:
+  def get_non_allow_listed_results(
+      self, scan_results: list[ScanResult] = None,
+      scan_results_whole: list[ScanResultList] = None, whole: bool = False
+  ) -> list[ScanResult] | list[ScanResultList]:
     """
     Get results where license check failed.
-
-    :param scan_results: Scan result from ojo/nomos
-    :param scan_results_whole: Whole scan result from ojo/nomos
-    :param: whole: return whole content from scanner
-    
-    :return: List of results with only not allowed licenses
-    :rtype: List[ScanResult] | List[ScanResultList]
     """
     final_results = []
     if whole and scan_results_whole is not None:
       for row in scan_results_whole:
-        if self.cli_options.repo is True and self.is_excluded_path(row.file) \
-          is True:
+        if self.cli_options.repo and self.is_excluded_path(row.file):
           continue
-        license_info_list = row.result
-        failed_licenses_list = list([lic for lic in license_info_list if lic['license'] not in
-                              self.cli_options.allowlist['licenses']])
-        if len(failed_licenses_list) > 0:
-          final_results.append(ScanResultList(row.file, row.path, failed_licenses_list))
+
+        # Filter licenses that are NOT in the allowlist
+        failed_licenses_list = [
+          lic for lic in row.result if
+          lic.get('license') not in self._allowlist_licenses_set
+        ]
+        if failed_licenses_list:
+          final_results.append(
+            ScanResultList(row.file, row.path, failed_licenses_list)
+          )
     elif not whole and scan_results is not None:
       for row in scan_results:
-        if self.cli_options.repo is True and self.is_excluded_path(row.file) \
-            is True:
+        if self.cli_options.repo and self.is_excluded_path(row.file):
           continue
-        license_set = row.result
-        failed_licenses = set([lic for lic in license_set if lic not in
-                              self.cli_options.allowlist['licenses']])
-        if len(failed_licenses) > 0:
+
+        # Filter licenses that are NOT in the allowlist
+        failed_licenses = {
+          lic for lic in row.result if
+          lic not in self._allowlist_licenses_set
+        }
+        if failed_licenses:
           final_results.append(ScanResult(row.file, row.path, failed_licenses))
     return final_results
 
-  def get_non_allow_listed_copyrights(self,
-                                      copyright_results: List[ScanResult]) \
-      -> List[ScanResult]:
+  def get_non_allow_listed_copyrights(self) -> list[ScanResult]:
     """
     Get copyrights from files which are not allow listed.
-
-    :param copyright_results: Copyright results from copyright agent
-    :return: List of scan results where copyrights found.
     """
-    return [
-      row for row in copyright_results if self.cli_options.repo is True and
-                                          self.is_excluded_path(row.file) is
-                                          False
-    ]
+    copyright_results = self.get_copyright_results()
+    return [row for row in copyright_results if
+      self.cli_options.repo and not self.is_excluded_path(row.file)]
 
-  def results_are_allow_listed(self, whole:bool = False) \
-    -> Union[List[ScanResult],List[ScanResultList],bool]:
+  def get_copyright_results(self) -> list[ScanResultList]:
+    """
+    Get list of copyright scan results from the package list.
+    """
+    copyright_results = []
+    copyright_results.extend(
+      self.scan_packages.parent_package.get('COPYRIGHT_RESULT', [])
+    )
+    for dep in self.scan_packages.dependencies.values():
+      copyright_results.extend(dep.get('COPYRIGHT_RESULT', []))
+    return copyright_results
+
+  def get_keyword_results(self) -> list[ScanResultList]:
+    """
+    Get list of keywords scan results from the package list.
+    """
+    keyword_results = []
+    keyword_results.extend(
+      self.scan_packages.parent_package.get('KEYWORD_RESULT', [])
+    )
+    for dep in self.scan_packages.dependencies.values():
+      keyword_results.extend(dep.get('KEYWORD_RESULT', []))
+    return keyword_results
+
+  def get_license_results(self) -> list[ScanResultList]:
+    """
+    Get list of license scan results from the package list.
+    """
+    scanner_results = []
+    scanner_results.extend(
+      self.scan_packages.parent_package.get('SCANNER_RESULTS', [])
+    )
+    for dep in self.scan_packages.dependencies.values():
+      scanner_results.extend(dep.get('SCANNER_RESULTS', []))
+    return scanner_results
+
+  def results_are_allow_listed(
+      self, whole: bool = False
+  ) -> list[ScanResult] | list[ScanResultList]:
     """
     Get the formatted list of license scanner findings
 
     The list contains the merged result of nomos/ojo scanner based on
     cli_options passed
-
-    :param: whole: return whole content from scanner
-    :return: merged list of scanner findings
-    :rtype: List[ScanResult] | List[ScanResultList] | bool
     """
-    failed_licenses = None
-    nomos_licenses = []
+    scanner_results = self.get_license_results()
 
-    if self.cli_options.nomos:
-      if whole is True:
-        nomos_licenses = self.__get_license_nomos(whole=True)
-      else:
-        nomos_licenses = self.__get_license_nomos()
-      if self.cli_options.ojo is False:
-        if whole is True:
-          failed_licenses = self.get_non_allow_listed_results(
-          scan_results_whole=nomos_licenses, whole=True)
-        else:
-          failed_licenses = self.get_non_allow_listed_results(scan_results=nomos_licenses)
-    if self.cli_options.ojo:
-      if whole is True:
-        ojo_licenses = self.__get_license_ojo(whole=True)
-      else:
-        ojo_licenses = self.__get_license_ojo()
-      if self.cli_options.nomos is False:
-        if whole is True:
-          failed_licenses = self.get_non_allow_listed_results(
-          scan_results_whole=ojo_licenses, whole=True)
-        else:
-          failed_licenses = self.get_non_allow_listed_results(scan_results=ojo_licenses)
-      else:
-        if whole is True:
-          failed_licenses = self.get_non_allow_listed_results(
-            scan_results_whole=nomos_licenses + ojo_licenses, whole=True)
-        else:
-          failed_licenses = self.get_non_allow_listed_results(
-            scan_results=self.__merge_nomos_ojo(nomos_licenses, ojo_licenses))
-    if len(failed_licenses) > 0:
+    failed_licenses = self.get_non_allow_listed_results(
+      scan_results_whole=scanner_results, whole=True
+    )
+
+    if whole:
       return failed_licenses
-    return True
+    else:
+      # Convert ScanResultList to ScanResult for non-whole output
+      return [
+        ScanResult(
+          item.file, item.path,
+          {res['license'] for res in item.result if 'license' in res}
+        ) for item in failed_licenses
+      ]
 
-  def get_scanner_results(self, whole:bool = False) \
-    -> Union[List[ScanResult],List[ScanResultList]]:
+  def set_scanner_results(self, whole: bool = False) -> None:
     """
-    Get scan results from nomos and ojo scanners (whichever is selected).
-
-    :param: whole: return whole content from scanner
-    :return: List of scan results
-    :rtype: List[ScanResult] | List[ScanResultList]
+    Set the key `SCANNER_RESULTS` for all components in scan_packages using
+    nomos and ojo scanners (whichever is selected).
     """
-    nomos_licenses = []
-    ojo_licenses = []
-
     if self.cli_options.nomos:
-      if whole:
-        nomos_licenses = self.__get_license_nomos(whole=True)
-      else:
-        nomos_licenses = self.__get_license_nomos()
+      self.__set_license_nomos(whole)
     if self.cli_options.ojo:
-      if whole:
-        ojo_licenses = self.__get_license_ojo(whole=True)
-      else:
-        ojo_licenses = self.__get_license_ojo()
+      self.__set_license_ojo(whole)
 
     if self.cli_options.nomos and self.cli_options.ojo:
+      # Handle parent package separately
       if whole:
-        return nomos_licenses + ojo_licenses
+        self.scan_packages.parent_package[
+          'SCANNER_RESULTS'] = self.scan_packages.parent_package.get(
+          'NOMOS_RESULT', []
+        ) + self.scan_packages.parent_package.get('OJO_RESULT', [])
       else:
-        return self.__merge_nomos_ojo(nomos_licenses, ojo_licenses)
-    elif self.cli_options.nomos:
-      return nomos_licenses
+        self.scan_packages.parent_package[
+          'SCANNER_RESULTS'] = self.__merge_nomos_ojo(
+          self.scan_packages.parent_package.get('NOMOS_RESULT', []),
+          self.scan_packages.parent_package.get('OJO_RESULT', [])
+        )
+      for purl in self.scan_packages.dependencies.keys():
+        component = self.scan_packages.dependencies[purl]
+        if whole:
+          # Concatenate lists for whole results
+          component['SCANNER_RESULTS'] = component.get(
+            'NOMOS_RESULT', []
+          ) + component.get(
+            'OJO_RESULT', []
+          )
+        else:
+          component['SCANNER_RESULTS'] = self.__merge_nomos_ojo(
+            component.get('NOMOS_RESULT', []), component.get('OJO_RESULT', [])
+          )
     else:
-      return ojo_licenses
+      scanner_key = 'NOMOS_RESULT' if self.cli_options.nomos else 'OJO_RESULT'
+      # Handle parent package separately
+      self.scan_packages.parent_package[
+        'SCANNER_RESULTS'] = self.scan_packages.parent_package.get(
+        scanner_key, []
+      )
+      for purl in self.scan_packages.dependencies.keys():
+        component = self.scan_packages.dependencies[purl]
+        component['SCANNER_RESULTS'] = component.get(scanner_key, [])

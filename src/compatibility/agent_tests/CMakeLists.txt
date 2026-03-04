@@ -41,7 +41,7 @@ target_link_libraries(test_compatibility
         ${cppunit_LIBRARIES}
         ${icu-uc_LIBRARIES}
         ${Boost_LIBRARIES}
-        jsoncpp_lib
+        ${jsoncpp_LIBRARIES}
         yaml-cpp
 )
 

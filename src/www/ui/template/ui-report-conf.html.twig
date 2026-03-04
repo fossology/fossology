@@ -246,7 +246,7 @@
             {{ "Show SPDX license comments"|trans }}
           </td>
           <td align="left">
-            <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="spdxLicenseComment" value="spdxLicenseComment" {{ spdxLicenseComment }} />
+            <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="spdxLicenseComment" value="spdxLicenseComment" {{ spdxLicenseComment }} id="spdxLicenseCommentCheckbox" />
          </td>
         </tr>
         <tr>
@@ -255,6 +255,15 @@
           </td>
           <td align="left">
             <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="ignoreFilesWOInfo" value="ignoreFilesWOInfo" {{ ignoreFilesWOInfo }} />
+          </td>
+        </tr>
+        <tr>
+          <td align="left">
+            {{ "Enable OSSelot export"|trans }}
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'When enabled, SPDX and ReadMeOSS exports will be OSSelot-compatible: custom licenses will be emitted as LicenseRef-<ShortName> (dropping &quot;-fossology-&quot;), ReadMeOSS will strip all LicenseRef- prefixes, and every license&apos;s full text will be included.'|trans }}" alt="" class="info-bullet"/>
+          </td>
+          <td align="left">
+            <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="osselotExport" value="osselotExport" {{ osselotExport }} id="osselotExportCheckbox" />
           </td>
         </tr>
       </table>

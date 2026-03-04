@@ -30,7 +30,7 @@ PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId,
                              " LEFT JOIN clearing_decision cd ON ("
                              "  (ut.uploadtree_pk = cd.uploadtree_fk AND cd.scope = 0 AND cd.group_fk = $5)"
                              "  OR (EXISTS ("
-                             "    SELECT 1 FROM report_info ri WHERE ri.upload_fk = ut.upload_fk AND ri.ri_globaldecision = 1"
+                             "    SELECT 1 FROM report_info ri WHERE ri.upload_fk=$1 AND ri.ri_globaldecision=1"
                              "  ) AND ut.pfile_fk = cd.pfile_fk AND cd.scope = 1)"
                              ")"
                              " WHERE upload_fk=$1 AND (ufile_mode&x'3C000000'::int)=0 AND (lft BETWEEN $2 AND $3) AND ut.pfile_fk != 0"

@@ -25,12 +25,13 @@ def update_license(licenses):
     list: A list of dictionaries containing relevant license information.
   """
   updated_licenses = []
-  keys_to_extract_from_licenses = ['spdx_license_key', 'score', 'name', 'text_url', 'start_line', 'matched_text']
+  keys_to_extract_from_licenses = ['license_expression_spdx', 'score', 'license_expression', 'rule_url', 'start_line', 'matched_text']
 
-  for key, value in licenses.items():
-    if key == 'licenses':
-      for license in value:
-        updated_licenses.append({key: license[key] for key in keys_to_extract_from_licenses if key in license})
+  for license in licenses:
+    for matches in license.get("matches", []):
+      updated_licenses.append({
+        key: matches[key] for key in keys_to_extract_from_licenses if key in matches
+      })
 
   return updated_licenses
 
@@ -131,7 +132,7 @@ def scan(line, scan_copyrights, scan_licenses, scan_emails, scan_urls, min_score
 
   if scan_licenses:
     licenses = api.get_licenses(result['file'], include_text=True, min_score=min_score)
-    updated_licenses = update_license(licenses)
+    updated_licenses = update_license(licenses.get("license_detections", []))
     result['licenses'] = updated_licenses
 
   if scan_emails:

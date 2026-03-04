@@ -975,6 +975,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_PHR_BSD_CLEAR_1)) {
     INTERESTING(lDebug ? "BSD-Clear(phr1)" : "BSD-3-Clause-Clear");
   }
+  else if (INFILE(_LT_BSD_NUMPY_TERMS)) {
+    INTERESTING("BSD-3-Clause");
+  }
   else if (INFILE(_PHR_BSD_3_CLAUSE_LBNL)) {
     INTERESTING("BSD-3-Clause-LBNL");
   }
@@ -1060,6 +1063,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_FILE_BSD1) || INFILE(_FILE_BSD2)) {
     INTERESTING(lDebug ? "BSD(deb)" : "BSD");
+  }
+  else if (INFILE(_CR_BSD_PERSONAL)) {
+    INTERESTING("BSD");
   }
   cleanLicenceBuffer();
   /*
@@ -1166,6 +1172,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (URL_INFILE(_URL_ORACLE_BERKELEY_DB)) {
     INTERESTING(lDebug ? "URL_ORACLE_BERKELEY_DB" : "Oracle-Berkeley-DB");
+  }
+  cleanLicenceBuffer();
+  /*
+   * DB License
+   */
+  if (INFILE(_LT_DATABRICKS_RESTRICTED)) {
+    INTERESTING("Databricks-DB-License");
   }
   cleanLicenceBuffer();
   /*
@@ -6840,12 +6853,19 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /* Mozilla Public License possibility */
-  if (!lmem[_mMPL] && INFILE(_TEXT_MPLV2) && INFILE(_URL_MPL20)) {
+  if (!lmem[_mMPL]) {
+    if (INFILE(_TEXT_MPLV2) && INFILE(_URL_MPL20)) {
       INTERESTING("MPL-2.0");
       lmem[_mMPL] = 1;
-  }
-  else if (!lmem[_mMPL] && URL_INFILE(_URL_MPL_LATEST)) {
-    INTERESTING(lDebug ? "MPL(latest)" : "MPL");
+    }
+    else if (INFILE(_TEXT_MPL20_UNDER)) {
+      INTERESTING("MPL-2.0");
+      lmem[_mMPL] = 1;
+    }
+    else if (URL_INFILE(_URL_MPL_LATEST)) {
+      INTERESTING(lDebug ? "MPL(latest)" : "MPL");
+      lmem[_mMPL] = 1;
+    }
   }
   cleanLicenceBuffer();
   /* Citrix License */

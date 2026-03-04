@@ -53,6 +53,21 @@
       </li>
       <li>
         <div class="form-group">
+          <div style="display: flex; align-items: center;flex-wrap: wrap;">
+            <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="excludefolder" value="1" style="margin-right: 6px;"/>
+            {{ 'Ignore Configured Folders:'|trans }}
+            <div id="chipsContainer" class="form-control" style="height: auto; min-height: 38px; display: flex; flex-wrap: wrap; align-items: center; padding: 5px 12px; max-width: 70%; width: 65%; box-sizing: border-box; margin: 0; gap: 8px 12px;">
+              <div id="excludeFoldersChips" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+              </div>
+              <input type="text" id="excludeFolderChipInput" style="border: none; outline: none; box-shadow: none; flex-grow: 1; flex-shrink: 1; min-width: 80px; max-width: 180px; width: 140px; padding: 0; margin-left: 8px; background: transparent;" placeholder="Add folder to ignore..." autocomplete="off"/>
+            </div>
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{'Configure folders from Admin-Customize-Exclude-Files from scanning'|trans}}" alt="" class="info-bullet" style="margin-left: 6px;"/>
+          </div>
+          <input type="hidden" name="excludefolderSpecific" id="excludefolderSpecific" />
+        </div>
+      </li>
+      <li>
+        <div class="form-group">
           <input type="radio" class="browse-upload-checkbox view-license-rc-size" name="public" value="private" {% if uploadVisibility == "private" %} checked="checked" {% endif %}/>
           {{ 'Visible only for active group'| trans }}
           <img src="images/info_16.png" data-toggle="tooltip" title="{{'which is the currently selected group'|trans}}" alt="" class="info-bullet"/><br/>
@@ -96,6 +111,97 @@
   <script type="text/javascript">
     $(document).ready(function () {
       $('[data-toggle="tooltip"]').tooltip();
+    });
+  </script>
+  <script>
+    // Chips-based exclude folders logic
+    let excludeFolders = [];
+    // Initialize from backend-provided folders. Ignore the placeholder "No Folder Configured".
+    {% if configureExcludeFolders and configureExcludeFolders != 'No Folder Configured' %}
+      excludeFolders = `{{ configureExcludeFolders }}`.split(',').map(f => f.trim()).filter(f => f !== '');
+    {% endif %}
+    function renderExcludeFolderChips() {
+      const chipsDiv = document.getElementById('excludeFoldersChips');
+      chipsDiv.innerHTML = '';
+      // remove any accidental placeholder
+      excludeFolders = excludeFolders.filter(f => f !== 'No Folder Configured');
+      excludeFolders.forEach((folder, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'badge';
+        // Add small bottom margin so wrapped lines have spacing (fallback for gap)
+        chip.style = 'margin-right:6px;margin-bottom:8px;padding:6px 10px;font-size:14px;display:inline-block;background-color:#e0e3e8;color:#333;border-radius:12px;';
+        chip.textContent = folder;
+        const closeBtn = document.createElement('span');
+        closeBtn.innerHTML = '&times;';
+        closeBtn.style = 'margin-left:8px;cursor:pointer;font-weight:bold;';
+        closeBtn.onclick = function() {
+          excludeFolders.splice(idx, 1);
+          updateExcludeFoldersInput();
+          renderExcludeFolderChips();
+        };
+        chip.appendChild(closeBtn);
+        chipsDiv.appendChild(chip);
+      });
+    }
+    function updateExcludeFoldersInput() {
+      document.getElementById('excludefolderSpecific').value = excludeFolders.join(',');
+    }
+    // Add chip on Enter key in input
+    document.addEventListener('DOMContentLoaded', function() {
+      const input = document.getElementById('excludeFolderChipInput');
+      const checkbox = document.querySelector('input[name="excludefolder"]');
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const value = input.value.trim();
+          if (value && !excludeFolders.includes(value)) {
+            excludeFolders.push(value);
+            updateExcludeFoldersInput();
+            renderExcludeFolderChips();
+            input.value = '';
+            // If user added at least one folder, ensure the excludefolder checkbox is checked
+            try {
+              if (checkbox) checkbox.checked = true;
+            } catch (err) {}
+          }
+        }
+      });
+      // Prevent the checkbox from being checked if there are no folders configured
+      if (checkbox) {
+        checkbox.addEventListener('change', function(e) {
+          if (this.checked && excludeFolders.length === 0) {
+            // Do not allow enabling exclude-folder without any folder configured
+            this.checked = false;
+            input.focus();
+            // show a modal warning consistent with existing upload warnings
+            if (!$('#excludeWarningModal').length) {
+              $('body').append(`
+                <div class="modal fade" id="excludeWarningModal" tabindex="-1" role="dialog">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header bg-secondary text-white">
+                        <h5 class="modal-title"><i class="fas fa-exclamation-circle"></i> {{ 'No Exclude Folders Configured'|trans }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span>&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        {{ 'You have not configured any folders. Please do not check this option.'|trans }}
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">OK</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `);
+            }
+            $('#excludeWarningModal').modal('show');
+          }
+        });
+      }
+      renderExcludeFolderChips();
+      updateExcludeFoldersInput();
     });
   </script>
   {% for aFoot in parmAgentFoots %}

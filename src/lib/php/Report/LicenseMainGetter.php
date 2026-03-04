@@ -42,7 +42,7 @@ class LicenseMainGetter extends ClearedGetterCommon
       // Null-check: if the license is missing, log and skip this ID.
       if ($allLicenseCols === null) {
         error_log("Error: License ID " . $originLicenseId . " not found in the database.");
-        exit;
+        continue; // Skip this license and continue with others
       }
       $allStatements[] = array(
         'licenseId' => $originLicenseId,

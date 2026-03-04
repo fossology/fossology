@@ -133,10 +133,10 @@ map<string, vector<Match>> extractDataFromScancodeResult(const string& scancodeR
     {
       for (auto oneresult : licensearrays)
       {
-          string licensename = oneresult["spdx_license_key"].asString();
+          string licensename = oneresult["license_expression_spdx"].asString();
           int percentage = (int)oneresult["score"].asFloat();
-          string full_name=oneresult["name"].asString();
-          string text_url=oneresult["text_url"].asString();
+          string full_name=oneresult["license_expression"].asString();
+          string text_url=oneresult["rule_url"].asString();
           string match_text = oneresult["matched_text"].asString();
           unsigned long start_line=oneresult["start_line"].asUInt();
           string temp_text= match_text.substr(0,match_text.find("\n"));

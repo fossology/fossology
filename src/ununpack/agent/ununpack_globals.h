@@ -100,7 +100,8 @@ cmdlist CMD[] =
 /* 34 */{ "application/zstd", "zstd", "-d", ">/dev/null 2>&1", "zstd -lv '%s' > '%s'", CMD_ZSTD, 1, 0177000, 0177000, },
 /* 35 */{ "application/x-lz4", "zstd", "-d", ">/dev/null 2>&1", "", CMD_ZSTD, 1, 0177000, 0177000, },
 /* 36 */{ "application/x-lzma", "zstd", "-d", ">/dev/null 2>&1", "", CMD_ZSTD, 1, 0177000, 0177000, },
-/* 37 */{ "","","",">/dev/null 2>&1","",CMD_DEFAULT,1,0177000,0177000, },
+/* 37 */{ "application/x-lzip", "lzip", "-d", ">/dev/null 2>&1", "lzip -lv '%s' > '%s'", CMD_LZIP, 1, 0177000, 0177000, },
+/* 38 */{ "","","",">/dev/null 2>&1","",CMD_DEFAULT,1,0177000,0177000, },
   { NULL,NULL,NULL,NULL,NULL,-1,-1,0177000,0177000, },
 };
 #endif

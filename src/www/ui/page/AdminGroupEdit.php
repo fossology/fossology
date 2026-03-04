@@ -84,7 +84,7 @@ class AdminGroupEdit extends DefaultPlugin
   {
     if (empty($groupName)) {
       return _("Invalid: Group name cannot be whitespace only");
-    } else if (preg_match('/^[\s\w_-]$/', $groupName) !== 1) {
+    } else if (preg_match('/^[\s\w_-]+$/', $groupName) !== 1) {
       return _("Invalid: Group name can only contain letters, numbers, hyphens and underscores");
     } else if (is_numeric($groupName)) {
       return _("Invalid: Group name cannot be numeric-only");

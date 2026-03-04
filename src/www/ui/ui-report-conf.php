@@ -84,7 +84,8 @@ class ui_report_conf extends FO_Plugin
    */
   private $checkBoxListSPDX = array(
     "spdxLicenseComment" => "spdxLicenseComment",
-    "ignoreFilesWOInfo" => "ignoreFilesWOInfo"
+    "ignoreFilesWOInfo" => "ignoreFilesWOInfo",
+    "osselotExport" => "osselotExport"
   );
 
 
@@ -177,6 +178,10 @@ class ui_report_conf extends FO_Plugin
       $listSPDXCheckbox = explode(',', $row['ri_spdx_selection']);
       foreach (array_keys($this->checkBoxListSPDX) as $key => $value) {
         $vars[$value] = $listSPDXCheckbox[$key];
+      }
+    } else {
+      foreach (array_keys($this->checkBoxListSPDX) as $key) {
+        $vars[$key] = 'unchecked';
       }
     }
 
@@ -462,6 +467,18 @@ class ui_report_conf extends FO_Plugin
           $('#copyrightRestrictionText').val('');
         } else {
           $('#copyrightRestrictionText').css('display', 'block');
+        }
+      });
+      
+      $('#osselotExportCheckbox').change(function() {
+        if ($(this).is(':checked')) {
+          $('#spdxLicenseCommentCheckbox').prop('checked', true);
+        }
+      });
+      $(\"[data-toggle='tooltip']\").tooltip();
+      $('#spdxLicenseCommentCheckbox').change(function() {
+        if (!this.checked) {
+          $('#osselotExportCheckbox').prop('checked', false);
         }
       });
     });

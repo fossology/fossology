@@ -69,10 +69,10 @@ class ReportImportAgentPlugin extends AgentPlugin
       $targetFile = time().'_'.random_int(0, getrandmax()).'_'.$report['name'];
       if (move_uploaded_file($report['tmp_name'], $fileBase.$targetFile))
       {
-        return '--report='.$targetFile;
+        return '--report=' . escapeshellarg($targetFile);
       }
     }elseif($report && is_string($report)){
-      return '--report='.$report;
+      return '--report=' . escapeshellarg($report);
     }
     return '';
   }

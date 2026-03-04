@@ -25,7 +25,7 @@ jobs:
           sudo apt-get update
           echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
           echo COMPOSER_HOME="$HOME/.composer/" >> $GITHUB_ENV
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 50
       - name: Setup PHP 7.4
@@ -55,7 +55,7 @@ jobs:
           sudo apt-get install -y cppcheck
           echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 50
       - name: Static Code Analysis
@@ -69,7 +69,7 @@ jobs:
         with:
           php-version: '8.1'
           extensions: gettext, mbstring, gd, json, xml, zip, pgsql, curl, uuid, posix, sqlite3
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 50
       - name: PHP Codesniffer
@@ -88,7 +88,7 @@ jobs:
           php-version: '8.1'
           extensions: gettext, mbstring, gd, json, xml, zip, pgsql, curl, uuid, posix, sqlite3, dom
           tools: sebastian/phpcpd:6.0.3
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 50
       - name: Copy/Paste detector
@@ -101,7 +101,7 @@ jobs:
   openapi-lint:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup default rules
         run: |
           echo '{"extends": ["spectral:oas"]}' > .spectral.json
@@ -113,7 +113,7 @@ jobs:
   REUSE-Compliance-Check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: REUSE Compliance Check
       uses: fsfe/reuse-action@v5
 
@@ -121,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 

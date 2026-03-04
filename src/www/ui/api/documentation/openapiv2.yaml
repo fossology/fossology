@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: © 2017-2023 Siemens AG
 # SPDX-FileCopyrightText: © 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 # SPDX-FileCopyrightText: © 2025 Tiyasa Kundu <tiyasakundu20@gmail.com>
+# SPDX-FileContributor: Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
 
 # SPDX-License-Identifier: GPL-2.0-only
 
@@ -4260,6 +4261,9 @@ paths:
               - unifiedreport
               - clixml
               - cyclonedx
+              - spdx3json
+              - spdx3rdf
+              - spdx3jsonld
         - name: groupName
           description: The group name to chose while generating a report
           in: query
@@ -5381,6 +5385,11 @@ components:
           default: false
           description: >
             Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype
+        excludefolder:
+          type: boolean
+          default: false
+          description: >
+            Ignore Configured Folders from scanning. Admin->Customize->Exclude-Files 
         uploadType:
           type: string
           enum:

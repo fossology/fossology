@@ -279,6 +279,12 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
     strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "15", "'$oidcDesc'", "null", "null");
 
+  $variable = "OidcScope";
+  $prompt = _('OIDC Scope');
+  $desc = _('Scope of OIDC for client_credential grant. Used with LicenseDB.');
+  $valueArray[$variable] = array("'$variable'", "''", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "16", "'$oidcDesc'", "null", "null");
+
   /*  Banner Message */
   $variable = "BannerMsg";
   $bannerMsgPrompt = _('Banner message');
@@ -376,6 +382,40 @@ function Populate_sysconfig()
   $contextDesc = _("Obligations and risk assessment,". "$commonExObligations");
   $valueArray[$variable] = array("'$variable'", "'$contextValue'", "'$contextNamePrompt'",
     strval(CONFIG_TYPE_TEXTAREA), "'ReportText'", "4", "'$contextDesc'", "null", "null");
+
+  $variable         = "EnableOsselotReuse";
+  $prompt           = ("Enable OSSelot Reuse");
+  $desc             = ("When enabled, shows the OSSelot-based reuse option in the Reuser plugin");
+  $valueArray[$variable] = array("'$variable'","true","'$prompt'",
+      strval(CONFIG_TYPE_BOOL),"'ReportText'","5","'$desc'","'check_boolean'","null");
+
+  $variable = "OsselotCuratedUrl";
+  $osselotCuratedPrompt = _('OSSelot Curated API URL');
+  $osselotCuratedValid = "check_url";
+  $osselotCuratedDesc = _('URL for OSSelot curated package information API.');
+  $valueArray[$variable] = array("'$variable'", "'https://www.osselot.org/curated.php'", "'$osselotCuratedPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OSSelot'", "1", "'$osselotCuratedDesc'", "'$osselotCuratedValid'", "null");
+
+  $variable = "OsselotPackageAnalysisUrl";
+  $osselotPackagePrompt = _('OSSelot Package Analysis Base URL');
+  $osselotPackageValid = "check_url";
+  $osselotPackageDesc = _('Base URL for OSSelot package analysis repository.');
+  $valueArray[$variable] = array("'$variable'", "'https://raw.githubusercontent.com/Open-Source-Compliance/package-analysis/main/analysed-packages'", "'$osselotPackagePrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OSSelot'", "2", "'$osselotPackageDesc'", "'$osselotPackageValid'", "null");
+
+  $variable = "OsselotPrimaryDomain";
+  $osselotPrimaryPrompt = _('OSSelot Primary Domain');
+  $osselotPrimaryValid = "check_domain";
+  $osselotPrimaryDesc = _('Primary domain used in OSSelot package analysis URLs (e.g., raw.githubusercontent.com).');
+  $valueArray[$variable] = array("'$variable'", "'raw.githubusercontent.com'", "'$osselotPrimaryPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OSSelot'", "3", "'$osselotPrimaryDesc'", "'$osselotPrimaryValid'", "null");
+
+  $variable = "OsselotFallbackDomain";
+  $osselotFallbackPrompt = _('OSSelot Fallback Domain');
+  $osselotFallbackValid = "check_domain";
+  $osselotFallbackDesc = _('Fallback domain used when primary domain fails (e.g., osselot.org).');
+  $valueArray[$variable] = array("'$variable'", "'osselot.org'", "'$osselotFallbackPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OSSelot'", "4", "'$osselotFallbackDesc'", "'$osselotFallbackValid'", "null");
 
   /*  "Upload from server"-configuration  */
   $variable = "UploadFromServerWhitelist";
@@ -582,19 +622,18 @@ function Populate_sysconfig()
     strval(CONFIG_TYPE_TEXT), "'SSS'", "2", "'$desc'", "null", "null");
 
   /* LicenseDB config */
-  $variable = "LicenseDBURL";
-  $prompt = _('LicenseDB URL');
-  $desc = _('URL to LicenseDB Server');
-  $valueArray[$variable] = array("'$variable'",
-    "''", "'$prompt'",
-    strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "1", "'$desc'", "'check_url'", "null");
-
   $variable = "LicenseDBBaseURL";
   $prompt = _('LicenseDB API base URI');
   $desc = _('Base URI for API calls e.g. /api/v1');
-  $valueArray[$variable] = array("'$variable'", "'/api/v1'",
-    "'$prompt'", strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "2", "'$desc'", "null",
+  $valueArray[$variable] = array("'$variable'", "'http://localhost:8080/api/v1'",
+    "'$prompt'", strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "1", "'$desc'", "null",
     "null");
+
+  $variable = "LicenseDBHealth";
+  $prompt = _('Health check');
+  $desc = _('Endpoint to check health of LicenseDB service');
+  $valueArray[$variable] = array("'$variable'", "'/health'", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'LicenseDB'", "2", "'$desc'", "null", "null");
 
   $variable = "LicenseDBContent";
   $prompt = _('Export endpoint Licenses');
@@ -610,9 +649,15 @@ function Populate_sysconfig()
 
   $variable = "LicenseDBToken";
   $prompt = _('Auth token For LicenseDB');
-  $desc = _('');
+  $desc = _("Token from LicenseDB. Do not set if using OIDC for LicenseDB and FOSSology communication.");
   $valueArray[$variable] = array("'$variable'", "''", "'$prompt'",
     strval(CONFIG_TYPE_PASSWORD), "'LicenseDB'", "5", "'$desc'", "null", "null");
+
+  $variable = "ExcludeFolders";
+  $mimeTypeToSkip = _("Exclude Folders from scanning");
+  $mimeTypeDesc = _("Add comma (,) separated folder patterns to exclude from unpacking");
+  $valueArray[$variable] = array("'$variable'", "null", "'$mimeTypeToSkip'",
+    strval(CONFIG_TYPE_TEXT), "'Skip'", "1", "'$mimeTypeDesc'", "null", "null");
 
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.
@@ -865,3 +910,4 @@ function get_system_load_average()
 
   return '<button type="button" aria-disabled="true" disabled class="btn '.$class.'">System Load</button>';
 }
+

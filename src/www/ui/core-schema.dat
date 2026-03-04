@@ -2243,6 +2243,10 @@
   $Schema["TABLE"]["users"]["group_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"group_fk\" int4";
   $Schema["TABLE"]["users"]["group_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
 
+  $Schema["TABLE"]["users"]["spdx_settings"]["DESC"] = "COMMENT ON COLUMN \"users\".\"spdx_settings\" IS 'Comma-separated SPDX export settings: osselot_export,spdx_license_comment,ignore_files_wo_info as checked/unchecked values'";
+  $Schema["TABLE"]["users"]["spdx_settings"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"spdx_settings\" text DEFAULT 'unchecked,unchecked,unchecked'";
+  $Schema["TABLE"]["users"]["spdx_settings"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"spdx_settings\" DROP NOT NULL, ALTER COLUMN \"spdx_settings\" SET DEFAULT 'unchecked,unchecked,unchecked'";
+
   $Schema["TABLE"]["report_info"]["ri_pk"]["DESC"] = "";
   $Schema["TABLE"]["report_info"]["ri_pk"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_pk\" int4 DEFAULT nextval('report_info_pk_seq'::regclass)";
   $Schema["TABLE"]["report_info"]["ri_pk"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_pk\" SET NOT NULL, ALTER COLUMN \"ri_pk\" SET DEFAULT nextval('report_info_pk_seq'::regclass)";
@@ -2574,6 +2578,8 @@
   $Schema["CONSTRAINT"]["copyright_decision_pkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pkey\" PRIMARY KEY (\"copyright_decision_pk\");";
   $Schema["CONSTRAINT"]["copyright_decision_pfile_fk_fkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_decision_pfile_hash_ukey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\",\"hash\");";
+  $Schema["CONSTRAINT"]["obligation_map_pkey"] = "ALTER TABLE \"obligation_map\" ADD CONSTRAINT \"obligation_map_pkey\" PRIMARY KEY (\"om_pk\");";
+  $Schema["CONSTRAINT"]["obligation_candidate_map_pkey"] = "ALTER TABLE \"obligation_candidate_map\" ADD CONSTRAINT \"obligation_candidate_map_pkey\" PRIMARY KEY (\"om_pk\");";
   $Schema["CONSTRAINT"]["copyright_spasht_pkey"] = "ALTER TABLE \"copyright_spasht\" ADD CONSTRAINT \"copyright_spasht_pkey\" PRIMARY KEY (\"copyright_spasht_pk\");";
   $Schema["CONSTRAINT"]["copyright_spasht_pfile_fk_fkey"] = "ALTER TABLE \"copyright_spasht\" ADD CONSTRAINT \"copyright_spasht_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_spasht_agent_fk_fkey"] = "ALTER TABLE \"copyright_spasht\" ADD CONSTRAINT \"copyright_spasht_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2711,6 +2717,8 @@
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_uploadtree_fk_idx"] = "CREATE INDEX clearing_decision_uploadtree_fk_idx ON clearing_decision USING btree (uploadtree_fk);";
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_group_fk_idx"] = "CREATE INDEX clearing_decision_group_fk_idx ON clearing_decision USING btree (group_fk);";
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_uploadtree_group_pfile_idx"] = "CREATE INDEX clearing_decision_uploadtree_group_pfile_idx ON clearing_decision USING btree (uploadtree_fk, group_fk, pfile_fk);";
+  $Schema["INDEX"]["clearing_decision"]["clearing_decision_type_idx"] = "CREATE INDEX clearing_decision_type_idx ON clearing_decision USING btree (decision_type) WHERE decision_type IN (4,5,6,7);";
+  $Schema["INDEX"]["clearing_decision"]["clearing_decision_up_grp_pk_desc_type_idx"] = "CREATE INDEX clearing_decision_up_grp_pk_desc_type_idx ON clearing_decision USING btree (uploadtree_fk, group_fk, clearing_decision_pk DESC, decision_type);";
 
   $Schema["INDEX"]["clearing_decision_event"]["clearing_decision_event_idx"] = "CREATE INDEX clearing_decision_event_idx ON clearing_decision_event USING btree (clearing_decision_fk, clearing_event_fk);";
 
@@ -2750,6 +2758,8 @@
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_pfile_fk_index"] = "CREATE INDEX ecc_decision_pfile_fk_index ON ecc_decision USING btree (pfile_fk);";
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_user_fk_index"] = "CREATE INDEX ecc_decision_user_fk_index ON ecc_decision USING btree (user_fk);";
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_pfile_hash_index"] = "CREATE INDEX ecc_decision_pfile_hash_index ON ecc_decision USING btree (hash, pfile_fk);";
+
+  $Schema["INDEX"]["foldercontents"]["foldercontents_parent_mode_idx"] = "CREATE INDEX foldercontents_parent_mode_idx ON foldercontents USING btree (parent_fk, foldercontents_mode, child_id);";
 
   $Schema["INDEX"]["ipra"]["ipra_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX ipra_pfile_fk_is_enabled_false_idx ON ipra USING btree (pfile_fk, is_enabled) WHERE (is_enabled = false);";
   $Schema["INDEX"]["ipra"]["ipra_agent_fk_index"] = "CREATE INDEX ipra_agent_fk_index ON ipra USING btree (agent_fk);";
@@ -2806,7 +2816,11 @@
 
   $Schema["INDEX"]["report_cache"]["report_cache_createdts"] = "CREATE INDEX report_cache_createdts ON report_cache USING btree (report_cache_tla);";
 
+  $Schema["INDEX"]["report_info"]["report_info_upload_fk_globaldecision_idx"] = "CREATE INDEX report_info_upload_fk_globaldecision_idx ON report_info USING btree (upload_fk, ri_globaldecision);";
+
   $Schema["INDEX"]["spasht"]["spasht_upload_fk_idx"] = "CREATE INDEX spasht_upload_fk_idx ON spasht USING btree (upload_fk);";
+
+  $Schema["INDEX"]["upload"]["upload_mode_idx"] = "CREATE INDEX upload_mode_idx ON upload USING btree (upload_pk, upload_mode);";
 
   $Schema["INDEX"]["uploadtree"]["lft_idx"] = "CREATE INDEX lft_idx ON uploadtree USING btree (lft);";
   $Schema["INDEX"]["uploadtree"]["parent"] = "CREATE INDEX parent ON uploadtree USING btree (parent);";
@@ -2819,9 +2833,14 @@
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_fk_idx"] = "CREATE INDEX uploadtree_a_upload_fk_idx ON uploadtree_a USING btree (upload_fk);";
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_fk_lft_idx"] = "CREATE INDEX uploadtree_a_upload_fk_lft_idx ON uploadtree_a USING btree (upload_fk, lft);";
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_lft_ufilemode_pfile_idx"] = "CREATE INDEX uploadtree_a_upload_lft_ufilemode_pfile_idx ON uploadtree_a USING btree (upload_fk, lft, ufile_mode, pfile_fk);";
+
+  $Schema["INDEX"]["upload_clearing"]["upload_clearing_group_idx"] = "CREATE INDEX upload_clearing_group_idx ON upload_clearing USING btree (upload_fk, group_fk);";
+
   $Schema["INDEX"]["upload_clearing_license"]["upload_clearing_license_upload_group_idx"] = "CREATE INDEX upload_clearing_license_upload_group_idx ON upload_clearing_license USING btree (upload_fk, group_fk);";
 
   $Schema["INDEX"]["upload_events"]["upload_events_upload_fk_event_ts_event_type_idx"] = "CREATE INDEX upload_events_upload_fk_event_ts_event_type_idx ON upload_events USING btree (upload_fk, event_ts DESC, event_type);";
+
+  $Schema["INDEX"]["upload_packages"]["upload_packages_package_fk_upload_fk_idx"] = "CREATE INDEX upload_packages_package_fk_upload_fk_idx ON upload_packages USING btree (package_fk, upload_fk);";
 
   $Schema["INDEX"]["copyright_event"]["copyright_event_upload_fk_index"] = "CREATE INDEX copyright_event_upload_fk_index ON copyright_event USING btree (upload_fk);";
   $Schema["INDEX"]["copyright_event"]["copyright_event_uploadtree_fk_index"] = "CREATE INDEX copyright_event_uploadtree_fk_index ON copyright_event USING btree (uploadtree_fk);";

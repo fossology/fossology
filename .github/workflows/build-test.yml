@@ -73,7 +73,7 @@ jobs:
           sudo apt update
           sudo apt install -y git
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 50
 
@@ -101,8 +101,8 @@ jobs:
           fail-fast: true
 
       - name: Install additional Dependencies
-        if: ${{ matrix.config.cc == 'gcc-8' }}
-        run: sudo apt install -y gcc-8 g++-8
+        if: ${{ matrix.config.cc == 'gcc-9' }}
+        run: sudo apt install -y gcc-9 g++-9
 
       - name: Configure and Generate CMake Project
         run: |
@@ -155,7 +155,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 50
       - name: Install Dependencies

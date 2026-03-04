@@ -34,6 +34,7 @@
 #include "checksum.h"
 #include "ununpack-ar.h"
 #include "ununpack-disk.h"
+#include "ununpack-lzip.h"
 #include "ununpack-iso.h"
 #include "ununpack-zstd.h"
 
@@ -63,6 +64,7 @@ enum cmdtype
   CMD_DISK,	        /** File system disk */
   CMD_DEB,	        /** Debian source package */
   CMD_ZSTD,         /** Zstandard compressed file */
+  CMD_LZIP,         /** Lzip compressed file */
   CMD_DEFAULT	      /** Default action */
 };
 
@@ -187,12 +189,13 @@ char *PathCheck(char *DirPath);
 void Usage (char *Name, char *Version);
 void deleteTmpFiles(char *dir);
 void SQLNoticeProcessor(void *arg, const char *message);
+int ShouldExclude(char *Filename, const char *ExcludePatterns);
+
 
 /* traverse.c */
-void TraverseStart (char *Filename, char *Label, char *NewDir, int Recurse);
+void TraverseStart (char *Filename, char *Label, char *NewDir, int Recurse, char *ExcludePatterns);
 void TraverseChild (int Index, ContainerInfo *CI, char *NewDir);
-int  Traverse (char *Filename, char *Basename, char *Label, char *NewDir,
-              int Recurse, ParentInfo *PI);
+int Traverse (char *Filename, char *Basename, char *Label, char *NewDir, int Recurse, ParentInfo *PI, char *ExcludePatterns);
 
 #endif
 

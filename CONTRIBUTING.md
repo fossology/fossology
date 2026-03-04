@@ -129,7 +129,7 @@ This closes #22
 
 All commits not submitted via GitHub pull request shall contain a
 Signed-off-by line, also known as the **Developer Certificate of Origin (DCO)**
-as we know it from the Linux Kernel [Documenation/SubmittingPatches](https://www.kernel.org/doc/Documentation/process/submitting-patches.rst)
+as we know it from the Linux Kernel [Documentation/SubmittingPatches](https://www.kernel.org/doc/Documentation/process/submitting-patches.rst)
 
 ```none
     Signed-off-by: Peace Fun Ingenium <peacefun.ingenium@example.com>

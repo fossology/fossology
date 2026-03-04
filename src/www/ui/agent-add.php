@@ -64,16 +64,16 @@ class AgentAdder extends DefaultPlugin
     $vars['uploadId'] = $uploadId;
 
     $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
-    $out = '<ol>';
     $parmAgentFoots = '';
+    $paramAgentIncludes = '';
+    $out = '';
     foreach ($parmAgentList as $parmAgent) {
       $agent = plugin_find($parmAgent);
-      $out .= "<br/><b>".$agent->AgentName.":</b><br/>";
+      $out .= "<br/><b>".ucfirst($agent->AgentName).":</b><br/>";
       $out .= $agent->renderContent($vars);
       $parmAgentFoots .= $agent->renderFoot($vars);
       $paramAgentIncludes .= $agent->getScriptIncludes($vars);
     }
-    $out .= '</ol>';
     $vars['out'] = $out;
     $vars['outFoot'] = '<script language="javascript"> '.$parmAgentFoots.'</script>';
     $vars['paramIncludes'] = $paramAgentIncludes;
