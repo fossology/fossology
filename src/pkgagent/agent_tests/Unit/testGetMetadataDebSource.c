@@ -70,7 +70,7 @@ void test_GetMetadataDebSource_wrong_testfile()
 
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
   memset(pi, 0, sizeof(struct debpkginfo));
-  int predictValue = 0; /* FIXED: seems pkgagent have bug here. */
+  int predictValue = -1; /* An RPM file is not a valid .dsc; expect failure. */
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   int Result = GetMetadataDebSource(repFile, pi);
   //printf("GetMetadataDebSource Result is:%d\n", Result);

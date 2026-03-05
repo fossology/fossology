@@ -39,3 +39,14 @@ add_test(clib_tests test_clibs)
 
 add_test(NAME clib_php_tests 
     COMMAND ${PHPUNIT} --bootstrap ${PHPUNIT_BOOTSTRAP} ${CMAKE_CURRENT_LIST_DIR}/testClib.php)
+
+# -------------------------------------------------------------------------
+# fosspkg unit tests
+# -------------------------------------------------------------------------
+add_executable(test_fosspkg "")
+target_sources(test_fosspkg PRIVATE ${FO_CWD}/test_fosspkg.c)
+target_include_directories(test_fosspkg
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)  # gives access to fosspkg.h
+target_link_libraries(test_fosspkg
+    PRIVATE fossology ${cunit_LIBRARIES})
+add_test(fosspkg_tests test_fosspkg)

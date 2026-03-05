@@ -1594,6 +1594,267 @@
   $Schema["TABLE"]["pfile"]["pfile_mimetypefk"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"pfile_mimetypefk\" DROP NOT NULL";
 
 
+  $Schema["TABLE"]["pkg_container"]["pkg_pk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["pkg_pk"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"pkg_pk\" int4 DEFAULT nextval('pkg_container_pkg_pk_seq'::regclass)";
+  $Schema["TABLE"]["pkg_container"]["pkg_pk"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"pkg_pk\" SET NOT NULL, ALTER COLUMN \"pkg_pk\" SET DEFAULT nextval('pkg_container_pkg_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["pkg_container"]["image_name"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["image_name"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"image_name\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["image_name"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"image_name\" SET NOT NULL, ALTER COLUMN \"image_name\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["image_tag"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["image_tag"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"image_tag\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["image_tag"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"image_tag\" SET NOT NULL, ALTER COLUMN \"image_tag\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["image_id"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["image_id"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"image_id\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["image_id"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"image_id\" SET NOT NULL, ALTER COLUMN \"image_id\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["format"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["format"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"format\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["format"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"format\" SET NOT NULL, ALTER COLUMN \"format\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["os"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["os"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"os\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["os"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"os\" SET NOT NULL, ALTER COLUMN \"os\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["architecture"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["architecture"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"architecture\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["architecture"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"architecture\" SET NOT NULL, ALTER COLUMN \"architecture\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["variant"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["variant"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"variant\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["variant"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"variant\" SET NOT NULL, ALTER COLUMN \"variant\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["created"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["created"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"created\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["created"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"created\" SET NOT NULL, ALTER COLUMN \"created\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["author"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["author"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"author\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["author"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"author\" SET NOT NULL, ALTER COLUMN \"author\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["description"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["description"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"description\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["description"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"description\" SET NOT NULL, ALTER COLUMN \"description\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["entrypoint"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["entrypoint"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"entrypoint\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["entrypoint"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"entrypoint\" SET NOT NULL, ALTER COLUMN \"entrypoint\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["cmd"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["cmd"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"cmd\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["cmd"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"cmd\" SET NOT NULL, ALTER COLUMN \"cmd\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["working_dir"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["working_dir"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"working_dir\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["working_dir"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"working_dir\" SET NOT NULL, ALTER COLUMN \"working_dir\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["user_field"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["user_field"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"user_field\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container"]["user_field"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"user_field\" SET NOT NULL, ALTER COLUMN \"user_field\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container"]["layer_count"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["layer_count"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"layer_count\" int4 DEFAULT 0";
+  $Schema["TABLE"]["pkg_container"]["layer_count"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"layer_count\" SET NOT NULL, ALTER COLUMN \"layer_count\" SET DEFAULT 0";
+
+  $Schema["TABLE"]["pkg_container"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container"]["pfile_fk"]["ADD"] = "ALTER TABLE \"pkg_container\" ADD COLUMN \"pfile_fk\" int4";
+  $Schema["TABLE"]["pkg_container"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"pkg_container\" ALTER COLUMN \"pfile_fk\" SET NOT NULL";
+
+
+  $Schema["TABLE"]["pkg_container_env"]["env_pk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_env"]["env_pk"]["ADD"] = "ALTER TABLE \"pkg_container_env\" ADD COLUMN \"env_pk\" int4 DEFAULT nextval('pkg_container_env_env_pk_seq'::regclass)";
+  $Schema["TABLE"]["pkg_container_env"]["env_pk"]["ALTER"] = "ALTER TABLE \"pkg_container_env\" ALTER COLUMN \"env_pk\" SET NOT NULL, ALTER COLUMN \"env_pk\" SET DEFAULT nextval('pkg_container_env_env_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["pkg_container_env"]["pkg_fk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_env"]["pkg_fk"]["ADD"] = "ALTER TABLE \"pkg_container_env\" ADD COLUMN \"pkg_fk\" int4";
+  $Schema["TABLE"]["pkg_container_env"]["pkg_fk"]["ALTER"] = "ALTER TABLE \"pkg_container_env\" ALTER COLUMN \"pkg_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["pkg_container_env"]["env_key"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_env"]["env_key"]["ADD"] = "ALTER TABLE \"pkg_container_env\" ADD COLUMN \"env_key\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_env"]["env_key"]["ALTER"] = "ALTER TABLE \"pkg_container_env\" ALTER COLUMN \"env_key\" SET NOT NULL, ALTER COLUMN \"env_key\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_env"]["env_val"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_env"]["env_val"]["ADD"] = "ALTER TABLE \"pkg_container_env\" ADD COLUMN \"env_val\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_env"]["env_val"]["ALTER"] = "ALTER TABLE \"pkg_container_env\" ALTER COLUMN \"env_val\" SET NOT NULL, ALTER COLUMN \"env_val\" SET DEFAULT ''::text";
+
+
+  $Schema["TABLE"]["pkg_container_inst_dep"]["dep_pk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_inst_dep"]["dep_pk"]["ADD"] = "ALTER TABLE \"pkg_container_inst_dep\" ADD COLUMN \"dep_pk\" int4 DEFAULT nextval('pkg_container_inst_dep_dep_pk_seq'::regclass)";
+  $Schema["TABLE"]["pkg_container_inst_dep"]["dep_pk"]["ALTER"] = "ALTER TABLE \"pkg_container_inst_dep\" ALTER COLUMN \"dep_pk\" SET NOT NULL, ALTER COLUMN \"dep_pk\" SET DEFAULT nextval('pkg_container_inst_dep_dep_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["pkg_container_inst_dep"]["inst_fk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_inst_dep"]["inst_fk"]["ADD"] = "ALTER TABLE \"pkg_container_inst_dep\" ADD COLUMN \"inst_fk\" int4";
+  $Schema["TABLE"]["pkg_container_inst_dep"]["inst_fk"]["ALTER"] = "ALTER TABLE \"pkg_container_inst_dep\" ALTER COLUMN \"inst_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["pkg_container_inst_dep"]["dep_name"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_inst_dep"]["dep_name"]["ADD"] = "ALTER TABLE \"pkg_container_inst_dep\" ADD COLUMN \"dep_name\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_inst_dep"]["dep_name"]["ALTER"] = "ALTER TABLE \"pkg_container_inst_dep\" ALTER COLUMN \"dep_name\" SET NOT NULL, ALTER COLUMN \"dep_name\" SET DEFAULT ''::text";
+
+
+  $Schema["TABLE"]["pkg_container_installed"]["inst_pk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_installed"]["inst_pk"]["ADD"] = "ALTER TABLE \"pkg_container_installed\" ADD COLUMN \"inst_pk\" int4 DEFAULT nextval('pkg_container_installed_inst_pk_seq'::regclass)";
+  $Schema["TABLE"]["pkg_container_installed"]["inst_pk"]["ALTER"] = "ALTER TABLE \"pkg_container_installed\" ALTER COLUMN \"inst_pk\" SET NOT NULL, ALTER COLUMN \"inst_pk\" SET DEFAULT nextval('pkg_container_installed_inst_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["pkg_container_installed"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_installed"]["upload_fk"]["ADD"] = "ALTER TABLE \"pkg_container_installed\" ADD COLUMN \"upload_fk\" int4";
+  $Schema["TABLE"]["pkg_container_installed"]["upload_fk"]["ALTER"] = "ALTER TABLE \"pkg_container_installed\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_fk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_fk"]["ADD"] = "ALTER TABLE \"pkg_container_installed\" ADD COLUMN \"pkg_fk\" int4";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_fk"]["ALTER"] = "ALTER TABLE \"pkg_container_installed\" ALTER COLUMN \"pkg_fk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_manager"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_manager"]["ADD"] = "ALTER TABLE \"pkg_container_installed\" ADD COLUMN \"pkg_manager\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_manager"]["ALTER"] = "ALTER TABLE \"pkg_container_installed\" ALTER COLUMN \"pkg_manager\" SET NOT NULL, ALTER COLUMN \"pkg_manager\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_name"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_name"]["ADD"] = "ALTER TABLE \"pkg_container_installed\" ADD COLUMN \"pkg_name\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_name"]["ALTER"] = "ALTER TABLE \"pkg_container_installed\" ALTER COLUMN \"pkg_name\" SET NOT NULL, ALTER COLUMN \"pkg_name\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_version"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_version"]["ADD"] = "ALTER TABLE \"pkg_container_installed\" ADD COLUMN \"pkg_version\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_version"]["ALTER"] = "ALTER TABLE \"pkg_container_installed\" ALTER COLUMN \"pkg_version\" SET NOT NULL, ALTER COLUMN \"pkg_version\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_arch"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_arch"]["ADD"] = "ALTER TABLE \"pkg_container_installed\" ADD COLUMN \"pkg_arch\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_arch"]["ALTER"] = "ALTER TABLE \"pkg_container_installed\" ALTER COLUMN \"pkg_arch\" SET NOT NULL, ALTER COLUMN \"pkg_arch\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_source"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_source"]["ADD"] = "ALTER TABLE \"pkg_container_installed\" ADD COLUMN \"pkg_source\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_source"]["ALTER"] = "ALTER TABLE \"pkg_container_installed\" ALTER COLUMN \"pkg_source\" SET NOT NULL, ALTER COLUMN \"pkg_source\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_summary"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_summary"]["ADD"] = "ALTER TABLE \"pkg_container_installed\" ADD COLUMN \"pkg_summary\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_summary"]["ALTER"] = "ALTER TABLE \"pkg_container_installed\" ALTER COLUMN \"pkg_summary\" SET NOT NULL, ALTER COLUMN \"pkg_summary\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_maintainer"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_maintainer"]["ADD"] = "ALTER TABLE \"pkg_container_installed\" ADD COLUMN \"pkg_maintainer\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_maintainer"]["ALTER"] = "ALTER TABLE \"pkg_container_installed\" ALTER COLUMN \"pkg_maintainer\" SET NOT NULL, ALTER COLUMN \"pkg_maintainer\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_license"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_license"]["ADD"] = "ALTER TABLE \"pkg_container_installed\" ADD COLUMN \"pkg_license\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_installed"]["pkg_license"]["ALTER"] = "ALTER TABLE \"pkg_container_installed\" ALTER COLUMN \"pkg_license\" SET NOT NULL, ALTER COLUMN \"pkg_license\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_installed"]["layer_index"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_installed"]["layer_index"]["ADD"] = "ALTER TABLE \"pkg_container_installed\" ADD COLUMN \"layer_index\" int4 DEFAULT '-1'::integer";
+  $Schema["TABLE"]["pkg_container_installed"]["layer_index"]["ALTER"] = "ALTER TABLE \"pkg_container_installed\" ALTER COLUMN \"layer_index\" SET NOT NULL, ALTER COLUMN \"layer_index\" SET DEFAULT '-1'::integer";
+
+
+  $Schema["TABLE"]["pkg_container_label"]["label_pk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_label"]["label_pk"]["ADD"] = "ALTER TABLE \"pkg_container_label\" ADD COLUMN \"label_pk\" int4 DEFAULT nextval('pkg_container_label_label_pk_seq'::regclass)";
+  $Schema["TABLE"]["pkg_container_label"]["label_pk"]["ALTER"] = "ALTER TABLE \"pkg_container_label\" ALTER COLUMN \"label_pk\" SET NOT NULL, ALTER COLUMN \"label_pk\" SET DEFAULT nextval('pkg_container_label_label_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["pkg_container_label"]["pkg_fk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_label"]["pkg_fk"]["ADD"] = "ALTER TABLE \"pkg_container_label\" ADD COLUMN \"pkg_fk\" int4";
+  $Schema["TABLE"]["pkg_container_label"]["pkg_fk"]["ALTER"] = "ALTER TABLE \"pkg_container_label\" ALTER COLUMN \"pkg_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["pkg_container_label"]["lbl_key"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_label"]["lbl_key"]["ADD"] = "ALTER TABLE \"pkg_container_label\" ADD COLUMN \"lbl_key\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_label"]["lbl_key"]["ALTER"] = "ALTER TABLE \"pkg_container_label\" ALTER COLUMN \"lbl_key\" SET NOT NULL, ALTER COLUMN \"lbl_key\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_label"]["lbl_val"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_label"]["lbl_val"]["ADD"] = "ALTER TABLE \"pkg_container_label\" ADD COLUMN \"lbl_val\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_label"]["lbl_val"]["ALTER"] = "ALTER TABLE \"pkg_container_label\" ALTER COLUMN \"lbl_val\" SET NOT NULL, ALTER COLUMN \"lbl_val\" SET DEFAULT ''::text";
+
+
+  $Schema["TABLE"]["pkg_container_lang_dep"]["dep_pk"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_dep\".\"dep_pk\" IS 'Surrogate primary key.'";
+  $Schema["TABLE"]["pkg_container_lang_dep"]["dep_pk"]["ADD"] = "ALTER TABLE \"pkg_container_lang_dep\" ADD COLUMN \"dep_pk\" int4 DEFAULT nextval('pkg_container_lang_dep_dep_pk_seq'::regclass)";
+  $Schema["TABLE"]["pkg_container_lang_dep"]["dep_pk"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_dep\" ALTER COLUMN \"dep_pk\" SET NOT NULL, ALTER COLUMN \"dep_pk\" SET DEFAULT nextval('pkg_container_lang_dep_dep_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["pkg_container_lang_dep"]["inst_fk"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_dep\".\"inst_fk\" IS 'FK → pkg_container_lang_installed.inst_pk.'";
+  $Schema["TABLE"]["pkg_container_lang_dep"]["inst_fk"]["ADD"] = "ALTER TABLE \"pkg_container_lang_dep\" ADD COLUMN \"inst_fk\" int4";
+  $Schema["TABLE"]["pkg_container_lang_dep"]["inst_fk"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_dep\" ALTER COLUMN \"inst_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["pkg_container_lang_dep"]["dep_name"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_dep\".\"dep_name\" IS 'Raw dependency token as declared in the lock file.'";
+  $Schema["TABLE"]["pkg_container_lang_dep"]["dep_name"]["ADD"] = "ALTER TABLE \"pkg_container_lang_dep\" ADD COLUMN \"dep_name\" text";
+  $Schema["TABLE"]["pkg_container_lang_dep"]["dep_name"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_dep\" ALTER COLUMN \"dep_name\" SET NOT NULL";
+
+
+  $Schema["TABLE"]["pkg_container_lang_installed"]["inst_pk"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_installed\".\"inst_pk\" IS 'Surrogate primary key.'";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["inst_pk"]["ADD"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD COLUMN \"inst_pk\" int4 DEFAULT nextval('pkg_container_lang_installed_inst_pk_seq'::regclass)";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["inst_pk"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_installed\" ALTER COLUMN \"inst_pk\" SET NOT NULL, ALTER COLUMN \"inst_pk\" SET DEFAULT nextval('pkg_container_lang_installed_inst_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["pkg_container_lang_installed"]["upload_fk"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_installed\".\"upload_fk\" IS 'FK → upload.upload_pk.'";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["upload_fk"]["ADD"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD COLUMN \"upload_fk\" int4";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["upload_fk"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_installed\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_fk"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_installed\".\"pkg_fk\" IS 'FK → pkg_container.pkg_pk (parent image).'";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_fk"]["ADD"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD COLUMN \"pkg_fk\" int4";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_fk"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_installed\" ALTER COLUMN \"pkg_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_manager"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_installed\".\"pkg_manager\" IS 'Package manager: npm | pip | maven | go | cargo | gem | nuget | composer | yarn.'";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_manager"]["ADD"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD COLUMN \"pkg_manager\" text";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_manager"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_installed\" ALTER COLUMN \"pkg_manager\" SET NOT NULL";
+
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_name"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_installed\".\"pkg_name\" IS 'Package or module name (e.g. \"express\", \"requests\", \"com.google.guava:guava\").'";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_name"]["ADD"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD COLUMN \"pkg_name\" text";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_name"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_installed\" ALTER COLUMN \"pkg_name\" SET NOT NULL";
+
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_version"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_installed\".\"pkg_version\" IS 'Resolved / locked version string (e.g. \"4.18.2\", \"==2.31.0\").'";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_version"]["ADD"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD COLUMN \"pkg_version\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_version"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_installed\" ALTER COLUMN \"pkg_version\" SET NOT NULL, ALTER COLUMN \"pkg_version\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_source"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_installed\".\"pkg_source\" IS 'Source groupId (Maven), parent module, or origin registry hostname.'";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_source"]["ADD"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD COLUMN \"pkg_source\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_source"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_installed\" ALTER COLUMN \"pkg_source\" SET NOT NULL, ALTER COLUMN \"pkg_source\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_license"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_installed\".\"pkg_license\" IS 'SPDX license identifier where available (npm, cargo, composer).'";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_license"]["ADD"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD COLUMN \"pkg_license\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_license"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_installed\" ALTER COLUMN \"pkg_license\" SET NOT NULL, ALTER COLUMN \"pkg_license\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_url"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_installed\".\"pkg_url\" IS 'Registry or homepage URL where available.'";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_url"]["ADD"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD COLUMN \"pkg_url\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["pkg_url"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_installed\" ALTER COLUMN \"pkg_url\" SET NOT NULL, ALTER COLUMN \"pkg_url\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_lang_installed"]["layer_index"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_installed\".\"layer_index\" IS '0-based index into the image layer list. -1 if layer could not be resolved.'";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["layer_index"]["ADD"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD COLUMN \"layer_index\" int4 DEFAULT '-1'::integer";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["layer_index"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_installed\" ALTER COLUMN \"layer_index\" SET NOT NULL, ALTER COLUMN \"layer_index\" SET DEFAULT '-1'::integer";
+
+  $Schema["TABLE"]["pkg_container_lang_installed"]["created_at"]["DESC"] = "COMMENT ON COLUMN \"pkg_container_lang_installed\".\"created_at\" IS 'Row insertion timestamp (UTC).'";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["created_at"]["ADD"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD COLUMN \"created_at\" timestamptz DEFAULT now()";
+  $Schema["TABLE"]["pkg_container_lang_installed"]["created_at"]["ALTER"] = "ALTER TABLE \"pkg_container_lang_installed\" ALTER COLUMN \"created_at\" SET NOT NULL, ALTER COLUMN \"created_at\" SET DEFAULT now()";
+
+
+  $Schema["TABLE"]["pkg_container_layer"]["layer_pk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_layer"]["layer_pk"]["ADD"] = "ALTER TABLE \"pkg_container_layer\" ADD COLUMN \"layer_pk\" int4 DEFAULT nextval('pkg_container_layer_layer_pk_seq'::regclass)";
+  $Schema["TABLE"]["pkg_container_layer"]["layer_pk"]["ALTER"] = "ALTER TABLE \"pkg_container_layer\" ALTER COLUMN \"layer_pk\" SET NOT NULL, ALTER COLUMN \"layer_pk\" SET DEFAULT nextval('pkg_container_layer_layer_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["pkg_container_layer"]["pkg_fk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_layer"]["pkg_fk"]["ADD"] = "ALTER TABLE \"pkg_container_layer\" ADD COLUMN \"pkg_fk\" int4";
+  $Schema["TABLE"]["pkg_container_layer"]["pkg_fk"]["ALTER"] = "ALTER TABLE \"pkg_container_layer\" ALTER COLUMN \"pkg_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["pkg_container_layer"]["layer_index"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_layer"]["layer_index"]["ADD"] = "ALTER TABLE \"pkg_container_layer\" ADD COLUMN \"layer_index\" int4 DEFAULT 0";
+  $Schema["TABLE"]["pkg_container_layer"]["layer_index"]["ALTER"] = "ALTER TABLE \"pkg_container_layer\" ALTER COLUMN \"layer_index\" SET NOT NULL, ALTER COLUMN \"layer_index\" SET DEFAULT 0";
+
+  $Schema["TABLE"]["pkg_container_layer"]["layer_id"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_layer"]["layer_id"]["ADD"] = "ALTER TABLE \"pkg_container_layer\" ADD COLUMN \"layer_id\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_layer"]["layer_id"]["ALTER"] = "ALTER TABLE \"pkg_container_layer\" ALTER COLUMN \"layer_id\" SET NOT NULL, ALTER COLUMN \"layer_id\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_layer"]["created_by"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_layer"]["created_by"]["ADD"] = "ALTER TABLE \"pkg_container_layer\" ADD COLUMN \"created_by\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_layer"]["created_by"]["ALTER"] = "ALTER TABLE \"pkg_container_layer\" ALTER COLUMN \"created_by\" SET NOT NULL, ALTER COLUMN \"created_by\" SET DEFAULT ''::text";
+
+  $Schema["TABLE"]["pkg_container_layer"]["empty_layer"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_layer"]["empty_layer"]["ADD"] = "ALTER TABLE \"pkg_container_layer\" ADD COLUMN \"empty_layer\" bool DEFAULT false";
+  $Schema["TABLE"]["pkg_container_layer"]["empty_layer"]["ALTER"] = "ALTER TABLE \"pkg_container_layer\" ALTER COLUMN \"empty_layer\" SET NOT NULL, ALTER COLUMN \"empty_layer\" SET DEFAULT false";
+
+
+  $Schema["TABLE"]["pkg_container_port"]["port_pk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_port"]["port_pk"]["ADD"] = "ALTER TABLE \"pkg_container_port\" ADD COLUMN \"port_pk\" int4 DEFAULT nextval('pkg_container_port_port_pk_seq'::regclass)";
+  $Schema["TABLE"]["pkg_container_port"]["port_pk"]["ALTER"] = "ALTER TABLE \"pkg_container_port\" ALTER COLUMN \"port_pk\" SET NOT NULL, ALTER COLUMN \"port_pk\" SET DEFAULT nextval('pkg_container_port_port_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["pkg_container_port"]["pkg_fk"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_port"]["pkg_fk"]["ADD"] = "ALTER TABLE \"pkg_container_port\" ADD COLUMN \"pkg_fk\" int4";
+  $Schema["TABLE"]["pkg_container_port"]["pkg_fk"]["ALTER"] = "ALTER TABLE \"pkg_container_port\" ALTER COLUMN \"pkg_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["pkg_container_port"]["port"]["DESC"] = "";
+  $Schema["TABLE"]["pkg_container_port"]["port"]["ADD"] = "ALTER TABLE \"pkg_container_port\" ADD COLUMN \"port\" text DEFAULT ''::text";
+  $Schema["TABLE"]["pkg_container_port"]["port"]["ALTER"] = "ALTER TABLE \"pkg_container_port\" ALTER COLUMN \"port\" SET NOT NULL, ALTER COLUMN \"port\" SET DEFAULT ''::text";
+
+
   $Schema["TABLE"]["pkg_deb"]["pkg_name"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"pkg_name\" IS 'the name of the package'";
   $Schema["TABLE"]["pkg_deb"]["pkg_name"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"pkg_name\" text";
   $Schema["TABLE"]["pkg_deb"]["pkg_name"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"pkg_name\" SET NOT NULL";
@@ -2347,12 +2608,213 @@
   $Schema["TABLE"]["report_info"]["ri_globaldecision"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_globaldecision\" int2 DEFAULT 1";
   $Schema["TABLE"]["report_info"]["ri_globaldecision"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_globaldecision\" SET NOT NULL, ALTER COLUMN \"ri_globaldecision\" SET DEFAULT 1";
 
+  $Schema["TABLE"]["v_container_installed"]["inst_pk"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["inst_pk"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"inst_pk\" int4";
+  $Schema["TABLE"]["v_container_installed"]["inst_pk"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"inst_pk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["upload_fk"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"upload_fk\" int4";
+  $Schema["TABLE"]["v_container_installed"]["upload_fk"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"upload_fk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["pkg_fk"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["pkg_fk"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"pkg_fk\" int4";
+  $Schema["TABLE"]["v_container_installed"]["pkg_fk"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"pkg_fk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["image_name"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["image_name"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"image_name\" text";
+  $Schema["TABLE"]["v_container_installed"]["image_name"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"image_name\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["image_tag"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["image_tag"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"image_tag\" text";
+  $Schema["TABLE"]["v_container_installed"]["image_tag"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"image_tag\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["format"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["format"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"format\" text";
+  $Schema["TABLE"]["v_container_installed"]["format"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"format\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["pkg_manager"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["pkg_manager"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"pkg_manager\" text";
+  $Schema["TABLE"]["v_container_installed"]["pkg_manager"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"pkg_manager\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["pkg_name"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["pkg_name"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"pkg_name\" text";
+  $Schema["TABLE"]["v_container_installed"]["pkg_name"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"pkg_name\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["pkg_version"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["pkg_version"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"pkg_version\" text";
+  $Schema["TABLE"]["v_container_installed"]["pkg_version"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"pkg_version\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["pkg_arch"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["pkg_arch"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"pkg_arch\" text";
+  $Schema["TABLE"]["v_container_installed"]["pkg_arch"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"pkg_arch\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["pkg_source"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["pkg_source"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"pkg_source\" text";
+  $Schema["TABLE"]["v_container_installed"]["pkg_source"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"pkg_source\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["pkg_summary"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["pkg_summary"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"pkg_summary\" text";
+  $Schema["TABLE"]["v_container_installed"]["pkg_summary"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"pkg_summary\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["pkg_maintainer"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["pkg_maintainer"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"pkg_maintainer\" text";
+  $Schema["TABLE"]["v_container_installed"]["pkg_maintainer"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"pkg_maintainer\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["pkg_license"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["pkg_license"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"pkg_license\" text";
+  $Schema["TABLE"]["v_container_installed"]["pkg_license"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"pkg_license\" DROP NOT NULL";
+
+  $Schema["TABLE"]["v_container_installed"]["layer_index"]["DESC"] = "";
+  $Schema["TABLE"]["v_container_installed"]["layer_index"]["ADD"] = "ALTER TABLE \"v_container_installed\" ADD COLUMN \"layer_index\" int4";
+  $Schema["TABLE"]["v_container_installed"]["layer_index"]["ALTER"] = "ALTER TABLE \"v_container_installed\" ALTER COLUMN \"layer_index\" DROP NOT NULL";
+
+
+  $Schema["TABLE"]["view_container_lang_packages"]["inst_pk"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["inst_pk"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"inst_pk\" int4";
+  $Schema["TABLE"]["view_container_lang_packages"]["inst_pk"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"inst_pk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["upload_pk"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["upload_pk"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"upload_pk\" int4";
+  $Schema["TABLE"]["view_container_lang_packages"]["upload_pk"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"upload_pk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["upload_filename"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["upload_filename"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"upload_filename\" text";
+  $Schema["TABLE"]["view_container_lang_packages"]["upload_filename"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"upload_filename\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_pk"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_pk"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"pkg_pk\" int4";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_pk"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"pkg_pk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["image_name"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["image_name"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"image_name\" text";
+  $Schema["TABLE"]["view_container_lang_packages"]["image_name"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"image_name\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["image_tag"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["image_tag"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"image_tag\" text";
+  $Schema["TABLE"]["view_container_lang_packages"]["image_tag"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"image_tag\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["image_id"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["image_id"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"image_id\" text";
+  $Schema["TABLE"]["view_container_lang_packages"]["image_id"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"image_id\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["os"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["os"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"os\" text";
+  $Schema["TABLE"]["view_container_lang_packages"]["os"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"os\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["architecture"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["architecture"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"architecture\" text";
+  $Schema["TABLE"]["view_container_lang_packages"]["architecture"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"architecture\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_manager"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_manager"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"pkg_manager\" text";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_manager"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"pkg_manager\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_name"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_name"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"pkg_name\" text";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_name"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"pkg_name\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_version"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_version"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"pkg_version\" text";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_version"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"pkg_version\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_source"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_source"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"pkg_source\" text";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_source"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"pkg_source\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_license"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_license"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"pkg_license\" text";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_license"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"pkg_license\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_url"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_url"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"pkg_url\" text";
+  $Schema["TABLE"]["view_container_lang_packages"]["pkg_url"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"pkg_url\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["layer_index"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["layer_index"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"layer_index\" int4";
+  $Schema["TABLE"]["view_container_lang_packages"]["layer_index"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"layer_index\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_packages"]["created_at"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_packages"]["created_at"]["ADD"] = "ALTER TABLE \"view_container_lang_packages\" ADD COLUMN \"created_at\" timestamptz";
+  $Schema["TABLE"]["view_container_lang_packages"]["created_at"]["ALTER"] = "ALTER TABLE \"view_container_lang_packages\" ALTER COLUMN \"created_at\" DROP NOT NULL";
+
+
+  $Schema["TABLE"]["view_container_lang_summary"]["image_name"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_summary"]["image_name"]["ADD"] = "ALTER TABLE \"view_container_lang_summary\" ADD COLUMN \"image_name\" text";
+  $Schema["TABLE"]["view_container_lang_summary"]["image_name"]["ALTER"] = "ALTER TABLE \"view_container_lang_summary\" ALTER COLUMN \"image_name\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_summary"]["image_tag"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_summary"]["image_tag"]["ADD"] = "ALTER TABLE \"view_container_lang_summary\" ADD COLUMN \"image_tag\" text";
+  $Schema["TABLE"]["view_container_lang_summary"]["image_tag"]["ALTER"] = "ALTER TABLE \"view_container_lang_summary\" ALTER COLUMN \"image_tag\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_summary"]["pkg_manager"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_summary"]["pkg_manager"]["ADD"] = "ALTER TABLE \"view_container_lang_summary\" ADD COLUMN \"pkg_manager\" text";
+  $Schema["TABLE"]["view_container_lang_summary"]["pkg_manager"]["ALTER"] = "ALTER TABLE \"view_container_lang_summary\" ALTER COLUMN \"pkg_manager\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_summary"]["pkg_count"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_summary"]["pkg_count"]["ADD"] = "ALTER TABLE \"view_container_lang_summary\" ADD COLUMN \"pkg_count\" int8";
+  $Schema["TABLE"]["view_container_lang_summary"]["pkg_count"]["ALTER"] = "ALTER TABLE \"view_container_lang_summary\" ALTER COLUMN \"pkg_count\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_summary"]["pkg_pk"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_summary"]["pkg_pk"]["ADD"] = "ALTER TABLE \"view_container_lang_summary\" ADD COLUMN \"pkg_pk\" int4";
+  $Schema["TABLE"]["view_container_lang_summary"]["pkg_pk"]["ALTER"] = "ALTER TABLE \"view_container_lang_summary\" ALTER COLUMN \"pkg_pk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["view_container_lang_summary"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["view_container_lang_summary"]["upload_fk"]["ADD"] = "ALTER TABLE \"view_container_lang_summary\" ADD COLUMN \"upload_fk\" int4";
+  $Schema["TABLE"]["view_container_lang_summary"]["upload_fk"]["ALTER"] = "ALTER TABLE \"view_container_lang_summary\" ALTER COLUMN \"upload_fk\" DROP NOT NULL";
+
 
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";
 
   $Schema["VIEW"]["uploadtree_tag_file_inner"] = "CREATE VIEW \"uploadtree_tag_file_inner\" AS SELECT uploadtree.pfile_fk, uploadtree.uploadtree_pk, uploadtree.parent, uploadtree.upload_fk, uploadtree.ufile_mode, uploadtree.lft, uploadtree.rgt, uploadtree.ufile_name, tag_file.tag_file_pk, tag_file.tag_fk, tag_file.tag_file_date, tag_file.tag_file_text FROM (uploadtree JOIN tag_file USING (pfile_fk));";
 
   $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::timestamp with time zone AS ts, NULL::integer AS upload_pk, NULL::integer AS pfile_fk, NULL::integer AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::integer AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
+
+  $Schema["VIEW"]["view_container_lang_packages"] = "CREATE VIEW \"view_container_lang_packages\" AS  SELECT pcli.inst_pk,
+    u.upload_pk,
+    u.upload_filename,
+    pc.pkg_pk,
+    pc.image_name,
+    pc.image_tag,
+    pc.image_id,
+    pc.os,
+    pc.architecture,
+    pcli.pkg_manager,
+    pcli.pkg_name,
+    pcli.pkg_version,
+    pcli.pkg_source,
+    pcli.pkg_license,
+    pcli.pkg_url,
+    pcli.layer_index,
+    pcli.created_at
+   FROM ((pkg_container_lang_installed pcli
+     JOIN pkg_container pc ON ((pc.pkg_pk = pcli.pkg_fk)))
+     JOIN upload u ON ((u.upload_pk = pcli.upload_fk)));";
+  $Schema["VIEW"]["view_container_lang_summary"] = "CREATE VIEW \"view_container_lang_summary\" AS  SELECT pc.image_name,
+    pc.image_tag,
+    pcli.pkg_manager,
+    count(*) AS pkg_count,
+    pc.pkg_pk,
+    pcli.upload_fk
+   FROM (pkg_container_lang_installed pcli
+     JOIN pkg_container pc ON ((pc.pkg_pk = pcli.pkg_fk)))
+  GROUP BY pc.image_name, pc.image_tag, pcli.pkg_manager, pc.pkg_pk, pcli.upload_fk;";
+  $Schema["VIEW"]["v_container_installed"] = "CREATE VIEW \"v_container_installed\" AS  SELECT i.inst_pk,
+    i.upload_fk,
+    i.pkg_fk,
+    c.image_name,
+    c.image_tag,
+    c.format,
+    i.pkg_manager,
+    i.pkg_name,
+    i.pkg_version,
+    i.pkg_arch,
+    i.pkg_source,
+    i.pkg_summary,
+    i.pkg_maintainer,
+    i.pkg_license,
+    i.layer_index
+   FROM (pkg_container_installed i
+     LEFT JOIN pkg_container c ON ((c.pkg_pk = i.pkg_fk)));";
 
 
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"sysconfig_sysconfig_pk_seq\"";
@@ -2545,7 +3007,46 @@
   $Schema["SEQUENCE"]["software_heritage_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"software_heritage_pk_seq\"";
   $Schema["SEQUENCE"]["software_heritage_pk_seq"]["UPDATE"] = "SELECT setval('software_heritage_pk_seq',(SELECT greatest(1,max(software_heritage_pk)) val FROM software_heritage))";
 
+  $Schema["SEQUENCE"]["pkg_container_lang_installed_inst_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"pkg_container_lang_installed_inst_pk_seq\"";
+  $Schema["SEQUENCE"]["pkg_container_lang_installed_inst_pk_seq"]["UPDATE"] = "SELECT setval('pkg_container_lang_installed_inst_pk_seq',(SELECT greatest(1,max(inst_pk)) val FROM pkg_container_lang_installed))";
+
+  $Schema["SEQUENCE"]["pkg_container_lang_dep_dep_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"pkg_container_lang_dep_dep_pk_seq\"";
+  $Schema["SEQUENCE"]["pkg_container_lang_dep_dep_pk_seq"]["UPDATE"] = "SELECT setval('pkg_container_lang_dep_dep_pk_seq',(SELECT greatest(1,max(dep_pk)) val FROM pkg_container_lang_dep))";
+
+  $Schema["SEQUENCE"]["pkg_container_pkg_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"pkg_container_pkg_pk_seq\"";
+  $Schema["SEQUENCE"]["pkg_container_pkg_pk_seq"]["UPDATE"] = "SELECT setval('pkg_container_pkg_pk_seq',(SELECT greatest(1,max(pkg_pk)) val FROM pkg_container))";
+
+  $Schema["SEQUENCE"]["pkg_container_env_env_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"pkg_container_env_env_pk_seq\"";
+  $Schema["SEQUENCE"]["pkg_container_env_env_pk_seq"]["UPDATE"] = "SELECT setval('pkg_container_env_env_pk_seq',(SELECT greatest(1,max(env_pk)) val FROM pkg_container_env))";
+
+  $Schema["SEQUENCE"]["pkg_container_port_port_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"pkg_container_port_port_pk_seq\"";
+  $Schema["SEQUENCE"]["pkg_container_port_port_pk_seq"]["UPDATE"] = "SELECT setval('pkg_container_port_port_pk_seq',(SELECT greatest(1,max(port_pk)) val FROM pkg_container_port))";
+
+  $Schema["SEQUENCE"]["pkg_container_label_label_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"pkg_container_label_label_pk_seq\"";
+  $Schema["SEQUENCE"]["pkg_container_label_label_pk_seq"]["UPDATE"] = "SELECT setval('pkg_container_label_label_pk_seq',(SELECT greatest(1,max(label_pk)) val FROM pkg_container_label))";
+
+  $Schema["SEQUENCE"]["pkg_container_layer_layer_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"pkg_container_layer_layer_pk_seq\"";
+  $Schema["SEQUENCE"]["pkg_container_layer_layer_pk_seq"]["UPDATE"] = "SELECT setval('pkg_container_layer_layer_pk_seq',(SELECT greatest(1,max(layer_pk)) val FROM pkg_container_layer))";
+
+  $Schema["SEQUENCE"]["pkg_container_installed_inst_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"pkg_container_installed_inst_pk_seq\"";
+  $Schema["SEQUENCE"]["pkg_container_installed_inst_pk_seq"]["UPDATE"] = "SELECT setval('pkg_container_installed_inst_pk_seq',(SELECT greatest(1,max(inst_pk)) val FROM pkg_container_installed))";
+
+  $Schema["SEQUENCE"]["pkg_container_inst_dep_dep_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"pkg_container_inst_dep_dep_pk_seq\"";
+  $Schema["SEQUENCE"]["pkg_container_inst_dep_dep_pk_seq"]["UPDATE"] = "SELECT setval('pkg_container_inst_dep_dep_pk_seq',(SELECT greatest(1,max(dep_pk)) val FROM pkg_container_inst_dep))";
   $Schema["CONSTRAINT"]["agent_pkey"] = "ALTER TABLE \"agent\" ADD CONSTRAINT \"agent_pkey\" PRIMARY KEY (\"agent_pk\");";
+  $Schema["CONSTRAINT"]["pkg_container_env_pkey"] = "ALTER TABLE \"pkg_container_env\" ADD CONSTRAINT \"pkg_container_env_pkey\" PRIMARY KEY (\"env_pk\");";
+  $Schema["CONSTRAINT"]["pkg_container_inst_dep_pkey"] = "ALTER TABLE \"pkg_container_inst_dep\" ADD CONSTRAINT \"pkg_container_inst_dep_pkey\" PRIMARY KEY (\"dep_pk\");";
+  $Schema["CONSTRAINT"]["pkg_container_installed_pkey"] = "ALTER TABLE \"pkg_container_installed\" ADD CONSTRAINT \"pkg_container_installed_pkey\" PRIMARY KEY (\"inst_pk\");";
+  $Schema["CONSTRAINT"]["pkg_container_label_pkey"] = "ALTER TABLE \"pkg_container_label\" ADD CONSTRAINT \"pkg_container_label_pkey\" PRIMARY KEY (\"label_pk\");";
+  $Schema["CONSTRAINT"]["pkg_container_lang_dep_pkey"] = "ALTER TABLE \"pkg_container_lang_dep\" ADD CONSTRAINT \"pkg_container_lang_dep_pkey\" PRIMARY KEY (\"dep_pk\");";
+  $Schema["CONSTRAINT"]["pkg_container_lang_installed_pkey"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD CONSTRAINT \"pkg_container_lang_installed_pkey\" PRIMARY KEY (\"inst_pk\");";
+  $Schema["CONSTRAINT"]["pkg_container_layer_pkey"] = "ALTER TABLE \"pkg_container_layer\" ADD CONSTRAINT \"pkg_container_layer_pkey\" PRIMARY KEY (\"layer_pk\");";
+  $Schema["CONSTRAINT"]["pkg_container_pkey"] = "ALTER TABLE \"pkg_container\" ADD CONSTRAINT \"pkg_container_pkey\" PRIMARY KEY (\"pkg_pk\");";
+  $Schema["CONSTRAINT"]["pkg_container_port_pkey"] = "ALTER TABLE \"pkg_container_port\" ADD CONSTRAINT \"pkg_container_port_pkey\" PRIMARY KEY (\"port_pk\");";
+  $Schema["CONSTRAINT"]["pkg_deb_pkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pkey\" PRIMARY KEY (\"pkg_pk\");";
+  $Schema["CONSTRAINT"]["pkg_deb_req_pkey"] = "ALTER TABLE \"pkg_deb_req\" ADD CONSTRAINT \"pkg_deb_req_pkey\" PRIMARY KEY (\"req_pk\");";
+  $Schema["CONSTRAINT"]["pkg_rpm_pkey"] = "ALTER TABLE \"pkg_rpm\" ADD CONSTRAINT \"pkg_rpm_pkey\" PRIMARY KEY (\"pkg_pk\");";
+  $Schema["CONSTRAINT"]["pkg_rpm_req_pkey"] = "ALTER TABLE \"pkg_rpm_req\" ADD CONSTRAINT \"pkg_rpm_req_pkey\" PRIMARY KEY (\"req_pk\");";
   $Schema["CONSTRAINT"]["agent_unique_name_rev"] = "ALTER TABLE \"agent\" ADD CONSTRAINT \"agent_unique_name_rev\" UNIQUE (\"agent_name\",\"agent_rev\");";
   $Schema["CONSTRAINT"]["agent_wc_pfile_fk_key"] = "ALTER TABLE \"agent_wc\" ADD CONSTRAINT \"agent_wc_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
   $Schema["CONSTRAINT"]["ars_ars_pkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"ars_ars_pkey\" PRIMARY KEY (\"ars_pk\");";
@@ -2648,6 +3149,17 @@
   $Schema["CONSTRAINT"]["pfile_md5_sha1_sha256_size_ukey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_md5_sha1_sha256_size_ukey\" UNIQUE (\"pfile_md5\",\"pfile_sha1\",\"pfile_sha256\",\"pfile_size\");";
   $Schema["CONSTRAINT"]["pfile_mimetype_fk_fkey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_mimetype_fk_fkey\" FOREIGN KEY (\"pfile_mimetypefk\") REFERENCES \"mimetype\" (\"mimetype_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["pkg_deb_pkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pkey\" PRIMARY KEY (\"pkg_pk\");";
+  $Schema["CONSTRAINT"]["pkg_container_env_pkg_fk_fkey"] = "ALTER TABLE \"pkg_container_env\" ADD CONSTRAINT \"pkg_container_env_pkg_fk_fkey\" FOREIGN KEY (\"pkg_fk\") REFERENCES \"pkg_container\" (\"pkg_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_container_inst_dep_inst_fk_fkey"] = "ALTER TABLE \"pkg_container_inst_dep\" ADD CONSTRAINT \"pkg_container_inst_dep_inst_fk_fkey\" FOREIGN KEY (\"inst_fk\") REFERENCES \"pkg_container_installed\" (\"inst_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_container_installed_pkg_fk_fkey"] = "ALTER TABLE \"pkg_container_installed\" ADD CONSTRAINT \"pkg_container_installed_pkg_fk_fkey\" FOREIGN KEY (\"pkg_fk\") REFERENCES \"pkg_container\" (\"pkg_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_container_installed_upload_fk_fkey"] = "ALTER TABLE \"pkg_container_installed\" ADD CONSTRAINT \"pkg_container_installed_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_container_label_pkg_fk_fkey"] = "ALTER TABLE \"pkg_container_label\" ADD CONSTRAINT \"pkg_container_label_pkg_fk_fkey\" FOREIGN KEY (\"pkg_fk\") REFERENCES \"pkg_container\" (\"pkg_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_container_lang_dep_inst_fk_fkey"] = "ALTER TABLE \"pkg_container_lang_dep\" ADD CONSTRAINT \"pkg_container_lang_dep_inst_fk_fkey\" FOREIGN KEY (\"inst_fk\") REFERENCES \"pkg_container_lang_installed\" (\"inst_pk\") ON UPDATE CASCADE ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_container_lang_installed_pkg_fk_fkey"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD CONSTRAINT \"pkg_container_lang_installed_pkg_fk_fkey\" FOREIGN KEY (\"pkg_fk\") REFERENCES \"pkg_container\" (\"pkg_pk\") ON UPDATE CASCADE ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_container_lang_installed_upload_fk_fkey"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD CONSTRAINT \"pkg_container_lang_installed_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE CASCADE ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_container_layer_pkg_fk_fkey"] = "ALTER TABLE \"pkg_container_layer\" ADD CONSTRAINT \"pkg_container_layer_pkg_fk_fkey\" FOREIGN KEY (\"pkg_fk\") REFERENCES \"pkg_container\" (\"pkg_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_container_pfile_fk_fkey"] = "ALTER TABLE \"pkg_container\" ADD CONSTRAINT \"pkg_container_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_container_port_pkg_fk_fkey"] = "ALTER TABLE \"pkg_container_port\" ADD CONSTRAINT \"pkg_container_port_pkg_fk_fkey\" FOREIGN KEY (\"pkg_fk\") REFERENCES \"pkg_container\" (\"pkg_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_fkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_key"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
   $Schema["CONSTRAINT"]["pkg_deb_req_pkey"] = "ALTER TABLE \"pkg_deb_req\" ADD CONSTRAINT \"pkg_deb_req_pkey\" PRIMARY KEY (\"req_pk\");";
@@ -2691,6 +3203,9 @@
   $Schema["CONSTRAINT"]["users_default_bucketpool_pk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_default_bucketpool_pk_fkey\" FOREIGN KEY (\"default_bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["users_group_id_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_group_id_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["users_new_upload_group_fk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_new_upload_group_fk_fkey\" FOREIGN KEY (\"new_upload_group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE CASCADE ON DELETE RESTRICT;";
+  $Schema["CONSTRAINT"]["pkg_container_lang_dep_dep_name_check"] = "ALTER TABLE \"pkg_container_lang_dep\" ADD CONSTRAINT \"pkg_container_lang_dep_dep_name_check\" CHECK (\"dep_name\");";
+  $Schema["CONSTRAINT"]["pkg_container_lang_installed_pkg_manager_check"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD CONSTRAINT \"pkg_container_lang_installed_pkg_manager_check\" CHECK (\"pkg_manager\");";
+  $Schema["CONSTRAINT"]["pkg_container_lang_installed_pkg_name_check"] = "ALTER TABLE \"pkg_container_lang_installed\" ADD CONSTRAINT \"pkg_container_lang_installed_pkg_name_check\" CHECK (\"pkg_name\");";
   $Schema["CONSTRAINT"]["upload_events_upload_fk_fkey"] = "ALTER TABLE \"upload_events\" ADD CONSTRAINT \"upload_events_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_event_pkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_pkey\" PRIMARY KEY (\"copyright_event_pk\");";
   $Schema["CONSTRAINT"]["copyright_event_upload_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2813,6 +3328,30 @@
   $Schema["INDEX"]["pfile"]["pfile_mimetypefk_idx"] = "CREATE INDEX pfile_mimetypefk_idx ON pfile USING btree (pfile_mimetypefk);";
   $Schema["INDEX"]["pfile"]["pfile_sha1_idx"] = "CREATE INDEX pfile_sha1_idx ON pfile USING btree (pfile_sha1);";
   $Schema["INDEX"]["pfile"]["pfile_sha256_idx"] = "CREATE INDEX pfile_sha256_idx ON pfile USING btree (pfile_sha256);";
+
+  $Schema["INDEX"]["pkg_container"]["pkg_container_pfile_fk_idx"] = "CREATE INDEX pkg_container_pfile_fk_idx ON pkg_container USING btree (pfile_fk);";
+
+  $Schema["INDEX"]["pkg_container_env"]["pkg_container_env_pkg_fk_idx"] = "CREATE INDEX pkg_container_env_pkg_fk_idx ON pkg_container_env USING btree (pkg_fk);";
+
+  $Schema["INDEX"]["pkg_container_inst_dep"]["pkg_container_inst_dep_inst_fk_idx"] = "CREATE INDEX pkg_container_inst_dep_inst_fk_idx ON pkg_container_inst_dep USING btree (inst_fk);";
+
+  $Schema["INDEX"]["pkg_container_installed"]["pkg_container_installed_name_idx"] = "CREATE INDEX pkg_container_installed_name_idx ON pkg_container_installed USING btree (pkg_name);";
+  $Schema["INDEX"]["pkg_container_installed"]["pkg_container_installed_pkg_fk_idx"] = "CREATE INDEX pkg_container_installed_pkg_fk_idx ON pkg_container_installed USING btree (pkg_fk);";
+  $Schema["INDEX"]["pkg_container_installed"]["pkg_container_installed_upload_fk_idx"] = "CREATE INDEX pkg_container_installed_upload_fk_idx ON pkg_container_installed USING btree (upload_fk);";
+
+  $Schema["INDEX"]["pkg_container_label"]["pkg_container_label_pkg_fk_idx"] = "CREATE INDEX pkg_container_label_pkg_fk_idx ON pkg_container_label USING btree (pkg_fk);";
+
+  $Schema["INDEX"]["pkg_container_lang_dep"]["idx_pcld_dep_name"] = "CREATE INDEX idx_pcld_dep_name ON pkg_container_lang_dep USING btree (dep_name text_pattern_ops);";
+  $Schema["INDEX"]["pkg_container_lang_dep"]["idx_pcld_inst_fk"] = "CREATE INDEX idx_pcld_inst_fk ON pkg_container_lang_dep USING btree (inst_fk);";
+
+  $Schema["INDEX"]["pkg_container_lang_installed"]["idx_pcli_pkg_fk"] = "CREATE INDEX idx_pcli_pkg_fk ON pkg_container_lang_installed USING btree (pkg_fk);";
+  $Schema["INDEX"]["pkg_container_lang_installed"]["idx_pcli_pkg_fk_manager"] = "CREATE INDEX idx_pcli_pkg_fk_manager ON pkg_container_lang_installed USING btree (pkg_fk, pkg_manager);";
+  $Schema["INDEX"]["pkg_container_lang_installed"]["idx_pcli_pkg_manager"] = "CREATE INDEX idx_pcli_pkg_manager ON pkg_container_lang_installed USING btree (pkg_manager);";
+  $Schema["INDEX"]["pkg_container_lang_installed"]["idx_pcli_pkg_name"] = "CREATE INDEX idx_pcli_pkg_name ON pkg_container_lang_installed USING btree (pkg_name text_pattern_ops);";
+  $Schema["INDEX"]["pkg_container_lang_installed"]["idx_pcli_upload_fk"] = "CREATE INDEX idx_pcli_upload_fk ON pkg_container_lang_installed USING btree (upload_fk);";
+  $Schema["INDEX"]["pkg_container_layer"]["pkg_container_layer_pkg_fk_idx"] = "CREATE INDEX pkg_container_layer_pkg_fk_idx ON pkg_container_layer USING btree (pkg_fk);";
+
+  $Schema["INDEX"]["pkg_container_port"]["pkg_container_port_pkg_fk_idx"] = "CREATE INDEX pkg_container_port_pkg_fk_idx ON pkg_container_port USING btree (pkg_fk);";
 
   $Schema["INDEX"]["report_cache"]["report_cache_createdts"] = "CREATE INDEX report_cache_createdts ON report_cache USING btree (report_cache_tla);";
 
