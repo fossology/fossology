@@ -407,7 +407,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Requires");
-          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
+          $entry['value'] = htmlspecialchars($R["req_value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
           $Count++;
           $vars['packageRequires'][] = $entry;
         }
@@ -443,7 +443,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Depends");
-          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
+          $entry['value'] = htmlspecialchars($R["req_value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
           $Count++;
           $vars['packageRequires'][] = $entry;
         }
@@ -479,7 +479,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Build-Depends");
-          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
+          $entry['value'] = htmlspecialchars($R["req_value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
           $Count++;
           $vars['packageRequires'][] = $entry;
         }
@@ -491,7 +491,6 @@ class ui_view_info extends FO_Plugin
     }
     return $vars;
   } // ShowPackageInfo()
-
 
   /**
    * \brief Display the tag info data associated with the file.
