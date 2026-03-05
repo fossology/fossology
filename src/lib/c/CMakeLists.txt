@@ -15,6 +15,13 @@ include_directories(
     ${glib_INCLUDE_DIRS}
     ${PostgreSQL_INCLUDE_DIRS})
 
+# sqlite3 — required for RPM sqlite database parsing in fosspkg
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(SQLITE3 sqlite3)
+if(SQLITE3_FOUND)
+    include_directories(${SQLITE3_INCLUDE_DIRS})
+endif()
+
 add_library(fossology "")
 add_library(fossology_cov EXCLUDE_FROM_ALL "")
 set(FO_CWD ${CMAKE_CURRENT_SOURCE_DIR})
@@ -35,9 +42,16 @@ foreach(FO_CLIB_TARGET fossology fossology_cov)
             ${FO_CWD}/libfossdbmanager.c
             ${FO_CWD}/fossconfig.c
             ${FO_CWD}/sqlCopy.c
-            ${FO_CWD}/libfossagentref.h)
+            ${FO_CWD}/libfossagentref.h
+            ${FO_CWD}/fosspkg.c)
     target_link_libraries(${FO_CLIB_TARGET}
         PRIVATE ${glib_LIBRARIES} ${PostgreSQL_LIBRARIES})
+    if(SQLITE3_FOUND)
+        target_compile_definitions(${FO_CLIB_TARGET}
+            PUBLIC FOSSPKG_HAVE_SQLITE3=1)
+        target_link_libraries(${FO_CLIB_TARGET}
+            PUBLIC ${SQLITE3_LIBRARIES})
+    endif()
 endforeach()
 
 target_compile_options(fossology_cov PRIVATE ${FO_COV_FLAGS})

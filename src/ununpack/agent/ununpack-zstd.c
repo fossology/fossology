@@ -108,13 +108,13 @@ int ExtractZstd(char *Source, const char *OrigName, char *Destination)
   /* Let's extract file */
   if (TempSource[0] != '/') {
     snprintf(Cmd, sizeof(Cmd),
-        " (zstd --decompress --output-dir-flat '%s' -o '%s/%s'%s "
+        " (zstd --decompress -f --output-dir-flat '%s' -o '%s/%s'%s "
         "'%s/%s') 2>/dev/null", Destination, Destination, OutputName, formatCmd,
         CWD, TempSource);
   }
   else {
     snprintf(Cmd, sizeof(Cmd),
-        " (zstd --decompress --output-dir-flat '%s' -o '%s/%s'%s "
+        " (zstd --decompress -f --output-dir-flat '%s' -o '%s/%s'%s "
         "'%s') 2>/dev/null", Destination, Destination, OutputName, formatCmd,
         TempSource);
   }
