@@ -818,13 +818,15 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
     }
     if (!strcasecmp(field, "Depends")) {
       char *depends = NULL;
-      char tempvalue[MAXCMD];
+      char countcopy[MAXCMD];
+      char splitcopy[MAXCMD];
       int size,i;
       size_t length = MAXLENGTH;
       size = 0;
       if (value[0] != '\0'){
-        strncpy(tempvalue, value, sizeof(tempvalue));
-        depends = strtok(value, ",");
+        strncpy(countcopy, value, sizeof(countcopy)-1);
+        countcopy[sizeof(countcopy)-1] = '\0';
+        depends = strtok(countcopy, ",");
         while (depends && (depends[0] != '\0')) {
           if (strlen(depends) >= length)
             length = strlen(depends) + 1;
@@ -833,12 +835,16 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
         }
         if (Verbose) { printf("SIZE:%d\n", size);}
 
+        strncpy(splitcopy, value, sizeof(splitcopy)-1);
+        splitcopy[sizeof(splitcopy)-1] = '\0';
         pi->depends = calloc(size, sizeof(char *));
-        pi->depends[0] = calloc(length, sizeof(char));
-        strcpy(pi->depends[0],strtok(tempvalue,","));
-        for (i=1;i<size;i++){
+        depends = strtok(splitcopy, ",");
+        for (i=0; i<size; i++){
           pi->depends[i] = calloc(length, sizeof(char));
-          strcpy(pi->depends[i],strtok(NULL, ","));
+          if (depends) {
+            strcpy(pi->depends[i], depends);
+            depends = strtok(NULL, ",");
+          }
         }
         pi->dep_size = size;
       }
@@ -978,13 +984,15 @@ int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
     }
     if (!strcasecmp(field, "Build-Depends")) {
       char *depends = NULL;
-      char tempvalue[MAXCMD];
+      char countcopy[MAXCMD];
+      char splitcopy[MAXCMD];
       int size,i;
       size = 0;
       size_t length = MAXLENGTH;
       if (value[0] != '\0'){
-        strncpy(tempvalue, value, sizeof(tempvalue));
-        depends = strtok(value, ",");
+        strncpy(countcopy, value, sizeof(countcopy)-1);
+        countcopy[sizeof(countcopy)-1] = '\0';
+        depends = strtok(countcopy, ",");
         while (depends && (depends[0] != '\0')) {
           if (strlen(depends) >= length)
             length = strlen(depends) + 1;
@@ -993,12 +1001,16 @@ int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
         }
         if (Verbose) { printf("SIZE:%d\n", size);}
 
+        strncpy(splitcopy, value, sizeof(splitcopy)-1);
+        splitcopy[sizeof(splitcopy)-1] = '\0';
         pi->depends = calloc(size, sizeof(char *));
-        pi->depends[0] = calloc(length, sizeof(char));
-        strcpy(pi->depends[0],strtok(tempvalue,","));
-        for (i=1;i<size;i++){
+        depends = strtok(splitcopy, ",");
+        for (i=0; i<size; i++){
           pi->depends[i] = calloc(length, sizeof(char));
-          strcpy(pi->depends[i],strtok(NULL, ","));
+          if (depends) {
+            strcpy(pi->depends[i], depends);
+            depends = strtok(NULL, ",");
+          }
         }
         pi->dep_size = size;
       }
