@@ -413,7 +413,8 @@ class ui_view_info extends FO_Plugin
         }
         $this->dbManager->freeResult($result);
       }
-    } elseif ($MIMETYPE == "application/x-debian-package") {
+    } elseif ($MIMETYPE == "application/x-debian-package" ||
+              $MIMETYPE == "application/vnd.debian.binary-package") {
       $vars['packageType'] = _("Debian Binary Package\n");
 
       $sql = "SELECT *
