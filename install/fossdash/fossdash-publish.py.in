@@ -303,6 +303,8 @@ def cleanOldReportedFile(connection):
     with open(fossdash_cleanfile_path,"r") as file_ptr:
         for file_name in file_ptr:
             file_name = file_name.strip()
+            if not file_name:
+              continue
             print("cleaning old reported file : ", file_name)
             subprocess.run(["rm", "-rf", file_name])
             
