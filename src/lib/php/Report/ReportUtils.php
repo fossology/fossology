@@ -71,6 +71,29 @@ class ReportUtils
   }
 
   /**
+   * @param int $uploadId
+   * @param int $groupId
+   * @return array map of uploadtree_pk to true for excluded files
+   */
+  public function getExcludedUtIds($uploadId, $groupId)
+  {
+    /** @var \Fossology\Lib\Dao\FileGroupDao $fileGroupDao */
+    $fileGroupDao = $this->container->get('dao.filegroup');
+    $excludedGroups = $fileGroupDao->getGroupsForUpload($uploadId, $groupId);
+    
+    $excludedUtIds = [];
+    foreach ($excludedGroups as $group) {
+      if (!$group['fg_include_in_report']) {
+        $members = $fileGroupDao->getGroupMembers($group['fg_pk']);
+        foreach ($members as $member) {
+          $excludedUtIds[$member['uploadtree_fk']] = true;
+        }
+      }
+    }
+    return $excludedUtIds;
+  }
+
+  /**
    * @brief Add clearing status to the files
    * @param FileNode[] &$filesWithLicenses
    * @param ItemTreeBounds $itemTreeBounds
@@ -187,13 +210,20 @@ class ReportUtils
     $uploadtreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
     $allScannerEntries = $copyrightDao->getScannerEntries('copyright', $uploadtreeTable, $uploadId, $type='statement', $extrawhere);
     $allEditedEntries = $copyrightDao->getEditedEntries('copyright_decision', $uploadtreeTable, $uploadId, $decisionType=null);
+    $excludedUtIds = $this->getExcludedUtIds($uploadId, $groupId);
     foreach ($allScannerEntries as $finding) {
+      if (isset($excludedUtIds[$finding['uploadtree_pk']])) {
+        continue;
+      }
       if (!array_key_exists($finding['uploadtree_pk'], $filesWithLicenses)) {
         $filesWithLicenses[$finding['uploadtree_pk']] = new FileNode();
       }
       $filesWithLicenses[$finding['uploadtree_pk']]->addCopyright(\convertToUTF8($finding['content'],false));
     }
     foreach ($allEditedEntries as $finding) {
+      if (isset($excludedUtIds[$finding['uploadtree_pk']])) {
+        continue;
+      }
       if (!array_key_exists($finding['uploadtree_pk'], $filesWithLicenses)) {
         $filesWithLicenses[$finding['uploadtree_pk']] = new FileNode();
       }
@@ -217,10 +247,14 @@ class ReportUtils
     }
 
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+    $excludedUtIds = $this->getExcludedUtIds($itemTreeBounds->getUploadId(), $groupId);
 
     $filesWithLicenses = array();
     $clearingsProceeded = 0;
     foreach ($clearingDecisions as $clearingDecision) {
+      if (isset($excludedUtIds[$clearingDecision->getUploadTreeId()])) {
+        continue;
+      }
       $clearingsProceeded += 1;
       if (($clearingsProceeded&2047)==0) {
         $agentObj->heartbeat(0);

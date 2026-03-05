@@ -23,6 +23,7 @@ require_once dirname(__FILE__, 4) . "/lib/php/bootstrap.php";
 use Fossology\Lib\Util\TimingLogger;
 use Fossology\UI\Api\Controllers\AuthController;
 use Fossology\UI\Api\Controllers\BadRequestController;
+use Fossology\UI\Api\Controllers\FileGroupController;
 use Fossology\UI\Api\Controllers\ConfController;
 use Fossology\UI\Api\Controllers\CopyrightController;
 use Fossology\UI\Api\Controllers\CustomiseController;
@@ -276,6 +277,14 @@ $app->group('/uploads',
       $app->patch('/ipras/{hash:.*}', CopyrightController::class . ':restoreFileIpra');
       $app->put('/ipras/{hash:.*}', CopyrightController::class . ':updateFileIpra');
     });
+    ////////////////////////////FILE GROUPS/////////////////////
+    $app->get('/{id:\\d+}/filegroups', FileGroupController::class . ':getFileGroups');
+    $app->post('/{id:\\d+}/filegroups', FileGroupController::class . ':createFileGroup');
+    $app->patch('/{id:\\d+}/filegroups/{fgId:\\d+}', FileGroupController::class . ':updateFileGroup');
+    $app->delete('/{id:\\d+}/filegroups/{fgId:\\d+}', FileGroupController::class . ':deleteFileGroup');
+    $app->post('/{id:\\d+}/filegroups/{fgId:\\d+}/members', FileGroupController::class . ':addMembersToGroup');
+    $app->delete('/{id:\\d+}/filegroups/{fgId:\\d+}/members/{utId:\\d+}', FileGroupController::class . ':removeMemberFromGroup');
+    $app->get('/{id:\\d+}/filegroups/suggest', FileGroupController::class . ':suggestFileGroups');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

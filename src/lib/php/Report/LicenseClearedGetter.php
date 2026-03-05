@@ -115,6 +115,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $ungroupedStatements = $this->getStatements($uploadId, $uploadTreeTableName,
       $groupId);
+    $this->filterExcludedStatements($ungroupedStatements, $uploadId, $groupId);
     $this->changeTreeIdsToPaths($ungroupedStatements, $uploadTreeTableName,
       $uploadId);
     if ($this->onlyAcknowledgements || $this->onlyComments) {

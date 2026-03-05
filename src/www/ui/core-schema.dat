@@ -2877,3 +2877,58 @@
   $Schema["INHERITS"]["monk_ars"] = "ars_master";
   $Schema["INHERITS"]["spasht_ars"] = "ars_master";
   $Schema["INHERITS"]["license_candidate"] = "license_ref";
+
+  $Schema["TABLE"]["file_group"]["fg_pk"]["DESC"] = "";
+  $Schema["TABLE"]["file_group"]["fg_pk"]["ADD"] = "ALTER TABLE \"file_group\" ADD COLUMN \"fg_pk\" serial";
+  $Schema["TABLE"]["file_group"]["fg_pk"]["ALTER"] = "ALTER TABLE \"file_group\" ALTER COLUMN \"fg_pk\" SET NOT NULL, ALTER COLUMN \"fg_pk\" SET DEFAULT nextval('file_group_fg_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["file_group"]["upload_fk"]["DESC"] = "COMMENT ON COLUMN \"file_group\".\"upload_fk\" IS 'Upload this group belongs to'";
+  $Schema["TABLE"]["file_group"]["upload_fk"]["ADD"] = "ALTER TABLE \"file_group\" ADD COLUMN \"upload_fk\" int8";
+  $Schema["TABLE"]["file_group"]["upload_fk"]["ALTER"] = "ALTER TABLE \"file_group\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["file_group"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"file_group\".\"group_fk\" IS 'Owner group'";
+  $Schema["TABLE"]["file_group"]["group_fk"]["ADD"] = "ALTER TABLE \"file_group\" ADD COLUMN \"group_fk\" int4";
+  $Schema["TABLE"]["file_group"]["group_fk"]["ALTER"] = "ALTER TABLE \"file_group\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
+
+  $Schema["TABLE"]["file_group"]["fg_name"]["DESC"] = "COMMENT ON COLUMN \"file_group\".\"fg_name\" IS 'Display name of the group'";
+  $Schema["TABLE"]["file_group"]["fg_name"]["ADD"] = "ALTER TABLE \"file_group\" ADD COLUMN \"fg_name\" text";
+  $Schema["TABLE"]["file_group"]["fg_name"]["ALTER"] = "ALTER TABLE \"file_group\" ALTER COLUMN \"fg_name\" SET NOT NULL";
+
+  $Schema["TABLE"]["file_group"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"file_group\".\"user_fk\" IS 'User who created this group'";
+  $Schema["TABLE"]["file_group"]["user_fk"]["ADD"] = "ALTER TABLE \"file_group\" ADD COLUMN \"user_fk\" int8";
+  $Schema["TABLE"]["file_group"]["user_fk"]["ALTER"] = "ALTER TABLE \"file_group\" ALTER COLUMN \"user_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["file_group"]["fg_curation_notes"]["DESC"] = "COMMENT ON COLUMN \"file_group\".\"fg_curation_notes\" IS 'Curation notes / metadata associated with this group'";
+  $Schema["TABLE"]["file_group"]["fg_curation_notes"]["ADD"] = "ALTER TABLE \"file_group\" ADD COLUMN \"fg_curation_notes\" text";
+  $Schema["TABLE"]["file_group"]["fg_curation_notes"]["ALTER"] = "ALTER TABLE \"file_group\" ALTER COLUMN \"fg_curation_notes\" DROP NOT NULL";
+
+  $Schema["TABLE"]["file_group"]["fg_include_in_report"]["DESC"] = "COMMENT ON COLUMN \"file_group\".\"fg_include_in_report\" IS 'Whether to include this group in generated reports'";
+  $Schema["TABLE"]["file_group"]["fg_include_in_report"]["ADD"] = "ALTER TABLE \"file_group\" ADD COLUMN \"fg_include_in_report\" bool DEFAULT true";
+  $Schema["TABLE"]["file_group"]["fg_include_in_report"]["ALTER"] = "ALTER TABLE \"file_group\" ALTER COLUMN \"fg_include_in_report\" SET NOT NULL, ALTER COLUMN \"fg_include_in_report\" SET DEFAULT true";
+
+  $Schema["TABLE"]["file_group"]["date_added"]["DESC"] = "COMMENT ON COLUMN \"file_group\".\"date_added\" IS 'Date when the group was created'";
+  $Schema["TABLE"]["file_group"]["date_added"]["ADD"] = "ALTER TABLE \"file_group\" ADD COLUMN \"date_added\" timestamptz DEFAULT now()";
+  $Schema["TABLE"]["file_group"]["date_added"]["ALTER"] = "ALTER TABLE \"file_group\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now()";
+
+
+  $Schema["TABLE"]["file_group_member"]["fg_fk"]["DESC"] = "COMMENT ON COLUMN \"file_group_member\".\"fg_fk\" IS 'Foreign key to file_group'";
+  $Schema["TABLE"]["file_group_member"]["fg_fk"]["ADD"] = "ALTER TABLE \"file_group_member\" ADD COLUMN \"fg_fk\" int4";
+  $Schema["TABLE"]["file_group_member"]["fg_fk"]["ALTER"] = "ALTER TABLE \"file_group_member\" ALTER COLUMN \"fg_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["file_group_member"]["uploadtree_fk"]["DESC"] = "COMMENT ON COLUMN \"file_group_member\".\"uploadtree_fk\" IS 'Foreign key to uploadtree'";
+  $Schema["TABLE"]["file_group_member"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"file_group_member\" ADD COLUMN \"uploadtree_fk\" int4";
+  $Schema["TABLE"]["file_group_member"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"file_group_member\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL";
+
+  $Schema["PK"]["file_group"] = "ALTER TABLE \"file_group\" ADD CONSTRAINT file_group_pkey PRIMARY KEY (fg_pk);";
+  $Schema["PK"]["file_group_member"] = "ALTER TABLE \"file_group_member\" ADD CONSTRAINT file_group_member_pkey PRIMARY KEY (fg_fk, uploadtree_fk);";
+
+  $Schema["FK"]["file_group"]["upload_fk"] = "ALTER TABLE \"file_group\" ADD CONSTRAINT file_group_upload_fk_fkey FOREIGN KEY (upload_fk) REFERENCES upload(upload_pk) ON DELETE CASCADE;";
+  $Schema["FK"]["file_group"]["user_fk"] = "ALTER TABLE \"file_group\" ADD CONSTRAINT file_group_user_fk_fkey FOREIGN KEY (user_fk) REFERENCES users(user_pk) ON DELETE SET NULL;";
+  $Schema["FK"]["file_group"]["group_fk"] = "ALTER TABLE \"file_group\" ADD CONSTRAINT file_group_group_fk_fkey FOREIGN KEY (group_fk) REFERENCES groups(group_pk) ON DELETE CASCADE;";
+  $Schema["FK"]["file_group_member"]["fg_fk"] = "ALTER TABLE \"file_group_member\" ADD CONSTRAINT file_group_member_fg_fk_fkey FOREIGN KEY (fg_fk) REFERENCES file_group(fg_pk) ON DELETE CASCADE;";
+
+  $Schema["INDEX"]["file_group"]["file_group_upload_fk_idx"] = "CREATE INDEX file_group_upload_fk_idx ON file_group USING btree (upload_fk);";
+  $Schema["INDEX"]["file_group"]["file_group_group_fk_idx"] = "CREATE INDEX file_group_group_fk_idx ON file_group USING btree (group_fk);";
+  $Schema["INDEX"]["file_group"]["file_group_upload_group_idx"] = "CREATE INDEX file_group_upload_group_idx ON file_group USING btree (upload_fk, group_fk);";
+  $Schema["INDEX"]["file_group_member"]["file_group_member_fg_fk_idx"] = "CREATE INDEX file_group_member_fg_fk_idx ON file_group_member USING btree (fg_fk);";
+  $Schema["INDEX"]["file_group_member"]["file_group_member_uploadtree_fk_idx"] = "CREATE INDEX file_group_member_uploadtree_fk_idx ON file_group_member USING btree (uploadtree_fk);";

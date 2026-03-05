@@ -1,0 +1,71 @@
+{# SPDX-FileCopyrightText: © 2024 Fossology contributors
+
+   SPDX-License-Identifier: FSFAP
+#}
+
+<!-- The File Group Modal -->
+<div class="modal fade" id="fileGroupModal" tabindex="-1" role="dialog" aria-labelledby="fileGroupModalLabel" aria-hidden="true" data-backdrop="false">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">{{ 'Manage File Groups'|trans }}</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <!-- Modal body -->
+      <div class="modal-body">
+        <div class="row mb-3">
+          <div class="col">
+            <button type="button" class="btn btn-primary btn-sm" onclick="suggestFileGroups();">
+              {{ 'Auto-suggest Groups'|trans }}
+            </button>
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Look for files with identical license findings and suggest grouping them.'|trans }}" alt="" class="info-bullet"/>
+          </div>
+        </div>
+
+        <h5>{{ 'Existing Groups'|trans }}</h5>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped" id="fileGroupsTable">
+            <thead>
+              <tr>
+                <th>{{ 'Name'|trans }}</th>
+                <th>{{ 'Notes'|trans }}</th>
+                <th>{{ 'Include in Report'|trans }}</th>
+                <th>{{ 'Files'|trans }}</th>
+                <th>{{ 'Actions'|trans }}</th>
+              </tr>
+            </thead>
+            <tbody id="fileGroupsList">
+              <!-- Content loaded via AJAX -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="suggestedGroupsContainer" style="display:none;">
+          <hr>
+          <h5>{{ 'Suggested Groups'|trans }}</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-striped" id="suggestedGroupsTable">
+              <thead>
+                <tr>
+                  <th>{{ 'Files'|trans }}</th>
+                  <th>{{ 'Identical Licenses'|trans }}</th>
+                  <th>{{ 'Action'|trans }}</th>
+                </tr>
+              </thead>
+              <tbody id="suggestedGroupsList">
+                <!-- Content loaded via AJAX -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ 'Close'|trans }}</button>
+      </div>
+    </div>
+  </div>
+</div>
