@@ -354,6 +354,7 @@ class fo_libschema
     $newViews = !array_key_exists('VIEW', $this->currSchema);
     foreach ($this->schema['VIEW'] as $name => $sql) {
       if (empty($name) || (!$newViews &&
+          array_key_exists($name, $this->currSchema['VIEW']) &&
           $this->currSchema['VIEW'][$name] == $sql)) {
         continue;
       }
