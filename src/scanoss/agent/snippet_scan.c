@@ -4,7 +4,7 @@
  *
  * The SCANOSS Agent for Fossology tool
  *
- * Copyright (C) 2018-2021 SCANOSS.COM
+ * Copyright (C) 2018-2025 SCANOSS.COM
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,114 @@
 #include "snippet_scan.h"
 #include <stdio.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 extern void logme(char *msg);
+
+/**
+ * @brief Safely run scanoss-py command using fork+exec instead of popen
+ *
+ * This function addresses GitHub Issue #3109 where the SCANOSS agent crashes
+ * with a segmentation fault in libcrypto.so.3 when executed by the FOSSology
+ * scheduler. The crash occurs because popen() inherits the parent's OpenSSL
+ * state after fork(), which can be corrupted.
+ *
+ * By using fork()+execv(), we ensure the child process gets a completely
+ * fresh library state, avoiding the inherited corruption.
+ *
+ * @param pythonPath Path to Python dependencies
+ * @param scanossPath Path to scanoss-py executable
+ * @param folder Folder to scan
+ * @param outputFile Output CSV file path
+ * @param apiurl API URL option (or empty string)
+ * @param key API key option (or empty string)
+ * @return 0 on success, -1 on failure
+ */
+static int run_scanoss_command(const char *pythonPath, const char *scanossPath,
+                                const char *folder, const char *outputFile,
+                                const char *apiurl, const char *key)
+{
+  pid_t pid;
+  int status;
+
+  pid = fork();
+
+  if (pid < 0)
+  {
+    LOG_ERROR("Snippet scan: fork() failed: %s", strerror(errno));
+    return -1;
+  }
+
+  if (pid == 0)
+  {
+    /* Child process - completely fresh state, no inherited OpenSSL corruption */
+
+    /* Set PYTHONPATH environment variable */
+    if (setenv("PYTHONPATH", pythonPath, 1) != 0)
+    {
+      _exit(127);
+    }
+
+    /* Build argument list for execv */
+    /* Maximum args: scanoss-py scan <folder> --format=csv -o <output> [--apiurl X] [--key Y] NULL */
+    char *args[12];
+    int argc = 0;
+
+    args[argc++] = (char *)scanossPath;
+    args[argc++] = "scan";
+    args[argc++] = (char *)folder;
+    args[argc++] = "--format=csv";
+    args[argc++] = "-o";
+    args[argc++] = (char *)outputFile;
+
+    /* Add optional API URL if provided */
+    if (apiurl != NULL && apiurl[0] != '\0')
+    {
+      args[argc++] = "--apiurl";
+      args[argc++] = (char *)apiurl;
+    }
+
+    /* Add optional API key if provided */
+    if (key != NULL && key[0] != '\0')
+    {
+      args[argc++] = "--key";
+      args[argc++] = (char *)key;
+    }
+
+    args[argc] = NULL;
+
+    /* Execute scanoss-py - this replaces the process entirely */
+    execv(scanossPath, args);
+
+    /* If execv returns, it failed */
+    _exit(127);
+  }
+
+  /* Parent process - wait for child to complete */
+  if (waitpid(pid, &status, 0) < 0)
+  {
+    LOG_ERROR("Snippet scan: waitpid() failed: %s", strerror(errno));
+    return -1;
+  }
+
+  if (WIFEXITED(status))
+  {
+    int exit_code = WEXITSTATUS(status);
+    if (exit_code != 0)
+    {
+      LOG_ERROR("Snippet scan: scanoss-py exited with code %d", exit_code);
+      return -1;
+    }
+  }
+  else if (WIFSIGNALED(status))
+  {
+    LOG_ERROR("Snippet scan: scanoss-py killed by signal %d", WTERMSIG(status));
+    return -1;
+  }
+
+  return 0;
+}
 
 extern char *baseTMP;
 int Verbose = 0;
@@ -302,51 +408,58 @@ void ParseResults(char *folder)
 
 /*!
  * \brief Scans a Temporary folder
- * \details Scans a Temporary folder with a rebuild project and place it results on a file results.csv
+ * \details Scans a Temporary folder with a rebuild project and places results in results.csv
+ *
+ * This function was updated to use fork+execv instead of popen() to fix
+ * GitHub Issue #3109: SCANOSS agent segfaults in libcrypto.so.3 when
+ * executed by the FOSSology scheduler.
+ *
  * \param folder path to temp folder
+ * \return 0 on success, -1 on failure
  */
 int ScanFolder(char *folder)
 {
+  char pythonPath[512];
+  char scanossPath[512];
+  char outputFile[512];
+  char *apiurlPtr = NULL;
+  char *keyPtr = NULL;
 
-  FILE *Fin;
-  char Cmd[MAXCMD];
-  memset(Cmd, '\0', MAXCMD);
-
-  unsigned char apiurl[400];
-  unsigned char key[110];
-
-  if (ApiUrl[0] != '\0')
+  /* Get project user from config */
+  char *user = fo_config_get(sysconfig, "DIRECTORIES", "PROJECTUSER", NULL);
+  if (user == NULL)
   {
-    sprintf((char *)apiurl, "--apiurl %s", ApiUrl);
-  }
-  else
-    memset(apiurl, 0, sizeof(apiurl));
-
-  if (accToken[0] != '\0' && accToken[0] != ' ')
-  {
-    sprintf((char *)key, "--key %s", accToken);
-  }
-  else
-    memset(key, 0, sizeof(key));
-
-  char *user;
-  asprintf(&user, "%s", fo_config_get(sysconfig, "DIRECTORIES", "PROJECTUSER", NULL));
-
-  sprintf(Cmd, "PYTHONPATH='/home/%s/pythondeps/' /home/%s/pythondeps/bin/scanoss-py scan  %s --format=csv -o %s/results.csv %s %s", user, user, folder, folder, apiurl, key); /* Create the command to run */
-  logme(Cmd);
-  free(user);
-  Fin = popen(Cmd, "r"); /* Run the command */
-  if (!Fin)
-  {
-    LOG_ERROR("Snippet scan: failed to start scan %s", strerror(errno));
-    pclose(Fin);
+    LOG_ERROR("Snippet scan: PROJECTUSER not configured");
     return -1;
   }
-  else
+
+  /* Build paths */
+  snprintf(pythonPath, sizeof(pythonPath), "/home/%s/pythondeps/", user);
+  snprintf(scanossPath, sizeof(scanossPath), "/home/%s/pythondeps/bin/scanoss-py", user);
+  snprintf(outputFile, sizeof(outputFile), "%s/results.csv", folder);
+
+  /* Set API URL if configured */
+  if (ApiUrl[0] != '\0')
   {
-    pclose(Fin);
+    apiurlPtr = ApiUrl;
   }
-  return 0;
+
+  /* Set API key if configured */
+  if (accToken[0] != '\0' && accToken[0] != ' ')
+  {
+    keyPtr = accToken;
+  }
+
+  /* Log the command for debugging */
+  char logMsg[MAXCMD];
+  snprintf(logMsg, sizeof(logMsg), "Running scanoss-py scan on %s", folder);
+  logme(logMsg);
+
+  /* Use the safe fork+exec function to avoid libcrypto crash (Issue #3109) */
+  int result = run_scanoss_command(pythonPath, scanossPath, folder, outputFile,
+                                    apiurlPtr, keyPtr);
+
+  return result;
 }
 
 int RebuildUpload(long upload_pk, char *tempFolder)
