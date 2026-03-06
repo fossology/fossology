@@ -30,7 +30,8 @@ DatabaseEntry::DatabaseEntry() :
         hash(""),
         type(""),
         copy_startbyte(0),
-        copy_endbyte(0)
+        copy_endbyte(0),
+        is_enabled(true)
 {
 };
 
@@ -373,6 +374,39 @@ bool CopyrightDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
     entry.content.c_str(),
     entry.type.c_str(),
     entry.copy_startbyte, entry.copy_endbyte
+  );
+}
+
+/**
+ * \brief Insert one deactivated finding per uploadtree node for a given upload, for a given finding
+ * \param entry               DatabaseEntry of the copyright that was inserted
+ * \param uploadId            Upload being scanned
+ * \param uploadTreeTableName Uploadtree table for this upload (e.g. "uploadtree_a")
+ * \return True on success, false otherwise
+ */
+bool CopyrightDatabaseHandler::insertDeactivatedEvents(const DatabaseEntry& entry,
+    int uploadId, const std::string& uploadTreeTableName) const
+{
+  // The query inserts one deactivated finding per uploadtree node for the given upload, for the given finding.
+  std::string sql =
+    "INSERT INTO copyright_event (upload_fk, copyright_fk, uploadtree_fk) "
+    "SELECT ut.upload_fk, cp.copyright_pk, ut.uploadtree_pk "
+    "FROM copyright AS cp "
+    "INNER JOIN " + uploadTreeTableName + " AS ut ON cp.pfile_fk = ut.pfile_fk "
+    "WHERE cp.hash = md5($1) AND cp.agent_fk = $2 "
+    "  AND cp.pfile_fk = $3 AND ut.upload_fk = $4";
+
+  return dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager.getStruct_dbManager(),
+      ("insertDeactivatedEventsFor" + uploadTreeTableName).c_str(),
+      sql.c_str(),
+      char*, long, long, int
+    ),
+    entry.content.c_str(),
+    entry.agent_fk,
+    entry.pfile_fk,
+    uploadId
   );
 }
 

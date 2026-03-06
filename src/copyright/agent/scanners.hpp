@@ -38,7 +38,14 @@ struct match {
    * Type of the match
    */
   const string& type;
-  match(const int s, const int e, const string& t) : start(s), end(e), type(t) { }
+  /**
+   * \var bool is_enabled
+   * True if the match is an active copyright finding; false if it was
+   * removed by a cleanup/exception rule and should be stored as deactivated.
+   */
+  bool is_enabled;
+  match(const int s, const int e, const string& t, bool enabled = true)
+    : start(s), end(e), type(t), is_enabled(enabled) { }
 } ;
 
 bool operator==(const match& m1, const match& m2);

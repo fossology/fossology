@@ -14,6 +14,24 @@ using std::vector;
 using std::pair;
 
 /**
+ * \struct CleanupResult
+ * \brief Outcome of the Cleanup() function
+ */
+struct CleanupResult {
+  std::string content;  ///< Cleaned text; empty when the copyright was removed
+  /**
+   * Disposition when content is empty:
+   *  - KEEP:       content is valid, store as an active finding
+   *  - DEACTIVATE: removed by an uncertain rule that may occasionally misfire;
+   *                store the raw text as a deactivated finding so reviewers can
+   *                inspect it in the UI
+   *  - DISCARD:    definitively not a copyright (binary noise, template syntax,
+   *                package-metadata fields, etc.); ignore silently
+   */
+  enum class Disposition { KEEP, DEACTIVATE, DISCARD } disposition;
+};
+
+/**
  * \class hCopyrightScanner
  * \brief Implementation of scanner class for copyright
  */
@@ -22,7 +40,7 @@ class hCopyrightScanner : public scanner
 public:
   void ScanString(const string& s, list<match>& results) const;
   hCopyrightScanner();
-  string Cleanup(const string &raw) const;
+  CleanupResult Cleanup(const string &raw) const;
   void TrimPunctuation(string &text) const;
   void RemoveNoisePatterns(string& text) const;
   void NormalizeCopyright(string& text) const;
@@ -41,7 +59,7 @@ private:
    * Regex for SPDX-FileCopyrightText
    */
   rx::regex regCopyright, regException, regExceptionCopy, regNonBlank, regSimpleCopyright,
-  regSpdxCopyright, regRemoveFileStmt, regStripLicenseTrail, regStripTrademarkTrail, regStripAllRightReserveTrail;
+  regSpdxCopyright, regRemoveFileStmt, regStripLicenseTrail, regStripTrademarkTrail, regStripAllRightReserveTrail, regExceptionVerbFollow, regExceptionAdjectivePrefix, regExceptionTemplate, regExceptionPassive, regStripCopySymNonYear, regExceptionBinaryNoise, regExceptionMeta, regExceptionCharNameRun;
 } ;
 
 #endif
