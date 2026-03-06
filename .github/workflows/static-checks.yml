@@ -25,7 +25,7 @@ jobs:
           sudo apt-get update
           echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
           echo COMPOSER_HOME="$HOME/.composer/" >> $GITHUB_ENV
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 50
       - name: Setup PHP 7.4
@@ -45,6 +45,13 @@ jobs:
           extensions: gettext, mbstring, json, xml, pgsql, curl, uuid, posix, sqlite3
       - name: Composer check on PHP 8.1
         run: composer validate --no-check-all --working-dir=src --strict
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: gettext, mbstring, json, xml, pgsql, curl, uuid, posix, sqlite3
+      - name: Composer check on PHP 8.2
+        run: composer validate --no-check-all --working-dir=src --strict
 
   code-analysis:
     runs-on: ubuntu-22.04
@@ -55,7 +62,7 @@ jobs:
           sudo apt-get install -y cppcheck
           echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 50
       - name: Static Code Analysis
@@ -69,7 +76,7 @@ jobs:
         with:
           php-version: '8.1'
           extensions: gettext, mbstring, gd, json, xml, zip, pgsql, curl, uuid, posix, sqlite3
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 50
       - name: PHP Codesniffer
@@ -88,7 +95,7 @@ jobs:
           php-version: '8.1'
           extensions: gettext, mbstring, gd, json, xml, zip, pgsql, curl, uuid, posix, sqlite3, dom
           tools: sebastian/phpcpd:6.0.3
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 50
       - name: Copy/Paste detector
@@ -101,7 +108,7 @@ jobs:
   openapi-lint:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup default rules
         run: |
           echo '{"extends": ["spectral:oas"]}' > .spectral.json
@@ -113,7 +120,7 @@ jobs:
   REUSE-Compliance-Check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: REUSE Compliance Check
       uses: fsfe/reuse-action@v5
 
@@ -121,7 +128,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
