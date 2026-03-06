@@ -10,6 +10,10 @@
 #include <algorithm>
 #include "regexConfProvider.hpp"
 
+extern "C" {
+#include "libfossology.h"
+}
+
 const string copyrightType("statement");  /**< A constant for default copyrightType as "statement" */
 
 /**
@@ -36,7 +40,7 @@ hCopyrightScanner::hCopyrightScanner()
 
   // Cleanup
   regExceptionCopy = rx::regex(rcp.getRegexValue("copyright","REG_EXCEPTION_COPY"),
-               rx::regex_constants::icase);
+                     rx::regex_constants::icase);
   regRemoveFileStmt = rx::regex(rcp.getRegexValue("copyright","REG_REMOVE_FILE_STATEMENT"),
                       rx::regex_constants::icase);
   regStripLicenseTrail = rx::regex(rcp.getRegexValue("copyright", "REG_STRIP_LICENSE_TRAIL"),
@@ -45,7 +49,22 @@ hCopyrightScanner::hCopyrightScanner()
                            rx::regex_constants::icase);
   regStripAllRightReserveTrail = rx::regex(rcp.getRegexValue("copyright", "REG_ALL_RIGHT_RESERVE_TRAIL"),
                                  rx::regex_constants::icase);
-  
+  regExceptionVerbFollow = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_VERB_FOLLOW"),
+                           rx::regex_constants::icase);
+  regExceptionAdjectivePrefix = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_ADJECTIVE_PREFIX"),
+                                rx::regex_constants::icase);
+  regExceptionTemplate = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_TEMPLATE"),
+                         rx::regex_constants::icase);
+  regExceptionPassive = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_PASSIVE"),
+                        rx::regex_constants::icase);
+  regStripCopySymNonYear = rx::regex(rcp.getRegexValue("copyright", "REG_STRIP_COPYSYM_NONYEAR"),
+                           rx::regex_constants::icase);
+  regExceptionBinaryNoise = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_BINARY_NOISE"),
+                            rx::regex_constants::icase);
+  regExceptionMeta = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_META"),
+                     rx::regex_constants::icase);
+  regExceptionCharNameRun = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_CHARNAME_RUN"),
+                            rx::regex_constants::icase);
 }
 
 /**
@@ -125,20 +144,40 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
 
 string hCopyrightScanner::Cleanup(const string &raw) const {
   if (rx::regex_search(raw, regExceptionCopy)) {
+    LOG_NOTICE("Cleared copyright (regExceptionCopy): %s", raw.c_str());
     return "";
   }
   if (rx::regex_match(raw, regRemoveFileStmt)) {
+    LOG_NOTICE("Cleared copyright (regRemoveFileStmt): %s", raw.c_str());
     return "";
   }
   string cleaned = raw;
   cleaned = rx::regex_replace(cleaned, regStripLicenseTrail, "");
   cleaned = rx::regex_replace(cleaned, regStripTrademarkTrail, "");
   cleaned = rx::regex_replace(cleaned, regStripAllRightReserveTrail, "");
+  cleaned = rx::regex_replace(cleaned, regStripCopySymNonYear, "");
+  const char* exceptionName = nullptr;
+  if (rx::regex_search(cleaned, regExceptionVerbFollow))           exceptionName = "regExceptionVerbFollow";
+  else if (rx::regex_search(cleaned, regExceptionAdjectivePrefix)) exceptionName = "regExceptionAdjectivePrefix";
+  else if (rx::regex_search(cleaned, regExceptionTemplate))        exceptionName = "regExceptionTemplate";
+  else if (rx::regex_search(cleaned, regExceptionPassive))         exceptionName = "regExceptionPassive";
+  else if (rx::regex_search(cleaned, regExceptionBinaryNoise))     exceptionName = "regExceptionBinaryNoise";
+  else if (rx::regex_search(cleaned, regExceptionMeta))            exceptionName = "regExceptionMeta";
+  else if (rx::regex_search(cleaned, regExceptionCharNameRun))     exceptionName = "regExceptionCharNameRun";
+
+  if (exceptionName) {
+    LOG_NOTICE("Cleared copyright (%s): %s", exceptionName, raw.c_str());
+    return "";
+  }
 
   RemoveNoisePatterns(cleaned);
   TrimPunctuation(cleaned);
   NormalizeCopyright(cleaned);
   StripSuffixes(cleaned);
+
+  if (cleaned.empty()) {
+    LOG_NOTICE("Cleared copyright (empty_after_postprocessing): %s", raw.c_str());
+  }
 
   return cleaned;
 }
