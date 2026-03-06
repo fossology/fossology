@@ -49,7 +49,7 @@ class OneShotbsdTest extends CommonCliTest
     $this->bsd = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/DNSDigest.c';
     $this->assertFileExists($this->bsd,"OneShotbsdTest FAILURE! $this->bsd not found\n");
     list($output,) = $this->runNomos("",array($this->bsd));
-    $bsdlic = "Apache-2.0,BSD-style,GPL";
+    $bsdlic = "Apache-2.0,GPL,LicenseRef-BSD-style";
     list(,$fname,,,$license) = explode(' ', $output);
     $this->assertEquals($fname, 'DNSDigest.c', "Error filename $fname does not equal DNSDigest.c");
     $this->assertEquals(trim($license), $bsdlic);
