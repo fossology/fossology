@@ -304,7 +304,7 @@ def cleanOldReportedFile(connection):
         for file_name in file_ptr:
             file_name = file_name.strip()
             if not file_name:
-               continue
+                continue
             print("cleaning old reported file : ", file_name)
             subprocess.run(["rm", "-rf", file_name])
             
