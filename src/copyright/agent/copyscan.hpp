@@ -41,7 +41,7 @@ private:
    * Regex for SPDX-FileCopyrightText
    */
   rx::regex regCopyright, regException, regExceptionCopy, regNonBlank, regSimpleCopyright,
-  regSpdxCopyright, regRemoveFileStmt, regStripLicenseTrail, regStripTrademarkTrail, regStripAllRightReserveTrail;
+  regSpdxCopyright, regRemoveFileStmt, regStripLicenseTrail, regStripTrademarkTrail, regStripAllRightReserveTrail, regExceptionVerbFollow, regExceptionAdjectivePrefix, regExceptionTemplate, regExceptionPassive, regStripCopySymNonYear, regExceptionBinaryNoise, regExceptionMeta, regExceptionCharNameRun;
 } ;
 
 #endif
