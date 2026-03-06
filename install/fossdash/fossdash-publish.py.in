@@ -302,9 +302,12 @@ def cleanOldReportedFile(connection):
     # TODO: require BUG FIX
     with open(fossdash_cleanfile_path,"r") as file_ptr:
         for file_name in file_ptr:
+            file_name = file_name.strip()
+            if not file_name:
+               continue
             print("cleaning old reported file : ", file_name)
-            delete_cmd = "rm -rf "+file_name
-            delete_cmd_output = subprocess.Popen(delete_cmd,shell=True)
+            subprocess.run(["rm", "-rf", file_name])
+            
               
 def updateNewInstanceNameInAllFiles(new_instance_name):
 
