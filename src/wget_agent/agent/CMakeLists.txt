@@ -32,13 +32,13 @@ foreach(FO_WGET_TARGET wget_agent wget_agent_exec wget_agent_cov)
     )
     if(${FO_WGET_TARGET} STREQUAL "wget_agent_exec")
         target_link_libraries(${FO_WGET_TARGET}
-            PRIVATE fossology wget_agent gcrypt checksum)
+            PRIVATE fossology wget_agent gcrypt checksum pthread)
         set_target_properties(${FO_WGET_TARGET}
             PROPERTIES OUTPUT_NAME wget_agent)
         set(WGET_XSRC "main.c")
     else()
         target_link_libraries(${FO_WGET_TARGET}
-            PRIVATE fossology gcrypt checksum)
+            PRIVATE fossology gcrypt checksum pthread)
         set(WGET_XSRC "")
     endif()
     target_sources(${FO_WGET_TARGET}

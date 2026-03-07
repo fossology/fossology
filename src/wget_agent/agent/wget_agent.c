@@ -16,6 +16,9 @@
 #define ASPRINTF_MEM_ERROR_LOG LOG_FATAL("Not enough memory for asprintf before line %d", __LINE__)
 
 #include "wget_agent.h"
+#include <pthread.h>
+#include <signal.h>
+#include <time.h>
 
 char SQL[STRMAX];
 
@@ -29,6 +32,63 @@ char *GlobalProxy[6];         ///< Proxy from fossology.conf
 char GlobalHttpProxy[STRMAX]; ///< HTTP proxy command to use
 int GlobalImportGold=1;       ///< Set to 0 to not store file in gold repository
 gid_t ForceGroup=-1;          ///< Set to group id to be used for download files
+
+/* Heartbeat monitoring variables */
+static volatile sig_atomic_t heartbeat_active = 0;
+static pthread_t heartbeat_thread;
+static pthread_mutex_t heartbeat_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+/**
+ * \brief Heartbeat monitoring thread function
+ * \param arg Unused parameter
+ * \return NULL
+ */
+static void* heartbeat_monitor(void* arg)
+{
+  (void)arg;  /* Suppress unused parameter warning */
+  
+  while(heartbeat_active)
+  {
+    sleep(30);  /* Send heartbeat every 30 seconds */
+    if (heartbeat_active)
+    {
+      fo_scheduler_heart(0);  /* Send heartbeat without incrementing item count */
+    }
+  }
+  return NULL;
+}
+
+/**
+ * \brief Start heartbeat monitoring
+ */
+static void start_heartbeat_monitoring()
+{
+  pthread_mutex_lock(&heartbeat_mutex);
+  if (!heartbeat_active)
+  {
+    heartbeat_active = 1;
+    if (pthread_create(&heartbeat_thread, NULL, heartbeat_monitor, NULL) != 0)
+    {
+      LOG_ERROR("Failed to create heartbeat monitoring thread");
+      heartbeat_active = 0;
+    }
+  }
+  pthread_mutex_unlock(&heartbeat_mutex);
+}
+
+/**
+ * \brief Stop heartbeat monitoring
+ */
+static void stop_heartbeat_monitoring()
+{
+  pthread_mutex_lock(&heartbeat_mutex);
+  if (heartbeat_active)
+  {
+    heartbeat_active = 0;
+    pthread_join(heartbeat_thread, NULL);
+  }
+  pthread_mutex_unlock(&heartbeat_mutex);
+}
 
 /**
  * \brief Given a filename, is it a file?
@@ -425,7 +485,11 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
      'http://a.org/file' -l 1 -R index.html*  2>&1"
    */
   LOG_VERBOSE0("CMD: %s", cmd);
+  
+  /* Start heartbeat monitoring for the long-running wget operation */
+  start_heartbeat_monitoring();
   rc = system(cmd);
+  stop_heartbeat_monitoring();
 
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
   {
@@ -499,7 +563,10 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 
       free(tmpfile_path);
 
+      /* Start heartbeat monitoring for the potentially long-running tar/mv operation */
+      start_heartbeat_monitoring();
       rc_system = system(cmd);
+      stop_heartbeat_monitoring();
       if (rc_system != 0)
       {
         systemError(__LINE__, rc_system, cmd)
@@ -612,7 +679,11 @@ int GetVersionControl()
     free(tmp_file_directory);
     return ASPRINTF_MEM_ERROR;
   }
+  
+  /* Start heartbeat monitoring for the long-running version control operation */
+  start_heartbeat_monitoring();
   rc = system(command);
+  stop_heartbeat_monitoring();
   free(command);
 
   if (resethome) // rollback
@@ -653,7 +724,11 @@ int GetVersionControl()
     return ASPRINTF_MEM_ERROR;
   }
   free(tmp_file_directory);
+  
+  /* Start heartbeat monitoring for the potentially long-running tar operation */
+  start_heartbeat_monitoring();
   rc = system(command);
+  stop_heartbeat_monitoring();
   if (rc != 0)
   {
     systemError(__LINE__, rc, command)
