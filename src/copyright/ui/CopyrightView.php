@@ -85,6 +85,12 @@ class CopyrightView extends Xpview
     $(document).ready(function() {
       tableCopyright =  createTablestatement();
       tableScancode =  createTablescancode_statement();
+      $('#testReplacementstatement').click(function() {
+        testReplacement(tableCopyright, 'statement');
+      });
+      $('#testReplacementscancode_statement').click(function() {
+        testReplacement(tableScancode, 'scancode_statement');
+      });
       $('#CopyrightViewTabs').tabs({
         active: ($.cookie(copyrightTabViewCookie) || 0),
         activate: function(e, ui){
