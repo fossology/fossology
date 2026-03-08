@@ -435,7 +435,7 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath = '',
   if (empty($ParentFolder)) {
     return array();
   }
-  if ($perm != Auth::PERM_READ && $perm = Auth::PERM_WRITE) {
+  if ($perm != Auth::PERM_READ && $perm != Auth::PERM_WRITE) {
     return array();
   }
   if ($ParentFolder == "-1") {
