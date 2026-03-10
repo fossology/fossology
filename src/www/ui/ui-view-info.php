@@ -244,7 +244,7 @@ class ui_view_info extends FO_Plugin
     $sql = "select * from upload where upload_pk=$1";
     $row = $this->dbManager->getSingleRow(
       $sql,
-      array($row['upload_fk']),
+      array($Upload),
       __METHOD__ . "getUploadOrigin"
     );
     if ($row) {
@@ -403,7 +403,7 @@ class ui_view_info extends FO_Plugin
         $this->dbManager->prepare(__METHOD__ . "getPkg_rpm_req", $sql);
         $result = $this->dbManager->execute(__METHOD__ . "getPkg_rpm_req", array($Require));
 
-        while ($R = pg_fetch_assoc($result) and ! empty($R['req_pk'])) {
+        while (($R = pg_fetch_assoc($result)) && ! empty($R['req_pk'])) {
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Requires");
@@ -439,7 +439,7 @@ class ui_view_info extends FO_Plugin
         $this->dbManager->prepare(__METHOD__ . "getPkg_rpm_req", $sql);
         $result = $this->dbManager->execute(__METHOD__ . "getPkg_rpm_req", array($Require));
 
-        while ($R = pg_fetch_assoc($result) and ! empty($R['req_pk'])) {
+        while (($R = pg_fetch_assoc($result)) && ! empty($R['req_pk'])) {
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Depends");
@@ -449,7 +449,6 @@ class ui_view_info extends FO_Plugin
         }
         $this->dbManager->freeResult($result);
       }
-      $V .= "</table>\n";
     } elseif ($MIMETYPE == "application/x-debian-source") {
       $vars['packageType'] = _("Debian Source Package\n");
 
@@ -475,7 +474,7 @@ class ui_view_info extends FO_Plugin
         $this->dbManager->prepare(__METHOD__ . "getPkg_rpm_req", $sql);
         $result = $this->dbManager->execute(__METHOD__ . "getPkg_rpm_req", array($Require));
 
-        while ($R = pg_fetch_assoc($result) and ! empty($R['req_pk'])) {
+        while (($R = pg_fetch_assoc($result)) && ! empty($R['req_pk'])) {
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Build-Depends");

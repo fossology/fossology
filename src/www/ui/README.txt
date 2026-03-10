@@ -15,6 +15,9 @@ High-level overview of commonly present UI subdirectories:
   src/www/ui/images/       - UI images/assets
   src/www/ui/css/          - UI stylesheets
   src/www/ui/scripts/      - UI JavaScript
+  src/www/ui/api/          - Public REST API for Fossology (used by the web UI and external clients)
+  src/www/ui/async/        - Async handlers for background UI requests
+  src/www/ui/page/         - Page-level UI controllers/views
 
 This list provides a high-level orientation of the UI layout.
 Other subdirectories may exist and evolve over time as the UI implementation
