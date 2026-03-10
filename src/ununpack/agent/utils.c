@@ -477,7 +477,7 @@ int	CopyFile	(char *Src, char *Dst)
 
   /* load the source file */
   Mmap = mmap(0,LenIn,PROT_READ,MAP_PRIVATE,Fin,0);
-  if (Mmap == NULL)
+  if (Mmap == MAP_FAILED)
   {
     LOG_FATAL("pfile %s Unable to process file.",Pfile_Pk);
     LOG_WARNING("pfile %s Mmap failed during copy.",Pfile_Pk);
