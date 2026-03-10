@@ -67,3 +67,7 @@ License: GPL-2.0-only
 Files: pbconf/pbcl pbconf/fossology/pbve.pre
 Copyright: Fossology contributors
 License: GPL-2.0-only
+
+Files: src/containeragent/agent_tests/testdata/*
+Copyright: Fossology contributors
+License: GPL-2.0-only

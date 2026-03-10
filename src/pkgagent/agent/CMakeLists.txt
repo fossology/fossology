@@ -10,6 +10,7 @@ include_directories(
     ${glib_INCLUDE_DIRS}
     ${PostgreSQL_INCLUDE_DIRS}
     ${rpm_INCLUDE_DIRS}
+    ${FO_CLIB_SRC}
 )
 
 if(NOT TARGET fossology)

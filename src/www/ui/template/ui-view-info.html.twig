@@ -155,6 +155,128 @@
   {% endif %}
 
 
+  {# ================================================================== #}
+  {# Container Image Info                                                #}
+  {# ================================================================== #}
+  {% if containerAgentNA == 1 %}
+    <h2>{{ "Container Image Info"|trans }}</h2>
+    <p>{{ "The containeragent is not installed. Please"|trans }}
+      <a href="?mod=agents">{{ "enable it"|trans }}</a>.</p>
+
+  {% elseif containerAgentStatus == 1 %}
+    <h2>{{ "Container Image Info"|trans }}</h2>
+    {{ containerActiveScript|raw }}
+    <p>{{ "Container image scan has not been run."|trans }}
+      <a href="{{ containerTrackbackUri|e }}">{{ "Schedule containeragent"|trans }}</a></p>
+
+  {% elseif containerType is not empty %}
+    <h2>{{ containerType|e }}</h2>
+    <table class="table" border="1">
+      <tr>
+        <th width="25%">{{ "Property"|trans }}</th>
+        <th>{{ "Value"|trans }}</th>
+      </tr>
+      {% for entry in containerEntries %}
+        {% if entry.value is not empty %}
+          <tr>
+            <td>{{ entry.type|e }}</td>
+            <td class="pkg-value" data-encoded="{{ entry.value|e }}"></td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </table>
+
+    {% if containerEnv is not empty %}
+      <h3>{{ "Environment Variables"|trans }}</h3>
+      <table class="table" border="1">
+        <tr><th>{{ "Variable"|trans }}</th></tr>
+        {% for entry in containerEnv %}
+          <tr><td class="pkg-value" data-encoded="{{ entry.value|e }}"></td></tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
+    {% if containerPorts is not empty %}
+      <h3>{{ "Exposed Ports"|trans }}</h3>
+      <table class="table" border="1">
+        <tr><th>{{ "Port"|trans }}</th></tr>
+        {% for entry in containerPorts %}
+          <tr><td class="pkg-value" data-encoded="{{ entry.value|e }}"></td></tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
+    {% if containerLabels is not empty %}
+      <h3>{{ "Labels"|trans }}</h3>
+      <table class="table" border="1">
+        <tr>
+          <th>{{ "Key"|trans }}</th>
+          <th>{{ "Value"|trans }}</th>
+        </tr>
+        {% for entry in containerLabels %}
+          <tr>
+            <td class="pkg-value" data-encoded="{{ entry.type|e }}"></td>
+            <td class="pkg-value" data-encoded="{{ entry.value|e }}"></td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
+    {% if containerLayers is not empty %}
+      <h3>{{ "Layer History"|trans }}</h3>
+      <table class="table" border="1">
+        <tr>
+          <th width="10%">{{ "Layer"|trans }}</th>
+          <th>{{ "Created By"|trans }}</th>
+        </tr>
+        {% for entry in containerLayers %}
+          <tr>
+            <td>{{ entry.type|e }}</td>
+            <td class="pkg-value" data-encoded="{{ entry.value|e }}"></td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+  {% endif %}
+
+  {# ================================================================== #}
+  {# Installed OS Packages (from pkg_container_installed)               #}
+  {# ================================================================== #}
+  {% if installedPkgList is not empty %}
+    <h2>{{ "Installed OS Packages"|trans }}</h2>
+    <table class="table table-striped" border="1">
+      <thead>
+        <tr>
+          <th>{{ "Layer"|trans }}</th>
+          <th>{{ "Manager"|trans }}</th>
+          <th>{{ "Package"|trans }}</th>
+          <th>{{ "Version"|trans }}</th>
+          <th>{{ "Arch"|trans }}</th>
+          <th>{{ "Source"|trans }}</th>
+          <th>{{ "License"|trans }}</th>
+          <th>{{ "Summary"|trans }}</th>
+          <th>{{ "Dependencies"|trans }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pkg in installedPkgList %}
+          <tr>
+            <td>{{ pkg.layer|e }}</td>
+            <td>{{ pkg.manager|e }}</td>
+            <td>{{ pkg.name|e }}</td>
+            <td>{{ pkg.version|e }}</td>
+            <td>{{ pkg.arch|e }}</td>
+            <td>{{ pkg.source|e }}</td>
+            <td>{{ pkg.license|e }}</td>
+            <td>{{ pkg.summary|e }}</td>
+            <td>{{ pkg.deps|e }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+
   {% if reusedPackageList is not empty %}
     <h2>{{ "Reused component"|trans }}</h2>
     <table class="table" border="1">
