@@ -162,7 +162,6 @@ function menu_cmp($a, $b)
   if ($a->Order < $b->Order) {
     return (1);
   }
-  $rc = strcmp($a->Name, $b->Name);
   return (strcmp($a->Name, $b->Name));
 } // menu_cmp()
 
