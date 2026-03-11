@@ -32,7 +32,7 @@ static char grepzone[10485760]; /* 10M for now, adjust if needed */
 static va_list ap;
 static char utilbuf[myBUFSIZ];
 static struct mm_cache mmap_data[MM_CACHESIZE];
-static char cmdBuf[512];
+static char cmdBuf[PATH_MAX * 2 + 256];
 
 
 #ifdef MEMORY_TRACING
@@ -1298,14 +1298,20 @@ void appendFile(char *pathname, char *str)
  * \brief Run a system command
  * \param fmt The command to run along with parameters
  * \note The function will log errors if and error occurs
- * \return The return code from the command.
+ * \return The return code from the command or -1 if the command was truncated.
  */
-int mySystem(const char *fmt, ...)
-{
+int mySystem(const char *fmt, ...) {
   int ret;
+  int len;
   va_start(ap, fmt);
-  (void) vsprintf(cmdBuf, fmt, ap);
+  len = vsnprintf(cmdBuf, sizeof(cmdBuf), fmt, ap);
   va_end(ap);
+
+  if(len < 0 || (size_t)len >= sizeof(cmdBuf)) {
+    LOG_ERROR("mySystem: command truncated (%d bytes needed, buffer is %zu bytes)",
+              len, sizeof(cmdBuf));
+    return -1;
+  }
 
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
   traceFunc("== mySystem('%s')\n", cmdBuf);
