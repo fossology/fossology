@@ -1154,8 +1154,10 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
       g_string_append_printf(client_cmd, " -S mta=\"");
     }
     /* use smtps only if port is not 25 or SMTPStartTls is provided */
-    if((g_strcmp0((char *)g_hash_table_lookup(smtpvariables, "SMTPPort"), "25") !=  0) 
-        || g_strcmp0((char *)g_hash_table_lookup(smtpvariables, "SMTPStartTls"), "1") == 0)
+    char *smtpPort = (char *)g_hash_table_lookup(smtpvariables, "SMTPPort");
+    char *smtpStartTls = (char *)g_hash_table_lookup(smtpvariables, "SMTPStartTls");
+    if((smtpPort && g_strcmp0(smtpPort, "25") != 0) 
+        || (smtpStartTls && g_strcmp0(smtpStartTls, "1") == 0))
     {
       g_string_append_printf(client_cmd, "smtps://");
     }
@@ -1174,8 +1176,11 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
         g_string_append_uri_escaped(client_cmd, temp_smtpvariable, NULL, TRUE);
       }
       g_string_append_printf(client_cmd, "@");
-      g_string_append_printf(client_cmd, "%s:%s\"", (char *)g_hash_table_lookup(smtpvariables, "SMTPHostName"),
-          (char *)g_hash_table_lookup(smtpvariables, "SMTPPort"));
+      char *smtpHostName = (char *)g_hash_table_lookup(smtpvariables, "SMTPHostName");
+      char *smtpPort2 = (char *)g_hash_table_lookup(smtpvariables, "SMTPPort");
+      g_string_append_printf(client_cmd, "%s:%s\"", 
+          smtpHostName ? smtpHostName : "",
+          smtpPort2 ? smtpPort2 : "");
     }
     temp_smtpvariable = NULL;
     final_command = g_strdup_printf(EMAIL_BUILD_CMD, scheduler->email_command,
