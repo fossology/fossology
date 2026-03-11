@@ -186,15 +186,77 @@ class ui_buckets extends FO_Plugin
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
-    /* Get the ars_pk of the scan to display, also the select list  */
-    $ars_pk = GetArrayVal("ars", $_GET);
-    $BucketSelect = SelectBucketDataset($upload_pk, $ars_pk, "selectbdata",
-                                        "onchange=\"addArsGo('newds','selectbdata');\"");
-    if ($ars_pk == 0)
+    $ars_pk = GetParm("ars", PARM_INTEGER);
+
+/* If ars not provided → try latest bucket dataset */
+if (!$ars_pk)
+{
+  $sql = "SELECT ars_pk
+          FROM bucket_ars
+          WHERE upload_fk = $upload_pk
+          ORDER BY ars_pk DESC
+          LIMIT 1";
+
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+  if ($row = pg_fetch_assoc($result))
+  {
+    $ars_pk = $row['ars_pk'];
+  }
+
+  pg_free_result($result);
+}
+
+/* 
+ * If no bucket dataset exists for this upload, allow the user
+ * to trigger bucket analysis directly from the bucket browser.
+ */
+if (!$ars_pk)
+{
+  $runBucket = GetParm("runbucket", PARM_INTEGER);
+
+  if ($runBucket)
+  {
+    /* create job required by AgentAdd() */
+    $sql = "INSERT INTO job (job_upload_fk, job_name, job_user_fk)
+            VALUES ($upload_pk, 'Bucket Analysis', " . intval($_SESSION['UserId']) . ")
+            RETURNING job_pk";
+
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    $row = pg_fetch_assoc($result);
+    $job_pk = $row['job_pk'];
+    pg_free_result($result);
+
+    /* schedule bucket agent */
+    $bucketAgent = plugin_find("agent_bucket");
+
+    if (!empty($bucketAgent))
     {
-      /* No bucket data for this upload */
-      return $BucketSelect;
+      $errorMsg = "";
+      $bucketAgent->AgentAdd($job_pk, $upload_pk, $errorMsg, array());
+
+      $VLic .= "<p><b>Bucket agent scheduled successfully.</b></p>";
+      $VLic .= "<p>Please refresh this page after analysis completes.</p>";
     }
+  }
+  else
+  {
+    $runUri = Traceback_uri() . "?mod=bucketbrowser&upload=$upload_pk&item=$Uploadtree_pk&runbucket=1";
+    $VLic .= "<p><b>No bucket analysis available for this upload.</b></p>";
+    $VLic .= "<p> <a href='$runUri' style=' display:inline-block;padding:6px 12px;background:#4CAF50;color:white;text-decoration:none;border-radius:4px;font-size:13px;'> Run Bucket Agent</a></p>";
+  }
+
+  return $VLic;
+}
+
+/* Create dataset selector */
+$BucketSelect = SelectBucketDataset($upload_pk, $ars_pk, "selectbdata",
+                                    "onchange=\"addArsGo('newds','selectbdata');\"");
+
+
 
     /* Get scan keys */
     $sql = "select agent_fk, nomosagent_fk, bucketpool_fk from bucket_ars where ars_pk=$ars_pk";
