@@ -172,6 +172,8 @@ $app->options('/{routes:.+}', AuthController::class . ':optionsVerification');
 
 //////////////////////////AUTH/////////////////////
 $app->post('/tokens', AuthController::class . ':createNewJwtToken');
+$app->get('/oauth/login', AuthController::class . ':getAuthUrl');
+$app->post('/oauth/callback', AuthController::class . ':getOauthToken');
 
 //////////////////////////OSSELOT/////////////////////
 $app->group('/osselot',
@@ -290,6 +292,8 @@ $app->group('/users',
     $app->delete("/{pathParam:$pattern", UserController::class . ':deleteUser');
     $app->post('/tokens', UserController::class . ':createRestApiToken');
     $app->get('/tokens/{type:\\w+}', UserController::class . ':getTokens');
+    $app->post('/oauthclient', UserController::class . ':createNewOauthClient');
+    $app->get('/oauthclient/{type:\\w+}', UserController::class . ':getOAuthClients');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
