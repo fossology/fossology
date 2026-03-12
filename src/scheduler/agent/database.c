@@ -39,7 +39,7 @@
   email_notify = 0;        \
   error = NULL; }
 
-#define EMAIL_BUILD_CMD "%s %s -s '%s' %s"    ///< Email command format
+#define EMAIL_BUILD_CMD "%s %s -s %s %s"    ///< Email command format
 #define DEFAULT_HEADER  "FOSSology scan complete\nmessage:\"" ///< Default email header
 #define DEFAULT_FOOTER  "\""                  ///< Default email footer
 #define DEFAULT_SUBJECT "FOSSology scan complete\n" ///< Default email subject
@@ -1178,8 +1178,12 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
           (char *)g_hash_table_lookup(smtpvariables, "SMTPPort"));
     }
     temp_smtpvariable = NULL;
+    gchar* safe_subject = g_shell_quote(scheduler->email_subject);
+    gchar* safe_email = g_shell_quote(user_email);
     final_command = g_strdup_printf(EMAIL_BUILD_CMD, scheduler->email_command,
-                  client_cmd->str, scheduler->email_subject, user_email);
+                  client_cmd->str, safe_subject, safe_email);
+    g_free(safe_subject);
+    g_free(safe_email);
   }
   else
   {
