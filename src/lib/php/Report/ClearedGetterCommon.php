@@ -88,6 +88,18 @@ abstract class ClearedGetterCommon
     return $groupId;
   }
 
+  protected function filterExcludedStatements(&$statements, $uploadId, $groupId)
+  {
+    global $container;
+    /** @var ReportUtils $reportUtils */
+    $reportUtils = $container->get('report.utils');
+    $excludedUtIds = $reportUtils->getExcludedUtIds($uploadId, $groupId);
+    
+    $statements = array_filter($statements, function($statement) use ($excludedUtIds) {
+      return !isset($excludedUtIds[$statement['uploadtree_pk']]);
+    });
+  }
+
   protected function changeTreeIdsToPaths(&$ungrupedStatements, $uploadTreeTableName, $uploadId)
   {
     $parentId = $this->treeDao->getMinimalCoveringItem($uploadId, $uploadTreeTableName);

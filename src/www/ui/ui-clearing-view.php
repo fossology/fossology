@@ -23,6 +23,7 @@ use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\Dao\FileGroupDao;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\UI\Component\MicroMenu;
 use Fossology\Lib\View\HighlightProcessor;
@@ -324,6 +325,11 @@ class ClearingView extends FO_Plugin
     $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionCheck($uploadTreeId, $groupId, DecisionTypes::WIP);
     $this->vars['bulkHistory'] = $bulkHistory;
 
+    /** @var FileGroupDao $fileGroupDao */
+    $fileGroupDao = $container->get('dao.filegroup');
+    $this->vars['itemGroups'] = $fileGroupDao->getGroupsForItem($uploadTreeId);
+    $this->vars['allGroups'] = $fileGroupDao->getGroupsForUpload($uploadId, $groupId);
+
     $noLicenseUploadTreeView = new UploadTreeProxy($uploadId,
       array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
         UploadTreeProxy::OPT_GROUP_ID => $groupId),
@@ -381,20 +387,44 @@ class ClearingView extends FO_Plugin
     $global = GetParm("globalDecision", PARM_STRING) === "on" ? 1 : 0;
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($lastItem);
     $itemBounds = $this->uploadDao->getItemTreeBounds($lastItem, $uploadTreeTableName);
+
+    $boundsToProcess = [];
+    global $container;
+    $fileGroupDao = $container->get('dao.filegroup');
+    if ($fileGroupDao) {
+      $uploadId = $itemBounds->getUploadId();
+      $groupRow = $fileGroupDao->getGroupForItem($lastItem, $uploadId);
+      if ($groupRow) {
+        $members = $fileGroupDao->getGroupMembers($groupRow['fg_pk'], $uploadTreeTableName);
+        foreach ($members as $m) {
+          $boundsToProcess[] = $this->uploadDao->getItemTreeBounds($m['uploadtree_fk'], $uploadTreeTableName);
+        }
+      }
+    }
+    if (empty($boundsToProcess)) {
+      $boundsToProcess[] = $itemBounds;
+    }
+
     if ($global) {
       $isDecisionWip = $this->clearingDao->isDecisionCheck($currentUploadtreeId, $groupId, DecisionTypes::WIP);
       $hasChangedClearingType = $this->clearingDao->isDecisionCheck($currentUploadtreeId, $groupId, '');
       if ($isDecisionWip) {
-        $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $groupId, $type, $global);
+        foreach ($boundsToProcess as $b) {
+          $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($b, $userId, $groupId, $type, $global);
+        }
       } else if (empty($hasChangedClearingType['scope'])
              || ($hasChangedClearingType['decision_type'] != $type)
            ) {
-        $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $groupId, $type, $global);
+        foreach ($boundsToProcess as $b) {
+          $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($b, $userId, $groupId, $type, $global);
+        }
       } else {
         return;
       }
     } else {
-      $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $groupId, $type, $global);
+      foreach ($boundsToProcess as $b) {
+        $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($b, $userId, $groupId, $type, $global);
+      }
     }
   }
 

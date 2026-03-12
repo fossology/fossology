@@ -72,6 +72,10 @@ SPDX-License-Identifier: FSFAP
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.upload"/>
         </service>
+        <service id="dao.filegroup" class="Fossology\Lib\Dao\FileGroupDao" public="true">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="logger"/>
+        </service>
         <service id="dao.highlight" class="Fossology\Lib\Dao\HighlightDao" public="true">
             <argument type="service" id="db.manager"/>
         </service>

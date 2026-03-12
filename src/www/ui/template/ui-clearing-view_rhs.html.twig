@@ -135,7 +135,11 @@
     &nbsp;
     <button type="button" data-toggle="modal" data-target="#ClearingHistoryDataModal" class="btn btn-default btn-sm" onclick="openClearingHistoryDataModal();">
       {{ 'Clearing History ...'| trans }}
-    </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'View the clearing history for this file: The table will show which user added or removed license results for this particular file in order to create a clearing decision. Clearing decisions are created when the user clicks on the button "Submit" or on the go next and go previous buttons'|trans }}" alt="" class="info-bullet"/>
+    </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'View the clearing history for this file'|trans }}" alt="" class="info-bullet"/>
+    &nbsp;
+    <button type="button" data-toggle="modal" data-target="#fileGroupModal" class="btn btn-default btn-sm" onclick="openFileGroupModal();">
+      {{ 'File Groups ...'| trans }}
+    </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Manage file groups for this upload'|trans }}" alt="" class="info-bullet"/>
     &nbsp;
     <br/>
     <span id="bulkIdResult" name="bulkIdResult"></span>
@@ -182,6 +186,7 @@
       </div>
     </div>
 
+      {% include 'ui-file-groups.html.twig' %}
       {% include 'ui-clearing-view_bulk.html.twig' %}
     </div>
   {% endif %}
