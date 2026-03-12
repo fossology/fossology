@@ -379,21 +379,53 @@ class SpdxAgent extends Agent
     $fileNodes = $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName(), $uploadId);
 
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
+    $customMainLicenseTexts = $this->clearingDao->getMainLicenseReportInfos($uploadId, $this->groupId);
     $mainLicenses = array();
     foreach ($mainLicenseIds as $licId) {
       $reportedLicenseId = $this->licenseMap->getProjectedId($licId);
       $mainLicense = $this->licenseDao->getLicenseById($reportedLicenseId, $this->groupId);
+      try {
+        $customText = isset($customMainLicenseTexts[$licId]) ? $customMainLicenseTexts[$licId] : null;
+      } catch (\Throwable $e) {
+        $customText = null;
+      }
       if ($mainLicense === null) {
         error_log(
             "spdx: Warning: main license ID {$reportedLicenseId} not found; skipping."
         );
         continue; // Skip this license and continue with the next one
       }
-      $reportLicId = $mainLicense->getId() . "-" . md5($mainLicense->getText());
+      if ($customText !== null && $customText !== '') {
+        $reportLicId = $mainLicense->getId() . "-" . md5($customText);
+      } else {
+        $reportLicId = $mainLicense->getId() . "-" . md5($mainLicense->getText());
+      }
       $mainLicenses[] = $reportLicId;
-      if (!array_key_exists($reportLicId, $this->licensesInDocument)) {
-        $listedLicense = stripos($mainLicense->getSpdxId(),
-            LicenseRef::SPDXREF_PREFIX) !== 0;
+
+      $exists = array_key_exists($reportLicId, $this->licensesInDocument);
+
+      // If custom text exists, always create/update with custom license
+      if ($customText !== null && $customText !== '') {
+        $customShortName = "LicenseRef-fossology-" . $mainLicense->getShortName() . "-" . md5($customText);        
+        $customLicense = new License(
+          $mainLicense->getId(),
+          $customShortName,
+          $mainLicense->getFullName(),
+          $mainLicense->getRisk(),
+          $customText,
+          $mainLicense->getUrl(),
+          $mainLicense->getDetectorType(),
+          ''
+        );
+        
+        $this->licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
+          ->setLicenseObj($customLicense)
+          ->setCustomText(true)
+          ->setListedLicense(false);
+          
+      } elseif (!$exists) {
+        // Only add standard if doesn't exist        
+        $listedLicense = stripos($mainLicense->getSpdxId(), LicenseRef::SPDXREF_PREFIX) !== 0;
         $this->licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
           ->setLicenseObj($mainLicense)
           ->setCustomText(false)
