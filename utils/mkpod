@@ -7,40 +7,24 @@
 # 
 #
 # simple script to generate man pages from pod sources
-# TODO: process version parameter.... need to be able to pass one in.
 #
 usage='mkpod <input-file>, input file should be a pod file.'
 
 infile=$1
+version=$2
 if [[ -z $infile ]]
 then
 	echo $usage
+	exit 1
 fi
 
-# Check if SVN is available.  If not, then abort.
-which svn >/dev/null 2>&1
-if [ $? != 0 ] ; then
-  echo "No SubVersion available."
-  exit 1
+if [[ -z $version ]]
+then
+	version='0.dev'
 fi
-which svnversion >/dev/null 2>&1
-if [ $? != 0 ] ; then
-  echo "No svnversion available."
-  exit 1
-fi
-
 name=${infile%.pod}
 # Man format (*roff)
-#version is the svn version use svn info to get it, can only specify
-# release in the pod2man translator.
-version="`svn info | grep '^Revision:' | awk '{print $2}'`"
-#echo "\$version is:$version"
-if [ "$version" == "" ]
-then
-	echo "Setting version to 1.x(unknown)"
-	version='1.x(unknown)'
-fi
-pod2man --center="$name" --release="Version: $version" "$infile" > "$name.1"
+pod2man --center="$name" --release="Version $version" "$infile" > "$name.1"
 
 # HTML
 pod2html --infile=$infile --outfile=$name.html
