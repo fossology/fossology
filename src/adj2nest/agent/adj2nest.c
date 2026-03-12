@@ -70,6 +70,7 @@
 #include <ctype.h>
 #include <signal.h>
 #include <libgen.h>
+#include <libpq-fe.h>
 
 #include "libfossology.h"
 
@@ -345,6 +346,11 @@ void    ListUploads     ()
   snprintf(SQL,sizeof(SQL), "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk");
   pgResult = PQexec(pgConn, SQL);
   fo_checkPQresult(pgConn, pgResult, SQL, __FILE__, __LINE__);
+
+  if (PQresultStatus(pgResult) != PGRES_TUPLES_OK) {
+    PQclear(pgResult);
+    return;
+  }
 
   /* list each value */
   MaxRow = PQntuples(pgResult);
