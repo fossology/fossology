@@ -1053,6 +1053,120 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    * @runInSeparateProcess
    * @preserveGlobalState disabled
    * @test
+   * -# Test for UploadController::postUpload() with negative integer folderId with V1 parameters
+   * -# Check if response throws HttpBadRequestException
+   */
+  public function testPostUploadNegativeFolderIdV1()
+  {
+    $this->testPostUploadInvalidFolderId(ApiVersion::V1, -5);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with negative integer folderId with V2 parameters
+   * -# Check if response throws HttpBadRequestException
+   */
+  public function testPostUploadNegativeFolderIdV2()
+  {
+    $this->testPostUploadInvalidFolderId(ApiVersion::V2, -5);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with negative string folderId with V1 parameters
+   * -# Check if response throws HttpBadRequestException
+   */
+  public function testPostUploadNegativeStringFolderIdV1()
+  {
+    $this->testPostUploadInvalidFolderId(ApiVersion::V1, "-5");
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with negative string folderId with V2 parameters
+   * -# Check if response throws HttpBadRequestException
+   */
+  public function testPostUploadNegativeStringFolderIdV2()
+  {
+    $this->testPostUploadInvalidFolderId(ApiVersion::V2, "-5");
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with non-numeric folderId with V1 parameters
+   * -# Check if response throws HttpBadRequestException
+   */
+  public function testPostUploadNonNumericFolderIdV1()
+  {
+    $this->testPostUploadInvalidFolderId(ApiVersion::V1, "abc");
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with non-numeric folderId with V2 parameters
+   * -# Check if response throws HttpBadRequestException
+   */
+  public function testPostUploadNonNumericFolderIdV2()
+  {
+    $this->testPostUploadInvalidFolderId(ApiVersion::V2, "abc");
+  }
+
+  /**
+   * @param int $version Version to test
+   * @param mixed $folderId Invalid folder ID to test
+   * @return void
+   */
+  private function testPostUploadInvalidFolderId(int $version, $folderId)
+  {
+    $uploadDescription = "Test Upload";
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+
+    if ($version == ApiVersion::V2) {
+      $reqBody = [
+        "location" => ["vcsType" => "git", "vcsUrl" => "https://github.com/test/repo"],
+        "folderId" => $folderId,
+        "uploadDescription" => $uploadDescription,
+        "uploadType" => "vcs"
+      ];
+    } else {
+      $reqBody = [
+        "location" => ["vcsType" => "git", "vcsUrl" => "https://github.com/test/repo"]
+      ];
+      $requestHeaders->setHeader('folderId', $folderId);
+      $requestHeaders->setHeader('uploadDescription', $uploadDescription);
+      $requestHeaders->setHeader('uploadType', 'vcs');
+    }
+
+    $body = $this->streamFactory->createStream(json_encode($reqBody));
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2);
+    }
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("folderId must be a positive integer!");
+
+    $this->uploadController->postUpload($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
    * -# Test for UploadController::getUploadLicenses() when version is V1
    * -# Check if the response status is 200 with correct information
    */
