@@ -496,4 +496,76 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
         'allLicenseInType', [$licenseMatches]);
     $this->assertFalse($agree, "Wrong result for non-compatible license types");
   }
+
+  public function testAreOjoLicenseRefsWithoutNomosContradiction_ojoOnly()
+  {
+    $deciderAgent = new DeciderAgent();
+    $licId = 401;
+    $licenseShortName = "LicA"; // This must match what createLicenseMatchWithLicId returns
+
+    $licenseDao = M::mock(LicenseDao::class);
+    $licenseRef = new LicenseRef($licId, $licenseShortName, "LicenseA", $licenseShortName);
+    $licenseDao->shouldReceive('getLicenseByShortName')->with($licenseShortName)->andReturn($licenseRef);
+
+    $reflector = new \ReflectionProperty(DeciderAgent::class, "licenseDao");
+    $reflector->setAccessible(true);
+    $reflector->setValue($deciderAgent, $licenseDao);
+
+    $licenseMatches = array('ojo'=>array($this->createLicenseMatchWithLicId($licId)));
+    $agree = Reflectory::invokeObjectsMethodnameWith($deciderAgent, 'areOjoLicenseRefsWithoutNomosContradiction', array($licenseMatches));
+    $this->assertTrue($agree, "OJO licenses without Nomos should return true");
+  }
+
+  public function testAreOjoLicenseRefsWithoutNomosContradiction_withContradiction()
+  {
+    $deciderAgent = new DeciderAgent();
+    $ojoLicId = 401;
+    $nomosLicId = 402;
+
+    $licenseDao = M::mock(LicenseDao::class);
+    $licenseDao->shouldReceive('getLicenseByShortName')->andReturn(new LicenseRef($ojoLicId, "MIT", "MIT", "MIT"));
+
+    $reflector = new \ReflectionProperty(DeciderAgent::class, "licenseDao");
+    $reflector->setAccessible(true);
+    $reflector->setValue($deciderAgent, $licenseDao);
+
+    $licenseMatches = array(
+      'nomos'=>array($this->createLicenseMatchWithLicId($nomosLicId)),
+      'ojo'=>array($this->createLicenseMatchWithLicId($ojoLicId))
+    );
+    $agree = Reflectory::invokeObjectsMethodnameWith($deciderAgent, 'areOjoLicenseRefsWithoutNomosContradiction', array($licenseMatches));
+    $this->assertFalse($agree, "OJO licenses with Nomos contradiction should return false");
+  }
+
+  public function testIsValidLicenseRefInMainList_valid()
+  {
+    $deciderAgent = new DeciderAgent();
+    $licenseShortName = "MIT";
+
+    $licenseDao = M::mock(LicenseDao::class);
+    $licenseDao->shouldReceive('getLicenseByShortName')->with($licenseShortName)->andReturn(new LicenseRef(401, $licenseShortName, "MIT", "MIT"));
+
+    $reflector = new \ReflectionProperty(DeciderAgent::class, "licenseDao");
+    $reflector->setAccessible(true);
+    $reflector->setValue($deciderAgent, $licenseDao);
+
+    $isValid = Reflectory::invokeObjectsMethodnameWith($deciderAgent, 'isValidLicenseRefInMainList', array($licenseShortName));
+    $this->assertTrue($isValid, "Valid LicenseRef should return true");
+  }
+
+  public function testIsValidLicenseRefInMainList_invalid()
+  {
+    $deciderAgent = new DeciderAgent();
+    $licenseShortName = "INVALID";
+
+    $licenseDao = M::mock(LicenseDao::class);
+    $licenseDao->shouldReceive('getLicenseByShortName')->with($licenseShortName)->andReturn(null);
+
+    $reflector = new \ReflectionProperty(DeciderAgent::class, "licenseDao");
+    $reflector->setAccessible(true);
+    $reflector->setValue($deciderAgent, $licenseDao);
+
+    $isValid = Reflectory::invokeObjectsMethodnameWith($deciderAgent, 'isValidLicenseRefInMainList', array($licenseShortName));
+    $this->assertFalse($isValid, "Invalid LicenseRef should return false");
+  }
 }
