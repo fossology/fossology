@@ -46,11 +46,11 @@ class upload_properties extends FO_Plugin
    **/
   public function UpdateUploadProperties($uploadId, $newName, $newDesc)
   {
-    if (empty($newName) and empty($newDesc)) {
+    if ($newName === null && $newDesc === null) {
       return 2;
     }
 
-    if (!empty($newName)) {
+    if ($newName !== null) {
       /*
        * Use pfile_fk to select the correct entry in the upload tree, artifacts
        * (e.g. directories of the upload do not have pfiles).
@@ -74,7 +74,7 @@ class upload_properties extends FO_Plugin
         __METHOD__ . '.updateUpload.name');
     }
 
-    if (! empty($newDesc)) {
+    if ($newDesc !== null) {
       $trimNewDesc = trim($newDesc);
       $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=$2 WHERE upload_pk=$1",
         array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
