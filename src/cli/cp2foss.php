@@ -357,6 +357,15 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
       $row = $dbManager->getSingleRow($SQL, array($UploadPk), __METHOD__.".UploadOne");
       if (empty($row)) {
         $working = false;
+        if ($jobqueuepk > 0) {
+          $SQL = "SELECT jq_end_bits FROM jobqueue WHERE jq_pk = $1";
+          $status = $dbManager->getSingleRow($SQL, array($jobqueuepk), __METHOD__);
+
+          if (!empty($status) && ($status['jq_end_bits'] & 0x2)) {
+            fwrite(STDERR, "ERROR: Failed to download component (URL invalid or HTTP error)\n");
+            return 1;
+          }
+        }
       }
 
     }
