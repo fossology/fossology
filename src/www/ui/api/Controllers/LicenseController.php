@@ -12,6 +12,7 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\Lib\Application\BulkTextExport;
 use Fossology\Lib\Application\LicenseCsvExport;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseAcknowledgementDao;
@@ -914,6 +915,100 @@ class LicenseController extends RestController
       ->withHeader('Pragma', 'no-cache')
       ->withHeader('Cache-Control', 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0')
       ->withHeader('Expires', 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
+    $sf = new StreamFactory();
+    return $newResponse->withBody(
+      $content ? $sf->createStream($content) : $sf->createStream('')
+    );
+  }
+
+  /**
+   * Export bulk text scan data to CSV or JSON.
+   *
+   * Query params:
+   * - format: optional export format, csv|json (default json)
+   * - filter: optional filter type, all|user|group (default all)
+   * - userId: required when filter=user
+   * - groupId: required when filter=group
+   * - delimiter: optional CSV delimiter (default ,)
+   * - enclosure: optional CSV enclosure (default ")
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function exportBulkText($request, $response, $args)
+  {
+    $this->throwNotAdminException();
+    $query = $request->getQueryParams();
+
+    $format = 'json';
+    if (array_key_exists('format', $query) && !empty($query['format'])) {
+      $format = strtolower($query['format']);
+    }
+    if (!in_array($format, array('csv', 'json'))) {
+      throw new HttpBadRequestException("Invalid format. Use 'csv' or 'json'.");
+    }
+
+    $filter = 'all';
+    if (array_key_exists('filter', $query) && !empty($query['filter'])) {
+      $filter = strtolower($query['filter']);
+    }
+    if (!in_array($filter, array('all', 'user', 'group'))) {
+      throw new HttpBadRequestException("Invalid filter. Use 'all', 'user', or 'group'.");
+    }
+
+    $userPk = 0;
+    $groupPk = 0;
+    if ($filter === 'user') {
+      if (!array_key_exists('userId', $query)) {
+        throw new HttpBadRequestException("userId is required when filter=user.");
+      }
+      $userPk = intval($query['userId']);
+      if ($userPk <= 0) {
+        throw new HttpBadRequestException("Invalid userId.");
+      }
+    } elseif ($filter === 'group') {
+      if (!array_key_exists('groupId', $query)) {
+        throw new HttpBadRequestException("groupId is required when filter=group.");
+      }
+      $groupPk = intval($query['groupId']);
+      if ($groupPk <= 0) {
+        throw new HttpBadRequestException("Invalid groupId.");
+      }
+    }
+
+    $dbManager = $this->dbHelper->getDbManager();
+    $bulkTextExport = new BulkTextExport($dbManager);
+
+    $isJson = ($format === 'json');
+    if (!$isJson) {
+      $delimiter = ',';
+      if (array_key_exists('delimiter', $query) && !empty($query['delimiter'])) {
+        $delimiter = $query['delimiter'];
+      }
+
+      $enclosure = '"';
+      if (array_key_exists('enclosure', $query) && !empty($query['enclosure'])) {
+        $enclosure = $query['enclosure'];
+      }
+
+      $bulkTextExport->setDelimiter($delimiter);
+      $bulkTextExport->setEnclosure($enclosure);
+    }
+
+    $content = $bulkTextExport->exportBulkText($userPk, $groupPk, $isJson);
+    $fileName = "fossology-bulk-text-export-" . date("YMj-Gis");
+    $extension = $isJson ? 'json' : 'csv';
+    $contentType = $isJson ? 'application/json; charset=UTF-8' : 'text/csv; charset=UTF-8';
+
+    $newResponse = $response->withHeader('Content-type', $contentType)
+      ->withHeader('Content-Disposition', 'attachment; filename=' . $fileName . '.' . $extension)
+      ->withHeader('Pragma', 'no-cache')
+      ->withHeader('Cache-Control', 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0')
+      ->withHeader('Expires', 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
+
     $sf = new StreamFactory();
     return $newResponse->withBody(
       $content ? $sf->createStream($content) : $sf->createStream('')
