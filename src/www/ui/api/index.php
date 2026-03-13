@@ -165,7 +165,7 @@ if ($dbConnected) {
 }
 
 // Regex for matching a valid path parameter
-$pattern = "[\\w\\d\\-\\.@_]+}";
+$pattern = "[\\w\\d\\-\\.@_]+";
 
 //////////////////////////OPTIONS/////////////////////
 $app->options('/{routes:.+}', AuthController::class . ':optionsVerification');
@@ -284,10 +284,10 @@ $app->group('/uploads',
 $app->group('/users',
   function (\Slim\Routing\RouteCollectorProxy $app) use ($pattern) {
     $app->get('/self', UserController::class . ':getCurrentUser');
-    $app->get("[/{pathParam:$pattern]", UserController::class . ':getUsers');
-    $app->put("/{pathParam:$pattern", UserController::class . ':updateUser');
+    $app->get("[/{pathParam:$pattern}]", UserController::class . ':getUsers');
+    $app->put("/{pathParam:$pattern}", UserController::class . ':updateUser');
     $app->post('', UserController::class . ':addUser');
-    $app->delete("/{pathParam:$pattern", UserController::class . ':deleteUser');
+    $app->delete("/{pathParam:$pattern}", UserController::class . ':deleteUser');
     $app->post('/tokens', UserController::class . ':createRestApiToken');
     $app->get('/tokens/{type:\\w+}', UserController::class . ':getTokens');
     $app->any('/{params:.*}', BadRequestController::class);
@@ -312,12 +312,12 @@ $app->group('/groups',
   function (\Slim\Routing\RouteCollectorProxy $app) use ($pattern) {
     $app->get('', GroupController::class . ':getGroups');
     $app->post('', GroupController::class . ':createGroup');
-    $app->post("/{pathParam:$pattern/user/{userPathParam:$pattern", GroupController::class . ':addMember');
-    $app->delete("/{pathParam:$pattern", GroupController::class . ':deleteGroup');
-    $app->delete("/{pathParam:$pattern/user/{userPathParam:$pattern", GroupController::class . ':deleteGroupMember');
+    $app->post("/{pathParam:$pattern}/user/{userPathParam:$pattern}", GroupController::class . ':addMember');
+    $app->delete("/{pathParam:$pattern}", GroupController::class . ':deleteGroup');
+    $app->delete("/{pathParam:$pattern}/user/{userPathParam:$pattern}", GroupController::class . ':deleteGroupMember');
     $app->get('/deletable', GroupController::class . ':getDeletableGroups');
-    $app->get("/{pathParam:$pattern/members", GroupController::class . ':getGroupMembers');
-    $app->put("/{pathParam:$pattern/user/{userPathParam:$pattern", GroupController::class . ':changeUserPermission');
+    $app->get("/{pathParam:$pattern}/members", GroupController::class . ':getGroupMembers');
+    $app->put("/{pathParam:$pattern}/user/{userPathParam:$pattern}", GroupController::class . ':changeUserPermission');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -411,6 +411,7 @@ $app->group('/license',
     $app->get('/export-csv', LicenseController::class . ':exportAdminLicenseToCSV');
     $app->post('/import-json', LicenseController::class . ':handleImportLicense');
     $app->get('/export-json', LicenseController::class . ':exportAdminLicenseToJSON');
+    $app->get('/bulk-text/export', LicenseController::class . ':exportBulkText');
     $app->post('', LicenseController::class . ':createLicense');
     $app->put('/verify/{shortname:.+}', LicenseController::class . ':verifyLicense');
     $app->put('/merge/{shortname:.+}', LicenseController::class . ':mergeLicense');
