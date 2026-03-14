@@ -96,12 +96,12 @@ class CommonMenuTest extends TestCase
     // Assert that menu_to_1html() generates correct output
     $result = menu_to_1html($MenuList);
     $pattern = "/TestMenu/";
-    $this->assertRegExp($pattern, $result);
+    $this->assertMatchesRegularExpression($pattern, $result);
 
     $parm = "";
     $result = menu_to_1list($MenuList, $parm, "", "");
     // Assert that menu_to_1list() generates correct output
-    $this->assertRegExp($pattern, $result);
+    $this->assertMatchesRegularExpression($pattern, $result);
   }
 
   /**
