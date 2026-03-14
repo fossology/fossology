@@ -46,6 +46,7 @@ class UserController extends RestController
    */
   public function getUsers($request, $response, $args)
   {
+    $this->throwNotAdminException();
     $apiVersion = ApiVersion::getVersion($request);
     $id = null;
     if (isset($args['pathParam'])) {
@@ -77,6 +78,7 @@ class UserController extends RestController
    */
   public function addUser($request, $response, $args)
   {
+    $this->throwNotAdminException();
     $apiVersion = ApiVersion::getVersion($request);
     $userDetails = $this->getParsedBody($request);
     $userHelper = new UserHelper();
@@ -140,6 +142,7 @@ class UserController extends RestController
    */
   public function deleteUser($request, $response, $args)
   {
+    $this->throwNotAdminException();
     $apiVersion = ApiVersion::getVersion($request);
     $id = $apiVersion == ApiVersion::V2 ? intval($this->restHelper->getUserDao()->getUserByName($args['pathParam'])['user_pk']) : intval($args['pathParam']);
     if (!$this->dbHelper->doesIdExist("users","user_pk", $id)) {
@@ -183,6 +186,7 @@ class UserController extends RestController
    */
   public function updateUser($request, $response, $args)
   {
+    $this->throwNotAdminException();
     $apiVersion = ApiVersion::getVersion($request);
     $id = $apiVersion == ApiVersion::V2 ? intval($this->restHelper->getUserDao()->getUserByName($args['pathParam'])['user_pk']) : intval($args['pathParam']);
     if (!$this->dbHelper->doesIdExist("users","user_pk", $id)) {
