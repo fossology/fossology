@@ -162,7 +162,7 @@ class schedulerTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createSequences(array('agent_agent_pk_seq','upload_upload_pk_seq','pfile_pfile_pk_seq','users_user_pk_seq','nomos_ars_ars_pk_seq'));
     $this->testDb->createConstraints(array('agent_pkey','upload_pkey_idx','pfile_pkey','user_pkey'));
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','users'));
-    $this->testDb->createInheritedTables(array('uploadtree_a'));
+    $this->testDb->createInheritedTables(array('uploadtree_a', 'copyright_ars'));
 
     $this->testDb->insertData(array('upload','pfile','uploadtree_a','bucketpool','mimetype','users'), false);
   }
