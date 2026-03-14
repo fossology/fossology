@@ -49,7 +49,15 @@ class UserController extends RestController
     $apiVersion = ApiVersion::getVersion($request);
     $id = null;
     if (isset($args['pathParam'])) {
-      $id = $apiVersion == ApiVersion::V2 ? intval($this->restHelper->getUserDao()->getUserByName($args['pathParam'])['user_pk']) : intval($args['pathParam']);
+      if ($apiVersion == ApiVersion::V2) {
+        $user = $this->restHelper->getUserDao()->getUserByName($args['pathParam']);
+        if ($user === null) {
+          throw new HttpNotFoundException("UserId doesn't exist");
+        }
+        $id = intval($user['user_pk']);
+      } else {
+        $id = intval($args['pathParam']);
+      }
       if (! $this->dbHelper->doesIdExist("users", "user_pk", $id)) {
         throw new HttpNotFoundException("UserId doesn't exist");
       }
@@ -141,7 +149,15 @@ class UserController extends RestController
   public function deleteUser($request, $response, $args)
   {
     $apiVersion = ApiVersion::getVersion($request);
-    $id = $apiVersion == ApiVersion::V2 ? intval($this->restHelper->getUserDao()->getUserByName($args['pathParam'])['user_pk']) : intval($args['pathParam']);
+    if ($apiVersion == ApiVersion::V2) {
+      $user = $this->restHelper->getUserDao()->getUserByName($args['pathParam']);
+      if ($user === null) {
+        throw new HttpNotFoundException("UserId doesn't exist");
+      }
+      $id = intval($user['user_pk']);
+    } else {
+      $id = intval($args['pathParam']);
+    }
     if (!$this->dbHelper->doesIdExist("users","user_pk", $id)) {
       throw new HttpNotFoundException("UserId doesn't exist");
     }
@@ -184,7 +200,15 @@ class UserController extends RestController
   public function updateUser($request, $response, $args)
   {
     $apiVersion = ApiVersion::getVersion($request);
-    $id = $apiVersion == ApiVersion::V2 ? intval($this->restHelper->getUserDao()->getUserByName($args['pathParam'])['user_pk']) : intval($args['pathParam']);
+    if ($apiVersion == ApiVersion::V2) {
+      $user = $this->restHelper->getUserDao()->getUserByName($args['pathParam']);
+      if ($user === null) {
+        throw new HttpNotFoundException("UserId doesn't exist");
+      }
+      $id = intval($user['user_pk']);
+    } else {
+      $id = intval($args['pathParam']);
+    }
     if (!$this->dbHelper->doesIdExist("users","user_pk", $id)) {
       throw new HttpNotFoundException("UserId doesn't exist");
     }

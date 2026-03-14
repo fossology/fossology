@@ -4012,7 +4012,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        '201':
           description: Group has been added
           content:
             application/json:
