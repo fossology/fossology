@@ -23,6 +23,15 @@ require_once dirname(__FILE__) . '/../common-parm.php';
 class CommonMenuTest extends TestCase
 {
   /**
+   * Set up before each test
+   */
+  protected function setUp() : void
+  {
+    global $MenuList;
+    $MenuList = array();
+  }
+
+  /**
    * Test for MenuPage() function
    */
   public function testMenuPage()
@@ -109,6 +118,7 @@ class CommonMenuTest extends TestCase
    */
   protected function tearDown(): void
   {
-    // Additional teardown code, if needed
+    global $MenuList;
+    $MenuList = array();
   }
 }
