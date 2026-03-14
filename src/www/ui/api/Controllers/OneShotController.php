@@ -18,6 +18,7 @@ use Fossology\Lib\View\HighlightProcessor;
 use Fossology\UI\Api\Models\OneShot;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpPayloadTooLargeException;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -27,6 +28,7 @@ use Psr\Http\Message\ServerRequestInterface;
 class OneShotController extends RestController
 {
   const FILE_INPUT_NAME = 'fileInput';
+  const ALT_FILE_INPUT_NAME = 'analysisFile';
 
   /** @var HighlightProcessor */
   private $highlightProcessor;
@@ -52,14 +54,7 @@ class OneShotController extends RestController
    */
   public function runOneShotNomos($request, $response, $args)
   {
-    $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
-    $uploadedFile = $symReq->files->get($this::FILE_INPUT_NAME, null);
-    if (is_null($uploadedFile)) {
-      throw new HttpBadRequestException("No file uploaded");
-    }
-    if ($uploadedFile->getError() !== UPLOAD_ERR_OK) {
-      throw new HttpBadRequestException("Error uploading file");
-    }
+    $uploadedFile = $this->getUploadedFileOrThrow();
     list($licenses, $highlightInfoKeywords, $highlightInfoLicenses) = $this->restHelper->getPlugin('agent_nomos_once')->
       AnalyzeFile($uploadedFile->getPathname(), true);
 
@@ -96,14 +91,7 @@ class OneShotController extends RestController
    */
   public function runOneShotMonk($request, $response, $args)
   {
-    $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
-    $uploadedFile = $symReq->files->get($this::FILE_INPUT_NAME, null);
-    if (is_null($uploadedFile)) {
-      throw new HttpBadRequestException("No file uploaded");
-    }
-    if ($uploadedFile->getError() !== UPLOAD_ERR_OK) {
-      throw new HttpBadRequestException("Error uploading file");
-    }
+    $uploadedFile = $this->getUploadedFileOrThrow();
 
     list($licenseIds, $highlights) = $this->restHelper->getPlugin('oneshot-monk')->
       scanMonk($uploadedFile->getPathname());
@@ -127,18 +115,56 @@ class OneShotController extends RestController
    */
   public function runOneShotCEU($request, $response, $args)
   {
-    $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
-    $uploadedFile = $symReq->files->get($this::FILE_INPUT_NAME, null);
-    if (is_null($uploadedFile)) {
-      throw new HttpBadRequestException("No file uploaded");
-    }
-    if ($uploadedFile->getError() !== UPLOAD_ERR_OK) {
-      throw new HttpBadRequestException("Error uploading file");
-    }
+    $uploadedFile = $this->getUploadedFileOrThrow();
     list($copyrights, $highlights) = $this->restHelper->getPlugin('agent_copyright_once')->
       AnalyzeOne(true, $uploadedFile->getPathname());
     $this->highlightProcessor->sortHighlights($highlights);
     $returnVal = new OneShot($copyrights, $highlights);
     return $response->withJson($returnVal->getArray('copyrights'), 200);
+  }
+
+  /**
+   * Get uploaded file from accepted form field names.
+   *
+   * @return \Symfony\Component\HttpFoundation\File\UploadedFile
+   * @throws HttpBadRequestException
+   * @throws HttpPayloadTooLargeException
+   */
+  private function getUploadedFileOrThrow()
+  {
+    $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+    $uploadedFile = $symReq->files->get($this::FILE_INPUT_NAME, null);
+    if (is_null($uploadedFile)) {
+      $uploadedFile = $symReq->files->get($this::ALT_FILE_INPUT_NAME, null);
+    }
+    if (is_null($uploadedFile)) {
+      throw new HttpBadRequestException("No file uploaded");
+    }
+
+    $uploadError = $uploadedFile->getError();
+    if ($uploadError === UPLOAD_ERR_OK) {
+      return $uploadedFile;
+    }
+
+    if ($uploadError === UPLOAD_ERR_INI_SIZE || $uploadError === UPLOAD_ERR_FORM_SIZE) {
+      throw new HttpPayloadTooLargeException("Uploaded file is too large");
+    }
+    if ($uploadError === UPLOAD_ERR_PARTIAL) {
+      throw new HttpBadRequestException("File was only partially uploaded");
+    }
+    if ($uploadError === UPLOAD_ERR_NO_FILE) {
+      throw new HttpBadRequestException("No file uploaded");
+    }
+    if ($uploadError === UPLOAD_ERR_NO_TMP_DIR) {
+      throw new HttpBadRequestException("Temporary upload directory is missing");
+    }
+    if ($uploadError === UPLOAD_ERR_CANT_WRITE) {
+      throw new HttpBadRequestException("Failed to write uploaded file to disk");
+    }
+    if ($uploadError === UPLOAD_ERR_EXTENSION) {
+      throw new HttpBadRequestException("File upload stopped by server extension");
+    }
+
+    throw new HttpBadRequestException("Error uploading file");
   }
 }
