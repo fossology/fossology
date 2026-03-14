@@ -379,6 +379,7 @@ class SpdxAgent extends Agent
     $fileNodes = $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName(), $uploadId);
 
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
+    $customMainLicenseTexts = $this->clearingDao->getMainLicenseReportInfos($uploadId, $this->groupId);
     $mainLicenses = array();
     foreach ($mainLicenseIds as $licId) {
       $reportedLicenseId = $this->licenseMap->getProjectedId($licId);
@@ -389,16 +390,37 @@ class SpdxAgent extends Agent
         );
         continue; // Skip this license and continue with the next one
       }
-      $reportLicId = $mainLicense->getId() . "-" . md5($mainLicense->getText());
-      $mainLicenses[] = $reportLicId;
-      if (!array_key_exists($reportLicId, $this->licensesInDocument)) {
-        $listedLicense = stripos($mainLicense->getSpdxId(),
-            LicenseRef::SPDXREF_PREFIX) !== 0;
+      $customText = $customMainLicenseTexts[$licId] ?? null;
+      if (!empty($customText)) {
+        $reportLicId = $mainLicense->getId() . "-" . md5($customText);
+        $prefix = $stateOsselot ? LicenseRef::SPDXREF_PREFIX : LicenseRef::SPDXREF_PREFIX_FOSSOLOGY;
+        $customShortName = $prefix . $mainLicense->getShortName() . "-" . md5($customText);
+        $customLicense = new License(
+          $mainLicense->getId(),
+          $customShortName,
+          $mainLicense->getFullName(),
+          $mainLicense->getRisk(),
+          $customText,
+          $mainLicense->getUrl(),
+          $mainLicense->getDetectorType(),
+          ''
+        );
         $this->licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
-          ->setLicenseObj($mainLicense)
-          ->setCustomText(false)
-          ->setListedLicense($listedLicense);
+          ->setLicenseObj($customLicense)
+          ->setCustomText(true)
+          ->setListedLicense(false);
+      } else {
+        $reportLicId = $mainLicense->getId() . "-" . md5($mainLicense->getText());
+        if (!array_key_exists($reportLicId, $this->licensesInDocument)) {
+          $listedLicense = stripos($mainLicense->getSpdxId(),
+              LicenseRef::SPDXREF_PREFIX) !== 0;
+          $this->licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
+            ->setLicenseObj($mainLicense)
+            ->setCustomText(false)
+            ->setListedLicense($listedLicense);
+        }
       }
+      $mainLicenses[] = $reportLicId;
     }
     $mainLicenseString = [];
     if ($this->outputFormat == "spdx2tv" ||
