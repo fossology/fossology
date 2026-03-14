@@ -2875,5 +2875,6 @@
   $Schema["INHERITS"]["ununpack_ars"] = "ars_master";
   $Schema["INHERITS"]["nomos_ars"] = "ars_master";
   $Schema["INHERITS"]["monk_ars"] = "ars_master";
+  $Schema["INHERITS"]["copyright_ars"] = "ars_master";
   $Schema["INHERITS"]["spasht_ars"] = "ars_master";
   $Schema["INHERITS"]["license_candidate"] = "license_ref";
