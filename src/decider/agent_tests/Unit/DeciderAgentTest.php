@@ -496,4 +496,78 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
         'allLicenseInType', [$licenseMatches]);
     $this->assertFalse($agree, "Wrong result for non-compatible license types");
   }
+
+  /**
+   * @test
+   * Nomos no-license fallback should not contradict OJO LicenseRef findings.
+   */
+  public function testAreOtherScannerFindingsAndOJOAgreedWithNomosNoLicenseFallback()
+  {
+    $deciderAgent = new DeciderAgent();
+    $licenseMatches = [
+      'nomos' => [
+        $this->createLicenseMatchWithShortName(507, LicenseDao::NO_LICENSE_FOUND)
+      ],
+      'ojo' => [
+        $this->createLicenseMatchWithShortName(7001, 'LicenseRef-TestKnown')
+      ]
+    ];
+
+    $agree = Reflectory::invokeObjectsMethodnameWith($deciderAgent,
+      'areOtherScannerFindingsAndOJOAgreed', [$licenseMatches]);
+    $this->assertTrue($agree, 'Nomos no-license fallback must not block OJO agreement');
+  }
+
+  /**
+   * @test
+   * Nomos no-license fallback alone should not be treated as contradiction.
+   */
+  public function testAreOtherScannerFindingsAndOJOAgreedWithOnlyNomosNoLicenseFallback()
+  {
+    $deciderAgent = new DeciderAgent();
+    $licenseMatches = [
+      'nomos' => [
+        $this->createLicenseMatchWithShortName(507, 'License not found')
+      ]
+    ];
+
+    $agree = Reflectory::invokeObjectsMethodnameWith($deciderAgent,
+      'areOtherScannerFindingsAndOJOAgreed', [$licenseMatches]);
+    $this->assertTrue($agree, 'No-license fallback-only groups should be ignored for OJO contradiction checks');
+  }
+
+  /**
+   * @test
+   * Nomos conflicting license should still block OJO agreement.
+   */
+  public function testAreOtherScannerFindingsAndOJOAgreedWithNomosConflict()
+  {
+    $deciderAgent = new DeciderAgent();
+    $licenseMatches = [
+      'nomos' => [
+        $this->createLicenseMatchWithShortName(8001, 'GPL-2.0-only')
+      ],
+      'ojo' => [
+        $this->createLicenseMatchWithShortName(7001, 'LicenseRef-TestKnown')
+      ]
+    ];
+
+    $agree = Reflectory::invokeObjectsMethodnameWith($deciderAgent,
+      'areOtherScannerFindingsAndOJOAgreed', [$licenseMatches]);
+    $this->assertFalse($agree, 'Real Nomos conflicts must still block auto conclusion');
+  }
+
+  /**
+   * Create mock LicenseMatch object with custom license id/shortname.
+   * @param int $licId
+   * @param string $licenseShortName
+   * @return LicenseMatch
+   */
+  protected function createLicenseMatchWithShortName($licId, $licenseShortName)
+  {
+    return new LicenseMatch(1,
+      new LicenseRef($licId, $licenseShortName, $licenseShortName, $licenseShortName),
+      M::mock(AgentRef::class),
+      1);
+  }
 }

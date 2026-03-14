@@ -323,9 +323,14 @@ class DeciderAgent extends Agent
   private function autodecideIfOjoMatchesNoContradiction(ItemTreeBounds $itemTreeBounds, $matches)
   {
     $licenseMatchExists = count($matches) > 0;
+    $haveOjoFinding = false;
     foreach ($matches as $licenseMatches) {
+      $haveOjoFinding = $haveOjoFinding ||
+        (array_key_exists('ojo', $licenseMatches) && count($licenseMatches['ojo']) > 0);
       $licenseMatchExists = $licenseMatchExists && $this->areOtherScannerFindingsAndOJOAgreed($licenseMatches);
     }
+
+    $licenseMatchExists = $licenseMatchExists && $haveOjoFinding;
 
     if ($licenseMatchExists) {
       try {
@@ -351,9 +356,14 @@ class DeciderAgent extends Agent
   private function autodecideIfResoMatchesNoContradiction(ItemTreeBounds $itemTreeBounds, $matches)
   {
     $licenseMatchExists = count($matches) > 0;
+    $haveResoFinding = false;
     foreach ($matches as $licenseMatches) {
+      $haveResoFinding = $haveResoFinding ||
+        (array_key_exists('reso', $licenseMatches) && count($licenseMatches['reso']) > 0);
       $licenseMatchExists = $licenseMatchExists && $this->areOtherScannerFindingsAndRESOAgreed($licenseMatches);
     }
+
+    $licenseMatchExists = $licenseMatchExists && $haveResoFinding;
 
     if ($licenseMatchExists) {
       try {
@@ -544,15 +554,22 @@ class DeciderAgent extends Agent
    * @brief extracts the matches corresponding to a scanner from a $licenseMatches structure
    * @param $scanner
    * @param LicenseMatch[][] $licenseMatches
+   * @param bool $skipNoLicenseFallback If true, skip No_license_found-like findings
    * @return int[] list of license ids
    */
-  protected function getLicenseIdsOfMatchesForScanner($scanner, $licenseMatches)
+  protected function getLicenseIdsOfMatchesForScanner($scanner, $licenseMatches, $skipNoLicenseFallback = false)
   {
     if (array_key_exists($scanner, $licenseMatches) === true) {
+      $scannerMatches = $licenseMatches[$scanner];
+      if ($skipNoLicenseFallback) {
+        $scannerMatches = array_filter($scannerMatches, function ($match) {
+          return !$this->isIgnoredNoLicenseFinding($match);
+        });
+      }
       return array_map(
         function ($match) {
           return $match->getLicenseId();
-        }, $licenseMatches[$scanner]);
+        }, $scannerMatches);
     }
     return [];
   }
@@ -564,13 +581,19 @@ class DeciderAgent extends Agent
    */
   protected function areOtherScannerFindingsAndOJOAgreed($licenseMatches)
   {
+    if ($this->hasOnlyIgnoredNoLicenseFindingsForScanner('nomos', $licenseMatches)) {
+      // Nomos fallback entries like No_license_found/License not found should
+      // not block an OJO-based auto conclusion.
+      return true;
+    }
+
     $findingsByOjo = $this->getLicenseIdsOfMatchesForScanner('ojo', $licenseMatches);
     if (count($findingsByOjo) == 0) {
       // nothing to do
       return false;
     }
 
-    $findingsByOtherScanner = $this->getLicenseIdsOfMatchesForScanner('nomos', $licenseMatches);
+    $findingsByOtherScanner = $this->getLicenseIdsOfMatchesForScanner('nomos', $licenseMatches, true);
     if (count($findingsByOtherScanner) == 0) {
       // nothing found by other scanner, so no contradiction
       return true;
@@ -591,13 +614,19 @@ class DeciderAgent extends Agent
    */
   protected function areOtherScannerFindingsAndRESOAgreed($licenseMatches)
   {
+    if ($this->hasOnlyIgnoredNoLicenseFindingsForScanner('nomos', $licenseMatches)) {
+      // Nomos fallback entries like No_license_found/License not found should
+      // not block a RESO-based auto conclusion.
+      return true;
+    }
+
     $findingsByReso = $this->getLicenseIdsOfMatchesForScanner('reso', $licenseMatches);
     if (count($findingsByReso) == 0) {
       // nothing to do
       return false;
     }
 
-    $findingsByOtherScanner = $this->getLicenseIdsOfMatchesForScanner('nomos', $licenseMatches);
+    $findingsByOtherScanner = $this->getLicenseIdsOfMatchesForScanner('nomos', $licenseMatches, true);
     if (count($findingsByOtherScanner) == 0) {
       // nothing found by other scanner, so no contradiction
       return true;
@@ -609,6 +638,40 @@ class DeciderAgent extends Agent
       }
     }
     return true;
+  }
+
+  /**
+   * @brief Check if scanner findings only contain "no license found" style entries.
+   * @param string $scanner Scanner key inside licenseMatches
+   * @param LicenseMatch[][] $licenseMatches
+   * @return bool
+   */
+  private function hasOnlyIgnoredNoLicenseFindingsForScanner($scanner, $licenseMatches)
+  {
+    if (!array_key_exists($scanner, $licenseMatches) || count($licenseMatches[$scanner]) == 0) {
+      return false;
+    }
+    foreach ($licenseMatches[$scanner] as $licenseMatch) {
+      if (!$this->isIgnoredNoLicenseFinding($licenseMatch)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief Identify scanner findings that represent a no-license fallback.
+   * @param LicenseMatch $licenseMatch
+   * @return bool
+   */
+  private function isIgnoredNoLicenseFinding($licenseMatch)
+  {
+    $shortName = strtolower(trim($licenseMatch->getLicenseRef()->getShortName()));
+    $normalized = str_replace(array(' ', '-'), '_', $shortName);
+
+    return $normalized === strtolower(LicenseDao::NO_LICENSE_FOUND)
+      || $normalized === 'license_not_found'
+      || $normalized === strtolower(LicenseDao::VOID_LICENSE);
   }
 
   /**
