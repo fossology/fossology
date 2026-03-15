@@ -168,15 +168,74 @@ class FolderDao
 
     $userGroupMap = $this->userDao->getUserGroupMap(Auth::getUserId());
 
-    $results = array();
+    // Collect all rows first
+    $rows = array();
     while ($row = $this->dbManager->fetchArray($res)) {
-      $countUploads = $this->countFolderUploads(intval($row['folder_pk']), $userGroupMap);
+      $rows[] = $row;
+    }
+    $this->dbManager->freeResult($res);
+
+    $folderIds = [];
+    foreach ($rows as $r) {
+      $folderIds[] = intval($r['folder_pk']);
+    }
+    // Batch-fetch upload counts for ALL folders in one query
+    $allCounts = $this->countFolderUploadsBatch($folderIds, $userGroupMap);
+
+    $results = array();
+    foreach ($rows as $row) {
+      $folderId = intval($row['folder_pk']);
+      $countUploads = isset($allCounts[$folderId]) ? $allCounts[$folderId] : array();
 
       $results[] = array(
         self::FOLDER_KEY => new Folder(
-          intval($row['folder_pk']), $row['folder_name'], $row['folder_desc'], intval($row['folder_perm'])),
+          $folderId, $row['folder_name'], $row['folder_desc'], intval($row['folder_perm'])),
         self::DEPTH_KEY => $row['depth'],
         self::REUSE_KEY => $countUploads
+      );
+    }
+    return $results;
+  }
+
+  /**
+   * @param int[] $folderIds
+   * @param string[] $userGroupMap map groupId=>groupName
+   * @return array map folderPk => array(groupName => array('group_id'=>...,'count'=>...,'group_name'=>...))
+   */
+  public function countFolderUploadsBatch($folderIds, $userGroupMap)
+  {
+    if (empty($folderIds)) {
+      return array();
+    }
+
+    $trustGroupIds = array_keys($userGroupMap);
+    $trustedGroups = '{' . implode(',', $trustGroupIds) . '}';
+    $folderIdList = '{' . implode(',', array_map('intval', $folderIds)) . '}';
+
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName, "
+      SELECT fc.parent_fk AS folder_pk, uc.group_fk AS group_id, count(*) AS cnt
+      FROM foldercontents fc
+      INNER JOIN upload u ON u.upload_pk = fc.child_id
+      INNER JOIN upload_clearing uc ON u.upload_pk = uc.upload_fk AND uc.group_fk = ANY($1)
+      WHERE fc.parent_fk = ANY($2)
+        AND fc.foldercontents_mode = " . self::MODE_UPLOAD . "
+        AND (u.upload_mode = 100 OR u.upload_mode = 104)
+      GROUP BY fc.parent_fk, uc.group_fk
+    ");
+    $res = $this->dbManager->execute($statementName, array($trustedGroups, $folderIdList));
+
+    $results = array();
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $folderId = intval($row['folder_pk']);
+      $groupName = $userGroupMap[$row['group_id']];
+      if (!isset($results[$folderId])) {
+        $results[$folderId] = array();
+      }
+      $results[$folderId][$groupName] = array(
+        'group_id' => $row['group_id'],
+        'count' => $row['cnt'],
+        'group_name' => $groupName
       );
     }
     $this->dbManager->freeResult($res);
@@ -215,17 +274,12 @@ GROUP BY group_fk
   public function getAllFolderIds()
   {
     $statementName = __METHOD__;
-    $this->dbManager->prepare($statementName, "SELECT DISTINCT folder_pk FROM folder");
+    $this->dbManager->prepare($statementName, "SELECT folder_pk FROM folder");
     $res = $this->dbManager->execute($statementName);
     $results = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
 
-    $allIds = array();
-    for ($i=0; $i < sizeof($results); $i++) {
-      $allIds[] = intval($results[$i]['folder_pk']);
-    }
-
-    return $allIds;
+    return array_map('intval', array_column($results, 'folder_pk'));
   }
 
   public function getFolderChildUploads($parentId, $trustGroupId)
@@ -234,10 +288,10 @@ GROUP BY group_fk
     $parameters = array($parentId, $trustGroupId);
 
     $this->dbManager->prepare($statementName, $sql = "
-SELECT u.*,uc.*,fc.foldercontents_pk FROM foldercontents fc
-  INNER JOIN upload u ON u.upload_pk = fc.child_id
-  INNER JOIN upload_clearing uc ON u.upload_pk=uc.upload_fk AND uc.group_fk=$2
-WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " AND (u.upload_mode = 100 OR u.upload_mode = 104);");
+SELECT u.*, uc.*, fc.foldercontents_pk FROM foldercontents fc
+  INNER JOIN upload u ON u.upload_pk = fc.child_id AND u.upload_mode IN (100, 104)
+  INNER JOIN upload_clearing uc ON uc.upload_fk = u.upload_pk AND uc.group_fk = $2
+WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . ";");
     $res = $this->dbManager->execute($statementName, $parameters);
     $results = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
@@ -258,6 +312,33 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
     foreach ($this->getFolderChildUploads($parentId, $trustGroupId) as $row) {
       $results[] = UploadProgress::createFromTable($row);
     }
+    return $results;
+  }
+
+  /**
+   * @brief Get all uploads accessible to a group in a single query
+   * @param int $trustGroupId
+   * @return UploadProgress[]
+   */
+  public function getAllUploadsForGroup($trustGroupId)
+  {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName, "
+      SELECT u.upload_pk, u.upload_filename, u.upload_desc,
+        u.uploadtree_tablename, u.upload_ts,
+        uc.group_fk, uc.assignee, uc.status_fk, uc.status_comment
+      FROM upload u
+      INNER JOIN upload_clearing uc ON uc.upload_fk = u.upload_pk AND uc.group_fk = $1
+      WHERE u.upload_mode IN (100, 104)
+        AND u.pfile_fk IS NOT NULL
+      ORDER BY u.upload_filename
+    ");
+    $res = $this->dbManager->execute($statementName, array($trustGroupId));
+    $results = array();
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $results[] = UploadProgress::createFromTable($row);
+    }
+    $this->dbManager->freeResult($res);
     return $results;
   }
 

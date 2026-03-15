@@ -177,75 +177,59 @@ function GetFolderFromItem($upload_pk="", $uploadtree_pk = "")
  */
 function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1, $linkParent=false, $OldParent=0)
 {
+  global $container;
+
+  $dbManager = $container->get('db.manager');
+  $folderDao = $container->get('dao.folder');
+
   if ($ParentFolder == "-1") {
     $ParentFolder = FolderGetTop();
   }
   if (empty($ParentFolder)) {
     return;
   }
-  global $PG_CONN;
-  if (empty($PG_CONN)) {
-    return;
-  }
+
+  $ParentFolder = intval($ParentFolder);
+
+  $statementName = __METHOD__ . '.folderTree';
+  $sql = $folderDao->getFolderTreeCte($ParentFolder) . "
+    SELECT folder_pk, parent_fk, folder_name, depth
+    FROM folder_tree
+    ORDER BY name_path";
+
+  $dbManager->prepare($statementName, $sql);
+  $res = $dbManager->execute($statementName, array($ParentFolder));
+
   $V = "";
+  while ($row = $dbManager->fetchArray($res)) {
+    $folderDepth = intval($row['depth']);
+    $folderPk = $row['folder_pk'];
+    $parentFk = $row['parent_fk'];
 
-  if (($Depth != 0) || $IncludeTop) {
-    if ($ParentFolder == $SelectId) {
-      $V .= "<option value='$ParentFolder' SELECTED>";
+    if ($folderDepth == 0 && !$IncludeTop) {
+      continue;
+    }
+
+    if ($folderPk == $SelectId) {
+      $V .= "<option value='$folderPk' SELECTED>";
     } elseif ($linkParent) {
-      if (empty($OldParent)) {
-        $OldParent = 0;
-      }
-      $V .= "<option value='$OldParent $ParentFolder'>";
+      $parent = empty($parentFk) ? 0 : $parentFk;
+      $V .= "<option value='$parent $folderPk'>";
     } else {
-      $V .= "<option value='$ParentFolder'>";
+      $V .= "<option value='$folderPk'>";
     }
-    if ($Depth != 0) {
-      $V .= "&nbsp;&nbsp;";
-    }
-    for ($i=1; $i < $Depth; $i++) {
+
+    for ($i = 0; $i < $folderDepth; $i++) {
       $V .= "&nbsp;&nbsp;";
     }
 
-    /* Load this folder's name */
-    $sql = "SELECT folder_name FROM folder WHERE folder_pk=$ParentFolder LIMIT 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
     $Name = trim($row['folder_name']);
     if ($Name == "") {
       $Name = "[default]";
     }
-
-    /* Load any subfolders */
-    /* Now create the HTML */
     $V .= htmlentities($Name, ENT_HTML5 | ENT_QUOTES);
     $V .= "</option>\n";
   }
-  /* Load any subfolders */
-  $sql = "SELECT folder.folder_pk, folder.folder_name AS name,
-            folder.folder_desc AS description,
-            foldercontents.parent_fk AS parent,
-            foldercontents.foldercontents_mode,
-            NULL AS ts, NULL AS upload_pk, NULL AS pfile_fk, NULL AS ufile_mode
-            FROM folder, foldercontents
-            WHERE foldercontents.foldercontents_mode = ".FolderDao::MODE_FOLDER."
-            AND foldercontents.parent_fk =$ParentFolder
-            AND foldercontents.child_id = folder.folder_pk
-            AND folder.folder_pk is not null
-            ORDER BY name";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) > 0) {
-    $Hide = "";
-    if ($Depth > 0) {
-      $Hide = "style='display:none;'";
-    }
-    while ($row = pg_fetch_assoc($result)) {
-      $V .= FolderListOption($row['folder_pk'], $Depth+1,$IncludeTop,$SelectId,$linkParent,$row['parent']);
-    }
-  }
-  pg_free_result($result);
   return($V);
 } // FolderListOption()
 

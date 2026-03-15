@@ -2,6 +2,7 @@
 
 use Fossology\Lib\Auth\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use Fossology\Lib\Dao\UploadDao;
 /*
  SPDX-FileCopyrightText: © 2014 Hewlett-Packard Development Company, L.P.
 
@@ -23,12 +24,14 @@ define("TITLE_AJAX_SCHEDULE_AGENT", _("Schedule agent"));
  */
 class ajax_schedule_agent extends FO_Plugin
 {
+  private $uploadDao;
   function __construct()
   {
     $this->Name       = "schedule_agent";
     $this->Title      = TITLE_AJAX_SCHEDULE_AGENT;
     $this->DBaccess   = PLUGIN_DB_READ;
     parent::__construct();
+    $this->uploadDao = $GLOBALS['container']->get('dao.upload');
   }
 
 
@@ -38,26 +41,20 @@ class ajax_schedule_agent extends FO_Plugin
   public function Output()
   {
     global $Plugins;
-    global $PG_CONN;
     $UploadPk = GetParm("upload",PARM_INTEGER);
     $Agent = GetParm("agent",PARM_STRING);
     if (empty($UploadPk) || empty($Agent)) {
       return new Response('missing parameter', Response::HTTP_BAD_REQUEST,
         array('Content-type' => 'text/plain'));
     }
-    $sql = "SELECT upload_pk, upload_filename FROM upload WHERE upload_pk = '$UploadPk'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1) {
+    $upload = $this->uploadDao->getUpload($UploadPk);
+    if ($upload === null) {
       $errMsg = __FILE__ . ":" . __LINE__ . " " . _("Upload") . " " . $UploadPk .
         " " . _("not found");
       return new Response($errMsg, Response::HTTP_BAD_REQUEST,
         array('Content-type' => 'text/plain'));
     }
-    $UploadRow = pg_fetch_assoc($result);
-    $ShortName = $UploadRow['upload_filename'];
-    pg_free_result($result);
-
+    $ShortName = $upload->getFilename();
     $user_pk = Auth::getUserId();
     $group_pk = Auth::getGroupId();
     $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $UploadPk);

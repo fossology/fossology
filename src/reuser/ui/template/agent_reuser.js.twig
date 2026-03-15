@@ -3,7 +3,8 @@
    SPDX-License-Identifier: GPL-2.0-only
 #}
 let osselotVersions = [];
-let lastUploadedFiles = []; 
+let lastUploadedFiles = [];
+let _reloadUploadsXhr = null;
 function registerFolderSelectorChange() {
   $('[id^={{ reuseFolderSelectorName }}]').change(function () {
     const groupIndex = $(this).attr('id').replace('{{ reuseFolderSelectorName }}', '');
@@ -13,30 +14,36 @@ function registerFolderSelectorChange() {
 }
 
 function reloadUploads(folderGroupPair, groupIndex) {
-  $.getJSON("?mod=plugin_reuser&do=getUploads" + folderGroupPair)
+  if (_reloadUploadsXhr) {
+    _reloadUploadsXhr.abort();
+    _reloadUploadsXhr = null;
+  }
+  const packageForReuse = $(`#{{ uploadToReuseSelectorName }}${groupIndex}`);
+  _reloadUploadsXhr = $.getJSON("?mod=plugin_reuser&do=getUploads" + folderGroupPair)
     .done(function (data) {
-      const packageForReuse = $(`#{{ uploadToReuseSelectorName }}${groupIndex}`);
-      packageForReuse.empty();
-      $.each(data, function (key, value) {
+      const entries = Object.entries(data).map(([key, value]) => ({ key, value }));
+      entries.sort(function (a, b) { return String(a.value).localeCompare(String(b.value)); });
+      const fragment = document.createDocumentFragment();
+      entries.forEach(function ({ key, value }) {
         const option = document.createElement("option");
-        option.innerHTML = value;
+        option.textContent = value;
         option.value = key;
-        packageForReuse.append(option);
+        fragment.appendChild(option);
       });
-      sortList(`#{{ uploadToReuseSelectorName }}${groupIndex} option`);
+      packageForReuse.empty();
+      packageForReuse[0].appendChild(fragment);
     })
-    .fail(failed);
+    .fail(function (xhr) { if (xhr.statusText !== 'abort') failed(xhr); })
+    .always(function () { _reloadUploadsXhr = null; });
 }
 
 function toggleDisabled() {
-  $('.reuseSearchInFolder').click(function () {
+  $(document).off('click.reuseSearchInFolder').on('click.reuseSearchInFolder', '.reuseSearchInFolder', function () {
     const gi = $(this).attr('id').replace('reuseSearchInFolder', '');
     const fs = $(`#{{ reuseFolderSelectorName }}${gi}`);
     fs.prop('disabled', !this.checked);
-    this.checked ? fs.trigger('change') : reloadUploads('', '');
+    this.checked ? fs.trigger('change') : reloadUploads('', gi);
   });
-
-  reloadUploads('', '');
   registerFolderSelectorChange();
 }
 
@@ -126,17 +133,14 @@ function initializeOsselotFields() {
       
       if ($localSection.length > 0) {
         $localSection.show().css('display', 'block');
-        setTimeout(() => {
-          registerFolderSelectorChange();
-          const groupIndex = index || '';
+        const groupIndex = index || '';
+        const checkboxId = groupIndex ? `#reuseSearchInFolder${groupIndex}` : '#reuseSearchInFolder';
+        const $checkbox = $(checkboxId);
+        if ($checkbox.length > 0 && $checkbox.is(':checked')) {
+          $(`#{{ reuseFolderSelectorName }}${groupIndex}`).prop('disabled', false).trigger('change');
+        } else {
           reloadUploads('', groupIndex);
-          
-          const checkboxId = groupIndex ? `#reuseSearchInFolder${groupIndex}` : '#reuseSearchInFolder';
-          const $checkbox = $(checkboxId);
-          if ($checkbox.length > 0 && $checkbox.is(':checked')) {
-            $checkbox.trigger('click').trigger('click');
-          }
-        }, 100);
+        }
       }
     }
   }
@@ -202,9 +206,6 @@ function initializeOsselotFields() {
       success: function(data) {
         const versions = Array.isArray(data) ? data : [];
         renderVersionRadioButtons(versions, index);
-        setTimeout(() => {
-          syncHiddenField(index);
-        }, 100);
       },
       error: function() {
         $(containerId).html('<em>Error loading versions</em>');
@@ -233,9 +234,7 @@ function initializeOsselotFields() {
     
     $(document).on(`input${namespace} change${namespace}`, `#${packageId}`, function(e) {
         const value = $(this).val();
-        setTimeout(function() {
-            $(`[id^="osselot-package"]:not(#${packageId})`).val(value);
-        }, 10);
+        $(`[id^="osselot-package"]:not(#${packageId})`).val(value);
     });
     
     $(document).on(`click${namespace} keypress${namespace}`, `#${packageId}, #${fetchButtonId}`, function(e) {
@@ -263,10 +262,8 @@ function initializeOsselotFields() {
     
     setupOsselotEvents(indexStr);
     
-    setTimeout(() => {
-      const reuseSourceId = indexStr !== '' ? `#reuse-source${indexStr}` : '#reuse-source';
-      $(reuseSourceId).trigger('change');
-    }, 150);
+    const reuseSourceId = indexStr !== '' ? `#reuse-source${indexStr}` : '#reuse-source';
+    $(reuseSourceId).trigger('change');
     
     window.osselotInitialized[indexStr] = true;
   };
@@ -320,14 +317,6 @@ $(document).ready(function () {
       
       addNavItems(i, val.name, reuseNameTab, reuseTabContent);
     }
-    
-    setTimeout(function() {
-      for (let i = 0; i < allFiles.length; i++) {
-        if (typeof window.initializeOsselotForIndex === 'function') {
-          window.initializeOsselotForIndex(i);
-        }
-      }
-    }, 300);
     
     toggleDisabled();
   });

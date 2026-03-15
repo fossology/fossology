@@ -785,14 +785,16 @@ class UploadTreeController extends RestController
           if ($existingLicense == null) {
             $isValid = false;
             $errors[] = "License with short name " . $license['licenseShortName'] . " does not exist";
-          } else if ($license['licenseAction'] != null && !in_array($license['licenseAction'], ["ADD", "REMOVE"])) {
-            $isValid = false;
-            $errors[] = "License action should be either ADD or REMOVE";
+          } else {
+            $licenseAction = $license['licenseAction'] ?? null;
+            if ($licenseAction !== null && !in_array($licenseAction, ["ADD", "REMOVE"])) {
+              $isValid = false;
+              $errors[] = "License action should be either ADD or REMOVE";
+            }
+            $license['licenseId'] = $existingLicense->getId();
+            $license['reportinfo'] = $license['licenseText'] ?? '';
+            $license['action'] = $licenseAction === 'REMOVE' ? 'Remove' : 'Add';
           }
-
-          $license['licenseId'] = $existingLicense->getId();
-          $license['reportinfo'] = $license['licenseText'];
-          $license['action'] = $license['licenseAction'] == 'REMOVE' ? 'Remove' : 'Add';
         }
       }
     }
@@ -800,7 +802,7 @@ class UploadTreeController extends RestController
     $errorMess = "";
     if (!$isValid) {
       foreach ($errors as $error) {
-        $errorMess = $error . "\n";
+        $errorMess .= $error . "\n";
       }
       throw new HttpBadRequestException($errorMess);
     }

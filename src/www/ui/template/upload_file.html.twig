@@ -43,6 +43,26 @@
 {% endblock %}
 
 {% block popup %}
+  <div class="modal fade" id="uploadWarningModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-secondary text-white">
+          <h5 class="modal-title">
+            <i class="fas fa-exclamation-circle"></i> Duplicate Files Found
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="warningMessages"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="$('#fileUploader').val('').trigger('change')" data-dismiss="modal">Clear Selection</button>
+          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Continue Anyway</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal fade" id="reuseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width:1140px">
         <div class="modal-content">
@@ -96,29 +116,6 @@
       const messages = [];
       const ajaxList = [];
       
-      if (!$('#uploadWarningModal').length) {
-        $('body').append(`
-          <div class="modal fade" id="uploadWarningModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-              <div class="modal-content">
-                <div class="modal-header bg-secondary text-white">
-                  <h5 class="modal-title">
-                    <i class="fas fa-exclamation-circle"></i> Duplicate Files Found
-                  </h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span>&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body" id="warningMessages"></div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" onclick="$('#fileUploader').val('')" data-dismiss="modal">Clear Selection</button>
-                  <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Continue Anyway</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        `);
-      }
       for (let i = 0; i < allFiles.length; i++) {
         const uploadName = allFiles[i].name;
         const ajaxCall = $.ajax({
@@ -332,9 +329,9 @@ function addNavItems(index, name, navItemDom, navContentDom) {
     navItem.addClass("active").attr('aria-selected', true);
     navContent.addClass("show active");
   }
-  
-  navItemDom.append(navItem);
-  navContentDom.append(navContent);
+
+  navItemDom[0].appendChild(navItem[0]);
+  navContentDom[0].appendChild(navContent[0]);
   
   if (typeof window.initializeOsselotForIndex === 'function') {
     window.initializeOsselotForIndex(index);
@@ -423,14 +420,8 @@ $(document).ready(function() {
     });
     
     $("#fileUploader").on("change", function(e) {
-        setTimeout(function() {
-            if (window.currentReuseSource && window.currentReuseSource !== 'local') {
-                $('select[id^="reuse-source"]').val(window.currentReuseSource).trigger('change');
-            }
-        }, 500);
-    });
-
-    $("#fileUploader").on("change", function(e) {
+      $('#warningMessages').html('');
+      $('#uploadWarningModal').modal('hide');
       checkDuplicateUploadWarning(e);
 
       var holder = $("#uploaddescriptions");
@@ -458,6 +449,9 @@ $(document).ready(function() {
         addNavItems(i, val.name, reuseNameTab, reuseTabContent);
       }
       toggleDisabled();
+      if (window.currentReuseSource && window.currentReuseSource !== 'local') {
+        $('select[id^="reuse-source"]').val(window.currentReuseSource);
+      }
     });
     $('#uploaddescriptions').on('hidden.bs.collapse', function () {
       $('#collapseDescription').find('button').text('+ expand');
