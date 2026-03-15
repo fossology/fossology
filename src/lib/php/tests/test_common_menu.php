@@ -12,6 +12,7 @@
 namespace Fossology\Tests;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Runner\Version as PHPUnitVersion;
 
 require_once dirname(__FILE__) . '/../common-menu.php';
 require_once dirname(__FILE__) . '/../common-parm.php';
@@ -96,12 +97,20 @@ class CommonMenuTest extends TestCase
     // Assert that menu_to_1html() generates correct output
     $result = menu_to_1html($MenuList);
     $pattern = "/TestMenu/";
-    $this->assertRegExp($pattern, $result);
+    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+      $this->assertMatchesRegularExpression($pattern, $result);
+    } else {
+      $this->assertRegExp($pattern, $result);
+    }
 
     $parm = "";
     $result = menu_to_1list($MenuList, $parm, "", "");
     // Assert that menu_to_1list() generates correct output
-    $this->assertRegExp($pattern, $result);
+    if (intval(explode('.', PHPUnitVersion::id())[0]) >= 9) {
+      $this->assertMatchesRegularExpression($pattern, $result);
+    } else {
+      $this->assertRegExp($pattern, $result);
+    }
   }
 
   /**
