@@ -59,7 +59,9 @@ class agent_copyright_once extends FO_Plugin
       return _("unable to change working directory to $copyright_dir\n");
     }
     //$Sys = "./copyright -C $tempFileName -c $SYSCONFDIR";
-    $Sys = "./copyright -c $SYSCONFDIR $tempFileName";
+    $escapedSysConfDir = escapeshellarg($SYSCONFDIR);
+    $escapedTempFile = escapeshellarg($tempFileName);
+    $Sys = "./copyright -c $escapedSysConfDir $escapedTempFile";
 
     $inputFile = popen($Sys, "r");
     $colors = array();
