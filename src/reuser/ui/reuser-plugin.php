@@ -69,23 +69,22 @@ class ReuserPlugin extends DefaultPlugin
   }
 
   /**
-   * @brief Get all uploads accessible to curent user
-   *
-   * Gets all folders accessible by current user and iterate them. Find every
-   * upload with in that folder and add data from prepareFolderUploads().
+   * @brief Get all uploads accessible to current user
    * @return array Key as upload id
    */
   function getAllUploads()
   {
-    $allFolder = $this->folderDao->getAllFolderIds();
-    $result = array();
-    for ($i=0; $i < sizeof($allFolder); $i++) {
-      $listObject = $this->prepareFolderUploads($allFolder[$i]);
-      foreach ($listObject as $key => $value) {
-        $result[explode(",",$key)[0]] = $value;
-      }
+    $trustGroupId = Auth::getGroupId();
+    $folderUploads = $this->folderDao->getAllUploadsForGroup($trustGroupId);
+    $uploadsById = array();
+    foreach ($folderUploads as $uploadProgress) {
+      $key = $uploadProgress->getId();
+      $display = $uploadProgress->getFilename() . _(" from ")
+            . Convert2BrowserTime(date("Y-m-d H:i:s", $uploadProgress->getTimestamp()))
+            . ' (' . $uploadProgress->getStatusString() . ')';
+      $uploadsById[$key] = $display;
     }
-    return $result;
+    return $uploadsById;
   }
 
   /**
