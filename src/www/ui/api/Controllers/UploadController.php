@@ -235,7 +235,7 @@ class UploadController extends RestController
       $limit = filter_var($limit, FILTER_VALIDATE_INT);
       if ($limit < 1) {
         throw new HttpBadRequestException(
-          "limit should be positive integer > 1");
+          "limit should be a positive integer >= 1");
       }
     } else {
       $limit = self::UPLOAD_FETCH_LIMIT;

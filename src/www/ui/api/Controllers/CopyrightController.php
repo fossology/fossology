@@ -850,7 +850,7 @@ class CopyrightController extends RestController
       $limit = filter_var($limit, FILTER_VALIDATE_INT);
       if ($limit < 1) {
         throw new HttpBadRequestException(
-          "limit should be positive integer > 1");
+          "limit should be a positive integer >= 1");
       }
     } else {
       $limit = self::COPYRIGHT_FETCH_LIMIT;
@@ -933,8 +933,6 @@ class CopyrightController extends RestController
     $copyrightHash = $args['hash'];
     $userId = $this->restHelper->getUserId();
     $cpTable = $this->copyrightHist->getTableName($dataType);
-
-    echo $uploadTreeId;
 
     $this->uploadAccessible($uploadPk);
     $this->isItemExists($uploadPk, $uploadTreeId);
