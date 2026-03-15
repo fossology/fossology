@@ -222,8 +222,13 @@ class CycloneDXAgent extends Agent
           ->setTextPrinted(true)
           ->setListedLicense(true);
       }
+      $licensedata = array();
       $licensedata['id'] = $mainLicObj->getSpdxId();
       $licensedata['url'] = $mainLicObj->getUrl();
+      if (!empty($mainLicObj->getText())) {
+          $licensedata['textContent'] = base64_encode($mainLicObj->getText());
+          $licensedata['textContentType'] = 'text/plain';
+      }
       $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
     }
 
