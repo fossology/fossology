@@ -222,10 +222,17 @@ class CycloneDXAgent extends Agent
           ->setTextPrinted(true)
           ->setListedLicense(true);
       }
-      $licensedata['id'] = $mainLicObj->getSpdxId();
-      $licensedata['url'] = $mainLicObj->getUrl();
-      $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
+      $licensedata = [
+      'id'  => $mainLicObj->getSpdxId(),
+      'url' => $mainLicObj->getUrl()
+    ];
+
+    if (!empty($mainLicObj->getText())) {
+      $licensedata['textContent'] = base64_encode($mainLicObj->getText());
+      $licensedata['textContentType'] = 'text/plain';
     }
+
+    $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
 
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
     $serializedhash = array();
