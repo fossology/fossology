@@ -31,6 +31,7 @@ extern gboolean* printcomma;       ///< True to print comma while printing JSON 
 struct cachenode
 {
     char *rf_shortname;     ///< License shortname
+    size_t len;             ///< Length of rf_shortname string
     long rf_pk;             ///< License id from database
 };
 typedef struct cachenode cachenode_t;
@@ -58,9 +59,9 @@ long add2license_ref(char *licenseName);
 long updateLicenseFile(long rfPk);
 int updateLicenseHighlighting(cacheroot_t *pcroot);
 int initLicRefCache(cacheroot_t *pcroot);
-long lrcache_hash(cacheroot_t *pcroot, char *rf_shortname);
+long lrcache_hash(cacheroot_t *pcroot, char *rf_shortname) __attribute__((always_inline));
 int lrcache_add(cacheroot_t *pcroot, long rf_pk, char *rf_shortname);
-long lrcache_lookup(cacheroot_t *pcroot, char *rf_shortname);
+long lrcache_lookup(cacheroot_t *pcroot, char *rf_shortname) __attribute__((always_inline));
 void lrcache_free(cacheroot_t *pcroot);
 void initializeCurScan(struct curScan* cur);
 void addLicence(GArray* theMatches, char* licenceName );

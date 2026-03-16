@@ -104,7 +104,7 @@ FUNCTION long add2license_ref(char *licenseName)
 }
 
 /**
- \brief calculate the hash of an rf_shortname
+ \brief calculate the hash of an rf_shortname using FNV-1a hash algorithm
  rf_shortname is the key
 
  @param pcroot Root pointer
@@ -114,15 +114,16 @@ FUNCTION long add2license_ref(char *licenseName)
  */
 FUNCTION long lrcache_hash(cacheroot_t *pcroot, char *rf_shortname)
 {
-  long hashval = 0;
-  int len, i;
-
-  /* use the first sizeof(long) bytes for the hash value */
-  len = (strlen(rf_shortname) < sizeof(long)) ? strlen(rf_shortname) : sizeof(long);
-  for (i = 0; i < len; i++)
-    hashval += rf_shortname[i] << 8 * i;
-  hashval = hashval % pcroot->maxnodes;
-  return hashval;
+  unsigned long hashval = 2166136261UL; // FNV offset basis
+  unsigned char *p = (unsigned char *)rf_shortname;
+  
+  while (*p) {
+    hashval ^= (unsigned long)*p++;
+    hashval *= 16777619UL; // FNV prime
+  }
+  
+  // Ensure hash fits within table bounds using power-of-2 masking
+  return (long)(hashval & (pcroot->maxnodes - 1));
 }
 
 /**
@@ -169,6 +170,9 @@ FUNCTION void lrcache_free(cacheroot_t *pcroot)
     {
       free(pcnode->rf_shortname);
     }
+    pcnode->rf_shortname = NULL;
+    pcnode->len = 0;
+    pcnode->rf_pk = 0;
     pcnode++;
   }
   free(pcroot->nodes);
@@ -202,6 +206,7 @@ FUNCTION int lrcache_add(cacheroot_t *pcroot, long rf_pk, char *rf_shortname)
     if (!pcnode->rf_pk)
     {
       pcnode->rf_shortname = strdup(rf_shortname);
+      pcnode->len = strlen(rf_shortname);
       pcnode->rf_pk = rf_pk;
       break;
     }
@@ -227,6 +232,7 @@ FUNCTION long lrcache_lookup(cacheroot_t *pcroot, char *rf_shortname)
   long hashval = 0;
   int i;
   int noden;
+  size_t key_len = strlen(rf_shortname);
 
   hashval = lrcache_hash(pcroot, rf_shortname);
 
@@ -238,7 +244,10 @@ FUNCTION long lrcache_lookup(cacheroot_t *pcroot, char *rf_shortname)
     pcnode = pcroot->nodes + noden;
     if (!pcnode->rf_pk)
       return 0;
-    if (strcmp(pcnode->rf_shortname, rf_shortname) == 0)
+    
+    // Quick length check before expensive string comparison
+    if (pcnode->len == key_len &&
+        strcmp(pcnode->rf_shortname, rf_shortname) == 0)
     {
       return pcnode->rf_pk;
     }
