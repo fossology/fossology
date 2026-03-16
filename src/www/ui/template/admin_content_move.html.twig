@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-{{ 'Select a folder on the left hand side to move or copy content to a different folder'|trans }}
+{{ 'Select a folder on the left hand side to move or alias content to a different folder'|trans }}
 <table>
   <tr style="vertical-align:top;">
     <td id="sidetree">
@@ -34,7 +34,7 @@
         <br/>
         <br/>
 
-        <input type="submit" name="move" value="{{ 'Move'|trans }}"/> &nbsp; <input type="submit" name="copy" value="{{ 'Copy'|trans }}"/>
+        <input type="submit" name="move" value="{{ 'Move'|trans }}"/> &nbsp; <input type="submit" name="copy" value="{{ 'Alias'|trans }}"/>
       </form>
     </td>
   </tr>
