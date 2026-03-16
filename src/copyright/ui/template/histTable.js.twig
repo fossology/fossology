@@ -92,9 +92,40 @@ function createTable{{ table.type }}() {
 
   createTableBase{{ table.type }}(false);
 
+  let lastCheckedRow = null;
   $('#selectDelete{{ table.type }}').change(function () {
-    $('.deleteBySelect{{ table.type }}').prop('checked', $(this).prop("checked"));
+    const isChecked = $(this).prop('checked');
+    $('.deleteBySelect{{ table.type }}').prop('checked', isChecked);
+    lastCheckedRow = null; // Reset on select all
   });
+
+  $(document).on('click', '.deleteBySelect{{ table.type }}', function (event) {
+    const $checkboxes = $('table tbody tr .deleteBySelect{{ table.type }}');
+    const currentRow = $checkboxes.index(this);
+    const isChecked = $(this).prop('checked');
+    if (event.shiftKey && lastCheckedRow !== null) {
+      const start = Math.min(lastCheckedRow, currentRow);
+      const end   = Math.max(lastCheckedRow, currentRow);
+      $checkboxes.slice(start, end + 1).prop('checked', isChecked);
+    }
+    lastCheckedRow = currentRow;
+    syncFromSelectAll{{ table.type }}();
+  });
+
+  function syncFromSelectAll{{ table.type }}() {
+    const $checkboxes = $('table tbody tr .deleteBySelect{{ table.type }}');
+    const total   = $checkboxes.length;
+    const checked = $checkboxes.filter(':checked').length;
+    const $selectAll = $('#selectDelete{{ table.type }}');
+
+    if (checked === 0) {
+      $selectAll.prop('checked', false).prop('indeterminate', false);
+    } else if (checked === total) {
+      $selectAll.prop('checked', true).prop('indeterminate', false);
+    } else {
+      $selectAll.prop('checked', false).prop('indeterminate', true); // Shows dash –
+    }
+  }
 
   $('#deleteSelected{{ table.type }}').click(function () {
     $("input:checkbox[class=deleteBySelect{{ table.type }}]:checked").each(function () {
