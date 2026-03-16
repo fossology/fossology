@@ -236,12 +236,19 @@ int main(int argc, char **argv)
       {
         if (strcmp(token, "bppk") == 0)
         {
-          bucketpool_pk = atoi(strtok_r(NULL, Delims, &saveptr));
+          char *val = strtok_r(NULL, Delims, &saveptr);
+          if (val)
+            bucketpool_pk = atoi(val);
+          else
+            LOG_ERROR("Malformed scheduler input: missing value for bppk");
         }
-        else
-        if (strcmp(token, "upk") == 0)
+        else if (strcmp(token, "upk") == 0)
         {
-          uploadtree.upload_fk = atoi(strtok_r(NULL, Delims, &saveptr));
+          char *val = strtok_r(NULL, Delims, &saveptr);
+          if (val)
+            uploadtree.upload_fk = atoi(val);
+          else
+            LOG_ERROR("Malformed scheduler input: missing value for upk");
         }
         token = strtok_r(NULL, Delims, &saveptr);
       }
