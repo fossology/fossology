@@ -34,7 +34,8 @@
         <br/>
         <br/>
 
-        <input type="submit" name="move" value="{{ 'Move'|trans }}"/> &nbsp; <input type="submit" name="copy" value="{{ 'Copy'|trans }}"/>
+        <input type="submit" name="move" value="{{ 'Move'|trans }}"/> &nbsp; <input type="submit" name="copy" value="{{ 'Alias'|trans }}"/>
+        <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Copy creates an alias; changes appear in all aliases. Use content_unlink to remove a single instance.'|trans }}" alt="" class="info-bullet"/>
       </form>
     </td>
   </tr>
@@ -52,6 +53,7 @@
       $('#toFolder').select2({
         "placeholder": "Select folder"
       });
+      $('[data-toggle="tooltip"]').tooltip();
     });
   </script>
   <script type="text/javascript">{% include 'admin_content_move.js.twig' %}</script>
