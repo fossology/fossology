@@ -14,6 +14,7 @@ namespace Fossology\UI\Api\Test\Controllers;
 
 require_once dirname(__DIR__, 4) . '/lib/php/Plugin/FO_Plugin.php';
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Mockery as M;
 use Fossology\UI\Api\Controllers\UserController;
@@ -72,6 +73,7 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
       'helper.restHelper'))->andReturn($this->restHelper);
     $this->userController = new UserController($container);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
   }
 
   /**
@@ -83,6 +85,7 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $this->addToAssertionCount(
       \Hamcrest\MatcherAssert::getCount() - $this->assertCountBefore);
     M::close();
+    unset($_SESSION[Auth::USER_LEVEL]);
   }
 
   /**
