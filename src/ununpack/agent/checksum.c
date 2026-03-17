@@ -197,6 +197,7 @@ Cksum *	SumComputeBuff	(CksumFile *CF)
   {
     LOG_ERROR("GCRY Error: %s/%s\n", gcry_strsource(checksumError),
         gcry_strerror(checksumError));
+    gcry_md_close(checksumhandler);
     return(NULL);
   }
 
@@ -205,12 +206,14 @@ Cksum *	SumComputeBuff	(CksumFile *CF)
   {
     LOG_ERROR("GCRY Error: %s/%s\n", gcry_strsource(checksumError),
         gcry_strerror(checksumError));
+    gcry_md_close(checksumhandler);
     return(NULL);
   }
 
   Sum = (Cksum *)calloc(1,sizeof(Cksum));
   if (!Sum)
   {
+    gcry_md_close(checksumhandler);
     return(NULL);
   }
   Sum->DataLen = CF->MmapSize;
