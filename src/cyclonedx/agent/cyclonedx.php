@@ -215,13 +215,6 @@ class CycloneDXAgent extends Agent
       $reportedLicenseId = $this->licenseMap->getProjectedId($licId);
       $mainLicObj = $this->licenseDao->getLicenseById($reportedLicenseId, $this->groupId);
       $licId = $mainLicObj->getId() . "-" . md5($mainLicObj->getText());
-      if (!array_key_exists($licId, $this->licensesInDocument)) {
-        $this->licensesInDocument = (new SpdxLicenseInfo())
-          ->setLicenseObj($mainLicObj)
-          ->setCustomText(false)
-          ->setTextPrinted(true)
-          ->setListedLicense(true);
-      }
       $licensedata['id'] = $mainLicObj->getSpdxId();
       $licensedata['url'] = $mainLicObj->getUrl();
       $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
