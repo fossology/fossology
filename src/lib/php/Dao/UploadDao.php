@@ -607,6 +607,11 @@ class UploadDao
     $this->permissionDao->makeAccessibleToAllGroupsOf($uploadId, $userId, $perm);
   }
 
+  public function getAccessibleUploads(array $uploadIds, $groupId)
+  {
+    return $this->permissionDao->getAccessibleUploads($uploadIds, $groupId);
+  }
+
   /**
    * @param int $uploadId
    * @return array with keys sha1, md5, sha256
