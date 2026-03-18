@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: © 2025 Gaurav Mishra <mishra.gaurav@siemens.com>
+#
+# SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
+name: Cleanup PR caches
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cleanup PR caches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh extension install actions/gh-actions-cache || echo "Failed to install gh-actions-cache extension, continuing anyway"
+          
+          REPO=${{ github.repository }}
+          BRANCH=${{ github.event.pull_request.head.ref }}
+
+          echo "Fetching list of cache keys"
+          cacheKeysForPR=$(gh cache list -R $REPO --ref $BRANCH --limit 100 --json key --jq '.[].key')
+
+          ## Setting this to not fail the workflow while deleting cache keys. 
+          set +e
+          echo "Deleting caches..."
+          for cacheKey in $cacheKeysForPR
+          do
+              gh cache delete $cacheKey -R $REPO || echo "Failed to delete $cacheKey"
+          done
+          echo "Done"
