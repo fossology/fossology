@@ -54,8 +54,8 @@ set from="your-email@example.com"
 
 ## Summary
 
- Package          Status       Recommended 
-|--------------|--------------|-------------|
- heirloom-mailx   Deprecated    No          
- bsd-mailx        Supported     Yes         
- mailutils        Supported     Yes         
+| Package         | Status      | Recommended |
+|-----------------|------------|-------------|
+| heirloom-mailx  | Deprecated | No          |
+| bsd-mailx       | Supported  | Yes         |
+| mailutils       | Supported  | Yes         |      
