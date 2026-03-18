@@ -200,22 +200,28 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
 void read_file_grab_license(int file_number, FILE **pFile)
 {
   char *line = NULL;
+  char *lineToProcess = NULL;
   size_t len = 0;
   int lenth_tmp = 0;
   ssize_t read = 0;
 
   /*read line by line, then start to scan licenses */
   while ((read = getline(&line, &len, pFile[file_number])) != -1) {
-    if (line && line[0]) // line is not empty
+    lineToProcess = line;
+    if (lineToProcess && lineToProcess[0]) // line is not empty
     {
-      lenth_tmp = strlen(line);
+      lenth_tmp = strlen(lineToProcess);
       /* trim the line */
-      while(isspace(line[lenth_tmp - 1])) line[--lenth_tmp] = 0;  // right trim
-      while(isspace(*line)) ++line;  // left trim
-      //printf("line is:%s, getpid() is:%d\n", line, getpid());
+      while (isspace(lineToProcess[lenth_tmp - 1])) {
+        lineToProcess[--lenth_tmp] = 0;  // right trim
+      }
+      while (*lineToProcess && isspace(*lineToProcess)) {
+        ++lineToProcess; // left trim
+      }
+      //printf("line is:%s, getpid() is:%d\n", lineToProcess, getpid());
     }
     initializeCurScan(&cur);
-    processFile(line); // start to scan licenses
+    processFile(lineToProcess); // start to scan licenses
   } // while
 
   if (line) free(line);
