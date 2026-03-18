@@ -169,22 +169,23 @@ void mapFileNameWithId(unsigned long pFileId,
   }
 
   char *fileName = NULL;
-  {
-    fileName = fo_RepMkPath("files", pFile);
-  }
-  if (fileName) {
-    fo::File file(pFileId, fileName);
-
-    fileIdsMap[file.getId()] = file.getFileName();
-    fileIdsMapReverse[file.getFileName()] = file.getId();
-
-    free(fileName);
-    free(pFile);
-  } else {
-    LOG_FATAL("PFile not found in repo %lu \n", pFileId);
-    bail(7);
-  }
+{
+  fileName = fo_RepMkPath("files", pFile);
 }
+
+if (fileName) {
+  fo::File file(pFileId, fileName);
+
+  fileIdsMap[file.getId()] = file.getFileName();
+
+  free(fileName);
+  free(pFile);
+} else {
+  free(pFile);
+  LOG_FATAL("PFile not found in repo %lu \n", pFileId);
+  bail(7);
+}
+
 
 /**
  * @brief write file name to text file
