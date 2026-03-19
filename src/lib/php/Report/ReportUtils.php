@@ -78,12 +78,16 @@ class ReportUtils
    */
   public function addClearingStatus(&$filesWithLicenses, ItemTreeBounds $itemTreeBounds, $groupId)
   {
-    $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        array(UploadTreeProxy::OPT_SKIP_THESE => UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED,
-              UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
-              UploadTreeProxy::OPT_GROUP_ID => $groupId),
-        $itemTreeBounds->getUploadTreeTableName(),
-        'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
+    $alreadyClearedUploadTreeView = new UploadTreeProxy(
+      $itemTreeBounds->getUploadId(),
+      array(
+        UploadTreeProxy::OPT_SKIP_THESE => UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED,
+        UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN " . $itemTreeBounds->getLeft() . " AND " . $itemTreeBounds->getRight() . ")",
+        UploadTreeProxy::OPT_GROUP_ID => $groupId
+      ),
+      $itemTreeBounds->getUploadTreeTableName(),
+      'already_cleared_uploadtree' . $itemTreeBounds->getUploadId()
+    );
 
     $alreadyClearedUploadTreeView->materialize();
     $filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->getNonArtifactDescendants($itemTreeBounds);
@@ -120,24 +124,26 @@ class ReportUtils
       return [];
     }
     $tableName = $itemTreeBounds->getUploadTreeTableName();
-    $stmt = __METHOD__ .'.scanner_findings';
+    $stmt = __METHOD__ . '.scanner_findings';
     $sql = "SELECT DISTINCT uploadtree_pk,rf_fk FROM $tableName ut, license_file
       WHERE ut.pfile_fk=license_file.pfile_fk AND rf_fk IS NOT NULL AND agent_fk=any($1)";
-    $param = array('{'.implode(',',$scannerIds).'}');
+    $param = array('{' . implode(',', $scannerIds) . '}');
     if ($tableName == 'uploadtree_a') {
       $param[] = $uploadId;
-      $sql .= " AND upload_fk=$".count($param);
+      $sql .= " AND upload_fk=$" . count($param);
       $stmt .= $tableName;
     }
-    $sql .=  " GROUP BY uploadtree_pk,rf_fk";
+    $sql .= " GROUP BY uploadtree_pk,rf_fk";
     $rows = $this->dbManager->getRows($sql, $param, $stmt);
     foreach ($rows as $row) {
       $reportedLicenseId = $this->licenseMap->getProjectedId($row['rf_fk']);
       $foundLicense = $this->licenseDao->getLicenseById($reportedLicenseId);
       if ($foundLicense !== null && $foundLicense->getShortName() != 'Void') {
-        $reportLicId =  "$reportedLicenseId-" . md5($foundLicense->getText());
+        $reportLicId = "$reportedLicenseId-" . md5($foundLicense->getText());
         $listedLicense = !StringOperation::stringStartsWith(
-          $foundLicense->getSpdxId(), LicenseRef::SPDXREF_PREFIX);
+          $foundLicense->getSpdxId(),
+          LicenseRef::SPDXREF_PREFIX
+        );
 
         if (!array_key_exists($row['uploadtree_pk'], $filesWithLicenses)) {
           $filesWithLicenses[$row['uploadtree_pk']] = new FileNode();
@@ -169,8 +175,10 @@ class ReportUtils
     /** @var CopyrightDao $copyrightDao */
     $copyrightDao = $this->container->get('dao.copyright');
     /** @var ScanJobProxy $scanJobProxy */
-    $scanJobProxy = new ScanJobProxy($this->container->get('dao.agent'),
-      $uploadId);
+    $scanJobProxy = new ScanJobProxy(
+      $this->container->get('dao.agent'),
+      $uploadId
+    );
 
     $scanJobProxy->createAgentStatus($agentName);
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
@@ -182,22 +190,22 @@ class ReportUtils
       $latestAgentId[] = $selectedScanners[$agentName[1]];
     }
     $ids = implode(',', $latestAgentId);
-    $extrawhere = ' agent_fk IN ('.$ids.')';
+    $extrawhere = ' agent_fk IN (' . $ids . ')';
 
     $uploadtreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $allScannerEntries = $copyrightDao->getScannerEntries('copyright', $uploadtreeTable, $uploadId, $type='statement', $extrawhere);
-    $allEditedEntries = $copyrightDao->getEditedEntries('copyright_decision', $uploadtreeTable, $uploadId, $decisionType=null);
+    $allScannerEntries = $copyrightDao->getScannerEntries('copyright', $uploadtreeTable, $uploadId, $type = 'statement', $extrawhere);
+    $allEditedEntries = $copyrightDao->getEditedEntries('copyright_decision', $uploadtreeTable, $uploadId, $decisionType = null);
     foreach ($allScannerEntries as $finding) {
       if (!array_key_exists($finding['uploadtree_pk'], $filesWithLicenses)) {
         $filesWithLicenses[$finding['uploadtree_pk']] = new FileNode();
       }
-      $filesWithLicenses[$finding['uploadtree_pk']]->addCopyright(\convertToUTF8($finding['content'],false));
+      $filesWithLicenses[$finding['uploadtree_pk']]->addCopyright(\convertToUTF8($finding['content'], false));
     }
     foreach ($allEditedEntries as $finding) {
       if (!array_key_exists($finding['uploadtree_pk'], $filesWithLicenses)) {
         $filesWithLicenses[$finding['uploadtree_pk']] = new FileNode();
       }
-      $filesWithLicenses[$finding['uploadtree_pk']]->addCopyright(\convertToUTF8($finding['textfinding'],false));
+      $filesWithLicenses[$finding['uploadtree_pk']]->addCopyright(\convertToUTF8($finding['textfinding'], false));
     }
   }
 
@@ -210,8 +218,11 @@ class ReportUtils
    * @return FileNode[] Mapping item->FileNode
    */
   public function getFilesWithLicensesFromClearings(
-    ItemTreeBounds $itemTreeBounds, $groupId, $agentObj, &$licensesInDocument)
-  {
+    ItemTreeBounds $itemTreeBounds,
+    $groupId,
+    $agentObj,
+    &$licensesInDocument
+  ) {
     if ($this->licenseMap === null) {
       $this->licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT, true);
     }
@@ -222,7 +233,7 @@ class ReportUtils
     $clearingsProceeded = 0;
     foreach ($clearingDecisions as $clearingDecision) {
       $clearingsProceeded += 1;
-      if (($clearingsProceeded&2047)==0) {
+      if (($clearingsProceeded & 2047) == 0) {
         $agentObj->heartbeat(0);
       }
       if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
@@ -235,8 +246,12 @@ class ReportUtils
           continue;
         }
 
-        if (!array_key_exists($clearingDecision->getUploadTreeId(),
-          $filesWithLicenses)) {
+        if (
+          !array_key_exists(
+            $clearingDecision->getUploadTreeId(),
+            $filesWithLicenses
+          )
+        ) {
           $filesWithLicenses[$clearingDecision->getUploadTreeId()] = new FileNode();
         }
 
@@ -250,7 +265,7 @@ class ReportUtils
         $concludedLicense = $this->licenseDao->getLicenseById($reportedLicenseId, $groupId);
         if ($concludedLicense === null) {
           error_log(
-              "ReportUtils: warning: clearing-license {$reportedLicenseId} not found; skipping event."
+            "ReportUtils: warning: clearing-license {$reportedLicenseId} not found; skipping event."
           );
           continue;
         }
@@ -264,11 +279,16 @@ class ReportUtils
           $filesWithLicenses[$clearingDecision->getUploadTreeId()]
             ->addConcludedLicense($reportLicId);
           if (!array_key_exists($reportLicId, $licensesInDocument)) {
-            $licenseObj = new License($concludedLicense->getId(),
-              $reportedLicenseShortname, $concludedLicense->getFullName(),
-              $concludedLicense->getRisk(), $customLicenseText,
-              $concludedLicense->getUrl(), $concludedLicense->getDetectorType(),
-              $concludedLicense->getSpdxId());
+            $licenseObj = new License(
+              $concludedLicense->getId(),
+              $reportedLicenseShortname,
+              $concludedLicense->getFullName(),
+              $concludedLicense->getRisk(),
+              $customLicenseText,
+              $concludedLicense->getUrl(),
+              $concludedLicense->getDetectorType(),
+              $concludedLicense->getSpdxId()
+            );
             $licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
               ->setLicenseObj($licenseObj)
               ->setCustomText(true)
@@ -282,7 +302,9 @@ class ReportUtils
           if (!array_key_exists($reportLicId, $licensesInDocument)) {
             $licenseObj = $this->licenseDao->getLicenseById($reportedLicenseId, $groupId);
             $listedLicense = !StringOperation::stringStartsWith(
-              $licenseObj->getSpdxId(), LicenseRef::SPDXREF_PREFIX);
+              $licenseObj->getSpdxId(),
+              LicenseRef::SPDXREF_PREFIX
+            );
             $licensesInDocument[$reportLicId] = (new SpdxLicenseInfo())
               ->setLicenseObj($licenseObj)
               ->setCustomText(false)
@@ -308,17 +330,25 @@ class ReportUtils
   public function updateOrInsertReportgenEntry($upload_fk, $job_fk, $filepath)
   {
     $sqlCheck = "SELECT 1 FROM reportgen WHERE upload_fk = $1 AND filepath = $2";
-    $row = $this->dbManager->getSingleRow($sqlCheck, [$upload_fk, $filepath],
-      __METHOD__.'.checkReportgenEntry');
+    $row = $this->dbManager->getSingleRow(
+      $sqlCheck,
+      [$upload_fk, $filepath],
+      __METHOD__ . '.checkReportgenEntry'
+    );
 
     if (!empty($row)) {
       $sqlUpdate = "UPDATE reportgen SET job_fk = $1 WHERE upload_fk = $2 AND filepath = $3";
-      $this->dbManager->getSingleRow($sqlUpdate, [$job_fk, $upload_fk, $filepath],
-        __METHOD__.'.updateReportgen');
+      $this->dbManager->getSingleRow(
+        $sqlUpdate,
+        [$job_fk, $upload_fk, $filepath],
+        __METHOD__ . '.updateReportgen'
+      );
     } else {
-      $this->dbManager->insertTableRow('reportgen',
+      $this->dbManager->insertTableRow(
+        'reportgen',
         ['upload_fk' => $upload_fk, 'job_fk' => $job_fk, 'filepath' => $filepath],
-        __METHOD__);
+        __METHOD__
+      );
     }
   }
 }
