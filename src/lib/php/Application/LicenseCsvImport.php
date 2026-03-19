@@ -77,10 +77,14 @@ class LicenseCsvImport
    * @brief Update the delimiter
    * @param string $delimiter New delimiter to use.
    */
-  public function setDelimiter($delimiter=',')
-  {
-    $this->delimiter = substr($delimiter,0,1);
-  }
+  public function setDelimiter($delimiter = ',')
+{
+    if (!is_string($delimiter) || trim($delimiter) === '') {
+        $this->delimiter = ',';
+    } else {
+        $this->delimiter = $delimiter[0];
+    }
+}
 
   /**
    * @brief Update the enclosure
