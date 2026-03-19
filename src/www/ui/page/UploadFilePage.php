@@ -28,10 +28,10 @@ class UploadFilePage extends UploadPageBase
   public function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => _("Upload a New File"),
-        self::MENU_LIST => "Upload::From File",
-        self::DEPENDENCIES => array("agent_unpack", "showjobs"),
-        self::PERMISSION => Auth::PERM_WRITE
+      self::TITLE => _("Upload a New File"),
+      self::MENU_LIST => "Upload::From File",
+      self::DEPENDENCIES => array("agent_unpack", "showjobs"),
+      self::PERMISSION => Auth::PERM_WRITE
     ));
   }
 
@@ -59,10 +59,13 @@ class UploadFilePage extends UploadPageBase
     <img src='images/info_16.png' data-toggle='tooltip' title='%s' alt='' class='info-bullet'/><br/>
     <button type='button' class='btn btn-default btn-sm' data-toggle='modal' data-target='#reuseModal'>%s</button>
     <img src='images/info_16.png' data-toggle='tooltip' title='%s' alt='' class='info-bullet'/><br/>
-</li>", _("Optional"), _("Reuse"),
+</li>",
+          _("Optional"),
+          _("Reuse"),
           _("Copy clearing decisions if there is the same file hash between two files"),
           _("Set the reuse information"),
-          _("Open the pop-up to setup the reuse information for uploads"));
+          _("Open the pop-up to setup the reuse information for uploads")
+        );
         $vars['hiddenAgentContents'][] = $agent->renderContent($vars);
       } else {
         $vars['parmAgentContents'][] = $agent->renderContent($vars);
@@ -84,17 +87,17 @@ class UploadFilePage extends UploadPageBase
     define("UPLOAD_ERR_INVALID_FOLDER_PK", 100);
     define("UPLOAD_ERR_RESEND", 200);
     $uploadErrors = array(
-        UPLOAD_ERR_OK => _("No errors."),
-        UPLOAD_ERR_INI_SIZE => _("Larger than upload_max_filesize ") . ini_get('upload_max_filesize'),
-        UPLOAD_ERR_FORM_SIZE => _("Larger than form MAX_FILE_SIZE."),
-        UPLOAD_ERR_PARTIAL => _("Partial upload."),
-        UPLOAD_ERR_NO_FILE => _("No file selected."),
-        UPLOAD_ERR_NO_TMP_DIR => _("No temporary directory."),
-        UPLOAD_ERR_CANT_WRITE => _("Can't write to disk."),
-        UPLOAD_ERR_EXTENSION => _("File upload stopped by extension."),
-        UPLOAD_ERR_EMPTY => _("File is empty or you don't have permission to read the file."),
-        UPLOAD_ERR_INVALID_FOLDER_PK => _("Invalid Folder."),
-        UPLOAD_ERR_RESEND => _("This seems to be a resent file.")
+      UPLOAD_ERR_OK => _("No errors."),
+      UPLOAD_ERR_INI_SIZE => _("Larger than upload_max_filesize ") . ini_get('upload_max_filesize'),
+      UPLOAD_ERR_FORM_SIZE => _("Larger than form MAX_FILE_SIZE."),
+      UPLOAD_ERR_PARTIAL => _("Partial upload."),
+      UPLOAD_ERR_NO_FILE => _("No file selected."),
+      UPLOAD_ERR_NO_TMP_DIR => _("No temporary directory."),
+      UPLOAD_ERR_CANT_WRITE => _("Can't write to disk."),
+      UPLOAD_ERR_EXTENSION => _("File upload stopped by extension."),
+      UPLOAD_ERR_EMPTY => _("File is empty or you don't have permission to read the file."),
+      UPLOAD_ERR_INVALID_FOLDER_PK => _("Invalid Folder."),
+      UPLOAD_ERR_RESEND => _("This seems to be a resent file.")
     );
 
     $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
@@ -130,8 +133,12 @@ class UploadFilePage extends UploadPageBase
       ) {
         return array(false, $uploadErrors[UPLOAD_ERR_EMPTY], "");
       } else if ($uploadedFile['file']->getSize() >= UploadedFile::getMaxFilesize()) {
-        return array(false, $uploadErrors[UPLOAD_ERR_INI_SIZE] .
-          _(" is  really ") . $uploadedFile['file']->getSize() . " bytes.", "");
+        return array(
+          false,
+          $uploadErrors[UPLOAD_ERR_INI_SIZE] .
+          _(" is  really ") . $uploadedFile['file']->getSize() . " bytes.",
+          ""
+        );
       }
       if (!$uploadedFile['file']->isValid()) {
         return array(false, $uploadedFile['file']->getErrorMessage(), "");
@@ -154,16 +161,26 @@ class UploadFilePage extends UploadPageBase
 
     $errors = [];
     $success = [];
+
     foreach ($uploadFiles as $uploadedFile) {
       $originalFileName = $uploadedFile['file']->getClientOriginalName();
       $originalFileName = $this->basicShEscaping($originalFileName);
+
       /* Create an upload record. */
-      $uploadId = JobAddUpload($userId, $groupId, $originalFileName,
-        $originalFileName, $uploadedFile['description'], $uploadMode,
-        $folderId, $publicPermission, $setGlobal);
+      $uploadId = JobAddUpload(
+        $userId,
+        $groupId,
+        $originalFileName,
+        $originalFileName,
+        $uploadedFile['description'],
+        $uploadMode,
+        $folderId,
+        $publicPermission,
+        $setGlobal
+      );
+
       if (empty($uploadId)) {
-        $errors[] = _("Failed to insert upload record: ") .
-          $originalFileName;
+        $errors[] = _("Failed to insert upload record: ") . $originalFileName;
         continue;
       }
 
@@ -173,16 +190,21 @@ class UploadFilePage extends UploadPageBase
           $uploadedFile['file']->getFilename() . '-uploaded'
         )->getPathname();
       } catch (FileException $e) {
+        if (!empty($uploadId)) {
+          $this->dbManager->getDbDriver()->exec(
+            "DELETE FROM upload WHERE upload_pk = " . intval($uploadId)
+          );
+        }
         $errors[] = _("Could not save uploaded file: ") . $originalFileName;
         continue;
       }
+
       $success[] = [
         "tempfile" => $uploadedTempFile,
-        "orignalfile" => $originalFileName,
+        "originalfile" => $originalFileName,
         "uploadid" => $uploadId
       ];
     }
-
     if (!empty($errors)) {
       return [false, implode(" ; ", $errors), ""];
     }
@@ -207,8 +229,11 @@ class UploadFilePage extends UploadPageBase
         $errors[] = $message;
       } else {
         $reuseRequest = $this->getRequestForReuse($request, $originalFileName);
-        $messages[] = $this->postUploadAddJobs($reuseRequest, $originalFileName,
-          $uploadId);
+        $messages[] = $this->postUploadAddJobs(
+          $reuseRequest,
+          $originalFileName,
+          $uploadId
+        );
       }
     }
 
@@ -216,8 +241,12 @@ class UploadFilePage extends UploadPageBase
       return [false, implode(" ; ", $errors), ""];
     }
 
-    return array(true, implode("", $messages), "",
-      array_column($success, "uploadid"));
+    return array(
+      true,
+      implode("", $messages),
+      "",
+      array_column($success, "uploadid")
+    );
   }
   /**
    * @brief Check if parameters exits for the request
@@ -235,63 +264,63 @@ class UploadFilePage extends UploadPageBase
     $osselotPackage = is_array($osselotPackageRaw) ? reset($osselotPackageRaw) : $osselotPackageRaw;
 
     if ($reuseSource === 'osselot') {
-        $reuseRequest->request->set('osselotPackage', $osselotPackage);
+      $reuseRequest->request->set('osselotPackage', $osselotPackage);
 
-        $versionRadio = $request->get('osselotVersionRadio', []);
-        $selectedVersion = '';
+      $versionRadio = $request->get('osselotVersionRadio', []);
+      $selectedVersion = '';
 
       if (is_array($versionRadio)) {
-          $selectedVersion = reset($versionRadio);
+        $selectedVersion = reset($versionRadio);
       } elseif (is_string($versionRadio)) {
-          $selectedVersion = $versionRadio;
+        $selectedVersion = $versionRadio;
       }
 
       if (empty($selectedVersion)) {
-          $hiddenVersions = $request->get('osselotVersions', '');
+        $hiddenVersions = $request->get('osselotVersions', '');
         if (!empty($hiddenVersions)) {
-            $selectedVersion = is_array($hiddenVersions) ? reset($hiddenVersions) : $hiddenVersions;
+          $selectedVersion = is_array($hiddenVersions) ? reset($hiddenVersions) : $hiddenVersions;
         }
       }
 
-        $reuseRequest->request->set('osselotVersions', $selectedVersion);
+      $reuseRequest->request->set('osselotVersions', $selectedVersion);
 
-        $osselotScalarFields = [
-            'osselotAddNewLicensesAs',
-            'osselotLicenseMatch'
-        ];
+      $osselotScalarFields = [
+        'osselotAddNewLicensesAs',
+        'osselotLicenseMatch'
+      ];
 
-        foreach ($osselotScalarFields as $field) {
-            $value = $request->get($field);
-            $finalValue = is_array($value) ? reset($value) : $value;
-            $reuseRequest->request->set($field, $finalValue);
+      foreach ($osselotScalarFields as $field) {
+        $value = $request->get($field);
+        $finalValue = is_array($value) ? reset($value) : $value;
+        $reuseRequest->request->set($field, $finalValue);
+      }
+
+      $osselotCheckboxFields = [
+        'osselotAddLicenseInfoFromInfoInFile',
+        'osselotAddLicenseInfoFromConcluded',
+        'osselotAddConcludedAsDecisions',
+        'osselotAddConcludedAsDecisionsOverwrite',
+        'osselotAddConcludedAsDecisionsTBD',
+        'osselotAddCopyrights'
+      ];
+
+      foreach ($osselotCheckboxFields as $field) {
+        $value = $request->get($field);
+        $finalValue = null;
+
+        if (is_array($value)) {
+          $firstValue = reset($value);
+          $finalValue = ($firstValue === 'true' || $firstValue === true) ? 'true' : null;
+        } else {
+          $finalValue = ($value === 'true' || $value === true) ? 'true' : null;
         }
 
-        $osselotCheckboxFields = [
-            'osselotAddLicenseInfoFromInfoInFile',
-            'osselotAddLicenseInfoFromConcluded',
-            'osselotAddConcludedAsDecisions',
-            'osselotAddConcludedAsDecisionsOverwrite',
-            'osselotAddConcludedAsDecisionsTBD',
-            'osselotAddCopyrights'
-        ];
+        $reuseRequest->request->set($field, $finalValue);
+      }
 
-        foreach ($osselotCheckboxFields as $field) {
-            $value = $request->get($field);
-            $finalValue = null;
+      $reuseRequest->request->set('reuseSource', 'osselot');
 
-          if (is_array($value)) {
-              $firstValue = reset($value);
-              $finalValue = ($firstValue === 'true' || $firstValue === true) ? 'true' : null;
-          } else {
-              $finalValue = ($value === 'true' || $value === true) ? 'true' : null;
-          }
-
-            $reuseRequest->request->set($field, $finalValue);
-        }
-
-        $reuseRequest->request->set('reuseSource', 'osselot');
-
-        return $reuseRequest;
+      return $reuseRequest;
     }
 
     $reuseSelector = $reuseRequest->get(ReuserAgentPlugin::UPLOAD_TO_REUSE_SELECTOR_NAME);
