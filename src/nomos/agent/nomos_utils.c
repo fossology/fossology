@@ -87,8 +87,10 @@ FUNCTION long add2license_ref(char *licenseName)
 
   /* retrieve the new rf_pk */
   result = PQexec(gl.pgConn, query);
-  if (fo_checkPQresult(gl.pgConn, result, query, __FILE__, __LINE__))
+  if (fo_checkPQresult(gl.pgConn, result, query, __FILE__, __LINE__)) {
+    PQclear(result);
     return 0;
+  }
   numRows = PQntuples(result);
   if (numRows)
     rf_pk = atol(PQgetvalue(result, 0, 0));
@@ -201,11 +203,18 @@ FUNCTION int lrcache_add(cacheroot_t *pcroot, long rf_pk, char *rf_shortname)
     pcnode = pcroot->nodes + noden;
     if (!pcnode->rf_pk)
     {
+      /* free existing memory if any (defensive) */
+      if (pcnode->rf_shortname)
+      {
+        free(pcnode->rf_shortname);
+      }
+
       pcnode->rf_shortname = strdup(rf_shortname);
       pcnode->rf_pk = rf_pk;
       break;
     }
   }
+
   if (i < pcroot->maxnodes)
     return 0;
 
@@ -272,8 +281,10 @@ FUNCTION int initLicRefCache(cacheroot_t *pcroot)
 
   sprintf(query, "SELECT rf_pk, rf_shortname FROM " LICENSE_REF_TABLE " where rf_detector_type=2");
   result = PQexec(gl.pgConn, query);
-  if (fo_checkPQresult(gl.pgConn, result, query, __FILE__, __LINE__))
+  if (fo_checkPQresult(gl.pgConn, result, query, __FILE__, __LINE__)){
+    PQclear(result);
     return 0;
+  }
 
   numLics = PQntuples(result);
   /* populate the cache  */
@@ -340,11 +351,6 @@ FUNCTION char *getFieldValue(char *inStr, char *field, int fieldMax,
   int v;
   int gotQuote;
 
-#ifdef PROC_TRACE
-  traceFunc("== getFieldValue(inStr= %s fieldMax= %d separator= '%c'\n",
-      inStr, fieldMax, separator);
-#endif /* PROC_TRACE */
-
   memset(field, 0, fieldMax);
   memset(value, 0, valueMax);
 
@@ -358,13 +364,15 @@ FUNCTION char *getFieldValue(char *inStr, char *field, int fieldMax,
   {
     return (NULL);
   }
+
   f = 0;
   v = 0;
 
   /* Skip to end of field name */
   for (s = 0; (inStr[s] != '\0') && !isspace(inStr[s]) && (inStr[s] != '='); s++)
   {
-    field[f++] = inStr[s];
+    if (f < fieldMax - 1)   // ✅ FIX: bounds check
+      field[f++] = inStr[s];
   }
 
   /* Skip spaces after field name */
@@ -372,23 +380,25 @@ FUNCTION char *getFieldValue(char *inStr, char *field, int fieldMax,
   {
     s++;
   }
-  /* If it is not a field, then just return it. */
+
   if (inStr[s] != separator)
   {
     return (inStr + s);
   }
+
   if (inStr[s] == '\0')
   {
     return (NULL);
   }
-  /* Skip '=' */
-  s++;
+
+  s++; /* Skip '=' */
 
   /* Skip spaces after '=' */
   while (isspace(inStr[s]))
   {
     s++;
   }
+
   if (inStr[s] == '\0')
   {
     return (NULL);
@@ -398,7 +408,7 @@ FUNCTION char *getFieldValue(char *inStr, char *field, int fieldMax,
   if ((inStr[s] == '\'') || (inStr[s] == '"'))
   {
     gotQuote = inStr[s];
-    s++; /* skip quote */
+    s++;
     if (inStr[s] == '\0')
     {
       return (NULL);
@@ -411,29 +421,39 @@ FUNCTION char *getFieldValue(char *inStr, char *field, int fieldMax,
     {
       if (inStr[s] == '\\')
       {
-        value[v++] = inStr[++s];
+        s++;
+        if (inStr[s] == '\0') break;
+
+        if (v < valueMax - 1)   
+          value[v++] = inStr[s];
       }
       else
       {
-        value[v++] = inStr[s];
+        if (v < valueMax - 1)   
+          value[v++] = inStr[s];
       }
     }
   }
   else
   {
-    /* if it gets here, then there is no quote */
     for (; (inStr[s] != '\0') && !isspace(inStr[s]); s++)
     {
       if (inStr[s] == '\\')
       {
-        value[v++] = inStr[++s];
+        s++;
+        if (inStr[s] == '\0') break;
+
+        if (v < valueMax - 1)   
+          value[v++] = inStr[s];
       }
       else
       {
-        value[v++] = inStr[s];
+        if (v < valueMax - 1)   
+          value[v++] = inStr[s];
       }
     }
   }
+
   /* Skip spaces */
   while (isspace(inStr[s]))
   {
@@ -441,8 +461,7 @@ FUNCTION char *getFieldValue(char *inStr, char *field, int fieldMax,
   }
 
   return (inStr + s);
-} /* getFieldValue */
-
+}
 /**
  \brief parse the comma separated list of license names found
 
@@ -451,58 +470,42 @@ FUNCTION char *getFieldValue(char *inStr, char *field, int fieldMax,
 
 FUNCTION void parseLicenseList()
 {
-
   int numLics = 0;
 
-  /* char saveLics[myBUFSIZ]; */
-  char *saveptr = 0; /* used for strtok_r */
+  char *saveptr = NULL; /* used for strtok_r */
   char *saveLicsPtr;
 
-  if ((strlen(cur.compLic)) == 0)
+  if (cur.compLic == NULL || strlen(cur.compLic) == 0)
   {
     return;
   }
 
-  /* check for a single name  FIX THIS!*/
-  if (strstr(cur.compLic, ",") == NULL)
+  /* Single license case */
+  if (strchr(cur.compLic, ',') == NULL)
   {
     cur.licenseList[0] = cur.compLic;
     cur.licenseList[1] = NULL;
     return;
   }
 
-  saveLicsPtr = strcpy(saveLics, cur.compLic);
+  /* ✅ Safe copy instead of strcpy (prevents overflow) */
+  strncpy(saveLics, cur.compLic, myBUFSIZ - 1);
+  saveLics[myBUFSIZ - 1] = '\0';
 
-  cur.tmpLics = strtok_r(saveLicsPtr, ",", &saveptr);
+  saveLicsPtr = saveLics;
 
-  cur.licenseList[numLics] = cur.tmpLics;
-  numLics++;
+  /* Tokenize */
+  char *token = strtok_r(saveLicsPtr, ",", &saveptr);
 
-  saveLicsPtr = NULL;
-  while (cur.tmpLics)
+  while (token != NULL && numLics < (myBUFSIZ - 1))
   {
-    cur.tmpLics = strtok_r(saveLicsPtr, ",", &saveptr);
-    if (cur.tmpLics == NULL)
-    {
-      break;
-    }
-    cur.licenseList[numLics] = cur.tmpLics;
-    numLics++;
+    cur.licenseList[numLics++] = token;
+    token = strtok_r(NULL, ",", &saveptr);
   }
+
+  /* Null-terminate list */
   cur.licenseList[numLics] = NULL;
-  numLics++;
-
-  /*
-   int i;
-   for(i=0; i<numLics; i++){
-   printf("cur.licenseList[%d] is:%s\n",i,cur.licenseList[i]);
-   }
-
-   printf("parseLicenseList: returning\n");
-   */
-
-  return;
-} /* parseLicenseList */
+}
 
 /**
  * \brief Print nomos usage help
@@ -934,6 +937,7 @@ FUNCTION inline LicenceAndMatchPositions* getLicenceAndMatchPositions(
  */
 FUNCTION void initializeCurScan(struct curScan* cur)
 {
+  memset(cur, 0, sizeof(struct curScan));
   cur->indexList =  g_array_new(FALSE, FALSE, sizeof(int));
   cur->theMatches = g_array_new(FALSE, FALSE, sizeof(LicenceAndMatchPositions));
   cur->keywordPositions = g_array_new(FALSE, FALSE, sizeof(MatchPositionAndType));
