@@ -166,6 +166,7 @@ int ProcessUpload (long upload_pk)
   PGresult *result;
   int mimetypepk = 0;
   int debmimetypepk = 0;
+  int debmodernmimetypepk = 0;
   int debsrcmimetypepk = 0;
   int numrows;
   int i;
@@ -259,6 +260,45 @@ int ProcessUpload (long upload_pk)
       return (-1);
     }
   }
+  snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/vnd.debian.binary-package' LIMIT 1;");
+  result = PQexec(db_conn, sqlbuf);
+  if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__))
+  {
+    free(pi);
+    free(dpi);
+    exit(-1);
+  }
+  debmodernmimetypepk = atoi(PQgetvalue(result, 0, 0));
+  PQclear(result);
+  if ( debmodernmimetypepk == 0 )
+  {
+    snprintf(sqlbuf, sizeof(sqlbuf), "INSERT INTO mimetype (mimetype_name) VALUES ('application/vnd.debian.binary-package');");
+    result = PQexec(db_conn, sqlbuf);
+    if (fo_checkPQcommand(db_conn, result, sqlbuf, __FILE__, __LINE__))
+    {
+      printf("ERROR: unable to insert modern debian mimetype %s\n", sqlbuf);
+      free(pi);
+      free(dpi);
+      exit(-1);
+    }
+    snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/vnd.debian.binary-package' LIMIT 1;");
+    result = PQexec(db_conn, sqlbuf);
+    if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__))
+    {
+      free(pi);
+      free(dpi);
+      exit(-1);
+    }
+    debmodernmimetypepk = atoi(PQgetvalue(result, 0, 0));
+    PQclear(result);
+    if ( debmodernmimetypepk == 0 )
+    {
+      LOG_ERROR("pkgagent modern debian mimetype not installed!");
+      free(pi);
+      free(dpi);
+      return (-1);
+    }
+  }
   snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-source' LIMIT 1;");
   result = PQexec(db_conn, sqlbuf);
   if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__))
@@ -308,7 +348,7 @@ int ProcessUpload (long upload_pk)
   if (NULL == uploadtree_tablename) uploadtree_tablename = strdup("uploadtree_a");
   /*  retrieve the records to process */
   snprintf(sqlbuf, sizeof(sqlbuf),
-      "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name as mimetype from pfile, mimetype, (SELECT distinct(pfile_fk) as PF from %s where upload_fk='%ld') as SS where PF=pfile_pk and (pfile_mimetypefk='%d' or pfile_mimetypefk='%d' OR pfile_mimetypefk='%d') and mimetype_pk=pfile_mimetypefk and (not exists (SELECT 1 from pkg_rpm where pkg_rpm.pfile_fk = pfile_pk)) and (not exists (SELECT 1 from pkg_deb where pkg_deb.pfile_fk = pfile_pk))", uploadtree_tablename, upload_pk, mimetypepk, debmimetypepk, debsrcmimetypepk);
+      "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name as mimetype from pfile, mimetype, (SELECT distinct(pfile_fk) as PF from %s where upload_fk='%ld') as SS where PF=pfile_pk and (pfile_mimetypefk='%d' or pfile_mimetypefk='%d' OR pfile_mimetypefk='%d' OR pfile_mimetypefk='%d') and mimetype_pk=pfile_mimetypefk and (not exists (SELECT 1 from pkg_rpm where pkg_rpm.pfile_fk = pfile_pk)) and (not exists (SELECT 1 from pkg_deb where pkg_deb.pfile_fk = pfile_pk))", uploadtree_tablename, upload_pk, mimetypepk, debmimetypepk, debsrcmimetypepk, debmodernmimetypepk);
   result = PQexec(db_conn, sqlbuf);
   if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__))
   {
@@ -350,7 +390,8 @@ int ProcessUpload (long upload_pk)
         free(pi->requires[i]);
       free(pi->requires);
     }
-    else if (!strcasecmp(mimetype, "application/x-debian-package")){
+    else if (!strcasecmp(mimetype, "application/x-debian-package") ||
+             !strcasecmp(mimetype, "application/vnd.debian.binary-package")){
       dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
       strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile)-1);
       dpi->pFile[sizeof(dpi->pFile)-1] = '\0';
@@ -777,13 +818,15 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
     }
     if (!strcasecmp(field, "Depends")) {
       char *depends = NULL;
-      char tempvalue[MAXCMD];
+      char countcopy[MAXCMD];
+      char splitcopy[MAXCMD];
       int size,i;
       size_t length = MAXLENGTH;
       size = 0;
       if (value[0] != '\0'){
-        strncpy(tempvalue, value, sizeof(tempvalue));
-        depends = strtok(value, ",");
+        strncpy(countcopy, value, sizeof(countcopy)-1);
+        countcopy[sizeof(countcopy)-1] = '\0';
+        depends = strtok(countcopy, ",");
         while (depends && (depends[0] != '\0')) {
           if (strlen(depends) >= length)
             length = strlen(depends) + 1;
@@ -792,12 +835,16 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
         }
         if (Verbose) { printf("SIZE:%d\n", size);}
 
+        strncpy(splitcopy, value, sizeof(splitcopy)-1);
+        splitcopy[sizeof(splitcopy)-1] = '\0';
         pi->depends = calloc(size, sizeof(char *));
-        pi->depends[0] = calloc(length, sizeof(char));
-        strcpy(pi->depends[0],strtok(tempvalue,","));
-        for (i=1;i<size;i++){
+        depends = strtok(splitcopy, ",");
+        for (i=0; i<size; i++){
           pi->depends[i] = calloc(length, sizeof(char));
-          strcpy(pi->depends[i],strtok(NULL, ","));
+          if (depends) {
+            strcpy(pi->depends[i], depends);
+            depends = strtok(NULL, ",");
+          }
         }
         pi->dep_size = size;
       }
@@ -937,13 +984,15 @@ int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
     }
     if (!strcasecmp(field, "Build-Depends")) {
       char *depends = NULL;
-      char tempvalue[MAXCMD];
+      char countcopy[MAXCMD];
+      char splitcopy[MAXCMD];
       int size,i;
       size = 0;
       size_t length = MAXLENGTH;
       if (value[0] != '\0'){
-        strncpy(tempvalue, value, sizeof(tempvalue));
-        depends = strtok(value, ",");
+        strncpy(countcopy, value, sizeof(countcopy)-1);
+        countcopy[sizeof(countcopy)-1] = '\0';
+        depends = strtok(countcopy, ",");
         while (depends && (depends[0] != '\0')) {
           if (strlen(depends) >= length)
             length = strlen(depends) + 1;
@@ -952,12 +1001,16 @@ int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
         }
         if (Verbose) { printf("SIZE:%d\n", size);}
 
+        strncpy(splitcopy, value, sizeof(splitcopy)-1);
+        splitcopy[sizeof(splitcopy)-1] = '\0';
         pi->depends = calloc(size, sizeof(char *));
-        pi->depends[0] = calloc(length, sizeof(char));
-        strcpy(pi->depends[0],strtok(tempvalue,","));
-        for (i=1;i<size;i++){
+        depends = strtok(splitcopy, ",");
+        for (i=0; i<size; i++){
           pi->depends[i] = calloc(length, sizeof(char));
-          strcpy(pi->depends[i],strtok(NULL, ","));
+          if (depends) {
+            strcpy(pi->depends[i], depends);
+            depends = strtok(NULL, ",");
+          }
         }
         pi->dep_size = size;
       }

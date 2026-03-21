@@ -316,7 +316,7 @@ function FuzzyName(&$Children)
     $NoNumbName = preg_replace('/([0-9]|\.|-|_)/', "", $NoExtName);
     $NoNumbNameext = preg_replace('/([0-9]|\.|-|_)/', "", $Child['ufile_name']);
     $Child['fuzzyname'] = $NoNumbName;
-    $Child['fuzzynameext'] = $NoNumbName;
+    $Child['fuzzynameext'] = $NoNumbNameext;
   }
 
   return;

@@ -115,6 +115,9 @@ class CopyrightHistogram extends HistogramBase
       $('#testReplacementstatement').click(function() {
         testReplacement(tableCopyright, 'statement');
       });
+      $('#testReplacementscancode_statement').click(function() {
+        testReplacement(tableScancode, 'scancode_statement');
+      });
       $('#copyrightFindingsTabs').tabs({
         active: ($.cookie(copyrightTabCookie) || 0),
         activate: function(e, ui){

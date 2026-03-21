@@ -244,7 +244,7 @@ class ui_view_info extends FO_Plugin
     $sql = "select * from upload where upload_pk=$1";
     $row = $this->dbManager->getSingleRow(
       $sql,
-      array($row['upload_fk']),
+      array($Upload),
       __METHOD__ . "getUploadOrigin"
     );
     if ($row) {
@@ -355,6 +355,7 @@ class ui_view_info extends FO_Plugin
       $vars['packageAgentStatus'] = 1;
       $vars['trackback_uri'] = Traceback_uri() .
       "?mod=schedule_agent&upload=$Upload&agent=agent_pkgagent";
+      $vars['activeScript'] = ActiveHTTPscript("Schedule");
       return ($vars);
     }
     $sql = "SELECT mimetype_name
@@ -402,17 +403,18 @@ class ui_view_info extends FO_Plugin
         $this->dbManager->prepare(__METHOD__ . "getPkg_rpm_req", $sql);
         $result = $this->dbManager->execute(__METHOD__ . "getPkg_rpm_req", array($Require));
 
-        while ($R = pg_fetch_assoc($result) and ! empty($R['req_pk'])) {
+        while (($R = pg_fetch_assoc($result)) && ! empty($R['req_pk'])) {
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Requires");
-          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
+          $entry['value'] = htmlspecialchars($R["req_value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
           $Count++;
           $vars['packageRequires'][] = $entry;
         }
         $this->dbManager->freeResult($result);
       }
-    } elseif ($MIMETYPE == "application/x-debian-package") {
+    } elseif ($MIMETYPE == "application/x-debian-package" ||
+              $MIMETYPE == "application/vnd.debian.binary-package") {
       $vars['packageType'] = _("Debian Binary Package\n");
 
       $sql = "SELECT *
@@ -437,17 +439,16 @@ class ui_view_info extends FO_Plugin
         $this->dbManager->prepare(__METHOD__ . "getPkg_rpm_req", $sql);
         $result = $this->dbManager->execute(__METHOD__ . "getPkg_rpm_req", array($Require));
 
-        while ($R = pg_fetch_assoc($result) and ! empty($R['req_pk'])) {
+        while (($R = pg_fetch_assoc($result)) && ! empty($R['req_pk'])) {
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Depends");
-          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
+          $entry['value'] = htmlspecialchars($R["req_value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
           $Count++;
           $vars['packageRequires'][] = $entry;
         }
         $this->dbManager->freeResult($result);
       }
-      $V .= "</table>\n";
     } elseif ($MIMETYPE == "application/x-debian-source") {
       $vars['packageType'] = _("Debian Source Package\n");
 
@@ -473,11 +474,11 @@ class ui_view_info extends FO_Plugin
         $this->dbManager->prepare(__METHOD__ . "getPkg_rpm_req", $sql);
         $result = $this->dbManager->execute(__METHOD__ . "getPkg_rpm_req", array($Require));
 
-        while ($R = pg_fetch_assoc($result) and ! empty($R['req_pk'])) {
+        while (($R = pg_fetch_assoc($result)) && ! empty($R['req_pk'])) {
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Build-Depends");
-          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
+          $entry['value'] = htmlspecialchars($R["req_value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
           $Count++;
           $vars['packageRequires'][] = $entry;
         }
@@ -489,7 +490,6 @@ class ui_view_info extends FO_Plugin
     }
     return $vars;
   } // ShowPackageInfo()
-
 
   /**
    * \brief Display the tag info data associated with the file.
@@ -592,7 +592,7 @@ class ui_view_info extends FO_Plugin
     $this->vars['micromenu'] = Dir2Browse("browse", $itemId, null, $showBox = 0, "View-Meta");
 
     $this->vars += $this->ShowTagInfo($uploadId, $itemId);
-    $this->vars += $this->ShowPackageinfo($uploadId, $itemId, 1);
+    $this->vars += $this->ShowPackageInfo($uploadId, $itemId, 1);
     $this->vars += $this->ShowMetaView($uploadId, $itemId);
     $this->vars += $this->ShowSightings($uploadId, $itemId);
     $this->vars += $this->ShowView($uploadId, $itemId);

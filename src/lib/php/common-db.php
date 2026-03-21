@@ -131,6 +131,7 @@ function DB2KeyValArray($Table, $KeyCol, $ValCol, $Where="")
   while ($row = pg_fetch_assoc($result)) {
     $ResArray[$row[$KeyCol]] = $row[$ValCol];
   }
+  pg_free_result($result);
   return $ResArray;
 }
 
@@ -169,6 +170,7 @@ function DB2ValArray($Table, $ValCol, $Uniq=false, $Where="")
     $ResArray[$i] = $row[$ValCol];
     ++ $i;
   }
+  pg_free_result($result);
   return $ResArray;
 }
 

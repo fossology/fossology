@@ -56,7 +56,7 @@ function ReportCacheGet($CacheKey)
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
     pg_free_result($result);
-    if (! empty($row['cache_on']) && ($result['cache_on'] == 'N')) {
+    if (! empty($row['cache_on']) && ($row['cache_on'] == 'N')) {
       $UserCacheStat = 2;
       return; /* cache is off for this user */
     }

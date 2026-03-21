@@ -21,4 +21,4 @@ $others = "bob.gobeille@hp.com dong.ma@hp.com alex.dav.norton@hp.com  yao-bin.sh
 
 // the whole team, comment out as needed
 
-$mailTo = $mailTo . $others;
+$mailTo .= $others;

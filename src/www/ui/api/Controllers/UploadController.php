@@ -1277,7 +1277,13 @@ class UploadController extends RestController
     $outputArray = [];
 
     foreach ($res as $key => $value) {
-      $scannedLicense = new ScannedLicense($licenseDao->getLicenseByShortName($key)->getId(), $key, $value['count'], $value['unique'], $value['spdx_id']);
+      $scannedLicense = new ScannedLicense(
+        $value['rf_pk'],
+        $key,
+        $value['count'],
+        $value['unique'],
+        $value['spdx_id']
+      );
       $outputArray[] = $scannedLicense->getArray(ApiVersion::getVersion($request));
     }
     return $response->withJson($outputArray, 200);
