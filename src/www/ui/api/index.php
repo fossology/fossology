@@ -42,6 +42,7 @@ use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UploadTreeController;
+use Fossology\UI\Api\Controllers\PolicyController;
 use Fossology\UI\Api\Controllers\UserController;
 use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Helper\CorsHelper;
@@ -57,6 +58,7 @@ use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Psr\Log\LoggerInterface;
 use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
+use Slim\Routing\RouteCollectorProxy;
 use Slim\Factory\AppFactory;
 use Slim\Middleware\ContentLengthMiddleware;
 use Slim\Psr7\Request;
@@ -425,6 +427,15 @@ $app->group('/license',
       LicenseController::class . ':deleteAdminLicenseCandidate');
     $app->put('/adminacknowledgements', LicenseController::class . ':handleAdminLicenseAcknowledgement');
     $app->any('/{params:.*}', BadRequestController::class);
+  });
+
+/////////////////////////POLICY SEARCH/////////////////
+$app->group('/policies',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', PolicyController::class . ':getAllPolicies');
+    $app->get('/{shortname:.+}', PolicyController::class . ':getPolicy');
+    $app->post('/{shortname:.+}', PolicyController::class . ':setPolicy');
+    $app->delete('/{shortname:.+}', PolicyController::class . ':deletePolicy');
   });
 
 ////////////////////////////OVERVIEW/////////////////////

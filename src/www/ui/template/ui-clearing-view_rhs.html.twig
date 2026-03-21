@@ -111,6 +111,25 @@
       {{ 'Apply decision to all future occurrences of this file'|trans }}
       <img data-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Based on a hash computation of the file contents, Fossology will determine a future occurrence of the same file. Then, if  the same file is part of a subsequent upload, this clearing decision will apply there as well.  Consider that this decision will impact also upload of other users. It should be checked with much care'|trans }}" alt="" class="info-bullet"/ >
     </fieldset>
+    <fieldset class="border p-2">
+      <legend style="width:auto;">
+        {{ 'Policy Filter'| trans }}
+      </legend>
+      <div id="policyFilterContainer">
+        <div>
+          <input type="checkbox" class="policy-filter-cb" value="0" id="filterPolicy0" checked>
+          <label for="filterPolicy0" style="color: #155724; font-weight: normal;">{{ 'Approved'|trans }}</label>
+        </div>
+        <div>
+          <input type="checkbox" class="policy-filter-cb" value="1" id="filterPolicy1" checked>
+          <label for="filterPolicy1" style="color: #856404; font-weight: normal;">{{ 'Restricted'|trans }}</label>
+        </div>
+        <div>
+          <input type="checkbox" class="policy-filter-cb" value="2" id="filterPolicy2" checked>
+          <label for="filterPolicy2" style="color: #721c24; font-weight: normal;">{{ 'Banned'|trans }}</label>
+        </div>
+      </div>
+    </fieldset>
   </div>
 </form>
 

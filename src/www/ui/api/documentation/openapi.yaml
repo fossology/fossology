@@ -5523,6 +5523,118 @@ paths:
               schema:
                 $ref: '#/components/schemas/Info'
         default:
+  /policies:
+    get:
+      operationId: getAllPolicies
+      tags:
+        - Admin
+      summary: Get all license policies
+      description: >
+        Get all user-defined license policies.
+      responses:
+        '200':
+          description: List of policies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /policies/{shortname}:
+    parameters:
+      - name: shortname
+        in: path
+        required: true
+        description: Shortname of the license
+        schema:
+          type: string
+    get:
+      operationId: getPolicy
+      tags:
+        - Admin
+      summary: Get license policy
+      description: >
+        Get policy for a specific license shortname.
+      responses:
+        '200':
+          description: The policy
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Policy or license not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    post:
+      operationId: setPolicy
+      tags:
+        - Admin
+      summary: Set license policy
+      description: >
+        Set or update the policy rank of a license.
+      requestBody:
+        description: Policy rank to set
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                policy_rank:
+                  type: integer
+                  description: 0 for Approved, 1 for Restricted, 2 for Banned
+              required:
+                - policy_rank
+      responses:
+        '200':
+          description: Policy set successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Invalid rank
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    delete:
+      operationId: deletePolicy
+      tags:
+        - Admin
+      summary: Delete license policy
+      description: >
+        Delete policy for a specific license.
+      responses:
+        '200':
+          description: Policy deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
           $ref: '#/components/responses/defaultResponse'
 
 components:

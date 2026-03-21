@@ -2243,6 +2243,10 @@
   $Schema["TABLE"]["users"]["group_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"group_fk\" int4";
   $Schema["TABLE"]["users"]["group_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
 
+  $Schema["TABLE"]["users"]["policy_filter"]["DESC"] = "COMMENT ON COLUMN \"users\".\"policy_filter\" IS 'JSON string holding license policy view filters'";
+  $Schema["TABLE"]["users"]["policy_filter"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"policy_filter\" text";
+  $Schema["TABLE"]["users"]["policy_filter"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"policy_filter\" DROP NOT NULL";
+
   $Schema["TABLE"]["users"]["spdx_settings"]["DESC"] = "COMMENT ON COLUMN \"users\".\"spdx_settings\" IS 'Comma-separated SPDX export settings: osselot_export,spdx_license_comment,ignore_files_wo_info as checked/unchecked values'";
   $Schema["TABLE"]["users"]["spdx_settings"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"spdx_settings\" text DEFAULT 'unchecked,unchecked,unchecked'";
   $Schema["TABLE"]["users"]["spdx_settings"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"spdx_settings\" DROP NOT NULL, ALTER COLUMN \"spdx_settings\" SET DEFAULT 'unchecked,unchecked,unchecked'";
@@ -2876,4 +2880,57 @@
   $Schema["INHERITS"]["nomos_ars"] = "ars_master";
   $Schema["INHERITS"]["monk_ars"] = "ars_master";
   $Schema["INHERITS"]["spasht_ars"] = "ars_master";
+
+  $Schema["TABLE"]["license_policy"]["lp_pk"]["DESC"] = "COMMENT ON COLUMN \"license_policy\".\"lp_pk\" IS 'Primary key'";
+  $Schema["TABLE"]["license_policy"]["lp_pk"]["ADD"] = "ALTER TABLE \"license_policy\" ADD COLUMN \"lp_pk\" int4 DEFAULT nextval('license_policy_lp_pk_seq'::regclass)";
+  $Schema["TABLE"]["license_policy"]["lp_pk"]["ALTER"] = "ALTER TABLE \"license_policy\" ALTER COLUMN \"lp_pk\" SET NOT NULL, ALTER COLUMN \"lp_pk\" SET DEFAULT nextval('license_policy_lp_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["license_policy"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_policy\".\"rf_fk\" IS 'license_ref key'";
+  $Schema["TABLE"]["license_policy"]["rf_fk"]["ADD"] = "ALTER TABLE \"license_policy\" ADD COLUMN \"rf_fk\" int4";
+  $Schema["TABLE"]["license_policy"]["rf_fk"]["ALTER"] = "ALTER TABLE \"license_policy\" ALTER COLUMN \"rf_fk\" SET NOT NULL, ADD CONSTRAINT uq_license_policy_rf_fk UNIQUE(rf_fk), ADD CONSTRAINT fk_license_policy_rf_fk FOREIGN KEY (rf_fk) REFERENCES license_ref(rf_pk) ON DELETE CASCADE";
+
+  $Schema["TABLE"]["license_policy"]["policy_rank"]["DESC"] = "COMMENT ON COLUMN \"license_policy\".\"policy_rank\" IS '0=Approved, 1=Restricted, 2=Banned'";
+  $Schema["TABLE"]["license_policy"]["policy_rank"]["ADD"] = "ALTER TABLE \"license_policy\" ADD COLUMN \"policy_rank\" int2 DEFAULT 0";
+  $Schema["TABLE"]["license_policy"]["policy_rank"]["ALTER"] = "ALTER TABLE \"license_policy\" ALTER COLUMN \"policy_rank\" SET NOT NULL, ALTER COLUMN \"policy_rank\" SET DEFAULT 0, ADD CONSTRAINT chk_license_policy_rank CHECK (policy_rank IN (0,1,2))";
+
+  $Schema["TABLE"]["license_policy"]["date_added"]["DESC"] = "";
+  $Schema["TABLE"]["license_policy"]["date_added"]["ADD"] = "ALTER TABLE \"license_policy\" ADD COLUMN \"date_added\" timestamptz DEFAULT now()";
+  $Schema["TABLE"]["license_policy"]["date_added"]["ALTER"] = "ALTER TABLE \"license_policy\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now()";
+
+  $Schema["TABLE"]["license_policy"]["date_modified"]["DESC"] = "";
+  $Schema["TABLE"]["license_policy"]["date_modified"]["ADD"] = "ALTER TABLE \"license_policy\" ADD COLUMN \"date_modified\" timestamptz DEFAULT now()";
+  $Schema["TABLE"]["license_policy"]["date_modified"]["ALTER"] = "ALTER TABLE \"license_policy\" ALTER COLUMN \"date_modified\" SET NOT NULL, ALTER COLUMN \"date_modified\" SET DEFAULT now()";
+
+  $Schema["TABLE"]["license_policy_log"]["lpl_pk"]["DESC"] = "COMMENT ON COLUMN \"license_policy_log\".\"lpl_pk\" IS 'Primary key'";
+  $Schema["TABLE"]["license_policy_log"]["lpl_pk"]["ADD"] = "ALTER TABLE \"license_policy_log\" ADD COLUMN \"lpl_pk\" int4 DEFAULT nextval('license_policy_log_lpl_pk_seq'::regclass)";
+  $Schema["TABLE"]["license_policy_log"]["lpl_pk"]["ALTER"] = "ALTER TABLE \"license_policy_log\" ALTER COLUMN \"lpl_pk\" SET NOT NULL, ALTER COLUMN \"lpl_pk\" SET DEFAULT nextval('license_policy_log_lpl_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["license_policy_log"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_policy_log\".\"rf_fk\" IS 'license_ref key affected'";
+  $Schema["TABLE"]["license_policy_log"]["rf_fk"]["ADD"] = "ALTER TABLE \"license_policy_log\" ADD COLUMN \"rf_fk\" int4";
+  $Schema["TABLE"]["license_policy_log"]["rf_fk"]["ALTER"] = "ALTER TABLE \"license_policy_log\" ALTER COLUMN \"rf_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["license_policy_log"]["old_rank"]["DESC"] = "COMMENT ON COLUMN \"license_policy_log\".\"old_rank\" IS 'Old policy rank'";
+  $Schema["TABLE"]["license_policy_log"]["old_rank"]["ADD"] = "ALTER TABLE \"license_policy_log\" ADD COLUMN \"old_rank\" int2";
+  $Schema["TABLE"]["license_policy_log"]["old_rank"]["ALTER"] = "ALTER TABLE \"license_policy_log\" ALTER COLUMN \"old_rank\" DROP NOT NULL";
+
+  $Schema["TABLE"]["license_policy_log"]["new_rank"]["DESC"] = "COMMENT ON COLUMN \"license_policy_log\".\"new_rank\" IS 'New policy rank'";
+  $Schema["TABLE"]["license_policy_log"]["new_rank"]["ADD"] = "ALTER TABLE \"license_policy_log\" ADD COLUMN \"new_rank\" int2";
+  $Schema["TABLE"]["license_policy_log"]["new_rank"]["ALTER"] = "ALTER TABLE \"license_policy_log\" ALTER COLUMN \"new_rank\" SET NOT NULL";
+
+  $Schema["TABLE"]["license_policy_log"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"license_policy_log\".\"user_fk\" IS 'User who made the change'";
+  $Schema["TABLE"]["license_policy_log"]["user_fk"]["ADD"] = "ALTER TABLE \"license_policy_log\" ADD COLUMN \"user_fk\" int4";
+  $Schema["TABLE"]["license_policy_log"]["user_fk"]["ALTER"] = "ALTER TABLE \"license_policy_log\" ALTER COLUMN \"user_fk\" SET NOT NULL, ADD CONSTRAINT fk_license_policy_log_user_fk FOREIGN KEY (user_fk) REFERENCES users(user_pk) ON DELETE SET NULL";
+
+  $Schema["TABLE"]["license_policy_log"]["date_changed"]["DESC"] = "COMMENT ON COLUMN \"license_policy_log\".\"date_changed\" IS 'Timestamp of change'";
+  $Schema["TABLE"]["license_policy_log"]["date_changed"]["ADD"] = "ALTER TABLE \"license_policy_log\" ADD COLUMN \"date_changed\" timestamptz DEFAULT now()";
+  $Schema["TABLE"]["license_policy_log"]["date_changed"]["ALTER"] = "ALTER TABLE \"license_policy_log\" ALTER COLUMN \"date_changed\" SET NOT NULL, ALTER COLUMN \"date_changed\" SET DEFAULT now()";
+
+  $Schema["TABLE"]["license_policy_log"]["source"]["DESC"] = "COMMENT ON COLUMN \"license_policy_log\".\"source\" IS 'Source of the change: UI or API'";
+  $Schema["TABLE"]["license_policy_log"]["source"]["ADD"] = "ALTER TABLE \"license_policy_log\" ADD COLUMN \"source\" varchar(16) DEFAULT 'API'";
+  $Schema["TABLE"]["license_policy_log"]["source"]["ALTER"] = "ALTER TABLE \"license_policy_log\" ALTER COLUMN \"source\" DROP NOT NULL, ALTER COLUMN \"source\" SET DEFAULT 'API'";
+
+  $Schema["TABLE"]["license_policy_log"]["request_ip"]["DESC"] = "COMMENT ON COLUMN \"license_policy_log\".\"request_ip\" IS 'IP address of the requester'";
+  $Schema["TABLE"]["license_policy_log"]["request_ip"]["ADD"] = "ALTER TABLE \"license_policy_log\" ADD COLUMN \"request_ip\" varchar(45)";
+  $Schema["TABLE"]["license_policy_log"]["request_ip"]["ALTER"] = "ALTER TABLE \"license_policy_log\" ALTER COLUMN \"request_ip\" DROP NOT NULL";
+
   $Schema["INHERITS"]["license_candidate"] = "license_ref";
