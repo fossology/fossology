@@ -127,6 +127,43 @@ class UserController extends RestController
       throw new HttpInternalServerErrorException($ErrMsg);
     }
 
+    if (isset($userDetails['groups']) && is_array($userDetails['groups'])) {
+      $userDao = $this->restHelper->getUserDao();
+      $newUser = $userDao->getUserByName($userDetails['name']);
+      if ($newUser) {
+        $newUserId = $newUser['user_pk'];
+        $currentUserId = $this->restHelper->getUserId();
+        foreach ($userDetails['groups'] as $group) {
+          if (!isset($group['id'])) {
+            continue;
+          }
+          $groupId = intval($group['id']);
+          $perm = intval($group['perm'] ?? 0);
+
+          // Security check 2 & 4: Validate group exists and caller has access
+          if (!$this->dbHelper->doesIdExist("groups", "group_pk", $groupId)) {
+            continue;
+          }
+
+          // If not system admin, check if caller is group admin/advisor
+          // Note: addUser is currently system-admin only due to throwNotAdminException()
+          if (!Auth::isAdmin() && !$userDao->isAdvisorOrAdmin($currentUserId, $groupId)) {
+            continue;
+          }
+
+          // Security check 3: Validate perm values [0, 1, 2]
+          if (!in_array($perm, [\Fossology\Lib\Dao\UserDao::USER, \Fossology\Lib\Dao\UserDao::ADMIN, \Fossology\Lib\Dao\UserDao::ADVISOR])) {
+            $perm = \Fossology\Lib\Dao\UserDao::USER;
+          }
+
+          // Avoid duplicate membership (add_user already adds them to their private group)
+          if ($groupId != $newUser['group_fk']) {
+            $userDao->addGroupMembership($groupId, $newUserId, $perm);
+          }
+        }
+      }
+    }
+
     $returnVal = new Info(201, "User created successfully", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }

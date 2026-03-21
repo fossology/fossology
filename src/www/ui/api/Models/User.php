@@ -74,6 +74,11 @@ class User
    * Default bucket pool of the user
    */
   private $defaultBucketPool;
+  /**
+   * @var array $groups
+   * Groups the user belongs to
+   */
+  private $groups;
 
   /**
    * User constructor.
@@ -87,9 +92,10 @@ class User
    * @param boolean $emailNotification
    * @param object $agents
    * @param integer $defaultBucketPool
+   * @param array $groups
    */
   public function __construct($id, $name, $description, $email, $accessLevel, $root_folder_id, $emailNotification,
-                              $agents, $default_group_fk=null, $defaultBucketPool=null)
+                              $agents, $default_group_fk=null, $defaultBucketPool=null, $groups=array())
   {
     $this->id = intval($id);
     $this->name = $name;
@@ -122,6 +128,7 @@ class User
     } else {
       $this->defaultBucketPool = null;
     }
+    $this->groups = $groups;
   }
 
   ////// Getters //////
@@ -244,6 +251,9 @@ class User
     }
     if ($this->defaultBucketPool !== null) {
       $returnUser["defaultBucketpool"] = $this->defaultBucketPool;
+    }
+    if ($this->groups !== null && !empty($this->groups)) {
+      $returnUser["groups"] = $this->groups;
     }
     return $returnUser;
   }

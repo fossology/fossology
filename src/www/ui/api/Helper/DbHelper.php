@@ -269,15 +269,18 @@ FROM $tableName WHERE $idRowName = $1", [$id],
     }
     $currentUser = Auth::getUserId();
     $userIsAdmin = Auth::isAdmin();
+    global $container;
+    $userDao = $container->get('helper.restHelper')->getUserDao();
     foreach ($result as $row) {
       $user = null;
       if ($userIsAdmin ||
         ($row["user_pk"] == $currentUser)) {
-        $user = new User($row["user_pk"], $row["user_name"], $row["user_desc"],
+        $groups = $userDao->getUserGroupsWithPerm($row["user_pk"]);
+        $user = new User($row["user_pk"], $row["name"] ?? $row["user_name"], $row["user_desc"],
           $row["user_email"], $row["user_perm"], $row["root_folder_fk"],
-          $row["email_notify"], $row["user_agent_list"], $row["group_fk"], $row["default_bucketpool_fk"]);
+          $row["email_notify"], $row["user_agent_list"], $row["group_fk"], $row["default_bucketpool_fk"], $groups);
       } else {
-        $user = new User($row["user_pk"], $row["user_name"], $row["user_desc"],
+        $user = new User($row["user_pk"], $row["name"] ?? $row["user_name"], $row["user_desc"],
           null, null, null, null, null, null);
       }
       $users[] = $user;
