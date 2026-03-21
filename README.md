@@ -45,6 +45,7 @@ both as a single instance or in combination with an external PostgreSQL database
 use since the standalone image does not take care of data persistence.
 
 A pre-built Docker image is available from [Docker Hub](https://hub.docker.com/r/fossology/fossology/) and can be run using the following command:
+Run the following command to start the FOSSology container:
 
 ```sh
 docker run -p 8081:80 fossology/fossology
@@ -53,8 +54,9 @@ docker run -p 8081:80 fossology/fossology
 The docker image can then be used using http://IP_OF_DOCKER_HOST:8081/repo user fossy password fossy.
 
 
-If you want to run Fossology with an external database container, you can use Docker Compose, via the following command: 
+If you want to run Fossology with an external database container, you can use Docker Compose.
 
+Run the following command:
 ```sh
 docker-compose up
 ```
