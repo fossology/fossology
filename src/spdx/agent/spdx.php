@@ -883,8 +883,11 @@ class SpdxAgent extends Agent
     $getCommentState = $this->dbManager->getSingleRow($sql, array($uploadId), __METHOD__.'.SPDX_license_comment');
     if (!empty($getCommentState['ri_spdx_selection'])) {
       $getCommentStateSingle = explode(',', $getCommentState['ri_spdx_selection']);
-      if ($getCommentStateSingle[$key] === "checked") {
+      if (isset($getCommentStateSingle[$key]) && $getCommentStateSingle[$key] === "checked") {
         return true;
+      }
+      if (isset($getCommentStateSingle[$key])) {
+        return false;
       }
     }
     return false;
