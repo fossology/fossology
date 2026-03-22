@@ -207,10 +207,12 @@ class ReportUtils
    * @param int $groupId
    * @param Agent $agentObj
    * @param SpdxLicenseInfo[] &$licensesInDocument
+   * @param bool $excludeIrrelevant Whether to exclude irrelevant files (default: true)
    * @return FileNode[] Mapping item->FileNode
    */
   public function getFilesWithLicensesFromClearings(
-    ItemTreeBounds $itemTreeBounds, $groupId, $agentObj, &$licensesInDocument)
+    ItemTreeBounds $itemTreeBounds, $groupId, $agentObj, &$licensesInDocument,
+    $excludeIrrelevant = true)
   {
     if ($this->licenseMap === null) {
       $this->licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT, true);
@@ -225,7 +227,7 @@ class ReportUtils
       if (($clearingsProceeded&2047)==0) {
         $agentObj->heartbeat(0);
       }
-      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
+      if ($excludeIrrelevant && $clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
         continue;
       }
 
