@@ -100,16 +100,59 @@ class ClearingDecisionProcessor
    * @param array $removedIds Licenses to be skipped
    * @return number[]
    */
-  private function insertClearingEventsForAgentFindings(ItemTreeBounds $itemBounds, $userId, $groupId, $remove = false, $type = ClearingEventTypes::AGENT, $removedIds = array())
-  {
+    private function insertClearingEventsForAgentFindings(
+    ItemTreeBounds $itemBounds,
+    $userId,
+    $groupId,
+    $remove = false,
+    $type = ClearingEventTypes::AGENT,
+    $removedIds = array()
+  ) {
     $eventIds = array();
-    foreach ($this->agentLicenseEventProcessor->getScannerEvents($itemBounds) as $licenseId => $scannerEvents) {
+
+    // Get all scanner events once
+    $allScannerEvents = $this->agentLicenseEventProcessor->getScannerEvents($itemBounds);
+
+    foreach ($allScannerEvents as $licenseId => $scannerEvents) {
+
       if (array_key_exists($licenseId, $removedIds)) {
         continue;
       }
+
       $scannerLicenseRef = $scannerEvents[0]->getLicenseRef();
-      $eventIds[$scannerLicenseRef->getId()] = $this->clearingDao->insertClearingEvent($itemBounds->getItemId(), $userId, $groupId, $scannerLicenseRef->getId(), $remove, $type);
+      $licenseShortName = $scannerLicenseRef->getShortName();
+
+      //Check if it's LicenseRef (Ojo)
+      $isLicenseRef = strpos($licenseShortName, 'LicenseRef-') === 0;
+
+      // Allow fallback ONLY if:
+      // - LicenseRef (Ojo)
+      // - No other scanner results (Nomos failed)
+      if ($isLicenseRef && count($allScannerEvents) === 1) {
+        $eventIds[$scannerLicenseRef->getId()] =
+          $this->clearingDao->insertClearingEvent(
+            $itemBounds->getItemId(),
+            $userId,
+            $groupId,
+            $scannerLicenseRef->getId(),
+            $remove,
+            $type
+          );
+        continue;
+      }
+
+      //Default behavior (unchanged)
+      $eventIds[$scannerLicenseRef->getId()] =
+        $this->clearingDao->insertClearingEvent(
+          $itemBounds->getItemId(),
+          $userId,
+          $groupId,
+          $scannerLicenseRef->getId(),
+          $remove,
+          $type
+        );
     }
+
     return $eventIds;
   }
 
