@@ -19,8 +19,8 @@
     <ol>
       <li>{{ "Select the folder containing the file to delete"|trans }}:
         <select name='folder' 
-        onLoad='Uploads_Get("{{ tracebackUri }}?mod=upload_options&folder=-1")'
-        onChange='Uploads_Get("{{ tracebackUri }}?mod=upload_options&folder=" + this.value)'
+        onLoad='Uploads_Get("{{ tracebackUri }}?mod=upload_options&folder=-1&editable=1")'
+        onChange='Uploads_Get("{{ tracebackUri }}?mod=upload_options&folder=" + this.value + "&editable=1")'
         class="ui-render-select2">
        {{ rootFolderListOptions }}
         </select>
