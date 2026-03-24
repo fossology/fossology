@@ -102,12 +102,12 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
 
     $dbManager = M::mock(DbManager::class);
     $dbManager->shouldReceive('getSingleRow')
-      ->with('SELECT rf_pk FROM ONLY license_ref WHERE rf_md5=md5($1)',
+      ->with('SELECT rf_pk FROM ONLY license_ref WHERE rf_md5=md5($1) AND rf_external_id IS NULL',
         array($licenseText))
       ->once()
       ->andReturn(array('rf_pk' => $knownId));
     $dbManager->shouldReceive('getSingleRow')
-      ->with('SELECT rf_pk FROM ONLY license_ref WHERE rf_md5=md5($1)',
+      ->with('SELECT rf_pk FROM ONLY license_ref WHERE rf_md5=md5($1) AND rf_external_id IS NULL',
         array($falseLicenseText))
       ->andReturnNull();
     $userDao = M::mock(UserDao::class);
@@ -175,7 +175,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
       'rf_url' => '',
       'rf_notes' => '',
       'rf_source' => '',
-      'rf_risk' => 4
+      'rf_risk' => 4,
+      'rf_external_id' => null,
     );
     $dbManager->shouldReceive('getSingleRow')
       ->with(
@@ -317,7 +318,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
         'text' => 'Text of candidate license',
         'url' => '', 'notes' => '', 'source' => '', 'risk' => 0,
         'parent_shortname' => null, 'report_shortname' => null,
-        'group' => 'fossy'
+        'group' => 'fossy', 'external_id' => null
       )));
     assertThat($returnC, is(
       "License 'canLicA' already exists in DB (id = 200)" .
@@ -350,7 +351,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
         'risk' => 2,
         'parent_shortname' => null,
         'report_shortname' => null,
-        'group' => null
+        'group' => null,
+        'spdx_id' => null
       )));
     assertThat($returnA, is(
         "License 'licA' already exists in DB (id = 101)" .
@@ -563,7 +565,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
       "rf_url" => '',
       "rf_notes" => 'noteA',
       "rf_source" => '',
-      "rf_risk" => 0
+      "rf_risk" => 0,
+      "rf_external_id" => null,
     );
     $this->addLicenseInsertToDbManager($dbManager, $licenseRow, 101);
     Reflectory::setObjectsProperty($licenseCsvImport, 'nkMap', array(

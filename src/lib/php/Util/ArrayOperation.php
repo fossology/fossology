@@ -74,4 +74,39 @@ class ArrayOperation
   {
     return !array_diff_key(array_flip($keys), $array);
   }
+
+  /**
+   * @brief Get list of additions/removals to make $oldArray equal to $newArray
+   *
+   * @param array $oldArray The old array
+   * @param array $newArray  The new array
+   * @return array $operations The list of additions and removals to be done
+   */
+  public static function getArrayDiffs(array $oldArray, array $newArray): array
+  {
+    $add = [];
+    $remove = [];
+
+    $oldSet = array_flip($oldArray);
+    $newSet = array_flip($newArray);
+
+    foreach ($newArray as $item) {
+      if (!isset($oldSet[$item])) {
+        $add[] = $item;
+      }
+    }
+
+    foreach ($oldArray as $item) {
+      if (!isset($newSet[$item])) {
+        $remove[] = $item;
+      }
+    }
+
+    $operations = [
+      'add' => $add,
+      'remove' => $remove,
+    ];
+
+    return $operations;
+  }
 }
