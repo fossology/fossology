@@ -421,8 +421,8 @@ class admin_license_file extends FO_Plugin
       $spdxId = LicenseRef::replaceSpaces($spdxId);
     }
 
-    if (empty($shortname)) {
-      $text = _("ERROR: The license shortname is empty. License not added.");
+    if ($this->isShortnameBlocked($rfId, $shortname, $text)) {
+      $text = _("ERROR: Shortname already exists. License not updated.");
       return "<b>$text</b><p>";
     }
 
