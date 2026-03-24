@@ -145,19 +145,6 @@ function Migrate_21_22($Verbose)
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
 
-  /** add UNIQUE CONSTRAINT on rf_shortname column of licenser_ref table when not exist */
-  $sql = "SELECT conname from pg_constraint where conname= 'license_ref_rf_shortname_key';";
-  $conresult = pg_query($PG_CONN, $sql);
-  DBCheckResult($conresult, $sql, __FILE__, __LINE__);
-  $tt = pg_num_rows($conresult);
-  if (pg_num_rows($conresult) == 0) {
-    $sql = "ALTER TABLE license_ref ADD CONSTRAINT  license_ref_rf_shortname_key UNIQUE (rf_shortname); ";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-  }
-  pg_free_result($conresult);
-
   /** Clean uploadtree_a table  */
   $sql = "CREATE VIEW uploadtree_a_upload AS SELECT uploadtree_pk,upload_fk,upload_pk FROM uploadtree_a LEFT OUTER JOIN upload ON upload_fk=upload_pk;
           DELETE FROM uploadtree_a WHERE uploadtree_pk IN (SELECT uploadtree_pk FROM uploadtree_a_upload WHERE upload_pk IS NULL);
