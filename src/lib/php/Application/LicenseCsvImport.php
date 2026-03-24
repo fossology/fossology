@@ -11,6 +11,7 @@ use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ArrayOperation;
+use Fossology\Lib\BusinessRules\ObligationMap;
 
 /**
  * @file
@@ -59,20 +60,25 @@ class LicenseCsvImport
       'source'=>array('source','Foreign ID'),
       'risk'=>array('risk','risk_level'),
       'group'=>array('group','License group'),
-      'obligations'=>array('obligations','License obligations')
+      'obligations'=>array('obligations','License obligations'),
+      'external_id'=>array('id','LicenseDB Id'),
       );
+
+  /** @var ObligationMap $obligationMap
+   * obligation map to use */
+  protected $obligationMap;
 
   /**
    * Constructor
    * @param DbManager $dbManager DB manager to use
    * @param UserDao $userDao     User Dao to use
    */
-  public function __construct(DbManager $dbManager, UserDao $userDao)
+  public function __construct(DbManager $dbManager, UserDao $userDao, $obligationMap = null)
   {
     $this->dbManager = $dbManager;
     $this->userDao = $userDao;
+    $this->obligationMap = $obligationMap;
   }
-
   /**
    * @brief Update the delimiter
    * @param string $delimiter New delimiter to use.
@@ -148,7 +154,7 @@ class LicenseCsvImport
       'risk' => 0,
       'group' => null,
       'spdx_id' => null
-     );
+    );
     $newArray = array();
     foreach ($row as $key => $value) {
       $newKey = $key;
@@ -225,7 +231,7 @@ class LicenseCsvImport
   /**
    * @brief Update the license info in the DB.
    * @param array $row  Row with new values.
-   * @param array $rfPk Matched license ID.
+   * @param int $rfPk Matched license ID.
    * @return string Log messages.
    */
   private function updateLicense($row, $rfPk)
@@ -235,29 +241,6 @@ class LicenseCsvImport
       'rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype ' .
       'FROM license_ref WHERE rf_pk = $1', array($rfPk), $stmt);
 
-    $stmt = __METHOD__ . '.getOldMapping';
-    $sql = 'SELECT rf_parent FROM license_map WHERE rf_fk = $1 AND usage = $2;';
-    $oldParent = null;
-    $oldParentRow = $this->dbManager->getSingleRow($sql, array($rfPk,
-      LicenseMap::CONCLUSION), $stmt);
-    if (!empty($oldParentRow)) {
-      $oldParent = $oldParentRow['rf_parent'];
-    }
-    $oldReport = null;
-    $oldReportRow = $this->dbManager->getSingleRow($sql, array($rfPk,
-      LicenseMap::REPORT), $stmt);
-    if (!empty($oldReportRow)) {
-      $oldReport = $oldReportRow['rf_parent'];
-    }
-
-    $newParent = null;
-    $newParent = ($row['parent_shortname'] == null) ? null :
-      $this->getKeyFromShortname($row['parent_shortname']);
-
-    $newReport = null;
-    $newReport = ($row['report_shortname'] == null) ? null :
-      $this->getKeyFromShortname($row['report_shortname']);
-
     $log = "License '$row[shortname]' already exists in DB (id = $rfPk)";
     $stmt = __METHOD__ . '.updateLicense';
     $sql = "UPDATE license_ref SET ";
@@ -266,50 +249,57 @@ class LicenseCsvImport
     }
     $extraParams = array();
     $param = array($rfPk);
-    if (!empty($row['fullname']) && $row['fullname'] != $oldLicense['rf_fullname']) {
+    if (isset($row['fullname']) && $row['fullname'] != $oldLicense['rf_fullname']) {
       $param[] = $row['fullname'];
       $stmt .= '.fullN';
       $extraParams[] = "rf_fullname=$" . count($param);
       $log .= ", updated fullname";
     }
-    if (!empty($row['spdx_id']) && $row['spdx_id'] != $oldLicense['rf_spdx_id']) {
+    // update shortname only if import from licensedb
+    if (isset($row['external_id']) && isset($row['shortname']) && $row['shortname'] !== $oldLicense['rf_shortname']) {
+      $param[] = $row['shortname'];
+      $stmt .= '.shortN';
+      $extraParams[] = "rf_shortname=$" . count($param);
+      $log .= ", updated shortname";
+    }
+    if (isset($row['spdx_id']) && $row['spdx_id'] != $oldLicense['rf_spdx_id']) {
       $param[] = $row['spdx_id'];
       $stmt .= '.spId';
       $extraParams[] = "rf_spdx_id=$" . count($param);
       $log .= ", updated SPDX ID";
     }
-    if (!empty($row['text']) && $row['text'] != $oldLicense['rf_text'] && $row['text'] != LicenseMap::TEXT_MAX_CHAR_LIMIT) {
+    if (isset($row['text']) && $row['text'] != $oldLicense['rf_text'] && $row['text'] != LicenseMap::TEXT_MAX_CHAR_LIMIT) {
       $param[] = $row['text'];
       $stmt .= '.text';
       $extraParams[] = "rf_text=$" . count($param) . ",rf_md5=md5($" .
         count($param) . ")";
       $log .= ", updated text";
     }
-    if (!empty($row['url']) && $row['url'] != $oldLicense['rf_url']) {
+    if (isset($row['url']) && $row['url'] != $oldLicense['rf_url']) {
       $param[] = $row['url'];
       $stmt .= '.url';
       $extraParams[] = "rf_url=$" . count($param);
       $log .= ", updated URL";
     }
-    if (!empty($row['notes']) && $row['notes'] != $oldLicense['rf_notes']) {
+    if (isset($row['notes']) && $row['notes'] != $oldLicense['rf_notes']) {
       $param[] = $row['notes'];
       $stmt .= '.notes';
       $extraParams[] = "rf_notes=$" . count($param);
       $log .= ", updated notes";
     }
-    if (!empty($row['source']) && $row['source'] != $oldLicense['rf_source']) {
+    if (isset($row['source']) && $row['source'] != $oldLicense['rf_source']) {
       $param[] = $row['source'];
       $stmt .= '.updSource';
       $extraParams[] = "rf_source=$".count($param);
       $log .= ', updated the source';
     }
-    if (!empty($row['risk']) && $row['risk'] != $oldLicense['rf_risk']) {
+    if (isset($row['risk']) && $row['risk'] != $oldLicense['rf_risk']) {
       $param[] = $row['risk'];
       $stmt .= '.updRisk';
       $extraParams[] = "rf_risk=$".count($param);
       $log .= ', updated the risk level';
     }
-    if (!empty($row['licensetype']) && $row['licensetype'] != $oldLicense['rf_licensetype']) {
+    if (isset($row['licensetype']) && $row['licensetype'] != $oldLicense['rf_licensetype']) {
       $param[] = $row['licensetype'];
       $stmt .= '.types';
       $extraParams[] = "rf_licensetype=$".count($param);
@@ -319,14 +309,43 @@ class LicenseCsvImport
       $sql .= join(",", $extraParams);
       $sql .= " WHERE rf_pk=$1;";
       $this->dbManager->getSingleRow($sql, $param, $stmt);
-      $this->mdkMap[md5($row['text'])] = $rfPk;
+      if (!isset($row['external_id'])) {
+        $this->mdkMap[md5($row['text'])] = $rfPk;
+      }
     }
 
-    if (($oldParent != $newParent) && $this->setMap($newParent, $rfPk, LicenseMap::CONCLUSION)) {
-      $log .= " with conclusion '$row[parent_shortname]'";
-    }
-    if (($oldReport != $newReport) && $this->setMap($newReport, $rfPk, LicenseMap::REPORT)) {
-      $log .= " reporting '$row[report_shortname]'";
+    // edit license maps only in case of normal import
+    // In case of import from licensedb, the mapping info must come from licensedb
+    if ($row['external_id'] === null) {
+      $stmt = __METHOD__ . '.getOldMapping';
+      $sql = 'SELECT rf_parent FROM license_map WHERE rf_fk = $1 AND usage = $2;';
+      $oldParent = null;
+      $oldParentRow = $this->dbManager->getSingleRow($sql, array($rfPk,
+        LicenseMap::CONCLUSION), $stmt);
+      if (!empty($oldParentRow)) {
+        $oldParent = $oldParentRow['rf_parent'];
+      }
+      $oldReport = null;
+      $oldReportRow = $this->dbManager->getSingleRow($sql, array($rfPk,
+        LicenseMap::REPORT), $stmt);
+      if (!empty($oldReportRow)) {
+        $oldReport = $oldReportRow['rf_parent'];
+      }
+
+      $newParent = null;
+      $newParent = ($row['parent_shortname'] == null) ? null :
+        $this->getKeyFromShortname($row['parent_shortname']);
+
+      $newReport = null;
+      $newReport = ($row['report_shortname'] == null) ? null :
+        $this->getKeyFromShortname($row['report_shortname']);
+
+      if (($oldParent != $newParent) && $this->setMap($newParent, $rfPk, LicenseMap::CONCLUSION)) {
+        $log .= " with conclusion '$row[parent_shortname]'";
+      }
+      if (($oldReport != $newReport) && $this->setMap($newReport, $rfPk, LicenseMap::REPORT)) {
+        $log .= " reporting '$row[report_shortname]'";
+      }
     }
     return $log;
   }
@@ -343,6 +362,9 @@ class LicenseCsvImport
   {
     if (empty($row['risk'])) {
       $row['risk'] = 0;
+    }
+    if (empty($row['external_id'])) {
+      $row['external_id'] = null;
     }
     $rfPk = $this->getKeyFromShortname($row['shortname'], $row['group']);
     $md5Match = $this->getKeyFromMd5($row['text']);
@@ -368,7 +390,95 @@ class LicenseCsvImport
     } else {
       $return = $this->insertNewLicense($row, "license_ref");
     }
-    return $return;
+    return $return['log'];
+  }
+
+  /**
+   * @brief Handle a single row from csv import form LicenseDB
+   *
+   * The function checks for license with the row's licensedb id in
+   * the license_ref table. If found, updates it with the row's content
+   * and if not, creates a new one.
+   *
+   * It also creates the license obligation maps with the obligations
+   * that are found in the obligation_ref table.
+   * @param array $row CSV row to be inserted.
+   * @return string Log messages.
+   */
+  private function handleLicenseDBLicenseImport($row)
+  {
+    if (empty($row["external_id"])) {
+      return "Error: external_id cannot be empty";
+    }
+    $stmt = __METHOD__ . ".getExistingLicense";
+    $rfPk = $this->dbManager->getSingleRow("SELECT rf_pk FROM " .
+      "license_ref WHERE rf_external_id=$1", array($row["external_id"]), $stmt);
+    $log = '';
+    if (!empty($rfPk)) {
+      // update license
+      $log .= $this->updateLicense($row, $rfPk['rf_pk']);
+
+      $this->dbManager->begin();
+      // fetch new obligation associations
+      $stmt = __METHOD__ . "getNewLicenseObligations";
+      $newObIds = array();
+      foreach ($row['obligation_ids'] as $obExternalId) {
+        $obPk = $this->dbManager->getSingleRow("SELECT ob_pk FROM obligation_ref WHERE ob_external_id = $1;",
+          array($obExternalId), $stmt);
+        if (!empty($obPk)) {
+          $newObIds[] = $obPk['ob_pk'];
+        } else {
+          $log .= \sprintf('obligation with ob_external_id %s not found', $obExternalId);
+        }
+      }
+
+      // fetch old obligation associations
+      $stmt = __METHOD__ . "getOldObligationAssociations";
+      $oldObIdsDB = $this->dbManager->getRows("SELECT ob_fk FROM obligation_map WHERE rf_fk = $1", array($rfPk['rf_pk']), $stmt);
+      $oldObIds = array();
+      foreach ($oldObIdsDB as $obId) {
+        $oldObIds[] = $obId['ob_fk'];
+      }
+
+      // create diff of obligations between current associated obligations and licensedb
+      // associated obligations
+      $diff = ArrayOperation::getArrayDiffs($oldObIds, $newObIds);
+
+      // delete associations
+      foreach ($diff['remove'] as $obid) {
+        $this->obligationMap->unassociateLicenseFromObligation($obid, $rfPk['rf_pk']);
+      }
+
+      // insert associations
+      foreach ($diff['add'] as $obid) {
+        $this->obligationMap->associateLicenseWithObligation($obid, $rfPk['rf_pk']);
+      }
+      $this->dbManager->commit();
+    } else {
+      $licRetVal = $this->insertNewLicense($row, "license_ref");
+      $log .= $licRetVal['log'];
+
+      $this->dbManager->begin();
+      $newObIds = array();
+      $stmt = __METHOD__ . "getNewLicenseObligationsForInsert";
+      foreach ($row['obligation_ids'] as $obExternalId) {
+        $obPk = $this->dbManager->getSingleRow("SELECT ob_pk FROM obligation_ref WHERE ob_external_id = $1;",
+          array($obExternalId), $stmt);
+        if (!empty($obPk)) {
+          $newObIds[] = $obPk['ob_pk'];
+        } else {
+          $log .= \sprintf('obligation with ob_external_id %s not found', $obExternalId);
+        }
+      }
+
+      // insert associations
+      foreach ($newObIds as $obid) {
+        $this->obligationMap->associateLicenseWithObligation($obid, $licRetVal['pkey']);
+      }
+      $this->dbManager->commit();
+    }
+
+    return $log;
   }
 
   /**
@@ -395,7 +505,7 @@ class LicenseCsvImport
   }
 
   /**
-   * @brief Get the license id using license shortname from DB or nkMap.
+   * @brief Get the license id using license shortname from DB  or nkMap.
    * @param string $shortname Shortname of the license.
    * @return int License id
    */
@@ -403,7 +513,7 @@ class LicenseCsvImport
   {
     $keyName = $shortname;
     $tableName = "license_ref";
-    $addCondition = "";
+    $addCondition = "AND rf_external_id IS NULL";
     $statement = __METHOD__ . ".getId";
     $params = array($shortname);
 
@@ -415,6 +525,7 @@ class LicenseCsvImport
       $params[] = $this->userDao->getGroupIdByName($groupFk);
     }
     $sql = "SELECT rf_pk FROM ONLY $tableName WHERE rf_shortname = $1 $addCondition;";
+
     if (array_key_exists($keyName, $this->nkMap)) {
       return $this->nkMap[$keyName];
     }
@@ -435,7 +546,7 @@ class LicenseCsvImport
       return $this->mdkMap[$md5];
     }
     $row = $this->dbManager->getSingleRow("SELECT rf_pk " .
-      "FROM ONLY license_ref WHERE rf_md5=md5($1)",
+      "FROM ONLY license_ref WHERE rf_md5=md5($1) AND rf_external_id IS NULL",
       array($licenseText));
     $this->mdkMap[$md5] = (empty($row)) ? false : $row['rf_pk'];
     return $this->mdkMap[$md5];
@@ -500,7 +611,8 @@ class LicenseCsvImport
       "rf_url"       => $row['url'],
       "rf_notes"     => $row['notes'],
       "rf_source"    => $row['source'],
-      "rf_risk"      => $row['risk']
+      "rf_risk"      => $row['risk'],
+      "rf_external_id" => $row['external_id']
     );
 
     $as = "";
@@ -517,20 +629,27 @@ class LicenseCsvImport
 
     $newPk = $this->dbManager->insertTableRow($tableName, $columns, $stmtInsert, 'rf_pk');
 
-    if ($tableName == "license_candidate") {
-      $this->nkMap[$row['shortname'].$row['group']] = $newPk;
-    } else {
-      $this->nkMap[$row['shortname']] = $newPk;
-    }
-    $this->mdkMap[md5($row['text'])] = $newPk;
-    $return = "Inserted '$row[shortname]' in DB" . $as;
+    // populate license maps and cache only when the import is not from licensedb
+    $log = "Inserted '$row[shortname]' in DB" . $as;
+    if ($row['external_id'] === null) {
+      if ($tableName == "license_candidate") {
+        $this->nkMap[$row['shortname'].$row['group']] = $newPk;
+      } else {
+        $this->nkMap[$row['shortname']] = $newPk;
+      }
+      $this->mdkMap[md5($row['text'])] = $newPk;
 
-    if ($this->insertMapIfNontrivial($row['parent_shortname'], $row['shortname'], LicenseMap::CONCLUSION)) {
-      $return .= " with conclusion '$row[parent_shortname]'";
+      if ($this->insertMapIfNontrivial($row['parent_shortname'], $row['shortname'], LicenseMap::CONCLUSION)) {
+        $log .= " with conclusion '$row[parent_shortname]'";
+      }
+      if ($this->insertMapIfNontrivial($row['report_shortname'], $row['shortname'], LicenseMap::REPORT)) {
+        $log .= " reporting '$row[report_shortname]'";
+      }
     }
-    if ($this->insertMapIfNontrivial($row['report_shortname'], $row['shortname'], LicenseMap::REPORT)) {
-      $return .= " reporting '$row[report_shortname]'";
-    }
+
+    $return = array();
+    $return['log'] = $log;
+    $return['pkey'] = $newPk;
     return $return;
   }
 
@@ -542,7 +661,7 @@ class LicenseCsvImport
   public function importJsonData($data, string $msg): string
   {
     foreach ($data as $row) {
-      $log = $this->handleCsvLicense($this->handleRowJson($row));
+      $log = $this->handleLicenseDBLicenseImport($this->handleRowJson($row));
       if (!empty($log)) {
         $msg .= "$log\n";
       }
