@@ -11,6 +11,7 @@ use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ArrayOperation;
+use Fossology\Lib\BusinessRules\ObligationMap;
 
 /**
  * @file
@@ -59,20 +60,26 @@ class LicenseCsvImport
       'source'=>array('source','Foreign ID'),
       'risk'=>array('risk','risk_level'),
       'group'=>array('group','License group'),
-      'obligations'=>array('obligations','License obligations')
+      'obligations'=>array('obligations','License obligations'),
+      'licensedb_id'=>array('id','LicenseDB Id'),
+      'obligation_ids'=>array('obligation_ids','Ids of associated obligations'),
       );
+
+  /** @var ObligationMap $obligationMap
+   * obligation map to use */
+  protected $obligationMap;
 
   /**
    * Constructor
    * @param DbManager $dbManager DB manager to use
    * @param UserDao $userDao     User Dao to use
    */
-  public function __construct(DbManager $dbManager, UserDao $userDao)
+  public function __construct(DbManager $dbManager, UserDao $userDao, $obligationMap = null)
   {
     $this->dbManager = $dbManager;
     $this->userDao = $userDao;
+    $this->obligationMap = $obligationMap;
   }
-
   /**
    * @brief Update the delimiter
    * @param string $delimiter New delimiter to use.
@@ -147,7 +154,8 @@ class LicenseCsvImport
       'source' => '',
       'risk' => 0,
       'group' => null,
-      'spdx_id' => null
+      'spdx_id' => null,
+      'licensedb_id' => null,
      );
     $newArray = array();
     foreach ($row as $key => $value) {
@@ -371,6 +379,111 @@ class LicenseCsvImport
     return $return;
   }
 
+  private function getArrayDiffs(array $oldArray, array $newArray): array
+  {
+    $add = [];
+    $remove = [];
+
+    $oldSet = array_flip($oldArray);
+    $newSet = array_flip($newArray);
+
+    foreach ($newArray as $item) {
+      if (!isset($oldSet[$item])) {
+        $add[] = $item;
+      }
+    }
+
+    foreach ($oldArray as $item) {
+      if (!isset($newSet[$item])) {
+        $remove[] = $item;
+      }
+    }
+
+    return [
+      'add' => $add,
+      'remove' => $remove,
+    ];
+  }
+
+  /**
+   * @brief Handle a single row from csv import form LicenseDB
+   *
+   * The function checks for license with the row's licensedb id in
+   * the license_ref table. If found, updates it with the row's content
+   * and if not, creates a new one.
+   *
+   * It also creates the license obligation maps with the obligations
+   * that are found in the obligation_ref table.
+   */
+  private function handleLicenseDBLicenseImport($row)
+  {
+    if (empty($row["licensedb_id"])) {
+      return "Error: licensedb_id cannot be empty";
+    }
+    $stmt = __METHOD__ . ".getExistingLicense";
+    $rfPk = $this->dbManager->getSingleRow("SELECT rf_pk FROM " .
+      "license_ref WHERE rf_license_id=$1", array($row["licensedb_id"]), $stmt);
+    $log = '';
+    if (!empty($rfPk)) {
+      // update license
+      $log .= $this->updateLicense($row, $rfPk);
+
+      $this->dbManager->begin();
+      // fetch new obligation associations
+      $stmt = __METHOD__ . "getNewLicenseObligations";
+      $newLicIds = array();
+      foreach ($row['obligations_ids'] as $obid) {
+        $obPk = $this->dbManager->getSingleRow("SELECT ob_fk FROM obligation_ref WHERE ob_licensedb_id = $1;",
+          array($obid), $stmt);
+        if (!empty($obPk)) {
+          $newLicIds[] = $obPk;
+        } else {
+          $log .= \sprintf('license with licensedb_id %s not found', $obid);
+        }
+      }
+
+      // fetch old obligation associations
+      $stmt = __METHOD__ . "getOldLiceneObligations";
+      $oldLicIds = $this->dbManager->getRows("SELECT ob_fk FROM obligation_map WHERE rf_fk = $1", $rfPk, $stmt);
+
+      // create diff of obligations between current associated obligations and licensedb
+      // associated obligations
+      $diff = $this->getArrayDiffs($oldLicIds, $newLicIds);
+
+      // delete associations
+      foreach ($diff['remove'] as $obid) {
+        $this->obligationMap->unassociateLicenseFromObligation($obid, $rfPk[0]);
+      }
+
+      // insert associations
+      foreach ($diff['add'] as $obid) {
+        $this->obligationMap->associateLicenseWithObligation($obid, $rfPk[0]);
+      }
+      $this->dbManager->commit();
+    } else {
+      $log .= $this->insertNewLicense($row, "license_ref");
+
+      $this->dbManager->begin();
+      $newLicIds = array();
+      $stmt = __METHOD__ . "getNewLicenseObligationsForInsert";
+      foreach ($row['obligations_ids'] as $obid) {
+        $obPk = $this->dbManager->getSingleRow("SELECT ob_fk FROM obligation_ref WHERE ob_licensedb_id = $1;",
+          array($obid), $stmt);
+        if (!empty($obPk)) {
+          $newLicIds[] = $obPk;
+        } else {
+          $log .= \sprintf('obligation with licensedb_id %s not found', $obid);
+        }
+      }
+
+      // insert associations
+      foreach ($newLicIds as $obid) {
+        $this->obligationMap->associateLicenseWithObligation($obid, $rfPk[0]);
+      }
+      $this->dbManager->commit();
+    }
+  }
+
   /**
    * @brief Insert in `license_map` table if the license conclusion is
    * non-trivial.
@@ -542,7 +655,7 @@ class LicenseCsvImport
   public function importJsonData($data, string $msg): string
   {
     foreach ($data as $row) {
-      $log = $this->handleCsvLicense($this->handleRowJson($row));
+      $log = $this->handleLicenseDBLicenseImport($this->handleRowJson($row));
       if (!empty($log)) {
         $msg .= "$log\n";
       }

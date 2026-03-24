@@ -13,6 +13,7 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\Reflectory;
 use Fossology\Lib\Test\TestLiteDb;
+
 use Mockery as M;
 
 /**

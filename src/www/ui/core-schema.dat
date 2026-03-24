@@ -1267,6 +1267,9 @@
   $Schema["TABLE"]["license_ref"]["rf_flag"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_flag\" int4 DEFAULT 1";
   $Schema["TABLE"]["license_ref"]["rf_flag"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_flag\" SET NOT NULL, ALTER COLUMN \"rf_flag\" SET DEFAULT 1";
 
+  $Schema["TABLE"]["license_ref"]["rf_license_id"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_license_id\" IS 'LicenseDB id of the license'";
+  $Schema["TABLE"]["license_ref"]["rf_license_id"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_license_id\" UUID";
+  $Schema["TABLE"]["license_ref"]["rf_license_id"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_license_id\" DROP NOT NULL";
 
   $Schema["TABLE"]["license_candidate"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"group_fk\" IS 'group seeing this candidate'";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"group_fk\" int8";
@@ -1504,6 +1507,10 @@
   $Schema["TABLE"]["obligation_ref"]["ob_md5"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_md5\" IS 'md5 of the obligation text, used to keep duplicates out of the system'";
   $Schema["TABLE"]["obligation_ref"]["ob_md5"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_md5\" char(32)";
   $Schema["TABLE"]["obligation_ref"]["ob_md5"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_md5\" DROP NOT NULL";
+
+  $Schema["TABLE"]["obligation_ref"]["ob_license_id"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_license_id\" IS 'LicenseDB id of the obligation'";
+  $Schema["TABLE"]["obligation_ref"]["ob_license_id"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_license_id\" UUID";
+  $Schema["TABLE"]["obligation_ref"]["ob_license_id"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_license_id\" DROP NOT NULL";
 
 
   $Schema["TABLE"]["package"]["package_pk"]["DESC"] = "";
@@ -2627,13 +2634,11 @@
   $Schema["CONSTRAINT"]["license_std_comment_user_fk_fkey"] = "ALTER TABLE \"license_std_comment\" ADD CONSTRAINT \"license_std_comment_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE SET NULL ON DELETE SET NULL;";
   $Schema["CONSTRAINT"]["license_std_acknowledgement_user_fk_fkey"] = "ALTER TABLE \"license_std_acknowledgement\" ADD CONSTRAINT \"license_std_acknowledgement_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE SET NULL ON DELETE SET NULL;";
   $Schema["CONSTRAINT"]["rf_pkpk"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_pkpk\" PRIMARY KEY (\"rf_pk\");";
-  $Schema["CONSTRAINT"]["rf_md5unique"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_md5unique\" UNIQUE (\"rf_md5\");";
   $Schema["CONSTRAINT"]["license_ref_bulk_pkey"] = "ALTER TABLE \"license_ref_bulk\" ADD CONSTRAINT \"license_ref_bulk_pkey\" PRIMARY KEY (\"lrb_pk\");";
   $Schema["CONSTRAINT"]["license_set_bulk_fkey"] = "ALTER TABLE \"license_set_bulk\" ADD CONSTRAINT \"license_set_bulk_fkey\" FOREIGN KEY (\"lrb_fk\") REFERENCES \"license_ref_bulk\" (\"lrb_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["mimetype_pk"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"mimetype_pk\" PRIMARY KEY (\"mimetype_pk\");";
   $Schema["CONSTRAINT"]["dirmodemask"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"dirmodemask\" UNIQUE (\"mimetype_name\");";
   $Schema["CONSTRAINT"]["obligation_ref_pkey"] = "ALTER TABLE \"obligation_ref\" ADD CONSTRAINT \"obligation_ref_pkey\" PRIMARY KEY (\"ob_pk\");";
-  $Schema["CONSTRAINT"]["obligation_ref_md5_ukey"] = "ALTER TABLE \"obligation_ref\" ADD CONSTRAINT \"obligation_ref_md5_ukey\" UNIQUE (\"ob_md5\");";
   $Schema["CONSTRAINT"]["package_pkey"] = "ALTER TABLE \"package\" ADD CONSTRAINT \"package_pkey\" PRIMARY KEY (\"package_pk\");";
   $Schema["CONSTRAINT"]["perm_upload_pkey"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_pkey\" PRIMARY KEY (\"perm_upload_pk\");";
   $Schema["CONSTRAINT"]["perm_upload_fkidx"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_fkidx\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE CASCADE ON DELETE CASCADE;";
@@ -2797,6 +2802,7 @@
 
   $Schema["INDEX"]["license_ref"]["rf_shortname_idx"] = "CREATE INDEX rf_shortname_idx ON license_ref USING btree (rf_shortname);";
   $Schema["INDEX"]["license_ref"]["rf_spdx_id_idx"] = "CREATE INDEX rf_spdx_id_idx ON license_ref USING btree (rf_spdx_id);";
+  $Schema["INDEX"]["license_ref"]["rf_md5_conditional_unique_index"] = "CREATE UNIQUE INDEX rf_md5_conditional_unique_index ON license_ref (rf_md5) WHERE rf_license_id IS NULL;";
 
   $Schema["INDEX"]["license_ref_bulk"]["license_ref_bulk_uploadtree_fk_idx"] = "CREATE INDEX license_ref_bulk_uploadtree_fk_idx ON license_ref_bulk USING btree (uploadtree_fk);";
   $Schema["INDEX"]["license_ref_bulk"]["license_ref_bulk_group_fk_idx"] = "CREATE INDEX license_ref_bulk_group_fk_idx ON license_ref_bulk USING btree (group_fk);";

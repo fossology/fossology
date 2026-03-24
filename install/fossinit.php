@@ -420,6 +420,12 @@ Migrate_40_41($dbManager);
 require_once("$LIBEXECDIR/dbmigrate_copyright-event.php");
 createCopyrightMigrationForCopyrightEvents($dbManager);
 
+if(version_compare($sysconfig['Release'], '4.6.0', '='))
+{
+  require_once("$LIBEXECDIR/dbmigrate_drop_md5-license_ref.php");
+  LicenseDB_compatibility_migration();
+}
+
 /* sanity check */
 require_once ("$LIBEXECDIR/sanity_check.php");
 $checker = new SanityChecker($dbManager,$Verbose);
