@@ -44,40 +44,41 @@ class upload_properties extends FO_Plugin
    *
    * @return int 1 if the upload record is updated, 0 if not, 2 if no inputs
    **/
-  public function UpdateUploadProperties($uploadId, $newName, $newDesc)
+  public function UpdateUploadProperties($uploadId, $newName, $newDesc) 
   {
-    if (empty($newName) and empty($newDesc)) {
+    if ($newName === null && $newDesc === null) {
       return 2;
     }
 
-    if (!empty($newName)) {
-      /*
-       * Use pfile_fk to select the correct entry in the upload tree, artifacts
-       * (e.g. directories of the upload do not have pfiles).
-       */
+    if ($newName !== null) {
       $row = $this->dbManager->getSingleRow(
-        "SELECT pfile_fk FROM upload WHERE upload_pk=$1",array($uploadId),__METHOD__.'.getPfileId');
+        "SELECT pfile_fk FROM upload WHERE upload_pk=$1", array($uploadId), __METHOD__ . '.getPfileId'
+      );
       if (empty($row)) {
         return 0;
       }
       $pfileFk = $row['pfile_fk'];
       $trimNewName = trim($newName);
 
-      /* Always keep uploadtree.ufile_name and upload.upload_filename in sync */
       $this->dbManager->getSingleRow(
         "UPDATE uploadtree SET ufile_name=$3 WHERE upload_fk=$1 AND pfile_fk=$2",
         array($uploadId, $pfileFk, $trimNewName),
-        __METHOD__ . '.updateItem');
+        __METHOD__ . '.updateItem'
+      );
       $this->dbManager->getSingleRow(
         "UPDATE upload SET upload_filename=$3 WHERE upload_pk=$1 AND pfile_fk=$2",
         array($uploadId, $pfileFk, $trimNewName),
-        __METHOD__ . '.updateUpload.name');
+        __METHOD__ . '.updateUpload.name'
+      );
     }
 
-    if (! empty($newDesc)) {
+    if ($newDesc !== null) {
       $trimNewDesc = trim($newDesc);
-      $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=$2 WHERE upload_pk=$1",
-        array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
+      $this->dbManager->getSingleRow(
+        "UPDATE upload SET upload_desc=$2 WHERE upload_pk=$1",
+        array($uploadId, $trimNewDesc),
+        __METHOD__ . '.updateUpload.desc'
+      );
     }
     return 1;
   }
