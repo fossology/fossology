@@ -39,7 +39,7 @@ class AdminUploadDelete extends DefaultPlugin
     parent::__construct(self::NAME, array(
         self::TITLE => _("Delete Uploaded File"),
         self::MENU_LIST => "Organize::Uploads::Delete Uploaded File",
-        self::PERMISSION => Auth::PERM_ADMIN,
+      self::PERMISSION => Auth::PERM_WRITE,
         self::REQUIRES_LOGIN => true
     ));
 
@@ -104,6 +104,9 @@ class AdminUploadDelete extends DefaultPlugin
     $uploadList = array();
     $folderList = FolderListUploads_perm($root_folder_pk, Auth::PERM_WRITE);
     foreach ($folderList as $L) {
+      if (!$this->uploadDao->isEditable($L['upload_pk'], Auth::getGroupId())) {
+        continue;
+      }
       $desc = $L['name'];
       if (!empty($L['upload_desc'])) {
         $desc .= " (" . $L['upload_desc'] . ")";

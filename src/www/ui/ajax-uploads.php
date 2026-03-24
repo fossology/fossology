@@ -38,12 +38,22 @@ class core_uploads extends FO_Plugin
   function Output()
   {
     $FolderId = GetParm("folder",PARM_INTEGER);
+    $editableOnly = GetParm("editable", PARM_INTEGER);
     if (empty($FolderId)) {
       $FolderId = FolderGetTop();
     }
     $V = '';
     $uploadList = FolderListUploads_perm($FolderId, Auth::PERM_WRITE);
+    global $container;
+    $uploadDao = null;
+    if (!empty($editableOnly) && !empty($container)) {
+      $uploadDao = $container->get('dao.upload');
+    }
     foreach ($uploadList as $upload) {
+      if (!empty($editableOnly) && !empty($uploadDao) &&
+        !$uploadDao->isEditable($upload['upload_pk'], Auth::getGroupId())) {
+        continue;
+      }
       $V .= "<option value='" . $upload['upload_pk'] . "'>";
       $V .= htmlentities($upload['name']);
       if (! empty($upload['upload_desc'])) {
