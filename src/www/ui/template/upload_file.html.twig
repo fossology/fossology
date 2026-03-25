@@ -5,6 +5,9 @@
 {% extends "include/upload.html.twig" %}
 
 {% block description %}
+  <div id="duplicate-check-loading" class="dataTables_processing" style="display:none;">
+    {{ 'Loading…'|trans }}
+  </div>
   <p>
     {{ 'This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from
         your computer to FOSSology.'| trans }}
@@ -115,6 +118,8 @@
       const folderId = $("#uploadFolderSelector").val();
       const messages = [];
       const ajaxList = [];
+
+      $('#duplicate-check-loading').show();
       
       for (let i = 0; i < allFiles.length; i++) {
         const uploadName = allFiles[i].name;
@@ -139,7 +144,9 @@
         ajaxList.push(ajaxCall);
       }
 
-      $.when.apply($, ajaxList).then(function() {
+      $.when.apply($, ajaxList).always(function() {
+        $('#duplicate-check-loading').hide();
+      }).then(function() {
         if (messages.length > 0) {
           $('#warningMessages').html(messages.join(''));
           $('#uploadWarningModal').modal('show');
