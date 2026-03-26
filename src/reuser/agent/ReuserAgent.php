@@ -286,6 +286,47 @@ class ReuserAgent extends Agent
   }
 
   /**
+   * @brief Fast-path check: Compare scanned licenses of two files via database
+   *
+   * @param int $reusedPfileFk The physical file ID of the baseline file
+   * @param int $newPfileFk The physical file ID of the new file
+   * @return boolean True if both files have the exact same scanned licenses
+   */
+  protected function areLicensesIdentical($reusedPfileFk, $newPfileFk)
+  {
+    $sql = "SELECT pfile_fk, array_agg(rf_fk ORDER BY rf_fk) as licenses 
+            FROM license_file 
+            WHERE pfile_fk IN ($1, $2) 
+            GROUP BY pfile_fk";
+
+    $stmt = __METHOD__ . '.getLicenses';
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, array($reusedPfileFk, $newPfileFk));
+
+    $licensesFile1 = array();
+    $licensesFile2 = array();
+
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $licenseStr = trim($row['licenses'], '{}');
+      $licenses = empty($licenseStr) ? array() : explode(',', $licenseStr);
+
+      if ($row['pfile_fk'] == $reusedPfileFk) {
+        $licensesFile1 = $licenses;
+      }
+      if ($row['pfile_fk'] == $newPfileFk) {
+        $licensesFile2 = $licenses;
+      }
+    }
+    $this->dbManager->freeResult($res);
+
+    if (empty(array_diff($licensesFile1, $licensesFile2)) && empty(array_diff($licensesFile2, $licensesFile1))) {
+        return true;
+    }
+
+    return false;
+  }
+
+  /**
    * @brief Get clearing decisions and use copyClearingDecisionIfDifferenceIsSmall()
    * @param ItemTreeBounds $itemTreeBounds        Current upload
    * @param ItemTreeBounds $itemTreeBoundsReused  Reused upload
@@ -311,16 +352,24 @@ class ReuserAgent extends Agent
     foreach ($clearingDecisionsToImport as $clearingDecision) {
       $reusedPath = $treeDao->getRepoPathOfPfile($clearingDecision->getPfileId());
       if (empty($reusedPath)) {
-        // File missing from repo
         continue;
       }
 
       $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId(),
         $itemTreeBoundsReused->getUploadId(),$clearingDecision->getPfileId()));
       while ($row = $this->dbManager->fetchArray($res)) {
+
+        $newPfileFk = $row['pfile_fk'];
+        $reusedPfileFk = $clearingDecision->getPfileId();
+
+        if ($this->areLicensesIdentical($reusedPfileFk, $newPfileFk)) {
+          $this->createCopyOfClearingDecision($row['uploadtree_pk'], $this->userId, $this->groupId, $clearingDecision);
+          $this->heartbeat(1);
+          continue;
+        }
+
         $newPath = $treeDao->getRepoPathOfPfile($row['pfile_fk']);
         if (empty($newPath)) {
-          // File missing from repo
           continue;
         }
         $this->copyClearingDecisionIfDifferenceIsSmall($reusedPath, $newPath, $clearingDecision, $row['uploadtree_pk']);
