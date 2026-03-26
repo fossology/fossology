@@ -907,6 +907,10 @@
 %KEY% "licen[cs]"
 %STR% "is bsd.licensed"
 #
+%ENTRY% _LT_DUAL_LICENSE_51
+%KEY% "licen[cs]"
+%STR% "bsd =FEW= mit"
+#
 %ENTRY% _LT_BSDSTYLEref1
 %KEY% "\<under\>"
 %STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (BSD[ -]style|BSD[ -]type|BSD-?ish|BSD[ -]like) licen[cs]e"
