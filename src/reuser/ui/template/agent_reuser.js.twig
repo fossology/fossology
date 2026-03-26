@@ -19,17 +19,51 @@ function reloadUploads(folderGroupPair, groupIndex) {
     _reloadUploadsXhr = null;
   }
   const packageForReuse = $(`#{{ uploadToReuseSelectorName }}${groupIndex}`);
+  
+  // Save current selection to preserve it across reloads
+  const currentSelection = packageForReuse.val();
+  let currentSelectionText = '';
+  if (currentSelection) {
+    currentSelectionText = packageForReuse.find('option:selected').text();
+  }
+  
   _reloadUploadsXhr = $.getJSON("?mod=plugin_reuser&do=getUploads" + folderGroupPair)
     .done(function (data) {
       const entries = Object.entries(data).map(([key, value]) => ({ key, value }));
       entries.sort(function (a, b) { return String(a.value).localeCompare(String(b.value)); });
       const fragment = document.createDocumentFragment();
+      let foundCurrent = false;
+      
+      const $tabPane = packageForReuse.closest('.tab-pane');
+      const $autoSuggestSelect = $tabPane.find('.auto-suggested-source');
+      const suggestedIds = [];
+      $autoSuggestSelect.find('option').each(function() {
+          if ($(this).val()) suggestedIds.push($(this).val().toString());
+      });
+
       entries.forEach(function ({ key, value }) {
+        if (suggestedIds.includes(key.toString())) {
+            return; // Mutual Exclusivity: skip if suggested
+        }
         const option = document.createElement("option");
         option.textContent = value;
         option.value = key;
+        if (key === currentSelection) {
+            option.selected = true;
+            foundCurrent = true;
+        }
         fragment.appendChild(option);
       });
+      
+      // If currentSelection was not in the new folder list but was selected (e.g., from auto-suggest)
+      if (currentSelection && !foundCurrent) {
+        const option = document.createElement("option");
+        option.textContent = currentSelectionText;
+        option.value = currentSelection;
+        option.selected = true;
+        fragment.appendChild(option);
+      }
+      
       packageForReuse.empty();
       packageForReuse[0].appendChild(fragment);
     })
