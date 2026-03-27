@@ -355,6 +355,8 @@ class ClearingDao
     } else if ($decType == DecisionTypes::IRRELEVANT) {
       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'delete', '2');
     }
+    
+    $pfileFk = $this->getValidPfileFk($uploadTreeId);
 
     $this->dbManager->begin();
 
@@ -540,28 +542,34 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
 
     return intval($row['clearing_event_pk']);
-    }
-  private function getValidPfileFk($uploadTreeId)
+  }
+
+  protected function getValidPfileFk($uploadTreeId)
   {
     $sql = "SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1";
-    $this->dbManager->prepare($stmt = __METHOD__, $sql);
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt, $sql);
     $result = $this->dbManager->execute($stmt, array($uploadTreeId));
 
-    $row = $this->dbManager->fetchArray($result);
+    try {
+      $row = $this->dbManager->fetchArray($result);
 
-    if (empty($row) || empty($row['pfile_fk']) || $row['pfile_fk'] == 0) {
-      throw new \Exception("Invalid pfile_fk for uploadtree_pk=$uploadTreeId");
-    }
+      if (empty($row) || empty($row['pfile_fk']) || $row['pfile_fk'] == 0) {
+        throw new \Exception("Invalid pfile_fk for uploadtree_pk=$uploadTreeId");
+      }
 
-    return $row['pfile_fk'];
-  }
+      return (int) $row['pfile_fk'];  
+    } finally {                        
+      $this->dbManager->freeResult($result);  
+    }                                 
+  }                                   
 
   /**
    * @param int $jobId
    * @return int[][] eventIds indexed by itemId and licenseId
    */
   public function getEventIdsOfJob($jobId)
-    {
+  {
     $statementName = __METHOD__;
     $this->dbManager->prepare(
         $statementName,

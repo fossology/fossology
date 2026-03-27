@@ -470,4 +470,18 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($rowFuture['comment'],equalTo($changeCom));
     assertThat($rowFuture['reportinfo'],equalTo($changeRep));
   }
-}
+  
+  public function testGetValidPfileFkThrowsOnZeroPfileFk()
+  {
+    // Item 304 is a directory with pfile_fk=0 in the fixture
+    $this->expectException(\Exception::class);
+    $this->clearingDao->getValidPfileFk(304);
+  }
+
+  public function testGetValidPfileFkReturnsIntOnValidItem()
+  {
+    // Item 301 is "Afile" with pfile_fk=201 — a normal file entry
+    $pfileFk = $this->clearingDao->getValidPfileFk(301);
+    assertThat($pfileFk, is(equalTo(201)));
+  }
+
