@@ -84,7 +84,7 @@ class copyright_list extends FO_Plugin
    * @throws Exception
    * @return array Rows to process, and $upload_pk
    */
-  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type, $tableName, $filter="")
+  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type, $tableName, $filter="", $limit=0, $offset=0)
   {
     /*******  Get license names and counts  ******/
     $row = $this->uploadDao->getUploadEntry($Uploadtree_pk);
@@ -93,16 +93,42 @@ class copyright_list extends FO_Plugin
     $upload_pk = $row["upload_fk"];
     $params = [];
 
+    $join = "";
+    $filter_query = "";
+    if ($filter == "nolic") {
+      $noLicStr = "No_license_found";
+      $voidLicStr = "Void";
+      $join = " INNER JOIN license_file AS LF on SS.PF = LF.pfile_fk ";
+      if ($type != "copyFindings") {
+        $join = " INNER JOIN license_file AS LF on cp.pfile_fk = LF.pfile_fk ";
+      }
+      $filter_query = " AND LF.rf_fk IN (SELECT rf_pk FROM license_ref WHERE rf_shortname IN ('$noLicStr', '$voidLicStr')) ";
+    }
+
+    $limit_clause = "";
+    $offset_clause = "";
+    $next_param = -1;
+
     if ($type == "copyFindings") {
-      $sql = "SELECT textfinding AS content, '$type' AS type, uploadtree_pk, ufile_name, PF, hash
+      $params = [
+        $upload_pk, $lft, $rgt, $hash
+      ];
+      $next_param = count($params) + 1;
+      if ($limit > 0) {
+        $limit_clause = " LIMIT $" . $next_param++;
+        $params[] = $limit;
+      }
+      if ($offset > 0) {
+        $offset_clause = " OFFSET $" . $next_param++;
+        $params[] = $offset;
+      }
+      $sql = "SELECT DISTINCT ON (ufile_name, uploadtree_pk) textfinding AS content, '$type' AS type, uploadtree_pk, ufile_name, PF, hash
               FROM $tableName,
               (SELECT uploadtree_pk, pfile_fk AS PF, ufile_name FROM uploadtree
                  WHERE upload_fk=$1
                    AND uploadtree.lft BETWEEN $2 AND $3) AS SS
-              WHERE PF=pfile_fk AND hash=$4 ORDER BY uploadtree_pk";
-      $params = [
-        $upload_pk, $lft, $rgt, $hash
-      ];
+              $join
+              WHERE PF=pfile_fk AND hash=$4 $filter_query ORDER BY ufile_name, uploadtree_pk $limit_clause $offset_clause";
     } else {
       $eventTable = $tableName . "_event";
       $eventFk = $tableName . "_fk";
@@ -111,12 +137,24 @@ class copyright_list extends FO_Plugin
       if (!empty($filter)) {
         if ($filter == "active") {
           $active_filter = "AND (ce.is_enabled IS NULL OR ce.is_enabled = 'true')";
-        } elseif ($filter = "inactive") {
+        } elseif ($filter == "inactive") {
           $active_filter = "AND ce.is_enabled = 'false'";
         }
       }
+      $params = [
+        $upload_pk, $lft, $rgt, "{". $Agent_pk . "}", $hash, $type
+      ];
+      $next_param = count($params) + 1;
+      if ($limit > 0) {
+        $limit_clause = " LIMIT $" . $next_param++;
+        $params[] = $limit;
+      }
+      if ($offset > 0) {
+        $offset_clause = " OFFSET $" . $next_param++;
+        $params[] = $offset;
+      }
       /* get all the copyright records for this uploadtree.  */
-      $sql = "SELECT
+      $sql = "SELECT DISTINCT ON (ufile_name, uploadtree_pk)
 (CASE WHEN (ce.content IS NULL OR ce.content = '') THEN cp.content ELSE ce.content END) AS content,
 (CASE WHEN (ce.hash IS NULL OR ce.hash = '') THEN cp.hash ELSE ce.hash END) AS hash,
 type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
@@ -126,14 +164,13 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
                 AND ut.lft BETWEEN $2 AND $3
               LEFT JOIN $eventTable AS ce ON ce.$eventFk = cp.$tablePk
                 AND ce.upload_fk = ut.upload_fk AND ce.uploadtree_fk = ut.uploadtree_pk
-              WHERE agent_fk = ANY($4::int[]) AND (cp.hash=$5 OR ce.hash=$5) AND type=$6
-                $active_filter
-              ORDER BY uploadtree_pk";
-      $params = [
-        $upload_pk, $lft, $rgt, "{". $Agent_pk . "}", $hash, $type
-      ];
+              $join
+              WHERE cp.agent_fk = ANY($4::int[]) AND (cp.hash=$5 OR ce.hash=$5) AND cp.type=$6
+                $active_filter $filter_query
+              ORDER BY ufile_name, uploadtree_pk $limit_clause $offset_clause";
     }
-    $statement = __METHOD__.$tableName;
+
+    $statement = __METHOD__.$tableName.$filter.($limit > 0 ? "L" : "").($offset > 0 ? "O" : "");
     $this->dbManager->prepare($statement, $sql);
     $result = $this->dbManager->execute($statement,$params);
 
@@ -141,6 +178,70 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
     $this->dbManager->freeResult($result);
 
     return $rows;
+  }
+
+  /**
+   * @brief Get total count of rows for pagination
+   */
+  function GetTotalCount($Uploadtree_pk, $Agent_pk, $hash, $type, $tableName, $filter="")
+  {
+    $row = $this->uploadDao->getUploadEntry($Uploadtree_pk);
+    $lft = $row["lft"];
+    $rgt = $row["rgt"];
+    $upload_pk = $row["upload_fk"];
+    $params = [$upload_pk, $lft, $rgt];
+
+    $join = "";
+    $filter_query = "";
+    if ($filter == "nolic") {
+      $noLicStr = "No_license_found";
+      $voidLicStr = "Void";
+      $join = " INNER JOIN license_file AS LF on SS.PF = LF.pfile_fk ";
+      if ($type != "copyFindings") {
+         $join = " INNER JOIN license_file AS LF on cp.pfile_fk = LF.pfile_fk ";
+      }
+      $filter_query = " AND LF.rf_fk IN (SELECT rf_pk FROM license_ref WHERE rf_shortname IN ('$noLicStr', '$voidLicStr')) ";
+    }
+
+    if ($type == "copyFindings") {
+      $sql = "SELECT count(*) AS instance_count, count(DISTINCT uploadtree_pk) AS file_count
+              FROM $tableName,
+              (SELECT uploadtree_pk, pfile_fk AS PF FROM uploadtree
+                 WHERE upload_fk=$1
+                   AND uploadtree.lft BETWEEN $2 AND $3) AS SS
+              $join
+              WHERE PF=pfile_fk AND hash=$4 $filter_query";
+      $params[] = $hash;
+    } else {
+      $eventTable = $tableName . "_event";
+      $eventFk = $tableName . "_fk";
+      $tablePk = $tableName . "_pk";
+      $active_filter = "";
+      if (!empty($filter)) {
+        if ($filter == "active") {
+          $active_filter = "AND (ce.is_enabled IS NULL OR ce.is_enabled = 'true')";
+        } elseif ($filter == "inactive") {
+          $active_filter = "AND ce.is_enabled = 'false'";
+        }
+      }
+      $sql = "SELECT count(*) AS instance_count, count(DISTINCT uploadtree_pk) AS file_count
+                FROM $tableName AS cp
+              INNER JOIN uploadtree UT ON cp.pfile_fk = ut.pfile_fk
+                AND ut.upload_fk=$1
+                AND ut.lft BETWEEN $2 AND $3
+              LEFT JOIN $eventTable AS ce ON ce.$eventFk = cp.$tablePk
+                AND ce.upload_fk = ut.upload_fk AND ce.uploadtree_fk = ut.uploadtree_pk
+              $join
+              WHERE cp.agent_fk = ANY($4::int[]) AND (cp.hash=$5 OR ce.hash=$5) AND cp.type=$6
+                $active_filter $filter_query";
+      $params[] = "{". $Agent_pk . "}";
+      $params[] = $hash;
+      $params[] = $type;
+    }
+
+    $statement = __METHOD__.$tableName.$filter;
+    $row = $this->dbManager->getSingleRow($sql, $params, $statement);
+    return array('instances' => intval($row['instance_count']), 'files' => intval($row['file_count']));
   }
 
   /**
@@ -156,37 +257,9 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
   function GetRequestedRows($rows, $excl, &$NumRows, $filter, $hash)
   {
     $NumRows = count($rows);
-    $prev = 0;
     $ExclArray = explode(":", $excl);
 
-    /* filter will need to know the rf_pk of "No_license_found" or "Void" */
-    if (!empty($filter) && ($filter == "nolic")) {
-      $NoLicStr = "No_license_found";
-      $VoidLicStr = "Void";
-      $rf_clause = "";
-
-      $sql = "select rf_pk from license_ref where rf_shortname IN ($1, $2)";
-      $statement = __METHOD__."NoLicenseFoundORVoid";
-      $this->dbManager->prepare($statement, $sql);
-      $result = $this->dbManager->execute($statement,array("$NoLicStr", "$VoidLicStr"));
-      $rf_rows = $this->dbManager->fetchAll($result);
-      if (!empty($rf_rows)) {
-        foreach ($rf_rows as $row) {
-          if (!empty($rf_clause)) {
-            $rf_clause .= " or ";
-          }
-          $rf_clause .= " rf_fk=$row[rf_pk]";
-        }
-      }
-      $this->dbManager->freeResult($result);
-    }
-
     for ($RowIdx = 0; $RowIdx < $NumRows; $RowIdx++) {
-      $row = $rows[$RowIdx];
-      /* remove non matching entries */
-      if ($row['hash'] != $hash) {
-        unset($rows[$RowIdx]);
-      }
       /* remove excluded files */
       if ($excl) {
         $FileExt = GetFileExt($rows[$RowIdx]['ufile_name']);
@@ -195,46 +268,14 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
           continue;
         }
       }
-
-      /* apply filters */
-      if (($filter == "nolic") && ($rf_clause)) {
-        /* discard file unless it has no license */
-        $sql = "select rf_fk from license_file where ($rf_clause) and pfile_fk=$1";
-        $statement = __METHOD__."CheckForNoLicenseFound";
-        $this->dbManager->prepare($statement, $sql);
-        $result = $this->dbManager->execute($statement,array("{$row['pf']}"));
-        $FoundRows = $this->dbManager->fetchAll($result);
-        if (empty($FoundRows)) {
-          unset($rows[$RowIdx]);
-          continue;
-        }
-      }
     }
 
-    /* reset array keys, keep order (uploadtree_pk) */
+    /* reset array keys, keep order */
     $rows2 = array();
     foreach ($rows as $row) {
       $rows2[] = $row;
     }
     unset($rows);
-
-    /* remove duplicate files */
-    $NumRows = count($rows2);
-    $prev = 0;
-    for ($RowIdx = 0; $RowIdx < $NumRows; $RowIdx++) {
-      if ($RowIdx > 0) {
-        /* Since rows are ordered by uploadtree_pk,
-         * remove duplicate uploadtree_pk's.  This can happen if there
-         * are multiple same copyrights in one file.
-         */
-        if ($rows2[$RowIdx-1]['uploadtree_pk'] == $rows2[$RowIdx]['uploadtree_pk']) {
-          unset($rows2[$RowIdx-1]);
-        }
-      }
-    }
-
-    /* sort by name so output has some order */
-    usort($rows2, 'copyright_namecmp');
 
     return $rows2;
   }
@@ -264,6 +305,8 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
     }
 
     $OutBuf = "";
+    $MenuDepth = 0;
+    $OutBuf .= menu_to_1html(menu_find($this->Name, $MenuDepth), 0);
     $Time = microtime(true);
     $Max = 50;
 
@@ -293,19 +336,16 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
 
     list($tableName,$modBack,$viewName) = $this->getTableName($type);
 
-    /* get all rows */
+    /* get rows with pagination */
     $upload_pk = -1;
-    $allRows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk, $hash, $type, $tableName, $filter);
+    $Offset = $Page * $Max;
+    $rows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk, $hash, $type, $tableName, $filter, $Max, $Offset);
     $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload_pk);
 
-    /* slim down to all rows with this hash and type,  and filter */
-    $NumInstances = 0;
-    $rows = $this->GetRequestedRows($allRows, $excl, $NumInstances, $filter, $hash);
-
-    // micro menus
-    $OutBuf .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
-
-    $RowCount = count($rows);
+    $Counts = $this->GetTotalCount($uploadtree_pk, $agent_pk, $hash, $type, $tableName, $filter);
+    $NumInstances = $Counts['instances'];
+    $RowCount = $Counts['files'];
+    $rows = $this->GetRequestedRows($rows, $excl, $dummyCount, $filter, $hash);
     if ($RowCount) {
       $TypeStr = "";
       $Content = htmlentities($rows[0]['content']);
@@ -364,18 +404,40 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
       $ShowBox = 1;
       $ShowMicro=NULL;
 
+      $selectKey = $filter;
+      if (empty($selectKey)) {
+        $selectKey = 'all';
+      }
+
+      $OutBuf .= "<div style='padding-bottom: 15px;'>";
+      $OutBuf .= "<form method='GET' action=''>";
+      $OutBuf .= "<input type='hidden' name='mod' value='" . $this->Name . "'>";
+      $OutBuf .= "<input type='hidden' name='agent' value='$agent_pk'>";
+      $OutBuf .= "<input type='hidden' name='item' value='$uploadtree_pk'>";
+      $OutBuf .= "<input type='hidden' name='hash' value='$hash'>";
+      $OutBuf .= "<input type='hidden' name='type' value='$type'>";
+      if (!empty($excl)) {
+        $OutBuf .= "<input type='hidden' name='excl' value='$excl'>";
+      }
+      $OutBuf .= "<label for='list_filter'><strong>" . _("Filter:") . "</strong></label>&nbsp;";
+      $OutBuf .= "<select name='filter' class='form-control-sm' id='list_filter' onchange='this.form.submit();'>";
+      foreach (array('all'=>_("Show all"), 'active'=>_("Show active"), 'inactive'=>_("Show inactive"), 'nolic'=> _("Show files without licenses")) as $key=>$text) {
+        $selected = ($selectKey == $key) ? "selected" : "";
+        $OutBuf .= "<option $selected value=\"$key\">$text</option>";
+      }
+      $OutBuf .= "</select>";
+      $OutBuf .= "</form>";
+      $OutBuf .= "</div>";
+
       $baseURL = "?mod=" . $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&hash=$hash&type=$type&page=-1";
+      if (!empty($filter) && $filter != 'all') {
+          $baseURL .= "&filter=$filter";
+      }
 
       // display rows
-      $RowNum = 0;
+      $RowNum = $Offset;
       foreach ($rows as $row) {
         ++$RowNum;
-        if ($RowNum < $Offset) {
-          continue;
-        }
-        if ($RowNum > $Offset + $Max) {
-          break;
-        }
 
         // Allow user to exclude files with this extension
         $FileExt = GetFileExt($row['ufile_name']);
@@ -388,18 +450,8 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
         $text = _("Exclude this file type");
         $Header = "<a href=$URL>$text.</a>";
 
-        $ok = true;
-        if ($excl) {
-          $ExclArray = explode(":", $excl);
-          if (in_array($FileExt, $ExclArray)) {
-            $ok = false;
-          }
-        }
-
-        if ($ok) {
-          $OutBuf .= Dir2Browse($modBack, $row['uploadtree_pk'], $LinkLast,
-            $ShowBox, $ShowMicro, $RowNum, $Header, '', $uploadtree_tablename);
-        }
+        $OutBuf .= Dir2Browse($modBack, $row['uploadtree_pk'], $LinkLast,
+          $ShowBox, $ShowMicro, $RowNum, $Header, '', $uploadtree_tablename);
       }
     } else {
       $OutBuf .= _("No files found");
