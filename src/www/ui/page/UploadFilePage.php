@@ -46,26 +46,32 @@ class UploadFilePage extends UploadPageBase
       try {
         $componentName = $request->get('component_name', '');
         $excludeFilename = $request->get('exclude_filename', '');
-        
+
         if (!empty($componentName)) {
           $componentName = trim($componentName);
-          
+
           // Properly fetch the DAO using FOSSology's global container
           $uploadDao = $GLOBALS['container']->get('dao.upload');
           $results = $uploadDao->getSuggestedUploadsByComponentName($componentName, 10, $excludeFilename);
-          
-          while (ob_get_level()) ob_end_clean();
+
+          while (ob_get_level()) {
+            ob_end_clean();
+          }
           header('Content-Type: application/json');
           echo json_encode($results);
           exit;
         } else {
-          while (ob_get_level()) ob_end_clean();
+          while (ob_get_level()) {
+            ob_end_clean();
+          }
           header('Content-Type: application/json');
           echo json_encode([]);
           exit;
         }
       } catch (\Throwable $e) {
-        while (ob_get_level()) ob_end_clean();
+        while (ob_get_level()) {
+          ob_end_clean();
+        }
         header('Content-Type: application/json');
         http_response_code(500);
         echo json_encode([
