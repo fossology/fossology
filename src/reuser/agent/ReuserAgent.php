@@ -150,8 +150,9 @@ class ReuserAgent extends Agent
   {
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($reusedUploadId, $reusedGroupId);
     if (!empty($mainLicenseIds)) {
+      $existingMainLicenseIds = $this->clearingDao->getMainLicenseIds($uploadId, $groupId);
       foreach ($mainLicenseIds as $mainLicenseId) {
-        if (in_array($mainLicenseId, $this->clearingDao->getMainLicenseIds($uploadId, $groupId))) {
+        if (in_array($mainLicenseId, $existingMainLicenseIds)) {
           continue;
         } else {
           $this->clearingDao->makeMainLicense($uploadId, $groupId, $mainLicenseId);
