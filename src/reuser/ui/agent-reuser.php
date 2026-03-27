@@ -115,7 +115,7 @@ class ReuserAgentPlugin extends AgentPlugin
 
     $groupId = $request->get('groupId', Auth::getGroupId());
     $getReuseValue = $request->get(self::REUSE_MODE) ?: array();
-    
+
     $reuseMode = UploadDao::REUSE_NONE;
     foreach ($getReuseValue as $currentReuseValue) {
       switch ($currentReuseValue) {
