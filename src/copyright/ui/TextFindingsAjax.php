@@ -99,7 +99,7 @@ class TextFindingsAjax
       $rw = $this->uploadDao->isEditable($upload, Auth::getGroupId());
       foreach ($rows as $row) {
         $aaData[] = $this->fillTableRow($row, $upload, $item, $type, $listPage,
-          $activated, $rw);
+          $activated, $rw, $filter);
       }
     }
 
@@ -283,7 +283,7 @@ class TextFindingsAjax
    * @internal param boolean $normalizeString
    */
   private function fillTableRow($row, $upload, $item, $type, $listPage,
-    $activated = true, $rw = true)
+    $activated = true, $rw = true, $filter = "all")
   {
     $hash = $row['hash'];
     $sql = "SELECT pfile_fk FROM " . $this->getTableName($type) .
@@ -301,7 +301,7 @@ class TextFindingsAjax
     $link = "<a href='";
     $link .= Traceback_uri();
     $link .= "?mod=$listPage&agent=-1&item=$item" .
-      "&hash=$hash&type=$type&filter=all";
+      "&hash=$hash&type=$type&filter=$filter";
     $link .= "'>". intval($row['textfinding_count']) . "</a>";
     $output['0'] = $link;
     $output['1'] = convertToUTF8($row['textfinding']);
