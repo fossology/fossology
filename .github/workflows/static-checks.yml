@@ -132,6 +132,7 @@ jobs:
           fi
 
       - name: Run Commit Lint
+        if: github.actor != 'dependabot[bot]'
         uses: wagoid/commitlint-github-action@v6
         with:
           configFile: ./commitlint.config.mjs
