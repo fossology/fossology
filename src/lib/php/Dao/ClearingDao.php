@@ -361,6 +361,8 @@ class ClearingDao
     $this->removeWipClearingDecision($uploadTreeId, $groupId);
 
     $statementName = __METHOD__;
+    $pfileFk = $this->getValidPfileFk($uploadTreeId);
+
     $this->dbManager->prepare($statementName,
         "
 INSERT INTO clearing_decision (
@@ -372,14 +374,15 @@ INSERT INTO clearing_decision (
   scope
 ) VALUES (
   $1,
-  (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1),
   $2,
   $3,
   $4,
-  $5) RETURNING clearing_decision_pk
-  ");
+  $5,
+  $6
+) RETURNING clearing_decision_pk
+");
     $res = $this->dbManager->execute($statementName,
-        array($uploadTreeId, $userId,  $groupId, $decType, $scope));
+        array($uploadTreeId, $pfileFk, $userId, $groupId, $decType, $scope));
     $result = $this->dbManager->fetchArray($res);
     $clearingDecisionId = $result['clearing_decision_pk'];
     $this->dbManager->freeResult($res);
@@ -537,6 +540,20 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
 
     return intval($row['clearing_event_pk']);
+    }
+  private function getValidPfileFk($uploadTreeId)
+  {
+    $sql = "SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1";
+    $this->dbManager->prepare($stmt = __METHOD__, $sql);
+    $result = $this->dbManager->execute($stmt, array($uploadTreeId));
+
+    $row = $this->dbManager->fetchArray($result);
+
+    if (empty($row) || empty($row['pfile_fk']) || $row['pfile_fk'] == 0) {
+      throw new \Exception("Invalid pfile_fk for uploadtree_pk=$uploadTreeId");
+    }
+
+    return $row['pfile_fk'];
   }
 
   /**
@@ -544,7 +561,7 @@ INSERT INTO clearing_decision (
    * @return int[][] eventIds indexed by itemId and licenseId
    */
   public function getEventIdsOfJob($jobId)
-  {
+    {
     $statementName = __METHOD__;
     $this->dbManager->prepare(
         $statementName,
@@ -604,11 +621,20 @@ INSERT INTO clearing_decision (
   {
     $statementName = __METHOD__;
 
+    $pfileFk = $this->getValidPfileFk($uploadTreeId);
+
     $this->dbManager->prepare($statementName,
-        "INSERT INTO clearing_decision (uploadtree_fk,pfile_fk,user_fk,group_fk,decision_type,scope) VALUES (
-            $1, (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1), $2, $3, $4, $5)");
+        "INSERT INTO clearing_decision (
+        uploadtree_fk,
+        pfile_fk,
+        user_fk,
+        group_fk,
+        decision_type,
+        scope
+       ) VALUES ($1, $2, $3, $4, $5, $6)"
+    );
     $res = $this->dbManager->execute($statementName,
-        array($uploadTreeId, $userId, $groupId, DecisionTypes::WIP, DecisionScopes::ITEM));
+        array($uploadTreeId, $pfileFk, $userId, $groupId, DecisionTypes::WIP, DecisionScopes::ITEM));
     $this->dbManager->freeResult($res);
   }
 
