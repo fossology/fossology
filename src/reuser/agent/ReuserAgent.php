@@ -208,24 +208,36 @@ class ReuserAgent extends Agent
       $reusedUploadId, $reusedAgentId);
 
     if (!empty($reusedCopyrights) && !empty($allCopyrights)) {
+      // Pre-index $allCopyrights by hash to avoid nested loop O(N*M)
+      $copyrightsByHash = [];
+      foreach ($allCopyrights as $copyrightKey => $copyright) {
+        $hash = $copyright['hash'];
+        if (!isset($copyrightsByHash[$hash])) {
+          $copyrightsByHash[$hash] = [];
+        }
+        $copyrightsByHash[$hash][] = $copyrightKey;
+      }
+
       foreach ($reusedCopyrights as $reusedCopyright) {
-        foreach ($allCopyrights as $copyrightKey => $copyright) {
-          if (strcmp($copyright['hash'], $reusedCopyright['hash']) == 0) {
-            if ($this->dbManager->booleanFromDb($reusedCopyright['is_enabled'])) {
-              $action = "update";
-              $content = $reusedCopyright["contentedited"];
-            } else {
-              $action = "delete";
-              $content = "";
-            }
-            $hash = $copyright['hash'];
-            $item = $this->uploadDao->getItemTreeBounds(intval($copyright['uploadtree_pk']),
-                      $uploadTreeTableName);
-            $this->copyrightDao->updateTable($item, $hash, $content,
-              $this->userId, 'copyright', $action);
-            unset($allCopyrights[$copyrightKey]);
-            $this->heartbeat(1);
+        $reusedHash = $reusedCopyright['hash'];
+        if (isset($copyrightsByHash[$reusedHash]) && !empty($copyrightsByHash[$reusedHash])) {
+          // Take the first matching entry
+          $copyrightKey = array_shift($copyrightsByHash[$reusedHash]);
+          $copyright = $allCopyrights[$copyrightKey];
+
+          if ($this->dbManager->booleanFromDb($reusedCopyright['is_enabled'])) {
+            $action = "update";
+            $content = $reusedCopyright["contentedited"];
+          } else {
+            $action = "delete";
+            $content = "";
           }
+          $hash = $copyright['hash'];
+          $item = $this->uploadDao->getItemTreeBounds(intval($copyright['uploadtree_pk']),
+                    $uploadTreeTableName);
+          $this->copyrightDao->updateTable($item, $hash, $content,
+            $this->userId, 'copyright', $action);
+          $this->heartbeat(1);
         }
       }
     }
