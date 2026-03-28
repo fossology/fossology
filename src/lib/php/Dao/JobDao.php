@@ -69,10 +69,9 @@ class JobDao
 
   public function hasActionPermissionsOnJob($jobId, $userId, $groupId)
   {
-    $result = array();
     $stmt = __METHOD__;
     $this->dbManager->prepare($stmt,
-      "SELECT *
+      "SELECT job_pk
        FROM job
          LEFT JOIN group_user_member gm
            ON gm.user_fk = job_user_fk
@@ -81,11 +80,9 @@ class JobDao
               OR gm.group_fk = $3)");
 
     $res = $this->dbManager->execute($stmt, array($jobId, $userId, $groupId));
-    while ($row = $this->dbManager->fetchArray($res)) {
-      $result[$row['jq_pk']] = $row['end_bits'];
-    }
+    $row = $this->dbManager->fetchArray($res);
     $this->dbManager->freeResult($res);
 
-    return $result;
+    return !empty($row);
   }
 }
