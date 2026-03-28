@@ -105,16 +105,16 @@ class ReuserAgentPlugin extends AgentPlugin
         return $this->scheduleOsselotImportDirect($jobId, $uploadId, $errorMsg, $request);
     }
 
-    $reuseUploadPair = explode(',', $request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME), 2);
-    if (count($reuseUploadPair) == 2) {
-      list($reuseUploadId, $reuseGroupId) = $reuseUploadPair;
-    } else {
+    $uploadToReuse = $request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME);
+    $reuseUploads = is_array($uploadToReuse) ? $uploadToReuse : (empty($uploadToReuse) ? [] : [$uploadToReuse]);
+
+    if (empty($reuseUploads)) {
       $errorMsg .= 'no reuse upload id given';
       return -1;
     }
+
     $groupId = $request->get('groupId', Auth::getGroupId());
     $getReuseValue = $request->get(self::REUSE_MODE) ?: array();
-    $reuserDependencies = array("agent_adj2nest");
 
     $reuseMode = UploadDao::REUSE_NONE;
     foreach ($getReuseValue as $currentReuseValue) {
@@ -134,14 +134,21 @@ class ReuserAgentPlugin extends AgentPlugin
       }
     }
 
+    foreach ($reuseUploads as $pair) {
+      $reuseUploadPair = explode(',', $pair, 2);
+      if (count($reuseUploadPair) == 2) {
+        list($reuseUploadId, $reuseGroupId) = $reuseUploadPair;
+        $this->createPackageLink($uploadId, $reuseUploadId, $groupId, $reuseGroupId,
+          $reuseMode);
+      }
+    }
+
+    $reuserDependencies = array("agent_adj2nest");
     list($agentDeps, $scancodeDeps) = $this->getReuserDependencies($request);
     $reuserDependencies = array_unique(array_merge($reuserDependencies, $agentDeps));
     if (!empty($scancodeDeps)) {
       $reuserDependencies[] = $scancodeDeps;
     }
-
-    $this->createPackageLink($uploadId, $reuseUploadId, $groupId, $reuseGroupId,
-      $reuseMode);
 
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg,
       $reuserDependencies, $uploadId, null, $request);

@@ -967,4 +967,44 @@ ORDER BY lft asc
     $this->dbManager->commit();
     return true;
   }
+
+  /**
+   * Get suggested uploads by component name for the Reuse Agent
+   * * @param string $componentName The stripped down name (e.g., 'Twig')
+   * @param int $limit Max results to return
+   * @return array Array of associative arrays containing id, name, and date
+  */
+  public function getSuggestedUploadsByComponentName($componentName, $limit = 10, $excludeFilename = "")
+  {
+    $groupId = \Fossology\Lib\Auth\Auth::getGroupId();
+
+    $sql = "SELECT u.upload_pk AS id, u.upload_filename AS name, u.upload_ts AS date 
+                FROM upload u
+                INNER JOIN upload_clearing uc ON uc.upload_fk = u.upload_pk AND uc.group_fk = $1
+                INNER JOIN foldercontents fc ON fc.child_id = u.upload_pk AND fc.foldercontents_mode = 2 
+                WHERE u.upload_filename ILIKE $2 
+                AND u.upload_mode IN (100, 104)
+                AND u.pfile_fk IS NOT NULL";
+
+    $params = array($groupId, "%" . $componentName . "%", $limit);
+    if (!empty($excludeFilename)) {
+      $sql .= " AND u.upload_filename != $4";
+      $params[] = $excludeFilename;
+    }
+
+    $sql .= " ORDER BY u.upload_ts DESC LIMIT $3";
+
+    // Use FOSSology's standard dbManager to execute safely and prevent SQL injection
+    $rows = $this->dbManager->getRows(
+      $sql,
+      $params,
+      __METHOD__ . '.suggestSource'
+    );
+
+    foreach ($rows as &$row) {
+      $row['id'] = $row['id'] . ',' . $groupId;
+    }
+
+    return $rows;
+  }
 }

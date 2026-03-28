@@ -66,8 +66,27 @@
         <img src="images/info_16.png" data-toggle="tooltip" title="{{'Use to copy edited and deactivated copyrights from the reused package'|trans}}" alt="" class="info-bullet"/>
       </label><br/>
       
-      <label for="{{ uploadToReuseSelectorName }}">{{ 'Upload to reuse'|trans }}:</label><br/>
-      {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width:420px;"', 5) }}
+      <hr style="margin: 12px 0; border-top: 1px solid #e0e0e0;">
+
+      <div class="form-group custom-autosuggest-wrap" style="margin-bottom: 10px;">
+        <label style="font-weight: bold;">{{ 'Auto-Suggest Baseline'|trans }}</label>
+        <div style="margin-bottom: 6px;">
+          <button type="button" class="btn btn-sm btn-outline-info btn-search-source">
+            <i class="fa fa-search"></i> {{ 'Search matching uploads'|trans }}
+          </button>
+          <span class="search-spinner text-muted" style="display:none; margin-left: 8px;">
+            <i class="fa fa-spinner fa-spin"></i> {{ 'Searching...'|trans }}
+          </span>
+        </div>
+        <select class="form-control auto-suggested-source" style="width: 100%; display: none;" multiple="multiple"></select>
+        <small class="form-text text-muted">{{ 'Click "Search" to find previous uploads of this component. Select one to reuse.'|trans }}</small>
+      </div>
+
+      <div class="form-group">
+        <label for="{{ uploadToReuseSelectorName }}" style="font-weight: bold;">{{ 'Upload to reuse'|trans }}:</label><br/>
+        {{ macro.select(uploadToReuseSelectorName ~ '[]', folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width:420px; max-width: 100%;" class="manual-reuse-dropdown"', 5) }}
+        <small class="form-text text-muted">{{ 'Or manually select one or more packages from the current folder above.'|trans }}</small>
+      </div>
     </div>
 
     {% if osselotAvailable %}

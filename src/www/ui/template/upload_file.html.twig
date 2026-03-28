@@ -230,7 +230,7 @@ function updateReuseIds(index, name, element, navContentDom) {
     } else {
         element.find("input,select").each(function() {
             let fieldName = $(this).attr('name');
-            if (fieldName && !fieldName.includes('[')) {
+            if (fieldName && (!fieldName.includes('[') || fieldName.endsWith('[]'))) {
                 if (fieldName === 'descriptionInputName') {
                     return;
                 }
@@ -470,5 +470,136 @@ $(document).ready(function() {
       $(this).find('[data-toggle="tooltip"]').tooltip();
     });
 });
+// ============================================================
+// Auto-Suggest Baseline: Search + Inject into native select
+// ============================================================
+
+// 1. Search button handler
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-search-source');
+    if (!btn) return;
+    e.preventDefault();
+
+    const wrap = btn.closest('.custom-autosuggest-wrap');
+    const spinner = wrap.querySelector('.search-spinner');
+    const dropdown = wrap.querySelector('.auto-suggested-source');
+
+    spinner.style.display = 'inline';
+
+    // Reset any previous Select2 instance
+    if ($(dropdown).hasClass("select2-hidden-accessible")) {
+        $(dropdown).select2('destroy');
+    }
+    dropdown.innerHTML = '';
+    dropdown.disabled = false;
+    dropdown.style.display = 'block';
+
+    // Get the filename from the tab's nav-link
+    let rawFilename = '';
+    const tabPane = btn.closest('.tab-pane');
+    if (tabPane) {
+        const tabId = tabPane.id;
+        const navLink = document.querySelector(`.nav-pills .nav-link[href="#${tabId}"]`);
+        if (navLink) rawFilename = navLink.textContent.trim();
+    }
+
+    if (!rawFilename) {
+        alert("Could not detect a filename to search for.");
+        spinner.style.display = 'none';
+        return;
+    }
+
+    // Extract component name by stripping version numbers and extensions
+    let componentName = rawFilename.replace(/[-_vV]?\d+(\.\d+)*.*$/, '').trim();
+    const url = window.location.pathname + '?mod=upload_file&ajax_action=suggest_source'
+                + '&component_name=' + encodeURIComponent(componentName)
+                + '&exclude_filename=' + encodeURIComponent(rawFilename);
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            spinner.style.display = 'none';
+
+            if (data && data.length > 0) {
+                // Add blank placeholder for Select2
+                dropdown.appendChild(document.createElement('option'));
+
+                const $tabPane = $(btn).closest('.tab-pane');
+                const $nativeSelect = $tabPane.find('select[id^="uploadToReuse"]');
+                const suggestedIds = [];
+
+                data.forEach((item, i) => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    // Serial indexing + exact timestamp
+                    option.textContent = `${i + 1}. ${item.name} (${item.date})`;
+                    dropdown.appendChild(option);
+                    suggestedIds.push(item.id.toString());
+                });
+
+                // MUTUAL EXCLUSIVITY: Hide these from the native (manual) select
+                $nativeSelect.find('option').each(function() {
+                    if (suggestedIds.includes($(this).val())) {
+                        $(this).prop('disabled', true).hide();
+                        if ($(this).is(':selected')) {
+                           $(this).prop('selected', false);
+                        }
+                    }
+                });
+                $nativeSelect.trigger('change.select2');
+
+                $(dropdown).select2({
+                    placeholder: "Select one or more baselines to reuse...",
+                    width: '100%',
+                    allowClear: true,
+                    multiple: true,
+                    dropdownParent: $(wrap)
+                });
+            } else {
+                const option = document.createElement('option');
+                option.textContent = "No previous versions found.";
+                dropdown.appendChild(option);
+                dropdown.disabled = true;
+            }
+        })
+        .catch(err => {
+            spinner.style.display = 'none';
+            console.error("Auto-suggest fetch error:", err);
+        });
+});
+
+// 2. When user selects from auto-suggest, inject into native FOSSology select
+$(document).on('change', '.auto-suggested-source', function() {
+    const $autoSelect = $(this);
+    const selectedIDs = $autoSelect.val() || [];
+    const $tabPane = $autoSelect.closest('.tab-pane');
+
+    // Find the NATIVE FOSSology select (the one with name="uploadToReuse[]")
+    const $nativeSelect = $tabPane.find('select[id^="uploadToReuse"]');
+
+    if ($nativeSelect.length === 0) {
+        return;
+    }
+
+    // Ensure we don't clear manual selections, we just sync auto-suggest selections in
+    if (selectedIDs.length > 0) {
+        selectedIDs.forEach(id => {
+            const selectedText = $autoSelect.find(`option[value="${id}"]`).text();
+            // Inject if missing (it might be hidden in manual select, so we unhide it if selected in auto?)
+            // Actually user wants them separate. If selected in auto, it should stay hidden in manual.
+            if ($nativeSelect.find(`option[value="${id}"]`).length === 0) {
+                const newOpt = new Option(selectedText, id, true, true);
+                $(newOpt).data('from-autosuggest', true);
+                $nativeSelect.append(newOpt);
+            } else {
+                $nativeSelect.find(`option[value="${id}"]`).prop('selected', true);
+            }
+        });
+        $nativeSelect.trigger('change');
+    }
+});
+
   </script>
+
+
 {% endblock %}
