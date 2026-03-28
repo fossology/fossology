@@ -141,10 +141,12 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, 
 
   /* get last nomos agent_pk that has data for this upload */
   $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
-  if ($AgentRec === false) {
-    echo _("No data available\n");
+
+  if (empty($AgentRec) || !isset($AgentRec[0]["agent_fk"])) {
+    echo _("No nomos scan results available\n");
     return;
   }
+
   $agent_pk = $AgentRec[0]["agent_fk"];
 
   $uploadtreeTablename = getUploadtreeTableName($upload_pk);
@@ -206,6 +208,12 @@ function GetCopyrightList($uploadtree_pk, $upload_pk, $exclude, $ignore)
   $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'), $upload_pk);
   $scanJobProxy->createAgentStatus([$agentName]);
   $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
+
+  if (!isset($selectedScanners[$agentName])) {
+    echo _("No copyright scan results available\n");
+    return;
+  }
+
   $latestAgentId = $selectedScanners[$agentName];
   $agentFilter = ' AND C.agent_fk='.$latestAgentId;
   $uploadtreeTablename = getUploadtreeTableName($upload_pk);
