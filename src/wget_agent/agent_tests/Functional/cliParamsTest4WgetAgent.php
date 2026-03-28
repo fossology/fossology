@@ -32,6 +32,43 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
   private $testDb;
 
   /**
+   * @brief Retry download commands that depend on external mirrors.
+   *
+   * A few wget functional tests fetch artifacts from mirrors.kernel.org and can
+   * occasionally miss the expected file on CI even though the URL is valid.
+   * Retry the command with a clean target directory before failing the test.
+   *
+   * @param string $command
+   * @param string $expectedFile
+   * @param int $attempts
+   */
+  private function runDownloadWithRetry($command, $expectedFile, $attempts = 3) {
+    global $TEST_RESULT_PATH;
+
+    $lastOutput = [];
+    $lastStatus = 0;
+
+    for ($attempt = 1; $attempt <= $attempts; $attempt++) {
+      exec("/bin/rm -rf " . escapeshellarg($TEST_RESULT_PATH));
+      exec($command . " 2>&1", $lastOutput, $lastStatus);
+      clearstatcache();
+
+      if (file_exists($expectedFile)) {
+        return;
+      }
+
+      sleep(1);
+    }
+
+    $this->fail(
+      "Failed to download expected file after {$attempts} attempts: {$expectedFile}\n" .
+      "Command: {$command}\n" .
+      "Exit status: {$lastStatus}\n" .
+      "Output:\n" . implode("\n", $lastOutput)
+    );
+  }
+
+  /**
    * @biref Initialization
    * @see PHPUnit_Framework_TestCase::setUp()
    */
@@ -213,9 +250,9 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
     //$this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
 
     $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/ -A fossology-scheduler_2.0.0* -R gz,fossology-scheduler_2.0.0-1_i386* -d $TEST_RESULT_PATH -l 1";
-    //print "command is:$command\n";
-    exec($command);
-    $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-scheduler_2.0.0-1_amd64.deb");
+    $expectedFile = "$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-scheduler_2.0.0-1_amd64.deb";
+    $this->runDownloadWithRetry($command, $expectedFile);
+    $this->assertFileExists($expectedFile);
     $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-scheduler_2.0.0-1_i386.deb");
   }
 
@@ -264,8 +301,9 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
     // http_proxy
     //$this->change_proxy("http_proxy", "web-proxy.cce.hp.com:8088");
     $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-mimetype_2.0.0-1_amd64.deb  -d $TEST_RESULT_PATH";
-    exec($command);
-    $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-mimetype_2.0.0-1_amd64.deb");
+    $expectedFile = "$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-mimetype_2.0.0-1_amd64.deb";
+    $this->runDownloadWithRetry($command, $expectedFile);
+    $this->assertFileExists($expectedFile);
 
     // no proxy
     //$this->change_proxy("no_proxy", "fossology.org");

@@ -45,8 +45,9 @@ class UploadTreeProxy extends DbViewProxy
   {
     $this->uploadId = $uploadId;
     $this->uploadTreeTableName = $uploadTreeTableName;
-    $dbViewName = $uploadTreeViewName ?: 'UploadTreeView'.(isset($this->dbViewName) ?: '');
     $dbViewQuery = $this->createUploadTreeViewQuery($options, $uploadTreeTableName);
+    $dbViewSuffix = preg_replace('/[^A-Za-z0-9_]+/', '_', $this->dbViewName ?? '');
+    $dbViewName = $uploadTreeViewName ?: 'UploadTreeView'.$dbViewSuffix;
     parent::__construct($dbViewQuery, $dbViewName);
   }
 
@@ -365,14 +366,13 @@ ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
   {
     $dbManager = $GLOBALS['container']->get('db.manager');
     $params = $this->params;
-    if (array_key_exists('uploadId', $params)) {
-      $uploadExpr = '$'.(1+array_search('uploadId', array_keys($params)));
-    } else {
-      $params[] = $this->uploadId;
-      $uploadExpr = '$'.count($params);
+    if (!array_key_exists('uploadId', $params)) {
+      $params['uploadId'] = $this->uploadId;
     }
-    $params[] = $parent;
-    $parentExpr = '$'.count($params);
+    $uploadExpr = '$'.(1 + array_search('uploadId', array_keys($params), true));
+
+    $params['parentId'] = $parent;
+    $parentExpr = '$'.(1 + array_search('parentId', array_keys($params), true));
 
     $sql = "SELECT count(*) cnt, u.uploadtree_pk, u.ufile_mode FROM ".$this->uploadTreeTableName." u, "
             . $this->getDbViewName() ." v where u.upload_fk=$uploadExpr"
@@ -449,11 +449,11 @@ ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
   private function addParamAndGetExpr($key,$value)
   {
     if (array_key_exists($key, $this->params)) {
-      return '$' . (1 + array_search($key, array_keys($this->params)));
+      return '$' . (1 + array_search($key, array_keys($this->params), true));
     }
 
-    $this->params[] = $value;
-    return '$'.count($this->params);
+    $this->params[$key] = $value;
+    return '$' . (1 + array_search($key, array_keys($this->params), true));
   }
 
   public function getParams()
