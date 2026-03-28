@@ -161,10 +161,10 @@ class LicenseAcknowledgementDao
       }
       $sql = "UPDATE license_std_acknowledgement " .
         "SET updated = NOW(), user_fk = $2, " . join(",", $updateStatement) .
-        "WHERE la_pk = $1 " .
+        " WHERE la_pk = $1 " .
         "RETURNING 1 AS updated;";
       $retVal = $this->dbManager->getSingleRow($sql, $params, $statement);
-      $updated += intval($retVal);
+      $updated += ($retVal !== false) ? intval($retVal['updated']) : 0;
     }
     return $updated;
   }
@@ -181,6 +181,9 @@ class LicenseAcknowledgementDao
     $statement = __METHOD__ . ".getAcknowledgement";
 
     $acknowledgement = $this->dbManager->getSingleRow($sql, [$acknowledgementPk], $statement);
+    if ($acknowledgement === false) {
+      return null;
+    }
     $acknowledgement = $acknowledgement['acknowledgement'];
     if (strcasecmp($acknowledgement, "null") === 0) {
       return null;
@@ -221,7 +224,7 @@ class LicenseAcknowledgementDao
   private function isAcknowledgementIdValid($acknowledgementPk)
   {
     if (! is_int($acknowledgementPk)) {
-      throw new \UnexpectedValueException("Inavlid acknowledgement id");
+      throw new \UnexpectedValueException("Invalid acknowledgement id");
     }
     $sql = "SELECT count(*) AS cnt FROM license_std_acknowledgement " .
       "WHERE la_pk = $1;";
@@ -229,7 +232,7 @@ class LicenseAcknowledgementDao
     $acknowledgementCount = $this->dbManager->getSingleRow($sql, [$acknowledgementPk]);
     if ($acknowledgementCount['cnt'] < 1) {
       // Invalid acknowledgement id
-      throw new \UnexpectedValueException("Inavlid acknowledgement id");
+      throw new \UnexpectedValueException("Invalid acknowledgement id");
     }
   }
 }

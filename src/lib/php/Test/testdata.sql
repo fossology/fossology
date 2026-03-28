@@ -806,3 +806,10 @@ INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode
 INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (468, NULL, 44, 761, 33188, 14, 15, 'GPL-2.0_OR_MIT');
 INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (468, NULL, 44, 762, 33188, 16, 17, 'GPL-2.0_WITH_Classpath-exception-2.0');
 INSERT INTO upload_clearing_license (upload_fk, group_fk, rf_fk) VALUES (3, 2, 498);
+INSERT INTO license_std_acknowledgement (la_pk, name, acknowledgement, updated, user_fk, is_enabled) VALUES (2, 'Acknowledgement #1', 'This is the first acknowledgement!', '2022-06-01 10:00:00+05:30', 2, true);
+INSERT INTO license_std_acknowledgement (la_pk, name, acknowledgement, updated, user_fk, is_enabled) VALUES (3, 'Acknowledgement #2', 'This is the second acknowledgement!', '2022-06-01 10:00:01+05:30', 2, true);
+INSERT INTO license_std_acknowledgement (la_pk, name, acknowledgement, updated, user_fk, is_enabled) VALUES (4, 'Acknowledgement #3', 'This is the third acknowledgement!', '2022-06-01 10:00:02+05:30', 2, true);
+INSERT INTO license_std_acknowledgement (la_pk, name, acknowledgement, updated, user_fk, is_enabled) VALUES (5, 'Acknowledgement #4', 'This is the fourth acknowledgement!', '2022-06-01 10:00:03+05:30', 2, true);
+INSERT INTO license_std_acknowledgement (la_pk, name, acknowledgement, updated, user_fk, is_enabled) VALUES (6, 'Acknowledgement #5', 'This is the fifth acknowledgement!', '2022-06-01 10:00:04+05:30', 2, true);
+INSERT INTO license_std_acknowledgement (la_pk, name, acknowledgement, updated, user_fk, is_enabled) VALUES (7, 'Acknowledgement #6', 'This is the sixth acknowledgement!', '2022-06-01 10:00:05+05:30', 2, true);
+INSERT INTO license_std_acknowledgement (la_pk, name, acknowledgement, updated, user_fk, is_enabled) VALUES (8, 'not-set', 'This acknowledgement is not set!', '2022-06-01 10:00:06+05:30', 2, false);
