@@ -119,6 +119,9 @@ class TreeDao
   {
     $pfile = $this->dbManager->getSingleRow("SELECT pfile.* FROM $uploadtreeTablename, pfile WHERE uploadtree_pk=$1 AND pfile_fk=pfile_pk",
         array($uploadtreeId), __METHOD__);
+    if ($pfile === false) {
+      throw new \Exception("Could not find pfile for uploadtree item $uploadtreeId");
+    }
     return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5'],'sha256'=>$pfile['pfile_sha256']);
   }
 
@@ -147,6 +150,6 @@ class TreeDao
     $sql = "SELECT realparent FROM $tableName WHERE uploadtree_pk = $1;";
     $statement = __METHOD__ . ".$tableName";
     $row = $this->dbManager->getSingleRow($sql, [$item], $statement);
-    return $row['realparent'];
+    return ($row !== false) ? $row['realparent'] : null;
   }
 }
