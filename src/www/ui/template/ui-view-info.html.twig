@@ -155,6 +155,188 @@
   {% endif %}
 
 
+  {# ================================================================== #}
+  {# Container Image Info                                                #}
+  {# ================================================================== #}
+  {% if containerAgentNA == 1 %}
+    <h2>{{ "Container Image Info"|trans }}</h2>
+    <p>{{ "The containeragent is not installed. Please"|trans }}
+      <a href="?mod=agents">{{ "enable it"|trans }}</a>.</p>
+
+  {% elseif containerAgentStatus == 1 %}
+    <h2>{{ "Container Image Info"|trans }}</h2>
+    {{ containerActiveScript|raw }}
+    <p>{{ "Container image scan has not been run."|trans }}
+      <a href="{{ containerTrackbackUri|e }}">{{ "Schedule containeragent"|trans }}</a></p>
+
+  {% elseif containerType is not empty %}
+    <h2>{{ containerType|e }}</h2>
+    <table class="table" border="1">
+      <tr>
+        <th width="25%">{{ "Property"|trans }}</th>
+        <th>{{ "Value"|trans }}</th>
+      </tr>
+      {% for entry in containerEntries %}
+        {% if entry.value is not empty %}
+          <tr>
+            <td>{{ entry.type|e }}</td>
+            <td class="pkg-value" data-encoded="{{ entry.value|e }}"></td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </table>
+
+    {% if containerEnv is not empty %}
+      <h3>{{ "Environment Variables"|trans }}</h3>
+      <table class="table" border="1">
+        <tr><th>{{ "Variable"|trans }}</th></tr>
+        {% for entry in containerEnv %}
+          <tr><td class="pkg-value" data-encoded="{{ entry.value|e }}"></td></tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
+    {% if containerPorts is not empty %}
+      <h3>{{ "Exposed Ports"|trans }}</h3>
+      <table class="table" border="1">
+        <tr><th>{{ "Port"|trans }}</th></tr>
+        {% for entry in containerPorts %}
+          <tr><td class="pkg-value" data-encoded="{{ entry.value|e }}"></td></tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
+    {% if containerLabels is not empty %}
+      <h3>{{ "Labels"|trans }}</h3>
+      <table class="table" border="1">
+        <tr>
+          <th>{{ "Key"|trans }}</th>
+          <th>{{ "Value"|trans }}</th>
+        </tr>
+        {% for entry in containerLabels %}
+          <tr>
+            <td class="pkg-value" data-encoded="{{ entry.type|e }}"></td>
+            <td class="pkg-value" data-encoded="{{ entry.value|e }}"></td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
+    {% if containerLayers is not empty %}
+      <h3>{{ "Layer History"|trans }}</h3>
+      <table class="table" border="1">
+        <tr>
+          <th width="10%">{{ "Layer"|trans }}</th>
+          <th>{{ "Created By"|trans }}</th>
+        </tr>
+        {% for entry in containerLayers %}
+          <tr>
+            <td>{{ entry.type|e }}</td>
+            <td class="pkg-value" data-encoded="{{ entry.value|e }}"></td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+  {% endif %}
+
+  {# ================================================================== #}
+  {# Installed OS Packages (dpkg / apk / rpm / rpm-bdb)                #}
+  {# ================================================================== #}
+  {% if installedPkgList is not empty %}
+    <h2>{{ "Installed OS Packages"|trans }}</h2>
+    <table class="table table-striped" border="1">
+      <thead>
+        <tr>
+          <th>{{ "Layer"|trans }}</th>
+          <th>{{ "Manager"|trans }}</th>
+          <th>{{ "Package"|trans }}</th>
+          <th>{{ "Version"|trans }}</th>
+          <th>{{ "Arch"|trans }}</th>
+          <th>{{ "Source"|trans }}</th>
+          <th>{{ "License"|trans }}</th>
+          <th>{{ "Summary"|trans }}</th>
+          <th>{{ "Dependencies"|trans }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pkg in installedPkgList %}
+          <tr>
+            <td>{{ pkg.layer|e }}</td>
+            <td>{{ pkg.manager|e }}</td>
+            <td>{{ pkg.name|e }}</td>
+            <td>{{ pkg.version|e }}</td>
+            <td>{{ pkg.arch|e }}</td>
+            <td>{{ pkg.source|e }}</td>
+            <td>{{ pkg.license|e }}</td>
+            <td>{{ pkg.summary|e }}</td>
+            <td>{{ pkg.deps|e }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+  {# ================================================================== #}
+  {# Language Ecosystem Packages (npm/pip/maven/go/cargo/gem/nuget/     #}
+  {#   composer/yarn — from pkg_container_lang_installed)               #}
+  {# ================================================================== #}
+  {% if langPkgList is not empty %}
+    <h2>{{ "Language Ecosystem Packages"|trans }}</h2>
+
+    {# Manager summary badges — one per ecosystem found #}
+    {% if langPkgManagers is not empty %}
+      <p class="lang-pkg-managers">
+        {% for mgr in langPkgManagers %}
+          <span class="badge badge-secondary lang-mgr-badge"
+                data-manager="{{ mgr|e }}">{{ mgr|e }}</span>
+        {% endfor %}
+      </p>
+    {% endif %}
+
+    <table class="table table-striped" id="lang-pkg-table" border="1">
+      <thead>
+        <tr>
+          <th>{{ "Layer"|trans }}</th>
+          <th>{{ "Manager"|trans }}</th>
+          <th>{{ "Package"|trans }}</th>
+          <th>{{ "Version"|trans }}</th>
+          <th>{{ "Source / Group"|trans }}</th>
+          <th>{{ "License"|trans }}</th>
+          <th>{{ "Registry URL"|trans }}</th>
+          <th>{{ "Dependencies"|trans }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set currentMgr = '' %}
+        {% for pkg in langPkgList %}
+          {# Insert a subtle group-separator row when the manager changes #}
+          {% if pkg.manager != currentMgr %}
+            {% set currentMgr = pkg.manager %}
+            <tr class="lang-mgr-header">
+              <td colspan="8"><strong>{{ pkg.manager|e }}</strong></td>
+            </tr>
+          {% endif %}
+          <tr class="lang-pkg-row" data-manager="{{ pkg.manager|e }}">
+            <td>{{ pkg.layer|e }}</td>
+            <td>{{ pkg.manager|e }}</td>
+            <td>{{ pkg.name|e }}</td>
+            <td>{{ pkg.version|e }}</td>
+            <td>{{ pkg.source|e }}</td>
+            <td>{{ pkg.license|e }}</td>
+            <td>
+              {% if pkg.url is not empty %}
+                <a href="{{ pkg.url|e }}" rel="noopener noreferrer"
+                   target="_blank">{{ pkg.url|e }}</a>
+              {% endif %}
+            </td>
+            <td>{{ pkg.deps|e }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+
   {% if reusedPackageList is not empty %}
     <h2>{{ "Reused component"|trans }}</h2>
     <table class="table" border="1">
@@ -230,13 +412,62 @@
 {% endblock %}
 {% block foot %}
   {{ parent() }}
+  <style>
+    .lang-mgr-header td { background-color: #f0f4f8; font-size: 0.85em;
+                          text-transform: uppercase; letter-spacing: 0.05em;
+                          padding: 4px 8px; }
+    .lang-mgr-badge     { cursor: pointer; margin: 0 3px 4px 0;
+                          display: inline-block; padding: 2px 8px;
+                          border-radius: 3px; font-size: 0.8em;
+                          background: #6c757d; color: #fff; }
+    .lang-mgr-badge.active { background: #0275d8; }
+    .lang-pkg-managers  { margin-bottom: 6px; }
+  </style>
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.pkg-value').forEach(el => {
-        const encoded = el.getAttribute('data-encoded');
-        const txt = document.createElement('textarea');
-        txt.innerHTML = encoded;
+      /* Decode HTML-entity-escaped cell values */
+      document.querySelectorAll('.pkg-value').forEach(function(el) {
+        var txt = document.createElement('textarea');
+        txt.innerHTML = el.getAttribute('data-encoded');
         el.textContent = txt.value;
+      });
+
+      /* Language package manager filter badges */
+      var badges = document.querySelectorAll('.lang-mgr-badge');
+      if (badges.length === 0) return;
+
+      var activeFilter = null;
+
+      badges.forEach(function(badge) {
+        badge.addEventListener('click', function() {
+          var mgr = this.getAttribute('data-manager');
+
+          if (activeFilter === mgr) {
+            /* Second click — clear filter, show all */
+            activeFilter = null;
+            badges.forEach(function(b) { b.classList.remove('active'); });
+            document.querySelectorAll('#lang-pkg-table .lang-pkg-row,' +
+                                      '#lang-pkg-table .lang-mgr-header')
+              .forEach(function(r) { r.style.display = ''; });
+          } else {
+            activeFilter = mgr;
+            badges.forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+
+            document.querySelectorAll('#lang-pkg-table .lang-pkg-row')
+              .forEach(function(r) {
+                r.style.display =
+                  (r.getAttribute('data-manager') === mgr) ? '' : 'none';
+              });
+            /* Show only the matching manager group header, hide the rest */
+            document.querySelectorAll('#lang-pkg-table .lang-mgr-header')
+              .forEach(function(r) {
+                var hdr = r.querySelector('td strong');
+                r.style.display =
+                  (hdr && hdr.textContent === mgr) ? '' : 'none';
+              });
+          }
+        }.bind(badge));
       });
     });
   </script>

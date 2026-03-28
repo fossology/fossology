@@ -17,6 +17,7 @@
  * Pkgagent get Debian source package info from .dsc file.
  */
 #include "pkgagent.h"
+#include "fosspkg.h"   /* shared deb/apk/rpm parser — src/lib/c/fosspkg.h */
 
 int Verbose = 0;
 PGconn* db_conn = NULL;        ///< The connection to Database
@@ -715,13 +716,6 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
   char SQL[MAXCMD];
   PGresult *result;
   unsigned long lft, rgt;
-
-  FILE *fp;
-  char field[MAXCMD];
-  char value[MAXCMD];
-  char line[MAXCMD];
-  char *s = NULL;
-  char temp[MAXCMD];
   char *uploadtree_tablename;
 
   if (!upload_pk) return -1; // when upload_pk is empty
@@ -769,91 +763,57 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
     return (-1);
   }
 
-  /* Parse the debian/control file to get every Field and Value */
-  if ((fp = fopen(repfile, "r")) == NULL){
-    LOG_FATAL("Unable to open debian/control file %s\n",repfile);
+  /* Parse the debian/control file using the shared fosspkg library.
+   * FossPkg_ParseDebControl() replaces the hand-rolled ParseDebFile loop
+   * and handles field parsing, continuation lines, and dep splitting
+   * in one place shared with containeragent. */
+  FossPkgInfo *fpkg = FossPkg_ParseDebControl(repfile);
+  if (!fpkg) {
+    LOG_FATAL("pkgagent: FossPkg_ParseDebControl failed for %s\n", repfile);
+    free(repfile);
     return (-1);
   }
 
-  while (fgets(line,MAXCMD,fp)!=NULL)
-  {
-    s = ParseDebFile(line,field,value);
-    trim(value);
-    if (!strcasecmp(field, "Description")) {
-      EscapeString(value, pi->summary, sizeof(pi->summary));
-      strcpy(temp, "");
-    }
-    if (s[0] != '\0') {
-      if ((strlen(temp) + strlen(s)) >= MAXCMD )
-        continue;
-      else
-        strcat(temp,s);
-    }
-    if (!strcasecmp(field, "Package")) {
-      EscapeString(value, pi->pkgName, sizeof(pi->pkgName));
-    }
-    if (!strcasecmp(field, "Version")) {
-      EscapeString(value, pi->version, sizeof(pi->version));
-    }
-    if (!strcasecmp(field, "Architecture")) {
-      EscapeString(value, pi->pkgArch, sizeof(pi->pkgArch));
-    }
-    if (!strcasecmp(field, "Maintainer")) {
-      EscapeString(value, pi->maintainer, sizeof(pi->maintainer));
-    }
-    if (!strcasecmp(field, "Installed-Size")) {
-      pi->installedSize=atol(value);
-    }
-    if (!strcasecmp(field, "Section")) {
-      EscapeString(value, pi->section, sizeof(pi->section));
-    }
-    if (!strcasecmp(field, "Priority")) {
-      EscapeString(value, pi->priority, sizeof(pi->priority));
-    }
-    if (!strcasecmp(field, "Homepage")) {
-      EscapeString(value, pi->homepage, sizeof(pi->homepage));
-    }
-    if (!strcasecmp(field, "Source")) {
-      EscapeString(value, pi->source, sizeof(pi->source));
-    }
-    if (!strcasecmp(field, "Depends")) {
-      char *depends = NULL;
-      char countcopy[MAXCMD];
-      char splitcopy[MAXCMD];
-      int size,i;
-      size_t length = MAXLENGTH;
-      size = 0;
-      if (value[0] != '\0'){
-        strncpy(countcopy, value, sizeof(countcopy)-1);
-        countcopy[sizeof(countcopy)-1] = '\0';
-        depends = strtok(countcopy, ",");
-        while (depends && (depends[0] != '\0')) {
-          if (strlen(depends) >= length)
-            length = strlen(depends) + 1;
-          depends = strtok(NULL, ",");
-          size++;
-        }
-        if (Verbose) { printf("SIZE:%d\n", size);}
-
-        strncpy(splitcopy, value, sizeof(splitcopy)-1);
-        splitcopy[sizeof(splitcopy)-1] = '\0';
-        pi->depends = calloc(size, sizeof(char *));
-        depends = strtok(splitcopy, ",");
-        for (i=0; i<size; i++){
-          pi->depends[i] = calloc(length, sizeof(char));
-          if (depends) {
-            strcpy(pi->depends[i], depends);
-            depends = strtok(NULL, ",");
-          }
-        }
-        pi->dep_size = size;
-      }
-    }
-  }
-  EscapeString(temp, pi->description, sizeof(pi->description));
-
-  fclose(fp);
   free(repfile);
+
+  /*
+   * FossPkgInfo fields are heap char* set to NULL when absent in the control
+   * file.  EscapeString() dereferences its first argument unconditionally
+   * (while(*cp) on the first line), so passing NULL crashes with SIGSEGV.
+   * SAFE_ESC substitutes an empty string for NULL before the call.
+   */
+#define SAFE_ESC(src, dst, len) EscapeString((src) ? (src) : "", (dst), (len))
+
+  SAFE_ESC(fpkg->name,        pi->pkgName,     sizeof(pi->pkgName));
+  SAFE_ESC(fpkg->version,     pi->version,     sizeof(pi->version));
+  SAFE_ESC(fpkg->arch,        pi->pkgArch,     sizeof(pi->pkgArch));
+  SAFE_ESC(fpkg->maintainer,  pi->maintainer,  sizeof(pi->maintainer));
+  SAFE_ESC(fpkg->url,         pi->homepage,    sizeof(pi->homepage));
+  SAFE_ESC(fpkg->source,      pi->source,      sizeof(pi->source));
+  SAFE_ESC(fpkg->summary,     pi->summary,     sizeof(pi->summary));
+  SAFE_ESC(fpkg->description, pi->description, sizeof(pi->description));
+  SAFE_ESC(fpkg->section,     pi->section,     sizeof(pi->section));
+  SAFE_ESC(fpkg->priority,    pi->priority,    sizeof(pi->priority));
+
+#undef SAFE_ESC
+
+  if (fpkg->requireCount > 0) {
+    int i;
+    size_t maxlen = MAXLENGTH;
+    /* find max dep string length */
+    for (i = 0; i < fpkg->requireCount; i++)
+      if (fpkg->requires[i] && strlen(fpkg->requires[i]) >= maxlen)
+        maxlen = strlen(fpkg->requires[i]) + 1;
+    pi->depends = calloc(fpkg->requireCount, sizeof(char *));
+    for (i = 0; i < fpkg->requireCount; i++) {
+      pi->depends[i] = calloc(maxlen, sizeof(char));
+      if (fpkg->requires[i])
+        strncpy(pi->depends[i], fpkg->requires[i], maxlen - 1);
+    }
+    pi->dep_size = fpkg->requireCount;
+  }
+  FossPkgInfoFree(fpkg);
+
   return (0);
 }/* GetMetadataDebBinary(struct debpkginfo *pi) */
 
@@ -938,86 +898,68 @@ int RecordMetadataDEB (struct debpkginfo *pi)
  */
 int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
 {
-  FILE *fp;
-  char field[MAXCMD];
-  char value[MAXCMD];
-  char line[MAXCMD];
 
-  /*  Parse the debian .dsc file to get every Field and Value */
-  if ((fp = fopen(repFile, "r")) == NULL){
-    LOG_FATAL("Unable to open .dsc file %s\n",repFile);
+  /* Parse the .dsc file using the shared fosspkg library */
+  FossPkgInfo *fpkg = FossPkg_ParseDebControl(repFile);
+  if (!fpkg) {
+    LOG_FATAL("pkgagent: FossPkg_ParseDebControl failed for %s\n", repFile);
     return (-1);
   }
 
-  while (fgets(line,MAXCMD,fp)!=NULL)
+  /*
+   * FossPkgInfo fields are heap char* and NULL when absent — guard every
+   * EscapeString call against NULL to prevent SIGSEGV.
+   */
+#define SAFE_ESC(src, dst, len) EscapeString((src) ? (src) : "", (dst), (len))
+
+  SAFE_ESC(fpkg->name,       pi->pkgName,   sizeof(pi->pkgName));
+  SAFE_ESC(fpkg->source,     pi->source,    sizeof(pi->source));
+  SAFE_ESC(fpkg->arch,       pi->pkgArch,   sizeof(pi->pkgArch));
+  SAFE_ESC(fpkg->version,    pi->version,   sizeof(pi->version));
+  SAFE_ESC(fpkg->maintainer, pi->maintainer,sizeof(pi->maintainer));
+  SAFE_ESC(fpkg->url,        pi->homepage,  sizeof(pi->homepage));
+
+#undef SAFE_ESC
+
+  /* FossPkg_ParseDebControl handles all standard RFC-822 fields (Package/Source,
+   * Version, Architecture, Maintainer, Homepage, Build-Depends, etc.).
+   * Three .dsc-specific fields — Format, Uploaders, Standards-Version — are
+   * not in FossPkgInfo; extract them with a targeted second pass on repFile. */
   {
-    ParseDebFile(line,field,value);
-
-    trim(value);
-    if (!strcasecmp(field, "Format")) {
-      EscapeString(value, pi->format, sizeof(pi->format));
-    }
-    if (!strcasecmp(field, "Source")) {
-      EscapeString(value, pi->source, sizeof(pi->source));
-    }
-    if (!strcasecmp(field, "Source")) {
-      EscapeString(value, pi->pkgName, sizeof(pi->pkgName));
-    }
-    if (!strcasecmp(field, "Architecture")) {
-      EscapeString(value, pi->pkgArch, sizeof(pi->pkgArch));
-    }
-    if (!strcasecmp(field, "Version")) {
-      if (strlen(pi->version) == 0)
-        EscapeString(value, pi->version, sizeof(pi->version));
-    }
-    if (!strcasecmp(field, "Maintainer")) {
-      EscapeString(value, pi->maintainer, sizeof(pi->maintainer));
-    }
-    if (!strcasecmp(field, "Homepage")) {
-      EscapeString(value, pi->homepage, sizeof(pi->homepage));
-    }
-    if (!strcasecmp(field, "Uploaders")) {
-      EscapeString(value, pi->uploaders, sizeof(pi->uploaders));
-    }
-    if (!strcasecmp(field, "Standards-Version")) {
-      EscapeString(value, pi->standardsVersion, sizeof(pi->standardsVersion));
-    }
-    if (!strcasecmp(field, "Build-Depends")) {
-      char *depends = NULL;
-      char countcopy[MAXCMD];
-      char splitcopy[MAXCMD];
-      int size,i;
-      size = 0;
-      size_t length = MAXLENGTH;
-      if (value[0] != '\0'){
-        strncpy(countcopy, value, sizeof(countcopy)-1);
-        countcopy[sizeof(countcopy)-1] = '\0';
-        depends = strtok(countcopy, ",");
-        while (depends && (depends[0] != '\0')) {
-          if (strlen(depends) >= length)
-            length = strlen(depends) + 1;
-          depends = strtok(NULL, ",");
-          size++;
-        }
-        if (Verbose) { printf("SIZE:%d\n", size);}
-
-        strncpy(splitcopy, value, sizeof(splitcopy)-1);
-        splitcopy[sizeof(splitcopy)-1] = '\0';
-        pi->depends = calloc(size, sizeof(char *));
-        depends = strtok(splitcopy, ",");
-        for (i=0; i<size; i++){
-          pi->depends[i] = calloc(length, sizeof(char));
-          if (depends) {
-            strcpy(pi->depends[i], depends);
-            depends = strtok(NULL, ",");
-          }
-        }
-        pi->dep_size = size;
+    FILE *fp2 = fopen(repFile, "r");
+    if (fp2) {
+      char line[MAXCMD], field[MAXCMD], value[MAXCMD];
+      while (fgets(line, MAXCMD, fp2) != NULL) {
+        ParseDebFile(line, field, value);
+        trim(value);
+        if (!strcasecmp(field, "Format"))
+          EscapeString(value, pi->format,           sizeof(pi->format));
+        else if (!strcasecmp(field, "Uploaders"))
+          EscapeString(value, pi->uploaders,         sizeof(pi->uploaders));
+        else if (!strcasecmp(field, "Standards-Version"))
+          EscapeString(value, pi->standardsVersion,  sizeof(pi->standardsVersion));
       }
+      fclose(fp2);
     }
   }
 
-  fclose(fp);
+  /* Build-Depends deps come from FossPkg_ParseDebControl (requireCount) */
+  if (fpkg->requireCount > 0) {
+    int i;
+    size_t maxlen = MAXLENGTH;
+    for (i = 0; i < fpkg->requireCount; i++)
+      if (fpkg->requires[i] && strlen(fpkg->requires[i]) >= maxlen)
+        maxlen = strlen(fpkg->requires[i]) + 1;
+    pi->depends = calloc(fpkg->requireCount, sizeof(char *));
+    for (i = 0; i < fpkg->requireCount; i++) {
+      pi->depends[i] = calloc(maxlen, sizeof(char));
+      if (fpkg->requires[i])
+        strncpy(pi->depends[i], fpkg->requires[i], maxlen - 1);
+    }
+    pi->dep_size = fpkg->requireCount;
+  }
+  FossPkgInfoFree(fpkg);
+
   return (0);
 }/*  GetMetadataDebSource(char *repFile, struct debpkginfo *pi) */
 
