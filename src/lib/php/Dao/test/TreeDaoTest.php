@@ -11,6 +11,7 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 class TreeDaoTest extends \PHPUnit\Framework\TestCase
 {
@@ -253,6 +254,51 @@ class TreeDaoTest extends \PHPUnit\Framework\TestCase
     // (pfile_pk, pfile_md5, pfile_sha1, pfile_sha256, pfile_size) := (762, 'C655F0AD3E4D3F90D8EE0541DD636E2E', 'D62DCD25DC68180758FD1C064ADC91AB70A78CB1', '8F39AC8ADD8CD0C0C2BF8924CE3B24F4B2760B8723BFD4205A49FB142490A355', 34);
     $hashes = $this->treeDao->getItemHashes(463,'uploadtree_a');
     assertThat($hashes,equalTo(array('md5'=>'C655F0AD3E4D3F90D8EE0541DD636E2E','sha1'=>'D62DCD25DC68180758FD1C064ADC91AB70A78CB1','sha256'=>'8F39AC8ADD8CD0C0C2BF8924CE3B24F4B2760B8723BFD4205A49FB142490A355')));
+  }
+
+  /**
+   * @brief Test getItemHashes() throws when the item does not exist
+   * @test
+   * -# Call getItemHashes() with an uploadtree_pk that has no matching pfile
+   * -# Expect an Exception to be thrown instead of a PHP error on false['pfile_sha1']
+   */
+  public function testGetItemHashesThrowsForUnknownItem()
+  {
+    $this->testDb->createPlainTables(array('pfile'));
+    $this->expectException(\Exception::class);
+    $this->treeDao->getItemHashes(99999, 'uploadtree');
+  }
+
+  /**
+   * @brief Test getParentOfItem() returns the correct parent id
+   * @test
+   * -# Insert an uploadtree entry with a known realparent
+   * -# Call getParentOfItem() with its ItemTreeBounds
+   * -# Check that the returned value matches the expected realparent
+   */
+  public function testGetParentOfItemReturnsParent()
+  {
+    $this->prepareUploadTree(array(
+      array(10, null, 1, 0, 0x20008400, 1, 4, 'root', null),
+      array(11, 10,  1, 0, 0x20004400, 2, 3, 'child', 10),
+    ));
+    $bounds = new ItemTreeBounds(11, 'uploadtree', 1, 2, 3);
+    $parent = $this->treeDao->getParentOfItem($bounds);
+    $this->assertEquals(10, $parent);
+  }
+
+  /**
+   * @brief Test getParentOfItem() returns null for a non-existent item
+   * @test
+   * -# Call getParentOfItem() with an ItemTreeBounds referencing an item that
+   *    does not exist in the uploadtree table
+   * -# Check that null is returned instead of causing a PHP error on false['realparent']
+   */
+  public function testGetParentOfItemReturnsNullForUnknownItem()
+  {
+    $bounds = new ItemTreeBounds(99999, 'uploadtree', 1, 0, 0);
+    $parent = $this->treeDao->getParentOfItem($bounds);
+    $this->assertNull($parent);
   }
 
   protected function getNestedTestFileStructure()
