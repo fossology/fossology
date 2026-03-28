@@ -6698,11 +6698,16 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (HASTEXT(_LT_DUAL_LICENSE_49, REG_EXTENDED)) {
     MEDINTEREST(lDebug ? "Dual-license(49)" : "Dual-license");
   }
+<<<<<<< Updated upstream
   else if (INFILE(_LT_DUAL_LICENSE_50)) {
   MEDINTEREST(lDebug ? "Dual-license(50)" : "Dual-license");
   }
   else if (INFILE(_LT_DUAL_LICENSE_51)) {
   MEDINTEREST(lDebug ? "Dual-license(BSD+MIT)" : "Dual-license");
+=======
+  else if (INFILE(_LT_DUAL_LICENSE_51)) {
+    MEDINTEREST(lDebug ? "Dual-license(BSD+MIT)" : "Dual-license");
+>>>>>>> Stashed changes
   }
   cleanLicenceBuffer();
   /*

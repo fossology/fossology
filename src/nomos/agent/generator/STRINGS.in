@@ -1715,6 +1715,10 @@
 %KEY% "licen[cs]"
 %STR% "spdx-license-identifier[-_:\+\.\(\)[:alnum:][:blank:]]+[[:blank:]]OR[[:blank:]]"
 #
+%ENTRY% _LT_DUAL_LICENSE_51
+%KEY% "bsd"
+%STR% "bsd =FEW= mit"
+#
 %ENTRY% _LT_SUBSEQUENT_VERSION
 %KEY% "licen[cs]"
 %STR% "under the terms of either =SOME= license =FEW= or =FEW= (subsequent|later|new) version =FEW= license"
