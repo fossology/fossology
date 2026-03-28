@@ -27,6 +27,12 @@ use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\Lib\Dao\UserDao;
 use Slim\Psr7\Request;
+use Slim\Psr7\Factory\StreamFactory;
+use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
+use Fossology\Lib\Exceptions\DuplicateTokenNameException;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpConflictException;
+use Fossology\UI\Api\Exceptions\HttpTooManyRequestException;
 
 /**
  * @class UserControllerTest
@@ -40,6 +46,9 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
    * Assertions before running tests
    */
   private $assertCountBefore;
+  private $userEditPlugin;
+  private $manageTokenPlugin;
+  private $streamFactory;
 
   /**
    * @var DbHelper $dbHelper
@@ -72,6 +81,13 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
     $this->userController = new UserController($container);
+    $this->streamFactory = new StreamFactory();
+     $this->userEditPlugin  = M::mock('UserEdit');
+    $this->manageTokenPlugin = M::mock('ManageToken');
+    $this->restHelper->shouldReceive('getPlugin')
+        ->withArgs(['user_edit'])->andReturn($this->userEditPlugin);
+    $this->restHelper->shouldReceive('getPlugin')
+        ->withArgs(['manage-token'])->andReturn($this->manageTokenPlugin);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
   }
@@ -392,5 +408,184 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
+  }
+  private function mockV2TokenRequest(array $reqBody)
+{
+    $request = M::mock(Request::class);
+
+    $request->shouldReceive('getAttribute')
+        ->with('apiVersion', 1)
+        ->andReturn(ApiVersion::V2);
+
+    $request->shouldReceive('getAttribute')
+        ->with('version')
+        ->andReturn(ApiVersion::V2);
+
+    $request->shouldReceive('getParsedBody')
+        ->andReturn($reqBody);
+
+    $request->shouldReceive('getBody')
+        ->andReturn($this->streamFactory->createStream(json_encode($reqBody)));
+
+    $request->shouldReceive('getHeaderLine')
+        ->with('Content-Type')
+        ->andReturn('application/json');
+
+    return $request;
+}
+  // ----------------------------------------------------------------
+  // createRestApiToken — success
+  // ----------------------------------------------------------------
+
+  public function testCreateRestApiTokenSuccess()
+  {
+    $tokenValue = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test';
+    $reqBody = [
+      'tokenName'   => 'myTestToken',
+      'tokenScope'  => 'read',
+      'tokenExpire' => date('Y-m-d', strtotime('+30 days')),
+    ];
+    $request = $this->mockV2TokenRequest($reqBody);
+    $this->userEditPlugin->shouldReceive('generateNewToken')
+      ->once()->andReturn($tokenValue);
+    $actualResponse = $this->userController->createRestApiToken(
+      $request, new ResponseHelper(), []
+    );
+    $this->assertEquals(201, $actualResponse->getStatusCode());
+    $body = $this->getResponseJson($actualResponse);
+    $this->assertArrayHasKey('token', $body);
+    $this->assertEquals($tokenValue, $body['token']);
+  }
+
+  // ----------------------------------------------------------------
+  // createRestApiToken — DuplicateTokenKeyException -> HTTP 429
+  // ----------------------------------------------------------------
+
+  public function testCreateRestApiTokenDuplicateKey()
+  {
+    $reqBody = [
+      'tokenName'   => 'duplicateKeyToken',
+      'tokenScope'  => 'read',
+      'tokenExpire' => date('Y-m-d', strtotime('+30 days')),
+    ];
+    $request = $this->mockV2TokenRequest($reqBody);
+    $this->userEditPlugin->shouldReceive('generateNewToken')
+      ->once()->andThrow(new DuplicateTokenKeyException("Duplicate key"));
+    $this->expectException(HttpTooManyRequestException::class);
+    $this->userController->createRestApiToken(
+      $request, new ResponseHelper(), []
+    );
+  }
+
+  // ----------------------------------------------------------------
+  // createRestApiToken — DuplicateTokenNameException -> HTTP 409
+  // ----------------------------------------------------------------
+
+  public function testCreateRestApiTokenDuplicateName()
+  {
+    $reqBody = [
+      'tokenName'   => 'duplicateNameToken',
+      'tokenScope'  => 'read',
+      'tokenExpire' => date('Y-m-d', strtotime('+30 days')),
+    ];
+    $request = $this->mockV2TokenRequest($reqBody);
+    $this->userEditPlugin->shouldReceive('generateNewToken')
+      ->once()->andThrow(new DuplicateTokenNameException("Duplicate name"));
+    $this->expectException(HttpConflictException::class);
+    $this->userController->createRestApiToken(
+      $request, new ResponseHelper(), []
+    );
+  }
+
+  // ----------------------------------------------------------------
+  // createRestApiToken — UnexpectedValueException -> HTTP 400
+  // ----------------------------------------------------------------
+
+  public function testCreateRestApiTokenInvalidValue()
+  {
+    $reqBody = [
+      'tokenName'   => 'badToken',
+      'tokenScope'  => 'read',
+      'tokenExpire' => date('Y-m-d', strtotime('+30 days')),
+    ];
+    $request = $this->mockV2TokenRequest($reqBody);
+    $this->userEditPlugin->shouldReceive('generateNewToken')
+      ->once()->andThrow(new \UnexpectedValueException("Invalid scope"));
+    $this->expectException(HttpBadRequestException::class);
+    $this->userController->createRestApiToken(
+      $request, new ResponseHelper(), []
+    );
+  }
+
+  // ----------------------------------------------------------------
+  // getTokens — active tokens
+  // ----------------------------------------------------------------
+
+  public function testGetTokensActive()
+  {
+    $tokenId    = '42.abc123';
+    $tokenPk    = '42';
+    $tokenValue = 'some.jwt.token';
+    $tokens = [
+      ['id' => $tokenId, 'name' => 'myToken', 'created' => '2026-01-01',
+       'expire' => '2026-12-31', 'scope' => 'read'],
+    ];
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V2);
+    $this->userEditPlugin->shouldReceive('getListOfActiveTokens')
+      ->once()->andReturn($tokens);
+    $this->manageTokenPlugin->shouldReceive('revealToken')
+      ->withArgs([$tokenPk])->once()->andReturn(['token' => $tokenValue]);
+    $actualResponse = $this->userController->getTokens(
+      $request, new ResponseHelper(), ['type' => 'active']
+    );
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $body = $this->getResponseJson($actualResponse);
+    $this->assertArrayHasKey('activeTokens', $body);
+    $this->assertCount(1, $body['activeTokens']);
+    $this->assertEquals($tokenValue, $body['activeTokens'][0]['token']);
+  }
+
+  // ----------------------------------------------------------------
+  // getTokens — expired tokens
+  // ----------------------------------------------------------------
+
+  public function testGetTokensExpired()
+  {
+    $tokenId    = '7.xyz789';
+    $tokenPk    = '7';
+    $tokenValue = 'expired.jwt.token';
+    $tokens = [
+      ['id' => $tokenId, 'name' => 'oldToken', 'created' => '2025-01-01',
+       'expire' => '2025-06-01', 'scope' => 'write'],
+    ];
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V2);
+    $this->userEditPlugin->shouldReceive('getListOfExpiredTokens')
+      ->once()->andReturn($tokens);
+    $this->manageTokenPlugin->shouldReceive('revealToken')
+      ->withArgs([$tokenPk])->once()->andReturn(['token' => $tokenValue]);
+    $actualResponse = $this->userController->getTokens(
+      $request, new ResponseHelper(), ['type' => 'expired']
+    );
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $body = $this->getResponseJson($actualResponse);
+    $this->assertArrayHasKey('expiredTokens', $body);
+    $this->assertCount(1, $body['expiredTokens']);
+    $this->assertEquals($tokenValue, $body['expiredTokens'][0]['token']);
+  }
+
+  // ----------------------------------------------------------------
+  // getTokens — invalid type -> HTTP 400
+  // ----------------------------------------------------------------
+
+  public function testGetTokensInvalidType()
+  {
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V2);
+    $this->expectException(HttpBadRequestException::class);
+    $this->userController->getTokens(
+      $request, new ResponseHelper(), ['type' => 'invalid']
+    );
   }
 }
