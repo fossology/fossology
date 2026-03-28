@@ -1655,6 +1655,125 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   }
 
+  /**
+   * @test
+   * -# Test for LicenseController::exportBulkText() default behavior.
+   * -# Verify default format=json and filter=all returns downloadable JSON.
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportBulkTextDefaultJsonAll()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $this->dbManager->shouldReceive('getRows')->withAnyArgs()->andReturn([]);
+
+    $request = $this->getRequestWithQueryParams('GET', []);
+    $actualResponse = $this->licenseController->exportBulkText($request,
+      new ResponseHelper(), []);
+
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $this->assertStringContainsString('application/json',
+      $actualResponse->getHeaderLine('Content-type'));
+    $this->assertStringContainsString('.json',
+      $actualResponse->getHeaderLine('Content-Disposition'));
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::exportBulkText() CSV with user filter.
+   * -# Verify csv content type and file extension.
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportBulkTextCsvByUser()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $this->dbManager->shouldReceive('getRows')->withAnyArgs()->andReturn([]);
+
+    $request = $this->getRequestWithQueryParams('GET', [
+      'format' => 'csv',
+      'filter' => 'user',
+      'userId' => 4,
+      'delimiter' => ';',
+      'enclosure' => '"'
+    ]);
+    $actualResponse = $this->licenseController->exportBulkText($request,
+      new ResponseHelper(), []);
+
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $this->assertStringContainsString('text/csv',
+      $actualResponse->getHeaderLine('Content-type'));
+    $this->assertStringContainsString('.csv',
+      $actualResponse->getHeaderLine('Content-Disposition'));
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::exportBulkText() invalid format.
+   * -# Verify HttpBadRequestException is thrown.
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportBulkTextInvalidFormat()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $request = $this->getRequestWithQueryParams('GET', ['format' => 'xml']);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->licenseController->exportBulkText($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::exportBulkText() missing userId.
+   * -# Verify HttpBadRequestException is thrown for filter=user.
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportBulkTextFilterUserWithoutUserId()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $request = $this->getRequestWithQueryParams('GET', ['filter' => 'user']);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->licenseController->exportBulkText($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::exportBulkText() invalid groupId.
+   * -# Verify HttpBadRequestException is thrown for non-positive group id.
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportBulkTextFilterGroupInvalidGroupId()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $request = $this->getRequestWithQueryParams('GET', [
+      'filter' => 'group',
+      'groupId' => 0
+    ]);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->licenseController->exportBulkText($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::exportBulkText() with non-admin user.
+   * -# Verify HttpForbiddenException is thrown.
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportBulkTextNotAdmin()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $request = $this->getRequestWithQueryParams('GET', []);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->licenseController->exportBulkText($request, new ResponseHelper(), []);
+  }
+
   /**\
    * @test
    * @return Request
@@ -1678,6 +1797,19 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
     $request = new Request($method, new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
+    return $request;
+  }
+
+  /**
+   * @param string $method
+   * @param array $queryParams
+   * @return M\MockInterface
+   */
+  private function getRequestWithQueryParams($method, $queryParams)
+  {
+    $request = M::mock('Psr\\Http\\Message\\ServerRequestInterface');
+    $request->shouldReceive('getQueryParams')->andReturn($queryParams);
+    $request->shouldReceive('getMethod')->andReturn($method);
     return $request;
   }
 
