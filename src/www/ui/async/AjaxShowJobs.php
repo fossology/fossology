@@ -441,7 +441,7 @@ class AjaxShowJobs extends \FO_Plugin
     $jobsInfo = $this->showJobsDao->getJobInfo($jobs);
     usort($jobsInfo, array($this,"compareJobsInfo"));
 
-    $pagination = ($totalPages > 1 ? MenuPage($page, $totalPages, $uri) : "");
+    $pagination = ($totalPages > 0 ? MenuPage($page, $totalPages, $uri) : "");
 
     $showJobData = $this->getShowJobsForEachJob($jobsInfo, false);
     return new JsonResponse(
