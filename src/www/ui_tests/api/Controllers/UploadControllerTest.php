@@ -42,6 +42,7 @@ use Fossology\UI\Api\Models\Hash;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\License;
+use Fossology\UI\Api\Models\ScannedLicense;
 use Fossology\UI\Api\Models\Upload;
 use Mockery as M;
 use Slim\Psr7\Factory\StreamFactory;
@@ -1704,6 +1705,121 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->expectException(HttpForbiddenException::class);
     $this->uploadController->getEditedLicenses(null,new ResponseHelper(),["id"=>$groupId]);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::getScannedLicenses()
+   *   -# Check if status code is 200 and response contains correct license data.
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   */
+  public function testGetScannedLicenses()
+  {
+    $uploadId = 3;
+    $agentsRun = [];
+
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->restHelper->shouldReceive('getUploadDao')->andReturn($this->uploadDao);
+    $this->uploadDao->shouldReceive("getUploadtreeTableName")
+      ->withArgs([$uploadId])->andReturn("uploadtree");
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withAnyArgs()->andReturn($this->getUploadBounds($uploadId));
+
+    $scanJobProxy = M::mock('overload:Fossology\Lib\Proxy\ScanJobProxy');
+    $scanJobProxy->shouldReceive('createAgentStatus')->withAnyArgs()->andReturn($agentsRun);
+    $scanJobProxy->shouldReceive('getLatestSuccessfulAgentIds')->andReturn([2]);
+
+    $histogram = [
+      'GPL-2.0-only' => [
+        'rf_pk'  => 2,
+        'count'  => 10,
+        'unique' => 5,
+        'spdx_id' => 'GPL-2.0-only',
+      ],
+    ];
+    $this->licenseDao->shouldReceive('getLicenseHistogram')
+      ->withAnyArgs()->andReturn($histogram);
+
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      new Headers(), [], [], $body);
+
+    $actualResponse = $this->uploadController->getScannedLicenses(
+      $request, new ResponseHelper(), ["id" => $uploadId]);
+
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $responseBody = $this->getResponseJson($actualResponse);
+    $this->assertCount(1, $responseBody);
+    $this->assertEquals(2, $responseBody[0]['id']);
+    $this->assertEquals('GPL-2.0-only', $responseBody[0]['shortname']);
+    $this->assertEquals(10, $responseBody[0]['occurence']);
+    $this->assertEquals(5, $responseBody[0]['unique']);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::getScannedLicenses()
+   *   -# Verify that uploads with files having no detected license
+   *      (No_license_found) return 200 without crashing.
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   */
+  public function testGetScannedLicensesWithNoLicenseFound()
+  {
+    $uploadId = 3;
+    $agentsRun = [];
+
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->restHelper->shouldReceive('getUploadDao')->andReturn($this->uploadDao);
+    $this->uploadDao->shouldReceive("getUploadtreeTableName")
+      ->withArgs([$uploadId])->andReturn("uploadtree");
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withAnyArgs()->andReturn($this->getUploadBounds($uploadId));
+
+    $scanJobProxy = M::mock('overload:Fossology\Lib\Proxy\ScanJobProxy');
+    $scanJobProxy->shouldReceive('createAgentStatus')->withAnyArgs()->andReturn($agentsRun);
+    $scanJobProxy->shouldReceive('getLatestSuccessfulAgentIds')->andReturn([2]);
+
+    $histogram = [
+      'MIT' => [
+        'rf_pk'  => 5,
+        'count'  => 3,
+        'unique' => 2,
+        'spdx_id' => 'MIT',
+      ],
+      LicenseDao::NO_LICENSE_FOUND => [
+        'rf_pk'  => 0,
+        'count'  => 7,
+        'unique' => 4,
+        'spdx_id' => LicenseDao::NO_LICENSE_FOUND,
+      ],
+    ];
+    $this->licenseDao->shouldReceive('getLicenseHistogram')
+      ->withAnyArgs()->andReturn($histogram);
+
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      new Headers(), [], [], $body);
+
+    $actualResponse = $this->uploadController->getScannedLicenses(
+      $request, new ResponseHelper(), ["id" => $uploadId]);
+
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $responseBody = $this->getResponseJson($actualResponse);
+    $this->assertCount(2, $responseBody);
+
+    $noLicenseEntry = array_values(array_filter($responseBody, function ($e) {
+      return $e['shortname'] === LicenseDao::NO_LICENSE_FOUND;
+    }))[0];
+    $this->assertEquals(0, $noLicenseEntry['id']);
+    $this->assertEquals(7, $noLicenseEntry['occurence']);
   }
 
   /**

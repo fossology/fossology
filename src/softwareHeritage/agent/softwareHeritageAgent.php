@@ -129,8 +129,10 @@ class softwareHeritageAgent extends Agent
       print "INFO :Software Heritage X-RateLimit-Limit reached. Next slot unlocks in ".gmdate("H:i:s", $timeToReset)."\n";
       if ($timeToReset > $maxTime) {
         sleep($maxTime);
-      } else {
+      } elseif ($timeToReset > 0) {
         sleep($timeToReset);
+      } else {
+        sleep(min($maxTime, 60));
       }
       $this->processEachPfileForSWH($pfileDetail, $agentId, $maxTime);
     } else {
@@ -158,10 +160,19 @@ class softwareHeritageAgent extends Agent
       $cookedResult = array();
       if ($statusCode == SoftwareHeritageDao::SWH_STATUS_OK) {
         $responseContent = json_decode($response->getBody()->getContents(),true);
-        $cookedResult = $responseContent["facts"][0]["licenses"];
+        if (isset($responseContent["facts"]) && !empty($responseContent["facts"]) &&
+            isset($responseContent["facts"][0]["licenses"])) {
+          $cookedResult = $responseContent["facts"][0]["licenses"];
+        } else {
+          $cookedResult = array();
+        }
       } else if ($statusCode == SoftwareHeritageDao::SWH_RATELIMIT_EXCEED) {
         $responseContent = $response->getHeaders();
-        $cookedResult = $responseContent["X-RateLimit-Reset"][0];
+        if (isset($responseContent["X-RateLimit-Reset"][0])) {
+          $cookedResult = $responseContent["X-RateLimit-Reset"][0];
+        } else {
+          $cookedResult = time() + $this->configuration['maxtime'];
+        }
       } else if ($statusCode == SoftwareHeritageDao::SWH_NOT_FOUND) {
         $response = $this->guzzleClient->get($URIToGetContent);
         $responseContent = json_decode($response->getBody(),true);

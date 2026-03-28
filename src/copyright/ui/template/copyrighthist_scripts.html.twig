@@ -57,18 +57,35 @@
     }
     var idPrefix = '#testVal' + type;
 
-    var firstRow = checkBoxes.first();
-    var testVal = table.api().row($(firstRow).parent().parent()[0]).data()[1];
-    testVal = $("<textarea/>").html(testVal).text();  // Decode HTML &lt; &gt;
     var regex = advanceSearchToRegex($('#advSearchText' + type).val());
-    var finalVal = toVal;
-    if (!/^\s*$/.test(regex)) {
-      finalVal = testVal.replace(new RegExp(regex, "gi"), toVal);
-    }
+    var fromValues = [];
+    var toValues = [];
 
-    $(idPrefix + 'From').text(testVal);
-    $(idPrefix + 'To').text(finalVal);
-    $(idPrefix).show();
+    checkBoxes.each(function() {
+      var testVal = table.api().row($(this).parent().parent()[0]).data()[1];
+      testVal = $("<textarea/>").html(testVal).text();  // Decode HTML &lt; &gt;
+      var finalVal = toVal;
+      if (!/^\s*$/.test(regex)) {
+        if (testVal.search(new RegExp(regex, "gi")) !== -1) {
+          finalVal = testVal.replace(new RegExp(regex, "gi"), toVal);
+          fromValues.push(testVal);
+          toValues.push(finalVal);
+        }
+      } else {
+        fromValues.push(testVal);
+        toValues.push(finalVal);
+      }
+    });
+
+    var testTable = $(idPrefix);
+    testTable.find('tr:not(:first)').remove();
+    
+    for (var i = 0; i < fromValues.length; i++) {
+      var newRow = '<tr><td>' + fromValues[i].replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</td><td>' + toValues[i].replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</td></tr>';
+      testTable.append(newRow);
+    }
+    
+    testTable.show();
   }
 
   function createReplacementText(type) {

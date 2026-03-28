@@ -215,13 +215,6 @@ class CycloneDXAgent extends Agent
       $reportedLicenseId = $this->licenseMap->getProjectedId($licId);
       $mainLicObj = $this->licenseDao->getLicenseById($reportedLicenseId, $this->groupId);
       $licId = $mainLicObj->getId() . "-" . md5($mainLicObj->getText());
-      if (!array_key_exists($licId, $this->licensesInDocument)) {
-        $this->licensesInDocument = (new SpdxLicenseInfo())
-          ->setLicenseObj($mainLicObj)
-          ->setCustomText(false)
-          ->setTextPrinted(true)
-          ->setListedLicense(true);
-      }
       $licensedata['id'] = $mainLicObj->getSpdxId();
       $licensedata['url'] = $mainLicObj->getUrl();
       $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
@@ -314,12 +307,13 @@ class CycloneDXAgent extends Agent
         }
       }
       if (!empty($fileName)) {
+        $mimeType = $this->getFileMimeType($fileId, $treeTableName);
         $componentdata = array(
           'bomref' => $uploadId .'-'. $fileId,
           'type' => 'file',
           'name' => $fileName,
           'hashes' => $serializedhash,
-          'mimeType' => 'text/plain',
+          'mimeType' => $mimeType,
           'copyright' => implode("\n", $licenses->getCopyrights()),
           'licenses' => $licensesfound
         );
@@ -377,6 +371,24 @@ class CycloneDXAgent extends Agent
 
     $row = $this->dbManager->getSingleRow($sql, [$uploadId], __METHOD__);
     return $row['mimetype_name'];
+  }
+
+  /**
+   * @brief Get the mime type of a file
+   * @param int $fileId File ID
+   * @param string $treeTableName Tree table name
+   * @return string Mime type of the file
+   */
+  protected function getFileMimeType($fileId, $treeTableName)
+  {
+    $sql = "SELECT m.mimetype_name
+      FROM $treeTableName ut
+      JOIN pfile pf ON ut.pfile_fk = pf.pfile_pk
+      LEFT JOIN mimetype m ON pf.pfile_mimetypefk = m.mimetype_pk
+      WHERE ut.uploadtree_pk = $1";
+
+    $row = $this->dbManager->getSingleRow($sql, [$fileId], __METHOD__);
+    return $row['mimetype_name'] ?? 'application/octet-stream';
   }
 }
 
