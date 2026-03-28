@@ -16,11 +16,17 @@ function updateCheckSuccess(data) {
     var callbacksuccess = val.callbacksuccess;
     var callbackfail = val.callbackfail;
     if ((data[jqId]) && (data[jqId].end_bits == 1)) {
-      callbacksuccess(jqId);
+      if (typeof callbacksuccess === 'function') {
+        callbacksuccess(jqId);
+      }
       return null;
     }
     else if ((data[jqId]) && (data[jqId].end_bits > 1)) {
-      callbackfail(jqId);
+      if (typeof callbackfail === 'function') {
+        callbackfail(jqId);
+      } else {
+        location.reload();
+      }
       return null;
     }
     else {
