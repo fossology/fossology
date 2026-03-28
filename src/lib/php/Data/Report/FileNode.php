@@ -42,6 +42,12 @@ class FileNode
   private $copyrights = [];
 
   /**
+   * @var array $scannerEvidences
+   * Scanner evidence (rf_pk + md5(text) => [['scanner' => 'agent_name', 'confidence' => percentage]])
+   */
+  private $scannerEvidences = [];
+
+  /**
    * Add comment to file.
    *
    * @param string|null $comment
@@ -148,6 +154,26 @@ class FileNode
   }
 
   /**
+   * Add scanner evidence finding to file.
+   *
+   * @param string $scannerId
+   * @param string $scannerName
+   * @param float|null $confidence
+   * @return FileNode
+   */
+  public function addScannerEvidence(string $scannerId, string $scannerName, ?float $confidence): FileNode
+  {
+    if (!isset($this->scannerEvidences[$scannerId])) {
+      $this->scannerEvidences[$scannerId] = [];
+    }
+    $this->scannerEvidences[$scannerId][] = [
+      'scanner' => $scannerName,
+      'confidence' => $confidence
+    ];
+    return $this;
+  }
+
+  /**
    * @return string[]
    */
   public function getComments(): array
@@ -193,5 +219,14 @@ class FileNode
   public function getCopyrights(): array
   {
     return $this->copyrights;
+  }
+
+  /**
+   * @param string $scannerId
+   * @return array
+   */
+  public function getScannerEvidences(string $scannerId): array
+  {
+    return $this->scannerEvidences[$scannerId] ?? [];
   }
 }

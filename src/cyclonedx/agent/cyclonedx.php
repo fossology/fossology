@@ -33,6 +33,7 @@ use Fossology\Lib\Report\ReportUtils;
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/reportgenerator.php");
+include_once(__DIR__ . "/../../spdx/agent/spdxutils.php");
 
 /**
  * @class cyclonedxAgent
@@ -105,20 +106,20 @@ class CycloneDXAgent extends Agent
   {
     // deduce the agent name from the command line arguments
     $args = getopt("", array(
-      self::OUTPUT_FORMAT_KEY.'::',
-      self::UPLOADS_ADD_KEY.'::'
+      self::OUTPUT_FORMAT_KEY . '::',
+      self::UPLOADS_ADD_KEY . '::'
     ));
     $agentName = "";
     if (array_key_exists(self::OUTPUT_FORMAT_KEY, $args)) {
       $agentName = trim($args[self::OUTPUT_FORMAT_KEY]);
     }
     if (empty($agentName)) {
-        $agentName = self::DEFAULT_OUTPUT_FORMAT;
+      $agentName = self::DEFAULT_OUTPUT_FORMAT;
     }
     if (array_key_exists(self::UPLOADS_ADD_KEY, $args)) {
       $uploadsString = $args[self::UPLOADS_ADD_KEY];
       if (!empty($uploadsString)) {
-          $this->additionalUploads = explode(',', $uploadsString);
+        $this->additionalUploads = explode(',', $uploadsString);
       }
     }
 
@@ -159,10 +160,10 @@ class CycloneDXAgent extends Agent
     if (count($this->additionalUploads) > 0) {
       $fileName = $fileBase . "multifile" . "_" . strtoupper($this->outputFormat);
     } else {
-      $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+      $fileName = $fileBase . strtoupper($this->outputFormat) . "_" . $this->packageName;
     }
 
-    return $fileName .".json" ;
+    return $fileName . ".json";
   }
 
   /**
@@ -175,7 +176,7 @@ class CycloneDXAgent extends Agent
     $upload = $this->uploadDao->getUpload($uploadId);
     $this->packageName = $upload->getFilename();
 
-    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
+    $fileBase = $SysConf['FOSSOLOGY']['path'] . "/report/";
 
     $this->uri = $this->getUri($fileBase);
   }
@@ -193,8 +194,12 @@ class CycloneDXAgent extends Agent
     $this->heartbeat(0);
 
     $filesWithLicenses = $this->reportutils
-      ->getFilesWithLicensesFromClearings($itemTreeBounds, $this->groupId,
-        $this, $this->licensesInDocument);
+      ->getFilesWithLicensesFromClearings(
+        $itemTreeBounds,
+        $this->groupId,
+        $this,
+        $this->licensesInDocument
+      );
     $this->heartbeat(0);
 
     $this->reportutils->addClearingStatus($filesWithLicenses, $itemTreeBounds, $this->groupId);
@@ -229,7 +234,7 @@ class CycloneDXAgent extends Agent
       $serializedhash[] = $this->reportGenerator->createHash('SHA-256', $hashes['sha256']);
     }
 
-    $maincomponentData = array (
+    $maincomponentData = array(
       'bomref' => strval($uploadId),
       'type' => 'library',
       'name' => $upload->getFilename(),
@@ -240,7 +245,7 @@ class CycloneDXAgent extends Agent
     );
     $maincomponent = $this->reportGenerator->createComponent($maincomponentData);
 
-    $bomdata = array (
+    $bomdata = array(
       'tool-version' => $SysConf['BUILD']['VERSION'],
       'maincomponent' => $maincomponent,
       'components' => $components
@@ -284,23 +289,34 @@ class CycloneDXAgent extends Agent
       $licensesfound = [];
 
       if (!empty($licenses->getConcludedLicenses())) {
+        $concludedLicensesString = [];
         foreach ($licenses->getConcludedLicenses() as $licenseId) {
           if (array_key_exists($licenseId, $this->licensesInDocument)) {
+            $shortName = $this->licensesInDocument[$licenseId]->getLicenseObj()->getShortName();
+            if (\Fossology\Lib\Util\StringOperation::stringStartsWith($shortName, \Fossology\Lib\Data\LicenseRef::SPDXREF_PREFIX)) {
+              $concludedLicensesString[] = $shortName;
+            } else {
+              $concludedLicensesString[] = $this->licensesInDocument[$licenseId]->getLicenseObj()->getSpdxId();
+            }
+          }
+        }
+        $expression = \Fossology\Spdx\SpdxUtils::implodeLicenses(
+            \Fossology\Spdx\SpdxUtils::removeEmptyLicenses($concludedLicensesString)
+        );
+        if (!empty($expression)) {
             $licensedata = array(
-              "id"   => $this->licensesInDocument[$licenseId]->getLicenseObj()->getSpdxId(),
-              "name" => $this->licensesInDocument[$licenseId]->getLicenseObj()->getFullName(),
-              "url"  => $this->licensesInDocument[$licenseId]->getLicenseObj()->getUrl()
+              "expression" => $expression
             );
             $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
-          }
         }
       } else {
         foreach ($licenses->getScanners() as $licenseId) {
           if (array_key_exists($licenseId, $this->licensesInDocument)) {
             $licensedata = array(
-              "id"   => $this->licensesInDocument[$licenseId]->getLicenseObj()->getSpdxId(),
+              "id" => $this->licensesInDocument[$licenseId]->getLicenseObj()->getSpdxId(),
               "name" => $this->licensesInDocument[$licenseId]->getLicenseObj()->getFullName(),
-              "url"  => $this->licensesInDocument[$licenseId]->getLicenseObj()->getUrl()
+              "url" => $this->licensesInDocument[$licenseId]->getLicenseObj()->getUrl(),
+              "evidences" => $licenses->getScannerEvidences($licenseId)
             );
             $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
           }
@@ -309,7 +325,7 @@ class CycloneDXAgent extends Agent
       if (!empty($fileName)) {
         $mimeType = $this->getFileMimeType($fileId, $treeTableName);
         $componentdata = array(
-          'bomref' => $uploadId .'-'. $fileId,
+          'bomref' => $uploadId . '-' . $fileId,
           'type' => 'file',
           'name' => $fileName,
           'hashes' => $serializedhash,
@@ -341,7 +357,7 @@ class CycloneDXAgent extends Agent
     $contents = json_encode($packageNodes, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     // To ensure the file is valid, replace any non-printable characters with a question mark.
     // 'Non-printable' is ASCII < 0x20 (excluding \r, \n and tab) and 0x7F - 0x9F.
-    $contents = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/u','?',$contents);
+    $contents = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/u', '?', $contents);
     file_put_contents($this->uri, $contents);
     $this->updateReportTable($uploadId, $this->jobId, $this->uri);
   }

@@ -59,10 +59,10 @@ class BomReportGenerator
   {
     return [
       'bomFormat' => 'CycloneDX',
-      '$schema' => 'http://cyclonedx.org/schema/bom-1.4.schema.json',
-      'specVersion' => '1.4',
+      '$schema' => 'https://cyclonedx.org/schema/bom-1.7.schema.json',
+      'specVersion' => '1.7',
       'version' => 1.0,
-      'serialNumber' => 'urn:uuid:'. uuid_create(UUID_TYPE_TIME),
+      'serialNumber' => 'urn:uuid:' . uuid_create(UUID_TYPE_TIME),
       'metadata' => [
         'timestamp' => date('c'),
         'tools' => [
@@ -138,29 +138,58 @@ class BomReportGenerator
   {
     $license = [];
 
-    // Check license ID is a LicenseRef
-    if (array_key_exists('id', $licenseData) && !empty($licenseData['id']) &&
-      stripos($licenseData['id'], LicenseRef::SPDXREF_PREFIX) === 0) {
+    // Check for explicit expression
+    if (array_key_exists('expression', $licenseData) && !empty($licenseData['expression'])) {
+      $license['expression'] = $licenseData['expression'];
+    } else if (
+      array_key_exists('id', $licenseData) && !empty($licenseData['id']) &&
+      stripos($licenseData['id'], LicenseRef::SPDXREF_PREFIX) === 0
+    ) {
       $license['expression'] = $licenseData['id'];
-      return $license;
+    } else {
+      if (array_key_exists('id', $licenseData) && !empty($licenseData['id'])) {
+        $license['license']['id'] = $licenseData['id'];
+      } else if (array_key_exists('name', $licenseData) && !empty($licenseData['name'])) {
+        $license['license']['name'] = $licenseData['name'];
+      }
+
+      if (array_key_exists('url', $licenseData) && !empty($licenseData['url'])) {
+        $license['license']['url'] = $licenseData['url'];
+      }
+
+      if (array_key_exists('textContent', $licenseData) && !empty($licenseData['textContent'])) {
+        $license['license']['text'] = [
+          'content' => $licenseData['textContent'],
+          'contentType' => $licenseData['textContentType'],
+          'encoding' => 'base64'
+        ];
+      }
     }
 
-    if (array_key_exists('id', $licenseData) && !empty($licenseData['id'])) {
-      $license['license']['id'] = $licenseData['id'];
-    } else if (array_key_exists('name', $licenseData) && !empty($licenseData['name'])) {
-      $license['license']['name'] = $licenseData['name'];
-    }
+    if (array_key_exists('evidences', $licenseData) && !empty($licenseData['evidences'])) {
+      $license['evidence']['licenses'] = [];
+      foreach ($licenseData['evidences'] as $ev) {
+        $evidenceLicense = [];
+        if (array_key_exists('id', $licenseData) && !empty($licenseData['id']) && stripos($licenseData['id'], LicenseRef::SPDXREF_PREFIX) !== 0) {
+          $evidenceLicense['id'] = $licenseData['id'];
+        } else if (array_key_exists('name', $licenseData) && !empty($licenseData['name'])) {
+          $evidenceLicense['name'] = $licenseData['name'];
+        } else if (array_key_exists('id', $licenseData) && !empty($licenseData['id'])) {
+          $evidenceLicense['name'] = $licenseData['id'];
+        }
 
-    if (array_key_exists('url', $licenseData) && !empty($licenseData['url'])) {
-      $license['license']['url'] = $licenseData['url'];
-    }
+        $source = [
+          'name' => $ev['scanner']
+        ];
+        if (isset($ev['confidence']) && $ev['confidence'] !== null) {
+          $source['confidence'] = $ev['confidence'];
+        }
 
-    if (array_key_exists('textContent', $licenseData) && !empty($licenseData['textContent'])) {
-      $license['license']['text'] = [
-        'content' => $licenseData['textContent'],
-        'contentType' => $licenseData['textContentType'],
-        'encoding' => 'base64'
-      ];
+        $license['evidence']['licenses'][] = [
+          'license' => $evidenceLicense,
+          'source' => $source
+        ];
+      }
     }
 
     return $license;
