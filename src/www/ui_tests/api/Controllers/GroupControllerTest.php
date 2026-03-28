@@ -171,6 +171,64 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
   }
   /**
    * @test
+   * -# Test GroupController::createGroup() for valid create request in version 1
+   * -# Check if response status is 200
+   */
+  public function testCreateGroupV1()
+  {
+    $this->testCreateGroup(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test GroupController::createGroup() for valid create request in version 2
+   * -# Check if response status is 201
+   */
+  public function testCreateGroupV2()
+  {
+    $this->testCreateGroup();
+  }
+  /**
+   * @param $version
+   * @return void
+   */
+  private function testCreateGroup($version = ApiVersion::V2)
+  {
+    $groupName = 'fossyGroup';
+    $groupId = 4;
+    $userId = 1;
+
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('addGroup')->withArgs([$groupName])
+      ->andReturn($groupId);
+    $this->userDao->shouldReceive('addGroupMembership')
+      ->withArgs([$groupId, $userId]);
+
+    $requestHeaders = new Headers();
+    if ($version == ApiVersion::V2) {
+      $request = new Request("POST",
+        new Uri("HTTP", "localhost", null, "/groups", "name=" . $groupName),
+        $requestHeaders, [], [], $this->streamFactory->createStream());
+    } else {
+      $requestHeaders->setHeader('name', $groupName);
+      $request = new Request("POST", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $this->streamFactory->createStream());
+    }
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
+
+    $expectedCode = $version == ApiVersion::V2 ? 201 : 200;
+    $expectedResponse = new Info($expectedCode,
+      "Group $groupName added.", InfoType::INFO);
+
+    $actualResponse = $this->groupController->createGroup($request,
+      new ResponseHelper(), []);
+
+    $this->assertEquals($expectedResponse->getCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($expectedResponse->getArray(),
+      $this->getResponseJson($actualResponse));
+  }
+  /**
+   * @test
    * -# Test GroupController::deleteGroup() for valid delete request in version 1
    * -# Check if response status is 202
    */
