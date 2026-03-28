@@ -29,6 +29,7 @@ selectedLicensesTableConfig = {
       if (nRow.className.match(/(^| )removed($| )/g)  ) {
           $('td', nRow).addClass('read_only');
       }
+      applyPolicyStyles(nRow, aData[1], 1);
   },
   "aoColumns": selectedLicensesTableColumns,
   "iDisplayLength": 25,
@@ -84,8 +85,26 @@ addLicenseTableConfig = {
           });
         }
       }
+      
+      // Apply Policy Filter
+      var activeRanks = [];
+      $('.policy-filter-cb:checked').each(function() {
+         activeRanks.push(parseInt($(this).val()));
+      });
+      data.aaData = data.aaData.filter(function (row) {
+         const plainName = $('<div>').html(row[0]).text().trim();
+         var rank = licensePolicies[plainName];
+         // If license has no known policy, treat it as approved (0) or always show it? 
+         // Realistically, treat unranked as approved, or always show. Let's assume Rank 0.
+         if (rank === undefined) rank = 0; 
+         return activeRanks.includes(rank);
+      });
+
       fnCallback(data);
     }).fail(failed);
+  },
+  "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+      applyPolicyStyles(nRow, aData[0], 0);
   },
   "aoColumns": addLicenseTableColumns,
   "iDisplayLength": 25,
@@ -267,9 +286,121 @@ function highlightSearchMatches() {
   });
 }
 
+var licensePolicies = {};
+var policyColors = {
+  0: '#d4edda', // Approved (Green)
+  1: '#fff3cd', // Restricted (Yellow)
+  2: '#f8d7da'  // Banned (Red)
+};
+var policyLabels = {
+  0: 'Approved',
+  1: 'Restricted',
+  2: 'Banned'
+};
+
+function applyPolicyStyles(nRow, licenseHtml, colIndex) {
+  var plainName = $('<div>').html(licenseHtml).text().trim();
+  if (licensePolicies[plainName] !== undefined) {
+    var rank = licensePolicies[plainName];
+    $(nRow).css('background-color', policyColors[rank]);
+    
+    var badge = $('<span>')
+      .addClass('label')
+      .css({
+        'background-color': '#fff',
+        'color': '#333',
+        'border': '1px solid ' + policyColors[rank],
+        'margin-left': '5px',
+        'font-weight': 'bold',
+        'padding': '2px 4px',
+        'border-radius': '3px'
+      })
+      .text('Policy: ' + policyLabels[rank]);
+      
+    $('td:eq('+colIndex+')', nRow).append(badge);
+  }
+}
+
 $(document).ready(function () {
-  createClearingTable();
-  createLicenseSelectionTable();
+  var uiCsrfToken = '';
+  
+  // Load policy ranks
+  $.ajax({
+    url: '?mod=ajax_license_policy&action=get_all',
+    method: 'GET',
+    dataType: 'json',
+    success: function(response) {
+      if (response && response.status === true && Array.isArray(response.policies)) {
+        response.policies.forEach(function(p) {
+          licensePolicies[p.rf_shortname] = p.policy_rank;
+        });
+      }
+      createClearingTable();
+      createLicenseSelectionTable();
+    },
+    error: function() {
+      // Fallback if API fails
+      createClearingTable();
+      createLicenseSelectionTable();
+    }
+  });
+  
+  // Load persistent policy filter and CSRF
+  $.ajax({
+    url: '?mod=ajax_license_policy&action=get_token',
+    method: 'GET',
+    dataType: 'json',
+    success: function(resp) {
+       if(resp.status && resp.csrfToken) {
+           uiCsrfToken = resp.csrfToken;
+       }
+    }
+  });
+
+  $.ajax({
+    url: '?mod=ajax_license_policy&action=get_filter',
+    method: 'GET',
+    dataType: 'json',
+    success: function(response) {
+      if (response && response.status === true && Array.isArray(response.filters)) {
+        if (response.filters.length > 0) {
+          $('.policy-filter-cb').prop('checked', false);
+          response.filters.forEach(function(f) {
+             $('#filterPolicy'+f).prop('checked', true);
+          });
+          if (typeof otable !== 'undefined' && $('#licenseSelectionTable').DataTable) {
+             $('#licenseSelectionTable').dataTable().fnDraw(false);
+          }
+        }
+      }
+    }
+  });
+
+  $('.policy-filter-cb').on('change', function() {
+      if ($('.policy-filter-cb:checked').length === 0) {
+          // Prevent unchecking all to avoid empty table trap
+          $(this).prop('checked', true);
+          return;
+      }
+      
+      $('#licenseSelectionTable').dataTable().fnDraw(false);
+      
+      var activeFilters = [];
+      $('.policy-filter-cb:checked').each(function() {
+         activeFilters.push(parseInt($(this).val()));
+      });
+      
+      $.ajax({
+         url: '?mod=ajax_license_policy&action=set_filter',
+         method: 'POST',
+         dataType: 'json',
+         data: {
+             filters: activeFilters,
+             csrfToken: uiCsrfToken
+         }
+      });
+  });
+
   $('[data-toggle="tooltip"]').tooltip();
 
   {% if searchQuery %}
@@ -292,3 +423,4 @@ $(document).ready(function () {
     navigateToMatch(currentMatchIndex - 1);
   });
 });
+

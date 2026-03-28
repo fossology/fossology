@@ -1,0 +1,12 @@
+### Summary
+The job queue polling code in `job-queue-poll.js` assumes that a `callbackfail` function is always provided when calling `queueUpdateCheck`. However, some components (like `scheduledBootstrapSuccess` in the License Browser) don't pass a failure callback. When a job fails (e.g. from version check failure at the scheduler), it calls `callbackfail(jqId)` which throws `TypeError: callbackfail is not a function`, causing the page to crash and freeze completely.
+
+### Fix
+This PR implements two fixes:
+1. **Defensive handling (`job-queue-poll.js`)**: Adds `typeof` checks before invoking callbacks. If no failure callback is provided, it falls back to `location.reload()` so the page doesn't freeze and reflects the previous state/licenses applied.
+2. **Proper Error Feedback (`change-license-common.js`)**: Updates the `queueUpdateCheck` calls to pass a failure callback that displays a red alert banner saying "job failed (see job #X)" instead of silently reloading or crashing.
+
+### Related Issues
+Fixes #1595
+
+*Note: This is a revised implementation following the closure of PR #3253, specifically addressing the maintainer's feedback that logging to the console is unhelpful for actual users. This ensures the user either sees a visible error banner or has the page reload safely.*
