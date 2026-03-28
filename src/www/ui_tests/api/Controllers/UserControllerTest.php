@@ -119,7 +119,7 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
         continue;
       }
       $user = new User($userId, "user$userId", "User $userId",
-        "user$userId@example.com", $accessLevel, 2, 4, "");
+        "user$userId@example.com", $accessLevel, 2, 4, "", null, null, [['id' => 1, 'name' => 'fossy', 'perm' => 1]]);
       $userArray[] = $user;
     }
     return $userArray;
@@ -392,5 +392,122 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test UserController::addUser() for version 1
+   * -# Check if response status is 201
+   */
+  public function testAddUserV1()
+  {
+    $this->testAddUser(ApiVersion::V1);
+  }
+
+  /**
+   * @test
+   * -# Test UserController::addUser() for version 2
+   * -# Check if response status is 201
+   */
+  public function testAddUserV2()
+  {
+    $this->testAddUser();
+  }
+
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testAddUser($version = ApiVersion::V2)
+  {
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn($version);
+    $request->shouldReceive('getHeaderLine')->with('Content-Type')->andReturn('application/json');
+    $userDetails = [
+      'name' => 'newuser',
+      'description' => 'test user',
+      'email' => 'test@example.com',
+      'accessLevel' => 'read_only',
+      'rootFolderId' => 1,
+      'emailNotification' => true,
+      'defaultVisibility' => 'public'
+    ];
+    $userDetails[$version == ApiVersion::V2 ? 'userPass' : 'user_pass'] = 'Password123!';
+
+    $stream = M::mock(\Psr\Http\Message\StreamInterface::class);
+    $stream->shouldReceive('getContents')->andReturn(json_encode($userDetails));
+    $request->shouldReceive('getBody')->andReturn($stream);
+
+    global $container;
+    $userAddPlugin = M::mock('user_add');
+    $userAddPlugin->shouldReceive('add')->with(M::type(\Symfony\Component\HttpFoundation\Request::class))
+      ->andReturn('');
+
+    $this->restHelper->shouldReceive('getPlugin')->with('user_add')->andReturn($userAddPlugin);
+
+    $info = new Info(201, "User created successfully", InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), $info->getCode());
+
+    $actualResponse = $this->userController->addUser($request, new ResponseHelper(), []);
+    $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+  }
+
+  /**
+   * @test
+   * -# Test UserController::addUser() with groups for version 2
+   * -# Check if response status is 201 and group membership is added
+   */
+  public function testAddUserWithGroupsV2()
+  {
+    $version = ApiVersion::V2;
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getAttribute')->andReturn($version);
+    $request->shouldReceive('getHeaderLine')->with('Content-Type')->andReturn('application/json');
+
+    $userDetails = [
+      'name' => 'newuser',
+      'userPass' => 'Password123!',
+      'description' => 'test user',
+      'email' => 'test@example.com',
+      'accessLevel' => 'read_only',
+      'rootFolderId' => 1,
+      'emailNotification' => true,
+      'defaultVisibility' => 'public',
+      'groups' => [
+        ['id' => 10, 'perm' => 1],
+        ['id' => 11, 'perm' => 0]
+      ]
+    ];
+
+    $stream = M::mock(\Psr\Http\Message\StreamInterface::class);
+    $stream->shouldReceive('getContents')->andReturn(json_encode($userDetails));
+    $request->shouldReceive('getBody')->andReturn($stream);
+
+    global $container;
+    $userAddPlugin = M::mock('user_add');
+    $userAddPlugin->shouldReceive('add')->andReturn('');
+    $this->restHelper->shouldReceive('getPlugin')->with('user_add')->andReturn($userAddPlugin);
+
+    $newUser = ['user_pk' => 100, 'name' => 'newuser', 'group_fk' => 100]; // own group is 100
+    $this->userDao->shouldReceive('getUserByName')->with('newuser')->andReturn($newUser);
+    $this->restHelper->shouldReceive('getUserId')->andReturn(1); // caller is admin (id 1)
+
+    // Setup group validation mocks
+    $this->dbHelper->shouldReceive('doesIdExist')->with('groups', 'group_pk', 10)->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')->with('groups', 'group_pk', 11)->andReturn(true);
+
+    // Callers access check
+    // Note: addUser is system-admin only in Controller, and we mock session in setUp.
+    // However the code also checks isAdvisorOrAdmin if not system admin.
+    // In our test Auth::isAdmin() is true (set in setUp).
+
+    $this->userDao->shouldReceive('addGroupMembership')->with(10, 100, 1)->once();
+    $this->userDao->shouldReceive('addGroupMembership')->with(11, 100, 0)->once();
+
+    $info = new Info(201, "User created successfully", InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), $info->getCode());
+
+    $actualResponse = $this->userController->addUser($request, new ResponseHelper(), []);
+    $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
   }
 }

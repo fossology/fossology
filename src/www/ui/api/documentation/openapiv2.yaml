@@ -5676,6 +5676,19 @@ components:
           description: Default bucket pool id
           type: integer
           nullable: true
+        groups:
+          type: array
+          description: List of groups to assign the user to
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: ID of the group
+              perm:
+                type: integer
+                enum: [0, 1, 2]
+                description: Permission level in the group (0=User, 1=Admin, 2=Advisor)
       required:
         - id
     Analysis:

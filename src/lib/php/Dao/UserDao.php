@@ -104,6 +104,27 @@ class UserDao
   }
 
   /**
+   * @param int $userId
+   * @return array List of groups with permissions in format [['id'=>int, 'name'=>string, 'perm'=>int], ...]
+   */
+  public function getUserGroupsWithPerm($userId)
+  {
+    $sql = "SELECT group_pk, group_name, group_perm FROM groups, group_user_member WHERE group_pk=group_fk AND user_fk=$1";
+    $this->dbManager->prepare($stmt=__METHOD__, $sql);
+    $res = $this->dbManager->execute($stmt,array($userId));
+    $groups = array();
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $groups[] = array(
+        'id' => intval($row['group_pk']),
+        'name' => $row['group_name'],
+        'perm' => intval($row['group_perm'])
+      );
+    }
+    $this->dbManager->freeResult($res);
+    return $groups;
+  }
+
+  /**
    * @brief get array of groups that this user has admin access to
    * @param int $userId
    * @return array in the format {group_pk=>group_name, group_pk=>group_name, ...}
