@@ -225,3 +225,108 @@ int saveDiffHighlightsToDb(fo_dbManager* dbManager, const GArray* matchedInfo, l
 
   return 1;
 }
+
+/**
+ * \brief Query all active custom phrases from the database
+ * \param dbManager Database manager
+ * \return GArray* of Phrase* structures (caller must free with phrases_free)
+ */
+GArray* queryActiveCustomPhrases(fo_dbManager* dbManager) {
+  PGresult* result = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager,
+      "queryActiveCustomPhrases",
+      "SELECT cp_pk, text, acknowledgement, comments FROM custom_phrase WHERE is_active = true"
+    )
+  );
+
+  if (!result) {
+    return g_array_new(FALSE, FALSE, sizeof(Phrase*));
+  }
+
+  int numRows = PQntuples(result);
+  GArray* phrases = g_array_new(FALSE, FALSE, sizeof(Phrase*));
+
+  for (int i = 0; i < numRows; i++) {
+    Phrase* phrase = (Phrase*)g_malloc(sizeof(Phrase));
+
+    phrase->cpId = atol(PQgetvalue(result, i, 0));
+    phrase->text = g_strdup(PQgetvalue(result, i, 1));
+    phrase->acknowledgement = PQgetisnull(result, i, 2) ? NULL : g_strdup(PQgetvalue(result, i, 2));
+    phrase->comments = PQgetisnull(result, i, 3) ? NULL : g_strdup(PQgetvalue(result, i, 3));
+
+    // Query mapped licenses for this phrase
+    phrase->licenseMappings = queryMappedLicensesForPhrase(dbManager, phrase->cpId);
+
+    g_array_append_val(phrases, phrase);
+  }
+
+  PQclear(result);
+  return phrases;
+}
+
+/**
+ * \brief Query mapped licenses for a given phrase with add/remove flags
+ * \param dbManager Database manager
+ * \param cpId Custom phrase ID (cp_pk)
+ * \return GArray* of LicenseMapping structures
+ */
+GArray* queryMappedLicensesForPhrase(fo_dbManager* dbManager, long cpId) {
+  PGresult* result = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager,
+      "queryMappedLicensesForPhrase",
+      "SELECT rf_fk, removing FROM custom_phrase_license_map WHERE cp_fk = $1",
+      long
+    ),
+    cpId
+  );
+
+  GArray* licenseMappings = g_array_new(FALSE, FALSE, sizeof(LicenseMapping));
+
+  if (result) {
+    int numRows = PQntuples(result);
+    for (int i = 0; i < numRows; i++) {
+      LicenseMapping mapping;
+      mapping.rfPk = atol(PQgetvalue(result, i, 0));
+      mapping.removing = (strcmp(PQgetvalue(result, i, 1), "t") == 0) ? 1 : 0;
+      g_array_append_val(licenseMappings, mapping);
+    }
+    PQclear(result);
+  }
+
+  return licenseMappings;
+}
+
+/**
+ * \brief Free a single Phrase structure
+ * \param phrase Phrase to free
+ */
+void phrase_free(Phrase* phrase) {
+  if (!phrase) return;
+
+  g_free(phrase->text);
+  g_free(phrase->acknowledgement);
+  g_free(phrase->comments);
+
+  if (phrase->licenseMappings) {
+    g_array_free(phrase->licenseMappings, TRUE);
+  }
+
+  g_free(phrase);
+}
+
+/**
+ * \brief Free an array of Phrase structures
+ * \param phrases GArray* of Phrase* to free
+ */
+void phrases_free(GArray* phrases) {
+  if (!phrases) return;
+
+  for (guint i = 0; i < phrases->len; i++) {
+    Phrase* phrase = g_array_index(phrases, Phrase*, i);
+    phrase_free(phrase);
+  }
+
+  g_array_free(phrases, TRUE);
+}

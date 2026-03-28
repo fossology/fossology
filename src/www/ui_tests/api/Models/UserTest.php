@@ -155,7 +155,8 @@ class UserTest extends TestCase
           "patent"                 => false,
           "scanoss"                => false,
           "reso"                   => false,
-          "compatibility"          => false
+          "compatibility"          => false,
+          "kotoba_bulk"            => false
         ]
       ];
     } else{
@@ -182,7 +183,8 @@ class UserTest extends TestCase
           "softwareHeritage"     => false,
           "scanoss"              => false,
           "reso"                 => false,
-          "compatibility"        => false
+          "compatibility"        => false,
+          "kotoba"           => false
         ]
       ];
     }
