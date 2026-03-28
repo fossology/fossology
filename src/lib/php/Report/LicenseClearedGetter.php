@@ -24,6 +24,8 @@ class LicenseClearedGetter extends ClearedGetterCommon
   private $onlyComments = false;
   /** @var Boolean */
   private $onlyAcknowledgements = false;
+  /** @var Boolean */
+  private $excludeIrrelevant = true;
   /** @var ClearingDao */
   private $clearingDao;
   /** @var LicenseDao */
@@ -54,7 +56,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
     $licenseMap = new LicenseMap($dbManager, $groupId, LicenseMap::REPORT);
     $ungroupedStatements = array();
     foreach ($clearingDecisions as $clearingDecision) {
-      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
+      if ($this->excludeIrrelevant && $clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
         continue;
       }
       /** @var ClearingDecision $clearingDecision */
@@ -188,6 +190,14 @@ class LicenseClearedGetter extends ClearedGetterCommon
   {
     $this->onlyComments = false;
     $this->onlyAcknowledgements = $displayOnlyAcknowledgements;
+  }
+
+  /**
+   * @param boolean $excludeIrrelevant Whether to exclude irrelevant files
+   */
+  public function setExcludeIrrelevant($excludeIrrelevant)
+  {
+    $this->excludeIrrelevant = $excludeIrrelevant;
   }
 
   /**
