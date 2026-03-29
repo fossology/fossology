@@ -966,6 +966,76 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    * @runInSeparateProcess
    * @preserveGlobalState disabled
    * @test
+   * -# Test for UploadController::postUpload() with negative folderId V1
+   * -# Check if response status is 400
+   */
+  public function testPostUploadNegativeFolderIdV1()
+  {
+    $this->testPostUploadNegativeFolderId(ApiVersion::V1);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
+   * -# Test for UploadController::postUpload() with negative folderId V2
+   * -# Check if response status is 400
+   */
+  public function testPostUploadNegativeFolderIdV2()
+  {
+    $this->testPostUploadNegativeFolderId(ApiVersion::V2);
+  }
+
+  /**
+   * @param int $version Version to test
+   * @return void
+   */
+  private function testPostUploadNegativeFolderId(int $version)
+  {
+    $folderId = -1;
+    $uploadDescription = "Test Upload";
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-type', 'application/json');
+    if ($version == ApiVersion::V2) {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData",
+        "folderId" => $folderId,
+        "uploadDescription" => $uploadDescription,
+        "ignoreScm" => "true",
+        "scanOptions" => "scanOptions",
+        "uploadType" => "vcs"
+      ]));
+    } else {
+      $body = $this->streamFactory->createStream(json_encode([
+        "location" => "vcsData",
+        "scanOptions" => "scanOptions"
+      ]));
+      $requestHeaders->setHeader('folderId', $folderId);
+      $requestHeaders->setHeader('uploadDescription', $uploadDescription);
+      $requestHeaders->setHeader('ignoreScm', 'true');
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $requestHeaders->setHeader('uploadType', 'vcs');
+    }
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+    }
+
+    $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
+
+    $this->expectException(HttpBadRequestException::class);
+
+    $this->uploadController->postUpload($request, new ResponseHelper(),
+      []);
+  }
+
+  /**
+   * @runInSeparateProcess
+   * @preserveGlobalState disabled
+   * @test
    * -# Test for UploadController::postUpload() with internal error with V1 parameters
    * -# Check if response status is 500 with error messages set
    */
