@@ -163,9 +163,11 @@ class ReuserPlugin extends DefaultPlugin
       $rootFolderId = $this->folderDao->getRootFolder(Auth::getUserId())->getId();
       $vars['folderStructure'] = $this->folderDao->getFolderStructure($rootFolderId);
     }
+    /* Disable the check to always show the reuser UI for Auto-Suggest
     if ($this->folderDao->isWithoutReusableFolders($vars['folderStructure'])) {
       return '';
     }
+    */
     $pair = array_key_exists(self::FOLDER_PARAMETER_NAME, $vars) ? $vars[self::FOLDER_PARAMETER_NAME] : '';
 
     list($folderId, $trustGroupId) = $this->getFolderIdAndTrustGroup($pair);

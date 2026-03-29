@@ -537,13 +537,13 @@ document.addEventListener('click', function(e) {
                     suggestedIds.push(item.id.toString());
                 });
 
-                // MUTUAL EXCLUSIVITY: Hide these from the native (manual) select
+                // MUTUAL EXCLUSIVITY: Hide these from the native (manual) select but do NOT disable
                 $nativeSelect.find('option').each(function() {
-                    if (suggestedIds.includes($(this).val())) {
-                        $(this).prop('disabled', true).hide();
-                        if ($(this).is(':selected')) {
-                           $(this).prop('selected', false);
-                        }
+                    const $opt = $(this);
+                    if (suggestedIds.includes($opt.val())) {
+                        // We only hide, we MUST NOT disable, otherwise they aren't submitted
+                        $opt.hide();
+                        // If it's already selected manually, keep it, otherwise do nothing
                     }
                 });
                 $nativeSelect.trigger('change.select2');
@@ -584,19 +584,23 @@ $(document).on('change', '.auto-suggested-source', function() {
     // Ensure we don't clear manual selections, we just sync auto-suggest selections in
     if (selectedIDs.length > 0) {
         selectedIDs.forEach(id => {
-            const selectedText = $autoSelect.find(`option[value="${id}"]`).text();
-            // Inject if missing (it might be hidden in manual select, so we unhide it if selected in auto?)
-            // Actually user wants them separate. If selected in auto, it should stay hidden in manual.
-            if ($nativeSelect.find(`option[value="${id}"]`).length === 0) {
+            const $existingOpt = $nativeSelect.find(`option[value="${id}"]`);
+            if ($existingOpt.length === 0) {
+                const selectedText = $autoSelect.find(`option[value="${id}"]`).text();
                 const newOpt = new Option(selectedText, id, true, true);
                 $(newOpt).data('from-autosuggest', true);
                 $nativeSelect.append(newOpt);
             } else {
-                $nativeSelect.find(`option[value="${id}"]`).prop('selected', true);
+                // Ensure it's enabled (just in case) and selected
+                $existingOpt.prop('disabled', false).prop('selected', true).show();
             }
         });
-        $nativeSelect.trigger('change');
+    } else {
+        // If nothing is selected in auto-suggest, we might want to unselect those that came from it?
+        // But the user might have selected them manually too. 
+        // For now, let's just trigger change.
     }
+    $nativeSelect.trigger('change').trigger('change.select2');
 });
 
   </script>

@@ -978,10 +978,12 @@ ORDER BY lft asc
   {
     $groupId = \Fossology\Lib\Auth\Auth::getGroupId();
 
-    $sql = "SELECT u.upload_pk AS id, u.upload_filename AS name, u.upload_ts AS date 
+    $sql = "SELECT u.upload_pk AS id, u.upload_filename AS name, MAX(ce.date_added) AS date 
                 FROM upload u
                 INNER JOIN upload_clearing uc ON uc.upload_fk = u.upload_pk AND uc.group_fk = $1
                 INNER JOIN foldercontents fc ON fc.child_id = u.upload_pk AND fc.foldercontents_mode = 2 
+                INNER JOIN uploadtree ut ON ut.upload_fk = u.upload_pk
+                INNER JOIN clearing_event ce ON ce.uploadtree_fk = ut.uploadtree_pk AND ce.removed = false
                 WHERE u.upload_filename ILIKE $2 
                 AND u.upload_mode IN (100, 104)
                 AND u.pfile_fk IS NOT NULL";
@@ -992,7 +994,8 @@ ORDER BY lft asc
       $params[] = $excludeFilename;
     }
 
-    $sql .= " ORDER BY u.upload_ts DESC LIMIT $3";
+    $sql .= " GROUP BY u.upload_pk, u.upload_filename";
+    $sql .= " ORDER BY date DESC LIMIT $3";
 
     // Use FOSSology's standard dbManager to execute safely and prevent SQL injection
     $rows = $this->dbManager->getRows(
