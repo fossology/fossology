@@ -493,6 +493,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
    * -# Check if the delimiter is changed.
    * -# Set a new delimiter using LicenseCsvImport::setDelimiter().
    * -# Check if the delimiter is changed with only the first character passed.
+   * -# Call setDelimiter() with an empty string.
+   * -# Check the delimiter is unchanged (empty string guard).
    */
   public function testSetDelimiter()
   {
@@ -505,6 +507,9 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
 
     $licenseCsvImport->setDelimiter('<>');
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'delimiter'),is('<'));
+
+    $licenseCsvImport->setDelimiter('');
+    assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'delimiter'),is('<'));
   }
 
   /**
@@ -515,6 +520,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
    * -# Check if the enclosure is changed.
    * -# Set a new enclosure using LicenseCsvImport::setEnclosure().
    * -# Check if the enclosure is changed with only the first character passed.
+   * -# Call setEnclosure() with an empty string.
+   * -# Check the enclosure is unchanged (empty string guard).
    */
   public function testSetEnclosure()
   {
@@ -526,6 +533,9 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'enclosure') ,is('|'));
 
     $licenseCsvImport->setEnclosure('<>');
+    assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'enclosure'),is('<'));
+
+    $licenseCsvImport->setEnclosure('');
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'enclosure'),is('<'));
   }
 
