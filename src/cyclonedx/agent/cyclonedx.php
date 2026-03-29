@@ -224,6 +224,11 @@ class CycloneDXAgent extends Agent
       }
       $licensedata['id'] = $mainLicObj->getSpdxId();
       $licensedata['url'] = $mainLicObj->getUrl();
+      $mainLicText = $mainLicObj->getText();
+      if (!empty($mainLicText)) {
+        $licensedata['textContent'] = base64_encode($mainLicText);
+        $licensedata['textContentType'] = 'text/plain';
+      }
       $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
     }
 
@@ -293,22 +298,34 @@ class CycloneDXAgent extends Agent
       if (!empty($licenses->getConcludedLicenses())) {
         foreach ($licenses->getConcludedLicenses() as $licenseId) {
           if (array_key_exists($licenseId, $this->licensesInDocument)) {
+            $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
             $licensedata = array(
-              "id"   => $this->licensesInDocument[$licenseId]->getLicenseObj()->getSpdxId(),
-              "name" => $this->licensesInDocument[$licenseId]->getLicenseObj()->getFullName(),
-              "url"  => $this->licensesInDocument[$licenseId]->getLicenseObj()->getUrl()
+              "id"   => $licObj->getSpdxId(),
+              "name" => $licObj->getFullName(),
+              "url"  => $licObj->getUrl()
             );
+            $licText = $licObj->getText();
+            if (!empty($licText)) {
+              $licensedata["textContent"] = base64_encode($licText);
+              $licensedata["textContentType"] = "text/plain";
+            }
             $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
           }
         }
       } else {
         foreach ($licenses->getScanners() as $licenseId) {
           if (array_key_exists($licenseId, $this->licensesInDocument)) {
+            $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
             $licensedata = array(
-              "id"   => $this->licensesInDocument[$licenseId]->getLicenseObj()->getSpdxId(),
-              "name" => $this->licensesInDocument[$licenseId]->getLicenseObj()->getFullName(),
-              "url"  => $this->licensesInDocument[$licenseId]->getLicenseObj()->getUrl()
+              "id"   => $licObj->getSpdxId(),
+              "name" => $licObj->getFullName(),
+              "url"  => $licObj->getUrl()
             );
+            $licText = $licObj->getText();
+            if (!empty($licText)) {
+              $licensedata["textContent"] = base64_encode($licText);
+              $licensedata["textContentType"] = "text/plain";
+            }
             $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
           }
         }
