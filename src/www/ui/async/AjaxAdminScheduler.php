@@ -80,6 +80,20 @@ class AjaxAdminScheduler extends DefaultPlugin
   }
 
   /**
+   * @brief Convert simple array to associative array for Twig macro
+   * @param array $simpleArray Simple array like [259, 260]
+   * @return array Associative array like [259 => 259, 260 => 260]
+   */
+  private function convertToAssociative($simpleArray)
+  {
+    $result = [];
+    foreach ($simpleArray as $item) {
+      $result[$item] = $item;
+    }
+    return $result;
+  }
+
+  /**
    * @brief get the job list for the specified operation
    * @param string $type operation type
    * @return array job list of option elements
@@ -92,16 +106,16 @@ class AjaxAdminScheduler extends DefaultPlugin
 
     $job_array = array();
     if ('status' == $type || 'verbose' == $type || 'priority' == $type) {
-      $job_array = GetRunnableJobList();
+      $job_array = $this->convertToAssociative(GetRunnableJobList());
       if ('priority' != $type) {
         $job_array[0] = "scheduler";
       }
     }
     if ('pause' == $type) {
-      $job_array = GetJobList("Started");
+      $job_array = $this->convertToAssociative(GetRunnableJobList());
     }
     if ('restart' == $type) {
-      $job_array = GetJobList("Paused");
+      $job_array = $this->convertToAssociative(GetRunnableJobList());
     }
     return $job_array;
   }
