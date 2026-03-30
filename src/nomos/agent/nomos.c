@@ -157,7 +157,7 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
   {
     /* get the file path, form the file path /dir_name/file_name,
        e.g. dir_name is '/tmp' file_name is 'test_file_1.txt', form one path '/tmp/test_file_1.txt' */
-    sprintf( filename_buf , "%s/%s",dir_name, dirent_handler->d_name);
+    snprintf(filename_buf, sizeof(filename_buf), "%s/%s", dir_name, dirent_handler->d_name);
 
     if (stat(filename_buf, &stat_buf) == -1) // if can access the current file, return
     {
@@ -291,7 +291,7 @@ int main(int argc, char **argv)
 
   COMMIT_HASH = fo_sysconfig("nomos", "COMMIT_HASH");
   VERSION = fo_sysconfig("nomos", "VERSION");
-  sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
+  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, COMMIT_HASH);
 
   gl.agentPk = fo_GetAgentKey(gl.pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
 
