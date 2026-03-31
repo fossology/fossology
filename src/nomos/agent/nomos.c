@@ -157,7 +157,19 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
   {
     /* get the file path, form the file path /dir_name/file_name,
        e.g. dir_name is '/tmp' file_name is 'test_file_1.txt', form one path '/tmp/test_file_1.txt' */
-    snprintf(filename_buf, sizeof(filename_buf), "%s/%s", dir_name, dirent_handler->d_name);
+    int snprintf_ret = snprintf(filename_buf, sizeof(filename_buf), "%s/%s", dir_name, dirent_handler->d_name);
+    if (snprintf_ret < 0)
+    {
+      LOG_FATAL("Unable to format file path due to encoding/formatting error: %s/%s", dir_name, dirent_handler->d_name);
+      closedir(dir_handler);
+      return;
+    }
+    if ((size_t)snprintf_ret >= sizeof(filename_buf))
+    {
+      LOG_FATAL("Truncated file path while formatting: %s/%s", dir_name, dirent_handler->d_name);
+      closedir(dir_handler);
+      return;
+    }
 
     if (stat(filename_buf, &stat_buf) == -1) // if can access the current file, return
     {
@@ -291,7 +303,17 @@ int main(int argc, char **argv)
 
   COMMIT_HASH = fo_sysconfig("nomos", "COMMIT_HASH");
   VERSION = fo_sysconfig("nomos", "VERSION");
-  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, COMMIT_HASH);
+  int snprintf_ret = snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, COMMIT_HASH);
+  if (snprintf_ret < 0)
+  {
+    LOG_FATAL("Unable to format agent revision due to encoding/formatting error: VERSION=%s COMMIT_HASH=%s", VERSION, COMMIT_HASH)
+    Bail(-__LINE__);
+  }
+  if ((size_t)snprintf_ret >= sizeof(agent_rev))
+  {
+    LOG_FATAL("Truncated agent revision while formatting: VERSION=%s COMMIT_HASH=%s", VERSION, COMMIT_HASH)
+    Bail(-__LINE__);
+  }
 
   gl.agentPk = fo_GetAgentKey(gl.pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
 
