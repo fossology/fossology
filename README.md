@@ -41,8 +41,11 @@ page in [GitHub Wiki](https://github.com/fossology/fossology/wiki)
 
 FOSSology comes with a Dockerfile allowing the containerized execution
 both as a single instance or in combination with an external PostgreSQL database.
+
 **Note:** It is strongly recommended to use an external database for production
 use since the standalone image does not take care of data persistence.
+
+**Prerequisite:** Docker Engine (or Docker Desktop) must be installed and running.
 
 A pre-built Docker image is available from [Docker Hub](https://hub.docker.com/r/fossology/fossology/) and can be run using the following command:
 
