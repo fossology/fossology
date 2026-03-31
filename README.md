@@ -48,7 +48,7 @@ use since the standalone image does not take care of data persistence.
 **Prerequisite:** Docker Engine (or Docker Desktop) must be installed and running.
 
 A pre-built Docker image is available from [Docker Hub](https://hub.docker.com/r/fossology/fossology/) and can be run using the following command:
-
+**Prerequisite:** Docker Engine (or Docker Desktop) must be installed and running.
 ```sh
 docker run -p 8081:80 fossology/fossology
 ```
