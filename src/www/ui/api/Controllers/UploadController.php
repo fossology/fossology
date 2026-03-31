@@ -726,16 +726,14 @@ class UploadController extends RestController
     // Handle update of name
     if (
       $isJsonRequest &&
-      array_key_exists(self::FILTER_NAME, $bodyContent) &&
-      strlen(trim($bodyContent[self::FILTER_NAME])) > 0
+      array_key_exists(self::FILTER_NAME, $bodyContent)
     ) {
       $newName = trim($bodyContent[self::FILTER_NAME]);
     }
     // Handle update of description
     if (
       $isJsonRequest &&
-      array_key_exists("uploadDescription", $bodyContent) &&
-      strlen(trim($bodyContent["uploadDescription"])) > 0
+      array_key_exists("uploadDescription", $bodyContent)
     ) {
       $newDescription = trim($bodyContent["uploadDescription"]);
     }
