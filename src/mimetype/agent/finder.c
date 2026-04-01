@@ -172,6 +172,19 @@ int CheckMimeTypes(char *Ext)
   /* For specagent (used because the DB query 'like %.spec' is slow) */
   if (!strcasecmp(Ext,"spec")) return(DBFindMime("application/x-rpm-spec"));
 
+  /* For containeragent — Docker saved image tarballs (docker save output).
+   * libmagic reports these as generic application/x-tar because it cannot
+   * inspect the tar contents for manifest.json.  We refine the type here
+   * based on the file extension so containeragent can pick them up. */
+  if (!strcasecmp(Ext,"tar")) return(DBFindMime("application/vnd.docker.image.rootfs.diff.tar"));
+
+  /* For containeragent — OCI image layout manifests.
+   * OCI images unpacked by ununpack expose their top-level index.json;
+   * when that file is the upload target its extension is .json.
+   * libmagic returns text/plain for JSON, so we intercept .json here and
+   * route it to the OCI MIME type so containeragent receives it. */
+  if (!strcasecmp(Ext,"json")) return(DBFindMime("application/vnd.oci.image.manifest.v1+json"));
+
   return(-1);
 } /* CheckMimeTypes() */
 

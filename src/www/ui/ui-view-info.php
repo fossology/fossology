@@ -194,6 +194,7 @@ class ui_view_info extends FO_Plugin
     if (pg_num_rows($result)) {
       $vars['fileInfo'] = 1;
       $row = pg_fetch_assoc($result);
+      $uploadFkForMeta = $row['upload_fk'];  /* save before $row is overwritten */
 
       if (! empty($row['mimetype_pk'])) {
         $vars['displayMimeTypeName'] = $row['mimetype_name'];
@@ -492,6 +493,420 @@ class ui_view_info extends FO_Plugin
   } // ShowPackageInfo()
 
   /**
+   * \brief Display the container image info associated with the file.
+   *
+   * Handles both Docker image tarballs and OCI image layouts that have
+   * been scanned by the containeragent.  Populates the same $vars keys
+   * used by ShowPackageInfo() so the existing Twig template can render
+   * all package/container data uniformly, plus additional container-specific
+   * keys for environment variables, exposed ports, labels, and layer history.
+   *
+   * \param int $Upload  upload_pk
+   * \param int $Item    uploadtree_pk
+   * \param int $ShowMenu unused, kept for API consistency with ShowPackageInfo
+   * \return array $vars Twig template variables
+   */
+  function ShowContainerInfo($Upload, $Item, $ShowMenu = 0)
+  {
+    $vars = [];
+
+    /* Fields shown in the main info table — label => pkg_container column */
+    $container_core_info = array(
+      "Image Name"   => "image_name",
+      "Tag"          => "image_tag",
+      "Image ID"     => "image_id",
+      "Format"       => "format",
+      "OS"           => "os",
+      "Architecture" => "architecture",
+      "Variant"      => "variant",
+      "Created"      => "created",
+      "Author"       => "author",
+      "Description"  => "description",
+      "Entrypoint"   => "entrypoint",
+      "Command"      => "cmd",
+      "Working Dir"  => "working_dir",
+      "User"         => "user_field",
+      "Layer Count"  => "layer_count",
+    );
+
+    if (empty($Item) || empty($Upload)) {
+      return $vars;
+    }
+
+    $sql = "SELECT agent_enabled FROM agent
+            WHERE agent_name = 'containeragent'
+            ORDER BY agent_ts LIMIT 1;";
+    $row = $this->dbManager->getSingleRow($sql, array(),
+             __METHOD__ . "checkContainerAgentDisabled");
+    if (isset($row) && ($row['agent_enabled'] == 'f')) {
+      return $vars;
+    }
+
+    $sql = "SELECT 1 FROM information_schema.tables
+            WHERE table_name = 'containeragent_ars' LIMIT 1;";
+    $this->dbManager->prepare(__METHOD__ . "checkContainerARS", $sql);
+    $result  = $this->dbManager->execute(__METHOD__ . "checkContainerARS",
+                                         array());
+    $numrows = pg_num_rows($result);
+    $this->dbManager->freeResult($result);
+    if ($numrows <= 0) {
+      $vars['containerAgentNA'] = 1;
+      return $vars;
+    }
+
+    $agent_status = AgentARSList('containeragent_ars', $Upload);
+    if (empty($agent_status)) {
+      $vars['containerAgentStatus'] = 1;
+      $vars['containerTrackbackUri'] = Traceback_uri() .
+        "?mod=schedule_agent&upload=$Upload&agent=agent_containeragent";
+      $vars['containerActiveScript'] = ActiveHTTPscript("Schedule");
+      return $vars;
+    }
+
+    $sql = "SELECT uploadtree_pk, upload_fk
+            FROM uploadtree WHERE uploadtree_pk = \$1;";
+    $itemRow = $this->dbManager->getSingleRow($sql, array($Item),
+                 __METHOD__ . "getItemRow");
+    if (empty($itemRow)) {
+      return $vars;
+    }
+    $uploadFk = (int)$itemRow['upload_fk'];
+
+    /* Find the upload root (parent IS NULL) */
+    $sql = "SELECT uploadtree_pk, pfile_fk
+            FROM uploadtree
+            WHERE upload_fk = \$1 AND parent IS NULL LIMIT 1;";
+    $rootRow = $this->dbManager->getSingleRow($sql, array($uploadFk),
+                 __METHOD__ . "getRootRow");
+    if (empty($rootRow)) {
+      return $vars;
+    }
+    $rootPfileFk = (int)$rootRow['pfile_fk'];
+
+    /* Look up pkg_container for the root pfile */
+    $sql = "SELECT * FROM pkg_container WHERE pfile_fk = \$1 LIMIT 1;";
+    $R = $this->dbManager->getSingleRow($sql, array($rootPfileFk),
+           __METHOD__ . "getContainerRow");
+
+    if (!$R) {
+      /* Agent has run (ARS entry exists) but found no container metadata —
+         this item is not a container image. */
+      return $vars;
+    }
+
+    $pkgPk = $R['pkg_pk'];
+    $Count = 1;
+
+    /* Derive display type from the format column set by the agent */
+    $vars['containerType'] = ($R['format'] === 'oci')
+      ? _('OCI Container Image')
+      : _('Docker Container Image');
+
+    /* Core identity and runtime fields */
+    foreach ($container_core_info as $key => $column) {
+      $entry          = [];
+      $entry['count'] = $Count;
+      $entry['type']  = _($key);
+      $entry['value'] = htmlspecialchars(
+                          $R[$column] ?? '',
+                          ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $Count++;
+      $vars['containerEntries'][] = $entry;
+    }
+
+    $sql = "SELECT env_key, env_val FROM pkg_container_env
+            WHERE pkg_fk = $1 ORDER BY env_pk ASC;";
+    $this->dbManager->prepare(__METHOD__ . "getContainerEnv", $sql);
+    $result = $this->dbManager->execute(__METHOD__ . "getContainerEnv",
+                                        array($pkgPk));
+    while ($row = pg_fetch_assoc($result)) {
+      if (empty($row['env_key'])) {
+        continue;
+      }
+      $entry          = [];
+      $entry['count'] = $Count;
+      $entry['type']  = _("Env");
+      $entry['value'] = htmlspecialchars(
+                          $row['env_key'] . '=' . $row['env_val'],
+                          ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $Count++;
+      $vars['containerEnv'][] = $entry;
+    }
+    $this->dbManager->freeResult($result);
+
+    $sql = "SELECT port FROM pkg_container_port
+            WHERE pkg_fk = $1 ORDER BY port_pk ASC;";
+    $this->dbManager->prepare(__METHOD__ . "getContainerPorts", $sql);
+    $result = $this->dbManager->execute(__METHOD__ . "getContainerPorts",
+                                        array($pkgPk));
+    while ($row = pg_fetch_assoc($result)) {
+      if (empty($row['port'])) {
+        continue;
+      }
+      $entry          = [];
+      $entry['count'] = $Count;
+      $entry['type']  = _("Exposes");
+      $entry['value'] = htmlspecialchars(
+                          $row['port'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $Count++;
+      $vars['containerPorts'][] = $entry;
+    }
+    $this->dbManager->freeResult($result);
+
+    $sql = "SELECT lbl_key, lbl_val FROM pkg_container_label
+            WHERE pkg_fk = $1 ORDER BY label_pk ASC;";
+    $this->dbManager->prepare(__METHOD__ . "getContainerLabels", $sql);
+    $result = $this->dbManager->execute(__METHOD__ . "getContainerLabels",
+                                        array($pkgPk));
+    while ($row = pg_fetch_assoc($result)) {
+      if (empty($row['lbl_key'])) {
+        continue;
+      }
+      $entry          = [];
+      $entry['count'] = $Count;
+      $entry['type']  = _("Label");
+      $entry['value'] = htmlspecialchars(
+                          $row['lbl_key'] . ': ' . $row['lbl_val'],
+                          ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $Count++;
+      $vars['containerLabels'][] = $entry;
+    }
+    $this->dbManager->freeResult($result);
+
+    $sql = "SELECT layer_index, layer_id, created_by, empty_layer
+            FROM pkg_container_layer
+            WHERE pkg_fk = $1
+            ORDER BY layer_index ASC;";
+    $this->dbManager->prepare(__METHOD__ . "getContainerLayers", $sql);
+    $result = $this->dbManager->execute(__METHOD__ . "getContainerLayers",
+                                        array($pkgPk));
+    while ($row = pg_fetch_assoc($result)) {
+      $empty          = ($row['empty_layer'] === 't') ? ' [empty]' : '';
+      $entry          = [];
+      $entry['count'] = $Count;
+      $entry['type']  = _("Layer " . $row['layer_index']);
+      $entry['value'] = htmlspecialchars(
+                          $row['created_by'] . $empty,
+                          ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $Count++;
+      $vars['containerLayers'][] = $entry;
+    }
+    $this->dbManager->freeResult($result);
+
+    return $vars;
+  } // ShowContainerInfo()
+
+
+  /**
+   * @brief Query pkg_container_installed and return Twig variables
+   *        for rendering the installed OS packages table.
+   *
+   * Only shown when containeragent has run and pkg_container_installed
+   * has rows for this upload.
+   *
+   * @param int $Upload  upload_pk
+   * @param int $Item    uploadtree_pk
+   * @return array  Twig variables — key 'installedPkgList'
+   */
+  function ShowInstalledPackages($Upload, $Item)
+  {
+    $vars = [];
+
+    if (empty($Upload)) {
+      return $vars;
+    }
+
+    /* Respect the agent-enabled flag — same check as ShowContainerInfo */
+    $sql = "SELECT agent_enabled FROM agent
+            WHERE agent_name = 'containeragent'
+            ORDER BY agent_ts LIMIT 1;";
+    $row = $this->dbManager->getSingleRow($sql, array(),
+             __METHOD__ . "checkContainerAgentEnabled");
+    if (isset($row) && ($row['agent_enabled'] == 'f')) {
+      return $vars;
+    }
+
+    /* Only show if the table exists (schema migration has run) */
+    $sql = "SELECT 1 FROM information_schema.tables
+            WHERE table_name = 'pkg_container_installed' LIMIT 1;";
+    $this->dbManager->prepare(__METHOD__ . "checkTable", $sql);
+    $result  = $this->dbManager->execute(__METHOD__ . "checkTable", array());
+    $numrows = pg_num_rows($result);
+    $this->dbManager->freeResult($result);
+    if ($numrows <= 0) {
+      return $vars;
+    }
+
+    /* Only show if this upload has been scanned by containeragent */
+    $agent_status = AgentARSList('containeragent_ars', $Upload);
+    if (empty($agent_status)) {
+      return $vars;
+    }
+
+    /* Fetch all installed packages, ordered by layer then name */
+    $sql = "SELECT inst_pk, pkg_manager, pkg_name, pkg_version,
+                   pkg_arch, pkg_source, pkg_summary, pkg_license,
+                   pkg_maintainer, layer_index
+            FROM pkg_container_installed
+            WHERE upload_fk = \$1
+            ORDER BY layer_index ASC, pkg_manager ASC, pkg_name ASC;";
+    $this->dbManager->prepare(__METHOD__ . "fetchPkgs", $sql);
+    $result = $this->dbManager->execute(__METHOD__ . "fetchPkgs",
+                                        array($Upload));
+    if (pg_num_rows($result) == 0) {
+      $this->dbManager->freeResult($result);
+      return $vars;
+    }
+
+    while ($row = pg_fetch_assoc($result)) {
+      /* Fetch dependencies for this package */
+      $deps = [];
+      $sqlDep = "SELECT dep_name FROM pkg_container_inst_dep
+                 WHERE inst_fk = \$1 ORDER BY dep_name;";
+      $this->dbManager->prepare(__METHOD__ . "fetchDeps", $sqlDep);
+      $depResult = $this->dbManager->execute(__METHOD__ . "fetchDeps",
+                                             array($row['inst_pk']));
+      while ($depRow = pg_fetch_assoc($depResult)) {
+        $deps[] = $depRow['dep_name'];
+      }
+      $this->dbManager->freeResult($depResult);
+
+      $entry = [];
+      $entry['manager']    = $row['pkg_manager'];
+      $entry['name']       = $row['pkg_name'];
+      $entry['version']    = $row['pkg_version'];
+      $entry['arch']       = $row['pkg_arch'];
+      $entry['source']     = $row['pkg_source'];
+      $entry['summary']    = $row['pkg_summary'];
+      $entry['license']    = $row['pkg_license'];
+      $entry['maintainer'] = $row['pkg_maintainer'];
+      $entry['layer']      = ($row['layer_index'] >= 0)
+                               ? _("Layer " . $row['layer_index'])
+                               : _("Unknown layer");
+      $entry['deps']       = implode(', ', $deps);
+
+      $vars['installedPkgList'][] = $entry;
+    }
+    $this->dbManager->freeResult($result);
+
+    return $vars;
+  } // ShowInstalledPackages()
+
+
+  /**
+   * @brief Query pkg_container_lang_installed and return Twig variables
+   *        for rendering the language-ecosystem packages table.
+   *
+   * Covers all managers written by the new fosspkg parsers:
+   * npm, pip, maven, go, cargo, gem, nuget, composer, yarn.
+   *
+   * Only shown when the schema migration has run and the containeragent has
+   * produced rows for this upload.
+   *
+   * @param int $Upload  upload_pk
+   * @param int $Item    uploadtree_pk (unused but kept for API consistency)
+   * @return array  Twig variables — key 'langPkgList' and 'langPkgManagers'
+   */
+  function ShowLangPackages($Upload, $Item)
+  {
+    $vars = [];
+
+    if (empty($Upload)) {
+      return $vars;
+    }
+
+    /* Respect the agent-enabled flag */
+    $sql = "SELECT agent_enabled FROM agent
+            WHERE agent_name = 'containeragent'
+            ORDER BY agent_ts LIMIT 1;";
+    $row = $this->dbManager->getSingleRow($sql, array(),
+             __METHOD__ . "checkContainerAgentEnabled");
+    if (isset($row) && ($row['agent_enabled'] == 'f')) {
+      return $vars;
+    }
+
+    /* Only show if the schema migration has run */
+    $sql = "SELECT 1 FROM information_schema.tables
+            WHERE table_name = 'pkg_container_lang_installed' LIMIT 1;";
+    $this->dbManager->prepare(__METHOD__ . "checkLangTable", $sql);
+    $result  = $this->dbManager->execute(__METHOD__ . "checkLangTable", array());
+    $numrows = pg_num_rows($result);
+    $this->dbManager->freeResult($result);
+    if ($numrows <= 0) {
+      return $vars;
+    }
+
+    /* Only show if this upload has been scanned by containeragent */
+    $agent_status = AgentARSList('containeragent_ars', $Upload);
+    if (empty($agent_status)) {
+      return $vars;
+    }
+
+    /* Fetch all language packages ordered by manager then name */
+    $sql = "SELECT inst_pk, pkg_manager, pkg_name, pkg_version,
+                   pkg_source, pkg_license, pkg_url, layer_index
+            FROM pkg_container_lang_installed
+            WHERE upload_fk = \$1
+            ORDER BY pkg_manager ASC, layer_index ASC, pkg_name ASC;";
+    $this->dbManager->prepare(__METHOD__ . "fetchLangPkgs", $sql);
+    $result = $this->dbManager->execute(__METHOD__ . "fetchLangPkgs",
+                                        array($Upload));
+    if (pg_num_rows($result) == 0) {
+      $this->dbManager->freeResult($result);
+      return $vars;
+    }
+
+    $managersSeen = [];
+
+    while ($row = pg_fetch_assoc($result)) {
+      /* Fetch dependencies for this package */
+      $deps = [];
+      $sqlDep = "SELECT dep_name FROM pkg_container_lang_dep
+                 WHERE inst_fk = \$1 ORDER BY dep_name;";
+      $this->dbManager->prepare(__METHOD__ . "fetchLangDeps", $sqlDep);
+      $depResult = $this->dbManager->execute(__METHOD__ . "fetchLangDeps",
+                                             array($row['inst_pk']));
+      while ($depRow = pg_fetch_assoc($depResult)) {
+        $deps[] = $depRow['dep_name'];
+      }
+      $this->dbManager->freeResult($depResult);
+
+      $entry = [];
+      $entry['manager'] = htmlspecialchars($row['pkg_manager'],
+                            ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $entry['name']    = htmlspecialchars($row['pkg_name'],
+                            ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $entry['version'] = htmlspecialchars($row['pkg_version'] ?? '',
+                            ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $entry['source']  = htmlspecialchars($row['pkg_source'] ?? '',
+                            ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $entry['license'] = htmlspecialchars($row['pkg_license'] ?? '',
+                            ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $entry['url']     = htmlspecialchars($row['pkg_url'] ?? '',
+                            ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $entry['layer']   = ($row['layer_index'] >= 0)
+                            ? _("Layer " . $row['layer_index'])
+                            : _("Unknown layer");
+      $entry['deps']    = implode(', ', $deps);
+
+      $vars['langPkgList'][] = $entry;
+      $managersSeen[$row['pkg_manager']] = true;
+    }
+    $this->dbManager->freeResult($result);
+
+    /* Pass a sorted list of managers present so the template can render
+       a per-manager summary badge / filter hint */
+    if (!empty($managersSeen)) {
+      $managers = array_keys($managersSeen);
+      sort($managers);
+      $vars['langPkgManagers'] = $managers;
+    }
+
+    return $vars;
+  } // ShowLangPackages()
+
+
+  /**
    * \brief Display the tag info data associated with the file.
    */
   function ShowTagInfo($Upload, $Item)
@@ -591,12 +1006,15 @@ class ui_view_info extends FO_Plugin
     $itemId = GetParm("item", PARM_INTEGER);
     $this->vars['micromenu'] = Dir2Browse("browse", $itemId, null, $showBox = 0, "View-Meta");
 
-    $this->vars += $this->ShowTagInfo($uploadId, $itemId);
-    $this->vars += $this->ShowPackageInfo($uploadId, $itemId, 1);
-    $this->vars += $this->ShowMetaView($uploadId, $itemId);
-    $this->vars += $this->ShowSightings($uploadId, $itemId);
-    $this->vars += $this->ShowView($uploadId, $itemId);
-    $this->vars += $this->showReuseInfo($uploadId);
+    $this->vars = array_merge($this->vars, $this->ShowTagInfo($uploadId, $itemId));
+    $this->vars = array_merge($this->vars, $this->ShowPackageInfo($uploadId, $itemId, 1));
+    $this->vars = array_merge($this->vars, $this->ShowContainerInfo($uploadId, $itemId, 1));
+    $this->vars = array_merge($this->vars, $this->ShowInstalledPackages($uploadId, $itemId));
+    $this->vars = array_merge($this->vars, $this->ShowLangPackages($uploadId, $itemId));
+    $this->vars = array_merge($this->vars, $this->ShowMetaView($uploadId, $itemId));
+    $this->vars = array_merge($this->vars, $this->ShowSightings($uploadId, $itemId));
+    $this->vars = array_merge($this->vars, $this->ShowView($uploadId, $itemId));
+    $this->vars = array_merge($this->vars, $this->showReuseInfo($uploadId));
   }
 
   public function getTemplateName()
