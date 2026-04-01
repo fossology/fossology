@@ -258,12 +258,15 @@ class ReportController extends RestController
       'SELECT jq_type FROM jobqueue WHERE jq_job_fk = $1', array(
         $id
       ), "reportValidity");
-    if (! in_array($row['jq_type'], $this->reportsAllowed)) {
+    if (!$row || ! in_array($row['jq_type'], $this->reportsAllowed)) {
       throw new HttpNotFoundException(
         "No report scheduled with given job id.");
     }
     $row = $dbManager->getSingleRow('SELECT job_upload_fk FROM job WHERE job_pk = $1',
       array($id), "reportFileUpload");
+    if (!$row) {
+      throw new HttpNotFoundException("No job found with given job id.");
+    }
     $uploadId = intval($row['job_upload_fk']);
     $uploadDao = $this->restHelper->getUploadDao();
     if (! $uploadDao->isAccessible($uploadId, $this->restHelper->getGroupId())) {
