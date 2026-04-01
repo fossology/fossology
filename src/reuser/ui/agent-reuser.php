@@ -105,13 +105,6 @@ class ReuserAgentPlugin extends AgentPlugin
         return $this->scheduleOsselotImportDirect($jobId, $uploadId, $errorMsg, $request);
     }
 
-    $reuseUploadPair = explode(',', $request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME), 2);
-    if (count($reuseUploadPair) == 2) {
-      list($reuseUploadId, $reuseGroupId) = $reuseUploadPair;
-    } else {
-      $errorMsg .= 'no reuse upload id given';
-      return -1;
-    }
     $groupId = $request->get('groupId', Auth::getGroupId());
     $getReuseValue = $request->get(self::REUSE_MODE) ?: array();
     $reuserDependencies = array("agent_adj2nest");
@@ -134,14 +127,43 @@ class ReuserAgentPlugin extends AgentPlugin
       }
     }
 
+    $reuseSelections = $request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME);
+    if (!is_array($reuseSelections)) {
+      $reuseSelections = [$reuseSelections];
+    }
+
+    $createdLinks = 0;
+    foreach ($reuseSelections as $reuseSelection) {
+      if (empty($reuseSelection) || !is_string($reuseSelection)) {
+        throw new \InvalidArgumentException("Reuser: Invalid reuse selection found - empty or non-string value");
+      }
+
+      $reuseUploadPair = explode(',', $reuseSelection, 2);
+      if (count($reuseUploadPair) !== 2) {
+        throw new \InvalidArgumentException("Reuser: Invalid reuse selection format: '$reuseSelection' (expected format: 'uploadId,groupId')");
+      }
+
+      [$reuseUploadId, $reuseGroupId] = $reuseUploadPair;
+      $this->createPackageLink(
+        $uploadId,
+        intval($reuseUploadId),
+        intval($groupId),
+        intval($reuseGroupId),
+        $reuseMode
+      );
+      $createdLinks++;
+    }
+
+    if ($createdLinks === 0) {
+      $errorMsg .= 'No valid reuse upload selections found';
+      return -1;
+    }
+
     list($agentDeps, $scancodeDeps) = $this->getReuserDependencies($request);
     $reuserDependencies = array_unique(array_merge($reuserDependencies, $agentDeps));
     if (!empty($scancodeDeps)) {
       $reuserDependencies[] = $scancodeDeps;
     }
-
-    $this->createPackageLink($uploadId, $reuseUploadId, $groupId, $reuseGroupId,
-      $reuseMode);
 
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg,
       $reuserDependencies, $uploadId, null, $request);
