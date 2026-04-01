@@ -84,7 +84,9 @@ function scheduledDeciderSuccess (data, resultEntity, callbackSuccess, callbackC
   if (jqPk) {
     resultEntity.html("scan scheduled as " + linkToJob(jqPk));
     if (callbackSuccess) {
-      queueUpdateCheck(jqPk, callbackSuccess);
+      queueUpdateCheck(jqPk, callbackSuccess, function() {
+        resultEntity.html("job failed (see " + linkToJob(jqPk) + ")");
+      });
     }
     callbackCloseModal();
   } else {
@@ -605,7 +607,13 @@ function scheduledBootstrapSuccess (data, resultEntity, callbackSuccess) {
     errorSpan.html("scan scheduled as " + linkToJob(jqPk));
     if (callbackSuccess) {
       resultEntity.show();
-      queueUpdateCheck(jqPk, callbackSuccess);
+      queueUpdateCheck(jqPk, callbackSuccess, function() {
+        resultEntity.removeClass("alert-success").addClass("alert-danger");
+        errorSpan.text("job failed (see ");
+        errorSpan.append(linkToJob(jqPk));
+        errorSpan.append(")");
+        resultEntity.show();
+      });
     }
   } else {
     resultEntity.removeClass("alert-success").addClass("alert-danger");
