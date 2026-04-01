@@ -6,20 +6,20 @@
 # SPDX-License-Identifier: GPL-2.0-only
 #
 # simple script to generate man pages from pod sources
-# TODO: process version parameter.... need to be able to pass one in.
 #
 usage='mkpod <input-file>, input file should be a pod file.'
 
 infile=$1
 version=$2
+
 if [[ -z $infile ]]
 then
 	echo $usage
+	exit 1
 fi
 
 if [[ -z $version ]]
 then
-	echo "Setting version to 0.dev"
 	version='0.dev'
 fi
 
