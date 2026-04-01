@@ -132,7 +132,7 @@ int main(int argc, char **argv)
             ReadFromStdin = 0;
             bucketpool_pk = atoi(optarg);
             /* validate bucketpool_pk */
-            sprintf(sqlbuf, "select bucketpool_pk from bucketpool where bucketpool_pk=%d and active='Y'", bucketpool_pk);
+            snprintf(sqlbuf, sizeof(sqlbuf), "select bucketpool_pk from bucketpool where bucketpool_pk=%d and active='Y'", bucketpool_pk);
             bucketpool_pk = validate_pk(pgConn, sqlbuf);
             if (!bucketpool_pk)
               printf("%d is not an active bucketpool_pk.\n", atoi(optarg));
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
             if (uploadtree.upload_fk) break;
             head_uploadtree_pk = atoi(optarg);
             /* validate bucketpool_pk */
-            sprintf(sqlbuf, "select uploadtree_pk from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
+            snprintf(sqlbuf, sizeof(sqlbuf), "select uploadtree_pk from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
             head_uploadtree_pk = validate_pk(pgConn, sqlbuf);
             if (!head_uploadtree_pk)
               printf("%d is not an active uploadtree_pk.\n", atoi(optarg));
@@ -153,13 +153,13 @@ int main(int argc, char **argv)
             {
               uploadtree.upload_fk = atoi(optarg);
               /* validate upload_pk  and get uploadtree_pk  */
-              sprintf(sqlbuf, "select upload_pk from upload where upload_pk=%d", uploadtree.upload_fk);
+              snprintf(sqlbuf, sizeof(sqlbuf), "select upload_pk from upload where upload_pk=%d", uploadtree.upload_fk);
               uploadtree.upload_fk = validate_pk(pgConn, sqlbuf);
               if (!uploadtree.upload_fk)
                 printf("%d is not an valid upload_pk.\n", atoi(optarg));
               else
               {
-                sprintf(sqlbuf, "select uploadtree_pk from uploadtree where upload_fk=%d and parent is null", uploadtree.upload_fk);
+                snprintf(sqlbuf, sizeof(sqlbuf), "select uploadtree_pk from uploadtree where upload_fk=%d and parent is null", uploadtree.upload_fk);
                 head_uploadtree_pk = validate_pk(pgConn, sqlbuf);
               }
             }
@@ -202,7 +202,7 @@ int main(int argc, char **argv)
    */
   COMMIT_HASH = fo_sysconfig("buckets", "COMMIT_HASH");
   VERSION = fo_sysconfig("buckets", "VERSION");
-  sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
+  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, COMMIT_HASH);
   agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), uploadtree.upload_fk, agent_rev, agentDesc);
 
   /*** Initialize the license_ref table cache ***/
@@ -254,7 +254,7 @@ int main(int argc, char **argv)
       }
 
       /* From the upload_pk, get the head of the uploadtree, pfile_pk and ufile_name  */
-      sprintf(sqlbuf, "select uploadtree_pk, pfile_fk, ufile_name, ufile_mode,lft,rgt from uploadtree \
+      snprintf(sqlbuf, sizeof(sqlbuf), "select uploadtree_pk, pfile_fk, ufile_name, ufile_mode,lft,rgt from uploadtree \
              where upload_fk='%d' and parent is null limit 1", uploadtree.upload_fk);
       topresult = PQexec(pgConn, sqlbuf);
       if (fo_checkPQresult(pgConn, topresult, sqlbuf, agentDesc, __LINE__)) return -1;
@@ -283,7 +283,7 @@ int main(int argc, char **argv)
       /* not reading from stdin
        * Get the pfile, and ufile_name for head_uploadtree_pk
        */
-      sprintf(sqlbuf, "select pfile_fk, ufile_name, ufile_mode,lft,rgt, upload_fk from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
+      snprintf(sqlbuf, sizeof(sqlbuf), "select pfile_fk, ufile_name, ufile_mode,lft,rgt, upload_fk from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
       topresult = PQexec(pgConn, sqlbuf);
       if (fo_checkPQresult(pgConn, topresult, sqlbuf, agentDesc, __LINE__))
       {
@@ -376,7 +376,7 @@ int main(int argc, char **argv)
     /*** END initializing bucketDefArray  ***/
 
     /*** Initialize DEB_SOURCE and DEB_BINARY  ***/
-    sprintf(sqlbuf, "select mimetype_pk from mimetype where mimetype_name='application/x-debian-package'");
+    snprintf(sqlbuf, sizeof(sqlbuf), "select mimetype_pk from mimetype where mimetype_name='application/x-debian-package'");
     result = PQexec(pgConn, sqlbuf);
     if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
     if (PQntuples(result) == 0)
@@ -387,7 +387,7 @@ int main(int argc, char **argv)
     DEB_BINARY = atoi(PQgetvalue(result, 0, 0));
     PQclear(result);
 
-    sprintf(sqlbuf, "select mimetype_pk from mimetype where mimetype_name='application/x-debian-source'");
+    snprintf(sqlbuf, sizeof(sqlbuf), "select mimetype_pk from mimetype where mimetype_name='application/x-debian-source'");
     result = PQexec(pgConn, sqlbuf);
     if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
     if (PQntuples(result) == 0)
@@ -412,7 +412,7 @@ int main(int argc, char **argv)
       PQclear(result);
 
       /* retrieve the ars_pk of the newly inserted record */
-      sprintf(sqlbuf, "select ars_pk from bucket_ars where agent_fk='%d' and upload_fk='%d' and ars_success='%s' and nomosagent_fk='%d' \
+      snprintf(sqlbuf, sizeof(sqlbuf), "select ars_pk from bucket_ars where agent_fk='%d' and upload_fk='%d' and ars_success='%s' and nomosagent_fk='%d' \
           and bucketpool_fk='%d' and ars_endtime is null \
           order by ars_starttime desc limit 1",
           agent_pk, uploadtree.upload_fk, "false", nomos_agent_pk, bucketpool_pk);
