@@ -10,7 +10,7 @@ namespace Fossology\Reuser;
 // Use relative paths to ensure the test works in any FOSSology environment (Local or CI)
 $autoloadPath = __DIR__ . '/../../../../vendor/autoload.php';
 if (file_exists($autoloadPath)) {
-    require_once $autoloadPath;
+  require_once $autoloadPath;
 }
 require_once __DIR__ . '/../../agent/ReuserAgent.php';
 
@@ -62,7 +62,7 @@ class ReuserAgentTest extends \PHPUnit\Framework\TestCase
     $this->copyrightDao->method('getScannerEntries')->willReturn($allCopyrights);
     $this->copyrightDao->method('getAllEventEntriesForUpload')->willReturn($reusedCopyrights);
     $this->dbManager->method('booleanFromDb')->willReturnCallback(function($val) {
-        return $val === 't';
+      return $val === 't';
     });
 
     $item1 = $this->createMock(ItemTreeBounds::class);
@@ -81,22 +81,22 @@ class ReuserAgentTest extends \PHPUnit\Framework\TestCase
 
     $reflection = new \ReflectionClass(ReuserAgent::class);
     foreach (['uploadDao', 'copyrightDao', 'dbManager', 'userId'] as $propName) {
-        $prop = $reflection->getProperty($propName);
-        $prop->setAccessible(true);
-        if ($propName === 'userId') {
-            $prop->setValue($mockReuserAgent, 1);
-        } else {
-            $prop->setValue($mockReuserAgent, $this->$propName);
-        }
+      $prop = $reflection->getProperty($propName);
+      $prop->setAccessible(true);
+      if ($propName === 'userId') {
+        $prop->setValue($mockReuserAgent, 1);
+      } else {
+        $prop->setValue($mockReuserAgent, $this->$propName);
+      }
     }
-    
+
     $mockReuserAgent->method('getAgentId')->willReturn($agentId);
     $mockReuserAgent->method('heartbeat')->willReturn(null);
 
     $method = $reflection->getMethod('reuseCopyrights');
     $method->setAccessible(true);
     $method->invoke($mockReuserAgent, $uploadId, $reusedUploadId);
-    
+
     $this->assertTrue(true);
   }
 
@@ -134,13 +134,13 @@ class ReuserAgentTest extends \PHPUnit\Framework\TestCase
 
     $reflection = new \ReflectionClass(ReuserAgent::class);
     foreach (['uploadDao', 'copyrightDao', 'dbManager', 'userId'] as $propName) {
-        $prop = $reflection->getProperty($propName);
-        $prop->setAccessible(true);
-        if ($propName === 'userId') {
-            $prop->setValue($mockReuserAgent, 1);
-        } else {
-            $prop->setValue($mockReuserAgent, $this->$propName);
-        }
+      $prop = $reflection->getProperty($propName);
+      $prop->setAccessible(true);
+      if ($propName === 'userId') {
+        $prop->setValue($mockReuserAgent, 1);
+      } else {
+        $prop->setValue($mockReuserAgent, $this->$propName);
+      }
     }
 
     $mockReuserAgent->method('getAgentId')->willReturn(10);
