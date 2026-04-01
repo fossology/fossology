@@ -288,47 +288,13 @@ $(document).ready(function () {
   
   $("#fileUploader").on("change", function(e) {
     window.osselotInitialized = {};
-    
-    const allFiles = e.target.files;
-    lastUploadedFiles = Array.from(allFiles);
-    
-    var holder = $("#uploaddescriptions");
-    holder.html("");
-    
-    if (allFiles.length > 10) {
-      $("#collapseDescription").show();
-      $("#uploaddescriptions").collapse('hide');
-    }
-    
-    const reuseNameTab = $("#reuse-name-tab");
-    const reuseTabContent = $("#reuse-tab-content");
-    reuseNameTab.html("");
-    reuseTabContent.html("");
-    
-    for (let i = 0; i < allFiles.length; i++) {
-      const val = allFiles[i];
-      
-      const tt = $("<h6 class='card-title'>").append(val.name);
-      let formg = $("<div class='form-group'>");
-      const ll = $(`<label for='desc${i}' class='card-text'>`).append("(Optional) Enter a description of this file:");
-      formg.append(ll).append(`<input type='text' class='form-control' name='descriptionInputName[${i}]' id='desc${i}'>`);
-      let body = $("<div class='card-body'>");
-      body.append(tt).append(formg);
-      let html = $("<div class='card'>");
-      html.append(body);
-      holder.append(html);
-      
-      addNavItems(i, val.name, reuseNameTab, reuseTabContent);
-    }
-    
+    lastUploadedFiles = Array.from(e.target.files);
     setTimeout(function() {
-      for (let i = 0; i < allFiles.length; i++) {
+      for (let i = 0; i < lastUploadedFiles.length; i++) {
         if (typeof window.initializeOsselotForIndex === 'function') {
           window.initializeOsselotForIndex(i);
         }
       }
     }, 300);
-    
-    toggleDisabled();
   });
 });
