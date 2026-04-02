@@ -219,7 +219,7 @@ class CopyrightDao
     }
 
     $sql = "SELECT DISTINCT ON(copyright_pk, UT.uploadtree_pk)
-copyright_pk, UT.uploadtree_pk as uploadtree_pk,
+copyright_pk, UT.uploadtree_pk as uploadtree_pk, UT.upload_fk, UT.lft, UT.rgt,
 (CASE WHEN (CE.content IS NULL OR CE.content = '') THEN C.content ELSE CE.content END) AS content,
 (CASE WHEN (CE.hash IS NULL OR CE.hash = '') THEN C.hash ELSE CE.hash END) AS hash,
 C.agent_fk as agent_fk
