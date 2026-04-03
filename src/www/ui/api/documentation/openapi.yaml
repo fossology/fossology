@@ -5764,6 +5764,25 @@ components:
             - INFO
             - ERROR
           description: Denotes if info was created on error
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: HTTP status code
+          example: 400
+        error:
+          type: string
+          description: HTTP status text
+          example: Bad Request
+        message:
+          type: string
+          description: Detailed error message
+          example: Username or password incorrect.
+      required:
+        - status
+        - error
+        - message
     Token:
       type: object
       properties:
@@ -7635,4 +7654,4 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Info'
+            $ref: '#/components/schemas/ErrorResponse'

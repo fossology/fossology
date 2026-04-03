@@ -60,7 +60,6 @@ use Slim\Exception\HttpNotFoundException;
 use Slim\Factory\AppFactory;
 use Slim\Middleware\ContentLengthMiddleware;
 use Slim\Psr7\Request;
-use Slim\Psr7\Response;
 use Throwable;
 
 // Extracts the version from the URL
@@ -462,12 +461,8 @@ $customErrorHandler = function (
       InfoType::ERROR);
     $payload = $error->getArray();
   }
-
-  $response = $app->getResponseFactory()->createResponse(500)
-    ->withHeader("Content-Type", "application/json");
-  $response->getBody()->write(
-      json_encode($payload, JSON_UNESCAPED_UNICODE)
-  );
+  $response = new ResponseHelper();
+  $response = $response->withJson($payload, 500);
 
   plugin_unload();
   return CorsHelper::addCorsHeaders($response);
@@ -491,10 +486,10 @@ $errorMiddleware->setErrorHandler(
 $errorMiddleware->setErrorHandler(
   HttpMethodNotAllowedException::class,
   function (ServerRequestInterface $request, Throwable $exception, bool $displayErrorDetails) {
-    $response = new Response();
-    $response->getBody()->write('405 NOT ALLOWED');
-
-    $response = $response->withStatus(405);
+    $response = new ResponseHelper();
+    $response = $response->withJson([
+      'message' => 'Method not allowed'
+    ], 405);
     plugin_unload();
     return CorsHelper::addCorsHeaders($response);
   });
