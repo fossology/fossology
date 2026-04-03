@@ -55,9 +55,7 @@ class ShowJobsDao
     $jobArray = array();
 
     // only use the uploads the user / group has access to
-    $upload_pks = array_filter($upload_pks, function($upload_pk) {
-      return $upload_pk !== null && $this->uploadDao->isAccessible($upload_pk, Auth::getGroupId());
-    });
+    $upload_pks = $this->uploadDao->filterAccessibleUploads($upload_pks, Auth::getGroupId());
 
     if (empty($upload_pks)) {
       return $jobArray;

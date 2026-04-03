@@ -80,10 +80,12 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
     $groupId = 2;
     $GLOBALS['SysConf']['auth'][Auth::GROUP_ID] = $groupId;
     $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 1;
-    $this->uploadPermissionDao->shouldReceive('isAccessible')->withArgs(array(anything(),$groupId))
-            ->andReturnUsing(function($upload,$group)
+    $this->uploadPermissionDao->shouldReceive('filterAccessibleUploads')
+            ->andReturnUsing(function($uploadIds,$group)
             {
-              return ($upload==1 || $upload==2 || $upload==3 || $upload==4 || $upload==5);
+              return array_values(array_filter($uploadIds, function($upload) {
+                return ($upload==1 || $upload==2 || $upload==3 || $upload==4 || $upload==5);
+              }));
             });
 
     $jobs = array(3=>2, 4=>3, 5=>5, 6=>8%6, 7=>13%6, 8=>21%6);
@@ -106,10 +108,12 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
     $GLOBALS['SysConf']['auth'][Auth::GROUP_ID] = $groupId;
     $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 1;
 
-    $this->uploadPermissionDao->shouldReceive('isAccessible')->withArgs(array(anything(),$groupId))
-            ->andReturnUsing(function($upload,$group)
+    $this->uploadPermissionDao->shouldReceive('filterAccessibleUploads')
+            ->andReturnUsing(function($uploadIds,$group)
             {
-              return in_array($upload, range(1, 17));
+              return array_values(array_filter($uploadIds, function($upload) {
+                return in_array($upload, range(1, 17));
+              }));
             });
 
     $jobs = array_combine(range(3,13),range(3,13));
