@@ -175,7 +175,7 @@ class TextFindingsAjax
 
     $countAllQuery = "SELECT count(*) FROM (SELECT hash $unorderedQuery$grouping) as K";
     $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params,
-      __METHOD__, $tableName . "count.all" . ($activated ? '' : '_deactivated'));
+      __METHOD__ . "." . $tableName . "count.all" . ($activated ? '' : '_deactivated'));
     $iTotalRecords = $iTotalRecordsRow['count'];
 
     $range = "";
@@ -298,11 +298,16 @@ class TextFindingsAjax
       'DT_RowId' => $this->getDecisionTypeName($type) . ",$hash"
     );
 
-    $link = "<a href='";
-    $link .= Traceback_uri();
-    $link .= "?mod=$listPage&agent=-1&item=$item" .
-      "&hash=$hash&type=$type&filter=$filter";
-    $link .= "'>". intval($row['textfinding_count']) . "</a>";
+    $allowed_filters = array('all', 'active', 'inactive', 'nolic');
+    if (!in_array($filter, $allowed_filters)) {
+      $filter = 'all';
+    }
+
+    $link_url = Traceback_uri() . "?mod=" . urlencode($listPage) . "&agent=-1&item=" . intval($item) .
+      "&hash=" . urlencode($hash) . "&type=" . urlencode($type) . "&filter=" . urlencode($filter);
+    $safe_link_url = htmlspecialchars($link_url, ENT_QUOTES, 'UTF-8');
+    $link = '<a href="' . $safe_link_url . '">' . intval($row['textfinding_count']) . '</a>';
+
     $output['0'] = $link;
     $output['1'] = convertToUTF8($row['textfinding']);
     $output['2'] = $this->getTableRowAction($hash, $upload, $type, $activated,

@@ -64,12 +64,13 @@ class copyright_list extends FO_Plugin
     $type = GetParm("type",PARM_RAW);
     $Excl = GetParm("excl",PARM_RAW);
 
-    $URL = $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&hash=$hash&type=$type&page=-1";
+    $URL = $this->Name . "&agent=" . intval($agent_pk) . "&item=" . intval($uploadtree_pk) . "&hash=" . urlencode($hash) . "&type=" . urlencode($type) . "&page=-1";
     if (!empty($Excl)) {
-      $URL .= "&excl=$Excl";
+      $URL .= "&excl=" . urlencode($Excl);
     }
     $text = _("Show All Files");
-    menu_insert($this->Name."::Show All",0, $URL, $text);
+    $safeURL = htmlspecialchars($URL, ENT_QUOTES, 'UTF-8');
+    menu_insert($this->Name."::Show All",0, $safeURL, $text);
   } // RegisterMenus()
 
   /**
@@ -84,7 +85,7 @@ class copyright_list extends FO_Plugin
    * @throws Exception
    * @return array Rows to process, and $upload_pk
    */
-  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type, $tableName, $filter="", $limit=0, $offset=0)
+  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type, $tableName, $filter="", $limit=0, $offset=0, $excl="")
   {
     /*******  Get license names and counts  ******/
     $row = $this->uploadDao->getUploadEntry($Uploadtree_pk);
@@ -103,6 +104,16 @@ class copyright_list extends FO_Plugin
         $join = " INNER JOIN license_file AS LF on cp.pfile_fk = LF.pfile_fk ";
       }
       $filter_query = " AND LF.rf_fk IN (SELECT rf_pk FROM license_ref WHERE rf_shortname IN ('$noLicStr', '$voidLicStr')) ";
+    }
+
+    $excl_filter = "";
+    if (!empty($excl)) {
+      $ExclArray = explode(":", $excl);
+      foreach ($ExclArray as $ext) {
+        if (!empty($ext)) {
+          $excl_filter .= " AND ufile_name NOT LIKE '%." . $this->dbManager->getDriver()->escapeString($ext) . "'";
+        }
+      }
     }
 
     $limit_clause = "";
@@ -128,7 +139,7 @@ class copyright_list extends FO_Plugin
                  WHERE upload_fk=$1
                    AND uploadtree.lft BETWEEN $2 AND $3) AS SS
               $join
-              WHERE PF=pfile_fk AND hash=$4 $filter_query ORDER BY ufile_name, uploadtree_pk $limit_clause $offset_clause";
+              WHERE PF=pfile_fk AND hash=$4 $filter_query $excl_filter ORDER BY ufile_name, uploadtree_pk $limit_clause $offset_clause";
     } else {
       $eventTable = $tableName . "_event";
       $eventFk = $tableName . "_fk";
@@ -166,11 +177,11 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
                 AND ce.upload_fk = ut.upload_fk AND ce.uploadtree_fk = ut.uploadtree_pk
               $join
               WHERE cp.agent_fk = ANY($4::int[]) AND (cp.hash=$5 OR ce.hash=$5) AND cp.type=$6
-                $active_filter $filter_query
+                $active_filter $filter_query $excl_filter
               ORDER BY ufile_name, uploadtree_pk $limit_clause $offset_clause";
     }
 
-    $statement = __METHOD__.$tableName.$filter.($limit > 0 ? "L" : "").($offset > 0 ? "O" : "");
+    $statement = __METHOD__.$tableName.$filter.($limit > 0 ? "L" : "").($offset > 0 ? "O" : "").(empty($excl) ? "" : "E");
     $this->dbManager->prepare($statement, $sql);
     $result = $this->dbManager->execute($statement,$params);
 
@@ -183,7 +194,7 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
   /**
    * @brief Get total count of rows for pagination
    */
-  function GetTotalCount($Uploadtree_pk, $Agent_pk, $hash, $type, $tableName, $filter="")
+  function GetTotalCount($Uploadtree_pk, $Agent_pk, $hash, $type, $tableName, $filter="", $excl="")
   {
     $row = $this->uploadDao->getUploadEntry($Uploadtree_pk);
     $lft = $row["lft"];
@@ -203,14 +214,24 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
       $filter_query = " AND LF.rf_fk IN (SELECT rf_pk FROM license_ref WHERE rf_shortname IN ('$noLicStr', '$voidLicStr')) ";
     }
 
+    $excl_filter = "";
+    if (!empty($excl)) {
+      $ExclArray = explode(":", $excl);
+      foreach ($ExclArray as $ext) {
+        if (!empty($ext)) {
+          $excl_filter .= " AND ufile_name NOT LIKE '%." . $this->dbManager->getDriver()->escapeString($ext) . "'";
+        }
+      }
+    }
+
     if ($type == "copyFindings") {
       $sql = "SELECT count(*) AS instance_count, count(DISTINCT uploadtree_pk) AS file_count
               FROM $tableName,
-              (SELECT uploadtree_pk, pfile_fk AS PF FROM uploadtree
+              (SELECT uploadtree_pk, pfile_fk AS PF, ufile_name FROM uploadtree
                  WHERE upload_fk=$1
                    AND uploadtree.lft BETWEEN $2 AND $3) AS SS
               $join
-              WHERE PF=pfile_fk AND hash=$4 $filter_query";
+              WHERE PF=pfile_fk AND hash=$4 $filter_query $excl_filter";
       $params[] = $hash;
     } else {
       $eventTable = $tableName . "_event";
@@ -233,13 +254,13 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
                 AND ce.upload_fk = ut.upload_fk AND ce.uploadtree_fk = ut.uploadtree_pk
               $join
               WHERE cp.agent_fk = ANY($4::int[]) AND (cp.hash=$5 OR ce.hash=$5) AND cp.type=$6
-                $active_filter $filter_query";
+                $active_filter $filter_query $excl_filter";
       $params[] = "{". $Agent_pk . "}";
       $params[] = $hash;
       $params[] = $type;
     }
 
-    $statement = __METHOD__.$tableName.$filter;
+    $statement = __METHOD__.$tableName.$filter.(empty($excl) ? "" : "E");
     $row = $this->dbManager->getSingleRow($sql, $params, $statement);
     return array('instances' => intval($row['instance_count']), 'files' => intval($row['file_count']));
   }
@@ -257,27 +278,9 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
   function GetRequestedRows($rows, $excl, &$NumRows, $filter, $hash)
   {
     $NumRows = count($rows);
-    $ExclArray = explode(":", $excl);
-
-    for ($RowIdx = 0; $RowIdx < $NumRows; $RowIdx++) {
-      /* remove excluded files */
-      if ($excl) {
-        $FileExt = GetFileExt($rows[$RowIdx]['ufile_name']);
-        if (in_array($FileExt, $ExclArray)) {
-          unset($rows[$RowIdx]);
-          continue;
-        }
-      }
-    }
-
-    /* reset array keys, keep order */
-    $rows2 = array();
-    foreach ($rows as $row) {
-      $rows2[] = $row;
-    }
-    unset($rows);
-
-    return $rows2;
+    /* Exclusions are now handled in SQL, so this function is mostly a pass-through
+     * or can be used for extra verification if needed. */
+    return $rows;
   }
 
   /**
@@ -334,15 +337,20 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
       $Page=0;
     }
 
+    $allowed_filters = array('all', 'active', 'inactive', 'nolic');
+    if (!in_array($filter, $allowed_filters)) {
+      $filter = 'all';
+    }
+
     list($tableName,$modBack,$viewName) = $this->getTableName($type);
 
     /* get rows with pagination */
     $upload_pk = -1;
     $Offset = $Page * $Max;
-    $rows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk, $hash, $type, $tableName, $filter, $Max, $Offset);
+    $rows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk, $hash, $type, $tableName, $filter, $Max, $Offset, $excl);
     $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload_pk);
 
-    $Counts = $this->GetTotalCount($uploadtree_pk, $agent_pk, $hash, $type, $tableName, $filter);
+    $Counts = $this->GetTotalCount($uploadtree_pk, $agent_pk, $hash, $type, $tableName, $filter, $excl);
     $NumInstances = $Counts['instances'];
     $RowCount = $Counts['files'];
     $rows = $this->GetRequestedRows($rows, $excl, $dummyCount, $filter, $hash);
@@ -388,7 +396,7 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
 
       $text = _("Display excludes files with these extensions");
       if (!empty($excl)) {
-        $OutBuf .= "<br>$text: $excl";
+        $OutBuf .= "<br>$text: " . htmlspecialchars($excl, ENT_QUOTES, 'UTF-8');
       }
 
       /* Get the page menu */
@@ -411,27 +419,27 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
 
       $OutBuf .= "<div style='padding-bottom: 15px;'>";
       $OutBuf .= "<form method='GET' action=''>";
-      $OutBuf .= "<input type='hidden' name='mod' value='" . $this->Name . "'>";
-      $OutBuf .= "<input type='hidden' name='agent' value='$agent_pk'>";
-      $OutBuf .= "<input type='hidden' name='item' value='$uploadtree_pk'>";
-      $OutBuf .= "<input type='hidden' name='hash' value='$hash'>";
-      $OutBuf .= "<input type='hidden' name='type' value='$type'>";
+      $OutBuf .= "<input type='hidden' name='mod' value='" . htmlspecialchars($this->Name, ENT_QUOTES, 'UTF-8') . "'>";
+      $OutBuf .= "<input type='hidden' name='agent' value='" . htmlspecialchars($agent_pk, ENT_QUOTES, 'UTF-8') . "'>";
+      $OutBuf .= "<input type='hidden' name='item' value='" . htmlspecialchars($uploadtree_pk, ENT_QUOTES, 'UTF-8') . "'>";
+      $OutBuf .= "<input type='hidden' name='hash' value='" . htmlspecialchars($hash, ENT_QUOTES, 'UTF-8') . "'>";
+      $OutBuf .= "<input type='hidden' name='type' value='" . htmlspecialchars($type, ENT_QUOTES, 'UTF-8') . "'>";
       if (!empty($excl)) {
-        $OutBuf .= "<input type='hidden' name='excl' value='$excl'>";
+        $OutBuf .= "<input type='hidden' name='excl' value='" . htmlspecialchars($excl, ENT_QUOTES, 'UTF-8') . "'>";
       }
       $OutBuf .= "<label for='list_filter'><strong>" . _("Filter:") . "</strong></label>&nbsp;";
       $OutBuf .= "<select name='filter' class='form-control-sm' id='list_filter' onchange='this.form.submit();'>";
       foreach (array('all'=>_("Show all"), 'active'=>_("Show active"), 'inactive'=>_("Show inactive"), 'nolic'=> _("Show files without licenses")) as $key=>$text) {
         $selected = ($selectKey == $key) ? "selected" : "";
-        $OutBuf .= "<option $selected value=\"$key\">$text</option>";
+        $OutBuf .= "<option $selected value=\"" . htmlspecialchars($key, ENT_QUOTES, 'UTF-8') . "\">" . htmlspecialchars($text, ENT_QUOTES, 'UTF-8') . "</option>";
       }
       $OutBuf .= "</select>";
       $OutBuf .= "</form>";
       $OutBuf .= "</div>";
 
-      $baseURL = "?mod=" . $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&hash=$hash&type=$type&page=-1";
+      $baseURL = "?mod=" . urlencode($this->Name) . "&agent=" . urlencode($agent_pk) . "&item=" . intval($uploadtree_pk) . "&hash=" . urlencode($hash) . "&type=" . urlencode($type) . "&page=-1";
       if (!empty($filter) && $filter != 'all') {
-          $baseURL .= "&filter=$filter";
+          $baseURL .= "&filter=" . urlencode($filter);
       }
 
       // display rows
@@ -442,13 +450,14 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
         // Allow user to exclude files with this extension
         $FileExt = GetFileExt($row['ufile_name']);
         if (empty($excl)) {
-          $URL = $baseURL . "&excl=$FileExt";
+          $URL = $baseURL . "&excl=" . urlencode($FileExt);
         } else {
-          $URL = $baseURL . "&excl=$excl:$FileExt";
+          $URL = $baseURL . "&excl=" . urlencode($excl . ":" . $FileExt);
         }
 
         $text = _("Exclude this file type");
-        $Header = "<a href=$URL>$text.</a>";
+        $safeURL = htmlspecialchars($URL, ENT_QUOTES, 'UTF-8');
+        $Header = '<a href="' . $safeURL . '">' . htmlspecialchars($text, ENT_QUOTES, 'UTF-8') . '.</a>';
 
         $OutBuf .= Dir2Browse($modBack, $row['uploadtree_pk'], $LinkLast,
           $ShowBox, $ShowMicro, $RowNum, $Header, '', $uploadtree_tablename);
