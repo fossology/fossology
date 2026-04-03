@@ -394,7 +394,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _($key);
-          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
+          $entry['value'] = $R["$value"] ?? '';
           $Count++;
           $vars['packageEntries'][] = $entry;
         }
@@ -407,7 +407,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Requires");
-          $entry['value'] = htmlspecialchars($R["req_value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
+          $entry['value'] = $R["req_value"] ?? '';
           $Count++;
           $vars['packageRequires'][] = $entry;
         }
@@ -430,7 +430,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _($key);
-          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
+          $entry['value'] = $R["$value"] ?? '';
           $Count++;
           $vars['packageEntries'][] = $entry;
         }
@@ -443,7 +443,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Depends");
-          $entry['value'] = htmlspecialchars($R["req_value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
+          $entry['value'] = $R["req_value"] ?? '';
           $Count++;
           $vars['packageRequires'][] = $entry;
         }
@@ -465,7 +465,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _($key);
-          $entry['value'] = htmlspecialchars($R["$value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
+          $entry['value'] = $R["$value"] ?? '';
           $Count++;
           $vars['packageEntries'][] = $entry;
         }
@@ -478,7 +478,7 @@ class ui_view_info extends FO_Plugin
           $entry = [];
           $entry['count'] = $Count;
           $entry['type'] = _("Build-Depends");
-          $entry['value'] = htmlspecialchars($R["req_value"], ENT_QUOTES|ENT_HTML5, 'UTF-8');
+          $entry['value'] = $R["req_value"] ?? '';
           $Count++;
           $vars['packageRequires'][] = $entry;
         }
