@@ -234,8 +234,9 @@ class ReuserAgent extends Agent
             $content = "";
           }
           $hash = $copyright['hash'];
-          $item = $this->uploadDao->getItemTreeBounds(intval($copyright['uploadtree_pk']),
-                    $uploadTreeTableName);
+          $item = new ItemTreeBounds(
+                    intval($copyright['uploadtree_pk']), $uploadTreeTableName,
+                    $copyright['upload_fk'], $copyright['lft'], $copyright['rgt']);
           $this->copyrightDao->updateTable($item, $hash, $content,
             $this->userId, 'copyright', $action);
           $this->heartbeat(1);
