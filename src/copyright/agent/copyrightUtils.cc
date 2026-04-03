@@ -291,9 +291,13 @@ CopyrightState getState(CliOptions&& cliOptions)
  * \param pFileId                  Id of pfile on which the statement was found
  * \param agentId                  Id of agent who discovered the statements
  * \param copyrightDatabaseHandler Database handler object
+ * \param uploadId                 Upload being scanned (used to create deactivated events)
+ * \param uploadTreeTableName      Uploadtree table for this upload
  * \return True of successful insertion, false otherwise
  */
-bool saveToDatabase(const string& s, const list<match>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler)
+bool saveToDatabase(const string& s, const list<match>& matches, unsigned long pFileId,
+    int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler,
+    int uploadId, const string& uploadTreeTableName)
 {
   if (!copyrightDatabaseHandler.begin())
   {
@@ -311,6 +315,7 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
     entry.copy_startbyte = m->start;
     entry.pfile_fk = pFileId;
     entry.type = m->type;
+    entry.is_enabled = m->is_enabled;
 
     if (entry.content.length() != 0)
     {
@@ -319,7 +324,18 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
       {
         copyrightDatabaseHandler.rollback();
         return false;
-      };
+      }
+      if (!entry.is_enabled)
+      {
+        // Copyright was removed by a cleanup rule: create a copyright_event row
+        // with is_enabled=false (the column default) so the UI shows it in the
+        // deactivated section automatically.
+        if (!copyrightDatabaseHandler.insertDeactivatedEvents(entry, uploadId, uploadTreeTableName))
+        {
+          copyrightDatabaseHandler.rollback();
+          return false;
+        }
+      }
     }
   }
 
@@ -328,13 +344,17 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
 
 /**
  * \brief Scan a given file with all available scanners and save findings to database
- * \param sContent        Content of file
- * \param pFileId         id of the pfile sent for scan
- * \param state           State of the agent
- * \param agentId         Agent id
- * \param databaseHandler Database handler used by agent
+ * \param sContent            Content of file
+ * \param pFileId             id of the pfile sent for scan
+ * \param state               State of the agent
+ * \param agentId             Agent id
+ * \param databaseHandler     Database handler used by agent
+ * \param uploadId            Upload being scanned
+ * \param uploadTreeTableName Uploadtree table for this upload
  */
-void matchFileWithLicenses(const string& sContent, unsigned long pFileId, CopyrightState const& state, int agentId, CopyrightDatabaseHandler& databaseHandler)
+void matchFileWithLicenses(const string& sContent, unsigned long pFileId,
+    CopyrightState const& state, int agentId, CopyrightDatabaseHandler& databaseHandler,
+    int uploadId, const string& uploadTreeTableName)
 {
   list<match> l;
   const list<unptr::shared_ptr<scanner>>& scanners = state.getScanners();
@@ -342,7 +362,7 @@ void matchFileWithLicenses(const string& sContent, unsigned long pFileId, Copyri
   {
     (*sc)->ScanString(sContent, l);
   }
-  saveToDatabase(sContent, l, pFileId, agentId, databaseHandler);
+  saveToDatabase(sContent, l, pFileId, agentId, databaseHandler, uploadId, uploadTreeTableName);
 }
 
 /**
@@ -353,12 +373,16 @@ void matchFileWithLicenses(const string& sContent, unsigned long pFileId, Copyri
  * If the pfile is not found for pFileId, bails with error code 8.
  *
  * If the pfile is not found in repository, bails with error code 7.
- * \param state           State of the agent
- * \param agentId         Agent id
- * \param pFileId         pFile to be scanned
- * \param databaseHandler Database handler used by agent
+ * \param state               State of the agent
+ * \param agentId             Agent id
+ * \param pFileId             pFile to be scanned
+ * \param databaseHandler     Database handler used by agent
+ * \param uploadId            Upload being scanned
+ * \param uploadTreeTableName Uploadtree table for this upload
  */
-void matchPFileWithLicenses(CopyrightState const& state, int agentId, unsigned long pFileId, CopyrightDatabaseHandler& databaseHandler)
+void matchPFileWithLicenses(CopyrightState const& state, int agentId,
+    unsigned long pFileId, CopyrightDatabaseHandler& databaseHandler,
+    int uploadId, const string& uploadTreeTableName)
 {
   char* pFile = databaseHandler.getPFileNameForFileId(pFileId);
 
@@ -378,7 +402,7 @@ void matchPFileWithLicenses(CopyrightState const& state, int agentId, unsigned l
     string s;
     ReadFileToString(fileName, s);
 
-    matchFileWithLicenses(s, pFileId, state, agentId, databaseHandler);
+    matchFileWithLicenses(s, pFileId, state, agentId, databaseHandler, uploadId, uploadTreeTableName);
 
     free(fileName);
     free(pFile);
@@ -405,6 +429,7 @@ void matchPFileWithLicenses(CopyrightState const& state, int agentId, unsigned l
 bool processUploadId(const CopyrightState& state, int agentId, int uploadId, CopyrightDatabaseHandler& databaseHandler, bool ignoreFilesWithMimeType)
 {
   vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(agentId, uploadId, ignoreFilesWithMimeType);
+  string uploadTreeTableName = databaseHandler.queryUploadTreeTableName(uploadId);
 
 #pragma omp parallel num_threads(THREADS)
   {
@@ -421,7 +446,7 @@ bool processUploadId(const CopyrightState& state, int agentId, int uploadId, Cop
         continue;
       }
 
-      matchPFileWithLicenses(state, agentId, pFileId, threadLocalDatabaseHandler);
+      matchPFileWithLicenses(state, agentId, pFileId, threadLocalDatabaseHandler, uploadId, uploadTreeTableName);
 
       fo_scheduler_heart(1);
     }

@@ -43,6 +43,7 @@ public:
   std::string type;
   int copy_startbyte;               /**< Statement start offset from start of pfile content */
   int copy_endbyte;                 /**< Statement end offset from start of pfile content */
+  bool is_enabled;                  /**< False if removed by a cleanup rule (stored as deactivated) */
 };
 
 /**
@@ -59,6 +60,8 @@ public:
 
   bool createTables() const;
   bool insertInDatabase(DatabaseEntry& entry) const;
+  bool insertDeactivatedEvents(const DatabaseEntry& entry, int uploadId,
+      const std::string& uploadTreeTableName) const;
   std::vector<unsigned long> queryFileIdsForUpload(int agentId, int uploadId, bool ignoreFilesWithMimeType);
 
 private:
