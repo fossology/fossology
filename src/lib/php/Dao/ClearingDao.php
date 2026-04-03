@@ -829,7 +829,7 @@ INSERT INTO clearing_decision (
     $uploadTreeProxy = new UploadTreeProxy($itemTreeBounds->getUploadId(), $options, $itemTreeBounds->getUploadTreeTableName());
     if (!$removeDecision) {
       $sql = $uploadTreeProxy->asCTE() .
-        ' SELECT uploadtree_pk FROM UploadTreeView;';
+        ' SELECT uploadtree_pk, upload_fk, lft, rgt FROM UploadTreeView;';
       $itemRows = $this->dbManager->getRows($sql, $params,
         __METHOD__ . ".getRevelantItems");
       $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
@@ -837,8 +837,9 @@ INSERT INTO clearing_decision (
       $clearingDecisionEventProcessor = $GLOBALS['container']->get(
         'businessrules.clearing_decision_processor');
       foreach ($itemRows as $itemRow) {
-        $itemBounds = $this->uploadDao->getItemTreeBounds(
-          $itemRow['uploadtree_pk'], $uploadTreeTableName);
+        $itemBounds = new ItemTreeBounds(
+          $itemRow['uploadtree_pk'], $uploadTreeTableName,
+          $itemRow['upload_fk'], $itemRow['lft'], $itemRow['rgt']);
         $clearingDecisionEventProcessor->makeDecisionFromLastEvents(
           $itemBounds, $userId, $groupId, $decisionMark, DecisionScopes::ITEM);
       }
