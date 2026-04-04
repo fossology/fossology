@@ -505,6 +505,12 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
 
     $licenseCsvImport->setDelimiter('<>');
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'delimiter'),is('<'));
+
+    $licenseCsvImport->setDelimiter('');
+    assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'delimiter'),is('<'));
+
+    $licenseCsvImport->setDelimiter(null);
+    assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'delimiter'),is('<'));
   }
 
   /**
@@ -526,6 +532,12 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'enclosure') ,is('|'));
 
     $licenseCsvImport->setEnclosure('<>');
+    assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'enclosure'),is('<'));
+
+    $licenseCsvImport->setEnclosure('');
+    assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'enclosure'),is('<'));
+
+    $licenseCsvImport->setEnclosure(null);
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'enclosure'),is('<'));
   }
 
