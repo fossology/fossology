@@ -416,7 +416,8 @@ class ReuserAgent extends Agent
         $groupId,
         $clearingDecisionToCopy->getType(),
         $clearingDecisionToCopy->getScope(),
-        $clearingEventIdsToCopy
+        $clearingEventIdsToCopy,
+        false  // Agent call: disable duplicate prevention to allow reusing decisions
     );
   }
 
