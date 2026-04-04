@@ -164,6 +164,79 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     assertThat($zipDescendants, equalTo(array('fileCDE.c','fileCF.cpp')) );
   }
 
+  public function testGeneratedDbViewNamesKeepOptionSuffixes()
+  {
+    $rangeBounds = new ItemTreeBounds(301, 'uploadtree_a', 4, 1, 16);
+    $rangeProxy = new UploadTreeProxy(4,
+      array(UploadTreeProxy::OPT_RANGE => $rangeBounds), 'uploadtree_a');
+    $parentProxy = new UploadTreeProxy(4,
+      array(UploadTreeProxy::OPT_REALPARENT => 301), 'uploadtree_a');
+
+    self::assertSame('UploadTreeView_lft_rgt',
+      $rangeProxy->getDbViewName());
+    self::assertSame('UploadTreeView_' . UploadTreeProxy::OPT_REALPARENT,
+      $parentProxy->getDbViewName());
+    self::assertNotSame($rangeProxy->getDbViewName(),
+      $parentProxy->getDbViewName());
+  }
+
+  public function testNamedParametersAreReusedAcrossFilters()
+  {
+    $this->testDb->createPlainTables(array('license_ref'));
+    $rangeBounds = new ItemTreeBounds(301, 'uploadtree_a', 4, 1, 16);
+    $rfId = 201;
+    $groupId = 301;
+    $options = array(
+      UploadTreeProxy::OPT_RANGE => $rangeBounds,
+      UploadTreeProxy::OPT_AGENT_SET => array(401),
+      UploadTreeProxy::OPT_SCAN_REF => $rfId,
+      UploadTreeProxy::OPT_GROUP_ID => $groupId,
+      UploadTreeProxy::OPT_CONCLUDE_REF => $rfId,
+      UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED => true
+    );
+
+    $uploadTreeProxy = new UploadTreeProxy(4, $options, 'uploadtree_a');
+
+    self::assertSame(array(
+      'lft' => 1,
+      'rgt' => 16,
+      'agentIdSet' => '{401}',
+      'scanRef' => $rfId,
+      'groupId' => $groupId,
+      'conId' => $rfId
+    ), $uploadTreeProxy->getParams());
+    self::assertSame(2,
+      substr_count($uploadTreeProxy->getDbViewQuery(), 'agent_fk=ANY($3)'));
+    self::assertStringContainsString('cd.group_fk=$5',
+      $uploadTreeProxy->getDbViewQuery());
+  }
+
+  public function testCountMaskedNonArtifactChildrenWithNamedParameters()
+  {
+    $this->testDb->createPlainTables(array('license_map', 'license_file'));
+    $rfId = 201;
+    $this->dbManager->insertTableRow('license_file',
+      array('rf_fk' => $rfId, 'pfile_fk' => 103, 'agent_fk' => 401));
+    $this->dbManager->insertTableRow('license_file',
+      array('rf_fk' => $rfId, 'pfile_fk' => 102, 'agent_fk' => 402));
+
+    $this->prepareUploadTree($upload=4);
+
+    $rangeBounds = new ItemTreeBounds(301, 'uploadtree_a', $upload, 1, 16);
+    $options = array(
+      UploadTreeProxy::OPT_RANGE => $rangeBounds,
+      UploadTreeProxy::OPT_AGENT_SET => array(401),
+      UploadTreeProxy::OPT_SCAN_REF => $rfId
+    );
+
+    $uploadTreeProxy = new UploadTreeProxy($upload, $options, 'uploadtree_a');
+    $children = $uploadTreeProxy->countMaskedNonArtifactChildren(301);
+
+    self::assertCount(2, $children);
+    self::assertEquals(1, $children[304]);
+    self::assertEquals(1, $children[307]);
+  }
+
   public function testOptionScanRefParented()
   {
     $this->testDb->createPlainTables( array('license_map','license_file') );
