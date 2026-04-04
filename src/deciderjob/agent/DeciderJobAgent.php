@@ -163,7 +163,6 @@ class DeciderJobAgent extends Agent
       if (!empty($this->clearingDao->getCandidateLicenseCountForCurrentDecisions($uploadTreeId, $uploadId))) {
         throw new \Exception( _("Cannot add candidate license as global decision\n") );
       }
-      $this->heartbeat(1);
       $this->heartbeat($this->clearingDao->marklocalDecisionsAsGlobal($uploadId));
     } else {
       $this->processClearingEventOfCurrentJob();
