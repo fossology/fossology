@@ -9,6 +9,7 @@
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
@@ -253,6 +254,31 @@ class TreeDaoTest extends \PHPUnit\Framework\TestCase
     // (pfile_pk, pfile_md5, pfile_sha1, pfile_sha256, pfile_size) := (762, 'C655F0AD3E4D3F90D8EE0541DD636E2E', 'D62DCD25DC68180758FD1C064ADC91AB70A78CB1', '8F39AC8ADD8CD0C0C2BF8924CE3B24F4B2760B8723BFD4205A49FB142490A355', 34);
     $hashes = $this->treeDao->getItemHashes(463,'uploadtree_a');
     assertThat($hashes,equalTo(array('md5'=>'C655F0AD3E4D3F90D8EE0541DD636E2E','sha1'=>'D62DCD25DC68180758FD1C064ADC91AB70A78CB1','sha256'=>'8F39AC8ADD8CD0C0C2BF8924CE3B24F4B2760B8723BFD4205A49FB142490A355')));
+  }
+
+  public function testGetParentOfItemReturnsRealParent()
+  {
+    $this->prepareUploadTree(array(
+      array(10, null, 1, 0, 0x20008400, 1, 4, 'root.tar', null),
+      array(11, 10, 1, 0, 0x20004400, 2, 3, 'inner', 10)
+    ));
+
+    $itemTreeBounds = new ItemTreeBounds(11, 'uploadtree', 1, 2, 3);
+    $parent = $this->treeDao->getParentOfItem($itemTreeBounds);
+
+    assertThat($parent, equalTo(10));
+  }
+
+  public function testGetParentOfItemFallsBackToItemOnRoot()
+  {
+    $this->prepareUploadTree(array(
+      array(99, null, 32, 88, 0x0, 1, 2, 'plainFile', null)
+    ));
+
+    $itemTreeBounds = new ItemTreeBounds(99, 'uploadtree', 32, 1, 2);
+    $parent = $this->treeDao->getParentOfItem($itemTreeBounds);
+
+    assertThat($parent, equalTo(99));
   }
 
   protected function getNestedTestFileStructure()
