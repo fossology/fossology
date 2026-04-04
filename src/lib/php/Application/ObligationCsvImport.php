@@ -9,6 +9,7 @@ namespace Fossology\Lib\Application;
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ArrayOperation;
+use Fossology\Lib\BusinessRules\ObligationMap;
 
 /**
  * @file
@@ -43,17 +44,22 @@ class ObligationCsvImport
       'modifications'=>array('modifications','Apply on modified source code'),
       'comment'=>array('comment','Comment'),
       'licnames'=>array('licnames','Associated Licenses'),
-      'candidatenames'=>array('candidatenames','Associated candidate Licenses')
+      'candidatenames'=>array('candidatenames','Associated candidate Licenses'),
+      'external_id'=>array('id','LicenseDB Id'),
     );
+
+  /** @var ObligationMap $obligationMap
+   * obligation map to use */
+  protected $obligationMap;
 
   /**
    * Constructor
    * @param DbManager $dbManager DB manager to use
    */
-  public function __construct(DbManager $dbManager)
+  public function __construct(DbManager $dbManager, $obligationMap = null)
   {
     $this->dbManager = $dbManager;
-    $this->obligationMap = $GLOBALS['container']->get('businessrules.obligationmap');
+    $this->obligationMap = $obligationMap;
   }
 
   /**
@@ -291,6 +297,116 @@ class ObligationCsvImport
     return $message;
   }
 
+  private function getArrayDiffs(array $oldArray, array $newArray): array
+  {
+    $add = [];
+    $remove = [];
+
+    $oldSet = array_flip($oldArray);
+    $newSet = array_flip($newArray);
+
+    foreach ($newArray as $item) {
+      if (!isset($oldSet[$item])) {
+        $add[] = $item;
+      }
+    }
+
+    foreach ($oldArray as $item) {
+      if (!isset($newSet[$item])) {
+        $remove[] = $item;
+      }
+    }
+
+    return [
+      'add' => $add,
+      'remove' => $remove,
+    ];
+  }
+
+  /**
+   * @brief Handle a single row from csv import form LicenseDB
+   *
+   * The function checks for obligation with the row's licensedb id in
+   * the obligation_ref table. If found, updates it with the row's content
+   * and if not, creates a new one.
+   *
+   * It also creates the license obligation maps with the licenses
+   * that are found in the license_ref table.
+   */
+  private function handleLicenseDBObligationImport($row)
+  {
+    if (empty($row["external_id"])) {
+      return "Error: external_id cannot be empty";
+    }
+    $stmt = __METHOD__ . ".getExistingObligation";
+    $obPk = $this->dbManager->getSingleRow("SELECT ob_pk FROM " .
+      "obligation_ref WHERE ob_external_id=$1", array($row["external_id"]), $stmt);
+    $log = '';
+    if (!empty($obPk)) {
+      // update obligation
+      $this->updateOtherFields($obPk['ob_pk'], $row);
+
+      $this->dbManager->begin();
+      // fetch new license associations
+      $stmt = __METHOD__ . "getNewLicenseAssociations";
+      $newLicIds = array();
+      foreach ($row['license_ids'] as $licExternalId) {
+        $rfPk = $this->dbManager->getSingleRow("SELECT rf_pk FROM license_ref WHERE rf_external_id = $1;",
+          array($licExternalId), $stmt);
+        if (!empty($rfPk)) {
+          $newLicIds[] = $rfPk['rf_pk'];
+        } else {
+          $log .= \sprintf('license with rf_external_id %s not found', $licExternalId);
+        }
+      }
+
+      // fetch old license associations
+      $stmt = __METHOD__ . "getOldLiceneAssociations";
+      $oldLicIdsDb = $this->dbManager->getRows("SELECT rf_fk FROM obligation_map WHERE ob_fk = $1", array($obPk['ob_pk']), $stmt);
+      $oldLicIds = array();
+      foreach ($oldLicIdsDb as $licId) {
+        $oldLicIds[] = $licId['rf_fk'];
+      }
+
+      // create diff of licenses between current associated licenses and licensedb
+      // associated licenses
+      $diff = $this->getArrayDiffs($oldLicIds, $newLicIds);
+
+      // delete associations
+      $this->obligationMap->unassociateLicenseFromLicenseList($obPk['ob_pk'], $diff['remove']);
+
+      // insert associations
+      $this->obligationMap->associateLicenseFromLicenseList($obPk['ob_pk'], $diff['add']);
+
+      $this->dbManager->commit();
+    } else {
+      $stmtInsert = __METHOD__.'.insert';
+      $this->dbManager->prepare($stmtInsert,'INSERT INTO obligation_ref (ob_type,ob_topic,ob_text,ob_classification,ob_modifications,ob_comment,ob_md5,ob_external_id)'
+              . ' VALUES ($1,$2,$3,$4,$5,$6,md5($3),$7) RETURNING ob_pk');
+      $resi = $this->dbManager->execute($stmtInsert,array($row['type'],$row['topic'],$row['text'],$row['classification'],'False',$row['comment'], $row['external_id']));
+      $new = $this->dbManager->fetchArray($resi);
+      $this->dbManager->freeResult($resi);
+
+      $this->dbManager->begin();
+      $newLicIds = array();
+      $stmt = __METHOD__ . "getNewLicensesForInsert";
+      foreach ($row['license_ids'] as $licExternalId) {
+        $rfPk = $this->dbManager->getSingleRow("SELECT rf_pk FROM license_ref WHERE rf_external_id = $1;",
+          array($licExternalId), $stmt);
+        if (!empty($rfPk)) {
+          $newLicIds[] = $rfPk['rf_pk'];
+        } else {
+          $message .= \sprintf('license with rf_external_id %s not found', $licExternalId);
+        }
+      }
+
+      // insert associations
+      $this->obligationMap->associateLicenseFromLicenseList($new['ob_pk'], $newLicIds);
+
+      $this->dbManager->commit();
+    }
+  }
+
   /**
    * @brief Associate selected licenses to the obligation
    *
@@ -340,14 +456,26 @@ class ObligationCsvImport
    * - classification
    * - modifications
    * - comment
+   * In case of LicenseDB import,
+   * - topic
+   * - text
+   * - type
+   * are also modified
    * @param int $exists Obligation key
    * @param array $row  Row from CSV.
    */
   function updateOtherFields($exists, $row)
   {
-    $this->dbManager->getSingleRow('UPDATE obligation_ref SET ob_classification=$2, ob_modifications=$3, ob_comment=$4 where ob_pk=$1',
-      array($exists, $row['classification'], $row['modifications'], $row['comment']),
-      __METHOD__ . '.updateOtherOb');
+    if (!empty($row['external_id'])) {
+      $this->dbManager->getSingleRow(
+        'UPDATE obligation_ref SET ob_topic=$2, ob_text=$3, ob_classification=$4, ob_modifications=\'False\', ob_comment=$5, ob_type=$6, ob_md5=md5($7) where ob_pk=$1',
+        array($exists, $row['topic'], $row['text'], $row['classification'], $row['comment'], $row['type'], $row['text']
+        ), __METHOD__ . '.updateOtherOb');
+    } else {
+      $this->dbManager->getSingleRow('UPDATE obligation_ref SET ob_classification=$2, ob_modifications=$3, ob_comment=$4 where ob_pk=$1',
+        array($exists, $row['classification'], $row['modifications'], $row['comment']),
+        __METHOD__ . '.updateOtherOb');
+    }
   }
 
   /**
@@ -358,7 +486,7 @@ class ObligationCsvImport
   public function importJsonData($data, string $msg): string
   {
     foreach ($data as $row) {
-      $log = $this->handleCsvObligation($this->handleRowJson($row));
+      $log = $this->handleLicenseDBObligationImport($this->handleRowJson($row));
       if (!empty($log)) {
         $msg .= "$log\n";
       }
