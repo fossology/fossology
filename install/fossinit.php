@@ -600,7 +600,8 @@ function initLicenseRefTable($Verbose)
       $sql = "UPDATE license_ref SET ";
       if (($rf_flag_check == 1 && $rf_flag == 1) &&
           ($rf_text_check != $rf_text && !empty($rf_text) &&
-          !(stristr($rf_text, 'License by Nomos')))) {
+          !(stristr($rf_text, 'License by Nomos')) &&
+          !(stristr($rf_text, 'License by OJO')))) {
         $params[] = $rf_text;
         $position = "$" . count($params);
         $sql .= "rf_text=$position,rf_md5=md5($position),rf_flag=1,";
