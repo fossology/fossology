@@ -132,18 +132,15 @@ class ReuserAgentPlugin extends AgentPlugin
       $reuseSelections = [$reuseSelections];
     }
 
-    $createdLinks = 0;
+    $reuseSelections = array_filter($reuseSelections, fn($s) => is_string($s) && substr_count($s, ',') >= 1);
+
+    if (empty($reuseSelections)) {
+      $errorMsg .= 'No valid reuse upload selections found';
+      return -1;
+    }
+
     foreach ($reuseSelections as $reuseSelection) {
-      if (empty($reuseSelection) || !is_string($reuseSelection)) {
-        throw new \InvalidArgumentException("Reuser: Invalid reuse selection found - empty or non-string value");
-      }
-
-      $reuseUploadPair = explode(',', $reuseSelection, 2);
-      if (count($reuseUploadPair) !== 2) {
-        throw new \InvalidArgumentException("Reuser: Invalid reuse selection format: '$reuseSelection' (expected format: 'uploadId,groupId')");
-      }
-
-      [$reuseUploadId, $reuseGroupId] = $reuseUploadPair;
+      [$reuseUploadId, $reuseGroupId] = explode(',', $reuseSelection, 2);
       $this->createPackageLink(
         $uploadId,
         intval($reuseUploadId),
@@ -151,12 +148,6 @@ class ReuserAgentPlugin extends AgentPlugin
         intval($reuseGroupId),
         $reuseMode
       );
-      $createdLinks++;
-    }
-
-    if ($createdLinks === 0) {
-      $errorMsg .= 'No valid reuse upload selections found';
-      return -1;
     }
 
     list($agentDeps, $scancodeDeps) = $this->getReuserDependencies($request);
