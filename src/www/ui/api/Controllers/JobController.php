@@ -81,7 +81,7 @@ class JobController extends RestController
     $status = $queryParams['status'] ?? null;
 
     if ($limit < 0 || $page < 1) {
-      throw new HttpBadRequestException("Limit and page cannot be smaller than 1 and has to be numeric!");
+      throw new HttpBadRequestException("Limit cannot be negative and page must be >= 1.");
     }
 
     return $this->getAllResults(null, $status, $request, $response, $sort, $limit, $page, $apiVersion);
@@ -112,7 +112,7 @@ class JobController extends RestController
     $status = $queryParams['status'] ?? null;
 
     if ($limit < 0 || $page < 1) {
-      throw new HttpBadRequestException("Limit and page cannot be smaller than 1 and has to be numeric!");
+      throw new HttpBadRequestException("Limit cannot be negative and page must be >= 1.");
     }
 
     $id = isset($args['id']) ? intval($args['id']) : null;

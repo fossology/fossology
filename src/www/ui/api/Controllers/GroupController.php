@@ -70,8 +70,9 @@ class GroupController extends RestController
    */
   public function createGroup($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $groupName = '';
-    if (ApiVersion::getVersion($request) == ApiVersion::V2) {
+    if ($apiVersion == ApiVersion::V2) {
       $queryParams = $request->getQueryParams();
       $groupName = $queryParams['name'] ?? '';
     } else {
@@ -83,7 +84,8 @@ class GroupController extends RestController
     $userDao = $this->restHelper->getUserDao();
     $groupId = $userDao->addGroup($groupName);
     $userDao->addGroupMembership($groupId, $this->restHelper->getUserId());
-    $returnVal = new Info(200, "Group $groupName added.", InfoType::INFO);
+    $statusCode = $apiVersion == ApiVersion::V2 ? 201 : 200;
+    $returnVal = new Info($statusCode, "Group $groupName added.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 
@@ -98,7 +100,7 @@ class GroupController extends RestController
    */
   public function deleteGroup($request, $response, $args)
   {
-    $apiVerison = ApiVersion::getVersion($request);
+    $apiVersion = ApiVersion::getVersion($request);
     if (empty($args['pathParam'])) {
       throw new HttpBadRequestException("ERROR - No group name or id provided");
     }
@@ -109,7 +111,7 @@ class GroupController extends RestController
     $groupMap = $userDao->getDeletableAdminGroupMap($userId,
       $_SESSION[Auth::USER_LEVEL]);
     $groupId = null;
-    if ($apiVerison == ApiVersion::V2) {
+    if ($apiVersion == ApiVersion::V2) {
       $groupName = $args['pathParam'];
       $groupId = intval($userDao->getGroupIdByName($groupName));
     } else {
