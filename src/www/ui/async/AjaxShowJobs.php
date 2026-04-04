@@ -223,6 +223,10 @@ class AjaxShowJobs extends \FO_Plugin
         'jobQueue' => $jobs['jobqueue']
       );
       foreach ($jobArr['jobQueue'] as $key => $singleJobQueue) {
+        // Special handling for kotoba display name
+        if ($singleJobQueue['jq_type'] === 'kotoba') {
+          $jobArr['jobQueue'][$key]['jq_type'] = 'kotoba';
+        }
         if (! $forApi) {
           if (! empty($jobArr['jobQueue'][$key]['jq_starttime'])) {
             $jobArr['jobQueue'][$key]['jq_starttime'] = Convert2BrowserTime(
