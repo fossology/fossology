@@ -147,6 +147,9 @@ class TreeDao
     $sql = "SELECT realparent FROM $tableName WHERE uploadtree_pk = $1;";
     $statement = __METHOD__ . ".$tableName";
     $row = $this->dbManager->getSingleRow($sql, [$item], $statement);
-    return $row['realparent'];
+    if ($row === false) {
+      return $item;
+    }
+    return empty($row['realparent']) ? $item : (int)$row['realparent'];
   }
 }
