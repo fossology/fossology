@@ -79,7 +79,8 @@ class LicenseCsvImport
    */
   public function setDelimiter($delimiter=',')
   {
-    $this->delimiter = substr($delimiter,0,1);
+    $this->delimiter = $this->normalizeCsvControlCharacter($delimiter,
+      $this->delimiter);
   }
 
   /**
@@ -88,7 +89,24 @@ class LicenseCsvImport
    */
   public function setEnclosure($enclosure='"')
   {
-    $this->enclosure = substr($enclosure,0,1);
+    $this->enclosure = $this->normalizeCsvControlCharacter($enclosure,
+      $this->enclosure);
+  }
+
+  /**
+   * Keep CSV control characters valid even if UI or CLI input is empty.
+   *
+   * @param mixed  $value    Raw user-provided value.
+   * @param string $fallback Existing valid single-character setting.
+   * @return string
+   */
+  private function normalizeCsvControlCharacter($value, $fallback)
+  {
+    if (!is_string($value) || $value === '') {
+      return $fallback;
+    }
+
+    return substr($value, 0, 1);
   }
 
   /**
