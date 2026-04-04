@@ -110,7 +110,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   {
     $this->testDb->createPlainTables(array(),true);
     $this->testDb->createInheritedTables();
-    $this->dbManager->queryOnce("CREATE TABLE copyright_ars () INHERITS (ars_master)");
+    $this->dbManager->queryOnce("CREATE TABLE IF NOT EXISTS copyright_ars () INHERITS (ars_master)");
 
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq',
       'nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq',
