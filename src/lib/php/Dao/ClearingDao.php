@@ -1067,7 +1067,7 @@ INSERT INTO clearing_decision (
              UPDATE clearing_decision SET scope = $2 WHERE clearing_decision_pk IN (
                SELECT clearing_decision_pk FROM latestDecisions) RETURNING clearing_decision_pk";
 
-    $countUpdated = $this->dbManager->getSingleRow($sql,
+    $countUpdated = $this->dbManager->getRows($sql,
                  array($uploadId, DecisionScopes::REPO), $statementName);
 
     return count($countUpdated);
