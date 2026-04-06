@@ -333,7 +333,7 @@ char* fo_RepMkPathTmp(const char* Type, char* Filename, char* Ext, int Which)
   {
     strcat(Path, ".");
     strcat(Path, Ext);
-    Len += strlen(Type) + 1;
+    Len += strlen(Ext) + 1;
   }
   return (Path);
 } /* fo_RepMkPathTmp() */
