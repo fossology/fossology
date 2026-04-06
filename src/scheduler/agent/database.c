@@ -213,7 +213,8 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
     {
       rows = g_ptr_array_new();
       GString *foldername = g_string_new(PQgetvalue(db_result, 0, 0));
-      guint folder_pk = atoi(PQget(db_result, 0, "folder_pk"));
+      char *folderPkStr = PQget(db_result, 0, "folder_pk");
+      guint folder_pk = (folderPkStr != NULL) ? (guint)atoi(folderPkStr) : 0;
       g_ptr_array_add(rows, foldername);
       SafePQclear(db_result);
       g_free(sql);
@@ -229,7 +230,8 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
       while(PQresultStatus(db_result) == PGRES_TUPLES_OK && PQntuples(db_result) == 1)
       {
         GString *foldername = g_string_new(PQgetvalue(db_result, 0, 0));
-        guint folder_pk = atoi(PQget(db_result, 0, "folder_pk"));
+        char *folderPkStr = PQget(db_result, 0, "folder_pk");
+        guint folder_pk = (folderPkStr != NULL) ? atoi(folderPkStr) : 0;
         g_ptr_array_add(rows, foldername);
         SafePQclear(db_result);
         g_free(sql);
