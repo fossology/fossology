@@ -904,7 +904,7 @@ void OctetType(char *Filename, char *TypeBuf)
   rc2 = RunCommand("7z","t -y -pjunk",Filename,">/dev/null 2>&1",NULL,NULL);
   if(rc2!=0)
   {
-    rc3 = RunCommand("7z","t -y -pjunk",Filename,"|grep 'Wrong password' >/dev/null 2>&1",NULL,NULL);
+    rc3 = RunCommand("7z","t -y -pjunk",Filename," 2>&1 | grep 'Wrong password' >/dev/null",NULL,NULL);
     if(rc3==0)
     {
       LOG_ERROR("'%s' cannot be unpacked, password required.",Filename);
