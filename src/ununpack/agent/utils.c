@@ -807,7 +807,7 @@ void OctetType(char *Filename, char *TypeBuf)
   rc2 = RunCommand("7z","t -y -pjunk",Filename,">/dev/null 2>&1",NULL,NULL);
   if(rc2!=0)
   {
-    rc3 = RunCommand("7z","t -y -pjunk",Filename,"|grep 'Wrong password' >/dev/null 2>&1",NULL,NULL);
+    rc3 = RunCommand("7z","t -y -pjunk",Filename," 2>&1 | grep 'Wrong password' >/dev/null",NULL,NULL);
     if(rc3==0)
     {
       LOG_ERROR("'%s' cannot be unpacked, password required.",Filename);
@@ -946,6 +946,19 @@ int	FindCmd	(char *Filename)
   }
   return(Match);
 } /* FindCmd() */
+
+/**
+ * @brief Check if a PDF file is encrypted/password-protected.
+ *  if the detection command cannot be run, so the caller falls
+ * back to the normal error path.
+ * @param Filename Absolute path to the PDF file
+ * @returns 1 if the PDF is encrypted, 0 otherwise
+ */
+int IsPdfEncrypted(char *Filename)
+{
+  return RunCommand("pdftotext", "", Filename,
+      "/dev/null 2>&1 | grep -qi 'password'", NULL, NULL) == 0;
+} /* IsPdfEncrypted() */
 
 /***************************************************************************/
 /***************************************************************************/
