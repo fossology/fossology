@@ -190,6 +190,7 @@ void Usage (char *Name, char *Version);
 void deleteTmpFiles(char *dir);
 void SQLNoticeProcessor(void *arg, const char *message);
 int ShouldExclude(char *Filename, const char *ExcludePatterns);
+int IsPdfEncrypted(char *Filename);
 
 
 /* traverse.c */

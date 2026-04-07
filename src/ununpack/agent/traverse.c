@@ -221,6 +221,11 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
       LOG_ERROR("pfile %s Command %s failed on: %s, Password required.",
         Pfile_Pk, CMD[CI->PI.Cmd].Cmd, CI->Source);
     }
+    else if (strstr(CMD[CI->PI.Cmd].Magic, "/pdf") && IsPdfEncrypted(CI->Source))
+    {
+      LOG_WARNING("pfile %s Command Failed on PDF file '%s' it is encrypted/password-protected",
+        Pfile_Pk, CI->Source);
+    }
     else
     {
       LOG_ERROR("pfile %s Command %s failed on: %s",
@@ -391,7 +396,18 @@ int	Traverse	(char *Filename, char *Basename,
     }
 
     if (CI.Source[strlen(CI.Source)-1] != '/') strcat(CI.Source,"/");
+    errno = 0;
     DLhead = MakeDirList(CI.Source);
+    if (DLhead == NULL && errno != 0)
+    {
+      /* Directory could not be opened even after chmod attempt — log and skip.
+         Do not register it as a container with children since none can be found. */
+      LOG_WARNING("pfile %s Cannot read directory \"%s\": %s -- skipping.",
+                  Pfile_Pk, CI.Source, strerror(errno));
+      CI.HasChild = 0;
+      IsContainer  = 0;
+      goto TraverseEnd;
+    }
     /* process inode in the directory (only if unique) */
     if (DisplayContainerInfo(&CI,PI->Cmd))
     {
