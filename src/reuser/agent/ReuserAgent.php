@@ -208,24 +208,37 @@ class ReuserAgent extends Agent
       $reusedUploadId, $reusedAgentId);
 
     if (!empty($reusedCopyrights) && !empty($allCopyrights)) {
+      // Pre-index $allCopyrights by hash to avoid nested loop O(N*M)
+      $copyrightsByHash = [];
+      foreach ($allCopyrights as $copyrightKey => $copyright) {
+        $hash = $copyright['hash'];
+        if (!isset($copyrightsByHash[$hash])) {
+          $copyrightsByHash[$hash] = [];
+        }
+        $copyrightsByHash[$hash][] = $copyrightKey;
+      }
+
       foreach ($reusedCopyrights as $reusedCopyright) {
-        foreach ($allCopyrights as $copyrightKey => $copyright) {
-          if (strcmp($copyright['hash'], $reusedCopyright['hash']) == 0) {
-            if ($this->dbManager->booleanFromDb($reusedCopyright['is_enabled'])) {
-              $action = "update";
-              $content = $reusedCopyright["contentedited"];
-            } else {
-              $action = "delete";
-              $content = "";
-            }
-            $hash = $copyright['hash'];
-            $item = $this->uploadDao->getItemTreeBounds(intval($copyright['uploadtree_pk']),
-                      $uploadTreeTableName);
-            $this->copyrightDao->updateTable($item, $hash, $content,
-              $this->userId, 'copyright', $action);
-            unset($allCopyrights[$copyrightKey]);
-            $this->heartbeat(1);
+        $reusedHash = $reusedCopyright['hash'];
+        if (isset($copyrightsByHash[$reusedHash]) && !empty($copyrightsByHash[$reusedHash])) {
+          // Take the first matching entry
+          $copyrightKey = array_shift($copyrightsByHash[$reusedHash]);
+          $copyright = $allCopyrights[$copyrightKey];
+
+          if ($this->dbManager->booleanFromDb($reusedCopyright['is_enabled'])) {
+            $action = "update";
+            $content = $reusedCopyright["contentedited"];
+          } else {
+            $action = "delete";
+            $content = "";
           }
+          $hash = $copyright['hash'];
+          $item = new ItemTreeBounds(
+                    intval($copyright['uploadtree_pk']), $uploadTreeTableName,
+                    $copyright['upload_fk'], $copyright['lft'], $copyright['rgt']);
+          $this->copyrightDao->updateTable($item, $hash, $content,
+            $this->userId, 'copyright', $action);
+          $this->heartbeat(1);
         }
       }
     }
@@ -286,6 +299,29 @@ class ReuserAgent extends Agent
   }
 
   /**
+   * @brief Fast-path check: Compare scanned licenses of two files via database
+   *
+   * @param int $reusedPfileFk The physical file ID of the baseline file
+   * @param int $newPfileFk The physical file ID of the new file
+   * @return boolean True if both files have the exact same scanned licenses
+   */
+  protected function areLicensesIdentical($reusedPfileFk, $newPfileFk)
+  {
+    $sql = "SELECT (t1.lice = t2.lice AND t1.lice IS NOT NULL) as are_identical
+            FROM
+              (SELECT array_agg(DISTINCT rf_fk ORDER BY rf_fk) as lice FROM license_file WHERE pfile_fk = $1) t1,
+              (SELECT array_agg(DISTINCT rf_fk ORDER BY rf_fk) as lice FROM license_file WHERE pfile_fk = $2) t2";
+
+    $stmt = __METHOD__ . '.compareLicenses';
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, array($reusedPfileFk, $newPfileFk));
+    $row = $this->dbManager->fetchArray($res);
+    $this->dbManager->freeResult($res);
+
+    return !empty($row['are_identical']) && ($this->dbManager->booleanFromDb($row['are_identical']));
+  }
+
+  /**
    * @brief Get clearing decisions and use copyClearingDecisionIfDifferenceIsSmall()
    * @param ItemTreeBounds $itemTreeBounds        Current upload
    * @param ItemTreeBounds $itemTreeBoundsReused  Reused upload
@@ -311,16 +347,24 @@ class ReuserAgent extends Agent
     foreach ($clearingDecisionsToImport as $clearingDecision) {
       $reusedPath = $treeDao->getRepoPathOfPfile($clearingDecision->getPfileId());
       if (empty($reusedPath)) {
-        // File missing from repo
         continue;
       }
 
       $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId(),
         $itemTreeBoundsReused->getUploadId(),$clearingDecision->getPfileId()));
       while ($row = $this->dbManager->fetchArray($res)) {
+
+        $newPfileFk = $row['pfile_fk'];
+        $reusedPfileFk = $clearingDecision->getPfileId();
+
+        if ($this->areLicensesIdentical($reusedPfileFk, $newPfileFk)) {
+          $this->createCopyOfClearingDecision($row['uploadtree_pk'], $this->userId, $this->groupId, $clearingDecision);
+          $this->heartbeat(1);
+          continue;
+        }
+
         $newPath = $treeDao->getRepoPathOfPfile($row['pfile_fk']);
         if (empty($newPath)) {
-          // File missing from repo
           continue;
         }
         $this->copyClearingDecisionIfDifferenceIsSmall($reusedPath, $newPath, $clearingDecision, $row['uploadtree_pk']);
