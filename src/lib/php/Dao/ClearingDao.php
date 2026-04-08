@@ -372,7 +372,7 @@ INSERT INTO clearing_decision (
   scope
 ) VALUES (
   $1,
-  (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1),
+  (SELECT pfile_fk FROM ". $uploadTreeTable ." WHERE uploadtree_pk=$1),
   $2,
   $3,
   $4,
