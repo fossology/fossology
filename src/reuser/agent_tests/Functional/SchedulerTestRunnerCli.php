@@ -28,17 +28,23 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
     $this->testDb = $testDb;
   }
 
-  public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
+  public function run($uploadId, $userId=2, $groupId=2, $jobId=1, array $args=[])
   {
     $sysConf = $this->testDb->getFossSysConf();
 
     $agentName = "reuser";
 
     $agentDir = dirname(dirname(__DIR__));
-    $execDir = "$agentDir/agent";
-    system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
 
-    $pipeFd = popen($cmd = "echo $uploadId | $execDir/$agentName --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start -c $sysConf $args", "r");
+    // Ensure VERSION is staged for the scheduler (create mods-enabled entry)
+    $installCmd = 'install -D ' . escapeshellarg($agentDir . '/VERSION') . ' ' . escapeshellarg($sysConf . '/mods-enabled/' . $agentName . '/VERSION');
+    system($installCmd);
+
+    $execPath = $agentDir . '/agent/' . $agentName;
+
+    $extraArgs = implode(' ', array_map('escapeshellarg', $args));
+    $cmd = 'echo ' . escapeshellarg((string)$uploadId) . ' | ' . escapeshellarg($execPath) . ' --userID=' . escapeshellarg((string)$userId) . ' --groupID=' . escapeshellarg((string)$groupId) . ' --jobId=' . escapeshellarg((string)$jobId) . ' --scheduler_start -c ' . escapeshellarg($sysConf) . ($extraArgs !== '' ? ' ' . $extraArgs : '');
+    $pipeFd = popen($cmd, 'r');
     $success = $pipeFd !== false;
 
     $output = "";
