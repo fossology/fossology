@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# FOSSology mod_deps script for reuser
+# SPDX-License-Identifier: GPL-2.0-only
+# Author: Dietmar Helmut Leher <helmut.leher.ext@vaillant-group.com>
+# SPDX-FileCopyrightText: © 2026 Vaillant GmbH
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../utils/utils.sh"
+
+YesOpt=''
+
+EVERYTHING=''
+RUNTIME=''
+BUILDTIME=''
+
+OPTS=$(getopt -o rbehy --long runtime,buildtime,everything,help -n 'mod_deps' -- "$@")
+
+if [[ $? -ne 0 ]]; then
+  OPTS='--help'
+fi
+
+eval set -- "$OPTS"
+
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
+  EVERYTHING=true
+fi
+
+while true; do
+  case "$1" in
+    -r|--runtime)     RUNTIME=true; shift;;
+    -b|--buildtime)   BUILDTIME=true; shift;;
+    -e|--everything)  EVERYTHING=true; shift;;
+    -y)               YesOpt='-y'; shift;;
+    -h|--help)        show_help_for_mod_deps; exit;;
+    --)               shift; break;;
+    *)                echo "ERROR: option $1 not recognised"; exit 1;;
+  esac
+done
+
+set -o errexit -o nounset -o pipefail
+
+must_run_as_root
+need_lsb_release
+
+if [[ $EVERYTHING ]]; then
+  echo "*** Installing both runtime and buildtime dependencies ***"
+  RUNTIME=true
+  BUILDTIME=true
+fi
+
+DISTRO=$(lsb_release --id --short)
+CODENAME=$(lsb_release --codename --short)
+
+if [[ $BUILDTIME ]]; then
+  echo "*** Installing $DISTRO buildtime dependencies for reuser ***";
+  case "$DISTRO" in
+    Debian|Ubuntu|Tuxedo)
+      apt-get $YesOpt install \
+        libpq-dev \
+        libicu-dev
+      ;;
+    Fedora|RedHatEnterprise*|CentOS)
+      yum $YesOpt install \
+        postgresql-devel \
+        libicu-devel
+      ;;
+    *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
+  esac
+fi
+
+if [[ $RUNTIME ]]; then
+  echo "*** Installing $DISTRO runtime dependencies for reuser ***";
+  case "$DISTRO" in
+    Debian|Ubuntu|Tuxedo)
+      case "$CODENAME" in
+        bullseye)
+          apt-get $YesOpt install libpq5 libicu67;;
+        bookworm|trixie|sid)
+          apt-get $YesOpt install libpq5 libicu72;;
+        jammy)
+          apt-get $YesOpt install libpq5 libicu70;;
+        noble)
+          apt-get $YesOpt install libpq5 libicu74;;
+        *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
+      esac;;
+    Fedora|RedHatEnterprise*|CentOS)
+      yum $YesOpt install \
+        postgresql \
+        libicu
+      ;;
+    *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
+  esac
+fi
+
+#######################################################################
