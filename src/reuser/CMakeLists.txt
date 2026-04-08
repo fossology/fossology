@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
 #]=======================================================================]
 
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
-project(reuser)
+project(reuser LANGUAGES CXX)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/SetDefaults.cmake)
 
