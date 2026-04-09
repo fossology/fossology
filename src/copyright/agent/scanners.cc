@@ -7,25 +7,25 @@
 
 #include "scanners.hpp"
 
-#include <codecvt>
+#include <fstream>
 #include <sstream>
 
 /**
- * \brief Utility: read file to string from scanners.h
+ * \brief Utility: read file to UnicodeString from scanners.h
  * \param[in]  fileName Path of file to read
- * \param[out] out      String created from file
+ * \param[out] out      UnicodeString created from file
  * \return True on success, fail otherwise
  * \todo There should be a maximum string size
  */
 bool ReadFileToString(const string& fileName, icu::UnicodeString& out)
 {
-  wifstream stream(fileName);
-  stream.imbue(std::locale(stream.getloc(), new std::codecvt_utf8_utf16<wchar_t>));
-  std::wstringstream sstr;
+  std::ifstream stream(fileName, std::ios::binary);
+  if (!stream)
+    return false;
+  std::ostringstream sstr;
   sstr << stream.rdbuf();
-  out = icu::UnicodeString::fromUTF32(
-    reinterpret_cast<const UChar32*>(sstr.str().c_str()),
-    sstr.str().length());
+  std::string content = sstr.str();
+  out = icu::UnicodeString::fromUTF8(content);
   return !stream.fail();
 }
 

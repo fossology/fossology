@@ -9,7 +9,7 @@
  */
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include <boost/regex.hpp>
+#include <boost/regex/icu.hpp>
 
 #include "ojoregex.hpp"
 
@@ -46,15 +46,15 @@ protected:
     std::string content = "SPDX-License-Identifier: " + gplLicense + " AND "
         + lgplLicense;
     // REUSE-IgnoreStart
-    boost::regex listRegex(SPDX_LICENSE_LIST, boost::regex_constants::icase);
-    boost::regex nameRegex(SPDX_LICENSE_NAMES, boost::regex_constants::icase);
+    boost::u32regex listRegex = boost::make_u32regex(SPDX_LICENSE_LIST, boost::regex_constants::icase);
+    boost::u32regex nameRegex = boost::make_u32regex(SPDX_LICENSE_NAMES, boost::regex_constants::icase);
 
     std::string::const_iterator begin = content.begin();
     std::string::const_iterator end = content.end();
-    boost::match_results<std::string::const_iterator> what;
+    boost::smatch what;
 
     string licenseList;
-    boost::regex_search(begin, end, what, listRegex);
+    boost::u32regex_search(begin, end, what, listRegex);
     licenseList = what[1].str();
 
     // Check if the correct license list is found
@@ -68,7 +68,7 @@ protected:
     while (begin != end)
     {
       boost::smatch res;
-      if (boost::regex_search(begin, end, res, nameRegex))
+      if (boost::u32regex_search(begin, end, res, nameRegex))
       {
         licensesFound.push_back(res[1].str());
         begin = res[0].second;
@@ -110,15 +110,15 @@ protected:
     std::string content = "SPDX-License-Identifier: " + gplLicense + " AND "
         + badLicense;
     // REUSE-IgnoreStart
-    boost::regex listRegex(SPDX_LICENSE_LIST, boost::regex_constants::icase);
-    boost::regex nameRegex(SPDX_LICENSE_NAMES, boost::regex_constants::icase);
+    boost::u32regex listRegex = boost::make_u32regex(SPDX_LICENSE_LIST, boost::regex_constants::icase);
+    boost::u32regex nameRegex = boost::make_u32regex(SPDX_LICENSE_NAMES, boost::regex_constants::icase);
 
     std::string::const_iterator begin = content.begin();
     std::string::const_iterator end = content.end();
-    boost::match_results<std::string::const_iterator> what;
+    boost::smatch what;
 
     string licenseList;
-    boost::regex_search(begin, end, what, listRegex);
+    boost::u32regex_search(begin, end, what, listRegex);
     licenseList = what[1].str();
 
     // Check if only correct license is found
@@ -132,7 +132,7 @@ protected:
     while (begin != end)
     {
       boost::smatch res;
-      if (boost::regex_search(begin, end, res, nameRegex))
+      if (boost::u32regex_search(begin, end, res, nameRegex))
       {
         licensesFound.push_back(res[1].str());
         begin = res[0].second;
@@ -177,15 +177,15 @@ protected:
     std::string content = "SPDX-License-Identifier: (" + gplLicense + " AND "
         + lgplLicense + ") OR " + mplLicense + " AND " + mitLicense + ".";
     // REUSE-IgnoreStart
-    boost::regex listRegex(SPDX_LICENSE_LIST, boost::regex_constants::icase);
-    boost::regex nameRegex(SPDX_LICENSE_NAMES, boost::regex_constants::icase);
+    boost::u32regex listRegex = boost::make_u32regex(SPDX_LICENSE_LIST, boost::regex_constants::icase);
+    boost::u32regex nameRegex = boost::make_u32regex(SPDX_LICENSE_NAMES, boost::regex_constants::icase);
 
     std::string::const_iterator begin = content.begin();
     std::string::const_iterator end = content.end();
-    boost::match_results<std::string::const_iterator> what;
+    boost::smatch what;
 
     string licenseList;
-    boost::regex_search(begin, end, what, listRegex);
+    boost::u32regex_search(begin, end, what, listRegex);
     licenseList = what[1].str();
 
     // Check if the correct license list is found
@@ -200,7 +200,7 @@ protected:
     while (begin != end)
     {
       boost::smatch res;
-      if (boost::regex_search(begin, end, res, nameRegex))
+      if (boost::u32regex_search(begin, end, res, nameRegex))
       {
         licensesFound.push_back(res[1].str());
         begin = res[0].second;

@@ -18,4 +18,8 @@ int sched_onDiffMatch(MonkState* state, const File* file, const License* license
 int sched_ignore(MonkState* state, const File* file);
 int sched_noop(MonkState* state);
 
+unsigned char* readFileBytes(const char* fileName, size_t* outSize);
+void convertDiffPointToUChar16(DiffPoint* pt,
+    const unsigned char* fileContent, size_t fileSize);
+
 #endif // MONK_AGENT_SCHEDULER_H

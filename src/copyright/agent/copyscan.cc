@@ -119,16 +119,33 @@ void hCopyrightScanner::ScanString(const icu::UnicodeString& s, list<match>& res
   auto pos = begin;
   auto const end = begin + s.length();
 
+  // u32regex_search is implemented with recursive descent and will overflow
+  // the stack on very large inputs.  Search in bounded chunks to keep the
+  // recursive depth manageable.
+  static const int CHUNK_SIZE = 8192;
+  static const int CHUNK_OVERLAP = 256;
+
   while (pos != end)
   {
-    // Find potential copyright statement
+    // Find potential copyright statement within a bounded chunk
+    auto const searchEnd = (end - pos > CHUNK_SIZE) ? pos + CHUNK_SIZE : end;
     rx::u16match matches;
-    if (!rx::u32regex_search(pos, end, matches, regCopyright))
-      // No further copyright statement found
-      break;
+    if (!rx::u32regex_search(pos, searchEnd, matches, regCopyright))
+    {
+      // No match in this chunk; advance past it (keeping overlap for boundary matches)
+      if (searchEnd == end)
+        break;
+      pos = searchEnd - CHUNK_OVERLAP;
+      continue;
+    }
     auto const foundPos = matches[0].first;
 
-    if (!rx::u32regex_match(foundPos, end, regException))
+    // Limit the exception check to the first 256 UChar16 units from the
+    // match position.  Exception phrases ("copyright licenses", etc.) are
+    // short; running u32regex_match over the entire remaining file can
+    // exceed boost's regex complexity limit on large inputs.
+    auto const exEnd = (end - foundPos > 256) ? foundPos + 256 : end;
+    if (!rx::u32regex_match(foundPos, exEnd, regException))
     {
       /**
        * Not an exception, this means that at foundPos there is a copyright statement.
@@ -152,13 +169,21 @@ void hCopyrightScanner::ScanString(const icu::UnicodeString& s, list<match>& res
         ++beginOfLine;
         auto const posEndOfLine = getLineBreakPosition(s, begin, end, beginOfLine);
         auto const endOfLine = (posEndOfLine != -1) ? begin + posEndOfLine : end;
-        if (rx::u32regex_search(beginOfLine, endOfLine, regSpdxCopyright))
+
+        // Cap the range to avoid stack overflow in u32regex_match/search
+        // on very long "lines" (e.g., minified files with no newlines).
+        // A line longer than 4096 UChar16 units is certainly non-blank.
+        static const int MAX_LINE_CHECK = 4096;
+        auto const checkEnd = (endOfLine - beginOfLine > MAX_LINE_CHECK)
+                                ? beginOfLine + MAX_LINE_CHECK : endOfLine;
+
+        if (rx::u32regex_search(beginOfLine, checkEnd, regSpdxCopyright))
         {
           // Found end
           break;
         }
-        if (rx::u32regex_search(beginOfLine, endOfLine, regSimpleCopyright)
-          || !rx::u32regex_match(beginOfLine, endOfLine, regNonBlank))
+        if (rx::u32regex_search(beginOfLine, checkEnd, regSimpleCopyright)
+          || !rx::u32regex_match(beginOfLine, checkEnd, regNonBlank))
         {
           // Found end
           break;

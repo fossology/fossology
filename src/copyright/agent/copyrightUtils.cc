@@ -264,8 +264,7 @@ scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defau
 
     std::string streamContent = type + "=" + match.str(3);
 
-    std::wistringstream stream;
-    stream.str(std::wstring(streamContent.begin(), streamContent.end()));
+    std::istringstream stream(streamContent);
     return new regexScanner(type, stream, regId);
   }
   return nullptr;

@@ -30,7 +30,7 @@ public:
 
   void maybeLoad(const std::string& identity);
   void maybeLoad(const std::string& identity,
-                 std::wistringstream& stream);
+                 std::istringstream& stream);
 
   const icu::UnicodeString getRegexValue(const std::string& name,
                                          const std::string& key);
@@ -41,7 +41,7 @@ private:
   bool _isVerbosityDebug;      /**< True to print debug messages */
 
   bool getRegexConfStream(const std::string& identity,
-                          /*out*/ std::wifstream& stream);
+                          /*out*/ std::ifstream& stream);
 };
 
 #endif /* REGEXCONFPROVIDER_HPP_ */

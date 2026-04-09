@@ -8,6 +8,8 @@
 #define _GNU_SOURCE
 #endif /* not defined _GNU_SOURCE */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "nomos_utils.h"
 #include "nomos.h"
 
@@ -694,6 +696,18 @@ FUNCTION int updateLicenseHighlighting(cacheroot_t *pcroot){
   printf("%s %s %i \n", cur.filePath,cur.compLic , cur.theMatches->len);
 #endif
 
+  /* Read the scanned file once so we can convert byte offsets to UChar16
+   * offsets. This makes positions consistent with the ICU-based copyright
+   * agent which stores UChar16 (UTF-16 code unit) positions. */
+  size_t fileSize = 0;
+  unsigned char* fileContent = fo_readFileBytes(cur.filePath, &fileSize);
+
+  /* Helper macro: convert a byte offset to UChar16 offset */
+#define BYTE_TO_UCHAR16(byteOff) \
+  ((fileContent && (size_t)(byteOff) <= fileSize) \
+    ? (int)fo_utf8ByteLenToUChar16Len(fileContent, (size_t)(byteOff)) \
+    : (byteOff))
+
   // This speeds up the writing to the database and ensures that we have either full highlight information or none
   PGresult* begin1 = PQexec(gl.pgConn, "BEGIN");
   PQclear(begin1);
@@ -711,12 +725,14 @@ FUNCTION int updateLicenseHighlighting(cacheroot_t *pcroot){
   for (i = 0; i < cur.keywordPositions->len; ++i)
   {
     MatchPositionAndType* ourMatchv = getMatchfromHighlightInfo(cur.keywordPositions, i);
+    int charStart = BYTE_TO_UCHAR16(ourMatchv->start);
+    int charEnd   = BYTE_TO_UCHAR16(ourMatchv->end);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     // If uninitialized, the loop will not start
     result = fo_dbManager_ExecPrepared(
                 preparedKeywords,
-                cur.pFileFk, ourMatchv->start, ourMatchv->end - ourMatchv->start);
+                cur.pFileFk, charStart, charEnd - charStart);
 #pragma GCC diagnostic pop
     if (result)
     {
@@ -751,23 +767,30 @@ FUNCTION int updateLicenseHighlighting(cacheroot_t *pcroot){
         //! the license File ID was never set and we should not insert it in the database
         continue;
       }
+      int charStart = BYTE_TO_UCHAR16(ourMatchv->start);
+      int charEnd   = BYTE_TO_UCHAR16(ourMatchv->end);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
       // If uninitialized, the loop will not start
       result = fo_dbManager_ExecPrepared(
                   preparedLicenses,
         ourLicence->licenseFileId,
-        ourMatchv->start, ourMatchv->end - ourMatchv->start
+        charStart, charEnd - charStart
       );
 #pragma GCC diagnostic pop
       if (result == NULL)
       {
+        if (fileContent) free(fileContent);
         return (FALSE);
       } else {
         PQclear(result);
       }
     }
   }
+
+#undef BYTE_TO_UCHAR16
+
+  if (fileContent) free(fileContent);
 
   PGresult* commit2 = PQexec(gl.pgConn, "COMMIT");
   PQclear(commit2);

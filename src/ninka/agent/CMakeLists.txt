@@ -43,7 +43,7 @@ foreach(FO_NINKA_TARGET ninka ninka_exec ninka_cov ninka_cov_exec)
     endif()
     if(${FO_NINKA_TARGET} MATCHES "_exec$")
         target_link_libraries(${FO_NINKA_TARGET}
-            PRIVATE fossologyCPP stdc++ icuuc icudata gcov OpenMP::OpenMP_CXX)
+            PRIVATE fossologyCPP stdc++ ICU::uc ICU::i18n gcov OpenMP::OpenMP_CXX)
         string(REPLACE "_exec" "" FO_NINKA_TARGET_R ${FO_NINKA_TARGET})
         set_target_properties(${FO_NINKA_TARGET}
             PROPERTIES OUTPUT_NAME ${FO_NINKA_TARGET_R})

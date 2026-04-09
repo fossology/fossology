@@ -28,4 +28,7 @@ char* GetUploadtreeTableName(PGconn* pgConn, int upload_pk);
 PGresult* checkDuplicateReq(PGconn* pgConn, int uploadPk, int agentPk);
 PGresult* getSelectedPFiles(PGconn* pgConn, int uploadPk, int agentPk, bool ignoreFilesWithMimeType);
 
+size_t fo_utf8ByteLenToUChar16Len(const unsigned char* utf8, size_t byteLen);
+unsigned char* fo_readFileBytes(const char* fileName, size_t* outSize);
+
 #endif

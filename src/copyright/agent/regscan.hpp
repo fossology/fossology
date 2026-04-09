@@ -13,17 +13,25 @@
 #include "regexConfProvider.hpp"
 #include <sstream>
 
+extern "C" {
+#include "libfossology.h"
+}
+
 /**
  * \class regexScanner
  * \brief Provides a regex scanner using predefined regexs
+ *
+ * Uses boost::regex on UTF-8 strings for performance; the ecc/keyword/ipra
+ * patterns only match ASCII content.  Byte offsets are converted to UChar16
+ * offsets at the end so positions are consistent with the ICU-based storage.
  */
 class regexScanner : public scanner
 {
   /**
    * \var rx::regex _reg
-   * Regex to be used during scan
+   * Regex to be used during scan (operates on UTF-8 bytes)
    */
-  rx::u32regex _reg;
+  rx::regex _reg;
   /**
    * \var string _type
    * Type of regex to use
@@ -44,7 +52,7 @@ public:
                const string& identity,
                int index = 0);
   regexScanner(const string& type,
-               std::wistringstream& stream,
+               std::istringstream& stream,
                int index = 0);
 } ;
 

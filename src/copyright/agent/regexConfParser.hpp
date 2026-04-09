@@ -23,17 +23,17 @@ extern "C" {
  */
 typedef std::map<std::string, icu::UnicodeString> RegexMap;
 
-RegexMap readConfStreamToMap(std::wistringstream& stream,
+RegexMap readConfStreamToMap(std::istringstream& stream,
                              const bool isVerbosityDebug = false);
 
-RegexMap readConfStreamToMap(std::wifstream& stream,
+RegexMap readConfStreamToMap(std::ifstream& stream,
                              const bool isVerbosityDebug = false);
 
 void addRegexToMap(/*in and out*/ RegexMap& oldMap,
-                    const std::wstring& regexDesc,
+                    const std::string& regexDesc,
                     const bool isVerbosityDebug = false);
 
 icu::UnicodeString replaceTokens(/*in*/ RegexMap& dict,
-                                 const std::wstring& constInput);
+                                 const std::string& constInput);
 
 #endif /* REGEXCONFPARSER_HPP_ */

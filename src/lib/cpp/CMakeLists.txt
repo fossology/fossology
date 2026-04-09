@@ -38,10 +38,11 @@ target_sources(fossologyCPP
         ${FO_CWD}/libfossUtils.cc)
 
 target_link_libraries(fossologyCPP
-    PRIVATE
-        fossology
+    PUBLIC
         ICU::uc
         ICU::i18n
+    PRIVATE
+        fossology
 )
 
 target_include_directories(fossologyCPP

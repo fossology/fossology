@@ -33,7 +33,7 @@ private:
    * \param testString String to check result against
    * \param testKey    Key to check result against
    */
-  void regexConfProviderTest (wistringstream& testStream,
+  void regexConfProviderTest (istringstream& testStream,
                     const string& testString,
                     const string& testKey)
   {
@@ -64,7 +64,7 @@ protected:
     string testString = "Lorem Ipsum";
     string testKey = "TEST";
     string testLine = testKey + "=" + testString + "\n";
-    wistringstream testStream(std::wstring(testLine.begin(), testLine.end()));
+    istringstream testStream(testLine);
 
     regexConfProviderTest(testStream,testString,testKey);
   }
@@ -81,7 +81,7 @@ protected:
     string testLine =
       testKey + "=" + "Lorem \n" +
       testKey + "=__" + testKey + "__Ipsum\n";
-    wistringstream testStream(std::wstring(testLine.begin(), testLine.end()));
+    istringstream testStream(testLine);
 
     regexConfProviderTest(testStream,testString,testKey);
   }
@@ -100,7 +100,7 @@ protected:
       "INFIX2=su\n" +
       "INFIX1=rem__SPACE__I\n" +
       testKey + "=Lo__INFIX1__p__INFIX2__m\n";
-    wistringstream testStream(std::wstring(testLine.begin(), testLine.end()));
+    istringstream testStream(testLine);
 
     regexConfProviderTest(testStream,testString,testKey);
   }
@@ -118,7 +118,7 @@ protected:
     string testLine =
       string("LOREM=Lorem__LOREM__ \n") +
       testKey + "=__LOREM__Ipsum\n";
-    wistringstream testStream(std::wstring(testLine.begin(), testLine.end()));
+    istringstream testStream(testLine);
 
     string testIdentity("testIdentity");
 

@@ -15,7 +15,6 @@
 #include <list>
 #include <string>
 #include <unicode/unistr.h>
-using std::wifstream;
 using std::istream;
 using std::string;
 using std::list;

@@ -88,18 +88,11 @@ icu::UnicodeString fo::recodeToUnicode(const icu::UnicodeString &input)
   while (iter.hasNext())
   {
     UChar32 uniChar = iter.next32PostInc();
-    if (uniChar > 0)
+    if (uniChar > 0 && U_IS_UNICODE_CHAR(uniChar))
     {
       out.append(uniChar);
     }
-    else
-    {
-      uniChar = iter.next32PostInc();
-      if (U_IS_UNICODE_CHAR(uniChar) && uniChar > 0)
-      {
-        out.append(uniChar);
-      }
-    }
+    // Skip null (U+0000) and invalid characters
   }
   out.trim();
   return out;
