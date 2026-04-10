@@ -1017,6 +1017,67 @@ INSERT INTO clearing_decision (
   }
 
   /**
+   * Get bulk IDs grouped by both text content AND license IDs, ordered by chronological (oldest first)
+   * Only combines entries when both text and license IDs are identical
+   * Returns latest bulk ID for each group (highest lrb_pk) to ensure most recent activity is processed
+   * Uses MAX(j.job_queued) to capture latest activity time including user corrections
+   * Groups display in chronological order: earliest scheduled appears first, latest scheduled appears last
+   * @param int $uploadId
+   * @param int $groupId
+   * @param int $userId
+   * @return array Array of groups, each containing bulk IDs with identical text AND licenses
+   */
+  public function getBulkIdsGroupedByTextAndLicenses($uploadId, $groupId, $userId)
+  {
+    $stmt = __METHOD__;
+    // Group by both text hash AND license IDs, ordered by job scheduling date
+    $sql = "SELECT DISTINCT lrb.lrb_pk, lrb.rf_text,
+                   md5(regexp_replace(regexp_replace(lrb.rf_text, E'\\s+', ' ', 'g'), '^\\s+|\\s+$', '', 'g')) as text_hash,
+                   array_agg(DISTINCT lsb.rf_fk ORDER BY lsb.rf_fk) as license_ids,
+                   MAX(j.job_queued) as job_queued
+            FROM license_ref_bulk lrb
+            JOIN license_set_bulk lsb ON lrb.lrb_pk = lsb.lrb_fk
+            JOIN jobqueue jq ON jq.jq_args LIKE '%' || lrb.lrb_pk || '%'
+            JOIN job j ON jq.jq_job_fk = j.job_pk
+            WHERE lrb.lrb_pk IN (
+              SELECT DISTINCT unnest(string_to_array(jq_args, '\n'))::bigint as bulk_id
+              FROM upload_reuse, jobqueue, job
+              WHERE upload_fk=$1 AND group_fk=$2
+               AND EXISTS(SELECT * FROM group_user_member gum WHERE gum.group_fk=upload_reuse.group_fk AND gum.user_fk=$3)
+               AND jq_type=$4 AND jq_job_fk=job_pk
+               AND job_upload_fk=reused_upload_fk AND job_group_fk=reused_group_fk
+            )
+            GROUP BY lrb.lrb_pk, lrb.rf_text
+            ORDER BY MAX(j.job_queued) ASC";
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, array($uploadId, $groupId, $userId, 'monkbulk'));
+    $groups = array();
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $textHash = $row['text_hash'];
+      // Create combined hash of text + license IDs for precise grouping
+      $licenseIds = is_array($row['license_ids']) ? $row['license_ids'] : array();
+      $licenseHash = md5(implode(',', $licenseIds));
+      $combinedHash = $textHash . '_' . $licenseHash;
+      if (!isset($groups[$combinedHash])) {
+        $groups[$combinedHash] = array(
+          'rf_text' => $row['rf_text'],
+          'license_ids' => $row['license_ids'],
+          'bulk_ids' => array(),
+          'latest_bulk_id' => $row['lrb_pk'],
+          'job_queued' => $row['job_queued']
+        );
+      }
+      // Keep track of latest bulk ID for this group
+      if ($row['lrb_pk'] > $groups[$combinedHash]['latest_bulk_id']) {
+        $groups[$combinedHash]['latest_bulk_id'] = $row['lrb_pk'];
+      }
+      $groups[$combinedHash]['bulk_ids'][] = $row['lrb_pk'];
+    }
+    $this->dbManager->freeResult($res);
+    return array_values($groups);
+  }
+
+  /**
    * @param int $uploadTreeId
    * @return int count
    */
