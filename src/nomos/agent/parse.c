@@ -1415,7 +1415,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mGPL] = 1;
       }
     }
-    else if ((INFILE(_LT_GPL_V2) || INFILE(_LT_GPL_V2_ref) || INFILE(_LT_GPL_V2_ref1) || INFILE(_LT_GPL_V2_ref2)) && !HASTEXT(_LT_GPL_EXCEPT_0, REG_EXTENDED)) {
+    else if ((INFILE(_LT_GPL_V2) || INFILE(_LT_GPL_V2_ref) || INFILE(_LT_GPL_V2_ref1) || INFILE(_LT_GPL_V2_ref2) || INFILE(_LT_GPL_V2_as_published)) && !HASTEXT(_LT_GPL_EXCEPT_0, REG_EXTENDED)) {
       if (INFILE(_PHR_GPL2_OR_LATER_1) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
       {
         INTERESTING(lDebug ? "PHR(GPL2_OR_LATER#2)" : "GPL-2.0-or-later");

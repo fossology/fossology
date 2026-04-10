@@ -10,6 +10,10 @@
 #include <algorithm>
 #include "regexConfProvider.hpp"
 
+extern "C" {
+#include "libfossology.h"
+}
+
 const string copyrightType("statement");  /**< A constant for default copyrightType as "statement" */
 
 /**
@@ -36,7 +40,7 @@ hCopyrightScanner::hCopyrightScanner()
 
   // Cleanup
   regExceptionCopy = rx::regex(rcp.getRegexValue("copyright","REG_EXCEPTION_COPY"),
-               rx::regex_constants::icase);
+                     rx::regex_constants::icase);
   regRemoveFileStmt = rx::regex(rcp.getRegexValue("copyright","REG_REMOVE_FILE_STATEMENT"),
                       rx::regex_constants::icase);
   regStripLicenseTrail = rx::regex(rcp.getRegexValue("copyright", "REG_STRIP_LICENSE_TRAIL"),
@@ -45,7 +49,22 @@ hCopyrightScanner::hCopyrightScanner()
                            rx::regex_constants::icase);
   regStripAllRightReserveTrail = rx::regex(rcp.getRegexValue("copyright", "REG_ALL_RIGHT_RESERVE_TRAIL"),
                                  rx::regex_constants::icase);
-  
+  regExceptionVerbFollow = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_VERB_FOLLOW"),
+                           rx::regex_constants::icase);
+  regExceptionAdjectivePrefix = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_ADJECTIVE_PREFIX"),
+                                rx::regex_constants::icase);
+  regExceptionTemplate = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_TEMPLATE"),
+                         rx::regex_constants::icase);
+  regExceptionPassive = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_PASSIVE"),
+                        rx::regex_constants::icase);
+  regStripCopySymNonYear = rx::regex(rcp.getRegexValue("copyright", "REG_STRIP_COPYSYM_NONYEAR"),
+                           rx::regex_constants::icase);
+  regExceptionBinaryNoise = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_BINARY_NOISE"),
+                            rx::regex_constants::icase);
+  regExceptionMeta = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_META"),
+                     rx::regex_constants::icase);
+  regExceptionCharNameRun = rx::regex(rcp.getRegexValue("copyright", "REG_EXCEPTION_CHARNAME_RUN"),
+                            rx::regex_constants::icase);
 }
 
 /**
@@ -102,13 +121,22 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
         j = endOfLine;
       }
       string raw = string(foundPos, j);
-      string cleaned = Cleanup(raw);
+      CleanupResult result = Cleanup(raw);
 
-      if (cleaned.empty()) {
+      if (result.disposition == CleanupResult::Disposition::DISCARD) {
+        // Definitively not a copyright
         pos = j;
         continue;
       }
 
+      if (result.disposition == CleanupResult::Disposition::DEACTIVATE) {
+        // deactivated copyright section
+        out.push_back(match(foundPos - begin, j - begin, copyrightType, false));
+        pos = j;
+        continue;
+      }
+
+      string& cleaned = result.content;
       if (cleaned.size() > 300)
         cleaned = cleaned.substr(0, 300);
 
@@ -123,24 +151,45 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
   }
 }
 
-string hCopyrightScanner::Cleanup(const string &raw) const {
-  if (rx::regex_search(raw, regExceptionCopy)) {
-    return "";
-  }
+CleanupResult hCopyrightScanner::Cleanup(const string &raw) const {
+  using Disposition = CleanupResult::Disposition;
+
   if (rx::regex_match(raw, regRemoveFileStmt)) {
-    return "";
+    return {"", Disposition::DISCARD};
   }
+
   string cleaned = raw;
   cleaned = rx::regex_replace(cleaned, regStripLicenseTrail, "");
   cleaned = rx::regex_replace(cleaned, regStripTrademarkTrail, "");
   cleaned = rx::regex_replace(cleaned, regStripAllRightReserveTrail, "");
+  cleaned = rx::regex_replace(cleaned, regStripCopySymNonYear, "");
+
+  // DISCARD
+  if (rx::regex_search(cleaned, regExceptionTemplate) ||
+    rx::regex_search(cleaned, regExceptionBinaryNoise) ||
+    rx::regex_search(cleaned, regExceptionMeta) ||
+    rx::regex_search(cleaned, regExceptionCharNameRun)) {
+    return {"", Disposition::DISCARD};
+  }
+
+  // DEACTIVATE
+  if (rx::regex_search(cleaned, regExceptionCopy) ||
+    rx::regex_search(cleaned, regExceptionVerbFollow) ||
+    rx::regex_search(cleaned, regExceptionAdjectivePrefix) ||
+    rx::regex_search(cleaned, regExceptionPassive)) {
+    return {"", Disposition::DEACTIVATE};
+  }
 
   RemoveNoisePatterns(cleaned);
   TrimPunctuation(cleaned);
   NormalizeCopyright(cleaned);
   StripSuffixes(cleaned);
 
-  return cleaned;
+  if (cleaned.empty()) {
+    return {"", Disposition::DISCARD};
+  }
+
+  return {cleaned, Disposition::KEEP};
 }
 
 void hCopyrightScanner::TrimPunctuation(string &text) const{

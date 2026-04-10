@@ -4,5 +4,5 @@
 # SPDX-License-Identifier: FSFAP
 # Description: Dependencies used by the CI scanner script
 spdx-tools==0.8.3
-requests==2.32.4
+requests==2.33.0
 packageurl-python==0.17.3

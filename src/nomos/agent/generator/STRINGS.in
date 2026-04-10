@@ -2944,6 +2944,10 @@
 %KEY% "\<under\>"
 %STR% "released under version 2 of the (gnu )?gpl"
 #
+%ENTRY% _LT_GPL_V2_as_published
+%KEY% "licen[cs]"
+%STR% "gnu general public license as published by the free software foundation; either version 2 of the license, or \(at your option\) any later version"
+#
 %ENTRY% _LT_GPL_V3_ref
 %KEY% "licen[cs]"
 %STR% "licen[cs]ed under (the )?((general p|p)ublic|general purpose) licen[cs]e (version |v)3"

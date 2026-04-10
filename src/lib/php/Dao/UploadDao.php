@@ -11,6 +11,7 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\Upload\Upload;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Upload\UploadEvents;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
@@ -136,6 +137,30 @@ class UploadDao
     $stmt = __METHOD__;
     $queryResult = $this->dbManager->getRows("SELECT * FROM upload where pfile_fk IS NOT NULL",
         array(), $stmt);
+
+    $results = array();
+    foreach ($queryResult as $row) {
+      $results[] = Upload::createFromTable($row);
+    }
+
+    return $results;
+  }
+
+  /**
+   * Get all uploads accessible by a group.
+   * @param int $groupId Group id
+   * @return Upload[] Array of Upload objects
+   */
+  public function getAccessibleUploads($groupId)
+  {
+    $stmt = __METHOD__;
+    $permNone = Auth::PERM_NONE;
+    $sql = "SELECT u.* FROM upload u
+            LEFT JOIN perm_upload p ON p.upload_fk = u.upload_pk AND p.group_fk = $1
+            WHERE u.pfile_fk IS NOT NULL
+            AND (p.perm > $permNone OR u.public_perm > $permNone)";
+
+    $queryResult = $this->dbManager->getRows($sql, array($groupId), $stmt);
 
     $results = array();
     foreach ($queryResult as $row) {
@@ -605,6 +630,11 @@ class UploadDao
   public function makeAccessibleToAllGroupsOf($uploadId, $userId, $perm=null)
   {
     $this->permissionDao->makeAccessibleToAllGroupsOf($uploadId, $userId, $perm);
+  }
+
+  public function filterAccessibleUploads(array $uploadIds, $groupId)
+  {
+    return $this->permissionDao->filterAccessibleUploads($uploadIds, $groupId);
   }
 
   /**

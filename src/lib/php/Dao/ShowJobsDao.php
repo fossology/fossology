@@ -23,13 +23,23 @@ class ShowJobsDao
   /** @var maxUploadsPerPage */
   private $maxJobsPerPage = 10; /* max number of jobs to display on a page */
   /** @var nhours */
-  private $nhours = 672;  /* 672=24*28 (4 weeks) What is considered a recent number of hours for "My Recent Jobs" */
+  private $nhours = 336;  /* 336=24*14 (2 weeks) What is considered a recent number of hours for "My Recent Jobs" */
 
   function __construct(DbManager $dbManager, UploadDao $uploadDao)
   {
     $this->dbManager = $dbManager;
     $this->uploadDao = $uploadDao;
     $this->logger = new Logger(self::class);
+  }
+
+  /**
+   * @brief Convert an array of integers to a Postgres array literal string.
+   * @param array $ints Array of integer values
+   * @return string Postgres array literal, e.g. "{1,2,3}"
+   */
+  private function toPgIntArray(array $ints)
+  {
+    return '{' . implode(',', array_map('intval', $ints)) . '}';
   }
 
   /**
@@ -45,33 +55,38 @@ class ShowJobsDao
     $jobArray = array();
 
     // only use the uploads the user / group has access to
-    $upload_pks = array_filter($upload_pks, function($upload_pk) {
-      return $upload_pk !== null && $this->uploadDao->isAccessible($upload_pk, Auth::getGroupId());
-    });
+    $upload_pks = $this->uploadDao->filterAccessibleUploads($upload_pks, Auth::getGroupId());
 
-    // get count of upload pks, return empty array if count equals 0
-    $jobCount = count($upload_pks);
-    if ($jobCount == 0) {
+    if (empty($upload_pks)) {
       return $jobArray;
     }
 
-    /* calculate index of starting upload_pk */
+    $upload_pks = array_values($upload_pks);
+    $uploadList = $this->toPgIntArray($upload_pks);
+
+    /* Count total jobs for pagination */
+    $countRow = $this->dbManager->getSingleRow(
+      "SELECT count(*) AS cnt FROM job WHERE job_upload_fk = ANY($1)",
+      array($uploadList),
+      __METHOD__ . ".countJobs"
+    );
+    $totalJobCount = intval($countRow['cnt']);
+    $totalPages = floor($totalJobCount / $this->maxJobsPerPage);
+
+    /* Fetch paginated jobs */
     $offset = empty($page) ? 0 : $page * $this->maxJobsPerPage;
-    $totalPages = floor($jobCount / $this->maxJobsPerPage);
+    $statementName = __METHOD__ . ".paginatedJobs";
+    $this->dbManager->prepare($statementName,
+      "SELECT job_pk FROM job WHERE job_upload_fk = ANY($1) " .
+      "ORDER BY job_pk DESC LIMIT $2 OFFSET $3");
+    $result = $this->dbManager->execute($statementName,
+      array($uploadList, $this->maxJobsPerPage, $offset));
 
-    /* Get the job_pk's for each for each upload_pk */
-    $lastOffset = ($jobCount < $this->maxJobsPerPage) ? $offset+$jobCount : $this->maxJobsPerPage;
-    $statementName = __METHOD__."upload_pkforjob";
-    $this->dbManager->prepare($statementName, "SELECT job_pk FROM job WHERE job_upload_fk=$1 ORDER BY job_pk ASC");
-    for (; $offset < $lastOffset; $offset++) {
-      $upload_pk = $upload_pks[$offset];
-
-      $result = $this->dbManager->execute($statementName, array($upload_pk));
-      while ($row = $this->dbManager->fetchArray($result)) {
-        $jobArray[] = $row['job_pk'];
-      }
-      $this->dbManager->freeResult($result);
+    while ($row = $this->dbManager->fetchArray($result)) {
+      $jobArray[] = $row['job_pk'];
     }
+    $this->dbManager->freeResult($result);
+
     return array($jobArray, $totalPages);
   }  /* uploads2Jobs() */
 
@@ -114,11 +129,22 @@ class ShowJobsDao
       "job_queued >= (now() - interval '" . $this->nhours . " hours') " .
       "ORDER BY job_queued DESC");
     $result = $this->dbManager->execute($statementName);
+
+    $rows = array();
+    $uploadIds = array();
     while ($row = $this->dbManager->fetchArray($result)) {
-      if (! empty($row['job_upload_fk'])) {
-        $uploadIsAccessible = $this->uploadDao->isAccessible(
-          $row['job_upload_fk'], Auth::getGroupId());
-        if (! $uploadIsAccessible) {
+      $rows[] = $row;
+      if (!empty($row['job_upload_fk'])) {
+        $uploadIds[] = intval($row['job_upload_fk']);
+      }
+    }
+    $this->dbManager->freeResult($result);
+
+    $accessibleUploads = $this->uploadDao->filterAccessibleUploads(array_unique($uploadIds), Auth::getGroupId());
+
+    foreach ($rows as $row) {
+      if (!empty($row['job_upload_fk'])) {
+        if (!in_array(intval($row['job_upload_fk']), $accessibleUploads)) {
           continue;
         }
       }
@@ -130,8 +156,6 @@ class ShowJobsDao
 
     // get jobs for current page only
     $pageJobs = array_slice($jobArray, $offset, $this->maxJobsPerPage);
-
-    $this->dbManager->freeResult($result);
 
     return array($pageJobs, $totalPages);
   }  /* myJobs() */
@@ -163,74 +187,176 @@ class ShowJobsDao
   **/
   public function getJobInfo($job_pks)
   {
-    /* Output data array */
-    $jobData = array();
-    foreach ($job_pks as $job_pk) {
-      /* Get job table data */
-      $statementName = __METHOD__ . "JobRec";
-      $jobRec = $this->dbManager->getSingleRow(
-        "SELECT * FROM job WHERE job_pk= $1", array($job_pk),
-        $statementName);
-      $jobData[$job_pk]["job"] = $jobRec;
-      if (! empty($jobRec["job_upload_fk"])) {
-        $upload_pk = $jobRec["job_upload_fk"];
-        /* Get Upload record for job */
-        $statementName = __METHOD__ . "UploadRec";
-        $uploadRec = $this->dbManager->getSingleRow(
-          "SELECT * FROM upload WHERE upload_pk= $1", array($upload_pk),
-          $statementName);
-        if (! empty($uploadRec)) {
-          $jobData[$job_pk]["upload"] = $uploadRec;
-          /* Get Upload record for uploadtree */
-          $uploadtree_tablename = $uploadRec["uploadtree_tablename"];
-          $statementName = __METHOD__ . "uploadtreeRec";
-          $uploadtreeRec = $this->dbManager->getSingleRow(
-            "SELECT * FROM $uploadtree_tablename where upload_fk = $1 and parent is null",
-            array($upload_pk), $statementName);
-          $jobData[$job_pk]["uploadtree"] = $uploadtreeRec;
-        } else {
-          $statementName = __METHOD__ . "uploadRecord";
-          $uploadRec = $this->dbManager->getSingleRow(
-            "SELECT * FROM upload right join job on upload_pk = job_upload_fk where job_upload_fk = $1",
-            array($upload_pk), $statementName);
-          /*
-           * upload has been deleted so try to get the job name from the
-           * original upload job record
-           */
-          $jobName = $this->getJobName($uploadRec["job_upload_fk"]);
-          $uploadRec["upload_filename"] = "Deleted Upload: " .
-            $uploadRec["job_upload_fk"] . "(" . $jobName . ")";
-          $uploadRec["upload_pk"] = $uploadRec["job_upload_fk"];
-          $jobData[$job_pk]["upload"] = $uploadRec;
-        }
-      }
-      /* Get jobqueue table data */
-      $statementName = __METHOD__ . "job_pkforjob";
-      $this->dbManager->prepare($statementName,
-        "SELECT jq.*,jd.jdep_jq_depends_fk FROM jobqueue jq LEFT OUTER JOIN jobdepends jd ON jq.jq_pk=jd.jdep_jq_fk WHERE jq.jq_job_fk=$1 ORDER BY jq_pk ASC");
-      $result = $this->dbManager->execute($statementName, array(
-        $job_pk
-      ));
-      $rows = $this->dbManager->fetchAll($result);
-      if (! empty($rows)) {
-        foreach ($rows as $jobQueueRec) {
-          $jq_pk = $jobQueueRec["jq_pk"];
-          if (array_key_exists($job_pk, $jobData) &&
-            array_key_exists('jobqueue', $jobData[$job_pk]) &&
-            array_key_exists($jq_pk, $jobData[$job_pk]['jobqueue'])) {
-            $jobData[$job_pk]['jobqueue'][$jq_pk]["depends"][] = $jobQueueRec["jdep_jq_depends_fk"];
-          } else {
-            $jobQueueRec["depends"] = array($jobQueueRec["jdep_jq_depends_fk"]);
-            $jobData[$job_pk]['jobqueue'][$jq_pk] = $jobQueueRec;
-          }
-        }
-      } else {
+    if (empty($job_pks)) {
+      return array();
+    }
+
+    $jobPkArray = $this->toPgIntArray($job_pks);
+
+    $jobData = $this->fetchJobRecords($jobPkArray);
+
+    list($uploadRows, $deletedMap) = $this->fetchUploadData($jobPkArray);
+    $uploadtreeRows = $this->fetchUploadtreeRoots($uploadRows);
+
+    $this->attachUploadData($jobData, $uploadRows, $uploadtreeRows, $deletedMap);
+    $this->attachJobQueueData($jobData, $jobPkArray);
+
+    // Remove jobs with no jobqueue entries
+    foreach ($jobData as $job_pk => $data) {
+      if (!isset($data['jobqueue'])) {
         unset($jobData[$job_pk]);
+      }
+    }
+
+    return $jobData;
+  } /* getJobInfo() */
+
+  /**
+   * @brief Fetch job records for the given job_pk's.
+   * @param string $jobPkArray Array of job_pk's in Postgres array format (e.g. "{1,2,3}")
+   * @return array of job records indexed by job_pk
+   */
+  private function fetchJobRecords($jobPkArray)
+  {
+    $jobData = array();
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt,
+      "SELECT * FROM job WHERE job_pk = ANY($1::int[])");
+    $result = $this->dbManager->execute($stmt, array($jobPkArray));
+    foreach ($this->dbManager->fetchAll($result) as $row) {
+      $jobData[$row['job_pk']]['job'] = $row;
+    }
+    $this->dbManager->freeResult($result);
+    return $jobData;
+  }
+
+  /**
+   * @brief Fetch both existing uploads and jobs referencing deleted uploads.
+   * @param string $jobPkArray
+   * @return array Two-element array: [uploadRows indexed by upload_pk, deletedMap of job_pk => upload_fk]
+   */
+  private function fetchUploadData($jobPkArray)
+  {
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt,
+      "SELECT u.*, j.job_pk, j.job_upload_fk AS jb_upload_fk
+       FROM job j
+       LEFT JOIN upload u ON u.upload_pk = j.job_upload_fk
+       WHERE j.job_pk = ANY($1::int[])
+         AND j.job_upload_fk IS NOT NULL");
+    $result = $this->dbManager->execute($stmt, array($jobPkArray));
+
+    $uploadRows = array();
+    $deletedMap = array();
+    foreach ($this->dbManager->fetchAll($result) as $row) {
+      $jobPk     = $row['job_pk'];
+      $uploadFk  = intval($row['jb_upload_fk']);
+      unset($row['job_pk'], $row['jb_upload_fk']);
+
+      if (!empty($row['upload_pk'])) {
+        $uploadRows[$row['upload_pk']] = $row;
+      } else {
+        $deletedMap[$jobPk] = $uploadFk;
+      }
+    }
+    $this->dbManager->freeResult($result);
+    return array($uploadRows, $deletedMap);
+  }
+
+  /**
+   * @brief Fetch root records from uploadtree tables for the given upload records.
+   * @param array $uploadRows Array of upload records indexed by upload_pk
+   * @return array of uploadtree root records indexed by upload_fk
+   */
+  private function fetchUploadtreeRoots($uploadRows)
+  {
+    $uploadsByTablename = array();
+    foreach ($uploadRows as $rec) {
+      $tablename = $rec['uploadtree_tablename'];
+      $uploadsByTablename[$tablename][] = intval($rec['upload_pk']);
+    }
+
+    $rows = array();
+    foreach ($uploadsByTablename as $tablename => $pks) {
+      if (!$this->dbManager->existsTable($tablename)) {
+        continue;
+      }
+      $pkArray = $this->toPgIntArray($pks);
+      $stmt = __METHOD__ . ".$tablename";
+      $this->dbManager->prepare($stmt,
+        "SELECT * FROM $tablename WHERE upload_fk = ANY($1::int[]) AND parent IS NULL");
+      $result = $this->dbManager->execute($stmt, array($pkArray));
+      foreach ($this->dbManager->fetchAll($result) as $row) {
+        $rows[$row['upload_fk']] = $row;
       }
       $this->dbManager->freeResult($result);
     }
-    return $jobData;
-  } /* getJobInfo() */
+    return $rows;
+  }
+
+  /**
+   * @brief Attach upload and uploadtree data to job data.
+   *        Also handles deleted uploads using the pre-fetched deletedMap.
+   * @param array $jobData Array of job records indexed by job_pk
+   * @param array $uploadRows Array of upload records indexed by upload_pk
+   * @param array $uploadtreeRows Array of uploadtree root records indexed by upload_fk
+   * @param array $deletedMap Map of job_pk => upload_fk for jobs referencing deleted uploads
+   */
+  private function attachUploadData(&$jobData, $uploadRows, $uploadtreeRows, $deletedMap)
+  {
+    foreach ($jobData as $job_pk => &$data) {
+      $upload_pk = $data['job']['job_upload_fk'] ?? null;
+      if (empty($upload_pk)) {
+        continue;
+      }
+      if (isset($uploadRows[$upload_pk])) {
+        $data['upload'] = $uploadRows[$upload_pk];
+        $data['uploadtree'] = $uploadtreeRows[$upload_pk] ?? null;
+      } elseif (isset($deletedMap[$job_pk])) {
+        $uploadFk = $deletedMap[$job_pk];
+        $jobName  = $this->getJobName($uploadFk);
+        $data['upload'] = array(
+          'upload_filename' => "Deleted Upload: " . $uploadFk . "(" . $jobName . ")",
+          'upload_pk'       => $uploadFk,
+        );
+      }
+    }
+    unset($data);
+  }
+
+  /**
+   * @brief Attach jobqueue data to job data for the given job_pk's.
+   * @param array $jobData Array of job records indexed by job_pk
+   * @param string $jobPkArray Array of job_pk's in Postgres array format (e.g. "{1,2,3}")
+   */
+  private function attachJobQueueData(&$jobData, $jobPkArray)
+  {
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt,
+      "SELECT jq.*, jd.jdep_jq_depends_fk
+      FROM jobqueue jq
+      LEFT OUTER JOIN jobdepends jd ON jq.jq_pk = jd.jdep_jq_fk
+      WHERE jq.jq_job_fk = ANY($1::int[])
+      ORDER BY jq.jq_pk ASC");
+    $result = $this->dbManager->execute($stmt, array($jobPkArray));
+
+    foreach ($this->dbManager->fetchAll($result) as $jobQueueRec) {
+      $job_pk = $jobQueueRec['jq_job_fk'];
+      $jq_pk = $jobQueueRec['jq_pk'];
+
+      if (!isset($jobData[$job_pk])) {
+        continue;
+      }
+
+      if (isset($jobData[$job_pk]['jobqueue'][$jq_pk])) {
+        $jobData[$job_pk]['jobqueue'][$jq_pk]['depends'][] = $jobQueueRec['jdep_jq_depends_fk'];
+      } else {
+        $jobQueueRec['depends'] = array($jobQueueRec['jdep_jq_depends_fk']);
+        $jobData[$job_pk]['jobqueue'][$jq_pk] = $jobQueueRec;
+      }
+    }
+    $this->dbManager->freeResult($result);
+  }
 
   /**
    * @brief Returns Number of files/items processed per sec

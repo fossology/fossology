@@ -164,7 +164,7 @@ class LicenseStdCommentDao
         " WHERE lsc_pk = $1 " .
         "RETURNING 1 AS updated;";
       $retVal = $this->dbManager->getSingleRow($sql, $params, $statement);
-      $updated += intval($retVal);
+      $updated += ($retVal !== false) ? intval($retVal['updated']) : 0;
     }
     return $updated;
   }
@@ -181,6 +181,9 @@ class LicenseStdCommentDao
     $statement = __METHOD__ . ".getComment";
 
     $comment = $this->dbManager->getSingleRow($sql, [$commentPk], $statement);
+    if ($comment === false) {
+      return null;
+    }
     $comment = $comment['comment'];
     if (strcasecmp($comment, "null") === 0) {
       return null;
@@ -221,7 +224,7 @@ class LicenseStdCommentDao
   private function isCommentIdValid($commentPk)
   {
     if (! is_int($commentPk)) {
-      throw new \UnexpectedValueException("Inavlid comment id");
+      throw new \UnexpectedValueException("Invalid comment id");
     }
     $sql = "SELECT count(*) AS cnt FROM license_std_comment " .
       "WHERE lsc_pk = $1;";
@@ -229,7 +232,7 @@ class LicenseStdCommentDao
     $commentCount = $this->dbManager->getSingleRow($sql, [$commentPk]);
     if ($commentCount['cnt'] < 1) {
       // Invalid comment id
-      throw new \UnexpectedValueException("Inavlid comment id");
+      throw new \UnexpectedValueException("Invalid comment id");
     }
   }
 }

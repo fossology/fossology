@@ -399,10 +399,14 @@ int ProcessUpload (long upload_pk)
         if (RecordMetadataDEB(dpi) != 0) continue;
       }
       /* free memory */
-      int i;
-      for(i=0; i< dpi->dep_size;i++)
-        free(dpi->depends[i]);
-      free(dpi->depends);
+      if (dpi->depends) {
+        int i;
+        for(i=0; i< dpi->dep_size;i++)
+          free(dpi->depends[i]);
+        free(dpi->depends);
+        dpi->depends = NULL;
+        dpi->dep_size = 0;
+      }
     }
     else if (!strcasecmp(mimetype, "application/x-debian-source")){
       dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
@@ -418,10 +422,14 @@ int ProcessUpload (long upload_pk)
         RecordMetadataDEB(dpi);
       }
       /* free memory */
-      int i;
-      for(i=0; i< dpi->dep_size;i++)
-        free(dpi->depends[i]);
-      free(dpi->depends);
+      if (dpi->depends) {
+        int i;
+        for(i=0; i< dpi->dep_size;i++)
+          free(dpi->depends[i]);
+        free(dpi->depends);
+        dpi->depends = NULL;
+        dpi->dep_size = 0;
+      }
     } else {
       printf("LOG: Not RPM and DEBIAN package!\n");
     }
@@ -522,7 +530,8 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
     for (j=0; j<(int)data_size;j++){
       const char * temp = rpmtdNextString(&req);
       pi->requires[j] = malloc(MAXCMD);
-      strcpy(pi->requires[j],temp);
+      strncpy(pi->requires[j], temp, MAXCMD - 1);
+      pi->requires[j][MAXCMD - 1] = '\0';
     }
     pi->req_size = data_size;
     rpmtdFreeData(&req);
@@ -842,7 +851,8 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
         for (i=0; i<size; i++){
           pi->depends[i] = calloc(length, sizeof(char));
           if (depends) {
-            strcpy(pi->depends[i], depends);
+            strncpy(pi->depends[i], depends, length - 1);
+            pi->depends[i][length - 1] = '\0';
             depends = strtok(NULL, ",");
           }
         }
@@ -960,7 +970,7 @@ int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
     if (!strcasecmp(field, "Source")) {
       EscapeString(value, pi->source, sizeof(pi->source));
     }
-    if (!strcasecmp(field, "Source")) {
+    if (!strcasecmp(field, "Binary")) {
       EscapeString(value, pi->pkgName, sizeof(pi->pkgName));
     }
     if (!strcasecmp(field, "Architecture")) {
@@ -1008,7 +1018,8 @@ int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
         for (i=0; i<size; i++){
           pi->depends[i] = calloc(length, sizeof(char));
           if (depends) {
-            strcpy(pi->depends[i], depends);
+            strncpy(pi->depends[i], depends, length - 1);
+            pi->depends[i][length - 1] = '\0';
             depends = strtok(NULL, ",");
           }
         }

@@ -22,7 +22,7 @@ class AdminContentMove extends DefaultPlugin
   {
     parent::__construct(self::NAME, array(
         self::TITLE => _("Move upload or folder"),
-        self::MENU_LIST => "Organize::Folders::Move or Copy",
+        self::MENU_LIST => "Organize::Folders::Move or Alias",
         self::PERMISSION => Auth::PERM_WRITE,
         self::REQUIRES_LOGIN => TRUE
     ));
@@ -33,7 +33,7 @@ class AdminContentMove extends DefaultPlugin
   {
     parent::RegisterMenus();
     if (!$this->isRequiresLogin() || $this->isLoggedIn()) {
-      menu_insert("Main::Organize::Uploads::Move or Copy", 0, $this->name, $this->name);
+      menu_insert("Main::Organize::Uploads::Move or Alias", 0, $this->name, $this->name);
     }
   }
 

@@ -150,8 +150,9 @@ class ReuserAgent extends Agent
   {
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($reusedUploadId, $reusedGroupId);
     if (!empty($mainLicenseIds)) {
+      $existingMainLicenseIds = $this->clearingDao->getMainLicenseIds($uploadId, $groupId);
       foreach ($mainLicenseIds as $mainLicenseId) {
-        if (in_array($mainLicenseId, $this->clearingDao->getMainLicenseIds($uploadId, $groupId))) {
+        if (in_array($mainLicenseId, $existingMainLicenseIds)) {
           continue;
         } else {
           $this->clearingDao->makeMainLicense($uploadId, $groupId, $mainLicenseId);
@@ -208,24 +209,37 @@ class ReuserAgent extends Agent
       $reusedUploadId, $reusedAgentId);
 
     if (!empty($reusedCopyrights) && !empty($allCopyrights)) {
+      // Pre-index $allCopyrights by hash to avoid nested loop O(N*M)
+      $copyrightsByHash = [];
+      foreach ($allCopyrights as $copyrightKey => $copyright) {
+        $hash = $copyright['hash'];
+        if (!isset($copyrightsByHash[$hash])) {
+          $copyrightsByHash[$hash] = [];
+        }
+        $copyrightsByHash[$hash][] = $copyrightKey;
+      }
+
       foreach ($reusedCopyrights as $reusedCopyright) {
-        foreach ($allCopyrights as $copyrightKey => $copyright) {
-          if (strcmp($copyright['hash'], $reusedCopyright['hash']) == 0) {
-            if ($this->dbManager->booleanFromDb($reusedCopyright['is_enabled'])) {
-              $action = "update";
-              $content = $reusedCopyright["contentedited"];
-            } else {
-              $action = "delete";
-              $content = "";
-            }
-            $hash = $copyright['hash'];
-            $item = $this->uploadDao->getItemTreeBounds(intval($copyright['uploadtree_pk']),
-                      $uploadTreeTableName);
-            $this->copyrightDao->updateTable($item, $hash, $content,
-              $this->userId, 'copyright', $action);
-            unset($allCopyrights[$copyrightKey]);
-            $this->heartbeat(1);
+        $reusedHash = $reusedCopyright['hash'];
+        if (isset($copyrightsByHash[$reusedHash]) && !empty($copyrightsByHash[$reusedHash])) {
+          // Take the first matching entry
+          $copyrightKey = array_shift($copyrightsByHash[$reusedHash]);
+          $copyright = $allCopyrights[$copyrightKey];
+
+          if ($this->dbManager->booleanFromDb($reusedCopyright['is_enabled'])) {
+            $action = "update";
+            $content = $reusedCopyright["contentedited"];
+          } else {
+            $action = "delete";
+            $content = "";
           }
+          $hash = $copyright['hash'];
+          $item = new ItemTreeBounds(
+                    intval($copyright['uploadtree_pk']), $uploadTreeTableName,
+                    $copyright['upload_fk'], $copyright['lft'], $copyright['rgt']);
+          $this->copyrightDao->updateTable($item, $hash, $content,
+            $this->userId, 'copyright', $action);
+          $this->heartbeat(1);
         }
       }
     }

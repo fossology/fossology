@@ -70,8 +70,9 @@ class GroupController extends RestController
    */
   public function createGroup($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $groupName = '';
-    if (ApiVersion::getVersion($request) == ApiVersion::V2) {
+    if ($apiVersion == ApiVersion::V2) {
       $queryParams = $request->getQueryParams();
       $groupName = $queryParams['name'] ?? '';
     } else {
@@ -83,7 +84,8 @@ class GroupController extends RestController
     $userDao = $this->restHelper->getUserDao();
     $groupId = $userDao->addGroup($groupName);
     $userDao->addGroupMembership($groupId, $this->restHelper->getUserId());
-    $returnVal = new Info(200, "Group $groupName added.", InfoType::INFO);
+    $statusCode = $apiVersion == ApiVersion::V2 ? 201 : 200;
+    $returnVal = new Info($statusCode, "Group $groupName added.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 
@@ -98,7 +100,7 @@ class GroupController extends RestController
    */
   public function deleteGroup($request, $response, $args)
   {
-    $apiVerison = ApiVersion::getVersion($request);
+    $apiVersion = ApiVersion::getVersion($request);
     if (empty($args['pathParam'])) {
       throw new HttpBadRequestException("ERROR - No group name or id provided");
     }
@@ -109,7 +111,7 @@ class GroupController extends RestController
     $groupMap = $userDao->getDeletableAdminGroupMap($userId,
       $_SESSION[Auth::USER_LEVEL]);
     $groupId = null;
-    if ($apiVerison == ApiVersion::V2) {
+    if ($apiVersion == ApiVersion::V2) {
       $groupName = $args['pathParam'];
       $groupId = intval($userDao->getGroupIdByName($groupName));
     } else {
@@ -146,7 +148,11 @@ class GroupController extends RestController
     $user_pk = null;
     $group_pk = null;
     if ($apiVersion == ApiVersion::V2) {
-      $user_pk = intval($this->restHelper->getUserDao()->getUserByName($args['userPathParam'])['user_pk']);
+      $user = $this->restHelper->getUserDao()->getUserByName($args['userPathParam']);
+      if ($user === null) {
+        throw new HttpNotFoundException("User not found");
+      }
+      $user_pk = intval($user['user_pk']);
       $group_pk = intval($this->restHelper->getUserDao()->getGroupIdByName($args['pathParam']));
     } else {
       $user_pk = intval($args['userPathParam']);
@@ -178,7 +184,7 @@ class GroupController extends RestController
     /** @var \Fossology\UI\Page\AdminGroupUsers $adminGroupUsers */
     $adminGroupUsers = $this->restHelper->getPlugin('group_manage_users');
     $adminGroupUsers->updateGUMPermission($group_user_member_pk, -1,$dbManager);
-    $returnVal = new Info(200, "User will be removed from group.", InfoType::INFO);
+    $returnVal = new Info(202, "User will be removed from group.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 
@@ -270,7 +276,11 @@ class GroupController extends RestController
     $newuser = null;
     $group_pk = null;
     if ($apiVersion == ApiVersion::V2) {
-      $newuser = intval($this->restHelper->getUserDao()->getUserByName($args['userPathParam'])['user_pk']);
+      $user = $this->restHelper->getUserDao()->getUserByName($args['userPathParam']);
+      if ($user === null) {
+        throw new HttpNotFoundException("User not found");
+      }
+      $newuser = intval($user['user_pk']);
       $group_pk = intval($this->restHelper->getUserDao()->getGroupIdByName($args['pathParam']));
     } else {
       $group_pk = intval($args['pathParam']);
@@ -311,7 +321,7 @@ class GroupController extends RestController
     $dbManager->freeResult(
       $dbManager->execute($stmt, array($group_pk, $newuser, $newperm)));
 
-    $returnVal = new Info(200, "User will be added to group.", InfoType::INFO);
+    $returnVal = new Info(201, "User added to group.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 
@@ -333,7 +343,11 @@ class GroupController extends RestController
     $user_pk = null;
     $group_pk = null;
     if ($apiVersion == ApiVersion::V2) {
-      $user_pk = intval($this->restHelper->getUserDao()->getUserByName($args['userPathParam'])['user_pk']);
+      $user = $this->restHelper->getUserDao()->getUserByName($args['userPathParam']);
+      if ($user === null) {
+        throw new HttpNotFoundException("User not found");
+      }
+      $user_pk = intval($user['user_pk']);
       $group_pk = intval($this->restHelper->getUserDao()->getGroupIdByName($args['pathParam']));
     } else {
       $user_pk = intval($args['userPathParam']);
@@ -369,13 +383,14 @@ class GroupController extends RestController
 
     // Check if the relation already exists, retrieve the PK.
     // IF not, return 404 error
-    $group_user_member_pk = $dbManager->getSingleRow("SELECT group_user_member_pk FROM group_user_member WHERE group_fk=$1 AND user_fk=$2",
+    $memberRow = $dbManager->getSingleRow("SELECT group_user_member_pk FROM group_user_member WHERE group_fk=$1 AND user_fk=$2",
       [$group_pk, $user_pk],
-      __METHOD__ . ".getByGroupAndUser")['group_user_member_pk'];
+      __METHOD__ . ".getByGroupAndUser");
 
-    if (empty($group_user_member_pk)) {
+    if (empty($memberRow)) {
       throw new HttpNotFoundException("User not part of the group");
     }
+    $group_user_member_pk = $memberRow['group_user_member_pk'];
     /** @var \Fossology\UI\Page\AdminGroupUsers $adminGroupUsers */
     $adminGroupUsers = $this->restHelper->getPlugin('group_manage_users');
     $adminGroupUsers->updateGUMPermission($group_user_member_pk, $newperm,$dbManager);

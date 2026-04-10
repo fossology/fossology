@@ -24,6 +24,10 @@ extern char *DBConfFile;
 void test_GetMetadataDebSource()
 {
   char *repFile = "./testdata/fossology_1.4.1.dsc";
+  const char *expectedBinary = "fossology, fossology-common, fossology-web, "
+      "fossology-web-single, fossology-scheduler, "
+      "fossology-scheduler-single, fossology-db, fossology-agents, "
+      "fossology-agents-single, fossology-dev";
   struct debpkginfo *pi;
   //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
@@ -37,7 +41,8 @@ void test_GetMetadataDebSource()
   //printf("GetMetadataDebSource Result is:%d\n", Result);
 
   //printf("GetMetadataDebSource Result is:%s\n", pi->version);
-  CU_ASSERT_STRING_EQUAL(pi->pkgName, "fossology");
+  CU_ASSERT_STRING_EQUAL(pi->pkgName, expectedBinary);
+  CU_ASSERT_STRING_EQUAL(pi->source, "fossology");
   CU_ASSERT_STRING_EQUAL(pi->pkgArch, "any");
   CU_ASSERT_STRING_EQUAL(pi->version, "1.4.1");
   CU_ASSERT_STRING_EQUAL(pi->maintainer, "Matt Taggart <taggart@debian.org>");
@@ -93,4 +98,3 @@ CU_TestInfo testcases_GetMetadataDebSource[] = {
     {"Testing the function GetMetadataDebSource with wrong testfile", test_GetMetadataDebSource_wrong_testfile},
     CU_TEST_INFO_NULL
 };
-

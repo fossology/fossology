@@ -823,13 +823,16 @@ INSERT INTO clearing_decision (
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $params[] = $groupId;
     $a = count($params);
-    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>'noLicense',
-                     UploadTreeProxy::OPT_ITEM_FILTER=>' AND (lft BETWEEN $1 AND $2)',
-                     UploadTreeProxy::OPT_GROUP_ID=>'$'.$a);
+
+    $options = array(
+      UploadTreeProxy::OPT_SKIP_THESE => 'nolicensenocopyright',
+      UploadTreeProxy::OPT_ITEM_FILTER => ' AND (lft BETWEEN $1 AND $2)',
+      UploadTreeProxy::OPT_GROUP_ID => '$' . $a
+    );
     $uploadTreeProxy = new UploadTreeProxy($itemTreeBounds->getUploadId(), $options, $itemTreeBounds->getUploadTreeTableName());
     if (!$removeDecision) {
       $sql = $uploadTreeProxy->asCTE() .
-        ' SELECT uploadtree_pk FROM UploadTreeView;';
+        ' SELECT uploadtree_pk, upload_fk, lft, rgt FROM UploadTreeView;';
       $itemRows = $this->dbManager->getRows($sql, $params,
         __METHOD__ . ".getRevelantItems");
       $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
@@ -837,8 +840,9 @@ INSERT INTO clearing_decision (
       $clearingDecisionEventProcessor = $GLOBALS['container']->get(
         'businessrules.clearing_decision_processor');
       foreach ($itemRows as $itemRow) {
-        $itemBounds = $this->uploadDao->getItemTreeBounds(
-          $itemRow['uploadtree_pk'], $uploadTreeTableName);
+        $itemBounds = new ItemTreeBounds(
+          $itemRow['uploadtree_pk'], $uploadTreeTableName,
+          $itemRow['upload_fk'], $itemRow['lft'], $itemRow['rgt']);
         $clearingDecisionEventProcessor->makeDecisionFromLastEvents(
           $itemBounds, $userId, $groupId, $decisionMark, DecisionScopes::ITEM);
       }
@@ -1063,7 +1067,7 @@ INSERT INTO clearing_decision (
              UPDATE clearing_decision SET scope = $2 WHERE clearing_decision_pk IN (
                SELECT clearing_decision_pk FROM latestDecisions) RETURNING clearing_decision_pk";
 
-    $countUpdated = $this->dbManager->getSingleRow($sql,
+    $countUpdated = $this->dbManager->getRows($sql,
                  array($uploadId, DecisionScopes::REPO), $statementName);
 
     return count($countUpdated);

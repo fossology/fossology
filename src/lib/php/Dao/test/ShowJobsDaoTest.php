@@ -80,10 +80,12 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
     $groupId = 2;
     $GLOBALS['SysConf']['auth'][Auth::GROUP_ID] = $groupId;
     $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 1;
-    $this->uploadPermissionDao->shouldReceive('isAccessible')->withArgs(array(anything(),$groupId))
-            ->andReturnUsing(function($upload,$group)
+    $this->uploadPermissionDao->shouldReceive('filterAccessibleUploads')
+            ->andReturnUsing(function($uploadIds,$group)
             {
-              return ($upload==1 || $upload==2 || $upload==3 || $upload==4 || $upload==5);
+              return array_values(array_filter($uploadIds, function($upload) {
+                return ($upload==1 || $upload==2 || $upload==3 || $upload==4 || $upload==5);
+              }));
             });
 
     $jobs = array(3=>2, 4=>3, 5=>5, 6=>8%6, 7=>13%6, 8=>21%6);
@@ -93,9 +95,9 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
     $jobsWithoutUpload = $this->showJobsDao->uploads2Jobs(array());
     assertThat($jobsWithoutUpload, is(emptyArray()));
     $jobsWithUploadIdOne = $this->showJobsDao->uploads2Jobs(array(1));
-    assertThat($jobsWithUploadIdOne, equalTo(array(array(1,7),0)));
+    assertThat($jobsWithUploadIdOne, equalTo(array(array(7,1),0)));
     $jobsAtAll = $this->showJobsDao->uploads2Jobs(array(1,2,3,4,5));
-    assertThat($jobsAtAll, equalTo(array(array(1,7, 2,3,6, 4,8, 5),0)));
+    assertThat($jobsAtAll, equalTo(array(array(8,7,6,5,4,3,2,1),0)));
     $jobsWithUploadFour = $this->showJobsDao->uploads2Jobs(array(4));
     assertThat($jobsWithUploadFour[0], is(emptyArray()));
   }
@@ -106,10 +108,12 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
     $GLOBALS['SysConf']['auth'][Auth::GROUP_ID] = $groupId;
     $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 1;
 
-    $this->uploadPermissionDao->shouldReceive('isAccessible')->withArgs(array(anything(),$groupId))
-            ->andReturnUsing(function($upload,$group)
+    $this->uploadPermissionDao->shouldReceive('filterAccessibleUploads')
+            ->andReturnUsing(function($uploadIds,$group)
             {
-              return range(1, 17);
+              return array_values(array_filter($uploadIds, function($upload) {
+                return in_array($upload, range(1, 17));
+              }));
             });
 
     $jobs = array_combine(range(3,13),range(3,13));
@@ -120,9 +124,9 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
     $jobsPage1 = $this->showJobsDao->uploads2Jobs(range(1,17),0);
     assertThat($jobsPage1[0], arrayWithSize(10));
     assertThat($jobsPage1[1], is(1));
-    $jobsPage2 = $this->showJobsDao->uploads2Jobs(array_combine(range(10,16),range(11,17)),1);
+    $jobsPage2 = $this->showJobsDao->uploads2Jobs(range(1,17),1);
     assertThat($jobsPage2[0], arrayWithSize(3));
-    assertThat($jobsPage2[1], is(0));
+    assertThat($jobsPage2[1], is(1));
     $jobsPage3 = $this->showJobsDao->uploads2Jobs(array(),2);
     assertThat($jobsPage3, arrayWithSize(0));
   }
@@ -147,6 +151,13 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
             ->andReturnUsing(function($upload,$group)
             {
               return ($upload==1 || $upload==2 || $upload==4);
+            });
+    $this->uploadPermissionDao->shouldReceive('filterAccessibleUploads')
+            ->andReturnUsing(function($uploadIds,$group)
+            {
+              return array_values(array_filter($uploadIds, function($upload) {
+                return ($upload==1 || $upload==2 || $upload==4);
+              }));
             });
     $testOurJobs = $this->showJobsDao->myJobs(true);
     assertThat($testOurJobs[0], is(arrayContainingInAnyOrder($this->job_pks)));
