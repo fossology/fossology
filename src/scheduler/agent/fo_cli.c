@@ -58,7 +58,7 @@ int socket_connect(char* host, char* port)
   struct addrinfo* servs, * curr = NULL;
 
   memset(&hints, 0, sizeof(hints));
-  hints.ai_family   = AF_UNSPEC;
+  hints.ai_family   = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
   if(getaddrinfo(host, port, &hints, &servs) == -1)
   {
@@ -74,7 +74,10 @@ int socket_connect(char* host, char* port)
       continue;
 
     if(connect(fd, curr->ai_addr, curr->ai_addrlen) == -1)
+    {
+      close(fd);
       continue;
+    }
 
     break;
   }
@@ -83,6 +86,7 @@ int socket_connect(char* host, char* port)
   {
     fprintf(stderr, "ERROR: %s.%d: unable to connect to %s port: %s\n",
         __FILE__, __LINE__, host, port);
+    freeaddrinfo(servs);
     return -1;
   }
 
