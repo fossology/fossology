@@ -9,6 +9,7 @@ namespace Fossology\Lib\Report;
 
 use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
+use Monolog\Logger;
 
 abstract class ClearedGetterCommon
 {
@@ -17,6 +18,9 @@ abstract class ClearedGetterCommon
 
   /** @var TreeDao */
   protected $treeDao;
+
+  /** @var Logger */
+  private $logger;
 
   /** @var array $fileNameCache */
   private $fileNameCache = array();
@@ -35,6 +39,7 @@ abstract class ClearedGetterCommon
 
     $this->uploadDao = $container->get('dao.upload');
     $this->treeDao = $container->get('dao.tree');
+    $this->logger = new Logger(self::class);
 
     $this->groupBy = $groupBy;
   }
@@ -97,12 +102,23 @@ abstract class ClearedGetterCommon
       unset($statement['uploadtree_pk']);
 
       if (!array_key_exists($uploadTreeId, $this->fileNameCache)) {
-        $this->fileNameCache[$uploadTreeId] = $this->treeDao->getFullPath($uploadTreeId, $uploadTreeTableName, $parentId);
-        $this->fileHashes[$uploadTreeId] = $this->treeDao->getItemHashes($uploadTreeId);
+        try {
+          $this->fileNameCache[$uploadTreeId] = $this->treeDao->getFullPath(
+            $uploadTreeId, $uploadTreeTableName, $parentId);
+          $this->fileHashes[$uploadTreeId] = $this->treeDao->getItemHashes(
+            $uploadTreeId, $uploadTreeTableName);
+        } catch (\Exception $e) {
+          $this->logger->error(
+            "Failed to resolve path for uploadtree_pk=$uploadTreeId" .
+            " in upload=$uploadId: " . $e->getMessage()
+          );
+          $this->fileNameCache[$uploadTreeId] = '';
+          $this->fileHashes[$uploadTreeId] = array('sha1' => '', 'md5' => '', 'sha256' => '');
+        }
       }
 
       $statement['fileName'] = $this->fileNameCache[$uploadTreeId];
-      $statement['fileHash'] = strtolower($this->fileHashes[$uploadTreeId]["sha1"]);
+      $statement['fileHash'] = strtolower($this->fileHashes[$uploadTreeId]['sha1'] ?? '');
     }
     unset($statement);
   }

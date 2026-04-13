@@ -82,6 +82,14 @@ class TreeDao
         $params, $statementName);
 
     if (false === $row) {
+      if ($parentId > 0) {
+        $this->logger->warning(
+          "getFullPath: could not find path of $itemId relative to parent $parentId" .
+          " in $tableName - item is not a descendant of that parent." .
+          " Falling back to root-based path."
+        );
+        return $this->getFullPath($itemId, $tableName, 0, $dropArtifactPrefix);
+      }
       throw new \Exception("could not find path of $itemId:\n$sql--".print_r($params,true));
     }
 
@@ -117,8 +125,13 @@ class TreeDao
    */
   public function getItemHashes($uploadtreeId, $uploadtreeTablename='uploadtree')
   {
-    $pfile = $this->dbManager->getSingleRow("SELECT pfile.* FROM $uploadtreeTablename, pfile WHERE uploadtree_pk=$1 AND pfile_fk=pfile_pk",
-        array($uploadtreeId), __METHOD__);
+    $statementName = __METHOD__ . "." . $uploadtreeTablename;
+    $pfile = $this->dbManager->getSingleRow(
+      "SELECT pfile.* FROM $uploadtreeTablename, pfile WHERE uploadtree_pk=$1 AND pfile_fk=pfile_pk",
+      array($uploadtreeId), $statementName);
+    if (empty($pfile)) {
+      return array('sha1' => '', 'md5' => '', 'sha256' => '');
+    }
     return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5'],'sha256'=>$pfile['pfile_sha256']);
   }
 
