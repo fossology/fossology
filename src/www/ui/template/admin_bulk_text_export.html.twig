@@ -1,0 +1,180 @@
+{# SPDX-FileCopyrightText: © 2026 Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block styles %}
+  {{ parent() }}
+  <style>
+    .radio-group {
+      margin-top: 10px;
+    }
+    .radio-group input[type="radio"] {
+      margin-right: 5px;
+    }
+    .select-field {
+      width: 40%;
+    }
+    .csv-select {
+      width: 150px;
+      display: inline-block;
+      margin-left: 10px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <p>
+    {{ 'Use this tool to export bulk scan text data in CSV or JSON format, filtered by user or group.' | trans }}
+  </p>
+
+  <form id="bulkTextExportForm" method="POST">
+    <input type="hidden" name="export" value="1">
+
+    <ol>
+      <li>
+        <div class="form-group">
+          <label>{{ 'Export Format' | trans }}:</label>
+          <div class="radio-group">
+            <input type="radio" id="exportFormatCsv" name="export_format" value="csv" checked="checked"/>
+            <label for="exportFormatCsv" class="d-inline">{{ 'CSV (Comma-Separated Values)' | trans }}</label>
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{'Standard spreadsheet format'|trans}}" alt="" class="info-bullet"/>
+          </div>
+          <div class="radio-group">
+            <input type="radio" id="exportFormatJson" name="export_format" value="json"/>
+            <label for="exportFormatJson" class="d-inline">{{ 'JSON (JavaScript Object Notation)' | trans }}</label>
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{'Structured data format for APIs'|trans}}" alt="" class="info-bullet"/>
+          </div>
+        </div>
+      </li>
+
+      <li>
+        <div class="form-group">
+          <label>{{ 'Filter By' | trans }}:</label>
+          <div class="radio-group">
+            <input type="radio" id="filterTypeAll" name="filter_type" value="all" checked="checked"/>
+            <label for="filterTypeAll" class="d-inline">{{ 'All (No Filter)' | trans }}</label>
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{'Export all bulk text entries'|trans}}" alt="" class="info-bullet"/>
+          </div>
+          <div class="radio-group">
+            <input type="radio" id="filterTypeUser" name="filter_type" value="user"/>
+            <label for="filterTypeUser" class="d-inline">{{ 'By User' | trans }}</label>
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{'Filter by specific user'|trans}}" alt="" class="info-bullet"/>
+          </div>
+          <div class="radio-group">
+            <input type="radio" id="filterTypeGroup" name="filter_type" value="group"/>
+            <label for="filterTypeGroup" class="d-inline">{{ 'By Group' | trans }}</label>
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{'Filter by specific group'|trans}}" alt="" class="info-bullet"/>
+          </div>
+        </div>
+      </li>
+
+      <li id="userSelectionRow" style="display: none;">
+        <div class="form-group">
+          <label for="selectedUser">{{ 'Select User' | trans }}:</label>
+          <select id="selectedUser" name="selected_user" class="form-control select-field">
+            <option value="0">{{ 'Select a user...' | trans }}</option>
+            {% for user_pk, user_name in users %}
+              <option value="{{ user_pk }}">{{ user_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </li>
+
+      <li id="groupSelectionRow" style="display: none;">
+        <div class="form-group">
+          <label for="selectedGroup">{{ 'Select Group' | trans }}:</label>
+          <select id="selectedGroup" name="selected_group" class="form-control select-field">
+            <option value="0">{{ 'Select a group...' | trans }}</option>
+            {% for group_pk, group_name in groups %}
+              <option value="{{ group_pk }}">{{ group_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </li>
+
+      <li id="csvOptionsRow">
+        <div class="form-group">
+          <label>{{ 'CSV Options' | trans }}:</label>
+          <div class="radio-group">
+            <label for="csvDelimiter">{{ 'Field Delimiter' | trans }}:</label>
+            <select id="csvDelimiter" name="delimiter" class="form-control csv-select">
+              <option value=",">{{ 'Comma (,)' | trans }}</option>
+              <option value=";">{{ 'Semicolon (;)' | trans }}</option>
+              <option value="|">{{ 'Pipe (|)' | trans }}</option>
+              <option value="	">{{ 'Tab' | trans }}</option>
+            </select>
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{'Character that separates columns'|trans}}" alt="" class="info-bullet"/>
+          </div>
+          <div class="radio-group">
+            <label for="csvEnclosure">{{ 'Text Enclosure' | trans }}:</label>
+            <select id="csvEnclosure" name="enclosure" class="form-control csv-select">
+              <option value="&quot;">{{ 'Double Quote (&quot;)' | trans }}</option>
+              <option value="'">{{ 'Single Quote (\')' | trans }}</option>
+            </select>
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{'Character for wrapping fields with special characters'|trans}}" alt="" class="info-bullet"/>
+          </div>
+        </div>
+      </li>
+    </ol>
+
+    <p>
+      <input type="submit" class="btn btn-primary btn-sm" value="{{ 'Export' | trans }}"/>
+    </p>
+  </form>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('[data-toggle="tooltip"]').tooltip();
+
+      function updateFilterOptions() {
+        var filterType = $('input[name="filter_type"]:checked').val();
+        if (filterType === 'user') {
+          $('#userSelectionRow').show();
+          $('#groupSelectionRow').hide();
+        } else if (filterType === 'group') {
+          $('#userSelectionRow').hide();
+          $('#groupSelectionRow').show();
+        } else {
+          $('#userSelectionRow').hide();
+          $('#groupSelectionRow').hide();
+        }
+      }
+
+      function updateCsvOptions() {
+        var exportFormat = $('input[name="export_format"]:checked').val();
+        if (exportFormat === 'csv') {
+          $('#csvOptionsRow').show();
+        } else {
+          $('#csvOptionsRow').hide();
+        }
+      }
+
+      $('input[name="filter_type"]').on('change', updateFilterOptions);
+      $('input[name="export_format"]').on('change', updateCsvOptions);
+
+      $('#bulkTextExportForm').on('submit', function(e) {
+        var filterType = $('input[name="filter_type"]:checked').val();
+
+        if (filterType === 'user' && $('#selectedUser').val() === '0') {
+          e.preventDefault();
+          alert('{{ "Please select a user for filtering" | trans }}');
+          return false;
+        }
+
+        if (filterType === 'group' && $('#selectedGroup').val() === '0') {
+          e.preventDefault();
+          alert('{{ "Please select a group for filtering" | trans }}');
+          return false;
+        }
+      });
+
+      updateFilterOptions();
+      updateCsvOptions();
+    });
+  </script>
+{% endblock %}
