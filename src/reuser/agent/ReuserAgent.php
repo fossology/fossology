@@ -380,6 +380,13 @@ class ReuserAgent extends Agent
       $fileId = $clearingDecision->getPfileId();
       if (!array_key_exists($fileId, $clearingDecisionByFileId)) {
         $clearingDecisionByFileId[$fileId] = $clearingDecision;
+      } else {
+        $existingType = $clearingDecisionByFileId[$fileId]->getType();
+        $newType = $clearingDecision->getType();
+        if ($this->getDecisionTypePriority($newType) > $this->getDecisionTypePriority($existingType)) {
+          print "INFO :: Detected conflicting decisions for the same pfile. Applying the stronger decision.\n";
+          $clearingDecisionByFileId[$fileId] = $clearingDecision;
+        }
       }
     }
     return $clearingDecisionByFileId;
@@ -437,5 +444,27 @@ class ReuserAgent extends Agent
     }
 
     return $mapped;
+  }
+
+  /**
+   * @brief Get priority for a decision type during reuse
+   *
+   * When the same pfile has different decisions at different locations,
+   * higher priority decisions take precedence for reuse.
+   *
+   * @param int $decisionType One of DecisionTypes constants
+   * @return int Priority value (higher = stronger)
+   */
+  private function getDecisionTypePriority($decisionType)
+  {
+    $priority = array(
+      DecisionTypes::WIP => 0,
+      DecisionTypes::TO_BE_DISCUSSED => 1,
+      DecisionTypes::IRRELEVANT => 2,
+      DecisionTypes::NON_FUNCTIONAL => 3,
+      DecisionTypes::DO_NOT_USE => 4,
+      DecisionTypes::IDENTIFIED => 5,
+    );
+    return array_key_exists($decisionType, $priority) ? $priority[$decisionType] : 0;
   }
 }
