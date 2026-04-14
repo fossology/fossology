@@ -29,13 +29,15 @@ void test_host_init()
 {
   host_t* host;
 
-  host = host_init("local", "localhost", "directory", 10);
+  host = host_init("local", "localhost", "directory", 10, NULL, 0);
   FO_ASSERT_PTR_NOT_NULL(host);
   FO_ASSERT_STRING_EQUAL(host->name, "local");
   FO_ASSERT_STRING_EQUAL(host->address, "localhost");
   FO_ASSERT_STRING_EQUAL(host->agent_dir, "directory");
   FO_ASSERT_EQUAL(host->max, 10);
   FO_ASSERT_EQUAL(host->running, 0);
+  FO_ASSERT_EQUAL(host->n_tags, 0);
+  FO_ASSERT_PTR_NULL(host->tags);
 
   host_destroy(host);
 }
@@ -65,7 +67,7 @@ void test_host_insert()
   for(i = 0; i < 9; i++)
   {
     name[0] = (char)('1' + i);
-    host_insert(host_init(name, "localhost", "directory", i), scheduler);
+    host_insert(host_init(name, "localhost", "directory", i, NULL, 0), scheduler);
 
     list_size  = g_tree_nnodes(scheduler->host_list);
     queue_size = g_list_length(scheduler->host_queue);
@@ -96,7 +98,7 @@ void test_host_insert()
  */
 void test_host_increase_load()
 {
-  host_t* host = host_init("local", "localhost", "directory", 10);
+  host_t* host = host_init("local", "localhost", "directory", 10, NULL, 0);
 
   FO_ASSERT_EQUAL(host->running, 0);
   host_increase_load(host);
@@ -117,7 +119,7 @@ void test_host_increase_load()
  */
 void test_host_decrease_load()
 {
-  host_t* host = host_init("local", "localhost", "directory", 10);
+  host_t* host = host_init("local", "localhost", "directory", 10, NULL, 0);
   host->running = 2;
 
   FO_ASSERT_EQUAL(host->running, 2);
@@ -149,7 +151,7 @@ void test_get_host()
   for(i = 0; i < 9; i++)
   {
     name[0] = (char)('1' + i);
-    host_insert(host_init(name, "localhost", "directory", i + 1), scheduler);
+    host_insert(host_init(name, "localhost", "directory", i + 1, NULL, 0), scheduler);
   }
 
   for(i = 0; i < 9; i++)
@@ -178,17 +180,81 @@ void test_get_host()
   g_free(name);
 }
 
+/**
+ * \brief Test host_init() stores and NUL-terminates a tag list
+ * \test
+ * -# Create a host with two tags and verify n_tags and tag strings
+ * -# Create a host with no tags and verify n_tags==0 and tags==NULL
+ */
+void test_host_init_with_tags()
+{
+  host_t* host;
+  const char* tag_arr[] = {"nomos", "monk"};
+
+  host = host_init("worker-heavy", "heavy.local", "/usr/lib/fossology", 8,
+                   (char**)tag_arr, 2);
+  FO_ASSERT_PTR_NOT_NULL(host);
+  FO_ASSERT_EQUAL(host->n_tags, 2);
+  FO_ASSERT_PTR_NOT_NULL(host->tags);
+  FO_ASSERT_STRING_EQUAL(host->tags[0], "nomos");
+  FO_ASSERT_STRING_EQUAL(host->tags[1], "monk");
+  FO_ASSERT_PTR_NULL(host->tags[2]);   /* NULL sentinel */
+  host_destroy(host);
+
+  host = host_init("worker-default", "default.local", "/usr/lib/fossology", 4,
+                   NULL, 0);
+  FO_ASSERT_PTR_NOT_NULL(host);
+  FO_ASSERT_EQUAL(host->n_tags, 0);
+  FO_ASSERT_PTR_NULL(host->tags);
+  host_destroy(host);
+}
+
+/**
+ * \brief Test get_host_for() routes by agent type with untagged fallback
+ * \test
+ * -# Initialize scheduler, add one tagged host ("nomos") and one untagged host
+ * -# get_host_for("nomos") returns the tagged host
+ * -# get_host_for("copyright") skips the tagged host and returns the untagged host
+ */
+void test_get_host_for_affinity()
+{
+  scheduler_t* scheduler;
+  host_t* result;
+  const char* heavy_tags[] = {"nomos"};
+
+  scheduler = scheduler_init(testdb, NULL);
+
+  host_insert(host_init("heavy", "heavy.local", "/usr/lib/fossology", 4,
+                        (char**)heavy_tags, 1), scheduler);
+  host_insert(host_init("light", "light.local", "/usr/lib/fossology", 4,
+                        NULL, 0), scheduler);
+
+  /* "nomos" → tagged host "heavy" is first eligible */
+  result = get_host_for(scheduler, "nomos", 1);
+  FO_ASSERT_PTR_NOT_NULL(result);
+  FO_ASSERT_STRING_EQUAL(result->name, "heavy");
+
+  /* "copyright" → "heavy" rejects it (tagged nomos only), "light" accepts */
+  result = get_host_for(scheduler, "copyright", 1);
+  FO_ASSERT_PTR_NOT_NULL(result);
+  FO_ASSERT_STRING_EQUAL(result->name, "light");
+
+  scheduler_destroy(scheduler);
+}
+
 /* ************************************************************************** */
 /* *** suite declaration **************************************************** */
 /* ************************************************************************** */
 
 CU_TestInfo tests_host[] =
 {
-    {"Test host_init",          test_host_init          },
-    {"Test host_insert",        test_host_insert        },
-    {"Test host_increase_load", test_host_increase_load },
-    {"Test host_decrease_load", test_host_decrease_load },
-    {"Test host_get_host",      test_get_host           },
+    {"Test host_init",                 test_host_init                },
+    {"Test host_insert",               test_host_insert              },
+    {"Test host_increase_load",        test_host_increase_load       },
+    {"Test host_decrease_load",        test_host_decrease_load       },
+    {"Test host_get_host",             test_get_host                 },
+    {"Test host_init_with_tags",       test_host_init_with_tags      },
+    {"Test get_host_for_affinity",     test_get_host_for_affinity    },
     CU_TEST_INFO_NULL
 };
 
