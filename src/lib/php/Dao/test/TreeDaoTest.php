@@ -304,6 +304,8 @@ class TreeDaoTest extends \PHPUnit\Framework\TestCase
 
     assertThat($this->treeDao->getFullPath(12, "uploadtree", 7),      equalTo('subExample.tar/subExample/innerFile'));
     assertThat($this->treeDao->getFullPath(12, "uploadtree", 7,true), equalTo(               'subExample/innerFile'));
+  }
+
   public function testGetRepoPathOfPfile()
   {
     $this->testDb->createPlainTables(array('pfile'));
