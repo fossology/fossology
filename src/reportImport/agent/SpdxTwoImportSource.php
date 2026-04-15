@@ -293,6 +293,7 @@ class SpdxTwoImportSource implements ImportSource
         $licenseId = substr($licenseId, 0, -33);
         $item = new ReportImportDataItem($licenseId);
         $item->setCustomText($licenseTextLiteral->getValue());
+        $item->setLicenseCandidate($licenseNameLiteral->getValue(), $licenseTextLiteral->getValue(), strpos($rawLicenseId, LicenseRef::SPDXREF_PREFIX), ($seeAlsoLiteral != null) ? $seeAlsoLiteral->getValue() : "");
       } else {
         $item = new ReportImportDataItem($licenseId);
         $item->setLicenseCandidate($licenseNameLiteral->getValue(),
