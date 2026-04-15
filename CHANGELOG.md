@@ -4,6 +4,181 @@
 -->
 # Changelog of FOSSology
 
+### 4.7.0-rc1 (April 15th 2026)
+
+This release [4.7.0-rc1](https://github.com/fossology/fossology/releases/tag/4.7.0-rc1)
+includes important fixes to
+[4.6.0](https://github.com/fossology/fossology/releases/tag/4.6.0)
+and introduces several fixes & enhancements to FOSSology, including:
+
+* Added support for SPDX 3.0 format in the API report endpoint.
+* Introduced support for LZIP archive format.
+* Removed support for outdated distributions: Ubuntu Focal, Debian Stretch, and Debian Buster.
+* Added support for multi-select using the Shift key for easier item grouping.
+* Performance Improvements
+  - Optimized copyright reuse using hash map–based lookups.
+  - Eliminated N+1 query issues in copyright reuse.
+  - Improved upload permission checks with batch filtering.
+  - Enhanced performance of the upload page and reuse-related queries.
+  - Accelerated folder access checks using CTEs and additional optimizations.
+* Bug Fixes & Stability
+  - Fixed a scheduler crash occurring when the agent owner is NULL.
+* Introduced new license footprints along with various minor fixes and improvements.
+
+#### Credits to contributors for 4.7.0-rc1
+
+From the GIT commit history, we have the following contributors since
+[4.6.0](https://github.com/fossology/fossology/releases/tag/4.6.0):
+
+```
+> Adithyadspawar <158747823+Adithyadspawar@users.noreply.github.com>
+> Aditya30ag <adityaagrwal3005@gmail.com>
+> Anuj Rewar <anujrewar5@gmail.com>
+> Aryan Shrivastava <aryan.shrivastava3005@gmail.com>
+> ayxsh_shxrma <ayushmaan.sharma911@gmail.com>
+> D3S-Gaurav <kumargauravrocco2724@gmail.com>
+> Dietmar Helmut Leher <helmut.leher.ext@vaillant-group.com>
+> FrankOHara43 <aryaswaraj5@gmail.com>
+> its-sushant <sushant.kumar@siemens-healthineers.com>
+> Jan Altenberg <jan.altenberg@osadl.org>
+> Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
+> kjarir <kjarir23@gmail.com>
+> Krrish Biswas <krrishbiswas175@gmail.com>
+> Mandar Joshi <mandarjoshi1045@gmail.com>
+> Muhammad Abdullah Shahid <108458621+abdollahShahid@users.noreply.github.com>
+> Muhammad Salman <chsalmanramzan422@gmail.com>
+> pranavsnotebook-a11y <pranavkrishnau@users.noreply.github.com>
+> Raj Gupta <150777419+Raj-G07@users.noreply.github.com>
+> SagarKhatri649 <138390171+SagarKhatri649@users.noreply.github.com>
+> Saksham Mishra <sakshammishra112@gmail.com>
+> Sandipmandal25 <sandipmandal02.sm@gmail.com>
+> sandyp025 <sandipmandal02.sm@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@gmail.com>
+> Shivangisriva <02shivangisrivastava@gmail.com>
+> SooryanshSingh <sooryanshsingh56@gmail.com>
+> Sumamasonia <sumamasonia@gmail.com>
+> Vishesh Gupta <vishesh15th@gmail.com>
+> winniem30 <tejaswinim446@gmail.com>
+```
+
+#### Features
+
+* `941f1ae08` feat(ui): add loader during duplicate upload check in upload file page
+* `da3e45e68` feat(copyrightHist): add functionility to group select items using Shift key
+* `a5bdbfb65` feat(chore): remove ubuntu focal, debian stretch and buster
+* `2d214895c` feat(db): composite index on upload_package
+* `d76882c43` feat(ui): add search option in con lic page text view
+* `4c85ba084` feat(api): add spdx3 format support to api report endpoint
+* `fe62cb043` feat(ununpack): add support for lzip archive format
+* `ffa42f97a` feat(nomos): add identification for BSD style numpy license
+* `b624de6f1` feat(license): add support for DB License
+
+#### Corrections
+
+* `8cb711c98` fix(libfossrepo): correct strlen variable in fo_RepMkPathTmp extension handling
+* `b5a609fa7` perf(showjobs): optimize upload permission checks with batch filter (#3559)
+* `bceb90394` fix(auth): handle missing LDAP env vars in external auth Fixes #3032
+* `42bb01f01` fix(browser): handle missing item in navigation for root uploads
+* `59b1d3599` fix(api): null safety and wrong status codes in GroupController member endpoints
+* `a42d6f1a2` fix(decider): fix return value bug in marklocalDecisionsAsGlobal
+* `10ffcbe11` fix(clearing): allow bulk edit decisions for files without detected licenses
+* `82a486ae7` fix(pkgagent): fix wrong field name, unsafe strcpy, null-free and HTML double-encoding
+* `26dadd647` fix(uploadFile): remove not required checks incase of no reuse selected
+* `83d63ea62` perf(reuser): optimize copyright reuse by eliminating N+1 queries
+* `0140ed3ce` perf(clearing): optimize directory decision marking by batch-fetching tree bounds
+* `8a069276c` fix(copyright): add copyright cleanup rules
+* `cdbdf483b` fix(ui): pause/unpause job from Scheduler Administration
+* `e2ed42c07` style(reuser): fix indentation and whitespace in unit tests
+* `7c8b30bf3` test(reuser): add unit tests for copyright matching optimization
+* `f735f5ea6` perf(search): reduce database query overhead on search page
+* `44be1c974` fix(api): null safety checks, wrong status code, typo and misleading error messages
+* `52b23a234` fix(reuser): support multiple upload reuse selections
+* `6a32973bd` fix(showjobs): optimize N+1 queries and fix pagination
+* `1d3374b02` fix(buckets): replace sprintf with snprintf to prevent buffer overrun
+* `06e1c87f4` fix(nomos): detect GPL-2.0 as published by FSF license variant
+* `21d8177a7` fix(ui): rename 'Copy' action to 'Alias' in content_move page (#613)
+* `ab2aeac75` fix(lib): fix null-safety, SQL spacing, intval misuse and typos in license DAOs
+* `556e001b8` perf(reuser): optimize copyright reuse via hash map lookup
+* `ee9bc0e6d` perf(reuser): eliminate N+1 database queries in main license reuse
+* `229880c37` fix(spdx): propagate custom license text to package-level concluded license
+* `23168b56f` fix(ui): handle missing failure callback in job queue
+* `886b07e6d` fix(softwareHeritage): handle missing X-RateLimit-Reset and prevent negative sleep()
+* `4e723dd5c` fix(ununpack): prevent gcrypt handle leak in checksum error paths
+* `56a1c9f6f` fix(api): enforce admin-only access on user management endpoints
+* `9b743a479` fix(unpack): use MAP_FAILED for mmap failure check in CopyFile
+* `e067f8821` fix(api): remove debug echo and fix wrong param in CopyrightController
+* `d87f4fe73` fix(nomos): prevent command buffer overflow in mySystem
+* `8109987cc` fix(api): remove null-deref and N+1 queries in getScannedLicenses
+* `d7d74949a` fix(copyright/oneshot): escape shell arguments to prevent command injection
+* `18d28315c` fix(test): replace deprecated assertRegExp in test_common_menu.php
+* `1559cdea7` fix(cyclonedx): remove unused licensesInDocument assignment in main license loop
+* `85abbf9ab` fix(cyclonedx): determine correct mimetype per file instead of hardcoded text/plain
+* `51ef61602` fix(viewInfo): replace and with && and fix warnings
+* `9a6c99619` refactor(lib): refactor code to get folder list is single query
+* `663421722` fix(pkAgent): dependency's of the packages where missed due to strtok
+* `4d91b451f` fix(php): correct logic errors and resource handling in common utility files
+* `0de6a27c3` perf(uploadpage): optimize upload page and reuser query performance
+* `f24cf31c8` fix(ui): ensure testReplacement processes all selected copyright rows
+* `3f539bbad` fix(cyclonedx): revert  URL to http:// to fix schema validation
+* `8b9b1e0cd` fix(fossdash): skip empty cleanfile entries
+* `cb14a8076` fix(ui): detect application/vnd.debian.binary-package for Debian packages
+* `2737a53e5` fix(ui): schedule agent button not working in view file information page
+* `2f06de6c5` refactor(bulk): refactor bulk history query
+* `b966ba77c` fix(spdx): sanitize invalid characters in LicenseRef identifiers
+* `e9c27a376` fix(api): return 400 for negative folderId in POST /uploads
+* `bd53b004d` fix(copyright): correct navigation for files with copyright/email/url filter
+* `792e7aec0` refactor(uploadfile): use variable to store json data remove $.each
+* `c9ae6ea40` refactor(ui): use UploadDao in ajax-schedule-agent instead of raw SQL
+* `b55149717` fix(api): fix null dereference and error concat in scheduleBulkScan
+* `b1b593d9b` refactor(getuploads): remove distinct for primary key, use In in join clause
+* `fd28d2379` fix: prevent unintended insertion into fileIdsMapReverse
+* `0d7c54867` fix(showjobs): redirect upload link to fileBrowse module instead of browse
+* `914a4870c` fix(ui): upload file page facing race condition
+* `62e02192f` fix(scheduler): prevent crash when agent owner is NULL
+* `00ad70cbc` refactor(spdx): use combined operators for concatenation
+* `6065ff947` refactor(cli): remove legacy SVN dependency from mkpod
+* `f06d40383` fix(util): correct column index handling for sortable flag
+* `bdb8614fc` fix(cyclonedx): use HTTPS schema URL for BOM 1.4
+* `07cd390f5` fix(db): add primary key constraints for obligation_map tables
+* `ccddcec01` fix(pagination): navigate to first page when out of range
+* `5d3bab04b` perf(ui-browse): speed up folder access check using CTE
+* `e844076bc` refactor(menu): shift system load from banner to menu for better usage Remove unused Refresh in menu
+* `b5950c00e` fix(scheduler): guard against NULL agent owner to prevent scheduler crash
+* `65c17d138` perf(psql): add composite index on clearing_decision
+* `3fc48eed9` fix(ui): avoid redirecting license browser for empty directories
+* `c3573f88f` fix(spdx2rdf): fix validation errors
+* `c963ff25d` fix(api): correct copyright export list response format
+* `efb447827` fix(license): merge CMU into CMU-Mach and add migration
+* `55de3110e` fix(util): correctly filter '.' and '..' segments in pURL subpath
+* `be18fed53` fix(api): return upload ID as string in POST /uploads response
+* `2b069b0cd` fix(config): update TLD regex length in copyright.conf
+* `a4005de98` fix: exclude invalid characters from URL regex in copyright agent, Fixes #317
+* `56e9c5d2b` fix(delagent): remove duplicate Close button in delete notification
+* `0f5cfc84f` fix(nomos): improve dual-license detection and update tests
+* `63f9abde9` fix(nomos): update lgpl-2.1-or-later license identification
+
+#### Infrastructure
+
+* `8aec7ba37` docs(compatibility): update the documentation and remove general links
+* `2dee954b7` docs(ui): extend UI directory documentation
+* `dcc8d4c55` chore(deps): bump requests
+* `5d240352f` chore(ci): skip commit lint check for dependabot
+* `188c95606` chore(deps): bump lukka/get-cmake from 4.1.2 to 4.3.0
+* `d0d03f7a5` chore(ci): remove obsolete Travis CI configuration (.travis.yml)
+* `4934ab686` chore(deps): bump docker/setup-buildx-action from 3 to 4
+* `360b36325` chore(deps): bump docker/build-push-action from 6 to 7
+* `0215accc0` docs: add comprehensive README for compatibility agent
+* `168394a6f` chore(vagrant): upgrade base box from focal to jammy
+* `2e38dc5e4` chore(deps): bump docker/setup-qemu-action from 3 to 4
+* `5713be9e9` chore(deps): bump docker/login-action from 3 to 4
+* `35e9e0a21` docs(readme): fix minor typos and broken links
+* `f81dfd30e` Revert "fix(api): align POST /uploads response with OpenAPI schema"
+* `2acf06ae3` docs(db): clarify PostgreSQL volume mount usage in Docker
+* `bbdba63ef` docs(ui): clarify current UI directory structure
+* `87d3307ec` chore(deps): bump the composer group across 1 directory with 3 updates
+* `509064eaa` docs: fix README typos and requirements wording
+* `a05209435` docs(install): add php.ini config note and wiki link
+
 ### 4.6.0 (Nov 25th 2025)
 
 This release [4.6.0](https://github.com/fossology/fossology/releases/tag/4.6.0)
