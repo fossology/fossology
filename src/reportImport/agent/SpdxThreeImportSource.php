@@ -246,22 +246,26 @@ class SpdxThreeImportSource implements ImportSource
       $rawLicenseId = $licenseIdLiteral->getValue();
       $licenseId = $this->stripLicenseRefPrefix($rawLicenseId);
 
+      $isCustomText = false;
       if ($license->isA('spdx:expandedlicensing_CustomLicense') &&
         (strlen($licenseId) > 33 &&
           substr($licenseId, -33, 1) === "-" &&
           ctype_alnum(substr($licenseId, -32))
         )) {
         $licenseId = substr($licenseId, 0, -33);
-        $item = new ReportImportDataItem($licenseId);
-        $item->setCustomText($licenseTextLiteral->getValue());
-      } else {
-        $item = new ReportImportDataItem($licenseId);
-        $item->setLicenseCandidate($licenseNameLiteral->getValue(),
-          $licenseTextLiteral->getValue(),
-          strpos($rawLicenseId, LicenseRef::SPDXREF_PREFIX),
-          ($seeAlsoLiteral != null) ? $seeAlsoLiteral->getValue() : ""
-        );
+        $isCustomText = true;
       }
+
+      $item = new ReportImportDataItem($licenseId);
+      if ($isCustomText) {
+        $item->setCustomText($licenseTextLiteral->getValue());
+      }
+      $item->setLicenseCandidate($licenseNameLiteral->getValue(),
+        $licenseTextLiteral->getValue(),
+        strpos($rawLicenseId, LicenseRef::SPDXREF_PREFIX),
+        ($seeAlsoLiteral != null) ? $seeAlsoLiteral->getValue() : ""
+      );
+
       return [$item];
     }
     return [];
