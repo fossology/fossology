@@ -1,0 +1,3 @@
+# In your Dockerfile, after building the agent binary:
+COPY ./build/src/reuser/agent/reuser_agent /usr/local/bin/reuser_agent
+RUN chmod +x /usr/local/bin/reuser_agent
