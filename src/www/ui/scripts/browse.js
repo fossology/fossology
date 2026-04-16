@@ -20,6 +20,10 @@ var staSel = null;
 $(document).ready(function () {
   assigneeSelected = ($.cookie("assigneeSelected") || 0);
   $('#assigneeSelector').val(assigneeSelected);
+  $(window).on('pageshow', function () {
+    $('select.goto-active-option').prop('selectedIndex', 0);
+  });
+
   table = createBrowseTable();
   $('#insert_browsetbl_filter').append($('#browsetbl_filter'));
   $("input[type='search']").addClass("form-control-sm");
@@ -32,13 +36,16 @@ $(document).ready(function () {
         var source=table.cell(this).data();
         openCommentModal(source[0],source[1],source[2]);
     } );
-    $('select.goto-active-option').change(function() {
+    $('select.goto-active-option')
+    .off('change')
+    .on('change', function() {
       const url = $(this).val();
       const optionText = $(this).find("option:selected").text();
-      let userResponse = true
+      let userResponse = true;
       if (optionText === "Delete") {
-        userResponse = confirm("Are you sure you want to delete this upload ?")
-      } 
+        userResponse = confirm("Are you sure you want to delete this upload ?");
+      }
+      this.selectedIndex = 0;
       if(url && userResponse) {
         window.location = url;
       }
