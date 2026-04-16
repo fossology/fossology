@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: © 2026 FOSSology contributors
+#
+# SPDX-License-Identifier: GPL-2.0-only
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fossology
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: app
+    spec:
+      containers:
+        - name: fossology
+          image: fossology/fossology:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          envFrom:
+            - configMapRef:
+                name: fossology-config
+            - secretRef:
+                name: fossology-secrets
+          startupProbe:
+            httpGet:
+              path: /repo/api/v1/health
+              port: http
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /repo/api/v1/health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /repo/api/v1/health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          volumeMounts:
+            - name: repository
+              mountPath: /srv/fossology/repository
+      volumes:
+        - name: repository
+          persistentVolumeClaim:
+            claimName: fossology-repository

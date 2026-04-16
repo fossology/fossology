@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: © 2026 FOSSology contributors
+#
+# SPDX-License-Identifier: GPL-2.0-only
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fossology-config
+data:
+  FOSSOLOGY_DB_HOST: postgres
+  FOSSOLOGY_DB_NAME: fossology
+  FOSSOLOGY_DB_USER: fossy
+  POSTGRES_DB: fossology
+  POSTGRES_USER: fossy

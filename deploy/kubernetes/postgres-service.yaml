@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: © 2026 FOSSology contributors
+#
+# SPDX-License-Identifier: GPL-2.0-only
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app.kubernetes.io/component: postgres
+  ports:
+    - port: 5432
+      targetPort: postgres
+      name: postgres

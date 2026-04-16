@@ -88,6 +88,22 @@ Avoid using version-specific internal paths such as:
 ```
 
 These directories may not be persisted as expected when containers are recreated. Always rely on the directory structure defined by the Postgres image.
+
+## Kubernetes
+
+An example Kubernetes deployment is available in `deploy/kubernetes`.
+It provisions a single FOSSology application pod, an in-cluster PostgreSQL
+database, and persistent volumes for the repository and database data.
+
+Deploy it with:
+
+```sh
+kubectl apply -k deploy/kubernetes
+```
+
+The guide in `deploy/kubernetes/README.md` covers customization points such as
+credentials, storage classes, and exposing the web UI with port-forwarding or
+an ingress controller.
  
 ## Vagrant
 
