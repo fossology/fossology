@@ -4693,6 +4693,83 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+
+  /license/bulk-text/export:
+    get:
+      operationId: exportBulkText
+      tags:
+        - License
+        - Admin
+      summary: Export bulk scan text as CSV or JSON
+      description: >
+        Export bulk scan text entries from license_ref_bulk.
+        Defaults are format=json and filter=all.
+      parameters:
+        - name: format
+          in: query
+          required: false
+          description: Output format.
+          schema:
+            type: string
+            enum:
+              - csv
+              - json
+            default: json
+        - name: filter
+          in: query
+          required: false
+          description: Filter mode for export.
+          schema:
+            type: string
+            enum:
+              - all
+              - user
+              - group
+            default: all
+        - name: userId
+          in: query
+          required: false
+          description: User ID, required when filter=user.
+          schema:
+            type: integer
+            minimum: 1
+        - name: groupId
+          in: query
+          required: false
+          description: Group ID, required when filter=group.
+          schema:
+            type: integer
+            minimum: 1
+        - name: delimiter
+          in: query
+          required: false
+          description: CSV delimiter character (used only when format=csv).
+          schema:
+            type: string
+            default: ','
+        - name: enclosure
+          in: query
+          required: false
+          description: CSV enclosure character (used only when format=csv).
+          schema:
+            type: string
+            default: '"'
+      responses:
+        '200':
+          description: Successfully exported
+          content:
+            text/csv:
+            application/json:
+        '400':
+          description: Validation error in query parameters
+          content:
+            application/json:
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /license/{shortname}:
     parameters:
       - name: shortname

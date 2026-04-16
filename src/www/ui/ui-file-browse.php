@@ -84,6 +84,9 @@ class ui_file_browse extends DefaultPlugin
        */
       $treeDao = $container->get('dao.tree');
       $parent = $treeDao->getParentOfItem($itemBounds);
+      if (empty($parent)) {
+        $parent = $Item;
+      }
       $viewLicenseURI = $this->NAME . Traceback_parm_keep(array("show",
         "format", "page", "upload")) . "&item=$parent";
     }

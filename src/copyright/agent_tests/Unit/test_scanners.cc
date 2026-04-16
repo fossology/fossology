@@ -113,7 +113,7 @@ protected:
       "Copyrights by any strange people",
       "(C) copyright 2007-2011, 2013 my favourite company Google",
       "(C) 2007-2011, 2013 my favourite company Google",
-      "Copyright (c) 1989, 1993\n* The Regents of the University of California. All rights reserved."
+      "Copyright (c) 1989, 1993\n* The Regents of the University of California. "
     });
   }
 
