@@ -131,7 +131,11 @@ class TreeDao
     }
     $hash = $pfileRow['pfile_sha1'] . "." . $pfileRow['pfile_md5'] . "." . $pfileRow['pfile_size'];
     $path = '';
-    exec("$LIBEXECDIR/reppath $repo $hash", $path);
+    // Escape shell arguments to prevent command injection
+    $safeRepo = escapeshellarg($repo);
+    $safeHash = escapeshellarg($hash);
+    $safeExec = escapeshellcmd("$LIBEXECDIR/reppath");
+    exec("$safeExec $safeRepo $safeHash", $path);
     return($path[0]);
   }
 
