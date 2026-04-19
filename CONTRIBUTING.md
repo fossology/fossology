@@ -6,7 +6,7 @@
 
 We welcome contributions in several forms, e.g.
 
-- Improve end user documenting on the [Wiki](https://github.com/fossology/fossology/wiki)
+- Improve end user documentation on the [Wiki](https://github.com/fossology/fossology/wiki)
 
 - Testing
 
