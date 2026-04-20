@@ -199,7 +199,21 @@ class AjaxClearingView extends FO_Plugin
       case "addLicense":
         $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId,
           $licenseId, false, ClearingEventTypes::USER);
-        return new JsonResponse();
+        $licenseRef = $this->licenseDao->getLicenseById($licenseId, $groupId);
+        $warning = null;
+        if ($licenseRef !== null) {
+          $shortName = $licenseRef->getShortName();
+          if (preg_match('/-style$/', $shortName) ||
+              preg_match('/-possibility$/', $shortName) ||
+              $shortName === 'UnclassifiedLicense') {
+            $warning = "\"$shortName\" is not SPDX compliant and may require manual review.";
+          }
+        }
+        $res = [];
+        if ($warning) {
+          $res['warning'] = $warning;
+        }
+        return new JsonResponse($res);
 
       case "removeLicense":
         $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId,

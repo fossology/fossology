@@ -36,7 +36,7 @@ File NomosTestfiles/Aladdin/LICENSE.txt contains license(s) Aladdin,LPPL-1.3+
 File NomosTestfiles/Amazon/ADSL.txt contains license(s) ADSL
 File NomosTestfiles/AML/AML.txt contains license(s) AML
 File NomosTestfiles/ANTLR-PD/ANTLR-PD.txt contains license(s) ANTLR-PD
-File NomosTestfiles/AOM/AOM.txt contains license(s) Alliance for Open Media Patent License 1.0
+File NomosTestfiles/AOM/AOM.txt contains license(s) AOM-Patent-1.0
 File NomosTestfiles/Apache/abs_s.h contains license(s) 3GPP,Apache-2.0
 File NomosTestfiles/Apache/Android_SDK_license.txt contains license(s) AndroidSDK.Commercial,Apache-2.0
 File NomosTestfiles/Apache/Apache-1.0.c contains license(s) Apache-1.0
@@ -103,7 +103,7 @@ File NomosTestfiles/Bittorrent/bittorrent.py contains license(s) BitTorrent-1.1
 File NomosTestfiles/BSD/0BSD.txt contains license(s) 0BSD
 File NomosTestfiles/BSD/access.c contains license(s) BSD-style
 File NomosTestfiles/BSD/AMPAS.txt contains license(s) AMPAS
-File NomosTestfiles/BSD/ANT+SharedSourceLicense.txt contains license(s) ANT+SharedSource
+File NomosTestfiles/BSD/ANT+SharedSourceLicense.txt contains license(s) ANT-SharedSource
 File NomosTestfiles/BSD/autoopts.c contains license(s) BSD,Dual-license,LGPL-3.0-or-later
 File NomosTestfiles/BSD/BSD-1-Clause.txt contains license(s) BSD-1-Clause
 File NomosTestfiles/BSD/BSD-2-Clause_2.txt contains license(s) BSD-2-Clause
@@ -297,7 +297,7 @@ File NomosTestfiles/CECILL/CECILL-1.1.txt contains license(s) CECILL-1.1
 File NomosTestfiles/CECILL/CECILL-2.0.txt contains license(s) CECILL
 File NomosTestfiles/CECILL/CECILL-B.txt contains license(s) CECILL-B
 File NomosTestfiles/CECILL/CECILL-C.txt contains license(s) CECILL-C
-File NomosTestfiles/CECILL/CImg.h contains license(s) CECILL(dual),Dual-license
+File NomosTestfiles/CECILL/CImg.h contains license(s) CECILL-2.1,Dual-license
 File NomosTestfiles/CECILL/dataset_io.h contains license(s) CECILL-B
 File NomosTestfiles/CECILL/GameMode.java contains license(s) CECILL
 File NomosTestfiles/CECILL/ParametersFileFilter.java contains license(s) CECILL
@@ -349,7 +349,7 @@ File NomosTestfiles/D-FSL/D-FSL-1.0.txt contains license(s) D-FSL-1.0
 File NomosTestfiles/DB-License/DB-License.txt contains license(s) Databricks-DB-License
 File NomosTestfiles/DPTC/dpt_osdutil.h contains license(s) DPTC
 File NomosTestfiles/Dual-license/004.phpt.GPLv2+-PHP contains license(s) GPL-2.0-or-later,PHP
-File NomosTestfiles/Dual-license/7-zip_GPL-2.1+-unRARrestriction contains license(s) LGPL-2.1-or-later,unRAR restriction
+File NomosTestfiles/Dual-license/7-zip_GPL-2.1+-unRARrestriction contains license(s) LGPL-2.1-or-later,unRAR-restriction
 File NomosTestfiles/Dual-license/aclocal.m4 contains license(s) Autoconf-exception,FSFAP,GPL-2.0-or-later,NOT-public-domain
 File NomosTestfiles/Dual-license/aes-586.pl contains license(s) Cryptogams,Dual-license,OpenSSL
 File NomosTestfiles/Dual-license/aes.h contains license(s) BSD-style,Dual-license,GPL
@@ -614,7 +614,7 @@ File NomosTestfiles/GPL/GPL-2.0+_with_linking-exception.txt contains license(s) 
 File NomosTestfiles/GPL/GPL-2.0_with_OpenSSL-exception_2.txt contains license(s) GPL-2.0-only,OpenSSL-exception
 File NomosTestfiles/GPL/GPL-2.0_with_OpenSSL-exception.txt contains license(s) GPL-2.0-only,OpenSSL-exception
 File NomosTestfiles/GPL/GPL-2.0+_with_OpenSSL-exception.txt contains license(s) GPL-2.0-or-later,OpenSSL-exception
-File NomosTestfiles/GPL/gpl21_plus.txt contains license(s) GPL-2.1+[sic]
+File NomosTestfiles/GPL/gpl21_plus.txt contains license(s) GPL-2.0-or-later
 File NomosTestfiles/GPL/GPL-3.0+_a.txt contains license(s) GPL-3.0-or-later
 File NomosTestfiles/GPL/GPL-3.0b.txt contains license(s) GPL-3.0-only
 File NomosTestfiles/GPL/GPL-3.0_c.txt contains license(s) GPL-3.0-only
@@ -659,7 +659,7 @@ File NomosTestfiles/GPL/serv_rssclient.c contains license(s) GPL-2.0-or-later,GP
 File NomosTestfiles/GPL/standalone_html.inc.php contains license(s) GPL
 File NomosTestfiles/GPL/Stats.java contains license(s) GPL-3.0-or-later
 File NomosTestfiles/GPL/stddef.h contains license(s) GCC-exception-3.1,GPL-3.0-or-later
-File NomosTestfiles/GPL/stdvga.c contains license(s) GPL-2.1[sic]
+File NomosTestfiles/GPL/stdvga.c contains license(s) GPL-2.0-only
 File NomosTestfiles/GPL/StopComponentCommand.java contains license(s) Classpath-exception-2.0,GPL-3.0-or-later
 File NomosTestfiles/GPL/sys-ecos.c contains license(s) CMU,GPL-2.0-or-later,eCos-exception-2.0
 File NomosTestfiles/GPL/taskset.c contains license(s) GPL-2.0-or-later
