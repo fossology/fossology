@@ -92,6 +92,12 @@
         "license"
     ],
     "scripts": {
+        "post-install-cmd": [
+            "patch -d vendor/easyrdf/easyrdf -N -p1 < patches/easyrdf-php84-xml-parser-fix.patch || true"
+        ],
+        "post-update-cmd": [
+            "patch -d vendor/easyrdf/easyrdf -N -p1 < patches/easyrdf-php84-xml-parser-fix.patch || true"
+        ],
         "phpcs": "phpcs --standard=fossy-ruleset.xml -p",
         "phpcbf": "phpcbf --standard=fossy-ruleset.xml -p"
     }
