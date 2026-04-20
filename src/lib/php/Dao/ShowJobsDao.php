@@ -141,10 +141,11 @@ class ShowJobsDao
     $this->dbManager->freeResult($result);
 
     $accessibleUploads = $this->uploadDao->filterAccessibleUploads(array_unique($uploadIds), Auth::getGroupId());
+    $accessibleMap = array_flip($accessibleUploads);
 
     foreach ($rows as $row) {
       if (!empty($row['job_upload_fk'])) {
-        if (!in_array(intval($row['job_upload_fk']), $accessibleUploads)) {
+        if (!isset($accessibleMap[intval($row['job_upload_fk'])])) {
           continue;
         }
       }
