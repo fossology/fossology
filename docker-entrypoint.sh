@@ -32,7 +32,7 @@ if [[ $db_host == 'localhost' ]]; then
   echo '*****************************************************'
   echo 'WARNING: No database host was set and therefore the'
   echo 'internal database without persistency will be used.'
-  echo 'THIS IS NOT RECOMENDED FOR PRODUCTIVE USE!'
+  echo 'THIS IS NOT RECOMMENDED FOR PRODUCTIVE USE!'
   echo '*****************************************************'
   sleep 5
   /etc/init.d/postgresql start

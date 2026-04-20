@@ -82,7 +82,7 @@ $(document).ready(function() {
             message = "No acknowledgements updated";
           } else if (data.updated > 0) {
             form.find(".inputChanged").removeClass("inputChanged");
-            message = "Acknowledgements updated succesfully";
+            message = "Acknowledgements updated successfully";
           } else {
             message = data.updated;
           }

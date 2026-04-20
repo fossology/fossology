@@ -268,7 +268,7 @@ function Populate_sysconfig()
 
   $variable = "OidcJwkAlgInject";
   $oidcPrompt = _('OIDC JWKS Algorithm inject');
-  $oidcDesc = _('Algorithm value to inject for JWKS. Leave empty to not modifiy.' .
+  $oidcDesc = _('Algorithm value to inject for JWKS. Leave empty to not modify.' .
     '<br><a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.4">Check info</a>.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
     strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "14", "'$oidcDesc'", "null", "null");

@@ -135,7 +135,7 @@ class agent_nomos_once extends FO_Plugin
          * which removes the POST data.
          */
         $tooltipText = _(
-          "FATAL: your file did not get passed throught.  Make sure this page wasn't a result of a web server redirect, or that it didn't exceed your php POST limit.");
+          "FATAL: your file did not get passed through.  Make sure this page wasn't a result of a web server redirect, or that it didn't exceed your php POST limit.");
         echo $tooltipText;
       }
     }
