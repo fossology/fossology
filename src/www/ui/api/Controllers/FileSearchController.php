@@ -197,10 +197,8 @@ class FileSearchController extends RestController
     if (empty($uploads)) {
       return [];
     }
-    return array_filter($uploads, function ($upload) {
-      return $this->restHelper->getUploadDao()->isAccessible($upload,
-        $this->restHelper->getGroupId());
-    });
+    return $this->restHelper->getUploadDao()->filterAccessibleUploads($uploads,
+      $this->restHelper->getGroupId());
   }
 
   /**

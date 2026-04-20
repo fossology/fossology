@@ -122,14 +122,27 @@ class AjaxBrowse extends DefaultPlugin
 
     $output = array();
     $rowCounter = 0;
+
+    $fetchedRows = array();
+    $uploadIds = array();
     while ($row = $this->dbManager->fetchArray($result)) {
-      if (empty($row['upload_pk']) || !$this->uploadDao->isAccessible($row['upload_pk'],Auth::getGroupId())) {
+      $fetchedRows[] = $row;
+      if (!empty($row['upload_pk'])) {
+        $uploadIds[] = $row['upload_pk'];
+      }
+    }
+    $this->dbManager->freeResult($result);
+
+    $accessibleUploads = $this->uploadDao->filterAccessibleUploads(array_unique($uploadIds), Auth::getGroupId());
+    $accessibleMap = array_flip($accessibleUploads);
+
+    foreach ($fetchedRows as $row) {
+      if (empty($row['upload_pk']) || !isset($accessibleMap[$row['upload_pk']])) {
         continue;
       }
       $rowCounter++;
       $output[] = $this->showRow($row, $request, $uri, $menuPfile, $menuPfileNoCompare, $statusTypesAvailable, $users, $rowCounter);
     }
-    $this->dbManager->freeResult($result);
     return new JsonResponse(array(
               'sEcho' => intval($request->get('sEcho')),
               'aaData' => $output,

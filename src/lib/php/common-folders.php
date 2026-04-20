@@ -371,16 +371,29 @@ function FolderListUploads_perm($ParentFolder, $perm)
 	ORDER BY upload_filename,upload_pk;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+  $fetchedRows = array();
+  $uploadIds = array();
   while ($R = pg_fetch_assoc($result)) {
     if (empty($R['upload_pk'])) {
       continue;
     }
-    if ($perm == Auth::PERM_READ &&
-      ! $uploadDao->isAccessible($R['upload_pk'], $groupId)) {
+    $fetchedRows[] = $R;
+    $uploadIds[] = $R['upload_pk'];
+  }
+  pg_free_result($result);
+
+  $accessibleMap = array();
+  if ($perm == Auth::PERM_READ && !empty($uploadIds)) {
+    $accessibleUploads = $uploadDao->filterAccessibleUploads(array_unique($uploadIds), $groupId);
+    $accessibleMap = array_flip($accessibleUploads);
+  }
+
+  foreach ($fetchedRows as $R) {
+    if ($perm == Auth::PERM_READ && !isset($accessibleMap[$R['upload_pk']])) {
       continue;
     }
-    if ($perm == Auth::PERM_WRITE &&
-      ! $uploadDao->isEditable($R['upload_pk'], $groupId)) {
+    if ($perm == Auth::PERM_WRITE && ! $uploadDao->isEditable($R['upload_pk'], $groupId)) {
       continue;
     }
 
@@ -391,7 +404,6 @@ function FolderListUploads_perm($ParentFolder, $perm)
     $New['name'] = $R['upload_filename'];
     $List[] = $New;
   }
-  pg_free_result($result);
   return($List);
 } // FolderListUploads_perm()
 
@@ -443,16 +455,29 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath = '',
     ORDER BY uploadtree.ufile_name,upload.upload_desc";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+  $fetchedRows = array();
+  $uploadIds = array();
   while ($R = pg_fetch_assoc($result)) {
     if (empty($R['upload_pk'])) {
       continue;
     }
-    if ($perm == Auth::PERM_READ &&
-      ! $uploadDao->isAccessible($R['upload_pk'], $groupId)) {
+    $fetchedRows[] = $R;
+    $uploadIds[] = $R['upload_pk'];
+  }
+  pg_free_result($result);
+
+  $accessibleMap = array();
+  if ($perm == Auth::PERM_READ && !empty($uploadIds)) {
+    $accessibleUploads = $uploadDao->filterAccessibleUploads(array_unique($uploadIds), $groupId);
+    $accessibleMap = array_flip($accessibleUploads);
+  }
+
+  foreach ($fetchedRows as $R) {
+    if ($perm == Auth::PERM_READ && !isset($accessibleMap[$R['upload_pk']])) {
       continue;
     }
-    if ($perm == Auth::PERM_WRITE &&
-      ! $uploadDao->isEditable($R['upload_pk'], $groupId)) {
+    if ($perm == Auth::PERM_WRITE && ! $uploadDao->isEditable($R['upload_pk'], $groupId)) {
       continue;
     }
 
@@ -463,7 +488,6 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath = '',
     $New['folder'] = $FolderPath . "/" . $R['folder_name'];
     $List[] = $New;
   }
-  pg_free_result($result);
 
   /* Get list of subfolders and recurse */
   /* mode 1<<0 = folder_pk */
