@@ -232,7 +232,7 @@ function GetAgentKey($agentName, $agentDesc)
 
   if (pg_num_rows($result) == 0) {
     /* no match, so add an agent rec */
-    $sql = "INSERT INTO agent (agent_name,agent_desc,agent_enabled) VALUES ('$agentName',E'$agentDesc',1)";
+    $sql = "INSERT INTO agent (agent_name,agent_desc,agent_enabled) VALUES ('$agentName',E'$agentDesc',true)";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
