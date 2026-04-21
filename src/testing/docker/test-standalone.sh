@@ -26,6 +26,17 @@ curl --silent --location "http://${HOST}/repo/" | grep -q "<title>Getting Starte
 docker exec "${CONTAINER_ID}" /usr/local/share/fossology/copyright/agent/copyright -h
 
 #### test whether the scheduler is running
-docker exec "${CONTAINER_ID}" /usr/local/share/fossology/scheduler/agent/fo_cli -S
+for attempt in {1..30}; do
+  if docker exec "${CONTAINER_ID}" /usr/local/share/fossology/scheduler/agent/fo_cli -S; then
+    break
+  fi
+
+  if [[ "$attempt" -eq 30 ]]; then
+    docker logs "${CONTAINER_ID}"
+    exit 1
+  fi
+
+  sleep 2
+done
 
 docker stop "${CONTAINER_ID}"
