@@ -147,8 +147,6 @@ class AdviceLicense extends DefaultPlugin
    */
   private function saveInput(Request $request, $oldRow, $userId)
   {
-    $spdxLicenses = new SpdxLicenses();
-
     $spdxId = $request->get('spdx_id');
     $shortname = $request->get('shortname');
     $fullname = $request->get('fullname');
@@ -178,22 +176,32 @@ class AdviceLicense extends DefaultPlugin
       $oldRow['rf_pk'] = $licenseDao->insertUploadLicense($shortname, $rfText, Auth::getGroupId(), $userId);
     }
 
-    if (! empty($spdxId) &&
-      strstr(strtolower($spdxId), strtolower(LicenseRef::SPDXREF_PREFIX)) === false) {
-      if (! $spdxLicenses->validate($spdxId)) {
-        $spdxId = LicenseRef::convertToSpdxId($spdxId, null);
-      }
-    } elseif (empty($spdxId)) {
-      $spdxId = null;
-    }
-    if (! empty($spdxId)) {
-      $spdxId = LicenseRef::replaceSpaces($spdxId);
-    }
+    $spdxId = $this->normalizeSpdxId($spdxId, $oldRow['rf_spdx_id'] ?? null);
 
     $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname,
       $rfText, $url, $note, $lastmodified, $userIdmodified, !empty($marydone),
       $riskLvl, $spdxId);
     return $this->getDataRow(Auth::getGroupId(), $oldRow['rf_pk']);
+  }
+
+  private function normalizeSpdxId($submittedSpdxId, $existingSpdxId)
+  {
+    if (empty($submittedSpdxId)) {
+      return null;
+    }
+
+    if (! empty($existingSpdxId) && $submittedSpdxId === $existingSpdxId) {
+      return $existingSpdxId;
+    }
+
+    if (strstr(strtolower($submittedSpdxId), strtolower(LicenseRef::SPDXREF_PREFIX)) === false) {
+      $spdxLicenses = new SpdxLicenses();
+      if (! $spdxLicenses->validate($submittedSpdxId)) {
+        $submittedSpdxId = LicenseRef::convertToSpdxId($submittedSpdxId, null);
+      }
+    }
+
+    return LicenseRef::replaceSpaces($submittedSpdxId);
   }
 }
 
