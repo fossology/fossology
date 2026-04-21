@@ -83,7 +83,7 @@ $(document).ready(function() {
             message = "No comments updated";
           } else if (data.updated > 0) {
             form.find(".inputChanged").removeClass("inputChanged");
-            message = "Comments updated succesfully";
+            message = "Comments updated successfully";
           } else {
             message = data.updated;
           }
