@@ -184,7 +184,7 @@ class ClearingDao
   {
     $this->dbManager->begin();
 
-    $statementName = __METHOD__;
+    $statementName = __METHOD__ . ($includeSubFolders ? ".subfolders" : ".direct");
 
     if (!$includeSubFolders) {
       $params = array($itemTreeBounds->getItemId());
@@ -231,7 +231,7 @@ class ClearingDao
             LEFT JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
             LEFT JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
             LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
-            ORDER BY decision.id DESC, event_id ASC";
+            ORDER BY decision.id DESC, itemid, event_id ASC";
 
     $this->dbManager->prepare($statementName, $sql);
 
