@@ -80,20 +80,12 @@ class fo_libschema
     if ($driver !== null && $driver instanceof Driver && $driver->isConnected()) {
       return;
     }
-
     global $PG_CONN;
     if (!empty($PG_CONN)) {
       $pgDriver = new Postgres($PG_CONN);
       $this->dbman->setDriver($pgDriver);
       return;
     }
-
-    if (!empty($GLOBALS['PG_CONN'])) {
-      $pgDriver = new Postgres($GLOBALS['PG_CONN']);
-      $this->dbman->setDriver($pgDriver);
-      return;
-    }
-
     throw new \Exception(
       "No database connection available: \$PG_CONN is not set and no driver " .
       "was injected into \$dbManager before calling this function."
@@ -589,7 +581,10 @@ class fo_libschema
       $viewowner = pg_parameter_status($PG_CONN, 'session_authorization');
     }
     if (empty($viewowner)) {
-      $viewowner = 'fossology';
+      throw new \Exception(
+        "Unable to load schema views: could not determine the view owner. " .
+        "Ensure \$SysConf['DBCONF']['user'] is set or a valid \$PG_CONN is available."
+      );
     }
     $this->addViews($viewowner);
     $this->addSequences($referencedSequencesInTableColumns);

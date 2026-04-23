@@ -21,12 +21,17 @@
  * dummy options in order to catch invalid options.
  */
 
- /* TODO: Once $MODDIR logic is fixed replace $dir with $MODDIR and remove below code */
-$dir = getcwd();
-if ($dir === false) {
-  return "Unable to determine working directory";
+if (!empty($MODDIR)) {
+  $dir = $MODDIR;
+} else {
+  /* Fallback: derive base dir from cwd (for environments where fo_wrapper did not bootstrap) */
+  $dir = getcwd();
+  if ($dir === false) {
+    print "ERROR: Unable to determine working directory and \$MODDIR is not set.\n";
+    exit(1);
+  }
+  $dir = dirname($dir);
 }
-$dir = dirname($dir);
 
 require_once("$dir/lib/php/libschema.php");
 
