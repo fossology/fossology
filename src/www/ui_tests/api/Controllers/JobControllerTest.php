@@ -14,7 +14,9 @@ namespace Fossology\UI\Api\Test\Controllers;
 
 use Fossology\Lib\Dao\JobDao;
 use Fossology\Lib\Dao\ShowJobsDao;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\UI\Api\Controllers\JobController;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\ApiVersion;
@@ -60,6 +62,12 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
   private $showJobsDao;
 
   /**
+   * @var UserDao $userDao
+   * UserDao mock
+   */
+  private $userDao;
+
+  /**
    * @var JobController $jobController
    * JobController object to test
    */
@@ -90,9 +98,12 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $this->jobDao = M::mock(JobDao::class);
     $this->showJobsDao = M::mock(ShowJobsDao::class);
 
+    $this->userDao = M::mock(UserDao::class);
+
     $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
     $this->restHelper->shouldReceive('getJobDao')->andReturn($this->jobDao);
     $this->restHelper->shouldReceive('getShowJobDao')->andReturn($this->showJobsDao);
+    $this->restHelper->shouldReceive('getUserDao')->andReturn($this->userDao);
 
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
@@ -362,6 +373,62 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $result = $method->invokeArgs($this->jobController,
       [$completedJob, $completedUpload]);
     $this->assertEquals(0, $result);
+  }
+
+  /**
+   * @test
+   * -# Test JobController::deleteJob() when job does not exist
+   * -# Expect HttpNotFoundException to be thrown
+   */
+  public function testDeleteJobNotFound()
+  {
+    $jobId = 99;
+    $userId = 2;
+
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('getUserName')->withArgs([$userId])
+      ->andReturn('testuser');
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["job", "job_pk", $jobId])->andReturn(false);
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("DELETE", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->jobController->deleteJob($request, new ResponseHelper(),
+      ['id' => $jobId, 'queue' => 1]);
+  }
+
+  /**
+   * @test
+   * -# Test JobController::deleteJob() when user has no permission
+   * -# Expect HttpForbiddenException to be thrown
+   */
+  public function testDeleteJobNoPermission()
+  {
+    $jobId = 10;
+    $userId = 3;
+    $groupId = 4;
+
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->restHelper->shouldReceive('getGroupId')->andReturn($groupId);
+    $this->userDao->shouldReceive('getUserName')->withArgs([$userId])
+      ->andReturn('testuser');
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["job", "job_pk", $jobId])->andReturn(true);
+    $this->jobDao->shouldReceive('hasActionPermissionsOnJob')
+      ->withArgs([$jobId, $userId, $groupId])->andReturn(false);
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("DELETE", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->jobController->deleteJob($request, new ResponseHelper(),
+      ['id' => $jobId, 'queue' => 1]);
   }
 
 }
