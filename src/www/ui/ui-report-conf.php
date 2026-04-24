@@ -185,10 +185,14 @@ class ui_report_conf extends FO_Plugin
       }
     }
 
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
+    $allClearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+
     $tableRows = "";
     $excludedObligations = array();
     $excludedObligations = (array) json_decode($row['ri_excluded_obligations'], true);
-    foreach ($this->getAllObligationsForGivenUploadId($uploadId, $groupId) as $obTopic => $obData) {
+    foreach ($this->getAllObligationsForGivenUploadId($groupId, $allClearingDecisions) as $obTopic => $obData) {
       $tableRows .= '<tr><td style="width:35%">'.$obTopic.'</td>';
       $tableRows .= '<td><textarea readonly="readonly" style="overflow:auto;width:98%;height:80px;">'.
                      $obData['text'].'</textarea></td><td>';
@@ -247,56 +251,124 @@ class ui_report_conf extends FO_Plugin
     $vars['tableRows'] = $tableRows;
     $vars['tableRowsUnifiedReport'] = $tableRowsUnifiedReport;
     $vars['tableRowsClixmlReport'] = $tableRowsClixmlReport;
+    $vars['ackRows'] = $this->buildAcknowledgementRows($uploadId, $allClearingDecisions);
     $vars['scriptBlock'] = $this->createScriptBlock();
 
     return $vars;
   }
 
   /**
-   * @brief get all the obgligations for cleared licenses
-   * @param int $uploadId
-   * @param int $groupId
-   * @return array with all obligations grouped by obligation topic
+   * @brief Get acknowledgements for cleared licenses grouped by text
+   * @param array $clearingDecisions Pre-fetched clearing decisions
+   * @return array ['ackText' => ['count' => int, 'licenses' => []]]
    */
-  function getAllObligationsForGivenUploadId($uploadId, $groupId)
+  function getAllAcknowledgementsForUpload(array $clearingDecisions)
   {
-    $allClearedLicenses = array();
-    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
-    $allClearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
-    $licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT);
-    foreach ($allClearingDecisions as $clearingDecisions) {
-      if ($clearingDecisions->getType() == DecisionTypes::IRRELEVANT) {
+    $ackData = array();
+    foreach ($clearingDecisions as $clearingDecision) {
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
         continue;
       }
-      foreach ($clearingDecisions->getClearingLicenses() as $eachClearingLicense) {
-        if ($eachClearingLicense->isRemoved()) {
+      $uploadTreeId = $clearingDecision->getUploadTreeId();
+      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+        if ($clearingLicense->isRemoved()) {
           continue;
         }
-        $getLicenseId = $eachClearingLicense->getLicenseId();
-        $allClearedLicenses[] = $licenseMap->getProjectedId($getLicenseId);
+        $ack = $clearingLicense->getAcknowledgement();
+        if (empty(trim($ack))) {
+          continue;
+        }
+        if (!isset($ackData[$ack])) {
+          $ackData[$ack] = array('files' => array(), 'licenses' => array());
+        }
+        $ackData[$ack]['files'][$uploadTreeId] = true;
+        $ackData[$ack]['licenses'][$clearingLicense->getShortName()] = true;
       }
     }
-    $obligationsForLicenses = $this->licenseDao->getLicenseObligations($allClearedLicenses) ?: array();
-    $obligationsForLicenseCandidates = $this->licenseDao->getLicenseObligations($allClearedLicenses, true) ?: array();
-    $allObligations = array_merge($obligationsForLicenses, $obligationsForLicenseCandidates);
-    $groupedObligations = array();
-    foreach ($allObligations as $obligations) {
-      $groupBy = $obligations['ob_topic'];
-      $licenseName = LicenseRef::convertToSpdxId($obligations['rf_shortname'],
-        $obligations['rf_spdx_id']);
-      if (array_key_exists($groupBy, $groupedObligations)) {
-        $currentLicenses = &$groupedObligations[$groupBy]['license'];
-        if (!in_array($licenseName, $currentLicenses)) {
-          $currentLicenses[] = $licenseName;
+    $result = array();
+    foreach ($ackData as $ack => $data) {
+      $result[$ack] = array(
+        'count' => count($data['files']),
+        'licenses' => array_keys($data['licenses'])
+      );
+    }
+    return $result;
+  }
+
+  /**
+   * @brief Build HTML table rows for acknowledgements tab
+   * @param int   $uploadId
+   * @param array $clearingDecisions Pre-fetched clearing decisions
+   * @return string HTML string of table rows
+   */
+  function buildAcknowledgementRows($uploadId, array $clearingDecisions)
+  {
+    $acknowledgements = $this->getAllAcknowledgementsForUpload($clearingDecisions);
+    $rows = "";
+    foreach ($acknowledgements as $ackText => $ackData) {
+      $ackHtml = htmlspecialchars($ackText, ENT_QUOTES);
+      $licensesHtml = htmlspecialchars(implode(', ', $ackData['licenses']));
+      $rows .= '<tr>';
+      $rows .= '<td style="width:5%;text-align:center">'
+             . '<a href="#" class="ack-count-link" data-upload="' . $uploadId
+             . '" data-ack="' . $ackHtml . '">' . $ackData['count'] . '</a></td>';
+      $rows .= '<td style="width:60%"><textarea class="ack-text-area" readonly="readonly"'
+             . ' data-original-ack="' . $ackHtml . '"'
+             . ' style="overflow:auto;width:98%;height:60px;">'
+             . $ackHtml . '</textarea></td>';
+      $rows .= '<td style="width:25%">' . $licensesHtml . '</td>';
+      $rows .= '<td style="width:10%;text-align:center">'
+             . '<button type="button" class="btn btn-danger btn-sm delete-ack-btn"'
+             . ' data-upload="' . $uploadId . '" data-ack="' . $ackHtml . '">'
+             . 'Delete</button></td>';
+      $rows .= '</tr>';
+    }
+    return $rows;
+  }
+
+  /**
+   * @brief get all the obligations for cleared licenses
+   * @param int   $groupId
+   * @param array $clearingDecisions Pre-fetched clearing decisions
+   * @return array with all obligations grouped by obligation topic
+   */
+  function getAllObligationsForGivenUploadId($groupId, array $clearingDecisions)
+  {
+    $allClearedLicenses = array();
+    $licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT);
+    foreach ($clearingDecisions as $clearingDecision) {
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
+        continue;
+      }
+      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+        if ($clearingLicense->isRemoved()) {
+          continue;
         }
+        $allClearedLicenses[$licenseMap->getProjectedId($clearingLicense->getLicenseId())] = true;
+      }
+    }
+    $uniqueLicenseIds = array_keys($allClearedLicenses);
+    $allObligations = array_merge(
+      $this->licenseDao->getLicenseObligations($uniqueLicenseIds) ?: array(),
+      $this->licenseDao->getLicenseObligations($uniqueLicenseIds, true) ?: array()
+    );
+    $groupedObligations = array();
+    foreach ($allObligations as $obligation) {
+      $groupBy = $obligation['ob_topic'];
+      $licenseName = LicenseRef::convertToSpdxId($obligation['rf_shortname'],
+        $obligation['rf_spdx_id']);
+      if (array_key_exists($groupBy, $groupedObligations)) {
+        $groupedObligations[$groupBy]['license'][$licenseName] = true;
       } else {
         $groupedObligations[$groupBy] = array(
-         "topic" => $obligations['ob_topic'],
-         "text" => $obligations['ob_text'],
-         "license" => array($licenseName)
+          "topic" => $obligation['ob_topic'],
+          "text" => $obligation['ob_text'],
+          "license" => array($licenseName => true)
         );
       }
+    }
+    foreach ($groupedObligations as &$ob) {
+      $ob['license'] = array_keys($ob['license']);
     }
     return $groupedObligations;
   }
@@ -440,8 +512,19 @@ class ui_report_conf extends FO_Plugin
           var idString = $(e.currentTarget).attr('id');
           idString = parseInt(idString.slice(-1)) - 1;
           $.cookie(reportTabCookie, idString);
+          // Hide submit button on acknowledgements tab (AJAX-only tab)
+          if (ui.newPanel.attr('id') === 'acknowledgementsConfTab') {
+            $('#reportConfSubmit').hide();
+          } else {
+            $('#reportConfSubmit').show();
+          }
         }
       });
+
+      var activeIdx = $.cookie(reportTabCookie) || 0;
+      if ($(\"#confTabs .ui-tabs-panel\").eq(activeIdx).attr('id') === 'acknowledgementsConfTab') {
+        $('#reportConfSubmit').hide();
+      }
       $(\"input[name='dependencySourceBinary']\").change(function(){
         var val = $(\"input[name='dependencySourceBinary']:checked\").val();
         if (val == 'noDependency') {
@@ -480,6 +563,121 @@ class ui_report_conf extends FO_Plugin
         if (!this.checked) {
           $('#osselotExportCheckbox').prop('checked', false);
         }
+      });
+
+      var ackAjaxUrl = '?mod=ajax-acknowledgement-conf';
+
+      $(document).on('click', '.ack-count-link', function(e) {
+        e.preventDefault();
+        var upload = $(this).data('upload');
+        var ack    = $(this).data('ack');
+        $('#ackFilesModalBody').html('<p>Loading...</p>');
+        $('#ackFilesModalCount').text('');
+        $('#ackFilesModal').modal('show');
+        $.get(ackAjaxUrl, {action: 'getFiles', upload: upload, ack: ack},
+          function(data) {
+            if (!data || data.length === 0) {
+              $('#ackFilesModalCount').text('');
+              $('#ackFilesModalBody').html('<p>No files found.</p>');
+              return;
+            }
+            $('#ackFilesModalCount').text('(' + data.length + ' files)');
+            var html = '<table class=\"table table-condensed table-hover\" style=\"margin:0;\">'
+                     + '<thead><tr><th>#</th><th>File</th></tr></thead><tbody>';
+            $.each(data, function(i, file) {
+              html += '<tr><td>' + (i + 1) + '</td>'
+                    + '<td><a href=\"' + file.url + '\" target=\"_blank\">'
+                    + $('<span/>').text(file.name).html()
+                    + '</a></td></tr>';
+            });
+            html += '</tbody></table>';
+            $('#ackFilesModalBody').html(html);
+          }
+        ).fail(function() {
+          $('#ackFilesModalCount').text('');
+          $('#ackFilesModalBody').html('<p>Error loading files.</p>');
+        });
+      });
+
+      $(document).on('dblclick', '.ack-text-area', function() {
+        if (!$(this).prop('readonly')) {
+          return;
+        }
+        var ta = $(this);
+        var td = ta.closest('td');
+        ta.prop('readonly', false).css('border', '2px solid #337ab7').focus();
+        td.append('<div class=\"ack-edit-actions\" style=\"margin-top:4px;\">'
+          + '<button type=\"button\" class=\"btn btn-primary btn-xs ack-save-btn\">Save</button> '
+          + '<button type=\"button\" class=\"btn btn-default btn-xs ack-cancel-btn\">Cancel</button>'
+          + '</div>');
+      });
+
+      $(document).on('click', '.ack-save-btn', function() {
+        var row    = $(this).closest('tr');
+        var td     = $(this).closest('td');
+        var ta     = td.find('.ack-text-area');
+        var newAck = ta.val();
+        var oldAck = ta.data('original-ack');
+        if (newAck === oldAck) {
+          ta.prop('readonly', true).css('border', '');
+          td.find('.ack-edit-actions').remove();
+          return;
+        }
+        var upload = row.find('.ack-count-link').data('upload');
+        $.post(ackAjaxUrl,
+          {action: 'updateAcknowledgement', upload: upload, oldAck: oldAck, newAck: newAck},
+          function(data) {
+            if (data && data.status === 'success') {
+              $('#acknowledgementsConfTab tbody tr').each(function() {
+                if ($(this).find('.ack-text-area').data('original-ack') === newAck
+                    && this !== row[0]) {
+                  $(this).remove();
+                }
+              });
+              ta.val(newAck)
+                .data('original-ack', newAck)
+                .prop('readonly', true)
+                .css('border', '');
+              row.find('.ack-count-link').text(data.count).data('ack', newAck);
+              row.find('.delete-ack-btn').data('ack', newAck);
+              td.find('.ack-edit-actions').remove();
+            } else {
+              alert('Failed to update acknowledgement.');
+            }
+          }
+        ).fail(function() {
+          alert('Error communicating with server.');
+        });
+      });
+
+      $(document).on('click', '.ack-cancel-btn', function() {
+        var td = $(this).closest('td');
+        var ta = td.find('.ack-text-area');
+        ta.val(ta.data('original-ack'))
+          .prop('readonly', true)
+          .css('border', '');
+        td.find('.ack-edit-actions').remove();
+      });
+
+      $(document).on('click', '.delete-ack-btn', function() {
+        var upload = $(this).data('upload');
+        var ack    = $(this).data('ack');
+        if (!confirm('Are you sure you want to clear this acknowledgement from all files?')) {
+          return;
+        }
+        var row = $(this).closest('tr');
+        $.post(ackAjaxUrl,
+          {action: 'deleteAcknowledgement', upload: upload, ack: ack},
+          function(data) {
+            if (data && data.status === 'success') {
+              row.fadeOut(400, function() { row.remove(); });
+            } else {
+              alert('Failed to delete acknowledgement.');
+            }
+          }
+        ).fail(function() {
+          alert('Error communicating with server.');
+        });
       });
     });
     ";
