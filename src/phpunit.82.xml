@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-FileCopyrightText: © Fossology contributors
+
+     SPDX-License-Identifier: GPL-2.0-only
+-->
+<phpunit
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  bootstrap="./phpunit-bootstrap.php"
+  colors="true" backupGlobals="true"
+  beStrictAboutTestsThatDoNotTestAnything="false"
+  failOnWarning="false" stopOnFailure="false"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd"
+  cacheDirectory=".phpunit.cache">
+  <coverage>
+    <report>
+      <clover outputFile="../clover.xml"/>
+    </report>
+  </coverage>
+  <php>
+    <env name="SYSCONFDIR" value="src/lib/php/tests/sysconfigDirTest"/>
+  </php>
+  <logging/>
+  <testsuites>
+    <testsuite name="Fossology PhpUnit Test Suite">
+      <directory suffix="Test.php">lib/php</directory>
+      <file>www/ui_tests/startUpTest.php</file>
+      <directory suffix="Test.php">www/ui_tests/api</directory>
+      <file>cli/tests/test_fo_copyright_list.php</file>
+    </testsuite>
+    <testsuite name="Fossology PhpUnit Agent Test Suite">
+      <directory suffix="Test.php">copyright/agent_tests/Functional</directory>
+      <directory suffix="Test.php">decider/agent_tests</directory>
+      <directory suffix="Test.php">deciderjob/agent_tests/Functional</directory>
+      <directory suffix="Test.php">monk/agent_tests/Functional</directory>
+      <directory suffix="Test.php">ojo/agent_tests/Functional</directory>
+      <directory suffix="Test.php">reuser/agent_tests/Functional</directory>
+      <directory suffix="Test.php">spdx/agent_tests</directory>
+      <directory suffix="Test.php">clixml/agent_tests</directory>
+    </testsuite>
+  </testsuites>
+  <source>
+    <include>
+      <directory suffix=".php">.</directory>
+    </include>
+  </source>
+</phpunit>
