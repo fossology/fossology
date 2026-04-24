@@ -69,6 +69,28 @@ class fo_libschema
     $this->dbman->setDriver($dbDriver);
   }
 
+  /**
+   * Ensure a driver is set on the DbManager before any query is executed.
+   * @throws \Exception if no connection is available
+   */
+  private function ensureDriver()
+  {
+    // If dbman already has a working driver, nothing to do
+    $driver = $this->dbman->getDriver();
+    if ($driver !== null && $driver instanceof Driver && $driver->isConnected()) {
+      return;
+    }
+    global $PG_CONN;
+    if (!empty($PG_CONN)) {
+      $pgDriver = new Postgres($PG_CONN);
+      $this->dbman->setDriver($pgDriver);
+      return;
+    }
+    throw new \Exception(
+      "No database connection available: \$PG_CONN is not set and no driver " .
+      "was injected into \$dbManager before calling this function."
+    );
+  }
 
   /**
    * Apply or echo the SQL statement based on the debugging status.
@@ -77,6 +99,7 @@ class fo_libschema
    */
   function applyOrEchoOnce($sql, $stmt = '')
   {
+    $this->ensureDriver();
     if ($this->debug) {
       print ("$sql\n");
     } else {
@@ -98,46 +121,26 @@ class fo_libschema
     global $PG_CONN;
 
     // first check to make sure we don't already have the plpgsql language installed
-    $sql_statement = "select lanname from pg_language where lanname = 'plpgsql'";
-
-    $result = pg_query($PG_CONN, $sql_statement);
-    if (!$result) {
-      throw new Exception("Could not check the database for plpgsql language");
-    }
-
-    $plpgsql_already_installed = false;
-    if ( pg_fetch_row($result) ) {
-      $plpgsql_already_installed = true;
-    }
+    $result = $this->dbman->getSingleRow(
+      "SELECT lanname FROM pg_language WHERE lanname = 'plpgsql'",
+      array(),
+      __METHOD__ . '.checkPlpgsql'
+    );
 
     // then create language plpgsql if not already created
-    if ($plpgsql_already_installed == false) {
-      $sql_statement = "CREATE LANGUAGE plpgsql";
-      $result = pg_query($PG_CONN, $sql_statement);
-      if (!$result) {
-        throw new Exception("Could not create plpgsql language in the database");
-      }
+    if (empty($result)) {
+      $this->dbman->queryOnce("CREATE LANGUAGE plpgsql", __METHOD__ . '.createPlpgsql');
     }
 
-    $sql_statement = "select extname from pg_extension where extname = 'uuid-ossp'";
-
-    $result = pg_query($PG_CONN, $sql_statement);
-    if (!$result) {
-      throw new Exception("Could not check the database for uuid-ossp extension");
-    }
-
-    $uuid_already_installed = false;
-    if ( pg_fetch_row($result) ) {
-      $uuid_already_installed = true;
-    }
+    $result = $this->dbman->getSingleRow(
+      "SELECT extname FROM pg_extension WHERE extname = 'uuid-ossp'",
+      array(),
+      __METHOD__ . '.checkUuid'
+    );
 
     // then create extension uuid-ossp if not already created
-    if ( $uuid_already_installed == false ) {
-      $sql_statement = 'CREATE EXTENSION "uuid-ossp";';
-      $result = pg_query($PG_CONN, $sql_statement);
-      if (!$result) {
-        throw new Exception("Could not create uuid-ossp extension in the database");
-      }
+    if (empty($result)) {
+      $this->dbman->queryOnce('CREATE EXTENSION "uuid-ossp"', __METHOD__ . '.createUuid');
     }
 
     $this->debug = $debug;
@@ -295,6 +298,19 @@ class fo_libschema
       } elseif (!array_key_exists($table, $this->currSchema['TABLE'])) {
         $newTable = true;
       }
+      /* Drop any leftover _old columns from previous incomplete migrations. */
+      $this->applyOrEchoOnce(
+        "DO \$cleanup\$ DECLARE r RECORD; BEGIN
+           FOR r IN
+             SELECT column_name FROM information_schema.columns
+             WHERE table_name = '$table' AND column_name LIKE '%_old'
+           LOOP
+             EXECUTE 'ALTER TABLE \"$table\" DROP COLUMN IF EXISTS \"' || r.column_name || '\"';
+           END LOOP;
+         END \$cleanup\$;",
+        $stmt = __METHOD__ . ".$table.purge_old_cols"
+      );
+
       foreach ($columns as $column => $modification) {
         if (!$newTable && !array_key_exists($column, $this->currSchema['TABLE'][$table])) {
           $colNewTable = true;
@@ -554,11 +570,23 @@ class fo_libschema
    **/
   function getCurrSchema()
   {
-    global $SysConf;
+    $this->ensureDriver();
+    global $SysConf, $PG_CONN;
     $this->currSchema = array();
     $this->addInheritedRelations();
     $referencedSequencesInTableColumns = $this->addTables();
-    $this->addViews($viewowner = $SysConf['DBCONF']['user']);
+    if (!empty($SysConf['DBCONF']['user'])) {
+      $viewowner = $SysConf['DBCONF']['user'];
+    } elseif (!empty($PG_CONN)) {
+      $viewowner = pg_parameter_status($PG_CONN, 'session_authorization');
+    }
+    if (empty($viewowner)) {
+      throw new \Exception(
+        "Unable to load schema views: could not determine the view owner. " .
+        "Ensure \$SysConf['DBCONF']['user'] is set or a valid \$PG_CONN is available."
+      );
+    }
+    $this->addViews($viewowner);
     $this->addSequences($referencedSequencesInTableColumns);
     $this->addConstraints();
     $this->addIndexes();
@@ -953,7 +981,7 @@ class fo_libschema
   }
 
   /**
-   * \brief Export the schema of the connected ($PG_CONN) database to a
+   * \brief Export the schema of the connected database to a
    *        file in the format readable by GetSchema().
    *
    * @param string $filename Path to the file to store the schema in.
@@ -962,15 +990,6 @@ class fo_libschema
    **/
   function exportSchema($filename = NULL)
   {
-    global $PG_CONN;
-
-    /* set driver */
-    $dbDriver = $this->dbman->getDriver();
-    if (empty($dbDriver)) {
-      $pgDrive = new Postgres($PG_CONN);
-      $this->dbman->setDriver($pgDrive);
-    }
-
     if (empty($filename)) {
       $filename = 'php://stdout';
     }
@@ -1088,8 +1107,22 @@ if (empty($dbManager) || !($dbManager instanceof DbManager)) {
   $logger = new Logger(__FILE__);
   $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $logLevel));
   $dbManager = new ModernDbManager($logger);
-  $pgDriver = new Postgres($GLOBALS['PG_CONN']);
-  $dbManager->setDriver($pgDriver);
+}
+global $PG_CONN;
+if (empty($PG_CONN)) {
+  $sysconfdir = getenv('SYSCONFDIR');
+  if (empty($sysconfdir)) {
+    $sysconfdir = "/usr/local/etc/fossology";
+  }
+  $foConf = $sysconfdir . "/fossology.conf";
+  if (file_exists($foConf)) {
+    require_once(__DIR__ . "/common-db.php");
+    $PG_CONN = DBconnect($sysconfdir);
+    $GLOBALS['PG_CONN'] = $PG_CONN;
+    if (!isset($GLOBALS['SysConf']) && isset($SysConf)) {
+      $GLOBALS['SysConf'] = $SysConf;
+    }
+  }
 }
 /* simulate the old functions*/
 $libschema = new fo_libschema($dbManager);
@@ -1116,7 +1149,7 @@ function GetSchema()
 }
 
 /**
- * \brief Export the schema of the connected ($PG_CONN) database to a
+ * \brief Export the schema of the connected database to a
  *        file in the format readable by GetSchema().
  * @param string $filename path to the file to store the schema in.
  * @return false=success, on error return string with error message.

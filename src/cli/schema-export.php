@@ -20,6 +20,21 @@
 /* Note: php 5 getopt() ignores options not specified in the function call, so add
  * dummy options in order to catch invalid options.
  */
+
+if (!empty($MODDIR)) {
+  $dir = $MODDIR;
+} else {
+  /* Fallback: derive base dir from cwd (for environments where fo_wrapper did not bootstrap) */
+  $dir = getcwd();
+  if ($dir === false) {
+    print "ERROR: Unable to determine working directory and \$MODDIR is not set.\n";
+    exit(1);
+  }
+  $dir = dirname($dir);
+}
+
+require_once("$dir/lib/php/libschema.php");
+
 $AllPossibleOpts = "abc:d:ef:ghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 /* defaults */
@@ -29,7 +44,7 @@ $UpdateLiceneseRef = false;
 $showUsage = false;
 
 /* default location of core-schema.dat.  This file is checked into svn */
-$SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
+$SchemaFilePath = "$dir/www/ui/core-schema.dat";
 
 /* command-line options */
 $Options = getopt($AllPossibleOpts);
