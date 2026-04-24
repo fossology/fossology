@@ -99,7 +99,7 @@ class TextFindingsAjax
       $rw = $this->uploadDao->isEditable($upload, Auth::getGroupId());
       foreach ($rows as $row) {
         $aaData[] = $this->fillTableRow($row, $upload, $item, $type, $listPage,
-          $activated, $rw);
+          $activated, $rw, $filter);
       }
     }
 
@@ -143,12 +143,11 @@ class TextFindingsAjax
 
     $join = "";
     $filterQuery = "";
-    if ($filter == "nolic") {
+    if (($type == 'statement' || $type == 'scancode_statement' || $type == 'copyFindings') && $filter == "nolic") {
       $noLicStr = "No_license_found";
       $voidLicStr = "Void";
       $join = " INNER JOIN license_file AS LF on cp.pfile_fk = LF.pfile_fk ";
-      $filterQuery = " AND LF.rf_fk IN (" . "SELECT rf_pk FROM license_ref " .
-        "WHERE rf_shortname IN ('$noLicStr','$voidLicStr')) ";
+      $filterQuery = " AND LF.rf_fk IN (SELECT rf_pk FROM license_ref WHERE rf_shortname IN ('$noLicStr','$voidLicStr')) ";
     }
 
     $params = array(
@@ -165,18 +164,22 @@ class TextFindingsAjax
       ($activated ? 'true' : 'false') . $sql_upload;
     $totalFilter = $filterQuery . " " . $searchFilter;
 
-    $grouping = " GROUP BY hash ";
+    if ($filter == "active" && !$activated) {
+      return array(array(), 0, 0);
+    }
+    if ($filter == "inactive" && $activated) {
+      return array(array(), 0, 0);
+    }
 
-    $countQuery = "SELECT count(*) FROM (SELECT hash $unorderedQuery $totalFilter $grouping) as K";
+    $countQuery = "SELECT count(DISTINCT hash) FROM $tableName AS cp INNER JOIN $uploadTreeTableName AS UT ON cp.pfile_fk = UT.pfile_fk $join WHERE cp.textfinding != '' AND ( UT.lft BETWEEN $1 AND $2 ) AND cp.is_enabled = " . ($activated ? 'true' : 'false') . $sql_upload . $totalFilter;
     $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow($countQuery,
       $filterParms,
-      __METHOD__ . $tableName . ".count" . ($activated ? '' : '_deactivated'));
-    $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
+      __METHOD__ . "." . $tableName . ".count" . ($activated ? '' : '_deactivated'));
+    $iTotalDisplayRecords = intval($iTotalDisplayRecordsRow['count']);
 
-    $countAllQuery = "SELECT count(*) FROM (SELECT hash $unorderedQuery$grouping) as K";
-    $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params,
-      __METHOD__, $tableName . "count.all" . ($activated ? '' : '_deactivated'));
-    $iTotalRecords = $iTotalRecordsRow['count'];
+    $countAllQuery = "SELECT count(DISTINCT hash) FROM $tableName AS cp INNER JOIN $uploadTreeTableName AS UT ON cp.pfile_fk = UT.pfile_fk WHERE cp.textfinding != '' AND ( UT.lft BETWEEN $1 AND $2 ) AND cp.is_enabled = " . ($activated ? 'true' : 'false') . $sql_upload;
+    $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__ . "." . $tableName . "count.all" . ($activated ? '' : '_deactivated'));
+    $iTotalRecords = intval($iTotalRecordsRow['count']);
 
     $range = "";
     $filterParms[] = $offset;
@@ -283,7 +286,7 @@ class TextFindingsAjax
    * @internal param boolean $normalizeString
    */
   private function fillTableRow($row, $upload, $item, $type, $listPage,
-    $activated = true, $rw = true)
+    $activated = true, $rw = true, $filter = "all")
   {
     $hash = $row['hash'];
     $sql = "SELECT pfile_fk FROM " . $this->getTableName($type) .
@@ -298,11 +301,16 @@ class TextFindingsAjax
       'DT_RowId' => $this->getDecisionTypeName($type) . ",$hash"
     );
 
-    $link = "<a href='";
-    $link .= Traceback_uri();
-    $link .= "?mod=$listPage&agent=-1&item=$item" .
-      "&hash=$hash&type=$type&filter=all";
-    $link .= "'>". intval($row['textfinding_count']) . "</a>";
+    $allowed_filters = array('all', 'active', 'inactive', 'nolic');
+    if (!in_array($filter, $allowed_filters)) {
+      $filter = 'all';
+    }
+
+    $link_url = Traceback_uri() . "?mod=" . urlencode($listPage) . "&agent=-1&item=" . intval($item) .
+      "&hash=" . urlencode($hash) . "&type=" . urlencode($type) . "&filter=" . urlencode($filter);
+    $safe_link_url = htmlspecialchars($link_url, ENT_QUOTES, 'UTF-8');
+    $link = '<a href="' . $safe_link_url . '">' . intval($row['textfinding_count']) . '</a>';
+
     $output['0'] = $link;
     $output['1'] = convertToUTF8($row['textfinding']);
     $output['2'] = $this->getTableRowAction($hash, $upload, $type, $activated,
