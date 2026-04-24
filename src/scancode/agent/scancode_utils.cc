@@ -85,8 +85,24 @@ bool processUploadId(const State &state, int uploadId,
 
   bool errors = false;
 
-  string fileLocation = tmpnam(nullptr);
-  string outputFile = tmpnam(nullptr);
+  char fileLocationTpl[] = "/tmp/scancode_input_XXXXXX";
+  int fdInput = mkstemp(fileLocationTpl);
+  if (fdInput == -1) {
+    LOG_ERROR("Failed to create temporary input file.\n");
+    return false;
+  }
+  close(fdInput);
+  string fileLocation(fileLocationTpl);
+
+  char outputFileTpl[] = "/tmp/scancode_output_XXXXXX";
+  int fdOutput = mkstemp(outputFileTpl);
+  if (fdOutput == -1) {
+    LOG_ERROR("Failed to create temporary output file.\n");
+    unlink(fileLocationTpl);
+    return false;
+  }
+  close(fdOutput);
+  string outputFile(outputFileTpl);
 
   size_t pFileCount = fileIds.size();
   for (size_t it = 0; it < pFileCount; ++it) {
@@ -105,7 +121,7 @@ bool processUploadId(const State &state, int uploadId,
 
   std::ifstream opfile(outputFile);
   if (!opfile) {
-    std::cerr << "Error opening the JSON file.\n";
+    LOG_ERROR("Error opening the JSON file.\n");
     return false;
   }
 
@@ -147,6 +163,9 @@ bool processUploadId(const State &state, int uploadId,
   }
   if (unlink(outputFile.c_str()) != 0) {
     LOG_FATAL("Unable to delete file %s \n", outputFile.c_str());
+  }
+  if (unlink(fileLocation.c_str()) != 0) {
+    LOG_FATAL("Unable to delete file %s \n", fileLocation.c_str());
   }
 
   return !errors;
