@@ -115,7 +115,7 @@ void DBLoadGold()
   if ((int)ForceGroup > 0)
   {
     rc = chown(GlobalTempFile,-1,ForceGroup);
-    if (rc) LOG_ERROR("chown failed on %s, error: %s", GlobalTempFile, strerror(errno));
+    if (rc) LOG_ERROR("chown failed on %s, error: %s. If this is an NFSv4 volume, check server-side permissions and user mapping. See https://github.com/fossology/fossology/issues/3129 for details.", GlobalTempFile, strerror(errno));
   }
 
   if (!Sum)
@@ -150,7 +150,7 @@ void DBLoadGold()
     if ((int)ForceGroup >= 0)
     {
       rc = chown(Path,-1,ForceGroup);
-      if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno));
+      if (rc) LOG_ERROR("chown failed on %s, error: %s. If this is an NFSv4 volume, check server-side permissions and user mapping. See https://github.com/fossology/fossology/issues/3129 for details.", Path, strerror(errno));
     }
   } /* if GlobalImportGold */
   else /* if !GlobalImportGold */
@@ -179,7 +179,7 @@ void DBLoadGold()
   if ((int)ForceGroup >= 0)
   {
     rc = chown(Path,-1,ForceGroup);
-    if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno));
+    if (rc) LOG_ERROR("chown failed on %s, error: %s. If this is an NFSv4 volume, check server-side permissions and user mapping. See https://github.com/fossology/fossology/issues/3129 for details.", Path, strerror(errno));
   }
 
   if (Path != GlobalTempFile)
