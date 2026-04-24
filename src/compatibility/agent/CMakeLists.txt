@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: © 2024 Siemens AG
 #]=======================================================================]
 
 set(FO_CWD ${CMAKE_CURRENT_SOURCE_DIR})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FO_CXX_FLAGS} -fopenmp")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FO_CXX_FLAGS}")
 
 include_directories(
         ${glib_INCLUDE_DIRS}
@@ -44,8 +44,8 @@ foreach (FO_COMP_TARGET compatibility compatibility_exec compatibility_cov
         target_compile_options(${FO_COMP_TARGET} PRIVATE ${FO_COV_FLAGS})
     endif ()
     target_link_libraries(${FO_COMP_TARGET}
-            PRIVATE fossologyCPP ${icu-uc_LIBRARIES} ${Boost_LIBRARIES}
-            ${jsoncpp_LIBRARIES} yaml-cpp)
+            PRIVATE fossologyCPP ICU::uc ICU::i18n ${Boost_LIBRARIES}
+            ${jsoncpp_LIBRARIES} yaml-cpp OpenMP::OpenMP_CXX)
     if (${FO_COMP_TARGET} MATCHES "_exec$")
         string(REPLACE "_exec" "" FO_COMP_TARGET_R ${FO_COMP_TARGET})
         set_target_properties(${FO_COMP_TARGET}

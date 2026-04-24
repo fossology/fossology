@@ -118,9 +118,12 @@ if(DEFINED CMAKE_CXX_COMPILER)
     find_package(Boost REQUIRED COMPONENTS regex system filesystem program_options NO_MODULE)
 endif()
 find_package(Git REQUIRED)
+find_package(ICU COMPONENTS uc i18n REQUIRED)
+find_package(LibXslt REQUIRED)
+find_package(OpenMP REQUIRED)
 
 foreach(SCHE_LIBS
-        glib-2.0 gthread-2.0 gio-2.0 gobject-2.0 rpm libxml-2.0 libxslt icu-uc
+        glib-2.0 gthread-2.0 gio-2.0 gobject-2.0 rpm libxml-2.0
         json-c
 )
     string(REPLACE "-2.0" "" LIB_NAME ${SCHE_LIBS})
