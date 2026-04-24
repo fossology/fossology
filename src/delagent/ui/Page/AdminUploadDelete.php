@@ -39,7 +39,7 @@ class AdminUploadDelete extends DefaultPlugin
     parent::__construct(self::NAME, array(
         self::TITLE => _("Delete Uploaded File"),
         self::MENU_LIST => "Organize::Uploads::Delete Uploaded File",
-        self::PERMISSION => Auth::PERM_ADMIN,
+        self::PERMISSION => Auth::PERM_WRITE,
         self::REQUIRES_LOGIN => true
     ));
 
