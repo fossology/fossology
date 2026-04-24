@@ -21,6 +21,7 @@ use Fossology\Lib\Util\ArrayOperation;
  */
 class ObligationCsvImport
 {
+  protected $obligationMap;
   /** @var DbManager $dbManager
    * DB manager to be used */
   protected $dbManager;
@@ -85,33 +86,63 @@ class ObligationCsvImport
     if (!is_file($filename) || ($handle = fopen($filename, 'r')) === false) {
       return _('Internal error');
     }
-    $cnt = -1;
+    $this->headrow = null;
     $msg = '';
     try {
       if ($fileExtension == 'csv') {
+        $cnt = 0;
         while (($row = fgetcsv($handle,0,$this->delimiter,$this->enclosure)) !== false) {
+          $isHeadRow = ($this->headrow === null);
           $log = $this->handleCsv($row);
-          if (!empty($log)) {
+          if (! $isHeadRow) {
+            $cnt++;
+          }
+          if (!empty($log) && ! $isHeadRow) {
             $msg .= "$log\n";
           }
-          $cnt++;
         }
         $msg .= _('Read csv').(": $cnt ")._('obligations');
       } else {
-        $jsonContent = fread($handle, filesize($filename));
-        $data = json_decode($jsonContent, true);
-        if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
-          $msg .= "Error decoding JSON: " . json_last_error_msg() . "\n";
-        }
+        $data = $this->readJsonRows($handle, $filename, $msg);
         $msg = $this->importJsonData($data, $msg);
         $msg .= _('Read json').(":". count($data) ." ")._('obligations');
       }
-    } catch(\Exception $e) {
+    } catch(\Throwable $e) {
       fclose($handle);
       return $msg .= _('Error while parsing file').': '.$e->getMessage();
     }
     fclose($handle);
     return $msg;
+  }
+
+  /** Normalize decoded JSON content to a list of rows. */
+  private function readJsonRows($handle, $filename, &$msg)
+  {
+    $jsonContent = filesize($filename) > 0 ? fread($handle, filesize($filename)) : '';
+    $data = json_decode($jsonContent, true);
+
+    if ($data === null) {
+      if (json_last_error() !== JSON_ERROR_NONE) {
+        $msg .= "Error decoding JSON: " . json_last_error_msg() . "\n";
+      }
+      return array();
+    }
+
+    if (!is_array($data)) {
+      $msg .= "Error decoding JSON: Unsupported JSON structure.\n";
+      return array();
+    }
+
+    return $this->isSequentialArray($data) ? $data : array($data);
+  }
+
+  /** Return true when the array keys are sequential. */
+  private function isSequentialArray(array $data)
+  {
+    if (empty($data)) {
+      return true;
+    }
+    return array_keys($data) === range(0, count($data) - 1);
   }
 
   /**
