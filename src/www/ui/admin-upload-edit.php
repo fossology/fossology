@@ -46,15 +46,15 @@ class upload_properties extends FO_Plugin
    **/
   public function UpdateUploadProperties($uploadId, $newName, $newDesc)
   {
-    if (empty($newName) and empty($newDesc)) {
+    if (!isset($newName) && !isset($newDesc)) {
       return 2;
     }
 
     if (!empty($newName)) {
       /*
-       * Use pfile_fk to select the correct entry in the upload tree, artifacts
-       * (e.g. directories of the upload do not have pfiles).
-       */
+      * Use pfile_fk to select the correct entry in the upload tree, artifacts
+      * (e.g. directories of the upload do not have pfiles).
+      */
       $row = $this->dbManager->getSingleRow(
         "SELECT pfile_fk FROM upload WHERE upload_pk=$1",array($uploadId),__METHOD__.'.getPfileId');
       if (empty($row)) {
@@ -74,7 +74,7 @@ class upload_properties extends FO_Plugin
         __METHOD__ . '.updateUpload.name');
     }
 
-    if (! empty($newDesc)) {
+    if (isset($newDesc)) {
       $trimNewDesc = trim($newDesc);
       $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=$2 WHERE upload_pk=$1",
         array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
@@ -95,7 +95,7 @@ class upload_properties extends FO_Plugin
     }
 
     $NewName = GetArrayVal("newname", $_POST);
-    $NewDesc = GetArrayVal("newdesc", $_POST);
+    $NewDesc = array_key_exists("newdesc", $_POST) ? $_POST["newdesc"] : null;
     $upload_pk = GetArrayVal("upload_pk", $_POST);
     if (empty($upload_pk)) {
       $upload_pk = GetParm('upload', PARM_INTEGER);
@@ -105,13 +105,16 @@ class upload_properties extends FO_Plugin
       $text = _("Permission Denied");
       return "<h2>$text</h2>";
     }
-    $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc);
-    if ($rc == 0) {
-      $text = _("Nothing to Change");
-      $this->vars['message'] = $text;
-    } else if ($rc == 1) {
-      $text = _("Upload Properties successfully changed");
-      $this->vars['message'] = $text;
+
+    if (array_key_exists("upload_pk", $_POST)) {
+      $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc);
+      if ($rc == 0) {
+        $text = _("Nothing to Change");
+        $this->vars['message'] = $text;
+      } else if ($rc == 1) {
+        $text = _("Upload Properties successfully changed");
+        $this->vars['message'] = $text;
+      }
     }
 
     $this->vars['folderStructure'] = $folderStructure;
