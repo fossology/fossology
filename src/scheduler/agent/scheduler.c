@@ -502,8 +502,8 @@ void scheduler_update(scheduler_t* scheduler)
          break;
        }
       }
-      // the generic case, this can run anywhere, find a place
-      else if((host = get_host(&(scheduler->host_queue), 1)) == NULL)
+      // the generic case, route by agent type for host affinity
+      else if((host = get_host_for(scheduler, job->agent_type, 1)) == NULL)
       {
         job = NULL;
         break;
@@ -906,8 +906,28 @@ void scheduler_foss_config(scheduler_t* scheduler)
       continue;
     }
 
+    /* Parse: address agent_dir max [| tag1 tag2 ...]
+     * The pipe and tag list are optional; omitting them preserves the existing
+     * behaviour where the host accepts any agent type. */
+    char* pipe_pos = strchr(tmp, '|');
+    char** tags = NULL;
+    int n_tags = 0;
+
+    if (pipe_pos != NULL) {
+      *pipe_pos = '\0';  /* terminate the base fields at the pipe */
+      pipe_pos++;        /* advance past the NUL we just wrote */
+      char* saveptr = NULL;
+      char* tok = strtok_r(pipe_pos, " \t", &saveptr);
+      while (tok != NULL && n_tags < 64) {
+        tags = g_renew(char*, tags, n_tags + 1);
+        tags[n_tags++] = tok;  /* points into tmp buffer; host_init will g_strdup */
+        tok = strtok_r(NULL, " \t", &saveptr);
+      }
+    }
+
     sscanf(tmp, "%s %s %d", addbuf, dirbuf, &max);
-    host = host_init(keys[i], addbuf, dirbuf, max);
+    host = host_init(keys[i], addbuf, dirbuf, max, tags, n_tags);
+    g_free(tags);  /* host_init g_strdup'd each tag string */
     host_insert(host, scheduler);
     if(TVERB_SCHED)
     {
@@ -916,6 +936,7 @@ void scheduler_foss_config(scheduler_t* scheduler)
       log_printf("   address = %s\n", addbuf);
       log_printf(" directory = %s\n", dirbuf);
       log_printf("       max = %d\n", max);
+      log_printf("    n_tags = %d\n", n_tags);
     }
   }
 

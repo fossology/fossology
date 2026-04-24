@@ -322,7 +322,7 @@ void test_sending_load()
 
   // create data structures
   CREATE_INTERFACE(scheduler);
-  host_insert(host_init("localhost", "localhost", "AGENT_DIR", 10), scheduler);
+  host_insert(host_init("localhost", "localhost", "AGENT_DIR", 10, NULL, 0), scheduler);
 
   // create the connection
   snprintf(buffer, sizeof(buffer), "%d", scheduler->i_port);
