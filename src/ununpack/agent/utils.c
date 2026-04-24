@@ -58,9 +58,16 @@ int IsInflatedFile(char *FileName, int InflateSize)
          e.g. for the file ./10g.tar.bz.dir/10g.tar, partent file is ./10g.tar.bz
        */
       FileNameParent[strlen(FileNameParent) - 4] = '\0';
-      stat(FileNameParent, &stParent);
-      stat(FileName, &st);
-      if(S_ISREG(stParent.st_mode) && (st.st_size/stParent.st_size > InflateSize))
+
+      /* Ensure parent and child files exist and can be stated */
+      if (stat(FileNameParent, &stParent) != 0 || stat(FileName, &st) != 0)
+      {
+        return 0;
+      }
+
+      /* Guard against division by zero */
+      if(S_ISREG(stParent.st_mode) && stParent.st_size > 0 && 
+         (st.st_size/stParent.st_size > InflateSize))
       {
         result = 1;
       }
