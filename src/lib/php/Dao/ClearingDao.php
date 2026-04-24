@@ -337,8 +337,10 @@ class ClearingDao
    * @param int $groupId
    * @param int $decType
    * @param int $scope
+   * @param array $eventIds
+   * @param bool $checkDuplicates
    */
-  public function createDecisionFromEvents($uploadTreeId, $userId, $groupId, $decType, $scope, $eventIds)
+  public function createDecisionFromEvents($uploadTreeId, $userId, $groupId, $decType, $scope, $eventIds, $checkDuplicates = true)
   {
     if ( ($scope == DecisionScopes::REPO) &&
          !empty($this->getCandidateLicenseCountForCurrentDecisions($uploadTreeId))) {
@@ -349,6 +351,16 @@ class ClearingDao
     $uploadId = $itemTreeBounds->getUploadId();
     $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTable);
+    if ($scope == DecisionScopes::REPO && $checkDuplicates) {
+      $stmt = "SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1";
+      $this->dbManager->prepare($stmt, $stmt);
+      $res = $this->dbManager->execute($stmt, array($uploadTreeId));
+      $row = $this->dbManager->fetchArray($res);
+      $this->dbManager->freeResult($res);
+      if ($row && $this->hasIdenticalGlobalDecision($row['pfile_fk'], $groupId, $decType, $eventIds)) {
+        return;
+      }
+    }
 
     if ($this->isDecisionCheck($uploadTreeId, $groupId, DecisionTypes::IRRELEVANT)) {
       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'rollback');
@@ -438,6 +450,59 @@ INSERT INTO clearing_decision (
     }
     $this->dbManager->freeResult($res);
     return $events;
+  }
+
+  /**
+   * @param int $pfileId
+   * @param int $groupId
+   * @param int $decisionType
+   * @param array $eventIds Array of clearing event IDs to compare
+   * @return bool True if identical global decision exists
+   */
+  public function hasIdenticalGlobalDecision($pfileId, $groupId, $decisionType, $eventIds = null)
+  {
+    $stmt = __METHOD__;
+
+    $sql = "SELECT 1
+            FROM clearing_decision cd
+            WHERE cd.pfile_fk = $1
+              AND cd.group_fk = $2
+              AND cd.scope = $3
+              AND cd.decision_type = $4
+              AND cd.decision_type != $5";
+
+    $params = array(
+        $pfileId,
+        $groupId,
+        DecisionScopes::REPO,
+        $decisionType,
+        DecisionTypes::WIP
+    );
+
+    if ($eventIds !== null && !empty($eventIds)) {
+        $eventCount = count($eventIds);
+        $eventIdList = implode(',', array_map('intval', $eventIds));
+
+        $sql .= " AND cd.clearing_decision_pk IN (
+                    SELECT cde.clearing_decision_fk
+                    FROM clearing_decision_event cde
+                    WHERE cde.clearing_event_fk IN ($eventIdList)
+                    GROUP BY cde.clearing_decision_fk
+                    HAVING COUNT(DISTINCT cde.clearing_event_fk) = $6
+                  )";
+
+        $params[] = $eventCount;
+    }
+
+    $sql .= " LIMIT 1";
+
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, $params);
+
+    $row = $this->dbManager->fetchArray($res);
+    $this->dbManager->freeResult($res);
+
+    return $row !== false;
   }
 
   /**
