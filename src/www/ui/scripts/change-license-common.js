@@ -413,7 +413,19 @@ function closeAckInputModal(){
 
 function doOnSuccess(textModal) {
   textModal.modal('hide');
-  $('#decTypeSet').addClass('border-danger');
+  $.ajax({
+    url: '?mod=conclude-license&do=checkWipStatus',
+    method: 'POST',
+    data: {
+      uploadTreeId: $('#lastItem').val(),
+      upload: $('#upload').val()
+    },
+    success: function(response) {
+      if(response.isWip) {
+        $('#decTypeSet').addClass('border-danger');
+      }
+    }
+  });
   oTable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable(editableConfiguration);
   oTable.fnDraw(false);
 }
