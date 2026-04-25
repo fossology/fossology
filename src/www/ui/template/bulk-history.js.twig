@@ -11,3 +11,42 @@ function refreshBulkHistory(callbacksuccess) {
     }
   });
 }
+
+function deleteBulkEntry(bulkId) {
+  if (!confirm('{{ "Are you sure you want to delete this bulk scan entry? This will remove it from bulk history and all scanner findings."| trans|e('js') }}')) {
+    return;
+  }
+  
+  $.ajax({
+    url: "{{ baseuri }}?mod=bulk-history",
+    type: "POST",
+    data: {
+      do: "deleteBulk",
+      bulkId: bulkId
+    },
+    success: function(response) {
+      try {
+        var data = typeof response === 'string' ? JSON.parse(response) : response;
+        if (data.status === 'success') {
+          $('#decTypeSet').addClass('border-danger');
+          
+          refreshBulkHistory(function() {
+            if (typeof createClearingTable === 'function') {
+              var clearingTable = createClearingTable();
+              if (clearingTable && typeof clearingTable.fnDraw === 'function') {
+                clearingTable.fnDraw(false);
+              }
+            }
+          });
+        } else {
+          alert('{{ "Error deleting bulk entry: "| trans|e('js') }}' + (data.message || 'Unknown error'));
+        }
+      } catch (e) {
+        alert('{{ "Error deleting bulk entry: "| trans|e('js') }}' + 'Invalid response: ' + response);
+      }
+    },
+    error: function(xhr, status, error) {
+      alert('{{ "Error deleting bulk entry: "| trans|e('js') }}' + error);
+    }
+  });
+}
