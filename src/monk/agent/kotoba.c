@@ -205,11 +205,9 @@ int phrase_onAllMatches(MonkState* state, const File* file, const GArray* matche
       if (clearingEventId <= 0)
         continue;
 
-      if (k == 0) {
-        if (!saveKotobaHighlights(state, file, matches, clearingEventId, phrase->cpId)) {
-          fo_dbManager_rollback(state->dbManager);
-          return 0;
-        }
+      if (!saveKotobaHighlights(state, file, matches, clearingEventId, phrase->cpId)) {
+        fo_dbManager_rollback(state->dbManager);
+        return 0;
       }
     }
   }

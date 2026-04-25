@@ -205,6 +205,12 @@ img.delete {
   background-image: url('../images/icons/close_16.png');
 }
 
+img.delete.delete-disabled {
+  cursor: default;
+  filter: grayscale(100%);
+  opacity: 0.5;
+}
+
 img.added {
   background-image: url('../images/icons/added_16.png');
 }
