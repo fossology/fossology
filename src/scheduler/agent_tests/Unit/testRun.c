@@ -12,12 +12,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <pwd.h>
+#include <grp.h>
 #include <CUnit/CUnit.h>
 #include <CUnit/Automated.h>
 #include <gio/gio.h>
 #include <glib.h>
 
 #include <libfossology.h>
+#include <libfocunit.h>
+#include <libfodbreposysconf.h>
 #include <testRun.h>
 
 #include <agent.h>
@@ -45,13 +49,6 @@ int init_suite(void)
   if(main_log)
     log_destroy(main_log);
   main_log = log_new("./founit.log", "UNIT_TESTS", getpid());
-
-  if(!testdb && (testdb = getenv("FOSSOLOGY_TESTCONFIG")) == NULL)
-  {
-    printf("ERROR: scheduler unit tests require a test database");
-    exit(1);
-  }
-
   return 0;
 }
 
@@ -84,7 +81,7 @@ CU_SuiteInfo suites[] =
     {"InterfaceThread", NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_interface_thread },
     {"Database",        NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_database },
     {"Email",           NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_email },
-  //  {"Job"  NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_job },
+    {"Job",             NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_job              },
     {"Scheduler",       NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_scheduler },
     {"MetaAgent",       NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_meta_agent },
     {"Agent",           NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_agent },
@@ -99,5 +96,34 @@ int main( int argc, char *argv[] )
   g_thread_init(NULL);
 #endif
 
-  return focunit_main(argc, argv, "scheduler_Tests", suites);
+  fo_dbManager* dbManager = createTestEnvironment(AGENT_DIR, NULL, 1);
+  testdb = get_sysconfdir();
+
+  /* createTestEnvironment writes a minimal fossology.conf that lacks the
+   * [FOSSOLOGY].port key and [SCHEDULER] section required by scheduler_foss_config.
+   * Overwrite it with a complete one using the current user/group credentials. */
+  {
+    struct passwd* pw = getpwuid(getuid());
+    struct group*  gr = getgrgid(getgid());
+    gchar* confpath = g_strdup_printf("%s/fossology.conf", testdb);
+    FILE*  f = fopen(confpath, "w");
+    if(f)
+    {
+      fprintf(f,
+          "[FOSSOLOGY]\nport = 12354\naddress = localhost\ndepth = 0\npath = %s/repo\n"
+          "[REPOSITORY]\nlocalhost[] = * 00 ff\n"
+          "[SCHEDULER]\nagent_death_timer = 10\nagent_update_interval = 15\nagent_update_number = 1\n"
+          "[DIRECTORIES]\nMODDIR = %s\nLOGDIR = %s\nPROJECTGROUP = %s\nPROJECTUSER = %s\n",
+          testdb, testdb, testdb,
+          gr ? gr->gr_name : PROJECT_GROUP,
+          pw ? pw->pw_name : PROJECT_USER);
+      fclose(f);
+    }
+    g_free(confpath);
+  }
+
+  int result = focunit_main(argc, argv, "scheduler_Tests", suites);
+
+  dropTestEnvironment(dbManager, AGENT_DIR, NULL);
+  return result;
 }

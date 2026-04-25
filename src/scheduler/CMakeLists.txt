@@ -16,9 +16,9 @@ install(FILES mod_deps "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
     DESTINATION ${FO_MODDIR}/${PROJECT_NAME}
     COMPONENT scheduler)
 
-# FIXME: Unable to create test DB
-# if(TESTING)
-#     file(COPY TestInstall.make DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-#     enable_testing()
-#     add_subdirectory(agent_tests)
-# endif()
+if(TESTING)
+    configure_file(TestInstall.make.in ${CMAKE_CURRENT_BINARY_DIR}/TestInstall.make
+        NEWLINE_STYLE LF @ONLY)
+    enable_testing()
+    add_subdirectory(agent_tests)
+endif()

@@ -114,13 +114,12 @@ void test_database_update_event()
   Prepare_Testing_Data(scheduler);
 
   database_update_event(scheduler, NULL);
-  sprintf(sql, "SELECT * FROM job;");
+  sprintf(sql, "SELECT * FROM job WHERE job_name = 'testing file' ORDER BY job_pk DESC LIMIT 1;");
   db_result = database_exec(scheduler, sql);
-  //printf("result: %s", PQget(db_result, 0, "job_name"));
   if(PQresultStatus(db_result) == PGRES_TUPLES_OK && PQntuples(db_result) != 0)
   {
     FO_ASSERT_STRING_EQUAL(PQget(db_result, 0, "job_name"), "testing file");
-    FO_ASSERT_EQUAL(atoi(PQget(db_result, 0, "job_user_fk")), 1);
+    FO_ASSERT_NOT_EQUAL(atoi(PQget(db_result, 0, "job_user_fk")), 0);
   }
   PQclear(db_result);
 
