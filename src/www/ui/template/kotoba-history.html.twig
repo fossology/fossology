@@ -5,12 +5,18 @@
 #}
 <table class="dataTable" border="1" cellpadding="5px" id="kotobaHistoryTable" name="kotobaHistoryTable">
   <tr>
+    <th>{{ 'Action'| trans }}</th>
     <th>{{ 'License'| trans }}</th>
     <th>{{ 'Text'| trans }}</th>
   </tr>
   {% if kotobaHistory %}
   {% for row in kotobaHistory %}
     <tr class="{{ cycle(['odd','even'], loop.index0) }}{% if row.matched %} match{% endif %}{% if not row.tried %} inactive{% endif %}">
+      <td>
+        <a href="javascript:;" onclick="deleteKotobaEntry('{{ row.text|e('js') }}');" title="{{ 'Delete this kotoba scan entry'| trans }}">
+          <img class="delete" src="images/space_16.png" alt="{{ 'Delete'| trans }}"/>
+        </a>
+      </td>
       <td>
           <table>
             {% if row.addedLicenses is not empty %}
@@ -34,6 +40,7 @@
   {% endfor %}
   {% else %}
     <tr class="even">
+      <td>&lt;no entries&gt;</td>
       <td>&lt;no entries&gt;</td>
       <td>&lt;no entries&gt;</td>
     </tr>
