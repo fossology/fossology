@@ -100,4 +100,91 @@ class BulkTextExportTest extends \PHPUnit\Framework\TestCase
     $this->expectException(\InvalidArgumentException::class);
     $bulkTextExport->setEnclosure(',');
   }
+
+  /**
+   * @test
+   * -# Export CSV with includeLicenseText enabled.
+   * -# Verify license_text column appears with rf_text from license_ref for added licenses.
+   */
+  public function testExportBulkTextCsvIncludesLicenseText()
+  {
+    $dbManager = M::mock(DbManager::class);
+    $dbManager->shouldReceive('getRows')->once()->withAnyArgs()->andReturn(array(
+      array(
+        'rf_text' => "some bulk text",
+        'rf_shortname' => 'MIT',
+        'removing' => 'f',
+        'comment' => null,
+        'acknowledgement' => null,
+        'rf_active' => 't',
+        'license_text' => 'Permission is hereby granted, free of charge...'
+      ),
+      array(
+        'rf_text' => "some bulk text",
+        'rf_shortname' => 'Apache-2.0',
+        'removing' => 't',
+        'comment' => null,
+        'acknowledgement' => null,
+        'rf_active' => 't',
+        'license_text' => 'Apache License Version 2.0...'
+      )
+    ));
+
+    $bulkTextExport = new BulkTextExport($dbManager);
+    $csv = $bulkTextExport->exportBulkText(0, 0, false, true);
+
+    $handle = fopen('php://temp', 'r+');
+    fwrite($handle, $csv);
+    rewind($handle);
+
+    $rows = array();
+    while (($row = fgetcsv($handle, 0, ',', '"')) !== false) {
+      $rows[] = $row;
+    }
+    fclose($handle);
+
+    $this->assertCount(2, $rows);
+    $this->assertSame('license_text', $rows[0][6]);
+    $this->assertSame('MIT', $rows[1][1]);
+    $this->assertSame('Apache-2.0', $rows[1][2]);
+    $this->assertStringContainsString('Permission is hereby granted', $rows[1][6]);
+    $this->assertStringNotContainsString('Apache License', $rows[1][6]);
+  }
+
+  /**
+   * @test
+   * -# Export CSV without includeLicenseText.
+   * -# Verify license_text column does NOT appear.
+   */
+  public function testExportBulkTextCsvExcludesLicenseTextByDefault()
+  {
+    $dbManager = M::mock(DbManager::class);
+    $dbManager->shouldReceive('getRows')->once()->withAnyArgs()->andReturn(array(
+      array(
+        'rf_text' => "some text",
+        'rf_shortname' => 'MIT',
+        'removing' => 'f',
+        'comment' => null,
+        'acknowledgement' => null,
+        'rf_active' => 't'
+      )
+    ));
+
+    $bulkTextExport = new BulkTextExport($dbManager);
+    $csv = $bulkTextExport->exportBulkText();
+
+    $handle = fopen('php://temp', 'r+');
+    fwrite($handle, $csv);
+    rewind($handle);
+
+    $rows = array();
+    while (($row = fgetcsv($handle, 0, ',', '"')) !== false) {
+      $rows[] = $row;
+    }
+    fclose($handle);
+
+    $this->assertCount(2, $rows);
+    $this->assertCount(6, $rows[0]);
+    $this->assertSame('is_active', $rows[0][5]);
+  }
 }

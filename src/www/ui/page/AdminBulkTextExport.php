@@ -83,6 +83,7 @@ class AdminBulkTextExport extends DefaultPlugin
     $group_pk = intval($request->get('selected_group', 0));
     $delimiter = $request->get('delimiter', ',');
     $enclosure = $request->get('enclosure', '"');
+    $includeLicenseText = $request->get('include_license_text', false) ? true : false;
 
     if (!in_array($exportFormat, array('csv', 'json'))) {
       $exportFormat = 'csv';
@@ -117,7 +118,7 @@ class AdminBulkTextExport extends DefaultPlugin
       }
     }
 
-    $content = $bulkTextExporter->exportBulkText($filterUserPk, $filterGroupPk, $generateJson);
+    $content = $bulkTextExporter->exportBulkText($filterUserPk, $filterGroupPk, $generateJson, $includeLicenseText);
 
     return DownloadUtil::getDownloadResponse($content, $fileName, $contentType);
   }
