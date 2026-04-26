@@ -11,6 +11,7 @@
  *
  * @version "$Id: util.c 4032 2011-04-05 22:16:20Z bobgo $"
  */
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include "nomos.h"
@@ -29,10 +30,8 @@ static char grepzone[10485760]; /* 10M for now, adjust if needed */
 /*
   File local variables
  */
-static va_list ap;
 static char utilbuf[myBUFSIZ];
 static struct mm_cache mmap_data[MM_CACHESIZE];
-static char cmdBuf[PATH_MAX * 2 + 256];
 
 
 #ifdef MEMORY_TRACING
@@ -205,7 +204,7 @@ char *newReloTarget(char *basename)
 char *memAllocTagged(int size, char *name)
 {
   void *ptr;
-  sErrorBuf[1024];
+  char sErrorBuf[1024];
 
   /*
    * we don't track memory allocated; we front-end for errors and return
@@ -959,6 +958,7 @@ void memStats(char *s)
  */
 void makeSymlink(char *path)
 {
+  char cmdBuf[PATH_MAX * 2 + 256];
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
   traceFunc("== makeSymlink(%s)\n", path);
 #endif /* PROC_TRACE || UNPACK_DEBUG */
@@ -1294,45 +1294,42 @@ void appendFile(char *pathname, char *str)
   return;
 }
 
-/**
- * \brief Run a system command
- * \param fmt The command to run along with parameters
- * \note The function will log errors if and error occurs
- * \return The return code from the command or -1 if the command was truncated.
- */
 int mySystem(const char *fmt, ...) {
+  va_list args;
+  char command[2048];
   int ret;
   int len;
-  va_start(ap, fmt);
-  len = vsnprintf(cmdBuf, sizeof(cmdBuf), fmt, ap);
-  va_end(ap);
 
-  if(len < 0 || (size_t)len >= sizeof(cmdBuf)) {
+  va_start(args, fmt);
+  len = vsnprintf(command, sizeof(command), fmt, args);
+  va_end(args);
+
+  if(len < 0 || (size_t)len >= sizeof(command)) {
     LOG_ERROR("mySystem: command truncated (%d bytes needed, buffer is %zu bytes)",
-              len, sizeof(cmdBuf));
+              len, sizeof(command));
     return -1;
   }
 
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-  traceFunc("== mySystem('%s')\n", cmdBuf);
+  traceFunc("== mySystem('%s')\n", command);
 #endif  /* PROC_TRACE || UNPACK_DEBUG */
 
-  ret = system(cmdBuf);
+  ret = system(command);
   if (WIFEXITED(ret)) {
     ret = WEXITSTATUS(ret);
 #ifdef DEBUG
     if (ret) {
-      LOG_ERROR("system(%s) returns %d", cmdBuf, ret)
+      LOG_ERROR("system(%s) returns %d", command, ret);
     }
 #endif /* DEBUG */
   }
   else if (WIFSIGNALED(ret)) {
     ret = WTERMSIG(ret);
-    LOG_ERROR("system(%s) died from signal %d", cmdBuf, ret)
+    LOG_ERROR("system(%s) died from signal %d", command, ret);
   }
   else if (WIFSTOPPED(ret)) {
     ret = WSTOPSIG(ret);
-    LOG_ERROR("system(%s) stopped, signal %d", cmdBuf, ret)
+    LOG_ERROR("system(%s) stopped, signal %d", command, ret);
   }
   return(ret);
 }
@@ -1363,8 +1360,9 @@ int isFILE(char *pathname)
  */
 int addEntry(char *pathname, int forceFlag, const char *fmt, ...)
 {
+  va_list ap;
   va_start(ap, fmt);
-  vsprintf(utilbuf, fmt, ap);
+  vsnprintf(utilbuf, sizeof(utilbuf), fmt, ap);
   va_end(ap);
 
 #ifdef  PROC_TRACE
@@ -1387,6 +1385,7 @@ int addEntry(char *pathname, int forceFlag, const char *fmt, ...)
  */
 void Msg(const char *fmt, ...)
 {
+  va_list ap;
   va_start(ap, fmt);
   (void) vprintf(fmt, ap);
   va_end(ap);
@@ -1400,9 +1399,10 @@ void Msg(const char *fmt, ...)
  */
 void Assert(int fatalFlag, const char *fmt, ...)
 {
+  va_list ap;
   va_start(ap, fmt);
-  (void) sprintf(utilbuf, "ASSERT: ");
-  (void) vsprintf(utilbuf+strlen(utilbuf), fmt, ap);
+  snprintf(utilbuf, sizeof(utilbuf), "ASSERT: ");
+  vsnprintf(utilbuf + strlen(utilbuf), sizeof(utilbuf) - strlen(utilbuf), fmt, ap);
   va_end(ap);
 
 #ifdef  PROC_TRACE

@@ -197,6 +197,9 @@ function modifyLicense(doWhat ,uploadId, uploadTreeId, licenseId) {
       if(data) {
         $('#decTypeSet').addClass('border-danger');
       }
+      if (data && data.warning) {
+        alert(data.warning);
+      }
       var table = createClearingTable();
       table.fnDraw(false);
     })

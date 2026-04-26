@@ -627,7 +627,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           INTERESTING("XMLDB-1.0");
         }
         else if (INFILE(_LT_BSD_CLAUSE_4) && INFILE(_LT_ANT_BSD_RESTRICTION)) {
-          INTERESTING("ANT+SharedSource");
+          INTERESTING("ANT-SharedSource");
         }
         else if (!lmem[_mAPACHE11] && INFILE(_LT_Apache_11_CLAUSE_3) && INFILE(_LT_Apache_11_CLAUSE_4) && INFILE(_LT_Apache_11_CLAUSE_5)) {
           INTERESTING(lDebug ? "BSD(Apache-1.1)" : "Apache-1.1-style");
@@ -734,7 +734,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "UI(1)" : "Unix-Intl");
     }
     else if (INFILE(_CR_XOPEN)) {
-      INTERESTING(lDebug ? "XOpen(1)" : "X/Open");
+      INTERESTING(lDebug ? "XOpen(1)" : "X11");
       lmem[_mXOPEN] = 1;
     }
     else if (INFILE(_PHR_HISTORICAL)) {
@@ -1198,7 +1198,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("CECILL-C");
   }
   else if (INFILE(_LT_CECILL_DUALref)) {
-    INTERESTING("CECILL(dual)");
+    INTERESTING("CECILL-2.1");
     lmem[_mGPL] = lmem[_mLGPL] = 1;
   }
   else if (INFILE(_SPDX_CECILL_10)) {
@@ -1849,7 +1849,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           lmem[_mGPL] = 1;
         }
         else if (INFILE(_CR_rms) && INFILE(_LT_GPL_2)) {
-          INTERESTING("GPL(rms)");
+          INTERESTING("GPL-2.0-only");
           lmem[_mGPL] = 1;
         }
         else if (INFILE(_PHR_GPLISH_SAMPLE)) {
@@ -2610,10 +2610,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Generic CopyLeft licenses
    */
   if (INFILE(_LT_COPYLEFT_1)) {
-    INTERESTING("CopyLeft[1]");
+    INTERESTING("Copyleft");
   }
   else if (INFILE(_LT_COPYLEFT_2)) {
-    INTERESTING("CopyLeft[2]");
+    INTERESTING("Copyleft");
   }
   cleanLicenceBuffer();
   /*
@@ -4789,7 +4789,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "SGI_GLX(1.0)" : "SGI_GLX-1.0");
     }
     else {
-      INTERESTING("SGI_GLX");
+      INTERESTING("SGI-B-2.0");
     }
   }
   else if (INFILE(_LT_SGI_GLXref) && INFILE(_CR_SGI)) {
@@ -4797,7 +4797,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "SGI_GLX(10ref)" : "SGI_GLX-1.0");
     }
     else {
-      INTERESTING(lDebug ? "SGI_GLX(ref)" : "SGI_GLX");
+      INTERESTING(lDebug ? "SGI_GLX(ref)" : "SGI-B-2.0");
     }
   }
   else if (INFILE(_LT_SGI_PROPRIETARY) && INFILE(_CR_SGI)) {
@@ -4898,7 +4898,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Alliance for Open Media Patent License
    */
   if (INFILE(_LT_AOM_Patent)) {
-    INTERESTING("Alliance for Open Media Patent License 1.0");
+    INTERESTING("AOM-Patent-1.0");
   }
   cleanLicenceBuffer();
   /*
@@ -5796,7 +5796,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "UI(2)" : "Unix-Intl");
     }
     else if (INFILE(_CR_XOPEN)) {
-      INTERESTING(lDebug ? "XOpen(2)" : "X/Open");
+      INTERESTING(lDebug ? "XOpen(2)" : "X11");
       lmem[_mXOPEN] = 1;
     }
     else if (INFILE(_CR_IPA)) {
@@ -5812,7 +5812,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   /* This one is funky - it includes part of the copyright */
   else if (!lmem[_mXOPEN] && INFILE(_LT_XOPEN_2)) {
-    INTERESTING(lDebug ? "XOpen(3)" : "X/Open");
+    INTERESTING(lDebug ? "XOpen(3)" : "X11");
     lmem[_mXOPEN] = 1;
   }
   cleanLicenceBuffer();
@@ -6133,7 +6133,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * M+ Fonts Project
    */
   if (INFILE(_LT_MPLUS_FONT) && INFILE(_CR_MPLUS)) {
-    INTERESTING("M-Plus-Project");
+    INTERESTING("M-Plus");
   }
   cleanLicenceBuffer();
   /*
@@ -6147,7 +6147,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Against DRM
    */
   if (INFILE(_LT_AGAINST_DRM)) {
-    INTERESTING("AgainstDRM");
+    INTERESTING("Against-DRM");
   }
   cleanLicenceBuffer();
   /*
@@ -6717,7 +6717,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * unRAR restriction
    */
   if (INFILE(_LT_UNRARref1) || INFILE(_LT_UNRARref2)) {
-    INTERESTING("unRAR restriction");
+    INTERESTING("unRAR-restriction");
   }
   cleanLicenceBuffer();
   /*
@@ -7468,7 +7468,7 @@ char *aslVersion(char *filetext, int size, int isML, int isPS)
     lmem[_mAPACHE] = 1;
   }
   else if (INFILE(_CR_IMAGEMAGICK)) {
-    lstr = "ImageMagick(Apache)";
+    lstr = "ImageMagick";
     lmem[_mAPACHE] = 1;
   }
   /*
@@ -8480,10 +8480,10 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
    * Finally let's see if there is a type error in license version
    */
   else if (INFILE(_PHR_GPL21_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
-    lstr = "GPL-2.1+[sic]";
+    lstr = "GPL-2.0-or-later";
   }
   else if (INFILE(_PHR_FSF_V21_ONLY) || INFILE(_PHR_GPL21_ONLY)) {
-    lstr = lDebug ? "GPL-v2.1[sic]" : "GPL-2.1[sic]";
+    lstr = lDebug ? "GPL-v2.1[sic]" : "GPL-2.0-only";
   }
   /*
    * Special case, HACK: "Debian packaging ... licensed under GPL"
