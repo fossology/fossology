@@ -458,7 +458,7 @@ ORDER BY copyright_pk, UT.uploadtree_pk, content DESC";
 
     if (!empty($hash)) {
       $params[] = $hash;
-      $withHash = " (cp.hash = $4 OR ce.hash = $4) AND ";
+      $withHash = " (CASE WHEN (ce.hash IS NULL OR ce.hash = '') THEN cp.hash ELSE ce.hash END) = $4 AND ";
       $stmt .= ".hash";
     }
     // get latest agent id for agent
