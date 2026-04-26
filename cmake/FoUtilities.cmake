@@ -167,9 +167,13 @@ macro(add_symlink)
     get_filename_component(LINK_TARGET_NAME ${LINK_TARGET} NAME_WE)
     install(CODE
         "file(MAKE_DIRECTORY \"\$ENV{DESTDIR}${LINK_DESTINATION}\")
-        execute_process(
-            COMMAND ln -sf -T \"${LINK_TARGET}\" \"${LINK_NAME}\"
-            WORKING_DIRECTORY \"\$ENV{DESTDIR}${LINK_DESTINATION}\")"
+        if(EXISTS \"\$ENV{DESTDIR}${LINK_DESTINATION}/${LINK_NAME}\" AND NOT IS_SYMLINK \"\$ENV{DESTDIR}${LINK_DESTINATION}/${LINK_NAME}\")
+            message(STATUS \"Skipping creation of symlink '${LINK_NAME}' in ${LINK_DESTINATION} because a native file already exists.\")
+        else()
+            execute_process(
+                COMMAND ln -sf -T \"${LINK_TARGET}\" \"${LINK_NAME}\"
+                WORKING_DIRECTORY \"\$ENV{DESTDIR}${LINK_DESTINATION}\")
+        endif()"
         COMPONENT ${PROJECT_NAME})
 endmacro(add_symlink)
 

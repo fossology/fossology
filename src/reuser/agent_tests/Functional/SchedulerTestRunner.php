@@ -19,8 +19,8 @@ interface SchedulerTestRunner
    * @param int $userId   User id to use
    * @param int $groupId  Group id to use
    * @param int $jobId    Job id to run
-   * @param string $args  Arguments for scheduler
+   * @param array $args   Additional arguments for the agent (each element is passed escaped)
    * @return array Success code, output, return code
    */
-  public function run($uploadId, $userId = 2, $groupId = 2, $jobId = 1, $args = "");
+  public function run($uploadId, $userId = 2, $groupId = 2, $jobId = 1, array $args = []);
 }

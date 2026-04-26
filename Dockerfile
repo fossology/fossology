@@ -42,6 +42,7 @@ COPY ./src/scancode/mod_deps ./src/scancode/
 COPY ./src/scheduler/mod_deps ./src/scheduler/
 COPY ./src/ununpack/mod_deps ./src/ununpack/
 COPY ./src/wget_agent/mod_deps ./src/wget_agent/
+COPY ./src/reuser/mod_deps ./src/reuser/
 COPY ./src/scanoss/mod_deps ./src/scanoss/
 
 RUN mkdir -p /fossology/dependencies-for-runtime \
