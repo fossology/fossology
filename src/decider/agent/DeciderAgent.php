@@ -636,6 +636,11 @@ class DeciderAgent extends Agent
     $allCopyrights = $this->copyrightDao->getScannerEntries('copyright',
       $uploadTreeTableName, $uploadId, null, $extrawhere);
 
+    if (empty($allCopyrights)) {
+      echo "No copyrights found for upload $uploadId. Skipping false positive deactivation.\n";
+      return;
+    }
+
     $copyrightJSON = json_encode($allCopyrights);
     $tmpFile = tmpfile();
     $tmpFilePath = stream_get_meta_data($tmpFile)['uri'];
