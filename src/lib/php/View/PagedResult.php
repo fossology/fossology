@@ -49,7 +49,7 @@ abstract class PagedResult
   public function appendContentText($text)
   {
     $this->empty = false;
-    $this->currentOffset += strlen($text);
+    $this->currentOffset += mb_strlen($text, 'UTF-8');
     $this->appendMetaText($this->renderContentText($text));
   }
 

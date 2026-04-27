@@ -8,6 +8,7 @@
 
 namespace Fossology\Lib\Data;
 
+
 class TextFragment
 {
 
@@ -28,7 +29,7 @@ class TextFragment
 
   public function getEndOffset()
   {
-    return $this->startOffset + strlen($this->text);
+    return $this->startOffset + mb_strlen($this->text, 'UTF-8');
   }
 
   public function getSlice($startOffset, $endOffset = null)
@@ -36,10 +37,10 @@ class TextFragment
     $adjustedStartOffset = max($startOffset - $this->startOffset, 0);
     if (isset($endOffset)) {
       $adjustedEndOffset = max($endOffset - $this->startOffset, 0);
-      return substr($this->text, $adjustedStartOffset,
-        max($adjustedEndOffset - $adjustedStartOffset, 0));
+      return mb_substr($this->text, $adjustedStartOffset,
+        max($adjustedEndOffset - $adjustedStartOffset, 0), 'UTF-8');
     } else {
-      return substr($this->text, $adjustedStartOffset);
+      return mb_substr($this->text, $adjustedStartOffset, null, 'UTF-8');
     }
   }
 }
