@@ -136,6 +136,13 @@ class DeciderJobAgent extends Agent
   private function loopContainedItems($itemTreeBounds)
   {
     if (!$itemTreeBounds->containsFiles()) {
+      $uploadEntry = $this->uploadDao->getUploadEntry(
+        $itemTreeBounds->getItemId(),
+        $itemTreeBounds->getUploadTreeTableName()
+      );
+      if (empty($uploadEntry) || intval($uploadEntry['pfile_fk']) == 0) {
+        return array();
+      }
       return array($itemTreeBounds);
     }
     $result = array();
