@@ -38,7 +38,7 @@ class BrowseUploadDelete extends DefaultPlugin
   {
     parent::__construct(self::NAME, array(
         self::TITLE => _("Delete Uploaded File"),
-        self::PERMISSION => Auth::PERM_ADMIN,
+        self::PERMISSION => Auth::PERM_WRITE,
         self::REQUIRES_LOGIN => true
     ));
 
