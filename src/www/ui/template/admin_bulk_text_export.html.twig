@@ -94,6 +94,17 @@
         </div>
       </li>
 
+      <li>
+        <div class="form-group">
+          <label>{{ 'Additional Data' | trans }}:</label>
+          <div class="radio-group">
+            <input type="checkbox" id="includeLicenseText" name="include_license_text" value="1"/>
+            <label for="includeLicenseText" class="d-inline">{{ 'Export License Text with Bulk Text' | trans }}</label>
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{'Include the full license text from license_ref for each added license'|trans}}" alt="" class="info-bullet"/>
+          </div>
+        </div>
+      </li>
+
       <li id="csvOptionsRow">
         <div class="form-group">
           <label>{{ 'CSV Options' | trans }}:</label>

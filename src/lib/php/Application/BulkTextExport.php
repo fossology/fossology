@@ -76,7 +76,7 @@ class BulkTextExport
    * @param bool $generateJson Whether to generate JSON format instead of CSV
    * @return string CSV or JSON content
    */
-  public function exportBulkText($user_pk=0, $group_pk=0, $generateJson=false)
+  public function exportBulkText($user_pk=0, $group_pk=0, $generateJson=false, $includeLicenseText=false)
   {
     $whereClause = "";
     $params = array();
@@ -89,13 +89,15 @@ class BulkTextExport
       $params[] = $group_pk;
     }
 
+    $licenseTextColumn = $includeLicenseText ? ",\n              lr.rf_text AS license_text" : "";
+
     $sql = "SELECT DISTINCT
               lrb.rf_text,
               lr.rf_shortname,
               lsb.removing,
               lsb.comment,
               lsb.acknowledgement,
-              lr.rf_active
+              lr.rf_active$licenseTextColumn
             FROM license_ref_bulk lrb
             LEFT JOIN license_set_bulk lsb ON lsb.lrb_fk = lrb.lrb_pk
             LEFT JOIN license_ref lr ON lr.rf_pk = lsb.rf_fk
@@ -105,9 +107,9 @@ class BulkTextExport
     $result = $this->dbManager->getRows($sql, $params);
 
     if ($generateJson) {
-      return $this->createJson($result);
+      return $this->createJson($result, $includeLicenseText);
     } else {
-      return $this->createCsvContent($result);
+      return $this->createCsvContent($result, $includeLicenseText);
     }
   }
 
@@ -116,7 +118,7 @@ class BulkTextExport
    * @param array $result Database result array
    * @return array Associative array keyed by rf_text with grouped export fields
    */
-  private function groupResultsByText($result)
+  private function groupResultsByText($result, $includeLicenseText=false)
   {
     $grouped = array();
     foreach ($result as $row) {
@@ -127,7 +129,8 @@ class BulkTextExport
           'licenses_to_remove' => array(),
           'comments'           => array(),
           'acknowledgements'   => array(),
-          'is_active_values'   => array()
+          'is_active_values'   => array(),
+          'license_texts'      => array()
         );
       }
       if (!empty($row['rf_shortname'])) {
@@ -135,6 +138,9 @@ class BulkTextExport
           $grouped[$text]['licenses_to_remove'][] = $row['rf_shortname'];
         } else {
           $grouped[$text]['licenses_to_add'][] = $row['rf_shortname'];
+          if ($includeLicenseText && !empty($row['license_text'])) {
+            $grouped[$text]['license_texts'][$row['rf_shortname']] = $row['license_text'];
+          }
         }
       }
 
@@ -158,6 +164,7 @@ class BulkTextExport
       $grouped[$text]['licenses_to_remove'] = array_values(array_unique($values['licenses_to_remove']));
       $grouped[$text]['comments'] = array_values(array_unique($values['comments']));
       $grouped[$text]['acknowledgements'] = array_values(array_unique($values['acknowledgements']));
+      $grouped[$text]['license_texts'] = array_values($values['license_texts']);
 
       if (empty($values['is_active_values'])) {
         $grouped[$text]['is_active'] = null;
@@ -176,15 +183,18 @@ class BulkTextExport
    * @param array $result Database result array
    * @return string CSV content
    */
-  private function createCsvContent($result)
+  private function createCsvContent($result, $includeLicenseText=false)
   {
     $headers = array('text', 'licenses_to_add', 'licenses_to_remove', 'comments', 'acknowledgements', 'is_active');
+    if ($includeLicenseText) {
+      $headers[] = 'license_text';
+    }
     $out = fopen('php://output', 'w');
     ob_start();
     fputs($out, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
     fputcsv($out, $headers, $this->delimiter, $this->enclosure);
 
-    foreach ($this->groupResultsByText($result) as $text => $licenses) {
+    foreach ($this->groupResultsByText($result, $includeLicenseText) as $text => $licenses) {
       $csvRow = array(
         $this->normalizeNewlinesForCsv($text),
         implode('|', array_map(array($this, 'normalizeNewlinesForCsv'), $licenses['licenses_to_add'])),
@@ -193,6 +203,9 @@ class BulkTextExport
         implode('|', array_map(array($this, 'normalizeNewlinesForCsv'), $licenses['acknowledgements'])),
         $licenses['is_active'] === null ? '' : ($licenses['is_active'] ? 'true' : 'false')
       );
+      if ($includeLicenseText) {
+        $csvRow[] = implode('|', array_map(array($this, 'normalizeNewlinesForCsv'), $licenses['license_texts']));
+      }
       fputcsv($out, $csvRow, $this->delimiter, $this->enclosure);
     }
 
@@ -219,12 +232,12 @@ class BulkTextExport
    * @param array $result Database result array
    * @return string JSON content
    */
-  private function createJson($result)
+  private function createJson($result, $includeLicenseText=false)
   {
     $data = array();
 
-    foreach ($this->groupResultsByText($result) as $text => $licenses) {
-      $data[] = array(
+    foreach ($this->groupResultsByText($result, $includeLicenseText) as $text => $licenses) {
+      $entry = array(
         'text'               => $text,
         'licenses_to_add'    => $licenses['licenses_to_add'],
         'licenses_to_remove' => $licenses['licenses_to_remove'],
@@ -232,6 +245,10 @@ class BulkTextExport
         'acknowledgements'   => $licenses['acknowledgements'],
         'is_active'          => $licenses['is_active']
       );
+      if ($includeLicenseText) {
+        $entry['license_text'] = $licenses['license_texts'];
+      }
+      $data[] = $entry;
     }
 
     return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
