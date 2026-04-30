@@ -69,7 +69,7 @@ class ClearingDao
     }
 
     $filterClause = $onlyCurrent ? "DISTINCT ON(itemid)" : "";
-    $sortClause = $onlyCurrent ? "ORDER BY itemid, scope, id DESC" : "";
+    $sortClause = $onlyCurrent ? "ORDER BY itemid, id DESC" : "";
 
     $statementName .= "." . $uploadTreeTable . ($onlyCurrent ? ".current": "");
 
@@ -261,7 +261,7 @@ class ClearingDao
       $reportInfo = $row['reportinfo'];
       $acknowledgement = $row['acknowledgement'];
 
-      if ($clearingId !== $previousClearingId && $itemId !== $previousItemId) {
+      if ($clearingId !== $previousClearingId || $itemId !== $previousItemId) {
         //store the old one
         if (!$firstMatch) {
           $clearingsWithLicensesArray[] = $clearingDecisionBuilder->setClearingEvents($clearingEvents)->build();
@@ -269,11 +269,8 @@ class ClearingDao
 
         $firstMatch = false;
         //prepare the new one
-        if ($forClearingHistory) {
-          $previousClearingId = $clearingId;
-        } else {
-          $previousItemId = $itemId;
-        }
+        $previousClearingId = $clearingId;
+        $previousItemId = $itemId;
         $clearingEvents = array();
         $clearingDecisionBuilder = ClearingDecisionBuilder::create()
             ->setClearingId($row['id'])

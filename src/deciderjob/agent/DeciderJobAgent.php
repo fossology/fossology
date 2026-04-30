@@ -113,7 +113,7 @@ class DeciderJobAgent extends Agent
   /**
    * @brief Process clearing events of current job handled by agent
    */
-  function processClearingEventOfCurrentJob()
+  function processClearingEventOfCurrentJob($uploadId)
   {
     $userId = $this->userId;
     $groupId = $this->groupId;
@@ -121,7 +121,7 @@ class DeciderJobAgent extends Agent
 
     $eventsOfThisJob = $this->clearingDao->getEventIdsOfJob($jobId);
     foreach ($eventsOfThisJob as $uploadTreeId => $additionalEventsFromThisJob) {
-      $containerBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
+      $containerBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
       foreach ($this->loopContainedItems($containerBounds) as $itemTreeBounds) {
         $this->processClearingEventsForItem($itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob);
       }
@@ -172,7 +172,7 @@ class DeciderJobAgent extends Agent
       }
       $this->heartbeat($this->clearingDao->marklocalDecisionsAsGlobal($uploadId));
     } else {
-      $this->processClearingEventOfCurrentJob();
+      $this->processClearingEventOfCurrentJob($uploadId);
     }
     return true;
   }

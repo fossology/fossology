@@ -73,7 +73,7 @@ class LicenseDao
           INNER JOIN $uploadTreeTableName as UT ON UT.pfile_fk = LFR.pfile_fk
           INNER JOIN agent as AG ON AG.agent_pk = LFR.agent_fk
           WHERE AG.agent_enabled='true' and
-           UT.upload_fk=$1 AND UT.lft BETWEEN $2 and $3
+           UT.upload_fk=$1 AND UT.lft BETWEEN $2 AND $3
           ORDER BY license_shortname ASC, percent_match DESC");
     $result = $this->dbManager->execute($statementName, $params);
     $matches = array();
