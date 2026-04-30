@@ -130,8 +130,11 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
       }
 
       if (result.disposition == CleanupResult::Disposition::DEACTIVATE) {
-        // deactivated copyright section
-        out.push_back(match(foundPos - begin, j - begin, copyrightType, false));
+        int startPos = foundPos - begin;
+        int endPos = j - begin;
+        if (endPos - startPos > 300)
+          endPos = startPos + 300;
+        out.push_back(match(startPos, endPos, copyrightType, false));
         pos = j;
         continue;
       }
@@ -155,7 +158,7 @@ CleanupResult hCopyrightScanner::Cleanup(const string &raw) const {
   using Disposition = CleanupResult::Disposition;
 
   if (rx::regex_match(raw, regRemoveFileStmt)) {
-    return {"", Disposition::DISCARD};
+    return {"", Disposition::DEACTIVATE};
   }
 
   string cleaned = raw;
@@ -164,19 +167,32 @@ CleanupResult hCopyrightScanner::Cleanup(const string &raw) const {
   cleaned = rx::regex_replace(cleaned, regStripAllRightReserveTrail, "");
   cleaned = rx::regex_replace(cleaned, regStripCopySymNonYear, "");
 
-  // DISCARD
+  // DEACTIVATE
   if (rx::regex_search(cleaned, regExceptionTemplate) ||
     rx::regex_search(cleaned, regExceptionBinaryNoise) ||
     rx::regex_search(cleaned, regExceptionMeta) ||
     rx::regex_search(cleaned, regExceptionCharNameRun)) {
-    return {"", Disposition::DISCARD};
+    return {"", Disposition::DEACTIVATE};
   }
 
-  // DEACTIVATE
-  if (rx::regex_search(cleaned, regExceptionCopy) ||
-    rx::regex_search(cleaned, regExceptionVerbFollow) ||
-    rx::regex_search(cleaned, regExceptionAdjectivePrefix) ||
-    rx::regex_search(cleaned, regExceptionPassive)) {
+  // DEACTIVATE: Limit scope to the first copyright context only.
+  string deactivateScope = cleaned;
+  {
+    string lower = cleaned;
+    transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    size_t first = lower.find("copyright");
+    if (first != string::npos) {
+      size_t second = lower.find("copyright", first + 9);
+      if (second != string::npos) {
+        deactivateScope = cleaned.substr(0, second);
+      }
+    }
+  }
+
+  if (rx::regex_search(deactivateScope, regExceptionCopy) ||
+    rx::regex_search(deactivateScope, regExceptionVerbFollow) ||
+    rx::regex_search(deactivateScope, regExceptionAdjectivePrefix) ||
+    rx::regex_search(deactivateScope, regExceptionPassive)) {
     return {"", Disposition::DEACTIVATE};
   }
 
