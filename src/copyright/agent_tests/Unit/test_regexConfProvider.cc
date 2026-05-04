@@ -44,10 +44,13 @@ private:
     // load parse test-stream
     rcp.maybeLoad(testIdentity,testStream);
 
+    std::string currentString;
+    rcp.getRegexValue(testIdentity,testKey).toUTF8String(currentString);
+
     // test RegexConfProvider
     CPPUNIT_ASSERT_MESSAGE("The generated string should match the expected string",
                            0 == strcmp(testString.c_str(),
-                                       rcp.getRegexValue(testIdentity,testKey)));
+                                       currentString.c_str()));
   }
 
 protected:
@@ -126,7 +129,7 @@ protected:
 
     // evaluate and verify, that recursion does not appear
     CPPUNIT_ASSERT_MESSAGE("This should just terminate (the return value is not specified)",
-                           rcp.getRegexValue(testIdentity,testKey));
+                           !rcp.getRegexValue(testIdentity,testKey).isEmpty());
   }
 };
 

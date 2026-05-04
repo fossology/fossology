@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: © 2022 Gaurav Mishra <mishra.gaurav@siemens.com>
 #]=======================================================================]
 
 set(FO_CWD ${CMAKE_CURRENT_SOURCE_DIR})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FO_CXX_FLAGS} -fopenmp")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FO_CXX_FLAGS}")
 
 include_directories(
     ${glib_INCLUDE_DIRS}
@@ -41,7 +41,7 @@ foreach(FO_SCANCODE_TARGET scancode scancode_exec scancode_cov scancode_cov_exec
         target_compile_options(${FO_SCANCODE_TARGET} PRIVATE ${FO_COV_FLAGS})
     endif()
     target_link_libraries(${FO_SCANCODE_TARGET}
-        PRIVATE fossologyCPP ${icu-uc_LIBRARIES} ${Boost_LIBRARIES} ${jsoncpp_LIBRARIES})
+        PRIVATE fossologyCPP ICU::uc ICU::i18n ${Boost_LIBRARIES} ${jsoncpp_LIBRARIES} OpenMP::OpenMP_CXX)
     if(${FO_SCANCODE_TARGET} MATCHES "_exec$")
         string(REPLACE "_exec" "" FO_SCANCODE_TARGET_R ${FO_SCANCODE_TARGET})
         set_target_properties(${FO_SCANCODE_TARGET}

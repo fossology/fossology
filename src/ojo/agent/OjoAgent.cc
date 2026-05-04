@@ -15,12 +15,35 @@ using namespace std;
  */
 OjoAgent::OjoAgent() :
     regLicenseList(
-        boost::regex(SPDX_LICENSE_LIST, boost::regex_constants::icase)),
+        boost::make_u32regex(SPDX_LICENSE_LIST, boost::regex_constants::icase)),
     regLicenseName(
-        boost::regex(SPDX_LICENSE_NAMES, boost::regex_constants::icase)),
+        boost::make_u32regex(SPDX_LICENSE_NAMES, boost::regex_constants::icase)),
     regDualLicense(
-        boost::regex(SPDX_DUAL_LICENSE, boost::regex_constants::icase))
+        boost::make_u32regex(SPDX_DUAL_LICENSE, boost::regex_constants::icase))
 {
+}
+
+/**
+ * @brief Read a file into an icu::UnicodeString.
+ *
+ * Reads the file as raw bytes and interprets it as UTF-8, converting to a
+ * UnicodeString so that subsequent regex operations work on Unicode code
+ * points rather than raw bytes.
+ * @param filePath Path to the file
+ * @param out      Output UnicodeString
+ * @return True on success, false on failure
+ */
+bool OjoAgent::readFileToUnicodeString(const string &filePath,
+  icu::UnicodeString &out) const
+{
+  std::ifstream stream(filePath, std::ios::binary);
+  if (!stream)
+    return false;
+  std::ostringstream sstr;
+  sstr << stream.rdbuf();
+  std::string content = sstr.str();
+  out = icu::UnicodeString::fromUTF8(content);
+  return !stream.fail();
 }
 
 /**
@@ -39,23 +62,22 @@ OjoAgent::OjoAgent() :
 vector<ojomatch> OjoAgent::processFile(const string &filePath,
   OjosDatabaseHandler &databaseHandler, const int groupId, const int userId)
 {
-  ifstream stream(filePath);
-  std::stringstream sstr;
-  sstr << stream.rdbuf();
-  if (stream.fail())
+  icu::UnicodeString fileContent;
+  if (!readFileToUnicodeString(filePath, fileContent))
   {
     throw std::runtime_error(filePath);
   }
-  stream.close();
-  const string fileContent = sstr.str();
+
   vector<ojomatch> licenseList;
   vector<ojomatch> licenseNames;
 
   scanString(fileContent, regLicenseList, licenseList, 0, false);
   for (auto m : licenseList)
   {
-    scanString(m.content, regLicenseName, licenseNames, m.start, false);
-    scanString(m.content, regDualLicense, licenseNames, m.start, true);
+    icu::UnicodeString contentUnicode =
+      icu::UnicodeString::fromUTF8(m.content);
+    scanString(contentUnicode, regLicenseName, licenseNames, m.start, false);
+    scanString(contentUnicode, regDualLicense, licenseNames, m.start, true);
   }
 
   findLicenseId(licenseNames, databaseHandler, groupId, userId);
@@ -73,23 +95,22 @@ vector<ojomatch> OjoAgent::processFile(const string &filePath,
  */
 vector<ojomatch> OjoAgent::processFile(const string &filePath)
 {
-  ifstream stream(filePath);
-  std::stringstream sstr;
-  sstr << stream.rdbuf();
-  if (stream.fail())
+  icu::UnicodeString fileContent;
+  if (!readFileToUnicodeString(filePath, fileContent))
   {
     throw std::runtime_error(filePath);
   }
-  stream.close();
-  const string fileContent = sstr.str();
+
   vector<ojomatch> licenseList;
   vector<ojomatch> licenseNames;
 
   scanString(fileContent, regLicenseList, licenseList, 0, false);
   for (auto m : licenseList)
   {
-    scanString(m.content, regLicenseName, licenseNames, m.start, false);
-    scanString(m.content, regDualLicense, licenseNames, m.start, true);
+    icu::UnicodeString contentUnicode =
+      icu::UnicodeString::fromUTF8(m.content);
+    scanString(contentUnicode, regLicenseName, licenseNames, m.start, false);
+    scanString(contentUnicode, regDualLicense, licenseNames, m.start, true);
   }
 
   // Remove duplicate matches for CLI run
@@ -101,31 +122,43 @@ vector<ojomatch> OjoAgent::processFile(const string &filePath)
 }
 
 /**
- * Scan a string based using a regex and create matches.
- * @param text        String to be scanned
- * @param reg         Regex to be used
+ * Scan a UnicodeString using a u32regex and create matches.
+ *
+ * All positions returned are UTF-16 code unit (UChar16) offsets, which is
+ * the native unit of icu::UnicodeString. This ensures that multi-byte UTF-8
+ * characters are counted correctly and that the offsets stored in the database
+ * correspond to character positions, not raw byte positions.
+ *
+ * @param text        UnicodeString to be scanned
+ * @param reg         u32regex to be used
  * @param[out] result The match list.
- * @param offset      The offset to be added for each match
+ * @param offset      UChar16 offset to add for each match (used for nested scans)
  * @param isDualTest  True if testing for Dual-license, false otherwise
  */
-void OjoAgent::scanString(const string &text, boost::regex reg,
+void OjoAgent::scanString(const icu::UnicodeString &text, const boost::u32regex &reg,
     vector<ojomatch> &result, unsigned int offset, bool isDualTest)
 {
-  string::const_iterator end = text.end();
-  string::const_iterator pos = text.begin();
+  const UChar* begin = text.getBuffer();
+  const UChar* end   = begin + text.length();
+  const UChar* pos   = begin;
 
   while (pos != end)
   {
-    // Find next match
-    boost::smatch res;
-    if (boost::regex_search(pos, end, res, reg))
+    boost::u16match res;
+    if (boost::u32regex_search(pos, end, res, reg))
     {
-      string content = "Dual-license";
-      if (! isDualTest)
+      string content;
+      if (isDualTest)
       {
-        content = res[1].str();
+        content = "Dual-license";
       }
-      // Found match
+      else
+      {
+        // toUTF8String appends, so start with an empty string
+        icu::UnicodeString matched(res[1].first,
+          static_cast<int32_t>(res[1].second - res[1].first));
+        matched.toUTF8String(content);
+      }
       result.push_back(
           ojomatch(offset + res.position(1),
               offset + res.position(1) + res.length(1),

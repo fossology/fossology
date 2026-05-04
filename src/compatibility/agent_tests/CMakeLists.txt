@@ -9,7 +9,7 @@ if(NOT TARGET phpunit)
     prepare_phpunit()
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FO_CXX_FLAGS} -fopenmp -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FO_CXX_FLAGS} -Wextra")
 
 add_executable(test_compatibility "")
 target_sources(test_compatibility
@@ -39,10 +39,11 @@ target_link_libraries(test_compatibility
     PRIVATE
         compatibility
         ${cppunit_LIBRARIES}
-        ${icu-uc_LIBRARIES}
+        ICU::uc ICU::i18n
         ${Boost_LIBRARIES}
         ${jsoncpp_LIBRARIES}
         yaml-cpp
+        OpenMP::OpenMP_CXX
 )
 
 add_test(compatibility_unit_test test_compatibility)

@@ -20,8 +20,9 @@ regexScanner::regexScanner(const string& type,
 {
   RegexConfProvider rcp;
   rcp.maybeLoad(_identity);
-  _reg = rx::regex(rcp.getRegexValue(_identity, _type),
-                   rx::regex_constants::icase);
+  std::string pattern;
+  rcp.getRegexValue(_identity, _type).toUTF8String(pattern);
+  _reg = rx::regex(pattern, rx::regex_constants::icase);
 }
 
 /**
@@ -39,38 +40,53 @@ regexScanner::regexScanner(const string& type,
 {
   RegexConfProvider rcp;
   rcp.maybeLoad(_identity,stream);
-  _reg = rx::regex(rcp.getRegexValue(_identity, _type),
-                   rx::regex_constants::icase);
+  std::string pattern;
+  rcp.getRegexValue(_identity, _type).toUTF8String(pattern);
+  _reg = rx::regex(pattern, rx::regex_constants::icase);
 }
 
 /**
  * \brief Scan a string using regex defined during initialization
- * \param[in]  s       String to scan
- * \param[out] results List of match results
+ *
+ * Converts the UnicodeString to UTF-8 and uses boost::regex for performance.
+ * The byte offsets from regex matches are then converted to UChar16 offsets
+ * so positions stored in the database are consistent with the ICU representation.
+ *
+ * \param[in]  s       UnicodeString to scan
+ * \param[out] results List of match results (positions in UChar16 offsets)
  */
-void regexScanner::ScanString(const string& s, list<match>& results) const
+void regexScanner::ScanString(const icu::UnicodeString& s, list<match>& results) const
 {
-  // Read file into one string
-  string::const_iterator end = s.end();
-  string::const_iterator pos = s.begin();
-  unsigned int intPos = 0;
+  std::string utf8;
+  s.toUTF8String(utf8);
+
+  const unsigned char* utf8Buf =
+    reinterpret_cast<const unsigned char*>(utf8.c_str());
+
+  auto pos = utf8.cbegin();
+  auto const end = utf8.cend();
 
   while (pos != end)
   {
-    // Find next match
     rx::smatch res;
     if (rx::regex_search(pos, end, res, _reg))
     {
-      // Found match
-      results.push_back(match(intPos + res.position(_index),
-                              intPos + res.position(_index) + res.length(_index),
-                              _type));
+      // Compute byte offsets relative to start of utf8 string
+      size_t byteMatchStart = static_cast<size_t>(
+        res.position(_index) + std::distance(utf8.cbegin(), pos));
+      size_t byteMatchEnd = byteMatchStart +
+        static_cast<size_t>(res.length(_index));
+
+      // Convert byte offsets to UChar16 offsets
+      int ucharStart = static_cast<int>(
+        fo_utf8ByteLenToUChar16Len(utf8Buf, byteMatchStart));
+      int ucharEnd = static_cast<int>(
+        fo_utf8ByteLenToUChar16Len(utf8Buf, byteMatchEnd));
+
+      results.push_back(match(ucharStart, ucharEnd, _type));
       pos = res[0].second;
-      intPos += res.position() + res.length();
     }
     else
-      // No match found
       break;
   }
 }
-

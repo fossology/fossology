@@ -150,17 +150,17 @@ void RegexConfProvider::maybeLoad(const string& identity,
 
 /**
  * \brief Get the regex as string from the RegexMap
- * \param identity Identity from which the map was loaded
- * \param key      Key of the regex value required
+ * \param name Identity from which the map was loaded
+ * \param key  Key of the regex value required
  * \return Regex value as a null terminated string
  */
-const char* RegexConfProvider::getRegexValue(const string& identity,
-                                             const string& key)
+const icu::UnicodeString RegexConfProvider::getRegexValue(const string& name,
+                                                const string& key)
 {
-  const string* rv;
+  icu::UnicodeString rv;
 #pragma omp critical(rmm)
   {
-    rv = &(RegexConfProvider::_regexMapMap[identity][key]);
+    rv = RegexConfProvider::_regexMapMap[name][key];
   }
-  return (*rv).c_str();
+  return rv;
 }

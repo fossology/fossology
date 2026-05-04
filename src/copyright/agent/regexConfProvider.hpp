@@ -32,8 +32,8 @@ public:
   void maybeLoad(const std::string& identity,
                  std::istringstream& stream);
 
-  const char* getRegexValue(const std::string& name,
-                            const std::string& key);
+  const icu::UnicodeString getRegexValue(const std::string& name,
+                                         const std::string& key);
 
 private:
   static std::map<std::string,RegexMap> _regexMapMap;

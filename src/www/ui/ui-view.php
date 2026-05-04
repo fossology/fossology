@@ -174,8 +174,19 @@ class ui_view extends FO_Plugin
     $output .= ($Flowed ? '<div class="text">' : '<div class="mono"><pre style="overflow:unset;">');
 
     fseek($inputFile, $startOffset, SEEK_SET);
-    $textFragment = new TextFragment($startOffset,
-      fread($inputFile, $outputLength));
+    $content = fread($inputFile, $outputLength);
+
+    // Convert byte startOffset to character offset for consistency
+    // with highlight positions stored in the database.
+    if ($startOffset > 0) {
+      rewind($inputFile);
+      $prefix = fread($inputFile, $startOffset);
+      $charStartOffset = mb_strlen($prefix, 'UTF-8');
+    } else {
+      $charStartOffset = 0;
+    }
+
+    $textFragment = new TextFragment($charStartOffset, $content);
 
     $renderedText = $this->textRenderer->renderText($textFragment,
       $splitPositions, $insertBacklink);
@@ -210,8 +221,18 @@ class ui_view extends FO_Plugin
 
     $output = "";
     fseek($inputFile, $startOffset, SEEK_SET);
-    $textFragment = new TextFragment($startOffset,
-      fread($inputFile, $outputLength));
+    $content = fread($inputFile, $outputLength);
+
+    // Convert byte startOffset to character offset
+    if ($startOffset > 0) {
+      rewind($inputFile);
+      $prefix = fread($inputFile, $startOffset);
+      $charStartOffset = mb_strlen($prefix, 'UTF-8');
+    } else {
+      $charStartOffset = 0;
+    }
+
+    $textFragment = new TextFragment($charStartOffset, $content);
 
     $output .= "<div class='mono'>";
 
@@ -338,6 +359,13 @@ class ui_view extends FO_Plugin
 
     $blockSize = $Format == 'hex' ? $this->blockSizeHex : $this->blockSizeText;
 
+    // Read full file content to compute character-level page boundaries.
+    // Highlight positions from the database are in character space,
+    // so pagination must also work in character space.
+    rewind($inputFile);
+    $fullContent = stream_get_contents($inputFile);
+    rewind($inputFile);
+
     if (! isset($Page) && ! empty($licenseId)) {
       $startPos = - 1;
       foreach ($highlightEntries as $highlightEntry) {
@@ -360,12 +388,16 @@ class ui_view extends FO_Plugin
       $output .= "<center>$PageMenu</center><br>\n";
     }
 
-    $startAt = $PageSize;
-    $endAt = $PageSize + $blockSize;
+    // Compute character-level page boundaries for highlight filtering.
+    // $PageSize is a byte offset; convert to character offset for the range check.
+    $charStartAt = ($PageSize > 0) ? mb_strlen(substr($fullContent, 0, $PageSize), 'UTF-8') : 0;
+    $charBlockContent = substr($fullContent, $PageSize, $blockSize);
+    $charEndAt = $charStartAt + mb_strlen($charBlockContent, 'UTF-8');
+
     $relevantHighlightEntries = array();
     foreach ($highlightEntries as $highlightEntry) {
-      if ($highlightEntry->getStart() < $endAt &&
-        $highlightEntry->getEnd() >= $startAt) {
+      if ($highlightEntry->getStart() < $charEndAt &&
+        $highlightEntry->getEnd() >= $charStartAt) {
         $relevantHighlightEntries[] = $highlightEntry;
       }
     }

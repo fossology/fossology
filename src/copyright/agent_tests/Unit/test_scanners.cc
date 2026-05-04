@@ -32,7 +32,7 @@ ostream& operator<<(ostream& out, const list<match>& l)
 /**
  * \brief test data
  */
-const char testContent[] = "© 2007 Hugh Jackman\n\n"
+const icu::UnicodeString testContent(u"© 2007 Hugh Jackman\n\n"
   "Copyright 2004 my company\n\n"
   "Copyrights by any strange people\n\n"
   "(C) copyright 2007-2011, 2013 my favourite company Google\n\n"
@@ -53,7 +53,7 @@ const char testContent[] = "© 2007 Hugh Jackman\n\n"
   "* Copyright (c) 1989, 1993\n" // Really just one newline here!
   "* The Regents of the University of California. All rights reserved.\n\n"
   "to be licensed as a whole"
-  "/* Most of the following tests are stolen from RCS 5.7's src/conf.sh.  */";
+  "/* Most of the following tests are stolen from RCS 5.7's src/conf.sh.  */");
 
 class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (scannerTestSuite);
@@ -76,7 +76,8 @@ private:
    * \param type            Match type
    * \param expectedStrings Expected strings from scanner result
    */
-  void scannerTest (const scanner& sc, const char* content, const string& type, list<const char*> expectedStrings)
+  void scannerTest (const scanner& sc, const icu::UnicodeString& content,
+    const string& type, const list<icu::UnicodeString>& expectedStrings)
   {
     list<match> matches;
     list<match> expected;
@@ -84,12 +85,10 @@ private:
 
     for (auto s = expectedStrings.begin(); s != expectedStrings.end(); ++s)
     {
-      const char * p = strstr(content, *s);
-      if (p)
-      {
-        int pos = p - content;
-        expected.push_back(match(pos, pos+strlen(*s), type));
-      }
+      auto const begin = content.indexOf(*s);
+      auto const end = begin + s->countChar32();
+      if (begin > -1)
+        expected.emplace_back(begin, end, type);
       // else: expected string is not contained in original string
     }
     CPPUNIT_ASSERT_EQUAL(expected, matches);
@@ -207,41 +206,56 @@ protected:
    */
   void cleanEntries () {
     // Binary content
-    string actualFileContent;
+    icu::UnicodeString actualFileContent;
     ReadFileToString("../testdata/testdata142", actualFileContent);
 
-    vector<string> binaryStrings;
-    std::stringstream *ss = new std::stringstream(actualFileContent);
-    string temp;
-
-    while (std::getline(*ss, temp)) {
-      binaryStrings.push_back(temp);
+    // Split by newline using UnicodeString operations to get proper UChar16 offsets
+    vector<int32_t> lineLengths;
+    int32_t lineStart = 0;
+    for (int32_t i = 0; i <= actualFileContent.length(); i++)
+    {
+      if (i == actualFileContent.length() || actualFileContent.charAt(i) == u'\n')
+      {
+        // Skip trailing empty segment (mimics getline semantics)
+        if (i == actualFileContent.length() && i == lineStart)
+          break;
+        lineLengths.push_back(i - lineStart);
+        lineStart = i + 1;
+      }
     }
 
-    // Simulate matches. Each line is a match
+    // Simulate matches. Each line is a match (in UChar16 offsets)
     vector<match> matches;
-    int pos = 0;
-    int size = binaryStrings.size();
-    for (int i = 0; i < size; i++)
+    int32_t pos = 0;
+    for (size_t i = 0; i < lineLengths.size(); i++)
     {
-      int length = binaryStrings[i].length();
+      int32_t length = lineLengths[i];
       matches.push_back(
         match(pos, pos + length, "statement"));
-      pos += length + 1;
+      pos += length + 1; // +1 for newline
     }
 
     // Expected data
-    string expectedFileContent;
+    icu::UnicodeString expectedFileContent;
     ReadFileToString("../testdata/testdata142_exp", expectedFileContent);
 
-    delete(ss);
-    ss = new std::stringstream(expectedFileContent);
-    vector<string> expectedStrings;
-    while (std::getline(*ss, temp)) {
-      expectedStrings.push_back(temp);
+    // Split expected content by newline
+    vector<icu::UnicodeString> expectedStrings;
+    lineStart = 0;
+    for (int32_t i = 0; i <= expectedFileContent.length(); i++)
+    {
+      if (i == expectedFileContent.length() || expectedFileContent.charAt(i) == u'\n')
+      {
+        if (i == expectedFileContent.length() && i == lineStart)
+          break;
+        icu::UnicodeString line;
+        expectedFileContent.extractBetween(lineStart, i, line);
+        expectedStrings.push_back(line);
+        lineStart = i + 1;
+      }
     }
 
-    vector<string> actualStrings;
+    vector<icu::UnicodeString> actualStrings;
     for (size_t i = 0; i < matches.size(); i ++)
     {
       actualStrings.push_back(cleanMatch(actualFileContent, matches[i]));

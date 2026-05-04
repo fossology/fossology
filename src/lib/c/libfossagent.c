@@ -487,3 +487,124 @@ PGresult* getSelectedPFiles(PGconn* pgConn, int uploadPk, int agentPk, bool igno
   result = PQexec(pgConn, SQL);
   return result;
 }
+
+/**
+ * @brief Count UTF-16 code units (UChar16) in a UTF-8 byte buffer.
+ *
+ * Each ASCII byte maps to 1 UChar16. Each 2- or 3-byte UTF-8 sequence maps
+ * to 1 UChar16. A 4-byte sequence (supplementary character) maps to 2
+ * UChar16 units (a surrogate pair). This matches the counting used by
+ * icu::UnicodeString so that offsets stored in the database are consistent
+ * across all agents.
+ *
+ * When byteLen falls in the middle of a multi-byte sequence, only the
+ * complete bytes are counted; the partial trailing sequence is ignored.
+ *
+ * @param utf8    UTF-8 encoded byte buffer
+ * @param byteLen Number of bytes to examine
+ * @return Number of UTF-16 code units
+ */
+size_t fo_utf8ByteLenToUChar16Len(const unsigned char* utf8, size_t byteLen)
+{
+  size_t count = 0;
+  size_t i = 0;
+  while (i < byteLen)
+  {
+    unsigned char c = utf8[i];
+    if (c < 0x80)
+    {
+      i += 1;
+      count += 1;
+    }
+    else if ((c & 0xE0) == 0xC0)
+    {
+      if (i + 2 > byteLen) break;
+      if ((utf8[i + 1] & 0xC0) != 0x80)
+      {
+        /* Invalid continuation byte; treat lead as single unit */
+        i += 1;
+        count += 1;
+        continue;
+      }
+      i += 2;
+      count += 1;
+    }
+    else if ((c & 0xF0) == 0xE0)
+    {
+      if (i + 3 > byteLen) break;
+      if ((utf8[i + 1] & 0xC0) != 0x80 || (utf8[i + 2] & 0xC0) != 0x80)
+      {
+        /* Invalid continuation byte; treat lead as single unit */
+        i += 1;
+        count += 1;
+        continue;
+      }
+      i += 3;
+      count += 1;
+    }
+    else if ((c & 0xF8) == 0xF0)
+    {
+      if (i + 4 > byteLen) break;
+      if ((utf8[i + 1] & 0xC0) != 0x80 || (utf8[i + 2] & 0xC0) != 0x80 ||
+          (utf8[i + 3] & 0xC0) != 0x80)
+      {
+        /* Invalid continuation byte; treat lead as single unit */
+        i += 1;
+        count += 1;
+        continue;
+      }
+      i += 4;
+      count += 2;
+    }
+    else
+    {
+      i += 1; /* continuation byte or invalid: skip */
+      count += 1;
+    }
+  }
+  return count;
+}
+
+/** Maximum file size (50 MB) we are willing to read for offset conversion.
+ *  Larger files are left with byte offsets to avoid excessive memory use. */
+#define FO_MAX_FILE_READ_SIZE (50UL * 1024 * 1024)
+
+/**
+ * \brief Read a file into a malloc'd buffer.
+ *
+ * Files larger than 50 MB are skipped (returns NULL) to avoid allocating
+ * excessive memory just for offset conversion.
+ *
+ * \param fileName  Path of the file to read
+ * \param outSize   Set to the number of bytes read on success
+ * \return Pointer to malloc'd buffer (caller must free), or NULL on failure
+ */
+unsigned char* fo_readFileBytes(const char* fileName, size_t* outSize)
+{
+  FILE* f = fopen(fileName, "rb");
+  if (!f)
+    return NULL;
+
+  fseek(f, 0, SEEK_END);
+  long fsize = ftell(f);
+  rewind(f);
+
+  if (fsize <= 0 || (unsigned long)fsize > FO_MAX_FILE_READ_SIZE)
+  {
+    fclose(f);
+    return NULL;
+  }
+
+  unsigned char* buf = (unsigned char*)malloc((size_t)fsize);
+  if (!buf)
+  {
+    fclose(f);
+    return NULL;
+  }
+
+  size_t bytesRead = fread(buf, 1, (size_t)fsize, f);
+  fclose(f);
+
+  *outSize = bytesRead;
+  return buf;
+}

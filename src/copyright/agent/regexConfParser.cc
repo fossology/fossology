@@ -9,13 +9,14 @@
  * \brief Handles RegexMap related requests
  */
 #include "regexConfParser.hpp"
+
 #include <string>
 #include <iostream>
 
 using namespace std;
 
 /**
- * \brief Read a string stream and crate a RegexMap
+ * \brief Read a string stream and create a RegexMap
  * \param stream           String stream to read from
  * \param isVerbosityDebug Print debug messages if true
  * \return RegexMap created using stream
@@ -23,7 +24,7 @@ using namespace std;
 RegexMap readConfStreamToMap(std::istringstream& stream,
                              const bool isVerbosityDebug)
 {
-  map<string, string> regexMap;
+  map<string, icu::UnicodeString> regexMap;
   for (string line; getline(stream, line); )
     addRegexToMap(regexMap, line, isVerbosityDebug);
 
@@ -36,7 +37,7 @@ RegexMap readConfStreamToMap(std::istringstream& stream,
 RegexMap readConfStreamToMap(std::ifstream& stream,
                              const bool isVerbosityDebug)
 {
-  map<string, string> regexMap;
+  map<string, icu::UnicodeString> regexMap;
   for (string line; getline(stream, line); )
     addRegexToMap(regexMap, line, isVerbosityDebug);
   stream.close();
@@ -54,7 +55,7 @@ void addRegexToMap(/*in and out*/ RegexMap& regexMap,
                    const std::string& regexDesc,
                    const bool isVerbosityDebug)
 {
-  if (regexDesc[0] == '#')
+  if (regexDesc.empty() || regexDesc[0] == '#')
     return;
 
   istringstream is_line(regexDesc);
@@ -63,10 +64,13 @@ void addRegexToMap(/*in and out*/ RegexMap& regexMap,
   {
     if(getline(is_line, value))
     {
-      value=replaceTokens(regexMap, value);
-      regexMap[key]=value;
+      regexMap[key] = replaceTokens(regexMap, value);
       if (isVerbosityDebug)
-        cout << "loaded or updated regex definition: " << key << " -> \"" << value << "\"" << endl;
+      {
+        string convertedValue;
+        regexMap[key].toUTF8String(convertedValue);
+        cout << "loaded or updated regex definition: " << key << " -> \"" << convertedValue << "\"" << endl;
+      }
     }
     else
     {
@@ -86,34 +90,35 @@ void addRegexToMap(/*in and out*/ RegexMap& regexMap,
  * \param[in] constInput Input which has to be removed
  * \return String with tokens removed
  */
-string replaceTokens(/*in*/ RegexMap& regexMap,
-                     const string& constInput)
+icu::UnicodeString replaceTokens(/*in*/ RegexMap& regexMap,
+                                 const string& constInput)
 {
-#define RGX_SEPARATOR_LEFT "__"
+#define RGX_SEPARATOR_LEFT u"__"
 #define RGX_SEPARATOR_RIGHT RGX_SEPARATOR_LEFT
 #define RGX_SEPARATOR_LEN 2
 
-  string input(constInput);
-  stringstream output;
+  icu::UnicodeString input = icu::UnicodeString::fromUTF8(constInput);
+  icu::UnicodeString output;
 
-  size_t pos = 0;
+  int32_t pos = 0;
   string token;
-  while ((pos = input.find(RGX_SEPARATOR_LEFT)) != string::npos) // find start of the next token
+  while ((pos = input.indexOf(RGX_SEPARATOR_LEFT)) != -1) // find start of the next token
   {
-    output << input.substr(0, pos);
-    input.erase(0, pos + RGX_SEPARATOR_LEN);
+    output.append(input.tempSubString(0, pos));
+    input.removeBetween(0, pos + RGX_SEPARATOR_LEN);
 
-    if ((pos = input.find(RGX_SEPARATOR_RIGHT)) != string::npos) // find end of token
+    if ((pos = input.indexOf(RGX_SEPARATOR_RIGHT)) != -1) // find end of token
     {
-      output << regexMap[input.substr(0, pos)];
-      input.erase(0, pos + RGX_SEPARATOR_LEN);
-
+      std::string utf8String;
+      input.tempSubString(0, pos).toUTF8String(utf8String);
+      output.append(regexMap[utf8String]);
+      input.removeBetween(0, pos + RGX_SEPARATOR_LEN);
     }
     else
     {
       cout << "uneven number of delimiters: " << constInput << endl;
     }
   }
-  output << input;
-  return output.str();
+  output.append(input);
+  return output;
 }
