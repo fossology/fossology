@@ -40,15 +40,6 @@ jobs:
       matrix:
         config:
           - {
-              name: "Ubuntu 22.04 GCC 9",
-              os: ubuntu-22.04,
-              build_type: "Debug",
-              cc: "gcc-9",
-              cxx: "g++-9",
-              php: "8.1",
-              experimental: false,
-            }
-          - {
               name: "Ubuntu 22.04 GCC 11",
               os: ubuntu-22.04,
               build_type: "Debug",
@@ -99,10 +90,6 @@ jobs:
           extensions: gettext, mbstring, gd, json, xml, zip, pgsql, curl, uuid, posix, sqlite3
         env:
           fail-fast: true
-
-      - name: Install additional Dependencies
-        if: ${{ matrix.config.cc == 'gcc-9' }}
-        run: sudo apt install -y gcc-9 g++-9
 
       - name: Configure and Generate CMake Project
         run: |

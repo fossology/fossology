@@ -129,6 +129,11 @@ set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_DEPENDS
     php7.2-gd | php7.3-gd | php7.4-gd | php8.1-gd | php8.2-gd | php8.3-gd | php8.4-gd,
     php7.2-yaml | php7.3-yaml | php7.4-yaml | php8.1-yaml | php8.2-yaml | php8.3-yaml | php8.4-yaml | php-yaml")
 
+set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_CONFLICTS
+    "fossology-spdx2 (<< 4.5.0)")
+set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_REPLACES
+    "fossology-spdx2 (<< 4.5.0)")
+
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_CONTROL_EXTRA
 "${FO_DEBDIR}/common/postinst;${FO_DEBDIR}/common/postrm;${FO_DEBDIR}/common/conffiles")
@@ -193,6 +198,9 @@ and consult the README.Debian file included in the fossology-common
 package.")
 
 set(CPACK_DEBIAN_DB_PACKAGE_DEPENDS "postgresql")
+
+set(CPACK_DEBIAN_DB_PACKAGE_REPLACES
+    "fossology-common (<< 4.5.0)")
 
 set(CPACK_DEBIAN_DB_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_DB_PACKAGE_CONTROL_EXTRA
@@ -587,7 +595,7 @@ set(CPACK_DEBIAN_SPDX_PACKAGE_DEPENDS
     "fossology-common")
 
 set(CPACK_DEBIAN_SPDX_PACKAGE_CONFLICTS
-    "fossology-spdx2 (< 4.5.0)")
+    "fossology-spdx2 (<< 4.5.0)")
 set(CPACK_DEBIAN_SPDX_PACKAGE_REPLACES
     "fossology-spdx2")
 
