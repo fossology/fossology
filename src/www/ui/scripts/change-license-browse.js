@@ -37,24 +37,23 @@ $(document).ready(function () {
 });
 
 $("#textModal").on('show.bs.modal', function (e) {
-    $("#bulkModal").modal("hide");
+    $("#bulkModal").hide();
 });
 
 $("#textModal").on('hide.bs.modal', function (e) {
-    $("#bulkModal").modal("show");
+    $("#bulkModal").show();
 });
 
 function openBulkModal(uploadTreeId) {
-  bulkModal = $('#bulkModal').modal('hide');
   $('#bulkScope').val("f");
   $('#bulkScope').attr("disabled", true);
   $('#uploadTreeId').val(uploadTreeId);
-  bulkModal.toggle();
+  $('#bulkModal').modal('show');
 }
 
 function closeBulkModal() {
   $('#editFilter').val(0);
-  $('#bulkModal').hide();
+  $('#bulkModal').modal('hide');
 }
 
 // Hide backdrop for bulk modal
