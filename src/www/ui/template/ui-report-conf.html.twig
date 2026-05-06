@@ -12,6 +12,9 @@
       {% if tableRows is not empty %}
         <li><a href="#ObligationsConfTab">Obligations in Unified Report</a></li>
       {% endif %}
+      {% if ackRows is not empty %}
+        <li><a href="#acknowledgementsConfTab">Acknowledgements</a></li>
+      {% endif %}
       <li><a href="#SPDXConfTab">SPDX Report Settings</a></li>
       {% if globalClearingAvailable is not empty %}
         <li><a href="#clearingConfTab">Decision Settings</a></li>
@@ -231,6 +234,45 @@
         </table>
       </div>
     {% endif %}
+    {% if ackRows is not empty %}
+    <div id="acknowledgementsConfTab">
+      <table border="1" class="table">
+        <thead>
+          <tr>
+            <th style="width:5%">{{ "Count"|trans }}</th>
+            <th style="width:60%">{{ "Acknowledgement Text"|trans }}</th>
+            <th style="width:25%">{{ "Licenses"|trans }}</th>
+            <th style="width:10%">{{ "Action"|trans }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ ackRows }}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- modal to list files for selected acknowledgement -->
+    <div id="ackFilesModal" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">{{ "Files containing selected acknowledgement"|trans }}
+              <small id="ackFilesModalCount" class="text-muted"></small>
+            </h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="ackFilesModalBody"
+               style="max-height:60vh;overflow-y:auto;padding:10px 15px;"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">{{ "Close"|trans }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="SPDXConfTab">
       <table border="1" class="table">
         <tr>
@@ -300,7 +342,7 @@
     {% endif %}
 
   </div>
-  <table border="0" align="center" cellpadding="20">
+  <table border="0" align="center" cellpadding="20" id="reportConfSubmit">
     <tr>
       <td>
         <input type="submit" class="btn btn-default" name="submitReportConf" value="Submit" />
