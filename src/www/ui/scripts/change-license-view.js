@@ -17,12 +17,12 @@ function openBulkModal() {
   $('#userModal').hide();
   $('#ClearingHistoryDataModal').hide();
   bulkModalOpened = 1;
-  $('#bulkModal').toggle();
+  $('#bulkModal').modal('show');
 }
 
 function closeBulkModal() {
   bulkModalOpened = 0;
-  $('#bulkModal').hide();
+  $('#bulkModal').modal('hide');
 }
 
 // Hide backdrop for bulk modal
@@ -48,13 +48,13 @@ function closeUserModal() {
 
 $("#textModal").on('show.bs.modal', function (e) {
   if(bulkModalOpened) {
-    $("#bulkModal").modal("hide");
+    $("#bulkModal").hide();
   }
 });
 
 $("#textModal").on('hide.bs.modal', function (e) {
   if(bulkModalOpened) {
-    $("#bulkModal").modal("show");
+    $("#bulkModal").show();
   }
 });
 
