@@ -182,7 +182,7 @@ char *newReloTarget(char *basename)
 #endif /* PROC_TRACE */
 
   for (i = 0; i < MAX_RENAME; i++) {
-    (void) sprintf(newpath, "%s_%s-renamed.%03d", basename, gl.progName, i);
+    (void) snprintf(newpath, sizeof(newpath), "%s_%s-renamed.%03d", basename, gl.progName, i);
     if (access(newpath, F_OK) && errno == ENOENT) {
       break;
     }
@@ -243,7 +243,8 @@ char *memAllocTagged(int size, char *name)
 #endif /* DEBUG > 3 || MEM_ACCT */
   memcache[memlast].mmPtr = ptr;
   memcache[memlast].size = size;
-  (void) strcpy(memcache[memlast].label, name);
+  strncpy(memcache[memlast].label, name, sizeof(memcache[memlast].label) - 1);
+  memcache[memlast].label[sizeof(memcache[memlast].label) - 1] = '\0';
 #ifdef MEM_ACCT
   printf("memAllocTagged(%d, \"%s\") == %p [entry %04d]\n", size, name, ptr,
       memlast);
@@ -575,7 +576,7 @@ char *wordCount(char *textp)
         break;
     }
   }
-  (void) sprintf(wcbuf, "%d lines", lines);
+  (void) snprintf(wcbuf, sizeof(wcbuf), "%d lines", lines);
   /*
    * Save these values for use elsewhere, too.
    */
@@ -671,7 +672,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
   if (recordOffsets) {
     if (p->bList) free(p->bList);
     p->bList = (list_t *)memAlloc(sizeof(list_t), MTAG_LIST);
-    (void) sprintf(utilbuf, "\"%c%c%c%c%c%c%c%c%c%c\" match-list",
+    (void) snprintf(utilbuf, sizeof(utilbuf), "\"%c%c%c%c%c%c%c%c%c%c\" match-list",
         *regex, *(regex+1), *(regex+2), *(regex+3), *(regex+4),
         *(regex+5), *(regex+6), *(regex+7), *(regex+8), *(regex+9));
 #ifdef PHRASE_DEBUG
@@ -729,7 +730,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
     printf("... found Match #%d\n", p->nMatch);
 #endif /* PHRASE_DEBUG */
     if (recordOffsets) {
-      (void) sprintf(utilbuf, "buf%05d", p->nMatch);
+      (void) snprintf(utilbuf, sizeof(utilbuf), "buf%05d", p->nMatch);
       bp = listGetItem(p->bList, utilbuf);
     }
     start = findBol(curptr + cur.regm.rm_so, textp);
@@ -870,9 +871,13 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
     }
     cp = bufmark = ibuf+buflen-1; /* where the NULL is _now_ */
     buflen += newDataLen;  /* new end-of-data ptr */
-    bufmark += sprintf(bufmark, "%s", start);
+    int remaining = bufmax - (bufmark - ibuf);
+    int written = snprintf(bufmark, remaining, "%s", start);
+    bufmark += (written >= remaining) ? remaining - 1 : written;
     if (notDone) {
-      bufmark += sprintf(bufmark, "%s\n", sep);
+      remaining = bufmax - (bufmark - ibuf);
+      written = snprintf(bufmark, remaining, "%s\n", sep);
+      bufmark += (written >= remaining) ? remaining - 1 : written;
     }
     /*
      * Some files use ^M as a line-terminator, so we need to convert those
@@ -935,7 +940,7 @@ void memStats(char *s)
 
   if (first) {
     first = 0;
-    sprintf(mbuf, "grep VmRSS /proc/%d/status", getpid());
+    snprintf(mbuf, sizeof(mbuf), "grep VmRSS /proc/%d/status", getpid());
   }
   if (s && *s) {
     int i;
@@ -963,7 +968,7 @@ void makeSymlink(char *path)
   traceFunc("== makeSymlink(%s)\n", path);
 #endif /* PROC_TRACE || UNPACK_DEBUG */
 
-  (void) sprintf(cmdBuf, ".%s", strrchr(path, '/'));
+  (void) snprintf(cmdBuf, sizeof(cmdBuf), ".%s", strrchr(path, '/'));
   if (symlink(path, cmdBuf) < 0) {
     perror(cmdBuf);
     LOG_FATAL("Failed: symlink(%s, %s)", path, cmdBuf)
@@ -1015,7 +1020,7 @@ void printRegexMatch(int n, int cached)
     printf("Match [%d:%d]\n", save_so, save_eo);
 #endif /* DEBUG */
     textp = mmapFile(debugStr);
-    (void) sprintf(misc, "=#%03d", n);
+    (void) snprintf(misc, sizeof(misc), "=#%03d", n);
     if (strGrep(misc, textp, REG_EXTENDED)) {
 #ifdef DEBUG
       printf("Patt: %s\nMatch: %d:%d\n", misc,
@@ -1034,7 +1039,8 @@ void printRegexMatch(int n, int cached)
       (void) strncpy(misc, x, cp - x); /* CDB - Fix */
       misc[cp-x] = NULL_CHAR;
     } else {
-      (void) strcpy(misc, "?");
+      strncpy(misc, "?", sizeof(misc) - 1);
+      misc[sizeof(misc) - 1] = '\0';
     }
     munmapFile(textp);
     if (match) {
@@ -1129,7 +1135,8 @@ char *mmapFile(char *pathname) /* read-only for now */
     Bail(14);
   }
 
-  (void) strcpy(mmp->label, pathname);
+  strncpy(mmp->label, pathname, sizeof(mmp->label) - 1);
+  mmp->label[sizeof(mmp->label) - 1] = '\0';
   if (cur.stbuf.st_size)
   {
     mmp->size = cur.stbuf.st_size + 1;
@@ -1364,7 +1371,7 @@ int isFILE(char *pathname)
 int addEntry(char *pathname, int forceFlag, const char *fmt, ...)
 {
   va_start(ap, fmt);
-  vsprintf(utilbuf, fmt, ap);
+  vsnprintf(utilbuf, sizeof(utilbuf), fmt, ap);
   va_end(ap);
 
 #ifdef  PROC_TRACE
@@ -1401,8 +1408,10 @@ void Msg(const char *fmt, ...)
 void Assert(int fatalFlag, const char *fmt, ...)
 {
   va_start(ap, fmt);
-  (void) sprintf(utilbuf, "ASSERT: ");
-  (void) vsprintf(utilbuf+strlen(utilbuf), fmt, ap);
+  (void) snprintf(utilbuf, sizeof(utilbuf), "ASSERT: ");
+  int offset = strlen(utilbuf);
+  int remaining_len = sizeof(utilbuf) - offset;
+  (void) vsnprintf(utilbuf + offset, remaining_len, fmt, ap);
   va_end(ap);
 
 #ifdef  PROC_TRACE
