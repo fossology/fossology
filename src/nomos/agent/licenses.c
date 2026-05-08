@@ -239,7 +239,30 @@ void licenseInit() {
       continue;
     }
   }
+
+  /* pre-compile all non-plain patterns once; idx_regc[] reused in idxGrep_base() */
+  for (i = 0; i < NFOOTPRINTS; i++) {
+    if (!licText[i].plain && licText[i].regex != NULL_STR) {
+      int rc = regcomp(&idx_regc[i], licText[i].regex, REG_ICASE | REG_EXTENDED);
+      if (rc == 0) {
+        licText[i].compiled = 1;
+      } else {
+        LOG_WARNING("nomos: failed to pre-compile regex #%d: %s", i, licText[i].regex);
+      }
+    }
+  }
   return;
+}
+
+void licenseRegexFree(void)
+{
+  int i;
+  for (i = 0; i < NFOOTPRINTS; i++) {
+    if (licText[i].compiled) {
+      regfree(&idx_regc[i]);
+      licText[i].compiled = 0;
+    }
+  }
 }
 
 #define	LINE_BYTES	50	/**< fudge for punctuation, etc. */

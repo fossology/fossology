@@ -8,6 +8,7 @@
 #define _LICENSES_H
 
 void licenseInit();
+void licenseRegexFree(void);
 int ignoreFileForScan(char *s);
 void licenseScan(list_t *l);
 

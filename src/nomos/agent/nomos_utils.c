@@ -10,6 +10,7 @@
 
 #include "nomos_utils.h"
 #include "nomos.h"
+#include "licenses.h"
 
 extern int should_connect_to_db;  /* Global variable to control DB connection */
 
@@ -546,6 +547,8 @@ FUNCTION void Bail(int exitval)
     memCacheDump("Mem-cache @ Bail() time:");
   }
 #endif /* MEMORY_TRACING && MEM_ACCT */
+
+  licenseRegexFree();
 
   /* close database and scheduler connections */
   if (gl.pgConn) {
