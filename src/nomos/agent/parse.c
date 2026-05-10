@@ -6516,6 +6516,38 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "IP(3)" : "IP-claim");
   }
   cleanLicenceBuffer();
+  if (INFILE(_LT_DUAL_LICENSE_13)) {
+    INTERESTING("BSD");
+    INTERESTING("MIT");
+    /*
+     * A special case for NomosTestfiles/Dual-license/respond.js
+     * that has two dual-license statements.
+     */
+    if (!lmem[_mGPL]) {
+      if (INFILE(_LT_DUAL_LICENSE_16)) {
+        INTERESTING(lDebug ? "GPLV2(Dual-license(16))" : "GPL-2.0-only");
+      }
+    }
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_14)) {
+    INTERESTING("BSD");
+    if (!lmem[_mGPL]) {
+      INTERESTING("GPL");
+    }
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_16)) {
+    INTERESTING("MIT");
+    INTERESTING(lDebug ? "GPLV2(Dual-license(16))" : "GPL-2.0-only");
+  }
+  else if (HASTEXT(_LT_DUAL_LICENSE_35, 0)) {
+    /*
+     * GPL is not detected correctly in this case, therefore it is set here.
+     */
+    INTERESTING("GPL");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_45)) {
+    INTERESTING("MIT");
+  }
   cleanLicenceBuffer();
   /*
    * The Beer-ware license(!)
