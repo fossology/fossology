@@ -64,6 +64,7 @@ use Fossology\Lib\Report\ObligationsGetter;
 use Fossology\Lib\Report\ReportUtils;
 use Fossology\Lib\Util\StringOperation;
 use Hamcrest\Arrays\IsArray;
+use SebastianBergmann\Environment\Console;
 use Twig\Environment;
 
 include_once(__DIR__ . "/spdxutils.php");
@@ -440,27 +441,28 @@ class SpdxAgent extends Agent
     if (is_array($mainLicenseString)) {
       if ($this->outputFormat == "spdx2tv" ||
           $this->outputFormat == "spdx2csv" ||
-        $this->outputFormat == "spdx3tv") {
-      foreach ($mainLicenses as $mainLicense) {
-        $shortName = $this->licensesInDocument[$mainLicense]
-          ->getLicenseObj()->getShortName();
-        if (StringOperation::stringStartsWith($shortName,
-          LicenseRef::SPDXREF_PREFIX)) {
-          $mainLicenseString[] = $shortName;
-        } else {
-          $mainLicenseString[] = $this->licensesInDocument[$mainLicense]
-            ->getLicenseObj()->getSpdxId();
+          $this->outputFormat == "spdx3tv") {
+        foreach ($mainLicenses as $mainLicense) {
+          $shortName = $this->licensesInDocument[$mainLicense]
+            ->getLicenseObj()->getShortName();
+          if (StringOperation::stringStartsWith($shortName,
+            LicenseRef::SPDXREF_PREFIX)) {
+            $mainLicenseString[] = $shortName;
+          } else {
+            $mainLicenseString[] = $this->licensesInDocument[$mainLicense]
+              ->getLicenseObj()->getSpdxId();
+          }
         }
       }
       if ($this->outputFormat == "spdx2tv") {
         if ($stateOsselot) {
-            $mainLicenseString = SpdxUtils::removeEmptyLicenses($mainLicenseString);
+          $mainLicenseString = SpdxUtils::removeEmptyLicenses($mainLicenseString);
           foreach ($mainLicenseString as $i => $licId) {
             if (StringOperation::stringStartsWith($licId, LicenseRef::SPDXREF_PREFIX)
-                  || StringOperation::stringStartsWith($licId, "Dual-license")) {
-                continue;
+                || StringOperation::stringStartsWith($licId, "Dual-license")) {
+              continue;
             }
-              $mainLicenseString[$i] = "LicenseRef-$licId";
+            $mainLicenseString[$i] = "LicenseRef-$licId";
           }
         }
       }
@@ -827,23 +829,19 @@ class SpdxAgent extends Agent
           $concludedLicensesString = str_replace("<spdx:member", "<spdx:licenseConcluded", $concludedLicensesString);
         }
       }
-      if ($this->outputFormat == "spdx2tv" ||
-          $this->outputFormat == "spdx2csv" ||
-          $this->outputFormat == "spdx3tv") {
-        if (empty($concludedLicensesString)) {
-          foreach ($fileData->getConcludedLicenses() as $license) {
-            $shortName = $this->licensesInDocument[$license]
-              ->getLicenseObj()->getShortName();
-            if (StringOperation::stringStartsWith($shortName,
-              LicenseRef::SPDXREF_PREFIX)) {
-              $concludedLicensesString[] = $shortName;
-            } else {
-              $concludedLicensesString[] = $this->licensesInDocument[$license]
-                ->getLicenseObj()->getSpdxId();
-            }
+      if (($this->outputFormat == "spdx2tv" ||
+        $this->outputFormat == "spdx2csv" ||
+        $this->outputFormat == "spdx3tv") && empty($concludedLicensesString)) {
+        foreach ($fileData->getConcludedLicenses() as $license) {
+          $shortName = $this->licensesInDocument[$license]
+            ->getLicenseObj()->getShortName();
+          if (StringOperation::stringStartsWith($shortName,
+            LicenseRef::SPDXREF_PREFIX)) {
+            $concludedLicensesString[] = $shortName;
+          } else {
+            $concludedLicensesString[] = $this->licensesInDocument[$license]
+              ->getLicenseObj()->getSpdxId();
           }
-          $concludedLicensesString = SpdxUtils::implodeLicenses(
-            SpdxUtils::removeEmptyLicenses($concludedLicensesString));
         }
         if ($this->outputFormat == "spdx2tv") {
           if ($stateOsselot) {
