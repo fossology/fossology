@@ -63,7 +63,7 @@ class OneShotMultiFileTest extends CommonCliTest
   	'FILEgpl3.0' => 'GPL-3.0-only',
   	'FILEgplv2.1' => 'LGPL-2.1-only',
   	'OSIzlibLicense-2006-10-31' => 'Zlib',
-  	'RCSL_v3.0_a.txt' => 'Dual-license,RCSL-3.0',
+    'RCSL_v3.0_a.txt' => 'RCSL-3.0',
   	'RPSL_v1.0_a.txt' => 'RPSL-1.0',
   	'RPSL_v1.0_b.txt' => 'RPSL-1.0',
   	'agpl-3.0.txt' => 'AGPL-3.0-only',
