@@ -124,7 +124,7 @@ class ClearingDao
     $sql = "$decisionsCte
             SELECT
               " . ($includeExpressions ?
-              " COALESCE(le.rf_fk, lr.rf_pk) AS license_id,
+              " COALESCE(le.rf_pk, lr.rf_pk) AS license_id,
               COALESCE(lr.rf_shortname, 'License Expression') AS shortname,
               COALESCE(lr.rf_spdx_id, '') AS spdx_id,
               COALESCE(le.rf_expression::text, lr.rf_fullname) AS fullname " :

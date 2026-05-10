@@ -137,11 +137,16 @@ class AjaxClearingView extends FO_Plugin
 
     list ($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId);
 
-    $licenseRefs = $this->licenseDao->getConclusionLicenseRefs(Auth::getGroupId(), $_GET['sSearch'], $orderAscending, array_keys($licenseDecisions));
+    $licenseRefs = $this->licenseDao->getConclusionLicenseRefs(Auth::getGroupId(), $_GET['sSearch'], $orderAscending, array_keys($licenseDecisions), true);
     $licenses = array();
     foreach ($licenseRefs as $licenseRef) {
       $licenseId = $licenseRef->getId();
-      $shortNameWithFullTextLink = $this->urlBuilder->getLicenseTextUrl($licenseRef);
+      if ($licenseRef->getShortName() == "License Expression") {
+        $fullName = $licenseRef->getFullName();
+        $shortNameWithFullTextLink = "<p>$fullName</p>";
+      } else {
+        $shortNameWithFullTextLink = $this->urlBuilder->getLicenseTextUrl($licenseRef);
+      }
       $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\">"
                   . "<img src=\"images/space_16.png\" class=\"add\"/></a>";
 

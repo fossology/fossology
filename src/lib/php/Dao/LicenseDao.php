@@ -200,7 +200,7 @@ class LicenseDao
   /**
    * @return LicenseRef[]
    */
-  public function getConclusionLicenseRefs($groupId, $search = null, $orderAscending = true, $exclude=array())
+  public function getConclusionLicenseRefs($groupId, $search = null, $orderAscending = true, $exclude=array(), $includeExpressions=false)
   {
     $rfTable = 'license_all';
     $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname', 'rf_active', 'rf_spdx_id'),
@@ -208,10 +208,12 @@ class LicenseDao
     $licenseViewDao = new LicenseViewProxy($groupId, $options, $rfTable);
     $order = $orderAscending ? "ASC" : "DESC";
     $statementName = __METHOD__ . ".order_$order";
+    $expressionStatementName = __METHOD__ . ".order_$order";
     $param = array();
     /* exclude license with parent, excluded child or selfexcluded */
     $sql = $licenseViewDao->asCTE()." SELECT rf_pk,rf_shortname,rf_spdx_id,rf_fullname FROM $rfTable
                   WHERE rf_active = 'yes' AND NOT EXISTS (select * from license_map WHERE rf_pk=rf_fk AND rf_fk!=rf_parent)";
+    $expressionSql = "SELECT rf_pk, rf_expression FROM license_expression";
     if ($search) {
       $param[] = '%' . $search . '%';
       $statementName .= '.search';
@@ -231,6 +233,22 @@ class LicenseDao
       $licenseRefs[] = new LicenseRef(intval($row['rf_pk']), $row['rf_shortname'], $row['rf_fullname'], $row['rf_spdx_id']);
     }
     $this->dbManager->freeResult($result);
+    $this->dbManager->prepare($expressionStatementName, "$expressionSql ORDER BY LOWER(rf_expression::text) $order");
+    $result = $this->dbManager->execute($expressionStatementName, array());
+    error_log("Got sql: $expressionSql");
+    while ($row = $this->dbManager->fetchArray($result)) {
+      $licenseRef = new LicenseRef(intval($row['rf_pk']), "License Expression", $row['rf_expression'], "License Expression");
+      $licenseRef->setFullName($licenseRef->getExpression($this, $groupId));
+      $fullName = $licenseRef->getFullName();
+      error_log("Found: $fullName, $search");
+      if ($search) {
+        if (stripos($fullName, $search) != false) {
+          $licenseRefs[] = $licenseRef;
+        }
+      } else {
+        $licenseRefs[] = $licenseRef;
+      }
+    }
     return $licenseRefs;
   }
 
@@ -522,6 +540,7 @@ ORDER BY lft asc
     }
     $this->dbManager->freeResult($result);
     if ($includeExpressions) {
+      $statementName .= ".includeExpressions";
       $this->dbManager->prepare($statementName,
       "SELECT license_expression.rf_expression
             FROM license_file JOIN license_expression ON license_file.rf_fk = license_expression.rf_pk

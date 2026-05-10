@@ -96,6 +96,7 @@ addLicenseTableConfig = {
           const partialMatchTerm = searchTerm.trim().toLowerCase();
 
           data.aaData = data.aaData.filter(function (row) {
+            console.log(row[0]);
             const licenseName = $(row[0]).text().toLowerCase();
             return licenseName.includes(partialMatchTerm);
           });

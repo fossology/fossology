@@ -140,7 +140,7 @@
     {% if hasExpression == false %}
     <button type="button" class="btn btn-default btn-sm" id="newExpressionbtn" onclick="editExpression();">
       {{ 'Conclude Expression ...'| trans }}
-    </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Conclude a license expression for this file'|trans }}" alt="" class="info-bullet"/>
+    </button><img src="images/info_16.png" data-toggle="tooltip" id="newExpressionInfo" title="{{ 'Conclude a license expression for this file'|trans }}" alt="" class="info-bullet"/>
     &nbsp;
     {% endif %}
     <br/>

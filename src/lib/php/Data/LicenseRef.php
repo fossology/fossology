@@ -102,6 +102,10 @@ class LicenseRef
     );
   }
 
+  public function setFullName($fullName) {
+    $this->fullName = $fullName;
+  }
+
   /**
    * @brief Given a license's shortname and spdx id, give out spdx id to use in
    *        reports.
