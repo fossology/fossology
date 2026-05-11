@@ -14,6 +14,7 @@
 #include <_autodefs.h>
 
 extern regex_t regc[NFOOTPRINTS];
+extern regex_t idx_regc[NFOOTPRINTS];
 
 void regexError(int ret, regex_t *regc, char *regex);
 int endsIn(char *s, char *suffix);

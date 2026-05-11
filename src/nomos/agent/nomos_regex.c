@@ -328,11 +328,10 @@ int idxGrep_base(int index, char *data, int flags, int mode)
 
   int show = flags & FL_SHOWMATCH;
   licText_t *ltp = licText + index;
-  /**
-   * \todo is idx_regc needed? Here we set the pointer to our array and later
-   * we fill it, but we never reuse the regex_t
-   */
   regex_t *rp = idx_regc + index;
+
+  /* skip regcomp/regfree for pre-compiled patterns; REG_NEWLINE changes ^/$ semantics so always recompile those */
+  int use_precompiled = ltp->compiled && !(flags & REG_NEWLINE);
 
   CALL_IF_DEBUG_MODE(printf(" %i %i \"", index, ltp->plain);)
 
@@ -354,32 +353,35 @@ int idxGrep_base(int index, char *data, int flags, int mode)
     return (0);
   }
 
-  if (ltp->plain )
+  if (ltp->plain)
   {
     ret = strNbuf(data, ltp->regex);
-    if(ret == 0) return (ret);
+    if (ret == 0) return (ret);
   }
   else {
-    if ((ret = regcomp(rp, ltp->regex, flags)))
+    if (!use_precompiled)
     {
-      fprintf(stderr, "Compile failed, regex #%d\n", index);
-      regexError(ret, rp, ltp->regex);
-      regfree(rp);
-      printf("Compile error \n");
-      return (-1); /* <0 indicates compile failure */
+      if ((ret = regcomp(rp, ltp->regex, flags)))
+      {
+        fprintf(stderr, "Compile failed, regex #%d\n", index);
+        regexError(ret, rp, ltp->regex);
+        regfree(rp);
+        printf("Compile error \n");
+        return (-1); /* <0 indicates compile failure */
+      }
     }
 
     if (regexec(rp, data, 1, &cur.regm, 0))
     {
-      regfree(rp);
+      if (!use_precompiled) regfree(rp);
       return (0);
     }
-    else ret  =1;
+    else ret = 1;
 
   #ifdef  QA_CHECKS
     if (cur.regm.rm_so == cur.regm.rm_eo)
     {
-      regfree(rp);
+      if (!use_precompiled) regfree(rp);
       Assert(NO, "start/end offsets are identical in idxGrep(%d)",
           index);
     }
@@ -405,16 +407,15 @@ int idxGrep_base(int index, char *data, int flags, int mode)
 
   //! Now we have a match
 
-  if (mode == 3 ) {
-      recordIndex(cur.indexList, index);
-    }
-  else if (mode==1 || mode == 2)
+  if (mode == 3) {
+    recordIndex(cur.indexList, index);
+  }
+  else if (mode == 1 || mode == 2)
   {
     CALL_IF_DEBUG_MODE(printf("MATCH!\n");)
     //! All sanity checks have passed and we have at least one match
 
     CALL_IF_DEBUG_MODE(printf("%s", data);)
-
 
     GArray* allmatches = g_array_new(FALSE, FALSE, sizeof(regmatch_t));
     regmatch_t currentRegMatch;
@@ -424,24 +425,23 @@ int idxGrep_base(int index, char *data, int flags, int mode)
 
     lastmatch = storeOneMatch(cur.regm, lastmatch, allmatches, &tmpData, data);
 
-    while (!matchOnce(ltp->plain,tmpData, ltp->regex, rp, &currentRegMatch )  )
+    while (!matchOnce(ltp->plain, tmpData, ltp->regex, rp, &currentRegMatch))
     {
       lastmatch = storeOneMatch(currentRegMatch, lastmatch, allmatches, &tmpData, data);
     }
 
-
-    if(index >= _KW_first  && index <= _KW_last ) {
+    if (index >= _KW_first && index <= _KW_last) {
       rememberWhatWeFound(cur.keywordPositions, allmatches, index, mode);
     }
-    else if (cur.currentLicenceIndex > -1 ) {
-       rememberWhatWeFound( getLicenceAndMatchPositions(cur.theMatches, cur.currentLicenceIndex )->matchPositions , allmatches, index, mode);
+    else if (cur.currentLicenceIndex > -1) {
+      rememberWhatWeFound(getLicenceAndMatchPositions(cur.theMatches, cur.currentLicenceIndex)->matchPositions, allmatches, index, mode);
     }
     g_array_free(allmatches, 1);
     CALL_IF_DEBUG_MODE(printf("Bye!\n");)
- }
+  }
 
-  if (!ltp->plain ) regfree(rp);
-return (1);
+  if (!ltp->plain && !use_precompiled) regfree(rp);
+  return (1);
 }
 
 /**
