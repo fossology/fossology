@@ -334,8 +334,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $bounds1->shouldReceive('getUploadTreeTableName')->andReturn('uploadtree');
     $bounds = array($bounds0, $bounds1);
 
-    $uploadDao->shouldReceive('getItemTreeBounds')->with($itemIds[0])->andReturn($bounds[0]);
-    $uploadDao->shouldReceive('getItemTreeBounds')->with($itemIds[1])->andReturn($bounds[1]);
+    $uploadDao->shouldReceive('getItemTreeBoundsFromUploadId')->with($itemIds[0], $uploadId)->andReturn($bounds[0]);
+    $uploadDao->shouldReceive('getItemTreeBoundsFromUploadId')->with($itemIds[1], $uploadId)->andReturn($bounds[1]);
     $uploadDao->shouldReceive('getUploadEntry')->with($itemIds[0], 'uploadtree')
       ->andReturn(array('pfile_fk' => 1));
     $uploadDao->shouldReceive('getUploadEntry')->with($itemIds[1], 'uploadtree')
