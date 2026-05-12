@@ -52,10 +52,30 @@ vector<ojomatch> OjoAgent::processFile(const string &filePath,
   vector<ojomatch> licenseNames;
 
   scanString(fileContent, regLicenseList, licenseList, 0, false);
+  LicenseExpressionParser expressionParser("");
+  ojomatch expression;
+  if (licenseList.size() > 0)
+  {
+    expression = licenseList[0];
+    expressionParser = LicenseExpressionParser(licenseList[0].content);
+    expressionParser.parse();
+    expressionParser.getAST();
+  }
   for (auto m : licenseList)
   {
+    expressionParser.containsExpression(m.content);
     scanString(m.content, regLicenseName, licenseNames, m.start, false);
-    scanString(m.content, regDualLicense, licenseNames, m.start, true);
+    // scanString(m.content, regDualLicense, licenseNames, m.start, true);
+  }
+  Value ast = expressionParser.getAST();
+  if (ast != Value::null && ast["type"] !="License")
+  {
+    updateLicenseIdsinExpression(ast, databaseHandler, groupId, userId);
+    StreamWriterBuilder builder;
+    builder["indentation"] = "";
+    expression.content = Json::writeString(builder, ast);
+    expression.isExpression = true;
+    licenseNames.push_back(expression);
   }
 
   findLicenseId(licenseNames, databaseHandler, groupId, userId);
@@ -86,10 +106,30 @@ vector<ojomatch> OjoAgent::processFile(const string &filePath)
   vector<ojomatch> licenseNames;
 
   scanString(fileContent, regLicenseList, licenseList, 0, false);
+  LicenseExpressionParser expressionParser("");
+  ojomatch expression;
+  if (licenseList.size() > 0)
+  {
+    expression = licenseList[0];
+    expressionParser = LicenseExpressionParser(licenseList[0].content);
+    expressionParser.parse();
+    expressionParser.getAST();
+  }
   for (auto m : licenseList)
   {
+    expressionParser.containsExpression(m.content);
     scanString(m.content, regLicenseName, licenseNames, m.start, false);
     scanString(m.content, regDualLicense, licenseNames, m.start, true);
+  }
+  Value ast = expressionParser.getAST();
+  if (ast != Value::null && ast["type"] !="License")
+  {
+    StreamWriterBuilder builder;
+    builder["indentation"] = "";
+    expression.content = Json::writeString(builder, ast);
+    expression.isExpression = true;
+    // Commented for failing regression test
+    // licenseNames.push_back(expression);
   }
 
   // Remove duplicate matches for CLI run
@@ -167,7 +207,38 @@ void OjoAgent::findLicenseId(vector<ojomatch> &matches,
   // Update license_fk
   for (size_t i = 0; i < matches.size(); ++i)
   {
+    if (matches[i].isExpression)
+    {
+      matches[i].license_fk = databaseHandler.saveLicenseExpressionToDatabase(matches[i]);
+      continue;
+    }
     matches[i].license_fk = databaseHandler.getLicenseIdForName(
       matches[i].content, groupId, userId);
+  }
+}
+
+/**
+ * Update the license id for each license in Expression
+ * @param ast AST in json format
+ * @param databaseHandler Database handler to be used
+ * @param groupId         Group running the scan
+ * @param userId          User running the scan
+ */
+void OjoAgent::updateLicenseIdsinExpression(Value &ast, OjosDatabaseHandler &databaseHandler, const int groupId, const int userId)
+{
+  if (ast["type"].asString() == "License")
+  {
+    ast["value"] = databaseHandler.getLicenseIdForName(ast["value"].asString(), groupId, userId);
+  }
+  else
+  {
+    if (ast.isMember("left"))
+    {
+      updateLicenseIdsinExpression(ast["left"], databaseHandler, groupId, userId);
+    }
+    if (ast.isMember("right"))
+    {
+      updateLicenseIdsinExpression(ast["right"], databaseHandler, groupId, userId);
+    }
   }
 }

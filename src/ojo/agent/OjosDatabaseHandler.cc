@@ -74,6 +74,43 @@ unsigned long OjosDatabaseHandler::saveLicenseToDatabase(
     return -1;
   }
 }
+/**
+ * @brief Save License Expressions findings to the database if agent was called by scheduler
+ * @param match Match found by the agent
+ * @return rf_pk on success, -1 on failure
+ */
+unsigned long OjosDatabaseHandler::saveLicenseExpressionToDatabase(const ojomatch &match) const
+{
+  QueryResult queryResult = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "ojoFindLicenseExpression",
+      "SELECT rf_pk FROM license_expression WHERE rf_expression = $1",
+      char*),
+    match.content.c_str());
+  vector<unsigned long> res = queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong);
+  if (res.size() > 0)
+  {
+    return res.at(0);
+  }
+  QueryResult insertResult = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "ojoInsertLicenseExpression",
+      "INSERT INTO license_expression"
+      "(rf_expression)"
+      " VALUES($1) RETURNING rf_pk",
+      char* ),
+    match.content.c_str());
+    res = insertResult.getSimpleResults<unsigned long>(0,
+    fo::stringToUnsignedLong);
+  if (res.size() > 0)
+  {
+    return res.at(0);
+  }
+  else
+  {
+    return -1;
+  }
+}
 
 /**
  * Save findings highlights to DB

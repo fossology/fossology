@@ -13,10 +13,16 @@
 #include <boost/regex.hpp>
 #include <fstream>
 #include <sstream>
+#include <jsoncpp/json/json.h>
 
 #include "OjosDatabaseHandler.hpp"
+#include "licenseExpression.hpp"
 #include "ojomatch.hpp"
 #include "ojoregex.hpp"
+
+using Json::Value;
+using Json::StreamWriterBuilder;
+using Json::String;
 
 /**
  * @class OjoAgent
@@ -46,6 +52,7 @@ class OjoAgent
     void findLicenseId(std::vector<ojomatch> &matches,
       OjosDatabaseHandler &databaseHandler, const int groupId,
       const int userId);
+    void updateLicenseIdsinExpression(Value &ast, OjosDatabaseHandler &databaseHandler, const int groupId, const int userId);
 };
 
 #endif /* SRC_OJO_AGENT_OJOAGENT_HPP_ */
