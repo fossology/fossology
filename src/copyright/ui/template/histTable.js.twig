@@ -3,6 +3,7 @@
    SPDX-License-Identifier: FSFAP
 #}
 
+
 function createTableBase{{ table.type }}(activated) {
   var aoColumns = [
       { "sTitle": "{{ 'Count'| trans }}", "sClass": "right read_only", "sWidth": "5%" },
@@ -78,16 +79,38 @@ function createTable{{ table.type }}() {
       var value = aInput[0].value;
       var isValid = (value) && !(/^\s*$/.test(value));
       if (isValid) {
-        var id = aInput.parents("tr:first")[0].id;
-        var hash = id.split(",")[2];
-        $("#delete{{ table.type }}" + hash).hide();
-        var updateElement = $("#update{{ table.type }}" + hash);
-        updateElement.text("updating...");
-        updateElement.show();
+        var $tr = aInput.parents("tr:first");
+        var rowData = enabledTable.api().row($tr[0]).data();
+        var dtRowId = (rowData && rowData['DT_RowId']) ? rowData['DT_RowId'] : $tr.attr('id');
+        var parts = dtRowId.split(",");
+        var hash = parts[2];
+        if (hash) {
+          $("#delete{{ table.type }}" + hash).hide();
+          var updateElement = $("#update{{ table.type }}" + hash);
+          updateElement.text("updating...");
+          updateElement.show();
+        }
       }
       return isValid;
     },
+    "fnOnEdited": function(status, sOldValue, sNewCellDisplayValue, rowIdx) {
+      if (status === "success" && sNewCellDisplayValue) {
+        var rowData = enabledTable.api().row(rowIdx).data();
+        if (rowData && rowData['DT_RowId']) {
+          var parts = rowData['DT_RowId'].split(",");
+          var upload = parts[0], item = parts[1], hash = parts[2], type = parts[3];
+          startRevert{{ table.type }}(upload, item, hash, sNewCellDisplayValue, type);
+        }
+      }
+    },
     "sSuccessResponse": "success"
+  });
+
+  enabledTable.api().on('draw.dt', function() {
+    var s = _revertState{{ table.type }};
+    if (s && Date.now() < s.expiresAt) {
+      applyRevertButton{{ table.type }}(s);
+    }
   });
 
   createTableBase{{ table.type }}(false);
@@ -165,14 +188,16 @@ function createTable{{ table.type }}() {
         ajaxList.push(updateRows{{ table.type }}(currUploadData[0],
           currUploadData[1], currUploadData[2], currUploadData[3], newValue));
       });
-      // Wait for all ajax calls to resolve
       $.when.apply($, ajaxList).done(function(){
-        location.reload(true)
+        $('#copyright{{ table.type }}').DataTable().ajax.reload(null, false);
       });
     }
   });
 
   $('#copyright{{ table.type }} tbody').on('click', 'tr td:nth-child(3)', function (event) {
+    if ($(event.target).closest('.revert-link').length > 0) {
+      return;
+    }
     if ($(this).find('img:visible').length > 0) {
       if ($(event.target).is('img')) {
         return;
@@ -333,5 +358,89 @@ function undo{{ table.type }}(upload, item, hash, kind) {
       error: function(errorResponse) {
         alert(errorResponse.responseText);
       }
+  });
+}
+
+var _revertState{{ table.type }} = null;
+
+function startRevert{{ table.type }}(upload, item, hash, newContent, type) {
+  if (_revertState{{ table.type }}) {
+    clearInterval(_revertState{{ table.type }}.timerId);
+    _revertState{{ table.type }} = null;
+  }
+  var state = {
+    upload: upload, item: item, hash: hash,
+    newContent: newContent, type: type,
+    expiresAt: Date.now() + 5000,
+    timerId: null
+  };
+  state.timerId = setInterval(function() {
+    var remaining = Math.ceil((state.expiresAt - Date.now()) / 1000);
+    var $btn = $('#revert{{ table.type }}' + state.hash);
+    if ($btn.length) {
+      $btn.find('.revert-countdown').text(Math.max(0, remaining));
+    }
+    if (remaining <= 0) {
+      clearInterval(state.timerId);
+      _revertState{{ table.type }} = null;
+      var $b = $('#revert{{ table.type }}' + state.hash);
+      $("tr.row" + state.hash + " td").removeAttr("style");
+      if ($b.length) {
+        $b.fadeOut(300, function() {
+          $(this).remove();
+          $('#copyright{{ table.type }}').DataTable().ajax.reload(null, false);
+        });
+      } else {
+        $('#copyright{{ table.type }}').DataTable().ajax.reload(null, false);
+      }
+    }
+  }, 1000);
+  _revertState{{ table.type }} = state;
+  applyRevertButton{{ table.type }}(state);
+}
+
+function applyRevertButton{{ table.type }}(state) {
+  var hash = state.hash;
+  var revertId = "revert{{ table.type }}" + hash;
+  if ($('#' + revertId).length) {
+    return;
+  }
+  var $deleteBtn = $('#delete{{ table.type }}' + hash);
+  if (!$deleteBtn.length) {
+    return;
+  }
+  $deleteBtn.hide();
+  $('#update{{ table.type }}' + hash).hide();
+  var $td = $deleteBtn.closest('td');
+  var remaining = Math.max(1, Math.ceil((state.expiresAt - Date.now()) / 1000));
+  var $btn = $('<span id="' + revertId + '">[<strong><a href="#" class="revert-link">Revert to original</a></strong> (<span class="revert-countdown">' + remaining + '</span>s)]</span>');
+  $td.prepend($btn);
+  $("tr.row" + hash + " td").attr("style", "background-color:#d4edda !important");
+  $btn.find('.revert-link').on('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (_revertState{{ table.type }}) {
+      clearInterval(_revertState{{ table.type }}.timerId);
+      _revertState{{ table.type }} = null;
+    }
+    $btn.remove();
+    $deleteBtn.show();
+    $("tr.row" + hash + " td").removeAttr("style");
+    revertToOriginal{{ table.type }}(state.upload, state.item, state.hash, state.newContent, state.type);
+  });
+}
+
+function revertToOriginal{{ table.type }}(upload, item, hash, newContent, type) {
+  $.ajax({
+    type: 'POST',
+    dataType: 'text',
+    url: '?mod=ajax-copyright-hist&action=revertToOriginal',
+    data: { id: upload + ',' + item + ',' + hash + ',' + type, newContent: newContent },
+    success: function(data) {
+      $('#copyright{{ table.type }}').DataTable().ajax.reload(null, false);
+    },
+    error: function(errorResponse) {
+      alert(errorResponse.responseText);
+    }
   });
 }

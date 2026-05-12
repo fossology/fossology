@@ -11,6 +11,7 @@ use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\DataTablesUtility;
+use Fossology\Lib\Util\StringOperation;
 use Fossology\Agent\Copyright\UI\TextFindingsAjax;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -92,7 +93,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
       $pfile = GetParm("pfile", PARM_INTEGER);
     } elseif ($action=="deleteHashDecision" || $action=="undoHashDecision") {
       $hash = GetParm("hash", PARM_STRING);
-    } elseif ($action=="update" || $action=="delete" || $action=="undo") {
+    } elseif ($action=="update" || $action=="delete" || $action=="undo" || $action=="revertToOriginal") {
       $id = GetParm("id", PARM_STRING);
       $getEachID = array_filter(explode(",", trim($id, ',')), function($var) {
           return $var !== "";
@@ -141,6 +142,9 @@ class CopyrightHistogramProcessPost extends FO_Plugin
           break;
         case "undo":
           $returnValue = $this->doUndo($item, $hash, $type);
+          break;
+        case "revertToOriginal":
+          $returnValue = $this->doRevertToOriginal($item, $type);
           break;
         case "deletedecision":
           $returnValue = $this->doDeleteDecision($decision, $pfile, $type);
@@ -521,6 +525,26 @@ count(*) AS copyright_count " .
     $cpTable = $this->getTableName($type);
     $this->copyrightDao->updateTable($item, $hash, '', Auth::getUserId(), $cpTable, 'rollback');
     return new Response('Successfully restored', Response::HTTP_OK, array('Content-type'=>'text/plain'));
+  }
+
+  /**
+   * @brief Revert an edited result back to its original scanner text
+   * @param int    $itemId Upload tree id of the item
+   * @param string $type   'copyright'|'ecc'|'keyword'
+   * @return Response
+   */
+  protected function doRevertToOriginal($itemId, $type)
+  {
+    $newContent = GetParm("newContent", PARM_RAW);
+    if (empty($newContent)) {
+      return new Response('empty content',
+        Response::HTTP_BAD_REQUEST, array('Content-type'=>'text/plain'));
+    }
+    $newHash = md5(StringOperation::replaceUnicodeControlChar($newContent));
+    $item = $this->uploadDao->getItemTreeBounds($itemId, $this->uploadtree_tablename);
+    $cpTable = $this->getTableName($type);
+    $this->copyrightDao->updateTable($item, $newHash, '', Auth::getUserId(), $cpTable, 'revertToOriginal');
+    return new Response('Successfully reverted', Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }
 
   /**
