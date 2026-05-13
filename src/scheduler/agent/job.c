@@ -456,9 +456,12 @@ void job_fail_event(scheduler_t* scheduler, job_t* job)
   for(iter = job->finished_agents; iter != NULL; iter = iter->next)
   {
     agent_t* a = (agent_t*)iter->data;
+    if(a->pid <= 0)
+      continue;
     V_JOB("JOB[%d]: job failed, killing finished agent pid %d\n", job->id, a->pid);
     a->return_code = 0;
     kill(-a->pid, SIGKILL);  /* process group, so child processes die too */
+    a->pid = 0;
   }
 }
 
