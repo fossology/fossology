@@ -167,7 +167,7 @@ const char* jobsql_failed =
     "   SET jq_endtime = now(), "
     "       jq_end_bits = jq_end_bits | 2, "
     "       jq_schedinfo = null, "
-    "       jq_endtext = '%s' "
+    "       jq_endtext = %s "
     "   WHERE jq_pk = %d;";
 
 /**
@@ -196,7 +196,7 @@ const char* jobsql_paused =
  */
 const char* jobsql_log =
     " UPDATE jobqueue "
-    "   SET jq_log = '%s' "
+    "   SET jq_log = %s "
     "   WHERE jq_pk = %d;";
 
 /**

@@ -958,8 +958,21 @@ void database_update_job(scheduler_t* scheduler, job_t* job, job_status status)
       sql = g_strdup_printf(jobsql_restart, j_id);
       break;
     case JB_FAILED:
-      sql = g_strdup_printf(jobsql_failed, message, j_id);
+    {
+      /* Escape message to prevent SQL injection via agent EMAIL command. */
+      char* escaped = PQescapeLiteral(scheduler->db_conn, message, strlen(message));
+      if(escaped)
+      {
+        sql = g_strdup_printf(jobsql_failed, escaped, j_id);
+        PQfreemem(escaped);
+      }
+      else
+      {
+        WARNING("PQescapeLiteral failed for job %d message, using fallback", j_id);
+        sql = g_strdup_printf(jobsql_failed, "'Failed'", j_id);
+      }
       break;
+    }
     case JB_PAUSED:
       sql = g_strdup_printf(jobsql_paused, j_id);
       break;
@@ -1002,12 +1015,42 @@ void database_job_processed(int j_id, int num)
  * @param j_id the id number for the relevant job
  * @param log_name the name of the log file
  */
+static void database_job_log_event(scheduler_t* scheduler, arg_int* params)
+{
+  char* log_name = (char*)params->first;
+  int j_id = params->second;
+  const char* name = log_name ? log_name : "";
+
+  char* escaped = PQescapeLiteral(scheduler->db_conn, name, strlen(name));
+  if(!escaped)
+  {
+    WARNING("PQescapeLiteral failed for job %d log_name", j_id);
+    g_free(log_name);
+    g_free(params);
+    return;
+  }
+
+  gchar* sql = g_strdup_printf(jobsql_log, escaped, j_id);
+  PQfreemem(escaped);
+  g_free(log_name);
+  g_free(params);
+
+  PGresult* db_result = database_exec(scheduler, sql);
+  if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
+  {
+    PQ_ERROR(db_result, "failed to set job log: %s", sql);
+  }
+  else
+    SafePQclear(db_result);
+  g_free(sql);
+}
+
 void database_job_log(int j_id, char* log_name)
 {
-  gchar* sql = NULL;
-
-  sql = g_strdup_printf(jobsql_log, log_name, j_id);
-  event_signal(database_exec_event, sql);
+  arg_int* params = g_new0(arg_int, 1);
+  params->first  = g_strdup(log_name);
+  params->second = j_id;
+  event_signal(database_job_log_event, params);
 }
 
 /**

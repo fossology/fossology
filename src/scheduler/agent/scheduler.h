@@ -185,6 +185,9 @@ typedef struct
     /* scheduler self-version tracking */
     gchar* scheduler_version; ///< The version string read from VERSION file at last (re)load
 
+    /* stale-job reaper state */
+    time_t last_stale_check;  ///< Last time reap_stale_jobs() ran (for rate-limiting)
+
     /* regular expressions */
     GRegex* parse_agent_msg;     ///< Parses messages coming from the agents
     GRegex* parse_db_email;      ///< Parses database email text
