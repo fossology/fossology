@@ -124,15 +124,18 @@ class TreeDao
 
   public function getRepoPathOfPfile($pfileId, $repo="files")
   {
+    if (!is_string($repo)) {
+      return null;
+    }
     $pfileRow = $this->dbManager->getSingleRow('SELECT * FROM pfile WHERE pfile_pk=$1',array($pfileId));
     global $LIBEXECDIR;
     if (empty($pfileRow['pfile_sha1'])) {
       return null;
     }
     $hash = $pfileRow['pfile_sha1'] . "." . $pfileRow['pfile_md5'] . "." . $pfileRow['pfile_size'];
-    $path = '';
-    exec("$LIBEXECDIR/reppath $repo $hash", $path);
-    return($path[0]);
+    $path = array();
+    exec(escapeshellcmd($LIBEXECDIR . "/reppath") . " " . escapeshellarg($repo) . " " . escapeshellarg($hash), $path);
+    return(isset($path[0]) ? $path[0] : null);
   }
 
   /**
