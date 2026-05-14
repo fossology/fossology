@@ -4,12 +4,18 @@
 #}
 <table class="dataTable" border="1" cellpadding="5px" id="bulkHistoryTable" name="bulkHistoryTable">
   <tr>
+    <th>{{ 'Action'| trans }}</th>
     <th>{{ 'License'| trans }}</th>
     <th>{{ 'Text'| trans }}</th>
   </tr>
   {% if bulkHistory %}
   {% for row in bulkHistory %}
     <tr class="{{ cycle(['odd','even'], loop.index0) }}{% if row.matched %} match{% endif %}{% if not row.tried %} inactive{% endif %}">
+      <td>
+        <a href="javascript:;" onclick="deleteBulkEntry({{ row.bulkId }});" title="{{ 'Delete this bulk scan entry'| trans }}">
+          <img class="delete" src="images/space_16.png" alt="{{ 'Delete'| trans }}"/>
+        </a>
+      </td>
       <td>
           <table>
             {% if row.addedLicenses is not empty %}
@@ -39,6 +45,7 @@
   {% endfor %}
   {% else %}
     <tr class="even">
+      <td>&lt;no entries&gt;</td>
       <td>&lt;no entries&gt;</td>
       <td>&lt;no entries&gt;</td>
     </tr>
