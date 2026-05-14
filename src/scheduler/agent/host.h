@@ -29,13 +29,15 @@ typedef struct {
   char* agent_dir;  ///< The location on the host machine where the executables are
   int max;          ///< The max number of agents that can run on this host
   int running;      ///< The number of agents currently running on this host
+  char** tags;      ///< NULL-terminated array of agent-type tags (e.g. "nomos", "monk"); NULL if universal
+  int    n_tags;    ///< Number of tags (0 = host accepts any agent type)
 } host_t;
 
 /* ************************************************************************** */
 /* **** Contructor Destructor *********************************************** */
 /* ************************************************************************** */
 
-host_t* host_init(char* name, char* address, char* agent_dir, int max);
+host_t* host_init(char* name, char* address, char* agent_dir, int max, char** tags, int n_tags);
 void host_destroy(host_t* h);
 
 /* ************************************************************************** */
@@ -48,6 +50,7 @@ void host_decrease_load(host_t* host);
 void host_print(host_t* host, GOutputStream* ostr);
 
 host_t* get_host(GList** queue, uint8_t num);
+host_t* get_host_for(scheduler_t* scheduler, const char* agent_type, uint8_t num);
 void    print_host_load(GTree* host_list, GOutputStream* ostr);
 
 #endif /* HOST_H_INCLUDE */
