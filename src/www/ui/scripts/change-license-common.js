@@ -194,11 +194,44 @@ function popUpLicenseText(popUpUri, title) {
   window.open(popUpUri + sel, title, 'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');
 }
 
+function showLicenseWarningModal(message) {
+  var modalId = 'licenseWarningModal';
+  var $modal = $('#' + modalId);
+  if ($modal.length === 0) {
+    $modal = $(
+      '<div class="modal fade" id="' + modalId + '" tabindex="-1" role="dialog">' +
+        '<div class="modal-dialog modal-dialog-centered" role="document">' +
+          '<div class="modal-content">' +
+            '<div class="modal-header bg-secondary text-white">' +
+              '<h5 class="modal-title">' +
+                '<i class="fas fa-exclamation-circle"></i> Warning' +
+              '</h5>' +
+              '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                '<span>&times;</span>' +
+              '</button>' +
+            '</div>' +
+            '<div class="modal-body" id="licenseWarningMessages"></div>' +
+            '<div class="modal-footer">' +
+              '<button type="button" class="btn btn-secondary" data-dismiss="modal">OK</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+    $('body').append($modal);
+  }
+  $('#licenseWarningMessages').html('<div class="alert alert-warning">' + message + '</div>');
+  $modal.modal('show');
+}
+
 function modifyLicense(doWhat ,uploadId, uploadTreeId, licenseId) {
   $.getJSON("?mod=conclude-license&do=" + doWhat + "&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId)
     .done(function (data) {
       if(data) {
         $('#decTypeSet').addClass('border-danger');
+      }
+      if (data && data.warning) {
+        showLicenseWarningModal(data.warning);
       }
       var table = createClearingTable();
       table.fnDraw(false);

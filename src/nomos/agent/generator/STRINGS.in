@@ -13739,6 +13739,56 @@ k
 %ENTRY% _LT_TRUECRYPT_30
 %KEY% "(truecrypt)"
 %STR% "all occurrences of the name truecrypt that could reasonably be considered to identify your product must be removed"
+%ENTRY% _SPDX_GPL_2_0_or_later_WITH_Bison_exception_2_2
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]2\.0[- ]or[- ]later WITH Bison[- ]exception[- ]2\.2|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.0[- ]or[- ]later WITH Bison[- ]exception[- ]2\.2)"
+
+%ENTRY% _SPDX_GPL_2_0_or_later_WITH_Classpath_exception_2_0
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]2\.0[- ]or[- ]later WITH Classpath[- ]exception[- ]2\.0|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.0[- ]or[- ]later WITH Classpath[- ]exception[- ]2\.0)"
+
+%ENTRY% _SPDX_GPL_2_0_only_WITH_Autoconf_exception_3_0
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]2\.0[- ]only WITH Autoconf[- ]exception[- ]3\.0|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.0[- ]only WITH Autoconf[- ]exception[- ]3\.0)"
+
+%ENTRY% _SPDX_GPL_2_0_only_WITH_Bison_exception_2_2
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]2\.0[- ]only WITH Bison[- ]exception[- ]2\.2|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.0[- ]only WITH Bison[- ]exception[- ]2\.2)"
+
+%ENTRY% _SPDX_GPL_2_0_only_WITH_Classpath_exception_2_0
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]2\.0[- ]only WITH Classpath[- ]exception[- ]2\.0|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.0[- ]only WITH Classpath[- ]exception[- ]2\.0)"
+
+%ENTRY% _SPDX_GPL_2_0_only_WITH_Font_exception_2_0
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]2\.0[- ]only WITH Font[- ]exception[- ]2\.0|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.0[- ]only WITH Font[- ]exception[- ]2\.0)"
+
+%ENTRY% _SPDX_GPL_2_0_only_WITH_GCC_exception_3_1
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]2\.0[- ]only WITH GCC[- ]exception[- ]3\.1|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.0[- ]only WITH GCC[- ]exception[- ]3\.1)"
+
+%ENTRY% _SPDX_GPL_3_0_or_later_WITH_Bison_exception_2_2
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]3\.0[- ]or[- ]later WITH Bison[- ]exception[- ]2\.2|(.{1,32} (AND|OR)){1,4} GPL[- ]3\.0[- ]or[- ]later WITH Bison[- ]exception[- ]2\.2)"
+
+%ENTRY% _SPDX_GPL_3_0_or_later_WITH_Classpath_exception_2_0
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]3\.0[- ]or[- ]later WITH Classpath[- ]exception[- ]2\.0|(.{1,32} (AND|OR)){1,4} GPL[- ]3\.0[- ]or[- ]later WITH Classpath[- ]exception[- ]2\.0)"
+
+%ENTRY% _SPDX_GPL_3_0_only_WITH_Autoconf_exception_3_0
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]3\.0[- ]only WITH Autoconf[- ]exception[- ]3\.0|(.{1,32} (AND|OR)){1,4} GPL[- ]3\.0[- ]only WITH Autoconf[- ]exception[- ]3\.0)"
+
+%ENTRY% _SPDX_GPL_3_0_only_WITH_Bison_exception_2_2
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]3\.0[- ]only WITH Bison[- ]exception[- ]2\.2|(.{1,32} (AND|OR)){1,4} GPL[- ]3\.0[- ]only WITH Bison[- ]exception[- ]2\.2)"
+
+%ENTRY% _SPDX_GPL_3_0_only_WITH_GCC_exception_3_1
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]3\.0[- ]only WITH GCC[- ]exception[- ]3\.1|(.{1,32} (AND|OR)){1,4} GPL[- ]3\.0[- ]only WITH GCC[- ]exception[- ]3\.1)"
+
+
+
 #####
 # This MUST be the last alias specified; the size of the array of encrypted
 # strings is determined from the following value! (see NFOOTPRINTS, below)
@@ -13768,4 +13818,3 @@ k
  */
 #define	_scCOMFORT	9	/* >= 9 --> certain it's a license */
 #define	_scINVALID	4	/* < 4 --> probably NOT a license */
-
