@@ -36,9 +36,9 @@ const char* url_checkout =
  * For a given job queue id, get the upload id
  */
 const char* select_upload_fk =
-    " SELECT job_upload_fk FROM job, jobqueue "
-    "   WHERE jq_job_fk = job_pk "
-    "     AND jq_pk = %d;";
+    " SELECT j.job_upload_fk FROM job j"
+    "   INNER JOIN jobqueue jq ON jq.jq_job_fk = j.job_pk"
+    "   WHERE jq.jq_pk = %d;";
 
 /**
  * For a given upload id, get job and job queue
@@ -104,25 +104,26 @@ const char* jobsql_email_job =
 
 /* job queue related sql */
 /**
- * Get the jobs which are not yet queued by the scheduler
+ * Fetch the next batch of schedulable jobs with user and priority in one round trip.
+ * INNER JOIN on users drops orphan jobs (no matching user). NOT EXISTS uses explicit
+ * INNER JOIN on jobdepends index so the planner avoids a full cross-join scan.
  */
 const char* basic_checkout =
-    " SELECT jobqueue.* FROM jobqueue INNER JOIN job ON job_pk = jq_job_fk "
-    " WHERE jq_starttime IS NULL AND jq_end_bits < 2 "
-    "   AND NOT EXISTS(SELECT * FROM jobdepends, jobqueue jdep "
-    "     WHERE jdep_jq_fk=jobqueue.jq_pk "
-    "       AND jdep_jq_depends_fk=jdep.jq_pk"
-    "       AND NOT(jdep.jq_endtime IS NOT NULL AND jdep.jq_end_bits < 2)) "
-    " ORDER BY job_priority DESC "
-    "   LIMIT 10;";
-
-/**
- * For a given job id, get the job information
- */
-const char* jobsql_information =
-    " SELECT user_pk, job_priority, job_group_fk as group_pk FROM users "
-    "   LEFT JOIN job ON job_user_fk = user_pk "
-    "   WHERE job_pk = '%s';";
+    " SELECT jq.jq_pk, jq.jq_job_fk, jq.jq_type, jq.jq_host,"
+    "        jq.jq_runonpfile, jq.jq_args, jq.jq_cmd_args,"
+    "        u.user_pk, j.job_priority, j.job_group_fk AS group_pk"
+    " FROM jobqueue jq"
+    " INNER JOIN job j     ON j.job_pk  = jq.jq_job_fk"
+    " INNER JOIN users u   ON u.user_pk = j.job_user_fk"
+    " WHERE jq.jq_starttime IS NULL AND jq.jq_end_bits < 2"
+    "   AND NOT EXISTS("
+    "     SELECT 1 FROM jobdepends jd"
+    "     INNER JOIN jobqueue dep ON dep.jq_pk = jd.jdep_jq_depends_fk"
+    "     WHERE jd.jdep_jq_fk = jq.jq_pk"
+    "       AND NOT (dep.jq_endtime IS NOT NULL AND dep.jq_end_bits < 2)"
+    "   )"
+    " ORDER BY j.job_priority DESC"
+    " LIMIT 10;";
 
 /**
  * Mark the given job id as started
@@ -132,7 +133,7 @@ const char* jobsql_started =
     "   SET jq_starttime = now(), "
     "       jq_schedinfo ='%s.%d', "
     "       jq_endtext = 'Started' "
-    "   WHERE jq_pk = '%d';";
+    "   WHERE jq_pk = %d;";
 
 /**
  * Mark the given job id as completed
@@ -143,7 +144,7 @@ const char* jobsql_complete =
     "       jq_end_bits = jq_end_bits | 1, "
     "       jq_schedinfo = null, "
     "       jq_endtext = 'Completed' "
-    "   WHERE jq_pk = '%d';";
+    "   WHERE jq_pk = %d;";
 
 /**
  * Mark the given job id as restarted
@@ -156,7 +157,7 @@ const char* jobsql_restart =
     "         THEN null "
     "         ELSE jq_starttime "
     "       END ) "
-    "   WHERE jq_pk = '%d';";
+    "   WHERE jq_pk = %d;";
 
 /**
  * Mark the given job id as failed
@@ -166,8 +167,8 @@ const char* jobsql_failed =
     "   SET jq_endtime = now(), "
     "       jq_end_bits = jq_end_bits | 2, "
     "       jq_schedinfo = null, "
-    "       jq_endtext = '%s' "
-    "   WHERE jq_pk = '%d';";
+    "       jq_endtext = %s "
+    "   WHERE jq_pk = %d;";
 
 /**
  * Update the items processed for the given job id
@@ -175,7 +176,7 @@ const char* jobsql_failed =
 const char* jobsql_processed =
     " Update jobqueue "
     "   SET jq_itemsprocessed = %d "
-    "   WHERE jq_pk = '%d';";
+    "   WHERE jq_pk = %d;";
 
 /**
  * Mark the given job id as paused
@@ -188,47 +189,51 @@ const char* jobsql_paused =
     "         THEN CAST('9999-12-31' AS timestamp with time zone) "
     "         ELSE jq_starttime "
     "       END ) "
-    "   WHERE jq_pk = '%d';";
+    "   WHERE jq_pk = %d;";
 
 /**
  * Get the log location for the given job id
  */
 const char* jobsql_log =
     " UPDATE jobqueue "
-    "   SET jq_log = '%s' "
-    "   WHERE jq_pk = '%d';";
+    "   SET jq_log = %s "
+    "   WHERE jq_pk = %d;";
 
 /**
  * Change the priority of the given job id
  */
 const char* jobsql_priority =
     " UPDATE job "
-    "   SET job_priority = '%d' "
+    "   SET job_priority = %d "
     "   WHERE job_pk IN ( "
     "     SELECT jq_job_fk FROM jobqueue "
-    "     WHERE jq_pk = '%d');";
+    "     WHERE jq_pk = %d);";
 
 /**
- * Get all jobs from job queue which are runnable for a given job id
+ * Check whether any runnable queue entries remain for the job containing jq_pk.
+ * LIMIT 1 short-circuits after the first match; SELECT 1 avoids projecting columns.
  */
 const char* jobsql_anyrunnable =
-    " SELECT * FROM jobqueue "
-    " WHERE jq_starttime IS NULL AND jq_end_bits < 2 "
-    "   AND NOT EXISTS(SELECT * FROM jobdepends, jobqueue jdep "
-    "     WHERE jdep_jq_fk=jobqueue.jq_pk "
-    "       AND jdep_jq_depends_fk=jdep.jq_pk"
-    "       AND NOT(jdep.jq_endtime IS NOT NULL AND jdep.jq_end_bits < 2))"
-    "   AND jq_job_fk = (SELECT jq_job_fk FROM jobqueue queue WHERE queue.jq_pk = %d)";
+    " SELECT 1 FROM jobqueue jq"
+    " WHERE jq.jq_starttime IS NULL AND jq.jq_end_bits < 2"
+    "   AND NOT EXISTS("
+    "     SELECT 1 FROM jobdepends jd"
+    "     INNER JOIN jobqueue dep ON dep.jq_pk = jd.jdep_jq_depends_fk"
+    "     WHERE jd.jdep_jq_fk = jq.jq_pk"
+    "       AND NOT (dep.jq_endtime IS NOT NULL AND dep.jq_end_bits < 2)"
+    "   )"
+    "   AND jq.jq_job_fk = (SELECT jq_job_fk FROM jobqueue WHERE jq_pk = %d)"
+    " LIMIT 1;";
 
 /**
- * Get the job id and job end bits for the given job id
+ * Get jq_pk and jq_end_bits for all queue entries sharing the same parent job as jq_pk.
+ * Self-join lets the planner use the jq_job_fk index on both sides.
  */
 const char* jobsql_jobendbits =
-    " SELECT jq_pk, jq_end_bits FROM jobqueue "
-    "   WHERE jq_job_fk = ( "
-    "     SELECT jq_job_fk FROM jobqueue "
-    "       WHERE jq_pk = %d "
-    "   );";
+    " SELECT jq2.jq_pk, jq2.jq_end_bits"
+    " FROM jobqueue jq1"
+    " INNER JOIN jobqueue jq2 ON jq2.jq_job_fk = jq1.jq_job_fk"
+    " WHERE jq1.jq_pk = %d;";
 
 /**
  * Reset the job queue for jobs with end time as NULL
@@ -241,14 +246,13 @@ const char* jobsql_resetqueue =
     "  WHERE jq_endtime is NULL;";
 
 /**
- * Get the job information for a given job id
+ * Get all queue entries sharing the same parent job as jq_pk (self-join on jq_job_fk).
  */
 const char* jobsql_jobinfo =
-    " SELECT * FROM jobqueue "
-    "   WHERE jq_job_fk = ( "
-    "     SELECT jq_job_fk FROM jobqueue "
-    "       WHERE jq_pk = %d "
-    "   );";
+    " SELECT jq2.*"
+    " FROM jobqueue jq1"
+    " INNER JOIN jobqueue jq2 ON jq2.jq_job_fk = jq1.jq_job_fk"
+    " WHERE jq1.jq_pk = %d;";
 
 /**
  * Get the SMTP (email) values for the sysconfig table
@@ -258,4 +262,3 @@ const char* smtp_values =
     "   WHERE variablename LIKE 'SMTP%';";
 
 #endif /* SQLSTATEMENTS_H */
-

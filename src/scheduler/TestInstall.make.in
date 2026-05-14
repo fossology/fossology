@@ -5,7 +5,7 @@
 
 NAME=scheduler
 VERSION=VERSION
-CURRDIR=.
+CURRDIR=@CMAKE_CURRENT_BINARY_DIR@
 
 all: install
 

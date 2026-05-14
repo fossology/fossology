@@ -495,6 +495,9 @@ void* interface_listen_thread(scheduler_t* scheduler)
 {
   GSocketListener* server_socket;
   GSocketConnection* new_connection;
+  GSocket* server_sock;
+  GInetAddress* inet_addr;
+  GSocketAddress* sock_addr;
   GError* error = NULL;
 
   /* validate new thread */
@@ -509,10 +512,34 @@ void* interface_listen_thread(scheduler_t* scheduler)
   if(server_socket == NULL)
     FATAL("could not create the server socket");
 
-  g_socket_listener_add_inet_port(server_socket, scheduler->i_port, NULL, &error);
+  /* Manually create and configure the socket so we can set SO_REUSEADDR.
+   * g_socket_listener_add_inet_port() does not set SO_REUSEADDR, which causes
+   * "Address already in use" errors when the scheduler restarts quickly.
+   * Passing allow_reuse=TRUE to g_socket_bind() sets SO_REUSEADDR internally. */
+  server_sock = g_socket_new(G_SOCKET_FAMILY_IPV4, G_SOCKET_TYPE_STREAM,
+      G_SOCKET_PROTOCOL_TCP, &error);
+  if(error)
+    FATAL("[port:%d]: failed to create socket: %s", scheduler->i_port, error->message);
+
+  inet_addr = g_inet_address_new_any(G_SOCKET_FAMILY_IPV4);
+  sock_addr = g_inet_socket_address_new(inet_addr, scheduler->i_port);
+  g_object_unref(inet_addr);
+
+  g_socket_bind(server_sock, sock_addr, TRUE, &error);
+  g_object_unref(sock_addr);
+  if(error)
+    FATAL("[port:%d]: failed to bind: %s", scheduler->i_port, error->message);
+
+  g_socket_listen(server_sock, &error);
+  if(error)
+    FATAL("[port:%d]: failed to listen: %s", scheduler->i_port, error->message);
+
+  g_socket_listener_add_socket(server_socket, server_sock, NULL, &error);
+  g_object_unref(server_sock);
   if(error)
     FATAL("[port:%d]: %s", scheduler->i_port, error->message);
-  scheduler->cancel  = g_cancellable_new();
+
+  scheduler->cancel = g_cancellable_new();
 
   V_INTERFACE("INTERFACE: listening port is %d\n", scheduler->i_port);
 
@@ -523,7 +550,10 @@ void* interface_listen_thread(scheduler_t* scheduler)
         scheduler->cancel, &error);
 
     if(scheduler->i_terminate)
+    {
+      g_clear_error(&error);
       break;
+    }
     V_INTERFACE("INTERFACE: new interface connection\n");
     if(error)
       FATAL("INTERFACE closing for %s", error->message);

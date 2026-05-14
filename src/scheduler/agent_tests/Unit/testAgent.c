@@ -187,7 +187,7 @@ void test_agent_death_event()
 
   create_pipe(&fagent.from_child, &fagent.to_parent, NULL, &fagent.write);
 
-  pid_set = g_new0(int, 2);
+  pid_set = g_new0(int, 3);  /* [0]=pid [1]=status [2]=retry */
   pid_set[0] = fagent.pid;
   pid_set[1] = 0;
   fagent.return_code = 0;
@@ -233,12 +233,18 @@ void test_agent_create_event()
   scheduler_config_event(scheduler, NULL);
 
   meta_agent_t* ma = g_tree_lookup(scheduler->meta_agents, "copyright");
-  for(iter = scheduler->host_queue; iter != NULL; iter = iter->next)
+  for(iter = scheduler->host_queue; ma && iter != NULL; iter = iter->next)
   {
     host = (host_t*)iter->data;
     fjob = job_init(scheduler->job_list, scheduler->job_queue, ma->name,
         host->name, id_gen--, 0, 0, 0, 0, NULL);
     fagent = agent_init(scheduler, host, fjob);
+  }
+  if(!fagent)
+  {
+    scheduler_close_event(scheduler, (void*)1);
+    scheduler_destroy(scheduler);
+    return;
   }
   fagent->pid    = 10;
   fagent->owner  = fjob;
@@ -282,7 +288,7 @@ void test_agent_create_event()
   FO_ASSERT_PTR_NOT_NULL(ag);
   FO_ASSERT_EQUAL(fagent->status, AG_FAILED);
 
-  pid_set = g_new0(int, 2);
+  pid_set = g_new0(int, 3);  /* [0]=pid [1]=status [2]=retry */
   pid_set[0] = fagent->pid;
   pid_set[1] = 0;
   fagent->return_code = 0;
