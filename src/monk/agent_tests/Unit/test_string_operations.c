@@ -222,6 +222,205 @@ void test_token_equal() {
   g_free(search);
 }
 
+/* -------------------------------------------------------------------------
+ * Tests for TOKEN_YEAR classification and year-sequence merging
+ * ---------------------------------------------------------------------- */
+
+/** Helper: tokenize a string and return token at index i */
+static Token getToken(const char* str, const char* delim, guint i)
+{
+  GArray* tokens = tokenize(str, delim);
+  CU_ASSERT_FATAL(tokens->len > i);
+  Token t = g_array_index(tokens, Token, i);
+  g_array_free(tokens, TRUE);
+  return t;
+}
+
+void test_yearTokenClassification()
+{
+  /* Only 4-digit numbers (and 4-digit-led ranges) are years */
+  Token t;
+
+  t = getToken("2024", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_YEAR);
+  CU_ASSERT_EQUAL(t.hashedContent, YEAR_CANONICAL_HASH);
+  CU_ASSERT_EQUAL(t.length, 4);
+
+  t = getToken("1998", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_YEAR);
+
+  /* Short digit runs are NOT years (section/list/version numbers) */
+  t = getToken("5", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_NORMAL);
+
+  t = getToken("34", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_NORMAL);
+
+  t = getToken("10", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_NORMAL);
+  CU_ASSERT_NOT_EQUAL(t.hashedContent, YEAR_CANONICAL_HASH);
+
+  t = getToken("100", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_NORMAL);
+
+  /* Long digit runs (>4) are NOT years */
+  t = getToken("20000", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_NORMAL);
+
+  t = getToken("12345", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_NORMAL);
+
+  /* Year range with hyphen -> TOKEN_YEAR */
+  t = getToken("2000-2009", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_YEAR);
+  CU_ASSERT_EQUAL(t.hashedContent, YEAR_CANONICAL_HASH);
+  CU_ASSERT_EQUAL(t.length, 9);
+
+  t = getToken("2024-23", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_YEAR);
+
+  /* Non-year ranges (leading part is not a 4-digit year) -> TOKEN_NORMAL */
+  t = getToken("10-99", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_NORMAL);
+  CU_ASSERT_NOT_EQUAL(t.hashedContent, YEAR_CANONICAL_HASH);
+
+  t = getToken("1-2", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_NORMAL);
+
+  /* Mixed letter+digit -> TOKEN_NORMAL */
+  t = getToken("v2", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_NORMAL);
+  CU_ASSERT_NOT_EQUAL(t.hashedContent, YEAR_CANONICAL_HASH);
+
+  t = getToken("GPL-2.0", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_NORMAL);
+
+  /* Trailing hyphen only -> TOKEN_NORMAL (no digit after hyphen) */
+  t = getToken("2000-", " ", 0);
+  CU_ASSERT_EQUAL(t.tokenType, TOKEN_NORMAL);
+}
+
+void test_punctTokenClassification()
+{
+  GArray* tokens;
+
+  /* Standalone all-punctuation tokens must be invisible (skipped) */
+  tokens = tokenize("foo @ bar", " ");
+  CU_ASSERT_EQUAL(tokens->len, 2); /* '@' eaten, only foo and bar */
+  g_array_free(tokens, TRUE);
+
+  tokens = tokenize("foo $& bar", " ");
+  CU_ASSERT_EQUAL(tokens->len, 2); /* '$&' eaten */
+  g_array_free(tokens, TRUE);
+
+  tokens = tokenize("foo --- bar", " ");
+  CU_ASSERT_EQUAL(tokens->len, 2); /* '---' eaten */
+  g_array_free(tokens, TRUE);
+
+  /* Mixed alnum+punct -> TOKEN_NORMAL, kept */
+  tokens = tokenize("(c)", " ");
+  CU_ASSERT_EQUAL(tokens->len, 1);
+  CU_ASSERT_EQUAL(g_array_index(tokens, Token, 0).tokenType, TOKEN_NORMAL);
+  g_array_free(tokens, TRUE);
+
+  /* Non-ASCII (UTF-8 multibyte) words are real content, NOT punctuation.
+     "\xc3\xa9" = e-acute, "\xc3\x9f" = sharp-s. They must be kept. */
+  tokens = tokenize("foo \xc3\xa9 bar", " ");
+  CU_ASSERT_EQUAL(tokens->len, 3);
+  CU_ASSERT_EQUAL(g_array_index(tokens, Token, 1).tokenType, TOKEN_NORMAL);
+  g_array_free(tokens, TRUE);
+
+  tokens = tokenize("\xc3\x9f", " ");
+  CU_ASSERT_EQUAL(tokens->len, 1);
+  CU_ASSERT_EQUAL(g_array_index(tokens, Token, 0).tokenType, TOKEN_NORMAL);
+  g_array_free(tokens, TRUE);
+}
+
+void test_yearTokensEqual()
+{
+  /* Two year tokens of different content must match each other */
+  GArray* a = tokenize("2000-2009", " ");
+  GArray* b = tokenize("2024", " ");
+
+  CU_ASSERT_EQUAL(a->len, 1);
+  CU_ASSERT_EQUAL(b->len, 1);
+
+  Token* ta = tokens_index(a, 0);
+  Token* tb = tokens_index(b, 0);
+
+  CU_ASSERT_EQUAL(ta->tokenType, TOKEN_YEAR);
+  CU_ASSERT_EQUAL(tb->tokenType, TOKEN_YEAR);
+  CU_ASSERT_TRUE(tokenEquals(ta, tb));
+
+  /* Year token must NOT match a plain word */
+  GArray* c = tokenize("Copyright", " ");
+  Token* tc = tokens_index(c, 0);
+  CU_ASSERT_EQUAL(tc->tokenType, TOKEN_NORMAL);
+  CU_ASSERT_FALSE(tokenEquals(ta, tc));
+
+  g_array_free(a, TRUE);
+  g_array_free(b, TRUE);
+  g_array_free(c, TRUE);
+}
+
+void test_mergeYearTokenSequences()
+{
+  GArray* tokens;
+
+  /* Comma-separated years (comma is a delimiter) become multiple TOKEN_YEAR;
+   * after merge: one TOKEN_YEAR whose length spans the whole group */
+  tokens = mergeYearTokenSequences(tokenize("2000,2001,2002", ","));
+  CU_ASSERT_EQUAL(tokens->len, 1);
+  CU_ASSERT_EQUAL(g_array_index(tokens, Token, 0).tokenType, TOKEN_YEAR);
+  /* length = 4+1+4+1+4 = 14 (each year=4, each comma=1 absorbed) */
+  CU_ASSERT_EQUAL(g_array_index(tokens, Token, 0).length, 14);
+  g_array_free(tokens, TRUE);
+
+  /* Non-year tokens are kept intact; year group between them is merged */
+  tokens = mergeYearTokenSequences(tokenize("Copyright^2000^2001^2002^Inc", "^"));
+  CU_ASSERT_EQUAL(tokens->len, 3); /* Copyright | YEAR_SEQ | Inc */
+  CU_ASSERT_EQUAL(g_array_index(tokens, Token, 0).tokenType, TOKEN_NORMAL);
+  CU_ASSERT_EQUAL(g_array_index(tokens, Token, 1).tokenType, TOKEN_YEAR);
+  CU_ASSERT_EQUAL(g_array_index(tokens, Token, 2).tokenType, TOKEN_NORMAL);
+  g_array_free(tokens, TRUE);
+
+  /* A single year range token (no merging needed) passes through unchanged */
+  tokens = mergeYearTokenSequences(tokenize("2000-2009", " "));
+  CU_ASSERT_EQUAL(tokens->len, 1);
+  CU_ASSERT_EQUAL(g_array_index(tokens, Token, 0).tokenType, TOKEN_YEAR);
+  CU_ASSERT_EQUAL(g_array_index(tokens, Token, 0).length, 9);
+  g_array_free(tokens, TRUE);
+
+  /* Empty input -> empty output */
+  tokens = mergeYearTokenSequences(tokens_new());
+  CU_ASSERT_EQUAL(tokens->len, 0);
+  g_array_free(tokens, TRUE);
+}
+
+void test_yearMergeProducesFullMatch()
+{
+  /* Simulate the core scenario from issue #647:
+   * reference "Copyright 2000-2009 Foo" (1 year token)
+   * file "Copyright 2000,2001,...,2009 Foo" (many year tokens, 1 after merge)
+   * After merging both sides, tokenEquals on the year tokens must be true
+   * and the token counts must match, enabling MATCH_TYPE_FULL. */
+  GArray* ref  = mergeYearTokenSequences(tokenize("Copyright^2000-2009^Foo", "^"));
+  GArray* file = mergeYearTokenSequences(tokenize("Copyright^2000^2001^2002^2003^2004^2005^2006^2007^2008^2009^Foo", "^"));
+
+  CU_ASSERT_EQUAL(ref->len, 3); /* Copyright | YEAR | Foo */
+  CU_ASSERT_EQUAL(file->len, 3); /* same count after merge */
+
+  /* All three token positions must compare equal */
+  for (guint i = 0; i < 3; i++) {
+    Token* tr = tokens_index(ref, i);
+    Token* tf = tokens_index(file, i);
+    CU_ASSERT_TRUE_FATAL(tokenEquals(tr, tf));
+  }
+
+  g_array_free(ref,  TRUE);
+  g_array_free(file, TRUE);
+}
+
 CU_TestInfo string_operations_testcases[] = {
   {"Testing tokenize:", test_tokenize},
   {"Testing tokenize with special delimiters:", test_tokenizeWithSpecialDelims},
@@ -230,5 +429,10 @@ CU_TestInfo string_operations_testcases[] = {
   {"Testing find token position in string:", test_tokenPosition},
   {"Testing find token position at end:", test_tokenPositionAtEnd},
   {"Testing token equals:", test_token_equal},
+  {"Testing year token classification:", test_yearTokenClassification},
+  {"Testing punct token classification:", test_punctTokenClassification},
+  {"Testing year tokens equal each other:", test_yearTokensEqual},
+  {"Testing mergeYearTokenSequences:", test_mergeYearTokenSequences},
+  {"Testing year merge enables full match:", test_yearMergeProducesFullMatch},
   CU_TEST_INFO_NULL
 };

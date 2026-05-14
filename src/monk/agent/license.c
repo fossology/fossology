@@ -47,7 +47,7 @@ Licenses* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult, uns
     license.shortname = g_strdup(licShortName);
 
     char* licenseText = getLicenseTextForLicenseRefId(dbManager, refId);
-    GArray* licenseTokens = tokenize(licenseText, DELIMITERS);
+    GArray* licenseTokens = mergeYearTokenSequences(tokenize(licenseText, DELIMITERS));
 
     free(licenseText);
     license.tokens = licenseTokens;
@@ -110,7 +110,7 @@ uint32_t getKey(const GArray* tokens, unsigned minAdjacentMatches, unsigned sear
   for (guint i = 0; (i < minAdjacentMatches) && (i+searchedStart < tokens->len); i++)
   {
     Token* nToken = tokens_index(tokens, i+searchedStart);
-    result = (result << 1) + nToken->hashedContent;
+    result = (result << 6) + result + nToken->hashedContent;
   }
 
   return result;

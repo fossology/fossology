@@ -13,6 +13,14 @@
 #include <stdio.h>
 #include <errno.h>
 
+/* tokenType is NOT serialized; re-derived on load for backward compat
+ * with old knowledgebases. */
+typedef struct {
+  unsigned int length;
+  unsigned int removedBefore;
+  uint32_t     hashedContent;
+} TokenOnDisk;
+
 /*
  * serialization
  */
@@ -62,7 +70,9 @@ int serializeOneShortname(License* license, FILE* fp) {
 
 int serializeOneTokens(GArray* tokens, FILE* fp) {
   for (guint i = 0; i < tokens->len; i++) {
-    if (fwrite(tokens_index(tokens,i), sizeof(Token), 1, fp) != 1) {
+    Token* t = tokens_index(tokens, i);
+    TokenOnDisk td = { t->length, t->removedBefore, t->hashedContent };
+    if (fwrite(&td, sizeof(TokenOnDisk), 1, fp) != 1) {
       return 0;
     }
   }
@@ -104,15 +114,22 @@ Licenses* deserialize(FILE* fp, unsigned minAdjacentMatches, unsigned maxLeading
 }
 
 GArray* deserializeTokens(FILE* fp, guint tokensLen) {
-  Token* freadResult = malloc(sizeof(Token) * tokensLen);
-  if(fread(freadResult, sizeof(Token), tokensLen, fp) != tokensLen){
+  TokenOnDisk* freadResult = malloc(sizeof(TokenOnDisk) * tokensLen);
+  if (fread(freadResult, sizeof(TokenOnDisk), tokensLen, fp) != tokensLen) {
     strerror(errno);
   }
 
   GArray* tokens = g_array_new(FALSE, FALSE, sizeof(Token));
-  g_array_append_vals(tokens,
-                      freadResult,
-                      tokensLen);
+  for (guint i = 0; i < tokensLen; i++) {
+    Token t;
+    t.length        = freadResult[i].length;
+    t.removedBefore = freadResult[i].removedBefore;
+    t.hashedContent = freadResult[i].hashedContent;
+    /* YEAR_CANONICAL_HASH maps to TOKEN_YEAR; activates year-normalization
+     * for imported knowledgebases */
+    t.tokenType = (t.hashedContent == YEAR_CANONICAL_HASH) ? TOKEN_YEAR : TOKEN_NORMAL;
+    g_array_append_vals(tokens, &t, 1);
+  }
   free(freadResult);
 
   return tokens;

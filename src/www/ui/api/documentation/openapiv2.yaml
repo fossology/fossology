@@ -6823,9 +6823,6 @@ components:
         ignoreIrre:
           type: boolean
           example: false
-        delimiters:
-          type: string
-          example: "DEFAULT"
     ScannedEditedLicense:
       type: object
       properties:
