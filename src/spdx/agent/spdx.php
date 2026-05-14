@@ -160,6 +160,14 @@ class SpdxAgent extends Agent
    * List of Declared License FileIds in the document
    */
   protected $declaredLicenseFileIds=[];
+  /** @var string $dep5MainLicense
+   * Main license string for DEP5 header paragraph, set during renderPackage
+   */
+  protected $dep5MainLicense = '';
+  /** @var string $dep5LicenseComments
+   * Scanner attribution string for DEP5 header Comment field, set during renderPackage
+   */
+  protected $dep5LicenseComments = '';
 
   function __construct()
   {
@@ -371,6 +379,9 @@ class SpdxAgent extends Agent
     if (!empty($scannerIDs)) {
       $licenseComment = $this->getLicenseComment($scannerIDs);
     }
+    if ($this->outputFormat === 'dep5') {
+      $this->dep5LicenseComments = $licenseComment;
+    }
     $this->heartbeat(0);
 
     $this->reportutils->addCopyrightResults($filesWithLicenses, $uploadId);
@@ -426,7 +437,8 @@ class SpdxAgent extends Agent
     $mainLicenseString = [];
     if ($this->outputFormat == "spdx2tv" ||
         $this->outputFormat == "spdx2csv" ||
-        $this->outputFormat == "spdx3tv") {
+        $this->outputFormat == "spdx3tv" ||
+        $this->outputFormat == "dep5") {
       foreach ($mainLicenses as $mainLicense) {
         $shortName = $this->licensesInDocument[$mainLicense]
           ->getLicenseObj()->getShortName();
@@ -452,6 +464,9 @@ class SpdxAgent extends Agent
       }
       $mainLicenseString = SpdxUtils::implodeLicenses(
         SpdxUtils::removeEmptyLicenses($mainLicenseString));
+      if ($this->outputFormat == "dep5") {
+        $this->dep5MainLicense = $mainLicenseString;
+      }
     }
 
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
@@ -660,8 +675,10 @@ class SpdxAgent extends Agent
     $this->concludedLicenseFileIds = array_unique($this->concludedLicenseFileIds);
     $this->validateLicenseIdentifiers();
     $message = $this->renderString($this->getTemplateFile('document'),array(
-        'documentName' => $fileBase,
+        'documentName' => $upload->getFilename(),
         'uri' => $this->uri,
+        'mainLicense' => $this->dep5MainLicense,
+        'licenseComments' => $this->dep5LicenseComments,
         'userName' => $this->container->get('dao.user')->getUserName($this->userId) . " (" . $this->container->get('dao.user')->getUserEmail($this->userId) . ")",
         'organisation' => $organizationName,
         'concludedLicenseFileIds'=>$this->concludedLicenseFileIds,
@@ -884,6 +901,10 @@ class SpdxAgent extends Agent
       } elseif (strrpos($licenseId, "None (scanners found: ", -strlen($licenseId)) !== false) {
         $comment = substr($licenseId,6,strlen($licenseId)-7);
         $licenseId = "None";
+      }
+      if ($this->outputFormat === 'dep5' &&
+          ($licenseId === 'NoLicenseConcluded' || $licenseId === 'None')) {
+        $licenseId = 'UNKNOWN';
       }
 
       $content .= $this->renderString($this->getTemplateFile('file'),array(

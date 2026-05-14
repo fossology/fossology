@@ -4,10 +4,7 @@
 #}
 
 Files: {{ fileNames|join('\n       ') }}
-{% if copyrights|default is not empty %}
-Copyright: {{ copyrights|join('\n           ') }}
-{% endif %}
+Copyright: {{ copyrights is defined and copyrights is not empty ? copyrights|join('\n           ') : 'UNKNOWN' }}
 License: {{ license }}
-{% if comment|default is not empty %}
-Comment: {{ comment }}
+{% if comment is defined and comment is not empty %}Comment: {{ comment }}
 {% endif %}

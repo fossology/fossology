@@ -2,26 +2,29 @@
 
    SPDX-License-Identifier: FSFAP
 #}
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/       
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: {{ documentName }}
-Upstream-Contact: 
-Source: 
 Disclaimer: <text> This file is offered as-is, without any warranty. </text>
-Copyright: 
+{% if mainLicense is not empty -%}
 License: {{ mainLicense }}
+{% endif -%}
 Comment: {% if licenseComments %}
- {{ licenseComments }}
+ {{ licenseComments|replace({'licenseInfoInFile determined by Scanners:': 'License information in files determined by scanners:'}) }}
  .
-
 {% endif %} created on {{ 'now'|date('Y-m-d\\TH:i:s\\Z') }} with FOSSology
 {# File Paragraphes: #}
 {{ packageNodes }}
 {# Stand-alone License Paragraphes: #}
-{% for licenseData in licenseTexts %}{% if licenseData.id starts with 'LicenseRef-' %}
+{% for licenseData in licenseList -%}
+{%- if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' -%}
+{%- set licId = licenseData.licenseObj.spdxId -%}
+{%- if licenseData.licenseObj.shortName starts with 'LicenseRef-' -%}
+{%- set licId = licenseData.licenseObj.shortName -%}
+{%- endif -%}
 
-License: {{ licenseData.id }}
- {{ licenseData.text|replace({'\f':''})|replace({'\r\n':'\n'})
-                                       |replace({'\n\n':'\n.\n'})
-                                       |replace({'\n\n':'\n.\n'})
-                                       |replace({'\n':'\n '}) }}
+License: {{ licId }}
+ {{ licenseData.licenseObj.text|replace({'\f':''})|replace({'\r\n':'\n'})
+                                                   |replace({'\n\n':'\n.\n'})
+                                                   |replace({'\n\n':'\n.\n'})
+                                                   |replace({'\n':'\n '}) }}
 {% endif %}{% endfor %}
