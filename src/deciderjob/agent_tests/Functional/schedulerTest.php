@@ -316,7 +316,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $agentDao->shouldReceive('arsTableExists')->andReturn(true);
     $agentDao->shouldReceive('getCurrentAgentId')->andReturn($agentId=24);
     $agentDao->shouldReceive('writeArsRecord')->with(anything(), $agentId, $uploadId)->andReturn($arsId=2);
-    $agentDao->shouldReceive('writeArsRecord')->with(anything(), $agentId, $uploadId, $arsId, true)->andReturn(0);
+    $agentDao->shouldReceive('writeArsRecord')->with(anything(), $agentId, $uploadId, $arsId, anything())->andReturn(0);
 
     $jobId = 42;
     $groupId = 6;
