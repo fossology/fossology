@@ -133,6 +133,7 @@ int main(int argc, char** argv)
   signal(SIGTERM, scheduler_sig_handle);
   signal(SIGQUIT, scheduler_sig_handle);
   signal(SIGHUP,  scheduler_sig_handle);
+  signal(SIGPIPE, SIG_IGN); /* writes to dead agent pipes must not kill the daemon */
 
   /* ***************************************************** */
   /* *** we have finished initialization without error *** */
