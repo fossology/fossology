@@ -20,6 +20,17 @@ curl --silent --location "http://${HOST}/repo/" | grep -q "<title>Getting Starte
 docker compose exec -T web /usr/local/share/fossology/copyright/agent/copyright -h
 
 #### test whether the scheduler is running
-docker compose exec -T scheduler /usr/local/share/fossology/scheduler/agent/fo_cli -S
+for attempt in {1..30}; do
+  if docker compose exec -T scheduler /usr/local/share/fossology/scheduler/agent/fo_cli -S; then
+    break
+  fi
+
+  if [[ "$attempt" -eq 30 ]]; then
+    docker compose logs scheduler
+    exit 1
+  fi
+
+  sleep 2
+done
 
 docker compose down
