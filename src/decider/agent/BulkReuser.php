@@ -36,11 +36,11 @@ class BulkReuser
 
   /**
    * @fn rerunBulkAndDeciderOnUpload($uploadId, $groupId, $userId, $bulkId, $dependency)
-   * @brief Rerun Monk bulk and decider on a given upload
-   * @param int   $uploadId   Upload on which the agents have to run
+   * @brief Rerun Monk bulk and decider on a given upload (handles grouped entries by processing latest ID)
+   * @param int   $uploadId   Upload on which agents have to run
    * @param int   $groupId    Group which is running the agents
    * @param int   $userId     User who is running the agents
-   * @param int   $bulkId     Previous bulk for reuse
+   * @param int   $bulkId     Bulk ID to process (for grouped entries, uses latest ID from group)
    * @param array $dependency Dependency on agent (Not in use)
    * @throws Exception If agent cannot be added, throw exception with message as HTML
    * @return int Id of the new job

@@ -186,15 +186,18 @@ class DeciderAgent extends Agent
     }
     if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE)) {
       $bulkReuser = new BulkReuser();
-      $bulkIds = $this->clearingDao->getPreviousBulkIds($uploadId, $this->groupId, $this->userId);
-      if (count($bulkIds) == 0) {
+      // Get bulk IDs grouped by both text content AND license IDs, ordered by scheduling date
+      $bulkGroups = $this->clearingDao->getBulkIdsGroupedByTextAndLicenses($uploadId, $this->groupId, $this->userId);
+      if (count($bulkGroups) == 0) {
         return true;
       }
       $jqId=0;
       $minTime="4";
       $maxTime="60";
-      foreach ($bulkIds as $bulkId) {
-        $jqId = $bulkReuser->rerunBulkAndDeciderOnUpload($uploadId, $this->groupId, $this->userId, $bulkId, $jqId);
+      foreach ($bulkGroups as $group) {
+        $bulkIds = $group['bulk_ids'];
+        // Use latest bulk ID from group - ensures most recent/corrected scan is processed
+        $jqId = $bulkReuser->rerunBulkAndDeciderOnUpload($uploadId, $this->groupId, $this->userId, $group['latest_bulk_id'], $jqId);
         $this->heartbeat(1);
         if (!empty($jqId)) {
           $jqIdRow = $this->showJobsDao->getDataForASingleJob($jqId);
