@@ -245,6 +245,24 @@ class TreeDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($this->treeDao->getFullPath(3665, "uploadtree",0,true), equalTo(                  "uploadDaoTest/L/L2/L2a"));
   }
 
+  public function testGetFullPathFallsBackToRootWhenItemNotUnderParent()
+  {
+    $this->prepareModularTable(array(array(6,5,1,0,0,5,6,"file",5)));
+
+    $nonAncestorParentId = 9999;
+    $pathWithFallback = $this->treeDao->getFullPath(6, "uploadtree", $nonAncestorParentId);
+    $pathFromRoot     = $this->treeDao->getFullPath(6, "uploadtree", 0);
+
+    assertThat($pathWithFallback, equalTo($pathFromRoot));
+  }
+
+  public function testGetItemHashesReturnsEmptyArrayForMissingPfile()
+  {
+    $this->testDb->createPlainTables(array('pfile'));
+    $hashes = $this->treeDao->getItemHashes(9999, 'uploadtree');
+    assertThat($hashes, equalTo(array('sha1' => '', 'md5' => '', 'sha256' => '')));
+  }
+
   public function testGetUploadHashes()
   {
     $this->testDb->createPlainTables(array('pfile'));
