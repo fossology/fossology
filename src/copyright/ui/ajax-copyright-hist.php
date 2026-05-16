@@ -244,6 +244,13 @@ class CopyrightHistogramProcessPost extends FO_Plugin
       $filter = "none";
     }
 
+    if ($filter == "active" && !$activated) {
+      return array(array(), 0, 0);
+    }
+    if ($filter == "inactive" && $activated) {
+      return array(array(), 0, 0);
+    }
+
     $sql_upload = "";
     if ('uploadtree_a' == $uploadTreeTableName) {
       $sql_upload = " AND UT.upload_fk=$5 ";
@@ -282,18 +289,21 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $grouping = " GROUP BY mcontent ";
 
     $countQuery = "SELECT count(*) FROM (
-  SELECT mcontent AS content FROM (SELECT
-    (CASE WHEN (ce.content IS NULL OR ce.content = '') THEN cp.content ELSE ce.content END) AS mcontent
-    $unorderedQuery $filterQuery $grouping) AS k $searchFilter) AS cx";
+      SELECT mcontent FROM (
+        SELECT (CASE WHEN (ce.content IS NULL OR ce.content = '') THEN cp.content ELSE ce.content END) AS mcontent
+        $unorderedQuery $filterQuery $grouping
+      ) AS k $searchFilter
+    ) AS cx";
     $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow($countQuery,
         $filterParms, __METHOD__.$tableName . ".count" . ($activated ? '' : '_deactivated'));
-    $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
+    $iTotalDisplayRecords = intval($iTotalDisplayRecordsRow['count']);
 
-    $countAllQuery = "SELECT count(*) FROM (SELECT
-(CASE WHEN (ce.content IS NULL OR ce.content = '') THEN cp.content ELSE ce.content END) AS mcontent
-$unorderedQuery$grouping) as K";
-    $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__,$tableName . "count.all" . ($activated ? '' : '_deactivated'));
-    $iTotalRecords = $iTotalRecordsRow['count'];
+    $countAllQuery = "SELECT count(*) FROM (
+      SELECT (CASE WHEN (ce.content IS NULL OR ce.content = '') THEN cp.content ELSE ce.content END) AS mcontent
+      $unorderedQuery $filterQuery $grouping
+    ) as K";
+    $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__ . "." . $tableName . "count.all" . ($activated ? '' : '_deactivated'));
+    $iTotalRecords = intval($iTotalRecordsRow['count']);
 
     $range = "";
     $filterParms[] = $offset;

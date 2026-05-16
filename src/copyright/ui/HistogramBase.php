@@ -287,9 +287,16 @@ abstract class HistogramBase extends FO_Plugin
       $OutBuf .= "<form action=\"$action\" id=\"newds\" method=\"POST\">$AgentSelect</form>";
     }
 
-    $selectKey = $filter == 'nolic' ? 'nolic' : 'all';
+    $allowed_filters = array('all', 'active', 'inactive', 'nolic');
+    $selectKey = in_array($filter, $allowed_filters) ? $filter : 'all';
     $OutBuf .= "<select name='view_filter' class='form-control-sm' id='view_filter' onchange='ChangeFilter(this,$uploadId, $item);'>";
-    foreach (array('all'=>_("Show all"), 'nolic'=> _("Show files without licenses")) as $key=>$text) {
+    $filterOptions = array(
+      'all' => _("Show all"),
+      'active' => _("Show active"),
+      'inactive' => _("Show inactive"),
+      'nolic' => _("Show files without licenses")
+    );
+    foreach ($filterOptions as $key => $text) {
       $selected = ($selectKey == $key) ? "selected" : "";
       $OutBuf .= "<option $selected value=\"$key\">$text</option>";
     }
