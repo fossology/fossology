@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fossology.fullname" . }}-web
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+    app.kubernetes.io/component: web
+spec:
+  replicas: {{ .Values.web.replicaCount }}
+  selector:
+    matchLabels:
+{{ include "fossology.selectorLabels" . | indent 6 }}
+      app.kubernetes.io/component: web
+  template:
+    metadata:
+      labels:
+{{ include "fossology.labels" . | indent 8 }}
+        app.kubernetes.io/component: web
+    spec:
+      initContainers:
+        - name: wait-for-db
+          image: {{ include "fossology.postgresImage" . }}
+          imagePullPolicy: {{ .Values.image.postgres.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "[init] Waiting for PostgreSQL..."
+              until pg_isready -h "${FOSSOLOGY_DB_HOST}" -p 5432 -U "${FOSSOLOGY_DB_USER}"; do
+                sleep 2
+              done
+          env:
+{{ include "fossology.envDatabase" . | indent 12 }}
+      containers:
+        - name: web
+          image: {{ include "fossology.webImage" . }}
+          imagePullPolicy: {{ .Values.image.web.pullPolicy }}
+          args: ["web"]
+          env:
+{{ include "fossology.envDatabase" . | indent 12 }}
+            - name: FOSSOLOGY_SCHEDULER_HOST
+              value: {{ include "fossology.fullname" . }}-scheduler
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /repo/api/v2/info
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /repo/api/v2/info
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          startupProbe:
+            httpGet:
+              path: /repo/api/v2/info
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 30
+          volumeMounts:
+            - name: fossology-repo
+              mountPath: /srv/fossology/repository
+{{- with .Values.web.resources }}
+          resources:
+{{ toYaml . | indent 12 }}
+{{- end }}
+      volumes:
+        - name: fossology-repo
+          persistentVolumeClaim:
+            claimName: {{ include "fossology.repoPvcName" . }}

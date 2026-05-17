@@ -1,0 +1,64 @@
+# FOSSology Helm Chart — Staging Environment Overrides
+# Usage: helm install fossology ./kubernetes/helm/fossology -f values-staging.yaml
+
+workers:
+  replicaCount: 3
+  resources:
+    requests:
+      cpu: "1"
+      memory: 1Gi
+    limits:
+      cpu: "4"
+      memory: 4Gi
+
+web:
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "4"
+      memory: 4Gi
+
+scheduler:
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+postgres:
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  storage:
+    size: 50Gi
+    # Set to your cluster's storage class
+    className: standard
+
+repository:
+  storage:
+    size: 100Gi
+    # Must be a ReadWriteMany-capable storage class (e.g. nfs-client, efs-sc)
+    className: standard
+
+ingress:
+  enabled: true
+  className: nginx
+  host: fossology-staging.example.com
+  path: /
+  pathType: Prefix
+
+postInstall:
+  enabled: true
+
+keda:
+  enabled: true
+  maxReplicaCount: 10

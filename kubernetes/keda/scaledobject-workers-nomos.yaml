@@ -1,0 +1,32 @@
+# Per-agent-type ScaledObject for nomos workers.
+# Requires PR3 (scheduler host capability extension) for agent routing.
+# Without PR3, this ScaledObject will scale pods that receive all agent types.
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: fossology-workers-nomos
+  namespace: fossology
+  labels:
+    app.kubernetes.io/name: fossology
+    app.kubernetes.io/component: worker-nomos
+spec:
+  scaleTargetRef:
+    kind: StatefulSet
+    name: fossology-workers-nomos
+  minReplicaCount: 1
+  maxReplicaCount: 10
+  pollingInterval: 30
+  cooldownPeriod: 300
+  triggers:
+    - type: postgresql
+      metadata:
+        connectionFromEnv: FOSSOLOGY_DB_CONNECTION
+        # Count pending jobs of type 'nomos'
+        query: >-
+          SELECT COUNT(*) FROM jobqueue
+          WHERE jq_endtime IS NULL
+          AND jq_starttime IS NULL
+          AND jq_type = 'nomos'
+        targetQueryValue: "3"
+      authenticationRef:
+        name: fossology-db-auth

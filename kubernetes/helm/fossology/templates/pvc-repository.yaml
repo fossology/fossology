@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "fossology.repoPvcName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+    app.kubernetes.io/component: storage
+spec:
+  accessModes:
+    - {{ .Values.repository.accessMode }}
+  storageClassName: {{ .Values.repository.storage.className | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.repository.storage.size }}

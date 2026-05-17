@@ -1,0 +1,106 @@
+{{- $root := . -}}
+{{- $pools := .Values.workers.pools | default list -}}
+{{- if eq (len $pools) 0 -}}
+{{- $pools = list (dict) -}}
+{{- end -}}
+{{- range $idx, $pool := $pools }}
+{{- if gt $idx 0 }}
+---
+{{- end }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "fossology.workerStatefulSetName" (dict "root" $root "pool" $pool) }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+{{ include "fossology.labels" $root | indent 4 }}
+    app.kubernetes.io/component: worker
+    fossology.org/role: worker
+    fossology.org/worker-pool: {{ include "fossology.workerPoolName" (dict "pool" $pool) | quote }}
+spec:
+  serviceName: {{ include "fossology.workersHeadless" $root }}
+  replicas: {{ default $root.Values.workers.replicaCount $pool.replicaCount }}
+  podManagementPolicy: {{ default $root.Values.workers.podManagementPolicy $pool.podManagementPolicy }}
+  selector:
+    matchLabels:
+{{ include "fossology.selectorLabels" $root | indent 6 }}
+      fossology.org/role: worker
+      fossology.org/worker-pool: {{ include "fossology.workerPoolName" (dict "pool" $pool) | quote }}
+  template:
+    metadata:
+      labels:
+{{ include "fossology.labels" $root | indent 8 }}
+        app.kubernetes.io/component: worker
+        fossology.org/role: worker
+        fossology.org/worker-pool: {{ include "fossology.workerPoolName" (dict "pool" $pool) | quote }}
+        fossology.org/max-agents: {{ printf "%v" (default $root.Values.workers.maxAgentsPerWorker $pool.maxAgentsPerWorker) | quote }}
+{{- with $pool.agentCaps }}
+      annotations:
+        fossology.org/agent-caps: {{ join "," . | quote }}
+{{- end }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+{{ include "fossology.selectorLabels" $root | indent 20 }}
+                    fossology.org/role: worker
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: worker
+          image: {{ include "fossology.workerImage" $root }}
+          imagePullPolicy: {{ $root.Values.image.worker.pullPolicy }}
+          ports:
+            - containerPort: 22
+              name: ssh
+              protocol: TCP
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              cat > /usr/local/etc/fossology/Db.conf <<EOF
+              dbname=${FOSSOLOGY_DB_NAME};
+              host=${FOSSOLOGY_DB_HOST};
+              user=${FOSSOLOGY_DB_USER};
+              password=${FOSSOLOGY_DB_PASSWORD};
+              EOF
+              exec /entrypoint-worker.sh
+          env:
+{{ include "fossology.envDatabase" $root | indent 12 }}
+          livenessProbe:
+            exec:
+              command: ["sshd", "-t"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command: ["ssh-keyscan", "-T", "2", "localhost"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          volumeMounts:
+            - name: fossology-repo
+              mountPath: /srv/fossology/repository
+            - name: ssh-public
+              mountPath: /run/secrets/ssh
+              readOnly: true
+{{- with (default $root.Values.workers.resources $pool.resources) }}
+          resources:
+{{ toYaml . | indent 12 }}
+{{- end }}
+      volumes:
+        - name: fossology-repo
+          persistentVolumeClaim:
+            claimName: {{ include "fossology.repoPvcName" $root }}
+        - name: ssh-public
+          secret:
+            secretName: {{ $root.Values.ssh.secretName }}
+            defaultMode: 0644
+            items:
+              - key: authorized_keys
+                path: authorized_keys
+{{- end }}

@@ -1,0 +1,31 @@
+# ConfigMap containing the fossology.conf template with __HOSTS__ placeholder.
+# The config-sync sidecar replaces __HOSTS__ with live worker pod entries.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fossology.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+data:
+  fossology.conf.tmpl: |
+    ; FOSSology configuration file — rendered by config-sync sidecar
+    [FOSSOLOGY]
+    port = 24693
+    address = 0.0.0.0
+    depth = 3
+    path = /srv/fossology/repository
+
+    [DIRECTORIES]
+    PROJECTUSER  = fossy
+    PROJECTGROUP = fossy
+    MODDIR  = /usr/local/share/fossology
+    LIBEXECDIR = /usr/local/lib/fossology
+    LOGDIR  = /var/log/fossology
+    SYSCONFDIR = /usr/local/etc/fossology
+
+    [REPOSITORY]
+    localhost = * 00 ff
+
+    [HOSTS]
+    __HOSTS__

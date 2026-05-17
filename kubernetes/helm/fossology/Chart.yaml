@@ -1,0 +1,17 @@
+apiVersion: v2
+name: fossology
+description: Helm chart for Kubernetes-native deployment of FOSSology
+type: application
+version: 0.1.0
+appVersion: "4.4.0"
+keywords:
+  - fossology
+  - license-scanning
+  - compliance
+  - spdx
+home: https://www.fossology.org
+sources:
+  - https://github.com/fossology/fossology
+maintainers:
+  - name: FOSSology
+    url: https://github.com/fossology
