@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: fossology
+  namespace: argocd
+spec:
+  description: FOSSology Kubernetes deployment
+  sourceRepos:
+    - https://github.com/fossology/fossology
+  destinations:
+    - namespace: fossology
+      server: https://kubernetes.default.svc
+    - namespace: "fossology-*"
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace

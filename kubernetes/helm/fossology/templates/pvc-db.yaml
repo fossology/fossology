@@ -1,0 +1,17 @@
+{{- if .Values.postgres.internal.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "fossology.dbPvcName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.postgres.storage.className | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.postgres.storage.size }}
+{{- end }}

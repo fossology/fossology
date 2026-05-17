@@ -1,0 +1,96 @@
+# FOSSology Helm Chart — Production Environment Overrides
+# Usage: helm install fossology ./kubernetes/helm/fossology -f values-production.yaml
+#
+# IMPORTANT: Do NOT store secrets in this file.
+# Use External Secrets Operator, Sealed Secrets, or your cloud's secret manager.
+
+workers:
+  replicaCount: 5
+  # Production workers need significant CPU and memory.
+  # nomos is the most memory-hungry agent (~2GB per instance).
+  # copyright, ecc, and keyword are CPU-intensive.
+  resources:
+    requests:
+      cpu: "2"
+      memory: 2Gi
+    limits:
+      cpu: "4"
+      memory: 8Gi
+
+web:
+  replicaCount: 3
+  # Web pods serve the PHP UI + REST API.
+  # Memory usage scales with concurrent user sessions.
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+
+scheduler:
+  # Scheduler is single-replica by design — do not increase.
+  # It manages job dispatch and agent lifecycle state.
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 2Gi
+
+postgres:
+  # For production: disable internal postgres and use a managed service
+  # (RDS, Cloud SQL, Azure Database) for HA, backups, and monitoring.
+  internal:
+    enabled: true  # Set to false when using external database
+  resources:
+    requests:
+      cpu: "1"
+      memory: 2Gi
+    limits:
+      cpu: "4"
+      memory: 8Gi
+  storage:
+    # Production DB should have ample room for scan metadata.
+    # 100+ scans/day with large repos can grow 1-2 GB/month.
+    size: 200Gi
+    className: gp3  # AWS: gp3, GCP: pd-ssd, Azure: managed-premium
+
+repository:
+  storage:
+    # The repository stores all uploaded files and extracted content.
+    # Size depends heavily on scan volume — monitor and expand as needed.
+    size: 500Gi
+    # Must be ReadWriteMany. Options:
+    #   AWS:   efs-sc (EFS CSI driver)
+    #   GCP:   filestore-sc (Filestore CSI)
+    #   Azure: azurefile-premium
+    #   On-prem: nfs-client
+    className: efs-sc
+
+ingress:
+  enabled: true
+  className: nginx
+  host: fossology.example.com
+  path: /
+  pathType: Prefix
+  tls: true
+  tlsSecretName: fossology-tls
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+postInstall:
+  enabled: true
+
+keda:
+  enabled: true
+  connectionSecretName: fossology-db
+  connectionSecretKey: KEDA_DB_CONNECTION
+  maxReplicaCount: 20
+  # Lower target value = more aggressive scaling.
+  # 3 means scale up for every 3 pending jobs.
+  targetValue: "3"
+  pollingInterval: 15
+  cooldownPeriod: 600
