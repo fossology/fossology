@@ -503,7 +503,7 @@ void scheduler_update(scheduler_t* scheduler)
        }
       }
       // the generic case, this can run anywhere, find a place
-      else if((host = get_host(&(scheduler->host_queue), 1)) == NULL)
+      else if((host = get_host(&(scheduler->host_queue), 1, job->agent_type)) == NULL)
       {
         job = NULL;
         break;
@@ -907,7 +907,34 @@ void scheduler_foss_config(scheduler_t* scheduler)
     }
 
     sscanf(tmp, "%s %s %d", addbuf, dirbuf, &max);
-    host = host_init(keys[i], addbuf, dirbuf, max);
+
+    /* Check for optional agents= field (PR3: per-host agent capabilities) */
+    {
+      GList* agent_caps = NULL;
+      gchar* agents_tok = strstr(tmp, "agents=");
+      if(agents_tok != NULL)
+      {
+        gchar* agents_val = agents_tok + 7; /* skip "agents=" */
+        if(agents_val[0] != '\0')
+        {
+          gchar** agent_arr = g_strsplit(agents_val, ",", -1);
+          gint j;
+          for(j = 0; agent_arr[j] != NULL; j++)
+          {
+            g_strstrip(agent_arr[j]);
+            if(agent_arr[j][0] != '\0')
+              agent_caps = g_list_append(agent_caps, g_strdup(agent_arr[j]));
+          }
+          g_strfreev(agent_arr);
+        }
+        else
+        {
+          WARNING("CONFIG: empty agents= value for host %s, treating as accept-all\n", keys[i]);
+        }
+      }
+      host = host_init_with_caps(keys[i], addbuf, dirbuf, max, agent_caps);
+    }
+
     host_insert(host, scheduler);
     if(TVERB_SCHED)
     {
@@ -916,6 +943,14 @@ void scheduler_foss_config(scheduler_t* scheduler)
       log_printf("   address = %s\n", addbuf);
       log_printf(" directory = %s\n", dirbuf);
       log_printf("       max = %d\n", max);
+      if(host->agent_caps)
+      {
+        GList* cap_iter;
+        log_printf("    agents =");
+        for(cap_iter = host->agent_caps; cap_iter; cap_iter = cap_iter->next)
+          log_printf(" %s", (char*)cap_iter->data);
+        log_printf("\n");
+      }
     }
   }
 

@@ -87,6 +87,7 @@ typedef struct
     char* version_source;       ///< the machine that reported the version information
     char* version;              ///< the version of the agent that is running on all hosts
     int valid;                  ///< flag indicating if the meta_agent is valid
+    int failed_startup_tests;   ///< the number of consecutive failed startup tests
     int run_count;              ///< the count of agents in running state
 } meta_agent_t;
 
