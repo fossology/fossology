@@ -4,6 +4,101 @@
 -->
 # Changelog of FOSSology
 
+### 4.7.0 (May 15th 2026)
+
+With [4.7.0](https://github.com/fossology/fossology/releases/tag/4.7.0),
+FOSSology introduces a number of stability fixes, usability improvements, and performance enhancements
+following the [4.6.0](https://github.com/fossology/fossology/releases/tag/4.6.0) release, including:
+
+* Added support for SPDX 3.0 format in the API report endpoint.
+* Introduced support for LZIP archive format.
+* Removed support for outdated distributions: Ubuntu Focal, Debian Stretch, and Debian Buster.
+* Added support for multi-select using the Shift key for easier item grouping.
+* Performance Improvements
+  - Pre-compiling nomos regex patterns once at startup.
+  - Optimized copyright reuse using hash map–based lookups.
+  - Eliminated N+1 query issues in copyright reuse.
+  - Improved upload permission checks with batch filtering.
+  - Enhanced performance of the upload page and reuse-related queries.
+  - Accelerated folder access checks using CTEs and additional optimizations.
+* Bug Fixes & Stability
+  - Fixed a scheduler crash occurring when the agent owner is NULL.
+* Introduced new license footprints along with various minor fixes and improvements.
+
+#### Credits to contributors for 4.7.0
+
+From the GIT commit history, we have the following contributors since
+[4.6.0](https://github.com/fossology/fossology/releases/tag/4.6.0):
+
+```
+> Adithyadspawar <@Adithyadspawar>
+> Aditya30ag <adityaagrwal3005@gmail.com>
+> Anuj Rewar <anujrewar5@gmail.com>
+> Aryan Shrivastava <aryan.shrivastava3005@gmail.com>
+> ayxsh_shxrma <ayushmaan.sharma911@gmail.com>
+> D3S-Gaurav <kumargauravrocco2724@gmail.com>
+> Darshan <darshan.kushal321@gmail.com>
+> Dietmar Helmut Leher <helmut.leher.ext@vaillant-group.com>
+> FrankOHara43 <aryaswaraj5@gmail.com>
+> its-sushant <sushant.kumar@siemens-healthineers.com>
+> Jan Altenberg <jan.altenberg@osadl.org>
+> Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
+> kjarir <kjarir23@gmail.com>
+> Krrish Biswas <krrishbiswas175@gmail.com>
+> Mandar Joshi <mandarjoshi1045@gmail.com>
+> Muhammad Abdullah Shahid <@abdollahShahid>
+> Muhammad Salman <chsalmanramzan422@gmail.com>
+> pranavsnotebook-a11y <@pranavsnotebook-a11y>
+> Priya Sharma <priyasharma1001a@gmail.com>
+> Raj Gupta <@Raj-G07>
+> SagarKhatri649 <@SagarKhatri649>
+> Saksham Mishra <sakshammishra112@gmail.com>
+> Sandipmandal25 <sandipmandal02.sm@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@gmail.com>
+> Shivangisriva <02shivangisrivastava@gmail.com>
+> SooryanshSingh <sooryanshsingh56@gmail.com>
+> Sumamasonia <sumamasonia@gmail.com>
+> Vishesh Gupta <vishesh15th@gmail.com>
+> winniem30 <tejaswinim446@gmail.com>
+```
+
+#### Features
+
+* `ecd95ccbc` feat: allow upload delete with write permission
+* `b5c7bf03d` feat(bulk): extend include license text functionality
+* `78c3e3ea0` feat(conf): add a new tab in conf page to manage acknowledgements
+* `d1132e2b6` feat(copyright): add revert to original for copyright hist
+
+#### Corrections
+
+* `1740df690` fix(DEP5): add a valid package-name, main license and fix formatting
+* `2be2e36bb` refactor(nomos): pre-compiling nomos regex patterns once at startup instead
+* `aac3b0511` fix(bulkScan): use uploadtreetablename, fix logic to get latest decisions
+* `bdeffe082` fix(nomos): eliminate buffer overflow vulnerabilities
+* `4a0dd5288` fix(Bulk): remove toggle and fix bulk popup i tree view
+* `a7b53fba1` fix(reportImport): add setLicenseCandidate for custom text licenses Fixes #3025
+* `27c49b882` fix(schema): transformation logic needed a unique execution
+* `c0126db58` fix(copyright): reduce false deactivations and limit stored text
+* `b4b413fc8` fix(scancode): replace tmpnam with mkstemp to fix warning
+* `f9070521c` fix(copyright): edge case with no copyright statement jumps before declutter
+* `f03e7a87f` fix(copyright): check hash and add distinct variable to method
+* `38f173130` fix: correct typos in user-facing messages
+* `5c8cd14aa` fix(ununpack): prevent floating point exception in IsInflatedFile (issue #2684)
+* `9e8aa6610` fix(deciderJob): add check if the upload tree contains a entry
+* `14abd7b87` fix(uploadFile): fix cast expression error on a empty database
+* `d26a9e681` fix(reuser): check if same pfile have different decisions
+* `23d242f8f` fix(schema-export): remove  and add current path fix libschema pg_conn issue
+* `c802372b6` fix(fossinit): add license by ojo to update the license text
+
+#### Infrastructure
+
+* `f834b05da` docs(contributing): fix end user documentation wording
+* `45abdd899` chore(deps): bump lukka/get-cmake from 4.3.0 to 4.3.2
+* `628b8285b` chore(code): clean and restructuring of schema export code
+* `3d1d3947e` chore(deps): bump phpoffice/phpspreadsheet
+* `84e7730fe` chore(ci): fix release information deprecation warning
+* `273568686` chore(install): upgrade safaa version to latest
+
 ### 4.7.0-rc1 (April 15th 2026)
 
 This release [4.7.0-rc1](https://github.com/fossology/fossology/releases/tag/4.7.0-rc1)
