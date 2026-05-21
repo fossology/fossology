@@ -425,6 +425,9 @@ require_once ("$LIBEXECDIR/sanity_check.php");
 $checker = new SanityChecker($dbManager,$Verbose);
 $errors = $checker->check();
 
+require_once("$LIBEXECDIR/dbmigrate_licensedb_compatibility.php");
+LicenseDB_compatibility_migration();
+
 if($errors>0)
 {
   echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";
