@@ -15,7 +15,7 @@ set(FO_WWW_OBSOLETE
     admin-folder-delete.php admin-dashboard.php ajax-showjobs.php
     group-manage-self.php group-manage.php ajax-perms.php
     upload_permissions.php upload-srv-files.php upload-vcs.php
-    ui-license-list.php ui-browse-license.php
+    ui-license-list.php ui-browse-license.php ui-picker.php
     template/ui-license-list-form.html.twig
     template/components template/include
 )

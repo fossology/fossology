@@ -1,0 +1,142 @@
+{# SPDX-FileCopyrightText: © 2026 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+var freezeCol  = {{ freezeCol }};
+var frozenItem = {{ frozenItem }};
+
+var curItems    = {{ items|json_encode|raw }};
+var curFilter   = {{ filter|json_encode|raw }};
+var curMode     = {{ mode|json_encode|raw }};
+var curView     = {{ view|json_encode|raw }};
+var curBaseline = {{ baseline }};
+
+function buildItemsQS(itemsArr) {
+  return '&items=' + itemsArr.join(',');
+}
+
+function baseQS(itemsArr, f, m, v, b) {
+  var qs = '?mod={{ pluginName }}' + buildItemsQS(itemsArr)
+         + '&filter=' + f + '&mode=' + m + '&view=' + v + '&baseline=' + b;
+  if (freezeCol > 0) {
+    qs += '&freeze=' + freezeCol + '&itemf=' + frozenItem;
+  }
+  return qs;
+}
+
+function ChangeFilter(f, items)  { window.location.assign(baseQS(items, f, curMode, curView, curBaseline)); }
+function ChangeMode(m, items)    { window.location.assign(baseQS(items, curFilter, m, curView, curBaseline)); }
+function ChangeView(v, items)    { window.location.assign(baseQS(items, curFilter, curMode, v, curBaseline)); }
+function SetBaseline(b, items)   { window.location.assign(baseQS(items, curFilter, curMode, curView, b)); }
+
+var histPageSize = 25;
+var histCurrentPage = 0;
+var histRows = [];
+var histQuery = '';
+
+function histRenderPage() {
+  var matched = histRows.filter(function (r) {
+    return r.cells[0].textContent.toLowerCase().indexOf(histQuery) >= 0;
+  });
+  var total = matched.length;
+  if (histCurrentPage * histPageSize >= total && total > 0) {
+    histCurrentPage = Math.max(0, Math.ceil(total / histPageSize) - 1);
+  }
+  var start = histCurrentPage * histPageSize;
+  var end   = Math.min(start + histPageSize, total);
+
+  histRows.forEach(function (r) { r.style.display = 'none'; });
+  matched.forEach(function (r, i) {
+    r.style.display = (i >= start && i < end) ? '' : 'none';
+  });
+
+  var info = document.getElementById('histPageInfo');
+  var prev = document.getElementById('histPrev');
+  var next = document.getElementById('histNext');
+  if (!info) return;
+  if (total === 0) {
+    info.textContent = '{{ 'No results'|trans|e('js') }}';
+  } else {
+    info.textContent = '{{ 'Showing'|trans|e('js') }} ' + (start + 1) + '–' + end
+                     + ' {{ 'of'|trans|e('js') }} ' + total;
+  }
+  if (prev) prev.disabled = (histCurrentPage === 0);
+  if (next) next.disabled = (end >= total);
+}
+
+function histPage(dir) {
+  histCurrentPage = Math.max(0, histCurrentPage + dir);
+  histRenderPage();
+}
+
+function histChangePageSize(val) {
+  histPageSize = parseInt(val, 10);
+  histCurrentPage = 0;
+  histRenderPage();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  var allRows = document.querySelectorAll('#multihisto tbody tr');
+  histRows = Array.prototype.slice.call(allRows);
+  histRenderPage();
+
+  var histSearch = document.getElementById('histSearch');
+  if (histSearch) {
+    histSearch.addEventListener('keyup', function () {
+      histQuery = this.value.toLowerCase();
+      histCurrentPage = 0;
+      histRenderPage();
+    });
+  }
+
+  /* Restore freeze button visual state when navigating back to a frozen page */
+  if (freezeCol > 0) {
+    var btn = document.getElementById('Freeze' + (freezeCol - 1));
+    if (btn) {
+      btn.textContent = '{{ 'Frozen'|trans|e('js') }}';
+      btn.className = btn.className.replace('btn-outline-secondary', 'btn-warning');
+    }
+    rewriteCompareLinks();
+  }
+});
+
+/* Append or remove &freeze=N&itemf=PK on every drill-down link in the table */
+function rewriteCompareLinks() {
+  var links = document.querySelectorAll('#dirlist a[href], #mc-banners a[href]');
+  for (var i = 0; i < links.length; i++) {
+    var href = links[i].getAttribute('href');
+    href = href.replace(/&freeze=\d+/, '').replace(/&itemf=\d+/, '');
+    if (freezeCol > 0) {
+      href += '&freeze=' + freezeCol + '&itemf=' + frozenItem;
+    }
+    links[i].setAttribute('href', href);
+  }
+}
+
+function Freeze(colIdx) {
+  var btn = document.getElementById('Freeze' + colIdx);
+  if (!btn) return;
+
+  if (freezeCol === colIdx + 1) {
+    /* toggle off: unfreeze this column */
+    freezeCol  = 0;
+    frozenItem = 0;
+    btn.textContent = '{{ 'Freeze'|trans|e('js') }}';
+    btn.className = btn.className.replace('btn-warning', 'btn-outline-secondary');
+  } else {
+    /* unfreeze the previously frozen column's button if different */
+    if (freezeCol > 0) {
+      var prevBtn = document.getElementById('Freeze' + (freezeCol - 1));
+      if (prevBtn) {
+        prevBtn.textContent = '{{ 'Freeze'|trans|e('js') }}';
+        prevBtn.className = prevBtn.className.replace('btn-warning', 'btn-outline-secondary');
+      }
+    }
+    freezeCol  = colIdx + 1;
+    frozenItem = curItems[colIdx];
+    btn.textContent = '{{ 'Frozen'|trans|e('js') }}';
+    btn.className = btn.className.replace('btn-outline-secondary', 'btn-warning');
+  }
+
+  rewriteCompareLinks();
+}

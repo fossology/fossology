@@ -1,0 +1,127 @@
+{# SPDX-FileCopyrightText: © 2026 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+{% if isMulti %}
+
+  {# ── Multi-compare: selected components card ────────────────────────── #}
+  <div class="card mb-3 shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center py-2 bg-light">
+      <h6 class="mb-0">{{ 'Selected Components (%d)'|trans|format(currentItems|length) }}</h6>
+      {% if currentItems|length >= 2 %}
+        <a class="btn btn-success btn-sm" href="{{ compareUri }}">
+          {{ 'Compare Now'|trans }} &rarr;
+        </a>
+      {% endif %}
+    </div>
+
+    {% if currentItems is not empty %}
+      <ul class="list-group list-group-flush">
+        {% for pk in currentItems %}
+          <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+            <code class="small">{{ selectedPaths[pk] }}</code>
+            <a href="{{ removeUris[pk] }}" class="btn btn-outline-danger btn-sm ml-2">
+              {{ 'Remove'|trans }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+  </div>
+
+{% else %}
+
+  {# ── Classic 2-way mode card ─────────────────────────────────────────── #}
+  <div class="card mb-3 shadow-sm">
+    <div class="card-header py-2 bg-light">
+      <h6 class="mb-0">{{ 'File Picker'|trans }}</h6>
+    </div>
+    <div class="card-body py-2">
+      <div class="mb-2">
+        <strong>{{ 'File 1:'|trans }}</strong>
+        <code class="small">{{ pathStr }}</code>
+      </div>
+      <div>{{ appPicker|raw }}</div>
+    </div>
+  </div>
+
+  {% if historyPick %}
+    <div class="card mb-3 shadow-sm">
+      <div class="card-header py-2">
+        <h6 class="mb-0">{{ 'Recent Picks (%d)'|trans|format(historyCount) }}</h6>
+      </div>
+      <div class="card-body py-2">{{ historyPick|raw }}</div>
+    </div>
+  {% endif %}
+
+{% endif %}
+
+{# ── Browse Repository ───────────────────────────────────────────────── #}
+<div class="card shadow-sm">
+  <div class="card-header py-2 d-flex align-items-center">
+    <h6 class="mb-0 mr-3 text-nowrap">{{ 'Browse Repository'|trans }}</h6>
+    <div class="d-flex align-items-center small text-muted text-nowrap mr-3">
+      <span id="uploadPageInfo" class="mr-2"></span>
+      <button id="uploadPrev" class="btn btn-outline-secondary btn-sm mr-1" onclick="pickerPage(-1)">&laquo; {{ 'Prev'|trans }}</button>
+      <button id="uploadNext" class="btn btn-outline-secondary btn-sm mr-3" onclick="pickerPage(1)">{{ 'Next'|trans }} &raquo;</button>
+      <select id="uploadPageSize" class="form-control form-control-sm d-inline-block w-auto mr-2"
+              onchange="pickerChangePageSize(this.value)">
+        <option value="10">10</option>
+        <option value="25" selected>25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+      <input type="text" id="uploadSearch" class="form-control form-control-sm"
+             style="width:180px" placeholder="{{ 'Search…'|trans }}">
+    </div>
+    <div class="d-flex align-items-center ml-auto">
+      <label class="mb-0 mr-2 small font-weight-bold text-nowrap">{{ 'Folder:'|trans }}</label>
+      <select id="folderSel" class="form-control form-control-sm ui-render-select2"
+              style="min-width:220px;max-width:300px" onchange="goFolder(this.value)">
+        {{ folderOptions|raw }}
+      </select>
+    </div>
+  </div>
+  <div class="card-body p-2">
+
+    {# Upload list for the selected folder #}
+    {% if uploads is empty %}
+      <div class="text-muted small p-2">{{ 'No uploads in this folder.'|trans }}</div>
+    {% else %}
+      <div id="uploadList" class="list-group list-group-flush">
+        {% for upload in uploads %}
+          <div class="list-group-item d-flex justify-content-between align-items-center py-2 picker-row"
+               data-name="{{ upload.name|lower }}">
+            <span>
+              <strong>{{ upload.name }}</strong>
+              {% if upload.desc %}
+                <small class="text-muted ml-1">{{ upload.desc }}</small>
+              {% endif %}
+              {% if upload.ts %}
+                <small class="text-muted ml-2">{{ upload.ts }}</small>
+              {% endif %}
+            </span>
+            <button type="button"
+                    class="btn {{ isMulti ? 'btn-outline-success' : 'btn-outline-primary' }} btn-sm ml-2"
+                    onclick="AppJump({{ upload.uploadtree_pk }})">
+              {{ isMulti ? ('+ ' ~ 'Add'|trans) : 'Select'|trans }}
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript">
+    {% include 'picker.js.twig' %}
+  </script>
+{% endblock %}
