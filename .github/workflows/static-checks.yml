@@ -138,7 +138,7 @@ jobs:
           configFile: ./commitlint.config.mjs
 
       - name: DCO Check
-        uses: christophebedard/dco-check@0.5.0
+        uses: christophebedard/dco-check@0.5.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
