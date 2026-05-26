@@ -142,8 +142,6 @@ void test_doctorBuffer_fromFile()
   report_Match(undoc);
   freeAndClearScan(&cur);
 
-  report_Match(undoc);
-
   initializeCurScan(&cur);
   cur.currentLicenceIndex=0;
   g_array_append_val(cur.indexList, licence_index);
