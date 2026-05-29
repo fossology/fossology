@@ -55,19 +55,17 @@ target_link_libraries(test_reuser
 
 add_test(reuser_unit_test test_reuser)
 
-# The binary is built as 'reuser_exec' in the build tree (OUTPUT_NAME is NOT
-# set to avoid a Ninja duplicate-rule conflict with the generate_version_php
-# custom target named 'reuser'). Create a symlink 'reuser' in the source tree
+# The binary is built as 'reuser' in the build tree. Create a symlink 'reuser' in the source tree
 # so SchedulerTestRunnerCli.php can invoke it with the correct argv[0] basename
 # (fo_scheduler_connect looks up mods-enabled/<basename>/VERSION).
 # Also symlink the generated VERSION file – mirrors the deciderjob pattern.
 add_custom_target(prepare_reuser_test ALL
     COMMENT "Staging reuser binary and VERSION symlinks for functional tests"
     COMMAND ln -sf "${CMAKE_CURRENT_BINARY_DIR}/../VERSION"
-    COMMAND ln -sf "${CMAKE_CURRENT_BINARY_DIR}/../agent/reuser_exec"
+    COMMAND ln -sf "${CMAKE_CURRENT_BINARY_DIR}/../agent/reuser"
         "${CMAKE_CURRENT_SOURCE_DIR}/../agent/reuser"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/..")
-add_dependencies(prepare_reuser_test reuser_exec)
+add_dependencies(prepare_reuser_test reuser)
 
 add_test(NAME reuser_functional_scheduler_test
     COMMAND ${PHPUNIT} --bootstrap ${PHPUNIT_BOOTSTRAP} ${FO_CWD}/Functional/schedulerTest.php)

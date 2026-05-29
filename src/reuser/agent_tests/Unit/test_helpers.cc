@@ -36,6 +36,11 @@ public:
   {
     return replaceUnicodeControlChars(s);
   }
+
+  int callGetDecisionTypePriority(int decisionType)
+  {
+    return getDecisionTypePriority(decisionType);
+  }
 };
 
 // ── isValidIdentifier tests ───────────────────────────────────────────────────
@@ -373,3 +378,62 @@ protected:
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(ReplaceUnicodeControlCharsTest);
+
+class DecisionTypePriorityTest : public CPPUNIT_NS::TestFixture
+{
+  CPPUNIT_TEST_SUITE(DecisionTypePriorityTest);
+  CPPUNIT_TEST(testPriorityOrdering);
+  CPPUNIT_TEST(testStrongerTypeBeatsWeakerRegardlessOfPkOrder);
+  CPPUNIT_TEST_SUITE_END();
+
+protected:
+  int prio(int decisionType)
+  {
+    ReuserHelpersAccessor accessor;
+    return accessor.callGetDecisionTypePriority(decisionType);
+  }
+
+  /** @brief Matches PHP ReuserAgent::getDecisionTypePriority. */
+  void testPriorityOrdering()
+  {
+    CPPUNIT_ASSERT(prio(0) < prio(3));
+    CPPUNIT_ASSERT(prio(3) < prio(4));
+    CPPUNIT_ASSERT(prio(4) < prio(7));
+    CPPUNIT_ASSERT(prio(7) < prio(6));
+    CPPUNIT_ASSERT(prio(6) < prio(5));
+    CPPUNIT_ASSERT_EQUAL(0, prio(999));
+  }
+
+  /**
+   * @brief Same pfile: IDENTIFIED (pk 40) must win over IRRELEVANT (pk 50).
+   *
+   * Mirrors getClearingDecisionMapByPfile() collapse when rows arrive id DESC.
+   */
+  void testStrongerTypeBeatsWeakerRegardlessOfPkOrder()
+  {
+    const int irrelevantPk = 50;
+    const int irrelevantType = 4;
+    const int identifiedPk = 40;
+    const int identifiedType = 5;
+
+    int chosenPk = irrelevantPk;
+    int chosenType = irrelevantType;
+
+    auto applyRow = [&](int pk, int type)
+    {
+      if (prio(type) > prio(chosenType))
+      {
+        chosenPk = pk;
+        chosenType = type;
+      }
+    };
+
+    applyRow(irrelevantPk, irrelevantType);
+    applyRow(identifiedPk, identifiedType);
+
+    CPPUNIT_ASSERT_EQUAL(identifiedPk, chosenPk);
+    CPPUNIT_ASSERT_EQUAL(identifiedType, chosenType);
+  }
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(DecisionTypePriorityTest);

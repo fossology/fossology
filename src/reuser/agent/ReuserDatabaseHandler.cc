@@ -36,6 +36,19 @@ ReuserDatabaseHandler ReuserDatabaseHandler::spawn() const
 
 // ── Private helpers ───────────────────────────────────────────────────────────
 
+int ReuserDatabaseHandler::getDecisionTypePriority(int decisionType)
+{
+  switch (decisionType)
+  {
+    case 5: return 5;  // IDENTIFIED
+    case 6: return 4;  // DO_NOT_USE
+    case 7: return 3;  // NON_FUNCTIONAL
+    case 4: return 2;  // IRRELEVANT
+    case 3: return 1;  // TO_BE_DISCUSSED
+    default: return 0; // WIP and others
+  }
+}
+
 bool ReuserDatabaseHandler::isValidIdentifier(const std::string& s)
 {
   if (s.empty()) return false;
@@ -217,16 +230,17 @@ std::map<int, int> ReuserDatabaseHandler::getClearingDecisionMapByPfile(
     ? " AND ut.upload_fk = " + std::to_string(uploadId)
     : "";
 
-  // decision_type 0 == WIP; scope 0 == ITEM takes priority over scope 1 == REPO.
   // The inner CTE picks the best decision per uploadtree_pk (ITEM before REPO,
-  // newest first).  The outer DISTINCT ON(pfile_id) then picks one
-  // uploadtree_pk per pfile deterministically (newest decision id wins),
-  // matching PHP's mapByFileId(getFileClearingsFolder(...)) behaviour.
+  // newest first).  The outer CTE preserves all rows so that when the same
+  // pfile has different decisions at different locations, priority-based
+  // conflict resolution (via getDecisionTypePriority) can choose the stronger
+  // decision.
   QueryResult qr = dbManager.queryPrintf(
     "WITH per_item AS ("
     " SELECT DISTINCT ON(ut.uploadtree_pk)"
     "   cd.clearing_decision_pk AS id,"
-    "   cd.pfile_fk AS pfile_id"
+    "   cd.pfile_fk AS pfile_id,"
+    "   cd.decision_type AS dec_type"
     " FROM clearing_decision cd"
     " INNER JOIN %s ut ON (%s)%s"
     " WHERE cd.decision_type != 0"
@@ -234,20 +248,34 @@ std::map<int, int> ReuserDatabaseHandler::getClearingDecisionMapByPfile(
     "          cd.clearing_decision_pk DESC"
     "),"
     " per_pfile AS ("
-    " SELECT DISTINCT ON(pfile_id) id, pfile_id"
+    " SELECT id, pfile_id, dec_type"
     " FROM per_item"
     " ORDER BY pfile_id, id DESC"
     ")"
-    " SELECT id, pfile_id FROM per_pfile",
+    " SELECT id, pfile_id, dec_type FROM per_pfile",
     table.c_str(), joinCond.c_str(), uploadFilter.c_str());
+
+  std::map<int, int> resultTypes;
 
   for (int i = 0; i < qr.getRowCount(); ++i)
   {
     auto row    = qr.getRow(i);
     int  decId  = std::stoi(row[0]);
     int  pfileId = std::stoi(row[1]);
-    if (pfileId > 0 && result.find(pfileId) == result.end())
-      result[pfileId] = decId;
+    int  decType = std::stoi(row[2]);
+    if (pfileId > 0) {
+      auto it = result.find(pfileId);
+      if (it == result.end()) {
+        result[pfileId] = decId;
+        resultTypes[pfileId] = decType;
+      } else if (getDecisionTypePriority(decType) >
+                 getDecisionTypePriority(resultTypes[pfileId])) {
+        printf("INFO :: Detected conflicting decisions for the same pfile."
+               " Applying the stronger decision.\n");
+        result[pfileId] = decId;
+        resultTypes[pfileId] = decType;
+      }
+    }
   }
   return result;
 }
@@ -858,6 +886,7 @@ bool ReuserDatabaseHandler::reuseCopyrights(
                     " (copyright_fk=%d, uploadtree_fk=%d) – continuing.",
                     copyrightPk, uploadtreePk);
     }
+    fo_scheduler_heart(1);
   }
   return true;
 }

@@ -119,6 +119,13 @@ protected:
   static bool        isValidIdentifier(const std::string& s);
   /** @brief Strip Unicode control characters (C0, C1, DEL) from @p input. */
   static std::string replaceUnicodeControlChars(const std::string& input);
+  /**
+   * @brief Priority for decision types during reuse conflict resolution.
+   *
+   * Higher priority values indicate a stronger decision. Used when the same
+   * pfile has different decision types at different locations.
+   */
+  static int getDecisionTypePriority(int decisionType);
 
 private:
   static std::string shellEscape(const std::string& s);
