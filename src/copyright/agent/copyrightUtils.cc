@@ -299,6 +299,10 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
     int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler,
     int uploadId, const string& uploadTreeTableName)
 {
+  if(matches.empty())
+  {
+    return true;
+  }
   if (!copyrightDatabaseHandler.begin())
   {
     return false;
