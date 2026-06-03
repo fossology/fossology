@@ -17,8 +17,8 @@ namespace Fossology\UI\Api\Models;
 class Reuser
 {
   /**
-   * @var integer $reuseUpload
-   * Upload id to reuse
+   * @var integer|integer[] $reuseUpload
+   * Upload id(s) to reuse
    */
   private $reuseUpload;
   /**
@@ -50,7 +50,7 @@ class Reuser
   /**
    * Reuser constructor.
    *
-   * @param integer $reuseUpload
+   * @param integer|integer[] $reuseUpload
    * @param string $reuseGroup
    * @param boolean $reuseMain
    * @param boolean $reuseEnhanced
@@ -60,17 +60,30 @@ class Reuser
   public function __construct($reuseUpload, $reuseGroup, $reuseMain = false,
     $reuseEnhanced = false)
   {
-    if (is_numeric($reuseUpload)) {
+    if (is_array($reuseUpload)) {
+      if (empty($reuseUpload)) {
+        throw new \UnexpectedValueException(
+          "reuse_upload should be integer or array of integers", 400);
+      }
+      $filtered = array_filter($reuseUpload, function ($val) {
+        return filter_var($val, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) !== null;
+      });
+      if (count($filtered) !== count($reuseUpload)) {
+        throw new \UnexpectedValueException(
+          "reuse_upload should be integer or array of integers", 400);
+      }
+      $this->reuseUpload = array_map('intval', $reuseUpload);
+    } elseif (is_numeric($reuseUpload)) {
       $this->reuseUpload = $reuseUpload;
-      $this->reuseGroup = $reuseGroup;
-      $this->reuseMain = $reuseMain;
-      $this->reuseEnhanced = $reuseEnhanced;
-      $this->reuseReport = false;
-      $this->reuseCopyright = false;
     } else {
       throw new \UnexpectedValueException(
-        "reuse_upload should be integer", 400);
+        "reuse_upload should be integer or array of integers", 400);
     }
+    $this->reuseGroup = $reuseGroup;
+    $this->reuseMain = $reuseMain;
+    $this->reuseEnhanced = $reuseEnhanced;
+    $this->reuseReport = false;
+    $this->reuseCopyright = false;
   }
 
   /**
@@ -101,9 +114,9 @@ class Reuser
     if (array_key_exists(($version == ApiVersion::V2? "reuseCopyright" : "reuse_copyright"), $reuserArray)) {
       $this->setReuseCopyright($reuserArray[$version == ApiVersion::V2? "reuseCopyright" : "reuse_copyright"]);
     }
-    if ($this->reuseUpload === null) {
+    if ($this->reuseUpload === null || (is_array($this->reuseUpload) && empty($this->reuseUpload))) {
       throw new \UnexpectedValueException(
-        "reuse_upload should be integer", 400);
+        "reuse_upload should be integer or array of integers", 400);
     }
     if ($this->reuseGroup === null) {
       throw new \UnexpectedValueException(
@@ -114,11 +127,23 @@ class Reuser
 
   ////// Getters //////
   /**
-   * @return integer
+   * @return integer|integer[]
    */
   public function getReuseUpload()
   {
     return $this->reuseUpload;
+  }
+
+  /**
+   * Always return reuse upload IDs as an array.
+   * @return integer[]
+   */
+  public function getReuseUploads()
+  {
+    if (is_array($this->reuseUpload)) {
+      return $this->reuseUpload;
+    }
+    return [$this->reuseUpload];
   }
 
   /**
@@ -163,14 +188,27 @@ class Reuser
 
   ////// Setters //////
   /**
-   * @param integer $reuseUpload
+   * @param integer|integer[] $reuseUpload
    */
   public function setReuseUpload($reuseUpload)
   {
-    $this->reuseUpload = filter_var($reuseUpload,
-      FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
-    if ($this->reuseUpload === null) {
-      throw new \UnexpectedValueException("Reuse upload should be an integer!", 400);
+    if (is_array($reuseUpload)) {
+      if (empty($reuseUpload)) {
+        throw new \UnexpectedValueException("Reuse upload should be an integer or array of integers!", 400);
+      }
+      $filtered = array_filter($reuseUpload, function ($val) {
+        return filter_var($val, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) !== null;
+      });
+      if (count($filtered) !== count($reuseUpload)) {
+        throw new \UnexpectedValueException("Reuse upload should be an integer or array of integers!", 400);
+      }
+      $this->reuseUpload = array_map('intval', $reuseUpload);
+    } else {
+      $this->reuseUpload = filter_var($reuseUpload,
+        FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+      if ($this->reuseUpload === null) {
+        throw new \UnexpectedValueException("Reuse upload should be an integer or array of integers!", 400);
+      }
     }
   }
 
