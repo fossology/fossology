@@ -5434,6 +5434,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_CC_BY_ND_30)) {
     INTERESTING("CC-BY-ND-3.0");
   }
+  else if (INFILE(_PHR_CC_BY_40)) {
+    INTERESTING("CC-BY-4.0");
+  }
   cleanLicenceBuffer();
   if (URL_INFILE(_URL_RPL)) {
     INTERESTING(lDebug ? "RPL(url)" : "RPL");
@@ -6916,6 +6919,20 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (!lmem[_mGPL] && NOT_INFILE(_LT_IGNORE_CLAUSE_2) && INFILE(_LT_GPLref21))
   {
     INTERESTING(lDebug ? "GPLref21" : "GPL");
+    lmem[_mGPL] = 1;
+  }
+  /*
+   * SPDX-License-Identifier lines may use a tab separator (e.g. ":\tGPL-2.0"),
+   * which prevents _LT_GPL_NAMED3 from firing (it requires printable ASCII before
+   * \<gpl\>). Check SPDX GPL identifiers directly here so they are not missed.
+   */
+  if (!lmem[_mGPL] && HASTEXT(_SPDX_GPL_20_or_later, REG_EXTENDED)
+      && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+    INTERESTING(lDebug ? "GPL-2.0-or-later(SPDX-direct)" : "GPL-2.0-or-later");
+    lmem[_mGPL] = 1;
+  }
+  else if (!lmem[_mGPL] && HASTEXT(_SPDX_GPL_20, REG_EXTENDED)) {
+    INTERESTING(lDebug ? "GPL-2.0-only(SPDX-direct)" : "GPL-2.0-only");
     lmem[_mGPL] = 1;
   }
   cleanLicenceBuffer();
@@ -8605,16 +8622,16 @@ char *ccVersion(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_TITLE_CC_BY_NC_ND_40) || URL_INFILE(_URL_CC_BY_NC_ND_40)) {
     lstr = "CC-BY-NC-ND-4.0";
   }
-  else if (INFILE(_TITLE_CC_BY_NC_ND_30) || URL_INFILE(_URL_CC_BY_NC_ND_30)) {
+  else if (INFILE(_TITLE_CC_BY_NC_ND_30) || INFILE(_TITLE_CC_BY_NC_ND_30_1) || URL_INFILE(_URL_CC_BY_NC_ND_30)) {
     lstr = "CC-BY-NC-ND-3.0";
   }
-  else if (INFILE(_TITLE_CC_BY_NC_ND_25) || URL_INFILE(_URL_CC_BY_NC_ND_25)) {
+  else if (INFILE(_TITLE_CC_BY_NC_ND_25) || INFILE(_TITLE_CC_BY_NC_ND_25_1) || URL_INFILE(_URL_CC_BY_NC_ND_25)) {
     lstr = "CC-BY-NC-ND-2.5";
   }
-  else if (INFILE(_TITLE_CC_BY_NC_ND_20) || URL_INFILE(_URL_CC_BY_NC_ND_20)) {
+  else if (INFILE(_TITLE_CC_BY_NC_ND_20) || INFILE(_TITLE_CC_BY_NC_ND_20_1) || URL_INFILE(_URL_CC_BY_NC_ND_20)) {
     lstr = "CC-BY-NC-ND-2.0";
   }
-  else if (INFILE(_TITLE_CC_BY_NC_ND_10) || INFILE(_TITLE_CC_BY_NC_ND_10_1) || URL_INFILE(_URL_CC_BY_NC_ND_10)) {
+  else if (INFILE(_TITLE_CC_BY_NC_ND_10) || INFILE(_TITLE_CC_BY_NC_ND_10_1) || INFILE(_TITLE_CC_BY_NC_ND_10_2) || URL_INFILE(_URL_CC_BY_NC_ND_10)) {
     lstr = "CC-BY-NC-ND-1.0";
   }
   /*
@@ -8668,7 +8685,7 @@ char *ccVersion(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_TITLE_CC_BY_30) || URL_INFILE(_URL_CC_BY_30)) {
     lstr = "CC-BY-3.0";
   }
-  else if (INFILE(_TITLE_CC_BY_40) || URL_INFILE(_URL_CC_BY_40)) {
+  else if (INFILE(_PHR_CC_BY_40) || INFILE(_TITLE_CC_BY_40) || URL_INFILE(_URL_CC_BY_40)) {
     lstr = "CC-BY-4.0";
   }
   /*
