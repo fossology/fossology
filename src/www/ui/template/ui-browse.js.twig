@@ -3,7 +3,7 @@
    SPDX-License-Identifier: FSFAP
 #}
 tableColumns = [
-  {"sTitle": "{{ "Upload Name and Description"|trans }}", "sClass": "left"},
+  {"sTitle": "{{ "Upload Name and Description"|trans }}", "sClass": "left", "sSearchPlaceholder": "Search Name"},
   {"sTitle": "{{ "Action"|trans }}", "sClass": "center", "bSortable": false, "bSearchable": false},
   {"sTitle": "{{ "Status"|trans }}", "sClass": "center", "bSortable": false, "bSearchable": false},
   {"sTitle": "{{ "Comment"|trans }}", "sClass": "center cc", "bSortable": false, "bSearchable": false, "mRender": function(data) {
@@ -57,6 +57,9 @@ var browseTable;
 
 dataTableConfig =
     {
+      "oLanguage": {
+        "sSearchPlaceholder": "Search..."
+      },
       "bServerSide": true,
       "sAjaxSource": "?mod=browse-processPost",
       "fnServerData": function (sSource, aoData, fnCallback) {
