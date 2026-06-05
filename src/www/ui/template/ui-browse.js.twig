@@ -90,10 +90,7 @@ function createBrowseTable() {
 $(document).ready(function() {
   browseTable = createBrowseTable();
   $('.clickable-folder').click(function(event){
-    folder = $(this).attr('data-folder');
-    browseTable.draw();
-    $('#current-folder').text($(this).text());
-    $('#browse-upload-all').val(folder);
+    window.location.href = $(this).attr('href');
     return false;
   });
   $('#browse-upload-all').button().change(function ( event ){
