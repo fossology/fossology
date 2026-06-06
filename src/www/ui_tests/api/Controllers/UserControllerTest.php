@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Test\Controllers;
 require_once dirname(__DIR__, 4) . '/lib/php/Plugin/FO_Plugin.php';
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Mockery as M;
 use Fossology\UI\Api\Controllers\UserController;
@@ -392,5 +393,43 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test UserController::addUser() with empty request body
+   * -# Check if HttpBadRequestException is thrown
+   */
+  public function testAddUserEmptyBody()
+  {
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getHeaderLine')
+      ->withArgs(['Content-Type'])->andReturn('');
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
+    $request->shouldReceive('getParsedBody')->andReturn(null);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("Request body is empty or malformed.");
+
+    $this->userController->addUser($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @test
+   * -# Test UserController::addUser() with missing username
+   * -# Check if HttpBadRequestException is thrown
+   */
+  public function testAddUserMissingName()
+  {
+    $request = M::mock(Request::class);
+    $request->shouldReceive('getHeaderLine')
+      ->withArgs(['Content-Type'])->andReturn('');
+    $request->shouldReceive('getAttribute')->andReturn(ApiVersion::V1);
+    $request->shouldReceive('getParsedBody')->andReturn(['email' => 'test@test.com']);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("Username must be specified.");
+
+    $this->userController->addUser($request, new ResponseHelper(), []);
   }
 }

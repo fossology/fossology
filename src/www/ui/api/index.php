@@ -492,10 +492,9 @@ $errorMiddleware->setErrorHandler(
 $errorMiddleware->setErrorHandler(
   HttpMethodNotAllowedException::class,
   function (ServerRequestInterface $request, Throwable $exception, bool $displayErrorDetails) {
-    $response = new Response();
-    $response->getBody()->write('405 NOT ALLOWED');
-
-    $response = $response->withStatus(405);
+    $response = new ResponseHelper();
+    $error = new Info(405, "Method not allowed", InfoType::ERROR);
+    $response = $response->withJson($error->getArray(), $error->getCode());
     plugin_unload();
     return CorsHelper::addCorsHeaders($response);
   });
