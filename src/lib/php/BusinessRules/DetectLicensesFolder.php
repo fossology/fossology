@@ -8,8 +8,9 @@
 namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\SearchHelperDao;
+use Fossology\Lib\Dao\UploadDao;
 
 /**
  * @class DetectLicensesFolder
@@ -23,10 +24,14 @@ class DetectLicensesFolder
   /** @var SearchHelperDao */
   private $searchHelperDao;
 
+  /** @var ClearingDao */
+  private $clearingDao;
+
   function __construct()
   {
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
     $this->searchHelperDao = $GLOBALS['container']->get('dao.searchhelperdao');
+    $this->clearingDao = $GLOBALS['container']->get('dao.clearing');
   }
 
   /**
@@ -65,6 +70,35 @@ class DetectLicensesFolder
     }
 
     return $licenseId;
+  }
+
+  /**
+   * @brief Get licenses declared in root LICENSE file
+   * @param int $uploadId
+   * @return array $licenseId, if found. Empty array otherwise.
+   */
+  function getLicenseFileDeclaredLicenses($uploadId)
+  {
+    $uploadTreeId = $this->uploadDao->getUploadParent($uploadId);
+    $uploadTreeTableName = GetUploadtreeTableName($uploadId);
+    $rootBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+
+    $condition = "(ut.ufile_name ilike 'LICENSE' OR ut.ufile_name ilike 'LICENSE.txt' OR ut.ufile_name ilike 'LICENSE.md' OR ut.ufile_name ilike 'LICENSE.rst')";
+    $items = $this->uploadDao->getContainedItems($rootBounds, $condition);
+
+    if (empty($items)) {
+      return array();
+    }
+
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($items[0]->getId(), $uploadTreeTableName);
+
+    $clearedLicenses = $this->clearingDao->getClearedLicenses($itemTreeBounds, Auth::getGroupId());
+    $licenseIds = array();
+    foreach ($clearedLicenses as $licenseRef) {
+      $licenseIds[] = $licenseRef->getShortName();
+    }
+
+    return array_unique($licenseIds);
   }
 
   /**
