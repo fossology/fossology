@@ -26,7 +26,6 @@ class AdminGroupEdit extends DefaultPlugin
   {
     parent::__construct(self::NAME, array(
         self::TITLE => _("Edit Group"),
-        self::MENU_LIST => "Admin::Groups::Edit Group",
         self::PERMISSION => Auth::PERM_ADMIN,
         self::REQUIRES_LOGIN => TRUE
     ));

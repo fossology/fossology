@@ -65,7 +65,7 @@
     {% endif %}
   {% endif %}
   <h2>{{ "Look up who is a member of group "|trans }}</h2>
-  {{ "To edit group memberships "|trans }} <a href="?mod=group_manage_users">{{ "click here"|trans }}</a>
+  {{ "To edit group memberships "|trans }} <a href="?mod=group&action=manage">{{ "click here"|trans }}</a>
   <br/>
   {{ 'To list the users in a group, select the group'|trans }}: <select id="groupsForGum" class="ui-render-select2">
   {% for gId,gName in groupArray %}

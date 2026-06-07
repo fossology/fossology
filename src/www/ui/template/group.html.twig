@@ -1,0 +1,137 @@
+{# SPDX-FileCopyrightText: © Fossology contributors
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  <div class="container-fluid py-3">
+    <h1 class="h2 mb-3">
+      {% if activeAction == 'add' %}
+        {{ 'Add Group'|trans }}
+      {% elseif activeAction == 'delete' %}
+        {{ 'Delete Group'|trans }}
+      {% elseif activeAction == 'edit' %}
+        {{ 'Edit Group'|trans }}
+      {% elseif activeAction == 'manage' %}
+        {{ 'Manage Group Users'|trans }}
+      {% endif %}
+    </h1>
+
+    <ul class="nav nav-tabs mb-3">
+      <li class="nav-item">
+        <a class="nav-link{% if activeAction == 'add' %} active{% endif %}" href="?mod=group&action=add">{{ 'Add Group'|trans }}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link{% if activeAction == 'delete' %} active{% endif %}" href="?mod=group&action=delete">{{ 'Delete Group'|trans }}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link{% if activeAction == 'edit' %} active{% endif %}" href="?mod=group&action=edit">{{ 'Edit Group'|trans }}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link{% if activeAction == 'manage' %} active{% endif %}" href="?mod=group&action=manage">{{ 'Manage Group Users'|trans }}</a>
+      </li>
+    </ul>
+
+    <div class="pt-2">
+      {% if message is defined and message is not empty %}
+        <div class="alert alert-info">{{ message }}</div>
+      {% endif %}
+
+      {% if activeAction == 'add' %}
+        <form name="formy" method="POST" action="?mod=group&action=add">
+          <div class="form-group mb-3">
+            <label class="form-label" for="groupname">{{ "Enter the groupname:"|trans }}</label>
+            <input type="text" id="groupname" name="groupname" class="form-control" size="20" required>
+          </div>
+          <button type="submit" class="btn btn-primary">{{ "Add"|trans }}</button>
+        </form>
+      {% elseif activeAction == 'delete' %}
+        {% if groupMap is empty %}
+          <p>{{ "You have no groups you can delete."|trans }}</p>
+        {% else %}
+          <form name="formy" method="post" action="?mod=group&action=delete">
+            <div class="form-group mb-3">
+              <label class="form-label" for="grouppk">{{ "Select the group to delete"|trans }}:</label>
+              {% import "include/macros.html.twig" as macro %}
+              {{ macro.select('grouppk', groupMap, 'grouppk', '', 'class="ui-render-select2 form-control"') }}
+            </div>
+            <button type="submit" class="btn btn-danger">{{ "Delete"|trans }}</button>
+          </form>
+          <br/>
+          <p class="text-danger"><strong>{{ 'Note: After deleting group, you will loose access to uploads that are associated with deleted group.'|trans }}</strong></p>
+        {% endif %}
+      {% elseif activeAction == 'edit' %}
+        {% if groupMap is empty %}
+          <p>{{ "You have no groups you can edit."|trans }}</p>
+        {% else %}
+          <form name="formEditGroup" method="post" action="?mod=group&action=edit">
+            <div class="form-group mb-3">
+              <label class="form-label" for="grouppk">{{ "Select the group to edit"|trans }}:</label>
+              {% import "include/macros.html.twig" as macro %}
+              {{ macro.select('grouppk', groupMap, 'grouppk', '', 'class="ui-render-select2 form-control"') }}
+            </div>
+            <div class="form-group mb-3">
+              <label class="form-label" for="newgroupname">{{ "Change group name:"|trans }}</label>
+              <input type="text" id="newgroupname" name="newgroupname" class="form-control" size="40" required>
+            </div>
+            <button type="submit" class="btn btn-primary">{{ "Update"|trans }}</button>
+          </form>
+        {% endif %}
+      {% elseif activeAction == 'manage' %}
+        <div class="mb-3">
+          <label class="form-label" for="groupselect">{{ "Select the group to manage"|trans }}:</label>
+          {% import "include/macros.html.twig" as macro %}
+          {{ macro.select('groupselect', groupMap, 'groupselect', groupId, groupMapAction ~ ' class="ui-render-select2 form-control"') }}
+        </div>
+
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>{{ "User"|trans }}</th>
+              <th>{{ 'Permission'|trans }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for gum in usersWithGroup %}
+              {% if gum.group_user_member_pk %}
+                <tr>
+                  <td>{{ gum.user_name }}</td>
+                  <td>
+                    {% set onchange = ' onchange="js_url(this.value, \'' ~ baseUrl ~ '&gum_pk=' ~ gum.group_user_member_pk ~ '&perm=\')"' %}
+                    {{ macro.select('permselect', permissionMap, 'permselect', gum.group_perm, onchange ~ ' class="form-select"') }}
+                  </td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+            {% if existsOtherUsers %}
+              <tr>
+                <td>
+                  {{ macro.select("userselectnew", otherUsers, "userselectnew", '', ' class="ui-render-select2 form-control" onchange="js_url(this.value, newpermurl)"') }}
+                </td>
+                <td>
+                  {{ macro.select("permselectnew", newPermissionMap, "permselectnew", -1, ' onchange="setNewPermUrl(this.value)" class="form-select"') }}
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+
+        <div class="alert alert-info mt-3">
+          <ul class="mb-0">
+            <li>{{ 'All user permissions take place immediately when a value is changed. There is no submit button.'|trans }}</li>
+            <li>{{ 'Add new users on the last line.'|trans }}</li>
+          </ul>
+        </div>
+        <p class="text-warning"><strong>{{ 'Note: By removing users, you may loose access to uploads, that are uploaded by them.'|trans }}</strong></p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  {% if activeAction == 'manage' %}
+    {{ scripts|raw }}
+  {% endif %}
+{% endblock %}
