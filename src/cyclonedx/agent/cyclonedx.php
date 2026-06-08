@@ -29,6 +29,7 @@ use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\Report\FileNode;
 use Fossology\Lib\Data\Report\SpdxLicenseInfo;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Data\Package\ComponentType;
 use Fossology\Lib\Report\ReportUtils;
 
 include_once(__DIR__ . "/version.php");
@@ -263,14 +264,46 @@ class CycloneDXAgent extends Agent
     }
     $allCopyrights = array_unique($allCopyrights);
 
+    $reportInfo = $this->uploadDao->getReportInfo($uploadId);
+    $componentVersion = ($reportInfo['ri_version'] ?? '');
+    if ($componentVersion == 'NA') {
+      $componentVersion = '';
+    }
+    $componentId = ($reportInfo['ri_component_id'] ?? '');
+    if ($componentId == 'NA') {
+      $componentId = '';
+    }
+    $componentType = intval($reportInfo['ri_component_type'] ?? 0);
+    $generalAssessment = ($reportInfo['ri_general_assesment'] ?? '');
+    if ($generalAssessment == 'NA') {
+      $generalAssessment = '';
+    }
+
+    $purl = '';
+    $externalReferences = [];
+    if (!empty($componentId)) {
+      if ($componentType === ComponentType::PURL || $componentType === ComponentType::PACKAGEURL) {
+        $purl = $componentId;
+      } else {
+        $externalReferences[] = [
+          'type' => 'distribution',
+          'url' => $componentId
+        ];
+      }
+    }
+
     $maincomponentData = array (
       'bomref' => strval($uploadId),
       'type' => 'library',
       'name' => $upload->getFilename(),
+      'version' => $componentVersion,
       'hashes' => $serializedhash,
       'scope' => 'required',
       'mimeType' => $this->getMimeType($uploadId),
       'copyright' => implode("\n", $allCopyrights),
+      'description' => $generalAssessment,
+      'purl' => $purl,
+      'externalReferences' => $externalReferences,
       'licenses' => $mainLicenses
     );
     $maincomponent = $this->reportGenerator->createComponent($maincomponentData);
@@ -278,7 +311,8 @@ class CycloneDXAgent extends Agent
     $bomdata = array (
       'tool-version' => $SysConf['BUILD']['VERSION'],
       'maincomponent' => $maincomponent,
-      'components' => $components
+      'components' => $components,
+      'externalReferences' => $externalReferences
     );
 
     return $this->reportGenerator->generateReport($bomdata);
@@ -346,7 +380,9 @@ class CycloneDXAgent extends Agent
           'hashes' => $serializedhash,
           'mimeType' => $mimeType,
           'copyright' => implode("\n", $licenses->getCopyrights()),
-          'licenses' => $licensesfound
+          'licenses' => $licensesfound,
+          'acknowledgements' => implode("\n", $licenses->getAcknowledgements()),
+          'comments' => implode("\n", $licenses->getComments())
         );
         $components[] = $this->reportGenerator->createComponent($componentdata);
       }
