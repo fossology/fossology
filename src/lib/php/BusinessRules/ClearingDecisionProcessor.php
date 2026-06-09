@@ -103,7 +103,7 @@ class ClearingDecisionProcessor
   private function insertClearingEventsForAgentFindings(ItemTreeBounds $itemBounds, $userId, $groupId, $remove = false, $type = ClearingEventTypes::AGENT, $removedIds = array())
   {
     $eventIds = array();
-    foreach ($this->agentLicenseEventProcessor->getScannerEvents($itemBounds) as $licenseId => $scannerEvents) {
+    foreach ($this->agentLicenseEventProcessor->getScannerEvents($itemBounds, LicenseMap::TRIVIAL, true) as $licenseId => $scannerEvents) {
       if (array_key_exists($licenseId, $removedIds)) {
         continue;
       }
@@ -195,13 +195,14 @@ class ClearingDecisionProcessor
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @param int $usageId
+   * @param boolean $includeExpressions
    * @return array Array of added and removed license findings
    * @throws Exception
    */
-  public function getCurrentClearings(ItemTreeBounds $itemTreeBounds, $groupId, $usageId=LicenseMap::TRIVIAL)
+  public function getCurrentClearings(ItemTreeBounds $itemTreeBounds, $groupId, $usageId=LicenseMap::TRIVIAL, $includeExpressions=false)
   {
-    $agentEvents = $this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds, $usageId);
-    $events = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
+    $agentEvents = $this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds, $usageId, $includeExpressions);
+    $events = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId, true, $includeExpressions);
 
     $addedResults = array();
     $removedResults = array();

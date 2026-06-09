@@ -191,10 +191,10 @@ class AjaxFileBrowser extends DefaultPlugin
     /*******    File Listing     ************/
     $pfileLicenses = array();
     foreach ($selectedScanners as $agentName=>$agentId) {
-      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId, $isFlat, $nameRange);
+      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId, $isFlat, $nameRange, true);
       foreach ($licensePerPfile as $pfile => $licenseRow) {
         foreach ($licenseRow as $licId => $row) {
-          $lic = $this->licenseProjector->getProjectedShortname($licId);
+          $lic = $row['expression_label'] ?? $this->licenseProjector->getProjectedShortname($licId);
           $pfileLicenses[$pfile][$lic][$agentName] = $row;
         }
       }

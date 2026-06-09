@@ -382,6 +382,17 @@ typedef struct  {
     int licenseFileId;        ///< PFile id
 } LicenceAndMatchPositions;
 
+/**
+ * SPDX license expression match detected before normal Nomos heuristics.
+ */
+typedef struct {
+    char* canonical;          ///< Canonical SPDX expression text
+    char* astJson;            ///< Parser contract AST JSON
+    int start;                ///< Start offset in original file buffer
+    int end;                  ///< End offset in original file buffer
+    int licenseFileId;        ///< license_file.fl_pk after DB insert
+} LicenseExpressionMatch;
+
 
 
 /**
@@ -415,6 +426,7 @@ struct curScan {
 
   GArray* indexList; /**< List of license indexes */
   GArray* theMatches; /**< List of matches */
+  GArray* expressionMatches; /**< List of SPDX expression matches */
   GArray* keywordPositions; /**< List of matche positions */
   GArray* docBufferPositionsAndOffsets;
   int currentLicenceIndex;

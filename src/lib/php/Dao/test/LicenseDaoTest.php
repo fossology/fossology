@@ -46,9 +46,9 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
    */
   private function setUpLicenseRefTable()
   {
-    $this->testDb->createPlainTables(array('license_ref'));
+    $this->testDb->createPlainTables(array('license_ref', 'license_expression'));
     $this->testDb->createSequences(array('license_ref_rf_pk_seq'));
-    $this->testDb->alterTables(array('license_ref'));
+    $this->testDb->alterTables(array('license_ref', 'license_expression'));
   }
 
   public function testGetFileLicenseMatches()

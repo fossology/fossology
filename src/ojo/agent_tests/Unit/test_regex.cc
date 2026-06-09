@@ -190,7 +190,7 @@ protected:
 
     // Check if the correct license list is found
     CPPUNIT_ASSERT_EQUAL("(" + gplLicense + " AND " + lgplLicense + ") OR " +
-      mplLicense + " AND " + mitLicense + ".", licenseList);
+      mplLicense + " AND " + mitLicense, licenseList);
 
     // Find the actual licenses in the list
     begin = licenseList.begin();

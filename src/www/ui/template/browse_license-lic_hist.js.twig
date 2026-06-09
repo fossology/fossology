@@ -7,7 +7,7 @@ function createLicHistTable() {
   tableColumns = [
       {"sTitle": "{{ "Scanner Count"|trans }}", "sClass": "right", "sWidth": "5%", "bSearchable": false, "sType": "num-html"},
       {"sTitle": "{{ "Concluded Count"|trans }}", "sClass": "right", "sWidth": "5%", "bSearchable": false, "sType": "num-html"},
-      {"sTitle": "{{ "License Name"|trans }} <img src='images/info_16.png' title='{{ "Click on the license name to search for where the license is found in the file listing."|trans}}' alt='' class='info-bullet'/>", "sClass": "left", "mRender": dressContents}
+      {"sTitle": "{{ "License Name"|trans }} <img src='images/info_16.png' title='{{ "Click on the license or expression name to search for where it is found in the file listing."|trans}}' alt='' class='info-bullet'/>", "sClass": "left", "mRender": dressContents}
   ];
 
   tableSorting = [
@@ -60,11 +60,16 @@ function dressContents(data, type, full) {
     var licenseName = data[0];
     var licenseId = data[1];
     var isMain = data[2];
+    var isExpression = data[3];
     var uploadId = {{ uploadId }};
 
     var nameLink = '<a href="#" onclick="filterScan(' + licenseId + ',\'scan\')">' +
                      licenseName +
                    '</a>';
+
+    if (isExpression) {
+      return nameLink;
+    }
 
     if (full[1] > 0) {
       if (isMain) {

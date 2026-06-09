@@ -74,6 +74,68 @@ unsigned long OjosDatabaseHandler::saveLicenseToDatabase(
     return -1;
   }
 }
+/**
+ * @brief Save License Expressions findings to the database if agent was called by scheduler
+ * @param match Match found by the agent
+ * @return rf_pk on success, -1 on failure
+ */
+unsigned long OjosDatabaseHandler::saveLicenseExpressionToDatabase(const ojomatch &match) const
+{
+  if (!dbManager.begin())
+  {
+    return -1;
+  }
+
+  dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "ojoLockLicenseExpressionSequence",
+      "SELECT pg_advisory_xact_lock(2771001)"));
+
+  QueryResult queryResult = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "ojoFindLicenseExpression",
+      "SELECT rf_pk FROM license_expression WHERE rf_expression = $1",
+      char*),
+    match.content.c_str());
+  vector<unsigned long> res = queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong);
+  if (res.size() > 0)
+  {
+    dbManager.commit();
+    return res.at(0);
+  }
+
+  dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "ojoSyncLicenseExpressionSequence",
+      "SELECT setval('license_ref_rf_pk_seq',"
+      " GREATEST("
+      "   (SELECT COALESCE(MAX(rf_pk), 0) FROM license_ref),"
+      "   (SELECT COALESCE(MAX(rf_pk), 0) FROM license_expression)"
+      " ))"));
+  QueryResult insertResult = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "ojoInsertLicenseExpression",
+      "INSERT INTO license_expression"
+      "(rf_expression)"
+      " VALUES($1)"
+      " ON CONFLICT (rf_expression) DO UPDATE"
+      " SET rf_expression = EXCLUDED.rf_expression"
+      " RETURNING rf_pk",
+      char* ),
+    match.content.c_str());
+    res = insertResult.getSimpleResults<unsigned long>(0,
+    fo::stringToUnsignedLong);
+  if (res.size() > 0)
+  {
+    dbManager.commit();
+    return res.at(0);
+  }
+  else
+  {
+    dbManager.rollback();
+    return -1;
+  }
+}
 
 /**
  * Save findings highlights to DB

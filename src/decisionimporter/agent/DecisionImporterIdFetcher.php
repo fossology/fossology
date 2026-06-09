@@ -306,7 +306,8 @@ class DecisionImporterIdFetcher
     foreach ($licenseList as $index => $item) {
       $newLicenseId = null;
       $license = $this->licenseDao->getLicenseByShortName($item["rf_shortname"], $this->groupId);
-      if ($license == null) {
+      $expression = $this->licenseDao->getExpressionByAST($item["rf_fullname"]);
+      if ($license == null && $expression == null) {
         $newLicenseData = [
           "rf_fullname" => $item["rf_fullname"],
           "rf_url" => $item["rf_url"],
@@ -317,12 +318,20 @@ class DecisionImporterIdFetcher
         if ($item["is_candidate"] == "t") {
           $newLicenseId = $this->licenseDao->insertUploadLicense($item["rf_shortname"], $item["rf_text"],
             $this->groupId, $this->userId);
-        } else {
+        } else if ($item["is_expression"] == "f") {
           $newLicenseId = $this->licenseDao->insertLicense($item["rf_shortname"], $item["rf_text"]);
         }
-        $this->dbManager->updateTableRow("license_ref", $newLicenseData, "rf_pk", $newLicenseId);
+        if ($item["is_expression"] == "t") {
+          $newLicenseId = $this->licenseDao->insertExpression($item['rf_fullname']);
+        } else {
+          $this->dbManager->updateTableRow("license_ref", $newLicenseData, "rf_pk", $newLicenseId);
+        }
       } else {
-        $newLicenseId = $license->getId();
+        if ($license == null) {
+          $newLicenseId = $expression->getId();
+        } else {
+          $newLicenseId = $license->getId();
+        }
       }
       $licenseList[$index]["new_rfid"] = $newLicenseId;
     }

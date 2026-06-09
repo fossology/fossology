@@ -3,7 +3,7 @@
    SPDX-License-Identifier: FSFAP
 #}
 <h3>{{ "Summary"|trans }}</h3>
-{% if uniqueLicenseCount==0 %}
+{% if uniqueLicenseCount==0 and uniqueExpressionCount==0 %}
   <b>{{ 'Neither license found by scanner nor concluded by user'|trans }}</b>
 {% endif %}
 
@@ -16,6 +16,12 @@
 
   <tr><td class="odd">{{ "Licenses found"|trans }}</td><td align="right" class="odd">{{ scannerLicenseCount }}</td>
     <td align="right" class="even">{{ editedLicenseCount}}</td><td class="even">{{ "Licenses concluded"|trans }}</td></tr>
+
+  <tr><td class="even">{{ "Unique license expressions"|trans }}</td><td align="right" class="even">{{ uniqueExpressionCount }}</td>
+    <td align="right" class="odd">{{ editedUniqueExpressionCount }}</td><td class="odd">{{ "Unique concluded expressions"|trans }}</td></tr>
+
+  <tr><td class="odd">{{ "License expressions found"|trans }}</td><td align="right" class="odd">{{ scannerExpressionCount }}</td>
+    <td align="right" class="even">{{ editedExpressionCount }}</td><td class="even">{{ "License expressions concluded"|trans }}</td></tr>
 
   <tr><td class="even">{{ "Files with no detected licenses"|trans }}</td><td align="right" class="even">{{ noScannerLicenseFoundCount }}</td>
   <td align="right" class="odd">{{ editedNoLicenseFoundCount }}</td><td class="odd">{{ "Concluded files with no detected licenses"|trans }}</td></tr>

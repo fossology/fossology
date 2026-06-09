@@ -59,6 +59,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
             'clearing_licenses',
             'highlight_bulk',
             'license_ref',
+            'license_expression',
             'license_ref_bulk',
             'license_set_bulk',
             'users',
