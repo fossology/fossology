@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+ SPDX-FileCopyrightText: © Fossology contributors
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -322,20 +323,15 @@ class AdminCustomTextManagement extends DefaultPlugin
     }
   }
 
-  /**
-   * Get license options for dropdown
-   */
   private function getLicenseOptions()
   {
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
 
-    $sql = "SELECT rf_pk, rf_shortname FROM license_ref ORDER BY rf_shortname";
+    $sql = "SELECT rf_pk, rf_shortname FROM license_ref WHERE rf_active = true ORDER BY rf_shortname";
     $result = $dbManager->getRows($sql);
 
     $options = array();
-    $options[''] = '-- Select License --';
-
     foreach ($result as $row) {
       $options[$row['rf_pk']] = $row['rf_shortname'];
     }

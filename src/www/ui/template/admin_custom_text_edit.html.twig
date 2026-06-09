@@ -1,174 +1,195 @@
 {# SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+   SPDX-FileCopyrightText: © Fossology contributors
 
-   SPDX-License-Identifier: FSFAP
+   SPDX-License-Identifier: GPL-2.0-only
 #}
 {% extends "include/base.html.twig" %}
 
+{% block styles %}
+  {{ parent() }}
+  <style>
+    .badge-add { background-color: #28a745; color: #fff; }
+    .badge-rm  { background-color: #dc3545; color: #fff; }
+    #licenseQueueTable td, #licenseQueueTable th { vertical-align: middle; }
+  </style>
+{% endblock %}
+
 {% block content %}
 
-<form method="post" id="customTextForm" onsubmit="return validateForm()">
+<form method="post" id="customTextForm">
   <input type="hidden" name="{{ updateParam }}" value="1">
-  {% if cp_pk %}
-    <input type="hidden" name="cp_pk" value="{{ cp_pk }}">
-  {% endif %}
-  
+  {% if cp_pk %}<input type="hidden" name="cp_pk" value="{{ cp_pk }}">{% endif %}
+
   <table>
     {% if isEdit and created_date is not empty %}
       <tr>
         <td>{{ 'Created Date'|trans }}:</td>
         <td><span>{{ created_date|e }}</span></td>
-      </tr>    
+      </tr>
     {% endif %}
-    
+
     <tr>
       <td valign="top">{{ 'Associated Licenses'|trans }}:</td>
       <td>
-        <table>
-          <tr>
-            <td>
-              <select id="licenseDropdown" style="width: 400px;">
-                <option value="">{{ '-- Select License --'|trans }}</option>
-                {% for key, value in licenseOptions %}
-                  {% if key != '' %}
-                    <option value="{{ key }}">{{ value|e }}</option>
-                  {% endif %}
-                {% endfor %}
-              </select>
-            </td>
-            <td class="px-1" style="padding-left: 10px;">
-              <a href="#" id="addLicenseBtn" style="font-size:20px;">
-                <img src="images/icons/add_16.png" title="{{ 'Add license to be associated (added)'|trans }}" alt="+"/>
-              </a>
-            </td>
-            <td class="px-1">
-              <a href="#" id="removeLicenseBtn" style="font-size:20px;">
-                <img src="images/icons/remove_16.png" title="{{ 'Add license to be removed'|trans }}" alt="-"/>
-              </a>
-            </td>
-          </tr>
-        </table>
-        <div style="margin-top: 10px;">
-          <table id="licenseQueueTable" class="semibordered" style="width: 100%; max-width: 800px;" border="1">
-            <thead>
-              <tr>
-                <th style="width: 15%;">{{ 'Action'|trans }}</th>
-                <th style="width: 70%;">{{ 'License'|trans }}</th>
-                <th style="width: 15%;"></th>
-              </tr>
-            </thead>
-            <tbody id="licenseQueueTableBody">
-              <!-- License queue will be populated here -->
-            </tbody>
-          </table>
+        <div class="input-group mb-1" style="width: 430px;">
+          <select id="licenseDropdown" class="form-control form-control-sm">
+            <option value="">{{ '-- Select License --'|trans }}</option>
+            {% for key, value in licenseOptions %}
+              {% if key != '' %}
+                <option value="{{ key }}">{{ value|e }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+          <div class="input-group-append" style="align-items: center;">
+            <a href="#" id="addLicenseBtn" style="font-size:20px; margin-left:4px;">
+              <img src="images/icons/add_16.png" title="{{ 'Add license to be associated (added)'|trans }}" alt="+"/>
+            </a>
+            <a href="#" id="removeLicenseBtn" style="font-size:20px; margin-left:4px;">
+              <img src="images/icons/remove_16.png" title="{{ 'Add license to be removed'|trans }}" alt="-"/>
+            </a>
+          </div>
         </div>
+        <table id="licenseQueueTable" class="semibordered" style="width: 100%; max-width: 600px;">
+          <thead>
+            <tr>
+              <th style="width: 15%;">{{ 'Action'|trans }}</th>
+              <th style="width: 70%;">{{ 'License'|trans }}</th>
+              <th style="width: 15%;"></th>
+            </tr>
+          </thead>
+          <tbody id="licenseQueueTableBody"></tbody>
+        </table>
         <input type="hidden" name="license_data" id="licenseDataInput" value=""/>
         <br/>
-        <small>{{ 'Select a license and click + to add or - to remove. The table shows all queued operations.'|trans }}</small>
+        <small class="text-muted">{{ 'Select a license and click + to add or − to mark for removal.'|trans }}</small>
       </td>
     </tr>
-    
+
     <tr>
       <td valign="top">{{ 'Text'|trans }}:</td>
       <td>
-        <textarea name="{{ textParam }}" id="textField" cols="120" rows="10" required>{{ text|e }}</textarea>
-        <div id="duplicateWarning" style="color: red; font-weight: bold; display: none; margin-top: 5px;">
+        <textarea name="{{ textParam }}" id="textField" class="form-control" cols="120" rows="10" required>{{ text|e }}</textarea>
+        <div id="duplicateWarning" class="alert alert-warning mt-1 d-none" role="alert">
+          <i class="bi bi-exclamation-triangle-fill"></i>
           {{ 'Warning: This text content may already exist in the database.'|trans }}
         </div>
       </td>
     </tr>
-    
+
     <tr>
       <td valign="top">{{ 'Acknowledgement'|trans }}:</td>
-      <td><textarea name="{{ acknowledgementParam }}" cols="120" rows="6">{{ acknowledgement|e }}</textarea></td>
+      <td><textarea name="{{ acknowledgementParam }}" class="form-control" cols="120" rows="6">{{ acknowledgement|e }}</textarea></td>
     </tr>
-    
+
     <tr>
       <td valign="top">{{ 'Comments'|trans }}:</td>
-      <td><textarea name="{{ commentsParam }}" cols="120" rows="6">{{ comments|e }}</textarea></td>
+      <td><textarea name="{{ commentsParam }}" class="form-control" cols="120" rows="6">{{ comments|e }}</textarea></td>
     </tr>
-    
+
     <tr>
       <td>{{ 'Active'|trans }}:</td>
-      <td><input type="checkbox" name="{{ isActiveParam }}"{% if is_active is not defined or is_active %} checked="checked"{% endif %}/></td>
+      <td>
+        <div class="custom-control custom-switch mt-1">
+          <input type="checkbox" class="custom-control-input" id="isActiveSwitch"
+                 name="{{ isActiveParam }}"
+                 {% if is_active is not defined or is_active %}checked{% endif %}/>
+          <label class="custom-control-label" for="isActiveSwitch"></label>
+        </div>
+      </td>
     </tr>
   </table>
-  
-  <input type="submit" value="{{ isEdit ? 'Update'|trans : 'Save'|trans }}"/>
-  {% if not isEdit %}
-    <input type="button" value="{{ 'Pull from Bulk Data'|trans }}" onclick="showBulkDataModal()" style="margin-left: 10px;"/>
-  {% endif %}
-  <input type="button" value="{{ 'Cancel'|trans }}" onclick="window.location.href='?mod=admin_custom_text_list'" style="margin-left: 10px;"/>
+
+  <div class="mt-2">
+    <button type="submit" class="btn btn-primary btn-sm mr-1">
+      {{ (isEdit ? 'Update' : 'Save')|trans }}
+    </button>
+    {% if not isEdit %}
+    <button type="button" class="btn btn-info btn-sm mr-1"
+            data-toggle="modal" data-target="#bulkDataModal">
+      {{ 'Pull from Bulk Data'|trans }}
+    </button>
+    {% endif %}
+    <a href="?mod=admin_custom_text_list" class="btn btn-secondary btn-sm">
+      {{ 'Cancel'|trans }}
+    </a>
+  </div>
+
 </form>
 
-<!-- Bulk Data Modal -->
-<div id="bulkDataModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-  <div style="background-color: #fefefe; margin: 2% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 1200px; border-radius: 5px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h3>{{ 'Select Bulk Data to Import'|trans }}</h3>
-      <span onclick="closeBulkDataModal()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-    </div>
-    
-    <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 15px;">
-      <input type="text" id="bulkDataSearch" placeholder="{{ 'Search bulk data...'|trans }}" style="width: 300px; padding: 5px;">
-      <label style="margin: 0;">{{ 'Show'|trans }}
-        <select id="bulkPageSizeSelect" onchange="bulkChangePageSize(this.value)" style="padding: 3px;">
-          <option value="10" selected>10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-        </select>
-        {{ 'entries'|trans }}
-      </label>
-    </div>
-    
-    <div style="max-height: 500px; overflow-y: auto;">
-      <table id="bulkDataTable" class="semibordered" width="100%" cellpadding="5">
-        <thead>
-          <tr>
-            <th width="8%">{{ 'ID'|trans }}</th>
-            <th width="27%">{{ 'Text Preview'|trans }}</th>
-            <th width="17%">{{ 'Associated Licenses'|trans }}</th>
-            <th width="17%">{{ 'Acknowledgement'|trans }}</th>
-            <th width="17%">{{ 'Comments'|trans }}</th>
-            <th width="8%">{{ 'User'|trans }}</th>
-            <th width="6%">{{ 'Actions'|trans }}</th>
-          </tr>
-        </thead>
-        <tbody id="bulkDataTableBody">
-          <!-- Data will be loaded via AJAX -->
-        </tbody>
-      </table>
-    </div>
+<!-- Bootstrap Bulk Data Modal -->
+<div class="modal fade" id="bulkDataModal" tabindex="-1" role="dialog"
+     aria-labelledby="bulkDataModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document" style="max-width: 80%; width: 80%;">
+    <div class="modal-content">
 
-    <!-- Pagination controls -->
-    <div id="bulkPaginationControls" style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
-      <div id="bulkPaginationInfo" style="color: #666; font-size: 13px;"></div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <button type="button" id="bulkPrevBtn" onclick="bulkPrevPage()" style="padding: 4px 12px;" disabled>&laquo; {{ 'Previous'|trans }}</button>
-        <span id="bulkPageIndicator" style="font-size: 13px;"></span>
-        <button type="button" id="bulkNextBtn" onclick="bulkNextPage()" style="padding: 4px 12px;" disabled>{{ 'Next'|trans }} &raquo;</button>
+      <div class="modal-header py-2">
+        <h5 class="modal-title" id="bulkDataModalLabel">{{ 'Select Bulk Data to Import'|trans }}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ 'Close'|trans }}">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-    </div>
-    
-    <div style="margin-top: 15px; text-align: center;">
-      <button onclick="closeBulkDataModal()" style="padding: 8px 20px;">{{ 'Cancel'|trans }}</button>
+
+      <div class="modal-body">
+        <div class="d-flex align-items-center mb-2">
+          <input type="text" id="bulkDataSearch" class="form-control form-control-sm mr-2"
+                 style="max-width: 280px;" placeholder="{{ 'Search bulk data...'|trans }}">
+          <label class="mb-0 mr-1 small">{{ 'Show'|trans }}</label>
+          <select id="bulkPageSizeSelect" class="form-control form-control-sm" style="width: auto;">
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+          <span class="ml-1 small text-muted">{{ 'entries'|trans }}</span>
+        </div>
+
+        <div style="max-height: 55vh; overflow-y: auto;">
+          <table class="semibordered" id="bulkDataTable" width="100%" cellpadding="5">
+            <thead>
+              <tr>
+                <th width="6%">{{ 'ID'|trans }}</th>
+                <th width="27%">{{ 'Text Preview'|trans }}</th>
+                <th width="17%">{{ 'Licenses'|trans }}</th>
+                <th width="17%">{{ 'Acknowledgement'|trans }}</th>
+                <th width="17%">{{ 'Comments'|trans }}</th>
+                <th width="10%">{{ 'User'|trans }}</th>
+                <th width="6%"></th>
+              </tr>
+            </thead>
+            <tbody id="bulkDataTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <span id="bulkPaginationInfo" class="text-muted small"></span>
+          <div class="btn-group btn-group-sm">
+            <button type="button" id="bulkPrevBtn" class="btn btn-outline-secondary" disabled>
+              &laquo; {{ 'Previous'|trans }}
+            </button>
+            <span id="bulkPageIndicator" class="btn btn-light disabled px-3 small"></span>
+            <button type="button" id="bulkNextBtn" class="btn btn-outline-secondary" disabled>
+              {{ 'Next'|trans }} &raquo;
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">{{ 'Close'|trans }}</button>
+      </div>
+
     </div>
   </div>
-</div>  
+</div>
 
 {% endblock %}
 
 {% block foot %}
   {{ parent() }}
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  
   <script type="text/javascript">
-    var bulkDataCache = [];       // Current page data (for import lookup)
+    var bulkDataCache = [];
     var duplicateCheckTimeout = null;
-    var licenseQueue = [];        // Array to store license operations
-
-    // Pagination state
+    var licenseQueue = [];
     var bulkCurrentPage  = 1;
     var bulkPageSize     = 10;
     var bulkTotalPages   = 0;
@@ -176,7 +197,6 @@
     var bulkSearchTerm   = '';
     var bulkSearchTimeout = null;
 
-    // Form validation function
     function validateForm() {
       if (licenseQueue.length === 0) {
         alert('{{ "At least one license must be associated with the custom text."|trans }}');
@@ -186,14 +206,16 @@
     }
 
     $(document).ready(function() {
-      // Initialize Select2 on license dropdown
+      $('#customTextForm').on('submit', function(e) {
+        if (!validateForm()) { e.preventDefault(); }
+      });
+
       $('#licenseDropdown').select2({
         placeholder: '{{ "-- Select License --"|trans }}',
         allowClear: true,
-        width: '400px'
+        width: '100%'
       });
 
-      // Load existing licenses if editing
       {% if isEdit and selectedLicenses is defined and selectedLicenses|length > 0 %}
         {% for license in selectedLicenses %}
           licenseQueue.push({
@@ -205,21 +227,9 @@
         updateLicenseQueue();
       {% endif %}
 
-      // Add license button click handler
-      $('#addLicenseBtn').click(function(e) {
-        e.preventDefault();
-        addLicense();
-        return false;
-      });
+      $('#addLicenseBtn').on('click', function(e) { e.preventDefault(); addLicense(); });
+      $('#removeLicenseBtn').on('click', function(e) { e.preventDefault(); rmLicense(); });
 
-      // Remove license button click handler
-      $('#removeLicenseBtn').click(function(e) {
-        e.preventDefault();
-        rmLicense();
-        return false;
-      });
-      
-      // Debounced server-side search for bulk data
       $('#bulkDataSearch').on('keyup', function() {
         clearTimeout(bulkSearchTimeout);
         var self = this;
@@ -230,337 +240,196 @@
         }, 300);
       });
 
-      // Add duplicate text checking
+      $('#bulkPageSizeSelect').on('change', function() {
+        bulkPageSize = parseInt($(this).val(), 10) || 10;
+        bulkCurrentPage = 1;
+        loadBulkData();
+      });
+
+      $('#bulkDataModal').on('show.bs.modal', function() {
+        bulkCurrentPage = 1;
+        bulkSearchTerm  = '';
+        $('#bulkDataSearch').val('');
+        loadBulkData();
+      });
+
+      $('#bulkPrevBtn').on('click', function() {
+        if (bulkCurrentPage > 1) { bulkCurrentPage--; loadBulkData(); }
+      });
+      $('#bulkNextBtn').on('click', function() {
+        if (bulkCurrentPage < bulkTotalPages) { bulkCurrentPage++; loadBulkData(); }
+      });
+
       $('#textField').on('input', function() {
         clearTimeout(duplicateCheckTimeout);
-        duplicateCheckTimeout = setTimeout(function() {
-          checkForDuplicateText();
-        }, 500); // Check after 500ms of no typing
+        duplicateCheckTimeout = setTimeout(checkForDuplicateText, 500);
       });
     });
-    
-    function showBulkDataModal() {
-      $('#bulkDataModal').show();
-      bulkCurrentPage = 1;
-      bulkSearchTerm = '';
-      $('#bulkDataSearch').val('');
-      loadBulkData();
-    }
-    
-    function closeBulkDataModal() {
-      $('#bulkDataModal').hide();
-      $('#bulkDataSearch').val('');
-    }
-    
+
     function loadBulkData() {
-      var params = {
-        page: bulkCurrentPage,
-        limit: bulkPageSize
-      };
-      if (bulkSearchTerm) {
-        params.search = bulkSearchTerm;
-      }
-
-      // Show loading state
-      $('#bulkDataTableBody').html('<tr><td colspan="7" style="text-align: center;">{{ "Loading..."|trans }}</td></tr>');
-
+      var params = { page: bulkCurrentPage, limit: bulkPageSize };
+      if (bulkSearchTerm) { params.search = bulkSearchTerm; }
+      $('#bulkDataTableBody').html('<tr><td colspan="7" class="text-center text-muted">{{ "Loading..."|trans }}</td></tr>');
       $.ajax({
         url: "?mod=admin_custom_text_list&action=get_bulk_data",
-        type: "GET",
-        data: params,
-        dataType: "json",
-        success: function (response) {
+        type: "GET", data: params, dataType: "json",
+        success: function(response) {
           if (response.data !== undefined) {
             bulkDataCache    = response.data;
             bulkTotalRecords = response.totalRecords || 0;
             bulkTotalPages   = response.totalPages   || 1;
             bulkCurrentPage  = response.currentPage  || 1;
-            bulkPageSize     = response.pageSize     || 10;
+            bulkPageSize     = response.pageSize      || 10;
             displayBulkData(response.data);
             updatePaginationControls();
-          } else {
-            alert("{{ 'Error loading bulk data'|trans }}");
-          }
+          } else { alert("{{ 'Error loading bulk data'|trans }}"); }
         },
-        error: function (xhr, status, error) {
-          alert("{{ 'Error loading bulk data:'|trans }} " + error);
-        }
-      });
-    }
-    
-    function displayBulkData(data) {
-      var tbody = $('#bulkDataTableBody');
-      tbody.empty();
-      
-      if (data.length === 0) {
-        tbody.append('<tr><td colspan="7" style="text-align: center;">{{ "No bulk data found"|trans }}</td></tr>');
-        return;
-      }
-      
-      $.each(data, function(index, item) {
-        var licenseSummary = item.license_summary || '';
-        var acknowledgementSummary = item.acknowledgement_summary || '';
-        var commentSummary = item.comment_summary || '';
-        
-        // Truncate long text for display
-        var displayLicenses = licenseSummary.length > 30 ? licenseSummary.substring(0, 30) + '...' : licenseSummary;
-        var displayAcknowledgement = acknowledgementSummary.length > 40 ? acknowledgementSummary.substring(0, 40) + '...' : acknowledgementSummary;
-        var displayComment = commentSummary.length > 40 ? commentSummary.substring(0, 40) + '...' : commentSummary;
-        
-        var row = '<tr>' +
-          '<td>' + item.lrb_pk + '</td>' +
-          '<td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">' + 
-            '<div title="' + (item.bulk_reference_text || '').replace(/"/g, '&quot;') + '">' + (item.text_preview || '') + '</div>' +
-          '</td>' +
-          '<td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis;">' +
-            '<div title="' + licenseSummary.replace(/"/g, '&quot;') + '">' + displayLicenses + '</div>' +
-          '</td>' +
-          '<td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis;">' +
-            '<div title="' + acknowledgementSummary.replace(/"/g, '&quot;') + '">' + displayAcknowledgement + '</div>' +
-          '</td>' +
-          '<td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis;">' +
-            '<div title="' + commentSummary.replace(/"/g, '&quot;') + '">' + displayComment + '</div>' +
-          '</td>' +
-          '<td>' + (item.created_by_user || '') + '</td>' +
-          '<td>' +
-            '<button type="button" onclick="importBulkData(' + item.lrb_pk + ')" style="padding: 2px 8px;">{{ "Import"|trans }}</button>' +
-          '</td>' +
-        '</tr>';
-        tbody.append(row);
+        error: function(xhr, status, error) { alert("{{ 'Error loading bulk data:'|trans }} " + error); }
       });
     }
 
-    // Pagination controls
+    function trunc(str, n) { return str && str.length > n ? str.substring(0, n) + '\u2026' : (str || ''); }
+
+    function displayBulkData(data) {
+      var tbody = $('#bulkDataTableBody');
+      tbody.empty();
+      if (data.length === 0) {
+        tbody.append('<tr><td colspan="7" class="text-center text-muted">{{ "No bulk data found"|trans }}</td></tr>');
+        return;
+      }
+      $.each(data, function(i, item) {
+        var lic = item.license_summary || '';
+        var ack = item.acknowledgement_summary || '';
+        var cmt = item.comment_summary || '';
+        var row = '<tr>' +
+          '<td>' + item.lrb_pk + '</td>' +
+          '<td><span title="' + $('<div/>').text(item.bulk_reference_text || '').html() + '">' + trunc(item.text_preview, 80) + '</span></td>' +
+          '<td><span title="' + $('<div/>').text(lic).html() + '">' + trunc(lic, 30) + '</span></td>' +
+          '<td><span title="' + $('<div/>').text(ack).html() + '">' + trunc(ack, 30) + '</span></td>' +
+          '<td><span title="' + $('<div/>').text(cmt).html() + '">' + trunc(cmt, 30) + '</span></td>' +
+          '<td>' + (item.created_by_user || '') + '</td>' +
+          '<td><button type="button" class="btn btn-primary btn-sm import-bulk-btn"' +
+               ' data-lrb-pk="' + item.lrb_pk + '">{{ "Import"|trans }}</button></td>' +
+          '</tr>';
+        tbody.append(row);
+      });
+      tbody.find('.import-bulk-btn').on('click', function() {
+        importBulkData(parseInt($(this).data('lrb-pk'), 10));
+      });
+    }
+
     function updatePaginationControls() {
-      // Info text
       if (bulkTotalRecords === 0) {
         $('#bulkPaginationInfo').text('{{ "No records found"|trans }}');
       } else {
         var start = (bulkCurrentPage - 1) * bulkPageSize + 1;
-        var end = Math.min(bulkCurrentPage * bulkPageSize, bulkTotalRecords);
-        $('#bulkPaginationInfo').text(
-          '{{ "Showing"|trans }} ' + start + ' {{ "to"|trans }} ' + end + ' {{ "of"|trans }} ' + bulkTotalRecords + ' {{ "entries"|trans }}'
-        );
+        var end   = Math.min(bulkCurrentPage * bulkPageSize, bulkTotalRecords);
+        $('#bulkPaginationInfo').text('{{ "Showing"|trans }} ' + start + ' {{ "to"|trans }} ' + end +
+          ' {{ "of"|trans }} ' + bulkTotalRecords + ' {{ "entries"|trans }}');
       }
-
-      // Page indicator
-      $('#bulkPageIndicator').text(
-        '{{ "Page"|trans }} ' + bulkCurrentPage + ' {{ "of"|trans }} ' + bulkTotalPages
-      );
-
-      // Button states
+      $('#bulkPageIndicator').text('{{ "Page"|trans }} ' + bulkCurrentPage + ' {{ "of"|trans }} ' + bulkTotalPages);
       $('#bulkPrevBtn').prop('disabled', bulkCurrentPage <= 1);
       $('#bulkNextBtn').prop('disabled', bulkCurrentPage >= bulkTotalPages);
     }
 
-    function bulkPrevPage() {
-      if (bulkCurrentPage > 1) {
-        bulkCurrentPage--;
-        loadBulkData();
-      }
-    }
-
-    function bulkNextPage() {
-      if (bulkCurrentPage < bulkTotalPages) {
-        bulkCurrentPage++;
-        loadBulkData();
-      }
-    }
-
-    function bulkChangePageSize(newSize) {
-      bulkPageSize = parseInt(newSize, 10) || 10;
-      bulkCurrentPage = 1;
-      loadBulkData();
-    }
-    
-
-    
     function importBulkData(lrbPk) {
-      var selectedData = bulkDataCache.find(function(item) {
-        return item.lrb_pk == lrbPk;
-      });
-      
-      if (!selectedData) {
-        alert("{{ 'Selected data not found'|trans }}");
-        return;
-      }
-      
-      // Populate basic form fields
+      var selectedData = bulkDataCache.find(function(item) { return item.lrb_pk == lrbPk; });
+      if (!selectedData) { alert("{{ 'Selected data not found'|trans }}"); return; }
       $('textarea[name="{{ textParam }}"]').val(selectedData.bulk_reference_text || '');
       $('input[name="{{ userFkParam }}"]').val(selectedData.user_fk || '');
       $('input[name="{{ groupFkParam }}"]').val(selectedData.group_fk || '');
-      
-      // Populate acknowledgement field with all unique acknowledgements
-      var acknowledgementText = selectedData.acknowledgement_summary || '';
-      $('textarea[name="{{ acknowledgementParam }}"]').val(acknowledgementText);
-      
-      // Populate comments field with only the actual license comments
-      var commentsText = selectedData.comment_summary || '';
-      $('textarea[name="{{ commentsParam }}"]').val(commentsText);
-      
-      // Populate associated licenses into the queue
+      $('textarea[name="{{ acknowledgementParam }}"]').val(selectedData.acknowledgement_summary || '');
+      $('textarea[name="{{ commentsParam }}"]').val(selectedData.comment_summary || '');
       if (selectedData.licenses && selectedData.licenses.length > 0) {
-        // Clear existing queue
         licenseQueue = [];
-
-        // Add licenses to queue based on their action type
         selectedData.licenses.forEach(function(license) {
           licenseQueue.push({
-            licenseId: license.license_id,
+            licenseId: parseInt(license.license_id, 10),
             licenseName: license.license_shortname,
             action: license.is_removing_license ? "Remove" : "Add"
           });
         });
-
-        // Update the display
         updateLicenseQueue();
       }
-      
-      closeBulkDataModal();
-      
-      // Trigger duplicate checking for the imported text
-      setTimeout(function() {
-        checkForDuplicateText();
-      }, 100);
-      
-      // Show detailed success message
-      var importedInfo = "{{ 'Bulk data imported successfully!'|trans }}\n\n";
-      importedInfo += "{{ 'Imported:'|trans }}\n";
-      importedInfo += "- {{ 'Text from bulk reference'|trans }}\n";
-      if (selectedData.licenses && selectedData.licenses.length > 0) {
-        var addedLicenses = selectedData.licenses.filter(function(l) { return !l.is_removing_license; });
-        if (addedLicenses.length > 0) {
-          importedInfo += "- " + addedLicenses.length + " {{ 'associated license(s)'|trans }}\n";
-        }
-      }
-      if (acknowledgementText) {
-        importedInfo += "- {{ 'Acknowledgement text'|trans }}\n";
-      }
-      if (selectedData.comment_summary) {
-        importedInfo += "- {{ 'Comments'|trans }}\n";
-      }
-      importedInfo += "\n{{ 'Please review and modify the fields as needed before saving.'|trans }}";
-      
-      alert(importedInfo);
+      $('#bulkDataModal').modal('hide');
+      setTimeout(checkForDuplicateText, 100);
     }
-    
+
     function checkForDuplicateText() {
       var textContent = $('#textField').val().trim();
       var currentCpPk = $('input[name="cp_pk"]').val() || 0;
-      
-      if (textContent.length === 0) {
-        $('#duplicateWarning').hide();
-        return;
-      }
-      
-      // Calculate MD5 hash of the text content
+      if (textContent.length === 0) { $('#duplicateWarning').addClass('d-none'); return; }
       var textMd5 = CryptoJS.MD5(textContent).toString();
-      
       $.ajax({
         url: "?mod=admin_custom_text_management&action=check_duplicate",
-        type: "POST",
-        data: { 
-          text_md5: textMd5,
-          cp_pk: currentCpPk
-        },
-        dataType: "json",
-        success: function (response) {
-          if (response.duplicate) {
-            $('#duplicateWarning').show();
-          } else {
-            $('#duplicateWarning').hide();
-          }
-        },
-        error: function (xhr, status, error) {
-          // Silently ignore errors for real-time checking
-          console.log("{{ 'Error checking for duplicate text:'|trans }} " + error);
+        type: "POST", data: { text_md5: textMd5, cp_pk: currentCpPk }, dataType: "json",
+        success: function(response) {
+          $('#duplicateWarning').toggleClass('d-none', !response.duplicate);
         }
       });
     }
 
-    // Close modal when clicking outside of it
-    $(window).click(function(event) {
-      if (event.target.id === 'bulkDataModal') {
-        closeBulkDataModal();
-      }
-    });
-
-    // License queue management functions
     function addLicense() {
       var licenseId = parseInt($('#licenseDropdown').val(), 10);
       if (licenseId > 0) {
-        var licenseName = $('#licenseDropdown option:selected').text();
         maybeRemoveOldEntry(licenseId);
-        licenseQueue.push({
-          licenseId: licenseId,
-          licenseName: licenseName,
-          action: "Add"
-        });
+        licenseQueue.push({ licenseId: licenseId, licenseName: $('#licenseDropdown option:selected').text(), action: "Add" });
         updateLicenseQueue();
-        $('#licenseDropdown').val(null).trigger('change');  // Clear selection
-      } else {
-        alert('{{ "Please select a license first"|trans }}');
-      }
+        $('#licenseDropdown').val(null).trigger('change');
+      } else { alert('{{ "Please select a license first"|trans }}'); }
     }
 
     function rmLicense() {
       var licenseId = parseInt($('#licenseDropdown').val(), 10);
       if (licenseId > 0) {
-        var licenseName = $('#licenseDropdown option:selected').text();
         maybeRemoveOldEntry(licenseId);
-        licenseQueue.push({
-          licenseId: licenseId,
-          licenseName: licenseName,
-          action: "Remove"
-        });
+        licenseQueue.push({ licenseId: licenseId, licenseName: $('#licenseDropdown option:selected').text(), action: "Remove" });
         updateLicenseQueue();
-        $('#licenseDropdown').val(null).trigger('change');  // Clear selection
-      } else {
-        alert('{{ "Please select a license first"|trans }}');
-      }
+        $('#licenseDropdown').val(null).trigger('change');
+      } else { alert('{{ "Please select a license first"|trans }}'); }
     }
 
     function maybeRemoveOldEntry(licenseId) {
-      // Remove existing entry for this license to prevent duplicates
-      licenseQueue = licenseQueue.filter(function(item) {
-        return item.licenseId !== licenseId;
-      });
+      licenseId = parseInt(licenseId, 10);
+      licenseQueue = licenseQueue.filter(function(item) { return parseInt(item.licenseId, 10) !== licenseId; });
     }
 
     function removeLicenseFromQueue(licenseId) {
-      licenseQueue = licenseQueue.filter(function(item) {
-        return item.licenseId !== licenseId;
-      });
+      licenseId = parseInt(licenseId, 10);
+      licenseQueue = licenseQueue.filter(function(item) { return parseInt(item.licenseId, 10) !== licenseId; });
       updateLicenseQueue();
     }
 
     function updateLicenseQueue() {
       var tbody = $('#licenseQueueTableBody');
       tbody.empty();
-
       if (licenseQueue.length === 0) {
-        tbody.append('<tr><td colspan="3" style="text-align: center; color: #999;">{{ "No licenses selected"|trans }}</td></tr>');
+        tbody.append('<tr><td colspan="3" class="text-center text-muted">{{ "No licenses selected"|trans }}</td></tr>');
       } else {
         for (var i = 0; i < licenseQueue.length; i++) {
           var item = licenseQueue[i];
-          var actionClass = item.action === 'Add' ? 'license-add' : 'license-remove';
-          var actionStyle = item.action === 'Add' ? 'color: green; font-weight: bold;' : 'color: red; font-weight: bold;';
-
+          var badge = item.action === 'Add'
+            ? '<span class="badge badge-add px-2 py-1">{{ "Add"|trans }}</span>'
+            : '<span class="badge badge-rm  px-2 py-1">{{ "Remove"|trans }}</span>';
           var row = '<tr class="' + (i % 2 === 1 ? 'even' : 'odd') + '">' +
-            '<td style="' + actionStyle + '">' + item.action + '</td>' +
-            '<td>' + item.licenseName + '</td>' +
+            '<td>' + badge + '</td>' +
+            '<td>' + $('<div/>').text(item.licenseName).html() + '</td>' +
             '<td style="text-align: center;">' +
-              '<a href="javascript:;" onclick="removeLicenseFromQueue(' + item.licenseId + ')">' +
-                '<img src="images/icons/remove_16.png" title="{{ "Remove from queue"|trans }}" alt="-"/>' +
-              '</a>' +
+              '<button type="button" class="remove-license-btn btn btn-link btn-sm p-0 text-danger"' +
+                ' data-license-id="' + parseInt(item.licenseId, 10) + '"' +
+                ' title="{{ "Remove from queue"|trans }}">' +
+                '<img src="images/icons/remove_16.png" alt="-"/>' +
+              '</button>' +
             '</td>' +
           '</tr>';
           tbody.append(row);
         }
       }
-
-      // Update hidden input with JSON data
       $('#licenseDataInput').val(JSON.stringify(licenseQueue));
     }
+
+    $(document).on('click', '.remove-license-btn', function() {
+      removeLicenseFromQueue($(this).data('license-id'));
+    });
   </script>
 {% endblock %}

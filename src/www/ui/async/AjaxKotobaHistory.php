@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+ SPDX-FileCopyrightText: © Fossology contributors
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -42,11 +43,11 @@ class AjaxKotobaHistory extends DefaultPlugin
   {
     $uploadId = intval($request->get('upload'));
     if (empty($uploadId)) {
-      return;
+      return new Response('Missing upload parameter', Response::HTTP_BAD_REQUEST);
     }
     $uploadTreeId = intval($request->get('item'));
     if (empty($uploadTreeId)) {
-      return;
+      return new Response('Missing item parameter', Response::HTTP_BAD_REQUEST);
     }
     $onlyTried = !$request->get('all');
 

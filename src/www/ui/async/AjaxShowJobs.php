@@ -3,6 +3,7 @@
  SPDX-FileCopyrightText: © 2015-2019, 2021 Siemens AG
  SPDX-FileCopyrightText: © 2020 Robert Bosch GmbH
  SPDX-FileCopyrightText: © Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
+ SPDX-FileCopyrightText: © Fossology contributors
  Author: Shaheem Azmal<shaheem.azmal@siemens.com>,
          Anupam Ghosh <anupam.ghosh@siemens.com>
 
@@ -223,10 +224,6 @@ class AjaxShowJobs extends \FO_Plugin
         'jobQueue' => $jobs['jobqueue']
       );
       foreach ($jobArr['jobQueue'] as $key => $singleJobQueue) {
-        // Special handling for kotoba display name
-        if ($singleJobQueue['jq_type'] === 'kotoba') {
-          $jobArr['jobQueue'][$key]['jq_type'] = 'kotoba';
-        }
         if (! $forApi) {
           if (! empty($jobArr['jobQueue'][$key]['jq_starttime'])) {
             $jobArr['jobQueue'][$key]['jq_starttime'] = Convert2BrowserTime(

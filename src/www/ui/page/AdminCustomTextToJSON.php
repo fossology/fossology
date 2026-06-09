@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+ SPDX-FileCopyrightText: © Fossology contributors
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -42,7 +43,7 @@ class AdminCustomTextToJSON extends DefaultPlugin
       return DownloadUtil::getDownloadConfirmationResponse($downloadUrl, $fileName, $referer);
     }
 
-    $customTextExport = new \Fossology\Lib\Application\CustomTextExport($this->getObject('db.manager'));
+    $customTextExport = $GLOBALS['container']->get('app.custom_text_export');
     $content = $customTextExport->export(intval($request->get('cp_pk')), true);
     return DownloadUtil::getDownloadResponse($content, $fileName, 'application/json');
   }

@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+ SPDX-FileCopyrightText: © Fossology contributors
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -8,7 +9,6 @@
 namespace Fossology\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -47,16 +47,12 @@ class AdminCustomTextList extends DefaultPlugin
     $action = $request->get('action');
 
     // Handle AJAX requests
-    if ($action == 'get_phrases') {
-      return $this->getPhrasesAjax();
-    }
-
     if ($action == 'fetchData') {
       return $this->fetchDataServerSide($request);
     }
 
     if ($action == 'get_bulk_data') {
-      return $this->getBulkDataAjax();
+      return $this->getBulkDataAjax($request);
     }
 
     if ($action == 'delete' && $request->getMethod() == 'POST') {
@@ -76,92 +72,6 @@ class AdminCustomTextList extends DefaultPlugin
   }
 
   /**
-   * Get phrases data for the table
-   */
-  private function getPhrasesTableData()
-  {
-    /** @var DbManager */
-    $dbManager = $this->getObject('db.manager');
-
-    $sql = "SELECT cp.cp_pk, cp.text, cp.text_md5, cp.acknowledgement, cp.comments,
-                   cp.user_fk, cp.group_fk, cp.created_date, cp.is_active,
-                   u.user_name,
-                   STRING_AGG(CASE WHEN cplm.removing = false THEN lr.rf_shortname END, ', ' ORDER BY lr.rf_shortname) as licenses_to_add,
-                   STRING_AGG(CASE WHEN cplm.removing = true THEN lr.rf_shortname END, ', ' ORDER BY lr.rf_shortname) as licenses_to_remove
-            FROM custom_phrase cp
-            LEFT JOIN users u ON cp.user_fk = u.user_pk
-            LEFT JOIN custom_phrase_license_map cplm ON cp.cp_pk = cplm.cp_fk
-            LEFT JOIN license_ref lr ON cplm.rf_fk = lr.rf_pk
-            GROUP BY cp.cp_pk, cp.text, cp.text_md5, cp.acknowledgement, cp.comments,
-                     cp.user_fk, cp.group_fk, cp.created_date, cp.is_active, u.user_name
-            ORDER BY cp.created_date DESC";
-
-    $result = $dbManager->getRows($sql);
-    $aaData = array();
-
-    foreach ($result as $row) {
-      $editLink = '<a href="?mod=admin_custom_text_management&edit=' . $row['cp_pk'] . '"><img border="0" src="images/button_edit.png"></a>';
-
-      $text = strlen($row['text']) > 100 ?
-                    substr($row['text'], 0, 100) . '...' :
-                    $row['text'];
-
-      $acknowledgement = strlen($row['acknowledgement'] ?: '') > 50 ?
-                         substr($row['acknowledgement'], 0, 50) . '...' :
-                         ($row['acknowledgement'] ?: 'N/A');
-
-      $comments = strlen($row['comments'] ?: '') > 50 ?
-                  substr($row['comments'], 0, 50) . '...' :
-                  ($row['comments'] ?: 'N/A');
-
-      $isActiveFlag = $dbManager->booleanFromDb($row['is_active']);
-      $statusToggle = '<input type="checkbox" ' . ($isActiveFlag ? 'checked' : '') .
-                      ' onchange="togglePhraseStatus(' . $row['cp_pk'] . ', ' . ($isActiveFlag ? 'true' : 'false') . ')"/>';
-
-      $deleteBtn = '<a href="javascript:;" onclick="deletePhrase(' . $row['cp_pk'] . ')"><img class="delete" src="images/space_16.png" alt="Delete"/></a>';
-
-      // Format licenses display with separate lines for add/remove
-      $licensesDisplay = '';
-      $licensesToAdd = $row['licenses_to_add'] ?: null;
-      $licensesToRemove = $row['licenses_to_remove'] ?: null;
-
-      if ($licensesToAdd || $licensesToRemove) {
-        if ($licensesToAdd) {
-          $licensesDisplay .= '<div><strong>To be added:</strong> ' . htmlentities($licensesToAdd) . '</div>';
-        }
-        if ($licensesToRemove) {
-          $licensesDisplay .= '<div><strong>To be removed:</strong> ' . htmlentities($licensesToRemove) . '</div>';
-        }
-      } else {
-        $licensesDisplay = 'N/A';
-      }
-
-      $aaData[] = array(
-        $editLink,
-        $licensesDisplay,
-        '<div style="overflow-y:scroll;max-height:100px;margin:0;">' . nl2br(htmlentities($text)) . '</div>',
-        htmlentities($acknowledgement),
-        htmlentities($comments),
-        htmlentities($row['user_name'] ?: 'N/A'),
-        $row['created_date'],
-        $statusToggle,
-        $deleteBtn
-      );
-    }
-
-    return $aaData;
-  }
-
-  /**
-   * AJAX endpoint to get phrases data
-   */
-  private function getPhrasesAjax()
-  {
-    $data = $this->getPhrasesTableData();
-    return new JsonResponse(array('data' => $data));
-  }
-
-  /**
    * AJAX endpoint for server-side pagination
    */
   private function fetchDataServerSide(Request $request)
@@ -169,19 +79,21 @@ class AdminCustomTextList extends DefaultPlugin
     $offset = intval($request->query->get('start', 0));
     $limit = intval($request->query->get('length', 10));
     $draw = intval($request->query->get('draw', 1));
-    $searchQuery = $_GET['search']['value'] ?? '';
+    $searchQuery = $request->query->all('search')['value'] ?? '';
 
+    $filteredQuery = '';
     if (!empty($searchQuery)) {
-      $searchQuery = '%' . $searchQuery . '%';
+      $filteredQuery = '%' . $searchQuery . '%';
     }
 
-    $totalCount = $this->getTotalPhrasesCount($searchQuery);
-    $phraseArray = $this->getPhrasesServerSide($limit, $offset, $searchQuery);
+    $totalCount = $this->getTotalPhrasesCount('');
+    $filteredCount = empty($filteredQuery) ? $totalCount : $this->getTotalPhrasesCount($filteredQuery);
+    $phraseArray = $this->getPhrasesServerSide($limit, $offset, $filteredQuery);
 
     return new JsonResponse([
       "draw" => $draw,
       "recordsTotal" => $totalCount,
-      "recordsFiltered" => $totalCount,
+      "recordsFiltered" => $filteredCount,
       "data" => $phraseArray,
     ], JsonResponse::HTTP_OK);
   }
@@ -256,15 +168,13 @@ class AdminCustomTextList extends DefaultPlugin
     }
   }
 
-  /**
-   * Get total count of custom phrases for server-side pagination
-   */
   private function getTotalPhrasesCount($searchQuery = '')
   {
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
 
-    $sql = "SELECT COUNT(*) as count FROM custom_phrase cp
+    $sql = "SELECT COUNT(DISTINCT cp.cp_pk) AS count
+            FROM custom_phrase cp
             LEFT JOIN users u ON cp.user_fk = u.user_pk
             LEFT JOIN custom_phrase_license_map cplm ON cp.cp_pk = cplm.cp_fk
             LEFT JOIN license_ref lr ON cplm.rf_fk = lr.rf_pk";
@@ -272,15 +182,12 @@ class AdminCustomTextList extends DefaultPlugin
     $params = array();
 
     if (!empty($searchQuery)) {
-      $sql .= " WHERE (cp.text ILIKE $1 OR cp.acknowledgement ILIKE $1 OR cp.comments ILIKE $1 OR u.user_name ILIKE $1 OR lr.rf_shortname ILIKE $1)";
+      $sql .= " WHERE (cp.text ILIKE $1 OR cp.acknowledgement ILIKE $1 OR cp.comments ILIKE $1"
+            . " OR u.user_name ILIKE $1 OR lr.rf_shortname ILIKE $1)";
       $params[] = $searchQuery;
     }
 
-    $sql .= " GROUP BY cp.cp_pk";
-
-    $countSql = "SELECT COUNT(*) as count FROM (" . $sql . ") as subquery";
-
-    $result = $dbManager->getSingleRow($countSql, $params, __METHOD__);
+    $result = $dbManager->getSingleRow($sql, $params, __METHOD__);
     return $result ? intval($result['count']) : 0;
   }
 
@@ -336,10 +243,14 @@ class AdminCustomTextList extends DefaultPlugin
                   ($row['comments'] ?: 'N/A');
 
       $isActiveFlag = $dbManager->booleanFromDb($row['is_active']);
-      $statusToggle = '<input type="checkbox" ' . ($isActiveFlag ? 'checked' : '') .
-                      ' onchange="togglePhraseStatus(' . $row['cp_pk'] . ', ' . ($isActiveFlag ? 'true' : 'false') . ')"/>';
+      $statusToggle = '<input type="checkbox" class="phrase-status-toggle"'
+        . ' data-phrase-id="' . intval($row['cp_pk']) . '"'
+        . ' data-current-status="' . ($isActiveFlag ? '1' : '0') . '"'
+        . ($isActiveFlag ? ' checked' : '') . '/>';
 
-      $deleteBtn = '<a href="javascript:;" onclick="deletePhrase(' . $row['cp_pk'] . ')"><img class="delete" src="images/space_16.png" alt="Delete"/></a>';
+      $deleteBtn = '<button type="button" class="custom-text-delete"'
+        . ' data-phrase-id="' . intval($row['cp_pk']) . '">'
+        . '<img class="delete" src="images/space_16.png" alt="Delete"/></button>';
 
       // Format licenses display with separate lines for add/remove
       $licensesDisplay = '';
@@ -412,11 +323,11 @@ class AdminCustomTextList extends DefaultPlugin
    *   limit  – rows per page       (default 10)
    *   search – optional search text
    */
-  private function getBulkDataAjax()
+  private function getBulkDataAjax(Request $request)
   {
-    $page  = max(1, intval($_GET['page']  ?? 1));
-    $limit = max(1, intval($_GET['limit'] ?? 10));
-    $searchTerm = trim($_GET['search'] ?? '');
+    $page  = max(1, intval($request->query->get('page', 1)));
+    $limit = max(1, intval($request->query->get('limit', 10)));
+    $searchTerm = trim($request->query->get('search', ''));
 
     $searchQuery = '';
     if (!empty($searchTerm)) {

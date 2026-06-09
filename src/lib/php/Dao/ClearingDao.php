@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2014-2018, 2020-2022 Siemens AG
+ SPDX-FileCopyrightText: © Fossology contributors
  Author: Johannes Najjar
 
  SPDX-License-Identifier: GPL-2.0-only
@@ -744,7 +745,7 @@ INSERT INTO clearing_decision (
     $stmt = __METHOD__ . "." . $uploadTreeTableName;
     $sql = "SELECT COUNT(*) FROM clearing_event ce
             INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
-            WHERE ce.type_fk = 6
+            WHERE ce.type_fk = " . ClearingEventTypes::KOTOBA . "
             AND ce.group_fk = $1
             AND ut.upload_fk = $2
             AND ut.lft BETWEEN $3 AND $4";
@@ -781,13 +782,14 @@ INSERT INTO clearing_decision (
       $stmt .= ".tried";
     }
 
+    $kotobaType = ClearingEventTypes::KOTOBA;
     $sql = "WITH alltried AS (
             SELECT ce.reportinfo, ce.clearing_event_pk ce_pk, ce.uploadtree_fk,
               $triedExpr AS tried
             FROM clearing_event ce
               INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
               INNER JOIN $uploadTreeTableName ut2 ON ut2.uploadtree_pk = ce.uploadtree_fk
-            WHERE ce.type_fk = 6
+            WHERE ce.type_fk = $kotobaType
             AND ce.group_fk = $5
             AND ut.upload_fk = $1
             AND ce.reportinfo IS NOT NULL
@@ -803,7 +805,7 @@ INSERT INTO clearing_decision (
             ) AS result ORDER BY reportinfo, matched DESC)
             SELECT aggregated_tried.text, lrf.rf_shortname, ce.removed, aggregated_tried.tried, aggregated_tried.ce_pk, aggregated_tried.matched
             FROM aggregated_tried
-              INNER JOIN clearing_event ce ON ce.reportinfo = aggregated_tried.text AND ce.type_fk = 6 AND ce.group_fk = $5
+              INNER JOIN clearing_event ce ON ce.reportinfo = aggregated_tried.text AND ce.type_fk = $kotobaType AND ce.group_fk = $5
               INNER JOIN license_ref lrf ON ce.rf_fk = lrf.rf_pk
               INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
             WHERE ut.upload_fk = $1

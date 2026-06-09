@@ -1,6 +1,7 @@
 /*
  Author: Daniele Fognini, Andreas Wuerl
  SPDX-FileCopyrightText: © 2013-2014 Siemens AG
+ SPDX-FileCopyrightText: © Fossology contributors
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -27,11 +28,12 @@ typedef struct LicenseMapping_t {
  * @brief Structure to hold a custom phrase and its mapped licenses
  */
 typedef struct Phrase_t {
-    long cpId;                ///< cp_pk from custom_phrase table
-    char* text;              ///< phrase text to match
-    char* acknowledgement;    ///< acknowledgement text (nullable)
-    char* comments;          ///< comments (nullable)
-    GArray* licenseMappings;  ///< array of LicenseMapping structures
+    long cpId;               /* cp_pk from custom_phrase table */
+    char* text;              /* phrase text to match */
+    char* acknowledgement;   /* acknowledgement text (nullable) */
+    char* comments;          /* comments (nullable) */
+    GArray* licenseMappings; /* array of LicenseMapping */
+    char* stmtName;          /* pre-built prepared-statement name (per upload) */
 } Phrase;
 
 PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId,
@@ -47,7 +49,6 @@ int saveDiffHighlightsToDb(fo_dbManager* dbManager, const GArray* matchedInfo, l
 
 // Kotoba phrase-mode database functions
 GArray* queryActiveCustomPhrases(fo_dbManager* dbManager);
-GArray* queryMappedLicensesForPhrase(fo_dbManager* dbManager, long cpId);
 void phrase_free(Phrase* phrase);
 void phrases_free(GArray* phrases);
 

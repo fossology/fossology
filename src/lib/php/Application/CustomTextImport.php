@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+ SPDX-FileCopyrightText: © Fossology contributors
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -8,6 +9,7 @@
 namespace Fossology\Lib\Application;
 use Fossology\Lib\Auth\Auth;
 
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ArrayOperation;
@@ -30,6 +32,8 @@ class CustomTextImport
   /** @var UserDao $userDao
    * User DAO to use */
   protected $userDao;
+  /** @var LicenseDao $licenseDao */
+  protected $licenseDao;
   /** @var string $delimiter
    * Delimiter used in CSV */
   protected $delimiter = ',';
@@ -53,14 +57,15 @@ class CustomTextImport
       );
 
   /**
-   * Constructor
-   * @param DbManager $dbManager DB manager to use
-   * @param UserDao $userDao     User Dao to use
+   * @param DbManager $dbManager
+   * @param UserDao $userDao
+   * @param LicenseDao $licenseDao Falls back to DI container when null.
    */
-  public function __construct(DbManager $dbManager, UserDao $userDao)
+  public function __construct(DbManager $dbManager, UserDao $userDao, LicenseDao $licenseDao = null)
   {
     $this->dbManager = $dbManager;
     $this->userDao = $userDao;
+    $this->licenseDao = $licenseDao ?: $GLOBALS['container']->get('dao.license');
   }
 
   /**
@@ -271,7 +276,6 @@ class CustomTextImport
 
       return array('success' => true, 'message' => $message);
     } catch (Exception $e) {
-      error_log("Failed to import phrase: " . $e->getMessage());
       return array('success' => false, 'message' => _("Failed to import phrase: ") . $e->getMessage());
     }
   }
@@ -350,42 +354,7 @@ class CustomTextImport
     return in_array($value, array('true', '1', 'yes', 'on', 'active'));
   }
 
-  /**
-   * @brief Normalize license name for lookup
-   * @param string $licenseName License name to normalize
-   * @return string Normalized license name
-   */
-  private function normalizeLicenseName($licenseName)
-  {
-    // Trim whitespace
-    $licenseName = trim($licenseName);
-
-    // Handle common variations
-    $variations = array(
-      'GPL-2.0' => array('GPL-2.0-only', 'GPL-2.0+', 'GPL-2.0-or-later'),
-      'GPL-3.0' => array('GPL-3.0-only', 'GPL-3.0+', 'GPL-3.0-or-later'),
-      'LGPL-2.1' => array('LGPL-2.1-only', 'LGPL-2.1+', 'LGPL-2.1-or-later'),
-      'LGPL-3.0' => array('LGPL-3.0-only', 'LGPL-3.0+', 'LGPL-3.0-or-later'),
-      'MIT' => array('MIT License', 'MIT-License'),
-      'Apache-2.0' => array('Apache License 2.0', 'Apache-2.0-only'),
-      'BSD-3-Clause' => array('BSD-3-Clause License', 'BSD-3-Clause-only'),
-      'MPL-2.0' => array('Mozilla Public License 2.0', 'MPL-2.0-only'),
-      'EPL-1.0' => array('Eclipse Public License 1.0', 'EPL-1.0-only'),
-      'AGPL-3.0' => array('AGPL-3.0-only', 'AGPL-3.0+', 'AGPL-3.0-or-later')
-    );
-
-    // Check if the license name matches any variations
-    foreach ($variations as $standard => $variants) {
-      if (in_array($licenseName, $variants)) {
-        return $standard;
-      }
-    }
-
-    return $licenseName;
-  }
-
-
-  private function associateLicenses($cpPk, $licenseNames, $removing = false)
+  private function associateLicenses($cpPk, $licenseNames, $removing = false, $allowCreate = false)
   {
     if (is_array($licenseNames)) {
       $licenseArray = $licenseNames;
@@ -406,38 +375,30 @@ class CustomTextImport
     $failedLicenses = array();
     $createdLicenses = array();
 
-    // Get LicenseDao for proper license lookups
-    $licenseDao = $GLOBALS['container']->get('dao.license');
-
     foreach ($licenseArray as $licenseName) {
       if (empty($licenseName)) {
         continue;
       }
 
-      // Normalize license name
-      $normalizedLicenseName = $this->normalizeLicenseName($licenseName);
+      $normalizedLicenseName = trim($licenseName);
 
-      // Find license using LicenseDao to avoid prepared statement conflicts
-      $license = $licenseDao->getLicenseByShortName($normalizedLicenseName);
+      $license = $this->licenseDao->getLicenseByShortName($normalizedLicenseName);
 
       if (!$license) {
-        // License not found in DB - validate and auto-create it
-        if (!$this->isValidLicenseShortname($normalizedLicenseName)) {
-          $failedLicenses[] = $licenseName . " (invalid shortname)";
+        if (!$allowCreate || !$this->isValidLicenseShortname($normalizedLicenseName)) {
+          $failedLicenses[] = $licenseName . " (unknown)";
           continue;
         }
 
         try {
-          $newLicenseId = $licenseDao->insertLicense(
-            $normalizedLicenseName,  // rf_shortname
-            '',                      // rf_text (empty, only shortname available)
-            null                     // rf_spdx_id
+          $newLicenseId = $this->licenseDao->insertLicense(
+            $normalizedLicenseName,
+            '',
+            null
           );
-          $license = $licenseDao->getLicenseById($newLicenseId);
+          $license = $this->licenseDao->getLicenseById($newLicenseId);
           $createdLicenses[] = $normalizedLicenseName;
-          error_log("Auto-created license '$normalizedLicenseName' (ID: $newLicenseId) during custom text import");
         } catch (Exception $e) {
-          error_log("Failed to create license '$licenseName': " . $e->getMessage());
           $failedLicenses[] = $licenseName . " (creation failed)";
           continue;
         }
@@ -463,24 +424,12 @@ class CustomTextImport
             $this->dbManager->insertTableRow('custom_phrase_license_map', $insertData);
             $associatedCount++;
           } catch (Exception $e) {
-            error_log("Failed to insert license association: " . $e->getMessage());
             $failedLicenses[] = $licenseName . " (insert failed)";
           }
         } else {
           $associatedCount++; // Already exists, count as successful
         }
       }
-    }
-
-    // Log results for debugging
-    if (!empty($createdLicenses)) {
-      error_log("Auto-created licenses during import for phrase ID $cpPk: " . implode(', ', $createdLicenses));
-    }
-    if (!empty($failedLicenses)) {
-      error_log("Failed licenses during import for phrase ID $cpPk: " . implode(', ', $failedLicenses));
-    }
-    if ($associatedCount > 0) {
-      error_log("Successfully associated $associatedCount licenses for phrase ID $cpPk");
     }
 
     return array('associated' => $associatedCount, 'failed' => $failedLicenses, 'created' => $createdLicenses);
@@ -513,12 +462,13 @@ class CustomTextImport
 
   /**
    * @brief Import JSON data directly
-   * @param array $data JSON data array
-   * @param string $msg Reference to message string
+   * @param array $data Decoded JSON array
+   * @param string $msg Populated with the result message
    * @return string Result message
    */
-  public function importJsonData($data, &$msg)
+  public function importJsonData($data, string &$msg): string
   {
-    return $this->importPhrases($data);
+    $msg = $this->importPhrases($data);
+    return $msg;
   }
 }

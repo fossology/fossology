@@ -1,6 +1,7 @@
 /*
  Author: Daniele Fognini, Andreas Wuerl
  SPDX-FileCopyrightText: © 2013-2017, 2021 Siemens AG
+ SPDX-FileCopyrightText: © Fossology contributors
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -234,33 +235,50 @@ int saveDiffHighlightsToDb(fo_dbManager* dbManager, const GArray* matchedInfo, l
  * \return GArray* of Phrase* structures (caller must free with phrases_free)
  */
 GArray* queryActiveCustomPhrases(fo_dbManager* dbManager) {
+  /* Single JOIN avoids N+1: one query instead of 1 + (1 per phrase). */
   PGresult* result = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
-      "queryActiveCustomPhrases",
-      "SELECT cp_pk, text, acknowledgement, comments FROM custom_phrase WHERE is_active = true"
+      "queryActiveCustomPhrasesWithMappings",
+      "SELECT cp.cp_pk, cp.text, cp.acknowledgement, cp.comments,"
+      "       cplm.rf_fk, cplm.removing"
+      " FROM custom_phrase cp"
+      " LEFT JOIN custom_phrase_license_map cplm ON cp.cp_pk = cplm.cp_fk"
+      " WHERE cp.is_active = true"
+      " ORDER BY cp.cp_pk"
     )
   );
 
-  if (!result) {
-    return g_array_new(FALSE, FALSE, sizeof(Phrase*));
-  }
-
-  int numRows = PQntuples(result);
   GArray* phrases = g_array_new(FALSE, FALSE, sizeof(Phrase*));
 
+  if (!result)
+    return phrases;
+
+  int numRows = PQntuples(result);
+  Phrase* current = NULL;
+
   for (int i = 0; i < numRows; i++) {
-    Phrase* phrase = (Phrase*)g_malloc(sizeof(Phrase));
+    long cpId = atol(PQgetvalue(result, i, 0));
 
-    phrase->cpId = atol(PQgetvalue(result, i, 0));
-    phrase->text = g_strdup(PQgetvalue(result, i, 1));
-    phrase->acknowledgement = PQgetisnull(result, i, 2) ? NULL : g_strdup(PQgetvalue(result, i, 2));
-    phrase->comments = PQgetisnull(result, i, 3) ? NULL : g_strdup(PQgetvalue(result, i, 3));
+    if (!current || current->cpId != cpId) {
+      Phrase* phrase = (Phrase*)g_malloc0(sizeof(Phrase));
+      phrase->cpId = cpId;
+      phrase->text = g_strdup(PQgetvalue(result, i, 1));
+      phrase->acknowledgement = PQgetisnull(result, i, 2) ? NULL : g_strdup(PQgetvalue(result, i, 2));
+      phrase->comments = PQgetisnull(result, i, 3) ? NULL : g_strdup(PQgetvalue(result, i, 3));
+      phrase->licenseMappings = g_array_new(FALSE, FALSE, sizeof(LicenseMapping));
+      phrase->stmtName = NULL;
+      g_array_append_val(phrases, phrase);
+      current = phrase;
+    }
 
-    // Query mapped licenses for this phrase
-    phrase->licenseMappings = queryMappedLicensesForPhrase(dbManager, phrase->cpId);
-
-    g_array_append_val(phrases, phrase);
+    /* LEFT JOIN row with no mapping has rf_fk = NULL — skip it. */
+    if (!PQgetisnull(result, i, 4)) {
+      LicenseMapping mapping;
+      mapping.rfPk = atol(PQgetvalue(result, i, 4));
+      mapping.removing = (strcmp(PQgetvalue(result, i, 5), "t") == 0) ? 1 : 0;
+      g_array_append_val(current->licenseMappings, mapping);
+    }
   }
 
   PQclear(result);
@@ -310,10 +328,10 @@ void phrase_free(Phrase* phrase) {
   g_free(phrase->text);
   g_free(phrase->acknowledgement);
   g_free(phrase->comments);
+  g_free(phrase->stmtName);
 
-  if (phrase->licenseMappings) {
+  if (phrase->licenseMappings)
     g_array_free(phrase->licenseMappings, TRUE);
-  }
 
   g_free(phrase);
 }

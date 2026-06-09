@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+ SPDX-FileCopyrightText: © Fossology contributors
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -22,6 +23,7 @@ class AdminCustomTextImport extends DefaultPlugin
   const NAME = "admin_custom_text_import";
   const KEY_UPLOAD_MAX_FILESIZE = 'upload_max_filesize';
   const FILE_INPUT_NAME = 'file_input';
+  const MAX_IMPORT_BYTES = 5242880; // 5 MB
 
   /** @var CustomTextImport $customTextImport */
   protected $customTextImport;
@@ -74,6 +76,8 @@ class AdminCustomTextImport extends DefaultPlugin
     } elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
       $errMsg = _("Larger than upload_max_filesize ") .
         ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
+    } elseif ($uploadedFile->getSize() > self::MAX_IMPORT_BYTES) {
+      $errMsg = _("File exceeds maximum allowed size of 5 MB");
     } elseif ($uploadedFile->getClientOriginalExtension() != 'csv'
       && $uploadedFile->getClientOriginalExtension() != 'json') {
       $errMsg = _('Invalid file extension ') .
