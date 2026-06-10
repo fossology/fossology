@@ -4,6 +4,53 @@
 -->
 # Changelog of FOSSology
 
+### 4.7.1 (June 10th 2026)
+
+With this new patch, FOSSology introduced a few bug fixed and infrastructure related changes. We have also integrated
+pulling Licenses and Obligations from [LicenseDB](https://github.com/fossology/LicenseDb). This further more stablised
+following previous release [4.7.0](https://github.com/fossology/fossology/releases/tag/4.7.0)
+
+* Improve error handling for unsupported methods
+* Improve upload browse search and filter controls
+* Fix false positives and false negatives in copyright agent
+* Bump the composer group across 1 directory with 2 updates
+* Chores:
+    - Bump lukka/get-cmake from 4.3.2 to 4.3.3
+    - Bump symfony/cache
+    - Bump christophebedard/dco-check from 0.5.0 to 0.5.1
+* Dangling reference pointer failing test
+* Fix import from licensedb
+
+#### Credits to contributors for 4.7.1
+
+From the GIT commit history, we have the following contributors since
+[4.7.0](https://github.com/fossology/fossology/releases/tag/4.7.0):
+
+```
+> Aditya30ag <adityaagrwal3005@gmail.com>
+> Dearsh Oberoi <oberoidearsh@gmail.com>
+> dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+> Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
+> Saksham Mishra <sakshammishra112@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@gmail.com>
+```
+
+#### Features
+* `3d29da809` feat(uploads): improve upload browse search and filter controls
+
+#### Corrections
+* `a7ee458a8` fix(REST): improve error handling for unsupported methods
+* `23d91f497` fix(copyright): fix false positives and false negatives in copyright agent
+* `4cc248c2c` fix(test): dangling reference pointer failing test
+* `0220b2c23` fix(licensedb): fix import from licensedb
+
+#### Infrastructure
+* `fc4e4c000` chore(deps): bump the composer group across 1 directory with 2 updates
+* `aca31135f` chore(deps): bump lukka/get-cmake from 4.3.2 to 4.3.3
+* `2256d1541` chore(deps): bump symfony/cache
+* `f1f43804e` chore(deps): bump christophebedard/dco-check from 0.5.0 to 0.5.1
+
+
 ### 4.7.0 (May 15th 2026)
 
 With [4.7.0](https://github.com/fossology/fossology/releases/tag/4.7.0),
