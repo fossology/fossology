@@ -149,6 +149,10 @@ class UploadHelper
       throw new HttpBadRequestException($e->getMessage(), $e);
     }
 
+    if ($decider->getBulkReused() === true) {
+      $reuser->setReuseBulk(true);
+    }
+
     if (! $parametersSent) {
       throw new HttpBadRequestException("No parameters selected for agents!");
     }

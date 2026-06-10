@@ -5822,9 +5822,12 @@ components:
         reuseCopyright:
           type: boolean
           description: Copy the copyright deactivation and edits.
+        reuseBulk:
+          type: boolean
+          description: Reuse bulk decisions.
       required:
-        - reuse_upload
-        - reuse_group
+        - reuseUpload
+        - reuseGroup
     Scancode:
       type: object
       properties:
