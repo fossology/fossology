@@ -263,6 +263,12 @@ static int agent_test(const gchar* name, meta_agent_t* ma, scheduler_t* schedule
   for (iter = scheduler->host_queue; iter != NULL; iter = iter->next)
   {
     host = (host_t*) iter->data;
+    if (!host_supports_agent(host, ma->name))
+    {
+      V_AGENT("META_AGENT[%s] skipping HOST[%s]: capability list does not include this agent\n",
+          ma->name, host->name);
+      continue;
+    }
     V_AGENT("META_AGENT[%s] testing on HOST[%s]\n", ma->name, host->name);
     job_t* job = job_init(scheduler->job_list, scheduler->job_queue, ma->name, host->name, id_gen--, 0, 0, 0, 0, jq_cmd_args);
     agent_init(scheduler, host, job);
@@ -321,7 +327,6 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
     }
     else
     {
-      agent->type->valid = 0;
       agent_fail_event(scheduler, agent);
       agent_kill(agent);
       con_printf(main_log, "ERROR %s.%d: agent %s.%s has been invalidated, removing from agents\n", __FILE__, __LINE__,
@@ -352,7 +357,6 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
         agent->type->name);
     con_printf(job_log(agent->owner), "ERROR: versions don't match: %s(%s) != received: %s(%s)\n",
         agent->type->version_source, agent->type->version, agent->host->name, buffer);
-    agent->type->valid = 0;
     agent_kill(agent);
 #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
     g_mutex_unlock(&version_lock);
@@ -366,6 +370,8 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
 #else
   g_static_mutex_unlock(&version_lock);
 #endif
+
+  agent->type->failed_startup_tests = 0;
 
   /*!
    * If we reach here the agent has correctly sent VERION information to the
@@ -749,7 +755,7 @@ static void* agent_spawn(agent_spawn_args* pass)
     else
     {
       args = g_new0(char*, 5);
-      len = snprintf(buffer, sizeof(buffer), AGENT_BINARY " --userID=%d --groupID=%d --scheduler_start --jobId=%d",
+      len = snprintf(buffer, sizeof(buffer), AGENT_BINARY " --userID=%d --groupID=%d --jobId=%d",
                      agent->host->agent_dir, AGENT_CONF, agent->type->name, agent->type->raw_cmd,
                      agent->owner->user_id, agent->owner->group_id, agent->owner->parent_id);
 
@@ -1015,6 +1021,9 @@ void agent_death_event(scheduler_t* scheduler, pid_t* pid)
 {
   agent_t* agent;
   int status = pid[1];
+  job_t *owner_ptr;
+  int is_test_agent;
+  char *jq_cmd_args;
 
   if ((agent = g_tree_lookup(scheduler->agents, &pid[0])) == NULL)
   {
@@ -1022,7 +1031,11 @@ void agent_death_event(scheduler_t* scheduler, pid_t* pid)
     return;
   }
 
-  if (agent->owner->id >= 0)
+  owner_ptr = agent->owner;
+  is_test_agent = (owner_ptr && owner_ptr->id < 0) ? 1 : 0;
+  jq_cmd_args = (owner_ptr && owner_ptr->jq_cmd_args) ? g_strdup(owner_ptr->jq_cmd_args) : NULL;
+
+  if (owner_ptr && owner_ptr->id >= 0)
     event_signal(database_update_event, NULL);
 
   if (write(agent->to_parent, "@@@1\n", 5) != 5)
@@ -1031,42 +1044,82 @@ void agent_death_event(scheduler_t* scheduler, pid_t* pid)
 
   if (agent->return_code != 0)
   {
-    if (WIFEXITED(status))
+    if (owner_ptr)
     {
-      AGENT_CONCURRENT_PRINT("agent failed, code: %d\n", (status >> 8));
+      if (WIFEXITED(status))
+      {
+        AGENT_CONCURRENT_PRINT("agent failed, code: %d\n", (status >> 8));
+      }
+      else if (WIFSIGNALED(status))
+      {
+        AGENT_CONCURRENT_PRINT("agent was killed by signal: %d.%s\n", WTERMSIG(status), strsignal(WTERMSIG(status)));
+        if (WCOREDUMP(status))
+          AGENT_CONCURRENT_PRINT("agent produced core dump\n");
+      }
+      else
+      {
+        AGENT_CONCURRENT_PRINT("agent failed, code: %d\n", agent->return_code);
+      }
+    }
+    else if (WIFEXITED(status))
+    {
+      log_printf("ERROR %s.%d: AGENT[%s][pid=%d][host=%s] exited without an owner, code: %d\n",
+          __FILE__, __LINE__, agent->type ? agent->type->name : "?", agent->pid,
+          agent->host ? agent->host->name : "?", (status >> 8));
     }
     else if (WIFSIGNALED(status))
     {
-      AGENT_CONCURRENT_PRINT("agent was killed by signal: %d.%s\n", WTERMSIG(status), strsignal(WTERMSIG(status)));
-      if (WCOREDUMP(status))
-        AGENT_CONCURRENT_PRINT("agent produced core dump\n");
+      log_printf("ERROR %s.%d: AGENT[%s][pid=%d][host=%s] was killed by signal: %d.%s\n",
+          __FILE__, __LINE__, agent->type ? agent->type->name : "?", agent->pid,
+          agent->host ? agent->host->name : "?", WTERMSIG(status), strsignal(WTERMSIG(status)));
     }
     else
     {
-      AGENT_CONCURRENT_PRINT("agent failed, code: %d\n", agent->return_code);
+      log_printf("ERROR %s.%d: AGENT[%s][pid=%d][host=%s] failed without an owner, code: %d\n",
+          __FILE__, __LINE__, agent->type ? agent->type->name : "?", agent->pid,
+          agent->host ? agent->host->name : "?", agent->return_code);
     }
     AGENT_WARNING("agent closed unexpectedly, agent status was %s", agent_status_strings[agent->status]);
-    agent_fail_event(scheduler, agent);
+    if (owner_ptr)
+      agent_fail_event(scheduler, agent);
+    else
+      agent_transition(agent, AG_FAILED);
   }
 
   if (agent->status != AG_PAUSED && agent->status != AG_FAILED)
     agent_transition(agent, AG_PAUSED);
 
-  job_update(scheduler, agent->owner);
-  if (agent->status == AG_FAILED && agent->owner->id < 0)
+  if (owner_ptr) {
+    job_update(scheduler, owner_ptr);
+  }
+  
+  static int retry_job_id = -1000000;
+
+  if (agent->status == AG_FAILED && is_test_agent)
   {
-    log_printf("ERROR %s.%d: agent %s.%s has failed scheduler startup test\n", __FILE__, __LINE__, agent->host->name,
-        agent->type->name);
-    agent->type->valid = 0;
+    if (agent->type->failed_startup_tests < 30) {
+      agent->type->failed_startup_tests++;
+      log_printf("WARNING %s.%d: agent %s.%s failed scheduler startup test, retrying (%d/30)\n", __FILE__, __LINE__, agent->host->name, agent->type->name, agent->type->failed_startup_tests);
+      sleep(2);
+      job_t* job = job_init(scheduler->job_list, scheduler->job_queue, agent->type->name, agent->host->name, retry_job_id--, 0, 0, 0, 0, jq_cmd_args);
+      agent_init(scheduler, agent->host, job);
+    } else {
+      log_printf("ERROR %s.%d: agent %s.%s has failed scheduler startup test after 30 retries. Invalidating.\n", __FILE__, __LINE__, agent->host->name,
+          agent->type->name);
+      agent->type->valid = 0;
+    }
   }
 
-  if (agent->owner->id < 0 && !agent->type->valid)
+  if (is_test_agent && !agent->type->valid)
     AGENT_SEQUENTIAL_PRINT("agent failed startup test, removing from meta agents\n");
 
   AGENT_SEQUENTIAL_PRINT("successfully remove from the system\n");
-  job_remove_agent(agent->owner, scheduler->job_list, agent);
+  if (owner_ptr) {
+    job_remove_agent(owner_ptr, scheduler->job_list, agent);
+  }
   g_tree_remove(scheduler->agents, &agent->pid);
   g_free(pid);
+  if (jq_cmd_args) g_free(jq_cmd_args);
 }
 
 /**

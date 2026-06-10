@@ -154,23 +154,23 @@ void test_get_host()
 
   for(i = 0; i < 9; i++)
   {
-    host = get_host(&scheduler->host_queue, i + 1);
+    host = get_host(&scheduler->host_queue, i + 1, NULL);
     name[0] = (char)('1' + i);
 
     FO_ASSERT_PTR_EQUAL(host, g_tree_lookup(scheduler->host_list, name));
     FO_ASSERT_EQUAL(host->max, i + 1);
   }
 
-  host = get_host(&scheduler->host_queue, 3);
+  host = get_host(&scheduler->host_queue, 3, NULL);
   FO_ASSERT_STRING_EQUAL(host->name, "3_local");
   FO_ASSERT_EQUAL(host->max, 3);
-  host = get_host(&scheduler->host_queue, 1);
+  host = get_host(&scheduler->host_queue, 1, NULL);
   FO_ASSERT_STRING_EQUAL(host->name, "1_local");
   FO_ASSERT_EQUAL(host->max, 1);
-  host = get_host(&scheduler->host_queue, 9);
+  host = get_host(&scheduler->host_queue, 9, NULL);
   FO_ASSERT_STRING_EQUAL(host->name, "9_local");
   FO_ASSERT_EQUAL(host->max, 9);
-  host = get_host(&scheduler->host_queue, 3);
+  host = get_host(&scheduler->host_queue, 3, NULL);
   FO_ASSERT_STRING_EQUAL(host->name, "4_local");
   FO_ASSERT_EQUAL(host->max, 4);
 

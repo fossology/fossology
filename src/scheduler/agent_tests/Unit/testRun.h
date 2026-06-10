@@ -32,6 +32,7 @@ int agent_clean_suite(void); */
 
 /* test case sets */
 extern CU_TestInfo tests_host[];
+extern CU_TestInfo tests_host_caps[];
 extern CU_TestInfo tests_interface[];
 extern CU_TestInfo tests_interface_thread[];
 
