@@ -13,6 +13,7 @@
 
 /* std library includes */
 #include <stdio.h>
+#include <time.h>
 #include <event.h>
 #include <libpq-fe.h>
 
@@ -73,6 +74,7 @@ typedef struct
     int32_t  id;        ///< The identifier for this job
     int32_t  user_id;   ///< The id of the user that created the job
     int32_t  group_id;  ///< The id of the group that created the job
+    time_t   checkedout_at; ///< Timestamp when job entered JB_CHECKEDOUT (for stale detection grace period)
 } job_t;
 
 /* ************************************************************************** */
@@ -112,5 +114,6 @@ log_t*    job_log(job_t* job);
 job_t*   next_job(GSequence* job_queue);
 job_t*   peek_job(GSequence* job_queue);
 uint32_t active_jobs(GTree* job_list);
+gint job_compare(gconstpointer a, gconstpointer b, gpointer user_data);
 
 #endif /* JOB_H_INCLUDE */
