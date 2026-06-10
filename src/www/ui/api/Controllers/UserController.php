@@ -89,6 +89,12 @@ class UserController extends RestController
     $this->throwNotAdminException();
     $apiVersion = ApiVersion::getVersion($request);
     $userDetails = $this->getParsedBody($request);
+    if ($userDetails === null || !is_array($userDetails)) {
+      throw new HttpBadRequestException("Request body is empty or malformed.");
+    }
+    if (empty($userDetails['name'])) {
+      throw new HttpBadRequestException("Username must be specified.");
+    }
     $userHelper = new UserHelper();
     // creating symphony request
     $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
