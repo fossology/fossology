@@ -1,0 +1,44 @@
+Redistribution and use in any form of this material and any product thereof including
+software in source or binary forms, along with any related documentation, with or
+without modification ("this material"), is permitted provided that the following
+conditions are met:
+
+Redistributions of source code of any software must retain the above copyright
+notice and all terms of this license as part of the code.
+
+Redistributions in binary form of any software must reproduce the above copyright
+notice and all terms of this license in any related documentation and/or other
+materials.
+
+Neither the names nor trademarks of Advanced Micro Devices, Inc. or any copyright
+holders or contributors may be used to endorse or promote products derived from this
+material without specific prior written permission.
+
+Notice about U.S. Government restricted rights: This material is provided with
+"RESTRICTED RIGHTS." Use, duplication or disclosure by the U.S. Government is subject
+to the full extent of restrictions set forth in FAR52.227 and DFARS252.227 et seq., or
+any successor or applicable regulations. Use of this material by the U.S. Government
+constitutes acknowledgment of the proprietary rights of Advanced Micro Devices, Inc.
+and any copyright holders and contributors.
+
+ANY BREACH OF ANY TERM OF THIS LICENSE SHALL RESULT IN THE IMMEDIATE REVOCATION OF
+ALL RIGHTS TO REDISTRIBUTE, ACCESS OR USE THIS MATERIAL.
+
+THIS MATERIAL IS PROVIDED BY ADVANCED MICRO DEVICES, INC. AND ANY COPYRIGHT HOLDERS
+AND CONTRIBUTORS "AS IS" IN ITS CURRENT CONDITION AND WITHOUT ANY REPRESENTATIONS,
+GUARANTEE, OR WARRANTY OF ANY KIND OR IN ANY WAY RELATED TO SUPPORT, INDEMNITY, ERROR
+FREE OR UNINTERRUPTED OPERATION, OR THAT IT IS FREE FROM DEFECTS OR VIRUSES.
+
+THE ENTIRE AND AGGREGATE LIABILITY OF ADVANCED MICRO DEVICES, INC. AND ANY COPYRIGHT
+HOLDERS AND CONTRIBUTORS SHALL NOT EXCEED TEN DOLLARS (US $10.00). ANYONE
+REDISTRIBUTING OR ACCESSING OR USING THIS MATERIAL ACCEPTS THIS ALLOCATION OF RISK AND
+AGREES TO RELEASE ADVANCED MICRO DEVICES, INC. AND ANY COPYRIGHT HOLDERS AND
+CONTRIBUTORS FROM ANY AND ALL LIABILITIES, OBLIGATIONS, CLAIMS, OR DEMANDS IN EXCESS
+OF TEN DOLLARS (US $10.00).
+
+This license shall be governed by and construed in accordance with the laws of the
+State of Texas without regard to rules on conflicts of law of any state or jurisdiction
+or the United Nations Convention on the International Sale of Goods. All disputes
+arising out of this license shall be subject to the jurisdiction of the federal and
+state courts in Austin, Texas, and all defenses are hereby waived concerning personal
+jurisdiction and venue of these courts.
