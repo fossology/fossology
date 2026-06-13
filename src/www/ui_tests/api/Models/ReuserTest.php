@@ -41,12 +41,12 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
   public function testReuserConst()
   {
     $expectedArray = [
-      "reuse_upload"   => 2,
-      "reuse_group"    => 'fossy',
-      "reuse_main"     => true,
-      "reuse_enhanced" => false,
-      "reuse_copyright" => false,
-      "reuse_report"   => false
+      "reuse_upload"     => 2,
+      "reuse_group"      => 'fossy',
+      "reuse_main"       => true,
+      "reuse_enhanced"   => false,
+      "reuse_copyright"  => false,
+      "reuse_report"     => false
     ];
 
     $actualReuser = new Reuser(2, 'fossy', true);
@@ -73,12 +73,12 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
   public function testReuserMultipleUploads()
   {
     $expectedArray = [
-      "reuse_upload"   => [2, 5, 10],
-      "reuse_group"    => 'fossy',
-      "reuse_main"     => true,
-      "reuse_enhanced" => false,
+      "reuse_upload"    => [2, 5, 10],
+      "reuse_group"     => 'fossy',
+      "reuse_main"      => true,
+      "reuse_enhanced"  => false,
       "reuse_copyright" => false,
-      "reuse_report"   => false
+      "reuse_report"    => false
     ];
 
     $actualReuser = new Reuser([2, 5, 10], 'fossy', true);
@@ -148,21 +148,21 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
   {
     if ($version == ApiVersion::V1) {
       $expectedArray = [
-        "reuse_upload"   => 2,
-        "reuse_group"    => 'fossy',
-        "reuse_main"     => 'true',
-        "reuse_enhanced" => false,
-        "reuse_copyright" => false,
-        "reuse_report"   => false
+        "reuse_upload"     => 2,
+        "reuse_group"      => 'fossy',
+        "reuse_main"       => 'true',
+        "reuse_enhanced"   => false,
+        "reuse_copyright"  => false,
+        "reuse_report"     => false
       ];
     } else {
       $expectedArray = [
-        "reuseUpload"   => 2,
-        "reuseGroup"    => 'fossy',
-        "reuseMain"     => 'true',
-        "reuseEnhanced" => false,
-        "reuseCopyright" => false,
-        "reuseReport"   => false
+        "reuseUpload"     => 2,
+        "reuseGroup"      => 'fossy',
+        "reuseMain"       => 'true',
+        "reuseEnhanced"   => false,
+        "reuseCopyright"  => false,
+        "reuseReport"     => false
       ];
     }
 

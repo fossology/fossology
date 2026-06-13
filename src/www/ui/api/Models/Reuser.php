@@ -114,7 +114,7 @@ class Reuser
     if (array_key_exists(($version == ApiVersion::V2? "reuseCopyright" : "reuse_copyright"), $reuserArray)) {
       $this->setReuseCopyright($reuserArray[$version == ApiVersion::V2? "reuseCopyright" : "reuse_copyright"]);
     }
-    if ($this->reuseUpload === null || (is_array($this->reuseUpload) && empty($this->reuseUpload))) {
+    if ($this->reuseUpload === null) {
       throw new \UnexpectedValueException(
         "reuse_upload should be integer or array of integers", 400);
     }
@@ -267,21 +267,21 @@ class Reuser
   {
     if ($version == ApiVersion::V2) {
       return [
-        "reuseUpload"    => $this->reuseUpload,
-        "reuseGroup"     => $this->reuseGroup,
-        "reuseMain"      => $this->reuseMain,
-        "reuseEnhanced"  => $this->reuseEnhanced,
-        "reuseReport"    => $this->reuseReport,
-        "reuseCopyright" => $this->reuseCopyright
+        "reuseUpload"     => $this->reuseUpload,
+        "reuseGroup"      => $this->reuseGroup,
+        "reuseMain"       => $this->reuseMain,
+        "reuseEnhanced"   => $this->reuseEnhanced,
+        "reuseReport"     => $this->reuseReport,
+        "reuseCopyright"  => $this->reuseCopyright
       ];
     } else {
       return [
-        "reuse_upload"    => $this->reuseUpload,
-        "reuse_group"     => $this->reuseGroup,
-        "reuse_main"      => $this->reuseMain,
-        "reuse_enhanced"  => $this->reuseEnhanced,
-        "reuse_report"    => $this->reuseReport,
-        "reuse_copyright" => $this->reuseCopyright
+        "reuse_upload"     => $this->reuseUpload,
+        "reuse_group"      => $this->reuseGroup,
+        "reuse_main"       => $this->reuseMain,
+        "reuse_enhanced"   => $this->reuseEnhanced,
+        "reuse_report"     => $this->reuseReport,
+        "reuse_copyright"  => $this->reuseCopyright
       ];
     }
   }

@@ -128,6 +128,19 @@ class ReuserPlugin extends DefaultPlugin
         return new JsonResponse(['packageName' => $packageName], JsonResponse::HTTP_OK);
     }
 
+    if ($ajax === 'autoDetectReuse') {
+        $filename = trim($request->get('filename', ''));
+      if ($filename === '') {
+          return new JsonResponse([], JsonResponse::HTTP_OK);
+      }
+      try {
+          $result = $this->autoDetectReuseFromFilename($filename);
+          return new JsonResponse($result, JsonResponse::HTTP_OK);
+      } catch (\Exception $e) {
+          return new JsonResponse([], JsonResponse::HTTP_OK);
+      }
+    }
+
     return new Response('called without valid method', Response::HTTP_METHOD_NOT_ALLOWED);
   }
 
@@ -198,6 +211,10 @@ class ReuserPlugin extends DefaultPlugin
     $vars['folderParameterName'] = self::FOLDER_PARAMETER_NAME;
     $vars['uploadToReuseSelectorName'] = self::UPLOAD_TO_REUSE_SELECTOR_NAME;
     $vars['osselotAvailable']           = $osselotAvailable;
+    $vars['autoDetectEnabled'] = filter_var(
+      $SysConf['SYSCONFIG']['ReuserAutoDetect'] ?? 'true',
+      FILTER_VALIDATE_BOOLEAN
+    );
 
     $renderer = $this->getObject('twig.environment');
     return $renderer->load('agent_reuser.js.twig')->render($vars);
@@ -238,6 +255,242 @@ class ReuserPlugin extends DefaultPlugin
       $uploadsById[$key] = $display;
     }
     return $uploadsById;
+  }
+  /**
+   * @brief Extract base package name from filename by removing version suffix
+   * @param string $filename
+   * @return string
+   */
+  private function extractBasePackageNameFromPlugin($filename)
+  {
+    if (empty($filename)) {
+      return '';
+    }
+    $nameWithoutExt = preg_replace('/\.[^.]+$/', '', $filename);
+    $nameWithoutExt = preg_replace('/\.(tar|zip|gz|bz2|xz|tgz|tbz2|txz|rar|7z)(\..*)?$/i', '', $nameWithoutExt);
+    $nameWithoutExt = preg_replace('/\.(tar|zip|gz|bz2|xz|tgz|tbz2|txz|rar|7z)$/i', '', $nameWithoutExt);
+    $baseName = preg_replace('/[-_](v?\d+[\.\d]*(?:[-_](?:alpha|beta|rc|pre|patch|p)\d*)?)$/i', '', $nameWithoutExt);
+    $baseName = preg_replace('/[-_]\d{8}$/', '', $baseName);
+    if ($baseName === $nameWithoutExt) {
+      $parts = explode('-', $nameWithoutExt);
+      $baseName = $parts[0];
+    }
+    return $baseName;
+  }
+
+  /**
+   * @brief Auto-detect best reuse upload for a given filename
+   * @param string $filename
+   * @return array ['uploadId'=>int, 'groupId'=>int, 'display'=>string] or []
+   */
+  private function autoDetectReuseFromFilename($filename)
+  {
+    global $SysConf;
+
+    $autoDetectEnabled = filter_var(
+      $SysConf['SYSCONFIG']['ReuserAutoDetect'] ?? 'true',
+      FILTER_VALIDATE_BOOLEAN
+    );
+    if (!$autoDetectEnabled) {
+      return [];
+    }
+
+    $statusFilter = $SysConf['SYSCONFIG']['ReuserSearchStatus'] ?? '3';
+    $statusIds = array_map('intval', array_filter(explode(',', $statusFilter)));
+    if (empty($statusIds)) {
+      $statusIds = [3];
+    }
+
+    $dbManager = $GLOBALS['container']->get('db.manager');
+    $basePackageName = $this->extractBasePackageNameFromPlugin($filename);
+    if (empty($basePackageName)) {
+      return [];
+    }
+
+    $uploaderUserId = Auth::getUserId();
+
+    $statusType = new \Fossology\Lib\Data\UploadStatus();
+    $match = $this->primarySearchFromPlugin($basePackageName, $uploaderUserId, $dbManager, $statusIds);
+    if ($match !== null) {
+      $uploadDao = $GLOBALS['container']->get('dao.upload');
+      $upload = $uploadDao->getUpload($match['uploadId']);
+      if ($upload !== null) {
+        $statusName = $statusType->getTypeName($match['statusId']);
+        $display = $upload->getFilename() . _(" from ")
+          . Convert2BrowserTime(date("Y-m-d H:i:s", $upload->getTimestamp()))
+          . ' (' . $statusName . ')';
+        return ['uploadId' => $match['uploadId'], 'groupId' => $match['groupId'], 'display' => $display];
+      }
+    }
+
+    return [];
+  }
+
+  /**
+   * @brief Primary search: package name matching (UI-level)
+   * @param string $basePackageName
+   * @param int $uploaderUserId
+   * @param \Fossology\Lib\Db\DbManager $dbManager
+   * @param int[] $statusIds Upload clearing status IDs to filter
+   * @return array|null ['uploadId'=>int, 'groupId'=>int, 'statusId'=>int] or null
+   */
+  private function primarySearchFromPlugin($basePackageName, $uploaderUserId, $dbManager, $statusIds)
+  {
+    $currentUserId = Auth::getUserId();
+    $userDao = $GLOBALS['container']->get('dao.user');
+    $uploaderGroups = $userDao->getUserGroupIds($uploaderUserId);
+    $currentUserGroups = $userDao->getUserGroupIds($currentUserId);
+
+    $matchTypes = [
+      'exact' => function($filename) use ($basePackageName) {
+        $candidateBase = $this->extractBasePackageNameFromPlugin($filename);
+        return strcasecmp($candidateBase, $basePackageName) === 0 && $candidateBase === $basePackageName;
+      },
+      'case_insensitive' => function($filename) use ($basePackageName) {
+        $candidateBase = $this->extractBasePackageNameFromPlugin($filename);
+        return strcasecmp($candidateBase, $basePackageName) === 0;
+      },
+      'prefix' => function($filename) use ($basePackageName) {
+        $nameWithoutExt = preg_replace('/\.[^.]+$/', '', $filename);
+        return stripos($nameWithoutExt, $basePackageName) === 0;
+      },
+      'ilike' => function($filename) use ($basePackageName) {
+        return stripos($filename, $basePackageName) !== false;
+      }
+    ];
+
+    $priorityQueries = [];
+
+    if ($uploaderUserId > 0) {
+      $stmtName = __METHOD__ . '.sameUploader';
+      $params = array_merge([$uploaderUserId], $statusIds, [$basePackageName]);
+      $statusOffset = 2;
+      $statusCount = count($statusIds);
+      $namePlaceholder = '$' . ($statusCount + 2);
+      $statusList = $this->buildStatusPlaceholders($statusIds, $statusOffset);
+      $dbManager->prepare($stmtName,
+        "SELECT DISTINCT u.upload_pk, u.upload_filename, uc.group_fk, uc.status_fk
+         FROM upload u
+         JOIN upload_clearing uc ON uc.upload_fk = u.upload_pk
+         WHERE u.upload_mode IN (100, 104)
+           AND u.pfile_fk IS NOT NULL
+           AND uc.group_fk IN ($groupIdPlaceholders)
+           AND uc.status_fk IN ($statusList)
+           AND EXISTS (SELECT 1 FROM group_user_member gum WHERE gum.group_fk = uc.group_fk AND gum.user_fk = $permPlaceholder AND gum.group_perm >= 2)
+           AND u.upload_filename ILIKE '%' || $namePlaceholder || '%'
+         ORDER BY u.upload_ts DESC
+         LIMIT 200");
+      $priorityQueries[] = ['stmt' => $stmtName, 'params' => $params];
+    }
+
+    if (!empty($uploaderGroups)) {
+      $stmtName = __METHOD__ . '.sameGroup';
+      $groupCount = count($uploaderGroups);
+      $statusCount = count($statusIds);
+      $permPlaceholder = '$' . ($groupCount + $statusCount + 1);
+      $namePlaceholder = '$' . ($groupCount + $statusCount + 2);
+      $params = array_merge($uploaderGroups, $statusIds, [$currentUserId, $basePackageName]);
+      $statusOffset = $groupCount + 1;
+      $statusList = $this->buildStatusPlaceholders($statusIds, $statusOffset);
+      $groupIdPlaceholders = $this->buildPlaceholders($groupCount);
+      $dbManager->prepare($stmtName,
+        "SELECT DISTINCT u.upload_pk, u.upload_filename, uc.group_fk, uc.status_fk
+         FROM upload u
+         JOIN upload_clearing uc ON uc.upload_fk = u.upload_pk
+         WHERE u.upload_mode IN (100, 104)
+           AND u.pfile_fk IS NOT NULL
+           AND uc.group_fk IN ($groupIdPlaceholders)
+           AND uc.status_fk IN ($statusList)
+           AND EXISTS (SELECT 1 FROM group_user_member gum WHERE gum.group_fk = uc.group_fk AND gum.user_fk = $permPlaceholder AND gum.group_perm >= 2)
+           AND u.upload_filename ILIKE '%' || $namePlaceholder || '%'
+         ORDER BY u.upload_ts DESC
+         LIMIT 200");
+      $priorityQueries[] = ['stmt' => $stmtName, 'params' => $params];
+    }
+
+    if (!empty($currentUserGroups)) {
+      $stmtName = __METHOD__ . '.anyAccessible';
+      $groupCount = count($currentUserGroups);
+      $statusCount = count($statusIds);
+      $permPlaceholder = '$' . ($groupCount + $statusCount + 1);
+      $namePlaceholder = '$' . ($groupCount + $statusCount + 2);
+      $params = array_merge($currentUserGroups, $statusIds, [$currentUserId, $basePackageName]);
+      $statusOffset = $groupCount + 1;
+      $statusList = $this->buildStatusPlaceholders($statusIds, $statusOffset);
+      $groupIdPlaceholders = $this->buildPlaceholders($groupCount);
+      $dbManager->prepare($stmtName,
+        "SELECT DISTINCT u.upload_pk, u.upload_filename, uc.group_fk, uc.status_fk
+         FROM upload u
+         JOIN upload_clearing uc ON uc.upload_fk = u.upload_pk
+         WHERE u.upload_mode IN (100, 104)
+           AND u.pfile_fk IS NOT NULL
+           AND uc.group_fk IN ($groupIdPlaceholders)
+           AND uc.status_fk IN ($statusList)
+           AND EXISTS (SELECT 1 FROM group_user_member gum WHERE gum.group_fk = uc.group_fk AND gum.user_fk = $permPlaceholder AND gum.group_perm >= 2)
+           AND u.upload_filename ILIKE '%' || $namePlaceholder || '%'
+         ORDER BY u.upload_ts DESC
+         LIMIT 200");
+      $priorityQueries[] = ['stmt' => $stmtName, 'params' => $params];
+    }
+
+    foreach ($priorityQueries as $pq) {
+      $res = $dbManager->execute($pq['stmt'], $pq['params']);
+      $candidates = [];
+      while ($row = $dbManager->fetchArray($res)) {
+        $candidates[] = [
+          'upload_pk' => intval($row['upload_pk']),
+          'upload_filename' => $row['upload_filename'],
+          'group_fk' => intval($row['group_fk']),
+          'status_fk' => intval($row['status_fk'])
+        ];
+      }
+      $dbManager->freeResult($res);
+
+      if (empty($candidates)) {
+        continue;
+      }
+
+      foreach ($matchTypes as $matchFn) {
+        $matched = [];
+        foreach ($candidates as $candidate) {
+          if ($matchFn($candidate['upload_filename'])) {
+            $matched[] = $candidate;
+          }
+        }
+        if (!empty($matched)) {
+          $clearingDao = $GLOBALS['container']->get('dao.clearing');
+          return $clearingDao->getMostRecentlyClearedUpload($matched);
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @brief Build comma-separated placeholder list starting at offset
+   * @param int $count Number of placeholders
+   * @param int $start Offset (1-based)
+   * @return string e.g. "$2,$3,$4"
+   */
+  private function buildPlaceholders($count, $start = 1)
+  {
+    $placeholders = [];
+    for ($i = 0; $i < $count; $i++) {
+      $placeholders[] = '$' . ($start + $i);
+    }
+    return implode(',', $placeholders);
+  }
+
+  /**
+   * @brief Build status placeholder list
+   * @param int[] $statusIds
+   * @param int $start Offset for placeholder numbering
+   * @return string e.g. "$2,$3"
+   */
+  private function buildStatusPlaceholders($statusIds, $start)
+  {
+    return $this->buildPlaceholders(count($statusIds), $start);
   }
 }
 
