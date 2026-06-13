@@ -85,6 +85,11 @@ class CopyrightLister
     $extraWhere = 'agent_fk='.$this->agentId.' AND lft>'.$toprow->getLeft().' AND rgt<'.$toprow->getRight();
     $allCopyrightEntries = $this->copyrightDao->getAllEntries('copyright', $uploadId, $uploadtree_tablename,
             empty($this->type)||$this->type=='all' ? null : $this->type, false, null, $extraWhere);
+    $copyrightEntriesByUploadTree = array();
+
+    foreach ($allCopyrightEntries as $entry) {
+      $copyrightEntriesByUploadTree[$entry['uploadtree_pk']][] = $entry['content'];
+    }
 
     $modeMask = empty($this->includeContainer) ? (3<<28) : (1<<28);
     $sql = "SELECT uploadtree_pk, ufile_name, lft, rgt FROM $uploadtree_tablename
@@ -93,7 +98,7 @@ class CopyrightLister
     $this->dbManager->prepare($outerStmt=__METHOD__.'.loopThroughAllRecordsInTree',$sql);
     $outerresult = $this->dbManager->execute($outerStmt,array($toprow->getUploadId(),$toprow->getLeft(),$toprow->getRight(),$modeMask));
     while ($row = $this->dbManager->fetchArray($outerresult)) {
-      $this->printRow($row,$uploadtree_tablename, $allCopyrightEntries); //$this->uploadDao->getParentItemBounds($uploadId)->getItemId());
+      $this->printRow($row, $uploadtree_tablename, $copyrightEntriesByUploadTree);
     }
     $this->dbManager->freeResult($outerresult);
   }
@@ -120,16 +125,10 @@ class CopyrightLister
   /**
    *  @brief write out text in format 'filepath: copyright list'
    */
-  private function printRow($row,$uploadtree_tablename, &$allCopyrightEntries, $parentId=0)
+  private function printRow($row, $uploadtree_tablename, $copyrightEntriesByUploadTree, $parentId=0)
   {
     $filepath = $this->treeDao->getFullPath($row['uploadtree_pk'], $uploadtree_tablename, $parentId);
-
-    $copyrightArray = array();
-    foreach ($allCopyrightEntries as $entry) {
-      if ($entry['uploadtree_pk'] == $row['uploadtree_pk']) {
-        $copyrightArray[] = $entry['content'];
-      }
-    }
+    $copyrightArray = $copyrightEntriesByUploadTree[$row['uploadtree_pk']] ?? array();
     $copyright = implode(', ', $copyrightArray);
 
     /** include and exclude together */
