@@ -143,4 +143,17 @@ class UserDaoTest extends \PHPUnit\Framework\TestCase
     $map = $this->userDao->getUserGroupMap($userId);
     assertThat($map,hasKey($groupId));
   }
+
+  public function testGetUserGroupIds()
+  {
+    $this->testDb->createPlainTables(array('groups','group_user_member'));
+    $this->testDb->insertData(array('groups','group_user_member'));
+
+    assertThat($this->userDao->getUserGroupIds(1), equalTo(array(1)));
+    assertThat($this->userDao->getUserGroupIds(2), equalTo(array(2)));
+
+    assertThat($this->userDao->getUserGroupIds(99), equalTo(array()));
+    assertThat($this->userDao->getUserGroupIds(0), equalTo(array()));
+    assertThat($this->userDao->getUserGroupIds(-5), equalTo(array()));
+  }
 }

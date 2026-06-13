@@ -182,6 +182,7 @@ function updateReuseIds(index, name, element, navContentDom) {
     element.find("label[for='reuseFolderSelectorName']").attr('for', `reuseFolderSelectorName${index}`);
     element.find("#uploadToReuse").attr('id', `uploadToReuse${index}`);
     element.find("label[for='uploadToReuse']").attr('for', `uploadToReuse${index}`);
+    element.find("#auto-detect-loading").attr('id', `auto-detect-loading${index}`);
     
     element.find("#osselot-download-report").attr("id", `osselot-download-report${index}`);
     element.find("#osselot-download-confirm").attr("id", `osselot-download-confirm${index}`);
@@ -468,6 +469,21 @@ $(document).ready(function() {
     });
     $('#reuseModal').on('shown.bs.modal', function () {
       $(this).find('[data-toggle="tooltip"]').tooltip();
+      const $activeTab = $('#reuse-name-tab').find('.nav-link.active');
+      if ($activeTab.length > 0) {
+        const tabId = $activeTab.attr('id');
+        const match = tabId && tabId.match(/reuse-name-(\d+)/);
+        if (match) {
+          runAutoDetect(match[1]);
+        }
+      }
+    });
+    $(document).on('shown.bs.tab', '#reuse-name-tab .nav-link', function () {
+      const tabId = $(this).attr('id');
+      const match = tabId && tabId.match(/reuse-name-(\d+)/);
+      if (match) {
+        runAutoDetect(match[1]);
+      }
     });
 });
   </script>

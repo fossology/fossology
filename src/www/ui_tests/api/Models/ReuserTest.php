@@ -74,10 +74,10 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
   public function testReuserMultipleUploads()
   {
     $expectedArray = [
-      "reuse_upload"   => [2, 5, 10],
-      "reuse_group"    => 'fossy',
-      "reuse_main"     => true,
-      "reuse_enhanced" => false,
+      "reuse_upload"    => [2, 5, 10],
+      "reuse_group"     => 'fossy',
+      "reuse_main"      => true,
+      "reuse_enhanced"  => false,
       "reuse_copyright" => false,
       "reuse_report"   => false,
       "reuse_bulk"     => false
