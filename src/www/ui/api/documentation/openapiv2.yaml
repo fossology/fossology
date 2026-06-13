@@ -5800,6 +5800,9 @@ components:
     Reuser:
       type: object
       properties:
+        autoSelectReuse:
+          type: boolean
+          description: Automatically detect the most suitable upload for reuse based on package name matching and file overlap analysis. When enabled, reuseUpload and reuseGroup are ignored.
         reuseUpload:
           oneOf:
             - type: integer
@@ -5809,7 +5812,7 @@ components:
           description: The UploadID(s) to reuse. Single integer or array of integers.
         reuseGroup:
           type: string
-          description: The group of the reused upload
+          description: The group of the reused upload. Required when autoSelectReuse is false or not set.
         reuseMain:
           type: boolean
           description: Copy the main license from reused package?

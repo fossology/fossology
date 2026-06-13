@@ -41,12 +41,13 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
   public function testReuserConst()
   {
     $expectedArray = [
-      "reuse_upload"   => 2,
-      "reuse_group"    => 'fossy',
-      "reuse_main"     => true,
-      "reuse_enhanced" => false,
-      "reuse_copyright" => false,
-      "reuse_report"   => false
+      "reuse_upload"     => 2,
+      "reuse_group"      => 'fossy',
+      "reuse_main"       => true,
+      "reuse_enhanced"   => false,
+      "reuse_copyright"  => false,
+      "reuse_report"     => false,
+      "auto_select_reuse" => false
     ];
 
     $actualReuser = new Reuser(2, 'fossy', true);
@@ -73,12 +74,13 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
   public function testReuserMultipleUploads()
   {
     $expectedArray = [
-      "reuse_upload"   => [2, 5, 10],
-      "reuse_group"    => 'fossy',
-      "reuse_main"     => true,
-      "reuse_enhanced" => false,
+      "reuse_upload"    => [2, 5, 10],
+      "reuse_group"     => 'fossy',
+      "reuse_main"      => true,
+      "reuse_enhanced"  => false,
       "reuse_copyright" => false,
-      "reuse_report"   => false
+      "reuse_report"    => false,
+      "auto_select_reuse" => false
     ];
 
     $actualReuser = new Reuser([2, 5, 10], 'fossy', true);
@@ -148,21 +150,21 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
   {
     if ($version == ApiVersion::V1) {
       $expectedArray = [
-        "reuse_upload"   => 2,
-        "reuse_group"    => 'fossy',
-        "reuse_main"     => 'true',
-        "reuse_enhanced" => false,
-        "reuse_copyright" => false,
-        "reuse_report"   => false
+        "reuse_upload"     => 2,
+        "reuse_group"      => 'fossy',
+        "reuse_main"       => 'true',
+        "reuse_enhanced"   => false,
+        "reuse_copyright"  => false,
+        "reuse_report"     => false
       ];
     } else {
       $expectedArray = [
-        "reuseUpload"   => 2,
-        "reuseGroup"    => 'fossy',
-        "reuseMain"     => 'true',
-        "reuseEnhanced" => false,
-        "reuseCopyright" => false,
-        "reuseReport"   => false
+        "reuseUpload"     => 2,
+        "reuseGroup"      => 'fossy',
+        "reuseMain"       => 'true',
+        "reuseEnhanced"   => false,
+        "reuseCopyright"  => false,
+        "reuseReport"     => false
       ];
     }
 
@@ -170,6 +172,11 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
     $actualReuser->setUsingArray($expectedArray, $version);
 
     $expectedArray[$version == ApiVersion::V1? "reuse_main" : "reuseMain"] = true;
+    if ($version == ApiVersion::V1) {
+      $expectedArray["auto_select_reuse"] = false;
+    } else {
+      $expectedArray["autoSelectReuse"] = false;
+    }
     $this->assertEquals($expectedArray, $actualReuser->getArray($version));
   }
 
@@ -194,6 +201,7 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
 
     $expectedArray["reuse_main"] = true;
     $expectedArray["reuse_copyright"] = true;
+    $expectedArray["auto_select_reuse"] = false;
     $this->assertEquals($expectedArray, $actualReuser->getArray());
   }
 

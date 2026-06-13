@@ -44,6 +44,8 @@ function toggleDisabled() {
     fs.prop('disabled', !this.checked);
     this.checked ? fs.trigger('change') : reloadUploads('', gi);
   });
+  $(document).off('click.autoSelectReuse').on('click.autoSelectReuse', '[id^=autoSelectReuse]', function () {
+  });
   registerFolderSelectorChange();
 }
 

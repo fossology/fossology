@@ -178,6 +178,8 @@ function updateReuseIds(index, name, element, navContentDom) {
     
     element.find("#reuseSearchInFolder").attr('id', `reuseSearchInFolder${index}`);
     element.find("label[for='reuseSearchInFolder']").attr('for', `reuseSearchInFolder${index}`);
+    element.find("#autoSelectReuse").attr('id', `autoSelectReuse${index}`);
+    element.find("label[for='autoSelectReuse']").attr('for', `autoSelectReuse${index}`);
     element.find("#reuseFolderSelectorName").attr('id', `reuseFolderSelectorName${index}`);
     element.find("label[for='reuseFolderSelectorName']").attr('for', `reuseFolderSelectorName${index}`);
     element.find("#uploadToReuse").attr('id', `uploadToReuse${index}`);

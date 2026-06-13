@@ -195,7 +195,7 @@ class ScanOptions
     $reuseUploads = array_filter($reuseUploads, function ($id) {
       return $id > 0;
     });
-    if (empty($reuseUploads)) {
+    if (empty($reuseUploads) && $this->reuse->getAutoSelectReuse() !== true) {
       return;
     }
     foreach ($reuseUploads as $reuseUploadId) {
@@ -216,6 +216,11 @@ class ScanOptions
     if ($this->reuse->getReuseCopyright() === true) {
       $reuserRules[] = 'reuseCopyright';
     }
+    $request->request->set('reuseMode', $reuserRules);
+
+    if ($this->reuse->getAutoSelectReuse() === true) {
+      $request->request->set('autoSelectReuse', 'true');
+    }
     $userDao = $GLOBALS['container']->get("dao.user");
     $groupId = $userDao->getGroupIdByName($this->reuse->getReuseGroup());
     $reuserSelectors = [];
@@ -224,10 +229,13 @@ class ScanOptions
     }
     if (count($reuserSelectors) === 1) {
       $request->request->set('uploadToReuse', $reuserSelectors[0]);
-    } else {
+    } elseif (count($reuserSelectors) > 1) {
       $request->request->set('uploadToReuse', $reuserSelectors);
     }
-    $request->request->set('reuseMode', $reuserRules);
+
+    if ($this->reuse->getAutoSelectReuse() === true) {
+      $request->request->set('autoSelectReuse', 'true');
+    }
   }
 
   /**
