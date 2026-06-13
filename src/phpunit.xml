@@ -26,6 +26,7 @@
   <testsuites>
     <testsuite name="Fossology PhpUnit Test Suite">
       <directory suffix="Test.php">lib/php</directory>
+      <directory suffix="Test.php">reuser/ui</directory>
       <file>www/ui_tests/startUpTest.php</file>
       <file>www/ui_tests/Unit/AgentAdderTest.php</file>
       <directory suffix="Test.php">www/ui_tests/api</directory>

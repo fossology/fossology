@@ -6176,7 +6176,7 @@ components:
           description: The UploadID(s) to reuse. Single integer or array of integers.
         reuseGroup:
           type: string
-          description: The group of the reused upload
+          description: The group of the reused upload.
         reuseMain:
           type: boolean
           description: Copy the main license from reused package?
