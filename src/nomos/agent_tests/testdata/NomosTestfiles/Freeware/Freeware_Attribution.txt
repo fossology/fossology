@@ -1,0 +1,3 @@
+This software does not have any registered copyright. It is free to be used
+and free to modify for any purpose. The only condition is not removing the
+contributor's name as the author from the source files.

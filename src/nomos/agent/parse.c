@@ -6361,7 +6361,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Andre-Adrian-DFS");
   }
   cleanLicenceBuffer();
-  if (INFILE(_LT_ACTIVESTATE) || INFILE(_TITLE_ACTIVESTATE) || INFILE(_CR_ACTIVESTATE)) {
+  if (INFILE(_LT_ACTIVESTATE) || INFILE(_TITLE_ACTIVESTATE)) {
     INTERESTING("ActiveState-Community");
   }
   cleanLicenceBuffer();
@@ -8210,7 +8210,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("mpi-permissive");
   }
   cleanLicenceBuffer();
-  if (INFILE(_LT_MPLUS_FREE_FONT)) {
+  if (INFILE(_LT_MPLUS_FREE_FONT) && NOT_INFILE(_CR_MPLUS)) {
     INTERESTING("mplus");
   }
   cleanLicenceBuffer();
