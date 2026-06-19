@@ -53,18 +53,75 @@ FUNCTION void PQexecCheckClear(int exitNumber, char *SQL, char *file, const int 
 FUNCTION void vacAnalyze()
 {
   long startTime, endTime;
-  char *SQL = "VACUUM ANALYZE";
+  char SQL_vacuum[64];
+  char SQL_analyze[64];
+  strncpy(SQL_analyze, "ANALYZE", sizeof(SQL_analyze));
 
-  startTime = (long)time(0);
+  /* Determine server major version and use VACUUM FULL for Postgres 17+ */
+  int serverVersion =
+      PQserverVersion(pgConn); /* returns ver as int, e.g., 170000 */
+  int serverMajor = 0;
+  if (serverVersion > 0)
+  {
+    serverMajor = serverVersion / 10000;
+  }
+  if (serverMajor >= 17)
+  {
+    snprintf(SQL_vacuum, sizeof(SQL_vacuum), "VACUUM FULL");
+  }
+  else
+  {
+    snprintf(SQL_vacuum, sizeof(SQL_vacuum), "VACUUM");
+  }
 
-  /* Vacuum and Analyze */
-  PQexecCheckClear(-110, SQL, __FILE__, __LINE__);
+  /* If very verbose (-vvvv) is requested, add VERBOSE to the commands */
+  if (agent_verbose >= 4)
+  {
+    strncat(SQL_vacuum, " VERBOSE",
+            sizeof(SQL_vacuum) - strlen(SQL_vacuum) - 1);
+    strncat(SQL_analyze, " VERBOSE",
+            sizeof(SQL_analyze) - strlen(SQL_analyze) - 1);
+  }
 
-  endTime = (long)time(0);
-  printf("Vacuum Analyze took %ld seconds\n", endTime-startTime);
+  startTime = (long) time(0);
+  double _start = now_monotonic_seconds();
+  log_action_start("vacAnalyze (2 Queries)");
 
-  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  /* Prepare descriptions for logs */
+  char desc_vac[80];
+  char desc_analyze[80];
+  snprintf(desc_vac, sizeof(desc_vac), "vacAnalyze: 1/2 - VACUUM");
+  if (serverMajor >= 17)
+  {
+    strncat(desc_vac, " FULL", sizeof(desc_vac) - strlen(desc_vac) - 1);
+  }
+  if (agent_verbose >= 4)
+  {
+    strncat(desc_vac, " VERBOSE", sizeof(desc_vac) - strlen(desc_vac) - 1);
+  }
+  snprintf(desc_analyze, sizeof(desc_analyze), "vacAnalyze: 2/2 - ANALYZE");
+  if (agent_verbose >= 4)
+  {
+    strncat(desc_analyze, " VERBOSE",
+            sizeof(desc_analyze) - strlen(desc_analyze) - 1);
+  }
+
+  /* Vacuum */
+  PQexecCheckClear(-110, SQL_vacuum, __FILE__, __LINE__);
+  log_action_end(desc_vac, _start);
+
+  /* Analyze */
+  PQexecCheckClear(-111, SQL_analyze, __FILE__, __LINE__);
+  log_action_end(desc_analyze, _start);
+
+  endTime = (long) time(0);
+  printf("Vacuum/Analyze took %ld seconds\n", endTime - startTime);
+
+  log_action_end("vacAnalyze", _start);
+
+  fo_scheduler_heart(
+      1); // Tell the scheduler that we are alive and update item count
+  return; // success
 }
 
 /**
@@ -84,6 +141,9 @@ FUNCTION void validateFolders()
   long startTime, endTime;
 
   startTime = (long)time(0);
+
+  double _start = now_monotonic_seconds();
+  log_action_start("validateFolders");
 
   /* Remove folder contents with invalid upload references */
   result = PQexecCheck(-120, invalidUploadRefs, __FILE__, __LINE__);
@@ -106,8 +166,10 @@ FUNCTION void validateFolders()
   endTime = (long)time(0);
   printf("Validate folders took %ld seconds\n", endTime-startTime);
 
+  log_action_end("validateFolders", _start);
+
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  return; // success
 }
 
 /**
@@ -115,7 +177,7 @@ FUNCTION void validateFolders()
 
  \code
  /usr/share/fossology drwxr-sr-x 15 fossy fossy
- /srv/repostitory
+ /srv/repository
  path /srv/fossology/repository drwxrws--- 3 fossy fossy
  /etc/fossology drwxr-sr-x 4 fossy fossy
  /usr/local/lib/fossology/ drwxr-sr-x 2 fossy fossy
@@ -144,7 +206,7 @@ FUNCTION void verifyFilePerms(int fix)
   LOG_NOTICE("Verify file permissions is not implemented yet");
 
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  return; // success
 }
 
 /**
@@ -158,22 +220,61 @@ FUNCTION void removeUploads()
   char *countTuples;
   long startTime, endTime;
 
-  char *SQL = "DELETE FROM upload WHERE upload_pk  \
-               IN (SELECT upload_fk FROM uploadtree WHERE parent IS NULL AND pfile_fk IS NULL)  \
-               OR (upload_pk NOT IN (SELECT upload_fk FROM uploadtree) \
-                 AND (expire_action IS NULL OR expire_action != 'd') AND pfile_fk IS NOT NULL)";
+  char SQLBuf[MAXSQL];
+  char tempTable[64];
+
+  double _start = now_monotonic_seconds();
+  log_action_start("removeUploads (4 Queries)");
 
   startTime = (long)time(0);
 
-  result = PQexecCheck(-130, SQL, __FILE__, __LINE__);
+  /* Create a session-local temp table and populate it with candidate upload ids */
+  snprintf(tempTable, sizeof(tempTable), "tmp_ids_%d", getpid());
+
+  snprintf(SQLBuf, MAXSQL, "CREATE TEMP TABLE %s(id bigint);", tempTable);
+  PQexecCheckClear(-130, SQLBuf, __FILE__, __LINE__);
+  log_action_end("removeUploads: 1/4 - temp table creation", _start);
+
+  /* Insert first set: upload_fk from uploadtree where parent IS NULL and
+   * pfile_fk IS NULL */
+  snprintf(SQLBuf, MAXSQL,
+           "INSERT INTO %s (id) SELECT upload_fk FROM uploadtree WHERE parent "
+           "IS NULL AND pfile_fk IS NULL;",
+           tempTable);
+  PQexecCheckClear(-131, SQLBuf, __FILE__, __LINE__);
+  log_action_end("removeUploads: 2/4 - first set insertion", _start);
+
+  /* Insert second set: uploads not referenced by uploadtree (and other
+   * predicates) */
+  snprintf(SQLBuf, MAXSQL,
+           "INSERT INTO %s (id) SELECT upload_pk FROM upload WHERE upload_pk "
+           "NOT IN (SELECT upload_fk FROM uploadtree) AND (expire_action IS "
+           "NULL OR expire_action != 'd') AND pfile_fk IS NOT NULL;",
+           tempTable);
+  PQexecCheckClear(-132, SQLBuf, __FILE__, __LINE__);
+  log_action_end("removeUploads: 3/4 - second set insertion", _start);
+
+  /* Now delete via join using the temp table to avoid client-side IN lists */
+  snprintf(SQLBuf, MAXSQL,
+           "DELETE FROM upload USING %s WHERE upload.upload_pk = %s.id;",
+           tempTable, tempTable);
+  result = PQexecCheck(-133, SQLBuf, __FILE__, __LINE__);
   countTuples = PQcmdTuples(result);
   PQclear(result);
+  log_action_end("removeUploads: 4/4 - deletion", _start);
 
   endTime = (long)time(0);
   printf("%s Uploads with no pfiles (%ld seconds)\n", countTuples, endTime-startTime);
 
-  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  log_action_end("removeUploads (4 Queries)", _start);
+
+  /* Drop the session-local temp table created earlier */
+  snprintf(SQLBuf, MAXSQL, "DROP TABLE IF EXISTS %s;", tempTable);
+  PQexecCheckClear(-134, SQLBuf, __FILE__, __LINE__);
+
+  fo_scheduler_heart(
+      1); // Tell the scheduler that we are alive and update item count
+  return; // success
 }
 
 /**
@@ -189,9 +290,13 @@ FUNCTION void removeTemps()
   char SQLBuf[MAXSQL];
   long startTime, endTime;
 
-  char *SQL = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE'"
-              "AND table_schema = 'public' AND (table_name SIMILAR TO '^metaanalysis_[[:digit:]]+$'"
-              "OR table_name SIMILAR TO '^delup_%');";
+  double _start = now_monotonic_seconds();
+  log_action_start("removeTemps");
+
+  char* SQL = 
+      "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' "
+      "AND table_schema = 'public' AND (table_name ~ '^metaanalysis_[[:digit:]]+$' "
+      "OR table_name LIKE 'delup_%');";
 
   startTime = (long)time(0);
 
@@ -209,8 +314,10 @@ FUNCTION void removeTemps()
   endTime = (long)time(0);
   printf("%d Orphaned temp tables were dropped (%ld seconds)\n", droppedCount, endTime-startTime);
 
+  log_action_end("removeTemps", _start);
+
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  return; // success
 }
 
 /**
@@ -233,7 +340,7 @@ FUNCTION void processExpired()
   LOG_NOTICE("Process expired uploads is not implemented yet");
 
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  return; // success
 }
 
 /**
@@ -246,6 +353,9 @@ FUNCTION void processExpired()
 FUNCTION void removeOrphanedFiles()
 {
   long StartTime, EndTime;
+  double _start = now_monotonic_seconds();
+  log_action_start("removeOrphanedFiles");
+
   char* repoPath;           ///< Path to fossology repository
   char filesPath[myBUFSIZ]; ///< Path to files directory
 
@@ -268,6 +378,8 @@ FUNCTION void removeOrphanedFiles()
   printf("Remove orphaned files from the repository took %ld seconds\n",
          EndTime - StartTime);
 
+  log_action_end("removeOrphanedFiles", _start);
+
   return; // success
 }
 
@@ -281,6 +393,9 @@ FUNCTION void removeOrphanedFiles()
 FUNCTION void deleteOrphanGold()
 {
   long StartTime, EndTime;
+  double _start = now_monotonic_seconds();
+  log_action_start("deleteOrphanGold");
+
   char* repoPath;          ///< Path to fossology repository
   char goldPath[myBUFSIZ]; ///< Path to gold directory
 
@@ -303,6 +418,8 @@ FUNCTION void deleteOrphanGold()
   printf("Remove orphaned gold files from the repository took %ld seconds\n",
          EndTime - StartTime);
 
+  log_action_end("deleteOrphanGold", _start);
+
   return; // success
 }
 
@@ -313,22 +430,37 @@ FUNCTION void deleteOrphanGold()
 FUNCTION void normalizeUploadPriorities()
 {
   long startTime, endTime;
+  double _start = now_monotonic_seconds();
+  log_action_start("normalizeUploadPriorities (3 Queries)");
 
-  char *SQL1 = "CREATE TEMPORARY TABLE tmp_upload_prio(ordprio serial, uploadid int, groupid int)";
-  char *SQL2 = "INSERT INTO tmp_upload_prio (uploadid, groupid) (SELECT upload_fk uploadid, group_fk groupid FROM upload_clearing ORDER BY priority ASC);";
-  char *SQL3 = "UPDATE upload_clearing SET priority = ordprio FROM tmp_upload_prio WHERE uploadid=upload_fk AND group_fk=groupid;";
+  char* SQL1 =
+      "CREATE TEMPORARY TABLE tmp_upload_prio(ordprio serial, uploadid int, groupid int)";
+  char* SQL2 =
+      "INSERT INTO tmp_upload_prio (uploadid, groupid) "
+      "(SELECT upload_fk uploadid, group_fk groupid FROM upload_clearing ORDER BY priority ASC);";
+  char* SQL3 =
+      "UPDATE upload_clearing "
+      "SET priority = ordprio FROM tmp_upload_prio "
+      "WHERE uploadid=upload_fk AND group_fk=groupid;";
 
   startTime = (long)time(0);
 
   PQexecCheckClear(-180, SQL1, __FILE__, __LINE__);
+  log_action_end("normalizeUploadPriorities: 1/3", _start);
+
   PQexecCheckClear(-181, SQL2, __FILE__, __LINE__);
+  log_action_end("normalizeUploadPriorities: 2/3", _start);
+
   PQexecCheckClear(-182, SQL3, __FILE__, __LINE__);
+  log_action_end("normalizeUploadPriorities: 3/3", _start);
 
   endTime = (long)time(0);
   printf("Normalized upload priorities (%ld seconds)\n", endTime-startTime);
 
+  log_action_end("normalizeUploadPriorities (3 Queries)", _start);
+
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  return; // success
 }
 
 /**
@@ -340,7 +472,13 @@ FUNCTION void reIndexAllTables()
   PGresult* result; // the result of the database access
   char SQLBuf[MAXSQL];
   long startTime, endTime;
-  char *SQL= "SELECT table_catalog FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = 'public' AND (table_name SIMILAR TO 'upload%') LIMIT 1";
+  double _start = now_monotonic_seconds();
+  log_action_start("reIndexAllTables");
+
+  char* SQL =
+      "SELECT table_catalog FROM information_schema.tables WHERE table_type = "
+      "'BASE TABLE' AND table_schema = 'public' AND table_name LIKE"
+      "'upload%' LIMIT 1";
 
   startTime = (long)time(0);
 
@@ -355,8 +493,10 @@ FUNCTION void reIndexAllTables()
   endTime = (long)time(0);
   printf("Time taken for reindexing the database : %ld seconds\n", endTime-startTime);
 
+  log_action_end("reIndexAllTables", _start);
+
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  return; // success
 }
 
 /**
@@ -368,53 +508,61 @@ FUNCTION void removeOrphanedRows()
   PGresult* result; // the result of the database access
   char *countTuples;
   long startTime, endTime;
+  double _start = now_monotonic_seconds();
+  log_action_start("removeOrphanedRows (6 Queries)");
 
-  char *SQL1 = "DELETE FROM uploadtree UT "
-               " WHERE NOT EXISTS ( "
-               "  SELECT 1 "
-               "  FROM upload U "
-               "  WHERE UT.upload_fk = U.upload_pk "
-               " );";
+  char* SQL1 =
+      "DELETE FROM uploadtree UT "
+      " WHERE NOT EXISTS ( "
+      "  SELECT 1 "
+      "  FROM upload U "
+      "  WHERE UT.upload_fk = U.upload_pk "
+      " );";
 
-  char *SQL2 = "DELETE FROM clearing_decision AS CD "
-               " WHERE NOT EXISTS ( "
-               "  SELECT 1 "
-               "  FROM uploadtree UT  "
-               "  WHERE CD.uploadtree_fk = UT.uploadtree_pk "
-               " ) AND CD.scope = '0';";
+  char* SQL2 =
+      "DELETE FROM clearing_decision AS CD "
+      " WHERE NOT EXISTS ( "
+      "  SELECT 1 "
+      "  FROM uploadtree UT  "
+      "  WHERE CD.uploadtree_fk = UT.uploadtree_pk "
+      " ) AND CD.scope = '0';";
 
-  char *SQL3 = "DELETE FROM clearing_event CE "
-               " WHERE NOT EXISTS ( "
-               "  SELECT 1 "
-               "  FROM uploadtree UT  "
-               "  WHERE CE.uploadtree_fk = UT.uploadtree_pk "
-               " ) AND NOT EXISTS ( "
-               "  SELECT 1 "
-               "  FROM clearing_decision CD"
-               "  WHERE CD.uploadtree_fk = CE.uploadtree_fk "
-               "  AND CD.scope = '1'"
-               " );";
+  char* SQL3 =
+      "DELETE FROM clearing_event CE "
+      " WHERE NOT EXISTS ( "
+      "  SELECT 1 "
+      "  FROM uploadtree UT  "
+      "  WHERE CE.uploadtree_fk = UT.uploadtree_pk "
+      " ) AND NOT EXISTS ( "
+      "  SELECT 1 "
+      "  FROM clearing_decision CD"
+      "  WHERE CD.uploadtree_fk = CE.uploadtree_fk "
+      "  AND CD.scope = '1'"
+      " );";
 
-  char *SQL4 = "DELETE FROM clearing_decision_event CDE"
-               " WHERE NOT EXISTS ( "
-               "  SELECT 1 "
-               "  FROM clearing_event CE  "
-               "  WHERE CE.clearing_event_pk = CDE.clearing_event_fk "
-               " );";
+  char* SQL4 =
+      "DELETE FROM clearing_decision_event CDE"
+      " WHERE NOT EXISTS ( "
+      "  SELECT 1 "
+      "  FROM clearing_event CE  "
+      "  WHERE CE.clearing_event_pk = CDE.clearing_event_fk "
+      " );";
 
-  char *SQL5 = "DELETE FROM obligation_map OM "
-               " WHERE NOT EXISTS ( "
-               "  SELECT 1 "
-               "  FROM license_ref LR  "
-               "  WHERE OM.rf_fk = LR.rf_pk "
-               " );";
+  char* SQL5 =
+      "DELETE FROM obligation_map OM "
+      " WHERE NOT EXISTS ( "
+      "  SELECT 1 "
+      "  FROM license_ref LR  "
+      "  WHERE OM.rf_fk = LR.rf_pk "
+      " );";
 
-  char *SQL6 = "DELETE FROM obligation_candidate_map OCM "
-               " WHERE NOT EXISTS ( "
-               "  SELECT 1 "
-               "  FROM license_ref LR  "
-               "  WHERE OCM.rf_fk = LR.rf_pk "
-               " );";
+  char* SQL6 =
+      "DELETE FROM obligation_candidate_map OCM "
+      " WHERE NOT EXISTS ( "
+      "  SELECT 1 "
+      "  FROM license_ref LR  "
+      "  WHERE OCM.rf_fk = LR.rf_pk "
+      " );";
 
   startTime = (long)time(0);
 
@@ -423,42 +571,50 @@ FUNCTION void removeOrphanedRows()
   PQclear(result);
   printf("%s Orphaned records have been removed from uploadtree table\n", countTuples);
   fo_scheduler_heart(1);
+  log_action_end("removeOrphanedRows: 1/6 - uploadtree", _start);
 
   result = PQexecCheck(-201, SQL2, __FILE__, __LINE__);
   countTuples = PQcmdTuples(result);
   PQclear(result);
   printf("%s Orphaned records have been removed from clearing_decision table\n", countTuples);
   fo_scheduler_heart(1);
+  log_action_end("removeOrphanedRows: 2/6 - clearing_decision", _start);
 
   result = PQexecCheck(-202, SQL3, __FILE__, __LINE__);
   countTuples = PQcmdTuples(result);
   PQclear(result);
   printf("%s Orphaned records have been removed from clearing_event table\n", countTuples);
   fo_scheduler_heart(1);
+  log_action_end("removeOrphanedRows: 3/6 - clearing_event", _start);
 
   result = PQexecCheck(-203, SQL4, __FILE__, __LINE__);
   countTuples = PQcmdTuples(result);
   PQclear(result);
   printf("%s Orphaned records have been removed from clearing_decision_event table\n", countTuples);
   fo_scheduler_heart(1);
+  log_action_end("removeOrphanedRows: 4/6 - clearing_decision_event", _start);
 
   result = PQexecCheck(-204, SQL5, __FILE__, __LINE__);
   countTuples = PQcmdTuples(result);
   PQclear(result);
   printf("%s Orphaned records have been removed from obligation_map table\n", countTuples);
   fo_scheduler_heart(1);
+  log_action_end("removeOrphanedRows: 5/6 - obligation_map", _start);
 
   result = PQexecCheck(-205, SQL6, __FILE__, __LINE__);
   countTuples = PQcmdTuples(result);
   PQclear(result);
   printf("%s Orphaned records have been removed from obligation_candidate_map table\n", countTuples);
   fo_scheduler_heart(1); // Tell the scheduler that we are alive and update item count
+  log_action_end("removeOrphanedRows: 6/6 - obligation_candidate_map", _start);
 
   endTime = (long)time(0);
 
   printf("Time taken for removing orphaned rows from database : %ld seconds\n", endTime-startTime);
 
-  return;  // success
+  log_action_end("removeOrphanedRows (6 Queries)", _start);
+
+  return; // success
 }
 
 
@@ -479,11 +635,15 @@ FUNCTION void removeOrphanedLogFiles()
   fo_dbManager_PreparedStatement* updateStatement;
   struct stat statbuf;
 
-  char *SQL = "SELECT jq_pk, jq_log FROM job ja "
-    "INNER JOIN job jb ON ja.job_upload_fk = jb.job_upload_fk "
-    "INNER JOIN jobqueue jq ON jb.job_pk = jq.jq_job_fk "
-    "WHERE ja.job_name = 'Delete' AND jq_log IS NOT NULL "
-    "AND jq_log != 'removed';";
+  double _start = now_monotonic_seconds();
+  log_action_start("removeOrphanedLogFiles");
+
+  char* SQL =
+      "SELECT jq_pk, jq_log FROM job ja "
+      "INNER JOIN job jb ON ja.job_upload_fk = jb.job_upload_fk "
+      "INNER JOIN jobqueue jq ON jb.job_pk = jq.jq_job_fk "
+      "WHERE ja.job_name = 'Delete' AND jq_log IS NOT NULL "
+      "AND jq_log != 'removed';";
 
   startTime = (long)time(0);
 
@@ -515,7 +675,7 @@ FUNCTION void removeOrphanedLogFiles()
     updateResult = fo_dbManager_ExecPrepared(updateStatement, jobQueueId);
     if (updateResult)
     {
-      free(updateResult);
+      PQclear(updateResult);
       removedCount++;
     }
     else
@@ -531,8 +691,10 @@ FUNCTION void removeOrphanedLogFiles()
   printf("%d / %d Orphaned log files were removed "
     "(%ld seconds)\n", removedCount, countTuples, endTime - startTime);
 
+  log_action_end("removeOrphanedLogFiles", _start);
+
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  return; // success
 }
 
 /**
@@ -548,6 +710,9 @@ FUNCTION void removeExpiredTokens(long int retentionPeriod)
   time_t current_time = time(0);
   time_t shifted_time = current_time - (retentionPeriod*24*60*60);
   struct tm time_structure = *localtime(&shifted_time);
+
+  double _start = now_monotonic_seconds();
+  log_action_start("removeExpiredTokens");
 
   snprintf(SQL, sizeof(SQL),
           "DELETE FROM personal_access_tokens WHERE (active = 'FALSE' OR expire_on < '%d-%02d-%02d') AND client_id IS NULL",
@@ -568,7 +733,9 @@ FUNCTION void removeExpiredTokens(long int retentionPeriod)
 
   printf("Time taken for removing expired personal access tokens from database : %ld seconds\n", endTime-startTime);
 
-  return;  // success
+  log_action_end("removeExpiredTokens", _start);
+
+  return; // success
 }
 
 /**
@@ -596,6 +763,9 @@ FUNCTION void deleteOldGold(char* date)
     LOG_FATAL("Invalid date! Require yyyy-mm-dd, '%s' given.", date);
     exitNow(-144);
   }
+
+  double _start = now_monotonic_seconds();
+  log_action_start("deleteOldGold");
 
   snprintf(sql, MAXSQL,
            "SELECT DISTINCT ON(pfile_pk) "
@@ -643,6 +813,8 @@ FUNCTION void deleteOldGold(char* date)
   printf("Removed %d old gold files from the repository, took %ld seconds\n",
          numrows, EndTime - StartTime);
 
+  log_action_end("deleteOldGold", _start);
+
   fo_scheduler_heart(
       1); // Tell the scheduler that we are alive and update item count
   return; // success
@@ -668,8 +840,10 @@ FUNCTION void removeOldLogFiles(const char* olderThan)
   long StartTime, EndTime;
   char ch;
   FILE* tempFile;
-  int retval;                ///< Return value of find
+  int retval; ///< Return value of find
 
+  double _start = now_monotonic_seconds();
+  log_action_start("removeOldLogFiles");
   StartTime = (long)time(0);
   if (sscanf(olderThan, "%d-%d-%d", &ti.tm_year, &ti.tm_mon, &ti.tm_mday) != 3)
   {
@@ -728,6 +902,8 @@ FUNCTION void removeOldLogFiles(const char* olderThan)
       "Removing log files older than '%s' from the repository took %ld "
       "seconds\n",
       olderThan, EndTime - StartTime);
+
+  log_action_end("removeOldLogFiles", _start);
 
   fo_scheduler_heart(1);
   return;

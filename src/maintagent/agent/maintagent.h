@@ -63,4 +63,9 @@ void removeExpiredTokens();
 void deleteOldGold(char* date);
 void removeOldLogFiles(const char* olderThan);
 
+/* timing helpers: gated extra output when agent_verbose >= 3 */
+double now_monotonic_seconds(void);
+void log_action_start(const char* action);
+void log_action_end(const char* action, double start);
+
 #endif /* _MAINTAGENT_H */

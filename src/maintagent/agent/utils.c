@@ -11,6 +11,70 @@
 
 #include "maintagent.h"
 
+/* monotonic time helper */
+double now_monotonic_seconds(void)
+{
+  struct timespec ts;
+  #if defined(CLOCK_MONOTONIC)
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+  #else
+    clock_gettime(CLOCK_REALTIME, &ts);
+  #endif
+  return ts.tv_sec + ts.tv_nsec / 1e9;
+}
+
+/* log start marker; always a NOTICE, extra detail only when agent_verbose >= 3 */
+void log_action_start(const char* action)
+{
+  time_t t = time(NULL);
+  /* format ISO8601 time */
+  char timestr[64];
+  struct tm tm;
+  if (localtime_r(&t, &tm)) {
+    strftime(timestr, sizeof(timestr), "%Y-%m-%dT%H:%M:%S%z", &tm);
+  } else {
+    snprintf(timestr, sizeof(timestr), "%ld", (long)t);
+  }
+
+  /* shorten file path to start from "maintagent/" if present */
+  const char *fullpath = __FILE__;
+  const char *shortpath = strstr(fullpath, "maintagent/");
+  if (!shortpath) shortpath = fullpath;
+
+  LOG_NOTICE("START %s %ld", action, (long)t);
+
+  if (agent_verbose >= 3) {
+    LOG_NOTICE("%s %s Action %s started at %ld", timestr, shortpath, action, (long)t);
+  }
+}
+
+/* log end marker and duration; always a NOTICE, extra detail only when agent_verbose >= 3 */
+void log_action_end(const char* action, double start)
+{
+  double end = now_monotonic_seconds();
+  double dur = end - start;
+  time_t t = time(NULL);
+  /* format ISO8601 time */
+  char timestr[64];
+  struct tm tm;
+  if (localtime_r(&t, &tm)) {
+    strftime(timestr, sizeof(timestr), "%Y-%m-%dT%H:%M:%S%z", &tm);
+  } else {
+    snprintf(timestr, sizeof(timestr), "%ld", (long)t);
+  }
+
+  /* shorten file path to start from "maintagent/" if present */
+  const char *fullpath = __FILE__;
+  const char *shortpath = strstr(fullpath, "maintagent/");
+  if (!shortpath) shortpath = fullpath;
+
+  LOG_NOTICE("END %s %ld duration=%.3f", action, (long)t, dur);
+
+  if (agent_verbose >= 3) {
+    LOG_NOTICE("%s %s Action %s ended at %ld (duration=%.3f s)", timestr, shortpath, action, (long)t, dur);
+  }
+}
+
 /**
  * @brief Exit function.  This does all cleanup and should be used
  *        instead of calling exit() or main() return.

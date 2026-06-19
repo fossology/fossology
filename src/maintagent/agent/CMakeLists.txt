@@ -29,8 +29,7 @@ target_compile_definitions(maintagent
     VERSION_S="${FO_VERSION}"
     COMMIT_HASH_S="${FO_COMMIT_HASH}")
 target_link_libraries(maintagent PRIVATE fossology)
-
 install(TARGETS maintagent
     RUNTIME
-    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent 
+    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent
     COMPONENT maintagent)

@@ -20,4 +20,4 @@ install(FILES maintagent.conf "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
     DESTINATION ${FO_MODDIR}/${PROJECT_NAME}
     COMPONENT maintagent)
 
-add_symlink() 
+add_symlink()
