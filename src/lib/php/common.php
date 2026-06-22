@@ -49,6 +49,7 @@ require_once("common-buckets.php");
 require_once("common-pkg.php");
 require_once("common-tags.php");
 require_once("common-compare.php");
+require_once("common-multicompare.php");
 require_once("common-db.php");
 require_once("common-auth.php");
 require_once("common-perms.php");

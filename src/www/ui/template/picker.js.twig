@@ -1,0 +1,97 @@
+{# SPDX-FileCopyrightText: © 2026 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+var currentItems  = {{ currentItemsJson|raw }};
+var currentFolder = {{ folderPk }};
+var anchorItem    = {{ anchorPk }};
+var currentRtnmod = {{ rtnmod|json_encode|raw }};
+var pickerUri     = '{{ pickerUri }}';
+
+var pickerPageSize = 25;
+var pickerCurrentPage = 0;
+var pickerRows = [];
+var pickerQuery = '';
+
+function pickerRenderPage() {
+  var matched = pickerRows.filter(function (r) {
+    return r.getAttribute('data-name').indexOf(pickerQuery) >= 0;
+  });
+  var total = matched.length;
+  if (pickerCurrentPage * pickerPageSize >= total && total > 0) {
+    pickerCurrentPage = Math.max(0, Math.ceil(total / pickerPageSize) - 1);
+  }
+  var start = pickerCurrentPage * pickerPageSize;
+  var end   = Math.min(start + pickerPageSize, total);
+
+  pickerRows.forEach(function (r) { r.style.setProperty('display', 'none', 'important'); });
+  matched.forEach(function (r, i) {
+    if (i >= start && i < end) {
+      r.style.removeProperty('display');
+    }
+  });
+
+  var info = document.getElementById('uploadPageInfo');
+  var prev = document.getElementById('uploadPrev');
+  var next = document.getElementById('uploadNext');
+  if (!info) return;
+  if (total === 0) {
+    info.textContent = '{{ 'No results'|trans|e('js') }}';
+  } else {
+    info.textContent = '{{ 'Showing'|trans|e('js') }} ' + (start + 1) + '–' + end
+                     + ' {{ 'of'|trans|e('js') }} ' + total;
+  }
+  if (prev) prev.disabled = (pickerCurrentPage === 0);
+  if (next) next.disabled = (end >= total);
+}
+
+function pickerPage(dir) {
+  pickerCurrentPage = Math.max(0, pickerCurrentPage + dir);
+  pickerRenderPage();
+}
+
+function pickerChangePageSize(val) {
+  pickerPageSize = parseInt(val, 10);
+  pickerCurrentPage = 0;
+  pickerRenderPage();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  var allRows = document.querySelectorAll('#uploadList .picker-row');
+  pickerRows = Array.prototype.slice.call(allRows);
+  pickerRenderPage();
+
+  var searchInput = document.getElementById('uploadSearch');
+  if (searchInput) {
+    searchInput.addEventListener('keyup', function () {
+      pickerQuery = this.value.toLowerCase();
+      pickerCurrentPage = 0;
+      pickerRenderPage();
+    });
+  }
+});
+
+function goFolder(fk) {
+  var u = pickerUri + '&rtnmod=' + currentRtnmod + '&folder=' + fk;
+  if (currentItems.length > 0) {
+    u += '&items=' + currentItems.join(',');
+  } else if (anchorItem > 0) {
+    /* initial state: no items yet, preserve the anchor via item= */
+    u += '&item=' + anchorItem;
+  }
+  window.location.assign(u);
+}
+
+{% if isMulti %}
+function AppJump(val) {
+  var next = currentItems.filter(function(v) { return v != val; });
+  next.push(val);
+  var u = pickerUri + '&rtnmod=' + currentRtnmod + '&items=' + next.join(',') + '&folder=' + currentFolder;
+  window.location.assign(u);
+}
+{% else %}
+function AppJump(val) {
+  var u = pickerUri + '&rtnmod=' + currentRtnmod + '&item={{ anchorPk }}&item2=' + val;
+  window.location.assign(u);
+}
+{% endif %}

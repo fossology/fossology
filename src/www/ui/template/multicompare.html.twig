@@ -1,0 +1,191 @@
+{# SPDX-FileCopyrightText: © 2026 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+<div class="text-right mb-1">
+  <a name="flist" href="#histo" class="small text-muted">&#8595; {{ 'Jump to histogram'|trans }}</a>
+</div>
+
+{# ── Toolbar ─────────────────────────────────────────────────────────── #}
+<div class="d-flex flex-wrap align-items-center mb-2 p-2 bg-light border rounded">
+  <span class="mr-2 font-weight-bold">{{ 'Filter:'|trans }}</span>
+  <select id="filterSel" class="form-control form-control-sm d-inline-block w-auto"
+          onchange="ChangeFilter(this.value, curItems)">
+    {% for val, label in filters %}
+      <option value="{{ val }}"
+              title="{{ filterDescriptions[val]|trans }}"
+              {% if filter == val %} selected{% endif %}>{{ label|trans }}</option>
+    {% endfor %}
+  </select>
+
+  <span class="mx-3">
+    <div class="btn-group btn-group-sm" role="group">
+      {% for val, label in modes %}
+        <button type="button"
+                class="btn {{ mode == val ? 'btn-primary' : 'btn-outline-secondary' }}"
+                onclick="ChangeMode('{{ val }}', curItems)">{{ label|trans }}</button>
+      {% endfor %}
+    </div>
+  </span>
+
+  <span class="mr-3">
+    <div class="btn-group btn-group-sm" role="group">
+      {% for val, label in views %}
+        <button type="button"
+                class="btn {{ view == val ? 'btn-primary' : 'btn-outline-secondary' }}"
+                onclick="ChangeView('{{ val }}', curItems)">{{ label|trans }}</button>
+      {% endfor %}
+    </div>
+  </span>
+
+  <span>
+    <select id="baselineSel" class="form-control form-control-sm d-inline-block w-auto"
+            onchange="SetBaseline(this.value, curItems)">
+      <option value="0"{% if baseline == 0 %} selected{% endif %}>{{ 'No baseline'|trans }}</option>
+      {% for c in 0..(N - 1) %}
+        <option value="{{ c + 1 }}"{% if baseline == c + 1 %} selected{% endif %}>
+          {{ 'Baseline: Col'|trans }} {{ c + 1 }}
+        </option>
+      {% endfor %}
+    </select>
+  </span>
+</div>
+
+{# ── Comparison summary panel ─────────────────────────────────────────── #}
+<div class="card mb-2">
+  <div class="card-header p-2">
+    <a class="text-body font-weight-bold" data-toggle="collapse" href="#summaryPanel">
+      {{ 'Comparison Summary'|trans }}
+      <small class="text-muted">({{ 'click to expand'|trans }})</small>
+    </a>
+  </div>
+  <div id="summaryPanel" class="collapse">
+    <div class="card-body p-2">
+      <div class="row">
+        {% for col in summaryData %}
+          <div class="col-sm border-right">
+            <strong>{{ 'Component'|trans }} {{ loop.index }}:</strong> {{ col.name }}<br>
+            <span class="badge badge-secondary">
+              {{ col.uniqueFiles }} {{ 'unique file(s)'|trans }}
+            </span>
+            <span class="badge badge-warning">
+              {{ col.missingFiles }} {{ 'missing file(s)'|trans }}
+            </span>
+            {% if col.uniqueEntries is not empty %}
+              <br>
+              <small>
+                {% if mode == 'license' %}{{ 'Unique licenses'|trans }}
+                {% else %}{{ 'Unique entries'|trans }}{% endif %}:
+                {{ col.uniqueEntries|join(', ') }}
+                {% if col.moreCount > 0 %}
+                  <em>+{{ col.moreCount }} {{ 'more'|trans }}</em>
+                {% endif %}
+              </small>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Per-column path banners ──────────────────────────────────────────── #}
+<div id="mc-banners" class="d-flex flex-wrap mb-2">
+  {% for banner in pathBanners %}
+    <div class="flex-fill mr-1" style="min-width:200px">{{ banner|raw }}</div>
+  {% endfor %}
+</div>
+
+{# ── Comparison table ─────────────────────────────────────────────────── #}
+<div class="table-responsive">
+  <table class="table table-sm table-bordered table-striped table-hover" id="dirlist">
+    <thead class="thead-light">
+      <tr>
+        {% if view == 'matrix' %}
+          <th>{{ 'File'|trans }}</th>
+          {% for col in treeInfoArray %}
+            <th class="text-center">{{ col.display_name }}</th>
+          {% endfor %}
+        {% else %}
+          {% for c, col in treeInfoArray %}
+            {% if c > 0 %}
+              <th class="border-left border-success p-0" style="width:3px"></th>
+            {% endif %}
+            <th colspan="2">{{ col.display_name }}</th>
+          {% endfor %}
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>{{ tableRows|raw }}</tbody>
+  </table>
+</div>
+
+{# ── Histogram ────────────────────────────────────────────────────────── #}
+<div class="d-flex align-items-center mt-4 mb-2 pb-1 border-bottom">
+  <h6 class="mb-0 mr-3 text-nowrap"><a name="histo"></a>
+    {% if mode == 'license' %}{{ 'License Histogram'|trans }}
+    {% elseif mode == 'copyright' %}{{ 'Copyright Histogram'|trans }}
+    {% else %}{{ 'ECC Histogram'|trans }}{% endif %}
+  </h6>
+  {% if histData is not empty %}
+    <div class="d-flex align-items-center small text-muted flex-grow-1">
+      <span id="histPageInfo" class="mr-2 text-nowrap"></span>
+      <button id="histPrev" class="btn btn-outline-secondary btn-sm mr-1" onclick="histPage(-1)">&laquo; {{ 'Prev'|trans }}</button>
+      <button id="histNext" class="btn btn-outline-secondary btn-sm mr-3" onclick="histPage(1)">{{ 'Next'|trans }} &raquo;</button>
+      <select id="histPageSize" class="form-control form-control-sm d-inline-block w-auto mr-2"
+              onchange="histChangePageSize(this.value)">
+        <option value="10">10</option>
+        <option value="25" selected>25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+      <input type="text" id="histSearch" class="form-control form-control-sm"
+             style="width:180px" placeholder="{{ 'Search…'|trans }}">
+    </div>
+  {% endif %}
+  <a href="#flist" class="small text-muted ml-auto text-nowrap">&#8593; {{ 'Jump to top'|trans }}</a>
+</div>
+
+{% if histData is empty %}
+  <p class="text-muted"><em>{{ 'No histogram data available.'|trans }}</em></p>
+{% else %}
+
+  <div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover" id="multihisto">
+      <thead class="thead-light">
+        <tr>
+          <th>{{ modeLabel|trans }}</th>
+          {% for name in colNames %}
+            <th class="text-center">{{ name }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry, counts in histData %}
+          <tr>
+            <td>{{ entry|e }}</td>
+            {% for c in 0..(N - 1) %}
+              {% set cnt = counts[c] is defined ? counts[c] : 0 %}
+              <td class="text-center {{ cnt == 0 ? 'text-muted' : '' }}">{{ cnt }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+
+<div class="text-right mt-2">
+  <a href="#flist" class="small text-muted">&#8593; {{ 'Jump to top'|trans }}</a>
+</div>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript">
+    {% include 'multicompare.js.twig' %}
+  </script>
+{% endblock %}
