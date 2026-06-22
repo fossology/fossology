@@ -182,6 +182,9 @@ typedef struct
     gboolean default_header;  ///< Is the header the default header
     gboolean default_footer;  ///< Is the footer the default footer
 
+    /* scheduler self-version tracking */
+    gchar* scheduler_version; ///< The version string read from VERSION file at last (re)load
+
     /* regular expressions */
     GRegex* parse_agent_msg;     ///< Parses messages coming from the agents
     GRegex* parse_db_email;      ///< Parses database email text
@@ -274,6 +277,7 @@ gint int_compare(gconstpointer a, gconstpointer b, gpointer user_data);
 void scheduler_config_event(scheduler_t* scheduler, void*);
 void scheduler_close_event(scheduler_t* scheduler, void*);
 void scheduler_test_agents(scheduler_t* scheduler, void*);
+void scheduler_version_refresh(scheduler_t* scheduler, void* unused);
 
 void scheduler_clear_config(scheduler_t* scheduler);
 void scheduler_agent_config(scheduler_t* scheduler);

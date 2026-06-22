@@ -125,6 +125,7 @@ typedef struct
     gboolean alive;           ///< flag to tell the scheduler if the agent is still alive
     uint8_t  return_code;     ///< what was returned by the agent when it disconnected
     uint32_t special;         ///< any special flags that the agent has set
+    gboolean accounted;       ///< TRUE if this agent holds host load + run_count (owner->id > 0 at init); used to release the slot if the agent dies after its job was already removed (owner == NULL)
 } agent_t;
 
 /* ************************************************************************** */
@@ -134,6 +135,7 @@ typedef struct
 /* meta agent */
 meta_agent_t* meta_agent_init(char* name, char* cmd, int max, int spc);
 void meta_agent_destroy(meta_agent_t* meta_agent);
+void agent_meta_version_reset(meta_agent_t* ma);
 
 /* agent */
 agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* owner);
@@ -148,6 +150,7 @@ void agent_create_event(scheduler_t* scheduler, agent_t* agent);
 void agent_ready_event(scheduler_t* scheduler, agent_t* agent);
 void agent_update_event(scheduler_t* scheduler, void* unused);
 void agent_fail_event(scheduler_t* scheduler, agent_t* agent);
+void agent_fail_event_pid(scheduler_t* scheduler, void* arg);
 void list_agents_event(scheduler_t* scheduler, GOutputStream* ostr);
 
 void agent_transition(agent_t* agent, agent_status new_status);

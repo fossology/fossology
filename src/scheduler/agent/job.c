@@ -132,7 +132,7 @@ static void job_transition(scheduler_t* scheduler, job_t* job, job_status new_st
  * @param user_data  unused
  * @return        The comparison of the two jobs
  */
-static gint job_compare(gconstpointer a, gconstpointer b, gpointer user_data)
+gint job_compare(gconstpointer a, gconstpointer b, gpointer user_data)
 {
   return ((job_t*)a)->priority - ((job_t*)b)->priority;
 }
@@ -185,6 +185,7 @@ job_t* job_init(GTree* job_list, GSequence* job_queue,
   job->user_id         = user_id;
   job->group_id        = group_id;
   job->jq_cmd_args     = g_strdup(jq_cmd_args);
+  job->checkedout_at   = time(NULL);
 
   g_tree_insert(job_list, &job->id, job);
   if(id >= 0) g_sequence_insert_sorted(job_queue, job, job_compare, NULL);
@@ -206,14 +207,19 @@ void job_destroy(job_t* job)
   {
     SafePQclear(job->db_result);
 
-    // Lock the mutex to prevent clearing locked mutex
-    g_mutex_lock(job->lock);
-    g_mutex_unlock(job->lock);
-#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
-    g_mutex_clear(job->lock);
+    /* lock may be NULL if job_set_data(sql=1) was never called. */
+    if(job->lock != NULL)
+    {
+      g_mutex_lock(job->lock);
+      g_mutex_unlock(job->lock);
+#if GLIB_CHECK_VERSION(2, 32, 0)
+      g_mutex_clear(job->lock);
 #else
-    g_mutex_free(job->lock);
+      g_mutex_free(job->lock);
 #endif
+      g_free(job->lock);
+      job->lock = NULL;
+    }
   }
 
   if(job->log)
@@ -385,11 +391,36 @@ void job_restart_event(scheduler_t* scheduler, arg_int* params)
 void job_priority_event(scheduler_t* scheduler, arg_int* params)
 {
   GList* iter;
+  job_t* job = (job_t*)params->first;
 
-  database_job_priority(scheduler, params->first, params->second);
-  ((job_t*)params->first)->priority = params->second;
-  for(iter = ((job_t*)params->first)->running_agents; iter; iter = iter->next)
+  if(!job)
+  {
+    ERROR("job_priority_event: NULL job passed, ignoring");
+    g_free(params);
+    return;
+  }
+
+  database_job_priority(scheduler, job, params->second);
+  job->priority = params->second;
+
+  /* re-sort in the queue. g_sequence_search() is unsafe once the key changed,
+   * so find the job by pointer and let g_sequence_sort_changed() move it */
+  {
+    GSequenceIter* it = g_sequence_get_begin_iter(scheduler->job_queue);
+    while(!g_sequence_iter_is_end(it))
+    {
+      if(g_sequence_get(it) == job)
+      {
+        g_sequence_sort_changed(it, job_compare, NULL);
+        break;
+      }
+      it = g_sequence_iter_next(it);
+    }
+  }
+
+  for(iter = job->running_agents; iter; iter = iter->next)
     setpriority(PRIO_PROCESS, ((agent_t*)iter->data)->pid, params->second);
+
   g_free(params);
 }
 
@@ -408,12 +439,26 @@ void job_fail_event(scheduler_t* scheduler, job_t* job)
   GList* iter;
 
   if(job->status != JB_FAILED)
+  {
     job_transition(scheduler, job, JB_FAILED);
+  }
 
   for(iter = job->running_agents; iter != NULL; iter = iter->next)
   {
-    V_JOB("JOB[%d]: job failed, killing agents\n", job->id);
+    V_JOB("JOB[%d]: job failed, killing agent\n", job->id);
     agent_kill(iter->data);
+  }
+
+  /* Also kill the finished (AG_PAUSED) agents, which still hold a process slot
+   * and pipes until the watchdog would fire. They were already accounted at the
+   * PAUSED transition, so kill() directly (return_code=0) rather than agent_kill()
+   * to avoid a double-decrement. */
+  for(iter = job->finished_agents; iter != NULL; iter = iter->next)
+  {
+    agent_t* a = (agent_t*)iter->data;
+    V_JOB("JOB[%d]: job failed, killing finished agent pid %d\n", job->id, a->pid);
+    a->return_code = 0;
+    kill(-a->pid, SIGKILL);  /* process group, so child processes die too */
   }
 }
 
@@ -454,15 +499,12 @@ void job_remove_agent(job_t* job, GTree* job_list, void* agent)
   if(job->finished_agents && agent)
     job->finished_agents = g_list_remove(job->finished_agents, agent);
 
-  if(job->finished_agents == NULL && (job->status == JB_COMPLETE || job->status == JB_FAILED))
+  if(job->finished_agents == NULL && job->running_agents == NULL &&
+     (job->status == JB_COMPLETE || job->status == JB_FAILED))
   {
     V_JOB("JOB[%d]: job removed from system\n", job->id);
 
-    for(curr = job->running_agents; curr != NULL; curr = curr->next)
-      ((agent_t*)curr->data)->owner = NULL;
     for(curr = job->failed_agents; curr != NULL; curr = curr->next)
-      ((agent_t*)curr->data)->owner = NULL;
-    for(curr = job->finished_agents; curr != NULL; curr = curr->next)
       ((agent_t*)curr->data)->owner = NULL;
 
     g_tree_remove(job_list, &job->id);
@@ -510,6 +552,7 @@ void job_fail_agent(job_t* job, void* agent)
  */
 void job_set_data(scheduler_t* scheduler, job_t* job, char* data, int sql)
 {
+  g_free(job->data);
   job->data = g_strdup(data);
   job->idx = 0;
 
@@ -543,19 +586,30 @@ void job_update(scheduler_t* scheduler, job_t* job)
   {
     if(job->failed_agents == NULL)
     {
-      job_transition(scheduler, job, JB_COMPLETE);
-      for(iter = job->finished_agents; iter != NULL; iter = iter->next)
+      /* don't mark an already-failed job complete: a finished agent killed by
+       * job_fail_event() can reach here after the job is already JB_FAILED */
+      if(job->status != JB_FAILED)
       {
-        aprintf(iter->data, "CLOSE\n");
+        job_transition(scheduler, job, JB_COMPLETE);
+        for(iter = job->finished_agents; iter != NULL; iter = iter->next)
+        {
+          aprintf(iter->data, "CLOSE\n");
+        }
       }
     }
     /* this indicates a failed agent */
     else
     {
-      g_list_free(job->failed_agents);
-      job->failed_agents = NULL;
-      job->message = NULL;
-      job_fail_event(scheduler, job);
+      /* free the failed-agent list before failing the job, and skip if it is
+       * already failed */
+      if(job->status != JB_FAILED)
+      {
+        g_list_free(job->failed_agents);
+        job->failed_agents = NULL;
+        g_free(job->message);
+        job->message = NULL;
+        job_fail_event(scheduler, job);
+      }
     }
   }
 }
@@ -592,6 +646,15 @@ int job_is_open(scheduler_t* scheduler, job_t* job)
     SafePQclear(job->db_result);
     job->db_result = database_exec(scheduler, job->data);
     job->idx = 0;
+
+    /* database_exec() can return NULL (lost connection, failed query). Guard so
+     * PQntuples() is never called on NULL, which would crash the scheduler. */
+    if(job->db_result == NULL)
+    {
+      g_mutex_unlock(job->lock);
+      ERROR("JOB[%d]: database_exec returned NULL, marking job as failed", job->id);
+      return -1;
+    }
 
     retval = PQntuples(job->db_result) != 0;
   }

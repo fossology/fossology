@@ -175,7 +175,7 @@ void scheduler_signal(scheduler_t* scheduler)
     while((n = waitpid(-1, &status, WNOHANG)) > 0)
     {
       V_SCHED("SIGNALS: received sigchld for pid %d\n", n);
-      pass = g_new0(pid_t, 2);
+      pass = g_new0(pid_t, 3);  /* [0]=pid [1]=status [2]=retry */
       pass[0] = n;
       pass[1] = status;
       event_signal(agent_death_event, pass);
@@ -269,6 +269,8 @@ scheduler_t* scheduler_init(gchar* sysconfigdir, log_t* log)
   ret->server        = NULL;
   ret->workers       = NULL;
   ret->cancel        = NULL;
+
+  ret->scheduler_version = NULL;
 
   ret->job_queue     = g_sequence_new(NULL);
 
@@ -370,6 +372,7 @@ void scheduler_destroy(scheduler_t* scheduler)
     main_log = NULL;
   }
 
+  if(scheduler->scheduler_version) g_free(scheduler->scheduler_version);
   if(scheduler->process_name) g_free(scheduler->process_name);
   if(scheduler->sysconfig)    fo_config_free(scheduler->sysconfig);
   if(scheduler->sysconfigdir) g_free(scheduler->sysconfigdir);
@@ -405,14 +408,142 @@ void scheduler_destroy(scheduler_t* scheduler)
  */
 static gboolean isMaxLimitReached(meta_agent_t* agent)
 {
-  if (agent != NULL && agent->max_run <= agent->run_count)
+  // max_run < 0 means unlimited; only enforce a non-negative limit.
+  if (agent != NULL && agent->max_run >= 0 && agent->max_run <= agent->run_count)
   {
     return TRUE;
   }
-  else
+  return FALSE;
+}
+
+/* ************************************************************************** */
+/* **** Stale CHECKEDOUT job reaper ***************************************** */
+/* ************************************************************************** */
+
+/**
+ * @brief Context for collect_stale_jobs traversal: carries current time so
+ *        each node can apply a per-job grace period without an extra pass.
+ */
+typedef struct {
+  GList*  list; ///< Accumulates stale job_t pointers
+  time_t  now;  ///< Current time snapshot for the traversal
+} stale_ctx;
+
+/**
+ * @brief GTraverseFunc: collect CHECKEDOUT jobs with no agents that have been
+ *        waiting longer than CONF_agent_update_interval seconds.
+ *
+ * The grace period avoids flagging a job that was just loaded from the DB and is
+ * still waiting for the scheduling loop to start its agent.
+ *
+ * @param key   unused
+ * @param val   job_t*
+ * @param data  stale_ctx*
+ * @return FALSE to continue traversal
+ */
+static gboolean collect_stale_jobs(gpointer key, gpointer val, gpointer data)
+{
+  job_t* j = (job_t*)val;
+  stale_ctx* ctx = (stale_ctx*)data;
+
+  // Skip non-CHECKEDOUT jobs and internal startup test jobs (id < 0).
+  if(j == NULL || j->status != JB_CHECKEDOUT || j->id < 0)
   {
     return FALSE;
   }
+
+  // Not stale if it still has agents assigned.
+  if(j->running_agents  != NULL ||
+     j->finished_agents != NULL ||
+     j->failed_agents   != NULL)
+  {
+    return FALSE;
+  }
+
+  // Grace period: only flag as stale after CONF_agent_update_interval seconds beyond checkout time.
+  if((ctx->now - j->checkedout_at) <= CONF_agent_update_interval)
+  {
+    return FALSE;
+  }
+
+  ctx->list = g_list_prepend(ctx->list, j);
+  return FALSE;
+}
+
+/**
+ * @brief Reap CHECKEDOUT jobs that never had an agent spawned.
+ *
+ * Skipped while shutting down: at close, CHECKEDOUT jobs with no agents are
+ * still valid in-flight work and should be left in the DB for the next start,
+ * not failed here.
+ *
+ * @param scheduler  the scheduler
+ */
+static void reap_stale_jobs(scheduler_t* scheduler)
+{
+  static time_t last_stale_check = 0;
+  time_t now = time(NULL);
+
+  // Never reap during shutdown: CHECKEDOUT-with-no-agents jobs are legitimately in-flight, not stale.
+  if(closing)
+  {
+    return;
+  }
+
+  // Rate-limit: bail immediately if the check interval hasn't elapsed.
+  if((now - last_stale_check) < CONF_agent_update_interval)
+  {
+    return;
+  }
+
+  last_stale_check = now;
+
+  // Skip the tree walk entirely when there are no jobs.
+  if(g_tree_nnodes(scheduler->job_list) == 0)
+  {
+    return;
+  }
+
+  stale_ctx ctx = { NULL, now };
+  g_tree_foreach(scheduler->job_list, collect_stale_jobs, &ctx);
+
+  // Nothing stale - common case, exit fast.
+  if(ctx.list == NULL)
+  {
+    return;
+  }
+
+  for(GList* iter = ctx.list; iter != NULL; iter = iter->next)
+  {
+    job_t* j = (job_t*)iter->data;
+
+    log_printf("WARNING %s.%d: JOB[%d] type:%s is CHECKEDOUT with no agents"
+               " - failing as stale\n",
+               __FILE__, __LINE__, j->id, j->agent_type);
+
+    g_free(j->message);
+    j->message = g_strdup("job checked out but no agent was ever started (stale)");
+    job_fail_event(scheduler, j);
+
+    // Remove from job_queue so the scheduler doesn't try to assign a fresh agent to this FAILED job.
+    {
+      GSequenceIter* sit = g_sequence_get_begin_iter(scheduler->job_queue);
+      while(!g_sequence_iter_is_end(sit))
+      {
+        if(g_sequence_get(sit) == j)
+        {
+          g_sequence_remove(sit);
+          break;
+        }
+        sit = g_sequence_iter_next(sit);
+      }
+    }
+
+    /* no agents were spawned, so this removes the job from job_list and frees it */
+    job_remove_agent(j, scheduler->job_list, NULL);
+  }
+
+  g_list_free(ctx.list);
 }
 
 /**
@@ -460,6 +591,10 @@ void scheduler_update(scheduler_t* scheduler)
 
   if(job == NULL && !lockout)
   {
+    /* blocked jobs are set aside in skipped_jobs and re-inserted (sorted) after
+     * the loop, so a blocked high-priority job doesn't starve the rest */
+    GList* skipped_jobs = NULL;
+
     while((job = peek_job(scheduler->job_queue)) != NULL)
     {
       // Check the max limit of running agents
@@ -468,8 +603,12 @@ void scheduler_update(scheduler_t* scheduler)
       {
         V_SCHED("JOB_INIT: Unable to run agent %s due to max_run limit.\n",
             job->agent_type);
+        // max_run reached: reset stale timer and defer to next cycle.
+        job->checkedout_at = time(NULL);
+        next_job(scheduler->job_queue);
+        skipped_jobs = g_list_prepend(skipped_jobs, job);
         job = NULL;
-        break;
+        continue;
       }
       // check if the agent is required to run on local host
       if(is_meta_special(
@@ -478,8 +617,12 @@ void scheduler_update(scheduler_t* scheduler)
         host = g_tree_lookup(scheduler->host_list, LOCAL_HOST);
         if(!(host->running < host->max))
         {
+          // Local host full: reset stale timer and defer to next cycle.
+          job->checkedout_at = time(NULL);
+          next_job(scheduler->job_queue);
+          skipped_jobs = g_list_prepend(skipped_jobs, job);
           job = NULL;
-          break;
+          continue;
         }
       }
       // check if the job is required to run on a specific machine
@@ -490,26 +633,43 @@ void scheduler_update(scheduler_t* scheduler)
         {
           if(!(host->running < host->max))
           {
+            // Required host full: reset stale timer and defer to next cycle.
+            job->checkedout_at = time(NULL);
+            next_job(scheduler->job_queue);
+            skipped_jobs = g_list_prepend(skipped_jobs, job);
+            job = NULL;
+            continue;
+          }
+        } else {
+          g_free(job->message);
+          job->message = g_strdup("ERROR: jq_host not in the agent list!");
+          job_fail_event(scheduler, job);
+          // Pop from queue first so job is not in queue when job_remove_agent frees it.
+          next_job(scheduler->job_queue);
+          job_remove_agent(job, scheduler->job_list, NULL);
           job = NULL;
-          break;
+          continue;
         }
-       } else {
-         //log_printf("ERROR %s.%d: jq_pk %d jq_host '%s' not in the agent list!\n",
-         //  __FILE__, __LINE__, job->id, job->required_host);
-         job->message = "ERROR: jq_host not in the agent list!";
-         job_fail_event(scheduler, job);
-         job = NULL;
-         break;
-       }
       }
       // the generic case, this can run anywhere, find a place
       else if((host = get_host(&(scheduler->host_queue), 1)) == NULL)
       {
+        // No host available: refresh stale timer on every queued job so reap_stale_jobs()
+        // doesn't misidentify legitimately blocked jobs as orphans.
+        time_t now = time(NULL);
+        GSequenceIter* sit = g_sequence_get_begin_iter(scheduler->job_queue);
+        while(!g_sequence_iter_is_end(sit))
+        {
+          ((job_t*)g_sequence_get(sit))->checkedout_at = now;
+          sit = g_sequence_iter_next(sit);
+        }
         job = NULL;
         break;
       }
 
       next_job(scheduler->job_queue);
+      // Reset stale timer: job is now actively being dispatched.
+      job->checkedout_at = time(NULL);
       if(is_meta_special(
           g_tree_lookup(scheduler->meta_agents, job->agent_type), SAG_EXCLUSIVE))
       {
@@ -521,6 +681,13 @@ void scheduler_update(scheduler_t* scheduler)
       agent_init(scheduler, host, job);
       job = NULL;
     }
+
+    // Restore skipped jobs to the queue in priority order.
+    for(GList* sl = skipped_jobs; sl != NULL; sl = sl->next)
+    {
+      g_sequence_insert_sorted(scheduler->job_queue, sl->data, job_compare, NULL);
+    }
+    g_list_free(skipped_jobs);
   }
 
   if(job != NULL && n_agents == 0 && n_jobs == 0)
@@ -530,6 +697,14 @@ void scheduler_update(scheduler_t* scheduler)
     job  = NULL;
     host = NULL;
   }
+
+  // Exclusive job is held in the static `job` pointer; reset its stale timer so the reaper doesn't free it.
+  if(job != NULL)
+  {
+    job->checkedout_at = time(NULL);
+  }
+
+  reap_stale_jobs(scheduler);
 
   if(scheduler->s_pause)
   {
@@ -694,6 +869,9 @@ void scheduler_clear_config(scheduler_t* scheduler)
 
   fo_config_free(scheduler->sysconfig);
   scheduler->sysconfig = NULL;
+
+  /* keep scheduler_version: scheduler_foss_config() compares it against the
+   * re-read COMMIT_HASH to detect a version change */
 }
 
 /**
@@ -934,6 +1112,34 @@ void scheduler_foss_config(scheduler_t* scheduler)
   g_free(tmp);
 
   fo_config_join(scheduler->sysconfig, version, NULL);
+
+  /* read COMMIT_HASH so we can detect a rebuilt binary on the next SIGHUP */
+  {
+    GError* ver_err = NULL;
+    const gchar* new_ver = fo_config_get(version, "BUILD", "COMMIT_HASH", &ver_err);
+    if (ver_err)
+    {
+      g_clear_error(&ver_err);
+      new_ver = "unknown";
+    }
+    if (scheduler->scheduler_version == NULL)
+    {
+      /* first load: just store it */
+      scheduler->scheduler_version = g_strdup(new_ver);
+      log_printf("NOTE: scheduler version initialised to \"%s\"\n",
+          scheduler->scheduler_version);
+    }
+    else if (strcmp(scheduler->scheduler_version, new_ver) != 0)
+    {
+      /* version changed: store it and respawn agents on the new binary */
+      log_printf("NOTE: scheduler version changed: \"%s\" -> \"%s\"\n",
+          scheduler->scheduler_version, new_ver);
+      g_free(scheduler->scheduler_version);
+      scheduler->scheduler_version = g_strdup(new_ver);
+      event_signal(scheduler_version_refresh, NULL);
+    }
+  }
+
   fo_config_free(version);
 
   /* This will create the load and the print command for the special
@@ -1030,6 +1236,87 @@ void scheduler_test_agents(scheduler_t* scheduler, void* unused)
 {
   scheduler->s_startup = TRUE;
   test_agents(scheduler);
+}
+
+/* ************************************************************************** */
+/* **** Version refresh ***************************************************** */
+/* ************************************************************************** */
+
+/**
+ * @brief Context structure for the version-refresh tree traversal.
+ */
+typedef struct
+{
+  scheduler_t* scheduler;
+  int          count;
+} version_refresh_ctx;
+
+/**
+ * @brief GTraverseFunc: respawn a not-yet-working agent on the new binary.
+ *
+ * Resets every meta agent's cached version so the first respawned agent of each
+ * type sets the new one.
+ *
+ * Only AG_SPAWNED agents are killed (job still JB_CHECKEDOUT, no data sent): the
+ * death event re-queues those for a fresh dispatch. AG_RUNNING agents are left
+ * to finish on the binary they started with, otherwise their half-done job would
+ * be marked complete.
+ *
+ * @param pid_ptr  Key in the agents GTree (pid)
+ * @param agent    The running agent
+ * @param ctx      version_refresh_ctx*
+ * @return 0 to continue traversal
+ */
+static gboolean version_refresh_kill_agent(int* pid_ptr, agent_t* agent,
+    version_refresh_ctx* ctx)
+{
+  if (agent == NULL)
+  {
+    return FALSE;
+  }
+
+  agent_meta_version_reset(agent->type);
+
+  /* leave agents that have already started; only respawn the not-yet-working ones */
+  if (agent->status != AG_SPAWNED)
+  {
+    return FALSE;
+  }
+
+  /* kill() directly, not agent_kill(): return_code=0 makes the death event
+   * re-queue the still-CHECKEDOUT job. Kill the process group too. */
+  agent->return_code = 0;
+  log_printf("NOTE: version refresh: sending SIGKILL to agent pid %d type \"%s\"\n",
+      agent->pid, agent->type ? agent->type->name : "?");
+  kill(-agent->pid, SIGKILL);
+  ctx->count++;
+  return FALSE;
+}
+
+/**
+ * @brief Event run when the scheduler's own version changed.
+ *
+ * Kills the agents that can be respawned so they pick up the new binary on the
+ * next scheduler_update(). Triggered by scheduler_foss_config() when COMMIT_HASH
+ * changes between two config loads (e.g. SIGHUP after a rebuild).
+ *
+ * @param scheduler  the scheduler
+ * @param unused     ignored (required by event signature)
+ */
+void scheduler_version_refresh(scheduler_t* scheduler, void* unused)
+{
+  version_refresh_ctx ctx;
+  ctx.scheduler = scheduler;
+  ctx.count = 0;
+
+  log_printf("NOTE: scheduler_version_refresh: killing all running agents "
+      "for version update\n");
+
+  g_tree_foreach(scheduler->agents,
+      (GTraverseFunc)version_refresh_kill_agent, &ctx);
+
+  log_printf("NOTE: scheduler_version_refresh: sent SIGKILL to %d agent(s); "
+      "they will respawn automatically\n", ctx.count);
 }
 
 /**
