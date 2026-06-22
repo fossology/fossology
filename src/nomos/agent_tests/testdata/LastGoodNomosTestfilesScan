@@ -233,6 +233,9 @@ File NomosTestfiles/CC/CC-BY-2.5_ref.txt contains license(s) Apache-2.0,CC-BY-2.
 File NomosTestfiles/CC/CC-BY-2.5.txt contains license(s) CC-BY-2.5
 File NomosTestfiles/CC/CC-BY-3.0.txt contains license(s) CC-BY-3.0
 File NomosTestfiles/CC/CC-BY-4.0.txt contains license(s) CC-BY-4.0
+File NomosTestfiles/CC/CC-BY-4.0_ref.txt contains license(s) CC-BY-4.0
+File NomosTestfiles/CC/CC-BY-4.0_ref_b.txt contains license(s) CC-BY-4.0
+File NomosTestfiles/CC/CC-BY-4.0_ref_c.txt contains license(s) CC-BY-4.0
 File NomosTestfiles/CC/CC-BY-NC-1.0.txt contains license(s) CC-BY-NC-1.0
 File NomosTestfiles/CC/CC-BY-NC-2.0.txt contains license(s) CC-BY-NC-2.0
 File NomosTestfiles/CC/CC-BY-NC-2.5.txt contains license(s) CC-BY-NC-2.5
@@ -242,6 +245,7 @@ File NomosTestfiles/CC/CC-BY-NC-ND-1.0.txt contains license(s) CC-BY-NC-ND-1.0
 File NomosTestfiles/CC/CC-BY-NC-ND-2.0.txt contains license(s) CC-BY-NC-ND-2.0
 File NomosTestfiles/CC/CC-BY-NC-ND-2.5.txt contains license(s) CC-BY-NC-ND-2.5
 File NomosTestfiles/CC/CC-BY-NC-ND-3.0.txt contains license(s) CC-BY-NC-ND-3.0
+File NomosTestfiles/CC/CC-BY-NC-ND-3.0_nodw.txt contains license(s) CC-BY-NC-ND-3.0
 File NomosTestfiles/CC/CC-BY-NC-ND-4.0.txt contains license(s) CC-BY-NC-ND-4.0
 File NomosTestfiles/CC/CC-BY-NC-SA-1.0.txt contains license(s) CC-BY-NC-SA-1.0
 File NomosTestfiles/CC/CC-BY-NC-SA-2.0.txt contains license(s) CC-BY-NC-SA-2.0
@@ -899,6 +903,7 @@ File NomosTestfiles/No_license_found/GPL-Ghostscript_b.txt contains license(s) N
 File NomosTestfiles/No_license_found/ipl.h contains license(s) No_license_found
 File NomosTestfiles/No_license_found/java1.class contains license(s) No_license_found
 File NomosTestfiles/No_license_found/java2.class contains license(s) No_license_found
+File NomosTestfiles/No_license_found/no-gpl-binary.bin contains license(s) No_license_found
 File NomosTestfiles/No_license_found/No_BSD-possibility.txt contains license(s) No_license_found
 File NomosTestfiles/No_license_found/Not-LGPL.txt contains license(s) No_license_found
 File NomosTestfiles/No_license_found/pretest.dat contains license(s) No_license_found
@@ -1423,6 +1428,7 @@ File NomosTestfiles/See-doc/xmlsec.c contains license(s) See-doc.OTHER
 File NomosTestfiles/See-file/ad_testfs_close.c contains license(s) See-file
 File NomosTestfiles/See-file/bzip2.c contains license(s) See-file.LICENSE
 File NomosTestfiles/See-file/camd_dump.c contains license(s) See-file
+File NomosTestfiles/See-file/copyright-file-distribution.c contains license(s) See-doc.OTHER
 File NomosTestfiles/See-file/client.go contains license(s) See-file
 File NomosTestfiles/See-file/clip_tbl.c contains license(s) See-file.LICENSE
 File NomosTestfiles/See-file/connection.h contains license(s) See-file.COPYING

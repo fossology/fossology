@@ -2742,7 +2742,7 @@
 # To catch things like "this is GPL".
 %ENTRY% _LT_GPL_NAMED3
 %KEY% "gpl"
-%STR% "[^-\.]\<gpl\>"
+%STR% "[ !-,/-~]\<gpl\>"
 #
 # To catch things like "this is GPLV2".
 %ENTRY% _LT_GPL_V2_NAMED
@@ -6496,6 +6496,10 @@ k
 %KEY% "copyright"
 %STR% "file (named )?copyright specifies the terms and conditions for r?e?distribution"
 #
+%ENTRY% _LT_SEE_OTHER_18
+%KEY% "copyright"
+%STR% "(conditions|redistribution) =SOME= contained in the file copyright =SOME= (distribut|part of)"
+#
 #####
 # These MUST be the last 3 checks for license references in some "other" place
 #####
@@ -7956,17 +7960,33 @@ k
 %KEY% "a(gree|ttribut|vailabl|uthor)"
 %STR% "creative commons attribution[ -]noderivs[ -]noncommercial 1\.?0"
 #
+%ENTRY% _TITLE_CC_BY_NC_ND_10_2
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]no derivative works 1\.?0"
+#
 %ENTRY% _TITLE_CC_BY_NC_ND_20
 %KEY% "a(gree|ttribut|vailabl|uthor)"
 %STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 2\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_ND_20_1
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]no derivative works 2\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_ND_25
 %KEY% "a(gree|ttribut|vailabl|uthor)"
 %STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 2\.?5"
 #
+%ENTRY% _TITLE_CC_BY_NC_ND_25_1
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]no derivative works 2\.?5"
+#
 %ENTRY% _TITLE_CC_BY_NC_ND_30
 %KEY% "a(gree|ttribut|vailabl|uthor)"
 %STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 3\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_ND_30_1
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]no derivative works 3\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_ND_40
 %KEY% "a(gree|ttribut|vailabl|uthor)"
@@ -9534,6 +9554,10 @@ k
 %KEY% "licen[cs]"
 %STR% "licen[cs]ed under creative commons by-sa 3\.?0"
 #
+%ENTRY% _PHR_CC_BY_40
+%KEY% "licen[cs]"
+%STR% "licen[cs]ed? =SOME= cc[ -]by[ -]?4\.?0"
+#
 %ENTRY% _PHR_CDDL_1
 %KEY% "distribut"
 %STR% "common development and distribution licen[cs]e"
@@ -11042,7 +11066,7 @@ k
 
 %ENTRY% _SPDX_GPL_10
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} GPL[- ]1\.?0)"
+%STR% "licen[cs]e(id|[- ]identifier)?[[:blank:]:\[\(]+(GPL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} GPL[- ]1\.?0)"
 
 %ENTRY% _SPDX_GPL_10plus
 %KEY% "licen[cs]e"
@@ -11050,15 +11074,15 @@ k
 
 %ENTRY% _SPDX_GPL_20
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]2\.?0|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.?0)"
+%STR% "licen[cs]e(id|[- ]identifier)?[[:blank:]:\[\(]+(GPL[- ]2\.?0|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.?0)"
 
 %ENTRY% _SPDX_GPL_20_or_later
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]2\.?0-or-later|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.?0-or-later)"
+%STR% "licen[cs]e(id|[- ]identifier)?[[:blank:]:\[\(]+(GPL[- ]2\.?0-or-later|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.?0-or-later)"
 
 %ENTRY% _SPDX_GPL_30
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+GPL[- ]3\.?0)"
+%STR% "licen[cs]e(id|[- ]identifier)?[[:blank:]:\[\(]+GPL[- ]3\.?0)"
 
 %ENTRY% _SPDX_GPL_30plus
 %KEY% "licen[cs]e"
