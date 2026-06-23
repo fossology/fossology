@@ -49,13 +49,17 @@ class size_dashboard extends FO_Plugin
     $row = $this->dbManager->getSingleRow($folderSizesql,array($folderId),$statementName);
     $folderSize = HumanSize($row['sum']);
 
-    $statementName = __METHOD__."GetEachUploadSize";
     $dispSql = "SELECT DISTINCT ON (upload.upload_pk) upload_pk, upload_filename, pfile_size, " .
       "to_char(upload_ts, 'YYYY-MM-DD HH24:MI:SS') AS upload_ts, status_fk FROM pfile " . $sql . " ORDER BY upload.upload_pk";
-    $results = $this->dbManager->getRows($dispSql, [$folderId], $statementName);
+    $statementNameDisp = __METHOD__ . "GetEachUploadSize";
+    $results = $this->dbManager->getRows($dispSql, [$folderId], $statementNameDisp);
+
+    $uploadIds = array_column($results, 'upload_pk');
+    $durationBatch = $this->uploadDao->getClearingDurationsBatch($uploadIds);
+
     $var = '';
     foreach ($results as $result) {
-      $clearingDuration = $this->uploadDao->getClearingDuration($result["upload_pk"]);
+      $clearingDuration = $durationBatch[$result["upload_pk"]] ?? ['NA', 0];
       $var .= "<tr><td align='left'>" . $result['upload_pk'] .
         "</td><td align='left'>" . $result['upload_filename'] .
         "</td><td align='left' data-order='{$result['pfile_size']}'>" .
@@ -75,19 +79,22 @@ class size_dashboard extends FO_Plugin
   private function generateExportData($folderId, $format)
   {
     $results = $this->dbManager->getRows(
-      "SELECT DISTINCT ON (upload.upload_pk) upload_pk, upload_filename, pfile_size, to_char(upload_ts, 'YYYY-MM-DD HH24:MI:SS') AS upload_ts " .
+      "SELECT DISTINCT ON (upload.upload_pk) upload_pk, upload_filename, pfile_size, to_char(upload_ts, 'YYYY-MM-DD HH24:MI:SS') AS upload_ts, status_fk " .
       "FROM pfile " .
       "INNER JOIN upload ON upload.pfile_fk=pfile.pfile_pk " .
       "INNER JOIN foldercontents ON upload.upload_pk=foldercontents.child_id " .
-      "INNER JOIN upload_clearing ON upload.upload_pk=upload_clearing.upload_fk ".
+      "INNER JOIN upload_clearing ON upload.upload_pk=upload_clearing.upload_fk " .
       "WHERE parent_fk=$1 ORDER BY upload.upload_pk",
       [$folderId],
-      __METHOD__."ExportData"
+      __METHOD__ . "ExportData"
     );
+
+    $uploadIds = array_column($results, 'upload_pk');
+    $durationBatch = $this->uploadDao->getClearingDurationsBatch($uploadIds);
 
     $data = [];
     foreach ($results as $row) {
-      $clearingDuration = $this->uploadDao->getClearingDuration($row["upload_pk"]);
+      $clearingDuration = $durationBatch[$row["upload_pk"]] ?? ['NA', 0];
       $data[] = [
         'uploadid' => $row['upload_pk'],
         'name' => $row['upload_filename'],

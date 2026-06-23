@@ -312,7 +312,7 @@ class UploadDao
    */
   public function getAssigneeDate(int $uploadId): ?string
   {
-    $sql = "SELECT event_ts FROM upload_events WHERE upload_fk = $1 " .
+    $sql = "SELECT MIN(event_ts) as event_ts FROM upload_events WHERE upload_fk = $1 " .
       "AND event_type = " . UploadEvents::ASSIGNEE_EVENT;
     $row = $this->dbManager->getSingleRow($sql, [$uploadId], __METHOD__);
     if (empty($row) || empty($row["event_ts"])) {
@@ -329,7 +329,7 @@ class UploadDao
    */
   public function getClosedDate(int $uploadId): ?string
   {
-    $sql = "SELECT event_ts FROM upload_events WHERE upload_fk = $1 " .
+    $sql = "SELECT MAX(event_ts) as event_ts FROM upload_events WHERE upload_fk = $1 " .
       "AND event_type = " . UploadEvents::UPLOAD_CLOSED_EVENT;
     $row = $this->dbManager->getSingleRow($sql, [$uploadId], __METHOD__);
     if (empty($row) || empty($row["event_ts"])) {
@@ -344,24 +344,64 @@ class UploadDao
    * @return array with duration and durationSort when upload was closed
    *                   or rejected.
    */
-  public function getClearingDuration(int $uploadId): ?array
+  public function getClearingDuration(int $uploadId): array
   {
-    $duration = "NA";
-    $assignDate = $this->getAssigneeDate($uploadId);
-    $closingDate = $this->getClosedDate($uploadId);
-    $durationSort = 0;
-    if ($assignDate != null && $closingDate != null) {
-      try {
-        $closingDate = new DateTime($closingDate);
-        $assignDate = new DateTime($assignDate);
-        if ($assignDate < $closingDate) {
-          $duration = HumanDuration($closingDate->diff($assignDate));
-          $durationSort = $closingDate->getTimestamp() - $assignDate->getTimestamp();
-        }
-      } catch (Exception $_) {
-      }
+    $batch = $this->getClearingDurationsBatch(array($uploadId));
+    return $batch[$uploadId] ?? ['NA', 0];
+  }
+
+  /**
+   * Get clearing durations for a list of uploads.
+   * @param int[] $uploadIds
+   * @return array Map of upload_pk => array(duration, durationSort)
+   */
+  public function getClearingDurationsBatch(array $uploadIds): array
+  {
+    if (empty($uploadIds)) {
+      return array();
     }
-    return array($duration, $durationSort);
+
+    $uploadIds = array_unique(array_filter($uploadIds));
+    if (empty($uploadIds)) {
+      return array();
+    }
+
+    $results = array();
+    foreach ($uploadIds as $id) {
+      $results[(int)$id] = array("NA", 0);
+    }
+
+    $uploadIdsStr = '{' . implode(',', array_map('intval', $uploadIds)) . '}';
+
+    $sql = "SELECT upload_fk, " .
+           "MIN(CASE WHEN event_type = $2 THEN event_ts END) as assignee_ts, " .
+           "MAX(CASE WHEN event_type = $3 THEN event_ts END) as closed_ts " .
+           "FROM upload_events " .
+           "WHERE upload_fk = ANY($1::int[]) AND event_type IN ($2, $3) " .
+           "GROUP BY upload_fk";
+
+    $rows = $this->dbManager->getRows($sql, array($uploadIdsStr, UploadEvents::ASSIGNEE_EVENT, UploadEvents::UPLOAD_CLOSED_EVENT), __METHOD__);
+
+    foreach ($rows as $row) {
+      $id = (int)$row['upload_fk'];
+      $duration = "NA";
+      $durationSort = 0;
+
+      if (!empty($row['assignee_ts']) && !empty($row['closed_ts'])) {
+        try {
+          $assignDate = new DateTime($row['assignee_ts']);
+          $closingDate = new DateTime($row['closed_ts']);
+          if ($assignDate < $closingDate) {
+            $duration = HumanDuration($closingDate->diff($assignDate));
+            $durationSort = $closingDate->getTimestamp() - $assignDate->getTimestamp();
+          }
+        } catch (\Exception $_) {
+        }
+      }
+      $results[$id] = array($duration, $durationSort);
+    }
+
+    return $results;
   }
   /**
    * \brief Get the uploadtree table name for this upload_pk
