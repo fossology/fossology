@@ -1184,8 +1184,8 @@
   $Schema["TABLE"]["license_ref"]["rf_shortname"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_shortname\" SET NOT NULL";
 
   $Schema["TABLE"]["license_ref"]["rf_licensetype"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_licensetype\" IS 'Permissive, Copyleft, Copyright, ...'";
-  $Schema["TABLE"]["license_ref"]["rf_licensetype"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_licensetype\" text";
-  $Schema["TABLE"]["license_ref"]["rf_licensetype"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_licensetype\" SET DEFAULT 'PERMISSIVE'";
+  $Schema["TABLE"]["license_ref"]["rf_licensetype"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_licensetype\" text DEFAULT 'UNKNOWN'::text";
+  $Schema["TABLE"]["license_ref"]["rf_licensetype"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_licensetype\" DROP NOT NULL, ALTER COLUMN \"rf_licensetype\" SET DEFAULT 'UNKNOWN'::text";
 
   $Schema["TABLE"]["license_ref"]["rf_text"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_text\" IS 'reference License text, or regex'";
   $Schema["TABLE"]["license_ref"]["rf_text"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_text\" text";
@@ -1260,15 +1260,15 @@
   $Schema["TABLE"]["license_ref"]["rf_risk"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_risk\" DROP NOT NULL";
 
   $Schema["TABLE"]["license_ref"]["rf_spdx_id"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_spdx_id\" IS 'Valid SPDX License Identifier for license. This will be exported in report.'";
-  $Schema["TABLE"]["license_ref"]["rf_spdx_id"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_spdx_id\" text DEFAULT NULL";
-  $Schema["TABLE"]["license_ref"]["rf_spdx_id"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_spdx_id\" SET DEFAULT NULL";
+  $Schema["TABLE"]["license_ref"]["rf_spdx_id"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_spdx_id\" text";
+  $Schema["TABLE"]["license_ref"]["rf_spdx_id"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_spdx_id\" DROP NOT NULL";
 
   $Schema["TABLE"]["license_ref"]["rf_flag"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_flag\" IS 'default will be 1 if it gets updated from UI it will be 2'";
   $Schema["TABLE"]["license_ref"]["rf_flag"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_flag\" int4 DEFAULT 1";
   $Schema["TABLE"]["license_ref"]["rf_flag"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_flag\" SET NOT NULL, ALTER COLUMN \"rf_flag\" SET DEFAULT 1";
 
   $Schema["TABLE"]["license_ref"]["rf_external_id"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_external_id\" IS 'LicenseDB id of the license'";
-  $Schema["TABLE"]["license_ref"]["rf_external_id"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_external_id\" UUID";
+  $Schema["TABLE"]["license_ref"]["rf_external_id"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_external_id\" uuid";
   $Schema["TABLE"]["license_ref"]["rf_external_id"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_external_id\" DROP NOT NULL";
 
   $Schema["TABLE"]["license_candidate"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"group_fk\" IS 'group seeing this candidate'";
@@ -1321,8 +1321,8 @@
   $Schema["TABLE"]["license_ref_bulk"]["ignore_irrelevant"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"ignore_irrelevant\" SET NOT NULL, ALTER COLUMN \"ignore_irrelevant\" SET DEFAULT true";
 
   $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"bulk_delimiters\" IS 'What delimiters to use for scan?'";
-  $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"bulk_delimiters\" text DEFAULT NULL";
-  $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"bulk_delimiters\" SET DEFAULT true";
+  $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"bulk_delimiters\" text DEFAULT true";
+  $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"bulk_delimiters\" DROP NOT NULL, ALTER COLUMN \"bulk_delimiters\" SET DEFAULT true";
 
   $Schema["TABLE"]["license_ref_bulk"]["scan_findings"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"scan_findings\" IS 'Should i scan only the files with license findings?'";
   $Schema["TABLE"]["license_ref_bulk"]["scan_findings"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"scan_findings\" bool DEFAULT false";
@@ -1509,7 +1509,7 @@
   $Schema["TABLE"]["obligation_ref"]["ob_md5"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_md5\" DROP NOT NULL";
 
   $Schema["TABLE"]["obligation_ref"]["ob_external_id"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_external_id\" IS 'LicenseDB id of the obligation'";
-  $Schema["TABLE"]["obligation_ref"]["ob_external_id"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_external_id\" UUID";
+  $Schema["TABLE"]["obligation_ref"]["ob_external_id"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_external_id\" uuid";
   $Schema["TABLE"]["obligation_ref"]["ob_external_id"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_external_id\" DROP NOT NULL";
 
 
@@ -1552,8 +1552,8 @@
   $Schema["TABLE"]["personal_access_tokens"]["created_on"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"created_on\" SET NOT NULL, ALTER COLUMN \"created_on\" SET DEFAULT now()";
 
   $Schema["TABLE"]["personal_access_tokens"]["expire_on"]["DESC"] = "COMMENT ON COLUMN \"personal_access_tokens\".\"expire_on\" IS 'When this token will expire'";
-  $Schema["TABLE"]["personal_access_tokens"]["expire_on"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"expire_on\" date DEFAULT NULL";
-  $Schema["TABLE"]["personal_access_tokens"]["expire_on"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"expire_on\" SET DEFAULT NULL";
+  $Schema["TABLE"]["personal_access_tokens"]["expire_on"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"expire_on\" date";
+  $Schema["TABLE"]["personal_access_tokens"]["expire_on"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"expire_on\" DROP NOT NULL";
 
   $Schema["TABLE"]["personal_access_tokens"]["token_scope"]["DESC"] = "COMMENT ON COLUMN \"personal_access_tokens\".\"token_scope\" IS 'Scope of the token (r=read only, w=read and write)'";
   $Schema["TABLE"]["personal_access_tokens"]["token_scope"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"token_scope\" char(1)";
@@ -1564,16 +1564,16 @@
   $Schema["TABLE"]["personal_access_tokens"]["token_name"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"token_name\" SET NOT NULL";
 
   $Schema["TABLE"]["personal_access_tokens"]["token_key"]["DESC"] = "COMMENT ON COLUMN \"personal_access_tokens\".\"token_key\" IS 'The secret key for token verification'";
-  $Schema["TABLE"]["personal_access_tokens"]["token_key"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"token_key\" char(40) DEFAULT NULL";
-  $Schema["TABLE"]["personal_access_tokens"]["token_key"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"token_key\" SET DEFAULT NULL";
+  $Schema["TABLE"]["personal_access_tokens"]["token_key"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"token_key\" char(40) DEFAULT NULL::char";
+  $Schema["TABLE"]["personal_access_tokens"]["token_key"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"token_key\" DROP NOT NULL, ALTER COLUMN \"token_key\" SET DEFAULT NULL::char";
 
   $Schema["TABLE"]["personal_access_tokens"]["active"]["DESC"] = "COMMENT ON COLUMN \"personal_access_tokens\".\"active\" IS 'True if token is active, false otherwise'";
   $Schema["TABLE"]["personal_access_tokens"]["active"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"active\" bool";
   $Schema["TABLE"]["personal_access_tokens"]["active"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"active\" SET NOT NULL";
 
   $Schema["TABLE"]["personal_access_tokens"]["client_id"]["DESC"] = "COMMENT ON COLUMN \"personal_access_tokens\".\"client_id\" IS 'Client id from oauth'";
-  $Schema["TABLE"]["personal_access_tokens"]["client_id"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"client_id\" text DEFAULT NULL";
-  $Schema["TABLE"]["personal_access_tokens"]["client_id"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"client_id\" SET DEFAULT NULL";
+  $Schema["TABLE"]["personal_access_tokens"]["client_id"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"client_id\" text";
+  $Schema["TABLE"]["personal_access_tokens"]["client_id"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"client_id\" DROP NOT NULL";
 
 
   $Schema["TABLE"]["pfile"]["pfile_pk"]["DESC"] = "";
@@ -1891,8 +1891,8 @@
   $Schema["TABLE"]["sysconfig"]["validation_function"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"validation_function\" DROP NOT NULL, ALTER COLUMN \"validation_function\" SET DEFAULT NULL::character varying";
 
   $Schema["TABLE"]["sysconfig"]["option_value"]["DESC"] = "COMMENT ON COLUMN \"sysconfig\".\"option_value\" IS 'If vartype is 5, provide options in format op1{val1}|op2{val2}|...'";
-  $Schema["TABLE"]["sysconfig"]["option_value"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"option_value\" text DEFAULT NULL";
-  $Schema["TABLE"]["sysconfig"]["option_value"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"option_value\" DROP NOT NULL, ALTER COLUMN \"option_value\" SET DEFAULT NULL";
+  $Schema["TABLE"]["sysconfig"]["option_value"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"option_value\" text DEFAULT NULL::character varying";
+  $Schema["TABLE"]["sysconfig"]["option_value"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"option_value\" DROP NOT NULL, ALTER COLUMN \"option_value\" SET DEFAULT NULL::character varying";
 
   $Schema["TABLE"]["fossdashconfig"]["fossdashconfig_pk"]["DESC"] = "";
   $Schema["TABLE"]["fossdashconfig"]["fossdashconfig_pk"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"fossdashconfig_pk\" int4 DEFAULT nextval('fossdashconfig_fossdashconfig_pk_seq'::regclass)";
@@ -1932,7 +1932,7 @@
 
   $Schema["TABLE"]["fossdashconfig"]["option_value"]["DESC"] = "COMMENT ON COLUMN \"fossdashconfig\".\"option_value\" IS 'If vartype is 5, provide options in format op1{val1}|op2{val2}|...'";
   $Schema["TABLE"]["fossdashconfig"]["option_value"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"option_value\" varchar(40) DEFAULT NULL::character varying";
-  $Schema["TABLE"]["fossdashconfig"]["option_value"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"option_value\" DROP NOT NULL, ALTER COLUMN \"option_value\" SET DEFAULT NULL::character varying";
+  $Schema["TABLE"]["fossdashconfig"]["option_value"]["ALTER"] = "ALTER TABLE \"fossdashconfig\" ALTER COLUMN \"option_value\" DROP NOT NULL, ALTER COLUMN \"option_value\" SET DEFAULT NULL::character varying";
 
   $Schema["TABLE"]["tag"]["tag_pk"]["DESC"] = "";
   $Schema["TABLE"]["tag"]["tag_pk"]["ADD"] = "ALTER TABLE \"tag\" ADD COLUMN \"tag_pk\" int4 DEFAULT nextval('tags_tag_pk_seq'::regclass)";
@@ -2187,8 +2187,8 @@
   $Schema["TABLE"]["users"]["root_folder_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"root_folder_fk\" SET NOT NULL";
 
   $Schema["TABLE"]["users"]["default_folder_fk"]["DESC"] = "COMMENT ON COLUMN \"users\".\"default_folder_fk\" IS 'default folder for this user'";
-  $Schema["TABLE"]["users"]["default_folder_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"default_folder_fk\" int4 DEFAULT -1";
-  $Schema["TABLE"]["users"]["default_folder_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"default_folder_fk\" SET NOT NULL";
+  $Schema["TABLE"]["users"]["default_folder_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"default_folder_fk\" int4 DEFAULT '-1'::integer";
+  $Schema["TABLE"]["users"]["default_folder_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"default_folder_fk\" SET NOT NULL, ALTER COLUMN \"default_folder_fk\" SET DEFAULT '-1'::integer";
 
   $Schema["TABLE"]["users"]["last_connection"]["DESC"] = "";
   $Schema["TABLE"]["users"]["last_connection"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"last_connection\" timestamptz";
@@ -2199,8 +2199,8 @@
   $Schema["TABLE"]["users"]["user_desc"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_desc\" DROP NOT NULL";
 
   $Schema["TABLE"]["users"]["user_status"]["DESC"] = "COMMENT ON COLUMN \"users\".\"user_status\" IS 'active, incactive'";
-  $Schema["TABLE"]["users"]["user_status"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_status\" text DEFAULT 'active'";
-  $Schema["TABLE"]["users"]["user_status"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_status\" DROP NOT NULL, ALTER COLUMN \"user_status\" SET DEFAULT 'active'";
+  $Schema["TABLE"]["users"]["user_status"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_status\" text DEFAULT 'active'::text";
+  $Schema["TABLE"]["users"]["user_status"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_status\" DROP NOT NULL, ALTER COLUMN \"user_status\" SET DEFAULT 'active'::text";
 
   $Schema["TABLE"]["users"]["user_seed"]["DESC"] = "";
   $Schema["TABLE"]["users"]["user_seed"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_seed\" text";
@@ -2251,8 +2251,8 @@
   $Schema["TABLE"]["users"]["group_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
 
   $Schema["TABLE"]["users"]["spdx_settings"]["DESC"] = "COMMENT ON COLUMN \"users\".\"spdx_settings\" IS 'Comma-separated SPDX export settings: osselot_export,spdx_license_comment,ignore_files_wo_info as checked/unchecked values'";
-  $Schema["TABLE"]["users"]["spdx_settings"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"spdx_settings\" text DEFAULT 'unchecked,unchecked,unchecked'";
-  $Schema["TABLE"]["users"]["spdx_settings"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"spdx_settings\" DROP NOT NULL, ALTER COLUMN \"spdx_settings\" SET DEFAULT 'unchecked,unchecked,unchecked'";
+  $Schema["TABLE"]["users"]["spdx_settings"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"spdx_settings\" text DEFAULT 'unchecked,unchecked,unchecked'::text";
+  $Schema["TABLE"]["users"]["spdx_settings"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"spdx_settings\" DROP NOT NULL, ALTER COLUMN \"spdx_settings\" SET DEFAULT 'unchecked,unchecked,unchecked'::text";
 
   $Schema["TABLE"]["report_info"]["ri_pk"]["DESC"] = "";
   $Schema["TABLE"]["report_info"]["ri_pk"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_pk\" int4 DEFAULT nextval('report_info_pk_seq'::regclass)";
@@ -2599,7 +2599,7 @@
   $Schema["CONSTRAINT"]["ipra_pkey"] = "ALTER TABLE \"ipra\" ADD CONSTRAINT \"ipra_pkey\" PRIMARY KEY (\"ipra_pk\");";
   $Schema["CONSTRAINT"]["ipra_agent_fk_fkey"] = "ALTER TABLE \"ipra\" ADD CONSTRAINT \"ipra_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["ipra_pfile_fk_fkey"] = "ALTER TABLE \"ipra\" ADD CONSTRAINT \"ipra_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["ipra_decision_pfile_hash_ukey"] = "ALTER TABLE \"ipra_decision\" ADD CONSTRAINT \"ipra_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\", \"hash\");";
+  $Schema["CONSTRAINT"]["ipra_decision_pfile_hash_ukey"] = "ALTER TABLE \"ipra_decision\" ADD CONSTRAINT \"ipra_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\",\"hash\");"; 
   $Schema["CONSTRAINT"]["ecc_decision_pfile_hash_ukey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\",\"hash\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["file_picker_user_fk_ukey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_user_fk_ukey\" UNIQUE (\"user_fk\",\"uploadtree_fk1\",\"uploadtree_fk2\");";
@@ -2722,7 +2722,7 @@
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_uploadtree_fk_idx"] = "CREATE INDEX clearing_decision_uploadtree_fk_idx ON clearing_decision USING btree (uploadtree_fk);";
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_group_fk_idx"] = "CREATE INDEX clearing_decision_group_fk_idx ON clearing_decision USING btree (group_fk);";
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_uploadtree_group_pfile_idx"] = "CREATE INDEX clearing_decision_uploadtree_group_pfile_idx ON clearing_decision USING btree (uploadtree_fk, group_fk, pfile_fk);";
-  $Schema["INDEX"]["clearing_decision"]["clearing_decision_type_idx"] = "CREATE INDEX clearing_decision_type_idx ON clearing_decision USING btree (decision_type) WHERE decision_type IN (4,5,6,7);";
+  $Schema["INDEX"]["clearing_decision"]["clearing_decision_type_idx"] = "CREATE INDEX clearing_decision_type_idx ON clearing_decision USING btree (decision_type) WHERE (decision_type = ANY (ARRAY[4, 5, 6, 7]));"; 
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_up_grp_pk_desc_type_idx"] = "CREATE INDEX clearing_decision_up_grp_pk_desc_type_idx ON clearing_decision USING btree (uploadtree_fk, group_fk, clearing_decision_pk DESC, decision_type);";
 
   $Schema["INDEX"]["clearing_decision_event"]["clearing_decision_event_idx"] = "CREATE INDEX clearing_decision_event_idx ON clearing_decision_event USING btree (clearing_decision_fk, clearing_event_fk);";
@@ -2802,9 +2802,9 @@
 
   $Schema["INDEX"]["license_ref"]["rf_shortname_idx"] = "CREATE INDEX rf_shortname_idx ON license_ref USING btree (rf_shortname);";
   $Schema["INDEX"]["license_ref"]["rf_spdx_id_idx"] = "CREATE INDEX rf_spdx_id_idx ON license_ref USING btree (rf_spdx_id);";
-  $Schema["INDEX"]["license_ref"]["rf_md5_conditional_unique_index"] = "CREATE UNIQUE INDEX rf_md5_conditional_unique_index ON license_ref (rf_md5) WHERE rf_external_id IS NULL;";
+  $Schema["INDEX"]["license_ref"]["rf_md5_conditional_unique_index"] = "CREATE UNIQUE INDEX rf_md5_conditional_unique_index ON license_ref USING btree (rf_md5) WHERE (rf_external_id IS NULL);"; 
 
-  $Schema["INDEX"]["obligation_ref"]["ob_md5_conditional_unique_index"] = "CREATE UNIQUE INDEX ob_md5_conditional_unique_index ON obligation_ref (ob_md5) WHERE ob_external_id IS NULL;";
+  $Schema["INDEX"]["obligation_ref"]["ob_md5_conditional_unique_index"] = "CREATE UNIQUE INDEX ob_md5_conditional_unique_index ON obligation_ref USING btree (ob_md5) WHERE (ob_external_id IS NULL);"; 
 
   $Schema["INDEX"]["license_ref_bulk"]["license_ref_bulk_uploadtree_fk_idx"] = "CREATE INDEX license_ref_bulk_uploadtree_fk_idx ON license_ref_bulk USING btree (uploadtree_fk);";
   $Schema["INDEX"]["license_ref_bulk"]["license_ref_bulk_group_fk_idx"] = "CREATE INDEX license_ref_bulk_group_fk_idx ON license_ref_bulk USING btree (group_fk);";
