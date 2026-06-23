@@ -118,6 +118,11 @@ class AdminCustomTextManagement extends DefaultPlugin
     // Get license options for dropdown
     $vars['licenseOptions'] = $this->getLicenseOptions();
 
+    // Get users for bulk data filter dropdown
+    /** @var UserDao */
+    $userDao = $this->getObject('dao.user');
+    $vars['bulkDataUsers'] = $userDao->getUsersByGroup();
+
     return $vars;
   }
 

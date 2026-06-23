@@ -151,7 +151,17 @@
                 <th width="17%">{{ 'Licenses'|trans }}</th>
                 <th width="17%">{{ 'Acknowledgement'|trans }}</th>
                 <th width="17%">{{ 'Comments'|trans }}</th>
-                <th width="10%">{{ 'User'|trans }}</th>
+                <th width="10%">
+                  <div class="d-flex align-items-center" style="gap:4px;">
+                    <span class="text-nowrap">{{ 'User'|trans }}</span>
+                    <select id="bulkUserFilter" class="form-control form-control-sm" style="min-width:90px;">
+                    <option value="">{{ 'All Users'|trans }}</option>
+                    {% for userId, userName in bulkDataUsers %}
+                      <option value="{{ userId }}">{{ userName|e }}</option>
+                    {% endfor %}
+                  </select>
+                  </div>
+                </th>
                 <th width="6%"></th>
               </tr>
             </thead>
@@ -195,6 +205,7 @@
     var bulkTotalPages   = 0;
     var bulkTotalRecords = 0;
     var bulkSearchTerm   = '';
+    var bulkUserFk       = 0;
     var bulkSearchTimeout = null;
 
     function validateForm() {
@@ -246,10 +257,18 @@
         loadBulkData();
       });
 
+      $('#bulkUserFilter').on('change', function() {
+        bulkUserFk = parseInt($(this).val(), 10) || 0;
+        bulkCurrentPage = 1;
+        loadBulkData();
+      });
+
       $('#bulkDataModal').on('show.bs.modal', function() {
         bulkCurrentPage = 1;
         bulkSearchTerm  = '';
+        bulkUserFk      = 0;
         $('#bulkDataSearch').val('');
+        $('#bulkUserFilter').val('');
         loadBulkData();
       });
 
@@ -269,6 +288,7 @@
     function loadBulkData() {
       var params = { page: bulkCurrentPage, limit: bulkPageSize };
       if (bulkSearchTerm) { params.search = bulkSearchTerm; }
+      if (bulkUserFk > 0) { params.user_fk = bulkUserFk; }
       $('#bulkDataTableBody').html('<tr><td colspan="7" class="text-center text-muted">{{ "Loading..."|trans }}</td></tr>');
       $.ajax({
         url: "?mod=admin_custom_text_list&action=get_bulk_data",

@@ -9,6 +9,7 @@
 namespace Fossology\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -290,7 +291,7 @@ class AdminCustomTextList extends DefaultPlugin
    * @param string $searchQuery Search term (already wrapped with % wildcards), or empty.
    * @return int
    */
-  private function getTotalBulkCount($searchQuery = '')
+  private function getTotalBulkCount($searchQuery = '', $userFk = 0)
   {
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
@@ -304,10 +305,17 @@ class AdminCustomTextList extends DefaultPlugin
             WHERE lrb.rf_text IS NOT NULL AND lrb.rf_text != ''";
 
     $params = array();
+    $paramIdx = 1;
 
     if (!empty($searchQuery)) {
-      $sql .= " AND (lrb.rf_text ILIKE $1 OR lr.rf_shortname ILIKE $1 OR u.user_name ILIKE $1 OR up.upload_filename ILIKE $1)";
+      $sql .= " AND (lrb.rf_text ILIKE \$$paramIdx OR lr.rf_shortname ILIKE \$$paramIdx OR u.user_name ILIKE \$$paramIdx OR up.upload_filename ILIKE \$$paramIdx)";
       $params[] = $searchQuery;
+      $paramIdx++;
+    }
+
+    if ($userFk > 0) {
+      $sql .= " AND lrb.user_fk = \$$paramIdx";
+      $params[] = $userFk;
     }
 
     $result = $dbManager->getSingleRow($sql, $params, __METHOD__);
@@ -328,6 +336,7 @@ class AdminCustomTextList extends DefaultPlugin
     $page  = max(1, intval($request->query->get('page', 1)));
     $limit = max(1, intval($request->query->get('limit', 10)));
     $searchTerm = trim($request->query->get('search', ''));
+    $userFk = max(0, intval($request->query->get('user_fk', 0)));
 
     $searchQuery = '';
     if (!empty($searchTerm)) {
@@ -335,7 +344,7 @@ class AdminCustomTextList extends DefaultPlugin
     }
 
     // Total matching entries (for pagination metadata)
-    $totalRecords = $this->getTotalBulkCount($searchQuery);
+    $totalRecords = $this->getTotalBulkCount($searchQuery, $userFk);
     $totalPages   = max(1, intval(ceil($totalRecords / $limit)));
 
     // Clamp page to valid range
@@ -357,6 +366,12 @@ class AdminCustomTextList extends DefaultPlugin
     if (!empty($searchQuery)) {
       $whereClause .= " AND (lrb.rf_text ILIKE \$$paramIdx OR lr.rf_shortname ILIKE \$$paramIdx OR u.user_name ILIKE \$$paramIdx OR up.upload_filename ILIKE \$$paramIdx)";
       $params[] = $searchQuery;
+      $paramIdx++;
+    }
+
+    if ($userFk > 0) {
+      $whereClause .= " AND lrb.user_fk = \$$paramIdx";
+      $params[] = $userFk;
       $paramIdx++;
     }
 

@@ -16,12 +16,14 @@
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h4 class="mb-0">{{ 'Custom Text Phrases'|trans }}</h4>
+  <p>
+    {{ 'This is a list of Custom Text imported into FOSSology.'| trans }}
+    {{ 'You can Export CSV/JSON or Import More custom texts. Using the following interactions provided'| trans }}
+  </p>
   <a href="?mod={{ addModuleName }}&edit=0" class="btn btn-success btn-sm">
     <i class="bi bi-plus-circle"></i> {{ 'Add New'|trans }}
   </a>
 </div>
-
 <div class="card shadow-sm">
   <div class="card-body p-2">
     <table class="semibordered" id="customPhrasesTable" width="100%" cellpadding="0">
