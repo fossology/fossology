@@ -31163,7 +31163,7 @@ documentation and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE NETBSD FOUNDATION, INC. AND CONTRIBUTORS ``AS IS'''' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE FOUNDATION OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. ', 'http://www.netbsd.org/about/redistribution.html#default', NULL, NULL, NULL, 'BSD 2-clause NetBSD License', NULL, NULL, NULL, '', NULL, false, false, true, 'cb67adae9f0e191318bfd93876ba1dd4', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
-VALUES (436, 'GPL-3.0-with-GCC-exception', 'insert GPL v3 text here
+VALUES (436, 'GPL-3.0-only WITH GCC-exception-3.1', 'insert GPL v3 text here
 
 GCC RUNTIME LIBRARY EXCEPTION
 Version 3.1, 31 March 2009
@@ -33551,7 +33551,7 @@ If any files are modified, you must cause the modified files to carry prominent 
 Disclaimer
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'''' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://old.zope.org/Resources/ZPL/', NULL, NULL, NULL, 'Zope Public License 2.1', NULL, NULL, NULL, '', NULL, false, false, false, 'bede8f98a18c76d62b77168e4801f1bd', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
-VALUES (1, 'GPL-2.0-with-autoconf-exception', '﻿insert GPL v2 license text here
+VALUES (1, 'GPL-2.0-only WITH Autoconf-exception-3.0', '﻿insert GPL v2 license text here
 
 Autoconf Exception
 
@@ -33561,7 +33561,7 @@ Certain portions of the Autoconf source text are designed to be copied (in certa
 
 This special exception to the GPL applies to versions of Autoconf released by the Free Software Foundation. When you make and distribute a modified version of Autoconf, you may extend this special exception to the GPL to apply to your modified version as well, *unless* your modified version has the potential to copy into its output some of the text that was the non-data portion of the version that you started with. (In other words, unless your change moves or copies text from the non-data portions to the data portions.) If your modification has such potential, you must delete any notice of this special exception to the GPL from your modified version.', 'http://ac-archive.sourceforge.net/doc/copyright.html', NULL, NULL, NULL, 'GNU General Public License v2.0 w/Autoconf exception', NULL, NULL, NULL, '', NULL, false, false, false, 'd49d025e60a3654db953a6c169e52ed9', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
-VALUES (461, 'GPL-2.0-with-GCC-exception', 'insert GPL v2 text here
+VALUES (461, 'GPL-2.0-only WITH GCC-exception-3.1', 'insert GPL v2 text here
 
 GCC Linking Exception
 In addition to the permissions in the GNU General Public License, the Free Software Foundation gives you unlimited permission to link the compiled version of this file into combinations with other programs, and to distribute those combinations without any restriction coming from the use of this file. (The General Public License restrictions do apply in other respects; for example, they cover modification of the file, and distribution when not linked into a combine executable.)', '', NULL, NULL, NULL, 'GNU General Public License v2.0 w/GCC Runtime Library exception', NULL, NULL, NULL, '', NULL, false, false, false, '5dd21a7c43ce6c65eeefdf29371b9afa', 1, NULL);
@@ -34972,7 +34972,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
 VALUES (494, 'CATOSL', 'CATOSL is referenced without a version number. Please look up CATOSL in the License Admin to view the different versions.', '', NULL, NULL, NULL, 'CATOSL', NULL, NULL, NULL, '', NULL, false, false, false, '01bb42e20f6cc95eb53ce8786b6abadb', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
-VALUES (501, 'GPL-2.0+-with-bison-exception', 'insert GPL v2+ text here
+VALUES (501, 'GPL-2.0-or-later WITH Bison-exception-2.2', 'insert GPL v2+ text here
 
 Bison Exception
 
@@ -35562,7 +35562,7 @@ WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 The End', 'http://www.opengroup.org/testing/downloads/The_Open_Group_TSL.txt', NULL, NULL, NULL, 'Open Group Test Suite License', NULL, NULL, NULL, '', NULL, false, false, false, '41b4ea8bbe095c8fefe76eb34d2e746a', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
-VALUES (442, 'GPL-2.0-with-bison-exception', '﻿insert GPL v2 text here
+VALUES (442, 'GPL-2.0-only WITH Bison-exception-2.2', '﻿insert GPL v2 text here
 
 Bison Exception
 
@@ -36904,7 +36904,7 @@ IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR DIRECT
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATIONS TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.', 'http://www.postgresql.org/about/licence', NULL, NULL, NULL, 'PostgreSQL License', NULL, NULL, NULL, '', NULL, false, false, false, 'd40dd6c3073a6eac37deb8fd086f0728', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
-VALUES (459, 'GPL-2.0-with-font-exception', '﻿insert GPL v2 text here
+VALUES (459, 'GPL-2.0-only WITH Font-exception-2.0', '﻿insert GPL v2 text here
 
 Font Exception
 
@@ -37089,7 +37089,7 @@ This file is free software; the Free Software Foundation
 gives unlimited permission to copy and/or distribute it,
 with or without modifications, as long as this notice is preserved.', '', NULL, NULL, NULL, 'Free Software Foundation', NULL, NULL, NULL, '', NULL, false, false, false, '34518a40552bca97ec5767a38759cea3', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
-VALUES (439, 'GPL-3.0-with-autoconf-exception', 'insert GPL v3 text here
+VALUES (439, 'GPL-3.0-only WITH Autoconf-exception-3.0', 'insert GPL v3 text here
 
 AUTOCONF CONFIGURE SCRIPT EXCEPTION
 
@@ -39288,7 +39288,7 @@ The above copyright notice including the dates of first publication and either t
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL SILICON GRAPHICS, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Except as contained in this notice, the name of Silicon Graphics, Inc. shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from Silicon Graphics, Inc.', 'http://oss.sgi.com/projects/FreeB/SGIFreeSWLicB.2.0.doc', NULL, NULL, NULL, 'SGI Free Software License B 2.0', NULL, NULL, NULL, '', NULL, false, false, false, 'cf37137fe121a9ce8d71b10bb0d3a13f', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
-VALUES (503, 'GPL-3.0+-with-bison-exception', 'insert GPL v3+ text here
+VALUES (503, 'GPL-3.0-or-later WITH Bison-exception-2.2', 'insert GPL v3+ text here
 
 Bison Exception
 
@@ -40246,7 +40246,7 @@ Copyright 1999-2000 The OpenLDAP Foundation, Redwood City,
 California, USA.  All Rights Reserved.  Permission to copy and
 distributed verbatim copies of this document is granted.', 'http://spdx.org/licenses/OLDAP-2.4#licenseText', NULL, NULL, NULL, 'Open LDAP Public License v2.4', NULL, NULL, NULL, '', NULL, false, false, false, 'ab77165f8f5828760211427c7c4474ff', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
-VALUES (502, 'GPL-3.0-with-bison-exception', 'insert GPL v3 text here
+VALUES (502, 'GPL-3.0-only WITH Bison-exception-2.2', 'insert GPL v3 text here
 
 Bison Exception
 
@@ -43224,13 +43224,13 @@ Copyright (c) 1996 NVIDIA, Corp. NVIDIA design patents pending in the U.S. and f
 
 NVIDIA, CORP. MAKES NO REPRESENTATION ABOUT THE SUITABILITY OF THIS SOURCE CODE FOR ANY PURPOSE. IT IS PROVIDED "AS IS" WITHOUT EXPRESS OR IMPLIED WARRANTY OF ANY KIND. NVIDIA, CORP. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOURCE CODE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL NVIDIA, CORP. BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOURCE CODE.', 'http://www.xfree86.org/current/LICENSE8.html', NULL, NULL, NULL, 'Nvidia', NULL, NULL, NULL, '', NULL, false, false, true, '2d8dbb6d3f39d1affcdd846b794eba83', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
-VALUES (557, 'GPL-3.0+-with-classpath-exception', 'insert GPL v3+ license text here
+VALUES (557, 'GPL-3.0-or-later WITH Classpath-exception-2.0', 'insert GPL v3+ license text here
 
 Class Path Exception
 
 Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination.
 
-As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.', '', NULL, NULL, NULL, 'GPL-3.0+-with-classpath-exception', NULL, NULL, NULL, '', NULL, false, false, false, 'cc1f944dcc0a13507be4d402c490a2db', 1, NULL);
+As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.', '', NULL, NULL, NULL, 'GPL-3.0-or-later WITH Classpath-exception-2.0', NULL, NULL, NULL, '', NULL, false, false, false, 'cc1f944dcc0a13507be4d402c490a2db', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
 VALUES (552, 'Logica-OSL-1.0', 'Logica Open Source License Version 1.0
 Copyright (c) 1996-2001 Logica Mobile Networks Limited, all rights reserved.
@@ -43412,7 +43412,7 @@ http://www.coyotegulch.com
 Acknowledgement:
 This document is based on the wonderful simple license that accompanies libpng.', 'https://svn.apache.org/repos/asf/forrest/branches/PDF_IMAGE_BRANCH/legal/LICENSE.jisp', NULL, NULL, NULL, 'Java Index Serialization Package', NULL, NULL, NULL, '', NULL, false, false, false, '7a4a33e74af880629c93970564182bd2', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
-VALUES (6, 'GPL-2.0-with-classpath-exception', 'insert GPL v2 license text here
+VALUES (6, 'GPL-2.0-only WITH Classpath-exception-2.0', 'insert GPL v2 license text here
 
 Class Path Exception
 
@@ -43420,13 +43420,13 @@ Linking this library statically or dynamically with other modules is making a co
 
 As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.', 'http://www.gnu.org/software/classpath/license.html', NULL, NULL, NULL, 'GNU General Public License v2.0 w/Classpath exception', NULL, NULL, NULL, '', NULL, false, false, false, '1a27b344460f49ce2d93365712a202ca', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
-VALUES (558, 'GPL-2.0+-with-classpath-exception', 'insert GPL v2+ text here
+VALUES (558, 'GPL-2.0-or-later WITH Classpath-exception-2.0', 'insert GPL v2+ text here
 
 Class Path Exception
 
 Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination.
 
-As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.', '', NULL, NULL, NULL, 'GPL-2.0+-with-classpath-exception', NULL, NULL, NULL, '', NULL, false, false, false, '7940d4b7aba4100c88b54e2d46edc883', 1, NULL);
+As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.', '', NULL, NULL, NULL, 'GPL-2.0-or-later WITH Classpath-exception-2.0', NULL, NULL, NULL, '', NULL, false, false, false, '7940d4b7aba4100c88b54e2d46edc883', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active,  rf_text_updatable, rf_md5, rf_detector_type, rf_source)
 VALUES (253, 'X11', 'Copyright (C) 1996 X Consortium
 

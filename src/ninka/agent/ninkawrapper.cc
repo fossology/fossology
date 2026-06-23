@@ -136,7 +136,7 @@ string mapLicenseFromNinkaToFossology(string name)
   if (name.compare("CDDLic") == 0) return string("CDDL");
   if (name.compare("CDDLicV1") == 0) return string("CDDL-1.0");
   if (name.compare("publicDomain") == 0) return string("Public-domain");
-  if (name.compare("ClassPathExceptionGPLv2") == 0) return string("GPL-2.0-with-classpath-exception");
+  if (name.compare("ClassPathExceptionGPLv2") == 0) return string("GPL-2.0-only WITH Classpath-exception-2.0");
   if (name.compare("CPLv1") == 0) return string("CPL-1.0");
   if (name.compare("CPLv0.5") == 0) return string("CPL-0.5");
   if (name.compare("SeeFile") == 0) return string("See-file");
@@ -292,21 +292,21 @@ bool isLicenseCollection(string name, vector<LicenseMatch>& matches)
   }
   if (name.compare("BisonException") == 0)
   {
-    matches.push_back(LicenseMatch(string("GPL-2.0-with-bison-exception"), 50));
-    matches.push_back(LicenseMatch(string("GPL-3.0-with-bison-exception"), 50));
+    matches.push_back(LicenseMatch(string("GPL-2.0-only WITH Bison-exception-2.2"), 50));
+    matches.push_back(LicenseMatch(string("GPL-3.0-only WITH Bison-exception-2.2"), 50));
     return true;
   }
   if (name.compare("ClassPathException") == 0)
   {
-    matches.push_back(LicenseMatch(string("GPL-2.0-with-classpath-exception"), 30));
-    matches.push_back(LicenseMatch(string("GPL-2.0+-with-classpath-exception"), 30));
-    matches.push_back(LicenseMatch(string("GPL-3.0-with-classpath-exception"), 40));
+    matches.push_back(LicenseMatch(string("GPL-2.0-only WITH Classpath-exception-2.0"), 30));
+    matches.push_back(LicenseMatch(string("GPL-2.0-or-later WITH Classpath-exception-2.0"), 30));
+    matches.push_back(LicenseMatch(string("GPL-3.0-only WITH Classpath-exception-2.0"), 40));
     return true;
   }
   if (name.compare("autoConfException") == 0)
   {
-    matches.push_back(LicenseMatch(string("GPL-2.0-with-autoconf-exception"), 50));
-    matches.push_back(LicenseMatch(string("GPL-3.0-with-autoconf-exception"), 50));
+    matches.push_back(LicenseMatch(string("GPL-2.0-only WITH Autoconf-exception-3.0"), 50));
+    matches.push_back(LicenseMatch(string("GPL-3.0-only WITH Autoconf-exception-3.0"), 50));
     return true;
   }
   if (name.compare("CPLv1orGPLv2+orLGPLv2+") == 0)
