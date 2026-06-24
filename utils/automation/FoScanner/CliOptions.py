@@ -19,6 +19,9 @@ class ReportFormat(Enum):
   SPDX_RDF = 2
   SPDX_TAG_VALUE = 3
   SPDX_YAML = 4
+  SPDX3_JSON = 5  
+  SPDX3_TTL = 6  
+  SPDX3_RDF = 7   
 
 
 class CliOptions(object):

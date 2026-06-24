@@ -25,10 +25,11 @@ from spdx_tools.spdx.validation.validation_message import ValidationMessage
 from spdx_tools.spdx.writer.write_anything import write_file
 
 from .CliOptions import CliOptions
+from .ReportBase import ReportBase
 from .Scanners import Scanners, ScanResultList
 
 
-class SpdxReport:
+class SpdxReport(ReportBase):
   """
   Handle SPDX reports.
 
