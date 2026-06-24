@@ -2607,6 +2607,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /*
+   * Freeware with attribution (no registered copyright, attribution-only)
+   */
+  if (INFILE(_LT_Freeware_Attribution) || INFILE(_LT_Freeware_Attribution_2)) {
+    INTERESTING("Freeware-Attribution");
+  }
+  cleanLicenceBuffer();
+  /*
    * Generic CopyLeft licenses
    */
   if (INFILE(_LT_COPYLEFT_1)) {
@@ -3760,6 +3767,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_LT_ADOBE_AFM)) {
       INTERESTING("APAFML");
     }
+    else if (INFILE(_LT_ADOBE_DNG_SPEC) || INFILE(_TITLE_ADOBE_DNG_SPEC)) {
+      INTERESTING("Adobe-DNG-Spec");
+    }
     else if (HASTEXT(_TITLE_ADOBE_DNG, 0)) {
       INTERESTING("Adobe-DNG");
     }
@@ -3794,6 +3804,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_MPEG3)) {
     INTERESTING("MPEG3-decoder");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Gutmann License (ASN.1 Object Dumping Code)
+   */
+  if (INFILE(_LT_GUTMANN)) {
+    INTERESTING("Gutmann");
   }
   cleanLicenceBuffer();
   /*
@@ -3971,7 +3988,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Ascender
    */
-  if (INFILE(_LT_ASCENDER_EULA) && INFILE(_TITLE_ASCENDER_EULA)) {
+  if (INFILE(_LT_ASCENDER_WEBFONT) || INFILE(_LT_ASCENDER_WEBFONT_2) ||
+      INFILE(_TITLE_ASCENDER_WEBFONT)) {
+    INTERESTING("Ascender-WebFont-EULA");
+  }
+  else if (INFILE(_LT_ASCENDER_EULA) && INFILE(_TITLE_ASCENDER_EULA)) {
     INTERESTING("Ascender-EULA");
   }
   cleanLicenceBuffer();
@@ -4675,23 +4696,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     cleanLicenceBuffer();
     /*
-     * Baekmuk Fonts and Hwan Design
-     */
-    if (INFILE(_LT_BAEKMUK_1)) {
-      INTERESTING("Baekmuk-Font");
-    }
-    else if (INFILE(_LT_BAEKMUK_2)) {
-      INTERESTING("Baekmuk.Hwan");
-    }
-    cleanLicenceBuffer();
-    /*
-     * Information-Technology Promotion Agency (IPA)
-     */
-    if (INFILE(_LT_IPA_EULA)) {
-      INTERESTING("IPA-Font-EULA");
-    }
-    cleanLicenceBuffer();
-    /*
      * Arphic Public License
      */
     if (INFILE(_LT_ARPHIC)) {
@@ -4702,6 +4706,37 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING("Arphic-style");
       }
     }
+  }
+  cleanLicenceBuffer();
+  /*
+   * Baekmuk Fonts and Hwan Design
+   */
+  if (INFILE(_LT_BAEKMUK_1)) {
+    INTERESTING("Baekmuk-Font");
+  }
+  else if (INFILE(_LT_BAEKMUK_2)) {
+    INTERESTING("Baekmuk.Hwan");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Baserow Enterprise Edition License
+   */
+  if (INFILE(_LT_BASEROW_EE) || INFILE(_LT_BASEROW_EE_2)) {
+    INTERESTING("Baserow-EE");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Baserow Premium Edition License
+   */
+  if (INFILE(_LT_BASEROW_PE) || INFILE(_LT_BASEROW_PE_2)) {
+    INTERESTING("Baserow-PE");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Information-Technology Promotion Agency (IPA)
+   */
+  if (INFILE(_LT_IPA_EULA)) {
+    INTERESTING("IPA-Font-EULA");
   }
   cleanLicenceBuffer();
   /*
@@ -5544,11 +5579,27 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Advanved Micro Devices (AMD)
    */
-  if (INFILE(_CR_AMD) && INFILE(_LT_AMD)) {
+  if (INFILE(_LT_AMDPLPA) || INFILE(_LT_AMDPLPA_2)) {
+    INTERESTING("AMDPLPA");
+  }
+  else if (INFILE(_LT_RADEON_FIRM) || INFILE(_LT_RADEON_FIRM_2)) {
+    INTERESTING("Radeon-rlx");
+  }
+  else if (INFILE(_LT_AMD_SEV) || INFILE(_LT_AMD_SEV_2) || INFILE(_TITLE_AMD_SEV)) {
+    INTERESTING("AMD-SEV");
+  }
+  else if (INFILE(_LT_AMD)) {
     INTERESTING("AMD");
   }
   else if (INFILE(_LT_AMD_EULA) && INFILE(_TITLE_AMD_EULA)) {
     INTERESTING("AMD-EULA");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Acki Nacki Gossip Igniter (ANGI) License
+   */
+  if (INFILE(_LT_ANGI) || INFILE(_LT_ANGI_2)) {
+    INTERESTING("ANGI");
   }
   cleanLicenceBuffer();
   /*
@@ -5714,6 +5765,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * ATMEL
    */
+  else if (INFILE(_LT_ATMEL_LINUX_FW) && INFILE(_LT_ATMEL_LINUX_FW_2)) {
+    INTERESTING("Atmel-linux-firmware");
+  }
   else if (INFILE(_CR_ATMEL) && INFILE(_LT_ATMEL)) {
     INTERESTING("ATMEL-FW");
   }
@@ -6074,6 +6128,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /*
+   * ArgoUML license (UC Regents, research-purposes clause)
+   */
+  if (INFILE(_LT_ARGOUML) || INFILE(_LT_ARGOUML_2)) {
+    INTERESTING("ArgoUML");
+  }
+  cleanLicenceBuffer();
+  /*
    * Piriform Ltd
    */
   if (INFILE(_LT_PIRIFORM) && INFILE(_CR_PIRIFORM)) {
@@ -6135,7 +6196,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * M+ Fonts Project
    */
-  if (INFILE(_LT_MPLUS_FONT) && INFILE(_CR_MPLUS)) {
+  if (INFILE(_LT_MPLUS_FREE_FONT) && INFILE(_CR_MPLUS)) {
     INTERESTING("M-Plus-Project");
   }
   cleanLicenceBuffer();
@@ -6295,10 +6356,22 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Abstyles");
   }
   cleanLicenceBuffer();
+  if (INFILE(_LT_ABRS)) {
+    INTERESTING("ABRS");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ANDRE_ADRIAN_DFS) || INFILE(_LT_ANDRE_ADRIAN_DFS_2)) {
+    INTERESTING("Andre-Adrian-DFS");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ACTIVESTATE) || INFILE(_TITLE_ACTIVESTATE)) {
+    INTERESTING("ActiveState-Community");
+  }
+  cleanLicenceBuffer();
   /*
    * Amazon Digital Services License
    */
-  if (INFILE(_LT_ADSL) && INFILE(_CR_AMAZON)) {
+  if (INFILE(_LT_ADSL) && (INFILE(_CR_AMAZON) || HASTEXT(_TEXT_AMAZON_DIG, REG_ICASE))) {
     INTERESTING("ADSL");
   }
   cleanLicenceBuffer();
@@ -7213,6 +7286,2502 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   listClear(&whereList, NO);      /* again, clear "unused" matches */
+  cleanLicenceBuffer();
+  /*
+   * Haskell Language Report License
+   */
+  if (INFILE(_LT_HASKELL_REPORT)) {
+    INTERESTING("HaskellReport");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Scheme Language Report License
+   */
+  if (INFILE(_LT_SCHEME_REPORT)) {
+    INTERESTING("SchemeReport");
+  }
+  cleanLicenceBuffer();
+  /*
+   * German Data Licences (DL-DE family)
+   */
+  if (INFILE(_LT_DL_DE_ZERO_2)) {
+    INTERESTING("DL-DE-ZERO-2.0");
+  }
+  else if (INFILE(_LT_DL_DE_BY_2_EN) || INFILE(_LT_DL_DE_BY_2_DE)) {
+    INTERESTING("DL-DE-BY-2.0");
+  }
+  else if (INFILE(_LT_DL_DE_BY_1_EN) || INFILE(_LT_DL_DE_BY_1_DE)) {
+    INTERESTING("DL-DE-BY-1.0");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Norwegian Licence for Open Government Data (NLOD)
+   */
+  if (INFILE(_LT_NLOD_20_TEXT)) {
+    INTERESTING("NLOD-2.0");
+  }
+  else if (INFILE(_LT_NLOD_10_TEXT)) {
+    INTERESTING("NLOD-1.0");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Statistics Canada Open License (SCOLA - French)
+   */
+  if (INFILE(_LT_SCOLA_FR)) {
+    INTERESTING("OGL-Canada-SCOL");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Canadian Open Government Licences
+   */
+  if (INFILE(_LT_OGL_TORONTO)) {
+    INTERESTING("OGL-Toronto-1.0");
+  }
+  else if (INFILE(_LT_OGL_ONTARIO)) {
+    INTERESTING("OGL-Ontario-1.0");
+  }
+  else if (INFILE(_LT_OGL_NOVA_SCOTIA)) {
+    INTERESTING("OGL-Nova-Scotia-1.0");
+  }
+  else if (INFILE(_LT_OGL_BC)) {
+    INTERESTING("OGL-British-Columbia-2.0");
+  }
+  else if (INFILE(_LT_OGL_ALBERTA)) {
+    INTERESTING("OGL-Alberta-2.1");
+  }
+  else if (INFILE(_LT_OGL_CANADA_EN) || INFILE(_LT_OGL_CANADA_FR)) {
+    INTERESTING("OGL-Canada-2.0");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Parity Public License 6.0.0
+   */
+  if (INFILE(_LT_PARITY_600)) {
+    INTERESTING("Parity-6.0.0");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Licence Art Libre 1.3
+   */
+  if (INFILE(_LT_LAL_13)) {
+    INTERESTING("LAL-1.3");
+  }
+  cleanLicenceBuffer();
+  /*
+   * COIL-1.0 (Copyfree Open Innovation License)
+   */
+  if (INFILE(_LT_COIL_10)) {
+    INTERESTING("COIL-1.0");
+  }
+  cleanLicenceBuffer();
+  /*
+   * TTWL (Text-Tabs+Wrap License)
+   */
+  if (INFILE(_LT_TTWL)) {
+    INTERESTING("TTWL");
+  }
+  cleanLicenceBuffer();
+  /*
+   * HIDAPI License
+   */
+  if (INFILE(_LT_HIDAPI)) {
+    INTERESTING("HIDAPI");
+  }
+  cleanLicenceBuffer();
+  /*
+   * ulem License
+   */
+  if (INFILE(_LT_ULEM)) {
+    INTERESTING("ulem");
+  }
+  cleanLicenceBuffer();
+  /*
+   * UnixCrypt License
+   */
+  if (INFILE(_LT_UNIXCRYPT)) {
+    INTERESTING("UnixCrypt");
+  }
+  cleanLicenceBuffer();
+  /*
+   * fwlw License
+   */
+  if (INFILE(_LT_FWLW)) {
+    INTERESTING("fwlw");
+  }
+  cleanLicenceBuffer();
+  /*
+   * McPhee Slideshow License
+   */
+  if (INFILE(_LT_MCPHEE_SLIDESHOW)) {
+    INTERESTING("McPhee-slideshow");
+  }
+  cleanLicenceBuffer();
+  /*
+   * MIPS Computer Systems License
+   */
+  if (INFILE(_LT_MIPS_CS)) {
+    INTERESTING("MIPS");
+  }
+  cleanLicenceBuffer();
+  /*
+   * MPEG Software Simulation Group License
+   */
+  if (INFILE(_LT_MPEG_SSG)) {
+    INTERESTING("MPEG-SSG");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Kastrup License
+   */
+  if (INFILE(_LT_KASTRUP)) {
+    INTERESTING("Kastrup");
+  }
+  cleanLicenceBuffer();
+  /*
+   * swrule License
+   */
+  if (INFILE(_LT_SWRULE)) {
+    INTERESTING("swrule");
+  }
+  cleanLicenceBuffer();
+  /*
+   * softSurfer License
+   */
+  if (INFILE(_LT_SOFTSURFER)) {
+    INTERESTING("softSurfer");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Widget Workshop License
+   */
+  if (INFILE(_LT_WIDGET_WORKSHOP)) {
+    INTERESTING("Widget-Workshop");
+  }
+  cleanLicenceBuffer();
+  /*
+   * LPD-document (Peter Deutsch Document License)
+   */
+  if (INFILE(_LT_LPD_DOCUMENT)) {
+    INTERESTING("LPD-document");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Zeeff License
+   */
+  if (INFILE(_LT_ZEEFF)) {
+    INTERESTING("Zeeff");
+  }
+  cleanLicenceBuffer();
+  /*
+   * DEC-3-Clause License
+   */
+  if (INFILE(_LT_DEC_3_CLAUSE)) {
+    INTERESTING("DEC-3-Clause");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Lucida Bitmap Fonts (Bigelow & Holmes)
+   */
+  if (INFILE(_LT_LUCIDA_BITMAP)) {
+    INTERESTING("Lucida-Bitmap-Fonts");
+  }
+  cleanLicenceBuffer();
+  /*
+   * ISO 8879 Permission
+   */
+  if (INFILE(_LT_ISO_8879)) {
+    INTERESTING("ISO-permission");
+  }
+  cleanLicenceBuffer();
+  /*
+   * threeparttable License
+   */
+  if (INFILE(_LT_THREEPARTTABLE)) {
+    INTERESTING("threeparttable");
+  }
+  cleanLicenceBuffer();
+  /*
+   * OWL-0.9.4 (Open Works License)
+   */
+  if (INFILE(_LT_OWL_094)) {
+    INTERESTING("OWL-0.9.4");
+  }
+  cleanLicenceBuffer();
+  /*
+   * vhfPL 1.1
+   */
+  if (INFILE(_LT_VHFPL_11)) {
+    INTERESTING("vhfPL-1.1");
+  }
+  cleanLicenceBuffer();
+  /*
+   * NXLOG Public License 1.0
+   */
+  if (INFILE(_LT_NXLOG_PL_10)) {
+    INTERESTING("NXLOG-PL-1.0");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Devblocks Public License 1.0
+   */
+  if (INFILE(_LT_DEVBLOCKS_10)) {
+    INTERESTING("Devblocks-1.0");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Treeware License
+   */
+  if (INFILE(_LT_TREEWARE_1) || INFILE(_LT_TREEWARE_2) || INFILE(_LT_TREEWARE_OPT2)) {
+    INTERESTING("Treeware");
+  }
+  cleanLicenceBuffer();
+  /*
+   * AMD ASPF 2023
+   */
+  if (INFILE(_LT_AMD_ASPF_2023) && NOT_INFILE(_TITLE_AMD_SEV)) {
+    INTERESTING("AMD-ASPF-2023");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Bosch Sensortec 2023
+   */
+  if (INFILE(_LT_BOSCH_SENSORTEC)) {
+    INTERESTING("Bosch-Sensortec");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Broadcom firmware licenses
+   */
+  if (INFILE(_LT_BROADCOM_RPI)) {
+    INTERESTING("Broadcom-Raspberry-Pi");
+  }
+  else if (INFILE(_LT_BROADCOM_CONFIDENTIAL)) {
+    INTERESTING("Broadcom-Confidential");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Marvell Firmware 2019
+   */
+  if (INFILE(_LT_MARVELL_FW)) {
+    INTERESTING("Marvell-Firmware-2019");
+  }
+  cleanLicenceBuffer();
+  /*
+   * MediaTek Proprietary 2008
+   */
+  if (INFILE(_LT_MEDIATEK_2008)) {
+    INTERESTING("MediaTek-Proprietary-2008");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Microchip Products 2018
+   */
+  if (INFILE(_LT_MICROCHIP_2018)) {
+    INTERESTING("Microchip-Products-2018");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Motorola License
+   */
+  if (INFILE(_LT_MOTOROLA)) {
+    INTERESTING("Motorola");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Nortel DASA License
+   */
+  if (INFILE(_LT_NORTEL_DASA)) {
+    INTERESTING("Nortel-DASA");
+  }
+  cleanLicenceBuffer();
+  /*
+   * NVIDIA with Government Qualifications
+   */
+  if (INFILE(_LT_NVIDIA_GOV)) {
+    INTERESTING("NVIDIA-Gov");
+  }
+  cleanLicenceBuffer();
+  /*
+   * NXP Linux Firmware
+   */
+  if (INFILE(_LT_NXP_LINUX_FW)) {
+    INTERESTING("NXP-Linux-Firmware");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Rockchip Proprietary (various years)
+   */
+  if (INFILE(_LT_ROCKCHIP_2023)) {
+    INTERESTING("Rockchip-Proprietary-2023");
+  }
+  else if (INFILE(_LT_ROCKCHIP_2022)) {
+    INTERESTING("Rockchip-Proprietary-2022");
+  }
+  else if (INFILE(_LT_ROCKCHIP_2019)) {
+    INTERESTING("Rockchip-Proprietary-2019");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Silicon Image 2007
+   */
+  if (INFILE(_LT_SILICON_IMAGE)) {
+    INTERESTING("Silicon-Image-2007");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Texas Instruments licenses
+   */
+  if (INFILE(_LT_TI_RESTRICTED)) {
+    INTERESTING("TI-Restricted");
+  }
+  else if (INFILE(_LT_TI_LINUX_FW) && NOT_INFILE(_LT_TI_TFL)) {
+    INTERESTING("TI-Linux-Firmware");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Wind River Commercial License
+   */
+  if (INFILE(_LT_WIND_RIVER)) {
+    INTERESTING("Wind-River-Commercial");
+  }
+  cleanLicenceBuffer();
+  /*
+   * BigScience/CreativeML RAIL licenses
+   */
+  if (INFILE(_LT_CREATIVEML_RAIL_M2)) {
+    INTERESTING("CreativeML-OpenRAIL-M2");
+  }
+  else if (INFILE(_LT_STABLE_DIFFUSION)) {
+    INTERESTING("CreativeML-OpenRAIL-M");
+  }
+  else if (INFILE(_LT_BIGSCIENCE_RAIL_M)) {
+    INTERESTING("BigScience-OpenRAIL-M");
+  }
+  cleanLicenceBuffer();
+  /*
+   * NYSL 0.9982 (Japanese license)
+   */
+  if (INFILE(_LT_NYSL_JP)) {
+    INTERESTING("NYSL-0.9982");
+  }
+  cleanLicenceBuffer();
+  /*
+   * AI/ML model licenses
+   */
+  if (INFILE(_LT_GEMMA_PUP)) {
+    INTERESTING("Gemma-PUP");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GEMINI_TOS)) {
+    INTERESTING("Gemini-API-TOS");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PLAYGROUND_V2)) {
+    INTERESTING("Playground-v2-Community");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SALESFORCE_AI_AUP)) {
+    INTERESTING("Salesforce-AI-AUP");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPENAI_TOU)) {
+    INTERESTING("OpenAI-TOU");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GOOGLE_ML_KIT)) {
+    INTERESTING("Google-ML-Kit-TOS");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MAX_MOJO)) {
+    INTERESTING("MAX-Mojo-Community");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_STACK_TOS)) {
+    INTERESTING("The-Stack-TOS");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DATABRICKS_DB)) {
+    INTERESTING("Databricks-DB");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Patent licenses
+   */
+  if (INFILE(_LT_CISCO_AVC)) {
+    INTERESTING("Cisco-AVC-H264");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_XIPH_PATENT)) {
+    INTERESTING("Xiph-Opus-Patent");
+  }
+  cleanLicenceBuffer();
+  /*
+   * CERN Attribution 1995
+   */
+  if (INFILE(_LT_CERN_ATTRIB)) {
+    INTERESTING("CERN-Attribution-1995");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Font licenses
+   */
+  if (INFILE(_LT_KFGQPC)) {
+    INTERESTING("KFGQPC-Uthmanic-Script");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MANFRED_KLEIN)) {
+    INTERESTING("Manfred-Klein-Fonts");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_WADALAB)) {
+    INTERESTING("Wadalab");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GENERALUSER_GS)) {
+    INTERESTING("GeneralUser-GS-2.0");
+  }
+  cleanLicenceBuffer();
+  /*
+   * ASN.1 Object Dumping Code License
+   */
+  if (INFILE(_LT_ASN1_DUMP)) {
+    INTERESTING("ASN1-Object-Dump");
+  }
+  cleanLicenceBuffer();
+  /*
+   * musl attribution exception
+   */
+  if (INFILE(_LT_MUSL_EXCEPTION)) {
+    INTERESTING("musl-exception");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Commercial/proprietary software licenses
+   */
+  if (INFILE(_LT_CLEARTHOUGHT_20)) {
+    INTERESTING("Clearthought-2.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CODEXIA)) {
+    INTERESTING("Codexia");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CRUNCHBASE)) {
+    INTERESTING("Crunchbase-Data");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CUBIWARE_10)) {
+    INTERESTING("Cubiware-Software-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CWE_TOU)) {
+    INTERESTING("CWE-TOU");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DAMAIL)) {
+    INTERESTING("DAMAIL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DATAMEKANIX)) {
+    INTERESTING("DataMekanix");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DENNIS_FERGUSON)) {
+    INTERESTING("Dennis-Ferguson");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DHTMLAB_PUBLIC)) {
+    INTERESTING("dhtmlab-Public");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DOKPLOY_DSAL)) {
+    INTERESTING("Dokploy-DSAL-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DTREE)) {
+    INTERESTING("dtree");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ECFONTS)) {
+    INTERESTING("ECFonts-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ECMA_NO_PATENT)) {
+    INTERESTING("Ecma-No-Patent");
+  }
+  else if (INFILE(_LT_ECMA_STD_2024)) {
+    INTERESTING("Ecma-Standard-2024");
+  }
+  else if (INFILE(_LT_ECMA_DOC)) {
+    INTERESTING("Ecma-Documentation");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_EPAPERPRESS)) {
+    INTERESTING("ePaperPress");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_EQVSL)) {
+    INTERESTING("eQVSL-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FABIEN_TASSIN)) {
+    INTERESTING("Fabien-Tassin");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FLEXBYTE)) {
+    INTERESTING("Flexbyte");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FPL)) {
+    INTERESTING("FPL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FTDI)) {
+    INTERESTING("FTDI");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GDCL)) {
+    INTERESTING("GDCL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GOOD_BOY)) {
+    INTERESTING("Good-Boy");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HACKING_LICENSE)) {
+    INTERESTING("Hacking-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HERE_PROPRIETARY)) {
+    INTERESTING("HERE-Proprietary");
+  }
+  else if (INFILE(_LT_HERE_DISCLAIMER)) {
+    INTERESTING("HERE-Disclaimer");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HOT_POTATO)) {
+    INTERESTING("Hot-Potato");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HTML5_SPEC)) {
+    INTERESTING("HTML5-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_IAN_KAPLAN)) {
+    INTERESTING("Ian-Kaplan");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ICANN_PUBLIC)) {
+    INTERESTING("ICANN-Public");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ISSL_2022)) {
+    INTERESTING("ISSL-2022");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_JASON_MAYES)) {
+    INTERESTING("Jason-Mayes");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_JJ2000)) {
+    INTERESTING("JJ2000");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_JSFROMHELL)) {
+    INTERESTING("JSFromHell");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_KARL_PETERSON)) {
+    INTERESTING("Karl-Peterson");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_KEITH_RULE)) {
+    INTERESTING("Keith-Rule");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_KO_MAN_PAGE)) {
+    INTERESTING("Korean-Manpage");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LENS_TOS)) {
+    INTERESTING("Lens-TOS-2023");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LINUXHOWTOS)) {
+    INTERESTING("LinuxHowtos");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MARKUS_MUMMERT)) {
+    INTERESTING("Markus-Mummert");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MATTHEW_KWAN)) {
+    INTERESTING("Matthew-Kwan");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NCSC_NL)) {
+    INTERESTING("NCSC-NL-Disclaimer");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NEWRAN)) {
+    INTERESTING("Newran");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NIST_SRD)) {
+    INTERESTING("NIST-SRD");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NWHM)) {
+    INTERESTING("NWHM");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OOURA_2001)) {
+    INTERESTING("OOURA-2001");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Oracle licenses
+   */
+  if (INFILE(_LT_ORACLE_MASTER)) {
+    INTERESTING("Oracle-Master-Agreement");
+  }
+  else if (INFILE(_LT_ORACLE_COMM_DB)) {
+    INTERESTING("Oracle-Commercial-DB-11g2");
+  }
+  else if (INFILE(_LT_ORACLE_FREE)) {
+    INTERESTING("Oracle-Free-2018");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_O_YOUNG_JONG)) {
+    INTERESTING("O-Young-Jong");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PAUL_HSIEH_DERIV)) {
+    INTERESTING("Paul-Hsieh-Derivative");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PAUL_HSIEH_EXP)) {
+    INTERESTING("Paul-Hsieh-Exposition");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PAULO_SOARES)) {
+    INTERESTING("Paulo-Soares");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PERL_10)) {
+    INTERESTING("Perl-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PFE_NOTICE)) {
+    INTERESTING("PFE-Proprietary");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_POKE_WIGGLE)) {
+    INTERESTING("Poke-Wiggle-Proprietary");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_QUIRKSMODE)) {
+    INTERESTING("Quirksmode");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_RED_HAT_TM)) {
+    INTERESTING("Red-Hat-Trademarks");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_RYSZARD_SZOPA)) {
+    INTERESTING("Ryszard-Szopa");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SCRIPT_ASYLUM)) {
+    INTERESTING("Script-Asylum");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SCRUB)) {
+    INTERESTING("SCRUB");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SHITAL_SHAH)) {
+    INTERESTING("Shital-Shah");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SNAPEDA_EXCEPTION)) {
+    INTERESTING("SnapEDA-Design-Exception-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_STU_NICHOLLS)) {
+    INTERESTING("Stu-Nicholls");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TEAMDEV)) {
+    INTERESTING("TeamDev-Services");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TCG_SPEC_V2)) {
+    INTERESTING("TCG-Spec-License-v2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TIGER_CRYPTO)) {
+    INTERESTING("Tiger-Crypto");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TIGRA_CAL)) {
+    INTERESTING("Tigra-Calendar-3.2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TIMESTAMP_PICKER)) {
+    INTERESTING("Timestamp-Picker");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_UBC_FREE)) {
+    INTERESTING("UBC");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_UNPBOOK)) {
+    INTERESTING("unpbook");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_VBACCELERATOR)) {
+    INTERESTING("vbAccelerator");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_VISUAL_IDIOT)) {
+    INTERESTING("Visual-Idiot");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_WHOSONFIRST)) {
+    INTERESTING("WhosOnFirst");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_WILLIAM_ALEXANDER)) {
+    INTERESTING("William-Alexander");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_WINK)) {
+    INTERESTING("Wink");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_WINZIP_SE)) {
+    INTERESTING("WinZip-Self-Extractor");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_WROX_DOWNLOAD)) {
+    INTERESTING("Wrox-Download");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_WXWINDOWS_U_30)) {
+    INTERESTING("wxWindows-Unrestricted-3.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_XXD)) {
+    INTERESTING("xxd");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_YALE_CAS)) {
+    INTERESTING("Yale-CAS");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_YENSDESIGN)) {
+    INTERESTING("Yensdesign");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_YOLO_10)) {
+    INTERESTING("YOLO-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ZIPEG)) {
+    INTERESTING("Zipeg");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ZUGFERD)) {
+    INTERESTING("ZUGFeRD-2.2.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CAREWARE)) {
+    INTERESTING("Careware");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CCL_2026)) {
+    INTERESTING("CCL-2026");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CCLRC)) {
+    INTERESTING("CCLRC");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DBAD_11)) {
+    INTERESTING("DBAD-1.1");
+  }
+  else if (INFILE(_LT_DBAD)) {
+    INTERESTING("DBAD");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ASWF_DIGITAL_11)) {
+    INTERESTING("ASWF-Digital-Assets-1.1");
+  }
+  else if (INFILE(_LT_ASWF_DIGITAL_10)) {
+    INTERESTING("ASWF-Digital-Assets-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CERN_OHL_S_20)) {
+    INTERESTING("CERN-OHL-S-2.0");
+  }
+  else if (INFILE(_LT_CERN_OHL_W_20)) {
+    INTERESTING("CERN-OHL-W-2.0");
+  }
+  else if (INFILE(_LT_CERN_OHL_P_20)) {
+    INTERESTING("CERN-OHL-P-2.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ESA_PL_SC_24)) {
+    INTERESTING("ESA-PL-strong-copyleft-2.4");
+  }
+  else if (INFILE(_LT_ESA_PL_PERM_24)) {
+    INTERESTING("ESA-PL-permissive-2.4");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ADOBE_UTOPIA)) {
+    INTERESTING("Adobe-Utopia");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ALGLIB_DOC)) {
+    INTERESTING("ALGLIB-Documentation");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ARPHIC_1999)) {
+    INTERESTING("Arphic-1999");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ASPELL_RU)) {
+    INTERESTING("Aspell-RU");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ASTERISK_EXCEPTION)) {
+    INTERESTING("Asterisk-exception");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BRIAN_GLADMAN)) {
+    INTERESTING("Brian-Gladman-2-Clause");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CAPEC_TOU)) {
+    INTERESTING("CAPEC-tou");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CHECK_CVS)) {
+    INTERESTING("check-cvs");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CRONYX)) {
+    INTERESTING("Cronyx");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CVE_TOU)) {
+    INTERESTING("cve-tou");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DANTE_TREGLIA)) {
+    INTERESTING("Game-Programming-Gems");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FBM)) {
+    INTERESTING("FBM");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FREEBSD_DOC)) {
+    INTERESTING("FreeBSD-DOC");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GNOME_EXAMPLES_EXCEPTION)) {
+    INTERESTING("GNOME-examples-exception");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HYPHEN_BULGARIAN)) {
+    INTERESTING("hyphen-bulgarian");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_IEC_CODE_EULA)) {
+    INTERESTING("IEC-Code-Components-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_JOVE)) {
+    INTERESTING("jove");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MAGAZ)) {
+    INTERESTING("magaz");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MAILPRIO)) {
+    INTERESTING("mailprio");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MINECRAFT_MOD)) {
+    INTERESTING("MMPL-1.0.1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MMIXWARE)) {
+    INTERESTING("MMIXware");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MPI_PERMISSIVE)) {
+    INTERESTING("mpi-permissive");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MPLUS_FREE_FONT) && NOT_INFILE(_CR_MPLUS)) {
+    INTERESTING("mplus");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NTIA_PD)) {
+    INTERESTING("NTIA-PD");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OFFIS)) {
+    INTERESTING("OFFIS");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPENVISION)) {
+    INTERESTING("OpenVision");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPL_UK_30)) {
+    INTERESTING("OPL-UK-3.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PARATYPE_FREE_13)) {
+    INTERESTING("ParaType-Free-Font-1.3");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PNMSTITCH)) {
+    INTERESTING("pnmstitch");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SSH_KEYSCAN)) {
+    INTERESTING("ssh-keyscan");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_THIRDEYE)) {
+    INTERESTING("ThirdEye");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_UNRAR)) {
+    INTERESTING("UnRAR");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_XZOOM)) {
+    INTERESTING("xzoom");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_AARDVARK_PY_2014)) {
+    INTERESTING("Aardvark-I2C/SPI-2014");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ACCELLERA_SYSTEMC)) {
+    INTERESTING("SystemC-Open-Source-License-Agreement");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ACTER_PSL_1_0)) {
+    INTERESTING("Acter-Public-Source-License-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ADAPTEC_EULA)) {
+    INTERESTING("Adaptec-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ADDTHIS_MOBILE_SDK_1_0)) {
+    INTERESTING("AddThis-Mobile-Application-SDK-License-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ADOBE_EULA)) {
+    INTERESTING("Adobe-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_AG_GRID_ENTERPRISE)) {
+    INTERESTING("AG-Grid-Enterprise-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_AGTPL)) {
+    INTERESTING("AGTPL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ALEXISISAAC_FREEWARE)) {
+    INTERESTING("Alexisisaac-Freeware-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_AMAZON_REDSHIFT_JDBC)) {
+    INTERESTING("Amazon-Redshift-JDBC-Driver-License-Agreement");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_AMAZON_SL)) {
+    INTERESTING("Amazon-Software-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_AMD_LINUX_FIRMWARE_EXPORT)) {
+    INTERESTING("AMD-Linux-Firmware-Export-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ANACONDA_TOS_2024_03_30)) {
+    INTERESTING("Anaconda-TOS-2024-03-30");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ANDROID_SDK_PREVIEW_2015)) {
+    INTERESTING("Android-SDK-Preview-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ANSWERCAREFULLY_TOU_2025)) {
+    INTERESTING("AnswerCarefully-Dataset-ToU-2025");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_APPFIRE_EULA)) {
+    INTERESTING("Appfire-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_APPLE_ATTRIBUTION)) {
+    INTERESTING("Apple-Attribution-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_APPLE_MPEG_4)) {
+    INTERESTING("Apple-MPEG-4-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_APPSFLYER_FRAMEWORK)) {
+    INTERESTING("AppsFlyer-Framework-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ARM_CORTEX_MX)) {
+    INTERESTING("ARM-Cortex-Mx-Proprietary");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ARM_LLVM_SGA)) {
+    INTERESTING("ARM-LLVM-Grant");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ASMUS)) {
+    INTERESTING("ASMUS-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ATLASSIAN_MARKETPLACE_TOU)) {
+    INTERESTING("Atlassian-Marketplace-Terms-of-Use");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_AUTHORIZENET_SDK)) {
+    INTERESTING("AuthorizeNet-SDK-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_AUTODESK_3D_SFT_3_0)) {
+    INTERESTING("Autodesk-3D-Studio-File-Toolkit-for-Release-3");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_AUTOIT_EULA)) {
+    INTERESTING("Autoit-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BEA_2_1)) {
+    INTERESTING("BEA-2.1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BEAL_SCREAMER)) {
+    INTERESTING("Beal-Screamer-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BEEGFS_EULA_2024)) {
+    INTERESTING("BeeGFS-EULA-2024");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BINARY_LINUX_FIRMWARE)) {
+    INTERESTING("Binary-Only-Linux-Firmware-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BIOPYTHON)) {
+    INTERESTING("Biopython-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BPEL4WS_SPEC)) {
+    INTERESTING("BPEL4WS-Specification-license");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BRANKAS_OPEN_LICENSE_1_0)) {
+    INTERESTING("Brankas-Open-License-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BROADCOM_LINKING_UNMODIFIED)) {
+    INTERESTING("Broadcom-Linking-Exception-if-unmodified");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BROADCOM_LINUX_FIRMWARE)) {
+    INTERESTING("Broadcom-Linux-Firmware-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BROADCOM_LINUX_TIMER)) {
+    INTERESTING("Broadcom-Warranty-Disclaimer");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BROADCOM_OPUS_PATENT)) {
+    INTERESTING("Broadcom-Opus-Patent-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BROADCOM_STANDARD_TERMS)) {
+    INTERESTING("Broadcom-Standard-Terms");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BROADCOM_UNMODIFIED_EXCEPTIO)) {
+    INTERESTING("Broadcom-Unmodified-Linking-Exception");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BSD_DPT)) {
+    INTERESTING("BSD-DPT");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BUDIBASE_SQS_2023)) {
+    INTERESTING("Budibase-SQS-License-2023");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BUGSENSE_SDK)) {
+    INTERESTING("BugSense-SDK-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BYTEMARK)) {
+    INTERESTING("BYTEmark-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CADENCE_LINUX_FIRMWARE)) {
+    INTERESTING("Cadence-Linux-Firmware-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CAMUNDA_1_0)) {
+    INTERESTING("Camunda-License-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CANONICAL_HA_CLA_ANY_E_V1_2)) {
+    INTERESTING("Canonical-HA-CLA-ANY-E_v1.2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CANONICAL_HA_CLA_ANY_I_V1_2)) {
+    INTERESTING("Canonical-HA-CLA-ANY-I_v1.2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CAVIUM_MALLOC)) {
+    INTERESTING("Cavium-malloc-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CEXCEPT_2008)) {
+    INTERESTING("cexcept-License-2008");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CGIC)) {
+    INTERESTING("CGIC-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CHILLICREAM_1_0)) {
+    INTERESTING("ChilliCream-License-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CNCF_CORPORATE_CLA_1_0)) {
+    INTERESTING("CNCF-Corporate-CLA-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CNCF_INDIVIDUAL_CLA_1_0)) {
+    INTERESTING("CNCF-Individual-CLA-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CODEGURU_PERMISSIONS)) {
+    INTERESTING("CodeGuru-Permissions");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_COMMONJ_TIMER)) {
+    INTERESTING("CommonJ-Timer-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_COUCHBASE_COMMUNITY)) {
+    INTERESTING("Couchbase-Community-Edition-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CPP_CORE_GUIDELINES)) {
+    INTERESTING("CppCoreGuidelines-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CRAPL_0_1)) {
+    INTERESTING("CRAPL-v0-BETA-1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CSLA)) {
+    INTERESTING("CSLA-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DCO_1_0)) {
+    INTERESTING("DCO-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DCO_1_1)) {
+    INTERESTING("DCO-1.1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DEEPSEEK_LA_1_0)) {
+    INTERESTING("DeepSeek-License-Agreement-v1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DIFFGRAM_DLV2)) {
+    INTERESTING("Diffgram-DLv2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DIVX_OPEN_2_1)) {
+    INTERESTING("DivX-Open-License-2.1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DO_NO_HARM_0_1)) {
+    INTERESTING("Do-No-Harm");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DOUGLAS_YOUNG)) {
+    INTERESTING("Douglas-Young-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DYNARCH_DEVELOPER)) {
+    INTERESTING("Dynarch-Developer-Agreement");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ECLIPSE_TCK_1_1)) {
+    INTERESTING("Eclipse-TCK-v1.1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ECMA_PATENT_COC_0)) {
+    INTERESTING("Ecma-Historical-Code-of-Conduct-in-Patent-Matters");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ECMA_PATENT_COC_1)) {
+    INTERESTING("Ecma-Code-of-Conduct-in-Patent-Matters-v1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ECMA_PATENT_COC_2)) {
+    INTERESTING("Ecma-Code-of-Conduct-in-Patent-Matters-v2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ENHYDRA_1_1)) {
+    INTERESTING("Enhydra-1.1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ENISA_LEGAL_NOTICE_2025)) {
+    INTERESTING("ENISA-Legal-Notice-2025");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ERIC_GLASS)) {
+    INTERESTING("Eric-Glass-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ESRI_DEVKIT)) {
+    INTERESTING("Esri-Developer-Kit-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_EXCELSIOR_JET_RUNTIME)) {
+    INTERESTING("Excelsior-JET-Runtime-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FACEBOOK_NUCLIDE)) {
+    INTERESTING("Facebook-Nuclide-Software-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FACEBOOK_PATENT_RIGHTS_2)) {
+    INTERESTING("Facebook-Patent-Rights-2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FIRST_EPSS_USAGE)) {
+    INTERESTING("FIRST-EPSS-Usage-Agreement");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FISH_AUDIO_RESEARCH_2026_03_)) {
+    INTERESTING("Fish-Audio-Research-License-Agreement-2026-03-07");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FRAUNHOFER_ISO_14496_10)) {
+    INTERESTING("Fraunhofer-ISO-14496-10-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FTPBEAN)) {
+    INTERESTING("FtpBean-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GARETH_MCCAUGHAN)) {
+    INTERESTING("Gareth-McCaughan-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GATLING_HIGHCHARTS)) {
+    INTERESTING("Gatling-Highcharts-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GEMMA_TOU_2024_04_01)) {
+    INTERESTING("Gemma-ToU-2024-04-01");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GEMMA_TOU_2025_03_24)) {
+    INTERESTING("Gemma-ToU-2025-03-24");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GENERIC_CLA)) {
+    INTERESTING("Generic-CLA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GITHUB_CODEQL_TERMS_2020)) {
+    INTERESTING("GitHub-CodeQL-Terms-2020");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GITLEAKS_ACTION_EULA)) {
+    INTERESTING("Gitleaks-Action-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GNU_EMACS_GPL_1985)) {
+    INTERESTING("GNU-emacs-General-Public-License-1985");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GOOGLE_APIS_TOS_2021)) {
+    INTERESTING("Google-APIs-TOS-2021");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GOOGLE_CLA)) {
+    INTERESTING("Google-CLA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GOOGLE_CORPORATE_CLA)) {
+    INTERESTING("Google-Corporate-CLA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GOOGLE_PATENT_LICENSE_FUCHSI)) {
+    INTERESTING("Google-Patent-License-for-Fuchsia");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GOOGLE_PATENT_LICENSE_GOLANG)) {
+    INTERESTING("Google-Patent-License-for-Go");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GOOGLE_PATENT_LICENSE)) {
+    INTERESTING("Google-Patent-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GOOGLE_TOS_2020)) {
+    INTERESTING("Google-TOS-2020");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GRADLE_ENTERPRISE_SLA_2022_1)) {
+    INTERESTING("Gradle-Enterprise-SLA-2022-");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GRADLE_TOU_2022_01_13)) {
+    INTERESTING("Gradle-Terms-of-Use-2022-01-13");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GSAP_STANDARD_NO_CHARGE_2025)) {
+    INTERESTING("Standard-No-Charge-GSAP-License-2025");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GTPL_V2)) {
+    INTERESTING("GTPL-v2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HESSLA)) {
+    INTERESTING("HESSLA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HFOIL_1_0)) {
+    INTERESTING("HFOILv1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HISTORICAL_NTP)) {
+    INTERESTING("Historical-Notice-NTP");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HTTPGET)) {
+    INTERESTING("httpget-notice-and-disclaimer");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HUGO)) {
+    INTERESTING("Hugo-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_IBM_DEVELOPERWORKS_COMMUNITY)) {
+    INTERESTING("IBM-developerWorks-Community-Download-Agreement");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_IBM_EMPLOYEE_WRITTEN)) {
+    INTERESTING("IBM-Employee-Written-Software-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_IBM_SAMPLE)) {
+    INTERESTING("IBM-Sample-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ICOT_FREE)) {
+    INTERESTING("ICOT-Free-Software");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_IDT_NOTICE)) {
+    INTERESTING("IDT-License-Notice");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_INFINEON_FREE)) {
+    INTERESTING("Infineon-Free-Software-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_INSTALLSITE)) {
+    INTERESTING("InstallSite-License-Agreement");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_INTEL_SAMPLE_SOURCE_CODE_201)) {
+    INTERESTING("Intel-Sample-Source-Code-2015");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_INTEL_SCL)) {
+    INTERESTING("Intel-Source-Code-License-Agreement");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_IOZONE)) {
+    INTERESTING("IOzone-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ISO_14496_10)) {
+    INTERESTING("ISO-14496-10");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ISO_SCHEMATRON_19757_3)) {
+    INTERESTING("ISO/IEC-19757-3");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ITC_EULA)) {
+    INTERESTING("ITC-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ITU)) {
+    INTERESTING("ITU-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ITU_T)) {
+    INTERESTING("ITU-T-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_JETBRAINS_PURCHASE_TERMS)) {
+    INTERESTING("JetBrains-Purchase-Terms");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_JGRAPH_GENERAL)) {
+    INTERESTING("JGraph-General-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_JIDE_SLA)) {
+    INTERESTING("JIDE-SLA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_JOINBASE_CELA_2022)) {
+    INTERESTING("JoinBase-Community-Edition-License-2022");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_JPEGXR)) {
+    INTERESTING("JPEG-XR-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_KEVAN_STANNARD)) {
+    INTERESTING("Kevan-Stannard-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_KUMAR_ROBOTICS)) {
+    INTERESTING("Kumar-Robotics-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LARABIE)) {
+    INTERESTING("Larabie-Fonts-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LATTICE_OSL_2017)) {
+    INTERESTING("Lattice-Open-Source-License-2017");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LCS_TELEGRAPHICS)) {
+    INTERESTING("LCS-Telegraphics-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LIBRATO_EXCEPTION)) {
+    INTERESTING("Librato-Open-License-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LIFERAY_EE)) {
+    INTERESTING("Liferay-Portal-EE-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LIFERAY_MARKETPLACE_TOS)) {
+    INTERESTING("Liferay-Marketplace-TOS");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LINUX_DEVICE_DRIVERS)) {
+    INTERESTING("Linux-Device-Drivers");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LIVEKIT_MODEL_2024)) {
+    INTERESTING("LiveKit-Model-License-Agreement-2024");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LLAMA_2_LICENSE_2023)) {
+    INTERESTING("Llama-2-Community-License-Agreement-2023");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LLAMA_3_1_LICENSE_2024)) {
+    INTERESTING("Llama-3.1-Community-License-Agreement-2024");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LLAMA_3_2_LICENSE_2024)) {
+    INTERESTING("Llama-3.2-Community-License-Agreement-2024");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LLAMA_3_3_LICENSE_2024)) {
+    INTERESTING("Llama-3.3-Community-License-Agreement-2024");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LLAMA_4_CLA_2025)) {
+    INTERESTING("Llama-4-Community-License-Agreement-2025");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LLAMA_4_LICENSE_2025)) {
+    INTERESTING("Llama-4-Acceptable-Use-Policy-2025");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MAPBOX_TOS_2021)) {
+    INTERESTING("Mapbox-TOS-2021");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MAPBOX_TOS_2024)) {
+    INTERESTING("Mapbox-TOS-2024");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MARVELL_FIRMWARE)) {
+    INTERESTING("Marvell-Firmware-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MATT_GALLAGHER_ATTRIBUTION)) {
+    INTERESTING("Matt-Gallagher-Attribution-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MCAFEE_TOU)) {
+    INTERESTING("McAfee-Free-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MEDIATEK_NO_WARRANTY)) {
+    INTERESTING("MediaTek-No-Warranty-Clause");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MEDIATEK_PROPRIETARY_2005)) {
+    INTERESTING("Mediatek-Proprietary-License-2005");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MEDIATEK_PROPRIETARY_2010)) {
+    INTERESTING("Mediatek-Proprietary-License-2010");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MEDIATEK_PROPRIETARY_2016)) {
+    INTERESTING("Mediatek-Proprietary-License-2016");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MELANGE)) {
+    INTERESTING("Melange-Public-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MICROCHIP_ENC28J60_2009)) {
+    INTERESTING("Microchip-ENC28J60-License-2009");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MICROCHIP_LINUX_FIRMWARE)) {
+    INTERESTING("Microchip-Linux-Firmware-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MICROCHIP_PK2CMD_2009)) {
+    INTERESTING("Microchip-pk2cmd-License-2009");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MICROSOFT_ENTERPRISE_LIBRARY)) {
+    INTERESTING("MS-Enterprise-Library-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MINIMAX_MODEL_M2_5)) {
+    INTERESTING("MiniMax-Model-License-M2.5");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MIT_NAGY)) {
+    INTERESTING("MIT-Nagy-Variant");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MODERNE_SALA_2024)) {
+    INTERESTING("Moderne-Source-Available-License-2024");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MOE_SPEECH)) {
+    INTERESTING("MoeSpeech-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MOV_AI_1_0)) {
+    INTERESTING("Mov.AI-License-version-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MOXA_LINUX_FIRMWARE)) {
+    INTERESTING("Moxa-Linux-Firmware-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MPEG_7)) {
+    INTERESTING("MPEG-7-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MPEG_ISO)) {
+    INTERESTING("MPEG-2-NBC-MPEG-4-Audio-ISO");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_ASP_NET_AJAX_SUPPLEMENTAL)) {
+    INTERESTING("MS-Supplemental-License-ASP.NET-2.0-AJAX-EXT");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_AZURE_RTOS_2020_05)) {
+    INTERESTING("MS-Azure-RTOS-2020-05");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_AZURE_RTOS_2020_07)) {
+    INTERESTING("MS-Azure-RTOS-2020-07");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_AZURE_RTOS_2023_05)) {
+    INTERESTING("MS-Azure-RTOS-2023-05");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_CONTAINER_EULA)) {
+    INTERESTING("Microsoft-Container-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_DIRECT3D_D3D120N7_1_1_0)) {
+    INTERESTING("MS-Direct3D-D3D12On7-1.1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_DXSDK_D3DX_9_29_952_3)) {
+    INTERESTING("MS-DXSDK.D3DX-9.29.952.3");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_ENTITY_FRAMEWORK_5)) {
+    INTERESTING("MS-Entity-Framework-5-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_IIS_CONTAINER_IMAGES_EULA)) {
+    INTERESTING("MS-IIS-Container-Images-EULA-2020");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MSJ_SAMPLE_CODE)) {
+    INTERESTING("MS-Systems-Journal-Sample-Code-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_LIMITED_COMMUNITY)) {
+    INTERESTING("MS-Limited-Community-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_NET_LIBRARY_2019_06)) {
+    INTERESTING("MS-.NET-Library-License-2019-06");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_OFFICE_SYSTEM_PROGRAMS_EU)) {
+    INTERESTING("MS-Office-System-Programs-Software-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_OPUS_PATENT_2012)) {
+    INTERESTING("MS-Opus-Patent-Terms-2012");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_PATENT_PROMISE)) {
+    INTERESTING("MS-Patent-Promise-for-.NET");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_PATENT_PROMISE_MONO)) {
+    INTERESTING("Microsoft-Patent-Promise-for-Mono");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_PYTHON_VSCODE_PYLANCE_202)) {
+    INTERESTING("MS-Pylance-Extension-for-VSCode-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_SSPL)) {
+    INTERESTING("MS-SS-PL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MSTAR_2007)) {
+    INTERESTING("MStar-Proprietary-License-2007");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MSTAR_2012)) {
+    INTERESTING("MStar-Proprietary-License-2012");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MTX_LICENSING_STATEMENT)) {
+    INTERESTING("MicroType-Express-(MTX)-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MUT_LICENSE)) {
+    INTERESTING("muT-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MYSQL_LINKING_EXCEPTION_2018)) {
+    INTERESTING("MySQL-linking-exception-2018");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NAUGHTER)) {
+    INTERESTING("Naughter-Software-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NEMOTRON_OPEN_MODEL_2025_12_)) {
+    INTERESTING("NVIDIA-Nemotron-Open-Model-2025-12-15");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NETCOMPONENTS)) {
+    INTERESTING("NetComponents-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NETDATA_NCUL1)) {
+    INTERESTING("Netdata-Cloud-UI-License-v1.0-(NCUL1)");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NETRONOME_FIRMWARE)) {
+    INTERESTING("Netronome-Firmware-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NEW_RELIC)) {
+    INTERESTING("New-Relic-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NON_VIOLENT_4_0)) {
+    INTERESTING("NVPL-4.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NON_VIOLENT_7_0)) {
+    INTERESTING("NVPL-7.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NTLM)) {
+    INTERESTING("NTLM-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NVIDIA_APEX_SDK_EULA_2011)) {
+    INTERESTING("NVIDIA-APEX-SDK-EULA-2011");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NVIDIA_MODEL_TRAINING_2025)) {
+    INTERESTING("NVIDIA-Data-Agreement-for-Model-Training-2025");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NVIDIA_OPEN_MODEL_2025_04_28)) {
+    INTERESTING("NVIDIA-Open-Model-License-Agreement-2025-04-28");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NXP_FIRMWARE_PATENT)) {
+    INTERESTING("NXP-Firmware-with-Patent-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NXP_MC_FIRMWARE)) {
+    INTERESTING("NXP-MC-Firmware-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NXP_WARRANTY_DISCLAIMER)) {
+    INTERESTING("NXP-Warranty-Disclaimer");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NYSL_0_9982)) {
+    INTERESTING("NYSL-0.9982");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ODIN_2000)) {
+    INTERESTING("Odin-Software-License-2000");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ODMG)) {
+    INTERESTING("ODMG-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OGL_1_0A)) {
+    INTERESTING("OGL-1.0a");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OKNOSOFT_2021)) {
+    INTERESTING("Oknosoft-License-2021");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ON2_PATENT)) {
+    INTERESTING("On2-VP3-Codec-Software-Patent-grant");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPENAI_TOU_20241211)) {
+    INTERESTING("OpenAI-Terms-of-Use-20241211");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPENATOM_MODEL_1_0)) {
+    INTERESTING("OpenAtom-Model-License-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPENVPN_AS_EULA)) {
+    INTERESTING("OpenVPN-AS-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPEN_WEIGHTS_PERMISSIVE_1_0_)) {
+    INTERESTING("Open-Weights-Permissive-License-v1.0.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPERA_EULA_2018)) {
+    INTERESTING("Opera-EULA-2018");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPERA_EULA_EEA_2018)) {
+    INTERESTING("Opera-EULA-EEA-2018");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPNL_1_0)) {
+    INTERESTING("OPNL-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPNL_2_0)) {
+    INTERESTING("OPNL-2.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ORACLE_ENTITLEMENT_05_15)) {
+    INTERESTING("Oracle-Entitlement-5-plus-15");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ORACLE_GFTC_2023_06_12)) {
+    INTERESTING("Oracle-GFTC-2023-06-12");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ORACLE_NFTC_2021)) {
+    INTERESTING("Oracle-NFTC-2021");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ORACLE_OTN_JAVASE_2019)) {
+    INTERESTING("OTN-for-Oracle-Java-SE-2019");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ORACLE_SQL_DEVELOPER)) {
+    INTERESTING("Oracle-SQL-Developer-License-Terms");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OREILLY_NOTICE)) {
+    INTERESTING("O'Reilly-Code-Sample-Notice");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OSGI_SPEC_2_0)) {
+    INTERESTING("OSGi-Specification-License-2.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OS_MAINTENANCE_FEE_EULA)) {
+    INTERESTING("Open-Source-Maintenance-Fee-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OTN_DEV_DIST_2016)) {
+    INTERESTING("OTN-License-2016");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OTNLA_2016_11_30)) {
+    INTERESTING("OTNLA-2016-11-30");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OWFA_1_0_2023_05)) {
+    INTERESTING("OWFa-1.0-Patent-and-Copyright-Grants-2023-05");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OWFA_1_0)) {
+    INTERESTING("OWFa-1.0-Patent-and-Copyright-Grants");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OWFA_1_0_PATENT_ONLY)) {
+    INTERESTING("OWFa-1.0-Patent-Only");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OWF_CLA_1_0_COPYRIGHT)) {
+    INTERESTING("OWF-CLA-1.0-Copyright");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OWF_CLA_1_0_COPYRIGHT_PATENT)) {
+    INTERESTING("OWF-CLA-1.0-Copyright-and-Patent");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OXYGEN_XML_WEBHELP_EULA)) {
+    INTERESTING("Oxygen-XML-WebHelp-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PAOLO_MESSINA_2000)) {
+    INTERESTING("Paolo-Messina-2000");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PAYPAL_SDK_2013_2016)) {
+    INTERESTING("PayPal-SDK-License-2013-2016");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PDF_CREATOR_PILOT)) {
+    INTERESTING("PDF-Creator-Pilot-License-Agreement");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PD_PROGRAMMING)) {
+    INTERESTING("PD'Programming-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PHASER_CCP4)) {
+    INTERESTING("Phaser-Commercial-EULA-(CCP4)");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PHASER_PHENIX)) {
+    INTERESTING("Phaser-Commercial-EULA-(Phenix)");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PHILIPPE_DE_MUYTER)) {
+    INTERESTING("Philippe-De-Muyter-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PLANET_SOURCE_CODE)) {
+    INTERESTING("Planet-Source-Code-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PLASTIMATCH_1_0)) {
+    INTERESTING("Plastimatch-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PML_2020)) {
+    INTERESTING("Amazon-PML-2020");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PNGSUITE)) {
+    INTERESTING("PngSuite-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_POWERVR_TOOLS_SOFTWARE_EULA)) {
+    INTERESTING("PowerVR-Tools-Software-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PROPRIETARY_LICENSE)) {
+    INTERESTING("Proprietary-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PSION_S3AEMUL)) {
+    INTERESTING("Psion-User-LIcence-for-S3AEMUL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PSION_SIEMUL)) {
+    INTERESTING("Psion-User-LIcence-for-SiEMUL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PSION_WRKAEMUL)) {
+    INTERESTING("Psion-User-LIcence-for-WrkAEmul");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PSYTEC_FREESOFT)) {
+    INTERESTING("Psytec-Free-Software-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_QAPLUG)) {
+    INTERESTING("QAPlug-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_QCA_LINUX_FIRMWARE)) {
+    INTERESTING("QCA-Linux-Firmware-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_QCA_TECHNOLOGY)) {
+    INTERESTING("QCA-Technology-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_QTI_LINUX_FIRMWARE)) {
+    INTERESTING("QTI-Linux-Firmware");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_QUALCOMM_ISO)) {
+    INTERESTING("Qualcomm-ISO/IEC-MPEG-B-DASH-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_QUICKNET_DOCUMENT_1999)) {
+    INTERESTING("Quicknet-Document-License-1999");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_QWEN_2024)) {
+    INTERESTING("Qwen-License-Agreement-2024");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_RACKSPACE)) {
+    INTERESTING("Rackspace-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_REDIS_SOURCE_AVAILABLE_1_0)) {
+    INTERESTING("Redis-Source-Available-License-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_RESPONSIBLE_AI_SOURCE_1_0)) {
+    INTERESTING("Reponsible-AI-Source-Code-License-v1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_RETYPE_3_7_0)) {
+    INTERESTING("Retype-Software-License-Agreement-v3.7.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_RICHARD_BLACK)) {
+    INTERESTING("Richard-Black-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ROOT_CERT_3_0)) {
+    INTERESTING("Root-Certificate-License-Agreement-v3.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_RSA_DEMO)) {
+    INTERESTING("RSA-Demo-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_RUBYENCODER_COMMERCIAL)) {
+    INTERESTING("RubyEncoder-Commercial-Licence");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_RUBYENCODER_LOADER)) {
+    INTERESTING("RubyEncoder-Loader-Licence");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SAFECOPY_EULA)) {
+    INTERESTING("SafeCopy-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SALESFORCESANS_FONT)) {
+    INTERESTING("SalesforceSans-Font-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SAM_2025_11_19)) {
+    INTERESTING("SAM-License-2025-11-19");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SANDEEP)) {
+    INTERESTING("Sandeep-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SCANLOGD_LICENSE)) {
+    INTERESTING("scanlogd-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SCOLA_EN)) {
+    INTERESTING("Statistics-Canada-Open-Licence-Agreement");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SCRIPT_NIKHILK)) {
+    INTERESTING("Script#-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SEMGREP_REGISTRY)) {
+    INTERESTING("Semgrep-Registry-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SEMGREP_RULES_1_0)) {
+    INTERESTING("Semgrep-Rules-License-v.1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SERVICE_COMP_ARCH)) {
+    INTERESTING("Service-Component-Architecture-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SGI_CID_1_0)) {
+    INTERESTING("SGI-CID-Font-Code-Public-License-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SLINT_COMMERCIAL_2_0)) {
+    INTERESTING("Slint-Commercial-License-2.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SMARTLABS_FREEWARE)) {
+    INTERESTING("SmartLabs-Freeware-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SOCKETXX_2003)) {
+    INTERESTING("Socketxx-License-2003");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SOFTFLOAT_2C)) {
+    INTERESTING("SoftFloat-Legal-Notice-2c");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SPARK_JIVE)) {
+    INTERESTING("Spark-Jive-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SPLUNK_3PP_EULA)) {
+    INTERESTING("Splunk-EULA-for-Third-Party-Content");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SQUARE_CLA)) {
+    INTERESTING("Square-CLA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_STABILITY_AI_COMMUNITY_2024)) {
+    INTERESTING("Stability-AI-Community-License-Agreement-2024");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_STMICROELECTRONICS_LINUX_FIR)) {
+    INTERESTING("STMicroelectronics-Linux-Firmware-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SUN_BCL_JAVA_SERVLET_IMP_2_1)) {
+    INTERESTING("Sun-BCL-Java-Servlet-Implementation-2.1.1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SUN_BSD_EXTRA)) {
+    INTERESTING("Sun-BSD-Style-with-Additional-Restrictions");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SUN_CC_PP_1_0)) {
+    INTERESTING("Sun-CC-PP-Processing-License-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SUN_EJB_SPEC_3_0)) {
+    INTERESTING("Sun-EJB-Specification-3.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SUN_GLASSFISH)) {
+    INTERESTING("Sun-GlassFish-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SUN_JAVAMAIL)) {
+    INTERESTING("Sun-JavaMail");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SUN_JAVA_TRANSACTION_API)) {
+    INTERESTING("Sun-Java-Transaction-API-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SUN_JSR_SPEC_04_2006)) {
+    INTERESTING("Sun-JSR-Specification-04-2006");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SUN_JTA_SPEC_1_0_1B)) {
+    INTERESTING("Sun-JTA-Specification-License-1.0.1B");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SUN_NO_HIGH_RISK_ACTIVITIES)) {
+    INTERESTING("Sun-No-High-Risk-Activities-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SYNOPSYS_ATTRIBUTION)) {
+    INTERESTING("Synopsys-Attribution-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TALIGENT_JDK)) {
+    INTERESTING("Taligent-JDK-Proprietary-Notice");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TANUKI_MAINTENANCE)) {
+    INTERESTING("Tanuki-Maintenance-Addendum-1.3");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TENCENT_HUNYUAN_IMAGE_3_0_CL)) {
+    INTERESTING("Tencent-Hunyuan-Image-3.0-CLA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_T_ENGINE_PUBLIC)) {
+    INTERESTING("T-Engine-Public-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TI_BROADBAND_APPS)) {
+    INTERESTING("TI-Broadband-Applications-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_T_LICENSE_1_0)) {
+    INTERESTING("T-License-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_T_LICENSE_2_0)) {
+    INTERESTING("T-License-2.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_T_LICENSE_2_1)) {
+    INTERESTING("T-License-2.1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_T_LICENSE_2_2)) {
+    INTERESTING("T-License-2.2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_T_LICENSE_AMP_T_KERNEL)) {
+    INTERESTING("T-License-for-AMP-T-Kernel");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_T_LICENSE_AMP_TKSE)) {
+    INTERESTING("T-License-for-AMP-TKSE");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_T_LICENSE_SMP_T_KERNEL)) {
+    INTERESTING("T-License-for-SMP-T-Kernel");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_T_LICENSE_SMP_TKSE)) {
+    INTERESTING("T-License-for-SMP-TKSE");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_T_LICENSE_TKSE)) {
+    INTERESTING("T-License-for-TKSE");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TONGYI_QIANWEN_2023)) {
+    INTERESTING("Tongyi-Qianwen-License-Agreement-2023");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TOPPERS_EDUCATIONAL)) {
+    INTERESTING("TOPPERS-Educational");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TOPPERS_LICENSE)) {
+    INTERESTING("TOPPERS-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TRCA_ODL_1_0)) {
+    INTERESTING("TRCA-Open-Data-Licence-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TREEVIEW_DEVELOPER)) {
+    INTERESTING("TreeView-Developer-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TREEVIEW_DISTRIBUTOR)) {
+    INTERESTING("TreeView-Distributor-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TRENDMICRO_CL_1_0)) {
+    INTERESTING("Trend-Micro-Community-License-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TRUSTONIC_PROPRIETARY_2013)) {
+    INTERESTING("Trustonic-Proprietary-License-2013");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TXL_10_5)) {
+    INTERESTING("TXL-10.5-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_UGUI)) {
+    INTERESTING("UGUI-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_UNLIMITED_BINARY_LINKING)) {
+    INTERESTING("Unlimited-Binary-Linking-Exception");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_UNLIMITED_BINARY_USE_EXCEPTI)) {
+    INTERESTING("Unlimited-Binary-Use-Exception");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_UNPUBLISHED_SOURCE)) {
+    INTERESTING("Unpublished-Source-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_US_GOVT_GEOTRANFORM)) {
+    INTERESTING("US-Government-GeoTransform");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_USROBOTICS_PERMISSIVE)) {
+    INTERESTING("USRobotics-Permissive-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_UTAH_CSL)) {
+    INTERESTING("Utah-CSL-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_VCALENDAR)) {
+    INTERESTING("VCalendar-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_VERISIGN)) {
+    INTERESTING("VeriSign-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_VICOMSOFT_SOFTWARE)) {
+    INTERESTING("Vicomsoft-Software-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_VISUAL_NUMERICS)) {
+    INTERESTING("Visual-Numerics-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_VITA_NUOVA_LIBERAL)) {
+    INTERESTING("Vita-Nuova-Liberal-Source-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_VITESSE_PROP)) {
+    INTERESTING("Vitesse-Proprietary-Notice");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_VPL_1_1)) {
+    INTERESTING("VPL-1.1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_VPL_1_2)) {
+    INTERESTING("VPL-1.2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_VS10X_CODE_MAP)) {
+    INTERESTING("VS10x-Code-Map");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_W3C_COMMUNITY_CLA)) {
+    INTERESTING("W3C-Community-CLA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_W3C_COMMUNITY_FINAL_SPEC)) {
+    INTERESTING("W3C-Community-Final-Specification-Agreement");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_WINCE_50_SHARED_SOURCE)) {
+    INTERESTING("MS-Windows-CE-5.0-Shared-Source-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_WINIDEA_SDK_2025)) {
+    INTERESTING("winIDEA-SDK-2025");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_XMOS_COMMERCIAL_2017)) {
+    INTERESTING("XMOS-Commercial-2017");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ZAPATEC_CALENDAR)) {
+    INTERESTING("Zapatec-Calendar-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ZEUSBENCH)) {
+    INTERESTING("ZeusBench-notice");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ZIPLIST5_GEOCODE_DUPLICATION)) {
+    INTERESTING("ZIPList5-Geocode-Duplication-Addendum");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ZVENO_RESEARCH)) {
+    INTERESTING("Zveno-Research-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_EJ_TECHNOLOGIES_EULA)) {
+    INTERESTING("ej-technologies-EULA");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HUGO_LICENSE) && NOT_INFILE(_LT_HUGO)) {
+    INTERESTING("Hugo-License");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MOVAI_1_0)) {
+    INTERESTING("Mov.AI-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SBIA_B)) {
+    INTERESTING("SBIA-B");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_YANDEXGPT_2025)) {
+    INTERESTING("YandexGPT-5-Lite-8B-2025");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ACTIVESTATE_COMMUNITY)) {
+    INTERESTING("ActiveState-Community");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CHRIS_STOY)) {
+    INTERESTING("Chris-Stoy-Attribution");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GLWTPL)) {
+    INTERESTING("GLWTPL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_RED_HAT_TRADEMARKS)) {
+    INTERESTING("Red-Hat-Trademarks");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_RTOOLS_UTIL)) {
+    INTERESTING("RTools-Util");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TGC_SPEC_V2)) {
+    INTERESTING("TCG-Spec-License-v2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TIGRA_CALENDAR_32)) {
+    INTERESTING("Tigra-Calendar-3.2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TIM_JANIK_2003)) {
+    INTERESTING("Tim-Janik-License-2003");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ATMEL_FW_LINUX)) {
+    INTERESTING("Atmel-linux-firmware");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SCANCODE_ACK)) {
+    INTERESTING("LicenseRef-scancode-acknowledgment");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_KFGQPC_UTHMANIC)) {
+    INTERESTING("KFGQPC-Uthmanic-Script-HAFS");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_KICAD_LIB_EXC)) {
+    INTERESTING("KiCad-libraries-exception");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_QPL_INRIA_2004)) {
+    INTERESTING("QPL-1.0-INRIA-2004-exception");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BITSTREAM_CHARTER)) {
+    INTERESTING("Bitstream-Charter");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GRAPHICS_GEMS)) {
+    INTERESTING("Graphics-Gems");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_KNUTH_CTAN)) {
+    INTERESTING("Knuth-CTAN");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LAL_12)) {
+    INTERESTING("LAL-1.2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LILIQ_P_11)) {
+    INTERESTING("LiLiQ-P-1.1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NLPL_PROSE)) {
+    INTERESTING("NLPL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OSC_10)) {
+    INTERESTING("OSC-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SGP4_LIC)) {
+    INTERESTING("SGP4");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SL_LIC)) {
+    INTERESTING("SL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FMT_EXCEPTION)) {
+    INTERESTING("fmt-exception");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ADVANCED_CRYPTICS)) {
+    INTERESTING("Advanced-Cryptics-Dictionary");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CFITSIO)) {
+    INTERESTING("CFITSIO");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ELASTIC_20)) {
+    INTERESTING("Elastic-2.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPENMDW_10)) {
+    INTERESTING("OpenMDW-1.0");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TPDL)) {
+    INTERESTING("TPDL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_WTFNMFPL)) {
+    INTERESTING("WTFNMFPL");
+  }
   cleanLicenceBuffer();
   /*
    * END of license-footprint checking of known patterns/strings
@@ -10598,6 +13167,9 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   if (INFILE(_SPDX_Bahyph)) {
     INTERESTING("Bahyph");
   }
+  if (INFILE(_SPDX_Baekmuk)) {
+    INTERESTING("Baekmuk");
+  }
   if (INFILE(_SPDX_Barr)) {
     INTERESTING("Barr");
   }
@@ -10958,7 +13530,7 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_SPDX_GFDL_13)) {
     INTERESTING("GFDL-1.3");
   }
-  if (INFILE(_SPDX_GLWTPL)) {
+  if (INFILE(_SPDX_GLWTPL) || INFILE(_SPDX_GLWTPL_text)) {
     INTERESTING("GLWTPL");
   }
   if (INFILE(_SPDX_gnuplot)) {
@@ -10966,6 +13538,9 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   }
   if (INFILE(_SPDX_gSOAP_13b)) {
     INTERESTING("gSOAP-1.3b");
+  }
+  if (INFILE(_SPDX_Gutmann)) {
+    INTERESTING("Gutmann");
   }
   if (INFILE(_SPDX_HaskellReport)) {
     INTERESTING("HaskellReport");
@@ -11042,7 +13617,7 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   if (INFILE(_SPDX_LAL_12)) {
     INTERESTING("LAL-1.2");
   }
-  if (INFILE(_SPDX_LAL_13)) {
+  if (INFILE(_SPDX_LAL_13) || INFILE(_SPDX_LAL_13_text)) {
     INTERESTING("LAL-1.3");
   }
   if (INFILE(_SPDX_LiLiQ_P_11)) {
@@ -11162,7 +13737,7 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   if (INFILE(_SPDX_NPOSL_30)) {
     INTERESTING("NPOSL-3.0");
   }
-  if (INFILE(_SPDX_NLOD_10)) {
+  if (INFILE(_SPDX_NLOD_10) || INFILE(_SPDX_NLOD_10_text)) {
     INTERESTING("NLOD-1.0");
   }
   if (INFILE(_SPDX_Noweb)) {
@@ -11201,7 +13776,7 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   if (INFILE(_SPDX_ODC_By_10)) {
     INTERESTING("ODC-By-1.0");
   }
-  if (INFILE(_SPDX_OGL_Canada_20)) {
+  if (INFILE(_SPDX_OGL_Canada_20) || INFILE(_SPDX_OGL_Canada_20_text)) {
     INTERESTING("OGL-Canada-2.0");
   }
   if (INFILE(_SPDX_OGL_UK_10)) {
@@ -11291,7 +13866,7 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   if (INFILE(_SPDX_Parity_700)) {
     INTERESTING("Parity-7.0.0");
   }
-  else if (INFILE(_SPDX_Parity_600)) {
+  else if (INFILE(_SPDX_Parity_600) || INFILE(_SPDX_Parity_600_text)) {
     INTERESTING("Parity-6.0.0");
   }
   if (INFILE(_SPDX_PHP_301)) {
@@ -11537,6 +14112,81 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   if (INFILE(_SPDX_Zimbra_14)) {
     INTERESTING("Zimbra-1.4");
   }
+  if (INFILE(_SPDX_TTWL)) {
+    INTERESTING("TTWL");
+  }
+  if (INFILE(_SPDX_COIL_10)) {
+    INTERESTING("COIL-1.0");
+  }
+  if (INFILE(_SPDX_HIDAPI)) {
+    INTERESTING("HIDAPI");
+  }
+  if (INFILE(_SPDX_ulem)) {
+    INTERESTING("ulem");
+  }
+  if (INFILE(_SPDX_UnixCrypt)) {
+    INTERESTING("UnixCrypt");
+  }
+  if (INFILE(_SPDX_fwlw)) {
+    INTERESTING("fwlw");
+  }
+  if (INFILE(_SPDX_McPhee_slideshow)) {
+    INTERESTING("McPhee-slideshow");
+  }
+  if (INFILE(_SPDX_MIPS)) {
+    INTERESTING("MIPS");
+  }
+  if (INFILE(_SPDX_MPEG_SSG)) {
+    INTERESTING("MPEG-SSG");
+  }
+  if (INFILE(_SPDX_NLOD_20)) {
+    INTERESTING("NLOD-2.0");
+  }
+  if (INFILE(_SPDX_LPD_document)) {
+    INTERESTING("LPD-document");
+  }
+  if (INFILE(_SPDX_SchemeReport)) {
+    INTERESTING("SchemeReport");
+  }
+  if (INFILE(_SPDX_softSurfer)) {
+    INTERESTING("softSurfer");
+  }
+  if (INFILE(_SPDX_swrule)) {
+    INTERESTING("swrule");
+  }
+  if (INFILE(_SPDX_threeparttable)) {
+    INTERESTING("threeparttable");
+  }
+  if (INFILE(_SPDX_Widget_Workshop)) {
+    INTERESTING("Widget-Workshop");
+  }
+  if (INFILE(_SPDX_Zeeff)) {
+    INTERESTING("Zeeff");
+  }
+  if (INFILE(_SPDX_DEC_3_Clause)) {
+    INTERESTING("DEC-3-Clause");
+  }
+  if (INFILE(_SPDX_Kastrup)) {
+    INTERESTING("Kastrup");
+  }
+  if (INFILE(_SPDX_DL_DE_BY_20)) {
+    INTERESTING("DL-DE-BY-2.0");
+  }
+  if (INFILE(_SPDX_DL_DE_ZERO_20)) {
+    INTERESTING("DL-DE-ZERO-2.0");
+  }
+  if (INFILE(_SPDX_Lucida_Bitmap_Fonts)) {
+    INTERESTING("Lucida-Bitmap-Fonts");
+  }
+  if (INFILE(_SPDX_ISO_permission)) {
+    INTERESTING("ISO-permission");
+  }
+  if (INFILE(_SPDX_NYSL_0_9982)) {
+    INTERESTING("NYSL-0.9982");
+  }
+  if (INFILE(_SPDX_LicenseRef_musl_exception)) {
+    INTERESTING("musl-exception");
+  }
   return;
 }
 
@@ -11640,6 +14290,9 @@ void copyleftExceptions(char *filetext, int size, int isML, int isPS)
    */
   if (INFILE(_LT_389_exception)) {
     INTERESTING("389-exception");
+  }
+  else if (INFILE(_LT_ASN1SCC_exception) || INFILE(_LT_ASN1SCC_exception_2)) {
+    INTERESTING("ASN1SCC-exception");
   }
   else if (INFILE(_LT_Autoconf_exception_20)) {
     INTERESTING("Autoconf-exception-2.0");
@@ -11881,6 +14534,7 @@ void dumpMatch(char *text, char *label)
     }
   }
   printf("]\n");
+
   return;
 }
 

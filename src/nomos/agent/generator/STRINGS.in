@@ -170,7 +170,7 @@
 %STR% "3gpp organizational partners =SOME= permission to distribute modify and use this file under the standard license terms"
 #
 %ENTRY% _LT_Imlib2
-%KEY% "distribut"
+%KEY% "so(ftware|urce)"
 %STR% "available publicly means including the source for this software with the distribution or a method to get this software via some reasonable mechanism"
 # Open Font License
 %ENTRY% _LT_OPEN_FONT_V10
@@ -196,6 +196,26 @@
 %ENTRY% _LT_ABSTYLES_2
 %KEY% "permi[st]"
 %STR% "permission is granted to copy and distribute modified versions of this document under the conditions for verbatim copying"
+#
+%ENTRY% _LT_ABRS
+%KEY% "redistrib"
+%STR% "richard =FEW= stallman =SOME= may not =FEW= redistribute"
+#
+%ENTRY% _LT_ANDRE_ADRIAN_DFS
+%KEY% "so(ftware|urce)"
+%STR% "you are not allowed to monopolize the source code or the algorithms =SOME= as your intellectual property"
+#
+%ENTRY% _LT_ANDRE_ADRIAN_DFS_2
+%KEY% "so(ftware|urce)"
+%STR% "you are allowed to use this source code in any open source or closed source software"
+#
+%ENTRY% _LT_ACTIVESTATE
+%KEY% "distribut"
+%STR% "activestate community edition =ANY= redistribution of the software you will require a special licen"
+#
+%ENTRY% _TITLE_ACTIVESTATE
+%KEY% "\<(end[ -]user|eula)\>"
+%STR% "activestate community licen[cs]e"
 #
 %ENTRY% _LT_ACAA_RIGHTS
 %KEY% "so(ftware|urce)"
@@ -241,7 +261,7 @@
 #####
 %ENTRY% _LT_ADOBE_1
 %KEY% "licen[cs]"
-%STR% "adobe grants to you a non-?exclusive licen[cs]e"
+%STR% "adobe end user license agreement"
 #
 %ENTRY% _LT_ADOBE_2
 %KEY% "permi[st]"
@@ -321,6 +341,10 @@
 %ENTRY% _LT_ADSL
 %KEY% "distribut"
 %STR% "you may copy display modify and redistribute the software code either by itself or as incorporated into your code provided =FEW= you do not remove any proprietary notices"
+#
+%ENTRY% _TEXT_AMAZON_DIG
+%KEY% "so(ftware|urce)"
+%STR% "amazon digital services"
 #
 %ENTRY% _LT_NOT_ADVERTISING
 %KEY% "permi[st]"
@@ -417,9 +441,45 @@
 %KEY% "distribut"
 %STR% "property of Advanced Micro Devices Inc AMD which specifically grants the user the right to modify use and/?o?r? distribute this"
 #
+%ENTRY% _LT_AMD_SEV
+%KEY% "p(atent|roduc|rofit|roject|ublic)"
+%STR% "you may not use the software to =FEW= develop inventions to seek patent protection =SOME= assist in the analysis of your patents"
+#
+%ENTRY% _LT_AMD_SEV_2
+%KEY% "licen[cs]"
+%STR% "amd grants you =SOME= copyright licen[cs]e to use copy modify and create derivatives =SOME= for use with AMD.{0,15} only"
+#
+%ENTRY% _TITLE_AMD_SEV
+%KEY% "firmware"
+%STR% "(amd =FEW= secure encrypted virtualization =FEW= firmware|AMD SEV =FEW= firmware)"
+#
 %ENTRY% _LT_AMD_EULA
 %KEY% "distribut"
 %STR% "regardless of the media upon which it is distributed the software is licen[cs]ed to you for use solely in conjunction with AMD hardware products"
+#
+%ENTRY% _LT_RADEON_FIRM
+%KEY% "liabilit"
+%STR% "copyright holder =SOME= total liability for all damages losses and causes of action =SOME= exceed the amount of US =FEW= 10"
+#
+%ENTRY% _LT_RADEON_FIRM_2
+%KEY% "distribut"
+%STR% "permission is hereby granted free of any license fees =SOME= copy of this microcode =SOME= install reproduce copy and distribute copies in binary form only"
+#
+%ENTRY% _LT_AMDPLPA
+%KEY% "licen[cs]"
+%STR% "any breach of any term of this licen[cs]e shall result in the immediate revocation of all rights to redistribute access or use this material"
+#
+%ENTRY% _LT_AMDPLPA_2
+%KEY% "jurisdict"
+%STR% "governed by and construed in accordance with the laws of the state of texas =SOME= jurisdiction"
+#
+%ENTRY% _LT_ANGI
+%KEY% "ignit"
+%STR% "acki nacki gossip igniter =SOME= decentralized network starter protocol"
+#
+%ENTRY% _LT_ANGI_2
+%KEY% "so(ftware|urce)"
+%STR% "installing the igniter software =SOME= you explicitly consent to all future updates and agree to run the updated software"
 #
 %ENTRY% _LT_AMPAS
 %KEY% "licen[cs]"
@@ -527,6 +587,14 @@
 %KEY% "distribut"
 %STR% "if you distribute this software to others you are required to distribute the entire package consisting"
 #
+%ENTRY% _LT_ARGOUML
+%KEY% "grant"
+%STR% "without fee and without a written agreement is hereby granted =ANY= regents of the university of california"
+#
+%ENTRY% _LT_ARGOUML_2
+%KEY% "research"
+%STR% "developed for research purposes and is advised not to rely exclusively on the program"
+#
 %ENTRY% _LT_ARTIFEX
 %KEY% "\<under\>"
 %STR% "distributed under licen[cs]e and may not be copied modified or r?e?-?distributed except as expressly authori[zs]ed"
@@ -586,6 +654,14 @@
 %KEY% "licen[cs]"
 %STR% "ascender grants =FEW= a non-exclusive world-wide licen[cs]e for the term i to use the deliverables to create Font Software ii to duplicate font software and iii to distribute Font Software embedded as part of"
 #
+%ENTRY% _LT_ASCENDER_WEBFONT
+%KEY% "licen[cs]"
+%STR% "ascender corporation web font software licen[cs]e =SOME= services agreement"
+#
+%ENTRY% _LT_ASCENDER_WEBFONT_2
+%KEY% "so(ftware|urce)"
+%STR% "(ascenderfonts\.com|fontslive\.com) =SOME= web font software =SOME= (services|licen[cs]e)"
+#
 %ENTRY% _LT_GOOGLE_SDK
 %KEY% "legal"
 %STR% "you agree that Google or third parties own all legal right =FEW=  title and interest in and to the SDK =FEW= any Intellectual Property Rights that subsist in the SDK =SOME= means any and all rights under patent law =FEW= trade secret law =FEW= and any and all other proprietary rights =FEW= Google reserves all rights not expressly granted to you"
@@ -602,6 +678,14 @@
 #####
 # DELETED: and it may only be ...
 #####
+%ENTRY% _LT_ATMEL_LINUX_FW
+%KEY% "hexadecimal"
+%STR% "in hexadecimal or equivalent formats"
+#
+%ENTRY% _LT_ATMEL_LINUX_FW_2
+%KEY% "jurisdict"
+%STR% "exclusive jurisdiction of the californian courts =SOME= atmel"
+#
 %ENTRY% _LT_ATT_1
 %KEY% "licen[cs]"
 %STR% "used by you under licen[cs]e from at&t corp"
@@ -642,6 +726,14 @@
 # DELETED: ... in whole or in part in any form by any means nor may you
 # translate the software into any other natural or computer language 
 #####
+#
+%ENTRY% _LT_ASN1SCC_exception
+%KEY% "generat"
+%STR% "a?s?n?1?s?c?c? =SOME= binary object code versions of works based on the tool run-?time libraries as well as code automatically generated by the tool"
+#
+%ENTRY% _LT_ASN1SCC_exception_2
+%KEY% "licen[cs]"
+%STR% "licen[cs]ed under the asn1scc licen[cs]e =SOME= run-?time libraries"
 #
 %ENTRY% _LT_Autoconf_exception_1
 %KEY% "(condit|vers)ion"
@@ -699,6 +791,22 @@
 # non-?transferable ... development and production use of the
 # accompanying software
 #####
+%ENTRY% _LT_BASEROW_EE
+%KEY% "so(ftware|urce)"
+%STR% "baserow enterprise edition =ANY= subscription =ANY= baserow grants you the right to modify the software"
+#
+%ENTRY% _LT_BASEROW_EE_2
+%KEY% "licen[cs]"
+%STR% "baserow open source edition =SOME= baserow ose =SOME= ee licen[cs]e"
+#
+%ENTRY% _LT_BASEROW_PE
+%KEY% "so(ftware|urce)"
+%STR% "baserow premium edition =ANY= subscription =ANY= baserow grants you the right to modify the software"
+#
+%ENTRY% _LT_BASEROW_PE_2
+%KEY% "licen[cs]"
+%STR% "baserow open source edition =SOME= baserow ose =SOME= pe licen[cs]e"
+#
 %ENTRY% _LT_BEA_1
 %KEY% "licen[cs]"
 %STR% "licen[cs]e for the internal evaluation testing"
@@ -2161,7 +2269,6 @@
 %ENTRY% _LT_FREE_58
 %KEY% "distribut"
 %STR% "unlimited permission is granted to use copy and distribute =FEW= with or without modification either commercially and noncommercially"
-%ALIAS% _LT_MPLUS_FONT
 #
 %ENTRY% _LT_FREE_59
 %KEY% "distribut"
@@ -2484,6 +2591,14 @@
 %KEY% "distribut"
 %STR% "you may copy distribute and/?o?r? modify it freely as long as"
 #
+%ENTRY% _LT_Freeware_Attribution
+%KEY% "copyright"
+%STR% "does not have any registered copyright =SOME= free to be used =SOME= free to modify"
+#
+%ENTRY% _LT_Freeware_Attribution_2
+%KEY% "author"
+%STR% "not removing =SOME= name =SOME= (as the )?author"
+#
 %ENTRY% _LT_GARMIN_EULA
 %KEY% "so(ftware|urce)"
 %STR% "this software is owned by garmin (ltd|limited) =SOME= and is protected under copyright laws and international copyright treaties"
@@ -2625,6 +2740,10 @@
 %ENTRY% _LT_GNUPLOT_2
 %KEY% "distribut"
 %STR% "distribute =FEW= source modifications from the released version in the form of a patch file"
+#
+%ENTRY% _LT_GUTMANN
+%KEY% "use"
+%STR% "you can use this code in whatever way you want as long as you don.t try to claim you wrote it"
 #
 %ENTRY% _LT_GOOGLE_1
 %KEY% "(condit|vers)ion"
@@ -6804,6 +6923,10 @@ k
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR% "(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= adaptec inc"
 #
+%ENTRY% _CR_ACTIVESTATE
+%KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR% "(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= activestate"
+#
 %ENTRY% _CR_ADOBE
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR% "(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= adobe systems"
@@ -7664,6 +7787,14 @@ k
 %KEY% =NULL=
 %STR% "DNG SDK License Agreement"
 #
+%ENTRY% _TITLE_ADOBE_DNG_SPEC
+%KEY% "patent"
+%STR% "digital negative =FEW= DNG =FEW= specification patent licen[cs]e"
+#
+%ENTRY% _LT_ADOBE_DNG_SPEC
+%KEY% "p(atent|roduc|rofit|roject|ublic)"
+%STR% "adobe =SOME= grants all individuals and organizations the worldwide royalty-free nontransferable nonexclusive right under all essential claims to make =SOME= use sell import and distribute compliant implementations"
+#
 %ENTRY% _TITLE_ADOBE_SRC
 %KEY% "licen[cs]"
 %STR% "adobe systems =SOME= source code licen[cs]e agreement"
@@ -7779,6 +7910,10 @@ k
 %ENTRY% _TITLE_ASCENDER_EULA
 %KEY% "licen[cs]"
 %STR% "licen[cs]e agreement between ascender corporation and"
+#
+%ENTRY% _TITLE_ASCENDER_WEBFONT
+%KEY% "licen[cs]"
+%STR% "ascender corporation =SOME= web font(s| software) (licen[cs]e|agreement)"
 #
 %ENTRY% _TITLE_Apache_11
 %KEY% "\<ap(ache|ple)\>"
@@ -10452,6 +10587,10 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Bahyph|(.{1,32} (AND|OR)){1,4} Bahyph)"
 
+%ENTRY% _SPDX_Baekmuk
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Baekmuk|(.{1,32} (AND|OR)){1,4} Baekmuk)"
+
 %ENTRY% _SPDX_Barr
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Barr|(.{1,32} (AND|OR)){1,4} Barr)"
@@ -11111,6 +11250,10 @@ k
 %ENTRY% _SPDX_gSOAP_13b
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](gSOAP[- ]1\.?3b|(.{1,32} (AND|OR)){1,4} gSOAP[- ]1\.?3b)"
+
+%ENTRY% _SPDX_Gutmann
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Gutmann|(.{1,32} (AND|OR)){1,4} Gutmann)"
 
 %ENTRY% _SPDX_HaskellReport
 %KEY% "licen[cs]e"
@@ -13760,16 +13903,2862 @@ k
 %KEY% =NULL=
 %STR% "n0m0s4u"
 #
+# Haskell Language Report License (HaskellReport)
+%ENTRY% _LT_HASKELL_REPORT
+%KEY% "community"
+%STR% "intend this report to belong to the entire haskell community =SOME= grant permission to copy and distribute =FEW= for any purpose =SOME= reproduced in its entirety"
+#
+# Scheme Language Report License (SchemeReport)
+%ENTRY% _LT_SCHEME_REPORT
+%KEY% "community"
+%STR% "intend this report to belong to the entire scheme community =SOME= grant permission to copy it in whole or in part without fee"
+#
+# German Data Licences (DL-DE family)
+%ENTRY% _LT_DL_DE_BY_1_EN
+%KEY% "licen[cs]"
+%STR% "data licen[cs]e germany =FEW= attribution =FEW= version 1"
+#
+%ENTRY% _LT_DL_DE_BY_1_DE
+%KEY% "vers"
+%STR% "datenlizenz deutschland =FEW= namensnennung =FEW= version 1?0"
+#
+%ENTRY% _LT_DL_DE_BY_2_EN
+%KEY% "licen[cs]"
+%STR% "data licen[cs]e germany =FEW= attribution =FEW= version 2"
+#
+%ENTRY% _LT_DL_DE_BY_2_DE
+%KEY% "vers"
+%STR% "datenlizenz deutschland =FEW= namensnennung =FEW= version 2"
+#
+%ENTRY% _LT_DL_DE_ZERO_2
+%KEY% "vers"
+%STR% "datenlizenz deutschland =FEW= zero =FEW= version 2"
+#
+# Norwegian Licence for Open Government Data (NLOD)
+%ENTRY% _LT_NLOD_10_TEXT
+%KEY% "distribut"
+%STR% "this licen[cs]e grants you the right to copy =FEW= use and distribute information =SOME= provided you acknowledge the contributors"
+#
+%ENTRY% _LT_NLOD_20_TEXT
+%KEY% "government"
+%STR% "norwegian licen[cs]e for open government data =SOME= nlod =FEW= 2"
+#
+# Canadian Open Government Licences
+%ENTRY% _LT_OGL_CANADA_EN
+%KEY% "government"
+%STR% "open government licen[cs]e =FEW= canada"
+#
+%ENTRY% _LT_OGL_CANADA_FR
+%KEY% "licen[cs]"
+%STR% "licence du gouvernement ouvert =FEW= canada"
+#
+%ENTRY% _LT_OGL_ALBERTA
+%KEY% "government"
+%STR% "open government licen[cs]e =FEW= alberta"
+#
+%ENTRY% _LT_OGL_BC
+%KEY% "government"
+%STR% "open government licen[cs]e =FEW= british columbia"
+#
+%ENTRY% _LT_OGL_NOVA_SCOTIA
+%KEY% "government"
+%STR% "open government licen[cs]e =FEW= nova scotia"
+#
+%ENTRY% _LT_OGL_ONTARIO
+%KEY% "government"
+%STR% "open government licen[cs]e =FEW= ontario"
+#
+%ENTRY% _LT_OGL_TORONTO
+%KEY% "government"
+%STR% "open government licen[cs]e =FEW= toronto"
+#
+# Statistics Canada Open License (SCOLA - French)
+%ENTRY% _LT_SCOLA_FR
+%KEY% "licen[cs]"
+%STR% "entente de licen[cs]e ouverte =FEW= statistique canada"
+#
+# COIL-1.0 (text-based)
+%ENTRY% _LT_COIL_10
+%KEY% "licen[cs]"
+%STR% "copyfree open innovation licen[cs]e"
+#
+# TTWL (Text-Tabs+Wrap License)
+%ENTRY% _LT_TTWL
+%KEY% "redistrib"
+%STR% "do not publicly redistribute modified versions =SOME= text =FEW= tabs"
+#
+# HIDAPI License
+%ENTRY% _LT_HIDAPI
+%KEY% "copyright"
+%STR% "this software may be used by anyone for any reason so long as the copyright notice in the source files remains intact"
+#
+# ulem License
+%ENTRY% _LT_ULEM
+%KEY% "copyright"
+%STR% "this software may be freely transmitted reproduced or modified for any purpose provided that this copyright notice is left intact"
+#
+# UnixCrypt License
+%ENTRY% _LT_UNIXCRYPT
+%KEY% "permi[st]"
+%STR% "permission to use copy modify and distribute this software for non.commercial or commercial purposes and without fee is hereby granted provided that this copyright notice appears in all copies"
+#
+# fwlw License
+%ENTRY% _LT_FWLW
+%KEY% "use"
+%STR% "this software package may be freely used transmitted reproduced or modified provided that this notice is left intact"
+#
+# McPhee Slideshow License
+%ENTRY% _LT_MCPHEE_SLIDESHOW
+%KEY% "use"
+%STR% "everyone is welcome to use this code for any purpose to modify it and to copy it in whole or in part for use in other macro sets"
+#
+# MIPS Computer Systems License
+%ENTRY% _LT_MIPS_CS
+%KEY% "use"
+%STR% "mips computer systems =SOME= grants reproduction and use rights to all parties =SOME= this comment is maintained in the copy"
+#
+# MPEG Software Simulation Group License
+%ENTRY% _LT_MPEG_SSG
+%KEY% "so(ftware|urce)"
+%STR% "mpeg software simulation group disclaims any and all warranties"
+#
+# Kastrup License
+%ENTRY% _LT_KASTRUP
+%KEY% "permi[st]"
+%STR% "any use of the code is permitted as long as this copyright notice is preserved in the code"
+#
+# swrule License
+%ENTRY% _LT_SWRULE
+%KEY% "copyright"
+%STR% "style package is copyrighted but may be used and extended in any way as long as a pointer to the original author is maintained"
+#
+# softSurfer License
+%ENTRY% _LT_SOFTSURFER
+%KEY% "copyright"
+%STR% "this code may be freely used and modified for any purpose providing that this copyright notice is included with it =SOME= copyright holder makes no warranty for this code"
+#
+# Widget Workshop License
+%ENTRY% _LT_WIDGET_WORKSHOP
+%KEY% "so(ftware|urce)"
+%STR% "widget workshop makes no representations or warranties about the suitability of the software"
+#
+# LPD-document (Peter Deutsch Document License)
+%ENTRY% _LT_LPD_DOCUMENT
+%KEY% "permi[st]"
+%STR% "permission is granted to copy and distribute this document for any purpose and without charge =SOME= translations into other languages and incorporation into compilations"
+#
+# Zeeff License
+%ENTRY% _LT_ZEEFF
+%KEY% "use"
+%STR% "you can use this code in any manner as long as you leave my name on it and don.?t hold me responsible"
+#
+# DEC-3-Clause License
+%ENTRY% _LT_DEC_3_CLAUSE
+%KEY% "licen[cs]"
+%STR% "this software is furnished under licen[cs]e and may be used and copied only in accordance =ANY= you may download copy install use modify and distribute this software in source and.?or binary form"
+#
+# Lucida Bitmap Fonts (Bigelow & Holmes)
+%ENTRY% _LT_LUCIDA_BITMAP
+%KEY% "lucida"
+%STR% "lucida fonts from bigelow =FEW= holmes"
+#
+# ISO 8879 Permission
+%ENTRY% _LT_ISO_8879
+%KEY% "permi[st]"
+%STR% "permission to copy in any form is granted for use with conforming sgml systems =SOME= iso 8879"
+#
+# threeparttable License
+%ENTRY% _LT_THREEPARTTABLE
+%KEY% "distribut"
+%STR% "this file may be distributed modified and used in other works =SOME= one restriction =SOME= modified versions must clearly indicate the modification"
+#
+# OWL-0.9.4 (Open Works License)
+%ENTRY% _LT_OWL_094
+%KEY% "licen[cs]"
+%STR% "open works licen[cs]e =SOME= this is version 0?9?4"
+#
+# vhfPL 1.1
+%ENTRY% _LT_VHFPL_11
+%KEY% "licen[cs]"
+%STR% "vhf public licen[cs]e =SOME= vhfpl =SOME= open source licen[cs]e"
+#
+# NXLOG Public License 1.0
+%ENTRY% _LT_NXLOG_PL_10
+%KEY% "licen[cs]"
+%STR% "nxlog public licen[cs]e v1?0"
+#
+# Devblocks Public License 1.0
+%ENTRY% _LT_DEVBLOCKS_10
+%KEY% "licen[cs]"
+%STR% "devblocks public licen[cs]e 1?0 =FEW= dpl"
+#
+# Treeware License
+%ENTRY% _LT_TREEWARE_1
+%KEY% "treeware"
+%STR% "treeware option one =ANY= buy the world a tree"
+#
+%ENTRY% _LT_TREEWARE_2
+%KEY% "treeware"
+%STR% "production environment you are required to buy the world a tree =ANY= treeware"
+#
+# AMD ASPF 2023 (4th Generation EPYC SEV)
+%ENTRY% _LT_AMD_ASPF_2023
+%KEY% "so(ftware|urce)"
+%STR% "amd =ANY= epyc =ANY= amd is not accepting contributions to this software"
+#
+# Bosch Sensortec License 2023
+%ENTRY% _LT_BOSCH_SENSORTEC
+%KEY% "sensortec"
+%STR% "bosch sensortec products are developed for the consumer goods industry"
+#
+# Broadcom Confidential
+%ENTRY% _LT_BROADCOM_CONFIDENTIAL
+%KEY% "permi[st]"
+%STR% "no portions of this material may be reproduced in any form without the written permission of =FEW= broadcom corporation"
+#
+# Broadcom Raspberry Pi Firmware License
+%ENTRY% _LT_BROADCOM_RPI
+%KEY% "so(ftware|urce)"
+%STR% "this software may only be used for the purposes of developing for =SOME= running or using a raspberry pi device"
+#
+# Marvell Firmware 2019
+%ENTRY% _LT_MARVELL_FW
+%KEY% "distribut"
+%STR% "redistribution and use in binary form is permitted =ANY= marvell"
+#
+# MediaTek Proprietary 2008
+%ENTRY% _LT_MEDIATEK_2008
+%KEY% "confidential"
+%STR% "the information contained herein is confidential =ANY= permission of mediatek"
+#
+# Microchip Products 2018
+%ENTRY% _LT_MICROCHIP_2018
+%KEY% "so(ftware|urce)"
+%STR% "you may use this software and any derivatives exclusively with microchip products"
+#
+# Motorola License
+%ENTRY% _LT_MOTOROLA
+%KEY% "motorola"
+%STR% "motorola disclaims all warranties whether express or implied including implied warranties of merchantability"
+#
+# Nortel DASA License
+%ENTRY% _LT_NORTEL_DASA
+%KEY% "licen[cs]"
+%STR% "nortel dasa licen[cs]e"
+#
+# NVIDIA with Government Qualifications
+%ENTRY% _LT_NVIDIA_GOV
+%KEY% "so(ftware|urce)"
+%STR% "nvidia =SOME= this source code is subject to nvidia ownership rights under u\.?s\.? and international copyright laws"
+#
+# NXP Linux Firmware License
+%ENTRY% _LT_NXP_LINUX_FW
+%KEY% "distribut"
+%STR% "redistribution and use in binary form is permitted =ANY= nxp"
+#
+# Rockchip Proprietary (2019)
+%ENTRY% _LT_ROCKCHIP_2019
+%KEY% "rockchip"
+%STR% "no part of this work may be reproduced =ANY= fuzhou rockchip electronics"
+#
+# Rockchip Confidential (2022)
+%ENTRY% _LT_ROCKCHIP_2022
+%KEY% "rockchip"
+%STR% "material in this file is confidential and contains trade secrets of rockchip corporation"
+#
+# Rockchip Proprietary (2023)
+%ENTRY% _LT_ROCKCHIP_2023
+%KEY% "so(ftware|urce)"
+%STR% "by downloading copying saving or otherwise using this software you acknowledge =SOME= rockchip"
+#
+# Silicon Image 2007
+%ENTRY% _LT_SILICON_IMAGE
+%KEY% "permi[st]"
+%STR% "no part of this work may be reproduced =ANY= without written permission of =FEW= silicon image"
+#
+# Texas Instruments Linux Firmware License
+%ENTRY% _LT_TI_LINUX_FW
+%KEY% "licen[cs]"
+%STR% "texas instruments incorporated grants a world-wide royalty-free non-exclusive licen[cs]e under copyrights and patents"
+#
+# Texas Instruments Restricted Use License
+%ENTRY% _LT_TI_RESTRICTED
+%KEY% "permi[st]"
+%STR% "permission is hereby granted to licen[cs]ees of texas instruments =SOME= for the sole purpose of implementing a licen[cs]ee product based on ti products"
+#
+# Wind River Commercial License
+%ENTRY% _LT_WIND_RIVER
+%KEY% "licen[cs]"
+%STR% "wind river =FEW= licen[cs]ing support =SOME= product activation =SOME= activate your software and manage your licen[cs]es"
+#
+# BigScience Open RAIL-M License
+%ENTRY% _LT_BIGSCIENCE_RAIL_M
+%KEY% "licen[cs]"
+%STR% "bigscience open rail-m licen[cs]e"
+#
+# CreativeML Open RAIL++-M License
+%ENTRY% _LT_CREATIVEML_RAIL_M2
+%KEY% "licen[cs]"
+%STR% "creativeml open rail\+\+-m licen[cs]e"
+#
+# CreativeML Open RAIL-M (Stable Diffusion, dated Aug 22)
+%ENTRY% _LT_STABLE_DIFFUSION
+%KEY% "creativeml"
+%STR% "creativeml open rail-m =SOME= dated august 22"
+#
+# NYSL Version 0.9982 (Japanese)
+%ENTRY% _LT_NYSL_JP
+%KEY% "nysl"
+%STR% "nysl version 0?9982"
+#
+# Gemma Prohibited Use Policy
+%ENTRY% _LT_GEMMA_PUP
+%KEY% "use"
+%STR% "gemma prohibited use policy =SOME= google reserves the right to update"
+#
+# Gemini API Additional Terms of Service
+%ENTRY% _LT_GEMINI_TOS
+%KEY% "gemini"
+%STR% "gemini api additional terms of service"
+#
+# Playground v2 Community License
+%ENTRY% _LT_PLAYGROUND_V2
+%KEY% "licen[cs]"
+%STR% "playground v2 community licen[cs]e"
+#
+# Salesforce AI Acceptable Use Policy
+%ENTRY% _LT_SALESFORCE_AI_AUP
+%KEY% "use"
+%STR% "salesforce =SOME= artificial intelligence acceptable use policy"
+#
+# OpenAI Terms of Use
+%ENTRY% _LT_OPENAI_TOU
+%KEY% "use"
+%STR% "terms of use apply when you use the services of openai"
+#
+# Google ML Kit Terms of Service
+%ENTRY% _LT_GOOGLE_ML_KIT
+%KEY% "google"
+%STR% "ml kit terms of service =ANY= google apis terms of service"
+#
+# MAX & Mojo Community License
+%ENTRY% _LT_MAX_MOJO
+%KEY% "licen[cs]"
+%STR% "max community licen[cs]e terms =ANY= modular =ANY= mojo programming language"
+#
+# The Stack Terms of Use
+%ENTRY% _LT_STACK_TOS
+%KEY% "so(ftware|urce)"
+%STR% "terms of use for the stack =SOME= collection of source code in over 300 programming languages"
+#
+# Databricks DB License
+%ENTRY% _LT_DATABRICKS_DB
+%KEY% "licen[cs]"
+%STR% "db licen[cs]e =SOME= databricks =SOME= databricks services"
+#
+# Cisco AVC/H.264 Patent Portfolio License
+%ENTRY% _LT_CISCO_AVC
+%KEY% "licen[cs]"
+%STR% "avc =FEW= h\.?264 patent portfolio licen[cs]e =SOME= cisco"
+#
+# Xiph Opus Patent License
+%ENTRY% _LT_XIPH_PATENT
+%KEY% "licen[cs]"
+%STR% "xiph =SOME= perpetual worldwide non-exclusive no-charge royalty-free irrevocable =SOME= licen[cs]ed patents"
+#
+# CERN Attribution 1995
+%ENTRY% _LT_CERN_ATTRIB
+%KEY% "so(ftware|urce)"
+%STR% "this product includes computer software created and made available by cern"
+#
+# KFGQPC Uthmanic Script License
+%ENTRY% _LT_KFGQPC
+%KEY% "licen[cs]"
+%STR% "uthmanic script licen[cs]e =SOME= king fahd glorious quran printing complex"
+#
+# Manfred Klein Fonts Terms of Service
+%ENTRY% _LT_MANFRED_KLEIN
+%KEY% "use"
+%STR% "manfreds fonts are free for private and charity use =SOME= even free for commercial use"
+#
+# Wadalab Font License
+%ENTRY% _LT_WADALAB
+%KEY% "distribut"
+%STR% "you can use.?modify.?distribute this font =SOME= distributed fonts are derived from wadalab fonts"
+#
+# GeneralUser GS License v2.0
+%ENTRY% _LT_GENERALUSER_GS
+%KEY% "licen[cs]"
+%STR% "generaluser gs =FEW= licen[cs]e v2.?0"
+#
+# ASN.1 Object Dumping Code License
+%ENTRY% _LT_ASN1_DUMP
+%KEY% "gutmann"
+%STR% "asn\.?1 object dumping code =SOME= peter gutmann =SOME= asn\.?1 dump program"
+#
+# musl attribution exception
+%ENTRY% _LT_MUSL_EXCEPTION
+%KEY% "permi[st]"
+%STR% "permission is hereby granted for all public header files =SOME= crt files intended to be linked into applications =SOME= to omit the copyright notice and permission notice"
+#
+# Clearthought Software License v2.0
+%ENTRY% _LT_CLEARTHOUGHT_20
+%KEY% "licen[cs]"
+%STR% "clearthought software licen[cs]e =FEW= version 2?0"
+#
+# Codexia License
+%ENTRY% _LT_CODEXIA
+%KEY% "grant"
+%STR% "code based on allen denver =ANY= free usage granted in all applications including commercial"
+#
+# Crunchbase Data Access Terms
+%ENTRY% _LT_CRUNCHBASE
+%KEY% "licen[cs]"
+%STR% "crunchbase =SOME= grants to licen[cs]ee a nonexclusive nontransferable nonsublicen[cs]able"
+#
+# Cubiware Software License 1.0
+%ENTRY% _LT_CUBIWARE_10
+%KEY% "licen[cs]"
+%STR% "cubiware =SOME= any rights which are not expressly granted in this licen[cs]e are entirely and exclusively reserved"
+#
+# CWE Terms of Use (MITRE)
+%ENTRY% _LT_CWE_TOU
+%KEY% "licen[cs]"
+%STR% "mitre hereby grants you a non-exclusive royalty-free licen[cs]e to use cwe for research"
+#
+# DAMAIL (Don't Ask Me About It License)
+%ENTRY% _LT_DAMAIL
+%KEY% "licen[cs]"
+%STR% "don.t ask me about it licen[cs]e =ANY= permitted in any medium provided you do not contact the author"
+#
+# DataMekanix License
+%ENTRY% _LT_DATAMEKANIX
+%KEY% "use"
+%STR% "this code is free for personal and commercial use =SOME= copyright notice remains intact =SOME= changes =SOME= clearly marked with comments"
+#
+# Dennis Ferguson License
+%ENTRY% _LT_DENNIS_FERGUSON
+%KEY% "permi[st]"
+%STR% "commercial use is permitted only if products =SOME= include this software are made available for purchase =SOME= canada"
+#
+# dhtmlab Public License
+%ENTRY% _LT_DHTMLAB_PUBLIC
+%KEY% "copyright"
+%STR% "you may use this code on a public web site only if this entire copyright notice appears unchanged =SOME= link to http //wwwdhtmlabcom"
+#
+# Dokploy Source Available License 1.0
+%ENTRY% _LT_DOKPLOY_DSAL
+%KEY% "licen[cs]"
+%STR% "dokploy source available licen[cs]e =FEW= dsal =FEW= version 1.?0"
+#
+# dtree License
+%ENTRY% _LT_DTREE
+%KEY% "copyright"
+%STR% "this script can be used freely as long as all copyright messages are intact"
+#
+# ECFonts License
+%ENTRY% _LT_ECFONTS
+%KEY% "warrant"
+%STR% "there is no warranty for the ec fonts"
+#
+# Ecma Documentation License
+%ENTRY% _LT_ECMA_DOC
+%KEY% "translat"
+%STR% "this document and possible translations of it may be copied and furnished to others =SOME= derivative works that comment on or otherwise explain it"
+#
+# Ecma No-Patent Notice
+%ENTRY% _LT_ECMA_NO_PATENT
+%KEY% "licen[cs]"
+%STR% "this software may be subject to third party rights =ANY= no licen[cs]es under such third party rights are granted =ANY= ecma"
+#
+# Ecma Standard Copyright 2024
+%ENTRY% _LT_ECMA_STD_2024
+%KEY% "distribut"
+%STR% "this document may be copied published and distributed =SOME= derivative works of it may be prepared =ANY= ecma"
+#
+# ePaperPress License
+%ENTRY% _LT_EPAPERPRESS
+%KEY% "permi[st]"
+%STR% "permission to reproduce portions of this document is given provided the web site listed below is referenced =ANY= tom niemann"
+#
+# Eclipse QVSL 1.0
+%ENTRY% _LT_EQVSL
+%KEY% "licen[cs]"
+%STR% "eclipse foundation quality verification suite licen[cs]e =FEW= v 1.?0"
+#
+# Fabien Tassin License
+%ENTRY% _LT_FABIEN_TASSIN
+%KEY% "use"
+%STR% "it may be used and modified freely =ANY= this copyright notice remain attached to the file =ANY= please attach a note listing the modifications"
+#
+# Flexbyte License
+%ENTRY% _LT_FLEXBYTE
+%KEY% "so(ftware|urce)"
+%STR% "you may use the source code in any product =ANY= you cannot modify the copyright details"
+#
+# Freeware Public License (FPL)
+%ENTRY% _LT_FPL
+%KEY% "licen[cs]"
+%STR% "freeware public licen[cs]e =FEW= fpl =SOME= this software is licen[cs]ed as freeware"
+#
+# FTDI License
+%ENTRY% _LT_FTDI
+%KEY% "technolog"
+%STR% "future technology devices international =FEW= as is =ANY= future technology devices international limited =FEW= liable for any direct"
+#
+# GDCL License
+%ENTRY% _LT_GDCL
+%KEY% "copyright"
+%STR% "you are free to re-use this as the basis for your own filter development =SOME= you retain this copyright notice in the source"
+#
+# Good Boy License
+%ENTRY% _LT_GOOD_BOY
+%KEY% "approv"
+%STR% "please do whatever your mom would approve of"
+#
+# Hacking License
+%ENTRY% _LT_HACKING_LICENSE
+%KEY% "licen[cs]"
+%STR% "hacking licen[cs]e =SOME= our curiosity will serve humanity through freedom candor and communion"
+#
+# HERE Disclaimer
+%ENTRY% _LT_HERE_DISCLAIMER
+%KEY% "warrant"
+%STR% "here does not warrant that the content is error free =SOME= here does not warrant or make any representations"
+#
+# HERE Proprietary License
+%ENTRY% _LT_HERE_PROPRIETARY
+%KEY% "so(ftware|urce)"
+%STR% "this software and other materials contain proprietary information controlled by here =ANY= conditional upon having a separate agreement with here"
+#
+# Hot Potato License
+%ENTRY% _LT_HOT_POTATO
+%KEY% "grant"
+%STR% "all rights reserved by the last person to commit a change to this repository =ANY= hereby granted to all of earth.s citizens"
+#
+# HTML5 Specification License
+%ENTRY% _LT_HTML5_SPEC
+%KEY% "licen[cs]"
+%STR% "you are granted a licen[cs]e to use reproduce and create derivative works of this document"
+#
+# Ian Kaplan License
+%ENTRY% _LT_IAN_KAPLAN
+%KEY% "use"
+%STR% "use of this program for any purpose is granted =SOME= ian kaplan =SOME= as long as this copyright notice is included"
+#
+# ICANN Public License
+%ENTRY% _LT_ICANN_PUBLIC
+%KEY% "distribut"
+%STR% "icann asserts no property rights to any of the iana registries =SOME= free to redistribute the iana registry files"
+#
+# ISSL 2022 (Intel Simplified Software License)
+%ENTRY% _LT_ISSL_2022
+%KEY% "licen[cs]"
+%STR% "intel simplified software licen[cs]e =FEW= version october 2022"
+#
+# Jason Mayes License
+%ENTRY% _LT_JASON_MAYES
+%KEY% "twit"
+%STR% "twitter post fetcher =ANY= coded by jason mayes =ANY= please keep this disclaimer"
+#
+# JJ2000 License
+%ENTRY% _LT_JJ2000
+%KEY% "so(ftware|urce)"
+%STR% "this software module was originally developed by =ANY= ericsson radio systems =ANY= canon research centre france"
+#
+# JSFromHell License
+%ENTRY% _LT_JSFROMHELL
+%KEY% "author"
+%STR% "we authori[zs]e the copy and modification of all the codes on the site =SOME= original author credits are kept"
+#
+# Karl Peterson License
+%ENTRY% _LT_KARL_PETERSON
+%KEY% "distribut"
+%STR% "you are free to use this code within your own applications =SOME= expressly forbidden from selling or otherwise distributing this source code without prior written consent"
+#
+# Keith Rule License
+%ENTRY% _LT_KEITH_RULE
+%KEY% "copyright"
+%STR% "you may freely use or modify this code provided this copyright is included in all derived versions"
+#
+# Korean Manpage Project License
+%ENTRY% _LT_KO_MAN_PAGE
+%KEY% "copyright"
+%STR% "copyrights of all translated manpages =FEW= korean manpage project =FEW= inherited from copyright of the original english"
+#
+# Lens TOS 2023 (Mirantis)
+%ENTRY% _LT_LENS_TOS
+%KEY% "so(ftware|urce)"
+%STR% "lens terms of service agreement =ANY= mirantis =ANY= lens software"
+#
+# LinuxHowtos License
+%ENTRY% _LT_LINUXHOWTOS
+%KEY% "linux"
+%STR% "all howtos and documents on this site are provided as is =ANY= linux is a registered trademark of linus torvalds"
+#
+# Markus Mummert Permissive License
+%ENTRY% _LT_MARKUS_MUMMERT
+%KEY% "distribut"
+%STR% "redistribution and use of this software modifcation and inclusion into other forms of software are permitted"
+#
+# Matthew Kwan License
+%ENTRY% _LT_MATTHEW_KWAN
+%KEY% "use"
+%STR% "this software may be modified redistributed and used for any purpose so long as its origin is acknowledged"
+#
+# NCSC-NL Disclaimer
+%ENTRY% _LT_NCSC_NL
+%KEY% "vulnerab"
+%STR% "netherlands cyber security center =ANY= ncsc-nl =ANY= vulnerabilities disclosed in this portal"
+#
+# Newran License
+%ENTRY% _LT_NEWRAN
+%KEY% "use"
+%STR% "there are no restrictions on the use of newran =ANY= i welcome its distribution as part of low cost cd-rom"
+#
+# NIST SRD License
+%ENTRY% _LT_NIST_SRD
+%KEY% "copyright"
+%STR% "copyright protection on this compilation of data has been secured by the secretary of the u\.?s\.? department of commerce =ANY= universal copyright convention"
+#
+# NWHM License
+%ENTRY% _LT_NWHM
+%KEY% "permi[st]"
+%STR% "if you are not a white heterosexual male you are permitted to copy sell and use this work"
+#
+# OOURA 2001 License
+%ENTRY% _LT_OOURA_2001
+%KEY% "use"
+%STR% "you may use copy modify this code for any purpose and without fee =SOME= you may distribute this original package"
+#
+# Oracle Commercial Database 11g2
+%ENTRY% _LT_ORACLE_COMM_DB
+%KEY% "licen[cs]"
+%STR% "this oracle database is subject to commercial licen[cs]ing terms"
+#
+# Oracle Free Use Terms 2018
+%ENTRY% _LT_ORACLE_FREE
+%KEY% "use"
+%STR% "oracle free use terms and conditions"
+#
+# Oracle Master Agreement
+%ENTRY% _LT_ORACLE_MASTER
+%KEY% "licen[cs]"
+%STR% "oracle master agreement =SOME= oma =SOME= standard agreement =SOME= licen[cs]e oracle programs"
+#
+# O Young Jong License
+%ENTRY% _LT_O_YOUNG_JONG
+%KEY% "permi[st]"
+%STR% "copying or modifying this code for any purpose is permitted provided that this copyright notice is preserved in its entirety in all copies or modifications"
+#
+# Parity Public License 6.0.0 (text-based)
+%ENTRY% _LT_PARITY_600
+%KEY% "licen[cs]"
+%STR% "parity public licen[cs]e =ANY= this licen[cs]e lets you use and share this software for free =SOME= contribute software you make with it"
+#
+# LAL 1.3 (Licence Art Libre - text-based)
+%ENTRY% _LT_LAL_13
+%KEY% "licen[cs]"
+%STR% "licen[cs]e art libre 1.?3"
+#
+# Paul Hsieh Derivative License
+%ENTRY% _LT_PAUL_HSIEH_DERIV
+%KEY% "licen[cs]"
+%STR% "paul hsieh derivative licen[cs]e =SOME= raw computer source code =ANY= transformations of such derivatives"
+#
+# Paul Hsieh Exposition License
+%ENTRY% _LT_PAUL_HSIEH_EXP
+%KEY% "copyright"
+%STR% "paul hsieh exposition licen[cs]e =SOME= content of all text figures tables =SOME= copyrighted by its author and owner paul hsieh"
+#
+# Paulo Soares License
+%ENTRY% _LT_PAULO_SOARES
+%KEY% "distribut"
+%STR% "these specific metrics files were created by paulo soares and may be used copied and distributed for any purpose and without charge"
+#
+# Perl 1.0 License
+%ENTRY% _LT_PERL_10
+%KEY% "perl"
+%STR% "perl kit =SOME= you may copy the perl kit in whole or in part as long as you don.t try to make money off it"
+#
+# PFE Proprietary Notice
+%ENTRY% _LT_PFE_NOTICE
+%KEY% "use"
+%STR% "you can use pfe at home at work =SOME= without paying me a penny"
+#
+# Poke & Wiggle Proprietary License 2026
+%ENTRY% _LT_POKE_WIGGLE
+%KEY% "licen[cs]"
+%STR% "poke =FEW= wiggle =FEW= proprietary licen[cs]e =ANY= all rights reserved"
+#
+# Quirksmode Copyright Notice
+%ENTRY% _LT_QUIRKSMODE
+%KEY% "copyright"
+%STR% "quirksmode =SOME= i don.t believe in copyrights for javascript or css solutions"
+#
+# Red Hat Trademarks Notice
+%ENTRY% _LT_RED_HAT_TM
+%KEY% "trademark"
+%STR% "red hat enterprise linux =SOME= shadowman logo =SOME= trademarks of red hat"
+#
+# Ryszard Szopa License
+%ENTRY% _LT_RYSZARD_SZOPA
+%KEY% "warrant"
+%STR% "this work as-is we provide =SOME= no warranty express or implied =ANY= weve done our best to debug and test"
+#
+# Script Asylum License
+%ENTRY% _LT_SCRIPT_ASYLUM
+%KEY% "permi[st]"
+%STR% "use of these materials are limited to personal and commercial use =ANY= credits are left intact =ANY= modification of the original material is permitted =ANY= permission is granted by the developer"
+#
+# SCRUB License
+%ENTRY% _LT_SCRUB
+%KEY% "scrub"
+%STR% "scrub =FEW= simple character string replacer"
+#
+# Shital Shah License
+%ENTRY% _LT_SHITAL_SHAH
+%KEY% "distribut"
+%STR% "you may freely copy store distribute and use any material published on this site free of charge and without my explicit permission"
+#
+# SnapEDA Design Exception 1.0
+%ENTRY% _LT_SNAPEDA_EXCEPTION
+%KEY% "licen[cs]"
+%STR% "design exception 1?0 =FEW= sub-licen[cs]ees are hereby licen[cs]ed to design manufacture =ANY= snapeda"
+#
+# Stu Nicholls License
+%ENTRY% _LT_STU_NICHOLLS
+%KEY% "copyright"
+%STR% "this copyright notice must be kept untouched in the stylesheet at all times =ANY= stu nicholls"
+#
+# TeamDev Services License
+%ENTRY% _LT_TEAMDEV
+%KEY% "teamdev"
+%STR% "teamdev =SOME= sales@teamdevcom"
+#
+# TCG Specification License v2
+%ENTRY% _LT_TCG_SPEC_V2
+%KEY% "warrant"
+%STR% "this specification is provided as is with no warranties whatsoever =SOME= tcg"
+#
+# Tiger Cryptography License
+%ENTRY% _LT_TIGER_CRYPTO
+%KEY% "cryptograph"
+%STR% "tiger cryptography =SOME= reference implementation of the tiger cryptographic hash function"
+#
+# Tigra Calendar 3.2 License
+%ENTRY% _LT_TIGRA_CAL
+%KEY% "permi[st]"
+%STR% "tigra calendar =FEW= 3\.2 =SOME= permission given to use this script in any kind of applications if header lines are left unchanged"
+#
+# Timestamp Picker License
+%ENTRY% _LT_TIMESTAMP_PICKER
+%KEY% "permi[st]"
+%STR% "permission given to use this script in any kind of applications if header lines are left unchanged =SOME= contact the author for feature requests"
+#
+# UBC License (free redistribute variant)
+%ENTRY% _LT_UBC_FREE
+%KEY% "copyright"
+%STR% "this library is free software =SOME= modify it provided that this copyright.?licen[cs]e information is retained in original form"
+#
+# UnPbook License
+%ENTRY% _LT_UNPBOOK
+%KEY% "permi[st]"
+%STR% "permission to use or modify this software for educational or for commercial purposes and without fee =SOME= copyright notice appears in connection with any and all uses"
+#
+# vbAccelerator Distribution Notice
+%ENTRY% _LT_VBACCELERATOR
+%KEY% "distribut"
+%STR% "you are free to distribute this zip in it.s original state to any public www site =SOME= without explicitly obtaining the author.s permission"
+#
+# Visual Idiot License
+%ENTRY% _LT_VISUAL_IDIOT
+%KEY% "licen[cs]"
+%STR% "by attaching this document to the given files =SOME= licen[cs]ee are hereby granted free usage in both personal and comm.{0,8} environments without any obligation"
+#
+# Who's On First License
+%ENTRY% _LT_WHOSONFIRST
+%KEY% "licen[cs]"
+%STR% "crediting who.s on first is recommended and linking back to the licen[cs]e is required"
+#
+# William Alexander License
+%ENTRY% _LT_WILLIAM_ALEXANDER
+%KEY% "use"
+%STR% "free for use as long as this comment is included in the program as it is"
+#
+# Wink License
+%ENTRY% _LT_WINK
+%KEY% "distribut"
+%STR% "this program and the accompanied libraries =ANY= artwork are freeware =ANY= you may not re-distribute this program without contacting the author"
+#
+# WinZip Self-Extractor License
+%ENTRY% _LT_WINZIP_SE
+%KEY% "licen[cs]"
+%STR% "licen[cs]e requirements to distribute self-extracting zip files =SOME= registered copy of winzip self-extractor"
+#
+# Wrox Download Terms
+%ENTRY% _LT_WROX_DOWNLOAD
+%KEY% "redistrib"
+%STR% "wrox press =ANY= you may not redistribute the code to any other person =ANY= make it available on any web site"
+#
+# wxWindows Unrestricted Licence 3.0
+%ENTRY% _LT_WXWINDOWS_U_30
+%KEY% "licen[cs]"
+%STR% "wxwindows unrestricted licen[cs]e =FEW= version 3"
+#
+# xxd License
+%ENTRY% _LT_XXD
+%KEY% "distribut"
+%STR% "distribute freely and credit me =SOME= make money and share with me =SOME= lose money and don.t ask me"
+#
+# Yale CAS License
+%ENTRY% _LT_YALE_CAS
+%KEY% "use"
+%STR% "yale university or its employees =SOME= be liable for any =ANY= damages =ANY= arising =FEW= out of the use of this software"
+#
+# Yensdesign License
+%ENTRY% _LT_YENSDESIGN
+%KEY% "use"
+%STR% "feel free to use it but keep this credits please"
+#
+# YOLO License v1
+%ENTRY% _LT_YOLO_10
+%KEY% "licen[cs]"
+%STR% "yolo licen[cs]e =SOME= version 1 =SOME= this software licen[cs]e is provided all caps"
+#
+# Zipeg License
+%ENTRY% _LT_ZIPEG
+%KEY% "licen[cs]"
+%STR% "zipeg licen[cs]e =SOME= redistribution and use in any forms without modification is permitted"
+#
+# ZUGFeRD Data Format License
+%ENTRY% _LT_ZUGFERD
+%KEY% "zugferd"
+%STR% "zugferd datenformat =FEW= 2.?2.?0"
+#
+# Careware License
+%ENTRY% _LT_CAREWARE
+%KEY% "licen[cs]"
+%STR% "careware licen[cs]e =SOME= may be freely distributed =SOME= provided that the user =SOME= once per use =SOME= smiles at somebody"
+#
+# Calq Commercial License 2026
+%ENTRY% _LT_CCL_2026
+%KEY% "licen[cs]"
+%STR% "non-exclusive non-transferable licen[cs]e is hereby granted =ANY= copy of this software =ANY= may not be published distributed sublicen[cs]ed"
+#
+# CCLRC License
+%ENTRY% _LT_CCLRC
+%KEY% "licen[cs]"
+%STR% "cclrc licen[cs]e for cclrc software =ANY= council for the central laboratory of the research councils"
+#
+# DBAD (Don't Be A Dick)
+%ENTRY% _LT_DBAD
+%KEY% "licen[cs]"
+%STR% "don.t be a dick public licen[cs]e =ANY= do whatever you like with the original work just don.t be a dick"
+#
+%ENTRY% _LT_DBAD_11
+%KEY% "licen[cs]"
+%STR% "don.t be a dick public licen[cs]e =SOME= version 1.?1"
+#
+##### SPDX text-based entries for new licenses #####
+%ENTRY% _SPDX_TTWL
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](TTWL|(.{1,32} (AND|OR)){1,4} TTWL)"
+
+%ENTRY% _SPDX_COIL_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](COIL-1\.0|(.{1,32} (AND|OR)){1,4} COIL-1\.0)"
+
+%ENTRY% _SPDX_HIDAPI
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](HIDAPI|(.{1,32} (AND|OR)){1,4} HIDAPI)"
+
+%ENTRY% _SPDX_ulem
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](ulem|(.{1,32} (AND|OR)){1,4} ulem)"
+
+%ENTRY% _SPDX_UnixCrypt
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](UnixCrypt|(.{1,32} (AND|OR)){1,4} UnixCrypt)"
+
+%ENTRY% _SPDX_fwlw
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](fwlw|(.{1,32} (AND|OR)){1,4} fwlw)"
+
+%ENTRY% _SPDX_McPhee_slideshow
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](McPhee-slideshow|(.{1,32} (AND|OR)){1,4} McPhee-slideshow)"
+
+%ENTRY% _SPDX_MIPS
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](MIPS|(.{1,32} (AND|OR)){1,4} MIPS)"
+
+%ENTRY% _SPDX_MPEG_SSG
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](MPEG-SSG|(.{1,32} (AND|OR)){1,4} MPEG-SSG)"
+
+%ENTRY% _SPDX_NLOD_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](NLOD-2\.0|(.{1,32} (AND|OR)){1,4} NLOD-2\.0)"
+
+%ENTRY% _SPDX_LPD_document
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](LPD-document|(.{1,32} (AND|OR)){1,4} LPD-document)"
+
+%ENTRY% _SPDX_SchemeReport
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](SchemeReport|(.{1,32} (AND|OR)){1,4} SchemeReport)"
+
+%ENTRY% _SPDX_softSurfer
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](softSurfer|(.{1,32} (AND|OR)){1,4} softSurfer)"
+
+%ENTRY% _SPDX_swrule
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](swrule|(.{1,32} (AND|OR)){1,4} swrule)"
+
+%ENTRY% _SPDX_threeparttable
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](threeparttable|(.{1,32} (AND|OR)){1,4} threeparttable)"
+
+%ENTRY% _SPDX_Widget_Workshop
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Widget-Workshop|(.{1,32} (AND|OR)){1,4} Widget-Workshop)"
+
+%ENTRY% _SPDX_Zeeff
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Zeeff|(.{1,32} (AND|OR)){1,4} Zeeff)"
+
+%ENTRY% _SPDX_DEC_3_Clause
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](DEC-3-Clause|(.{1,32} (AND|OR)){1,4} DEC-3-Clause)"
+
+%ENTRY% _SPDX_Kastrup
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Kastrup|(.{1,32} (AND|OR)){1,4} Kastrup)"
+
+%ENTRY% _SPDX_DL_DE_BY_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](DL-DE-BY-2\.0|(.{1,32} (AND|OR)){1,4} DL-DE-BY-2\.0)"
+
+%ENTRY% _SPDX_DL_DE_ZERO_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](DL-DE-ZERO-2\.0|(.{1,32} (AND|OR)){1,4} DL-DE-ZERO-2\.0)"
+
+%ENTRY% _SPDX_Lucida_Bitmap_Fonts
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Lucida-Bitmap-Fonts|(.{1,32} (AND|OR)){1,4} Lucida-Bitmap-Fonts)"
+
+%ENTRY% _SPDX_ISO_permission
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](ISO-permission|(.{1,32} (AND|OR)){1,4} ISO-permission)"
+
+%ENTRY% _SPDX_OGL_Canada_20_text
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](OGL-Canada-2\.0|(.{1,32} (AND|OR)){1,4} OGL-Canada-2\.0)"
+
+%ENTRY% _SPDX_NYSL_0_9982
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](NYSL-0\.9982|(.{1,32} (AND|OR)){1,4} NYSL-0\.9982)"
+
+%ENTRY% _SPDX_Parity_600_text
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Parity-6\.0\.0|(.{1,32} (AND|OR)){1,4} Parity-6\.0\.0)"
+
+%ENTRY% _SPDX_LAL_13_text
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](LAL-1\.3|(.{1,32} (AND|OR)){1,4} LAL-1\.3)"
+
+%ENTRY% _SPDX_NLOD_10_text
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](NLOD-1\.0|(.{1,32} (AND|OR)){1,4} NLOD-1\.0)"
+
+%ENTRY% _SPDX_GLWTPL_text
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GLWTPL|(.{1,32} (AND|OR)){1,4} GLWTPL)"
+
+%ENTRY% _SPDX_LicenseRef_musl_exception
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](musl-exception|(.{1,32} (AND|OR)){1,4} musl-exception)"
+
+#
+%ENTRY% _LT_ADOBE_UTOPIA
+%KEY% "permi[st]"
+%STR% "permission to use reproduce display and distribute the listed typefaces is hereby granted =SOME= adobe copyright notice appears"
+#
+%ENTRY% _LT_ALGLIB_DOC
+%KEY% "distribut"
+%STR% "redistribution and use of this document =SOME= alglib reference manual =SOME= with or without modification"
+#
+%ENTRY% _LT_ARPHIC_1999
+%KEY% "licen[cs]"
+%STR% "arphic public licen[cs]e =SOME= arphic technology"
+#
+%ENTRY% _LT_ASPELL_RU
+%KEY% "permi[st]"
+%STR% "permission to use copy redistribute is granted =SOME= permission to redistribute modifications in patch form is granted"
+#
+%ENTRY% _LT_ASTERISK_EXCEPTION
+%KEY% "licen[cs]"
+%STR% "when this program is distributed with asterisk =SOME= combined work =SOME= derivative work =SOME= redistribute =SOME= under the terms of the licen[cs]e provided with that copy of asterisk"
+#
+%ENTRY% _LT_ASWF_DIGITAL_10
+%KEY% "licen[cs]"
+%STR% "aswf digital assets licen[cs]e"
+#
+%ENTRY% _LT_ASWF_DIGITAL_11
+%KEY% "licen[cs]"
+%STR% "aswf digital assets licen[cs]e v1.?1"
+#
+%ENTRY% _LT_BRIAN_GLADMAN
+%KEY% "distribut"
+%STR% "redistribution and use of this software =SOME= without the payment of fees or royalties provided that =SOME= source code distributions include the above copyright notice"
+#
+%ENTRY% _LT_CAPEC_TOU
+%KEY% "licen[cs]"
+%STR% "mitre corporation =SOME= hereby grants you a non-exclusive royalty-free licen[cs]e to use common attack pattern enumeration and classification"
+#
+%ENTRY% _LT_CERN_OHL_P_20
+%KEY% "licen[cs]"
+%STR% "cern open hardware licen[cs]e version 2 =FEW= permissive"
+#
+%ENTRY% _LT_CERN_OHL_S_20
+%KEY% "licen[cs]"
+%STR% "cern open hardware licen[cs]e version 2 =FEW= strongly reciprocal"
+#
+%ENTRY% _LT_CERN_OHL_W_20
+%KEY% "licen[cs]"
+%STR% "cern open hardware licen[cs]e version 2 =FEW= weakly reciprocal"
+#
+%ENTRY% _LT_CHECK_CVS
+%KEY% "permi[st]"
+%STR% "permission is granted to copy and.?or distribute this file with or without modifications provided this notice is preserved"
+#
+%ENTRY% _LT_CRONYX
+%KEY% "use"
+%STR% "this software may be used modified copied distributed and sold =SOME= in both source and binary form provided that the copyright and these terms are retained"
+#
+%ENTRY% _LT_CVE_TOU
+%KEY% "licen[cs]"
+%STR% "mitre hereby grants you a perpetual worldwide non-exclusive no-charge royalty-free irrevocable copyright licen[cs]e =ANY= common vulnerabilities and exposures"
+#
+%ENTRY% _LT_DANTE_TREGLIA
+%KEY% "distribut"
+%STR% "provided as is without express or implied warranties =ANY= freely copy and compile this source into applications you distribute provided that the copyright text below is included"
+#
+%ENTRY% _LT_ESA_PL_PERM_24
+%KEY% "licen[cs]"
+%STR% "european space agency public licen[cs]e =SOME= esa-pl =SOME= permissive =SOME= type 3 =SOME= v2?4"
+#
+%ENTRY% _LT_ESA_PL_SC_24
+%KEY% "licen[cs]"
+%STR% "european space agency public licen[cs]e =SOME= esa-pl =SOME= strong copyleft =SOME= type 1 =SOME= v2?4"
+#
+%ENTRY% _LT_FBM
+%KEY% "permi[st]"
+%STR% "permission is granted to use this file in whole or in part for any purpose educational recreational or commercial =SOME= copyright notice is retained unchanged"
+#
+%ENTRY% _LT_GNOME_EXAMPLES_EXCEPTION
+%KEY% "permi[st]"
+%STR% "as a special exception the copyright holders give you permission to copy modify and distribute the example code contained in this document =SOME= without restriction"
+#
+%ENTRY% _LT_HYPHEN_BULGARIAN
+%KEY% "distribut"
+%STR% "this software may be used modified copied distributed and sold =SOME= both in source and binary form provided that the above copyright notice and these terms are retained"
+#
+%ENTRY% _LT_IEC_CODE_EULA
+%KEY% "licen[cs]"
+%STR% "iec code components end-user licen[cs]e agreement =SOME= code components in iec standards"
+#
+%ENTRY% _LT_JOVE
+%KEY% "distribut"
+%STR% "jove is provided by jonathan =SOME= without charge and without warranty =SOME= you may copy modify and.?or distribute jove =SOME= provided that this notice is included in all the source files and documentation"
+#
+%ENTRY% _LT_MAGAZ
+%KEY% "permi[st]"
+%STR% "this software may be freely used transmitted reproduced or modified provided that the copyright notice and this permission is retained"
+#
+%ENTRY% _LT_MAILPRIO
+%KEY% "distribut"
+%STR% "rights are hereby granted to download use modify sell copy and redistribute this software so long as the original copyright notice and this list of conditions remain intact"
+#
+%ENTRY% _LT_MINECRAFT_MOD
+%KEY% "licen[cs]"
+%STR% "minecraft =ANY= denotes a copy of the minecraft game licen[cs]ed by mojang =ANY= mmpl"
+#
+%ENTRY% _LT_MMIXWARE
+%KEY% "distribut"
+%STR% "this file may be freely copied and distributed provided that no changes whatsoever are made =SOME= mmixware files consistent"
+#
+%ENTRY% _LT_MPI_PERMISSIVE
+%KEY% "warrant"
+%STR% "neither etnus nor any of their employees makes any warranty express or implied"
+#
+%ENTRY% _LT_MPLUS_FREE_FONT
+%KEY% "distribut"
+%STR% "these fonts are free software =SOME= unlimited permission is granted to use copy and distribute them =SOME= with or without modification either commercially or noncommercially"
+#
+%ENTRY% _LT_NTIA_PD
+%KEY% "copyright"
+%STR% "national telecommunications and information administration =ANY= works of ntia employees are not subject to copyright"
+#
+%ENTRY% _LT_OFFIS
+%KEY% "so(ftware|urce)"
+%STR% "this software and supporting documentation were developed by =SOME= kuratorium offis"
+#
+%ENTRY% _LT_OPENVISION
+%KEY% "openvisi"
+%STR% "retrieving the openvision kerberos administration system =SOME= indicates your acceptance of the following terms"
+#
+%ENTRY% _LT_OPL_UK_30
+%KEY% "licen[cs]"
+%STR% "united kingdom open parliament licen[cs]e =SOME= you are encouraged to use and re-use the information"
+#
+%ENTRY% _LT_PARATYPE_FREE_13
+%KEY% "licen[cs]"
+%STR% "paratype free font licen[cs]ing agreement =ANY= pt sans pt serif pt mono"
+#
+%ENTRY% _LT_PNMSTITCH
+%KEY% "distribut"
+%STR% "terms and conditions of use =FEW= redistribution and use in source form with or without modification"
+#
+%ENTRY% _LT_SSH_KEYSCAN
+%KEY% "distribut"
+%STR% "modification and redistribution in source and binary forms is permitted provided that due credit is given to the author and the openbsd project"
+#
+%ENTRY% _LT_THIRDEYE
+%KEY% "use"
+%STR% "third eye software =SOME= grants reproduction and use rights to all parties =SOME= provided that this comment is maintained in the copy"
+#
+%ENTRY% _LT_UNRAR
+%KEY% "distribut"
+%STR% "unrar =FEW= free utility for rar archives =SOME= licen[cs]e for use and distribution of =SOME= free portable version"
+#
+%ENTRY% _LT_XZOOM
+%KEY% "distribut"
+%STR% "source files for this program may be distributed freely =SOME= modifications to this file are okay as long as =SOME= this copyright notice and comment are preserved"
+#
+# Aardvark I2C/SPI 2014
+%ENTRY% _LT_AARDVARK_PY_2014
+%KEY% "so(ftware|urce)"
+%STR% "aardvark i2c/spi software and firmware"
+#
+# SystemC Open Source License Agreement
+%ENTRY% _LT_ACCELLERA_SYSTEMC
+%KEY% "licen[cs]"
+%STR% "systemc open source license agreement"
+#
+# Acter Public Source License 1.0
+%ENTRY% _LT_ACTER_PSL_1_0
+%KEY% "licen[cs]"
+%STR% "acter public source license 1.?0"
+#
+# Adaptec EULA
+%ENTRY% _LT_ADAPTEC_EULA
+%KEY% "adaptec"
+%STR% "adaptec by pmc downloadable files"
+#
+# AddThis Mobile Application SDK License 1.0
+%ENTRY% _LT_ADDTHIS_MOBILE_SDK_1_0
+%KEY% "licen[cs]"
+%STR% "addthis mobile application sdk license agreement"
+#
+# Adobe EULA
+%ENTRY% _LT_AG_GRID_ENTERPRISE
+%KEY% "licen[cs]"
+%STR% "please read these licence terms carefully before downloading any software"
+#
+# AGTPL
+%ENTRY% _LT_AGTPL
+%KEY% "licen[cs]"
+%STR% "access grid toolkit public license agtpl"
+#
+# Alexisisaac Freeware License
+%ENTRY% _LT_ALEXISISAAC_FREEWARE
+%KEY% "licen[cs]"
+%STR% "freeware license agreement"
+#
+# Amazon Redshift JDBC Driver License Agreement
+%ENTRY% _LT_AMAZON_REDSHIFT_JDBC
+%KEY% "licen[cs]"
+%STR% "amazon redshift jdbc driver license agreement"
+#
+# Amazon Software License
+%ENTRY% _LT_AMAZON_SL
+%KEY% "licen[cs]"
+%STR% "amazon software license"
+#
+# AMD Linux Firmware Export License
+%ENTRY% _LT_AMD_LINUX_FIRMWARE_EXPORT
+%KEY% "permi[st]"
+%STR% "permission is hereby granted by advanced micro devices inc amd"
+#
+# Anaconda TOS 2024-03-30
+%ENTRY% _LT_ANACONDA_TOS_2024_03_30
+%KEY% "terms"
+%STR% "anaconda terms of service"
+#
+# Android SDK Preview License
+%ENTRY% _LT_ANDROID_SDK_PREVIEW_2015
+%KEY% "licen[cs]"
+%STR% "this is the android sdk preview license agreement the license agreement ."
+#
+# AnswerCarefully Dataset ToU 2025
+%ENTRY% _LT_ANSWERCAREFULLY_TOU_2025
+%KEY% "use"
+%STR% "answercarefully dataset terms of use"
+#
+# Appfire EULA
+%ENTRY% _LT_APPFIRE_EULA
+%KEY% "atlassian"
+%STR% "appfire technologies =ANY= bob swift atlassian add-ons"
+#
+# Apple Attribution License
+%ENTRY% _LT_APPLE_ATTRIBUTION
+%KEY% "so(ftware|urce)"
+%STR% "even though apple has reviewed this software apple makes no warranty"
+#
+# Apple MPEG-4 License
+%ENTRY% _LT_APPLE_MPEG_4
+%KEY% "so(ftware|urce)"
+%STR% "this software module was originally developed by apple computer inc in the"
+#
+# AppsFlyer Framework License
+%ENTRY% _LT_APPSFLYER_FRAMEWORK
+%KEY% "so(ftware|urce)"
+%STR% "appsflyer ltd =FEW= appsflyer =FEW= provides a software development kit"
+#
+# ARM Cortex-Mx Proprietary
+%ENTRY% _LT_ARM_CORTEX_MX
+%KEY% "so(ftware|urce)"
+%STR% "arm limited arm is supplying this software for use with cortex-mx"
+#
+# ARM LLVM Grant
+%ENTRY% _LT_ARM_LLVM_SGA
+%KEY% "licen[cs]"
+%STR% "software grant license agreement agreement"
+#
+# ASMUS License
+%ENTRY% _LT_ASMUS
+%KEY% "disclaim"
+%STR% "disclaimer and legal rights"
+#
+# Atlassian Marketplace Terms of Use
+%ENTRY% _LT_ATLASSIAN_MARKETPLACE_TOU
+%KEY% "use"
+%STR% "atlassian marketplace terms of use"
+#
+# AuthorizeNet SDK License
+%ENTRY% _LT_AUTHORIZENET_SDK
+%KEY% "licen[cs]"
+%STR% "sdk license agreement =ANY= authorizenet llc"
+#
+# Autodesk 3D Studio File Toolkit for Release 3
+%ENTRY% _LT_AUTODESK_3D_SFT_3_0
+%KEY% "autodesk"
+%STR% "autodesk 3d studio file toolkit for release 3"
+#
+# Autoit EULA
+%ENTRY% _LT_AUTOIT_EULA
+%KEY% "autoit"
+%STR% "autoit eula"
+#
+# BEA 2.1
+%ENTRY% _LT_BEA_2_1
+%KEY% "licen[cs]"
+%STR% "bea public license version 2.?1"
+#
+# Beal Screamer License
+%ENTRY% _LT_BEAL_SCREAMER
+%KEY% "screamer"
+%STR% "by beal screamer"
+#
+# BeeGFS EULA 2024
+%ENTRY% _LT_BEEGFS_EULA_2024
+%KEY% "licen[cs]"
+%STR% "beegfs end user license agreement"
+#
+# Binary-Only Linux Firmware License
+%ENTRY% _LT_BINARY_LINUX_FIRMWARE
+%KEY% "distribut"
+%STR% "redistribution redistribution and use in binary form without"
+#
+# Biopython License
+%ENTRY% _LT_BIOPYTHON
+%KEY% "licen[cs]"
+%STR% "biopython license agreement"
+#
+# BPEL4WS Specification license
+%ENTRY% _LT_BPEL4WS_SPEC
+%KEY% "copyright"
+%STR% "bpel4ws specification version 1 1 dated may 5 2003 copyright statement"
+#
+# Brankas Open License 1.0
+%ENTRY% _LT_BRANKAS_OPEN_LICENSE_1_0
+%KEY% "licen[cs]"
+%STR% "brankas open license"
+#
+# Broadcom Linking Exception if unmodified
+%ENTRY% _LT_BROADCOM_LINKING_UNMODIFIED
+%KEY% "copyright"
+%STR% "as a special exception the copyright holders of this software give you permission to link this software with independent modules and to copy and distribute"
+#
+# Broadcom Linux Firmware License
+%ENTRY% _LT_BROADCOM_LINUX_FIRMWARE
+%KEY% "so(ftware|urce)"
+%STR% "accompanying software in binary code form =ANY= unless licensee and broadcom corporation"
+#
+# Broadcom Warranty Disclaimer
+%ENTRY% _LT_BROADCOM_LINUX_TIMER
+%KEY% "so(ftware|urce)"
+%STR% "this software is offered as is and broadcom grants"
+#
+# Broadcom Opus Patent License
+%ENTRY% _LT_BROADCOM_OPUS_PATENT
+%KEY% "licen[cs]"
+%STR% "license grant broadcom corporation =FEW= hereby grants to you a perpetual"
+#
+# Broadcom Standard Terms
+%ENTRY% _LT_BROADCOM_STANDARD_TERMS
+%KEY% "so(ftware|urce)"
+%STR% "this program is the proprietary software of broadcom corporation and/or"
+#
+# Broadcom Unmodified Linking Exception
+%ENTRY% _LT_BROADCOM_UNMODIFIED_EXCEPTIO
+%KEY% "copyright"
+%STR% "as a special exception the copyright holders of this software give you permission to link this software with independent modules and to copy and distribute"
+#
+# BSD DPT
+%ENTRY% _LT_BSD_DPT
+%KEY% "distribut"
+%STR% "this software is provided as is by distributed processing technology"
+#
+# Budibase SQS License 2023
+%ENTRY% _LT_BUDIBASE_SQS_2023
+%KEY% "licen[cs]"
+%STR% "form of customer licence"
+#
+# BugSense SDK License
+%ENTRY% _LT_BUGSENSE_SDK
+%KEY% "bugsense"
+%STR% "binding contract between you and bugsense =SOME= bugsense sdk"
+#
+# BYTEmark License
+%ENTRY% _LT_BYTEMARK
+%KEY% "native"
+%STR% "byte s native mode benchmarks"
+#
+# Cadence Linux Firmware License
+%ENTRY% _LT_CADENCE_LINUX_FIRMWARE
+%KEY% "cadence"
+%STR% "neither the name of cadence design systems"
+#
+# Camunda License 1.0
+%ENTRY% _LT_CAMUNDA_1_0
+%KEY% "licen[cs]"
+%STR% "camunda license 1.?0"
+#
+# Canonical-HA-CLA-ANY-E_v1.2
+%ENTRY% _LT_CANONICAL_HA_CLA_ANY_E_V1_2
+%KEY% "licen[cs]"
+%STR% "canonical entity contributor license agreement"
+#
+# Canonical-HA-CLA-ANY-I_v1.2
+%ENTRY% _LT_CANONICAL_HA_CLA_ANY_I_V1_2
+%KEY% "licen[cs]"
+%STR% "canonical individual contributor license agreement"
+#
+# Cavium malloc License
+%ENTRY% _LT_CAVIUM_MALLOC
+%KEY% "distribut"
+%STR% "permission to use copy modify distribute and sell this software and its =ANY= wolfram gloger"
+#
+# cexcept License 2008
+%ENTRY% _LT_CEXCEPT_2008
+%KEY% "so(ftware|urce)"
+%STR% "this software may be modified only if its author and version"
+#
+# CGIC License
+%ENTRY% _LT_CGIC
+%KEY% "licen[cs]"
+%STR% "cgic license terms"
+#
+# ChilliCream License 1.0
+%ENTRY% _LT_CHILLICREAM_1_0
+%KEY% "licen[cs]"
+%STR% "chillicream license 1.?0"
+#
+# CNCF Corporate CLA 1.0
+%ENTRY% _LT_CNCF_CORPORATE_CLA_1_0
+%KEY% "licen[cs]"
+%STR% "softwaregrantandcorporatecontributorlicenseagreement"
+#
+# CNCF Individual CLA 1.0
+%ENTRY% _LT_CNCF_INDIVIDUAL_CLA_1_0
+%KEY% "licen[cs]"
+%STR% "individualcontributorlicenseagreement =ANY= cloudnativecomputingfoundation"
+#
+# CodeGuru Permissions
+%ENTRY% _LT_CODEGURU_PERMISSIONS
+%KEY% "so(ftware|urce)"
+%STR% "as you know this site is a valuable resource for the developer community."
+#
+# CommonJ Timer License
+%ENTRY% _LT_COMMONJ_TIMER
+%KEY% "licen[cs]"
+%STR% "commonj timer and work manager license"
+#
+# Couchbase Community Edition License
+%ENTRY% _LT_COUCHBASE_COMMUNITY
+%KEY% "licen[cs]"
+%STR% "couchbase inc community edition license agreement"
+#
+# CppCoreGuidelines License
+%ENTRY% _LT_CPP_CORE_GUIDELINES
+%KEY% "grant"
+%STR% "foundation grants you a worldwide nonexclusive royalty-free perpetual licen[cs]e"
+#
+# CRAPL v0 BETA 1
+%ENTRY% _LT_CRAPL_0_1
+%KEY% "crapl"
+%STR% "the crapl v0 beta 1"
+#
+# CSLA License
+%ENTRY% _LT_CSLA
+%KEY% "licen[cs]"
+%STR% "license and warranty"
+#
+# DCO 1.0
+%ENTRY% _LT_DCO_1_0
+%KEY% "develope"
+%STR% "developer s certificate of origin 1.?0"
+#
+# DCO 1.1
+%ENTRY% _LT_DCO_1_1
+%KEY% "develope"
+%STR% "developer certificate of origin"
+#
+# DeepSeek License Agreement v1.0
+%ENTRY% _LT_DEEPSEEK_LA_1_0
+%KEY% "licen[cs]"
+%STR% "deepseek license agreement"
+#
+# Diffgram DLv2
+%ENTRY% _LT_DIFFGRAM_DLV2
+%KEY% "licen[cs]"
+%STR% "the licensor grants you a non-exclusive royalty-free worldwide non-transferable license"
+#
+# DivX Open License 2.1
+%ENTRY% _LT_DIVX_OPEN_2_1
+%KEY% "licen[cs]"
+%STR% "opendivx is licensed under the divx open license."
+#
+# Do No Harm
+%ENTRY% _LT_DO_NO_HARM_0_1
+%KEY% "licen[cs]"
+%STR% "do no harm license"
+#
+# Douglas Young License
+%ENTRY% _LT_DOUGLAS_YOUNG
+%KEY% "distribut"
+%STR% "permission to use copy modify and distribute this software for any purpose =SOME= except publication and without fee"
+#
+# Dynarch Developer Agreement
+%ENTRY% _LT_DYNARCH_DEVELOPER
+%KEY% "dynarch"
+%STR% "dynarch developer agreement"
+#
+# Eclipse TCK v1.1
+%ENTRY% _LT_ECLIPSE_TCK_1_1
+%KEY% "licen[cs]"
+%STR% "eclipse foundation technology compatibility kit license v1?1"
+#
+# Ecma Historical Code of Conduct in Patent Matters
+%ENTRY% _LT_ECMA_PATENT_COC_0
+%KEY% "historic"
+%STR% "historical code of conduct in patent matters valid until december 3 2009"
+#
+# Ecma Code of Conduct in Patent Matters v1
+%ENTRY% _LT_ECMA_PATENT_COC_1
+%KEY% "conduct"
+%STR% "code of conduct in patent matters"
+#
+# Ecma Code of Conduct in Patent Matters v2
+%ENTRY% _LT_ECMA_PATENT_COC_2
+%KEY% "conduct"
+%STR% "ecma code of conduct in patent matters*"
+#
+# Enhydra 1.1
+%ENTRY% _LT_ENHYDRA_1_1
+%KEY% "licen[cs]"
+%STR% "enhydra public license version 1.?1"
+#
+# ENISA Legal Notice 2025
+%ENTRY% _LT_ENISA_LEGAL_NOTICE_2025
+%KEY% "copyright"
+%STR% "this web site is subject to a copyright clause a"
+#
+# Eric Glass License
+%ENTRY% _LT_ERIC_GLASS
+%KEY% "distribut"
+%STR% "permission to use copy modify and distribute this document for any purpose"
+#
+# Esri Developer Kit License
+%ENTRY% _LT_ESRI_DEVKIT
+%KEY% "copyright"
+%STR% "copyright 2006 esri"
+#
+# Excelsior JET Runtime License
+%ENTRY% _LT_EXCELSIOR_JET_RUNTIME
+%KEY% "licen[cs]"
+%STR% "excelsior jet licensing terms and conditions"
+#
+# Facebook Nuclide Software License
+%ENTRY% _LT_FACEBOOK_NUCLIDE
+%KEY% "facebook"
+%STR% "facebook inc facebook owns all right title and interest including all"
+#
+# Facebook Patent Rights 2
+%ENTRY% _LT_FACEBOOK_PATENT_RIGHTS_2
+%KEY% "grant"
+%STR% "additional grant of patent rights version 2"
+#
+# FIRST EPSS Usage Agreement
+%ENTRY% _LT_FIRST_EPSS_USAGE
+%KEY% "emerging"
+%STR% "epss is an emerging standard developed by a volunteer group"
+#
+# Fish Audio Research License Agreement 2026-03-07
+%ENTRY% _LT_FISH_AUDIO_RESEARCH_2026_03_
+%KEY% "licen[cs]"
+%STR% "fish audio research license agreement last updated"
+#
+# Fraunhofer ISO 14496-10 License
+%ENTRY% _LT_FRAUNHOFER_ISO_14496_10
+%KEY% "copyright"
+%STR% "note - one of the two copyright statements below may be chosen"
+#
+# FtpBean License
+%ENTRY% _LT_FTPBEAN
+%KEY% "ftpbean"
+%STR% "ftpbean version 1.?4.?2"
+#
+# Gareth McCaughan License
+%ENTRY% _LT_GARETH_MCCAUGHAN
+%KEY% "distribut"
+%STR% "this file may be distributed and used freely provided"
+#
+# Gatling-Highcharts License
+%ENTRY% _LT_GATLING_HIGHCHARTS
+%KEY% "licen[cs]"
+%STR% "this module is protected by a specific license because it"
+#
+# Gemma ToU 2024-04-01
+%ENTRY% _LT_GEMMA_TOU_2024_04_01
+%KEY% "use"
+%STR% "gemma terms of use"
+#
+# Gemma ToU 2025-03-24
+%ENTRY% _LT_GEMMA_TOU_2025_03_24
+%KEY% "use"
+%STR% "gemma terms of use"
+#
+# Generic CLA
+%ENTRY% _LT_GENERIC_CLA
+%KEY% "licen[cs]"
+%STR% "generic contributor license agreement"
+#
+# GitHub CodeQL Terms 2020
+%ENTRY% _LT_GITHUB_CODEQL_TERMS_2020
+%KEY% "github"
+%STR% "github codeql terms and conditions"
+#
+# Gitleaks-Action EULA
+%ENTRY% _LT_GITLEAKS_ACTION_EULA
+%KEY% "licen[cs]"
+%STR% "gitleaks-action end-user license agreement"
+#
+# GNU emacs General Public License 1985
+%ENTRY% _LT_GNU_EMACS_GPL_1985
+%KEY% "licen[cs]"
+%STR% "gnu emacs general public license"
+#
+# Google APIs TOS 2021
+%ENTRY% _LT_GOOGLE_APIS_TOS_2021
+%KEY% "google"
+%STR% "google apis terms of service"
+#
+# Google CLA
+%ENTRY% _LT_GOOGLE_CLA
+%KEY% "licen[cs]"
+%STR% "google individual contributor license agreement"
+#
+# Google Corporate CLA
+%ENTRY% _LT_GOOGLE_CORPORATE_CLA
+%KEY% "licen[cs]"
+%STR% "google software grant and corporate contributor license agreement"
+#
+# Google Patent License for Fuchsia
+%ENTRY% _LT_GOOGLE_PATENT_LICENSE_FUCHSI
+%KEY% "grant"
+%STR% "additional ip rights grant patents"
+#
+# Google Patent License for Go
+%ENTRY% _LT_GOOGLE_PATENT_LICENSE_GOLANG
+%KEY% "grant"
+%STR% "additional ip rights grant patents"
+#
+# Google Patent License
+%ENTRY% _LT_GOOGLE_PATENT_LICENSE
+%KEY% "grant"
+%STR% "google hereby grants to you a perpetual worldwide non-exclusive"
+#
+# Google TOS 2020
+%ENTRY% _LT_GOOGLE_TOS_2020
+%KEY% "effectiv"
+%STR% "effective march 31 2020"
+#
+# Gradle Enterprise SLA 2022-
+%ENTRY% _LT_GRADLE_ENTERPRISE_SLA_2022_1
+%KEY% "licen[cs]"
+%STR% "gradle enterprise software license agreement"
+#
+# Gradle Terms of Use 2022-01-13
+%ENTRY% _LT_GRADLE_TOU_2022_01_13
+%KEY% "use"
+%STR% "gradle terms of use"
+#
+# Standard "No Charge" GSAP License 2025
+%ENTRY% _LT_GSAP_STANDARD_NO_CHARGE_2025
+%KEY% "licen[cs]"
+%STR% "standard no charge gsap license"
+#
+# GTPL-v2
+%ENTRY% _LT_GTPL_V2
+%KEY% "licen[cs]"
+%STR% "globus toolkit public license"
+#
+# HESSLA
+%ENTRY% _LT_HESSLA
+%KEY% "distribut"
+%STR% "terms and conditions for copying distribution use and/or modification"
+#
+# HFOILv1.0
+%ENTRY% _LT_HFOIL_1_0
+%KEY% "licen[cs]"
+%STR% "hugging face optimized inference license 1.?0 hfoilv1.?0"
+#
+# Historical Notice - NTP
+%ENTRY% _LT_HISTORICAL_NTP
+%KEY% "permi[st]"
+%STR% "permission is hereby granted for unlimited modification use and"
+#
+# httpget notice and disclaimer
+%ENTRY% _LT_HTTPGET
+%KEY% "distribut"
+%STR% "the right to use modify and redistribute this code is allowed"
+#
+# Hugo License
+%ENTRY% _LT_HUGO
+%KEY% "licen[cs]"
+%STR% "hugo license - december 19 2003"
+#
+# IBM developerWorks Community Download Agreement
+%ENTRY% _LT_IBM_DEVELOPERWORKS_COMMUNITY
+%KEY% "content"
+%STR% "download of content agreement"
+#
+# IBM Employee-Written Software License
+%ENTRY% _LT_IBM_EMPLOYEE_WRITTEN
+%KEY% "licen[cs]"
+%STR% "ibm license agreement for ibm employee-written software"
+#
+# IBM Sample License
+%ENTRY% _LT_IBM_SAMPLE
+%KEY% "sample"
+%STR% "the sample program s is/are owned by international business machines"
+#
+# ICOT Free Software
+%ENTRY% _LT_ICOT_FREE
+%KEY% "so(ftware|urce)"
+%STR% "terms and conditions for use of icot free software"
+#
+# IDT License Notice
+%ENTRY% _LT_IDT_NOTICE
+%KEY% "so(ftware|urce)"
+%STR% "this source code has been made available to you by idt on an as-is"
+#
+# Infineon Free Software License
+%ENTRY% _LT_INFINEON_FREE
+%KEY% "licen[cs]"
+%STR% "infineon =SOME= licensed free of charge =SOME= no warranty for the program"
+#
+# InstallSite License Agreement
+%ENTRY% _LT_INSTALLSITE
+%KEY% "legal"
+%STR% "important read carefully this is a legal agreement between you"
+#
+# Intel Sample Source Code 2015
+%ENTRY% _LT_INTEL_SAMPLE_SOURCE_CODE_201
+%KEY% "licen[cs]"
+%STR% "intel sample source code license agreement"
+#
+# Intel Source Code License Agreement
+%ENTRY% _LT_INTEL_SCL
+%KEY% "licen[cs]"
+%STR% "intel source code license agreement"
+#
+# IOzone License
+%ENTRY% _LT_IOZONE
+%KEY% "licen[cs]"
+%STR% "license to freely use and distribute this software is hereby granted by the"
+#
+# ISO 14496-10
+%ENTRY% _LT_ISO_14496_10
+%KEY% "licen[cs]"
+%STR% "software copyright licensing disclaimer"
+#
+# ISO/IEC 19757-3
+%ENTRY% _LT_ISO_SCHEMATRON_19757_3
+%KEY% "permi[st]"
+%STR% "the following permission notice and disclaimer shall be included in all"
+#
+# ITC EULA
+%ENTRY% _LT_ITC_EULA
+%KEY% "constitut"
+%STR% "this agreement constitutes the complete agreement between you and international"
+#
+# ITU License
+%ENTRY% _LT_ITU
+%KEY% "copyright"
+%STR% "copyright and warranty information copyright international telecommunications union geneva"
+#
+# ITU-T License
+%ENTRY% _LT_ITU_T
+%KEY% "licen[cs]"
+%STR% "software 1 license agreement"
+#
+# JetBrains Purchase Terms
+%ENTRY% _LT_JETBRAINS_PURCHASE_TERMS
+%KEY% "terms"
+%STR% "terms and conditions of purchase"
+#
+# JGraph General License
+%ENTRY% _LT_JGRAPH_GENERAL
+%KEY% "licen[cs]"
+%STR% "jgraph general license"
+#
+# JIDE SLA
+%ENTRY% _LT_JIDE_SLA
+%KEY% "licen[cs]"
+%STR% "software license agreement for jide software inc s products"
+#
+# JoinBase Community Edition License 2022
+%ENTRY% _LT_JOINBASE_CELA_2022
+%KEY% "licen[cs]"
+%STR% "joinbase community edition license agreement"
+#
+# JPEG XR License
+%ENTRY% _LT_JPEGXR
+%KEY% "so(ftware|urce)"
+%STR% "this software module was originally contributed by microsoft"
+#
+# Kevan Stannard License
+%ENTRY% _LT_KEVAN_STANNARD
+%KEY% "distribut"
+%STR% "permission to use copy modify and distribute this software =ANY= non-commercial or commercial purposes and without fee =ANY= no warranty"
+#
+# Kumar Robotics License
+%ENTRY% _LT_KUMAR_ROBOTICS
+%KEY% "use"
+%STR% "this code is 100 free use it anywhere you"
+#
+# Larabie Fonts EULA
+%ENTRY% _LT_LARABIE
+%KEY% "fonts"
+%STR% "the fonts contained in this archive are freeware no payment"
+#
+# Lattice Open Source License 2017
+%ENTRY% _LT_LATTICE_OSL_2017
+%KEY% "licen[cs]"
+%STR% "lattice open source license agreement"
+#
+# LCS-Telegraphics License
+%ENTRY% _LT_LCS_TELEGRAPHICS
+%KEY% "informat"
+%STR% "the text and information contained in this file may be freely used"
+#
+# Librato Open License 1.0
+%ENTRY% _LT_LIBRATO_EXCEPTION
+%KEY% "licen[cs]"
+%STR% "librato open license"
+#
+# Liferay Portal EE License
+%ENTRY% _LT_LIFERAY_EE
+%KEY% "contents"
+%STR% "the contents of this file are subject to the terms of the liferay enterprise"
+#
+# Liferay Marketplace TOS
+%ENTRY% _LT_LIFERAY_MARKETPLACE_TOS
+%KEY% "liferay"
+%STR% "liferay marketplace terms of service agreement"
+#
+# Linux Device Drivers
+%ENTRY% _LT_LINUX_DEVICE_DRIVERS
+%KEY% "so(ftware|urce)"
+%STR% "the source code in this file can be freely used adapted"
+#
+# LiveKit Model License Agreement 2024
+%ENTRY% _LT_LIVEKIT_MODEL_2024
+%KEY% "licen[cs]"
+%STR% "livekit model license agreement"
+#
+# Llama 2 Community License Agreement 2023
+%ENTRY% _LT_LLAMA_2_LICENSE_2023
+%KEY% "licen[cs]"
+%STR% "llama 2 community license agreement"
+#
+# Llama 3.1 Community License Agreement 2024
+%ENTRY% _LT_LLAMA_3_1_LICENSE_2024
+%KEY% "licen[cs]"
+%STR% "llama 3.?1 community license agreement"
+#
+# Llama 3.2 Community License Agreement 2024
+%ENTRY% _LT_LLAMA_3_2_LICENSE_2024
+%KEY% "licen[cs]"
+%STR% "llama 3.?2 community license agreement"
+#
+# Llama 3.3 Community License Agreement 2024
+%ENTRY% _LT_LLAMA_3_3_LICENSE_2024
+%KEY% "llama"
+%STR% "llama 3.?3 version release date december 6 2024"
+#
+# Llama 4 Community License Agreement 2025
+%ENTRY% _LT_LLAMA_4_CLA_2025
+%KEY% "licen[cs]"
+%STR% "llama 4 community license agreement"
+#
+# Llama 4 Acceptable Use Policy 2025
+%ENTRY% _LT_LLAMA_4_LICENSE_2025
+%KEY% "use"
+%STR% "llama 4 acceptable use policy"
+#
+# Mapbox TOS 2021
+%ENTRY% _LT_MAPBOX_TOS_2021
+%KEY% "mapbox"
+%STR% "welcome to the future of mapping =ANY= owned and operated by mapbox"
+#
+# Mapbox TOS 2024
+%ENTRY% _LT_MAPBOX_TOS_2024
+%KEY% "use"
+%STR% "last updated march 31 2024 =SOME= terms and conditions govern your use of mapbox.?s services"
+#
+# Marvell Firmware License
+%ENTRY% _LT_MARVELL_FIRMWARE
+%KEY% "marvell"
+%STR% "neither the name of marvell corporation nor the names of its suppliers"
+#
+# Matt Gallagher Attribution License
+%ENTRY% _LT_MATT_GALLAGHER_ATTRIBUTION
+%KEY% "permi[st]"
+%STR% "permission is given to use this source code file free of charge in any"
+#
+# McAfee Free License
+%ENTRY% _LT_MCAFEE_TOU
+%KEY% "licen[cs]"
+%STR% "mcafee software royalty-free license"
+#
+# MediaTek No Warranty Clause
+%ENTRY% _LT_MEDIATEK_NO_WARRANTY
+%KEY% "except"
+%STR% "except as may be otherwise agreed to in writing no warranties of any"
+#
+# Mediatek Proprietary License 2005
+%ENTRY% _LT_MEDIATEK_PROPRIETARY_2005
+%KEY% "so(ftware|urce)"
+%STR% "this mt3620 driver software/firmware and related documentation"
+#
+# Mediatek Proprietary License 2010
+%ENTRY% _LT_MEDIATEK_PROPRIETARY_2010
+%KEY% "so(ftware|urce)"
+%STR% "this software/firmware and related documentation mediatek software"
+#
+# Mediatek Proprietary License 2016
+%ENTRY% _LT_MEDIATEK_PROPRIETARY_2016
+%KEY% "so(ftware|urce)"
+%STR% "this software/firmware and related documentation mediatek software are"
+#
+# Melange Public License
+%ENTRY% _LT_MELANGE
+%KEY% "licen[cs]"
+%STR% "melange chat server/client public license"
+#
+# Microchip ENC28J60 License 2009
+%ENTRY% _LT_MICROCHIP_ENC28J60_2009
+%KEY% "licen[cs]"
+%STR% "microchip licenses to you the right to use modify copy and distribute =SOME= embedded on a microchip microcontroller"
+#
+# Microchip Linux Firmware License
+%ENTRY% _LT_MICROCHIP_LINUX_FIRMWARE
+%KEY% "distribut"
+%STR% "redistribution permission is hereby granted by microchip technology"
+#
+# Microchip pk2cmd License 2009
+%ENTRY% _LT_MICROCHIP_PK2CMD_2009
+%KEY% "so(ftware|urce)"
+%STR% "you may use copy modify and distribute the software for use with microchip products only"
+#
+# MS Enterprise Library EULA
+%ENTRY% _LT_MICROSOFT_ENTERPRISE_LIBRARY
+%KEY% "licen[cs]"
+%STR% "enterprise library =SOME= june 2005 =SOME= this license governs use of the accompanying software"
+#
+# MiniMax Model License M2.5
+%ENTRY% _LT_MINIMAX_MODEL_M2_5
+%KEY% "licen[cs]"
+%STR% "minimax model license"
+#
+# MIT Nagy Variant
+%ENTRY% _LT_MIT_NAGY
+%KEY% "distribut"
+%STR% "permission to use copy modify and/or distribute this code"
+#
+# Moderne Source Available License 2024
+%ENTRY% _LT_MODERNE_SALA_2024
+%KEY% "licen[cs]"
+%STR% "moderne source available license agreement"
+#
+# MoeSpeech License
+%ENTRY% _LT_MOE_SPEECH
+%KEY% "licen[cs]"
+%STR% "moespeech license"
+#
+# Mov.AI License version 1.0
+%ENTRY% _LT_MOV_AI_1_0
+%KEY% "licen[cs]"
+%STR% "mov.ai license version 1.?0 https //www.mov.ai/flow-license"
+#
+# Moxa Linux Firmware License
+%ENTRY% _LT_MOXA_LINUX_FIRMWARE
+%KEY% "licen[cs]"
+%STR% "the software accompanying this license statement the software"
+#
+# MPEG-7 License
+%ENTRY% _LT_MPEG_7
+%KEY% "so(ftware|urce)"
+%STR% "this software module was originally developed by"
+#
+# MPEG-2 NBC MPEG-4 Audio ISO
+%ENTRY% _LT_MPEG_ISO
+%KEY% "audio"
+%STR% "mpeg-2 nbc audio decoder =ANY= fraunhofer =FEW= iis"
+#
+# MS Supplemental License - ASP.NET 2.0 AJAX EXT
+%ENTRY% _LT_MS_ASP_NET_AJAX_SUPPLEMENTAL
+%KEY% "licen[cs]"
+%STR% "microsoft software supplement license terms"
+#
+# MS Azure RTOS 2020-05
+%ENTRY% _LT_MS_AZURE_RTOS_2020_05
+%KEY% "licen[cs]"
+%STR% "microsoft software license terms"
+#
+# MS Azure RTOS 2020-07
+%ENTRY% _LT_MS_AZURE_RTOS_2020_07
+%KEY% "licen[cs]"
+%STR% "microsoft software license terms"
+#
+# MS Azure RTOS 2023-05
+%ENTRY% _LT_MS_AZURE_RTOS_2023_05
+%KEY% "licen[cs]"
+%STR% "microsoft software license terms"
+#
+# Microsoft Container EULA
+%ENTRY% _LT_MS_CONTAINER_EULA
+%KEY% "licen[cs]"
+%STR% "microsoft software license terms"
+#
+# MS Direct3D D3D12On7 1.1.0
+%ENTRY% _LT_MS_DIRECT3D_D3D120N7_1_1_0
+%KEY% "licen[cs]"
+%STR% "microsoft software license terms"
+#
+# MS DXSDK.D3DX 9.29.952.3
+%ENTRY% _LT_MS_DXSDK_D3DX_9_29_952_3
+%KEY% "licen[cs]"
+%STR% "microsoft software license terms"
+#
+# MS Entity Framework 5 License
+%ENTRY% _LT_MS_ENTITY_FRAMEWORK_5
+%KEY% "licen[cs]"
+%STR% "entity framework 5 license"
+#
+# MS IIS Container Images EULA 2020
+%ENTRY% _LT_MS_IIS_CONTAINER_IMAGES_EULA
+%KEY% "licen[cs]"
+%STR% "microsoft software supplemental license terms"
+#
+# MS Systems Journal Sample Code License
+%ENTRY% _LT_MSJ_SAMPLE_CODE
+%KEY% "grant"
+%STR% "microsoft grants to you a royalty-free right to use and"
+#
+# MS Limited Community License
+%ENTRY% _LT_MS_LIMITED_COMMUNITY
+%KEY% "licen[cs]"
+%STR% "microsoft limited community license ms-lcl"
+#
+# MS .NET Library License 2019-06
+%ENTRY% _LT_MS_NET_LIBRARY_2019_06
+%KEY% "licen[cs]"
+%STR% "microsoft software license terms"
+#
+# MS Office System Programs Software EULA
+%ENTRY% _LT_MS_OFFICE_SYSTEM_PROGRAMS_EU
+%KEY% "licen[cs]"
+%STR% "supplemental end user license agreement for"
+#
+# MS Opus Patent Terms 2012
+%ENTRY% _LT_MS_OPUS_PATENT_2012
+%KEY% "microsof"
+%STR% "microsoft opus patent terms"
+#
+# MS Patent Promise for .NET
+%ENTRY% _LT_MS_PATENT_PROMISE
+%KEY% "microsof"
+%STR% "microsoft patent promise for net libraries and runtime components"
+#
+# Microsoft Patent Promise for Mono
+%ENTRY% _LT_MS_PATENT_PROMISE_MONO
+%KEY% "microsof"
+%STR% "microsoft patent promise for mono"
+#
+# MS Pylance Extension for VSCode License
+%ENTRY% _LT_MS_PYTHON_VSCODE_PYLANCE_202
+%KEY% "licen[cs]"
+%STR% "microsoft software license terms microsoft pylance extension for visual studio"
+#
+# MS-SS-PL
+%ENTRY% _LT_MS_SSPL
+%KEY% "licen[cs]"
+%STR% "microsoft shared source permissive license ss-pl"
+#
+# MStar Proprietary License 2007
+%ENTRY% _LT_MSTAR_2007
+%KEY% "unless"
+%STR% "unless otherwise stipulated in writing any and all information contained"
+#
+# MStar Proprietary License 2012
+%ENTRY% _LT_MSTAR_2012
+%KEY% "so(ftware|urce)"
+%STR% "all software firmware and related documentation herein mstar software are"
+#
+# MicroType Express (MTX) License
+%ENTRY% _LT_MTX_LICENSING_STATEMENT
+%KEY% "licen[cs]"
+%STR% "patent license grant monotype hereby grants to all a worldwide"
+#
+# muT-License
+%ENTRY% _LT_MUT_LICENSE
+%KEY% "licen[cs]"
+%STR% "t-license license agreement for source code of =FEW= t-kernel"
+#
+# MySQL linking exception 2018
+%ENTRY% _LT_MYSQL_LINKING_EXCEPTION_2018
+%KEY% "distribut"
+%STR% "this program is also distributed with certain software including"
+#
+# Naughter Software License
+%ENTRY% _LT_NAUGHTER
+%KEY% "licen[cs]"
+%STR% "naughter software license"
+#
+# NVIDIA Nemotron Open Model 2025-12-15
+%ENTRY% _LT_NEMOTRON_OPEN_MODEL_2025_12_
+%KEY% "licen[cs]"
+%STR% "nvidia nemotron open model license"
+#
+# NetComponents License
+%ENTRY% _LT_NETCOMPONENTS
+%KEY% "distribut"
+%STR% "1996-1999 daniel =FEW= savarese =ANY= may not redistribut"
+#
+# Netdata Cloud UI License v1.0 (NCUL1)
+%ENTRY% _LT_NETDATA_NCUL1
+%KEY% "licen[cs]"
+%STR% "netdata cloud ui license v1.?0 ncul1"
+#
+# Netronome Firmware License
+%ENTRY% _LT_NETRONOME_FIRMWARE
+%KEY% "licen[cs]"
+%STR% "agilio r firmware license agreement the agreement"
+#
+# New Relic License
+%ENTRY% _LT_NEW_RELIC
+%KEY% "other"
+%STR% "all other components of this product are"
+#
+# NVPL 4.0
+%ENTRY% _LT_NON_VIOLENT_4_0
+%KEY% "licen[cs]"
+%STR% "non-violent public license v4"
+#
+# NVPL 7.0
+%ENTRY% _LT_NON_VIOLENT_7_0
+%KEY% "licen[cs]"
+%STR% "cooperative non-violent public license =SOME= the work is protected by copyright and all other applicable laws"
+#
+# NTLM License
+%ENTRY% _LT_NTLM
+%KEY% "licen[cs]"
+%STR% "copyright and licence"
+#
+# NVIDIA APEX SDK EULA 2011
+%ENTRY% _LT_NVIDIA_APEX_SDK_EULA_2011
+%KEY% "licen[cs]"
+%STR% "nvidia apex sdk end user license agreement"
+#
+# NVIDIA Data Agreement for Model Training 2025
+%ENTRY% _LT_NVIDIA_MODEL_TRAINING_2025
+%KEY% "nvidia"
+%STR% "nvidia data agreement for model training"
+#
+# NVIDIA Open Model License Agreement 2025-04-28
+%ENTRY% _LT_NVIDIA_OPEN_MODEL_2025_04_28
+%KEY% "licen[cs]"
+%STR% "nvidia open model license agreement"
+#
+# NXP Firmware with Patent License
+%ENTRY% _LT_NXP_FIRMWARE_PATENT
+%KEY% "distribut"
+%STR% "redistribution reproduction and redistribution in binary form without"
+#
+# NXP MC Firmware License
+%ENTRY% _LT_NXP_MC_FIRMWARE
+%KEY% "distribut"
+%STR% "any use reproduction or distribution of the accompanying binary software constitutes licensee.s acceptance =ANY= nxp"
+#
+# NXP Warranty Disclaimer
+%ENTRY% _LT_NXP_WARRANTY_DISCLAIMER
+%KEY% "so(ftware|urce)"
+%STR% "software that is described herein is for illustrative purposes only"
+#
+# NYSL 0.9982
+%ENTRY% _LT_NYSL_0_9982
+%KEY% "version"
+%STR% "nysl version 0.?9982 en unofficial"
+#
+# Odin Software License 2000
+%ENTRY% _LT_ODIN_2000
+%KEY% "licen[cs]"
+%STR% "project odin software license"
+#
+# ODMG License
+%ENTRY% _LT_ODMG
+%KEY% "distribut"
+%STR% "redistribution of this software is permitted provided that the following"
+#
+# OGL 1.0a
+%ENTRY% _LT_OGL_1_0A
+%KEY% "licen[cs]"
+%STR% "open game license version 1.?0a"
+#
+# Oknosoft License 2021
+%ENTRY% _LT_OKNOSOFT_2021
+%KEY% "licen[cs]"
+%STR% "this license agreement license is a legal agreement between you"
+#
+# On2 VP3 Codec Software Patent grant
+%ENTRY% _LT_ON2_PATENT
+%KEY% "licen[cs]"
+%STR% "in addition to and irrespective of the copyright license associated"
+#
+# OpenAI Terms of Use 20241211
+%ENTRY% _LT_OPENAI_TOU_20241211
+%KEY% "use"
+%STR% "openai terms of use"
+#
+# OpenAtom Model License 1.0
+%ENTRY% _LT_OPENATOM_MODEL_1_0
+%KEY% "licen[cs]"
+%STR% "openatom model license version 1.?0"
+#
+# OpenVPN-AS EULA
+%ENTRY% _LT_OPENVPN_AS_EULA
+%KEY% "licen[cs]"
+%STR% "openvpn access server end user license agreement openvpn-as eula"
+#
+# Open Weights Permissive License v1.0.0
+%ENTRY% _LT_OPEN_WEIGHTS_PERMISSIVE_1_0_
+%KEY% "licen[cs]"
+%STR% "this is an open weights permissive license"
+#
+# Opera EULA 2018
+%ENTRY% _LT_OPERA_EULA_2018
+%KEY% "licen[cs]"
+%STR% "opera for computers =ANY= end user license agreement =ANY= opera unite pte"
+#
+# Opera EULA EEA 2018
+%ENTRY% _LT_OPERA_EULA_EEA_2018
+%KEY% "licen[cs]"
+%STR% "opera for computers =ANY= end user license agreement =ANY= opera software as =ANY= norway"
+#
+# OPNL-1.0
+%ENTRY% _LT_OPNL_1_0
+%KEY% "licen[cs]"
+%STR% "released under the open innovation license"
+#
+# OPNL-2.0
+%ENTRY% _LT_OPNL_2_0
+%KEY% "licen[cs]"
+%STR% "the open innovation license"
+#
+# Oracle Entitlement 5 plus 15
+%ENTRY% _LT_ORACLE_ENTITLEMENT_05_15
+%KEY% "so(ftware|urce)"
+%STR% "oracle corporation oracle entitlement for software"
+#
+# Oracle GFTC 2023-06-12
+%ENTRY% _LT_ORACLE_GFTC_2023_06_12
+%KEY% "licen[cs]"
+%STR% "graalvm free terms and conditions gftc including license for early"
+#
+# Oracle NFTC 2021
+%ENTRY% _LT_ORACLE_NFTC_2021
+%KEY% "oracle"
+%STR% "oracle no-fee terms and conditions nftc"
+#
+# OTN for Oracle Java SE 2019
+%ENTRY% _LT_ORACLE_OTN_JAVASE_2019
+%KEY% "licen[cs]"
+%STR% "oracle technology network license agreement for oracle java se"
+#
+# Oracle SQL Developer License Terms
+%ENTRY% _LT_ORACLE_SQL_DEVELOPER
+%KEY% "licen[cs]"
+%STR% "oracle sql developer license terms"
+#
+# O'Reilly Code Sample Notice
+%ENTRY% _LT_OREILLY_NOTICE
+%KEY% "use"
+%STR% "our books are here to help you get your job done in general you may use the"
+#
+# OSGi Specification License 2.0
+%ENTRY% _LT_OSGI_SPEC_2_0
+%KEY% "licen[cs]"
+%STR% "osgi specification license version 2.?0."
+#
+# Open Source Maintenance Fee EULA
+%ENTRY% _LT_OS_MAINTENANCE_FEE_EULA
+%KEY% "licen[cs]"
+%STR% "open source maintenance fee agreement =ANY= osi license =ANY= osi-approved open source license"
+#
+# OTN License 2016
+%ENTRY% _LT_OTN_DEV_DIST_2016
+%KEY% "licen[cs]"
+%STR% "oracle technology network license agreement"
+#
+# OTNLA 2016-11-30
+%ENTRY% _LT_OTNLA_2016_11_30
+%KEY% "licen[cs]"
+%STR% "oracle technology network license agreement"
+#
+# OWFa 1.0 - Patent and Copyright Grants - 2023-05
+%ENTRY% _LT_OWFA_1_0_2023_05
+%KEY% "foundati"
+%STR% "open web foundation"
+#
+# OWFa 1.0 - Patent and Copyright Grants
+%ENTRY% _LT_OWFA_1_0
+%KEY% "foundati"
+%STR% "open web foundation"
+#
+# OWFa 1.0 - Patent Only
+%ENTRY% _LT_OWFA_1_0_PATENT_ONLY
+%KEY% "patent"
+%STR% "owfa 1.?0 - patent only"
+#
+# OWF CLA 1.0 - Copyright
+%ENTRY% _LT_OWF_CLA_1_0_COPYRIGHT
+%KEY% "licen[cs]"
+%STR% "owf contributor license agreement 1.?0 - copyright"
+#
+# OWF CLA 1.0 - Copyright and Patent
+%ENTRY% _LT_OWF_CLA_1_0_COPYRIGHT_PATENT
+%KEY% "licen[cs]"
+%STR% "owf contributor license agreement 1.?0 - copyright and patent"
+#
+# Oxygen XML WebHelp EULA
+%ENTRY% _LT_OXYGEN_XML_WEBHELP_EULA
+%KEY% "licen[cs]"
+%STR% "oxygen xml webhelp license"
+#
+# Paolo Messina 2000
+%ENTRY% _LT_PAOLO_MESSINA_2000
+%KEY% "use"
+%STR% "free for non-commercial and commercial use provided that the original"
+#
+# PayPal SDK License 2013-2016
+%ENTRY% _LT_PAYPAL_SDK_2013_2016
+%KEY% "licen[cs]"
+%STR% "the paypal sdk is released under the following license"
+#
+# PDF Creator Pilot License Agreement
+%ENTRY% _LT_PDF_CREATOR_PILOT
+%KEY% "licen[cs]"
+%STR% "pdf creator pilot license agreement"
+#
+# PD'Programming License
+%ENTRY% _LT_PD_PROGRAMMING
+%KEY% "use"
+%STR% "coords\.?js is free for both commercial and non-commercial use and"
+#
+# Phaser Commercial EULA (CCP4)
+%ENTRY% _LT_PHASER_CCP4
+%KEY% "licen[cs]"
+%STR% "commercial end user licence agreement ccp4"
+#
+# Phaser Commercial EULA (Phenix)
+%ENTRY% _LT_PHASER_PHENIX
+%KEY% "licen[cs]"
+%STR% "commercial end user licence agreement phenix"
+#
+# Philippe De Muyter License
+%ENTRY% _LT_PHILIPPE_DE_MUYTER
+%KEY% "distribut"
+%STR% "this program is distributed in the hope that it will be useful but without =SOME= philippe de muyter"
+#
+# Planet Source Code License
+%ENTRY% _LT_PLANET_SOURCE_CODE
+%KEY% "planet"
+%STR% "planet source code"
+#
+# Plastimatch 1.0
+%ENTRY% _LT_PLASTIMATCH_1_0
+%KEY% "licen[cs]"
+%STR% "plastimatch software license software license version 1.?0"
+#
+# Amazon PML 2020
+%ENTRY% _LT_PML_2020
+%KEY% "updated"
+%STR% "last updated january 9 2020"
+#
+# PngSuite License
+%ENTRY% _LT_PNGSUITE
+%KEY% "distribut"
+%STR% "permission to use copy modify and distribute these images for any"
+#
+# PowerVR Tools Software EULA
+%ENTRY% _LT_POWERVR_TOOLS_SOFTWARE_EULA
+%KEY% "so(ftware|urce)"
+%STR% "imagination technologies limited imagination provides this software subject to the"
+#
+# Proprietary License
+%ENTRY% _LT_PROPRIETARY_LICENSE
+%KEY% "licen[cs]"
+%STR% "this component is normally licensed under a proprietary license agreement with"
+#
+# Psion User LIcence for S3AEMUL
+%ENTRY% _LT_PSION_S3AEMUL
+%KEY% "licen[cs]"
+%STR% "psion plc business/institution/government/home user licence"
+#
+# Psion User LIcence for SiEMUL
+%ENTRY% _LT_PSION_SIEMUL
+%KEY% "licen[cs]"
+%STR% "psion plc business/institution/government/home user licence"
+#
+# Psion User LIcence for WrkAEmul
+%ENTRY% _LT_PSION_WRKAEMUL
+%KEY% "licen[cs]"
+%STR% "psion plc business/institution/government/home user licence"
+#
+# Psytec Free Software License
+%ENTRY% _LT_PSYTEC_FREESOFT
+%KEY% "translat"
+%STR% "translated from the japanese"
+#
+# QAPlug License
+%ENTRY% _LT_QAPLUG
+%KEY% "licen[cs]"
+%STR% "soldevelo =ANY= licensor =ANY= license the software application =ANY= end user license agreement"
+#
+# QCA Linux Firmware License
+%ENTRY% _LT_QCA_LINUX_FIRMWARE
+%KEY% "distribut"
+%STR% "redistribution reproduction and redistribution in binary form without"
+#
+# QCA Technology License
+%ENTRY% _LT_QCA_TECHNOLOGY
+%KEY% "distribut"
+%STR% "redistribution and use in binary forms without"
+#
+# QTI Linux Firmware
+%ENTRY% _LT_QTI_LINUX_FIRMWARE
+%KEY% "licen[cs]"
+%STR% "please read this license agreement agreement carefully this agreement is"
+#
+# Qualcomm ISO/IEC MPEG-B DASH License
+%ENTRY% _LT_QUALCOMM_ISO
+%KEY% "so(ftware|urce)"
+%STR% "this software module was originally developed by qualcomm inc in"
+#
+# Quicknet Document License 1999
+%ENTRY% _LT_QUICKNET_DOCUMENT_1999
+%KEY% "permi[st]"
+%STR% "1999 quicknet technologies inc permission is granted"
+#
+# Qwen License Agreement 2024
+%ENTRY% _LT_QWEN_2024
+%KEY% "licen[cs]"
+%STR% "qwen license agreement"
+#
+# Rackspace License
+%ENTRY% _LT_RACKSPACE
+%KEY% "grant"
+%STR% "subject to the terms of this notice rackspace inc grants you a"
+#
+# Redis Source Available License 1.0
+%ENTRY% _LT_REDIS_SOURCE_AVAILABLE_1_0
+%KEY% "licen[cs]"
+%STR% "redis source available license agreement"
+#
+# Reponsible AI Source Code License v1.0
+%ENTRY% _LT_RESPONSIBLE_AI_SOURCE_1_0
+%KEY% "licen[cs]"
+%STR% "responsible ai source code license"
+#
+# Retype Software License Agreement v3.7.0
+%ENTRY% _LT_RETYPE_3_7_0
+%KEY% "licen[cs]"
+%STR% "retype software license agreement"
+#
+# Richard Black License
+%ENTRY% _LT_RICHARD_BLACK
+%KEY% "copyright"
+%STR% "this code is copyright 1993 richard black all rights are"
+#
+# Root Certificate License Agreement v3.0
+%ENTRY% _LT_ROOT_CERT_3_0
+%KEY% "licen[cs]"
+%STR% "root certificate license agreement"
+#
+# RSA Demo License
+%ENTRY% _LT_RSA_DEMO
+%KEY% "demonstr"
+%STR% "this file is used to demonstrate how to interface to an"
+#
+# RubyEncoder Commercial Licence
+%ENTRY% _LT_RUBYENCODER_COMMERCIAL
+%KEY% "terms"
+%STR% "terms & conditions"
+#
+# RubyEncoder Loader Licence
+%ENTRY% _LT_RUBYENCODER_LOADER
+%KEY% "licen[cs]"
+%STR% "rubyencoder loader licence"
+#
+# SafeCopy EULA
+%ENTRY% _LT_SAFECOPY_EULA
+%KEY% "safecopy"
+%STR% "the safecopy free utility is freeware."
+#
+# SalesforceSans Font License
+%ENTRY% _LT_SALESFORCESANS_FONT
+%KEY% "salesfor"
+%STR% "salesforce sans font =SOME= salesforcecom"
+#
+# SAM License 2025-11-19
+%ENTRY% _LT_SAM_2025_11_19
+%KEY% "november"
+%STR% "last updated november 19 2025"
+#
+# Sandeep License
+%ENTRY% _LT_SANDEEP
+%KEY% "scripts"
+%STR% "all scripts available here are original scripts written by the author"
+#
+# SBIA Part B
+# (entry moved to end of file with fixed pattern)
+# scanlogd License
+%ENTRY% _LT_SCANLOGD_LICENSE
+%KEY% "so(ftware|urce)"
+%STR% "you re allowed to do whatever you like with this software including"
+#
+# Statistics Canada Open Licence Agreement
+%ENTRY% _LT_SCOLA_EN
+%KEY% "licen[cs]"
+%STR% "statistics canada open licence agreement"
+#
+# Script# License
+%ENTRY% _LT_SCRIPT_NIKHILK
+%KEY% "licen[cs]"
+%STR% "end user license agreement for script"
+#
+# Semgrep Registry License
+%ENTRY% _LT_SEMGREP_REGISTRY
+%KEY% "licen[cs]"
+%STR% "semgrep registry license"
+#
+# Semgrep Rules License v.1.0
+%ENTRY% _LT_SEMGREP_RULES_1_0
+%KEY% "licen[cs]"
+%STR% "semgrep rules license v ?1?0"
+#
+# Service Component Architecture License
+%ENTRY% _LT_SERVICE_COMP_ARCH
+%KEY% "service"
+%STR% "the service component architecture javadoc interface definition files"
+#
+# SGI CID Font Code Public License 1.0
+%ENTRY% _LT_SGI_CID_1_0
+%KEY% "licen[cs]"
+%STR% "cid font code public license version 1.?0 3/31/99"
+#
+# Slint Commercial License 2.0
+%ENTRY% _LT_SLINT_COMMERCIAL_2_0
+%KEY% "licen[cs]"
+%STR% "slint software license agreement version 2?0"
+#
+# SmartLabs Freeware License
+%ENTRY% _LT_SMARTLABS_FREEWARE
+%KEY% "licen[cs]"
+%STR% "freeware licence agreement"
+#
+# Socketxx License 2003
+%ENTRY% _LT_SOCKETXX_2003
+%KEY% "distribut"
+%STR% "permission is granted to use at your own risk and distribute this software"
+#
+# SoftFloat Legal Notice 2c
+%ENTRY% _LT_SOFTFLOAT_2C
+%KEY% "softfloa"
+%STR% "softfloat was written by john r hauser release 2c of softfloat was made"
+#
+# Spark Jive License
+%ENTRY% _LT_SPARK_JIVE
+%KEY% "licen[cs]"
+%STR% "spark jive license"
+#
+# Splunk EULA for Third-Party Content
+%ENTRY% _LT_SPLUNK_3PP_EULA
+%KEY% "licen[cs]"
+%STR% "end user license agreement for third-party content"
+#
+# Square CLA
+%ENTRY% _LT_SQUARE_CLA
+%KEY% "licen[cs]"
+%STR% "square inc individual contributor license agreement"
+#
+# Stability AI Community License Agreement 2024
+%ENTRY% _LT_STABILITY_AI_COMMUNITY_2024
+%KEY% "licen[cs]"
+%STR% "stability ai community license agreement"
+#
+# STMicroelectronics Linux Firmware License
+%ENTRY% _LT_STMICROELECTRONICS_LINUX_FIR
+%KEY% "distribut"
+%STR% "redistribution. redistribution and use in binary form without modification"
+#
+# Sun BCL Java Servlet Implementation 2.1.1
+%ENTRY% _LT_SUN_BCL_JAVA_SERVLET_IMP_2_1
+%KEY% "servlet"
+%STR% "java servlet implementation classes"
+#
+# Sun BSD-Style with Additional Restrictions
+%ENTRY% _LT_SUN_BSD_EXTRA
+%KEY% "licen[cs]"
+%STR% "sun grants you licensee a non-exclusive royalty free license to use"
+#
+# Sun CC-PP Processing License 1.0
+%ENTRY% _LT_SUN_CC_PP_1_0
+%KEY% "composit"
+%STR% "composite capability/preference profiles cc/pp processing"
+#
+# Sun EJB Specification 3.0
+%ENTRY% _LT_SUN_EJB_SPEC_3_0
+%KEY% "enterpri"
+%STR% "specification jsr-000220 enterprise javabeans v.3.?0 specification"
+#
+# Sun GlassFish License
+%ENTRY% _LT_SUN_GLASSFISH
+%KEY% "licen[cs]"
+%STR% "sun glassfish license"
+#
+# Sun JavaMail
+%ENTRY% _LT_SUN_JAVAMAIL
+%KEY% "javamail"
+%STR% "sun javamail"
+#
+# Sun Java Transaction API License
+%ENTRY% _LT_SUN_JAVA_TRANSACTION_API
+%KEY% "licen[cs]"
+%STR% "sun microsystems inc sun is willing to license its java transaction api"
+#
+# Sun JSR Specification 04-2006
+%ENTRY% _LT_SUN_JSR_SPEC_04_2006
+%KEY% "copyright"
+%STR% "copyright 2006 sun microsystems inc."
+#
+# Sun JTA Specification License 1.0.1B
+%ENTRY% _LT_SUN_JTA_SPEC_1_0_1B
+%KEY% "transact"
+%STR% "java tm transaction api jta specification"
+#
+# Sun No High Risk Activities License
+%ENTRY% _LT_SUN_NO_HIGH_RISK_ACTIVITIES
+%KEY% "distribut"
+%STR% "permission to use copy modify and distribute this software and its =SOME= non-commercial or commercial purposes and without fee =SOME= this software is provided as is"
+#
+# Synopsys Attribution License
+%ENTRY% _LT_SYNOPSYS_ATTRIBUTION
+%KEY% "so(ftware|urce)"
+%STR% "synopsys hs otg linux software driver and documentation hereinafter"
+#
+# Taligent JDK Proprietary Notice
+%ENTRY% _LT_TALIGENT_JDK
+%KEY% "so(ftware|urce)"
+%STR% "the original version of this source code and documentation"
+#
+# Tanuki Maintenance Addendum 1.3
+%ENTRY% _LT_TANUKI_MAINTENANCE
+%KEY% "so(ftware|urce)"
+%STR% "tanuki software ltd."
+#
+# Tencent Hunyuan Image 3.0 CLA
+%ENTRY% _LT_TENCENT_HUNYUAN_IMAGE_3_0_CL
+%KEY% "licen[cs]"
+%STR% "tencent hunyuan community license agreement"
+#
+# T-Engine Public License
+%ENTRY% _LT_T_ENGINE_PUBLIC
+%KEY% "licen[cs]"
+%STR% "t-engine public license license agreement for software for t-engine"
+#
+# TI Broadband Applications License
+%ENTRY% _LT_TI_BROADBAND_APPS
+%KEY% "licen[cs]"
+%STR% "1 license texas instruments hereinafter ti grants you a license"
+#
+# T-License 1.0
+%ENTRY% _LT_T_LICENSE_1_0
+%KEY% "licen[cs]"
+%STR% "t-license license agreement for source code of t-kernel"
+#
+# T-License 2.0
+%ENTRY% _LT_T_LICENSE_2_0
+%KEY% "licen[cs]"
+%STR% "license agreement for programs and copyrighted works"
+#
+# T-License 2.1
+%ENTRY% _LT_T_LICENSE_2_1
+%KEY% "licen[cs]"
+%STR% "license agreement for programs and copyrighted works"
+#
+# T-License 2.2
+%ENTRY% _LT_T_LICENSE_2_2
+%KEY% "licen[cs]"
+%STR% "license agreement for programs and copyrighted works"
+#
+# T-License for AMP T-Kernel
+%ENTRY% _LT_T_LICENSE_AMP_T_KERNEL
+%KEY% "licen[cs]"
+%STR% "t-license for amp t-kernel license agreement for source code of amp t-kernel"
+#
+# T-License for AMP TKSE
+%ENTRY% _LT_T_LICENSE_AMP_TKSE
+%KEY% "licen[cs]"
+%STR% "t-license for amp t-kernel standard extension license agreement for source"
+#
+# T-License for SMP T-Kernel
+%ENTRY% _LT_T_LICENSE_SMP_T_KERNEL
+%KEY% "licen[cs]"
+%STR% "t-license for smp t-kernel license agreement for source code of smp t-kernel"
+#
+# T-License for SMP TKSE
+%ENTRY% _LT_T_LICENSE_SMP_TKSE
+%KEY% "licen[cs]"
+%STR% "t-license for smp t-kernel standard extension license agreement for source"
+#
+# T-License for TKSE
+%ENTRY% _LT_T_LICENSE_TKSE
+%KEY% "licen[cs]"
+%STR% "t-license for t-kernel standard extension license agreement for source code"
+#
+# Tongyi Qianwen License Agreement 2023
+%ENTRY% _LT_TONGYI_QIANWEN_2023
+%KEY% "licen[cs]"
+%STR% "tongyi qianwen license agreement"
+#
+# TOPPERS Educational
+%ENTRY% _LT_TOPPERS_EDUCATIONAL
+%KEY% "copyright"
+%STR% "the above copyright holder limited to cases in which one satisfies"
+#
+# TOPPERS License
+%ENTRY% _LT_TOPPERS_LICENSE
+%KEY% "permi[st]"
+%STR% "the above copyright holders grant permission gratis to use"
+#
+# TRCA Open Data Licence 1.0
+%ENTRY% _LT_TRCA_ODL_1_0
+%KEY% "licen[cs]"
+%STR% "toronto and region conservation authority trca open data licence v1.?0"
+#
+# TreeView Developer License
+%ENTRY% _LT_TREEVIEW_DEVELOPER
+%KEY% "licen[cs]"
+%STR% "treeview license developer s license"
+#
+# TreeView Distributor License
+%ENTRY% _LT_TREEVIEW_DISTRIBUTOR
+%KEY% "licen[cs]"
+%STR% "treeview license distributor s license"
+#
+# Trend Micro Community License 1.0
+%ENTRY% _LT_TRENDMICRO_CL_1_0
+%KEY% "licen[cs]"
+%STR% "trend micro community license 1.?0"
+#
+# Trustonic Proprietary License 2013
+%ENTRY% _LT_TRUSTONIC_PROPRIETARY_2013
+%KEY% "so(ftware|urce)"
+%STR% "the present software is the confidential and proprietary information of"
+#
+# TXL 10.5 License
+%ENTRY% _LT_TXL_10_5
+%KEY% "version"
+%STR% "txl version 10.?5e"
+#
+# UGUI License
+%ENTRY% _LT_UGUI
+%KEY% "so(ftware|urce)"
+%STR% "this is a free software and is opened for education"
+#
+# Unlimited Binary Linking Exception
+%ENTRY% _LT_UNLIMITED_BINARY_LINKING
+%KEY% "distribut"
+%STR% "as a special exception you may use copy link modify and distribute"
+#
+# Unlimited Binary Use Exception
+%ENTRY% _LT_UNLIMITED_BINARY_USE_EXCEPTI
+%KEY% "distribut"
+%STR% "as a special exception you may use copy link modify and distribute"
+#
+# Unpublished Source License
+%ENTRY% _LT_UNPUBLISHED_SOURCE
+%KEY% "copyright"
+%STR% "this is unpublished proprietary source code of the copyright holder."
+#
+# US Government GeoTransform
+%ENTRY% _LT_US_GOVT_GEOTRANFORM
+%KEY% "licen[cs]"
+%STR% "geotransform license agreement"
+#
+# USRobotics Permissive License
+%ENTRY% _LT_USROBOTICS_PERMISSIVE
+%KEY% "distribut"
+%STR% "permission to copy display distribute and make derivative works"
+#
+# Utah CSL License
+%ENTRY% _LT_UTAH_CSL
+%KEY% "distribut"
+%STR% "permission to use copy modify and distribute this software is hereby"
+#
+# VCalendar License
+%ENTRY% _LT_VCALENDAR
+%KEY% "licen[cs]"
+%STR% "for purposes of this license notice the term licensors shall mean"
+#
+# VeriSign License
+%ENTRY% _LT_VERISIGN
+%KEY% "licen[cs]"
+%STR% "verisign inc license agreement"
+#
+# Vicomsoft Software License
+%ENTRY% _LT_VICOMSOFT_SOFTWARE
+%KEY% "licen[cs]"
+%STR% "vicomsoft software license"
+#
+# Visual Numerics License
+%ENTRY% _LT_VISUAL_NUMERICS
+%KEY% "distribut"
+%STR% "permission to use copy modify and distribute this software is freely granted =SOME= visual numerics"
+#
+# Vita Nuova Liberal Source License
+%ENTRY% _LT_VITA_NUOVA_LIBERAL
+%KEY% "licen[cs]"
+%STR% "vita nuova liberal source licence"
+#
+# Vitesse Proprietary Notice
+%ENTRY% _LT_VITESSE_PROP
+%KEY% "copyright"
+%STR% "unpublished rights reserved under the copyright laws of the united states of"
+#
+# VPL 1.1
+%ENTRY% _LT_VPL_1_1
+%KEY% "licen[cs]"
+%STR% "vtiger public license vpl 1.?1"
+#
+# VPL 1.2
+%ENTRY% _LT_VPL_1_2
+%KEY% "licen[cs]"
+%STR% "vtiger public license 1.?2 vpl 1.?2"
+#
+# VS10x Code Map
+%ENTRY% _LT_VS10X_CODE_MAP
+%KEY% "limited"
+%STR% "vs10x code map limited product warranty"
+#
+# W3C Community CLA
+%ENTRY% _LT_W3C_COMMUNITY_CLA
+%KEY% "licen[cs]"
+%STR% "w3c community contributor license agreement cla"
+#
+# W3C Community Final Specification Agreement
+%ENTRY% _LT_W3C_COMMUNITY_FINAL_SPEC
+%KEY% "w3c"
+%STR% "w3c community final specification agreement"
+#
+# MS Windows CE 5.0 Shared Source License
+%ENTRY% _LT_WINCE_50_SHARED_SOURCE
+%KEY% "licen[cs]"
+%STR% "microsoft windows ce 5.?0 shared source license agreement"
+#
+# winIDEA SDK 2025
+%ENTRY% _LT_WINIDEA_SDK_2025
+%KEY% "licen[cs]"
+%STR% "tasking germany gmbh is willing to license the software to"
+#
+# XMOS Commercial 2017
+%ENTRY% _LT_XMOS_COMMERCIAL_2017
+%KEY% "licen[cs]"
+%STR% "software release license agreement"
+#
+# Zapatec Calendar License
+%ENTRY% _LT_ZAPATEC_CALENDAR
+%KEY% "licen[cs]"
+%STR% "zapatec dhtml/javascript calendar license agreement"
+#
+# ZeusBench notice
+%ENTRY% _LT_ZEUSBENCH
+%KEY% "copyright"
+%STR% "this program may be used and copied freely providing this copyright notice"
+#
+# ZIPList5 Geocode Duplication Addendum
+%ENTRY% _LT_ZIPLIST5_GEOCODE_DUPLICATION
+%KEY% "licen[cs]"
+%STR% "ziplist5 geocode duplication license addendum"
+#
+# Zveno Research License
+%ENTRY% _LT_ZVENO_RESEARCH
+%KEY% "so(ftware|urce)"
+%STR% "zveno makes this software available free of charge for any purpose this"
+#
 %ENTRY% _LT_TRUECRYPT_30
 %KEY% "(truecrypt)"
 %STR% "all occurrences of the name truecrypt that could reasonably be considered to identify your product must be removed"
-#####
-# This MUST be the last alias specified; the size of the array of encrypted
-# strings is determined from the following value! (see NFOOTPRINTS, below)
-#####
-%ALIAS% _CRYPT_last
 #
-%DEF% NFOOTPRINTS	_CRYPT_last+1
 %DEF% NCOPYRIGHT	(_CR_last-_CR_first+1)
 %DEF% NKEYWORDS	(_KW_last-_KW_first+1)
 %DEF% NDICTIONARY	(_DICT_last-_DICT_first+1)
@@ -13793,3 +16782,182 @@ k
 #define	_scCOMFORT	9	/* >= 9 --> certain it's a license */
 #define	_scINVALID	4	/* < 4 --> probably NOT a license */
 
+# ActiveState Community License
+%ENTRY% _LT_ACTIVESTATE_COMMUNITY
+%KEY% "licen[cs]"
+%STR% "activestate community licen[cs]e =ANY= activestate maintains control over the development"
+#
+
+# Chris Stoy Attribution License
+%ENTRY% _LT_CHRIS_STOY
+%KEY% "copyright"
+%STR% "you are free to use this code in all commercial and non-commercial applications =SOME= copyright message is left intact"
+#
+
+# GLWTPL - Good Luck With That Public License
+%ENTRY% _LT_GLWTPL
+%KEY% "licen[cs]"
+%STR% "glwt =FEW= good luck with that =FEW= public licen[cs]e"
+#
+
+# Red Hat Trademarks License
+%ENTRY% _LT_RED_HAT_TRADEMARKS
+%KEY% "trademark"
+%STR% "red hat =ANY= trademarks of red hat =FEW= registered in the united states and other countries"
+#
+
+# RTools.Util License
+%ENTRY% _LT_RTOOLS_UTIL
+%KEY% "licen[cs]"
+%STR% "licen[cs]e to use this software is limited =ANY= this code may be used in any program including programs developed for commercial purposes provided that this notice is included verbatim"
+#
+
+# TCG Spec License v2
+%ENTRY% _LT_TGC_SPEC_V2
+%KEY% "licen[cs]"
+%STR% "trusted computing group =ANY= specification licensing through membership"
+#
+
+# Tigra Calendar 3.2 License
+%ENTRY% _LT_TIGRA_CALENDAR_32
+%KEY% "permi[st]"
+%STR% "tigra calendar =SOME= permission given to use this script in any kind of applications"
+#
+
+# Tim Janik License 2003
+%ENTRY% _LT_TIM_JANIK_2003
+%KEY% "distribut"
+%STR% "redistribution and modification is permitted =SOME= disclaimer is retained"
+#
+
+# Treeware Option 2
+%ENTRY% _LT_TREEWARE_OPT2
+%KEY% "treeware"
+%STR% "treeware option two =ANY= production environment you are required to buy the world a tree"
+#
+# EJ Technologies EULA (JProfiler)
+%ENTRY% _LT_EJ_TECHNOLOGIES_EULA
+%KEY% "licen[cs]"
+%STR% "end-user license agreement =ANY= ej-technologies gmbh"
+#
+
+# Hugo License (General Coffee Company)
+%ENTRY% _LT_HUGO_LICENSE
+%KEY% "copyright"
+%STR% "copyright =FEW= kent tessman =FEW= the general coffee company"
+#
+
+# Mov.AI License 1.0
+%ENTRY% _LT_MOVAI_1_0
+%KEY% "licen[cs]"
+%STR% "movai license version 1?0"
+#
+
+# SBIA Part B License
+%ENTRY% _LT_SBIA_B
+%KEY% "licen[cs]"
+%STR% "downloading agreement license from sbia with right to sublicense"
+#
+
+# YandexGPT-5-Lite-8B License 2025
+%ENTRY% _LT_YANDEXGPT_2025
+%KEY% "licen[cs]"
+%STR% "yandexgpt =ANY= this license agreement the agreement applies to any natural or legal person"
+#
+
+# Atmel Linux Firmware redistribution permission
+%ENTRY% _LT_ATMEL_FW_LINUX
+%KEY% "atmel"
+%STR% "redistribution permission is hereby granted by atmel corporation =FEW= free of any license fees to any person obtaining a copy of this firmware"
+#
+
+# ScanCode-generated acknowledgment notice
+%ENTRY% _LT_SCANCODE_ACK
+%KEY% "scancode"
+%STR% "generated with scancode and provided on an as is basis"
+#
+
+# KFGQPC Uthmanic Script HAFS font license
+%ENTRY% _LT_KFGQPC_UTHMANIC
+%KEY% "uthmanic"
+%STR% "uthmanic script license =FEW= king fahd glorious quran"
+#
+%ENTRY% _LT_KICAD_LIB_EXC
+%KEY% "licen[cs]"
+%STR% "creation of electronic designs that use licensed material =SOME= copyright holder waives article 3 of the licen[cs]e"
+#
+%ENTRY% _LT_QPL_INRIA_2004
+%KEY% "licen[cs]"
+%STR% "as a special exception to the q public licen[cs]e you may develop application programs reusable components"
+#
+%ENTRY% _LT_BITSTREAM_CHARTER
+%KEY% "bitstream"
+%STR% "4 bitstream charter r type 1 outline fonts"
+#
+%ENTRY% _LT_GRAPHICS_GEMS
+%KEY% "copyright"
+%STR% "graphics gems code is copyright-protected"
+#
+%ENTRY% _LT_KNUTH_CTAN
+%KEY% "redistrib"
+%STR% "unlimited copying and redistribution of this package =SOME= individual files are permitted as long as there are no modifications"
+#
+%ENTRY% _LT_LAL_12
+%KEY% "licen[cs]"
+%STR% "licence art libre copyleft attitude version 1?2"
+#
+%ENTRY% _LT_LILIQ_P_11
+%KEY% "licen[cs]"
+%STR% "licence libre du qubec permissive liliq-p"
+#
+%ENTRY% _LT_NLPL_PROSE
+%KEY% "licen[cs]"
+%STR% "no limit public licen[cs]e terms and conditions for copying distribution modification or anything else"
+#
+%ENTRY% _LT_OSC_10
+%KEY% "software"
+%STR% "hiermit kostenlos die erlaubnis erteilt ohne einschrnkung die software zu verwenden"
+#
+%ENTRY% _LT_SGP4_LIC
+%KEY% "licen[cs]"
+%STR% "there is no licen[cs]e associated with the code and you may use it for any purpose"
+#
+%ENTRY% _LT_SL_LIC
+%KEY% "permi[st]"
+%STR% "everyone is permitted to do anything on this program =SOME= unless you try to pretend that you wrote it"
+#
+%ENTRY% _LT_FMT_EXCEPTION
+%KEY% "licen[cs]"
+%STR% "optional exception to the licen[cs]e =ANY= source code portions of this software are embedded into a machine-executable object form"
+#
+%ENTRY% _LT_ADVANCED_CRYPTICS
+%KEY% "software"
+%STR% "uk advanced cryptics dictionary is used in a software package"
+#
+%ENTRY% _LT_CFITSIO
+%KEY% "copyright"
+%STR% "no copyright is claimed in the united states under title 17 =FEW= permission to freely use copy modify and distribute"
+#
+%ENTRY% _LT_ELASTIC_20
+%KEY% "licen[cs]"
+%STR% "elastic licen[cs]e 20 =SOME= acceptance by using the software you agree"
+#
+%ENTRY% _LT_OPENMDW_10
+%KEY% "licen[cs]"
+%STR% "openmdw licen[cs]e agreement version 1?0"
+#
+%ENTRY% _LT_TPDL
+%KEY% "licen[cs]"
+%STR% "licen[cs]e hereby granted for anyone to use modify or redistribute this module at their own risk"
+#
+%ENTRY% _LT_WTFNMFPL
+%KEY% "licen[cs]"
+%STR% "do what the fuck you want to but it s not my fault public licen[cs]e"
+#
+#####
+# This MUST be the last alias specified; the size of the array of encrypted
+# strings is determined from the following value! (see NFOOTPRINTS, below)
+#####
+%ALIAS% _CRYPT_last
+#
+%DEF% NFOOTPRINTS	_CRYPT_last+1
