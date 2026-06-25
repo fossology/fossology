@@ -28,11 +28,14 @@ add_library(monk EXCLUDE_FROM_ALL "")
 add_library(monk_cov EXCLUDE_FROM_ALL "")
 add_executable(monk_exec "")
 add_executable(monkbulk "")
-foreach(FO_MONK_TARGET monk monk_exec monk_cov monkbulk)
+add_executable(kotoba "")
+foreach(FO_MONK_TARGET monk monk_exec monk_cov monkbulk kotoba)
     if(${FO_MONK_TARGET} STREQUAL "monk")
         set(MONK_XSRC "monk.c" )
     elseif(${FO_MONK_TARGET} STREQUAL "monkbulk")
         set(MONK_XSRC "monkbulk.c" )
+    elseif(${FO_MONK_TARGET} STREQUAL "kotoba")
+        set(MONK_XSRC "kotoba.c" )
     endif()
     target_sources(${FO_MONK_TARGET}
         PRIVATE
@@ -69,5 +72,10 @@ install(TARGETS monk_exec
 
 install(TARGETS monkbulk
     RUNTIME
-    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}bulk/agent 
+    DESTINATION ${FO_MODDIR}/${PROJECT_NAME}bulk/agent
     COMPONENT monkbulk)
+
+install(TARGETS kotoba
+    RUNTIME
+    DESTINATION ${FO_MODDIR}/kotoba/agent
+    COMPONENT kotoba)

@@ -89,6 +89,11 @@ class Analysis
    * Whether to schedule compatibility agent or not
    */
   private $compatibility;
+  /**
+   * @var boolean $kotoba
+   * Whether to schedule kotoba agent or not
+   */
+  private $kotoba;
 
   /**
    * Analysis constructor.
@@ -106,9 +111,10 @@ class Analysis
    * @param boolean $scanoss
    * @param boolean $ipra
    * @param boolean $softwareHeritage
+   * @param boolean $kotoba
    */
   public function __construct($bucket = false, $copyright = false, $ecc = false, $keyword = false,
-    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $reso = false, $pkgagent = false, $compatibility = false, $scanoss = false, $ipra = false, $softwareHeritage = false)
+    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $reso = false, $pkgagent = false, $compatibility = false, $scanoss = false, $ipra = false, $softwareHeritage = false, $kotoba = false)
   {
     $this->bucket = $bucket;
     $this->copyright = $copyright;
@@ -124,6 +130,7 @@ class Analysis
     $this->ipra = $ipra;
     $this->softwareHeritage = $softwareHeritage;
     $this->compatibility = $compatibility;
+    $this->kotoba = $kotoba;
   }
 
   /**
@@ -161,7 +168,8 @@ class Analysis
       ($version == ApiVersion::V2 ? "pkgagent" : "package") => 'pkgagent',
       ($version == ApiVersion::V2 ? 'ipra' : 'patent') => 'ipra',
       ($version == ApiVersion::V2 ? 'softwareHeritage' : "heritage") => 'softwareHeritage',
-      'compatibility' => 'compatibility'
+      'compatibility' => 'compatibility',
+      ($version == ApiVersion::V2 ? 'kotoba' : 'kotoba_bulk') => 'kotoba'
     ];
 
     $this->setBooleanProperties($analysisArray, $propertyMap);
@@ -189,7 +197,8 @@ class Analysis
       'pkgagent' => 'pkgagent',
       'ipra' => 'ipra',
       'softwareHeritage' => 'softwareHeritage',
-      'compatibility' => 'compatibility'
+      'compatibility' => 'compatibility',
+      'kotoba' => 'kotoba'
     ];
 
     foreach ($propertyMap as $key => $property) {
@@ -313,6 +322,14 @@ class Analysis
     return $this->compatibility;
   }
 
+  /**
+   * @return boolean
+   */
+  public function getkotoba()
+  {
+    return $this->kotoba;
+  }
+
   ////// Setters //////
   /**
    * @param boolean $bucket
@@ -427,6 +444,14 @@ class Analysis
   }
 
   /**
+   * @param boolean $kotoba
+   */
+  public function setkotoba($kotoba)
+  {
+    $this->kotoba = filter_var($kotoba, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
    * Get the object as an associative array
    * @return array
    */
@@ -447,7 +472,8 @@ class Analysis
         "pkgagent"   => $this->pkgagent,
         "ipra"    => $this->ipra,
         "softwareHeritage" => $this->softwareHeritage,
-        "compatibility" => $this->compatibility
+        "compatibility" => $this->compatibility,
+        "kotoba" => $this->kotoba
       ];
     } else {
       return [
@@ -464,7 +490,8 @@ class Analysis
         "package"   => $this->pkgagent,
         "patent"    => $this->ipra,
         "heritage" => $this->softwareHeritage,
-        "compatibility" => $this->compatibility
+        "compatibility" => $this->compatibility,
+        "kotoba_bulk" => $this->kotoba
       ];
     }
   }

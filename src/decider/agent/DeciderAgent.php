@@ -4,6 +4,7 @@
  SPDX-FileCopyrightText: © 2014-2019 Siemens AG
  SPDX-FileCopyrightText: © 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
  SPDX-FileCopyrightText: © 2021 Kaushlendra Pratap <kaushlendrapratap.9837@gmail.com>
+ SPDX-FileCopyrightText: © Fossology contributors
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -61,6 +62,7 @@ use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -84,9 +86,12 @@ class DeciderAgent extends Agent
   const RULES_COPYRIGHT_FALSE_POSITIVE = 0x20;
   const RULES_COPYRIGHT_FALSE_POSITIVE_CLUTTER = 0x40;
   const RULES_LICENSE_TYPE_CONCLUSION = 0x80;
+  const RULES_KOTOBA_NO_CONTRADICTION = 0x100;
+  const RULES_RESO_NO_CONTRADICTION = 0x200;
   const RULES_ALL = self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA |
     self::RULES_BULK_REUSE | self::RULES_WIP_SCANNER_UPDATES |
-    self::RULES_OJO_NO_CONTRADICTION | self::RULES_LICENSE_TYPE_CONCLUSION;
+    self::RULES_OJO_NO_CONTRADICTION | self::RULES_RESO_NO_CONTRADICTION |
+    self::RULES_LICENSE_TYPE_CONCLUSION | self::RULES_KOTOBA_NO_CONTRADICTION;
 
   /** @var int $activeRules
    * Rules active for upload (nomos in monk; ninka in monk; nomos, ninka and monk)
@@ -260,17 +265,27 @@ class DeciderAgent extends Agent
       return 1;
     }
 
+    /* Kotoba stores findings as clearing events, which would trip the guard
+       below. Auto-conclude here when all events are from kotoba and no scanner
+       license is unaccounted for. */
+    if (null === $lastDecision && count($currentEvents) > 0
+        && ($this->activeRules & self::RULES_KOTOBA_NO_CONTRADICTION) == self::RULES_KOTOBA_NO_CONTRADICTION) {
+      if ($this->autodecideIfKotobaMatchesNoContradiction($itemTreeBounds, $projectedScannerMatches, $currentEvents)) {
+        return 1;
+      }
+    }
+
     if (null!==$lastDecision || 0<count($currentEvents)) {
       return 0;
     }
 
     $haveDecided = false;
 
-    if (($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
+    if (!$haveDecided && ($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
       $haveDecided = $this->autodecideIfOjoMatchesNoContradiction($itemTreeBounds, $projectedScannerMatches);
     }
 
-    if (!$haveDecided && ($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
+    if (!$haveDecided && ($this->activeRules&self::RULES_RESO_NO_CONTRADICTION) == self::RULES_RESO_NO_CONTRADICTION) {
       $haveDecided = $this->autodecideIfResoMatchesNoContradiction($itemTreeBounds, $projectedScannerMatches);
     }
 
@@ -338,6 +353,45 @@ class DeciderAgent extends Agent
       }
     }
     return $licenseMatchExists;
+  }
+
+  /**
+   * @brief Auto-conclude when kotoba events cover all scanner findings.
+   *
+   * Aborts if any non-kotoba event exists or a scanner license is not
+   * addressed by any kotoba phrase (add or remove).
+   * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
+   * @param LicenseMatch[][][] $projectedScannerMatches Scanner matches by projected license id
+   * @param ClearingEvent[] $currentEvents Current clearing events by license id
+   * @return boolean True if a decision was applied, false otherwise
+   */
+  private function autodecideIfKotobaMatchesNoContradiction(ItemTreeBounds $itemTreeBounds, $projectedScannerMatches, $currentEvents)
+  {
+    $accountedLicenses = array();
+    foreach ($currentEvents as $event) {
+      if ($event->getEventType() != ClearingEventTypes::KOTOBA) {
+        return false; // human event present; do not override
+      }
+      $projectedId = $this->licenseMap->getProjectedId($event->getLicenseId());
+      $accountedLicenses[$projectedId] = true;
+    }
+
+    foreach (array_keys($projectedScannerMatches) as $projectedLicenseId) {
+      if (!array_key_exists($projectedLicenseId, $accountedLicenses)) {
+        return false; // unaccounted scanner license: contradiction
+      }
+    }
+
+    try {
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents(
+        $itemTreeBounds, $this->userId, $this->groupId,
+        DecisionTypes::IDENTIFIED, false);
+    } catch (\Exception $e) {
+      echo "Can not auto decide as file '" .
+        $itemTreeBounds->getItemId() . "' contains candidate license.\n";
+      return false;
+    }
+    return true;
   }
 
   /**
