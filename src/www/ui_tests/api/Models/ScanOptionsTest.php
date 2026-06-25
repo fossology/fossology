@@ -18,6 +18,7 @@ namespace Fossology\UI\Api\Test\Models
   use Fossology\UI\Api\Models\Reuser;
   use Fossology\UI\Api\Models\Decider;
   use Fossology\UI\Api\Models\Scancode;
+  use Fossology\Lib\Dao\UploadDao;
   use Fossology\Lib\Dao\UserDao;
   use Fossology\Lib\Auth\Auth;
   use Symfony\Component\HttpFoundation\Request;
@@ -57,8 +58,13 @@ namespace Fossology\UI\Api\Test\Models
       $container = M::mock('ContainerBuilder');
       $this->agentAdderMock = M::mock('overload:\AgentAdder');
       $this->userDao = M::mock(UserDao::class);
+      $uploadDao = M::mock(UploadDao::class);
+      $uploadDao->shouldReceive('isAccessible')->andReturn(true);
+      $container->shouldReceive('get')->withArgs(["dao.upload"])
+        ->andReturn($uploadDao);
       $container->shouldReceive('get')->withArgs(["dao.user"])
         ->andReturn($this->userDao);
+      $GLOBALS['SysConf']['auth'][Auth::GROUP_ID] = 2;
       $container->shouldReceive('get')->andReturn(null);
 
       self::$functions = M::mock(\stdClass::class);

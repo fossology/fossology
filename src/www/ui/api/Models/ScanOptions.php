@@ -191,9 +191,13 @@ class ScanOptions
    */
   private function prepareReuser(Request &$request)
   {
-    if ($this->reuse->getReuseUpload() == 0) {
+    $reuseUploadId = $this->reuse->getReuseUpload();
+    if ($reuseUploadId == 0) {
       // No upload to reuse
       return;
+    }
+    if (!$GLOBALS['container']->get("dao.upload")->isAccessible($reuseUploadId, Auth::getGroupId())) {
+      throw new HttpForbiddenException("Upload $reuseUploadId is not accessible for reuse");
     }
     $reuserRules = [];
     if ($this->reuse->getReuseMain() === true) {
