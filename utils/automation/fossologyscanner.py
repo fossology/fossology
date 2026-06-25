@@ -25,6 +25,7 @@ from FoScanner.RepoSetup import RepoSetup
 from FoScanner.Scanners import (Scanners, ScanResult)
 from FoScanner.SpdxReport import SpdxReport
 from FoScanner.Spdx3Report import Spdx3Report
+from FoScanner.DashboardReport import DashboardReport
 from FoScanner.Utils import (
   validate_keyword_conf_file, copy_keyword_file_to_destination
 )
@@ -466,6 +467,18 @@ def main(parsed_args):
       cli_options, result_dir, return_val, scanner,
       format_results
     )
+
+  # Generate compliance dashboard
+  try:
+    logging.info("Generating compliance dashboard...")
+    dashboard = DashboardReport(cli_options, scanner)
+    dashboard.finalize_document()
+    dashboard_file = f"{result_dir}/dashboard.md"
+    dashboard.write_report(dashboard_file)
+    logging.info("Dashboard generated successfully.")
+  except Exception as exc:
+    logging.critical(f"Dashboard generation failed: {exc}")
+
   return return_val
 
 
