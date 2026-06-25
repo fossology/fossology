@@ -28,6 +28,24 @@ define("CONFIG_TYPE_BOOL", 6);
 
 
 /**
+ * Resolve simple $VAR and ${VAR} placeholders against already-known values.
+ *
+ * @param string $value The raw config value.
+ * @param array $scope Previously resolved values.
+ * @return string
+ */
+if (!function_exists('resolve_sysconfig_value')) {
+  function resolve_sysconfig_value($value, array $scope)
+  {
+    return preg_replace_callback('/\$(?:([A-Za-z_][A-Za-z0-9_]*)|\{([A-Za-z_][A-Za-z0-9_]*)\})/', static function ($matches) use ($scope) {
+      $name = !empty($matches[1]) ? $matches[1] : $matches[2];
+      return array_key_exists($name, $scope) ? $scope[$name] : $matches[0];
+    }, $value);
+  }
+}
+
+
+/**
  * \brief Initialize the fossology system after bootstrap().
  *
  * This function also opens a database connection (global PG_CONN).
@@ -87,16 +105,18 @@ function get_pg_conn($sysconfdir, &$SysConf, $exitOnDbFail=true)
   /*************  Parse VERSION *******************/
   $versionFile = "{$sysconfdir}/VERSION";
   $versionConf = parse_ini_file($versionFile, true);
+  $resolvedValues = array();
 
-  /* Add this file contents to $SysConf, then destroy $VersionConf
-   * This file can define its own groups and is eval'd.
+  /* Add this file contents to $SysConf, then destroy $VersionConf.
+   * This file can define its own groups and uses simple placeholder expansion.
    */
   foreach ($versionConf as $groupName => $groupArray) {
     foreach ($groupArray as $var => $assign) {
-      $toeval = "\$$var = \"$assign\";";
-      eval($toeval);
-      $SysConf[$groupName][$var] = ${$var};
-      $GLOBALS[$var] = ${$var};
+      $resolvedValue = resolve_sysconfig_value($assign, $resolvedValues);
+      $resolvedValues[$var] = $resolvedValue;
+      $SysConf[$groupName][$var] = $resolvedValue;
+      ${$var} = $resolvedValue;
+      $GLOBALS[$var] = $resolvedValue;
     }
   }
   unset($versionConf);

@@ -12,6 +12,24 @@
  */
 
 
+/**
+ * Resolve simple $VAR and ${VAR} placeholders against already-known values.
+ *
+ * @param string $value The raw config value.
+ * @param array $scope Previously resolved values.
+ * @return string
+ */
+if (!function_exists('resolve_config_value')) {
+  function resolve_config_value($value, array $scope)
+  {
+    return preg_replace_callback('/\$(?:([A-Za-z_][A-Za-z0-9_]*)|\{([A-Za-z_][A-Za-z0-9_]*)\})/', static function ($matches) use ($scope) {
+      $name = !empty($matches[1]) ? $matches[1] : $matches[2];
+      return array_key_exists($name, $scope) ? $scope[$name] : $matches[0];
+    }, $value);
+  }
+}
+
+
 function guessSysconfdir()
 {
   $rcfile = "fossology.rc";
@@ -86,14 +104,16 @@ function bootstrap($sysconfdir="")
    * For example, if PREFIX=/usr/local and BINDIR=$PREFIX/bin, we
    * want BINDIR=/usr/local/bin
    */
+  $resolvedValues = array();
   foreach($SysConf['DIRECTORIES'] as $var=>$assign)
   {
-    $toeval = "\$$var = \"$assign\";";
-    eval($toeval);
+    $resolvedValue = resolve_config_value($assign, $resolvedValues);
+    $resolvedValues[$var] = $resolvedValue;
 
     /* now reassign the array value with the evaluated result */
-    $SysConf['DIRECTORIES'][$var] = ${$var};
-    $GLOBALS[$var] = ${$var};
+    $SysConf['DIRECTORIES'][$var] = $resolvedValue;
+    ${$var} = $resolvedValue;
+    $GLOBALS[$var] = $resolvedValue;
   }
 
   if (empty($MODDIR))
