@@ -19,7 +19,7 @@ ReuserState getState(DbManager& dbManager)
 int queryAgentId(DbManager& dbManager)
 {
   char* commitHash = fo_sysconfig(AGENT_NAME, "COMMIT_HASH");
-  char* version    = fo_sysconfig(AGENT_NAME, "VERSION");
+  char* version = fo_sysconfig(AGENT_NAME, "VERSION");
 
   if (!commitHash || !version)
   {
@@ -61,7 +61,7 @@ bool processUploadId(const ReuserState& /*state*/, int uploadId,
   ReuserDatabaseHandler& databaseHandler)
 {
   int groupId = fo_scheduler_groupID();
-  int userId  = fo_scheduler_userID();
+  int userId = fo_scheduler_userID();
 
   auto reusedUploads = databaseHandler.getReusedUploads(uploadId, groupId);
 
@@ -72,7 +72,7 @@ bool processUploadId(const ReuserState& /*state*/, int uploadId,
           boundsReused))
     {
       LOG_WARNING("Reuser: could not determine parent bounds for reused"
-                  " upload %d – skipping.", triple.reusedUploadId);
+                  " upload %d, skipping.", triple.reusedUploadId);
       continue;
     }
 
@@ -98,7 +98,7 @@ bool processUploadId(const ReuserState& /*state*/, int uploadId,
       if (!databaseHandler.reuseMainLicense(uploadId, groupId,
             triple.reusedUploadId, triple.reusedGroupId))
         LOG_WARNING("Reuser: reuseMainLicense failed for upload %d"
-                    " (reused %d) – continuing.",
+                    " (reused %d), continuing.",
                     uploadId, triple.reusedUploadId);
     }
 
@@ -106,7 +106,7 @@ bool processUploadId(const ReuserState& /*state*/, int uploadId,
     {
       if (!databaseHandler.reuseConfSettings(uploadId, triple.reusedUploadId))
         LOG_WARNING("Reuser: reuseConfSettings failed for upload %d"
-                    " (reused %d) – continuing.",
+                    " (reused %d), continuing.",
                     uploadId, triple.reusedUploadId);
     }
 
@@ -115,7 +115,7 @@ bool processUploadId(const ReuserState& /*state*/, int uploadId,
       if (!databaseHandler.reuseCopyrights(uploadId, triple.reusedUploadId,
             userId))
         LOG_WARNING("Reuser: reuseCopyrights failed for upload %d"
-                    " (reused %d) – continuing.",
+                    " (reused %d), continuing.",
                     uploadId, triple.reusedUploadId);
     }
   }

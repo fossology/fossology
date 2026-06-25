@@ -87,7 +87,7 @@ protected:
     bool enhancedCalled = false;
 
     handler.onGetReusedUploads = [](int, int) -> std::vector<ReuseTriple>
-    { return {{10, 1, 0 /* no flags → standard */}}; };
+    { return {{10, 1, 0 /* no flags -> standard */}}; };
 
     handler.onGetParentItemBounds = [](int, ItemTreeBounds& out) -> bool
     { out = {1, "uploadtree_a", 10, 1, 100}; return true; };
@@ -152,8 +152,8 @@ protected:
   {
     MockReuserDatabaseHandler handler;
 
-    bool mainCalled      = false;
-    bool confCalled      = false;
+    bool mainCalled = false;
+    bool confCalled = false;
     bool copyrightCalled = false;
 
     int allFlags = REUSE_ENHANCED | REUSE_MAIN | REUSE_CONF | REUSE_COPYRIGHT;
@@ -192,7 +192,7 @@ protected:
   void testNoReusedUploadsSucceeds()
   {
     MockReuserDatabaseHandler handler;
-    // Default: onGetReusedUploads not set → returns empty vector.
+    // Default: onGetReusedUploads not set -> returns empty vector.
     bool ok = runProcessUpload(handler, 1, 1, 1);
     CPPUNIT_ASSERT(ok);
   }
@@ -213,8 +213,8 @@ protected:
     handler.onGetReusedUploads = [](int, int) -> std::vector<ReuseTriple>
     { return {{10, 1, 0}, {20, 1, 0}}; };
 
-    // First upload: bounds not found → skip.
-    // Second upload: bounds found → process.
+    // First upload: bounds not found -> skip.
+    // Second upload: bounds found -> process.
     handler.onGetParentItemBounds =
       [](int uploadId, ItemTreeBounds& out) -> bool
     {

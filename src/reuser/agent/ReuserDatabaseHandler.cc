@@ -22,7 +22,7 @@ extern "C" {
 
 using namespace fo;
 
-// ── Construction ─────────────────────────────────────────────────────────────
+// Construction
 
 ReuserDatabaseHandler::ReuserDatabaseHandler(DbManager dbManager)
   : AgentDatabaseHandler(dbManager)
@@ -34,18 +34,29 @@ ReuserDatabaseHandler ReuserDatabaseHandler::spawn() const
   return ReuserDatabaseHandler(dbManager.spawn());
 }
 
-// ── Private helpers ───────────────────────────────────────────────────────────
+// Private helpers
+
+/* Mirror of DecisionTypes.php; keep in sync if the PHP enum changes.
+ * Types 1 and 2 do not exist in that enum; default covers them. */
+namespace {
+  constexpr int DT_WIP = 0;
+  constexpr int DT_TO_BE_DISCUSSED = 3;
+  constexpr int DT_IRRELEVANT = 4;
+  constexpr int DT_IDENTIFIED = 5;
+  constexpr int DT_DO_NOT_USE = 6;
+  constexpr int DT_NON_FUNCTIONAL = 7;
+}
 
 int ReuserDatabaseHandler::getDecisionTypePriority(int decisionType)
 {
   switch (decisionType)
   {
-    case 5: return 5;  // IDENTIFIED
-    case 6: return 4;  // DO_NOT_USE
-    case 7: return 3;  // NON_FUNCTIONAL
-    case 4: return 2;  // IRRELEVANT
-    case 3: return 1;  // TO_BE_DISCUSSED
-    default: return 0; // WIP and others
+    case DT_IDENTIFIED: return 5;
+    case DT_DO_NOT_USE: return 4;
+    case DT_NON_FUNCTIONAL: return 3;
+    case DT_IRRELEVANT: return 2;
+    case DT_TO_BE_DISCUSSED: return 1;
+    default: return 0;
   }
 }
 
@@ -128,7 +139,7 @@ std::string ReuserDatabaseHandler::getRepoPathOfPfile(int pfileId)
   return result;
 }
 
-// ── Upload-tree helpers ───────────────────────────────────────────────────────
+// Upload-tree helpers
 
 bool ReuserDatabaseHandler::getParentItemBounds(int uploadId,
   ItemTreeBounds& out)
@@ -153,15 +164,15 @@ bool ReuserDatabaseHandler::getParentItemBounds(int uploadId,
   if (!result || result.getRowCount() == 0) return false;
 
   auto row = result.getRow(0);
-  out.uploadtree_pk       = std::stoi(row[0]);
+  out.uploadtree_pk = std::stoi(row[0]);
   out.uploadTreeTableName = table;
-  out.upload_fk           = std::stoi(row[1]);
-  out.lft                 = std::stoi(row[2]);
-  out.rgt                 = std::stoi(row[3]);
+  out.upload_fk = std::stoi(row[1]);
+  out.lft = std::stoi(row[2]);
+  out.rgt = std::stoi(row[3]);
   return true;
 }
 
-// ── Reuse relationship queries ────────────────────────────────────────────────
+// Reuse relationship queries
 
 std::vector<ReuseTriple> ReuserDatabaseHandler::getReusedUploads(
   int uploadId, int groupId)
@@ -211,12 +222,7 @@ std::map<int, int> ReuserDatabaseHandler::getClearingDecisionMapByPfile(
   if (globalQr && globalQr.getRowCount() > 0)
     applyGlobal = fo::stringToBool(globalQr.getRow(0)[0].c_str());
 
-  // Build JOIN condition (no user input embedded – only integers).
-  // When applyGlobal is false, PHP's ClearingDao::getRelevantDecisionsCte also
-  // does NOT add cd.scope = 0 – it only switches from pfile_fk to uploadtree_fk
-  // matching.  We intentionally mirror that behaviour: scope=1 (REPO) rows whose
-  // uploadtree_fk happens to match a concrete item would also be included, exactly
-  // as they would be in PHP.  Adding "AND cd.scope = 0" here would diverge from PHP.
+  // Omit scope=0 check to mirror PHP ClearingDao::getRelevantDecisionsCte.
   std::string joinCond =
     applyGlobal
     ? "(ut.pfile_fk = cd.pfile_fk AND cd.scope = 1)"
@@ -230,11 +236,8 @@ std::map<int, int> ReuserDatabaseHandler::getClearingDecisionMapByPfile(
     ? " AND ut.upload_fk = " + std::to_string(uploadId)
     : "";
 
-  // The inner CTE picks the best decision per uploadtree_pk (ITEM before REPO,
-  // newest first).  The outer CTE preserves all rows so that when the same
-  // pfile has different decisions at different locations, priority-based
-  // conflict resolution (via getDecisionTypePriority) can choose the stronger
-  // decision.
+  // Inner CTE: best decision per uploadtree_pk (ITEM before REPO, newest first).
+  // Outer CTE: all rows kept for priority-based conflict resolution.
   QueryResult qr = dbManager.queryPrintf(
     "WITH per_item AS ("
     " SELECT DISTINCT ON(ut.uploadtree_pk)"
@@ -259,10 +262,10 @@ std::map<int, int> ReuserDatabaseHandler::getClearingDecisionMapByPfile(
 
   for (int i = 0; i < qr.getRowCount(); ++i)
   {
-    auto row    = qr.getRow(i);
-    int  decId  = std::stoi(row[0]);
-    int  pfileId = std::stoi(row[1]);
-    int  decType = std::stoi(row[2]);
+    auto row = qr.getRow(i);
+    int decId = std::stoi(row[0]);
+    int pfileId = std::stoi(row[1]);
+    int decType = std::stoi(row[2]);
     if (pfileId > 0) {
       auto it = result.find(pfileId);
       if (it == result.end()) {
@@ -270,8 +273,9 @@ std::map<int, int> ReuserDatabaseHandler::getClearingDecisionMapByPfile(
         resultTypes[pfileId] = decType;
       } else if (getDecisionTypePriority(decType) >
                  getDecisionTypePriority(resultTypes[pfileId])) {
-        printf("INFO :: Detected conflicting decisions for the same pfile."
-               " Applying the stronger decision.\n");
+        LOG_NOTICE("Reuser: conflicting decisions for pfile %d,"
+                   " applying stronger decision type %d over %d.",
+                   pfileId, decType, resultTypes[pfileId]);
         result[pfileId] = decId;
         resultTypes[pfileId] = decType;
       }
@@ -290,7 +294,7 @@ ReuserDatabaseHandler::getUploadTreePksForPfiles(
   std::string table = queryUploadTreeTableName(uploadId);
   if (!isValidIdentifier(table)) return result;
 
-  // Build PostgreSQL integer-array literal – all values are integers, safe.
+  // Integer-only array; no user input embedded.
   std::string arr;
   for (size_t i = 0; i < pfileIds.size(); ++i)
   {
@@ -314,43 +318,43 @@ ReuserDatabaseHandler::getUploadTreePksForPfiles(
 
   for (int i = 0; i < qr.getRowCount(); ++i)
   {
-    auto row    = qr.getRow(i);
-    int  pk     = std::stoi(row[0]);
-    int  pfileId = std::stoi(row[1]);
+    auto row = qr.getRow(i);
+    int pk = std::stoi(row[0]);
+    int pfileId = std::stoi(row[1]);
     if (pk > 0 && pfileId > 0)
       result[pfileId].push_back(pk);
   }
   return result;
 }
 
-// ── Clearing-decision operations ──────────────────────────────────────────────
+// Clearing-decision operations
 
 int ReuserDatabaseHandler::insertClearingEvent(
-  int uploadTreeId, int userId, int groupId,
+  int uploadId, int uploadTreeId, int userId, int groupId,
   int licenseId, bool removed, int type,
   const std::string& reportInfo, const std::string& comment,
   const std::string& ack, int jobId)
 {
   // Strip Unicode control characters (mirrors PHP StringOperation).
-  std::string safeReport  = replaceUnicodeControlChars(reportInfo);
+  std::string safeReport = replaceUnicodeControlChars(reportInfo);
   std::string safeComment = replaceUnicodeControlChars(comment);
-  std::string safeAck     = replaceUnicodeControlChars(ack);
-  const char* removedStr  = removed ? "t" : "f";
+  std::string safeAck = replaceUnicodeControlChars(ack);
+  const char* removedStr = removed ? "t" : "f";
 
   if (jobId <= 0)
   {
     // Mark existing decision as WIP first (mirrors ClearingDao::markDecisionAsWip).
-    // DecisionTypes::WIP = 0, DecisionScopes::ITEM = 0
-    dbManager.execPrepared(
-      fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-        "reuserMarkDecisionAsWip",
-        "INSERT INTO clearing_decision"
-        " (uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope)"
-        " VALUES ($1,"
-        " (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1),"
-        " $2, $3, 0, 0)",
-        int, int, int),
-      uploadTreeId, userId, groupId);
+    std::string table = queryUploadTreeTableName(uploadId);
+    if (!isValidIdentifier(table))
+      table = "uploadtree";
+
+    dbManager.queryPrintf(
+      "INSERT INTO clearing_decision"
+      " (uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope)"
+      " VALUES (%d,"
+      " (SELECT pfile_fk FROM %s WHERE uploadtree_pk=%d),"
+      " %d, %d, 0, 0)",
+      uploadTreeId, table.c_str(), uploadTreeId, userId, groupId);
 
     QueryResult qr = dbManager.execPrepared(
       fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
@@ -388,7 +392,7 @@ int ReuserDatabaseHandler::insertClearingEvent(
 }
 
 int ReuserDatabaseHandler::createDecisionFromEvents(
-  int uploadTreeId, int userId, int groupId,
+  int uploadId, int uploadTreeId, int userId, int groupId,
   int decType, int scope, const std::vector<int>& eventIds)
 {
   if (eventIds.empty()) return 0;
@@ -406,18 +410,18 @@ int ReuserDatabaseHandler::createDecisionFromEvents(
 
   if (!rRem) { rollback(); return 0; }
 
-  // Insert the new clearing_decision.
-  QueryResult rIns = dbManager.execPrepared(
-    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-      "reuserInsertClearingDecision",
-      "INSERT INTO clearing_decision"
-      " (uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope)"
-      " VALUES ($1,"
-      " (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1),"
-      " $2, $3, $4, $5)"
-      " RETURNING clearing_decision_pk",
-      int, int, int, int, int),
-    uploadTreeId, userId, groupId, decType, scope);
+  std::string table = queryUploadTreeTableName(uploadId);
+  if (!isValidIdentifier(table))
+    table = "uploadtree";
+
+  QueryResult rIns = dbManager.queryPrintf(
+    "INSERT INTO clearing_decision"
+    " (uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope)"
+    " VALUES (%d,"
+    " (SELECT pfile_fk FROM %s WHERE uploadtree_pk=%d),"
+    " %d, %d, %d, %d)"
+    " RETURNING clearing_decision_pk",
+    uploadTreeId, table.c_str(), uploadTreeId, userId, groupId, decType, scope);
 
   if (!rIns || rIns.getRowCount() == 0) { rollback(); return 0; }
   int decisionPk = std::stoi(rIns.getRow(0)[0]);
@@ -437,7 +441,7 @@ int ReuserDatabaseHandler::createDecisionFromEvents(
     QueryResult rLink = dbManager.execPrepared(stmtLink, decisionPk, evPk);
     if (!rLink)
       LOG_WARNING("Reuser: failed to link clearing_event %d to"
-                  " clearing_decision %d – continuing.", evPk, decisionPk);
+                  " clearing_decision %d, continuing.", evPk, decisionPk);
   }
 
   if (!commit()) { rollback(); return 0; }
@@ -445,7 +449,8 @@ int ReuserDatabaseHandler::createDecisionFromEvents(
 }
 
 int ReuserDatabaseHandler::createCopyOfClearingDecision(
-  int newItemUploadTreePk, int userId, int groupId, int originalDecisionPk)
+  int uploadId, int newItemUploadTreePk, int userId, int groupId,
+  int originalDecisionPk)
 {
   // Fetch decision meta (type and scope).
   QueryResult rMeta = dbManager.execPrepared(
@@ -458,11 +463,9 @@ int ReuserDatabaseHandler::createCopyOfClearingDecision(
 
   if (!rMeta || rMeta.getRowCount() == 0) return 0;
   int decType = std::stoi(rMeta.getRow(0)[0]);
-  int scope   = std::stoi(rMeta.getRow(0)[1]);
+  int scope = std::stoi(rMeta.getRow(0)[1]);
 
-  // Fetch the clearing events linked to the original decision.
-  // Note: type_fk is intentionally not reused – copies always use USER type (1).
-  //       job_fk is not reused – the copy is linked to the current scheduler job.
+  // type_fk and job_fk are not copied; copies always use USER type (1).
   QueryResult rEvents = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
       "reuserGetEventsForDecision",
@@ -483,12 +486,13 @@ int ReuserDatabaseHandler::createCopyOfClearingDecision(
 
   for (int i = 0; i < rEvents.getRowCount(); ++i)
   {
-    auto row      = rEvents.getRow(i);
-    int  rfFk     = std::stoi(row[0]);
+    auto row = rEvents.getRow(i);
+    int rfFk = std::stoi(row[0]);
     bool isRemoved = (row[1] == "t" || row[1] == "true");
-    // Always use USER type (1) for copied events – mirrors PHP behavior.
-    int  evType   = 1;
-    int  evPk     = insertClearingEvent(newItemUploadTreePk, userId, groupId,
+    // Always use USER type (1) for copied events - mirrors PHP behavior.
+    int evType = 1;
+    int evPk = insertClearingEvent(uploadId, newItemUploadTreePk,
+                      userId, groupId,
                       rfFk, isRemoved, evType,
                       row[2], row[3], row[4], jobId);
     if (evPk > 0)
@@ -496,11 +500,11 @@ int ReuserDatabaseHandler::createCopyOfClearingDecision(
   }
 
   if (newEventIds.empty()) return 0;
-  return createDecisionFromEvents(newItemUploadTreePk, userId, groupId,
+  return createDecisionFromEvents(uploadId, newItemUploadTreePk, userId, groupId,
     decType, scope, newEventIds);
 }
 
-// ── ARS record ────────────────────────────────────────────────────────────────
+// ARS record
 
 int ReuserDatabaseHandler::writeArsRecord(int agentId, int uploadId,
   int arsId, bool success)
@@ -509,13 +513,13 @@ int ReuserDatabaseHandler::writeArsRecord(int agentId, int uploadId,
     "reuser_ars", nullptr, success ? 1 : 0);
 }
 
-// ── Reuse operations ──────────────────────────────────────────────────────────
+// Reuse operations
 
 bool ReuserDatabaseHandler::processUploadReuse(
   int uploadId, int reusedUploadId,
   int groupId, int reusedGroupId, int userId)
 {
-  auto reusedMap  = getClearingDecisionMapByPfile(reusedUploadId, reusedGroupId);
+  auto reusedMap = getClearingDecisionMapByPfile(reusedUploadId, reusedGroupId);
   if (reusedMap.empty()) return true;
 
   auto currentMap = getClearingDecisionMapByPfile(uploadId, groupId);
@@ -541,7 +545,7 @@ bool ReuserDatabaseHandler::processUploadReuse(
       for (int uploadtreePk : entry.second)
       {
         int newDecision = createCopyOfClearingDecision(
-          uploadtreePk, userId, groupId, originalDecision);
+          uploadId, uploadtreePk, userId, groupId, originalDecision);
         if (newDecision > 0)
           fo_scheduler_heart(1);
       }
@@ -554,7 +558,7 @@ bool ReuserDatabaseHandler::processEnhancedUploadReuse(
   int uploadId, int reusedUploadId,
   int groupId, int reusedGroupId, int userId)
 {
-  auto reusedMap  = getClearingDecisionMapByPfile(reusedUploadId, reusedGroupId);
+  auto reusedMap = getClearingDecisionMapByPfile(reusedUploadId, reusedGroupId);
   if (reusedMap.empty()) return true;
 
   auto currentMap = getClearingDecisionMapByPfile(uploadId, groupId);
@@ -566,25 +570,25 @@ bool ReuserDatabaseHandler::processEnhancedUploadReuse(
 
   if (toImport.empty()) return true;
 
+  std::string tableReused = queryUploadTreeTableName(reusedUploadId);
+  std::string tableTarget = queryUploadTreeTableName(uploadId);
+  if (!isValidIdentifier(tableReused) || !isValidIdentifier(tableTarget))
+    return true;
+
+  bool reusedNeedsFilter = (tableReused == "uploadtree" || tableReused == "uploadtree_a");
+  bool targetNeedsFilter = (tableTarget == "uploadtree" || tableTarget == "uploadtree_a");
+
+  std::string reusedFilter = reusedNeedsFilter
+    ? " AND ur.upload_fk=" + std::to_string(reusedUploadId) : "";
+  std::string targetFilter = targetNeedsFilter
+    ? " AND ut.upload_fk=" + std::to_string(uploadId) : "";
+
   for (int pfileFk : toImport)
   {
     int originalDecision = reusedMap.at(pfileFk);
 
     std::string reusedPath = getRepoPathOfPfile(pfileFk);
     if (reusedPath.empty()) continue;
-
-    std::string tableReused = queryUploadTreeTableName(reusedUploadId);
-    std::string tableTarget = queryUploadTreeTableName(uploadId);
-    if (!isValidIdentifier(tableReused) || !isValidIdentifier(tableTarget))
-      continue;
-
-    bool reusedNeedsFilter = (tableReused == "uploadtree" || tableReused == "uploadtree_a");
-    bool targetNeedsFilter = (tableTarget == "uploadtree" || tableTarget == "uploadtree_a");
-
-    std::string reusedFilter = reusedNeedsFilter
-      ? " AND ur.upload_fk=" + std::to_string(reusedUploadId) : "";
-    std::string targetFilter = targetNeedsFilter
-      ? " AND ut.upload_fk=" + std::to_string(uploadId) : "";
 
     // Find items in target upload with matching filename.
     QueryResult rr = dbManager.queryPrintf(
@@ -598,20 +602,20 @@ bool ReuserDatabaseHandler::processEnhancedUploadReuse(
 
     for (int i = 0; i < rr.getRowCount(); ++i)
     {
-      auto row      = rr.getRow(i);
-      int  newItemPk  = std::stoi(row[0]);
-      int  newPfileFk = std::stoi(row[1]);
+      auto row = rr.getRow(i);
+      int newItemPk = std::stoi(row[0]);
+      int newPfileFk = std::stoi(row[1]);
       if (newItemPk <= 0 || newPfileFk <= 0) continue;
 
       std::string newPath = getRepoPathOfPfile(newPfileFk);
       if (newPath.empty()) continue;
 
       int diffCount = diffLineCount(reusedPath, newPath);
-      if (diffCount < 0) return false; // diff itself failed – abort
+      if (diffCount < 0) return false; // diff failed
       if (diffCount < 5)
       {
         int newDecision = createCopyOfClearingDecision(
-          newItemPk, userId, groupId, originalDecision);
+          uploadId, newItemPk, userId, groupId, originalDecision);
         if (newDecision > 0)
           fo_scheduler_heart(1);
       }
@@ -625,7 +629,7 @@ bool ReuserDatabaseHandler::reuseMainLicense(
 {
   QueryResult r1 = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-      "reuserGetMainLicenses",
+      "reuserGetReusedMainLicenses",
       "SELECT rf_fk FROM upload_clearing_license"
       " WHERE upload_fk=$1 AND group_fk=$2",
       int, int),
@@ -639,7 +643,7 @@ bool ReuserDatabaseHandler::reuseMainLicense(
 
   QueryResult r2 = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-      "reuserGetMainLicenses",
+      "reuserGetTargetMainLicenses",
       "SELECT rf_fk FROM upload_clearing_license"
       " WHERE upload_fk=$1 AND group_fk=$2",
       int, int),
@@ -694,7 +698,8 @@ bool ReuserDatabaseHandler::reuseConfSettings(
   QueryResult rCols = dbManager.queryPrintf(
     "SELECT string_agg(quote_ident(column_name), ',')"
     " FROM information_schema.columns"
-    " WHERE table_name = 'report_info'"
+    " WHERE table_schema = current_schema()"
+    "   AND table_name = 'report_info'"
     "   AND column_name != 'ri_pk'"
     "   AND column_name != 'upload_fk'");
 
@@ -722,7 +727,7 @@ bool ReuserDatabaseHandler::reuseCopyrights(
   // Resolve copyright agent id for both uploads.
   QueryResult rAgentT = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-      "reuserCopyrightAgentId",
+      "reuserCopyrightTargetAgentId",
       "SELECT agent_pk AS agent_id FROM agent"
       " LEFT JOIN copyright_ars ON agent_fk=agent_pk"
       " WHERE agent_name=$2 AND agent_enabled"
@@ -736,7 +741,7 @@ bool ReuserDatabaseHandler::reuseCopyrights(
 
   QueryResult rAgentR = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-      "reuserCopyrightAgentId",
+      "reuserCopyrightReusedAgentId",
       "SELECT agent_pk AS agent_id FROM agent"
       " LEFT JOIN copyright_ars ON agent_fk=agent_pk"
       " WHERE agent_name=$2 AND agent_enabled"
@@ -776,12 +781,12 @@ bool ReuserDatabaseHandler::reuseCopyrights(
     table.c_str(), uploadFilter.c_str(), uploadId, targetAgentId);
 
   // Index existing copyrights by hash.
-  // hash → list of {copyright_pk, uploadtree_pk, upload_fk}
+  // hash -> list of {copyright_pk, uploadtree_pk, upload_fk}
   using Row3 = std::array<int, 3>;
   std::map<std::string, std::vector<Row3>> allMap;
   for (int i = 0; i < rAll.getRowCount(); ++i)
   {
-    auto row  = rAll.getRow(i);
+    auto row = rAll.getRow(i);
     std::string hash = row[4];
     if (!hash.empty())
       allMap[hash].push_back(Row3{std::stoi(row[0]), std::stoi(row[1]),
@@ -804,19 +809,19 @@ bool ReuserDatabaseHandler::reuseCopyrights(
 
   for (int i = 0; i < rReused.getRowCount(); ++i)
   {
-    auto rRow    = rReused.getRow(i);
+    auto rRow = rReused.getRow(i);
     std::string hash = rRow[2];
     if (hash.empty()) continue;
 
     auto it = allMap.find(hash);
     if (it == allMap.end() || it->second.empty()) continue;
 
-    Row3  entry      = it->second.back();
+    Row3 entry = it->second.back();
     it->second.pop_back();
-    int   copyrightPk  = entry[0];
-    int   uploadtreePk = entry[1];
-    int   uploadFk     = entry[2];
-    bool  isEnabled    = fo::stringToBool(rRow[1].c_str());
+    int copyrightPk = entry[0];
+    int uploadtreePk = entry[1];
+    int uploadFk = entry[2];
+    bool isEnabled = fo::stringToBool(rRow[1].c_str());
     const std::string& contentEdited = rRow[3];
 
     // Check if a copyright_event already exists for this combination.
@@ -857,7 +862,7 @@ bool ReuserDatabaseHandler::reuseCopyrights(
             uploadFk, copyrightPk, uploadtreePk, 1);
       if (!rWrite)
         LOG_WARNING("Reuser: failed to disable copyright_event"
-                    " (copyright_fk=%d, uploadtree_fk=%d) – continuing.",
+                    " (copyright_fk=%d, uploadtree_fk=%d), continuing.",
                     copyrightPk, uploadtreePk);
     }
     else
@@ -883,7 +888,7 @@ bool ReuserDatabaseHandler::reuseCopyrights(
             uploadFk, copyrightPk, uploadtreePk, contentEdited.c_str());
       if (!rWrite)
         LOG_WARNING("Reuser: failed to update copyright_event content"
-                    " (copyright_fk=%d, uploadtree_fk=%d) – continuing.",
+                    " (copyright_fk=%d, uploadtree_fk=%d), continuing.",
                     copyrightPk, uploadtreePk);
     }
     fo_scheduler_heart(1);

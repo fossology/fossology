@@ -44,10 +44,17 @@ int main(int argc, char** argv)
 
     int arsId = writeARS(state, 0, uploadId, 0, dbManager);
     if (arsId <= 0)
-      bail(5);
+    {
+      LOG_ERROR("Reuser: failed to write ARS start record for upload %d, skipping.",
+                uploadId);
+      continue;
+    }
 
     if (!processUploadId(state, uploadId, databaseHandler))
+    {
+      writeARS(state, arsId, uploadId, 0, dbManager);
       bail(2);
+    }
 
     fo_scheduler_heart(0);
     writeARS(state, arsId, uploadId, 1, dbManager);

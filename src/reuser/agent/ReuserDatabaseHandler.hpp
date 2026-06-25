@@ -33,7 +33,7 @@ public:
   /** Spawn a new handler sharing the same connection pool (for threads). */
   virtual ReuserDatabaseHandler spawn() const;
 
-  // ── Upload-tree helpers ───────────────────────────────────────────────────
+  // Upload-tree helpers
 
   /**
    * @brief Fetch the parent item bounds for a given upload.
@@ -41,7 +41,7 @@ public:
    */
   virtual bool getParentItemBounds(int uploadId, ItemTreeBounds& out);
 
-  // ── Reuse relationship queries ────────────────────────────────────────────
+  // Reuse relationship queries
 
   /**
    * @brief Return the list of uploads that should be reused for @p uploadId.
@@ -49,43 +49,49 @@ public:
   virtual std::vector<ReuseTriple> getReusedUploads(int uploadId, int groupId);
 
   /**
-   * @brief Build a pfile_fk → clearing_decision_pk map for @p uploadId.
+   * @brief Build a pfile_fk to clearing_decision_pk map for @p uploadId.
    *
    * Considers both ITEM-scope and (when enabled) REPO-scope decisions.
    */
   virtual std::map<int, int> getClearingDecisionMapByPfile(int uploadId, int groupId);
 
   /**
-   * @brief For a set of pfile ids, return a map pfile_fk → [uploadtree_pk].
+   * @brief For a set of pfile ids, return a map pfile_fk to [uploadtree_pk].
    */
   virtual std::map<int, std::vector<int>> getUploadTreePksForPfiles(
     int uploadId, const std::vector<int>& pfileIds);
 
-  // ── Clearing-decision operations ─────────────────────────────────────────
+  // Clearing-decision operations
 
   /**
    * @brief Insert a new clearing event and return its primary key (0 on error).
+   * @param uploadId Upload owning @p uploadTreeId; used to pick the right uploadtree table.
    */
-  virtual int insertClearingEvent(int uploadTreeId, int userId, int groupId,
+  virtual int insertClearingEvent(int uploadId, int uploadTreeId,
+    int userId, int groupId,
     int licenseId, bool removed, int type,
     const std::string& reportInfo, const std::string& comment,
     const std::string& ack, int jobId);
 
   /**
    * @brief Create a clearing_decision linked to @p eventIds.
+   * @param uploadId Upload owning @p uploadTreeId; used to pick the right uploadtree table.
    * @return New clearing_decision_pk or 0 on error.
    */
-  virtual int createDecisionFromEvents(int uploadTreeId, int userId, int groupId,
+  virtual int createDecisionFromEvents(int uploadId, int uploadTreeId,
+    int userId, int groupId,
     int decType, int scope, const std::vector<int>& eventIds);
 
   /**
    * @brief Copy an existing clearing decision to a new uploadtree item.
+   * @param uploadId Upload owning @p newItemUploadTreePk.
    * @return New clearing_decision_pk or 0 on error.
    */
-  virtual int createCopyOfClearingDecision(int newItemUploadTreePk, int userId,
+  virtual int createCopyOfClearingDecision(int uploadId,
+    int newItemUploadTreePk, int userId,
     int groupId, int originalDecisionPk);
 
-  // ── ARS record ───────────────────────────────────────────────────────────
+  // ARS record
 
   /**
    * @brief Write (insert or update) an ARS record.
@@ -94,7 +100,7 @@ public:
   virtual int writeArsRecord(int agentId, int uploadId, int arsId = 0,
     bool success = false);
 
-  // ── Reuse operations ─────────────────────────────────────────────────────
+  // Reuse operations
 
   /** Standard reuse: copy clearing decisions matched by pfile id. */
   virtual bool processUploadReuse(int uploadId, int reusedUploadId,

@@ -68,7 +68,7 @@ protected:
   void testGetClearingDecisionMapEmptyOnNoData()
   {
     MockReuserDatabaseHandler handler;
-    // Callback not set → default returns empty map.
+    // Callback not set -> default returns empty map.
     auto result = handler.getClearingDecisionMapByPfile(99, 1);
     CPPUNIT_ASSERT(result.empty());
   }
@@ -116,7 +116,7 @@ protected:
   void testGetUploadTreePksEmptyOnEmptyInput()
   {
     MockReuserDatabaseHandler handler;
-    // Callback not set and empty input → must return empty map.
+    // Callback not set and empty input -> must return empty map.
     auto result = handler.getUploadTreePksForPfiles(1, {});
     CPPUNIT_ASSERT(result.empty());
   }

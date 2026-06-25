@@ -43,7 +43,7 @@ public:
   }
 };
 
-// ── isValidIdentifier tests ───────────────────────────────────────────────────
+// isValidIdentifier tests
 
 class IsValidIdentifierTest : public CPPUNIT_NS::TestFixture
 {
@@ -208,7 +208,7 @@ protected:
 
 CPPUNIT_TEST_SUITE_REGISTRATION(IsValidIdentifierTest);
 
-// ── replaceUnicodeControlChars tests ─────────────────────────────────────────
+// replaceUnicodeControlChars tests
 
 class ReplaceUnicodeControlCharsTest : public CPPUNIT_NS::TestFixture
 {
@@ -246,7 +246,7 @@ protected:
    * @brief Horizontal tab (U+0009) and line feed (U+000A) are kept.
    *
    * These are standard whitespace characters not classified as controls
-   * by the filter (only U+0000–U+0008 are stripped in the C0 range).
+   * by the filter (only U+0000-U+0008 are stripped in the C0 range).
    */
   void testTabAndNewlineAreKept()
   {
@@ -271,9 +271,9 @@ protected:
   }
 
   /**
-   * @brief C0 control characters U+0001–U+0008 are stripped.
+   * @brief C0 control characters U+0001-U+0008 are stripped.
    *
-   * Characters in the range 0x01–0x08 are non-printable controls that
+   * Characters in the range 0x01-0x08 are non-printable controls that
    * can corrupt database content or confuse downstream parsers.
    */
   void testC0ControlCharsAreStripped()
@@ -300,7 +300,7 @@ protected:
   }
 
   /**
-   * @brief C1 control characters U+0080–U+009F are stripped.
+   * @brief C1 control characters U+0080-U+009F are stripped.
    *
    * These are legacy 8-bit control codes that appear in some legacy
    * copyright strings; they must not pass through to the database.
@@ -357,12 +357,12 @@ protected:
    */
   void testMixedControlAndPrintableFiltered()
   {
-    // "hello\x01world" → "helloworld"
+    // "hello\x01world" -> "helloworld"
     std::string in = "hello\x01world";
     CPPUNIT_ASSERT_EQUAL(std::string("helloworld"), call(in));
 
     // control sandwiched between emoji
-    // \xF0\x9F\x98\x80 \x01 \xF0\x9F\x98\x80  →  emoji + emoji
+    // \xF0\x9F\x98\x80 \x01 \xF0\x9F\x98\x80  ->  emoji + emoji
     std::string emoji = "\xF0\x9F\x98\x80";
     std::string mixed = emoji + "\x01" + emoji;
     CPPUNIT_ASSERT_EQUAL(emoji + emoji, call(mixed));

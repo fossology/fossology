@@ -13,17 +13,17 @@
  * bits stored in each ReuseTriple.
  *
  * Covered scenarios:
- *  - No upload_reuse link → no processing, success
- *  - Reuse link present, source upload has no decisions → agent still succeeds
+ *  - No upload_reuse link -> no processing, success
+ *  - Reuse link present, source upload has no decisions -> agent still succeeds
  *  - Correct arguments forwarded to processUploadReuse (uploadId, reusedUploadId,
  *    groupId, reusedGroupId, userId)
- *  - reuseMode == 0 → standard reuse path regardless of clearing scope
- *  - REUSE_ENHANCED bit → enhanced reuse path
+ *  - reuseMode == 0 -> standard reuse path regardless of clearing scope
+ *  - REUSE_ENHANCED bit -> enhanced reuse path
  *  - Enhanced reuse failure propagates to caller
- *  - Multiple upload_reuse rows → all links processed in order
- *  - REUSE_MAIN / REUSE_CONF / REUSE_COPYRIGHT bits → only the matching
+ *  - Multiple upload_reuse rows -> all links processed in order
+ *  - REUSE_MAIN / REUSE_CONF / REUSE_COPYRIGHT bits -> only the matching
  *    optional method is called
- *  - reuseMode == 0 → no optional methods called
+ *  - reuseMode == 0 -> no optional methods called
  */
 
 #include <cppunit/TestFixture.h>
@@ -33,7 +33,7 @@
 #include "ReuserState.hpp"
 #include "ReuserTypes.hpp"
 
-// ── Minimal replica of processUploadId without scheduler dependency ───────────
+// Minimal replica of processUploadId without scheduler dependency
 // Accepts groupId / userId explicitly so tests remain self-contained.
 // Mirrors the helper defined in test_worker.cc.
 static bool runProcess(ReuserDatabaseHandler& db, int uploadId,
@@ -72,29 +72,29 @@ static bool runProcess(ReuserDatabaseHandler& db, int uploadId,
   return true;
 }
 
-// ── Test fixture ──────────────────────────────────────────────────────────────
+// Test fixture
 class ReuserScenarioTest : public CPPUNIT_NS::TestFixture
 {
   CPPUNIT_TEST_SUITE(ReuserScenarioTest);
 
-  // ── No reuse link ────────────────────────────────────────────────────────
+  // No reuse link
   CPPUNIT_TEST(testNoReuseLinkSucceedsWithoutProcessing);
   CPPUNIT_TEST(testReuseExistsButSourceHasNoClearings);
 
-  // ── Argument forwarding ──────────────────────────────────────────────────
+  // Argument forwarding
   CPPUNIT_TEST(testCorrectArgumentsForwardedToProcessUploadReuse);
 
-  // ── Scope handling ───────────────────────────────────────────────────────
+  // Scope handling
   CPPUNIT_TEST(testRepoClearingUsesStandardReusePath);
 
-  // ── Enhanced reuse ───────────────────────────────────────────────────────
+  // Enhanced reuse
   CPPUNIT_TEST(testEnhancedReuseUsesEnhancedPath);
   CPPUNIT_TEST(testEnhancedReuseFailurePropagates);
 
-  // ── Multiple upload_reuse rows ───────────────────────────────────────────
+  // Multiple upload_reuse rows
   CPPUNIT_TEST(testMultipleReuseLinksAllProcessed);
 
-  // ── Optional flag dispatch ───────────────────────────────────────────────
+  // Optional flag dispatch
   CPPUNIT_TEST(testReuseMainLicenseFlagOnly);
   CPPUNIT_TEST(testReuseConfFlagOnly);
   CPPUNIT_TEST(testReuseCopyrightFlagOnly);
@@ -107,7 +107,7 @@ protected:
   /**
    * @brief No upload_reuse row exists for this upload.
    *
-   * getReusedUploads returns an empty list → no processing takes place,
+   * getReusedUploads returns an empty list -> no processing takes place,
    * the overall result is success.
    */
   void testNoReuseLinkSucceedsWithoutProcessing()
@@ -119,7 +119,7 @@ protected:
       [&](int, int, int, int, int) -> bool
       { processUploadCalled = true; return true; };
 
-    // onGetReusedUploads not set → default returns empty vector
+    // onGetReusedUploads not set -> default returns empty vector
     bool ok = runProcess(db, /*uploadId=*/1, /*groupId=*/3, /*userId=*/2);
 
     CPPUNIT_ASSERT_MESSAGE("should succeed with no reuse links", ok);
@@ -131,7 +131,7 @@ protected:
    * @brief upload_reuse row exists but the source upload has no clearing decisions.
    *
    * The agent calls processUploadReuse and trusts the return value.
-   * Whether 0 rows were actually copied is a database detail — the agent
+   * Whether 0 rows were actually copied is a database detail the agent
    * must succeed as long as processUploadReuse returns true.
    */
   void testReuseExistsButSourceHasNoClearings()
@@ -167,48 +167,48 @@ protected:
   {
     MockReuserDatabaseHandler db;
 
-    const int uploadId      = 3;
-    const int reusedUpload  = 2;
-    const int groupId       = 3;
+    const int uploadId = 3;
+    const int reusedUpload = 2;
+    const int groupId = 3;
     const int reusedGroupId = 3;
-    const int userId        = 2;
+    const int userId = 2;
 
     db.onGetReusedUploads =
       [&](int uid, int gid) -> std::vector<ReuseTriple>
       {
         CPPUNIT_ASSERT_EQUAL(uploadId, uid);
-        CPPUNIT_ASSERT_EQUAL(groupId,  gid);
+        CPPUNIT_ASSERT_EQUAL(groupId, gid);
         return {{reusedUpload, reusedGroupId, 0 /* standard reuse, ITEM scope */}};
       };
 
     db.onGetParentItemBounds = [](int, ItemTreeBounds& out) -> bool
     { out = {1, "uploadtree_a", 2, 1, 100}; return true; };
 
-    int capturedUpload      = -1;
-    int capturedReused      = -1;
-    int capturedGroup       = -1;
+    int capturedUpload = -1;
+    int capturedReused = -1;
+    int capturedGroup = -1;
     int capturedReusedGroup = -1;
-    int capturedUser        = -1;
+    int capturedUser = -1;
 
     db.onProcessUploadReuse =
       [&](int u, int r, int g, int rg, int usr) -> bool
       {
-        capturedUpload      = u;
-        capturedReused      = r;
-        capturedGroup       = g;
+        capturedUpload = u;
+        capturedReused = r;
+        capturedGroup = g;
         capturedReusedGroup = rg;
-        capturedUser        = usr;
+        capturedUser = usr;
         return true;
       };
 
     bool ok = runProcess(db, uploadId, groupId, userId);
 
     CPPUNIT_ASSERT(ok);
-    CPPUNIT_ASSERT_EQUAL(uploadId,      capturedUpload);
-    CPPUNIT_ASSERT_EQUAL(reusedUpload,  capturedReused);
-    CPPUNIT_ASSERT_EQUAL(groupId,       capturedGroup);
+    CPPUNIT_ASSERT_EQUAL(uploadId, capturedUpload);
+    CPPUNIT_ASSERT_EQUAL(reusedUpload, capturedReused);
+    CPPUNIT_ASSERT_EQUAL(groupId, capturedGroup);
     CPPUNIT_ASSERT_EQUAL(reusedGroupId, capturedReusedGroup);
-    CPPUNIT_ASSERT_EQUAL(userId,        capturedUser);
+    CPPUNIT_ASSERT_EQUAL(userId, capturedUser);
   }
 
   /**
@@ -225,7 +225,7 @@ protected:
     bool standardCalled = false;
     bool enhancedCalled = false;
 
-    // reuseMode == 0 → no REUSE_ENHANCED → standard path, even for REPO scope
+    // reuseMode == 0 -> no REUSE_ENHANCED -> standard path, even for REPO scope
     db.onGetReusedUploads = [](int, int) -> std::vector<ReuseTriple>
     { return {{2, 3, 0}}; };
 
@@ -342,8 +342,8 @@ protected:
   {
     MockReuserDatabaseHandler db;
 
-    bool mainCalled      = false;
-    bool confCalled      = false;
+    bool mainCalled = false;
+    bool confCalled = false;
     bool copyrightCalled = false;
 
     db.onGetReusedUploads = [](int, int) -> std::vector<ReuseTriple>
@@ -382,8 +382,8 @@ protected:
   {
     MockReuserDatabaseHandler db;
 
-    bool mainCalled      = false;
-    bool confCalled      = false;
+    bool mainCalled = false;
+    bool confCalled = false;
     bool copyrightCalled = false;
 
     db.onGetReusedUploads = [](int, int) -> std::vector<ReuseTriple>
@@ -422,8 +422,8 @@ protected:
   {
     MockReuserDatabaseHandler db;
 
-    bool mainCalled      = false;
-    bool confCalled      = false;
+    bool mainCalled = false;
+    bool confCalled = false;
     bool copyrightCalled = false;
 
     db.onGetReusedUploads = [](int, int) -> std::vector<ReuseTriple>
@@ -453,7 +453,7 @@ protected:
   }
 
   /**
-   * @brief reuseMode == 0 → only processUploadReuse is called, no optional extras.
+   * @brief reuseMode == 0 -> only processUploadReuse is called, no optional extras.
    *
    * With none of the REUSE_MAIN, REUSE_CONF, or REUSE_COPYRIGHT bits set,
    * none of the corresponding methods must be called.
@@ -462,10 +462,10 @@ protected:
   {
     MockReuserDatabaseHandler db;
 
-    bool mainCalled      = false;
-    bool confCalled      = false;
+    bool mainCalled = false;
+    bool confCalled = false;
     bool copyrightCalled = false;
-    bool standardCalled  = false;
+    bool standardCalled = false;
 
     db.onGetReusedUploads = [](int, int) -> std::vector<ReuseTriple>
     { return {{2, 3, 0 /* no flags */}}; };
