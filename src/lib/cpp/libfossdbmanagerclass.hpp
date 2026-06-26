@@ -37,7 +37,7 @@ namespace fo
      */
     void operator ()(fo_dbManager* d)
     {
-      fo_dbManager_finish(d);
+      if (d) fo_dbManager_finish(d);
     }
   };
 

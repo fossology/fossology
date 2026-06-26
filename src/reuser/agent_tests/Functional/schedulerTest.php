@@ -39,7 +39,6 @@ use Monolog\Logger;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
-include_once(__DIR__.'/SchedulerTestRunnerMock.php');
 
 /**
  * @class SchedulerTest
@@ -105,11 +104,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    */
   private $runnerCli;
 
-  /** @var SchedulerTestRunnerMock $runnerMock
-   * Test runner
-   */
-  private $runnerMock;
-
   /**
    * @brief Setup test env
    */
@@ -128,11 +122,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->copyrightDao = new CopyrightDao($this->dbManager, $this->uploadDao);
     $this->treeDao = \Mockery::mock(TreeDao::class);
 
-    $agentDao = new AgentDao($this->dbManager, $logger);
-
-    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao,
-                        $this->clearingDao, $this->uploadDao, $this->clearingDecisionFilter,
-                        $this->treeDao, $this->copyrightDao);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
@@ -232,18 +221,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    * @brief Call runnerReuserScanWithoutAnyUploadToCopyAndNoClearing()
    * @test
    * -# Setup an upload with no clearing decisions
-   * -# Run reuser on the empty upload with mock agent
-   * -# Check that no clearing decisions added by reuser
-   */
-  public function testReuserMockedScanWithoutAnyUploadToCopyAndNoClearing()
-  {
-    $this->runnerReuserScanWithoutAnyUploadToCopyAndNoClearing($this->runnerMock);
-  }
-
-  /**
-   * @brief Call runnerReuserScanWithoutAnyUploadToCopyAndNoClearing()
-   * @test
-   * -# Setup an upload with no clearing decisions
    * -# Run reuser on the empty upload with scheduler cli
    * -# Check that no clearing decisions added by reuser
    */
@@ -309,17 +286,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Call runnerReuserScanWithoutAnyUploadToCopyAndAClearing()
    * @test
-   * -# Run reuser on the empty upload with agent mock
-   * -# Check that no clearing decisions added by reuser
-   */
-  public function testReuserMockedScanWithoutAnyUploadToCopyAndAClearing()
-  {
-    $this->runnerReuserScanWithoutAnyUploadToCopyAndAClearing($this->runnerMock);
-  }
-
-  /**
-   * @brief Call runnerReuserScanWithoutAnyUploadToCopyAndAClearing()
-   * @test
    * -# Run reuser on the empty upload with scheduler cli
    * -# Check that no clearing decisions added by reuser
    */
@@ -350,21 +316,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     assertThat($decisions, is(emptyArray()));
 
     $this->rmRepo();
-  }
-
-  /**
-   * @brief Call runnerReuserScanWithALocalClearing()
-   * @test
-   * -# Create an upload with clearing decisions on files
-   * -# Run reuser on the upload new upload with mock agent
-   * -# Check if clearing decisions are added
-   * -# Check if the clearing decisions have new ids
-   * -# Check the clearing type and scope are retained
-   * -# Check the upload tree id of the clearing decision
-   */
-  public function testReuserMockedScanWithALocalClearing()
-  {
-    $this->runnerReuserScanWithALocalClearing($this->runnerMock,1);
   }
 
   /**
@@ -429,21 +380,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
       equalTo($potentiallyReusableClearing->getUploadTreeId() + $reusingUploadItemShift));
 
     $this->rmRepo();
-  }
-
-  /**
-   * @brief Call runnerReuserScanWithARepoClearing()
-   * @test
-   * -# Create an upload with license clearing done
-   * -# Run reuser with mock agent
-   * -# Check if new upload has clearings
-   * -# Reuser should have not created a new clearing decision and reuse them
-   * -# Decision types and scopes are same
-   * -# Reuser should have not created a correct local event history
-   */
-  public function testReuserMockedScanWithARepoClearing()
-  {
-    $this->runnerReuserScanWithARepoClearing($this->runnerMock);
   }
 
   /**
@@ -526,22 +462,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     }
 
     $this->rmRepo();
-  }
-
-  /**
-   * @brief Call runnerReuserScanWithARepoClearingEnhanced()
-   * @test
-   * -# Create an upload with license clearing done
-   * -# Create an upload with files with small difference
-   * -# Run reuser with mock agent
-   * -# Check if new upload has clearings
-   * -# Reuser should have not created a new clearing decision and reuse them
-   * -# Decision types and scopes are same
-   * -# Reuser should have not created a correct local event history
-   */
-  public function testReuserRealScanWithARepoClearingEnhanced()
-  {
-    $this->runnerReuserScanWithARepoClearingEnhanced($this->runnerMock);
   }
 
   /**
