@@ -205,6 +205,42 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
+   * -# Test for RestHelper::copyUpload() with link action
+   * -# Check if the response for RestHelper::copyUpload() is 202 and indicates linked
+   */
+  public function testLinkUpload()
+  {
+    $uploadId = 5;
+    $newFolderId = 10;
+    $isCopy = true;
+    $uploadContentId = 44;
+
+    $this->folderDao->shouldReceive('isFolderAccessible')
+      ->withArgs([$newFolderId, $this->userId])
+      ->once()
+      ->andReturn(true);
+    $this->uploadPermissionDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])
+      ->once()
+      ->andReturn(true);
+    $this->folderDao->shouldReceive('getFolderContentsId')
+      ->withArgs([$uploadId, 2])
+      ->once()
+      ->andReturn($uploadContentId);
+    $this->contentMovePlugin->shouldReceive('copyContent')
+      ->withArgs([[$uploadContentId], $newFolderId, $isCopy])
+      ->once()
+      ->andReturn("");
+
+    $expected = new Info(202, "Upload $uploadId will be linked to folder " .
+      $newFolderId, InfoType::INFO);
+    $actual = $this->restHelper->copyUpload($uploadId, $newFolderId, $isCopy, "link");
+
+    $this->assertEquals($expected, $actual);
+  }
+
+  /**
+   * @test
    * -# Test for RestHelper::validateTokenRequest()
    * -# Check if RestHelper::validateTokenRequest() accepts valid requests
    */

@@ -679,10 +679,11 @@ paths:
             enum:
               - copy
               - move
+              - link
       summary: Copy/Move an upload
       responses:
         '202':
-          description: Upload will be copied/moved
+          description: Upload will be copied/moved/linked
           content:
             application/json:
               schema:
