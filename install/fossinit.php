@@ -391,13 +391,18 @@ if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == "3.1
   $sysconfig['Release'] = "3.3.0";
 }
 
-$dbManager->begin();
-$dbManager->getSingleRow("DELETE FROM sysconfig WHERE variablename=$1",array('Release'),'drop.sysconfig.release');
-$dbManager->insertTableRow('sysconfig',
-  array('variablename'=>'Release','conf_value'=>$SysConf["BUILD"]["VERSION"],
-  'ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>'')
-);
-$dbManager->commit();
+// Handle idempotency of this script by checking if the Release variable is set
+$new_version = $SysConf["BUILD"]["VERSION"] ?? '';
+if ($new_version !==''){
+  $dbManager->begin();
+  $dbManager->getSingleRow("DELETE FROM sysconfig WHERE variablename=$1",array('Release'),'drop.sysconfig.release');
+  $dbManager->insertTableRow('sysconfig',
+    array('variablename'=>'Release','conf_value'=>$SysConf["BUILD"]["VERSION"],
+    'ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>'')
+  );
+  $dbManager->commit();
+}
+
 /* email/url/author data migration to other table */
 require_once("$LIBEXECDIR/dbmigrate_copyright-author.php");
 
