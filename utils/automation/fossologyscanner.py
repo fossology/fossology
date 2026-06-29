@@ -24,11 +24,14 @@ from FoScanner.Packages import Packages
 from FoScanner.RepoSetup import RepoSetup
 from FoScanner.Scanners import (Scanners, ScanResult)
 from FoScanner.SpdxReport import SpdxReport
+from FoScanner.Spdx3Report import Spdx3Report
 from FoScanner.Utils import (
   validate_keyword_conf_file, copy_keyword_file_to_destination
 )
 from ScanDeps.Downloader import Downloader
 from ScanDeps.Parsers import Parser, PythonParser, NPMParser
+
+SPDX3_FORMATS = (ReportFormat.SPDX3_JSON, ReportFormat.SPDX3_TTL, ReportFormat.SPDX3_RDF)
 
 
 def get_api_config() -> ApiConfig:
@@ -77,6 +80,7 @@ def get_allow_list(path: str = '') -> dict:
 
   :param path: path to allowlist file. Default=''
   :return: allowlist dictionary
+
   """
   file_name = 'allowlist.json'
   if not path:
@@ -303,7 +307,10 @@ def bom_report(
     scanner: Scanners, format_results: FormatResult
 ) -> int:
   """
-  Run scanners and print results as an SBOM.
+  Run scanners and generate a report.
+
+  Handles all SPDX formats (2.3 and 3.0) via a single entry point.
+  The report class and file name are selected based on report_format.
 
   :param cli_options: CLI options
   :param result_dir: Result directory location
@@ -312,13 +319,19 @@ def bom_report(
   :param format_results: FormatResult object
   :return: Program's return value
   """
-  report_obj = SpdxReport(cli_options, scanner)
+  
+  if cli_options.report_format in SPDX3_FORMATS:
+    report_obj = Spdx3Report(cli_options, scanner)
+  else:
+    report_obj = SpdxReport(cli_options, scanner)
+
   return_val = perform_scans(
     cli_options, format_results, result_dir, return_val, scanner
   )
   logging.info("Finalizing reports...")
   report_obj.finalize_document()
 
+  # Pick file name based on format
   report_name = f"{result_dir}/sbom_"
   if cli_options.report_format == ReportFormat.SPDX_JSON:
     report_name += "spdx.json"
@@ -328,6 +341,12 @@ def bom_report(
     report_name += "spdx.spdx"
   elif cli_options.report_format == ReportFormat.SPDX_YAML:
     report_name += "spdx.yaml"
+  elif cli_options.report_format == ReportFormat.SPDX3_JSON:
+    report_name += "spdx3.jsonld"
+  elif cli_options.report_format == ReportFormat.SPDX3_TTL:
+    report_name += "spdx3.ttl"
+  elif cli_options.report_format == ReportFormat.SPDX3_RDF:
+    report_name += "spdx3.rdf"
 
   logging.info(f"Validating and writing report to file {report_name}...")
   try:
