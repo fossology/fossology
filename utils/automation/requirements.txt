@@ -6,3 +6,6 @@
 spdx-tools==0.8.3
 requests==2.33.0
 packageurl-python==0.17.3
+semantic-version==2.10.0
+rdflib==7.6.0
+pyshacl==0.31.0

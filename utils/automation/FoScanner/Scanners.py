@@ -168,9 +168,21 @@ class Scanners:
     """
     Get the raw results from ojo scanner
 
-    :return: raw json from ojo
+    :return: raw json from ojo, normalized to nomos format
     """
-    return self._execute_scanner_command(self.ojo_path, dir_to_scan)
+    raw = self._execute_scanner_command(self.ojo_path, dir_to_scan)
+    # Normalize ojo output to match nomos format:
+    # ojo returns: [{"file": "...", "results": [...]}]
+    # nomos returns: {"results": [{"file": "...", "licenses": [...]}]}
+    if isinstance(raw, list):
+      transformed = []
+      for entry in raw:
+        transformed.append({
+          'file': entry.get('file', ''),
+          'licenses': entry.get('results') or []
+        })
+      return {'results': transformed}
+    return raw
 
   def __get_copyright_results(self, dir_to_scan: str) -> dict:
     """
