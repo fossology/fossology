@@ -107,6 +107,12 @@ const char* jobsql_email_job =
  * Fetch the next batch of schedulable jobs with their user and priority.
  * The users table is LEFT JOINed so a job whose user was deleted shows up with a
  * NULL user_pk and can be skipped instead of silently dropped.
+ *
+ * This is a printf format string: the single '%d' placeholder is filled with
+ * the dynamic checkout limit computed in database_update_event() as the sum of
+ * max-agent slots across all configured hosts (falling back to CHECKOUT_SIZE).
+ * Do NOT use this string directly with database_exec(); always format it first
+ * via g_strdup_printf().
  */
 const char* basic_checkout =
     " SELECT jq.jq_pk, jq.jq_job_fk, jq.jq_type, jq.jq_host,"
@@ -123,7 +129,7 @@ const char* basic_checkout =
     "       AND NOT (dep.jq_endtime IS NOT NULL AND dep.jq_end_bits < 2)"
     "   )"
     " ORDER BY j.job_priority DESC"
-    " LIMIT 10;";
+    " LIMIT %d;";
 
 /**
  * Mark the given job id as started

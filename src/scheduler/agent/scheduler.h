@@ -117,6 +117,10 @@
 /* fo library includes */
 #include <fossconfig.h>
 
+/** Maximum number of jobs to fetch from the database in a single poll cycle
+ *  when no host configuration has been loaded yet (startup fallback).
+ *  At runtime the actual limit is the sum of max-agent slots across all
+ *  configured hosts; see database_update_event() in database.c. */
 #define CHECKOUT_SIZE 100
 
 #define AGENT_BINARY "%s/%s/%s/agent/%s"  ///< Format to get agent binary
