@@ -48,7 +48,10 @@ class ReuseReportProcessor
    */
   public function getReuseSummary($uploadId)
   {
-    $declearedLicenses = $this->detectLicensesFolder->getDeclearedLicenses($uploadId);
+    $declearedLicenses = array_merge(
+      $this->detectLicensesFolder->getDeclearedLicenses($uploadId),
+      $this->detectLicensesFolder->getLicenseFileDeclaredLicenses($uploadId)
+    );
     $groupId = Auth::getGroupId();
     $uploadtreeTablename = GetUploadtreeTableName($uploadId);
     $uploadTreeId = $this->uploadDao->getUploadParent($uploadId);
