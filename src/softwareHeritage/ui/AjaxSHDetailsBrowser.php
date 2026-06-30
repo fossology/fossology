@@ -16,7 +16,7 @@ use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use \Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class AjaxSHDetailsBrowser extends DefaultPlugin
@@ -129,7 +129,9 @@ class AjaxSHDetailsBrowser extends DefaultPlugin
     if ($isFlat) {
       $options = array(UploadTreeProxy::OPT_RANGE => $itemTreeBounds);
     } else {
-      $options = array(UploadTreeProxy::OPT_REALPARENT => $itemTreeBounds->getItemId());
+      $options = array(
+        UploadTreeProxy::OPT_ITEM_FILTER => "AND ut.ufile_mode & (1<<28) = 0 AND ut.realparent=" . $itemTreeBounds->getItemId()
+      );
     }
 
     $searchMap = array();
@@ -267,23 +269,30 @@ class AjaxSHDetailsBrowser extends DefaultPlugin
       $fileName = "<a href='$linkUri'>$fileName</a>";
     }
 
-    $pfileHash = $this->uploadDao->getUploadHashesFromPfileId($fileId);
-    $shRecord = $this->shDao->getSoftwareHetiageRecord($fileId);
     $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename, !$isFlat);
 
-    if (! $isContainer) {
-      $text = _("Software Heritage");
-      $shLink = $this->configuration['url'] .
-        $this->configuration['uri'] . strtolower($pfileHash["sha256"]) .
-        $this->configuration['content'];
-      $fileListLinks .= "[<a href='".$shLink."' target=\"_blank\">$text</a>]";
-    }
-    $img = "";
-    if (! $isContainer) {
-      $img = $shRecord["img"];
+    if ($isContainer) {
+      $childBounds = new ItemTreeBounds(
+        $child['uploadtree_pk'],
+        $this->uploadtree_tablename,
+        $uploadId,
+        $child['lft'],
+        $child['rgt']
+      );
+      $shRecord = $this->shDao->getAggregatedSWHRecord($childBounds);
+      return [$fileName, "", $shRecord["license"], $shRecord["img"], $fileListLinks];
     }
 
-    return [$fileName, $pfileHash["sha256"], $shRecord["license"], $img, $fileListLinks];
+    $pfileHash = $this->uploadDao->getUploadHashesFromPfileId($fileId);
+    $shRecord = $this->shDao->getSoftwareHetiageRecord($fileId);
+
+    $text = _("Software Heritage");
+    $shLink = $this->configuration['url'] .
+      $this->configuration['uri'] . strtolower($pfileHash["sha256"]) .
+      $this->configuration['content'];
+    $fileListLinks .= "[<a href='".$shLink."' target=\"_blank\">$text</a>]";
+
+    return [$fileName, $pfileHash["sha256"], $shRecord["license"], $shRecord["img"], $fileListLinks];
   }
 }
 
