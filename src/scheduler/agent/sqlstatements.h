@@ -108,9 +108,10 @@ const char* jobsql_email_job =
  * The users table is LEFT JOINed so a job whose user was deleted shows up with a
  * NULL user_pk and can be skipped instead of silently dropped.
  *
- * This is a printf format string: the single '%d' placeholder is filled with
- * the dynamic checkout limit computed in database_update_event() as the sum of
- * max-agent slots across all configured hosts (falling back to CHECKOUT_SIZE).
+ * printf format string with two placeholders:
+ *  %s  known jq_pk list for NOT IN (sentinel "0" when empty; prevents
+ *      re-fetching JB_CHECKEDOUT jobs whose jq_starttime is still NULL).
+ *  %d  checkout limit (sum of host max slots, fallback CHECKOUT_SIZE).
  * Do NOT use this string directly with database_exec(); always format it first
  * via g_strdup_printf().
  */
@@ -122,6 +123,7 @@ const char* basic_checkout =
     " INNER JOIN job j     ON j.job_pk  = jq.jq_job_fk"
     " LEFT JOIN users u    ON u.user_pk = j.job_user_fk"
     " WHERE jq.jq_starttime IS NULL AND jq.jq_end_bits < 2"
+    "   AND jq.jq_pk NOT IN (%s)"
     "   AND NOT EXISTS("
     "     SELECT 1 FROM jobdepends jd"
     "     INNER JOIN jobqueue dep ON dep.jq_pk = jd.jdep_jq_depends_fk"

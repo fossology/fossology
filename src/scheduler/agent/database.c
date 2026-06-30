@@ -838,6 +838,27 @@ void database_exec_event(scheduler_t* scheduler, char* sql)
 }
 
 /**
+ * @brief GTraverseFunc callback: append each job's id (jq_pk) to a
+ *        comma-separated GString for use in a SQL NOT IN clause.
+ *
+ * Called by g_tree_foreach() on scheduler->job_list inside
+ * database_update_event() to build the exclusion list that prevents
+ * in-flight JB_CHECKEDOUT jobs (whose jq_starttime is still NULL in the
+ * database) from being re-fetched and consuming LIMIT slots.
+ *
+ * @param key   Pointer to the job id (int*) stored as the GTree key
+ * @param val   Unused job_t* value
+ * @param data  GString* to append to
+ * @return FALSE to continue the traversal
+ */
+static gboolean collect_known_pks(gpointer key, gpointer val, gpointer data)
+{
+  (void)val;
+  g_string_append_printf((GString*)data, ",%d", *(int*)key);
+  return FALSE;
+}
+
+/**
  * @brief Checks the job queue for any new entries.
  *
  * The number of rows fetched from the database is bounded by the sum of
@@ -858,6 +879,7 @@ void database_update_event(scheduler_t* scheduler, void* unused)
   job_t* job;
   gchar* checkout_sql;
   int   checkout_limit;
+  GString* excl_pks;
   GList* iter;
 
   if(closing)
@@ -866,42 +888,44 @@ void database_update_event(scheduler_t* scheduler, void* unused)
     return;
   }
 
-  /* Compute the checkout limit as the total number of agent slots available
-   * across all configured hosts so that every available slot can be filled
-   * in a single poll cycle. Two distinct cases are handled separately:
-   *  a) host_queue is NULL (startup: no hosts loaded yet)
-   *     -> fall back to CHECKOUT_SIZE so the query runs and finds pending
-   *        jobs even before host configuration has been applied.
-   *  b) hosts are configured
-   *     -> use the sum of their max values directly. LIMIT 0 is valid
-   *        PostgreSQL and returns no rows when all hosts have max=0 config;
-   *        do NOT inflate to CHECKOUT_SIZE here as that would over-fetch
-   *        jobs that can never be dispatched.
-   *        Clamp to 0 if the sum goes negative (e.g. hosts with max<0) to
-   *        avoid a PostgreSQL "LIMIT must not be negative" error. */
+  /* Compute the checkout limit from configured host capacity.
+   *  a) No hosts loaded yet (startup): fall back to CHECKOUT_SIZE.
+   *  b) Hosts configured: sum max values for hosts with max > 0 only
+   *     (max <= 0 provides no real slots per get_host() and must not reduce
+   *     the total). LIMIT 0 is valid SQL and correct when all hosts have
+   *     max=0; do NOT inflate to CHECKOUT_SIZE or jobs that can never run
+   *     would be over-fetched. On integer overflow (requires INT_MAX
+   *     slots – practically impossible) fall back to CHECKOUT_SIZE. */
   if(scheduler->host_queue == NULL)
   {
     checkout_limit = CHECKOUT_SIZE;
   }
   else
   {
-    checkout_limit = 0;
+    gint64 limit64 = 0;
     for(iter = scheduler->host_queue; iter != NULL; iter = iter->next)
     {
       int host_max = ((host_t*)iter->data)->max;
       /* Only count hosts that can actually accept agents */
       if(host_max > 0)
-        checkout_limit += host_max;
+        limit64 += host_max;
     }
-    /* If the sum wrapped negative (requires INT_MAX total slots across
-     * all hosts – practically impossible), fall back to CHECKOUT_SIZE */
-    if(checkout_limit < 0)
-      checkout_limit = CHECKOUT_SIZE;
+    /* Accumulating positive ints into gint64 cannot overflow in practice,
+     * but guard the cast back to int to avoid UB (requires >2^31 total slots). */
+    checkout_limit = (limit64 <= INT_MAX) ? (int)limit64 : CHECKOUT_SIZE;
   }
+
+  /* Exclude in-memory jobs from the poll: JB_CHECKEDOUT jobs have
+   * jq_starttime NULL in the DB until the agent handshake completes, so
+   * basic_checkout would otherwise re-fetch them and waste LIMIT slots.
+   * Sentinel 0 keeps the list non-empty when job_list is empty. */
+  excl_pks = g_string_new("0");
+  g_tree_foreach(scheduler->job_list, collect_known_pks, excl_pks);
 
   /* one query for the queue rows joined with priority and user info, instead of
    * a basic_checkout plus a per-row jobsql_information lookup */
-  checkout_sql = g_strdup_printf(basic_checkout, checkout_limit);
+  checkout_sql = g_strdup_printf(basic_checkout, excl_pks->str, checkout_limit);
+  g_string_free(excl_pks, TRUE);
   db_result = database_exec(scheduler, checkout_sql);
   g_free(checkout_sql);
   if(db_result == NULL)
