@@ -272,7 +272,9 @@ class AjaxFileBrowser extends DefaultPlugin
     $licenseEntries = array();
     if ($isContainer) {
       $agentFilter = $selectedAgentId ? array($selectedAgentId) : $latestSuccessfulAgentIds;
-      $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array());
+      [$licenseEntries, $expressionsEntries] = $this->licenseDao
+        ->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array(), true);
+      $licenseEntries = array_merge($licenseEntries, $expressionsEntries);
     } else {
       if (array_key_exists($fileId, $pfileLicenses)) {
         foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo) {

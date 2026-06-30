@@ -727,7 +727,7 @@ ORDER BY lft asc
             INNER JOIN $uploadTreeTableName uploadTree ON uploadTree.pfile_fk=license_file.pfile_fk
             WHERE upload_fk=$1
               AND lft BETWEEN $2 AND $3
-              $noLicenseFoundStmt $agentFilter
+              $agentFilter
             GROUP BY rf_expression
             ORDER BY rf_expression ASC");
       $result = $this->dbManager->execute($statementName,
@@ -735,7 +735,7 @@ ORDER BY lft asc
 
       $expressions = [];
       while ($row = $this->dbManager->fetchArray($result)) {
-        $expressions[] = $row['rf_expression'];
+        $expressions[] = $this->expressionAstToString($row['rf_expression']);
       }
       $this->dbManager->freeResult($result);
       return [$licenses, $expressions];

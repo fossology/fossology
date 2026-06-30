@@ -363,10 +363,7 @@ class AjaxExplorer extends DefaultPlugin
       [$licenseEntries, $expressionsEntries] = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array(), true);
       $editedLicenses = $this->clearingDao->getClearedLicenses($childItemTreeBounds, $groupId, true);
 
-      foreach ($expressionsEntries as $expression) {
-        $expression = json_decode($expression);
-        $licenseEntries[] = $this->licenseDao->buildExpression($expression, $groupId);
-      }
+      $licenseEntries = array_merge($licenseEntries, $expressionsEntries);
 
       if ($request->get('fromRest')) {
         foreach ($licenseEntries as $shortName) {
