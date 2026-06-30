@@ -191,13 +191,17 @@ class ScanOptions
    */
   private function prepareReuser(Request &$request)
   {
-    $reuseUploadId = $this->reuse->getReuseUpload();
-    if ($reuseUploadId == 0) {
-      // No upload to reuse
+    $reuseUploads = $this->reuse->getReuseUploads();
+    $reuseUploads = array_filter($reuseUploads, function ($id) {
+      return $id > 0;
+    });
+    if (empty($reuseUploads)) {
       return;
     }
-    if (!$GLOBALS['container']->get("dao.upload")->isAccessible($reuseUploadId, Auth::getGroupId())) {
-      throw new HttpForbiddenException("Upload $reuseUploadId is not accessible for reuse");
+    foreach ($reuseUploads as $reuseUploadId) {
+      if (!$GLOBALS['container']->get("dao.upload")->isAccessible($reuseUploadId, Auth::getGroupId())) {
+        throw new HttpForbiddenException("Upload $reuseUploadId is not accessible for reuse");
+      }
     }
     $reuserRules = [];
     if ($this->reuse->getReuseMain() === true) {
@@ -213,8 +217,16 @@ class ScanOptions
       $reuserRules[] = 'reuseCopyright';
     }
     $userDao = $GLOBALS['container']->get("dao.user");
-    $reuserSelector = $this->reuse->getReuseUpload() . "," . $userDao->getGroupIdByName($this->reuse->getReuseGroup());
-    $request->request->set('uploadToReuse', $reuserSelector);
+    $groupId = $userDao->getGroupIdByName($this->reuse->getReuseGroup());
+    $reuserSelectors = [];
+    foreach ($reuseUploads as $uploadId) {
+      $reuserSelectors[] = $uploadId . "," . $groupId;
+    }
+    if (count($reuserSelectors) === 1) {
+      $request->request->set('uploadToReuse', $reuserSelectors[0]);
+    } else {
+      $request->request->set('uploadToReuse', $reuserSelectors);
+    }
     $request->request->set('reuseMode', $reuserRules);
   }
 
