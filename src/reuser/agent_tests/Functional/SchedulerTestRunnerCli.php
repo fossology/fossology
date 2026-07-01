@@ -43,7 +43,7 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
     $execPath = $agentDir . '/agent/' . $agentName;
 
     $extraArgs = implode(' ', array_map('escapeshellarg', $args));
-    $cmd = 'echo ' . escapeshellarg((string)$uploadId) . ' | ' . escapeshellarg($execPath) . ' --userID=' . escapeshellarg((string)$userId) . ' --groupID=' . escapeshellarg((string)$groupId) . ' --jobId=' . escapeshellarg((string)$jobId) . ' --scheduler_start -c ' . escapeshellarg($sysConf) . ($extraArgs !== '' ? ' ' . $extraArgs : '');
+    $cmd = 'echo ' . escapeshellarg((string)$uploadId) . ' | FOSSOLOGY_TEST=1 ' . escapeshellarg($execPath) . ' --userID=' . escapeshellarg((string)$userId) . ' --groupID=' . escapeshellarg((string)$groupId) . ' --jobId=' . escapeshellarg((string)$jobId) . ' --scheduler_start -c ' . escapeshellarg($sysConf) . ($extraArgs !== '' ? ' ' . $extraArgs : '');
     $pipeFd = popen($cmd, 'r');
     $success = $pipeFd !== false;
 

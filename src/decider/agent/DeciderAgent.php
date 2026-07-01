@@ -89,7 +89,7 @@ class DeciderAgent extends Agent
   const RULES_KOTOBA_NO_CONTRADICTION = 0x100;
   const RULES_RESO_NO_CONTRADICTION = 0x200;
   const RULES_ALL = self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA |
-    self::RULES_BULK_REUSE | self::RULES_WIP_SCANNER_UPDATES |
+    self::RULES_WIP_SCANNER_UPDATES |
     self::RULES_OJO_NO_CONTRADICTION | self::RULES_RESO_NO_CONTRADICTION |
     self::RULES_LICENSE_TYPE_CONCLUSION | self::RULES_KOTOBA_NO_CONTRADICTION;
 
@@ -188,34 +188,6 @@ class DeciderAgent extends Agent
     }
     if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_COPYRIGHT_FALSE_POSITIVE_CLUTTER)== self::RULES_COPYRIGHT_FALSE_POSITIVE_CLUTTER)) {
       $this->getCopyrightsToDisableFalsePositivesClutter($uploadId, true);
-    }
-    if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE)) {
-      $bulkReuser = new BulkReuser();
-      $bulkIds = $this->clearingDao->getPreviousBulkIds($uploadId, $this->groupId, $this->userId);
-      if (count($bulkIds) == 0) {
-        return true;
-      }
-      $jqId=0;
-      $minTime="4";
-      $maxTime="60";
-      foreach ($bulkIds as $bulkId) {
-        $jqId = $bulkReuser->rerunBulkAndDeciderOnUpload($uploadId, $this->groupId, $this->userId, $bulkId, $jqId);
-        $this->heartbeat(1);
-        if (!empty($jqId)) {
-          $jqIdRow = $this->showJobsDao->getDataForASingleJob($jqId);
-          while ($this->showJobsDao->getJobStatus($jqId)) {
-            $this->heartbeat(0);
-            $timeInSec = $this->showJobsDao->getEstimatedTime($jqIdRow['jq_job_fk'],'',0,0,1);
-            if ($timeInSec > $maxTime) {
-              sleep($maxTime);
-            } else if ($timeInSec < $minTime) {
-              sleep($minTime);
-            } else {
-              sleep($timeInSec);
-            }
-          }
-        }
-      }
     }
     $parentBounds = $this->uploadDao->getParentItemBounds($uploadId);
     foreach ($this->uploadDao->getContainedItems($parentBounds) as $item) {

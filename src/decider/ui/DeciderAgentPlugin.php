@@ -105,12 +105,6 @@ class DeciderAgentPlugin extends AgentPlugin
           $dependencies[] = 'agent_ninka';
           $rulebits |= 0x2;
           break;
-        case 'reuseBulk':
-          $dependencies[] = 'agent_nomos';
-          $dependencies[] = 'agent_monk';
-          $dependencies[] = 'agent_reuser';
-          $rulebits |= 0x4;
-          break;
         case 'wipScannerUpdates':
           $this->addScannerDependencies($dependencies, $request);
           $rulebits |= 0x8;

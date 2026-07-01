@@ -13,6 +13,9 @@
 #include <set>
 #include <sstream>
 #include <sys/wait.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
 
 #include <unicode/unistr.h>
 
@@ -894,4 +897,444 @@ bool ReuserDatabaseHandler::reuseCopyrights(
     fo_scheduler_heart(1);
   }
   return true;
+}
+
+std::vector<int> ReuserDatabaseHandler::getPreviousBulkIds(int uploadId, int groupId, int userId)
+{
+  std::vector<int> bulkIds;
+
+  QueryResult qr = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetPreviousBulkIds",
+      "SELECT jq_args FROM upload_reuse, jobqueue, job"
+      " WHERE upload_fk=$1 AND group_fk=$2"
+      "  AND (reuse_mode & 8) = 8"
+      "  AND EXISTS(SELECT * FROM group_user_member gum WHERE gum.group_fk=upload_reuse.group_fk AND gum.user_fk=$3)"
+      "  AND jq_type=$4 AND jq_job_fk=job_pk"
+      "  AND job_upload_fk=reused_upload_fk AND job_group_fk=reused_group_fk"
+      "  ORDER BY jq_pk",
+      int, int, int, char*),
+    uploadId, groupId, userId, (char*)"monkbulk");
+
+  for (int i = 0; i < qr.getRowCount(); ++i)
+  {
+    std::string jqArgs = qr.getRow(i)[0];
+    std::stringstream ss(jqArgs);
+    std::string line;
+    while (std::getline(ss, line, '\n'))
+    {
+      if (!line.empty())
+      {
+        try {
+          bulkIds.push_back(std::stoi(line));
+        } catch (...) {}
+      }
+    }
+  }
+
+  return bulkIds;
+}
+
+bool ReuserDatabaseHandler::processBulkReuser(int uploadId, int groupId, int userId)
+{
+  std::vector<int> bulkIds = getPreviousBulkIds(uploadId, groupId, userId);
+  if (bulkIds.empty()) {
+    return true;
+  }
+
+  int minTime = 4;
+  int maxTime = 60;
+
+  for (int bulkId : bulkIds) {
+    int jqPk = rerunBulkAndDeciderOnUpload(uploadId, groupId, userId, bulkId);
+    if (jqPk <= 0) {
+      continue;
+    }
+
+    fo_scheduler_heart(1);
+
+    const char* fossologyTest = std::getenv("FOSSOLOGY_TEST");
+    if (fossologyTest && std::string(fossologyTest) == "1") {
+      continue;
+    }
+
+    while (isJobQueueRunning(jqPk)) {
+      fo_scheduler_heart(0);
+      int timeInSec = getEstimatedTime(jqPk);
+      if (timeInSec > maxTime) {
+        sleep(maxTime);
+      } else if (timeInSec < minTime) {
+        sleep(minTime);
+      } else {
+        sleep(timeInSec);
+      }
+    }
+  }
+
+  return true;
+}
+
+int ReuserDatabaseHandler::rerunBulkAndDeciderOnUpload(int uploadId, int groupId, int userId, int bulkId)
+{
+  ItemTreeBounds bounds;
+  if (!getParentItemBounds(uploadId, bounds)) {
+    return 0;
+  }
+  int nTopItem = bounds.uploadtree_pk;
+
+  QueryResult qrBulk = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetBulkUploadtree",
+      "SELECT uploadtree_fk FROM license_ref_bulk WHERE lrb_pk=$1",
+      int),
+    bulkId);
+  if (qrBulk.getRowCount() == 0) {
+    return 0;
+  }
+  int bulkUploadtreeFk = std::stoi(qrBulk.getRow(0)[0]);
+
+  int pUID = 0;
+  std::string ufileName;
+  int ufileMode = 0;
+
+  QueryResult qrEntry = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetUploadtreeEntry1",
+      "SELECT upload_fk, ufile_name, ufile_mode FROM uploadtree WHERE uploadtree_pk=$1",
+      int),
+    bulkUploadtreeFk);
+  if (qrEntry.getRowCount() > 0) {
+    pUID = std::stoi(qrEntry.getRow(0)[0]);
+    ufileName = qrEntry.getRow(0)[1];
+    ufileMode = std::stoi(qrEntry.getRow(0)[2]);
+  } else {
+    QueryResult qrEntry2 = dbManager.execPrepared(
+      fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+        "reuserGetUploadtreeEntry2",
+        "SELECT upload_fk, ufile_name, ufile_mode FROM uploadtree_a WHERE uploadtree_pk=$1",
+        int),
+      bulkUploadtreeFk);
+    if (qrEntry2.getRowCount() > 0) {
+      pUID = std::stoi(qrEntry2.getRow(0)[0]);
+      ufileName = qrEntry2.getRow(0)[1];
+      ufileMode = std::stoi(qrEntry2.getRow(0)[2]);
+    } else {
+      return 0;
+    }
+  }
+
+  ItemTreeBounds pBounds;
+  if (!getParentItemBounds(pUID, pBounds)) {
+    return 0;
+  }
+  int pTopItem = pBounds.uploadtree_pk;
+
+  int topItem = 0;
+  if (pTopItem == bulkUploadtreeFk) {
+    topItem = nTopItem;
+  } else {
+    // Find the corresponding entry in the new upload
+    QueryResult qrMatch = dbManager.execPrepared(
+      fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+        "reuserGetMatchingEntry1",
+        "SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=$1 AND ufile_name=$2 AND ufile_mode=$3",
+        int, char*, int),
+      uploadId, ufileName.c_str(), ufileMode);
+    if (qrMatch.getRowCount() == 1) {
+      topItem = std::stoi(qrMatch.getRow(0)[0]);
+    } else {
+      QueryResult qrMatch2 = dbManager.execPrepared(
+        fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+          "reuserGetMatchingEntry2",
+          "SELECT uploadtree_pk FROM uploadtree_a WHERE upload_fk=$1 AND ufile_name=$2 AND ufile_mode=$3",
+          int, char*, int),
+        uploadId, ufileName.c_str(), ufileMode);
+      if (qrMatch2.getRowCount() == 1) {
+        topItem = std::stoi(qrMatch2.getRow(0)[0]);
+      }
+    }
+  }
+  if (topItem == 0) {
+    return 0;
+  }
+
+  QueryResult qrClone = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserCloneBulk",
+      "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_text,upload_fk,uploadtree_fk,ignore_irrelevant,bulk_delimiters,scan_findings) "
+      "SELECT $1 AS user_fk, $2 AS group_fk,rf_text,$3 AS upload_fk, $4 as uploadtree_fk, ignore_irrelevant, bulk_delimiters, scan_findings "
+      "FROM license_ref_bulk WHERE lrb_pk=$5 RETURNING lrb_pk",
+      int, int, int, int, int),
+    userId, groupId, uploadId, topItem, bulkId);
+  if (qrClone.getRowCount() == 0) {
+    return 0;
+  }
+  int newBulkId = std::stoi(qrClone.getRow(0)[0]);
+
+  dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserCloneBulkLic",
+      "INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing, comment, reportinfo, acknowledgement) "
+      "SELECT $1 as lrb_fk, rf_fk, removing, comment, reportinfo, acknowledgement FROM license_set_bulk WHERE lrb_fk=$2",
+      int, int),
+    newBulkId, bulkId);
+
+  QueryResult qrUpload = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetUploadFilename",
+      "SELECT upload_filename FROM upload WHERE upload_pk=$1",
+      int),
+    uploadId);
+  if (qrUpload.getRowCount() == 0) {
+    return 0;
+  }
+  std::string uploadName = qrUpload.getRow(0)[0];
+
+  QueryResult qrJob = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserCreateJob",
+      "INSERT INTO job (job_user_fk, job_group_fk, job_queued, job_priority, job_name, job_upload_fk)"
+      " VALUES ($1, $2, now(), 0, $3, $4) RETURNING job_pk",
+      int, int, char*, int),
+    userId, groupId, uploadName.c_str(), uploadId);
+  if (qrJob.getRowCount() == 0) {
+    return 0;
+  }
+  int jobPk = std::stoi(qrJob.getRow(0)[0]);
+
+  std::string newBulkIdStr = std::to_string(newBulkId);
+  QueryResult qrMonk = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserScheduleMonkBulk",
+      "INSERT INTO jobqueue (jq_job_fk, jq_type, jq_args, jq_runonpfile, jq_starttime, jq_endtime, jq_end_bits, jq_host, jq_cmd_args)"
+      " VALUES ($1, 'monkbulk', $2, NULL, NULL, NULL, 0, NULL, NULL) RETURNING jq_pk",
+      int, char*),
+    jobPk, newBulkIdStr.c_str());
+  if (qrMonk.getRowCount() == 0) {
+    return 0;
+  }
+  int monkJqPk = std::stoi(qrMonk.getRow(0)[0]);
+
+  QueryResult qrAdjCheck = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserCheckAdj2Nest",
+      "SELECT jq_pk FROM jobqueue, job WHERE job_pk=jq_job_fk"
+      " AND jq_type='adj2nest' AND job_upload_fk=$1",
+      int),
+    uploadId);
+  int adj2nestJqPk = 0;
+  if (qrAdjCheck.getRowCount() > 0) {
+    adj2nestJqPk = std::stoi(qrAdjCheck.getRow(0)[0]);
+  } else {
+    std::string uploadIdStr = std::to_string(uploadId);
+    QueryResult qrAdj = dbManager.execPrepared(
+      fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+        "reuserScheduleAdj2Nest",
+        "INSERT INTO jobqueue (jq_job_fk, jq_type, jq_args, jq_runonpfile, jq_starttime, jq_endtime, jq_end_bits, jq_host, jq_cmd_args)"
+        " VALUES ($1, 'adj2nest', $2, NULL, NULL, NULL, 0, NULL, NULL) RETURNING jq_pk",
+        int, char*),
+      jobPk, uploadIdStr.c_str());
+    if (qrAdj.getRowCount() > 0) {
+      adj2nestJqPk = std::stoi(qrAdj.getRow(0)[0]);
+    }
+  }
+
+  std::string uploadIdStr = std::to_string(uploadId);
+  QueryResult qrDecider = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserScheduleDecider",
+      "INSERT INTO jobqueue (jq_job_fk, jq_type, jq_args, jq_runonpfile, jq_starttime, jq_endtime, jq_end_bits, jq_host, jq_cmd_args)"
+      " VALUES ($1, 'deciderjob', $2, NULL, NULL, NULL, 0, NULL, NULL) RETURNING jq_pk",
+      int, char*),
+    jobPk, uploadIdStr.c_str());
+  if (qrDecider.getRowCount() == 0) {
+    return 0;
+  }
+  int deciderJqPk = std::stoi(qrDecider.getRow(0)[0]);
+
+  dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserAddDependencyMonk",
+      "INSERT INTO jobdepends (jdep_jq_fk, jdep_jq_depends_fk) VALUES ($1, $2)",
+      int, int),
+    deciderJqPk, monkJqPk);
+
+  if (adj2nestJqPk > 0) {
+    dbManager.execPrepared(
+      fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+        "reuserAddDependencyAdj",
+        "INSERT INTO jobdepends (jdep_jq_fk, jdep_jq_depends_fk) VALUES ($1, $2)",
+        int, int),
+      deciderJqPk, adj2nestJqPk);
+  }
+
+  notifySchedulerOfDatabaseChange();
+  return deciderJqPk;
+}
+
+bool ReuserDatabaseHandler::isJobQueueRunning(int jqPk)
+{
+  QueryResult qr = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserIsJobQueueRunning",
+      "SELECT jq_end_bits FROM jobqueue WHERE jq_pk = $1",
+      int),
+    jqPk);
+
+  if (qr.getRowCount() == 0) {
+    return false;
+  }
+
+  try {
+    int endBits = std::stoi(qr.getRow(0)[0]);
+    return !(endBits == 1 || endBits == 2);
+  } catch (...) {
+    return false;
+  }
+}
+
+int ReuserDatabaseHandler::getEstimatedTime(int jqPk)
+{
+  QueryResult qrJob = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetJobFkFromJqPk",
+      "SELECT jq_job_fk FROM jobqueue WHERE jq_pk = $1",
+      int),
+    jqPk);
+  if (qrJob.getRowCount() == 0) {
+    return 0;
+  }
+  int jobPk = 0;
+  std::string valJob;
+  try {
+    valJob = qrJob.getRow(0)[0];
+    if (!valJob.empty()) {
+      jobPk = std::stoi(valJob);
+    }
+  } catch (const std::exception& e) {
+    LOG_WARNING("Reuser: failed to parse job FK for jqPk %d (val='%s'): %s",
+                jqPk, valJob.c_str(), e.what());
+    return 0;
+  } catch (...) {
+    LOG_WARNING("Reuser: unknown error parsing job FK for jqPk %d (val='%s')",
+                jqPk, valJob.c_str());
+    return 0;
+  }
+
+  QueryResult qrUnpack = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetUnunpackProcessed",
+      "SELECT jq_itemsprocessed FROM jobqueue WHERE jq_type = 'ununpack' AND jq_end_bits = 1 AND jq_job_fk = $1",
+      int),
+    jobPk);
+  if (qrUnpack.getRowCount() == 0) {
+    return 0;
+  }
+  int ununpackProcessed = 0;
+  std::string valUnpack;
+  try {
+    valUnpack = qrUnpack.getRow(0)[0];
+    if (!valUnpack.empty()) {
+      ununpackProcessed = std::stoi(valUnpack);
+    }
+  } catch (const std::exception& e) {
+    LOG_WARNING("Reuser: failed to parse ununpack processed count (val='%s'): %s",
+                valUnpack.c_str(), e.what());
+    return 0;
+  } catch (...) {
+    LOG_WARNING("Reuser: unknown error parsing ununpack processed count (val='%s')",
+                valUnpack.c_str());
+    return 0;
+  }
+
+  if (ununpackProcessed <= 0) {
+    return 0;
+  }
+
+  QueryResult qrAgents = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetEstimatedTimeAgents",
+      "SELECT jq_itemsprocessed, EXTRACT(EPOCH FROM (now() - jq_starttime)) AS burn_time FROM jobqueue "
+      "WHERE jq_type <> 'ununpack' AND jq_type <> 'reportgen' AND jq_type <> 'decider' AND jq_type <> 'softwareHeritage' "
+      "  AND jq_job_fk = $1 AND jq_endtime IS NULL AND jq_starttime IS NOT NULL",
+      int),
+    jobPk);
+
+  double maxCompletionTime = 0.0;
+  bool foundEstimate = false;
+
+  for (int i = 0; i < qrAgents.getRowCount(); ++i) {
+    int jqItemsProcessed = 0;
+    double burnTime = 0.0;
+    std::string val0, val1;
+    try {
+      val0 = qrAgents.getRow(i)[0];
+      val1 = qrAgents.getRow(i)[1];
+      if (!val0.empty()) {
+        jqItemsProcessed = std::stoi(val0);
+      }
+      if (!val1.empty()) {
+        burnTime = std::stod(val1);
+      }
+    } catch (const std::exception& e) {
+      LOG_WARNING("Reuser: failed to parse agent jobqueue row (val0='%s', val1='%s'): %s",
+                  val0.c_str(), val1.c_str(), e.what());
+      continue;
+    } catch (...) {
+      LOG_WARNING("Reuser: unknown error parsing agent jobqueue row (val0='%s', val1='%s')",
+                  val0.c_str(), val1.c_str());
+      continue;
+    }
+
+    if (burnTime > 0.0) {
+      double filesPerSec = static_cast<double>(jqItemsProcessed) / burnTime;
+      if (filesPerSec > 0.0) {
+        double timeOfCompletion = static_cast<double>(ununpackProcessed - jqItemsProcessed) / filesPerSec;
+        if (timeOfCompletion > maxCompletionTime) {
+          maxCompletionTime = timeOfCompletion;
+        }
+        foundEstimate = true;
+      }
+    }
+  }
+
+  if (!foundEstimate) {
+    return 0;
+  }
+
+  return static_cast<int>(maxCompletionTime + 0.5);
+}
+
+void ReuserDatabaseHandler::notifySchedulerOfDatabaseChange()
+{
+  char* host = fo_sysconfig("FOSSOLOGY", "address");
+  char* port = fo_sysconfig("FOSSOLOGY", "port");
+  if (!host || !port) return;
+
+  struct addrinfo hints, *servs, *curr = nullptr;
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  if (getaddrinfo(host, port, &hints, &servs) != 0) {
+    return;
+  }
+
+  int fd = -1;
+  for (curr = servs; curr != nullptr; curr = curr->ai_next) {
+    fd = socket(curr->ai_family, hints.ai_socktype, curr->ai_protocol);
+    if (fd < 0) continue;
+    if (connect(fd, curr->ai_addr, curr->ai_addrlen) == 0) {
+      break;
+    }
+    close(fd);
+    fd = -1;
+  }
+  freeaddrinfo(servs);
+
+  if (fd >= 0) {
+    if (write(fd, "database", 8) < 0) {
+      // ignore
+    }
+    close(fd);
+  }
 }
