@@ -67,12 +67,10 @@
         </div>
         <!-- Modal body -->
         <div class="modal-body">
-          {{ 'Notice'|trans }}: {{ 'Since punctuation is included in the matching process, periods needs to be included in the phrases if the word just before is included.'|trans }}
-          <br/>
           {{ 'Hint'|trans }}: {{ 'New license candidates can be added via'|trans }}
           <a href="?mod=advice_license">{{ 'menu Organize&raquo;Licenses'|trans }}</a><br/>
           <form name="bulkForm">
-            <table>
+            <table width="100%">
               <tr>
                 <td id="bulkExistingLicense">
                   <select id="bulkLicense" class="ui-render-select2 w-100">
@@ -95,6 +93,14 @@
                 </td>
                 <td>
                   <button type="button" class="btn btn-default btn-sm" onclick="popUpLicenseText('{{ bulkUri }}&rf=', '{{ 'License Text'| trans }}');">{{ 'Show license'| trans }}</button>
+                </td>
+                <td style="width:100%;"></td>
+                <td style="white-space:nowrap;">
+                  <select name="bulkScope" class="form-control-sm" id="bulkScope">
+                    <option value="u">{{ 'scan whole Upload'| trans }}</option>
+                    <option value="f">{{ 'scan only current Folder'| trans }}</option>
+                  </select>
+                  <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'Scan whole upload or this folder determines the scope of files where the text phrase is searched for. If “scan whole upload” is selected, the text phrase is searched in all files of the entire upload'|trans }}" alt="" class="info-bullet"/></img>
                 </td>
               </tr>
             </table>
@@ -119,13 +125,6 @@
             <textarea name="bulkRefText" id="bulkRefText" type="text" rows="12" class="form-control"></textarea>
             <div class="container-fluid pt-2">
               <div class="row justify-content-start">
-                <div class="col-sm-auto pr-0">
-                  <select name="bulkScope" class="form-control-sm" id="bulkScope">
-                    <option value="u">{{ 'scan whole Upload'| trans }}</option>
-                    <option value="f">{{ 'scan only current Folder'| trans }}</option>
-                  </select>
-                  <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'Scan whole upload or this folder determines the scope of files where the text phrase is searched for. If “scan whole upload” is selected, the text phrase is searched in all files of the entire upload'|trans }}" alt="" class="info-bullet"/></img>
-                </div>
                 <div class="col-sm-auto pr-0">
                   <div class="form-check form-check-inline">
                     <input type="checkbox" class="form-check-input" id="forceDecision"/>
@@ -157,45 +156,14 @@
                 </div>
                 <div class="col-sm-auto pr-0">
                   <div class="form-check form-check-inline">
-                    <input type="checkbox" class="form-check-input" id="custDelim"/>
-                    <label for="custDelim" class="form-check-label">
-                      {{ 'Custom delimiters'|trans }}
-                      <img src="images/info_16.png" data-toggle="tooltip"
-                      data-placement="left" style="vertical-align:middle !important;"
-                      title="{{ 'Provide custom list of characters for spliting tokens for scan. Note, the characters will be ignored.'|trans }}"
-                      alt="" class="info-bullet"/>
-                    </label>
-                  </div>
-                </div>
-                <div class="col-sm-auto pr-0">
-                  <div class="form-check form-check-inline">
                     <input type="checkbox" class="form-check-input" id="addToCustomPhrase"/>
                     <label for="addToCustomPhrase" class="form-check-label">
-                      {{ 'Add text phrase to custom phrase table'|trans }}
+                      {{ 'Save phrase for kotoba'|trans }}
                       <img src="images/info_16.png" data-toggle="tooltip"
                       data-placement="left" style="vertical-align:middle !important;"
-                      title="{{ 'When checked, the reference text and associated licenses will be saved to the custom phrase table for future scanning with the kotoba agent'|trans }}"
+                      title="{{ 'When enabled, the reference text and its associated licenses will be saved to the custom phrase table and used for future scans by the Kotoba agent.'|trans }}"
                       alt="" class="info-bullet"/>
                     </label>
-                  </div>
-                </div>
-              </div>
-              <div class="row pt-2 invisible" id="delimRow">
-                <div class="col-md-auto">
-                  <label for="delimdrop" class="col-form-label">
-                    Delimiters:
-                  </label>&nbsp;<img src="images/info_16.png"
-                    data-toggle="tooltip"
-                    data-placement="left"
-                    title="{{ 'Use default list of delimiters (\' \\t\\n\\r\\f#^%,*\') or type your own in the box. Currently limited to single characters only and space is always a delimiter.'|trans }}"
-                    alt="" class="info-bullet"/>
-                </div>
-                <div class="col">
-                  <div class="input-group input-group-sm">
-                    <div class="input-group-prepend">
-                      <button class="btn btn-outline-secondary" type="button" id="resetDel">Reset</button>
-                    </div>
-                    <input class="form-control" id="delimdrop" type="text" value="DEFAULT">
                   </div>
                 </div>
               </div>

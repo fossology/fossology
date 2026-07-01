@@ -6,5 +6,6 @@
 
 extern unsigned int squareVisitorX[SQUARE_VISITOR_LENGTH];
 extern unsigned int squareVisitorY[SQUARE_VISITOR_LENGTH];
+extern unsigned int squareVisitorDist2[SQUARE_VISITOR_LENGTH];
 
 #endif // SQUAREVISITOR_H

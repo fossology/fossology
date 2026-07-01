@@ -1,6 +1,7 @@
 /*
  Author: Daniele Fognini, Andreas Wuerl
  SPDX-FileCopyrightText: © 2013-2015 Siemens AG
+ SPDX-FileCopyrightText: © 2026 Siemens AG
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -18,6 +19,21 @@
 
 #define MAX_TOKENS_ARRAY_SIZE 4194304
 #define MAX_DELIMIT_LEN 255
+
+/* Per-character state flags; internal to streamTokenize, converted to
+ * TOKEN_* by classifyToken(). */
+#define TOK_STATE_ALL_DIGITS 0x10u /* every char so far is a digit */
+#define TOK_STATE_HAS_HYPHEN 0x20u /* saw a hyphen after leading digits */
+#define TOK_STATE_DIGIT_AFTER 0x40u /* saw a digit after the hyphen */
+#define TOK_STATE_ALL_PUNCT 0x80u /* every char is non-alphanumeric */
+
+/** Initial tokenType for a new token: optimistically assume year/punct. */
+#define TOK_STATE_INIT (TOK_STATE_ALL_DIGITS | TOK_STATE_ALL_PUNCT)
+
+/* A year is a 4-digit number (e.g. 1998, 2026). Range forms anchor on a
+ * 4-digit leading year, e.g. "2000-2009" or "2024-25". Shorter digit runs
+ * (section numbers, list items, versions like "10", "20") are NOT years. */
+#define YEAR_DIGIT_LEN 4
 
 unsigned splittingDelim(char a, const char* delimiters) {
   if (a == '\0')
@@ -63,6 +79,61 @@ static inline void initStateToken(Token* stateToken) {
   stateToken->hashedContent = hash_init();
   stateToken->length = 0;
   stateToken->removedBefore = 0;
+  stateToken->tokenType = TOK_STATE_INIT;
+}
+
+/** TOKEN_YEAR: 4-digit number or 4-digit-led range; TOKEN_PUNCT: all
+ * non-alnum; otherwise TOKEN_NORMAL. */
+static uint8_t classifyToken(const Token* t)
+{
+  uint8_t f = t->tokenType;
+
+  int isYearLike =
+    ((f & TOK_STATE_ALL_DIGITS) && t->length == YEAR_DIGIT_LEN) ||
+    ((f & TOK_STATE_HAS_HYPHEN) && (f & TOK_STATE_DIGIT_AFTER));
+
+  if (isYearLike)
+    return TOKEN_YEAR;
+
+  if ((f & TOK_STATE_ALL_PUNCT) && t->length > 0)
+    return TOKEN_PUNCT;
+
+  return TOKEN_NORMAL;
+}
+
+/** Update tokenType flags. Must be called BEFORE incrementing length;
+ * the hyphen check reads the current digit count. */
+static inline void updateTokenTypeFlags(Token* stateToken, char c)
+{
+  uint8_t* f = &stateToken->tokenType;
+
+  if (isdigit((unsigned char)c)) {
+    if (*f & TOK_STATE_HAS_HYPHEN)
+      *f |= TOK_STATE_DIGIT_AFTER;
+    *f &= (uint8_t)~TOK_STATE_ALL_PUNCT; /* digit is alphanumeric */
+    /* TOK_STATE_ALL_DIGITS preserved */
+  } else if (c == '-') {
+    if ((*f & TOK_STATE_ALL_DIGITS) && stateToken->length == YEAR_DIGIT_LEN
+        && !(*f & TOK_STATE_HAS_HYPHEN)) {
+      /* year-range hyphen: exactly 4 leading digits, e.g. "2000-" */
+      *f |= TOK_STATE_HAS_HYPHEN;
+      *f &= (uint8_t)~TOK_STATE_ALL_DIGITS;
+    } else {
+      /* not a 4-digit year prefix, second hyphen, or hyphen after non-digits */
+      *f &= (uint8_t)~(TOK_STATE_ALL_DIGITS | TOK_STATE_HAS_HYPHEN | TOK_STATE_DIGIT_AFTER);
+    }
+    /* hyphen is non-alphanumeric: TOK_STATE_ALL_PUNCT preserved */
+  } else if (isalpha((unsigned char)c) || (unsigned char)c >= 0x80) {
+    /* ASCII letter or any non-ASCII (UTF-8 multibyte) byte is real content:
+       it ends year/punctuation-only status. Non-ASCII words (accented
+       Latin, Cyrillic, CJK, ...) must not be dropped as punctuation. */
+    *f &= (uint8_t)~(TOK_STATE_ALL_DIGITS | TOK_STATE_HAS_HYPHEN |
+                     TOK_STATE_DIGIT_AFTER | TOK_STATE_ALL_PUNCT);
+  } else {
+    /* ASCII punctuation, non-hyphen (e.g. '@', '$', '&', '.', '!') */
+    *f &= (uint8_t)~(TOK_STATE_ALL_DIGITS | TOK_STATE_HAS_HYPHEN | TOK_STATE_DIGIT_AFTER);
+    /* TOK_STATE_ALL_PUNCT preserved: still possibly all-punctuation */
+  }
 }
 
 static int isIgnoredToken(Token* token) {
@@ -75,6 +146,7 @@ static int isIgnoredToken(Token* token) {
 #endif
   remToken.length = 3;
   remToken.removedBefore = 0;
+  remToken.tokenType = TOKEN_NORMAL; /* explicit: avoids year short-circuit */
 
   return tokenEquals(token, &remToken);
 }
@@ -86,9 +158,14 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
   unsigned int initialTokenCount = tokens->len;
 
   if (!inputChunk) {
+    /* Flush the final in-progress token */
     if ((stateToken = *remainder)) {
-      if ((stateToken->length > 0) && !isIgnoredToken(stateToken)) {
-        g_array_append_val(tokens, *stateToken);
+      if (stateToken->length > 0 && !isIgnoredToken(stateToken)) {
+        stateToken->tokenType = classifyToken(stateToken);
+        if (stateToken->tokenType == TOKEN_YEAR)
+          stateToken->hashedContent = YEAR_CANONICAL_HASH;
+        if (stateToken->tokenType != TOKEN_PUNCT)
+          g_array_append_val(tokens, *stateToken);
       }
       free(stateToken);
     }
@@ -97,7 +174,6 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
   }
 
   if (!*remainder) {
-    //initialize state
     stateToken = malloc(sizeof (Token));
     *remainder = stateToken;
     initStateToken(stateToken);
@@ -125,12 +201,25 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
     if (delimLen > 0) {
       if (stateToken->length > 0) {
         if (isIgnoredToken(stateToken)) {
+          /* REM keyword: treat as invisible (existing behavior) */
           stateToken->removedBefore += stateToken->length;
           stateToken->length = 0;
           stateToken->hashedContent = hash_init();
+          stateToken->tokenType = TOK_STATE_INIT;
         } else {
-          g_array_append_val(tokens, *stateToken);
-          initStateToken(stateToken);
+          stateToken->tokenType = classifyToken(stateToken);
+          if (stateToken->tokenType == TOKEN_PUNCT) {
+            /* all-punctuation token: absorbed into the gap before next token */
+            stateToken->removedBefore += stateToken->length;
+            stateToken->length = 0;
+            stateToken->hashedContent = hash_init();
+            stateToken->tokenType = TOK_STATE_INIT;
+          } else {
+            if (stateToken->tokenType == TOKEN_YEAR)
+              stateToken->hashedContent = YEAR_CANONICAL_HASH;
+            g_array_append_val(tokens, *stateToken);
+            initStateToken(stateToken);
+          }
         }
       }
 
@@ -139,6 +228,8 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
       ptr += delimLen;
       readBytes += delimLen;
     } else {
+      updateTokenTypeFlags(stateToken, *ptr);
+
 #ifndef MONK_CASE_INSENSITIVE
       const char* newCharPtr = ptr;
 #else
@@ -217,6 +308,38 @@ size_t token_position_of(size_t index, const GArray* tokens) {
     printf("WARNING: requested calculation of token index after the END token\n");
   }
 
+  return result;
+}
+
+GArray* mergeYearTokenSequences(GArray* tokens)
+{
+  GArray* result = tokens_new();
+
+  for (size_t i = 0; i < tokens->len; ) {
+    Token* t = tokens_index(tokens, i);
+
+    if (t->tokenType != TOKEN_YEAR) {
+      g_array_append_val(result, *t);
+      i++;
+      continue;
+    }
+
+    /* Start a year group: copy the first year token and absorb followers. */
+    Token merged = *t;
+    i++;
+
+    while (i < tokens->len) {
+      Token* next = tokens_index(tokens, i);
+      if (next->tokenType != TOKEN_YEAR) break;
+      /* include gap so highlights span the full year group */
+      merged.length += next->removedBefore + next->length;
+      i++;
+    }
+
+    g_array_append_val(result, merged);
+  }
+
+  tokens_free(tokens);
   return result;
 }
 

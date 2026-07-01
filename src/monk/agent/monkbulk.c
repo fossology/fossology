@@ -179,7 +179,8 @@ int bulk_identification(MonkState* state) {
   License license = (License){
     .refId = bulkArguments->licenseId,
   };
-  license.tokens = tokenize(bulkArguments->refText, bulkArguments->delimiters);
+  license.tokens = mergeYearTokenSequences(
+    tokenize(bulkArguments->refText, bulkArguments->delimiters));
 
   GArray* licenseArray = g_array_new(FALSE, FALSE, sizeof (License));
   g_array_append_val(licenseArray, license);

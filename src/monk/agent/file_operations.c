@@ -1,6 +1,7 @@
 /*
  Author: Daniele Fognini, Andreas Wuerl
  SPDX-FileCopyrightText: © 2013-2014 Siemens AG
+ SPDX-FileCopyrightText: © 2026 Siemens AG
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -98,6 +99,9 @@ int readTokensFromFile(const char* fileName, GArray** tokens, const char* delimi
   {
     iconv_close(converter);
   }
+
+  /* normalize years so year-only differences don't break full matches */
+  *tokens = mergeYearTokenSequences(*tokens);
 
   return 1;
 }

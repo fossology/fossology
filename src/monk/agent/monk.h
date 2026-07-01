@@ -31,6 +31,10 @@
 #define MIN_ADJACENT_MATCHES 3
 #define MAX_LEADING_DIFF 10
 #define MIN_ALLOWED_RANK 66
+/* Penalty per skipped leading token (license title/identifier absent from
+ * file). W=200: sPos=10 on a ~23k-token license drops rank ~8%, below a
+ * sPos=0 match. */
+#define LEADING_DIFF_RANK_WEIGHT 200
 
 #include <glib.h>
 #include <stdbool.h>
