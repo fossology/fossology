@@ -183,8 +183,8 @@ class AdminObligationFromCSV extends DefaultPlugin
     $errMsg = '';
     if (!($uploadedFile instanceof UploadedFile)) {
       $errMsg = _("No file selected");
-    } elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
-      $errMsg = _("Larger than upload_max_filesize ") . ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
+    } elseif ($uploadedFile->getError() !== UPLOAD_ERR_OK) {
+      $errMsg = $uploadedFile->getErrorMessage();
     } elseif (
       $uploadedFile->getClientOriginalExtension() != 'csv'
       && $uploadedFile->getClientOriginalExtension() != 'json'
@@ -198,6 +198,12 @@ class AdminObligationFromCSV extends DefaultPlugin
         return array(false, $errMsg, 400);
       }
       return $errMsg;
+    }
+    if ($delimiter === null || $delimiter === '') {
+      $delimiter = ',';
+    }
+    if ($enclosure === null || $enclosure === '') {
+      $enclosure = '"';
     }
     $this->obligationsCsvImport->setDelimiter($delimiter);
     $this->obligationsCsvImport->setEnclosure($enclosure);
