@@ -20,15 +20,7 @@ NOASSERTION,
 {%- if fileData.scanners|default is empty -%}
 NOASSERTION,
 {%- else -%}
-"{% for res in fileData.scanners %}
-  {%- set licId=licenseList[res].licenseObj.spdxId %}
-  {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
-    {% set licId=licenseList[res].licenseObj.shortName %}
-  {%- endif ~%}
-  {% if licenseList[res].licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' %}
-  {{ licId }}{% if res != fileData.scanners|last %} AND {% endif %}
-  {% endif %}
-{% endfor %}",
+"{{ scannerLicenseInfoInFileString|replace({'"':'""'}) }}",
 {%- endif -%}
 {%- if fileData.copyrights|default is empty -%}
 NOASSERTION

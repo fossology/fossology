@@ -437,7 +437,8 @@ class SpdxAgent extends Agent
       $mainLicenses[] = $reportLicId;
     }
     $mainLicenseString = [];
-    if ($this->outputFormat == "spdx2tv" ||
+    if ($this->outputFormat == self::DEFAULT_OUTPUT_FORMAT ||
+        $this->outputFormat == "spdx2tv" ||
         $this->outputFormat == "spdx2csv" ||
         $this->outputFormat == "spdx3tv" ||
         $this->outputFormat == "dep5") {
@@ -613,29 +614,29 @@ class SpdxAgent extends Agent
       if (! empty($fileNode->getConcludedLicenses())) {
         $licenses = [];
         foreach ($fileNode->getConcludedLicenses() as $license) {
-          if ($this->licensesInDocument[$license]->getLicenseObj()->getSpdxId() === "LicenseRef-fossology-License-Expression") {
-            $ast = json_decode($this->licensesInDocument[$license]->getLicenseObj()->getFullName(), true);
-            $licenses = $this->buildExpression($ast, $this->groupId);
+          $licenseObj = $this->licensesInDocument[$license]->getLicenseObj();
+          if ($this->isLicenseExpression($licenseObj)) {
+            $licenses = $this->buildExpressionFromLicense($licenseObj);
             break;
           }
-          $licenses[] = $this->licensesInDocument[$license]
-            ->getLicenseObj()->getSpdxId();
+          $licenses[] = $licenseObj->getSpdxId();
         }
-        $licenses = SpdxTwoUtils::implodeLicenses(
-          SpdxTwoUtils::removeEmptyLicenses(array_unique($licenses)));
+        if (is_array($licenses)) {
+          $licenses = SpdxTwoUtils::implodeLicenses(
+            SpdxTwoUtils::removeEmptyLicenses(array_unique($licenses)));
+        }
         $this->toLicensesWithFilesAdder($licensesWithFiles,
           $licenses, $fileNode->getCopyrights(), $fileId, $fullPath);
       } else {
         if (! empty($fileNode->getScanners())) {
           $implodedLicenses = [];
           foreach ($fileNode->getScanners() as $license) {
-            if ($this->licensesInDocument[$license]->getLicenseObj()->getSpdxId() === "LicenseRef-fossology-License-Expression") {
-              $ast = json_decode($this->licensesInDocument[$license]->getLicenseObj()->getFullName(), true);
-              $implodedLicenses = $this->buildExpression($ast, $this->groupId);
+            $licenseObj = $this->licensesInDocument[$license]->getLicenseObj();
+            if ($this->isLicenseExpression($licenseObj)) {
+              $implodedLicenses = $this->buildExpressionFromLicense($licenseObj);
               break;
             }
-            $implodedLicenses[] = $this->licensesInDocument[$license]
-              ->getLicenseObj()->getSpdxId();
+            $implodedLicenses[] = $licenseObj->getSpdxId();
           }
           if (is_array($implodedLicenses)) {
             $implodedLicenses = SpdxUtils::implodeLicenses(
@@ -830,9 +831,9 @@ class SpdxAgent extends Agent
       foreach ($fileData->getConcludedLicenses() as $license) {
         $this->concludedLicenseFileIds[] = $fileId;
         if (! $this->licensesInDocument[$license]->isTextPrinted()) {
-          if ($this->licensesInDocument[$license]->getLicenseObj()->getSpdxId() === "LicenseRef-fossology-License-Expression") {
-            $ast = json_decode($this->licensesInDocument[$license]->getLicenseObj()->getFullName(), true);
-            $concludedLicensesString[] = $this->buildExpression($ast, $this->groupId);
+          $licenseObj = $this->licensesInDocument[$license]->getLicenseObj();
+          if ($this->isLicenseExpression($licenseObj)) {
+            $concludedLicensesString[] = $this->buildExpressionFromLicense($licenseObj);
             continue;
           }
           $textToBePrinted[] = $license;
@@ -901,6 +902,9 @@ class SpdxAgent extends Agent
           'fileData' => $fileData,
           'licenseList' => $this->licensesInDocument,
           'concludedLicensesString' => $concludedLicensesString,
+          'scannerLicenseExpressions' => $this->getScannerLicenseExpressions($fileData->getScanners()),
+          'scannerLicenseExpressionIds' => $this->getScannerLicenseExpressionIds($fileData->getScanners()),
+          'scannerLicenseInfoInFileString' => $this->getLicenseInfoInFileString($fileData->getScanners(), $stateOsselot),
           'licenseCommentState' => $stateComment,
           'EnableOsselotExport' =>$stateOsselot,
         );
@@ -1086,7 +1090,126 @@ class SpdxAgent extends Agent
     }
   }
 
-    /**
+  /**
+   * @brief Check whether the given license object stores a license expression.
+   * @param License $licenseObj License object
+   * @return bool True if license object is a license expression
+   */
+  protected function isLicenseExpression($licenseObj)
+  {
+    return $licenseObj !== null &&
+      $licenseObj->getSpdxId() === "LicenseRef-fossology-License-Expression";
+  }
+
+  /**
+   * @brief Render a license expression object for the current SPDX output format.
+   * @param License $licenseObj License expression object
+   * @param bool $forMain If the expression is used as package main license
+   * @return string Rendered expression
+   */
+  protected function buildExpressionFromLicense($licenseObj, $forMain=false)
+  {
+    $ast = json_decode($licenseObj->getFullName(), true);
+    return $this->buildExpression($ast, $this->groupId, $forMain);
+  }
+
+  /**
+   * @brief Render a license expression object as SPDX expression text.
+   * @param License $licenseObj License expression object
+   * @return string Rendered expression text
+   */
+  protected function buildExpressionTextFromLicense($licenseObj)
+  {
+    return $licenseObj->getExpression($this->licenseDao, $this->groupId);
+  }
+
+  /**
+   * @brief Return scanner expression renderings keyed by report license id.
+   * @param string[] $licenseIds Scanner report license ids
+   * @return string[] Rendered expression map
+   */
+  protected function getScannerLicenseExpressions($licenseIds)
+  {
+    $expressions = [];
+    foreach ($licenseIds as $licenseId) {
+      $licenseObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
+      if ($this->isLicenseExpression($licenseObj)) {
+        $expressions[$licenseId] = $this->outputFormat == self::DEFAULT_OUTPUT_FORMAT
+          ? $this->buildExpressionFromLicense($licenseObj)
+          : $this->buildExpressionTextFromLicense($licenseObj);
+      }
+    }
+    return $expressions;
+  }
+
+  /**
+   * @brief Return stable scanner expression ids for SPDX3 annotation nodes.
+   * @param string[] $licenseIds Scanner report license ids
+   * @return string[] Rendered expression id map
+   */
+  protected function getScannerLicenseExpressionIds($licenseIds)
+  {
+    $expressionIds = [];
+    foreach ($licenseIds as $licenseId) {
+      $licenseObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
+      if ($this->isLicenseExpression($licenseObj)) {
+        $expressionIds[$licenseId] = 'LicenseExpression-' .
+          md5($this->buildExpressionTextFromLicense($licenseObj));
+      }
+    }
+    return $expressionIds;
+  }
+
+  /**
+   * @brief Build a text representation of scanner LicenseInfoInFile entries.
+   * @param string[] $licenseIds Scanner report license ids
+   * @param bool $stateOsselot If Osselot-compatible LicenseRef ids are needed
+   * @return string LicenseInfoInFile expression string
+   */
+  protected function getLicenseInfoInFileString($licenseIds, $stateOsselot=false)
+  {
+    $licenses = [];
+    foreach ($licenseIds as $licenseId) {
+      $licenseObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
+      if ($this->isLicenseExpression($licenseObj)) {
+        $licenses[] = $this->buildExpressionTextFromLicense($licenseObj);
+        continue;
+      }
+      $licId = $this->getLicenseIdentifier($licenseObj, $stateOsselot);
+      if (!empty($licId)) {
+        $licenses[] = SpdxUtils::addPrefixOnDemand($licId);
+      }
+    }
+    $licenses = array_unique(SpdxUtils::removeEmptyLicenses($licenses));
+    return implode(" AND ", $licenses);
+  }
+
+  /**
+   * @brief Return the SPDX report identifier for a normal license object.
+   * @param License $licenseObj License object
+   * @param bool $stateOsselot If Osselot-compatible LicenseRef ids are needed
+   * @return string SPDX license identifier
+   */
+  protected function getLicenseIdentifier($licenseObj, $stateOsselot=false)
+  {
+    $licId = $licenseObj->getSpdxId();
+    if (StringOperation::stringStartsWith($licenseObj->getShortName(),
+      LicenseRef::SPDXREF_PREFIX)) {
+      $licId = $licenseObj->getShortName();
+    }
+    if ($stateOsselot &&
+        StringOperation::stringStartsWith($licId, LicenseRef::SPDXREF_PREFIX_FOSSOLOGY)) {
+      $licId = str_replace(LicenseRef::SPDXREF_PREFIX_FOSSOLOGY,
+        LicenseRef::SPDXREF_PREFIX, $licId);
+    }
+    if ($stateOsselot &&
+        !StringOperation::stringStartsWith($licId, LicenseRef::SPDXREF_PREFIX)) {
+      $licId = LicenseRef::SPDXREF_PREFIX . $licId;
+    }
+    return str_replace(' ', '-', $licId);
+  }
+
+  /**
    * Converts License Expression AST into Expression string based on report format
    * @param $node
    * @param int $groupId
@@ -1095,8 +1218,17 @@ class SpdxAgent extends Agent
    */
   protected function buildExpression($node, $groupId, $forMain=false)
   {
+    if (!is_array($node) || !array_key_exists('type', $node)) {
+      return 'License Expression';
+    }
     if ($node['type'] === 'License') {
+      if (!is_numeric($node['value'])) {
+        return $node['value'];
+      }
       $licenseNode = $this->licenseDao->getLicenseById($node['value'], $groupId);
+      if ($licenseNode === null) {
+        return 'LicenseRef-' . $node['value'];
+      }
       if ($this->outputFormat == self::DEFAULT_OUTPUT_FORMAT) {
         if (StringOperation::stringStartsWith($licenseNode->getShortName(), LicenseRef::SPDXREF_PREFIX) || StringOperation::stringStartsWith($licenseNode->getSpdxId(), LicenseRef::SPDXREF_PREFIX)) {
           if (StringOperation::stringStartsWith($licenseNode->getShortName(), LicenseRef::SPDXREF_PREFIX)) {
@@ -1118,8 +1250,10 @@ class SpdxAgent extends Agent
       }
       return $licenseNode->getSpdxId();
     }
-    $left = $this->buildExpression($node['left'], $groupId, $forMain);
-    $right = $this->buildExpression($node['right'], $groupId, $forMain);
+    $leftNode = $node['left'] ?? $node['license'] ?? null;
+    $rightNode = $node['right'] ?? $node['exception'] ?? null;
+    $left = $this->buildExpression($leftNode, $groupId, $forMain);
+    $right = $this->buildExpression($rightNode, $groupId, $forMain);
     $operator = $node['value'];
     if ($this->outputFormat == self::DEFAULT_OUTPUT_FORMAT) {
       if ((stripos($left, '<spdx:member') === false || stripos($left, '<spdx:member') != 0) && (stripos($left, "<spdx:licenseException") === false || stripos($left, "<spdx:licenseException") != 0)) {

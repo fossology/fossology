@@ -88,7 +88,7 @@ name: {{ userName | split(' ')[0] }}
 ## License Information
 ##-------------------------
 {% for licenseData in licenseList %}
-{%- if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
+{%- if (licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-') and licenseData.licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' %}
 {%- set licId = licenseData.licenseObj.spdxId %}
 {%- if licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
 {%- set licId = licenseData.licenseObj.shortName %}

@@ -64,6 +64,14 @@ subject: SPDXRef-item{{ fileId }}
 statement: SPDX 2.X LicenseInfoInFiles
 {% else %}
 {% for res in fileData.scanners %}
+{% if scannerLicenseExpressions[res]|default is not empty %}
+type: Annotation
+spdxId: SPDXRef-item{{ fileId }}#{{ scannerLicenseExpressionIds[res] }}
+creationInfo: creationInfo1
+annotationType: other
+subject: SPDXRef-item{{ fileId }}
+statement: SPDX 2.X LicenseInfoInFiles: <text> {{ scannerLicenseExpressions[res]|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})|replace({'\f':'','"':"'", '\n':''}) }} </text>
+{% else %}
 {%- set licId=licenseList[res].licenseObj.spdxId %}
 {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
   {% set licId=licenseList[res].licenseObj.shortName %}
@@ -74,6 +82,7 @@ creationInfo: creationInfo1
 annotationType: other
 subject: SPDXRef-item{{ fileId }}
 statement: SPDX 2.X LicenseInfoInFiles
+{% endif %}
 {% endfor %}
 {% endif %}
 
@@ -89,5 +98,4 @@ software_copyrightText: <text> {{ fileData.copyrights|join('\n')|replace({'<text
 
 software_attributionText: <text> {{ fileData.acknowledgements|join('\n')|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})|replace({'\f':'','"':"'", '\n':''}) }} </text>
 {%- endif %}
-
 

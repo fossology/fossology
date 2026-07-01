@@ -122,6 +122,11 @@
     <spdx:licenseInfoInFile rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {%~ else %}
   {%~ for res in fileData.scanners %}
+    {%~ if scannerLicenseExpressions[res]|default is not empty %}
+    <spdx:licenseInfoInFile>
+      {{ scannerLicenseExpressions[res]|raw }}
+    </spdx:licenseInfoInFile>
+    {%~ else %}
     {%~ if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
       {%~ if licenseList[res].licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' %}
         {%- set licId=licenseList[res].licenseObj.spdxId %}
@@ -147,6 +152,7 @@
       <spdx:ListedLicense rdf:about="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}" />
     </spdx:licenseInfoInFile>
       {%~ endif %}
+    {%- endif %}
     {%- endif %}
   {%- endfor %}{# End printing license infos in file #}
 {%- endif %}
