@@ -840,6 +840,12 @@ void database_exec_event(scheduler_t* scheduler, char* sql)
 /**
  * @brief Checks the job queue for any new entries.
  *
+ * The number of rows fetched from the database is bounded by the sum of
+ * max-agent slots across all configured hosts so that every available slot
+ * can be filled in a single poll cycle.  When the scheduler has not yet
+ * loaded any host configuration (startup path) the query falls back to
+ * CHECKOUT_SIZE as a safe upper bound.
+ *
  * @param scheduler The scheduler_t* that holds the connection
  * @param unused
  */
@@ -850,6 +856,9 @@ void database_update_event(scheduler_t* scheduler, void* unused)
   int i, j_id;
   char* value, * type, * host, * pfile, * jq_cmd_args;
   job_t* job;
+  gchar* checkout_sql;
+  int   checkout_limit;
+  GList* iter;
 
   if(closing)
   {
@@ -857,12 +866,47 @@ void database_update_event(scheduler_t* scheduler, void* unused)
     return;
   }
 
+  /* Compute the checkout limit from configured host capacity.
+   *  a) No hosts loaded yet (startup): fall back to CHECKOUT_SIZE.
+   *  b) Hosts configured: sum max values for hosts with max > 0 only
+   *     (max <= 0 provides no real slots per get_host() and must not reduce
+   *     the total). LIMIT 0 is valid SQL and correct when all hosts have
+   *     max=0; do NOT inflate to CHECKOUT_SIZE or jobs that can never run
+   *     would be over-fetched. On integer overflow (requires INT_MAX
+   *     slots – practically impossible) fall back to CHECKOUT_SIZE. */
+  if(scheduler->host_queue == NULL)
+  {
+    checkout_limit = CHECKOUT_SIZE;
+  }
+  else
+  {
+    gint64 limit64 = 0;
+    for(iter = scheduler->host_queue; iter != NULL; iter = iter->next)
+    {
+      int host_max = ((host_t*)iter->data)->max;
+      /* Only count hosts that can actually accept agents */
+      if(host_max > 0)
+        limit64 += host_max;
+    }
+    /* Accumulating positive ints into gint64 cannot overflow in practice,
+     * but guard the cast back to int to avoid UB (requires >2^31 total slots). */
+    checkout_limit = (limit64 <= INT_MAX) ? (int)limit64 : CHECKOUT_SIZE;
+  }
+
   /* one query for the queue rows joined with priority and user info, instead of
    * a basic_checkout plus a per-row jobsql_information lookup */
-  db_result = database_exec(scheduler, basic_checkout);
+  checkout_sql = g_strdup_printf(basic_checkout, checkout_limit);
+  db_result = database_exec(scheduler, checkout_sql);
+  g_free(checkout_sql);
+  if(db_result == NULL)
+  {
+    ERROR("database update: database_exec returned NULL (connection failure)");
+    return;
+  }
   if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {
     PQ_ERROR(db_result, "database update failed on call to PQexec");
+    SafePQclear(db_result);
     return;
   }
 
