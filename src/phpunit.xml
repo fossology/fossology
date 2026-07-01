@@ -39,6 +39,7 @@
       <directory suffix="Test.php">reuser/agent_tests/Functional</directory>
       <directory suffix="Test.php">spdx/agent_tests</directory>
       <directory suffix="Test.php">clixml/agent_tests</directory>
+      <directory suffix="Test.php">reportImport/agent_tests</directory>
     </testsuite>
   </testsuites>
 </phpunit>

@@ -24,3 +24,8 @@ install(FILES reportImport.conf "${CMAKE_CURRENT_BINARY_DIR}/VERSION"
     COMPONENT reportImport)
 
 add_symlink()
+
+if(TESTING)
+    enable_testing()
+    add_subdirectory(agent_tests)
+endif()
