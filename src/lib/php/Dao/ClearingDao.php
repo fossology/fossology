@@ -1179,4 +1179,74 @@ INSERT INTO clearing_decision (
 
     return count($countUpdated);
   }
+
+  /**
+   * @brief From a list of candidates, return the one most recently cleared.
+   * @param array[] $candidates Each entry must have 'upload_pk' and 'group_fk' keys.
+   * @return array|null ['uploadId'=>int, 'groupId'=>int] or first candidate if
+   *                    none have clearing timestamps.
+   */
+  public function getMostRecentlyClearedUpload($candidates)
+  {
+    if (empty($candidates)) {
+      return null;
+    }
+    if (count($candidates) === 1) {
+      return [
+        'uploadId' => $candidates[0]['upload_pk'],
+        'groupId' => $candidates[0]['group_fk']
+      ];
+    }
+
+    $uploadIds = [];
+    $params = [];
+    foreach ($candidates as $c) {
+      $uploadIds[] = $c['upload_pk'];
+      $params[] = $c['upload_pk'];
+    }
+    $placeholders = [];
+    for ($i = 0; $i < count($uploadIds); $i++) {
+      $placeholders[] = '$' . ($i + 1);
+    }
+    $inClause = implode(',', $placeholders);
+
+    $stmtName = __METHOD__;
+    $this->dbManager->prepare($stmtName,
+      "SELECT ut.upload_fk, MAX(cd.date_added) AS last_cleared
+       FROM clearing_decision cd
+       JOIN uploadtree ut ON ut.uploadtree_pk = cd.uploadtree_fk
+       WHERE ut.upload_fk IN ($inClause)
+       GROUP BY ut.upload_fk
+       ORDER BY MAX(cd.date_added) DESC");
+    $res = $this->dbManager->execute($stmtName, $params);
+
+    $timestamps = [];
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $timestamps[intval($row['upload_fk'])] = $row['last_cleared'];
+    }
+    $this->dbManager->freeResult($res);
+
+    $bestCandidate = null;
+    $bestTimestamp = null;
+    foreach ($candidates as $candidate) {
+      $uploadPk = $candidate['upload_pk'];
+      $ts = $timestamps[$uploadPk] ?? null;
+      if ($ts !== null && ($bestTimestamp === null || $ts > $bestTimestamp)) {
+        $bestTimestamp = $ts;
+        $bestCandidate = $candidate;
+      }
+    }
+
+    if ($bestCandidate !== null) {
+      return [
+        'uploadId' => $bestCandidate['upload_pk'],
+        'groupId' => $bestCandidate['group_fk']
+      ];
+    }
+
+    return [
+      'uploadId' => $candidates[0]['upload_pk'],
+      'groupId' => $candidates[0]['group_fk']
+    ];
+  }
 }

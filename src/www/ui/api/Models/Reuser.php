@@ -48,6 +48,12 @@ class Reuser
   private $reuseCopyright;
 
   /**
+   * @var boolean $autoSelectReuse
+   * Auto select for reuse
+   */
+  private $autoSelectReuse;
+
+  /**
    * Reuser constructor.
    *
    * @param integer|integer[] $reuseUpload
@@ -84,6 +90,7 @@ class Reuser
     $this->reuseEnhanced = $reuseEnhanced;
     $this->reuseReport = false;
     $this->reuseCopyright = false;
+    $this->autoSelectReuse = false;
   }
 
   /**
@@ -114,7 +121,10 @@ class Reuser
     if (array_key_exists(($version == ApiVersion::V2? "reuseCopyright" : "reuse_copyright"), $reuserArray)) {
       $this->setReuseCopyright($reuserArray[$version == ApiVersion::V2? "reuseCopyright" : "reuse_copyright"]);
     }
-    if ($this->reuseUpload === null || (is_array($this->reuseUpload) && empty($this->reuseUpload))) {
+    if (array_key_exists(($version == ApiVersion::V2? "autoSelectReuse" : "auto_select_reuse"), $reuserArray)) {
+      $this->setAutoSelectReuse($reuserArray[$version == ApiVersion::V2? "autoSelectReuse" : "auto_select_reuse"]);
+    }
+    if ($this->reuseUpload === null) {
       throw new \UnexpectedValueException(
         "reuse_upload should be integer or array of integers", 400);
     }
@@ -184,6 +194,14 @@ class Reuser
   public function getReuseCopyright()
   {
     return $this->reuseCopyright;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getAutoSelectReuse()
+  {
+    return $this->autoSelectReuse;
   }
 
   ////// Setters //////
@@ -260,6 +278,15 @@ class Reuser
   }
 
   /**
+   * @param boolean $autoSelectReuse
+   */
+  public function setAutoSelectReuse($autoSelectReuse)
+  {
+    $this->autoSelectReuse = filter_var($autoSelectReuse,
+      FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
    * Get reuser info as an associative array
    * @return array
    */
@@ -267,21 +294,23 @@ class Reuser
   {
     if ($version == ApiVersion::V2) {
       return [
-        "reuseUpload"    => $this->reuseUpload,
-        "reuseGroup"     => $this->reuseGroup,
-        "reuseMain"      => $this->reuseMain,
-        "reuseEnhanced"  => $this->reuseEnhanced,
-        "reuseReport"    => $this->reuseReport,
-        "reuseCopyright" => $this->reuseCopyright
+        "reuseUpload"     => $this->reuseUpload,
+        "reuseGroup"      => $this->reuseGroup,
+        "reuseMain"       => $this->reuseMain,
+        "reuseEnhanced"   => $this->reuseEnhanced,
+        "reuseReport"     => $this->reuseReport,
+        "reuseCopyright"  => $this->reuseCopyright,
+        "autoSelectReuse" => $this->autoSelectReuse
       ];
     } else {
       return [
-        "reuse_upload"    => $this->reuseUpload,
-        "reuse_group"     => $this->reuseGroup,
-        "reuse_main"      => $this->reuseMain,
-        "reuse_enhanced"  => $this->reuseEnhanced,
-        "reuse_report"    => $this->reuseReport,
-        "reuse_copyright" => $this->reuseCopyright
+        "reuse_upload"     => $this->reuseUpload,
+        "reuse_group"      => $this->reuseGroup,
+        "reuse_main"       => $this->reuseMain,
+        "reuse_enhanced"   => $this->reuseEnhanced,
+        "reuse_report"     => $this->reuseReport,
+        "reuse_copyright"  => $this->reuseCopyright,
+        "auto_select_reuse" => $this->autoSelectReuse
       ];
     }
   }
