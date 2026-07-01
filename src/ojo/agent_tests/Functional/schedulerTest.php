@@ -9,6 +9,9 @@
  * @file
  * @brief Functional test cases for ojo agent using scheduler
  */
+
+namespace Fossology\Ojo\Test;
+
 require_once "SchedulerTestRunnerCli.php";
 require_once "SchedulerTestRunnerScheduler.php";
 
@@ -23,10 +26,10 @@ use Fossology\Ojo\Test\SchedulerTestRunnerCli;
 use Fossology\Ojo\Test\SchedulerTestRunnerScheduler;
 
 /**
- * @class OjoScheduledTest
+ * @class SchedulerTest
  * @brief Functional test cases for ojo agent using scheduler
  */
-class OjoScheduledTest extends \PHPUnit\Framework\TestCase
+class SchedulerTest extends \PHPUnit\Framework\TestCase
 {
 
   /**
@@ -217,7 +220,7 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
    * @return number -1 if right is small, 1 is left is small or 0 if both are
    *         equal
    */
-  private function compareMatches($left, $right)
+  public static function compareMatches($left, $right)
   {
     $leftFile = basename($left["file"]);
     $rightFile = basename($right["file"]);
@@ -250,7 +253,7 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
    * @param array $right Right match
    * @return number strcmp of left filename and right filename
    */
-  private function compareMatchesFiles($left, $right)
+  public static function compareMatchesFiles($left, $right)
   {
     return strcmp($left["file"], $right["file"]);
   }
@@ -366,12 +369,12 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
     $jsonFromOutput = json_decode($output, true);
 
     // Sort the data to reduce differences
-    usort($jsonFromFile, array('OjoScheduledTest', 'compareMatchesFiles'));
-    usort($jsonFromOutput, array('OjoScheduledTest', 'compareMatchesFiles'));
+    usort($jsonFromFile, array(self::class, 'compareMatchesFiles'));
+    usort($jsonFromOutput, array(self::class, 'compareMatchesFiles'));
 
     // Find the difference
     $jsonDiff = array_udiff($jsonFromFile, $jsonFromOutput,
-      array('OjoScheduledTest', 'compareMatches'));
+      array(self::class, 'compareMatches'));
 
     $outputDiff = "JSON does not match regression test file.\n";
     $outputDiff .= "Following are the results not in regression test file.\n";
