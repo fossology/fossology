@@ -88,6 +88,7 @@ class CycloneDXGeneratorUi extends DefaultPlugin
 
     $vars = array('jqPk' => $jobQueueId,
                   'downloadLink' => Traceback_uri(). "?mod=download&report=".$jobId,
+                  'showJobsLink' => Traceback_uri(). "?mod=showjobs&upload=".$upload->getId(),
                   'reportType' => $this->outputFormat);
     $text = sprintf(_("Generating ". $this->outputFormat . " report for '%s'"), $upload->getFilename());
     $vars['content'] = "<h2>".$text."</h2>";
