@@ -41,12 +41,78 @@
 
 .jobTable {
   width: 100%;
+  height: auto;
+  font: normal 8pt verdana, arial, helvetica;
 }
 
-.jobTable thead th {
+.jobTable thead tr.jobTablePackageLink {
+  background: #ffd700;
+}
+
+.jobTable thead tr.jobTablePackageLink th {
   font: bold 10pt verdana, arial, helvetica;
-  background: gold;
-  color: white;
+  background: #ffd700;
+  color: #000;
+  text-align: center;
+  height: auto;
+  line-height: 1.25;
+  padding: 4px 6px;
+  border-top: 0;
+  border-bottom: 0;
+  background-image: none;
+}
+
+.jobTable thead tr.jobTablePackageName {
+  background: #f2f2f2;
+}
+
+.jobTable thead tr.jobTablePackageName th {
+  font: bold 8pt verdana, arial, helvetica;
+  background: #f2f2f2;
+  color: #000;
+  text-align: center;
+  height: auto;
+  line-height: 1.2;
+  padding: 3px 6px;
+  border-top: 0;
+  border-bottom: 0;
+  background-image: none;
+}
+
+.jobTable thead tr.jobTableColHeaders {
+  background: #f2f2f2;
+}
+
+.jobTable thead tr.jobTableColHeaders th {
+  font: bold 8pt verdana, arial, helvetica;
+  background: #f2f2f2;
+  color: #000;
+  text-align: center;
+  height: auto;
+  line-height: 1.2;
+  padding: 3px 6px;
+  border-top: 0;
+  border-bottom: 0;
+  background-image: none;
+}
+
+.jobTable thead tr.jobTableColHeaders th:last-child {
+  border-top: 0;
+}
+
+.jobTableColHeaders th[tabindex="0"] {
+  cursor: pointer;
+}
+
+.jobTableColHeaders th:focus {
+  outline: 3px solid #005a9c;
+  outline-offset: 2px;
+}
+
+.sort-indicator {
+  margin-left: 6px;
+  font-size: 10px;
+  color: #333;
 }
 
 .jobTableNewJob td {
