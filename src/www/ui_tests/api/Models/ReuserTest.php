@@ -62,8 +62,61 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
   public function testReuserException()
   {
     $this->expectException(\UnexpectedValueException::class);
-    $this->expectExceptionMessage("reuse_upload should be integer");
+    $this->expectExceptionMessage("reuse_upload should be integer or array of integers");
     $object = new Reuser('alpha', 2);
+  }
+
+  /**
+   * @test
+   * -# Test constructor with array of upload IDs
+   */
+  public function testReuserMultipleUploads()
+  {
+    $expectedArray = [
+      "reuse_upload"   => [2, 5, 10],
+      "reuse_group"    => 'fossy',
+      "reuse_main"     => true,
+      "reuse_enhanced" => false,
+      "reuse_copyright" => false,
+      "reuse_report"   => false
+    ];
+
+    $actualReuser = new Reuser([2, 5, 10], 'fossy', true);
+
+    $this->assertEquals($expectedArray, $actualReuser->getArray());
+    $this->assertEquals([2, 5, 10], $actualReuser->getReuseUploads());
+  }
+
+  /**
+   * @test
+   * -# Test getReuseUploads returns array for single upload
+   */
+  public function testReuseUploadsSingle()
+  {
+    $reuser = new Reuser(3, 'fossy');
+    $this->assertEquals([3], $reuser->getReuseUploads());
+  }
+
+  /**
+   * @test
+   * -# Test constructor with empty array throws exception
+   */
+  public function testReuserExceptionEmptyArray()
+  {
+    $this->expectException(\UnexpectedValueException::class);
+    $this->expectExceptionMessage("reuse_upload should be integer or array of integers");
+    $object = new Reuser([], 'fossy');
+  }
+
+  /**
+   * @test
+   * -# Test constructor with array containing non-numeric throws exception
+   */
+  public function testReuserExceptionInvalidArray()
+  {
+    $this->expectException(\UnexpectedValueException::class);
+    $this->expectExceptionMessage("reuse_upload should be integer or array of integers");
+    $object = new Reuser([1, 'bad', 3], 'fossy');
   }
 
   /**
@@ -159,9 +212,53 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
     ];
 
     $this->expectException(\UnexpectedValueException::class);
-    $this->expectExceptionMessage("Reuse upload should be an integer");
+    $this->expectExceptionMessage("Reuse upload should be an integer or array of integers!");
 
     $actualReuser = new Reuser(1, 'fossy');
     $actualReuser->setUsingArray($expectedArray);
+  }
+
+  /**
+   * @test
+   * -# Test setUsingArray with array of upload IDs (V1)
+   */
+  public function testSetUsingArrayMultipleUploadsV1()
+  {
+    $inputArray = [
+      "reuse_upload"   => [2, 5, 10],
+      "reuse_group"    => 'fossy',
+      "reuse_main"     => 'true',
+      "reuse_enhanced" => false,
+      "reuse_copyright" => false,
+      "reuse_report"   => false
+    ];
+
+    $reuser = new Reuser(1, 'fossy');
+    $reuser->setUsingArray($inputArray, ApiVersion::V1);
+
+    $this->assertEquals([2, 5, 10], $reuser->getReuseUpload());
+    $this->assertEquals([2, 5, 10], $reuser->getReuseUploads());
+  }
+
+  /**
+   * @test
+   * -# Test setUsingArray with array of upload IDs (V2)
+   */
+  public function testSetUsingArrayMultipleUploadsV2()
+  {
+    $inputArray = [
+      "reuseUpload"   => [2, 5, 10],
+      "reuseGroup"    => 'fossy',
+      "reuseMain"     => 'true',
+      "reuseEnhanced" => false,
+      "reuseCopyright" => false,
+      "reuseReport"   => false
+    ];
+
+    $reuser = new Reuser(1, 'fossy');
+    $reuser->setUsingArray($inputArray, ApiVersion::V2);
+
+    $this->assertEquals([2, 5, 10], $reuser->getReuseUpload());
+    $this->assertEquals([2, 5, 10], $reuser->getReuseUploads());
   }
 }

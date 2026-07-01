@@ -122,17 +122,26 @@ function bootstrap($sysconfdir="")
    * For example, if PREFIX=/usr/local and BINDIR=$PREFIX/bin, we
    * want BINDIR=/usr/local/bin
    */
+  $resolvedDirectories = array();
   foreach($SysConf['DIRECTORIES'] as $var=>$assign)
   {
-    /* Evaluate the individual variables because they may be referenced
-     * in subsequent assignments.
+    /* Resolve only previously expanded directory variables.
+     * This keeps config substitution behavior without executing PHP code.
      */
-    $toeval = "\$$var = \"$assign\";";
-    eval($toeval);
+    $value = $assign;
+    $previousValue = null;
+    $iterations = 0;
+    while ($value !== $previousValue && $iterations < 10)
+    {
+      $previousValue = $value;
+      $value = strtr($value, $resolvedDirectories);
+      $iterations++;
+    }
 
-    /* now reassign the array value with the evaluated result */
-    $SysConf['DIRECTORIES'][$var] = ${$var};
-    $GLOBALS[$var] = ${$var};
+    /* now reassign the array value with the resolved result */
+    $SysConf['DIRECTORIES'][$var] = $value;
+    $resolvedDirectories['$' . $var] = $value;
+    $GLOBALS[$var] = $value;
   }
 
   if (empty($MODDIR))

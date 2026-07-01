@@ -817,7 +817,15 @@ JSOUT;
     if ($Cached) {
       $text = _("cached");
       $text1 = _("Update");
-      echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+      $separator = strpos($_SERVER['REQUEST_URI'], '?') === false ? '?' : '&';
+      $updateHref = htmlspecialchars(
+        $_SERVER['REQUEST_URI'] . $separator . 'updcache=1',
+        ENT_QUOTES | ENT_SUBSTITUTE,
+        'UTF-8'
+      );
+      echo ' <i>' . htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') .
+        '</i>   <a href="' . $updateHref . '"> ' .
+        htmlspecialchars($text1, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . ' </a>';
     } else {
       // Cache Report if this took longer than 1/2 second
       if ($Time > 0.5) {

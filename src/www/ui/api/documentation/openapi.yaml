@@ -5908,8 +5908,12 @@ components:
       type: object
       properties:
         reuse_upload:
-          type: integer
-          description: The UploadID to reuse.
+          oneOf:
+            - type: integer
+            - type: array
+              items:
+                type: integer
+          description: The UploadID(s) to reuse. Single integer or array of integers.
         reuse_group:
           type: string
           description: The group of the reused upload

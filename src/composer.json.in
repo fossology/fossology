@@ -23,7 +23,7 @@
         "firebase/php-jwt": "v6.3.0",
         "monolog/monolog" : "2.8.0",
         "phpoffice/phpword" : "0.18.3",
-        "slim/slim": "4.8.1",
+        "slim/slim": "4.15.2",
         "slim/psr7": "1.4.1",
         "symfony/cache": "v5.4.52",
         "symfony/config" : "v5.4.11",
@@ -34,9 +34,9 @@
         "symfony/yaml" : "v5.4.52",
         "symfony/mime" : "v5.4.52",
         "twig/twig" : "v3.11.2",
-        "guzzlehttp/guzzle": "v7.5.0",
-        "phpoffice/phpspreadsheet": "1.30.4",
-        "twbs/bootstrap": "v4.1.0",
+        "guzzlehttp/guzzle": "v7.12.1",
+        "phpoffice/phpspreadsheet": "1.30.5",
+        "twbs/bootstrap": "v4.5.0",
         "league/oauth2-client": "2.6.1"
     },
     "require-dev" : {
