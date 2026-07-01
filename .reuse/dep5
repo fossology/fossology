@@ -20,6 +20,10 @@ Files: src/lib/php/Test/repo/*
 Copyright: Fossology contributors
 License: GPL-2.0-only
 
+Files: src/lib/spdx-expression/contract/test-corpus.json
+Copyright: FOSSology contributors
+License: GPL-2.0-only
+
 Files: src/pkgagent/agent_tests/testdata/*
 Copyright: Fossology contributors
 License: GPL-2.0-only

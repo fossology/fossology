@@ -1337,6 +1337,15 @@
   $Schema["TABLE"]["license_ref"]["rf_external_id"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_external_id\" uuid";
   $Schema["TABLE"]["license_ref"]["rf_external_id"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_external_id\" DROP NOT NULL";
 
+  $Schema["TABLE"]["license_expression"]["rf_pk"]["DESC"] = "COMMENT ON COLUMN \"license_expression\".\"rf_pk\" IS 'Primary Key'";
+  $Schema["TABLE"]["license_expression"]["rf_pk"]["ADD"] = "ALTER TABLE \"license_expression\" ADD COLUMN \"rf_pk\" int8 DEFAULT nextval('license_ref_rf_pk_seq'::regclass)";
+  $Schema["TABLE"]["license_expression"]["rf_pk"]["ALTER"] = "ALTER TABLE \"license_expression\" ALTER COLUMN \"rf_pk\" SET NOT NULL, ALTER COLUMN \"rf_pk\" SET DEFAULT nextval('license_ref_rf_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["license_expression"]["rf_expression"]["DESC"] = "COMMENT ON COLUMN \"license_expression\".\"rf_expression\" IS 'License Expression AST in JSON format'";
+  $Schema["TABLE"]["license_expression"]["rf_expression"]["ADD"] = "ALTER TABLE \"license_expression\" ADD COLUMN \"rf_expression\" jsonb";
+  $Schema["TABLE"]["license_expression"]["rf_expression"]["ALTER"] = "ALTER TABLE \"license_expression\" ALTER COLUMN \"rf_expression\" SET NOT NULL";
+
+
   $Schema["TABLE"]["license_candidate"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"group_fk\" IS 'group seeing this candidate'";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"group_fk\" int8";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
@@ -2512,7 +2521,7 @@
   $Schema["SEQUENCE"]["job_job_pk_seq"]["UPDATE"] = "SELECT setval('job_job_pk_seq',(SELECT greatest(1,max(job_pk)) val FROM job))";
 
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_ref_rf_pk_seq\"";
-  $Schema["SEQUENCE"]["license_ref_rf_pk_seq"]["UPDATE"] = "SELECT setval('license_ref_rf_pk_seq',(SELECT greatest(1,max(rf_pk)) val FROM license_ref))";
+  $Schema["SEQUENCE"]["license_ref_rf_pk_seq"]["UPDATE"] = "SELECT setval('license_ref_rf_pk_seq',(SELECT greatest(1,(SELECT COALESCE(max(rf_pk),0) FROM license_ref),(SELECT COALESCE(max(rf_pk),0) FROM license_expression))))";
 
   $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_decision_pk_seq\"";
   $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["UPDATE"] = "SELECT setval('copyright_decision_pk_seq',(SELECT greatest(1,max(copyright_decision_pk)) val FROM copyright_decision))";
@@ -2700,6 +2709,8 @@
   $Schema["CONSTRAINT"]["license_map_pkpk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_pkpk\" PRIMARY KEY (\"license_map_pk\");";
   $Schema["CONSTRAINT"]["license_map_rf_fkfk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_rf_fkfk\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["license_rules_pkey"] = "ALTER TABLE \"license_rules\" ADD CONSTRAINT \"license_rules_pkey\" PRIMARY KEY (\"lr_pk\");";
+  $Schema["CONSTRAINT"]["license_expression_pkey"] = "ALTER TABLE \"license_expression\" ADD CONSTRAINT \"license_expression_pkey\" PRIMARY KEY (\"rf_pk\");";
+  $Schema["CONSTRAINT"]["license_expression_unique_expression"] = "ALTER TABLE \"license_expression\" ADD CONSTRAINT \"license_expression_unique_expression\" UNIQUE (\"rf_expression\");";
   $Schema["CONSTRAINT"]["license_std_comment_user_fk_fkey"] = "ALTER TABLE \"license_std_comment\" ADD CONSTRAINT \"license_std_comment_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE SET NULL ON DELETE SET NULL;";
   $Schema["CONSTRAINT"]["license_std_acknowledgement_user_fk_fkey"] = "ALTER TABLE \"license_std_acknowledgement\" ADD CONSTRAINT \"license_std_acknowledgement_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE SET NULL ON DELETE SET NULL;";
   $Schema["CONSTRAINT"]["rf_pkpk"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_pkpk\" PRIMARY KEY (\"rf_pk\");";

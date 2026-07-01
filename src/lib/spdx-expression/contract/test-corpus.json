@@ -1,0 +1,97 @@
+{
+  "valid": [
+    {
+      "name": "single license",
+      "input": "MIT",
+      "canonical": "MIT",
+      "ast": "{\"type\":\"license\",\"id\":\"MIT\"}"
+    },
+    {
+      "name": "or expression",
+      "input": "MIT OR Apache-2.0",
+      "canonical": "MIT OR Apache-2.0",
+      "ast": "{\"type\":\"OR\",\"left\":{\"type\":\"license\",\"id\":\"MIT\"},\"right\":{\"type\":\"license\",\"id\":\"Apache-2.0\"}}"
+    },
+    {
+      "name": "case-insensitive known license ids",
+      "input": "mit OR apache-2.0",
+      "canonical": "MIT OR Apache-2.0",
+      "ast": "{\"type\":\"OR\",\"left\":{\"type\":\"license\",\"id\":\"MIT\"},\"right\":{\"type\":\"license\",\"id\":\"Apache-2.0\"}}"
+    },
+    {
+      "name": "with exception",
+      "input": "GPL-2.0-only WITH Classpath-exception-2.0",
+      "canonical": "GPL-2.0-only WITH Classpath-exception-2.0",
+      "ast": "{\"type\":\"WITH\",\"license\":{\"type\":\"license\",\"id\":\"GPL-2.0-only\"},\"exception\":{\"type\":\"exception\",\"id\":\"Classpath-exception-2.0\"}}"
+    },
+    {
+      "name": "and expression with exception",
+      "input": "GPL-2.0 AND LGPL-2.1+ WITH Classpath-exception-2.0",
+      "canonical": "GPL-2.0 AND LGPL-2.1+ WITH Classpath-exception-2.0",
+      "ast": "{\"type\":\"AND\",\"left\":{\"type\":\"license\",\"id\":\"GPL-2.0\"},\"right\":{\"type\":\"WITH\",\"license\":{\"type\":\"license\",\"id\":\"LGPL-2.1+\"},\"exception\":{\"type\":\"exception\",\"id\":\"Classpath-exception-2.0\"}}}"
+    },
+    {
+      "name": "parenthesized expression",
+      "input": "(MIT OR Apache-2.0) AND BSD-2-Clause",
+      "canonical": "(MIT OR Apache-2.0) AND BSD-2-Clause",
+      "ast": "{\"type\":\"AND\",\"left\":{\"type\":\"OR\",\"left\":{\"type\":\"license\",\"id\":\"MIT\"},\"right\":{\"type\":\"license\",\"id\":\"Apache-2.0\"}},\"right\":{\"type\":\"license\",\"id\":\"BSD-2-Clause\"}}"
+    },
+    {
+      "name": "precedence without parentheses",
+      "input": "MIT OR Apache-2.0 AND BSD-2-Clause",
+      "canonical": "MIT OR Apache-2.0 AND BSD-2-Clause",
+      "ast": "{\"type\":\"OR\",\"left\":{\"type\":\"license\",\"id\":\"MIT\"},\"right\":{\"type\":\"AND\",\"left\":{\"type\":\"license\",\"id\":\"Apache-2.0\"},\"right\":{\"type\":\"license\",\"id\":\"BSD-2-Clause\"}}}"
+    },
+    {
+      "name": "license ref",
+      "input": "LicenseRef-Proprietary",
+      "canonical": "LicenseRef-Proprietary",
+      "ast": "{\"type\":\"licenseRef\",\"id\":\"LicenseRef-Proprietary\"}"
+    },
+    {
+      "name": "document license ref",
+      "input": "DocumentRef-third-party:LicenseRef-Custom",
+      "canonical": "DocumentRef-third-party:LicenseRef-Custom",
+      "ast": "{\"type\":\"licenseRef\",\"id\":\"DocumentRef-third-party:LicenseRef-Custom\"}"
+    },
+    {
+      "name": "none",
+      "input": "NONE",
+      "canonical": "NONE",
+      "ast": "{\"type\":\"special\",\"id\":\"NONE\"}"
+    },
+    {
+      "name": "no assertion",
+      "input": "NOASSERTION",
+      "canonical": "NOASSERTION",
+      "ast": "{\"type\":\"special\",\"id\":\"NOASSERTION\"}"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "empty expression",
+      "input": "",
+      "error": "empty_expression"
+    },
+    {
+      "name": "double operator",
+      "input": "MIT OR OR Apache-2.0",
+      "error": "expected_license"
+    },
+    {
+      "name": "missing closing parenthesis",
+      "input": "(MIT OR Apache-2.0",
+      "error": "missing_closing_parenthesis"
+    },
+    {
+      "name": "special in compound expression",
+      "input": "MIT AND NONE",
+      "error": "special_license_must_stand_alone"
+    },
+    {
+      "name": "with after compound expression",
+      "input": "(MIT OR Apache-2.0) WITH Classpath-exception-2.0",
+      "error": "with_requires_simple_license"
+    }
+  ]
+}

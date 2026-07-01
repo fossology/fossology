@@ -153,5 +153,5 @@ testMplBsd2MitApache2()
   
   found="$( _runojo "${testFile}" )"
   out="$( _getLicenseName "$found" )"
-  assertEquals "MPL-2.0-no-copyleft-exception BSD-2-Clause MIT Apache-2.0 Dual-license" "${out}"
+  assertEquals "MPL-2.0-no-copyleft-exception AND BSD-2-Clause AND (MIT OR Apache-2.0)" "${out}"
 }

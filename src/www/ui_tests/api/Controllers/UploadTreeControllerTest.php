@@ -540,6 +540,10 @@ namespace Fossology\UI\Api\Test\Controllers {
         [],
       );
       $result[] = $obj->getArray();
+      $body = $this->streamFactory->createStream();
+      $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+        "/uploads/$uploadId/item/$itemId/clearing-history"),
+        new Headers(), [], [], $body);
 
       $this->uploadDao->shouldReceive('isAccessible')
         ->withArgs([$uploadId, $this->groupId])->andReturn(true);
@@ -553,14 +557,14 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->uploadDao->shouldReceive("getItemTreeBoundsFromUploadId")
         ->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
       $this->clearingDao->shouldReceive("getFileClearings")
-        ->withArgs([$itemTreeBounds, $this->groupId, false, true])->andReturn($fileClearings);
+        ->withArgs([$itemTreeBounds, $this->groupId, false, true, false])->andReturn($fileClearings);
       $this->decisionTypes->shouldReceive("getTypeName")
         ->withArgs([$fileClearings[0]->getType()])->andReturn("test");
       $this->decisionScopes->shouldReceive("getTypeName")->withArgs([$fileClearings[0]->getScope()])->andReturn("test");
       $this->decisionTypes->shouldReceive("getConstantNameFromKey")
         ->withArgs([$fileClearings[0]->getType()])->andReturn("TO_BE_DISCUSSED");
       $expectedResponse = (new ResponseHelper())->withJson($result, 200);
-      $actualResponse = $this->uploadTreeController->getClearingHistory(null, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+      $actualResponse = $this->uploadTreeController->getClearingHistory($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
       $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
       $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
     }
@@ -787,6 +791,11 @@ namespace Fossology\UI\Api\Test\Controllers {
       $licenseDecisionResult = new ClearingResult($clearingEvent, []);
       $addedClearingResults[$licenseId] = $licenseDecisionResult;
 
+      $body = $this->streamFactory->createStream();
+      $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+        "/uploads/$uploadId/item/$itemId/licenses"),
+        new Headers(), [], [], $body);
+
       $this->uploadDao->shouldReceive('isAccessible')
         ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
@@ -801,14 +810,14 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->clearingDao->shouldReceive('getMainLicenseIds')->andReturn([]);
       $this->clearingEventTypes->shouldReceive('getTypeName')->withArgs([$clearingEvent->getEventType()])->andReturn($result['name']);
       $this->highlightDao->shouldReceive('getHighlightRegion')->withArgs([1])->andReturn([""]);
-      $this->clearingDecisionEventProcessor->shouldReceive("getCurrentClearings")->withArgs([$itemTreeBounds, $this->groupId, LicenseMap::CONCLUSION])->andReturn([$addedClearingResults, []]);
+      $this->clearingDecisionEventProcessor->shouldReceive("getCurrentClearings")->withArgs([$itemTreeBounds, $this->groupId, LicenseMap::CONCLUSION, false])->andReturn([$addedClearingResults, []]);
       $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], false])->andReturn([]);
       $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], true])->andReturn([]);
-      $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId])->andReturn($license);
+      $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId, $this->groupId])->andReturn($license);
       $licenses[] = $licenseDecision->getArray();
 
       $expectedResponse = (new ResponseHelper())->withJson($licenses, 200);
-      $actualResponse = $this->uploadTreeController->getLicenseDecisions(null, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+      $actualResponse = $this->uploadTreeController->getLicenseDecisions($request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
       $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
       $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
     }

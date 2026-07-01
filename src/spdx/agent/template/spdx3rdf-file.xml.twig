@@ -166,7 +166,19 @@
   </spdx:Annotation>
 {%~ else %}
 {%~ for res in fileData.scanners %}
-  {%~ if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
+  {%~ if scannerLicenseExpressions[res]|default is not empty %}
+  <spdx:Annotation rdf:about="#{{ scannerLicenseExpressionIds[res] }}">
+    <spdx:spdxId rdf:resource="#SPDXRef-item{{ fileId }}"/>
+    <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
+    <spdx:annotationType> other </spdx:annotationType>
+    <spdx:subject> File:SPDXRef-item{{ fileId }} </spdx:subject>
+    <spdx:statement> SPDX 2.X LicenseInfoInFiles <![CDATA[
+            {{ scannerLicenseExpressions[res]|replace({'\f':''})
+                |replace({']]>':']]]]><![CDATA[>'}) }}
+              ]]>
+    </spdx:statement>
+  </spdx:Annotation>
+  {%~ elseif licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
     {%- set licId=licenseList[res].licenseObj.spdxId %}
     {% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}
       {% set licId=licenseList[res].licenseObj.shortName %}

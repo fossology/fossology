@@ -57,6 +57,15 @@
             <spdx:checksumValue>{{ md5 | lower }}</spdx:checksumValue>
           </spdx:Checksum>
         </spdx:checksum>
+{% if mainLicenseString %}
+  {% if mainLicenseString starts with '<spdx:licenseConcluded' %}
+    {{mainLicenseString}}
+  {%~ else %}
+    <spdx:licenseConcluded>
+      {{mainLicenseString}}
+    </spdx:licenseConcluded>
+  {%~ endif %}
+{% else %}
 {% if mainLicenses|length > 1 %}
         <spdx:licenseConcluded>
 {% if dualLicense %}
@@ -91,6 +100,7 @@
         <spdx:licenseConcluded rdf:resource="#{{ licId|replace({' ': '-'})|url_encode }}" />
 {% else %}
         <spdx:licenseConcluded rdf:resource="http://spdx.org/licenses/{{ licenseList[res].licenseObj.spdxId|replace({' ': '-'})|url_encode }}" />
+{% endif %}
 {% endif %}
 {% endif %}
         {% if licenseComments %}<spdx:licenseComments><![CDATA[
