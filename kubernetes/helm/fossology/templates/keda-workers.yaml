@@ -1,0 +1,90 @@
+{{- if .Values.keda.enabled }}
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: {{ include "fossology.fullname" . }}-db-auth
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+spec:
+  secretTargetRef:
+    - parameter: connection
+      name: {{ .Values.keda.connectionSecretName }}
+      key: {{ .Values.keda.connectionSecretKey }}
+{{- $root := . -}}
+{{- $pools := .Values.workers.pools | default list -}}
+{{- if eq (len $pools) 0 }}
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "fossology.workerStatefulSetName" (dict "root" $root "pool" dict) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+    app.kubernetes.io/component: worker
+    fossology.org/role: worker
+spec:
+  scaleTargetRef:
+    kind: StatefulSet
+    name: {{ include "fossology.workerStatefulSetName" (dict "root" $root "pool" dict) }}
+  minReplicaCount: 1
+  maxReplicaCount: {{ .Values.keda.maxReplicaCount }}
+  pollingInterval: {{ .Values.keda.pollingInterval }}
+  cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
+  triggers:
+    - type: postgresql
+      metadata:
+        connectionFromEnv: FOSSOLOGY_DB_CONNECTION
+        query: "SELECT COUNT(*) FROM jobqueue WHERE jq_endtime IS NULL AND jq_starttime IS NULL"
+        targetQueryValue: {{ .Values.keda.targetValue | quote }}
+      authenticationRef:
+        name: {{ include "fossology.fullname" . }}-db-auth
+{{- else }}
+{{- range $pool := $pools }}
+{{- $poolKeda := $pool.keda | default dict -}}
+{{- $enabled := true -}}
+{{- if hasKey $poolKeda "enabled" }}
+{{- $enabled = $poolKeda.enabled -}}
+{{- end }}
+{{- if $enabled }}
+{{- $useGenericQuery := and (not $poolKeda.query) (not $pool.agentCaps) (eq (len $pools) 1) -}}
+{{- if or $poolKeda.query $pool.agentCaps $useGenericQuery }}
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "fossology.workerStatefulSetName" (dict "root" $root "pool" $pool) }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+{{ include "fossology.labels" $root | indent 4 }}
+    app.kubernetes.io/component: worker
+    fossology.org/role: worker
+    fossology.org/worker-pool: {{ include "fossology.workerPoolName" (dict "pool" $pool) | quote }}
+spec:
+  scaleTargetRef:
+    kind: StatefulSet
+    name: {{ include "fossology.workerStatefulSetName" (dict "root" $root "pool" $pool) }}
+  minReplicaCount: {{ default (default 1 $pool.replicaCount) $poolKeda.minReplicaCount }}
+  maxReplicaCount: {{ default $root.Values.keda.maxReplicaCount $poolKeda.maxReplicaCount }}
+  pollingInterval: {{ default $root.Values.keda.pollingInterval $poolKeda.pollingInterval }}
+  cooldownPeriod: {{ default $root.Values.keda.cooldownPeriod $poolKeda.cooldownPeriod }}
+  triggers:
+    - type: postgresql
+      metadata:
+        connectionFromEnv: FOSSOLOGY_DB_CONNECTION
+{{- if $poolKeda.query }}
+        query: {{ $poolKeda.query | quote }}
+{{- else if $pool.agentCaps }}
+        query: {{ printf "SELECT COUNT(*) FROM jobqueue WHERE jq_endtime IS NULL AND jq_starttime IS NULL AND jq_type IN ('%s')" (join "','" $pool.agentCaps) | quote }}
+{{- else }}
+        query: "SELECT COUNT(*) FROM jobqueue WHERE jq_endtime IS NULL AND jq_starttime IS NULL"
+{{- end }}
+        targetQueryValue: {{ default $root.Values.keda.targetValue $poolKeda.targetValue | quote }}
+      authenticationRef:
+        name: {{ include "fossology.fullname" $root }}-db-auth
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

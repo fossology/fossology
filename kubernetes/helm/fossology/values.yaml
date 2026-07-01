@@ -1,0 +1,153 @@
+# FOSSology Helm Chart — Default values (local/kind development)
+# Override with values-staging.yaml or values-production.yaml for other environments.
+
+fullnameOverride: fossology
+
+image:
+  web:
+    repository: fossology/fossology
+    tag: "4.4.0"
+    pullPolicy: IfNotPresent
+  scheduler:
+    repository: fossology/fossology
+    tag: "4.4.0"
+    pullPolicy: IfNotPresent
+  worker:
+    repository: fossology-worker
+    tag: "4.4.0"
+    pullPolicy: IfNotPresent
+  postgres:
+    repository: postgres
+    tag: "16"
+    pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+
+rbac:
+  create: true
+
+# ── SSH Keys ──────────────────────────────────────────────────
+# Secret must contain: id_rsa, id_rsa.pub, authorized_keys
+# Generate with: ssh-keygen -t ed25519 -f fossology-ssh -N ""
+ssh:
+  secretName: fossology-ssh
+
+# ── Database ──────────────────────────────────────────────────
+# For production, use an external PostgreSQL and set internal.enabled=false
+db:
+  secretName: fossology-db
+  name: fossology
+  user: fossy
+  password: fossy
+
+postgres:
+  internal:
+    enabled: true
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  storage:
+    size: 5Gi
+    className: standard
+
+# ── Repository PVC ────────────────────────────────────────────
+# ReadWriteMany required when workers run on separate pods
+repository:
+  storage:
+    size: 10Gi
+    className: standard
+  accessMode: ReadWriteMany
+
+# ── Web ───────────────────────────────────────────────────────
+web:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 80
+
+# ── Scheduler ─────────────────────────────────────────────────
+# The scheduler is always a single replica. Do not scale horizontally.
+scheduler:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# ── Workers ───────────────────────────────────────────────────
+workers:
+  replicaCount: 2
+  podManagementPolicy: Parallel
+  maxAgentsPerWorker: 10
+  minReadyStartup: 2
+  minReadySync: 1
+  # Optional named pools for per-agent-type scaling.
+  # When empty, the chart deploys a single generic fossology-workers StatefulSet.
+  # Example:
+  # pools:
+  #   - name: nomos
+  #     replicaCount: 2
+  #     maxAgentsPerWorker: 12
+  #     agentCaps: ["nomos", "ojo", "monk"]
+  #   - name: copyright
+  #     replicaCount: 1
+  #     maxAgentsPerWorker: 6
+  #     agentCaps: ["copyright", "ecc", "keyword", "ipra"]
+  pools: []
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "4"
+      memory: 4Gi
+
+# ── Config Sync ───────────────────────────────────────────────
+configSync:
+  startupPollIntervalSeconds: 3
+  pollIntervalSeconds: 5
+  timeoutSeconds: 300
+
+# ── Post-install Job ──────────────────────────────────────────
+postInstall:
+  enabled: false
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+
+# ── Ingress ───────────────────────────────────────────────────
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  host: fossology.local
+  path: /
+  pathType: Prefix
+  tls: false
+  tlsSecretName: ""
+
+# ── KEDA (requires separate KEDA installation) ───────────────
+keda:
+  enabled: false
+  connectionSecretName: fossology-db
+  connectionSecretKey: KEDA_DB_CONNECTION
+  maxReplicaCount: 10
+  pollingInterval: 30
+  cooldownPeriod: 300
+  targetValue: "5"

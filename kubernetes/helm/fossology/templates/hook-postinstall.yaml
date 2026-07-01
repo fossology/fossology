@@ -1,0 +1,50 @@
+{{- if .Values.postInstall.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "fossology.fullname" . }}-postinstall
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+    app.kubernetes.io/component: postinstall
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.postInstall.backoffLimit }}
+  ttlSecondsAfterFinished: {{ .Values.postInstall.ttlSecondsAfterFinished }}
+  template:
+    metadata:
+      labels:
+{{ include "fossology.labels" . | indent 8 }}
+        app.kubernetes.io/component: postinstall
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-db
+          image: {{ include "fossology.postgresImage" . }}
+          imagePullPolicy: {{ .Values.image.postgres.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "[postinstall] Waiting for PostgreSQL..."
+              until pg_isready -h "${FOSSOLOGY_DB_HOST}" -p 5432 -U "${FOSSOLOGY_DB_USER}"; do
+                sleep 2
+              done
+              echo "[postinstall] PostgreSQL is ready."
+          env:
+{{ include "fossology.envDatabase" . | indent 12 }}
+      containers:
+        - name: postinstall
+          image: {{ include "fossology.webImage" . }}
+          imagePullPolicy: {{ .Values.image.web.pullPolicy }}
+          command:
+            - /usr/local/lib/fossology/fo-postinstall
+            - --common
+            - --database
+            - --licenseref
+          env:
+{{ include "fossology.envDatabase" . | indent 12 }}
+{{- end }}

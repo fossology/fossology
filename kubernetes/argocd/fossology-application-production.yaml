@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fossology-production
+  namespace: argocd
+spec:
+  project: fossology
+  source:
+    repoURL: https://github.com/fossology/fossology
+    targetRevision: main
+    path: kubernetes/helm/fossology
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-production.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fossology-production
+  # Production: manual sync only — no automated changes
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      jsonPointers:
+        - /data

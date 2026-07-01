@@ -1,0 +1,20 @@
+{{- if .Values.postgres.internal.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fossology.fullname" . }}-db
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: postgres
+      protocol: TCP
+      name: postgres
+  selector:
+{{ include "fossology.selectorLabels" . | indent 4 }}
+    app.kubernetes.io/component: database
+{{- end }}

@@ -1,0 +1,35 @@
+╔══════════════════════════════════════════════════════════════╗
+║                    FOSSology on Kubernetes                    ║
+╚══════════════════════════════════════════════════════════════╝
+
+Thank you for installing {{ .Chart.Name }} v{{ .Chart.Version }}!
+
+🌐 Access the Web UI:
+{{- if .Values.ingress.enabled }}
+   URL: http{{ if .Values.ingress.tls }}s{{ end }}://{{ .Values.ingress.host }}/repo
+{{- else }}
+   kubectl port-forward svc/{{ include "fossology.fullname" . }}-web 8081:80 -n {{ .Release.Namespace }}
+   Then open: http://localhost:8081/repo
+{{- end }}
+
+🔐 Default Credentials:
+   Username: fossy
+   Password: fossy
+   ⚠️  CHANGE THESE IMMEDIATELY in production!
+
+📋 Check Component Status:
+   kubectl get pods -n {{ .Release.Namespace }}
+   kubectl logs deployment/{{ include "fossology.fullname" . }}-scheduler -c scheduler -n {{ .Release.Namespace }}
+
+👷 Worker Management:
+   Current workers:
+     kubectl get pods -l app={{ include "fossology.fullname" . }}-worker -n {{ .Release.Namespace }}
+
+   Scale workers:
+     kubectl scale statefulset {{ include "fossology.fullname" . }}-workers --replicas=N -n {{ .Release.Namespace }}
+
+📖 Documentation:
+   Quickstart:      docs/kubernetes/quickstart.md
+   Production:      docs/kubernetes/production.md
+   Architecture:    docs/kubernetes/architecture.md
+   Troubleshooting: docs/kubernetes/troubleshooting.md
