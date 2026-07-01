@@ -201,7 +201,7 @@ function fillTableWithJobInfo(tableTemplate, job) {
   });
 }
 
-function getTableBody() {
+function getTableBody(callback) {
   var post_data = {
     "upload"  :{{ uploadId }},
     "allusers":{{ allusersval }},
@@ -215,7 +215,12 @@ function getTableBody() {
     success: function (data) {
       createShowJobsTable(data);
     },
-    error: function(responseobject) { }
+    error: function(responseobject) { },
+    complete: function () {
+      if (typeof callback === "function") {
+        callback();
+      }
+    }
   });
 }
 

@@ -5,21 +5,55 @@
   <script src="scripts/job-queue-poll.js" type="text/javascript"></script>
   <script>
     var resultEntity = $("#jobResult");
+    var downloadLink = {{ downloadLink|json_encode|raw }};
+    var reportType = {{ reportType|json_encode|raw }};
+    var showJobsLink = {{ showJobsLink|json_encode|raw }};
 
-    function linkDownloadReport() {
-      resultEntity.html("<a href='{{ downloadLink }}'>Download {{ reportType }} report</a>");
-      window.location = "{{ downloadLink }}";
+    function replaceReportHistory() {
+      if (showJobsLink && window.history && window.history.replaceState) {
+        window.history.replaceState(null, document.title, showJobsLink);
+      }
+    }
+
+    function markReportJobFinished(jqPk) {
+      var jobRow = $("#showjobstable tr").filter(function () {
+        return $.trim($(this).children("td:first").text()).split(/\s+/)[0] === String(jqPk);
+      });
+      var downloadAction = $("<span>").append("[")
+        .append($("<a>").attr("href", downloadLink).text("Download " + reportType + " report"))
+        .append("]");
+
+      jobRow.removeClass("jobQueued jobScheduled jobFailed").addClass("jobFinished");
+      jobRow.children("td").eq(1).text("Completed");
+      jobRow.children("td").eq(6).text("Scanned");
+      jobRow.children("td.jobAction").empty().append(downloadAction);
+    }
+
+    function linkDownloadReport(jqPk) {
+      markReportJobFinished(jqPk);
+      resultEntity.empty().append(
+        $("<a>").attr("href", downloadLink).text("Download " + reportType + " report")
+      );
+      window.setTimeout(function () {
+        if (typeof getTableBody === "function") {
+          getTableBody(function () {
+            window.location = downloadLink;
+          });
+        } else {
+          window.location = downloadLink;
+        }
+      }, 1000);
     }
     function genereationFailed(jqPk) {
       var text = (jqPk > 0) ? linkToJob(jqPk) : "no job scheduled";
-      resultEntity.html("{{ reportType }} generation failed: " + text);
+      resultEntity.html(reportType + " generation failed: " + text);
     }
 
     function addLinkAndQueueAjaxPolling() {
       var jqPk = {{ jqPk }};
       if (jqPk > 0)
       {
-        resultEntity.html("{{ reportType }} report generation scheduled as " + linkToJob(jqPk));
+        resultEntity.html(reportType + " report generation scheduled as " + linkToJob(jqPk));
         queueUpdateCheck(jqPk, linkDownloadReport, genereationFailed);
       }
       else
@@ -29,6 +63,7 @@
     }
 
     $(document).ready(function () {
+      replaceReportHistory();
       addLinkAndQueueAjaxPolling();
     });
   </script>
