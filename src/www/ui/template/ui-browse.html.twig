@@ -83,7 +83,7 @@
           <input type="checkbox" name="folder" checked="checked" id="browse-upload-all" value="{{ folderId }}" data-toggle="toggle" data-on="Whole folder" data-off="Marked uploads" data-onstyle="outline-success" data-offstyle="outline-success">
           {{ 'to run'|trans }}:
           {% for muAgent,muDesc in multiUploadAgents %}
-            <input type="submit" value="{{ muDesc }}" name="{{ muAgent }}" class="multi-upload-agent btn btn-default"/>
+            <input type="submit" value="{{ muDesc }}" name="{{ muAgent }}" class="multi-upload-agent btn btn-light"/>
           {% endfor %}
         {% endif %}
         </form>
