@@ -57,7 +57,7 @@ class UploadFilePage extends UploadPageBase
       (%s) %s
     </label>
     <img src='images/info_16.png' data-toggle='tooltip' title='%s' alt='' class='info-bullet'/><br/>
-    <button type='button' class='btn btn-default btn-sm' data-toggle='modal' data-target='#reuseModal'>%s</button>
+    <button type='button' class='btn btn-light btn-sm' data-toggle='modal' data-target='#reuseModal'>%s</button>
     <img src='images/info_16.png' data-toggle='tooltip' title='%s' alt='' class='info-bullet'/><br/>
 </li>", _("Optional"), _("Reuse"),
           _("Copy clearing decisions if there is the same file hash between two files"),
