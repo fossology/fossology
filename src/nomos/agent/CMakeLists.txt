@@ -18,6 +18,14 @@ endif()
 
 add_executable(encode ${FO_CWD}/encode.c)
 
+set(FO_GEN_INPUTS
+    ${FO_CWD}/generator/STRINGS.in
+    ${FO_CWD}/generator/GenCodeCopyright
+    ${FO_CWD}/generator/_split_words
+    ${FO_CWD}/generator/GENSEARCHDATA
+    ${FO_CWD}/generator/PRECHECK
+    ${FO_CWD}/generator/CHECKSTR)
+
 add_custom_command(
     OUTPUT _autodefs.h _autodata.c
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -25,7 +33,7 @@ add_custom_command(
     COMMAND echo "NOTE: GENSEARCHDATA takes 1-2 minutes to run"
     COMMAND bash $<TARGET_FILE_DIR:encode>/GENSEARCHDATA
     WORKING_DIRECTORY $<TARGET_FILE_DIR:encode>
-    DEPENDS encode)
+    DEPENDS encode ${FO_GEN_INPUTS})
 
 add_custom_command(
     OUTPUT _precheck.c

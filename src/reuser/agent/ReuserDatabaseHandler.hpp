@@ -106,10 +106,6 @@ public:
   virtual bool processUploadReuse(int uploadId, int reusedUploadId,
     int groupId, int reusedGroupId, int userId);
 
-  /** Enhanced reuse: match by filename + diff threshold. */
-  virtual bool processEnhancedUploadReuse(int uploadId, int reusedUploadId,
-    int groupId, int reusedGroupId, int userId);
-
   /** Copy main-license entries from reused upload. */
   virtual bool reuseMainLicense(int uploadId, int groupId,
     int reusedUploadId, int reusedGroupId);
@@ -137,24 +133,4 @@ public:
 
   /** Connect to the scheduler socket and write "database" command. */
   virtual void notifySchedulerOfDatabaseChange();
-
-protected:
-  /** @brief Validate that @p s contains only characters safe for SQL identifiers. */
-  static bool        isValidIdentifier(const std::string& s);
-  /** @brief Strip Unicode control characters (C0, C1, DEL) from @p input. */
-  static std::string replaceUnicodeControlChars(const std::string& input);
-  /**
-   * @brief Priority for decision types during reuse conflict resolution.
-   *
-   * Higher priority values indicate a stronger decision. Used when the same
-   * pfile has different decision types at different locations.
-   */
-  static int getDecisionTypePriority(int decisionType);
-
-private:
-  static std::string shellEscape(const std::string& s);
-  static int         diffLineCount(const std::string& a, const std::string& b);
-
-  /** Return the repository file path for a pfile, or empty string on error. */
-  std::string getRepoPathOfPfile(int pfileId);
 };

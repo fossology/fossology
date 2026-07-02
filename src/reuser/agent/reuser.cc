@@ -13,13 +13,11 @@
  *
  * The reuser agent copies clearing decisions, copyright events, main
  * licenses and report configuration from a previously cleared upload to a
- * new upload, based on pfile identity (standard reuse), file-name matching
- * with diff-threshold (enhanced reuse), or both.
+ * new upload, based on pfile identity.
  *
  * @section reuseractions Supported modes (set in upload_reuse.reuse_mode)
  * | Bit | Constant         | Description                          |
  * | --: | :--------------- | :----------------------------------- |
- * |   2 | REUSE_ENHANCED   | Match by filename + diff threshold   |
  * |   4 | REUSE_MAIN       | Copy main-license entries            |
  * |   8 | REUSE_BULK       | Copy bulk license ref/set and run monkbulk |
  * |  16 | REUSE_CONF       | Copy report configuration            |

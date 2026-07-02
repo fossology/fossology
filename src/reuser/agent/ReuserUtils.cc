@@ -82,20 +82,10 @@ bool processUploadId(const ReuserState& /*state*/, int uploadId,
       continue;
     }
 
-    if (triple.reuseMode & REUSE_ENHANCED)
-    {
-      if (!databaseHandler.processEnhancedUploadReuse(
-            uploadId, triple.reusedUploadId,
-            groupId, triple.reusedGroupId, userId))
-        return false;
-    }
-    else
-    {
-      if (!databaseHandler.processUploadReuse(
-            uploadId, triple.reusedUploadId,
-            groupId, triple.reusedGroupId, userId))
-        return false;
-    }
+    if (!databaseHandler.processUploadReuse(
+          uploadId, triple.reusedUploadId,
+          groupId, triple.reusedGroupId, userId))
+      return false;
 
     // Failures are logged but do not abort the overall reuse run, matching
     // the original PHP behaviour where their return values were also not checked.

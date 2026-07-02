@@ -162,8 +162,27 @@ class ReuserAgentPlugin extends AgentPlugin
       $reuserDependencies[] = $scancodeDeps;
     }
 
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg,
+    $jqPk = $this->doAgentAdd($jobId, $uploadId, $errorMsg,
       $reuserDependencies, $uploadId, null, $request);
+
+    // When enhanced reuse is selected, schedule enhancedreuser to run after reuser.
+    if ($reuseMode & UploadDao::REUSE_ENHANCED) {
+      $enhancedPlugin = plugin_find('agent_enhancedreuser');
+      if ($enhancedPlugin) {
+        $jqPkEnhanced = $enhancedPlugin->scheduleAgent($jobId, $uploadId, $errorMsg, $request);
+        if ($jqPkEnhanced > 0 && $jqPk > 0) {
+          $dbManager = $GLOBALS['container']->get('db.manager');
+          $dbManager->insertTableRow('jobdepends', array(
+            'jdep_jq_fk' => $jqPkEnhanced,
+            'jdep_jq_depends_fk' => $jqPk
+          ));
+        }
+      } else {
+        $errorMsg .= _("Enhanced Reuse agent is not available. ") . PHP_EOL;
+      }
+    }
+
+    return $jqPk;
   }
 
   private function scheduleOsselotImportDirect(int $jobId, int $uploadId, string &$errorMsg, Request $request): int

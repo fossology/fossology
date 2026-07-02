@@ -35,7 +35,8 @@ target_sources(fossologyCPP
         ${FO_CWD}/libfossdbmanagerclass.cc
         ${FO_CWD}/files.cc
         ${FO_CWD}/libfossdbQueryResult.cc
-        ${FO_CWD}/libfossUtils.cc)
+        ${FO_CWD}/libfossUtils.cc
+        ${FO_CWD}/ClearingDecisionUtils.cc)
 
 target_link_libraries(fossologyCPP
     PRIVATE
@@ -51,6 +52,10 @@ install(TARGETS fossologyCPP
     COMPONENT lib)
 
 install(FILES ${FO_CWD}/libfossologyCPP.hpp
+    DESTINATION ${FO_INCLUDEDIR}
+    COMPONENT lib)
+
+install(FILES ${FO_CWD}/ClearingDecisionUtils.hpp
     DESTINATION ${FO_INCLUDEDIR}
     COMPONENT lib)
 

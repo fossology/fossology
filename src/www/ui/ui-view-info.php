@@ -557,7 +557,7 @@ class ui_view_info extends FO_Plugin
       $reusedUpload = $this->uploadDao->getUpload($reuseUploadFk);
       $reuseMode = array();
       if ($row['reuse_mode'] & UploadDao::REUSE_ENHANCED) {
-        $reuseMode[] = "Enhanced";
+        $reuseMode[] = "Enhanced (Nirjas-based)";
       } else {
         $reuseMode[] = "Normal";
       }

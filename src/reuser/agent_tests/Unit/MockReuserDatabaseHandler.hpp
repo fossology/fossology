@@ -56,9 +56,6 @@ public:
   std::function<bool(int, int, int, int, int)>
     onProcessUploadReuse;
 
-  std::function<bool(int, int, int, int, int)>
-    onProcessEnhancedUploadReuse;
-
   std::function<bool(int, int, int, int)>
     onReuseMainLicense;
 
@@ -112,15 +109,6 @@ public:
   {
     if (onProcessUploadReuse)
       return onProcessUploadReuse(uploadId, reusedUploadId, groupId,
-        reusedGroupId, userId);
-    return true;
-  }
-
-  bool processEnhancedUploadReuse(int uploadId, int reusedUploadId,
-    int groupId, int reusedGroupId, int userId) override
-  {
-    if (onProcessEnhancedUploadReuse)
-      return onProcessEnhancedUploadReuse(uploadId, reusedUploadId, groupId,
         reusedGroupId, userId);
     return true;
   }
