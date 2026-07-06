@@ -9,6 +9,9 @@ on:
     types:
       - published
 
+permissions:
+  contents: write # required to upload release assets
+
 env:
   DEBIAN_FRONTEND: noninteractive
 

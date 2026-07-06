@@ -9,6 +9,7 @@ on:
     types: [synchronize]
 
 permissions:
+  contents: read
   pull-requests: write # to label PRs
 
 jobs:
