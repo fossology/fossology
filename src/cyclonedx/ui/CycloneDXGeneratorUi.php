@@ -27,7 +27,7 @@ class CycloneDXGeneratorUi extends DefaultPlugin
     $possibleOutputFormat = trim(GetParm("outputFormat",PARM_STRING));
     if (strcmp($possibleOutputFormat,"") !== 0 &&
         strcmp($possibleOutputFormat,self::DEFAULT_OUTPUT_FORMAT) !== 0 &&
-        ctype_alnum($possibleOutputFormat)) {
+        preg_match('/^[a-zA-Z0-9_]+$/', $possibleOutputFormat)) {
       $this->outputFormat = $possibleOutputFormat;
     }
     parent::__construct(self::NAME, array(
@@ -39,10 +39,13 @@ class CycloneDXGeneratorUi extends DefaultPlugin
 
   function preInstall()
   {
-    $text = _("Generate CycloneDX report");
-    menu_insert("Browse-Pfile::Export&nbsp;CycloneDX Report", 0, self::NAME, $text);
-    menu_insert("UploadMulti::Generate&nbsp;CycloneDX Report", 0, self::NAME, $text);
+    $text = _("Generate CycloneDX 1.4 report");
+    menu_insert("Browse-Pfile::Export&nbsp;CycloneDX 1.4 Report", 0, self::NAME . '&outputFormat=cyclonedx_json_1_4', $text);
+    menu_insert("UploadMulti::Generate&nbsp;CycloneDX 1.4 Report", 0, self::NAME . '&outputFormat=cyclonedx_json_1_4', $text);
 
+    $text = _("Generate CycloneDX 1.7 report");
+    menu_insert("Browse-Pfile::Export&nbsp;CycloneDX 1.7 Report", 0, self::NAME . '&outputFormat=cyclonedx_json_1_7', $text);
+    menu_insert("UploadMulti::Generate&nbsp;CycloneDX 1.7 Report", 0, self::NAME . '&outputFormat=cyclonedx_json_1_7', $text);
   }
 
   protected function handle(Request $request)
@@ -113,6 +116,11 @@ class CycloneDXGeneratorUi extends DefaultPlugin
     $cyclonedxAgent = plugin_find('agent_cyclonedx');
     $userId = Auth::getUserId();
     $jqCmdArgs = $this->uploadsAdd($addUploads);
+    if (empty($jqCmdArgs)) {
+      $jqCmdArgs = '--outputFormat=' . $this->outputFormat;
+    } else {
+      $jqCmdArgs .= ' --outputFormat=' . $this->outputFormat;
+    }
 
     $dbManager = $this->getObject('db.manager');
     $sql = 'SELECT jq_pk,job_pk FROM jobqueue, job '
