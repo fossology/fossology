@@ -2856,6 +2856,8 @@
   $Schema["INDEX"]["ipra_decision"]["ipra_decision_user_fk_index"] = "CREATE INDEX ipra_decision_user_fk_index ON ipra_decision USING btree (user_fk);";
   $Schema["INDEX"]["ipra_decision"]["ipra_decision_pfile_hash_index"] = "CREATE INDEX ipra_decision_pfile_hash_index ON ipra_decision USING btree (hash, pfile_fk);";
 
+  $Schema["INDEX"]["jobdepends"]["jobdepends_jq_fk_idx"] = "CREATE INDEX jobdepends_jq_fk_idx ON jobdepends USING btree (jdep_jq_fk);";
+
   $Schema["INDEX"]["keyword"]["keyword_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX keyword_pfile_fk_is_enabled_false_idx ON keyword USING btree (pfile_fk, is_enabled) WHERE (is_enabled = false);";
   $Schema["INDEX"]["keyword"]["keyword_agent_fk_index"] = "CREATE INDEX keyword_agent_fk_index ON keyword USING btree (agent_fk);";
   $Schema["INDEX"]["keyword"]["keyword_hash_index"] = "CREATE INDEX keyword_hash_index ON keyword USING btree (hash);";
