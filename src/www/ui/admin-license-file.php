@@ -110,7 +110,8 @@ class admin_license_file extends FO_Plugin
     }
 
     if (@$_POST["req_shortname"]) {
-      $this->vars += $this->getLicenseListData($_POST["req_shortname"], $_POST["req_marydone"]);
+      $licTypeFilter = array_key_exists('req_licensetype', $_POST) ? trim($_POST['req_licensetype']) : 'all';
+      $this->vars += $this->getLicenseListData($_POST["req_shortname"], $_POST["req_marydone"], $licTypeFilter);
     }
     $this->vars['Inputfm'] = $this->Inputfm();
     return $this->render('admin_license_file.html.twig');
@@ -123,6 +124,7 @@ class admin_license_file extends FO_Plugin
    */
   function Inputfm()
   {
+    global $SysConf;
     $V = "<FORM name='Inputfm' action='?mod=" . $this->Name . "' method='POST'>";
     $V.= _("What license family do you wish to view:<br>");
 
@@ -143,6 +145,22 @@ class admin_license_file extends FO_Plugin
     $V.= "</select>";
     $V.= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 
+    $V.= _("License type: ");
+    $V.= "<select name='req_licensetype'>\n";
+    $Selected = (@$_REQUEST['req_licensetype'] == 'all' || !isset($_REQUEST['req_licensetype'])) ? " SELECTED " : "";
+    $text = _("All");
+    $V.= "<option value='all' $Selected> $text </option>";
+    $licenseTypesConf = !empty($SysConf['SYSCONFIG']['LicenseTypes']) ? $SysConf['SYSCONFIG']['LicenseTypes'] : '';
+    if (!empty($licenseTypesConf)) {
+      $licenseTypeList = array_filter(array_map('trim', explode(',', $licenseTypesConf)));
+      foreach ($licenseTypeList as $licType) {
+        $Selected = (@$_REQUEST['req_licensetype'] === $licType) ? " SELECTED " : "";
+        $V.= "<option value='" . htmlspecialchars($licType) . "' $Selected> " . htmlspecialchars($licType) . " </option>";
+      }
+    }
+    $V.= "</select>";
+    $V.= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+
     // by short name -ajax-> fullname
     $V.= _("License family name: ");
     $Shortnamearray = $this->FamilyNames();
@@ -160,7 +178,7 @@ class admin_license_file extends FO_Plugin
   }
 
 
-  private function getLicenseData($where)
+  private function getLicenseData($where, $params = [])
   {
     $sql = "SELECT rf_pk, marydone, rf_shortname, rf_spdx_id, " .
       "rf_shortname, rf_fullname, rf_url, rf_text, ".
@@ -170,7 +188,7 @@ class admin_license_file extends FO_Plugin
       "LEFT OUTER JOIN obligation_ref ON ob_fk = ob_pk " .
       "$where GROUP BY rf_pk ORDER BY rf_shortname";
 
-    return $this->dbManager->getRows($sql);
+    return $this->dbManager->getRows($sql, $params, 'getLicenseData.' . md5($where));
   }
 
   /**
@@ -181,13 +199,15 @@ class admin_license_file extends FO_Plugin
    *
    * \return The input form as a string
    */
-  function getLicenseListData($namestr, $filter)
+  function getLicenseListData($namestr, $filter, $licensetype = 'all')
   {
+    $params = [];
     // look at all
     if ($namestr == "All") {
       $where = "";
     } else {
-      $where = "where rf_shortname like '" . pg_escape_string($namestr) . "%' ";
+      $params[] = $namestr . '%';
+      $where = "where rf_shortname like $" . count($params) . " ";
     }
 
     // $filter is one of these: "all", "done", "notdone"
@@ -205,7 +225,17 @@ class admin_license_file extends FO_Plugin
       }
     }
 
-    $data = $this->getLicenseData($where);
+    if (!empty($licensetype) && $licensetype != 'all') {
+      if (empty($where)) {
+        $where .= "where ";
+      } else {
+        $where .= " and ";
+      }
+      $params[] = $licensetype;
+      $where .= " license_ref.rf_licensetype=$" . count($params);
+    }
+
+    $data = $this->getLicenseData($where, $params);
     if (! $data) {
       $dataMessage = _(
         "No licenses matching the filter and name pattern were found");
@@ -318,7 +348,7 @@ class admin_license_file extends FO_Plugin
         'rf_url' => '',
         'rf_detector_type' => 1,
         'rf_notes' => '',
-        'rf_licensetype' => 'Permissive'
+        'rf_licensetype' => 'Unknown'
       );
     }
 

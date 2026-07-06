@@ -25,6 +25,11 @@ class exportLicenseRef
     'exceptions' => array('licenseExceptionId', 'licenseExceptionText', 'name')
   );
 
+  /**
+   * @var const BOA_LIST_URL
+   */
+  const BOA_LIST_URL = 'https://blueoakcouncil.org/list.json';
+
 
   function startProcessingLicenseData()
   {
@@ -68,6 +73,7 @@ class exportLicenseRef
     /* get type and url if exists, if not set them to empty */
     $type = array_key_exists("type", $options) ? $options["type"] : '';
     $URL =  array_key_exists("url", $options) ? $options["url"] : '';
+
     foreach ($options as $option => $optVal) {
       switch ($option) {
         case 'c': /* used by fo_wrapper */
@@ -109,14 +115,16 @@ class exportLicenseRef
             $newLicenseRefData, $deleteDeprecated);
         }
       }
+      if (empty($newLicenseRefData)) {
+        echo "\nERROR: No license data collected. Verify \$LIBEXECDIR ";
+        exit(1);
+      }
       $newFileName = "licenseRefNew.json";
       if (file_exists($newFileName)) {
         unlink($newFileName);
       }
       $this->sanitizeRefData($newLicenseRefData);
-      $file = fopen($newFileName, 'w+');
       file_put_contents($newFileName, json_encode($newLicenseRefData, JSON_PRETTY_PRINT, JSON_UNESCAPED_SLASHES));
-      fclose($file);
       echo "\n\n INFO: new $newFileName file created \n\n";
     } else {
       echo "\nINVALID OPTION PROVIDED\n\n";
@@ -142,19 +150,18 @@ class exportLicenseRef
 
     if (!is_dir($LIBEXECDIR)) {
       print "FATAL: Directory '$LIBEXECDIR' does not exist.\n";
-      return (1);
+      return [];
     }
 
-    $dir = opendir($LIBEXECDIR);
-    if (!$dir) {
+    if (!is_readable($LIBEXECDIR)) {
       print "FATAL: Unable to access '$LIBEXECDIR'.\n";
-      return (1);
+      return [];
     }
     /* check if licenseref.json exists */
     $fileName = "$LIBEXECDIR/licenseRef.json";
     if (!file_exists($fileName)) {
       print "FATAL: File '$fileName' does not exist.\n";
-      return (1);
+      return [];
     }
 
     if (empty($existingLicenseRefData)) {
@@ -163,19 +170,62 @@ class exportLicenseRef
       /* dump all the data from licenseRef.json file to an array */
       $existingLicenseRefData = (array) json_decode($getExistingLicenseRefData, true);
     }
+    $boaIds = [];
+    if ($type === 'licenses') {
+      $boaRaw = fetchBoaList(BOA_LIST_URL);
+      if ($boaRaw !== false) {
+        $boaJson = json_decode($boaRaw, true);
+        foreach (($boaJson['ratings'] ?? []) as $rating) {
+          foreach (($rating['licenses'] ?? []) as $lic) {
+            if (!empty($lic['id'])) {
+              $boaIds[$lic['id']] = true;
+            }
+          }
+        }
+      }
+      $boaCount = count($boaIds);
+      if ($boaCount === 0) {
+        echo "WARNING: Blue Oak Council fetch failed or returned empty — Permissive classification degraded.\n";
+      } else {
+        echo "INFO: loaded $boaCount permissive licenses from Blue Oak Council\n";
+      }
+    }
+
     /* get license list and each license's URL */
-    $getList = json_decode(file_get_contents($URL));
+    $rawList = file_get_contents($URL, false, $httpCtx);
+    if ($rawList === false) {
+      print "FATAL: Unable to fetch data from '$URL'.\n";
+      return [];
+    }
+    $getList = json_decode($rawList);
+    if ($getList === null || !isset($getList->$type)) {
+      print "FATAL: Invalid data received from '$URL'.\n";
+      return [];
+    }
     foreach ($getList->$type as $listValue) {
       /* get current license data from given URL */
       if (strstr($URL, "spdx.org") !== false) {
         // If fetching exceptions from spdx, fix the detailsUrl
         if (substr_compare($listValue->detailsUrl, ".html", -5) === 0) {
+          if (!isset($listValue->reference)) {
+            echo "WARNING: Missing 'reference' field for '" . ($listValue->licenseExceptionId ?? '?') . "', skipping.\n";
+            continue;
+          }
           $baseUrl = str_replace("exceptions.json", "", $URL);
           $listValue->detailsUrl = $baseUrl . str_replace("./", "", $listValue->reference);
         }
       }
-      $getCurrentData = file_get_contents($listValue->detailsUrl);
-      $getCurrentData = (array) json_decode($getCurrentData, true);
+      $rawCurrentData = file_get_contents($listValue->detailsUrl, false, $httpCtx);
+      if ($rawCurrentData === false) {
+        echo "WARNING: Unable to fetch license details from '" . $listValue->detailsUrl . "', skipping.\n";
+        continue;
+      }
+      $getCurrentData = json_decode($rawCurrentData, true);
+      if (!is_array($getCurrentData) || empty($getCurrentData[$this->mapArrayData[$type][0]])) {
+        echo "WARNING: Invalid or missing data from '" . $listValue->detailsUrl . "', skipping.\n";
+        continue;
+      }
+      $getCurrentData = (array) $getCurrentData;
       echo "INFO: search for license " . $getCurrentData[$this->mapArrayData[$type][0]] . "\n";
       /* check if the licenseid of the current license exists in old license data */
       $licenseIdCheck = array_search($getCurrentData[$this->mapArrayData[$type][0]],
@@ -197,10 +247,10 @@ class exportLicenseRef
       if (is_numeric($licenseIdCheck) &&
           (!empty($updateWithNew) || !empty($updateExisting))) {
         // License exists, just remove old fields
-        if (array_key_exists('rf_spdx_compatible',
-            $existingLicenseRefData[$licenseIdCheck])) {
-          unset($existingLicenseRefData[$licenseIdCheck]['rf_spdx_compatible']);
-        }
+        $existingLicenseRefData[$licenseIdCheck]['rf_spdx_compatible'] =
+          $listValue->isDeprecatedLicenseId ? "f" : "t";
+        $existingLicenseRefData[$licenseIdCheck]['rf_licensetype'] =
+          $this->getLicenseType($type, $getCurrentData, $boaIds);
       }
       if (
         is_numeric($licenseIdCheck) &&
@@ -210,8 +260,8 @@ class exportLicenseRef
         )
       ) {
         $existingLicenseRefData[$licenseIdCheck]['rf_fullname'] = $getCurrentData[$this->mapArrayData[$type][2]];
-        $existingLicenseRefData[$licenseIdCheck]['rf_text'] = $getCurrentData[$this->mapArrayData[$type][1]];
-        $existingLicenseRefData[$licenseIdCheck]['rf_url'] = $getCurrentData['seeAlso'][0];
+        $existingLicenseRefData[$licenseIdCheck]['rf_text'] = $currentText;
+        $existingLicenseRefData[$licenseIdCheck]['rf_url'] = isset($getCurrentData['seeAlso'][0]) ? $getCurrentData['seeAlso'][0] : $existingLicenseRefData[$licenseIdCheck]['rf_url'];
         $existingLicenseRefData[$licenseIdCheck]['rf_notes'] = (array_key_exists("licenseComments", $getCurrentData) ? $getCurrentData['licenseComments'] : $existingLicenseRefData[$licenseIdCheck]['rf_notes']);
         echo "INFO: license " . $getCurrentData[$this->mapArrayData[$type][0]] . " updated\n\n";
       }
@@ -224,8 +274,8 @@ class exportLicenseRef
       ) {
         $existingLicenseRefData[] = array(
           'rf_shortname' => $getCurrentData[$this->mapArrayData[$type][0]],
-          'rf_text' =>  $getCurrentData[$this->mapArrayData[$type][1]],
-          'rf_url' =>  $getCurrentData['seeAlso'][0],
+          'rf_text' =>  $currentText,
+          'rf_url' =>  isset($getCurrentData['seeAlso'][0]) ? $getCurrentData['seeAlso'][0] : null,
           'rf_add_date' => null,
           'rf_copyleft' => null,
           'rf_OSIapproved' => null,
@@ -241,13 +291,114 @@ class exportLicenseRef
           'rf_detector_type' => 1,
           'rf_source' => null,
           'rf_risk' => null,
-          'rf_spdx_compatible' => $listValue->isDeprecatedLicenseId == false,
+          'rf_spdx_compatible' => $listValue->isDeprecatedLicenseId ? "f" : "t",
           'rf_flag' => "1",
+          'rf_licensetype' => $this->getLicenseType($type, $getCurrentData, $boaIds),
         );
         echo "INFO: new license " . $getCurrentData[$this->mapArrayData[$type][0]] . " added\n\n";
       }
     }
     return array_values($existingLicenseRefData);
+  }
+
+  /**
+   * @brief Classify a license into rf_licensetype using name, comments, and BOA membership.
+   * @return string Exception|Public Domain|Permissive|Weak Copyleft|Strong Copyleft|
+   *                Network Copyleft|Non-commercial|Source Available|Font|Data|Unknown
+   */
+  private function getLicenseType($type, $licenseData, $boaIds)
+  {
+    if ($type === 'exceptions') {
+      return 'Exception';
+    }
+
+    $licenseId = $licenseData[$this->mapArrayData[$type][0]] ?? '';
+    $name = strtolower($licenseData[$this->mapArrayData[$type][2]] ?? '');
+    $comments = strtolower($licenseData['licenseComments'] ?? '');
+
+    // Check public domain before Creative Commons to catch CC0/PDM.
+    if (strpos($name, 'public domain') !== false ||
+        strpos($name, 'unlicense') !== false ||
+        strpos($comments, 'public domain') !== false) {
+      return 'Public Domain';
+    }
+
+    // Classify Creative Commons by variant.
+    if (strpos($name, 'creative commons') !== false) {
+      if (strpos($licenseId, 'CC0') === 0 || strpos($licenseId, 'CC-PDM') === 0 ||
+          strpos($licenseId, 'CC-PDDC') === 0) {
+        return 'Public Domain';
+      }
+      if (strpos($licenseId, '-NC-') !== false ||
+          strpos($name, 'noncommercial') !== false ||
+          strpos($name, 'non-commercial') !== false) {
+        return 'Non-commercial';
+      }
+      // ND variants prohibit modification; treat as Source Available.
+      if (strpos($licenseId, '-ND') !== false ||
+          strpos($name, 'noderivatives') !== false ||
+          strpos($name, 'no derivatives') !== false) {
+        return 'Source Available';
+      }
+      if (strpos($licenseId, '-SA') !== false || strpos($name, 'sharealike') !== false) {
+        return 'Weak Copyleft';
+      }
+      return 'Permissive';
+    }
+
+    if (strpos($licenseId, 'GFDL') === 0 ||
+        strpos($name, 'free documentation license') !== false) {
+      return 'Weak Copyleft';
+    }
+
+    // Export/military restriction licenses are not freely usable; keep Unknown.
+    if (strpos($licenseId, 'No-Nuclear') !== false ||
+        strpos($licenseId, 'No-Military') !== false ||
+        strpos($name, 'no nuclear') !== false ||
+        strpos($name, 'no military') !== false) {
+      return 'Unknown';
+    }
+
+    if (preg_match('/\bfont\b/i', $name)) {
+      return 'Font';
+    }
+
+    if (strpos($name, 'database') !== false ||
+        (strpos($name, 'data') !== false && strpos($name, 'license') !== false)) {
+      return 'Data';
+    }
+
+    if (isset($boaIds[$licenseId])) {
+      return 'Permissive';
+    }
+
+    $isCopyleft = strpos($name, 'copyleft') !== false ||
+                  strpos($comments, 'copyleft') !== false ||
+                  strpos($name, 'general public license') !== false;
+    if ($isCopyleft) {
+      $isNetwork = strpos($name, 'affero') !== false ||
+                   strpos($name, 'network copyleft') !== false ||
+                   strpos($comments, 'affero') !== false;
+      $isWeak = strpos($name, 'lesser') !== false ||
+                strpos($name, 'limited') !== false ||
+                strpos($name, 'weak copyleft') !== false ||
+                strpos($comments, 'weak copyleft') !== false ||
+                strpos($comments, 'lesser general public') !== false;
+      if ($isNetwork) {
+        return 'Network Copyleft';
+      }
+      if ($isWeak) {
+        return 'Weak Copyleft';
+      }
+      return 'Strong Copyleft';
+    }
+
+    if (strpos($name, 'non-commercial') !== false ||
+        strpos($name, 'noncommercial') !== false) {
+      return 'Non-commercial';
+    }
+
+    return 'Unknown';
   }
 
   /**
@@ -296,6 +447,33 @@ class exportLicenseRef
       $newLicenseRefData[$i]["rf_fullname"] = $this->replaceUnicode($newLicenseRefData[$i]["rf_fullname"]);
       $newLicenseRefData[$i]["rf_text"] = $this->replaceUnicode($newLicenseRefData[$i]["rf_text"]);
       $newLicenseRefData[$i]["rf_notes"] = $this->replaceUnicode($newLicenseRefData[$i]["rf_notes"]);
+    }
+  }
+
+  /**
+   * Pull/fetch data from BOA.
+   *
+   * @param string $url Input text
+   * @return JSON raw
+   */
+  private function fetchBoaList($url)
+  {
+    try {
+      $boaRaw = file_get_contents($url, false, stream_context_create([
+        'http' => [
+          'timeout' => 30,
+          'user_agent' => 'FOSSology/SPDX'
+        ]
+      ]));
+
+      if ($boaRaw === false) {
+        throw new Exception("Failed to fetch BOA list");
+      }
+
+      return $boaRaw;
+    } catch (Exception $e) {
+      error_log("BOA List fetch error: " . $e->getMessage());
+      return null;
     }
   }
 }
