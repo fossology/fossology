@@ -360,6 +360,51 @@ namespace {
 
   echo "\n";
 
+  echo "\n";
+
+  echo "Test 15: CycloneDX 1.7 Specifics\n";
+  $generator17 = new BomReportGenerator('cyclonedx_json_1_7');
+
+  $report17 = $generator17->generateReport(array(
+    'tool-version' => '4.5.0',
+    'maincomponent' => $comp,
+    'components' => array($fileComponent)
+  ));
+
+  assert_test('Report specVersion is 1.7', $report17['specVersion'] === '1.7');
+  assert_test('Metadata tools uses components array in 1.7', isset($report17['metadata']['tools']['components']));
+  assert_test('Metadata properties added in 1.7', isset($report17['metadata']['properties']));
+
+  $licenseData17 = array(
+    'id' => 'MIT',
+    'bom-ref' => 'license-MIT-1234',
+    'textContent' => base64_encode('MIT License text'),
+    'textContentType' => 'text/plain'
+  );
+
+  $packageLicense = $generator17->createLicense($licenseData17, true);
+  assert_test('Package license has bom-ref in 1.7', isset($packageLicense['license']['bom-ref']));
+  assert_test('Package license has properties in 1.7', isset($packageLicense['license']['properties']));
+  assert_test('Package license has text in 1.7', isset($packageLicense['license']['text']));
+
+  $fileLicense = $generator17->createLicense($licenseData17, false);
+  assert_test('File license has bom-ref in 1.7', isset($fileLicense['license']['bom-ref']));
+  assert_test('File license has properties in 1.7', isset($fileLicense['license']['properties']));
+  assert_test('File license does NOT have text in 1.7', !isset($fileLicense['license']['text']));
+
+  $comp17 = $generator17->createComponent(array(
+    'type' => 'library',
+    'name' => 'test-comp'
+  ));
+  assert_test('Component has volkswagen properties in 1.7', isset($comp17['properties']));
+  $hasModifiedProp = false;
+  foreach ($comp17['properties'] as $prop) {
+    if ($prop['name'] === 'volkswagen:modified') {
+      $hasModifiedProp = true;
+    }
+  }
+  assert_test('Component has volkswagen:modified property', $hasModifiedProp);
+
   echo "=== Results ===\n";
   echo "Passed: $passed | Failed: $failed\n";
 
