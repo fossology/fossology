@@ -175,7 +175,7 @@ class AjaxBrowse extends DefaultPlugin
         }
       }
     }
-    $nameColumn = "<strong class='btn btn-sm font-weight-bold' style='margin-left:10px;font-size:11pt;'>$fileName</strong>";
+    $nameColumn = "<strong class='btn font-weight-bold text-primary' style='margin-left:10px;font-size:11pt;'>$fileName</strong>";
     if (IsContainer($row['ufile_mode'])) {
       $nameColumn = "<a href='$uri&upload=$uploadId&folder=$folder&item=$itemId&show=$show'>$nameColumn</a>";
     }

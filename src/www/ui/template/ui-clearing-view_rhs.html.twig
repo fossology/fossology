@@ -10,9 +10,9 @@
   <table>
     <tr>
       <td style="vertical-align:top;">
-        <button type="submit" name="update" class="btn btn-default btn-sm" id="prev" disabled>&lt;</button>
-        <button type="submit" name="update" class="btn btn-default btn-sm" onclick="form.action = '{{ uri }}&item={{ itemId }}';">{{ 'Submit'|trans }}</button>
-        <button type="submit" name="update" class="btn btn-default btn-sm" id="next" disabled>&gt;</button>
+        <button type="submit" name="update" class="btn btn-light btn-sm" id="prev" disabled>&lt;</button>
+        <button type="submit" name="update" class="btn btn-light btn-sm" onclick="form.action = '{{ uri }}&item={{ itemId }}';">{{ 'Submit'|trans }}</button>
+        <button type="submit" name="update" class="btn btn-light btn-sm" id="next" disabled>&gt;</button>
       </td>
       <td>
         <input type="radio" class="info-bullet view-license-rc-size" name="FileSelection" value="none">
@@ -72,7 +72,7 @@
       {% endfor %}
 
 
-      <button type="button" id="toggleMoreOptions" class="btn btn-default btn-sm" style="float: right;">
+      <button type="button" id="toggleMoreOptions" class="btn btn-light btn-sm" style="float: right;">
         <img src="images/icons/chevron-down.png" id="toggleIcon" alt="More Options" width="12" height="12">
       </button>
       <br>
@@ -125,15 +125,15 @@
     file.
     '| trans }}
   {% else %}
-    <button type="button" data-toggle="modal" data-target="#userModal" class="btn btn-default btn-sm" onclick="openUserDecisionModal();">
+    <button type="button" data-toggle="modal" data-target="#userModal" class="btn btn-light btn-sm" onclick="openUserDecisionModal();">
       {{ 'User Decision ...'| trans }}
     </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Add manually a license that is not found by scanners or bulk'|trans }}" alt="" class="info-bullet"/>
     &nbsp;
-    <button type="button" class="btn btn-default btn-sm" onclick="openBulkModal();">
+    <button type="button" class="btn btn-light btn-sm" onclick="openBulkModal();">
       {{ 'Bulk Recognition ...'| trans }}
     </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Adding or removing a license based on a text fragment that is searched for across the relevant files'|trans }}" alt="" class="info-bullet"/>
     &nbsp;
-    <button type="button" data-toggle="modal" data-target="#ClearingHistoryDataModal" class="btn btn-default btn-sm" onclick="openClearingHistoryDataModal();">
+    <button type="button" data-toggle="modal" data-target="#ClearingHistoryDataModal" class="btn btn-light btn-sm" onclick="openClearingHistoryDataModal();">
       {{ 'Clearing History ...'| trans }}
     </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'View the clearing history for this file: The table will show which user added or removed license results for this particular file in order to create a clearing decision. Clearing decisions are created when the user clicks on the button "Submit" or on the go next and go previous buttons'|trans }}" alt="" class="info-bullet"/>
     &nbsp;

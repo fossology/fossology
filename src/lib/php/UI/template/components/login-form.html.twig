@@ -40,10 +40,10 @@
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
         {% if loginProvider == 'password' %}
-          <button type="submit" class="btn btn-default">{{ 'Login'|trans }}</button>
+          <button type="submit" class="btn btn-light">{{ 'Login'|trans }}</button>
         {% endif %}
         {% if providerExist %}
-          <button type="submit" name="providerCheck" value="{{ providerExist }}" class="btn btn-default">{{ 'Login with '|trans }}{{ providerExist }}</button>
+          <button type="submit" name="providerCheck" value="{{ providerExist }}" class="btn btn-light">{{ 'Login with '|trans }}{{ providerExist }}</button>
         {% endif %}
       </div>
     </div>
