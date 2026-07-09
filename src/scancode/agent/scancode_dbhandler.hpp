@@ -37,7 +37,6 @@ using namespace fo;
   } while(0)
 
 
-#define MAX_TABLE_CREATION_RETRIES 5
 
 /**
  * \class DatabaseEntry

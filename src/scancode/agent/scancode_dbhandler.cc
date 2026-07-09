@@ -423,30 +423,13 @@ bool ScancodeDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
  */
 bool ScancodeDatabaseHandler::createTables() const
 {
-  int failedCounter = 0;
-  bool tablesChecked = false;
-
   dbManager.ignoreWarnings(true);
-  while (!tablesChecked && failedCounter < MAX_TABLE_CREATION_RETRIES)
-  {
-    dbManager.begin();
-    tablesChecked = createTableAgentFindings("scancode_copyright") && createTableAgentFindings("scancode_author")&& createTableAgentEvents("scancode_copyright_event") && createTableAgentEvents("scancode_author_event");
-
-
-    if (tablesChecked)
-      dbManager.commit();
-    else
-    {
-      dbManager.rollback();
-      ++failedCounter;
-      if (failedCounter < MAX_TABLE_CREATION_RETRIES)
-      LOG_WARNING("table creation failed: trying again (%d/%d) \n", failedCounter, MAX_TABLE_CREATION_RETRIES);
-    }
-  }
-  if (tablesChecked && (failedCounter > 0))
-    LOG_NOTICE("table creation succeeded on try %d/%d \n", failedCounter, MAX_TABLE_CREATION_RETRIES);
+  bool result = createTableAgentFindings("scancode_copyright") &&
+                createTableAgentFindings("scancode_author") &&
+                createTableAgentEvents("scancode_copyright_event") &&
+                createTableAgentEvents("scancode_author_event");
   dbManager.ignoreWarnings(false);
-  return tablesChecked;
+  return result;
 }
 
 /**
@@ -494,6 +477,11 @@ const ScancodeDatabaseHandler::ColumnDef
  */
 bool ScancodeDatabaseHandler::createTableAgentFindings( string tableName) const
 {
+  if (tableName != "scancode_copyright" && tableName != "scancode_author") {
+    LOG_FATAL("createTableAgentFindings: unexpected table name '%s'", tableName.c_str());
+    return false;
+  }
+
   const char *tablename = "";
   const char *sequencename = "";
   if (tableName == "scancode_copyright") {
@@ -503,68 +491,87 @@ bool ScancodeDatabaseHandler::createTableAgentFindings( string tableName) const
     tablename = "scancode_author";
     sequencename = "scancode_author_pk_seq";
   }
-  if (!dbManager.sequenceExists(sequencename)) {
-    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE SEQUENCE %s"
-      " START WITH 1"
-        " INCREMENT BY 1"
-        " NO MAXVALUE"
-        " NO MINVALUE"
-        " CACHE 1",sequencename));
-  }
 
-  if (!dbManager.tableExists(tablename))
-  {
-    if (tableName == "scancode_copyright") {
+  RETURN_IF_FALSE(dbManager.queryPrintf("CREATE SEQUENCE IF NOT EXISTS %s"
+    " START WITH 1"
+    " INCREMENT BY 1"
+    " NO MAXVALUE"
+    " NO MINVALUE"
+    " CACHE 1", sequencename));
+
+  if (tableName == "scancode_copyright") {
     size_t ncolumns = (sizeof(ScancodeDatabaseHandler::columns_copyright) / sizeof(ScancodeDatabaseHandler::ColumnDef));
-    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE table %s(%s)", tablename,
+    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE TABLE IF NOT EXISTS %s(%s)", tablename,
       getColumnCreationString(ScancodeDatabaseHandler::columns_copyright, ncolumns).c_str()
-    )
-    );
+    ));
   } else if (tableName == "scancode_author") {
     size_t ncolumns = (sizeof(ScancodeDatabaseHandler::columns_author) / sizeof(ScancodeDatabaseHandler::ColumnDef));
-    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE table %s(%s)", tablename,
+    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE TABLE IF NOT EXISTS %s(%s)", tablename,
       getColumnCreationString(ScancodeDatabaseHandler::columns_author, ncolumns).c_str()
-    )
-    );
+    ));
   }
-    
-    RETURN_IF_FALSE(dbManager.queryPrintf(
-      "CREATE INDEX %s_agent_fk_index"
-        " ON %s"
-        " USING BTREE (agent_fk)",
-      tablename, tablename
-    ));
 
-    RETURN_IF_FALSE(dbManager.queryPrintf(
-      "CREATE INDEX %s_hash_index"
-        " ON %s"
-        " USING BTREE (hash)",
-      tablename, tablename
-    ));
+  RETURN_IF_FALSE(dbManager.queryPrintf(
+    "CREATE INDEX IF NOT EXISTS %s_agent_fk_index"
+    " ON %s"
+    " USING BTREE (agent_fk)",
+    tablename, tablename
+  ));
 
-    RETURN_IF_FALSE(dbManager.queryPrintf(
-      "CREATE INDEX %s_pfile_fk_index"
-        " ON %s"
-        " USING BTREE (pfile_fk)",
-      tablename, tablename
-    ));
+  RETURN_IF_FALSE(dbManager.queryPrintf(
+    "CREATE INDEX IF NOT EXISTS %s_hash_index"
+    " ON %s"
+    " USING BTREE (hash)",
+    tablename, tablename
+  ));
 
-    RETURN_IF_FALSE(dbManager.queryPrintf(
-      "ALTER TABLE ONLY %s"
+  RETURN_IF_FALSE(dbManager.queryPrintf(
+    "CREATE INDEX IF NOT EXISTS %s_pfile_fk_index"
+    " ON %s"
+    " USING BTREE (pfile_fk)",
+    tablename, tablename
+  ));
+
+  {
+    QueryResult fkCheck = dbManager.queryPrintf(
+      "SELECT 1 FROM pg_constraint"
+      " WHERE conname = 'agent_fk' AND conrelid = '%s'::regclass",
+      tablename);
+    RETURN_IF_FALSE(fkCheck);
+    if (fkCheck.getRowCount() == 0) {
+      RETURN_IF_FALSE(dbManager.queryPrintf(
+        "DO $$ BEGIN"
+        " ALTER TABLE ONLY %s"
         " ADD CONSTRAINT agent_fk"
         " FOREIGN KEY (agent_fk)"
-        " REFERENCES agent(agent_pk) ON DELETE CASCADE",
-      tablename
-    ));
+        " REFERENCES agent(agent_pk) ON DELETE CASCADE;"
+        " EXCEPTION WHEN duplicate_object THEN NULL;"
+        " END $$",
+        tablename
+      ));
+    }
+  }
 
-    RETURN_IF_FALSE(dbManager.queryPrintf(
-      "ALTER TABLE ONLY %s"
+  {
+    QueryResult fkCheck = dbManager.queryPrintf(
+      "SELECT 1 FROM pg_constraint"
+      " WHERE conname = 'pfile_fk' AND conrelid = '%s'::regclass",
+      tablename);
+    RETURN_IF_FALSE(fkCheck);
+    if (fkCheck.getRowCount() == 0) {
+      RETURN_IF_FALSE(dbManager.queryPrintf(
+        "DO $$ BEGIN"
+        " ALTER TABLE ONLY %s"
         " ADD CONSTRAINT pfile_fk"
         " FOREIGN KEY (pfile_fk)"
-        " REFERENCES pfile(pfile_pk) ON DELETE CASCADE",
-      tablename
-    ));
+        " REFERENCES pfile(pfile_pk) ON DELETE CASCADE;"
+        " EXCEPTION WHEN duplicate_object THEN NULL;"
+        " END $$",
+        tablename
+      ));
+    }
   }
+
   return true;
 }
  
@@ -611,6 +618,11 @@ const ScancodeDatabaseHandler::ColumnDef
  */
 bool ScancodeDatabaseHandler::createTableAgentEvents( string tableName) const
 {
+  if (tableName != "scancode_copyright_event" && tableName != "scancode_author_event") {
+    LOG_FATAL("createTableAgentEvents: unexpected table name '%s'", tableName.c_str());
+    return false;
+  }
+
   const char *tablename = "";
   const char *etablename = "";
   const char *esequencename = "";
@@ -623,71 +635,104 @@ bool ScancodeDatabaseHandler::createTableAgentEvents( string tableName) const
     esequencename = "scancode_author_event_pk_seq";
     tablename = "scancode_author";
   }
-  if (!dbManager.sequenceExists(esequencename)) {
-    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE SEQUENCE %s"
-      " START WITH 1"
-        " INCREMENT BY 1"
-        " NO MAXVALUE"
-        " NO MINVALUE"
-        " CACHE 1",esequencename));
-  }
 
-  if (!dbManager.tableExists(etablename))
-  {
-    if (tableName == "scancode_copyright_event") {
+  RETURN_IF_FALSE(dbManager.queryPrintf("CREATE SEQUENCE IF NOT EXISTS %s"
+    " START WITH 1"
+    " INCREMENT BY 1"
+    " NO MAXVALUE"
+    " NO MINVALUE"
+    " CACHE 1", esequencename));
+
+  if (tableName == "scancode_copyright_event") {
     size_t ncolumns = (sizeof(ScancodeDatabaseHandler::columns_copyright_event) / sizeof(ScancodeDatabaseHandler::ColumnDef));
-    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE table %s(%s)", etablename,
+    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE TABLE IF NOT EXISTS %s(%s)", etablename,
       getColumnCreationString(ScancodeDatabaseHandler::columns_copyright_event, ncolumns).c_str()
-    )
-    );
+    ));
   } else if (tableName == "scancode_author_event") {
     size_t ncolumns = (sizeof(ScancodeDatabaseHandler::columns_author_event) / sizeof(ScancodeDatabaseHandler::ColumnDef));
-    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE table %s(%s)", etablename,
+    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE TABLE IF NOT EXISTS %s(%s)", etablename,
       getColumnCreationString(ScancodeDatabaseHandler::columns_author_event, ncolumns).c_str()
-    )
-    );
+    ));
   }
-    RETURN_IF_FALSE(dbManager.queryPrintf(
-      "CREATE INDEX %s_upload_fk_index"
-        " ON %s"
-        " USING BTREE (upload_fk)",
-      etablename, etablename
-    ));
-    RETURN_IF_FALSE(dbManager.queryPrintf(
-      "CREATE INDEX %s_uploadtree_fk_index"
-        " ON %s"
-        " USING BTREE (uploadtree_fk)",
-      etablename, etablename
-    ));
-    RETURN_IF_FALSE(dbManager.queryPrintf(
-      "CREATE INDEX %s_scancode_fk_index"
-        " ON %s"
-        " USING BTREE (%s_fk)",
-      etablename, etablename, tablename
-    ));
-    
-    RETURN_IF_FALSE(dbManager.queryPrintf(
-      "ALTER TABLE ONLY %s"
+
+  RETURN_IF_FALSE(dbManager.queryPrintf(
+    "CREATE INDEX IF NOT EXISTS %s_upload_fk_index"
+    " ON %s"
+    " USING BTREE (upload_fk)",
+    etablename, etablename
+  ));
+
+  RETURN_IF_FALSE(dbManager.queryPrintf(
+    "CREATE INDEX IF NOT EXISTS %s_uploadtree_fk_index"
+    " ON %s"
+    " USING BTREE (uploadtree_fk)",
+    etablename, etablename
+  ));
+
+  RETURN_IF_FALSE(dbManager.queryPrintf(
+    "CREATE INDEX IF NOT EXISTS %s_scancode_fk_index"
+    " ON %s"
+    " USING BTREE (%s_fk)",
+    etablename, etablename, tablename
+  ));
+
+  {
+    QueryResult fkCheck = dbManager.queryPrintf(
+      "SELECT 1 FROM pg_constraint"
+      " WHERE conname = 'upload_fk' AND conrelid = '%s'::regclass",
+      etablename);
+    RETURN_IF_FALSE(fkCheck);
+    if (fkCheck.getRowCount() == 0) {
+      RETURN_IF_FALSE(dbManager.queryPrintf(
+        "DO $$ BEGIN"
+        " ALTER TABLE ONLY %s"
         " ADD CONSTRAINT upload_fk"
         " FOREIGN KEY (upload_fk)"
-        " REFERENCES upload(upload_pk) ON DELETE CASCADE",
-      etablename
-    ));
+        " REFERENCES upload(upload_pk) ON DELETE CASCADE;"
+        " EXCEPTION WHEN duplicate_object THEN NULL;"
+        " END $$",
+        etablename
+      ));
+    }
+  }
 
-
-    RETURN_IF_FALSE(dbManager.queryPrintf(
-      "ALTER TABLE ONLY %s"
+  {
+    string contentFkName = string(tablename) + "_fk";
+    QueryResult fkCheck = dbManager.queryPrintf(
+      "SELECT 1 FROM pg_constraint"
+      " WHERE conname = '%s' AND conrelid = '%s'::regclass",
+      contentFkName.c_str(), etablename);
+    RETURN_IF_FALSE(fkCheck);
+    if (fkCheck.getRowCount() == 0) {
+      RETURN_IF_FALSE(dbManager.queryPrintf(
+        "DO $$ BEGIN"
+        " ALTER TABLE ONLY %s"
         " ADD CONSTRAINT %s_fk"
         " FOREIGN KEY (%s_fk)"
-        " REFERENCES %s(%s_pk) ON DELETE CASCADE",
-      etablename, tablename, tablename, tablename, tablename
-    ));
-    RETURN_IF_FALSE(dbManager.queryPrintf(
-      "ALTER TABLE %s"
-      " ALTER COLUMN scope"
-      " SET DEFAULT 1",
-      etablename
-    ));
+        " REFERENCES %s(%s_pk) ON DELETE CASCADE;"
+        " EXCEPTION WHEN duplicate_object THEN NULL;"
+        " END $$",
+        etablename, tablename, tablename, tablename, tablename
+      ));
+    }
   }
+
+  {
+    QueryResult defaultCheck = dbManager.queryPrintf(
+      "SELECT 1 FROM pg_attrdef ad"
+      " JOIN pg_attribute a ON a.attrelid = ad.adrelid AND a.attnum = ad.adnum"
+      " WHERE ad.adrelid = '%s'::regclass"
+      " AND a.attname = 'scope'"
+      " AND pg_get_expr(ad.adbin, ad.adrelid) = '1'",
+      etablename);
+    RETURN_IF_FALSE(defaultCheck);
+    if (defaultCheck.getRowCount() == 0) {
+      RETURN_IF_FALSE(dbManager.queryPrintf(
+        "ALTER TABLE %s ALTER COLUMN scope SET DEFAULT 1",
+        etablename
+      ));
+    }
+  }
+
   return true;
 }
