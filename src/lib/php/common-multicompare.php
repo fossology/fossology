@@ -10,6 +10,33 @@
  * \brief N-way file matching and link generation for multi-component comparison.
  */
 
+/**
+ * \brief Select the effective comparison root for a tree item.
+ *
+ * Archive uploads commonly contain one extracted, non-artifact wrapper
+ * directory below the upload root.  In that specific case, compare the
+ * wrapper's children instead of comparing the wrapper name itself.
+ *
+ * @param int   $selectedItem Selected uploadtree_pk
+ * @param array $children     Non-artifact children of the selected item
+ * @return int Original item, or its sole directory child's uploadtree_pk
+ */
+function NormalizeMultiCompareRoot(int $selectedItem, array $children): int
+{
+  if (count($children) !== 1) {
+    return $selectedItem;
+  }
+
+  $child = reset($children);
+  if (empty($child['uploadtree_pk']) ||
+      !isset($child['ufile_mode']) ||
+      !Isdir($child['ufile_mode'])) {
+    return $selectedItem;
+  }
+
+  return intval($child['uploadtree_pk']);
+}
+
 
 /**
  * \brief Remove one key from a name-index bucket list (used by MakeMasterN).
