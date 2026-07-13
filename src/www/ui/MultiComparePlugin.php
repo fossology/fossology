@@ -168,6 +168,32 @@ class MultiComparePlugin extends DefaultPlugin
   }
 
   /**
+   * Descend through a sole non-artifact directory child for each selected
+   * comparison root. Roots with zero/multiple children or a sole file child
+   * are left unchanged.
+   */
+  private function normalizeComparisonRoots(array $items): array
+  {
+    foreach ($items as $idx => $itemPk) {
+      $row = $this->dbManager->getSingleRow(
+        "SELECT u.uploadtree_tablename
+         FROM uploadtree ut
+         JOIN upload u ON u.upload_pk = ut.upload_fk
+         WHERE ut.uploadtree_pk = \$1",
+        [$itemPk], __METHOD__ . '.table'
+      );
+      if (!$row) {
+        continue;
+      }
+
+      $children = GetNonArtifactChildren($itemPk, $row['uploadtree_tablename']);
+      $items[$idx] = NormalizeMultiCompareRoot($itemPk, $children);
+    }
+
+    return $items;
+  }
+
+  /**
    * Populate dataarray and datastr on every child for the given mode.
    * License and copyright/ECC data are fetched in single batch queries
    * (one per column) instead of one query per child.
@@ -778,6 +804,8 @@ class MultiComparePlugin extends DefaultPlugin
         }
       }
     }
+
+    $items = $this->normalizeComparisonRoots($items);
 
     $cacheKey = "?mod=" . self::NAME
         . "&items=" . implode(",", $items)
