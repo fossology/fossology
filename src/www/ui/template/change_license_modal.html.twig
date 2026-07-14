@@ -47,9 +47,9 @@
               </select>
             </div>
             <div class="col-xs-1 my-auto px-0 text-center">
-              <input type="button" value="&gt;" class="btn btn-default btn-sm" onclick="moveLicense(this.form.licenseLeft, this.form.licenseRight);" />
+              <input type="button" value="&gt;" class="btn btn-light btn-sm" onclick="moveLicense(this.form.licenseLeft, this.form.licenseRight);" />
               <br><br>
-              <input type="button" value="&lt;" class="btn btn-default btn-sm" onclick="moveLicense(this.form.licenseRight, this.form.licenseLeft);" />
+              <input type="button" value="&lt;" class="btn btn-light btn-sm" onclick="moveLicense(this.form.licenseRight, this.form.licenseLeft);" />
             </div>
             <div class="col">
               <label for="licenseRight">{{ 'Selected licenses'|trans }}:</label>
@@ -60,14 +60,14 @@
           </div>
           <div class="row justify-content-md-center pt-3">
             <div class="col text-center">
-              <button type="button" class="btn btn-default"
+              <button type="button" class="btn btn-light"
                   onclick="performPostRequest(false);">
                 {{ 'Add selected licenses'|trans }}
               </button>
             </div>
             <div class="col-xs-1 my-auto px-0 text-center"></div>
             <div class="col text-center">
-              <button type="button" class="btn btn-default"
+              <button type="button" class="btn btn-light"
                   onclick="performPostRequest(true);">
                 {{ 'Remove selected licenses'|trans }}
               </button>

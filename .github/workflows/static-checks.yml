@@ -9,6 +9,9 @@ concurrency:
   group: static-${{ github.head_ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [master]
@@ -119,6 +122,11 @@ jobs:
 
   lint-commits:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read   # wagoid/commitlint reads PR commits
+      checks: write         # wagoid/commitlint posts check annotations
+      statuses: write       # christophebedard/dco-check posts commit statuses
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5

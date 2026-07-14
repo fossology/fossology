@@ -20,13 +20,13 @@
             
             <div class="clearing-search-bar" style="display:inline-flex;">
                 <input type="text" id="textSearchInput" class="clearing-search-bar__input" placeholder="Search in file..." value="{{ searchQuery }}">
-                <button class="btn btn-default btn-sm" id="btnTriggerSearch" title="Search">
+                <button class="btn btn-light btn-sm" id="btnTriggerSearch" title="Search">
                      Search
                 </button>
-                <button class="btn btn-default btn-sm" id="btnPrevMatch" title="Previous Match" disabled>
+                <button class="btn btn-light btn-sm" id="btnPrevMatch" title="Previous Match" disabled>
                     &uarr;
                 </button>
-                <button class="btn btn-default btn-sm" id="btnNextMatch" title="Next Match" disabled>
+                <button class="btn btn-light btn-sm" id="btnNextMatch" title="Next Match" disabled>
                     &darr;
                 </button>
                 <span id="searchCountInfo" style="font-size: 0.9em; margin-left: 5px;"></span>
@@ -35,10 +35,10 @@
                 {% endif %}
             </div>
 
-            <button class="legendHider btn btn-default btn-sm">
+            <button class="legendHider btn btn-light btn-sm">
               {{ 'Hide Legend'| trans }}
             </button>
-            <button class="legendShower btn btn-default btn-sm">
+            <button class="legendShower btn btn-light btn-sm">
               {{ 'Show Legend'| trans }}
             </button>
           </div>

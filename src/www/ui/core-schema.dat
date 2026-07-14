@@ -1250,8 +1250,8 @@
   $Schema["TABLE"]["license_ref"]["rf_shortname"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_shortname\" SET NOT NULL";
 
   $Schema["TABLE"]["license_ref"]["rf_licensetype"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_licensetype\" IS 'Permissive, Copyleft, Copyright, ...'";
-  $Schema["TABLE"]["license_ref"]["rf_licensetype"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_licensetype\" text DEFAULT 'UNKNOWN'::text";
-  $Schema["TABLE"]["license_ref"]["rf_licensetype"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_licensetype\" DROP NOT NULL, ALTER COLUMN \"rf_licensetype\" SET DEFAULT 'UNKNOWN'::text";
+  $Schema["TABLE"]["license_ref"]["rf_licensetype"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_licensetype\" text DEFAULT 'Unknown'::text";
+  $Schema["TABLE"]["license_ref"]["rf_licensetype"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_licensetype\" DROP NOT NULL, ALTER COLUMN \"rf_licensetype\" SET DEFAULT 'Unknown'::text";
 
   $Schema["TABLE"]["license_ref"]["rf_text"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_text\" IS 'reference License text, or regex'";
   $Schema["TABLE"]["license_ref"]["rf_text"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_text\" text";
@@ -2855,6 +2855,8 @@
   $Schema["INDEX"]["ipra_decision"]["ipra_decision_pfile_fk_index"] = "CREATE INDEX ipra_decision_pfile_fk_index ON ipra_decision USING btree (pfile_fk);";
   $Schema["INDEX"]["ipra_decision"]["ipra_decision_user_fk_index"] = "CREATE INDEX ipra_decision_user_fk_index ON ipra_decision USING btree (user_fk);";
   $Schema["INDEX"]["ipra_decision"]["ipra_decision_pfile_hash_index"] = "CREATE INDEX ipra_decision_pfile_hash_index ON ipra_decision USING btree (hash, pfile_fk);";
+
+  $Schema["INDEX"]["jobdepends"]["jobdepends_jq_fk_idx"] = "CREATE INDEX jobdepends_jq_fk_idx ON jobdepends USING btree (jdep_jq_fk);";
 
   $Schema["INDEX"]["keyword"]["keyword_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX keyword_pfile_fk_is_enabled_false_idx ON keyword USING btree (pfile_fk, is_enabled) WHERE (is_enabled = false);";
   $Schema["INDEX"]["keyword"]["keyword_agent_fk_index"] = "CREATE INDEX keyword_agent_fk_index ON keyword USING btree (agent_fk);";
