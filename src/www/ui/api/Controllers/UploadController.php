@@ -119,6 +119,11 @@ class UploadController extends RestController
   const VALID_STATUS = ["open", "inprogress", "closed", "rejected"];
 
   /**
+   * Valid action inputs for move/copy/link
+   */
+  const VALID_ACTIONS = ["copy", "move", "link"];
+
+  /**
    * Agent names list
    */
   private $agentNames = AgentRef::AGENT_LIST;
@@ -394,6 +399,13 @@ class UploadController extends RestController
       $action = $request->getHeaderLine('action');
     }
     $action = strtolower($action);
+
+    // Validate action parameter against enum
+    if (empty($action) || !in_array($action, self::VALID_ACTIONS)) {
+      throw new HttpBadRequestException(
+        "action must be one of: " . implode(", ", self::VALID_ACTIONS));
+    }
+
     if ($action == "move") {
       $copy = false;
     } else {

@@ -216,6 +216,8 @@ class RestHelper
 
     $errors = $contentMove->copyContent([$uploadContentId], $newFolderId, $isCopy);
     if (empty($errors)) {
+      // Normalize action to lowercase for case-insensitive comparison
+      $action = strtolower($action);
       if ($action === "link") {
         $actionStr = "linked";
       } else {
