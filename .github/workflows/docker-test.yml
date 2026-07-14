@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: GPL-2.0-only AND LGPL-2.1-only
 name: Docker test
 
+permissions:
+  contents: read
+
 on:
   pull_request
 

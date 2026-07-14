@@ -608,7 +608,7 @@ class ui_report_conf extends FO_Plugin
         ta.prop('readonly', false).css('border', '2px solid #337ab7').focus();
         td.append('<div class=\"ack-edit-actions\" style=\"margin-top:4px;\">'
           + '<button type=\"button\" class=\"btn btn-primary btn-xs ack-save-btn\">Save</button> '
-          + '<button type=\"button\" class=\"btn btn-default btn-xs ack-cancel-btn\">Cancel</button>'
+          + '<button type=\"button\" class=\"btn btn-light btn-xs ack-cancel-btn\">Cancel</button>'
           + '</div>');
       });
 

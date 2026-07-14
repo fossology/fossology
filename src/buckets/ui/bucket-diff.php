@@ -672,7 +672,8 @@ return;
     {
       $text = _("cached");
       $text1 = _("Update");
-      echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+      $updateUri = $_SERVER['REQUEST_URI'] . '&updcache=1';
+      echo " <i>$text</i>   <a href=\"" . htmlspecialchars($updateUri, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . "\"> $text1 </a>";
     }
     else if ($Time > 0.5)
     {

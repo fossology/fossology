@@ -10,6 +10,7 @@
       <file>test_common_cache.php</file>
       <file>test_common_cli.php</file>
       <file>test_common_dir.php</file>
+      <file>test_common_multicompare.php</file>
       <file>test_common_license_file.php</file>
       <file>test_common_menu.php</file>
       <file>test_common_parm.php</file>
