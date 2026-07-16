@@ -906,6 +906,43 @@ ORDER BY lft asc
   }
 
   /**
+   * @brief Get cyclone dx settings for a user
+   * @param int $uploadId Upload ID to get user for
+   * @return string Comma separated values for cyclonedxLicenseComment, ignoreFilesWOInfo, osselotExport
+   */
+  public function getCyclonedxSettings($uploadId)
+  {
+    $uploadOwner = $this->getUploadOwner($uploadId);
+
+    if (empty($uploadOwner)) {
+      return "unchecked,unchecked,unchecked";
+    }
+
+    $userId = $uploadOwner['user_fk'];
+
+    $stmt = __METHOD__ . '.getUserDefaults';
+    $sql = "SELECT cyclonedx_settings FROM users WHERE user_pk = $1";
+    $userDefaults = $this->dbManager->getSingleRow($sql, array($userId), $stmt);
+
+    if (empty($userDefaults) || empty($userDefaults['cyclonedx_settings'])) {
+      return "unchecked,unchecked,unchecked";
+    }
+
+    $settings = explode(',', $userDefaults['cyclonedx_settings']);
+    if (count($settings) < 3) {
+      $settings = array_pad($settings, 3, 'unchecked');
+    }
+
+    $osselotExport = $settings[0];
+    $cyclonedxLicenseComment = $settings[1];
+    $ignoreFilesWOInfo = $settings[2];
+
+    $result = "$cyclonedxLicenseComment,$ignoreFilesWOInfo,$osselotExport";
+
+    return $result;
+  }
+
+  /**
    * @brief Update report info for upload
    * @param int $uploadId  Upload ID to update
    * @param string $column Column to update
