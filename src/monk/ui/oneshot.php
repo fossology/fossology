@@ -109,7 +109,7 @@ class OneShot extends DefaultPlugin
   public function scanMonk($fileName)
   {
     global $SYSCONFDIR;
-    $cmd = dirname(__DIR__).'/agent/monk -c '.$SYSCONFDIR.' '.$fileName;
+    $cmd = dirname(__DIR__).'/agent/monk -c '.escapeshellarg($SYSCONFDIR).' '.escapeshellarg($fileName);
     exec($cmd, $output, $returnVar);
     if ($returnVar != 0) {
       throw new \Exception("scan failed with $returnVar");

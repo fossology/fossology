@@ -60,8 +60,8 @@ class changeLicenseProcessPost extends FO_Plugin
     $uploadId = GetParm("upload", PARM_STRING);
     $uploadTreeId = GetParm("item", PARM_STRING);
 
-    $sql = "SELECT bucketpool_fk from bucket_ars where upload_fk = $uploadId;";
-    $result = pg_query($PG_CONN, $sql);
+    $sql = "SELECT bucketpool_fk from bucket_ars where upload_fk = $1;";
+    $result = pg_query_params($PG_CONN, $sql, array($uploadId));
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $bucketpool_array = pg_fetch_all_columns($result, 0);
     pg_free_result($result);

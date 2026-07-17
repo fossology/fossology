@@ -410,7 +410,7 @@ class core_auth extends FO_Plugin
         } else if (! empty($row['user_seed'])) {
           $passwordHash = sha1($row['user_seed'] . $password);
           /* If verify with new hash fails check with the old hash */
-          if (strcmp($passwordHash, $row['user_pass']) == 0) {
+          if (hash_equals($row['user_pass'], $passwordHash)) {
             $newHash = password_hash($password, PASSWORD_DEFAULT, $options);
             /* Update old hash with new hash */
             update_password_hash($userName, $newHash);
