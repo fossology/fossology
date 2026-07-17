@@ -47,31 +47,46 @@ function FuzzyCmp($Master1, $Master2)
 function MakeMaster($Children1, $Children2)
 {
   $Master = array();
-  $row =  -1;   // Master row number
+  $row = -1;
 
-  if (! empty($Children1) && (! empty($Children2))) {
+  if (!empty($Children1) && !empty($Children2)) {
+    /* Build hash-map indices for fast matching */
+    $allChildren2 = [];
+    $byName  = [];
+    $byFuzzyExt = [];
+    $byFuzzy = [];
+    foreach ($Children2 as $idx => $child) {
+      $allChildren2[$idx] = $child;
+      $byName[$child['ufile_name']][$idx] = $idx;
+      $byFuzzyExt[$child['fuzzynameext']][$idx] = $idx;
+      $byFuzzy[$child['fuzzyname']][$idx] = $idx;
+    }
+    $consumed = [];
+
     foreach ($Children1 as $Child1) {
       $done = false;
       $row++;
 
       /* find complete name match */
-      foreach ($Children2 as $key => $Child2) {
-        if ($Child1['ufile_name'] == $Child2['ufile_name']) {
-          $Master[$row][1] = $Child1;
-          $Master[$row][2] = $Child2;
-          unset($Children2[$key]);
-          $done = true;
-          break;
+      if (!$done && !empty($byName[$Child1['ufile_name']])) {
+        foreach ($byName[$Child1['ufile_name']] as $idx) {
+          if (!isset($consumed[$idx])) {
+            $Master[$row][1] = $Child1;
+            $Master[$row][2] = $allChildren2[$idx];
+            $consumed[$idx] = true;
+            $done = true;
+            break;
+          }
         }
       }
 
       /* find fuzzy+extension match */
-      if (! $done) {
-        foreach ($Children2 as $key => $Child2) {
-          if ($Child1['fuzzynameext'] == $Child2['fuzzynameext']) {
+      if (!$done && !empty($byFuzzyExt[$Child1['fuzzynameext']])) {
+        foreach ($byFuzzyExt[$Child1['fuzzynameext']] as $idx) {
+          if (!isset($consumed[$idx])) {
             $Master[$row][1] = $Child1;
-            $Master[$row][2] = $Child2;
-            unset($Children2[$key]);
+            $Master[$row][2] = $allChildren2[$idx];
+            $consumed[$idx] = true;
             $done = true;
             break;
           }
@@ -79,25 +94,33 @@ function MakeMaster($Children1, $Children2)
       }
 
       /* find files that only differ by 1 character in fuzzyext */
-      if (! $done) {
-        foreach ($Children2 as $key => $Child2) {
-          if (levenshtein($Child1['fuzzynameext'], $Child2['fuzzynameext']) == 1) {
-            $Master[$row][1] = $Child1;
-            $Master[$row][2] = $Child2;
-            unset($Children2[$key]);
-            $done = true;
-            break;
+      if (!$done) {
+        $best = null;
+        foreach ($byFuzzyExt as $key => $indices) {
+          if (levenshtein($Child1['fuzzynameext'], $key) == 1) {
+            foreach ($indices as $idx) {
+              if (!isset($consumed[$idx])) {
+                $best = $idx;
+                break 2;
+              }
+            }
           }
+        }
+        if ($best !== null) {
+          $Master[$row][1] = $Child1;
+          $Master[$row][2] = $allChildren2[$best];
+          $consumed[$best] = true;
+          $done = true;
         }
       }
 
       /* Look for fuzzy match */
-      if (! $done) {
-        foreach ($Children2 as $key => $Child2) {
-          if ($Child1['fuzzyname'] == $Child2['fuzzyname']) {
+      if (!$done && !empty($byFuzzy[$Child1['fuzzyname']])) {
+        foreach ($byFuzzy[$Child1['fuzzyname']] as $idx) {
+          if (!isset($consumed[$idx])) {
             $Master[$row][1] = $Child1;
-            $Master[$row][2] = $Child2;
-            unset($Children2[$key]);
+            $Master[$row][2] = $allChildren2[$idx];
+            $consumed[$idx] = true;
             $done = true;
             break;
           }
@@ -105,24 +128,43 @@ function MakeMaster($Children1, $Children2)
       }
 
       /* no match so add it in by itself */
-      if (! $done) {
+      if (!$done) {
         $Master[$row][1] = $Child1;
         $Master[$row][2] = array();
       }
     }
+  } elseif (!empty($Children1)) {
+    /* Only Children1 exists */
+    foreach ($Children1 as $Child1) {
+      $row++;
+      $Master[$row][1] = $Child1;
+      $Master[$row][2] = array();
+    }
   }
 
   /* Remaining Child2 recs */
-  foreach ($Children2 as $Child) {
-    $row ++;
-    $Master[$row][1] = '';
-    $Master[$row][2] = $Child;
+  if (!empty($Children2)) {
+    if (!isset($consumed)) {
+      foreach ($Children2 as $Child) {
+        $row++;
+        $Master[$row][1] = '';
+        $Master[$row][2] = $Child;
+      }
+    } else {
+      foreach ($allChildren2 as $idx => $child) {
+        if (!isset($consumed[$idx])) {
+          $row++;
+          $Master[$row][1] = '';
+          $Master[$row][2] = $child;
+        }
+      }
+    }
   }
 
   /* Sort master by child1 */
   usort($Master, "FuzzyCmp");
 
-  return($Master);
+  return $Master;
 } // MakeMaster()
 
 

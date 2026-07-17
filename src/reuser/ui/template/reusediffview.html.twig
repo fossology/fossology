@@ -1,0 +1,175 @@
+{# SPDX-FileCopyrightText: © 2026 Siemens AG
+
+   SPDX-License-Identifier: GPL-2.0-only
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+<style>
+  .diff-lines-container { font-family:monospace;font-size:0;line-height:0;margin:0;padding:4px; }
+  .diff-line { margin:0;padding:0;line-height:1.2;font-size:12px;white-space:pre-wrap; }
+  .diff-line-added { background-color:#d4edda;color:#155724; }
+  .diff-line-deleted { background-color:#f8d7da;color:#721c24; }
+  .diff-line-unchanged { color:#6c757d; }
+  .legend-box { background-color:white;padding:2px;border:1px outset #222222;width:150px;position:absolute;right:17px;bottom:17px; }
+</style>
+  <div id="leftrightalignment" name="leftrightalignment">
+    <table border="0" style="padding:0px; height:100%; width:100%">
+      <tr>
+        <td style="padding:0px; position:relative; height: 100%; width:50%">
+          <div class="centered" style='padding:2px;'>
+            <a href="?mod=reusecompare&upload={{ uploadId }}&item={{ item|default('') }}{% if reuse > 0 %}&reuse={{ reuse }}{% endif %}" class="btn btn-default btn-sm">
+              &larr; {{ 'Back to Reuse Compare'|trans }}
+            </a>
+
+            <button class="legendHider btn btn-default btn-sm">
+              {{ 'Hide Legend'|trans }}
+            </button>
+            <button class="legendShower btn btn-default btn-sm">
+              {{ 'Show Legend'|trans }}
+            </button>
+          </div>
+
+          <div class="boxnew" id="fileTextView" style="overflow:scroll;">
+            <div class="diff-lines-container">
+{%- for line in diffData %}{% if line.type == 'added' %}<div class="diff-line diff-line-added">+ {{ line.content|e }}</div>{% elseif line.type == 'deleted' %}<div class="diff-line diff-line-deleted">- {{ line.content|e }}</div>{% else %}<div class="diff-line diff-line-unchanged">  {{ line.content|e }}</div>{% endif %}
+{%- endfor %}
+            </div>
+          </div>
+
+          <div id="legendBox" name="legendBox" class="legend-box">
+            <u><b>{{ 'Legend:'|trans }}</b></u><br/>
+            <span class="hi-added diff-line-added" style="display:inline-block;">+ {{ 'Added lines'|trans }}</span><br/>
+            <span class="hi-deleted diff-line-deleted" style="display:inline-block;">- {{ 'Deleted lines'|trans }}</span><br/>
+            <span class="diff-line-unchanged" style="display:inline-block;">  {{ 'Unchanged lines'|trans }}</span>
+          </div>
+        </td>
+        <td style="width:50%;vertical-align:top;padding:0;overflow:auto;background:#fff;">
+          {% block rhs %}
+            {% set totalLines = diffData|length %}
+            {% set addedLines = diffData|filter(line => line.type == 'added')|length %}
+            {% set deletedLines = diffData|filter(line => line.type == 'deleted')|length %}
+            {% set unchangedLines = diffData|filter(line => line.type == 'unchanged')|length %}
+
+            <div class="p-3">
+              <!-- Diff Statistics -->
+{% if diffData is not empty %}
+              <div class="card mb-3">
+                <div class="card-header py-2 px-3">
+                  <strong>{{ 'Diff Statistics'|trans }}</strong>
+                </div>
+                <div class="card-body p-0">
+                  <table class="simpleTable w-100" cellpadding="3">
+                    <thead>
+                      <tr>
+                        <th>{{ 'Metric'|trans }}</th>
+                        <th class="text-center">{{ 'Count'|trans }}</th>
+                        <th class="text-center">{{ 'Percent'|trans }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="odd">
+                        <td>{{ 'Total'|trans }}</td>
+                        <td class="text-center">{{ totalLines }}</td>
+                        <td class="text-center">100%</td>
+                      </tr>
+                      <tr class="even">
+                        <td class="text-success">{{ 'Added'|trans }}</td>
+                        <td class="text-center">{{ addedLines }}</td>
+                        <td class="text-center">{{ totalLines > 0 ? ((addedLines / totalLines) * 100)|number_format(1) : 0 }}%</td>
+                      </tr>
+                      <tr class="odd">
+                        <td class="text-danger">{{ 'Deleted'|trans }}</td>
+                        <td class="text-center">{{ deletedLines }}</td>
+                        <td class="text-center">{{ totalLines > 0 ? ((deletedLines / totalLines) * 100)|number_format(1) : 0 }}%</td>
+                      </tr>
+                      <tr class="even">
+                        <td class="text-info">{{ 'Unchanged'|trans }}</td>
+                        <td class="text-center">{{ unchangedLines }}</td>
+                        <td class="text-center">{{ totalLines > 0 ? ((unchangedLines / totalLines) * 100)|number_format(1) : 0 }}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+{% endif %}
+
+              <!-- File Details -->
+              <div class="card mb-3">
+                <div class="card-header py-2 px-3">
+                  <strong>{{ 'File Details'|trans }}</strong>
+                </div>
+                <div class="card-body p-0">
+                  <table class="simpleTable w-100" cellpadding="3">
+                    <thead>
+                      <tr>
+                        <th>{{ 'Property'|trans }}</th>
+                        <th>{{ 'Current'|trans }}</th>
+                        <th>{{ 'Reused'|trans }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="odd">
+                        <td>{{ 'Size'|trans }}</td>
+                        <td>{{ currentFile.pfile_size|e }} bytes</td>
+                        <td>{{ reusedFile.pfile_size|e }} bytes</td>
+                      </tr>
+                      <tr class="even">
+                        <td class="align-middle">{{ 'SHA1'|trans }}</td>
+                        <td style="font-family:monospace;"><code>{{ currentFile.pfile_sha1|e }}</code></td>
+                        <td style="font-family:monospace;"><code>{{ reusedFile.pfile_sha1|e }}</code></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- License Comparison -->
+              <div class="card mb-3">
+                <div class="card-header py-2 px-3">
+                  <strong>{{ 'Licenses'|trans }}</strong>
+                </div>
+                <div class="card-body p-0">
+                  <table class="simpleTable w-100" cellpadding="3">
+                    <thead>
+                      <tr>
+                        <th>{{ 'License'|trans }}</th>
+                        <th>{{ 'Status'|trans }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for licenseName, licenseData in allLicenses %}
+                        <tr class="{{ cycle(['odd', 'even'], loop.index0) }}">
+                          <td>{{ licenseName|e }}</td>
+                          <td>
+                            {% if licenseData.status == 'both' %}
+                              <span class="text-success font-weight-bold">{{ 'Common'|trans }}</span>
+                            {% elseif licenseData.status == 'removed-in-current' %}
+                              <span class="text-danger font-weight-bold">{{ 'Removed from Current'|trans }}</span>
+                            {% elseif licenseData.status == 'removed-in-reuse' %}
+                              <span class="text-warning font-weight-bold">{{ 'Removed from Reuse'|trans }}</span>
+                            {% elseif licenseData.status == 'added-in-current' %}
+                              <span class="text-info font-weight-bold">{{ 'Added to Current'|trans }}</span>
+                            {% elseif licenseData.status == 'added-in-reuse' %}
+                              <span class="text-success font-weight-bold">{{ 'Added to Reuse'|trans }}</span>
+                            {% endif %}
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          {% endblock %}
+        </td>
+      </tr>
+    </table>
+  </div>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script src="scripts/legend.js" type="text/javascript"></script>
+  <script src="scripts/tools.js" type="text/javascript"></script>
+{% endblock %}
