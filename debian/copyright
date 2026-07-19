@@ -713,7 +713,6 @@ Files: fossology-master.zip/fossology-master/src/pkgagent/agent_tests/Unit/testT
        fossology-master.zip/fossology-master/src/cli/fo_monk_license_list.php
        fossology-master.zip/fossology-master/src/cli/fo_usergroup.php
        fossology-master.zip/fossology-master/src/cli/fo_import_licenses.php
-       fossology-master.zip/fossology-master/src/cli/fo_ninka_license_list.php
        fossology-master.zip/fossology-master/src/cli/tests/tests.xml
        fossology-master.zip/fossology-master/src/cli/tests/desc.php
        fossology-master.zip/fossology-master/src/cli/tests/all_tests.php

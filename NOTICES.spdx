@@ -19799,18 +19799,6 @@ FileCopyrightText: <text> © 2015 Siemens AG </text>
 
 ##File
 
-FileName: fossology-master.zip/fossology-master/src/cli/fo_ninka_license_list.php
-SPDXID: SPDXRef-item283116089
-FileChecksum: SHA1: ef7852d7d32d83d2574d681ac6689b65c54b43e0
-FileChecksum: SHA256: a1e41f3d1fd5d3544f5cfcf43b1b50bccae10ecbb5cb50cfd5cf01acf8c39591
-FileChecksum: MD5: 51e2358c57daaaf8fd11145e68db41e0
-LicenseConcluded: GPL-2.0-only
-
-LicenseInfoInFile: GPL-2.0-only
-FileCopyrightText: <text> © 2013-2014 Hewlett-Packard Development Company, L.P. </text>
-
-##File
-
 FileName: fossology-master.zip/fossology-master/src/cli/exportLicenseRefUsingSPDX.php
 SPDXID: SPDXRef-item283116087
 FileChecksum: SHA1: 04e5220dada57183ad038e77e89cf7e6a3fb55f7
