@@ -162,7 +162,7 @@ function account_check(&$user, &$passwd, &$group = "")
       } else if (! empty($row['user_seed'])) {
         $passwd_hash = sha1($row['user_seed'] . $passwd);
         /* If verify with new hash fails check with the old hash */
-        if (strcmp($passwd_hash, $row['user_pass']) == 0) {
+        if (hash_equals($row['user_pass'], $passwd_hash)) {
           $newHash = password_hash($passwd, PASSWORD_DEFAULT, $options);
           /* Update old hash with new hash */
           update_password_hash($user, $newHash);

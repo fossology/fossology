@@ -50,7 +50,7 @@ class agent_nomos_once extends FO_Plugin
   {
     global $SYSCONFDIR;
 
-    exec("$SYSCONFDIR/mods-enabled/nomos/agent/nomos -S $FilePath", $out, $rtn);
+    exec("$SYSCONFDIR/mods-enabled/nomos/agent/nomos -S " . escapeshellarg($FilePath), $out, $rtn);
     $licensesFromAgent = explode('contains license(s)', $out[0]);
     $licenses_and_Highlight = end($licensesFromAgent);
     $licenses = explode('Highlighting Info at', $licenses_and_Highlight);

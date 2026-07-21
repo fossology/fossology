@@ -211,8 +211,8 @@ class AjaxExplorer extends DefaultPlugin
 
     $orderString = $this->getObject('utils.data_tables_utility')->getSortingString($request->get('fromRest') ? $request->request->all(): $request->query->all(), $columnNamesInDatabase, $defaultOrder);
 
-    $offset = $request->get('iDisplayStart');
-    $limit = $request->get('iDisplayLength');
+    $offset = intval($request->get('iDisplayStart'));
+    $limit = intval($request->get('iDisplayLength'));
     if ($offset) {
       $orderString .= " OFFSET $offset";
     }

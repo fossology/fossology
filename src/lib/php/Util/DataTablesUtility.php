@@ -67,7 +67,7 @@ class DataTablesUtility
       $name = $columNamesInDatabase[$colNumber];
 
       $whichDir = 'sSortDir_' . $i;
-      $order = $inputArray[$whichDir];
+      $order = $this->sanitizeSortDirection($inputArray[$whichDir]);
       $orderArray[] = $name . " " . $order;
     }
 
@@ -83,9 +83,23 @@ class DataTablesUtility
       }
 
       $name = $columNamesInDatabase[$colNumber];
-      $orderArray[] = $name . " " . $order;
+      $orderArray[] = $name . " " . $this->sanitizeSortDirection($order);
     }
     return $orderArray;
+  }
+
+  /**
+   * @brief Validate sort direction for SQL ORDER BY.
+   *
+   * Only "asc" and "desc" are accepted. Any other value defaults
+   * to "ASC" to prevent SQL injection via user-controlled input.
+   *
+   * @param mixed $direction
+   * @return string "ASC" or "DESC"
+   */
+  private function sanitizeSortDirection($direction)
+  {
+    return (is_string($direction) && strcasecmp($direction, 'desc') === 0) ? 'DESC' : 'ASC';
   }
 
 

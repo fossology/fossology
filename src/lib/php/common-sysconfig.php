@@ -852,18 +852,19 @@ function is_available($url, $timeout = 2, $tries = 2)
   $proxyStmts = "";
   if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
     $SysConf['FOSSOLOGY']['http_proxy']) {
-    $proxyStmts .= "export http_proxy={$SysConf['FOSSOLOGY']['http_proxy']};";
+    $proxyStmts .= "export http_proxy=" . escapeshellarg($SysConf['FOSSOLOGY']['http_proxy']) . ";";
   }
   if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
     $SysConf['FOSSOLOGY']['https_proxy']) {
-    $proxyStmts .= "export https_proxy={$SysConf['FOSSOLOGY']['https_proxy']};";
+    $proxyStmts .= "export https_proxy=" . escapeshellarg($SysConf['FOSSOLOGY']['https_proxy']) . ";";
   }
   if (array_key_exists('ftp_proxy', $SysConf['FOSSOLOGY']) &&
     $SysConf['FOSSOLOGY']['ftp_proxy']) {
-    $proxyStmts .= "export ftp_proxy={$SysConf['FOSSOLOGY']['ftp_proxy']};";
+    $proxyStmts .= "export ftp_proxy=" . escapeshellarg($SysConf['FOSSOLOGY']['ftp_proxy']) . ";";
   }
 
-  $commands = "$proxyStmts wget --spider '$url' --tries=$tries --timeout=$timeout";
+  $commands = $proxyStmts . "wget --spider " . escapeshellarg($url) .
+    " --tries=" . (int) $tries . " --timeout=" . (int) $timeout;
   system($commands, $return_var);
   if (0 == $return_var) {
     return 1;
