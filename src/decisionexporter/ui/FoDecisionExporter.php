@@ -60,6 +60,7 @@ class FoDecisionExporter extends DefaultPlugin
 
     $vars = array('jqPk' => $jobQueueId,
                   'downloadLink' => Traceback_uri(). "?mod=download&report=".$jobId,
+                  'showJobsLink' => Traceback_uri(). "?mod=showjobs&upload=".$upload->getId(),
                   'reportType' => "dumpexporter");
     $text = sprintf(_("Generating FOSSology Decisions for '%s'"), $upload->getFilename());
     $vars['content'] = "<h2>".$text."</h2>";

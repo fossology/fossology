@@ -89,6 +89,7 @@ class ReadMeOssPlugin extends DefaultPlugin
 
     $vars = array('jqPk' => $jobQueueId,
                   'downloadLink' => Traceback_uri(). "?mod=download&report=".$jobId,
+                  'showJobsLink' => Traceback_uri(). "?mod=showjobs&upload=".$upload->getId(),
                   'reportType' => "ReadMe_OSS");
     $text = sprintf(_("Generating ReadMe_OSS for '%s'"), $upload->getFilename());
     $vars['content'] = "<h2>".$text."</h2>";
