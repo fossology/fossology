@@ -34,7 +34,7 @@
         "symfony/yaml" : "v5.4.52",
         "symfony/mime" : "v5.4.52",
         "twig/twig" : "v3.11.2",
-        "guzzlehttp/guzzle": "v7.12.1",
+        "guzzlehttp/guzzle": "v7.15.1",
         "phpoffice/phpspreadsheet": "1.30.5",
         "twbs/bootstrap": "v4.5.0",
         "league/oauth2-client": "2.6.1"
