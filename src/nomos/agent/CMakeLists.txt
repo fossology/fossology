@@ -25,7 +25,7 @@ add_custom_command(
     COMMAND echo "NOTE: GENSEARCHDATA takes 1-2 minutes to run"
     COMMAND bash $<TARGET_FILE_DIR:encode>/GENSEARCHDATA
     WORKING_DIRECTORY $<TARGET_FILE_DIR:encode>
-    DEPENDS encode)
+    DEPENDS encode ${FO_CWD}/generator/STRINGS.in)
 
 add_custom_command(
     OUTPUT _precheck.c
