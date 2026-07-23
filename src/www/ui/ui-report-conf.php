@@ -88,6 +88,15 @@ class ui_report_conf extends FO_Plugin
     "osselotExport" => "osselotExport"
   );
 
+  /**
+   * @var array $checkBoxListCycloneDX
+   */
+  private $checkBoxListCycloneDX = array(
+    "cyclonedxLicenseComment" => "cyclonedxLicenseComment",
+    "cyclonedxIgnoreFilesWOInfo" => "cyclonedxIgnoreFilesWOInfo",
+    "cyclonedxOsselotExport" => "cyclonedxOsselotExport"
+  );
+
 
   function __construct()
   {
@@ -156,15 +165,15 @@ class ui_report_conf extends FO_Plugin
     $textAreaStyle = ' style="overflow:auto;width:98%;height:80px;"';
     $vars['styleDependencyTA'] = $vars['styleExportTA'] = $vars['styleRestrictionTA'] = $textAreaStyle;
     if ($row['ri_depnotes'] == 'NA' || empty($row['ri_depnotes'])) {
-       $vars['styleDependencyTA'] = $textAreaNoneStyle;
+      $vars['styleDependencyTA'] = $textAreaNoneStyle;
     }
 
     if ($row['ri_exportnotes'] == 'NA' || empty($row['ri_exportnotes'])) {
-       $vars['styleExportTA'] = $textAreaNoneStyle;
+      $vars['styleExportTA'] = $textAreaNoneStyle;
     }
 
     if ($row['ri_copyrightnotes'] == 'NA' || empty($row['ri_copyrightnotes'])) {
-       $vars['styleRestrictionTA'] = $textAreaNoneStyle;
+      $vars['styleRestrictionTA'] = $textAreaNoneStyle;
     }
 
     if (!empty($row['ri_ga_checkbox_selection'])) {
@@ -184,6 +193,13 @@ class ui_report_conf extends FO_Plugin
         $vars[$key] = 'unchecked';
       }
     }
+
+    $cyclonedxSettingsStr = $this->uploadDao->getCyclonedxSettings($uploadId);
+    $cyclonedxSettings = explode(',', $cyclonedxSettingsStr);
+    $vars['cyclonedxLicenseComment'] = $cyclonedxSettings[0];
+    $vars['cyclonedxIgnoreFilesWOInfo'] = $cyclonedxSettings[1];
+    $vars['cyclonedxOsselotExport'] = isset($cyclonedxSettings[2]) ? $cyclonedxSettings[2] : 'unchecked';
+    $vars['cyclonedxCustomTagNamespace'] = isset($cyclonedxSettings[3]) ? $cyclonedxSettings[3] : 'fossology:';
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
@@ -401,8 +417,8 @@ class ui_report_conf extends FO_Plugin
       return;
     }
 
-    $itemId = GetParm("item",PARM_INTEGER);
-    $this->vars['micromenu'] = Dir2Browse("browse", $itemId, NULL, $showBox=0, "View-Meta");
+    $itemId = GetParm("item", PARM_INTEGER);
+    $this->vars['micromenu'] = Dir2Browse("browse", $itemId, null, $showBox = 0, "View-Meta");
     $this->vars['globalClearingAvailable'] = Auth::isClearingAdmin();
 
     $submitReportConf = GetParm("submitReportConf", PARM_STRING);
@@ -441,6 +457,14 @@ class ui_report_conf extends FO_Plugin
       $checkBoxUrPos = count($parms);
       $parms[] = $this->getCheckBoxSelectionList($this->checkBoxListSPDX);
       $checkBoxSpdxPos = count($parms);
+      $cyclonedxSettingsToSave = $this->getCheckBoxSelectionList($this->checkBoxListCycloneDX);
+      $cyclonedxCustomTagNs = GetParm('cyclonedxCustomTagNamespace', PARM_STRING);
+      if (empty($cyclonedxCustomTagNs)) {
+        $cyclonedxCustomTagNs = 'fossology:';
+      }
+      $cyclonedxSettingsToSave .= ',' . $cyclonedxCustomTagNs;
+      $parms[] = $cyclonedxSettingsToSave;
+      $cyclonedxPos = count($parms);
       $parms[] = json_encode($obLicenses);
       $excludeObligationPos = count($parms);
       $parms[] = json_encode($unifiedReportColumnsForJson);
@@ -455,6 +479,7 @@ class ui_report_conf extends FO_Plugin
       $SQL = "UPDATE report_info SET $columns" .
                "ri_ga_checkbox_selection = $$checkBoxUrPos, " .
                "ri_spdx_selection = $$checkBoxSpdxPos, " .
+               "ri_cyclonedx_selection = $$cyclonedxPos, " .
                "ri_excluded_obligations = $$excludeObligationPos, " .
                "ri_unifiedcolumns = $$unifiedColumnsPos, " .
                "ri_clixmlcolumns = $$clixmlColumnsPos, " .
