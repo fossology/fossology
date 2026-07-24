@@ -61,20 +61,19 @@
     {% if isSessionAdmin %}
       {% if passwordPolicy is empty %}
       <tr class="classic">
-        <th width="25%">{{ "Require no password."|trans }}</th>
+        <th width="25%"><label for="blank_pass">{{ "Require no password."|trans }}</label></th>
         <td><input type="checkbox" name="_blank_pass" id="blank_pass" {% if isBlankPassword %}checked="checked" disabled="disabled"{% endif %}/></td>
       </tr>
       {% endif %}
     {% endif %}
-    <title>Toggle Password Visibility</title>
     <tr class="classic">
-      <th width="25%">{{ "Password."|trans }}</th>
-      <td><input type="password" name="_pass1" size="20" id="passcheck" onchange="togglePasswords();"/><span class="bi bi-eye"></span><img src="images/eyes.png" class="bi bi-eye-slash" id="togglePasswords"></img>{% if passwordPolicy is not empty %}
+      <th width="25%"><label for="passcheck">{{ "Password."|trans }}</label></th>
+      <td><input type="password" name="_pass1" size="20" id="passcheck" onchange="togglePasswords();"/><span class="bi bi-eye"></span><img src="images/eyes.png" class="bi bi-eye-slash" id="togglePasswords" alt="Toggle password visibility" />{% if passwordPolicy is not empty %}
       <br /><span class="passPolicy">{{ passwordPolicy }}</span>
       {% endif %}</td>
     </tr>
     <tr class="classic">
-      <th width='25%'>{{ "Re-enter password."|trans }}</th>
+      <th width='25%'><label for="pass2">{{ "Re-enter password."|trans }}</label></th>
       <td><input type="password" name="_pass2" size="20" id="pass2"/></td>
     </tr>
     <tr class="classic">
