@@ -16,6 +16,15 @@ from .CliOptions import CliOptions
 from .Packages import Packages
 
 
+# ---------------------------------------------------------------------------
+# Single source of truth for "no-license" sentinel values.
+# Used by both scanner processing (here) and dashboard reporting.
+# ---------------------------------------------------------------------------
+_NO_LICENSE = frozenset({
+  'No_license_found', 'NOASSERTION', 'NONE', 'UnclassifiedLicense',
+})
+
+
 class ScanResult:
   """
   Store scan results from agents.
@@ -265,7 +274,7 @@ class Scanners:
             current_findings.append(finding)
           elif (
               result_key == 'licenses'
-              and finding.get('license') != "No_license_found"
+              and finding.get('license') not in _NO_LICENSE
           ):
             current_findings.append(finding)
         else:
@@ -279,18 +288,21 @@ class Scanners:
           ):
             continue
 
-          if content and content != "No_license_found":
+          if content and content not in _NO_LICENSE:
             current_findings.add(content)
 
-      if (whole and current_findings) or (not whole and current_findings):
-        if whole:
-          processed_list.append(
-            ScanResultList(file_path, result_entry['file'], current_findings)
-          )
-        else:
-          processed_list.append(
-            ScanResult(file_path, result_entry['file'], current_findings)
-          )
+      # Always create a result entry when the scanner returned findings for
+      # this file, even if all values were NO_LICENSE — the dashboard needs
+      # these to count them in "Total Files" and "Files Without License".
+      # `findings_list` is non-None here (checked above).
+      if whole:
+        processed_list.append(
+          ScanResultList(file_path, result_entry['file'], current_findings)
+        )
+      else:
+        processed_list.append(
+          ScanResult(file_path, result_entry['file'], current_findings)
+        )
 
     return processed_list
 
@@ -369,8 +381,10 @@ class Scanners:
       )
 
   def __merge_nomos_ojo(
-      self, nomos_licenses: list[ScanResult], ojo_licenses: list[ScanResult]
-  ) -> list[ScanResult]:
+      self, nomos_licenses: list[ScanResult] | list[ScanResultList],
+      ojo_licenses: list[ScanResult] | list[ScanResultList],
+      whole: bool = False
+  ) -> list[ScanResult] | list[ScanResultList]:
     """
     Merge the results from nomos and ojo based on file name
     """
@@ -378,7 +392,19 @@ class Scanners:
 
     for ojo_entry in ojo_licenses:
       if ojo_entry.file in nomos_dict:
-        nomos_dict[ojo_entry.file].result.update(ojo_entry.result)
+        existing = nomos_dict[ojo_entry.file]
+        if whole:
+          seen = {
+            item.get('license') for item in existing.result
+            if isinstance(item, dict)
+          }
+          for item in ojo_entry.result:
+            lic = item.get('license') if isinstance(item, dict) else item
+            if lic not in seen:
+              existing.result.append(item)
+              seen.add(lic)
+        else:
+          existing.result.update(ojo_entry.result)
       else:
         # If an ojo entry doesn't have a corresponding nomos entry, add it
         nomos_licenses.append(ojo_entry)
@@ -501,31 +527,21 @@ class Scanners:
       self.__set_license_ojo(whole)
 
     if self.cli_options.nomos and self.cli_options.ojo:
-      # Handle parent package separately
-      if whole:
-        self.scan_packages.parent_package[
-          'SCANNER_RESULTS'] = self.scan_packages.parent_package.get(
-          'NOMOS_RESULT', []
-        ) + self.scan_packages.parent_package.get('OJO_RESULT', [])
-      else:
-        self.scan_packages.parent_package[
-          'SCANNER_RESULTS'] = self.__merge_nomos_ojo(
-          self.scan_packages.parent_package.get('NOMOS_RESULT', []),
-          self.scan_packages.parent_package.get('OJO_RESULT', [])
-        )
+      # Merge nomos and ojo per file so a file scanned by both scanners
+      # produces a single SCANNER_RESULTS entry (avoids duplicate file rows
+      # in the text report, dashboard and SBOM).
+      self.scan_packages.parent_package[
+        'SCANNER_RESULTS'] = self.__merge_nomos_ojo(
+        self.scan_packages.parent_package.get('NOMOS_RESULT', []),
+        self.scan_packages.parent_package.get('OJO_RESULT', []),
+        whole=whole
+      )
       for purl in self.scan_packages.dependencies.keys():
         component = self.scan_packages.dependencies[purl]
-        if whole:
-          # Concatenate lists for whole results
-          component['SCANNER_RESULTS'] = component.get(
-            'NOMOS_RESULT', []
-          ) + component.get(
-            'OJO_RESULT', []
-          )
-        else:
-          component['SCANNER_RESULTS'] = self.__merge_nomos_ojo(
-            component.get('NOMOS_RESULT', []), component.get('OJO_RESULT', [])
-          )
+        component['SCANNER_RESULTS'] = self.__merge_nomos_ojo(
+          component.get('NOMOS_RESULT', []), component.get('OJO_RESULT', []),
+          whole=whole
+        )
     else:
       scanner_key = 'NOMOS_RESULT' if self.cli_options.nomos else 'OJO_RESULT'
       # Handle parent package separately
