@@ -21,6 +21,10 @@ export HOME := $(CURDIR)
 
 COMPOSER_PHAR := $(shell which composer)
 
+define install_component
+DESTDIR=$(CURDIR)/debian/$(1) cmake --install build --component $(2) --prefix=/usr
+endef
+
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
@@ -37,15 +41,16 @@ build-arch-stamp: configure-stamp
 
 	# Add here commands to compile the arch part of the package.
 	@dpkg-parsechangelog | sed -n -e 's/^Version: //p' > VERSIONSTRING
-	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var
-	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var -C src/nomos/agent/ -f Makefile.sa
+	mkdir -p build
+	cd build && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DFO_SYSCONFDIR=/etc/fossology -DFO_LOCALSTATEDIR=/var
+	$(MAKE) -C build
 	touch $@
 
 build-indep: build-indep-stamp
 build-indep-stamp: configure-stamp
 
 	@# this currently doesn't do anything, but in case it does someday
-	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var install/db/
+	true
 	touch $@
 
 clean:
@@ -53,7 +58,7 @@ clean:
 	dh_testroot
 	rm -f build-arch-stamp build-indep-stamp configure-stamp
 
-	$(MAKE) clean
+	rm -rf build
 
 	dh_clean
 
@@ -61,14 +66,7 @@ install: install-indep install-arch
 install-indep:
 	dh_testdir
 	dh_testroot
-	dh_clean -k -i
-	dh_installdirs -i
-
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-db \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C install/db install
-
-	dh_install -i
+	true
 
 install-arch:
 	dh_testdir
@@ -82,141 +80,72 @@ ifeq ($(COMPOSER_PHAR),)
 	$(eval COMPOSER_PHAR=$(CURDIR)/composer/composer)
 endif
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var install-install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/lib install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/cli install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/maintagent install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           COMPOSER_PHAR=$(COMPOSER_PHAR) \
-           -C src composer_install
+	$(MAKE) -C build install DESTDIR=$(CURDIR)/debian/fossology-db
+
+	$(call install_component,fossology-common,cli)
+	$(call install_component,fossology-common,maintagent)
+	$(call install_component,fossology-common,vendor)
 	mkdir -p $(CURDIR)/debian/fossology-common/usr/share/fossology/setup
 	cp $(CURDIR)/install/scripts/* $(CURDIR)/debian/fossology-common/usr/share/fossology/setup
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/www install
+	$(call install_component,fossology-web,www)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-wgetagent \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/wget_agent install
+	$(call install_component,fossology-wgetagent,wget_agent)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/scheduler install
+	$(call install_component,fossology-scheduler,scheduler)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-ununpack \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/ununpack install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-ununpack \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/adj2nest install
+	$(call install_component,fossology-ununpack,ununpack)
+	$(call install_component,fossology-ununpack,adj2nest)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-copyright \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/copyright install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-buckets \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/buckets install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-mimetype \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/mimetype install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-nomos \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/nomos install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-nomos \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/nomos/agent/ -f Makefile.sa install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-pkgagent \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/pkgagent install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-delagent \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/delagent install
+	$(call install_component,fossology-copyright,copyright)
+	$(call install_component,fossology-buckets,buckets)
+	$(call install_component,fossology-mimetype,mimetype)
+	$(call install_component,fossology-nomos,nomos)
+	$(call install_component,fossology-pkgagent,pkgagent)
+	$(call install_component,fossology-delagent,delagent)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-debug \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/debug install
+	$(call install_component,fossology-debug,debug)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-monk \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/monk install-monk
+	$(call install_component,fossology-monk,monk)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-monkbulk \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/monk install-monkbulk
+	$(call install_component,fossology-monkbulk,monkbulk)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-ojo \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/ojo install
+	$(call install_component,fossology-ojo,ojo)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reso \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/reso install
+	$(call install_component,fossology-reso,reso)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-decider \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/decider install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-deciderjob \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/deciderjob install
+	$(call install_component,fossology-decider,decider)
+	$(call install_component,fossology-deciderjob,deciderjob)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-readmeoss \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/readmeoss install
+	$(call install_component,fossology-readmeoss,readmeoss)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-clixml \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/clixml install
+	$(call install_component,fossology-clixml,clixml)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-unifiedreport \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/unifiedreport install
+	$(call install_component,fossology-unifiedreport,unifiedreport)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reuser \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/reuser install
+	$(call install_component,fossology-reuser,reuser)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-spdx2 \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/spdx2 install
+	$(call install_component,fossology-spdx2,spdx)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reportimport \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/reportImport install
+	$(call install_component,fossology-reportimport,reportImport)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-softwareheritage \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/softwareHeritage install
+	$(call install_component,fossology-softwareheritage,softwareHeritage)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scancode \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/scancode install
+	$(call install_component,fossology-scancode,scancode)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-spasht \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/spasht install
+	$(call install_component,fossology-spasht,spasht)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-decisionexporter \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/decisionexporter install
+	$(call install_component,fossology-decisionexporter,decisionexporter)
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-decisionimporter \
-             PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-             -C src/decisionimporter install
+	$(call install_component,fossology-decisionimporter,decisionimporter)
 
 
 	mkdir -p $(CURDIR)/debian/fossology-dev/usr/bin
 	cp $(COMPOSER_PHAR) $(CURDIR)/debian/fossology-dev/usr/bin
 	mkdir -p $(CURDIR)/debian/fossology-dev/usr/share/fossology/
-	tar czf $(CURDIR)/debian/fossology-dev/usr/share/fossology/php-vendor.tar.gz -C $(CURDIR)/debian/fossology-common/usr/share/fossology vendor
+	if [ -d $(CURDIR)/debian/fossology-common/usr/share/fossology/vendor ]; then \
+	tar czf $(CURDIR)/debian/fossology-dev/usr/share/fossology/php-vendor.tar.gz -C $(CURDIR)/debian/fossology-common/usr/share/fossology vendor; \
+fi
 
 	dh_install -a
 # Must not depend on anything. This is to be called by
@@ -240,7 +169,9 @@ binary-common:
 # make backports easier, switch when etch support dropped
 #	dh_lintian
 	mkdir -p debian/fossology-common/usr/share/lintian/overrides
-	cp debian/fossology-common.lintian-overrides debian/fossology-common/usr/share/lintian/overrides/fossology-common
+	if [ -f debian/fossology-common.lintian-overrides ]; then \
+		cp debian/fossology-common.lintian-overrides debian/fossology-common/usr/share/lintian/overrides/fossology-common; \
+	fi
 	#mkdir -p debian/fossology-agents/usr/share/lintian/overrides
 	#cp debian/fossology-agents.lintian-overrides debian/fossology-agents/usr/share/lintian/overrides/fossology-agents
 	#mkdir -p debian/fossology-agents-single/usr/share/lintian/overrides
