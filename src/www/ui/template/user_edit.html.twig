@@ -114,6 +114,27 @@
       </th>
       <td><input type="checkbox" name="ignore_files_wo_info_default" {% if ignoreFilesWOInfoDefault %}checked{% endif %}></td>
     </tr>
+    <tr class="classic">
+      <th width="25%">
+        {{ "Enable CycloneDX OSSelot export by default"|trans }}
+        <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'When enabled, CycloneDX exports will be OSSelot-compatible.'|trans }}" alt="" class="info-bullet"/>
+      </th>
+      <td><input type="checkbox" name="cyclonedx_osselot_export_enabled" id="cyclonedxOsselotExportEnabledCheckbox" {% if cyclonedxOsselotExportEnabled %}checked{% endif %}></td>
+    </tr>
+    <tr class="classic">
+      <th width="25%">
+        {{ "Show CycloneDX license comments by default"|trans }}
+        <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'When enabled, CycloneDX reports will include license comments by default.'|trans }}" alt="" class="info-bullet"/>
+      </th>
+      <td><input type="checkbox" name="cyclonedx_license_comment_default" id="cyclonedxLicenseCommentDefaultCheckbox" {% if cyclonedxLicenseCommentDefault %}checked{% endif %}></td>
+    </tr>
+    <tr class="classic">
+      <th width="25%">
+        {{ "Ignore files with no info in CycloneDX by default"|trans }}
+        <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'When enabled, CycloneDX reports will ignore files with no license information by default.'|trans }}" alt="" class="info-bullet"/>
+      </th>
+      <td><input type="checkbox" name="cyclonedx_ignore_files_wo_info_default" {% if cyclonedxIgnoreFilesWOInfoDefault %}checked{% endif %}></td>
+    </tr>
     {%  if isSessionAdmin %}
       <tr class="classic">
         <th width="25%">{{ "Select user's default group."|trans }}</th>
@@ -531,6 +552,17 @@
       $('#spdxLicenseCommentDefaultCheckbox').change(function() {
         if (!$(this).is(':checked')) {
           $('#osselotExportEnabledCheckbox').prop('checked', false);
+        }
+      });
+
+      $('#cyclonedxOsselotExportEnabledCheckbox').change(function() {
+        if ($(this).is(':checked')) {
+          $('#cyclonedxLicenseCommentDefaultCheckbox').prop('checked', true);
+        }
+      });
+      $('#cyclonedxLicenseCommentDefaultCheckbox').change(function() {
+        if (!$(this).is(':checked')) {
+          $('#cyclonedxOsselotExportEnabledCheckbox').prop('checked', false);
         }
       });
     });
