@@ -1,0 +1,340 @@
+{# SPDX-FileCopyrightText: © 2026 Siemens AG
+
+   SPDX-License-Identifier: GPL-2.0-only
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  <div class="container-fluid mt-3">
+    <!-- Reuse info header -->
+    <div class="row mb-3">
+      <div class="col-12">
+        <div style="padding:10px;background:#f8f9fa;border:1px solid #dee2e6;border-radius:4px">
+          <strong>{{ 'Reuse source'|trans }}:</strong>
+          <select id="reuse-source-select" class="form-select form-select-sm" style="margin-left:8px">
+            {% for src in reuseSources %}
+              <option value="{{ src.id }}"
+                {% if src.id == reuseUploadId %}selected{% endif %}>
+                {{ src.name }} (ID: {{ src.id }})
+              </option>
+            {% endfor %}
+          </select>
+          &nbsp;|&nbsp; <a href="javascript:history.back()" class="small">&larr; {{ 'Back'|trans }}</a>
+        </div>
+        <script type="text/javascript">
+          document.getElementById('reuse-source-select').addEventListener('change', function() {
+            var url = new URL(window.location.href);
+            url.searchParams.set('reuse', this.value);
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
+          });
+        </script>
+      </div>
+    </div>
+
+    <!-- Main content: diff tree table + stats sidebar -->
+    <div class="row">
+      <!-- Diff tree table -->
+      <div class="col-md-9">
+        <div class="d-flex flex-wrap align-items-center mb-2 p-2 bg-light border rounded">
+          <span class="mr-2 font-weight-bold">{{ 'Search'|trans }}:</span>
+          <input type="text" id="fileSearch" class="form-control form-control-sm d-inline-block w-auto mr-3"
+                 placeholder="{{ 'File name'|trans }}..."
+                 value="{{ searchQuery }}" onkeyup="filterDiffTable()">
+          <span class="mr-2 font-weight-bold">{{ 'Status'|trans }}:</span>
+          <select id="statusFilter" class="form-control form-control-sm d-inline-block w-auto"
+                  onchange="applyStatusFilter()">
+            <option value="">{{ 'All'|trans }}</option>
+            <option value="IDENTICAL"{% if statusFilterQuery == 'IDENTICAL' %} selected{% endif %}>{{ 'Identical'|trans }}</option>
+            <option value="MODIFIED"{% if statusFilterQuery == 'MODIFIED' %} selected{% endif %}>{{ 'Modified'|trans }}</option>
+            <option value="NEW"{% if statusFilterQuery == 'NEW' %} selected{% endif %}>{{ 'New'|trans }}</option>
+            <option value="REMOVED"{% if statusFilterQuery == 'REMOVED' %} selected{% endif %}>{{ 'Removed'|trans }}</option>
+          </select>
+        </div>
+        <table class="simpleTable w-100" id="diffTreeTable" cellpadding="3">
+          <thead>
+            <tr>
+              <th>{{ 'Upload'|trans }}</th>
+              <th>{{ 'Reuse'|trans }}</th>
+              <th>{{ 'Status'|trans }}</th>
+              <th>{{ 'Diff'|trans }}</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for row in diffTree %}
+            <tr class="{{ cycle(['odd', 'even'], loop.index0) }}" data-status="{{ row.classification }}">
+              <td class="td-upload">
+                {% if row.upload_file_name %}
+                  {% if row.upload_href %}
+                    <a href="{{ row.upload_href }}">{{ row.upload_file_name }}</a>
+                  {% else %}
+                    {{ row.upload_file_name }}
+                  {% endif %}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td class="td-reuse">
+                {% if row.reuse_file_name %}
+                  {% if row.reuse_href %}
+                    <a href="{{ row.reuse_href }}">{{ row.reuse_file_name }}</a>
+                  {% else %}
+                    {{ row.reuse_file_name }}
+                  {% endif %}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                {% set s = row.classification %}
+                {% if s == 'IDENTICAL' %}
+                  <span class="text-success" style="background:#d4edda;padding:0 6px;font-weight:600;">{{ 'Identical'|trans }}</span>
+                {% elseif s == 'MODIFIED' %}
+                  <span class="text-warning" style="background:#fff3cd;padding:0 6px;font-weight:600;">{{ 'Modified'|trans }}</span>
+                {% elseif s == 'NEW' %}
+                  <span class="text-info" style="background:#d1ecf1;padding:0 6px;font-weight:600;">{{ 'New'|trans }}</span>
+                {% elseif s == 'REMOVED' %}
+                  <span class="text-danger" style="background:#f8d7da;padding:0 6px;font-weight:600;">{{ 'Removed'|trans }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if row.classification == 'MODIFIED' and row.upload_pfile_fk > 0 and row.reused_pfile_fk > 0 %}
+                  <a href="?mod=reusediffview&upload={{ uploadId }}&item={{ itemId }}&currentPfile={{ row.upload_pfile_fk }}&reusedPfile={{ row.reused_pfile_fk }}&reuse={{ reuseUploadId }}">
+                    {{ 'View Diff'|trans }}
+                  </a>
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        <div id="paginationContainer" class="d-flex align-items-center justify-content-between mt-2">
+          <div>
+            <small class="text-muted">
+              {{ 'Showing'|trans }}
+              {% if totalDiffRows > 0 %}
+                {{ (currentPage - 1) * perPage + 1 }}-{{ min(currentPage * perPage, totalDiffRows) }}
+              {% else %}
+                0-0
+              {% endif %}
+              {{ 'of'|trans }}
+              {{ totalDiffRows }}
+              {{ 'files'|trans }}
+            </small>
+          </div>
+          <div class="d-flex align-items-center">
+            {% if totalPagesView > 1 %}
+              <nav>
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item {{ currentPage <= 1 ? 'disabled' : '' }}">
+                    <a class="page-link" href="{{ currentPage > 1 ? pageUri ~ '&page=' ~ (currentPage - 2) : '#' }}">&laquo; {{ 'Prev'|trans }}</a>
+                  </li>
+                  <li class="page-item">
+                    <span class="page-link">
+                      <select id="pageSelect" class="form-control form-control-sm d-inline-block" style="width:auto;padding:0 4px;height:auto;font-size:12px;" onchange="goToPage(this.value)">
+                        {% for i in 1..totalPagesView %}
+                          <option value="{{ i - 1 }}" {{ i == currentPage ? 'selected' : '' }}>{{ i }}</option>
+                        {% endfor %}
+                      </select>
+                      <span class="ml-1">{{ 'of'|trans }} {{ totalPagesView }}</span>
+                    </span>
+                  </li>
+                  <li class="page-item {{ currentPage >= totalPagesView ? 'disabled' : '' }}">
+                    <a class="page-link" href="{{ currentPage < totalPagesView ? pageUri ~ '&page=' ~ currentPage : '#' }}">{{ 'Next'|trans }} &raquo;</a>
+                  </li>
+                </ul>
+              </nav>
+            {% endif %}
+          </div>
+        </div>
+        <script type="text/javascript">
+          function goToPage(page) {
+            var url = new URL(window.location.href);
+            url.searchParams.set('page', page);
+            window.location.href = url.toString();
+          }
+          function updatePaginationLinks(search) {
+            var prevLink = document.querySelector('#paginationContainer .pagination li:first-child a');
+            var nextLink = document.querySelector('#paginationContainer .pagination li:last-child a');
+            var base = window.location.pathname + '?' + new URLSearchParams(window.location.search).toString();
+            base = base.replace(/[?&]page=[^&]*/g, '').replace(/[?&]search=[^&]*/g, '').replace(/[?&]statusFilter=[^&]*/g, '');
+            var sep = base.indexOf('?') !== -1 ? '&' : '?';
+            if (prevLink && !prevLink.parentElement.classList.contains('disabled')) {
+              var prevPage = parseInt(document.getElementById('pageSelect').value) - 1;
+              prevLink.href = base + sep + 'page=' + prevPage + (search ? '&search=' + encodeURIComponent(search) : '');
+            }
+            if (nextLink && !nextLink.parentElement.classList.contains('disabled')) {
+              var nextPage = parseInt(document.getElementById('pageSelect').value) + 1;
+              nextLink.href = base + sep + 'page=' + nextPage + (search ? '&search=' + encodeURIComponent(search) : '');
+            }
+            var pageSelect = document.getElementById('pageSelect');
+            if (pageSelect && search) {
+              var currentBase = base;
+              for (var i = 0; i < pageSelect.options.length; i++) {
+                var opt = pageSelect.options[i];
+                var pageUri = currentBase + sep + 'page=' + opt.value + '&search=' + encodeURIComponent(search);
+                opt.setAttribute('data-href', pageUri);
+              }
+            }
+          }
+          function applyStatusFilter() {
+            var statusEl = document.getElementById('statusFilter');
+            var status = statusEl.value || '';
+            var url = new URL(window.location.href);
+            if (status) {
+              url.searchParams.set('statusFilter', status);
+            } else {
+              url.searchParams.delete('statusFilter');
+            }
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
+          }
+          function filterDiffTable() {
+            var searchEl = document.getElementById('fileSearch');
+            var search = (searchEl.value || '').toLowerCase();
+            var rows = document.querySelectorAll('#diffTreeTable tbody tr');
+            var visibleCount = 0;
+            for (var i = 0; i < rows.length; i++) {
+              var row = rows[i];
+              var upload = (row.querySelector('.td-upload')?.textContent || '').toLowerCase();
+              var reuse = (row.querySelector('.td-reuse')?.textContent || '').toLowerCase();
+              var matchesSearch = !search || upload.indexOf(search) !== -1 || reuse.indexOf(search) !== -1;
+              if (matchesSearch) {
+                row.style.display = '';
+                visibleCount++;
+              } else {
+                row.style.display = 'none';
+              }
+            }
+            var pagination = document.getElementById('paginationContainer');
+            if (pagination) {
+              pagination.style.display = visibleCount === 0 ? 'none' : '';
+            }
+            updatePaginationLinks(searchEl.value);
+          }
+          (function() {
+            var searchEl = document.getElementById('fileSearch');
+            if (searchEl.value) {
+              filterDiffTable();
+            }
+          })();
+        </script>
+      </div>
+
+      <!-- Stats sidebar -->
+      <div class="col-md-3">
+        <div class="card mb-3">
+          <div class="card-header py-2 px-3">
+            <strong>{{ 'File Classification'|trans }}</strong>
+          </div>
+          <div class="card-body p-0">
+            <table class="simpleTable w-100" cellpadding="3">
+              <thead>
+                <tr>
+                  <th>{{ 'Type'|trans }}</th>
+                  <th class="text-center">{{ 'Count'|trans }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="odd">
+                  <td>{{ 'Total (upload)'|trans }}</td>
+                  <td class="text-center font-weight-bold">{{ totalUpload }}</td>
+                </tr>
+                <tr class="even">
+                  <td>{{ 'Total (reuse)'|trans }}</td>
+                  <td class="text-center font-weight-bold">{{ totalReuse }}</td>
+                </tr>
+                <tr class="odd">
+                  <td class="text-success">{{ 'Identical'|trans }}</td>
+                  <td class="text-center font-weight-bold">{{ stats.IDENTICAL|default(0) }}</td>
+                </tr>
+                <tr class="even">
+                  <td class="text-warning">{{ 'Modified'|trans }}</td>
+                  <td class="text-center font-weight-bold">{{ stats.MODIFIED|default(0) }}</td>
+                </tr>
+                <tr class="odd">
+                  <td class="text-info">{{ 'New'|trans }}</td>
+                  <td class="text-center font-weight-bold">{{ stats.NEW|default(0) }}</td>
+                </tr>
+                <tr class="even">
+                  <td class="text-danger">{{ 'Removed'|trans }}</td>
+                  <td class="text-center font-weight-bold">{{ stats.REMOVED|default(0) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header py-2 px-3">
+            <strong>{{ 'License Statistics'|trans }}</strong>
+          </div>
+          <div class="card-body p-0">
+            <table class="simpleTable w-100" cellpadding="3">
+              <thead class="thead-light">
+                <tr>
+                  <th>{{ 'Type'|trans }}</th>
+                  <th class="text-center">{{ 'Count'|trans }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="odd">
+                  <td class="text-success">{{ 'New'|trans }}</td>
+                  <td class="text-center font-weight-bold">
+                    {% if licenseSummary.new > 0 %}
+                      <a href="?mod=reusecompare&upload={{ uploadId }}&item={{ itemId }}&license_filter=new&reuse={{ reuseUploadId }}">{{ licenseSummary.new }}</a>
+                    {% else %}
+                      {{ licenseSummary.new }}
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr class="even">
+                  <td class="text-danger">{{ 'Removed'|trans }}</td>
+                  <td class="text-center font-weight-bold">
+                    {% if licenseSummary.deleted > 0 %}
+                      <a href="?mod=reusecompare&upload={{ uploadId }}&item={{ itemId }}&license_filter=deleted&reuse={{ reuseUploadId }}">{{ licenseSummary.deleted }}</a>
+                    {% else %}
+                      {{ licenseSummary.deleted }}
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr class="odd">
+                  <td class="text-warning">{{ 'Modified'|trans }}</td>
+                  <td class="text-center font-weight-bold">
+                    {% if licenseSummary.modified > 0 %}
+                      <a href="?mod=reusecompare&upload={{ uploadId }}&item={{ itemId }}&license_filter=modified&reuse={{ reuseUploadId }}">{{ licenseSummary.modified }}</a>
+                    {% else %}
+                      {{ licenseSummary.modified }}
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr class="even">
+                  <td class="text-info">{{ 'Unchanged'|trans }}</td>
+                  <td class="text-center font-weight-bold">
+                    {% if licenseSummary.unchanged > 0 %}
+                      <a href="?mod=reusecompare&upload={{ uploadId }}&item={{ itemId }}&license_filter=unchanged&reuse={{ reuseUploadId }}">{{ licenseSummary.unchanged }}</a>
+                    {% else %}
+                      {{ licenseSummary.unchanged }}
+                    {% endif %}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            {% if licenseFilter and licenseCategories[licenseFilter] is defined and licenseCategories[licenseFilter]|length > 0 %}
+              <div class="px-3 py-2" style="border-top:1px solid #dee2e6;background:#fff;">
+                <strong>{{ licenseFilter|capitalize }} {{ 'licenses'|trans }}:</strong>
+                <ul class="list-unstyled mb-0 mt-1" style="font-size:13px;">
+                  {% for lic in licenseCategories[licenseFilter] %}
+                    <li><a href="?mod=license_list_files&item={{ itemId }}&lic={{ lic|url_encode }}&reuse={{ reuseUploadId }}">{{ lic }}</a></li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
