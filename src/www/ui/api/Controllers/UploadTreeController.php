@@ -563,21 +563,55 @@ class UploadTreeController extends RestController
     foreach ($licenseDecisionResult->getAgentDecisionEvents() as $agentDecisionEvent) {
       $agentId = $agentDecisionEvent->getAgentId();
       $matchId = $agentDecisionEvent->getMatchId();
+      $agentName = $agentDecisionEvent->getAgentName();
       $highlightRegion = $this->highlightDao->getHighlightRegion($matchId);
-      $page = null;
       $percentage = $agentDecisionEvent->getPercentage();
       if ($highlightRegion[0] != "" && $highlightRegion[1] != "") {
-        $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
+        $isNomosAgent = stripos($agentName, 'nomos') !== false;
+        if ($isNomosAgent) {
+          $pageAnchors = $this->highlightDao->getSignaturePageAnchorsOfHighlightEntry($matchId);
+          if (!empty($pageAnchors)) {
+            foreach ($pageAnchors as $pageIndex => $pageAnchor) {
+              $agentResults[] = array(
+                'name' => $agentName,
+                'clearingId' => null,
+                'agentId' => $agentId,
+                'highlightId' => $matchId,
+                'page' => intval($pageAnchor['page']),
+                'percentage' => $pageIndex === 0 ? $percentage : null
+              );
+            }
+          } else {
+            $agentResults[] = array(
+              'name' => $agentName,
+              'clearingId' => null,
+              'agentId' => $agentId,
+              'highlightId' => $matchId,
+              'page' => null,
+              'percentage' => $percentage
+            );
+          }
+        } else {
+          $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
+          $agentResults[] = array(
+            'name' => $agentName,
+            'clearingId' => null,
+            'agentId' => $agentId,
+            'highlightId' => $matchId,
+            'page' => intval($page),
+            'percentage' => $percentage
+          );
+        }
+      } else {
+        $agentResults[] = array(
+          'name' => $agentName,
+          'clearingId' => null,
+          'agentId' => $agentId,
+          'highlightId' => $matchId,
+          'page' => null,
+          'percentage' => $percentage
+        );
       }
-      $result = array(
-        'name' => $agentDecisionEvent->getAgentName(),
-        'clearingId' => null,
-        'agentId' => $agentId,
-        'highlightId' => $matchId,
-        'page' => intval($page),
-        'percentage' => $percentage
-      );
-      $agentResults[] = $result;
     }
     return $agentResults;
   }

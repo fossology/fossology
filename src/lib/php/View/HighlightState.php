@@ -141,6 +141,20 @@ class HighlightState
    */
   protected function checkForAnchor(SplitPosition $entry)
   {
+    $anchorStart = null;
+    if (array_key_exists('anchorStart', $_GET) && is_numeric($_GET['anchorStart'])) {
+      $anchorStart = intval($_GET['anchorStart']);
+    }
+    if ($anchorStart !== null) {
+      $shouldShowAnchor = !$this->anchorDrawn
+        && $entry->getHighlight()->getStart() == $anchorStart
+        && $entry->getHighlight()->getType() == Highlight::SIGNATURE;
+      if ($shouldShowAnchor) {
+        $this->anchorDrawn = true;
+      }
+      return $shouldShowAnchor;
+    }
+
     $shouldShowAnchor = !$this->anchorDrawn && $entry->getHighlight()->getType() != Highlight::KEYWORD;
     if ($shouldShowAnchor) {
       $this->anchorDrawn = true;

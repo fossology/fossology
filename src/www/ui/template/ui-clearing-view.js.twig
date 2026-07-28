@@ -267,10 +267,80 @@ function highlightSearchMatches() {
   });
 }
 
+// Captured at script evaluation time: the browser strips/normalizes the hash
+// as soon as it performs its native anchor jump, so we remember the intent
+// before that happens.
+var shouldFocusLinkedHighlight = (window.location.hash === '#highlight');
+
+// Returns the visible blue signature span that the linked hash points at.
+// The server renders a zero-width `<a id="highlight">` marker immediately
+// before the relevant `span.hi-signature`, so we prefer that sibling.
+function getLinkedHighlightNode() {
+  const container = document.getElementById('fileTextView');
+  if (!container) return null;
+
+  const marker = document.getElementById('highlight');
+  if (marker) {
+    let sibling = marker.nextElementSibling;
+    while (sibling && !(sibling.classList && sibling.classList.contains('hi-signature'))) {
+      sibling = sibling.nextElementSibling;
+    }
+    if (sibling) return sibling;
+    if (marker.parentElement && marker.parentElement.classList.contains('hi-signature')) {
+      return marker.parentElement;
+    }
+    return marker;
+  }
+
+  return container.querySelector('span.hi-signature');
+}
+
+// Centers the file text pane on the linked highlight. Only the pane is
+// scrolled (never the window or scrollIntoView), so the browser's native
+// anchor handling cannot fight us and push the highlight off-screen.
+function centerLinkedHighlight() {
+  const container = document.getElementById('fileTextView');
+  const target = getLinkedHighlightNode();
+  if (!container || !target) return;
+
+  const targetRect = target.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+  const left = container.scrollLeft + (targetRect.left - containerRect.left) - (container.clientWidth / 2) + (targetRect.width / 2);
+  const top = container.scrollTop + (targetRect.top - containerRect.top) - (container.clientHeight / 2) + (targetRect.height / 2);
+
+  container.scrollLeft = Math.max(0, left);
+  container.scrollTop = Math.max(0, top);
+}
+
+function scheduleLinkedHighlightFocus() {
+  if (!shouldFocusLinkedHighlight) return;
+
+  // Stop the browser's own jump to `#highlight`, which repeatedly overrode
+  // the manual centering and left the blue text clipped to the side.
+  if (window.history && window.history.replaceState && window.location.hash === '#highlight') {
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+
+  // Center after layout settles, then a few more times to absorb late reflow
+  // from fonts, images or the surrounding tables.
+  window.requestAnimationFrame(function () {
+    centerLinkedHighlight();
+    window.requestAnimationFrame(centerLinkedHighlight);
+  });
+  [100, 300, 600, 1000].forEach(function (delay) {
+    window.setTimeout(centerLinkedHighlight, delay);
+  });
+}
+
 $(document).ready(function () {
   createClearingTable();
   createLicenseSelectionTable();
   $('[data-toggle="tooltip"]').tooltip();
+
+  // Center the linked highlight after DOM ready and again after full load so
+  // late layout does not leave the signature highlight clipped to the side.
+  scheduleLinkedHighlightFocus();
+  $(window).on('load', scheduleLinkedHighlightFocus);
 
   {% if searchQuery %}
     highlightSearchMatches(); 

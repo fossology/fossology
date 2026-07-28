@@ -373,18 +373,43 @@ class AjaxClearingView extends FO_Plugin
     foreach ($licenseDecisionResult->getAgentDecisionEvents() as $agentDecisionEvent) {
       $agentId = $agentDecisionEvent->getAgentId();
       $matchId = $agentDecisionEvent->getMatchId();
+      $agentName = $agentDecisionEvent->getAgentName();
       $highlightRegion = $this->highlightDao->getHighlightRegion($matchId);
-      $uri = null;
-      $percentage = false;
+      $percentage = $agentDecisionEvent->getPercentage();
       if ($highlightRegion[0] != "" && $highlightRegion[1] != "") {
-        $percentage = $agentDecisionEvent->getPercentage();
-        $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
-        $uri = $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId&page=$page#highlight";
+        $isNomosAgent = stripos($agentName, 'nomos') !== false;
+        if ($isNomosAgent) {
+          $pageAnchors = $this->highlightDao->getSignaturePageAnchorsOfHighlightEntry($matchId);
+          if (!empty($pageAnchors)) {
+            foreach ($pageAnchors as $pageIndex => $pageAnchor) {
+              $page = $pageAnchor['page'];
+              $anchorStart = $pageAnchor['start'];
+              $uri = $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId&page=$page&anchorStart=$anchorStart&format=text#highlight";
+              $agentResults[$agentName][] = array(
+                "uri" => $uri,
+                "text" => ($pageIndex === 0 && $percentage) ? " (" . $percentage . " %)" : ""
+              );
+            }
+          } else {
+            $agentResults[$agentName][] = array(
+              "uri" => null,
+              "text" => $percentage ? " (" . $percentage . " %)" : ""
+            );
+          }
+        } else {
+          $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
+          $uri = $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId&page=$page&format=text#highlight";
+          $agentResults[$agentName][] = array(
+            "uri" => $uri,
+            "text" => $percentage ? " (" . $percentage . " %)" : ""
+          );
+        }
+      } else {
+        $agentResults[$agentName][] = array(
+          "uri" => null,
+          "text" => $percentage ? " (" . $percentage . " %)" : ""
+        );
       }
-      $agentResults[$agentDecisionEvent->getAgentName()][] = array(
-        "uri" => $uri,
-        "text" => $percentage ? " (" . $percentage . " %)" : ""
-      );
     }
 
     $results = array();
