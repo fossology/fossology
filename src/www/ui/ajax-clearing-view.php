@@ -374,17 +374,26 @@ class AjaxClearingView extends FO_Plugin
       $agentId = $agentDecisionEvent->getAgentId();
       $matchId = $agentDecisionEvent->getMatchId();
       $highlightRegion = $this->highlightDao->getHighlightRegion($matchId);
-      $uri = null;
-      $percentage = false;
+      $percentage = $agentDecisionEvent->getPercentage();
       if ($highlightRegion[0] != "" && $highlightRegion[1] != "") {
-        $percentage = $agentDecisionEvent->getPercentage();
-        $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
-        $uri = $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId&page=$page#highlight";
+        $pages = $this->highlightDao->getPageNumbersOfHighlightEntries($matchId);
+        if (empty($pages)) {
+          $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
+          $pages = array(intval($page));
+        }
+        foreach ($pages as $pageIndex => $page) {
+          $uri = $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId&page=$page#highlight";
+          $agentResults[$agentDecisionEvent->getAgentName()][] = array(
+            "uri" => $uri,
+            "text" => ($pageIndex === 0 && $percentage) ? " (" . $percentage . " %)" : ""
+          );
+        }
+      } else {
+        $agentResults[$agentDecisionEvent->getAgentName()][] = array(
+          "uri" => null,
+          "text" => $percentage ? " (" . $percentage . " %)" : ""
+        );
       }
-      $agentResults[$agentDecisionEvent->getAgentName()][] = array(
-        "uri" => $uri,
-        "text" => $percentage ? " (" . $percentage . " %)" : ""
-      );
     }
 
     $results = array();
