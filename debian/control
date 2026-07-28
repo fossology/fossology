@@ -29,7 +29,7 @@ Architecture: any
 Depends: fossology-web, fossology-scheduler, fossology-ununpack,
  fossology-copyright, fossology-buckets, fossology-mimetype,
  fossology-delagent, fossology-wgetagent, ${misc:Depends}
-Recommends: fossology-monk, fossology-monkbulk, fossology-decider,
+Recommends: fossology-monk, fossology-monkbulk, fossology-kotoba, fossology-decider,
  fossology-readmeoss, fossology-spdx2, fossology-reportimport,
  fossology-softwareheritage, fossology-reuser, fossology-ninka,
  fossology-decisionexporter, fossology-decisionimporter
@@ -247,6 +247,18 @@ Description: architecture for analyzing software, monk bulk scanning
  type identification.
  .
  This package contains the monk bulk agent programs and their resources.
+
+Package: fossology-kotoba
+Architecture: any
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, kotoba
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the kotoba agent programs and their resources.
 
 Package: fossology-ojo
 Architecture: any
