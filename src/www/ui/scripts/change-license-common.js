@@ -152,7 +152,6 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
     "forceDecision": $('#forceDecision').is(':checked')?1:0,
     "scanOnlyFindings": $('#scanOnlyFindings').is(':checked') ? 1 : 0,
     "ignoreIrre": $('#bulkIgnoreIrre').is(':checked') ? 1 : 0,
-    "delimiters": $("#delimdrop").val(),
     "addToCustomPhrase": $('#addToCustomPhrase').is(':checked') ? 1 : 0
   };
 
@@ -449,18 +448,6 @@ $(document).ready(function () {
     }
   });
 
-  $('#custDelim').change(function () {
-    if (this.checked) {
-      $('#delimRow').removeClass("invisible").addClass("visible");
-    } else {
-      $('#delimRow').removeClass("visible").addClass("invisible");
-      $('#resetDel').click();
-    }
-  });
-
-  $('#resetDel').click(function () {
-    $('#delimdrop').val('DEFAULT');
-  });
 });
 
 function createDropDown(element, textBox) {

@@ -86,11 +86,7 @@ function scheduleBulkScan() {
 function cleanText(textField) {
   var text = textField.val();
 
-  var delimiters = $("#delimdrop").val();
-  if (delimiters.toLowerCase() === "default") {
-    delimiters = '\t\f#^%*';
-  }
-  delimiters = escapeRegExp(delimiters);
+  var delimiters = escapeRegExp('\t\f#^%*');
   var re = new RegExp("[" + delimiters + "]+", "gi");
   text = text.replace(/ [ ]*/gi, ' ')
              .replace(/(^|\n) ?\/[\*\/]+/gi, '$1')
