@@ -107,6 +107,13 @@ const char* jobsql_email_job =
  * Fetch the next batch of schedulable jobs with their user and priority.
  * The users table is LEFT JOINed so a job whose user was deleted shows up with a
  * NULL user_pk and can be skipped instead of silently dropped.
+ *
+ * printf format string with two placeholders:
+ *  %s  known jq_pk list for NOT IN (sentinel "0" when empty; prevents
+ *      re-fetching JB_CHECKEDOUT jobs whose jq_starttime is still NULL).
+ *  %d  checkout limit (sum of host max slots, fallback CHECKOUT_SIZE).
+ * Do NOT use this string directly with database_exec(); always format it first
+ * via g_strdup_printf().
  */
 const char* basic_checkout =
     " SELECT jq.jq_pk, jq.jq_job_fk, jq.jq_type, jq.jq_host,"
@@ -116,6 +123,7 @@ const char* basic_checkout =
     " INNER JOIN job j     ON j.job_pk  = jq.jq_job_fk"
     " LEFT JOIN users u    ON u.user_pk = j.job_user_fk"
     " WHERE jq.jq_starttime IS NULL AND jq.jq_end_bits < 2"
+    "   AND jq.jq_pk NOT IN (%s)"
     "   AND NOT EXISTS("
     "     SELECT 1 FROM jobdepends jd"
     "     INNER JOIN jobqueue dep ON dep.jq_pk = jd.jdep_jq_depends_fk"
@@ -123,7 +131,7 @@ const char* basic_checkout =
     "       AND NOT (dep.jq_endtime IS NOT NULL AND dep.jq_end_bits < 2)"
     "   )"
     " ORDER BY j.job_priority DESC"
-    " LIMIT 10;";
+    " LIMIT %d;";
 
 /**
  * Mark the given job id as started

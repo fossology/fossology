@@ -177,6 +177,107 @@ void test_database_update_job()
 }
 
 /**
+ * \brief Test that database_update_event() excludes already-known jobs via
+ *        the NOT IN clause.
+ *
+ * A host with max=1 forces checkout_limit=1 (LIMIT=1 per poll). Two jobs are
+ * created: job1 at high priority (returned first) and job2 at low priority.
+ * After the first poll loads job1, the second poll must load job2 -- which is
+ * only possible if job1 is excluded by the NOT IN clause. Without the clause
+ * job1 (jq_starttime IS NULL) would re-occupy the sole slot and job2 would
+ * never be fetched.
+ * \test
+ * -# Add a host with max=1 to constrain LIMIT to 1 per poll
+ * -# Insert job1 (priority 9999) and job2 (priority 0)
+ * -# First poll: job1 loaded (highest priority wins LIMIT=1)
+ * -# Second poll: job1 excluded by NOT IN → job2 loaded (fix validated)
+ */
+void test_database_update_event_excludes_known()
+{
+  scheduler_t* scheduler;
+  host_t* host;
+  char sql[512];
+  PGresult* db_result;
+  int jq_pk1, jq_pk2, job_pk2, user_pk, upload_pk;
+
+  scheduler = scheduler_init(testdb, NULL);
+  FO_ASSERT_PTR_NULL(scheduler->db_conn);
+  database_init(scheduler);
+  FO_ASSERT_PTR_NOT_NULL(scheduler->db_conn);
+
+  /* Clean up any leftover job2 from a previous run. */
+  db_result = database_exec(scheduler,
+      "DELETE FROM jobqueue WHERE jq_job_fk IN "
+      "(SELECT job_pk FROM job WHERE job_name = 'testing file 2')");
+  SafePQclear(db_result);
+  db_result = database_exec(scheduler, "DELETE FROM job WHERE job_name = 'testing file 2'");
+  SafePQclear(db_result);
+
+  /* job1 at high priority (9999) via the standard helper. */
+  jq_pk1 = Prepare_Testing_Data(scheduler);
+
+  /* Retrieve user_pk and upload_pk from job1 to reuse in job2's INSERT. */
+  sprintf(sql,
+      "SELECT j.job_user_fk, j.job_upload_fk"
+      " FROM job j INNER JOIN jobqueue jq ON jq.jq_job_fk = j.job_pk"
+      " WHERE jq.jq_pk = %d",
+      jq_pk1);
+  db_result = database_exec(scheduler, sql);
+  user_pk   = (PQresultStatus(db_result) == PGRES_TUPLES_OK && PQntuples(db_result) > 0)
+              ? atoi(PQgetvalue(db_result, 0, 0)) : 1;
+  upload_pk = (PQresultStatus(db_result) == PGRES_TUPLES_OK && PQntuples(db_result) > 0)
+              ? atoi(PQgetvalue(db_result, 0, 1)) : 0;
+  PQclear(db_result);
+
+  /* job2 at priority 0: always ranked below job1 by ORDER BY priority DESC,
+   * so job1 is deterministically returned first when LIMIT=1. */
+  sprintf(sql,
+      "INSERT INTO job"
+      " (job_pk, job_user_fk, job_queued, job_priority, job_name, job_upload_fk)"
+      " VALUES (nextval('job_job_pk_seq'), %d, now(), 0, 'testing file 2', %d)"
+      " RETURNING job_pk",
+      user_pk, upload_pk);
+  db_result = database_exec(scheduler, sql);
+  job_pk2 = (PQresultStatus(db_result) == PGRES_TUPLES_OK && PQntuples(db_result) > 0)
+            ? atoi(PQgetvalue(db_result, 0, 0)) : 0;
+  PQclear(db_result);
+  FO_ASSERT_NOT_EQUAL(job_pk2, 0);
+
+  sprintf(sql,
+      "INSERT INTO jobqueue"
+      " (jq_pk, jq_job_fk, jq_type, jq_args, jq_runonpfile,"
+      "  jq_starttime, jq_endtime, jq_end_bits, jq_host)"
+      " VALUES (nextval('jobqueue_jq_pk_seq'), %d, 'ununpack', '0',"
+      "  NULL, NULL, NULL, 0, NULL)"
+      " RETURNING jq_pk",
+      job_pk2);
+  db_result = database_exec(scheduler, sql);
+  jq_pk2 = (PQresultStatus(db_result) == PGRES_TUPLES_OK && PQntuples(db_result) > 0)
+           ? atoi(PQgetvalue(db_result, 0, 0)) : 0;
+  PQclear(db_result);
+  FO_ASSERT_NOT_EQUAL(jq_pk2, 0);
+
+  /* Force checkout_limit=1: exposes the regression where the sole LIMIT slot
+   * is wasted by a re-fetched in-flight job. */
+  host = host_init("limit_test_host", "localhost", ".", 1);
+  host_insert(host, scheduler);
+
+  /* First poll: LIMIT=1, NOT IN(0) → job1 (priority 9999) loaded. */
+  database_update_event(scheduler, NULL);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(g_tree_lookup(scheduler->job_list, &jq_pk1));
+
+  /* Second poll: LIMIT=1.
+   * Without NOT IN: job1 (jq_starttime IS NULL) re-fetched, skipped by
+   * g_tree_lookup, slot wasted → job2 never loaded. Regression.
+   * With NOT IN: job1 excluded → job2 loaded. Fix validated. */
+  database_update_event(scheduler, NULL);
+  FO_ASSERT_PTR_NOT_NULL(g_tree_lookup(scheduler->job_list, &jq_pk2));
+
+  database_reset_queue(scheduler);
+  scheduler_destroy(scheduler);
+}
+
+/**
  * \brief Test for database_job_processed(),database_job_log(),database_job_priority()
  * \test
  * -# Initialize test database
@@ -261,11 +362,12 @@ void test_email_notify()
 
 CU_TestInfo tests_database[] =
 {
-    {"Test database_init",          test_database_init        },
-    {"Test database_exec_event",    test_database_exec_event  },
-    {"Test database_update_event",  test_database_update_event},
-    {"Test database_update_job",    test_database_update_job  },
-    {"Test database_job",           test_database_job         },
+    {"Test database_init",                         test_database_init                        },
+    {"Test database_exec_event",                   test_database_exec_event                  },
+    {"Test database_update_event",                 test_database_update_event                },
+    {"Test database_update_event excludes known",  test_database_update_event_excludes_known },
+    {"Test database_update_job",                   test_database_update_job                  },
+    {"Test database_job",                          test_database_job                         },
     CU_TEST_INFO_NULL
 };
 

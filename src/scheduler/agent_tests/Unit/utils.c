@@ -26,7 +26,8 @@ int Prepare_Testing_Data(scheduler_t * scheduler)
   int upload_pk, job_pk, jq_pk, user_pk, folder_pk;
   PGresult* db_result;
 
-  /* Remove stale test data so basic_checkout's LIMIT 10 always includes ours. */
+  /* Remove stale test data so the test job is not already in job_list and is
+   * returned by basic_checkout (NOT IN exclusion skips known jobs). */
   database_exec(scheduler,
       "DELETE FROM jobqueue WHERE jq_job_fk IN "
       "(SELECT job_pk FROM job WHERE job_name = 'testing file')");
@@ -88,7 +89,7 @@ int Prepare_Testing_Data(scheduler_t * scheduler)
       upload_pk);
   database_exec(scheduler, sql);
 
-  /* High priority ensures this job is within basic_checkout's LIMIT 10. */
+  /* High priority ensures this job is ordered first in basic_checkout results. */
   sprintf(sql,
       "INSERT INTO job"
       " (job_pk, job_user_fk, job_queued, job_priority, job_name, job_upload_fk)"
