@@ -11,6 +11,7 @@
     .badge-add { background-color: #28a745; color: #fff; }
     .badge-rm  { background-color: #dc3545; color: #fff; }
     #licenseQueueTable td, #licenseQueueTable th { vertical-align: middle; }
+    .meta-cell textarea { width: 100%; min-width: 160px; font-size: 0.8em; resize: vertical; }
   </style>
 {% endblock %}
 
@@ -31,37 +32,46 @@
     <tr>
       <td valign="top">{{ 'Associated Licenses'|trans }}:</td>
       <td>
-        <div class="input-group mb-1" style="width: 430px;">
-          <select id="licenseDropdown" class="form-control form-control-sm">
-            <option value="">{{ '-- Select License --'|trans }}</option>
-            {% for key, value in licenseOptions %}
-              {% if key != '' %}
-                <option value="{{ key }}">{{ value|e }}</option>
-              {% endif %}
-            {% endfor %}
-          </select>
-          <div class="input-group-append" style="align-items: center;">
-            <a href="#" id="addLicenseBtn" style="font-size:20px; margin-left:4px;">
-              <img src="images/icons/add_16.png" title="{{ 'Add license to be associated (added)'|trans }}" alt="+"/>
-            </a>
-            <a href="#" id="removeLicenseBtn" style="font-size:20px; margin-left:4px;">
-              <img src="images/icons/remove_16.png" title="{{ 'Add license to be removed'|trans }}" alt="-"/>
-            </a>
+        <div class="d-flex mb-1" style="gap:10px;">
+          <div style="flex:1;">
+            <div class="small font-weight-bold text-success mb-1">
+              <img src="images/icons/add_16.png" alt="+"/> {{ 'Add License'|trans }}
+            </div>
+            <select id="addLicenseSelect" class="form-control form-control-sm">
+              <option value="">{{ '-- Select to add --'|trans }}</option>
+              {% for key, value in licenseOptions %}
+                {% if key != '' %}<option value="{{ key }}">{{ value|e }}</option>{% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div style="flex:1;">
+            <div class="small font-weight-bold text-danger mb-1">
+              <img src="images/icons/remove_16.png" alt="-"/> {{ 'Remove License'|trans }}
+            </div>
+            <select id="removeLicenseSelect" class="form-control form-control-sm">
+              <option value="">{{ '-- Select to remove --'|trans }}</option>
+              {% for key, value in licenseOptions %}
+                {% if key != '' %}<option value="{{ key }}">{{ value|e }}</option>{% endif %}
+              {% endfor %}
+            </select>
           </div>
         </div>
-        <table id="licenseQueueTable" class="semibordered" style="width: 100%; max-width: 600px;">
+        <table id="licenseQueueTable" class="semibordered" style="width: 100%;">
           <thead>
             <tr>
-              <th style="width: 15%;">{{ 'Action'|trans }}</th>
-              <th style="width: 70%;">{{ 'License'|trans }}</th>
-              <th style="width: 15%;"></th>
+              <th style="width: 8%;">{{ 'Action'|trans }}</th>
+              <th style="width: 18%;">{{ 'License'|trans }}</th>
+              <th style="width: 22%;">{{ 'License Text'|trans }}</th>
+              <th style="width: 22%;">{{ 'Acknowledgement'|trans }}</th>
+              <th style="width: 22%;">{{ 'Comment'|trans }}</th>
+              <th style="width: 8%;"></th>
             </tr>
           </thead>
           <tbody id="licenseQueueTableBody"></tbody>
         </table>
         <input type="hidden" name="license_data" id="licenseDataInput" value=""/>
         <br/>
-        <small class="text-muted">{{ 'Select a license and click + to add or − to mark for removal.'|trans }}</small>
+        <small class="text-muted">{{ 'Select from the left to add a license, or from the right to mark one for removal.'|trans }}</small>
       </td>
     </tr>
 
@@ -74,16 +84,6 @@
           {{ 'Warning: This text content may already exist in the database.'|trans }}
         </div>
       </td>
-    </tr>
-
-    <tr>
-      <td valign="top">{{ 'Acknowledgement'|trans }}:</td>
-      <td><textarea name="{{ acknowledgementParam }}" class="form-control" cols="120" rows="6">{{ acknowledgement|e }}</textarea></td>
-    </tr>
-
-    <tr>
-      <td valign="top">{{ 'Comments'|trans }}:</td>
-      <td><textarea name="{{ commentsParam }}" class="form-control" cols="120" rows="6">{{ comments|e }}</textarea></td>
     </tr>
 
     <tr>
@@ -195,7 +195,6 @@
 
 {% block foot %}
   {{ parent() }}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script type="text/javascript">
     var bulkDataCache = [];
     var duplicateCheckTimeout = null;
@@ -221,8 +220,18 @@
         if (!validateForm()) { e.preventDefault(); }
       });
 
-      $('#licenseDropdown').select2({
-        placeholder: '{{ "-- Select License --"|trans }}',
+      $('#bulkUserFilter').select2({
+        placeholder: '{{ "All Users"|trans }}',
+        allowClear: true,
+        width: 'resolve'
+      });
+      $('#addLicenseSelect').select2({
+        placeholder: '{{ "-- Select to add --"|trans }}',
+        allowClear: true,
+        width: '100%'
+      });
+      $('#removeLicenseSelect').select2({
+        placeholder: '{{ "-- Select to remove --"|trans }}',
         allowClear: true,
         width: '100%'
       });
@@ -230,16 +239,19 @@
       {% if isEdit and selectedLicenses is defined and selectedLicenses|length > 0 %}
         {% for license in selectedLicenses %}
           licenseQueue.push({
-            licenseId: {{ license.rf_pk }},
-            licenseName: '{{ license.rf_shortname|e('js') }}',
-            action: {{ license.removing ? '"Remove"' : '"Add"' }}
+            licenseId:       {{ license.rf_pk }},
+            licenseName:     '{{ license.rf_shortname|e('js') }}',
+            action:          {{ license.removing ? '"Remove"' : '"Add"' }},
+            reportinfo:      '{{ (license.reportinfo ?? '')|e('js') }}',
+            acknowledgement: '{{ (license.acknowledgement ?? '')|e('js') }}',
+            comment:         '{{ (license.comment ?? '')|e('js') }}'
           });
         {% endfor %}
         updateLicenseQueue();
       {% endif %}
 
-      $('#addLicenseBtn').on('click', function(e) { e.preventDefault(); addLicense(); });
-      $('#removeLicenseBtn').on('click', function(e) { e.preventDefault(); rmLicense(); });
+      $('#addLicenseSelect').on('change', function() { addLicense(); });
+      $('#removeLicenseSelect').on('change', function() { rmLicense(); });
 
       $('#bulkDataSearch').on('keyup', function() {
         clearTimeout(bulkSearchTimeout);
@@ -268,7 +280,7 @@
         bulkSearchTerm  = '';
         bulkUserFk      = 0;
         $('#bulkDataSearch').val('');
-        $('#bulkUserFilter').val('');
+        $('#bulkUserFilter').val('').trigger('change');
         loadBulkData();
       });
 
@@ -310,6 +322,14 @@
 
     function trunc(str, n) { return str && str.length > n ? str.substring(0, n) + '\u2026' : (str || ''); }
 
+    // Built via DOM APIs, not string concatenation: full/text are free text
+    // submitted by any user with bulk-decision access.
+    function previewCell(full, previewLen) {
+      return $('<td>').append(
+        $('<span>').attr('title', full).text(trunc(full, previewLen))
+      );
+    }
+
     function displayBulkData(data) {
       var tbody = $('#bulkDataTableBody');
       tbody.empty();
@@ -318,20 +338,21 @@
         return;
       }
       $.each(data, function(i, item) {
-        var lic = item.license_summary || '';
-        var ack = item.acknowledgement_summary || '';
-        var cmt = item.comment_summary || '';
-        var row = '<tr>' +
-          '<td>' + item.lrb_pk + '</td>' +
-          '<td><span title="' + $('<div/>').text(item.bulk_reference_text || '').html() + '">' + trunc(item.text_preview, 80) + '</span></td>' +
-          '<td><span title="' + $('<div/>').text(lic).html() + '">' + trunc(lic, 30) + '</span></td>' +
-          '<td><span title="' + $('<div/>').text(ack).html() + '">' + trunc(ack, 30) + '</span></td>' +
-          '<td><span title="' + $('<div/>').text(cmt).html() + '">' + trunc(cmt, 30) + '</span></td>' +
-          '<td>' + (item.created_by_user || '') + '</td>' +
-          '<td><button type="button" class="btn btn-primary btn-sm import-bulk-btn"' +
-               ' data-lrb-pk="' + item.lrb_pk + '">{{ "Import"|trans }}</button></td>' +
-          '</tr>';
-        tbody.append(row);
+        var $row = $('<tr>');
+        $row.append($('<td>').text(item.lrb_pk));
+        $row.append(previewCell(item.bulk_reference_text || '', 80));
+        $row.append(previewCell(item.license_summary || '', 30));
+        $row.append(previewCell(item.acknowledgement_summary || '', 30));
+        $row.append(previewCell(item.comment_summary || '', 30));
+        $row.append($('<td>').text(item.created_by_user || ''));
+        $row.append(
+          $('<td>').append(
+            $('<button type="button" class="btn btn-primary btn-sm import-bulk-btn">')
+              .attr('data-lrb-pk', item.lrb_pk)
+              .text('{{ "Import"|trans }}')
+          )
+        );
+        tbody.append($row);
       });
       tbody.find('.import-bulk-btn').on('click', function() {
         importBulkData(parseInt($(this).data('lrb-pk'), 10));
@@ -356,17 +377,16 @@
       var selectedData = bulkDataCache.find(function(item) { return item.lrb_pk == lrbPk; });
       if (!selectedData) { alert("{{ 'Selected data not found'|trans }}"); return; }
       $('textarea[name="{{ textParam }}"]').val(selectedData.bulk_reference_text || '');
-      $('input[name="{{ userFkParam }}"]').val(selectedData.user_fk || '');
-      $('input[name="{{ groupFkParam }}"]').val(selectedData.group_fk || '');
-      $('textarea[name="{{ acknowledgementParam }}"]').val(selectedData.acknowledgement_summary || '');
-      $('textarea[name="{{ commentsParam }}"]').val(selectedData.comment_summary || '');
       if (selectedData.licenses && selectedData.licenses.length > 0) {
         licenseQueue = [];
         selectedData.licenses.forEach(function(license) {
           licenseQueue.push({
-            licenseId: parseInt(license.license_id, 10),
-            licenseName: license.license_shortname,
-            action: license.is_removing_license ? "Remove" : "Add"
+            licenseId:       parseInt(license.license_id, 10),
+            licenseName:     license.license_shortname,
+            action:          license.is_removing_license ? "Remove" : "Add",
+            reportinfo:      license.license_reportinfo      || '',
+            acknowledgement: license.license_acknowledgement || '',
+            comment:         license.license_comment         || ''
           });
         });
         updateLicenseQueue();
@@ -379,10 +399,9 @@
       var textContent = $('#textField').val().trim();
       var currentCpPk = $('input[name="cp_pk"]').val() || 0;
       if (textContent.length === 0) { $('#duplicateWarning').addClass('d-none'); return; }
-      var textMd5 = CryptoJS.MD5(textContent).toString();
       $.ajax({
         url: "?mod=admin_custom_text_management&action=check_duplicate",
-        type: "POST", data: { text_md5: textMd5, cp_pk: currentCpPk }, dataType: "json",
+        type: "POST", data: { text: textContent, cp_pk: currentCpPk }, dataType: "json",
         success: function(response) {
           $('#duplicateWarning').toggleClass('d-none', !response.duplicate);
         }
@@ -390,23 +409,25 @@
     }
 
     function addLicense() {
-      var licenseId = parseInt($('#licenseDropdown').val(), 10);
+      var licenseId = parseInt($('#addLicenseSelect').val(), 10);
       if (licenseId > 0) {
         maybeRemoveOldEntry(licenseId);
-        licenseQueue.push({ licenseId: licenseId, licenseName: $('#licenseDropdown option:selected').text(), action: "Add" });
+        licenseQueue.push({ licenseId: licenseId, licenseName: $('#addLicenseSelect option:selected').text(), action: "Add",
+                            reportinfo: '', acknowledgement: '', comment: '' });
         updateLicenseQueue();
-        $('#licenseDropdown').val(null).trigger('change');
-      } else { alert('{{ "Please select a license first"|trans }}'); }
+        $('#addLicenseSelect').val(null).trigger('change');
+      }
     }
 
     function rmLicense() {
-      var licenseId = parseInt($('#licenseDropdown').val(), 10);
+      var licenseId = parseInt($('#removeLicenseSelect').val(), 10);
       if (licenseId > 0) {
         maybeRemoveOldEntry(licenseId);
-        licenseQueue.push({ licenseId: licenseId, licenseName: $('#licenseDropdown option:selected').text(), action: "Remove" });
+        licenseQueue.push({ licenseId: licenseId, licenseName: $('#removeLicenseSelect option:selected').text(), action: "Remove",
+                            reportinfo: '', acknowledgement: '', comment: '' });
         updateLicenseQueue();
-        $('#licenseDropdown').val(null).trigger('change');
-      } else { alert('{{ "Please select a license first"|trans }}'); }
+        $('#removeLicenseSelect').val(null).trigger('change');
+      }
     }
 
     function maybeRemoveOldEntry(licenseId) {
@@ -420,33 +441,62 @@
       updateLicenseQueue();
     }
 
+    function serializeQueue() {
+      $('#licenseDataInput').val(JSON.stringify(licenseQueue));
+    }
+
     function updateLicenseQueue() {
       var tbody = $('#licenseQueueTableBody');
       tbody.empty();
       if (licenseQueue.length === 0) {
-        tbody.append('<tr><td colspan="3" class="text-center text-muted">{{ "No licenses selected"|trans }}</td></tr>');
+        tbody.append('<tr><td colspan="6" class="text-center text-muted">{{ "No licenses selected"|trans }}</td></tr>');
       } else {
         for (var i = 0; i < licenseQueue.length; i++) {
-          var item = licenseQueue[i];
-          var badge = item.action === 'Add'
-            ? '<span class="badge badge-add px-2 py-1">{{ "Add"|trans }}</span>'
-            : '<span class="badge badge-rm  px-2 py-1">{{ "Remove"|trans }}</span>';
-          var row = '<tr class="' + (i % 2 === 1 ? 'even' : 'odd') + '">' +
-            '<td>' + badge + '</td>' +
-            '<td>' + $('<div/>').text(item.licenseName).html() + '</td>' +
-            '<td style="text-align: center;">' +
-              '<button type="button" class="remove-license-btn btn btn-link btn-sm p-0 text-danger"' +
-                ' data-license-id="' + parseInt(item.licenseId, 10) + '"' +
-                ' title="{{ "Remove from queue"|trans }}">' +
-                '<img src="images/icons/remove_16.png" alt="-"/>' +
-              '</button>' +
-            '</td>' +
-          '</tr>';
-          tbody.append(row);
+          (function(idx) {
+            var item = licenseQueue[idx];
+            var badge = item.action === 'Add'
+              ? '<span class="badge badge-add px-2 py-1">{{ "Add"|trans }}</span>'
+              : '<span class="badge badge-rm  px-2 py-1">{{ "Remove"|trans }}</span>';
+            var safeId = 'lic_' + parseInt(item.licenseId, 10);
+            var metaCells = item.action === 'Add'
+              ? '<td class="meta-cell"><textarea class="lq-reportinfo form-control form-control-sm" rows="2"' +
+                  ' data-idx="' + idx + '" id="' + safeId + '_ri" placeholder="{{ "License text"|trans }}">' +
+                  $('<div/>').text(item.reportinfo || '').html() + '</textarea></td>' +
+                '<td class="meta-cell"><textarea class="lq-acknowledgement form-control form-control-sm" rows="2"' +
+                  ' data-idx="' + idx + '" id="' + safeId + '_ack" placeholder="{{ "Acknowledgement"|trans }}">' +
+                  $('<div/>').text(item.acknowledgement || '').html() + '</textarea></td>' +
+                '<td class="meta-cell"><textarea class="lq-comment form-control form-control-sm" rows="2"' +
+                  ' data-idx="' + idx + '" id="' + safeId + '_cmt" placeholder="{{ "Comment"|trans }}">' +
+                  $('<div/>').text(item.comment || '').html() + '</textarea></td>'
+              : '<td class="text-center text-muted">—</td>' +
+                '<td class="text-center text-muted">—</td>' +
+                '<td class="text-center text-muted">—</td>';
+            var row = '<tr class="' + (idx % 2 === 1 ? 'even' : 'odd') + '">' +
+              '<td>' + badge + '</td>' +
+              '<td>' + $('<div/>').text(item.licenseName).html() + '</td>' +
+              metaCells +
+              '<td style="text-align: center;">' +
+                '<button type="button" class="remove-license-btn btn btn-link btn-sm p-0 text-danger"' +
+                  ' data-license-id="' + parseInt(item.licenseId, 10) + '"' +
+                  ' title="{{ "Remove from queue"|trans }}">' +
+                  '<img src="images/icons/remove_16.png" alt="-"/>' +
+                '</button>' +
+              '</td>' +
+            '</tr>';
+            tbody.append(row);
+          })(i);
         }
       }
-      $('#licenseDataInput').val(JSON.stringify(licenseQueue));
+      serializeQueue();
     }
+
+    $(document).on('input', '.lq-reportinfo, .lq-acknowledgement, .lq-comment', function() {
+      var idx = parseInt($(this).data('idx'), 10);
+      if ($(this).hasClass('lq-reportinfo'))      licenseQueue[idx].reportinfo      = $(this).val();
+      if ($(this).hasClass('lq-acknowledgement'))  licenseQueue[idx].acknowledgement = $(this).val();
+      if ($(this).hasClass('lq-comment'))          licenseQueue[idx].comment         = $(this).val();
+      serializeQueue();
+    });
 
     $(document).on('click', '.remove-license-btn', function() {
       removeLicenseFromQueue($(this).data('license-id'));

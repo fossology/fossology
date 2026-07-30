@@ -775,61 +775,59 @@ INSERT INTO clearing_decision (
     $params = array($uploadId, $itemId, $left, $right, $groupId);
     $stmt = __METHOD__ . "." . $uploadTreeTableName;
 
-    $triedExpr = "ut2.lft BETWEEN $3 AND $4";
+    $triedExpr = "ut.lft BETWEEN $3 AND $4";
     $triedFilter = "";
     if ($onlyTried) {
       $triedFilter = "AND " . $triedExpr;
       $stmt .= ".tried";
     }
 
+    // Group by cp_fk, not reportinfo: reportinfo is per-mapping metadata,
+    // empty for a "remove" mapping, so it is not a stable phrase identity.
     $kotobaType = ClearingEventTypes::KOTOBA;
     $sql = "WITH alltried AS (
-            SELECT ce.reportinfo, ce.clearing_event_pk ce_pk, ce.uploadtree_fk,
+            SELECT h.cp_fk, ce.clearing_event_pk ce_pk, ce.uploadtree_fk,
               $triedExpr AS tried
             FROM clearing_event ce
+              INNER JOIN highlight_kotoba h ON h.clearing_event_fk = ce.clearing_event_pk
               INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
-              INNER JOIN $uploadTreeTableName ut2 ON ut2.uploadtree_pk = ce.uploadtree_fk
             WHERE ce.type_fk = $kotobaType
             AND ce.group_fk = $5
             AND ut.upload_fk = $1
-            AND ce.reportinfo IS NOT NULL
-            AND ce.reportinfo != ''
             $triedFilter
-            ORDER BY ce.reportinfo, ce.clearing_event_pk
+            ORDER BY h.cp_fk, ce.clearing_event_pk
             ), aggregated_tried AS (
-            SELECT DISTINCT ON(reportinfo) reportinfo AS text, ce_pk, tried, matched
+            SELECT DISTINCT ON(cp_fk) cp_fk, ce_pk, tried, matched
             FROM (
-              SELECT DISTINCT ON(reportinfo) reportinfo, ce_pk, tried, true AS matched FROM alltried WHERE uploadtree_fk = $2
+              SELECT DISTINCT ON(cp_fk) cp_fk, ce_pk, tried, true AS matched FROM alltried WHERE uploadtree_fk = $2
               UNION ALL
-              SELECT DISTINCT ON(reportinfo) reportinfo, ce_pk, tried, false AS matched FROM alltried WHERE uploadtree_fk != $2 OR uploadtree_fk IS NULL
-            ) AS result ORDER BY reportinfo, matched DESC)
-            SELECT aggregated_tried.text, lrf.rf_shortname, ce.removed, aggregated_tried.tried, aggregated_tried.ce_pk, aggregated_tried.matched
-            FROM aggregated_tried
-              INNER JOIN clearing_event ce ON ce.reportinfo = aggregated_tried.text AND ce.type_fk = $kotobaType AND ce.group_fk = $5
-              INNER JOIN license_ref lrf ON ce.rf_fk = lrf.rf_pk
-              INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
-            WHERE ut.upload_fk = $1
-            ORDER BY aggregated_tried.text, ce.clearing_event_pk";
+              SELECT DISTINCT ON(cp_fk) cp_fk, ce_pk, tried, false AS matched FROM alltried WHERE uploadtree_fk != $2 OR uploadtree_fk IS NULL
+            ) AS result ORDER BY cp_fk, matched DESC)
+            SELECT a.cp_fk, cp.text, lrf.rf_shortname, cplm.removing, a.tried, a.ce_pk, a.matched
+            FROM aggregated_tried a
+              INNER JOIN custom_phrase cp ON cp.cp_pk = a.cp_fk
+              INNER JOIN custom_phrase_license_map cplm ON cplm.cp_fk = a.cp_fk
+              INNER JOIN license_ref lrf ON cplm.rf_fk = lrf.rf_pk
+            ORDER BY a.cp_fk";
 
     $this->dbManager->prepare($stmt, $sql);
     $res = $this->dbManager->execute($stmt, $params);
 
     $phrases = array();
     while ($row = $this->dbManager->fetchArray($res)) {
-      $phraseText = $row['text'];
-      $phraseId = md5($phraseText); // Use hash of phrase text as ID
+      $phraseId = $row['cp_fk'];
 
       if (!array_key_exists($phraseId, $phrases)) {
         $phrases[$phraseId] = array(
             "phraseId" => $phraseId,
             "id" => $row['ce_pk'],
-            "text" => $phraseText,
+            "text" => $row['text'],
             "matched" => $this->dbManager->booleanFromDb($row['matched']),
             "tried" => $this->dbManager->booleanFromDb($row['tried']),
             "removedLicenses" => array(),
             "addedLicenses" => array());
       }
-      $key = $this->dbManager->booleanFromDb($row['removed']) ? 'removedLicenses' : 'addedLicenses';
+      $key = $this->dbManager->booleanFromDb($row['removing']) ? 'removedLicenses' : 'addedLicenses';
       if (!in_array($row['rf_shortname'], $phrases[$phraseId][$key])) {
         $phrases[$phraseId][$key][] = $row['rf_shortname'];
       }

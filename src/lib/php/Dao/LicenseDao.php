@@ -228,6 +228,35 @@ class LicenseDao
     return $licenseRefs;
   }
 
+  /**
+   * Active licenses (including the requesting group's own candidates)
+   * visible to a group, keyed by rf_pk.
+   *
+   * @param int $groupId
+   * @return array rf_pk => rf_shortname
+   */
+  public function getActiveLicensesForGroup($groupId)
+  {
+    // $groupId is a literal in the CTE, so the statement name must vary
+    // with it or two different groups collide on one cached statement.
+    $statementName = __METHOD__ . ".$groupId";
+    $rfTable = 'license_all';
+    $viewOptions = array('columns' => array('rf_pk', 'rf_shortname', 'rf_active'), 'candidatePrefix' => $this->candidatePrefix);
+    $licenseViewDao = new LicenseViewProxy($groupId, $viewOptions, $rfTable);
+    $withCte = $licenseViewDao->asCTE();
+
+    $this->dbManager->prepare($statementName,
+        $withCte . " SELECT rf_pk, rf_shortname FROM $rfTable WHERE rf_active = true ORDER BY LOWER(rf_shortname)");
+    $result = $this->dbManager->execute($statementName);
+    $rows = $this->dbManager->fetchAll($result);
+    $this->dbManager->freeResult($result);
+
+    $licenses = array();
+    foreach ($rows as $row) {
+      $licenses[$row['rf_pk']] = $row['rf_shortname'];
+    }
+    return $licenses;
+  }
 
   /**
    * @param ItemTreeBounds $itemTreeBounds

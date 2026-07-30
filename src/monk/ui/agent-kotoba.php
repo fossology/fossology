@@ -143,9 +143,12 @@ class KotobaAgentPlugin extends AgentPlugin
   }
 
   /**
-   * Check if an agent is scheduled for an upload (in any job for that upload)
+   * Check if an agent is already queued for an upload (in any job).
+   * Callers must schedule the scanner before kotoba, otherwise its jobqueue
+   * row does not exist yet and the dependency is dropped. Adding a not-yet
+   * queued agent here instead would re-schedule it without its own args.
    * @param int $uploadId The upload ID
-   * @param string $agentName The agent name (from agent.agent_name, not plugin name)
+   * @param string $pluginName Agent plugin name (e.g. "agent_scancode")
    * @return boolean true if agent is scheduled, false otherwise
    */
   private function isAgentScheduledForUpload($uploadId, $pluginName)
