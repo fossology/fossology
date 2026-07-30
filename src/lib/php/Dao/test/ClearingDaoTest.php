@@ -12,6 +12,7 @@ use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
@@ -57,7 +58,10 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
             'clearing_decision_type',
             'clearing_event',
             'clearing_licenses',
+            'custom_phrase',
+            'custom_phrase_license_map',
             'highlight_bulk',
+            'highlight_kotoba',
             'license_ref',
             'license_ref_bulk',
             'license_set_bulk',
@@ -130,6 +134,23 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
       $this->dbManager->insertInto('license_set_bulk', 'lrb_fk, rf_fk, removing', $paramsSet, 'insert.bulkset');
     }
 
+    // cp_pk => [text, [[rf_fk, removing], ...]]. Phrase 2 carries both an
+    // add and a remove mapping, to catch the empty-reportinfo case.
+    $kotobaPhrases = array(
+        1 => array('TextFOO', array(array(401, false))),
+        2 => array('TextMixed', array(array(401, false), array(402, true))),
+    );
+    foreach ($kotobaPhrases as $cpPk => $phrase) {
+      list($text, $mappings) = $phrase;
+      $this->dbManager->insertInto('custom_phrase', 'cp_pk, group_fk, text, text_md5, is_active',
+          array($cpPk, $this->groupId, $text, md5('phrase' . $cpPk), true), 'insert.customphrase');
+      foreach ($mappings as $mapping) {
+        list($rfFk, $removing) = $mapping;
+        $this->dbManager->insertInto('custom_phrase_license_map', 'cp_fk, rf_fk, removing',
+            array($cpPk, $rfFk, $removing), 'insert.customphraselicensemap');
+      }
+    }
+
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
@@ -156,6 +177,30 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     );
     foreach ($bulkClearingEvents as $params) {
       $this->dbManager->insertInto('clearing_event', 'clearing_event_pk, uploadtree_fk', $params, $logStmt = 'insert.bulkevents');
+    }
+  }
+
+  /**
+   * Simulate kotoba.c: one clearing_event row per license mapping of a
+   * matched phrase, but highlight_kotoba only gets a row for the first
+   * mapping (k==0) of each phrase match, not every sibling row.
+   */
+  private function insertKotobaEvents()
+  {
+    $kotobaClearingEvents = array(
+        // clearing_event_pk, uploadtree_fk, cp_fk, has a highlight_kotoba row
+        array(6001, 302, 1, true),  // phrase 1 (FOO, add), matched on 302 only
+        array(6002, 301, 2, true),  // phrase 2 (Mixed), add mapping, anchor
+        array(6003, 301, 2, false), // phrase 2 (Mixed), remove mapping, no anchor
+    );
+    foreach ($kotobaClearingEvents as $params) {
+      list($cePk, $uploadtreeFk, $cpFk, $hasHighlight) = $params;
+      $this->dbManager->insertInto('clearing_event', 'clearing_event_pk, uploadtree_fk, type_fk, group_fk',
+          array($cePk, $uploadtreeFk, ClearingEventTypes::KOTOBA, $this->groupId), 'insert.kotobaevents');
+      if ($hasHighlight) {
+        $this->dbManager->insertInto('highlight_kotoba', 'clearing_event_fk, cp_fk',
+            array($cePk, $cpFk), 'insert.kotobafinds');
+      }
     }
   }
 
@@ -362,6 +407,91 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($this->collectBulkLicenses($bulks), arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX', 'FOO'));
     assertThat($bulkLicDirs, arrayContaining(false, false, true, false, true, true));
     assertThat($bulkTried, arrayContaining(true, true, true, true, true, false));
+  }
+
+  /**
+   * @test
+   * Regression: reportinfo is now per-license-mapping metadata, so it is
+   * empty for a "remove" mapping with no custom text. getKotobaHistory()
+   * used to group by reportinfo and filter out empty values, silently
+   * dropping every such remove mapping. It must group by cp_fk instead,
+   * so an add and a remove mapping of the same phrase show up together.
+   */
+  public function testKotobaHistoryGroupsAddedAndRemovedLicensesOfSamePhrase()
+  {
+    $this->insertKotobaEvents();
+
+    $treeBounds = M::mock(ItemTreeBounds::class);
+    $treeBounds->shouldReceive('getItemId')->andReturn(301);
+    $treeBounds->shouldReceive('getLeft')->andReturn(1);
+    $treeBounds->shouldReceive('getRight')->andReturn(2);
+    $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $treeBounds->shouldReceive('getUploadId')->andReturn(101);
+    $phrases = $this->clearingDao->getKotobaHistory($treeBounds, $this->groupId);
+
+    assertThat($phrases, hasKeyInArray(2));
+    $mixedPhrase = $phrases[2];
+    assertThat($mixedPhrase['text'], is('TextMixed'));
+    assertThat($mixedPhrase['matched'], is(true));
+    assertThat($mixedPhrase['tried'], is(true));
+    assertThat($mixedPhrase['addedLicenses'], arrayContaining('FOO'));
+    assertThat($mixedPhrase['removedLicenses'], arrayContaining('BAR'));
+  }
+
+  /**
+   * @test
+   * matched = decided exactly on the current item; tried = decided
+   * somewhere within the current item's subtree. Verifies this distinction
+   * still holds after grouping by cp_fk instead of reportinfo.
+   */
+  public function testKotobaHistoryDistinguishesMatchedFromTriedOnly()
+  {
+    $this->insertKotobaEvents();
+
+    // Viewed from item 301 itself: phrase 1 was decided on 302, a sibling,
+    // not on 301 and not inside 301's own (file-sized) range -> absent.
+    $fileBounds = M::mock(ItemTreeBounds::class);
+    $fileBounds->shouldReceive('getItemId')->andReturn(301);
+    $fileBounds->shouldReceive('getLeft')->andReturn(1);
+    $fileBounds->shouldReceive('getRight')->andReturn(2);
+    $fileBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $fileBounds->shouldReceive('getUploadId')->andReturn(101);
+    $phrasesFromFile = $this->clearingDao->getKotobaHistory($fileBounds, $this->groupId);
+    assertThat($phrasesFromFile, is(not(hasKeyInArray(1))));
+
+    // Viewed from the upload root: phrase 1 is tried (decided somewhere in
+    // the subtree) but not matched on the root item itself.
+    $rootBounds = M::mock(ItemTreeBounds::class);
+    $rootBounds->shouldReceive('getItemId')->andReturn(299);
+    $rootBounds->shouldReceive('getLeft')->andReturn(1);
+    $rootBounds->shouldReceive('getRight')->andReturn(4);
+    $rootBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $rootBounds->shouldReceive('getUploadId')->andReturn(101);
+    $phrasesFromRoot = $this->clearingDao->getKotobaHistory($rootBounds, $this->groupId);
+    assertThat($phrasesFromRoot, hasKeyInArray(1));
+    assertThat($phrasesFromRoot[1]['matched'], is(false));
+    assertThat($phrasesFromRoot[1]['tried'], is(true));
+  }
+
+  /**
+   * @test
+   * Custom phrases are global (not scoped to an upload at creation, unlike
+   * a bulk run's own uploadtree_fk), so unlike getBulkHistory() there is no
+   * "candidate list" to fall back on before anything has ever been scanned
+   * and decided. No clearing_event/highlight_kotoba rows yet must mean an
+   * empty result, not an error.
+   */
+  public function testKotobaHistoryEmptyWhenNoDecisionsRecordedYet()
+  {
+    $treeBounds = M::mock(ItemTreeBounds::class);
+    $treeBounds->shouldReceive('getItemId')->andReturn(301);
+    $treeBounds->shouldReceive('getLeft')->andReturn(1);
+    $treeBounds->shouldReceive('getRight')->andReturn(2);
+    $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $treeBounds->shouldReceive('getUploadId')->andReturn(101);
+    $phrases = $this->clearingDao->getKotobaHistory($treeBounds, $this->groupId);
+
+    assertThat($phrases, is(emptyArray()));
   }
 
   public function testGetClearedLicenseMultiplicities()

@@ -148,6 +148,7 @@ class BrowseLicense extends DefaultPlugin
     $vars = array_merge($vars, $histVars);
 
     $vars['content'] = js_url();
+    $vars['isAdmin'] = Auth::isAdmin();
 
     return $this->render("browse.html.twig",$this->mergeWithDefault($vars));
   }
