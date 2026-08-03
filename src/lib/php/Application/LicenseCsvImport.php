@@ -49,7 +49,7 @@ class LicenseCsvImport
    * Alias for headers */
   protected $alias = array(
       'shortname'=>array('shortname','Short Name'),
-      'licensetype'=>array('licensetype','License Type'),
+      'licensetype'=>array('licensetype','license_type','License Type'),
       'fullname'=>array('fullname','Long Name'),
       'spdx_id'=>array('spdx_id', 'SPDX ID'),
       'text'=>array('text','Full Text'),
@@ -221,6 +221,10 @@ class LicenseCsvImport
       if (!array_key_exists($optNeedle, $mRow)) {
         $mRow[$optNeedle] = $defaultValue;
       }
+    }
+
+    if (empty($mRow['external_id'])) {
+      return $this->handleCsvLicense($mRow);
     }
 
     return $this->handleLicenseDBLicenseImport($mRow);
@@ -411,6 +415,11 @@ class LicenseCsvImport
       $return = $this->insertNewLicense($row, "license_candidate");
     } else {
       $return = $this->insertNewLicense($row, "license_ref");
+    }
+    // insertNewLicense() returns a plain string on error (e.g. missing group)
+    // or an array on success.
+    if (is_string($return)) {
+      return $return;
     }
     return $return['log'];
   }
