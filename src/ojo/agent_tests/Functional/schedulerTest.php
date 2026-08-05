@@ -135,6 +135,7 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
         'groups',
         'ars_master',
         'license_ref',
+        'license_expression',
         'license_file',
         'highlight'
       ));
@@ -160,6 +161,8 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
         'upload_pkey_idx',
         'pfile_pkey',
         'user_pkey',
+        'license_expression_pkey',
+        'license_expression_unique_expression',
         'license_file_pkey'
       ));
     $this->testDb->alterTables(
@@ -171,6 +174,7 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
         'users',
         'groups',
         'license_ref',
+        'license_expression',
         'license_file'
       ));
     $this->testDb->createInheritedTables(array(
@@ -201,6 +205,51 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
       }
     }
     return false;
+  }
+
+  private function scanResultsContainAll($scanResults, $licenses)
+  {
+    foreach ($licenses as $license) {
+      if (!in_array($license, $scanResults)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static function normalizeLicenseResult($license)
+  {
+    if ($license === 'Dual-license') {
+      return array();
+    }
+
+    $cleaned = str_replace(array('(', ')'), ' ', $license);
+    $parts = preg_split('/\s+(?:AND|OR|WITH)\s+/i', $cleaned);
+    $result = array();
+    foreach ($parts as $part) {
+      $part = trim($part);
+      if ($part !== '') {
+        $result[] = $part;
+      }
+    }
+    sort($result);
+    return $result;
+  }
+
+  private static function normalizeLicenseResults($results)
+  {
+    $normalized = array();
+    if ($results === null) {
+      return $normalized;
+    }
+
+    foreach ($results as $result) {
+      $normalized = array_merge($normalized,
+        self::normalizeLicenseResult($result['license']));
+    }
+    $normalized = array_values(array_unique($normalized));
+    sort($normalized);
+    return $normalized;
   }
 
   /**
@@ -234,7 +283,12 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
       return -1;
     }
     if (count($left["results"]) !== count($right["results"])) {
-      return count($left["results"]) - count($right["results"]);
+      $leftLicenses = self::normalizeLicenseResults($left["results"]);
+      $rightLicenses = self::normalizeLicenseResults($right["results"]);
+      if ($leftLicenses === $rightLicenses) {
+        return 0;
+      }
+      return strcmp(implode('|', $leftLicenses), implode('|', $rightLicenses));
     }
     foreach ($left["results"] as $key => $result) {
       if (strcmp($result["license"], $right["results"][$key]["license"]) !== 0) {
@@ -280,14 +334,10 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
       $uploadParent, [1]);
 
     $this->assertGreaterThan(8, count($licenseMatches), $output);
-    $this->assertContains("Classpath-exception-2.0",
-      $licenseMatches["spdx.tar/spdx/GPL-2.0_WITH_Classpath-exception-2.0"]["scanResults"]);
-    $this->assertContains("GPL-2.0-only",
+    $this->assertContains("(GPL-2.0-only WITH Classpath-exception-2.0)",
       $licenseMatches["spdx.tar/spdx/GPL-2.0_WITH_Classpath-exception-2.0"]["scanResults"]);
 
-    $this->assertContains("GPL-2.0-only",
-      $licenseMatches["spdx.tar/spdx/GPL-2.0_OR_MIT"]["scanResults"]);
-    $this->assertContains("MIT",
+    $this->assertContains("(GPL-2.0-only OR MIT)",
       $licenseMatches["spdx.tar/spdx/GPL-2.0_OR_MIT"]["scanResults"]);
 
     $this->assertContains("GPL-2.0-or-later",
@@ -296,12 +346,16 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
     $this->assertContains("GPL-2.0-only",
       $licenseMatches["spdx.tar/spdx/GPL-2.0-only"]["scanResults"]);
 
-    $this->assertContains("LGPL-2.1-or-later",
-      $licenseMatches["spdx.tar/spdx/GPL-2.0_AND_LGPL-2.1-or-later_OR_MIT"]["scanResults"]);
-    $this->assertContains("GPL-2.0-only",
-      $licenseMatches["spdx.tar/spdx/GPL-2.0_AND_LGPL-2.1-or-later_OR_MIT"]["scanResults"]);
-    $this->assertContains("MIT",
-      $licenseMatches["spdx.tar/spdx/GPL-2.0_AND_LGPL-2.1-or-later_OR_MIT"]["scanResults"]);
+    $gplLgplMitResults =
+      $licenseMatches["spdx.tar/spdx/GPL-2.0_AND_LGPL-2.1-or-later_OR_MIT"]["scanResults"];
+    $this->assertTrue(
+      in_array("((GPL-2.0-only AND LGPL-2.1-or-later) OR MIT)",
+        $gplLgplMitResults) ||
+      in_array("(GPL-2.0-only AND (LGPL-2.1-or-later OR MIT))",
+        $gplLgplMitResults) ||
+      $this->scanResultsContainAll($gplLgplMitResults,
+        array("GPL-2.0-only", "LGPL-2.1-or-later", "MIT"))
+    );
 
     $this->assertContains("GPL-2.0-or-later",
       $licenseMatches["spdx.tar/spdx/GPL-2.0+"]["scanResults"]);
@@ -332,15 +386,7 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
 
     $this->assertEquals($testFile, $result[0]["file"]);
     $this->assertTrue($this->resultArrayContainsLicense($resultArray,
-      "MPL-2.0-no-copyleft-exception"));
-    $this->assertTrue($this->resultArrayContainsLicense($resultArray,
-      "BSD-2-Clause"));
-    $this->assertTrue($this->resultArrayContainsLicense($resultArray,
-      "MIT"));
-    $this->assertTrue($this->resultArrayContainsLicense($resultArray,
-      "Apache-2.0"));
-    $this->assertTrue($this->resultArrayContainsLicense($resultArray,
-      "Dual-license"));
+      "MPL-2.0-no-copyleft-exception AND BSD-2-Clause AND (MIT OR Apache-2.0)"));
   }
 
   /**

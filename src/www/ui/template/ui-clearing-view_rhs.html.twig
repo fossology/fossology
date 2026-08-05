@@ -137,12 +137,10 @@
       {{ 'Clearing History ...'| trans }}
     </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'View the clearing history for this file: The table will show which user added or removed license results for this particular file in order to create a clearing decision. Clearing decisions are created when the user clicks on the button "Submit" or on the go next and go previous buttons'|trans }}" alt="" class="info-bullet"/>
     &nbsp;
-    {% if hasExpression == false %}
     <button type="button" class="btn btn-default btn-sm" id="newExpressionbtn" onclick="editExpression();">
       {{ 'Conclude Expression ...'| trans }}
     </button><img src="images/info_16.png" data-toggle="tooltip" id="newExpressionInfo" title="{{ 'Conclude a license expression for this file'|trans }}" alt="" class="info-bullet"/>
     &nbsp;
-    {% endif %}
     <br/>
     <span id="bulkIdResult" name="bulkIdResult"></span>
     <div style="padding-top: 10px;">
@@ -202,7 +200,6 @@
         <!-- Modal body -->
         <div class="modal-body">
           <div id="ast-viewer"></div>
-          <button class="btn btn-success" id="addLicenseInExpression" onclick="addLicenseInExpression();">Add License</button>
           <button class="btn btn-info" id="addGroup" onclick="addGroup();">Add Group</button>
         </div>
         <!-- Modal footer -->

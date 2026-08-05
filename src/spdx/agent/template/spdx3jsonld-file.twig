@@ -119,7 +119,15 @@
       "annotationType": "other",
       "subject": "File:SPDXRef-item{{ fileId }}",
       "statement": "SPDX 2.X LicenseInfoInFiles"
-    },{{ "\n" }}{%~ else %}{%~ for res in fileData.scanners %}{%~ if licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}{%- set licId=licenseList[res].licenseObj.spdxId %}{% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}{% set licId=licenseList[res].licenseObj.shortName %}{%- endif ~%}
+  },{{ "\n" }}{%~ else %}{%~ for res in fileData.scanners %}{%~ if scannerLicenseExpressions[res]|default is not empty %}
+  {
+    "type": "Annotation",
+    "spdxId": "https://spdx.org/rdf/3.0.0/terms/Software/File#SPDXRef-item{{ fileId }}#{{ scannerLicenseExpressionIds[res] }}",
+    "creationInfo": "https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1",
+    "annotationType": "other",
+    "subject": "https://spdx.org/rdf/3.0.0/terms/Software/File#SPDXRef-item{{ fileId }}",
+    "statement": "SPDX 2.X LicenseInfoInFiles: <text> {{ scannerLicenseExpressions[res]|replace({'<text>': '&lt;text&gt;', '</text>': '&lt;/text&gt;'})|replace({'\f': '', '"': "'", '\n': ''}) }} </text>"
+  },{%~ elseif licenseList[res].licenseObj.spdxId starts with 'LicenseRef-' or licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}{%- set licId=licenseList[res].licenseObj.spdxId %}{% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' %}{% set licId=licenseList[res].licenseObj.shortName %}{%- endif ~%}
     {
       "type": "Annotation",
       "spdxId": "File:SPDXRef-item{{ fileId }}#{{ licId|replace({' ': '-'}) }}",

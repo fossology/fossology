@@ -14,6 +14,7 @@
 #include "util.h"
 #include "nomos_regex.h"
 #include "nomos_utils.h"
+#include "spdx_expression_nomos.h"
 #include <_autodefs.h>
 
 /* DEBUG
@@ -126,6 +127,7 @@ void showLTCache(char *);
 void checkCornerCases(char *, int, int, int, int, int, int, int);
 void checkFileReferences(char *, int, int, int, int, int);
 void  addRef(char *, int);
+static void addExpressionRef(char *);
 #ifdef DOCTOR_DEBUG
 void dumpMatch(char *, char *);
 #endif /* DOCTOR_DEBUG */
@@ -361,6 +363,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 {
   static int first = 1;
   char *cp;
+  char *originalFiletext = filetext;
+  char *workingFiletext = NULL_STR;
   int i;
   int j;
   int nw = 0;
@@ -428,6 +432,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 
   *licStr = NULL_CHAR;
   refOffset = 0;
+
+  workingFiletext = g_malloc((gsize)size + 1);
+  memcpy(workingFiletext, filetext, (size_t)size);
+  workingFiletext[size] = '\0';
+  extractSpdxExpressionFindings(originalFiletext, workingFiletext, size);
+  filetext = workingFiletext;
+  cp = filetext;
   (void) memset(ltsr, 0, sizeof(ltsr));
   (void) memset(lmem, 0, sizeof(lmem));
 #if defined(DEBUG) && defined(LTSR_DEBUG)
@@ -9850,6 +9861,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if (whereList.used) {
     listClear(&whereList, NO);      /* may already be cleared! */
   }
+  for (i = 0; i < cur.expressionMatches->len; i++)
+  {
+    LicenseExpressionMatch* expression =
+      &g_array_index(cur.expressionMatches, LicenseExpressionMatch, i);
+    addExpressionRef(expression->canonical);
+  }
+  g_free(workingFiletext);
   return(licStr+1);       /* don't include the leading comma */
 }
 
@@ -12054,6 +12072,34 @@ void addRef(char *str, int interest)
   addLicence(cur.theMatches,str);
 
   return;
+}
+
+static void addExpressionRef(char *str)
+{
+  item_t *p;
+  char *bp;
+  char *sp = str;
+
+  if (!(str && str[0]))
+  {
+    return;
+  }
+
+  bp = licStr + refOffset;
+  *bp++ = ',';
+  while (*sp)
+  {
+    *bp++ = *sp++;
+  }
+  *bp = NULL_CHAR;
+  refOffset = bp - licStr;
+
+  p = listGetItem(&cur.parseList, str);
+  p->iFlag++;
+  p->iLevel = IL_HIGH;
+  maxInterest = IL_HIGH;
+
+  addLicence(cur.theMatches, str);
 }
 
 /**

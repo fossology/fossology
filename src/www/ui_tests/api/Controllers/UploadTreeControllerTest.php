@@ -824,6 +824,148 @@ namespace Fossology\UI\Api\Test\Controllers {
 
     /**
      * @test
+     * -# Test for UploadTreeController::getLicenseDecisions()
+     * -# Check expression decisions include text, acknowledgement and comment
+     * @throws \Fossology\Lib\Exception
+     */
+    public function testGetLicenseDecisionsWithExpressionMetadata()
+    {
+      $itemId = 200;
+      $uploadId = 1;
+      $expressionId = 500;
+      $mitId = 1;
+      $apacheId = 2;
+      $expressionAst = json_encode([
+        'type' => 'Expression',
+        'value' => 'OR',
+        'left' => ['type' => 'License', 'value' => $mitId],
+        'right' => ['type' => 'License', 'value' => $apacheId]
+      ]);
+      $itemTreeBounds = new ItemTreeBounds($itemId, 'uploadtree_a', $uploadId, 0, 1);
+      $expressionRef = new LicenseRef($expressionId, "License Expression", $expressionAst, "");
+      $mitRef = new LicenseRef($mitId, "MIT", "MIT License", "MIT");
+      $apacheRef = new LicenseRef($apacheId, "Apache-2.0", "Apache License 2.0", "Apache-2.0");
+      $clearingLicense = new ClearingLicense(
+        $expressionRef, false, "", "Expression text", "Expression comment",
+        "Expression acknowledgement");
+      $clearingEvent = new ClearingEvent(
+        1, $itemId, 12, $this->userId, $this->groupId, ClearingEventTypes::USER,
+        $clearingLicense);
+      $addedClearingResults = [
+        $expressionId => new ClearingResult($clearingEvent, [])
+      ];
+
+      $body = $this->streamFactory->createStream();
+      $uri = (new Uri("HTTP", "localhost", 80,
+        "/uploads/$uploadId/item/$itemId/licenses"))->withQuery("includeExpressions=true");
+      $request = new Request("GET", $uri, new Headers(), [], [], $body);
+
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadtreeTableName')
+        ->withArgs([$uploadId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive("getItemTreeBoundsFromUploadId")
+        ->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
+      $this->clearingDao->shouldReceive('getMainLicenseIds')->andReturn([$expressionId]);
+      $this->clearingEventTypes->shouldReceive('getTypeName')
+        ->withArgs([$clearingEvent->getEventType()])->andReturn('User decision');
+      $this->clearingDecisionEventProcessor->shouldReceive("getCurrentClearings")
+        ->withArgs([$itemTreeBounds, $this->groupId, LicenseMap::CONCLUSION, true])
+        ->andReturn([$addedClearingResults, []]);
+      $this->licenseDao->shouldReceive('getLicenseObligations')
+        ->withArgs([[$expressionId], false])->andReturn([]);
+      $this->licenseDao->shouldReceive('getLicenseObligations')
+        ->withArgs([[$expressionId], true])->andReturn([]);
+      $this->licenseDao->shouldReceive('getLicenseById')
+        ->withArgs([$expressionId, $this->groupId])->andReturn($expressionRef);
+      $this->licenseDao->shouldReceive('getLicenseById')
+        ->withArgs([$mitId, $this->groupId])->andReturn($mitRef);
+      $this->licenseDao->shouldReceive('getLicenseById')
+        ->withArgs([$apacheId, $this->groupId])->andReturn($apacheRef);
+
+      $actualResponse = $this->uploadTreeController->getLicenseDecisions(
+        $request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+      $actual = $this->getResponseJson($actualResponse);
+
+      $this->assertEquals(200, $actualResponse->getStatusCode());
+      $this->assertCount(1, $actual);
+      $this->assertEquals("(MIT OR Apache-2.0)", $actual[0]['expression']);
+      $this->assertEquals("Expression text", $actual[0]['text']);
+      $this->assertEquals("Expression acknowledgement", $actual[0]['acknowledgement']);
+      $this->assertEquals("Expression comment", $actual[0]['comment']);
+      $this->assertTrue($actual[0]['isMainLicense']);
+      $this->assertFalse($actual[0]['isRemoved']);
+    }
+
+    /**
+     * @test
+     * -# Test UploadTreeController::setLicenseExpressionDecision()
+     * -# Check expression metadata is stored with the inserted clearing event
+     */
+    public function testSetLicenseExpressionDecisionWithMetadata()
+    {
+      $uploadId = 1;
+      $itemId = 200;
+      $expressionId = 500;
+      $itemTreeBounds = new ItemTreeBounds($itemId, 'uploadtree_a', $uploadId, 1, 2);
+      $mit = new License(1, "MIT", "MIT License", "risk", "texts", [], 'type', false);
+      $apache = new License(2, "Apache-2.0", "Apache License 2.0", "risk", "texts", [],
+        'type', false);
+      $body = [
+        'expression' => 'MIT OR Apache-2.0',
+        'text' => 'Expression text',
+        'acknowledgement' => 'Expression acknowledgement',
+        'comment' => 'Expression comment'
+      ];
+      $resource = fopen('data://text/plain;base64,' .
+        base64_encode(json_encode($body)), 'r+');
+      $requestHeaders = new Headers();
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("PUT", new Uri("HTTP", "localhost", 80,
+        "/uploads/$uploadId/item/$itemId/expression"), $requestHeaders, [], [],
+        $this->streamFactory->createStreamFromResource($resource));
+
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadtreeTableName')
+        ->withArgs([$uploadId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getItemTreeBoundsFromUploadId')
+        ->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
+      $this->concludeLicensePlugin->shouldReceive('getCurrentSelectedLicensesTableData')
+        ->withArgs([$itemTreeBounds, $this->groupId, true, true])->andReturn([]);
+      $this->licenseDao->shouldReceive('getLicenseByShortName')
+        ->withArgs(["MIT", $this->groupId])->andReturn($mit);
+      $this->licenseDao->shouldReceive('getLicenseByShortName')
+        ->withArgs(["Apache-2.0", $this->groupId])->andReturn($apache);
+      $this->licenseDao->shouldReceive('getExpressionByAST')->once()
+        ->withArgs([M::type('string')])->andReturn(null);
+      $this->licenseDao->shouldReceive('insertExpression')->once()
+        ->withArgs([M::type('string')])->andReturn($expressionId);
+      $this->clearingDao->shouldReceive('insertClearingEvent')->once()
+        ->withArgs([
+          $itemId, $this->userId, $this->groupId, $expressionId, false,
+          ClearingEventTypes::USER, 'Expression text', 'Expression comment',
+          'Expression acknowledgement'
+        ])->andReturn(null);
+
+      $actualResponse = $this->uploadTreeController->setLicenseExpressionDecision(
+        $request, new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
+      $actual = $this->getResponseJson($actualResponse);
+
+      $this->assertEquals(200, $actualResponse->getStatusCode());
+      $this->assertEquals("Successfully updated license expression decision", $actual['message']);
+    }
+
+    /**
+     * @test
      * -# Test for UploadTreeController::handleAddEditAndDeleteLicenseDecision() for adding, editing, and deleting license decision
      * -# Check if response status is 200 and response body matches
      */

@@ -9,6 +9,7 @@
 #endif /* not defined _GNU_SOURCE */
 
 #include "nomos_utils.h"
+#include <json-c/json.h>
 #include "nomos.h"
 #include "licenses.h"
 
@@ -649,6 +650,222 @@ FUNCTION long updateLicenseFile(long rfPk)
   }
 } /* updateLicenseFile */
 
+static json_object* convertExpressionAstForStorage(json_object* node,
+    cacheroot_t* pcroot)
+{
+  json_object* typeObject = NULL;
+  json_object* stored = NULL;
+  const char* type = NULL;
+
+  if (!json_object_object_get_ex(node, "type", &typeObject))
+  {
+    return NULL;
+  }
+
+  type = json_object_get_string(typeObject);
+  stored = json_object_new_object();
+
+  if (strcmp(type, "license") == 0 || strcmp(type, "licenseRef") == 0 ||
+      strcmp(type, "exception") == 0 || strcmp(type, "special") == 0)
+  {
+    json_object* idObject = NULL;
+    long rfPk = 0;
+
+    if (!json_object_object_get_ex(node, "id", &idObject))
+    {
+      json_object_put(stored);
+      return NULL;
+    }
+
+    rfPk = get_rfpk(pcroot, (char*)json_object_get_string(idObject));
+    if (rfPk <= 0)
+    {
+      json_object_put(stored);
+      return NULL;
+    }
+
+    json_object_object_add(stored, "type", json_object_new_string("License"));
+    json_object_object_add(stored, "value", json_object_new_int64(rfPk));
+    return stored;
+  }
+
+  json_object_object_add(stored, "type", json_object_new_string("Expression"));
+  json_object_object_add(stored, "value", json_object_new_string(type));
+
+  if (strcmp(type, "WITH") == 0)
+  {
+    json_object* license = NULL;
+    json_object* exception = NULL;
+    json_object* left = NULL;
+    json_object* right = NULL;
+
+    if (!json_object_object_get_ex(node, "license", &license) ||
+        !json_object_object_get_ex(node, "exception", &exception))
+    {
+      json_object_put(stored);
+      return NULL;
+    }
+
+    left = convertExpressionAstForStorage(license, pcroot);
+    right = convertExpressionAstForStorage(exception, pcroot);
+    if (left == NULL || right == NULL)
+    {
+      if (left != NULL)
+      {
+        json_object_put(left);
+      }
+      if (right != NULL)
+      {
+        json_object_put(right);
+      }
+      json_object_put(stored);
+      return NULL;
+    }
+
+    json_object_object_add(stored, "left", left);
+    json_object_object_add(stored, "right", right);
+    return stored;
+  }
+
+  {
+    json_object* contractLeft = NULL;
+    json_object* contractRight = NULL;
+    json_object* left = NULL;
+    json_object* right = NULL;
+
+    if (!json_object_object_get_ex(node, "left", &contractLeft) ||
+        !json_object_object_get_ex(node, "right", &contractRight))
+    {
+      json_object_put(stored);
+      return NULL;
+    }
+
+    left = convertExpressionAstForStorage(contractLeft, pcroot);
+    right = convertExpressionAstForStorage(contractRight, pcroot);
+    if (left == NULL || right == NULL)
+    {
+      if (left != NULL)
+      {
+        json_object_put(left);
+      }
+      if (right != NULL)
+      {
+        json_object_put(right);
+      }
+      json_object_put(stored);
+      return NULL;
+    }
+
+    json_object_object_add(stored, "left", left);
+    json_object_object_add(stored, "right", right);
+    return stored;
+  }
+}
+
+static long saveLicenseExpressionToDatabase(LicenseExpressionMatch* expression,
+    cacheroot_t* pcroot)
+{
+  PGresult *result;
+  json_object* contractAst = NULL;
+  json_object* storedAst = NULL;
+  const char* storedExpression = NULL;
+  long rfPk = -1;
+
+  contractAst = json_tokener_parse(expression->astJson);
+  if (contractAst == NULL)
+  {
+    return -1;
+  }
+
+  storedAst = convertExpressionAstForStorage(contractAst, pcroot);
+  json_object_put(contractAst);
+  if (storedAst == NULL)
+  {
+    return -1;
+  }
+
+  storedExpression = json_object_to_json_string_ext(storedAst,
+      JSON_C_TO_STRING_PLAIN);
+
+  result = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      gl.dbManager,
+      "nomosFindLicenseExpression",
+      "SELECT rf_pk FROM license_expression WHERE rf_expression = $1",
+      char*
+    ),
+    storedExpression
+  );
+
+  if (result && PQntuples(result) > 0)
+  {
+    rfPk = atol(PQgetvalue(result, 0, 0));
+    PQclear(result);
+    json_object_put(storedAst);
+    return rfPk;
+  }
+  if (result)
+  {
+    PQclear(result);
+  }
+
+  result = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      gl.dbManager,
+      "nomosSyncLicenseExpressionSequence",
+      "SELECT setval('license_ref_rf_pk_seq',"
+      " GREATEST("
+      "   (SELECT COALESCE(MAX(rf_pk), 0) FROM license_ref),"
+      "   (SELECT COALESCE(MAX(rf_pk), 0) FROM license_expression)"
+      " ))"
+    )
+  );
+  if (result)
+  {
+    PQclear(result);
+  }
+
+  result = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      gl.dbManager,
+      "nomosInsertLicenseExpression",
+      "INSERT INTO license_expression(rf_expression) VALUES($1)"
+      " ON CONFLICT (rf_expression) DO UPDATE"
+      " SET rf_expression = EXCLUDED.rf_expression"
+      " RETURNING rf_pk",
+      char*
+    ),
+    storedExpression
+  );
+
+  if (result)
+  {
+    if (PQntuples(result) > 0)
+    {
+      rfPk = atol(PQgetvalue(result, 0, 0));
+    }
+    PQclear(result);
+  }
+
+  json_object_put(storedAst);
+  return rfPk;
+}
+
+int updateLicenseExpressionFileAndHighlightArray(LicenseExpressionMatch* expression,
+    cacheroot_t* pcroot)
+{
+  long rfPk = saveLicenseExpressionToDatabase(expression, pcroot);
+  long licenseFileId = updateLicenseFile(rfPk);
+
+  if (licenseFileId > 0)
+  {
+    expression->licenseFileId = (int)licenseFileId;
+    return (true);
+  }
+
+  return (false);
+}
+
 /**
  * \brief Return the highlight type (K|L|0) for a given index
  * @param index Index to convert
@@ -892,7 +1109,26 @@ FUNCTION int recordScanToDB(cacheroot_t *pcroot, struct curScan *scanRecord)
   /* loop through the found license names */
   for (numLicenses = 0; cur.licenseList[numLicenses] != NULL; numLicenses++)
   {
-    if (!updateLicenseFileAndHighlightArray(cur.licenseList[numLicenses], pcroot))
+    int expressionIndex;
+    int expressionSaved = false;
+
+    for (expressionIndex = 0; expressionIndex < cur.expressionMatches->len;
+        expressionIndex++)
+    {
+      LicenseExpressionMatch* expression =
+        &g_array_index(cur.expressionMatches, LicenseExpressionMatch,
+            expressionIndex);
+      if (strcmp(cur.licenseList[numLicenses], expression->canonical) == 0)
+      {
+        if (!updateLicenseExpressionFileAndHighlightArray(expression, pcroot))
+          return (-1);
+        expressionSaved = true;
+        break;
+      }
+    }
+
+    if (!expressionSaved &&
+        !updateLicenseFileAndHighlightArray(cur.licenseList[numLicenses], pcroot))
       return (-1);
   }
 
@@ -939,6 +1175,8 @@ FUNCTION void initializeCurScan(struct curScan* cur)
 {
   cur->indexList =  g_array_new(FALSE, FALSE, sizeof(int));
   cur->theMatches = g_array_new(FALSE, FALSE, sizeof(LicenceAndMatchPositions));
+  cur->expressionMatches = g_array_new(FALSE, FALSE,
+      sizeof(LicenseExpressionMatch));
   cur->keywordPositions = g_array_new(FALSE, FALSE, sizeof(MatchPositionAndType));
   cur->docBufferPositionsAndOffsets = g_array_new(FALSE, FALSE, sizeof(pairPosOff));
   cur->currentLicenceIndex=-1;
@@ -962,6 +1200,12 @@ FUNCTION void freeAndClearScan(struct curScan *thisScan)
   listClear(&thisScan->lList, DEALLOC_LIST);
   g_array_free(thisScan->indexList,TRUE);
   cleanTheMatches(thisScan->theMatches);
+  for (int i = 0; i < thisScan->expressionMatches->len; i++)
+  {
+    cleanLicenseExpressionMatch(&g_array_index(thisScan->expressionMatches,
+        LicenseExpressionMatch, i));
+  }
+  g_array_free(thisScan->expressionMatches, TRUE);
   g_array_free(thisScan->keywordPositions, TRUE);
   g_array_free(thisScan->docBufferPositionsAndOffsets, TRUE);
 
@@ -993,6 +1237,18 @@ FUNCTION inline void cleanLicenceAndMatchPositions( LicenceAndMatchPositions* in
   if(in->licenceName) g_free(in->licenceName);
   g_array_free(in->matchPositions, TRUE);
   g_array_free(in->indexList,TRUE);
+}
+
+FUNCTION void cleanLicenseExpressionMatch(LicenseExpressionMatch* in)
+{
+  if (in->canonical)
+  {
+    g_free(in->canonical);
+  }
+  if (in->astJson)
+  {
+    g_free(in->astJson);
+  }
 }
 
 /**

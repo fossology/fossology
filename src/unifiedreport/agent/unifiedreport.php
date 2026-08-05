@@ -290,9 +290,14 @@ class UnifiedReport extends Agent
     $this->licenseMainGetter->setOnlyExpressions(true);
     $licenseExpressionsMain = $this->licenseMainGetter->getCleared($uploadId, $this, $groupId, true, null, false, true);
     $this->heartbeat(empty($licenseExpressionsMain) ? 0 : count($licenseExpressionsMain["statements"]));
+    $this->licenseMainGetter->setOnlyExpressions(false);
 
     $licensesHist = $this->licenseClearedGetter->getLicenseHistogramForReport($uploadId, $groupId);
     $this->heartbeat(empty($licensesHist) ? 0 : count($licensesHist["statements"]));
+
+    $licenseExpressionsHist = $this->licenseClearedGetter
+      ->getLicenseExpressionHistogramForReport($uploadId, $groupId);
+    $this->heartbeat(empty($licenseExpressionsHist) ? 0 : count($licenseExpressionsHist["statements"]));
 
     $bulkLicenses = $this->bulkMatchesGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($bulkLicenses) ? 0 : count($bulkLicenses["statements"]));
@@ -360,6 +365,7 @@ class UnifiedReport extends Agent
                         "licensesMain" => $licensesMain,
                         "licenseExpressionsMain" => $licenseExpressionsMain,
                         "licensesHist" => $licensesHist,
+                        "licenseExpressionsHist" => $licenseExpressionsHist,
                         "otherStatement" => $otherStatement
                      );
 
@@ -798,7 +804,10 @@ class UnifiedReport extends Agent
     }
     $reportSummarySection->summaryTable($section, $uploadId, $userName,
       $contents['licensesMain']['statements'], $contents['licenses']['statements'],
-      $contents['licensesHist']['statements'], $contents['otherStatement'], $timestamp, $groupName, $packageUri, $assignedToUserName);
+      $contents['licensesHist']['statements'], $contents['otherStatement'],
+      $timestamp, $groupName, $packageUri, $assignedToUserName,
+      $contents['licenseExpressionsMain']['statements'], $licenseExpressions,
+      $contents['licenseExpressionsHist']['statements']);
 
     if (!empty($contents['otherStatement']['ri_unifiedcolumns'])) {
       $unifiedColumns = (array) json_decode($contents['otherStatement']['ri_unifiedcolumns'], true);
@@ -869,8 +878,10 @@ class UnifiedReport extends Agent
     $isEnabled = array_values($unifiedColumns['scanresults'])[0];
     if ($isEnabled) {
       /* Display scan results and edited results */
-      $titleSubHeadingHistogram = "(Scanner count, Concluded license count, License name)";
-      $this->licenseHistogram($section, $contents['licensesHist']['statements'], $titleSubHeadingHistogram, $heading);
+      $titleSubHeadingHistogram = "(Scanner count, Concluded count, License name or expression)";
+      $scanResults = array_merge($contents['licensesHist']['statements'],
+        $contents['licenseExpressionsHist']['statements']);
+      $this->licenseHistogram($section, $scanResults, $titleSubHeadingHistogram, $heading);
     }
 
     $heading = array_keys($unifiedColumns['mainlicenses'])[0];

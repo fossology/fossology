@@ -10,7 +10,7 @@ var bulkFormTableContent = (function(){
   function updateTable(){
     var s = "";
     var uploadTreeId = $('#uploadTreeId').val();
-    for (i = 0; i < content.length; ++i) {
+    for (var i = 0; i < content.length; ++i) {
       var licenseTitle = content[i].reportinfo || '';
       var licenseText = licenseTitle.length > 0 ? licenseTitle.slice(0, 10) + "..." : 'Click to add';
       var ackTitle = content[i].acknowledgement || '';
@@ -20,18 +20,18 @@ var bulkFormTableContent = (function(){
 
       s += `<tr class='${(i % 2 == 1) ? "even" : "odd"}'>
         <td align='center'>${content[i].action}</td>
-        <td ${(content[i].isExpression) ? 'colspan="2"' : ''}>${content[i].licenseName}</td>
-        <td ${(content[i].isExpression) ? 'style="display: none;"' : ''}><a href='javascript:;' style='color:#000;'
+        <td>${content[i].licenseName}</td>
+        <td><a href='javascript:;' style='color:#000;'
           id='${content[i].licenseId}reportinfoBulk'
           onClick="openTextModel('${uploadTreeId}', ${content[i].licenseId},
             'reportinfo', 'Bulk');" title='${licenseTitle}'>
           ${licenseText}</a></td>
-        <td ${(content[i].isExpression) ? 'colspan="2"' : ''}><a href='javascript:;' style='color:#000;'
+        <td><a href='javascript:;' style='color:#000;'
           id='${content[i].licenseId}acknowledgementBulk'
           onClick="openTextModel('${uploadTreeId}', ${content[i].licenseId},
             'acknowledgement', 'Bulk');" title='${ackTitle}'>
           ${ackText}</a></td>
-        <td ${(content[i].isExpression) ? 'style="display: none;"' : ''}><a href='javascript:;' style='color:#000;'
+        <td><a href='javascript:;' style='color:#000;'
           id='${content[i].licenseId}commentBulk'
           onClick="openTextModel('${uploadTreeId}', ${content[i].licenseId},
             'comment', 'Bulk');" title='${commentTitle}'>
@@ -45,7 +45,7 @@ var bulkFormTableContent = (function(){
     $('#bulkFormTable tbody').html(s);
   }
   function maybeRemoveOldEntry(lic){
-    for (i = 0; i < content.length; ++i) {
+    for (var i = 0; i < content.length; ++i) {
       if (content[i].licenseId === lic){
         content.splice(i, 1);
         return;
@@ -57,7 +57,7 @@ var bulkFormTableContent = (function(){
       updateTable();
   }
   function addLicense(){
-      var lic = parseInt($('#bulkLicense').val(), 10)
+      var lic = parseInt($('#bulkLicense').val(), 10);
     if(lic > 0){
         maybeRemoveOldEntry(lic);
         content.push({
@@ -72,21 +72,25 @@ var bulkFormTableContent = (function(){
       updateTable();
   }
   function addExpressionBulk(id, text) {
-    for (i = 0; i < content.length; ++i) {
+    for (var i = 0; i < content.length; ++i) {
       if (content[i].isExpression){
         content.splice(i, 1);
+        i--;
       }
     }
     content.unshift({
       licenseId: id,
       licenseName: text,
       action: "Add",
+      reportinfo: '',
+      acknowledgement: '',
+      comment: '',
       isExpression: true
     });
     updateTable();
   }
   function rmLicense(){
-      var lic = parseInt($('#bulkLicense').val(), 10)
+      var lic = parseInt($('#bulkLicense').val(), 10);
     if(lic > 0){
         maybeRemoveOldEntry(lic);
         content.push({
@@ -113,7 +117,16 @@ var bulkFormTableContent = (function(){
       }
     }
   }
-    return [addLicense, rmLicense, removeOldEntry, getContent, setLicenseText,addExpressionBulk];
+    var api = [
+      addLicense,
+      rmLicense,
+      removeOldEntry,
+      getContent,
+      setLicenseText,
+      addExpressionBulk
+    ];
+    api.addExpression = addExpressionBulk;
+    return api;
 }());
 
 $('#bulkFormAddLicense').click(function(){ bulkFormTableContent[0](); });

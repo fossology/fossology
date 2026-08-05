@@ -160,6 +160,28 @@ class AjaxClearingView extends FO_Plugin
   }
 
   /**
+   * @param int $groupId
+   * @return array
+   */
+  protected function doExpressionLicenseOptions($groupId)
+  {
+    $licenseRefs = $this->licenseDao->getConclusionLicenseRefs($groupId);
+    $licenses = array();
+    foreach ($licenseRefs as $licenseRef) {
+      if ($licenseRef->getShortName() === "License Expression") {
+        continue;
+      }
+      $licenses[] = array(
+        'id' => $licenseRef->getId(),
+        'shortName' => $licenseRef->getShortName(),
+        'fullName' => $licenseRef->getFullName(),
+        'spdxId' => $licenseRef->getSpdxId()
+      );
+    }
+    return $licenses;
+  }
+
+  /**
    * @param $orderAscending
    * @param $groupId
    * @param $uploadId
@@ -210,8 +232,11 @@ class AjaxClearingView extends FO_Plugin
 
       case "licenseDecisionsData":
         return new JsonResponse(
-          $this->getCurrentSelectedLicensesTableData($this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId), $groupId, $orderAscending, false, false)
+          $this->getCurrentSelectedLicensesTableData($this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId), $groupId, $orderAscending, true, false)
         );
+
+      case "expressionLicenseOptions":
+        return new JsonResponse($this->doExpressionLicenseOptions($groupId));
 
       case "addLicense":
         $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId,
@@ -269,7 +294,9 @@ class AjaxClearingView extends FO_Plugin
         return $this->createPlainResponse("success");
 
       case "getLicense":
-        $license = $this->licenseDao->getLicenseById($licenseId, $groupId);
+        $license = filter_var(GetParm("expression", PARM_STRING), FILTER_VALIDATE_BOOL) ?
+          $this->licenseDao->getExpressionById($licenseId) :
+          $this->licenseDao->getLicenseById($licenseId, $groupId);
         return new JsonResponse($license->getArray());
 
       default:
@@ -350,27 +377,29 @@ class AjaxClearingView extends FO_Plugin
         $mainLicenseLink = " <a href=\"javascript:;\" onclick=\"makeMainLicense($uploadId, $licenseId);\"><img src=\"images/icons/star_16.png\" alt=\"noMainLicense\" title=\"$tooltip\" border=\"0\"/></a>";
       }
       $actionLink .= $mainLicenseLink;
-      $detectorType = $this->licenseDao->getLicenseById($clearingResult->getLicenseId(), $groupId)->getDetectorType();
       $id = "$uploadTreeId,$licenseId";
-      $reportInfoField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $reportInfo, 2, $detectorType);
       $acknowledgementField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $acknowledgement, 3);
-      $commentField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $comment, 4);
       if ($includeExpressions && $clearingResult->getLicenseRef()->getShortName() === 'License Expression') {
-        $actionLink = $mainLicenseLink . " <a href=\"javascript:;\" onclick=\"editExpression($licenseId);\"><img src=\"images/button_edit.png\" alt=\"editExpression\" title=\"Edit Expression\" border=\"0\"/></a><a href=\"javascript:;\" onclick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></a>";
+        $actionLink .= " <a href=\"javascript:;\" onclick=\"editExpression($licenseId);\"><img src=\"images/button_edit.png\" alt=\"editExpression\" title=\"Edit Expression\" border=\"0\"/></a>";
         $expression = $clearingResult->getLicenseRef()->getFullName();
         $ast = json_decode($expression, true);
         $expression = $this->buildExpression($ast, $groupId);
+        $reportInfoField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $reportInfo, 2);
+        $commentField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $comment, 4);
         $expressionTable[$licenseShortName] = array('DT_RowId' => $id,
           '0' => $actionLink,
           '1' => $expression,
-          '2' => "",
-          '3' => "",
+          '2' => implode("<br/>", $types),
+          '3' => $reportInfoField,
           '4' => $acknowledgementField,
-          '5' => "");
+          '5' => $commentField);
         $data[] = $clearingResult->getLicenseRef()->getArray();
         continue;
       }
 
+      $detectorType = $this->licenseDao->getLicenseById($clearingResult->getLicenseId(), $groupId)->getDetectorType();
+      $reportInfoField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $reportInfo, 2, $detectorType);
+      $commentField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $comment, 4);
       $table[$licenseShortName] = array('DT_RowId' => $id,
           '0' => $actionLink,
           '1' => $licenseShortNameWithLink,
@@ -460,11 +489,19 @@ class AjaxClearingView extends FO_Plugin
    */
   protected function buildExpression($node, $groupId)
   {
+    if (!is_array($node) || !array_key_exists('type', $node)) {
+      return 'License Expression';
+    }
     if ($node['type'] === 'License') {
+      if (!is_numeric($node['value'])) {
+        return $node['value'];
+      }
       return $this->licenseDao->getLicenseById($node['value'], $groupId)->getShortName();
     }
-    $left = $this->buildExpression($node['left'], $groupId);
-    $right = $this->buildExpression($node['right'], $groupId);
+    $leftNode = $node['left'] ?? $node['license'] ?? null;
+    $rightNode = $node['right'] ?? $node['exception'] ?? null;
+    $left = $this->buildExpression($leftNode, $groupId);
+    $right = $this->buildExpression($rightNode, $groupId);
     $operator = $node['value'];
     return "($left $operator $right)";
   }

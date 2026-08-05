@@ -304,10 +304,12 @@ class DecisionImporterIdFetcher
   private function updateLicenses(array &$licenseList): void
   {
     foreach ($licenseList as $index => $item) {
+      if ($this->isExpressionLicense($item)) {
+        continue;
+      }
       $newLicenseId = null;
       $license = $this->licenseDao->getLicenseByShortName($item["rf_shortname"], $this->groupId);
-      $expression = $this->licenseDao->getExpressionByAST($item["rf_fullname"]);
-      if ($license == null && $expression == null) {
+      if ($license == null) {
         $newLicenseData = [
           "rf_fullname" => $item["rf_fullname"],
           "rf_url" => $item["rf_url"],
@@ -318,22 +320,81 @@ class DecisionImporterIdFetcher
         if ($item["is_candidate"] == "t") {
           $newLicenseId = $this->licenseDao->insertUploadLicense($item["rf_shortname"], $item["rf_text"],
             $this->groupId, $this->userId);
-        } else if ($item["is_expression"] == "f") {
+        } else {
           $newLicenseId = $this->licenseDao->insertLicense($item["rf_shortname"], $item["rf_text"]);
         }
-        if ($item["is_expression"] == "t") {
-          $newLicenseId = $this->licenseDao->insertExpression($item['rf_fullname']);
-        } else {
-          $this->dbManager->updateTableRow("license_ref", $newLicenseData, "rf_pk", $newLicenseId);
-        }
+        $this->dbManager->updateTableRow("license_ref", $newLicenseData, "rf_pk", $newLicenseId);
       } else {
-        if ($license == null) {
-          $newLicenseId = $expression->getId();
-        } else {
-          $newLicenseId = $license->getId();
-        }
+        $newLicenseId = $license->getId();
       }
       $licenseList[$index]["new_rfid"] = $newLicenseId;
+    }
+
+    foreach ($licenseList as $index => $item) {
+      if (!$this->isExpressionLicense($item)) {
+        continue;
+      }
+      $expressionAst = $this->remapExpressionAst($item['rf_fullname'], $licenseList);
+      $expression = $this->licenseDao->getExpressionByAST($expressionAst);
+      if ($expression == null) {
+        $newLicenseId = $this->licenseDao->insertExpression($expressionAst);
+      } else {
+        $newLicenseId = $expression->getId();
+      }
+      $licenseList[$index]['rf_fullname'] = $expressionAst;
+      $licenseList[$index]["new_rfid"] = $newLicenseId;
+    }
+  }
+
+  /**
+   * @param array $licenseRow Exported license row.
+   * @return bool True if the row represents a license expression.
+   */
+  private function isExpressionLicense(array $licenseRow): bool
+  {
+    return array_key_exists('is_expression', $licenseRow)
+      && ($licenseRow['is_expression'] === true || $licenseRow['is_expression'] === 't');
+  }
+
+  /**
+   * Remap license_ref IDs inside an exported expression AST to local DB IDs.
+   *
+   * @param string $expressionAst Exported expression AST JSON.
+   * @param array $licenseList Exported licenses keyed by old license ID.
+   * @return string Expression AST JSON with local license IDs.
+   */
+  private function remapExpressionAst(string $expressionAst, array $licenseList): string
+  {
+    $expressionNode = json_decode($expressionAst, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+      return $expressionAst;
+    }
+    $this->remapExpressionNode($expressionNode, $licenseList);
+    return json_encode($expressionNode, JSON_UNESCAPED_SLASHES);
+  }
+
+  /**
+   * @param array $expressionNode Expression AST node.
+   * @param array $licenseList Exported licenses keyed by old license ID.
+   */
+  private function remapExpressionNode(array &$expressionNode, array $licenseList): void
+  {
+    if (!array_key_exists('type', $expressionNode)) {
+      return;
+    }
+    if ($expressionNode['type'] === 'License' && isset($expressionNode['value']) &&
+      is_numeric($expressionNode['value'])) {
+      $oldLicenseId = intval($expressionNode['value']);
+      if (array_key_exists($oldLicenseId, $licenseList) &&
+        array_key_exists('new_rfid', $licenseList[$oldLicenseId])) {
+        $expressionNode['value'] = intval($licenseList[$oldLicenseId]['new_rfid']);
+      }
+      return;
+    }
+    foreach (array('left', 'right', 'license', 'exception') as $childKey) {
+      if (array_key_exists($childKey, $expressionNode) && is_array($expressionNode[$childKey])) {
+        $this->remapExpressionNode($expressionNode[$childKey], $licenseList);
+      }
     }
   }
 

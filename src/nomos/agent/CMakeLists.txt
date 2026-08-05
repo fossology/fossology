@@ -51,8 +51,10 @@ foreach(FO_NOM_TARGET nomos nomos_cov nomos_exec nomos_cov_exec nomossa)
         ${FO_CWD}/util.c
         ${FO_CWD}/nomos_gap.c
         ${FO_CWD}/nomos_utils.c
+        ${FO_CWD}/spdx_expression_nomos.c
         ${FO_CWD}/doctorBuffer_utils.c
         ${FO_CWD}/json_writer.c
+        ${FO_CLIB_SRC}/spdx_expression_parser.c
         $<TARGET_FILE_DIR:encode>/_autodata.c
         $<TARGET_FILE_DIR:encode>/_precheck.c)
     target_compile_definitions(${FO_NOM_TARGET}

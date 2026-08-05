@@ -98,6 +98,7 @@ class DecisionExporter extends Agent
     $reportInfoData = $this->uploadDao->getReportInfo($uploadId);
     $this->heartbeat(1);
     $licenseData = $this->allDecisionsDao->getAllLicenseDataForUpload($uploadId);
+    $licenseData = $this->addExpressionMemberLicenseData($licenseData);
     $this->heartbeat(1);
     $mainLicenseData = $this->clearingDao->getMainLicenseIds($uploadId, $groupId);
 
@@ -200,6 +201,107 @@ class DecisionExporter extends Agent
   {
     $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",
       array($uploadId, $jobId, $filename), __METHOD__);
+  }
+
+  /**
+   * Include normal license rows referenced inside exported expression ASTs.
+   *
+   * Expression AST leaf nodes store license_ref IDs. Importing the dump into a
+   * different database requires those member licenses to be present in the dump
+   * so the importer can remap the expression AST to the target database IDs.
+   *
+   * @param array $licenseData License rows already selected for the upload.
+   * @return array License rows plus any expression member license rows.
+   */
+  private function addExpressionMemberLicenseData($licenseData)
+  {
+    $exportedLicenseIds = array();
+    $expressionMemberIds = array();
+
+    foreach ($licenseData as $licenseRow) {
+      $exportedLicenseIds[intval($licenseRow['rf_pk'])] = true;
+      if (!$this->isExpressionLicenseRow($licenseRow)) {
+        continue;
+      }
+      $expressionAst = json_decode($licenseRow['rf_fullname'], true);
+      if (json_last_error() !== JSON_ERROR_NONE) {
+        continue;
+      }
+      $this->collectExpressionMemberLicenseIds($expressionAst, $expressionMemberIds);
+    }
+
+    $missingLicenseIds = array();
+    foreach (array_keys($expressionMemberIds) as $licenseId) {
+      if (!array_key_exists($licenseId, $exportedLicenseIds)) {
+        $missingLicenseIds[] = $licenseId;
+      }
+    }
+
+    if (empty($missingLicenseIds)) {
+      return $licenseData;
+    }
+
+    return array_merge($licenseData, $this->getLicenseDataForIds($missingLicenseIds));
+  }
+
+  /**
+   * @param array $licenseRow Exported license row.
+   * @return bool True for license expression rows.
+   */
+  private function isExpressionLicenseRow($licenseRow)
+  {
+    return array_key_exists('is_expression', $licenseRow)
+      && ($licenseRow['is_expression'] === true || $licenseRow['is_expression'] === 't');
+  }
+
+  /**
+   * Recursively collect numeric license IDs from an expression AST.
+   *
+   * @param array $node Expression AST node.
+   * @param array $licenseIds Collected license IDs, keyed by ID.
+   */
+  private function collectExpressionMemberLicenseIds($node, &$licenseIds)
+  {
+    if (!is_array($node) || !array_key_exists('type', $node)) {
+      return;
+    }
+    if ($node['type'] === 'License' && isset($node['value']) && is_numeric($node['value'])) {
+      $licenseIds[intval($node['value'])] = true;
+      return;
+    }
+    foreach (array('left', 'right', 'license', 'exception') as $childKey) {
+      if (array_key_exists($childKey, $node)) {
+        $this->collectExpressionMemberLicenseIds($node[$childKey], $licenseIds);
+      }
+    }
+  }
+
+  /**
+   * Fetch export-compatible license rows for the given license IDs.
+   *
+   * @param array $licenseIds License IDs to export.
+   * @return array Export-compatible license rows.
+   */
+  private function getLicenseDataForIds($licenseIds)
+  {
+    $licenseIds = array_values(array_unique(array_map('intval', $licenseIds)));
+    if (empty($licenseIds)) {
+      return array();
+    }
+
+    $params = array();
+    $placeholders = array();
+    foreach ($licenseIds as $licenseId) {
+      $params[] = $licenseId;
+      $placeholders[] = '$' . count($params);
+    }
+
+    $columns = "rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_notes, rf_md5, rf_risk";
+    $sql = "WITH alllicense AS (" .
+      "SELECT $columns, false AS is_candidate, false AS is_expression FROM ONLY license_ref UNION " .
+      "SELECT $columns, true AS is_candidate, false AS is_expression FROM ONLY license_candidate) " .
+      "SELECT * FROM alllicense WHERE rf_pk IN (" . implode(',', $placeholders) . ")";
+    return $this->dbManager->getRows($sql, $params, __METHOD__ . ".expressionMemberLicenseData");
   }
 }
 

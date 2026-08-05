@@ -1664,7 +1664,9 @@ paths:
         - Upload
       summary: Set License Expression Decision for an item in the upload
       description: >
-        Set or update the license expression decision for a specific item within an upload. This involves specifying a license expression and an optional   acknowledgement.
+        Set or update the license expression decision for a specific item
+        within an upload. The payload can include expression text,
+        acknowledgement, and comment metadata.
       requestBody:
         description: License expression decision payload
         required: true
@@ -1677,10 +1679,18 @@ paths:
                   type: string
                   description: License expression to be set
                   example: "(MIT AND (GPL-2.0-only OR BSD-2-Clause))"
+                text:
+                  type: string
+                  description: Optional license expression text
+                  example: "License expression text"
                 acknowledgement:
                   type: string
                   description: Optional license acknowledgement
                   example: "Acknowledgement text"
+                comment:
+                  type: string
+                  description: Optional license expression comment
+                  example: "Comment text"
       responses:
         '200':
           description: License expression decision updated successfully
@@ -6449,6 +6459,14 @@ components:
                 example: null
         acknowledgement:
           description: License acknowledgement
+          type: string
+          example: ""
+        text:
+          description: License expression text
+          type: string
+          example: ""
+        comment:
+          description: License expression comment
           type: string
           example: ""
         isMainLicense:

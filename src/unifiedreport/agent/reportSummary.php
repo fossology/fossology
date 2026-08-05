@@ -79,7 +79,10 @@ class ReportSummary
    * @param string $packageUri
    * @param $assignedToUserName
    */
-  function summaryTable(Section $section, $uploadId, $userName, $mainLicenses, $licenses, $histLicenses, $otherStatement, $timestamp, $groupName, $packageUri, $assignedToUserName)
+  function summaryTable(Section $section, $uploadId, $userName, $mainLicenses,
+    $licenses, $histLicenses, $otherStatement, $timestamp, $groupName,
+    $packageUri, $assignedToUserName, $mainLicenseExpressions = array(),
+    $licenseExpressions = array(), $histLicenseExpressions = array())
   {
     $cellRowContinue = array("vMerge" => "continue");
     $firstRowStyle = array("size" => 14, "bold" => true);
@@ -94,12 +97,15 @@ class ReportSummary
     $cellSecondLen = 3800;
     $cellThirdLen = 5500;
 
-    $allMainLicenses = $this->accumulateLicenses($mainLicenses);
-    $allOtherLicenses = $this->accumulateLicenses($licenses);
+    $allMainLicenses = $this->accumulateLicenses(
+      array_merge($mainLicenses, $mainLicenseExpressions));
+    $allOtherLicenses = $this->accumulateLicenses(
+      array_merge($licenses, $licenseExpressions));
 
     $allHistLicenses = "";
-    if (!empty($histLicenses)) {
-      foreach ($histLicenses as $histLicense) {
+    $histResults = array_merge($histLicenses, $histLicenseExpressions);
+    if (!empty($histResults)) {
+      foreach ($histResults as $histLicense) {
         $allHistLicenses .= $histLicense["licenseShortname"].", ";
       }
       $allHistLicenses = rtrim($allHistLicenses, ", ");

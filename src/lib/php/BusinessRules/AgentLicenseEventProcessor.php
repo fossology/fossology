@@ -25,6 +25,8 @@ use Fossology\Lib\Proxy\LatestScannerProxy;
  */
 class AgentLicenseEventProcessor
 {
+  const LICENSE_EXPRESSION_SPDX_ID = 'LicenseRef-fossology-License-Expression';
+
   /** @var array $latestAgentMapCache
    * License map cache */
   private $latestAgentMapCache = array();
@@ -91,7 +93,8 @@ class AgentLicenseEventProcessor
       if ($licenseRef->getShortName() === "No_license_found") {
         continue;
       }
-      if ($licenseRef->getShortName() === "License Expression" && !$includeExpressions) {
+      if ($licenseRef->getSpdxId() === self::LICENSE_EXPRESSION_SPDX_ID
+          && !$includeExpressions) {
         continue;
       }
       $agentRef = $licenseMatch->getAgentRef();

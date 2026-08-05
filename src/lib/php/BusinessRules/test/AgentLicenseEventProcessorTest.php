@@ -186,6 +186,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
     $licenseRef = M::mock(LicenseRef::class);
     $licenseRef->shouldReceive("getId")->withNoArgs()->andReturn($licenseId);
     $licenseRef->shouldReceive("getShortName")->withNoArgs()->andReturn($licenseShortName);
+    $licenseRef->shouldReceive("getSpdxId")->withNoArgs()->andReturn($licenseShortName);
 
     $agentRef = M::mock(LicenseRef::class);
     $agentRef->shouldReceive("getAgentId")->withNoArgs()->andReturn($agentId);

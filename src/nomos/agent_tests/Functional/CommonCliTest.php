@@ -61,10 +61,16 @@ class CommonCliTest extends \PHPUnit\Framework\TestCase
     ), false);
     $this->testDb->createPlainTables(array(
       'agent',
-      'license_ref'
+      'license_ref',
+      'license_expression'
     ), false);
     $this->testDb->alterTables(array(
-      'license_ref'
+      'license_ref',
+      'license_expression'
+    ), false);
+    $this->testDb->createConstraints(array(
+      'license_expression_pkey',
+      'license_expression_unique_expression'
     ), false);
   }
 

@@ -102,7 +102,8 @@ class LicenseRef
     );
   }
 
-  public function setFullName($fullName) {
+  public function setFullName($fullName)
+  {
     $this->fullName = $fullName;
   }
 
@@ -214,7 +215,13 @@ class LicenseRef
    */
   protected function buildExpression($node, $licenseDao, $groupId)
   {
+    if (!is_array($node) || !array_key_exists('type', $node)) {
+      return 'License Expression';
+    }
     if ($node['type'] === 'License') {
+      if (!is_numeric($node['value'])) {
+        return $node['value'];
+      }
       $licenseNode = $licenseDao->getLicenseById($node['value'], $groupId);
       if (StringOperation::stringStartsWith($licenseNode->getShortName(),
         LicenseRef::SPDXREF_PREFIX)) {
@@ -222,8 +229,10 @@ class LicenseRef
       }
       return $licenseNode->getSpdxId();
     }
-    $left = $this->buildExpression($node['left'], $licenseDao, $groupId);
-    $right = $this->buildExpression($node['right'], $licenseDao, $groupId);
+    $leftNode = $node['left'] ?? $node['license'] ?? null;
+    $rightNode = $node['right'] ?? $node['exception'] ?? null;
+    $left = $this->buildExpression($leftNode, $licenseDao, $groupId);
+    $right = $this->buildExpression($rightNode, $licenseDao, $groupId);
     $operator = $node['value'];
     return "($left $operator $right)";
   }

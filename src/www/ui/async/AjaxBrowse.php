@@ -12,7 +12,6 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
-use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
@@ -233,10 +232,11 @@ class AjaxBrowse extends DefaultPlugin
     $mainParams = array($uploadId, Auth::getGroupId());
     $lic = $this->dbManager->getRows($sql, $mainParams, $stmt);
     foreach ($lic as $mainLic) {
-      $expressionRef = new LicenseRef($mainLic['rf_pk'], 'License Expression', $mainLic['rf_expression'], '');
+      $expression = $this->licenseDao->renderLicenseExpression(
+        $mainLic['rf_expression']);
       $mainLicenses[] = '<a onclick="javascript:window.open(\''.Traceback_uri()
               ."?mod=popup-license&rf=$mainLic[rf_pk]','License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');"
-              .'" href="javascript:;">'.$expressionRef->getExpression($this->licenseDao, Auth::getGroupId()).'</a>'
+              .'" href="javascript:;">'.$expression.'</a>'
               ."<img onclick=\"removeMainLicense($uploadId,$mainLic[rf_pk]);\" class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></img>";
     }
 

@@ -8,6 +8,7 @@
 namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\BusinessRules\DetectLicensesFolder;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Db\DbManager;
@@ -29,6 +30,8 @@ class ReuseReportProcessor
   private $detectLicensesFolder;
   /** @var ClearingDao */
   private $clearingDao;
+  /** @var LicenseDao */
+  private $licenseDao;
   /** @var LicenseMap */
   private $licenseProjector;
 
@@ -37,6 +40,7 @@ class ReuseReportProcessor
     $this->dbManager = $GLOBALS['container']->get('db.manager');
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
     $this->clearingDao = $GLOBALS['container']->get('dao.clearing');
+    $this->licenseDao = $GLOBALS['container']->get('dao.license');
     $this->detectLicensesFolder = $GLOBALS['container']->get('businessrules.detectlicensesfolder');
   }
 
@@ -56,13 +60,19 @@ class ReuseReportProcessor
     $uploadtreeTablename = GetUploadtreeTableName($uploadId);
     $uploadTreeId = $this->uploadDao->getUploadParent($uploadId);
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadtreeTablename);
-    $clearedLicenses = $this->clearingDao->getClearedLicenses($itemTreeBounds, $groupId);
+    $clearedLicenses = $this->clearingDao->getClearedLicenses($itemTreeBounds, $groupId, true);
     $this->licenseProjector = new LicenseMap($this->dbManager,$groupId,LicenseMap::CONCLUSION,true);
     $concludedLicenses = [];
     /** @var LicenseRef $licenseRef */
     if (!empty($clearedLicenses)) {
       foreach ($clearedLicenses as $licenseRef) {
-        $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(),$licenseRef->getShortName());
+        if ($licenseRef->getShortName() === 'License Expression') {
+          $concludedLicenses[] = $this->licenseDao->renderLicenseExpression(
+            $licenseRef->getFullName());
+          continue;
+        }
+        $projectedName = $this->licenseProjector->getProjectedShortname(
+          $licenseRef->getId(), $licenseRef->getShortName());
         $concludedLicenses[] = $projectedName;
       }
     }

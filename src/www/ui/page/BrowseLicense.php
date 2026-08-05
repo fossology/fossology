@@ -235,7 +235,10 @@ class BrowseLicense extends DefaultPlugin
   {
     $fileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $agentIds);
+    $expressionHistogram = $this->licenseDao->getLicenseExpressionHistogram($itemTreeBounds, $agentIds);
     $editedLicensesHist = $this->clearingDao->getClearedLicenseIdAndMultiplicities($itemTreeBounds, $groupId);
+    $editedExpressionHist = $this->clearingDao
+      ->getClearedLicenseExpressionIdAndMultiplicities($itemTreeBounds, $groupId);
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($itemTreeBounds->getUploadId(), $groupId);
 
     $agentId = GetParm('agentId', PARM_INTEGER);
@@ -250,26 +253,39 @@ class BrowseLicense extends DefaultPlugin
     /* Write license histogram to $VLic  */
     list($tableData, $totalScannerLicenseCount, $editedTotalLicenseCount)
         = $this->createLicenseHistogramJSarray($licenseHistogram, $editedLicensesHist, $licListUri, $mainLicenseIds);
+    list($expressionTableData, $totalScannerExpressionCount, $editedTotalExpressionCount)
+        = $this->createExpressionHistogramJSarray($expressionHistogram, $editedExpressionHist);
+    $combinedTableData = array_merge($tableData, $expressionTableData);
 
     $uniqueLicenseCount = count($tableData);
+    $uniqueExpressionCount = count($expressionTableData);
     $scannerUniqueLicenseCount = count( $licenseHistogram );
+    $scannerUniqueExpressionCount = count($expressionHistogram);
     $editedUniqueLicenseCount = count($editedLicensesHist);
+    $editedUniqueExpressionCount = count($editedExpressionHist);
     $noScannerLicenseFoundCount = array_key_exists(LicenseDao::NO_LICENSE_FOUND, $licenseHistogram)
             ? $licenseHistogram[LicenseDao::NO_LICENSE_FOUND]['count'] : 0;
     $editedNoLicenseFoundCount = array_key_exists(LicenseDao::NO_LICENSE_FOUND, $editedLicensesHist)
             ? $editedLicensesHist[LicenseDao::NO_LICENSE_FOUND]['count'] : 0;
 
-    return array('tableDataJson'=>json_encode($tableData),
+    return array('tableDataJson'=>json_encode($combinedTableData),
         'uniqueLicenseCount'=>$uniqueLicenseCount,
+        'uniqueExpressionCount'=>$uniqueExpressionCount,
         'fileCount'=>$fileCount,
         'scannerUniqueLicenseCount'=>$scannerUniqueLicenseCount,
+        'scannerUniqueExpressionCount'=>$scannerUniqueExpressionCount,
         'editedUniqueLicenseCount'=>$editedUniqueLicenseCount,
+        'editedUniqueExpressionCount'=>$editedUniqueExpressionCount,
         'scannerLicenseCount'=> $totalScannerLicenseCount,
+        'scannerExpressionCount'=> $totalScannerExpressionCount,
         'editedLicenseCount'=> $editedTotalLicenseCount-$editedNoLicenseFoundCount,
+        'editedExpressionCount'=> $editedTotalExpressionCount,
         'noScannerLicenseFoundCount'=>$noScannerLicenseFoundCount,
         'editedNoLicenseFoundCount'=>$editedNoLicenseFoundCount,
         'scannerLicenses'=>$licenseHistogram,
-        'editedLicenses'=>$editedLicensesHist
+        'scannerExpressions'=>$expressionHistogram,
+        'editedLicenses'=>$editedLicensesHist,
+        'editedExpressions'=>$editedExpressionHist
         );
   }
 
@@ -310,10 +326,35 @@ class BrowseLicense extends DefaultPlugin
       $editedLink = ($editedCount > 0) ? $editedCount : "0";
 
       $isMain = in_array($rfId, $mainLicenseIds);
-      $tableData[] = array($scannerCountLink, $editedLink, array($licenseShortName,$rfId,$isMain));
+      $tableData[] = array($scannerCountLink, $editedLink, array($licenseShortName, $rfId, $isMain, false));
     }
 
     return array($tableData, $totalScannerLicenseCount, $editedTotalLicenseCount);
+  }
+
+  protected function createExpressionHistogramJSarray($scannerExpressions, $editedExpressions)
+  {
+    $allScannerExpressionNames = array_keys($scannerExpressions);
+    $allEditedExpressionNames = array_keys($editedExpressions);
+    $allExpressionNames = array_unique(array_merge($allScannerExpressionNames, $allEditedExpressionNames));
+
+    $tableData = array();
+    $totalScannerExpressionCount = 0;
+    $editedTotalExpressionCount = 0;
+
+    foreach ($allExpressionNames as $expression) {
+      $count = array_key_exists($expression, $scannerExpressions)
+        ? $scannerExpressions[$expression]['unique'] : 0;
+      $editedCount = array_key_exists($expression, $editedExpressions)
+        ? $editedExpressions[$expression]['count'] : 0;
+      $rfPk = array_key_exists($expression, $scannerExpressions)
+        ? $scannerExpressions[$expression]['rf_pk'] : $editedExpressions[$expression]['rf_pk'];
+      $totalScannerExpressionCount += $count;
+      $editedTotalExpressionCount += $editedCount;
+      $tableData[] = array($count, $editedCount, array($expression, $rfPk, false, true));
+    }
+
+    return array($tableData, $totalScannerExpressionCount, $editedTotalExpressionCount);
   }
 
   /**

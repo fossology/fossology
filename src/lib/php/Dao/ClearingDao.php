@@ -1,7 +1,6 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2014-2018, 2020-2022 Siemens AG
- SPDX-FileCopyrightText: © Fossology contributors
  Author: Johannes Najjar
 
  SPDX-License-Identifier: GPL-2.0-only
@@ -49,6 +48,98 @@ class ClearingDao
     $this->licenseRefCache = array();
     global $container;
     $this->copyrightDao = $container->get('dao.copyright');
+  }
+
+  private function licenseExpressionView($alias = 'le')
+  {
+    return "(SELECT DISTINCT ON (rf_pk) rf_pk, rf_expression
+              FROM license_expression
+              ORDER BY rf_pk, ctid) $alias";
+  }
+
+  private function expressionAstToString($expression)
+  {
+    if (empty($expression)) {
+      return 'License Expression';
+    }
+
+    $decoded = is_array($expression) ? $expression : json_decode($expression, true);
+    if (empty($decoded)) {
+      return 'License Expression';
+    }
+
+    $licenseIds = array_unique($this->collectExpressionLicenseIds($decoded));
+    $licenseNames = $this->getLicenseNamesByIds($licenseIds);
+    return $this->renderExpressionNode($decoded, $licenseNames);
+  }
+
+  private function collectExpressionLicenseIds($node)
+  {
+    if (!is_array($node)) {
+      return array();
+    }
+
+    if (array_key_exists('type', $node) && $node['type'] === 'License') {
+      return is_numeric($node['value']) ? array(intval($node['value'])) : array();
+    }
+
+    return array_merge(
+      $this->collectExpressionLicenseIds($node['left'] ?? null),
+      $this->collectExpressionLicenseIds($node['right'] ?? null),
+      $this->collectExpressionLicenseIds($node['license'] ?? null),
+      $this->collectExpressionLicenseIds($node['exception'] ?? null)
+    );
+  }
+
+  private function getLicenseNamesByIds($licenseIds)
+  {
+    if (empty($licenseIds)) {
+      return array();
+    }
+
+    $params = array_values($licenseIds);
+    $placeholders = array();
+    foreach ($params as $index => $licenseId) {
+      $placeholders[] = '$' . ($index + 1);
+    }
+
+    $statementName = __METHOD__ . '.' . count($params);
+    $this->dbManager->prepare($statementName,
+      'SELECT rf_pk, rf_shortname FROM license_ref WHERE rf_pk IN (' .
+      implode(',', $placeholders) . ')');
+    $result = $this->dbManager->execute($statementName, $params);
+
+    $licenseNames = array();
+    while ($row = $this->dbManager->fetchArray($result)) {
+      $licenseNames[intval($row['rf_pk'])] = $row['rf_shortname'];
+    }
+    $this->dbManager->freeResult($result);
+    return $licenseNames;
+  }
+
+  private function renderExpressionNode($node, $licenseNames)
+  {
+    if (!is_array($node) || !array_key_exists('type', $node)) {
+      return 'License Expression';
+    }
+
+    if ($node['type'] === 'License') {
+      if (!is_numeric($node['value'])) {
+        return $node['value'];
+      }
+      $licenseId = intval($node['value']);
+      return $licenseNames[$licenseId] ?? 'LicenseRef-' . $licenseId;
+    }
+
+    if ($node['type'] !== 'Expression') {
+      return 'License Expression';
+    }
+
+    $leftNode = $node['left'] ?? $node['license'] ?? null;
+    $rightNode = $node['right'] ?? $node['exception'] ?? null;
+    $left = $this->renderExpressionNode($leftNode, $licenseNames);
+    $right = $this->renderExpressionNode($rightNode, $licenseNames);
+    return '(' . $left . ' ' . $node['value'] . ' ' . $right . ')';
   }
 
   private function getRelevantDecisionsCte(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent, &$statementName, &$params, $condition="")
@@ -120,15 +211,17 @@ class ClearingDao
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $condition = "ut.lft BETWEEN $1 AND $2";
 
-    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent=true, $statementName, $params, $condition);
+    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId,
+      $onlyCurrent=true, $statementName, $params, $condition);
     $params[] = DecisionTypes::IRRELEVANT;
+    $expressionView = $this->licenseExpressionView('le');
     $sql = "$decisionsCte
             SELECT
               " . ($includeExpressions ?
               " COALESCE(le.rf_pk, lr.rf_pk) AS license_id,
-              COALESCE(lr.rf_shortname, 'License Expression') AS shortname,
-              COALESCE(lr.rf_spdx_id, '') AS spdx_id,
-              COALESCE(le.rf_expression::text, lr.rf_fullname) AS fullname " :
+              CASE WHEN le.rf_pk IS NOT NULL THEN 'License Expression' ELSE lr.rf_shortname END AS shortname,
+              CASE WHEN le.rf_pk IS NOT NULL THEN '' ELSE lr.rf_spdx_id END AS spdx_id,
+              CASE WHEN le.rf_pk IS NOT NULL THEN le.rf_expression::text ELSE lr.rf_fullname END AS fullname " :
               " lr.rf_pk AS license_id,
               lr.rf_shortname AS shortname,
               lr.rf_spdx_id AS spdx_id,
@@ -137,8 +230,10 @@ class ClearingDao
               INNER JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
               INNER JOIN clearing_event ce ON
                 (ce.clearing_event_pk = cde.clearing_event_fk AND NOT ce.removed)
-              INNER JOIN license_ref lr ON lr.rf_pk = ce.rf_fk".
-              ($includeExpressions ? " INNER JOIN license_expression le ON le.rf_pk = ce.rf_fk " : " ") .
+              " . ($includeExpressions ?
+                "LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
+                 LEFT JOIN $expressionView ON le.rf_pk = ce.rf_fk " :
+                "INNER JOIN license_ref lr ON lr.rf_pk = ce.rf_fk ") .
             "WHERE type_id != $".count($params)."
             GROUP BY license_id,shortname,fullname,spdx_id";
 
@@ -221,6 +316,7 @@ class ClearingDao
    */
   private function getDecisionsFromCte($decisionsCte, $statementName, $params, $forClearingHistory=false, $includeExpressions = false)
   {
+    $expressionView = $this->licenseExpressionView('le');
     $sql = "$decisionsCte
             SELECT
               decision.*,
@@ -229,9 +325,9 @@ class ClearingDao
               ce.user_fk as event_user_id,
               ce.group_fk as event_group_id,
               " . ($includeExpressions ? "COALESCE(le.rf_pk, lr.rf_pk) AS license_id,
-          COALESCE(lr.rf_shortname, 'License Expression') AS shortname,
-          COALESCE(le.rf_expression::text, lr.rf_fullname) AS fullname,
-          COALESCE(lr.rf_spdx_id, '') AS spdx_id," : "lr.rf_pk AS license_id,
+          CASE WHEN le.rf_pk IS NOT NULL THEN 'License Expression' ELSE lr.rf_shortname END AS shortname,
+          CASE WHEN le.rf_pk IS NOT NULL THEN le.rf_expression::text ELSE lr.rf_fullname END AS fullname,
+          CASE WHEN le.rf_pk IS NOT NULL THEN '' ELSE lr.rf_spdx_id END AS spdx_id," : "lr.rf_pk AS license_id,
           lr.rf_spdx_id AS spdx_id,
           lr.rf_shortname AS shortname,
           lr.rf_fullname AS fullname,") . "
@@ -245,7 +341,7 @@ class ClearingDao
             LEFT JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
             LEFT JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
             LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk " .
-            ($includeExpressions ? "LEFT JOIN license_expression le ON le.rf_pk = ce.rf_fk " : "") . "
+            ($includeExpressions ? "LEFT JOIN $expressionView ON le.rf_pk = ce.rf_fk " : "") . "
             ORDER BY decision.id DESC, itemid, event_id ASC";
 
     $this->dbManager->prepare($statementName, $sql);
@@ -300,10 +396,11 @@ class ClearingDao
 
       if ($licenseId !== null) {
         if (!array_key_exists($eventId, $clearingEventCache)) {
-          if (!array_key_exists($licenseId, $this->licenseRefCache)) {
-            $this->licenseRefCache[$licenseId] = new LicenseRef($licenseId, $licenseShortName, $licenseName, $licenseSpdxId);
+          $licenseRefCacheKey = ($licenseShortName === 'License Expression' ? 'expression:' : 'license:') . $licenseId;
+          if (!array_key_exists($licenseRefCacheKey, $this->licenseRefCache)) {
+            $this->licenseRefCache[$licenseRefCacheKey] = new LicenseRef($licenseId, $licenseShortName, $licenseName, $licenseSpdxId);
           }
-          $licenseRef = $this->licenseRefCache[$licenseId];
+          $licenseRef = $this->licenseRefCache[$licenseRefCacheKey];
           $clearingEventCache[$eventId] = $this->buildClearingEvent($eventId, $eventUserId, $eventGroupId, $licenseRef, $licenseIsRemoved, $eventType, $reportInfo, $comment, $acknowledgement);
         }
         $clearingEvents[] = $clearingEventCache[$eventId];
@@ -428,11 +525,15 @@ INSERT INTO clearing_decision (
       $date = $decision[0]->getTimeStamp();
     }
 
-    $stmt = __METHOD__;
+    $expressionView = $this->licenseExpressionView('le');
+    $stmt = __METHOD__ . ($includeExpressions ? ".includeExpressions" : ".licensesOnly");
     $sql = 'SELECT rf_fk,rf_shortname,rf_spdx_id,rf_fullname,clearing_event_pk,comment,type_fk,removed,reportinfo,acknowledgement, EXTRACT(EPOCH FROM date_added) AS ts_added
-             FROM clearing_event LEFT JOIN license_ref ON rf_fk=rf_pk
-             WHERE uploadtree_fk=$1 AND group_fk=$2 AND date_added>to_timestamp($3)
-             ORDER BY clearing_event_pk ASC';
+             FROM clearing_event
+             LEFT JOIN license_ref ON rf_fk=license_ref.rf_pk ' .
+             ($includeExpressions ? "LEFT JOIN $expressionView ON rf_fk=le.rf_pk " : '') .
+            'WHERE uploadtree_fk=$1 AND group_fk=$2 AND date_added>to_timestamp($3) ' .
+             ($includeExpressions ? 'AND le.rf_pk IS NULL ' : '') .
+            'ORDER BY clearing_event_pk ASC';
     $this->dbManager->prepare($stmt, $sql);
     $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getItemId(),$groupId,$date));
 
@@ -451,9 +552,13 @@ INSERT INTO clearing_decision (
               ->build();
     }
     $this->dbManager->freeResult($res);
-    $stmt = __METHOD__.'expression';
+    if (!$includeExpressions) {
+      return $events;
+    }
+
+    $stmt = __METHOD__.'.includeExpressions.expression';
     $sql = 'SELECT rf_fk,rf_expression,clearing_event_pk,comment,type_fk,removed,reportinfo,acknowledgement, EXTRACT(EPOCH FROM date_added) AS ts_added
-             FROM clearing_event JOIN license_expression ON rf_fk=rf_pk
+             FROM clearing_event JOIN ' . $expressionView . ' ON rf_fk=le.rf_pk
              WHERE uploadtree_fk=$1 AND group_fk=$2 AND date_added>to_timestamp($3)
              ORDER BY clearing_event_pk ASC';
     $this->dbManager->prepare($stmt, $sql);
@@ -782,15 +887,18 @@ INSERT INTO clearing_decision (
     $right = $itemTreeBound->getRight();
 
     $stmt = __METHOD__ . "." . $uploadTreeTableName;
-    $sql = "SELECT COUNT(*) FROM clearing_event ce
-            INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
+    $sql = "SELECT COUNT(*) AS count
+            FROM clearing_event ce
+              INNER JOIN $uploadTreeTableName ut
+                ON ut.uploadtree_pk = ce.uploadtree_fk
             WHERE ce.type_fk = " . ClearingEventTypes::KOTOBA . "
-            AND ce.group_fk = $1
-            AND ut.upload_fk = $2
-            AND ut.lft BETWEEN $3 AND $4";
+              AND ce.group_fk = $1
+              AND ut.upload_fk = $2
+              AND ut.lft BETWEEN $3 AND $4";
 
     $this->dbManager->prepare($stmt, $sql);
-    $res = $this->dbManager->execute($stmt, array($groupId, $uploadId, $left, $right));
+    $res = $this->dbManager->execute($stmt,
+      array($groupId, $uploadId, $left, $right));
     $row = $this->dbManager->fetchArray($res);
     $this->dbManager->freeResult($res);
 
@@ -801,9 +909,11 @@ INSERT INTO clearing_decision (
    * @param ItemTreeBounds $itemTreeBound
    * @param int $groupId
    * @param boolean $onlyTried
-   * @return array[] where array has keys ("phraseId","id","text","matched","tried","removedLicenses","addedLicenses")
+   * @return array[] where array has keys
+   * ("phraseId","id","text","matched","tried","removedLicenses","addedLicenses")
    */
-  public function getKotobaHistory(ItemTreeBounds $itemTreeBound, $groupId, $onlyTried = true)
+  public function getKotobaHistory(ItemTreeBounds $itemTreeBound, $groupId,
+    $onlyTried = true)
   {
     $uploadTreeTableName = $itemTreeBound->getUploadTreeTableName();
     $itemId = $itemTreeBound->getItemId();
@@ -823,30 +933,46 @@ INSERT INTO clearing_decision (
 
     $kotobaType = ClearingEventTypes::KOTOBA;
     $sql = "WITH alltried AS (
-            SELECT ce.reportinfo, ce.clearing_event_pk ce_pk, ce.uploadtree_fk,
-              $triedExpr AS tried
+            SELECT ce.reportinfo, ce.clearing_event_pk ce_pk,
+              ce.uploadtree_fk, $triedExpr AS tried
             FROM clearing_event ce
-              INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
-              INNER JOIN $uploadTreeTableName ut2 ON ut2.uploadtree_pk = ce.uploadtree_fk
+              INNER JOIN $uploadTreeTableName ut
+                ON ut.uploadtree_pk = ce.uploadtree_fk
+              INNER JOIN $uploadTreeTableName ut2
+                ON ut2.uploadtree_pk = ce.uploadtree_fk
             WHERE ce.type_fk = $kotobaType
-            AND ce.group_fk = $5
-            AND ut.upload_fk = $1
-            AND ce.reportinfo IS NOT NULL
-            AND ce.reportinfo != ''
-            $triedFilter
+              AND ce.group_fk = $5
+              AND ut.upload_fk = $1
+              AND ce.reportinfo IS NOT NULL
+              AND ce.reportinfo != ''
+              $triedFilter
             ORDER BY ce.reportinfo, ce.clearing_event_pk
             ), aggregated_tried AS (
-            SELECT DISTINCT ON(reportinfo) reportinfo AS text, ce_pk, tried, matched
+            SELECT DISTINCT ON(reportinfo) reportinfo AS text, ce_pk, tried,
+              matched
             FROM (
-              SELECT DISTINCT ON(reportinfo) reportinfo, ce_pk, tried, true AS matched FROM alltried WHERE uploadtree_fk = $2
+              SELECT DISTINCT ON(reportinfo) reportinfo, ce_pk, tried,
+                true AS matched
+              FROM alltried
+              WHERE uploadtree_fk = $2
               UNION ALL
-              SELECT DISTINCT ON(reportinfo) reportinfo, ce_pk, tried, false AS matched FROM alltried WHERE uploadtree_fk != $2 OR uploadtree_fk IS NULL
-            ) AS result ORDER BY reportinfo, matched DESC)
-            SELECT aggregated_tried.text, lrf.rf_shortname, ce.removed, aggregated_tried.tried, aggregated_tried.ce_pk, aggregated_tried.matched
+              SELECT DISTINCT ON(reportinfo) reportinfo, ce_pk, tried,
+                false AS matched
+              FROM alltried
+              WHERE uploadtree_fk != $2 OR uploadtree_fk IS NULL
+            ) AS result
+            ORDER BY reportinfo, matched DESC)
+            SELECT aggregated_tried.text, lrf.rf_shortname, ce.removed,
+              aggregated_tried.tried, aggregated_tried.ce_pk,
+              aggregated_tried.matched
             FROM aggregated_tried
-              INNER JOIN clearing_event ce ON ce.reportinfo = aggregated_tried.text AND ce.type_fk = $kotobaType AND ce.group_fk = $5
+              INNER JOIN clearing_event ce
+                ON ce.reportinfo = aggregated_tried.text
+                AND ce.type_fk = $kotobaType
+                AND ce.group_fk = $5
               INNER JOIN license_ref lrf ON ce.rf_fk = lrf.rf_pk
-              INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
+              INNER JOIN $uploadTreeTableName ut
+                ON ut.uploadtree_pk = ce.uploadtree_fk
             WHERE ut.upload_fk = $1
             ORDER BY aggregated_tried.text, ce.clearing_event_pk";
 
@@ -856,19 +982,20 @@ INSERT INTO clearing_decision (
     $phrases = array();
     while ($row = $this->dbManager->fetchArray($res)) {
       $phraseText = $row['text'];
-      $phraseId = md5($phraseText); // Use hash of phrase text as ID
+      $phraseId = md5($phraseText);
 
       if (!array_key_exists($phraseId, $phrases)) {
         $phrases[$phraseId] = array(
-            "phraseId" => $phraseId,
-            "id" => $row['ce_pk'],
-            "text" => $phraseText,
-            "matched" => $this->dbManager->booleanFromDb($row['matched']),
-            "tried" => $this->dbManager->booleanFromDb($row['tried']),
-            "removedLicenses" => array(),
-            "addedLicenses" => array());
+          "phraseId" => $phraseId,
+          "id" => $row['ce_pk'],
+          "text" => $phraseText,
+          "matched" => $this->dbManager->booleanFromDb($row['matched']),
+          "tried" => $this->dbManager->booleanFromDb($row['tried']),
+          "removedLicenses" => array(),
+          "addedLicenses" => array());
       }
-      $key = $this->dbManager->booleanFromDb($row['removed']) ? 'removedLicenses' : 'addedLicenses';
+      $key = $this->dbManager->booleanFromDb($row['removed'])
+        ? 'removedLicenses' : 'addedLicenses';
       if (!in_array($row['rf_shortname'], $phrases[$phraseId][$key])) {
         $phrases[$phraseId][$key][] = $row['rf_shortname'];
       }
@@ -890,20 +1017,24 @@ INSERT INTO clearing_decision (
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $condition = "ut.lft BETWEEN $1 AND $2";
 
-    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent=true, $statementName, $params, $condition);
+    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId,
+      $onlyCurrent=true, $statementName, $params, $condition);
     $params[] = DecisionTypes::IRRELEVANT;
+    $expressionView = $this->licenseExpressionView('le');
     $sql = "$decisionsCte
             SELECT
               COUNT(DISTINCT itemid) AS count,
               lr.rf_shortname AS shortname,
               lr.rf_spdx_id AS spdx_id,
-              rf_pk
+              lr.rf_pk
             FROM decision
               LEFT JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
               LEFT JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
               LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
+              LEFT JOIN $expressionView ON le.rf_pk = ce.rf_fk
             WHERE (NOT ce.removed OR clearing_event_pk IS NULL) AND type_id!=$".count($params)."
-            GROUP BY shortname,rf_pk,spdx_id";
+              AND le.rf_pk IS NULL
+            GROUP BY shortname,lr.rf_pk,spdx_id";
 
     $this->dbManager->prepare($statementName, $sql);
     $res = $this->dbManager->execute($statementName, $params);
@@ -912,6 +1043,46 @@ INSERT INTO clearing_decision (
       $shortname = empty($row['rf_pk']) ? LicenseDao::NO_LICENSE_FOUND : $row['shortname'];
       $row['spdx_id'] = LicenseRef::convertToSpdxId($shortname, $row['spdx_id']);
       $multiplicity[$shortname] = $row;
+    }
+    $this->dbManager->freeResult($res);
+
+    return $multiplicity;
+  }
+
+  function getClearedLicenseExpressionIdAndMultiplicities(ItemTreeBounds $itemTreeBounds, $groupId)
+  {
+    $statementName = __METHOD__;
+
+    $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+    $condition = "ut.lft BETWEEN $1 AND $2";
+
+    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId,
+      $onlyCurrent=true, $statementName, $params, $condition);
+    $params[] = DecisionTypes::IRRELEVANT;
+    $expressionView = $this->licenseExpressionView('le');
+    $sql = "$decisionsCte
+            SELECT
+              COUNT(DISTINCT itemid) AS count,
+              le.rf_pk,
+              le.rf_expression
+            FROM decision
+              INNER JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
+              INNER JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
+              INNER JOIN $expressionView ON le.rf_pk = ce.rf_fk
+            WHERE NOT ce.removed AND type_id!=$".count($params)."
+            GROUP BY le.rf_pk,le.rf_expression";
+
+    $this->dbManager->prepare($statementName, $sql);
+    $res = $this->dbManager->execute($statementName, $params);
+    $multiplicity = array();
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $expression = $this->expressionAstToString($row['rf_expression']);
+      $multiplicity[$expression] = array(
+        'count' => intval($row['count']),
+        'rf_pk' => intval($row['rf_pk']),
+        'rf_expression' => $row['rf_expression'],
+        'spdx_id' => $expression
+      );
     }
     $this->dbManager->freeResult($res);
 

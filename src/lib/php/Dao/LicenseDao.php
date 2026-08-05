@@ -37,6 +37,116 @@ class LicenseDao
     $this->logger = new Logger(self::class);
   }
 
+  private function expressionAstToString($expression)
+  {
+    if (empty($expression)) {
+      return 'License Expression';
+    }
+
+    $decoded = is_array($expression) ? $expression : json_decode($expression, true);
+    if (empty($decoded)) {
+      return 'License Expression';
+    }
+
+    $licenseIds = array_unique($this->collectExpressionLicenseIds($decoded));
+    $licenseNames = $this->getLicenseNamesByIds($licenseIds);
+    return $this->renderExpressionNode($decoded, $licenseNames);
+  }
+
+  public function renderLicenseExpression($expression)
+  {
+    return $this->expressionAstToString($expression);
+  }
+
+  private function collectExpressionLicenseIds($node)
+  {
+    if (!is_array($node)) {
+      return array();
+    }
+
+    if (array_key_exists('type', $node) && $node['type'] === 'License') {
+      return is_numeric($node['value']) ? array(intval($node['value'])) : array();
+    }
+
+    return array_merge(
+      $this->collectExpressionLicenseIds($node['left'] ?? null),
+      $this->collectExpressionLicenseIds($node['right'] ?? null),
+      $this->collectExpressionLicenseIds($node['license'] ?? null),
+      $this->collectExpressionLicenseIds($node['exception'] ?? null)
+    );
+  }
+
+  private function getLicenseNamesByIds($licenseIds)
+  {
+    if (empty($licenseIds)) {
+      return array();
+    }
+
+    $params = array_values($licenseIds);
+    $placeholders = array();
+    foreach ($params as $index => $licenseId) {
+      $placeholders[] = '$' . ($index + 1);
+    }
+
+    $statementName = __METHOD__ . '.' . count($params);
+    $this->dbManager->prepare($statementName,
+      'SELECT rf_pk, rf_shortname FROM license_ref WHERE rf_pk IN (' .
+      implode(',', $placeholders) . ')');
+    $result = $this->dbManager->execute($statementName, $params);
+
+    $licenseNames = array();
+    while ($row = $this->dbManager->fetchArray($result)) {
+      $licenseNames[intval($row['rf_pk'])] = $row['rf_shortname'];
+    }
+    $this->dbManager->freeResult($result);
+    return $licenseNames;
+  }
+
+  private function renderExpressionNode($node, $licenseNames)
+  {
+    if (!is_array($node) || !array_key_exists('type', $node)) {
+      return 'License Expression';
+    }
+
+    if ($node['type'] === 'License') {
+      if (!is_numeric($node['value'])) {
+        return $node['value'];
+      }
+      $licenseId = intval($node['value']);
+      return $licenseNames[$licenseId] ?? 'LicenseRef-' . $licenseId;
+    }
+
+    if ($node['type'] !== 'Expression') {
+      return 'License Expression';
+    }
+
+    $leftNode = $node['left'] ?? $node['license'] ?? null;
+    $rightNode = $node['right'] ?? $node['exception'] ?? null;
+    $left = $this->renderExpressionNode($leftNode, $licenseNames);
+    $right = $this->renderExpressionNode($rightNode, $licenseNames);
+    return '(' . $left . ' ' . $node['value'] . ' ' . $right . ')';
+  }
+
+  private function licenseExpressionView($alias = 'license_expression')
+  {
+    return "(SELECT DISTINCT ON (rf_pk) rf_pk, rf_expression
+              FROM license_expression
+              ORDER BY rf_pk, ctid) $alias";
+  }
+
+  public function getExpressionById($licenseId)
+  {
+    $expressionView = $this->licenseExpressionView('le');
+    $row = $this->dbManager->getSingleRow(
+      "SELECT rf_pk, rf_expression FROM $expressionView WHERE rf_pk=$1",
+      array($licenseId), __METHOD__ . ".rf_pk=$1.expression");
+    if (false === $row) {
+      return null;
+    }
+    return new License(intval($row['rf_pk']), 'License Expression',
+      $row['rf_expression'], '', '', '', '', '');
+  }
+
   /**
    * \brief get all the licenses for a single file or uploadtree
    *
@@ -49,6 +159,9 @@ class LicenseDao
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . ".$uploadTreeTableName.$usageId";
+    if ($includeExpressions) {
+      $statementName .= ".includeExpressions";
+    }
     $params = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     if ($usageId==LicenseMap::TRIVIAL) {
       $licenseJoin = "license_ref mlr ON license_file.rf_fk = mlr.rf_pk";
@@ -57,6 +170,10 @@ class LicenseDao
       $licenseMapCte = LicenseMap::getMappedLicenseRefView('$4');
       $licenseJoin = "($licenseMapCte) AS mlr ON license_file.rf_fk = mlr.rf_origin";
     }
+    $expressionView = $this->licenseExpressionView('le');
+    $expressionFilter = $includeExpressions ?
+      "LEFT JOIN $expressionView ON license_file.rf_fk = le.rf_pk WHERE le.rf_pk IS NULL" :
+      "";
 
     $this->dbManager->prepare($statementName,
         "SELECT   LFR.rf_shortname AS license_shortname,
@@ -70,7 +187,7 @@ class LicenseDao
                   AG.agent_pk AS agent_id,
                   AG.agent_rev AS agent_revision
           FROM ( SELECT mlr.rf_fullname, mlr.rf_shortname, mlr.rf_spdx_id, mlr.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk, license_file.rf_match_pct
-               FROM license_file JOIN $licenseJoin) as LFR
+               FROM license_file JOIN $licenseJoin $expressionFilter) as LFR
           INNER JOIN $uploadTreeTableName as UT ON UT.pfile_fk = LFR.pfile_fk
           INNER JOIN agent as AG ON AG.agent_pk = LFR.agent_fk
           WHERE AG.agent_enabled='true' and
@@ -86,6 +203,7 @@ class LicenseDao
     if ($includeExpressions) {
       $statementName .= "withExpressions";
       $params = array_slice($params, 0, 3);
+      $expressionView = $this->licenseExpressionView('le');
 
       $this->dbManager->freeResult($result);
       $this->dbManager->prepare($statementName,
@@ -98,7 +216,7 @@ class LicenseDao
                     AG.agent_pk AS agent_id,
                     AG.agent_rev AS agent_revision
             FROM ( SELECT le.rf_pk, le.rf_expression, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk, license_file.rf_match_pct
-                FROM license_file JOIN license_expression le ON license_file.rf_fk = le.rf_pk) as LFR
+                FROM license_file JOIN $expressionView ON license_file.rf_fk = le.rf_pk) as LFR
             INNER JOIN $uploadTreeTableName as UT ON UT.pfile_fk = LFR.pfile_fk
             INNER JOIN agent as AG ON AG.agent_pk = LFR.agent_fk
             WHERE AG.agent_enabled='true' and
@@ -208,12 +326,12 @@ class LicenseDao
     $licenseViewDao = new LicenseViewProxy($groupId, $options, $rfTable);
     $order = $orderAscending ? "ASC" : "DESC";
     $statementName = __METHOD__ . ".order_$order";
-    $expressionStatementName = __METHOD__ . ".order_$order";
+    $expressionStatementName = __METHOD__ . ".order_$order.expression";
     $param = array();
     /* exclude license with parent, excluded child or selfexcluded */
     $sql = $licenseViewDao->asCTE()." SELECT rf_pk,rf_shortname,rf_spdx_id,rf_fullname FROM $rfTable
                   WHERE rf_active = 'yes' AND NOT EXISTS (select * from license_map WHERE rf_pk=rf_fk AND rf_fk!=rf_parent)";
-    $expressionSql = "SELECT rf_pk, rf_expression FROM license_expression";
+    $expressionSql = "SELECT rf_pk, rf_expression FROM " . $this->licenseExpressionView('le');
     if ($search) {
       $param[] = '%' . $search . '%';
       $statementName .= '.search';
@@ -233,14 +351,15 @@ class LicenseDao
       $licenseRefs[] = new LicenseRef(intval($row['rf_pk']), $row['rf_shortname'], $row['rf_fullname'], $row['rf_spdx_id']);
     }
     $this->dbManager->freeResult($result);
+    if (!$includeExpressions) {
+      return $licenseRefs;
+    }
     $this->dbManager->prepare($expressionStatementName, "$expressionSql ORDER BY LOWER(rf_expression::text) $order");
     $result = $this->dbManager->execute($expressionStatementName, array());
-    error_log("Got sql: $expressionSql");
     while ($row = $this->dbManager->fetchArray($result)) {
       $licenseRef = new LicenseRef(intval($row['rf_pk']), "License Expression", $row['rf_expression'], "License Expression");
       $licenseRef->setFullName($licenseRef->getExpression($this, $groupId));
       $fullName = $licenseRef->getFullName();
-      error_log("Found: $fullName, $search");
       if ($search) {
         if (stripos($fullName, $search) != false) {
           $licenseRefs[] = $licenseRef;
@@ -287,6 +406,9 @@ class LicenseDao
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
+    if ($includeExpressions) {
+      $statementName .= ".includeExpressions";
+    }
     $param = array($selectedAgentId);
 
     if ($includeSubfolders) {
@@ -310,16 +432,19 @@ class LicenseDao
       $condition .= " AND utree.upload_fk=$".count($param);
     }
 
+    $expressionView = $this->licenseExpressionView('le');
+    $expressionSelect = $includeExpressions ? ", le.rf_expression" : "";
     $sql = "SELECT utree.pfile_fk as pfile_id," .
-           ($includeExpressions ? "COALESCE(license_ref.rf_pk, license_expression.rf_pk)" : "license_ref.rf_pk"). " as license_id,
+           ($includeExpressions ? "COALESCE(le.rf_pk, license_ref.rf_pk)" : "license_ref.rf_pk"). " as license_id,
            rf_match_pct as match_percentage,
            CAST($1 AS INT) AS agent_id,
-           uploadtree_pk
+           uploadtree_pk" . $expressionSelect . "
           FROM license_file
          LEFT JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk ".
-          ($includeExpressions ? "LEFT JOIN license_expression ON license_file.rf_fk = license_expression.rf_pk": "").
+          ($includeExpressions ? "LEFT JOIN $expressionView ON license_file.rf_fk = le.rf_pk": "").
          " JOIN $uploadTreeTableName utree ON license_file.pfile_fk = utree.pfile_fk
          WHERE agent_fk = $1
+           AND license_file.rf_fk IS NOT NULL
            AND $condition
          ORDER BY match_percentage ASC";
 
@@ -327,6 +452,9 @@ class LicenseDao
     $result = $this->dbManager->execute($statementName, $param);
     $licensesPerFileId = array();
     while ($row = $this->dbManager->fetchArray($result)) {
+      if ($includeExpressions && !empty($row['rf_expression'])) {
+        $row['expression_label'] = $this->expressionAstToString($row['rf_expression']);
+      }
       $licensesPerFileId[$row['pfile_id']][$row['license_id']] = $row;
     }
 
@@ -381,17 +509,21 @@ class LicenseDao
       }
     }
 
+    $expressionView = $this->licenseExpressionView('le');
     $sql = "
 SELECT uploadtree_pk, ufile_name, lft, rgt, ufile_mode,
-       rf_shortname, agent_fk
+       rf_shortname, rf_expression, agent_fk
 FROM (SELECT
         uploadtree_pk, ufile_name,
         lft, rgt, ufile_mode, pfile_fk
       FROM $uploadTreeTableName
       WHERE $condition) AS subselect1
-LEFT JOIN (SELECT rf_shortname,pfile_fk,agent_fk
-           FROM license_file, license_ref
-           WHERE rf_fk = rf_pk) AS subselect2
+LEFT JOIN (SELECT license_ref.rf_shortname, le.rf_expression,
+                  license_file.pfile_fk, license_file.agent_fk
+           FROM license_file
+           LEFT JOIN $expressionView ON license_file.rf_fk = le.rf_pk
+           LEFT JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk
+           WHERE le.rf_pk IS NOT NULL OR license_ref.rf_pk IS NOT NULL) AS subselect2
   ON subselect1.pfile_fk = subselect2.pfile_fk
 $agentSelect
 ORDER BY lft asc
@@ -447,8 +579,11 @@ ORDER BY lft asc
                                             $includeTreeId=false)
   {
     if (($row['ufile_mode'] & (1 << 29)) == 0) {
-      if ($row['rf_shortname']) {
-        $licensesPerFileName[$path]['scanResults'][] = $row['rf_shortname'];
+      if ($row['rf_shortname'] || $row['rf_expression']) {
+        $scanResult = $row['rf_expression'] ?
+          $this->expressionAstToString($row['rf_expression']) :
+          $row['rf_shortname'];
+        $licensesPerFileName[$path]['scanResults'][] = $scanResult;
         if (array_key_exists($row['uploadtree_pk'], $clearingDecisionsForLicList)) {
           $licensesPerFileName[$path]['concludedResults'][] = $clearingDecisionsForLicList[$row['uploadtree_pk']];
         }
@@ -472,10 +607,13 @@ ORDER BY lft asc
     $agentText = $agentId ? (is_array($agentId) ? implode(',', $agentId) : $agentId) : '-';
     $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$agentText";
     $param = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+    $expressionView = $this->licenseExpressionView('le');
     $sql = "SELECT rf_shortname AS license_shortname, rf_spdx_id AS spdx_id, rf_pk, count(*) AS count, count(distinct pfile_ref.pfile_fk) as \"unique\"
          FROM ( SELECT license_ref.rf_shortname, license_ref.rf_spdx_id, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
              FROM license_file
-             JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref
+             JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk
+             LEFT JOIN $expressionView ON license_file.rf_fk = le.rf_pk
+             WHERE le.rf_pk IS NULL) AS pfile_ref
          RIGHT JOIN $uploadTreeTableName UT ON pfile_ref.pfile_fk = UT.pfile_fk";
     if (is_array($agentId)) {
       $sql .= ' AND agent_fk=ANY($4)';
@@ -501,6 +639,47 @@ ORDER BY lft asc
     }
     $this->dbManager->freeResult($result);
     return $assocLicenseHist;
+  }
+
+  public function getLicenseExpressionHistogram(ItemTreeBounds $itemTreeBounds, $agentId=null)
+  {
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
+    $agentText = $agentId ? (is_array($agentId) ? implode(',', $agentId) : $agentId) : '-';
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$agentText";
+    $param = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+
+    $expressionView = $this->licenseExpressionView('le');
+    $sql = "SELECT le.rf_pk, le.rf_expression, count(*) AS count,
+                   count(distinct license_file.pfile_fk) AS \"unique\"
+              FROM license_file
+              JOIN $expressionView ON license_file.rf_fk = le.rf_pk
+              JOIN $uploadTreeTableName UT ON license_file.pfile_fk = UT.pfile_fk";
+    if (is_array($agentId)) {
+      $sql .= ' AND agent_fk=ANY($4)';
+      $param[] = '{' . implode(',', $agentId) . '}';
+    } elseif (!empty($agentId)) {
+      $sql .= ' AND agent_fk=$4';
+      $param[] = $agentId;
+    }
+    $sql .= " WHERE upload_fk=$1
+                AND (UT.lft BETWEEN $2 AND $3)
+                AND UT.ufile_mode&(3<<28)=0
+              GROUP BY le.rf_pk, le.rf_expression";
+
+    $this->dbManager->prepare($statementName, $sql);
+    $result = $this->dbManager->execute($statementName, $param);
+    $expressionHist = array();
+    while ($row = $this->dbManager->fetchArray($result)) {
+      $expression = $this->expressionAstToString($row['rf_expression']);
+      $expressionHist[$expression] = array(
+        'count' => intval($row['count']),
+        'unique' => intval($row['unique']),
+        'rf_pk' => intval($row['rf_pk']),
+        'spdx_id' => $expression
+      );
+    }
+    $this->dbManager->freeResult($result);
+    return $expressionHist;
   }
 
   public function getLicenseShortnamesContained(ItemTreeBounds $itemTreeBounds, $latestSuccessfulAgentIds=null, $filterLicenses = array('VOID'), $includeExpressions=false) //'No_license_found',
@@ -541,13 +720,14 @@ ORDER BY lft asc
     $this->dbManager->freeResult($result);
     if ($includeExpressions) {
       $statementName .= ".includeExpressions";
+      $expressionView = $this->licenseExpressionView('le');
       $this->dbManager->prepare($statementName,
-      "SELECT license_expression.rf_expression
-            FROM license_file JOIN license_expression ON license_file.rf_fk = license_expression.rf_pk
+      "SELECT le.rf_expression
+            FROM license_file JOIN $expressionView ON license_file.rf_fk = le.rf_pk
             INNER JOIN $uploadTreeTableName uploadTree ON uploadTree.pfile_fk=license_file.pfile_fk
             WHERE upload_fk=$1
               AND lft BETWEEN $2 AND $3
-              $noLicenseFoundStmt $agentFilter
+              $agentFilter
             GROUP BY rf_expression
             ORDER BY rf_expression ASC");
       $result = $this->dbManager->execute($statementName,
@@ -555,7 +735,7 @@ ORDER BY lft asc
 
       $expressions = [];
       while ($row = $this->dbManager->fetchArray($result)) {
-        $expressions[] = $row['rf_expression'];
+        $expressions[] = $this->expressionAstToString($row['rf_expression']);
       }
       $this->dbManager->freeResult($result);
       return [$licenses, $expressions];
@@ -610,15 +790,7 @@ ORDER BY lft asc
   {
     $license = $this->getLicenseByCondition('rf_pk=$1', array($licenseId), $groupId);
     if (is_null($license)) {
-      $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_expression FROM license_expression WHERE rf_pk=$1",
-        array($licenseId), __METHOD__ . ".rf_pk=$1.expression");
-      if (false === $row) {
-        return null;
-      }
-      return new License(intval($row['rf_pk']), 'License Expression',
-      $row['rf_expression'], '', '', '',
-      '', '');
+      return $this->getExpressionById($licenseId);
     }
     return $this->getLicenseByCondition('rf_pk=$1', array($licenseId), $groupId);
   }
@@ -662,7 +834,13 @@ ORDER BY lft asc
 
   public function buildExpression($node, $groupId)
   {
+    if (!is_array($node) || !array_key_exists('type', $node)) {
+      return 'License Expression';
+    }
     if ($node['type'] === 'License') {
+      if (!is_numeric($node['value'])) {
+        return $node['value'];
+      }
       $licenseNode = $this->getLicenseById($node['value'], $groupId);
       if (StringOperation::stringStartsWith($licenseNode->getShortName(),
         LicenseRef::SPDXREF_PREFIX)) {
@@ -670,8 +848,10 @@ ORDER BY lft asc
       }
       return $licenseNode->getSpdxId();
     }
-    $left = $this->buildExpression($node['left'], $this, $groupId);
-    $right = $this->buildExpression($node['right'], $this, $groupId);
+    $leftNode = $node['left'] ?? $node['license'] ?? null;
+    $rightNode = $node['right'] ?? $node['exception'] ?? null;
+    $left = $this->buildExpression($leftNode, $groupId);
+    $right = $this->buildExpression($rightNode, $groupId);
     $operator = $node['value'];
     return "($left $operator $right)";
   }
@@ -816,7 +996,18 @@ ORDER BY lft asc
   public function insertExpression($expression)
   {
     $this->dbManager->begin();
-    $sql = 'INSERT INTO license_expression (rf_expression) VALUES ($1) RETURNING rf_pk';
+    $this->dbManager->queryOnce(
+      "SELECT setval('license_ref_rf_pk_seq',
+        GREATEST(
+          (SELECT COALESCE(MAX(rf_pk), 0) FROM license_ref),
+          (SELECT COALESCE(MAX(rf_pk), 0) FROM license_expression)
+        )
+      )"
+    );
+    $sql = 'INSERT INTO license_expression (rf_expression) VALUES ($1)'
+      . ' ON CONFLICT (rf_expression) DO UPDATE'
+      . ' SET rf_expression = EXCLUDED.rf_expression'
+      . ' RETURNING rf_pk';
     $params = array($expression);
     $statement = __METHOD__;
     $result = $this->dbManager->getSingleRow($sql, $params, $statement.'insertExpression');

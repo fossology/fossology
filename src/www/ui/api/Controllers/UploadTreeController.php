@@ -548,8 +548,10 @@ class UploadTreeController extends RestController
           $licenses[] = [
             "id" => $license->getId(),
             "expression" => $license->getExpression($this->licenseDao, $this->restHelper->getGroupId()),
+            "text" => ($item['isRemoved'] ? '-' : $reportInfo),
             "sources" => $types,
-            "acknowledgement" => ($item['isRemoved'] ? '' : $acknowledgement),
+            "acknowledgement" => ($item['isRemoved'] ? '-' : $acknowledgement),
+            "comment" => ($item['isRemoved'] ? '-' : $comment),
             "isMainLicense" => in_array($license->getId(), $mainLicIds),
             "isRemoved" => $item['isRemoved']
           ];
@@ -754,7 +756,9 @@ class UploadTreeController extends RestController
   {
     $body = $this->getParsedBody($request);
     $expression = $body['expression'];
+    $reportInfo = $body['text'] ?? "";
     $acknowledgement = $body['acknowledgement'] ?? "";
+    $comment = $body['comment'] ?? "";
     $uploadTreeId = intval($args['itemId']);
     $uploadId = intval($args['id']);
     $uploadDao = $this->restHelper->getUploadDao();
@@ -779,10 +783,13 @@ class UploadTreeController extends RestController
     }
 
     $parser = new LicenseExpressionParser($expression, $this->restHelper->getGroupId(), $this->restHelper->getUserId());
-    $parser->parse();
-    $license = $this->licenseDao->getExpressionByAST(json_encode($parser->getAST()));
+    if (!$parser->parse()) {
+      throw new HttpBadRequestException("Invalid license expression: " . $parser->getErrorCode());
+    }
+    $expressionAst = json_encode($parser->getAST());
+    $license = $this->licenseDao->getExpressionByAST($expressionAst);
     if ($license === null) {
-      $newExpressionId = $this->licenseDao->insertExpression(json_encode($parser->getAST()));
+      $newExpressionId = $this->licenseDao->insertExpression($expressionAst);
     } else {
       $newExpressionId = $license->getId();
     }
@@ -793,7 +800,9 @@ class UploadTreeController extends RestController
       }
     }
 
-    $this->clearingDao->updateClearingEvent($uploadTreeId, $this->restHelper->getUserId(), $this->restHelper->getGroupId(), $newExpressionId, 'acknowledgement', $acknowledgement);
+    $this->clearingDao->insertClearingEvent($uploadTreeId, $this->restHelper->getUserId(),
+      $this->restHelper->getGroupId(), $newExpressionId, false,
+      ClearingEventTypes::USER, $reportInfo, $comment, $acknowledgement);
     $returnVal = new Info(200, "Successfully updated license expression decision", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }

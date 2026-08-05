@@ -16,7 +16,6 @@
 #include <jsoncpp/json/json.h>
 
 #include "OjosDatabaseHandler.hpp"
-#include "licenseExpression.hpp"
 #include "ojomatch.hpp"
 #include "ojoregex.hpp"
 
@@ -46,6 +45,12 @@ class OjoAgent
      * Regex to find dual license strings
      */
     const boost::regex regLicenseList, regLicenseName, regDualLicense;
+    void scanLicenseList(const std::vector<ojomatch> &licenseList,
+        std::vector<ojomatch> &licenseNames, bool emitExpressions);
+    void scanLicenseListForDatabase(const std::vector<ojomatch> &licenseList,
+        std::vector<ojomatch> &licenseNames,
+        OjosDatabaseHandler &databaseHandler, const int groupId,
+        const int userId);
     void scanString(const std::string &text, boost::regex reg,
         std::vector<ojomatch> &result, unsigned int offset, bool isDualTest);
     void filterMatches(std::vector<ojomatch> &matches);

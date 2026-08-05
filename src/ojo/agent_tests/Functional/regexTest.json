@@ -282,7 +282,7 @@
   {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/mpich2","results":[{"end":31,"len":6,"license":"mpich2","start":25}]},
   {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/MPL-1.0","results":[{"end":32,"len":7,"license":"MPL-1.0","start":25}]},
   {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/MPL-1.1","results":[{"end":32,"len":7,"license":"MPL-1.1","start":25}]},
-  {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/MPL-2.0_AND_BSD-2-Clause_AND_MIT_OR_Apache-2.0.txt","results":[{"end":54,"len":29,"license":"MPL-2.0-no-copyleft-exception","start":25},{"end":71,"len":12,"license":"BSD-2-Clause","start":59},{"end":80,"len":3,"license":"MIT","start":77},{"end":94,"len":10,"license":"Apache-2.0","start":84},{"end":58,"len":3,"license":"Dual-license","start":55}]},
+  {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/MPL-2.0_AND_BSD-2-Clause_AND_MIT_OR_Apache-2.0.txt","results":[{"end":95,"len":70,"license":"MPL-2.0-no-copyleft-exception AND BSD-2-Clause AND (MIT OR Apache-2.0)","start":25}]},
   {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/MPL-2.0-no-copyleft-exception","results":[{"end":54,"len":29,"license":"MPL-2.0-no-copyleft-exception","start":25}]},
   {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/MPL-2.0","results":[{"end":32,"len":7,"license":"MPL-2.0","start":25}]},
   {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/MS-PL","results":[{"end":30,"len":5,"license":"MS-PL","start":25}]},

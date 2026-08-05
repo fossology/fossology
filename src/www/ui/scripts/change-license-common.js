@@ -650,57 +650,124 @@ function getLicense(licenseId, callback) {
   });
 }
 
+function getExpression(licenseId, callback) {
+  $.ajax({
+    type: "GET",
+    url: "?mod=conclude-license&do=getLicense&expression=true" + "&licenseId=" + licenseId,
+    data: {},
+    success: function(data) {
+      callback(data);
+    },
+    error: function(data) {
+      callback(data.error);
+    }
+  });
+}
+
+function appendExpressionLicenseOption(license) {
+  $('#licenseValue').append($('<option></option>')
+    .attr('value', license.id)
+    .attr('title', license.fullName)
+    .text(license.shortName));
+}
+
+function loadExpressionLicenseOptions(callback) {
+  $('#licenseValue').empty();
+  $.getJSON("?mod=conclude-license&do=expressionLicenseOptions")
+    .done(function (data) {
+      if (data) {
+        data.forEach(function (license) {
+          appendExpressionLicenseOption(license);
+        });
+      }
+      firstLicense = $('#licenseValue option:first').val() || firstLicense;
+      if (callback) {
+        callback();
+      }
+    })
+    .fail(failed);
+}
+
+function ensureExpressionLicenseOption(licenseId, callback) {
+  if (!licenseId || $('#licenseValue option[value="' + licenseId + '"]').length) {
+    callback();
+    return;
+  }
+  getLicense(licenseId, function(license) {
+    if (license && license.shortName && license.shortName !== 'License Expression') {
+      appendExpressionLicenseOption(license);
+    }
+    callback();
+  });
+}
+
 function editExpression(id=0, byBulk=false) {
   if (byBulk) {
     editExpressionTrigger = "Bulk";
     var content = bulkFormTableContent[3]();
-    for (i = 0; i < content.length; ++i) {
+    for (var i = 0; i < content.length; ++i) {
       if (!content[i].isExpression){
         firstLicense =content[i].licenseId;
       }
     }
   } else {
     editExpressionTrigger = "Clearing";
-    firstLicense = licenseDecisionsArray[0].id;
+    var firstSimpleLicense = licenseDecisionsArray.find(function(license) {
+      return license.shortName !== 'License Expression' && license.shortname !== 'License Expression';
+    });
+    firstLicense = firstSimpleLicense ? firstSimpleLicense.id : firstLicense;
   }
   if (id==0)
   {
-    console.log('clicked');
-    currentAST = null;
-    displayAST(currentAST, $('#ast-viewer'));
-    $('#editExpressionModal').modal('show');
+    loadExpressionLicenseOptions(function() {
+      currentAST = null;
+      currentASTId = 0;
+      displayAST(currentAST, $('#ast-viewer'));
+      $('#editExpressionModal').modal('show');
+    });
   }
   else
   {
     currentASTId = id;
-    getLicense(id, function(license) {
-      currentAST = JSON.parse(license.fullName);
-      $('#licenseValue').empty();
-      $.getJSON("?mod=conclude-license&do=licenseDecisionsData" + "&upload=" + uploadId + "&item=" + $('#uploadTreeId').val())
-      .done(function (data) {
-        if(data) {
-          console.log(data);
-          data.forEach(function (license) {
-            $('#licenseValue').append($('<option></option>').attr('value', license.id).attr('title', license.fullName).text(license.shortName));
-          });
+    getExpression(id, function(license) {
+      try {
+        currentAST = JSON.parse(license.fullName);
+      } catch (error) {
+        failed({responseText: 'Unable to load license expression'});
+        return;
+      }
+      loadExpressionLicenseOptions(function() {
           displayAST(currentAST, $('#ast-viewer'));
           $('#editExpressionModal').modal('show');
-      }})
-      .fail(failed);
+      });
     });
   }
 }
 
 function concludeExpressionBulk() {
   var content = bulkFormTableContent[3]();
-  for (i = 0; i < content.length; ++i) {
+  for (var i = 0; i < content.length; ++i) {
     if (content[i].isExpression){
-      console.log(content[i]);
       editExpression(content[i].licenseId, true);
       return;
     }
   }
   editExpression(0, true);
+}
+
+function getSavedExpressionId(data) {
+  if (data && typeof data === 'object') {
+    return data.expressionId || data.id || data.rf_pk || null;
+  }
+  return data || null;
+}
+
+function getLeftNode(node) {
+  return node.left || node.license || null;
+}
+
+function getRightNode(node) {
+  return node.right || node.exception || null;
 }
 
 function displayAST(node, container) {
@@ -718,8 +785,8 @@ function displayAST(node, container) {
   } else {
     let leftContainer = $('<div class="child ml-3"></div>');
     let rightContainer = $('<div class="child ml-3"></div>');
-    displayAST(node.left, leftContainer);
-    displayAST(node.right, rightContainer);
+    displayAST(getLeftNode(node), leftContainer);
+    displayAST(getRightNode(node), rightContainer);
     content.append(leftContainer);
     content.append(`<span class="ml-2 mr-2">${node.value}</span>`);
     content.append(rightContainer);
@@ -748,9 +815,9 @@ async function getExpressionString(node) {
       });
     });
   } else {
-    let left=await getExpressionString(node.left);
+    let left=await getExpressionString(getLeftNode(node));
     console.log(left);
-    let right=await getExpressionString(node.right);
+    let right=await getExpressionString(getRightNode(node));
     return `(${left} ${node.value} ${right})`
   }
 }
@@ -797,23 +864,18 @@ function addGroup() {
 
 function editNode(node) {
   currentNode = node;
-  $('#licenseValue').val(node.value || '').parent().toggle(node.type === 'License');
-  $('#operatorValue').val(node.value || '').parent().toggle(node.type === 'Expression');
-  if (editExpressionTrigger === "Bulk") {
-    var licenseSelect = $('#licenseValue');
-    console.log("bulk");
-
-    // Clear previous options
-    licenseSelect.empty();
-    // Use licenses from bulkFormTableContent
-    var bulkContent = bulkFormTableContent[3](); // Get content array
-    bulkContent.forEach(function(lic) {
-      if (lic.action === "Add") {
-        licenseSelect.append(new Option(lic.licenseName, lic.licenseId, false, node.value == lic.licenseId));
-      }
-    });
+  function showEditNodeModal() {
+    $('#licenseValue').val(node.value || '').parent().toggle(node.type === 'License');
+    $('#operatorValue').val(node.value || '').parent().toggle(node.type === 'Expression');
+    $('#editNodeModal').modal('show');
   }
-  $('#editNodeModal').modal('show');
+  if (node.type === 'License') {
+    loadExpressionLicenseOptions(function() {
+      ensureExpressionLicenseOption(node.value, showEditNodeModal);
+    });
+    return;
+  }
+  showEditNodeModal();
 }
 
 function saveNodeChanges() {
@@ -874,20 +936,26 @@ async function saveExpression() {
   if (currentAST != null) {
     if (editExpressionTrigger === 'Bulk') {
       let exp = await getExpressionString(currentAST);
-      console.log(exp);
       $('#editExpressionModal').modal('hide');
-      $.getJSON("?mod=conclude-license&do=saveExpression" + "&upload=" + uploadId + "&item=" + $('#uploadTreeId').val() + "&ast=" + JSON.stringify(currentAST) + "&astId=" + currentASTId + "&bulk=true")
+      $.getJSON("?mod=conclude-license&do=saveExpression" + "&upload=" + uploadId + "&item=" + $('#uploadTreeId').val() + "&ast=" + encodeURIComponent(JSON.stringify(currentAST)) + "&astId=" + currentASTId + "&bulk=true")
         .done(function (data) {
-          console.log(data);
-          currentASTId = data.expressionId;
-          bulkFormTableContent[4](currentASTId, exp);
+          currentASTId = getSavedExpressionId(data);
+          if (!currentASTId) {
+            failed({responseText: 'Unable to save license expression'});
+            return;
+          }
+          if (typeof bulkFormTableContent.addExpression === 'function') {
+            bulkFormTableContent.addExpression(currentASTId, exp);
+          } else {
+            bulkFormTableContent[5](currentASTId, exp);
+          }
+          $('#bulkModal').modal('show');
         })
+        .fail(failed);
     } else {
-      $.getJSON("?mod=conclude-license&do=saveExpression" + "&upload=" + uploadId + "&item=" + $('#uploadTreeId').val() + "&ast=" + JSON.stringify(currentAST) + "&astId=" + currentASTId + "&bulk=false")
+      $.getJSON("?mod=conclude-license&do=saveExpression" + "&upload=" + uploadId + "&item=" + $('#uploadTreeId').val() + "&ast=" + encodeURIComponent(JSON.stringify(currentAST)) + "&astId=" + currentASTId + "&bulk=false")
         .done(function (data) {
           $('#editExpressionModal').modal('hide');
-          $('#newExpressionbtn').hide();
-          $('#newExpressionInfo').hide();
           $('#decTypeSet').addClass('border-danger');
           var table = createClearingTable();
           table.fnDraw(false);

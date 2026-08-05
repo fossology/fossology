@@ -14,6 +14,8 @@ use Fossology\Lib\Dao\LicenseDao;
 
 class LicenseMainGetter extends ClearedGetterCommon
 {
+  const LICENSE_EXPRESSION_SPDX_ID = 'LicenseRef-fossology-License-Expression';
+
   /** @var Boolean */
   private $onlyExpressions = false;
 
@@ -47,9 +49,10 @@ class LicenseMainGetter extends ClearedGetterCommon
         error_log("Error: License ID " . $originLicenseId . " not found in the database.");
         continue; // Skip this license and continue with others
       }
-      if ($allLicenseCols->getSpdxId() == 'LicenseRef-fossology-License-Expression') {
+      if ($allLicenseCols->getSpdxId() == self::LICENSE_EXPRESSION_SPDX_ID) {
         if ($includeExpressions) {
-          $expression = $allLicenseCols->getExpression($this->licenseDao, $groupId);
+          $expression = $this->licenseDao->renderLicenseExpression(
+            $allLicenseCols->getFullName());
           $allStatements[] = array(
             'licenseId' => $originLicenseId,
             'risk' => $allLicenseCols->getRisk(),

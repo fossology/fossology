@@ -631,11 +631,27 @@ class CliXml extends Agent
   {
     $statementsWithNames = [];
     foreach ($licenses as $license) {
+      $expression = $this->licenseDao->getExpressionById($license["licenseId"]);
+      if ($expression !== null) {
+        $expressionName = $expression->getExpression(
+          $this->licenseDao, $this->groupId);
+        if ($license["content"] === $expressionName) {
+          $license['name'] = $expressionName;
+          $statementsWithNames[] = $license;
+          continue;
+        }
+      }
       $allLicenseCols = $this->licenseDao->getLicenseById($license["licenseId"],
         $this->groupId);
+      if ($allLicenseCols === null) {
+        $license["name"] = $license["content"];
+        $statementsWithNames[] = $license;
+        continue;
+      }
       $license["name"] = $allLicenseCols->getShortName();
       if ($license["name"] == 'License Expression') {
-        $license['name'] = $allLicenseCols->getExpression($this->licenseDao, $this->groupId);
+        $license['name'] = $allLicenseCols->getExpression(
+          $this->licenseDao, $this->groupId);
       }
       $statementsWithNames[] = $license;
     }

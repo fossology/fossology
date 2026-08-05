@@ -39,6 +39,9 @@
                   {% for shortname,row in scannerLicenses %}
                     <option value="{{row.rf_pk}}">{{ shortname }}</option>
                   {% endfor %}
+                  {% for expression,row in scannerExpressions %}
+                    <option value="{{row.rf_pk}}">{{ expression }}</option>
+                  {% endfor %}
                 </select>
               </th>
               <th>
@@ -46,6 +49,9 @@
                   <option value="0">-- {{'filter for edited results'|trans}} --</option>
                   {% for shortname,row in editedLicenses %}
                     <option value="{{row.rf_pk}}">{{ shortname }}</option>
+                  {% endfor %}
+                  {% for expression,row in editedExpressions %}
+                    <option value="{{row.rf_pk}}">{{ expression }}</option>
                   {% endfor %}
                 </select>
               </th>
