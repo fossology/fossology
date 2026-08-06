@@ -581,6 +581,26 @@ class CliXml extends Agent
         $usage = 'Found';
       }
     }
+    $criticalNotesText = '';
+    if ($critical != 'None' && $row['ri_criticalnotes'] != 'NA'
+      && !empty($row['ri_criticalnotes'])) {
+      $criticalNotesText = $row['ri_criticalnotes'];
+    }
+    $dependencyNotesText = '';
+    if ($dependency != 'None' && $row['ri_depnotes'] != 'NA'
+      && !empty($row['ri_depnotes'])) {
+      $dependencyNotesText = $row['ri_depnotes'];
+    }
+    $exportRestrictionsText = '';
+    if ($ecc != 'None' && $row['ri_exportnotes'] != 'NA'
+      && !empty($row['ri_exportnotes'])) {
+      $exportRestrictionsText = $row['ri_exportnotes'];
+    }
+    $usageRestrictionsText = '';
+    if ($usage != 'None' && $row['ri_copyrightnotes'] != 'NA'
+      && !empty($row['ri_copyrightnotes'])) {
+      $usageRestrictionsText = $row['ri_copyrightnotes'];
+    }
     $componentType = $row['ri_component_type'];
     if (!empty($componentType)) {
       $componentType = ComponentType::TYPE_MAP[$componentType];
@@ -615,9 +635,13 @@ class CliXml extends Agent
     ], [
       'generalAssessment' => $row['ri_general_assesment'],
       'criticalFilesFound' => $critical,
+      'criticalFilesText' => $criticalNotesText,
       'dependencyNotes' => $dependency,
+      'dependencyNotesText' => $dependencyNotesText,
       'exportRestrictionsFound' => $ecc,
+      'exportRestrictionsText' => $exportRestrictionsText,
       'usageRestrictionsFound' => $usage,
+      'usageRestrictionsText' => $usageRestrictionsText,
       'additionalNotes' => $row['ri_ga_additional']
     ]];
   }
