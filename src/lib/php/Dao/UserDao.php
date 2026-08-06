@@ -471,9 +471,18 @@ class UserDao
   /**
    * @param int $groupId
    * @param string $newGroupName
+   * @throws \Exception if the name is already taken by another group
    */
   function editGroup($groupId, $newGroupName)
   {
+    $groupAlreadyExists = $this->dbManager->getSingleRow(
+            "SELECT group_pk FROM groups WHERE LOWER(group_name)=LOWER($1) AND group_pk!=$2",
+            array($newGroupName, $groupId),
+            __METHOD__.'.gExists');
+    if ($groupAlreadyExists) {
+      throw new \Exception(_("Group exists. Try different Name, Group-Name checking is case-insensitive and Duplicate not allowed"));
+    }
+
     $this->dbManager->getSingleRow('UPDATE groups SET group_name=$2 WHERE group_pk=$1;',
             array($groupId, $newGroupName),__METHOD__.'.UpdateEditGroup');
   }
