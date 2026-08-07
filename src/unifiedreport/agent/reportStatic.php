@@ -218,6 +218,11 @@ class ReportStatic
     $cell = $table->addCell($cellLen);
     $this->addCheckBoxText($cell, (array_key_exists(0,$getCheckboxList)) ? $getCheckboxList[0] : '', $nocriticalfiles);
     $this->addCheckBoxText($cell, (array_key_exists(1,$getCheckboxList)) ? $getCheckboxList[1] : '', $criticalfiles);
+    if ($otherStatement["ri_criticalnotes"] != 'NA' && !empty($otherStatement["ri_criticalnotes"])) {
+      $extraNotes = str_replace("\n", "</w:t>\n<w:br />\n<w:t xml:space=\"preserve\">", htmlspecialchars($otherStatement["ri_criticalnotes"], ENT_DISALLOWED));
+      $extraNotes = str_replace("\r", "", $extraNotes);
+      $cell->addText($extraNotes, $rightColStyleBlue, "pStyle");
+    }
 
     $nodependenciesfound = " no dependencies found, neither in source code nor in binaries";
     $dependenciesfoundinsourcecode = " dependencies found in source code (see obligations)";
