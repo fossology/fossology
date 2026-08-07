@@ -32,6 +32,7 @@ use Fossology\UI\Api\Controllers\FolderController;
 use Fossology\UI\Api\Controllers\GroupController;
 use Fossology\UI\Api\Controllers\InfoController;
 use Fossology\UI\Api\Controllers\JobController;
+use Fossology\UI\Api\Controllers\LicenseCompatibilityRuleController;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\ObligationController;
@@ -425,6 +426,18 @@ $app->group('/license',
     $app->delete('/admincandidates/{id:\\d+}',
       LicenseController::class . ':deleteAdminLicenseCandidate');
     $app->put('/adminacknowledgements', LicenseController::class . ':handleAdminLicenseAcknowledgement');
+    $app->any('/{params:.*}', BadRequestController::class);
+  });
+
+/////////////////LICENSE COMPATIBILITY RULES////////////
+$app->group('/license-compatibility-rules',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', LicenseCompatibilityRuleController::class . ':getRules');
+    $app->post('', LicenseCompatibilityRuleController::class . ':createRule');
+    $app->get('/export', LicenseCompatibilityRuleController::class . ':exportRules');
+    $app->post('/import', LicenseCompatibilityRuleController::class . ':importRules');
+    $app->put('/{id:\\d+}', LicenseCompatibilityRuleController::class . ':updateRule');
+    $app->delete('/{id:\\d+}', LicenseCompatibilityRuleController::class . ':deleteRule');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

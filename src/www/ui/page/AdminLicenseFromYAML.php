@@ -10,6 +10,7 @@ namespace Fossology\UI\Page;
 use Fossology\Lib\Application\LicenseCompatibilityRulesYamlImport;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\UI\Api\Models\ApiVersion;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +22,8 @@ class AdminLicenseFromYAML extends DefaultPlugin
 {
   const NAME = "admin_license_from_yaml";
   const KEY_UPLOAD_MAX_FILESIZE = 'upload_max_filesize';
+  const FILE_INPUT_NAME = 'file_input';
+  const FILE_INPUT_NAME_V2 = 'fileInput';
   function __construct()
   {
     parent::__construct(self::NAME, array(
@@ -31,6 +34,18 @@ class AdminLicenseFromYAML extends DefaultPlugin
         ));
   }
   /**
+   * @return string
+   */
+  public function getFileInputName($apiVersion = ApiVersion::V1)
+  {
+    if ($apiVersion == ApiVersion::V2) {
+      return $this::FILE_INPUT_NAME_V2;
+    } else {
+      return $this::FILE_INPUT_NAME;
+    }
+  }
+
+  /**
    * @param Request $request
    * @return Response
    */
@@ -38,7 +53,7 @@ class AdminLicenseFromYAML extends DefaultPlugin
   {
     $vars = array();
     if ($request->isMethod('POST')) {
-      $uploadFile = $request->files->get('file_input');
+      $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
       $vars['message'] = $this->handleFileUpload($uploadFile);
     }
     $vars[self::KEY_UPLOAD_MAX_FILESIZE] = ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
@@ -48,9 +63,11 @@ class AdminLicenseFromYAML extends DefaultPlugin
 
   /**
    * @param UploadedFile $uploadedFile
-   * @return null|string
+   * @param boolean $fromRest Return an array with the status code if called
+   *        from the REST API
+   * @return array|null|string
    */
-  protected function handleFileUpload($uploadedFile)
+  public function handleFileUpload($uploadedFile, $fromRest = false)
   {
     $errMsg = '';
     if (! ($uploadedFile instanceof UploadedFile)) {
@@ -67,11 +84,18 @@ class AdminLicenseFromYAML extends DefaultPlugin
         $uploadedFile->getClientOriginalName();
     }
     if (! empty($errMsg)) {
+      if ($fromRest) {
+        return array(false, $errMsg, 400);
+      }
       return $errMsg;
     }
     /** @var LicenseCompatibilityRulesYamlImport $licenseYamlImport */
     $licenseYamlImport = $this->getObject('app.license_yaml_import');
-    return $licenseYamlImport->handleFile($uploadedFile->getRealPath());
+    $msg = $licenseYamlImport->handleFile($uploadedFile->getRealPath());
+    if ($fromRest) {
+      return array(true, $msg, 200);
+    }
+    return $msg;
   }
 }
 

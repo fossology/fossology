@@ -5164,6 +5164,290 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /license-compatibility-rules:
+    get:
+      operationId: getLicenseCompatibilityRules
+      tags:
+        - License
+        - Admin
+      summary: Get the license compatibility rules
+      description: >
+        Get the list of license compatibility rules from the server.
+      parameters:
+        - name: page
+          description: Page number for responses
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          description: Limit of rules per request
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+        - name: search
+          description: Filter the rules on their description
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of the license compatibility rules
+          headers:
+            X-Total-Pages:
+              description: Total number of pages available
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LicenseCompatibilityRule'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    post:
+      operationId: createLicenseCompatibilityRule
+      tags:
+        - License
+        - Admin
+      summary: Create a new license compatibility rule
+      description: >
+        Create a new license compatibility rule. At least one license or
+        license type has to be given, a rule without any of them would shadow
+        the default compatibility of the server.
+      requestBody:
+        description: New license compatibility rule
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewLicenseCompatibilityRule'
+      responses:
+        '201':
+          description: Rule added successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /license-compatibility-rules/{id}:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the license compatibility rule
+        in: path
+        schema:
+          type: integer
+    put:
+      operationId: updateLicenseCompatibilityRule
+      tags:
+        - License
+        - Admin
+      summary: Update a license compatibility rule
+      description: >
+        Update an existing license compatibility rule. Only the fields sent in
+        the request body are updated.
+      requestBody:
+        description: Values of the rule to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditLicenseCompatibilityRule'
+      responses:
+        '200':
+          description: Rule updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Rule not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    delete:
+      operationId: deleteLicenseCompatibilityRule
+      tags:
+        - License
+        - Admin
+      summary: Delete a license compatibility rule
+      description: >
+        Permanently remove an existing license compatibility rule.
+      responses:
+        '200':
+          description: Rule deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Rule not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /license-compatibility-rules/import:
+    post:
+      operationId: importLicenseCompatibilityRules
+      tags:
+        - License
+        - Admin
+      summary: Import license compatibility rules from a YAML file
+      description: >
+        Import the license compatibility rules from a YAML file. Rules already
+        present in the server are updated, the missing ones are created.
+      requestBody:
+        description: Include the YAML file
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileInput:
+                  type: string
+                  format: binary
+                  description: YAML to be imported
+              required:
+                - fileInput
+      responses:
+        '200':
+          description: Successfully imported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /license-compatibility-rules/export:
+    get:
+      operationId: exportLicenseCompatibilityRules
+      tags:
+        - License
+        - Admin
+      summary: Export the license compatibility rules as a YAML file
+      description: >
+        Export the license compatibility rules of the server as a YAML file.
+      parameters:
+        - name: id
+          description: Id of the rule to export, 0 for all
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Successfully exported
+          content:
+            text/x-yaml:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Rule not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /overview/database/contents:
     get:
       operationId: getDatabaseContents
@@ -6689,6 +6973,144 @@ components:
           nullable: true
           example:
             "Please respect the obligation"
+    LicenseCompatibilityRule:
+      description: License compatibility rule information
+      type: object
+      properties:
+        id:
+          description: Id of the rule
+          type: integer
+          example:
+            4
+        firstLicenseId:
+          description: Id of the first license, null matches every license
+          type: integer
+          nullable: true
+          example:
+            306
+        firstLicenseName:
+          description: Short name of the first license
+          type: string
+          nullable: true
+          example:
+            "MIT"
+        secondLicenseId:
+          description: Id of the second license, null matches every license
+          type: integer
+          nullable: true
+          example:
+            188
+        secondLicenseName:
+          description: Short name of the second license
+          type: string
+          nullable: true
+          example:
+            "GPL-2.0-only"
+        firstType:
+          description: >
+            License type of the first license, null matches every type. Allowed
+            values are configured by the `LicenseTypes` setting of the server.
+          type: string
+          nullable: true
+          example:
+            "Permissive"
+        secondType:
+          description: License type of the second license, null matches every type
+          type: string
+          nullable: true
+          example:
+            "Strong Copyleft"
+        comment:
+          description: Description of the rule
+          type: string
+          example:
+            "A permissive license is compatible with a copyleft license"
+        compatibility:
+          description: Compatibility result of the rule
+          type: boolean
+          example:
+            true
+    NewLicenseCompatibilityRule:
+      description: New license compatibility rule
+      type: object
+      properties:
+        firstLicenseId:
+          description: Id of the first license, null matches every license
+          type: integer
+          nullable: true
+          example:
+            306
+        secondLicenseId:
+          description: Id of the second license, null matches every license
+          type: integer
+          nullable: true
+          example:
+            188
+        firstType:
+          description: License type of the first license, null matches every type
+          type: string
+          nullable: true
+          example:
+            "Permissive"
+        secondType:
+          description: License type of the second license, null matches every type
+          type: string
+          nullable: true
+          example:
+            "Strong Copyleft"
+        comment:
+          description: Description of the rule
+          type: string
+          example:
+            "A permissive license is compatible with a copyleft license"
+        compatibility:
+          description: Compatibility result of the rule
+          type: boolean
+          example:
+            true
+      required:
+        - comment
+        - compatibility
+    EditLicenseCompatibilityRule:
+      description: >
+        Values of a license compatibility rule to update. Only the fields sent
+        in the request body are updated, at least one is required.
+      type: object
+      properties:
+        firstLicenseId:
+          description: Id of the first license, null matches every license
+          type: integer
+          nullable: true
+          example:
+            306
+        secondLicenseId:
+          description: Id of the second license, null matches every license
+          type: integer
+          nullable: true
+          example:
+            188
+        firstType:
+          description: License type of the first license, null matches every type
+          type: string
+          nullable: true
+          example:
+            "Permissive"
+        secondType:
+          description: License type of the second license, null matches every type
+          type: string
+          nullable: true
+          example:
+            "Strong Copyleft"
+        comment:
+          description: Description of the rule
+          type: string
+          example:
+            "A permissive license is compatible with a copyleft license"
+        compatibility:
+          description: Compatibility result of the rule
+          type: boolean
+          example:
+            true
     ApiInfo:
       description: Info about the API
       type: object
