@@ -5928,6 +5928,9 @@ components:
         reuse_copyright:
           type: boolean
           description: Copy the copyright deactivation and edits.
+        reuse_bulk:
+          type: boolean
+          description: Reuse bulk decisions.
       required:
         - reuse_upload
         - reuse_group

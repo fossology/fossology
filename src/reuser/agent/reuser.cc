@@ -21,6 +21,7 @@
  * | --: | :--------------- | :----------------------------------- |
  * |   2 | REUSE_ENHANCED   | Match by filename + diff threshold   |
  * |   4 | REUSE_MAIN       | Copy main-license entries            |
+ * |   8 | REUSE_BULK       | Copy bulk license ref/set and run monkbulk |
  * |  16 | REUSE_CONF       | Copy report configuration            |
  * | 128 | REUSE_COPYRIGHT  | Copy copyright events                |
  *
