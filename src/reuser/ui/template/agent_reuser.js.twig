@@ -37,12 +37,78 @@ function reloadUploads(folderGroupPair, groupIndex) {
     .always(function () { _reloadUploadsXhr = null; });
 }
 
+let _autoDetectXhr = null;
+
+function runAutoDetect(groupIndex) {
+  {% if not autoDetectEnabled %}
+  return;
+  {% endif %}
+  if (window.currentReuseSource && window.currentReuseSource !== 'local') {
+    return;
+  }
+  if (!lastUploadedFiles || lastUploadedFiles.length === 0) {
+    return;
+  }
+  const fileIndex = parseInt(groupIndex) || 0;
+  const file = lastUploadedFiles[fileIndex] || lastUploadedFiles[0];
+  if (!file || !file.name) {
+    return;
+  }
+  const filename = file.name;
+  const selectId = `#{{ uploadToReuseSelectorName }}${groupIndex}`;
+  const $select = $(selectId);
+  const $autoDetectIndicator = $(`#auto-detect-loading${groupIndex}`);
+
+  if ($select.length === 0) {
+    return;
+  }
+
+  if (_autoDetectXhr) {
+    _autoDetectXhr.abort();
+    _autoDetectXhr = null;
+  }
+
+  $autoDetectIndicator.show();
+  _autoDetectXhr = $.ajax({
+    url: '?mod=plugin_reuser&do=autoDetectReuse',
+    method: 'GET',
+    data: { filename: filename },
+    dataType: 'json',
+    success: function(data) {
+      if (data && data.uploadId && data.groupId && data.display) {
+        const optionValue = data.uploadId + ',' + data.groupId;
+        const exists = $select.find('option[value="' + optionValue + '"]').length > 0;
+        if (!exists) {
+          const selectEl = $select[0];
+          const opt = document.createElement('option');
+          opt.value = optionValue;
+          opt.textContent = data.display;
+          selectEl.insertBefore(opt, selectEl.firstChild);
+        }
+        $select.val(optionValue);
+        $select.trigger('change');
+        $select[0].size = $select[0].size;
+      }
+    },
+    error: function(xhr, status, error) {
+    },
+    complete: function() {
+      _autoDetectXhr = null;
+      $autoDetectIndicator.hide();
+    }
+  });
+}
+
 function toggleDisabled() {
   $(document).off('click.reuseSearchInFolder').on('click.reuseSearchInFolder', '.reuseSearchInFolder', function () {
     const gi = $(this).attr('id').replace('reuseSearchInFolder', '');
     const fs = $(`#{{ reuseFolderSelectorName }}${gi}`);
     fs.prop('disabled', !this.checked);
-    this.checked ? fs.trigger('change') : reloadUploads('', gi);
+    if (this.checked) {
+      fs.trigger('change');
+    } else {
+      reloadUploads('', gi);
+    }
   });
   registerFolderSelectorChange();
 }
