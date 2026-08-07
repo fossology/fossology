@@ -61,7 +61,8 @@ class ui_report_conf extends FO_Plugin
     "gaRisk" => "ri_ga_risk",
     "dependencyBinarySource" => "ri_depnotes",
     "exportRestrictionText" => "ri_exportnotes",
-    "copyrightRestrictionText" => "ri_copyrightnotes"
+    "copyrightRestrictionText" => "ri_copyrightnotes",
+    "criticalFilesText" => "ri_criticalnotes"
   );
 
   /**
@@ -152,9 +153,19 @@ class ui_report_conf extends FO_Plugin
     foreach ($this->mapDBColumns as $key => $value) {
       $vars[$key] = $row[$value];
     }
+    foreach (["dependencyBinarySource", "exportRestrictionText",
+      "copyrightRestrictionText", "criticalFilesText"] as $noteField) {
+      if ($vars[$noteField] == 'NA') {
+        $vars[$noteField] = '';
+      }
+    }
     $textAreaNoneStyle = ' style="display:none;overflow:auto;width:98%;height:80px;"';
     $textAreaStyle = ' style="overflow:auto;width:98%;height:80px;"';
     $vars['styleDependencyTA'] = $vars['styleExportTA'] = $vars['styleRestrictionTA'] = $textAreaStyle;
+    $vars['styleCriticalTA'] = $textAreaStyle;
+    if ($row['ri_criticalnotes'] == 'NA' || empty($row['ri_criticalnotes'])) {
+       $vars['styleCriticalTA'] = $textAreaNoneStyle;
+    }
     if ($row['ri_depnotes'] == 'NA' || empty($row['ri_depnotes'])) {
        $vars['styleDependencyTA'] = $textAreaNoneStyle;
     }
@@ -525,6 +536,15 @@ class ui_report_conf extends FO_Plugin
       if ($(\"#confTabs .ui-tabs-panel\").eq(activeIdx).attr('id') === 'acknowledgementsConfTab') {
         $('#reportConfSubmit').hide();
       }
+      $(\"input[name='critical']\").change(function(){
+        var val = $(\"input[name='critical']:checked\").val();
+        if (val == 'nonCritical') {
+          $('#criticalFilesText').hide();
+          $('#criticalFilesText').val('');
+        } else {
+          $('#criticalFilesText').css('display', 'block');
+        }
+      });
       $(\"input[name='dependencySourceBinary']\").change(function(){
         var val = $(\"input[name='dependencySourceBinary']:checked\").val();
         if (val == 'noDependency') {

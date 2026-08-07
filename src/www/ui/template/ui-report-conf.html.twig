@@ -165,6 +165,7 @@
           <td align="left">
             <label><input type="radio" class="browse-upload-checkbox view-license-rc-size" name="critical" value="nonCritical" {{ nonCritical }} />{{ "no critical files found, source code and binaries can be used as is"|trans }}</label><br />
             <label><input type="radio" class="browse-upload-checkbox view-license-rc-size" name="critical" value="critical" {{ critical }} />{{ "critical files found, source code needs to be adapted and binaries possibly re-built"|trans }}</label>
+            <label><textarea {{ styleCriticalTA }} id="criticalFilesText" name="criticalFilesText">{{ criticalFilesText|e }}</textarea></label>
           </td>
         </tr>
         <tr>
