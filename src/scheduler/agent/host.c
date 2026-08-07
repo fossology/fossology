@@ -47,6 +47,22 @@ static int print_host_all(gchar* host_name, host_t* host, GOutputStream* ostr)
  */
 host_t* host_init(char* name, char* address, char* agent_dir, int max)
 {
+  return host_init_with_caps(name, address, agent_dir, max, NULL);
+}
+
+/**
+ * @brief Creates a new host with a specific agent capability list.
+ *
+ * @param name        The name of the host
+ * @param address     Address that can be passed to ssh when starting agent on host
+ * @param agent_dir   The location of agent binaries on the host
+ * @param max         The max number of agents that can run on this host
+ * @param agent_caps  List of agent names this host can run (NULL = accept all)
+ * @returns New host
+ */
+host_t* host_init_with_caps(char* name, char* address, char* agent_dir,
+                            int max, GList* agent_caps)
+{
   host_t* host = g_new0(host_t, 1);
 
   host->name = g_strdup(name);
@@ -54,6 +70,7 @@ host_t* host_init(char* name, char* address, char* agent_dir, int max)
   host->agent_dir = g_strdup(agent_dir);
   host->max = max;
   host->running = 0;
+  host->agent_caps = agent_caps;
 
   return host;
 }
@@ -69,9 +86,13 @@ void host_destroy(host_t* host)
   g_free(host->address);
   g_free(host->agent_dir);
 
+  if(host->agent_caps)
+    g_list_free_full(host->agent_caps, g_free);
+
   host->name = NULL;
   host->address = NULL;
   host->agent_dir = NULL;
+  host->agent_caps = NULL;
   host->max = 0;
   host->running = 0;
 
@@ -134,14 +155,45 @@ void host_print(host_t* host, GOutputStream* ostr)
 }
 
 /**
- * Gets a host for which there are at least num agents available to start
- * new agents on.
+ * @brief Checks if a host supports running a specific agent.
  *
- * @param queue GList of available hosts
- * @param num the number of agents to start on the host
+ * If the host has no agent_caps (NULL), it accepts all agents.
+ * Otherwise, returns TRUE only if the agent name appears in the caps list.
+ *
+ * @param host        The host to check
+ * @param agent_name  The name of the agent to check for
+ * @return TRUE if the host supports the agent, FALSE otherwise
+ */
+gboolean host_supports_agent(host_t* host, const char* agent_name)
+{
+  GList* iter;
+
+  if(host == NULL || agent_name == NULL)
+    return FALSE;
+
+  /* NULL agent_caps means the host accepts all agents */
+  if(host->agent_caps == NULL)
+    return TRUE;
+
+  for(iter = host->agent_caps; iter != NULL; iter = iter->next)
+  {
+    if(strcmp((char*)iter->data, agent_name) == 0)
+      return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Gets a host for which there are at least num agents available to start
+ * new agents on, and which supports the given agent type.
+ *
+ * @param queue       GList of available hosts
+ * @param num         the number of agents to start on the host
+ * @param agent_name  the agent type to check capability for (NULL = any agent)
  * @return the host with that number of available slots, NULL if none exist
  */
-host_t* get_host(GList** queue, uint8_t num)
+host_t* get_host(GList** queue, uint8_t num, const char* agent_name)
 {
   GList*  host_queue = *queue;
   GList*  curr       = NULL;
@@ -150,7 +202,8 @@ host_t* get_host(GList** queue, uint8_t num)
   for(curr = host_queue; curr != NULL; curr = curr->next)
   {
     ret = curr->data;
-    if(ret->max - ret->running >= num)
+    if(ret->max - ret->running >= num &&
+       (agent_name == NULL || host_supports_agent(ret, agent_name)))
       break;
   }
 

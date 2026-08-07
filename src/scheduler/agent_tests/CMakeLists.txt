@@ -22,6 +22,7 @@ target_sources(test_scheduler
     PRIVATE
     ${FO_CWD}/Unit/testRun.c
     ${FO_CWD}/Unit/testHost.c
+    ${FO_CWD}/Unit/testHostCaps.c
     ${FO_CWD}/Unit/testInterface.c
     ${FO_CWD}/Unit/testAgent.c
     ${FO_CWD}/Unit/testEvent.c
