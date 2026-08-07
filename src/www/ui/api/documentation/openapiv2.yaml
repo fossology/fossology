@@ -3651,12 +3651,13 @@ paths:
             enum:
               - copy
               - move
-      summary: Copy/Move a folder
+              - link
+      summary: Copy/Move/Link a folder
       description: >
-        Copy or move a folder by id
+        Copy, move or link a folder by id
       responses:
         '202':
-          description: Folder will be copied/moved
+          description: Folder will be copied/moved/linked
           content:
             application/json:
               schema:

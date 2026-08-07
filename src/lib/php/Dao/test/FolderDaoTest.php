@@ -175,6 +175,41 @@ class FolderDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($this->folderDao->getFolderChildFolders(FolderDao::TOP_LEVEL),is(arrayWithSize(3)));
   }
 
+  public function testCopyContentShouldFailIfContentAlreadyExistsInTargetFolder()
+  {
+    $this->expectException(Exception::class);
+    $this->expectExceptionMessage('the content already exists in the target folder');
+    $this->folderDao->ensureTopLevelFolder();
+    $folderA = $this->folderDao->insertFolder($folderName='A', '/A', FolderDao::TOP_LEVEL);
+    $folderB = $this->folderDao->insertFolder($folderName='B', '/A/B', $folderA);
+    $fc = $this->dbManager->getSingleRow('SELECT foldercontents_pk FROM foldercontents WHERE child_id=$1',
+            array($folderB),__METHOD__.'.needs.the.foldercontent_pk');
+    $this->folderDao->copyContent($fc['foldercontents_pk'], FolderDao::TOP_LEVEL);
+    $this->folderDao->copyContent($fc['foldercontents_pk'], FolderDao::TOP_LEVEL);
+  }
+
+  public function testMoveContentShouldFailIfContentAlreadyExistsInTargetFolder()
+  {
+    $this->expectException(Exception::class);
+    $this->expectExceptionMessage('the content already exists in the target folder');
+    $this->folderDao->ensureTopLevelFolder();
+    $folderA = $this->folderDao->insertFolder($folderName='A', '/A', FolderDao::TOP_LEVEL);
+    $folderB = $this->folderDao->insertFolder($folderName='B', '/A/B', $folderA);
+    $fc = $this->dbManager->getSingleRow('SELECT foldercontents_pk FROM foldercontents WHERE child_id=$1',
+            array($folderB),__METHOD__.'.needs.the.foldercontent_pk');
+    $this->folderDao->copyContent($fc['foldercontents_pk'], FolderDao::TOP_LEVEL);
+    $this->folderDao->moveContent($fc['foldercontents_pk'], FolderDao::TOP_LEVEL);
+  }
+
+  public function testIsContentInFolder()
+  {
+    $this->folderDao->ensureTopLevelFolder();
+    $folderA = $this->folderDao->insertFolder($folderName='A', '/A', FolderDao::TOP_LEVEL);
+    assertThat($this->folderDao->isContentInFolder($folderA, FolderDao::MODE_FOLDER, FolderDao::TOP_LEVEL), is(TRUE));
+    assertThat($this->folderDao->isContentInFolder($folderA, FolderDao::MODE_UPLOAD, FolderDao::TOP_LEVEL), is(FALSE));
+    assertThat($this->folderDao->isContentInFolder(FolderDao::TOP_LEVEL, FolderDao::MODE_FOLDER, $folderA), is(FALSE));
+  }
+
   public function testGetRemovableContents()
   {
     $this->folderDao->ensureTopLevelFolder();

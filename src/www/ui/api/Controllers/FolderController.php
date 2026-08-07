@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Controllers;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\UI\Ajax\AjaxFolderContents;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpConflictException;
 use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpInternalServerErrorException;
@@ -202,7 +203,7 @@ class FolderController extends RestController
   }
 
   /**
-   * Copy/move the folder
+   * Copy/move/link the folder
    *
    * @param ServerRequestInterface $request
    * @param ResponseHelper $response
@@ -241,15 +242,21 @@ class FolderController extends RestController
         $this->restHelper->getUserId())) {
       throw new HttpForbiddenException("Parent folder is not accessible!");
     }
-    if (strcmp($action, "copy") != 0 && strcmp($action, "move") != 0) {
+    if (strcmp($action, "copy") != 0 && strcmp($action, "move") != 0
+        && strcmp($action, "link") != 0) {
       throw new HttpBadRequestException(
-        "Action can be one of [copy,move]!");
+        "Action can be one of [copy,move,link]!");
+    }
+    if ($folderDao->isContentInFolder($folderId, $folderDao::MODE_FOLDER,
+        $newParent)) {
+      throw new HttpConflictException(
+        "Folder is already present under the new parent!");
     }
     /** @var \AdminContentMove $folderMove */
     $folderMove = $this->restHelper->getPlugin('content_move');
     $folderName = FolderGetName($folderId);
     $parentFolderName = FolderGetName($newParent);
-    $isCopy = (strcmp($action, "copy") == 0);
+    $isCopy = (strcmp($action, "move") != 0);
     $message = $folderMove->copyContent(
       [
         $folderDao->getFolderContentsId($folderId, $folderDao::MODE_FOLDER)

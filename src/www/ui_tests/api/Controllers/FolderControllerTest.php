@@ -54,6 +54,7 @@ namespace Fossology\UI\Api\Test\Controllers
   use Fossology\Lib\Data\Folder\Folder;
   use Fossology\UI\Api\Controllers\FolderController;
   use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+  use Fossology\UI\Api\Exceptions\HttpConflictException;
   use Fossology\UI\Api\Exceptions\HttpForbiddenException;
   use Fossology\UI\Api\Exceptions\HttpNotFoundException;
   use Fossology\UI\Api\Helper\DbHelper;
@@ -792,6 +793,9 @@ namespace Fossology\UI\Api\Test\Controllers
       $this->folderDao->shouldReceive('isFolderAccessible')
         ->withArgs([$parentId,
           $this->userId])->andReturn(true);
+      $this->folderDao->shouldReceive('isContentInFolder')
+        ->withArgs([$folderId, FolderDao::MODE_FOLDER, $parentId])
+        ->andReturn(false);
       $this->folderDao->shouldReceive('getFolderContentsId')
         ->withArgs(array($folderId, 1))->andReturn($folderContentPk);
       $this->folderContentPlugin->shouldReceive('copyContent')
@@ -859,6 +863,9 @@ namespace Fossology\UI\Api\Test\Controllers
           $this->userId))->andReturn(true);
       $this->folderDao->shouldReceive('isFolderAccessible')
         ->withArgs([$parentId, $this->userId])->andReturn(true);
+      $this->folderDao->shouldReceive('isContentInFolder')
+        ->withArgs([$folderId, FolderDao::MODE_FOLDER, $parentId])
+        ->andReturn(false);
       $this->folderDao->shouldReceive('getFolderContentsId')
         ->withArgs(array($folderId, 1))->andReturn($folderContentPk);
       $this->folderContentPlugin->shouldReceive('copyContent')
@@ -884,6 +891,132 @@ namespace Fossology\UI\Api\Test\Controllers
         $actualResponse->getStatusCode());
       $this->assertEquals($expectedResponse->getArray(),
         $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for link action on FolderController::copyFolder() with version 1 attributes
+     * -# Check for 202 response
+     */
+    public function testLinkFolderV1()
+    {
+      $this->testLinkFolder(ApiVersion::V1);
+    }
+    /**
+     * @test
+     * -# Test for link action on FolderController::copyFolder() with version 2 attributes
+     * -# Check for 202 response
+     */
+    public function testLinkFolderV2()
+    {
+      $this->testLinkFolder();
+    }
+
+    /**
+     * @param $version to test
+     * @return void
+     */
+    private function testLinkFolder($version = ApiVersion::V2)
+    {
+      $folderId = 3;
+      $parentId = 2;
+      $folderContentPk = 5;
+      $folderName = \Fossology\UI\Api\Controllers\FolderGetName($folderId);
+      $parentFolderName = \Fossology\UI\Api\Controllers\FolderGetName($parentId);
+
+      $this->folderDao->shouldReceive('getFolder')
+        ->andReturnUsing([$this, 'getFolder']);
+      $this->folderDao->shouldReceive('isFolderAccessible')
+        ->withArgs(array(M::anyOf($folderId, "$parentId"),
+          $this->userId))->andReturn(true);
+      $this->folderDao->shouldReceive('isFolderAccessible')
+        ->withArgs([$parentId, $this->userId])->andReturn(true);
+      $this->folderDao->shouldReceive('isContentInFolder')
+        ->withArgs([$folderId, FolderDao::MODE_FOLDER, $parentId])
+        ->andReturn(false);
+      $this->folderDao->shouldReceive('getFolderContentsId')
+        ->withArgs(array($folderId, 1))->andReturn($folderContentPk);
+      $this->folderContentPlugin->shouldReceive('copyContent')
+        ->withArgs(array([$folderContentPk], $parentId, true))->andReturn("");
+      $requestHeaders = new Headers();
+      $body = $this->streamFactory->createStream();
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+      $response = new ResponseHelper();
+      if ($version == ApiVersion::V2) {
+        $request = $request->withQueryParams(['parent'=>$parentId, 'action'=>'link']);
+      } else {
+        $request = $request->withHeader('parent', $parentId)
+          ->withHeader('action', "link");
+      }
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
+      $actualResponse = $this->folderController->copyFolder($request,
+        $response, ["id" => $folderId]);
+      $expectedResponse = new Info(202,
+        "Folder \"$folderName\" link(ed) under \"$parentFolderName\".",
+        InfoType::INFO);
+      $this->assertEquals($expectedResponse->getCode(),
+        $actualResponse->getStatusCode());
+      $this->assertEquals($expectedResponse->getArray(),
+        $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for copy action on FolderController::copyFolder() when the folder
+     *    is already present under the new parent, with version 1 attributes
+     * -# Check if the HttpConflictException is thrown
+     */
+    public function testCopyFolderAlreadyPresentV1()
+    {
+      $this->testCopyFolderAlreadyPresent(ApiVersion::V1);
+    }
+    /**
+     * @test
+     * -# Test for copy action on FolderController::copyFolder() when the folder
+     *    is already present under the new parent, with version 2 attributes
+     * -# Check if the HttpConflictException is thrown
+     */
+    public function testCopyFolderAlreadyPresentV2()
+    {
+      $this->testCopyFolderAlreadyPresent();
+    }
+
+    /**
+     * @param $version to test
+     * @return void
+     */
+    private function testCopyFolderAlreadyPresent($version = ApiVersion::V2)
+    {
+      $folderId = 3;
+      $parentId = 2;
+
+      $this->folderDao->shouldReceive('getFolder')
+        ->andReturnUsing([$this, 'getFolder']);
+      $this->folderDao->shouldReceive('isFolderAccessible')
+        ->withArgs(array(M::anyOf($folderId, "$parentId"),
+          $this->userId))->andReturn(true);
+      $this->folderDao->shouldReceive('isFolderAccessible')
+        ->withArgs([$parentId, $this->userId])->andReturn(true);
+      $this->folderDao->shouldReceive('isContentInFolder')
+        ->withArgs([$folderId, FolderDao::MODE_FOLDER, $parentId])
+        ->andReturn(true);
+      $requestHeaders = new Headers();
+      $body = $this->streamFactory->createStream();
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+      if ($version == ApiVersion::V2) {
+        $request = $request->withQueryParams(['parent'=>$parentId, 'action'=>'copy']);
+      } else {
+        $request = $request->withHeader('parent', $parentId)
+          ->withHeader('action', "copy");
+      }
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
+      $response = new ResponseHelper();
+      $this->expectException(HttpConflictException::class);
+
+      $this->folderController->copyFolder($request, $response,
+        ["id" => $folderId]);
     }
 
     /**
