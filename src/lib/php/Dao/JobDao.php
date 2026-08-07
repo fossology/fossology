@@ -88,4 +88,37 @@ class JobDao
 
     return $result;
   }
+
+  public function getJobIdFromJobQueue($jqPk)
+  {
+    $stmt = __METHOD__;
+    $row = $this->dbManager->getSingleRow(
+      "SELECT jq_job_fk FROM jobqueue WHERE jq_pk = $1",
+      array($jqPk),
+      $stmt
+    );
+    return $row ? $row['jq_job_fk'] : null;
+  }
+
+  public function getJobDependencies($jobId)
+  {
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt,
+        "SELECT DISTINCT child.jq_pk AS child_id,
+                child.jq_type AS child_agent,
+                child.jq_end_bits AS child_status
+         FROM jobdepends jd
+         JOIN jobqueue child ON child.jq_pk = jd.jdep_jq_fk
+         WHERE jd.jdep_jq_depends_fk IN (
+           SELECT jq_pk FROM jobqueue WHERE jq_job_fk = $1
+         )
+         ORDER BY child.jq_pk");
+    $result = $this->dbManager->execute($stmt, array($jobId));
+    $dependencies = [];
+    while ($row = $this->dbManager->fetchArray($result)) {
+      $dependencies[] = $row;
+    }
+    $this->dbManager->freeResult($result);
+    return $dependencies;
+  }
 }

@@ -152,10 +152,51 @@ class showjobs extends FO_Plugin
               break;
             }
             $Msg = "\"" . _("Killed by") . " " . $_SESSION[Auth::USER_NAME] . "\"";
-            $command = "kill $jq_pk $Msg";
-            $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
-            if ($rv == false) {
-              $this->vars['errorInfo'] =  _("Unable to cancel job.") . $response_from_scheduler . $error_info;
+            $jobId = $this->jobDao->getJobIdFromJobQueue($jq_pk);
+            if (empty($jobId)) {
+              $this->vars['errorInfo'] =  _("Unable to find job for queue item: ") . $jq_pk;
+              break;
+            }
+            try {
+              $jobData = $this->showJobsDao->getJobInfo([$jobId]);
+              $jobsToCancel = [];
+              if (!empty($jobData)) {
+                $jobInfo = reset($jobData);
+                if (isset($jobInfo['jobqueue'])) {
+                  // Find all jobs that depend on the cancelled job (directly or indirectly)
+                  foreach ($jobInfo['jobqueue'] as $jobQueue) {
+                    if (in_array($jq_pk, $jobQueue["depends"])) {
+                      $jobsToCancel[] = $jobQueue["jq_pk"];
+                    }
+                  }
+                  // Also find jobs that depend on jobs we're about to cancel (recursive dependency)
+                  $changed = true;
+                  while ($changed) {
+                    $changed = false;
+                    foreach ($jobInfo['jobqueue'] as $jobQueue) {
+                      $currentJqPk = $jobQueue["jq_pk"];
+                      if (!in_array($currentJqPk, $jobsToCancel) && !empty(array_intersect($jobQueue["depends"], $jobsToCancel))) {
+                        $jobsToCancel[] = $currentJqPk;
+                        $changed = true;
+                      }
+                    }
+                  }
+                }
+              }
+              $command = "kill $jq_pk $Msg";
+              $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
+              if ($rv == false) {
+                $this->vars['errorInfo'] =  _("Unable to cancel job.") . $response_from_scheduler . $error_info;
+              }
+              foreach ($jobsToCancel as $dependentJqPk) {
+                $command = "kill $dependentJqPk $Msg";
+                $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
+                if ($rv == false) {
+                  $this->vars['errorInfo'] =  _("Unable to cancel dependent job.") . $response_from_scheduler . $error_info;
+                }
+              }
+            } catch (Exception $e) {
+              $this->vars['errorInfo'] =  _("Error during cancellation: ") . $e->getMessage();
             }
             echo "<script type=\"text/javascript\"> window.location.replace(\"$thisURL\"); </script>";
             break;
