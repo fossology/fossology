@@ -183,12 +183,14 @@ class AdminCustomTextList extends DefaultPlugin
     $params = array();
 
     if (!empty($searchQuery)) {
-      $sql .= " WHERE (cp.text ILIKE $1 OR cp.acknowledgement ILIKE $1 OR cp.comments ILIKE $1"
+      $sql .= " WHERE (cp.text ILIKE $1 OR cplm.reportinfo ILIKE $1"
+            . " OR cplm.acknowledgement ILIKE $1 OR cplm.comment ILIKE $1"
             . " OR u.user_name ILIKE $1 OR lr.rf_shortname ILIKE $1)";
       $params[] = $searchQuery;
     }
 
-    $result = $dbManager->getSingleRow($sql, $params, __METHOD__);
+    $stmtName = empty($searchQuery) ? __METHOD__ . '.unfiltered' : __METHOD__ . '.filtered';
+    $result = $dbManager->getSingleRow($sql, $params, $stmtName);
     return $result ? intval($result['count']) : 0;
   }
 
@@ -200,11 +202,13 @@ class AdminCustomTextList extends DefaultPlugin
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
 
-    $sql = "SELECT cp.cp_pk, cp.text, cp.text_md5, cp.acknowledgement, cp.comments,
-                   cp.user_fk, cp.group_fk, cp.created_date, cp.is_active,
+    $sql = "SELECT cp.cp_pk, cp.text, cp.created_date, cp.is_active,
                    u.user_name,
                    STRING_AGG(CASE WHEN cplm.removing = false THEN lr.rf_shortname END, ', ' ORDER BY lr.rf_shortname) as licenses_to_add,
-                   STRING_AGG(CASE WHEN cplm.removing = true THEN lr.rf_shortname END, ', ' ORDER BY lr.rf_shortname) as licenses_to_remove
+                   STRING_AGG(CASE WHEN cplm.removing = true THEN lr.rf_shortname END, ', ' ORDER BY lr.rf_shortname) as licenses_to_remove,
+                   STRING_AGG(CASE WHEN cplm.reportinfo IS NOT NULL AND cplm.reportinfo != '' THEN cplm.reportinfo END, '; ') as reportinfo,
+                   STRING_AGG(CASE WHEN cplm.acknowledgement IS NOT NULL AND cplm.acknowledgement != '' THEN cplm.acknowledgement END, '; ') as acknowledgement,
+                   STRING_AGG(CASE WHEN cplm.comment IS NOT NULL AND cplm.comment != '' THEN cplm.comment END, '; ') as comments
             FROM custom_phrase cp
             LEFT JOIN users u ON cp.user_fk = u.user_pk
             LEFT JOIN custom_phrase_license_map cplm ON cp.cp_pk = cplm.cp_fk
@@ -212,73 +216,91 @@ class AdminCustomTextList extends DefaultPlugin
 
     $params = array();
 
+    // Filter by cp_pk via subquery: a WHERE on the outer join would drop
+    // non-matching license rows from STRING_AGG too, truncating the list.
     if (!empty($searchQuery)) {
-      $sql .= " WHERE (cp.text ILIKE $1 OR cp.acknowledgement ILIKE $1 OR cp.comments ILIKE $1 OR u.user_name ILIKE $1 OR lr.rf_shortname ILIKE $1)";
+      $sql .= " WHERE cp.cp_pk IN (
+                  SELECT cp2.cp_pk FROM custom_phrase cp2
+                  LEFT JOIN users u2 ON cp2.user_fk = u2.user_pk
+                  LEFT JOIN custom_phrase_license_map cplm2 ON cp2.cp_pk = cplm2.cp_fk
+                  LEFT JOIN license_ref lr2 ON cplm2.rf_fk = lr2.rf_pk
+                  WHERE (cp2.text ILIKE $1 OR cplm2.reportinfo ILIKE $1"
+            . " OR cplm2.acknowledgement ILIKE $1 OR cplm2.comment ILIKE $1"
+            . " OR u2.user_name ILIKE $1 OR lr2.rf_shortname ILIKE $1)
+                )";
       $params[] = $searchQuery;
     }
 
-    $sql .= " GROUP BY cp.cp_pk, cp.text, cp.text_md5, cp.acknowledgement, cp.comments, 
-                      cp.user_fk, cp.group_fk, cp.created_date, cp.is_active, u.user_name
+    $sql .= " GROUP BY cp.cp_pk, cp.text, cp.created_date, cp.is_active, u.user_name
               ORDER BY cp.created_date DESC";
 
     $sql .= " LIMIT $" . (count($params) + 1) . " OFFSET $" . (count($params) + 2);
     $params[] = $limit;
     $params[] = $offset;
 
-    $result = $dbManager->getRows($sql, $params, __METHOD__);
+    $stmtName = empty($searchQuery) ? __METHOD__ . '.unfiltered' : __METHOD__ . '.filtered';
+    $result = $dbManager->getRows($sql, $params, $stmtName);
     $aaData = array();
 
     foreach ($result as $row) {
-      $editLink = '<a href="?mod=admin_custom_text_management&edit=' . $row['cp_pk'] . '"><img border="0" src="images/button_edit.png"></a>';
+      $text = mb_strlen($row['text'], 'UTF-8') > 100
+        ? mb_substr($row['text'], 0, 100, 'UTF-8') . '...'
+        : $row['text'];
 
-      $text = strlen($row['text']) > 100 ?
-                    substr($row['text'], 0, 100) . '...' :
-                    $row['text'];
-
-      $acknowledgement = strlen($row['acknowledgement'] ?: '') > 50 ?
-                         substr($row['acknowledgement'], 0, 50) . '...' :
-                         ($row['acknowledgement'] ?: 'N/A');
-
-      $comments = strlen($row['comments'] ?: '') > 50 ?
-                  substr($row['comments'], 0, 50) . '...' :
-                  ($row['comments'] ?: 'N/A');
-
-      $isActiveFlag = $dbManager->booleanFromDb($row['is_active']);
-      $statusToggle = '<input type="checkbox" class="phrase-status-toggle"'
-        . ' data-phrase-id="' . intval($row['cp_pk']) . '"'
-        . ' data-current-status="' . ($isActiveFlag ? '1' : '0') . '"'
-        . ($isActiveFlag ? ' checked' : '') . '/>';
-
-      $deleteBtn = '<button type="button" class="custom-text-delete"'
-        . ' data-phrase-id="' . intval($row['cp_pk']) . '">'
-        . '<img class="delete" src="images/space_16.png" alt="Delete"/></button>';
-
-      // Format licenses display with separate lines for add/remove
-      $licensesDisplay = '';
       $licensesToAdd = $row['licenses_to_add'] ?: null;
       $licensesToRemove = $row['licenses_to_remove'] ?: null;
-
+      $licensesDisplay = '';
       if ($licensesToAdd || $licensesToRemove) {
         if ($licensesToAdd) {
-          $licensesDisplay .= '<div><strong>To be added:</strong> ' . htmlentities($licensesToAdd) . '</div>';
+          $licensesDisplay .= '<div><img src="images/icons/add_16.png" alt="+" title="To be added"/> ' . htmlspecialchars($licensesToAdd, ENT_QUOTES, 'UTF-8') . '</div>';
         }
         if ($licensesToRemove) {
-          $licensesDisplay .= '<div><strong>To be removed:</strong> ' . htmlentities($licensesToRemove) . '</div>';
+          $licensesDisplay .= '<div><img src="images/icons/remove_16.png" alt="-" title="To be removed"/> ' . htmlspecialchars($licensesToRemove, ENT_QUOTES, 'UTF-8') . '</div>';
         }
       } else {
         $licensesDisplay = 'N/A';
       }
 
+      $reportinfo = trim($row['reportinfo'] ?: '');
+      $acknowledgement = trim($row['acknowledgement'] ?: '');
+      $comments = trim($row['comments'] ?: '');
+
+      $makeIndicator = function($content, $letter, $label, $typeClass) {
+        $has = $content !== '';
+        $tip = $has
+          ? $label . ': ' . htmlspecialchars(mb_substr($content, 0, 150) . (mb_strlen($content) > 150 ? '…' : ''), ENT_QUOTES)
+          : $label . ': not set';
+        $class = 'custom-text-indicator ' . ($has ? $typeClass : 'custom-text-indicator-empty');
+        return '<span class="' . $class . '" title="' . $tip . '">' . $letter . '</span>';
+      };
+
+      $detailsCell = '<div class="custom-text-details-cell">'
+        . $makeIndicator($reportinfo, 'T', 'License Text', 'custom-text-indicator-reportinfo')
+        . $makeIndicator($acknowledgement, 'A', 'Acknowledgement', 'custom-text-indicator-acknowledgement')
+        . $makeIndicator($comments, 'C', 'Comment', 'custom-text-indicator-comment')
+        . '</div>';
+
+      $isActiveFlag = $dbManager->booleanFromDb($row['is_active']);
+      $statusToggle = '<input type="checkbox" class="phrase-status-toggle"'
+        . ' data-phrase-id="' . intval($row['cp_pk']) . '"'
+        . ' data-current-status="' . ($isActiveFlag ? '1' : '0') . '"'
+        . ' title="' . ($isActiveFlag ? 'Active' : 'Inactive') . '"'
+        . ($isActiveFlag ? ' checked' : '') . '/>';
+
+      $editLink = '<a href="?mod=admin_custom_text_management&edit=' . intval($row['cp_pk']) . '"'
+        . ' title="Edit"><img border="0" src="images/button_edit.png" alt="Edit"/></a>';
+
+      $deleteBtn = '<button type="button" class="custom-text-delete custom-text-delete-btn btn btn-link btn-sm p-0"'
+        . ' data-phrase-id="' . intval($row['cp_pk']) . '" title="Delete">'
+        . '&times;</button>';
+
       $aaData[] = array(
-        $editLink,
         $licensesDisplay,
-        '<div style="overflow-y:scroll;max-height:100px;margin:0;">' . nl2br(htmlentities($text)) . '</div>',
-        htmlentities($acknowledgement),
-        htmlentities($comments),
-        htmlentities($row['user_name'] ?: 'N/A'),
-        $row['created_date'],
-        $statusToggle,
-        $deleteBtn
+        '<div class="custom-text-cell">' . nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8')) . '</div>',
+        $detailsCell,
+        htmlspecialchars($row['user_name'] ?: 'N/A', ENT_QUOTES, 'UTF-8'),
+        '<div class="custom-text-actions-cell">'
+          . $editLink . $statusToggle . $deleteBtn . '</div>'
       );
     }
 
@@ -324,16 +346,13 @@ class AdminCustomTextList extends DefaultPlugin
 
   /**
    * AJAX endpoint to get bulk data from license_ref_bulk table with
-   * associated licenses.  Supports server-side pagination and search.
+   * associated licenses. Supports server-side pagination and search.
    *
-   * Query parameters accepted:
-   *   page   – 1-based page number (default 1)
-   *   limit  – rows per page       (default 10)
-   *   search – optional search text
+   * Query parameters accepted: page, limit, search.
    */
   private function getBulkDataAjax(Request $request)
   {
-    $page  = max(1, intval($request->query->get('page', 1)));
+    $page = max(1, intval($request->query->get('page', 1)));
     $limit = max(1, intval($request->query->get('limit', 10)));
     $searchTerm = trim($request->query->get('search', ''));
     $userFk = max(0, intval($request->query->get('user_fk', 0)));
@@ -343,9 +362,8 @@ class AdminCustomTextList extends DefaultPlugin
       $searchQuery = '%' . $searchTerm . '%';
     }
 
-    // Total matching entries (for pagination metadata)
     $totalRecords = $this->getTotalBulkCount($searchQuery, $userFk);
-    $totalPages   = max(1, intval(ceil($totalRecords / $limit)));
+    $totalPages = max(1, intval(ceil($totalRecords / $limit)));
 
     // Clamp page to valid range
     if ($page > $totalPages) {
@@ -356,9 +374,8 @@ class AdminCustomTextList extends DefaultPlugin
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
 
-    // Build a subquery that selects the paginated set of distinct lrb_pk values,
-    // then join the full row data.  This ensures every license row belonging to
-    // a paginated bulk entry is returned.
+    // Paginate distinct lrb_pk first, then join full row data so every
+    // license row for a paginated bulk entry is returned.
     $whereClause = "WHERE lrb.rf_text IS NOT NULL AND lrb.rf_text != ''";
     $params = array();
     $paramIdx = 1;

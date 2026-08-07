@@ -519,13 +519,25 @@
   $Schema["TABLE"]["custom_phrase_license_map"]["cp_fk"]["ADD"] = "ALTER TABLE \"custom_phrase_license_map\" ADD COLUMN \"cp_fk\" int4";
   $Schema["TABLE"]["custom_phrase_license_map"]["cp_fk"]["ALTER"] = "ALTER TABLE \"custom_phrase_license_map\" ALTER COLUMN \"cp_fk\" SET NOT NULL";
 
-  $Schema["TABLE"]["custom_phrase_license_map"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase_license_map\".\"rf_fk\" IS 'Foreign key to license_ref table'";
+  $Schema["TABLE"]["custom_phrase_license_map"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase_license_map\".\"rf_fk\" IS 'reference to license_ref* (not only license_ref)'";
   $Schema["TABLE"]["custom_phrase_license_map"]["rf_fk"]["ADD"] = "ALTER TABLE \"custom_phrase_license_map\" ADD COLUMN \"rf_fk\" int4";
   $Schema["TABLE"]["custom_phrase_license_map"]["rf_fk"]["ALTER"] = "ALTER TABLE \"custom_phrase_license_map\" ALTER COLUMN \"rf_fk\" SET NOT NULL";
 
   $Schema["TABLE"]["custom_phrase_license_map"]["removing"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase_license_map\".\"removing\" IS 'true if removing license, false if adding license'";
   $Schema["TABLE"]["custom_phrase_license_map"]["removing"]["ADD"] = "ALTER TABLE \"custom_phrase_license_map\" ADD COLUMN \"removing\" bool DEFAULT false";
   $Schema["TABLE"]["custom_phrase_license_map"]["removing"]["ALTER"] = "ALTER TABLE \"custom_phrase_license_map\" ALTER COLUMN \"removing\" SET NOT NULL, ALTER COLUMN \"removing\" SET DEFAULT false";
+
+  $Schema["TABLE"]["custom_phrase_license_map"]["comment"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase_license_map\".\"comment\" IS 'User comment for this license mapping'";
+  $Schema["TABLE"]["custom_phrase_license_map"]["comment"]["ADD"] = "ALTER TABLE \"custom_phrase_license_map\" ADD COLUMN \"comment\" text";
+  $Schema["TABLE"]["custom_phrase_license_map"]["comment"]["ALTER"] = "ALTER TABLE \"custom_phrase_license_map\" ALTER COLUMN \"comment\" DROP NOT NULL";
+
+  $Schema["TABLE"]["custom_phrase_license_map"]["reportinfo"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase_license_map\".\"reportinfo\" IS 'License text / public comment for this mapping'";
+  $Schema["TABLE"]["custom_phrase_license_map"]["reportinfo"]["ADD"] = "ALTER TABLE \"custom_phrase_license_map\" ADD COLUMN \"reportinfo\" text";
+  $Schema["TABLE"]["custom_phrase_license_map"]["reportinfo"]["ALTER"] = "ALTER TABLE \"custom_phrase_license_map\" ALTER COLUMN \"reportinfo\" DROP NOT NULL";
+
+  $Schema["TABLE"]["custom_phrase_license_map"]["acknowledgement"]["DESC"] = "COMMENT ON COLUMN \"custom_phrase_license_map\".\"acknowledgement\" IS 'Acknowledgement text for this license mapping'";
+  $Schema["TABLE"]["custom_phrase_license_map"]["acknowledgement"]["ADD"] = "ALTER TABLE \"custom_phrase_license_map\" ADD COLUMN \"acknowledgement\" text";
+  $Schema["TABLE"]["custom_phrase_license_map"]["acknowledgement"]["ALTER"] = "ALTER TABLE \"custom_phrase_license_map\" ALTER COLUMN \"acknowledgement\" DROP NOT NULL";
 
 
   $Schema["TABLE"]["author"]["author_pk"]["DESC"] = "";
@@ -2779,7 +2791,6 @@
   $Schema["CONSTRAINT"]["copyright_event_copyright_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_copyright_fk_fkey\" FOREIGN KEY (\"copyright_fk\") REFERENCES \"copyright\" (\"copyright_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["custom_phrase_pkey"] = "ALTER TABLE \"custom_phrase\" ADD CONSTRAINT \"custom_phrase_pkey\" PRIMARY KEY (\"cp_pk\");";
   $Schema["CONSTRAINT"]["custom_phrase_license_map_cp_fk_fkey"] = "ALTER TABLE \"custom_phrase_license_map\" ADD CONSTRAINT \"custom_phrase_license_map_cp_fk_fkey\" FOREIGN KEY (\"cp_fk\") REFERENCES \"custom_phrase\" (\"cp_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["custom_phrase_license_map_rf_fk_fkey"] = "ALTER TABLE \"custom_phrase_license_map\" ADD CONSTRAINT \"custom_phrase_license_map_rf_fk_fkey\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["custom_phrase_license_map_pk"] = "ALTER TABLE \"custom_phrase_license_map\" ADD CONSTRAINT \"custom_phrase_license_map_pk\" PRIMARY KEY (\"cp_fk\", \"rf_fk\");";
   $Schema["CONSTRAINT"]["author_event_pkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_pkey\" PRIMARY KEY (\"author_event_pk\");";
   $Schema["CONSTRAINT"]["author_event_upload_fk_fkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2883,6 +2894,9 @@
 
   $Schema["INDEX"]["highlight_bulk"]["highlight_bulk_clearing_event_fk_idx"] = "CREATE INDEX highlight_bulk_clearing_event_fk_idx ON highlight_bulk USING btree (clearing_event_fk);";
   $Schema["INDEX"]["highlight_bulk"]["highlight_bulk_lrb_fk_idx"] = "CREATE INDEX highlight_bulk_lrb_fk_idx ON highlight_bulk USING btree (lrb_fk);";
+
+  $Schema["INDEX"]["highlight_kotoba"]["highlight_kotoba_clearing_event_fk_idx"] = "CREATE INDEX highlight_kotoba_clearing_event_fk_idx ON highlight_kotoba USING btree (clearing_event_fk);";
+  $Schema["INDEX"]["highlight_kotoba"]["highlight_kotoba_cp_fk_idx"] = "CREATE INDEX highlight_kotoba_cp_fk_idx ON highlight_kotoba USING btree (cp_fk);";
 
   $Schema["INDEX"]["license_file"]["fl_rf_fk"] = "CREATE INDEX fl_rf_fk ON license_file USING btree (rf_fk);";
   $Schema["INDEX"]["license_file"]["lf_pfile_fk"] = "CREATE INDEX lf_pfile_fk ON license_file USING btree (pfile_fk);";

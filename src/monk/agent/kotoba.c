@@ -164,6 +164,15 @@ int phrase_onAllMatches(MonkState* state, const File* file, const GArray* matche
     for (guint k = 0; k < phrase->licenseMappings->len; k++) {
       LicenseMapping mapping = g_array_index(phrase->licenseMappings, LicenseMapping, k);
 
+      /* Per-mapping fields win; phrase-level is the compat fallback.
+       * A "remove" mapping has no license text, so it skips phrase->text. */
+      const char* comment = mapping.comment ? mapping.comment
+                          : (phrase->comments ? phrase->comments : "");
+      const char* reportinfo = mapping.reportinfo ? mapping.reportinfo
+                              : (mapping.removing ? "" : phrase->text);
+      const char* acknowledgement = mapping.acknowledgement ? mapping.acknowledgement
+                                  : (phrase->acknowledgement ? phrase->acknowledgement : "");
+
       PGresult* result = fo_dbManager_ExecPrepared(
         fo_dbManager_PrepareStamement(
           state->dbManager,
@@ -178,9 +187,9 @@ int phrase_onAllMatches(MonkState* state, const File* file, const GArray* matche
         BULK_DECISION_TYPE_KOTOBA,
         mapping.rfPk,
         mapping.removing ? 1 : 0,
-        phrase->comments ? phrase->comments : "",
-        phrase->text,
-        phrase->acknowledgement ? phrase->acknowledgement : "",
+        comment,
+        reportinfo,
+        acknowledgement,
         args->uploadId
       );
 
@@ -335,7 +344,7 @@ int processUploadWithPhrases(MonkState* state, int uploadId) {
   return !haveError;
 }
 
-/* Main function — phrase-driven bulk scanning. */
+/* Main function - phrase-driven bulk scanning. */
 int main(int argc, char** argv) {
   MonkState stateStore;
   MonkState* state = &stateStore;

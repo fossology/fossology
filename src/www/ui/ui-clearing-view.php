@@ -330,6 +330,7 @@ class ClearingView extends FO_Plugin
     $this->vars['bulkHistory'] = $bulkHistory;
     $this->vars['hasKotobaFindings'] = $hasKotobaFindings;
     $this->vars['kotobaHistory'] = $kotobaHistory;
+    $this->vars['isAdmin'] = Auth::isAdmin();
 
     $noLicenseUploadTreeView = new UploadTreeProxy($uploadId,
       array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",

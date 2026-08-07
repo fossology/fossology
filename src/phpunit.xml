@@ -27,6 +27,7 @@
     <testsuite name="Fossology PhpUnit Test Suite">
       <directory suffix="Test.php">lib/php</directory>
       <file>www/ui_tests/startUpTest.php</file>
+      <file>www/ui_tests/Unit/AgentAdderTest.php</file>
       <directory suffix="Test.php">www/ui_tests/api</directory>
       <file>cli/tests/test_fo_copyright_list.php</file>
     </testsuite>
@@ -34,7 +35,7 @@
       <directory suffix="Test.php">copyright/agent_tests/Functional</directory>
       <directory suffix="Test.php">decider/agent_tests</directory>
       <directory suffix="Test.php">deciderjob/agent_tests/Functional</directory>
-      <directory suffix="Test.php">monk/agent_tests/Functional</directory>
+      <directory suffix="Test.php">monk/agent_tests</directory>
       <directory suffix="Test.php">ojo/agent_tests/Functional</directory>
       <directory suffix="Test.php">reuser/agent_tests/Functional</directory>
       <directory suffix="Test.php">spdx/agent_tests</directory>

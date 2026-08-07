@@ -440,6 +440,9 @@ $errors = $checker->check();
 require_once("$LIBEXECDIR/dbmigrate_licensedb_compatibility.php");
 LicenseDB_compatibility_migration();
 
+require_once("$LIBEXECDIR/dbmigrate_kotoba_candidate_licenses.php");
+Kotoba_candidate_license_migration();
+
 if($errors>0)
 {
   echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";

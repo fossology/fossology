@@ -184,67 +184,77 @@ class ChangeLicenseBulk extends DefaultPlugin
     $refText = $bulkRow['rf_text'];
     $textMd5 = md5($refText);
 
-    // Check if duplicate exists
-    $checkSql = "SELECT cp_pk FROM custom_phrase WHERE text_md5 = $1";
-    $this->dbManager->prepare($checkStmt = __METHOD__ . ".checkDuplicate", $checkSql);
-    $checkResult = $this->dbManager->execute($checkStmt, array($textMd5));
-    $existingPhrase = $this->dbManager->fetchArray($checkResult);
-    $this->dbManager->freeResult($checkResult);
-
-    if ($existingPhrase !== false) {
-      // Duplicate exists, skip insertion
-      error_log("Custom phrase with MD5 hash $textMd5 already exists. Skipping insertion.");
-      return;
-    }
-
-    // Fetch associated licenses from license_set_bulk (both adding and removing licenses)
-    $licensesSql = "SELECT rf_fk, COALESCE(removing, false) as removing FROM license_set_bulk
-                    WHERE lrb_fk = $1";
+    $licensesSql = "SELECT rf_fk, COALESCE(removing, false) as removing,
+                           comment, reportinfo, acknowledgement
+                    FROM license_set_bulk WHERE lrb_fk = $1";
     $this->dbManager->prepare($licenseStmt = __METHOD__ . ".getLicenses", $licensesSql);
     $licensesResult = $this->dbManager->execute($licenseStmt, array($bulkId));
 
     $licenses = array();
     while ($licenseRow = $this->dbManager->fetchArray($licensesResult)) {
       $licenses[] = array(
-        'rf_fk' => intval($licenseRow['rf_fk']),
-        'removing' => $licenseRow['removing'] === 't' || $licenseRow['removing'] === true
+        'rf_fk'           => intval($licenseRow['rf_fk']),
+        'removing'        => $licenseRow['removing'] === 't' || $licenseRow['removing'] === true,
+        'comment'         => $licenseRow['comment'] ?: null,
+        'reportinfo'      => $licenseRow['reportinfo'] ?: null,
+        'acknowledgement' => $licenseRow['acknowledgement'] ?: null
       );
     }
     $this->dbManager->freeResult($licensesResult);
 
-    // Start transaction to insert into custom_phrase
+    // ON CONFLICT DO NOTHING avoids a check-then-insert race between two
+    // concurrent bulk decisions on the same text.
     $this->dbManager->begin();
     try {
-      // Insert into custom_phrase table
       $insertSql = "INSERT INTO custom_phrase
                     (text, text_md5, acknowledgement, comments, user_fk, group_fk, is_active, created_date)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING cp_pk";
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
+                    ON CONFLICT (text_md5) DO NOTHING
+                    RETURNING cp_pk";
       $params = array($refText, $textMd5, '', '', $userId, $groupId, 'true');
       $this->dbManager->prepare($insertStmt = __METHOD__ . ".insertPhrase", $insertSql);
       $result = $this->dbManager->execute($insertStmt, $params);
       $row = $this->dbManager->fetchArray($result);
-
-      if ($row === false) {
-        $this->dbManager->freeResult($result);
-        throw new Exception('Failed to insert custom phrase');
-      }
-
-      $cpPk = $row['cp_pk'];
       $this->dbManager->freeResult($result);
 
-      // Insert license associations into custom_phrase_license_map
+      $isNewPhrase = ($row !== false);
+      if ($isNewPhrase) {
+        $cpPk = $row['cp_pk'];
+      } else {
+        $checkSql = "SELECT cp_pk FROM custom_phrase WHERE text_md5 = $1";
+        $this->dbManager->prepare($checkStmt = __METHOD__ . ".findExisting", $checkSql);
+        $checkResult = $this->dbManager->execute($checkStmt, array($textMd5));
+        $existingPhrase = $this->dbManager->fetchArray($checkResult);
+        $this->dbManager->freeResult($checkResult);
+        if ($existingPhrase === false) {
+          throw new Exception("custom_phrase insert conflicted but no row found for text_md5 $textMd5");
+        }
+        $cpPk = $existingPhrase['cp_pk'];
+      }
+
       if (!empty($licenses)) {
-        $mapSql = "INSERT INTO custom_phrase_license_map (cp_fk, rf_fk, removing) VALUES ($1, $2, $3)";
+        $mapSql = "INSERT INTO custom_phrase_license_map
+                   (cp_fk, rf_fk, removing, comment, reportinfo, acknowledgement)
+                   VALUES ($1, $2, $3, $4, $5, $6)
+                   ON CONFLICT (cp_fk, rf_fk) DO NOTHING";
         $this->dbManager->prepare($mapStmt = __METHOD__ . ".insertLicenseMap", $mapSql);
 
         foreach ($licenses as $license) {
-          $mapResult = $this->dbManager->execute($mapStmt, array($cpPk, $license['rf_fk'], $license['removing'] ? 'true' : 'false'));
+          $mapResult = $this->dbManager->execute($mapStmt, array(
+            $cpPk,
+            $license['rf_fk'],
+            $license['removing'] ? 'true' : 'false',
+            $license['comment'],
+            $license['reportinfo'],
+            $license['acknowledgement']
+          ));
           $this->dbManager->freeResult($mapResult);
         }
       }
 
       $this->dbManager->commit();
-      error_log("Custom phrase imported successfully from bulk data. cp_pk: $cpPk, lrb_pk: $bulkId");
+      error_log(($isNewPhrase ? "Custom phrase imported" : "Licenses merged into existing custom phrase")
+        . " from bulk data. cp_pk: $cpPk, lrb_pk: $bulkId");
     } catch (Exception $e) {
       $this->dbManager->rollback();
       error_log("Error importing bulk data to custom phrase: " . $e->getMessage());
