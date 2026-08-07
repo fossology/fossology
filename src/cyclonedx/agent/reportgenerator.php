@@ -15,6 +15,12 @@ use Fossology\Lib\Data\LicenseRef;
 
 class BomReportGenerator
 {
+  private $outputFormat;
+
+  public function __construct($outputFormat = 'cyclonedx_json_1_4')
+  {
+    $this->outputFormat = $outputFormat;
+  }
   /**
    * Creates a component.
    *
@@ -44,9 +50,9 @@ class BomReportGenerator
    * @param array $licenseData The license data.
    * @return array The generated license.
    */
-  public function createLicense(array $licenseData): array
+  public function createLicense(array $licenseData, bool $isPackageLevel = true): array
   {
-    return $this->generateLicense($licenseData);
+    return $this->generateLicense($licenseData, $isPackageLevel);
   }
 
   /**
@@ -57,15 +63,28 @@ class BomReportGenerator
    */
   public function generateReport($bomdata): array
   {
+    $is17 = ($this->outputFormat === 'cyclonedx_json_1_7');
+    $specVersion = $is17 ? '1.7' : '1.4';
+    $schema = $is17 ? 'http://cyclonedx.org/schema/bom-1.7b.schema.json' : 'http://cyclonedx.org/schema/bom-1.4.schema.json';
+
     $report = [
       'bomFormat' => 'CycloneDX',
-      '$schema' => 'http://cyclonedx.org/schema/bom-1.4.schema.json',
-      'specVersion' => '1.4',
+      '$schema' => $schema,
+      'specVersion' => $specVersion,
       'version' => 1,
       'serialNumber' => 'urn:uuid:'. uuid_create(UUID_TYPE_TIME),
       'metadata' => [
         'timestamp' => date('c'),
-        'tools' => [
+        'tools' => $is17 ? [
+          'components' => [
+            [
+              'type' => 'application',
+              'author' => 'FOSSology',
+              'name' => 'FOSSology',
+              'version' => $bomdata['tool-version']
+            ]
+          ]
+        ] : [
           [
             'vendor' => 'FOSSology',
             'name' => 'FOSSology',
@@ -76,6 +95,15 @@ class BomReportGenerator
       ],
       'components' => $bomdata['components']
     ];
+
+    if ($is17) {
+      $report['metadata']['properties'] = [
+        [
+          'name' => 'statements.scan_executed',
+          'value' => 'null'
+        ]
+      ];
+    }
 
     if (!empty($bomdata['externalReferences'])) {
       $report['externalReferences'] = $bomdata['externalReferences'];
@@ -156,6 +184,17 @@ class BomReportGenerator
         'value' => $componentData['comments']
       ];
     }
+    if ($this->outputFormat === 'cyclonedx_json_1_7') {
+      $properties[] = [
+        'name' => 'fossology:modified',
+        'value' => 'null'
+      ];
+      $properties[] = [
+        'name' => 'fossology:linkage-type',
+        'value' => 'null'
+      ];
+    }
+
     if (!empty($properties)) {
       $component['properties'] = $properties;
     }
@@ -169,7 +208,7 @@ class BomReportGenerator
    * @param array $licenseData The license data.
    * @return array The generated license.
    */
-  private function generateLicense(array $licenseData): array
+  private function generateLicense(array $licenseData, bool $isPackageLevel = true): array
   {
     $license = [];
 
@@ -180,22 +219,39 @@ class BomReportGenerator
       return $license;
     }
 
+    $is17 = ($this->outputFormat === 'cyclonedx_json_1_7');
+
+    if ($is17 && array_key_exists('bom-ref', $licenseData) && !empty($licenseData['bom-ref'])) {
+      $license['license']['bom-ref'] = $licenseData['bom-ref'];
+    }
+
     if (array_key_exists('id', $licenseData) && !empty($licenseData['id'])) {
       $license['license']['id'] = $licenseData['id'];
     } else if (array_key_exists('name', $licenseData) && !empty($licenseData['name'])) {
       $license['license']['name'] = $licenseData['name'];
     }
 
-    if (array_key_exists('url', $licenseData) && !empty($licenseData['url'])) {
-      $license['license']['url'] = $licenseData['url'];
+    if ($is17) {
+      $license['license']['properties'] = [
+        [
+          'name' => 'fossology:notice-file',
+          'value' => 'null'
+        ]
+      ];
     }
 
-    if (array_key_exists('textContent', $licenseData) && !empty($licenseData['textContent'])) {
-      $license['license']['text'] = [
-        'content' => $licenseData['textContent'],
-        'contentType' => $licenseData['textContentType'],
-        'encoding' => 'base64'
-      ];
+    if ($isPackageLevel) {
+      if (array_key_exists('url', $licenseData) && !empty($licenseData['url'])) {
+        $license['license']['url'] = $licenseData['url'];
+      }
+
+      if (array_key_exists('textContent', $licenseData) && !empty($licenseData['textContent'])) {
+        $license['license']['text'] = [
+          'content' => $licenseData['textContent'],
+          'contentType' => $licenseData['textContentType'],
+          'encoding' => 'base64'
+        ];
+      }
     }
 
     return $license;

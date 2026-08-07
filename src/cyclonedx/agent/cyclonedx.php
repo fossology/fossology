@@ -109,12 +109,12 @@ class CycloneDXAgent extends Agent
       self::OUTPUT_FORMAT_KEY.'::',
       self::UPLOADS_ADD_KEY.'::'
     ));
-    $agentName = "";
+    $agentName = self::DEFAULT_OUTPUT_FORMAT;
     if (array_key_exists(self::OUTPUT_FORMAT_KEY, $args)) {
-      $agentName = trim($args[self::OUTPUT_FORMAT_KEY]);
+      $this->outputFormat = trim($args[self::OUTPUT_FORMAT_KEY]);
     }
-    if (empty($agentName)) {
-        $agentName = self::DEFAULT_OUTPUT_FORMAT;
+    if (empty($this->outputFormat)) {
+        $this->outputFormat = self::DEFAULT_OUTPUT_FORMAT;
     }
     if (array_key_exists(self::UPLOADS_ADD_KEY, $args)) {
       $uploadsString = $args[self::UPLOADS_ADD_KEY];
@@ -131,7 +131,7 @@ class CycloneDXAgent extends Agent
     $this->dbManager = $this->container->get('db.manager');
 
     $this->reportutils = new ReportUtils();
-    $this->reportGenerator = new BomReportGenerator();
+    $this->reportGenerator = new BomReportGenerator($this->outputFormat);
   }
 
   /**
@@ -223,7 +223,7 @@ class CycloneDXAgent extends Agent
       }
 
       $licensedata = $this->getLicenseDataForCycloneDX($mainLicObj, $licId, $customLicenseTexts);
-      $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
+      $mainLicenses[] = $this->reportGenerator->createLicense($licensedata, true);
 
       $customText = array_key_exists($licId, $customLicenseTexts) ? $customLicenseTexts[$licId] : null;
       $licText = !empty($customText) ? $customText : $mainLicObj->getText();
@@ -241,7 +241,7 @@ class CycloneDXAgent extends Agent
           $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
           $isCustomText = $this->licensesInDocument[$licenseId]->isCustomText();
           $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText);
-          $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
+          $mainLicenses[] = $this->reportGenerator->createLicense($licensedata, true);
         }
       }
     }
@@ -365,7 +365,7 @@ class CycloneDXAgent extends Agent
             $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
             $isCustomText = $this->licensesInDocument[$licenseId]->isCustomText();
             $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText, false);
-            $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
+            $licensesfound[] = $this->reportGenerator->createLicense($licensedata, false);
           }
         }
       } else {
@@ -374,7 +374,7 @@ class CycloneDXAgent extends Agent
             $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
             $isCustomText = $this->licensesInDocument[$licenseId]->isCustomText();
             $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText, false);
-            $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
+            $licensesfound[] = $this->reportGenerator->createLicense($licensedata, false);
           }
         }
       }
@@ -446,7 +446,8 @@ class CycloneDXAgent extends Agent
     $licText = !empty($customText) ? $customText : $licObj->getText();
 
     $licensedata = array(
-      'url' => $licObj->getUrl()
+      'url' => $licObj->getUrl(),
+      'bom-ref' => 'license-' . $licObj->getId() . "-" . md5($licText)
     );
 
     if (!empty($customText) || $isCustomText) {
