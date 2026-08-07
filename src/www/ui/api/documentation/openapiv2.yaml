@@ -6344,6 +6344,8 @@ components:
     GroupRename:
       description: New name for an existing group
       type: object
+      required:
+        - name
       properties:
         name:
           description: New name for the group
