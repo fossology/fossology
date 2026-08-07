@@ -242,4 +242,35 @@ class HighlightDao
     );
     return $row['page'];
   }
+
+  /**
+   * Get page numbers for all highlight entries for a given match id.
+   *
+   * The resulting array can contain duplicate page numbers when multiple
+   * highlight fragments exist on the same page.
+   *
+   * @param int $licenseMatchId
+   * @return int[]
+   */
+  public function getPageNumbersOfHighlightEntries($licenseMatchId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT FLOOR(start / (
+              SELECT conf_value FROM sysconfig WHERE variablename LIKE 'BlockSizeText'
+            )::numeric) AS page
+            FROM highlight
+            WHERE fl_fk = $1
+            ORDER BY start ASC";
+
+    $this->dbManager->prepare($stmt, $sql);
+    $result = $this->dbManager->execute($stmt, array($licenseMatchId));
+
+    $pages = array();
+    while ($row = $this->dbManager->fetchArray($result)) {
+      $pages[] = intval($row['page']);
+    }
+    $this->dbManager->freeResult($result);
+
+    return $pages;
+  }
 }

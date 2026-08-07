@@ -564,20 +564,33 @@ class UploadTreeController extends RestController
       $agentId = $agentDecisionEvent->getAgentId();
       $matchId = $agentDecisionEvent->getMatchId();
       $highlightRegion = $this->highlightDao->getHighlightRegion($matchId);
-      $page = null;
       $percentage = $agentDecisionEvent->getPercentage();
       if ($highlightRegion[0] != "" && $highlightRegion[1] != "") {
-        $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
+        $pages = $this->highlightDao->getPageNumbersOfHighlightEntries($matchId);
+        if (empty($pages)) {
+          $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
+          $pages = array(intval($page));
+        }
+        foreach ($pages as $pageIndex => $page) {
+          $agentResults[] = array(
+            'name' => $agentDecisionEvent->getAgentName(),
+            'clearingId' => null,
+            'agentId' => $agentId,
+            'highlightId' => $matchId,
+            'page' => intval($page),
+            'percentage' => $pageIndex === 0 ? $percentage : null
+          );
+        }
+      } else {
+        $agentResults[] = array(
+          'name' => $agentDecisionEvent->getAgentName(),
+          'clearingId' => null,
+          'agentId' => $agentId,
+          'highlightId' => $matchId,
+          'page' => null,
+          'percentage' => $percentage
+        );
       }
-      $result = array(
-        'name' => $agentDecisionEvent->getAgentName(),
-        'clearingId' => null,
-        'agentId' => $agentId,
-        'highlightId' => $matchId,
-        'page' => intval($page),
-        'percentage' => $percentage
-      );
-      $agentResults[] = $result;
     }
     return $agentResults;
   }
