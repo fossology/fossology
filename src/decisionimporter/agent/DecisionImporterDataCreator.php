@@ -167,7 +167,7 @@ class DecisionImporterDataCreator
 
     $i = 0;
     foreach ($clearingEventList as $oldEventId => $eventItem) {
-      if ($eventItem["new_itemid"] !== null) {
+      if ($eventItem["new_itemid"] !== null && $eventItem["new_rfid"] !== null) {
         $newCeId = $this->dbManager->insertTableRow("clearing_event", [
           "uploadtree_fk" => $eventItem["new_itemid"],
           "rf_fk" => $eventItem["new_rfid"],
@@ -196,19 +196,46 @@ class DecisionImporterDataCreator
     }
 
     foreach ($clearingDecisionEventList as $oldCdId => $ceList) {
-      $newCdId = $clearingDecisionList[$oldCdId]["new_decision"];
-      if ($newCdId === null) {
+      $linkedDecisions = [];
+      foreach ($clearingDecisionList as $expandedDecision) {
+        if (isset($expandedDecision['original_index']) && $expandedDecision['original_index'] == $oldCdId) {
+          $linkedDecisions[] = $expandedDecision["new_decision"];
+        } elseif (!isset($expandedDecision['original_index']) && array_search($expandedDecision, $clearingDecisionList) == $oldCdId) {
+          $linkedDecisions[] = $expandedDecision["new_decision"];
+        }
+      }
+
+      if (empty($linkedDecisions)) {
+        echo "DEBUG: No new decisions found for old decision ID $oldCdId\n";
         continue;
       }
+
       foreach ($ceList as $oldCeId) {
-        $newCeId = $clearingEventList[$oldCeId]["new_event"];
-        if ($newCeId === null) {
+        $linkedEvents = [];
+        foreach ($clearingEventList as $expandedEvent) {
+          if (isset($expandedEvent['original_index']) && $expandedEvent['original_index'] == $oldCeId) {
+            $linkedEvents[] = $expandedEvent["new_event"];
+          } elseif (!isset($expandedEvent['original_index']) && array_search($expandedEvent, $clearingEventList) == $oldCeId) {
+            $linkedEvents[] = $expandedEvent["new_event"];
+          }
+        }
+
+        if (empty($linkedEvents)) {
+          echo "DEBUG: No new events found for old event ID $oldCeId\n";
           continue;
         }
-        $this->dbManager->insertTableRow("clearing_decision_event", [
-          "clearing_decision_fk" => $newCdId,
-          "clearing_event_fk" => $newCeId
-        ], __METHOD__ . ".insertCdCe");
+
+        foreach ($linkedDecisions as $newCdId) {
+          foreach ($linkedEvents as $newCeId) {
+            if ($newCdId !== null && $newCeId !== null) {
+              $this->dbManager->insertTableRow("clearing_decision_event", [
+                "clearing_decision_fk" => $newCdId,
+                "clearing_event_fk" => $newCeId
+              ], __METHOD__ . ".insertCdCe");
+              echo "DEBUG: Linked decision $newCdId to event $newCeId\n";
+            }
+          }
+        }
       }
     }
     $agentObj->heartbeat(0);
