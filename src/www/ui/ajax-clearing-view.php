@@ -239,6 +239,13 @@ class AjaxClearingView extends FO_Plugin
         }
         return $this->createPlainResponse("success");
 
+      case "checkWipStatus":
+        $uploadTreeId = GetParm("uploadTreeId", PARM_INTEGER);
+        $uploadId = GetParm("upload", PARM_INTEGER);
+        $groupId = $this->restHelper->getGroupId();
+        $isWip = $this->clearingDao->isDecisionCheck($uploadTreeId, $groupId, DecisionTypes::WIP);
+        return new JsonResponse(array('isWip' => $isWip));
+
       case "showClearingHistory":
         return new JsonResponse($this->doClearingHistory($groupId, $uploadId, $uploadTreeId));
 
