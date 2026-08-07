@@ -840,6 +840,113 @@ INSERT INTO clearing_decision (
   }
 
   /**
+   * Check if user can delete a kotoba entry
+   * @param string $reportinfo
+   * @param int $userId
+   * @param int $groupId
+   * @return bool
+   */
+  public function canUserDeleteKotobaEntry($reportinfo, $userId, $groupId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT user_fk, group_fk FROM clearing_event WHERE type_fk = " . ClearingEventTypes::KOTOBA . "
+            AND reportinfo = $1 AND group_fk = $2 LIMIT 1";
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, array($reportinfo, $groupId));
+    $row = $this->dbManager->fetchArray($res);
+    $this->dbManager->freeResult($res);
+    if (!$row) {
+      return false;
+    }
+    return $row['user_fk'] == $userId || $row['group_fk'] == $groupId;
+  }
+
+  /**
+   * Delete a kotoba history entry and all related data
+   * @param string $reportinfo
+   * @param int $groupId
+   * @throws \Exception
+   */
+  public function deleteKotobaEntry($reportinfo, $groupId)
+  {
+    if (empty($reportinfo)) {
+      throw new \InvalidArgumentException('Invalid reportinfo provided');
+    }
+    $this->dbManager->begin();
+    try {
+      $clearingEventIds = array();
+      $jobIds = array();
+      $stmt = __METHOD__ . ".get_kotoba_events";
+      $sql  = "SELECT clearing_event_pk, job_fk FROM clearing_event WHERE type_fk = " . ClearingEventTypes::KOTOBA . "
+               AND reportinfo = $1 AND group_fk = $2";
+      $this->dbManager->prepare($stmt, $sql);
+      $res  = $this->dbManager->execute($stmt, array($reportinfo, $groupId));
+      while ($row = $this->dbManager->fetchArray($res)) {
+        $clearingEventIds[] = $row['clearing_event_pk'];
+        if (!empty($row['job_fk'])) {
+          $jobIds[] = $row['job_fk'];
+        }
+      }
+      $this->dbManager->freeResult($res);
+
+      if (empty($clearingEventIds)) {
+        $this->dbManager->commit();
+        return;
+      }
+
+      $eventIdArray = '{' . implode(',', $clearingEventIds) . '}';
+
+      $stmt = __METHOD__ . ".delete_kotoba_highlights";
+      $sql  = "DELETE FROM highlight_kotoba WHERE clearing_event_fk = ANY($1)";
+      $this->dbManager->prepare($stmt, $sql);
+      $this->dbManager->execute($stmt, array($eventIdArray));
+
+      $affectedDecisionIds = array();
+      $stmt = __METHOD__ . ".find_affected_decisions";
+      $sql  = "SELECT DISTINCT clearing_decision_fk FROM clearing_decision_event WHERE clearing_event_fk = ANY($1)";
+      $this->dbManager->prepare($stmt, $sql);
+      $res = $this->dbManager->execute($stmt, array($eventIdArray));
+      while ($row = $this->dbManager->fetchArray($res)) {
+        $affectedDecisionIds[] = $row['clearing_decision_fk'];
+      }
+      $this->dbManager->freeResult($res);
+
+      $stmt = __METHOD__ . ".delete_decision_events";
+      $sql  = "DELETE FROM clearing_decision_event WHERE clearing_event_fk = ANY($1)";
+      $this->dbManager->prepare($stmt, $sql);
+      $this->dbManager->execute($stmt, array($eventIdArray));
+
+      $stmt = __METHOD__ . ".delete_clearing_events";
+      $sql  = "DELETE FROM clearing_event WHERE clearing_event_pk = ANY($1)";
+      $this->dbManager->prepare($stmt, $sql);
+      $this->dbManager->execute($stmt, array($eventIdArray));
+
+      if (!empty($affectedDecisionIds)) {
+        $decisionArray = '{' . implode(',', $affectedDecisionIds) . '}';
+        $stmt = __METHOD__ . ".reset_decisions_to_wip";
+        $sql  = "UPDATE clearing_decision SET decision_type = 0 WHERE clearing_decision_pk = ANY($1)";
+        $this->dbManager->prepare($stmt, $sql);
+        $this->dbManager->execute($stmt, array($decisionArray));
+      }
+
+      if (!empty($jobIds)) {
+        $jobIdArray = '{' . implode(',', array_unique($jobIds)) . '}';
+        $stmt = __METHOD__ . ".delete_deciderjob_entries";
+        $sql  = "DELETE FROM jobqueue WHERE jq_type = 'deciderjob' AND jq_job_fk = ANY($1)";
+        $this->dbManager->prepare($stmt, $sql);
+        $this->dbManager->execute($stmt, array($jobIdArray));
+      }
+
+      $this->dbManager->commit();
+      $this->logger->debug("Successfully deleted kotoba entry '$reportinfo': " . count($clearingEventIds) . " clearing events removed, " . count($affectedDecisionIds) . " decisions reset to WIP");
+    } catch (\Exception $e) {
+      $this->dbManager->rollback();
+      $this->logger->error("Failed to delete kotoba entry '$reportinfo': " . $e->getMessage());
+      throw $e;
+    }
+  }
+
+  /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @return array mapping 'shortname'=>'count'
@@ -877,6 +984,120 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
 
     return $multiplicity;
+  }
+
+  /**
+   * Check if user can delete the bulk entry
+   * @param int $bulkId
+   * @param int $userId
+   * @param int $groupId
+   * @return bool
+   */
+  public function canUserDeleteBulkEntry($bulkId, $userId, $groupId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT user_fk, group_fk FROM license_ref_bulk WHERE lrb_pk = $1";
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, array($bulkId));
+    $row = $this->dbManager->fetchArray($res);
+    $this->dbManager->freeResult($res);
+    if (!$row) {
+      return false;
+    }
+
+    return $row['user_fk'] == $userId || $row['group_fk'] == $groupId;
+  }
+
+  /**
+   * Delete a bulk history entry and all related data
+   * @param int $bulkId
+   * @param int $groupId
+   * @throws \Exception
+   */
+  public function deleteBulkEntry($bulkId, $groupId)
+  {
+    if (empty($bulkId) || !is_numeric($bulkId)) {
+      throw new \InvalidArgumentException('Invalid bulk ID provided');
+    }
+    $this->dbManager->begin();
+    try {
+      $clearingEventIds = array();
+      $affectedDecisionIds = array();
+      $stmt = __METHOD__ . ".get_clearing_events";
+      $sql  = "SELECT clearing_event_fk FROM highlight_bulk WHERE lrb_fk = $1";
+      $this->dbManager->prepare($stmt, $sql);
+      $res  = $this->dbManager->execute($stmt, array($bulkId));
+      while ($row = $this->dbManager->fetchArray($res)) {
+        $clearingEventIds[] = $row['clearing_event_fk'];
+      }
+      $this->dbManager->freeResult($res);
+
+      if (!empty($clearingEventIds)) {
+        $eventIdArray = '{' . implode(',', $clearingEventIds) . '}';
+        $stmt = __METHOD__ . ".find_affected_decisions";
+        $sql  = "SELECT DISTINCT clearing_decision_fk FROM clearing_decision_event WHERE clearing_event_fk = ANY($1)";
+        $this->dbManager->prepare($stmt, $sql);
+        $res = $this->dbManager->execute($stmt, array($eventIdArray));
+        while ($row = $this->dbManager->fetchArray($res)) {
+          $affectedDecisionIds[] = $row['clearing_decision_fk'];
+        }
+        $this->dbManager->freeResult($res);
+
+        $stmt = __METHOD__ . ".delete_decision_events";
+        $sql  = "DELETE FROM clearing_decision_event WHERE clearing_event_fk = ANY($1)";
+        $this->dbManager->prepare($stmt, $sql);
+        $this->dbManager->execute($stmt, array($eventIdArray));
+
+        $stmt = __METHOD__ . ".delete_clearing_events";
+        $sql  = "DELETE FROM clearing_event WHERE clearing_event_pk = ANY($1)";
+        $this->dbManager->prepare($stmt, $sql);
+        $this->dbManager->execute($stmt, array($eventIdArray));
+        if (!empty($affectedDecisionIds)) {
+          $decisionArray = '{' . implode(',', $affectedDecisionIds) . '}';
+          $stmt = __METHOD__ . ".reset_decisions_to_wip";
+          $sql  = "UPDATE clearing_decision SET decision_type = 0 WHERE clearing_decision_pk = ANY($1)";
+          $this->dbManager->prepare($stmt, $sql);
+          $this->dbManager->execute($stmt, array($decisionArray));
+        }
+      }
+
+      $stmt = __METHOD__ . ".delete_highlights";
+      $sql  = "DELETE FROM highlight_bulk WHERE lrb_fk = $1";
+      $this->dbManager->prepare($stmt, $sql);
+      $this->dbManager->execute($stmt, array($bulkId));
+
+      $stmt = __METHOD__ . ".find_job_for_bulk";
+      $sql  = "SELECT jq_job_fk FROM jobqueue WHERE jq_type = 'monkbulk' AND jq_args = $1 LIMIT 1";
+      $this->dbManager->prepare($stmt, $sql);
+      $res  = $this->dbManager->execute($stmt, array((string)$bulkId));
+      $row = $this->dbManager->fetchArray($res);
+      $this->dbManager->freeResult($res);
+      $jobId = $row ? $row['jq_job_fk'] : null;
+
+      if (!empty($jobId)) {
+        $stmt = __METHOD__ . ".delete_deciderjob_entries";
+        $sql  = "DELETE FROM jobqueue WHERE jq_type = 'deciderjob' AND jq_job_fk = $1";
+        $this->dbManager->prepare($stmt, $sql);
+        $this->dbManager->execute($stmt, array($jobId));
+      }
+
+      $stmt = __METHOD__ . ".delete_monkbulk_entries";
+      $sql  = "DELETE FROM jobqueue WHERE jq_type = 'monkbulk' AND jq_args = $1";
+      $this->dbManager->prepare($stmt, $sql);
+      $this->dbManager->execute($stmt, array((string)$bulkId));
+
+      $stmt = __METHOD__ . ".delete_bulk";
+      $sql  = "DELETE FROM license_ref_bulk WHERE lrb_pk = $1 AND group_fk = $2";
+      $this->dbManager->prepare($stmt, $sql);
+      $this->dbManager->execute($stmt, array($bulkId, $groupId));
+
+      $this->dbManager->commit();
+      $this->logger->debug("Successfully deleted bulk entry $bulkId: " . count($clearingEventIds) . " clearing events removed, " . count($affectedDecisionIds) . " decisions reset to WIP");
+    } catch (\Exception $e) {
+      $this->dbManager->rollback();
+      $this->logger->error("Failed to delete bulk entry $bulkId: " . $e->getMessage());
+      throw $e;
+    }
   }
 
   /**
