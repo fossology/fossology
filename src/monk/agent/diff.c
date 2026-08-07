@@ -49,9 +49,16 @@ int lookForDiff(const GArray* textTokens, const GArray* searchTokens,
   size_t searchStopAt = MIN(iSearch + maxAllowedDiff, searchLength);
   size_t textStopAt = MIN(iText + maxAllowedDiff, textLength);
 
+  unsigned int tw = (textStopAt > iText) ? (unsigned int)(textStopAt - iText) - 1 : 0;
+  unsigned int sw = (searchStopAt > iSearch) ? (unsigned int)(searchStopAt - iSearch) - 1 : 0;
+  unsigned int maxDist2 = tw * tw + sw * sw;
+
   size_t textPos;
   size_t searchPos;
   for (unsigned int i = 0; i < SQUARE_VISITOR_LENGTH; i++) {
+    if (squareVisitorDist2[i] > maxDist2)
+      break;
+
     textPos = iText + squareVisitorX[i];
     searchPos = iSearch + squareVisitorY[i];
 

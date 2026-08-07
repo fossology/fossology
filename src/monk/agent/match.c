@@ -31,6 +31,7 @@ GArray* findAllMatchesBetween(const File* file, const Licenses* licenses,
 
   const GArray* textTokens = file->tokens;
   const guint textLength = textTokens->len;
+  const GArray* shortLicenses = getShortLicenseArray(licenses);
 
   for (guint tPos = 0; tPos < textLength; tPos++) {
     for (guint sPos = 0; sPos <= maxLeadingDiff; sPos++) {
@@ -39,7 +40,6 @@ GArray* findAllMatchesBetween(const File* file, const Licenses* licenses,
     }
 
     /* now search short licenses only fully (i.e. maxAllowedDiff = 0, minAdjacentMatches = 1) */
-    const GArray* shortLicenses = getShortLicenseArray(licenses);
     doFindAllMatches(file, shortLicenses, tPos, 0, 0, 1, matches);
   }
 
@@ -164,8 +164,18 @@ static unsigned short match_rank(Match* match) {
     size_t numberOfMatches = diffResult->matched;
     size_t numberOfAdditions = diffResult->added;
 
-    // calculate result percentage as jaccard index
-    double rank = (100.0 * numberOfMatches) / (licenseLength + numberOfAdditions);
+    // head-removal (sPos>0): applyDiff stores it as a DIFF_TYPE_REMOVAL
+    // with search.start==0 and text.length==0
+    size_t leadingDiff = 0;
+    if (diffResult->matchedInfo->len > 0) {
+      DiffMatchInfo firstInfo = g_array_index(diffResult->matchedInfo, DiffMatchInfo, 0);
+      if (firstInfo.search.start == 0 && firstInfo.text.length == 0)
+        leadingDiff = firstInfo.search.length;
+    }
+
+    // calculate result percentage as jaccard index with leading-diff penalty
+    double rank = (100.0 * numberOfMatches) /
+                  (licenseLength + numberOfAdditions + leadingDiff * LEADING_DIFF_RANK_WEIGHT);
     int result = (int) rank;
 
     result = MIN(result, 99);
@@ -304,6 +314,26 @@ int match_partialComparator(const Match* thisMatch, const Match* otherMatch) {
 
     return (compareMatchByRank(thisMatch, otherMatch) >= 0) ? 1 : -1;
   }
+
+  // Nearly-identical licenses can match the same region where neither
+  // strictly contains the other (tail-removal shifts getEnd()). Require
+  // >50% overlap to avoid triggering on adjacent-section boundaries.
+  const size_t thisStart  = match_getStart(thisMatch);
+  const size_t thisEnd    = match_getEnd(thisMatch);
+  const size_t otherStart = match_getStart(otherMatch);
+  const size_t otherEnd   = match_getEnd(otherMatch);
+  if (thisStart < otherEnd && otherStart < thisEnd) {
+    const size_t overlapStart = (thisStart > otherStart) ? thisStart : otherStart;
+    const size_t overlapEnd   = (thisEnd   < otherEnd)   ? thisEnd   : otherEnd;
+    const size_t overlapSize  = (overlapEnd > overlapStart) ? overlapEnd - overlapStart : 0;
+    const size_t thisSize     = (thisEnd  > thisStart)  ? thisEnd  - thisStart  : 1;
+    const size_t otherSize    = (otherEnd > otherStart) ? otherEnd - otherStart : 1;
+    const size_t minSize      = (thisSize < otherSize)  ? thisSize : otherSize;
+    if (overlapSize * 2 > minSize) { /* overlap > 50% of smaller match */
+      return (compareMatchByRank(thisMatch, otherMatch) >= 0) ? 1 : -1;
+    }
+  }
+
   return 0;
 }
 
