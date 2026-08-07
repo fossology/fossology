@@ -224,7 +224,7 @@ void test_interface_pool()
   interface_init(scheduler);
   sleep(1);
 
-  FO_ASSERT_EQUAL(g_thread_pool_get_max_threads(scheduler->workers), CONF_interface_nthreads);
+  FO_ASSERT_TRUE(g_thread_pool_get_max_threads(scheduler->workers) >= CONF_interface_nthreads);
   FO_ASSERT_EQUAL(g_thread_pool_unprocessed(scheduler->workers), 0);
 
   snprintf(buffer, sizeof(buffer), "%d", scheduler->i_port);
@@ -553,16 +553,55 @@ void test_sending_agents()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test that interface_init() grows the pool when host max exceeds CONF_interface_nthreads
+ * \test
+ * -# Initialize scheduler using scheduler_init() (no foss config, host_list is empty)
+ * -# Fix CONF_interface_nthreads to 10 so the test is independent of global state
+ * -# Insert a host with max = 25 > CONF_interface_nthreads (10)
+ * -# Initialize interface using interface_init()
+ * -# Check the pool's max threads equals the host max, not CONF_interface_nthreads
+ */
+void test_interface_pool_scales_with_host_max()
+{
+  scheduler_t* scheduler;
+  gint saved_nthreads = CONF_interface_nthreads;
+
+  /* Pin the global to a known value so the test is not affected by other tests
+   * that call scheduler_foss_config() and may have set a different value
+   * (including the -1 unlimited sentinel). */
+  CONF_interface_nthreads = 10;
+
+  scheduler = scheduler_init(testdb, NULL);
+  scheduler->i_terminate = FALSE;
+  scheduler->i_created   = FALSE;
+
+  /* Insert a host whose max (25) exceeds CONF_interface_nthreads (10). */
+  host_insert(host_init("bighost", "localhost", "/tmp", 25), scheduler);
+
+  interface_init(scheduler);
+  sleep(1);
+
+  /* Pool must have grown to host_total_max (25), not stayed at CONF_interface_nthreads (10). */
+  FO_ASSERT_EQUAL(g_thread_pool_get_max_threads(scheduler->workers), 25);
+
+  interface_destroy(scheduler);
+  scheduler_destroy(scheduler);
+
+  CONF_interface_nthreads = saved_nthreads;
+}
+
 /* ************************************************************************** */
 /* **** suite declaration *************************************************** */
 /* ************************************************************************** */
 
 CU_TestInfo tests_interface[] =
 {
-    {"Test interface_init",          test_interface_init          },
-    {"Test interface_destroy",       test_interface_destroy       },
-    {"Test interface_listen_thread", test_interface_listen_thread },
-    {"Test interface_pool",          test_interface_pool          },
+    {"Test interface_init",                      test_interface_init                      },
+    {"Test interface_destroy",                   test_interface_destroy                   },
+    {"Test interface_listen_thread",             test_interface_listen_thread             },
+    {"Test interface_pool",                      test_interface_pool                      },
+    {"Test interface_pool scales with host max", test_interface_pool_scales_with_host_max },
     CU_TEST_INFO_NULL
 };
 
