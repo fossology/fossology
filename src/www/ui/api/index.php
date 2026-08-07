@@ -411,6 +411,8 @@ $app->group('/license',
     $app->get('/export-csv', LicenseController::class . ':exportAdminLicenseToCSV');
     $app->post('/import-json', LicenseController::class . ':handleImportLicense');
     $app->get('/export-json', LicenseController::class . ':exportAdminLicenseToJSON');
+    $app->get('/marydone/export-csv', LicenseController::class . ':exportAdminLicenseMarydoneToCSV');
+    $app->get('/marydone/export-json', LicenseController::class . ':exportAdminLicenseMarydoneToJSON');
     $app->get('/bulk-text/export', LicenseController::class . ':exportBulkText');
     $app->post('', LicenseController::class . ':createLicense');
     $app->put('/verify/{shortname:.+}', LicenseController::class . ':verifyLicense');
