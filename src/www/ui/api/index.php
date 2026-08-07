@@ -313,6 +313,7 @@ $app->group('/groups',
     $app->get('', GroupController::class . ':getGroups');
     $app->post('', GroupController::class . ':createGroup');
     $app->post("/{pathParam:$pattern}/user/{userPathParam:$pattern}", GroupController::class . ':addMember');
+    $app->put("/{pathParam:$pattern}", GroupController::class . ':updateGroup');
     $app->delete("/{pathParam:$pattern}", GroupController::class . ':deleteGroup');
     $app->delete("/{pathParam:$pattern}/user/{userPathParam:$pattern}", GroupController::class . ':deleteGroupMember');
     $app->get('/deletable', GroupController::class . ':getDeletableGroups');

@@ -4056,6 +4056,61 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+    put:
+      operationId: updateGroupByName
+      tags:
+        - Organize
+        - Groups
+        - Admin
+      summary: Rename group by name
+      description: >
+        Renames a single group by name. Only an admin of the group can rename it.
+      requestBody:
+        description: New name of the group
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroup'
+      responses:
+        '200':
+          description: Group has been renamed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: No group name provided or the new name is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Not admin of the group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '409':
+          description: Another group already uses the new name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /groups/{name}/user/{userName}:
     parameters:
       - name: name
@@ -6950,6 +7005,18 @@ components:
         hash:
           type: string
           description: MD5 hash of obligation text
+    UpdateGroup:
+      description: Group rename options
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          description: New name of the group
+          type: string
+          nullable: false
+          example:
+            "Main group"
     AddMember:
       description: UserMember options
       type: object

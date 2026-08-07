@@ -19,6 +19,7 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\GroupController;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpConflictException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\DbHelper;
@@ -74,6 +75,12 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
   private $adminPlugin;
 
   /**
+   * @var M\MockInterface $adminEditPlugin
+   * AdminGroupEdit plugin mock
+   */
+  private $adminEditPlugin;
+
+  /**
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
@@ -85,6 +92,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper = M::mock(RestHelper::class);
     $this->userDao = M::mock(UserDao::class);
     $this->adminPlugin = M::mock('AdminGroupUsers');
+    $this->adminEditPlugin = M::mock('AdminGroupEdit');
 
     $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
     $this->restHelper->shouldReceive('getUserDao')
@@ -92,6 +100,9 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->restHelper->shouldReceive('getPlugin')
       ->withArgs(array('group_manage_users'))->andReturn($this->adminPlugin);
+
+    $this->restHelper->shouldReceive('getPlugin')
+      ->withArgs(array('group_edit'))->andReturn($this->adminEditPlugin);
 
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
@@ -283,6 +294,205 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
   }
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() for valid rename request in version 1
+   * -# Check if response status is 200
+   */
+  public function testUpdateGroupV1()
+  {
+    $this->testUpdateGroup(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() for valid rename request in version 2
+   * -# Check if response status is 200
+   */
+  public function testUpdateGroupV2()
+  {
+    $this->testUpdateGroup();
+  }
+  /**
+   * @param $version
+   * @return void
+   */
+  private function testUpdateGroup($version = ApiVersion::V2)
+  {
+    $groupId = 4;
+    $groupName = 'fossyGroup';
+    $newGroupName = 'newFossyGroup';
+    $userId = 1;
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    if ($version == ApiVersion::V2) {
+      $this->userDao->shouldReceive('getGroupIdByName')
+        ->withArgs([$groupName])->andReturn($groupId);
+    }
+    $this->adminEditPlugin->shouldReceive('validateGroupName')
+      ->withArgs([$newGroupName])->andReturn("");
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+    $this->userDao->shouldReceive('getDeletableAdminGroupMap')
+      ->withArgs([$userId, $_SESSION[Auth::USER_LEVEL]])
+      ->andReturn([$groupId => $groupName]);
+    $this->userDao->shouldReceive('editGroup')
+      ->withArgs([$groupId, $newGroupName]);
+
+    $request = $this->getUpdateGroupRequest($newGroupName, $version);
+    $pathParam = $version == ApiVersion::V2 ? $groupName : $groupId;
+
+    $expectedResponse = new Info(200, "Group $newGroupName updated.",
+      InfoType::INFO);
+    $actualResponse = $this->groupController->updateGroup($request,
+      new ResponseHelper(), ['pathParam' => $pathParam]);
+
+    $this->assertEquals($expectedResponse->getCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($expectedResponse->getArray(),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() with an empty new group name
+   * -# Check if HttpBadRequestException is thrown
+   */
+  public function testUpdateGroupNoNameProvidedV2()
+  {
+    $request = $this->getUpdateGroupRequest("  ");
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->groupController->updateGroup($request, new ResponseHelper(),
+      ['pathParam' => 'fossyGroup']);
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() with an invalid new group name
+   * -# Check if HttpBadRequestException is thrown
+   */
+  public function testUpdateGroupInvalidNameV2()
+  {
+    $newGroupName = '123';
+    $this->adminEditPlugin->shouldReceive('validateGroupName')
+      ->withArgs([$newGroupName])
+      ->andReturn("Invalid: Group name cannot be numeric-only");
+
+    $request = $this->getUpdateGroupRequest($newGroupName);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->groupController->updateGroup($request, new ResponseHelper(),
+      ['pathParam' => 'fossyGroup']);
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() for a group which does not exist
+   * -# Check if HttpNotFoundException is thrown
+   */
+  public function testUpdateGroupNotFoundV2()
+  {
+    $groupName = 'fossyGroup';
+    $newGroupName = 'newFossyGroup';
+
+    $this->userDao->shouldReceive('getGroupIdByName')
+      ->withArgs([$groupName])->andReturn(null);
+    $this->adminEditPlugin->shouldReceive('validateGroupName')
+      ->withArgs([$newGroupName])->andReturn("");
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", 0])->andReturn(false);
+
+    $request = $this->getUpdateGroupRequest($newGroupName);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->groupController->updateGroup($request, new ResponseHelper(),
+      ['pathParam' => $groupName]);
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() when the user is not admin of the group
+   * -# Check if HttpForbiddenException is thrown
+   */
+  public function testUpdateGroupNotGroupAdminV2()
+  {
+    $groupId = 4;
+    $groupName = 'fossyGroup';
+    $newGroupName = 'newFossyGroup';
+    $userId = 1;
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->userDao->shouldReceive('getGroupIdByName')
+      ->withArgs([$groupName])->andReturn($groupId);
+    $this->adminEditPlugin->shouldReceive('validateGroupName')
+      ->withArgs([$newGroupName])->andReturn("");
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+    $this->userDao->shouldReceive('getDeletableAdminGroupMap')
+      ->withArgs([$userId, $_SESSION[Auth::USER_LEVEL]])->andReturn([]);
+
+    $request = $this->getUpdateGroupRequest($newGroupName);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->groupController->updateGroup($request, new ResponseHelper(),
+      ['pathParam' => $groupName]);
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() when the new name is already taken
+   * -# Check if HttpConflictException is thrown
+   */
+  public function testUpdateGroupNameAlreadyExistsV2()
+  {
+    $groupId = 4;
+    $groupName = 'fossyGroup';
+    $newGroupName = 'newFossyGroup';
+    $userId = 1;
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $this->userDao->shouldReceive('getGroupIdByName')
+      ->withArgs([$groupName])->andReturn($groupId);
+    $this->adminEditPlugin->shouldReceive('validateGroupName')
+      ->withArgs([$newGroupName])->andReturn("");
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+    $this->userDao->shouldReceive('getDeletableAdminGroupMap')
+      ->withArgs([$userId, $_SESSION[Auth::USER_LEVEL]])
+      ->andReturn([$groupId => $groupName]);
+    $this->userDao->shouldReceive('editGroup')
+      ->withArgs([$groupId, $newGroupName])
+      ->andThrow(new \Exception("Group exists."));
+
+    $request = $this->getUpdateGroupRequest($newGroupName);
+
+    $this->expectException(HttpConflictException::class);
+    $this->groupController->updateGroup($request, new ResponseHelper(),
+      ['pathParam' => $groupName]);
+  }
+
+  /**
+   * Create a rename request for the given group name
+   * @param string $newGroupName New name of the group
+   * @param int $version API version
+   * @return Request
+   */
+  private function getUpdateGroupRequest($newGroupName,
+    $version = ApiVersion::V2)
+  {
+    $body = $this->streamFactory->createStream(json_encode([
+      "name" => $newGroupName
+    ]));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("PUT", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    return $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
+  }
+
   /**
    * @test
    * -# Test GroupController::getDeletableGroups() for version 1
