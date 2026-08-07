@@ -824,4 +824,234 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->groupController->changeUserPermission($request,
       new ResponseHelper(), ['pathParam' => $groupId, 'userPathParam' => $userId]);
   }
+
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() for valid rename request in version 1
+   * -# Check if response status is 200
+   */
+  public function testUpdateGroupV1()
+  {
+    $this->testUpdateGroup(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() for valid rename request in version 2
+   * -# Check if response status is 200
+   */
+  public function testUpdateGroupV2()
+  {
+    $this->testUpdateGroup();
+  }
+  /**
+   * @param $version
+   * @return void
+   */
+  private function testUpdateGroup($version = ApiVersion::V2)
+  {
+    $groupId = 4;
+    $userId = 1;
+    $oldGroupName = 'oldGroup';
+    $newGroupName = 'newGroup';
+    $pathParam = $version == ApiVersion::V2 ? $oldGroupName : $groupId;
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('getDeletableAdminGroupMap')
+      ->withArgs([$userId, $_SESSION[Auth::USER_LEVEL]])
+      ->andReturn([$groupId => $oldGroupName]);
+    if ($version == ApiVersion::V2) {
+      $this->userDao->shouldReceive('getGroupIdByName')
+        ->withArgs([$oldGroupName])->andReturn($groupId);
+    }
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([M::any(), [$newGroupName, $groupId], M::any()])
+      ->andReturn(false);
+    $this->userDao->shouldReceive('editGroup')->withArgs([$groupId, $newGroupName]);
+
+    $body = $this->streamFactory->createStream(json_encode([
+      "name" => $newGroupName
+    ]));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("PATCH", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
+
+    $expectedResponse = new Info(200, "Group renamed to $newGroupName.", InfoType::INFO);
+
+    $actualResponse = $this->groupController->updateGroup($request, new ResponseHelper(),
+      ['pathParam' => $pathParam]);
+
+    $this->assertEquals($expectedResponse->getCode(), $actualResponse->getStatusCode());
+    $this->assertEquals($expectedResponse->getArray(), $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() when user is not admin of the group
+   * -# Check if HttpForbiddenException is thrown
+   */
+  public function testUpdateGroupNotAdminV2()
+  {
+    $groupId = 4;
+    $userId = 1;
+    $groupName = 'someGroup';
+    $newGroupName = 'newGroup';
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('getDeletableAdminGroupMap')
+      ->withArgs([$userId, $_SESSION[Auth::USER_LEVEL]])->andReturn([]);
+    $this->userDao->shouldReceive('getGroupIdByName')
+      ->withArgs([$groupName])->andReturn($groupId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+
+    $body = $this->streamFactory->createStream(json_encode(["name" => $newGroupName]));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("PATCH", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->groupController->updateGroup($request, new ResponseHelper(),
+      ['pathParam' => $groupName]);
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() when group does not exist
+   * -# Check if HttpNotFoundException is thrown
+   */
+  public function testUpdateGroupNotFoundV2()
+  {
+    $groupId = 4;
+    $userId = 1;
+    $groupName = 'someGroup';
+    $newGroupName = 'newGroup';
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('getDeletableAdminGroupMap')
+      ->withArgs([$userId, $_SESSION[Auth::USER_LEVEL]])->andReturn([]);
+    $this->userDao->shouldReceive('getGroupIdByName')
+      ->withArgs([$groupName])->andReturn($groupId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(false);
+
+    $body = $this->streamFactory->createStream(json_encode(["name" => $newGroupName]));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("PATCH", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->groupController->updateGroup($request, new ResponseHelper(),
+      ['pathParam' => $groupName]);
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() with invalid (numeric only) group name
+   * -# Check if HttpBadRequestException is thrown
+   */
+  public function testUpdateGroupInvalidNameV2()
+  {
+    $groupId = 4;
+    $userId = 1;
+    $groupName = 'someGroup';
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('getDeletableAdminGroupMap')
+      ->withArgs([$userId, $_SESSION[Auth::USER_LEVEL]])->andReturn([$groupId => $groupName]);
+    $this->userDao->shouldReceive('getGroupIdByName')
+      ->withArgs([$groupName])->andReturn($groupId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+
+    $body = $this->streamFactory->createStream(json_encode(["name" => "12345"]));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("PATCH", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->groupController->updateGroup($request, new ResponseHelper(),
+      ['pathParam' => $groupName]);
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() when "name" in the request body is not a string
+   * -# Check if HttpBadRequestException is thrown instead of a TypeError
+   */
+  public function testUpdateGroupNonStringNameV2()
+  {
+    $groupId = 4;
+    $userId = 1;
+    $groupName = 'someGroup';
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('getDeletableAdminGroupMap')
+      ->withArgs([$userId, $_SESSION[Auth::USER_LEVEL]])->andReturn([$groupId => $groupName]);
+    $this->userDao->shouldReceive('getGroupIdByName')
+      ->withArgs([$groupName])->andReturn($groupId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+
+    $body = $this->streamFactory->createStream(json_encode(["name" => ["a", "b"]]));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("PATCH", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->groupController->updateGroup($request, new ResponseHelper(),
+      ['pathParam' => $groupName]);
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::updateGroup() when a group with the new name already exists
+   * -# Check if HttpBadRequestException is thrown
+   */
+  public function testUpdateGroupDuplicateNameV2()
+  {
+    $groupId = 4;
+    $userId = 1;
+    $groupName = 'someGroup';
+    $newGroupName = 'existingGroup';
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->userDao->shouldReceive('getDeletableAdminGroupMap')
+      ->withArgs([$userId, $_SESSION[Auth::USER_LEVEL]])->andReturn([$groupId => $groupName]);
+    $this->userDao->shouldReceive('getGroupIdByName')
+      ->withArgs([$groupName])->andReturn($groupId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([M::any(), [$newGroupName, $groupId], M::any()])
+      ->andReturn(['group_pk' => 9]);
+
+    $body = $this->streamFactory->createStream(json_encode(["name" => $newGroupName]));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("PATCH", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->groupController->updateGroup($request, new ResponseHelper(),
+      ['pathParam' => $groupName]);
+  }
 }

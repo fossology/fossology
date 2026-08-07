@@ -4056,6 +4056,48 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+    patch:
+      operationId: updateGroupByName
+      tags:
+        - Groups
+        - Admin
+      summary: Rename a group
+      description: >
+        Rename an existing group. Only group admins can rename a group.
+      requestBody:
+        description: New name for the group
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupRename'
+      responses:
+        '200':
+          description: Group has been renamed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Invalid group name, or a group with that name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Not an admin of the group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /groups/{name}/user/{userName}:
     parameters:
       - name: name
@@ -6299,6 +6341,15 @@ components:
           type: string
           example:
             "Main group"
+    GroupRename:
+      description: New name for an existing group
+      type: object
+      properties:
+        name:
+          description: New name for the group
+          type: string
+          example:
+            "Renamed group"
     GetPrevNextItem:
       type: object
       properties:
