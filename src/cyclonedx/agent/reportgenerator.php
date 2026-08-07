@@ -173,6 +173,12 @@ class BomReportGenerator
   {
     $license = [];
 
+    if (array_key_exists('expression', $licenseData) &&
+      !empty($licenseData['expression'])) {
+      $license['expression'] = $licenseData['expression'];
+      return $license;
+    }
+
     // Check license ID is a LicenseRef
     if (array_key_exists('id', $licenseData) && !empty($licenseData['id']) &&
       stripos($licenseData['id'], LicenseRef::SPDXREF_PREFIX) === 0) {

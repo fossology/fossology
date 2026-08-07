@@ -7,6 +7,7 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
@@ -28,6 +29,8 @@ class MultiComparePlugin extends DefaultPlugin
   private $uploadDao;
   /** @var AgentDao */
   private $agentDao;
+  /** @var LicenseDao */
+  private $licenseDao;
 
   public function __construct()
   {
@@ -40,6 +43,7 @@ class MultiComparePlugin extends DefaultPlugin
     $this->dbManager = $this->getObject('db.manager');
     $this->uploadDao = $this->getObject('dao.upload');
     $this->agentDao = $this->getObject('dao.agent');
+    $this->licenseDao = $this->getObject('dao.license');
   }
 
   // ── DB setup ───────────────────────────────────────────────────────────
@@ -231,17 +235,39 @@ class MultiComparePlugin extends DefaultPlugin
           $pfileIn = implode(',', $pfilePh);
           $stmt = __METHOD__ . ".licbatch." . implode('_', $licAgentPks) . ".p" . count($pfileUniq);
           $this->dbManager->prepare($stmt,
-            "SELECT lf.pfile_fk, lr.rf_pk, lr.rf_shortname
-             FROM ONLY license_ref lr, license_file lf
-             WHERE lf.rf_fk = lr.rf_pk
+            "SELECT lf.pfile_fk, lr.rf_pk, lr.rf_shortname, NULL::text AS rf_expression
+             FROM ONLY license_ref lr
+             INNER JOIN license_file lf ON lf.rf_fk = lr.rf_pk
+             LEFT JOIN (
+               SELECT DISTINCT ON (rf_pk) rf_pk, rf_expression
+               FROM license_expression
+               ORDER BY rf_pk, ctid
+             ) le ON lf.rf_fk = le.rf_pk
+             WHERE le.rf_pk IS NULL
                AND lf.agent_fk IN ($agentIn)
+               AND lf.pfile_fk IN ($pfileIn)
+             UNION
+             SELECT lf.pfile_fk, le.rf_pk, NULL::text AS rf_shortname,
+                    le.rf_expression::text AS rf_expression
+             FROM license_file lf
+             INNER JOIN (
+               SELECT DISTINCT ON (rf_pk) rf_pk, rf_expression
+               FROM license_expression
+               ORDER BY rf_pk, ctid
+             ) le ON lf.rf_fk = le.rf_pk
+             WHERE lf.agent_fk IN ($agentIn)
                AND lf.pfile_fk IN ($pfileIn)"
           );
           $res = $this->dbManager->execute($stmt, $params);
           while ($row = $this->dbManager->fetchArray($res)) {
             $pf = intval($row['pfile_fk']);
             /* rf_pk key deduplicates same license found by multiple agents */
-            $licByPfile[$pf][intval($row['rf_pk'])] = $row['rf_shortname'];
+            if (!empty($row['rf_expression'])) {
+              $licByPfile[$pf]['E:' . intval($row['rf_pk'])] =
+                $this->licenseDao->renderLicenseExpression($row['rf_expression']);
+            } else {
+              $licByPfile[$pf]['L:' . intval($row['rf_pk'])] = $row['rf_shortname'];
+            }
           }
           $this->dbManager->freeResult($res);
         }
@@ -252,12 +278,8 @@ class MultiComparePlugin extends DefaultPlugin
         if ($pf > 0) {
           $dataarray = $licByPfile[$pf] ?? [];
         } else {
-          /* Directory: fall back to per-item call to preserve subtree aggregation */
-          $dataarray = [];
-          foreach ($licAgentPks as $agentPk) {
-            $dataarray += GetFileLicenses($agentPk, 0, $child['uploadtree_pk'],
-                $treeInfo['uploadtree_tablename']);
-          }
+          $dataarray = $this->getLicenseDataForSubtree($licAgentPks, $child,
+            $treeInfo['uploadtree_tablename']);
         }
         $child['dataarray'] = $dataarray;
         $child['datastr'] = implode(", ", $dataarray);
@@ -314,6 +336,81 @@ class MultiComparePlugin extends DefaultPlugin
       }
       unset($child);
     }
+  }
+
+  private function getLicenseDataForSubtree(array $licAgentPks, array $child, string $table): array
+  {
+    if (empty($licAgentPks)) {
+      return [];
+    }
+
+    $lft = intval($child['lft'] ?? 0);
+    $rgt = intval($child['rgt'] ?? 0);
+    if ($lft <= 0 || $rgt <= 0) {
+      return [];
+    }
+
+    $params = [$lft, $rgt];
+    $upClause = '';
+    if ($table === 'uploadtree_a' || $table === 'uploadtree') {
+      $params[] = intval($child['upload_fk']);
+      $upClause = "UT.upload_fk=$" . count($params) . " AND ";
+    }
+
+    $agentPlaceholders = [];
+    foreach ($licAgentPks as $apk) {
+      $params[] = $apk;
+      $agentPlaceholders[] = '$' . count($params);
+    }
+    $agentIn = implode(',', $agentPlaceholders);
+
+    $stmt = __METHOD__ . ".$table." . implode('_', $licAgentPks);
+    $this->dbManager->prepare($stmt,
+      "SELECT lr.rf_pk, lr.rf_shortname, NULL::text AS rf_expression
+       FROM ONLY license_ref lr
+       INNER JOIN license_file lf ON lf.rf_fk = lr.rf_pk
+       INNER JOIN (
+         SELECT DISTINCT pfile_fk
+         FROM $table UT
+         WHERE {$upClause}UT.lft BETWEEN $1 AND $2
+       ) SS ON SS.pfile_fk = lf.pfile_fk
+       LEFT JOIN (
+         SELECT DISTINCT ON (rf_pk) rf_pk, rf_expression
+         FROM license_expression
+         ORDER BY rf_pk, ctid
+       ) le ON lf.rf_fk = le.rf_pk
+       WHERE le.rf_pk IS NULL
+         AND lf.agent_fk IN ($agentIn)
+       UNION
+       SELECT le.rf_pk, NULL::text AS rf_shortname,
+              le.rf_expression::text AS rf_expression
+       FROM license_file lf
+       INNER JOIN (
+         SELECT DISTINCT pfile_fk
+         FROM $table UT
+         WHERE {$upClause}UT.lft BETWEEN $1 AND $2
+       ) SS ON SS.pfile_fk = lf.pfile_fk
+       INNER JOIN (
+         SELECT DISTINCT ON (rf_pk) rf_pk, rf_expression
+         FROM license_expression
+         ORDER BY rf_pk, ctid
+       ) le ON lf.rf_fk = le.rf_pk
+       WHERE lf.agent_fk IN ($agentIn)"
+    );
+
+    $dataarray = [];
+    $res = $this->dbManager->execute($stmt, $params);
+    while ($row = $this->dbManager->fetchArray($res)) {
+      if (!empty($row['rf_expression'])) {
+        $dataarray['E:' . intval($row['rf_pk'])] =
+          $this->licenseDao->renderLicenseExpression($row['rf_expression']);
+      } else {
+        $dataarray['L:' . intval($row['rf_pk'])] = $row['rf_shortname'];
+      }
+    }
+    $this->dbManager->freeResult($res);
+
+    return $dataarray;
   }
 
   // ── Filters ────────────────────────────────────────────────────────────
@@ -677,17 +774,44 @@ class MultiComparePlugin extends DefaultPlugin
           $agentPlaceholders[] = "\$" . count($params);
         }
         $agentIn = implode(",", $agentPlaceholders);
-        $sql = "SELECT rf_shortname AS entry, count(DISTINCT pfile_fk) AS cnt
-                 FROM ONLY license_ref, license_file,
-                   (SELECT DISTINCT(pfile_fk) AS PF FROM $table
-                    WHERE {$upClause}{$table}.lft BETWEEN \$1 AND \$2) AS SS
-                 WHERE PF=pfile_fk AND agent_fk IN ($agentIn) AND rf_fk=rf_pk
-                 GROUP BY rf_shortname ORDER BY cnt DESC";
+        $sql = "SELECT lr.rf_shortname AS entry, count(DISTINCT lf.pfile_fk) AS cnt
+                 FROM ONLY license_ref lr
+                 INNER JOIN license_file lf ON lf.rf_fk = lr.rf_pk
+                 INNER JOIN (
+                   SELECT DISTINCT(pfile_fk) AS PF FROM $table
+                   WHERE {$upClause}{$table}.lft BETWEEN \$1 AND \$2
+                 ) AS SS ON SS.PF = lf.pfile_fk
+                 LEFT JOIN (
+                   SELECT DISTINCT ON (rf_pk) rf_pk, rf_expression
+                   FROM license_expression
+                   ORDER BY rf_pk, ctid
+                 ) le ON lf.rf_fk = le.rf_pk
+                 WHERE le.rf_pk IS NULL
+                   AND lf.agent_fk IN ($agentIn)
+                 GROUP BY lr.rf_shortname
+                 UNION
+                 SELECT le.rf_expression::text AS entry, count(DISTINCT lf.pfile_fk) AS cnt
+                 FROM license_file lf
+                 INNER JOIN (
+                   SELECT DISTINCT(pfile_fk) AS PF FROM $table
+                   WHERE {$upClause}{$table}.lft BETWEEN \$1 AND \$2
+                 ) AS SS ON SS.PF = lf.pfile_fk
+                 INNER JOIN (
+                   SELECT DISTINCT ON (rf_pk) rf_pk, rf_expression
+                   FROM license_expression
+                   ORDER BY rf_pk, ctid
+                 ) le ON lf.rf_fk = le.rf_pk
+                 WHERE lf.agent_fk IN ($agentIn)
+                 GROUP BY le.rf_expression";
         $stmt = __METHOD__ . ".lic.$table.$c." . implode("_", $licAgentPks);
         $this->dbManager->prepare($stmt, $sql);
         $res = $this->dbManager->execute($stmt, $params);
         while ($row = $this->dbManager->fetchArray($res)) {
-          $histData[$row['entry']][$c] = (int)$row['cnt'];
+          $entry = $row['entry'];
+          if (!empty($entry) && $entry[0] === '{') {
+            $entry = $this->licenseDao->renderLicenseExpression($entry);
+          }
+          $histData[$entry][$c] = (int)$row['cnt'];
         }
         $this->dbManager->freeResult($res);
 

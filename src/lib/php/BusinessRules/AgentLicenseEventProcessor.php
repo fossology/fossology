@@ -25,6 +25,8 @@ use Fossology\Lib\Proxy\LatestScannerProxy;
  */
 class AgentLicenseEventProcessor
 {
+  const LICENSE_EXPRESSION_SPDX_ID = 'LicenseRef-fossology-License-Expression';
+
   /** @var array $latestAgentMapCache
    * License map cache */
   private $latestAgentMapCache = array();
@@ -63,6 +65,7 @@ class AgentLicenseEventProcessor
    * @brief Get licenses match from agents for given upload tree items
    * @param ItemTreeBounds $itemTreeBounds Upload tree bounds to get results for
    * @param int $usageId  License usage
+   * @param bool $includeExpressions Include license expressions
    * @return array Associative array with
    * \code
    * res => array(
@@ -79,16 +82,19 @@ class AgentLicenseEventProcessor
    * \endcode
    * format
    */
-  protected function getScannerDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
+  protected function getScannerDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL, $includeExpressions=false)
   {
     $agentDetectedLicenses = array();
 
-    $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds, $usageId);
-
+    $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds, $usageId, $includeExpressions);
     foreach ($licenseFileMatches as $licenseMatch) {
       $licenseRef = $licenseMatch->getLicenseRef();
       $licenseId = $licenseRef->getId();
       if ($licenseRef->getShortName() === "No_license_found") {
+        continue;
+      }
+      if ($licenseRef->getSpdxId() === self::LICENSE_EXPRESSION_SPDX_ID
+          && !$includeExpressions) {
         continue;
       }
       $agentRef = $licenseMatch->getAgentRef();
@@ -226,11 +232,12 @@ class AgentLicenseEventProcessor
    * @brief Get all scanner events that occurred on a given upload tree bound
    * @param ItemTreeBounds $itemTreeBounds Upload tree bound
    * @param int $usageId  License usage
+   * @param bool $includeExpressions Include license expressions
    * @return AgentClearingEvent[][] indexed by LicenseId
    */
-  public function getScannerEvents(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
+  public function getScannerEvents(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL, $includeExpressions=false)
   {
-    $agentDetails = $this->getScannerDetectedLicenseDetails($itemTreeBounds, $usageId);
+    $agentDetails = $this->getScannerDetectedLicenseDetails($itemTreeBounds, $usageId, $includeExpressions);
 
     $result = array();
     foreach ($agentDetails as $licenseId => $properties) {

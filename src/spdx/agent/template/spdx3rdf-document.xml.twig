@@ -60,7 +60,7 @@
     <spdx:spdxId>SPDXRef-Actor-{{ organization }}</spdx:spdxId>
     <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>
     <spdx:name>{{ userName | split(' ')[0] }}</spdx:name>
-  </spdx:Organization>{% endif %}{% for licenseData in licenseList %}{% if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' ~%}{%- set licId=licenseData.licenseObj.spdxId %}{% if licenseData.licenseObj.shortName starts with 'LicenseRef-' %}{% set licId=licenseData.licenseObj.shortName %}{%- endif ~%}
+  </spdx:Organization>{% endif %}{% for licenseData in licenseList %}{% if (licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-') and licenseData.licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' ~%}{%- set licId=licenseData.licenseObj.spdxId %}{% if licenseData.licenseObj.shortName starts with 'LicenseRef-' %}{% set licId=licenseData.licenseObj.shortName %}{%- endif ~%}
   <spdx:expandedlicensing_CustomLicense rdf:about="#{{ licId|replace({' ': '-'})|url_encode }}">
     <spdx:spdxId>{{ licenseData.licenseObj.spdxId|replace({' ': '-'})|e }}</spdx:spdxId>
     <spdx:creationInfo rdf:resource="https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1"/>

@@ -122,17 +122,20 @@ class ReadmeOssAgent extends Agent
       if (!$this->uploadDao->isAccessible($addUploadId, $groupId)) {
         continue;
       }
-      $moreLicenses = $this->licenseClearedGetter->getCleared($addUploadId, $this, $groupId, true, "license", false);
+      $moreLicenses = $this->licenseClearedGetter->getCleared(
+        $addUploadId, $this, $groupId, true, "license", false, true);
       $licenseStmts = array_merge($licenseStmts, $moreLicenses['statements']);
       $this->heartbeat(count($moreLicenses['statements']));
       $this->licenseClearedGetter->setOnlyAcknowledgements(true);
-      $moreAcknowledgements = $this->licenseClearedGetter->getCleared($addUploadId, $this, $groupId, true, "license", false);
+      $moreAcknowledgements = $this->licenseClearedGetter->getCleared(
+        $addUploadId, $this, $groupId, true, "license", false, true);
       $licenseAcknowledgements = array_merge($licenseAcknowledgements, $moreAcknowledgements['statements']);
       $this->heartbeat(count($moreAcknowledgements['statements']));
       $moreCopyrights = $this->cpClearedGetter->getCleared($addUploadId, $this, $groupId, true, "copyright", false);
       $copyrightStmts = array_merge($copyrightStmts, $moreCopyrights['statements']);
       $this->heartbeat(count($moreCopyrights['statements']));
-      $moreMainLicenses = $this->licenseMainGetter->getCleared($addUploadId, $this, $groupId, true, null, false);
+      $moreMainLicenses = $this->licenseMainGetter->getCleared(
+        $addUploadId, $this, $groupId, true, null, false, true);
       $licenseStmtsMain = array_merge($licenseStmtsMain, $moreMainLicenses['statements']);
       $this->heartbeat(count($moreMainLicenses['statements']));
     }
@@ -204,6 +207,7 @@ class ReadmeOssAgent extends Agent
     trim($selections[2]) === 'checked'
     );
     foreach ($dataForReadME as $statements) {
+      $skipStatementText = false;
       if ($extract == 'text') {
         $licenseLine = $statements["content"];
         if ($osselotEnabled) {
@@ -211,8 +215,13 @@ class ReadmeOssAgent extends Agent
             $licenseLine = str_replace(LicenseRef::SPDXREF_PREFIX, "", $licenseLine);
         }
         $outData .= $licenseLine . $break;
+        if ($statements[$extract] === 'License Expression') {
+          $skipStatementText = true;
+        }
       }
-      $outData .= str_replace("\n", "\r\n", $statements[$extract]) . $break;
+      if (!$skipStatementText) {
+        $outData .= str_replace("\n", "\r\n", $statements[$extract]) . $break;
+      }
       if (!empty($addSeparator)) {
         $outData .= $addSeparator . $break;
       }

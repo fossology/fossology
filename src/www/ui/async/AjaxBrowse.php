@@ -9,6 +9,7 @@
 namespace Fossology\UI\Ajax;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
@@ -29,6 +30,7 @@ class AjaxBrowse extends DefaultPlugin
   private $uploadDao;
   /** @var UserDao $userDao */
   private $userDao;
+  private $licenseDao;
   /** @var DbManager dbManager */
   private $dbManager;
   /** @var DataTablesUtility $dataTablesUtility */
@@ -49,6 +51,7 @@ class AjaxBrowse extends DefaultPlugin
     global $container;
     $this->uploadDao = $container->get('dao.upload');
     $this->userDao = $container->get('dao.user');
+    $this->licenseDao = $container->get('dao.license');
     $this->dbManager = $container->get('db.manager');
     $this->dataTablesUtility = $container->get('utils.data_tables_utility');
   }
@@ -221,6 +224,19 @@ class AjaxBrowse extends DefaultPlugin
       $mainLicenses[] = '<a onclick="javascript:window.open(\''.Traceback_uri()
               ."?mod=popup-license&rf=$mainLic[rf_pk]','License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');"
               .'" href="javascript:;">'.$mainLic['rf_shortname'].'</a>'
+              ."<img onclick=\"removeMainLicense($uploadId,$mainLic[rf_pk]);\" class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></img>";
+    }
+    $sql = "SELECT rf_pk, rf_expression FROM license_expression le JOIN upload_clearing_license ucl"
+            . " ON le.rf_pk=ucl.rf_fk WHERE upload_fk=$1 AND ucl.group_fk=$2";
+    $stmt = __METHOD__.'.collectMainLicensesExpressions';
+    $mainParams = array($uploadId, Auth::getGroupId());
+    $lic = $this->dbManager->getRows($sql, $mainParams, $stmt);
+    foreach ($lic as $mainLic) {
+      $expression = $this->licenseDao->renderLicenseExpression(
+        $mainLic['rf_expression']);
+      $mainLicenses[] = '<a onclick="javascript:window.open(\''.Traceback_uri()
+              ."?mod=popup-license&rf=$mainLic[rf_pk]','License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');"
+              .'" href="javascript:;">'.$expression.'</a>'
               ."<img onclick=\"removeMainLicense($uploadId,$mainLic[rf_pk]);\" class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></img>";
     }
 
