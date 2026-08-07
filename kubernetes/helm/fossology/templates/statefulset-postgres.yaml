@@ -1,0 +1,79 @@
+{{- if .Values.postgres.internal.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "fossology.fullname" . }}-db
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  serviceName: {{ include "fossology.fullname" . }}-db
+  replicas: 1
+  selector:
+    matchLabels:
+{{ include "fossology.selectorLabels" . | indent 6 }}
+      app.kubernetes.io/component: database
+  template:
+    metadata:
+      labels:
+{{ include "fossology.labels" . | indent 8 }}
+        app.kubernetes.io/component: database
+    spec:
+      containers:
+        - name: postgres
+          image: {{ include "fossology.postgresImage" . }}
+          imagePullPolicy: {{ .Values.image.postgres.pullPolicy }}
+          ports:
+            - containerPort: 5432
+              name: postgres
+              protocol: TCP
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.db.name | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.db.user | quote }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.secretName }}
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_INITDB_ARGS
+              value: "-E SQL_ASCII"
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - {{ .Values.db.user | quote }}
+                - -d
+                - {{ .Values.db.name | quote }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - {{ .Values.db.user | quote }}
+                - -d
+                - {{ .Values.db.name | quote }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+              subPath: pgdata
+{{- with .Values.postgres.resources }}
+          resources:
+{{ toYaml . | indent 12 }}
+{{- end }}
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: {{ include "fossology.dbPvcName" . }}
+{{- end }}

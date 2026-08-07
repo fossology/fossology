@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["image", "web", "scheduler", "workers", "postgres", "repository", "ssh", "db"],
+  "properties": {
+    "fullnameOverride": { "type": "string" },
+    "image": {
+      "type": "object",
+      "required": ["web", "scheduler", "worker", "postgres"],
+      "properties": {
+        "web":       { "$ref": "#/definitions/image" },
+        "scheduler": { "$ref": "#/definitions/image" },
+        "worker":    { "$ref": "#/definitions/image" },
+        "postgres":  { "$ref": "#/definitions/image" }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": { "type": "boolean" },
+        "name":   { "type": "string" }
+      }
+    },
+    "rbac": {
+      "type": "object",
+      "properties": {
+        "create": { "type": "boolean" }
+      }
+    },
+    "ssh": {
+      "type": "object",
+      "required": ["secretName"],
+      "properties": {
+        "secretName": { "type": "string", "minLength": 1 }
+      }
+    },
+    "db": {
+      "type": "object",
+      "required": ["secretName", "name", "user", "password"],
+      "properties": {
+        "secretName": { "type": "string", "minLength": 1 },
+        "name":       { "type": "string", "minLength": 1 },
+        "user":       { "type": "string", "minLength": 1 },
+        "password":   { "type": "string" }
+      }
+    },
+    "postgres": {
+      "type": "object",
+      "properties": {
+        "internal": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" }
+          }
+        },
+        "resources": { "$ref": "#/definitions/resources" },
+        "storage": { "$ref": "#/definitions/storage" }
+      }
+    },
+    "repository": {
+      "type": "object",
+      "properties": {
+        "storage": { "$ref": "#/definitions/storage" },
+        "accessMode": {
+          "type": "string",
+          "enum": ["ReadWriteOnce", "ReadWriteMany", "ReadOnlyMany"]
+        }
+      }
+    },
+    "web": {
+      "type": "object",
+      "properties": {
+        "replicaCount": { "type": "integer", "minimum": 1 },
+        "resources": { "$ref": "#/definitions/resources" },
+        "service": {
+          "type": "object",
+          "properties": {
+            "type":       { "type": "string", "enum": ["ClusterIP", "NodePort", "LoadBalancer"] },
+            "port":       { "type": "integer", "minimum": 1, "maximum": 65535 },
+            "targetPort": { "type": "integer", "minimum": 1, "maximum": 65535 }
+          }
+        }
+      }
+    },
+    "scheduler": {
+      "type": "object",
+      "properties": {
+        "replicaCount": { "type": "integer", "minimum": 1, "maximum": 1 },
+        "resources": { "$ref": "#/definitions/resources" }
+      }
+    },
+    "workers": {
+      "type": "object",
+      "properties": {
+        "replicaCount":        { "type": "integer", "minimum": 1 },
+        "podManagementPolicy": { "type": "string", "enum": ["OrderedReady", "Parallel"] },
+        "maxAgentsPerWorker":  { "type": "integer", "minimum": 1 },
+        "minReadyStartup":    { "type": "integer", "minimum": 1 },
+        "minReadySync":       { "type": "integer", "minimum": 1 },
+        "pools": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/workerPool" }
+        },
+        "resources": { "$ref": "#/definitions/resources" }
+      }
+    },
+    "configSync": {
+      "type": "object",
+      "properties": {
+        "startupPollIntervalSeconds": { "type": "integer", "minimum": 1 },
+        "pollIntervalSeconds":        { "type": "integer", "minimum": 1 },
+        "timeoutSeconds":             { "type": "integer", "minimum": 1 }
+      }
+    },
+    "postInstall": {
+      "type": "object",
+      "properties": {
+        "enabled":                  { "type": "boolean" },
+        "backoffLimit":             { "type": "integer", "minimum": 0 },
+        "ttlSecondsAfterFinished":  { "type": "integer", "minimum": 0 }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "enabled":       { "type": "boolean" },
+        "className":     { "type": "string" },
+        "annotations":   { "type": "object" },
+        "host":          { "type": "string" },
+        "path":          { "type": "string" },
+        "pathType":      { "type": "string" },
+        "tls":           { "type": "boolean" },
+        "tlsSecretName": { "type": "string" }
+      }
+    },
+    "keda": {
+      "type": "object",
+      "properties": {
+        "enabled":          { "type": "boolean" },
+        "connectionSecretName": { "type": "string", "minLength": 1 },
+        "connectionSecretKey":  { "type": "string", "minLength": 1 },
+        "maxReplicaCount":  { "type": "integer", "minimum": 1 },
+        "pollingInterval":  { "type": "integer", "minimum": 1 },
+        "cooldownPeriod":   { "type": "integer", "minimum": 1 },
+        "targetValue":      { "type": "string" }
+      }
+    }
+  },
+  "definitions": {
+    "image": {
+      "type": "object",
+      "required": ["repository", "tag", "pullPolicy"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "tag":        { "type": ["string", "number"] },
+        "pullPolicy": { "type": "string", "enum": ["Always", "IfNotPresent", "Never"] }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "requests": {
+          "type": "object",
+          "properties": {
+            "cpu":    { "type": "string" },
+            "memory": { "type": "string" }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "cpu":    { "type": "string" },
+            "memory": { "type": "string" }
+          }
+        }
+      }
+    },
+    "storage": {
+      "type": "object",
+      "properties": {
+        "size":      { "type": "string", "minLength": 1 },
+        "className": { "type": "string" }
+      },
+      "required": ["size"]
+    },
+    "workerPool": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "replicaCount": { "type": "integer", "minimum": 1 },
+        "podManagementPolicy": {
+          "type": "string",
+          "enum": ["OrderedReady", "Parallel"]
+        },
+        "maxAgentsPerWorker": { "type": "integer", "minimum": 1 },
+        "agentCaps": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "resources": { "$ref": "#/definitions/resources" },
+        "keda": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "minReplicaCount": { "type": "integer", "minimum": 1 },
+            "maxReplicaCount": { "type": "integer", "minimum": 1 },
+            "pollingInterval": { "type": "integer", "minimum": 1 },
+            "cooldownPeriod": { "type": "integer", "minimum": 1 },
+            "targetValue": { "type": "string" },
+            "query": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+# Scheduler service — allows web pods to connect to the scheduler
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fossology.fullname" . }}-scheduler
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+    app.kubernetes.io/component: scheduler
+spec:
+  type: ClusterIP
+  ports:
+    - port: 24693
+      targetPort: scheduler
+      protocol: TCP
+      name: scheduler
+  selector:
+{{ include "fossology.selectorLabels" . | indent 4 }}
+    app.kubernetes.io/component: scheduler

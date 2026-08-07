@@ -1,0 +1,12 @@
+# ConfigMap containing the render_fossology_conf.py script
+# mounted into the scheduler pod's init and sidecar containers
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fossology.fullname" . }}-render-script
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+data:
+  render_fossology_conf.py: |
+{{ .Files.Get "files/render_fossology_conf.py" | indent 4 }}

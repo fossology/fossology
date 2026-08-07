@@ -1,0 +1,42 @@
+# Generic ScaledObject for the main worker StatefulSet.
+# Scales based on pending job count in the FOSSology jobqueue table.
+# Requires KEDA operator: https://keda.sh/docs/deploy/
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: fossology-workers
+  namespace: fossology
+  labels:
+    app.kubernetes.io/name: fossology
+    app.kubernetes.io/component: worker
+spec:
+  scaleTargetRef:
+    kind: StatefulSet
+    name: fossology-workers
+  minReplicaCount: 1
+  maxReplicaCount: 10   # Override in values-production.yaml
+  pollingInterval: 30
+  cooldownPeriod: 300
+  triggers:
+    - type: postgresql
+      metadata:
+        # Connection string from a Secret — do NOT hardcode credentials
+        connectionFromEnv: FOSSOLOGY_DB_CONNECTION
+        query: >-
+          SELECT COUNT(*) FROM jobqueue
+          WHERE jq_endtime IS NULL
+          AND jq_starttime IS NULL
+        targetQueryValue: "5"
+      authenticationRef:
+        name: fossology-db-auth
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: fossology-db-auth
+  namespace: fossology
+spec:
+  secretTargetRef:
+    - parameter: connection
+      name: fossology-db
+      key: KEDA_DB_CONNECTION

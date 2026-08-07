@@ -1,0 +1,24 @@
+# Headless service for worker StatefulSet — required for stable DNS.
+# Produces DNS names like:
+#   fossology-workers-0.fossology-workers-headless.<ns>.svc.cluster.local
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fossology.workersHeadless" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+    app.kubernetes.io/component: worker
+    fossology.org/role: worker
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: false
+  ports:
+    - port: 22
+      targetPort: ssh
+      protocol: TCP
+      name: ssh
+  selector:
+{{ include "fossology.selectorLabels" . | indent 4 }}
+    fossology.org/role: worker

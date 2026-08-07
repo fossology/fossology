@@ -1,0 +1,215 @@
+{{- /*
+  Scheduler Deployment — the most critical template.
+  Runs fo_scheduler with a config-sync sidecar that watches
+  Kubernetes for ready worker pods and rewrites fossology.conf.
+  Always exactly 1 replica — fo_scheduler cannot be horizontally scaled.
+*/ -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fossology.fullname" . }}-scheduler
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "fossology.labels" . | indent 4 }}
+    app.kubernetes.io/component: scheduler
+spec:
+  replicas: {{ .Values.scheduler.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+{{ include "fossology.selectorLabels" . | indent 6 }}
+      app.kubernetes.io/component: scheduler
+  template:
+    metadata:
+      labels:
+{{ include "fossology.labels" . | indent 8 }}
+        app.kubernetes.io/component: scheduler
+    spec:
+      serviceAccountName: {{ include "fossology.serviceAccountName" . }}
+      shareProcessNamespace: true
+      initContainers:
+        # Wait for PostgreSQL to be ready before scheduler starts
+        - name: wait-for-db
+          image: {{ include "fossology.postgresImage" . }}
+          imagePullPolicy: {{ .Values.image.postgres.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "[init] Waiting for PostgreSQL at ${FOSSOLOGY_DB_HOST}:5432..."
+              until pg_isready -h "${FOSSOLOGY_DB_HOST}" -p 5432 -U "${FOSSOLOGY_DB_USER}"; do
+                sleep 2
+              done
+              echo "[init] PostgreSQL is ready."
+          env:
+{{ include "fossology.envDatabase" . | indent 12 }}
+        # Initialize the database schema
+        - name: init-db
+          image: {{ include "fossology.webImage" . }}
+          imagePullPolicy: {{ .Values.image.web.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Waiting for postgres..."
+              until PGPASSWORD=$FOSSOLOGY_DB_PASSWORD psql -h "$FOSSOLOGY_DB_HOST" "$FOSSOLOGY_DB_NAME" "$FOSSOLOGY_DB_USER" -c '\l' >/dev/null 2>&1; do sleep 2; done
+              echo "Writing Db.conf..."
+              mkdir -p /usr/local/etc/fossology
+              cat <<EOM > /usr/local/etc/fossology/Db.conf
+              dbname=$FOSSOLOGY_DB_NAME;
+              host=$FOSSOLOGY_DB_HOST;
+              user=$FOSSOLOGY_DB_USER;
+              password=$FOSSOLOGY_DB_PASSWORD;
+              EOM
+              echo "Running database initialization..."
+              yes | /usr/local/lib/fossology/fo-postinstall --common --database --licenseref
+          env:
+{{ include "fossology.envDatabase" . | indent 12 }}
+        # Render initial fossology.conf with [HOSTS] from live worker pods
+        - name: render-config
+          image: {{ include "fossology.schedulerImage" . }}
+          imagePullPolicy: {{ .Values.image.scheduler.pullPolicy }}
+          command:
+            - python3
+            - /opt/render_fossology_conf.py
+            - --template=/config-source/fossology.conf.tmpl
+            - --output=/shared/fossology.conf
+            - --namespace=$(POD_NAMESPACE)
+            - --label-selector={{ include "fossology.workerLabelSelector" . }}
+            - --headless-service={{ include "fossology.workersHeadless" . }}
+            - --max-agents-per-worker={{ .Values.workers.maxAgentsPerWorker }}
+            - --max-agents-label=fossology.org/max-agents
+            - --min-ready-workers={{ .Values.workers.minReadyStartup }}
+            - --poll-interval-seconds={{ .Values.configSync.startupPollIntervalSeconds }}
+            - --timeout-seconds={{ .Values.configSync.timeoutSeconds }}
+            - --scheduler-host=$(MY_POD_IP)
+            - --mode=once
+          env:
+{{ include "fossology.envPodNamespace" . | indent 12 }}
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          volumeMounts:
+            - name: fossology-conf
+              mountPath: /shared
+            - name: config-source
+              mountPath: /config-source
+              readOnly: true
+            - name: render-script
+              mountPath: /opt/render_fossology_conf.py
+              subPath: render_fossology_conf.py
+              readOnly: true
+      containers:
+        # Main scheduler process
+        - name: scheduler
+          image: {{ include "fossology.schedulerImage" . }}
+          imagePullPolicy: {{ .Values.image.scheduler.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              ln -sf /shared/fossology.conf /usr/local/etc/fossology/fossology.conf
+              install -d -o fossy -g fossy -m 700 /home/fossy/.ssh
+              cp /run/secrets/ssh-private/id_rsa /home/fossy/.ssh/id_rsa
+              chmod 600 /home/fossy/.ssh/id_rsa
+              chown fossy:fossy /home/fossy/.ssh/id_rsa
+              if [ -f /run/secrets/ssh-private/known_hosts ]; then
+                cp /run/secrets/ssh-private/known_hosts /home/fossy/.ssh/known_hosts
+                chmod 600 /home/fossy/.ssh/known_hosts
+                chown fossy:fossy /home/fossy/.ssh/known_hosts
+              fi
+              export HOME=/home/fossy
+              export USER=fossy
+              export LOGNAME=fossy
+              echo 'StrictHostKeyChecking no' >> /etc/ssh/ssh_config
+              echo 'UserKnownHostsFile /dev/null' >> /etc/ssh/ssh_config
+              echo 'LogLevel QUIET' >> /etc/ssh/ssh_config
+              exec /fossology/docker-entrypoint.sh /usr/local/share/fossology/scheduler/agent/fo_scheduler --log /dev/stdout --verbose=3 --reset
+          env:
+{{ include "fossology.envDatabase" . | indent 12 }}
+            - name: FOSSOLOGY_SCHEDULER_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          ports:
+            - containerPort: 24693
+              name: scheduler
+              protocol: TCP
+          volumeMounts:
+            - name: fossology-repo
+              mountPath: /srv/fossology/repository
+            - name: fossology-conf
+              mountPath: /shared
+            - name: ssh-private
+              mountPath: /run/secrets/ssh-private
+              readOnly: true
+{{- with .Values.scheduler.resources }}
+          resources:
+{{ toYaml . | indent 12 }}
+{{- end }}
+        # Config-sync sidecar — watches worker pod changes, rewrites
+        # fossology.conf, then requests an in-process reload via fo_cli
+        # (with SIGHUP fallback if the CLI is unavailable)
+        - name: config-sync
+          image: {{ include "fossology.schedulerImage" . }}
+          imagePullPolicy: {{ .Values.image.scheduler.pullPolicy }}
+          command:
+            - python3
+            - /opt/render_fossology_conf.py
+            - --template=/config-source/fossology.conf.tmpl
+            - --output=/shared/fossology.conf
+            - --namespace=$(POD_NAMESPACE)
+            - --label-selector={{ include "fossology.workerLabelSelector" . }}
+            - --headless-service={{ include "fossology.workersHeadless" . }}
+            - --max-agents-per-worker={{ .Values.workers.maxAgentsPerWorker }}
+            - --max-agents-label=fossology.org/max-agents
+            - --min-ready-workers={{ .Values.workers.minReadySync }}
+            - --poll-interval-seconds={{ .Values.configSync.pollIntervalSeconds }}
+            - --timeout-seconds={{ .Values.configSync.timeoutSeconds }}
+            - --scheduler-host=$(MY_POD_IP)
+            - --signal-command=fo_cli -H $(MY_POD_IP) --reload -q || /usr/local/share/fossology/scheduler/agent/fo_cli -H $(MY_POD_IP) --reload -q || pkill -HUP fo_scheduler || true
+            - --mode=loop
+          env:
+{{ include "fossology.envPodNamespace" . | indent 12 }}
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          volumeMounts:
+            - name: fossology-conf
+              mountPath: /shared
+            - name: config-source
+              mountPath: /config-source
+              readOnly: true
+            - name: render-script
+              mountPath: /opt/render_fossology_conf.py
+              subPath: render_fossology_conf.py
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: fossology-repo
+          persistentVolumeClaim:
+            claimName: {{ include "fossology.repoPvcName" . }}
+        - name: fossology-conf
+          emptyDir: {}
+        - name: config-source
+          configMap:
+            name: {{ include "fossology.fullname" . }}-config
+        - name: ssh-private
+          secret:
+            secretName: {{ .Values.ssh.secretName }}
+            defaultMode: 0600
+            items:
+              - key: id_rsa
+                path: id_rsa
+              - key: known_hosts
+                path: known_hosts
+        - name: render-script
+          configMap:
+            name: {{ include "fossology.fullname" . }}-render-script

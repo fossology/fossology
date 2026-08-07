@@ -45,6 +45,8 @@ EOF
 # it without being careful can destroy your system.
 #
 YesOpt=''
+PIP_TIMEOUT='120'
+PIP_RETRIES='10'
 
 EVERYTHING=''
 RUNTIME=''
@@ -155,19 +157,19 @@ if [[ $RUNTIME ]]; then
     # Using --target causes conflict in bin dir, using --upgrade overwrites it.
     # See https://github.com/pypa/pip/issues/8063
     # Dependencies for scancode
-    su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'python3 -m pip install --target=$HOME/pythondeps --no-input setuptools wheel'
+    su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'PIP_DEFAULT_TIMEOUT='"$PIP_TIMEOUT"' python3 -m pip install --target=$HOME/pythondeps --no-input --retries='"$PIP_RETRIES"' setuptools wheel'
     ###########################################################################
     if [[ $EXPERIMENTAL ]]; then
       # Include experimental dependencies
-      su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install \
-        --target=$HOME/pythondeps --no-input --upgrade \
+      su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" PIP_DEFAULT_TIMEOUT='"$PIP_TIMEOUT"' python3 -m pip install \
+        --target=$HOME/pythondeps --no-input --retries='"$PIP_RETRIES"' --upgrade \
         scancode-toolkit==32.4.1 scanoss==1.5.1 safaa==0.0.4'
-      su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m spacy \
+      su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" PIP_DEFAULT_TIMEOUT='"$PIP_TIMEOUT"' PIP_RETRIES='"$PIP_RETRIES"' python3 -m spacy \
         download en_core_web_sm --target=$HOME/pythondeps'
     else
       # Only non-experimental dependencies
-      su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install\
-        --target=$HOME/pythondeps --no-input --upgrade \
+      su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" PIP_DEFAULT_TIMEOUT='"$PIP_TIMEOUT"' python3 -m pip install\
+        --target=$HOME/pythondeps --no-input --retries='"$PIP_RETRIES"' --upgrade \
         scancode-toolkit==32.4.1 scanoss==1.5.1'
     fi
     ###########################################################################

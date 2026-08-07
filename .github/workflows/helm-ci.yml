@@ -1,0 +1,131 @@
+name: Helm Chart CI
+
+on:
+  push:
+    branches: ["*"]
+    paths:
+      - "kubernetes/**"
+      - "docker/worker/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "kubernetes/**"
+      - "docker/worker/**"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Helm lint
+        run: helm lint kubernetes/helm/fossology/
+
+      - name: Helm template (dry run)
+        run: |
+          helm template fossology kubernetes/helm/fossology/ \
+            --debug \
+            --set ssh.secretName=test-ssh \
+            --set db.secretName=test-db
+
+      - name: Validate staging values
+        run: |
+          helm template fossology kubernetes/helm/fossology/ \
+            -f kubernetes/helm/fossology/values-staging.yaml \
+            --debug > /dev/null
+
+      - name: Validate production values
+        run: |
+          helm template fossology kubernetes/helm/fossology/ \
+            -f kubernetes/helm/fossology/values-production.yaml \
+            --debug > /dev/null
+
+  install-test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Install kind
+        run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+
+      - name: Create kind cluster
+        run: kind create cluster --name fossology-ci --wait 120s
+
+      - name: Build worker image
+        run: |
+          docker build \
+            --build-arg FOSSOLOGY_VERSION=4.4.0 \
+            -t fossology-worker:ci \
+            -f docker/worker/Dockerfile .
+
+      - name: Load worker image into kind
+        run: kind load docker-image fossology-worker:ci --name fossology-ci
+
+      - name: Generate SSH keys and create secret
+        run: |
+          ssh-keygen -t ed25519 -f /tmp/fossology-ssh -N "" -q
+          kubectl create namespace fossology || true
+          kubectl create secret generic fossology-ssh \
+            --namespace fossology \
+            --from-file=id_rsa=/tmp/fossology-ssh \
+            --from-file=id_rsa.pub=/tmp/fossology-ssh.pub \
+            --from-file=authorized_keys=/tmp/fossology-ssh.pub \
+            --from-literal=known_hosts=""
+
+      - name: Helm install
+        run: |
+          helm install fossology kubernetes/helm/fossology/ \
+            --namespace fossology \
+            --set image.worker.repository=fossology-worker \
+            --set image.worker.tag=ci \
+            --set image.worker.pullPolicy=Never \
+            --set repository.storage.className=standard \
+            --set postgres.storage.className=standard \
+            --wait \
+            --timeout 10m
+
+      - name: Debug — print pod status
+        if: always()
+        run: |
+          kubectl get pods -n fossology -o wide
+          kubectl get pvc -n fossology
+          kubectl get events -n fossology --sort-by='.lastTimestamp' | tail -30
+
+      - name: Smoke test — check web UI
+        run: |
+          kubectl port-forward svc/fossology-web 8081:80 -n fossology &
+          PF_PID=$!
+          sleep 10
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/repo/api/v2/info || echo "000")
+          kill $PF_PID 2>/dev/null || true
+          echo "HTTP response: $HTTP_CODE"
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Smoke test passed"
+          else
+            echo "❌ Smoke test failed (expected 200, got $HTTP_CODE)"
+            kubectl logs deployment/fossology-web -n fossology --tail=50 || true
+            kubectl logs deployment/fossology-scheduler -c scheduler -n fossology --tail=50 || true
+            exit 1
+          fi
+
+      - name: Cleanup
+        if: always()
+        run: |
+          helm uninstall fossology -n fossology || true
+          kind delete cluster --name fossology-ci
