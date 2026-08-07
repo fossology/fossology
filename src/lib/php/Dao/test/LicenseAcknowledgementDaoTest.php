@@ -22,6 +22,8 @@ use PHPUnit\Runner\Version as PHPUnitVersion;
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
  */
+#[\PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses]
+#[\PHPUnit\Framework\Attributes\PreserveGlobalState(false)]
 class LicenseAcknowledgementDaoTest extends TestCase
 {
 
@@ -58,7 +60,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
     $this->testDb->alterTables(["license_std_acknowledgement"]);
     $this->testDb->insertData(["users", "license_std_acknowledgement"]);
     $this->authClass = \Mockery::mock('alias:Fossology\Lib\Auth\Auth');
-    $this->authClass->expects('getUserId')->andReturn(2);
+    $this->authClass->shouldReceive('getUserId')->andReturn(2);
   }
 
   protected function tearDown() : void
@@ -67,6 +69,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
       \Hamcrest\MatcherAssert::getCount() - $this->assertCountBefore);
     $this->testDb = null;
     $this->dbManager = null;
+    \Mockery::close();
   }
 
   /**
