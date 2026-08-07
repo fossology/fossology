@@ -564,8 +564,14 @@ class ui_view_info extends FO_Plugin
       if ($row['reuse_mode'] & UploadDao::REUSE_MAIN) {
         $reuseMode[] = "Main license";
       }
+      if ($row['reuse_mode'] & UploadDao::REUSE_BULK) {
+        $reuseMode[] = "Bulk scan";
+      }
       if ($row['reuse_mode'] & UploadDao::REUSE_CONF) {
         $reuseMode[] = "Report configuration settings";
+      }
+      if ($row['reuse_mode'] & UploadDao::REUSE_COPYRIGHT) {
+        $reuseMode[] = "Copyright";
       }
       $entry['name'] = $reusedUpload->getFilename();
       $entry['url'] = Traceback_uri() .

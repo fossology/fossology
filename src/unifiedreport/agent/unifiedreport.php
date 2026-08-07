@@ -331,6 +331,39 @@ class UnifiedReport extends Agent
     $otherStatement['includeDNU'] = (count($licensesDNU["statements"]) > 0) ? true : false;
     $otherStatement['includeNonFunctional'] = (count($licensesNonFunctional["statements"]) > 0) ? true : false;
 
+    $reusedPackages = array();
+    $reusedInfo = $this->uploadDao->getReusedUpload($uploadId, $groupId);
+    foreach ($reusedInfo as $row) {
+      $reuseUploadFk = $row['reused_upload_fk'];
+      $reuseGroupFk = $row['reused_group_fk'];
+      $reusedUpload = $this->uploadDao->getUpload($reuseUploadFk);
+      $reuseModes = array();
+      if ($row['reuse_mode'] & UploadDao::REUSE_ENHANCED) {
+        $reuseModes[] = "Enhanced";
+      } else {
+        $reuseModes[] = "Normal";
+      }
+      if ($row['reuse_mode'] & UploadDao::REUSE_MAIN) {
+        $reuseModes[] = "Main license";
+      }
+      if ($row['reuse_mode'] & UploadDao::REUSE_BULK) {
+        $reuseModes[] = "Bulk scan";
+      }
+      if ($row['reuse_mode'] & UploadDao::REUSE_CONF) {
+        $reuseModes[] = "Report configuration settings";
+      }
+      if ($row['reuse_mode'] & UploadDao::REUSE_COPYRIGHT) {
+        $reuseModes[] = "Copyright";
+      }
+      $hashes = $this->uploadDao->getUploadHashes($reuseUploadFk);
+      $reusedPackages[] = array(
+        'name' => $reusedUpload->getFilename(),
+        'sha1' => $hashes['sha1'],
+        'group' => $this->userDao->getGroupNameById($reuseGroupFk) . " ($reuseGroupFk)",
+        'mode' => implode(", ", $reuseModes) . " reuse"
+      );
+    }
+
     $contents = array(
                         "licenses" => $licenses,
                         "bulkLicenses" => $bulkLicenses,
@@ -347,7 +380,8 @@ class UnifiedReport extends Agent
                         "licensesNonFunctionalComment" => $licensesNonFunctionalComment,
                         "licensesMain" => $licensesMain,
                         "licensesHist" => $licensesHist,
-                        "otherStatement" => $otherStatement
+                        "otherStatement" => $otherStatement,
+                        "reusedPackages" => $reusedPackages
                      );
 
     $this->writeReport($contents, $uploadId, $groupId, $userId);
@@ -648,6 +682,46 @@ class UnifiedReport extends Agent
   }
 
   /**
+   * @brief Reused component section in report.
+   * @param Section $section
+   * @param string $title
+   * @param array $reusedPackages
+   * @param array $titleSubHeading
+   */
+  private function reusedComponentTable(Section $section, $title, $reusedPackages, $titleSubHeading)
+  {
+    $firstColLen = 3000;
+    $secondColLen = 3000;
+    $thirdColLen = 4500;
+    $fourthColLen = 4500;
+
+    $section->addTitle(htmlspecialchars($title), 2);
+    $section->addText($titleSubHeading, $this->subHeadingStyle);
+
+    $table = $section->addTable($this->tablestyle);
+    if (!empty($reusedPackages)) {
+      foreach ($reusedPackages as $reusedPkg) {
+        $table->addRow($this->rowHeight);
+        $cell1 = $table->addCell($firstColLen);
+        $cell1->addText(htmlspecialchars($reusedPkg['name']), $this->licenseColumn, "pStyle");
+        $cell2 = $table->addCell($secondColLen);
+        $cell2->addText(htmlspecialchars($reusedPkg['sha1']), $this->filePathColumn, "pStyle");
+        $cell3 = $table->addCell($thirdColLen);
+        $cell3->addText(htmlspecialchars($reusedPkg['group']), $this->filePathColumn, "pStyle");
+        $cell4 = $table->addCell($fourthColLen);
+        $cell4->addText(htmlspecialchars($reusedPkg['mode']), $this->filePathColumn, "pStyle");
+      }
+    } else {
+      $table->addRow($this->rowHeight);
+      $table->addCell($firstColLen)->addText("");
+      $table->addCell($secondColLen)->addText("");
+      $table->addCell($thirdColLen)->addText("");
+      $table->addCell($fourthColLen)->addText("");
+    }
+    $section->addTextBreak();
+  }
+
+  /**
    * @brief License histogram into report.
    * @param Section $section
    * @param array $dataHistogram
@@ -900,6 +974,12 @@ class UnifiedReport extends Agent
       $section->addTitle(htmlspecialchars("$subHeading"), 3);
       $titleSubHeadingNotes = "(License name, Comment Entered, File path)";
       $this->bulkLicenseTable($section, "", $contents['licensesIrreComment']['statements'], $titleSubHeadingNotes);
+    }
+
+    if (!empty($contents['reusedPackages'])) {
+      $heading = "Reused component";
+      $titleSubHeadingReuse = "(Package name, SHA1, Group, Mode)";
+      $this->reusedComponentTable($section, $heading, $contents['reusedPackages'], $titleSubHeadingReuse);
     }
 
     $heading = array_keys($unifiedColumns['dnufiles'])[0];
