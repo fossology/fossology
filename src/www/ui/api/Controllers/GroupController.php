@@ -189,6 +189,86 @@ class GroupController extends RestController
   }
 
   /**
+   * Rename an existing group
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function updateGroup($request, $response, $args)
+  {
+    if (empty($args['pathParam'])) {
+      throw new HttpBadRequestException("ERROR - No group name or id provided");
+    }
+    $userId = $this->restHelper->getUserId();
+
+    /** @var UserDao $userDao */
+    $userDao = $this->restHelper->getUserDao();
+    $groupMap = $userDao->getDeletableAdminGroupMap($userId,
+      $_SESSION[Auth::USER_LEVEL]);
+
+    $apiVersion = ApiVersion::getVersion($request);
+    if ($apiVersion == ApiVersion::V2) {
+      $groupId = intval($userDao->getGroupIdByName($args['pathParam']));
+    } else {
+      $groupId = intval($args['pathParam']);
+    }
+
+    if (!$this->dbHelper->doesIdExist("groups", "group_pk", $groupId)) {
+      throw new HttpNotFoundException("Group id not found!");
+    }
+    if (!array_key_exists($groupId, $groupMap)) {
+      throw new HttpForbiddenException("Not admin of the group. " .
+        "Can not process request.");
+    }
+
+    $body = $this->getParsedBody($request);
+    $newGroupName = (isset($body['name']) && is_string($body['name'])) ? trim($body['name']) : '';
+
+    $validationError = $this->validateGroupName($newGroupName);
+    if (!empty($validationError)) {
+      throw new HttpBadRequestException($validationError);
+    }
+
+    $dbManager = $this->dbHelper->getDbManager();
+    $duplicateGroup = $dbManager->getSingleRow(
+      "SELECT group_pk FROM groups WHERE LOWER(group_name)=LOWER($1) AND group_pk != $2",
+      [$newGroupName, $groupId], __METHOD__ . ".groupNameExists");
+    if (!empty($duplicateGroup)) {
+      throw new HttpBadRequestException("Group exists. Try different Name, " .
+        "Group-Name checking is case-insensitive and Duplicate not allowed");
+    }
+
+    try {
+      $userDao->editGroup($groupId, $newGroupName);
+    } catch (\Exception $e) {
+      throw new HttpBadRequestException($e->getMessage(), $e);
+    }
+    $returnVal = new Info(200, "Group renamed to $newGroupName.", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Validate a group name
+   *
+   * @param string $groupName
+   * @return string Empty string if valid, error message otherwise
+   */
+  private function validateGroupName($groupName)
+  {
+    if (empty($groupName)) {
+      return "Invalid: Group name cannot be whitespace only";
+    } elseif (preg_match('/^[\s\w_-]+$/', $groupName) !== 1) {
+      return "Invalid: Group name can only contain letters, numbers, hyphens and underscores";
+    } elseif (is_numeric($groupName)) {
+      return "Invalid: Group name cannot be numeric-only";
+    }
+    return "";
+  }
+
+  /**
    * Get a list of groups that can be deleted
    *
    * @param ServerRequestInterface $request

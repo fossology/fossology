@@ -318,6 +318,7 @@ $app->group('/groups',
     $app->get('/deletable', GroupController::class . ':getDeletableGroups');
     $app->get("/{pathParam:$pattern}/members", GroupController::class . ':getGroupMembers');
     $app->put("/{pathParam:$pattern}/user/{userPathParam:$pattern}", GroupController::class . ':changeUserPermission');
+    $app->patch("/{pathParam:$pattern}", GroupController::class . ':updateGroup');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
