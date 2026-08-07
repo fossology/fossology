@@ -193,11 +193,12 @@ class RestHelper
    * @param integer $uploadId Upload to copy/move
    * @param integer $newFolderId New folder id
    * @param boolean $isCopy Set true to perform copy, false to move
+   * @param string $action The action performed (move, copy, link)
    * @return Fossology::UI::Api::Models::Info
    * @throws HttpForbiddenException If upload or folder is not accessible
    * @throws HttpBadRequestException If folder id is not a positive integer
    */
-  public function copyUpload($uploadId, $newFolderId, $isCopy)
+  public function copyUpload($uploadId, $newFolderId, $isCopy, $action = "")
   {
     if (! is_numeric($newFolderId) || $newFolderId <= 0) {
       throw new HttpBadRequestException("Folder id should be a positive integer");
@@ -215,8 +216,12 @@ class RestHelper
 
     $errors = $contentMove->copyContent([$uploadContentId], $newFolderId, $isCopy);
     if (empty($errors)) {
-      $action = $isCopy ? "copied" : "moved";
-      $info = new Info(202, "Upload $uploadId will be $action to folder $newFolderId",
+      if ($action === "link") {
+        $actionStr = "linked";
+      } else {
+        $actionStr = $isCopy ? "copied" : "moved";
+      }
+      $info = new Info(202, "Upload $uploadId will be $actionStr to folder $newFolderId",
         InfoType::INFO);
     } else {
       $info = new Info(202, "Exceptions occurred: $errors",

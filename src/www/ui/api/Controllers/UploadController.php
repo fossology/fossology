@@ -393,12 +393,13 @@ class UploadController extends RestController
     } else {
       $action = $request->getHeaderLine('action');
     }
-    if (strtolower($action) == "move") {
+    $action = strtolower($action);
+    if ($action == "move") {
       $copy = false;
     } else {
       $copy = true;
     }
-    return $this->changeUpload($request, $response, $args, $copy);
+    return $this->changeUpload($request, $response, $args, $copy, $action);
   }
 
   /**
@@ -408,10 +409,11 @@ class UploadController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @param boolean $isCopy True to perform copy, else false
+   * @param string $action Action parameter (move, copy, link)
    * @return ResponseHelper
    * @throws HttpErrorException
    */
-  private function changeUpload($request, $response, $args, $isCopy)
+  private function changeUpload($request, $response, $args, $isCopy, $action = "")
   {
     $queryParams = $request->getQueryParams();
     $isApiVersionV2 = (ApiVersion::getVersion($request) == ApiVersion::V2);
@@ -423,7 +425,7 @@ class UploadController extends RestController
     }
 
     $id = intval($args['id']);
-    $returnVal = $this->restHelper->copyUpload($id, $newFolderID, $isCopy);
+    $returnVal = $this->restHelper->copyUpload($id, $newFolderID, $isCopy, $action);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 

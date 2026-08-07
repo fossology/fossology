@@ -67,12 +67,19 @@ class JobDao
     return $result;
   }
 
+  /**
+   * Check if user has permission to perform actions on a job.
+   *
+   * @param int $jobId  The job_pk from the job table
+   * @param int $userId
+   * @param int $groupId
+   * @return bool True if user has permission, false otherwise
+   */
   public function hasActionPermissionsOnJob($jobId, $userId, $groupId)
   {
-    $result = array();
     $stmt = __METHOD__;
     $this->dbManager->prepare($stmt,
-      "SELECT *
+      "SELECT 1
        FROM job
          LEFT JOIN group_user_member gm
            ON gm.user_fk = job_user_fk
@@ -81,11 +88,38 @@ class JobDao
               OR gm.group_fk = $3)");
 
     $res = $this->dbManager->execute($stmt, array($jobId, $userId, $groupId));
-    while ($row = $this->dbManager->fetchArray($res)) {
-      $result[$row['jq_pk']] = $row['end_bits'];
-    }
+    $row = $this->dbManager->fetchArray($res);
     $this->dbManager->freeResult($res);
 
-    return $result;
+    return !empty($row);
+  }
+
+  /**
+   * Check if user has permission to perform actions on a job queue item.
+   *
+   * @param int $jqPk   The jq_pk from the jobqueue table
+   * @param int $userId
+   * @param int $groupId
+   * @return bool True if user has permission, false otherwise
+   */
+  public function hasActionPermissionsOnJobQueue($jqPk, $userId, $groupId)
+  {
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt,
+      "SELECT 1
+       FROM jobqueue jq
+         INNER JOIN job j
+           ON jq.jq_job_fk = j.job_pk
+         LEFT JOIN group_user_member gm
+           ON gm.user_fk = j.job_user_fk
+       WHERE jq.jq_pk = $1
+         AND (j.job_user_fk = $2
+              OR gm.group_fk = $3)");
+
+    $res = $this->dbManager->execute($stmt, array($jqPk, $userId, $groupId));
+    $row = $this->dbManager->fetchArray($res);
+    $this->dbManager->freeResult($res);
+
+    return !empty($row);
   }
 }
