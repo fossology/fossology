@@ -59,23 +59,44 @@ class BomReportGenerator
   {
     $report = [
       'bomFormat' => 'CycloneDX',
-      '$schema' => 'http://cyclonedx.org/schema/bom-1.4.schema.json',
-      'specVersion' => '1.4',
+      '$schema' => 'http://cyclonedx.org/schema/bom-1.7.schema.json',
+      'specVersion' => '1.7',
       'version' => 1,
       'serialNumber' => 'urn:uuid:'. uuid_create(UUID_TYPE_TIME),
       'metadata' => [
         'timestamp' => date('c'),
         'tools' => [
+          'components' => [
+            [
+              'type' => 'application',
+              'vendor' => 'FOSSology',
+              'name' => 'FOSSology',
+              'version' => $bomdata['tool-version'],
+              'bom-ref' => 'tool-fossology'
+            ],
+            [
+              'type' => 'application',
+              'vendor' => 'FOSSology',
+              'name' => 'FOSSology Scanners',
+              'version' => $bomdata['tool-version'],
+              'bom-ref' => 'tool-fossology-scanners'
+            ]
+          ]
+        ],
+        'authors' => [
           [
-            'vendor' => 'FOSSology',
-            'name' => 'FOSSology',
-            'version' => $bomdata['tool-version']
+            'name' => 'FOSSology Analyst',
+            'bom-ref' => 'person-fossology-analyst'
           ]
         ],
         'component' => $bomdata['maincomponent']
       ],
       'components' => $bomdata['components']
     ];
+
+    if (isset($bomdata['citations']) && !empty($bomdata['citations'])) {
+      $report['citations'] = $bomdata['citations'];
+    }
 
     if (!empty($bomdata['externalReferences'])) {
       $report['externalReferences'] = $bomdata['externalReferences'];
@@ -163,12 +184,6 @@ class BomReportGenerator
     return $component;
   }
 
-  /**
-   * Generates a license.
-   *
-   * @param array $licenseData The license data.
-   * @return array The generated license.
-   */
   private function generateLicense(array $licenseData): array
   {
     $license = [];
@@ -176,7 +191,17 @@ class BomReportGenerator
     // Check license ID is a LicenseRef
     if (array_key_exists('id', $licenseData) && !empty($licenseData['id']) &&
       stripos($licenseData['id'], LicenseRef::SPDXREF_PREFIX) === 0) {
-      $license['expression'] = $licenseData['id'];
+      if (array_key_exists('bom-ref', $licenseData) && !empty($licenseData['bom-ref'])) {
+        $license['expressionDetailed'] = [
+          'value' => $licenseData['id'],
+          'bom-ref' => $licenseData['bom-ref']
+        ];
+        if (array_key_exists('acknowledgement', $licenseData) && !empty($licenseData['acknowledgement'])) {
+          $license['expressionDetailed']['acknowledgement'] = $licenseData['acknowledgement'];
+        }
+      } else {
+        $license['expression'] = $licenseData['id'];
+      }
       return $license;
     }
 
@@ -184,6 +209,14 @@ class BomReportGenerator
       $license['license']['id'] = $licenseData['id'];
     } else if (array_key_exists('name', $licenseData) && !empty($licenseData['name'])) {
       $license['license']['name'] = $licenseData['name'];
+    }
+
+    if (array_key_exists('bom-ref', $licenseData) && !empty($licenseData['bom-ref'])) {
+      $license['license']['bom-ref'] = $licenseData['bom-ref'];
+    }
+
+    if (array_key_exists('acknowledgement', $licenseData) && !empty($licenseData['acknowledgement'])) {
+      $license['license']['acknowledgement'] = $licenseData['acknowledgement'];
     }
 
     if (array_key_exists('url', $licenseData) && !empty($licenseData['url'])) {
