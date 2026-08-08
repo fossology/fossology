@@ -360,6 +360,82 @@ namespace {
 
   echo "\n";
 
+  echo "Test 15: Default tag namespace is fossology:\n";
+  $defaultNsGenerator = new BomReportGenerator();
+  assert_test('Default namespace is fossology:',
+    $defaultNsGenerator->getTagNamespace() === 'fossology:');
+
+  $defaultNsComp = $defaultNsGenerator->createComponent(array(
+    'type' => 'file',
+    'name' => 'test.c',
+    'acknowledgements' => 'Thanks',
+    'comments' => 'A comment'
+  ));
+  assert_test('Default namespace acknowledgement property',
+    $defaultNsComp['properties'][0]['name'] === 'fossology:acknowledgement');
+  assert_test('Default namespace comment property',
+    $defaultNsComp['properties'][1]['name'] === 'fossology:comment');
+
+  echo "\n";
+
+  echo "Test 16: Custom tag namespace (custom:)\n";
+  $customNsGenerator = new BomReportGenerator();
+  $customNsGenerator->setTagNamespace('custom:');
+  assert_test('Custom namespace is custom:',
+    $customNsGenerator->getTagNamespace() === 'custom:');
+
+  $customNsComp = $customNsGenerator->createComponent(array(
+    'type' => 'file',
+    'name' => 'test.c',
+    'acknowledgements' => 'Thanks to Custom team',
+    'comments' => 'Custom internal review'
+  ));
+  assert_test('Custom namespace acknowledgement property',
+    $customNsComp['properties'][0]['name'] === 'custom:acknowledgement');
+  assert_test('Custom namespace comment property',
+    $customNsComp['properties'][1]['name'] === 'custom:comment');
+  assert_test('Custom namespace acknowledgement value',
+    $customNsComp['properties'][0]['value'] === 'Thanks to Custom team');
+  assert_test('Custom namespace comment value',
+    $customNsComp['properties'][1]['value'] === 'Custom internal review');
+
+  echo "\n";
+
+  echo "Test 17: Namespace change mid-session\n";
+  $switchGenerator = new BomReportGenerator();
+  $switchGenerator->setTagNamespace('acme:');
+  $acmeComp = $switchGenerator->createComponent(array(
+    'type' => 'file',
+    'name' => 'a.c',
+    'comments' => 'First'
+  ));
+  assert_test('Acme namespace applied',
+    $acmeComp['properties'][0]['name'] === 'acme:comment');
+
+  $switchGenerator->setTagNamespace('corp:');
+  $corpComp = $switchGenerator->createComponent(array(
+    'type' => 'file',
+    'name' => 'b.c',
+    'comments' => 'Second'
+  ));
+  assert_test('Corp namespace applied after switch',
+    $corpComp['properties'][0]['name'] === 'corp:comment');
+
+  echo "\n";
+
+  echo "Test 18: Empty namespace prefix\n";
+  $emptyNsGenerator = new BomReportGenerator();
+  $emptyNsGenerator->setTagNamespace('');
+  $emptyNsComp = $emptyNsGenerator->createComponent(array(
+    'type' => 'file',
+    'name' => 'test.c',
+    'comments' => 'No prefix'
+  ));
+  assert_test('Empty namespace gives bare property name',
+    $emptyNsComp['properties'][0]['name'] === 'comment');
+
+  echo "\n";
+
   echo "=== Results ===\n";
   echo "Passed: $passed | Failed: $failed\n";
 
