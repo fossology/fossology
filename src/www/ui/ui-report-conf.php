@@ -583,12 +583,24 @@ class ui_report_conf extends FO_Plugin
           $('#spdxLicenseCommentCheckbox').prop('checked', true);
         }
       });
-      $(\"[data-toggle='tooltip']\").tooltip();
       $('#spdxLicenseCommentCheckbox').change(function() {
         if (!this.checked) {
           $('#osselotExportCheckbox').prop('checked', false);
         }
       });
+
+      $('#cyclonedxOsselotExportCheckbox').change(function() {
+        if ($(this).is(':checked')) {
+          $('#cyclonedxLicenseCommentCheckbox').prop('checked', true);
+        }
+      });
+      $('#cyclonedxLicenseCommentCheckbox').change(function() {
+        if (!this.checked) {
+          $('#cyclonedxOsselotExportCheckbox').prop('checked', false);
+        }
+      });
+
+      $(\"[data-toggle='tooltip']\").tooltip();
 
       var ackAjaxUrl = '?mod=ajax-acknowledgement-conf';
 
