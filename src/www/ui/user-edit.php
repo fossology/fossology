@@ -198,6 +198,18 @@ class UserEditPage extends DefaultPlugin
     $vars['spdxLicenseCommentDefault'] = ($spdxSettings[1] === 'checked');
     $vars['ignoreFilesWOInfoDefault'] = ($spdxSettings[2] === 'checked');
 
+    $cyclonedxSettings = isset($UserRec['cyclonedx_settings']) ? explode(',', $UserRec['cyclonedx_settings']) : ['unchecked', 'unchecked', 'unchecked', 'fossology:'];
+    if (count($cyclonedxSettings) < 4) {
+      $cyclonedxSettings = array_pad($cyclonedxSettings, 4, 'unchecked');
+      if (empty($cyclonedxSettings[3]) || $cyclonedxSettings[3] === 'unchecked') {
+        $cyclonedxSettings[3] = 'fossology:';
+      }
+    }
+    $vars['cyclonedxOsselotExportEnabled'] = ($cyclonedxSettings[0] === 'checked');
+    $vars['cyclonedxLicenseCommentDefault'] = ($cyclonedxSettings[1] === 'checked');
+    $vars['cyclonedxIgnoreFilesWOInfoDefault'] = ($cyclonedxSettings[2] === 'checked');
+    $vars['cyclonedxCustomTagNamespace'] = $cyclonedxSettings[3];
+
     if ($SessionIsAdmin) {
       $vars['allAccessLevels'] = array(
           PLUGIN_DB_NONE => _("None (very basic, no database access)"),
@@ -459,6 +471,15 @@ class UserEditPage extends DefaultPlugin
         $ignoreFilesEnabled = !empty($request->get('ignore_files_wo_info_default')) ? 'checked' : 'unchecked';
 
         $UserRec['spdx_settings'] = "$osselotEnabled,$spdxCommentEnabled,$ignoreFilesEnabled";
+      }
+
+      if ($this->dbManager->existsColumn('users', 'cyclonedx_settings')) {
+        $cyclonedxOsselotEnabled = !empty($request->get('cyclonedx_osselot_export_enabled')) ? 'checked' : 'unchecked';
+        $cyclonedxCommentEnabled = !empty($request->get('cyclonedx_license_comment_default')) ? 'checked' : 'unchecked';
+        $cyclonedxIgnoreFilesEnabled = !empty($request->get('cyclonedx_ignore_files_wo_info_default')) ? 'checked' : 'unchecked';
+        $cyclonedxCustomTagNamespace = !empty($request->get('cyclonedx_custom_tag_namespace')) ? stripslashes($request->get('cyclonedx_custom_tag_namespace')) : 'fossology:';
+
+        $UserRec['cyclonedx_settings'] = "$cyclonedxOsselotEnabled,$cyclonedxCommentEnabled,$cyclonedxIgnoreFilesEnabled,$cyclonedxCustomTagNamespace";
       }
     }
     return $UserRec;

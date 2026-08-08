@@ -906,6 +906,59 @@ ORDER BY lft asc
   }
 
   /**
+   * @brief Get cyclone dx settings for a user
+   * @param int $uploadId Upload ID to get user for
+   * @return string Comma separated values for cyclonedxLicenseComment, ignoreFilesWOInfo, osselotExport, customTagNamespace
+   */
+  public function getCyclonedxSettings($uploadId)
+  {
+    $stmt = __METHOD__ . '.getReportInfo';
+    $sql = "SELECT ri_cyclonedx_selection FROM report_info WHERE upload_fk = $1";
+    $reportInfo = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
+
+    // Per-upload settings are stored in comment,ignore,osselot,namespace order
+    if (!empty($reportInfo) && !empty($reportInfo['ri_cyclonedx_selection'])) {
+      $settings = explode(',', $reportInfo['ri_cyclonedx_selection']);
+      if (count($settings) < 4) {
+        $settings = array_pad($settings, 4, 'unchecked');
+      }
+      if (empty($settings[3]) || $settings[3] === 'unchecked') {
+        $settings[3] = 'fossology:';
+      }
+      return implode(',', $settings);
+    }
+
+    // User defaults are stored in osselot,comment,ignore,namespace order
+    $stmt = __METHOD__ . '.getOwner';
+    $sql = "SELECT user_fk FROM upload WHERE upload_pk = $1";
+    $uploadOwner = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
+
+    if (!empty($uploadOwner)) {
+      $userId = $uploadOwner['user_fk'];
+      $stmt = __METHOD__ . '.getUserDefaults';
+      $sql = "SELECT cyclonedx_settings FROM users WHERE user_pk = $1";
+      $userDefaults = $this->dbManager->getSingleRow($sql, array($userId), $stmt);
+      if (!empty($userDefaults) && !empty($userDefaults['cyclonedx_settings'])) {
+        $settings = explode(',', $userDefaults['cyclonedx_settings']);
+        if (count($settings) < 4) {
+          $settings = array_pad($settings, 4, 'unchecked');
+        }
+        if (empty($settings[3]) || $settings[3] === 'unchecked') {
+          $settings[3] = 'fossology:';
+        }
+        // Reorder from user-edit format to report-conf format
+        $osselotExport = $settings[0];
+        $cyclonedxLicenseComment = $settings[1];
+        $ignoreFilesWOInfo = $settings[2];
+        $customTagNamespace = $settings[3];
+        return "$cyclonedxLicenseComment,$ignoreFilesWOInfo,$osselotExport,$customTagNamespace";
+      }
+    }
+
+    return "unchecked,unchecked,unchecked,fossology:";
+  }
+
+  /**
    * @brief Update report info for upload
    * @param int $uploadId  Upload ID to update
    * @param string $column Column to update

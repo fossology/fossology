@@ -114,12 +114,12 @@ class CycloneDXAgent extends Agent
       $agentName = trim($args[self::OUTPUT_FORMAT_KEY]);
     }
     if (empty($agentName)) {
-        $agentName = self::DEFAULT_OUTPUT_FORMAT;
+      $agentName = self::DEFAULT_OUTPUT_FORMAT;
     }
     if (array_key_exists(self::UPLOADS_ADD_KEY, $args)) {
       $uploadsString = $args[self::UPLOADS_ADD_KEY];
       if (!empty($uploadsString)) {
-          $this->additionalUploads = explode(',', $uploadsString);
+        $this->additionalUploads = explode(',', $uploadsString);
       }
     }
 
@@ -142,6 +142,11 @@ class CycloneDXAgent extends Agent
   {
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
 
+    $cyclonedxSettings = $this->uploadDao->getCyclonedxSettings($uploadId);
+    $cyclonedxSettingsArr = explode(',', $cyclonedxSettings);
+    $customNamespace = isset($cyclonedxSettingsArr[3]) ? $cyclonedxSettingsArr[3] : 'fossology:';
+    $this->reportGenerator->setTagNamespace($customNamespace);
+
     $packageNodes = $this->renderPackage($uploadId);
 
     $this->computeUri($uploadId);
@@ -160,10 +165,10 @@ class CycloneDXAgent extends Agent
     if (count($this->additionalUploads) > 0) {
       $fileName = $fileBase . "multifile" . "_" . strtoupper($this->outputFormat);
     } else {
-      $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+      $fileName = $fileBase . strtoupper($this->outputFormat) . "_" . $this->packageName;
     }
 
-    return $fileName .".json" ;
+    return $fileName . ".json";
   }
 
   /**
@@ -292,7 +297,7 @@ class CycloneDXAgent extends Agent
       }
     }
 
-    $maincomponentData = array (
+    $maincomponentData = array(
       'bomref' => strval($uploadId),
       'type' => 'library',
       'name' => $upload->getFilename(),
@@ -308,7 +313,9 @@ class CycloneDXAgent extends Agent
     );
     $maincomponent = $this->reportGenerator->createComponent($maincomponentData);
 
-    $bomdata = array (
+    $formattedDate = date('Y-m-d\TH:i:s\Z');
+    $bomdata = array(
+      'timestamp' => $formattedDate,
       'tool-version' => $SysConf['BUILD']['VERSION'],
       'maincomponent' => $maincomponent,
       'components' => $components,
@@ -330,6 +337,14 @@ class CycloneDXAgent extends Agent
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
 
+    $stateLicenseComment = $this->getCycloneDXReportConf($uploadId, 0);
+    $stateWoInfos = $this->getCycloneDXReportConf($uploadId, 1);
+    $stateOsselot = $this->getCycloneDXReportConf($uploadId, 2);
+
+    if ($stateOsselot) {
+      $stateLicenseComment = true;
+    }
+
     $filesProceeded = 0;
     $lastValue = 0;
     $components = array();
@@ -338,6 +353,11 @@ class CycloneDXAgent extends Agent
       if (($filesProceeded & 2047) == 0) {
         $this->heartbeat($filesProceeded - $lastValue);
         $lastValue = $filesProceeded;
+      }
+
+      if ($stateWoInfos && empty($licenses->getConcludedLicenses()) &&
+          empty($licenses->getScanners()) && empty($licenses->getCopyrights())) {
+        continue;
       }
 
       $hashes = $treeDao->getItemHashes($fileId);
@@ -374,7 +394,7 @@ class CycloneDXAgent extends Agent
       if (!empty($fileName)) {
         $mimeType = $this->getFileMimeType($fileId, $treeTableName);
         $componentdata = array(
-          'bomref' => $uploadId .'-'. $fileId,
+          'bomref' => $uploadId . '-' . $fileId,
           'type' => 'file',
           'name' => $fileName,
           'hashes' => $serializedhash,
@@ -382,7 +402,7 @@ class CycloneDXAgent extends Agent
           'copyright' => implode("\n", $licenses->getCopyrights()),
           'licenses' => $licensesfound,
           'acknowledgements' => implode("\n", $licenses->getAcknowledgements()),
-          'comments' => implode("\n", $licenses->getComments())
+          'comments' => $stateLicenseComment ? implode("\n", $licenses->getComments()) : ''
         );
         $components[] = $this->reportGenerator->createComponent($componentdata);
       }
@@ -408,7 +428,9 @@ class CycloneDXAgent extends Agent
     $contents = json_encode($packageNodes, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     // To ensure the file is valid, replace any non-printable characters with a question mark.
     // 'Non-printable' is ASCII < 0x20 (excluding \r, \n and tab) and 0x7F - 0x9F.
-    $contents = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/u','?',$contents);
+    if (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/u', $contents)) {
+      $contents = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/u', '?', $contents);
+    }
     file_put_contents($this->uri, $contents);
     $this->updateReportTable($uploadId, $this->jobId, $this->uri);
   }
@@ -498,6 +520,26 @@ class CycloneDXAgent extends Agent
 
     $row = $this->dbManager->getSingleRow($sql, [$fileId], __METHOD__);
     return $row['mimetype_name'] ?? 'application/octet-stream';
+  }
+
+  /**
+   * @brief Get CycloneDX report conf state for a given upload
+   *
+   * Reads user default settings from users.cyclonedx_settings.
+   * @param int $uploadId
+   * @param int $key Array key (0=cyclonedxLicenseComment, 1=ignoreFilesWOInfo, 2=osselotExport, 3=customTagNamespace)
+   * @return bool Configuration state (TRUE/FALSE)
+   */
+  protected function getCycloneDXReportConf($uploadId, $key)
+  {
+    $settings = $this->uploadDao->getCyclonedxSettings($uploadId);
+    if (!empty($settings)) {
+      $settingsArr = explode(',', $settings);
+      if (isset($settingsArr[$key]) && $settingsArr[$key] === "checked") {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
