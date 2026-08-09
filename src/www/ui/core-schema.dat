@@ -1179,6 +1179,19 @@
   $Schema["TABLE"]["jobqueue"]["jq_cmd_args"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_cmd_args\" DROP NOT NULL";
 
 
+  $Schema["TABLE"]["licenselynx_map"]["ll_pk"]["DESC"] = "COMMENT ON COLUMN \"licenselynx_map\".\"ll_pk\" IS 'Primary Key'";
+  $Schema["TABLE"]["licenselynx_map"]["ll_pk"]["ADD"] = "ALTER TABLE \"licenselynx_map\" ADD COLUMN \"ll_pk\" int8 DEFAULT nextval('licenselynx_map_ll_pk_seq'::regclass)";
+  $Schema["TABLE"]["licenselynx_map"]["ll_pk"]["ALTER"] = "ALTER TABLE \"licenselynx_map\" ALTER COLUMN \"ll_pk\" SET NOT NULL, ALTER COLUMN \"ll_pk\" SET DEFAULT nextval('licenselynx_map_ll_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["licenselynx_map"]["raw_name"]["DESC"] = "COMMENT ON COLUMN \"licenselynx_map\".\"raw_name\" IS 'Raw license alias from LicenseLynx mapping data'";
+  $Schema["TABLE"]["licenselynx_map"]["raw_name"]["ADD"] = "ALTER TABLE \"licenselynx_map\" ADD COLUMN \"raw_name\" text";
+  $Schema["TABLE"]["licenselynx_map"]["raw_name"]["ALTER"] = "ALTER TABLE \"licenselynx_map\" ALTER COLUMN \"raw_name\" SET NOT NULL";
+
+  $Schema["TABLE"]["licenselynx_map"]["spdx_id"]["DESC"] = "COMMENT ON COLUMN \"licenselynx_map\".\"spdx_id\" IS 'SPDX license identifier returned by LicenseLynx'";
+  $Schema["TABLE"]["licenselynx_map"]["spdx_id"]["ADD"] = "ALTER TABLE \"licenselynx_map\" ADD COLUMN \"spdx_id\" text";
+  $Schema["TABLE"]["licenselynx_map"]["spdx_id"]["ALTER"] = "ALTER TABLE \"licenselynx_map\" ALTER COLUMN \"spdx_id\" SET NOT NULL";
+
+
   $Schema["TABLE"]["license_file"]["fl_pk"]["DESC"] = "COMMENT ON COLUMN \"license_file\".\"fl_pk\" IS 'Primary Key'";
   $Schema["TABLE"]["license_file"]["fl_pk"]["ADD"] = "ALTER TABLE \"license_file\" ADD COLUMN \"fl_pk\" int8 DEFAULT nextval('license_file_fl_pk_seq'::regclass)";
   $Schema["TABLE"]["license_file"]["fl_pk"]["ALTER"] = "ALTER TABLE \"license_file\" ALTER COLUMN \"fl_pk\" SET NOT NULL, ALTER COLUMN \"fl_pk\" SET DEFAULT nextval('license_file_fl_pk_seq'::regclass)";
@@ -2493,6 +2506,9 @@
   $Schema["SEQUENCE"]["license_file_fl_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_file_fl_pk_seq\"";
   $Schema["SEQUENCE"]["license_file_fl_pk_seq"]["UPDATE"] = "SELECT setval('license_file_fl_pk_seq',(SELECT greatest(1,max(fl_pk)) val FROM license_file))";
 
+  $Schema["SEQUENCE"]["licenselynx_map_ll_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"licenselynx_map_ll_pk_seq\"";
+  $Schema["SEQUENCE"]["licenselynx_map_ll_pk_seq"]["UPDATE"] = "SELECT setval('licenselynx_map_ll_pk_seq',(SELECT greatest(1,max(ll_pk)) val FROM licenselynx_map))";
+
   $Schema["SEQUENCE"]["license_rules_lr_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_rules_lr_pk_seq\"";
   $Schema["SEQUENCE"]["license_rules_lr_pk_seq"]["UPDATE"] = "SELECT setval('license_rules_lr_pk_seq',(SELECT greatest(1,max(lr_pk)) val FROM license_rules))";
   $Schema["SEQUENCE"]["folder_folder_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"folder_folder_pk_seq\"";
@@ -2699,6 +2715,7 @@
   $Schema["CONSTRAINT"]["keyword_decision_pkey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pkey\" PRIMARY KEY (\"keyword_decision_pk\");";
   $Schema["CONSTRAINT"]["keyword_decision_pfile_fk_fkey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["keyword_decision_pfile_hash_ukey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\",\"hash\");";
+  $Schema["CONSTRAINT"]["licenselynx_map_pkey"] = "ALTER TABLE \"licenselynx_map\" ADD CONSTRAINT \"licenselynx_map_pkey\" PRIMARY KEY (\"ll_pk\");";
   $Schema["CONSTRAINT"]["license_candidate_fkey"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["license_candidate_rf_pk_idk"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_rf_pk_idk\" PRIMARY KEY (\"rf_pk\");";
   $Schema["CONSTRAINT"]["license_candidate_rf_user_fk_modified_fkey"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_rf_user_fk_modified_fkey\" FOREIGN KEY (\"rf_user_fk_modified\") REFERENCES \"users\" (\"user_pk\") ON UPDATE SET NULL ON DELETE SET NULL;";

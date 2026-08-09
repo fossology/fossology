@@ -22,6 +22,7 @@ function explainUsage()
   -l  update the license_ref table with fossology supplied licenses
   -r  {prefix} drop database with name starts with prefix
   -v  enable verbose preview (prints sql that would happen, but does not execute it, DB is not updated)
+  --licenselynx    update the licenselynx_map table with bundled LicenseLynx mappings
   --force-decision force recalculation of SHA256 for decision tables
   --force-pfile    force recalculation of SHA256 for pfile entries
   --force-encode   force recode of copyright and sister tables
@@ -46,6 +47,7 @@ use Fossology\Lib\Db\Driver\Postgres;
  */
 $AllPossibleOpts = "abc:d:ef:ghijklmnopqr:stuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 $longOpts = [
+  "licenselynx",
   "force-decision",
   "force-pfile",
   "force-encode"
@@ -55,6 +57,7 @@ $longOpts = [
 $Verbose = false;
 $DatabaseName = "fossology";
 $UpdateLiceneseRef = false;
+$UpdateLicenseLynx = false;
 $sysconfdir = '';
 $delDbPattern = 'the option -rfosstest will drop data bases with datname like "fosstest%"';
 $forceDecision = false;
@@ -85,6 +88,9 @@ foreach($Options as $optKey => $optVal)
       break;
     case 'r':
       $delDbPattern = $optVal ? "$optVal%" : "fosstest%";
+      break;
+    case "licenselynx":
+      $UpdateLicenseLynx = true;
       break;
     case "force-decision":
       $forceDecision = true;
@@ -320,6 +326,11 @@ if ($UpdateLiceneseRef)
 
     print "fresh install, import licenseRef.json \n";
   }
+}
+
+if ($UpdateLicenseLynx)
+{
+  initLicenseLynxMapTable();
 }
 
 if(!$isUpdating || $sysconfig['Release'] == '2.6')
@@ -605,6 +616,61 @@ function insertInToLicenseRefTableUsingJson($tableName)
     $dbManager->execute($statementName, $arrayValues);
   }
   $dbManager->commit();
+  return (0);
+}
+
+/**
+ * \brief Load the licenselynx_map table with bundled LicenseLynx mappings.
+ *
+ * This imports stable SPDX mappings from licenseLynxMapping.json. The table is
+ * refreshed as a whole so repeated fossinit runs remain deterministic.
+ *
+ * \return 0 on success, 1 on failure
+ **/
+function initLicenseLynxMapTable()
+{
+  global $LIBEXECDIR;
+  global $dbManager;
+
+  $mappingFile = "$LIBEXECDIR/licenseLynxMapping.json";
+  if (!file_exists($mappingFile)) {
+    print "WARNING: LicenseLynx mapping file '$mappingFile' not found, skipping import.\n";
+    return (1);
+  }
+
+  $jsonData = json_decode(file_get_contents($mappingFile), true);
+  if (json_last_error() !== JSON_ERROR_NONE || !is_array($jsonData)) {
+    print "WARNING: Unable to parse LicenseLynx mapping file '$mappingFile': " .
+      json_last_error_msg() . "\n";
+    return (1);
+  }
+
+  $dbManager->begin();
+  $dbManager->queryOnce("DELETE FROM licenselynx_map", __METHOD__ . ".delete");
+  $dbManager->prepare(__METHOD__ . ".insert",
+    "INSERT INTO licenselynx_map " .
+    "(raw_name, spdx_id) VALUES ($1, $2)");
+
+  $inserted = 0;
+  $skipped = 0;
+  if (!empty($jsonData['stableMap']) && is_array($jsonData['stableMap'])) {
+    foreach ($jsonData['stableMap'] as $rawName => $mapping) {
+      if (is_array($mapping) && !empty($mapping['id']) &&
+        !empty($mapping['src']) && strtolower($mapping['src']) === 'spdx') {
+        $dbManager->execute(__METHOD__ . ".insert", array($rawName, $mapping['id']));
+        $inserted++;
+      } else {
+        $skipped++;
+      }
+    }
+  }
+  $dbManager->commit();
+
+  print "Imported LicenseLynx stable SPDX mappings: $inserted";
+  if ($skipped > 0) {
+    print ", skipped=$skipped";
+  }
+  print "\n";
   return (0);
 }
 
