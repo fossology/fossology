@@ -18,6 +18,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\Report\CycloneDxSettings;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use UnexpectedValueException;
@@ -250,6 +251,12 @@ class DecisionImporterDataCreator
       "ri_component_id" => $reportInfo["ri_component_id"],
       "ri_component_type" => $reportInfo["ri_component_type"]
     ];
+    // Exports made before CycloneDX settings existed do not carry the key.
+    if (array_key_exists("ri_cyclonedx_selection", $reportInfo)) {
+      $cyclonedxSettings = CycloneDxSettings::fromReportInfo($reportInfo["ri_cyclonedx_selection"]);
+      $assocParams["ri_cyclonedx_selection"] = $cyclonedxSettings === null ? null :
+        $cyclonedxSettings->toReportInfo();
+    }
     $existsSql = "SELECT ri_pk FROM report_info WHERE upload_fk = $1;";
     $existsStatement = __METHOD__ . ".reportInfoExists";
 

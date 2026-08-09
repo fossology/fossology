@@ -45,6 +45,7 @@ class ConfTest extends TestCase
       "ri_ga_risk" => "Low",
       "ri_ga_checkbox_selection" => "Option 1",
       "ri_spdx_selection" => "MIT",
+      "ri_cyclonedx_selection" => '{"licenseComment":true,"ignoreFilesWithoutInfo":false,"osselotExport":false,"tagNamespace":"acme:","specVersion":"1.6"}',
       "ri_excluded_obligations" => json_encode(["obligation1", "obligation2"]),
       "ri_department" => "Test Department",
       "ri_depnotes" => "Department Notes",
@@ -93,6 +94,9 @@ class ConfTest extends TestCase
     $this->assertEquals("Low", $result['gaRisk']);
     $this->assertEquals("Option 1", $result['gaCheckbox']);
     $this->assertEquals("MIT", $result['spdxSelection']);
+    $this->assertEquals("acme:", $result['cyclonedxSelection']['tagNamespace']);
+    $this->assertEquals("1.6", $result['cyclonedxSelection']['specVersion']);
+    $this->assertTrue($result['cyclonedxSelection']['licenseComment']);
     $this->assertEquals(["obligation1", "obligation2"], $result['excludedObligations']);
     $this->assertEquals("Test Department", $result['department']);
     $this->assertEquals("Department Notes", $result['depNotes']);

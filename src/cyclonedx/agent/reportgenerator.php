@@ -12,9 +12,44 @@
 namespace Fossology\CycloneDX;
 
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\Report\CycloneDxSettings;
 
 class BomReportGenerator
 {
+  /** @var string Prefix of the property names this generator emits */
+  private $tagNamespace = CycloneDxSettings::DEFAULT_NAMESPACE;
+
+  /** @var string CycloneDX spec version of the generated document */
+  private $specVersion = CycloneDxSettings::DEFAULT_VERSION;
+
+  /**
+   * @param CycloneDxSettings $settings
+   */
+  public function applySettings(CycloneDxSettings $settings): void
+  {
+    $this->tagNamespace = $settings->getTagNamespace();
+    $this->specVersion = $settings->getSpecVersion();
+  }
+
+  public function getTagNamespace(): string
+  {
+    return $this->tagNamespace;
+  }
+
+  public function getSpecVersion(): string
+  {
+    return $this->specVersion;
+  }
+
+  /**
+   * @param string $version Spec version that introduced a field
+   * @return bool True if the document's spec version has that field
+   */
+  private function supports(string $version): bool
+  {
+    return version_compare($this->specVersion, $version, '>=');
+  }
+
   /**
    * Creates a component.
    *
@@ -57,44 +92,28 @@ class BomReportGenerator
    */
   public function generateReport($bomdata): array
   {
+    $author = ['name' => 'FOSSology Analyst'];
+    if ($this->supports('1.5')) {
+      $author['bom-ref'] = 'person-fossology-analyst';
+    }
+
     $report = [
       'bomFormat' => 'CycloneDX',
-      '$schema' => 'http://cyclonedx.org/schema/bom-1.7.schema.json',
-      'specVersion' => '1.7',
+      '$schema' => 'http://cyclonedx.org/schema/bom-' . $this->specVersion . '.schema.json',
+      'specVersion' => $this->specVersion,
       'version' => 1,
       'serialNumber' => 'urn:uuid:'. uuid_create(UUID_TYPE_TIME),
       'metadata' => [
         'timestamp' => date('c'),
-        'tools' => [
-          'components' => [
-            [
-              'type' => 'application',
-              'manufacturer' => ['name' => 'FOSSology'],
-              'name' => 'FOSSology',
-              'version' => $bomdata['tool-version'],
-              'bom-ref' => 'tool-fossology'
-            ],
-            [
-              'type' => 'application',
-              'manufacturer' => ['name' => 'FOSSology'],
-              'name' => 'FOSSology Scanners',
-              'version' => $bomdata['tool-version'],
-              'bom-ref' => 'tool-fossology-scanners'
-            ]
-          ]
-        ],
-        'authors' => [
-          [
-            'name' => 'FOSSology Analyst',
-            'bom-ref' => 'person-fossology-analyst'
-          ]
-        ],
+        'tools' => $this->generateTools($bomdata['tool-version']),
+        'authors' => [$author],
         'component' => $bomdata['maincomponent']
       ],
       'components' => $bomdata['components']
     ];
 
-    if (isset($bomdata['citations']) && !empty($bomdata['citations'])) {
+    // citations point at bom-refs of the analyst and the scanner tool
+    if ($this->supports('1.7') && !empty($bomdata['citations'])) {
       $report['citations'] = $bomdata['citations'];
     }
 
@@ -103,6 +122,36 @@ class BomReportGenerator
     }
 
     return $report;
+  }
+
+  /**
+   * @param string $toolVersion
+   * @return array metadata.tools in the form the spec version expects
+   */
+  private function generateTools($toolVersion): array
+  {
+    $tools = [
+      ['name' => 'FOSSology', 'bom-ref' => 'tool-fossology'],
+      ['name' => 'FOSSology Scanners', 'bom-ref' => 'tool-fossology-scanners']
+    ];
+    if (!$this->supports('1.5')) {
+      return array_map(function ($tool) use ($toolVersion) {
+        return ['vendor' => 'FOSSology', 'name' => $tool['name'], 'version' => $toolVersion];
+      }, $tools);
+    }
+    $components = [];
+    foreach ($tools as $tool) {
+      $component = ['type' => 'application'];
+      if ($this->supports('1.6')) {
+        $component['manufacturer'] = ['name' => 'FOSSology'];
+      }
+      $components[] = $component + [
+        'name' => $tool['name'],
+        'version' => $toolVersion,
+        'bom-ref' => $tool['bom-ref']
+      ];
+    }
+    return ['components' => $components];
   }
 
   /**
@@ -167,13 +216,13 @@ class BomReportGenerator
     $properties = [];
     if (array_key_exists('acknowledgements', $componentData) && !empty($componentData['acknowledgements'])) {
       $properties[] = [
-        'name' => 'fossology:acknowledgement',
+        'name' => $this->tagNamespace . 'acknowledgement',
         'value' => $componentData['acknowledgements']
       ];
     }
     if (array_key_exists('comments', $componentData) && !empty($componentData['comments'])) {
       $properties[] = [
-        'name' => 'fossology:comment',
+        'name' => $this->tagNamespace . 'comment',
         'value' => $componentData['comments']
       ];
     }
@@ -188,9 +237,21 @@ class BomReportGenerator
   {
     $license = [];
 
-    // Check license ID is a LicenseRef
-    if (array_key_exists('id', $licenseData) && !empty($licenseData['id']) &&
-      stripos($licenseData['id'], LicenseRef::SPDXREF_PREFIX) === 0) {
+    if (!$this->supports('1.5')) {
+      unset($licenseData['bom-ref']);
+    }
+    if (!$this->supports('1.6')) {
+      unset($licenseData['acknowledgement']);
+    }
+
+    $isLicenseRef = !empty($licenseData['id']) &&
+      stripos($licenseData['id'], LicenseRef::SPDXREF_PREFIX) === 0;
+    // Before 1.7 an expression cannot share a licenses array with license
+    // objects, so a LicenseRef id is written as a license name there.
+    if ($isLicenseRef && !$this->supports('1.7')) {
+      $licenseData['name'] = $licenseData['id'];
+      unset($licenseData['id']);
+    } elseif ($isLicenseRef) {
       $license['expression'] = $licenseData['id'];
       if (array_key_exists('bom-ref', $licenseData) && !empty($licenseData['bom-ref'])) {
         $license['bom-ref'] = $licenseData['bom-ref'];
