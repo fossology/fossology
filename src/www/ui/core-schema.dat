@@ -2320,9 +2320,9 @@
   $Schema["TABLE"]["users"]["spdx_settings"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"spdx_settings\" text DEFAULT 'unchecked,unchecked,unchecked'::text";
   $Schema["TABLE"]["users"]["spdx_settings"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"spdx_settings\" DROP NOT NULL, ALTER COLUMN \"spdx_settings\" SET DEFAULT 'unchecked,unchecked,unchecked'::text";
 
-  $Schema["TABLE"]["users"]["cyclonedx_settings"]["DESC"] = "COMMENT ON COLUMN \"users\".\"cyclonedx_settings\" IS 'Comma-separated CycloneDX export settings: osselot_export,cyclonedx_license_comment,ignore_files_wo_info as checked/unchecked values'";
-  $Schema["TABLE"]["users"]["cyclonedx_settings"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"cyclonedx_settings\" text DEFAULT 'unchecked,unchecked,unchecked'::text";
-  $Schema["TABLE"]["users"]["cyclonedx_settings"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"cyclonedx_settings\" DROP NOT NULL, ALTER COLUMN \"cyclonedx_settings\" SET DEFAULT 'unchecked,unchecked,unchecked'::text";
+  $Schema["TABLE"]["users"]["cyclonedx_settings"]["DESC"] = "COMMENT ON COLUMN \"users\".\"cyclonedx_settings\" IS 'Comma-separated CycloneDX export settings: osselot_export,cyclonedx_license_comment,ignore_files_wo_info,custom_tag_namespace'";
+  $Schema["TABLE"]["users"]["cyclonedx_settings"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"cyclonedx_settings\" text DEFAULT 'unchecked,unchecked,unchecked,fossology:'::text";
+  $Schema["TABLE"]["users"]["cyclonedx_settings"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"cyclonedx_settings\" DROP NOT NULL, ALTER COLUMN \"cyclonedx_settings\" SET DEFAULT 'unchecked,unchecked,unchecked,fossology:'::text";
 
   $Schema["TABLE"]["report_info"]["ri_pk"]["DESC"] = "";
   $Schema["TABLE"]["report_info"]["ri_pk"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_pk\" int4 DEFAULT nextval('report_info_pk_seq'::regclass)";
@@ -2391,6 +2391,10 @@
   $Schema["TABLE"]["report_info"]["ri_spdx_selection"]["DESC"] = "";
   $Schema["TABLE"]["report_info"]["ri_spdx_selection"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_spdx_selection\" text";
   $Schema["TABLE"]["report_info"]["ri_spdx_selection"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_spdx_selection\" DROP NOT NULL";
+
+  $Schema["TABLE"]["report_info"]["ri_cyclonedx_selection"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_cyclonedx_selection"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_cyclonedx_selection\" text";
+  $Schema["TABLE"]["report_info"]["ri_cyclonedx_selection"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_cyclonedx_selection\" DROP NOT NULL";
 
   $Schema["TABLE"]["report_info"]["ri_excluded_obligations"]["DESC"] = "";
   $Schema["TABLE"]["report_info"]["ri_excluded_obligations"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_excluded_obligations\" json";
