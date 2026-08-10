@@ -57,6 +57,8 @@ tags:
     description: Maintenance operations
   - name: Overview
     description: Overview of FOSSology operations
+  - name: BucketPools
+    description: Bucket pool management
 
 x-reuse:
   - &cxGetParams
@@ -509,6 +511,108 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ObligationExtended'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /bucketpools:
+    get:
+      operationId: getBucketpools
+      tags:
+        - BucketPools
+        - Admin
+      summary: Get the list of active bucket pools
+      description: >
+        Returns all active bucket pools (including version information),
+        ordered by name and latest version first. Intended to populate a
+        bucket pool selection dropdown.
+      responses:
+        '200':
+          description: List of bucket pools
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BucketPool'
+        '403':
+          description: Only admin can access this endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /bucketpools/{id}/duplicate:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the bucket pool to duplicate
+        in: path
+        schema:
+          type: integer
+    post:
+      operationId: duplicateBucketpool
+      tags:
+        - BucketPools
+        - Admin
+      summary: Duplicate a bucket pool
+      description: >
+        Clone an existing bucket pool together with all its bucket
+        definitions. The new bucket pool keeps the same name with its
+        version incremented by one. Optionally, the requesting user's
+        default bucket pool is updated to the newly created one.
+      requestBody:
+        description: Options for the duplication
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                updateDefault:
+                  type: boolean
+                  description: >
+                    Set to true to also update the requesting user's default
+                    bucket pool to the newly created one.
+                  default: false
+      responses:
+        '201':
+          description: Bucket pool duplicated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: Id of the newly created bucket pool
+                  version:
+                    type: integer
+                    description: Version of the newly created bucket pool
+              example:
+                {"id": 5, "version": 3}
+        '403':
+          description: Only admin can access this endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Bucket pool does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '409':
+          description: >
+            A bucket pool with the same name and version already exists
+            (concurrent duplication of the same bucket pool). Retry the
+            request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
 
@@ -6651,6 +6755,34 @@ components:
           type: integer
         optionValue:
           description: If type is 'dropdown', provide options in format op1{val1}|op2{val2}|...
+          type: string
+    BucketPool:
+      description: BucketPool object
+      type: object
+      properties:
+        id:
+          description: Id of the bucket pool
+          type: integer
+          readOnly: true
+          example:
+            1
+        name:
+          description: Name of the bucket pool
+          type: string
+          example:
+            "GPL Demo bucket pool"
+        version:
+          description: Version of the bucket pool
+          type: integer
+          example:
+            1
+        active:
+          description: Whether the bucket pool is active
+          type: boolean
+          example:
+            true
+        description:
+          description: Description of the bucket pool
           type: string
     Group:
       description: Group object

@@ -23,6 +23,7 @@ require_once dirname(__FILE__, 4) . "/lib/php/bootstrap.php";
 use Fossology\Lib\Util\TimingLogger;
 use Fossology\UI\Api\Controllers\AuthController;
 use Fossology\UI\Api\Controllers\BadRequestController;
+use Fossology\UI\Api\Controllers\BucketPoolController;
 use Fossology\UI\Api\Controllers\ConfController;
 use Fossology\UI\Api\Controllers\CopyrightController;
 use Fossology\UI\Api\Controllers\CustomiseController;
@@ -308,6 +309,14 @@ $app->group('/obligations',
     $app->post('/import-csv', ObligationController::class . ':importObligationsFromCSV');
     $app->get('/export-json', ObligationController::class . ':exportObligationsToJSON');
     $app->post('/import-json', ObligationController::class . ':importObligationsFromJSON');
+    $app->any('/{params:.*}', BadRequestController::class);
+  });
+
+////////////////////////////BUCKETPOOLS/////////////////////
+$app->group('/bucketpools',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', BucketPoolController::class . ':getBucketpools');
+    $app->post('/{id:\\d+}/duplicate', BucketPoolController::class . ':duplicateBucketpool');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
