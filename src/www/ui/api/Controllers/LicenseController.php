@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Controllers;
 use Fossology\Lib\Application\BulkTextExport;
 use Fossology\Lib\Application\LicenseCsvExport;
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\LicenseAcknowledgementDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\LicenseStdCommentDao;
@@ -107,8 +108,8 @@ class LicenseController extends RestController
       throw new HttpBadRequestException("Short name missing from request.");
     }
 
-    $license = $this->licenseDao->getLicenseByShortName($shortName,
-      $this->restHelper->getGroupId());
+    $groupId = $this->restHelper->getGroupId();
+    $license = $this->licenseDao->getLicenseByShortName($shortName, $groupId);
 
     if ($license === null) {
       throw new HttpNotFoundException(
@@ -140,8 +141,42 @@ class LicenseController extends RestController
       $obligationList,
       $license->getRisk()
     );
+    $returnVal->setSpdxId($license->getSpdxId());
+
+    $metadata = $this->licenseDao->getLicenseTypeAndStatus($license->getId());
+    if ($metadata !== null) {
+      $returnVal->setActive($metadata['active']);
+      $returnVal->setLicenseType($metadata['licenseType']);
+    }
+
+    $returnVal->setParentLicense($this->getLicenseRefArray(
+      $this->licenseDao->getProjectedLicenseRef($license->getId(),
+        LicenseMap::CONCLUSION, $groupId)));
+    $returnVal->setReportLicense($this->getLicenseRefArray(
+      $this->licenseDao->getProjectedLicenseRef($license->getId(),
+        LicenseMap::REPORT, $groupId)));
 
     return $response->withJson($returnVal->getArray(), 200);
+  }
+
+  /**
+   * Convert a projected LicenseRef into a lightweight array for API
+   * responses.
+   *
+   * @param \Fossology\Lib\Data\LicenseRef|null $ref
+   * @return array|null
+   */
+  private function getLicenseRefArray($ref)
+  {
+    if ($ref === null) {
+      return null;
+    }
+    return [
+      'id' => intval($ref->getId()),
+      'shortName' => $ref->getShortName(),
+      'fullName' => $ref->getFullName(),
+      'spdxId' => $ref->getSpdxId(),
+    ];
   }
 
   /**

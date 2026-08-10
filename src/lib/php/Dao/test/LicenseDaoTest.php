@@ -124,6 +124,59 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
     $this->assertNull($lic);
   }
 
+  public function testGetProjectedLicenseRef()
+  {
+    $this->setUpLicenseRefTable();
+    $this->testDb->createPlainTables(array('license_map'));
+    $this->testDb->createInheritedTables(array('license_candidate'));
+    $this->dbManager->insertTableRow('license_ref',
+      array('rf_pk'=>1,'rf_shortname'=>'One','rf_fullname'=>'One-1','rf_spdx_id'=>'One','rf_text'=>'text-1','rf_detector_type'=>1));
+    $this->dbManager->insertTableRow('license_ref',
+      array('rf_pk'=>2,'rf_shortname'=>'Two','rf_fullname'=>'Two-2','rf_spdx_id'=>'Two','rf_text'=>'text-2','rf_detector_type'=>1));
+    $this->dbManager->insertTableRow('license_map',
+      array('license_map_pk'=>0,'rf_fk'=>2,'rf_parent'=>1,'usage'=>LicenseMap::CONCLUSION));
+
+    $licDao = new LicenseDao($this->dbManager);
+    $groupId = 101;
+
+    $ref = $licDao->getProjectedLicenseRef(2, LicenseMap::CONCLUSION, $groupId);
+    assertThat($ref, is(notNullValue()));
+    assertThat($ref->getId(), is(1));
+    assertThat($ref->getShortName(), is('One'));
+    assertThat($ref->getFullName(), is('One-1'));
+
+    $unmapped = $licDao->getProjectedLicenseRef(1, LicenseMap::CONCLUSION, $groupId);
+    assertThat($unmapped, is(nullValue()));
+
+    $otherUsage = $licDao->getProjectedLicenseRef(2, LicenseMap::REPORT, $groupId);
+    assertThat($otherUsage, is(nullValue()));
+
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
+  }
+
+  public function testGetLicenseTypeAndStatus()
+  {
+    $this->setUpLicenseRefTable();
+    $this->testDb->createInheritedTables(array('license_candidate'));
+    $this->dbManager->insertTableRow('license_ref',
+      array('rf_pk'=>1,'rf_shortname'=>'One','rf_text'=>'text-1','rf_detector_type'=>1,'rf_active'=>true,'rf_licensetype'=>'Permissive'));
+    $this->dbManager->insertTableRow('license_candidate',
+      array('rf_pk'=>2,'rf_shortname'=>'Two','rf_text'=>'text-2','rf_detector_type'=>1,'rf_active'=>false,'rf_licensetype'=>'Unknown','group_fk'=>101));
+
+    $licDao = new LicenseDao($this->dbManager);
+
+    $status = $licDao->getLicenseTypeAndStatus(1);
+    assertThat($status, is(array('active'=>true,'licenseType'=>'Permissive')));
+
+    $candidateStatus = $licDao->getLicenseTypeAndStatus(2);
+    assertThat($candidateStatus, is(array('active'=>false,'licenseType'=>'Unknown')));
+
+    $missing = $licDao->getLicenseTypeAndStatus(999);
+    assertThat($missing, is(nullValue()));
+
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
+  }
+
   public function testGetLicenseRefs()
   {
     $this->setUpLicenseRefTable();

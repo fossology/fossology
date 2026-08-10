@@ -4897,6 +4897,52 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Obligation'
+                      spdxId:
+                        description: SPDX id of the license
+                        type: string
+                        nullable: true
+                        example:
+                          "MIT"
+                      active:
+                        description: Is the license active?
+                        type: boolean
+                        nullable: true
+                      licenseType:
+                        description: Type of the license
+                        type: string
+                        nullable: true
+                        example:
+                          "Permissive"
+                      parentLicense:
+                        description: >
+                          Parent license this license is mapped to for
+                          conclusions, null if not mapped to another license
+                        type: object
+                        nullable: true
+                        properties:
+                          id:
+                            type: integer
+                          shortName:
+                            type: string
+                          fullName:
+                            type: string
+                          spdxId:
+                            type: string
+                      reportLicense:
+                        description: >
+                          License this license is mapped to for reports,
+                          null if not mapped to another license
+                        type: object
+                        nullable: true
+                        properties:
+                          id:
+                            type: integer
+                          shortName:
+                            type: string
+                          fullName:
+                            type: string
+                          spdxId:
+                            type: string
         '404':
           description: License not found
           content:

@@ -592,6 +592,49 @@ ORDER BY lft asc
   }
 
   /**
+   * @brief Get the projected (mapped) license reference for a license, for
+   * a given usage/mapping type (e.g. conclusion parent, report license).
+   *
+   * @param int $licenseId License id to look up
+   * @param int $usageId   Usage type, see LicenseMap constants
+   * @param int|null $groupId Group id for license visibility
+   * @return LicenseRef|null Projected license reference, or null if the
+   *         license has no mapping of the given type.
+   */
+  public function getProjectedLicenseRef($licenseId, $usageId, $groupId=null)
+  {
+    $licenseMap = new LicenseMap($this->dbManager, $groupId, $usageId, false, $licenseId);
+    return $licenseMap->getProjectedRef($licenseId);
+  }
+
+  /**
+   * @brief Get the active status and license type for a license or
+   * candidate license.
+   *
+   * @param int $licenseId License id to look up
+   * @return array|null ['active' => bool, 'licenseType' => string], or
+   *         null if no license with the given id could be found.
+   */
+  public function getLicenseTypeAndStatus($licenseId)
+  {
+    $row = $this->dbManager->getSingleRow(
+      "SELECT rf_active, rf_licensetype FROM ONLY license_ref WHERE rf_pk = $1",
+      [$licenseId], __METHOD__ . ".main");
+    if ($row === false) {
+      $row = $this->dbManager->getSingleRow(
+        "SELECT rf_active, rf_licensetype FROM license_candidate WHERE rf_pk = $1",
+        [$licenseId], __METHOD__ . ".candidate");
+    }
+    if ($row === false) {
+      return null;
+    }
+    return [
+      'active' => $this->dbManager->booleanFromDb($row['rf_active']),
+      'licenseType' => $row['rf_licensetype'],
+    ];
+  }
+
+  /**
    * @param int $userId
    * @param int $groupId
    * @param int $uploadTreeId

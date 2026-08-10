@@ -39,8 +39,12 @@ class LicenseMap
    * @param int $groupId
    * @param int $usageId
    * @param bool $full
+   * @param int|null $licenseId Only load the mapping for this one license,
+   *        instead of the whole group's map. Ignored when $full is true.
+   *        Use this when only a single license's projection is needed, to
+   *        avoid the cost of loading and joining every mapped license.
    */
-  public function __construct(DbManager $dbManager, $groupId, $usageId=null, $full=false)
+  public function __construct(DbManager $dbManager, $groupId, $usageId=null, $full=false, $licenseId=null)
   {
     $this->usageId = $usageId?:self::CONCLUSION;
     $this->groupId = $groupId;
@@ -49,6 +53,7 @@ class LicenseMap
       return;
     }
     $licenseView = new LicenseViewProxy($groupId);
+    $params = array($this->usageId);
     if ($full) {
       $query = $licenseView->asCTE()
             .' SELECT distinct on(rf_pk) rf_pk rf_fk, rf_shortname parent_shortname,
@@ -70,9 +75,14 @@ class LicenseMap
             .'rf_parent, rf_fullname AS parent_fullname FROM license_map, '.$licenseView->getDbViewName()
             .' WHERE rf_pk=rf_parent AND rf_fk!=rf_parent AND usage=$1';
       $stmt = __METHOD__.".$this->usageId,$groupId";
+      if ($licenseId !== null) {
+        $query .= ' AND rf_fk=$2';
+        $stmt .= '.scoped';
+        $params[] = $licenseId;
+      }
     }
     $dbManager->prepare($stmt,$query);
-    $res = $dbManager->execute($stmt,array($this->usageId));
+    $res = $dbManager->execute($stmt,$params);
     while ($row = $dbManager->fetchArray($res)) {
       $this->map[$row['rf_fk']] = $row;
     }
@@ -141,6 +151,28 @@ class LicenseMap
       return $licenseName;
     }
     return $defaultName;
+  }
+
+  /**
+   * @brief For a given license id, get the projected license as a full
+   * reference.
+   *
+   * Unlike getProjectedId()/getProjectedShortname(), this returns null
+   * when the license has no mapping (or maps to itself), so callers can
+   * tell "not mapped" apart from "mapped to itself".
+   * @param int $licenseId License id to be queried
+   * @return LicenseRef|null Projected license reference, or null if the
+   *         license is not mapped to a different license.
+   */
+  public function getProjectedRef($licenseId)
+  {
+    if (!array_key_exists($licenseId, $this->map) ||
+        $this->map[$licenseId]['rf_parent'] == $licenseId) {
+      return null;
+    }
+    $row = $this->map[$licenseId];
+    return new LicenseRef($row['rf_parent'], $row['parent_shortname'],
+      $row['parent_fullname'], $row['parent_spdx_id']);
   }
 
   /**
