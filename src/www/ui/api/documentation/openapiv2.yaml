@@ -492,6 +492,76 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /obligations/import-json:
+    post:
+      operationId: importObligationJson
+      tags:
+        - License
+      summary: Import an obligation json file
+      description: >
+        Import an obligation json file
+      requestBody:
+        description: JSON file to be imported.
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileInput:
+                  type: string
+                  format: binary
+                  description: JSON to be imported
+              required:
+                - fileInput
+      responses:
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '200':
+          description: Successfully imported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /obligations/export-json:
+    get:
+      operationId: exportLicenseObligationsJson
+      parameters:
+        - name: id
+          description: Obligation id to export, 0 for all
+          in: query
+          required: false
+          schema:
+            type: integer
+      tags:
+        - License
+      summary: Export a json obligation list
+      description: >
+        Export a json license obligation list
+      responses:
+        '200':
+          description: Successfully exported
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /obligations:
     get:
       operationId: getAllObligationsData
@@ -509,6 +579,45 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ObligationExtended'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    post:
+      operationId: createObligation
+      tags:
+        - Admin
+      summary: Create a new obligation
+      description: >
+        Add a new obligation to the database
+      requestBody:
+        description: Information about new obligation
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ObligationExtended'
+              required:
+                - topic
+                - text
+      responses:
+        '201':
+          description: Obligation added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '409':
+          description: Obligation with same topic and text already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
 

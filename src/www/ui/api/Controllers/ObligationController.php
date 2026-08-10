@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Controllers;
 use Fossology\Lib\Application\ObligationCsvExport;
 use Fossology\Lib\BusinessRules\ObligationMap;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpConflictException;
 use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\ResponseHelper;
@@ -98,6 +99,70 @@ class ObligationController extends RestController
         ->getArray();
     }
     return $response->withJson($obligationArray, 200);
+  }
+
+  /**
+   * Create a new obligation
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function createObligation($request, $response, $args)
+  {
+    $this->throwNotAdminException();
+    $newObligationArr = $this->getParsedBody($request);
+    $newObligation = Obligation::parseFromArray($newObligationArr);
+    if ($newObligation === -1) {
+      throw new HttpBadRequestException(
+        "Input contains additional properties.");
+    }
+    if ($newObligation === -2) {
+      throw new HttpBadRequestException("Property 'topic' is required.");
+    }
+    if ($newObligation === -3) {
+      throw new HttpBadRequestException("Property 'text' is required.");
+    }
+
+    $dbManager = $this->dbHelper->getDbManager();
+    $checkSql = "SELECT count(*) AS cnt FROM obligation_ref " .
+      "WHERE ob_topic = $1 AND ob_text = $2";
+    $existing = $dbManager->getSingleRow($checkSql,
+      [$newObligation->getTopic(), $newObligation->getText()],
+      __METHOD__ . '.checkExisting');
+    if (! empty($existing) && intval($existing['cnt']) > 0) {
+      throw new HttpConflictException(
+        "Obligation with same topic and text already exists!");
+    }
+
+    $assocData = [
+      "ob_active" => $newObligation->isActive(),
+      "ob_type" => $newObligation->getType(),
+      "ob_modifications" => $newObligation->isModification() ? "Yes" : "No",
+      "ob_topic" => $newObligation->getTopic(),
+      "ob_md5" => md5($newObligation->getText()),
+      "ob_text" => $newObligation->getText(),
+      "ob_classification" => $newObligation->getClassification(),
+      "ob_text_updatable" => $newObligation->isTextUpdatable(),
+      "ob_comment" => $newObligation->getComment()
+    ];
+
+    $obPk = $dbManager->insertTableRow("obligation_ref", $assocData,
+      __METHOD__ . ".newObligation", "ob_pk");
+
+    foreach ($newObligation->getLicenses() as $license) {
+      $licIds = $this->obligationMap->getIdFromShortname($license, false);
+      $this->obligationMap->associateLicenseFromLicenseList($obPk, $licIds, false);
+    }
+    foreach ($newObligation->getCandidateLicenses() as $license) {
+      $licIds = $this->obligationMap->getIdFromShortname($license, true);
+      $this->obligationMap->associateLicenseFromLicenseList($obPk, $licIds, true);
+    }
+
+    $newInfo = new Info(201, $obPk, InfoType::INFO);
+    return $response->withJson($newInfo->getArray(), $newInfo->getCode());
   }
 
   /**
