@@ -57,6 +57,8 @@ tags:
     description: Maintenance operations
   - name: Overview
     description: Overview of FOSSology operations
+  - name: Agent
+    description: Agent management
 
 x-reuse:
   - &cxGetParams
@@ -289,6 +291,43 @@ paths:
                 $ref: '#/components/schemas/Info'
         '400':
           description: Validation Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /agents/monk/renew:
+    post:
+      operationId: renewMonkAgent
+      tags:
+        - Agent
+        - Admin
+      summary: Renew the current Monk agent
+      description: >
+        Trigger renewal of the current Monk agent revision, equivalent to the
+        legacy "Manage Monk Revision" admin page.
+      responses:
+        '200':
+          description: Monk agent revision renewed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Monk agent has not run yet, nothing to renew.
           content:
             application/json:
               schema:
