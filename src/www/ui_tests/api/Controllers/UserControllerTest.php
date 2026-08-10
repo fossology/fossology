@@ -432,4 +432,81 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->userController->addUser($request, new ResponseHelper(), []);
   }
+
+  /**
+   * Invoke a private/protected method via reflection.
+   *
+   * @param object $object
+   * @param string $method
+   * @param array $args
+   * @return mixed
+   */
+  private function invokePrivate($object, $method, array $args)
+  {
+    $reflection = new \ReflectionClass(get_class($object));
+    $m = $reflection->getMethod($method);
+    $m->setAccessible(true);
+    return $m->invokeArgs($object, $args);
+  }
+
+  /**
+   * @test
+   * -# Test UserController::buildAgentCheckboxes() for V2 DTOs
+   * -# Check that pkgagent and softwareHeritage (which previously used the
+   *    wrong V1 key names for a V2 request) are now read correctly
+   * -# Check that ipra (which was never wired up at all, for either
+   *    version) is now read correctly too
+   */
+  public function testBuildAgentCheckboxesV2()
+  {
+    $agentsDto = [
+      'bucket' => true, 'copyrightEmailAuthor' => true, 'ecc' => false,
+      'ipra' => true, 'keyword' => false, 'mime' => true, 'monk' => false,
+      'nomos' => false, 'ojo' => false, 'pkgagent' => true, 'reso' => false,
+      'softwareHeritage' => true,
+    ];
+    $result = $this->invokePrivate($this->userController, 'buildAgentCheckboxes',
+      [$agentsDto, ApiVersion::V2]);
+
+    $this->assertEquals(1, $result['Check_agent_bucket']);
+    $this->assertEquals(1, $result['Check_agent_copyright']);
+    $this->assertEquals(0, $result['Check_agent_ecc']);
+    $this->assertEquals(1, $result['Check_agent_mimetype']);
+    $this->assertEquals(1, $result['Check_agent_pkgagent']);
+    $this->assertEquals(1, $result['Check_agent_shagent']);
+    $this->assertEquals(1, $result['Check_agent_ipra']);
+  }
+
+  /**
+   * @test
+   * -# Test UserController::buildAgentCheckboxes() for V1 DTOs
+   * -# Check the V1 key names (package, heritage, copyright_email_author,
+   *    patent)
+   */
+  public function testBuildAgentCheckboxesV1()
+  {
+    $agentsDto = [
+      'package' => true, 'heritage' => true, 'copyright_email_author' => true,
+      'patent' => true,
+    ];
+    $result = $this->invokePrivate($this->userController, 'buildAgentCheckboxes',
+      [$agentsDto, ApiVersion::V1]);
+
+    $this->assertEquals(1, $result['Check_agent_pkgagent']);
+    $this->assertEquals(1, $result['Check_agent_shagent']);
+    $this->assertEquals(1, $result['Check_agent_copyright']);
+    $this->assertEquals(1, $result['Check_agent_ipra']);
+  }
+
+  /**
+   * @test
+   * -# Test UserController::buildAgentCheckboxes() with no agents given
+   * -# Check that an empty map is returned instead of erroring
+   */
+  public function testBuildAgentCheckboxesEmpty()
+  {
+    $result = $this->invokePrivate($this->userController, 'buildAgentCheckboxes',
+      [null, ApiVersion::V2]);
+    $this->assertEquals([], $result);
+  }
 }

@@ -95,38 +95,44 @@ class UserController extends RestController
     if (empty($userDetails['name'])) {
       throw new HttpBadRequestException("Username must be specified.");
     }
+
+    list($success, $message) = $this->createUser($userDetails, $apiVersion);
+    if (!$success) {
+      throw new HttpInternalServerErrorException($message);
+    }
+
+    $returnVal = new Info(201, "User created successfully", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Build a legacy user_add compatible request from a DTO and create the
+   * user through the user_add plugin.
+   *
+   * @param array $userDetails Associative array using the same keys as the
+   *   REST createUser DTO (name, description, email, accessLevel,
+   *   rootFolderId, emailNotification, defaultBucketpool, agents{...}).
+   * @param string $apiVersion ApiVersion::V1 or ApiVersion::V2
+   * @return array{0: bool, 1: string} [success, message or error]
+   */
+  private function createUser($userDetails, $apiVersion)
+  {
     $userHelper = new UserHelper();
     // creating symphony request
     $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
     $symfonyRequest->request->set('username', $userDetails['name']);
-    $symfonyRequest->request->set('pass1', $userDetails[$apiVersion == ApiVersion::V2 ? 'userPass' : 'user_pass']);
-    $symfonyRequest->request->set('pass2', $userDetails[$apiVersion == ApiVersion::V2 ? 'userPass' : 'user_pass']);
-    $symfonyRequest->request->set('description', $userDetails['description']);
-    $symfonyRequest->request->set('permission', $userHelper->getEquivalentValueForPermission($userDetails['accessLevel']));
-    $symfonyRequest->request->set('folder', $userDetails['rootFolderId']);
-    $symfonyRequest->request->set('enote', $userDetails['emailNotification'] ? 'y' : 'n');
-    $symfonyRequest->request->set('email', $userDetails['email']);
-    $symfonyRequest->request->set('public', $userDetails['defaultVisibility']);
+    $pass = $userDetails[$apiVersion == ApiVersion::V2 ? 'userPass' : 'user_pass'] ?? '';
+    $symfonyRequest->request->set('pass1', $pass);
+    $symfonyRequest->request->set('pass2', $pass);
+    $symfonyRequest->request->set('description', $userDetails['description'] ?? '');
+    $symfonyRequest->request->set('permission', $userHelper->getEquivalentValueForPermission($userDetails['accessLevel'] ?? null));
+    $symfonyRequest->request->set('folder', $userDetails['rootFolderId'] ?? '');
+    $symfonyRequest->request->set('enote', !empty($userDetails['emailNotification']) ? 'y' : 'n');
+    $symfonyRequest->request->set('email', $userDetails['email'] ?? '');
+    $symfonyRequest->request->set('public', $userDetails['defaultVisibility'] ?? '');
     $symfonyRequest->request->set('default_bucketpool_fk', $userDetails['defaultBucketpool'] ?? 2);
 
-    $agents = array();
-    if (isset($userDetails['agents'])) {
-      if (is_string($userDetails['agents'])) { // If 'x-www-form-urlencoded', inner elements are not decoded
-        $userDetails['agents'] = json_decode($userDetails['agents'], true);
-      }
-      $agents['Check_agent_mimetype'] = isset($userDetails['agents']['mime']) && $userDetails['agents']['mime'] ? 1 : 0;
-      $agents['Check_agent_monk'] = isset($userDetails['agents']['monk']) && $userDetails['agents']['monk'] ? 1 : 0;
-      $agents['Check_agent_ojo'] = isset($userDetails['agents']['ojo']) && $userDetails['agents']['ojo'] ? 1 : 0;
-      $agents['Check_agent_bucket'] = isset($userDetails['agents']['bucket']) && $userDetails['agents']['bucket'] ? 1 : 0 ;
-      $agents['Check_agent_copyright'] = isset($userDetails['agents'][$apiVersion == ApiVersion::V2 ? 'copyrightEmailAuthor' : 'copyright_email_author']) && $userDetails['agents'][$apiVersion == ApiVersion::V2 ? 'copyrightEmailAuthor' : 'copyright_email_author'] ? 1 : 0;
-      $agents['Check_agent_ecc'] = isset($userDetails['agents']['ecc']) && $userDetails['agents']['ecc'] ? 1 : 0;
-      $agents['Check_agent_keyword'] = isset($userDetails['agents']['keyword']) && $userDetails['agents']['keyword'] ? 1 : 0;
-      $agents['Check_agent_nomos'] = isset($userDetails['agents']['nomos']) && $userDetails['agents']['nomos'] ? 1 : 0;
-      $agents['Check_agent_pkgagent'] = isset($userDetails['agents']['package']) && $userDetails['agents']['package'] ? 1 : 0;
-      $agents['Check_agent_reso'] = isset($userDetails['agents']['reso']) && $userDetails['agents']['reso'] ? 1 : 0;
-      $agents['Check_agent_shagent'] = isset($userDetails['agents']['heritage']) && $userDetails['agents']['heritage'] ? 1 : 0 ;
-    }
-
+    $agents = $this->buildAgentCheckboxes($userDetails['agents'] ?? null, $apiVersion);
     $symfonyRequest->request->set('user_agent_list', userAgents($agents));
 
     // initialising the user_add object
@@ -135,14 +141,61 @@ class UserController extends RestController
     $userAddObj = $restHelper->getPlugin('user_add');
 
     // calling the add function
-    $ErrMsg = $userAddObj->add($symfonyRequest);
+    $errMsg = $userAddObj->add($symfonyRequest);
 
-    if ($ErrMsg != '') {
-      throw new HttpInternalServerErrorException($ErrMsg);
+    if ($errMsg != '') {
+      return [false, $errMsg];
     }
+    return [true, "User '" . $userDetails['name'] . "' created successfully."];
+  }
 
-    $returnVal = new Info(201, "User created successfully", InfoType::INFO);
-    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  /**
+   * Translate a REST agents DTO (bucket, copyrightEmailAuthor, ecc, ipra,
+   * keyword, mime, monk, nomos, ojo, pkgagent, reso, softwareHeritage for
+   * V2; the V1 equivalents otherwise) into the legacy Check_agent_* map
+   * expected by userAgents().
+   *
+   * Previously this mapping used the wrong (V1) key names for pkgagent and
+   * softwareHeritage when handling a V2 request -- 'package'/'heritage'
+   * instead of 'pkgagent'/'softwareHeritage' -- so those two agent flags
+   * were silently ignored for every V2 createUser() call. The ipra agent
+   * had no mapping at all, for either version, so it was always ignored.
+   *
+   * @param array|string|null $agentsDto
+   * @param string $apiVersion ApiVersion::V1 or ApiVersion::V2
+   * @return array<string, int>
+   */
+  private function buildAgentCheckboxes($agentsDto, $apiVersion)
+  {
+    if (empty($agentsDto)) {
+      return array();
+    }
+    if (is_string($agentsDto)) { // If 'x-www-form-urlencoded', inner elements are not decoded
+      $agentsDto = json_decode($agentsDto, true);
+    }
+    $copyrightKey = $apiVersion == ApiVersion::V2 ? 'copyrightEmailAuthor' : 'copyright_email_author';
+    $pkgagentKey = $apiVersion == ApiVersion::V2 ? 'pkgagent' : 'package';
+    $heritageKey = $apiVersion == ApiVersion::V2 ? 'softwareHeritage' : 'heritage';
+    $ipraKey = $apiVersion == ApiVersion::V2 ? 'ipra' : 'patent';
+
+    $isChecked = function ($key) use ($agentsDto) {
+      return isset($agentsDto[$key]) && $agentsDto[$key] ? 1 : 0;
+    };
+
+    return array(
+      'Check_agent_mimetype' => $isChecked('mime'),
+      'Check_agent_monk' => $isChecked('monk'),
+      'Check_agent_ojo' => $isChecked('ojo'),
+      'Check_agent_bucket' => $isChecked('bucket'),
+      'Check_agent_copyright' => $isChecked($copyrightKey),
+      'Check_agent_ecc' => $isChecked('ecc'),
+      'Check_agent_keyword' => $isChecked('keyword'),
+      'Check_agent_nomos' => $isChecked('nomos'),
+      'Check_agent_pkgagent' => $isChecked($pkgagentKey),
+      'Check_agent_reso' => $isChecked('reso'),
+      'Check_agent_shagent' => $isChecked($heritageKey),
+      'Check_agent_ipra' => $isChecked($ipraKey),
+    );
   }
 
   /**
