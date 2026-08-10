@@ -21,6 +21,7 @@ require_once dirname(__DIR__, 3) . "/vendor/autoload.php";
 require_once dirname(__FILE__, 4) . "/lib/php/bootstrap.php";
 
 use Fossology\Lib\Util\TimingLogger;
+use Fossology\UI\Api\Controllers\AgentController;
 use Fossology\UI\Api\Controllers\AuthController;
 use Fossology\UI\Api\Controllers\BadRequestController;
 use Fossology\UI\Api\Controllers\ConfController;
@@ -346,6 +347,13 @@ $app->group('/search',
 $app->group('/maintenance',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->post('', MaintenanceController::class . ':createMaintenance');
+    $app->any('/{params:.*}', BadRequestController::class);
+  });
+
+////////////////////////////AGENTS/////////////////////
+$app->group('/agents',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->post('/monk/renew', AgentController::class . ':renewMonkAgent');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

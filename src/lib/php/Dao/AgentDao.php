@@ -236,11 +236,15 @@ class AgentDao
   }
 
   /**
-   * @param string[] $row
+   * @param string[]|false $row getSingleRow()/fetchArray() return false, not
+   *        an array, when no row matches.
    * @return AgentRef
    */
   private function createAgentRef($row)
   {
+    if (!is_array($row)) {
+      return new AgentRef(0, null, null);
+    }
     return new AgentRef(intval($row['agent_pk']), $row['agent_name'], $row['agent_rev']);
   }
 
