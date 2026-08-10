@@ -348,6 +348,7 @@ $app->group('/search',
 $app->group('/maintenance',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->post('', MaintenanceController::class . ':createMaintenance');
+    $app->get('', MaintenanceController::class . ':getMaintenanceInfo');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

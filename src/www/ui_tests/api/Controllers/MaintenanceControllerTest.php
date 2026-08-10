@@ -376,4 +376,64 @@ class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
     $this->maintenanceController->createMaintenance($request, new ResponseHelper(), null);
   }
 
+  /**
+   * @test
+   * -# Test MaintenanceController::getMaintenanceInfo() when a maintenance job has completed
+   * -# Check if response status is 200 and lastRun is formatted as an ISO 8601 timestamp
+   */
+  public function testGetMaintenanceInfo()
+  {
+    $_SESSION['UserLevel'] = 10;
+
+    $this->maintagentPlugin->shouldReceive('getLastMaintenanceRunTime')
+      ->andReturn("2022-07-16 10:15:30");
+
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      new Headers(), [], [], $this->streamFactory->createStream());
+
+    $actualResponse = $this->maintenanceController->getMaintenanceInfo($request, new ResponseHelper(), null);
+
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $this->assertEquals(
+      ['lastRun' => date(DATE_ATOM, strtotime("2022-07-16 10:15:30"))],
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test MaintenanceController::getMaintenanceInfo() when no maintenance job has completed yet
+   * -# Check if response status is 200 and lastRun is null
+   */
+  public function testGetMaintenanceInfoNoRuns()
+  {
+    $_SESSION['UserLevel'] = 10;
+
+    $this->maintagentPlugin->shouldReceive('getLastMaintenanceRunTime')
+      ->andReturn(null);
+
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      new Headers(), [], [], $this->streamFactory->createStream());
+
+    $actualResponse = $this->maintenanceController->getMaintenanceInfo($request, new ResponseHelper(), null);
+
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $this->assertEquals(['lastRun' => null], $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test MaintenanceController::getMaintenanceInfo() for non admin users
+   * -# Check if access is denied with HttpForbiddenException
+   */
+  public function testGetMaintenanceInfoUserNotAdmin()
+  {
+    $_SESSION['UserLevel'] = 0;
+
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      new Headers(), [], [], $this->streamFactory->createStream());
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->maintenanceController->getMaintenanceInfo($request, new ResponseHelper(), null);
+  }
+
 }
