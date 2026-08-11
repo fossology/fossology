@@ -179,6 +179,37 @@ const char* jobsql_failed =
     "   WHERE jq_pk = %d;";
 
 /**
+ * Mark every jobqueue entry that (transitively) depends on the given jq_pk as
+ * failed, so a failed prerequisite (e.g. a failed wget_agent) fails its
+ * dependent ununpack/adj2nest jobs instead of leaving them stuck in the queue
+ * forever.
+ *
+ * Recursively walks the jobdepends DAG from the failed jq_pk and marks all
+ * dependents failed. A depth guard (20) keeps the recursion bounded even if a
+ * jobdepends cycle ever appears. Entries that already finished (jq_endtime IS
+ * NOT NULL) are left untouched.
+ *
+ * printf format string with one placeholder:
+ *  %d  the jq_pk of the failed jobqueue entry.
+ */
+const char* jobsql_fail_dependents =
+    " WITH RECURSIVE deps(jq_pk, depth) AS ("
+    "   SELECT jdep_jq_fk, 1 FROM jobdepends"
+    "     WHERE jdep_jq_depends_fk = %d"
+    "   UNION ALL"
+    "   SELECT jd.jdep_jq_fk, deps.depth + 1 FROM jobdepends jd"
+    "     INNER JOIN deps ON deps.jq_pk = jd.jdep_jq_depends_fk"
+    "     WHERE deps.depth < 20"
+    " )"
+    " UPDATE jobqueue"
+    "   SET jq_endtime = now(),"
+    "       jq_end_bits = jq_end_bits | 2,"
+    "       jq_schedinfo = null,"
+    "       jq_endtext = 'dependency failed'"
+    "   WHERE jq_pk IN (SELECT jq_pk FROM deps)"
+    "     AND jq_endtime IS NULL;";
+
+/**
  * Update the items processed for the given job id
  */
 const char* jobsql_processed =

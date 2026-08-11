@@ -52,6 +52,15 @@ if [[ $# -eq 0 || ($# -eq 1 && "$1" == "scheduler") ]]; then
   /usr/local/lib/fossology/fo-postinstall --common --database --licenseref
 fi
 
+# Fix repository directory permissions. libfossrepo creates directories under a
+# restrictive umask that can strip the owner/group execute bits (leaving e.g.
+# mode 2660 instead of 2770). Without the execute bit the scheduler (running as
+# the fossy user) cannot create log files inside such directories, and agents
+# (e.g. wget_agent) cannot traverse/create work directories -- causing job
+# failures like "Permission denied". Enforce the intended drwxrws--- mode on
+# every repository directory so jobs never get stuck on missing permissions.
+find /srv/fossology/repository -type d -exec chmod 2770 {} +
+
 # Start Fossology
 echo
 echo 'Fossology initialisation complete; Starting up...'
