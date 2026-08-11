@@ -95,7 +95,7 @@ class UserHelper
     $symfonyRequest->request->set('_pass1', $userDetails[$version == ApiVersion::V2 ? 'userPass' : 'user_pass'] ?? null);
     $symfonyRequest->request->set('_pass2', $userDetails[$version == ApiVersion::V2 ? 'userPass' : 'user_pass'] ?? null);
     $symfonyRequest->request->set('_blank_pass', $userDetails['_blank_pass'] ?? "");
-    $symfonyRequest->request->set('user_status', $userDetails['user_status'] ?? $user['user_status']);
+    $symfonyRequest->request->set('user_status', $userDetails[$version == ApiVersion::V2 ? 'userStatus' : 'user_status'] ?? $user['user_status']);
     $symfonyRequest->request->set('user_email', $userDetails['email'] ?? $user['user_email']);
     $symfonyRequest->request->set('email_notify', isset($userDetails['emailNotification']) && $userDetails['emailNotification'] ? "y" : $user['email_notify']);
     $symfonyRequest->request->set('default_bucketpool_fk', $userDetails['defaultBucketpool'] ?? $user['default_bucketpool_fk']);
