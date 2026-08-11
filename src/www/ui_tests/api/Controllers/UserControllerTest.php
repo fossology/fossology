@@ -16,6 +16,7 @@ require_once dirname(__DIR__, 4) . '/lib/php/Plugin/FO_Plugin.php';
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Mockery as M;
 use Fossology\UI\Api\Controllers\UserController;
@@ -431,5 +432,113 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $this->expectExceptionMessage("Username must be specified.");
 
     $this->userController->addUser($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @test
+   * -# Test UserController::revokeRestApiToken() for a token owned by the
+   *    current user
+   * -# Check if response status is 200 and the token is invalidated
+   */
+  public function testRevokeRestApiTokenSuccess()
+  {
+    $userId = 2;
+    $tokenPk = 5;
+    $tokenId = "$tokenPk.$userId";
+    $request = M::mock(Request::class);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->dbHelper->shouldReceive('invalidateTokenForUser')
+      ->withArgs(function ($actualTokenPk, $actualUserId) use ($tokenPk, $userId) {
+        return $actualTokenPk === $tokenPk && $actualUserId === $userId;
+      })
+      ->once()
+      ->andReturn(['pat_pk' => $tokenPk, 'user_fk' => $userId]);
+
+    $info = new Info(200, "Token revoked successfully", InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->userController->revokeRestApiToken($request,
+      new ResponseHelper(), ['tokenId' => $tokenId]);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test UserController::revokeRestApiToken() with a malformed token id
+   * -# Check if HttpBadRequestException is thrown
+   */
+  public function testRevokeRestApiTokenInvalidId()
+  {
+    $request = M::mock(Request::class);
+    $this->expectException(HttpBadRequestException::class);
+
+    $this->userController->revokeRestApiToken($request, new ResponseHelper(),
+      ['tokenId' => 'not-a-valid-id']);
+  }
+
+  /**
+   * @test
+   * -# Test UserController::revokeRestApiToken() with a token id whose
+   *    numeric part exceeds Postgres' int4 range
+   * -# Check if HttpBadRequestException is thrown without reaching the DB
+   */
+  public function testRevokeRestApiTokenIdOutOfRange()
+  {
+    $request = M::mock(Request::class);
+    $this->dbHelper->shouldNotReceive('invalidateTokenForUser');
+    $this->expectException(HttpBadRequestException::class);
+
+    $this->userController->revokeRestApiToken($request, new ResponseHelper(),
+      ['tokenId' => '9999999999.5']);
+  }
+
+  /**
+   * @test
+   * -# Test UserController::revokeRestApiToken() for a token which does not
+   *    exist
+   * -# Check if HttpNotFoundException is thrown
+   */
+  public function testRevokeRestApiTokenNotFound()
+  {
+    $tokenPk = 99;
+    $userId = 2;
+    $tokenId = "$tokenPk.$userId";
+    $request = M::mock(Request::class);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->dbHelper->shouldReceive('invalidateTokenForUser')
+      ->withArgs(function ($actualTokenPk, $actualUserId) use ($tokenPk, $userId) {
+        return $actualTokenPk === $tokenPk && $actualUserId === $userId;
+      })->andReturn(false);
+    $this->expectException(HttpNotFoundException::class);
+
+    $this->userController->revokeRestApiToken($request, new ResponseHelper(),
+      ['tokenId' => $tokenId]);
+  }
+
+  /**
+   * @test
+   * -# Test UserController::revokeRestApiToken() for a token owned by
+   *    another user
+   * -# Check if HttpForbiddenException is thrown
+   */
+  public function testRevokeRestApiTokenForbidden()
+  {
+    $tokenPk = 5;
+    $userId = 2;
+    $tokenId = "$tokenPk.3";
+    $request = M::mock(Request::class);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->dbHelper->shouldReceive('invalidateTokenForUser')
+      ->withArgs(function ($actualTokenPk, $actualUserId) use ($tokenPk, $userId) {
+        return $actualTokenPk === $tokenPk && $actualUserId === $userId;
+      })
+      ->andReturn(['pat_pk' => $tokenPk, 'user_fk' => 3]);
+    $this->expectException(HttpForbiddenException::class);
+
+    $this->userController->revokeRestApiToken($request, new ResponseHelper(),
+      ['tokenId' => $tokenId]);
   }
 }

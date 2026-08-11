@@ -294,6 +294,7 @@ $app->group('/users',
     $app->delete("/{pathParam:$pattern}", UserController::class . ':deleteUser');
     $app->post('/tokens', UserController::class . ':createRestApiToken');
     $app->get('/tokens/{type:\\w+}', UserController::class . ':getTokens');
+    $app->delete("/tokens/{tokenId:$pattern}", UserController::class . ':revokeRestApiToken');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

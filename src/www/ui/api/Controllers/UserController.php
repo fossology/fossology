@@ -17,6 +17,7 @@ use Fossology\Lib\Exceptions\DuplicateTokenNameException;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Exceptions\HttpConflictException;
 use Fossology\UI\Api\Exceptions\HttpErrorException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpInternalServerErrorException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Exceptions\HttpTooManyRequestException;
@@ -311,5 +312,43 @@ class UserController extends RestController
     $res = $returnVal->getArray();
     $res[$tokenType . ($apiVersion == ApiVersion::V2 ? 'Tokens' : '_tokens')] = $finalTokens;
     return $response->withJson($res, $returnVal->getCode());
+  }
+
+  /**
+   * Revoke an existing REST API Token belonging to the current user
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpBadRequestException
+   * @throws HttpForbiddenException
+   * @throws HttpNotFoundException
+   */
+  public function revokeRestApiToken($request, $response, $args)
+  {
+    $tokenId = $args['tokenId'];
+    if (!preg_match('/^\d+\.\d+$/', $tokenId)) {
+      throw new HttpBadRequestException("Invalid token id.");
+    }
+    list($tokenPk, ) = explode(".", $tokenId);
+    $tokenPk = intval($tokenPk);
+    if ($tokenPk > 2147483647) {
+      // pat_pk is a Postgres int4 column; anything larger can never match
+      // and would otherwise abort the query with an out-of-range error.
+      throw new HttpBadRequestException("Invalid token id.");
+    }
+
+    $tokenInfo = $this->dbHelper->invalidateTokenForUser($tokenPk,
+      $this->restHelper->getUserId());
+    if (empty($tokenInfo)) {
+      throw new HttpNotFoundException("Token not found.");
+    }
+    if (intval($tokenInfo['user_fk']) !== intval($this->restHelper->getUserId())) {
+      throw new HttpForbiddenException("You are not allowed to revoke this token.");
+    }
+
+    $returnVal = new Info(200, "Token revoked successfully", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 }
