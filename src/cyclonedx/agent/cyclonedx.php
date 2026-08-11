@@ -44,6 +44,7 @@ class CycloneDXAgent extends Agent
   const OUTPUT_FORMAT_KEY = "outputFormat";               ///< Argument key for output format
   const DEFAULT_OUTPUT_FORMAT = "cyclonedx_json";                  ///< Default output format
   const UPLOADS_ADD_KEY = "uploadsAdd";
+  const LICENSE_EXPRESSION_SPDX_ID = "LicenseRef-fossology-License-Expression";
 
   /** @var array $addtionalUploads
    * Array of addtional uploads
@@ -201,7 +202,8 @@ class CycloneDXAgent extends Agent
     $this->reportutils->addClearingStatus($filesWithLicenses, $itemTreeBounds, $this->groupId);
     $this->heartbeat(0);
 
-    $this->reportutils->addScannerResults($filesWithLicenses, $itemTreeBounds, $this->groupId, $this->licensesInDocument);
+    $this->reportutils->addScannerResults($filesWithLicenses, $itemTreeBounds,
+      $this->groupId, $this->licensesInDocument);
     $this->heartbeat(0);
 
     $this->reportutils->addCopyrightResults($filesWithLicenses, $uploadId);
@@ -210,7 +212,9 @@ class CycloneDXAgent extends Agent
     $customLicenseTexts = $this->clearingDao->getMainLicenseReportInfos($uploadId, $this->groupId);
 
     $upload = $this->uploadDao->getUpload($uploadId);
-    $components = $this->generateFileComponents($filesWithLicenses, $upload->getTreeTableName(), $uploadId, $itemTreeBounds, $customLicenseTexts);
+    $components = $this->generateFileComponents($filesWithLicenses,
+      $upload->getTreeTableName(), $uploadId, $itemTreeBounds,
+      $customLicenseTexts);
 
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     $mainLicenses = array();
@@ -222,12 +226,18 @@ class CycloneDXAgent extends Agent
         continue;
       }
 
-      $licensedata = $this->getLicenseDataForCycloneDX($mainLicObj, $licId, $customLicenseTexts);
+      $licensedata = $this->getLicenseDataForCycloneDX($mainLicObj, $licId,
+        $customLicenseTexts);
       $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
 
-      $customText = array_key_exists($licId, $customLicenseTexts) ? $customLicenseTexts[$licId] : null;
-      $licText = !empty($customText) ? $customText : $mainLicObj->getText();
-      $reportLicId = $mainLicObj->getId() . "-" . md5($licText);
+      if ($this->isLicenseExpression($mainLicObj)) {
+        $reportLicId = $mainLicObj->getId() . "-" . md5($licensedata['expression']);
+      } else {
+        $customText = array_key_exists($licId, $customLicenseTexts) ?
+          $customLicenseTexts[$licId] : null;
+        $licText = !empty($customText) ? $customText : $mainLicObj->getText();
+        $reportLicId = $mainLicObj->getId() . "-" . md5($licText);
+      }
       $seenLicenseIds[$reportLicId] = true;
     }
 
@@ -236,11 +246,13 @@ class CycloneDXAgent extends Agent
         ? $fileNode->getConcludedLicenses()
         : $fileNode->getScanners();
       foreach ($licenseIds as $licenseId) {
-        if (array_key_exists($licenseId, $this->licensesInDocument) && !array_key_exists($licenseId, $seenLicenseIds)) {
+        if (array_key_exists($licenseId, $this->licensesInDocument) &&
+          !array_key_exists($licenseId, $seenLicenseIds)) {
           $seenLicenseIds[$licenseId] = true;
           $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
           $isCustomText = $this->licensesInDocument[$licenseId]->isCustomText();
-          $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText);
+          $licensedata = $this->getLicenseDataForCycloneDX($licObj,
+            $licenseId, $customLicenseTexts, $isCustomText);
           $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
         }
       }
@@ -325,7 +337,8 @@ class CycloneDXAgent extends Agent
    * @param int $uploadId
    * @return array Components list
    */
-  protected function generateFileComponents($filesWithLicenses, $treeTableName, $uploadId, $itemTreeBounds, $customLicenseTexts = array())
+  protected function generateFileComponents($filesWithLicenses, $treeTableName,
+    $uploadId, $itemTreeBounds, $customLicenseTexts = array())
   {
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
@@ -364,7 +377,8 @@ class CycloneDXAgent extends Agent
           if (array_key_exists($licenseId, $this->licensesInDocument)) {
             $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
             $isCustomText = $this->licensesInDocument[$licenseId]->isCustomText();
-            $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText, false);
+            $licensedata = $this->getLicenseDataForCycloneDX($licObj,
+              $licenseId, $customLicenseTexts, $isCustomText, false);
             $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
           }
         }
@@ -373,7 +387,8 @@ class CycloneDXAgent extends Agent
           if (array_key_exists($licenseId, $this->licensesInDocument)) {
             $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
             $isCustomText = $this->licensesInDocument[$licenseId]->isCustomText();
-            $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText, false);
+            $licensedata = $this->getLicenseDataForCycloneDX($licObj,
+              $licenseId, $customLicenseTexts, $isCustomText, false);
             $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
           }
         }
@@ -440,9 +455,17 @@ class CycloneDXAgent extends Agent
    * @param bool $includeText
    * @return array
    */
-  private function getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText = false, $includeText = true)
+  private function getLicenseDataForCycloneDX($licObj, $licenseId,
+    $customLicenseTexts, $isCustomText = false, $includeText = true)
   {
-    $customText = array_key_exists($licenseId, $customLicenseTexts) ? $customLicenseTexts[$licenseId] : null;
+    if ($this->isLicenseExpression($licObj)) {
+      return array(
+        'expression' => $licObj->getExpression($this->licenseDao, $this->groupId)
+      );
+    }
+
+    $customText = array_key_exists($licenseId, $customLicenseTexts) ?
+      $customLicenseTexts[$licenseId] : null;
     $licText = !empty($customText) ? $customText : $licObj->getText();
 
     $licensedata = array(
@@ -471,6 +494,17 @@ class CycloneDXAgent extends Agent
     }
 
     return $licensedata;
+  }
+
+  /**
+   * @brief Check if a license object represents a license expression
+   * @param \Fossology\Lib\Data\License $licObj License object
+   * @return bool True if the license object is an expression
+   */
+  private function isLicenseExpression($licObj)
+  {
+    return $licObj !== null &&
+      $licObj->getSpdxId() === self::LICENSE_EXPRESSION_SPDX_ID;
   }
 
   /**

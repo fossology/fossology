@@ -39,6 +39,7 @@ struct curScan cur;
 
 extern CU_TestInfo nomos_gap_testcases[];
 extern CU_TestInfo doctorBuffer_testcases[];
+extern CU_TestInfo spdx_expression_nomos_testcases[];
 /* ************************************************************************** */
 /* **** create test suite *************************************************** */
 /* ************************************************************************** */
@@ -47,6 +48,8 @@ CU_SuiteInfo suites[] =
 {
     {"Testing process:", NULL, NULL, NULL, NULL, nomos_gap_testcases},
     {"Testing doctor Buffer:", NULL, NULL, NULL, NULL, doctorBuffer_testcases},
+    {"Testing SPDX expression Nomos pre-scan:", NULL, NULL, NULL, NULL,
+        spdx_expression_nomos_testcases},
     CU_SUITE_INFO_NULL
 };
 

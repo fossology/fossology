@@ -54,9 +54,11 @@ LicenseListVersion: 3.22
 {% if EnableOsselotExport and not (licId starts with 'LicenseRef-') -%}
   {% set licId = 'LicenseRef-' ~ licId -%}
 {% endif -%}
+{% if licenseData.licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' %}
 LicenseID: {{ licId|replace({' ': '-'}) }}
 LicenseName: {{ licenseData.licenseObj.fullName }}
 ExtractedText: <text> {{ licenseData.licenseObj.text|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
     |replace({'\f':''}) }} </text>
+{%- endif ~%}
 
 {% endif %}{% endfor %}

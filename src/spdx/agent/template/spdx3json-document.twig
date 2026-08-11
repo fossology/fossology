@@ -73,7 +73,7 @@
     "spdxId": "https://spdx.org/rdf/3.0.0/terms/Core/Organization#SPDXRef-Actor-{{ organization }}",
     "creationInfo": "https://spdx.org/rdf/3.0.0/terms/Core/creationInfo#creationInfo1",
     "name": "{{ userName | split(' ')[0] }}"
-  },{% endif %}{% for licenseData in licenseList %}{% if licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-' %}
+  },{% endif %}{% for licenseData in licenseList %}{% if (licenseData.licenseObj.spdxId starts with 'LicenseRef-' or licenseData.licenseObj.shortName starts with 'LicenseRef-') and licenseData.licenseObj.spdxId != 'LicenseRef-fossology-License-Expression' %}
   {
     "type": "expandedlicensing_CustomLicense",
     "spdxId": "{{ uri }}#{{ licenseData.licenseObj.spdxId|replace({' ': '-'})|e }}",

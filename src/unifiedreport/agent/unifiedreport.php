@@ -243,6 +243,8 @@ class UnifiedReport extends Agent
    */
   private $groupBy;
 
+  private $fh;
+
   function __construct()
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement");
@@ -285,14 +287,28 @@ class UnifiedReport extends Agent
     $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($licensesMain) ? 0 : count($licensesMain["statements"]));
 
+    $this->licenseMainGetter->setOnlyExpressions(true);
+    $licenseExpressionsMain = $this->licenseMainGetter->getCleared($uploadId, $this, $groupId, true, null, false, true);
+    $this->heartbeat(empty($licenseExpressionsMain) ? 0 : count($licenseExpressionsMain["statements"]));
+    $this->licenseMainGetter->setOnlyExpressions(false);
+
     $licensesHist = $this->licenseClearedGetter->getLicenseHistogramForReport($uploadId, $groupId);
     $this->heartbeat(empty($licensesHist) ? 0 : count($licensesHist["statements"]));
+
+    $licenseExpressionsHist = $this->licenseClearedGetter
+      ->getLicenseExpressionHistogramForReport($uploadId, $groupId);
+    $this->heartbeat(empty($licenseExpressionsHist) ? 0 : count($licenseExpressionsHist["statements"]));
 
     $bulkLicenses = $this->bulkMatchesGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($bulkLicenses) ? 0 : count($bulkLicenses["statements"]));
 
+    $this->licenseClearedGetter->setOnlyExpressions(true);
+    $licenseExpressions = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, "license", false, true);
+    $this->heartbeat(empty($licenseExpressions) ? 0 : count($licenseExpressions["statements"]));
+    $this->licenseClearedGetter->setOnlyExpressions(false);
+
     $this->licenseClearedGetter->setOnlyAcknowledgements(true);
-    $licenseAcknowledgements = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, "license", false);
+    $licenseAcknowledgements = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, "license", false, true);
     $this->heartbeat(empty($licenseAcknowledgements) ? 0 : count($licenseAcknowledgements["statements"]));
 
     $this->licenseClearedGetter->setOnlyComments(true);
@@ -333,6 +349,7 @@ class UnifiedReport extends Agent
 
     $contents = array(
                         "licenses" => $licenses,
+                        "licenseExpressions" => $licenseExpressions,
                         "bulkLicenses" => $bulkLicenses,
                         "licenseAcknowledgements" => $licenseAcknowledgements,
                         "licenseComments" => $licenseComments,
@@ -346,7 +363,9 @@ class UnifiedReport extends Agent
                         "licensesNonFunctional" => $licensesNonFunctional,
                         "licensesNonFunctionalComment" => $licensesNonFunctionalComment,
                         "licensesMain" => $licensesMain,
+                        "licenseExpressionsMain" => $licenseExpressionsMain,
                         "licensesHist" => $licensesHist,
+                        "licenseExpressionsHist" => $licenseExpressionsHist,
                         "otherStatement" => $otherStatement
                      );
 
@@ -562,6 +581,43 @@ class UnifiedReport extends Agent
   }
 
   /**
+   * @brief This function lists out the license expressions
+   * and associated files in a two-column table.
+   * @param Section $section
+   * @param string $title
+   * @param array $licenses
+   * @param array $titleSubHeading
+   */
+  private function licenseExpressionTable(Section $section, $title, $licenses, $titleSubHeading)
+  {
+    $firstColLen = 5000;
+    $secondColLen = 6000;
+    if (!empty($title)) {
+      $section->addTitle(htmlspecialchars($title), 2);
+    }
+    $section->addText($titleSubHeading, $this->subHeadingStyle);
+    $table = $section->addTable($this->tablestyle);
+    if (!empty($licenses)) {
+      foreach ($licenses as $license) {
+        $table->addRow($this->rowHeight);
+        $cell1 = $table->addCell($firstColLen, "pStyle");
+        $cell1->addText(htmlspecialchars($license["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
+        $cell2 = $table->addCell($secondColLen, "pStyle");
+        asort($license["files"]);
+        foreach ($license["files"] as $fileName) {
+          $cell2->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
+        }
+      }
+    } else {
+      $table->addRow($this->rowHeight);
+      $table->addCell($firstColLen)->addText("");
+      $table->addCell($secondColLen)->addText("");
+    }
+    $section->addTextBreak();
+  }
+
+
+  /**
    * @brief Copyright or ecc table.
    * @param Section $section
    * @param string $title
@@ -737,6 +793,8 @@ class UnifiedReport extends Agent
 
     list($contents['licensesMain']['statements'], $contents['licenses']['statements']) = $this->licenseClearedGetter->updateIdentifiedGlobalLicenses($contents['licensesMain']['statements'], $contents['licenses']['statements']);
 
+    list($contents['licenseExpressionsMain']['statements'], $licenseExpressions) = $this->licenseClearedGetter->updateIdentifiedGlobalLicenses($contents['licenseExpressionsMain']['statements'], $contents['licenseExpressions']['statements']);
+
     /* Summery table */
     $assignedToUserId = $this->uploadDao->getAssignee($uploadId, $groupId);
     if ($assignedToUserId != 1) {
@@ -746,7 +804,10 @@ class UnifiedReport extends Agent
     }
     $reportSummarySection->summaryTable($section, $uploadId, $userName,
       $contents['licensesMain']['statements'], $contents['licenses']['statements'],
-      $contents['licensesHist']['statements'], $contents['otherStatement'], $timestamp, $groupName, $packageUri, $assignedToUserName);
+      $contents['licensesHist']['statements'], $contents['otherStatement'],
+      $timestamp, $groupName, $packageUri, $assignedToUserName,
+      $contents['licenseExpressionsMain']['statements'], $licenseExpressions,
+      $contents['licenseExpressionsHist']['statements']);
 
     if (!empty($contents['otherStatement']['ri_unifiedcolumns'])) {
       $unifiedColumns = (array) json_decode($contents['otherStatement']['ri_unifiedcolumns'], true);
@@ -817,8 +878,10 @@ class UnifiedReport extends Agent
     $isEnabled = array_values($unifiedColumns['scanresults'])[0];
     if ($isEnabled) {
       /* Display scan results and edited results */
-      $titleSubHeadingHistogram = "(Scanner count, Concluded license count, License name)";
-      $this->licenseHistogram($section, $contents['licensesHist']['statements'], $titleSubHeadingHistogram, $heading);
+      $titleSubHeadingHistogram = "(Scanner count, Concluded count, License name or expression)";
+      $scanResults = array_merge($contents['licensesHist']['statements'],
+        $contents['licenseExpressionsHist']['statements']);
+      $this->licenseHistogram($section, $scanResults, $titleSubHeadingHistogram, $heading);
     }
 
     $heading = array_keys($unifiedColumns['mainlicenses'])[0];
@@ -827,6 +890,14 @@ class UnifiedReport extends Agent
       /* Display global licenses */
       $titleSubHeadingLicense = "(License name, License text, File path)";
       $this->globalLicenseTable($section, $contents['licensesMain']['statements'], $titleSubHeadingLicense, $heading);
+    }
+
+    $heading = array_keys($unifiedColumns['mainlicenseexpressions'])[0];
+    $isEnabled = array_values($unifiedColumns['mainlicenseexpressions'])[0];
+    if ($isEnabled) {
+      /* Display global license expressions */
+      $titleSubHeadingLicense = "(License Expression, File path)";
+      $this->licenseExpressionTable($section, $heading, $contents['licenseExpressionsMain']['statements'], $titleSubHeadingLicense);
     }
 
     $heading = array_keys($unifiedColumns['redlicense'])[0];
@@ -851,6 +922,14 @@ class UnifiedReport extends Agent
       /* Display licenses(white) name,text and files */
       $whiteLicense = array("color" => array("bgColor" => "FFFFFF"), "riskLevel" => array("", "0", "1"));
       $this->licensesTable($section, $heading, $contents['licenses']['statements'], $whiteLicense, $titleSubHeadingLicense);
+    }
+
+    $heading = array_keys($unifiedColumns['licenseexpressioninfile'])[0];
+    $isEnabled = array_values($unifiedColumns['licenseexpressioninfile'])[0];
+    if ($isEnabled) {
+      /* Display license expressions in file */
+      $titleSubHeadingLicense = "(License Expression, File path)";
+      $this->licenseExpressionTable($section, $heading, $contents['licenseExpressions']['statements'], $titleSubHeadingLicense);
     }
 
     $heading = array_keys($unifiedColumns['overviewwithwithoutobligations'])[0];

@@ -191,10 +191,10 @@ class AjaxFileBrowser extends DefaultPlugin
     /*******    File Listing     ************/
     $pfileLicenses = array();
     foreach ($selectedScanners as $agentName=>$agentId) {
-      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId, $isFlat, $nameRange);
+      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId, $isFlat, $nameRange, true);
       foreach ($licensePerPfile as $pfile => $licenseRow) {
         foreach ($licenseRow as $licId => $row) {
-          $lic = $this->licenseProjector->getProjectedShortname($licId);
+          $lic = $row['expression_label'] ?? $this->licenseProjector->getProjectedShortname($licId);
           $pfileLicenses[$pfile][$lic][$agentName] = $row;
         }
       }
@@ -272,7 +272,9 @@ class AjaxFileBrowser extends DefaultPlugin
     $licenseEntries = array();
     if ($isContainer) {
       $agentFilter = $selectedAgentId ? array($selectedAgentId) : $latestSuccessfulAgentIds;
-      $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array());
+      [$licenseEntries, $expressionsEntries] = $this->licenseDao
+        ->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array(), true);
+      $licenseEntries = array_merge($licenseEntries, $expressionsEntries);
     } else {
       if (array_key_exists($fileId, $pfileLicenses)) {
         foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo) {

@@ -57,6 +57,7 @@ char convertIndexToHighlightType(int index);
 long add2license_ref(char *licenseName);
 long updateLicenseFile(long rfPk);
 int updateLicenseHighlighting(cacheroot_t *pcroot);
+int updateLicenseExpressionFileAndHighlightArray(LicenseExpressionMatch* expression, cacheroot_t* pcroot);
 int initLicRefCache(cacheroot_t *pcroot);
 long lrcache_hash(cacheroot_t *pcroot, char *rf_shortname);
 int lrcache_add(cacheroot_t *pcroot, long rf_pk, char *rf_shortname);
@@ -67,6 +68,7 @@ void addLicence(GArray* theMatches, char* licenceName );
 void cleanLicenceBuffer();
 bool clearLastElementOfLicenceBuffer();   //returns true to be used in if-statements
 void cleanLicenceAndMatchPositions( LicenceAndMatchPositions* in );
+void cleanLicenseExpressionMatch(LicenseExpressionMatch* in);
 MatchPositionAndType* getMatchfromHighlightInfo(GArray* in, int index);
 LicenceAndMatchPositions* getLicenceAndMatchPositions(GArray* in,int  index);
 void cleanTheMatches(GArray* in);

@@ -34,19 +34,7 @@ LicenseComments: <text> {{ fileData.comments|join('\n')
 {% if fileData.scanners|default is empty -%}
 LicenseInfoInFile: NOASSERTION
 {% else -%}
-{% for res in fileData.scanners -%}
-{%- set licId=licenseList[res].licenseObj.spdxId -%}
-{% if licenseList[res].licenseObj.shortName starts with 'LicenseRef-' -%}
-  {% set licId=licenseList[res].licenseObj.shortName -%}
-{% endif -%}
-{% if EnableOsselotExport and licId starts with 'LicenseRef-fossology-' -%}
-  {% set licId = licId|replace({'LicenseRef-fossology-':'LicenseRef-'}) -%}
-{% endif -%}
-{% if EnableOsselotExport and not (licId starts with 'LicenseRef-') -%}
-  {% set licId = 'LicenseRef-' ~ licId -%}
-{% endif -%}
-LicenseInfoInFile: {{ licId|replace({' ':'-'})}}
-{% endfor -%}
+LicenseInfoInFile: {{ scannerLicenseInfoInFileString }}
 {% endif -%}
 {# FileSize: 48 Kb (49173 bytes) #}
 {% if fileData.copyrights|default is empty -%}

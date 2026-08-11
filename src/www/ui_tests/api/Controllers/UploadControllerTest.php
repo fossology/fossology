@@ -1326,6 +1326,10 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $licenseIds[$licenseId] = $licenseId;
     $license = new License($licenseId, "MIT", "MIT License", "risk", "texts", [],
       'type', false);
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/uploads/$uploadId/licenses/main"),
+      new Headers(), [], [], $body);
 
     $this->uploadDao->shouldReceive('isAccessible')
       ->withArgs([$uploadId, $this->groupId])->andReturn(true);
@@ -1334,11 +1338,11 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->clearingDao->shouldReceive('getMainLicenseIds')->withArgs([$uploadId, $this->groupId])->andReturn($licenseIds);
     $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], false])->andReturn([]);
     $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], true])->andReturn([]);
-    $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId])->andReturn($license);
+    $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId, $this->groupId])->andReturn($license);
 
     $licenses[] = $license->getArray();
     $expectedResponse = (new ResponseHelper())->withJson($licenses, 200);
-    $actualResponse = $this->uploadController->getMainLicenses(null, new ResponseHelper(), ['id' => $uploadId]);
+    $actualResponse = $this->uploadController->getMainLicenses($request, new ResponseHelper(), ['id' => $uploadId]);
     $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
   }

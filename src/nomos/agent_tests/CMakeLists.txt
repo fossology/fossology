@@ -24,7 +24,8 @@ target_sources(test_nomos
     PRIVATE 
     ${FO_CWD}/Unit/run_tests.c
     ${FO_CWD}/Unit/test_DoctoredBuffer.c
-    ${FO_CWD}/Unit/test_nomos_gap.c)
+    ${FO_CWD}/Unit/test_nomos_gap.c
+    ${FO_CWD}/Unit/test_spdx_expression_nomos.c)
 target_compile_definitions(test_nomos 
     PRIVATE _FILE_OFFSET_BITS=64
         TESTDATADIR="${FO_SOURCEDIR}/nomos/agent_tests/testdata")
