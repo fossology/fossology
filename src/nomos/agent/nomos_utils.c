@@ -851,6 +851,41 @@ static long saveLicenseExpressionToDatabase(LicenseExpressionMatch* expression,
   return rfPk;
 }
 
+static int updateLicenseExpressionHighlighting(
+    LicenseExpressionMatch* expression, long licenseFileId)
+{
+  PGresult *result;
+
+  if (cur.cliMode == 1 || optionIsSet(OPTS_NO_HIGHLIGHTINFO))
+  {
+    return (true);
+  }
+
+  if (licenseFileId <= 0 || expression->start < 0 ||
+      expression->end <= expression->start)
+  {
+    return (false);
+  }
+
+  result = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      gl.dbManager,
+      "updateLicenseExpressionHighlighting",
+      "INSERT INTO highlight (fl_fk, start, len, type) VALUES($1, $2, $3,'L')",
+      long, int, int
+    ),
+    licenseFileId, expression->start, expression->end - expression->start
+  );
+
+  if (result == NULL)
+  {
+    return (false);
+  }
+
+  PQclear(result);
+  return (true);
+}
+
 int updateLicenseExpressionFileAndHighlightArray(LicenseExpressionMatch* expression,
     cacheroot_t* pcroot)
 {
@@ -860,6 +895,10 @@ int updateLicenseExpressionFileAndHighlightArray(LicenseExpressionMatch* express
   if (licenseFileId > 0)
   {
     expression->licenseFileId = (int)licenseFileId;
+    if (!updateLicenseExpressionHighlighting(expression, licenseFileId))
+    {
+      return (false);
+    }
     return (true);
   }
 
