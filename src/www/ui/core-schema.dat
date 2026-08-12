@@ -2412,10 +2412,6 @@
   $Schema["TABLE"]["report_info"]["ri_copyrightnotes"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_copyrightnotes\" text DEFAULT 'NA'::text";
   $Schema["TABLE"]["report_info"]["ri_copyrightnotes"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_copyrightnotes\" SET NOT NULL, ALTER COLUMN \"ri_copyrightnotes\" SET DEFAULT 'NA'::text";
 
-  $Schema["TABLE"]["report_info"]["ri_criticalnotes"]["DESC"] = "";
-  $Schema["TABLE"]["report_info"]["ri_criticalnotes"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_criticalnotes\" text DEFAULT 'NA'::text";
-  $Schema["TABLE"]["report_info"]["ri_criticalnotes"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_criticalnotes\" SET NOT NULL, ALTER COLUMN \"ri_criticalnotes\" SET DEFAULT 'NA'::text";
-
   $Schema["TABLE"]["report_info"]["ri_unifiedcolumns"]["DESC"] = "COMMENT ON COLUMN \"report_info\".\"ri_unifiedcolumns\" IS 'to edit unified report columns'";
   $Schema["TABLE"]["report_info"]["ri_unifiedcolumns"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_unifiedcolumns\" json";
   $Schema["TABLE"]["report_info"]["ri_unifiedcolumns"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_unifiedcolumns\" DROP NOT NULL";

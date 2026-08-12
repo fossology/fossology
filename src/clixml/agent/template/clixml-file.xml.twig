@@ -33,10 +33,10 @@
 
   <AssessmentSummary>
     <GeneralAssessment><![CDATA[{{ assessmentSummary.generalAssessment|trim }}]]></GeneralAssessment>
-    <CriticalFilesFound>{% if assessmentSummary.criticalFilesText is not empty %}<![CDATA[{{ assessmentSummary.criticalFilesText|trim }}]]>{% else %}{{ assessmentSummary.criticalFilesFound|trim }}{% endif %}</CriticalFilesFound>
-    <DependencyNotes>{% if assessmentSummary.dependencyNotesText is not empty %}<![CDATA[{{ assessmentSummary.dependencyNotesText|trim }}]]>{% else %}{{ assessmentSummary.dependencyNotes|trim }}{% endif %}</DependencyNotes>
-    <ExportRestrictionsFound>{% if assessmentSummary.exportRestrictionsText is not empty %}<![CDATA[{{ assessmentSummary.exportRestrictionsText|trim }}]]>{% else %}{{ assessmentSummary.exportRestrictionsFound|trim }}{% endif %}</ExportRestrictionsFound>
-    <UsageRestrictionsFound>{% if assessmentSummary.usageRestrictionsText is not empty %}<![CDATA[{{ assessmentSummary.usageRestrictionsText|trim }}]]>{% else %}{{ assessmentSummary.usageRestrictionsFound|trim }}{% endif %}</UsageRestrictionsFound>
+    <CriticalFilesFound>{{ assessmentSummary.criticalFilesFound|trim }}</CriticalFilesFound>
+    <DependencyNotes>{{ assessmentSummary.dependencyNotes|trim }}</DependencyNotes>
+    <ExportRestrictionsFound>{{ assessmentSummary.exportRestrictionsFound|trim }}</ExportRestrictionsFound>
+    <UsageRestrictionsFound>{{ assessmentSummary.usageRestrictionsFound|trim }}</UsageRestrictionsFound>
     <AdditionalNotes><![CDATA[{{ assessmentSummary.additionalNotes|trim }}]]></AdditionalNotes>
   </AssessmentSummary>
 
