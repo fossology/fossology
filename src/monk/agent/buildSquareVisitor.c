@@ -25,12 +25,14 @@ typedef struct {
 } point;
 
 gint pointSorter(gconstpointer a, gconstpointer b) {
-  unsigned int aTime = ((const point *) a)->time;
-  unsigned int bTime = ((const point *) b)->time;
-  if (aTime > bTime)
-    return 1;
-  if (aTime < bTime)
-    return -1;
+  const point* pa = (const point*)a;
+  const point* pb = (const point*)b;
+  unsigned int aDist2 = pa->x * pa->x + pa->y * pa->y;
+  unsigned int bDist2 = pb->x * pb->x + pb->y * pb->y;
+  if (aDist2 > bDist2) return 1;
+  if (aDist2 < bDist2) return -1;
+  if (pa->time > pb->time) return 1;
+  if (pa->time < pb->time) return -1;
   return 0;
 }
 
@@ -84,6 +86,14 @@ int writeVisitorToSourceFiles(GArray* visitor) {
   for (size_t i = 1; i < visitor->len; i++) {
     point p = g_array_index(visitor, point, i);
     fprintf(fc, ",\n\t%u", p.y);
+  }
+  fprintf(fc, "};\n");
+
+  fprintf(fc, "unsigned int squareVisitorDist2[] = ");
+  fprintf(fc, "{%u", p0.x * p0.x + p0.y * p0.y);
+  for (size_t i = 1; i < visitor->len; i++) {
+    point p = g_array_index(visitor, point, i);
+    fprintf(fc, ",\n\t%u", p.x * p.x + p.y * p.y);
   }
   fprintf(fc, "};\n");
 

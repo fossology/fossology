@@ -6935,9 +6935,6 @@ components:
         ignoreIrre:
           type: boolean
           example: false
-        delimiters:
-          type: string
-          example: "DEFAULT"
         scanOnlyFindings:
           type: boolean
           example: false
