@@ -158,13 +158,13 @@ namespace {
   ));
 
   assert_test('Report bomFormat is CycloneDX', $report['bomFormat'] === 'CycloneDX');
-  assert_test('Report specVersion is 1.4', $report['specVersion'] === '1.4');
+  assert_test('Report specVersion is 1.7', $report['specVersion'] === '1.7');
   assert_test('Report version is integer 1', $report['version'] === 1);
   assert_test('Report has serialNumber', !empty($report['serialNumber']));
   assert_test('Report has metadata', isset($report['metadata']));
   assert_test('Report metadata has tools', isset($report['metadata']['tools']));
-  assert_test('Tool vendor is FOSSology', $report['metadata']['tools'][0]['vendor'] === 'FOSSology');
-  assert_test('Tool version is 4.5.0', $report['metadata']['tools'][0]['version'] === '4.5.0');
+  assert_test('Tool vendor is FOSSology', $report['metadata']['tools']['components'][0]['vendor'] === 'FOSSology');
+  assert_test('Tool version is 4.5.0', $report['metadata']['tools']['components'][0]['version'] === '4.5.0');
   assert_test('Metadata has main component', isset($report['metadata']['component']));
   assert_test('Main component has copyright', isset($report['metadata']['component']['copyright']));
   assert_test('Report has components array', is_array($report['components']));

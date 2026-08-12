@@ -55,6 +55,10 @@ class CycloneDXAgent extends Agent
    */
   private $reportGenerator;
   /**
+   * @var array $citations
+   */
+  protected $citations = [];
+  /**
    * @var ReportUtils $reportutils
    * ReportUtils object
    */
@@ -207,6 +211,19 @@ class CycloneDXAgent extends Agent
     $this->reportutils->addCopyrightResults($filesWithLicenses, $uploadId);
     $this->heartbeat(0);
 
+    $this->citations = [
+      'cite-scanner' => [
+        'timestamp' => date('c'),
+        'attributedTo' => 'tool-fossology-scanners',
+        'expressions' => []
+      ],
+      'cite-analyst' => [
+        'timestamp' => date('c'),
+        'attributedTo' => 'person-fossology-analyst',
+        'expressions' => []
+      ]
+    ];
+
     $customLicenseTexts = $this->clearingDao->getMainLicenseReportInfos($uploadId, $this->groupId);
 
     $upload = $this->uploadDao->getUpload($uploadId);
@@ -223,6 +240,9 @@ class CycloneDXAgent extends Agent
       }
 
       $licensedata = $this->getLicenseDataForCycloneDX($mainLicObj, $licId, $customLicenseTexts);
+      $licensedata['bom-ref'] = 'lic-clearing-main-' . $licId;
+      $licensedata['acknowledgement'] = 'concluded';
+      $this->citations['cite-analyst']['expressions'][] = '$..[?(@.bom-ref=="lic-clearing-main-' . $licId . '")]';
       $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
 
       $customText = array_key_exists($licId, $customLicenseTexts) ? $customLicenseTexts[$licId] : null;
@@ -232,7 +252,8 @@ class CycloneDXAgent extends Agent
     }
 
     foreach ($filesWithLicenses as $fileNode) {
-      $licenseIds = !empty($fileNode->getConcludedLicenses())
+      $isConcluded = !empty($fileNode->getConcludedLicenses());
+      $licenseIds = $isConcluded
         ? $fileNode->getConcludedLicenses()
         : $fileNode->getScanners();
       foreach ($licenseIds as $licenseId) {
@@ -241,6 +262,10 @@ class CycloneDXAgent extends Agent
           $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
           $isCustomText = $this->licensesInDocument[$licenseId]->isCustomText();
           $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText);
+          $refPrefix = $isConcluded ? 'clearing' : 'scanner';
+          $licensedata['bom-ref'] = 'lic-' . $refPrefix . '-main-' . $licenseId;
+          $licensedata['acknowledgement'] = $isConcluded ? 'concluded' : 'declared';
+          $this->citations['cite-' . ($isConcluded ? 'analyst' : 'scanner')]['expressions'][] = '$..[?(@.bom-ref=="lic-' . $refPrefix . '-main-' . $licenseId . '")]';
           $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
         }
       }
@@ -308,11 +333,23 @@ class CycloneDXAgent extends Agent
     );
     $maincomponent = $this->reportGenerator->createComponent($maincomponentData);
 
-    $bomdata = array (
+    $formattedDate = date('Y-m-d\TH:i:s\Z');
+
+    $finalCitations = [];
+    if (!empty($this->citations['cite-scanner']['expressions'])) {
+      $finalCitations[] = $this->citations['cite-scanner'];
+    }
+    if (!empty($this->citations['cite-analyst']['expressions'])) {
+      $finalCitations[] = $this->citations['cite-analyst'];
+    }
+
+    $bomdata = array(
+      'timestamp' => $formattedDate,
       'tool-version' => $SysConf['BUILD']['VERSION'],
       'maincomponent' => $maincomponent,
       'components' => $components,
-      'externalReferences' => $externalReferences
+      'externalReferences' => $externalReferences,
+      'citations' => $finalCitations
     );
 
     return $this->reportGenerator->generateReport($bomdata);
@@ -364,8 +401,10 @@ class CycloneDXAgent extends Agent
           if (array_key_exists($licenseId, $this->licensesInDocument)) {
             $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
             $isCustomText = $this->licensesInDocument[$licenseId]->isCustomText();
-            $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText, false);
-            $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
+            $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText, $stateOsselot);
+            $licensedata['bom-ref'] = 'lic-clearing-' . $licenseId . '-' . $fileId;
+            $licensedata['acknowledgement'] = 'concluded';
+            $licensesfound[] = $this->reportGenerator->createLicense($licensedata, false);
           }
         }
       } else {
@@ -373,8 +412,10 @@ class CycloneDXAgent extends Agent
           if (array_key_exists($licenseId, $this->licensesInDocument)) {
             $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
             $isCustomText = $this->licensesInDocument[$licenseId]->isCustomText();
-            $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText, false);
-            $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
+            $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText, $stateOsselot);
+            $licensedata['bom-ref'] = 'lic-scanner-' . $licenseId . '-' . $fileId;
+            $licensedata['acknowledgement'] = 'declared';
+            $licensesfound[] = $this->reportGenerator->createLicense($licensedata, false);
           }
         }
       }
