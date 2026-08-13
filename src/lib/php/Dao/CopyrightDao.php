@@ -498,9 +498,7 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
       $paramEvent[] = $row['upload_fk'];
       $paramEvent[] = $row[$cpTablePk];
       $paramEvent[] = $row['uploadtree_pk'];
-      $sqlExists = "SELECT exists(SELECT 1 FROM $cpTableEvent WHERE $cpTableEventFk = $1 AND upload_fk = $2 AND uploadtree_fk = $3)::int";
-      $rowExists = $this->dbManager->getSingleRow($sqlExists, array($row[$cpTablePk], $row['upload_fk'], $row['uploadtree_pk']), $stmt.'Exists');
-      $eventExists = $rowExists['exists'];
+      $eventExists = !empty($row[$cpTableEvent . '_pk']);
       if ($action == "delete") {
         $paramEvent[] = $scope;
         if ($eventExists) {
