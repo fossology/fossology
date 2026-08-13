@@ -498,9 +498,14 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
       $paramEvent[] = $row['upload_fk'];
       $paramEvent[] = $row[$cpTablePk];
       $paramEvent[] = $row['uploadtree_pk'];
-      $sqlExists = "SELECT exists(SELECT 1 FROM $cpTableEvent WHERE $cpTableEventFk = $1 AND upload_fk = $2 AND uploadtree_fk = $3)::int";
-      $rowExists = $this->dbManager->getSingleRow($sqlExists, array($row[$cpTablePk], $row['upload_fk'], $row['uploadtree_pk']), $stmt.'Exists');
-      $eventExists = $rowExists['exists'];
+      // The initial SELECT above already LEFT JOINs $cpTableEvent and
+      // returns ce.{$cpTableEvent}_pk using the exact same join key
+      // ($cpTableEventFk, upload_fk, uploadtree_fk). That column is NULL
+      // iff no matching event row exists, so we can derive $eventExists
+      // from data already fetched instead of issuing one extra
+      // "SELECT exists(...)" round-trip per row (avoids an N+1 query
+      // pattern when $rows spans a large upload/folder).
+      $eventExists = !empty($row[$cpTableEvent . '_pk']);
       if ($action == "delete") {
         $paramEvent[] = $scope;
         if ($eventExists) {
