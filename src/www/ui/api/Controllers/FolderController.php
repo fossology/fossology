@@ -92,9 +92,9 @@ class FolderController extends RestController
   {
     if (ApiVersion::getVersion($request) == ApiVersion::V2) {
       $queryParams = $request->getQueryParams();
-      $parentFolder = $queryParams['parentFolder'];
-      $folderName = trim($queryParams['folderName']);
-      $folderDescription = trim($queryParams['folderDescription']);
+      $parentFolder = $queryParams['parentFolder'] ?? '';
+      $folderName = trim($queryParams['folderName'] ?? '');
+      $folderDescription = trim($queryParams['folderDescription'] ?? '');
     } else {
       $parentFolder = $request->getHeaderLine('parentFolder');
       $folderName = trim($request->getHeaderLine('folderName'));
@@ -180,8 +180,8 @@ class FolderController extends RestController
     $folderId = $args['id'];
     if (ApiVersion::getVersion($request) == ApiVersion::V2) {
       $queryParams = $request->getQueryParams();
-      $newName = $queryParams['name'];
-      $newDesc = $queryParams['description'];
+      $newName = $queryParams['name'] ?? '';
+      $newDesc = $queryParams['description'] ?? '';
     } else {
       $newName = $request->getHeaderLine('name');
       $newDesc = $request->getHeaderLine('description');
@@ -216,8 +216,8 @@ class FolderController extends RestController
     $folderId = $args['id'];
     if (ApiVersion::getVersion($request) == ApiVersion::V2) {
       $queryParams = $request->getQueryParams();
-      $newParent = $queryParams['parent'];
-      $action = strtolower($queryParams['action']);
+      $newParent = $queryParams['parent'] ?? '';
+      $action = strtolower($queryParams['action'] ?? '');
     } else {
       $newParent = $request->getHeaderLine('parent');
       $action = strtolower($request->getHeaderLine('action'));
