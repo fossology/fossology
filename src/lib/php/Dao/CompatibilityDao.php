@@ -20,6 +20,18 @@ use Monolog\Logger;
  */
 class CompatibilityDao
 {
+  /**
+   * @var string RULE_SELECT
+   *      Base query to fetch the rules along with the license short names
+   */
+  const RULE_SELECT = "SELECT lr_pk, first_rf_fk, second_rf_fk,
+      lrf.rf_shortname AS first_rf_shortname,
+      lrs.rf_shortname AS second_rf_shortname, first_type, second_type,
+      comment, compatibility
+    FROM license_rules
+      LEFT JOIN license_ref lrf ON lrf.rf_pk = first_rf_fk
+      LEFT JOIN license_ref lrs ON lrs.rf_pk = second_rf_fk";
+
   /** @var DbManager */
   private $dbManager;
   /** @var Logger */
@@ -102,14 +114,31 @@ class CompatibilityDao
    */
   public function getAllRules($limit = 10, $offset = 0, $searchTerm = '')
   {
-    $sql = "SELECT lr_pk, first_rf_fk, second_rf_fk, first_type, second_type,
-      comment, compatibility
-      FROM license_rules";
+    $stmt = __METHOD__;
+    $params = [];
+    $sql = self::RULE_SELECT;
     if (!empty($searchTerm)) {
-      $sql .= " WHERE comment ILIKE '$searchTerm'";
+      $params[] = $searchTerm;
+      $sql .= ' WHERE comment ILIKE $' . count($params);
+      $stmt .= '.search';
     }
-    $sql .= " ORDER BY lr_pk LIMIT $limit OFFSET $offset;";
-    return $this->dbManager->getRows($sql);
+    $params[] = $limit;
+    $sql .= ' ORDER BY lr_pk LIMIT $' . count($params);
+    $params[] = $offset;
+    $sql .= ' OFFSET $' . count($params) . ';';
+    return $this->dbManager->getRows($sql, $params, $stmt);
+  }
+
+  /**
+   * @brief Get a single license compatibility rule from the database
+   * @param int $rulePk ID of the rule to fetch
+   * @return array|null The rule if it exists, null otherwise
+   */
+  public function getRuleById($rulePk)
+  {
+    $row = $this->dbManager->getSingleRow(self::RULE_SELECT .
+      ' WHERE lr_pk = $1;', [$rulePk], __METHOD__);
+    return empty($row) ? null : $row;
   }
 
   /**
@@ -119,12 +148,16 @@ class CompatibilityDao
    */
   public function getTotalRulesCount($searchTerm = '')
   {
+    $stmt = __METHOD__;
+    $params = [];
     $query = "SELECT COUNT(*) as count FROM license_rules";
     if (!empty($searchTerm)) {
-      $query .= " WHERE comment ILIKE '$searchTerm'";
+      $params[] = $searchTerm;
+      $query .= ' WHERE comment ILIKE $' . count($params);
+      $stmt .= '.search';
     }
-    $count = $this->dbManager->getSingleRow($query);
-    return $count ? reset($count) : 0;
+    $count = $this->dbManager->getSingleRow($query, $params, $stmt);
+    return $count ? intval($count['count']) : 0;
   }
 
   /**
@@ -246,7 +279,9 @@ class CompatibilityDao
         $statement .= ".comment";
       }
       if (array_key_exists("result", $rule)) {
-        $params[] = $rule["result"];
+        // Booleans are not casted by the driver, unlike on insert.
+        $params[] = is_bool($rule["result"]) ?
+          $this->dbManager->booleanToDb($rule["result"]) : $rule["result"];
         $updateStatement[] = "compatibility = $" . count($params);
         $statement .= ".compatibility";
       }
