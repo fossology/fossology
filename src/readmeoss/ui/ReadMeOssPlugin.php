@@ -17,6 +17,8 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Report\MultiUploadAggregatorScheduler;
+use Fossology\Lib\Report\ReportUtils;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -111,6 +113,13 @@ class ReadMeOssPlugin extends DefaultPlugin
    */
   protected function getJobAndJobqueue($groupId, $upload, $addUploads)
   {
+    if (!empty($addUploads) && ReportUtils::isAggregatorSupportedFormat('readmeoss')) {
+      $allUploads = $addUploads;
+      $allUploads[$upload->getId()] = $upload;
+      $scheduler = new MultiUploadAggregatorScheduler();
+      return $scheduler->scheduleForCurrentUser('readmeoss', $upload, $allUploads);
+    }
+
     $uploadId = $upload->getId();
     $readMeOssAgent = plugin_find('agent_readmeoss');
     $userId = Auth::getUserId();

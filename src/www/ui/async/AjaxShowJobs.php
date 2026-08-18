@@ -276,7 +276,12 @@ class AjaxShowJobs extends \FO_Plugin
           1);
 
         $reportName = "";
-        if ($this->showJobsDao->isJobIdPresentInReportGen($singleJobQueue['jq_job_fk'])) {
+        // A multi-upload job also holds the report rows of its single uploads,
+        // but only the merged report is downloadable for the job.
+        $onlyAggregated = $this->showJobsDao->jobIsAggregated($singleJobQueue['jq_job_fk'])
+          && $singleJobQueue['jq_type'] != 'reportaggregator';
+        if (!$onlyAggregated &&
+            $this->showJobsDao->isJobIdPresentInReportGen($singleJobQueue['jq_job_fk'])) {
           switch ($singleJobQueue['jq_type']) {
             case 'readmeoss':
               $reportName = "ReadMeOss";
@@ -319,6 +324,9 @@ class AjaxShowJobs extends \FO_Plugin
               break;
             case 'decisionexporter':
               $reportName = "FOSSology Decisions";
+              break;
+            case 'reportaggregator':
+              $reportName = "Aggregated report";
               break;
           }
         }
