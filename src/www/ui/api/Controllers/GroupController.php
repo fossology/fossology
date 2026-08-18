@@ -16,6 +16,7 @@ namespace Fossology\UI\Api\Controllers;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpConflictException;
 use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
@@ -128,6 +129,59 @@ class GroupController extends RestController
     } catch (\Exception $e) {
       throw new HttpBadRequestException($e->getMessage(), $e);
     }
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Rename a given group
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function updateGroup($request, $response, $args)
+  {
+    $apiVersion = ApiVersion::getVersion($request);
+    if (empty($args['pathParam'])) {
+      throw new HttpBadRequestException("ERROR - No group name or id provided");
+    }
+    $newGroupName = trim($this->getParsedBody($request)['name'] ?? '');
+    if (empty($newGroupName)) {
+      throw new HttpBadRequestException("ERROR - no group name provided");
+    }
+    /** @var \Fossology\UI\Page\AdminGroupEdit $adminGroupEdit */
+    $adminGroupEdit = $this->restHelper->getPlugin('group_edit');
+    $validationError = $adminGroupEdit->validateGroupName($newGroupName);
+    if (!empty($validationError)) {
+      throw new HttpBadRequestException($validationError);
+    }
+
+    /** @var UserDao $userDao */
+    $userDao = $this->restHelper->getUserDao();
+    $groupId = null;
+    if ($apiVersion == ApiVersion::V2) {
+      $groupId = intval($userDao->getGroupIdByName($args['pathParam']));
+    } else {
+      $groupId = intval($args['pathParam']);
+    }
+
+    if (!$this->dbHelper->doesIdExist("groups", "group_pk", $groupId)) {
+      throw new HttpNotFoundException("Group id not found!");
+    }
+    $groupMap = $userDao->getDeletableAdminGroupMap($this->restHelper->getUserId(),
+      $_SESSION[Auth::USER_LEVEL]);
+    if (!array_key_exists($groupId, $groupMap)) {
+      throw new HttpForbiddenException("Not admin of the group. " .
+        "Can not process request.");
+    }
+    try {
+      $userDao->editGroup($groupId, $newGroupName);
+    } catch (\Exception $e) {
+      throw new HttpConflictException($e->getMessage(), $e);
+    }
+    $returnVal = new Info(200, "Group $newGroupName updated.", InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 
