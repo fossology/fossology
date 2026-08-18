@@ -320,7 +320,7 @@ class CustomTextImportTest extends \PHPUnit\Framework\TestCase
     $this->assertSame($expected, $result);
   }
 
-  public function parseBooleanProvider(): array
+  public static function parseBooleanProvider(): array
   {
     return [
       ['true',   true],
