@@ -35,23 +35,28 @@ function createLicHistTable() {
   {% endif %}
 }
 
-function createReuseReportTable() {
-  var reuseReportTableConfig = {
+function createCompatibilityReportTable() {
+  var compatibilityReportTableConfig = {
     "ajax": {
-      "url":"?mod=ajax_reuse_report&upload={{ uploadId }}",
+      "url":"?mod=ajax_compatibility_report&upload={{ uploadId }}",
       "type": "GET",
       "cache": "true"
     },
     "columns": [
-      {"data": "title"},
-      {"data": "value"}
+      {"data": "license1"},
+      {"data": "license2"},
+      {"data": "result", "render": function(data) {
+        if (data === 'Unknown') return '<span class="text-warning font-weight-bold">Unknown</span>';
+        return data ? '<span class="text-success">Compatible</span>' : '<span class="text-danger font-weight-bold">Incompatible</span>';
+      }},
+      {"data": "description"}
     ],
-    "paging": false,
-    "ordering": false,
-    "info": false,
-    "searching": false
+    "paging": true,
+    "ordering": true,
+    "info": true,
+    "searching": true
   };
-  return $('#reuseTable').dataTable(reuseReportTableConfig);
+  return $('#compatibilityTable').dataTable(compatibilityReportTableConfig);
 }
 
 function dressContents(data, type, full) {

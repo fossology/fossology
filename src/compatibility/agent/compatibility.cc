@@ -183,6 +183,15 @@ int main(int argc, char** argv)
         bail(2);
       }
 
+      if (state.getCliOptions().doAutoConclude())
+      {
+        int userId = fo_scheduler_userID();
+        string cmd = "php /usr/local/share/fossology/compatibility/agent/auto_conclude.php " +
+                     to_string(uploadId) + " " + to_string(state.getAgentId()) + " " +
+                     to_string(userId) + " " + to_string(groupId);
+        system(cmd.c_str());
+      }
+
       fo_scheduler_heart(0);
       writeARS(state, arsId, uploadId, 1, dbManager);
     }

@@ -65,7 +65,7 @@ class CompatibilityDao
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $uploadTreePk = $itemTreeBounds->getItemId();
     $stmt = __METHOD__.$uploadTreeTableName;
-    $sql = "SELECT pfile_fk FROM $uploadTreeTableName UT      
+    $sql = "SELECT pfile_fk FROM $uploadTreeTableName UT
             WHERE UT.uploadtree_pk = $1";
     $result = $this->dbManager->getSingleRow($sql, [$uploadTreePk], $stmt);
     $pfileId = $result["pfile_fk"];
@@ -312,5 +312,122 @@ class CompatibilityDao
   public function getDefaultCompatibility()
   {
     return $this->defaultCompatibility;
+  }
+
+  /**
+   * @brief Get incompatible license pairs for an upload.
+   * @param int $uploadId Upload ID
+   * @return array Incompatible pairs with rule description
+   */
+  public function getIncompatiblePairsForUpload($uploadId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT DISTINCT lr1.rf_shortname AS license1, lr2.rf_shortname AS license2, c.result, r.comment AS description
+            FROM comp_result c
+            LEFT JOIN license_ref lr1 ON c.first_rf_fk = lr1.rf_pk
+            LEFT JOIN license_ref lr2 ON c.second_rf_fk = lr2.rf_pk
+            LEFT JOIN license_rules r ON (c.first_rf_fk = r.first_rf_fk AND c.second_rf_fk = r.second_rf_fk)
+               OR (c.first_rf_fk = r.second_rf_fk AND c.second_rf_fk = r.first_rf_fk)
+            JOIN uploadtree ut ON ut.pfile_fk = c.pfile_fk
+            WHERE ut.upload_fk = $1 AND c.result IS NOT TRUE;";
+
+    return $this->dbManager->getRows($sql, [$uploadId], $stmt);
+  }
+
+  /**
+   * @brief Get incompatible license pairs across multiple uploads.
+   * @param array $uploadIds Array of Upload IDs
+   * @return array Incompatible pairs with rule description
+   */
+  public function getIncompatiblePairsForUploads(array $uploadIds)
+  {
+    if (empty($uploadIds)) {
+      return [];
+    }
+
+    $uploadIdsStr = implode(',', array_map('intval', $uploadIds));
+    $stmt = __METHOD__;
+
+    $defaultComp = $this->defaultCompatibility ? "TRUE" : "FALSE";
+
+    // Get all distinct licenses for the given uploads, cross join and check rules
+    $sql = "
+      WITH UploadLicenses AS (
+        SELECT DISTINCT ut.upload_fk, lf.rf_fk, lr.rf_shortname, u.uploadname
+        FROM uploadtree ut
+        JOIN upload u ON ut.upload_fk = u.upload_pk
+        JOIN license_file lf ON ut.pfile_fk = lf.pfile_fk
+        JOIN license_ref lr ON lf.rf_fk = lr.rf_pk
+        WHERE ut.upload_fk IN ($uploadIdsStr)
+      )
+      SELECT u1.uploadname AS upload1_name, u1.rf_shortname AS license1,
+             u2.uploadname AS upload2_name, u2.rf_shortname AS license2,
+             r.compatibility AS result, r.comment AS description
+      FROM UploadLicenses u1
+      JOIN UploadLicenses u2 ON u1.upload_fk < u2.upload_fk
+      LEFT JOIN license_rules r ON (u1.rf_fk = r.first_rf_fk AND u2.rf_fk = r.second_rf_fk)
+                                OR (u1.rf_fk = r.second_rf_fk AND u2.rf_fk = r.first_rf_fk)
+      WHERE COALESCE(r.compatibility, $defaultComp) IS NOT TRUE;
+    ";
+
+    return $this->dbManager->getRows($sql, [], $stmt);
+  }
+
+  /**
+   * @brief Auto conclude files with only compatible licenses.
+   * @param int $uploadId Upload ID
+   * @param int $agentId Compatibility Agent ID
+   * @param int $userId User ID
+   * @param int $groupId Group ID
+   * @return int Number of files concluded
+   */
+  public function autoConcludeCompatibleFiles($uploadId, $agentId, $userId, $groupId)
+  {
+    $stmt = __METHOD__;
+
+    // Select all pfile_fk from uploadtree for this upload
+    // where there are licenses found, but NO incompatible or unknown results.
+    $sql = "
+      SELECT DISTINCT ut.uploadtree_pk, ut.pfile_fk
+      FROM uploadtree ut
+      JOIN license_file lf ON ut.pfile_fk = lf.pfile_fk
+      WHERE ut.upload_fk = $1
+        AND NOT EXISTS (
+          SELECT 1 FROM comp_result cr
+          WHERE cr.pfile_fk = ut.pfile_fk AND cr.result IS NOT TRUE
+        )
+    ";
+
+    $rows = $this->dbManager->getRows($sql, [$uploadId], $stmt);
+    if (empty($rows)) {
+      return 0;
+    }
+
+    $clearingDao = new \Fossology\Lib\Dao\ClearingDao($this->dbManager);
+    $agentLicenseEventProcessor = new \Fossology\Lib\BusinessRules\AgentLicenseEventProcessor(
+      new \Fossology\Lib\Dao\LicenseDao($this->dbManager),
+      new \Fossology\Lib\Dao\AgentDao($this->dbManager)
+    );
+    $clearingEventProcessor = new \Fossology\Lib\BusinessRules\ClearingEventProcessor();
+
+    $clearingDecisionProcessor = new \Fossology\Lib\BusinessRules\ClearingDecisionProcessor(
+      $clearingDao, $agentLicenseEventProcessor, $clearingEventProcessor, $this->dbManager
+    );
+
+    $concludedCount = 0;
+    foreach ($rows as $row) {
+      $itemBounds = new \Fossology\Lib\Data\Tree\ItemTreeBounds($row['uploadtree_pk'], $uploadId);
+      try {
+        $clearingDecisionProcessor->makeDecisionFromLastEvents(
+          $itemBounds, $userId, $groupId,
+          \Fossology\Lib\Data\DecisionTypes::IDENTIFIED, false, [], true
+        );
+        $concludedCount++;
+      } catch (\Exception $e) {
+        $this->logger->error("Error auto-concluding item " . $row['uploadtree_pk'] . ": " . $e->getMessage());
+      }
+    }
+
+    return $concludedCount;
   }
 }
