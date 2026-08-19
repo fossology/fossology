@@ -65,3 +65,19 @@ std::vector<std::string> QueryResult::getRow(int i) const {
 
   return result;
 }
+
+/**
+ * Check if a specific field is NULL
+ * \param row The row to check
+ * \param col The column to check
+ * \return True if the field is NULL, false otherwise
+ */
+bool QueryResult::isNull(int row, int col) const {
+  if (ptr) {
+    PGresult* r = ptr.get();
+    if (row >= 0 && row < getRowCount() && col >= 0 && col < PQnfields(r)) {
+      return PQgetisnull(r, row, col) == 1;
+    }
+  }
+  return true; // Default to true if invalid row/col or null ptr
+}

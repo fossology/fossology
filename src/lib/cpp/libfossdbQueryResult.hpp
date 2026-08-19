@@ -61,6 +61,8 @@ namespace fo {
       return !isFailed();
     };
 
+    bool isNull(int row, int col) const;
+
     int getRowCount() const;
 
     std::vector<std::string> getRow(int i) const;
