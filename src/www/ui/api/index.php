@@ -23,6 +23,7 @@ require_once dirname(__FILE__, 4) . "/lib/php/bootstrap.php";
 use Fossology\Lib\Util\TimingLogger;
 use Fossology\UI\Api\Controllers\AuthController;
 use Fossology\UI\Api\Controllers\BadRequestController;
+use Fossology\UI\Api\Controllers\CompatibilityController;
 use Fossology\UI\Api\Controllers\ConfController;
 use Fossology\UI\Api\Controllers\CopyrightController;
 use Fossology\UI\Api\Controllers\CustomiseController;
@@ -200,7 +201,7 @@ $app->group('/uploads',
     $app->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
     $app->get('/{id:\\d+}/licenses/histogram', UploadController::class . ':getLicensesHistogram');
     $app->get('/{id:\\d+}/licenses/edited', UploadController::class . ':getEditedLicenses');
-    $app->get('/{id:\\d+}/licenses/reuse', UploadController::class . ':getReuseReportSummary');
+    $app->get('/{id:\\d+}/compatibility', CompatibilityController::class . ':getResults');
     $app->get('/{id:\\d+}/licenses/scanned', UploadController::class . ':getScannedLicenses');
     $app->get('/{id:\\d+}/licenses/main', UploadController::class . ':getMainLicenses');
     $app->post('/{id:\\d+}/licenses/main', UploadController::class . ':setMainLicense');

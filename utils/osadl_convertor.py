@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#  SPDX-FileCopyrightText: © 2024 Siemens AG
+#  SPDX-FileCopyrightText: © 2026 Siemens AG
 #  SPDX-FileContributor: Gaurav Mishra <mishra.gaurav@siemens.com>
 #
 #  SPDX-License-Identifier: GPL-2.0-only
@@ -419,7 +419,6 @@ def save_db(license_handler: LicenseHandler, compliance_matrix: list[MatrixItem]
   count = 0
   for rule in compliance_matrix:
     if rule.first_license is None or rule.second_license is None:
-      # Direct import currently handles specific license combinations, not types
       continue
 
     first_id = license_handler.get_license_id(rule.first_license)
@@ -428,20 +427,16 @@ def save_db(license_handler: LicenseHandler, compliance_matrix: list[MatrixItem]
     if first_id is None or second_id is None:
       continue
 
-    # Check if rule exists
     cur = license_handler._LicenseHandler__conn.cursor()
     cur.execute("SELECT lr_pk FROM license_rules WHERE first_rf_fk = %s AND second_rf_fk = %s", (first_id, second_id))
     resp = cur.fetchone()
 
-    # The result could be None (Check Dependency/Unknown), True (Compatible), or False (Incompatible)
     if resp is not None:
-      # Update
       license_handler.execute_write(
         "UPDATE license_rules SET first_type = %s, second_type = %s, compatibility = %s, comment = %s WHERE lr_pk = %s",
         (rule.first_type, rule.second_type, rule.result, rule.comment, resp[0])
       )
     else:
-      # Insert
       license_handler.execute_write(
         "INSERT INTO license_rules (first_rf_fk, second_rf_fk, first_type, second_type, compatibility, comment) "
         "VALUES (%s, %s, %s, %s, %s, %s)",

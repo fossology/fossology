@@ -1,0 +1,75 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+{{ _("Compare Components (Compatibility)") }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <h3 class="box-title">{{ _("Compatibility Report for Selected Components") }}</h3>
+      </div>
+      <div class="box-body">
+        {% if incompatiblePairs is empty %}
+          <div class="alert alert-success">
+            <h4><i class="icon fa fa-check"></i> {{ _("All Clear!") }}</h4>
+            {{ _("No incompatible licenses found between the selected components.") }}
+          </div>
+        {% else %}
+          <div class="alert alert-warning">
+            <h4><i class="icon fa fa-warning"></i> {{ _("Potential Issues Found") }}</h4>
+            {{ _("The following license combinations across the selected components are not explicitly compatible according to the license rules.") }}
+          </div>
+          <table class="table table-bordered table-striped dataTable" id="compatibility-compare-table">
+            <thead>
+              <tr>
+                <th>{{ _("Component 1") }}</th>
+                <th>{{ _("License 1") }}</th>
+                <th>{{ _("Component 2") }}</th>
+                <th>{{ _("License 2") }}</th>
+                <th>{{ _("Result") }}</th>
+                <th>{{ _("Rule Description") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pair in incompatiblePairs %}
+                <tr>
+                  <td>{{ pair.upload1_name }}</td>
+                  <td>{{ pair.license1 }}</td>
+                  <td>{{ pair.upload2_name }}</td>
+                  <td>{{ pair.license2 }}</td>
+                  <td>
+                    {% if pair.result is same as(false) %}
+                      <span class="text-danger"><i class="fa fa-times-circle"></i> {{ _("Incompatible") }}</span>
+                    {% else %}
+                      <span class="text-warning"><i class="fa fa-question-circle"></i> {{ _("Unknown") }}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ pair.description|default(_("No specific rule defined")) }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('#compatibility-compare-table').DataTable({
+      "paging": true,
+      "lengthChange": true,
+      "searching": true,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false
+    });
+  });
+</script>
+{% endblock %}
