@@ -270,7 +270,7 @@
             {{ singleClient.name }}
           </td>
           <td>
-            {{ singleClient.created }}
+            {{ singleClient.created|date("Y-m-d") }}
           </td>
           <td>
             {%if singleClient.scope == 'r' %}
@@ -317,7 +317,7 @@
             {{ singleClient.name }}
           </td>
           <td>
-            {{ singleClient.created }}
+            {{ singleClient.created|date("Y-m-d") }}
           </td>
           <td>
             {%if singleClient.scope == 'r' %}
@@ -437,10 +437,10 @@
             {{ singleToken.name }}
           </td>
           <td>
-            {{ singleToken.created }}
+            {{ singleToken.created|date("Y-m-d") }}
           </td>
           <td>
-            {{ singleToken.expire }}
+            {{ singleToken.expire|date("Y-m-d") }}
           </td>
           <td>
             {%if singleToken.scope == 'r' %}
@@ -490,10 +490,10 @@
             {{ singleToken.name }}
           </td>
           <td>
-            {{ singleToken.created }}
+            {{ singleToken.created|date("Y-m-d") }}
           </td>
           <td>
-            {{ singleToken.expire }}
+            {{ singleToken.expire|date("Y-m-d") }}
           </td>
           <td>
             {%if singleToken.scope == 'r' %}
