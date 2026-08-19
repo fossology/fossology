@@ -29,11 +29,11 @@ class HighlightRenderer
             Highlight::SIGNATURE => 'hi-signature',
             Highlight::KEYWORD => 'hi-keyword',
             Highlight::BULK => 'hi-bulk',
+            Highlight::KOTOBA => 'hi-kotoba',
             Highlight::COPYRIGHT => 'hi-cp',
             Highlight::EMAIL => 'hi-email',
             Highlight::URL => 'hi-url',
             Highlight::AUTHOR => 'hi-author',
-            Highlight::BULK => 'hi-bulk',
             Highlight::IPRA => 'hi-ipra',
             Highlight::ECC => 'hi-mediumorchid',
             Highlight::KEYWORDOTHERS => 'hi-teal'
@@ -143,7 +143,8 @@ class HighlightRenderer
             Highlight::DELETED => _('&nbsp;- removed'),
             Highlight::SIGNATURE => _('license relevant text'),
             Highlight::KEYWORD => _('keyword'),
-            Highlight::BULK => _('bulk'))
+            Highlight::BULK => _('bulk'),
+            Highlight::KOTOBA => _('kotoba'))
         : array(
             Highlight::UNDEFINED => _("license relevant text"));
     foreach ($colorDefinition as $colorKey => $txt) {

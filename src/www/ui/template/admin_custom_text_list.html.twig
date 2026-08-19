@@ -29,15 +29,26 @@
     <table class="semibordered" id="customPhrasesTable" width="100%" cellpadding="0">
       <thead>
         <tr>
-          <th>{{ "Edit"|trans }}</th>
-          <th>{{ "Licenses"|trans }}</th>
+          <th>
+            {{ "Licenses"|trans }}
+            <img src="images/info_16.png" alt="info" class="info-bullet"
+              data-toggle="tooltip" data-placement="top"
+              title="{{ 'Shows licenses to be added (+ icon) or removed (− icon) when this phrase is matched by the kotoba agent'|trans }}"/>
+          </th>
           <th>{{ "Text"|trans }}</th>
-          <th>{{ "Acknowledgement"|trans }}</th>
-          <th>{{ "Comments"|trans }}</th>
+          <th>
+            {{ "Details"|trans }}
+            <img src="images/info_16.png" alt="info" class="info-bullet"
+              data-toggle="tooltip" data-placement="top"
+              title="{{ 'T = License Text set, A = Acknowledgement set, C = Comment set. Hover each dot to preview the content'|trans }}"/>
+          </th>
           <th>{{ "Created By"|trans }}</th>
-          <th>{{ "Created Date"|trans }}</th>
-          <th>{{ "Active"|trans }}</th>
-          <th>{{ "Actions"|trans }}</th>
+          <th>
+            {{ "Actions"|trans }}
+            <img src="images/info_16.png" alt="info" class="info-bullet"
+              data-toggle="tooltip" data-placement="top"
+              title="{{ 'Edit: modify this phrase and its license mappings. Toggle: activate or deactivate scanning for this phrase. Delete: permanently remove this phrase'|trans }}"/>
+          </th>
         </tr>
       </thead>
     </table>
@@ -52,31 +63,29 @@
   <script src="scripts/jquery.dataTables.select.js" type="text/javascript"></script>
   <script type="text/javascript">
     $(document).ready(function () {
-      $('#customPhrasesTable').DataTable({
+      $('[data-toggle="tooltip"]').tooltip();
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('#customPhrasesTable').DataTable({
         "processing": true,
         "serverSide": true,
         "ajax": { "url": "?mod=admin_custom_text_list&action=fetchData", "type": "GET" },
         "columns": [
-          { "data": 0, "orderable": false },
-          { "data": 1, "orderable": false },
-          { "data": 2, "orderable": false },
-          { "data": 3, "orderable": false },
-          { "data": 4, "orderable": false },
-          { "data": 5, "orderable": false },
-          { "data": 6, "orderable": true  },
-          { "data": 7, "orderable": false },
-          { "data": 8, "orderable": false }
+          { "data": 0, "orderable": false, "render": function(d) { return d || ''; } },
+          { "data": 1, "orderable": false, "render": function(d) { return d || ''; } },
+          { "data": 2, "orderable": false, "render": function(d) { return d || ''; } },
+          { "data": 3, "orderable": false, "render": function(d) { return d || ''; } },
+          { "data": 4, "orderable": false, "render": function(d) { return d || ''; } }
         ],
         "columnDefs": [
-          { "targets": [0, 6, 7, 8], "className": "text-center" },
-          { "targets": [0, 7, 8],    "searchable": false, "orderable": false },
-          { "targets": [1, 2, 3, 4, 5], "searchable": true,  "orderable": false },
-          { "targets": [6],          "searchable": false, "orderable": true  }
+          { "targets": [0, 1, 3], "searchable": true },
+          { "targets": [2, 4], "searchable": false, "className": "text-center" }
         ],
-        "order": [[ 6, "desc" ]],
-        "pageLength": 20,
-        "stateSave": true,
-        "dom": '<"top"lf>rt<"bottom"ip><"clear">',
+        "pageLength": 10,
+        "lengthMenu": [[10, 20, 50, 100], [10, 20, 50, 100]],
+        "paging": true,
+        "sPaginationType": "listbox",
+        "stateSave": false,
+        "autoWidth": false,
         "initComplete": function() {
           var $toolbar = $('<div class="btn-group btn-group-sm mr-2">' +
             '<a href="?mod=admin_custom_text_to_csv"  class="btn btn-outline-secondary">{{ "Export CSV"|trans }}</a>' +

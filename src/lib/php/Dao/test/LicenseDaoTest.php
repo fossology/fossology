@@ -391,6 +391,42 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
+  /**
+   * @test
+   * -# A candidate license belonging to another group must not leak into
+   *    getActiveLicensesForGroup() for a different group.
+   * -# The owning group must see its own candidate, prefixed with '*'.
+   * -# Plain (non-candidate) licenses must remain visible to every group.
+   */
+  public function testGetActiveLicensesForGroupScopesCandidatesByGroup()
+  {
+    $ownerGroupId = 401;
+    $otherGroupId = 402;
+    $this->setUpLicenseRefTable();
+    $this->testDb->insertData_license_ref();
+
+    $this->dbManager->queryOnce("CREATE TABLE license_candidate AS SELECT *,$ownerGroupId group_fk FROM license_ref LIMIT 1");
+    $licCandi = $this->dbManager->getSingleRow("SELECT * FROM license_candidate", array(), __METHOD__.'.candi');
+    $this->dbManager->queryOnce("DELETE FROM license_ref WHERE rf_pk=$licCandi[rf_pk]");
+    $this->dbManager->queryOnce("UPDATE license_candidate SET rf_shortname='CANDIDATE-SCOPE-TEST' WHERE rf_pk=$licCandi[rf_pk]");
+
+    $licRef = $this->dbManager->getSingleRow("SELECT * FROM license_ref LIMIT 1", array(), __METHOD__.'.ref');
+
+    $licDao = new LicenseDao($this->dbManager);
+
+    $ownerLicenses = $licDao->getActiveLicensesForGroup($ownerGroupId);
+    $otherLicenses = $licDao->getActiveLicensesForGroup($otherGroupId);
+
+    assertThat($ownerLicenses, hasValue('*CANDIDATE-SCOPE-TEST'));
+    assertThat($otherLicenses, not(hasValue('*CANDIDATE-SCOPE-TEST')));
+    assertThat($otherLicenses, not(hasValue('CANDIDATE-SCOPE-TEST')));
+
+    assertThat($ownerLicenses, hasValue($licRef['rf_shortname']));
+    assertThat($otherLicenses, hasValue($licRef['rf_shortname']));
+
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
+  }
+
   public function testGetAgentFileLicenseMatchesWithLicenseMapping()
   {
     $this->testDb->createPlainTables(array('uploadtree','license_file','agent','license_map'));

@@ -357,3 +357,61 @@ img[src*="ajax-loader.gif"] {
   max-width: 16px !important;
   max-height: 16px !important;
 }
+
+/* Admin Custom Text List */
+.custom-text-cell {
+  overflow-y: scroll;
+  max-height: 100px;
+  margin: 0;
+}
+
+.custom-text-actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.custom-text-details-cell {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-text-indicator {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 20px;
+  cursor: default;
+}
+
+.custom-text-indicator-empty {
+  background: #e0e0e0;
+  color: #999;
+}
+
+.custom-text-indicator-reportinfo {
+  background: #0d6efd;
+}
+
+.custom-text-indicator-acknowledgement {
+  background: #198754;
+}
+
+.custom-text-indicator-comment {
+  background: #6f42c1;
+}
+
+button.custom-text-delete-btn {
+  color: #dc3545;
+  font-size: 1.2rem;
+  line-height: 1;
+  font-weight: bold;
+}
