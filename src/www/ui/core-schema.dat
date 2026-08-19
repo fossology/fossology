@@ -332,7 +332,7 @@
 
   $Schema["TABLE"]["comp_result"]["result"]["DESC"] = "COMMENT ON COLUMN \"comp_result\".\"result\" IS 'compatibility result'";
   $Schema["TABLE"]["comp_result"]["result"]["ADD"] = "ALTER TABLE \"comp_result\" ADD COLUMN \"result\" bool";
-  $Schema["TABLE"]["comp_result"]["result"]["ALTER"] = "ALTER TABLE \"comp_result\" ALTER COLUMN \"result\" SET NOT NULL";
+  $Schema["TABLE"]["comp_result"]["result"]["ALTER"] = "ALTER TABLE \"comp_result\" ALTER COLUMN \"result\" DROP NOT NULL";
 
 
   $Schema["TABLE"]["copyright"]["copyright_pk"]["DESC"] = "";
@@ -1417,11 +1417,11 @@
 
   $Schema["TABLE"]["license_rules"]["compatibility"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"compatibility\" IS 'Tells whether license1/main_id and license2/sub_id are compatible or not'";
   $Schema["TABLE"]["license_rules"]["compatibility"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"compatibility\" bool";
-  $Schema["TABLE"]["license_rules"]["compatibility"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"compatibility\" SET NOT NULL";
+  $Schema["TABLE"]["license_rules"]["compatibility"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"compatibility\" DROP NOT NULL";
 
   $Schema["TABLE"]["license_rules"]["comment"]["DESC"] = "COMMENT ON COLUMN \"license_rules\".\"comment\" IS 'Rule Description'";
   $Schema["TABLE"]["license_rules"]["comment"]["ADD"] = "ALTER TABLE \"license_rules\" ADD COLUMN \"comment\" text";
-  $Schema["TABLE"]["license_rules"]["comment"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"comment\" SET NOT NULL";
+  $Schema["TABLE"]["license_rules"]["comment"]["ALTER"] = "ALTER TABLE \"license_rules\" ALTER COLUMN \"comment\" DROP NOT NULL";
 
 
   $Schema["TABLE"]["license_set_bulk"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_set_bulk\".\"rf_fk\" IS 'reference to license_ref* (not only license_ref)'";
