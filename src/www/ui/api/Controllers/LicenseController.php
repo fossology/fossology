@@ -15,6 +15,8 @@ namespace Fossology\UI\Api\Controllers;
 use Fossology\Lib\Application\BulkTextExport;
 use Fossology\Lib\Application\LicenseCsvExport;
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\BusinessRules\ObligationMap;
 use Fossology\Lib\Dao\LicenseAcknowledgementDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\LicenseStdCommentDao;
@@ -78,6 +80,12 @@ class LicenseController extends RestController
    */
   private $licenseStdCommentDao;
 
+  /**
+   * @var ObligationMap $obligationMap
+   * Obligation Map object
+   */
+  private $obligationMap;
+
 
   /**
    * @param ContainerInterface $container
@@ -88,6 +96,54 @@ class LicenseController extends RestController
     $this->licenseDao = $this->container->get('dao.license');
     $this->adminLicenseAckDao = $this->container->get('dao.license.acknowledgement');
     $this->licenseStdCommentDao = $this->container->get('dao.license.stdc');
+    $this->obligationMap = $this->container->get('businessrules.obligationmap');
+  }
+
+  /**
+   * Ensure every given obligation id exists.
+   *
+   * @param integer[] $obligationIds Obligation IDs to check
+   * @throws HttpBadRequestException If an obligation ID does not exist
+   */
+  private function validateObligationIdsExist($obligationIds)
+  {
+    foreach ($obligationIds as $obligationId) {
+      if (! $this->dbHelper->doesIdExist("obligation_ref", "ob_pk", $obligationId)) {
+        throw new HttpBadRequestException(
+          "Obligation with id '$obligationId' does not exist.");
+      }
+    }
+  }
+
+  /**
+   * Associate the given obligation IDs with a license, removing any
+   * associations that are no longer in the list. Assumes the ids have
+   * already been validated with validateObligationIdsExist().
+   *
+   * @param integer   $licenseId     License to associate obligations with
+   * @param integer[] $obligationIds Obligation IDs that should be associated
+   * @param boolean   $isCandidate   Is the license a candidate license?
+   */
+  private function syncLicenseObligations($licenseId, $obligationIds, $isCandidate)
+  {
+    // LicenseMap::TRIVIAL skips building the (unrelated and costly) license
+    // conclusion/report map in the constructor; getObligationsForLicenseRef()
+    // only queries the obligation map tables directly and does not use it.
+    $licenseMap = new LicenseMap($this->dbHelper->getDbManager(), 0,
+      LicenseMap::TRIVIAL);
+    $currentObligationIds = $licenseMap->getObligationsForLicenseRef(
+      $licenseId, $isCandidate);
+
+    $addedObligationIds = array_diff($obligationIds, $currentObligationIds);
+    foreach ($addedObligationIds as $obligationId) {
+      $this->obligationMap->associateLicenseWithObligation($obligationId,
+        $licenseId, $isCandidate);
+    }
+    $removedObligationIds = array_diff($currentObligationIds, $obligationIds);
+    foreach ($removedObligationIds as $obligationId) {
+      $this->obligationMap->unassociateLicenseFromObligation($obligationId,
+        $licenseId, $isCandidate);
+    }
   }
 
   /**
@@ -248,6 +304,10 @@ class LicenseController extends RestController
     if ($newLicense === -2) {
       throw new HttpBadRequestException("Property 'shortName' is required.");
     }
+    if ($newLicense === -3) {
+      throw new HttpBadRequestException("Property 'obligations' must be " .
+        "an array of obligation ids.");
+    }
     if (! $newLicense->getIsCandidate() && ! Auth::isAdmin()) {
       throw new HttpForbiddenException("Need to be admin to create " .
         "non-candidate license.");
@@ -278,6 +338,10 @@ class LicenseController extends RestController
       throw new HttpConflictException("License with shortname '" .
         $newLicense->getShortName() . "' already exists!");
     }
+    $obligationIds = $newLicense->getObligationIds();
+    if ($obligationIds !== null) {
+      $this->validateObligationIdsExist($obligationIds);
+    }
     try {
       $rfPk = $this->dbHelper->getDbManager()->insertTableRow($tableName,
         $assocData, __METHOD__ . ".newLicense", "rf_pk");
@@ -285,6 +349,12 @@ class LicenseController extends RestController
     } catch (\Exception $e) {
       throw new HttpConflictException(
         "License with same text already exists!", $e);
+    }
+    if ($obligationIds !== null) {
+      foreach ($obligationIds as $obligationId) {
+        $this->obligationMap->associateLicenseWithObligation($obligationId,
+          $rfPk, $newLicense->getIsCandidate());
+      }
     }
     return $response->withJson($newInfo->getArray(), $newInfo->getCode());
   }
@@ -338,7 +408,19 @@ class LicenseController extends RestController
     if (array_key_exists('risk', $newParams)) {
       $assocData['rf_risk'] = intval($newParams['risk']);
     }
-    if (empty($assocData)) {
+    $obligationIds = null;
+    if (array_key_exists('obligations', $newParams)) {
+      if (! is_array($newParams['obligations'])) {
+        throw new HttpBadRequestException("Property 'obligations' must " .
+          "be an array of obligation ids.");
+      }
+      $obligationIds = array_values(array_unique(
+        array_map('intval', $newParams['obligations'])));
+      // Validate before writing anything, so a bad obligation id does not
+      // leave the license partially updated.
+      $this->validateObligationIdsExist($obligationIds);
+    }
+    if (empty($assocData) && $obligationIds === null) {
       throw new HttpBadRequestException("Empty body sent.");
     }
 
@@ -346,8 +428,14 @@ class LicenseController extends RestController
     if ($isCandidate) {
       $tableName = "license_candidate";
     }
-    $this->dbHelper->getDbManager()->updateTableRow($tableName, $assocData,
-      "rf_pk", $license->getId(), __METHOD__ . ".updateLicense");
+    if (! empty($assocData)) {
+      $this->dbHelper->getDbManager()->updateTableRow($tableName, $assocData,
+        "rf_pk", $license->getId(), __METHOD__ . ".updateLicense");
+    }
+    if ($obligationIds !== null) {
+      $this->syncLicenseObligations($license->getId(), $obligationIds,
+        $isCandidate);
+    }
     $newInfo = new Info(200, "License " . $license->getShortName() .
       " updated.", InfoType::INFO);
     return $response->withJson($newInfo->getArray(), $newInfo->getCode());

@@ -4683,6 +4683,14 @@ paths:
                       description: Open a merge request for candidate license?
                       type: boolean
                       default: false
+                    obligations:
+                      description: IDs of obligations to associate with the license
+                      type: array
+                      items:
+                        type: integer
+                      example:
+                        - 1
+                        - 2
               required:
                 - shortName
       responses:
@@ -4945,6 +4953,16 @@ paths:
                   nullable: true
                   example:
                     2
+                obligations:
+                  description: >
+                    IDs of obligations to associate with the license. Replaces
+                    the full set of currently associated obligations.
+                  type: array
+                  items:
+                    type: integer
+                  example:
+                    - 1
+                    - 2
       responses:
         '200':
           description: License added successfully

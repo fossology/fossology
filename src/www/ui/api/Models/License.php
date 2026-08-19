@@ -23,7 +23,7 @@ class License
    * Allowed keys from user to parse
    */
   const ALLOWED_KEYS = ['shortName', 'fullName', 'text', 'url', 'risk',
-    'isCandidate', 'mergeRequest'];
+    'isCandidate', 'mergeRequest', 'obligations'];
   /**
    * @var integer $id
    * License id
@@ -69,6 +69,13 @@ class License
    * Create merge request for candidate license?
    */
   private $mergeRequest;
+  /**
+   * @var integer[]|null $obligationIds
+   * IDs of obligations to be associated with the license, as sent by the
+   * user on create/update. Kept separate from $obligations, which holds
+   * full Obligation objects for API responses.
+   */
+  private $obligationIds;
 
   /**
    * License constructor.
@@ -102,6 +109,7 @@ class License
     $this->setRisk($risk);
     $this->setIsCandidate($isCandidate);
     $this->mergeRequest = false;
+    $this->obligationIds = null;
   }
 
   /**
@@ -236,6 +244,15 @@ class License
   }
 
   /**
+   * Get the IDs of obligations to be associated with the license.
+   * @return integer[]|null Obligation IDs sent by the user, null if not set
+   */
+  public function getObligationIds()
+  {
+    return $this->obligationIds;
+  }
+
+  /**
    * Set the license's short name
    * @param string $shortName License's short name
    */
@@ -325,6 +342,16 @@ class License
   }
 
   /**
+   * Set the IDs of obligations to be associated with the license.
+   * @param array $obligationIds Obligation IDs sent by the user
+   */
+  public function setObligationIds($obligationIds)
+  {
+    $this->obligationIds = array_values(array_unique(
+      array_map('intval', $obligationIds)));
+  }
+
+  /**
    * Set the merge request for new license
    * @param boolean $mergeRequest
    */
@@ -370,6 +397,12 @@ class License
     }
     if (array_key_exists('mergeRequest', $inputLicense)) {
       $newLicense->setMergeRequest($inputLicense['mergeRequest']);
+    }
+    if (array_key_exists('obligations', $inputLicense)) {
+      if (! is_array($inputLicense['obligations'])) {
+        return -3;
+      }
+      $newLicense->setObligationIds($inputLicense['obligations']);
     }
     return $newLicense;
   }
