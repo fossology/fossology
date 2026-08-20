@@ -53,6 +53,14 @@ class user_add extends DefaultPlugin
     $agentList = is_null($request->get('user_agent_list')) ? userAgents() : $request->get('user_agent_list');
     $default_bucketpool_fk = $request->get('default_bucketpool_fk');
 
+    $spdxSettings = null;
+    if ($this->dbManager->existsColumn('users', 'spdx_settings')) {
+      $osselotEnabled = !empty($request->get('osselot_export_enabled')) ? 'checked' : 'unchecked';
+      $spdxCommentEnabled = !empty($request->get('spdx_license_comment_default')) ? 'checked' : 'unchecked';
+      $ignoreFilesEnabled = !empty($request->get('ignore_files_wo_info_default')) ? 'checked' : 'unchecked';
+      $spdxSettings = "$osselotEnabled,$spdxCommentEnabled,$ignoreFilesEnabled";
+    }
+
     /* Make sure username looks valid */
     if (empty($User)) {
       $text = _("Username must be specified. Not added.");
@@ -116,7 +124,7 @@ class user_add extends DefaultPlugin
     }
 
     $ErrMsg = add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify, $Upload_visibility,
-      $agentList, $Folder, $default_bucketpool_fk);
+      $agentList, $Folder, $default_bucketpool_fk, $spdxSettings);
 
     return ($ErrMsg);
   } // Add()
