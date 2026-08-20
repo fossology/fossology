@@ -15,6 +15,7 @@ use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Auth\Auth;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class AjaxKotobaHistory extends DefaultPlugin
@@ -28,7 +29,7 @@ class AjaxKotobaHistory extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::PERMISSION => Auth::PERM_READ
+        self::PERMISSION => Auth::PERM_WRITE
     ));
 
     $this->uploadDao = $this->getObject('dao.upload');
@@ -41,6 +42,10 @@ class AjaxKotobaHistory extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
+    $action = $request->get('do');
+    if ($action === 'deleteKotoba') {
+      return $this->deleteKotobaEntry($request);
+    }
     $uploadId = intval($request->get('upload'));
     if (empty($uploadId)) {
       return new Response('Missing upload parameter', Response::HTTP_BAD_REQUEST);
@@ -59,6 +64,32 @@ class AjaxKotobaHistory extends DefaultPlugin
     $groupId = $session->get(Auth::GROUP_ID);
     $kotobaHistory = $this->clearingDao->getKotobaHistory($itemTreeBounds, $groupId, $onlyTried);
     return $this->render("kotoba-history.html.twig",$this->mergeWithDefault(array('kotobaHistory'=>$kotobaHistory)));
+  }
+
+  /**
+   * Delete a kotoba history entry
+   * @param Request $request
+   * @return Response
+   */
+  protected function deleteKotobaEntry(Request $request)
+  {
+    $reportinfo = $request->get('reportinfo');
+    if (empty($reportinfo)) {
+      return new Response('Invalid reportinfo', Response::HTTP_BAD_REQUEST);
+    }
+    /** @var Session */
+    $session = $this->getObject('session');
+    $groupId = $session->get(Auth::GROUP_ID);
+    $userId = $session->get(Auth::USER_ID);
+    if (!$this->clearingDao->canUserDeleteKotobaEntry($reportinfo, $userId, $groupId)) {
+      return new Response('Permission denied', Response::HTTP_FORBIDDEN);
+    }
+    try {
+      $this->clearingDao->deleteKotobaEntry($reportinfo, $groupId);
+      return new JsonResponse(['status' => 'success'], Response::HTTP_OK);
+    } catch (\Exception $e) {
+      return new JsonResponse(['status' => 'error', 'message' => 'Deletion failed: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
   }
 }
 
