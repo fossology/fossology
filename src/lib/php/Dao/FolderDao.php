@@ -382,6 +382,23 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . ";"
     return !empty($cycle);
   }
 
+  /**
+   * Check if a folder already contains the given content
+   * @param integer $childId  Id of the child
+   * @param integer $mode     Mode of the child
+   * @param integer $folderId Folder to look in
+   * @return boolean True if the folder contains the content, false otherwise
+   */
+  public function isContentInFolder($childId, $mode, $folderId)
+  {
+    $content = $this->dbManager->getSingleRow(
+      'SELECT foldercontents_pk FROM foldercontents '.
+      'WHERE parent_fk=$1 AND foldercontents_mode=$2 AND child_id=$3',
+      array($folderId, $mode, $childId),
+      __METHOD__);
+    return !empty($content);
+  }
+
   public function getContent($folderContentId)
   {
     $content = $this->dbManager->getSingleRow('SELECT * FROM foldercontents WHERE foldercontents_pk=$1',
@@ -403,6 +420,10 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . ";"
       __METHOD__ . '.getParent');
     if (empty($newParent)) {
       throw new \Exception('invalid parent folder');
+    }
+    if ($this->isContentInFolder($content['child_id'],
+        $content['foldercontents_mode'], $newParentId)) {
+      throw new \Exception('the content already exists in the target folder');
     }
 
     if ($content['foldercontents_mode'] == self::MODE_FOLDER) {
