@@ -75,4 +75,28 @@ class MaintenanceController extends RestController
     $returnVal = new Info(201, $mess, InfoType::INFO);
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
+
+  /**
+   * Get details about the last completed maintenance job
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function getMaintenanceInfo($request, $response, $args)
+  {
+    // Check if the request comes from the admin.
+    $this->throwNotAdminException();
+
+    /** @var \maintagent $maintain */
+    $maintain = $this->restHelper->getPlugin('maintagent');
+    $lastRunTime = $maintain->getLastMaintenanceRunTime();
+
+    $data = [
+      'lastRun' => $lastRunTime === null ? null : date(DATE_ATOM, strtotime($lastRunTime))
+    ];
+    return $response->withJson($data, 200);
+  }
 }
