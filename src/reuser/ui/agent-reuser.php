@@ -124,6 +124,12 @@ class ReuserAgentPlugin extends AgentPlugin
         case 'reuseCopyright':
           $reuseMode |= UploadDao::REUSE_COPYRIGHT;
           break;
+        case 'reuseBulk':
+          $reuseMode |= UploadDao::REUSE_BULK;
+          $reuserDependencies[] = 'agent_nomos';
+          $reuserDependencies[] = 'agent_monk';
+          $reuserDependencies[] = 'agent_ojo';
+          break;
       }
     }
 

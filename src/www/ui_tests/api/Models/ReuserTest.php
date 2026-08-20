@@ -46,7 +46,8 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
       "reuse_main"     => true,
       "reuse_enhanced" => false,
       "reuse_copyright" => false,
-      "reuse_report"   => false
+      "reuse_report"   => false,
+      "reuse_bulk"     => false
     ];
 
     $actualReuser = new Reuser(2, 'fossy', true);
@@ -78,7 +79,8 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
       "reuse_main"     => true,
       "reuse_enhanced" => false,
       "reuse_copyright" => false,
-      "reuse_report"   => false
+      "reuse_report"   => false,
+      "reuse_bulk"     => false
     ];
 
     $actualReuser = new Reuser([2, 5, 10], 'fossy', true);
@@ -153,7 +155,8 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
         "reuse_main"     => 'true',
         "reuse_enhanced" => false,
         "reuse_copyright" => false,
-        "reuse_report"   => false
+        "reuse_report"   => false,
+        "reuse_bulk"     => false
       ];
     } else {
       $expectedArray = [
@@ -162,7 +165,8 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
         "reuseMain"     => 'true',
         "reuseEnhanced" => false,
         "reuseCopyright" => false,
-        "reuseReport"   => false
+        "reuseReport"   => false,
+        "reuseBulk"     => false
       ];
     }
 
@@ -186,7 +190,8 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
       "reuse_main"     => 'true',
       "reuse_enhanced" => false,
       "reuse_copyright" => 'true',
-      "reuse_report"   => false
+      "reuse_report"   => false,
+      "reuse_bulk"     => false
     ];
 
     $actualReuser = new Reuser(1, 'fossy');
@@ -195,6 +200,33 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
     $expectedArray["reuse_main"] = true;
     $expectedArray["reuse_copyright"] = true;
     $this->assertEquals($expectedArray, $actualReuser->getArray());
+  }
+
+  /**
+   * @test
+   * -# Test getter, setter, and array serialization of reuseBulk/reuse_bulk
+   */
+  public function testReuseBulkOption()
+  {
+    $reuser = new Reuser(2, 'fossy');
+    $this->assertFalse($reuser->getReuseBulk());
+
+    $reuser->setReuseBulk(true);
+    $this->assertTrue($reuser->getReuseBulk());
+
+    $arrV1 = $reuser->getArray(ApiVersion::V1);
+    $this->assertTrue($arrV1['reuse_bulk']);
+
+    $arrV2 = $reuser->getArray(ApiVersion::V2);
+    $this->assertTrue($arrV2['reuseBulk']);
+
+    $reuser2 = new Reuser(2, 'fossy');
+    $reuser2->setUsingArray(['reuse_bulk' => 'true', 'reuse_upload' => 2, 'reuse_group' => 'fossy'], ApiVersion::V1);
+    $this->assertTrue($reuser2->getReuseBulk());
+
+    $reuser3 = new Reuser(2, 'fossy');
+    $reuser3->setUsingArray(['reuseBulk' => true, 'reuseUpload' => 2, 'reuseGroup' => 'fossy'], ApiVersion::V2);
+    $this->assertTrue($reuser3->getReuseBulk());
   }
 
   /**
