@@ -641,7 +641,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       InfoType::INFO);
 
     $this->restHelper->shouldReceive('copyUpload')
-      ->withArgs([$uploadId, $folderId, true])->andReturn($info);
+      ->withArgs([$uploadId, $folderId, true, 'copy'])->andReturn($info);
     $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
       $info->getCode());
 
@@ -664,6 +664,128 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
           ApiVersion::V2);
       }
       $actualResponse = $this->uploadController->moveUpload($request->withUri($request->getUri()->withQuery("folderId=$folderId&action=copy")),
+        new ResponseHelper(), ['id' => $uploadId]);
+    }
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::moveUpload() for a link action when version is V1
+   * -# Check if response status is 202
+   */
+  public function testLinkUploadV1()
+  {
+    $this->testLinkUpload(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for UploadController::moveUpload() for a link action when version is V2
+   * -# Check if response status is 202
+   */
+  public function testLinkUploadV2()
+  {
+    $this->testLinkUpload(ApiVersion::V2);
+  }
+  /**
+   * @param $version version to test
+   * @return void
+   */
+  private function testLinkUpload($version)
+  {
+    $uploadId = 3;
+    $folderId = 5;
+    $info = new Info(202, "Upload $uploadId will be linked to folder $folderId",
+      InfoType::INFO);
+
+    $this->restHelper->shouldReceive('copyUpload')
+      ->withArgs([$uploadId, $folderId, true, 'link'])->andReturn($info);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+
+    if($version==ApiVersion::V1){
+      $requestHeaders->setHeader('folderId', $folderId);
+      $requestHeaders->setHeader('action', 'link');
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+      $actualResponse = $this->uploadController->moveUpload($request,
+        new ResponseHelper(), ['id' => $uploadId]);
+    }
+    else{
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+      if ($version == ApiVersion::V2) {
+        $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+          ApiVersion::V2);
+      }
+      $actualResponse = $this->uploadController->moveUpload($request->withUri($request->getUri()->withQuery("folderId=$folderId&action=link")),
+        new ResponseHelper(), ['id' => $uploadId]);
+    }
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::moveUpload() for a move action when version is V1
+   * -# Check if response status is 202
+   */
+  public function testMoveUploadV1()
+  {
+    $this->testMoveUpload(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for UploadController::moveUpload() for a move action when version is V2
+   * -# Check if response status is 202
+   */
+  public function testMoveUploadV2()
+  {
+    $this->testMoveUpload(ApiVersion::V2);
+  }
+  /**
+   * @param $version version to test
+   * @return void
+   */
+  private function testMoveUpload($version)
+  {
+    $uploadId = 3;
+    $folderId = 5;
+    $info = new Info(202, "Upload $uploadId will be moved to folder $folderId",
+      InfoType::INFO);
+
+    $this->restHelper->shouldReceive('copyUpload')
+      ->withArgs([$uploadId, $folderId, false, 'move'])->andReturn($info);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+
+    if($version==ApiVersion::V1){
+      $requestHeaders->setHeader('folderId', $folderId);
+      $requestHeaders->setHeader('action', 'move');
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+      $actualResponse = $this->uploadController->moveUpload($request,
+        new ResponseHelper(), ['id' => $uploadId]);
+    }
+    else{
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+      if ($version == ApiVersion::V2) {
+        $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+          ApiVersion::V2);
+      }
+      $actualResponse = $this->uploadController->moveUpload($request->withUri($request->getUri()->withQuery("folderId=$folderId&action=move")),
         new ResponseHelper(), ['id' => $uploadId]);
     }
     $this->assertEquals($expectedResponse->getStatusCode(),

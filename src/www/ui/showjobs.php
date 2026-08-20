@@ -117,7 +117,7 @@ class showjobs extends FO_Plugin
 
       if (!($uploadPk === -1 &&
             ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_ADMIN ||
-             $this->jobDao->hasActionPermissionsOnJob($jq_pk, Auth::getUserId(), Auth::getGroupId()))) &&
+             $this->jobDao->hasActionPermissionsOnJobQueue($jq_pk, Auth::getUserId(), Auth::getGroupId()))) &&
           !$this->uploadDao->isEditable($uploadPk, Auth::getGroupId())) {
         $this->vars['message'] = _("Permission Denied to perform action");
       } else {
