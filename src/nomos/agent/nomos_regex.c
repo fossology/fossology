@@ -327,11 +327,24 @@ int idxGrep_base(int index, char *data, int flags, int mode)
   int ret;
 
   int show = flags & FL_SHOWMATCH;
-  licText_t *ltp = licText + index;
-  regex_t *rp = idx_regc + index;
+  licText_t *ltp;
+  regex_t localRegc;
+  regex_t *rp;
+  int use_precompiled;
+
+  /* licText[] and idx_regc[] hold NFOOTPRINTS entries; check before dereferencing */
+  if (index >= NFOOTPRINTS)
+  {
+    LOG_FATAL("idxGrep: index %d out of range", index)
+    Bail(-__LINE__);
+  }
+  ltp = licText + index;
 
   /* skip regcomp/regfree for pre-compiled patterns; REG_NEWLINE changes ^/$ semantics so always recompile those */
-  int use_precompiled = ltp->compiled && !(flags & REG_NEWLINE);
+  use_precompiled = ltp->compiled && !(flags & REG_NEWLINE);
+
+  /* transient compiles use local storage; freeing idx_regc[index] would dangle it */
+  rp = use_precompiled ? idx_regc + index : &localRegc;
 
   CALL_IF_DEBUG_MODE(printf(" %i %i \"", index, ltp->plain);)
 
@@ -340,11 +353,6 @@ int idxGrep_base(int index, char *data, int flags, int mode)
       flags, _REGEX(index));
 #endif  /* PROC_TRACE || PHRASE_DEBUG */
 
-  if (index > NFOOTPRINTS)
-  {
-    LOG_FATAL("idxGrep: index %d out of range", index)
-    Bail(-__LINE__);
-  }
   if (data == NULL_STR)
   {
 #ifdef  PHRASE_DEBUG

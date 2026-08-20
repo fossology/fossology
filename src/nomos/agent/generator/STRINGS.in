@@ -169,25 +169,29 @@
 %KEY% "licen[cs]"
 %STR% "3gpp organizational partners =SOME= permission to distribute modify and use this file under the standard license terms"
 #
+%ENTRY% _LT_3COM_MICROCODE
+%KEY% "copyright"
+%STR% "patent copyright trade secret mask work or other =SOME= 3com hardware or software either solely or in"
+#
 %ENTRY% _LT_Imlib2
 %KEY% "so(ftware|urce)"
 %STR% "available publicly means including the source for this software with the distribution or a method to get this software via some reasonable mechanism"
 # Open Font License
 %ENTRY% _LT_OPEN_FONT_V10
 %KEY% "font"
-%STR% "open font license(,|[[:space:]])* version 1\.?0"
+%STR% "open font license(,|[[:space:]])*(version|v)?(,|[[:space:]])*1\.?0"
 #
 %ENTRY% _LT_OPEN_FONT_V11
 %KEY% "font"
-%STR% "open font license(,|[[:space:]])* version 1\.?1"
+%STR% "open font license(,|[[:space:]])*(version|v)?(,|[[:space:]])*1\.?1"
 #
 %ENTRY% _LT_OPEN_FONT_V10_1
 %KEY% "licen[cs]"
-%STR% "licen[cs]ed under (sil open font license|sil ofl) =FEW= 1\.?0"
+%STR% "licen[cs]ed under (the )?(sil open font license|sil ofl|open font license) =FEW= 1\.?0"
 #
 %ENTRY% _LT_OPEN_FONT_V11_1
 %KEY% "licen[cs]"
-%STR% "licen[cs]ed under (sil open font license|sil ofl) =FEW= 1\.?1"
+%STR% "licen[cs]ed under (the )?(sil open font license|sil ofl|open font license) =FEW= 1\.?1"
 #
 %ENTRY% _LT_ABSTYLES_1
 %KEY% "permi[st]"
@@ -315,8 +319,8 @@
 %STR% "and is subject to all restrictions on such code as contained in the end[ -]user licen[cs]e agreement accompanying this product"
 #
 %ENTRY% _LT_ADOBE_GLYPH_1
-%KEY% =NULL=
-%STR% "No modification, editing or other alteration of this document is allowed"
+%KEY% "modification"
+%STR% "No modification,? editing or other alteration of this document is allowed"
 #
 %ENTRY% _LT_ADOBE_GLYPH_2
 %KEY% "permi[st]"
@@ -1051,7 +1055,7 @@
 #####
 %ENTRY% _LT_BSD_1
 %KEY% "distribut"
-%STR% "r?e?-?distribution and/?o?r? use in source and binary form(s|s =SOME= with or without modi(fi|.?)catio?ns?) (is|are) (permitted|permitted for any purpose) provid(ed|ing) that"
+%STR% "r?e?-?distribution and/?o?r? use =FEW= in source and binary form(s|s =SOME= with or without modi(fi|.?)catio?ns?) (is|are) (permitted|permitted for any purpose) provid(ed|ing) that"
 #####
 # There are a couple of different forms of this licen[cs]e, and some copies
 # of the licensing terms use "it's" in the text (which gets changed to
@@ -1215,7 +1219,7 @@
 %STR% "version 1\.?0\.?5 =FEW= copyright =FEW= julian seward"
 #
 %ENTRY% _PHR_BZIP2_4
-%KEY% =NULL=
+%KEY% "version"
 %STR% "bzip2 =FEW= libbzip2 =FEW= version 1.0.6"
 #
 %ENTRY% _LT_UC
@@ -1271,7 +1275,7 @@
 # CC v 3.0 no derivatives wording
 %ENTRY% _LT_CC_BY_ND_30
 %KEY% "derogatory"
-%STR% "You must not distort, mutilate, modify or take other derogatory"
+%STR% "You must not distort,? mutilate,? modify or take other derogatory"
 #
 %ENTRY% _LT_CCPL
 %KEY% "(condit|vers)ion"
@@ -1358,15 +1362,15 @@
 %STR% "disclosed =ANY= without =FEW= prior =SOME= written permission"
 #####
 %ENTRY% _LT_COMMERCIAL_4
-%KEY% "license"
+%KEY% "licen[cs]"
 %STR% "software license for =SOME= code"
 #####
 %ENTRY% _LT_COMMERCIAL_5
-%KEY% "license"
+%KEY% "licen[cs]"
 %STR% "((may|can)|( be)?) used? (this file )?in accordance with the commercial license agreement"
 #####
 %ENTRY% _LT_COMMERCIAL_6
-%KEY% "license"
+%KEY% "licen[cs]"
 %STR% "commercial use of =FEW= requires a license"
 #####
 %ENTRY% _LT_COMMERCIAL_7
@@ -1382,7 +1386,7 @@
 %STR% "copyright =SOME= Broadcom Corporation =ANY= disclosed =ANY= without =FEW= prior =SOME= written permission"
 #####
 %ENTRY% _LT_COMMERCIAL_Android_Fraunhofer
-%KEY% =NULL=
+%KEY% "librar"
 %STR% "Fraunhofer FDK AAC Codec Library for Android"
 #####
 # DELETED: permission to use copy and modify this software and its
@@ -1849,11 +1853,11 @@
 #
 %ENTRY% _LT_ECL1
 %KEY% "licen[cs]"
-%STR% "under the educational community licen[cs]e (version |v)1\.?0"
+%STR% "(under )?the educational community licen[cs]e (version |v)1\.?0"
 #
 %ENTRY% _LT_ECL2
 %KEY% "licen[cs]"
-%STR% "under the educational community licen[cs]e (version |v)2\.?0"
+%STR% "(under )?the educational community licen[cs]e (version |v)2\.?0"
 #
 %ENTRY% _LT_EPLref
 %KEY% "\<under\>"
@@ -1861,7 +1865,7 @@
 #
 %ENTRY% _LT_EPL10ref_1
 %KEY% "licen[cs]"
-%STR% "(subject to|license(:?|d under)) (the )?eclipse public licen[cs]e =FEW= 1\.?0"
+%STR% "(subject to|license(:?|d under)) (the )?(terms and conditions of (the )?)?eclipse public licen[cs]e =FEW= 1\.?0"
 #
 %ENTRY% _LT_EPL10ref_2
 %KEY% "licen[cs]"
@@ -1873,7 +1877,7 @@
 #
 %ENTRY% _LT_EPL20ref_1
 %KEY% "licen[cs]"
-%STR% "(subject to|license(:?|d under)) (the )?eclipse public licen[cs]e =FEW= 2\.?0"
+%STR% "(subject to|license(:?|d under)) (the )?(terms and conditions of (the )?)?eclipse public licen[cs]e =FEW= 2\.?0"
 #
 %ENTRY% _LT_EPL
 %KEY% "licen[cs]"
@@ -1983,7 +1987,7 @@
 %STR% "submitted by you to the project shall be under the terms and conditions of this licen[cs]e"
 #
 %ENTRY% _LT_FLTK_exception
-%KEY% =NULL=
+%KEY% "librar"
 %STR% "static linking of applications and widgets to the FLTK library does not constitute a derivative work"
 #
 %ENTRY% _LT_FONT_EXCEPTION_20
@@ -2726,7 +2730,7 @@
 %STR% "you should have received a copy of the =SOME= licen[cs]e along"
 #
 %ENTRY% _LT_GNU_GETTEXT
-%KEY% =NULL=
+%KEY% "librar"
 %STR% "please note that the actual code of the GNU gettext library is covered"
 #
 %ENTRY% _LT_GNU_PROJECTS
@@ -2870,11 +2874,11 @@
 #
 %ENTRY% _LT_GPL_V2_NAMED_ref1
 %KEY% "gpl"
-%STR% "[^l]gpl( )?v2"
+%STR% "[^al]gpl( )?v2"
 #
 %ENTRY% _LT_GPL_V2_NAMED_later
 %KEY% "gpl"
-%STR% "[^l]gpl(-| ?v)2\.?0?\+"
+%STR% "[^al]gpl(-| ?v)2\.?0?\+([^A-Za-z]|$)"
 #
 # To catch things like "this is GPLV3".
 %ENTRY% _LT_GPL_V3_NAMED
@@ -2883,7 +2887,7 @@
 #
 %ENTRY% _LT_GPL_V3_NAMED_later
 %KEY% "gpl"
-%STR% "[^al]gpl(-|v)3\.?0?\+"
+%STR% "[^al]gpl(-|v)3\.?0?\+([^A-Za-z]|$)"
 #
 %ENTRY% _LT_GPL_NAMED3_EXHIBIT
 %KEY% "licen[cs]"
@@ -2895,11 +2899,19 @@
 #
 %ENTRY% _LT_GPL_NAMED_COMPATIBLE_1
 %KEY% =NULL=
-%STR% "(\<gpl\>|gnu general public license) compatib(le|ility)"
+%STR% "(\<gpl\>|gnu general public licen[cs]e) compatib(le|ility)"
 #
 %ENTRY% _LT_AGPL_NAMED
 %KEY% "agpl"
 %STR% "\<agpl(v.)?\>"
+#
+%ENTRY% _LT_AGPL_NAMED_ref
+%KEY% "affero"
+%STR% "affero gnu general public licen[cs]e"
+#
+%ENTRY% _LT_AGPL_NAMED_ref2
+%KEY% "affero"
+%STR% "gnu affero gpl"
 #
 %ENTRY% _LT_RPSL_COMPATIBLE
 %KEY% "licen[cs]"
@@ -3126,7 +3138,7 @@
 %STR% "can be used in projects which are not available under (the )?gnu general public license"
 #
 %ENTRY% _LT_IGNORE_CLAUSE
-%KEY% =NULL=
+%KEY% "apply"
 %STR% "to apply these terms =ANY= to (the|your) (program|library)"
 #####
 # This is an 'exclusionary' clause - the Python licen[cs]e for instance has
@@ -3617,10 +3629,6 @@
 %KEY% "licen[cs]"
 %STR% "information-technology promotion agency hereinafter called IPA grants? the licen[cs]e of digital font program =FEW= hereinafter called licen[cs]ed program under the following terms and conditions"
 #
-%ENTRY% _LT_IPTC_1
-%KEY% "licen[cs]"
-%STR% "licen[cs]ee recognises the licen[cs]or as the sole owner of the intellectual property protected by the trademark"
-#
 %ENTRY% _LT_IPTC_2
 %KEY% "licen[cs]"
 %STR% "subject to =FEW= licensing requirements contained herein you may =FEW= use the specifications and materials =FEW= IPTC"
@@ -3948,7 +3956,7 @@
 %STR% "re-create the rar compression algorithm"
 #
 %ENTRY% _LT_libmng_2007_1
-%KEY% =NULL=
+%KEY% "librar"
 %STR% "result from the use of the MNG Library"
 #
 %ENTRY% _LT_libmng_2007_Clause_1
@@ -3985,15 +3993,15 @@
 %STR% "this copyright does not cover user programs that use kernel services by normal system calls"
 #
 %ENTRY% _LT_LLVM_exception_1
-%KEY% =NULL=
+%KEY% "licen[cs]"
 %STR% "LLVM Exceptions to the Apache 2\.0 License"
 #
 %ENTRY% _LT_LLVM_exception_2
-%KEY% =NULL=
+%KEY% "distribut"
 %STR% "you may redistribute such embedded portions in such Object form without complying with the conditions of Sections 4\(a\)"
 #
 %ENTRY% _LT_LOGICA
-%KEY% "documentation"
+%KEY% "document"
 %STR% "all associated documentation and other material must acknowledge logica"
 #
 %ENTRY% _LT_LPL_102
@@ -4012,11 +4020,11 @@
 %STR% "licen[cs]or grants you a limited personal internal use non-exclusive non-transferable licen[cs]e to use the software solely"
 #
 %ENTRY% _LT_MAKEINDEX_1
-%KEY% =NULL=
+%KEY% "grant"
 %STR% "is granted access to a machine-readable form of the source code"
 #
 %ENTRY% _LT_MAKEINDEX_2
-%KEY% =NULL=
+%KEY% "version"
 %STR% "all modified versions should be reported back to the author"
 #
 %ENTRY% _LT_MANDRIVA
@@ -4423,6 +4431,14 @@
 %KEY% "licen[cs]"
 %STR% "microsoft reciprocal licen[cs]e Ms-RL governs use of the accompanying software"
 #
+%ENTRY% _TITLE_MSCORP_RL
+%KEY% "reciprocal"
+%STR% "microsoft reciprocal licen[cs]e"
+#
+%ENTRY% _TITLE_MSCORP_PL
+%KEY% "microsoft"
+%STR% "microsoft (permissive public|permissive|public) licen[cs]e"
+#
 %ENTRY% _LT_MSCORP_SSLref
 %KEY% "\<under\>"
 %STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (MS|microsoft) =FEW= shared source licen[cs]e"
@@ -4456,7 +4472,7 @@
 %STR% "This edition of the Multics software materials and documentation is provided and donated to Massachusetts Institute of Technology by Group BULL including BULL HN Information Systems Inc as a contribution to computer science knowledge"
 #
 %ENTRY% _LT_MUP
-%KEY% "documentation"
+%KEY% "document"
 %STR% "any additions deletions or changes to the original files must be clearly indicated in accompanying documentation"
 #
 %ENTRY% _LT_MYSQL_EXCEPT
@@ -5103,7 +5119,7 @@
 #
 %ENTRY% _LT_PUBDOM_NOTclaim
 %KEY% "p(atent|roduc|rofit|roject|ublic)"
-%STR% "(\<not\>|[-_\*]not[-_\*]) (covered|under|in|to) =FEW= \<public\>[ -]\<domain\>"
+%STR% "((\<not\>|[-_\*]not[-_\*]) (covered|under|in|to)|\<no\> part of) =FEW= \<public\>[ -]\<domain\>"
 
 #####
 # DELETED: the purpose of this document is to enable rightsholders to place
@@ -5251,7 +5267,7 @@
 #
 %ENTRY% _LT_QT_GPL_EXCEPTION_10_2
 %KEY% "licen[cs]"
-%STR% "as a special exception, you have permission to combine this application with plugins licensed under the terms of your choice"
+%STR% "as a special exception,? you have permission to combine this application with plugins licensed under the terms of your choice"
 #
 %ENTRY% _LT_QT_GPL_EXCEPTION_10_3
 %KEY% =NULL=
@@ -5272,7 +5288,7 @@
 %STR% "Qwt Licen[cs]e Version 1\.?0"
 #
 %ENTRY% _LT_Qwt_exception_10_2
-%KEY% =NULL=
+%KEY% "librar"
 %STR% "static linking of applications and widgets to the Qwt library does not constitute a derivative work"
 #
 %ENTRY% _LT_REAL_RCSL
@@ -5400,6 +5416,10 @@
 %ENTRY% _LT_RSA_3
 %KEY% "licen[cs]"
 %STR% "this product includes code licen[cs]ed from RSA data security"
+#
+%ENTRY% _TITLE_RSA_MD
+%KEY% "rsa"
+%STR% "rsa( data security)?[ -]*(md5 )?message[ -]?digest( algorithm)? licen[cs]e"
 #
 %ENTRY% _LT_RSA_4
 %KEY% "licen[cs]"
@@ -6811,12 +6831,12 @@ k
 %STR% "under =FEW= XFree86 licen[cs]e"
 #
 %ENTRY% _LT_XFREE86_V10
-%KEY% "licen[cs]e"
-%STR% "XFree86 licen[cs]e =FEW= (version |v)1\.?0"
+%KEY% "xfree86"
+%STR% "XFree86 (licen[cs]e =FEW= (version |v)?1\.?0|1\.?0 licen[cs]e)"
 #
 %ENTRY% _LT_XFREE86_V11
-%KEY% "licen[cs]e"
-%STR% "XFree86 licen[cs]e =FEW= (version |v)1\.?1"
+%KEY% "xfree86"
+%STR% "XFree86 (licen[cs]e =FEW= (version |v)?1\.?1|1\.?1 licen[cs]e)"
 #
 %ENTRY% _LT_MX4J_V10
 %KEY% "licen[cs]e"
@@ -6829,6 +6849,14 @@ k
 %ENTRY% _LT_Oracle_Berkeley_DB
 %KEY% "so(ftware|urce)"
 %STR% "copyright =FEW= oracle =ANY= redistributions in any form must be accompanied by information on how to obtain complete source code for the db software and any accompanying software that uses the db software"
+#
+%ENTRY% _TITLE_BERKELEY_DB_PRODUCT
+%KEY% "berkeley"
+%STR% "berkeley db product licen[cs]e"
+#
+%ENTRY% _LT_BERKELEY_DB_REF
+%KEY% "berkeley"
+%STR% "licen[cs]e that applies to this copy of the berkeley db software"
 #
 %ENTRY% _LT_LIBGCJ
 %KEY% "licen[cs]e"
@@ -7840,12 +7868,12 @@ k
 %STR% "affero (general p|p)ublic licen[cs]e =FEW= (v|version )1 =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
 %ENTRY% _TITLE_AGPL_30_only
-%KEY% "licen[cs]"
-%STR% "affero (general p|p)ublic licen[cs]e =FEW= (v|version )3"
+%KEY% "affero"
+%STR% "affero ((gnu )?(general p|p)ublic licen[cs]e|gpl) =FEW= (v|version )3"
 #
 %ENTRY% _TITLE_AGPL_30_or_later
-%KEY% "licen[cs]"
-%STR% "affero (general p|p)ublic licen[cs]e =FEW= (v|version )3 =SOME= or =SOME= (newer|later|subsequent|more recent)"
+%KEY% "affero"
+%STR% "affero ((gnu )?(general p|p)ublic licen[cs]e|gpl) =FEW= (v|version )3 =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
 %ENTRY% _TITLE_AGPL_30_or_later_ref1
 %KEY% "agpl"
@@ -7906,6 +7934,14 @@ k
 %ENTRY% _TITLE_ART20
 %KEY% "licen[cs]"
 %STR% "artistic licen[cs]e (2\.?0|(v|version )2\.?0)"
+#
+%ENTRY% _TITLE_ART10
+%KEY% "artistic"
+%STR% "artistic licen[cs]e (1\.?0|(v|version )1\.?0)"
+#
+%ENTRY% _TITLE_ART10_CL8
+%KEY% "clause"
+%STR% "artistic licen[cs]e (1\.?0|(v|version )1\.?0) =FEW= clause 8"
 #
 %ENTRY% _TITLE_ASCENDER_EULA
 %KEY% "licen[cs]"
@@ -8035,6 +8071,10 @@ k
 %KEY% "licen[cs]"
 %STR% "creative commons gnu (lesser|library) general public licen[cs]e"
 #
+%ENTRY% _TITLE_CC_RESTRICTED
+%KEY% "attribut"
+%STR% "attribution[ -]?(non[ -]?commercial|no[ -]?deriv)"
+#
 %ENTRY% _TITLE_CC_BY
 %KEY% "a(gree|ttribut|vailabl|uthor)"
 %STR% "creative commons attribution"
@@ -8069,103 +8109,103 @@ k
 #
 %ENTRY% _TITLE_CC_BY_NC_10
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]nonCommercial 1\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial 1\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_20
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]nonCommercial 2\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial 2\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_25
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]nonCommercial 2\.?5"
+%STR% "creative commons attribution[ -]non[ -]?commercial 2\.?5"
 #
 %ENTRY% _TITLE_CC_BY_NC_30
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]nonCommercial 3\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial 3\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_40
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]nonCommercial 4\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial 4\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_ND_10
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 1\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]no[ -]?deriv(ative)?s 1\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_ND_10_1
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noderivs[ -]noncommercial 1\.?0"
+%STR% "creative commons attribution[ -]no[ -]?derivs[ -]non[ -]?commercial 1\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_ND_10_2
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]no derivative works 1\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]no derivative works 1\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_ND_20
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 2\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]no[ -]?deriv(ative)?s 2\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_ND_20_1
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]no derivative works 2\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]no derivative works 2\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_ND_25
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 2\.?5"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]no[ -]?deriv(ative)?s 2\.?5"
 #
 %ENTRY% _TITLE_CC_BY_NC_ND_25_1
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]no derivative works 2\.?5"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]no derivative works 2\.?5"
 #
 %ENTRY% _TITLE_CC_BY_NC_ND_30
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 3\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]no[ -]?deriv(ative)?s 3\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_ND_30_1
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]no derivative works 3\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]no derivative works 3\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_ND_40
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 4\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]no[ -]?deriv(ative)?s 4\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_SA_10
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]sharealike 1\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]share[ -]?alike 1\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_SA_20
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]sharealike 2\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]share[ -]?alike 2\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_SA_25
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]sharealike 2\.?5"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]share[ -]?alike 2\.?5"
 #
 %ENTRY% _TITLE_CC_BY_NC_SA_30
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]sharealike 3\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]share[ -]?alike 3\.?0"
 #
 %ENTRY% _TITLE_CC_BY_NC_SA_40
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noncommercial[ -]sharealike 4\.?0"
+%STR% "creative commons attribution[ -]non[ -]?commercial[ -]share[ -]?alike 4\.?0"
 #
 %ENTRY% _TITLE_CC_BY_ND_10
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noderiv(ative)?s 1\.?0"
+%STR% "creative commons attribution[ -]no[ -]?deriv(ative)?s 1\.?0"
 #
 %ENTRY% _TITLE_CC_BY_ND_20
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noderiv(ative)?s 2\.?0"
+%STR% "creative commons attribution[ -]no[ -]?deriv(ative)?s 2\.?0"
 #
 %ENTRY% _TITLE_CC_BY_ND_25
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noderiv(ative)?s 2\.?5"
+%STR% "creative commons attribution[ -]no[ -]?deriv(ative)?s 2\.?5"
 #
 %ENTRY% _TITLE_CC_BY_ND_30
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noderiv(ative)?s 3\.?0"
+%STR% "creative commons attribution[ -]no[ -]?deriv(ative)?s 3\.?0"
 #
 %ENTRY% _TITLE_CC_BY_ND_40
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]noderiv(ative)?s 4\.?0"
+%STR% "creative commons attribution[ -]no[ -]?deriv(ative)?s 4\.?0"
 #
 %ENTRY% _TITLE_CC_BY_SA
 %KEY% "a(gree|ttribut|vailabl|uthor)"
@@ -8371,6 +8411,10 @@ k
 %KEY% =NULL=
 %STR% "Independent JPEG Group's software"
 #
+%ENTRY% _TITLE_IJG_LICENSE
+%KEY% =NULL=
+%STR% "Independent JPEG Group licen[cs]e"
+#
 %ENTRY% _TITLE_IJG_2
 %KEY% =NULL=
 %STR% "Independent JPEG Group"
@@ -8507,6 +8551,18 @@ k
 %KEY% "licen[cs]"
 %STR% "H2 license (v|version) 1\.?0"
 #
+%ENTRY% _TITLE_HIPPOCRATIC_NAMED_21
+%KEY% "hippocratic"
+%STR% "mit-hippocratic-2\.?1"
+#
+%ENTRY% _TITLE_HIPPOCRATIC_NAMED_20
+%KEY% "hippocratic"
+%STR% "mit-hippocratic-2\.?0"
+#
+%ENTRY% _TITLE_HIPPOCRATIC_NAMED_12
+%KEY% "hippocratic"
+%STR% "mit-hippocratic-1\.?2"
+#
 %ENTRY% _TITLE_IBM_PL20
 %KEY% "licen[cs]"
 %STR% "ibm public licen[cs]e =FEW= (v|version )2\.?0"
@@ -8518,6 +8574,10 @@ k
 %ENTRY% _TITLE_IBM_PL
 %KEY% "licen[cs]"
 %STR% "ibm public licen[cs]e =FEW= version"
+#
+%ENTRY% _TITLE_ISC
+%KEY% "isc"
+%STR% "\<isc\> licen[cs]e"
 #
 %ENTRY% _TITLE_ICU
 %KEY% "licen[cs]"
@@ -8615,6 +8675,10 @@ k
 %KEY% "(condit|vers)ion"
 %STR% "version 2\.?1 February 1999"
 #
+%ENTRY% _TITLE_LGPL_NAMED
+%KEY% "licen[cs]"
+%STR% "gnu (lesser|library) (general p|p)ublic licen[cs]e =FEW= (v|[^_-]version ) ?[0-9]"
+#
 %ENTRY% _TITLE_LGPLV21_2
 %KEY% "licen[cs]"
 %STR% "(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =SOME= (version |v)2\.?1"
@@ -8673,6 +8737,10 @@ k
 %KEY% "licen[cs]"
 %STR% "exhibit [abc] =ANY= \<MIT\> licen[cs]e"
 #
+%ENTRY% _PHR_NOT_MIT_LICENSE
+%KEY% "licen[cs]"
+%STR% "(does|do|did) ?n.?t (employ|use|utilize|adopt) (an? )?\<MIT\> licen[cs]e"
+#
 %ENTRY% _TITLE_MOTOROLA_MOBILE
 %KEY% "licen[cs]"
 %STR% "MOTOROLA MOBILE Software License Agreement"
@@ -8691,15 +8759,27 @@ k
 #
 %ENTRY% _TITLE_EUPL_10
 %KEY% "licen[cs]"
-%STR% "European Union Public Licence (V\.?)?1\.?0"
+%STR% "European Union Public Licen[cs]e (V\.? ?)?1\.?0"
 #
 %ENTRY% _TITLE_EUPL_11
 %KEY% "licen[cs]"
-%STR% "European Union Public Licence (V\.? )?1\.?1"
+%STR% "European Union Public Licen[cs]e (V\.? ?)?1\.?1"
 #
 %ENTRY% _TITLE_EUPL_12
 %KEY% "licen[cs]"
-%STR% "EUROPEAN UNION PUBLIC LICENCE (v\.? )?1\.?2"
+%STR% "EUROPEAN UNION PUBLIC LICEN[CS]E (v\.? ?)?1\.?2"
+#
+%ENTRY% _PHR_EUPL_NAMED_10
+%KEY% "eupl"
+%STR% "eupl[-/ ](version |v)?\.?1\.?0"
+#
+%ENTRY% _PHR_EUPL_NAMED_11
+%KEY% "eupl"
+%STR% "eupl[-/ ](version |v)?\.?1\.?1"
+#
+%ENTRY% _PHR_EUPL_NAMED_12
+%KEY% "eupl"
+%STR% "eupl[-/ ](version |v)?\.?1\.?2"
 #
 %ENTRY% _TITLE_MOZNET_PL
 %KEY% "\<([mn]pl|mozilla|netscape)\>"
@@ -8735,7 +8815,11 @@ k
 #
 %ENTRY% _TITLE_MPL20_EXCEPTION
 %KEY% "licen[cs]"
-%STR% "exhibit b =FEW= incompatible with secondary licenses"
+%STR% "(exhibit b|source code form is) =FEW= incompatible with secondary licen[cs]es"
+#
+%ENTRY% _TITLE_MPL20_NO_COPYLEFT_NAMED
+%KEY% "copyleft"
+%STR% "mozilla public licen[cs]e =FEW= no copyleft exception"
 #
 %ENTRY% _TITLE_MPL_EULA_20
 %KEY% "\<([mn]pl|mozilla|netscape)\>"
@@ -8891,71 +8975,71 @@ k
 #
 %ENTRY% _TITLE_OPENLDAP11
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )1\.?1"
+%STR% "open ?ldap public licen[cs]e (v|version )1\.?1"
 #
 %ENTRY% _TITLE_OPENLDAP12
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )1\.?2"
+%STR% "open ?ldap public licen[cs]e (v|version )1\.?2"
 #
 %ENTRY% _TITLE_OPENLDAP13
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )1\.?3"
+%STR% "open ?ldap public licen[cs]e (v|version )1\.?3"
 #
 %ENTRY% _TITLE_OPENLDAP14
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )1\.?4"
+%STR% "open ?ldap public licen[cs]e (v|version )1\.?4"
 #
 %ENTRY% _TITLE_OPENLDAP20
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )2\.?0"
+%STR% "open ?ldap public licen[cs]e (v|version )2\.?0"
 #
 %ENTRY% _TITLE_OPENLDAP201
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )2\.?0\.?1"
+%STR% "open ?ldap public licen[cs]e (v|version )2\.?0\.?1"
 #
 %ENTRY% _TITLE_OPENLDAP21
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )2\.?1"
+%STR% "open ?ldap public licen[cs]e (v|version )2\.?1"
 #
 %ENTRY% _TITLE_OPENLDAP22
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )2\.?2"
+%STR% "open ?ldap public licen[cs]e (v|version )2\.?2"
 #
 %ENTRY% _TITLE_OPENLDAP221
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )2\.?2\.?1"
+%STR% "open ?ldap public licen[cs]e (v|version )2\.?2\.?1"
 #
 %ENTRY% _TITLE_OPENLDAP222
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )2\.?2\.?2"
+%STR% "open ?ldap public licen[cs]e (v|version )2\.?2\.?2"
 #
 %ENTRY% _TITLE_OPENLDAP23
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )2\.?3"
+%STR% "open ?ldap public licen[cs]e (v|version )2\.?3"
 #
 %ENTRY% _TITLE_OPENLDAP24
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )2\.?4"
+%STR% "open ?ldap public licen[cs]e (v|version )2\.?4"
 #
 %ENTRY% _TITLE_OPENLDAP25
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )2\.?5"
+%STR% "open ?ldap public licen[cs]e (v|version )2\.?5"
 #
 %ENTRY% _TITLE_OPENLDAP26
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )2\.?6"
+%STR% "open ?ldap public licen[cs]e (v|version )2\.?6"
 #
 %ENTRY% _TITLE_OPENLDAP27
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )2\.?7"
+%STR% "open ?ldap public licen[cs]e (v|version )2\.?7"
 #
 %ENTRY% _TITLE_OPENLDAP28
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e (v|version )2\.?8"
+%STR% "open ?ldap public licen[cs]e (v|version )2\.?8"
 #
 %ENTRY% _TITLE_OPENLDAP
 %KEY% "licen[cs]"
-%STR% "openldap public licen[cs]e"
+%STR% "open ?ldap public licen[cs]e"
 #
 %ENTRY% _TITLE_OPENPL10
 %KEY% "p(atent|roduc|rofit|roject|ublic)"
@@ -9013,6 +9097,10 @@ k
 %KEY% "licen[cs]"
 %STR% "open (source|software) licen[cs]e[^s] =FEW= (3\.?0|(osl |v|version )3\.?0)"
 #
+%ENTRY% _TITLE_OSL_EARLY
+%KEY% "software"
+%STR% "open software licen[cs]e[^s] =FEW= (1\.?[01]|2\.?0|(osl |v|version )(1\.?[01]|2\.?0))"
+#
 %ENTRY% _TITLE_OSL30_EXHIBIT
 %KEY% "licen[cs]"
 %STR% "Compatible Licences =ANY= open (source|software) licen[cs]e[^s] =FEW= (3\.?0|(osl |v|version )3\.?0)"
@@ -9067,11 +9155,11 @@ k
 #
 %ENTRY% _TITLE_PHP301
 %KEY% "licen[cs]"
-%STR% "the php licen[cs]e (v|version )3\.?0\.?1"
+%STR% "(the )?php licen[cs]e[, ]*(v|version )3\.?0\.?1"
 #
 %ENTRY% _TITLE_PHP30
 %KEY% "licen[cs]"
-%STR% "the php licen[cs]e (v|version )3\.?0"
+%STR% "(the )?php licen[cs]e[, ]*(v|version )3\.?0"
 #
 %ENTRY% _TITLE_PHP202
 %KEY% "licen[cs]"
@@ -9337,6 +9425,10 @@ k
 %KEY% "\<(end[ -]user|eula)\>"
 %STR% "vmware =SOME= end[ -]user licen[cs]e agreement"
 #
+%ENTRY% _TITLE_W3C
+%KEY% "w3c"
+%STR% "w3c *(r *)?(software |document |notice |and )+licen[cs]e"
+#
 %ENTRY% _TITLE_WOL
 %KEY% "licen[cs]"
 %STR% "The Wide Open License"
@@ -9498,6 +9590,10 @@ k
 %KEY% "licen[cs]"
 %STR% "academic free licen[cs]e =SOME= (v|version)"
 #
+%ENTRY% _PHR_AGPL_REFERENCE_ONLY
+%KEY% "licen[cs]"
+%STR% "(compatible licen[cs]es|means a version of the gnu)"
+#
 %ENTRY% _PHR_AGPL
 %KEY% "licen[cs]"
 %STR% "affero (general p|p)ublic licen[cs]e"
@@ -9515,7 +9611,7 @@ k
 #
 %ENTRY% _PHR_AGPL_30_or_later
 %KEY% "so(ftware|urce)"
-%STR% "affero (general p|p)ublic =SOME= by the free software foundation ((either v|v)ersion 3 =SOME= or =SOME= (later|newer|subsequent|more recent))"
+%STR% "affero (gnu )?(general p|p)ublic =SOME= by the free software foundation ((either v|v)ersion 3 =SOME= or =SOME= (later|newer|subsequent|more recent))"
 #
 %ENTRY% _PHR_AGPL_30plus
 %KEY% "licen[cs]e"
@@ -9602,11 +9698,11 @@ k
 %STR% "licen[cs]es Perl allows itself to be r?e?-?distributed and/or modified for the other one th(e perl|e) artistic licen[cs]e"
 #
 %ENTRY% _PHR_ARTISTIC_CLAUSE8
-%KEY% =NULL=
+%KEY% "distribut"
 %STR% "Aggregation of this Package with a commercial distribution is always permitted provided that the use of this Package is embedded"
 #
 %ENTRY% _PHR_ARTISTIC_PERL
-%KEY% =NULL=
+%KEY% "version"
 %STR% "provided that the complete Standard Version of the interpreter is so embedded"
 #
 %ENTRY% _PHR_ATTRIBUTION
@@ -9857,7 +9953,7 @@ k
 #
 %ENTRY% _PHR_GPL2_OR_LATER_1
 %KEY% "(\<gnu|free\>|l?gpl)"
-%STR% "(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|[^l]gpl[_-]?v?2) =SOME= (\<or\>|alternatively|and) =FEW= (later|newer|subsequent|more recent|above)"
+%STR% "(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|[^l]gpl[_-]?v?2) =SOME= (\<or\>|\<alternatively\>|\<and\>) =FEW= (later|newer|subsequent|more recent|above)"
 #
 %ENTRY% _PHR_GPL2_OR_LATER_2
 %KEY% "licen[cs]"
@@ -9964,15 +10060,15 @@ k
 %STR% "based on the (code|sw|software) =FEW= from the independent jpeg group"
 #
 %ENTRY% _PHR_IJG_2
-%KEY% =NULL=
+%KEY% "software"
 %STR% "this software is based in part on the work of the Independent JPEG Group"
 #
 %ENTRY% _PHR_IJG_INTERFACE_1
-%KEY% =NULL=
+%KEY% "librar"
 %STR% "This file is simply an interface to the libjpeg library"
 #
 %ENTRY% _PHR_IJG_INTERFACE_2
-%KEY% =NULL=
+%KEY% "librar"
 %STR% "This file interfaces with Release 6B of the JPEG Library"
 #
 %ENTRY% _PHR_JYTHON_NOTGPL
@@ -10149,7 +10245,7 @@ k
 #
 %ENTRY% _PHR_LGPL3_OR_LATER
 %KEY% "(\<gnu|free\>|l?gpl)"
-%STR% "(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =SOME= (v|[^_-]version )3 =SOME= or =SOME= (\<later\>|newer|subsequent|more recent|above)"
+%STR% "(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =SOME= (v|[^_-]version )3 =SOME= or =SOME= (\<later\>|\<newer\>|\<subsequent\>|\<more recent\>|\<above\>)"
 #
 %ENTRY% _PHR_LGPL3_OR_LATER_ref1
 %KEY% "licen[cs]"
@@ -12300,7 +12396,7 @@ k
 %ALIAS% _HOT_defend
 #
 %ENTRY% _TEXT_DRBD_NOT_GPL3
-%KEY% =NULL=
+%KEY% "licen[cs]"
 %STR% "how is DRBD licen[cs]ed DRBD is licen[cs]ed under the GPL 301414"
 #
 ##%ENTRY% _TEXT_DISTRIBUT
@@ -12324,7 +12420,7 @@ k
 ##%STR% "fedora"
 #
 %ENTRY% _TEXT_FONT
-%KEY% =NULL=
+%KEY% "exception"
 %STR% "as a special exception =FEW= which uses this font"
 #
 %ENTRY% _TEXT_GCC
@@ -12397,7 +12493,7 @@ k
 %STR% "file standardsinfo node --version next"
 #
 %ENTRY% _TEXT_GNUTERMS
-%KEY% "(\<gnu|free\>|l?gpl)"
+%KEY% "(\<gnu|free\>|l?gpl|affero)"
 %STR% "."
 #
 %ENTRY% _TEXT_GPL_NOT_LGPL
@@ -12504,7 +12600,7 @@ k
 #
 %ENTRY% _TEXT_OPENLDAP
 %KEY% =NULL=
-%STR% "openldap"
+%STR% "open ?ldap"
 #
 ##%ENTRY% _TEXT_OPENMKT
 ##%KEY% =NULL=
@@ -12754,7 +12850,7 @@ k
 #
 %ENTRY% _URL_CC_BY_NC_ND_10
 %KEY% "licen[cs]"
-%STR% "creativecommons\.?org/licen[cs]es/by-nc-nd/1\.?0"
+%STR% "creativecommons\.?org/licen[cs]es/(by-nc-nd|by-nd-nc)/1\.?0"
 #
 %ENTRY% _URL_CC_BY_NC_ND_20
 %KEY% "licen[cs]"
@@ -12857,8 +12953,8 @@ k
 %STR% "creativecommons\.?org/licen[cs]es/by-sa/4\.?0"
 #
 %ENTRY% _URL_CC0
-%KEY% "public"
-%STR% "creativecommons\.?org/publicdomain/zero/1\.?0"
+%KEY% "zero"
+%STR% "creativecommons\.?org/(publicdomain|licen[cs]es)/zero/1\.?0"
 #
 %ENTRY% _URL_CC_PDDC
 %KEY% "public"
@@ -13010,11 +13106,11 @@ k
 #
 %ENTRY% _URL_NPL10
 %KEY% "\<([mn]pl|mozilla|netscape)\>"
-%STR% "w?w?w?\.?mozilla\.?org/[MN]PL/NPL-1\.?0"
+%STR% "w?w?w?\.?mozilla\.?org/[MN]PL/(MPL/)?NPL[-/]1\.?0"
 #
 %ENTRY% _URL_NPL11
 %KEY% "\<([mn]pl|mozilla|netscape)\>"
-%STR% "w?w?w?\.?mozilla\.?org/[MN]PL/NPL-1\.?1"
+%STR% "w?w?w?\.?mozilla\.?org/[MN]PL/(MPL/)?NPL[-/]1\.?1"
 #
 %ENTRY% _URL_OPENSSL
 %KEY% "licen[cs]"
@@ -13871,7 +13967,7 @@ k
 %STR% "(ISO 9660|file ?system)"
 #
 %ENTRY% _FTYP_MSOFFICE
-%KEY% =NULL=
+%KEY% "document"
 %STR% "microsoft office document"
 #
 %ENTRY% _FTYP_BIN
@@ -14556,6 +14652,20 @@ k
 %KEY% "licen[cs]"
 %STR% "parity public licen[cs]e =ANY= this licen[cs]e lets you use and share this software for free =SOME= contribute software you make with it"
 #
+# Parity Public License 7.0.0 (text-based)
+%ENTRY% _LT_PARITY_700
+%KEY% "licen[cs]"
+%STR% "parity public licen[cs]e =ANY= this licen[cs]e allows you to use and share this software for free =SOME= share software that builds on it alike"
+#
+# Cryptographic Autonomy License 1.0 (text-based)
+%ENTRY% _LT_CAL_10_CWE
+%KEY% "autonomy"
+%STR% "cryptographic autonomy licen[cs]e =FEW= 1\.?0 =FEW= combined work exception"
+#
+%ENTRY% _LT_CAL_10
+%KEY% "autonomy"
+%STR% "cryptographic autonomy licen[cs]e"
+#
 # LAL 1.3 (Licence Art Libre - text-based)
 %ENTRY% _LT_LAL_13
 %KEY% "licen[cs]"
@@ -14567,11 +14677,6 @@ k
 %STR% "paul hsieh derivative licen[cs]e =SOME= raw computer source code =ANY= transformations of such derivatives"
 #
 # Paul Hsieh Exposition License
-%ENTRY% _LT_PAUL_HSIEH_EXP
-%KEY% "copyright"
-%STR% "paul hsieh exposition licen[cs]e =SOME= content of all text figures tables =SOME= copyrighted by its author and owner paul hsieh"
-#
-# Paulo Soares License
 %ENTRY% _LT_PAULO_SOARES
 %KEY% "distribut"
 %STR% "these specific metrics files were created by paulo soares and may be used copied and distributed for any purpose and without charge"
@@ -16872,12 +16977,6 @@ k
 #
 
 # ScanCode-generated acknowledgment notice
-%ENTRY% _LT_SCANCODE_ACK
-%KEY% "scancode"
-%STR% "generated with scancode and provided on an as is basis"
-#
-
-# KFGQPC Uthmanic Script HAFS font license
 %ENTRY% _LT_KFGQPC_UTHMANIC
 %KEY% "uthmanic"
 %STR% "uthmanic script license =FEW= king fahd glorious quran"
@@ -16954,6 +17053,2870 @@ k
 %KEY% "licen[cs]"
 %STR% "do what the fuck you want to but it s not my fault public licen[cs]e"
 #
+%ENTRY% _LT_3DSLICER_1_0
+%KEY% "sublicense"
+%STR% "or other open source license part b =SOME= sublicense software license 1 as used in"
+#
+%ENTRY% _LT_996_ICU_1_0
+%KEY% "limitation"
+%STR% "including without limitation the rights =SOME= distribute publish and sublicense the"
+#
+%ENTRY% _LT_AC3FILTER
+%KEY% "distributed"
+%STR% "author has no liability regarding this =SOME= distributed freely unless prohibited by law"
+#
+%ENTRY% _LT_ACRONAME_BDK
+%KEY% "sufficient"
+%STR% "gnu lesser general public license =SOME= request support@acronamecom object code sufficient"
+#
+%ENTRY% _LT_ACTIVESTATE_KOMODO_EDIT
+%KEY% "activestate"
+%STR% "license does not grant you any =SOME= activestate or its licensors privacy policy"
+#
+%ENTRY% _LT_ACTUATE_BIRT_IHUB_FTYPE_SLA
+%KEY% "disclaimer"
+%STR% "patent copyright trade secret trademark =SOME= 6 disclaimer of warranty unless"
+#
+%ENTRY% _LT_ADA_LINKING_EXCEPTION
+%KEY% "instantiate"
+%STR% "reasons why the executable file might =SOME= exception if other files instantiate generics"
+#
+%ENTRY% _LT_ADI_BSD
+%KEY% "separate"
+%STR% "separate licenses from these patent =SOME= provided by analog devices as"
+#
+%ENTRY% _LT_ADOBE_AIR_SDK_2014
+%KEY% "redistributable"
+%STR% "redistributable at no charge =SOME= copyright notices trademarks logos"
+#
+%ENTRY% _LT_ADOBE_AIR_SDK
+%KEY% "disclaimer"
+%STR% "warranty disclaimer and license =SOME= user this document includes"
+#
+%ENTRY% _LT_ADOBE_FLASH_PLAYER_EULA_21_0
+%KEY% "information"
+%STR% "adobe runtime is granted for =SOME= information on software license terms"
+#
+%ENTRY% _LT_ADOBE_FLEX_4_SDK
+%KEY% "copyright"
+%STR% "copyright notice appears in such =SOME= source code under the terms"
+#
+%ENTRY% _LT_ADOBE_GENERAL_TOU
+%KEY% "translation"
+%STR% "translation center cs6 software =SOME= digital publishing suite phonegap"
+#
+%ENTRY% _LT_ADOBE_INDESIGN_SDK
+%KEY% "riverwalk"
+%STR% "means adobe systems software =SOME= 46 riverwalk citywest business campus dublin"
+#
+%ENTRY% _LT_AES_128_3_0
+%KEY% "distributed"
+%STR% "code contained in this distributed =SOME= public domain disclaimer this software"
+#
+%ENTRY% _LT_AGENTXPP
+%KEY% "incidental"
+%STR% "licensor be liable whether in tort =SOME= otherwise for any indirect incidental special"
+#
+%ENTRY% _LT_AGERE_BSD
+%KEY% "redistributions"
+%STR% "other materials provided with the distribution redistributions =SOME= reproduce the above copyright notice this list"
+#
+%ENTRY% _LT_AGO_PRIVATE_1_0
+%KEY% "redistribution"
+%STR% "license 10 redistribution and =SOME= without modification are permitted"
+#
+%ENTRY% _LT_AGPL_3_0_BACULA
+%KEY% "modification"
+%STR% "2-clause see file license-foss =SOME= without modification are permitted"
+#
+%ENTRY% _LT_ALASIR
+%KEY% "absolutely"
+%STR% "the alasir licence this is a =SOME= provided as-is and carries absolutely no"
+#
+%ENTRY% _LT_ALFRESCO_EXCEPTION_0_5
+%KEY% "applications"
+%STR% "version 05 30 august 2006 exception intent =SOME= floss applications to be able to use"
+#
+%ENTRY% _LT_ALLEN_INSTITUTE_SOFTWARE_2018
+%KEY% "redistributions"
+%STR% "3 redistributions for commercial =SOME= allen institutes written permission"
+#
+%ENTRY% _LT_ALTERMIME
+%KEY% "altermime"
+%STR% "linkable source code of altermime including =SOME= code must retain the copyright notices"
+#
+%ENTRY% _LT_ALTOVA_EULA
+%KEY% "rudolfsplatz"
+%STR% "altova gmbh rudolfsplatz 13a/9 a-1010 =SOME= important read carefully notice to"
+#
+%ENTRY% _LT_AMLOGIC_LINUX_FIRMWARE
+%KEY% "containing"
+%STR% "devices containing amlogic chipsets but =SOME= which would require these files"
+#
+%ENTRY% _LT_AMS_FONTS
+%KEY% "applications"
+%STR% "font collections or computer applications use =SOME= etc however the ams does require"
+#
+%ENTRY% _LT_ANEPOKIS_1_0
+%KEY% "modification"
+%STR% "mehmed permission is granted to copy =SOME= modification nothing in this license permits"
+#
+%ENTRY% _LT_ANTI_CAPITALIST_1_4
+%KEY% "organization"
+%STR% "permission is hereby granted free =SOME= person or organization the user"
+#
+%ENTRY% _LT_ANU_LICENSE
+%KEY% "australian"
+%STR% "in no event shall the australian =SOME= be liable to any party for"
+#
+%ENTRY% _LT_APACHE_2_0_LINKING_EXCEPTION
+%KEY% "redistributions"
+%STR% "the additional requirements listed in section 4 of the apache license 20 this exception applies only to redistributions"
+#
+%ENTRY% _LT_APACHE_DUE_CREDIT
+%KEY% "registered"
+%STR% "in their names without prior =SOME= product is a registered trademark"
+#
+%ENTRY% _LT_APACHE_PATENT_EXCEPTION
+%KEY% "jurisdiction"
+%STR% "gplv2 or lgplv2 combined software and if a court of competent jurisdiction determines that the patent provision section"
+#
+%ENTRY% _LT_APACHE_PATENT_PROVISION_EXCEPTION
+%KEY% "jurisdiction"
+%STR% "gplv2 or lgplv2 combined software and if a court of competent jurisdiction determines that the patent provision section"
+#
+%ENTRY% _LT_APL_1_1
+%KEY% "noncommercial"
+%STR% "as you 1 permission is hereby =SOME= program free of charge for noncommercial"
+#
+%ENTRY% _LT_APP_S2P
+%KEY% "distribute"
+%STR% "copyright and license this program =SOME= modify distribute and sell this"
+#
+%ENTRY% _LT_SWIFT_EXCEPTION
+%KEY% "exception"
+%STR% "runtime library exception to the apache 2 0 license"
+#
+%ENTRY% _LT_APTANA_EXCEPTION_3_0
+%KEY% "attribution"
+%STR% "latest version attribution requirement this license does not grant any license or rights to use the trademarks aptana"
+#
+%ENTRY% _LT_ARACHNI_PSL_1_0
+%KEY% "irrevocable"
+%STR% "royalty-free irrevocable copyright =SOME= perform sublicense distribute"
+#
+%ENTRY% _LT_ARRAY_INPUT_METHOD_PL
+%KEY% "everyone"
+%STR% "of array input method revise date 2013/07/05 =SOME= in this section replace hold everyone else"
+#
+%ENTRY% _LT_ASLP
+%KEY% "contributor"
+%STR% "released material aslr subject =SOME= each contributor hereby grants"
+#
+%ENTRY% _LT_ASLR
+%KEY% "exploitation"
+%STR% "exploitation license for the =SOME= commercial distribution 51 obligation"
+#
+%ENTRY% _LT_ATKINSON_HYPERLEGIBLE_FONT
+%KEY% "modified"
+%STR% "this may include source files =SOME= modified version refers to any"
+#
+%ENTRY% _LT_ATMEL_FIRMWARE
+%KEY% "copyright"
+%STR% "patent copyright trade secret mask work or =SOME= hardware or firmware either solely or in"
+#
+%ENTRY% _LT_ATMEL_MICROCONTROLLER
+%KEY% "permission"
+%STR% "the name of atmel may not be =SOME= this software without specific prior written permission"
+#
+%ENTRY% _LT_ATMOSPHERE_0_4
+%KEY% "charitable"
+%STR% "charitable impulse to help users =SOME= tasks more easily the atmosphere"
+#
+%ENTRY% _LT_AUTOCONF_SIMPLE_EXCEPTION
+%KEY% "distribution"
+%STR% "same distribution terms that =SOME= is an additional permission"
+#
+%ENTRY% _LT_AUTOOPTS_EXCEPTION_2_0
+%KEY% "exception"
+%STR% "notice as a special exception bruce korb =SOME= contained in his release of autoopts the"
+#
+%ENTRY% _LT_AVISYNTH_C_INTERFACE_EXCEPTION
+%KEY% "avisynth"
+%STR% "avisynth itself with the version used to =SOME= terms of the gnu general public license"
+#
+%ENTRY% _LT_AVISYNTH_LINKING_EXCEPTION
+%KEY% "conditions"
+%STR% "other modules is making a combined work based on avisynth =SOME= terms and conditions of the gnu general public license cover"
+#
+%ENTRY% _LT_BACULA_EXCEPTION
+%KEY% "published"
+%STR% "kern sibbald last revision 21 may 2017 =SOME= public license version 30 as published by"
+#
+%ENTRY% _LT_BAKOMA_FONTS_1995
+%KEY% "required"
+%STR% "not required to provide any notices about =SOME= high energy physics ihep omvt moscow region"
+#
+%ENTRY% _LT_BAPL_1_0
+%KEY% "originator"
+%STR% "originator has a right to grant =SOME= selling offering for sale having made"
+#
+%ENTRY% _LT_BASH_EXCEPTION_GPL
+%KEY% "exception"
+%STR% "this exception applies to any =SOME= serves as a shell and that is"
+#
+%ENTRY% _LT_BIGDIGITS
+%KEY% "conditions"
+%STR% "these terms and conditions and keep =SOME= notices intact in the source code"
+#
+%ENTRY% _LT_BINARY_LINUX_FIRMWARE_PATENT
+%KEY% "copyright"
+%STR% "limited patent license the copyright holder grants a world-wide"
+#
+%ENTRY% _LT_BITTORRENT_EULA
+%KEY% "downloaded"
+%STR% "have downloaded or shared through bittorrent =SOME= users use of your network connection"
+#
+%ENTRY% _LT_BITWARDEN_1_0
+%KEY% "agreement"
+%STR% "of this agreement will not affect your =SOME= modules made available pursuant to an open"
+#
+%ENTRY% _LT_BITZI_PD
+%KEY% "redistribute"
+%STR% "granted us by copyright law =SOME= copy use redistribute and modify"
+#
+%ENTRY% _LT_BLOOMBERG_BLPAPI
+%KEY% "proprietary"
+%STR% "hereby granted free of charge =SOME= a copy of this proprietary"
+#
+%ENTRY% _LT_BOHL_0_2
+%KEY% "permission"
+%STR% "itechnic ltd permission is granted to =SOME= license unmodified and use it to"
+#
+%ENTRY% _LT_BOOST_ORIGINAL
+%KEY% "permission"
+%STR% "permission to copy use modify =SOME= software is granted provided this"
+#
+%ENTRY% _LT_BPMN_IO
+%KEY% "responsible"
+%STR% "software the source code responsible for =SOME= that links back to http //bpmnio"
+#
+%ENTRY% _LT_BRAD_MARTINEZ_VB_32
+%KEY% "frequenting"
+%STR% "deja news newsgroup archives for answers =SOME= frequenting some of the vb newsgroups"
+#
+%ENTRY% _LT_BRENT_CORKUM
+%KEY% "portions"
+%STR% "corkum email corkum@rocsciencecom latest version http =SOME= portions of code supplied by ben"
+#
+%ENTRY% _LT_BRIAN_CLAPPER
+%KEY% "modifications"
+%STR% "binary forms are permitted provided =SOME= notice and comment 2 modifications"
+#
+%ENTRY% _LT_BRIAN_GLADMAN_DUAL
+%KEY% "distributed"
+%STR% "distributed under the terms of =SOME= license gpl of your choice"
+#
+%ENTRY% _LT_BROADCOM_COMMERCIAL
+%KEY% "agreement"
+%STR% "an executed software license agreement =SOME= exploit this material except subject"
+#
+%ENTRY% _LT_BROADCOM_DUAL
+%KEY% "available"
+%STR% "terms of the gnu general public license version 2 available"
+#
+%ENTRY% _LT_BROADCOM_LINKING_EXCEPTION_2_0
+%KEY% "copyright"
+%STR% "other than the gpl without broadcom =SOME= copyright holders of this software give"
+#
+%ENTRY% _LT_BROADCOM_PROPRIETARY
+%KEY% "expressly"
+%STR% "license rights expressly set forth in this =SOME= not receive any ownership right title or"
+#
+%ENTRY% _LT_BROADCOM_WICED
+%KEY% "accordingly"
+%STR% "broadcom accordingly you must limit access =SOME= those of your employees who need"
+#
+%ENTRY% _LT_BROADLEAF_FAIR_USE
+%KEY% "internal"
+%STR% "company with offices located at 5550 granite =SOME= internal business purpose means the use of"
+#
+%ENTRY% _LT_BROCADE_FIRMWARE
+%KEY% "redistribute"
+%STR% "brocade linux fibre channel hba =SOME= may redistribute the hardware specific"
+#
+%ENTRY% _LT_BSD_1988
+%KEY% "permitted"
+%STR% "and binary forms are permitted =SOME= copyright notice and comment and"
+#
+%ENTRY% _LT_BSD_2_CLAUSE_NETBSD
+%KEY% "spdxorg"
+%STR% "bsd-simplified per spdxorg netbsd =SOME= 2-clause license in 2008 for code"
+#
+%ENTRY% _LT_BSD_2_CLAUSE_PLUS_ADVERTIZING
+%KEY% "contributors"
+%STR% "contributors this software is provided by the author and contributors as is and any express or implied warranties"
+#
+%ENTRY% _LT_BSD_3_CLAUSE_DEVINE
+%KEY% "redistributions"
+%STR% "permitted provided that the following conditions are met redistributions of source code _must retain the above copyright notice"
+#
+%ENTRY% _LT_BSD_3_CLAUSE_FDA
+%KEY% "redistributions"
+%STR% "disclaimer redistributions in binary =SOME= reproduce the above notice"
+#
+%ENTRY% _LT_BSD_3_CLAUSE_JTAG
+%KEY% "conditions"
+%STR% "conditions and the following two paragraphs =SOME= must reproduce the above copyright notice"
+#
+%ENTRY% _LT_BSD_3_CLAUSE_NO_MILITARY_LICENSE
+%KEY% "modification"
+%STR% "year copyright holder all rights =SOME= forms with or without modification"
+#
+%ENTRY% _LT_BSD_3_CLAUSE_NO_NUCLEAR_WARRANTY
+%KEY% "possibility"
+%STR% "regardless of the theory of liability arising out of the use of or inability =SOME= possibility of such damages you acknowledge that this software is not designed or intended"
+#
+%ENTRY% _LT_BSD_3_CLAUSE_NO_TRADEMARK
+%KEY% "permission"
+%STR% "specific prior written permission =SOME= trademarks of the copyright"
+#
+%ENTRY% _LT_BSD_3_CLAUSE_SUN
+%KEY% "copyright"
+%STR% "the above copyright notice this list =SOME= -redistribution in binary form must reproduce"
+#
+%ENTRY% _LT_BSD_ACK_CARROT2
+%KEY% "document"
+%STR% "in the documentation and/or other materials provided =SOME= carrot2 project nor the names of its"
+#
+%ENTRY% _LT_BSD_ARTWORK
+%KEY% "redistributions"
+%STR% "conditions are met redistributions of source code must retain the above copyright notice and"
+#
+%ENTRY% _LT_BSD_ATMEL
+%KEY% "redistributions"
+%STR% "met redistributions of source =SOME= conditions and the disclaimer"
+#
+%ENTRY% _LT_BSD_AXIS_NOMOD
+%KEY% "modification"
+%STR% "must retain the above copyright =SOME= disclaimer without modification 2 neither"
+#
+%ENTRY% _LT_BSD_AXIS
+%KEY% "disclaimer"
+%STR% "source code must retain the =SOME= the following disclaimer 2 neither"
+#
+%ENTRY% _LT_BSD_EXPORT
+%KEY% "permission"
+%STR% "without specific prior written permission this software =SOME= data may be subject to us export"
+#
+%ENTRY% _LT_BSD_INNOSYS
+%KEY% "redistributions"
+%STR% "are met 1 redistributions of =SOME= this licence text without modification"
+#
+%ENTRY% _LT_BSD_INTEL
+%KEY% "contributors"
+%STR% "a particular purpose are disclaimed in =SOME= shall intel or contributors be liable"
+#
+%ENTRY% _LT_BSD_MYLEX
+%KEY% "corporation"
+%STR% "by mylex corporation all rights reserved =SOME= license and a bsd-style copyright see"
+#
+%ENTRY% _LT_BSD_NEW_DERIVATIVE
+%KEY% "redistributions"
+%STR% "met 1 because this is a derivative =SOME= reproduced above 2 redistributions of source code"
+#
+%ENTRY% _LT_BSD_NEW_FAR_MANAGER
+%KEY% "document"
+%STR% "following disclaimer in the documentation and/or other =SOME= distribution 3 the name of the authors"
+#
+%ENTRY% _LT_BSD_NEW_NOMOD
+%KEY% "modification"
+%STR% "following disclaimer without modification =SOME= the above copyright notice"
+#
+%ENTRY% _LT_BSD_NEW_TCPDUMP
+%KEY% "distributions"
+%STR% "in its entirety and 2 distributions =SOME= code include the above copyright notice"
+#
+%ENTRY% _LT_BSD_NO_DISCLAIMER_UNMODIFIED
+%KEY% "redistributions"
+%STR% "1 redistributions of source =SOME= of conditions without modification"
+#
+%ENTRY% _LT_BSD_NO_DISCLAIMER
+%KEY% "copyright"
+%STR% "copyright notice and this list =SOME= in binary form must reproduce"
+#
+%ENTRY% _LT_BSD_ORIGINAL_UC_1986
+%KEY% "redistribution"
+%STR% "redistribution and use in source =SOME= notice is preserved and that"
+#
+%ENTRY% _LT_BSD_PLUS_MOD_NOTICE
+%KEY% "distribution"
+%STR% "distribution neither the name of the copyright holder nor the names of any contributors"
+#
+%ENTRY% _LT_BSD_PROTECTION
+%KEY% "protection"
+%STR% "for the above reasons we put forth this bsd protection license a"
+#
+%ENTRY% _LT_BSD_SIMPLIFIED_DARWIN
+%KEY% "redistribution"
+%STR% "country or planet redistribution =SOME= modification are permitted provided"
+#
+%ENTRY% _LT_BSD_SIMPLIFIED_INTEL
+%KEY% "distribution"
+%STR% "distribution this software is provided as is and without any express or implied warranties"
+#
+%ENTRY% _LT_BSD_SIMPLIFIED_SOURCE
+%KEY% "modification"
+%STR% "binary forms with or without modification =SOME= source code retain the above copyright"
+#
+%ENTRY% _LT_BSD_SOURCE_CODE
+%KEY% "contributors"
+%STR% "neither name of the copyright holders nor the names of their contributors"
+#
+%ENTRY% _LT_BSD_TOP_GPL_ADDITION
+%KEY% "redistributions"
+%STR% "file 2 redistributions in binary =SOME= above copyright notice this list"
+#
+%ENTRY% _LT_BSD_TOP
+%KEY% "modification"
+%STR% "following disclaimer without modification =SOME= beginning of the file 2 the name"
+#
+%ENTRY% _LT_BSD_UNCHANGED
+%KEY% "disclaimer"
+%STR% "following disclaimer in this position =SOME= reproduce the above copyright notice"
+#
+%ENTRY% _LT_BSD_UNMODIFIED
+%KEY% "unspecified"
+%STR% "unmodified name bsd simplified with unmodified =SOME= unspecified notes contains this extra word"
+#
+%ENTRY% _LT_BSD_X11
+%KEY% "document"
+%STR% "disclaimer in the documentation and/or =SOME= name of the copyright owner"
+#
+%ENTRY% _LT_BSL_1_0
+%KEY% "licen[cs]"
+%STR% "laws license to copy modify display use create =SOME= until the change date if your use of"
+#
+%ENTRY% _LT_BUSL_1_1
+%KEY% "corporation"
+%STR% "business source license is a trademark of mariadb corporation ab"
+#
+%ENTRY% _LT_BSLA_NO_ADVERT
+%KEY% "document"
+%STR% "above copyright notice and =SOME= any documentation and other"
+#
+%ENTRY% _LT_BSLA
+%KEY% "distribution"
+%STR% "materials related to such distribution and use acknowledge that the software was developed by the university of california"
+#
+%ENTRY% _LT_C_FSL_1_1
+%KEY% "liability"
+%STR% "c-fsl 1 any work under this license =SOME= of liability such as lost revenues profits"
+#
+%ENTRY% _LT_C_UDA_1_0
+%KEY% "capitalized"
+%STR% "c-uda capitalized terms are defined in =SOME= provider and you agree as follows 1"
+#
+%ENTRY% _LT_CARNEGIE_MELLON_CONTRIBUTORS
+%KEY% "distribution"
+%STR% "software distribution coordinator or softwaredistribution@cscmuedu =SOME= carnegie mellon university pittsburgh pa"
+#
+%ENTRY% _LT_CC_GPL_2_0_PT
+%KEY% "sublicenciar"
+%STR% "outro modo copiar modificar sublicenciar =SOME= rescindir seus direitos sob esta"
+#
+%ENTRY% _LT_CC_LGPL_2_1_PT
+%KEY% "redistribuir"
+%STR% "acordado por escrito qualquer titular =SOME= possa modificar e/ou redistribuir a"
+#
+%ENTRY% _LT_CC_PDM_1_0
+%KEY% "persons"
+%STR% "persons may have other rights in or related to the work such as patent or tradem"
+#
+%ENTRY% _LT_CCRC_1_0
+%KEY% "termination"
+%STR% "common cure rights commitment version 10 before filing or continuing to prosecute any legal proceeding or =SOME= termination of a covered license we commit to extend to the person or entity you accused"
+#
+%ENTRY% _LT_CDLA_PERMISSIVE_2_0
+%KEY% "restriction"
+%STR% "impose any restriction or obligations with =SOME= sharing of results 4 no warranty"
+#
+%ENTRY% _LT_CHELSIO_LINUX_FIRMWARE
+%KEY% "terminator"
+%STR% "terminator 4/5 ethernet controller firmware =SOME= and use in binary form without"
+#
+%ENTRY% _LT_CHICKEN_DL_0_2
+%KEY% "redistribute"
+%STR% "without specific prior written =SOME= redistribute in binary form"
+#
+%ENTRY% _LT_CHRISTOPHER_VELAZQUEZ
+%KEY% "prohibited"
+%STR% "the content on this web site =SOME= of the author is strictly prohibited"
+#
+%ENTRY% _LT_CLASSIC_VB
+%KEY% "developers"
+%STR% "community of classic vb developers code provided =SOME= visitors report bugs and fixes are found"
+#
+%ENTRY% _LT_CLASSWORLDS
+%KEY% "classworlds"
+%STR% "without prior written permission of the codehaus classworlds is a registered trademark of the"
+#
+%ENTRY% _LT_CLAUSE_6_EXCEPTION_LGPL_2_1
+%KEY% "relaxation"
+%STR% "as a relaxation of clause 6 of the lgpl the copyright holders of this"
+#
+%ENTRY% _LT_CLICK_LICENSE
+%KEY% "permission"
+%STR% "permission notice shall be included =SOME= software the name and trademarks"
+#
+%ENTRY% _LT_CLOUDERA_EXPRESS
+%KEY% "provided"
+%STR% "these terms apply to your use =SOME= defined below provided by cloudera inc"
+#
+%ENTRY% _LT_CMR_NO
+%KEY% "suitability"
+%STR% "christian michelsen research as makes =SOME= suitability of this software for"
+#
+%ENTRY% _LT_CMU_MIT
+%KEY% "document"
+%STR% "use copy modify and distribute =SOME= documentation is hereby granted including"
+#
+%ENTRY% _LT_CMU_TEMPLATE
+%KEY% "whatsoever"
+%STR% "copyright holder disclaims any =SOME= damages whatsoever resulting from"
+#
+%ENTRY% _LT_COCKROACH
+%KEY% "cockroachdb"
+%STR% "please read this cockroachdb community license agreement the agreement"
+#
+%ENTRY% _LT_COCKROACHDB_USE_GRANT_FOR_BSL_1_1
+%KEY% "additional"
+%STR% "labs inc additional use grant =SOME= licensed work provided that you"
+#
+%ENTRY% _LT_COLT
+%KEY% "permission"
+%STR% "more info permission to use and/or =SOME= the terms of the lgpl license"
+#
+%ENTRY% _LT_COM_OREILLY_SERVLET
+%KEY% "programming"
+%STR% "project owns a copy of the book =SOME= programming o reilly in its most recent"
+#
+%ENTRY% _LT_COMMONS_CLAUSE
+%KEY% "attribution"
+%STR% "license notice or attribution =SOME= include this commons cause"
+#
+%ENTRY% _LT_COMPASS
+%KEY% "attribution"
+%STR% "agree to grant all rights to =SOME= holder of the primary product attribution"
+#
+%ENTRY% _LT_COMPONENTACE_JCRAFT
+%KEY% "document"
+%STR% "disclaimer in the documentation and/or =SOME= name of componentace nor the"
+#
+%ENTRY% _LT_CONCURSIVE_PL_1_0
+%KEY% "copyright"
+%STR% "public license version 1 april 2014 preamble =SOME= states copyright law as defined by title"
+#
+%ENTRY% _LT_COOPERATIVE_NON_VIOLENT_4_0
+%KEY% "cooperative"
+%STR% "cooperative non-violent public license v4"
+#
+%ENTRY% _LT_CORPORATE_ACCOUNTABILITY_1_1
+%KEY% "commercial"
+%STR% "if licensee is a commercial entity =SOME= accepts a duty of care as that"
+#
+%ENTRY% _LT_COSLI
+%KEY% "redistributions"
+%STR% "disclaimer 3 redistributions in binary =SOME= list of conditions this restriction"
+#
+%ENTRY% _LT_CPM_2022
+%KEY% "derivatives"
+%STR% "right to use distribute modify =SOME= manner cp/m and its derivatives"
+#
+%ENTRY% _LT_CRASHLYTICS_AGREEMENT_2018
+%KEY% "crashlytics"
+%STR% "data developer hereby grants crashlytics =SOME= license fee free and royalty"
+#
+%ENTRY% _LT_CRCALC
+%KEY% "warranties"
+%STR% "warranties that the subject software =SOME= particular purpose or non-infringing copy"
+#
+%ENTRY% _LT_CRYPTOPP
+%KEY% "applications"
+%STR% "permission to use copy modify =SOME= commercial applications is hereby granted"
+#
+%ENTRY% _LT_COMMUNITY_SPEC_1_0
+%KEY% "specification"
+%STR% "9 9 license license means this community specification license"
+#
+%ENTRY% _LT_CTL_LINUX_FIRMWARE
+%KEY% "limited"
+%STR% "limited patent license ctl grants a limited world-wide"
+#
+%ENTRY% _LT_CUPS_APPLE_OS_EXCEPTION
+%KEY% "development"
+%STR% "copyright holder of cups apple inc grants =SOME= 1 apple operating system development license exception"
+#
+%ENTRY% _LT_CUPS_2
+%KEY% "exceptions"
+%STR% "filter license exceptions in addition as =SOME= holder of cups apple inc grants"
+#
+%ENTRY% _LT_CVWL
+%KEY% "redistribution"
+%STR% "license agreement general 1 redistribution =SOME= reproduce mitre s copyright designation"
+#
+%ENTRY% _LT_CYGWIN_EXCEPTION_LGPL_3_0_PLUS
+%KEY% "exception"
+%STR% "as a special exception the copyright holders of the cygwin library grant you"
+#
+%ENTRY% _LT_CYPRESS_LINUX_FIRMWARE
+%KEY% "semiconductor"
+%STR% "cypress semiconductor corporation attn =SOME= officer 198 champion court san jose"
+#
+%ENTRY% _LT_DAY_SPEC
+%KEY% "management"
+%STR% "copyright 2005 day management =SOME= reserved notice limited license"
+#
+%ENTRY% _LT_DEFENSIVE_PATENT_1_1
+%KEY% "creators"
+%STR% "will end up being used to bully =SOME= other creators the dpl legally binds patent"
+#
+%ENTRY% _LT_DEJAVU_FONT
+%KEY% "bitstream"
+%STR% "fonts are c bitstream see below dejavu changes are in public domain"
+#
+%ENTRY% _LT_DGRAPH_CLA
+%KEY% "harmless"
+%STR% "third party works you will defend =SOME= and hold dgraph labs harmless"
+#
+%ENTRY% _LT_DIGIA_QT_EXCEPTION_LGPL_2_1
+%KEY% "exception"
+%STR% "version 2 1 moreover you may apply this exception"
+#
+%ENTRY% _LT_DIVX_OPEN_1_0
+%KEY% "agreement"
+%STR% "provided below is our open source license agreement license under which we provi"
+#
+%ENTRY% _LT_DL_DE_BY_NC_1_0_DE
+%KEY% "namensnennung"
+%STR% "datenlizenz deutschland namensnennung nicht kommerziell version 1 0"
+#
+%ENTRY% _LT_DL_DE_BY_NC_1_0_EN
+%KEY% "attribution"
+%STR% "data licence germany attribution non-commercial version 1 0"
+#
+%ENTRY% _LT_DMALLOC
+%KEY% "permission"
+%STR% "and this permission notice =SOME= copies and that the name of gray"
+#
+%ENTRY% _LT_DOCBOOK_2
+%KEY% "contribution"
+%STR% "except as contained in this =SOME= individuals credited with contribution to"
+#
+%ENTRY% _LT_PLEXUS
+%KEY% "redistribution"
+%STR% "codehaus all rights reserved redistribution and use of this software"
+#
+%ENTRY% _LT_DOS32A_EXTENDER
+%KEY% "modification"
+%STR% "dos extender software license =SOME= without modification are permitted"
+#
+%ENTRY% _LT_DOUG_LEA
+%KEY% "contributing"
+%STR% "labs and everyone contributing testing and =SOME= public version lea 8094b your file"
+#
+%ENTRY% _LT_DPL_1_1
+%KEY% "derivative"
+%STR% "dstc has the right to modify =SOME= created under this license 63 derivative"
+#
+%ENTRY% _LT_DR_JOHN_MADDOCK
+%KEY% "software"
+%STR% "dr john maddock makes no representations =SOME= suitability of this software for any"
+#
+%ENTRY% _LT_DRL_1_0
+%KEY% "permission"
+%STR% "rule license drl 10 permission is =SOME= charge to any person obtaining a"
+#
+%ENTRY% _LT_DROPBEAR_2016
+%KEY% "copyright"
+%STR% "copyright 2008 google inc all rights =SOME= and use in source and binary"
+#
+%ENTRY% _LT_DROPBEAR
+%KEY% "organization"
+%STR% "organization > nor the names of its contributors may be used to endorse or"
+#
+%ENTRY% _LT_DUAL_BSD_GPL
+%KEY% "foundation"
+%STR% "public license gpl version =SOME= software foundation this software"
+#
+%ENTRY% _LT_DUAL_COMMERCIAL_GPL
+%KEY% "redistribute"
+%STR% "can redistribute and/or modify =SOME= gnu general public license"
+#
+%ENTRY% _LT_DUENDE_SLA_2022
+%KEY% "redistribute"
+%STR% "redistribute sell lease license =SOME= software ii reproduce distribute"
+#
+%ENTRY% _LT_DUNE_EXCEPTION
+%KEY% "specifically"
+%STR% "as a special exception you may =SOME= library or application without restriction specifically"
+#
+%ENTRY% _LT_DYNAMIC_DRIVE_TOU
+%KEY% "designers"
+%STR% "dynamic drive free of charge on both =SOME= designers who wish to use our dhtml"
+#
+%ENTRY% _LT_DYNARCH_LINKWARE
+%KEY% "agreement"
+%STR% "synonym license agreement licensee =SOME= remove any copyright notices"
+#
+%ENTRY% _LT_ECLIPSE_SUA_2002
+%KEY% "information"
+%STR% "user agreement 17th june 2002 eclipseorg =SOME= information and/or other materials for open"
+#
+%ENTRY% _LT_ECLIPSE_SUA_2003
+%KEY% "document"
+%STR% "user agreement 14th august 2003 =SOME= software documentation information and/or other"
+#
+%ENTRY% _LT_ECLIPSE_SUA_2004
+%KEY% "document"
+%STR% "user agreement 15th june 2004 =SOME= software documentation information and/or other"
+#
+%ENTRY% _LT_ECLIPSE_SUA_2005
+%KEY% "microsystems"
+%STR% "this is permitted java and =SOME= trademarks of sun microsystems inc"
+#
+%ENTRY% _LT_ECLIPSE_SUA_2010
+%KEY% "foundation"
+%STR% "eclipse foundation software user agreement april 14 2010 usage =ANY= include but are not limited to common public license"
+#
+%ENTRY% _LT_ECLIPSE_SUA_2011
+%KEY% "distribution"
+%STR% "eclipse foundation software user agreement february 1 2011 usage =ANY= include but are not limited to eclipse distribution license"
+#
+%ENTRY% _LT_ECLIPSE_SUA_2014_11
+%KEY% "foundation"
+%STR% "eclipse foundation software user agreement november 22 2014 usage =ANY= and conditions of the eclipse public license version 20"
+#
+%ENTRY% _LT_ECLIPSE_SUA_2014
+%KEY% "distribution"
+%STR% "eclipse foundation software user agreement april 9 2014 usage =ANY= include but are not limited to eclipse distribution license"
+#
+%ENTRY% _LT_ECLIPSE_SUA_2017
+%KEY% "foundation"
+%STR% "eclipse foundation software user agreement november 22 2017 usage =ANY= and conditions of the eclipse public license version 20"
+#
+%ENTRY% _LT_EGRAPPLER
+%KEY% "redistribute"
+%STR% "are free for personal and commercial =SOME= you cannot redistribute sale re-upload these"
+#
+%ENTRY% _LT_EKIGA_EXCEPTION_2_0_PLUS
+%KEY% "permission"
+%STR% "exception you have permission to link or otherwise combine this program with"
+#
+%ENTRY% _LT_ELASTIC_LICENSE_2018
+%KEY% "software"
+%STR% "and third party open source software =SOME= user license subject to the terms"
+#
+%ENTRY% _LT_ELIB_GPL
+%KEY% "otherwise"
+%STR% "state law except when otherwise stated in =SOME= other parties provide gnu elib as is"
+#
+%ENTRY% _LT_ELLIS_LAB
+%KEY% "modified"
+%STR% "files that have been modified must =SOME= names of those who changed them"
+#
+%ENTRY% _LT_EMIT
+%KEY% "licenses"
+%STR% "regular mit license q can i use =SOME= codes under other licenses without being forced"
+#
+%ENTRY% _LT_EMX_LIBRARY
+%KEY% "copyright"
+%STR% "gnu general public license you are =SOME= you keep the copyright message intact"
+#
+%ENTRY% _LT_ENERGYPLUS_BSD
+%KEY% "permission"
+%STR% "be used to endorse or promote products =SOME= permission 4 use of energyplus name if"
+#
+%ENTRY% _LT_EPO_OSL_2005_1
+%KEY% "redistribute"
+%STR% "its scope 1 licence 11 you =SOME= use reproduce display modify and redistribute"
+#
+%ENTRY% _LT_ERRBOT_EXCEPTION
+%KEY% "potentially"
+%STR% "itself and potentially licensed under a =SOME= also meet the terms and conditions"
+#
+%ENTRY% _LT_ETALAB_2_0_FR
+%KEY% "language"
+%STR% "yes replaced_by etalab-20 language fr =SOME= etalab open license 20 french name"
+#
+%ENTRY% _LT_EXAMDIFF
+%KEY% "commercial"
+%STR% "files together if you wish to =SOME= part of a commercial offering written"
+#
+%ENTRY% _LT_FACEBOOK_SOFTWARE_LICENSE
+%KEY% "granted"
+%STR% "you are hereby granted a non-exclusive =SOME= license to use copy modify and"
+#
+%ENTRY% _LT_FAIR_SOURCE_0_9
+%KEY% "distribute"
+%STR% "of the licensors copyright =SOME= distribute prepare derivative works"
+#
+%ENTRY% _LT_FANCYZOOM
+%KEY% "permitted"
+%STR% "website use is permitted without license/payment =SOME= the above copyright notice this list"
+#
+%ENTRY% _LT_FAR_MANAGER_EXCEPTION
+%KEY% "distribution"
+%STR% "from the above license on them exception =SOME= header files from this distribution none or"
+#
+%ENTRY% _LT_OML
+%KEY% "market"
+%STR% "no event shall open market be liable to you or any third party for any"
+#
+%ENTRY% _LT_FATFS
+%KEY% "fatfs"
+%STR% "fatfs module is an open source software"
+#
+%ENTRY% _LT_FFTPACK_2004
+%KEY% "redistributions"
+%STR% "permission redistributions of source =SOME= conditions and the disclaimer"
+#
+%ENTRY% _LT_FILAMENT_GROUP_MIT
+%KEY% "acknowledgment"
+%STR% "must include the following acknowledgment =SOME= filament group inc http //wwwfilamentgroupcom"
+#
+%ENTRY% _LT_FIRST_WORKS_APPRECIATIVE_1_2
+%KEY% "privately"
+%STR% "work publicly or privately 2 =SOME= grant of copyright license for"
+#
+%ENTRY% _LT_FLEX_2_5
+%KEY% "copyright"
+%STR% "flexskl scanner skeleton carries no copyright =SOME= scanners generated using flex for them"
+#
+%ENTRY% _LT_FLOWPLAYER_GPL_3_0
+%KEY% "flowplayer"
+%STR% "does not require any flowplayer notices or texts =SOME= additional term per gpl section 7 if you"
+#
+%ENTRY% _LT_FONT_ALIAS
+%KEY% "incurred"
+%STR% "damages incurred with its use this software =SOME= in both source and binary form provided"
+#
+%ENTRY% _LT_FOOBAR2000
+%KEY% "binaries"
+%STR% "foobar2000 binaries in any other form is =SOME= neither the name of the author nor"
+#
+%ENTRY% _LT_FREEBSD_FIRST
+%KEY% "redistributions"
+%STR% "first lines of this file unmodified =SOME= notices 2 redistributions in binary form"
+#
+%ENTRY% _LT_FREEIMAGE
+%KEY% "conspicuously"
+%STR% "conspicuously included in any notice in =SOME= collateral in which you descr ibe"
+#
+%ENTRY% _LT_FREEMARKER
+%KEY% "community"
+%STR% "later by community consensus we have switched =SOME= 22pre1 the original author benjamin geer has"
+#
+%ENTRY% _LT_GCC_COMPILER_EXCEPTION_2_0
+%KEY% "executable"
+%STR% "other reasons why the executable file =SOME= a special exception if you include"
+#
+%ENTRY% _LT_GCC_EXCEPTION_3_0
+%KEY% "language"
+%STR% "a high-level non-intermediate language into =SOME= example use of source code"
+#
+%ENTRY% _LT_GCEL_2022
+%KEY% "redistribution"
+%STR% "redistribution subject to section =SOME= or derivative works thereof"
+#
+%ENTRY% _LT_GCO_V3_0
+%KEY% "commercial"
+%STR% "commercial use of this code =SOME= not permited the copyright notices"
+#
+%ENTRY% _LT_GENODE_AGPL_3_0_EXCEPTION
+%KEY% "independent"
+%STR% "copyright holder of genode =SOME= source code with independent"
+#
+%ENTRY% _LT_GEOFF_KUENNING_1993
+%KEY% "redistribution"
+%STR% "copyright 1993 geoff kuenning =SOME= rights reserved redistribution and"
+#
+%ENTRY% _LT_GEOSERVER_EXCEPTION_2_0_PLUS
+%KEY% "exception"
+%STR% "as an exception to the terms of the gpl you may copy modify"
+#
+%ENTRY% _LT_GHOSTPDL_PERMISSIVE
+%KEY% "distribute"
+%STR% "modify and distribute this software =SOME= fee is hereby granted this"
+#
+%ENTRY% _LT_GHOSTSCRIPT_1988
+%KEY% "ghostscript"
+%STR% "please contact the free software foundation =SOME= 876-3296 no warranty because ghostscript is"
+#
+%ENTRY% _LT_GITLAB_EE
+%KEY% "compliance"
+%STR% "if you and any entity that =SOME= are in compliance with the gitlab"
+#
+%ENTRY% _LT_GNU_EMACS_GPL_1988
+%KEY% "foundation"
+%STR% "please contact the free software foundation inc 675 =SOME= call 617 876-3296 no warranty because gnu emacs"
+#
+%ENTRY% _LT_GOAHEAD
+%KEY% "washington"
+%STR% "goahead software inc 10900 ne =SOME= suite 750 bellevue washington 98004"
+#
+%ENTRY% _LT_GOOGLE_ANALYTICS_TOS_2015
+%KEY% "indemnification"
+%STR% "terms between you and google regarding =SOME= 8 indemnification to the extent permitted"
+#
+%ENTRY% _LT_GOOGLE_ANALYTICS_TOS_2016
+%KEY% "provide"
+%STR% "other url as google may provide =SOME= the suite home terms but subject"
+#
+%ENTRY% _LT_GOOGLE_ANALYTICS_TOS_2019
+%KEY% "revocable"
+%STR% "google grants you a limited revocable =SOME= and use the gamc and/or sdks"
+#
+%ENTRY% _LT_GOOGLE_ANALYTICS_TOS
+%KEY% "analytics"
+%STR% "item or event hits may also be =SOME= the google analytics system without using one"
+#
+%ENTRY% _LT_GOOGLE_MAPS_TOS_2018_02_07
+%KEY% "restrictions"
+%STR% "additional restrictions located in the =SOME= subject to these terms including"
+#
+%ENTRY% _LT_GOOGLE_MAPS_TOS_2018_05_01
+%KEY% "agreement"
+%STR% "terms of service last modified may =SOME= google maps platform license agreement"
+#
+%ENTRY% _LT_GOOGLE_MAPS_TOS_2018_06_07
+%KEY% "agreement"
+%STR% "platform terms of service last =SOME= 2018 google maps platform license agreement"
+#
+%ENTRY% _LT_GOOGLE_MAPS_TOS_2018_07_09
+%KEY% "agreement"
+%STR% "terms of service last modified july =SOME= google maps platform license agreement"
+#
+%ENTRY% _LT_GOOGLE_MAPS_TOS_2018_07_19
+%KEY% "platform"
+%STR% "maps platform terms of service last modified july 19 =ANY= your use of the google maps core services google"
+#
+%ENTRY% _LT_GOOGLE_MAPS_TOS_2018_10_01
+%KEY% "customers"
+%STR% "for customers with a billing =SOME= 2018 this agreement is made"
+#
+%ENTRY% _LT_GOOGLE_MAPS_TOS_2018_10_31
+%KEY% "singapore"
+%STR% "ltd with offices at 70 pasir =SOME= ii singapore 117371 if customers billing"
+#
+%ENTRY% _LT_GOOGLE_MAPS_TOS_2019_05_02
+%KEY% "australia"
+%STR% "at level 5 48 pirrama road =SOME= billing address is in australia vi"
+#
+%ENTRY% _LT_GOOGLE_MAPS_TOS_2019_11_21
+%KEY% "platform"
+%STR% "google maps platform terms of service last modified november 21"
+#
+%ENTRY% _LT_GOOGLE_MAPS_TOS_2020_04_02
+%KEY% "zealand"
+%STR% "8 new zealand google new zealand =SOME= tower level 27 188 quay street"
+#
+%ENTRY% _LT_GOOGLE_MAPS_TOS_2020_04_27
+%KEY% "zealand"
+%STR% "9 new zealand google new zealand =SOME= tower level 27 188 quay street"
+#
+%ENTRY% _LT_GOOGLE_MAPS_TOS_2020_05_06
+%KEY% "customers"
+%STR% "re-distribute the google maps core =SOME= were customers services ii use"
+#
+%ENTRY% _LT_GOOGLE_PATENT_LICENSE_WEBM
+%KEY% "distributed"
+%STR% "webm codecs distributed by google as part of the webm project"
+#
+%ENTRY% _LT_GOOGLE_PATENT_LICENSE_WEBRTC
+%KEY% "package"
+%STR% "google as part of the webrtc code package"
+#
+%ENTRY% _LT_GOOGLE_PLAYCORE_SDK_TOS_2020
+%KEY% "september"
+%STR% "last modified september 24 2020"
+#
+%ENTRY% _LT_GOOGLE_TOS_2013
+%KEY% "otherwise"
+%STR% "when you upload or otherwise submit =SOME= you give google and those we"
+#
+%ENTRY% _LT_GOOGLE_TOS_2014
+%KEY% "modified"
+%STR% "google terms of service last modified april 30 2014 =ANY= the services are provided by google inc google located"
+#
+%ENTRY% _LT_GOOGLE_TOS_2017
+%KEY% "modified"
+%STR% "google terms of service last modified october 25 2017 =ANY= the services are provided by google llc google located"
+#
+%ENTRY% _LT_GOOGLE_TOS_2019
+%KEY% "infringement"
+%STR% "privacy when you use our services =SOME= to notices of alleged copyright infringement"
+#
+%ENTRY% _LT_GPL_2_0_ADAPTEC
+%KEY% "attributed"
+%STR% "software without specific prior written =SOME= attributed in a copyright notice"
+#
+%ENTRY% _LT_GPL_2_0_AUTOOPTS
+%KEY% "redistribute"
+%STR% "free software you may redistribute it =SOME= of the gnu general public license"
+#
+%ENTRY% _LT_GPL_2_0_BISON_2_2
+%KEY% "foundation"
+%STR% "gpl 20 or later with bison 22 exception =SOME= foundation fsf notes replaced by an expression of"
+#
+%ENTRY% _LT_GPL_2_0_BISON
+%KEY% "boston"
+%STR% "floor boston ma 02110-1301 usa as a =SOME= file is copied by bison into a"
+#
+%ENTRY% _LT_GPL_2_0_BROADCOM_LINKING
+%KEY% "permission"
+%STR% "license as a special exception =SOME= this software give you permission"
+#
+%ENTRY% _LT_GPL_2_0_CYGWIN
+%KEY% "redistribute"
+%STR% "software you can redistribute =SOME= general public license gpl"
+#
+%ENTRY% _LT_GPL_2_0_DJVU
+%KEY% "lizardtech"
+%STR% "lizardtech grants recipient a =SOME= non-exclusive license under patent"
+#
+%ENTRY% _LT_GPL_2_0_FREERTOS
+%KEY% "exception"
+%STR% "gnu general public license the =SOME= exception permits the source code"
+#
+%ENTRY% _LT_GPL_2_0_GCC_COMPILER_EXCEPTION
+%KEY% "exception"
+%STR% "place suite 330 boston ma 02111-1307 =SOME= special exception if you include"
+#
+%ENTRY% _LT_GPL_2_0_GLIBC
+%KEY% "boston"
+%STR% "fifth floor boston ma 02110-1301 usa as =SOME= may use this file as part of"
+#
+%ENTRY% _LT_GPL_2_0_GUILE
+%KEY% "foundation"
+%STR% "software foundation releases into =SOME= general public license permits"
+#
+%ENTRY% _LT_GPL_2_0_ICE
+%KEY% "software"
+%STR% "this copy of ice is free software =SOME= and/or modify it under the terms of"
+#
+%ENTRY% _LT_GPL_2_0_INDEPENDENT_MODULE_LINKING
+%KEY% "commercial"
+%STR% "bottom line in plain english =SOME= use this library in commercial"
+#
+%ENTRY% _LT_GPL_2_0_IOLIB
+%KEY% "librar"
+%STR% "gnu io library this library is =SOME= and/or modify it under the terms"
+#
+%ENTRY% _LT_GPL_2_0_ISO_CPP
+%KEY% "foundation"
+%STR% "write to the free software foundation 59 =SOME= boston ma 02111 1307 usa as a"
+#
+%ENTRY% _LT_GPL_2_0_JAVASCRIPT
+%KEY% "exception"
+%STR% "as a special exception =SOME= function calls to this code"
+#
+%ENTRY% _LT_GPL_2_0_KERNEL
+%KEY% "torvalds"
+%STR% "stated linus torvalds this library is =SOME= and/or modify it under the terms"
+#
+%ENTRY% _LT_GPL_2_0_KOTEROV
+%KEY% "modifications"
+%STR% "type and any of license conditions =SOME= permitted to make private modifications"
+#
+%ENTRY% _LT_GPL_2_0_LIBGIT2
+%KEY% "permission"
+%STR% "gnu general public license the authors =SOME= unlimited permission to link the compiled"
+#
+%ENTRY% _LT_GPL_2_0_LIBRARY
+%KEY% "distribut"
+%STR% "is distributed under the gnu =SOME= the library exception described below"
+#
+%ENTRY% _LT_GPL_2_0_LIBTOOL
+%KEY% "exception"
+%STR% "2 or at your option any later =SOME= exception to the gnu general public license"
+#
+%ENTRY% _LT_GPL_2_0_LMBENCH
+%KEY% "restrictions"
+%STR% "as lmbench are distributed under =SOME= with the following additional restrictions"
+#
+%ENTRY% _LT_GPL_2_0_MYSQL_CONNECTOR_ODBC
+%KEY% "licen[cs]"
+%STR% "boston ma 02110-1301 usa as =SOME= the mysql connector/odbc gpl license"
+#
+%ENTRY% _LT_GPL_2_0_MYSQL_FLOSS
+%KEY% "copying"
+%STR% "file copying if not write to the =SOME= boston ma 02110-1301 usa mysql floss license"
+#
+%ENTRY% _LT_GPL_2_0_OPENJDK
+%KEY% "distributed"
+%STR% "ma 02110-1301 usa classpath exception =SOME= 2 certain source files distributed"
+#
+%ENTRY% _LT_GPL_2_0_ORACLE_MYSQL_FOSS
+%KEY% "conditions"
+%STR% "gnu general public license therefore =SOME= to the terms and conditions"
+#
+%ENTRY% _LT_GPL_2_0_ORACLE_OPENJDK
+%KEY% "distributed"
+%STR% "floor boston ma 02110-1301 usa =SOME= gpl certain source files distributed"
+#
+%ENTRY% _LT_GPL_2_0_PLUS_EKIGA
+%KEY% "permission"
+%STR% "02111-1307 usa ekiga/gnomemeeting is =SOME= exception you have permission"
+#
+%ENTRY% _LT_GPL_2_0_PLUS_GEOSERVER
+%KEY% "collectively"
+%STR% "either version 2 of the license =SOME= option any later version collectively"
+#
+%ENTRY% _LT_GPL_2_0_PLUS_SYNTEXT
+%KEY% "derivative"
+%STR% "you or your derivative work =SOME= license name version academic free"
+#
+%ENTRY% _LT_GPL_2_0_PROGUARD
+%KEY% "applications"
+%STR% "license proguard is free you =SOME= for processing your applications commercial"
+#
+%ENTRY% _LT_GPL_2_0_QT_QCA
+%KEY% "permission"
+%STR% "boston ma 02110-1301 usa as =SOME= copyright holder s give permission"
+#
+%ENTRY% _LT_GPL_2_0_REDHAT
+%KEY% "exception"
+%STR% "franklin street fifth floor boston ma 02110-1301 usa in addition as a special exception red hat inc gives"
+#
+%ENTRY% _LT_GPL_2_0_RRDTOOL_FLOSS
+%KEY% "numerical"
+%STR% "rrdtool round robin database =SOME= of numerical data graphical"
+#
+%ENTRY% _LT_GPL_2_0_UBOOT
+%KEY% "exception"
+%STR% "franklin street fifth floor =SOME= exception note this copyright"
+#
+%ENTRY% _LT_GPL_3_0_APTANA
+%KEY% "redistribute"
+%STR% "you can redistribute it and/or modify =SOME= gnu general public license version 3"
+#
+%ENTRY% _LT_GPL_3_0_BISON
+%KEY% "redistribute"
+%STR% "1989-1990 2000-2006 2009-2010 free software =SOME= can redistribute it and/or modify"
+#
+%ENTRY% _LT_GPL_3_0_CYGWIN
+%KEY% "foundation"
+%STR% "software foundation you can =SOME= gnu general public license"
+#
+%ENTRY% _LT_GPL_3_0_FONT
+%KEY% "scalable"
+%STR% "license free ucs scalable fonts is =SOME= and/or modify it under the terms"
+#
+%ENTRY% _LT_GPL_3_0_LINKING_SOURCE_EXCEPTION
+%KEY% "librar"
+%STR% "library s license the licensors =SOME= convey the resulting work corresponding"
+#
+%ENTRY% _LT_GPL_3_0_OPENBD
+%KEY% "additional"
+%STR% "the terms of java jax-rpc the =SOME= this program grant you additional permission"
+#
+%ENTRY% _LT_GPL_3_0_PLUS_OPENSSL
+%KEY% "librar"
+%STR% "link the code of portions of this program with the openssl library under certain"
+#
+%ENTRY% _LT_GREG_ROELOFS
+%KEY% "redistributions"
+%STR% "2 redistributions in binary =SOME= notice disclaimer and this"
+#
+%ENTRY% _LT_GREGORY_PIETSCH
+%KEY% "hereby"
+%STR% "hereby placed in the public domain =SOME= just give the auth credit don"
+#
+%ENTRY% _LT_GSTREAMER_EXCEPTION_2_0
+%KEY% "compatible"
+%STR% "the gnome music authors hereby =SOME= for non-gpl compatible gstreamer plugins"
+#
+%ENTRY% _LT_GSTREAMER_EXCEPTION_2005
+%KEY% "permission"
+%STR% "totem this permission are above =SOME= granted by the gpl license"
+#
+%ENTRY% _LT_GSTREAMER_EXCEPTION_2008
+%KEY% "permissions"
+%STR% "and beyond the permissions granted by =SOME= project is covered if you modify"
+#
+%ENTRY% _LT_GUILE_EXCEPTION_2_0
+%KEY% "foundation"
+%STR% "name guile exception to gpl 20 =SOME= free software foundation fsf is_exception yes"
+#
+%ENTRY% _LT_GUTENBERG_2020
+%KEY% "gutenberg"
+%STR% "laws alone swamp our small staff please check the project gutenberg web"
+#
+%ENTRY% _LT_HACOS_1_2
+%KEY% "corporation"
+%STR% "corporation to use reproduce =SOME= perform sublicense and distribute"
+#
+%ENTRY% _LT_HAPPY_BUNNY
+%KEY% "restrictions"
+%STR% "permission notice shall be included =SOME= software restrictions by making use"
+#
+%ENTRY% _LT_HDF4
+%KEY% "developed"
+%STR% "use of this software are asked =SOME= it was developed by the hdf"
+#
+%ENTRY% _LT_HDF5
+%KEY% "enhancements"
+%STR% "enhancements to anyone however if =SOME= publicly or directly to the"
+#
+%ENTRY% _LT_HDPARM
+%KEY% "redistribute"
+%STR% "may freely use modify and redistribute =SOME= program as either binary or source"
+#
+%ENTRY% _LT_HELIOS_EULA
+%KEY% "solutions"
+%STR% "helios software solutions po =SOME= 2gw england http //wwwtextpadcom"
+#
+%ENTRY% _LT_HIPPOCRATIC_1_0
+%KEY% "underprivileged"
+%STR% "of underprivileged individuals or groups the =SOME= provided as is without warranty of"
+#
+%ENTRY% _LT_HIPPOCRATIC_1_1
+%KEY% "declaration"
+%STR% "nations universal declaration of human =SOME= provided as is without warranty"
+#
+%ENTRY% _LT_HIPPOCRATIC_1_1_ref
+%KEY% "endanger"
+%STR% "used by individuals =SOME= for systems or activities that actively and knowingly endanger"
+#
+%ENTRY% _LT_HIPPOCRATIC_1_2
+%KEY% "permitted"
+%STR% "the fullest extent permitted by law =SOME= is provided as is without warranty"
+#
+%ENTRY% _LT_HIPPOCRATIC_2_0
+%KEY% "notification"
+%STR% "if licensor receives notification or =SOME= alleged violation of any human"
+#
+%ENTRY% _LT_HOMEBREWED
+%KEY% "redistributions"
+%STR% "as well as documentation with =SOME= following conditions are met redistributions"
+#
+%ENTRY% _LT_HP_ENTERPRISE_EULA
+%KEY% "software"
+%STR% "software license terms upon =SOME= audit during normal business"
+#
+%ENTRY% _LT_HP_PROLIANT_ESSENTIALS
+%KEY% "configuration"
+%STR% "agreement then depending upon the =SOME= configuration you employ hp grants"
+#
+%ENTRY% _LT_HP_SOFTWARE_EULA
+%KEY% "information"
+%STR% "public open source or third party =SOME= means technical information about software products"
+#
+%ENTRY% _LT_HXD
+%KEY% "accessible"
+%STR% "freely accessible part that the software is =SOME= //mh-nexusde/hxd if you want to bundle hxd"
+#
+%ENTRY% _LT_IAN_PIUMARTA
+%KEY% "acknowledgement"
+%STR% "that the above copyright notice =SOME= copies of the software acknowledgement"
+#
+%ENTRY% _LT_IBPP
+%KEY% "permission"
+%STR% "ibpp license v11 permission is hereby =SOME= of charge to any person or"
+#
+%ENTRY% _LT_IC_1_0
+%KEY% "foundation"
+%STR% "license text copyright 2021 dfinity foundation all rights =SOME= computer community source license is a trademark of"
+#
+%ENTRY% _LT_IC_SHARED_1_0
+%KEY% "derivative"
+%STR% "to the software or derivative =SOME= the internet computer platform or"
+#
+%ENTRY% _LT_ILMID
+%KEY% "derivative"
+%STR% "copies of the software derivative =SOME= and any portions thereof that"
+#
+%ENTRY% _LT_IMAGEN
+%KEY% "commercial"
+%STR% "commercial gain involved in =SOME= copyright notice is preserved"
+#
+%ENTRY% _LT_INDEPENDENT_MODULE_LINKING_EXCEPTION
+%KEY% "conditions"
+%STR% "terms and conditions of the license =SOME= is a module which is neither"
+#
+%ENTRY% _LT_XPP
+%KEY% "trustees"
+%STR% "2002 the trustees of indiana =SOME= source and binary forms with"
+#
+%ENTRY% _LT_INDIANA_EXTREME
+%KEY% "modification"
+%STR% "lab indiana university all rights =SOME= forms with or without modification"
+#
+%ENTRY% _LT_INFO_ZIP_1997_10
+%KEY% "copyrighted"
+%STR% "written by the info-zip group are copyrighted 1997 by steve p"
+#
+%ENTRY% _LT_INFO_ZIP_2001_01
+%KEY% "copyright"
+%STR% "1990-2001 info-zip all rights =SOME= copyright and license info-zip"
+#
+%ENTRY% _LT_INFONODE_1_1
+%KEY% "specifically"
+%STR% "not specifically granted in this license =SOME= reserved by nnl 4 warranty disclaimer"
+#
+%ENTRY% _LT_INITIAL_DEVELOPER_PUBLIC
+%KEY% "disclaimer"
+%STR% "netscape public license has been =SOME= disclaimer of warranty covered code"
+#
+%ENTRY% _LT_INNO_SETUP
+%KEY% "modification"
+%STR% "conditions without modification 2 all =SOME= of the above copyright notice"
+#
+%ENTRY% _LT_INRIA_LINKING_EXCEPTION
+%KEY% "exception"
+%STR% "as a special exception to the q public licence you may develop"
+#
+%ENTRY% _LT_INTEL_BSD_2_CLAUSE
+%KEY% "redistributions"
+%STR% "modification 2 redistributions in binary form =SOME= substantially similar to the no warranty"
+#
+%ENTRY% _LT_INTEL_BSD
+%KEY% "permission"
+%STR% "be used to endorse or promote products =SOME= without specific prior written permission no warranty"
+#
+%ENTRY% _LT_INTEL_MASTER_EULA_SW_DEV_2016
+%KEY% "irrevocable"
+%STR% "irrevocable royalty-free copyright =SOME= display disclose distribute"
+#
+%ENTRY% _LT_IRFANVIEW_EULA
+%KEY% "agreement"
+%STR% "legal agreement between you and =SOME= irfan skiljan covering your use"
+#
+%ENTRY% _LT_ISO_RECORDER
+%KEY% "reserved"
+%STR% "not be liable for any damage =SOME= utility all rights are reserved 4"
+#
+%ENTRY% _LT_ISOTOPE_CLA
+%KEY% "installing"
+%STR% "llc metafizzy by installing copying or =SOME= these terms of this agreement grant"
+#
+%ENTRY% _LT_JAM_STAPL
+%KEY% "agreement"
+%STR% "stapl software license software =SOME= agreement the jam software program"
+#
+%ENTRY% _LT_JAM
+%KEY% "copyright"
+%STR% "license is hereby granted to =SOME= long as this copyright notice"
+#
+%ENTRY% _LT_JAMON
+%KEY% "redistributions"
+%STR% "permitted provided that the following conditions are met redistributions in binary form must reproduce the above copyright notice"
+#
+%ENTRY% _LT_JASPER_1_0
+%KEY% "following"
+%STR% "if any must include the following =SOME= product includes software developed by teodor"
+#
+%ENTRY% _LT_JAVA_RESEARCH_1_5
+%KEY% "definitions"
+%STR% "java research license version 15 i definitions =SOME= has entered into and has in effect"
+#
+%ENTRY% _LT_JAVA_RESEARCH_1_6
+%KEY% "definitions"
+%STR% "java research license version 16 i definitions =SOME= has entered into and has in effect"
+#
+%ENTRY% _LT_JAVASCRIPT_EXCEPTION_2_0
+%KEY% "javascript"
+%STR% "name javascript exception to =SOME= foundation fsf is_exception yes"
+#
+%ENTRY% _LT_JBOSS_EULA
+%KEY% "transactions"
+%STR% "gnu lesser general public license v 21 =SOME= portal forums and jboss transactions jts each"
+#
+%ENTRY% _LT_JDBM_1_00
+%KEY% "without"
+%STR% "jdbm appear in their names without prior =SOME= of cees de groot 5 due credit"
+#
+%ENTRY% _LT_JELURIDA_PUBLIC_1_1
+%KEY% "redistribution"
+%STR% "example if a patent license =SOME= redistribution of the covered work"
+#
+%ENTRY% _LT_JETBRAINS_TOOLBOX_OPEN_SOURCE_3
+%KEY% "development"
+%STR% "file 86211 idnr 265 02 275 12 =SOME= you means an open source development group"
+#
+%ENTRY% _LT_JETTY_CCLA_1_1
+%KEY% "consulting"
+%STR% "thank you for your interest in =SOME= mort bay consulting pty ltd australia"
+#
+%ENTRY% _LT_JGRAPH
+%KEY% "distribution"
+%STR% "and/or other materials provided with the distribution neither the name of jgraph ltd nor the names of its contributors may be used"
+#
+%ENTRY% _LT_JMAGNETIC
+%KEY% "agreement"
+%STR% "a legal agreement between you and =SOME= read the following agreement before using"
+#
+%ENTRY% _LT_JPRS_OSCL_1_1
+%KEY% "licen[cs]"
+%STR% "open source code license version 11 japan =SOME= having its head office at chiyoda first"
+#
+%ENTRY% _LT_JQUERY_PD
+%KEY% "licenses"
+%STR% "licenses do what you like this =SOME= evil they block the natural progress"
+#
+%ENTRY% _LT_JRUNNER
+%KEY% "downloading"
+%STR% "the jrunner software program and executable =SOME= available for downloading from this web"
+#
+%ENTRY% _LT_JSCHEME
+%KEY% "restrictions"
+%STR% "modify compile decompile run and =SOME= following restrictions 1 the author"
+#
+%ENTRY% _LT_JSR_107_JCACHE_SPEC_2013
+%KEY% "version"
+%STR% "version 29 status public review release =SOME= luck 4150 network circle santa clara"
+#
+%ENTRY% _LT_JSR_107_JCACHE_SPEC
+%KEY% "specification"
+%STR% "page specification jsr-107 jcache specification =SOME= specification leads oracle america inc"
+#
+%ENTRY% _LT_JYTHON
+%KEY% "source"
+%STR% "2000 2001 2002 2003 2004 2005 2006 2007 =SOME= and use in source and binary forms with"
+#
+%ENTRY% _LT_KALLE_KAUKONEN
+%KEY% "contributors"
+%STR% "kalle kaukonen or contributors =SOME= directi indirect incidental special"
+#
+%ENTRY% _LT_KDE_ACCEPTED_GPL
+%KEY% "distributed"
+%STR% "as a proxy as defined in section 14 =SOME= 3 of the license this program is distributed"
+#
+%ENTRY% _LT_KDE_ACCEPTED_LGPL
+%KEY% "distributed"
+%STR% "as a proxy as defined in section 6 =SOME= 3 of the license this program is distributed"
+#
+%ENTRY% _LT_KERBEROS
+%KEY% "permission"
+%STR% "and this permission notice =SOME= the name of zero-knowledge"
+#
+%ENTRY% _LT_KEVLIN_HENNEY
+%KEY% "distribute"
+%STR% "and distribute this software and =SOME= without fee provided that this"
+#
+%ENTRY% _LT_KFQF_ACCEPTED_GPL
+%KEY% "licen[cs]"
+%STR% "this file may be used under =SOME= public license version 20 or at"
+#
+%ENTRY% _LT_KHRONOS
+%KEY% "substantial"
+%STR% "permission notice shall be included in all copies or substantial portions of the materials the materials are provided"
+#
+%ENTRY% _LT_KREATIVE_RELAY_FONTS_FREE_USE_1_2F
+%KEY% "otherwise"
+%STR% "or otherwise arising from out of the use or inability to use the software"
+#
+%ENTRY% _LT_LAVANTECH
+%KEY% "distribute"
+%STR% "resell rent lease or distribute software =SOME= protect and keep secure all source"
+#
+%ENTRY% _LT_BSD_3_CLAUSE_LBNL
+%KEY% "university"
+%STR% "2003 the regents of the university =SOME= laboratory subject to receipt of any"
+#
+%ENTRY% _LT_LDPC_1994
+%KEY% "document"
+%STR% "linux documentation project copying =SOME= modified 30 march 1994 the following"
+#
+%ENTRY% _LT_LDPC_1997
+%KEY% "document"
+%STR% "linux documentation project copying license =SOME= 6 january 1997 the following"
+#
+%ENTRY% _LT_LDPC_1999
+%KEY% "document"
+%STR% "linux documentation project copying license =SOME= 16 september 1999 please read"
+#
+%ENTRY% _LT_LDPM_1998
+%KEY% "document"
+%STR% "this is the linux documentation project manifesto =SOME= johnson copyright and license here is a"
+#
+%ENTRY% _LT_LEAP_MOTION_SDK_2019
+%KEY% "bristol"
+%STR% "west wing glass wharf bristol bs2 0el united kingdom leap motion device"
+#
+%ENTRY% _LT_LGPL_2_0_FLTK
+%KEY% "modifications"
+%STR% "provided under the terms of =SOME= the following exceptions 1 modifications"
+#
+%ENTRY% _LT_LGPL_2_1_NOKIA_QT
+%KEY% "exception"
+%STR% "usa nokia qt lgpl exception =SOME= gnu lesser general public license"
+#
+%ENTRY% _LT_LGPL_2_1_PLUS_LINKING
+%KEY% "executable"
+%STR% "with a gnu compiler to produce an executable that does not cause the resulting"
+#
+%ENTRY% _LT_LGPL_2_1_QT_COMPANY
+%KEY% "exception"
+%STR% "qt company qt lgpl exception version 11 as =SOME= exception to the gnu lesser general public license"
+#
+%ENTRY% _LT_LGPL_2_1_RXTX
+%KEY% "informat"
+%STR% "for more information this library is =SOME= and/or modify it under the terms"
+#
+%ENTRY% _LT_LGPL_3_PLUS_LINKING
+%KEY% "permi[st]"
+%STR% "lgpl3 the copyright holders of this library give you permission to convey"
+#
+%ENTRY% _LT_LGPL_3_0_CYGWIN
+%KEY% "licen[cs]"
+%STR% "public license lgpl cygwin linking =SOME= of the cygwin library grant"
+#
+%ENTRY% _LT_LGPL_3_0_ZEROMQ
+%KEY% "permi[st]"
+%STR% "exception granted by copyright holders as a special exception copyright holders give you permission to link this library"
+#
+%ENTRY% _LT_LHA
+%KEY% "redistributed"
+%STR% "if lha is redistributed with added =SOME= translator comment if read literally original"
+#
+%ENTRY% _LT_LIBCAP
+%KEY% "disclaimer"
+%STR% "including the disclaimer of warranties =SOME= prior and current copyright notices"
+#
+%ENTRY% _LT_LIBERATION_FONT_EXCEPTION
+%KEY% "distribute"
+%STR% "permit client to distribute modified =SOME= using red hat s trademarks"
+#
+%ENTRY% _LT_LIBGEOTIFF
+%KEY% "libgeotiff"
+%STR% "carrying their own copyright =SOME= libgeotiff should be considered"
+#
+%ENTRY% _LT_LIBMIB
+%KEY% "restriction"
+%STR% "person obtaining a copy of this software =SOME= in the software without restriction including the"
+#
+%ENTRY% _LT_LIBPBM
+%KEY% "document"
+%STR% "all copies and that both that =SOME= appear in supporting documentation this file"
+#
+%ENTRY% _LT_LIBWEBSOCKETS_EXCEPTION
+%KEY% "included"
+%STR% "program is based in part on the work =SOME= 4 some sources included have their own more"
+#
+%ENTRY% _LT_LIBZIP
+%KEY% "permission"
+%STR% "prior written permission this software is provided by the authors as is and any express or implied warranties"
+#
+%ENTRY% _LT_LILIQ_R_1_1
+%KEY% "obligation"
+%STR% "licenci distribue le logiciel ou =SOME= dernier doit assumer l obligation"
+#
+%ENTRY% _LT_LILIQ_RPLUS_1_1
+%KEY% "obligation"
+%STR% "le licenci distribue le logiciel un =SOME= ce dernier doit assumer l obligation"
+#
+%ENTRY% _LT_LILO
+%KEY% "redistribution"
+%STR% "redistribution and use in source =SOME= forms of parts of or the whole"
+#
+%ENTRY% _LT_LLGPL
+%KEY% "librar"
+%STR% "terms and conditions of the =SOME= of library or your derivative"
+#
+%ENTRY% _LT_LOSLA
+%KEY% "sublicense"
+%STR% "grants you a world-wide royalty-free =SOME= reproduce modify display perform sublicense"
+#
+%ENTRY% _LT_LUMISOFT_MAIL_SERVER
+%KEY% "application"
+%STR% "it s allowed to complile source =SOME= to your application but then you"
+#
+%ENTRY% _LT_LUXI
+%KEY% "obtaining"
+%STR% "is hereby granted free of charge to any person obtaining a copy of these"
+#
+%ENTRY% _LT_LZMA_SDK_2006
+%KEY% "licen[cs]"
+%STR% "igor pavlov 2006-05-01 http //www7-ziporg lzma =SOME= public license gnu lgpl 2 common"
+#
+%ENTRY% _LT_LZMA_SDK_2008
+%KEY% "exception"
+%STR% "pavlov special exception 2 allows owners =SOME= as update for previous versions some"
+#
+%ENTRY% _LT_LZMA_SDK_LICENSE
+%KEY% "written"
+%STR% "sdk is written and placed in =SOME= some code in lzma is based"
+#
+%ENTRY% _LT_LZMA_SDK_9_22
+%KEY% "publish"
+%STR% "copy modify publish use compile sell =SOME= code either in source code form"
+#
+%ENTRY% _LT_LZMA_SDK_ORIGINAL
+%KEY% "applications"
+%STR% "subject to the gnu lgpl or cpl =SOME= sdk in applications with closed code while"
+#
+%ENTRY% _LT_MADWIFI_DUAL
+%KEY% "warrant"
+%STR% "public license gpl version =SOME= software foundation no warranty"
+#
+%ENTRY% _LT_MAGPIE_EXCEPTION_1_0
+%KEY% "copyright"
+%STR% "license version 3 agpl-30 it =SOME= notice placed by the copyright"
+#
+%ENTRY% _LT_MAKE_HUMAN_EXCEPTION
+%KEY% "exception"
+%STR% "output gpl exception as a special and =SOME= assets grants the option to use cc0"
+#
+%ENTRY% _LT_MAME
+%KEY% "redistributions"
+%STR% "the executable redistributions must reproduce =SOME= and the following disclaimer in"
+#
+%ENTRY% _LT_MARKUS_KUHN_LICENSE
+%KEY% "distribute"
+%STR% "copy modify and distribute =SOME= granted the author disclaims"
+#
+%ENTRY% _LT_MATTHEW_WELCH_FONT_LICENSE
+%KEY% "otherwise"
+%STR% "otherwise being sold you can =SOME= long as you charge nothing"
+#
+%ENTRY% _LT_MATTKRUSE
+%KEY% "permission"
+%STR% "notice you may use this code =SOME= without any further permission from the"
+#
+%ENTRY% _LT_MCRAE_PL_4_R53
+%KEY% "copyright"
+%STR% "4r53 this license applies to =SOME= notice placed by the copyright"
+#
+%ENTRY% _LT_MEDIAINFO_LIB
+%KEY% "redistribution"
+%STR% "sarl all rights reserved redistribution =SOME= modification are permitted provided that"
+#
+%ENTRY% _LT_MENTALIS
+%KEY% "disclaimer"
+%STR% "source code must retain the =SOME= the following disclaimer neither the"
+#
+%ENTRY% _LT_METAGEEK_INSSIDER_EULA
+%KEY% "individual"
+%STR% "program install metageek llc s end-user license =SOME= either an individual or a single entity"
+#
+%ENTRY% _LT_MICHAEL_BARR
+%KEY% "distribution"
+%STR% "removed and no warranty is =SOME= by its publication or distribution"
+#
+%ENTRY% _LT_MIKE95
+%KEY% "restriction"
+%STR% "copyright it may freely be =SOME= if the restriction listed below"
+#
+%ENTRY% _LT_MINI_XML
+%KEY% "provided"
+%STR% "usa mini-xml license lgpl 20 =SOME= are provided under the terms"
+#
+%ENTRY% _LT_MINPACK
+%KEY% "modification"
+%STR% "chicago all rights reserved =SOME= without modification are permitted"
+#
+%ENTRY% _LT_MIT_1995
+%KEY% "copyrights"
+%STR% "patents copyrights trademarks or other rights =SOME= will bear no liability for any"
+#
+%ENTRY% _LT_MIT_ADDITION
+%KEY% "redistributions"
+%STR% "applies all redistributions must =SOME= copyright notice and disclaimer"
+#
+%ENTRY% _LT_XEROX
+%KEY% "derivative"
+%STR% "software or of any derivative =SOME= above copyright notice of xerox"
+#
+%ENTRY% _LT_MIT_MODERN_VARIANT
+%KEY% "obligation"
+%STR% "on an as is basis and the copyright holder has no obligation to"
+#
+%ENTRY% _LT_MIT_NO_ADVERT_EXPORT_CONTROL
+%KEY% "distribution"
+%STR% "to distribution of the software =SOME= permission the author makes no"
+#
+%ENTRY% _LT_MIT_NO_TRADEMARKS
+%KEY% "disclaimer"
+%STR% "the disclaimer and that the =SOME= copies of the software and"
+#
+%ENTRY% _LT_MIT_OLD_STYLE_SPARSE
+%KEY% "document"
+%STR% "software and its documentation =SOME= that the copyright notices"
+#
+%ENTRY% _LT_MIT_OLD_STYLE
+%KEY% "document"
+%STR% "for any purpose is hereby granted without fee provided that the above copyright notice appear =SOME= this permission notice appear in supporting documentation no representations are made about the suitability of"
+#
+%ENTRY% _LT_MIT_README
+%KEY% "permission"
+%STR% "permission is hereby granted free of =SOME= copy of this software and the"
+#
+%ENTRY% _LT_MIT_TAYLOR_VARIANT
+%KEY% "including"
+%STR% "the software is provided as =SOME= any kind including all implied"
+#
+%ENTRY% _LT_MIT_WITH_MODIFICATION_OBLIGATIONS
+%KEY% "furthermore"
+%STR% "software from the united states of america may require =ANY= of the software without specific written prior permission furthermore"
+#
+%ENTRY% _LT_MIT_XFIG
+%KEY% "obtaining"
+%STR% "any party obtaining a copy =SOME= files is granted free of charge a"
+#
+%ENTRY% _LT_MONETDB_1_1
+%KEY% "derivative"
+%STR% "bv has the right to modify =SOME= created under this license 63 derivative"
+#
+%ENTRY% _LT_MS_CL
+%KEY% "licensethis"
+%STR% "b no trademark licensethis license =SOME= the licensors name logo or"
+#
+%ENTRY% _LT_MS_DEVELOPER_SERVICES_AGREEMENT_2018_06
+%KEY% "limitation"
+%STR% "data and content accessed through =SOME= including without limitation laws related"
+#
+%ENTRY% _LT_MS_INVISIBLE_EULA_1_0
+%KEY% "accompanying"
+%STR% "microsoft invisible computing this =SOME= the accompanying software you"
+#
+%ENTRY% _LT_MS_NUGET
+%KEY% "interacting"
+%STR% "nuget begin license text microsoft grants =SOME= sole purpose of either i interacting"
+#
+%ENTRY% _LT_MS_PROGRAMSYNTHESIS_7_22_0
+%KEY% "microsoft"
+%STR% "microsoft program synthesis using examples"
+#
+%ENTRY% _LT_MS_RESEARCH_SHARED_SOURCE
+%KEY% "distribute"
+%STR% "use modify distribute make and have made =SOME= works of the software source code or"
+#
+%ENTRY% _LT_MS_VISUAL_STUDIO_2017
+%KEY% "professional"
+%STR% "microsoft visual studio enterprise 2017 visual studio professional 2017 visual studio test"
+#
+%ENTRY% _LT_MS_VISUAL_STUDIO_CODE_2022
+%KEY% "otherwise"
+%STR% "or otherwise attempt to derive =SOME= solely to the extent required"
+#
+%ENTRY% _LT_MS_VISUAL_STUDIO_CODE
+%KEY% "affiliates"
+%STR% "visual studio code these license terms are =SOME= where you live one of its affiliates"
+#
+%ENTRY% _LT_MS_WINDOWS_CONTAINER_BASE_IMAGE_EULA_2020
+%KEY% "container"
+%STR% "the host license also apply to the =SOME= the container image may contain third party"
+#
+%ENTRY% _LT_MS_WINDOWS_OS_2018
+%KEY% "restriction"
+%STR% "the foregoing restriction is =SOME= permitted by licensing terms"
+#
+%ENTRY% _LT_MULLE_KYBERNETIK
+%KEY% "supporting"
+%STR% "that both notices appear in supporting =SOME= that credit is given to mulle"
+#
+%ENTRY% _LT_MX4J_2
+%KEY% "following"
+%STR% "any must include the following =SOME= software developed by the mx4j"
+#
+%ENTRY% _LT_MYSQL_FLOSS_EXCEPTION_2_0
+%KEY% "licensing"
+%STR% "another valid licensing option from mysql ab 2 floss license list license name version s /copyright date academic"
+#
+%ENTRY% _LT_NANT_EXCEPTION_2_0_PLUS
+%KEY% "permission"
+%STR% "in addition as a special exception gerry shaw gives permission to link the"
+#
+%ENTRY% _LT_NCBI
+%KEY% "written"
+%STR% "work under the terms of the =SOME= written as part of the authors"
+#
+%ENTRY% _LT_NERO_EULA
+%KEY% "integrated"
+%STR% "web search feature please visit =SOME= hosting services nero has integrated"
+#
+%ENTRY% _LT_NET_SNMP
+%KEY% "redistributions"
+%STR% "the above copyright notice his list =SOME= redistributions in binary form must reproduce"
+#
+%ENTRY% _LT_NETAPP_SDK_AUG2020
+%KEY% "restrictive"
+%STR% "restrictive than those set forth =SOME= will promptly disclose to netapp"
+#
+%ENTRY% _LT_NETCAT
+%KEY% "generous"
+%STR% "how anyone uses it if netcat =SOME= and you re feeling generous mail"
+#
+%ENTRY% _LT_NEWTON_KING_CLA
+%KEY% "contributing"
+%STR% "by contributing your code to =SOME= newton-king a non-exclusive irrevocable worldwide"
+#
+%ENTRY% _LT_NEXB_SSLA_1_1_0
+%KEY% "derivative"
+%STR% "publish display disclose rent lease =SOME= software or create derivative works"
+#
+%ENTRY% _LT_NICE
+%KEY% "document"
+%STR% "does not write documentation =SOME= application programming interface api"
+#
+%ENTRY% _LT_NICTA_EXCEPTION
+%KEY% "national"
+%STR% "mark logo or trade name of national =SOME= limited abn 62 102 206 173 nicta"
+#
+%ENTRY% _LT_NICTA_1_0
+%KEY% "permission"
+%STR% "by this licence national ict australia ltd nicta grants permission"
+#
+%ENTRY% _LT_NIELS_FERGUSON
+%KEY% "liability"
+%STR% "liability of any form this code =SOME= well be flawed you have been"
+#
+%ENTRY% _LT_NIST_PD_FALLBACK
+%KEY% "technology"
+%STR% "and technology nist an agency of the federal government and is being made"
+#
+%ENTRY% _LT_NIST_PD
+%KEY% "technology"
+%STR% "standards and technology nist an agency of the federal government"
+#
+%ENTRY% _LT_NODE_JS
+%KEY% "copyright"
+%STR% "terms below copyright 2006-2012 the v8 =SOME= and use in source and binary"
+#
+%ENTRY% _LT_NONEXCLUSIVE
+%KEY% "recipient"
+%STR% "the recipient and any party =SOME= these files from the recipient"
+#
+%ENTRY% _LT_NORTHWOODS_SLA_2021
+%KEY% "northwoods"
+%STR% "replace the defective licensed =SOME= days after northwoods receipt"
+#
+%ENTRY% _LT_NPSL_EXCEPTION_0_93
+%KEY% "information"
+%STR% "nmap public source license version 093 for more information =ANY= license means this document including exhibits licensor means insecurecom"
+#
+%ENTRY% _LT_NRL_PERMISSION
+%KEY% "condition"
+%STR% "nrl allows free use of this =SOME= its as is condition and disclaims"
+#
+%ENTRY% _LT_NUMERICAL_RECIPES_NOTICE
+%KEY% "workstation"
+%STR% "ourweb site basically this license lets =SOME= workstation x-terminal etc you may also"
+#
+%ENTRY% _LT_NVIDIA_CUDA_SUPPLEMENT_2020
+%KEY% "redistribution"
+%STR% "reserved the bsd licence redistribution =SOME= or without modification are permitted"
+#
+%ENTRY% _LT_NVIDIA_ISAAC_EULA_2019_1
+%KEY% "sublicense"
+%STR% "nvidia hereby grants you a non-exclusive =SOME= sublicense to modify and create derivative"
+#
+%ENTRY% _LT_NVIDIA_NGX_EULA_2019
+%KEY% "permitted"
+%STR% "other only as permitted in =SOME= license to nvidia you grant"
+#
+%ENTRY% _LT_NXP_MICROCONTROLLER_PROPRIETARY
+%KEY% "document"
+%STR% "use copy modify and distribute =SOME= documentation is hereby granted under"
+#
+%ENTRY% _LT_O_UDA_1_0
+%KEY% "limitation"
+%STR% "312 your terms include a warranty =SOME= limitation of liability for upstream data"
+#
+%ENTRY% _LT_OCAML_LGPL_LINKING_EXCEPTION
+%KEY% "exception"
+%STR% "special exception to the gnu lesser general =SOME= a work that uses the ocaml core"
+#
+%ENTRY% _LT_OCB_NON_MILITARY_2013
+%KEY% "restrictions"
+%STR% "compliance with the terms of this license including the restrictions set forth in section 22 licensor hereby grants"
+#
+%ENTRY% _LT_OCB_OPEN_SOURCE_2013
+%KEY% "implementations"
+%STR% "license for open source software implementations of ocb"
+#
+%ENTRY% _LT_OCSL_1_0
+%KEY% "sublicense"
+%STR% "worldwide royalty-free non-exclusive copyright =SOME= and sublicense the software"
+#
+%ENTRY% _LT_OCULUS_SDK_2020
+%KEY% "discontinuation"
+%STR% "terms without liability or other =SOME= discontinuation of sdk oculus reserves"
+#
+%ENTRY% _LT_OCULUS_SDK_3_5
+%KEY% "sublicenseable"
+%STR% "non-exclusive no-charge royalty-free sublicenseable =SOME= redistribute subject to restrictions"
+#
+%ENTRY% _LT_OCULUS_SDK
+%KEY% "technologies"
+%STR% "oculus developer data use policy =SOME= technologies ireland limited an affiliate"
+#
+%ENTRY% _LT_OKL
+%KEY% "reproduce"
+%STR% "licence terms and the above =SOME= in binary form must reproduce"
+#
+%ENTRY% _LT_OLF_CCLA_1_0
+%KEY% "contributor"
+%STR% "contact cla-manager e-mail phone =SOME= contributor or you 1 definitions"
+#
+%ENTRY% _LT_OLL_1_0
+%KEY% "distribution"
+%STR% "and distribution 1 definitions 1 subject =SOME= software components in source code or"
+#
+%ENTRY% _LT_OPEN_DIAMETER
+%KEY% "different"
+%STR% "open diameter project this software consists =SOME= use different licences as described below"
+#
+%ENTRY% _LT_OPENJDK_EXCEPTION
+%KEY% "distribution"
+%STR% "copyright holder openjdk designated =SOME= in the openjdk distribution"
+#
+%ENTRY% _LT_OPENMOTIF_EXCEPTION_2_0_PLUS
+%KEY% "exception"
+%STR% "in addition as a special exception to the gnu gpl the copyright holders"
+#
+%ENTRY% _LT_OPENORB_1_0
+%KEY% "following"
+%STR% "any must include the following =SOME= software developed by the openorb"
+#
+%ENTRY% _LT_OPENPBS_2_3
+%KEY% "disclaimer"
+%STR% "the disclaimer contained in paragraph 7 =SOME= must reproduce the above copyright notice"
+#
+%ENTRY% _LT_OPENSAML_1_0
+%KEY% "development"
+%STR% "advanced internet development nor may =SOME= appear in their name without prior"
+#
+%ENTRY% _LT_OPENSC_OPENSSL_OPENPACE_EXCEPTION_GPL
+%KEY% "librar"
+%STR% "modified version of that library containing parts covered by the =SOME= openssl s license the licensors of this program grant you"
+#
+%ENTRY% _LT_OPENSSL_EXCEPTION_AGPL_3_0_PLUS
+%KEY% "licen[cs]"
+%STR% "you must obey the gnu affero =SOME= license v3 or later in all"
+#
+%ENTRY% _LT_OPENSSL_EXCEPTION_GPL_2_0_PLUS
+%KEY% "exception"
+%STR% "as a special exception to the gnu general public license terms"
+#
+%ENTRY% _LT_OPENSSL_EXCEPTION_LGPL
+%KEY% "distribut"
+%STR% "source file and distribute linked =SOME= gnu lesser general public license"
+#
+%ENTRY% _LT_OPERA_WIDGET_1_0
+%KEY% "contributor"
+%STR% "grant the copyright license set forth in =SOME= a a contributor may choose to distribute"
+#
+%ENTRY% _LT_ORACLE_BCL_JAVASE_JAVAFX_2012
+%KEY% "california"
+%STR% "inc 500 oracle parkway redwood shores california 94065 usa last updated 25"
+#
+%ENTRY% _LT_ORACLE_BCL_JAVASE_PLATFORM_JAVAFX_2013
+%KEY% "california"
+%STR% "inc 500 oracle parkway redwood shores california 94065 usa last updated 02"
+#
+%ENTRY% _LT_ORACLE_BCL_JAVASE_PLATFORM_JAVAFX_2017
+%KEY% "california"
+%STR% "inc 500 oracle parkway redwood shores california 94065 usa last updated 21"
+#
+%ENTRY% _LT_BSD_3_CLAUSE_NO_NUCLEAR_LICENSE_2014
+%KEY% "reserved"
+%STR% "reserved use is subject to license =SOME= and use in source and binary"
+#
+%ENTRY% _LT_ORACLE_CODE_SAMPLES_BSD
+%KEY% "licensors"
+%STR% "hereby excluded oracle and/or its =SOME= licensors shall not be liable"
+#
+%ENTRY% _LT_ORACLE_DEVTOOLS_VSNET_DEV
+%KEY% "certificate"
+%STR% "terms including the oracle program =SOME= certificate oracle technology network license"
+#
+%ENTRY% _LT_ORACLE_JAVA_EE_SDK_2010
+%KEY% "technology"
+%STR% "oracle technology network developer license =SOME= sdk export controls on the"
+#
+%ENTRY% _LT_ORACLE_MYSQL_FOSS_EXCEPTION_2_0
+%KEY% "distribution"
+%STR% "license 20 artistic license =SOME= and distribution license 10"
+#
+%ENTRY% _LT_ORACLE_WEB_SITES_TOU
+%KEY% "february"
+%STR% "terms of use last revised february =SOME= the oracle web sites you agree"
+#
+%ENTRY% _LT_OSET_PL_2_1
+%KEY% "licensable"
+%STR% "1 9 licensable means having the right to grant to the maximum extent possible wh"
+#
+%ENTRY% _LT_OSSN_3_0
+%KEY% "allowed"
+%STR% "you are allowed to distribute/sell the =SOME= other 3rd party open source program/software"
+#
+%ENTRY% _LT_OSWEGO_CONCURRENT
+%KEY% "permission"
+%STR% "without specific prior written permission =SOME= contain the above copyright notice"
+#
+%ENTRY% _LT_OTHER_COPYLEFT
+%KEY% "subcomponents"
+%STR% "obligations of these subcomponents may =SOME= subcomponent is used and/or redistributed"
+#
+%ENTRY% _LT_OTN_DEV_DIST_2009
+%KEY% "commercial"
+%STR% "commercial or production purpose without =SOME= oracle reseller remove or modify"
+#
+%ENTRY% _LT_OTN_DEV_DIST_2014
+%KEY% "provisions"
+%STR% "remaining provisions will remain =SOME= updated 11 july 2014 should you"
+#
+%ENTRY% _LT_OTN_DEV_DIST
+%KEY% "disclaimer"
+%STR% "entitled license rights ownership =SOME= export disclaimer of warranties"
+#
+%ENTRY% _LT_OTN_EARLY_ADOPTER_2018
+%KEY% "technology"
+%STR% "oracle technology network early adopter license agreement for oracle solaris"
+#
+%ENTRY% _LT_OTN_EARLY_ADOPTER_DEVELOPMENT
+%KEY% "development"
+%STR% "oracle technology network early adopter development license agreement"
+#
+%ENTRY% _LT_OTN_STANDARD_2014_09
+%KEY% "september"
+%STR% "last updated 09 september 2014"
+#
+%ENTRY% _LT_OWAL_1_0
+%KEY% "reasonable"
+%STR% "a reasonable manner on or through =SOME= covered code is made available 1"
+#
+%ENTRY% _LT_OWTCHART
+%KEY% "application"
+%STR% "copyright and license terms owtchart =SOME= personnal or commercial application as"
+#
+%ENTRY% _LT_PAINT_NET
+%KEY% "thereof"
+%STR% "modify adapt rent lease loan sell =SOME= part thereof however certain icons used"
+#
+%ENTRY% _LT_PASSIVE_AGGRESSIVE
+%KEY% "permission"
+%STR% "permission is hereby given to the =SOME= free of charge to any person"
+#
+%ENTRY% _LT_PAUL_MACKERRAS_NEW
+%KEY% "distribution"
+%STR% "materials provided with the distribution 3 the name s of the authors of this software =SOME= from this software without prior written permission the authors of this software disclaim all warranties"
+#
+%ENTRY% _LT_PAUL_MACKERRAS_SIMPLIFIED
+%KEY% "conditions"
+%STR% "the above copyright notice this list of conditions and the following disclaimer 2 the =SOME= to endorse or promote products derived from this software without prior written permission the"
+#
+%ENTRY% _LT_PAUL_MACKERRAS
+%KEY% "redistributions"
+%STR% "endorse or promote products derived from =SOME= 3 redistributions of any form whatsoever"
+#
+%ENTRY% _LT_PBL_1_0
+%KEY% "accompanying"
+%STR% "accompanying file named dependencies and any dependencies listed in"
+#
+%ENTRY% _LT_PCRE
+%KEY% "librar"
+%STR% "otherwise you must put a sentence like =SOME= pcre library package which is open source"
+#
+%ENTRY% _LT_MODIFIED_MIT
+%KEY% "modified"
+%STR% "modified mit licen[cs]e"
+#
+%ENTRY% _LT_MODIFIED_APACHE
+%KEY% "modified"
+%STR% "modified apache[ 0-9]*licen[cs]e"
+#
+%ENTRY% _LT_PD_MIT
+%KEY% "permission"
+%STR% "authors in year permission is =SOME= charge to any person obtaining"
+#
+%ENTRY% _LT_PDL_1_0
+%KEY% "modifications"
+%STR% "writer hereby grants you a =SOME= to use reproduce prepare modifications"
+#
+%ENTRY% _LT_PFTIJAH_1_1
+%KEY% "derivative"
+%STR% "twente has the right to modify =SOME= created under this license 63 derivative"
+#
+%ENTRY% _LT_PFTUS_1_1
+%KEY% "protected"
+%STR% "the pftus protected free to use =SOME= license version 11x unless required"
+#
+%ENTRY% _LT_PHIL_BUNCE
+%KEY% "warranty"
+%STR% "to use this code any way you =SOME= it comes without any sort of warranty"
+#
+%ENTRY% _LT_PHILIPS_PROPRIETARY_NOTICE_2000
+%KEY% "confidential"
+%STR% "party other than philips corporation =SOME= limited by the confidential information"
+#
+%ENTRY% _LT_PHORUM_2_0
+%KEY% "products"
+%STR% "contact core@phorumorg 5 products derived from =SOME= appear in their name without prior"
+#
+%ENTRY% _LT_PIVOTAL_TOU
+%KEY% "applicable"
+%STR% "protected by the applicable copyright =SOME= pivotal or the third-party licensor"
+#
+%ENTRY% _LT_PIXABAY_CONTENT
+%KEY% "distribution"
+%STR% "on stock media websites sale or distribution =SOME= music files or physical products without adding"
+#
+%ENTRY% _LT_POLITEPIX_PL_1_0
+%KEY% "sublicense"
+%STR% "fixes hereby grants politepix a =SOME= reproduce modify display perform sublicense"
+#
+%ENTRY% _LT_POLYFORM_DEFENSIVE_1_0_0
+%KEY% "permitted"
+%STR% "a permitted purpose except for providing any product that competes with the software or any product the licensor"
+#
+%ENTRY% _LT_POLYFORM_FREE_TRIAL_1_0_0
+%KEY% "distribute"
+%STR% "not distribute copies of the =SOME= grants you an additional copyright"
+#
+%ENTRY% _LT_POLYFORM_INTERNAL_USE_1_0_0
+%KEY% "distribute"
+%STR% "distribute the software changes and =SOME= additional copyright license to make"
+#
+%ENTRY% _LT_POLYFORM_NONCOMMERCIAL_1_0_0
+%KEY% "acceptance"
+%STR% "//polyformprojectorg/licenses/noncommercial/100> acceptance in order to =SOME= these terms you must agree"
+#
+%ENTRY% _LT_POLYFORM_SHIELD_1_0_0
+%KEY% "permitted"
+%STR% "a permitted purpose except for providing any product that competes with the software or any product the licensor"
+#
+%ENTRY% _LT_POLYFORM_SMALL_BUSINESS_1_0_0
+%KEY% "sublicense"
+%STR% "100 reference base no other =SOME= not allow you to sublicense"
+#
+%ENTRY% _LT_POLYFORM_STRICT_1_0_0
+%KEY% "distributing"
+%STR% "infringe the licensor s copyright =SOME= permitted purpose other than distributing"
+#
+%ENTRY% _LT_PPP
+%KEY% "copyright"
+%STR% "that existing copyright notices are =SOME= copies and that this notice and"
+#
+%ENTRY% _LT_PROSPERITY_1_0_1
+%KEY% "requiring"
+%STR% "part of a larger program you =SOME= doing anything requiring this license within"
+#
+%ENTRY% _LT_PROSPERITY_2_0
+%KEY% "prosperity"
+%STR% "the prosperity public license 20 =SOME= notice licensor name source"
+#
+%ENTRY% _LT_PROSPERITY_3_0
+%KEY% "contributor"
+%STR% "developing feedback changes or additions that =SOME= back to the contributor on the"
+#
+%ENTRY% _LT_PROTOBUF
+%KEY% "support"
+%STR% "be linked with it this support =SOME= itself covered by the above license"
+#
+%ENTRY% _LT_PS_OR_PDF_FONT_EXCEPTION_20170817
+%KEY% "directory"
+%STR% "font and related files in this directory =SOME= license version 3 see the file copying"
+#
+%ENTRY% _LT_PSUTILS
+%KEY% "acknowledge"
+%STR% "basically i don t mind how you use the programs so long as you acknowledge the a"
+#
+%ENTRY% _LT_PYBENCH
+%KEY% "including"
+%STR% "the author marc-andre lemburg =SOME= this software including all"
+#
+%ENTRY% _LT_PYCRYPTO
+%KEY% "distribute"
+%STR% "this product pycrypto the python =SOME= distribute and use freely there"
+#
+%ENTRY% _LT_PYGRES_2_2
+%KEY% "paragraphs"
+%STR% "notice and this paragraph and the =SOME= paragraphs appear in all copies or"
+#
+%ENTRY% _LT_PYTHON_2_0_1
+%KEY% "distribute"
+%STR% "license for code in the python =SOME= to use copy modify and/or distribute"
+#
+%ENTRY% _LT_QCAD_EXCEPTION_GPL
+%KEY% "permission"
+%STR% "gnu general public license cover the whole =SOME= of qcad give you permission to link"
+#
+%ENTRY% _LT_QLOGIC_FIRMWARE
+%KEY% "modification"
+%STR% "binary form without modification =SOME= with qlogic authorized products"
+#
+%ENTRY% _LT_QLOGIC_MICROCODE
+%KEY% "permission"
+%STR% "software without specific prior written permission regardless of what licensing"
+#
+%ENTRY% _LT_QT_COMMERCIAL_1_1
+%KEY% "derivative"
+%STR% "royalty-free and fully paid-up copyright =SOME= modify and prepare derivative works"
+#
+%ENTRY% _LT_QT_KDE_LINKING_EXCEPTION
+%KEY% "distribute"
+%STR% "any edition of qt and distribute =SOME= executable without including the source code"
+#
+%ENTRY% _LT_QT_QCA_EXCEPTION_2_0
+%KEY% "permission"
+%STR% "trolltech 2 the qca plugin api =SOME= the copyright holder s give permission"
+#
+%ENTRY% _LT_QUALCOMM_TURING
+%KEY% "licen[cs]"
+%STR% "is this code cannot simply be copied =SOME= gnu public license 5 the turing family"
+#
+%ENTRY% _LT_QUICKFIX_1_0
+%KEY% "quickfixengineorg"
+%STR% "if any must include the following =SOME= product includes software developed by quickfixengineorg"
+#
+%ENTRY% _LT_QUIN_STREET
+%KEY% "quinstreet"
+%STR% "a book contact details quinstreet inc =SOME= ca 94404 tel 650 578-7700 fax"
+#
+%ENTRY% _LT_QWT_1_0
+%KEY% "february"
+%STR% "qwt project http //qwtsfnet gnu =SOME= public license version 21 february"
+#
+%ENTRY% _LT_RADVD
+%KEY% "specifically"
+%STR% "if you receive a version of =SOME= that is specifically labelled as not"
+#
+%ENTRY% _LT_RALINK_FIRMWARE
+%KEY% "corporation"
+%STR% "limited patent license ralink technology corporation grants a world-wide"
+#
+%ENTRY% _LT_REALM_PLATFORM_EXTENSION_2017
+%KEY% "modification"
+%STR% "realm inc all rights reserved =SOME= without modification is permitted provided"
+#
+%ENTRY% _LT_RED_HAT_BSD_SIMPLIFIED
+%KEY% "expressed"
+%STR% "are those of the authors and should not =SOME= either expressed or implied of red hat inc"
+#
+%ENTRY% _LT_REPORTBUG
+%KEY% "warranties"
+%STR% "i disclaim all warranties with =SOME= including all implied warranties of"
+#
+%ENTRY% _LT_RH_EULA_LGPL
+%KEY% "trademarks"
+%STR% "other countries this eula does not =SOME= trademarks regardless of whether they have"
+#
+%ENTRY% _LT_RH_EULA_2
+%KEY% "obligations"
+%STR% "subject to certain obligations in some cases =SOME= binary code forms this eula pertains solely"
+#
+%ENTRY% _LT_RICEBSD
+%KEY% "software"
+%STR% "rice bsd software license permits =SOME= and p_arpack for both non-commercial"
+#
+%ENTRY% _LT_ROGUE_WAVE
+%KEY% "corvallis"
+%STR% "contractor/manufacturer is rogue wave =SOME= box 2328 corvallis oregon 97339"
+#
+%ENTRY% _LT_RSA_MD2
+%KEY% "provided"
+%STR% "license to copy and use this =SOME= privacy-enhanced mail provided that it is"
+#
+%ENTRY% _LT_RUTE
+%KEY% "redistribute"
+%STR% "law will any copyright holder =SOME= redistribute the work as permitted"
+#
+%ENTRY% _LT_SAAS_MIT
+%KEY% "permission"
+%STR% "with it remotely through a =SOME= copyright notice and this permission"
+#
+%ENTRY% _LT_SANE_EXCEPTION_2_0_PLUS
+%KEY% "librar"
+%STR% "account of linking the sane library code into it"
+#
+%ENTRY% _LT_SASH
+%KEY% "distribute"
+%STR% "granted to use distribute or =SOME= that this copyright notice remains"
+#
+%ENTRY% _LT_SATA
+%KEY% "kongtianyi"
+%STR% "the star and thank author license =SOME= i@ztrixme kongtianyi kongtianyi@foxmailcom project url https"
+#
+%ENTRY% _LT_SCANSOFT_1_2
+%KEY% "permission"
+%STR% "written permission contact director product =SOME= boston ma 02111 products derived"
+#
+%ENTRY% _LT_SCILAB_EN_2005
+%KEY% "previously"
+%STR% "a name other than scilab 4 any =SOME= shall have been previously authorized by inria"
+#
+%ENTRY% _LT_SCILAB_FR
+%KEY% "logiciels"
+%STR% "enpc les logiciels derives de scilab =SOME= avez modifi et/ou traduit et/ou adapt"
+#
+%ENTRY% _LT_SCINTILLA
+%KEY% "warranties"
+%STR% "neil hodgson disclaims all =SOME= including all implied warranties"
+#
+%ENTRY% _LT_SCSL_3_0
+%KEY% "intellectual"
+%STR% "infringe the intellectual property =SOME= third party 3 you acknowledge"
+#
+%ENTRY% _LT_SECRET_LABS_2011
+%KEY% "document"
+%STR% "permission to use copy modify and =SOME= this software and its associated documentation for"
+#
+%ENTRY% _LT_LIBSELINUX_1_0
+%KEY% "librar"
+%STR% "this library libselinux is public domain software i e not copyrighted"
+#
+%ENTRY% _LT_SENCHA_APP_FLOSS_EXCEPTION
+%KEY% "applications"
+%STR% "applications version 104 january 18 2013 =SOME= free/libre and open source software floss"
+#
+%ENTRY% _LT_SENCHA_COMMERCIAL_3_17
+%KEY% "community"
+%STR% "event you have obtained a sencha ext js standard community edition license"
+#
+%ENTRY% _LT_SENCHA_COMMERCIAL_3_9
+%KEY% "commercial"
+%STR% "other cases third parties will =SOME= their own commercial license"
+#
+%ENTRY% _LT_SENCHA_COMMERCIAL
+%KEY% "commercial"
+%STR% "commercial software license agreement ext js sencha gxt and/or sencha touch charts"
+#
+%ENTRY% _LT_SENCHA_DEV_FLOSS_EXCEPTION
+%KEY% "development"
+%STR% "development version 104 january =SOME= build extensions developer toolkits"
+#
+%ENTRY% _LT_SENDMAIL_8_23
+%KEY% "conditions"
+%STR% "copyright notice this list of conditions =SOME= binary form must reproduce the abovec"
+#
+%ENTRY% _LT_IMATIX
+%KEY% "provide"
+%STR% "you do not need to provide the source code for the product as part of your produ"
+#
+%ENTRY% _LT_SGLIB
+%KEY% "derivative"
+%STR% "the source code when using sglib =SOME= use sglib or its derivative forms"
+#
+%ENTRY% _LT_SHAVLIK_EULA
+%KEY% "technologies"
+%STR% "license contact shavlik technologies llc 2665 long lake =SOME= telephone 1 800 690 6911 or 1 651"
+#
+%ENTRY% _LT_SHL_0_5
+%KEY% "modifications"
+%STR% "database extraction rights but excluding =SOME= preferred form for making modifications"
+#
+%ENTRY% _LT_SHL_0_51
+%KEY% "solderpad"
+%STR% "solderpad hardware license version 051 this license is based =ANY= are licensed under the solderpad hardware license version 051"
+#
+%ENTRY% _LT_SHL_2_0
+%KEY% "replaces"
+%STR% "section 2 below replaces sections 2 =SOME= you may at your option choose"
+#
+%ENTRY% _LT_SHL_2_1
+%KEY% "terminology"
+%STR% "the apache license thus ignoring =SOME= written below entirely 1 terminology"
+#
+%ENTRY% _LT_SLF4J_2008
+%KEY% "distributed"
+%STR% "licensing terms for slf4j slf4j =SOME= are distributed under the mit"
+#
+%ENTRY% _LT_SLYSOFT_EULA
+%KEY% "exercise"
+%STR% "exercise your remedy contact slysoft =SOME= street john henry building 3rd"
+#
+%ENTRY% _LT_SMAIL_GPL
+%KEY% "applicable"
+%STR% "by applicable state law except when =SOME= karr and/or other parties provide smail"
+#
+%ENTRY% _LT_SMPPL
+%KEY% "messaging"
+%STR% "secure messaging protocol smp libraries acl cml sfl"
+#
+%ENTRY% _LT_SMSC_NON_COMMERCIAL_2012
+%KEY% "software"
+%STR% "this software provided by standard =SOME= smsc is sample code intended"
+#
+%ENTRY% _LT_SNIA
+%KEY% "exhibit"
+%STR% "exhibit a the snia public license"
+#
+%ENTRY% _LT_SNMP4J_SMI
+%KEY% "disclaimer"
+%STR% "licensor reserves the right at =SOME= product 35 disclaimer of warranty"
+#
+%ENTRY% _LT_SOFTFLOAT_2_0
+%KEY% "softfloat"
+%STR% "softfloat legal notice written by john =SOME= was made possible in part by"
+#
+%ENTRY% _LT_SPARKY
+%KEY% "document"
+%STR% "the following copyright license =SOME= sparky source code documentation"
+#
+%ENTRY% _LT_SPEECHWORKS_1_1
+%KEY% "permission"
+%STR% "written permission contact director product =SOME= ave boston ma 02110 products"
+#
+%ENTRY% _LT_SPELL_CHECKER_EXCEPTION_LGPL_2_1_PLUS
+%KEY% "combinations"
+%STR% "spell checker backend and distribute linked combinations including"
+#
+%ENTRY% _LT_SPLUNK_MINT_TOS_2018
+%KEY% "unrestricted"
+%STR% "customer hereby grants to splunk a =SOME= paid-up unrestricted right and license to"
+#
+%ENTRY% _LT_SPLUNK_SLA
+%KEY% "copyright"
+%STR% "copyright trademark patent or other =SOME= materials i exceed the licensed"
+#
+%ENTRY% _LT_ST_BSD_RESTRICTED
+%KEY% "redistribution"
+%STR% "5 redistribution and use of =SOME= as permitted under this license"
+#
+%ENTRY% _LT_ST_MCD_2_0
+%KEY% "redistributions"
+%STR% "the disclaimer set forth below =SOME= redistributions in binary form except"
+#
+%ENTRY% _LT_STANFORD_PVRG
+%KEY% "university"
+%STR% "public domain license stanford university =SOME= video research group if you use"
+#
+%ENTRY% _LT_STATEWIZARD
+%KEY% "statewizard"
+%STR% "called statewizard nor may statewizard =SOME= their names without prior written"
+#
+%ENTRY% _LT_STLPORT_2000
+%KEY% "downloading"
+%STR% "by downloading using or copying =SOME= thereof licensee agrees to abide"
+#
+%ENTRY% _LT_STMICROELECTRONICS_CENTRALLABS
+%KEY% "stmicroelectronics"
+%STR% "documentation and/or other materials =SOME= trademarks of stmicroelectronics international"
+#
+%ENTRY% _LT_STREAM_BENCHMARK
+%KEY% "benchmark"
+%STR% "clearly labelled whenever they =SOME= stream benchmark results based"
+#
+%ENTRY% _LT_STRONGSWAN_EXCEPTION
+%KEY% "strongswan"
+%STR% "other modules is making a combined work based on strongswan =SOME= terms and conditions of the gnu general public license cover"
+#
+%ENTRY% _LT_SUBCOMMANDER_EXCEPTION_2_0_PLUS
+%KEY% "permission"
+%STR% "in addition as a special exception the copyright holder gives permission to"
+#
+%ENTRY% _LT_BSD_3_CLAUSE_NO_NUCLEAR_LICENSE
+%KEY% "microsystems"
+%STR% "copyright 1994-2009 sun microsystems inc all =SOME= source and binary forms with or"
+#
+%ENTRY% _LT_SUNSOFT
+%KEY% "contract"
+%STR% "sunsoft inc or its parent company =SOME= in an action of contract tort"
+#
+%ENTRY% _LT_SUSTAINABLE_USE_1_0
+%KEY% "limitations"
+%STR% "each case subject to the limitations =SOME= for your own internal business purposes"
+#
+%ENTRY% _LT_SVNDIFF
+%KEY% "redistributions"
+%STR% "following disclaimer unmodified other than =SOME= notices 2 redistributions in binary"
+#
+%ENTRY% _LT_SWIG
+%KEY% "distribute"
+%STR% "copy modify distribute and make =SOME= this software in source code"
+#
+%ENTRY% _LT_SWL
+%KEY% "permission"
+%STR% "behalf permission to use and =SOME= specified in this license by"
+#
+%ENTRY% _LT_SYMPHONYSOFT
+%KEY% "symphonysoft"
+%STR% "5 neither the name of symphonysoft =SOME= limited mule universal message objects nor"
+#
+%ENTRY% _LT_SYNOPSYS_MIT
+%KEY% "document"
+%STR% "the synopsys dwc ether qos software driver and documentation =ANY= licensed product with synopsys or any supplement thereto permission"
+#
+%ENTRY% _LT_SYNTEXT_SERNA_EXCEPTION_1_0
+%KEY% "additional"
+%STR% "source package syntext inc gpl =SOME= 10 additional rights granted beyond"
+#
+%ENTRY% _LT_SYNTHESIS_TOOLKIT
+%KEY% "modifications"
+%STR% "or substantial portions of =SOME= distribute modifications to the"
+#
+%ENTRY% _LT_TAKAO_ABE
+%KEY% "distribution"
+%STR% "and both the copyright notice =SOME= materials provided with the distribution"
+#
+%ENTRY% _LT_TANUKI_COMMUNITY_SLA_1_0
+%KEY% "information"
+%STR% "modified nor may the product =SOME= notice and license information displayed"
+#
+%ENTRY% _LT_TANUKI_COMMUNITY_SLA_1_1
+%KEY% "community"
+%STR% "tanuki software ltd community software license agreement version 11 =ANY= public license version 2 gplv2 included in section 4"
+#
+%ENTRY% _LT_TANUKI_COMMUNITY_SLA_1_2
+%KEY% "community"
+%STR% "tanuki software ltd community software license agreement version 12 =ANY= public license version 2 gplv2 included in section 4"
+#
+%ENTRY% _LT_TANUKI_COMMUNITY_SLA_1_3
+%KEY% "contributor"
+%STR% "license each contributor grants =SOME= worldwide royaltyfree patent"
+#
+%ENTRY% _LT_TANUKI_DEVELOPMENT
+%KEY% "redistributable"
+%STR% "distributed in source code program =SOME= derivative works or iii redistributable"
+#
+%ENTRY% _LT_TAPR_OHL_1_0
+%KEY% "document"
+%STR% "d if you make or have products made include in the documentation all elements re"
+#
+%ENTRY% _TITLE_TAPR_NCL
+%KEY% "noncommercial"
+%STR% "tapr noncommercial hardware licen[cs]e"
+#
+%ENTRY% _LT_TCP_WRAPPERS
+%KEY% "constitutes"
+%STR% "as of june 1 2001 the text below constitutes the tcp wrappers license"
+#
+%ENTRY% _LT_TELERIK_EULA
+%KEY% "project"
+%STR% "labs project with new logic 1221 support package fair usage policy telerik"
+#
+%ENTRY% _LT_TENABLE_NESSUS
+%KEY% "licen[cs]"
+%STR% "http //wwwtenablecom your license to =SOME= manager also will provide you"
+#
+%ENTRY% _LT_TESTED_SOFTWARE
+%KEY% "including"
+%STR% "license this is free software =SOME= including modification/redistribution so long as"
+#
+%ENTRY% _LT_TFL
+%KEY% "undesirable"
+%STR% "will not have undesirable side =SOME= to use modify and distribute"
+#
+%ENTRY% _LT_TGPPL_1_0
+%KEY% "transitive"
+%STR% "license is the transitive grace period public =SOME= tgppl and you may not use those"
+#
+%ENTRY% _LT_THOMAS_BANDT
+%KEY% "commercial"
+%STR% "copyright notice must be included =SOME= allowed to build a commercial"
+#
+%ENTRY% _LT_THOR_PL
+%KEY% "derivative"
+%STR% "richter has the right to modify =SOME= created under this license 63 derivative"
+#
+%ENTRY% _LT_TIZEN_SDK
+%KEY% "redistribute"
+%STR% "redistribute or sublicense the =SOME= obscure any copyright notices"
+#
+%ENTRY% _LT_TORQUE_1_1
+%KEY% "disclaimer"
+%STR% "the disclaimer contained in paragraph 5 =SOME= must reproduce the above copyright notice"
+#
+%ENTRY% _LT_TPL_1_0
+%KEY% "distribute"
+%STR% "warranty support indemnity or liability =SOME= you may distribute or otherwise"
+#
+%ENTRY% _LT_TRIPTRACKER
+%KEY% "subscription"
+%STR% "license subscription or royalty fee is =SOME= is granted to use this code"
+#
+%ENTRY% _LT_TROLLTECH_GPL_EXCEPTION_1_0
+%KEY% "accordance"
+%STR% "accordance in accordance with =SOME= qt commercial license agreement"
+#
+%ENTRY% _LT_TROLLTECH_GPL_EXCEPTION_1_1
+%KEY% "reproduced"
+%STR% "file zope public license 20 21 licenses =SOME= reproduced in the addendum to the trolltech"
+#
+%ENTRY% _LT_TROLLTECH_GPL_EXCEPTION_1_2
+%KEY% "conditions"
+%STR% "gpl version 30 trolltech hereby grants =SOME= terms and conditions in this exception"
+#
+%ENTRY% _LT_TSL_2018
+%KEY% "executable"
+%STR% "portion thereof in binary executable =SOME= tsl licensed software source code"
+#
+%ENTRY% _LT_TSL_2020
+%KEY% "derivative"
+%STR% "expressly permitted in section 21 =SOME= derivative works in binary form"
+#
+%ENTRY% _LT_TSO_LICENSE
+%KEY% "permission"
+%STR% "permission to use this file =SOME= this copyright statement is kept"
+#
+%ENTRY% _LT_TTCL
+%KEY% "sublicence"
+%STR% "author hereby grants you a world-wide =SOME= reproduce display transmit sublicence sell and"
+#
+%ENTRY% _LT_TTF2PT1
+%KEY% "permission"
+%STR% "reserved permission is hereby =SOME= purpose provided this copyright"
+#
+%ENTRY% _LT_TTYP0
+%KEY% "obtaining"
+%STR% "hereby granted free of charge to =SOME= obtaining a copy of this font"
+#
+%ENTRY% _LT_TWISTED_SNMP
+%KEY% "redistribution"
+%STR% "fault tolerant and should not be used =SOME= redistribution and use in source and binary"
+#
+%ENTRY% _LT_UBDL
+%KEY% "distribute"
+%STR% "distribute only the unmodified binaries =SOME= granted by this licence apply"
+#
+%ENTRY% _LT_UCL_1_0
+%KEY% "modification"
+%STR% "tzeng permission is granted to copy =SOME= modification nothing in this license permits"
+#
+%ENTRY% _LT_UNLIMITED_LINKING_EXCEPTION_GPL
+%KEY% "permissions"
+%STR% "in addition to the permissions in the gnu general public license the free software foundation gives =SOME= of this file with other programs and to distribute those programs without any restriction coming from"
+#
+%ENTRY% _LT_UNSPLASH
+%KEY% "irrevocable"
+%STR% "unsplash grants you an irrevocable =SOME= copy modify distribute perform and"
+#
+%ENTRY% _LT_UOFU_RFPL
+%KEY% "definitions"
+%STR% "license 1 definitions 11 commercial use =SOME= stream including but not limited to"
+#
+%ENTRY% _LT_UPL_1_0
+%KEY% "condition"
+%STR% "subject to the condition set =SOME= hereby granted to any person"
+#
+%ENTRY% _LT_US_GOVT_PUBLIC_DOMAIN
+%KEY% "government"
+%STR% "17 us code 105 subject matter =SOME= united states government works copyright protection"
+#
+%ENTRY% _LT_VIC_METCALFE_PD
+%KEY% "modifications"
+%STR% "copyright on it the original =SOME= metcalfe vic@brutustlugorg and any modifications"
+#
+%ENTRY% _LT_VIEWFLOW_AGPL_3_0_EXCEPTION
+%KEY% "additional"
+%STR% "license terms the licensors =SOME= additional permission to convey"
+#
+%ENTRY% _LT_VNC_VIEWER_IOS
+%KEY% "downloading"
+%STR% "ios end-user licence agreement important =SOME= before downloading installing and/or using"
+#
+%ENTRY% _LT_VUFORIA_2013_07_29
+%KEY% "vuforia"
+%STR% "engine binary files sample code and/or vuforia word lists except as fully"
+#
+%ENTRY% _LT_WATERFALL_FEED_PARSER
+%KEY% "permission"
+%STR% "permission notice shall be included =SOME= software 2 this software cannot"
+#
+%ENTRY% _LT_WESTHAWK
+%KEY% "copyright"
+%STR% "provided that the above copyright notices =SOME= all copies and that both the"
+#
+%ENTRY% _LT_WHISTLE
+%KEY% "negligence"
+%STR% "strict liability or tort including negligence =SOME= of this software even if whistle"
+#
+%ENTRY% _LT_WHITECAT
+%KEY% "permission"
+%STR% "without specific prior written permission the whitecat =SOME= but you cannot change it in any"
+#
+%ENTRY% _LT_WIDE_LICENSE
+%KEY% "permission"
+%STR% "permission to use copy modify =SOME= hereby granted provided only with"
+#
+%ENTRY% _LT_WIFI_ALLIANCE
+%KEY% "authorized"
+%STR% "authorized without specific prior written permission =SOME= derivative works for your own internal"
+#
+%ENTRY% _LT_WINGO
+%KEY% "redistributions"
+%STR% "redistributions of source code must retain =SOME= notice and link to this license"
+#
+%ENTRY% _LT_WINZIP_EULA
+%KEY% "dropbox"
+%STR% "sky drive dropbox boxnet etc =SOME= neither monitor nor control what"
+#
+%ENTRY% _LT_WOODRUFF_2002
+%KEY% "applicable"
+%STR% "terms for applicable parties =SOME= merge publish distribute sublicense"
+#
+%ENTRY% _LT_WORDNET_2
+%KEY% "modifications"
+%STR% "modifications that you make for =SOME= princeton university all rights reserved"
+#
+%ENTRY% _LT_WTHPL_1_0
+%KEY% "licen[cs]"
+%STR% "do what the hell you want to public license"
+#
+%ENTRY% _LT_WXWIDGETS
+%KEY% "wxwidgets"
+%STR% "purpose see the wxwidgets licence for more =SOME= should have received a copy of the"
+#
+%ENTRY% _LT_WXWINDOWS_R_3_0
+%KEY% "unrestricted"
+%STR% "binary object code versions of =SOME= wxwindows unrestricted licence either version"
+#
+%ENTRY% _LT_X11_ACER
+%KEY% "consequential"
+%STR% "no event shall the author be liable for any special direct indirect or consequential damages =SOME= or profits whether in an action of contract negligence or other tortuous action arising out"
+#
+%ENTRY% _LT_X11_ADOBE
+%KEY% "document"
+%STR% "permission to use copy modify distribute and sublicense this software and its documentation for any purpose and without"
+#
+%ENTRY% _LT_X11_BITSTREAM
+%KEY% "bitstream"
+%STR% "under all bitstream propriety rights to use =SOME= bitstream charter r type 1 outline fonts"
+#
+%ENTRY% _LT_X11_DEC1
+%KEY% "permission"
+%STR% "specific written prior permission =SOME= holders disclaim all warranties"
+#
+%ENTRY% _LT_X11_DEC2
+%KEY% "document"
+%STR% "and this permission notice appear in =SOME= documentation and that the name of digital"
+#
+%ENTRY% _LT_X11_DOC
+%KEY% "document"
+%STR% "the author makes no representations =SOME= the information in this document"
+#
+%ENTRY% _LT_X11_DSC
+%KEY% "document"
+%STR% "copy modify distribute and license =SOME= documentation for any purpose and"
+#
+%ENTRY% _LT_X11_DISTRIBUTE_MODIFICATIONS_VARIANT
+%KEY% "modifications"
+%STR% "distribute distribute with modifications sublicense and/or sell"
+#
+%ENTRY% _LT_X11_HANSON
+%KEY% "permission"
+%STR% "permission to use copy modify and =SOME= software for any purpose subject to"
+#
+%ENTRY% _LT_X11_IBM
+%KEY% "distribute"
+%STR% "hereby granted provided that licensee provides a license to ibm corp to use copy modify and distribute derivative"
+#
+%ENTRY% _LT_X11_LUCENT_VARIANT
+%KEY% "particular"
+%STR% "this software this software =SOME= warranty in particular neither"
+#
+%ENTRY% _LT_X11_LUCENT
+%KEY% "particular"
+%STR% "being provided as is without any express or implied warranty in particular neither the author nor lucent makes"
+#
+%ENTRY% _LT_X11_OAR
+%KEY% "particular"
+%STR% "provided as is without any =SOME= in particular the author makes"
+#
+%ENTRY% _LT_X11_OPENGL
+%KEY% "successor"
+%STR% "data and computer software clause at =SOME= successor clauses in the far or"
+#
+%ENTRY% _LT_X11_QUARTERDECK
+%KEY% "permission"
+%STR% "permission to use copy modify =SOME= software and software and its"
+#
+%ENTRY% _LT_X11_REALMODE
+%KEY% "disclaims"
+%STR% "purpose it is provided as is =SOME= or implied warranty the authors disclaims"
+#
+%ENTRY% _LT_X11_STANFORD
+%KEY% "permission"
+%STR% "available for broadest use =SOME= permission is hereby granted"
+#
+%ENTRY% _LT_X11_TEKTRONIX
+%KEY% "management"
+%STR% "tekcolor color management system permission is hereby granted to use copy modify sell and otherwise distribute this software"
+#
+%ENTRY% _LT_X11_X11R5
+%KEY% "software"
+%STR% "the copyright holders makes no representations =SOME= suitability of this software for any"
+#
+%ENTRY% _LT_X11_XCONSORTIUM_VEILLARD
+%KEY% "contained"
+%STR% "the software except as contained =SOME= name of the copyright holder"
+#
+%ENTRY% _LT_X11R5_AUTHORS
+%KEY% "permission"
+%STR% "that copyright notice and this permission =SOME= that the names of the authors"
+#
+%ENTRY% _LT_XENOMAI_GPL_EXCEPTION
+%KEY% "exception"
+%STR% "derived work this exception does not however =SOME= might be covered by the gnu general"
+#
+%ENTRY% _LT_XILINX_2016
+%KEY% "interconnect"
+%STR% "xilinx device through a bus or interconnect =SOME= of any kind express or implied including"
+#
+%ENTRY% _LT_XMING
+%KEY% "individuals"
+%STR% "it without written permission private individuals =SOME= at home will be given access"
+#
+%ENTRY% _LT_YAHOO_BROWSERPLUS_EULA
+%KEY% "software"
+%STR% "the software other than as set =SOME= yahoo grants you no right title"
+#
+%ENTRY% _LT_YAHOO_MESSENGER_EULA
+%KEY% "privacy"
+%STR% "privacy module to find out more =SOME= you wish to update your yahoo"
+#
+%ENTRY% _LT_YOLO_2_0
+%KEY% "merchantability"
+%STR% "contract tort liable claims restriction merchantability =SOME= domain 1 do whatever you want"
+#
+%ENTRY% _LT_ZHORN_STICKIES
+%KEY% "disclaimer"
+%STR% "copyright licence and disclaimer stickies is =SOME= may use this software on any"
+#
+%ENTRY% _LT_ZIPLIST5_GEOCODE_END_USER_WORKSTATION
+%KEY% "workstation"
+%STR% "ziplist5 geocode end-user workstation single-user license agreement"
+#
+%ENTRY% _LT_ZSH
+%KEY% "precedence"
+%STR% "precedence permission is hereby granted without =SOME= royalty fees to use copy modify"
+#
+%ENTRY% _LT_ZUORA_SOFTWARE
+%KEY% "documentation"
+%STR% "software and associated documentation files =SOME= copy modify merge publish the"
+#
+%ENTRY% _LT_AGPL_20
+%KEY% "affero"
+%STR% "this is version 2 of the affero general public license it gives each licensee permission"
+#
+%ENTRY% _LT_IPTC_1
+%KEY% "licen[cs]"
+%STR% "licen[cs]ee recognises the licen[cs]or as the sole owner of the intellectual property protected by the trademark"
+#
+%ENTRY% _LT_CCAI_1_0
+%KEY% "requirement"
+%STR% "this requirement also applies to any model dataset or system that is trained on derived"
+#
+%ENTRY% _LT_CCAI_CLAUSE
+%KEY% "generate"
+%STR% "if this software is used to train fine-tune or otherwise generate any machine learning model"
+#
+%ENTRY% _LT_POLYFORM_PERIMETER_1_0_0
+%KEY% "functionality"
+%STR% "for example a product may compete even if it provides its functionality via any"
+#
+%ENTRY% _LT_BLAS_2017
+%KEY% "responsibility"
+%STR% "if a modification is done however =SOME= responsibility of the person who modified the routine to provide support"
+#
+%ENTRY% _LT_MPL20_BODY
+%KEY% "contributor"
+%STR% "covered software means source code form to which the initial contributor has attached the notice"
+#
 #####
 # This MUST be the last alias specified; the size of the array of encrypted
 # strings is determined from the following value! (see NFOOTPRINTS, below)
@@ -16961,3 +19924,4 @@ k
 %ALIAS% _CRYPT_last
 #
 %DEF% NFOOTPRINTS	_CRYPT_last+1
+
