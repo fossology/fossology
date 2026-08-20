@@ -306,7 +306,7 @@ class AjaxShowJobs extends \FO_Plugin
               $reportName = "DEP5 copyright file";
               break;
             case 'reportImport':
-              $reportName = "uploaded SPDX2 report";
+              $reportName = "uploaded report";
               break;
             case 'unifiedreport':
               $reportName = "Unified Report";
