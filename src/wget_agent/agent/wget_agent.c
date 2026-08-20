@@ -612,7 +612,15 @@ int GetVersionControl()
     free(tmp_file_directory);
     return ASPRINTF_MEM_ERROR;
   }
+  /* The VCS clone (git/svn/cvs checkout) inherits the process umask, which can
+   * strip the owner/group execute bits from the directories it creates (e.g.
+   * leaving mode 2660 instead of 2770). Without the execute bit the scheduler
+   * and agents cannot traverse/create work directories, causing job failures
+   * like "Permission denied". Relax the umask around the clone so the cloned
+   * directory gets the intended drwxrws--- permissions. */
+  mode_t old_umask = umask(0007);
   rc = system(command);
+  umask(old_umask);
   free(command);
 
   if (resethome) // rollback
