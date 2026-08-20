@@ -22,7 +22,7 @@ function explainUsage()
   -l  update the license_ref table with fossology supplied licenses
   -r  {prefix} drop database with name starts with prefix
   -v  enable verbose preview (prints sql that would happen, but does not execute it, DB is not updated)
-  --licenselynx    update the licenselynx_map table with bundled LicenseLynx mappings
+  --licenselynx    update the licenselynx_map table with LicenseLynx mappings
   --force-decision force recalculation of SHA256 for decision tables
   --force-pfile    force recalculation of SHA256 for pfile entries
   --force-encode   force recode of copyright and sister tables
@@ -620,10 +620,11 @@ function insertInToLicenseRefTableUsingJson($tableName)
 }
 
 /**
- * \brief Load the licenselynx_map table with bundled LicenseLynx mappings.
+ * \brief Load the licenselynx_map table with LicenseLynx mappings.
  *
- * This imports stable SPDX mappings from licenseLynxMapping.json. The table is
- * refreshed as a whole so repeated fossinit runs remain deterministic.
+ * This imports stable SPDX mappings from a local cache, downloading it on first
+ * use if needed. The table is refreshed as a whole so repeated fossinit runs
+ * remain deterministic.
  *
  * \return 0 on success, 1 on failure
  **/
@@ -632,9 +633,9 @@ function initLicenseLynxMapTable()
   global $LIBEXECDIR;
   global $dbManager;
 
-  $mappingFile = "$LIBEXECDIR/licenseLynxMapping.json";
-  if (!file_exists($mappingFile)) {
-    print "WARNING: LicenseLynx mapping file '$mappingFile' not found, skipping import.\n";
+  $mappingFile = getLicenseLynxMappingFile();
+  if ($mappingFile === null) {
+    print "WARNING: LicenseLynx mapping file unavailable, skipping import.\n";
     return (1);
   }
 
@@ -649,15 +650,30 @@ function initLicenseLynxMapTable()
   $dbManager->queryOnce("DELETE FROM licenselynx_map", __METHOD__ . ".delete");
   $dbManager->prepare(__METHOD__ . ".insert",
     "INSERT INTO licenselynx_map " .
-    "(raw_name, spdx_id) VALUES ($1, $2)");
+    "(raw_name, rf_fk) VALUES ($1, $2)");
+
+  $licenseRefMap = getLicenseRefIdMap();
 
   $inserted = 0;
   $skipped = 0;
+  $seenRawNames = array();
   if (!empty($jsonData['stableMap']) && is_array($jsonData['stableMap'])) {
     foreach ($jsonData['stableMap'] as $rawName => $mapping) {
       if (is_array($mapping) && !empty($mapping['id']) &&
         !empty($mapping['src']) && strtolower($mapping['src']) === 'spdx') {
-        $dbManager->execute(__METHOD__ . ".insert", array($rawName, $mapping['id']));
+        $rawName = trim($rawName);
+        $dedupeKey = strtolower($rawName);
+        $spdxKey = strtolower($mapping['id']);
+        if (empty($rawName) || isset($seenRawNames[$dedupeKey]) ||
+          !isset($licenseRefMap[$spdxKey])) {
+          $skipped++;
+          continue;
+        }
+        // Some LicenseLynx aliases contain package classifier or quoted metadata
+        // forms. They are imported as-is for now; cleanup can be added later.
+        $dbManager->execute(__METHOD__ . ".insert",
+          array($rawName, $licenseRefMap[$spdxKey]));
+        $seenRawNames[$dedupeKey] = true;
         $inserted++;
       } else {
         $skipped++;
@@ -672,6 +688,83 @@ function initLicenseLynxMapTable()
   }
   print "\n";
   return (0);
+}
+
+/**
+ * \brief Return a local LicenseLynx mapping file, downloading it if missing.
+ *
+ * \return string|null Mapping file path, or null when the file is unavailable
+ **/
+function getLicenseLynxMappingFile()
+{
+  global $LIBEXECDIR;
+
+  $mappingFile = getenv('FOSSOLOGY_LICENSELYNX_MAPPING');
+  if (empty($mappingFile)) {
+    $mappingFile = "$LIBEXECDIR/licenseLynxMapping.json";
+  }
+
+  if (file_exists($mappingFile)) {
+    return $mappingFile;
+  }
+
+  $mappingUrl = 'https://licenselynx.org/json/latest/mapping.json';
+  print "LicenseLynx mapping cache missing, downloading $mappingUrl\n";
+
+  $context = stream_context_create(array(
+    'http' => array(
+      'ignore_errors' => true,
+      'timeout' => 30,
+      'user_agent' => 'FOSSology LicenseLynx postinstall'
+    )
+  ));
+  $mappingContent = @file_get_contents($mappingUrl, false, $context);
+  if ($mappingContent === false || empty($mappingContent)) {
+    print "WARNING: Unable to download LicenseLynx mapping from $mappingUrl\n";
+    return null;
+  }
+
+  $mappingDir = dirname($mappingFile);
+  if (!is_dir($mappingDir) || !is_writable($mappingDir)) {
+    print "WARNING: LicenseLynx mapping cache directory '$mappingDir' is not writable.\n";
+    return null;
+  }
+
+  $tmpFile = tempnam($mappingDir, 'licenselynx_');
+  if ($tmpFile === false || file_put_contents($tmpFile, $mappingContent) === false ||
+    !rename($tmpFile, $mappingFile)) {
+    if ($tmpFile !== false && file_exists($tmpFile)) {
+      unlink($tmpFile);
+    }
+    print "WARNING: Unable to write LicenseLynx mapping cache '$mappingFile'.\n";
+    return null;
+  }
+
+  return $mappingFile;
+}
+
+/**
+ * \brief Build a map of license_ref shortnames and SPDX ids to rf_pk.
+ *
+ * \return array Lowercase license identifier to rf_pk
+ **/
+function getLicenseRefIdMap()
+{
+  global $dbManager;
+
+  $licenseRefMap = array();
+  $rows = $dbManager->getRows(
+    "SELECT rf_pk, rf_shortname, rf_spdx_id FROM ONLY license_ref",
+    array(), __METHOD__ . ".licenseRefRows");
+  foreach ($rows as $row) {
+    if (!empty($row['rf_shortname'])) {
+      $licenseRefMap[strtolower($row['rf_shortname'])] = $row['rf_pk'];
+    }
+    if (!empty($row['rf_spdx_id'])) {
+      $licenseRefMap[strtolower($row['rf_spdx_id'])] = $row['rf_pk'];
+    }
+  }
+  return $licenseRefMap;
 }
 
 /**

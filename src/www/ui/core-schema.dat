@@ -1187,9 +1187,9 @@
   $Schema["TABLE"]["licenselynx_map"]["raw_name"]["ADD"] = "ALTER TABLE \"licenselynx_map\" ADD COLUMN \"raw_name\" text";
   $Schema["TABLE"]["licenselynx_map"]["raw_name"]["ALTER"] = "ALTER TABLE \"licenselynx_map\" ALTER COLUMN \"raw_name\" SET NOT NULL";
 
-  $Schema["TABLE"]["licenselynx_map"]["spdx_id"]["DESC"] = "COMMENT ON COLUMN \"licenselynx_map\".\"spdx_id\" IS 'SPDX license identifier returned by LicenseLynx'";
-  $Schema["TABLE"]["licenselynx_map"]["spdx_id"]["ADD"] = "ALTER TABLE \"licenselynx_map\" ADD COLUMN \"spdx_id\" text";
-  $Schema["TABLE"]["licenselynx_map"]["spdx_id"]["ALTER"] = "ALTER TABLE \"licenselynx_map\" ALTER COLUMN \"spdx_id\" SET NOT NULL";
+  $Schema["TABLE"]["licenselynx_map"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"licenselynx_map\".\"rf_fk\" IS 'License reference mapped from LicenseLynx data'";
+  $Schema["TABLE"]["licenselynx_map"]["rf_fk"]["ADD"] = "ALTER TABLE \"licenselynx_map\" ADD COLUMN \"rf_fk\" int8";
+  $Schema["TABLE"]["licenselynx_map"]["rf_fk"]["ALTER"] = "ALTER TABLE \"licenselynx_map\" ALTER COLUMN \"rf_fk\" SET NOT NULL";
 
 
   $Schema["TABLE"]["license_file"]["fl_pk"]["DESC"] = "COMMENT ON COLUMN \"license_file\".\"fl_pk\" IS 'Primary Key'";
@@ -2716,6 +2716,7 @@
   $Schema["CONSTRAINT"]["keyword_decision_pfile_fk_fkey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["keyword_decision_pfile_hash_ukey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\",\"hash\");";
   $Schema["CONSTRAINT"]["licenselynx_map_pkey"] = "ALTER TABLE \"licenselynx_map\" ADD CONSTRAINT \"licenselynx_map_pkey\" PRIMARY KEY (\"ll_pk\");";
+  $Schema["CONSTRAINT"]["licenselynx_map_rf_fk_fkey"] = "ALTER TABLE \"licenselynx_map\" ADD CONSTRAINT \"licenselynx_map_rf_fk_fkey\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["license_candidate_fkey"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["license_candidate_rf_pk_idk"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_rf_pk_idk\" PRIMARY KEY (\"rf_pk\");";
   $Schema["CONSTRAINT"]["license_candidate_rf_user_fk_modified_fkey"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_rf_user_fk_modified_fkey\" FOREIGN KEY (\"rf_user_fk_modified\") REFERENCES \"users\" (\"user_pk\") ON UPDATE SET NULL ON DELETE SET NULL;";

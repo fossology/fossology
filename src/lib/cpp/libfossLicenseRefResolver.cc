@@ -182,11 +182,8 @@ namespace fo
       fo_dbManager_PrepareStamement(
         dbManager.getStruct_dbManager(),
         "selectLicenseIdFromLicenseLynx",
-        "SELECT lr.rf_pk FROM ONLY licenselynx_map ll"
-        " INNER JOIN ONLY license_ref lr"
-        " ON LOWER(lr.rf_spdx_id) = LOWER(ll.spdx_id)"
-        " OR LOWER(lr.rf_shortname) = LOWER(ll.spdx_id)"
-        " WHERE LOWER(ll.raw_name) = LOWER($1)"
+        "SELECT rf_fk FROM ONLY licenselynx_map"
+        " WHERE LOWER(raw_name) = LOWER($1)"
         " LIMIT 1",
         char*),
       licenseName.c_str());

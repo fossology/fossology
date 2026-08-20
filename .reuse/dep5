@@ -67,7 +67,3 @@ License: GPL-2.0-only
 Files: pbconf/pbcl pbconf/fossology/pbve.pre
 Copyright: Fossology contributors
 License: GPL-2.0-only
-
-Files: install/db/licenseLynxMapping.json
-Copyright: Siemens AG 2025 ALL RIGHTS RESERVED
-License: BSD-3-Clause
