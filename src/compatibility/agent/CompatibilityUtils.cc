@@ -200,6 +200,7 @@ bool parseCliOptions(int argc, char** argv, CompatibilityCliOptions& dest,
       ("file,f", boost::program_options::value<string>(),
        "json file, containing fileNames and licenses within that fileNames")
       ("json,J", "output as JSON")
+      ("auto-conclude,a", "auto-conclude fully compatible files")
       ("main_license", boost::program_options::value<string>(),
        "name of main license to check licenses in files against")
       ("config,c", boost::program_options::value<string>(),
@@ -259,8 +260,9 @@ bool parseCliOptions(int argc, char** argv, CompatibilityCliOptions& dest,
 
     int verbosity = (int) vm.count("verbose");
     bool json = vm.count("json") > 0;
+    bool autoConclude = vm.count("auto-conclude") > 0;
 
-    dest = CompatibilityCliOptions(verbosity, json);
+    dest = CompatibilityCliOptions(verbosity, json, autoConclude);
 
     return true;
   }
