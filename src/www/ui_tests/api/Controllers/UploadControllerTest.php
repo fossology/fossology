@@ -60,6 +60,8 @@ function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
  * @class UploadControllerTest
  * @brief Unit tests for UploadController
  */
+#[\PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses]
+#[\PHPUnit\Framework\Attributes\PreserveGlobalState(false)]
 class UploadControllerTest extends \PHPUnit\Framework\TestCase
 {
   /**
