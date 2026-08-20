@@ -9,6 +9,7 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Report\ReportUtils;
 use Monolog\Handler\BrowserConsoleHandler;
 use Monolog\Handler\NullHandler;
 use Monolog\Logger;
@@ -137,7 +138,23 @@ class ui_download extends FO_Plugin
     $logJq = GetParm('log', PARM_INTEGER);
 
     if (!empty($reportId)) {
-      $row = $dbManager->getSingleRow("SELECT * FROM reportgen WHERE job_fk = $1", array($reportId), "reportFileName");
+      $reportType = GetParm("type", PARM_STRING);
+      if ($reportType === 'provenance') {
+        $row = $dbManager->getSingleRow(
+          "SELECT * FROM reportgen WHERE job_fk = $1 AND filepath LIKE '%.provenance.json'",
+          array($reportId), "reportFileNameProvenance");
+      } else {
+        $row = $dbManager->getSingleRow(
+          "SELECT * FROM reportgen WHERE job_fk = $1 AND filepath NOT LIKE '%.provenance.json' "
+          . ReportUtils::AGGREGATED_FIRST_ORDER,
+          array($reportId), "reportFileName");
+        if ($row === false) {
+          // Backward compatible: jobs with a single reportgen row
+          $row = $dbManager->getSingleRow(
+            "SELECT * FROM reportgen WHERE job_fk = $1",
+            array($reportId), "reportFileNameFallback");
+        }
+      }
       if ($row === false) {
         throw new Exception("Missing report");
       }

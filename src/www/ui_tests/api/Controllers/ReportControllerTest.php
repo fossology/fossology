@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Test\Controllers;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Report\ReportUtils;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
@@ -56,6 +57,14 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     'spdx3json',
     'spdx3rdf',
     'spdx3jsonld'
+  );
+
+  /**
+   * @var array $downloadAllowed
+   * Agent names whose report can be downloaded but not scheduled
+   */
+  private $downloadAllowed = array(
+    'reportaggregator'
   );
 
   /**
@@ -387,20 +396,14 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $reportId = 43;
     $uploadId = 3;
 
-    $this->dbManager->shouldReceive('getSingleRow')
-      ->withArgs(['SELECT jq_type FROM jobqueue WHERE jq_job_fk = $1',
-        [$reportId], "reportValidity"])
-      ->andReturn(["jq_type" => $this->reportsAllowed[1]]);
+    $this->expectReportValidity($reportId, $this->reportsAllowed[1]);
     $this->dbManager->shouldReceive('getSingleRow')
       ->withArgs(['SELECT job_upload_fk FROM job WHERE job_pk = $1',
         [$reportId], "reportFileUpload"])
       ->andReturn(["job_upload_fk" => $uploadId]);
     $this->uploadDao->shouldReceive('isAccessible')->withArgs([$uploadId,
       $this->groupId])->andReturn(true);
-    $this->dbManager->shouldReceive('getSingleRow')
-      ->withArgs(['SELECT * FROM reportgen WHERE job_fk = $1',
-        [$reportId], "reportFileName"])
-      ->andReturn(["job_upload_fk" => $uploadId]);
+    $this->expectReportFileName($reportId, ["job_upload_fk" => $uploadId]);
 
     $tmpfile = tempnam(sys_get_temp_dir(), "FOO");
 
@@ -436,6 +439,46 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
+   * @brief Stub the check that the job produced a report of an allowed type
+   * @param int $reportId Job id
+   * @param string $jqType Type found, empty when the job produced no report
+   */
+  private function expectReportValidity($reportId, $jqType)
+  {
+    $placeholders = [];
+    $params = [$reportId];
+    $i = 2;
+    foreach (array_merge($this->reportsAllowed, $this->downloadAllowed) as $allowed) {
+      $placeholders[] = '$' . $i;
+      $params[] = $allowed;
+      $i++;
+    }
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([
+        'SELECT jq_type FROM jobqueue WHERE jq_job_fk = $1 AND jq_type IN ('
+        . implode(',', $placeholders) . ') LIMIT 1', $params, "reportValidity"])
+      ->andReturn(empty($jqType) ? false : ["jq_type" => $jqType]);
+  }
+
+  /**
+   * @brief Stub the lookup of the report file of a job
+   * @param int $reportId Job id
+   * @param array|false $row Row found in reportgen
+   */
+  private function expectReportFileName($reportId, $row)
+  {
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([
+        "SELECT * FROM reportgen WHERE job_fk = $1 AND filepath NOT LIKE '%.provenance.json' "
+        . ReportUtils::AGGREGATED_FIRST_ORDER, [$reportId], "reportFileName"])
+      ->andReturn($row);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs(['SELECT * FROM reportgen WHERE job_fk = $1', [$reportId],
+        "reportFileNameFallback"])
+      ->andReturn($row);
+  }
+
+  /**
    * @test
    * -# Test ReportController::downloadReport() for inaccessible upload
    * -# Check for 403 response
@@ -445,10 +488,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $reportId = 43;
     $uploadId = 3;
 
-    $this->dbManager->shouldReceive('getSingleRow')
-      ->withArgs(['SELECT jq_type FROM jobqueue WHERE jq_job_fk = $1',
-        [$reportId], "reportValidity"])
-      ->andReturn(["jq_type" => $this->reportsAllowed[1]]);
+    $this->expectReportValidity($reportId, $this->reportsAllowed[1]);
     $this->dbManager->shouldReceive('getSingleRow')
       ->withArgs(['SELECT job_upload_fk FROM job WHERE job_pk = $1',
         [$reportId], "reportFileUpload"])
@@ -471,10 +511,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
   {
     $reportId = 43;
 
-    $this->dbManager->shouldReceive('getSingleRow')
-      ->withArgs(['SELECT jq_type FROM jobqueue WHERE jq_job_fk = $1',
-        [$reportId], "reportValidity"])
-      ->andReturn(["jq_type" => ""]);
+    $this->expectReportValidity($reportId, "");
 
     $this->expectException(HttpNotFoundException::class);
 
@@ -492,20 +529,14 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $reportId = 43;
     $uploadId = 3;
 
-    $this->dbManager->shouldReceive('getSingleRow')
-      ->withArgs(['SELECT jq_type FROM jobqueue WHERE jq_job_fk = $1',
-        [$reportId], "reportValidity"])
-      ->andReturn(["jq_type" => $this->reportsAllowed[1]]);
+    $this->expectReportValidity($reportId, $this->reportsAllowed[1]);
     $this->dbManager->shouldReceive('getSingleRow')
       ->withArgs(['SELECT job_upload_fk FROM job WHERE job_pk = $1',
         [$reportId], "reportFileUpload"])
       ->andReturn(["job_upload_fk" => $uploadId]);
     $this->uploadDao->shouldReceive('isAccessible')->withArgs([$uploadId,
       $this->groupId])->andReturn(true);
-    $this->dbManager->shouldReceive('getSingleRow')
-      ->withArgs(['SELECT * FROM reportgen WHERE job_fk = $1',
-        [$reportId], "reportFileName"])
-      ->andReturn(false);
+    $this->expectReportFileName($reportId, false);
 
     $this->expectException(HttpServiceUnavailableException::class);
 
