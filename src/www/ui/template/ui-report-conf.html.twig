@@ -16,6 +16,7 @@
         <li><a href="#acknowledgementsConfTab">Acknowledgements</a></li>
       {% endif %}
       <li><a href="#SPDXConfTab">SPDX Report Settings</a></li>
+      <li><a href="#CycloneDXConfTab">CycloneDX Report Settings</a></li>
       {% if globalClearingAvailable is not empty %}
         <li><a href="#clearingConfTab">Decision Settings</a></li>
       {% endif %}
@@ -138,11 +139,11 @@
                     <option value="5" {% if componentType == 5 %}selected{% endif %}>package-url</option>
                   </optgroup>
                   <optgroup label="Legacy">
-                  {%- for type in typemap ~%}
+                  {%- for type in typemap -%}
                     <option value="{{ type.key }}"
                     {%- if componentType == type.key %} selected{% endif -%}
                     >{{ type.name }}</option>
-                  {%- endfor ~%}
+                  {%- endfor -%}
                   </optgroup>
                 </select>
               </div>
@@ -308,6 +309,53 @@
             <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="osselotExport" value="osselotExport" {{ osselotExport }} id="osselotExportCheckbox" />
           </td>
         </tr>
+      </table>
+    </div>
+    <div id="CycloneDXConfTab">
+      <table border="1" class="table">
+        <tr>
+          <th>
+            {{ "Attribute"|trans }}
+          </th>
+          <th>
+            {{ "Information"|trans }}
+          </th>
+        </tr>
+        <tr>
+          <td align="left">
+            {{ "Show CycloneDX license comments"|trans }}
+          </td>
+          <td align="left">
+            <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="cyclonedxLicenseComment" value="cyclonedxLicenseComment" {{ cyclonedxLicenseComment }} id="cyclonedxLicenseCommentCheckbox" />
+         </td>
+        </tr>
+        <tr>
+          <td align="left">
+            {{ "Ignore files with no info in CycloneDX"|trans }}
+          </td>
+          <td align="left">
+            <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="cyclonedxIgnoreFilesWOInfo" value="cyclonedxIgnoreFilesWOInfo" {{ cyclonedxIgnoreFilesWOInfo }} />
+          </td>
+        </tr>
+        <tr>
+          <td align="left">
+            {{ "Enable OSSelot export"|trans }}
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'When enabled, CycloneDX exports will be OSSelot-compatible.'|trans }}" alt="" class="info-bullet"/>
+          </td>
+          <td align="left">
+            <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="cyclonedxOsselotExport" value="cyclonedxOsselotExport" {{ cyclonedxOsselotExport }} id="cyclonedxOsselotExportCheckbox" />
+          </td>
+        </tr>
+        <tr>
+          <td align="left">
+            {{ "Custom tag namespace"|trans }}
+            <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Custom tag namespace prefix used in CycloneDX properties (default: fossology:). Users can set their own prefix like custom: for custom tagging.'|trans }}" alt="" class="info-bullet"/>
+          </td>
+          <td align="left">
+            <input type="text" name="cyclonedxCustomTagNamespace" value="{{ cyclonedxCustomTagNamespace }}" />
+          </td>
+        </tr>
+
       </table>
     </div>
     {% if globalClearingAvailable is not empty %}

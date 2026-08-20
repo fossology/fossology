@@ -859,8 +859,10 @@ ORDER BY lft asc
     if (empty($row)) {
       $this->dbManager->begin();
       $stmt = __METHOD__.'ifempty';
-      $sql = "INSERT INTO report_info (upload_fk) VALUES ($1) RETURNING *";
-      $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
+      $userSPDXDefaults = $this->getUserSPDXDefaultsForUpload($uploadId);
+      $userCycloneDxDefaults = $this->getUserCycloneDxDefaultsForUpload($uploadId);
+      $sql = "INSERT INTO report_info (upload_fk, ri_spdx_selection, ri_cyclonedx_selection) VALUES ($1, $2, $3) RETURNING *";
+      $row = $this->dbManager->getSingleRow($sql, array($uploadId, $userSPDXDefaults, $userCycloneDxDefaults), $stmt);
       $this->dbManager->commit();
     }
     return $row;
@@ -906,18 +908,18 @@ ORDER BY lft asc
   }
 
   /**
-   * @brief Get cyclone dx settings for a user
-   * @param int $uploadId Upload ID to get user for
-   * @return string Comma separated values for cyclonedxLicenseComment, ignoreFilesWOInfo, osselotExport
+   * Get user CycloneDX defaults for a specific upload (based on upload owner)
+   * @param int $uploadId
+   * @return string Comma-separated checkbox values
    */
-  public function getCyclonedxSettings($uploadId)
+  private function getUserCycloneDxDefaultsForUpload($uploadId)
   {
     $stmt = __METHOD__ . '.getOwner';
     $sql = "SELECT user_fk FROM upload WHERE upload_pk = $1";
     $uploadOwner = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
 
     if (empty($uploadOwner)) {
-      return "unchecked,unchecked,unchecked";
+      return "unchecked,unchecked,unchecked,fossology:";
     }
 
     $userId = $uploadOwner['user_fk'];
@@ -927,21 +929,51 @@ ORDER BY lft asc
     $userDefaults = $this->dbManager->getSingleRow($sql, array($userId), $stmt);
 
     if (empty($userDefaults) || empty($userDefaults['cyclonedx_settings'])) {
-      return "unchecked,unchecked,unchecked";
+      return "unchecked,unchecked,unchecked,fossology:";
     }
 
     $settings = explode(',', $userDefaults['cyclonedx_settings']);
-    if (count($settings) < 3) {
-      $settings = array_pad($settings, 3, 'unchecked');
+    if (count($settings) < 4) {
+      $settings = array_pad($settings, 4, 'unchecked');
+    }
+    if (empty($settings[3]) || $settings[3] === 'unchecked') {
+      $settings[3] = 'fossology:';
     }
 
+    // Reorder from user-edit format to report-conf format
     $osselotExport = $settings[0];
     $cyclonedxLicenseComment = $settings[1];
     $ignoreFilesWOInfo = $settings[2];
+    $customTagNamespace = $settings[3];
 
-    $result = "$cyclonedxLicenseComment,$ignoreFilesWOInfo,$osselotExport";
+    return "$cyclonedxLicenseComment,$ignoreFilesWOInfo,$osselotExport,$customTagNamespace";
+  }
 
-    return $result;
+  /**
+   * @brief Get cyclone dx settings for a user
+   * @param int $uploadId Upload ID to get user for
+   * @return string Comma separated values for cyclonedxLicenseComment, ignoreFilesWOInfo, osselotExport, customTagNamespace
+   */
+  public function getCyclonedxSettings($uploadId)
+  {
+    $stmt = __METHOD__ . '.getReportInfo';
+    $sql = "SELECT ri_cyclonedx_selection FROM report_info WHERE upload_fk = $1";
+    $reportInfo = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
+
+    // Per-upload settings are stored in comment,ignore,osselot,namespace order
+    if (!empty($reportInfo) && !empty($reportInfo['ri_cyclonedx_selection'])) {
+      $settings = explode(',', $reportInfo['ri_cyclonedx_selection']);
+      if (count($settings) < 4) {
+        $settings = array_pad($settings, 4, 'unchecked');
+      }
+      if (empty($settings[3]) || $settings[3] === 'unchecked') {
+        $settings[3] = 'fossology:';
+      }
+      return implode(',', $settings);
+    }
+
+    // Return hardcoded default if not set in report_info (e.g. old uploads before CycloneDX feature)
+    return "unchecked,unchecked,unchecked,fossology:";
   }
 
   /**
@@ -996,21 +1028,23 @@ ORDER BY lft asc
   public function getGlobalDecisionSettingsFromInfo($uploadId, $setGlobal=null)
   {
     $stmt = __METHOD__ . 'get';
-    $sql = "SELECT ri_globaldecision, ri_spdx_selection FROM report_info WHERE upload_fk = $1";
+    $sql = "SELECT ri_globaldecision, ri_spdx_selection, ri_cyclonedx_selection FROM report_info WHERE upload_fk = $1";
     $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
     if (empty($row)) {
+      $this->dbManager->begin();
       if ($setGlobal === null) {
         // Old upload, set default value to enable
         $setGlobal = 1;
       }
-      $stmt = __METHOD__ . 'ifempty';
+      $stmt = __METHOD__.'ifempty';
       $userSPDXDefaults = $this->getUserSPDXDefaultsForUpload($uploadId);
-      $sql = "INSERT INTO report_info (upload_fk, ri_globaldecision, ri_spdx_selection) VALUES ($1, $2, $3) RETURNING ri_globaldecision";
-      $row = $this->dbManager->getSingleRow($sql, array($uploadId, $setGlobal, $userSPDXDefaults), $stmt);
-
+      $userCycloneDxDefaults = $this->getUserCycloneDxDefaultsForUpload($uploadId);
+      $sql = "INSERT INTO report_info (upload_fk, ri_globaldecision, ri_spdx_selection, ri_cyclonedx_selection) VALUES ($1, $2, $3, $4) RETURNING ri_globaldecision";
+      $row = $this->dbManager->getSingleRow($sql, array($uploadId, $setGlobal, $userSPDXDefaults, $userCycloneDxDefaults), $stmt);
+      $this->dbManager->commit();
     }
 
-    if (!empty($setGlobal)) {
+    if ($setGlobal !== null) {
       $stmt = __METHOD__ . 'update';
       $sql = "UPDATE report_info SET ri_globaldecision = $2 WHERE upload_fk = $1 RETURNING ri_globaldecision";
       $row = $this->dbManager->getSingleRow($sql, array($uploadId, $setGlobal), $stmt);
