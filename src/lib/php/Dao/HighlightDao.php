@@ -242,4 +242,69 @@ class HighlightDao
     );
     return $row['page'];
   }
+
+  /**
+   * Get unique page numbers for license-relevant (signature) highlights for
+   * a given match id.
+   *
+   * @param int $licenseMatchId
+   * @return int[]
+   */
+  public function getPageNumbersOfHighlightEntries($licenseMatchId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT DISTINCT FLOOR(start / (
+              SELECT conf_value FROM sysconfig WHERE variablename LIKE 'BlockSizeText'
+            )::numeric) AS page
+            FROM highlight
+            WHERE fl_fk = $1 AND type = 'L' AND len > 0
+            ORDER BY page ASC";
+
+    $this->dbManager->prepare($stmt, $sql);
+    $result = $this->dbManager->execute($stmt, array($licenseMatchId));
+
+    $pages = array();
+    while ($row = $this->dbManager->fetchArray($result)) {
+      $pages[] = intval($row['page']);
+    }
+    $this->dbManager->freeResult($result);
+
+    return $pages;
+  }
+
+  /**
+   * Get one signature-highlight anchor start per page for a given match id.
+   *
+   * @param int $licenseMatchId
+   * @return array[] Each entry has keys: page, start
+   */
+  public function getSignaturePageAnchorsOfHighlightEntry($licenseMatchId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT DISTINCT ON (page)
+              page, start
+            FROM (
+              SELECT FLOOR(start / (
+                       SELECT conf_value FROM sysconfig WHERE variablename LIKE 'BlockSizeText'
+                     )::numeric)::int AS page,
+                     start
+              FROM highlight
+              WHERE fl_fk = $1 AND type = 'L' AND len > 0
+            ) p
+            ORDER BY page ASC, start ASC";
+
+    $this->dbManager->prepare($stmt, $sql);
+    $result = $this->dbManager->execute($stmt, array($licenseMatchId));
+
+    $anchors = array();
+    while ($row = $this->dbManager->fetchArray($result)) {
+      $anchors[] = array(
+        'page' => intval($row['page']),
+        'start' => intval($row['start'])
+      );
+    }
+    $this->dbManager->freeResult($result);
+
+    return $anchors;
+  }
 }
