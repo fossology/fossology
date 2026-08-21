@@ -446,6 +446,33 @@ FROM $tableName WHERE $idRowName = $1", [$id],
   }
 
   /**
+   * Mark a token as invalid/inactive, but only if it belongs to the given
+   * user. Existence and ownership are resolved in the same round trip as
+   * the update.
+   *
+   * @param int $tokenId The token to be marked as invalid
+   * @param int $userId  Expected owner of the token
+   * @return array|false Array with `pat_pk` and `user_fk` of the token if it
+   *         exists (regardless of ownership), or false if no such token
+   *         exists. The token is only invalidated when `user_fk` matches
+   *         $userId.
+   */
+  public function invalidateTokenForUser($tokenId, $userId)
+  {
+    $sql = "WITH target AS (" .
+      "SELECT pat_pk, user_fk FROM personal_access_tokens WHERE pat_pk = $1" .
+      "), updated AS (" .
+      "UPDATE personal_access_tokens SET active = false " .
+      "WHERE pat_pk = $1 AND user_fk = $2 " .
+      "RETURNING pat_pk" .
+      ") " .
+      "SELECT target.pat_pk, target.user_fk " .
+      "FROM target LEFT JOIN updated ON updated.pat_pk = target.pat_pk;";
+    return $this->dbManager->getSingleRow($sql, [$tokenId, $userId],
+      __METHOD__ . ".invalidateTokenForUser");
+  }
+
+  /**
    * Insert a new token in the DB.
    *
    * @param int    $userId User of the new token

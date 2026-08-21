@@ -2691,6 +2691,52 @@ paths:
 
         default:
           $ref: '#/components/responses/defaultResponse'
+  /users/tokens/{tokenId}:
+    parameters:
+      - name: tokenId
+        required: true
+        in: path
+        description: >
+          Id of the token to be revoked, as returned in the `id` field of
+          GET /users/tokens/{type}
+        schema:
+          type: string
+          example: "5.3"
+    delete:
+      operationId: revokeRestApiToken
+      tags:
+        - User
+      summary: Revoke an existing REST API Token
+      description: >
+        Revoke (deactivate) an existing REST API Token belonging to the
+        current user
+      responses:
+        '200':
+          description: Token revoked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Invalid token id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Not allowed to revoke a token belonging to another user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Token not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /uploads/{id}/item/{itemId}/copyrights:
     parameters: *cxGetParams
