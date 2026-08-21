@@ -13,10 +13,12 @@
 namespace Fossology\UI\Api\Test\Controllers;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\LicenseAcknowledgementDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\LicenseStdCommentDao;
 use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
@@ -319,7 +321,9 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
   public function testGetLicense()
   {
     $licenseShortName = "MIT";
+    $daoLicense = $this->getDaoLicense($licenseShortName);
     $license = $this->getLicense($licenseShortName, true);
+    $license->setSpdxId($daoLicense->getSpdxId());
 
     $requestHeaders = new Headers();
     $body = $this->streamFactory->createStream();
@@ -327,11 +331,17 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
       "/license/$licenseShortName"), $requestHeaders, [], [], $body);
     $this->licenseDao->shouldReceive('getLicenseByShortName')
       ->withArgs([$licenseShortName, $this->groupId])
-      ->andReturn($this->getDaoLicense($licenseShortName));
+      ->andReturn($daoLicense);
     $this->licenseDao->shouldReceive('getLicenseObligations')
       ->withArgs([[22], false])->andReturn([]);
     $this->licenseDao->shouldReceive('getLicenseObligations')
       ->withArgs([[22], true])->andReturn([]);
+    $this->licenseDao->shouldReceive('getLicenseTypeAndStatus')
+      ->withArgs([22])->andReturn(null);
+    $this->licenseDao->shouldReceive('getProjectedLicenseRef')
+      ->withArgs([22, LicenseMap::CONCLUSION, $this->groupId])->andReturn(null);
+    $this->licenseDao->shouldReceive('getProjectedLicenseRef')
+      ->withArgs([22, LicenseMap::REPORT, $this->groupId])->andReturn(null);
     $expectedResponse = (new ResponseHelper())->withJson($license->getArray(), 200);
 
     $actualResponse = $this->licenseController->getLicense($request,
@@ -351,7 +361,9 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
   public function testGetLicenseObligations()
   {
     $licenseShortName = "MIT";
+    $daoLicense = $this->getDaoLicense($licenseShortName);
     $license = $this->getLicense($licenseShortName, true, false);
+    $license->setSpdxId($daoLicense->getSpdxId());
 
     $requestHeaders = new Headers();
     $body = $this->streamFactory->createStream();
@@ -359,11 +371,74 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
       "/license/$licenseShortName"), $requestHeaders, [], [], $body);
     $this->licenseDao->shouldReceive('getLicenseByShortName')
       ->withArgs([$licenseShortName, $this->groupId])
-      ->andReturn($this->getDaoLicense($licenseShortName));
+      ->andReturn($daoLicense);
     $this->licenseDao->shouldReceive('getLicenseObligations')
       ->withArgs([[22], false])->andReturn([$this->getDaoObligation(123)]);
     $this->licenseDao->shouldReceive('getLicenseObligations')
       ->withArgs([[22], true])->andReturn([$this->getDaoObligation(124)]);
+    $this->licenseDao->shouldReceive('getLicenseTypeAndStatus')
+      ->withArgs([22])->andReturn(null);
+    $this->licenseDao->shouldReceive('getProjectedLicenseRef')
+      ->withArgs([22, LicenseMap::CONCLUSION, $this->groupId])->andReturn(null);
+    $this->licenseDao->shouldReceive('getProjectedLicenseRef')
+      ->withArgs([22, LicenseMap::REPORT, $this->groupId])->andReturn(null);
+    $expectedResponse = (new ResponseHelper())->withJson($license->getArray(), 200);
+
+    $actualResponse = $this->licenseController->getLicense($request,
+      new ResponseHelper(), ['shortname' => $licenseShortName]);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::getLicense() to fetch single license
+   * -# The license has parent/report mappings and active/type metadata
+   * -# Check if response is 200 and includes the new fields
+   */
+  public function testGetLicenseWithMappingsAndMetadata()
+  {
+    $licenseShortName = "MIT";
+    $daoLicense = $this->getDaoLicense($licenseShortName);
+    $license = $this->getLicense($licenseShortName, true);
+    $license->setSpdxId($daoLicense->getSpdxId());
+    $license->setActive(true);
+    $license->setLicenseType('Permissive');
+    $license->setParentLicense([
+      'id' => 5,
+      'shortName' => 'Parent',
+      'fullName' => 'Parent License',
+      'spdxId' => 'Parent',
+    ]);
+    $license->setReportLicense([
+      'id' => 6,
+      'shortName' => 'Report',
+      'fullName' => 'Report License',
+      'spdxId' => 'Report',
+    ]);
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/license/$licenseShortName"), $requestHeaders, [], [], $body);
+    $this->licenseDao->shouldReceive('getLicenseByShortName')
+      ->withArgs([$licenseShortName, $this->groupId])
+      ->andReturn($daoLicense);
+    $this->licenseDao->shouldReceive('getLicenseObligations')
+      ->withArgs([[22], false])->andReturn([]);
+    $this->licenseDao->shouldReceive('getLicenseObligations')
+      ->withArgs([[22], true])->andReturn([]);
+    $this->licenseDao->shouldReceive('getLicenseTypeAndStatus')
+      ->withArgs([22])
+      ->andReturn(['active' => true, 'licenseType' => 'Permissive']);
+    $this->licenseDao->shouldReceive('getProjectedLicenseRef')
+      ->withArgs([22, LicenseMap::CONCLUSION, $this->groupId])
+      ->andReturn(new LicenseRef(5, 'Parent', 'Parent License', 'Parent'));
+    $this->licenseDao->shouldReceive('getProjectedLicenseRef')
+      ->withArgs([22, LicenseMap::REPORT, $this->groupId])
+      ->andReturn(new LicenseRef(6, 'Report', 'Report License', 'Report'));
     $expectedResponse = (new ResponseHelper())->withJson($license->getArray(), 200);
 
     $actualResponse = $this->licenseController->getLicense($request,

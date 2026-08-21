@@ -99,6 +99,50 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     assertThat($licenseMap->getProjectedShortName(2),is('One'));
   }
 
+  function testProjectedRefOfUnmappedIdIsNull()
+  {
+    $licenseMap = new LicenseMap($this->dbManager, $this->groupId);
+    assertThat($licenseMap->getProjectedRef(1),is(nullValue()));
+  }
+
+  function testProjectedRefOfCandidateIsNull()
+  {
+    $licenseMap = new LicenseMap($this->dbManager, $this->groupId);
+    assertThat($licenseMap->getProjectedRef(3),is(nullValue()));
+  }
+
+  function testProjectedRefOfMappedId()
+  {
+    $licenseMap = new LicenseMap($this->dbManager, $this->groupId);
+    $ref = $licenseMap->getProjectedRef(2);
+    assertThat($ref, is(notNullValue()));
+    assertThat($ref->getId(), is(1));
+    assertThat($ref->getShortName(), is('One'));
+    assertThat($ref->getFullName(), is('One-1'));
+    assertThat($ref->getSpdxId(), is('One'));
+  }
+
+  function testScopedConstructorLoadsOnlyTheRequestedLicense()
+  {
+    // A second, distinct mapping so a scoped load can be told apart from
+    // a full one.
+    $this->dbManager->insertTableRow('license_ref',
+      array('rf_pk'=>4,'rf_shortname'=>'Four','rf_fullname'=>'Four-4','rf_spdx_id'=>'Four'));
+    $this->dbManager->insertTableRow('license_map',
+      array('license_map_pk'=>1,'rf_fk'=>4,'rf_parent'=>1,'usage'=>LicenseMap::CONCLUSION));
+
+    $scoped = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::CONCLUSION, false, 2);
+    $ref = $scoped->getProjectedRef(2);
+    assertThat($ref, is(notNullValue()));
+    assertThat($ref->getId(), is(1));
+    assertThat($ref->getShortName(), is('One'));
+
+    // The scoped instance never loaded license 4's mapping, so it falls
+    // back to "unmapped" for it even though license 4 really is mapped.
+    assertThat($scoped->getProjectedId(4), is(4));
+    assertThat($scoped->getProjectedRef(4), is(nullValue()));
+  }
+
   function testObligationForLicense()
   {
     $licenseMap = new LicenseMap($this->dbManager, $this->groupId);

@@ -69,6 +69,31 @@ class License
    * Create merge request for candidate license?
    */
   private $mergeRequest;
+  /**
+   * @var string|null $spdxId
+   * SPDX id of the license
+   */
+  private $spdxId;
+  /**
+   * @var boolean|null $active
+   * Is the license active?
+   */
+  private $active;
+  /**
+   * @var string|null $licenseType
+   * Type of the license (e.g. Permissive, Copyleft)
+   */
+  private $licenseType;
+  /**
+   * @var array|null $parentLicense
+   * Parent license this license is mapped to for conclusions, if any
+   */
+  private $parentLicense;
+  /**
+   * @var array|null $reportLicense
+   * License this license is mapped to for reports, if any
+   */
+  private $reportLicense;
 
   /**
    * License constructor.
@@ -102,6 +127,11 @@ class License
     $this->setRisk($risk);
     $this->setIsCandidate($isCandidate);
     $this->mergeRequest = false;
+    $this->spdxId = null;
+    $this->active = null;
+    $this->licenseType = null;
+    $this->parentLicense = null;
+    $this->reportLicense = null;
   }
 
   /**
@@ -130,6 +160,21 @@ class License
     ];
     if ($this->obligations !== null) {
       $data['obligations'] = $this->getObligations();
+    }
+    if ($this->spdxId !== null) {
+      $data['spdxId'] = $this->spdxId;
+    }
+    if ($this->active !== null) {
+      $data['active'] = $this->active;
+    }
+    if ($this->licenseType !== null) {
+      $data['licenseType'] = $this->licenseType;
+    }
+    if ($this->parentLicense !== null) {
+      $data['parentLicense'] = $this->parentLicense;
+    }
+    if ($this->reportLicense !== null) {
+      $data['reportLicense'] = $this->reportLicense;
     }
     return $data;
   }
@@ -236,6 +281,51 @@ class License
   }
 
   /**
+   * Get the license's SPDX id
+   * @return string|null License's SPDX id if set, null if not set
+   */
+  public function getSpdxId()
+  {
+    return $this->spdxId;
+  }
+
+  /**
+   * Is the license active?
+   * @return boolean|null License's active status if set, null if not set
+   */
+  public function getActive()
+  {
+    return $this->active;
+  }
+
+  /**
+   * Get the license's type (e.g. Permissive, Copyleft)
+   * @return string|null License's type if set, null if not set
+   */
+  public function getLicenseType()
+  {
+    return $this->licenseType;
+  }
+
+  /**
+   * Get the parent license this license is mapped to for conclusions
+   * @return array|null Parent license reference if set, null if not set
+   */
+  public function getParentLicense()
+  {
+    return $this->parentLicense;
+  }
+
+  /**
+   * Get the license this license is mapped to for reports
+   * @return array|null Report license reference if set, null if not set
+   */
+  public function getReportLicense()
+  {
+    return $this->reportLicense;
+  }
+
+  /**
    * Set the license's short name
    * @param string $shortName License's short name
    */
@@ -322,6 +412,55 @@ class License
       $this->obligations = [];
     }
     $this->obligations[] = $obligation;
+  }
+
+  /**
+   * Set the license's SPDX id
+   * @param string|null $spdxId License's SPDX id
+   */
+  public function setSpdxId($spdxId)
+  {
+    $this->spdxId = $spdxId;
+  }
+
+  /**
+   * Set whether the license is active
+   * @param boolean|null $active License's active status
+   */
+  public function setActive($active)
+  {
+    if (!is_null($active)) {
+      $this->active = filter_var($active, FILTER_VALIDATE_BOOLEAN);
+    } else {
+      $this->active = null;
+    }
+  }
+
+  /**
+   * Set the license's type (e.g. Permissive, Copyleft)
+   * @param string|null $licenseType License's type
+   */
+  public function setLicenseType($licenseType)
+  {
+    $this->licenseType = $licenseType;
+  }
+
+  /**
+   * Set the parent license this license is mapped to for conclusions
+   * @param array|null $parentLicense Parent license reference
+   */
+  public function setParentLicense($parentLicense)
+  {
+    $this->parentLicense = $parentLicense;
+  }
+
+  /**
+   * Set the license this license is mapped to for reports
+   * @param array|null $reportLicense Report license reference
+   */
+  public function setReportLicense($reportLicense)
+  {
+    $this->reportLicense = $reportLicense;
   }
 
   /**

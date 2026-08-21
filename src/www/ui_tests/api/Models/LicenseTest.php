@@ -85,6 +85,58 @@ class LicenseTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
+   * -# Test data model returned by License::getArray() is correct when
+   *    SPDX id, active, licenseType, parentLicense and reportLicense are
+   *    set
+   */
+  public function testDataFormatWithMappingsAndMetadata()
+  {
+    $parentLicense = [
+      'id' => 5,
+      'shortName' => 'Parent',
+      'fullName' => 'Parent License',
+      'spdxId' => 'Parent',
+    ];
+    $reportLicense = [
+      'id' => 6,
+      'shortName' => 'Report',
+      'fullName' => 'Report License',
+      'spdxId' => 'Report',
+    ];
+    $expectedLicense = [
+      'id'        => 22,
+      'shortName' => "MIT",
+      'fullName'  => "MIT License",
+      'text'      => "MIT License Copyright (c) <year> <copyright holders> ...",
+      'url'       => "https://opensource.org/licenses/MIT",
+      'risk'      => 3,
+      'isCandidate' => false,
+      'spdxId'    => 'MIT',
+      'active'    => true,
+      'licenseType' => 'Permissive',
+      'parentLicense' => $parentLicense,
+      'reportLicense' => $reportLicense,
+    ];
+
+    $actualLicense = new License(22, "MIT", "MIT License",
+      "MIT License Copyright (c) <year> <copyright holders> ...",
+      "https://opensource.org/licenses/MIT", null, 3, false);
+    $actualLicense->setSpdxId('MIT');
+    $actualLicense->setActive(true);
+    $actualLicense->setLicenseType('Permissive');
+    $actualLicense->setParentLicense($parentLicense);
+    $actualLicense->setReportLicense($reportLicense);
+
+    $this->assertEquals($expectedLicense, $actualLicense->getArray());
+    $this->assertSame('MIT', $actualLicense->getSpdxId());
+    $this->assertTrue($actualLicense->getActive());
+    $this->assertSame('Permissive', $actualLicense->getLicenseType());
+    $this->assertSame($parentLicense, $actualLicense->getParentLicense());
+    $this->assertSame($reportLicense, $actualLicense->getReportLicense());
+  }
+
+  /**
+   * @test
    * -# Test parser License::parseFromArray()
    * -# Create a valid license input and check the function.
    * -# Create an input with invalid keys and check if function returns error.
