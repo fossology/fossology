@@ -13,6 +13,7 @@
 namespace Fossology\UI\Api\Test\Controllers;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\BusinessRules\ObligationMap;
 use Fossology\Lib\Dao\LicenseAcknowledgementDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\LicenseStdCommentDao;
@@ -112,6 +113,12 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
   private $licenseStdCommentDao;
 
   /**
+   * @var ObligationMap $obligationMap
+   * ObligationMap mock
+   */
+  private $obligationMap;
+
+  /**
    * @var M\MockInterface $adminLicensePlugin
    * admin_license_from_csv mock
    */
@@ -156,6 +163,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->adminLicensePlugin = M::mock('admin_license_from_csv');
     $this->licenseCandidatePlugin = M::mock('admin_license_candidate');
     $this->licenseStdCommentDao = M::mock(LicenseStdCommentDao::class);
+    $this->obligationMap = M::mock(ObligationMap::class);
 
     $this->dbHelper->shouldReceive('getDbManager')->andReturn($this->dbManager);
 
@@ -177,6 +185,8 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
       'dao.license'))->andReturn($this->licenseDao);
     $container->shouldReceive('get')->withArgs(array(
       'dao.license.acknowledgement'))->andReturn($this->adminLicenseAckDao);
+    $container->shouldReceive('get')->withArgs(array(
+      'businessrules.obligationmap'))->andReturn($this->obligationMap);
     $this->licenseController = new LicenseController($container);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
     $this->streamFactory = new StreamFactory();
@@ -636,6 +646,109 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
   /**
    * @test
    * -# Test for LicenseController::createLicense() to create new license
+   * -# The request contains obligation ids to associate
+   * -# Check if response is 201 and obligations get associated
+   */
+  public function testCreateLicenseWithObligations()
+  {
+    $license = $this->getLicense("MIT");
+    $requestBody = $license->getArray();
+    $requestBody["isCandidate"] = true;
+    $requestBody["obligations"] = [123, 124];
+    unset($requestBody['id']);
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream();
+    $body->write(json_encode($requestBody));
+    $body->seek(0);
+    $request = new Request("POST", new Uri("HTTP", "localhost", 80,
+      "/license"), $requestHeaders, [], [], $body);
+
+    $tableName = "license_candidate";
+    $assocData = [
+      "rf_shortname" => $license->getShortName(),
+      "rf_fullname" => $license->getFullName(),
+      "rf_text" => $license->getText(),
+      "rf_md5" => md5($license->getText()),
+      "rf_risk" => $license->getRisk(),
+      "rf_url" => $license->getUrl(),
+      "rf_detector_type" => 1,
+      "group_fk" => $this->groupId,
+      "rf_user_fk_created" => $this->userId,
+      "rf_user_fk_modified" => $this->userId,
+      "marydone" => false
+    ];
+
+    $sql = "SELECT count(*) cnt FROM ".
+      "$tableName WHERE rf_shortname = $1 AND group_fk = $2;";
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["obligation_ref", "ob_pk", 123])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["obligation_ref", "ob_pk", 124])->andReturn(true);
+    $this->dbManager->shouldReceive('insertTableRow')
+      ->withArgs([$tableName, $assocData, M::any(), "rf_pk"])->andReturn(4);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([$sql, [$license->getShortName(), $this->groupId], M::any()])
+      ->andReturn(["cnt" => 0]);
+    $this->obligationMap->shouldReceive('associateLicenseWithObligation')
+      ->withArgs([123, 4, true])->once();
+    $this->obligationMap->shouldReceive('associateLicenseWithObligation')
+      ->withArgs([124, 4, true])->once();
+
+    $info = new Info(201, '4', InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+
+    $actualResponse = $this->licenseController->createLicense($request,
+      new ResponseHelper(), []);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::createLicense() to create new license
+   * -# One of the given obligation ids does not exist
+   * -# Check if response is 400 and no license row is created
+   */
+  public function testCreateLicenseInvalidObligation()
+  {
+    $license = $this->getLicense("MIT");
+    $requestBody = $license->getArray();
+    $requestBody["isCandidate"] = true;
+    $requestBody["obligations"] = [999];
+    unset($requestBody['id']);
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream();
+    $body->write(json_encode($requestBody));
+    $body->seek(0);
+    $request = new Request("POST", new Uri("HTTP", "localhost", 80,
+      "/license"), $requestHeaders, [], [], $body);
+
+    $tableName = "license_candidate";
+    $sql = "SELECT count(*) cnt FROM ".
+      "$tableName WHERE rf_shortname = $1 AND group_fk = $2;";
+
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([$sql, [$license->getShortName(), $this->groupId], M::any()])
+      ->andReturn(["cnt" => 0]);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["obligation_ref", "ob_pk", 999])->andReturn(false);
+    $this->dbManager->shouldNotReceive('insertTableRow');
+    $this->expectException(HttpBadRequestException::class);
+
+    $this->licenseController->createLicense($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::createLicense() to create new license
    * -# The request body is malformed
    * -# Check if response is 400
    */
@@ -803,6 +916,105 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::updateLicense() to associate obligations
+   * -# Currently associated obligations not in the new list get removed
+   * -# Check if response is 200
+   */
+  public function testUpdateLicenseWithObligations()
+  {
+    $license = $this->getDaoLicense("Exotic");
+    $requestBody = [
+      "obligations" => [123, 124]
+    ];
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream();
+    $body->write(json_encode($requestBody));
+    $body->seek(0);
+    $request = new Request("PATCH", new Uri("HTTP", "localhost", 80,
+      "/license/" . $license->getShortName()), $requestHeaders, [], [], $body);
+
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])->andReturn(true);
+    $this->licenseDao->shouldReceive('getLicenseByShortName')
+      ->withArgs([$license->getShortName(), $this->groupId])
+      ->andReturn($license);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["license_candidate", "rf_pk", $license->getId()])
+      ->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["obligation_ref", "ob_pk", 123])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["obligation_ref", "ob_pk", 124])->andReturn(true);
+
+    // LicenseMap::TRIVIAL short-circuits its constructor, so only the
+    // direct getRows() call made by getObligationsForLicenseRef() needs to
+    // be mocked here.
+    $this->dbManager->shouldReceive('getRows')
+      ->withArgs([
+        "SELECT distinct(ob_fk) FROM obligation_candidate_map WHERE rf_fk = $1;",
+        [$license->getId()], M::any()])
+      ->andReturn([['ob_fk' => 123], ['ob_fk' => 999]]);
+
+    // 123 is already associated, so only 124 should be newly associated.
+    $this->obligationMap->shouldReceive('associateLicenseWithObligation')
+      ->withArgs([124, $license->getId(), true])->once();
+    $this->obligationMap->shouldNotReceive('associateLicenseWithObligation')
+      ->withArgs([123, $license->getId(), true]);
+    $this->obligationMap->shouldReceive('unassociateLicenseFromObligation')
+      ->withArgs([999, $license->getId(), true])->once();
+
+    $info = new Info(200, "License " . $license->getShortName() . " updated.",
+      InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+
+    $actualResponse = $this->licenseController->updateLicense($request,
+      new ResponseHelper(), ["shortname" => $license->getShortName()]);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::updateLicense() with obligations
+   * -# The obligations property is not an array
+   * -# Check if response is 400
+   */
+  public function testUpdateLicenseObligationsNotArray()
+  {
+    $license = $this->getDaoLicense("Exotic");
+    $requestBody = [
+      "obligations" => "not-an-array"
+    ];
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream();
+    $body->write(json_encode($requestBody));
+    $body->seek(0);
+    $request = new Request("PATCH", new Uri("HTTP", "localhost", 80,
+      "/license/" . $license->getShortName()), $requestHeaders, [], [], $body);
+
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])->andReturn(true);
+    $this->licenseDao->shouldReceive('getLicenseByShortName')
+      ->withArgs([$license->getShortName(), $this->groupId])
+      ->andReturn($license);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["license_candidate", "rf_pk", $license->getId()])
+      ->andReturn(true);
+    $this->expectException(HttpBadRequestException::class);
+
+    $this->licenseController->updateLicense($request, new ResponseHelper(),
+      ["shortname" => $license->getShortName()]);
   }
 
   /**

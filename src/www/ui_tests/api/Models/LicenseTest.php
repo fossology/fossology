@@ -110,4 +110,28 @@ class LicenseTest extends \PHPUnit\Framework\TestCase
     $bogusLicense = License::parseFromArray($bogusInput);
     $this->assertEquals(-1, $bogusLicense);
   }
+
+  /**
+   * @test
+   * -# Test parser License::parseFromArray() with obligations
+   * -# Check that obligation ids are parsed, deduplicated and cast to int.
+   * -# Check that a non-array obligations value is rejected.
+   */
+  public function testArrayParserWithObligations()
+  {
+    $inputLicense = [
+      'shortName' => "MIT",
+      'obligations' => ["1", 2, 2]
+    ];
+
+    $actualLicense = License::parseFromArray($inputLicense);
+
+    $this->assertEquals([1, 2], $actualLicense->getObligationIds());
+
+    $bogusInput = [
+      'shortName' => "MIT",
+      'obligations' => "not-an-array"
+    ];
+    $this->assertEquals(-3, License::parseFromArray($bogusInput));
+  }
 }
