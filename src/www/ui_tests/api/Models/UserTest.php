@@ -79,7 +79,7 @@ class UserTest extends TestCase
    */
   public function testConstructor()
   {
-    $user = new User(1, "fossy", "Admin user", "fossy@gmail.com", "admin", 4, "fossy@gmail.com", "monk", 3, null);
+    $user = new User(1, "fossy", "Admin user", "fossy@gmail.com", "admin", 4, "fossy@gmail.com", "monk", 3, null, 4, "active");
     $this->assertInstanceOf(User::class, $user);
   }
 
@@ -122,6 +122,26 @@ class UserTest extends TestCase
   public function testDataFormatV2()
   {
     $this->testDataFormat(ApiVersion::V2);
+  }
+
+  /**
+   * @test
+   * -# Test that User::getArray(V2) omits defaultFolderId when the user has
+   *    the DB's default "unset" sentinel (-1) for default_folder_fk
+   * -# Test that a real folder id is still reported normally
+   */
+  public function testDefaultFolderIdSentinelExcludedV2()
+  {
+    $unsetUser = new User(2, 'fossy', 'super user', 'fossy@localhost',
+      PLUGIN_DB_ADMIN, 2, true, "bucket,copyright,nomos,ojo", null, null, -1, 'active');
+    $setUser = new User(2, 'fossy', 'super user', 'fossy@localhost',
+      PLUGIN_DB_ADMIN, 2, true, "bucket,copyright,nomos,ojo", null, null, 5, 'active');
+
+    $unsetArray = $unsetUser->getArray(ApiVersion::V2);
+    $setArray = $setUser->getArray(ApiVersion::V2);
+
+    $this->assertArrayNotHasKey('defaultFolderId', $unsetArray);
+    $this->assertSame(5, $setArray['defaultFolderId']);
   }
 
   /**
@@ -169,6 +189,8 @@ class UserTest extends TestCase
         "rootFolderId"           => 2,
         "defaultGroup"           => "fossy",
         "emailNotification"      => true,
+        "defaultFolderId"        => 3,
+        "userStatus"             => 'active',
         "agents"                            => [
           "bucket"               => true,
           "copyrightEmailAuthor" => true,
@@ -196,12 +218,12 @@ class UserTest extends TestCase
     ];
 
     $actualCurrentUserV1 = new User(2, 'fossy', 'super user', 'fossy@localhost',
-      PLUGIN_DB_ADMIN, 2, true, "bucket,copyright,nomos,ojo", 0);
+      PLUGIN_DB_ADMIN, 2, true, "bucket,copyright,nomos,ojo", 0, null, 3, 'active');
 
     $this->userDao->shouldReceive('getGroupNameById')->withArgs([0])->andReturn("fossy");
 
     $actualCurrentUserV2 = new User(2, 'fossy', 'super user', 'fossy@localhost',
-      PLUGIN_DB_ADMIN, 2, true, "bucket,copyright,nomos,ojo", "fossy");
+      PLUGIN_DB_ADMIN, 2, true, "bucket,copyright,nomos,ojo", "fossy", null, 3, 'active');
     $actualNonAdminUser = new User(8, 'userii', 'very useri', null, null, null,
       null, null, 0);
     if ($version == ApiVersion::V2) {

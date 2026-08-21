@@ -74,6 +74,16 @@ class User
    * Default bucket pool of the user
    */
   private $defaultBucketPool;
+  /**
+   * @var integer $defaultFolderId
+   * Current user's default folder id for upload and browse operations
+   */
+  private $defaultFolderId;
+  /**
+   * @var string $userStatus
+   * Current user's account status (active/inactive)
+   */
+  private $userStatus;
 
   /**
    * User constructor.
@@ -87,9 +97,12 @@ class User
    * @param boolean $emailNotification
    * @param object $agents
    * @param integer $defaultBucketPool
+   * @param integer $defaultFolderId
+   * @param string $userStatus
    */
   public function __construct($id, $name, $description, $email, $accessLevel, $root_folder_id, $emailNotification,
-                              $agents, $default_group_fk=null, $defaultBucketPool=null)
+                              $agents, $default_group_fk=null, $defaultBucketPool=null, $defaultFolderId=null,
+                              $userStatus=null)
   {
     $this->id = intval($id);
     $this->name = $name;
@@ -122,6 +135,8 @@ class User
     } else {
       $this->defaultBucketPool = null;
     }
+    $this->defaultFolderId = is_null($defaultFolderId) ? null : intval($defaultFolderId);
+    $this->userStatus = $userStatus;
   }
 
   ////// Getters //////
@@ -206,6 +221,22 @@ class User
   }
 
   /**
+   * @return integer
+   */
+  public function getDefaultFolderId()
+  {
+    return $this->defaultFolderId;
+  }
+
+  /**
+   * @return string
+   */
+  public function getUserStatus()
+  {
+    return $this->userStatus;
+  }
+
+  /**
    * Get current user in JSON representation
    * @return string
    */
@@ -244,6 +275,14 @@ class User
     }
     if ($this->defaultBucketPool !== null) {
       $returnUser["defaultBucketpool"] = $this->defaultBucketPool;
+    }
+    if ($version == ApiVersion::V2) {
+      if ($this->defaultFolderId !== null && $this->defaultFolderId != -1) {
+        $returnUser["defaultFolderId"] = $this->defaultFolderId;
+      }
+      if ($this->userStatus !== null) {
+        $returnUser["userStatus"] = $this->userStatus;
+      }
     }
     return $returnUser;
   }

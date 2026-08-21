@@ -2530,8 +2530,6 @@ paths:
                   properties:
                     userPass:
                       type: string
-                    defaultFolderId:
-                      type: integer
                     defaultVisibility:
                       type: string
                       enum:
@@ -2546,8 +2544,6 @@ paths:
                   properties:
                     userPass:
                       type: string
-                    defaultFolderId:
-                      type: integer
                     defaultVisibility:
                       type: string
                       enum:
@@ -6120,6 +6116,15 @@ components:
           description: Default bucket pool id
           type: integer
           nullable: true
+        defaultFolderId:
+          type: integer
+          description: Default folder id of the user, used for upload and browse operations
+        userStatus:
+          type: string
+          enum:
+            - active
+            - inactive
+          description: Status of the user account
       required:
         - id
     Analysis:
