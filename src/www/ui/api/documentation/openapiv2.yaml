@@ -2691,6 +2691,137 @@ paths:
 
         default:
           $ref: '#/components/responses/defaultResponse'
+  /users/import:
+    post:
+      operationId: importUsers
+      tags:
+        - User
+        - Admin
+      summary: Import users from a CSV or JSON file
+      description: >
+        Bulk create users from an uploaded CSV or JSON file, in the
+        format produced by /users/export. Parser is chosen by the
+        fileInput extension. Row failures don't stop the rest of the
+        file; see "message" for a per-row summary.
+      requestBody:
+        description: Users CSV or JSON file to import.
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileInput:
+                  type: string
+                  format: binary
+                  description: CSV or JSON file to import.
+                delimiter:
+                  type: string
+                  description: >
+                    CSV column delimiter (comma, semicolon, or tab).
+                    Ignored for JSON.
+                  enum: [",", ";", "\t"]
+                  default: ","
+                enclosure:
+                  type: string
+                  description: >
+                    CSV field enclosure (double or single quote).
+                    Ignored for JSON.
+                  enum: ['"', "'"]
+                  default: '"'
+              required:
+                - fileInput
+      responses:
+        '200':
+          description: >
+            At least one row imported; "message" has a per-row summary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: >
+            Invalid file, delimiter, or enclosure, or every row failed
+            (see "message" for details).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: The session owner is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /users/export:
+    get:
+      operationId: exportUsers
+      tags:
+        - User
+        - Admin
+      summary: Export all users as CSV or JSON
+      description: >
+        Export all users as CSV or JSON, using the UserImportExport
+        shape. Output is re-importable via /users/import as-is.
+      parameters:
+        - name: format
+          in: query
+          description: Export format, case-insensitive.
+          required: false
+          schema:
+            type: string
+            enum: [csv, json]
+            default: csv
+          example: csv
+        - name: delimiter
+          in: query
+          description: >
+            CSV column delimiter (comma, semicolon, or tab). Ignored
+            when format=json.
+          required: false
+          schema:
+            type: string
+            enum: [",", ";", "\t"]
+            default: ","
+        - name: enclosure
+          in: query
+          description: >
+            CSV field enclosure (double or single quote). Ignored when
+            format=json.
+          required: false
+          schema:
+            type: string
+            enum: ['"', "'"]
+            default: '"'
+      responses:
+        '200':
+          description: Successfully exported
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserImportExport'
+        '400':
+          description: Invalid format, delimiter, or enclosure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: The session owner is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
 
   /uploads/{id}/item/{itemId}/copyrights:
     parameters: *cxGetParams
@@ -6164,6 +6295,77 @@ components:
         kotoba:
           type: boolean
           description: Should Kotoba Bulk Analysis be run on this upload.
+    UserImportExportAgents:
+      type: object
+      description: >
+        Agent flags used by /users/import and /users/export. Excludes
+        pkgagent, softwareHeritage, ipra and kotoba.
+      properties:
+        bucket:
+          type: boolean
+        copyrightEmailAuthor:
+          type: boolean
+        ecc:
+          type: boolean
+        keyword:
+          type: boolean
+        mime:
+          type: boolean
+        monk:
+          type: boolean
+        nomos:
+          type: boolean
+        ojo:
+          type: boolean
+        reso:
+          type: boolean
+    UserImportExport:
+      type: object
+      description: >
+        A single user row, as returned by /users/export?format=json and
+        accepted by /users/import. The CSV form flattens "agents" into
+        agent_bucket, agent_ecc, etc. columns.
+      properties:
+        id:
+          type: integer
+          nullable: true
+          description: Informational on export; ignored on import.
+        name:
+          type: string
+          description: Unique username. Required on import.
+        userPass:
+          type: string
+          description: >
+            Plaintext new-account password. Required on import; omitted
+            from /users/export output.
+        description:
+          type: string
+        email:
+          type: string
+        accessLevel:
+          type: string
+          enum:
+            - none
+            - read_only
+            - read_write
+            - clearing_admin
+            - admin
+        rootFolderId:
+          type: number
+          format: int
+        defaultGroup:
+          type: string
+          nullable: true
+          description: Informational on export; ignored on import.
+        emailNotification:
+          type: boolean
+        defaultBucketpool:
+          type: integer
+          nullable: true
+        agents:
+          $ref: '#/components/schemas/UserImportExportAgents'
+      required:
+        - name
     Reuser:
       type: object
       properties:
