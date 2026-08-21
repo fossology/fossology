@@ -848,7 +848,7 @@ class LicenseController extends RestController
   }
 
   /**
-   * Export licenses to CSV file
+   * Export all licenses (main + candidates) to CSV file
    *
    * @param Request $request
    * @param ResponseHelper $response
@@ -858,34 +858,11 @@ class LicenseController extends RestController
    */
   public function exportAdminLicenseToCSV($request, $response, $args)
   {
-    $this->throwNotAdminException();
-    $query = $request->getQueryParams();
-    $rf = 0;
-    if (array_key_exists('id', $query)) {
-      $rf = intval($query['id']);
-    }
-    if ($rf != 0 &&
-        (! $this->dbHelper->doesIdExist("license_ref", "rf_pk", $rf) &&
-         ! $this->dbHelper->doesIdExist("license_candidate", "rf_pk", $rf))) {
-      throw new HttpNotFoundException("License not found.");
-    }
-    $dbManager = $this->dbHelper->getDbManager();
-    $licenseCsvExport = new LicenseCsvExport($dbManager);
-    $content = $licenseCsvExport->createCsv($rf);
-    $fileName = "fossology-license-export-" . date("YMj-Gis");
-    $newResponse = $response->withHeader('Content-type', 'text/csv, charset=UTF-8')
-      ->withHeader('Content-Disposition', 'attachment; filename=' . $fileName . '.csv')
-      ->withHeader('Pragma', 'no-cache')
-      ->withHeader('Cache-Control', 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0')
-      ->withHeader('Expires', 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
-    $sf = new StreamFactory();
-    return $newResponse->withBody(
-      $content ? $sf->createStream($content) : $sf->createStream('')
-    );
+    return $this->exportLicenseFile($request, $response, false, false);
   }
 
   /**
-   * Export licenses to JSON file
+   * Export all licenses (main + candidates) to JSON file
    *
    * @param Request $request
    * @param ResponseHelper $response
@@ -894,6 +871,52 @@ class LicenseController extends RestController
    * @throws HttpErrorException
    */
   public function exportAdminLicenseToJSON($request, $response, $args)
+  {
+    return $this->exportLicenseFile($request, $response, true, false);
+  }
+
+  /**
+   * Export only marydone (approved merge-request) candidate licenses to CSV
+   * file
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function exportAdminLicenseMarydoneToCSV($request, $response, $args)
+  {
+    return $this->exportLicenseFile($request, $response, false, true);
+  }
+
+  /**
+   * Export only marydone (approved merge-request) candidate licenses to
+   * JSON file
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function exportAdminLicenseMarydoneToJSON($request, $response, $args)
+  {
+    return $this->exportLicenseFile($request, $response, true, true);
+  }
+
+  /**
+   * Build the CSV/JSON license export response.
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param boolean $asJson       Export as JSON instead of CSV
+   * @param boolean $marydoneOnly Restrict export to marydone candidate
+   *                              licenses instead of all licenses
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  private function exportLicenseFile($request, $response, $asJson, $marydoneOnly)
   {
     $this->throwNotAdminException();
     $query = $request->getQueryParams();
@@ -908,10 +931,15 @@ class LicenseController extends RestController
     }
     $dbManager = $this->dbHelper->getDbManager();
     $licenseCsvExport = new LicenseCsvExport($dbManager);
-    $content = $licenseCsvExport->createCsv($rf, false, true);
-    $fileName = "fossology-license-export-" . date("YMj-Gis");
-    $newResponse = $response->withHeader('Content-type', 'text/json, charset=UTF-8')
-      ->withHeader('Content-Disposition', 'attachment; filename=' . $fileName . '.json')
+    $content = $licenseCsvExport->createCsv($rf, ! $marydoneOnly, $asJson);
+
+    $suffix = $marydoneOnly ? "-marydone" : "";
+    $extension = $asJson ? "json" : "csv";
+    $contentType = $asJson ? "text/json, charset=UTF-8" : "text/csv, charset=UTF-8";
+    $fileName = "fossology-license-export" . $suffix . "-" . date("YMj-Gis");
+
+    $newResponse = $response->withHeader('Content-type', $contentType)
+      ->withHeader('Content-Disposition', 'attachment; filename=' . $fileName . '.' . $extension)
       ->withHeader('Pragma', 'no-cache')
       ->withHeader('Cache-Control', 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0')
       ->withHeader('Expires', 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
