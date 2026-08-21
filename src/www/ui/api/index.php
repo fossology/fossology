@@ -303,6 +303,7 @@ $app->group('/obligations',
     $app->get('/list', ObligationController::class . ':obligationsList');
     $app->get('/{id:\\d+}', ObligationController::class . ':obligationsDetails');
     $app->get('', ObligationController::class . ':obligationsAllDetails');
+    $app->post('', ObligationController::class . ':createObligation');
     $app->delete('/{id:\\d+}', ObligationController::class . ':deleteObligation');
     $app->get('/export-csv', ObligationController::class . ':exportObligationsToCSV');
     $app->post('/import-csv', ObligationController::class . ':importObligationsFromCSV');

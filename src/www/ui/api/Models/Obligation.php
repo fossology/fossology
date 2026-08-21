@@ -19,6 +19,13 @@ namespace Fossology\UI\Api\Models;
 class Obligation
 {
   /**
+   * @var array ALLOWED_KEYS
+   * Keys allowed while creating an obligation from a request body
+   */
+  const ALLOWED_KEYS = ["topic", "type", "text", "classification", "comment",
+    "modification", "active", "textUpdatable", "licenses", "candidateLicenses"];
+
+  /**
    * @var integer $id
    * Obligation id
    */
@@ -406,5 +413,50 @@ class Obligation
       }
     }
     return $obligation;
+  }
+
+  /**
+   * Parse an Obligation object from an associative array (e.g. request body).
+   *
+   * @param array $inputObligation Array with obligation properties
+   * @return Obligation|integer New obligation object, or -1 if the array
+   *         contains keys other than ALLOWED_KEYS, -2 if 'topic' is missing
+   *         or empty, -3 if 'text' is missing or empty
+   */
+  public static function parseFromArray($inputObligation)
+  {
+    $inputKeys = array_keys($inputObligation);
+    $intersectKeys = array_intersect($inputKeys, self::ALLOWED_KEYS);
+    if (count($inputKeys) > 0 && count($intersectKeys) != count($inputKeys)) {
+      return -1;
+    }
+    if (! array_key_exists('topic', $inputObligation) || empty($inputObligation['topic'])) {
+      return -2;
+    }
+    if (! array_key_exists('text', $inputObligation) || empty($inputObligation['text'])) {
+      return -3;
+    }
+
+    $newObligation = new Obligation(0, $inputObligation['topic'],
+      array_key_exists('type', $inputObligation) ? $inputObligation['type'] : 'Obligation',
+      $inputObligation['text'],
+      array_key_exists('classification', $inputObligation) ? $inputObligation['classification'] : 'green',
+      array_key_exists('comment', $inputObligation) ? $inputObligation['comment'] : '',
+      true);
+    $newObligation->setActive(array_key_exists('active', $inputObligation) ? $inputObligation['active'] : true);
+    $newObligation->setTextUpdatable(array_key_exists('textUpdatable', $inputObligation) ? $inputObligation['textUpdatable'] : true);
+    $newObligation->setModification(array_key_exists('modification', $inputObligation) ? $inputObligation['modification'] : false);
+
+    if (array_key_exists('licenses', $inputObligation) && is_array($inputObligation['licenses'])) {
+      foreach ($inputObligation['licenses'] as $license) {
+        $newObligation->addLicense($license);
+      }
+    }
+    if (array_key_exists('candidateLicenses', $inputObligation) && is_array($inputObligation['candidateLicenses'])) {
+      foreach ($inputObligation['candidateLicenses'] as $license) {
+        $newObligation->addCandidateLicense($license);
+      }
+    }
+    return $newObligation;
   }
 }
