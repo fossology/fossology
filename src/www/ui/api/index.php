@@ -41,6 +41,7 @@ use Fossology\UI\Api\Controllers\OverviewController;
 use Fossology\UI\Api\Controllers\OsselotController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
+use Fossology\UI\Api\Controllers\TagController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UploadTreeController;
 use Fossology\UI\Api\Controllers\UserController;
@@ -227,6 +228,7 @@ $app->group('/uploads',
     $app->put('/{id:\\d+}/conf', ConfController::class . ':updateConfData');
     $app->get('/{id:\\d+}/copyrights', UploadController::class . ':getUploadCopyrights');
     $app->post('/{id:\\d+}/osselot/import', OsselotController::class . ':importOsselotReport');
+    $app->put('/{id:\\d+}/tags/display', TagController::class . ':setTagDisplayStatus');
     ////////////////////////// BULK FOR CX OPERATIONS /////////////////////
     $app->group('/{id:\\d+}/item/{itemId:\\d+}', function (\Slim\Routing\RouteCollectorProxy $app) {
       $app->get('/copyrights', CopyrightController::class . ':getFileCopyrights');
@@ -308,6 +310,13 @@ $app->group('/obligations',
     $app->post('/import-csv', ObligationController::class . ':importObligationsFromCSV');
     $app->get('/export-json', ObligationController::class . ':exportObligationsToJSON');
     $app->post('/import-json', ObligationController::class . ':importObligationsFromJSON');
+    $app->any('/{params:.*}', BadRequestController::class);
+  });
+
+////////////////////////////TAGS/////////////////////
+$app->group('/tags',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->post('', TagController::class . ':createTag');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
