@@ -1177,4 +1177,77 @@ INSERT INTO clearing_decision (
 
     return count($countUpdated);
   }
+
+  /**
+   * @brief Get clearing coverage (files of interest vs finally decided) per upload
+   *
+   * Mirrors the clearing-progress semantics of the UI (UploadTreeProxy):
+   * only real files count that are "of interest", i.e. have scanner findings
+   * (license_file rows other than No_license_found/Void) or an explicit
+   * clearing decision for the given group. A file counts as cleared when its
+   * latest decision for the group is one of the final decision types
+   * (Irrelevant, Identified, DoNotUse, NonFunctional).
+   * Note: unlike UploadTreeProxy, license findings are not restricted to the
+   * latest successful agent runs.
+   * @param int[] $uploadIds
+   * @param int $groupId
+   * @return array[] Map of uploadId => ['total'=>int, 'cleared'=>int]
+   */
+  public function getClearingCoverage($uploadIds, $groupId)
+  {
+    $uploadIds = array_values(array_unique(array_map('intval', $uploadIds)));
+    if (empty($uploadIds)) {
+      return [];
+    }
+
+    $placeholders = [];
+    $params = [];
+    for ($i = 0; $i < count($uploadIds); $i++) {
+      $placeholders[] = '$' . ($i + 1);
+      $params[] = $uploadIds[$i];
+    }
+    $inClause = implode(',', $placeholders);
+    $groupIdPlaceholder = '$' . (count($uploadIds) + 1);
+    $params[] = $groupId;
+
+    $finalTypes = implode(',', [
+      DecisionTypes::IRRELEVANT,
+      DecisionTypes::IDENTIFIED,
+      DecisionTypes::DO_NOT_USE,
+      DecisionTypes::NON_FUNCTIONAL]);
+
+    $coverage = [];
+    $stmtName = __METHOD__;
+    $this->dbManager->prepare($stmtName,
+      "SELECT ut.upload_fk, COUNT(*) AS total_files,
+              COUNT(*) FILTER (WHERE ld.decision_type IN ($finalTypes)) AS cleared_files
+       FROM uploadtree ut
+       LEFT JOIN LATERAL (SELECT cd.decision_type
+                          FROM clearing_decision cd
+                          WHERE cd.uploadtree_fk = ut.uploadtree_pk
+                            AND cd.group_fk = $groupIdPlaceholder
+                          ORDER BY cd.clearing_decision_pk DESC LIMIT 1) ld ON TRUE
+       WHERE ut.upload_fk IN ($inClause)
+         AND (ut.ufile_mode & (3<<28)) = 0
+         AND ut.pfile_fk != 0
+         AND (EXISTS (SELECT 1 FROM license_file lf
+                      JOIN license_ref lr ON lr.rf_pk = lf.rf_fk
+                      WHERE lf.pfile_fk = ut.pfile_fk
+                        AND lr.rf_shortname NOT IN ('No_license_found','Void'))
+           OR ld.decision_type IS NOT NULL)
+       GROUP BY ut.upload_fk");
+    $res = $this->dbManager->execute($stmtName, $params);
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $coverage[intval($row['upload_fk'])] =
+        ['total' => intval($row['total_files']), 'cleared' => intval($row['cleared_files'])];
+    }
+    $this->dbManager->freeResult($res);
+
+    foreach ($uploadIds as $uploadId) {
+      if (!isset($coverage[$uploadId])) {
+        $coverage[$uploadId] = ['total' => 0, 'cleared' => 0];
+      }
+    }
+    return $coverage;
+  }
 }
