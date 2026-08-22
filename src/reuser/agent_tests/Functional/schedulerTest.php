@@ -165,20 +165,20 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   private function setUpTables()
   {
     $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree',
-      'uploadtree_a','license_ref','license_ref_bulk','clearing_decision',
+      'uploadtree_a','license_ref','license_ref_bulk','license_set_bulk','clearing_decision',
       'clearing_decision_event','clearing_event','license_file','highlight',
       'highlight_bulk','agent','pfile','ars_master','users','group_user_member',
-      'upload_clearing_license','report_info'),false);
+      'upload_clearing_license','report_info','job','jobqueue','jobdepends'),false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq',
       'upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq',
       'license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq',
       'clearing_decision_clearing_decision_pk_seq',
-      'clearing_event_clearing_event_pk_seq','report_info_pk_seq'),false);
+      'clearing_event_clearing_event_pk_seq','report_info_pk_seq','job_job_pk_seq','jobqueue_jq_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey',
       'upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master',
-      'license_ref_bulk','license_ref','clearing_event','clearing_decision','license_file','highlight'),false);
+      'license_ref_bulk','license_set_bulk','license_ref','clearing_event','clearing_decision','license_file','highlight','job','jobqueue'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('monk'));
 
@@ -465,81 +465,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
-   * @brief Run reuser with enhanced flag on upload with clearing
-   * @param SchedulerTestRunner $runner
-   */
-  private function runnerReuserScanWithARepoClearingEnhanced($runner)
-  {
-    $this->setUpTables();
-    $this->setUpRepo();
-
-    $originallyClearedItemId = 23;
-    /* upload 3 in the test db is the same as upload 2 -> items 13-24 in upload 2 correspond to 33-44 */
-    $reusingUploadItemShift = 20;
-
-    $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2,$this->groupId,$this->groupId,$reuseMode=2);
-
-    $repoPath = $this->testDb->getFossSysConf().'/repo/files/';
-    $this->treeDao->shouldReceive('getRepoPathOfPfile')->with(4)->andReturn($repoPath
-      .'04621571bcbabce75c4dd1c6445b87dec0995734.59cacdfce5051cd8a1d8a1f2dcce40a5.12320');
-    $this->treeDao->shouldReceive('getRepoPathOfPfile')->with(351)->andReturn($repoPath
-      .'c518ce1658140b65fa0132ad1130cb91512416bf.8e913e594d24ff3aeabe350107d97815.35829');
-
-    list($clearingLicense1, $clearingLicense2, $addedEventIds) = $this->insertDecisionFromTwoEvents(
-      DecisionScopes::REPO,$originallyClearedItemId);
-    $clearingLicenses = array($clearingLicense1, $clearingLicense2);
-
-    list($success,$output,$retCode) = $runner->run($uploadId, $this->userId, $this->groupId);
-
-    $this->assertTrue($success, 'cannot run runner');
-    $this->assertEquals($retCode, 0, 'reuser failed: '.$output);
-
-    $newUploadClearings = $this->getFilteredClearings($uploadId, $this->groupId);
-    $potentiallyReusableClearings = $this->getFilteredClearings($reusedUpload, $this->groupId);
-
-    assertThat($newUploadClearings, is(arrayWithSize(1)));
-
-    assertThat($potentiallyReusableClearings, is(arrayWithSize(1)));
-    /** @var ClearingDecision */
-    $potentiallyReusableClearing = $potentiallyReusableClearings[0];
-    /** @var ClearingDecision */
-    $newClearing = $newUploadClearings[0];
-
-    /* they are actually the same ClearingDecision
-     * only sameFolder and sameUpload are different */
-    assertThat($newClearing, not(equalTo($potentiallyReusableClearing)));
-
-    assertThat($newClearing->getClearingLicenses(), arrayContainingInAnyOrder($clearingLicenses));
-
-    assertThat($newClearing->getType(), equalTo($potentiallyReusableClearing->getType()));
-    assertThat($newClearing->getScope(), equalTo($potentiallyReusableClearing->getScope()));
-
-    assertThat($newClearing->getUploadTreeId(),
-            equalTo($potentiallyReusableClearing->getUploadTreeId() + $reusingUploadItemShift));
-
-    /* reuser should have not created a correct local event history */
-    $bounds = $this->uploadDao->getItemTreeBounds($originallyClearedItemId + $reusingUploadItemShift);
-    $newEvents = $this->clearingDao->getRelevantClearingEvents($bounds, $this->groupId);
-
-    assertThat($newEvents, is(arrayWithSize(count($clearingLicenses))));
-
-    /** @var ClearingEvent $newEvent */
-    foreach ($newEvents as $newEvent) {
-      assertThat($newEvent->getEventId(), anyOf($addedEventIds));
-      assertThat($newEvent->getClearingLicense(), anyOf($clearingLicenses));
-    }
-    /*reuse main license*/
-    $this->clearingDao->makeMainLicense($uploadId=2, $this->groupId, $mainLicenseId=402);
-    $mainLicenseIdForReuse = $this->clearingDao->getMainLicenseIds($reusedUploadId=2, $this->groupId);
-    $mainLicenseIdForReuseSingle = array_values($mainLicenseIdForReuse);
-    $this->clearingDao->makeMainLicense($uploadId=3, $this->groupId, $mainLicenseIdForReuseSingle[0]);
-    $mainLicense=$this->clearingDao->getMainLicenseIds($uploadId=3, $this->groupId);
-    $mainLicenseSingle = array_values($mainLicense);
-    $this->assertEquals($mainLicenseIdForReuseSingle, $mainLicenseSingle);
-    $this->rmRepo();
-  }
-
-  /**
    * @brief Test multiple reuse selections validation logic
    * @test
    * -# Test the validation logic for multiple reuse selections
@@ -682,5 +607,51 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
         throw new \InvalidArgumentException("Reuser: Invalid reuse selection format: '$malformedValue' (expected format: 'uploadId,groupId')");
       }
     }
+  }
+
+  /** @group Functional */
+  public function testReuserRealBulkReuseShouldScheduleMonkBulk()
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
+    $licId1 = $licenseRef1->getId();
+
+    $agentBulk = 6;
+    $pfile = 4;
+    $jobId = 16;
+    $otherJob = 333;
+    $groupId = 2;
+
+    $this->dbManager->queryOnce("DELETE FROM license_file");
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$agentBulk)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,12,3)");
+    $this->dbManager->queryOnce("INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed, jq_log, jq_runonpfile, jq_host, jq_cmd_args)"
+            . " VALUES ($jobId, 2, 'reuser', '123456', '2014-08-07 09:57:27.718312+00', NULL, '', 0, NULL, 6, NULL, NULL, NULL, NULL)");
+
+    $this->dbManager->queryOnce("INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed, jq_log, jq_runonpfile, jq_host, jq_cmd_args)"
+            . " VALUES ($jobId-1, $otherJob, 'monkbulk', '123456', '2014-08-07 09:22:22.718312+00', NULL, '', 0, NULL, 6, NULL, NULL, NULL, NULL)");
+    $this->dbManager->queryOnce("INSERT INTO job (job_pk, job_queued, job_priority, job_upload_fk, job_user_fk, job_group_fk)"
+            . " VALUES ($otherJob, '2014-08-07 09:22:22.718312+00', 0, 1, 2, $groupId)");
+
+    $this->dbManager->queryOnce("INSERT INTO license_ref_bulk (lrb_pk, user_fk, group_fk, rf_text, upload_fk, uploadtree_fk) VALUES (123456, 2, $groupId, 'foo bar', 1, 1)");
+    $this->dbManager->queryOnce("INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing) VALUES (123456, $licId1, 'f')");
+
+    $this->dbManager->queryOnce("INSERT INTO upload_reuse (upload_fk, reused_upload_fk, group_fk, reused_group_fk, reuse_mode)"
+            . " VALUES (2, 1, $groupId, $groupId, 8)");
+
+    list($success,$output,$retCode) = $this->runnerCli->run($uploadId=2, $userId=2, $groupId);
+
+    $this->assertTrue($success, 'cannot run runner');
+    $this->assertEquals($retCode, 0, 'reuser failed: '.$output);
+
+    $monkbulkRows = $this->dbManager->getRows("SELECT * FROM jobqueue WHERE jq_type = 'monkbulk' AND jq_pk != $jobId-1");
+    $this->assertCount(1, $monkbulkRows);
+
+    $deciderRows = $this->dbManager->getRows("SELECT * FROM jobqueue WHERE jq_type = 'deciderjob'");
+    $this->assertCount(1, $deciderRows);
+
+    $this->rmRepo();
   }
 }

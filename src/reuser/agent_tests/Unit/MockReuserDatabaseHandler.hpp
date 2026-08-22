@@ -56,9 +56,6 @@ public:
   std::function<bool(int, int, int, int, int)>
     onProcessUploadReuse;
 
-  std::function<bool(int, int, int, int, int)>
-    onProcessEnhancedUploadReuse;
-
   std::function<bool(int, int, int, int)>
     onReuseMainLicense;
 
@@ -67,6 +64,15 @@ public:
 
   std::function<bool(int, int, int)>
     onReuseCopyrights;
+
+  std::function<bool(int, int, int)>
+    onProcessBulkReuser;
+
+  std::function<bool(int)>
+    onIsJobQueueRunning;
+
+  std::function<int(int)>
+    onGetEstimatedTime;
 
   // ── ReuserDatabaseHandler overrides ──────────────────────────────────────
 
@@ -107,15 +113,6 @@ public:
     return true;
   }
 
-  bool processEnhancedUploadReuse(int uploadId, int reusedUploadId,
-    int groupId, int reusedGroupId, int userId) override
-  {
-    if (onProcessEnhancedUploadReuse)
-      return onProcessEnhancedUploadReuse(uploadId, reusedUploadId, groupId,
-        reusedGroupId, userId);
-    return true;
-  }
-
   bool reuseMainLicense(int uploadId, int groupId,
     int reusedUploadId, int reusedGroupId) override
   {
@@ -136,5 +133,24 @@ public:
     if (onReuseCopyrights)
       return onReuseCopyrights(uploadId, reusedUploadId, userId);
     return true;
+  }
+
+  bool processBulkReuser(int uploadId, int groupId, int userId) override
+  {
+    if (onProcessBulkReuser)
+      return onProcessBulkReuser(uploadId, groupId, userId);
+    return true;
+  }
+
+  bool isJobQueueRunning(int jqPk) override
+  {
+    if (onIsJobQueueRunning) return onIsJobQueueRunning(jqPk);
+    return false;
+  }
+
+  int getEstimatedTime(int jqPk) override
+  {
+    if (onGetEstimatedTime) return onGetEstimatedTime(jqPk);
+    return 0;
   }
 };

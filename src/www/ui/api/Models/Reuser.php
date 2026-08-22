@@ -46,6 +46,11 @@ class Reuser
    * Use enhanced reuse
    */
   private $reuseCopyright;
+  /**
+   * @var boolean $reuseBulk
+   * Reuse bulk decisions
+   */
+  private $reuseBulk;
 
   /**
    * Reuser constructor.
@@ -84,6 +89,7 @@ class Reuser
     $this->reuseEnhanced = $reuseEnhanced;
     $this->reuseReport = false;
     $this->reuseCopyright = false;
+    $this->reuseBulk = false;
   }
 
   /**
@@ -113,6 +119,9 @@ class Reuser
     }
     if (array_key_exists(($version == ApiVersion::V2? "reuseCopyright" : "reuse_copyright"), $reuserArray)) {
       $this->setReuseCopyright($reuserArray[$version == ApiVersion::V2? "reuseCopyright" : "reuse_copyright"]);
+    }
+    if (array_key_exists(($version == ApiVersion::V2? "reuseBulk" : "reuse_bulk"), $reuserArray)) {
+      $this->setReuseBulk($reuserArray[$version == ApiVersion::V2? "reuseBulk" : "reuse_bulk"]);
     }
     if ($this->reuseUpload === null || (is_array($this->reuseUpload) && empty($this->reuseUpload))) {
       throw new \UnexpectedValueException(
@@ -184,6 +193,14 @@ class Reuser
   public function getReuseCopyright()
   {
     return $this->reuseCopyright;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getReuseBulk()
+  {
+    return $this->reuseBulk;
   }
 
   ////// Setters //////
@@ -260,6 +277,15 @@ class Reuser
   }
 
   /**
+   * @param boolean $reuseBulk
+   */
+  public function setReuseBulk($reuseBulk)
+  {
+    $this->reuseBulk = filter_var($reuseBulk,
+      FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
    * Get reuser info as an associative array
    * @return array
    */
@@ -272,7 +298,8 @@ class Reuser
         "reuseMain"      => $this->reuseMain,
         "reuseEnhanced"  => $this->reuseEnhanced,
         "reuseReport"    => $this->reuseReport,
-        "reuseCopyright" => $this->reuseCopyright
+        "reuseCopyright" => $this->reuseCopyright,
+        "reuseBulk"      => $this->reuseBulk
       ];
     } else {
       return [
@@ -281,7 +308,8 @@ class Reuser
         "reuse_main"      => $this->reuseMain,
         "reuse_enhanced"  => $this->reuseEnhanced,
         "reuse_report"    => $this->reuseReport,
-        "reuse_copyright" => $this->reuseCopyright
+        "reuse_copyright" => $this->reuseCopyright,
+        "reuse_bulk"      => $this->reuseBulk
       ];
     }
   }

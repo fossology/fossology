@@ -7,14 +7,15 @@
 #include "ReuserDatabaseHandler.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <set>
 #include <sstream>
-#include <sys/wait.h>
-
-#include <unicode/unistr.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
 
 extern "C" {
 #include "libfossagent.h"
@@ -34,142 +35,12 @@ ReuserDatabaseHandler ReuserDatabaseHandler::spawn() const
   return ReuserDatabaseHandler(dbManager.spawn());
 }
 
-// Private helpers
-
-/* Mirror of DecisionTypes.php; keep in sync if the PHP enum changes.
- * Types 1 and 2 do not exist in that enum; default covers them. */
-namespace {
-  constexpr int DT_WIP = 0;
-  constexpr int DT_TO_BE_DISCUSSED = 3;
-  constexpr int DT_IRRELEVANT = 4;
-  constexpr int DT_IDENTIFIED = 5;
-  constexpr int DT_DO_NOT_USE = 6;
-  constexpr int DT_NON_FUNCTIONAL = 7;
-}
-
-int ReuserDatabaseHandler::getDecisionTypePriority(int decisionType)
-{
-  switch (decisionType)
-  {
-    case DT_IDENTIFIED: return 5;
-    case DT_DO_NOT_USE: return 4;
-    case DT_NON_FUNCTIONAL: return 3;
-    case DT_IRRELEVANT: return 2;
-    case DT_TO_BE_DISCUSSED: return 1;
-    default: return 0;
-  }
-}
-
-bool ReuserDatabaseHandler::isValidIdentifier(const std::string& s)
-{
-  if (s.empty()) return false;
-  for (char c : s)
-    if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-          (c >= '0' && c <= '9') || c == '_'))
-      return false;
-  return true;
-}
-
-std::string ReuserDatabaseHandler::replaceUnicodeControlChars(
-  const std::string& input)
-{
-  icu::UnicodeString us = icu::UnicodeString::fromUTF8(input);
-  icu::UnicodeString result;
-  for (int32_t i = 0; i < us.length(); ++i)
-  {
-    UChar32 cp = us.char32At(i);
-    if (cp > 0xFFFF) ++i; // surrogate pair: char32At already consumed 2 units
-    bool isControl = (cp <= 0x08)
-                  || (cp == 0x0B)
-                  || (cp == 0x0C)
-                  || (cp >= 0x0E && cp <= 0x1F)
-                  || (cp >= 0x7F && cp <= 0x9F);
-    if (!isControl)
-      result.append(cp);
-  }
-  std::string out;
-  result.toUTF8String(out);
-  return out;
-}
-
-std::string ReuserDatabaseHandler::shellEscape(const std::string& s)
-{
-  std::string r = "'";
-  for (char c : s)
-    r += (c == '\'') ? std::string("'\\''") : std::string(1, c);
-  r += "'";
-  return r;
-}
-
-int ReuserDatabaseHandler::diffLineCount(const std::string& a,
-  const std::string& b)
-{
-  if (a.empty() || b.empty()) return -1;
-
-  // Run diff directly (no pipeline) so pclose() returns diff's own exit code.
-  // Redirect diff's stderr to suppress "no such file" noise.
-  std::string cmd = "diff -- " + shellEscape(a) + " " + shellEscape(b)
-                  + " 2>/dev/null";
-  FILE* pipe = popen(cmd.c_str(), "r");
-  if (!pipe) return -1;
-
-  int lines = 0;
-  char buf[4096];
-  while (fgets(buf, sizeof(buf), pipe))
-    ++lines;
-
-  int status = pclose(pipe);
-  // diff exit codes: 0 = identical, 1 = differences found, 2 = error.
-  if (WIFEXITED(status) && WEXITSTATUS(status) == 2)
-    return -1;
-
-  return lines;
-}
-
-std::string ReuserDatabaseHandler::getRepoPathOfPfile(int pfileId)
-{
-  char* pfileName =
-    getPFileNameForFileId(static_cast<unsigned long>(pfileId));
-  if (!pfileName) return {};
-  char* filePath = fo_RepMkPath("files", pfileName);
-  free(pfileName);
-  if (!filePath) return {};
-  std::string result(filePath);
-  free(filePath);
-  return result;
-}
-
-// Upload-tree helpers
+// ── Upload-tree helpers ───────────────────────────────────────────────────────
 
 bool ReuserDatabaseHandler::getParentItemBounds(int uploadId,
   ItemTreeBounds& out)
 {
-  std::string table = queryUploadTreeTableName(uploadId);
-  if (!isValidIdentifier(table)) return false;
-
-  bool needsUploadFilter =
-    (table == "uploadtree" || table == "uploadtree_a");
-
-  QueryResult result =
-    needsUploadFilter
-    ? dbManager.queryPrintf(
-        "SELECT uploadtree_pk, upload_fk, lft, rgt"
-        " FROM %s WHERE parent IS NULL AND upload_fk=%d",
-        table.c_str(), uploadId)
-    : dbManager.queryPrintf(
-        "SELECT uploadtree_pk, upload_fk, lft, rgt"
-        " FROM %s WHERE parent IS NULL",
-        table.c_str());
-
-  if (!result || result.getRowCount() == 0) return false;
-
-  auto row = result.getRow(0);
-  out.uploadtree_pk = std::stoi(row[0]);
-  out.uploadTreeTableName = table;
-  out.upload_fk = std::stoi(row[1]);
-  out.lft = std::stoi(row[2]);
-  out.rgt = std::stoi(row[3]);
-  return true;
+  return ClearingDecisionUtils::getParentItemBounds(dbManager, uploadId, out);
 }
 
 // Reuse relationship queries
@@ -177,111 +48,14 @@ bool ReuserDatabaseHandler::getParentItemBounds(int uploadId,
 std::vector<ReuseTriple> ReuserDatabaseHandler::getReusedUploads(
   int uploadId, int groupId)
 {
-  std::vector<ReuseTriple> result;
-
-  QueryResult qr = dbManager.execPrepared(
-    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-      "reuserGetReusedUploads",
-      "SELECT reused_upload_fk, reused_group_fk, reuse_mode"
-      " FROM upload_reuse"
-      " WHERE upload_fk=$1 AND group_fk=$2"
-      " ORDER BY date_added DESC",
-      int, int),
-    uploadId, groupId);
-
-  for (int i = 0; i < qr.getRowCount(); ++i)
-  {
-    auto row = qr.getRow(i);
-    result.push_back({std::stoi(row[0]), std::stoi(row[1]),
-                      std::stoi(row[2])});
-  }
-  return result;
+  return ClearingDecisionUtils::getReusedUploads(dbManager, uploadId, groupId);
 }
 
 std::map<int, int> ReuserDatabaseHandler::getClearingDecisionMapByPfile(
   int uploadId, int groupId)
 {
-  std::map<int, int> result;
-
-  std::string table = queryUploadTreeTableName(uploadId);
-  if (!isValidIdentifier(table)) return result;
-
-  bool needsUploadFilter =
-    (table == "uploadtree" || table == "uploadtree_a");
-
-  // Determine whether global (REPO) decisions should be applied.
-  bool applyGlobal = true;
-  QueryResult globalQr = dbManager.execPrepared(
-    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-      "reuserGetGlobalDecision",
-      // Cast int2 to boolean so PostgreSQL returns 't'/'f' regardless of storage
-      // format ('1'/'0' vs 'true'/'false'); stringToBool only recognises 't'/'true'.
-      "SELECT (ri_globaldecision != 0) FROM report_info WHERE upload_fk=$1",
-      int),
-    uploadId);
-  if (globalQr && globalQr.getRowCount() > 0)
-    applyGlobal = fo::stringToBool(globalQr.getRow(0)[0].c_str());
-
-  // Omit scope=0 check to mirror PHP ClearingDao::getRelevantDecisionsCte.
-  std::string joinCond =
-    applyGlobal
-    ? "(ut.pfile_fk = cd.pfile_fk AND cd.scope = 1)"
-      " OR (ut.uploadtree_pk = cd.uploadtree_fk"
-      " AND cd.scope = 0 AND cd.group_fk = " + std::to_string(groupId) + ")"
-    : "(ut.uploadtree_pk = cd.uploadtree_fk"
-      " AND cd.group_fk = " + std::to_string(groupId) + ")";
-
-  std::string uploadFilter =
-    needsUploadFilter
-    ? " AND ut.upload_fk = " + std::to_string(uploadId)
-    : "";
-
-  // Inner CTE: best decision per uploadtree_pk (ITEM before REPO, newest first).
-  // Outer CTE: all rows kept for priority-based conflict resolution.
-  QueryResult qr = dbManager.queryPrintf(
-    "WITH per_item AS ("
-    " SELECT DISTINCT ON(ut.uploadtree_pk)"
-    "   cd.clearing_decision_pk AS id,"
-    "   cd.pfile_fk AS pfile_id,"
-    "   cd.decision_type AS dec_type"
-    " FROM clearing_decision cd"
-    " INNER JOIN %s ut ON (%s)%s"
-    " WHERE cd.decision_type != 0"
-    " ORDER BY ut.uploadtree_pk, cd.scope ASC,"
-    "          cd.clearing_decision_pk DESC"
-    "),"
-    " per_pfile AS ("
-    " SELECT id, pfile_id, dec_type"
-    " FROM per_item"
-    " ORDER BY pfile_id, id DESC"
-    ")"
-    " SELECT id, pfile_id, dec_type FROM per_pfile",
-    table.c_str(), joinCond.c_str(), uploadFilter.c_str());
-
-  std::map<int, int> resultTypes;
-
-  for (int i = 0; i < qr.getRowCount(); ++i)
-  {
-    auto row = qr.getRow(i);
-    int decId = std::stoi(row[0]);
-    int pfileId = std::stoi(row[1]);
-    int decType = std::stoi(row[2]);
-    if (pfileId > 0) {
-      auto it = result.find(pfileId);
-      if (it == result.end()) {
-        result[pfileId] = decId;
-        resultTypes[pfileId] = decType;
-      } else if (getDecisionTypePriority(decType) >
-                 getDecisionTypePriority(resultTypes[pfileId])) {
-        LOG_NOTICE("Reuser: conflicting decisions for pfile %d,"
-                   " applying stronger decision type %d over %d.",
-                   pfileId, decType, resultTypes[pfileId]);
-        result[pfileId] = decId;
-        resultTypes[pfileId] = decType;
-      }
-    }
-  }
-  return result;
+  return ClearingDecisionUtils::getClearingDecisionMapByPfile(dbManager,
+    uploadId, groupId);
 }
 
 std::map<int, std::vector<int>>
@@ -292,7 +66,7 @@ ReuserDatabaseHandler::getUploadTreePksForPfiles(
   if (pfileIds.empty()) return result;
 
   std::string table = queryUploadTreeTableName(uploadId);
-  if (!isValidIdentifier(table)) return result;
+  if (!ClearingDecisionUtils::isValidIdentifier(table)) return result;
 
   // Integer-only array; no user input embedded.
   std::string arr;
@@ -335,173 +109,25 @@ int ReuserDatabaseHandler::insertClearingEvent(
   const std::string& reportInfo, const std::string& comment,
   const std::string& ack, int jobId)
 {
-  // Strip Unicode control characters (mirrors PHP StringOperation).
-  std::string safeReport = replaceUnicodeControlChars(reportInfo);
-  std::string safeComment = replaceUnicodeControlChars(comment);
-  std::string safeAck = replaceUnicodeControlChars(ack);
-  const char* removedStr = removed ? "t" : "f";
-
-  if (jobId <= 0)
-  {
-    // Mark existing decision as WIP first (mirrors ClearingDao::markDecisionAsWip).
-    std::string table = queryUploadTreeTableName(uploadId);
-    if (!isValidIdentifier(table))
-      table = "uploadtree";
-
-    dbManager.queryPrintf(
-      "INSERT INTO clearing_decision"
-      " (uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope)"
-      " VALUES (%d,"
-      " (SELECT pfile_fk FROM %s WHERE uploadtree_pk=%d),"
-      " %d, %d, 0, 0)",
-      uploadTreeId, table.c_str(), uploadTreeId, userId, groupId);
-
-    QueryResult qr = dbManager.execPrepared(
-      fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-        "reuserInsertClearingEvent",
-        "INSERT INTO clearing_event"
-        " (uploadtree_fk, user_fk, group_fk, type_fk, rf_fk,"
-        "  removed, reportinfo, comment, acknowledgement)"
-        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)"
-        " RETURNING clearing_event_pk",
-        int, int, int, int, int, char*, char*, char*, char*),
-      uploadTreeId, userId, groupId, type, licenseId,
-      removedStr, safeReport.c_str(), safeComment.c_str(), safeAck.c_str());
-
-    if (!qr || qr.getRowCount() == 0) return 0;
-    return std::stoi(qr.getRow(0)[0]);
-  }
-  else
-  {
-    QueryResult qr = dbManager.execPrepared(
-      fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-        "reuserInsertClearingEventWithJob",
-        "INSERT INTO clearing_event"
-        " (uploadtree_fk, user_fk, group_fk, type_fk, rf_fk,"
-        "  removed, reportinfo, comment, acknowledgement, job_fk)"
-        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)"
-        " RETURNING clearing_event_pk",
-        int, int, int, int, int, char*, char*, char*, char*, int),
-      uploadTreeId, userId, groupId, type, licenseId,
-      removedStr, safeReport.c_str(), safeComment.c_str(), safeAck.c_str(),
-      jobId);
-
-    if (!qr || qr.getRowCount() == 0) return 0;
-    return std::stoi(qr.getRow(0)[0]);
-  }
+  return ClearingDecisionUtils::insertClearingEvent(dbManager, uploadTreeId,
+    userId, groupId, licenseId, removed, type, reportInfo, comment, ack,
+    jobId);
 }
 
 int ReuserDatabaseHandler::createDecisionFromEvents(
   int uploadId, int uploadTreeId, int userId, int groupId,
   int decType, int scope, const std::vector<int>& eventIds)
 {
-  if (eventIds.empty()) return 0;
-
-  if (!begin()) return 0;
-
-  // Remove stale WIP decisions for this item/group.
-  QueryResult rRem = dbManager.execPrepared(
-    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-      "reuserRemoveWipDecision",
-      "DELETE FROM clearing_decision"
-      " WHERE uploadtree_fk=$1 AND group_fk=$2 AND decision_type=0",
-      int, int),
-    uploadTreeId, groupId);
-
-  if (!rRem) { rollback(); return 0; }
-
-  std::string table = queryUploadTreeTableName(uploadId);
-  if (!isValidIdentifier(table))
-    table = "uploadtree";
-
-  QueryResult rIns = dbManager.queryPrintf(
-    "INSERT INTO clearing_decision"
-    " (uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope)"
-    " VALUES (%d,"
-    " (SELECT pfile_fk FROM %s WHERE uploadtree_pk=%d),"
-    " %d, %d, %d, %d)"
-    " RETURNING clearing_decision_pk",
-    uploadTreeId, table.c_str(), uploadTreeId, userId, groupId, decType, scope);
-
-  if (!rIns || rIns.getRowCount() == 0) { rollback(); return 0; }
-  int decisionPk = std::stoi(rIns.getRow(0)[0]);
-
-  // Link events to the new decision.
-  // Former PHP's ClearingDao::createDecisionFromEvents did not check individual
-  // insert results in the loop (freeResult without error check), so we match
-  // that behaviour: log a warning on failure but continue and commit.
-  auto* stmtLink = fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-    "reuserInsertClearingDecisionEvent",
-    "INSERT INTO clearing_decision_event"
-    " (clearing_decision_fk, clearing_event_fk) VALUES($1,$2)",
-    int, int);
-
-  for (int evPk : eventIds)
-  {
-    QueryResult rLink = dbManager.execPrepared(stmtLink, decisionPk, evPk);
-    if (!rLink)
-      LOG_WARNING("Reuser: failed to link clearing_event %d to"
-                  " clearing_decision %d, continuing.", evPk, decisionPk);
-  }
-
-  if (!commit()) { rollback(); return 0; }
-  return decisionPk;
+  return ClearingDecisionUtils::createDecisionFromEvents(dbManager,
+    uploadTreeId, userId, groupId, decType, scope, eventIds);
 }
 
 int ReuserDatabaseHandler::createCopyOfClearingDecision(
   int uploadId, int newItemUploadTreePk, int userId, int groupId,
   int originalDecisionPk)
 {
-  // Fetch decision meta (type and scope).
-  QueryResult rMeta = dbManager.execPrepared(
-    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-      "reuserGetDecisionMeta",
-      "SELECT decision_type, scope FROM clearing_decision"
-      " WHERE clearing_decision_pk=$1",
-      int),
-    originalDecisionPk);
-
-  if (!rMeta || rMeta.getRowCount() == 0) return 0;
-  int decType = std::stoi(rMeta.getRow(0)[0]);
-  int scope = std::stoi(rMeta.getRow(0)[1]);
-
-  // type_fk and job_fk are not copied; copies always use USER type (1).
-  QueryResult rEvents = dbManager.execPrepared(
-    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-      "reuserGetEventsForDecision",
-      "SELECT ce.rf_fk, ce.removed,"
-      "       ce.reportinfo, ce.comment, ce.acknowledgement"
-      " FROM clearing_event ce"
-      " INNER JOIN clearing_decision_event cde"
-      "   ON cde.clearing_event_fk = ce.clearing_event_pk"
-      " WHERE cde.clearing_decision_fk=$1"
-      " ORDER BY ce.clearing_event_pk ASC",
-      int),
-    originalDecisionPk);
-
-  if (!rEvents) return 0;
-
-  int jobId = fo_scheduler_jobId();
-  std::vector<int> newEventIds;
-
-  for (int i = 0; i < rEvents.getRowCount(); ++i)
-  {
-    auto row = rEvents.getRow(i);
-    int rfFk = std::stoi(row[0]);
-    bool isRemoved = (row[1] == "t" || row[1] == "true");
-    // Always use USER type (1) for copied events - mirrors PHP behavior.
-    int evType = 1;
-    int evPk = insertClearingEvent(uploadId, newItemUploadTreePk,
-                      userId, groupId,
-                      rfFk, isRemoved, evType,
-                      row[2], row[3], row[4], jobId);
-    if (evPk > 0)
-      newEventIds.push_back(evPk);
-  }
-
-  if (newEventIds.empty()) return 0;
-  return createDecisionFromEvents(uploadId, newItemUploadTreePk, userId, groupId,
-    decType, scope, newEventIds);
+  return ClearingDecisionUtils::createCopyOfClearingDecision(dbManager,
+    newItemUploadTreePk, userId, groupId, originalDecisionPk);
 }
 
 // ARS record
@@ -546,76 +172,6 @@ bool ReuserDatabaseHandler::processUploadReuse(
       {
         int newDecision = createCopyOfClearingDecision(
           uploadId, uploadtreePk, userId, groupId, originalDecision);
-        if (newDecision > 0)
-          fo_scheduler_heart(1);
-      }
-    }
-  }
-  return true;
-}
-
-bool ReuserDatabaseHandler::processEnhancedUploadReuse(
-  int uploadId, int reusedUploadId,
-  int groupId, int reusedGroupId, int userId)
-{
-  auto reusedMap = getClearingDecisionMapByPfile(reusedUploadId, reusedGroupId);
-  if (reusedMap.empty()) return true;
-
-  auto currentMap = getClearingDecisionMapByPfile(uploadId, groupId);
-
-  std::vector<int> toImport;
-  for (const auto& kv : reusedMap)
-    if (currentMap.find(kv.first) == currentMap.end())
-      toImport.push_back(kv.first);
-
-  if (toImport.empty()) return true;
-
-  std::string tableReused = queryUploadTreeTableName(reusedUploadId);
-  std::string tableTarget = queryUploadTreeTableName(uploadId);
-  if (!isValidIdentifier(tableReused) || !isValidIdentifier(tableTarget))
-    return true;
-
-  bool reusedNeedsFilter = (tableReused == "uploadtree" || tableReused == "uploadtree_a");
-  bool targetNeedsFilter = (tableTarget == "uploadtree" || tableTarget == "uploadtree_a");
-
-  std::string reusedFilter = reusedNeedsFilter
-    ? " AND ur.upload_fk=" + std::to_string(reusedUploadId) : "";
-  std::string targetFilter = targetNeedsFilter
-    ? " AND ut.upload_fk=" + std::to_string(uploadId) : "";
-
-  for (int pfileFk : toImport)
-  {
-    int originalDecision = reusedMap.at(pfileFk);
-
-    std::string reusedPath = getRepoPathOfPfile(pfileFk);
-    if (reusedPath.empty()) continue;
-
-    // Find items in target upload with matching filename.
-    QueryResult rr = dbManager.queryPrintf(
-      "SELECT ut.uploadtree_pk, ut.pfile_fk"
-      " FROM %s ur, %s ut"
-      " WHERE ur.pfile_fk=%d%s"
-      "   AND ut.ufile_name=ur.ufile_name%s",
-      tableReused.c_str(), tableTarget.c_str(),
-      pfileFk, reusedFilter.c_str(),
-      targetFilter.c_str());
-
-    for (int i = 0; i < rr.getRowCount(); ++i)
-    {
-      auto row = rr.getRow(i);
-      int newItemPk = std::stoi(row[0]);
-      int newPfileFk = std::stoi(row[1]);
-      if (newItemPk <= 0 || newPfileFk <= 0) continue;
-
-      std::string newPath = getRepoPathOfPfile(newPfileFk);
-      if (newPath.empty()) continue;
-
-      int diffCount = diffLineCount(reusedPath, newPath);
-      if (diffCount < 0) return false; // diff failed
-      if (diffCount < 5)
-      {
-        int newDecision = createCopyOfClearingDecision(
-          uploadId, newItemPk, userId, groupId, originalDecision);
         if (newDecision > 0)
           fo_scheduler_heart(1);
       }
@@ -755,7 +311,7 @@ bool ReuserDatabaseHandler::reuseCopyrights(
 
   // Fetch existing copyright entries in the target upload, keyed by hash.
   std::string table = queryUploadTreeTableName(uploadId);
-  if (!isValidIdentifier(table)) return true;
+  if (!ClearingDecisionUtils::isValidIdentifier(table)) return true;
 
   bool needsUploadFilter = (table == "uploadtree" || table == "uploadtree_a");
   std::string uploadFilter = needsUploadFilter
@@ -894,4 +450,523 @@ bool ReuserDatabaseHandler::reuseCopyrights(
     fo_scheduler_heart(1);
   }
   return true;
+}
+
+std::vector<int> ReuserDatabaseHandler::getPreviousBulkIds(int uploadId, int groupId, int userId)
+{
+  std::vector<int> bulkIds;
+
+  QueryResult qr = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetPreviousBulkIds",
+      "SELECT jq_args FROM upload_reuse, jobqueue, job"
+      " WHERE upload_fk=$1 AND group_fk=$2"
+      "  AND (reuse_mode & 8) = 8"
+      "  AND EXISTS(SELECT * FROM group_user_member gum WHERE gum.group_fk=upload_reuse.group_fk AND gum.user_fk=$3)"
+      "  AND jq_type=$4 AND jq_job_fk=job_pk"
+      "  AND job_upload_fk=reused_upload_fk AND job_group_fk=reused_group_fk"
+      "  ORDER BY jq_pk",
+      int, int, int, char*),
+    uploadId, groupId, userId, (char*)"monkbulk");
+
+  std::set<int> seenBulkIds;
+  for (int i = 0; i < qr.getRowCount(); ++i)
+  {
+    std::string jqArgs = qr.getRow(i)[0];
+    std::stringstream ss(jqArgs);
+    std::string line;
+    while (std::getline(ss, line, '\n'))
+    {
+      if (!line.empty())
+      {
+        try {
+          int bulkId = std::stoi(line);
+          if (seenBulkIds.insert(bulkId).second)
+          {
+            bulkIds.push_back(bulkId);
+          }
+        } catch (...) {}
+      }
+    }
+  }
+
+  return bulkIds;
+}
+
+bool ReuserDatabaseHandler::processBulkReuser(int uploadId, int groupId, int userId)
+{
+  std::vector<int> bulkIds = getPreviousBulkIds(uploadId, groupId, userId);
+  if (bulkIds.empty()) {
+    return true;
+  }
+
+  int minTime = 4;
+  int maxTime = 60;
+
+  for (int bulkId : bulkIds) {
+    int jqPk = rerunBulkAndDeciderOnUpload(uploadId, groupId, userId, bulkId);
+    if (jqPk <= 0) {
+      continue;
+    }
+
+    fo_scheduler_heart(1);
+
+    const char* fossologyTest = std::getenv("FOSSOLOGY_TEST");
+    if (fossologyTest && std::string(fossologyTest) == "1") {
+      continue;
+    }
+
+    while (isJobQueueRunning(jqPk)) {
+      fo_scheduler_heart(0);
+      int timeInSec = getEstimatedTime(jqPk);
+      if (timeInSec > maxTime) {
+        sleep(maxTime);
+      } else if (timeInSec < minTime) {
+        sleep(minTime);
+      } else {
+        sleep(timeInSec);
+      }
+    }
+  }
+
+  return true;
+}
+
+int ReuserDatabaseHandler::rerunBulkAndDeciderOnUpload(int uploadId, int groupId, int userId, int bulkId)
+{
+  ItemTreeBounds bounds;
+  if (!getParentItemBounds(uploadId, bounds)) {
+    return 0;
+  }
+  int nTopItem = bounds.uploadtree_pk;
+
+  QueryResult qrBulk = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetBulkUploadtree",
+      "SELECT uploadtree_fk FROM license_ref_bulk WHERE lrb_pk=$1",
+      int),
+    bulkId);
+  if (qrBulk.getRowCount() == 0) {
+    LOG_WARNING("Reuser: no license_ref_bulk row found for lrb_pk %d", bulkId);
+    return 0;
+  }
+  int bulkUploadtreeFk = 0;
+  try {
+    bulkUploadtreeFk = std::stoi(qrBulk.getRow(0)[0]);
+  } catch (...) {
+    LOG_WARNING("Reuser: invalid uploadtree_fk for lrb_pk %d", bulkId);
+    return 0;
+  }
+
+  int pUID = 0;
+  std::string ufileName;
+  int ufileMode = 0;
+
+  QueryResult qrEntry = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetUploadtreeEntry1",
+      "SELECT upload_fk, ufile_name, ufile_mode FROM uploadtree WHERE uploadtree_pk=$1",
+      int),
+    bulkUploadtreeFk);
+  if (qrEntry.getRowCount() > 0) {
+    pUID = std::stoi(qrEntry.getRow(0)[0]);
+    ufileName = qrEntry.getRow(0)[1];
+    ufileMode = std::stoi(qrEntry.getRow(0)[2]);
+  } else {
+    QueryResult qrEntry2 = dbManager.execPrepared(
+      fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+        "reuserGetUploadtreeEntry2",
+        "SELECT upload_fk, ufile_name, ufile_mode FROM uploadtree_a WHERE uploadtree_pk=$1",
+        int),
+      bulkUploadtreeFk);
+    if (qrEntry2.getRowCount() > 0) {
+      pUID = std::stoi(qrEntry2.getRow(0)[0]);
+      ufileName = qrEntry2.getRow(0)[1];
+      ufileMode = std::stoi(qrEntry2.getRow(0)[2]);
+    } else {
+      LOG_WARNING("Reuser: no uploadtree entry found for lrb_pk %d uploadtree_fk %d",
+                  bulkId, bulkUploadtreeFk);
+      return 0;
+    }
+  }
+
+  ItemTreeBounds pBounds;
+  if (!getParentItemBounds(pUID, pBounds)) {
+    LOG_WARNING("Reuser: getParentItemBounds failed for upload %d", pUID);
+    return 0;
+  }
+  int pTopItem = pBounds.uploadtree_pk;
+
+  int topItem = 0;
+  if (pTopItem == bulkUploadtreeFk) {
+    topItem = nTopItem;
+  } else {
+    // Find the corresponding entry in the new upload
+    QueryResult qrMatch = dbManager.execPrepared(
+      fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+        "reuserGetMatchingEntry1",
+        "SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=$1 AND ufile_name=$2 AND ufile_mode=$3",
+        int, char*, int),
+      uploadId, ufileName.c_str(), ufileMode);
+    if (qrMatch.getRowCount() > 0) {
+      try {
+        topItem = std::stoi(qrMatch.getRow(0)[0]);
+      } catch (...) {
+        LOG_WARNING("Reuser: invalid matching uploadtree entry for upload %d", uploadId);
+      }
+    }
+    if (topItem == 0) {
+      QueryResult qrMatch2 = dbManager.execPrepared(
+        fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+          "reuserGetMatchingEntry2",
+          "SELECT uploadtree_pk FROM uploadtree_a WHERE upload_fk=$1 AND ufile_name=$2 AND ufile_mode=$3",
+          int, char*, int),
+        uploadId, ufileName.c_str(), ufileMode);
+      if (qrMatch2.getRowCount() > 0) {
+        try {
+          topItem = std::stoi(qrMatch2.getRow(0)[0]);
+        } catch (...) {
+          LOG_WARNING("Reuser: invalid matching uploadtree_a entry for upload %d", uploadId);
+        }
+      }
+    }
+  }
+  if (topItem == 0) {
+    LOG_WARNING("Reuser: no matching uploadtree entry in new upload %d for"
+                " ufile_name='%s' ufile_mode=%d", uploadId, ufileName.c_str(), ufileMode);
+    return 0;
+  }
+
+  QueryResult qrClone = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserCloneBulk",
+      "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_text,upload_fk,uploadtree_fk,ignore_irrelevant,bulk_delimiters,scan_findings) "
+      "SELECT $1 AS user_fk, $2 AS group_fk,rf_text,$3 AS upload_fk, $4 as uploadtree_fk, ignore_irrelevant, bulk_delimiters, scan_findings "
+      "FROM license_ref_bulk WHERE lrb_pk=$5 RETURNING lrb_pk",
+      int, int, int, int, int),
+    userId, groupId, uploadId, topItem, bulkId);
+  if (qrClone.getRowCount() == 0) {
+    LOG_WARNING("Reuser: clone license_ref_bulk failed for lrb_pk %d", bulkId);
+    return 0;
+  }
+  int newBulkId = 0;
+  try {
+    newBulkId = std::stoi(qrClone.getRow(0)[0]);
+  } catch (...) {
+    LOG_WARNING("Reuser: invalid newBulkId from RETURNING for lrb_pk %d", bulkId);
+    return 0;
+  }
+
+  dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserCloneBulkLic",
+      "INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing, comment, reportinfo, acknowledgement) "
+      "SELECT $1 as lrb_fk, rf_fk, removing, comment, reportinfo, acknowledgement FROM license_set_bulk WHERE lrb_fk=$2",
+      int, int),
+    newBulkId, bulkId);
+
+  QueryResult qrUpload = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetUploadFilename",
+      "SELECT upload_filename FROM upload WHERE upload_pk=$1",
+      int),
+    uploadId);
+  if (qrUpload.getRowCount() == 0) {
+    LOG_WARNING("Reuser: no upload row found for upload_pk %d", uploadId);
+    return 0;
+  }
+  std::string uploadName = qrUpload.getRow(0)[0];
+
+  QueryResult qrJob = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserCreateJob",
+      "INSERT INTO job (job_user_fk, job_group_fk, job_queued, job_priority, job_name, job_upload_fk)"
+      " VALUES ($1, $2, now(), 0, $3, $4) RETURNING job_pk",
+      int, int, char*, int),
+    userId, groupId, uploadName.c_str(), uploadId);
+  if (qrJob.getRowCount() == 0) {
+    LOG_WARNING("Reuser: failed to create job for upload %d", uploadId);
+    return 0;
+  }
+  int jobPk = 0;
+  try {
+    jobPk = std::stoi(qrJob.getRow(0)[0]);
+  } catch (...) {
+    LOG_WARNING("Reuser: invalid job_pk from RETURNING for upload %d", uploadId);
+    return 0;
+  }
+
+  std::string newBulkIdStr = std::to_string(newBulkId);
+  QueryResult qrMonk = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserScheduleMonkBulk",
+      "INSERT INTO jobqueue (jq_job_fk, jq_type, jq_args, jq_runonpfile, jq_starttime, jq_endtime, jq_end_bits, jq_host, jq_cmd_args)"
+      " VALUES ($1, 'monkbulk', $2, NULL, NULL, NULL, 0, NULL, NULL) RETURNING jq_pk",
+      int, char*),
+    jobPk, newBulkIdStr.c_str());
+  if (qrMonk.getRowCount() <= 0) {
+    LOG_WARNING("Reuser: failed to schedule monkbulk for job %d", jobPk);
+    return 0;
+  }
+  int monkJqPk = 0;
+  try {
+    monkJqPk = std::stoi(qrMonk.getRow(0)[0]);
+  } catch (...) {
+    LOG_WARNING("Reuser: invalid monkbulk jq_pk for job %d", jobPk);
+    return 0;
+  }
+
+  QueryResult qrAdjCheck = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserCheckAdj2Nest",
+      "SELECT jq_pk FROM jobqueue, job WHERE job_pk=jq_job_fk"
+      " AND jq_type='adj2nest' AND job_upload_fk=$1",
+      int),
+    uploadId);
+  int adj2nestJqPk = 0;
+  if (qrAdjCheck.getRowCount() > 0) {
+    adj2nestJqPk = std::stoi(qrAdjCheck.getRow(0)[0]);
+  } else {
+    std::string uploadIdStr = std::to_string(uploadId);
+    QueryResult qrAdj = dbManager.execPrepared(
+      fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+        "reuserScheduleAdj2Nest",
+        "INSERT INTO jobqueue (jq_job_fk, jq_type, jq_args, jq_runonpfile, jq_starttime, jq_endtime, jq_end_bits, jq_host, jq_cmd_args)"
+        " VALUES ($1, 'adj2nest', $2, NULL, NULL, NULL, 0, NULL, NULL) RETURNING jq_pk",
+        int, char*),
+      jobPk, uploadIdStr.c_str());
+    if (qrAdj.getRowCount() > 0) {
+      adj2nestJqPk = std::stoi(qrAdj.getRow(0)[0]);
+    }
+  }
+
+  std::string uploadIdStr = std::to_string(uploadId);
+
+  if (!dbManager.begin()) {
+    LOG_WARNING("Reuser: failed to begin transaction for scheduling upload %d", uploadId);
+    return 0;
+  }
+
+  QueryResult qrDecider = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserScheduleDecider",
+      "INSERT INTO jobqueue (jq_job_fk, jq_type, jq_args, jq_runonpfile, jq_starttime, jq_endtime, jq_end_bits, jq_host, jq_cmd_args)"
+      " VALUES ($1, 'deciderjob', $2, NULL, NULL, NULL, 0, NULL, NULL) RETURNING jq_pk",
+      int, char*),
+    jobPk, uploadIdStr.c_str());
+  if (qrDecider.getRowCount() <= 0) {
+    LOG_WARNING("Reuser: failed to schedule deciderjob for job %d", jobPk);
+    dbManager.rollback();
+    return 0;
+  }
+  int deciderJqPk = 0;
+  try {
+    deciderJqPk = std::stoi(qrDecider.getRow(0)[0]);
+  } catch (...) {
+    LOG_WARNING("Reuser: invalid deciderjob jq_pk for job %d", jobPk);
+    dbManager.rollback();
+    return 0;
+  }
+
+  QueryResult qrDepMonk = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserAddDependencyMonk",
+      "INSERT INTO jobdepends (jdep_jq_fk, jdep_jq_depends_fk) VALUES ($1, $2)",
+      int, int),
+    deciderJqPk, monkJqPk);
+  if (!qrDepMonk) {
+    LOG_WARNING("Reuser: failed to add monkbulk dependency for job %d", jobPk);
+    dbManager.rollback();
+    return 0;
+  }
+
+  if (adj2nestJqPk > 0) {
+    QueryResult qrDepAdj = dbManager.execPrepared(
+      fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+        "reuserAddDependencyAdj",
+        "INSERT INTO jobdepends (jdep_jq_fk, jdep_jq_depends_fk) VALUES ($1, $2)",
+        int, int),
+      deciderJqPk, adj2nestJqPk);
+    if (!qrDepAdj) {
+      LOG_WARNING("Reuser: failed to add adj2nest dependency for job %d", jobPk);
+      dbManager.rollback();
+      return 0;
+    }
+  }
+
+  if (!dbManager.commit()) {
+    LOG_WARNING("Reuser: failed to commit scheduling for job %d", jobPk);
+    dbManager.rollback();
+    return 0;
+  }
+
+  notifySchedulerOfDatabaseChange();
+  return deciderJqPk;
+}
+
+bool ReuserDatabaseHandler::isJobQueueRunning(int jqPk)
+{
+  QueryResult qr = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserIsJobQueueRunning",
+      "SELECT jq_end_bits FROM jobqueue WHERE jq_pk = $1",
+      int),
+    jqPk);
+
+  if (qr.getRowCount() == 0) {
+    return false;
+  }
+
+  try {
+    int endBits = std::stoi(qr.getRow(0)[0]);
+    return !(endBits == 1 || endBits == 2);
+  } catch (...) {
+    return false;
+  }
+}
+
+int ReuserDatabaseHandler::getEstimatedTime(int jqPk)
+{
+  QueryResult qrJob = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetJobFkFromJqPk",
+      "SELECT jq_job_fk FROM jobqueue WHERE jq_pk = $1",
+      int),
+    jqPk);
+  if (qrJob.getRowCount() == 0) {
+    return 0;
+  }
+  int jobPk = 0;
+  std::string valJob;
+  try {
+    valJob = qrJob.getRow(0)[0];
+    if (!valJob.empty()) {
+      jobPk = std::stoi(valJob);
+    }
+  } catch (const std::exception& e) {
+    LOG_WARNING("Reuser: failed to parse job FK for jqPk %d (val='%s'): %s",
+                jqPk, valJob.c_str(), e.what());
+    return 0;
+  } catch (...) {
+    LOG_WARNING("Reuser: unknown error parsing job FK for jqPk %d (val='%s')",
+                jqPk, valJob.c_str());
+    return 0;
+  }
+
+  QueryResult qrUnpack = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetUnunpackProcessed",
+      "SELECT jq_itemsprocessed FROM jobqueue WHERE jq_type = 'ununpack' AND jq_end_bits = 1 AND jq_job_fk = $1",
+      int),
+    jobPk);
+  if (qrUnpack.getRowCount() == 0) {
+    return 0;
+  }
+  int ununpackProcessed = 0;
+  std::string valUnpack;
+  try {
+    valUnpack = qrUnpack.getRow(0)[0];
+    if (!valUnpack.empty()) {
+      ununpackProcessed = std::stoi(valUnpack);
+    }
+  } catch (const std::exception& e) {
+    LOG_WARNING("Reuser: failed to parse ununpack processed count (val='%s'): %s",
+                valUnpack.c_str(), e.what());
+    return 0;
+  } catch (...) {
+    LOG_WARNING("Reuser: unknown error parsing ununpack processed count (val='%s')",
+                valUnpack.c_str());
+    return 0;
+  }
+
+  if (ununpackProcessed <= 0) {
+    return 0;
+  }
+
+  QueryResult qrAgents = dbManager.execPrepared(
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      "reuserGetEstimatedTimeAgents",
+      "SELECT jq_itemsprocessed, EXTRACT(EPOCH FROM (now() - jq_starttime)) AS burn_time FROM jobqueue "
+      "WHERE jq_type <> 'ununpack' AND jq_type <> 'reportgen' AND jq_type <> 'decider' AND jq_type <> 'softwareHeritage' "
+      "  AND jq_job_fk = $1 AND jq_endtime IS NULL AND jq_starttime IS NOT NULL",
+      int),
+    jobPk);
+
+  double maxCompletionTime = 0.0;
+  bool foundEstimate = false;
+
+  for (int i = 0; i < qrAgents.getRowCount(); ++i) {
+    int jqItemsProcessed = 0;
+    double burnTime = 0.0;
+    std::string val0, val1;
+    try {
+      val0 = qrAgents.getRow(i)[0];
+      val1 = qrAgents.getRow(i)[1];
+      if (!val0.empty()) {
+        jqItemsProcessed = std::stoi(val0);
+      }
+      if (!val1.empty()) {
+        burnTime = std::stod(val1);
+      }
+    } catch (const std::exception& e) {
+      LOG_WARNING("Reuser: failed to parse agent jobqueue row (val0='%s', val1='%s'): %s",
+                  val0.c_str(), val1.c_str(), e.what());
+      continue;
+    } catch (...) {
+      LOG_WARNING("Reuser: unknown error parsing agent jobqueue row (val0='%s', val1='%s')",
+                  val0.c_str(), val1.c_str());
+      continue;
+    }
+
+    if (burnTime > 0.0) {
+      double filesPerSec = static_cast<double>(jqItemsProcessed) / burnTime;
+      if (filesPerSec > 0.0) {
+        double timeOfCompletion = static_cast<double>(ununpackProcessed - jqItemsProcessed) / filesPerSec;
+        if (timeOfCompletion > maxCompletionTime) {
+          maxCompletionTime = timeOfCompletion;
+        }
+        foundEstimate = true;
+      }
+    }
+  }
+
+  if (!foundEstimate) {
+    return 0;
+  }
+
+  return static_cast<int>(maxCompletionTime + 0.5);
+}
+
+void ReuserDatabaseHandler::notifySchedulerOfDatabaseChange()
+{
+  char* host = fo_sysconfig("FOSSOLOGY", "address");
+  char* port = fo_sysconfig("FOSSOLOGY", "port");
+  if (!host || !port) return;
+
+  struct addrinfo hints, *servs, *curr = nullptr;
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  if (getaddrinfo(host, port, &hints, &servs) != 0) {
+    return;
+  }
+
+  int fd = -1;
+  for (curr = servs; curr != nullptr; curr = curr->ai_next) {
+    fd = socket(curr->ai_family, hints.ai_socktype, curr->ai_protocol);
+    if (fd < 0) continue;
+    if (connect(fd, curr->ai_addr, curr->ai_addrlen) == 0) {
+      break;
+    }
+    close(fd);
+    fd = -1;
+  }
+  freeaddrinfo(servs);
+
+  if (fd >= 0) {
+    if (write(fd, "database", 8) < 0) {
+      // ignore
+    }
+    close(fd);
+  }
 }

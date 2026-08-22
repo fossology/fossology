@@ -134,7 +134,7 @@ protected:
     handler.onGetReusedUploads =
       [](int /*uploadId*/, int /*groupId*/) -> std::vector<ReuseTriple>
     {
-      return {{10, 1, REUSE_MAIN}, {20, 2, REUSE_ENHANCED | REUSE_COPYRIGHT}};
+      return {{10, 1, REUSE_MAIN}, {20, 2, REUSE_MAIN | REUSE_COPYRIGHT}};
     };
 
     auto result = handler.getReusedUploads(5, 1);
@@ -143,7 +143,7 @@ protected:
     CPPUNIT_ASSERT_EQUAL(10,         result[0].reusedUploadId);
     CPPUNIT_ASSERT_EQUAL(REUSE_MAIN, result[0].reuseMode);
     CPPUNIT_ASSERT_EQUAL(20,                          result[1].reusedUploadId);
-    CPPUNIT_ASSERT_EQUAL(REUSE_ENHANCED | REUSE_COPYRIGHT,
+    CPPUNIT_ASSERT_EQUAL(REUSE_MAIN | REUSE_COPYRIGHT,
                          result[1].reuseMode);
   }
 

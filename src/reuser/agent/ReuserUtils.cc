@@ -63,6 +63,12 @@ bool processUploadId(const ReuserState& /*state*/, int uploadId,
   int groupId = fo_scheduler_groupID();
   int userId = fo_scheduler_userID();
 
+  if (!databaseHandler.processBulkReuser(uploadId, groupId, userId))
+  {
+    LOG_WARNING("Reuser: processBulkReuser failed for upload %d", uploadId);
+    return false;
+  }
+
   auto reusedUploads = databaseHandler.getReusedUploads(uploadId, groupId);
 
   for (const auto& triple : reusedUploads)
@@ -76,20 +82,10 @@ bool processUploadId(const ReuserState& /*state*/, int uploadId,
       continue;
     }
 
-    if (triple.reuseMode & REUSE_ENHANCED)
-    {
-      if (!databaseHandler.processEnhancedUploadReuse(
-            uploadId, triple.reusedUploadId,
-            groupId, triple.reusedGroupId, userId))
-        return false;
-    }
-    else
-    {
-      if (!databaseHandler.processUploadReuse(
-            uploadId, triple.reusedUploadId,
-            groupId, triple.reusedGroupId, userId))
-        return false;
-    }
+    if (!databaseHandler.processUploadReuse(
+          uploadId, triple.reusedUploadId,
+          groupId, triple.reusedGroupId, userId))
+      return false;
 
     // Failures are logged but do not abort the overall reuse run, matching
     // the original PHP behaviour where their return values were also not checked.

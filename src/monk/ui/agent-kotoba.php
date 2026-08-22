@@ -33,6 +33,8 @@ class KotobaAgentPlugin extends AgentPlugin
   function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=[],
      $arguments=null, $request=null, $unpackArgs=null)
   {
+    global $container;
+
     // Handle SCM flag if needed
     if ($request != null && !is_array($request)) {
       $unpackArgs = intval($request->get('scm', 0)) == 1 ? '-I' : '';
@@ -99,6 +101,19 @@ class KotobaAgentPlugin extends AgentPlugin
 
         // Return deciderjob queue ID as the final job in the chain
         if ($deciderJobJqId > 0) {
+          // The enhancedreuser (scheduled by the reuser plugin, which runs
+          // before this plugin) reads kotoba results from license_file as its
+          // license oracle. Link it after the kotoba deciderjob so those
+          // results exist before enhancedreuser starts.
+          $enhancedReuserJqId = \IsAlreadyScheduled($jobId, 'enhancedreuser', $uploadId);
+          if ($enhancedReuserJqId > 0) {
+            $dbManager = $container->get('db.manager');
+            $dbManager->insertTableRow('jobdepends', array(
+              'jdep_jq_fk' => $enhancedReuserJqId,
+              'jdep_jq_depends_fk' => $deciderJobJqId
+            ));
+          }
+
           return $deciderJobJqId;
         }
       }
