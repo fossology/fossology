@@ -260,6 +260,34 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
   /maintenance:
+    get:
+      operationId: getMaintenanceInfo
+      tags:
+        - Maintenance
+      summary: Get details about the last completed maintenance job
+      description: >
+        Retrieve the timestamp of the last successfully completed maintenance job.
+      responses:
+        '200':
+          description: Maintenance information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceInfo'
+        '403':
+          description: Access denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
     post:
       operationId: initiateMaintenance
       tags:
@@ -7228,6 +7256,16 @@ components:
               description: Date on which packages were built in ISO8601 format
               nullable: true
               example: "2022-01-07T11:13:00+05:30"
+    MaintenanceInfo:
+      description: Details about the last completed maintenance job
+      type: object
+      properties:
+        lastRun:
+          type: string
+          format: date-time
+          description: Timestamp of the most recently successfully completed maintenance job. Null if no maintenance job has completed successfully.
+          nullable: true
+          example: "2022-07-16T10:15:30+00:00"
     CreateMaintenance:
       description: Maintenance options
       type: object
