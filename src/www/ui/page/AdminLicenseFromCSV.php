@@ -63,16 +63,14 @@ class AdminLicenseFromCSV extends DefaultPlugin
 
     if ($this->configuration['token'] == null) {
       $this->oidcProvider = new GenericProvider([
-        "clientId" => trim($this->sysconfig['SYSCONFIG']['OidcAppId']),
-        "clientSecret" => trim($this->sysconfig['SYSCONFIG']['OidcSecret']),
-        "redirectUri" => trim($this->sysconfig['SYSCONFIG']['OidcRedirectURL']),
-        "urlAuthorize" => trim($this->sysconfig['SYSCONFIG']['OidcAuthorizeURL']),
-        "urlAccessToken" => trim($this->sysconfig['SYSCONFIG']['OidcAccessTokenURL']),
-        "urlResourceOwnerDetails" => trim($this->sysconfig['SYSCONFIG']['OidcResourceURL']),
+        "clientId" => trim($this->sysconfig['SYSCONFIG']['OidcM2MAppId']),
+        "clientSecret" => trim($this->sysconfig['SYSCONFIG']['OidcM2MSecret']),
+        "urlAuthorize" => trim($this->sysconfig['SYSCONFIG']['OidcM2MAuthorizeURL']),
+        "urlAccessToken" => trim($this->sysconfig['SYSCONFIG']['OidcM2MAccessTokenURL']),
       ]);
 
-      if (isset($this->sysconfig['SYSCONFIG']['OidcScope'])) {
-        $this->configuration['scope'] = trim($this->sysconfig['SYSCONFIG']['OidcScope']);
+      if (isset($this->sysconfig['SYSCONFIG']['OidcM2MScope'])) {
+        $this->configuration['scope'] = trim($this->sysconfig['SYSCONFIG']['OidcM2MScope']);
       }
     } else {
       $this->oidcProvider = null;

@@ -305,6 +305,36 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "''", "'$prompt'",
     strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "16", "'$oidcDesc'", "null", "null");
 
+  $variable = "OidcM2MAppId";
+  $oidcPrompt = _('OIDC M2M Client Id');
+  $oidcDesc = _('e.g. "e0ec21b9f4b21adc76f185962b52bdfc13af134a"<br>Client ID generated while registering the M2M application.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthM2M'", "1", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcM2MSecret";
+  $oidcPrompt = _('OIDC M2M Secret');
+  $oidcDesc = _('e.g. "cf13476f185b9f4b2e0ec962b52211adbdfc13aa"<br>Secret generated while registering the M2M application.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_PASSWORD), "'OauthM2M'", "2", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcM2MScope";
+  $oidcPrompt = _('OIDC M2M Scope');
+  $oidcDesc = _('Scope used for the client_credentials grant with LicenseDB.');
+  $valueArray[$variable] = array("'$variable'", "''", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthM2M'", "3", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcM2MAuthorizeURL";
+  $oidcPrompt = _('OIDC M2M Authorize URL');
+  $oidcDesc = _('URL for the M2M OAuth2 authorization endpoint.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthM2M'", "4", "'$oidcDesc'", "null", "null");
+
+  $variable = "OidcM2MAccessTokenURL";
+  $oidcPrompt = _('OIDC M2M Access Token URL');
+  $oidcDesc = _('URL for the M2M OAuth2 access token endpoint.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthM2M'", "5", "'$oidcDesc'", "null", "null");
+
   /*  Banner Message */
   $variable = "BannerMsg";
   $bannerMsgPrompt = _('Banner message');
