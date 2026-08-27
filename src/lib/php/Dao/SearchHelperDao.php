@@ -155,7 +155,7 @@ class SearchHelperDao
       if ($NeedAnd) {
         $SQLWhere .= " AND";
       }
-      $SQLWhere .= " ufile_name ilike '" . $Filename . "'";
+      $SQLWhere .= " ufile_name ilike '" . pg_escape_string($Filename) . "'";
       $NeedAnd = 1;
     }
 
