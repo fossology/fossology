@@ -4340,6 +4340,7 @@ paths:
               - dep5
               - spdx2
               - spdx2tv
+              - spdx2csv
               - readmeoss
               - unifiedreport
               - clixml
@@ -4347,6 +4348,7 @@ paths:
               - spdx3json
               - spdx3rdf
               - spdx3jsonld
+              - spdx3tv
         - name: groupName
           description: The group name to chose while generating a report
           in: query
