@@ -197,4 +197,12 @@ class FolderDaoTest extends \PHPUnit\Framework\TestCase
     $badFolder = $this->folderDao->getFolder(987);
     assertThat($badFolder, is(nullValue()));
   }
+
+  public function testIsFolderAccessible_nullRootFolderReturnsFalse()
+  {
+    $this->testDb->createPlainTables(array('users'));
+    $this->folderDao->ensureTopLevelFolder();
+    $isAccessible = $this->folderDao->isFolderAccessible(FolderDao::TOP_LEVEL, 99999);
+    assertThat($isAccessible, is(false));
+  }
 }
