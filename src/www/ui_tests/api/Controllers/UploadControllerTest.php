@@ -807,7 +807,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
-      ->withArgs([$folderId])->andReturn(true);
+      ->withArgs([$folderId, $this->userId])->andReturn(true);
 
     $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
       $info->getCode());
@@ -926,7 +926,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
-      ->withArgs([$folderId])->andReturn(false);
+      ->withArgs([$folderId, $this->userId])->andReturn(false);
     $this->expectException(HttpForbiddenException::class);
 
     $this->uploadController->postUpload($request, new ResponseHelper(),
@@ -1085,7 +1085,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
-      ->withArgs([$folderId])->andReturn(true);
+      ->withArgs([$folderId, $this->userId])->andReturn(true);
     $this->expectException(HttpInternalServerErrorException::class);
 
     $this->uploadController->postUpload($request, new ResponseHelper(), []);
