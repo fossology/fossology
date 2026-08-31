@@ -1168,6 +1168,100 @@ namespace Fossology\UI\Api\Test\Controllers
 
     /**
      * @test
+     * -# Test for FolderController::unlinkFolder() on accessible content
+     * -# Check if the statusCode is 200 and the content gets unlinked
+     */
+    public function testUnlinkFolder()
+    {
+      $contentId = 4;
+      $parentFolderId = 2;
+      $this->dbHelper->shouldReceive("doesIdExist")
+        ->withArgs(array("foldercontents", "foldercontents_pk", $contentId))
+        ->andReturn(true);
+      $this->folderDao->shouldReceive('getContent')
+        ->withArgs(array($contentId))
+        ->andReturn(["foldercontents_pk" => $contentId, "parent_fk" => $parentFolderId]);
+      $this->folderDao->shouldReceive('isFolderAccessible')
+        ->withArgs(array($parentFolderId, $this->userId))->andReturn(true);
+      $this->folderDao->shouldReceive('removeContent')
+        ->withArgs(array($contentId))->andReturn(true);
+
+      $requestHeaders = new Headers();
+      $body = $this->streamFactory->createStream();
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+      $actualResponse = $this->folderController->unlinkFolder($request,
+        new ResponseHelper(), ['contentId' => $contentId]);
+      $expectedResponse = new Info(200, "Folder unlinked successfully.",
+        InfoType::INFO);
+      $this->assertEquals($expectedResponse->getCode(),
+        $actualResponse->getStatusCode());
+      $this->assertEquals($expectedResponse->getArray(),
+        $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for FolderController::unlinkFolder() on content owned by a
+     *    folder the current user cannot access
+     * -# Check if the HttpForbiddenException is thrown and the content is
+     *    never removed
+     */
+    public function testUnlinkFolderNotAccessible()
+    {
+      $contentId = 4;
+      $parentFolderId = 3;
+      $this->dbHelper->shouldReceive("doesIdExist")
+        ->withArgs(array("foldercontents", "foldercontents_pk", $contentId))
+        ->andReturn(true);
+      $this->folderDao->shouldReceive('getContent')
+        ->withArgs(array($contentId))
+        ->andReturn(["foldercontents_pk" => $contentId, "parent_fk" => $parentFolderId]);
+      $this->folderDao->shouldReceive('isFolderAccessible')
+        ->withArgs(array($parentFolderId, $this->userId))->andReturn(false);
+      $this->folderDao->shouldNotReceive('removeContent');
+
+      $requestHeaders = new Headers();
+      $body = $this->streamFactory->createStream();
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+      $this->expectException(HttpForbiddenException::class);
+      $this->folderController->unlinkFolder($request, new ResponseHelper(),
+        ['contentId' => $contentId]);
+    }
+
+    /**
+     * @test
+     * -# Test for FolderController::unlinkFolder() when the DAO refuses to
+     *    remove a non-removable (single-parent) content link
+     * -# Check if the HttpBadRequestException is thrown
+     */
+    public function testUnlinkFolderNotRemovable()
+    {
+      $contentId = 4;
+      $parentFolderId = 2;
+      $this->dbHelper->shouldReceive("doesIdExist")
+        ->withArgs(array("foldercontents", "foldercontents_pk", $contentId))
+        ->andReturn(true);
+      $this->folderDao->shouldReceive('getContent')
+        ->withArgs(array($contentId))
+        ->andReturn(["foldercontents_pk" => $contentId, "parent_fk" => $parentFolderId]);
+      $this->folderDao->shouldReceive('isFolderAccessible')
+        ->withArgs(array($parentFolderId, $this->userId))->andReturn(true);
+      $this->folderDao->shouldReceive('removeContent')
+        ->withArgs(array($contentId))->andReturn(false);
+
+      $requestHeaders = new Headers();
+      $body = $this->streamFactory->createStream();
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+      $this->expectException(HttpBadRequestException::class);
+      $this->folderController->unlinkFolder($request, new ResponseHelper(),
+        ['contentId' => $contentId]);
+    }
+
+    /**
+     * @test
      * -# Test for invalid action on FolderController::getAllFolderContents()
      * -# Check if the statusCode is 200
      */

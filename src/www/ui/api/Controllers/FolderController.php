@@ -310,7 +310,11 @@ class FolderController extends RestController
       throw new HttpNotFoundException("Folder content id not found!");
     }
     /** @var FolderDao $folderDao */
-    $folderDao = $this->container->get('dao.folder');
+    $folderDao = $this->restHelper->getFolderDao();
+    $content = $folderDao->getContent($folderContentId);
+    if (! $folderDao->isFolderAccessible($content['parent_fk'], $this->restHelper->getUserId())) {
+      throw new HttpForbiddenException("Folder is not accessible!");
+    }
     if (!$folderDao->removeContent($folderContentId)) {
       throw new HttpBadRequestException("Content cannot be unlinked.");
     }
