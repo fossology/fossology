@@ -51,6 +51,7 @@ class ReportController extends RestController
     'dep5',
     'spdx2',
     'spdx2tv',
+    'spdx2csv',
     'readmeoss',
     'unifiedreport',
     'clixml',
@@ -58,7 +59,8 @@ class ReportController extends RestController
     'cyclonedx',
     'spdx3json',
     'spdx3rdf',
-    'spdx3jsonld'
+    'spdx3jsonld',
+    'spdx3tv'
   );
 
   /**
@@ -106,47 +108,49 @@ class ReportController extends RestController
     $jobQueueId = null;
 
     switch ($reportFormat) {
-      case $this->reportsAllowed[0]:
-      case $this->reportsAllowed[1]:
-      case $this->reportsAllowed[2]:
+      case 'dep5':
+      case 'spdx2':
+      case 'spdx2tv':
+      case 'spdx2csv':
         /** @var SpdxTwoGeneratorUi $spdxGenerator */
         $spdxGenerator = $this->restHelper->getPlugin('ui_spdx2');
         list ($jobId, $jobQueueId, $error) = $spdxGenerator->scheduleAgent(
           $this->restHelper->getGroupId(), $upload, $reportFormat);
         break;
-      case $this->reportsAllowed[3]:
+      case 'readmeoss':
         /** @var ReadMeOssPlugin $readmeGenerator */
         $readmeGenerator = $this->restHelper->getPlugin('ui_readmeoss');
         list ($jobId, $jobQueueId, $error) = $readmeGenerator->scheduleAgent(
           $this->restHelper->getGroupId(), $upload);
         break;
-      case $this->reportsAllowed[4]:
+      case 'unifiedreport':
         /** @var FoUnifiedReportGenerator $unifiedGenerator */
         $unifiedGenerator = $this->restHelper->getPlugin('agent_founifiedreport');
         list ($jobId, $jobQueueId, $error) = $unifiedGenerator->scheduleAgent(
           $this->restHelper->getGroupId(), $upload);
         break;
-      case $this->reportsAllowed[5]:
+      case 'clixml':
         /** @var CliXmlGeneratorUi $clixmlGenerator */
         $clixmlGenerator = $this->restHelper->getPlugin('ui_clixml');
         list ($jobId, $jobQueueId) = $clixmlGenerator->scheduleAgent(
           $this->restHelper->getGroupId(), $upload);
         break;
-      case $this->reportsAllowed[6]:
+      case 'decisionexporter':
         /** @var FoDecisionExporter $decisionExporter */
         $decisionExporter = $this->restHelper->getPlugin('agent_fodecisionexporter');
         list($jobId, $jobQueueId) = $decisionExporter->scheduleAgent(
           $this->restHelper->getGroupId(), $upload);
         break;
-      case $this->reportsAllowed[7]:
+      case 'cyclonedx':
         /** @var CycloneDXGeneratorUi $cyclonedxGenerator */
         $cyclonedxGenerator = $this->restHelper->getPlugin('ui_cyclonedx');
         list ($jobId, $jobQueueId) = $cyclonedxGenerator->scheduleAgent(
           $this->restHelper->getGroupId(), $upload);
         break;
-      case $this->reportsAllowed[8]:
-      case $this->reportsAllowed[9]:
-      case $this->reportsAllowed[10]:
+      case 'spdx3json':
+      case 'spdx3rdf':
+      case 'spdx3jsonld':
+      case 'spdx3tv':
         /** @var SpdxThreeGeneratorUi $spdx3Generator */
         $spdx3Generator = $this->restHelper->getPlugin('ui_spdx3');
         list ($jobId, $jobQueueId, $error) = $spdx3Generator->scheduleAgent(
