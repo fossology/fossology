@@ -493,7 +493,8 @@ class UploadController extends RestController
     if (!in_array($folderId, $allFolderIds)) {
       throw new HttpNotFoundException("folderId $folderId does not exists!");
     }
-    if (!$this->restHelper->getFolderDao()->isFolderAccessible($folderId)) {
+    if (!$this->restHelper->getFolderDao()->isFolderAccessible($folderId,
+        $this->restHelper->getUserId())) {
       throw new HttpForbiddenException("folderId $folderId is not accessible!");
     }
 

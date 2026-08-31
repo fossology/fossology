@@ -520,8 +520,11 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . ";"
     if ($userId == null) {
       $userId = Auth::getUserId();
     }
-    $rootFolder = $this->getRootFolder($userId)->getId();
-    return $this->isInFolderTree($rootFolder, $folderId);
+    $rootFolder = $this->getRootFolder($userId);
+    if (!$rootFolder) {
+      return false;
+    }
+    return $this->isInFolderTree($rootFolder->getId(), $folderId);
   }
 
   /**
