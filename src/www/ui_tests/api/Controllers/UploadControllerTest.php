@@ -12,7 +12,24 @@
  * @brief Tests for UploadController
  */
 
-namespace Fossology\UI\Api\Test\Controllers;
+namespace {
+  if (!function_exists('TryToDelete')) {
+    function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
+    {
+      return \Fossology\UI\Api\Test\Controllers\UploadControllerTest::$functions->TryToDelete($uploadpk, $user_pk,
+        $group_pk, $uploadDao);
+    }
+  }
+
+  if (!function_exists('RepPath')) {
+    function RepPath($PfilePk, $Repo = "files")
+    {
+      return \Fossology\UI\Api\Test\Controllers\UploadControllerTest::$functions->RepPath($PfilePk, $Repo);
+    }
+  }
+}
+
+namespace Fossology\UI\Api\Test\Controllers {
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\ReuseReportProcessor;
@@ -49,12 +66,6 @@ use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request;
 use Slim\Psr7\Uri;
-
-function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
-{
-  return UploadControllerTest::$functions->TryToDelete($uploadpk, $user_pk,
-    $group_pk, $uploadDao);
-}
 
 /**
  * @class UploadControllerTest
@@ -2025,4 +2036,184 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals(500,$actualResponse->getStatusCode());
 
   }
+
+  /**
+   * @test
+   *   -# Test UploadController::uploadDownload() success
+   *   -# Check if response status is 200 with proper headers
+   */
+  public function testUploadDownloadSuccess()
+  {
+    $uploadId = 2;
+    $pfilePk = 123;
+    $ufileName = "test_package.tar.gz";
+    $filePath = __FILE__;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withArgs([$uploadId])->andReturn($this->getUploadBounds($uploadId));
+    $this->uploadDao->shouldReceive("getUploadtreeTableName")
+      ->withArgs([$uploadId])->andReturn("uploadtree_a");
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withArgs([$uploadId, "uploadtree_a"])->andReturn($this->getUploadBounds($uploadId));
+
+    $itemId = $this->getUploadBounds($uploadId)->getItemId();
+    $sql = "SELECT pfile_fk, ufile_name FROM uploadtree_a WHERE uploadtree_pk=$1";
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([$sql, [$itemId]])->andReturn(['pfile_fk' => $pfilePk, 'ufile_name' => $ufileName]);
+
+    self::$functions->shouldReceive('RepPath')
+      ->withArgs([$pfilePk, "files"])->andReturn($filePath);
+
+    $responseContent = M::mock();
+    $responseContent->shouldReceive('getMimeType')->andReturn('application/gzip');
+    $responseContent->shouldReceive('getPathname')->andReturn($filePath);
+
+    $headerBag = M::mock();
+    $headerBag->shouldReceive('get')
+      ->withArgs(['Content-Disposition'])->andReturn('attachment; filename="test_package.tar.gz"');
+
+    $responseFile = M::mock();
+    $responseFile->headers = $headerBag;
+    $responseFile->shouldReceive('getFile')->andReturn($responseContent);
+
+    $this->downloadPlugin->shouldReceive('getDownload')
+      ->withArgs([$filePath, $ufileName])->andReturn($responseFile);
+
+    $actualResponse = $this->uploadController->uploadDownload(null, new ResponseHelper(), ["id" => $uploadId]);
+
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $this->assertEquals('application/gzip', $actualResponse->getHeaderLine('Content-Type'));
+    $this->assertEquals('attachment; filename="test_package.tar.gz"', $actualResponse->getHeaderLine('Content-Disposition'));
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::uploadDownload() with inaccessible upload
+   *   -# Check if HttpForbiddenException is thrown
+   */
+  public function testUploadDownloadInaccessible()
+  {
+    $uploadId = 3;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(false);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->uploadController->uploadDownload(null, new ResponseHelper(), ["id" => $uploadId]);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::uploadDownload() when ununpack is not done
+   *   -# Check if HttpServiceUnavailableException is thrown
+   */
+  public function testUploadDownloadUnpackNotDone()
+  {
+    $uploadId = 5;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withArgs([$uploadId])->andReturn(false);
+
+    $this->expectException(HttpServiceUnavailableException::class);
+    $this->uploadController->uploadDownload(null, new ResponseHelper(), ["id" => $uploadId]);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::uploadDownload() when upload tree is missing
+   *   -# Check if HttpNotFoundException is thrown
+   */
+  public function testUploadDownloadTreeNotFound()
+  {
+    $uploadId = 2;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withArgs([$uploadId])->andReturn($this->getUploadBounds($uploadId));
+    $this->uploadDao->shouldReceive("getUploadtreeTableName")
+      ->withArgs([$uploadId])->andReturn("uploadtree_a");
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withArgs([$uploadId, "uploadtree_a"])->andReturn(false);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->uploadController->uploadDownload(null, new ResponseHelper(), ["id" => $uploadId]);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::uploadDownload() when descendant record is not found in DB
+   *   -# Check if HttpNotFoundException is thrown
+   */
+  public function testUploadDownloadRecordNotFound()
+  {
+    $uploadId = 2;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withArgs([$uploadId])->andReturn($this->getUploadBounds($uploadId));
+    $this->uploadDao->shouldReceive("getUploadtreeTableName")
+      ->withArgs([$uploadId])->andReturn("uploadtree_a");
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withArgs([$uploadId, "uploadtree_a"])->andReturn($this->getUploadBounds($uploadId));
+
+    $itemId = $this->getUploadBounds($uploadId)->getItemId();
+    $sql = "SELECT pfile_fk, ufile_name FROM uploadtree_a WHERE uploadtree_pk=$1";
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([$sql, [$itemId]])->andReturn(false);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->uploadController->uploadDownload(null, new ResponseHelper(), ["id" => $uploadId]);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::uploadDownload() when repository file is missing on server
+   *   -# Check if HttpNotFoundException is thrown
+   */
+  public function testUploadDownloadFileMissingOnDisk()
+  {
+    $uploadId = 2;
+    $pfilePk = 123;
+    $ufileName = "test_package.tar.gz";
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withArgs([$uploadId])->andReturn($this->getUploadBounds($uploadId));
+    $this->uploadDao->shouldReceive("getUploadtreeTableName")
+      ->withArgs([$uploadId])->andReturn("uploadtree_a");
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withArgs([$uploadId, "uploadtree_a"])->andReturn($this->getUploadBounds($uploadId));
+
+    $itemId = $this->getUploadBounds($uploadId)->getItemId();
+    $sql = "SELECT pfile_fk, ufile_name FROM uploadtree_a WHERE uploadtree_pk=$1";
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([$sql, [$itemId]])->andReturn(['pfile_fk' => $pfilePk, 'ufile_name' => $ufileName]);
+
+    self::$functions->shouldReceive('RepPath')
+      ->withArgs([$pfilePk, "files"])->andReturn("/nonexistent/file/path.tar.gz");
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->uploadController->uploadDownload(null, new ResponseHelper(), ["id" => $uploadId]);
+  }
 }
+}
+
