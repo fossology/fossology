@@ -285,7 +285,7 @@ namespace Fossology\UI\Api\Test\Controllers
         ->andReturn($rootFolder);
       $this->folderDao->shouldReceive('getFolder')
         ->andReturnUsing([$this, 'getFolder']);
-      $this->folderDao->shouldReceive('isFolderAccessible')->withArgs([$folderId])->andReturn(false);
+      $this->folderDao->shouldReceive('isFolderAccessible')->withArgs([$folderId, $this->userId])->andReturn(false);
       $this->folderDao->shouldReceive('getFolderParentId')
         ->andReturnUsing([$this, 'getFolderParent']);
       $this->expectException(HttpForbiddenException::class);
@@ -304,7 +304,7 @@ namespace Fossology\UI\Api\Test\Controllers
     {
       $folderId = 3;
       $this->folderDao->shouldReceive('isFolderAccessible')
-        ->withArgs(array($folderId))->andReturn(true);
+        ->withArgs(array($folderId, $this->userId))->andReturn(true);
       $this->folderDao->shouldReceive('getFolder')
         ->andReturnUsing([$this, 'getFolder']);
       $this->folderDao->shouldReceive('getFolderParentId')
@@ -332,7 +332,7 @@ namespace Fossology\UI\Api\Test\Controllers
     {
       $folderId = -1;
       $this->folderDao->shouldReceive('isFolderAccessible')
-        ->withArgs(array($folderId))->andReturn(false);
+        ->withArgs(array($folderId, $this->userId))->andReturn(false);
       $this->folderDao->shouldReceive('getFolder')
         ->andReturnUsing([$this, 'getFolder']);
       $this->expectException(HttpForbiddenException::class);
@@ -351,7 +351,7 @@ namespace Fossology\UI\Api\Test\Controllers
     {
       $folderId = 3;
       $this->folderDao->shouldReceive('isFolderAccessible')
-        ->withArgs(array($folderId))->andReturn(false);
+        ->withArgs(array($folderId, $this->userId))->andReturn(false);
       $this->folderDao->shouldReceive('getFolder')
         ->andReturnUsing([$this, 'getFolder']);
       $this->expectException(HttpForbiddenException::class);
