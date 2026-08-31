@@ -176,8 +176,9 @@ class UploadPermissionPage extends DefaultPlugin
   {
     $fileName = false;
     foreach ($uploadList as $uploadEntry) {
-      if ($uploadEntry['upload_pk']) {
+      if ($uploadEntry['upload_pk'] == $uploadId) {
         $fileName = $uploadEntry['name'];
+        break;
       }
     }
     if (empty($fileName)) {
