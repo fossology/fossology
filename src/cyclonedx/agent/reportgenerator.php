@@ -15,6 +15,29 @@ use Fossology\Lib\Data\LicenseRef;
 
 class BomReportGenerator
 {
+  /** @var string Custom tag namespace prefix for properties */
+  private $tagNamespace = 'fossology:';
+
+  /**
+   * Set the tag namespace prefix for CycloneDX properties.
+   *
+   * @param string $namespace The namespace prefix (e.g. 'fossology:').
+   */
+  public function setTagNamespace(string $namespace): void
+  {
+    $this->tagNamespace = $namespace;
+  }
+
+  /**
+   * Get the current tag namespace prefix.
+   *
+   * @return string The namespace prefix.
+   */
+  public function getTagNamespace(): string
+  {
+    return $this->tagNamespace;
+  }
+
   /**
    * Creates a component.
    *
@@ -167,13 +190,13 @@ class BomReportGenerator
     $properties = [];
     if (array_key_exists('acknowledgements', $componentData) && !empty($componentData['acknowledgements'])) {
       $properties[] = [
-        'name' => 'fossology:acknowledgement',
+        'name' => $this->tagNamespace . 'acknowledgement',
         'value' => $componentData['acknowledgements']
       ];
     }
     if (array_key_exists('comments', $componentData) && !empty($componentData['comments'])) {
       $properties[] = [
-        'name' => 'fossology:comment',
+        'name' => $this->tagNamespace . 'comment',
         'value' => $componentData['comments']
       ];
     }

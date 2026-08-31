@@ -146,6 +146,11 @@ class CycloneDXAgent extends Agent
   {
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
 
+    $cyclonedxSettings = $this->uploadDao->getCyclonedxSettings($uploadId);
+    $cyclonedxSettingsArr = explode(',', $cyclonedxSettings);
+    $customNamespace = isset($cyclonedxSettingsArr[3]) ? $cyclonedxSettingsArr[3] : 'fossology:';
+    $this->reportGenerator->setTagNamespace($customNamespace);
+
     $packageNodes = $this->renderPackage($uploadId);
 
     $this->computeUri($uploadId);
@@ -367,7 +372,13 @@ class CycloneDXAgent extends Agent
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
 
+    $stateLicenseComment = $this->getCycloneDXReportConf($uploadId, 0);
     $stateWoInfos = $this->getCycloneDXReportConf($uploadId, 1);
+    $stateOsselot = $this->getCycloneDXReportConf($uploadId, 2);
+
+    if ($stateOsselot) {
+      $stateLicenseComment = true;
+    }
 
     $filesProceeded = 0;
     $lastValue = 0;
@@ -430,7 +441,7 @@ class CycloneDXAgent extends Agent
           'copyright' => implode("\n", $licenses->getCopyrights()),
           'licenses' => $licensesfound,
           'acknowledgements' => implode("\n", $licenses->getAcknowledgements()),
-          'comments' => implode("\n", $licenses->getComments())
+          'comments' => $stateLicenseComment ? implode("\n", $licenses->getComments()) : ''
         );
         $components[] = $this->reportGenerator->createComponent($componentdata);
       }
@@ -553,7 +564,7 @@ class CycloneDXAgent extends Agent
    *
    * Reads user default settings from users.cyclonedx_settings.
    * @param int $uploadId
-   * @param int $key Array key (0=cyclonedxLicenseComment, 1=ignoreFilesWOInfo, 2=osselotExport)
+   * @param int $key Array key (0=cyclonedxLicenseComment, 1=ignoreFilesWOInfo, 2=osselotExport, 3=customTagNamespace)
    * @return bool Configuration state (TRUE/FALSE)
    */
   protected function getCycloneDXReportConf($uploadId, $key)

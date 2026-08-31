@@ -134,6 +134,13 @@
       </th>
       <td><input type="checkbox" name="cyclonedx_ignore_files_wo_info_default" {% if cyclonedxIgnoreFilesWOInfoDefault %}checked{% endif %}></td>
     </tr>
+    <tr class="classic">
+      <th width="25%">
+        {{ "CycloneDX custom tag namespace"|trans }}
+        <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Custom tag namespace prefix used in CycloneDX exports (default: fossology:).'|trans }}" alt="" class="info-bullet"/>
+      </th>
+      <td><input type="text" name="cyclonedx_custom_tag_namespace" value="{{ cyclonedxCustomTagNamespace }}"></td>
+    </tr>
     {%  if isSessionAdmin %}
       <tr class="classic">
         <th width="25%">{{ "Select user's default group."|trans }}</th>
