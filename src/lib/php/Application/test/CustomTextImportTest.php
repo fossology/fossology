@@ -238,15 +238,16 @@ class CustomTextImportTest extends \PHPUnit\Framework\TestCase
    * @test
    * -# Call parseBoolean with various truthy and falsy string/bool values.
    * -# Verify each maps to the expected bool.
-   *
-   * @dataProvider parseBooleanProvider
    */
-  public function testParseBoolean($input, bool $expected): void
+  public function testParseBoolean(): void
   {
-    $result = Reflectory::invokeObjectsMethodnameWith(
-      $this->importer, 'parseBoolean', [$input]
-    );
-    $this->assertSame($expected, $result);
+    foreach (self::parseBooleanProvider() as $testCase) {
+      [$input, $expected] = $testCase;
+      $result = Reflectory::invokeObjectsMethodnameWith(
+        $this->importer, 'parseBoolean', [$input]
+      );
+      $this->assertSame($expected, $result);
+    }
   }
 
   public static function parseBooleanProvider(): array
