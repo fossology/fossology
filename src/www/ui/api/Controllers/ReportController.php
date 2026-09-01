@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Controllers;
 use Fossology\CliXml\UI\CliXmlGeneratorUi;
 use Fossology\DecisionExporter\UI\FoDecisionExporter;
 use Fossology\DecisionImporter\UI\AgentDecisionImporterPlugin;
+use Fossology\Lib\Report\ReportUtils;
 use Fossology\ReadmeOSS\UI\ReadMeOssPlugin;
 use Fossology\Spdx\UI\SpdxTwoGeneratorUi;
 use Fossology\Spdx\UI\SpdxThreeGeneratorUi;
@@ -61,6 +62,16 @@ class ReportController extends RestController
     'spdx3rdf',
     'spdx3jsonld',
     'spdx3tv'
+  );
+
+  /**
+   * @var array $downloadAllowed
+   * Agent names whose report can be downloaded. A merged multi-upload report
+   * cannot be scheduled through this API, but it can be fetched once the UI
+   * has scheduled it.
+   */
+  private $downloadAllowed = array(
+    'reportaggregator'
   );
 
   /**
@@ -258,11 +269,19 @@ class ReportController extends RestController
   private function checkReport($id)
   {
     $dbManager = $this->dbHelper->getDbManager();
+    $placeholders = [];
+    $params = [$id];
+    $i = 2;
+    foreach (array_merge($this->reportsAllowed, $this->downloadAllowed) as $allowed) {
+      $placeholders[] = '$' . $i;
+      $params[] = $allowed;
+      $i++;
+    }
     $row = $dbManager->getSingleRow(
-      'SELECT jq_type FROM jobqueue WHERE jq_job_fk = $1', array(
-        $id
-      ), "reportValidity");
-    if (empty($row) || ! in_array($row['jq_type'], $this->reportsAllowed)) {
+      'SELECT jq_type FROM jobqueue WHERE jq_job_fk = $1 AND jq_type IN ('
+      . implode(',', $placeholders) . ') LIMIT 1',
+      $params, "reportValidity");
+    if (empty($row)) {
       throw new HttpNotFoundException(
         "No report scheduled with given job id.");
     }
@@ -277,8 +296,14 @@ class ReportController extends RestController
     if (! $uploadDao->isAccessible($uploadId, $this->restHelper->getGroupId())) {
       throw new HttpForbiddenException("Report is not accessible!");
     }
-    $row = $dbManager->getSingleRow('SELECT * FROM reportgen WHERE job_fk = $1',
+    $row = $dbManager->getSingleRow(
+      "SELECT * FROM reportgen WHERE job_fk = $1 AND filepath NOT LIKE '%.provenance.json' "
+      . ReportUtils::AGGREGATED_FIRST_ORDER,
       array($id), "reportFileName");
+    if (empty($row)) {
+      $row = $dbManager->getSingleRow('SELECT * FROM reportgen WHERE job_fk = $1',
+        array($id), "reportFileNameFallback");
+    }
     if (empty($row)) {
       throw (new HttpServiceUnavailableException(
         "Report is not ready. Retry after 10s."))

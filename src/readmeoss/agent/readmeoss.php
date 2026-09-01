@@ -150,12 +150,10 @@ class ReadmeOssAgent extends Agent
    */
   private function writeReport($contents, $uploadId)
   {
-    global $SysConf;
-
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
 
-    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
-    $fileName = $fileBase. "ReadMe_OSS_".$packageName.".txt" ;
+    $fileName = ReportUtils::canonicalReportPath('readmeoss', $packageName);
+    $fileBase = dirname($fileName);
 
     foreach ($this->additionalUploadIds as $addUploadId) {
       $packageName .= ', ' . $this->uploadDao->getUpload($addUploadId)->getFilename();
