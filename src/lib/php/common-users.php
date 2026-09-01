@@ -26,11 +26,12 @@
  * \param string $agentList user_agent_list
  * \param int    $Folder root_folder_fk
  * \param int    $default_bucketpool_fk default is empty
+ * \param string $spdxSettings spdx_settings
  *
  * \return error: exit (1)
  */
 function add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify, $Upload_visibility,
-                  $agentList, $Folder, $default_bucketpool_fk='')
+                  $agentList, $Folder, $default_bucketpool_fk='', $spdxSettings=null)
 {
   global $container;
   $dbManager = $container->get('db.manager');
@@ -39,10 +40,17 @@ function add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify, $Upload_vis
     $default_bucketpool_fk = null;
   }
 
-  $dbManager->prepare($stmt='users.insert',$sql="INSERT INTO users
-         (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
-          email_notify,upload_visibility,user_agent_list,root_folder_fk,default_folder_fk) VALUES ($1,$2,$3,$4,$5,$6,  $7,$8,$9,$10,$11)");
-  $dbManager->execute($stmt,array ($User,$Desc,'Seed',$Hash,$Perm,$Email,  $Email_notify,$Upload_visibility,$agentList,$Folder,$Folder));
+  if ($dbManager->existsColumn('users', 'spdx_settings') && $spdxSettings !== null) {
+    $dbManager->prepare($stmt='users.insert',$sql="INSERT INTO users
+           (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
+            email_notify,upload_visibility,user_agent_list,root_folder_fk,default_folder_fk,spdx_settings) VALUES ($1,$2,$3,$4,$5,$6,  $7,$8,$9,$10,$11,$12)");
+    $dbManager->execute($stmt,array ($User,$Desc,'Seed',$Hash,$Perm,$Email,  $Email_notify,$Upload_visibility,$agentList,$Folder,$Folder,$spdxSettings));
+  } else {
+    $dbManager->prepare($stmt='users.insert',$sql="INSERT INTO users
+           (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
+            email_notify,upload_visibility,user_agent_list,root_folder_fk,default_folder_fk) VALUES ($1,$2,$3,$4,$5,$6,  $7,$8,$9,$10,$11)");
+    $dbManager->execute($stmt,array ($User,$Desc,'Seed',$Hash,$Perm,$Email,  $Email_notify,$Upload_visibility,$agentList,$Folder,$Folder));
+  }
 
   /* Make sure it was added */
   $row = $dbManager->getSingleRow("SELECT * FROM users WHERE user_name = $1",array($User),$stmt='users.get');
