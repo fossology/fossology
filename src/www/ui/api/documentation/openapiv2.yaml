@@ -57,6 +57,8 @@ tags:
     description: Maintenance operations
   - name: Overview
     description: Overview of FOSSology operations
+  - name: Tags
+    description: Tag management
 
 x-reuse:
   - &cxGetParams
@@ -509,6 +511,49 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ObligationExtended'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /tags:
+    post:
+      operationId: createTag
+      tags:
+        - Tags
+      summary: Create a new tag
+      description: >
+        Add a new tag to the database, without tagging anything with it
+      requestBody:
+        description: Information about new tag
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+        '201':
+          description: Tag added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Only admin can access this endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '409':
+          description: Tag with same name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
 
@@ -1081,6 +1126,64 @@ paths:
           description: >
             The agent has not been scheduled for the upload. Please check the
             response message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/tags/display:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    put:
+      operationId: setTagDisplayStatus
+      tags:
+        - Tags
+      summary: Enable or disable tag display for an upload
+      description: >
+        Displaying tags while browsing can be slow for large uploads. This
+        endpoint allows an admin to enable or disable the tag display for a
+        specific upload. By default the tag display is enabled.
+      requestBody:
+        description: Whether tag display should be enabled for the upload
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  description: True to enable tag display, false to disable it
+              required:
+                - enabled
+      responses:
+        '200':
+          description: Tag display status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Only admin can access this endpoint, or upload is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Upload does not exist
           content:
             application/json:
               schema:
@@ -5899,6 +6002,12 @@ components:
         removable:
           type: boolean
           description: Is the folder removable.
+        uploadId:
+          type: integer
+          description: >
+            Id of the upload (upload_pk), if this content is an upload.
+            Null if the content is a subfolder.
+          nullable: true
     UploadSummary:
       type: object
       properties:
@@ -7479,6 +7588,24 @@ components:
           nullable: false
           example:
             "Main group"
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Id of the tag
+          readOnly: true
+        name:
+          type: string
+          description: >
+            Name of the tag. Only characters from
+            A-Za-z0-9_~-!@#$%^*.() are allowed
+          example: Software_Repository
+        description:
+          type: string
+          description: Description of the tag
+      required:
+        - name
     AddMember:
       description: UserMember options
       type: object
