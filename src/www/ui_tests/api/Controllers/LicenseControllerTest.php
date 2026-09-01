@@ -1656,6 +1656,155 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
+   *  -# Test for LicenseController::exportAdminLicenseToCSV() to confirm it
+   *     exports all licenses, not only marydone candidates.
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportAdminLicenseToCSVExportsAllLicenses()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $this->dbManager->shouldReceive('prepare')
+      ->withArgs(function ($stmt, $sql) {
+        return strpos($sql, 'WHERE marydone = true') === false;
+      })->once();
+    $this->dbManager->shouldReceive('fetchAll')->andReturn([]);
+    $this->dbManager->shouldReceive('freeResult')->andReturn([]);
+    $this->dbManager->shouldReceive('execute');
+
+    $request = $this->getRequestWithQueryParams('GET', []);
+    $actualResponse = $this->licenseController->exportAdminLicenseToCSV(
+      $request, new ResponseHelper(), []);
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $this->assertStringNotContainsString('marydone',
+      $actualResponse->getHeaderLine('Content-Disposition'));
+  }
+
+  /**
+   *  -# Test for LicenseController::exportAdminLicenseToJSON() to export
+   *     license to JSON.
+   *  -# Check if the status code is 200
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportAdminLicenseToJSON()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $this->dbManager->shouldReceive('prepare');
+    $this->dbManager->shouldReceive('fetchAll')->andReturn([]);
+    $this->dbManager->shouldReceive('freeResult')->andReturn([]);
+    $this->dbManager->shouldReceive('execute');
+
+    $request = $this->getRequestWithQueryParams('GET', []);
+    $actualResponse = $this->licenseController->exportAdminLicenseToJSON(
+      $request, new ResponseHelper(), []);
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $this->assertStringContainsString('json',
+      $actualResponse->getHeaderLine('Content-type'));
+    $this->assertStringNotContainsString('marydone',
+      $actualResponse->getHeaderLine('Content-Disposition'));
+  }
+
+  /**
+   *  -# Test for LicenseController::exportAdminLicenseToJSON()
+   *  -# Check if the status code is 403 with HttpForbiddenException
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportAdminLicenseToJSONNotAdmin()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $request = $this->getEmptyRequest("GET");
+    $this->expectException(HttpForbiddenException::class);
+    $this->licenseController->exportAdminLicenseToJSON($request,
+      new ResponseHelper(), []);
+  }
+
+  /**
+   *  -# Test for LicenseController::exportAdminLicenseMarydoneToCSV() to
+   *     confirm it filters to marydone candidates only.
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportAdminLicenseMarydoneToCSV()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $this->dbManager->shouldReceive('prepare')
+      ->withArgs(function ($stmt, $sql) {
+        return strpos($sql, 'WHERE marydone = true') !== false;
+      })->once();
+    $this->dbManager->shouldReceive('fetchAll')->andReturn([]);
+    $this->dbManager->shouldReceive('freeResult')->andReturn([]);
+    $this->dbManager->shouldReceive('execute');
+
+    $request = $this->getRequestWithQueryParams('GET', []);
+    $actualResponse = $this->licenseController->exportAdminLicenseMarydoneToCSV(
+      $request, new ResponseHelper(), []);
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $this->assertStringContainsString('csv',
+      $actualResponse->getHeaderLine('Content-type'));
+    $this->assertStringContainsString('marydone',
+      $actualResponse->getHeaderLine('Content-Disposition'));
+  }
+
+  /**
+   *  -# Test for LicenseController::exportAdminLicenseMarydoneToCSV()
+   *  -# Check if the status code is 403 with HttpForbiddenException
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportAdminLicenseMarydoneToCSVNotAdmin()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $request = $this->getEmptyRequest("GET");
+    $this->expectException(HttpForbiddenException::class);
+    $this->licenseController->exportAdminLicenseMarydoneToCSV($request,
+      new ResponseHelper(), []);
+  }
+
+  /**
+   *  -# Test for LicenseController::exportAdminLicenseMarydoneToJSON() to
+   *     confirm it filters to marydone candidates only.
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportAdminLicenseMarydoneToJSON()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $this->dbManager->shouldReceive('prepare')
+      ->withArgs(function ($stmt, $sql) {
+        return strpos($sql, 'WHERE marydone = true') !== false;
+      })->once();
+    $this->dbManager->shouldReceive('fetchAll')->andReturn([]);
+    $this->dbManager->shouldReceive('freeResult')->andReturn([]);
+    $this->dbManager->shouldReceive('execute');
+
+    $request = $this->getRequestWithQueryParams('GET', []);
+    $actualResponse = $this->licenseController->exportAdminLicenseMarydoneToJSON(
+      $request, new ResponseHelper(), []);
+    $this->assertEquals(200, $actualResponse->getStatusCode());
+    $this->assertStringContainsString('json',
+      $actualResponse->getHeaderLine('Content-type'));
+    $this->assertStringContainsString('marydone',
+      $actualResponse->getHeaderLine('Content-Disposition'));
+  }
+
+  /**
+   *  -# Test for LicenseController::exportAdminLicenseMarydoneToJSON()
+   *  -# Check if the status code is 403 with HttpForbiddenException
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testExportAdminLicenseMarydoneToJSONNotAdmin()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $request = $this->getEmptyRequest("GET");
+    $this->expectException(HttpForbiddenException::class);
+    $this->licenseController->exportAdminLicenseMarydoneToJSON($request,
+      new ResponseHelper(), []);
+  }
+
+  /**
    * @test
    * -# Test for LicenseController::exportBulkText() default behavior.
    * -# Verify default format=json and filter=all returns downloadable JSON.

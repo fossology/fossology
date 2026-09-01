@@ -4747,6 +4747,45 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /license/import-json:
+    post:
+      operationId: importLicenseJson
+      tags:
+        - License
+      summary: Import a JSON license
+      description: >
+        Import a JSON license file to the database. Shares the same
+        handler as /license/import-csv; the file extension of fileInput
+        determines whether it is parsed as CSV or JSON.
+      requestBody:
+        description: License JSON file to import.
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileInput:
+                  type: string
+                  format: binary
+                  description: JSON file to be imported
+              required:
+                - fileInput
+      responses:
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '200':
+          description: Successfully imported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /license/export-csv:
     get:
       operationId: exportLicense
@@ -4759,14 +4798,113 @@ paths:
             type: integer
       tags:
         - License
-      summary: Export a csv license
+      summary: Export all licenses as CSV
       description: >
-        Export a csv license
+        Export all licenses, including candidates from every group, as a
+        csv file. Use /license/marydone/export-csv to export only
+        marydone (approved merge-request) candidate licenses.
       responses:
         '200':
           description: Successfully exported
           content:
             text/csv:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /license/export-json:
+    get:
+      operationId: exportLicenseJson
+      parameters:
+        - name: id
+          description: License id to export, 0 for all
+          in: query
+          required: false
+          schema:
+            type: integer
+      tags:
+        - License
+      summary: Export all licenses as JSON
+      description: >
+        Export all licenses, including candidates from every group, as a
+        JSON file. Use /license/marydone/export-json to export only
+        marydone (approved merge-request) candidate licenses.
+      responses:
+        '200':
+          description: Successfully exported
+          content:
+            text/json:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /license/marydone/export-csv:
+    get:
+      operationId: exportLicenseMarydoneCsv
+      parameters:
+        - name: id
+          description: License id to export, 0 for all marydone candidates
+          in: query
+          required: false
+          schema:
+            type: integer
+      tags:
+        - License
+      summary: Export marydone candidate licenses as CSV
+      description: >
+        Export only marydone (approved merge-request) candidate licenses
+        as a csv file. Use /license/export-csv to export all licenses.
+      responses:
+        '200':
+          description: Successfully exported
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+  /license/marydone/export-json:
+    get:
+      operationId: exportLicenseMarydoneJson
+      parameters:
+        - name: id
+          description: License id to export, 0 for all marydone candidates
+          in: query
+          required: false
+          schema:
+            type: integer
+      tags:
+        - License
+      summary: Export marydone candidate licenses as JSON
+      description: >
+        Export only marydone (approved merge-request) candidate licenses
+        as a JSON file. Use /license/export-json to export all licenses.
+      responses:
+        '200':
+          description: Successfully exported
+          content:
+            text/json:
               schema:
                 type: string
                 format: binary
@@ -4787,7 +4925,10 @@ paths:
         - Admin
       summary: Export bulk scan text as CSV or JSON
       description: >
-        Export bulk scan text entries from license_ref_bulk.
+        Export bulk scan text entries from license_ref_bulk. This is
+        unrelated to the /license/export-csv, /license/export-json and
+        /license/marydone/export-* endpoints, which export license
+        definitions rather than bulk scan text/replacement rules.
         Defaults are format=json and filter=all.
       parameters:
         - name: format
