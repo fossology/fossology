@@ -553,7 +553,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
   private function testGetGroupMembers($version = ApiVersion::V2)
   {
     $userIds = [2];
-    $groupName = 'fossy';
     $groupId = 1;
     $newuser = 3;
     $userPk = 2;
@@ -568,9 +567,11 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
       $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userPk])->andReturn($userArray);
     }
     $request->shouldReceive('getAttribute')->andReturn($version);
-    $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupName])->andReturn($groupId);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userIds[0]);
-    $this->userDao->shouldReceive('getAdminGroupMap')->withArgs([$userIds[0],$_SESSION[Auth::USER_LEVEL]])->andReturn([1]);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$userIds[0], $groupId])->andReturn(true);
 
     $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
     $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId)])->andReturn(1);
@@ -588,6 +589,105 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $actualResponse = $this->groupController->getGroupMembers($request, new ResponseHelper(), ['pathParam' => $groupId]);
     $this->assertEquals($expectedResponse->getStatusCode(),$actualResponse->getStatusCode());
   }
+
+  /**
+   * @test
+   * -# Test GroupController::getGroupMembers() when the caller administers
+   *    a different group but not the one being requested
+   * -# Check if HttpForbiddenException is thrown
+   */
+  public function testGetGroupMembersNotGroupAdminV1()
+  {
+    $groupId = 4;
+    $userId = 1;
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$userId, $groupId])->andReturn(false);
+
+    $requestHeaders = new Headers();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $this->streamFactory->createStream());
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V1);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->groupController->getGroupMembers($request, new ResponseHelper(),
+      ['pathParam' => $groupId]);
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::getGroupMembers() for a group that does not exist
+   * -# Check if HttpNotFoundException is thrown
+   */
+  public function testGetGroupMembersGroupNotFoundV1()
+  {
+    $groupId = 999;
+    $userId = 1;
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(false);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$userId, $groupId])->andReturn(false);
+
+    $requestHeaders = new Headers();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $this->streamFactory->createStream());
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V1);
+
+    $this->expectException(HttpNotFoundException::class);
+    $this->groupController->getGroupMembers($request, new ResponseHelper(),
+      ['pathParam' => $groupId]);
+  }
+
+  /**
+   * @test
+   * -# Test GroupController::getGroupMembers() for a global admin who is not
+   *    advisor or admin of the specific group being requested
+   * -# Check if the response status is 200
+   */
+  public function testGetGroupMembersGlobalAdminV1()
+  {
+    $userIds = [2];
+    $groupId = 1;
+    $callerId = 99;
+    $memberList = $this->getGroupMembers($userIds);
+
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($callerId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$callerId, $groupId])->andReturn(false);
+
+    $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
+    $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId)])->andReturn(1);
+    $this->dbManager->shouldReceive('fetchAll')->withArgs([1])->andReturn($this->getUsersWithGroup($userIds));
+    $this->dbManager->shouldReceive('freeResult')->withArgs([1]);
+
+    $user = $this->getUsersWithGroup($userIds)[0];
+    $users = [];
+    $users[] = new User($user["user_pk"], $user["user_name"], $user["user_desc"],
+      null, null, null, null, null);
+    $this->dbHelper->shouldReceive("getUsers")->withArgs([$user['user_pk']])->andReturn($users);
+
+    $requestHeaders = new Headers();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $this->streamFactory->createStream());
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V1);
+
+    $expectedResponse = (new ResponseHelper())->withJson($memberList, 200);
+    $actualResponse = $this->groupController->getGroupMembers($request,
+      new ResponseHelper(), ['pathParam' => $groupId]);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+  }
+
   /**
    * @test
    * -# Test GroupController::addMember() for version 1

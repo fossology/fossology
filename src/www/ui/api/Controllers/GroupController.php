@@ -280,14 +280,20 @@ class GroupController extends RestController
     $apiVersion = ApiVersion::getVersion($request);
     $userId = $this->restHelper->getUserId();
     $userDao = $this->restHelper->getUserDao();
-    $groupMap = $userDao->getAdminGroupMap($userId, $_SESSION[Auth::USER_LEVEL]);
-
-    if (empty($groupMap)) {
-      throw new HttpForbiddenException("You have no permission to manage any group.");
-    }
 
     // Get the group name/id form the params and then the group Id
-    $groupId = $apiVersion == ApiVersion::V2 ? intval($this->restHelper->getUserDao()->getGroupIdByName($args['pathParam'])) : intval($args['pathParam']);
+    $groupId = $apiVersion == ApiVersion::V2 ? intval($userDao->getGroupIdByName($args['pathParam'])) : intval($args['pathParam']);
+
+    $userIsAdmin = Auth::isAdmin();
+    $userHasGroupAccess = $userDao->isAdvisorOrAdmin($userId, $groupId);
+
+    if (!$this->dbHelper->doesIdExist("groups", "group_pk", $groupId)) {
+      throw new HttpNotFoundException("Group id not found!");
+    }
+    if (! $userIsAdmin && ! $userHasGroupAccess) {
+      throw new HttpForbiddenException("Not advisor or admin of the group. " .
+        "Can not process request.");
+    }
 
     // The query to get the list of users with corresponding roles from the group.
     $dbManager = $this->dbHelper->getDbManager();
