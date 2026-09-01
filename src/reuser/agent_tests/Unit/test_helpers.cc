@@ -2,46 +2,21 @@
  SPDX-License-Identifier: GPL-2.0-only
  Author: Dietmar Helmut Leher <helmut.leher.ext@vaillant-group.com>
  SPDX-FileCopyrightText: © 2026 Vaillant GmbH
-*/
+ */
 /**
  * @file
- * @brief Unit tests for ReuserDatabaseHandler private helper methods.
+ * @brief Unit tests for the shared clearing-decision helpers.
  *
- * Tests isValidIdentifier() and replaceUnicodeControlChars() via a thin
- * protected-accessor subclass so the private helpers are reachable without
- * modifying production code.
+ * Tests fo::ClearingDecisionUtils::isValidIdentifier(),
+ * replaceUnicodeControlChars() and getDecisionTypePriority() directly.
  */
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "ReuserDatabaseHandler.hpp"
-#include "MockReuserDatabaseHandler.hpp"
+#include "ClearingDecisionUtils.hpp"
 
-/**
- * @class ReuserHelpersAccessor
- * @brief Thin subclass that exposes private helper methods for testing.
- */
-class ReuserHelpersAccessor : public MockReuserDatabaseHandler
-{
-public:
-  using MockReuserDatabaseHandler::MockReuserDatabaseHandler;
-
-  bool callIsValidIdentifier(const std::string& s)
-  {
-    return isValidIdentifier(s);
-  }
-
-  std::string callReplaceUnicodeControlChars(const std::string& s)
-  {
-    return replaceUnicodeControlChars(s);
-  }
-
-  int callGetDecisionTypePriority(int decisionType)
-  {
-    return getDecisionTypePriority(decisionType);
-  }
-};
+namespace cdu = fo::ClearingDecisionUtils;
 
 // isValidIdentifier tests
 
@@ -66,15 +41,13 @@ class IsValidIdentifierTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST(testKnownTableNamesAreValid);
   CPPUNIT_TEST_SUITE_END();
 
-  ReuserHelpersAccessor acc;
-
 protected:
   /**
    * @brief An empty string is not a valid SQL identifier.
    */
   void testEmptyStringIsInvalid()
   {
-    CPPUNIT_ASSERT(!acc.callIsValidIdentifier(""));
+    CPPUNIT_ASSERT(!cdu::isValidIdentifier(""));
   }
 
   /**
@@ -82,7 +55,7 @@ protected:
    */
   void testLowercaseLettersAreValid()
   {
-    CPPUNIT_ASSERT(acc.callIsValidIdentifier("abc"));
+    CPPUNIT_ASSERT(cdu::isValidIdentifier("abc"));
   }
 
   /**
@@ -90,7 +63,7 @@ protected:
    */
   void testUppercaseLettersAreValid()
   {
-    CPPUNIT_ASSERT(acc.callIsValidIdentifier("ABC"));
+    CPPUNIT_ASSERT(cdu::isValidIdentifier("ABC"));
   }
 
   /**
@@ -98,7 +71,7 @@ protected:
    */
   void testDigitsAreValid()
   {
-    CPPUNIT_ASSERT(acc.callIsValidIdentifier("123"));
+    CPPUNIT_ASSERT(cdu::isValidIdentifier("123"));
   }
 
   /**
@@ -106,7 +79,7 @@ protected:
    */
   void testUnderscoreIsValid()
   {
-    CPPUNIT_ASSERT(acc.callIsValidIdentifier("_"));
+    CPPUNIT_ASSERT(cdu::isValidIdentifier("_"));
   }
 
   /**
@@ -114,8 +87,8 @@ protected:
    */
   void testMixedAlphanumericUnderscoreIsValid()
   {
-    CPPUNIT_ASSERT(acc.callIsValidIdentifier("uploadtree_a"));
-    CPPUNIT_ASSERT(acc.callIsValidIdentifier("upload_fk_123"));
+    CPPUNIT_ASSERT(cdu::isValidIdentifier("uploadtree_a"));
+    CPPUNIT_ASSERT(cdu::isValidIdentifier("upload_fk_123"));
   }
 
   /**
@@ -123,7 +96,7 @@ protected:
    */
   void testSpaceIsInvalid()
   {
-    CPPUNIT_ASSERT(!acc.callIsValidIdentifier("upload tree"));
+    CPPUNIT_ASSERT(!cdu::isValidIdentifier("upload tree"));
   }
 
   /**
@@ -131,7 +104,7 @@ protected:
    */
   void testHyphenIsInvalid()
   {
-    CPPUNIT_ASSERT(!acc.callIsValidIdentifier("upload-tree"));
+    CPPUNIT_ASSERT(!cdu::isValidIdentifier("upload-tree"));
   }
 
   /**
@@ -139,7 +112,7 @@ protected:
    */
   void testDotIsInvalid()
   {
-    CPPUNIT_ASSERT(!acc.callIsValidIdentifier("public.uploadtree"));
+    CPPUNIT_ASSERT(!cdu::isValidIdentifier("public.uploadtree"));
   }
 
   /**
@@ -147,7 +120,7 @@ protected:
    */
   void testSemicolonIsInvalid()
   {
-    CPPUNIT_ASSERT(!acc.callIsValidIdentifier("foo;DROP TABLE uploadtree"));
+    CPPUNIT_ASSERT(!cdu::isValidIdentifier("foo;DROP TABLE uploadtree"));
   }
 
   /**
@@ -155,7 +128,7 @@ protected:
    */
   void testSingleQuoteIsInvalid()
   {
-    CPPUNIT_ASSERT(!acc.callIsValidIdentifier("up'load"));
+    CPPUNIT_ASSERT(!cdu::isValidIdentifier("up'load"));
   }
 
   /**
@@ -163,7 +136,7 @@ protected:
    */
   void testDoubleQuoteIsInvalid()
   {
-    CPPUNIT_ASSERT(!acc.callIsValidIdentifier("up\"load"));
+    CPPUNIT_ASSERT(!cdu::isValidIdentifier("up\"load"));
   }
 
   /**
@@ -171,7 +144,7 @@ protected:
    */
   void testDollarIsInvalid()
   {
-    CPPUNIT_ASSERT(!acc.callIsValidIdentifier("$1"));
+    CPPUNIT_ASSERT(!cdu::isValidIdentifier("$1"));
   }
 
   /**
@@ -179,7 +152,7 @@ protected:
    */
   void testNullByteIsInvalid()
   {
-    CPPUNIT_ASSERT(!acc.callIsValidIdentifier(std::string("up\x00load", 8)));
+    CPPUNIT_ASSERT(!cdu::isValidIdentifier(std::string("up\x00load", 8)));
   }
 
   /**
@@ -190,8 +163,8 @@ protected:
    */
   void testSqlInjectionPatternIsInvalid()
   {
-    CPPUNIT_ASSERT(!acc.callIsValidIdentifier("t WHERE 1=1--"));
-    CPPUNIT_ASSERT(!acc.callIsValidIdentifier("t UNION SELECT 1"));
+    CPPUNIT_ASSERT(!cdu::isValidIdentifier("t WHERE 1=1--"));
+    CPPUNIT_ASSERT(!cdu::isValidIdentifier("t UNION SELECT 1"));
   }
 
   /**
@@ -199,10 +172,10 @@ protected:
    */
   void testKnownTableNamesAreValid()
   {
-    CPPUNIT_ASSERT(acc.callIsValidIdentifier("uploadtree"));
-    CPPUNIT_ASSERT(acc.callIsValidIdentifier("uploadtree_a"));
+    CPPUNIT_ASSERT(cdu::isValidIdentifier("uploadtree"));
+    CPPUNIT_ASSERT(cdu::isValidIdentifier("uploadtree_a"));
     // upload-specific table names follow the pattern uploadtree_<pk>
-    CPPUNIT_ASSERT(acc.callIsValidIdentifier("uploadtree_42"));
+    CPPUNIT_ASSERT(cdu::isValidIdentifier("uploadtree_42"));
   }
 };
 
@@ -226,11 +199,9 @@ class ReplaceUnicodeControlCharsTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST(testEmptyStringIsUnchanged);
   CPPUNIT_TEST_SUITE_END();
 
-  ReuserHelpersAccessor acc;
-
   std::string call(const std::string& s)
   {
-    return acc.callReplaceUnicodeControlChars(s);
+    return cdu::replaceUnicodeControlChars(s);
   }
 
 protected:
@@ -389,8 +360,7 @@ class DecisionTypePriorityTest : public CPPUNIT_NS::TestFixture
 protected:
   int prio(int decisionType)
   {
-    ReuserHelpersAccessor accessor;
-    return accessor.callGetDecisionTypePriority(decisionType);
+    return cdu::getDecisionTypePriority(decisionType);
   }
 
   /** @brief Matches PHP ReuserAgent::getDecisionTypePriority. */

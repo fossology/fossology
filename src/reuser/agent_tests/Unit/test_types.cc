@@ -43,26 +43,26 @@ protected:
   /**
    * @brief Reuse mode flag constants are distinct and combine correctly.
    *
-   * Guards against accidental bit-overlap between REUSE_ENHANCED, REUSE_MAIN,
-   * REUSE_CONF and REUSE_COPYRIGHT, and verifies that OR-combining all flags
+   * Guards against accidental bit-overlap between REUSE_MAIN, REUSE_CONF,
+   * REUSE_COPYRIGHT and REUSE_BULK, and verifies that OR-combining all flags
    * sets every individual bit.
    */
   void testReuseModeFlags()
   {
     // Flags must be distinct powers-of-two (no overlap).
-    CPPUNIT_ASSERT((REUSE_ENHANCED  & REUSE_MAIN)      == 0);
-    CPPUNIT_ASSERT((REUSE_ENHANCED  & REUSE_CONF)      == 0);
-    CPPUNIT_ASSERT((REUSE_ENHANCED  & REUSE_COPYRIGHT) == 0);
     CPPUNIT_ASSERT((REUSE_MAIN      & REUSE_CONF)      == 0);
     CPPUNIT_ASSERT((REUSE_MAIN      & REUSE_COPYRIGHT) == 0);
+    CPPUNIT_ASSERT((REUSE_MAIN      & REUSE_BULK)      == 0);
     CPPUNIT_ASSERT((REUSE_CONF      & REUSE_COPYRIGHT) == 0);
+    CPPUNIT_ASSERT((REUSE_CONF      & REUSE_BULK)      == 0);
+    CPPUNIT_ASSERT((REUSE_COPYRIGHT & REUSE_BULK)      == 0);
 
     // Combined mode works as expected.
-    int combined = REUSE_ENHANCED | REUSE_MAIN | REUSE_CONF | REUSE_COPYRIGHT;
-    CPPUNIT_ASSERT((combined & REUSE_ENHANCED)  != 0);
+    int combined = REUSE_MAIN | REUSE_CONF | REUSE_COPYRIGHT | REUSE_BULK;
     CPPUNIT_ASSERT((combined & REUSE_MAIN)      != 0);
     CPPUNIT_ASSERT((combined & REUSE_CONF)      != 0);
     CPPUNIT_ASSERT((combined & REUSE_COPYRIGHT) != 0);
+    CPPUNIT_ASSERT((combined & REUSE_BULK)      != 0);
   }
 
   /**
