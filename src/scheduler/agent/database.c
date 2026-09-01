@@ -763,6 +763,8 @@ static PGconn* database_connect(gchar* configdir)
   return ret;
 }
 
+static GMutex db_mutex;
+
 /**
  * Initializes any one-time attributes relating to the database. Currently this
  * includes creating the db connection and checking the URL of the FOSSology
@@ -785,6 +787,14 @@ void database_init(scheduler_t* scheduler)
   check_tables(scheduler);
 }
 
+/**
+ * Cleans up database static resources such as the mutex lock.
+ */
+void database_destroy(void)
+{
+  g_mutex_clear(&db_mutex);
+}
+
 /* ************************************************************************** */
 /* **** event and functions ************************************************* */
 /* ************************************************************************** */
@@ -797,6 +807,10 @@ void database_init(scheduler_t* scheduler)
  * ever lost we automatically try to reconnect and if we are unable to, the
  * scheduler will die.
  *
+ * Thread safety: Access to database_exec is synchronized with db_mutex so
+ * multiple worker or agent threads cannot execute PQexec on scheduler->db_conn
+ * concurrently.
+ *
  * @param scheduler  the scheduler_t* that holds the connection
  * @param sql        the sql that will be performed
  * @return           the PGresult struct that is returned by PQexec
@@ -807,6 +821,8 @@ PGresult* database_exec(scheduler_t* scheduler, const char* sql)
 
   V_SPECIAL("DATABASE: exec \"%s\"\n", sql);
 
+  g_mutex_lock(&db_mutex);
+
   ret = PQexec(scheduler->db_conn, sql);
   if(ret == NULL || PQstatus(scheduler->db_conn) != CONNECTION_OK)
   {
@@ -815,6 +831,8 @@ PGresult* database_exec(scheduler_t* scheduler, const char* sql)
 
     ret = PQexec(scheduler->db_conn, sql);
   }
+
+  g_mutex_unlock(&db_mutex);
 
   return ret;
 }
