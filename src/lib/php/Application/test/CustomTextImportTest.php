@@ -892,6 +892,67 @@ class CustomTextImportTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
+   * Regression for #3776: the "Tab" option in the import UI's delimiter
+   * <select> used value="\t", which HTML does not decode as an escape
+   * sequence -- it submitted the literal two characters "\" and "t". That
+   * string then got truncated by setDelimiter() to just "\", so choosing
+   * "Tab" silently parsed uploads with a backslash delimiter instead of a
+   * tab. The template now emits value="&#9;", a numeric character
+   * reference that browsers do decode to a real tab byte.
+   * -# Call setDelimiter() with a real tab byte, exactly as the fixed
+   *    template now submits it.
+   * -# Write a tab-delimited CSV file (no comma/semicolon in it).
+   * -# Import via handleFile() and verify one phrase is created, proving
+   *    the row was actually split into columns rather than read as one
+   *    unparsed blob.
+   */
+  public function testHandleCsvFileWithTabDelimiterCreatesSinglePhrase(): void
+  {
+    $this->importer->setDelimiter("\t");
+
+    $bom = chr(0xEF) . chr(0xBB) . chr(0xBF);
+    $csv = $bom . "Text\tIs Active\tLicense Shortname\tRemoving\tComment\tLicense Text\tAcknowledgement\n";
+    $csv .= "\"tab delimited phrase\"\ttrue\tMIT\tfalse\t\t\t";
+
+    $path = $this->writeTempFile($csv, 'csv');
+
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->with(M::pattern('/INSERT INTO custom_phrase/'), M::any(), M::any())
+      ->once()->andReturn(['cp_pk' => 1]);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->with(M::pattern('/custom_phrase_license_map/'), M::any(), M::any())
+      ->once()->andReturn(null);
+    $this->dbManager->shouldReceive('insertTableRow')->once();
+
+    $this->licenseDao->shouldReceive('getLicenseByShortName')
+      ->with('MIT', 1)->once()->andReturn($this->makeLicense(3));
+
+    $result = $this->importer->handleFile($path, 'csv');
+
+    $this->assertStringContainsString('1 phrase(s) created', $result);
+  }
+
+  /**
+   * @test
+   * Documents the pre-existing truncation behavior of setDelimiter() that
+   * made the #3776 bug possible: a multi-character string is silently cut
+   * to its first byte rather than rejected. Before the template fix, the
+   * browser sent exactly this "\t" two-character string for the "Tab"
+   * option, which truncated to "\".
+   * -# Call setDelimiter() with the literal two-character string "\t".
+   * -# Verify the stored delimiter is just the backslash.
+   */
+  public function testSetDelimiterTruncatesMultiCharStringToFirstByte(): void
+  {
+    $this->importer->setDelimiter('\\t');
+
+    $delimiter = Reflectory::getObjectsProperty($this->importer, 'delimiter');
+
+    $this->assertSame('\\', $delimiter);
+  }
+
+  /**
+   * @test
    * -# Write a CSV with 3 rows sharing the same text (one phrase, 3 licenses).
    *    This mirrors the output of BulkTextExport for a phrase with 3 license mappings.
    * -# Row 1 creates the phrase and associates GPL-2.0-or-later.
