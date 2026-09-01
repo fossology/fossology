@@ -216,6 +216,9 @@ class ScanOptions
     if ($this->reuse->getReuseCopyright() === true) {
       $reuserRules[] = 'reuseCopyright';
     }
+    if ($this->decider !== null && $this->decider->getBulkReused() === true) {
+      $reuserRules[] = 'reuseBulk';
+    }
     $userDao = $GLOBALS['container']->get("dao.user");
     $groupId = $userDao->getGroupIdByName($this->reuse->getReuseGroup());
     $reuserSelectors = [];
