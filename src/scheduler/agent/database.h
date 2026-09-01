@@ -25,6 +25,7 @@ extern const char* jobsql_failed;
 /* ************************************************************************** */
 
 void database_init(scheduler_t* scheduler);
+void database_destroy(void);
 void email_init(scheduler_t* scheduler);
 
 /* ************************************************************************** */
