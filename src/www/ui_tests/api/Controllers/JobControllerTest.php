@@ -14,7 +14,9 @@ namespace Fossology\UI\Api\Test\Controllers;
 
 use Fossology\Lib\Dao\JobDao;
 use Fossology\Lib\Dao\ShowJobsDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\UI\Api\Controllers\JobController;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\ApiVersion;
@@ -60,6 +62,18 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
   private $showJobsDao;
 
   /**
+   * @var UploadDao $uploadDao
+   * UploadDao mock
+   */
+  private $uploadDao;
+
+  /**
+   * @var integer $groupId
+   * Group id of the current user
+   */
+  private $groupId;
+
+  /**
    * @var JobController $jobController
    * JobController object to test
    */
@@ -89,10 +103,14 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper = M::mock(RestHelper::class);
     $this->jobDao = M::mock(JobDao::class);
     $this->showJobsDao = M::mock(ShowJobsDao::class);
+    $this->uploadDao = M::mock(UploadDao::class);
+    $this->groupId = 2;
 
     $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
     $this->restHelper->shouldReceive('getJobDao')->andReturn($this->jobDao);
     $this->restHelper->shouldReceive('getShowJobDao')->andReturn($this->showJobsDao);
+    $this->restHelper->shouldReceive('getUploadDao')->andReturn($this->uploadDao);
+    $this->restHelper->shouldReceive('getGroupId')->andReturn($this->groupId);
 
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
@@ -265,6 +283,10 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["job", "job_pk", 12])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", 5])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([5, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('getJobs')->withArgs(array(12, NULL, 'ASC', 0, 1, NULL))
       ->andReturn([[$job], 1]);
     $this->jobDao->shouldReceive('getChlidJobStatus')->withArgs(array(12))
@@ -294,6 +316,41 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
+   * -# Test JobController::getJobs() with a single job id whose upload is
+   *    not accessible to the caller (regression test for #3798)
+   * -# Check if HttpForbiddenException is thrown and job data is never
+   *    returned
+   */
+  public function testGetJobFromIdNotAccessible()
+  {
+    $job = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["job", "job_pk", 12])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", 5])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([5, $this->groupId])->andReturn(false);
+    $this->dbHelper->shouldReceive('getJobs')->withArgs(array(12, NULL, 'ASC', 0, 1, NULL))
+      ->andReturn([[$job], 1]);
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+    $userId = 3;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->expectException(HttpForbiddenException::class);
+
+    /* showJobsDao and the ajaxShowJobs plugin are deliberately left
+     * unmocked here: if getAllResults() ever proceeds past the upload
+     * accessibility check, building the job queue details would hit an
+     * unexpected Mockery call and fail the test for the wrong reason. */
+    $this->jobController->getJobs($request, $response, ["id" => 12]);
+  }
+
+  /**
+   * @test
    * -# Test JobController::getJobs() with single upload
    * -# Check if response is 200
    */
@@ -305,6 +362,8 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", 5])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([5, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(['job', 'job_pk', 12])->andReturn(true);
     $this->dbHelper->shouldReceive('getJobs')->withArgs(array(null, null, "ASC", 0, 1, 5))
@@ -332,6 +391,60 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
       $this->getResponseJson($actualResponse)[0]);
     $this->assertEquals('1',
       $actualResponse->getHeaderLine('X-Total-Pages'));
+  }
+
+  /**
+   * @test
+   * -# Test JobController::getJobs() with an upload query parameter the
+   *    caller cannot access (regression test for #3798)
+   * -# Check if HttpForbiddenException is thrown and no job list is
+   *    ever queried
+   */
+  public function testGetJobsFromUploadNotAccessible()
+  {
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", 5])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([5, $this->groupId])->andReturn(false);
+    $this->dbHelper->shouldNotReceive('getJobs');
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withQueryParams([JobController::UPLOAD_PARAM => 5]);
+    $response = new ResponseHelper();
+    $userId = 3;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->expectException(HttpForbiddenException::class);
+
+    $this->jobController->getJobs($request, $response, []);
+  }
+
+  /**
+   * @test
+   * -# Test JobController::getJobs() with an upload query parameter for
+   *    an upload that does not exist
+   * -# Check if HttpNotFoundException is thrown and no job list is ever
+   *    queried
+   */
+  public function testGetJobsFromUploadNotFound()
+  {
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", 99])->andReturn(false);
+    $this->dbHelper->shouldNotReceive('getJobs');
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withQueryParams([JobController::UPLOAD_PARAM => 99]);
+    $response = new ResponseHelper();
+    $userId = 3;
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->expectException(HttpNotFoundException::class);
+
+    $this->jobController->getJobs($request, $response, []);
   }
 
   /**
