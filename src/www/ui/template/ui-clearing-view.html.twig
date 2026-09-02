@@ -8,6 +8,9 @@
   <link rel="stylesheet" href="css/highlights.css"/>
   <link rel="stylesheet" href="css/spasht.css"/>
   <link rel="stylesheet" href="css/search.css"/>
+  <style>
+    .nomos-active-occurrence { outline: 2px solid #d9534f; outline-offset: 1px; }
+  </style>
 {% endblock %}
 
 {% block content %}
@@ -35,6 +38,13 @@
                 {% endif %}
             </div>
 
+            <span id="nomosNavBar" class="clearing-nomos-nav" style="display:none; align-items:center; margin-left:10px;">
+                <span style="font-size:0.9em;">License matches:</span>
+                <button class="btn btn-light btn-sm" id="btnNomosPrev" title="Previous occurrence">&uarr;</button>
+                <button class="btn btn-light btn-sm" id="btnNomosNext" title="Next occurrence">&darr;</button>
+                <span id="nomosNavCount" style="font-size:0.9em; margin-left:5px;"></span>
+            </span>
+
             <button class="legendHider btn btn-light btn-sm">
               {{ 'Hide Legend'| trans }}
             </button>
@@ -43,6 +53,12 @@
             </button>
           </div>
           <div class="boxnew" id="fileTextView" style="overflow:scroll;">{{ textView }}</div>
+          <div id="nomosFloatingNav" style="display:none; position:absolute; top:64px; right:30px; z-index:20; background:#fff; border:1px solid #888; border-radius:4px; padding:3px 8px; box-shadow:0 1px 4px rgba(0,0,0,0.25); font-size:0.9em; align-items:center;">
+            <span id="nomosFloatingLabel" style="margin-right:6px; font-weight:bold;"></span>
+            <span id="nomosFloatingCount" style="margin-right:6px;"></span>
+            <button type="button" class="btn btn-light btn-xs" id="btnNomosFloatPrev" title="Previous occurrence">&#9664;</button>
+            <button type="button" class="btn btn-light btn-xs" id="btnNomosFloatNext" title="Next occurrence">&#9654;</button>
+          </div>
           <div id="legendBox" name="legendBox" style="background-color:white; padding:2px; border:1px outset #222222; width:150px; position:absolute; right:17px; bottom:17px; ">
             <u><b>{{ 'Legend:'| trans }}</b></u><br/>
               {% for entry in legendData %}

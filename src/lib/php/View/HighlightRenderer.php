@@ -58,7 +58,7 @@ class HighlightRenderer
       }
     }
 
-    return $this->createStyleWithPadding($type, $highlight->getInfoText(), $depth) . $wrappendElement;
+    return $this->createStyleWithPadding($type, $highlight->getInfoText(), $depth, $highlight->getStart()) . $wrappendElement;
   }
 
   /**
@@ -87,9 +87,9 @@ class HighlightRenderer
    * @param int $depth
    * @return string
    */
-  public function createStyleWithPadding($type, $title, $depth = 0)
+  public function createStyleWithPadding($type, $title, $depth = 0, $start = null)
   {
-    $style = $this->createStartSpan($type, $title);
+    $style = $this->createStartSpan($type, $title, $start);
     if ($depth < self::DEFAULT_PADDING) {
       $padd = (2 * (self::DEFAULT_PADDING - $depth - 2)) . 'px';
       return $this->getStyleWithPadding($padd, $style);
@@ -114,7 +114,7 @@ class HighlightRenderer
    * @param string $title
    * @return string
    */
-  public function createStartSpan($type, $title)
+  public function createStartSpan($type, $title, $start = null)
   {
     if ($type == 'K ' || $type == 'K') {
       return "<span class=\"hi-keyword\">";
@@ -123,7 +123,8 @@ class HighlightRenderer
       $type = Highlight::UNDEFINED;
     }
     $class = $this->classMapping[$type];
-    return "<span class=\"$class\" title=\"$title\">";
+    $dataStart = ($type == Highlight::SIGNATURE && $start !== null) ? " data-start=\"$start\"" : "";
+    return "<span class=\"$class\" title=\"$title\"$dataStart>";
   }
 
   /**
