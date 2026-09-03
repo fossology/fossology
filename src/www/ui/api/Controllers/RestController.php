@@ -108,6 +108,26 @@ class RestController
   }
 
   /**
+   * Check if upload is accessible and writable by the current group.
+   *
+   * Read access (Auth::PERM_READ) alone is not enough to create or modify
+   * clearing decisions, license findings or scans on an upload; the calling
+   * group needs at least Auth::PERM_WRITE.
+   *
+   * @param integer $id Upload ID
+   * @throws HttpNotFoundException Upload not found
+   * @throws HttpForbiddenException Upload not accessible or read-only for the caller
+   */
+  protected function uploadEditable($id): void
+  {
+    $this->uploadAccessible($id);
+    if (! $this->restHelper->getUploadDao()->isEditable($id,
+        $this->restHelper->getGroupId())) {
+      throw new HttpForbiddenException("Upload is not editable");
+    }
+  }
+
+  /**
    * Check if upload tree is accessible
    *
    * @param int $uploadId
