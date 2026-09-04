@@ -5915,9 +5915,10 @@ components:
               items:
                 type: integer
           description: The UploadID(s) to reuse. Single integer or array of integers.
+          example: 42
         reuse_group:
           type: string
-          description: The group of the reused upload
+          description: The group of the reused upload.
         reuse_main:
           type: boolean
           description: Copy the main license from reused package?

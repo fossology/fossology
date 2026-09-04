@@ -448,6 +448,27 @@ class UserDao
 
   /**
    * @param int $userId
+   * @return int[]
+   */
+  public function getUserGroupIds($userId)
+  {
+    $groupIds = [];
+    if ($userId <= 0) {
+      return $groupIds;
+    }
+    $stmtName = __METHOD__;
+    $this->dbManager->prepare($stmtName,
+      "SELECT group_fk FROM group_user_member WHERE user_fk = $1");
+    $res = $this->dbManager->execute($stmtName, [$userId]);
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $groupIds[] = intval($row['group_fk']);
+    }
+    $this->dbManager->freeResult($res);
+    return $groupIds;
+  }
+
+  /**
+   * @param int $userId
    * @return string
    */
   public function getUserEmail($userId)
