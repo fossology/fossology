@@ -53,6 +53,7 @@ class HighlightRendererTest extends \PHPUnit\Framework\TestCase
     $this->highlight->shouldReceive('getType')->andReturn(Highlight::MATCH)->byDefault();
     $this->highlight->shouldReceive('getInfoText')->andReturn("<infoText>")->byDefault();
     $this->highlight->shouldReceive('getHtmlElement')->andReturn(null)->byDefault();
+    $this->highlight->shouldReceive('getStart')->andReturn(0)->byDefault();
 
     $this->splitPosition = M::mock(SplitPosition::class);
     $this->splitPosition->shouldReceive('getLevel')->andReturn($this->level)->byDefault();
