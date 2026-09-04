@@ -300,6 +300,10 @@ static int fileHasPatt(int licTextIdx, char *filetext, int size,
     }
     return(ltsr[licTextIdx] & LTSR_RMASK);
   }
+  /* Entries with no seed cannot use findPhrase(); fall back to direct regex search. */
+  if (licText[licTextIdx].tseed == NULL_STR) {
+    return idxGrep_recordPosition(licTextIdx, filetext, REG_ICASE | REG_EXTENDED);
+  }
   return(findPhrase(licTextIdx, PARSE_ARGS, qType));
 }
 
@@ -550,12 +554,460 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   cleanLicenceBuffer();
+  if (INFILE(_LT_ANTI_CAPITALIST_1_4)) {
+    INTERESTING("ACSL-v.-1.4");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ANU_LICENSE)) {
+    INTERESTING("ANU");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ATKINSON_HYPERLEGIBLE_FONT)) {
+    INTERESTING("Atkinson-Hyperlegible-Font");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BLOOMBERG_BLPAPI)) {
+    INTERESTING("Bloomberg-BLPAPI");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BOOST_ORIGINAL)) {
+    INTERESTING("Boost-Original");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CARNEGIE_MELLON_CONTRIBUTORS)) {
+    INTERESTING("CMU-Mach");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CMR_NO)) {
+    INTERESTING("CMR");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CMU_MIT)) {
+    INTERESTING("CMU-MIT-style");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CMU_TEMPLATE)) {
+    INTERESTING("CMU");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_CORPORATE_ACCOUNTABILITY_1_1)) {
+    INTERESTING("CAL-Software");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DMALLOC)) {
+    INTERESTING("dmalloc");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DOCBOOK_2)) {
+    INTERESTING("DOCBOOK");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DR_JOHN_MADDOCK)) {
+    INTERESTING("Dr-John-Maddock");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DROPBEAR)) {
+    INTERESTING("Dropbear");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_FACEBOOK_SOFTWARE_LICENSE)) {
+    INTERESTING("Facebook-Software");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GITLAB_EE)) {
+    INTERESTING("GitLab-EE");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GOOGLE_MAPS_TOS_2020_05_06)) {
+    INTERESTING("Google-Maps-Platform-ToS-2020-05-06");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GPL_2_0_PLUS_GEOSERVER)) {
+    INTERESTING("GPL-2.0-or-later-geoserver");
+    lmem[_mGPL] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GPL_3_0_APTANA)) {
+    INTERESTING("GPL-3.0-with-Aptana-exception");
+    lmem[_mGPL] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HDF4)) {
+    INTERESTING("HDF4");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HDF5)) {
+    INTERESTING("HDF5");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_HIPPOCRATIC_2_0)) {
+    INTERESTING("Hippocratic-2.0");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_IBPP)) {
+    INTERESTING("IBPP");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_IC_1_0)) {
+    INTERESTING("IC-1.0");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_IC_SHARED_1_0)) {
+    INTERESTING("IC-Shared-1.0");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ILMID)) {
+    INTERESTING("ilmid");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_JASPER_1_0)) {
+    INTERESTING("Jasper-1.0");
+    lmem[_mAPACHE] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_KERBEROS)) {
+    INTERESTING("Kerberos");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_KEVLIN_HENNEY)) {
+    INTERESTING("HPND-Kevlin-Henney");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_KREATIVE_RELAY_FONTS_FREE_USE_1_2F)) {
+    INTERESTING("Kreative-Software-Relay-Fonts-Free-Use-1.2f");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LIBMIB)) {
+    INTERESTING("LibMib");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LUMISOFT_MAIL_SERVER)) {
+    INTERESTING("LumiSoft-Mail-Server");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_LUXI)) {
+    INTERESTING("Bigelow-and-Holmes-Luxi-fonts");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MIT_NO_TRADEMARKS)) {
+    INTERESTING("MIT-No-Commercial-Use-of-Trademarks");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MIT_OLD_STYLE_SPARSE)) {
+    INTERESTING("MIT-Old-Style-Spare");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MIT_TAYLOR_VARIANT)) {
+    INTERESTING("pkgconf");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MIT_XFIG)) {
+    INTERESTING("Xfig");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_CL)) {
+    INTERESTING("MS-CL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MS_VISUAL_STUDIO_CODE_2022)) {
+    INTERESTING("MS-Visual-Studio-Code-2022");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MULLE_KYBERNETIK)) {
+    INTERESTING("Mulle-Kybernetik");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_MX4J_2)) {
+    INTERESTING("MX4J");
+    lmem[_mAPACHE] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NEWTON_KING_CLA)) {
+    INTERESTING("Newton-King-CLA");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NICE)) {
+    INTERESTING("Nice");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NONEXCLUSIVE)) {
+    INTERESTING("Nonexclusive");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NRL_PERMISSION)) {
+    INTERESTING("CMU-Mach-nodoc");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_NXP_MICROCONTROLLER_PROPRIETARY)) {
+    INTERESTING("NXP-Microcontroller-Proprietary");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_OPENSSL_EXCEPTION_AGPL_3_0_PLUS)) {
+    INTERESTING("openssl-exception-AGPL-3.0-or-later");
+    lmem[_mGPL] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_ORACLE_MYSQL_FOSS_EXCEPTION_2_0)) {
+    INTERESTING("Oracle-MySQL-FOSS-exception-2.0");
+    lmem[_mGPL] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PASSIVE_AGGRESSIVE)) {
+    INTERESTING("Passive-Aggressive");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PPP)) {
+    INTERESTING("ppp");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PROSPERITY_3_0)) {
+    INTERESTING("Prosperity-Public-3.0");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PYBENCH)) {
+    INTERESTING("pybench");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_PYGRES_2_2)) {
+    INTERESTING("PyGres-2.2");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_REPORTBUG)) {
+    INTERESTING("Debian-reportbug");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SCINTILLA)) {
+    INTERESTING("Scintilla");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_SECRET_LABS_2011)) {
+    INTERESTING("Secret-Labs-2011");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_STLPORT_2000)) {
+    INTERESTING("STLport-2000");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TTYP0)) {
+    INTERESTING("TTYP0");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_UPL_1_0)) {
+    INTERESTING("UPL-1.0");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_WESTHAWK)) {
+    INTERESTING("Westhawk");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_X11_DEC2)) {
+    INTERESTING("HPND-DEC");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_X11_DOC)) {
+    INTERESTING("X11-Documentation");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_X11_DSC)) {
+    INTERESTING("X11-Style-DSC-Technologies");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_X11_HANSON)) {
+    INTERESTING("X11-Style-David-R.-Hanson");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_X11_OPENGL)) {
+    INTERESTING("SGI-OpenGL");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_X11_QUARTERDECK)) {
+    INTERESTING("X11-Style-Quarterdeck");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_X11R5_AUTHORS)) {
+    INTERESTING("X11-R5-Authors");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_X11_X11R5)) {
+    INTERESTING("X11-R5");
+    lmem[_mMIT] = 1;
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BSD_3_CLAUSE_LBNL)) {
+    INTERESTING("BSD-3-Clause-LBNL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_BLAS_2017)) {
+    INTERESTING("BLAS-2017");
+  }
+  cleanLicenceBuffer();
   /*
    * Check Apache licenses before BSD
    */
   if (HASTEXT(_PHR_Apache_ref0, REG_EXTENDED) || INFILE(_PHR_Apache_ref7) || INFILE(_TITLE_Apache)) {
-    cp = ASLVERS();
-    INTERESTING(cp);
+    /* Exceptions modify an Apache grant rather than replacing it, so
+       record them and still resolve the base Apache version below. */
+    if (INFILE(_LT_APACHE_2_0_LINKING_EXCEPTION)) {
+      INTERESTING("Apache-2.0-with-Linking-Exception");
+    }
+    else if (INFILE(_LT_SWIFT_EXCEPTION)) {
+      INTERESTING("Swift-exception");
+    }
+    if (INFILE(_LT_QUICKFIX_1_0)) {
+      INTERESTING("QuickFix-1.0");
+      lmem[_mAPACHE] = 1;
+    }
+    else if (INFILE(_LT_CLOUDERA_EXPRESS)) {
+      INTERESTING("Cloudera-Express");
+      lmem[_mAPACHE] = 1;
+    }
+    else if (INFILE(_LT_COCKROACH)) {
+      INTERESTING("CockroachDB-BSL-1.1");
+    }
+    else if (INFILE(_LT_COCKROACHDB_USE_GRANT_FOR_BSL_1_1)) {
+      INTERESTING("CockroachDB-Use-Grant-for-BSL-1.1");
+    }
+    else if (INFILE(_LT_DGRAPH_CLA)) {
+      INTERESTING("Dgraph-Community");
+    }
+    else if (INFILE(_LT_ELASTIC_LICENSE_2018)) {
+      INTERESTING("Elastic-2018");
+      lmem[_mAPACHE] = 1;
+    }
+    else if (INFILE(_LT_GCEL_2022)) {
+      INTERESTING("GCEL-2022");
+    }
+    else if (INFILE(_LT_JYTHON)) {
+      INTERESTING("Jython");
+      lmem[_mAPACHE] = 1;
+    }
+    else if (INFILE(_LT_LEAP_MOTION_SDK_2019)) {
+      INTERESTING("Leap-Motion-SDK-2019");
+      lmem[_mAPACHE] = 1;
+    }
+    else if (INFILE(_LT_PHORUM_2_0)) {
+      INTERESTING("Phorum-2.0");
+      lmem[_mAPACHE] = 1;
+    }
+    else if (INFILE(_LT_SHL_0_5)) {
+      INTERESTING("SHL-0.5");
+      lmem[_mAPACHE] = 1;
+    }
+    else if (INFILE(_LT_SHL_0_51)) {
+      INTERESTING("SHL-0.51");
+      lmem[_mAPACHE] = 1;
+    }
+    else if (INFILE(_LT_SHL_2_0)) {
+      INTERESTING("SHL-2.0");
+      lmem[_mAPACHE] = 1;
+    }
+    else if (INFILE(_LT_SHL_2_1)) {
+      INTERESTING("SHL-2.1");
+      lmem[_mAPACHE] = 1;
+    }
+    else if (INFILE(_LT_SYMPHONYSOFT)) {
+      INTERESTING("Symphonysoft");
+      lmem[_mAPACHE] = 1;
+    }
+    else if (INFILE(_LT_TSL_2018)) {
+      INTERESTING("TSL");
+    }
+    else if (INFILE(_LT_TSL_2020)) {
+      INTERESTING("TSL-2020");
+    }
+    else if (INFILE(_LT_UCL_1_0)) {
+      INTERESTING("UCL-1.0");
+      lmem[_mAPACHE] = 1;
+    }
+    else {
+      cp = ASLVERS();
+      INTERESTING(cp);
+    }
+  }
+  cleanLicenceBuffer();
+  /*
+   * Fallback independent checks for licenses that reference Apache but are
+   * not Apache derivatives. These run unconditionally so files that lack
+   * the Apache pre-filter text are still detected.
+   */
+  if (INFILE(_LT_COCKROACH)) {
+    INTERESTING("CockroachDB-BSL-1.1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_COCKROACHDB_USE_GRANT_FOR_BSL_1_1)) {
+    INTERESTING("CockroachDB-Use-Grant-for-BSL-1.1");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_DGRAPH_CLA)) {
+    INTERESTING("Dgraph-Community");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_GCEL_2022)) {
+    INTERESTING("GCEL-2022");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TSL_2018)) {
+    INTERESTING("TSL");
+  }
+  cleanLicenceBuffer();
+  if (INFILE(_LT_TSL_2020)) {
+    INTERESTING("TSL-2020");
   }
   cleanLicenceBuffer();
   /*
@@ -564,7 +1016,130 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * from the wordings of these licenses.  There are still many more, for
    * certain, but LOTS of licenses are based on ~10 originally-BSD-phrases.
    */
-  if (INFILE(_LT_BSD_1)) {
+  if (INFILE(_LT_WHITECAT)) {
+    INTERESTING("Whitecat");
+  }
+  else if (INFILE(_LT_TWISTED_SNMP)) {
+    INTERESTING("TwistedSNMP");
+  }
+  else if (INFILE(_LT_TTF2PT1)) {
+    INTERESTING("TTF2PT1-Project");
+  }
+  else if (INFILE(_LT_STMICROELECTRONICS_CENTRALLABS)) {
+    INTERESTING("STMicroelectronics-CentralLabs");
+  }
+  else if (INFILE(_LT_ST_BSD_RESTRICTED)) {
+    INTERESTING("STMicro-BSD-Restricted");
+  }
+  else if (INFILE(_LT_SPARKY)) {
+    INTERESTING("Sparky");
+  }
+  else if (INFILE(_LT_SPEECHWORKS_1_1)) {
+    INTERESTING("SpeechWorks-Public-1.1");
+  }
+  else if (INFILE(_LT_SCANSOFT_1_2)) {
+    INTERESTING("ScanSoft-Public-1.2");
+  }
+  else if (INFILE(_LT_RICEBSD)) {
+    INTERESTING("RiceBSD");
+  }
+  else if (INFILE(_LT_RED_HAT_BSD_SIMPLIFIED)) {
+    INTERESTING("Red-Hat-BSD-Simplified");
+  }
+  else if (INFILE(_LT_QUALCOMM_TURING)) {
+    INTERESTING("Qualcomm-Turing");
+  }
+  else if (INFILE(_LT_PROTOBUF)) {
+    INTERESTING("Protobuf");
+  }
+  else if (INFILE(_LT_PAUL_MACKERRAS_NEW)) {
+    INTERESTING("Mackerras-3-Clause");
+  }
+  else if (INFILE(_LT_ORACLE_CODE_SAMPLES_BSD)) {
+    INTERESTING("Oracle-Code-Samples-BSD-Style");
+  }
+  else if (INFILE(_LT_OPENSAML_1_0)) {
+    INTERESTING("OpenSAML-v1");
+  }
+  else if (INFILE(_LT_OPENORB_1_0)) {
+    INTERESTING("OpenORB-Community-1.0");
+  }
+  else if (INFILE(_LT_MINPACK)) {
+    INTERESTING("Minpack");
+  }
+  else if (INFILE(_LT_LIBZIP)) {
+    INTERESTING("libzip");
+  }
+  else if (INFILE(_LT_JGRAPH)) {
+    INTERESTING("JGraph");
+  }
+  else if (INFILE(_LT_INDIANA_EXTREME)) {
+    INTERESTING("Indiana-Extreme-1.1.1");
+  }
+  else if (INFILE(_LT_GEOFF_KUENNING_1993)) {
+    INTERESTING("Geoff-Kuenning-1993");
+  }
+  else if (INFILE(_LT_FAR_MANAGER_EXCEPTION)) {
+    INTERESTING("Far-Manager-exception");
+  }
+  else if (INFILE(_LT_FLEX_2_5)) {
+    INTERESTING("BSD-3-Clause-flex");
+  }
+  else if (INFILE(_LT_ENERGYPLUS_BSD)) {
+    INTERESTING("EnergyPlus-BSD-Style");
+  }
+  else if (INFILE(_LT_DOS32A_EXTENDER)) {
+    INTERESTING("DOS32A-Extender");
+  }
+  else if (INFILE(_LT_COMPONENTACE_JCRAFT)) {
+    INTERESTING("ComponentAce-JCraft");
+  }
+  else if (INFILE(_LT_CHICKEN_DL_0_2)) {
+    INTERESTING("Chicken-Dance-v0.2");
+  }
+  else if (INFILE(_LT_BSD_UNMODIFIED)) {
+    INTERESTING("BSD-Unmodified");
+  }
+  else if (INFILE(_LT_BSD_UNCHANGED)) {
+    INTERESTING("BSD-Unchanged");
+  }
+  else if (INFILE(_LT_BSD_PLUS_MOD_NOTICE)) {
+    INTERESTING("BSD-plus-modification-notice");
+  }
+  else if (INFILE(_LT_BSD_INTEL)) {
+    INTERESTING("BSD-Intel");
+  }
+  else if (INFILE(_LT_BSD_NEW_FAR_MANAGER)) {
+    INTERESTING("BSD-3-Clause-with-Far-Manager-exception");
+  }
+  else if (INFILE(_LT_BSD_NEW_NOMOD)) {
+    INTERESTING("BSD-3-Clause-without-notice-modification");
+  }
+  else if (INFILE(_LT_BSD_ACK_CARROT2)) {
+    INTERESTING("BSD-Acknowledgment-Carrot2");
+  }
+  else if (INFILE(_LT_BSD_EXPORT)) {
+    INTERESTING("BSD-Export");
+  }
+  else if (INFILE(_LT_BSD_3_CLAUSE_NO_TRADEMARK)) {
+    INTERESTING("BSD-3-Clause-no-trademark");
+  }
+  else if (INFILE(_LT_BSD_2_CLAUSE_PLUS_ADVERTIZING)) {
+    INTERESTING("BSD-2-Clause-plus-advertizing");
+  }
+  else if (INFILE(_LT_BSD_3_CLAUSE_SUN)) {
+    INTERESTING("BSD-3-Clause-Sun");
+  }
+  else if (INFILE(_LT_ATMEL_MICROCONTROLLER)) {
+    INTERESTING("Atmel-Microcontroller");
+  }
+  else if (INFILE(_LT_ALTERMIME)) {
+    INTERESTING("alterMIME");
+  }
+  else if (INFILE(_LT_ALLEN_INSTITUTE_SOFTWARE_2018)) {
+    INTERESTING("Allen-Institute-Software-2018");
+  }
+  else if (INFILE(_LT_BSD_1)) {
     if (INFILE(_TITLE_PHP301)) {
       INTERESTING(lDebug ? "PHP(v3.01#1)" : "PHP-3.01");
       lmem[_mPHP] = 1;
@@ -604,7 +1179,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("Zend-2.0");
     }
     else if (!lmem[_fOPENLDAP] && !TRYGROUP(famOPENLDAP)) {
-      if (HASTEXT(_LT_OPENSSLref5, REG_EXTENDED)) {
+      if (INFILE(_LT_RADVD)) {
+        INTERESTING("radvd");
+      }
+      else if (HASTEXT(_LT_OPENSSLref5, REG_EXTENDED)) {
         INTERESTING(lDebug ? "OpenSSL(ref)" : "OpenSSL");
       }
       else if (INFILE(_LT_BSD_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)) {
@@ -704,6 +1282,106 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       else if (INFILE(_LT_Spencer_99) && INFILE(_CR_Spencer)) {
         INTERESTING("Spencer-99");
       }
+      else if (INFILE(_LT_BRIAN_CLAPPER)) {
+        INTERESTING("Brian-Clapper");
+      }
+      else if (INFILE(_LT_BSD_1988)) {
+        INTERESTING("BSD-1988");
+      }
+      else if (INFILE(_LT_BSD_3_CLAUSE_DEVINE)) {
+        INTERESTING("BSD-3-Clause-Devine");
+      }
+      else if (INFILE(_LT_BSD_3_CLAUSE_FDA)) {
+        INTERESTING("BSD-3-Clause-FDA");
+      }
+      else if (INFILE(_LT_BSD_3_CLAUSE_JTAG)) {
+        INTERESTING("BSD-3-Clause-jtag");
+      }
+      else if (INFILE(_LT_BSD_ATMEL)) {
+        INTERESTING("BSD-Atmel");
+      }
+      else if (INFILE(_LT_BSD_AXIS_NOMOD)) {
+        INTERESTING("BSD-Axis-without-modification");
+      }
+      else if (INFILE(_LT_BSD_AXIS)) {
+        INTERESTING("BSD-Axis");
+      }
+      else if (INFILE(_LT_BSD_INNOSYS)) {
+        INTERESTING("BSD-InnoSys");
+      }
+      else if (INFILE(_LT_BSD_NEW_DERIVATIVE)) {
+        INTERESTING("BSD-Derivative");
+      }
+      else if (INFILE(_LT_BSD_NEW_TCPDUMP)) {
+        INTERESTING("BSD-3-Clause-tcpdump-variant");
+      }
+      else if (INFILE(_LT_BSD_NO_DISCLAIMER_UNMODIFIED)) {
+        INTERESTING("BSD-2-Clause-no-disclaimer-Unmod");
+      }
+      else if (INFILE(_LT_BSD_NO_DISCLAIMER)) {
+        INTERESTING("BSD-2-Clause-no-disclaimer");
+      }
+      else if (INFILE(_LT_BSD_ORIGINAL_UC_1986)) {
+        INTERESTING("BSD-4.3RENO");
+      }
+      else if (INFILE(_LT_BSD_SIMPLIFIED_DARWIN)) {
+        INTERESTING("BSD-2-Clause-Darwin");
+      }
+      else if (INFILE(_LT_BSD_SIMPLIFIED_INTEL)) {
+        INTERESTING("BSD-Simplified-Intel");
+      }
+      else if (INFILE(_LT_BSD_SIMPLIFIED_SOURCE)) {
+        INTERESTING("BSD-Simplified-source");
+      }
+      else if (INFILE(_LT_BSD_SOURCE_CODE)) {
+        INTERESTING("BSD-Source-Code");
+      }
+      else if (INFILE(_LT_BSD_TOP)) {
+        INTERESTING("BSD-Source-beginning-file");
+      }
+      else if (INFILE(_LT_BSLA_NO_ADVERT)) {
+        INTERESTING("BSLA-no-advertizing");
+      }
+      /* NOTE: bsla text is identical to bsd-original-uc-1990; unreachable in this else-if chain */
+      else if (INFILE(_LT_BSLA)) {
+        INTERESTING("BSD-4.3TAHOE");
+      }
+      else if (INFILE(_LT_FREEBSD_FIRST)) {
+        INTERESTING("FreeBSD-unmodified-first-lines");
+      }
+      else if (INFILE(_LT_HOMEBREWED)) {
+        INTERESTING("Homebrewed");
+      }
+      else if (INFILE(_LT_XPP)) {
+        INTERESTING("xpp");
+      }
+      else if (INFILE(_LT_INTEL_BSD_2_CLAUSE)) {
+        INTERESTING("Intel-BSD-2-Clause");
+      }
+      else if (INFILE(_LT_KALLE_KAUKONEN)) {
+        INTERESTING("Kalle-Kaukonen");
+      }
+      else if (INFILE(_LT_MENTALIS)) {
+        INTERESTING("Mentalis");
+      }
+      else if (INFILE(_LT_PAUL_MACKERRAS_SIMPLIFIED)) {
+        INTERESTING("Paul-Mackerras-Simplified");
+      }
+      else if (INFILE(_LT_PAUL_MACKERRAS)) {
+        INTERESTING("Mackerras-3-Clause-acknowledgment");
+      }
+      else if (INFILE(_LT_SENDMAIL_8_23)) {
+        INTERESTING("Sendmail-8.23");
+      }
+      else if (INFILE(_LT_SVNDIFF)) {
+        INTERESTING("svndiff");
+      }
+      else if (INFILE(_LT_TCP_WRAPPERS)) {
+        INTERESTING("TCP-wrappers");
+      }
+      else if (INFILE(_LT_WINGO)) {
+        INTERESTING("wingo");
+      }
       else if (!lmem[_fZPL]) {
         INTERESTING(lDebug ? "BSD-style(1)" : "BSD-style");
       }
@@ -764,6 +1442,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("HPND");
       lmem[_mMIT] = 1;
     }
+    else if (INFILE(_LT_MIT_1995)) {
+      INTERESTING("MIT-1995");
+    }
     else if (INFILE(_LT_NOT_ADVERTISING)) {
       INTERESTING(lDebug ? "BSD-style(2)" : "BSD-style");
     }
@@ -790,6 +1471,57 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      */
     else if (HASTEXT(_TEXT_JPNIC, 0) && INFILE(_LT_JPNIC)) {
       INTERESTING("JPNIC");
+    }
+    else if (INFILE(_LT_3COM_MICROCODE)) {
+      INTERESTING("3Com-Microcode");
+    }
+    else if (INFILE(_LT_AGERE_BSD)) {
+      INTERESTING("Agere-BSD");
+    }
+    else if (INFILE(_LT_APACHE_DUE_CREDIT)) {
+      INTERESTING("Apache-Due-Credit-Variant");
+    }
+    else if (INFILE(_LT_BROCADE_FIRMWARE)) {
+      INTERESTING("Brocade-Firmware");
+    }
+    else if (INFILE(_LT_CHELSIO_LINUX_FIRMWARE)) {
+      INTERESTING("Chelsio-Linux-Firmware");
+    }
+    else if (INFILE(_LT_ELLIS_LAB)) {
+      INTERESTING("EllisLab");
+    }
+    else if (INFILE(_LT_FFTPACK_2004)) {
+      INTERESTING("NCL");
+    }
+    else if (INFILE(_LT_GREG_ROELOFS)) {
+      INTERESTING("Greg-Roelofs");
+    }
+    else if (INFILE(_LT_INFO_ZIP_2001_01)) {
+      INTERESTING("Info-Zip-2001-01");
+    }
+    else if (INFILE(_LT_JAMON)) {
+      INTERESTING("JAMon");
+    }
+    else if (INFILE(_LT_JDBM_1_00)) {
+      INTERESTING("JDBM-v1.00");
+    }
+    else if (INFILE(_LT_NICTA_1_0)) {
+      INTERESTING("NICTA-1.0");
+    }
+    else if (INFILE(_LT_OKL)) {
+      INTERESTING("OKL");
+    }
+    else if (INFILE(_LT_OPENPBS_2_3)) {
+      INTERESTING("OpenPBS-2.3");
+    }
+    else if (INFILE(_LT_QLOGIC_FIRMWARE)) {
+      INTERESTING("QLogic-Firmware");
+    }
+    else if (INFILE(_LT_QLOGIC_MICROCODE)) {
+      INTERESTING("QLogic-Microcode");
+    }
+    else if (INFILE(_LT_REALM_PLATFORM_EXTENSION_2017)) {
+      INTERESTING("Realm-Platform-Extensions-2017");
     }
     else if (NOT_INFILE(_CR_XFREE86) && NOT_INFILE(_TITLE_NCSA) && NOT_INFILE(_TITLE_INNERNET200)) {
       INTERESTING(lDebug ? "BSD-style(3)" : "BSD-style");
@@ -828,6 +1560,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_BSD_6)) {
     if (INFILE(_CR_BSDCAL)) {
       INTERESTING(lDebug ? "BSD(6)" : "BSD");
+    }
+    else if (INFILE(_LT_MIT_MODERN_VARIANT)) {
+      INTERESTING("MIT-Modern-Variant");
     }
     else {
       INTERESTING(lDebug ? "BSD-style(6)" : "BSD-style");
@@ -877,6 +1612,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (INFILE(_CR_BSDCAL)) {
       INTERESTING(lDebug ? "BSD(11)" : "BSD");
     }
+    else if (INFILE(_LT_WHISTLE)) {
+      INTERESTING("Whistle-Communications");
+    }
     else {
       INTERESTING(lDebug ? "BSD-style(10)" : "BSD-style");
     }
@@ -885,6 +1623,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_BSD_12)) {
     if (INFILE(_CR_BSDCAL)) {
       INTERESTING(lDebug ? "BSD(12)" : "BSD");
+    }
+    else if (INFILE(_LT_SOFTFLOAT_2_0)) {
+      INTERESTING("SoftFloat-Legal-Notice-2.0");
     }
     else {
       INTERESTING(lDebug ? "BSD-style(11)" : "BSD-style");
@@ -930,11 +1671,29 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_SPDX_BSD_3_Clause_Open_MPI)) {
     INTERESTING("BSD-3-Clause-Open-MPI");
   }
+  else if (INFILE(_LT_BSD_3_CLAUSE_NO_MILITARY_LICENSE)) {
+    INTERESTING("BSD-3-Clause-No-Military-License");
+  }
+  else if (INFILE(_LT_BSD_3_CLAUSE_NO_NUCLEAR_WARRANTY)) {
+    INTERESTING("BSD-3-Clause-No-Nuclear-Warranty");
+  }
+  else if (INFILE(_LT_NET_SNMP)) {
+    INTERESTING("Net-SNMP");
+  }
+  else if (INFILE(_LT_BSD_3_CLAUSE_NO_NUCLEAR_LICENSE_2014)) {
+    INTERESTING("BSD-3-Clause-No-Nuclear-License-2014");
+  }
+  else if (INFILE(_LT_BSD_3_CLAUSE_NO_NUCLEAR_LICENSE)) {
+    INTERESTING("BSD-3-Clause-No-Nuclear-License");
+  }
   else if (INFILE(_SPDX_BSD_3_Clause)) {
     INTERESTING("BSD-3-Clause");
   }
   else if (INFILE(_PHR_BSD_3_CLAUSE_1) || INFILE(_PHR_BSD_3_CLAUSE_2) || INFILE(_PHR_BSD_3_CLAUSE_3) || INFILE(_PHR_BSD_3_CLAUSE_4)) {
     INTERESTING(lDebug ? "BSD(phr1/2)" : "BSD-3-Clause");
+  }
+  else if (INFILE(_LT_BSD_2_CLAUSE_NETBSD)) {
+    INTERESTING("BSD-2-Clause-NetBSD");
   }
   else if (INFILE(_SPDX_BSD_2_Clause_FreeBSD)) {
     INTERESTING("BSD-2-Clause-FreeBSD");
@@ -1084,7 +1843,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * PHP variants
    */
-  if (!lmem[_mPHP] && INFILE(_LT_PHP)) {
+  if (!lmem[_mPHP] && (INFILE(_LT_PHP) || INFILE(_TITLE_PHP301)
+      || INFILE(_TITLE_PHP30))) {
     if (INFILE(_TITLE_PHP301)) {
       INTERESTING(lDebug ? "PHP(v3.01#2)" : "PHP-3.01");
     }
@@ -1172,6 +1932,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (URL_INFILE(_URL_ORACLE_BERKELEY_DB)) {
     INTERESTING(lDebug ? "URL_ORACLE_BERKELEY_DB" : "Oracle-Berkeley-DB");
+  }
+  /* "berkeley" alone falls through to _MIN_BSD */
+  else if (INFILE(_TITLE_BERKELEY_DB_PRODUCT) || INFILE(_LT_BERKELEY_DB_REF)) {
+    INTERESTING("Oracle-Berkeley-DB");
   }
   cleanLicenceBuffer();
   /*
@@ -1320,6 +2084,973 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Leptonica");
   }
   cleanLicenceBuffer();
+  /* Specific license identification - skip if GPL already confirmed */
+  if (!lmem[_mGPL]) {
+  if (INFILE(_LT_SPLUNK_SLA)) {
+    INTERESTING("Splunk");
+  }
+  else if (INFILE(_LT_SLF4J_2008)) {
+    INTERESTING("SLF4J-2008");
+  }
+  else if (INFILE(_LT_SHAVLIK_EULA)) {
+    INTERESTING("Shavlik-Technologies");
+  }
+  else if (INFILE(_LT_OPENSSL_EXCEPTION_LGPL)) {
+    INTERESTING("LGPL-with-OpenSSL-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_NPSL_EXCEPTION_0_93)) {
+    INTERESTING("Nmap-NPSL-Exception-0.93");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_NVIDIA_CUDA_SUPPLEMENT_2020)) {
+    INTERESTING("NVIDIA-CUDA-Supplement-2020");
+  }
+  else if (INFILE(_LT_NERO_EULA)) {
+    INTERESTING("Nero");
+  }
+  else if (INFILE(_LT_MINI_XML)) {
+    INTERESTING("LGPL-2.0-with-Mini-XML-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_MEDIAINFO_LIB)) {
+    INTERESTING("MediaInfoLib");
+  }
+  else if (INFILE(_LT_LZMA_SDK_9_22)) {
+    INTERESTING("LZMA-SDK-9.22");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LIBCAP)) {
+    INTERESTING("libcap");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LGPL_3_0_CYGWIN)) {
+    INTERESTING("LGPL-3.0-or-later-with-Cygwin-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_3_0_OPENBD)) {
+    INTERESTING("GPL-3.0h-with-OpenBD-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_ISO_CPP)) {
+    INTERESTING("GPL-2.0-with-ISO-C-Library-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_ICE)) {
+    INTERESTING("GPL-2.0-with-Ice-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_DUAL_COMMERCIAL_GPL)) {
+    INTERESTING("Dual-Commercial-GPL");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_COSLI)) {
+    INTERESTING("COSLi");
+  }
+  else if (INFILE(_LT_CC_GPL_2_0_PT)) {
+    INTERESTING("CC-GPL-2.0-PT");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_BACULA_EXCEPTION)) {
+    INTERESTING("Bacula-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ADA_LINKING_EXCEPTION)) {
+    INTERESTING("GNAT-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_3DSLICER_1_0)) {
+    INTERESTING("3D-Slicer-1.0");
+  }
+  else if (INFILE(_LT_AC3FILTER)) {
+    INTERESTING("AC3Filter");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ACRONAME_BDK)) {
+    INTERESTING("Acroname-BDK");
+  }
+  else if (INFILE(_LT_ACTIVESTATE_KOMODO_EDIT)) {
+    INTERESTING("ActiveState-Komodo-Edit");
+  }
+  else if (INFILE(_LT_ADI_BSD)) {
+    INTERESTING("ADI-BSD");
+  }
+  else if (INFILE(_LT_ADOBE_INDESIGN_SDK)) {
+    INTERESTING("Adobe-InDesign-SDK");
+  }
+  else if (INFILE(_LT_AGPL_3_0_BACULA)) {
+    INTERESTING("AGPL-3.0-with-Bacula-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ALFRESCO_EXCEPTION_0_5)) {
+    INTERESTING("Alfresco-FLOSS-Exception-v0.5");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_AMLOGIC_LINUX_FIRMWARE)) {
+    INTERESTING("Amlogic-Linux-Firmware");
+  }
+  else if (INFILE(_LT_APACHE_PATENT_EXCEPTION)) {
+    INTERESTING("mxml-exception");
+  }
+  /* NOTE: apache-patent-provision-exception text is identical to apache-patent-exception; unreachable */
+  else if (INFILE(_LT_APACHE_PATENT_PROVISION_EXCEPTION)) {
+    INTERESTING("Apache-Patent-Provision-Exception-Deprecated");
+  }
+  else if (INFILE(_LT_APL_1_1)) {
+    INTERESTING("APL-1.1");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_APTANA_EXCEPTION_3_0)) {
+    INTERESTING("Aptana-exception-3.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ASLP)) {
+    INTERESTING("Artop-ASLP");
+  }
+  else if (INFILE(_LT_ASLR)) {
+    INTERESTING("Artop-ASLR");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ATMOSPHERE_0_4)) {
+    INTERESTING("atmosphere");
+  }
+  else if (INFILE(_LT_AUTOCONF_SIMPLE_EXCEPTION)) {
+    INTERESTING("Autoconf-exception-generic-3.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_AUTOOPTS_EXCEPTION_2_0)) {
+    INTERESTING("AutoOpts-exception-2.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_AVISYNTH_C_INTERFACE_EXCEPTION)) {
+    INTERESTING("Avisynth-C-Interface-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_AVISYNTH_LINKING_EXCEPTION)) {
+    INTERESTING("Avisynth-Linking-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_BASH_EXCEPTION_GPL)) {
+    INTERESTING("GPL-with-Bash-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_BIGDIGITS)) {
+    INTERESTING("BigDigits");
+  }
+  else if (INFILE(_LT_BOHL_0_2)) {
+    INTERESTING("BOHL-0.2");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_BRIAN_GLADMAN_DUAL)) {
+    INTERESTING("Brian-Gladman-3-Clause");
+  }
+  else if (INFILE(_LT_BROADCOM_DUAL)) {
+    INTERESTING("Broadcom-Dual-GPL-Commercial");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_BROADCOM_LINKING_EXCEPTION_2_0)) {
+    INTERESTING("Broadcom-Linking-Exception-2.0");
+  }
+  else if (INFILE(_LT_BSD_MYLEX)) {
+    INTERESTING("BSD-Mylex");
+  }
+  else if (INFILE(_LT_BSD_PROTECTION)) {
+    INTERESTING("BSD-Protection");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_BSD_TOP_GPL_ADDITION)) {
+    INTERESTING("BSD-3-Clause-with-GPL-reference");
+  }
+  else if (INFILE(_LT_BSL_1_0)) {
+    INTERESTING("BSL-1.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_BUSL_1_1)) {
+    INTERESTING("BUSL-1.1");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_CC_LGPL_2_1_PT)) {
+    INTERESTING("CC-LGPL-2.1-PT");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_CCRC_1_0)) {
+    INTERESTING("Common-Cure-Rights-Commitment-v1.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_CLASSWORLDS)) {
+    INTERESTING("Classworlds");
+  }
+  else if (INFILE(_LT_CLAUSE_6_EXCEPTION_LGPL_2_1)) {
+    INTERESTING("polyparse-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_COLT)) {
+    INTERESTING("Colt");
+  }
+  else if (INFILE(_LT_CONCURSIVE_PL_1_0)) {
+    INTERESTING("Concursive-Public-1.0");
+  }
+  else if (INFILE(_LT_CUPS_APPLE_OS_EXCEPTION)) {
+    INTERESTING("CUPS-Apple-OS-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_CUPS_2)) {
+    INTERESTING("CUPS");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_CVWL)) {
+    INTERESTING("Collaborative-Virtual-Workspace");
+  }
+  else if (INFILE(_LT_CYGWIN_EXCEPTION_LGPL_3_0_PLUS)) {
+    INTERESTING("cygwin-exception-LGPL-3.0-or-later");
+    lmem[_mGPL] = 1;
+    lmem[_mLGPL] = 1;
+  }
+  else if (INFILE(_LT_CYPRESS_LINUX_FIRMWARE)) {
+    INTERESTING("Cypress-Linux-Firmware");
+  }
+  else if (INFILE(_LT_DEFENSIVE_PATENT_1_1)) {
+    INTERESTING("Defensive-Patent-v1.1");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_DIGIA_QT_EXCEPTION_LGPL_2_1)) {
+    INTERESTING("Qt-LGPL-exception-1.1");
+    lmem[_mGPL] = 1;
+    lmem[_mLGPL] = 1;
+  }
+  else if (INFILE(_LT_PLEXUS)) {
+    INTERESTING("Plexus");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_DPL_1_1)) {
+    INTERESTING("DPL-1.1");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_DUAL_BSD_GPL)) {
+    INTERESTING("Dual-BSD-GPL");
+  }
+  else if (INFILE(_LT_DUNE_EXCEPTION)) {
+    INTERESTING("DUNE-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ECLIPSE_SUA_2002)) {
+    INTERESTING("Eclipse-Foundation-Software-User-2002");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ECLIPSE_SUA_2003)) {
+    INTERESTING("Eclipse-Foundation-Software-User-2003");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ECLIPSE_SUA_2004)) {
+    INTERESTING("Eclipse-Foundation-Software-User-2004");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ECLIPSE_SUA_2005)) {
+    INTERESTING("Eclipse-Foundation-Software-User-2005");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ECLIPSE_SUA_2010)) {
+    INTERESTING("Eclipse-Foundation-Software-User-2010");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ECLIPSE_SUA_2011)) {
+    INTERESTING("Eclipse-Foundation-Software-User-2011");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ECLIPSE_SUA_2014_11)) {
+    INTERESTING("Eclipse-Foundation-Software-User-2014-11");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ECLIPSE_SUA_2014)) {
+    INTERESTING("Eclipse-Foundation-Software-User-2014");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ECLIPSE_SUA_2017)) {
+    INTERESTING("Eclipse-Foundation-Software-User-2017");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_EKIGA_EXCEPTION_2_0_PLUS)) {
+    INTERESTING("ekiga-exception-2.0-or-later");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ELIB_GPL)) {
+    INTERESTING("GPL-Elib");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_EMIT)) {
+    INTERESTING("Enhanced-MIT");
+  }
+  else if (INFILE(_LT_EMX_LIBRARY)) {
+    INTERESTING("EMX-Library");
+  }
+  else if (INFILE(_LT_EPO_OSL_2005_1)) {
+    INTERESTING("EPO-OSL");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ERRBOT_EXCEPTION)) {
+    INTERESTING("Errbot-exception");
+  }
+  else if (INFILE(_LT_OML)) {
+    INTERESTING("OML");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_FLOWPLAYER_GPL_3_0)) {
+    INTERESTING("Flowplayer-GPL-3.0-only");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_FREEIMAGE)) {
+    INTERESTING("FreeImage");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_FREEMARKER)) {
+    INTERESTING("FreeMarker");
+  }
+  else if (INFILE(_LT_GCC_COMPILER_EXCEPTION_2_0)) {
+    INTERESTING("GPL-2.0-only-with-GCC-compiler-exception-2.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GCC_EXCEPTION_3_0)) {
+    INTERESTING("GCC-exception-3.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GENODE_AGPL_3_0_EXCEPTION)) {
+    INTERESTING("AGPL-3.0-only-with-Genode-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GEOSERVER_EXCEPTION_2_0_PLUS)) {
+    INTERESTING("geoserver-exception-2.0-or-later");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GHOSTSCRIPT_1988)) {
+    INTERESTING("Ghostscript-General-Public-1988");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GNU_EMACS_GPL_1988)) {
+    INTERESTING("GNU-emacs-General-Public-1988");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_ADAPTEC)) {
+    INTERESTING("GPL-2.0-plus-Adaptec-conditions");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_AUTOOPTS)) {
+    INTERESTING("GPL-2.0-or-later-with-AutoOpts-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_BISON_2_2)) {
+    INTERESTING("GPL-2.0-or-later-with-Bison-2.2-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_BISON)) {
+    INTERESTING("gpl-2.0-bison");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_BROADCOM_LINKING)) {
+    INTERESTING("GPL-2.0-with-Broadcom-Linking-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_CYGWIN)) {
+    INTERESTING("GPL-2.0-with-Cygwin-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_DJVU)) {
+    INTERESTING("GPL-2.0-with-DjVu-Patent-Grant");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_FREERTOS)) {
+    INTERESTING("GPL-2.0-with-FreeRTOS-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_GCC_COMPILER_EXCEPTION)) {
+    INTERESTING("GPL-2.0-with-GCC-compiler-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_GLIBC)) {
+    INTERESTING("GPL-2.0-with-GLibC-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_GUILE)) {
+    INTERESTING("GPL-2.0-with-GUILE-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_INDEPENDENT_MODULE_LINKING)) {
+    INTERESTING("gpl-2.0-independent-module-linking");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_IOLIB)) {
+    INTERESTING("GPL-2.0-with-GNU-IO-Library-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_JAVASCRIPT)) {
+    INTERESTING("GPL-2.0-with-Javascript-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_KERNEL)) {
+    INTERESTING("GPL-2.0-with-Kernel-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_KOTEROV)) {
+    INTERESTING("GPL-2.0-with-Dmitry-Koterov-additions");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_LIBGIT2)) {
+    INTERESTING("GPL-2.0-with-libgit2-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_LIBRARY)) {
+    INTERESTING("GPL-2.0-with-Library-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_LIBTOOL)) {
+    INTERESTING("GPL-2.0-with-GNU-Libtool-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_LMBENCH)) {
+    INTERESTING("GPL-2.0-with-LMBench-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_MYSQL_CONNECTOR_ODBC)) {
+    INTERESTING("GPL-2.0-with-MySQL-Connector-ODBC-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_MYSQL_FLOSS)) {
+    INTERESTING("GPL-2.0-with-MySQL-FLOSS-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_OPENJDK)) {
+    INTERESTING("GPL-2.0-with-OpenJDK-Classpath-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_ORACLE_MYSQL_FOSS)) {
+    INTERESTING("GPL-2.0-with-Oracle-MySQL-FOSS-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_ORACLE_OPENJDK)) {
+    INTERESTING("gpl-2.0-oracle-openjdk");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_PLUS_EKIGA)) {
+    INTERESTING("GPL-2.0-or-later-ekiga");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_PLUS_SYNTEXT)) {
+    INTERESTING("GPL-2.0-or-later-syntext");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_PROGUARD)) {
+    INTERESTING("GPL-2.0-with-ProGuard-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_QT_QCA)) {
+    INTERESTING("GPL-2.0-with-Qt-QCA-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_REDHAT)) {
+    INTERESTING("GPL-2.0-with-Fedora-Red-Hat-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_RRDTOOL_FLOSS)) {
+    INTERESTING("GPL-2.0-with-RRDtool-FLOSS-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_2_0_UBOOT)) {
+    INTERESTING("GPL-2.0-with-U-Boot-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_3_0_BISON)) {
+    INTERESTING("GPL-3.0-or-later-with-Bison-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_3_0_CYGWIN)) {
+    INTERESTING("GPL-3.0-or-later-with-Cygwin-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_3_0_FONT)) {
+    INTERESTING("GPL-3.0-or-later-with-font-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_3_0_LINKING_SOURCE_EXCEPTION)) {
+    INTERESTING("GPL-3.0-linking-source-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GPL_3_0_PLUS_OPENSSL)) {
+    INTERESTING("GPL-3.0-or-later-openssl");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GSTREAMER_EXCEPTION_2_0)) {
+    INTERESTING("GPL-2.0-or-later-with-GStreamer-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_GSTREAMER_EXCEPTION_2005)) {
+    INTERESTING("GStreamer-exception-2005");
+  }
+  else if (INFILE(_LT_GSTREAMER_EXCEPTION_2008)) {
+    INTERESTING("GStreamer-exception-2008");
+  }
+  else if (INFILE(_LT_GUILE_EXCEPTION_2_0)) {
+    INTERESTING("harbour-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_HACOS_1_2)) {
+    INTERESTING("HACOS-1.2");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_HP_ENTERPRISE_EULA)) {
+    INTERESTING("HP-Enterprise");
+  }
+  else if (INFILE(_LT_HP_PROLIANT_ESSENTIALS)) {
+    INTERESTING("hp-proliant-essentials");
+  }
+  else if (INFILE(_LT_HP_SOFTWARE_EULA)) {
+    INTERESTING("HP-Software");
+  }
+  else if (INFILE(_LT_INDEPENDENT_MODULE_LINKING_EXCEPTION)) {
+    INTERESTING("Independent-modules-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_INITIAL_DEVELOPER_PUBLIC)) {
+    INTERESTING("Initial-Developer-Public");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_INTEL_BSD)) {
+    INTERESTING("BSD-3-Clause-acpica");
+  }
+  else if (INFILE(_LT_INTEL_MASTER_EULA_SW_DEV_2016)) {
+    INTERESTING("Intel-Master-for-SW-Dev-2016");
+  }
+  else if (INFILE(_LT_JAVASCRIPT_EXCEPTION_2_0)) {
+    INTERESTING("Javascript-exception-2.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_JBOSS_EULA)) {
+    INTERESTING("JBoss");
+  }
+  else if (INFILE(_LT_JELURIDA_PUBLIC_1_1)) {
+    INTERESTING("Jeulurida-Public-1.1");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_JPRS_OSCL_1_1)) {
+    INTERESTING("JPRS-OSCL-1.1");
+  }
+  else if (INFILE(_LT_KDE_ACCEPTED_GPL)) {
+    INTERESTING("KDE-Accepted-GPL");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_KDE_ACCEPTED_LGPL)) {
+    INTERESTING("KDE-Accepted-LGPL");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_KFQF_ACCEPTED_GPL)) {
+    INTERESTING("KFQF-Accepted-GPL");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LDPC_1994)) {
+    INTERESTING("LDPC-1994");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LDPC_1997)) {
+    INTERESTING("LDPC-1997");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LDPC_1999)) {
+    INTERESTING("LDPC-1999");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LDPM_1998)) {
+    INTERESTING("LDPM-1998");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LGPL_2_0_FLTK)) {
+    INTERESTING("LGPL-2.0-with-FLTK-exception");
+    lmem[_mGPL] = 1;
+    lmem[_mLGPL] = 1;
+  }
+  else if (INFILE(_LT_LGPL_2_1_NOKIA_QT)) {
+    INTERESTING("LGPL-2.1-with-Nokia-Qt-Exception");
+    lmem[_mGPL] = 1;
+    lmem[_mLGPL] = 1;
+  }
+  else if (INFILE(_LT_LGPL_2_1_PLUS_LINKING)) {
+    INTERESTING("LGPL-2.1-or-later-linking");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LGPL_2_1_QT_COMPANY)) {
+    INTERESTING("LGPL-2.1-with-Qt-Company-Exception");
+    lmem[_mGPL] = 1;
+    lmem[_mLGPL] = 1;
+  }
+  else if (INFILE(_LT_LGPL_2_1_RXTX)) {
+    INTERESTING("LGPL-2.1-with-RXTX-exception");
+    lmem[_mGPL] = 1;
+    lmem[_mLGPL] = 1;
+  }
+  else if (INFILE(_LT_LGPL_3_PLUS_LINKING)) {
+    INTERESTING("LGPL-3.0-or-later-linking");
+    lmem[_mGPL] = 1;
+    lmem[_mLGPL] = 1;
+  }
+  else if (INFILE(_LT_LGPL_3_0_ZEROMQ)) {
+    INTERESTING("LGPL-3.0-with-ZeroMQ-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LIBERATION_FONT_EXCEPTION)) {
+    INTERESTING("Liberation-Font-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LIBWEBSOCKETS_EXCEPTION)) {
+    INTERESTING("libwebsockets-exception");
+    lmem[_mGPL] = 1;
+    lmem[_mLGPL] = 1;
+  }
+  else if (INFILE(_LT_LILIQ_R_1_1)) {
+    INTERESTING("LiLiQ-R-1.1");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LILIQ_RPLUS_1_1)) {
+    INTERESTING("LiLiQ-Rplus-1.1");
+    lmem[_mGPL] = 1;
+  }
+  /* NOTE: linking-exception-lgpl-3.0 text is identical to lgpl-3.0-linking-exception; unreachable */
+  else if (INFILE(_LT_LLGPL)) {
+    INTERESTING("LLGPL");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LOSLA)) {
+    INTERESTING("LOSLA");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LZMA_SDK_2006)) {
+    INTERESTING("LZMA-SDK-2006");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LZMA_SDK_2008)) {
+    INTERESTING("LZMA-SDK-2008");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_LZMA_SDK_ORIGINAL)) {
+    INTERESTING("LZMA-SDK-Original");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_MADWIFI_DUAL)) {
+    INTERESTING("MadWifi-Dual-BSD-GPL");
+  }
+  else if (INFILE(_LT_MAGPIE_EXCEPTION_1_0)) {
+    INTERESTING("Magpie-exception-1.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_MAKE_HUMAN_EXCEPTION)) {
+    INTERESTING("MakeHuman");
+  }
+  else if (INFILE(_LT_XEROX)) {
+    INTERESTING("Xerox");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_MIT_NO_ADVERT_EXPORT_CONTROL)) {
+    INTERESTING("HPND-export2-US");
+  }
+  else if (INFILE(_LT_MONETDB_1_1)) {
+    INTERESTING("MonetDB-1.1");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_MS_NUGET)) {
+    INTERESTING("MS-Nuget");
+  }
+  else if (INFILE(_LT_MS_VISUAL_STUDIO_CODE)) {
+    INTERESTING("MS-Visual-Studio-Code");
+  }
+  else if (INFILE(_LT_MS_WINDOWS_OS_2018)) {
+    INTERESTING("MS-Windows-OS-2018");
+  }
+  else if (INFILE(_LT_MYSQL_FLOSS_EXCEPTION_2_0)) {
+    INTERESTING("MySQL-FLOSS-exception-2.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_NANT_EXCEPTION_2_0_PLUS)) {
+    INTERESTING("nant-exception-2.0-or-later");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_NETCAT)) {
+    INTERESTING("Netcat");
+  }
+  else if (INFILE(_LT_NEXB_SSLA_1_1_0)) {
+    INTERESTING("nexB-SSLA-1.1.0");
+  }
+  else if (INFILE(_LT_NICTA_EXCEPTION)) {
+    INTERESTING("NICTA-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_NIELS_FERGUSON)) {
+    INTERESTING("Niels-Ferguson");
+  }
+  else if (INFILE(_LT_OCAML_LGPL_LINKING_EXCEPTION)) {
+    INTERESTING("OCaml-LGPL-linking-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_OPEN_DIAMETER)) {
+    INTERESTING("Open-Diameter");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_OPENJDK_EXCEPTION)) {
+    INTERESTING("OpenJDK-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_OPENMOTIF_EXCEPTION_2_0_PLUS)) {
+    INTERESTING("openmotif-exception-2.0-or-later");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_OPENSC_OPENSSL_OPENPACE_EXCEPTION_GPL)) {
+    INTERESTING("opensc-openssl-openpace-exception-gpl");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_OPENSSL_EXCEPTION_GPL_2_0_PLUS)) {
+    INTERESTING("openssl-exception-GPL-2.0-or-later");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_OPERA_WIDGET_1_0)) {
+    INTERESTING("Opera-Widget-1.0");
+  }
+  else if (INFILE(_LT_ORACLE_DEVTOOLS_VSNET_DEV)) {
+    INTERESTING("oracle-devtools-vsnet-dev");
+  }
+  else if (INFILE(_LT_ORACLE_JAVA_EE_SDK_2010)) {
+    INTERESTING("OTN-Developer-for-JAVA-EE-SDK");
+  }
+  else if (INFILE(_LT_OSET_PL_2_1)) {
+    INTERESTING("OSET-PL-2.1");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_OSSN_3_0)) {
+    INTERESTING("OSSN-3.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_OTHER_COPYLEFT)) {
+    INTERESTING("Other-Copyleft-Licenses");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_OTN_DEV_DIST_2009)) {
+    INTERESTING("OTN-2009");
+  }
+  else if (INFILE(_LT_OTN_DEV_DIST_2014)) {
+    INTERESTING("OTN-2014");
+  }
+  else if (INFILE(_LT_OTN_DEV_DIST)) {
+    INTERESTING("OTN");
+  }
+  else if (INFILE(_LT_OWAL_1_0)) {
+    INTERESTING("Opera-Web-Applications-1.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_PAINT_NET)) {
+    INTERESTING("Paint.NET");
+  }
+  else if (INFILE(_LT_PCRE)) {
+    INTERESTING("PCRE");
+  }
+  else if (INFILE(_LT_PFTIJAH_1_1)) {
+    INTERESTING("PfTijah-Public-1.1");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_POLITEPIX_PL_1_0)) {
+    INTERESTING("Politepix-Public-1.0");
+  }
+  else if (INFILE(_LT_PS_OR_PDF_FONT_EXCEPTION_20170817)) {
+    INTERESTING("PS-or-PDF-font-exception-20170817");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_PSUTILS)) {
+    INTERESTING("psutils");
+  }
+  else if (INFILE(_LT_PYTHON_2_0_1)) {
+    INTERESTING("Python-2.0.1");
+  }
+  else if (INFILE(_LT_QCAD_EXCEPTION_GPL)) {
+    INTERESTING("GPL-with-QCAD-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_QT_COMMERCIAL_1_1)) {
+    INTERESTING("Qt-Commercial-v1.1");
+  }
+  else if (INFILE(_LT_QT_KDE_LINKING_EXCEPTION)) {
+    INTERESTING("GPL-2.0-or-later-with-Qt-Linking-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_QT_QCA_EXCEPTION_2_0)) {
+    INTERESTING("GPL-2.0-only-with-Qt-QCA-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_QWT_1_0)) {
+    INTERESTING("Qwt-1.0-Deprecated");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_RH_EULA_LGPL)) {
+    INTERESTING("Red-Hat-LGPL-Based");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_RH_EULA_2)) {
+    INTERESTING("Red-Hat");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_SANE_EXCEPTION_2_0_PLUS)) {
+    INTERESTING("sane-exception-2.0-or-later");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_SENCHA_APP_FLOSS_EXCEPTION)) {
+    INTERESTING("Sencha-GPL-3.0-Exception-for-Applications");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_SENCHA_COMMERCIAL_3_17)) {
+    INTERESTING("Sencha-Software-v3.17");
+  }
+  else if (INFILE(_LT_SENCHA_COMMERCIAL_3_9)) {
+    INTERESTING("Sencha-Software-3.9");
+  }
+  else if (INFILE(_LT_SENCHA_COMMERCIAL)) {
+    INTERESTING("Sencha-Commercial-1.1");
+  }
+  else if (INFILE(_LT_SENCHA_DEV_FLOSS_EXCEPTION)) {
+    INTERESTING("Sencha-GPL-3.0-Exception-for-Development");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_IMATIX)) {
+    INTERESTING("iMatix");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_SGLIB)) {
+    INTERESTING("Sglib");
+  }
+  else if (INFILE(_LT_SMAIL_GPL)) {
+    INTERESTING("SMAIL-GPL");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_SMPPL)) {
+    INTERESTING("SMPPL");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_SNIA)) {
+    INTERESTING("SNIA");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_SPELL_CHECKER_EXCEPTION_LGPL_2_1_PLUS)) {
+    INTERESTING("spell-checker-exception-LGPL-2.1-or-later");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_ST_MCD_2_0)) {
+    INTERESTING("STMicro-Liberty-v2");
+  }
+  else if (INFILE(_LT_STATEWIZARD)) {
+    INTERESTING("StateWizard");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_STRONGSWAN_EXCEPTION)) {
+    INTERESTING("GPL-with-strongSwan-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_SUBCOMMANDER_EXCEPTION_2_0_PLUS)) {
+    INTERESTING("subcommander-exception-2.0-or-later");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_SWIG)) {
+    INTERESTING("SWIG-Library");
+  }
+  else if (INFILE(_LT_SWL)) {
+    INTERESTING("SWL");
+  }
+  else if (INFILE(_LT_SYNTEXT_SERNA_EXCEPTION_1_0)) {
+    INTERESTING("syntext-serna-exception-1.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_TANUKI_COMMUNITY_SLA_1_0)) {
+    INTERESTING("Tanuki-Community-1.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_TANUKI_COMMUNITY_SLA_1_1)) {
+    INTERESTING("Tanuki-Community-1.1");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_TANUKI_COMMUNITY_SLA_1_2)) {
+    INTERESTING("Tanuki-Community-1.2");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_TANUKI_COMMUNITY_SLA_1_3)) {
+    INTERESTING("Tanuki-Community-1.3");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_TAPR_OHL_1_0) && NOT_INFILE(_TITLE_TAPR_NCL)) {
+    /* the Noncommercial variant shares this wording but forbids commercial use */
+    INTERESTING("TAPR-OHL-1.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_TELERIK_EULA)) {
+    INTERESTING("Telerik");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_THOR_PL)) {
+    INTERESTING("TPL-1.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_TORQUE_1_1)) {
+    INTERESTING("TORQUE-1.1");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_TPL_1_0)) {
+    INTERESTING("TPL-1.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_TROLLTECH_GPL_EXCEPTION_1_0)) {
+    INTERESTING("Trolltech-GPL-Exception-1.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_TROLLTECH_GPL_EXCEPTION_1_1)) {
+    INTERESTING("Trolltech-GPL-Exception-1.1");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_TROLLTECH_GPL_EXCEPTION_1_2)) {
+    INTERESTING("Trolltech-GPL-Exception-1.2");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_UBDL)) {
+    INTERESTING("UBDL-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_UNLIMITED_LINKING_EXCEPTION_GPL)) {
+    INTERESTING("GPL-with-Unlimited-linking-exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_UOFU_RFPL)) {
+    INTERESTING("UURF-Public");
+  }
+  else if (INFILE(_LT_VIEWFLOW_AGPL_3_0_EXCEPTION)) {
+    INTERESTING("AGPL-3.0-only-with-Viewflow-Library-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_VUFORIA_2013_07_29)) {
+    INTERESTING("Vuforia-2013-07-29");
+  }
+  else if (INFILE(_LT_WINZIP_EULA)) {
+    INTERESTING("WinZip");
+  }
+  else if (INFILE(_LT_WXWIDGETS)) {
+    INTERESTING("wxWidgets");
+  }
+  else if (INFILE(_LT_WXWINDOWS_R_3_0)) {
+    INTERESTING("wxWindows-Restricted-3.0");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_X11_REALMODE)) {
+    INTERESTING("X11-Style-Realmode");
+  }
+  else if (INFILE(_LT_XENOMAI_GPL_EXCEPTION)) {
+    INTERESTING("Xenomai-GPL-Exception");
+    lmem[_mGPL] = 1;
+  }
+  else if (INFILE(_LT_XMING)) {
+    INTERESTING("Xming");
+  }
+  else if (INFILE(_LT_ZSH)) {
+    INTERESTING("zsh");
+  }
+  } /* end !lmem[_mGPL] guard */
+  cleanLicenceBuffer();
   /* copyleft-next license
    * It has to be checked before GPL because the license has the reference
    * to GPL license which gives a false positive GPL finding.
@@ -1371,8 +3102,20 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "Affero(CR)" : cp);
         lmem[_mGPL] = 1;
       }
+      /* named, not granted: other licences list Affero in secondary-licence,
+         compatible-licence and definition clauses */
+      else if (NOT_INFILE(_LT_MPL_SECONDARY)
+          && NOT_INFILE(_PHR_AGPL_REFERENCE_ONLY)) {
+        /* agplVersion() also returns GPL names; no lmem[_mGPL] here, so a
+           separate GPL grant still gets reported */
+        cp = AGPLVERS();
+        if (strncmp(cp, "AGPL", 4) == 0) {
+          INTERESTING(lDebug ? "Affero(named)" : cp);
+        }
+      }
     }
-    else if (INFILE(_LT_AGPL_NAMED)) {
+    else if (INFILE(_LT_AGPL_NAMED) || INFILE(_LT_AGPL_NAMED_ref)
+        || INFILE(_LT_AGPL_NAMED_ref2)) {
       cp = AGPLVERS();
       INTERESTING(lDebug ? "AGPL(named)" : cp);
       lmem[_mGPL] = 1;
@@ -1604,6 +3347,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       }
       else if (INFILE(_PHR_LGPL21_ONLY_ref) || INFILE(_TITLE_LGPLV21_2)) {
         INTERESTING("LGPL-2.1-only");
+        lmem[_mLGPL] = 1;
+      }
+      else if (INFILE(_TITLE_LGPL_NAMED)) {
+        cp = LGPLVERS();
+        INTERESTING(lDebug ? "LGPL(title)" : cp);
         lmem[_mLGPL] = 1;
       }
     }
@@ -1950,6 +3698,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "XFree86(1)" : "XFree86");
     lmem[_mMIT] = 1;
   }
+  else if (INFILE(_LT_CCAI_1_0)) {
+    INTERESTING("CCAI-1.0");
+    lmem[_mMIT] = 1;
+  }
+  else if (INFILE(_LT_MODIFIED_MIT)) {
+    /* modified text must not report the pristine licence */
+    INTERESTING("MIT-style");
+    lmem[_mMIT] = 1;
+  }
   else if (HASTEXT(_LT_BSD_OR_MIT, REG_EXTENDED)) {
     INTERESTING("MIT");
     INTERESTING("BSD");
@@ -1964,13 +3721,205 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * MIT search order changed. First MIT license explicit phrases and references are checked .
    */
   else if (!lmem[_mMIT] && NOT_INFILE(_TITLE_MIT_EXHIBIT) && NOT_INFILE(_TITLE_SGI) &&
-        (INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT))) {
+        (INFILE(_LT_MIT_1) || (INFILE(_TITLE_MIT) && NOT_INFILE(_PHR_NOT_MIT_LICENSE)))) {
     if(INFILE(_LT_MIT_NO_EVIL)) {
       INTERESTING(lDebug ? "MIT-style(no evil)" : "JSON");
       lmem[_mMIT] = 1;
     }
     else if (INFILE(_LT_MIT_2)) {
-      if (mCR_MIT() || INFILE(_TITLE_MIT)) {
+      if (INFILE(_LT_ZUORA_SOFTWARE)) {
+        INTERESTING("Zuora-Software");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_XILINX_2016)) {
+        INTERESTING("Xilinx-2016");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_X11_STANFORD)) {
+        INTERESTING("X11-Style-Stanford-University");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_X11_XCONSORTIUM_VEILLARD)) {
+        INTERESTING("X11-Style-X-Consortium-Veillard");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_X11_BITSTREAM)) {
+        INTERESTING("Bitstream-Charter");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_X11_TEKTRONIX)) {
+        INTERESTING("X11-Style-Tektronix");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_X11_IBM)) {
+        INTERESTING("IBM-Derivative-Works");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_X11_OAR)) {
+        INTERESTING("OAR");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_X11_ADOBE)) {
+        INTERESTING("Adobe-Display-PostScript");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_X11_LUCENT_VARIANT)) {
+        INTERESTING("X11-Style-Lucent-variant");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_X11_DEC1)) {
+        INTERESTING("X11-Style-DEC-1");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_X11_ACER)) {
+        INTERESTING("X11-Style-Acer");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_X11_LUCENT)) {
+        INTERESTING("dtoa");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_WORDNET_2)) {
+        INTERESTING("WordNet");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_WATERFALL_FEED_PARSER)) {
+        INTERESTING("Waterfall-Feed-Parser");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_WIDE_LICENSE)) {
+        INTERESTING("WIDE");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_WOODRUFF_2002)) {
+        INTERESTING("Woodruff-Restricted-MIT-2002");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_TANUKI_DEVELOPMENT)) {
+        INTERESTING("Tanuki-Development-1.3");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_TAKAO_ABE)) {
+        INTERESTING("Takao-Abe");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_SYNOPSYS_MIT)) {
+        INTERESTING("Synopsys-MIT");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_SYNTHESIS_TOOLKIT)) {
+        INTERESTING("MIT-STK");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_SUNSOFT)) {
+        INTERESTING("Sunsoft");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_SATA)) {
+        INTERESTING("SATA");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_SAAS_MIT)) {
+        INTERESTING("SaaS-MIT");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_PD_MIT)) {
+        INTERESTING("Modified-MIT-for-Public-Domain-software");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_OWTCHART)) {
+        INTERESTING("OWTChart");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_NODE_JS)) {
+        INTERESTING("Node");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_MIT_WITH_MODIFICATION_OBLIGATIONS)) {
+        INTERESTING("HPND-export-US-modify");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_MIT_README)) {
+        INTERESTING("MIT-README");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_MIT_OLD_STYLE)) {
+        INTERESTING("Advanced-Cryptics-Dictionary");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_MIT_ADDITION)) {
+        INTERESTING("MIT-Wu");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_MARKUS_KUHN_LICENSE)) {
+        INTERESTING("HPND-Markus-Kuhn");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_LIBGEOTIFF)) {
+        INTERESTING("libgeoTiff");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_LIBPBM)) {
+        INTERESTING("xlock");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_KHRONOS)) {
+        INTERESTING("Khronos");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_IAN_PIUMARTA)) {
+        INTERESTING("Ian-Piumarta");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_HIPPOCRATIC_1_2)) {
+        INTERESTING("Hippocratic-v1.2");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_HIPPOCRATIC_1_1) || INFILE(_LT_HIPPOCRATIC_1_1_ref)) {
+        INTERESTING("Hippocratic-1.1");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_HIPPOCRATIC_1_0)) {
+        INTERESTING("Hippocratic-1.0");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_HAPPY_BUNNY)) {
+        INTERESTING("The-Happy-Bunny");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_GHOSTPDL_PERMISSIVE)) {
+        INTERESTING("Ghostpdl-Permissive");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_FILAMENT_GROUP_MIT)) {
+        INTERESTING("Filament-Group-MIT");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_DROPBEAR_2016)) {
+        INTERESTING("Dropbear-2016");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_CRCALC)) {
+        INTERESTING("CRCalc");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_COMPASS)) {
+        INTERESTING("Compass");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_CLICK_LICENSE)) {
+        INTERESTING("MIT-Click");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_BSD_X11)) {
+        INTERESTING("BSD-3-Clause-X11-disclaimer");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_BPMN_IO)) {
+        INTERESTING("bpmn.io");
+        lmem[_mMIT] = 1;
+      }
+      else if (mCR_MIT() || (INFILE(_TITLE_MIT) && NOT_INFILE(_PHR_NOT_MIT_LICENSE))) {
         INTERESTING(lDebug ? "MIT(1)" : "MIT");
         lmem[_mMIT] = 1;
       }
@@ -2025,6 +3974,18 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING("MIT-0");
         lmem[_mMIT] = 1;
       }
+      else if (INFILE(_LT_COMMUNITY_SPEC_1_0)) {
+        INTERESTING("Community-Spec-1.0");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_DRL_1_0)) {
+        INTERESTING("DRL-1.0");
+        lmem[_mMIT] = 1;
+      }
+      else if (INFILE(_LT_X11_DISTRIBUTE_MODIFICATIONS_VARIANT)) {
+        INTERESTING("X11-distribute-modifications-variant");
+        lmem[_mMIT] = 1;
+      }
       else if (NOT_INFILE(_LT_INTEL_7)) {
         INTERESTING(lDebug ? "MIT-style(1)" : "MIT-style");
         lmem[_mMIT] = 1;
@@ -2042,7 +4003,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "MPL/NPL#5" : cp);
       lmem[_mMPL] = 1;
     }
-    else if (!lmem[_mMIT] && (mCR_MIT() || INFILE(_TITLE_MIT)) && NOT_INFILE(_TITLE_MIT_EXHIBIT)) {
+    else if (!lmem[_mMIT] && (mCR_MIT() || (INFILE(_TITLE_MIT) && NOT_INFILE(_PHR_NOT_MIT_LICENSE))) && NOT_INFILE(_TITLE_MIT_EXHIBIT)) {
       INTERESTING(lDebug ? "MIT(2)" : "MIT");
       lmem[_mMIT] = 1;
     }
@@ -2245,6 +4206,16 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_SPDX_MIT_CMU)) {
     INTERESTING("MIT-CMU");
   }
+  /* \<MIT\> matches inside MIT-Hippocratic-x.y, the hyphen being a boundary */
+  else if (INFILE(_TITLE_HIPPOCRATIC_NAMED_21)) {
+    INTERESTING("Hippocratic-2.1");
+  }
+  else if (INFILE(_TITLE_HIPPOCRATIC_NAMED_20)) {
+    INTERESTING("Hippocratic-2.0");
+  }
+  else if (INFILE(_TITLE_HIPPOCRATIC_NAMED_12)) {
+    INTERESTING("Hippocratic-v1.2");
+  }
   else if (!lmem[_fREAL] && (INFILE(_SPDX_MIT))) {
     INTERESTING(lDebug ? "MIT(SPDX)" : "MIT");
   }
@@ -2331,7 +4302,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * ISC License
    */
-  if (INFILE(_PHR_ISC_1) || INFILE(_PHR_ISC_2) || HASTEXT(_URL_ISC, REG_EXTENDED)) {
+  if (INFILE(_PHR_ISC_1) || INFILE(_PHR_ISC_2) || HASTEXT(_URL_ISC, REG_EXTENDED)
+      || INFILE(_TITLE_ISC)) {
     INTERESTING(lDebug ? "PHR(ISC)" : "ISC");
     lmem[_mISC] = 1;
   }
@@ -2468,6 +4440,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (URL_INFILE(_URL_W3C)) {
     INTERESTING(lDebug ? "W3C(url)" : "W3C");
+    lmem[_fW3C] = 1;
+  }
+  else if (INFILE(_TITLE_W3C)) {
+    INTERESTING(lDebug ? "W3C(title)" : "W3C");
     lmem[_fW3C] = 1;
   }
   else if (!lmem[_mMIT] && INFILE(_LT_MIT_3)) {
@@ -2981,6 +4957,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_LT_MSCORP_RLref)) {
       INTERESTING(lDebug ? "MS-RL(ref)" : "MS-RL");
+      lmem[_fMSCORP] = 1;
+    }
+    else if (INFILE(_TITLE_MSCORP_RL)) {
+      INTERESTING(lDebug ? "MS-RL(title)" : "MS-RL");
+      lmem[_fMSCORP] = 1;
+    }
+    else if (INFILE(_TITLE_MSCORP_PL)) {
+      INTERESTING(lDebug ? "MS-PL(title)" : "MS-PL");
       lmem[_fMSCORP] = 1;
     }
     else if (INFILE(_LT_MSCORP_REFLIC)) {
@@ -3900,6 +5884,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       cp = LPPLVERS();
       INTERESTING(lDebug ? "LPPL(8)" : cp);
     }
+    else if (INFILE(_TITLE_LATEX_PL10) || INFILE(_TITLE_LATEX_PL11) ||
+        INFILE(_TITLE_LATEX_PL12) || INFILE(_TITLE_LATEX_PL13)) {
+      cp = LPPLVERS();
+      INTERESTING(lDebug ? "LPPL(title)" : cp);
+    }
     else if (URL_INFILE(_URL_LATEX)) {
       cp = LPPLVERS();
       INTERESTING(lDebug ? "LPPL(url)" : cp);
@@ -4080,7 +6069,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       (INFILE(_LT_ART_1) || INFILE(_LT_ARTref1) ||
           INFILE(_LT_ARTref2) || INFILE(_LT_ARTref3) ||
           INFILE(_LT_ARTref4) || PERL_INFILE(_LT_ARTref5) ||
-          PERL_INFILE(_LT_ARTref6))) {
+          PERL_INFILE(_LT_ARTref6) || INFILE(_TITLE_ART10) ||
+          INFILE(_TITLE_ART20))) {
     if (INFILE(_TITLE_OGTSL)) {
       INTERESTING("OGTSL");
     }
@@ -4100,7 +6090,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING("Artistic-1.0-Perl");
         lmem[_fARTISTIC] = 1;
       }
-      else if (HASTEXT(_PHR_ARTISTIC_CLAUSE8, 0))
+      else if (HASTEXT(_PHR_ARTISTIC_CLAUSE8, 0) || INFILE(_TITLE_ART10_CL8))
       {
         INTERESTING("Artistic-1.0-cl8");
         lmem[_fARTISTIC] = 1;
@@ -4165,7 +6155,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "GPDL(2)" : "GPDL");
   }
   else if (INFILE(_LT_FREEBSD_DOC) && INFILE(_TITLE_FREEBSD_DOC)) {
-    INTERESTING("FreeBSD-Doc");
+    INTERESTING("FreeBSD-DOC");
   }
   else if (INFILE(_LT_LINUX_HOWTO)) {
     INTERESTING("Linux-HOWTO");
@@ -4642,6 +6632,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "RSA(2)" : "RSA-Security");
     }
   }
+  else if (INFILE(_TITLE_RSA_MD)) {
+    INTERESTING(lDebug ? "RSA(title)" : "RSA-MD");
+  }
   cleanLicenceBuffer();
   /* Some licenses only deal with fonts */
   if (HASTEXT(_TEXT_FONT, 0)) {
@@ -5029,7 +7022,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * CPL, Lucent Public License, Eclipse PL
    */
   int _epl = 0;
-  if (INFILE(_LT_CPL_1) || INFILE(_LT_CPL_2)) {
+  if (INFILE(_LT_CPL_1) || INFILE(_LT_CPL_2) || INFILE(_TITLE_IBM_PL10)
+      || INFILE(_TITLE_IBM_PL20) || INFILE(_TITLE_IBM_PL)) {
     if (INFILE(_TITLE_IBM_PL20)) {
       INTERESTING("IPL-2.0");
     }
@@ -5349,6 +7343,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_TITLE_AFL30)) {
     cp = AFLVERS();
     INTERESTING(lDebug? "AFL(T3.0)" : cp);
+  }
+  else if (INFILE(_TITLE_OSL_EARLY)) {
+    cp = OSLVERS();
+    INTERESTING(lDebug? "OSL(Tearly)" : cp);
   }
   else if (URL_INFILE(_URL_OSL11)) {
     INTERESTING(lDebug ? "OSL_v1.1(url)" : "OSL-1.1");
@@ -6025,6 +8023,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_LT_OPENLDAP_2)) {
       INTERESTING("OLDAP");
+    }
+    else {
+      (void) TRYGROUP(famOPENLDAP);
     }
   }
   cleanLicenceBuffer();
@@ -6827,13 +8828,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * European Union Public Licence
    */
-  if (INFILE(_PHR_EUPL_10) || INFILE(_TITLE_EUPL_10)) {
+  if (INFILE(_PHR_EUPL_10) || INFILE(_TITLE_EUPL_10)
+      || INFILE(_PHR_EUPL_NAMED_10)) {
     INTERESTING("EUPL-1.0");
   }
-  else if (INFILE(_PHR_EUPL_11) || INFILE(_TITLE_EUPL_11)) {
+  else if (INFILE(_PHR_EUPL_11) || INFILE(_TITLE_EUPL_11)
+      || INFILE(_PHR_EUPL_NAMED_11)) {
     INTERESTING("EUPL-1.1");
   }
-  else if (INFILE(_TITLE_EUPL_12)) {
+  else if (INFILE(_TITLE_EUPL_12) || INFILE(_PHR_EUPL_NAMED_12)) {
     INTERESTING("EUPL-1.2");
   }
   else if (INFILE(_PHR_EUPL)) {
@@ -6896,6 +8899,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (HASTEXT(_TITLE_IJG_1, 0) && !HASTEXT(_PHR_IJG_INTERFACE_1, 0) && !HASTEXT(_PHR_IJG_INTERFACE_2, 0)) {
       INTERESTING("IJG");
     }
+    /* the licence, not just the group */
+    else if (HASTEXT(_TITLE_IJG_LICENSE, 0) && !HASTEXT(_PHR_IJG_INTERFACE_1, 0) && !HASTEXT(_PHR_IJG_INTERFACE_2, 0)) {
+      INTERESTING("IJG");
+    }
     /* Independent JPEG Group can be referenced without IJG license*/
     else if (HASTEXT(_TITLE_IJG_2, 0) && !HASTEXT(_PHR_IJG_INTERFACE_1, 0) && !HASTEXT(_PHR_IJG_INTERFACE_2, 0)) {
       INTERESTING("IJG-possibility");
@@ -6936,6 +8943,16 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_TEXT_MPL20_UNDER)) {
       INTERESTING("MPL-2.0");
+      lmem[_mMPL] = 1;
+    }
+    /* _URL_MPL_LATEST also matches the NPL paths, and lmem[_mMPL] would
+       then stop mplNplVersion() resolving them */
+    else if (URL_INFILE(_URL_NPL10)) {
+      INTERESTING("NPL-1.0");
+      lmem[_mMPL] = 1;
+    }
+    else if (URL_INFILE(_URL_NPL11)) {
+      INTERESTING("NPL-1.1");
       lmem[_mMPL] = 1;
     }
     else if (URL_INFILE(_URL_MPL_LATEST)) {
@@ -7176,6 +9193,43 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * We call these claims "Freeware", because you can use the software free of charge,
    * but some other copyright holder exclusive rights are not granted in some cases.
    */
+  /* Specific freeware-like licenses */
+    if (INFILE(_LT_SASH)) {
+      INTERESTING("Sash-Notice");
+    }
+    else if (INFILE(_LT_LILO)) {
+      INTERESTING("LILO");
+    }
+    else if (INFILE(_LT_INNO_SETUP)) {
+      INTERESTING("InnoSetup");
+    }
+    else if (INFILE(_LT_APP_S2P)) {
+      INTERESTING("App-s2p");
+    }
+    else if (INFILE(_LT_FONT_ALIAS)) {
+      INTERESTING("font-alias");
+    }
+    else if (INFILE(_LT_HDPARM)) {
+      INTERESTING("hdparm");
+    }
+    else if (INFILE(_LT_HXD)) {
+      INTERESTING("HxD");
+    }
+    else if (INFILE(_LT_JAM)) {
+      INTERESTING("Jam");
+    }
+    else if (INFILE(_LT_JMAGNETIC)) {
+      INTERESTING("JMagnetic");
+    }
+    else if (INFILE(_LT_PYCRYPTO)) {
+      INTERESTING("PyCrypto");
+    }
+    else if (INFILE(_LT_TESTED_SOFTWARE)) {
+      INTERESTING("Tested-Software");
+    }
+    else if (INFILE(_LT_TSO_LICENSE)) {
+      INTERESTING("Theodore-Ts-o");
+    }
   if (*licStr == NULL_CHAR || pd >= 0) {
     for (i = 0; i < NFREECLAIM; i++) {
       if (CANSKIP(i, _KW_permission, _FREE_first_perm,
@@ -7199,6 +9253,151 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   cleanLicenceBuffer();
+  /* Specific public-domain-like licenses */
+    if (INFILE(_LT_ZHORN_STICKIES)) {
+      INTERESTING("Zhorn-Stickies");
+      pd = 1;
+    }
+    else if (INFILE(_LT_LZMA_SDK_LICENSE)) {
+      INTERESTING("LZMA-SDK-license");
+      pd = 1;
+    }
+    else if (INFILE(_LT_CRYPTOPP)) {
+      INTERESTING("Crypto");
+      pd = 1;
+    }
+    else if (INFILE(_LT_BITZI_PD)) {
+      INTERESTING("Bitzi-PD");
+      pd = 1;
+    }
+    else if (INFILE(_LT_AGENTXPP)) {
+      INTERESTING("AgentX");
+      pd = 1;
+    }
+    else if (INFILE(_LT_AES_128_3_0)) {
+      INTERESTING("AES-128-3.0");
+      pd = 1;
+    }
+    else if (INFILE(_LT_ALASIR)) {
+      INTERESTING("Alasir");
+      pd = 1;
+    }
+    else if (INFILE(_LT_ALTOVA_EULA)) {
+      INTERESTING("Altova");
+      pd = 1;
+    }
+    else if (INFILE(_LT_AMS_FONTS)) {
+      INTERESTING("AMSFonts");
+      pd = 1;
+    }
+    else if (INFILE(_LT_BRENT_CORKUM)) {
+      INTERESTING("Brent-Corkum");
+      pd = 1;
+    }
+    else if (INFILE(_LT_BROADCOM_PROPRIETARY)) {
+      INTERESTING("Broadcom-Proprietary");
+      pd = 1;
+    }
+    else if (INFILE(_LT_C_UDA_1_0)) {
+      INTERESTING("C-UDA-1.0");
+      pd = 1;
+    }
+    else if (INFILE(_LT_CDLA_PERMISSIVE_2_0)) {
+      INTERESTING("CDLA-Permissive-2.0");
+      pd = 1;
+    }
+    else if (INFILE(_LT_DOUG_LEA)) {
+      INTERESTING("Doug-Lea");
+      pd = 1;
+    }
+    else if (INFILE(_LT_GREGORY_PIETSCH)) {
+      INTERESTING("Gregory-Pietsch-Liberal");
+      pd = 1;
+    }
+    else if (INFILE(_LT_GUTENBERG_2020)) {
+      INTERESTING("Gutenberg-2020");
+      pd = 1;
+    }
+    else if (INFILE(_LT_JQUERY_PD)) {
+      INTERESTING("jQuery-Tools-PD");
+      pd = 1;
+    }
+    else if (INFILE(_LT_MICHAEL_BARR)) {
+      INTERESTING("Michael-Barr");
+      pd = 1;
+    }
+    else if (INFILE(_LT_NCBI)) {
+      INTERESTING("NCBI-PD");
+      pd = 1;
+    }
+    else if (INFILE(_LT_NETAPP_SDK_AUG2020)) {
+      INTERESTING("NetApp-SDK-rev.-Aug2020");
+      pd = 1;
+    }
+    else if (INFILE(_LT_NIST_PD_FALLBACK)) {
+      INTERESTING("NIST-PD-fallback");
+      pd = 1;
+    }
+    else if (INFILE(_LT_NIST_PD)) {
+      INTERESTING("NIST-PD");
+      pd = 1;
+    }
+    else if (INFILE(_LT_NUMERICAL_RECIPES_NOTICE)) {
+      INTERESTING("Numerical-Recipes-Notice");
+      pd = 1;
+    }
+    else if (INFILE(_LT_O_UDA_1_0)) {
+      INTERESTING("O-UDA-1.0");
+      pd = 1;
+    }
+    else if (INFILE(_LT_OCULUS_SDK_3_5)) {
+      INTERESTING("Oculus-SDK-v3.5");
+      pd = 1;
+    }
+    else if (INFILE(_LT_OSWEGO_CONCURRENT)) {
+      INTERESTING("Oswego-Concurrent");
+      pd = 1;
+    }
+    else if (INFILE(_LT_PHIL_BUNCE)) {
+      INTERESTING("Phil-Bunce");
+      pd = 1;
+    }
+    else if (INFILE(_LT_LIBSELINUX_1_0)) {
+      INTERESTING("libselinux-1.0");
+      pd = 1;
+    }
+    else if (INFILE(_LT_SNMP4J_SMI)) {
+      INTERESTING("SNMP4J-SMI");
+      pd = 1;
+    }
+    else if (INFILE(_LT_SPLUNK_MINT_TOS_2018)) {
+      INTERESTING("Splunk-MINT-TOS-2018");
+      pd = 1;
+    }
+    else if (INFILE(_LT_STANFORD_PVRG)) {
+      INTERESTING("Stanford-PVRG");
+      pd = 1;
+    }
+    else if (INFILE(_LT_TFL)) {
+      INTERESTING("TFL");
+      pd = 1;
+    }
+    else if (INFILE(_LT_TIZEN_SDK)) {
+      INTERESTING("Tizen-SDK");
+      pd = 1;
+    }
+    else if (INFILE(_LT_US_GOVT_PUBLIC_DOMAIN)) {
+      INTERESTING("US-Government-Public-Domain");
+      pd = 1;
+    }
+    else if (INFILE(_LT_VIC_METCALFE_PD)) {
+      INTERESTING("Vic-Metcalfe-Public-Domain");
+      pd = 1;
+    }
+    else if (INFILE(_LT_YOLO_2_0)) {
+      INTERESTING("YOLO-v2");
+      pd = 1;
+    }
   /* Check for Public Domain */
   if (!lmem[_fANTLR] && !lmem[_fCLA] && !lmem[_mPYTHON] && !lmem[_mGFDL] &&
       !lmem[_fODBL] && !lmem[_fPDDL] && !lmem[_fRUBY] && !lmem[_fSAX] && !lmem[_fAPL] && !lmem[_mAPACHE] && !lmem[_mAPACHE10] && !lmem[_mAPACHE11] &&
@@ -7210,6 +9409,148 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Some licenses point you to files/URLs...
    */
+  /* Specific licenses that would otherwise be caught by See-URL */
+    if (INFILE(_LT_PIXABAY_CONTENT)) {
+      INTERESTING("Pixabay-Content");
+    }
+    else if (INFILE(_LT_MCRAE_PL_4_R53)) {
+      INTERESTING("McRae-PL-v4.r53");
+    }
+    else if (INFILE(_LT_DAY_SPEC)) {
+      INTERESTING("Day-Specification");
+    }
+    else if (INFILE(_LT_996_ICU_1_0)) {
+      INTERESTING("Anti-996-1.0");
+    }
+    else if (INFILE(_LT_ANEPOKIS_1_0)) {
+      INTERESTING("Anepokis-1.0");
+    }
+    else if (INFILE(_LT_ARACHNI_PSL_1_0)) {
+      INTERESTING("Arachni-PSL-v1.0");
+    }
+    else if (INFILE(_LT_ARRAY_INPUT_METHOD_PL)) {
+      INTERESTING("Array-Input-Method-Public");
+    }
+    else if (INFILE(_LT_ATMEL_FIRMWARE)) {
+      INTERESTING("Atmel-Firmware");
+    }
+    else if (INFILE(_LT_BAKOMA_FONTS_1995)) {
+      INTERESTING("BaKoMa-Fonts-1995");
+    }
+    else if (INFILE(_LT_BROADLEAF_FAIR_USE)) {
+      INTERESTING("Broadleaf-Fair-Use-v1.0");
+    }
+    else if (INFILE(_LT_BSD_ARTWORK)) {
+      INTERESTING("BSD-Artwork");
+    }
+    else if (INFILE(_LT_C_FSL_1_1)) {
+      INTERESTING("C-FSL-1.1");
+    }
+    else if (INFILE(_LT_CLASSIC_VB)) {
+      INTERESTING("Classic-VB");
+    }
+    else if (INFILE(_LT_CPM_2022)) {
+      INTERESTING("CP-M-2022");
+    }
+    else if (INFILE(_LT_DUENDE_SLA_2022)) {
+      INTERESTING("Duende-2022");
+    }
+    else if (INFILE(_LT_EGRAPPLER)) {
+      INTERESTING("eGrappler");
+    }
+    else if (INFILE(_LT_FAIR_SOURCE_0_9)) {
+      INTERESTING("Fair-Source-v0.9");
+    }
+    else if (INFILE(_LT_FATFS)) {
+      INTERESTING("FatFs");
+    }
+    else if (INFILE(_LT_FOOBAR2000)) {
+      INTERESTING("foobar2000");
+    }
+    else if (INFILE(_LT_INFONODE_1_1)) {
+      INTERESTING("InfoNode-Software-1.1");
+    }
+    else if (INFILE(_LT_JETTY_CCLA_1_1)) {
+      INTERESTING("Jetty-CCLA-1.1");
+    }
+    else if (INFILE(_LT_JSCHEME)) {
+      INTERESTING("Jscheme");
+    }
+    else if (INFILE(_LT_JSR_107_JCACHE_SPEC_2013)) {
+      INTERESTING("JSR-107-JCache-Specification-2013");
+    }
+    else if (INFILE(_LT_JSR_107_JCACHE_SPEC)) {
+      INTERESTING("JSR-107-JCache-Specification");
+    }
+    else if (INFILE(_LT_LAVANTECH)) {
+      INTERESTING("LavanTech");
+    }
+    else if (INFILE(_LT_LHA)) {
+      INTERESTING("lha");
+    }
+    else if (INFILE(_LT_NORTHWOODS_SLA_2021)) {
+      INTERESTING("Northwoods-Software-2021");
+    }
+    else if (INFILE(_LT_OCSL_1_0)) {
+      INTERESTING("OCSL-1.0");
+    }
+    else if (INFILE(_LT_OCULUS_SDK_2020)) {
+      INTERESTING("Oculus-SDK-2020");
+    }
+    else if (INFILE(_LT_OCULUS_SDK)) {
+      INTERESTING("Oculus-SDK");
+    }
+    else if (INFILE(_LT_OLF_CCLA_1_0)) {
+      INTERESTING("OLF-CCLA-1.0");
+    }
+    else if (INFILE(_LT_OLL_1_0)) {
+      INTERESTING("OLL-1.0");
+    }
+    else if (INFILE(_LT_PDL_1_0)) {
+      INTERESTING("PDL-1.0");
+    }
+    else if (INFILE(_LT_POLYFORM_DEFENSIVE_1_0_0)) {
+      INTERESTING("PolyForm-Defensive-1.0.0");
+    }
+    else if (INFILE(_LT_POLYFORM_FREE_TRIAL_1_0_0)) {
+      INTERESTING("PolyForm-Free-Trial-1.0.0");
+    }
+    else if (INFILE(_LT_POLYFORM_INTERNAL_USE_1_0_0)) {
+      INTERESTING("PolyForm-Internal-Use-1.0.0");
+    }
+    else if (INFILE(_LT_POLYFORM_NONCOMMERCIAL_1_0_0)) {
+      INTERESTING("PolyForm-Noncommercial-1.0.0");
+    }
+    else if (INFILE(_LT_POLYFORM_PERIMETER_1_0_0)) {
+      INTERESTING("PolyForm-Perimeter-1.0.0");
+    }
+    else if (INFILE(_LT_POLYFORM_SHIELD_1_0_0)) {
+      INTERESTING("PolyForm-Shield-1.0.0");
+    }
+    else if (INFILE(_LT_POLYFORM_SMALL_BUSINESS_1_0_0)) {
+      INTERESTING("PolyForm-Small-Business-1.0.0");
+    }
+    else if (INFILE(_LT_POLYFORM_STRICT_1_0_0)) {
+      INTERESTING("PolyForm-Strict-1.0.0");
+    }
+    else if (INFILE(_LT_PROSPERITY_1_0_1)) {
+      INTERESTING("Prosperity-Public-1.0.1");
+    }
+    else if (INFILE(_LT_PROSPERITY_2_0)) {
+      INTERESTING("Prosperity-Public-2.0");
+    }
+    else if (INFILE(_LT_SUSTAINABLE_USE_1_0)) {
+      INTERESTING("SUL-1.0");
+    }
+    else if (INFILE(_LT_TTCL)) {
+      INTERESTING("Talis-Community");
+    }
+    else if (INFILE(_LT_UNSPLASH)) {
+      INTERESTING("Unsplash");
+    }
+    else if (INFILE(_LT_YAHOO_BROWSERPLUS_EULA)) {
+      INTERESTING("Yahoo-BrowserPlus");
+    }
   if (*licStr == NULL_CHAR) {
     checkFileReferences(filetext, size, score, kwbm, isML, isPS);
   }
@@ -7221,6 +9562,278 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 #if 0
   if (*licStr == NULL_CHAR && !HASKW(kwbm, _KW_public_domain))
 #endif
+  /* Specific non-commercial license identification */
+    if (INFILE(_LT_MATTKRUSE)) {
+      INTERESTING("Matt-Kruse");
+    }
+    else if (INFILE(_LT_IMAGEN)) {
+      INTERESTING("IMAGEN");
+    }
+    else if (INFILE(_LT_DYNARCH_LINKWARE)) {
+      INTERESTING("Dynarch-Linkware");
+    }
+    else if (INFILE(_LT_ACTUATE_BIRT_IHUB_FTYPE_SLA)) {
+      INTERESTING("BIRT-iHub-F-Type-Software");
+    }
+    else if (INFILE(_LT_ADOBE_AIR_SDK_2014)) {
+      INTERESTING("Adobe-AIR-SDK-2014");
+    }
+    else if (INFILE(_LT_ADOBE_AIR_SDK)) {
+      INTERESTING("Adobe-AIR-SDK-2008");
+    }
+    else if (INFILE(_LT_ADOBE_FLASH_PLAYER_EULA_21_0)) {
+      INTERESTING("Adobe-Flash-Player-21.0");
+    }
+    else if (INFILE(_LT_ADOBE_FLEX_4_SDK)) {
+      INTERESTING("Adobe-Flex-4-SDK");
+    }
+    else if (INFILE(_LT_ADOBE_GENERAL_TOU)) {
+      INTERESTING("Adobe-General-TOU");
+    }
+    else if (INFILE(_LT_AGO_PRIVATE_1_0)) {
+      INTERESTING("Ago-Private-1.0");
+    }
+    else if (INFILE(_LT_BAPL_1_0)) {
+      INTERESTING("Booz-Allen-Public-v1.0");
+    }
+    else if (INFILE(_LT_BITTORRENT_EULA)) {
+      INTERESTING("bittorrent-eula");
+    }
+    else if (INFILE(_LT_BITWARDEN_1_0)) {
+      INTERESTING("Bitwarden-v1");
+    }
+    else if (INFILE(_LT_BRAD_MARTINEZ_VB_32)) {
+      INTERESTING("Brad-Martinez-VB-32");
+    }
+    else if (INFILE(_LT_BROADCOM_COMMERCIAL)) {
+      INTERESTING("Broadcom-Commercial-Notice");
+    }
+    else if (INFILE(_LT_BROADCOM_WICED)) {
+      INTERESTING("Broadcom-WICED-SDK");
+    }
+    else if (INFILE(_LT_CHRISTOPHER_VELAZQUEZ)) {
+      INTERESTING("Christopher-Velazquez");
+    }
+    else if (INFILE(_LT_COM_OREILLY_SERVLET)) {
+      INTERESTING("com.oreilly.servlet");
+    }
+    else if (INFILE(_LT_COMMONS_CLAUSE)) {
+      INTERESTING("Commons-Clause");
+    }
+    else if (INFILE(_LT_CRASHLYTICS_AGREEMENT_2018)) {
+      INTERESTING("Crashlytics-2018");
+    }
+    else if (INFILE(_LT_DYNAMIC_DRIVE_TOU)) {
+      INTERESTING("Dynamic-Drive-TOU");
+    }
+    else if (INFILE(_LT_ETALAB_2_0_FR)) {
+      INTERESTING("Etalab-Open-2.0-French");
+    }
+    /* NOTE: etalab-2.0 and etalab-2.0-fr are identical bilingual texts; only etalab-2.0-fr fires */
+    else if (INFILE(_LT_EXAMDIFF)) {
+      INTERESTING("ExamDiff");
+    }
+    else if (INFILE(_LT_FANCYZOOM)) {
+      INTERESTING("FancyZoom");
+    }
+    else if (INFILE(_LT_FIRST_WORKS_APPRECIATIVE_1_2)) {
+      INTERESTING("First-Works-Appreciative-1.2");
+    }
+    else if (INFILE(_LT_GCO_V3_0)) {
+      INTERESTING("GCO-v3.0");
+    }
+    else if (INFILE(_LT_GOAHEAD)) {
+      INTERESTING("GoAhead");
+    }
+    else if (INFILE(_LT_GOOGLE_ANALYTICS_TOS_2015)) {
+      INTERESTING("Google-Analytics-Terms-of-Service-2015");
+    }
+    else if (INFILE(_LT_GOOGLE_ANALYTICS_TOS_2016)) {
+      INTERESTING("Google-Analytics-Terms-of-Service-2016");
+    }
+    else if (INFILE(_LT_GOOGLE_ANALYTICS_TOS_2019)) {
+      INTERESTING("Google-Analytics-Terms-of-Service-2019");
+    }
+    else if (INFILE(_LT_GOOGLE_ANALYTICS_TOS)) {
+      INTERESTING("Google-Analytics-Terms-of-Service");
+    }
+    else if (INFILE(_LT_GOOGLE_MAPS_TOS_2018_02_07)) {
+      INTERESTING("Google-Maps-Platform-ToS-2018-02-07");
+    }
+    else if (INFILE(_LT_GOOGLE_MAPS_TOS_2018_05_01)) {
+      INTERESTING("Google-Maps-Platform-ToS-2018-05-01");
+    }
+    else if (INFILE(_LT_GOOGLE_MAPS_TOS_2018_06_07)) {
+      INTERESTING("Google-Maps-Platform-ToS-2018-06-07");
+    }
+    else if (INFILE(_LT_GOOGLE_MAPS_TOS_2018_07_09)) {
+      INTERESTING("Google-Maps-Platform-ToS-2018-07-09");
+    }
+    else if (INFILE(_LT_GOOGLE_MAPS_TOS_2018_07_19)) {
+      INTERESTING("Google-Maps-Platform-ToS-2018-07-19");
+    }
+    else if (INFILE(_LT_GOOGLE_MAPS_TOS_2018_10_01)) {
+      INTERESTING("Google-Maps-Platform-ToS-2018-10-01");
+    }
+    else if (INFILE(_LT_GOOGLE_MAPS_TOS_2018_10_31)) {
+      INTERESTING("Google-Maps-Platform-ToS-2018-10-31");
+    }
+    else if (INFILE(_LT_GOOGLE_MAPS_TOS_2019_05_02)) {
+      INTERESTING("Google-Maps-Platform-ToS-2019-05-02");
+    }
+    else if (INFILE(_LT_GOOGLE_MAPS_TOS_2019_11_21)) {
+      INTERESTING("Google-Maps-Platform-ToS-2019-11-21");
+    }
+    else if (INFILE(_LT_GOOGLE_MAPS_TOS_2020_04_02)) {
+      INTERESTING("Google-Maps-Platform-ToS-2020-04-02");
+    }
+    else if (INFILE(_LT_GOOGLE_MAPS_TOS_2020_04_27)) {
+      INTERESTING("Google-Maps-Platform-ToS-2020-04-27");
+    }
+    else if (INFILE(_LT_GOOGLE_TOS_2013)) {
+      INTERESTING("Google-TOS-2013");
+    }
+    else if (INFILE(_LT_GOOGLE_TOS_2014)) {
+      INTERESTING("Google-TOS-2014");
+    }
+    else if (INFILE(_LT_GOOGLE_TOS_2017)) {
+      INTERESTING("Google-TOS-2017");
+    }
+    else if (INFILE(_LT_GOOGLE_TOS_2019)) {
+      INTERESTING("Google-TOS-2019");
+    }
+    else if (INFILE(_LT_HELIOS_EULA)) {
+      INTERESTING("Helios");
+    }
+    else if (INFILE(_LT_IRFANVIEW_EULA)) {
+      INTERESTING("IrfanView");
+    }
+    else if (INFILE(_LT_ISO_RECORDER)) {
+      INTERESTING("ISO-Recorder");
+    }
+    else if (INFILE(_LT_ISOTOPE_CLA)) {
+      INTERESTING("Isotope-Commercial");
+    }
+    else if (INFILE(_LT_JAM_STAPL)) {
+      INTERESTING("Jam-STAPL-Software");
+    }
+    else if (INFILE(_LT_JAVA_RESEARCH_1_5)) {
+      INTERESTING("Java-Research-1.5");
+    }
+    else if (INFILE(_LT_JAVA_RESEARCH_1_6)) {
+      INTERESTING("Java-Research-1.6");
+    }
+    else if (INFILE(_LT_JETBRAINS_TOOLBOX_OPEN_SOURCE_3)) {
+      INTERESTING("JetBrains-Toolbox-Open-Source-v3");
+    }
+    else if (INFILE(_LT_JRUNNER)) {
+      INTERESTING("JRunner");
+    }
+    else if (INFILE(_LT_MAME)) {
+      INTERESTING("MAME");
+    }
+    else if (INFILE(_LT_MATTHEW_WELCH_FONT_LICENSE)) {
+      INTERESTING("Matthew-Welch-Font");
+    }
+    else if (INFILE(_LT_METAGEEK_INSSIDER_EULA)) {
+      INTERESTING("inSSIDer");
+    }
+    else if (INFILE(_LT_MIKE95)) {
+      INTERESTING("Mike95");
+    }
+    else if (INFILE(_LT_MS_DEVELOPER_SERVICES_AGREEMENT_2018_06)) {
+      INTERESTING("MS-Developer-Services-2018-06");
+    }
+    else if (INFILE(_LT_MS_INVISIBLE_EULA_1_0)) {
+      INTERESTING("MS-Invisible-Computing-1.0");
+    }
+    else if (INFILE(_LT_MS_RESEARCH_SHARED_SOURCE)) {
+      INTERESTING("MS-Research-Shared-Source");
+    }
+    else if (INFILE(_LT_MS_WINDOWS_CONTAINER_BASE_IMAGE_EULA_2020)) {
+      INTERESTING("MS-Windows-Container-Base-Image-2020");
+    }
+    else if (INFILE(_LT_NVIDIA_ISAAC_EULA_2019_1)) {
+      INTERESTING("NVIDIA-ISAAC-v2019.1");
+    }
+    else if (INFILE(_LT_NVIDIA_NGX_EULA_2019)) {
+      INTERESTING("NVIDIA-NGX-2019");
+    }
+    else if (INFILE(_LT_OCB_NON_MILITARY_2013)) {
+      INTERESTING("ocb-non-military-2013");
+    }
+    else if (INFILE(_LT_ORACLE_BCL_JAVASE_JAVAFX_2012)) {
+      INTERESTING("Oracle-BCL-for-JavaSE-and-JavaFX-2012");
+    }
+    else if (INFILE(_LT_ORACLE_BCL_JAVASE_PLATFORM_JAVAFX_2013)) {
+      INTERESTING("oracle-bcl-javase-platform-javafx-2013");
+    }
+    else if (INFILE(_LT_ORACLE_BCL_JAVASE_PLATFORM_JAVAFX_2017)) {
+      INTERESTING("oracle-bcl-javase-platform-javafx-2017");
+    }
+    else if (INFILE(_LT_ORACLE_WEB_SITES_TOU)) {
+      INTERESTING("Oracle-Web-Sites-TOU");
+    }
+    else if (INFILE(_LT_PFTUS_1_1)) {
+      INTERESTING("PFTUS-license");
+    }
+    else if (INFILE(_LT_PHILIPS_PROPRIETARY_NOTICE_2000)) {
+      INTERESTING("Philips-Proprietary-Notice-2000");
+    }
+    else if (INFILE(_LT_PIVOTAL_TOU)) {
+      INTERESTING("Pivotal-Software-Terms-of-Use");
+    }
+    else if (INFILE(_LT_QUIN_STREET)) {
+      INTERESTING("QuinStreet");
+    }
+    else if (INFILE(_LT_ROGUE_WAVE)) {
+      INTERESTING("Rogue-Wave-Software");
+    }
+    else if (INFILE(_LT_RSA_MD2)) {
+      INTERESTING("RSA-MD2");
+    }
+    else if (INFILE(_LT_RUTE)) {
+      INTERESTING("Rute-Users-Tutorial-and-Exposition-0.8.0");
+    }
+    else if (INFILE(_LT_SCILAB_EN_2005)) {
+      INTERESTING("SCILAB-en-2005");
+    }
+    else if (INFILE(_LT_SCILAB_FR)) {
+      INTERESTING("SCILAB-FR");
+    }
+    else if (INFILE(_LT_SCSL_3_0)) {
+      INTERESTING("SCSL-3.0");
+    }
+    else if (INFILE(_LT_SLYSOFT_EULA)) {
+      INTERESTING("SlySoft");
+    }
+    else if (INFILE(_LT_SMSC_NON_COMMERCIAL_2012)) {
+      INTERESTING("SMSC-Non-Commercial-2012");
+    }
+    else if (INFILE(_LT_STREAM_BENCHMARK)) {
+      INTERESTING("STREAM-Benchmark");
+    }
+    else if (INFILE(_LT_TENABLE_NESSUS)) {
+      INTERESTING("Tenable-Nessus");
+    }
+    else if (INFILE(_LT_TGPPL_1_0)) {
+      INTERESTING("TGPPL-1.0");
+    }
+    else if (INFILE(_LT_THOMAS_BANDT)) {
+      INTERESTING("Thomas-Bandt");
+    }
+    else if (INFILE(_LT_TRIPTRACKER)) {
+      INTERESTING("TripTracker");
+    }
+    else if (INFILE(_LT_VNC_VIEWER_IOS)) {
+      INTERESTING("VNCViewer-iOS");
+    }
+    else if (INFILE(_LT_WIFI_ALLIANCE)) {
+      INTERESTING("Wi-Fi-Alliance");
+    }
+    else if (INFILE(_LT_YAHOO_MESSENGER_EULA)) {
+      INTERESTING("Yahoo-Messenger");
+    }
     if (maxInterest != IL_HIGH && !HASKW(kwbm, _KW_public_domain) &&
         NOT_INFILE(_PHR_COMMERC_NONCOMM)) {
       if (INFILE(_LT_NONCOMMERCIAL_1)) {
@@ -7358,6 +9971,19 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_PARITY_600)) {
     INTERESTING("Parity-6.0.0");
+  }
+  else if (INFILE(_LT_PARITY_700)) {
+    INTERESTING("Parity-7.0.0");
+  }
+  cleanLicenceBuffer();
+  /*
+   * Cryptographic Autonomy License
+   */
+  if (INFILE(_LT_CAL_10_CWE)) {
+    INTERESTING("CAL-1.0-Combined-Work-Exception");
+  }
+  else if (INFILE(_LT_CAL_10)) {
+    INTERESTING("CAL-1.0");
   }
   cleanLicenceBuffer();
   /*
@@ -7960,9 +10586,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Paul-Hsieh-Derivative");
   }
   cleanLicenceBuffer();
-  if (INFILE(_LT_PAUL_HSIEH_EXP)) {
-    INTERESTING("Paul-Hsieh-Exposition");
-  }
+  cleanLicenceBuffer();
   cleanLicenceBuffer();
   if (INFILE(_LT_PAULO_SOARES)) {
     INTERESTING("Paulo-Soares");
@@ -8272,7 +10896,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_AARDVARK_PY_2014)) {
-    INTERESTING("Aardvark-I2C/SPI-2014");
+    INTERESTING("Aardvark-I2C-SPI-2014");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_ACCELLERA_SYSTEMC)) {
@@ -8452,11 +11076,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_CANONICAL_HA_CLA_ANY_E_V1_2)) {
-    INTERESTING("Canonical-HA-CLA-ANY-E_v1.2");
+    INTERESTING("Canonical-HA-CLA-ANY-E-v1.2");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_CANONICAL_HA_CLA_ANY_I_V1_2)) {
-    INTERESTING("Canonical-HA-CLA-ANY-I_v1.2");
+    INTERESTING("Canonical-HA-CLA-ANY-I-v1.2");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_CAVIUM_MALLOC)) {
@@ -8544,15 +11168,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_ECMA_PATENT_COC_0)) {
-    INTERESTING("Ecma-Historical-Code-of-Conduct-in-Patent-Matters");
+    INTERESTING("Ecma-Patent-COC");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_ECMA_PATENT_COC_1)) {
-    INTERESTING("Ecma-Code-of-Conduct-in-Patent-Matters-v1");
+    INTERESTING("Ecma-Patent-COC-1.0");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_ECMA_PATENT_COC_2)) {
-    INTERESTING("Ecma-Code-of-Conduct-in-Patent-Matters-v2");
+    INTERESTING("Ecma-Patent-COC-2.0");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_ENHYDRA_1_1)) {
@@ -8740,7 +11364,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_ISO_SCHEMATRON_19757_3)) {
-    INTERESTING("ISO/IEC-19757-3");
+    INTERESTING("ISO-IEC-19757-3");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_ITC_EULA)) {
@@ -9008,7 +11632,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_MTX_LICENSING_STATEMENT)) {
-    INTERESTING("MicroType-Express-(MTX)-License");
+    INTERESTING("MicroType-Express-MTX");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_MUT_LICENSE)) {
@@ -9032,7 +11656,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_NETDATA_NCUL1)) {
-    INTERESTING("Netdata-Cloud-UI-License-v1.0-(NCUL1)");
+    INTERESTING("Netdata-Cloud-UI-NCUL1-v1.0");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_NETRONOME_FIRMWARE)) {
@@ -9156,7 +11780,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_OREILLY_NOTICE)) {
-    INTERESTING("O'Reilly-Code-Sample-Notice");
+    INTERESTING("OReilly-Code-Sample-Notice");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_OSGI_SPEC_2_0)) {
@@ -9212,15 +11836,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_PD_PROGRAMMING)) {
-    INTERESTING("PD'Programming-License");
+    INTERESTING("PDProgramming-License");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_PHASER_CCP4)) {
-    INTERESTING("Phaser-Commercial-EULA-(CCP4)");
+    INTERESTING("Phaser-Commercial-EULA-CCP4");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_PHASER_PHENIX)) {
-    INTERESTING("Phaser-Commercial-EULA-(Phenix)");
+    INTERESTING("Phaser-Commercial-EULA-Phenix");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_PHILIPPE_DE_MUYTER)) {
@@ -9284,7 +11908,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_QUALCOMM_ISO)) {
-    INTERESTING("Qualcomm-ISO/IEC-MPEG-B-DASH-License");
+    INTERESTING("Qualcomm-ISO-IEC-MPEG-B-DASH");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_QUICKNET_DOCUMENT_1999)) {
@@ -9356,7 +11980,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_SCRIPT_NIKHILK)) {
-    INTERESTING("Script#-License");
+    INTERESTING("ScriptSharp-License");
   }
   cleanLicenceBuffer();
   if (INFILE(_LT_SEMGREP_REGISTRY)) {
@@ -9547,7 +12171,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("TXL-10.5-License");
   }
   cleanLicenceBuffer();
-  if (INFILE(_LT_UGUI)) {
+  if (INFILE(_LT_CCAI_CLAUSE)) {
+    INTERESTING("CCAI-clause");
+  }
+  cleanLicenceBuffer();
+  /* FatFs uses this same wording; prefer the more specific licence. */
+  if (INFILE(_LT_UGUI) && NOT_INFILE(_LT_FATFS)) {
     INTERESTING("UGUI-License");
   }
   cleanLicenceBuffer();
@@ -9703,9 +12332,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Atmel-linux-firmware");
   }
   cleanLicenceBuffer();
-  if (INFILE(_LT_SCANCODE_ACK)) {
-    INTERESTING("LicenseRef-scancode-acknowledgment");
-  }
+  cleanLicenceBuffer();
   cleanLicenceBuffer();
   if (INFILE(_LT_KFGQPC_UTHMANIC)) {
     INTERESTING("KFGQPC-Uthmanic-Script-HAFS");
@@ -10057,6 +12684,11 @@ char *aslVersion(char *filetext, int size, int isML, int isPS)
     lstr = "ImageMagick(Apache)";
     lmem[_mAPACHE] = 1;
   }
+  else if (INFILE(_LT_MODIFIED_APACHE)) {
+    /* modified text must not report the pristine licence */
+    lstr = "Apache-style";
+    lmem[_mAPACHE] = 1;
+  }
   /*
    * Apache-2.0 cases
    */
@@ -10250,7 +12882,8 @@ char *mplNplVersion(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_TITLE_MPL11) && !HASTEXT(_LT_NP_AME, REG_EXTENDED)) {
     lstr = "MPL-1.1";
   }
-  else if (INFILE(_TITLE_MPL20_EXCEPTION)) {
+  else if ((INFILE(_TITLE_MPL20_EXCEPTION) || INFILE(_TITLE_MPL20_NO_COPYLEFT_NAMED))
+      && NOT_INFILE(_LT_MPL20_BODY)) {
     lstr = "MPL-2.0-no-copyleft-exception";
   }
   else if (INFILE(_TITLE_MPL20) || URL_INFILE(_URL_MPL20) || HASTEXT(_LT_MPL20_ref, REG_EXTENDED)) {
@@ -10683,7 +13316,12 @@ char *agplVersion(char *filetext, int size, int isML, int isPS)
    * you can also license it under GPL version 3... same reasoning goes with
    * the actual v3 license (vs the reference).
    */
-  if (INFILE(_PHR_AGPL_10_or_later)
+  /* Version 2 is a bridging licence whose own text grants v3-or-later, so it
+     must be recognised before the v1 and v3 patterns claim it. */
+  if (INFILE(_LT_AGPL_20)) {
+    lstr = "AGPL-2.0";
+  }
+  else if (INFILE(_PHR_AGPL_10_or_later)
       || INFILE(_TITLE_AGPL_10_or_later)
       || INFILE(_SPDX_AGPL_10_or_later)
       || HASTEXT(_SPDX_AGPL_10plus, REG_EXTENDED)
@@ -10762,7 +13400,7 @@ char *gfdlVersion(char *filetext, int size, int isML, int isPS)
    * specific order
    */
   if (INFILE(_TITLE_GFDL_V13_FULL_LICENSE)) {
-    lstr = "GFDL-1.3";
+    lstr = "GFDL-1.3-only";
     /* Full GFDL-1.3 license text has a reference to Creative Commons */
     if (HASTEXT(_LT_CC_ref, REG_EXTENDED)) {
       lmem[_fCCBY] = 1;
@@ -10772,7 +13410,7 @@ char *gfdlVersion(char *filetext, int size, int isML, int isPS)
     lstr = "GFDL-1.3-or-later";
   }
   else if (INFILE(_TITLE_GFDL_V13_ONLY)) {
-    lstr = lDebug ? "GFDL-1.3(#1)" : "GFDL-1.3";
+    lstr = lDebug ? "GFDL-1.3-only(#1)" : "GFDL-1.3-only";
   }
   else if (INFILE(_TITLE_GFDL_V12_FULL_LICENSE)) {
     lstr = lDebug ? "GFDL-1.2-only(#1)" : "GFDL-1.2-only";
@@ -11276,11 +13914,12 @@ char *ccVersion(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_TITLE_CCPL)) {
     INTERESTING("CCPL");
   }
-  else if (INFILE(_TITLE_CC_BY)) {
+  else if (INFILE(_TITLE_CC_BY) && NOT_INFILE(_TITLE_CC_RESTRICTED)) {
     lstr = lDebug ? "CCA(1)" : "CC-BY";
   }
   else {
-    lstr = lDebug ? "CCA(def)" : "CC-BY";
+    /* unidentified Creative Commons: report the family, not CC-BY */
+    lstr = lDebug ? "CCA(def)" : "CCPL";
   }
   lmem[_fCCBY] = 1;
   return lstr;
@@ -12745,9 +15384,7 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
   } else if (INFILE(_LT_PUBDOM_2) && NOT_INFILE(_PHR_PUBLIC_FUNCT) && NOT_INFILE(_LT_NOTPUBDOM_1)) {
     INTERESTING(lDebug ? "Pubdom(2)" : LS_PD_CLM);
     ret = 1;
-  } else if (INFILE(_LT_PUBDOM_3)) {
-    INTERESTING(lDebug ? "Pubdom(3)" : LS_PD_CLM);
-    ret = 1;
+  /* "publicly available" is not a public domain dedication */
 #ifdef REMOVED_AS_TOO_BROAD
   } else if (INFILE(_LT_PUBDOM_4)) {
     INTERESTING(lDebug ? "Pubdom(4)" : LS_PD_CLM);
@@ -13528,7 +16165,7 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
     INTERESTING("GFDL-1.3-or-later");
   }
   else if (INFILE(_SPDX_GFDL_13)) {
-    INTERESTING("GFDL-1.3");
+    INTERESTING("GFDL-1.3-only");
   }
   if (INFILE(_SPDX_GLWTPL) || INFILE(_SPDX_GLWTPL_text)) {
     INTERESTING("GLWTPL");

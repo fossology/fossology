@@ -1,0 +1,7 @@
+Contextual Copyleft AI (CCAI) Clause
+
+If this software is used to train, fine-tune, or otherwise generate any machine learning model or generative AI
+system, any resulting model, dataset, or system must be released under terms no more restrictive than this
+license. This includes the requirement to make available the training code, a description of the data used in
+training, and the model's parameters and architecture. Providing access to such a model or its outputs via a
+network is considered distribution and triggers this obligation.
