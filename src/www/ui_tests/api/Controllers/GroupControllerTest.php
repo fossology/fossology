@@ -267,6 +267,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $userId = 1;
     $userPk = 1;
     $newUser = 2;
+    $groupName = 'fossyGroup';
     $request = M::mock(Request::class);
     $userArray = ['user_pk' => $newUser];
 
@@ -280,7 +281,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
-    $this->userDao->shouldReceive('getDeletableAdminGroupMap')->withArgs([$userId,$_SESSION[Auth::USER_LEVEL]]);
+    $this->userDao->shouldReceive('getDeletableAdminGroupMap')->withArgs([$userId,$_SESSION[Auth::USER_LEVEL]])->andReturn([$groupId => $groupName]);
     $this->userDao->shouldReceive('deleteGroup')->withArgs([$groupId]);
 
     $info = new Info(202, "User Group will be deleted", InfoType::INFO);

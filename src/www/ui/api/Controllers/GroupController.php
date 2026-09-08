@@ -122,6 +122,10 @@ class GroupController extends RestController
     if (!$this->dbHelper->doesIdExist("groups", "group_pk", $groupId)) {
       throw new HttpNotFoundException("Group id not found!");
     }
+    if (!array_key_exists($groupId, $groupMap)) {
+      throw new HttpForbiddenException("Not admin of the group. " .
+        "Can not process request.");
+    }
     try {
       $userDao->deleteGroup($groupId);
       $returnVal = new Info(202, "User Group will be deleted", InfoType::INFO);
