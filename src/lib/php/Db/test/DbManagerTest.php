@@ -66,6 +66,47 @@ abstract class DbManagerTestCase extends \PHPUnit\Framework\TestCase
     $this->dbManager->commit();
   }
 
+  function testRollbackTransaction()
+  {
+    $this->expectException(Exception::class);
+    $this->driver->shouldReceive("rollback")->withNoArgs()->never();
+    $this->dbManager->rollback();
+  }
+
+  function testBeginAndRollbackTransaction()
+  {
+    $this->driver->shouldReceive("begin")->withNoArgs()->once();
+    $this->dbManager->begin();
+    $this->driver->shouldReceive("rollback")->withNoArgs()->once();
+    $this->dbManager->rollback();
+  }
+
+  // Regression test: rolling back an inner, nested transaction must not
+  // discard the outer transaction. The driver's real rollback() should only
+  // fire once the nesting unwinds back to the outermost level, the same way
+  // begin()/commit() only touch the driver at depth 0/1.
+  function testBeginTransactionTwiceThenRollbackOnlyRollsBackOnce()
+  {
+    $this->driver->shouldReceive("begin")->withNoArgs()->once();
+    $this->dbManager->begin();
+    $this->dbManager->begin();
+
+    $this->driver->shouldReceive("rollback")->withNoArgs()->once();
+    $this->dbManager->rollback();
+    $this->dbManager->rollback();
+  }
+
+  function testRollbackTransactionTwice()
+  {
+    $this->driver->shouldReceive("begin")->withNoArgs()->once();
+    $this->dbManager->begin();
+    $this->driver->shouldReceive("rollback")->withNoArgs()->once();
+    $this->dbManager->rollback();
+
+    $this->expectException(Exception::class);
+    $this->dbManager->rollback();
+  }
+
   abstract function testInsertTableRow();
 
   function testFlushStats()
