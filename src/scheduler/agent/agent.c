@@ -648,7 +648,10 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
  * @param[out] argc     Returns the number of arguments parsed
  * @param[out] argv     The parsed arguments
  */
-static void shell_parse(char* confdir, int user_id, int group_id, char* input, char *jq_cmd_args, int jobId, int* argc, char*** argv)
+/* Deliberately not declared in agent.h: this is an internal helper, not part
+ * of the public agent API. It is left with external linkage (not static) so
+ * testAgent.c can declare its own prototype and unit test it directly. */
+void shell_parse(char* confdir, int user_id, int group_id, char* input, char *jq_cmd_args, int jobId, int* argc, char*** argv)
 {
   char* begin;
   char* curr;
@@ -692,7 +695,7 @@ static void shell_parse(char* confdir, int user_id, int group_id, char* input, c
   (*argv)[idx++] = g_strdup_printf("--config=%s", confdir);
   (*argv)[idx++] = g_strdup_printf("--userID=%d", user_id);
   (*argv)[idx++] = g_strdup_printf("--groupID=%d", group_id);
-  (*argv)[idx++] = "--scheduler_start";
+  (*argv)[idx++] = g_strdup("--scheduler_start");
   if (jq_cmd_args)
   {
     const char *start = jq_cmd_args;
@@ -760,10 +763,11 @@ static void* agent_spawn(agent_spawn_args* pass)
   agent_t* agent = pass->agent;
   g_free(pass);  /* all values extracted; free before fork so g_thread_exit can't leak it */
   gchar* tmp;                 // pointer to temporary string
-  gchar** args;               // the arguments that will be passed to the child
+  gchar** args = NULL;        // the arguments that will be passed to the child
   int argc;                   // the number of arguments parsed
-  int len;
+  int len = 0;                // length returned by snprintf() in the ssh-exec branch
   char buffer[2048];          // character buffer
+  gboolean is_local;          // TRUE if the agent runs on this host rather than over ssh
 
   /* spawn the new process */
   if (agent->owner == NULL)
@@ -782,10 +786,58 @@ static void* agent_spawn(agent_spawn_args* pass)
     return NULL;
   }
 
+  /*
+   * Build the exec() argv -- and, for a local agent, the directory to
+   * chdir() into -- before forking. This step calls into GLib (shell_parse(),
+   * g_strdup_printf()) and must stay on the parent side of the fork(): fork()
+   * only duplicates the calling thread, so any allocator lock (glibc's malloc
+   * arena lock, GLib's internal slice-allocator lock, etc.) some *other*
+   * thread happens to hold at the instant of fork() is inherited by the
+   * child already locked, with no thread left alive in the child to ever
+   * release it. A child that then calls an allocating function needing that
+   * same lock hangs forever, before it ever reaches execv(). See issue #3817.
+   * The child below is limited to plain, non-allocating syscalls.
+   *
+   * if the agent's host is local, run it using the commands that were
+   * parsed when the meta_agent was created. Otherwise the agent will be
+   * started using ssh; if the agent is started using ssh we don't need to
+   * fully parse the arguments, just pass the run command as the last
+   * argument to the ssh command.
+   */
+  is_local = (strcmp(agent->host->address, LOCAL_HOST) == 0);
+  if (is_local)
+  {
+    shell_parse(scheduler->sysconfigdir, agent->owner->user_id, agent->owner->group_id,
+                agent->type->raw_cmd, agent->owner->jq_cmd_args,
+                agent->owner->parent_id, &argc, &args);
+
+    tmp = args[0];
+    args[0] = g_strdup_printf(AGENT_BINARY, scheduler->sysconfigdir,
+    AGENT_CONF, agent->type->name, tmp);
+    g_free(tmp);
+
+    strcpy(buffer, args[0]);
+    *strrchr(buffer, '/') = '\0';
+  }
+  else
+  {
+    args = g_new0(char*, 5);
+    len = snprintf(buffer, sizeof(buffer), AGENT_BINARY " --userID=%d --groupID=%d --scheduler_start --jobId=%d",
+                   agent->host->agent_dir, AGENT_CONF, agent->type->name, agent->type->raw_cmd,
+                   agent->owner->user_id, agent->owner->group_id, agent->owner->parent_id);
+
+    args[0] = "/usr/bin/ssh";
+    args[1] = agent->host->address;
+    args[2] = buffer;
+    args[3] = agent->owner->jq_cmd_args;
+    args[4] = NULL;
+  }
+
   while ((agent->pid = fork()) < 0)
     sleep(rand() % CONF_fork_backoff_time);
 
-  /* we are in the child */
+  /* we are in the child: only async-signal-safe, non-allocating calls from
+   * here down to execv() -- see the comment above the argv construction. */
   if (agent->pid == 0)
   {
     /* Own process group so kill(-pid) reaches all child processes. */
@@ -805,54 +857,22 @@ static void* agent_spawn(agent_spawn_args* pass)
     if (nice(agent->owner->priority) == -1)
       ERROR("unable to correctly set priority of agent process %d", agent->pid);
 
-    /* if host is null, the agent will run locally to */
-    /* run the agent locally, use the commands that    */
-    /* were parsed when the meta_agent was created    */
-    if (strcmp(agent->host->address, LOCAL_HOST) == 0)
+    if (is_local)
     {
-      shell_parse(scheduler->sysconfigdir, agent->owner->user_id, agent->owner->group_id,
-                  agent->type->raw_cmd, agent->owner->jq_cmd_args,
-                  agent->owner->parent_id, &argc, &args);
-
-      tmp = args[0];
-      args[0] = g_strdup_printf(AGENT_BINARY, scheduler->sysconfigdir,
-      AGENT_CONF, agent->type->name, tmp);
-
-      strcpy(buffer, args[0]);
-      *strrchr(buffer, '/') = '\0';
       if (chdir(buffer) != 0)
       {
         ERROR("unable to change working directory: %s\n", strerror(errno));
       }
-
-      execv(args[0], args);
     }
-    /* otherwise the agent will be started using ssh   */
-    /* if the agent is started using ssh we don't need */
-    /* to fully parse the arguments, just pass the run */
-    /* command as the last argument to the ssh command */
-    else
-    {
-      args = g_new0(char*, 5);
-      len = snprintf(buffer, sizeof(buffer), AGENT_BINARY " --userID=%d --groupID=%d --scheduler_start --jobId=%d",
-                     agent->host->agent_dir, AGENT_CONF, agent->type->name, agent->type->raw_cmd,
-                     agent->owner->user_id, agent->owner->group_id, agent->owner->parent_id);
+    else if (len>=sizeof(buffer)) {
+      *(buffer + sizeof(buffer) - 1) = '\0';
+      log_printf("ERROR %s.%d: JOB[%d.%s]: exec failed: truncated buffer: \"%s\"",
+          __FILE__, __LINE__, agent->owner->id, agent->owner->agent_type, buffer);
 
-      if (len>=sizeof(buffer)) {
-        *(buffer + sizeof(buffer) - 1) = '\0';
-        log_printf("ERROR %s.%d: JOB[%d.%s]: exec failed: truncated buffer: \"%s\"",
-            __FILE__, __LINE__, agent->owner->id, agent->owner->agent_type, buffer);
-
-        exit(5);
-      }
-
-      args[0] = "/usr/bin/ssh";
-      args[1] = agent->host->address;
-      args[2] = buffer;
-      args[3] = agent->owner->jq_cmd_args;
-      args[4] = NULL;
-      execv(args[0], args);
+      exit(5);
     }
+
+    execv(args[0], args);
 
     /* If we reach here, the exec call has failed */
     log_printf("ERROR %s.%d: JOB[%d.%s]: exec failed: pid = %d, errno = \"%s\"", __FILE__, __LINE__, agent->owner->id,
@@ -863,6 +883,12 @@ static void* agent_spawn(agent_spawn_args* pass)
   {
     /* Mirror child's setpgid to close the race between fork and exec. */
     setpgid(agent->pid, agent->pid);
+
+    /* The child forked its own copy of args/buffer; free ours. */
+    if (is_local)
+      g_strfreev(args);
+    else
+      g_free(args);
 
     event_signal(agent_create_event, agent);
     agent_listen(scheduler, agent);
