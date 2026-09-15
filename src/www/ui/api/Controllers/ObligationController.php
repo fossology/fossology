@@ -130,6 +130,7 @@ class ObligationController extends RestController
    */
   function deleteObligation($request, $response, $args)
   {
+    $this->throwNotAdminException();
     $obligationId = intval($args['id']);
     if (!$this->dbHelper->doesIdExist("obligation_ref", "ob_pk", $obligationId)) {
       throw new HttpNotFoundException("Obligation does not exist");
