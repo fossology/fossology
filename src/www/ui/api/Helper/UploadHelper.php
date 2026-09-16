@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2018, 2020 Siemens AG
+ SPDX-FileCopyrightText: © 2026 Shubham Padkonde
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
  SPDX-FileContributor: Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
 
@@ -832,16 +833,14 @@ class UploadHelper
         $responseList[] = $responseRow->getArray($apiVersion);
       }
     } elseif (!$boolLicense && $boolCopyright) {
-      foreach ($copyrightList as $copyFilepath) {
-        $copyrightContent = array();
-        foreach ($copyrightList as $copy) {
-          if (($copyFilepath['filePath'] == $copy['filePath']) === true) {
-            $copyrightContent[] = $copy['content'];
-          }
-        }
+      $copyrightsByFile = array();
+      foreach ($copyrightList as $copy) {
+        $copyrightsByFile[$copy['filePath']][] = $copy['content'];
+      }
+      foreach ($copyrightsByFile as $filePath => $copyrightContent) {
         $findings = new Findings();
         $findings->setCopyright($copyrightContent);
-        $responseRow = new FileLicenses($copyFilepath['filePath'], $findings);
+        $responseRow = new FileLicenses($filePath, $findings);
         $responseList[] = $responseRow->getArray($apiVersion);
       }
     }
