@@ -31,7 +31,7 @@
   </table>
 
   <div class="groupBox" style="display: flex; gap: 20px; align-items: flex-start;">
-    <fieldset class="border p-2" style="display: inline;" {% if tmpClearingType %}class="border-danger"{% endif %} id="decTypeSet">
+    <fieldset class="border p-2{% if tmpClearingType %} border-danger{% endif %}" style="display: inline;" id="decTypeSet">
       <legend style="width:auto;">
         {{ 'Clearing decision type'| trans }}
       </legend>

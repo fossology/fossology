@@ -479,6 +479,10 @@ class AjaxExplorer extends DefaultPlugin
 
     $img = ($isDecisionDNU || $isDecisionNonFunctional) ? 'redGreen' : $img;
 
+    // override with orange flag in case of single file with decision type "WIP"
+    $isDecisionWip = $this->clearingDao->isDecisionCheck($childUploadTreeId, $groupId, DecisionTypes::WIP);
+    $img = $isDecisionWip ? 'orange' : $img;
+
     return $request->get('fromRest') ? array(
       "fileDetails" => $fileDetails,
       "licenseList" => $licenseEntriesRest,

@@ -6690,6 +6690,7 @@ components:
             - grey
             - yellow
             - redGreen
+            - orange
         clearingProgress:
           type: object
           description: The progress of clearing.
