@@ -99,7 +99,7 @@ class AjaxSHDetailsBrowser extends DefaultPlugin
     return new JsonResponse(array(
       'sEcho' => intval($request->get('sEcho')),
       'aaData' => $vars['fileData'],
-      'iTotalRecords' => $vars['iTotalDisplayRecords'],
+      'iTotalRecords' => $vars['iTotalRecords'],
       'iTotalDisplayRecords' => $vars['iTotalDisplayRecords']
     ));
   }
@@ -144,16 +144,26 @@ class AjaxSHDetailsBrowser extends DefaultPlugin
       }
     }
 
-    if (array_key_exists('ext', $searchMap) && strlen($searchMap['ext'])>=1) {
+    $unfilteredView = new UploadTreeProxy($uploadId, $options, $itemTreeBounds->getUploadTreeTableName(), 'uberItems');
+    $vars['iTotalRecords'] = $unfilteredView->count();
+
+    $hasExt = array_key_exists('ext', $searchMap) && strlen($searchMap['ext'])>=1;
+    $hasHead = array_key_exists('head', $searchMap) && strlen($searchMap['head'])>=1;
+
+    if ($hasExt) {
       $options[UploadTreeProxy::OPT_EXT] = $searchMap['ext'];
     }
-    if (array_key_exists('head', $searchMap) && strlen($searchMap['head'])>=1) {
+    if ($hasHead) {
       $options[UploadTreeProxy::OPT_HEAD] = $searchMap['head'];
     }
 
-    $descendantView = new UploadTreeProxy($uploadId, $options, $itemTreeBounds->getUploadTreeTableName(), 'uberItems');
-
-    $vars['iTotalDisplayRecords'] = $descendantView->count();
+    if ($hasExt || $hasHead) {
+      $descendantView = new UploadTreeProxy($uploadId, $options, $itemTreeBounds->getUploadTreeTableName(), 'uberItems');
+      $vars['iTotalDisplayRecords'] = $descendantView->count();
+    } else {
+      $descendantView = $unfilteredView;
+      $vars['iTotalDisplayRecords'] = $vars['iTotalRecords'];
+    }
 
     $columnNamesInDatabase = array($isFlat?'ufile_name':'lft');
     $defaultOrder = array(array(0, "asc"));
