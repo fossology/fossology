@@ -1114,10 +1114,12 @@ INSERT INTO clearing_decision (
       $bulkIds = array_merge($bulkIds,explode("\n", $row['jq_args']));
     }
     $this->dbManager->freeResult($res);
+    $bulkIds = array_unique(array_filter($bulkIds, 'is_numeric'));
+    sort($bulkIds, SORT_NUMERIC);
     if (empty($onlyCount)) {
-      return array_unique($bulkIds);
+      return $bulkIds;
     } else {
-      return count(array_unique($bulkIds));
+      return count($bulkIds);
     }
   }
 
