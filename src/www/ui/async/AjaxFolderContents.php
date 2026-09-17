@@ -41,6 +41,7 @@ class AjaxFolderContents extends DefaultPlugin
       return $this->uploadExists(Auth::getGroupId(), $folderId, $uploadName);
     }
     $results = array();
+    $uploadIds = array();
     $childFolders = $this->folderDao->getFolderChildFolders($folderId);
     foreach ($childFolders as $folder) {
       $results[$folder['foldercontents_pk']] = '/'.$folder['folder_name'];
@@ -51,15 +52,17 @@ class AjaxFolderContents extends DefaultPlugin
       $uploadDate = explode(".", $upload['upload_ts'])[0];
       $uploadStatus = " (" . $uploadStatus->getTypeName($upload['status_fk']) . ")";
       $results[$upload['foldercontents_pk']] = $upload['upload_filename'] . _(" from ") . Convert2BrowserTime($uploadDate) . $uploadStatus;
+      $uploadIds[$upload['foldercontents_pk']] = intval($upload['upload_pk']);
     }
 
     if (!$request->get('removable')) {
       if ($request->get('fromRest')) {
-        return array_map(function($key, $value) {
+        return array_map(function ($key, $value) use ($uploadIds) {
           return array(
             'id' => $key,
             'content' => $value,
-            'removable' => false
+            'removable' => false,
+            'uploadId' => array_key_exists($key, $uploadIds) ? $uploadIds[$key] : null
           );
         }, array_keys($results), $results);
       }
@@ -72,11 +75,12 @@ class AjaxFolderContents extends DefaultPlugin
     }
 
     if ($request->get('fromRest')) {
-      return array_map(function ($key, $value) {
+      return array_map(function ($key, $value) use ($uploadIds) {
         return array(
           'id' => $key,
           'content' => $value,
-          'removable' => true
+          'removable' => true,
+          'uploadId' => array_key_exists($key, $uploadIds) ? $uploadIds[$key] : null
         );
       }, array_keys($filterResults), $filterResults);
     }

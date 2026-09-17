@@ -25,16 +25,66 @@ class admin_tag extends FO_Plugin
   }
 
   /**
-   * \brief Create Tag without tagging anything
+   * \brief Check whether a tag with the given name already exists
    *
-   * \return null for success or error text
+   * \param string $tag_name
+   * \return boolean true if a tag with this name exists
    */
-  function CreateTag()
+  function TagExists($tag_name)
   {
     global $PG_CONN;
 
-    $tag_name = GetParm('tag_name', PARM_TEXT);
-    $tag_desc = GetParm('tag_desc', PARM_TEXT);
+    $sql = "SELECT tag_pk FROM tag WHERE tag = '" . pg_escape_string($tag_name) . "'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $exists = pg_num_rows($result) > 0;
+    pg_free_result($result);
+    return $exists;
+  }
+
+  /**
+   * \brief Get the tag_pk of a tag by name
+   *
+   * \param string $tag_name
+   * \return integer|null pk of the tag, or null if no such tag exists
+   */
+  function GetTagId($tag_name)
+  {
+    global $PG_CONN;
+
+    $sql = "SELECT tag_pk FROM tag WHERE tag = '" . pg_escape_string($tag_name) . "' LIMIT 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $tagPk = null;
+    if (pg_num_rows($result) > 0) {
+      $row = pg_fetch_assoc($result);
+      $tagPk = intval($row['tag_pk']);
+    }
+    pg_free_result($result);
+    return $tagPk;
+  }
+
+  /**
+   * \brief Create Tag without tagging anything
+   *
+   * \param array $tag_array Optional array with tag_name/tag_desc, used
+   *        when calling this method outside of the plugin's own POST
+   *        handling (e.g. from the REST API). Falls back to request
+   *        parameters when not given.
+   *
+   * \return null for success or error text
+   */
+  function CreateTag($tag_array = null)
+  {
+    global $PG_CONN;
+
+    if (isset($tag_array)) {
+      $tag_name = $tag_array['tag_name'];
+      $tag_desc = $tag_array['tag_desc'];
+    } else {
+      $tag_name = GetParm('tag_name', PARM_TEXT);
+      $tag_desc = GetParm('tag_desc', PARM_TEXT);
+    }
     if (empty($tag_name)) {
       $text = _("TagName must be specified. Tag Not created.");
       return ($text);
