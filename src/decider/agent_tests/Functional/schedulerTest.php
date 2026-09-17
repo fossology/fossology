@@ -562,52 +562,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
 
   /** @group Functional */
-  public function testDeciderRealBulkReuseShouldScheduleMonkBulk()
-  {
-    $this->runnerBulkReuseShouldScheduleMonkBulk($this->runnerMock);
-  }
-
-  private function  runnerBulkReuseShouldScheduleMonkBulk($runner)
-  {
-    $this->setUpTables();
-    $this->setUpRepo();
-
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
-    $licId1 = $licenseRef1->getId();
-
-    $agentBulk = 6;
-    $pfile = 4;
-    $jobId = 16;
-    $otherJob = 333;
-    $groupId = 2;
-
-    $this->dbManager->queryOnce("DELETE FROM license_file");
-    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$agentBulk)");
-    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,12,3)");
-    $this->dbManager->queryOnce("INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed, jq_log, jq_runonpfile, jq_host, jq_cmd_args)"
-            . " VALUES ($jobId, 2, 'decider', '123456', '2014-08-07 09:57:27.718312+00', NULL, '', 0, NULL, 6, NULL, NULL, NULL, NULL)");
-
-    $this->dbManager->queryOnce("INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed, jq_log, jq_runonpfile, jq_host, jq_cmd_args)"
-            . " VALUES ($jobId-1, $otherJob, 'monkbulk', '123456', '2014-08-07 09:22:22.718312+00', NULL, '', 0, NULL, 6, NULL, NULL, NULL, NULL)");
-    $this->dbManager->queryOnce("INSERT INTO job (job_pk, job_queued, job_priority, job_upload_fk, job_user_fk, job_group_fk)"
-            . " VALUES ($otherJob, '2014-08-07 09:22:22.718312+00', 0, 1, 2, $groupId)");
-
-    $this->dbManager->queryOnce("INSERT INTO license_ref_bulk (lrb_pk, user_fk, group_fk, rf_text, upload_fk, uploadtree_fk) VALUES (123456, 2, $groupId, 'foo bar', 1, 1)");
-    $this->dbManager->queryOnce("INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing) VALUES (123456, $licId1, 'f')");
-
-    $this->dbManager->queryOnce("INSERT INTO upload_reuse (upload_fk, reused_upload_fk, group_fk, reused_group_fk, reuse_mode)"
-            . " VALUES (2, 1, $groupId, $groupId, 0)");
-
-    require_once 'HelperPluginMock.php';
-    list($success,$output,$retCode) = $runner->run($uploadId=2, $userId=2, $groupId, $jobId, $args='-r4');
-
-    $this->assertTrue($success, 'cannot run runner');
-    $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
-
-    $this->rmRepo();
-  }
-
-  /** @group Functional */
   public function testDeciderRealShouldMakeDecisionAsWipIfUnhandledScannerEvent()
   {
     $this->runnerShouldMakeDecisionAsWipIfUnhandledScannerEvent($this->runnerMock);

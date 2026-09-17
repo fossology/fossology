@@ -31,6 +31,7 @@ class UploadDao
   const REUSE_MAIN = 4;
   const REUSE_CONF = 16;
   const REUSE_COPYRIGHT = 128;
+  const REUSE_BULK = 8;
   const UNIFIED_REPORT_HEADINGS = array(
     "assessment" => array("Assessment Summary" => true),
     "compliancetasks" => array("Required license compliance tasks" => true),

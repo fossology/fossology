@@ -5561,7 +5561,7 @@ components:
           description: Scanners matches if all Nomos findings are within the Monk findings.
         bulk_reused:
           type: boolean
-          description: Bulk phrases from reused packages.
+          description: Reuse bulk phrases.
         new_scanner:
           type: boolean
           description: New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses.
@@ -5930,6 +5930,9 @@ components:
         reuse_copyright:
           type: boolean
           description: Copy the copyright deactivation and edits.
+        reuse_bulk:
+          type: boolean
+          description: Reuse bulk decisions.
       required:
         - reuse_upload
         - reuse_group
