@@ -92,6 +92,11 @@ void test_meta_agent_init()
 
   FO_ASSERT_PTR_NULL(meta_agent_init(NULL, cmmd, max, spc));
   FO_ASSERT_PTR_NULL(meta_agent_init(name, NULL, max, spc));
+
+  char long_cmd[1024];
+  memset(long_cmd, 'a', 1010);
+  long_cmd[1010] = '\0';
+  FO_ASSERT_PTR_NULL(meta_agent_init(name, long_cmd, max, spc));
 }
 
 /**
