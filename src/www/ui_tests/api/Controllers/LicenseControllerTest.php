@@ -924,6 +924,8 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    * -# Check if response status is 200
    * -# Check if response body is matches the expected response body
    */
+  #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
+  #[\PHPUnit\Framework\Attributes\PreserveGlobalState(false)]
   public function testImportLicenseV1()
   {
     $this->testImportLicense(ApiVersion::V1);
@@ -936,6 +938,8 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    * -# Check if response status is 200
    * -# Check if response body is matches the expected response body
    */
+  #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
+  #[\PHPUnit\Framework\Attributes\PreserveGlobalState(false)]
   public function testImportLicenseV2()
   {
     $this->testImportLicense();
