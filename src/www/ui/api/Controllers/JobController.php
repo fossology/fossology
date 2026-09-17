@@ -84,7 +84,7 @@ class JobController extends RestController
       throw new HttpBadRequestException("Limit cannot be negative and page must be >= 1.");
     }
 
-    return $this->getAllResults(null, $status, $request, $response, $sort, $limit, $page, $apiVersion);
+    return $this->getAllResults(null, $status, $request, $response, $sort, $limit, $page, $apiVersion, $this->restHelper->getGroupId());
   }
 
   /**
@@ -133,7 +133,131 @@ class JobController extends RestController
     }
 
     /* Otherwise return all jobs for the current user */
-    return $this->getAllUserResults($userId, $status, $request, $response, $sort, $limit, $page, $apiVersion);
+    return $this->getAllUserResults($userId, $status, $request, $response, $sort, $limit, $page, $apiVersion, $this->restHelper->getGroupId());
+  }
+
+  /**
+   * Get the log contents for a job queue.
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param int $jobId
+   * @param int $queueId
+   *
+   * @return ResponseHelper
+   */
+  public function getJobLog(
+    ServerRequestInterface $request,
+    ResponseHelper $response,
+    array $args
+  ): ResponseHelper
+  {
+    $jobId = intval($args['id']);
+    $queueId = intval($args['queue']);
+
+    $dbManager = $this->dbHelper->getDbManager();
+
+    $jobQueue = $dbManager->getSingleRow(
+      "SELECT jq.jq_log
+      FROM jobqueue jq
+      INNER JOIN job j ON j.job_pk = jq.jq_job_fk
+      WHERE j.job_pk = $1
+        AND jq.jq_pk = $2",
+      [$jobId, $queueId]
+    );
+
+    if (empty($jobQueue)) {
+      $error = new Info(404, "Job queue not found.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $logPath = $jobQueue['jq_log'] ?? '';
+
+    if (
+      empty($logPath) ||
+      $logPath === 'removed' ||
+      !file_exists($logPath) ||
+      !is_readable($logPath)
+    ) {
+      return $response->withJson([
+        'log' => '',
+        'truncated' => false,
+      ], 200);
+    }
+
+    $maxLogOutput = 32768;
+    $fileSize = filesize($logPath);
+
+    if ($fileSize > $maxLogOutput) {
+      $log = file_get_contents($logPath, false, null, 0, $maxLogOutput);
+
+      return $response->withJson([
+        'log' => $log === false ? '' : $log,
+        'truncated' => true,
+      ], 200);
+    }
+
+    $log = file_get_contents($logPath);
+
+    return $response->withJson([
+      'log' => $log === false ? '' : $log,
+      'truncated' => false,
+    ], 200);
+  }
+
+  public function downloadJobLog(
+    ServerRequestInterface $request,
+    ResponseHelper $response,
+    array $args
+  ): ResponseHelper
+  {
+    $jobId = intval($args['id']);
+    $queueId = intval($args['queue']);
+
+    $dbManager = $this->dbHelper->getDbManager();
+
+    $jobQueue = $dbManager->getSingleRow(
+      "SELECT jq.jq_log
+      FROM jobqueue jq
+      INNER JOIN job j ON j.job_pk = jq.jq_job_fk
+      WHERE j.job_pk = $1
+        AND jq.jq_pk = $2",
+      [$jobId, $queueId]
+    );
+
+    if (empty($jobQueue)) {
+      $error = new Info(404, "Job queue not found.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $logPath = $jobQueue['jq_log'] ?? '';
+
+    if (
+      empty($logPath) ||
+      $logPath === 'removed' ||
+      !file_exists($logPath) ||
+      !is_readable($logPath)
+    ) {
+      $error = new Info(404, "Job log not found.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $log = file_get_contents($logPath);
+
+    if ($log === false) {
+      $error = new Info(500, "Unable to read job log.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    return $response
+      ->withHeader("Content-Type", "text/plain")
+      ->withHeader(
+        "Content-Disposition",
+        'attachment; filename="job-' . $jobId . '-queue-' . $queueId . '.log"'
+      )
+      ->withBody(
+        (new \Slim\Psr7\Factory\StreamFactory())->createStream($log)
+      );
   }
 
   /**
@@ -244,11 +368,12 @@ class JobController extends RestController
    * @param integer $limit   Limit of jobs per page
    * @param integer $page    Page number required
    * @param integer $apiVersion API version
+   * @param integer $groupId Group id to scope the results to (null for no filter)
    * @return ResponseHelper
    */
-  private function getAllUserResults($userId, $status, $request, $response, $sort, $limit, $page, $apiVersion)
+  private function getAllUserResults($userId, $status, $request, $response, $sort, $limit, $page, $apiVersion, $groupId = null)
   {
-    list($jobs, $count) = $this->dbHelper->getUserJobs($userId, $status, $sort, $limit, $page);
+    list($jobs, $count) = $this->dbHelper->getUserJobs($userId, $status, $sort, $limit, $page, $groupId);
     $finalJobs = [];
     foreach ($jobs as $job) {
       $this->updateEta($job);
@@ -271,13 +396,14 @@ class JobController extends RestController
    * @param integer $limit   Limit of jobs per page
    * @param integer $page    Page number required
    * @param integer $apiVersion API version
+   * @param integer $groupId Group id to scope the results to; ignored when $id is set (null for no filter)
    * @return ResponseHelper
    * @throws HttpErrorException If a specific job id is requested and its
    *         upload does not exist or is not accessible to the caller
    */
-  private function getAllResults($id, $status, $request, $response, $sort, $limit, $page, $apiVersion)
+  private function getAllResults($id, $status, $request, $response, $sort, $limit, $page, $apiVersion, $groupId = null)
   {
-    list($jobs, $count) = $this->dbHelper->getJobs($id, $status, $sort, $limit, $page, null);
+    list($jobs, $count) = $this->dbHelper->getJobs($id, $status, $sort, $limit, $page, null, null, $id === null ? $groupId : null);
     if ($id !== null && !empty($jobs)) {
       /* A specific job was requested, make sure the caller can access the
        * upload it belongs to before returning any of its data. */
@@ -415,7 +541,7 @@ class JobController extends RestController
           $jqVal['jq_starttime'], $jqVal['jq_endtime'], $jqVal['jq_endtext'],
           $jqVal['jq_itemsprocessed'], $jqVal['jq_log'], $depends,
           $jqVal['itemsPerSec'], $jqVal['canDoActions'], $jqVal['isInProgress'],
-          $jqVal['isReady'], $download);
+          $jqVal['isReady'], $download, $jqVal['jq_priority']);
         $finalJobqueue[] = $jobQueue->getArray();
       }
       $job = new ShowJob($jobValObj['job']['jobId'],
@@ -475,7 +601,7 @@ class JobController extends RestController
         $jqVal['jq_starttime'], $jqVal['jq_endtime'], $jqVal['jq_endtext'],
         $jqVal['jq_itemsprocessed'], $jqVal['jq_log'], $depends,
         $jqVal['itemsPerSec'], $jqVal['canDoActions'], $jqVal['isInProgress'],
-        $jqVal['isReady'], $download);
+        $jqVal['isReady'], $download, $jqVal['jq_priority']);
       $finalJobqueue[] = $singleJobQueue->getArray();
     }
     $job->setJobQueue($finalJobqueue);

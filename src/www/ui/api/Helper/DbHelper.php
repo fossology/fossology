@@ -297,6 +297,9 @@ FROM $tableName WHERE $idRowName = $1", [$id],
   {
     return "WITH job_with_status_cte AS (
       SELECT j.job_pk, j.job_queued, j.job_name, j.job_upload_fk, j.job_user_fk, j.job_group_fk,
+        (SELECT original.job_name FROM job original
+         WHERE original.job_upload_fk = j.job_upload_fk
+         ORDER BY original.job_pk ASC LIMIT 1) AS upload_name,
         CASE
           WHEN COUNT(CASE WHEN jq.jq_endtext = 'Failed' THEN 1 END) > 0 THEN 'Failed'
           WHEN COUNT(CASE WHEN jq.jq_endtext in ('Started', 'Restarted', 'Paused') THEN 1 END) > 0 THEN 'Processing'
@@ -322,10 +325,11 @@ FROM $tableName WHERE $idRowName = $1", [$id],
    * @param integer $page     Page number required
    * @param integer $uploadId Upload ID to be filtered
    * @param integer $userId      Set to get information of only given user's ID
+   * @param integer $groupId     Set to get information of only given group's jobs
    * @return array[] List of jobs at first index and total number of pages at
    *         second.
    */
-  public function getJobs($id = null, $status = null, $sort = "ASC", $limit = 0, $page = 1, $uploadId = null, $userId = null)
+  public function getJobs($id = null, $status = null, $sort = "ASC", $limit = 0, $page = 1, $uploadId = null, $userId = null, $groupId = null)
   {
     $jobsWithStatusCteSQL = $this->getJobStatusCteSQLStatement();
     $jobSQL = "$jobsWithStatusCteSQL SELECT * FROM job_with_status_cte";
@@ -353,6 +357,12 @@ FROM $tableName WHERE $idRowName = $1", [$id],
     if ($userId !== null) {
       $params[] = $userId;
       $filter[] = "job_user_fk = $" . count($params);
+    }
+
+    // if groupId was given, add it to the where filter
+    if ($groupId !== null) {
+      $params[] = $groupId;
+      $filter[] = "job_group_fk = $" . count($params);
     }
 
     // if status was given, add it to the where filter
@@ -393,6 +403,7 @@ FROM $tableName WHERE $idRowName = $1", [$id],
       $job->setName($row["job_name"]);
       $job->setQueueDate($row["job_queued"]);
       $job->setUploadId($row["job_upload_fk"]);
+      $job->setUploadName($row["upload_name"]);
       $job->setUserId($row["job_user_fk"]);
       $job->setGroupId($row["job_group_fk"]);
       $job->setStatus($row["job_status"]);
@@ -411,12 +422,13 @@ FROM $tableName WHERE $idRowName = $1", [$id],
    * @param string  $sort     Set to sort the results asc or desc
    * @param integer $limit    Set to limit the result length
    * @param integer $page     Page number required
+   * @param integer $groupId  Set to get information of only given group's jobs
    * @return array[] List of jobs at first index and total number of pages at
    *         second.
    */
-  public function getUserJobs($userId = null, $status = null, $sort = "ASC", $limit = 0, $page = 1)
+  public function getUserJobs($userId = null, $status = null, $sort = "ASC", $limit = 0, $page = 1, $groupId = null)
   {
-    return $this->getJobs(null, $status, $sort, $limit, $page, null, $userId);
+    return $this->getJobs(null, $status, $sort, $limit, $page, null, $userId, $groupId);
   }
 
   /**
