@@ -16,6 +16,16 @@
 #include <job.h>
 #include <scheduler.h>
 
+/* library includes */
+#include <string.h>
+
+/* shell_parse() is an agent.c-internal helper (not declared in agent.h) that
+ * agent_spawn() uses to build an agent's exec() argv. It is left with
+ * external linkage specifically so this test can call it directly; see the
+ * comment above its definition in agent.c. */
+void shell_parse(char* confdir, int user_id, int group_id, char* input,
+    char* jq_cmd_args, int jobId, int* argc, char*** argv);
+
 /* ************************************************************************** */
 /* **** local declarations ************************************************** */
 /* ************************************************************************** */
@@ -344,6 +354,92 @@ void test_agent_init()
   scheduler_destroy(scheduler);
   // TODO finish
 }
+
+/**
+ * \brief Test for shell_parse()
+ *
+ * Regression test for issue #3817. agent_spawn() used to build this argv
+ * array by calling shell_parse() *after* fork(), inside the forked child.
+ * That is unsafe: shell_parse() allocates through GLib, and allocating in
+ * the child of a fork() from a multi-threaded process can deadlock forever
+ * if some other thread held a GLib/libc allocator lock at the instant of
+ * the fork. The fix moves this call to before the fork, in the parent,
+ * which relies on every entry shell_parse() puts into argv being a real
+ * heap allocation the caller can free with g_strfreev() once the fork is
+ * done. Before this fix, the trailing "--scheduler_start" entry was a bare
+ * string literal, so g_strfreev() would have crashed trying to free it.
+ * This test locks down both the parsed content and that safety property.
+ *
+ * \test
+ * -# Call shell_parse() with a simple command line and extra jq_cmd_args
+ * -# Check every parsed token, including the flags shell_parse() appends
+ *    itself, shows up in the result
+ * -# Check every entry up to argc is non-NULL and that freeing the whole
+ *    array with g_strfreev() does not crash
+ */
+void test_shell_parse()
+{
+  char confdir[] = "/etc/fossology";
+  char input[] = "nomos -S ";
+  char jq_cmd_args[] = "extra1 extra2";
+  int argc = 0;
+  char** argv = NULL;
+  int i;
+  gboolean found_nomos = FALSE;
+  gboolean found_dash_s = FALSE;
+  gboolean found_extra1 = FALSE;
+  gboolean found_extra2 = FALSE;
+  gboolean found_job_id = FALSE;
+  gboolean found_config = FALSE;
+  gboolean found_user_id = FALSE;
+  gboolean found_group_id = FALSE;
+  gboolean found_scheduler_start = FALSE;
+
+  shell_parse(confdir, 42, 7, input, jq_cmd_args, 99, &argc, &argv);
+
+  FO_ASSERT_PTR_NOT_NULL(argv);
+  FO_ASSERT_TRUE(argc > 0);
+
+  for (i = 0; i < argc; i++)
+  {
+    FO_ASSERT_PTR_NOT_NULL(argv[i]);
+    if (strcmp(argv[i], "nomos") == 0)
+      found_nomos = TRUE;
+    else if (strcmp(argv[i], "-S") == 0)
+      found_dash_s = TRUE;
+    else if (strcmp(argv[i], "extra1") == 0)
+      found_extra1 = TRUE;
+    else if (strcmp(argv[i], "extra2") == 0)
+      found_extra2 = TRUE;
+    else if (strncmp(argv[i], "--jobId=", 8) == 0)
+      found_job_id = TRUE;
+    else if (strncmp(argv[i], "--config=", 9) == 0)
+      found_config = TRUE;
+    else if (strncmp(argv[i], "--userID=", 9) == 0)
+      found_user_id = TRUE;
+    else if (strncmp(argv[i], "--groupID=", 10) == 0)
+      found_group_id = TRUE;
+    else if (strcmp(argv[i], "--scheduler_start") == 0)
+      found_scheduler_start = TRUE;
+  }
+
+  FO_ASSERT_TRUE(found_nomos);
+  FO_ASSERT_TRUE(found_dash_s);
+  FO_ASSERT_TRUE(found_extra1);
+  FO_ASSERT_TRUE(found_extra2);
+  FO_ASSERT_TRUE(found_job_id);
+  FO_ASSERT_TRUE(found_config);
+  FO_ASSERT_TRUE(found_user_id);
+  FO_ASSERT_TRUE(found_group_id);
+  FO_ASSERT_TRUE(found_scheduler_start);
+
+  /* The actual regression check: every entry up to argc must be a genuine
+   * heap allocation, not a string literal. agent_spawn() now builds this
+   * argv before fork() and frees it in the parent with g_strfreev() once
+   * the child has its own copy, so a stray literal here would crash. */
+  g_strfreev(argv);
+}
+
 /* ************************************************************************** */
 /* **** suite declaration *************************************************** */
 /* ************************************************************************** */
@@ -361,6 +457,7 @@ CU_TestInfo tests_agent[] =
     {"Test agent_init",  test_agent_init  },
     //{"Test agent_death_event", test_agent_death_event },
     {"Test agent_create_event", test_agent_create_event },
+    {"Test shell_parse", test_shell_parse },
     CU_TEST_INFO_NULL
 };
 
