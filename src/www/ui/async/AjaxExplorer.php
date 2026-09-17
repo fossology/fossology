@@ -213,10 +213,10 @@ class AjaxExplorer extends DefaultPlugin
 
     $offset = intval($request->get('iDisplayStart'));
     $limit = intval($request->get('iDisplayLength'));
-    if ($offset) {
+    if ($offset > 0) {
       $orderString .= " OFFSET $offset";
     }
-    if ($limit) {
+    if ($limit > 0) {
       $orderString .= " LIMIT $limit";
     }
 
