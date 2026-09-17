@@ -88,12 +88,16 @@ class UserHelper
     $symfonyRequest->request->set('user_pk', $userDetails['id'] ?? $this->user_pk);
     $symfonyRequest->request->set('user_name', $userDetails['name'] ?? $user['user_name']);
     $symfonyRequest->request->set('root_folder_fk', $userDetails['rootFolderId'] ?? $user['root_folder_fk']);
-    $symfonyRequest->request->set('default_group_fk', $userDetails['defaultGroup'] ?? $user['group_fk']);
+    $defaultGroup = $userDetails['defaultGroup'] ?? null;
+    $symfonyRequest->request->set(
+      'default_group_fk',
+      !empty($defaultGroup) ? $defaultGroup : $user['group_fk']
+    );
     $symfonyRequest->request->set('public', $userDetails['defaultVisibility'] ?? $user['upload_visibility']);
     $symfonyRequest->request->set('default_folder_fk', $userDetails['defaultFolderId'] ?? $user['default_folder_fk']);
     $symfonyRequest->request->set('user_desc', $userDetails['description'] ?? $user['user_desc']);
-    $symfonyRequest->request->set('_pass1', $userDetails[$version == ApiVersion::V2 ? 'userPass' : 'user_pass'] ?? null);
-    $symfonyRequest->request->set('_pass2', $userDetails[$version == ApiVersion::V2 ? 'userPass' : 'user_pass'] ?? null);
+    $symfonyRequest->request->set('_pass1', $userDetails[$version == ApiVersion::V2 ? 'userPass' : 'user_pass'] ?? "");
+    $symfonyRequest->request->set('_pass2', $userDetails[$version == ApiVersion::V2 ? 'userPass' : 'user_pass'] ?? "");
     $symfonyRequest->request->set('_blank_pass', $userDetails['_blank_pass'] ?? "");
     $symfonyRequest->request->set('user_status', $userDetails['user_status'] ?? $user['user_status']);
     $symfonyRequest->request->set('user_email', $userDetails['email'] ?? $user['user_email']);
