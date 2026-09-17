@@ -321,6 +321,8 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$upload_pk])->andReturn("uploadtree");
       $this->uploadDao->shouldReceive('isAccessible')
         ->withArgs([$upload_pk, $this->groupId])->andReturn(true);
+      $this->uploadDao->shouldReceive('isEditable')
+        ->withArgs([$upload_pk, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $upload_pk])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
@@ -369,6 +371,8 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$upload_pk])->andReturn("uploadtree");
       $this->uploadDao->shouldReceive('isAccessible')
         ->withArgs([$upload_pk, $this->groupId])->andReturn(true);
+      $this->uploadDao->shouldReceive('isEditable')
+        ->withArgs([$upload_pk, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $upload_pk])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
@@ -388,6 +392,45 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->uploadTreeController->setClearingDecision($request,
         new ResponseHelper(), ['id' => $upload_pk, 'itemId' => $item_pk]);
     }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::setClearingDecision() when the
+     *    caller's group only has read access to the upload
+     * -# Check that a HttpForbiddenException is thrown and no decision is
+     *    recorded
+     */
+    public function testSetClearingDecisionReturnsForbiddenForReadOnlyUpload()
+    {
+      $upload_pk = 1;
+      $item_pk = 200;
+      $rq = [
+        "decisionType" => 3,
+        "globalDecision" => false,
+      ];
+
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$upload_pk, $this->groupId])->andReturn(true);
+      $this->uploadDao->shouldReceive('isEditable')
+        ->withArgs([$upload_pk, $this->groupId])->andReturn(false);
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $upload_pk])->andReturn(true);
+
+      $this->viewLicensePlugin->shouldNotReceive('updateLastItem');
+
+      $reqBody = $this->streamFactory->createStream(json_encode(
+        $rq
+      ));
+      $requestHeaders = new Headers();
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $reqBody);
+      $this->expectException(HttpForbiddenException::class);
+
+      $this->uploadTreeController->setClearingDecision($request,
+        new ResponseHelper(), ['id' => $upload_pk, 'itemId' => $item_pk]);
+    }
+
     /**
      * @test
      * -# Test for UploadTreeController::getNextPreviousItem()
@@ -838,6 +881,8 @@ namespace Fossology\UI\Api\Test\Controllers {
 
       $this->uploadDao->shouldReceive('isAccessible')
         ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+      $this->uploadDao->shouldReceive('isEditable')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
@@ -896,6 +941,8 @@ namespace Fossology\UI\Api\Test\Controllers {
       $existingLicenses = array(['DT_RowId' => "$itemId,$licenseId", 'DT_RowClass' => 'removed']);
 
       $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+      $this->uploadDao->shouldReceive('isEditable')
         ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
@@ -956,6 +1003,8 @@ namespace Fossology\UI\Api\Test\Controllers {
 
       $this->uploadDao->shouldReceive('isAccessible')
         ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+      $this->uploadDao->shouldReceive('isEditable')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
@@ -987,6 +1036,47 @@ namespace Fossology\UI\Api\Test\Controllers {
         $actualResponse->getStatusCode());
       $this->assertEquals($this->getResponseJson($expectedResponse),
         $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::handleAddEditAndDeleteLicenseDecision()
+     *    when the caller's group only has read access to the upload
+     * -# Check that a HttpForbiddenException is thrown and no clearing event
+     *    is written
+     */
+    public function testHandleAddEditAndDeleteLicenseDecisionReturnsForbiddenForReadOnlyUpload()
+    {
+      $uploadId = 1;
+      $itemId = 200;
+      $rq = [
+        array(
+          "shortName" => "MIT",
+          "add" => true
+        )
+      ];
+
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+      $this->uploadDao->shouldReceive('isEditable')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(false);
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+
+      $this->clearingDao->shouldNotReceive('insertClearingEvent');
+      $this->clearingDao->shouldNotReceive('updateClearingEvent');
+
+      $reqBody = $this->streamFactory->createStream(json_encode(
+        $rq
+      ));
+      $requestHeaders = new Headers();
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $reqBody);
+      $this->expectException(HttpForbiddenException::class);
+
+      $this->uploadTreeController->handleAddEditAndDeleteLicenseDecision($request,
+        new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
     }
 
     /**
@@ -1024,6 +1114,8 @@ namespace Fossology\UI\Api\Test\Controllers {
 
       $this->uploadDao->shouldReceive('isAccessible')
         ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+      $this->uploadDao->shouldReceive('isEditable')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
@@ -1056,6 +1148,58 @@ namespace Fossology\UI\Api\Test\Controllers {
         $actualResponse->getStatusCode());
       $this->assertEquals($this->getResponseJson($expectedResponse),
         $this->getResponseJson($actualResponse));
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::scheduleBulkScan() when the
+     *    caller's group only has read access to the upload
+     * -# Check that a HttpForbiddenException is thrown and no bulk scan is
+     *    scheduled
+     */
+    public function testScheduleBulkScanReturnsForbiddenForReadOnlyUpload()
+    {
+      $body = [
+        'bulkActions' => [
+          [
+            'licenseShortName' => 'MIT',
+            'licenseText' => '',
+            'acknowledgement' => '',
+            'comment' => '',
+            'licenseAction' => 'ADD'
+          ]
+        ],
+        'refText' => 'Copyright (c) 2011-2023 The Bootstrap Authors',
+        'bulkScope' => 'folder',
+        'forceDecision' => 0,
+        'ignoreIrre' => 0,
+        'delimiters' => 'DEFAULT',
+        'scanOnlyFindings' => 0
+      ];
+
+      $itemId = 1;
+      $uploadId = 1;
+
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+      $this->uploadDao->shouldReceive('isEditable')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(false);
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+
+      $this->changeLicenseBulk->shouldNotReceive('handle');
+
+      $reqBody = $this->streamFactory->createStream(json_encode(
+        $body
+      ));
+      $requestHeaders = new Headers();
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      $request = new Request("POST", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $reqBody);
+      $this->expectException(HttpForbiddenException::class);
+
+      $this->uploadTreeController->scheduleBulkScan($request,
+        new ResponseHelper(), ['id' => $uploadId, 'itemId' => $itemId]);
     }
   }
 }
