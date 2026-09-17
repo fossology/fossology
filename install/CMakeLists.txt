@@ -92,6 +92,7 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/gen/fo-postinstall
     ${FO_CWD}/fossinit-common.php
     ${FO_CWD}/fossinit.php
     ${FO_CWD}/fo-install-pythondeps
+    ${FO_CWD}/../utils/osadl_convertor.py
     ${CMAKE_CURRENT_BINARY_DIR}/gen/fossdash-publish.py
     DESTINATION ${FO_LIBEXECDIR}
     COMPONENT common
