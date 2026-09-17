@@ -161,10 +161,10 @@ class AjaxSHDetailsBrowser extends DefaultPlugin
 
     $offset = GetParm('iDisplayStart', PARM_INTEGER);
     $limit = GetParm('iDisplayLength', PARM_INTEGER);
-    if ($offset) {
+    if ($offset > 0) {
       $orderString .= " OFFSET $offset";
     }
-    if ($limit) {
+    if ($limit > 0) {
       $orderString .= " LIMIT $limit";
     }
 
