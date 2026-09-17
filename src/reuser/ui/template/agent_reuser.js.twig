@@ -4,6 +4,9 @@
 #}
 let osselotVersions = [];
 let lastUploadedFiles = [];
+let lastGetUploadsDataByGroup = {};
+const reuserSearchStatuses = {{ reuserSearchStatusesJson|raw }};
+const reuserCurrentUserId = {{ reuserCurrentUserId|raw }};
 let _reloadUploadsXhr = null;
 function registerFolderSelectorChange() {
   $(document)
@@ -11,11 +14,12 @@ function registerFolderSelectorChange() {
     .on('change.reuseFolderSelector', '[id^={{ reuseFolderSelectorName }}]', function () {
       const groupIndex = $(this).attr('id').replace('{{ reuseFolderSelectorName }}', '');
       const folderGroupPair = this.selectedOptions[0].value;
-      reloadUploads('&{{ folderParameterName }}=' + folderGroupPair, groupIndex);
+      reloadUploads('&{{ folderParameterName }}=' + folderGroupPair, groupIndex,
+        function () { runAutoDetect(groupIndex); });
     });
 }
 
-function reloadUploads(folderGroupPair, groupIndex) {
+function reloadUploads(folderGroupPair, groupIndex, onDone) {
   if (_reloadUploadsXhr) {
     _reloadUploadsXhr.abort();
     _reloadUploadsXhr = null;
@@ -23,21 +27,322 @@ function reloadUploads(folderGroupPair, groupIndex) {
   const packageForReuse = $(`#{{ uploadToReuseSelectorName }}${groupIndex}`);
   _reloadUploadsXhr = $.getJSON("?mod=plugin_reuser&do=getUploads" + folderGroupPair)
     .done(function (data) {
-      const entries = Object.entries(data).map(([key, value]) => ({ key, value }));
-      entries.sort(function (a, b) { return String(a.value).localeCompare(String(b.value)); });
+      const entries = Array.isArray(data) ? data : [];
+      lastGetUploadsDataByGroup[groupIndex] = entries;
+      entries.sort(function (a, b) { return String(a.display).localeCompare(String(b.display)); });
       const fragment = document.createDocumentFragment();
-      entries.forEach(function ({ key, value }) {
+      entries.forEach(function (item) {
         const option = document.createElement("option");
-        option.textContent = value;
-        option.value = key;
+        option.textContent = item.display;
+        option.value = item.uploadId + ',' + item.groupId;
         fragment.appendChild(option);
       });
       packageForReuse.empty();
       packageForReuse[0].appendChild(fragment);
       packageForReuse.trigger('change.select2');
+      if (typeof onDone === 'function') {
+        onDone();
+      }
     })
     .fail(function (xhr) { if (xhr.statusText !== 'abort') failed(xhr); })
     .always(function () { _reloadUploadsXhr = null; });
+}
+
+let _autoDetectXhr = null;
+
+function parsePackageNameFromFilename(filename) {
+  if (!filename) {
+    return { baseName: '', versionParts: null, prerelease: 0 };
+  }
+  let nameWithoutExt = filename.replace(/\.[^.]+$/, '');
+  nameWithoutExt = nameWithoutExt.replace(/\.(tar|zip|gz|bz2|xz|tgz|tbz2|txz|rar|7z)(\..*)?$/i, '');
+  nameWithoutExt = nameWithoutExt.replace(/\.(tar|zip|gz|bz2|xz|tgz|tbz2|txz|rar|7z)$/i, '');
+  nameWithoutExt = nameWithoutExt.replace(/[-_]\d{8}$/, '');
+  const versionMatch = nameWithoutExt.match(/[-_](v?\d+(?:\.\d+)*)(?:[-_](?:alpha|beta|rc|pre|patch|p)\d*)?$/i);
+  if (versionMatch) {
+    const baseName = nameWithoutExt.substring(0, nameWithoutExt.length - versionMatch[0].length);
+    const versionParts = versionMatch[1].replace(/^v/i, '').split('.').map(function (s) { return parseInt(s, 10); });
+    const prerelease = /[-_](?:alpha|beta|rc|pre|patch|p)\d*$/i.test(nameWithoutExt) ? 1 : 0;
+    return { baseName: baseName, versionParts: versionParts, prerelease: prerelease };
+  }
+  return { baseName: nameWithoutExt.split('-')[0], versionParts: null, prerelease: 0 };
+}
+
+function computeVersionDistance(parts, requestedParts, L, R) {
+  const digits = new Array(L);
+  let borrow = 0;
+  for (let i = L - 1; i >= 0; i--) {
+    let v = (i < parts.length ? parts[i] : 0) - (i < requestedParts.length ? requestedParts[i] : 0) - borrow;
+    if (v < 0) {
+      v += R;
+      borrow = 1;
+    } else {
+      borrow = 0;
+    }
+    digits[i] = v;
+  }
+  if (borrow === 1) {
+    for (let i = 0; i < L; i++) {
+      digits[i] = (R - 1) - digits[i];
+    }
+    let carry = 1;
+    for (let i = L - 1; i >= 0; i--) {
+      const s = digits[i] + carry;
+      if (s >= R) {
+        digits[i] = s - R;
+        carry = 1;
+      } else {
+        digits[i] = s;
+        carry = 0;
+      }
+    }
+  }
+  return digits;
+}
+
+function compareVersionCloseness(requestedParts, aParts, bParts, L, R) {
+  if (!requestedParts) {
+    return 0;
+  }
+  if (!aParts && !bParts) {
+    return 0;
+  }
+  if (!aParts) {
+    return 1;
+  }
+  if (!bParts) {
+    return -1;
+  }
+  const distA = computeVersionDistance(aParts, requestedParts, L, R);
+  const distB = computeVersionDistance(bParts, requestedParts, L, R);
+  for (let i = 0; i < L; i++) {
+    if (distA[i] !== distB[i]) {
+      return distA[i] - distB[i];
+    }
+  }
+  return 0;
+}
+
+function rankCandidates(candidates, requestedVersionParts) {
+  let L = 0;
+  let R = 10;
+  const all = requestedVersionParts
+    ? candidates.concat([{ versionParts: requestedVersionParts }])
+    : candidates;
+  all.forEach(function (c) {
+    const parts = c.versionParts;
+    if (!parts) {
+      return;
+    }
+    L = Math.max(L, parts.length);
+    parts.forEach(function (component) { R = Math.max(R, component + 1); });
+  });
+  candidates.sort(function (a, b) {
+    if (requestedVersionParts) {
+      const cmp = compareVersionCloseness(requestedVersionParts, a.versionParts, b.versionParts, L, R);
+      if (cmp !== 0) {
+        return cmp;
+      }
+      if (a.prerelease !== b.prerelease) {
+        return a.prerelease - b.prerelease;
+      }
+    }
+    const tsA = a.clearedAt ? Date.parse(a.clearedAt) : null;
+    const tsB = b.clearedAt ? Date.parse(b.clearedAt) : null;
+    if (tsA !== null && tsB !== null && tsA !== tsB) {
+      return tsB - tsA;
+    }
+    if (tsA !== null) {
+      return -1;
+    }
+    if (tsB !== null) {
+      return 1;
+    }
+    return Date.parse(b.timestamp) - Date.parse(a.timestamp);
+  });
+}
+
+function clientSideAutoDetect(filename, groupIndex) {
+  const lastGetUploadsData = lastGetUploadsDataByGroup[groupIndex] || [];
+  if (lastGetUploadsData.length === 0) {
+    return [];
+  }
+  const parsed = parsePackageNameFromFilename(filename);
+  const basePackageName = parsed.baseName;
+  if (!basePackageName) {
+    return [];
+  }
+  const statusSpecific = reuserSearchStatuses && reuserSearchStatuses.length > 0 && reuserSearchStatuses.length < 4;
+  const limit = statusSpecific ? 1 : 4;
+  const candidates = [];
+  lastGetUploadsData.forEach(function (item) {
+    if (reuserCurrentUserId > 0 && item.userId && item.userId !== reuserCurrentUserId) {
+      return;
+    }
+    const itemParsed = parsePackageNameFromFilename(item.filename);
+    if (itemParsed.baseName.toLowerCase() !== basePackageName.toLowerCase()) {
+      return;
+    }
+    if (statusSpecific && reuserSearchStatuses.indexOf(item.statusId) === -1) {
+      return;
+    }
+    candidates.push({
+      uploadId: item.uploadId,
+      groupId: item.groupId,
+      statusId: item.statusId,
+      versionParts: itemParsed.versionParts,
+      prerelease: itemParsed.prerelease,
+      clearedAt: item.clearedAt,
+      timestamp: item.timestamp
+    });
+  });
+  if (candidates.length === 0) {
+    return [];
+  }
+  rankCandidates(candidates, parsed.versionParts);
+  const selected = candidates.slice(0, limit);
+  return selected.map(function (item) {
+    return item.uploadId + ',' + item.groupId;
+  });
+}
+
+function serverNarrowReuse(candidateValues, $select, $autoDetectIndicator) {
+  if (_autoDetectXhr) {
+    _autoDetectXhr.abort();
+    _autoDetectXhr = null;
+  }
+  const candidatesParam = candidateValues.join(';');
+  $autoDetectIndicator.show();
+  _autoDetectXhr = $.ajax({
+    url: '?mod=plugin_reuser&do=autoDetectReuse',
+    method: 'GET',
+    data: { candidates: candidatesParam },
+    dataType: 'json',
+    success: function(data) {
+      const winner = Array.isArray(data) && data.length === 1 && data[0].uploadId && data[0].groupId
+        ? data[0]
+        : null;
+      if (!winner) {
+        return;
+      }
+      const optionValue = winner.uploadId + ',' + winner.groupId;
+      $select.val([optionValue]);
+      $select.trigger('change');
+    },
+    error: function() {
+    },
+    complete: function() {
+      _autoDetectXhr = null;
+      $autoDetectIndicator.hide();
+    }
+  });
+}
+
+function serverAutoDetect(filename, folderGroupPair, $select, $autoDetectIndicator) {
+  if (_autoDetectXhr) {
+    _autoDetectXhr.abort();
+    _autoDetectXhr = null;
+  }
+
+  $autoDetectIndicator.show();
+  _autoDetectXhr = $.ajax({
+    url: '?mod=plugin_reuser&do=autoDetectReuse',
+    method: 'GET',
+    data: folderGroupPair
+      ? { filename: filename, folder: folderGroupPair }
+      : { filename: filename },
+    dataType: 'json',
+    success: function(data) {
+      const results = Array.isArray(data)
+        ? data
+        : (data && data.uploadId && data.groupId && data.display ? [data] : []);
+      if (results.length === 0) {
+        return;
+      }
+      const selectedValues = [];
+      results.forEach(function (match) {
+        if (match && match.uploadId && match.groupId && match.display) {
+          selectedValues.push(match.uploadId + ',' + match.groupId);
+        }
+      });
+      selectedValues.forEach(function (optionValue) {
+        $select.find('option[value="' + optionValue + '"]').remove();
+      });
+      const selectEl = $select[0];
+      const insertBeforeNode = selectEl.firstChild;
+      results.forEach(function (match) {
+        if (!match || !match.uploadId || !match.groupId || !match.display) {
+          return;
+        }
+        const optionValue = match.uploadId + ',' + match.groupId;
+        const opt = document.createElement('option');
+        opt.value = optionValue;
+        opt.textContent = match.display;
+        selectEl.insertBefore(opt, insertBeforeNode);
+      });
+      if (selectedValues.length > 0) {
+        $select.val(selectedValues);
+      }
+      $select.trigger('change');
+    },
+    error: function(xhr, status, error) {
+    },
+    complete: function() {
+      _autoDetectXhr = null;
+      $autoDetectIndicator.hide();
+    }
+  });
+}
+
+function runAutoDetect(groupIndex) {
+  {% if not autoDetectEnabled %}
+  return;
+  {% endif %}
+  if (window.currentReuseSource && window.currentReuseSource !== 'local') {
+    return;
+  }
+  if (!lastUploadedFiles || lastUploadedFiles.length === 0) {
+    return;
+  }
+  const fileIndex = parseInt(groupIndex) || 0;
+  const file = lastUploadedFiles[fileIndex] || lastUploadedFiles[0];
+  if (!file || !file.name) {
+    return;
+  }
+  const filename = file.name;
+  const selectId = `#{{ uploadToReuseSelectorName }}${groupIndex}`;
+  const $select = $(selectId);
+  const $autoDetectIndicator = $(`#auto-detect-loading${groupIndex}`);
+
+  if ($select.length === 0) {
+    return;
+  }
+
+  const $folderSelect = $(`#{{ reuseFolderSelectorName }}${groupIndex}`);
+  const folderGroupPair = $folderSelect.length > 0 && !$folderSelect.prop('disabled')
+    ? ($folderSelect.val() || '')
+    : '';
+
+  const localMatches = clientSideAutoDetect(filename, groupIndex);
+  if (localMatches.length === 1) {
+    $select.val(localMatches);
+    $select.trigger('change');
+    return;
+  }
+  if (localMatches.length > 1) {
+    const statusSpecific = reuserSearchStatuses && reuserSearchStatuses.length > 0 && reuserSearchStatuses.length < 4;
+    if (statusSpecific) {
+      $select.val([localMatches[0]]);
+      $select.trigger('change');
+      return;
+    }
+    $select.val(localMatches);
+    $select.trigger('change');
+    serverNarrowReuse(localMatches, $select, $autoDetectIndicator);
+    return;
+  }
+
+  serverAutoDetect(filename, folderGroupPair, $select, $autoDetectIndicator);
 }
 
 function toggleDisabled() {
@@ -45,7 +350,11 @@ function toggleDisabled() {
     const gi = $(this).attr('id').replace('reuseSearchInFolder', '');
     const fs = $(`#{{ reuseFolderSelectorName }}${gi}`);
     fs.prop('disabled', !this.checked);
-    this.checked ? fs.trigger('change') : reloadUploads('', gi);
+    if (this.checked) {
+      fs.trigger('change');
+    } else {
+      reloadUploads('', gi, function () { runAutoDetect(gi); });
+    }
   });
   registerFolderSelectorChange();
   if ($('#hiddenFormHolder').length === 0) {
@@ -153,7 +462,7 @@ function initializeOsselotFields() {
         if ($checkbox.length > 0 && $checkbox.is(':checked')) {
           $(`#{{ reuseFolderSelectorName }}${groupIndex}`).prop('disabled', false).trigger('change');
         } else {
-          reloadUploads('', groupIndex);
+          reloadUploads('', groupIndex, function () { runAutoDetect(groupIndex); });
         }
       }
     }

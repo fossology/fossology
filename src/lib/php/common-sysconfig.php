@@ -25,6 +25,8 @@ define("CONFIG_TYPE_PASSWORD", 4);
 define("CONFIG_TYPE_DROP", 5);
 /** Checkbox type config */
 define("CONFIG_TYPE_BOOL", 6);
+/** Multi-select checkbox (checklist) type config */
+define("CONFIG_TYPE_CHECKLIST", 7);
 
 
 /**
@@ -436,6 +438,20 @@ function Populate_sysconfig()
   $osselotFallbackDesc = _('Fallback domain used when primary domain fails (e.g., osselot.org).');
   $valueArray[$variable] = array("'$variable'", "'osselot.org'", "'$osselotFallbackPrompt'",
     strval(CONFIG_TYPE_TEXT), "'OSSelot'", "4", "'$osselotFallbackDesc'", "'$osselotFallbackValid'", "null");
+
+  /* Reuser */
+  $variable = "ReuserAutoDetect";
+  $prompt = _("Enable Auto Select for Reuse");
+  $desc = _("When enabled, automatically detects and suggests the best matching upload for reuse when selecting a folder to search.");
+  $valueArray[$variable] = array("'$variable'", "'true'", "'$prompt'",
+    strval(CONFIG_TYPE_BOOL), "'Reuser'", "1", "'$desc'", "'check_boolean'", "null");
+
+  $variable = "ReuserSearchStatus";
+  $prompt = _("Upload Statuses for Auto Detect");
+  $desc = _("Select which upload clearing statuses to search for auto-detect.");
+  $valueArray[$variable] = array("'$variable'", "'3'", "'$prompt'",
+    strval(CONFIG_TYPE_CHECKLIST), "'Reuser'", "2", "'$desc'", "null",
+    "'Open{1}|In Progress{2}|Closed{3}|Rejected{4}'");
 
   /*  "Upload from server"-configuration  */
   $variable = "UploadFromServerWhitelist";

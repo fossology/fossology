@@ -2,7 +2,6 @@
 
    SPDX-License-Identifier: GPL-2.0-only
 #}
-{% import "include/macros.html.twig" as macro %}
 
 <li>
   <div class="form-group">
@@ -64,10 +63,17 @@
         <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseCopyright"/>
         {{ 'Reuse deactivated copyrights'|trans }}
         <img src="images/info_16.png" data-toggle="tooltip" title="{{'Use to copy edited and deactivated copyrights from the reused package'|trans}}" alt="" class="info-bullet"/>
-      </label><br/>
+      </label>      <br/>
       
       <label for="{{ uploadToReuseSelectorName }}">{{ 'Upload to reuse'|trans }}:</label><br/>
-      {{ macro.select(uploadToReuseSelectorName ~ '[]', folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width:420px;"', 5) }}
+      <select name="{{ uploadToReuseSelectorName }}[]" id="{{ uploadToReuseSelectorName }}" style="min-width:420px;" size="5" multiple="multiple">
+        {% for upload in folderUploads %}
+          <option value="{{ upload.uploadId }},{{ upload.groupId }}">{{ upload.display|e }}</option>
+        {% endfor %}
+      </select>
+      <div id="auto-detect-loading" class="dataTables_processing" style="display:none;">
+        {{ 'Searching…'|trans }}
+      </div>
     </div>
 
     {% if osselotAvailable %}

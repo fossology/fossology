@@ -267,21 +267,21 @@ class Reuser
   {
     if ($version == ApiVersion::V2) {
       return [
-        "reuseUpload"    => $this->reuseUpload,
-        "reuseGroup"     => $this->reuseGroup,
-        "reuseMain"      => $this->reuseMain,
-        "reuseEnhanced"  => $this->reuseEnhanced,
-        "reuseReport"    => $this->reuseReport,
-        "reuseCopyright" => $this->reuseCopyright
+        "reuseUpload"     => $this->reuseUpload,
+        "reuseGroup"      => $this->reuseGroup,
+        "reuseMain"       => $this->reuseMain,
+        "reuseEnhanced"   => $this->reuseEnhanced,
+        "reuseReport"     => $this->reuseReport,
+        "reuseCopyright"  => $this->reuseCopyright
       ];
     } else {
       return [
-        "reuse_upload"    => $this->reuseUpload,
-        "reuse_group"     => $this->reuseGroup,
-        "reuse_main"      => $this->reuseMain,
-        "reuse_enhanced"  => $this->reuseEnhanced,
-        "reuse_report"    => $this->reuseReport,
-        "reuse_copyright" => $this->reuseCopyright
+        "reuse_upload"     => $this->reuseUpload,
+        "reuse_group"      => $this->reuseGroup,
+        "reuse_main"       => $this->reuseMain,
+        "reuse_enhanced"   => $this->reuseEnhanced,
+        "reuse_report"     => $this->reuseReport,
+        "reuse_copyright"  => $this->reuseCopyright
       ];
     }
   }
