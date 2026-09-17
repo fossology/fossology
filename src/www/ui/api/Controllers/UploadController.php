@@ -467,6 +467,9 @@ class UploadController extends RestController
     if (array_key_exists('scanOptions', $reqBody)) {
       if ($uploadType == 'file') {
         $scanOptions = json_decode($reqBody['scanOptions'], true);
+        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($scanOptions)) {
+          throw new HttpBadRequestException("Invalid scanOptions JSON");
+        }
       } else {
         $scanOptions = $reqBody['scanOptions'];
       }
@@ -525,7 +528,7 @@ class UploadController extends RestController
     $uploadId = $uploadResponse[3];
     if (! empty($scanOptions)) {
       $info =  $uploadHelper->handleScheduleAnalysis(intval($uploadId),
-        intval($folderId), $scanOptions, true);
+        intval($folderId), $scanOptions, true, ApiVersion::getVersion($request));
       if ($info->getCode() == 201) {
         $info = new Info($info->getCode(), intval($uploadId), $info->getType());
       }
