@@ -285,10 +285,13 @@ class AjaxBrowse extends DefaultPlugin
 
     $statementString = "SELECT upload.*,upload_clearing.*,uploadtree.ufile_name,uploadtree.ufile_mode,uploadtree.uploadtree_pk"
             . " FROM $partQuery $filter $orderString";
+    $displayStart = intval($request->get('iDisplayStart'));
+    $displayLength = intval($request->get('iDisplayLength'));
+
     $rangedFilterParams = $this->filterParams;
-    $rangedFilterParams[] = intval($request->get('iDisplayStart'));
+    $rangedFilterParams[] = $displayStart > 0 ? $displayStart : 0;
     $statementString .= ' OFFSET $' . count($rangedFilterParams);
-    $rangedFilterParams[] = intval($request->get('iDisplayLength'));
+    $rangedFilterParams[] = $displayLength > 0 ? $displayLength : null;
     $statementString .= ' LIMIT $' . count($rangedFilterParams);
 
     $this->dbManager->prepare($stmt, $statementString);
