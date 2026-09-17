@@ -124,7 +124,14 @@ class ReuserAgentPlugin extends AgentPlugin
         case 'reuseCopyright':
           $reuseMode |= UploadDao::REUSE_COPYRIGHT;
           break;
+        case 'reuseBulk':
+          $reuseMode |= UploadDao::REUSE_BULK;
+          break;
       }
+    }
+    $deciderRules = $request->get('deciderRules', []);
+    if (is_array($deciderRules) && in_array('reuseBulk', $deciderRules)) {
+      $reuseMode |= UploadDao::REUSE_BULK;
     }
 
     $reuseSelections = $request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME);
