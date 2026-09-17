@@ -36,6 +36,13 @@ path = @FO_REPODIR@
 [HOSTS]
 localhost = localhost @FO_SYSCONFDIR@ 10
 
+[SCHEDULER]
+; Number of threads in the interface thread pool (default: 10).
+; The scheduler automatically raises this to the sum of all host 'max' values,
+; so that UI/CLI connections are never queued behind active agent threads.
+; Only set this explicitly when you need a fixed value larger than host maximum.
+;interface_nthreads = 10
+
 [REPOSITORY]
 localhost[] = * 00 ff
 
