@@ -624,14 +624,22 @@ FROM $tableName WHERE $idRowName = $1", [$id],
    *
    * @param string  $kind    Which kind of licenses to look for
    * @param integer $groupId Group of the user
+   * @param boolean $active  True to count only active licenses
    * @return int Count of licenses
    */
-  public function getLicenseCount($kind, $groupId)
+  public function getLicenseCount($kind, $groupId, $active = false)
   {
     $sql = "SELECT sum(cnt) AS total FROM (";
     $mainLicSql = " SELECT count(*) AS cnt FROM ONLY license_ref ";
     $candidateLicSql = " SELECT count(*) AS cnt FROM license_candidate WHERE group_fk = $1";
     $params = [];
+
+    if ($active) {
+      $extraCondition = "rf_active = '" .
+        $this->dbManager->booleanToDb($active) . "'";
+      $mainLicSql .= " WHERE $extraCondition";
+      $candidateLicSql .= " AND $extraCondition";
+    }
 
     if ($kind == "main") {
       $sql .= $mainLicSql;
@@ -644,7 +652,7 @@ FROM $tableName WHERE $idRowName = $1", [$id],
     }
     $sql .= ") as all_lic;";
 
-    $statement = __METHOD__ . ".getLicenseCount.$kind";
+    $statement = __METHOD__ . ".getLicenseCount.$kind" . ($active ? ".active" : "");
     $result = $this->dbManager->getSingleRow($sql, $params, $statement);
     return intval($result['total']);
   }
