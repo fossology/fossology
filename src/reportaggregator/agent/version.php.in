@@ -1,0 +1,10 @@
+<?php
+/*
+ SPDX-FileCopyrightText: © 2026 Harshit Gandhi <gandhiharshit716@gmail.com>
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
+define("REPORTAGGREGATOR_AGENT_NAME", "reportaggregator");
+define("AGENT_VERSION", "@FO_VERSION@");
+define("AGENT_REV", "@FO_COMMIT_HASH@");

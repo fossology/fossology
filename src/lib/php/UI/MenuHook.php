@@ -21,7 +21,8 @@ class MenuHook
     if (is_array($agentList)) {
       foreach ($agentList as $parmAgent) {
         $agent = plugin_find_id($parmAgent->URI);
-        if (!empty($agent)) {
+        if (!empty($agent) && $agent !== -1 &&
+            !in_array($agent, $agentPluginNames)) {
           $agentPluginNames[] = $agent;
         }
       }

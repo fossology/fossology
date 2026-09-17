@@ -12,6 +12,8 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Report\MultiUploadAggregatorScheduler;
+use Fossology\Lib\Report\ReportUtils;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -54,6 +56,7 @@ class SpdxThreeGeneratorUi extends DefaultPlugin
 
     $text = _("Generate SPDX3.0 report in JSON format");
     menu_insert("Browse-Pfile::Export&nbsp;SPDX3.0&nbsp;JSON&nbsp;report", 0, self::NAME . '&outputFormat=spdx3json', $text);
+    menu_insert("UploadMulti::Generate&nbsp;SPDX3.0&nbsp;JSON", 0, self::NAME . '&outputFormat=spdx3json', $text);
 
     $text = _("Generate SPDX3.0 report in RDF format");
     menu_insert("Browse-Pfile::Export&nbsp;SPDX3.0&nbsp;RDF&nbsp;report", 0, self::NAME . '&outputFormat=spdx3rdf', $text);
@@ -139,6 +142,13 @@ class SpdxThreeGeneratorUi extends DefaultPlugin
    */
   protected function getJobAndJobqueue($groupId, $upload, $addUploads)
   {
+    if (!empty($addUploads) && ReportUtils::isAggregatorSupportedFormat($this->outputFormat)) {
+      $allUploads = $addUploads;
+      $allUploads[$upload->getId()] = $upload;
+      $scheduler = new MultiUploadAggregatorScheduler();
+      return $scheduler->scheduleForCurrentUser($this->outputFormat, $upload, $allUploads);
+    }
+
     $uploadId = $upload->getId();
     $SpdxThreeAgent = plugin_find('agent_'.$this->outputFormat);
     $userId = Auth::getUserId();
