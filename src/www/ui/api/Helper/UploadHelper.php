@@ -832,16 +832,14 @@ class UploadHelper
         $responseList[] = $responseRow->getArray($apiVersion);
       }
     } elseif (!$boolLicense && $boolCopyright) {
-      foreach ($copyrightList as $copyFilepath) {
-        $copyrightContent = array();
-        foreach ($copyrightList as $copy) {
-          if (($copyFilepath['filePath'] == $copy['filePath']) === true) {
-            $copyrightContent[] = $copy['content'];
-          }
-        }
+      $grouped = [];
+      foreach ($copyrightList as $copy) {
+        $grouped[$copy['filePath']][] = $copy['content'];
+      }
+      foreach ($grouped as $filePath => $copyrightContent) {
         $findings = new Findings();
-        $findings->setCopyright($copyrightContent);
-        $responseRow = new FileLicenses($copyFilepath['filePath'], $findings);
+        $findings->setCopyright(array_values(array_unique($copyrightContent)));
+        $responseRow = new FileLicenses($filePath, $findings);
         $responseList[] = $responseRow->getArray($apiVersion);
       }
     }
