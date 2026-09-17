@@ -23,3 +23,8 @@ install(FILES "${PROJECT_BINARY_DIR}/VERSION" adj2nest.conf
     COMPONENT adj2nest)
 
 add_symlink()
+
+if(TESTING)
+    enable_testing()
+    add_subdirectory(agent_tests)
+endif()
