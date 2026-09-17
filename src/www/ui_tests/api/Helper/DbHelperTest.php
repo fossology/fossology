@@ -283,4 +283,57 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
     }
     $this->assertEquals([$expectedUsers[$fetchId]], $allUsers);
   }
+
+  /**
+   * @test
+   * -# Test for DbHelper::getLicenseCount() fetching all licenses without active filter
+   * -# Check if SQL query unions license_ref and license_candidate and returns count
+   */
+  public function testGetLicenseCountAll()
+  {
+    $groupId = 2;
+    $sql = "SELECT sum(cnt) AS total FROM (" .
+      " SELECT count(*) AS cnt FROM ONLY license_ref " .
+      " UNION ALL " .
+      " SELECT count(*) AS cnt FROM license_candidate WHERE group_fk = $1" .
+      ") as all_lic;";
+    $statement = DbHelper::class . "::getLicenseCount.getLicenseCount.all";
+
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([$sql, [$groupId], $statement])
+      ->once()
+      ->andReturn(['total' => 10]);
+
+    $actualCount = $this->dbHelper->getLicenseCount("all", $groupId, false);
+    $this->assertEquals(10, $actualCount);
+  }
+
+  /**
+   * @test
+   * -# Test for DbHelper::getLicenseCount() fetching active licenses
+   * -# Check if SQL query filters by rf_active for both tables
+   */
+  public function testGetLicenseCountActive()
+  {
+    $groupId = 2;
+    $this->dbManager->shouldReceive('booleanToDb')
+      ->withArgs([true])
+      ->once()
+      ->andReturn('t');
+
+    $sql = "SELECT sum(cnt) AS total FROM (" .
+      " SELECT count(*) AS cnt FROM ONLY license_ref  WHERE rf_active = 't'" .
+      " UNION ALL " .
+      " SELECT count(*) AS cnt FROM license_candidate WHERE group_fk = $1 AND rf_active = 't'" .
+      ") as all_lic;";
+    $statement = DbHelper::class . "::getLicenseCount.getLicenseCount.all.active";
+
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([$sql, [$groupId], $statement])
+      ->once()
+      ->andReturn(['total' => 7]);
+
+    $actualCount = $this->dbHelper->getLicenseCount("all", $groupId, true);
+    $this->assertEquals(7, $actualCount);
+  }
 }
