@@ -58,7 +58,7 @@ class LicenseCompatibilityRulesYamlExport
       $param[] = $lr;
       $sql .= ' WHERE lr_pk = $'.count($param);
       $row = $this->dbManager->getSingleRow($sql, $param, $stmt);
-      $vars = $row ?: [];
+      $vars = $row ? [$row] : [];
     } else {
       $stmt = __METHOD__;
       $sql .= ' ORDER BY lr_pk';
