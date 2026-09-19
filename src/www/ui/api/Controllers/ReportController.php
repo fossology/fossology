@@ -153,7 +153,7 @@ class ReportController extends RestController
           $this->restHelper->getGroupId(), $upload, $reportFormat);
         break;
       default:
-        throw new HttpInternalServerErrorException("Some error occured!");
+        throw new HttpInternalServerErrorException("Some error occurred!");
     }
     $download_path = $this->buildDownloadPath($request, $jobId);
     $info = new Info(201, $download_path, InfoType::INFO);
