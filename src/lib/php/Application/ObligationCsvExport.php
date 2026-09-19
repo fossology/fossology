@@ -29,15 +29,23 @@ class ObligationCsvExport
   /** @var string $enclosure
    * Ecnlosure used in the CSV */
   protected $enclosure = '"';
+  /** @var \Fossology\Lib\BusinessRules\ObligationMap $obligationMap
+   * Obligation map to use */
+  protected $obligationMap;
 
   /**
    * Constructor
    * @param DbManager $dbManager DbManager to be used.
+   * @param \Fossology\Lib\BusinessRules\ObligationMap|null $obligationMap ObligationMap to be used.
    */
-  public function __construct(DbManager $dbManager)
+  public function __construct(DbManager $dbManager, $obligationMap = null)
   {
     $this->dbManager = $dbManager;
-    $this->obligationMap = $GLOBALS['container']->get('businessrules.obligationmap');
+    if ($obligationMap !== null) {
+      $this->obligationMap = $obligationMap;
+    } elseif (isset($GLOBALS['container'])) {
+      $this->obligationMap = $GLOBALS['container']->get('businessrules.obligationmap');
+    }
   }
 
   /**
@@ -73,12 +81,14 @@ class ObligationCsvExport
       $stmt = __METHOD__.'.ob';
       $sql .= ' WHERE ob_pk=$1;';
       $row = $this->dbManager->getSingleRow($sql, [$ob], $stmt);
-      $liclist = $this->obligationMap->getLicenseList($ob);
-      $candidatelist = $this->obligationMap->getLicenseList($ob, True);
-      array_shift($row);
-      $row["Associated Licenses"] = $liclist;
-      $row["Associated candidate Licenses"] = $candidatelist;
-      $csvarray[] = $row;
+      if (!empty($row)) {
+        $liclist = $this->obligationMap->getLicenseList($ob);
+        $candidatelist = $this->obligationMap->getLicenseList($ob, True);
+        array_shift($row);
+        $row["Associated Licenses"] = $liclist;
+        $row["Associated candidate Licenses"] = $candidatelist;
+        $csvarray[] = $row;
+      }
     } else {
       $stmt = __METHOD__;
       $this->dbManager->prepare($stmt,$sql);
@@ -91,7 +101,7 @@ class ObligationCsvExport
         $candidatelist = $this->obligationMap->getLicenseList($row['ob_pk'], True);
         array_shift($row);
         $row["Associated Licenses"] = $liclist;
-        $row["Associated candidate Licenses/"] = $candidatelist;
+        $row["Associated candidate Licenses"] = $candidatelist;
         $csvarray[] = $row;
       }
     }
