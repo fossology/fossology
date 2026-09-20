@@ -751,6 +751,10 @@
 %KEY% "distribut"
 %STR% "unlimited permission to copy distribute and modify the configure scripts that are the output of autoconf"
 #
+%ENTRY% _LT_Autoconf_exception_macro
+%KEY% "autoconf"
+%STR% "output of autoconf when processing the macro"
+#
 %ENTRY% _LT_Autoconf_exception_20
 %KEY% "distribut"
 %STR% "as a special exception the free software foundation gives unlimited permission to copy distribute and modify the configure scripts that are the output of autoconf"
@@ -2554,6 +2558,14 @@
 %ENTRY% _LT_FSF_1
 %KEY% "permi[st]"
 %STR% "gives unlimited permission to copy and/or distribute it with or without modifications"
+#
+%ENTRY% _LT_FSFULLRWD
+%KEY% "warranty"
+%STR% "but without any warranty to the extent permitted by law"
+#
+%ENTRY% _LT_FSFULLRSD
+%KEY% "warranty"
+%STR% "offered as.is without any warranty"
 #####
 # DELETED: ... of =SOME= in any medium provided that the copyright notice
 # (and|and this) permission notice are preserved and that the distributor
@@ -11782,6 +11794,14 @@ k
 %ENTRY% _SPDX_FSFULLR
 %KEY% "licen[cs]e"
 %STR% "(licen[cs]e(exception ?id|id|[- ]identifier| name)?[: ]|spdxorg/licen[cs]es/|opensourceorg/licen[cs]es/|choosealicensecom/licen[cs]es/)(FSFULLR|(.{1,32} (AND|OR)){1,4} FSFULLR)"
+
+%ENTRY% _SPDX_FSFULLRWD
+%KEY% "licen[cs]e"
+%STR% "(licen[cs]e(exception ?id|id|[- ]identifier| name)?[: ]|spdxorg/licen[cs]es/|opensourceorg/licen[cs]es/|choosealicensecom/licen[cs]es/)(FSFULLRWD|(.{1,32} (AND|OR)){1,4} FSFULLRWD)"
+
+%ENTRY% _SPDX_FSFULLRSD
+%KEY% "licen[cs]e"
+%STR% "(licen[cs]e(exception ?id|id|[- ]identifier| name)?[: ]|spdxorg/licen[cs]es/|opensourceorg/licen[cs]es/|choosealicensecom/licen[cs]es/)(FSFULLRSD|(.{1,32} (AND|OR)){1,4} FSFULLRSD)"
 
 %ENTRY% _SPDX_Giftware
 %KEY% "licen[cs]e"
