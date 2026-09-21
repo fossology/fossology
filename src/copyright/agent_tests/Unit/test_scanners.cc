@@ -61,6 +61,7 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST (copyscannerDotPrefixedNameTest);
   CPPUNIT_TEST (copyscannerBareKeywordDiscardTest);
   CPPUNIT_TEST (copyscannerCopyrightedStatementTest);
+  CPPUNIT_TEST (copyscannerCamelCaseHolderTest);
   CPPUNIT_TEST (copyscannerBinaryNoiseTest);
   CPPUNIT_TEST (copyscannerSpdxFullLineTest);
   CPPUNIT_TEST (copyscannerSpdxArrayTest);
@@ -219,6 +220,58 @@ protected:
       CPPUNIT_ASSERT_MESSAGE(
         string("Expected active match for: ") + valid[i],
         !matches.empty() && matches.front().is_enabled);
+    }
+  }
+
+  /**
+   * \brief Regression: REG_EXCEPTION_COPY carries a To[A-Z][a-zA-Z]{4,} branch
+   * to skip camelCase identifiers such as Copyright.ToString(). The expression
+   * is compiled with icase, which makes [A-Z] match lowercase too, degrading the
+   * branch into "any word starting with to". Holder names such as TOSHIBA then
+   * matched and were deactivated. The branch is guarded with (?-i:...) so only
+   * real camelCase matches.
+   * \test
+   */
+  void copyscannerCamelCaseHolderTest()
+  {
+    hCopyrightScanner sc;
+
+    // Holder names beginning with "to" in any casing must stay active
+    const char* holders[] = {
+      "Copyright TOSHIBA CORPORATION, 2022. Part of the SW360 Portal Project.\n",
+      "Copyright Toshiba Software Development (Vietnam) Co., Ltd., 2022. Part of the SW360 Portal Project.\n",
+      "Copyright (C) TOSHIBA CORPORATION, 2025. Part of the SW360 Frontend Project.\n",
+      "Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2025. Part of the SW360 Frontend Project.\n",
+      "Copyright TOSHIBA TEC CORPORATION, 2023\n",
+      "Copyright TORONTO DOMINION BANK, 2019\n",
+      "Copyright TOYOTA MOTOR CORPORATION, 2018\n",
+      "Copyright TOMTOM INTERNATIONAL BV, 2021\n",
+      nullptr
+    };
+    for (int i = 0; holders[i]; ++i)
+    {
+      list<match> matches;
+      sc.ScanString(holders[i], matches);
+      CPPUNIT_ASSERT_MESSAGE(
+        string("Expected active match for holder: ") + holders[i],
+        !matches.empty() && matches.front().is_enabled);
+    }
+
+    // Genuine camelCase identifiers must still be deactivated
+    const char* identifiers[] = {
+      "Copyright.ToString() returns the assembly attribute\n",
+      "copyright.ToArray().Select(x => x.Holder)\n",
+      "Copyright ToUpperInvariant helper for holder names\n",
+      nullptr
+    };
+    for (int i = 0; identifiers[i]; ++i)
+    {
+      list<match> matches;
+      sc.ScanString(identifiers[i], matches);
+      bool hasActive = !matches.empty() && matches.front().is_enabled;
+      CPPUNIT_ASSERT_MESSAGE(
+        string("Expected no active match for identifier: ") + identifiers[i],
+        !hasActive);
     }
   }
 
