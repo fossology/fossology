@@ -888,6 +888,18 @@ void database_update_event(scheduler_t* scheduler, void* unused)
     return;
   }
 
+  /* Safety-net sweep: fail any pending jobqueue entry whose dependency has
+   * already failed but was inserted (by JobQueueAdd()) after the one-shot
+   * jobsql_fail_dependents cascade for that dependency already ran. Cheap
+   * and run every poll so multi-level chains resolve within a few cycles. */
+  db_result = database_exec(scheduler, jobsql_fail_stuck_dependents);
+  if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
+  {
+    PQ_ERROR(db_result, "failed to sweep stuck dependent jobs");
+  }
+  else
+    SafePQclear(db_result);
+
   /* Compute the checkout limit from configured host capacity.
    *  a) No hosts loaded yet (startup): fall back to CHECKOUT_SIZE.
    *  b) Hosts configured: sum max values for hosts with max > 0 only
