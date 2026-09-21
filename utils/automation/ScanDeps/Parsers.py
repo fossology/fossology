@@ -201,7 +201,7 @@ class PythonParser:
           )
 
         # Extract VCS and homepage URLs
-        project_urls = data.get('info', {}).get('project_urls', {})
+        project_urls = data.get('info', {}).get('project_urls') or {}
         for key, value in project_urls.items():
           if "source" in key.lower():
             component['vcs_url'] = value
