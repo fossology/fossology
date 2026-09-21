@@ -120,6 +120,24 @@ public:
   /** Copy copyright events from reused upload. */
   virtual bool reuseCopyrights(int uploadId, int reusedUploadId, int userId);
 
+  /** Process bulk license reuse for the upload. */
+  virtual bool processBulkReuser(int uploadId, int groupId, int userId);
+
+  /** Retrieve the list of previous bulk IDs from reused uploads. */
+  virtual std::vector<int> getPreviousBulkIds(int uploadId, int groupId, int userId);
+
+  /** Clone the bulk license tables, schedule monkbulk and deciderjob, and notify the scheduler. */
+  virtual int rerunBulkAndDeciderOnUpload(int uploadId, int groupId, int userId, int bulkId);
+
+  /** Check if a jobqueue task is currently running. */
+  virtual bool isJobQueueRunning(int jqPk);
+
+  /** Get estimated time for a job. */
+  virtual int getEstimatedTime(int jqPk);
+
+  /** Connect to the scheduler socket and write "database" command. */
+  virtual void notifySchedulerOfDatabaseChange();
+
 protected:
   /** @brief Validate that @p s contains only characters safe for SQL identifiers. */
   static bool        isValidIdentifier(const std::string& s);

@@ -63,6 +63,12 @@ bool processUploadId(const ReuserState& /*state*/, int uploadId,
   int groupId = fo_scheduler_groupID();
   int userId = fo_scheduler_userID();
 
+  if (!databaseHandler.processBulkReuser(uploadId, groupId, userId))
+  {
+    LOG_WARNING("Reuser: processBulkReuser failed for upload %d", uploadId);
+    return false;
+  }
+
   auto reusedUploads = databaseHandler.getReusedUploads(uploadId, groupId);
 
   for (const auto& triple : reusedUploads)
