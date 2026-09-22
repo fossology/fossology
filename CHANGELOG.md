@@ -4,6 +4,28 @@
 -->
 # Changelog of FOSSology
 
+### 4.7.2 (Sept 22nd 2026)
+
+Compared with the broader 4.7.1 patch release, 4.7.2 is a small targeted update that adds a new work-in-progress indication in the tree view and fixes a monkbulk issue where files scanned under an earlier upload could be dropped during bulk operations.
+
+* add new indication for WIP state and fix feildset
+* stop bulk dropping files scanned under an earlier upload
+
+#### Credits to contributors for 4.7.2
+
+From the GIT commit history, we have the following contributors since
+[4.7.1](https://github.com/fossology/fossology/releases/tag/4.7.1):
+
+```
+> Shaheem Azmal M MD <shaheem.azmal@gmail.com>
+```
+
+#### Features
+* `29210e87e1` feat(tree-view): add new indication for WIP state and fix feildset
+
+#### Corrections
+* `da3a432dbf` fix(monk): stop bulk dropping files scanned under an earlier upload
+
 ### 4.7.1 (June 10th 2026)
 
 With this new patch, FOSSology introduced a few bug fixed and infrastructure related changes. We have also integrated

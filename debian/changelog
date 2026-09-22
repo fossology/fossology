@@ -1,3 +1,10 @@
+fossology (4.7.2-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.7.2 for details
+
+ -- Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>  Tue, 22 Sept 2026 09:42:15 +0530
+
 fossology (4.7.1-1) unstable; urgency=low
 
   * New upstream release
