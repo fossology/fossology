@@ -9,14 +9,21 @@
 import concurrent.futures
 import logging
 import os
+import shutil
+import subprocess
 import tarfile
 import threading
 import urllib.parse
 import zipfile
+from pathlib import Path
 
 import requests
 
 from .Parsers import DOWNLOAD_URL_KEY, Parser
+
+
+MAX_UNPACKED_BYTES = 5 * 1024 ** 3
+DEBSBOM_TIMEOUT = 600  # Seconds per debsbom call
 
 
 class Downloader:
@@ -28,6 +35,37 @@ class Downloader:
     self.parser = None
     self.lock = threading.Lock()
     self.download_timeout = 30  # Seconds for network requests
+
+  @staticmethod
+  def __extract_zip(zip_ref: zipfile.ZipFile, destination: str) -> None:
+    """Extract a zip archive unless it unpacks to an unreasonable size."""
+    if sum(i.file_size for i in zip_ref.infolist()) > MAX_UNPACKED_BYTES:
+      raise zipfile.BadZipFile("Archive unpacks to too much data")
+    zip_ref.extractall(destination)
+
+  @staticmethod
+  def __extract_tar(tar_ref: tarfile.TarFile, destination: str) -> None:
+    """Extract a tar archive after rejecting unsafe or oversized members."""
+    root = os.path.realpath(destination)
+    members = tar_ref.getmembers()
+    if sum(m.size for m in members) > MAX_UNPACKED_BYTES:
+      raise tarfile.TarError("Archive unpacks to too much data")
+    for member in members:
+      target = os.path.realpath(os.path.join(root, member.name))
+      if member.issym():
+        link = os.path.join(os.path.dirname(target), member.linkname)
+      elif member.islnk():
+        link = os.path.join(root, member.linkname)
+      else:
+        link = target
+      if member.isdev() or any(
+          os.path.commonpath([root, os.path.realpath(path)]) != root
+          for path in (target, link)):
+        raise tarfile.TarError(f"Unsafe archive member: {member.name}")
+    if hasattr(tarfile, 'data_filter'):
+      tar_ref.extractall(destination, filter='data')
+    else:
+      tar_ref.extractall(destination)
 
   def __get_archive_base_dir(self, archive_path: str) -> str:
     """
@@ -43,9 +81,9 @@ class Downloader:
           if members:
             # Check if all members start with a common prefix (single root
             # directory)
-            first_part = members[0].split(os.sep)[0]
+            first_part = members[0].split('/')[0]
             if all(
-                m.startswith(first_part + os.sep) or m == first_part for m in
+                m.startswith(first_part + '/') or m == first_part for m in
                 members
             ):
               base_dir = first_part
@@ -55,9 +93,9 @@ class Downloader:
         with tarfile.open(archive_path, 'r:*') as tar_ref:
           members = tar_ref.getnames()
           if members:
-            first_part = members[0].split(os.sep)[0]
+            first_part = members[0].split('/')[0]
             if all(
-                m.startswith(first_part + os.sep) or m == first_part for m in
+                m.startswith(first_part + '/') or m == first_part for m in
                 members
             ):
               base_dir = first_part
@@ -100,7 +138,7 @@ class Downloader:
     # This list is more specific for common archive types
     archive_extensions = [
       '.tar.gz', '.tgz', '.tar.bz2', '.tbz', '.tar.xz', '.txz', '.zip', '.whl',
-      '.tar'
+      '.jar', '.tar'
     ]
     file_extension = ''
     for ext in archive_extensions:
@@ -113,7 +151,7 @@ class Downloader:
       if not file_extension:  # Ensure there's at least some extension
         file_extension = '.bin'  # Unable to determine. Ignore
 
-    file_path = os.path.join(package_folder, f"{package_name}{file_extension}")
+    file_path = os.path.join(package_folder, f"archive{file_extension}")
 
     temp_archive_path = file_path  # Use this path for download and extraction
 
@@ -132,17 +170,15 @@ class Downloader:
           f.write(chunk)
       logging.info(f"Downloaded {package_name} to {temp_archive_path}")
 
-      if temp_archive_path.lower().endswith('.zip'):
+      if zipfile.is_zipfile(temp_archive_path):
         with zipfile.ZipFile(temp_archive_path, 'r') as zip_ref:
-          zip_ref.extractall(package_folder)
+          self.__extract_zip(zip_ref, package_folder)
         base_dir = self.__get_archive_base_dir(
           temp_archive_path
         )
-      elif temp_archive_path.lower().endswith(
-          ('.tar.gz', '.tgz', '.tar.bz2', '.tbz', '.tar.xz', '.txz', '.tar')
-      ):
+      elif tarfile.is_tarfile(temp_archive_path):
         with tarfile.open(temp_archive_path, 'r:*') as tar_ref:
-          tar_ref.extractall(package_folder)
+          self.__extract_tar(tar_ref, package_folder)
         base_dir = self.__get_archive_base_dir(
           temp_archive_path
         )
@@ -177,7 +213,7 @@ class Downloader:
         f"Network error while downloading {package_name} from {download_url}: "
         f"{e}"
       )
-    except (zipfile.BadZipFile, tarfile.ReadError, tarfile.FilterError) as e:
+    except (zipfile.BadZipFile, tarfile.TarError) as e:
       logging.error(
         f"Error extracting archive for {package_name} from "
         f"{temp_archive_path}: {e}"
@@ -238,3 +274,67 @@ class Downloader:
       f"Finished concurrent download process for {len(download_list)} packages."
     )
     return f"{len(download_list)} packages downloaded."
+
+  def download_debian_sources(self, parser: Parser) -> str:
+    """Download and unpack patched Debian source packages with debsbom."""
+    source_components = parser.debian_source_components
+    binary_components = [component for component in parser.debian_components
+                         if component not in source_components]
+    for component in binary_components:
+      logging.warning(
+        'Skipping Debian binary package %s. Use a source PURL with '
+        'the arch=source qualifier.', component.get('purl', 'N/A')
+      )
+
+    if not source_components:
+      return '0 Debian source packages downloaded.'
+    if not shutil.which('debsbom'):
+      logging.error('debsbom is required to download Debian source packages.')
+      return '0 Debian source packages downloaded.'
+
+    prepared = 0
+    for component in source_components:
+      purl = component['purl']
+      package_folder = Path(component['download_dir'])
+      work_dir = package_folder / '.debsbom'
+      try:
+        package_folder.mkdir(parents=True, exist_ok=True)
+        subprocess.run(
+          ['debsbom', 'download', '--sources', '--outdir', str(work_dir)],
+          input=f'{purl}\n', text=True, capture_output=True, check=True,
+          timeout=DEBSBOM_TIMEOUT
+        )
+        subprocess.run(
+          [
+            'debsbom', 'source-merge', '--apply-patches', '--pkgdir',
+            str(work_dir / 'sources'), '--outdir', str(package_folder)
+          ],
+          input=f'{purl}\n', text=True, capture_output=True, check=True,
+          timeout=DEBSBOM_TIMEOUT
+        )
+        archives = list(package_folder.rglob('*.merged.patched.tar*'))
+        if len(archives) != 1:
+          raise RuntimeError(
+            f'Expected one patched source archive, found {len(archives)}.'
+          )
+        archive_path = archives[0]
+        with tarfile.open(archive_path, 'r:*') as tar_ref:
+          self.__extract_tar(tar_ref, package_folder)
+        base_dir = self.__get_archive_base_dir(str(archive_path))
+        if not base_dir:
+          raise RuntimeError('Patched source archive has no single base directory.')
+        component['base_dir'] = base_dir
+        prepared += 1
+      except (OSError, subprocess.SubprocessError, tarfile.TarError,
+              RuntimeError) as error:
+        details = getattr(error, 'stderr', '')
+        logging.error(
+          'Failed to prepare Debian source package %s: %s %s',
+          purl, error, details.strip() if details else ''
+        )
+      finally:
+        shutil.rmtree(work_dir, ignore_errors=True)
+        for archive_path in package_folder.rglob('*.merged.patched.tar*'):
+          archive_path.unlink()
+
+    return f'{prepared} Debian source packages downloaded.'
