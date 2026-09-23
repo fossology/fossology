@@ -59,6 +59,9 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (scannerTestSuite);
   CPPUNIT_TEST (copyscannerTest);
   CPPUNIT_TEST (copyscannerDotPrefixedNameTest);
+  CPPUNIT_TEST (copyscannerBracketedYearTest);
+  CPPUNIT_TEST (copyscannerBracketedYearNoiseTest);
+  CPPUNIT_TEST (copyscannerBracketedYearBoundariesTest);
   CPPUNIT_TEST (copyscannerBareKeywordDiscardTest);
   CPPUNIT_TEST (copyscannerCopyrightedStatementTest);
   CPPUNIT_TEST (copyscannerCamelCaseHolderTest);
@@ -146,6 +149,101 @@ protected:
     const char* content3 = "Copyright \xc2\xa9 2021 .NET Foundation\n";
     scannerTest(sc, content3, "statement",
       {"Copyright \xc2\xa9 2021 .NET Foundation"});
+  }
+
+  /**
+   * \brief Preserve bracketed numeric years after a copyright symbol.
+   * \test
+   */
+  void copyscannerBracketedYearTest()
+  {
+    hCopyrightScanner sc;
+    const char* valid[] = {
+      "Copyright (c) [2021] [Marvin Countryman]",
+      "Copyright (C) [1999] Marvin Countryman",
+      "Copyright (c)[2021] [Marvin Countryman]",
+      "Copyright (c)\t[ 2021 ] [Marvin Countryman]",
+      "Copyright (c) [\t2021\t] [Marvin Countryman]",
+      "Copyright \xc2\xa9 [2021] [Marvin Countryman]",
+      "Copyright &copy; [2021] [Marvin Countryman]",
+      "Copyrighted (C) [2021] [Marvin Countryman]",
+      "Copyright (c) 2021 [Marvin Countryman]",
+      "Copyright [2021] [Marvin Countryman]",
+      "Copyright (c) 2021 Marvin Countryman"
+    };
+
+    for (const char* statement : valid)
+    {
+      for (const char* ending : {"", "\n"})
+      {
+        list<match> matches;
+        sc.ScanString(string(statement) + ending, matches);
+        const string message = string("Expected full active match for: ") + statement;
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, (size_t)1, matches.size());
+        const match& finding = matches.front();
+        CPPUNIT_ASSERT_MESSAGE(message, finding.is_enabled);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, string("statement"), finding.type);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, 0, finding.start);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, (int)strlen(statement), finding.end);
+      }
+    }
+  }
+
+  /**
+   * \brief Brackets must not exempt placeholders or noise from cleanup.
+   * \test
+   */
+  void copyscannerBracketedYearNoiseTest()
+  {
+    hCopyrightScanner sc;
+    const char* noise[] = {
+      "Copyright (c) [year] [name]\n",
+      "Copyright (c) [yyyy] [name]\n",
+      "Copyright (c) [Marvin Countryman]\n",
+      "Copyright (c) [c] [name]\n",
+      "Copyright (c) [] [name]\n",
+      "Copyright (c) [202] [name]\n",
+      "Copyright (c) [20210] [name]\n",
+      "Copyright (c) [2021suffix] [name]\n",
+      "Copyright (c) [2021 [name]\n",
+      "Copyright (c) [[2021]] [name]\n",
+      "Copyright (c) {year} {name}\n",
+      "Copyright (c) <year> <name>\n",
+      "Copyright (c) $year $name\n",
+      "Copyright (c) %year% %name%\n"
+    };
+
+    for (const char* statement : noise)
+    {
+      list<match> matches;
+      sc.ScanString(statement, matches);
+      for (const auto& finding : matches)
+        CPPUNIT_ASSERT_MESSAGE(
+          string("Expected no active match for: ") + statement,
+          !finding.is_enabled);
+    }
+  }
+
+  /**
+   * \brief Preserve offsets and separation from the following statement.
+   * \test
+   */
+  void copyscannerBracketedYearBoundariesTest()
+  {
+    hCopyrightScanner sc;
+    const char* content =
+      "// Copyright (c) [2021] [Marvin Countryman]. All rights reserved.\n"
+      "// Copyright (c) 2022 Another Company\n";
+    scannerTest(sc, content, "statement", {
+      "Copyright (c) [2021] [Marvin Countryman].",
+      "Copyright (c) 2022 Another Company"
+    });
+
+    list<match> matches;
+    sc.ScanString(content, matches);
+    for (const auto& finding : matches)
+      CPPUNIT_ASSERT_MESSAGE("Both copyright statements must stay active",
+        finding.is_enabled);
   }
 
   /**
