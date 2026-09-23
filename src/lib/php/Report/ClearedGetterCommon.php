@@ -116,19 +116,19 @@ abstract class ClearedGetterCommon
   {
     $uniqueArray = array();
     foreach ($findings as $item) {
-      $contentKey = $item['content'];
+      $contentKey = array_key_exists('content', $item) ? $item['content'] : '';
       if (!isset($uniqueArray[$contentKey])) {
         $uniqueArray[$contentKey] = array(
-          "licenseId" => $item["licenseId"],
-          "content" => $item["content"],
-          "text" => $item["text"],
+          "licenseId" => array_key_exists('licenseId', $item) ? $item['licenseId'] : '',
+          "content" => $contentKey,
+          "text" => array_key_exists('text', $item) ? $item['text'] : '',
           "files" => array(),
           "hash" => array(),
-          "comments" => $item["comments"]
+          "comments" => array_key_exists('comments', $item) ? $item['comments'] : ''
           );
       }
-      $uniqueArray[$contentKey]['files'] = array_merge($uniqueArray[$contentKey]['files'], $item['files']);
-      $uniqueArray[$contentKey]['hash'] = array_merge($uniqueArray[$contentKey]['hash'], $item['hash']);
+      $uniqueArray[$contentKey]['files'] = array_merge($uniqueArray[$contentKey]['files'], (array)($item['files'] ?? array()));
+      $uniqueArray[$contentKey]['hash'] = array_merge($uniqueArray[$contentKey]['hash'], (array)($item['hash'] ?? array()));
     }
     return array_values($uniqueArray);
   }
@@ -169,10 +169,10 @@ abstract class ClearedGetterCommon
 
       if ($agentCall == "license") {
         $this->groupBy = "text";
-        $groupBy = md5($statement[$this->groupBy].$statement["content"]);
+        $groupBy = md5($text . $content);
       } else {
         $this->groupBy = "content";
-        $groupBy = $statement[$this->groupBy];
+        $groupBy = $content;
       }
 
       if (empty($comments) && array_key_exists($groupBy, $statements)) {
