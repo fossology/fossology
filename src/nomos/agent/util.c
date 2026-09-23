@@ -670,7 +670,10 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
   p->seqNo = cur.offList.used;
   p->nMatch = 0;
   if (recordOffsets) {
-    if (p->bList) free(p->bList);
+    if (p->bList) {
+      listClear(p->bList, DEALLOC_LIST);
+      free(p->bList);
+    }
     p->bList = (list_t *)memAlloc(sizeof(list_t), MTAG_LIST);
     (void) snprintf(utilbuf, sizeof(utilbuf), "\"%c%c%c%c%c%c%c%c%c%c\" match-list",
         *regex, *(regex+1), *(regex+2), *(regex+3), *(regex+4),
