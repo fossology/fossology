@@ -188,6 +188,10 @@ int	main	(int argc, char *argv[])
     {
       struct rpmpkginfo *rpmpi;
       rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+      if (!rpmpi) {
+        LOG_FATAL("Failed to allocate memory for rpmpkginfo\n");
+        return -1;
+      }
       rpmReadConfigFiles(NULL, NULL);
       //if(ProcessUpload(atoi(argv[optind])) == 0)
       if(GetMetadata(argv[optind],rpmpi) != -1)
