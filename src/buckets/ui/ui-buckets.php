@@ -177,7 +177,7 @@ class ui_buckets extends FO_Plugin
     if (pg_num_rows($result) < 1)
     {
       pg_free_result($result);
-      $text = _("Invalid URL, nonexistant item");
+      $text = _("Invalid URL, nonexistent item");
       return "<h2>$text $Uploadtree_pk</h2>";
     }
     $row = pg_fetch_assoc($result);
