@@ -373,17 +373,34 @@ class AjaxClearingView extends FO_Plugin
     foreach ($licenseDecisionResult->getAgentDecisionEvents() as $agentDecisionEvent) {
       $agentId = $agentDecisionEvent->getAgentId();
       $matchId = $agentDecisionEvent->getMatchId();
+      $agentName = $agentDecisionEvent->getAgentName();
       $highlightRegion = $this->highlightDao->getHighlightRegion($matchId);
       $uri = null;
       $percentage = false;
+      $occurrences = null;
       if ($highlightRegion[0] != "" && $highlightRegion[1] != "") {
         $percentage = $agentDecisionEvent->getPercentage();
-        $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
-        $uri = $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId&page=$page#highlight";
+        if (stripos($agentName, 'nomos') !== false) {
+          $anchors = $this->highlightDao->getSignaturePageAnchorsOfHighlightEntry($matchId);
+          if (!empty($anchors)) {
+            $first = $anchors[0];
+            $uri = $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId&page={$first['page']}&anchorStart={$first['start']}&format=text#highlight";
+            if (count($anchors) > 1) {
+              $occurrences = $anchors;
+            }
+          }
+        }
+        if ($uri === null) {
+          $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
+          $uri = $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId&page=$page#highlight";
+        }
       }
-      $agentResults[$agentDecisionEvent->getAgentName()][] = array(
+      $agentResults[$agentName][] = array(
         "uri" => $uri,
-        "text" => $percentage ? " (" . $percentage . " %)" : ""
+        "text" => $percentage ? " (" . $percentage . " %)" : "",
+        "occurrences" => $occurrences,
+        "agentId" => $agentId,
+        "matchId" => $matchId
       );
     }
 
@@ -394,7 +411,21 @@ class AjaxClearingView extends FO_Plugin
       foreach ($agentResult as $index => $agentData) {
         $uri = $agentData['uri'];
         if (! empty($uri)) {
-          $matchTexts[] = "<a href=\"$uri\">#" . ($index + 1) . "</a>" . $agentData['text'];
+          $label = "#" . ($index + 1);
+          if (!empty($agentData['occurrences'])) {
+            $occJson = htmlspecialchars(json_encode($agentData['occurrences']), ENT_QUOTES);
+            $matchTexts[] = "<span class=\"nomos-occurrence\" data-highlight-id=\"{$agentData['matchId']}\">"
+              . "<a href=\"$uri\" class=\"nomos-occurrence-link\""
+              . " data-occurrences=\"$occJson\""
+              . " data-agent-id=\"{$agentData['agentId']}\""
+              . " data-highlight-id=\"{$agentData['matchId']}\">$label</a>"
+              . " <button type=\"button\" class=\"btn btn-light btn-xs nomos-inline-prev\" title=\"Previous occurrence\">&#9664;</button>"
+              . "<button type=\"button\" class=\"btn btn-light btn-xs nomos-inline-next\" title=\"Next occurrence\">&#9654;</button>"
+              . " <span class=\"nomos-inline-count\" style=\"font-size:0.9em;\"></span>"
+              . "</span>" . $agentData['text'];
+          } else {
+            $matchTexts[] = "<a href=\"$uri\">$label</a>" . $agentData['text'];
+          }
         } else {
           $matchTexts[] = $agentData['text'];
         }
