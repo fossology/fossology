@@ -1,0 +1,5 @@
+# License
+
+The analyzers in this repository are published under the
+Sonar Source-Available License. See individual files for the terms that
+apply to each of them.
