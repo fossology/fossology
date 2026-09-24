@@ -77,7 +77,7 @@ COPY ./utils/automation/requirements.txt /bin/
 RUN echo 'APT::Install-Recommends "0" ; APT::Install-Suggests "0" ;' >> /etc/apt/apt.conf \
  && DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install --yes \
- --no-install-recommends $(cat /opt/run-deps) python3 python3-pip \
+ --no-install-recommends $(cat /opt/run-deps) dpkg python3 python3-pip \
  && python3 -m pip install --break-system-packages -r /bin/requirements.txt \
  && DEBIAN_FRONTEND=noninteractive apt-get autoremove --yes \
  && rm -rf /var/lib/apt/lists/* /opt/run-deps /bin/requirements.txt

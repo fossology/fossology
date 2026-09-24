@@ -9,6 +9,7 @@
 import concurrent.futures
 import logging
 import os
+import subprocess
 import tarfile
 import threading
 import urllib.parse
@@ -100,7 +101,7 @@ class Downloader:
     # This list is more specific for common archive types
     archive_extensions = [
       '.tar.gz', '.tgz', '.tar.bz2', '.tbz', '.tar.xz', '.txz', '.zip', '.whl',
-      '.tar'
+      '.jar', '.tar'
     ]
     file_extension = ''
     for ext in archive_extensions:
@@ -132,20 +133,24 @@ class Downloader:
           f.write(chunk)
       logging.info(f"Downloaded {package_name} to {temp_archive_path}")
 
-      if temp_archive_path.lower().endswith('.zip'):
+      if zipfile.is_zipfile(temp_archive_path):
         with zipfile.ZipFile(temp_archive_path, 'r') as zip_ref:
           zip_ref.extractall(package_folder)
         base_dir = self.__get_archive_base_dir(
           temp_archive_path
         )
-      elif temp_archive_path.lower().endswith(
-          ('.tar.gz', '.tgz', '.tar.bz2', '.tbz', '.tar.xz', '.txz', '.tar')
-      ):
+      elif tarfile.is_tarfile(temp_archive_path):
         with tarfile.open(temp_archive_path, 'r:*') as tar_ref:
           tar_ref.extractall(package_folder)
         base_dir = self.__get_archive_base_dir(
           temp_archive_path
         )
+      elif component.get('fossology_component_type') == 'deb':
+        subprocess.run(
+          ['dpkg-deb', '--extract', temp_archive_path, package_folder],
+          check=True, capture_output=True, text=True
+        )
+        base_dir = ''
       else:
         logging.warning(
           f"Unsupported file format for extraction: {file_extension} for "
@@ -181,6 +186,14 @@ class Downloader:
       logging.error(
         f"Error extracting archive for {package_name} from "
         f"{temp_archive_path}: {e}"
+      )
+    except subprocess.CalledProcessError as e:
+      logging.error(
+        f"Error extracting Debian package {package_name}: {e.stderr}"
+      )
+    except FileNotFoundError as e:
+      logging.error(
+        f"Required extraction tool was not found for {package_name}: {e}"
       )
     except IOError as e:
       logging.error(
