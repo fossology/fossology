@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Test\Controllers;
 use Fossology\Lib\Dao\JobDao;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\JobController;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
@@ -74,6 +75,12 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
   private $groupId;
 
   /**
+   * @var DbManager $dbManager
+   * DbManager mock
+   */
+  private $dbManager;
+
+  /**
    * @var JobController $jobController
    * JobController object to test
    */
@@ -105,8 +112,10 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $this->showJobsDao = M::mock(ShowJobsDao::class);
     $this->uploadDao = M::mock(UploadDao::class);
     $this->groupId = 2;
+    $this->dbManager = M::mock(DbManager::class);
 
     $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
+    $this->dbHelper->shouldReceive('getDbManager')->andReturn($this->dbManager);
     $this->restHelper->shouldReceive('getJobDao')->andReturn($this->jobDao);
     $this->restHelper->shouldReceive('getShowJobDao')->andReturn($this->showJobsDao);
     $this->restHelper->shouldReceive('getUploadDao')->andReturn($this->uploadDao);
@@ -178,7 +187,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $job = new Job(11, "job_name", "01-01-2020", 4, 2, 2, 0, "Completed");
     $jobQueue = new JobQueue(44, 'readmeoss', '2020-01-01 20:41:49', '2020-01-01 20:41:50',
       'Completed', 0, null, [], 0, true, false, true,
-      ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']);
+      ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16'], 0);
     $this->jobDao->shouldReceive('getChlidJobStatus')->withArgs(array(11))
       ->andReturn(['44' => 0]);
     $this->showJobsDao->shouldReceive('getEstimatedTime')
@@ -194,7 +203,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $userId = 2;
     $user = $this->getUsers([$userId]);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
-    $this->dbHelper->shouldReceive('getUserJobs')->withArgs(array(2, NULL, 'ASC', 0, 1))
+    $this->dbHelper->shouldReceive('getUserJobs')->withArgs(array(2, NULL, 'ASC', 0, 1, $this->groupId))
       ->andReturn([[$job], 1]);
     $actualResponse = $this->jobController->getJobs($request, $response, []);
     $expectedResponse = $job->getArray(ApiVersion::V1);
@@ -215,7 +224,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $jobTwo = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");
     $jobTwoQueue = new JobQueue(45, 'readmeoss', '2020-01-01 20:41:49', '2020-01-01 20:41:50',
     'Completed', 0, null, [], 0, true, false, true,
-    ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']);
+    ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16'], 0);
     $this->jobDao->shouldReceive('getChlidJobStatus')->withArgs(array(11))
       ->andReturn(['44' => 0]);
     $this->jobDao->shouldReceive('getChlidJobStatus')->withArgs(array(12))
@@ -235,7 +244,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $userId = 2;
     $user = $this->getUsers([$userId]);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
-    $this->dbHelper->shouldReceive('getUserJobs')->withArgs(array(2, null, "ASC", 1, 2))
+    $this->dbHelper->shouldReceive('getUserJobs')->withArgs(array(2, null, "ASC", 1, 2, $this->groupId))
     ->andReturn([[$jobTwo], 2]);
     $actualResponse = $this->jobController->getJobs($request, $response, []);
     $expectedResponse = $jobTwo->getArray(ApiVersion::V1);
@@ -280,14 +289,14 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $job = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");
     $jobTwoQueue = new JobQueue(45, 'readmeoss', '2020-01-01 20:41:49', '2020-01-01 20:41:50',
     'Completed', 0, null, [], 0, true, false, true,
-    ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']);
+    ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16'], 0);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["job", "job_pk", 12])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", 5])->andReturn(true);
     $this->uploadDao->shouldReceive('isAccessible')
       ->withArgs([5, $this->groupId])->andReturn(true);
-    $this->dbHelper->shouldReceive('getJobs')->withArgs(array(12, NULL, 'ASC', 0, 1, NULL))
+    $this->dbHelper->shouldReceive('getJobs')->withArgs(array(12, NULL, 'ASC', 0, 1, NULL, NULL, NULL))
       ->andReturn([[$job], 1]);
     $this->jobDao->shouldReceive('getChlidJobStatus')->withArgs(array(12))
       ->andReturn(['45' => 0]);
@@ -330,7 +339,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs(["upload", "upload_pk", 5])->andReturn(true);
     $this->uploadDao->shouldReceive('isAccessible')
       ->withArgs([5, $this->groupId])->andReturn(false);
-    $this->dbHelper->shouldReceive('getJobs')->withArgs(array(12, NULL, 'ASC', 0, 1, NULL))
+    $this->dbHelper->shouldReceive('getJobs')->withArgs(array(12, NULL, 'ASC', 0, 1, NULL, NULL, NULL))
       ->andReturn([[$job], 1]);
 
     $requestHeaders = new Headers();
@@ -349,6 +358,209 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $this->jobController->getJobs($request, $response, ["id" => 12]);
   }
 
+  public function testGetJobLog()
+  {
+    $jobId = 12;
+    $queueId = 45;
+    $logContent = "Started scan\nProcessing files\nScan completed successfully\n";
+
+    $logFile = tempnam(sys_get_temp_dir(), 'fossology-job-log-');
+    file_put_contents($logFile, $logContent);
+
+    $this->dbManager->shouldReceive('getSingleRow')
+    ->once()
+    ->withArgs([
+      "SELECT jq.jq_log
+      FROM jobqueue jq
+      INNER JOIN job j ON j.job_pk = jq.jq_job_fk
+      WHERE j.job_pk = $1
+        AND jq.jq_pk = $2",
+      [$jobId, $queueId]
+    ])
+    ->andReturn([
+      'jq_log' => $logFile
+    ]);
+
+    $response = new ResponseHelper();
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+
+    $request = new Request(
+      'GET',
+      new Uri("HTTP", "localhost"),
+      $requestHeaders,
+      [],
+      [],
+      $body
+    );
+
+    $result = $this->jobController->getJobLog(
+      $request,
+      $response,
+      [
+        'id' => $jobId,
+        'queue' => $queueId
+      ]
+    );
+
+    $data = $this->getResponseJson($result);
+
+    $this->assertEquals(200, $result->getStatusCode());
+    $this->assertEquals($logContent, $data['log']);
+    $this->assertFalse($data['truncated']);
+
+    unlink($logFile);
+  }
+
+  public function testGetJobLogWhenLogFileDoesNotExist()
+  {
+    $jobId = 12;
+    $queueId = 45;
+
+    $this->dbManager->shouldReceive('getSingleRow')
+    ->withArgs([
+      "SELECT jq.jq_log
+      FROM jobqueue jq
+      INNER JOIN job j ON j.job_pk = jq.jq_job_fk
+      WHERE j.job_pk = $1
+        AND jq.jq_pk = $2",
+      [$jobId, $queueId]
+    ])
+    ->andReturn([
+      'jq_log' => '/non/existent/job/log/file.log'
+    ]);
+
+    $response = new ResponseHelper();
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+
+    $request = new Request(
+      'GET',
+      new Uri("HTTP", "localhost"),
+      $requestHeaders,
+      [],
+      [],
+      $body
+    );
+
+    $result = $this->jobController->getJobLog(
+      $request,
+      $response,
+      [
+        'id' => $jobId,
+        'queue' => $queueId
+      ]
+    );
+
+    $data = $this->getResponseJson($result);
+
+    $this->assertEquals(200, $result->getStatusCode());
+    $this->assertEquals('', $data['log']);
+    $this->assertFalse($data['truncated']);
+  }
+
+  public function testGetJobLogWhenJobQueueDoesNotExist()
+  {
+    $jobId = 12;
+    $queueId = 999;
+
+    $this->dbManager->shouldReceive('getSingleRow')
+    ->withArgs([
+      "SELECT jq.jq_log
+      FROM jobqueue jq
+      INNER JOIN job j ON j.job_pk = jq.jq_job_fk
+      WHERE j.job_pk = $1
+        AND jq.jq_pk = $2",
+      [$jobId, $queueId]
+    ])
+    ->andReturn([]);
+
+    $response = new ResponseHelper();
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+
+    $request = new Request(
+      'GET',
+      new Uri("HTTP", "localhost"),
+      $requestHeaders,
+      [],
+      [],
+      $body
+    );
+
+    $result = $this->jobController->getJobLog(
+      $request,
+      $response,
+      [
+        'id' => $jobId,
+        'queue' => $queueId
+      ]
+    );
+
+    $data = $this->getResponseJson($result);
+
+    $this->assertEquals(404, $result->getStatusCode());
+    $this->assertEquals('Job queue not found.', $data['message']);
+  }
+
+  public function testGetJobLogTruncatesLargeLog()
+  {
+    $jobId = 12;
+    $queueId = 45;
+
+    $logContent = str_repeat('A', 32768) . 'EXTRA CONTENT';
+
+    $logFile = tempnam(sys_get_temp_dir(), 'fossology-job-log-');
+    file_put_contents($logFile, $logContent);
+
+    $this->dbManager->shouldReceive('getSingleRow')
+    ->withArgs([
+      "SELECT jq.jq_log
+      FROM jobqueue jq
+      INNER JOIN job j ON j.job_pk = jq.jq_job_fk
+      WHERE j.job_pk = $1
+        AND jq.jq_pk = $2",
+      [$jobId, $queueId]
+    ])
+    ->andReturn([
+      'jq_log' => $logFile
+    ]);
+
+    $response = new ResponseHelper();
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+
+    $request = new Request(
+      'GET',
+      new Uri("HTTP", "localhost"),
+      $requestHeaders,
+      [],
+      [],
+      $body
+    );
+
+    $result = $this->jobController->getJobLog(
+      $request,
+      $response,
+      [
+        'id' => $jobId,
+        'queue' => $queueId
+      ]
+    );
+
+    $data = $this->getResponseJson($result);
+
+    $this->assertEquals(32768, strlen($data['log']));
+    $this->assertTrue($data['truncated']);
+    $this->assertEquals(str_repeat('A', 32768), $data['log']);
+
+    unlink($logFile);
+  }
+
   /**
    * @test
    * -# Test JobController::getJobs() with single upload
@@ -359,7 +571,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
     $job = new Job(12, "job_two", "01-01-2020", 5, 2, 2, 0, "Completed");
     $jobTwoQueue = new JobQueue(45, 'readmeoss', '2020-01-01 20:41:49', '2020-01-01 20:41:50',
     'Completed', 0, null, [], 0, true, false, true,
-    ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']);
+    ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16'], 0);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", 5])->andReturn(true);
     $this->uploadDao->shouldReceive('isAccessible')

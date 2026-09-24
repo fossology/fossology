@@ -27,6 +27,11 @@ class JobQueue
    */
   private $jobQueueType;
   /**
+   * @var integer $priority
+   * Job queue priority
+   */
+  private $priority;
+  /**
    * @var string $startTime
    * Start time of the Job
    */
@@ -85,6 +90,7 @@ class JobQueue
    * Upload constructor.
    * @param integer $jobQueueId
    * @param string $jobQueueType
+   * @param integer $priority
    * @param string $startTime
    * @param string $endTime
    * @param string $status
@@ -100,7 +106,7 @@ class JobQueue
   public function __construct($jobQueueId, $jobQueueType, $startTime, $endTime,
                               $status, $itemsProcessed, $log, $dependencies,
                               $itemsPerSec, $canDoActions, $isInProgress,
-                              $isReady, $download)
+                              $isReady, $download, $priority)
   {
     $this->setJobQueueId($jobQueueId);
     $this->setJobQueueType($jobQueueType);
@@ -115,6 +121,7 @@ class JobQueue
     $this->setIsInProgress($isInProgress);
     $this->setIsReady($isReady);
     $this->setDownload($download);
+    $this->setPriority($priority);
   }
 
   /**
@@ -147,6 +154,22 @@ class JobQueue
   public function setJobQueueType($jobQueueType)
   {
     $this->jobQueueType = $jobQueueType;
+  }
+
+  /**
+   * @return int
+   */
+  public function getPriority()
+  {
+    return $this->priority;
+  }
+
+  /**
+   * @param int $priority
+   */
+  public function setPriority($priority)
+  {
+    $this->priority = intval($priority);
   }
 
   /**
@@ -346,6 +369,7 @@ class JobQueue
     return [
       "jobQueueId" => $this->getJobQueueId(),
       "jobQueueType" => $this->getJobQueueType(),
+      "priority" => $this->getPriority(),
       "startTime" => $this->getStartTime(),
       "endTime" => $this->getEndTime(),
       "status" => $this->getStatus(),

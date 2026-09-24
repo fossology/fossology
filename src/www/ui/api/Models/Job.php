@@ -41,6 +41,8 @@ class Job
    * Upload id for current job
    */
   private $uploadId;
+  /** @var string */
+  private $uploadName;
   /**
    * @var integer $userId
    * User id for current job
@@ -86,12 +88,13 @@ class Job
    * @param array $jobQueue
    */
   public function __construct($id, $name = "", $queueDate = "", $uploadId = 0,
-    $userId = 0, $groupId = 0, $eta = 0, $status = "", $jobQueue = [])
+    $userId = 0, $groupId = 0, $eta = 0, $status = "", $jobQueue = [], $uploadName = "")
   {
     $this->id = intval($id);
     $this->name = $name;
     $this->queueDate = $queueDate;
     $this->uploadId = intval($uploadId);
+    $this->uploadName = $uploadName;
     $this->userId = intval($userId);
     $this->groupId = intval($groupId);
     $this->eta = intval($eta);
@@ -123,6 +126,7 @@ class Job
         'name'      => $this->name,
         'queueDate' => $this->queueDate,
         'uploadId'  => $this->uploadId,
+        'uploadName' => $this->uploadName,
         'userName'  => $userDao->getUserName($this->userId),
         'groupName' => $userDao->getGroupNameById($this->groupId),
         'eta'       => $this->eta,
@@ -135,6 +139,7 @@ class Job
         'name'      => $this->name,
         'queueDate' => $this->queueDate,
         'uploadId'  => $this->uploadId,
+        'uploadName' => $this->uploadName,
         'userId'    => $this->userId,
         'groupId'   => $this->groupId,
         'eta'       => $this->eta,
@@ -249,6 +254,15 @@ class Job
   public function setUploadId($uploadId)
   {
     $this->uploadId = $uploadId;
+  }
+
+  /**
+   * Set the historical upload name.
+   * @param string $uploadName
+   */
+  public function setUploadName($uploadName)
+  {
+    $this->uploadName = $uploadName;
   }
 
   /**
