@@ -577,6 +577,31 @@ void* interface_listen_thread(scheduler_t* scheduler)
 /* ************************************************************************** */
 
 /**
+ * @brief Compute the interface thread-pool size, honoring GLib's contract.
+ *
+ * CONF_interface_nthreads < 0 is GLib's "unlimited" sentinel and is passed
+ * through unchanged. Otherwise the pool is raised to at least host_total_max()
+ * so UI/CLI connections are never queued behind agent threads - but never 0,
+ * which would stall the pool.
+ *
+ * @param scheduler  the scheduler whose host_list drives the floor value
+ * @return the number of threads to give the interface pool (or -1 for unlimited)
+ */
+gint interface_pool_size(scheduler_t* scheduler)
+{
+  gint nthreads = CONF_interface_nthreads;
+  if(nthreads >= 0)                       /* not the unlimited sentinel */
+  {
+    gint total = host_total_max(scheduler->host_list);
+    if(total > nthreads)
+      nthreads = total;
+    if(nthreads < 1)
+      nthreads = 1;                        /* never hand GLib a 0-thread pool */
+  }
+  return nthreads;
+}
+
+/**
  * @brief Create the interface thread and thread pool that handle UI connections
  *
  * The GUI and the CLI use a socket connection to communicate with the
@@ -590,12 +615,14 @@ void interface_init(scheduler_t* scheduler)
 {
   if(!scheduler->i_created)
   {
+    gint nthreads = interface_pool_size(scheduler);
+
     scheduler->i_created = 1;
     scheduler->i_terminate = 0;
 
     scheduler->cancel = NULL;
     scheduler->workers = g_thread_pool_new((GFunc)interface_thread,
-        scheduler, CONF_interface_nthreads, FALSE, NULL);
+        scheduler, nthreads, FALSE, NULL);
 
 #if GLIB_CHECK_VERSION(2, 32, 0)
     scheduler->server = g_thread_new("interface",
