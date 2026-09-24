@@ -437,7 +437,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     }
     $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,$version);
     $this->dbHelper->shouldReceive('getLicenseCount')
-      ->withArgs(["all", $this->groupId])->andReturn(4);
+      ->withArgs(["all", $this->groupId, false])->andReturn(4);
     $this->dbHelper->shouldReceive('getLicensesPaginated')
       ->withArgs([1, 100, "all", $this->groupId, false])
       ->andReturn($this->translateLicenseToDb($licenses));
@@ -499,7 +499,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     }
     $request = $request->withAttribute(Apiversion::ATTRIBUTE_NAME,$version);
     $this->dbHelper->shouldReceive('getLicenseCount')
-      ->withArgs(["all", $this->groupId])->andReturn(4);
+      ->withArgs(["all", $this->groupId, false])->andReturn(4);
     $this->expectException(HttpBadRequestException::class);
 
     $this->licenseController->getAllLicenses($request, new ResponseHelper(), []);
@@ -535,7 +535,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("GET", new Uri("HTTP", "localhost", 80,
       "/license", "kind=all"), $requestHeaders, [], [], $body);
     $this->dbHelper->shouldReceive('getLicenseCount')
-      ->withArgs(["all", $this->groupId])->andReturn(4)->once();
+      ->withArgs(["all", $this->groupId, false])->andReturn(4)->once();
     $this->dbHelper->shouldReceive('getLicensesPaginated')
       ->withArgs([1, 100, "all", $this->groupId, false])
       ->andReturn([])->once();
@@ -546,7 +546,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("GET", new Uri("HTTP", "localhost", 80,
       "/license", "kind=main"), $requestHeaders, [], [], $body);
     $this->dbHelper->shouldReceive('getLicenseCount')
-      ->withArgs(["main", $this->groupId])->andReturn(4)->once();
+      ->withArgs(["main", $this->groupId, false])->andReturn(4)->once();
     $this->dbHelper->shouldReceive('getLicensesPaginated')
       ->withArgs([1, 100, "main", $this->groupId, false])
       ->andReturn([])->once();
@@ -558,7 +558,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
       "/license", "kind=candidate"), $requestHeaders, [], [], $body);
     $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
     $this->dbHelper->shouldReceive('getLicenseCount')
-      ->withArgs(["candidate", $this->groupId])->andReturn(4)->once();
+      ->withArgs(["candidate", $this->groupId, false])->andReturn(4)->once();
     $this->dbHelper->shouldReceive('getLicensesPaginated')
       ->withArgs([1, 100, "candidate", $this->groupId, false])
       ->andReturn([])->once();
@@ -569,12 +569,76 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("GET", new Uri("HTTP", "localhost", 80,
       "/license", "kind=bogus"), $requestHeaders, [], [], $body);
     $this->dbHelper->shouldReceive('getLicenseCount')
-      ->withArgs(["all", $this->groupId])->andReturn(4)->once();
+      ->withArgs(["all", $this->groupId, false])->andReturn(4)->once();
     $this->dbHelper->shouldReceive('getLicensesPaginated')
       ->withArgs([1, 100, "all", $this->groupId, false])
       ->andReturn([])->once();
 
     $this->licenseController->getAllLicenses($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::getAllLicenses() with active filter for version 1
+   * -# Check if active parameter is passed to DbHelper
+   */
+  public function testGetAllLicenseActiveFilterV1()
+  {
+    $this->testGetAllLicenseActiveFilter(ApiVersion::V1);
+  }
+  /**
+   * @test
+   * -# Test for LicenseController::getAllLicenses() with active filter for version 2
+   * -# Check if active parameter is passed to DbHelper
+   */
+  public function testGetAllLicenseActiveFilterV2()
+  {
+    $this->testGetAllLicenseActiveFilter();
+  }
+  /**
+   * @param $version to test
+   * @return void
+   */
+  private function testGetAllLicenseActiveFilter($version = ApiVersion::V2)
+  {
+    $licenses = [
+      $this->getLicense("MIT"),
+      $this->getLicense("Exotic")
+    ];
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/license"), $requestHeaders, [], [], $body);
+    if ($version == ApiVersion::V2) {
+      $request = $request->withQueryParams(["page" => 1, "limit" => 100, "active" => "true"]);
+    } else {
+      $request = $request->withHeader('limit', 100)
+        ->withHeader('page', 1)
+        ->withHeader('active', 'true');
+    }
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
+    $this->dbHelper->shouldReceive('getLicenseCount')
+      ->withArgs(["all", $this->groupId, true])->andReturn(2)->once();
+    $this->dbHelper->shouldReceive('getLicensesPaginated')
+      ->withArgs([1, 100, "all", $this->groupId, true])
+      ->andReturn($this->translateLicenseToDb($licenses))->once();
+
+    $responseLicense = [];
+    foreach ($licenses as $license) {
+      $responseLicense[] = $license->getArray();
+    }
+    $expectedResponse = (new ResponseHelper())->withHeader("X-Total-Pages", 1)
+      ->withJson($responseLicense, 200);
+
+    $actualResponse = $this->licenseController->getAllLicenses($request,
+      new ResponseHelper(), []);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+    $this->assertEquals($expectedResponse->getHeaders(),
+      $actualResponse->getHeaders());
   }
 
   /**
