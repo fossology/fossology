@@ -202,26 +202,27 @@ class core_auth extends FO_Plugin
   /**
    * \brief This is only called when the user logs out.
    */
-  public function Output()
+  public function Output($fromRest=false)
   {
     global $SysConf;
+    if (! $fromRest) {
+      $this->vars['loginProvider'] = "password";
+      if (array_key_exists('AUTHENTICATION', $SysConf) &&
+        array_key_exists('provider', $SysConf['AUTHENTICATION'])) {
+        $this->vars['loginProvider'] = $SysConf['AUTHENTICATION']['provider'];
+      }
 
-    $this->vars['loginProvider'] = "password";
-    if (array_key_exists('AUTHENTICATION', $SysConf) &&
-      array_key_exists('provider', $SysConf['AUTHENTICATION'])) {
-      $this->vars['loginProvider'] = $SysConf['AUTHENTICATION']['provider'];
+      $userName = GetParm("username", PARM_TEXT);
+      $password = GetParm("password", PARM_TEXT);
+      $timezone = GetParm("timezone", PARM_TEXT);
+      if (empty($timezone) || strpos($timezone,"Unknown") == true) {
+        $timezone = date_default_timezone_get();
+      }
+      $_SESSION['timezone'] = $timezone;
+      $referrer = GetParm("HTTP_REFERER", PARM_TEXT);
+      $getEmail = "";
+      $providerCheck = GetParm("providerCheck", PARM_TEXT);
     }
-
-    $userName = GetParm("username", PARM_TEXT);
-    $password = GetParm("password", PARM_TEXT);
-    $timezone = GetParm("timezone", PARM_TEXT);
-    if (empty($timezone) || strpos($timezone,"Unknown") == true) {
-      $timezone = date_default_timezone_get();
-    }
-    $_SESSION['timezone'] = $timezone;
-    $referrer = GetParm("HTTP_REFERER", PARM_TEXT);
-    $getEmail = "";
-    $providerCheck = GetParm("providerCheck", PARM_TEXT);
     $proxy = "";
     if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
         ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
@@ -232,7 +233,7 @@ class core_auth extends FO_Plugin
       $proxy = $SysConf['FOSSOLOGY']['https_proxy'];
     }
 
-    if (! empty($providerCheck)) {
+    if ((! empty($providerCheck)) || $fromRest) {
       $provider = new GenericProvider([
         "clientId"                => $SysConf['SYSCONFIG']['OidcAppId'],
         "clientSecret"            => $SysConf['SYSCONFIG']['OidcSecret'],
@@ -245,6 +246,9 @@ class core_auth extends FO_Plugin
       $authorizationUrl = $provider->getAuthorizationUrl([
         "scope" => ['email openid']
       ]);
+      if ($fromRest) {
+        return $authorizationUrl;
+      }
       $_SESSION['oauth2state'] = $provider->getState();
       $_SESSION['HTTP_REFERER'] = $referrer;
       header('Location: ' . $authorizationUrl);
