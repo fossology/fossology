@@ -727,6 +727,17 @@ class UploadController extends RestController
       }
       $uploadBrowseProxy->setStatusAndComment($id, $status, $comment);
     }
+    if (
+      $isJsonRequest &&
+      $status === null &&
+      array_key_exists("comment", $bodyContent)
+    ) {
+      $uploadBrowseProxy->setStatusAndComment(
+        $id,
+        $uploadBrowseProxy->getStatus($id),
+        $bodyContent["comment"]
+      );
+    }
     // Handle update of name
     if (
       $isJsonRequest &&

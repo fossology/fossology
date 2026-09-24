@@ -165,7 +165,7 @@ class DbHelper
     $params[] = ($page - 1) * $limit;
 
     $sql = "SELECT
-upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename, upload_clearing.assignee
+upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename, upload_clearing.assignee, upload_clearing.status_fk, upload_clearing.status_comment
 FROM $partialQuery $where ORDER BY upload_pk ASC LIMIT $limit OFFSET $" .
       count($params) . ";";
     $results = $this->dbManager->getRows($sql, $params, $statementGet);
@@ -193,7 +193,7 @@ FROM $partialQuery $where ORDER BY upload_pk ASC LIMIT $limit OFFSET $" .
 
       $hash = new Hash($pfile_sha1, $pfile_md5, $pfile_sha256, $pfile_size);
       $upload = new Upload($folderId, $folderName, $uploadId,
-        $row["upload_desc"], $row["upload_filename"], $row["upload_ts"], $row["assignee"], $hash);
+        $row["upload_desc"], $row["upload_filename"], $row["upload_ts"], $row["assignee"], $row["status_fk"], $hash, $row["status_comment"]);
       if (! empty($row["assignee"]) && $row["assignee"] != 1) {
         $upload->setAssigneeDate($this->uploadDao->getAssigneeDate($uploadId));
       }
