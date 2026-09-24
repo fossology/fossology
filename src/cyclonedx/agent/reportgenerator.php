@@ -15,6 +15,56 @@ use Fossology\Lib\Data\LicenseRef;
 
 class BomReportGenerator
 {
+  /** @var string Custom tag namespace prefix for properties */
+  private $tagNamespace = 'fossology:';
+
+  /** @var string CycloneDX spec version */
+  private $specVersion = '1.7';
+
+  const SUPPORTED_VERSIONS = ['1.4', '1.5', '1.6', '1.7'];
+
+  /**
+   * Set the tag namespace prefix for CycloneDX properties.
+   *
+   * @param string $namespace The namespace prefix (e.g. 'fossology:').
+   */
+  public function setTagNamespace(string $namespace): void
+  {
+    $this->tagNamespace = $namespace;
+  }
+
+  /**
+   * Get the current tag namespace prefix.
+   *
+   * @return string The namespace prefix.
+   */
+  public function getTagNamespace(): string
+  {
+    return $this->tagNamespace;
+  }
+
+  /**
+   * Set the CycloneDX spec version.
+   *
+   * @param string $version The spec version (e.g. '1.4', '1.7').
+   */
+  public function setSpecVersion(string $version): void
+  {
+    if (in_array($version, self::SUPPORTED_VERSIONS)) {
+      $this->specVersion = $version;
+    }
+  }
+
+  /**
+   * Get the current CycloneDX spec version.
+   *
+   * @return string The spec version.
+   */
+  public function getSpecVersion(): string
+  {
+    return $this->specVersion;
+  }
+
   /**
    * Creates a component.
    *
@@ -57,44 +107,53 @@ class BomReportGenerator
    */
   public function generateReport($bomdata): array
   {
+    $ver = $this->specVersion;
+
+    $metadata = [
+      'timestamp' => date('c'),
+      'tools' => [
+        'components' => [
+          [
+            'type' => 'application',
+            'vendor' => 'FOSSology',
+            'name' => 'FOSSology',
+            'version' => $bomdata['tool-version'],
+            'bom-ref' => 'tool-fossology'
+          ],
+          [
+            'type' => 'application',
+            'vendor' => 'FOSSology',
+            'name' => 'FOSSology Scanners',
+            'version' => $bomdata['tool-version'],
+            'bom-ref' => 'tool-fossology-scanners'
+          ]
+        ]
+      ],
+      'component' => $bomdata['maincomponent']
+    ];
+
+    // metadata.authors was introduced in CycloneDX 1.6
+    if (version_compare($ver, '1.6', '>=')) {
+      $metadata['authors'] = [
+        [
+          'name' => 'FOSSology Analyst',
+          'bom-ref' => 'person-fossology-analyst'
+        ]
+      ];
+    }
+
     $report = [
       'bomFormat' => 'CycloneDX',
-      '$schema' => 'http://cyclonedx.org/schema/bom-1.7.schema.json',
-      'specVersion' => '1.7',
+      '$schema' => 'http://cyclonedx.org/schema/bom-' . $ver . '.schema.json',
+      'specVersion' => $ver,
       'version' => 1,
       'serialNumber' => 'urn:uuid:'. uuid_create(UUID_TYPE_TIME),
-      'metadata' => [
-        'timestamp' => date('c'),
-        'tools' => [
-          'components' => [
-            [
-              'type' => 'application',
-              'vendor' => 'FOSSology',
-              'name' => 'FOSSology',
-              'version' => $bomdata['tool-version'],
-              'bom-ref' => 'tool-fossology'
-            ],
-            [
-              'type' => 'application',
-              'vendor' => 'FOSSology',
-              'name' => 'FOSSology Scanners',
-              'version' => $bomdata['tool-version'],
-              'bom-ref' => 'tool-fossology-scanners'
-            ]
-          ]
-        ],
-        'authors' => [
-          [
-            'name' => 'FOSSology Analyst',
-            'bom-ref' => 'person-fossology-analyst'
-          ]
-        ],
-        'component' => $bomdata['maincomponent']
-      ],
+      'metadata' => $metadata,
       'components' => $bomdata['components']
     ];
 
-    if (isset($bomdata['citations']) && !empty($bomdata['citations'])) {
+    // citations (annotations) introduced in CycloneDX 1.5
+    if (version_compare($ver, '1.5', '>=') && !empty($bomdata['citations'])) {
       $report['citations'] = $bomdata['citations'];
     }
 
@@ -167,13 +226,13 @@ class BomReportGenerator
     $properties = [];
     if (array_key_exists('acknowledgements', $componentData) && !empty($componentData['acknowledgements'])) {
       $properties[] = [
-        'name' => 'fossology:acknowledgement',
+        'name' => $this->tagNamespace . 'acknowledgement',
         'value' => $componentData['acknowledgements']
       ];
     }
     if (array_key_exists('comments', $componentData) && !empty($componentData['comments'])) {
       $properties[] = [
-        'name' => 'fossology:comment',
+        'name' => $this->tagNamespace . 'comment',
         'value' => $componentData['comments']
       ];
     }
