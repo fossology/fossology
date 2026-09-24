@@ -88,7 +88,7 @@ public:
       std::tuple<unsigned long, std::string> lic1,
       std::tuple<unsigned long, std::string> lic2) const;
   bool queryInsertResult(unsigned long pFileId, int a_id, unsigned long id1,
-                         unsigned long id2, const string& comp);
+                         unsigned long id2, const char* comp);
   bool check(unsigned long id1, unsigned long id2, unsigned long pFileId);
   CompatibilityStatus getDefaultRule() const;
 };
