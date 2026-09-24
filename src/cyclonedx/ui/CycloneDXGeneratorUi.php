@@ -13,6 +13,8 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Report\MultiUploadAggregatorScheduler;
+use Fossology\Lib\Report\ReportUtils;
 use Symfony\Component\HttpFoundation\Request;
 
 class CycloneDXGeneratorUi extends DefaultPlugin
@@ -110,6 +112,14 @@ class CycloneDXGeneratorUi extends DefaultPlugin
 
   protected function getJobAndJobqueue($groupId, $upload, $addUploads)
   {
+    $aggFormat = 'cyclonedx';
+    if (!empty($addUploads) && ReportUtils::isAggregatorSupportedFormat($aggFormat)) {
+      $allUploads = $addUploads;
+      $allUploads[$upload->getId()] = $upload;
+      $scheduler = new MultiUploadAggregatorScheduler();
+      return $scheduler->scheduleForCurrentUser($aggFormat, $upload, $allUploads);
+    }
+
     $uploadId = $upload->getId();
     $cyclonedxAgent = plugin_find('agent_cyclonedx');
     $userId = Auth::getUserId();

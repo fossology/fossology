@@ -321,4 +321,233 @@ class ReportUtils
         __METHOD__);
     }
   }
+
+  /**
+   * jq_type values of every agent that registers rows in the reportgen table.
+   *
+   * Used as a blocklist when looking for changes to an upload: a job of any
+   * other type is treated as having changed the data a report is built from,
+   * so an unknown agent errs towards regenerating the report.
+   */
+  const REPORT_AGENT_TYPES = [
+    'spdx2',
+    'spdx2tv',
+    'spdx2csv',
+    'dep5',
+    'spdx3json',
+    'spdx3jsonld',
+    'spdx3rdf',
+    'spdx3tv',
+    'readmeoss',
+    'cyclonedx',
+    'clixml',
+    'unifiedreport',
+    'decisionexporter',
+    'reportImport',
+    'reportaggregator',
+  ];
+
+  /**
+   * ORDER BY clause picking the report to offer for a job.
+   *
+   * A multi-upload job holds one reportgen row per upload on top of the merged
+   * report, so the merged one has to win.
+   */
+  const AGGREGATED_FIRST_ORDER =
+    "ORDER BY (position('/aggregated_' in filepath) > 0) DESC, upload_fk";
+
+  /**
+   * Formats supported by report-aggregator multi-upload merge.
+   */
+  const AGGREGATOR_FORMATS = [
+    'spdx2tv',
+    'cyclonedx',
+    'spdx3json',
+    'dep5',
+    'readmeoss',
+    'clixml',
+  ];
+
+  /**
+   * @param string $format Library / FOSSology format name
+   * @return bool
+   */
+  public static function isAggregatorSupportedFormat($format)
+  {
+    return in_array($format, self::AGGREGATOR_FORMATS, true);
+  }
+
+  /**
+   * Map library format to AgentPlugin Name (plugin_find key).
+   *
+   * @param string $format
+   * @return string|null
+   */
+  public static function agentPluginNameForAggregatorFormat($format)
+  {
+    $map = [
+      'spdx2tv' => 'agent_spdx2tv',
+      'dep5' => 'agent_dep5',
+      'spdx3json' => 'agent_spdx3json',
+      'cyclonedx' => 'agent_cyclonedx',
+      'clixml' => 'agent_clixml',
+      'readmeoss' => 'agent_readmeoss',
+    ];
+    return $map[$format] ?? null;
+  }
+
+  /**
+   * Name parts [prefix, extension] of a report, per output format.
+   *
+   * Keyed by every format string an agent can hold, not only by the merge
+   * format names, because an agent's own name for a format is not always the
+   * one the rest of the code uses for it.
+   */
+  const REPORT_FILE_NAME_PARTS = [
+    'spdx2' => ['SPDX2', '.spdx.rdf'],
+    'spdx2tv' => ['SPDX2TV', '.spdx'],
+    'spdx2csv' => ['SPDX2CSV', '.csv'],
+    'dep5' => ['DEP5', '.txt'],
+    'spdx3json' => ['SPDX3JSON', '.json'],
+    'spdx3jsonld' => ['SPDX3JSONLD', '.jsonld'],
+    'spdx3rdf' => ['SPDX3RDF', '.spdx.rdf'],
+    'spdx3tv' => ['SPDX3TV', '.spdx'],
+    // CycloneDXAgent calls its only format cyclonedx_json, the merge calls the
+    // same thing cyclonedx. Both have to name the same file.
+    'cyclonedx' => ['CYCLONEDX_JSON', '.json'],
+    'cyclonedx_json' => ['CYCLONEDX_JSON', '.json'],
+    'clixml' => ['CLIXML', '.xml'],
+    'xml' => ['XML', '.xml'],
+    'readmeoss' => ['ReadMe_OSS', '.txt'],
+  ];
+
+  /**
+   * File extension (including leading dot) of a report format.
+   *
+   * @param string $format Report output format
+   * @return string Extension, empty for an unknown format
+   */
+  public static function reportFileExtension($format)
+  {
+    return self::REPORT_FILE_NAME_PARTS[$format][1] ?? '';
+  }
+
+  /**
+   * File extension (including leading dot) for a merge format.
+   *
+   * @param string $format
+   * @return string
+   */
+  public static function extensionForAggregatorFormat($format)
+  {
+    return self::reportFileExtension($format);
+  }
+
+  /**
+   * Base name a report agent writes for a single upload.
+   *
+   * This is the single source of truth for report file names: the agents build
+   * their output path from it, and report reuse looks reports up by it.
+   *
+   * @param string $format      Report output format
+   * @param string $packageName Upload file name
+   * @return string Report base name
+   */
+  public static function canonicalReportBasename($format, $packageName)
+  {
+    list($prefix, $extension) = self::REPORT_FILE_NAME_PARTS[$format]
+      ?? [strtoupper($format), ''];
+    return $prefix . '_' . $packageName . $extension;
+  }
+
+  /**
+   * Absolute path a report agent writes for a single upload.
+   *
+   * @param string $format      Report output format
+   * @param string $packageName Upload file name
+   * @return string Absolute report path
+   */
+  public static function canonicalReportPath($format, $packageName)
+  {
+    global $SysConf;
+    return rtrim($SysConf['FOSSOLOGY']['path'], '/') . '/report/'
+      . self::canonicalReportBasename($format, $packageName);
+  }
+
+  /**
+   * Absolute path of the aggregator temp directory for a job.
+   *
+   * @param int $jobId
+   * @return string
+   */
+  public static function getAggregatorTempDir($jobId)
+  {
+    global $SysConf;
+    return rtrim($SysConf['FOSSOLOGY']['path'], '/')
+      . '/report/aggregator-temp/' . intval($jobId);
+  }
+
+  /**
+   * Absolute path a per-upload report is staged at for a merge.
+   *
+   * The merge library derives the provenance source id from the input file
+   * stem, so inputs are staged under their upload id.
+   *
+   * @param int $jobId
+   * @param int $uploadId
+   * @param string $format
+   * @return string
+   */
+  public static function getAggregatorTempFilePath($jobId, $uploadId, $format)
+  {
+    $dir = self::getAggregatorTempDir($jobId);
+    return $dir . '/' . intval($uploadId) . self::extensionForAggregatorFormat($format);
+  }
+
+  /**
+   * Recursively delete the aggregator temp directory for a job.
+   *
+   * @param int $jobId
+   * @return void
+   */
+  public static function removeAggregatorTempDir($jobId)
+  {
+    $dir = self::getAggregatorTempDir($jobId);
+    if (!is_dir($dir)) {
+      return;
+    }
+    $files = scandir($dir);
+    foreach ($files as $file) {
+      if ($file === '.' || $file === '..') {
+        continue;
+      }
+      $path = $dir . '/' . $file;
+      if (is_file($path)) {
+        @unlink($path);
+      }
+    }
+    @rmdir($dir);
+  }
+
+  /**
+   * Whether a reportgen filepath is a provenance sidecar.
+   *
+   * @param string $filepath
+   * @return bool
+   */
+  public static function isProvenanceReportPath($filepath)
+  {
+    return substr($filepath, -strlen('.provenance.json')) === '.provenance.json';
+  }
+
+  /**
+   * Whether a reportgen filepath is a merged multi-upload report.
+   *
+   * @param string $filepath
+   * @return bool
+   */
+  public static function isAggregatedReportPath($filepath)
+  {
+    return strpos(basename($filepath), 'aggregated_') === 0;
+  }
 }
