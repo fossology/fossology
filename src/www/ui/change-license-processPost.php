@@ -162,8 +162,8 @@ class changeLicenseProcessPost extends FO_Plugin
     /**
      * @todo Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to
      * take the newest valid license, then uncomment this line
-    // $this->ChangeBuckets(); // change bucket accordingly
      */
+    $this->ChangeBuckets(); // change bucket accordingly
 
     if (empty($errorMsg) && ($jq_pk>0)) {
       return new JsonResponse(array("jqid" => $jq_pk));
