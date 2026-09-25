@@ -1,6 +1,6 @@
-{# SPDX-FileCopyrightText: © 2014-2015, 2021 Siemens AG
-   SPDX-FileCopyrightText: © 2020 Robert Bosch GmbH
-   SPDX-FileCopyrightText: © Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
+{# SPDX-FileCopyrightText: Â© 2014-2015, 2021 Siemens AG
+   SPDX-FileCopyrightText: Â© 2020 Robert Bosch GmbH
+   SPDX-FileCopyrightText: Â© Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
 
    SPDX-License-Identifier: FSFAP
 #}
@@ -40,6 +40,7 @@
       <div class="col-sm-offset-2 col-sm-10">
         {% if loginProvider == 'password' %}
           <button type="submit" class="btn btn-light">{{ 'Login'|trans }}</button>
+          <a href="?mod=auth&action=forgot-password" class="btn btn-link" style="margin-left: 10px;">{{ 'Forgot Password?'|trans }}</a>
         {% endif %}
         {% if providerExist %}
           <button type="submit" name="providerCheck" value="{{ providerExist }}" class="btn btn-light">{{ 'Login with '|trans }}{{ providerExist }}</button>

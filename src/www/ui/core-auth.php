@@ -1,10 +1,10 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2008-2013 Hewlett-Packard Development Company, L.P.
- SPDX-FileCopyrightText: © 2015-2016, 2021 Siemens AG
- SPDX-FileCopyrightText: © 2020 Robert Bosch GmbH
- SPDX-FileCopyrightText: © Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
- SPDX-FileCopyrightText: © 2021-2022 Orange
+ SPDX-FileCopyrightText: Ã‚Â© 2008-2013 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: Ã‚Â© 2015-2016, 2021 Siemens AG
+ SPDX-FileCopyrightText: Ã‚Â© 2020 Robert Bosch GmbH
+ SPDX-FileCopyrightText: Ã‚Â© Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
+ SPDX-FileCopyrightText: Ã‚Â© 2021-2022 Orange
  Contributors: Piotr Pszczola, Bartlomiej Drozdz
 
  SPDX-License-Identifier: GPL-2.0-only
@@ -203,6 +203,16 @@ class core_auth extends FO_Plugin
    * \brief This is only called when the user logs out.
    */
   public function Output()
+  {
+    global $SysConf;
+
+    $action = GetParm("action", PARM_TEXT);
+
+    if ($action === "forgot-password") {
+      return $this->handleForgotPassword();
+    } elseif ($action === "reset-password") {
+      return $this->handleResetPassword();
+    }
   {
     global $SysConf;
 
@@ -452,6 +462,83 @@ class core_auth extends FO_Plugin
 
     return true;
   }
-}
 
-$NewPlugin = new core_auth();
+  /**
+   * Handle Forgot Password Workflow
+   */
+  private function handleForgotPassword()
+  {
+    $identifier = GetParm("identifier", PARM_TEXT);
+    $message = "";
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($identifier)) {
+      $user = $this->userDao->getUserByEmailOrUsername($identifier);
+
+      if ($user && !empty($user['user_email'])) {
+        $rawToken = bin2hex(random_bytes(32));
+        $tokenHash = hash('sha256', $rawToken);
+        $expiresAt = date('Y-m-d H:i:sP', time() + 3600);
+
+        $this->userDao->createPasswordResetToken($user['user_pk'], $tokenHash, $expiresAt);
+
+        $resetUrl = Traceback_uri() . "?mod=auth&action=reset-password&token=" . $rawToken;
+        $subject = "FOSSology Password Reset Request";
+        $body = "Hello " . $user['user_name'] . ",\n\n"
+              . "A password reset was requested for your account. Click the link below to set a new password:\n"
+              . $resetUrl . "\n\n"
+              . "This link is valid for 1 hour.\n"
+              . "If you did not request this, please ignore this email.";
+
+        @mail($user['user_email'], $subject, $body);
+      }
+
+      // Non-enumerative generic response
+      $message = _("If an account matching that username or email exists, a password reset link has been sent.");
+    }
+
+    $this->vars['message'] = $message;
+    return $this->render('forgot-password.html.twig', $this->vars);
+  }
+
+  /**
+   * Handle Reset Password Workflow
+   */
+  private function handleResetPassword()
+  {
+    $rawToken = GetParm("token", PARM_TEXT);
+    $newPassword = GetParm("new_password", PARM_TEXT);
+    $confirmPassword = GetParm("confirm_password", PARM_TEXT);
+
+    if (empty($rawToken)) {
+      $this->vars['error'] = _("Invalid or missing password reset token.");
+      return $this->render('reset-password.html.twig', $this->vars);
+    }
+
+    $tokenHash = hash('sha256', $rawToken);
+    $tokenRecord = $this->userDao->getValidPasswordResetToken($tokenHash);
+
+    if (!$tokenRecord) {
+      $this->vars['error'] = _("This password reset link is invalid or has expired.");
+      return $this->render('reset-password.html.twig', $this->vars);
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      if (empty($newPassword) || $newPassword !== $confirmPassword) {
+        $this->vars['error'] = _("Passwords do not match or are empty.");
+        $this->vars['token'] = $rawToken;
+        return $this->render('reset-password.html.twig', $this->vars);
+      }
+
+      // Update password and invalidate token
+      $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT, array('cost' => 10));
+      $this->userDao->updateUserPassword($tokenRecord['user_fk'], $hashedPassword);
+      $this->userDao->markTokenAsUsed($tokenRecord['password_reset_pk']);
+
+      $this->vars['success'] = _("Your password has been successfully reset. You can now log in.");
+      return $this->render('reset-password.html.twig', $this->vars);
+    }
+
+    $this->vars['token'] = $rawToken;
+    return $this->render('reset-password.html.twig', $this->vars);
+  }
+}
