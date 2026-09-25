@@ -539,7 +539,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
     if (!pi->requires) {
       LOG_FATAL("Failed to allocate memory for requires array\n");
       rpmtdFreeData(&req);
-      return -1;
+      return;
     }
     for (j=0; j<(int)data_size;j++){
       const char * temp = rpmtdNextString(&req);
@@ -548,7 +548,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
         LOG_FATAL("Failed to allocate memory for requires string\n");
         rpmtdFreeData(&req);
         pi->req_size = j;
-        return -1;
+        return;
       }
       strncpy(pi->requires[j], temp, MAXCMD - 1);
       pi->requires[j][MAXCMD - 1] = '\0';
