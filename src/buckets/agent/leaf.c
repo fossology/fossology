@@ -120,9 +120,24 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray,
              (SELECT distinct(pfile_fk) as PF from uploadtree \
              where upload_fk=%d \
              and uploadtree.lft BETWEEN %d and %d) as SS \
-             where PF=pfile_fk and agent_fk=%d and rf_fk=rf_pk",
+             where PF=pfile_fk and agent_fk=%d and rf_fk=rf_pk \
+             and not exists (select 1 from clearing_decision cd where cd.pfile_fk=PF) \
+       UNION \
+       SELECT distinct(rf_shortname) as rf_shortname, rf_pk \
+        from license_ref, clearing_decision_event cde, clearing_event ce,\
+             (SELECT DISTINCT ON (pfile_fk) clearing_decision_pk, pfile_fk \
+              FROM clearing_decision ORDER BY pfile_fk, clearing_decision_pk DESC) as cd,\
+             (SELECT distinct(pfile_fk) as PF from uploadtree \
+             where upload_fk=%d \
+             and uploadtree.lft BETWEEN %d and %d) as SS \
+             where cd.pfile_fk=PF \
+             and cde.clearing_decision_fk=cd.clearing_decision_pk \
+             and ce.clearing_event_pk=cde.clearing_event_fk \
+             and ce.rf_fk=rf_pk \
+             and (ce.removed IS NULL OR ce.removed = FALSE)",
        puploadtree->upload_fk, puploadtree->lft, puploadtree->rgt,
-       bucketDefArray->nomos_agent_pk);
+       bucketDefArray->nomos_agent_pk,
+       puploadtree->upload_fk, puploadtree->lft, puploadtree->rgt);
 
   result = PQexec(pgConn, sql);
   if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
