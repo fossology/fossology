@@ -1,8 +1,8 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2008-2012 Hewlett-Packard Development Company, L.P.
+  SPDX-FileCopyrightText: © 2008-2012 Hewlett-Packard Development Company, L.P.
 
- SPDX-License-Identifier: GPL-2.0-only
+  SPDX-License-Identifier: GPL-2.0-only
 */
 
 use Fossology\Lib\Db\DbManager;
@@ -30,7 +30,7 @@ class folder_properties extends FO_Plugin
    * \brief Given a folder's ID and a name, alter
    * the folder properties.
    * Includes idiot checking since the input comes from stdin.
-   * \return 1 if changed, 0 if failed.
+   * \return 1 if changed, 0 if failed, 4 if duplicate name exists.
    */
   function Edit($FolderId, $NewName, $NewDesc)
   {
@@ -53,6 +53,16 @@ class folder_properties extends FO_Plugin
     } else {
       return (0); // $FolderId is empty
     }
+
+    // Check for duplicate sibling folder names under the same parent
+    $folderDao = new \Fossology\Lib\Dao\FolderDao($this->dbManager);
+    $parentId = $Row['parent_pk'];
+    $folderWithSameNameUnderParent = $folderDao->getFolderId($NewName, $parentId);
+
+    if (!empty($folderWithSameNameUnderParent) && $folderWithSameNameUnderParent != $FolderId) {
+      return 4; // Return error code matching folder creation restriction
+    }
+
     /* Change the properties */
     $sql = 'UPDATE folder SET folder_name = $1, folder_desc = $2 WHERE folder_pk = $3;';
     $this->dbManager->getSingleRow($sql,array($NewName, $NewDesc, $FolderId),__METHOD__."Set");
