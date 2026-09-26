@@ -449,6 +449,9 @@ Token_timestamp_migration();
 require_once("$LIBEXECDIR/dbmigrate_kotoba_candidate_licenses.php");
 Kotoba_candidate_license_migration();
 
+require_once("$LIBEXECDIR/dbmigrate_password_reset.php");
+Password_reset_migration();
+
 if($errors>0)
 {
   echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";
@@ -927,3 +930,4 @@ function insertNewLicense($dbManager, $license, $wasCandidate = false)
   }
   return $rfPk;
 }
+
