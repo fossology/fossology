@@ -185,7 +185,7 @@ class core_auth extends FO_Plugin
     $userName = GetParm("username", PARM_TEXT);
     $password = GetParm("password", PARM_TEXT);
     $timezone = GetParm("timezone", PARM_TEXT);
-    if (empty($timezone) \vert{}\vert{} strpos($timezone,"Unknown") == true) {
+    if (empty($timezone) || strpos($timezone,"Unknown") == true) {
       $timezone = date_default_timezone_get();
     }
     $_SESSION['timezone'] =$timezone;
@@ -264,7 +264,7 @@ class core_auth extends FO_Plugin
     }
 
     $this->vars['referrer'] =$referrer;
-    $this->vars['loginFailure'] = !empty($userName) \vert{}\vert{} !empty($password);
+    $this->vars['loginFailure'] = !empty($userName) || !empty($password);
     if (!empty($userName) &&$userName!='Default User') {
       $this->vars['userName'] =$userName;
     }
@@ -324,7 +324,7 @@ class core_auth extends FO_Plugin
         $authProvider =$SysConf['AUTHENTICATION']['provider'];
     }
 
-    if (empty($userName) \vert{}\vert{}$userName == 'Default User') {
+    if (empty($userName) ||$userName == 'Default User') {
       return false;
     }
     try {
@@ -382,7 +382,7 @@ class core_auth extends FO_Plugin
 
   protected function isCsrfTokenValid($id,$token)
   {
-    if (empty($token) \vert{}\vert{} empty($this->csrfTokenManager)) {
+    if (empty($token) || empty($this->csrfTokenManager)) {
       return false;
     }
     return $this->csrfTokenManager->isTokenValid(new CsrfToken($id,$token));
@@ -459,7 +459,7 @@ class core_auth extends FO_Plugin
         return $this->render('reset-password.html.twig',$this->vars);
       }
 
-      if (empty($newPassword) \vert{}\vert{}$newPassword !== $confirmPassword) {$this->vars['error'] = _("Passwords do not match or are empty.");
+      if (empty($newPassword) ||$newPassword !== $confirmPassword) {$this->vars['error'] = _("Passwords do not match or are empty.");
         $this->vars['token'] =$rawToken;
         return $this->render('reset-password.html.twig',$this->vars);
       }
