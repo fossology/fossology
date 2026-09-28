@@ -60,7 +60,7 @@ class UserHelper
       $ErrMsgs = $userEditObj->UpdateUser($userRec, $SessionIsAdmin);
 
       if ($ErrMsgs == null) {
-        $returnVal = new Info(200, "User updated succesfully!", InfoType::INFO);
+        $returnVal = new Info(200, "User updated successfully!", InfoType::INFO);
       } else {
         $returnVal = new Info(400, $ErrMsgs, InfoType::INFO);
       }

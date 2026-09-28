@@ -7,7 +7,7 @@
 {% block content %}
   <h2>{{ "Tag Info"|trans }}</h2>
   {% if tagInvalid == 1 %}
-    <h2>{{ "Invalid URL, nonexistant item"|trans }}</h2>
+    <h2>{{ "Invalid URL, nonexistent item"|trans }}</h2>
   {% elseif tagInvalid == 2%}
     <h2>{{ "Upload data is unavailable. It needs to be unpacked."|trans }}</h2>
   {% elseif tagsEntries|length > 0 %}

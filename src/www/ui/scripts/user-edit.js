@@ -39,7 +39,7 @@ $(function() {
         }
       },
       error : function(data) {
-        var infoMessage = $("<td>Some error occured</td>");
+        var infoMessage = $("<td>Some error occurred</td>");
         parentTr.append(infoMessage);
         delayedFadeOut(5000, infoMessage);
       }
@@ -75,7 +75,7 @@ $(function() {
       error : function(data) {
         var infoMessage = $("<tr><td colspan='6'>"
             + "<textarea readonly style='width:100%'>"
-            + "Some error occured</textarea></td></tr>");
+            + "Some error occurred</textarea></td></tr>");
         parentTr.after(infoMessage);
         delayedFadeOut(5000, infoMessage);
       }
