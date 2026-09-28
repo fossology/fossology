@@ -210,7 +210,7 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
    */
   public function testValidateTokenRequest()
   {
-    $tokenExpire = strftime('%Y-%m-%d', strtotime('+3 day'));
+    $tokenExpire = date('Y-m-d', strtotime('+3 day'));
     $tokenName = "myTok";
     $tokenScope = "r";
     $tokenValidity = 30;
@@ -228,7 +228,7 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
    */
   public function testValidateTokenRequestMaxExpire()
   {
-    $tokenExpire = strftime('%Y-%m-%d', strtotime('+10 day'));
+    $tokenExpire = date('Y-m-d', strtotime('+10 day'));
     $tokenName = "myTok";
     $tokenScope = "read";
     $tokenValidity = 3;
@@ -248,7 +248,7 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
    */
   public function testValidateTokenRequestInvalidExpire()
   {
-    $tokenExpire = strftime('%d-%m-%Y', strtotime('+10 day'));
+    $tokenExpire = date('d-m-Y', strtotime('+10 day'));
     $tokenName = "myTok";
     $tokenScope = "read";
     $tokenValidity = 30;
@@ -268,7 +268,7 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
    */
   public function testValidateTokenRequestInvalidScope()
   {
-    $tokenExpire = strftime('%Y-%m-%d', strtotime('+10 day'));
+    $tokenExpire = date('Y-m-d', strtotime('+10 day'));
     $tokenName = "myTok";
     $tokenScope = "rread";
     $tokenValidity = 30;
