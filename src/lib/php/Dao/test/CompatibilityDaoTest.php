@@ -10,6 +10,7 @@
  */
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
@@ -39,10 +40,6 @@ class CompatibilityDaoTest extends TestCase
   /** @var int $assertCountBefore */
   private $assertCountBefore;
 
-  /** @var M\MockInterface $authClass
-   *       Alias mock of the Auth class */
-  private $authClass;
-
   /** @var int $firstLicenseId
    *       Id of a license present in license_ref */
   private $firstLicenseId;
@@ -68,8 +65,7 @@ class CompatibilityDaoTest extends TestCase
     $this->firstLicenseId = intval($licenses[0]['rf_pk']);
     $this->secondLicenseId = intval($licenses[1]['rf_pk']);
 
-    $this->authClass = M::mock('alias:Fossology\Lib\Auth\Auth');
-    $this->authClass->shouldReceive('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $this->compatibilityDao = new CompatibilityDao($this->dbManager,
       new Logger("test"), M::mock(LicenseDao::class), M::mock(AgentDao::class));
