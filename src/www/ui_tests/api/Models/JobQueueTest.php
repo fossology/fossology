@@ -37,7 +37,8 @@ class JobQueueTest extends TestCase
       true,
       false,
       true,
-      ["text" => "Download Report", "link" => "/download/report/123"]
+      ["text" => "Download Report", "link" => "/download/report/123"],
+      0
     );
   }
 
@@ -71,6 +72,14 @@ class JobQueueTest extends TestCase
   public function testGetJobQueueType()
   {
     $this->assertEquals("monkbulk", $this->jobQueue->getJobQueueType());
+  }
+  /**
+   * @test
+   * -# Test getter for Priority
+   */
+  public function testGetPriority()
+  {
+    $this->assertEquals(0, $this->jobQueue->getPriority());
   }
 
   /**
@@ -192,6 +201,16 @@ class JobQueueTest extends TestCase
   {
     $this->jobQueue->setJobQueueType("monkBulk");
     $this->assertEquals("monkBulk", $this->jobQueue->getJobQueueType());
+  }
+
+  /**
+   * @test
+   * -# Test setter for Priority
+   */
+  public function testSetPriority()
+  {
+    $this->jobQueue->setPriority(5);
+    $this->assertEquals(5, $this->jobQueue->getPriority());
   }
 
   /**
@@ -327,6 +346,7 @@ class JobQueueTest extends TestCase
     $expectedArray = [
       "jobQueueId" => 123,
       "jobQueueType" => "monkbulk",
+      "priority" => 0,
       "startTime" => "2024-02-16 10:00:00",
       "endTime" => "2024-02-16 10:30:00",
       "status" => "Completed",
