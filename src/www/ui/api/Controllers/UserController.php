@@ -226,7 +226,13 @@ class UserController extends RestController
     }
     $reqBody = $this->getParsedBody($request);
     $userHelper = new UserHelper($id);
-    $returnVal = $userHelper->modifyUserDetails($reqBody, $apiVersion);
+    try {
+      $returnVal = $userHelper->modifyUserDetails($reqBody, $apiVersion);
+    } catch (\Throwable $exception) {
+      throw new HttpInternalServerErrorException(
+        "Unable to update user: " . $exception->getMessage()
+      );
+    }
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 

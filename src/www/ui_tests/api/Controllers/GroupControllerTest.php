@@ -561,7 +561,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $groupIds = [1,2,3,4,5,6];
     $userArray = ['user_pk' => $newuser];
 
-    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     if ($version == ApiVersion::V2) {
       $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupIds[0]])->andReturn($groupIds[0]);
       $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userPk])->andReturn($userArray);
@@ -570,8 +570,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper->shouldReceive('getUserId')->andReturn($userIds[0]);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')
-      ->withArgs([$userIds[0], $groupId])->andReturn(true);
 
     $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
     $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId)])->andReturn(1);
@@ -605,8 +603,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')
-      ->withArgs([$userId, $groupId])->andReturn(false);
 
     $requestHeaders = new Headers();
     $request = new Request("GET", new Uri("HTTP", "localhost"),
@@ -632,8 +628,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["groups", "group_pk", $groupId])->andReturn(false);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')
-      ->withArgs([$userId, $groupId])->andReturn(false);
 
     $requestHeaders = new Headers();
     $request = new Request("GET", new Uri("HTTP", "localhost"),
@@ -662,8 +656,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper->shouldReceive('getUserId')->andReturn($callerId);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')
-      ->withArgs([$callerId, $groupId])->andReturn(false);
 
     $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
     $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId)])->andReturn(1);
@@ -735,7 +727,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn($emptyArr);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(true);
 
     $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
     $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $newuser,$newPerm)])->andReturn(1);
@@ -796,7 +787,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(false);
 
     $body = $this->streamFactory->createStream(json_encode([
       "perm" => $newPerm
@@ -842,7 +832,7 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $userArray = ['user_pk' => $newuser];
     $userId = 1;
 
-    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     if ($version == ApiVersion::V2) {
       $this->restHelper->getUserDao()->shouldReceive('getGroupIdByName')->withArgs([$groupIds[0]])->andReturn($groupId);
       $this->restHelper->getUserDao()->shouldReceive('getUserByName')->withArgs([$userId])->andReturn($userArray);
@@ -851,7 +841,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$newuser])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn($emptyArr);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userId, $groupId])->andReturn(true);
 
     $this->dbManager->shouldReceive('prepare')->withArgs([M::any(),M::any()]);
     $this->dbManager->shouldReceive('execute')->withArgs([M::any(),array($groupId, $newuser,$newPerm)])->andReturn(1);
@@ -976,7 +965,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('doesIdExist')->withArgs(["users","user_pk",$userPk])->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(),M::any(),M::any()])->andReturn(['group_pk'=>$groupIds[0],'group_user_member_pk'=>$group_user_member_pk,'permission'=>$newPerm]);
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')->withArgs([$userPk, $groupIds[0]])->andReturn(true);
     $this->userDao->shouldReceive('getUserByName')->withArgs([M::any(),M::any()]);
 
     $this->adminPlugin->shouldReceive('updateGUMPermission')->withArgs([$group_user_member_pk,$newPerm, $this->dbManager ]);
@@ -1038,7 +1026,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs(["groups", "group_pk", $groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["users", "user_pk", $userId])->andReturn(true);
-    $this->userDao->shouldReceive('isAdvisorOrAdmin')->andReturn(true);
     $this->dbManager->shouldReceive('getSingleRow')->withArgs([M::any(), M::any(), M::any()])
       ->andReturn(['group_user_member_pk' => $groupMemberPk]);
     $this->adminPlugin->shouldReceive('updateGUMPermission')
