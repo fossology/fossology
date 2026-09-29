@@ -1,0 +1,81 @@
+{#
+ SPDX-FileCopyrightText: © 2026 Siemens AG
+
+ SPDX-License-Identifier: GPL-2.0-only
+#}
+{% extends "include/base.html.twig" %}
+
+{% block title %}
+{{ "Compare Components (Compatibility)"|trans }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <h3 class="box-title">{{ "Compatibility Report for Selected Components"|trans }}</h3>
+      </div>
+      <div class="box-body">
+        {% if incompatiblePairs is empty %}
+          <div class="alert alert-success">
+            <h4><i class="icon fa fa-check"></i> {{ "All Clear!"|trans }}</h4>
+            {{ "No incompatible licenses found between the selected components."|trans }}
+          </div>
+        {% else %}
+          <div class="alert alert-warning">
+            <h4><i class="icon fa fa-warning"></i> {{ "Potential Issues Found"|trans }}</h4>
+            {{ "The following license combinations across the selected components are not explicitly compatible according to the license rules."|trans }}
+          </div>
+          <table class="table table-bordered table-striped dataTable" id="compatibility-compare-table">
+            <thead>
+              <tr>
+                <th>{{ "Component 1"|trans }}</th>
+                <th>{{ "License 1"|trans }}</th>
+                <th>{{ "Component 2"|trans }}</th>
+                <th>{{ "License 2"|trans }}</th>
+                <th>{{ "Result"|trans }}</th>
+                <th>{{ "Rule Description"|trans }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pair in incompatiblePairs %}
+                <tr>
+                  <td>{{ pair.upload1_name }}</td>
+                  <td>{{ pair.license1 }}</td>
+                  <td>{{ pair.upload2_name }}</td>
+                  <td>{{ pair.license2 }}</td>
+                  <td>
+                    {% if pair.result is same as(false) %}
+                      <span class="text-danger"><i class="fa fa-times-circle"></i> {{ "Incompatible"|trans }}</span>
+                    {% else %}
+                      <span class="text-warning"><i class="fa fa-question-circle"></i> {{ "Unknown"|trans }}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ pair.description|default("No specific rule defined"|trans) }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('#compatibility-compare-table').DataTable({
+        "paging": true,
+        "lengthChange": true,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false
+      });
+    });
+  </script>
+{% endblock %}
