@@ -51,6 +51,11 @@ class Upload
    */
   private $assignee;
   /**
+   * @var integer $status
+   * Upload clearing status
+   */
+  private $status;
+  /**
    * @var string $assigneeDate
    * Date when a user was assigned to the upload.
    */
@@ -60,6 +65,8 @@ class Upload
    * Date when the upload was closed or rejected.
    */
   private $closingDate;
+  /** @var string|null */
+  private $comment;
   /**
    * @var Hash $hash
    * Hash information of the upload
@@ -74,10 +81,12 @@ class Upload
    * @param string $description
    * @param string $uploadName
    * @param string $uploadDate
+   * @param integer $assignee
+   * @param integer $status
    * @param Hash $hash
    */
   public function __construct($folderId, $folderName, $uploadId, $description,
-    $uploadName, $uploadDate, $assignee, $hash)
+    $uploadName, $uploadDate, $assignee, $status, $hash, $comment = null)
   {
     $this->folderId = intval($folderId);
     $this->folderName = $folderName;
@@ -86,8 +95,10 @@ class Upload
     $this->uploadName = $uploadName;
     $this->uploadDate = $uploadDate;
     $this->assignee = $assignee == 1 ? null : intval($assignee);
+    $this->status = intval($status);
     $this->assigneeDate = null;
     $this->closingDate = null;
+    $this->comment = $comment;
     $this->hash = $hash;
   }
 
@@ -108,16 +119,18 @@ class Upload
   {
     if ($version==ApiVersion::V2) {
       return [
-        "folderId"    => $this->folderId,
-        "folderName"  => $this->folderName,
-        "id"          => $this->uploadId,
-        "description" => $this->description,
-        "uploadName"  => $this->uploadName,
-        "uploadDate"  => $this->uploadDate,
-        "assignee"    => $this->assignee,
+        "folderId"     => $this->folderId,
+        "folderName"   => $this->folderName,
+        "id"           => $this->uploadId,
+        "description"  => $this->description,
+        "uploadName"   => $this->uploadName,
+        "uploadDate"   => $this->uploadDate,
+        "assignee"     => $this->assignee,
         "assigneeDate" => $this->assigneeDate,
-        "closingDate" => $this->closingDate,
-        "hash"        => $this->hash->getArray()
+        "closingDate"  => $this->closingDate,
+        "comment"      => $this->comment,
+        "status"       => $this->statusToString($this->status),
+        "hash"         => $this->hash->getArray()
       ];
     } else {
       return [
@@ -132,6 +145,28 @@ class Upload
         "closingDate" => $this->closingDate,
         "hash"        => $this->hash->getArray()
       ];
+    }
+  }
+
+  /**
+   * Convert internal clearing status to API string.
+   *
+   * @param int $status Upload clearing status
+   * @return string
+   */
+  private static function statusToString($status)
+  {
+    switch ($status) {
+      case \Fossology\Lib\Data\UploadStatus::OPEN:
+        return "Open";
+      case \Fossology\Lib\Data\UploadStatus::IN_PROGRESS:
+        return "InProgress";
+      case \Fossology\Lib\Data\UploadStatus::CLOSED:
+        return "Closed";
+      case \Fossology\Lib\Data\UploadStatus::REJECTED:
+        return "Rejected";
+      default:
+        return "NA";
     }
   }
 
