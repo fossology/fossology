@@ -176,7 +176,16 @@ int ProcessUpload (long upload_pk)
   struct debpkginfo *dpi;
 
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+  if (!pi) {
+    LOG_FATAL("Failed to allocate memory for rpmpkginfo\n");
+    return (-1);
+  }
   dpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+  if (!dpi) {
+    LOG_FATAL("Failed to allocate memory for debpkginfo\n");
+    free(pi);
+    return (-1);
+  }
 
   rpmReadConfigFiles(NULL, NULL);
 
@@ -527,9 +536,20 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
   if (header_status) {
     data_size = rpmtdCount(&req);
     pi->requires = calloc(data_size, sizeof(char *));
+    if (!pi->requires) {
+      LOG_FATAL("Failed to allocate memory for requires array\n");
+      rpmtdFreeData(&req);
+      return;
+    }
     for (j=0; j<(int)data_size;j++){
       const char * temp = rpmtdNextString(&req);
       pi->requires[j] = malloc(MAXCMD);
+      if (!pi->requires[j]) {
+        LOG_FATAL("Failed to allocate memory for requires string\n");
+        rpmtdFreeData(&req);
+        pi->req_size = j;
+        return;
+      }
       strncpy(pi->requires[j], temp, MAXCMD - 1);
       pi->requires[j][MAXCMD - 1] = '\0';
     }
@@ -847,9 +867,22 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
         strncpy(splitcopy, value, sizeof(splitcopy)-1);
         splitcopy[sizeof(splitcopy)-1] = '\0';
         pi->depends = calloc(size, sizeof(char *));
+        if (!pi->depends) {
+          LOG_FATAL("Failed to allocate memory for depends array\n");
+          fclose(fp);
+          free(repfile);
+          return -1;
+        }
         depends = strtok(splitcopy, ",");
         for (i=0; i<size; i++){
           pi->depends[i] = calloc(length, sizeof(char));
+          if (!pi->depends[i]) {
+            LOG_FATAL("Failed to allocate memory for depends string\n");
+            pi->dep_size = i;
+            fclose(fp);
+            free(repfile);
+            return -1;
+          }
           if (depends) {
             strncpy(pi->depends[i], depends, length - 1);
             pi->depends[i][length - 1] = '\0';
@@ -1014,9 +1047,20 @@ int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
         strncpy(splitcopy, value, sizeof(splitcopy)-1);
         splitcopy[sizeof(splitcopy)-1] = '\0';
         pi->depends = calloc(size, sizeof(char *));
+        if (!pi->depends) {
+          LOG_FATAL("Failed to allocate memory for depends array\n");
+          fclose(fp);
+          return -1;
+        }
         depends = strtok(splitcopy, ",");
         for (i=0; i<size; i++){
           pi->depends[i] = calloc(length, sizeof(char));
+          if (!pi->depends[i]) {
+            LOG_FATAL("Failed to allocate memory for depends string\n");
+            pi->dep_size = i;
+            fclose(fp);
+            return -1;
+          }
           if (depends) {
             strncpy(pi->depends[i], depends, length - 1);
             pi->depends[i][length - 1] = '\0';
