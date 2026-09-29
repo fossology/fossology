@@ -10,7 +10,7 @@
 #
 # Description: Docker container image recipe
 
-FROM debian:bookworm-slim AS builder
+FROM debian:trixie-slim AS builder
 LABEL org.opencontainers.image.authors="Fossology <fossology@fossology.org>"
 LABEL org.opencontainers.image.source="https://github.com/fossology/fossology"
 LABEL org.opencontainers.image.vendor="FOSSology"
@@ -22,7 +22,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       git \
       lsb-release \
-      php8.2-cli \
+      php8.4-cli \
       sudo \
       cmake \
       ninja-build \
@@ -59,7 +59,7 @@ RUN cmake -DCMAKE_BUILD_TYPE=MinSizeRel -S. -B./build -G Ninja \
  && cmake --build ./build --parallel \
  && cmake --install build
 
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 LABEL org.opencontainers.image.authors="Fossology <fossology@fossology.org>"
 LABEL org.opencontainers.image.url="https://fossology.org"

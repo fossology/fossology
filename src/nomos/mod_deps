@@ -81,9 +81,7 @@ if [[ $RUNTIME ]]; then
   case "$DISTRO" in
     Debian|Ubuntu|Tuxedo)
       case "$CODENAME" in
-        bullseye)
-          apt-get $YesOpt install libjson-c5;;
-        bookworm|trixie|sid)
+        trixie|sid)
           apt-get $YesOpt install libjson-c5;;
         jammy)
           apt-get $YesOpt install libjson-c5;;

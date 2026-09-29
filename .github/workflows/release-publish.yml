@@ -21,8 +21,6 @@ jobs:
     strategy:
       matrix:
         os:
-          - 'debian:bullseye'
-          - 'debian:bookworm'
           - 'debian:trixie'
           - 'ubuntu:jammy'
           - 'ubuntu:noble'

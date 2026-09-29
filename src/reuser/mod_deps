@@ -72,9 +72,9 @@ if [[ $RUNTIME ]]; then
   case "$DISTRO" in
     Debian|Ubuntu|Tuxedo)
       case "$CODENAME" in
-        bullseye)
-          apt-get $YesOpt install libpq5 libicu67;;
-        bookworm|trixie|sid)
+        trixie)
+          apt-get $YesOpt install libpq5 libicu76;;
+        sid)
           apt-get $YesOpt install libpq5 libicu72;;
         jammy)
           apt-get $YesOpt install libpq5 libicu70;;
