@@ -33,6 +33,7 @@ target_sources(fossologyCPP
     PRIVATE
         ${FO_CWD}/libfossAgentDatabaseHandler.cc
         ${FO_CWD}/libfossdbmanagerclass.cc
+        ${FO_CWD}/libfossLicenseRefResolver.cc
         ${FO_CWD}/files.cc
         ${FO_CWD}/libfossdbQueryResult.cc
         ${FO_CWD}/libfossUtils.cc)
@@ -50,7 +51,7 @@ install(TARGETS fossologyCPP
     DESTINATION ${FO_LIBEXECDIR}
     COMPONENT lib)
 
-install(FILES ${FO_CWD}/libfossologyCPP.hpp
+install(FILES ${FO_CWD}/libfossologyCPP.hpp ${FO_CWD}/libfossLicenseRefResolver.hpp
     DESTINATION ${FO_INCLUDEDIR}
     COMPONENT lib)
 
