@@ -13,6 +13,8 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Report\MultiUploadAggregatorScheduler;
+use Fossology\Lib\Report\ReportUtils;
 use Symfony\Component\HttpFoundation\Request;
 
 class CliXmlGeneratorUi extends DefaultPlugin
@@ -110,6 +112,13 @@ class CliXmlGeneratorUi extends DefaultPlugin
 
   protected function getJobAndJobqueue($groupId, $upload, $addUploads)
   {
+    if (!empty($addUploads) && ReportUtils::isAggregatorSupportedFormat($this->outputFormat)) {
+      $allUploads = $addUploads;
+      $allUploads[$upload->getId()] = $upload;
+      $scheduler = new MultiUploadAggregatorScheduler();
+      return $scheduler->scheduleForCurrentUser($this->outputFormat, $upload, $allUploads);
+    }
+
     $uploadId = $upload->getId();
     $clixmlAgent = plugin_find('agent_'.$this->outputFormat);
     $userId = Auth::getUserId();
