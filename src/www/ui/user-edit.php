@@ -198,13 +198,21 @@ class UserEditPage extends DefaultPlugin
     $vars['spdxLicenseCommentDefault'] = ($spdxSettings[1] === 'checked');
     $vars['ignoreFilesWOInfoDefault'] = ($spdxSettings[2] === 'checked');
 
-    $cyclonedxSettings = isset($UserRec['cyclonedx_settings']) ? explode(',', $UserRec['cyclonedx_settings']) : ['unchecked', 'unchecked', 'unchecked'];
-    if (count($cyclonedxSettings) < 3) {
-      $cyclonedxSettings = array_pad($cyclonedxSettings, 3, 'unchecked');
+    $cyclonedxSettings = isset($UserRec['cyclonedx_settings']) ? explode(',', $UserRec['cyclonedx_settings']) : ['unchecked', 'unchecked', 'unchecked', 'fossology:', '1.7'];
+    if (count($cyclonedxSettings) < 5) {
+      $cyclonedxSettings = array_pad($cyclonedxSettings, 5, 'unchecked');
+      if (empty($cyclonedxSettings[3]) || $cyclonedxSettings[3] === 'unchecked') {
+        $cyclonedxSettings[3] = 'fossology:';
+      }
+      if (empty($cyclonedxSettings[4]) || $cyclonedxSettings[4] === 'unchecked') {
+        $cyclonedxSettings[4] = '1.7';
+      }
     }
     $vars['cyclonedxOsselotExportEnabled'] = ($cyclonedxSettings[0] === 'checked');
     $vars['cyclonedxLicenseCommentDefault'] = ($cyclonedxSettings[1] === 'checked');
     $vars['cyclonedxIgnoreFilesWOInfoDefault'] = ($cyclonedxSettings[2] === 'checked');
+    $vars['cyclonedxCustomTagNamespace'] = $cyclonedxSettings[3];
+    $vars['cyclonedxSpecVersion'] = $cyclonedxSettings[4];
 
     if ($SessionIsAdmin) {
       $vars['allAccessLevels'] = array(
@@ -473,8 +481,14 @@ class UserEditPage extends DefaultPlugin
         $cyclonedxOsselotEnabled = !empty($request->get('cyclonedx_osselot_export_enabled')) ? 'checked' : 'unchecked';
         $cyclonedxCommentEnabled = !empty($request->get('cyclonedx_license_comment_default')) ? 'checked' : 'unchecked';
         $cyclonedxIgnoreFilesEnabled = !empty($request->get('cyclonedx_ignore_files_wo_info_default')) ? 'checked' : 'unchecked';
+        $cyclonedxCustomTagNamespace = !empty($request->get('cyclonedx_custom_tag_namespace')) ? stripslashes($request->get('cyclonedx_custom_tag_namespace')) : 'fossology:';
+        $allowedVersions = ['1.4', '1.5', '1.6', '1.7'];
+        $cyclonedxSpecVersion = $request->get('cyclonedx_spec_version');
+        if (!in_array($cyclonedxSpecVersion, $allowedVersions)) {
+          $cyclonedxSpecVersion = '1.7';
+        }
 
-        $UserRec['cyclonedx_settings'] = "$cyclonedxOsselotEnabled,$cyclonedxCommentEnabled,$cyclonedxIgnoreFilesEnabled";
+        $UserRec['cyclonedx_settings'] = "$cyclonedxOsselotEnabled,$cyclonedxCommentEnabled,$cyclonedxIgnoreFilesEnabled,$cyclonedxCustomTagNamespace,$cyclonedxSpecVersion";
       }
     }
     return $UserRec;
