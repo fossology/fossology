@@ -242,12 +242,12 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
     global $db_conf;
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
-    return; // TODO ignore this test case, because it is flaky on travis
+
     // ftp_proxy
     //$this->change_proxy("ftp_proxy", "web-proxy.cce.hp.com:8088");
-    $command = "$WGET_PATH ftp://releases.ubuntu.com/releases/trusty/SHA1SUMS  -d $TEST_RESULT_PATH";
+    $command = "$WGET_PATH ftp://ftp.gnu.org/README -d $TEST_RESULT_PATH";
     exec($command);
-    $this->assertFileExists("$TEST_RESULT_PATH/releases.ubuntu.com/releases/trusty/SHA1SUMS");
+    $this->assertFileExists("$TEST_RESULT_PATH/ftp.gnu.org/README");
   }
 
   /**
