@@ -67,7 +67,7 @@ class Auth
    */
   public static function getUserId()
   {
-    if (array_key_exists('auth', $GLOBALS['SysConf'])) {
+    if (isset($GLOBALS['SysConf']['auth'][self::USER_ID])) {
       return $GLOBALS['SysConf']['auth'][self::USER_ID];
     }
     return 0;
@@ -79,7 +79,7 @@ class Auth
    */
   public static function getGroupId()
   {
-    if (array_key_exists('auth', $GLOBALS['SysConf'])) {
+    if (isset($GLOBALS['SysConf']['auth'][self::GROUP_ID])) {
       return $GLOBALS['SysConf']['auth'][self::GROUP_ID];
     }
     return 0;
