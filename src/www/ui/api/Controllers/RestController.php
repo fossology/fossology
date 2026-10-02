@@ -108,6 +108,27 @@ class RestController
   }
 
   /**
+   * Check if upload is accessible and editable (requires write permission).
+   *
+   * A user with only read access to an upload must not be allowed to mutate
+   * its findings via the REST API. This mirrors the guard already applied in
+   * the legacy UI (e.g. ui-clearing-view.php, ajax-acknowledgement-conf.php).
+   *
+   * @param integer $id Upload ID
+   * @throws HttpNotFoundException Upload not found
+   * @throws HttpForbiddenException Upload not editable by current group
+   */
+  protected function uploadEditable($id): void
+  {
+    $this->uploadAccessible($id);
+    if (! $this->restHelper->getUploadDao()->isEditable($id,
+        $this->restHelper->getGroupId())) {
+      throw new HttpForbiddenException(
+        "Upload is not accessible or you do not have write permission.");
+    }
+  }
+
+  /**
    * Check if upload tree is accessible
    *
    * @param int $uploadId
