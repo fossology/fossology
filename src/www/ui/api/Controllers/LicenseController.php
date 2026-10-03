@@ -504,6 +504,7 @@ class LicenseController extends RestController
    */
   public function handleAdminLicenseAcknowledgement($request, $response, $args)
   {
+    $this->throwNotAdminException();
     $body = $this->getParsedBody($request);
     $errors = [];
     $success = [];
