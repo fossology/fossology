@@ -1138,6 +1138,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testHandleAdminLicenseAcknowledgementBadRequest()
   {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('Content-Type', 'application/json');
     $body = $this->streamFactory->createStream();
@@ -1159,6 +1160,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testHandleAdminLicenseAcknowledgementInvalidBody()
   {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('Content-Type', 'application/json');
     $body = $this->streamFactory->createStream(json_encode([]));
@@ -1182,6 +1184,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
   public function testHandleAdminLicenseAcknowledgementWithUpdate()
   {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(["license_std_acknowledgement","name", $this->getDummyVars()["bodyContent"][0]["name"]])->andReturn(true);
@@ -1220,6 +1223,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testHandleAdminLicenseAcknowledgementLicenseExists()
   {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $bodyContent = $this->getDummyVars()["bodyContent"];
     $bodyContent[0]["update"] = false;
@@ -1255,6 +1259,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
    */
   public function testHandleAdminLicenseAcknowledgementCreateNew()
   {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $bodyContent = $this->getDummyVars()["bodyContent"];
     $bodyContent[0]["update"] = false;
@@ -1289,12 +1294,13 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
   /**
    * @test
    *  - # Test LicenseController::handleAdminLicenseAcknowledgement()
-   *  - # Check the error code is 500 for users without admin permission
+   *  - # Check the error code is 500 for DB insert failure
    * @return void
    * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
    */
   public function testHandleAdminLicenseAcknowledgementWithNoPermission()
   {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $bodyContent = $this->getDummyVars()["bodyContent"];
     $bodyContent[0]["update"] = false;
@@ -1324,6 +1330,27 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEmpty($this->getResponseJson($actualResponse)["success"]);
     $this->assertEquals($this->getResponseJson($expectedResponse),$this->getResponseJson($actualResponse));
     $this->assertEquals($expectedResponse->getBody()->getContents(),$actualResponse->getBody()->getContents());
+  }
+
+  /**
+   * @test
+   *  - # Test LicenseController::handleAdminLicenseAcknowledgement
+   *  - # Check if HttpForbiddenException is thrown for non admin user
+   * @return void
+   * @throws \Fossology\UI\Api\Exceptions\HttpErrorException
+   */
+  public function testHandleAdminLicenseAcknowledgementNotAdmin()
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_NONE;
+
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream();
+    $request = new Request("PUT", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
+    $this->expectException(HttpForbiddenException::class);
+    $this->licenseController->handleAdminLicenseAcknowledgement($request, $response, []);
   }
 
   /**
