@@ -69,14 +69,12 @@ class BomReportGenerator
           'components' => [
             [
               'type' => 'application',
-              'vendor' => 'FOSSology',
               'name' => 'FOSSology',
               'version' => $bomdata['tool-version'],
               'bom-ref' => 'tool-fossology'
             ],
             [
               'type' => 'application',
-              'vendor' => 'FOSSology',
               'name' => 'FOSSology Scanners',
               'version' => $bomdata['tool-version'],
               'bom-ref' => 'tool-fossology-scanners'
