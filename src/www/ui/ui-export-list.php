@@ -397,16 +397,17 @@ class UIExportList extends FO_Plugin
       $extrawhere .= " AND UT.ufile_name NOT LIKE '%$exclude%'";
     }
     $lines = [];
+    $uploadtreePkToFilePath = [];
 
     $copyrights =  $this->copyrightDao->getScannerEntries($agentName[0],
       $uploadTreeTableName, $uploadId, null, $extrawhere . $agentFilter);
-    $this->updateCopyrightList($lines, $copyrights, $NomostListNum,
-      $uploadTreeTableName, "content");
+    $this->updateCopyrightList($lines, $uploadtreePkToFilePath, $copyrights,
+      $NomostListNum, $uploadTreeTableName, "content");
 
     $copyrights = $this->copyrightDao->getEditedEntries('copyright_decision',
       $uploadTreeTableName, $uploadId, [], $extrawhere);
-    $this->updateCopyrightList($lines, $copyrights, $NomostListNum,
-      $uploadTreeTableName, "textfinding");
+    $this->updateCopyrightList($lines, $uploadtreePkToFilePath, $copyrights,
+      $NomostListNum, $uploadTreeTableName, "textfinding");
 
     if ($copyrightType != "all") {
       $agentList = [];
@@ -416,8 +417,8 @@ class UIExportList extends FO_Plugin
           $agentList[] = $AgentRec[0]["agent_fk"];
         }
       }
-      $this->removeCopyrightWithLicense($lines, $itemTreeBounds, $agentList,
-        $exclude);
+      $this->removeCopyrightWithLicense($lines, $uploadtreePkToFilePath,
+        $itemTreeBounds, $agentList, $exclude);
     }
     return $this->reduceCopyrightLines($lines);
   }
@@ -425,13 +426,14 @@ class UIExportList extends FO_Plugin
   /**
    * Update the list of copyrights with new list
    * @param array[in,out] $list     List of copyrights
+   * @param array[in,out] $uploadtreePkToFilePath Map of tree IDs to full paths
    * @param array   $newCopyrights  List of copyrights to be included
    * @param integer $NomostListNum  Limit of copyrights
    * @param string  $uploadTreeTableName Upload tree table name
    * @param string  $key            Key of the array holding copyright
    */
-  private function updateCopyrightList(&$list, $newCopyrights, $NomostListNum,
-    $uploadTreeTableName, $key)
+  private function updateCopyrightList(&$list, &$uploadtreePkToFilePath,
+    $newCopyrights, $NomostListNum, $uploadTreeTableName, $key)
   {
     foreach ($newCopyrights as $copyright) {
       if ($NomostListNum > -1 && count($list) >= $NomostListNum) {
@@ -444,6 +446,7 @@ class UIExportList extends FO_Plugin
       $row["content"] = $copyright[$key];
       $row["filePath"] = $this->treeDao->getFullPath($copyright["uploadtree_pk"],
         $uploadTreeTableName);
+      $uploadtreePkToFilePath[$copyright["uploadtree_pk"]] = $row["filePath"];
       $list[$row["filePath"]][] = $row;
     }
   }
@@ -452,12 +455,13 @@ class UIExportList extends FO_Plugin
    * Remove all files which either have license findings and not remove, or
    * have at least one license as conclusion
    * @param array[in,out] $lines            Lines to be filtered
+   * @param array $uploadtreePkToFilePath   Map of tree IDs to full paths
    * @param ItemTreeBounds $itemTreeBounds  Item bounds
    * @param array $agentList                List of agent IDs
    * @param string $exclude                 Files to be excluded
    */
-  private function removeCopyrightWithLicense(&$lines, $itemTreeBounds,
-    $agentList, $exclude)
+  private function removeCopyrightWithLicense(&$lines,
+    $uploadtreePkToFilePath, $itemTreeBounds, $agentList, $exclude)
   {
     $licensesPerFileName = array();
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds,
@@ -465,9 +469,11 @@ class UIExportList extends FO_Plugin
     $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisionsForCopyrightList(
       $allDecisions);
     $licensesPerFileName = $this->licenseDao->getLicensesPerFileNameForAgentId(
-      $itemTreeBounds, $agentList, true, $exclude, true, $editedMappedLicenses);
-    foreach ($licensesPerFileName as $fileName => $licenseNames) {
+      $itemTreeBounds, $agentList, true, $exclude, true, $editedMappedLicenses,
+      true);
+    foreach ($licensesPerFileName as $licenseNames) {
       if ($licenseNames !== false && count($licenseNames) > 0) {
+        $shouldRemove = false;
         if (array_key_exists('concludedResults', $licenseNames)) {
           $conclusions = $this->consolidateConclusions($licenseNames['concludedResults']);
           if (in_array("Void", $conclusions)) {
@@ -475,12 +481,16 @@ class UIExportList extends FO_Plugin
             continue;
           }
           // File has license conclusions
-          $this->removeIfKeyExists($lines, $fileName);
+          $shouldRemove = true;
         }
         if ((! empty($licenseNames['scanResults'])) &&
           ! (in_array("No_license_found", $licenseNames['scanResults']) ||
           in_array("Void", $licenseNames['scanResults']))) {
-          $this->removeIfKeyExists($lines, $fileName);
+          $shouldRemove = true;
+        }
+        if ($shouldRemove) {
+          $this->removeCopyrightByUploadtreePk($lines, $uploadtreePkToFilePath,
+            $licenseNames['uploadtree_pk']);
         }
       }
     }
@@ -502,18 +512,18 @@ class UIExportList extends FO_Plugin
   }
 
   /**
-   * Remove key from a list if it exists
+   * Remove filepath groups belonging to the given uploadtree IDs
    *
-   * @note Uses strpos to find the key
    * @param array[in,out] $lines Array
-   * @param string $key          Key to be removed
+   * @param array $uploadtreePkToFilePath Map of tree IDs to full paths
+   * @param array $uploadtreePks Tree IDs to remove
    */
-  private function removeIfKeyExists(&$lines, $key)
+  private function removeCopyrightByUploadtreePk(&$lines,
+    $uploadtreePkToFilePath, $uploadtreePks)
   {
-    foreach (array_keys($lines) as $file) {
-      if (strpos($file, $key) !== false) {
-        unset($lines[$file]);
-        break;
+    foreach ($uploadtreePks as $uploadtreePk) {
+      if (array_key_exists($uploadtreePk, $uploadtreePkToFilePath)) {
+        unset($lines[$uploadtreePkToFilePath[$uploadtreePk]]);
       }
     }
   }
