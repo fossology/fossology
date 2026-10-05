@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "0.2-draft",
+  "assertionId": "srac-stale-superseded-001",
+  "subject": {
+    "name": "synthetic-brake-monitor",
+    "purl": "pkg:generic/synthetic-brake-monitor@1.0.0",
+    "version": "1.0.0"
+  },
+  "safetyRelevance": {
+    "status": "safety-related",
+    "classification": "ASIL-B"
+  },
+  "rationale": "Superseded by newer analysis record.",
+  "evidence": [
+    {
+      "id": "ev-old-001",
+      "type": "safety-analysis",
+      "uri": "https://example.org/evidence/old-001"
+    }
+  ],
+  "assertion": {
+    "status": "superseded",
+    "author": {
+      "name": "Engineer Alice"
+    },
+    "created": "2025-01-01T10:00:00Z"
+  }
+}
