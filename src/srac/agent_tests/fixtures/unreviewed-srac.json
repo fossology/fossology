@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "0.2-draft",
+  "assertionId": "srac-draft-unreviewed-001",
+  "subject": {
+    "name": "synthetic-brake-monitor",
+    "purl": "pkg:generic/synthetic-brake-monitor@1.0.0",
+    "version": "1.0.0"
+  },
+  "safetyRelevance": {
+    "status": "safety-related",
+    "classification": "ASIL-B"
+  },
+  "rationale": "Draft assertion awaiting peer safety review.",
+  "evidence": [
+    {
+      "id": "ev-draft-001",
+      "type": "safety-analysis",
+      "uri": "https://example.org/evidence/draft-001"
+    }
+  ],
+  "assertion": {
+    "status": "draft",
+    "author": {
+      "name": "Engineer Alice"
+    },
+    "reviewer": null,
+    "created": "2026-09-01T10:00:00Z"
+  }
+}
