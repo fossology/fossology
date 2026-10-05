@@ -121,7 +121,7 @@ class BomReportGenerator
     }
 
     if (array_key_exists('mimeType', $componentData) && !empty($componentData['mimeType'])) {
-      $component['mime-type'] = $componentData['mimeType'];
+      $component['mime-type'] = strtolower($componentData['mimeType']);
     }
 
     if (array_key_exists('bomref', $componentData) && !empty($componentData['bomref'])) {
@@ -190,6 +190,9 @@ class BomReportGenerator
     if (array_key_exists('id', $licenseData) && !empty($licenseData['id']) &&
       stripos($licenseData['id'], LicenseRef::SPDXREF_PREFIX) === 0) {
       if (array_key_exists('bom-ref', $licenseData) && !empty($licenseData['bom-ref'])) {
+        if (array_key_exists('name', $licenseData) && !empty($licenseData['name'])) {
+              $license['license']['expression'] = $licenseData['name'];
+        }
         $license['expressionDetails'] = [
           'licenseIdentifier' => $licenseData['id'],
           'bom-ref' => $licenseData['bom-ref']
