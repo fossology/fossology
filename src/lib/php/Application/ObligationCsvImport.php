@@ -346,10 +346,10 @@ class ObligationCsvImport
       $diff = ArrayOperation::getArrayDiffs($oldLicIds, $newLicIds);
 
       if (!empty($diff['remove'])) {
-        $log .= ' removed license ids [' . implode(',', $diff['remove']) . ']';
+        $log .= ' unlinked license ids [' . implode(',', $diff['remove']) . ']';
       }
       if (!empty($diff['add'])) {
-        $log .= ' added license ids [' . implode(',', $diff['add']) . ']';
+        $log .= ' linked license ids [' . implode(',', $diff['add']) . ']';
       }
 
       // delete associations
@@ -376,14 +376,14 @@ class ObligationCsvImport
         if (!empty($rfPk)) {
           $newLicIds[] = $rfPk['rf_pk'];
         } else {
-          $message .= \sprintf('license with rf_external_id %s not found', $licExternalId);
+          $log .= \sprintf('license with rf_external_id %s not found', $licExternalId);
         }
       }
 
       // insert associations
       $this->obligationMap->associateLicenseFromLicenseList($new['ob_pk'], $newLicIds);
       if (!empty($newLicIds)) {
-        $log .= ' added license ids [' . implode(',', $newLicIds) . ']';
+        $log .= ' linked license ids [' . implode(',', $newLicIds) . ']';
       }
 
       $this->dbManager->commit();
