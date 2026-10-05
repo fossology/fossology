@@ -190,12 +190,12 @@ class BomReportGenerator
     if (array_key_exists('id', $licenseData) && !empty($licenseData['id']) &&
       stripos($licenseData['id'], LicenseRef::SPDXREF_PREFIX) === 0) {
       if (array_key_exists('bom-ref', $licenseData) && !empty($licenseData['bom-ref'])) {
-        $license['expressionDetailed'] = [
-          'value' => $licenseData['id'],
+        $license['expressionDetails'] = [
+          'licenseIdentifier' => $licenseData['id'],
           'bom-ref' => $licenseData['bom-ref']
         ];
         if (array_key_exists('acknowledgement', $licenseData) && !empty($licenseData['acknowledgement'])) {
-          $license['expressionDetailed']['acknowledgement'] = $licenseData['acknowledgement'];
+          $license['acknowledgement'] = $licenseData['acknowledgement'];
         }
       } else {
         $license['expression'] = $licenseData['id'];
