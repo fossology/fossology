@@ -475,6 +475,13 @@ class LicenseCsvImport
       // associated obligations
       $diff = ArrayOperation::getArrayDiffs($oldObIds, $newObIds);
 
+      if (!empty($diff['remove'])) {
+        $log .= ' unlinked obligation ids [' . implode(',', $diff['remove']) . ']';
+      }
+      if (!empty($diff['add'])) {
+        $log .= ' linked obligation ids [' . implode(',', $diff['add']) . ']';
+      }
+
       // delete associations
       foreach ($diff['remove'] as $obid) {
         $this->obligationMap->unassociateLicenseFromObligation($obid, $rfPk['rf_pk']);
@@ -503,6 +510,9 @@ class LicenseCsvImport
       }
 
       // insert associations
+      if (!empty($newObIds)) {
+        $log .= ' linked obligation ids [' . implode(',', $newObIds) . ']';
+      }
       foreach ($newObIds as $obid) {
         $this->obligationMap->associateLicenseWithObligation($obid, $licRetVal['pkey']);
       }
