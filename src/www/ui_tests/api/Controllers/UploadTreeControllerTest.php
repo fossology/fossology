@@ -271,6 +271,22 @@ namespace Fossology\UI\Api\Test\Controllers {
     }
 
     /**
+     * Helper function to build a JSON request
+     *
+     * @param string $method HTTP method
+     * @param array $body Request body, encoded as JSON
+     * @return Request
+     */
+    private function getJsonRequest($method, $body)
+    {
+      $requestHeaders = new Headers();
+      $requestHeaders->setHeader('Content-Type', 'application/json');
+      return new Request($method, new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $this->streamFactory->createStream(
+          json_encode($body)));
+    }
+
+    /**
      * @test
      * -# Test for UploadController::viewLicenseFile() with valid status
      * -# Check if response status is 200 and the body has the expected contents
@@ -418,13 +434,7 @@ namespace Fossology\UI\Api\Test\Controllers {
 
       $this->viewLicensePlugin->shouldNotReceive('updateLastItem');
 
-      $reqBody = $this->streamFactory->createStream(json_encode(
-        $rq
-      ));
-      $requestHeaders = new Headers();
-      $requestHeaders->setHeader('Content-Type', 'application/json');
-      $request = new Request("PUT", new Uri("HTTP", "localhost"),
-        $requestHeaders, [], [], $reqBody);
+      $request = $this->getJsonRequest("PUT", $rq);
       $this->expectException(HttpForbiddenException::class);
 
       $this->uploadTreeController->setClearingDecision($request,
@@ -1066,13 +1076,7 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->clearingDao->shouldNotReceive('insertClearingEvent');
       $this->clearingDao->shouldNotReceive('updateClearingEvent');
 
-      $reqBody = $this->streamFactory->createStream(json_encode(
-        $rq
-      ));
-      $requestHeaders = new Headers();
-      $requestHeaders->setHeader('Content-Type', 'application/json');
-      $request = new Request("PUT", new Uri("HTTP", "localhost"),
-        $requestHeaders, [], [], $reqBody);
+      $request = $this->getJsonRequest("PUT", $rq);
       $this->expectException(HttpForbiddenException::class);
 
       $this->uploadTreeController->handleAddEditAndDeleteLicenseDecision($request,
@@ -1189,13 +1193,7 @@ namespace Fossology\UI\Api\Test\Controllers {
 
       $this->changeLicenseBulk->shouldNotReceive('handle');
 
-      $reqBody = $this->streamFactory->createStream(json_encode(
-        $body
-      ));
-      $requestHeaders = new Headers();
-      $requestHeaders->setHeader('Content-Type', 'application/json');
-      $request = new Request("POST", new Uri("HTTP", "localhost"),
-        $requestHeaders, [], [], $reqBody);
+      $request = $this->getJsonRequest("POST", $body);
       $this->expectException(HttpForbiddenException::class);
 
       $this->uploadTreeController->scheduleBulkScan($request,

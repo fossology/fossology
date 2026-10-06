@@ -123,7 +123,8 @@ class RestController
     $this->uploadAccessible($id);
     if (! $this->restHelper->getUploadDao()->isEditable($id,
         $this->restHelper->getGroupId())) {
-      throw new HttpForbiddenException("Upload is not editable");
+      throw new HttpForbiddenException(
+        "Write permission is required for this upload");
     }
   }
 
