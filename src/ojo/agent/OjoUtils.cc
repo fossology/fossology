@@ -9,6 +9,8 @@
  */
 
 #include <iostream>
+#include <memory>
+#include <glib.h>
 
 #include "OjoUtils.hpp"
 #include "OjoAgent.hpp"
@@ -124,11 +126,12 @@ bool processUploadId(const OjoState &state, int uploadId,
       if (pFileId == 0)
         continue;
 
-      char *fileName = threadLocalDatabaseHandler.getPFileNameForFileId(
-        pFileId);
-      char *filePath = NULL;
+      std::unique_ptr<char,decltype(&g_free)> fileName(
+        threadLocalDatabaseHandler.getPFileNameForFileId(pFileId), &g_free);
+      std::unique_ptr<char,decltype(&free)> filePath(nullptr, &free);
 #pragma omp critical (repo_mk_path)
-      filePath = fo_RepMkPath(repoArea, fileName);
+      filePath.reset(fo_RepMkPath(repoArea, fileName.get()));
+      fileName.reset();
 
       if (!filePath)
       {
@@ -141,7 +144,7 @@ bool processUploadId(const OjoState &state, int uploadId,
       vector<ojomatch> identified;
       try
       {
-        identified = agentObj.processFile(filePath, threadLocalDatabaseHandler,
+        identified = agentObj.processFile(filePath.get(), threadLocalDatabaseHandler,
                                           state.getCliOptions().getGroupId(),
                                           state.getCliOptions().getUserId());
       }
@@ -150,6 +153,8 @@ bool processUploadId(const OjoState &state, int uploadId,
         LOG_FATAL("Unable to read %s.", e.what());
         continue;
       }
+
+      filePath.reset();
 
       if (!storeResultInDb(identified, threadLocalDatabaseHandler,
           state.getAgentId(), pFileId))
