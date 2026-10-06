@@ -226,4 +226,65 @@ class TokenRequestTest extends TestCase
     $input = ['username' => 'testUser'];
     TokenRequest::fromArray($input, 1);
   }
+
+  /**
+   * @dataProvider invalidTokenExpireProvider
+   */
+  public function testFromArrayInvalidTokenExpire(string $expiry, int $version)
+  {
+    $keys = $version === 1 ? TokenRequest::VERSION_1_KEYS : TokenRequest::VERSION_2_KEYS;
+    $input = array_combine($keys, ['testUser', 'testPassword', 'TestToken', 'read', $expiry]);
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage('Invalid date format provided');
+    TokenRequest::fromArray($input, $version);
+  }
+
+  public function invalidTokenExpireProvider(): array
+  {
+    $cases = [];
+    foreach ([1, 2] as $version) {
+      foreach (['2026-10-32', '2026-11-31', '2026-02-29', '1900-02-29',
+        '2026-13-01', '2026-00-01', '2026-01-00', '2026-1-01',
+        '2026-01-1', '2026-01-01 ', 'not-a-date', ''] as $expiry) {
+        $cases[] = [$expiry, $version];
+      }
+    }
+    return $cases;
+  }
+
+  /**
+   * @dataProvider validTokenExpireProvider
+   */
+  public function testFromArrayValidTokenExpire(string $expiry, int $version)
+  {
+    $keys = $version === 1 ? TokenRequest::VERSION_1_KEYS : TokenRequest::VERSION_2_KEYS;
+    $input = array_combine($keys, ['testUser', 'testPassword', 'TestToken', 'read', $expiry]);
+
+    $tokenRequest = TokenRequest::fromArray($input, $version);
+    $this->assertSame($expiry, $tokenRequest->getTokenExpire());
+  }
+
+  public function validTokenExpireProvider(): array
+  {
+    return [
+      ['2026-11-01', 1],
+      ['2026-11-01', 2],
+      ['2028-02-29', 1],
+      ['2028-02-29', 2],
+      ['2000-02-29', 1],
+      ['2000-02-29', 2]
+    ];
+  }
+
+  public function testInvalidTokenExpirePreservesPreviousValue()
+  {
+    $tokenRequest = new TokenRequest(...array_values($this->sampleData));
+    try {
+      $tokenRequest->setTokenExpire('2026-10-32');
+      $this->fail('Expected an invalid date to be rejected');
+    } catch (HttpBadRequestException $exception) {
+      $this->assertSame($this->sampleData['tokenExpire'], $tokenRequest->getTokenExpire());
+    }
+  }
 }
