@@ -69,14 +69,12 @@ class BomReportGenerator
           'components' => [
             [
               'type' => 'application',
-              'vendor' => 'FOSSology',
               'name' => 'FOSSology',
               'version' => $bomdata['tool-version'],
               'bom-ref' => 'tool-fossology'
             ],
             [
               'type' => 'application',
-              'vendor' => 'FOSSology',
               'name' => 'FOSSology Scanners',
               'version' => $bomdata['tool-version'],
               'bom-ref' => 'tool-fossology-scanners'
@@ -123,7 +121,7 @@ class BomReportGenerator
     }
 
     if (array_key_exists('mimeType', $componentData) && !empty($componentData['mimeType'])) {
-      $component['mime-type'] = $componentData['mimeType'];
+      $component['mime-type'] = strtolower($componentData['mimeType']);
     }
 
     if (array_key_exists('bomref', $componentData) && !empty($componentData['bomref'])) {
@@ -189,40 +187,56 @@ class BomReportGenerator
     $license = [];
 
     // Check license ID is a LicenseRef
-    if (array_key_exists('id', $licenseData) && !empty($licenseData['id']) &&
-      stripos($licenseData['id'], LicenseRef::SPDXREF_PREFIX) === 0) {
+    if (array_key_exists('id', $licenseData) &&
+        !empty($licenseData['id']) &&
+        stripos($licenseData['id'], LicenseRef::SPDXREF_PREFIX) === 0) {
+
+        //==========================================
+        // The is the license Expression option flow
+        //==========================================
+
+      // check if the bom-ref field exists and is filled
       if (array_key_exists('bom-ref', $licenseData) && !empty($licenseData['bom-ref'])) {
-        $license['expressionDetailed'] = [
-          'value' => $licenseData['id'],
-          'bom-ref' => $licenseData['bom-ref']
-        ];
+
+        // copy the bom-ref field
+        $license['bom-ref'] = $licenseData['bom-ref'];
+
+        // fill the acknowledgement if available
         if (array_key_exists('acknowledgement', $licenseData) && !empty($licenseData['acknowledgement'])) {
-          $license['expressionDetailed']['acknowledgement'] = $licenseData['acknowledgement'];
+          $license['acknowledgement'] = $licenseData['acknowledgement'];
         }
-      } else {
-        $license['expression'] = $licenseData['id'];
       }
+      $license['expression'] = $licenseData['id'];
       return $license;
     }
 
+    //===============================
+    // The is the license option flow
+    //===============================
+
+    // if the ID field is filled then use this or otherwise use the name field.
     if (array_key_exists('id', $licenseData) && !empty($licenseData['id'])) {
       $license['license']['id'] = $licenseData['id'];
     } else if (array_key_exists('name', $licenseData) && !empty($licenseData['name'])) {
       $license['license']['name'] = $licenseData['name'];
     }
 
+    // copy the bom-ref field
     if (array_key_exists('bom-ref', $licenseData) && !empty($licenseData['bom-ref'])) {
       $license['license']['bom-ref'] = $licenseData['bom-ref'];
     }
 
+    // copy the aknowlegde field
     if (array_key_exists('acknowledgement', $licenseData) && !empty($licenseData['acknowledgement'])) {
       $license['license']['acknowledgement'] = $licenseData['acknowledgement'];
     }
 
+    // copy the URL field
     if (array_key_exists('url', $licenseData) && !empty($licenseData['url'])) {
       $license['license']['url'] = $licenseData['url'];
     }
 
+    // copy the license text
     if (array_key_exists('textContent', $licenseData) && !empty($licenseData['textContent'])) {
       $license['license']['text'] = [
         'content' => $licenseData['textContent'],
