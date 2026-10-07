@@ -361,9 +361,9 @@ class ObligationCsvImport
       $this->dbManager->commit();
     } else {
       $stmtInsert = __METHOD__.'.insert';
-      $this->dbManager->prepare($stmtInsert,'INSERT INTO obligation_ref (ob_type,ob_topic,ob_text,ob_classification,ob_modifications,ob_comment,ob_md5,ob_external_id)'
-              . ' VALUES ($1,$2,$3,$4,$5,$6,md5($3),$7) RETURNING ob_pk');
-      $resi = $this->dbManager->execute($stmtInsert,array($row['type'],$row['topic'],$row['text'],$row['classification'],'False',$row['comment'], $row['external_id']));
+      $this->dbManager->prepare($stmtInsert,'INSERT INTO obligation_ref (ob_type,ob_topic,ob_text,ob_classification,ob_modifications,ob_comment,ob_md5,ob_external_id,ob_active)'
+              . ' VALUES ($1,$2,$3,$4,$5,$6,md5($3),$7,$8) RETURNING ob_pk');
+      $resi = $this->dbManager->execute($stmtInsert,array($row['type'],$row['topic'],$row['text'],$row['classification'],'False',$row['comment'], $row['external_id'], $row['active']));
       $new = $this->dbManager->fetchArray($resi);
       $this->dbManager->freeResult($resi);
 
@@ -453,7 +453,7 @@ class ObligationCsvImport
   {
     $stmt = __METHOD__ . '.getOldObligation';
     $oldObligation = $this->dbManager->getSingleRow(
-      'SELECT ob_topic, ob_text, ob_classification, ob_modifications, ob_comment, ob_type FROM obligation_ref WHERE ob_pk=$1',
+      'SELECT ob_topic, ob_text, ob_classification, ob_modifications, ob_comment, ob_type, ob_active FROM obligation_ref WHERE ob_pk=$1',
       array($exists),
       $stmt
     );
@@ -499,6 +499,13 @@ class ObligationCsvImport
         $stmt .= '.type';
         $extraParams[] = 'ob_type=$' . count($params);
         $log .= ', updated type';
+      }
+      if (isset($row['active']) && $row['active'] !=
+        $this->dbManager->booleanFromDb($oldObligation['ob_active'])) {
+          $params[] = $this->dbManager->booleanToDb($row['active']);
+          $stmt .= '.active';
+          $extraParams[] = 'ob_active=$' . count($params);
+          $log .= ', updated active';
       }
     } else {
       if (isset($row['classification']) && $row['classification'] != $oldObligation['ob_classification']) {
