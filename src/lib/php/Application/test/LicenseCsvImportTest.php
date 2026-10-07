@@ -177,10 +177,11 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
       'rf_source' => '',
       'rf_risk' => 4,
       'rf_external_id' => null,
+      'rf_active' => null,
     );
     $dbManager->shouldReceive('getSingleRow')
       ->with(
-      'SELECT rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype ' .
+      'SELECT rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype, rf_active ' .
       'FROM license_ref WHERE rf_pk = $1', array(101), anything())
       ->once()
       ->andReturn($singleRowA);
@@ -291,7 +292,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $canLicA["rf_group"] = 4;
     $dbManager->shouldReceive('getSingleRow')
     ->with(
-      'SELECT rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype ' .
+      'SELECT rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype, rf_active ' .
       'FROM license_ref WHERE rf_pk = $1', array(200), anything())
       ->once()
       ->andReturn($canLicA);
@@ -567,6 +568,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
       "rf_source" => '',
       "rf_risk" => 0,
       "rf_external_id" => null,
+      "rf_active" => null,
     );
     $this->addLicenseInsertToDbManager($dbManager, $licenseRow, 101);
     Reflectory::setObjectsProperty($licenseCsvImport, 'nkMap', array(
