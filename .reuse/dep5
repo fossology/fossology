@@ -67,3 +67,7 @@ License: GPL-2.0-only
 Files: pbconf/pbcl pbconf/fossology/pbve.pre
 Copyright: Fossology contributors
 License: GPL-2.0-only
+
+Files: src/copyright/agent/keyword-hints.json
+Copyright: 2026 DenishShiroya22 <denishshiroya22@gmail.com>
+License: GPL-2.0-only

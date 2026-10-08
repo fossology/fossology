@@ -1,5 +1,7 @@
 {# SPDX-FileCopyrightText: © 2014-2017 Siemens AG
 
+   SPDX-FileCopyrightText: © 2026 DenishShiroya22 <denishshiroya22@gmail.com>
+
    SPDX-License-Identifier: FSFAP
 #}
 
@@ -9,13 +11,16 @@ function createTableBase{{ table.type }}(activated) {
       { "sTitle": "{{ 'Count'| trans }}", "sClass": "right read_only", "sWidth": "5%" },
       { "sTitle": "{{ table.description }}", "sClass": "left"}
     ]
+  {% if table.type == 'keyword' %}
+  aoColumns.push({ "sTitle": "{{ 'Suggested Action'| trans }}", "sClass": "left read_only", "bSortable": false, "bSearchable": false });
+  {% endif %}
   if (activated)
   {
     var id = '#copyright{{ table.type }}';
     var action = 'getData'
     aoColumns = aoColumns.concat([
-      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false },
-      { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:47.5%'>", "sClass": "center read_only", "sWidth": "10%", "bSortable": false }
+      { "sTitle": "", "sClass": "center read_only copyright-actions", "sWidth": "10%", "bSortable": false },
+      { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:47.5%'>", "sClass": "center read_only copyright-select", "sWidth": "10%", "bSortable": false }
     ]);
   }
   else
@@ -23,8 +28,8 @@ function createTableBase{{ table.type }}(activated) {
     var id = '#copyright{{ table.type }}deactivated';
     var action = 'getDeactivatedData'
     aoColumns = aoColumns.concat([
-      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false },
-      { "sTitle": "<input type='checkbox' name='selectUndo{{ table.type }}' id='selectUndo{{ table.type }}' style='margin-left:47.5%'>", "sClass": "center read_only", "sWidth": "10%", "bSortable": false }
+      { "sTitle": "", "sClass": "center read_only copyright-actions", "sWidth": "10%", "bSortable": false },
+      { "sTitle": "<input type='checkbox' name='selectUndo{{ table.type }}' id='selectUndo{{ table.type }}' style='margin-left:47.5%'>", "sClass": "center read_only copyright-select", "sWidth": "10%", "bSortable": false }
     ]);
   }
 
@@ -194,7 +199,7 @@ function createTable{{ table.type }}() {
     }
   });
 
-  $('#copyright{{ table.type }} tbody').on('click', 'tr td:nth-child(3)', function (event) {
+  $('#copyright{{ table.type }} tbody').on('click', 'tr td.copyright-actions', function (event) {
     if ($(event.target).closest('.revert-link').length > 0) {
       return;
     }
@@ -215,7 +220,7 @@ function createTable{{ table.type }}() {
     }
   });
 
-  $('#copyright{{ table.type }} tbody').on('click', 'tr td:nth-child(4)', function (event) {
+  $('#copyright{{ table.type }} tbody').on('click', 'tr td.copyright-select', function (event) {
     if ($(event.target).is('input')) {
       return;
     }
