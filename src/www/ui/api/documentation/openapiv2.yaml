@@ -1639,6 +1639,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         '404':
           description: Resource not found.
           content:
@@ -1678,6 +1684,12 @@ paths:
       responses:
         '200':
           description: License is removed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
           content:
             application/json:
               schema:
