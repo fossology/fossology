@@ -64,6 +64,8 @@
             "Fossology\\DelAgent\\UI\\" : "@FO_SOURCEDIR@/delagent/ui",
             "Fossology\\ReadmeOSS\\UI\\" : "@FO_SOURCEDIR@/readmeoss/ui",
             "Fossology\\Spdx\\UI\\" : "@FO_SOURCEDIR@/spdx/ui",
+            "Fossology\\Srac\\" : "@FO_SOURCEDIR@/srac/agent",
+            "Fossology\\Srac\\UI\\" : "@FO_SOURCEDIR@/srac/ui",
             "Fossology\\UnifiedReport\\UI\\" : "@FO_SOURCEDIR@/unifiedreport/ui",
             "Fossology\\UI\\Page\\" : "@FO_SOURCEDIR@/www/ui/page",
             "Fossology\\UI\\Api\\" : "@FO_SOURCEDIR@/www/ui/api"
