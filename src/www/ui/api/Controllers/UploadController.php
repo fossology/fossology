@@ -982,12 +982,12 @@ class UploadController extends RestController
   public function setMainLicense($request, $response, $args)
   {
     $uploadId = intval($args['id']);
+    $this->uploadEditable($uploadId);
+
     $body = $this->getParsedBody($request);
     $shortName = $body['shortName'];
     $licenseDao = $this->container->get('dao.license');
     $clearingDao = $this->container->get('dao.clearing');
-
-    $this->uploadAccessible($uploadId);
 
     if (empty($shortName)) {
       throw new HttpBadRequestException("Short name missing from request.");
@@ -1025,12 +1025,12 @@ class UploadController extends RestController
   public function removeMainLicense($request, $response, $args)
   {
     $uploadId = intval($args['id']);
+    $this->uploadEditable($uploadId);
+
     $shortName = $args['shortName'];
     $licenseDao = $this->container->get('dao.license');
     $clearingDao = $this->container->get('dao.clearing');
     $license = $licenseDao->getLicenseByShortName($shortName, $this->restHelper->getGroupId());
-
-    $this->uploadAccessible($uploadId);
 
     if ($license === null) {
       throw new HttpNotFoundException(
