@@ -3553,7 +3553,17 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     /* checking for FSF */
     if (INFILE(_LT_FSF_1)) {
-      INTERESTING(lDebug ? "FSF(1)" : "FSFULLR");
+      /* the retention notice alone, or with one of its two disclaimers */
+      int wd = INFILE(_LT_FSFULLRWD), sd = INFILE(_LT_FSFULLRSD);
+      if (wd) {
+        INTERESTING("FSFULLRWD");
+      }
+      if (sd) {
+        INTERESTING("FSFULLRSD");
+      }
+      if (!wd && !sd) {
+        INTERESTING(lDebug ? "FSF(1)" : "FSFULLR");
+      }
       lmem[_mLGPL] = 1;
     }
     else if (INFILE(_LT_FSF_2)) {
@@ -17378,7 +17388,13 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   if ((hasSpdxDecl && INFILE(_SPDX_FSFAP))) {
     INTERESTING("FSFAP");
   }
-  if ((hasSpdxDecl && INFILE(_SPDX_FSFULLR))) {
+  if ((hasSpdxDecl && INFILE(_SPDX_FSFULLRWD))) {
+    INTERESTING("FSFULLRWD");
+  }
+  else if ((hasSpdxDecl && INFILE(_SPDX_FSFULLRSD))) {
+    INTERESTING("FSFULLRSD");
+  }
+  else if ((hasSpdxDecl && INFILE(_SPDX_FSFULLR))) {
     INTERESTING("FSFULLR");
   }
   else if ((hasSpdxDecl && INFILE(_SPDX_FSFUL))) {
@@ -18290,7 +18306,14 @@ void copyleftExceptions(char *filetext, int size, int isML, int isPS)
     INTERESTING("Autoconf-exception-3.0");
   }
   else if (INFILE(_LT_Autoconf_exception_3)) {
-    INTERESTING("Autoconf-exception");
+    /* the 2.0 sentence with another licensor: the macro's owner, or one
+       the standard head does not name */
+    if (INFILE(_LT_Autoconf_exception_macro)) {
+      INTERESTING("Autoconf-exception-macro");
+    }
+    else {
+      INTERESTING("Autoconf-exception-2.0");
+    }
   }
   else if (INFILE(_LT_Bison_exception_22)) {
     INTERESTING("Bison-exception-2.2");
@@ -18360,8 +18383,10 @@ void copyleftExceptions(char *filetext, int size, int isML, int isPS)
     if (HASTEXT(_LT_Libtool_exception, 0)) {
       INTERESTING("Libtool-exception");
     }
-    if (HASTEXT(_LT_Autoconf_exception_2, REG_EXTENDED) || INFILE(_LT_Autoconf_exception_1)) {
-      INTERESTING("Autoconf-exception");
+    /* the section-7 form was named Autoconf-exception-generic-3.0 above */
+    if ((HASTEXT(_LT_Autoconf_exception_2, REG_EXTENDED) || INFILE(_LT_Autoconf_exception_1))
+        && NOT_INFILE(_LT_AUTOCONF_SIMPLE_EXCEPTION)) {
+      INTERESTING("Autoconf-exception-generic");
     }
   }
   else if (INFILE(_LT_Linux_syscall_note)) {
