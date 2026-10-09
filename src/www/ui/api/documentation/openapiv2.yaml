@@ -571,6 +571,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        '403':
+          description: User does not have permissions to delete the upload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
     patch:
