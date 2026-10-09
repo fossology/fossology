@@ -193,7 +193,7 @@ class LicenseCsvImport
     }
     foreach (array('parent_shortname' => null, 'report_shortname' => null,
       'url' => '', 'notes' => '', 'source' => '', 'risk' => 0,
-      'group' => null, 'spdx_id' => null, 'licensetype' => "Permisssive"
+      'group' => null, 'spdx_id' => null, 'licensetype' => null
       ) as $optNeedle=>$defaultValue) {
       $mRow[$optNeedle] = $defaultValue;
       if ($this->headrow[$optNeedle]!==false && array_key_exists($this->headrow[$optNeedle], $row)) {
@@ -215,7 +215,7 @@ class LicenseCsvImport
     $mRow = $this->handleRowJson($row);
     foreach (array('parent_shortname' => null, 'report_shortname' => null,
       'url' => '', 'notes' => '', 'source' => '', 'risk' => 0,
-      'group' => null, 'spdx_id' => null, 'licensetype' => 'Permisssive',
+      'group' => null, 'spdx_id' => null, 'licensetype' => null,
       'obligation_ids' => array()
       ) as $optNeedle => $defaultValue) {
       if (!array_key_exists($optNeedle, $mRow)) {
@@ -643,7 +643,7 @@ class LicenseCsvImport
     $stmtInsert = __METHOD__ . '.insert.' . $tableName;
     $columns = array(
       "rf_shortname" => $row['shortname'],
-      "rf_licensetype" => $row['licensetype'],
+      "rf_licensetype" => $row['licensetype'] ?: 'Unknown',
       "rf_fullname"  => $row['fullname'],
       "rf_spdx_id"   => $row['spdx_id'],
       "rf_text"      => $row['text'],

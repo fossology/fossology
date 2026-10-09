@@ -584,6 +584,70 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
+   * @brief Test for LicenseCsvImport::handleCsv() without licensetype column
+   * @test
+   * -# Import an existing and a new license from a CSV without licensetype.
+   * -# Type of the existing license must not be updated.
+   * -# New license must be inserted with type `Unknown`.
+   */
+  public function testHandleCsvWithoutLicenseType()
+  {
+    $dbManager = M::mock(DbManager::class);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
+    Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleCsv',
+      array(array('shortname', 'fullname', 'text')));
+    Reflectory::setObjectsProperty($licenseCsvImport, 'nkMap', array(
+      'licA' => 101, 'licB' => false
+    ));
+    Reflectory::setObjectsProperty($licenseCsvImport, 'mdkMap', array(
+      md5('txA') => 101, md5('txB') => false
+    ));
+
+    $dbManager->shouldReceive('getSingleRow')
+      ->with(
+      'SELECT rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype ' .
+      'FROM license_ref WHERE rf_pk = $1', array(101), anything())
+      ->once()
+      ->andReturn(array(
+        'rf_shortname' => 'licA',
+        'rf_fullname' => 'liceA',
+        'rf_spdx_id' => null,
+        'rf_text' => 'txA',
+        'rf_url' => '',
+        'rf_notes' => '',
+        'rf_source' => '',
+        'rf_risk' => 0,
+        'rf_licensetype' => 'Strong Copyleft'
+      ));
+    $dbManager->shouldReceive('getSingleRow')
+      ->with('SELECT rf_parent FROM license_map WHERE rf_fk = $1 AND usage = $2;',
+        anything(), anything())
+      ->andReturn(false);
+    $returnA = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'handleCsv', array(array('licA', 'liceA', 'txA')));
+    assertThat($returnA, is("License 'licA' already exists in DB (id = 101)"));
+
+    $this->addLicenseInsertToDbManager($dbManager, array(
+      "rf_shortname" => "licB",
+      "rf_licensetype" => "Unknown",
+      "rf_fullname" => "liceB",
+      "rf_spdx_id" => null,
+      "rf_text" => "txB",
+      "rf_md5" => md5("txB"),
+      "rf_detector_type" => 1,
+      "rf_url" => '',
+      "rf_notes" => '',
+      "rf_source" => '',
+      "rf_risk" => 0,
+      "rf_external_id" => null,
+    ), 102);
+    $returnB = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'handleCsv', array(array('licB', 'liceB', 'txB')));
+    assertThat($returnB, is("Inserted 'licB' in DB"));
+  }
+
+  /**
    * @brief Test for LicenseCsvImport::handleFile() (non-existing file)
    * @test
    * -# Call LicenseCsvImport::handleFile() on non-existing file
