@@ -4,6 +4,7 @@
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
  SPDX-FileCopyrightText: © 2022 Samuel Dushimimana <dushsam100@gmail.com>
  SPDX-FileContributor: Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
+ SPDX-FileContributor: © 2026 Adhithya Pandiri <adhithyapandiri@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -12,8 +13,18 @@
  * @brief Tests for UploadController
  */
 
+namespace Fossology\UI\Api\Controllers;
+
+function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
+{
+  return \Fossology\UI\Api\Test\Controllers\UploadControllerTest::$functions->TryToDelete($uploadpk, $user_pk,
+    $group_pk, $uploadDao);
+}
+
 namespace Fossology\UI\Api\Test\Controllers;
 
+use Fossology\DelAgent\UI\DeleteMessages;
+use Fossology\DelAgent\UI\DeleteResponse;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\ReuseReportProcessor;
 use Fossology\Lib\Dao\AgentDao;
@@ -49,12 +60,6 @@ use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request;
 use Slim\Psr7\Uri;
-
-function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
-{
-  return UploadControllerTest::$functions->TryToDelete($uploadpk, $user_pk,
-    $group_pk, $uploadDao);
-}
 
 /**
  * @class UploadControllerTest
@@ -174,13 +179,14 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
    */
   protected function setUp() : void
   {
-    global $container;
+    global $container, $dbManager;
     $this->userId = 2;
     $this->groupId = 2;
     $container = M::mock('ContainerBuilder');
     self::$functions = M::mock();
     $this->dbHelper = M::mock(DbHelper::class);
     $this->dbManager = M::mock(DbManager::class);
+    $dbManager = $this->dbManager;
     $this->restHelper = M::mock(RestHelper::class);
     $this->uploadDao = M::mock(UploadDao::class);
     $this->folderDao = M::mock(FolderDao::class);
@@ -2021,8 +2027,130 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $actualResponse = $this->uploadController->getTopItem(null,new ResponseHelper(),["id"=>$uploadId]);
 
-
     $this->assertEquals(500,$actualResponse->getStatusCode());
+  }
 
+  /**
+   * @test
+   * -# Test UploadController::deleteUpload() when user lacks permission on V2
+   * -# Check if HttpForbiddenException is thrown (HTTP 403)
+   */
+  public function testDeleteUploadForbiddenWhenNoPermissionV2()
+  {
+    $uploadId = 5;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+
+    self::$functions->shouldReceive('TryToDelete')
+      ->withArgs([$uploadId, $this->userId, $this->groupId, $this->uploadDao])
+      ->andReturn(new DeleteResponse(DeleteMessages::NO_PERMISSION));
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("DELETE", new Uri("HTTP", "localhost", 80,
+      "/uploads/$uploadId"), $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2);
+
+    $this->expectException(HttpForbiddenException::class);
+
+    $this->uploadController->deleteUpload($request, new ResponseHelper(),
+      ['id' => $uploadId]);
+  }
+
+  /**
+   * @test
+   * -# Test UploadController::deleteUpload() when user lacks permission on V1
+   * -# Check if HttpInternalServerErrorException is thrown (HTTP 500)
+   */
+  public function testDeleteUploadInternalServerErrorWhenNoPermissionV1()
+  {
+    $uploadId = 5;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+
+    self::$functions->shouldReceive('TryToDelete')
+      ->withArgs([$uploadId, $this->userId, $this->groupId, $this->uploadDao])
+      ->andReturn(new DeleteResponse(DeleteMessages::NO_PERMISSION));
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("DELETE", new Uri("HTTP", "localhost", 80,
+      "/uploads/$uploadId"), $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V1);
+
+    $this->expectException(HttpInternalServerErrorException::class);
+
+    $this->uploadController->deleteUpload($request, new ResponseHelper(),
+      ['id' => $uploadId]);
+  }
+
+  /**
+   * @test
+   * -# Test UploadController::deleteUpload() when scheduling deletion fails
+   * -# Check if HttpInternalServerErrorException is thrown (HTTP 500)
+   */
+  public function testDeleteUploadInternalServerErrorWhenSchedulingFailed()
+  {
+    $uploadId = 5;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+
+    self::$functions->shouldReceive('TryToDelete')
+      ->withArgs([$uploadId, $this->userId, $this->groupId, $this->uploadDao])
+      ->andReturn(new DeleteResponse(DeleteMessages::SCHEDULING_FAILED));
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("DELETE", new Uri("HTTP", "localhost", 80,
+      "/uploads/$uploadId"), $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2);
+
+    $this->expectException(HttpInternalServerErrorException::class);
+
+    $this->uploadController->deleteUpload($request, new ResponseHelper(),
+      ['id' => $uploadId]);
+  }
+
+  /**
+   * @test
+   * -# Test UploadController::deleteUpload() when deletion succeeds
+   * -# Check if response status is 202
+   */
+  public function testDeleteUploadSuccess()
+  {
+    $uploadId = 5;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+
+    self::$functions->shouldReceive('TryToDelete')
+      ->withArgs([$uploadId, $this->userId, $this->groupId, $this->uploadDao])
+      ->andReturn(new DeleteResponse(DeleteMessages::SUCCESS));
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("DELETE", new Uri("HTTP", "localhost", 80,
+      "/uploads/$uploadId"), $requestHeaders, [], [], $body);
+    $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2);
+
+    $actualResponse = $this->uploadController->deleteUpload($request,
+      new ResponseHelper(), ['id' => $uploadId]);
+
+    $this->assertEquals(202, $actualResponse->getStatusCode());
+    $responseJson = $this->getResponseJson($actualResponse);
+    $this->assertEquals(202, $responseJson['code']);
+    $this->assertStringContainsString("Delete Job for file with id $uploadId",
+      $responseJson['message']);
   }
 }

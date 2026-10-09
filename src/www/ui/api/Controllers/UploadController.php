@@ -5,6 +5,7 @@
  SPDX-FileCopyrightText: © 2022 Soham Banerjee <sohambanerjee4abc@hotmail.com>
  SPDX-FileCopyrightText: © 2022, 2023 Samuel Dushimimana <dushsam100@gmail.com>
  SPDX-FileContributor: Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
+ SPDX-FileContributor: © 2026 Adhithya Pandiri <adhithyapandiri@gmail.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -359,16 +360,25 @@ class UploadController extends RestController
    * @param array $args
    * @return ResponseHelper
    * @throws HttpErrorException
+   * @throws HttpForbiddenException
+   * @throws HttpInternalServerErrorException
    */
   public function deleteUpload($request, $response, $args)
   {
-    require_once dirname(__DIR__, 4) . "/delagent/ui/delete-helper.php";
+    if (!function_exists('TryToDelete') && !function_exists('Fossology\UI\Api\Controllers\TryToDelete')) {
+      require_once dirname(__DIR__, 4) . "/delagent/ui/delete-helper.php";
+    }
     $id = intval($args['id']);
+    $apiVersion = ApiVersion::getVersion($request);
 
     $this->uploadAccessible($id);
     $result = TryToDelete($id, $this->restHelper->getUserId(),
       $this->restHelper->getGroupId(), $this->restHelper->getUploadDao());
     if ($result->getDeleteMessageCode() !== DeleteMessages::SUCCESS) {
+      if ($apiVersion >= ApiVersion::V2 &&
+        $result->getDeleteMessageCode() === DeleteMessages::NO_PERMISSION) {
+        throw new HttpForbiddenException($result->getDeleteMessageString());
+      }
       throw new HttpInternalServerErrorException(
         $result->getDeleteMessageString());
     }
