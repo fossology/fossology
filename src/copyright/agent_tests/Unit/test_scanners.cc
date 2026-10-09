@@ -62,6 +62,7 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST (copyscannerBracketedYearTest);
   CPPUNIT_TEST (copyscannerBracketedYearNoiseTest);
   CPPUNIT_TEST (copyscannerBracketedYearBoundariesTest);
+  CPPUNIT_TEST (copyscannerCopySymByHolderTest);
   CPPUNIT_TEST (copyscannerBareKeywordDiscardTest);
   CPPUNIT_TEST (copyscannerCopyrightedStatementTest);
   CPPUNIT_TEST (copyscannerCamelCaseHolderTest);
@@ -244,6 +245,58 @@ protected:
     for (const auto& finding : matches)
       CPPUNIT_ASSERT_MESSAGE("Both copyright statements must stay active",
         finding.is_enabled);
+  }
+
+  /**
+   * \brief A copyright symbol followed by "by <holder>" without a year must
+   * not be stripped down to a bare keyword by REG_STRIP_COPYSYM_NONYEAR.
+   * \test
+   */
+  void copyscannerCopySymByHolderTest()
+  {
+    hCopyrightScanner sc;
+    const char* valid[] = {
+      "Copyright(c) by Mei Qingguang",
+      "Copyright (c) by Mei Qingguang",
+      "Copyright (C) by Heiko Eissfeldt",
+      "Copyright \xc2\xa9 by Mei Qingguang"
+    };
+
+    for (const char* statement : valid)
+    {
+      for (const char* ending : {"", "\n"})
+      {
+        list<match> matches;
+        sc.ScanString(string(statement) + ending, matches);
+        const string message = string("Expected full active match for: ") + statement;
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, (size_t)1, matches.size());
+        const match& finding = matches.front();
+        CPPUNIT_ASSERT_MESSAGE(message, finding.is_enabled);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, 0, finding.start);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, (int)strlen(statement), finding.end);
+      }
+    }
+
+    // Full MIT header: the grant text must be stripped, holder kept.
+    const char* mit =
+      "This software is licensed under the MIT License.\n\n"
+      "Copyright(c) by Mei Qingguang\n\n"
+      "Permission is hereby granted, free of charge, to any person obtaining a copy\n"
+      "of this software and associated documentation files (the \"Software\"), to deal\n"
+      "in the Software without restriction.\n";
+    scannerTest(sc, mit, "statement", {"Copyright(c) by Mei Qingguang"});
+
+    // "by" alone still leaves nothing to keep.
+    const char* bare[] = {"Copyright (c) by\n", "(c) by\n"};
+    for (const char* statement : bare)
+    {
+      list<match> matches;
+      sc.ScanString(statement, matches);
+      for (const auto& finding : matches)
+        CPPUNIT_ASSERT_MESSAGE(
+          string("Expected no active match for: ") + statement,
+          !finding.is_enabled);
+    }
   }
 
   /**
