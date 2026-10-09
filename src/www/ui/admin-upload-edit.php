@@ -46,6 +46,8 @@ class upload_properties extends FO_Plugin
    **/
   public function UpdateUploadProperties($uploadId, $newName, $newDesc)
   {
+    /* Treat a whitespace-only name like an empty one, keep the old name */
+    $newName = trim($newName ?? '');
     if (empty($newName) and empty($newDesc)) {
       return 2;
     }
@@ -61,16 +63,15 @@ class upload_properties extends FO_Plugin
         return 0;
       }
       $pfileFk = $row['pfile_fk'];
-      $trimNewName = trim($newName);
 
       /* Always keep uploadtree.ufile_name and upload.upload_filename in sync */
       $this->dbManager->getSingleRow(
         "UPDATE uploadtree SET ufile_name=$3 WHERE upload_fk=$1 AND pfile_fk=$2",
-        array($uploadId, $pfileFk, $trimNewName),
+        array($uploadId, $pfileFk, $newName),
         __METHOD__ . '.updateItem');
       $this->dbManager->getSingleRow(
         "UPDATE upload SET upload_filename=$3 WHERE upload_pk=$1 AND pfile_fk=$2",
-        array($uploadId, $pfileFk, $trimNewName),
+        array($uploadId, $pfileFk, $newName),
         __METHOD__ . '.updateUpload.name');
     }
 
