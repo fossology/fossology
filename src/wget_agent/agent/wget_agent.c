@@ -1004,12 +1004,76 @@ void Usage(char *Name)
   printf("  no file :: process data from the scheduler.\n");
 } /* Usage() */
 
+/**
+ * \brief Percent-encode a string for the user information part of a URL
+ *
+ * Everything except the unreserved characters of RFC 3986 (letters, digits,
+ * "-", ".", "_" and "~") is written as %XX, so credentials containing
+ * characters like '#', '@', ':' or '/' do not break the URL.
+ * \param src   string to encode
+ * \param dest  buffer for the encoded string
+ * \param destSize size of dest
+ * \return 0 on success, -1 if dest is too small
+ */
+int UrlEncodeUserinfo(const char *src, char *dest, size_t destSize)
+{
+  static const char hex[] = "0123456789ABCDEF";
+  size_t used = 0;
+
+  for (; *src; src++)
+  {
+    unsigned char c = (unsigned char)*src;
+    if (isalnum(c) || c == '-' || c == '.' || c == '_' || c == '~')
+    {
+      if (used + 1 >= destSize) return -1;
+      dest[used++] = (char)c;
+    }
+    else
+    {
+      if (used + 3 >= destSize) return -1;
+      dest[used++] = '%';
+      dest[used++] = hex[c >> 4];
+      dest[used++] = hex[c & 0x0F];
+    }
+  }
+  dest[used] = '\0';
+  return 0;
+}
+
+/**
+ * \brief Undo the shell escaping done by the web UI for the VCS credentials
+ *
+ * The UI (UploadPageBase::basicShEscaping()) puts a backslash in front of
+ * '\', '"', '`' and '$'. Remove these backslashes so the real credentials are
+ * left. Other backslashes are kept as they are.
+ * \param str string to change in place
+ */
+void UnescapeShellEscaping(char *str)
+{
+  char *in = str;
+  char *out = str;
+
+  while (*in)
+  {
+    if (*in == '\\' && in[1] != '\0' && strchr("\\\"`$", in[1]))
+    {
+      in++;
+    }
+    *out++ = *in++;
+  }
+  *out = '\0';
+}
+
  /**
   * \brief Translate authentication of git clone
   *
   * Translate authentication of git clone
   * from http://git.code.sf.net/p/fossology/fossology.git --username --password password (input)
   * to http://username:password@git.code.sf.net/p/fossology/fossology.git
+  *
+  * The username and password are percent-encoded, so characters like '#' or '@'
+  * in them do not break the URL. The shell escaping added by the web UI is
+  * removed first.
   */
 void replace_url_with_auth()
 {
@@ -1020,8 +1084,13 @@ void replace_url_with_auth()
   int index = 0;
   char *username = NULL;
   char *password = NULL;
+  /* every byte can grow to "%XX", the input comes from GlobalParam (STRMAX) */
+  char encodedUsername[STRMAX * 3 + 1] = "";
+  char encodedPassword[STRMAX * 3 + 1] = "";
   char http[PREFIXMAX] = "";
   char URI[FILEPATH] = "";
+  char newURL[URLMAX] = "";
+  int written = 0;
   char *token = NULL;
   char *temp = NULL;
   char *additionalParams = NULL;
@@ -1054,7 +1123,23 @@ void replace_url_with_auth()
       token = strtok(NULL, needle);
       index++;
     }
-    snprintf(GlobalURL, URLMAX-1, "%s%s:%s@%s", http, username, password, URI);
+    if (!username || !password)
+    {
+      return;
+    }
+    UnescapeShellEscaping(username);
+    UnescapeShellEscaping(password);
+    if (UrlEncodeUserinfo(username, encodedUsername, sizeof(encodedUsername)) ||
+        UrlEncodeUserinfo(password, encodedPassword, sizeof(encodedPassword)))
+    {
+      return;
+    }
+    written = snprintf(newURL, URLMAX, "%s%s:%s@%s", http, encodedUsername, encodedPassword, URI);
+    if (written < 0 || written >= URLMAX)
+    {
+      return;
+    }
+    strcpy(GlobalURL, newURL);
 
     if (strlen(additionalParams) > 0) {
       memmove(GlobalParam, additionalParams, strlen(additionalParams) +1);
