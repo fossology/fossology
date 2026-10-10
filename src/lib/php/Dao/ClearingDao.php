@@ -26,6 +26,12 @@ use Monolog\Logger;
 
 class ClearingDao
 {
+  /**
+   * Deletion window (in seconds) within which a bulk/kotoba history entry
+   * can be deleted after it was created.
+   */
+  const DELETION_WINDOW_SECONDS = 3600;
+
   /** @var DbManager */
   private $dbManager;
   /** @var Logger */
@@ -49,6 +55,23 @@ class ClearingDao
     $this->licenseRefCache = array();
     global $container;
     $this->copyrightDao = $container->get('dao.copyright');
+  }
+
+  /**
+   * Check whether the given creation date is still within the deletion window.
+   * @param string|null $dateAdded date_added column value (timestamptz) or null
+   * @return bool
+   */
+  private function isWithinDeletionWindow($dateAdded)
+  {
+    if ($dateAdded === null || $dateAdded === '') {
+      return true;
+    }
+    $created = strtotime($dateAdded);
+    if ($created === false) {
+      return true;
+    }
+    return (time() - $created) <= self::DELETION_WINDOW_SECONDS;
   }
 
   private function getRelevantDecisionsCte(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent, &$statementName, &$params, $condition="")
@@ -680,12 +703,22 @@ INSERT INTO clearing_decision (
               SELECT DISTINCT ON(lrb_pk) lrb_pk, ce_pk, tried, true AS matched FROM alltried WHERE uploadtree_fk = $2
               UNION ALL
               SELECT DISTINCT ON(lrb_pk) lrb_pk, ce_pk, tried, false AS matched FROM alltried WHERE uploadtree_fk != $2 OR uploadtree_fk IS NULL
-            ) AS result ORDER BY lrb_pk, matched DESC)
-            SELECT a.lrb_pk, lr.rf_text AS text, lrf.rf_shortname, lsb.removing, a.tried, a.ce_pk, a.matched
+            ) AS result ORDER BY lrb_pk, matched DESC),
+            bulk_dates AS (
+            SELECT lrb.lrb_pk, MIN(ce.date_added) AS date_added
+            FROM license_ref_bulk lrb
+              INNER JOIN highlight_bulk h ON h.lrb_fk = lrb.lrb_pk
+              INNER JOIN clearing_event ce ON ce.clearing_event_pk = h.clearing_event_fk
+              INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
+            WHERE lrb.group_fk = $4 AND ut.upload_fk = $1
+            GROUP BY lrb.lrb_pk)
+            SELECT a.lrb_pk, lr.rf_text AS text, lrf.rf_shortname, lsb.removing, a.tried, a.ce_pk, a.matched,
+                   EXTRACT(EPOCH FROM bd.date_added)::bigint AS date_added
             FROM aggregated_tried a
               INNER JOIN license_set_bulk lsb ON lsb.lrb_fk = a.lrb_pk
               INNER JOIN license_ref lrf ON lsb.rf_fk = lrf.rf_pk
               INNER JOIN license_ref_bulk lr ON lr.lrb_pk = a.lrb_pk
+              LEFT JOIN bulk_dates bd ON bd.lrb_pk = a.lrb_pk
             ORDER BY a.lrb_pk";
 
     $this->dbManager->prepare($stmt, $sql);
@@ -701,6 +734,7 @@ INSERT INTO clearing_decision (
             "text" => $row['text'],
             "matched" => $this->dbManager->booleanFromDb($row['matched']),
             "tried" => $this->dbManager->booleanFromDb($row['tried']),
+            "dateAdded" => $row['date_added'],
             "removedLicenses" => array(),
             "addedLicenses" => array());
       }
@@ -802,12 +836,21 @@ INSERT INTO clearing_decision (
               SELECT DISTINCT ON(cp_fk) cp_fk, ce_pk, tried, true AS matched FROM alltried WHERE uploadtree_fk = $2
               UNION ALL
               SELECT DISTINCT ON(cp_fk) cp_fk, ce_pk, tried, false AS matched FROM alltried WHERE uploadtree_fk != $2 OR uploadtree_fk IS NULL
-            ) AS result ORDER BY cp_fk, matched DESC)
-            SELECT a.cp_fk, cp.text, lrf.rf_shortname, cplm.removing, a.tried, a.ce_pk, a.matched
+            ) AS result ORDER BY cp_fk, matched DESC),
+            phrase_dates AS (
+            SELECT h.cp_fk, MIN(ce.date_added) AS date_added
+            FROM clearing_event ce
+              INNER JOIN highlight_kotoba h ON h.clearing_event_fk = ce.clearing_event_pk
+              INNER JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
+            WHERE ce.type_fk = $kotobaType AND ce.group_fk = $5 AND ut.upload_fk = $1
+            GROUP BY h.cp_fk)
+            SELECT a.cp_fk, cp.text, lrf.rf_shortname, cplm.removing, a.tried, a.ce_pk, a.matched,
+                   EXTRACT(EPOCH FROM pd.date_added)::bigint AS date_added
             FROM aggregated_tried a
               INNER JOIN custom_phrase cp ON cp.cp_pk = a.cp_fk
               INNER JOIN custom_phrase_license_map cplm ON cplm.cp_fk = a.cp_fk
               INNER JOIN license_ref lrf ON cplm.rf_fk = lrf.rf_pk
+              LEFT JOIN phrase_dates pd ON pd.cp_fk = a.cp_fk
             ORDER BY a.cp_fk";
 
     $this->dbManager->prepare($stmt, $sql);
@@ -824,6 +867,7 @@ INSERT INTO clearing_decision (
             "text" => $row['text'],
             "matched" => $this->dbManager->booleanFromDb($row['matched']),
             "tried" => $this->dbManager->booleanFromDb($row['tried']),
+            "dateAdded" => $row['date_added'],
             "removedLicenses" => array(),
             "addedLicenses" => array());
       }
@@ -835,6 +879,136 @@ INSERT INTO clearing_decision (
 
     $this->dbManager->freeResult($res);
     return $phrases;
+  }
+
+  /**
+   * Check if user can delete a kotoba entry
+   * @param int $cpFk custom_phrase primary key
+   * @param int $userId
+   * @param int $groupId
+   * @return bool
+   */
+  public function canUserDeleteKotobaEntry($cpFk, $userId, $groupId)
+  {
+    $stmt = __METHOD__;
+    $kotobaType = ClearingEventTypes::KOTOBA;
+    $sql = "SELECT ce.user_fk, ce.group_fk, MIN(ce.date_added) AS date_added
+            FROM clearing_event ce
+            INNER JOIN highlight_kotoba hk ON hk.clearing_event_fk = ce.clearing_event_pk
+            WHERE ce.type_fk = $3 AND hk.cp_fk = $1 AND ce.group_fk = $2
+            GROUP BY ce.user_fk, ce.group_fk LIMIT 1";
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, array($cpFk, $groupId, $kotobaType));
+    $row = $this->dbManager->fetchArray($res);
+    $this->dbManager->freeResult($res);
+    if (!$row) {
+      return false;
+    }
+    if (!$this->isWithinDeletionWindow($row['date_added'])) {
+      return false;
+    }
+    return $row['user_fk'] == $userId || $row['group_fk'] == $groupId;
+  }
+
+  /**
+   * Delete a kotoba history entry and all related data
+   * @param int $cpFk custom_phrase primary key
+   * @param int $groupId
+   * @throws \Exception
+   */
+  public function deleteKotobaEntry($cpFk, $groupId)
+  {
+    if (empty($cpFk) || !is_numeric($cpFk)) {
+      throw new \InvalidArgumentException('Invalid custom phrase ID provided');
+    }
+    $this->dbManager->begin();
+    try {
+      $clearingEventIds = array();
+      $jobIds = array();
+      $kotobaType = ClearingEventTypes::KOTOBA;
+
+      $stmt = __METHOD__ . ".get_kotoba_creation_date";
+      $sql  = "SELECT MIN(ce.date_added) AS date_added
+               FROM clearing_event ce
+                 INNER JOIN highlight_kotoba hk ON hk.clearing_event_fk = ce.clearing_event_pk
+               WHERE ce.type_fk = $3 AND hk.cp_fk = $1 AND ce.group_fk = $2";
+      $this->dbManager->prepare($stmt, $sql);
+      $res = $this->dbManager->execute($stmt, array($cpFk, $groupId, $kotobaType));
+      $dateRow = $this->dbManager->fetchArray($res);
+      $this->dbManager->freeResult($res);
+      if ($dateRow && !$this->isWithinDeletionWindow($dateRow['date_added'])) {
+        throw new \RuntimeException('This entry can only be deleted within one hour of creation');
+      }
+
+      $stmt = __METHOD__ . ".get_kotoba_events";
+      $sql  = "SELECT ce.clearing_event_pk, ce.job_fk FROM clearing_event ce
+               INNER JOIN highlight_kotoba hk ON hk.clearing_event_fk = ce.clearing_event_pk
+               WHERE ce.type_fk = $3 AND hk.cp_fk = $1 AND ce.group_fk = $2";
+      $this->dbManager->prepare($stmt, $sql);
+      $res  = $this->dbManager->execute($stmt, array($cpFk, $groupId, $kotobaType));
+      while ($row = $this->dbManager->fetchArray($res)) {
+        $clearingEventIds[] = $row['clearing_event_pk'];
+        if (!empty($row['job_fk'])) {
+          $jobIds[] = $row['job_fk'];
+        }
+      }
+      $this->dbManager->freeResult($res);
+
+      if (empty($clearingEventIds)) {
+        $this->dbManager->commit();
+        return;
+      }
+
+      $eventIdArray = '{' . implode(',', $clearingEventIds) . '}';
+
+      $stmt = __METHOD__ . ".delete_kotoba_highlights";
+      $sql  = "DELETE FROM highlight_kotoba WHERE clearing_event_fk = ANY($1)";
+      $this->dbManager->prepare($stmt, $sql);
+      $this->dbManager->execute($stmt, array($eventIdArray));
+
+      $affectedDecisionIds = array();
+      $stmt = __METHOD__ . ".find_affected_decisions";
+      $sql  = "SELECT DISTINCT clearing_decision_fk FROM clearing_decision_event WHERE clearing_event_fk = ANY($1)";
+      $this->dbManager->prepare($stmt, $sql);
+      $res = $this->dbManager->execute($stmt, array($eventIdArray));
+      while ($row = $this->dbManager->fetchArray($res)) {
+        $affectedDecisionIds[] = $row['clearing_decision_fk'];
+      }
+      $this->dbManager->freeResult($res);
+
+      $stmt = __METHOD__ . ".delete_decision_events";
+      $sql  = "DELETE FROM clearing_decision_event WHERE clearing_event_fk = ANY($1)";
+      $this->dbManager->prepare($stmt, $sql);
+      $this->dbManager->execute($stmt, array($eventIdArray));
+
+      $stmt = __METHOD__ . ".delete_clearing_events";
+      $sql  = "DELETE FROM clearing_event WHERE clearing_event_pk = ANY($1)";
+      $this->dbManager->prepare($stmt, $sql);
+      $this->dbManager->execute($stmt, array($eventIdArray));
+
+      if (!empty($affectedDecisionIds)) {
+        $decisionArray = '{' . implode(',', $affectedDecisionIds) . '}';
+        $stmt = __METHOD__ . ".reset_decisions_to_wip";
+        $sql  = "UPDATE clearing_decision SET decision_type = 0 WHERE clearing_decision_pk = ANY($1)";
+        $this->dbManager->prepare($stmt, $sql);
+        $this->dbManager->execute($stmt, array($decisionArray));
+      }
+
+      if (!empty($jobIds)) {
+        $jobIdArray = '{' . implode(',', array_unique($jobIds)) . '}';
+        $stmt = __METHOD__ . ".delete_deciderjob_entries";
+        $sql  = "DELETE FROM jobqueue WHERE jq_type = 'deciderjob' AND jq_job_fk = ANY($1)";
+        $this->dbManager->prepare($stmt, $sql);
+        $this->dbManager->execute($stmt, array($jobIdArray));
+      }
+
+      $this->dbManager->commit();
+      $this->logger->debug("Successfully deleted kotoba entry cp_fk=$cpFk: " . count($clearingEventIds) . " clearing events removed, " . count($affectedDecisionIds) . " decisions reset to WIP");
+    } catch (\Exception $e) {
+      $this->dbManager->rollback();
+      $this->logger->error("Failed to delete kotoba entry cp_fk=$cpFk: " . $e->getMessage());
+      throw $e;
+    }
   }
 
   /**
@@ -875,6 +1049,146 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
 
     return $multiplicity;
+  }
+
+  /**
+   * Check if user can delete the bulk entry
+   * @param int $bulkId
+   * @param int $userId
+   * @param int $groupId
+   * @return bool
+   */
+  public function canUserDeleteBulkEntry($bulkId, $userId, $groupId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT lrb.user_fk, lrb.group_fk, MIN(ce.date_added) AS date_added
+            FROM license_ref_bulk lrb
+              LEFT JOIN highlight_bulk h ON h.lrb_fk = lrb.lrb_pk
+              LEFT JOIN clearing_event ce ON ce.clearing_event_pk = h.clearing_event_fk
+            WHERE lrb.lrb_pk = $1
+            GROUP BY lrb.user_fk, lrb.group_fk";
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, array($bulkId));
+    $row = $this->dbManager->fetchArray($res);
+    $this->dbManager->freeResult($res);
+    if (!$row) {
+      return false;
+    }
+    if (!$this->isWithinDeletionWindow($row['date_added'])) {
+      return false;
+    }
+
+    return $row['user_fk'] == $userId || $row['group_fk'] == $groupId;
+  }
+
+  /**
+   * Delete a bulk history entry and all related data
+   * @param int $bulkId
+   * @param int $groupId
+   * @throws \Exception
+   */
+  public function deleteBulkEntry($bulkId, $groupId)
+  {
+    if (empty($bulkId) || !is_numeric($bulkId)) {
+      throw new \InvalidArgumentException('Invalid bulk ID provided');
+    }
+    $this->dbManager->begin();
+    try {
+      $bulkCreationDate = null;
+      $stmt = __METHOD__ . ".get_bulk_creation_date";
+      $sql  = "SELECT MIN(ce.date_added) AS date_added
+               FROM license_ref_bulk lrb
+                 INNER JOIN highlight_bulk h ON h.lrb_fk = lrb.lrb_pk
+                 INNER JOIN clearing_event ce ON ce.clearing_event_pk = h.clearing_event_fk
+               WHERE lrb.lrb_pk = $1 AND lrb.group_fk = $2";
+      $this->dbManager->prepare($stmt, $sql);
+      $res = $this->dbManager->execute($stmt, array($bulkId, $groupId));
+      $dateRow = $this->dbManager->fetchArray($res);
+      $this->dbManager->freeResult($res);
+      if ($dateRow) {
+        $bulkCreationDate = $dateRow['date_added'];
+      }
+      if (!$this->isWithinDeletionWindow($bulkCreationDate)) {
+        throw new \RuntimeException('This entry can only be deleted within one hour of creation');
+      }
+
+      $clearingEventIds = array();
+      $affectedDecisionIds = array();
+      $stmt = __METHOD__ . ".get_clearing_events";
+      $sql  = "SELECT clearing_event_fk FROM highlight_bulk WHERE lrb_fk = $1";
+      $this->dbManager->prepare($stmt, $sql);
+      $res  = $this->dbManager->execute($stmt, array($bulkId));
+      while ($row = $this->dbManager->fetchArray($res)) {
+        $clearingEventIds[] = $row['clearing_event_fk'];
+      }
+      $this->dbManager->freeResult($res);
+
+      if (!empty($clearingEventIds)) {
+        $eventIdArray = '{' . implode(',', $clearingEventIds) . '}';
+        $stmt = __METHOD__ . ".find_affected_decisions";
+        $sql  = "SELECT DISTINCT clearing_decision_fk FROM clearing_decision_event WHERE clearing_event_fk = ANY($1)";
+        $this->dbManager->prepare($stmt, $sql);
+        $res = $this->dbManager->execute($stmt, array($eventIdArray));
+        while ($row = $this->dbManager->fetchArray($res)) {
+          $affectedDecisionIds[] = $row['clearing_decision_fk'];
+        }
+        $this->dbManager->freeResult($res);
+
+        $stmt = __METHOD__ . ".delete_decision_events";
+        $sql  = "DELETE FROM clearing_decision_event WHERE clearing_event_fk = ANY($1)";
+        $this->dbManager->prepare($stmt, $sql);
+        $this->dbManager->execute($stmt, array($eventIdArray));
+
+        $stmt = __METHOD__ . ".delete_clearing_events";
+        $sql  = "DELETE FROM clearing_event WHERE clearing_event_pk = ANY($1)";
+        $this->dbManager->prepare($stmt, $sql);
+        $this->dbManager->execute($stmt, array($eventIdArray));
+        if (!empty($affectedDecisionIds)) {
+          $decisionArray = '{' . implode(',', $affectedDecisionIds) . '}';
+          $stmt = __METHOD__ . ".reset_decisions_to_wip";
+          $sql  = "UPDATE clearing_decision SET decision_type = 0 WHERE clearing_decision_pk = ANY($1)";
+          $this->dbManager->prepare($stmt, $sql);
+          $this->dbManager->execute($stmt, array($decisionArray));
+        }
+      }
+
+      $stmt = __METHOD__ . ".delete_highlights";
+      $sql  = "DELETE FROM highlight_bulk WHERE lrb_fk = $1";
+      $this->dbManager->prepare($stmt, $sql);
+      $this->dbManager->execute($stmt, array($bulkId));
+
+      $stmt = __METHOD__ . ".find_job_for_bulk";
+      $sql  = "SELECT jq_job_fk FROM jobqueue WHERE jq_type = 'monkbulk' AND jq_args = $1 LIMIT 1";
+      $this->dbManager->prepare($stmt, $sql);
+      $res  = $this->dbManager->execute($stmt, array((string)$bulkId));
+      $row = $this->dbManager->fetchArray($res);
+      $this->dbManager->freeResult($res);
+      $jobId = $row ? $row['jq_job_fk'] : null;
+
+      if (!empty($jobId)) {
+        $stmt = __METHOD__ . ".delete_deciderjob_entries";
+        $sql  = "DELETE FROM jobqueue WHERE jq_type = 'deciderjob' AND jq_job_fk = $1";
+        $this->dbManager->prepare($stmt, $sql);
+        $this->dbManager->execute($stmt, array($jobId));
+      }
+
+      $stmt = __METHOD__ . ".delete_monkbulk_entries";
+      $sql  = "DELETE FROM jobqueue WHERE jq_type = 'monkbulk' AND jq_args = $1";
+      $this->dbManager->prepare($stmt, $sql);
+      $this->dbManager->execute($stmt, array((string)$bulkId));
+
+      $stmt = __METHOD__ . ".delete_bulk";
+      $sql  = "DELETE FROM license_ref_bulk WHERE lrb_pk = $1 AND group_fk = $2";
+      $this->dbManager->prepare($stmt, $sql);
+      $this->dbManager->execute($stmt, array($bulkId, $groupId));
+
+      $this->dbManager->commit();
+      $this->logger->debug("Successfully deleted bulk entry $bulkId: " . count($clearingEventIds) . " clearing events removed, " . count($affectedDecisionIds) . " decisions reset to WIP");
+    } catch (\Exception $e) {
+      $this->dbManager->rollback();
+      $this->logger->error("Failed to delete bulk entry $bulkId: " . $e->getMessage());
+      throw $e;
+    }
   }
 
   /**
