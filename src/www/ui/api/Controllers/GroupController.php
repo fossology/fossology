@@ -46,11 +46,19 @@ class GroupController extends RestController
   public function getGroups($request, $response, $args)
   {
     $userDao = $this->restHelper->getUserDao();
-    $groups = array();
-    if (Auth::isAdmin()) {
-      $groups = $userDao->getAdminGroupMap($this->restHelper->getUserId(),Auth::PERM_ADMIN);
+    $userId = $this->restHelper->getUserId();
+    $includeAll = filter_var(
+      $request->getQueryParams()['all'] ?? false,
+      FILTER_VALIDATE_BOOLEAN
+    );
+    if (Auth::isAdmin() && $includeAll) {
+      $adminGroups = $userDao->getAdminGroupMap(
+        $userId,
+        Auth::PERM_ADMIN
+      );
+      $groups = $adminGroups;
     } else {
-      $groups = $userDao->getUserGroupMap($this->restHelper->getUserId());
+      $groups = $userDao->getUserGroupMap($userId);
     }
     $groupList = array();
     foreach ($groups as $key => $value) {
@@ -213,19 +221,14 @@ class GroupController extends RestController
       $group_pk = intval($args['pathParam']);
     }
 
-    $userIsAdmin = Auth::isAdmin();
-    $userHasGroupAccess = $this->restHelper->getUserDao()->isAdvisorOrAdmin(
-      $this->restHelper->getUserId(), $group_pk);
-
     if (!$this->dbHelper->doesIdExist("groups", "group_pk", $group_pk)) {
       throw new HttpNotFoundException("Group id not found!");
     }
     if (!$this->dbHelper->doesIdExist("users", "user_pk", $user_pk)) {
       throw new HttpNotFoundException("User id not found!");
     }
-    if (! $userIsAdmin && ! $userHasGroupAccess) {
-      throw new HttpForbiddenException("Not advisor or admin of the group. " .
-        "Can not process request.");
+    if (!Auth::isAdmin()) {
+      throw new HttpForbiddenException("You have no permission to manage this group.");
     }
     $fetchResult = $dbManager->getSingleRow(
       "SELECT group_user_member_pk FROM group_user_member " .
@@ -278,21 +281,15 @@ class GroupController extends RestController
   public function getGroupMembers($request, $response, $args)
   {
     $apiVersion = ApiVersion::getVersion($request);
-    $userId = $this->restHelper->getUserId();
     $userDao = $this->restHelper->getUserDao();
-
     // Get the group name/id form the params and then the group Id
     $groupId = $apiVersion == ApiVersion::V2 ? intval($userDao->getGroupIdByName($args['pathParam'])) : intval($args['pathParam']);
-
-    $userIsAdmin = Auth::isAdmin();
-    $userHasGroupAccess = $userDao->isAdvisorOrAdmin($userId, $groupId);
 
     if (!$this->dbHelper->doesIdExist("groups", "group_pk", $groupId)) {
       throw new HttpNotFoundException("Group id not found!");
     }
-    if (! $userIsAdmin && ! $userHasGroupAccess) {
-      throw new HttpForbiddenException("Not advisor or admin of the group. " .
-        "Can not process request.");
+    if (!Auth::isAdmin()) {
+      throw new HttpForbiddenException("You have no permission to manage this group.");
     }
 
     // The query to get the list of users with corresponding roles from the group.
@@ -348,10 +345,6 @@ class GroupController extends RestController
     }
     $newperm = intval($body['perm']);
 
-    $userIsAdmin = Auth::isAdmin();
-    $userHasGroupAccess = $this->restHelper->getUserDao()->isAdvisorOrAdmin(
-      $this->restHelper->getUserId(), $group_pk);
-
     if (!isset($newperm)) {
       throw new HttpBadRequestException("ERROR - no default permission provided");
     }
@@ -364,9 +357,10 @@ class GroupController extends RestController
     if ($newperm < 0 || $newperm > 2) {
       throw new HttpBadRequestException("ERROR - Permission should be in range [0-2]");
     }
-    if (! $userIsAdmin && ! $userHasGroupAccess) {
-      throw new HttpForbiddenException("Not advisor or admin of the group. " .
-        "Can not process request.");
+    if (!Auth::isAdmin()) {
+      throw new HttpForbiddenException(
+        "You have no permission to manage this group."
+      );
     }
     $stmt = __METHOD__ . ".getByGroupAndUser";
     $sql = "SELECT group_user_member_pk FROM group_user_member WHERE group_fk=$1 AND user_fk=$2;";
@@ -415,9 +409,6 @@ class GroupController extends RestController
     }
 
     $newperm = intval($this->getParsedBody($request)['perm']);
-    $userIsAdmin = Auth::isAdmin();
-    $userHasGroupAccess = $this->restHelper->getUserDao()->isAdvisorOrAdmin(
-      $this->restHelper->getUserId(), $group_pk);
 
     // Validate arguments
 
@@ -436,9 +427,10 @@ class GroupController extends RestController
     if ($newperm > 2) {
       throw new HttpBadRequestException("Permission can not be greater than 2");
     }
-    if (! $userIsAdmin && ! $userHasGroupAccess) {
-      throw new HttpForbiddenException("Not advisor or admin of the group. " .
-        "Can not process request.");
+    if (!Auth::isAdmin()) {
+      throw new HttpForbiddenException(
+        "You have no permission to manage this group."
+      );
     }
 
     // Check if the relation already exists, retrieve the PK.
