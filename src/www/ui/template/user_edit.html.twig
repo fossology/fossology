@@ -134,6 +134,26 @@
       </th>
       <td><input type="checkbox" name="cyclonedx_ignore_files_wo_info_default" {% if cyclonedxIgnoreFilesWOInfoDefault %}checked{% endif %}></td>
     </tr>
+    <tr class="classic">
+      <th width="25%">
+        {{ "CycloneDX custom tag namespace"|trans }}
+        <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Custom tag namespace prefix used in CycloneDX exports (default: fossology:).'|trans }}" alt="" class="info-bullet"/>
+      </th>
+      <td><input type="text" name="cyclonedx_custom_tag_namespace" value="{{ cyclonedxCustomTagNamespace }}"></td>
+    </tr>
+    <tr class="classic">
+      <th width="25%">
+        {{ "Default CycloneDX spec version"|trans }}
+      </th>
+      <td>
+        <select name="cyclonedx_spec_version" class="form-control" style="width:auto;">
+          <option value="1.4" {% if cyclonedxSpecVersion == '1.4' %}selected{% endif %}>1.4</option>
+          <option value="1.5" {% if cyclonedxSpecVersion == '1.5' %}selected{% endif %}>1.5</option>
+          <option value="1.6" {% if cyclonedxSpecVersion == '1.6' %}selected{% endif %}>1.6</option>
+          <option value="1.7" {% if cyclonedxSpecVersion is not defined or cyclonedxSpecVersion == '1.7' or cyclonedxSpecVersion is empty %}selected{% endif %}>1.7 (latest)</option>
+        </select>
+      </td>
+    </tr>
     {%  if isSessionAdmin %}
       <tr class="classic">
         <th width="25%">{{ "Select user's default group."|trans }}</th>
