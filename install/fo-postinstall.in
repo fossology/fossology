@@ -20,6 +20,7 @@ Usage: fo-postinstall [options]
   -e or --everything      : all actions, default
   -o or --overwrite       : overwrite config files with new versions
   -l or --licenseref      : update the license_ref table with fossology supplied licenses
+  --licenselynx           : update the licenselynx_map table with LicenseLynx mappings
   -c or --common          : common actions
   -h or --help            : this help text
  Special options
@@ -39,6 +40,7 @@ SCHEDULERONLY=''
 EVERYTHING=true
 OVERWRITE=''
 LICENSEREF=''
+LICENSELYNX=''
 COMMON=''
 RUNNINGDATABASE=true
 FORCEDECISION=''
@@ -49,7 +51,7 @@ DEBIAN=''
 
 ## Options parsing and setup
 # parse options
-OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,no-running-database,force-decision,force-pfile,force-encode,python-experimental,debian,help -n 'fo-postinstall' -- "$@")
+OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,licenselynx,common,no-running-database,force-decision,force-pfile,force-encode,python-experimental,debian,help -n 'fo-postinstall' -- "$@")
 
 if [[ $? -ne 0 ]]; then
    OPTS="--help"
@@ -67,6 +69,7 @@ while true; do
       -e|--everything)       EVERYTHING=true; shift;;
       -o|--overwrite)        OVERWRITE=true; shift;;
       -l|--licenseref)       LICENSEREF=true; EVERYTHING=''; shift;;
+      --licenselynx)         LICENSELYNX=true; EVERYTHING=''; shift;;
       -c|--common)           COMMON=true; EVERYTHING=''; shift;;
       --no-running-database) RUNNINGDATABASE=''; EVERYTHING=''; shift;;
       --force-decision)      FORCEDECISION='--force-decision'; shift;;
@@ -95,6 +98,7 @@ if [[ $EVERYTHING ]]; then
    DATABASE=true
    WEBONLY=true
    LICENSEREF=true
+   LICENSELYNX=true
 fi
 
 must_run_as_root() {
@@ -247,11 +251,19 @@ if [[ $DATABASE && $RUNNINGDATABASE ]]; then
    @FO_LIBEXECDIR@/dbcreate
 fi # end of DATABASE
 
-if [[ $LICENSEREF && $RUNNINGDATABASE ]]; then
+FOSSINIT_ARGS=()
+if [[ $LICENSEREF ]]; then
+    FOSSINIT_ARGS+=("-l")
+fi
+if [[ $LICENSELYNX ]]; then
+    FOSSINIT_ARGS+=("--licenselynx")
+fi
+
+if [[ ${#FOSSINIT_ARGS[@]} -gt 0 && $RUNNINGDATABASE ]]; then
     must_run_as_root
-    echo "*** update the database and license_ref table ***"
-    @FO_LIBEXECDIR@/fossinit.php -l -c @FO_SYSCONFDIR@ $FORCEDECISION $FORCEPFILE $FORCEENCODE
-fi # end of license reference
+    echo "*** update the database reference tables ***"
+    @FO_LIBEXECDIR@/fossinit.php "${FOSSINIT_ARGS[@]}" -c @FO_SYSCONFDIR@ $FORCEDECISION $FORCEPFILE $FORCEENCODE
+fi # end of database reference table updates
 
 ########################################################################
 

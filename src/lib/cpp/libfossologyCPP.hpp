@@ -14,6 +14,7 @@ extern "C" {
 #include "files.hpp"
 #include "libfossdbmanagerclass.hpp"
 #include "libfossAgentDatabaseHandler.hpp"
+#include "libfossLicenseRefResolver.hpp"
 #include "libfossUtils.hpp"
 
 /**
