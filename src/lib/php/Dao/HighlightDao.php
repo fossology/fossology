@@ -242,4 +242,38 @@ class HighlightDao
     );
     return $row['page'];
   }
+
+  /**
+   * Get every signature-highlight occurrence (page + start offset) for a match
+   * id, ordered by position. Includes multiple occurrences on the same page.
+   * Drives per-license occurrence navigation.
+   *
+   * @param int $licenseMatchId
+   * @return array[] Each entry has keys: page, start
+   */
+  public function getSignaturePageAnchorsOfHighlightEntry($licenseMatchId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT FLOOR(start / (
+                     SELECT conf_value FROM sysconfig WHERE variablename LIKE 'BlockSizeText'
+                   )::numeric)::int AS page,
+                   start
+            FROM highlight
+            WHERE fl_fk = $1 AND type = 'L' AND len > 0
+            ORDER BY start ASC";
+
+    $this->dbManager->prepare($stmt, $sql);
+    $result = $this->dbManager->execute($stmt, array($licenseMatchId));
+
+    $anchors = array();
+    while ($row = $this->dbManager->fetchArray($result)) {
+      $anchors[] = array(
+        'page' => intval($row['page']),
+        'start' => intval($row['start'])
+      );
+    }
+    $this->dbManager->freeResult($result);
+
+    return $anchors;
+  }
 }
