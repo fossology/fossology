@@ -130,7 +130,7 @@ class UploadTreeController extends RestController
   public function setClearingDecision($request, $response, $args)
   {
     $uploadId = intval($args['id']);
-    $this->uploadAccessible($uploadId);
+    $this->uploadEditable($uploadId);
 
     $body = $this->getParsedBody($request);
     $decisionType = $body['decisionType'];
@@ -617,7 +617,7 @@ class UploadTreeController extends RestController
     $errors = [];
     $success = [];
 
-    $this->uploadAccessible($uploadId);
+    $this->uploadEditable($uploadId);
     $this->isItemExists($uploadId, $uploadTreeId);
 
     if (empty($body)) {
@@ -735,7 +735,7 @@ class UploadTreeController extends RestController
     $uploadId = intval($args['id']);
     $licenseDao = $this->container->get('dao.license');
 
-    $this->uploadAccessible($uploadId);
+    $this->uploadEditable($uploadId);
     $this->isItemExists($uploadId, $uploadTreeId);
 
     $isValid = true;
