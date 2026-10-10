@@ -1,4 +1,6 @@
 #[=======================================================================[
+SPDX-FileCopyrightText: © 2026 DenishShiroya22 <denishshiroya22@gmail.com>
+
 SPDX-License-Identifier: GPL-2.0-only
 SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
 #]=======================================================================]
@@ -96,6 +98,10 @@ foreach(COP ecc keyword copyright ipra)
         DESTINATION ${FO_MODDIR}/${COP}/agent
         COMPONENT ${COP})
 endforeach()
+
+install(FILES keyword-hints.json
+    DESTINATION ${FO_MODDIR}/keyword/agent
+    COMPONENT keyword)
 
 if(TESTING)
     file(COPY copyright.conf DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
