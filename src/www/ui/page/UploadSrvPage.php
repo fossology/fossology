@@ -43,8 +43,15 @@ class UploadSrvPage extends UploadPageBase
   }
 
   /**
-   * \brief checks, whether a normalized path starts with an path in the
-   * whiteliste
+   * \brief checks, whether a normalized path lies inside one of the
+   * directories in the whitelist
+   *
+   * The whitelist is the colon separated setting UploadFromServerWhitelist.
+   * A path is accepted if it is equal to a whitelist entry or located below it
+   * (the match is done on directory boundaries, so "/tmp" does not allow
+   * "/tmpevil"). Empty entries (empty setting, leading, trailing or doubled
+   * colon) are ignored and never match, so a malformed setting can only
+   * restrict uploads and never lift the restriction.
    *
    * \param $path - the path to check
    *
@@ -62,9 +69,27 @@ class UploadSrvPage extends UploadPageBase
       $whitelist = array("/tmp");
     }
 
+    $path = str_replace('\ ', ' ', $path);
+
     foreach ($whitelist as $item) {
-      if (substr($path, 0,strlen($item)) === trim($item)) {
+      $item = trim($item);
+      if ($item === '/') {
         return true;
+      }
+      $item = rtrim($item, '/');
+      if ($item === '') {
+        continue;
+      }
+      $prefixes = array($item);
+      $realItem = realpath($item);
+      if ($realItem !== false && $realItem !== $item) {
+        $prefixes[] = rtrim($realItem, '/');
+      }
+      foreach ($prefixes as $prefix) {
+        if ($prefix !== '' &&
+          ($path === $prefix || strpos($path, $prefix . '/') === 0)) {
+          return true;
+        }
       }
     }
     return false;
