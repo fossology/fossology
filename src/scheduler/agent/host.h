@@ -49,5 +49,6 @@ void host_print(host_t* host, GOutputStream* ostr);
 
 host_t* get_host(GList** queue, uint8_t num);
 void    print_host_load(GTree* host_list, GOutputStream* ostr);
+gint    host_total_max(GTree* host_list);
 
 #endif /* HOST_H_INCLUDE */
