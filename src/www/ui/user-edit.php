@@ -360,7 +360,11 @@ class UserEditPage extends DefaultPlugin
       if (!$first) {
         $sql .= ",";
       }
-      $sql .= "$key='" . pg_escape_string($val) . "'";
+      if ($val === null) {
+        $sql .= "$key=NULL";
+      } else {
+        $sql .= "$key='" . pg_escape_string($val) . "'";
+      }
       $first = false;
     }
     $sql .= " WHERE user_pk=$UserRec[user_pk]";
@@ -459,7 +463,9 @@ class UserEditPage extends DefaultPlugin
         $UserRec['email_notify'] = 'y';
       }
       $UserRec['user_agent_list'] = is_null($request->get('user_agent_list')) ? userAgents() : $request->get('user_agent_list');
-      $UserRec['default_bucketpool_fk'] = intval($request->get("default_bucketpool_fk"));
+      $bucketPoolFk = intval($request->get("default_bucketpool_fk"));
+      // No bucket pool selected (e.g. none is active): store NULL, not an invalid FK of 0
+      $UserRec['default_bucketpool_fk'] = $bucketPoolFk > 0 ? $bucketPoolFk : null;
 
       if ($this->dbManager->existsColumn('users', 'spdx_settings')) {
         $osselotEnabled = !empty($request->get('osselot_export_enabled')) ? 'checked' : 'unchecked';
