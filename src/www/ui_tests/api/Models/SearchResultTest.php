@@ -15,6 +15,7 @@ namespace Fossology\UI\Api\Test\Models;
 use Fossology\UI\Api\Models\Upload;
 use Fossology\UI\Api\Models\SearchResult;
 use Fossology\UI\Api\Models\Hash;
+use Fossology\Lib\Data\UploadStatus;
 
 use PHPUnit\Framework\TestCase;
 
@@ -35,7 +36,7 @@ class SearchResultTest extends TestCase
   {
     $hash = new Hash('sha1checksum', 'md5checksum', 'sha256checksum', 123123);
     $upload = new Upload(2, 'root', 3, '', 'my.tar.gz', '01-01-2020', null,
-      $hash);
+      UploadStatus::OPEN, $hash);
     $searchResult = new SearchResult($upload->getArray(), '12',
     'fileinupload.txt');
     $this->assertInstanceOf(SearchResult::class, $searchResult);
@@ -49,7 +50,7 @@ class SearchResultTest extends TestCase
   {
     $hash = new Hash('sha1checksum', 'md5checksum', 'sha256checksum', 123123);
     $upload = new Upload(2, 'root', 3, '', 'my.tar.gz', '01-01-2020', null,
-      $hash);
+      UploadStatus::OPEN, $hash);
     $expectedResult = [
       'upload'        => $upload->getArray(),
       'uploadTreeId'  => 12,

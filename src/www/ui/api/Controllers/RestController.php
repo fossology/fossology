@@ -131,7 +131,11 @@ class RestController
    */
   public function isJsonRequest($request)
   {
-    return strcasecmp($request->getHeaderLine('Content-Type'),
-        "application/json") === 0;
+    $contentType = $request->getHeaderLine('Content-Type');
+
+    return str_contains(
+      strtolower($contentType),
+      "application/json"
+    );
   }
 }
