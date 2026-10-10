@@ -43,7 +43,7 @@ class RestAuthMiddleware
   {
     $requestUri = $request->getUri();
     $requestPath = strtolower($requestUri->getPath());
-    $authFreePaths = ["/info", "/openapi", "/health"];
+    $authFreePaths = ["/info", "/openapi", "/health" , "/oauth/login", "/oauth/callback"];
 
     $isPassThroughPath = false;
     // path is /repo/api/v2/<endpoint>, we need to get only the endpoint part
