@@ -23,6 +23,7 @@ CU_SuiteInfo suites[] = {
     {"SetEnv", NULL, NULL, (CU_SetUpFunc)SetEnvInit, (CU_TearDownFunc)SetEnvClean, testcases_SetEnv},
     {"Utiliies", NULL, NULL, NULL, NULL, testcases_Utiliies},
     {"DBLoadGold", NULL, NULL, (CU_SetUpFunc)DBLoadGoldInit, (CU_TearDownFunc)DBLoadGoldClean, testcases_DBLoadGold},
+    {"GitAuth", NULL, NULL, NULL, NULL, testcases_GitAuth},
     CU_SUITE_INFO_NULL
 };
 

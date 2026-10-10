@@ -73,6 +73,10 @@ int GetVersionControl();
 
 void GetProxy();
 
+int UrlEncodeUserinfo(const char *src, char *dest, size_t destSize);
+
+void UnescapeShellEscaping(char *str);
+
 void replace_url_with_auth();
 
 void MaskPassword();

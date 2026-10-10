@@ -14,6 +14,7 @@ extern CU_TestInfo testcases_GetURL[];
 extern CU_TestInfo testcases_SetEnv[];
 extern CU_TestInfo testcases_Utiliies[];
 extern CU_TestInfo testcases_DBLoadGold[];
+extern CU_TestInfo testcases_GitAuth[];
 
 /* GetURL */
 extern int GetURLInit();

@@ -25,7 +25,8 @@ target_sources(test_wget_agent
     ${FO_CWD}/Unit/wget_agent/testGetURL.c
     ${FO_CWD}/Unit/wget_agent/testSetEnv.c
     ${FO_CWD}/Unit/wget_agent/testUtilities.c
-    ${FO_CWD}/Unit/wget_agent/testDBLoadGold.c)
+    ${FO_CWD}/Unit/wget_agent/testDBLoadGold.c
+    ${FO_CWD}/Unit/wget_agent/testGitAuth.c)
 target_compile_definitions(test_wget_agent PRIVATE AGENT_DIR="${CMAKE_CURRENT_BINARY_DIR}/..")
 target_include_directories(test_wget_agent
     PRIVATE ${FO_TESTDIR}/lib/c ${FO_TESTDIR}/db/c ${FO_CWD}/../agent 
