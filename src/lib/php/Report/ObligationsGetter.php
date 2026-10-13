@@ -7,7 +7,6 @@
 
 namespace Fossology\Lib\Report;
 
-use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\LicenseRef;
@@ -23,11 +22,6 @@ class ObligationsGetter
    */
   private $licenseDao;
 
-  /** @var ClearingDao $clearingDao
-   * ClearingDao object
-   */
-  private $clearingDao;
-
   /** @var UploadDao $uploadDao
    * UploadDao object
    */
@@ -37,7 +31,6 @@ class ObligationsGetter
   {
     global $container;
     $this->licenseDao = $container->get('dao.license');
-    $this->clearingDao = $container->get('dao.clearing');
     $this->uploadDao = $container->get('dao.upload');
   }
 
@@ -62,11 +55,6 @@ class ObligationsGetter
       $allLicenseIds = array_unique($licenseIds);
     }
 
-    $bulkAddIds = $this->getBulkAddLicenseList($uploadId, $groupId);
-    if (!empty($bulkAddIds)) {
-      $allLicenseIds = array_unique(array_merge($licenseIds, $bulkAddIds));
-    }
-
     $obligationRef = $this->licenseDao->getLicenseObligations($allLicenseIds) ?: array();
     $obligationCandidate = $this->licenseDao->getLicenseObligations($allLicenseIds, true) ?: array();
     $obligations = array_merge($obligationRef, $obligationCandidate);
@@ -81,39 +69,6 @@ class ObligationsGetter
     }
     list($newobligations, $newWhiteList) = $this->groupObligations($obligations, $uploadId);
     return array($newobligations, array_unique(array_merge($whiteLists, $newWhiteList)));
-  }
-
-  /**
-   * @brief Get list of licenses added by Monk bulk
-   * @param int $uploadId
-   * @param int $groupId
-   * @return array List of license ids
-   */
-  function getBulkAddLicenseList($uploadId, $groupId)
-  {
-    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $parentTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
-    $bulkHistory = $this->clearingDao->getBulkHistory($parentTreeBounds, $groupId, false);
-    $licenseId = [];
-    if (!empty($bulkHistory)) {
-      foreach ($bulkHistory as $key => $value) {
-        if (empty($value['id'])) {
-          unset($bulkHistory[$key]);
-        }
-      }
-      $licenseLists = array_column($bulkHistory, 'addedLicenses');
-      $allLicenses = array();
-      foreach ($licenseLists as $licenseList) {
-        $allLicenses = array_unique(array_merge($allLicenses, $licenseList));
-      }
-      foreach ($allLicenses as $allLicense) {
-        $license = $this->licenseDao->getLicenseByShortName($allLicense);
-        if (!empty($license)) {
-          $licenseId[] = $license->getId();
-        }
-      }
-    }
-    return $licenseId;
   }
 
   /**
