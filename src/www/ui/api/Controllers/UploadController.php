@@ -673,6 +673,12 @@ class UploadController extends RestController
     $groupId = $this->restHelper->getGroupId();
     $isJsonRequest = $this->isJsonRequest($request);
 
+    $this->uploadAccessible($id);
+    if (! $this->restHelper->getUploadDao()->isEditable($id, $groupId)) {
+      throw new HttpForbiddenException(
+        "You do not have write permission on this upload.");
+    }
+
     $perm = $userDao->isAdvisorOrAdmin($userId, $groupId);
     if (!$perm) {
       throw new HttpForbiddenException("Not advisor or admin of current group. " .

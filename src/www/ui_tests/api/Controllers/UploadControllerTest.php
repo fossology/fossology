@@ -2076,4 +2076,29 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->uploadController->uploadDownload(null, new ResponseHelper(),
       ['id' => $uploadId]);
   }
+
+  /**
+   * @test
+   * -# Test for UploadController::updateUpload() when the user has read but no
+   *    write permission on the upload
+   * -# Check if HttpForbiddenException is thrown
+   */
+  public function testUpdateUploadNotEditable()
+  {
+    $uploadId = 2;
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("PATCH", new Uri("HTTP", "localhost", 80,
+      "/uploads/$uploadId"), $requestHeaders, [], [], $body);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(false);
+    $this->expectException(HttpForbiddenException::class);
+
+    $this->uploadController->updateUpload($request, new ResponseHelper(),
+      ['id' => $uploadId]);
+  }
 }
