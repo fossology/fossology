@@ -75,6 +75,7 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST (regEccTest);
   CPPUNIT_TEST (regUrlTest);
   CPPUNIT_TEST (regEmailTest);
+  CPPUNIT_TEST (regEmailReservedDomainTest);
   CPPUNIT_TEST (regKeywordTest);
   CPPUNIT_TEST (cleanEntries);
 
@@ -689,6 +690,33 @@ protected:
   void regEmailTest () {
     regexScanner sc("email", "copyright",1);
     scannerTest(sc, testContent, "email", { "info@mysite.org", "benj@debian.org" });
+  }
+
+  /**
+   * \brief Test email scanner skips reserved domains (RFC 2606)
+   * \test
+   * -# Create a email scanner
+   * -# Scan addresses in example.{com,net,org}, .test and .invalid
+   * -# Check that they are not reported, not even truncated
+   * -# Check that other addresses are reported unchanged
+   */
+  void regEmailReservedDomainTest () {
+    const char content[] =
+      "alice@example.com\n"
+      "<bob@example.net>\n"
+      "(carol@example.org)\n"
+      "dave@server.test\n"
+      "erin@host.invalid\n"
+      "grace@sub.example.com\n"
+      "frank@realcompany.de\n"
+      "john@myexample.com\n"
+      "maria@example.community\n"
+      "Contact paul@kernel.org.\n"
+      "sam@mail.co.uk\n";
+    regexScanner sc("email", "copyright", 1);
+    scannerTest(sc, content, "email", { "frank@realcompany.de",
+      "john@myexample.com", "maria@example.community", "paul@kernel.org",
+      "sam@mail.co.uk" });
   }
 
   /**
