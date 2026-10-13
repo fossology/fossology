@@ -844,6 +844,13 @@ class UploadController extends RestController
   public function setUploadPermissions($request, $response, $args)
   {
     $returnVal = null;
+    $upload_pk = intval($args['id']);
+    $this->uploadAccessible($upload_pk);
+    if (! $this->restHelper->getUploadDao()->isEditable($upload_pk,
+        $this->restHelper->getGroupId())) {
+      throw new HttpForbiddenException(
+        "You do not have permission to edit permissions of this upload.");
+    }
     // checking if the scheduler is running or not
     $commu_status = fo_communicate_with_scheduler('status', $response_from_scheduler, $error_info);
     if (!$commu_status) {
@@ -859,8 +866,6 @@ class UploadController extends RestController
     $reqBody = $this->getParsedBody($request);
 
     $folder_pk = intval($reqBody['folderId']);
-    $upload_pk = intval($args['id']);
-    $this->uploadAccessible($upload_pk);
     $allUploadsPerm = $reqBody['allUploadsPermission'] ? 1 : 0;
     $newgroup = intval($reqBody['groupId']);
     $newperm = $this->getEquivalentValueForPermission($reqBody['newPermission']);

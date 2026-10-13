@@ -2076,4 +2076,35 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->uploadController->uploadDownload(null, new ResponseHelper(),
       ['id' => $uploadId]);
   }
+
+  /**
+   * @test
+   * -# Test for UploadController::setUploadPermissions() when the user has
+   *    read but no write permission on the upload
+   * -# Check if HttpForbiddenException is thrown
+   */
+  public function testSetUploadPermissionsNotEditable()
+  {
+    $uploadId = 2;
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $body = $this->streamFactory->createStream(json_encode([
+      "folderId" => 1,
+      "allUploadsPermission" => false,
+      "groupId" => $this->groupId,
+      "newPermission" => "admin"
+    ]));
+    $request = new Request("PUT", new Uri("HTTP", "localhost", 80,
+      "/uploads/$uploadId/permissions"), $requestHeaders, [], [], $body);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(false);
+    $this->expectException(HttpForbiddenException::class);
+
+    $this->uploadController->setUploadPermissions($request,
+      new ResponseHelper(), ['id' => $uploadId]);
+  }
 }

@@ -122,6 +122,7 @@ class UploadPermissionPage extends DefaultPlugin
         $upload_pk = $UploadList[0]['upload_pk'];
       }
       if (!empty($perm_upload_pk)) {
+        $this->assertUploadIsWritable($upload_pk, $UploadList);
         $this->uploadPermDao->updatePermissionId($perm_upload_pk, $perm);
       } else if (!empty($newgroup) && !empty($newperm)) {
         if ($commu_status) {
@@ -129,6 +130,7 @@ class UploadPermissionPage extends DefaultPlugin
         }
         $newperm = $newgroup = 0;
       } else if ($public_perm >= 0) {
+        $this->assertUploadIsWritable($upload_pk, $UploadList);
         $this->uploadPermDao->setPublicPermission($upload_pk, $public_perm);
       }
     } else {
@@ -172,18 +174,27 @@ class UploadPermissionPage extends DefaultPlugin
     return $permNamesWithReuse;
   }
 
-  function insertPermission($groupId,$uploadId,$permission,$uploadList)
+  /**
+   * @brief Check that the user may edit the permissions of the given upload
+   *
+   * @param int $uploadId Upload to be changed
+   * @param array $uploadList Uploads the user has write permission on
+   * @return string Name of the upload
+   * @throws \Exception If the upload is not writable by the user
+   */
+  private function assertUploadIsWritable($uploadId, $uploadList)
   {
-    $fileName = false;
     foreach ($uploadList as $uploadEntry) {
       if ($uploadEntry['upload_pk'] == $uploadId) {
-        $fileName = $uploadEntry['name'];
-        break;
+        return $uploadEntry['name'];
       }
     }
-    if (empty($fileName)) {
-      throw new \Exception('This upload is missing or inaccessible');
-    }
+    throw new \Exception('This upload is missing or inaccessible');
+  }
+
+  function insertPermission($groupId,$uploadId,$permission,$uploadList)
+  {
+    $fileName = $this->assertUploadIsWritable($uploadId, $uploadList);
 
     $reuseBit = $permission&self::MOD_REUSE;
     if ($reuseBit) {
