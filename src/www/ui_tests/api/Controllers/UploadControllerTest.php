@@ -2025,4 +2025,55 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals(500,$actualResponse->getStatusCode());
 
   }
+
+  /**
+   * @test
+   * -# Test for UploadController::uploadDownload() where ununpack not finished
+   * -# Check if HttpServiceUnavailableException is thrown
+   */
+  public function testUploadDownloadNotUnpacked()
+  {
+    $uploadId = 5;
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withArgs([$uploadId])->andReturn(false);
+    $this->expectException(HttpServiceUnavailableException::class);
+
+    $this->uploadController->uploadDownload(null, new ResponseHelper(),
+      ['id' => $uploadId]);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::uploadDownload() where upload root file is
+   *    missing
+   * -# Check if the dynamic uploadtree table is queried
+   * -# Check if HttpNotFoundException is thrown
+   */
+  public function testUploadDownloadFileNotFound()
+  {
+    $uploadId = 2;
+    $uploadTreeTableName = "uploadtree";
+    $itemTreeBounds = $this->getUploadBounds($uploadId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withAnyArgs()->andReturn($itemTreeBounds);
+    $this->uploadDao->shouldReceive('getUploadtreeTableName')
+      ->withArgs([$uploadId])->andReturn($uploadTreeTableName);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([M::on(function ($sql) use ($uploadTreeTableName) {
+        return strpos($sql, "FROM $uploadTreeTableName WHERE") !== false;
+      }), [$itemTreeBounds->getItemId()], M::any()])
+      ->once()->andReturn(false);
+    $this->expectException(HttpNotFoundException::class);
+
+    $this->uploadController->uploadDownload(null, new ResponseHelper(),
+      ['id' => $uploadId]);
+  }
 }

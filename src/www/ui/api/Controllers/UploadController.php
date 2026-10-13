@@ -283,13 +283,19 @@ class UploadController extends RestController
       $id = intval($args['id']);
       $this->uploadAccessible($id);
     }
+    $this->isAdj2nestDone($id);
     $dbManager = $this->restHelper->getDbHelper()->getDbManager();
     $uploadDao = $this->restHelper->getUploadDao();
     $uploadTreeTableName = $uploadDao->getUploadtreeTableName($id);
     $itemTreeBounds = $uploadDao->getParentItemBounds($id,$uploadTreeTableName);
-    $sql =  "SELECT pfile_fk , ufile_name FROM uploadtree_a WHERE uploadtree_pk=$1";
+    $sql = "SELECT pfile_fk, ufile_name FROM $uploadTreeTableName " .
+      "WHERE uploadtree_pk=$1";
     $params = array($itemTreeBounds->getItemId());
-    $descendants = $dbManager->getSingleRow($sql,$params);
+    $descendants = $dbManager->getSingleRow($sql, $params,
+      __METHOD__ . "." . $uploadTreeTableName);
+    if (empty($descendants)) {
+      throw new HttpNotFoundException("Upload file not found.");
+    }
     $path= RepPath(($descendants['pfile_fk']));
     $responseFile = $ui_download->getDownload($path, $descendants['ufile_name']);
     $responseContent = $responseFile->getFile();
