@@ -5,6 +5,7 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
+use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Db\DbManager;
 
 define("TITLE_FOLDER_PROPERTIES", _("Edit Folder Properties"));
@@ -30,7 +31,7 @@ class folder_properties extends FO_Plugin
    * \brief Given a folder's ID and a name, alter
    * the folder properties.
    * Includes idiot checking since the input comes from stdin.
-   * \return 1 if changed, 0 if failed.
+   * \return 1 if changed, 0 if failed, 4 if a sibling folder already has the name.
    */
   function Edit($FolderId, $NewName, $NewDesc)
   {
@@ -52,6 +53,16 @@ class folder_properties extends FO_Plugin
       }
     } else {
       return (0); // $FolderId is empty
+    }
+    /* @var $folderDao FolderDao */
+    $folderDao = $GLOBALS['container']->get('dao.folder');
+    $parentId = $folderDao->getFolderParentId($FolderId);
+    if (! empty($parentId)) {
+      $folderWithSameNameUnderParent = $folderDao->getFolderId($NewName, $parentId);
+      if (! empty($folderWithSameNameUnderParent) &&
+          $folderWithSameNameUnderParent != $FolderId) {
+        return 4;
+      }
     }
     /* Change the properties */
     $sql = 'UPDATE folder SET folder_name = $1, folder_desc = $2 WHERE folder_pk = $3;';
@@ -79,6 +90,10 @@ class folder_properties extends FO_Plugin
         /* Need to refresh the screen */
         $text = _("Folder Properties changed");
         $this->vars["message"] = $text;
+      } else if ($rc == 4) {
+        $text = _("Folder");
+        $text1 = _("Exists");
+        $this->vars["message"] = "$text " . htmlentities(trim($NewName)) . " $text1";
       }
     }
     /* Get the folder info */

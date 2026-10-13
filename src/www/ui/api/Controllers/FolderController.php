@@ -196,8 +196,13 @@ class FolderController extends RestController
     /** @var \folder_properties $folderEdit */
     $folderEdit = $this->restHelper->getPlugin('folder_properties');
     $folderName = FolderGetName($folderId);
-    $folderEdit->Edit($folderId, $newName, $newDesc);
-    $info = new Info(200, "Folder \"$folderName\" updated.", InfoType::INFO);
+    $rc = $folderEdit->Edit($folderId, $newName, $newDesc);
+    if ($rc == 4) {
+      $newName = trim($newName);
+      $info = new Info(200, "Folder $newName already exists!", InfoType::INFO);
+    } else {
+      $info = new Info(200, "Folder \"$folderName\" updated.", InfoType::INFO);
+    }
     return $response->withJson($info->getArray(), $info->getCode());
   }
 
