@@ -29,6 +29,7 @@
       <file>www/ui_tests/startUpTest.php</file>
       <file>www/ui_tests/Unit/AgentAdderTest.php</file>
       <file>www/ui_tests/Unit/UploadPermissionPageTest.php</file>
+      <file>www/ui_tests/Unit/UIExportListTest.php</file>
       <directory suffix="Test.php">www/ui_tests/api</directory>
       <file>cli/tests/test_fo_copyright_list.php</file>
     </testsuite>
