@@ -51,6 +51,7 @@ namespace Fossology\UI\Api\Test\Controllers {
   use Fossology\UI\Api\Helper\DbHelper;
   use Fossology\UI\Api\Helper\ResponseHelper;
   use Fossology\UI\Api\Helper\RestHelper;
+  use Fossology\UI\Api\Models\ApiVersion;
   use Fossology\UI\Api\Models\BulkHistory;
   use Fossology\UI\Api\Models\ClearingHistory;
   use Fossology\UI\Api\Models\Info;
@@ -274,8 +275,9 @@ namespace Fossology\UI\Api\Test\Controllers {
      * @test
      * -# Test for UploadController::viewLicenseFile() with valid status
      * -# Check if response status is 200 and the body has the expected contents
+     * @dataProvider itemTableProvider
      */
-    public function testViewLicenseFile()
+    public function testViewLicenseFile($version, $tableName)
     {
       $upload_pk = 1;
       $item_pk = 200;
@@ -285,19 +287,104 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->withArgs([$upload_pk, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $upload_pk])->andReturn(true);
-      $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$upload_pk])->andReturn("uploadtree");
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $item_pk])->andReturn(true);
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")
+        ->withArgs([$upload_pk])->andReturn($tableName);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$item_pk, $tableName])->once()
+        ->andReturn(['upload_fk' => (string) $upload_pk]);
 
       $this->viewFilePlugin->shouldReceive('getText')->withArgs([M::any(), 0, 0, -1, null, false, true])->andReturn($expectedContent);
 
       $expectedResponse = new ResponseHelper();
       $expectedResponse->getBody()->write($expectedContent);
-      $actualResponse = $this->uploadTreeController->viewLicenseFile(null, new ResponseHelper(), ['id' => $upload_pk, 'itemId' => $item_pk]);
+      $request = (new Request('GET', new Uri('http', 'localhost'),
+        new Headers(), [], [], $this->streamFactory->createStream()))
+        ->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
+      $actualResponse = $this->uploadTreeController->viewLicenseFile($request,
+        new ResponseHelper(), ['id' => $upload_pk, 'itemId' => $item_pk]);
       $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
       $this->assertEquals($expectedResponse->getBody()->getContents(), $actualResponse->getBody()->getContents());
     }
 
+    public function itemTableProvider(): array
+    {
+      $cases = [];
+      foreach ([ApiVersion::V1, ApiVersion::V2] as $version) {
+        foreach (['uploadtree', 'uploadtree_a', 'uploadtree_1'] as $tableName) {
+          $cases["v$version $tableName"] = [$version, $tableName];
+        }
+      }
+      return $cases;
+    }
+
+    /**
+     * @dataProvider itemTableProvider
+     */
+    public function testViewLicenseFileRejectsInaccessibleUpload($version, $tableName)
+    {
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->with('upload', 'upload_pk', 1)->andReturn(true);
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->with(1, $this->groupId)->andReturn(false);
+      $this->uploadDao->shouldReceive('getUploadtreeTableName')
+        ->with(1)->andReturn($tableName);
+      $this->uploadDao->shouldNotReceive('getUploadEntry');
+      $this->viewFilePlugin->shouldNotReceive('getText');
+
+      $request = (new Request('GET', new Uri('http', 'localhost'),
+        new Headers(), [], [], $this->streamFactory->createStream()))
+        ->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
+      $this->expectException(HttpForbiddenException::class);
+      $this->expectExceptionCode(403);
+      $this->uploadTreeController->viewLicenseFile($request, new ResponseHelper(),
+        ['id' => 1, 'itemId' => 200]);
+    }
+
+    /**
+     * @dataProvider invalidItemProvider
+     */
+    public function testViewLicenseFileRejectsInvalidItem($version, $tableName,
+      $itemExists, $otherUploadAccessible)
+    {
+      $uploadId = 1;
+      $itemId = 200;
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->with('upload', 'upload_pk', $uploadId)->andReturn(true);
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->with($uploadId, $this->groupId)->andReturn(true);
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->with(2, $this->groupId)->andReturn($otherUploadAccessible);
+      $this->uploadDao->shouldReceive('getUploadtreeTableName')
+        ->with($uploadId)->andReturn($tableName);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->with($itemId, $tableName)->once()
+        ->andReturn($itemExists ? ['upload_fk' => '2'] : false);
+      $this->viewFilePlugin->shouldNotReceive('getText');
+
+      $request = (new Request('GET', new Uri('http', 'localhost'),
+        new Headers(), [], [], $this->streamFactory->createStream()))
+        ->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
+      $this->expectException(HttpNotFoundException::class);
+      $this->expectExceptionCode(404);
+      $this->uploadTreeController->viewLicenseFile($request, new ResponseHelper(),
+        ['id' => $uploadId, 'itemId' => $itemId]);
+    }
+
+    public function invalidItemProvider(): array
+    {
+      $cases = [];
+      foreach ([ApiVersion::V1, ApiVersion::V2] as $version) {
+        foreach (['uploadtree', 'uploadtree_a', 'uploadtree_1'] as $tableName) {
+          $cases["v$version $tableName inaccessible foreign item"] =
+            [$version, $tableName, true, false];
+          $cases["v$version $tableName accessible foreign item"] =
+            [$version, $tableName, true, true];
+          $cases["v$version $tableName missing item"] =
+            [$version, $tableName, false, false];
+        }
+      }
+      return $cases;
+    }
 
     /**
      * @test
@@ -323,8 +410,9 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->withArgs([$upload_pk, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $upload_pk])->andReturn(true);
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $item_pk])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$item_pk, "uploadtree"])
+        ->andReturn(['upload_fk' => (string) $upload_pk]);
 
 
       $this->viewLicensePlugin->shouldReceive('updateLastItem')->withArgs([2, 2, $item_pk, $item_pk]);
@@ -371,8 +459,9 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->withArgs([$upload_pk, $this->groupId])->andReturn(true);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $upload_pk])->andReturn(true);
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $item_pk])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$item_pk, "uploadtree"])
+        ->andReturn(['upload_fk' => (string) $upload_pk]);
 
       $this->viewLicensePlugin->shouldReceive('updateLastItem')->withArgs([2, 2, $item_pk, $item_pk]);
 
@@ -416,8 +505,9 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$itemId, "uploadtree"])
+        ->andReturn(['upload_fk' => (string) $uploadId]);
 
       $this->uploadDao->shouldReceive('getNextItem')->withArgs([$uploadId, $itemId, $options])->andReturn($item1);
       $this->uploadDao->shouldReceive('getPreviousItem')->withArgs([$uploadId, $itemId, $options])->andReturn($item2);
@@ -458,8 +548,9 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$itemId, "uploadtree"])
+        ->andReturn(['upload_fk' => (string) $uploadId]);
 
       $this->uploadDao->shouldReceive('getNextItem')->withArgs([$uploadId, $itemId, $options])->andReturn($item1);
       $this->uploadDao->shouldReceive('getPreviousItem')->withArgs([$uploadId, $itemId, $options])->andReturn($item2);
@@ -506,8 +597,9 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
 
       $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$itemId, "uploadtree"])
+        ->andReturn(['upload_fk' => (string) $uploadId]);
 
       $this->uploadDao->shouldReceive("getItemTreeBounds")
         ->withArgs([$itemId, "uploadtree"])->andReturn($itemTreeBounds);
@@ -547,8 +639,9 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
 
       $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$itemId, "uploadtree"])
+        ->andReturn(['upload_fk' => (string) $uploadId]);
 
       $this->uploadDao->shouldReceive("getItemTreeBoundsFromUploadId")
         ->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
@@ -593,8 +686,9 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$itemId, "uploadtree"])
+        ->andReturn(['upload_fk' => (string) $uploadId]);
       $this->uploadDao->shouldReceive("getItemTreeBounds")->withArgs([$itemId, "uploadtree"])->andReturn($itemTreeBounds);
       $this->viewLicensePlugin->shouldReceive('getSelectedHighlighting')->withArgs([$itemTreeBounds, null, null, null, null, $uploadId])->andReturn([$highlight]);
 
@@ -793,8 +887,9 @@ namespace Fossology\UI\Api\Test\Controllers {
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
 
       $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$itemId, "uploadtree"])
+        ->andReturn(['upload_fk' => (string) $uploadId]);
 
       $this->uploadDao->shouldReceive("getItemTreeBoundsFromUploadId")->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
       $this->itemTreeBoundsMock->shouldReceive("containsFiles")->andReturn(false);
@@ -841,8 +936,9 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$itemId, "uploadtree"])
+        ->andReturn(['upload_fk' => (string) $uploadId]);
       $this->uploadDao->shouldReceive('getItemTreeBoundsFromUploadId')->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
       $this->concludeLicensePlugin->shouldReceive('getCurrentSelectedLicensesTableData')->withArgs([$itemTreeBounds, $this->groupId, true])->andReturn($existingLicenses);
       $this->licenseDao->shouldReceive('getLicenseByShortName')
@@ -900,8 +996,9 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$itemId, "uploadtree"])
+        ->andReturn(['upload_fk' => (string) $uploadId]);
       $this->uploadDao->shouldReceive('getItemTreeBoundsFromUploadId')->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
       $this->concludeLicensePlugin->shouldReceive('getCurrentSelectedLicensesTableData')->withArgs([$itemTreeBounds, $this->groupId, true])->andReturn($existingLicenses);
       $this->licenseDao->shouldReceive('getLicenseByShortName')
@@ -959,8 +1056,9 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$itemId, "uploadtree"])
+        ->andReturn(['upload_fk' => (string) $uploadId]);
       $this->uploadDao->shouldReceive('getItemTreeBoundsFromUploadId')->withArgs([$itemId, $uploadId])->andReturn($itemTreeBounds);
       $this->concludeLicensePlugin->shouldReceive('getCurrentSelectedLicensesTableData')->withArgs([$itemTreeBounds, $this->groupId, true])->andReturn($existingLicenses);
       $this->licenseDao->shouldReceive('getLicenseByShortName')
@@ -1027,8 +1125,9 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
       $this->uploadDao->shouldReceive('getUploadtreeTableName')->withArgs([$uploadId])->andReturn("uploadtree");
-      $this->dbHelper->shouldReceive('doesIdExist')
-        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+      $this->uploadDao->shouldReceive('getUploadEntry')
+        ->withArgs([$itemId, "uploadtree"])
+        ->andReturn(['upload_fk' => (string) $uploadId]);
       $this->dbHelper->shouldReceive('doesIdExist')
         ->withArgs(["license_ref", "rf_pk", $licenseId])->andReturn(true);
       $this->licenseDao->shouldReceive('getLicenseByShortName')
