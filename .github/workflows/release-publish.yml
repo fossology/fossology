@@ -64,7 +64,7 @@ jobs:
         rm -rf src/vendor
 
     - name: Get CMake
-      uses: lukka/get-cmake@v4.4.2
+      uses: lukka/get-cmake@v4.4.4
 
     - name: Fetch tags
       run: |
@@ -156,7 +156,7 @@ jobs:
           libjson-c-dev librpm-dev libboost-all-dev libxslt1-dev
 
       - name: Setup CMake
-        uses: lukka/get-cmake@v4.4.2
+        uses: lukka/get-cmake@v4.4.4
 
       - name: Build Nomossa
         run: |
