@@ -163,7 +163,9 @@ namespace {
   assert_test('Report has serialNumber', !empty($report['serialNumber']));
   assert_test('Report has metadata', isset($report['metadata']));
   assert_test('Report metadata has tools', isset($report['metadata']['tools']));
-  assert_test('Tool vendor is FOSSology', $report['metadata']['tools']['components'][0]['vendor'] === 'FOSSology');
+  assert_test('Tool manufacturer is FOSSology',
+    $report['metadata']['tools']['components'][0]['manufacturer']['name'] === 'FOSSology');
+  assert_test('Tool has no vendor', !isset($report['metadata']['tools']['components'][0]['vendor']));
   assert_test('Tool version is 4.5.0', $report['metadata']['tools']['components'][0]['version'] === '4.5.0');
   assert_test('Metadata has main component', isset($report['metadata']['component']));
   assert_test('Main component has copyright', isset($report['metadata']['component']['copyright']));
@@ -357,6 +359,22 @@ namespace {
   assert_test('Full component has licenses', count($fullComp['licenses']) === 1);
   assert_test('Full component has externalReferences', count($fullComp['externalReferences']) === 1);
   assert_test('Full component has properties', count($fullComp['properties']) === 2);
+
+  echo "\n";
+
+  echo "Test 15: LicenseRef expression with bom-ref and acknowledgement\n";
+  $licenseRefWithRef = $generator->createLicense(array(
+    'id' => 'LicenseRef-fossology-BSD-style',
+    'bom-ref' => 'lic-scanner-320-42',
+    'acknowledgement' => 'declared'
+  ));
+
+  assert_test('Expression value correct',
+    $licenseRefWithRef['expression'] === 'LicenseRef-fossology-BSD-style');
+  assert_test('Expression has bom-ref', $licenseRefWithRef['bom-ref'] === 'lic-scanner-320-42');
+  assert_test('Expression has acknowledgement', $licenseRefWithRef['acknowledgement'] === 'declared');
+  assert_test('Expression has only schema keys',
+    array_keys($licenseRefWithRef) === array('expression', 'bom-ref', 'acknowledgement'));
 
   echo "\n";
 
