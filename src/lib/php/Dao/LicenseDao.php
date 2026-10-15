@@ -434,11 +434,11 @@ ORDER BY lft asc
           $licensesPerFileName[$path]['concludedResults'][] = $clearingDecisionsForLicList[$row['uploadtree_pk']];
         }
       }
+      if ($includeTreeId) {
+        $licensesPerFileName[$path]['uploadtree_pk'][] = $row['uploadtree_pk'];
+      }
     } else if (!$ignore) {
       $licensesPerFileName[$path] = false;
-    }
-    if ($includeTreeId) {
-      $licensesPerFileName[$path]['uploadtree_pk'][] = $row['uploadtree_pk'];
     }
   }
 
