@@ -961,7 +961,8 @@ class UploadController extends RestController
           $obligation['ob_comment']
         );
       }
-      $license = $licenseDao->getLicenseById($licenseId);
+      $license = $licenseDao->getLicenseById($licenseId,
+        $this->restHelper->getGroupId());
       $licenseObj = new License(
         $license->getId(),
         $license->getShortName(),
