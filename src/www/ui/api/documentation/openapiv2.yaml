@@ -571,6 +571,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        '403':
+          description: >
+            Upload is not accessible or the user does not have write
+            permission on the upload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
     patch:
