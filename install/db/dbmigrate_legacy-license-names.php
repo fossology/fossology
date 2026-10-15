@@ -38,6 +38,9 @@ function getLegacyLicenseNames()
     /* Was misspelled ('Reponsible') and is now named for the RAIL family. */
     'Reponsible-AI-Source-Code-License-v1.0' => 'RAIL-S-1.0',
 
+    /* nomos named every Autoconf exception wording it could not version by
+     * the bare name; nearly all of them were the generic wording. */
+    'Autoconf-exception' => 'Autoconf-exception-generic',
     /* The hyphenated forms are FOSSology-local and not valid SPDX. */
     'GPL-2.0-with-autoconf-exception' => 'GPL-2.0-only WITH Autoconf-exception-3.0',
     'GPL-2.0-with-bison-exception' => 'GPL-2.0-only WITH Bison-exception-2.2',
