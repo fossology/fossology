@@ -375,6 +375,10 @@ class UploadController extends RestController
     $result = TryToDelete($id, $this->restHelper->getUserId(),
       $this->restHelper->getGroupId(), $this->restHelper->getUploadDao());
     if ($result->getDeleteMessageCode() !== DeleteMessages::SUCCESS) {
+      if (ApiVersion::getVersion($request) == ApiVersion::V2 &&
+          $result->getDeleteMessageCode() === DeleteMessages::NO_PERMISSION) {
+        throw new HttpForbiddenException($result->getDeleteMessageString());
+      }
       throw new HttpInternalServerErrorException(
         $result->getDeleteMessageString());
     }
