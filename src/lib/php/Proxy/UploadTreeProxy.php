@@ -28,6 +28,7 @@ class UploadTreeProxy extends DbViewProxy
   const OPT_SCAN_REF = 'scanRef';
   const OPT_CONCLUDE_REF = 'conRef';
   const OPT_SKIP_ALREADY_CLEARED = 'alreadyCleared';
+  const OPT_ONLY_TBD = 'onlyTBD';
 
   /** @var string */
   private $uploadTreeTableName;
@@ -244,6 +245,7 @@ class UploadTreeProxy extends DbViewProxy
       case "noLicense":
       case "nolicensenocopyright":
       case self::OPT_SKIP_ALREADY_CLEARED:
+      case self::OPT_ONLY_TBD:
       case "noCopyright":
       case "noIpra":
       case "noEcc":
@@ -270,7 +272,7 @@ class UploadTreeProxy extends DbViewProxy
       return '';
     }
     $skipThese = $options[self::OPT_SKIP_THESE];
-    if ($skipThese != "noLicense" && $skipThese != "nolicensenocopyright" && $skipThese != self::OPT_SKIP_ALREADY_CLEARED) {
+    if ($skipThese != "noLicense" && $skipThese != "nolicensenocopyright" && $skipThese != self::OPT_SKIP_ALREADY_CLEARED && $skipThese != self::OPT_ONLY_TBD) {
       return '';
     }
 
@@ -341,6 +343,14 @@ WHERE $globalSql
 ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
         return " $conditionQueryHasLicense
             AND NOT EXISTS (SELECT 1 FROM ($decisionQuery) AS latest_decision WHERE latest_decision.decision_type IN (".DecisionTypes::IRRELEVANT.",".DecisionTypes::IDENTIFIED.",".DecisionTypes::DO_NOT_USE.",".DecisionTypes::NON_FUNCTIONAL."))";
+      case self::OPT_ONLY_TBD:
+        $decisionQuery = "
+SELECT cd.decision_type
+FROM clearing_decision cd
+WHERE $globalSql
+ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
+        return " $conditionQueryHasLicense
+            AND ($decisionQuery) = ".DecisionTypes::TO_BE_DISCUSSED;
       case "noCopyright":
         return "(EXISTS (SELECT 1 FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null)" .
               " OR EXISTS (SELECT 1 FROM copyright_decision AS cd WHERE ut.pfile_fk = cd.pfile_fk))";
