@@ -49,8 +49,13 @@ class CompatibilityAgentPlugin extends AgentPlugin
       return $jobQueueId;
     }
 
+    $arguments = "";
+    if (is_array($request) && !empty($request["auto_conclude_compatibility"])) {
+      $arguments = "-a";
+    }
+
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg,
-        array_unique($compatibilityDependencies), $arguments, null, $request);
+        array_unique($compatibilityDependencies), $uploadId, $arguments, $request);
   }
 
   function AgentHasResults($uploadId = 0)

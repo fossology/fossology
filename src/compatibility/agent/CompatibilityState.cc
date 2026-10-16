@@ -52,16 +52,17 @@ const CompatibilityAgent& CompatibilityState::getCompatibilityAgent() const
  * @brief Constructor for CompatibilityCliOptions
  * @param verbosity Verbosity set by CLI
  * @param json      True to get output in JSON format
+ * @param autoConclude True to auto conclude fully compatible files
  */
-CompatibilityCliOptions::CompatibilityCliOptions(int verbosity, bool json) :
-    verbosity(verbosity), json(json)
+CompatibilityCliOptions::CompatibilityCliOptions(int verbosity, bool json, bool autoConclude) :
+    verbosity(verbosity), json(json), autoConclude(autoConclude)
 {
 }
 
 /**
  * @brief Default constructor for CompatibilityCliOptions
  */
-CompatibilityCliOptions::CompatibilityCliOptions() : verbosity(0), json(false)
+CompatibilityCliOptions::CompatibilityCliOptions() : verbosity(0), json(false), autoConclude(false)
 {
 }
 
@@ -90,4 +91,13 @@ bool CompatibilityCliOptions::isVerbosityDebug() const
 bool CompatibilityCliOptions::doJsonOutput() const
 {
   return json;
+}
+
+/**
+ * @brief Check if auto-conclude is required
+ * @return True if required, else false
+ */
+bool CompatibilityCliOptions::doAutoConclude() const
+{
+  return autoConclude;
 }

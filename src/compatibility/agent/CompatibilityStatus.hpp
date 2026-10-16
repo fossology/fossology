@@ -15,7 +15,8 @@ enum CompatibilityStatus
 {
   COMPATIBLE,    ///< Licenses are compatible
   NOTCOMPATIBLE, ///< Licenses are not compatible
-  UNKNOWN        ///< Compatibility unknown
+  UNKNOWN,       ///< No rule found
+  EXPLICIT_UNKNOWN ///< Explicitly marked as unknown (e.g. Check Dependency)
 };
 
 #endif // FOSSOLOGY_COMPATIBILITYSTATUS_HPP
