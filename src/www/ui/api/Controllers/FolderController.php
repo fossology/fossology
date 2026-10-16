@@ -114,7 +114,8 @@ class FolderController extends RestController
     }
     /** @var \folder_create $folderCreate */
     $folderCreate = $this->restHelper->getPlugin('folder_create');
-    $rc = $folderCreate->create($parentFolder, $folderName, $folderDescription);
+    $rc = $folderCreate->create($parentFolder, $folderName, $folderDescription,
+      $this->restHelper->getUserId());
     if ($rc == 4) {
       $info = new Info(200, "Folder $folderName already exists!", InfoType::INFO);
     } elseif ($rc == 0) {
