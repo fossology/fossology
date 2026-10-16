@@ -925,16 +925,17 @@ class CopyrightController extends RestController
    */
   private function deleteFileCX($args, $response, $cxType)
   {
+    $uploadPk = intval($args['id']);
+    $this->uploadEditable($uploadPk);
+
     list($dataType, $delName) = $this->convertTypeToTable($cxType);
 
     $uploadDao = $this->restHelper->getUploadDao();
-    $uploadPk = intval($args['id']);
     $uploadTreeId = intval($args['itemId']);
     $copyrightHash = $args['hash'];
     $userId = $this->restHelper->getUserId();
     $cpTable = $this->copyrightHist->getTableName($dataType);
 
-    $this->uploadAccessible($uploadPk);
     $this->isItemExists($uploadPk, $uploadTreeId);
 
     $uploadTreeTableName = $uploadDao->getUploadTreeTableName($uploadPk);
@@ -965,14 +966,15 @@ class CopyrightController extends RestController
    */
   private function restoreFileCx($args, $response, $cxType)
   {
-    list($dataType, $resName) = $this->convertTypeToTable($cxType);
     $uploadPk = intval($args['id']);
+    $this->uploadEditable($uploadPk);
+
+    list($dataType, $resName) = $this->convertTypeToTable($cxType);
     $uploadTreeId = intval($args['itemId']);
     $copyrightHash = ($args['hash']);
     $userId = $this->restHelper->getUserId();
     $cpTable = $this->copyrightHist->getTableName($dataType);
 
-    $this->uploadAccessible($uploadPk);
     $this->isItemExists($uploadPk, $uploadTreeId);
 
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk);
@@ -1004,16 +1006,17 @@ class CopyrightController extends RestController
    */
   private function updateFileCx($request, $response, $args, $cxType)
   {
+    $uploadPk = intval($args["id"]);
+    $this->uploadEditable($uploadPk);
+
     list($dataType, $resName) = $this->convertTypeToTable($cxType);
     $uploadTreeId = intval($args["itemId"]);
-    $uploadPk = intval($args["id"]);
     $copyrightHash = $args["hash"];
     $userId = $this->restHelper->getUserId();
     $cpTable = $this->copyrightHist->getTableName($dataType);
     $body = $this->getParsedBody($request);
     $content = $body['content'];
 
-    $this->uploadAccessible($uploadPk);
     $this->isItemExists($uploadPk, $uploadTreeId);
 
     $uploadTreeTableName = $this->restHelper->getUploadDao()->getuploadTreeTableName($uploadPk);
