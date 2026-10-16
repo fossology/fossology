@@ -44,7 +44,7 @@ class ObligationCsvImport
       'modifications'=>array('modifications','Apply on modified source code'),
       'comment'=>array('comment','Comment'),
       'licnames'=>array('licnames','Associated Licenses'),
-      'candidatenames'=>array('candidatenames','Associated candidate Licenses'),
+      'candidatenames'=>array('candidatenames','Associated candidate Licenses','Associated candidate Licenses/'),
       'external_id'=>array('id','LicenseDB Id'),
     );
 
@@ -108,11 +108,14 @@ class ObligationCsvImport
         $data = json_decode($jsonContent, true);
         if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
           $msg .= "Error decoding JSON: " . json_last_error_msg() . "\n";
+        } elseif (!is_array($data)) {
+          $msg .= "Error decoding JSON: Expected array of obligations\n";
+        } else {
+          $msg = $this->importJsonData($data, $msg);
+          $msg .= _('Read json').(":". count($data) ." ")._('obligations');
         }
-        $msg = $this->importJsonData($data, $msg);
-        $msg .= _('Read json').(":". count($data) ." ")._('obligations');
       }
-    } catch(\Exception $e) {
+    } catch(\Throwable $e) {
       fclose($handle);
       return $msg .= _('Error while parsing file').': '.$e->getMessage();
     }
@@ -531,14 +534,47 @@ class ObligationCsvImport
   }
 
   /**
-   * @param $data
+   * Handle a single row read from JSON and normalize optional values before
+   * importing.
+   * @param array $row Single row from JSON
+   * @return string Log messages
+   */
+  private function handleJsonObligation($row)
+  {
+    if (!is_array($row)) {
+      return '';
+    }
+    $mRow = $this->handleRowJson($row);
+    foreach (array(
+      'type' => 'Obligation', 'topic' => '', 'text' => '',
+      'classification' => '', 'modifications' => '',
+      'comment' => '', 'licnames' => '', 'candidatenames' => '',
+      'license_ids' => array()
+    ) as $needle => $defaultValue) {
+      if (!array_key_exists($needle, $mRow)) {
+        $mRow[$needle] = $defaultValue;
+      }
+    }
+
+    if (empty($mRow['external_id'])) {
+      return $this->handleCsvObligation($mRow);
+    }
+
+    return $this->handleLicenseDBObligationImport($mRow);
+  }
+
+  /**
+   * @param array $data
    * @param string $msg
    * @return string
    */
   public function importJsonData($data, string $msg): string
   {
+    if (!is_array($data)) {
+      return $msg;
+    }
     foreach ($data as $row) {
-      $log = $this->handleLicenseDBObligationImport($this->handleRowJson($row));
+      $log = $this->handleJsonObligation($row);
       if (!empty($log)) {
         $msg .= "$log\n";
       }
