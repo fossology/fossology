@@ -288,6 +288,8 @@ $app->group('/uploads',
 $app->group('/users',
   function (\Slim\Routing\RouteCollectorProxy $app) use ($pattern) {
     $app->get('/self', UserController::class . ':getCurrentUser');
+    $app->post('/import', UserController::class . ':handleImportUsers');
+    $app->get('/export', UserController::class . ':handleExportUsers');
     $app->get("[/{pathParam:$pattern}]", UserController::class . ':getUsers');
     $app->put("/{pathParam:$pattern}", UserController::class . ':updateUser');
     $app->post('', UserController::class . ':addUser');
