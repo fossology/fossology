@@ -13,6 +13,7 @@
  */
 
 #include <crypt.h>
+#include <errno.h>
 
 #include "delagent.h"
 
@@ -334,16 +335,7 @@ int deleteUpload (long uploadId, int userId, int userPerm)
 
   snprintf(desc, myBUFSIZ, "Deleting upload %ld",uploadId);
   PQexecCheckClear(desc, "SET statement_timeout = 0;", __FILE__, __LINE__);
-  PQexecCheckClear(NULL, "BEGIN;", __FILE__, __LINE__);
 
-  /* Delete everything that impacts the UI */
-  if (!Test) {
-    /* The UI depends on uploadtree and folders for navigation.
-     Delete them now to block timeouts from the UI. */
-    PQexecCheckClear(NULL, "COMMIT;", __FILE__, __LINE__);
-  }
-
-  /* Begin complicated stuff */
   /* Get the list of pfiles to delete */
   /* These are all pfiles in the upload_fk that only appear once. */
   snprintf(SQL,MAXSQL,"SELECT DISTINCT pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile INTO %s FROM uploadtree INNER JOIN pfile ON upload_fk = %ld AND pfile_fk = pfile_pk;",tempTable,uploadId);
@@ -363,8 +355,11 @@ int deleteUpload (long uploadId, int userId, int userPerm)
     PQclear(result);
   }
 
-  /* Now to delete the actual pfiles from the repository before remove the DB. */
-  /* Get the file listing -- needed for deleting pfiles from the repository. */
+  /* Get the list of pfiles (sha1.md5.size) that will need to be removed from
+   the repository. This is only a read -- the repository is not touched here.
+   The actual repository removal is deferred until after the DB transaction
+   below has committed, so that a crash or DB error can never leave the
+   repository files deleted while the DB still references them as present. */
   snprintf(SQL,MAXSQL,"SELECT pfile FROM %s ORDER BY pfile_pk;",tempTable);
   pfileResult = PQexecCheckResult("Get pfiles to delete from repo", SQL,
                                   __FILE__, __LINE__);
@@ -372,32 +367,6 @@ int deleteUpload (long uploadId, int userId, int userPerm)
   {
     return -1;
   }
-
-  if (Test <= 1) {
-    maxRow = PQntuples(pfileResult);
-    for(Row=0; Row<maxRow; Row++) {
-      S = PQgetvalue(pfileResult,Row,0); /* sha1.md5.len */
-      if (fo_RepExist("files",S)) {
-        if (Test) {
-          printf("TEST: Delete %s %s\n","files",S);
-        } else {
-          fo_RepRemove("files",S);
-        }
-      }
-      if (fo_RepExist("gold",S)) {
-        if (Test) {
-          printf("TEST: Delete %s %s\n","gold",S);
-        } else {
-          fo_RepRemove("gold",S);
-        }
-      }
-      if (Scheduler == 1)
-      {
-        fo_scheduler_heart(1);
-      }
-    }
-  }
-  PQclear(pfileResult);
 
   /*
    This begins the slow part that locks the DB.
@@ -514,6 +483,43 @@ int deleteUpload (long uploadId, int userId, int userPerm)
   } else {
     PQexecCheckClear(NULL, "COMMIT;", __FILE__, __LINE__);
   }
+
+  /* Only remove the pfiles from the repository once the DB transaction that
+   removes their references has actually committed. If this process is
+   killed or crashes before this point, the upload's DB rows are already
+   either fully deleted (commit above succeeded) or untouched (transaction
+   never committed) -- either way the DB and repository stay consistent.
+   Doing this the other way around (removing files first) can leave the DB
+   referencing repository content that no longer exists on disk. */
+  if (Test <= 1) {
+    maxRow = PQntuples(pfileResult);
+    for(Row=0; Row<maxRow; Row++) {
+      S = PQgetvalue(pfileResult,Row,0); /* sha1.md5.len */
+      if (fo_RepExist("files",S)) {
+        if (Test) {
+          printf("TEST: Delete %s %s\n","files",S);
+        } else if (fo_RepRemove("files",S)) {
+          fprintf(stderr,
+            "WARNING: Failed to remove repository file 'files/%s' while "
+            "deleting upload %ld: %s\n", S, uploadId, strerror(errno));
+        }
+      }
+      if (fo_RepExist("gold",S)) {
+        if (Test) {
+          printf("TEST: Delete %s %s\n","gold",S);
+        } else if (fo_RepRemove("gold",S)) {
+          fprintf(stderr,
+            "WARNING: Failed to remove repository file 'gold/%s' while "
+            "deleting upload %ld: %s\n", S, uploadId, strerror(errno));
+        }
+      }
+      if (Scheduler == 1)
+      {
+        fo_scheduler_heart(1);
+      }
+    }
+  }
+  PQclear(pfileResult);
 
   printfInCaseOfVerbosity("Deleted upload %ld\n",uploadId);
 
