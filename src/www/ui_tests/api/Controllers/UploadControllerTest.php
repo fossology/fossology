@@ -1334,7 +1334,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->clearingDao->shouldReceive('getMainLicenseIds')->withArgs([$uploadId, $this->groupId])->andReturn($licenseIds);
     $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], false])->andReturn([]);
     $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], true])->andReturn([]);
-    $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId])->andReturn($license);
+    $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId, $this->groupId])->andReturn($license);
 
     $licenses[] = $license->getArray();
     $expectedResponse = (new ResponseHelper())->withJson($licenses, 200);

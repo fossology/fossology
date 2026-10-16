@@ -804,7 +804,7 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->clearingDecisionEventProcessor->shouldReceive("getCurrentClearings")->withArgs([$itemTreeBounds, $this->groupId, LicenseMap::CONCLUSION])->andReturn([$addedClearingResults, []]);
       $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], false])->andReturn([]);
       $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], true])->andReturn([]);
-      $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId])->andReturn($license);
+      $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId, $this->groupId])->andReturn($license);
       $licenses[] = $licenseDecision->getArray();
 
       $expectedResponse = (new ResponseHelper())->withJson($licenses, 200);
