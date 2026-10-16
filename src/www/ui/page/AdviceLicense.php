@@ -178,7 +178,8 @@ class AdviceLicense extends DefaultPlugin
       $oldRow['rf_pk'] = $licenseDao->insertUploadLicense($shortname, $rfText, Auth::getGroupId(), $userId);
     }
 
-    if (! empty($spdxId) &&
+    $oldSpdxId = array_key_exists('rf_spdx_id', $oldRow) ? $oldRow['rf_spdx_id'] : null;
+    if (! empty($spdxId) && $spdxId !== $oldSpdxId &&
       strstr(strtolower($spdxId), strtolower(LicenseRef::SPDXREF_PREFIX)) === false) {
       if (! $spdxLicenses->validate($spdxId)) {
         $spdxId = LicenseRef::convertToSpdxId($spdxId, null);
