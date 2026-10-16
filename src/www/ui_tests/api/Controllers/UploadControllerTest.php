@@ -1362,6 +1362,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $licenseIds[$licenseId] = $licenseId;
     $this->uploadDao->shouldReceive('isAccessible')
       ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
     $this->licenseDao->shouldReceive('getLicenseByShortName')
@@ -1407,6 +1409,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $licenseIds[$licenseId] = $licenseId;
     $this->uploadDao->shouldReceive('isAccessible')
       ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
     $this->licenseDao->shouldReceive('getLicenseByShortName')
@@ -1427,6 +1431,33 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->uploadController->setMainLicense($request, new ResponseHelper(), ['id' => $uploadId]);
   }
 
+  /**
+   * @test
+   * -# Test for UploadController::setMainLicense()
+   * -# Check if HttpForbiddenException is thrown when user lacks write permission
+   */
+  public function testSetMainLicense_forbiddenForReadOnlyUser()
+  {
+    $uploadId = 2;
+    $rq = [
+      "shortName" => "MIT",
+    ];
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(false);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+
+    $reqBody = $this->streamFactory->createStream(json_encode($rq));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $reqBody);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->uploadController->setMainLicense($request, new ResponseHelper(), ['id' => $uploadId]);
+  }
 
   /**
    * @test
@@ -1443,6 +1474,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $licenseIds[$licenseId] = $licenseId;
 
     $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
       ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
@@ -1463,6 +1496,27 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::removeMainLicense()
+   * -# Check if HttpForbiddenException is thrown when user lacks write permission
+   */
+  public function testRemoveMainLicense_forbiddenForReadOnlyUser()
+  {
+    $uploadId = 3;
+    $shortName = "MIT";
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(false);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->uploadController->removeMainLicense(null, new ResponseHelper(),
+      ['id' => $uploadId, 'shortName' => $shortName]);
   }
 
   /**
