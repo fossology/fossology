@@ -178,6 +178,33 @@ void test_get_host()
   g_free(name);
 }
 
+/**
+ * \brief Test for host_total_max()
+ * \test
+ * -# Initialize scheduler using scheduler_init()
+ * -# Verify host_total_max() returns 0 on an empty host list
+ * -# Insert three hosts with known max values
+ * -# Verify host_total_max() returns the correct sum
+ */
+void test_host_total_max()
+{
+  scheduler_t* scheduler;
+
+  scheduler = scheduler_init(testdb, NULL);
+
+  /* empty host list: sum must be 0 */
+  FO_ASSERT_EQUAL(host_total_max(scheduler->host_list), 0);
+
+  host_insert(host_init("host_a", "localhost", "/tmp",  5), scheduler);
+  host_insert(host_init("host_b", "localhost", "/tmp", 10), scheduler);
+  host_insert(host_init("host_c", "localhost", "/tmp", 15), scheduler);
+
+  /* 5 + 10 + 15 = 30 */
+  FO_ASSERT_EQUAL(host_total_max(scheduler->host_list), 30);
+
+  scheduler_destroy(scheduler);
+}
+
 /* ************************************************************************** */
 /* *** suite declaration **************************************************** */
 /* ************************************************************************** */
@@ -189,6 +216,7 @@ CU_TestInfo tests_host[] =
     {"Test host_increase_load", test_host_increase_load },
     {"Test host_decrease_load", test_host_decrease_load },
     {"Test host_get_host",      test_get_host           },
+    {"Test host_total_max",     test_host_total_max     },
     CU_TEST_INFO_NULL
 };
 

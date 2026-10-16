@@ -176,3 +176,35 @@ void print_host_load(GTree* host_list, GOutputStream* ostr)
   g_tree_foreach(host_list, (GTraverseFunc)print_host_all, ostr);
   g_output_stream_write(ostr, "\nend\n", 5, NULL, NULL);
 }
+
+/**
+ * @brief GTraverseFunc that accumulates host->max values.
+ *
+ * Only positive max values contribute: a host with max <= 0 has no effective
+ * capacity (the scheduler never dispatches to it), so including it would
+ * under-size the interface thread pool floor.
+ */
+static int sum_host_max_fn(gchar* host_name, host_t* host, gpointer data)
+{
+  (void)host_name;
+  if(host->max > 0)
+    *(gint*)data += host->max;
+  return FALSE;
+}
+
+/**
+ * @brief Returns the sum of all host->max values across all configured hosts.
+ *
+ * Used by interface_init() and scheduler_config_event() to size the interface
+ * thread pool so it is never a bottleneck when host.max exceeds
+ * CONF_interface_nthreads.
+ *
+ * @param host_list  GTree of host_t pointers (scheduler->host_list)
+ * @return Total maximum agent slots across all configured hosts
+ */
+gint host_total_max(GTree* host_list)
+{
+  gint total = 0;
+  g_tree_foreach(host_list, (GTraverseFunc)sum_host_max_fn, &total);
+  return total;
+}
