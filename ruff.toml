@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: © 2026 Fossology contributors
+#
+# SPDX-License-Identifier: GPL-2.0-only
+
+exclude = [
+  # Sample sources the scanners are run against, not project code.
+  "src/nomos/agent_tests/testdata",
+  "src/testing/dataFiles",
+]
+
+# Start with pyflakes and the pycodestyle error classes. The wider rule sets
+# (naming, pyupgrade, flake8-bugbear, ...) already report a few hundred findings
+# and are better turned on in a separate pass once this one is stable.
+[lint]
+select = ["E4", "E7", "E9", "F"]
+
+[lint.per-file-ignores]
+# Module level imports follow setup that has to run before them.
+"src/scancode/agent/runscanonfiles.py" = ["E402"]
+"utils/automation/fossologyscanner.py" = ["E402"]

@@ -45,7 +45,6 @@ from spdx_tools.spdx3.model.licensing import (
     AnyLicenseInfo,
     ConjunctiveLicenseSet,
     CustomLicense,
-    DisjunctiveLicenseSet,
     NoAssertionLicense,
 )
 from spdx_tools.spdx3.payload import Payload
@@ -56,7 +55,7 @@ from spdx_tools.spdx3.writer.json_ld.json_ld_converter import (
 
 from .CliOptions import CliOptions
 from .ReportBase import ReportBase
-from .Scanners import Scanners, ScanResultList
+from .Scanners import Scanners
 
 SPDX3_SPEC_VERSION = Version("3.0.1")
 TOOL_NAME = "FOSSology CI Scanner"
@@ -646,7 +645,7 @@ class Spdx3Report(ReportBase):
     else:
       lines = results_text.strip().split('\n')
       violation_count = len(
-        [l for l in lines if 'Violation' in l]
+        [entry for entry in lines if 'Violation' in entry]
       )
       logging.warning(
         "SHACL validation reported %d violation(s).",

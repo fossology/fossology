@@ -8,7 +8,7 @@
 '''
 import pandas as pd
 import argparse
-from safaa.Safaa import *
+from safaa.Safaa import SafaaAgent
 
 def CopyrightFalsePositiveDetection(file, clutter_flag):
   with open(file, 'r') as f:
