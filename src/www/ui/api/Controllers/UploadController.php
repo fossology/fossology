@@ -749,12 +749,11 @@ class UploadController extends RestController
     // Handle update of description
     if (
       $isJsonRequest &&
-      array_key_exists("uploadDescription", $bodyContent) &&
-      strlen(trim($bodyContent["uploadDescription"])) > 0
+      array_key_exists("uploadDescription", $bodyContent)
     ) {
-      $newDescription = trim($bodyContent["uploadDescription"]);
+      $newDescription = trim($bodyContent["uploadDescription"] ?? '');
     }
-    if ($newName != null || $newDescription != null) {
+    if ($newName != null || $newDescription !== null) {
       /** @var \upload_properties $uploadProperties */
       $uploadProperties = $this->restHelper->getPlugin('upload_properties');
       $updated = $uploadProperties->UpdateUploadProperties($id, $newName, $newDescription);

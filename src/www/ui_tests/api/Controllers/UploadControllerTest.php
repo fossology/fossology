@@ -1287,6 +1287,47 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
+   * -# Test for UploadController::updateUpload() clearing upload description
+   * -# Check if response status is 202
+   */
+  public function testUpdateUploadClearDescription()
+  {
+    $upload = 2;
+    $bodyContent = json_encode(['uploadDescription' => '']);
+    $resource = fopen('data://text/plain;base64,' . base64_encode($bodyContent), 'r+');
+    $body = $this->streamFactory->createStreamFromResource($resource);
+    $headers = new Headers(['Content-Type' => ['application/json']]);
+    $request = new Request("PATCH", new Uri("HTTP", "localhost", 80,
+      "/uploads/$upload"), $headers, [], [], $body);
+
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(true);
+
+    $uploadProperties = M::mock();
+    $uploadProperties->shouldReceive('UpdateUploadProperties')
+      ->withArgs([$upload, null, ''])
+      ->once()
+      ->andReturn(1);
+
+    $this->restHelper->shouldReceive('getPlugin')
+      ->withArgs(['upload_properties'])
+      ->once()
+      ->andReturn($uploadProperties);
+
+    $info = new Info(202, "Upload updated successfully.", InfoType::INFO);
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->uploadController->updateUpload($request,
+      new ResponseHelper(), ['id' => $upload]);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
    * -# Test for UploadController::updateUpload() without permission
    * -# Check if response status is 403
    */
