@@ -4573,6 +4573,177 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+  /osselot/packages/{package}/versions:
+    parameters:
+      - name: package
+        required: true
+        description: Name of the package as known to OSSelot (e.g. zlib)
+        in: path
+        schema:
+          type: string
+          pattern: '^[\w\-.@]+$'
+    get:
+      operationId: getOsselotPackageVersions
+      tags:
+        - Report
+      summary: Get curated OSSelot versions of a package
+      description: >
+        Get the versions of a package for which OSSelot provides a curated
+        SPDX report, sorted in descending natural order. Requires the
+        OSSelot integration to be enabled in the system configuration
+        (EnableOsselotReuse).
+      responses:
+        '200':
+          description: List of curated versions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["v1.3.2", "v1.3.1", "1.3", "1.2.13"]
+        '404':
+          description: >
+            No curated versions found for the package (also returned when
+            OSSelot cannot be reached)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '501':
+          description: OSSelot integration is disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/osselot/import:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    post:
+      operationId: importOsselotReport
+      tags:
+        - Report
+      summary: Import a curated OSSelot SPDX report to an existing upload
+      description: >
+        Fetch the curated SPDX report of the given package version from
+        OSSelot and schedule a ReportImport job for the upload. Requires the
+        OSSelot integration to be enabled in the system configuration
+        (EnableOsselotReuse).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                package:
+                  type: string
+                  description: Name of the package as known to OSSelot
+                  example: zlib
+                version:
+                  type: string
+                  description: Curated version of the package
+                  example: 1.2.13
+                options:
+                  type: object
+                  description: Options passed to the ReportImport agent
+                  properties:
+                    addLicenseInfoFromInfoInFile:
+                      type: boolean
+                    addLicenseInfoFromConcluded:
+                      type: boolean
+                    addConcludedAsDecisions:
+                      type: boolean
+                    addConcludedAsDecisionsOverwrite:
+                      type: boolean
+                      default: false
+                    addConcludedAsDecisionsTBD:
+                      type: boolean
+                      default: false
+                    addCopyrights:
+                      type: boolean
+                    addNewLicensesAs:
+                      type: string
+                      enum:
+                        - candidate
+                        - approved
+                        - rejected
+                      default: candidate
+                      description: Unknown values fall back to candidate
+                    licenseMatch:
+                      type: string
+                      enum:
+                        - spdxid
+                        - name
+                        - text
+                      default: spdxid
+                      description: Unknown values fall back to spdxid
+                  required:
+                    - addLicenseInfoFromInfoInFile
+                    - addLicenseInfoFromConcluded
+                    - addConcludedAsDecisions
+                    - addCopyrights
+              required:
+                - package
+                - version
+                - options
+      responses:
+        '202':
+          description: Import job scheduled successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Info'
+                  - type: object
+                    properties:
+                      jobId:
+                        type: integer
+                        description: Id of the scheduled job queue entry
+        '400':
+          description: Missing or invalid package, version or options
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Upload is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: >
+            Upload does not exist, or no curated SPDX report found for the
+            package version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '501':
+          description: OSSelot integration is disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '502':
+          description: >
+            OSSelot unavailable, or the import job could not be prepared
+            or scheduled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /filesearch:
     parameters:
       - name: groupName
