@@ -750,6 +750,194 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->uploadTreeController->getTreeView($request, new ResponseHelper(), ["id" => $this->uploadId, "itemId"=> 10]);
     }
 
+    /**
+     * Values that are not a positive integer, for an int8 id column.
+     * @return array
+     */
+    public function invalidIdProvider()
+    {
+      return [
+        'not a number' => ['abc'],
+        'decimal' => ['1.5'],
+        'zero' => ['0'],
+        'negative' => ['-1'],
+        'empty' => [''],
+        'above int8 range' => ['99999999999999999999'],
+      ];
+    }
+
+    /**
+     * Values that are not a positive integer, for an int4 id column.
+     * @return array
+     */
+    public function invalidInt4IdProvider()
+    {
+      return array_merge($this->invalidIdProvider(),
+        ['above int4 range' => ['2147483648']]);
+    }
+
+    /**
+     * Mock an accessible upload with an existing item.
+     * @param int $uploadId
+     * @param int $itemId
+     */
+    private function mockAccessibleItem($uploadId, $itemId)
+    {
+      $this->uploadDao->shouldReceive('isAccessible')
+        ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+      $this->uploadDao->shouldReceive("getUploadtreeTableName")
+        ->withArgs([$uploadId])->andReturn("uploadtree");
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["uploadtree", "uploadtree_pk", $itemId])->andReturn(true);
+    }
+
+    /**
+     * Build a GET request with the given query parameters.
+     * @param array $queryParams
+     * @return Request
+     */
+    private function getRequestWithQuery($queryParams)
+    {
+      $uri = (new Uri('HTTP', 'localhost'))
+        ->withQuery(http_build_query($queryParams));
+      return new Request("GET", $uri, new Headers(), [], [],
+        $this->streamFactory->createStream());
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::getHighlightEntries() with an invalid agentId
+     * -# Check if HttpBadRequestException is thrown before the id reaches the database
+     * @dataProvider invalidInt4IdProvider
+     */
+    public function testGetHighlightEntriesInvalidAgentId($agentId)
+    {
+      $this->mockAccessibleItem($this->uploadId, 200);
+      $this->dbHelper->shouldNotReceive('doesIdExist')
+        ->with("agent", "agent_pk", \Mockery::any());
+
+      $this->expectException(HttpBadRequestException::class);
+      $this->expectExceptionMessage("agentId should be positive integer.");
+      $this->uploadTreeController->getHighlightEntries(
+        $this->getRequestWithQuery(["agentId" => $agentId]),
+        new ResponseHelper(), ['id' => $this->uploadId, 'itemId' => 200]);
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::getHighlightEntries() with an invalid licenseId
+     * -# Check if HttpBadRequestException is thrown before the id reaches the database
+     * @dataProvider invalidIdProvider
+     */
+    public function testGetHighlightEntriesInvalidLicenseId($licenseId)
+    {
+      $this->mockAccessibleItem($this->uploadId, 200);
+      $this->dbHelper->shouldNotReceive('doesIdExist')
+        ->with("license_ref", "rf_pk", \Mockery::any());
+
+      $this->expectException(HttpBadRequestException::class);
+      $this->expectExceptionMessage("licenseId should be positive integer.");
+      $this->uploadTreeController->getHighlightEntries(
+        $this->getRequestWithQuery(["licenseId" => $licenseId]),
+        new ResponseHelper(), ['id' => $this->uploadId, 'itemId' => 200]);
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::getHighlightEntries() with an invalid highlightId
+     * -# Check if HttpBadRequestException is thrown before the id reaches the database
+     * @dataProvider invalidIdProvider
+     */
+    public function testGetHighlightEntriesInvalidHighlightId($highlightId)
+    {
+      $this->mockAccessibleItem($this->uploadId, 200);
+      $this->dbHelper->shouldNotReceive('doesIdExist')
+        ->with("highlight", "fl_fk", \Mockery::any());
+
+      $this->expectException(HttpBadRequestException::class);
+      $this->expectExceptionMessage("highlightId should be positive integer.");
+      $this->uploadTreeController->getHighlightEntries(
+        $this->getRequestWithQuery(["highlightId" => $highlightId]),
+        new ResponseHelper(), ['id' => $this->uploadId, 'itemId' => 200]);
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::getHighlightEntries() with an invalid clearingId
+     * -# Check if HttpBadRequestException is thrown before the id reaches the database
+     * @dataProvider invalidInt4IdProvider
+     */
+    public function testGetHighlightEntriesInvalidClearingId($clearingId)
+    {
+      $this->mockAccessibleItem($this->uploadId, 200);
+      $this->dbHelper->shouldNotReceive('doesIdExist')
+        ->with("clearing_event", "clearing_event_pk", \Mockery::any());
+
+      $this->expectException(HttpBadRequestException::class);
+      $this->expectExceptionMessage("clearingId should be positive integer.");
+      $this->uploadTreeController->getHighlightEntries(
+        $this->getRequestWithQuery(["clearingId" => $clearingId]),
+        new ResponseHelper(), ['id' => $this->uploadId, 'itemId' => 200]);
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::getHighlightEntries() with a licenseId
+     *    above the int4 range
+     * -# rf_pk is int8, so the id is valid and is looked up in the database
+     */
+    public function testGetHighlightEntriesLicenseIdAboveInt4Range()
+    {
+      $this->mockAccessibleItem($this->uploadId, 200);
+      $this->dbHelper->shouldReceive('doesIdExist')
+        ->withArgs(["license_ref", "rf_pk", 2147483648])->once()->andReturn(false);
+
+      $this->expectException(HttpNotFoundException::class);
+      $this->uploadTreeController->getHighlightEntries(
+        $this->getRequestWithQuery(["licenseId" => "2147483648"]),
+        new ResponseHelper(), ['id' => $this->uploadId, 'itemId' => 200]);
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::getTreeView() with an invalid agentId
+     * -# Check if HttpBadRequestException is thrown before the id reaches the database
+     * @dataProvider invalidInt4IdProvider
+     */
+    public function testGetTreeViewInvalidAgentId($agentId)
+    {
+      $this->mockAccessibleItem($this->uploadId, 10);
+      $this->dbHelper->shouldNotReceive('doesIdExist')
+        ->with("agent", "agent_pk", \Mockery::any());
+
+      $this->expectException(HttpBadRequestException::class);
+      $this->expectExceptionMessage("agentId should be positive integer.");
+      $this->uploadTreeController->getTreeView(
+        $this->getRequestWithQuery(["agentId" => $agentId, "showQuick" => "false"]),
+        new ResponseHelper(), ["id" => $this->uploadId, "itemId" => 10]);
+    }
+
+    /**
+     * @test
+     * -# Test for UploadTreeController::getTreeView() with an invalid tagId
+     * -# Check if HttpBadRequestException is thrown before the id reaches the database
+     * @dataProvider invalidInt4IdProvider
+     */
+    public function testGetTreeViewInvalidTagId($tagId)
+    {
+      $this->mockAccessibleItem($this->uploadId, 10);
+      $this->dbHelper->shouldNotReceive('doesIdExist')
+        ->with("tag", "tag_pk", \Mockery::any());
+
+      $this->expectException(HttpBadRequestException::class);
+      $this->expectExceptionMessage("tagId should be positive integer.");
+      $this->uploadTreeController->getTreeView(
+        $this->getRequestWithQuery(["tagId" => $tagId, "showQuick" => "false"]),
+        new ResponseHelper(), ["id" => $this->uploadId, "itemId" => 10]);
+    }
+
 
 
     /**
