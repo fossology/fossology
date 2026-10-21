@@ -45,7 +45,9 @@ class size_dashboard extends FO_Plugin
            'INNER JOIN upload_clearing ON upload.upload_pk=upload_clearing.upload_fk '.
            'WHERE parent_fk=$1';
     $statementName = __METHOD__."GetFolderSize";
-    $folderSizesql = 'SELECT SUM(pfile_size) FROM pfile '.$sql;
+    $folderSizesql = 'SELECT SUM(pfile_size) FROM (' .
+      'SELECT DISTINCT upload.upload_pk, pfile_size FROM pfile ' . $sql .
+      ') AS folder_uploads';
     $row = $this->dbManager->getSingleRow($folderSizesql,array($folderId),$statementName);
     $folderSize = HumanSize($row['sum']);
 
