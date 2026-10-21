@@ -70,32 +70,36 @@ class FileSearchController extends RestController
     $fileListJSON = $this->getParsedBody($request);
     $inputFileList = File::parseFromArray($fileListJSON);
     $existsList = [];
-    $nonExistsList = [];
+    $positionsByPfile = [];
 
-    foreach ($inputFileList as $inputFile) {
+    foreach ($inputFileList as $index => $inputFile) {
       if ($inputFile->getMessage() == File::INVALID) {
-        $nonExistsList[] = $inputFile;
         continue;
       }
 
       $pfileId = $this->getPfileId($inputFile);
       if ($pfileId !== false) {
-        $existsList[$pfileId] = $inputFile;
+        if (!isset($existsList[$pfileId])) {
+          $existsList[$pfileId] = $inputFile;
+        }
+        $positionsByPfile[$pfileId][] = $index;
       } else {
         $inputFile->setMessage(File::NOT_FOUND);
-        $nonExistsList[] = $inputFile;
       }
     }
 
     $this->getInfoForFiles($existsList);
-    $existsList = array_values($existsList);
-
-    foreach ($nonExistsList as $file) {
-      $existsList[] = $file;
+    foreach ($positionsByPfile as $pfileId => $positions) {
+      $representative = $existsList[$pfileId];
+      foreach (array_slice($positions, 1) as $index) {
+        $inputFileList[$index]->setFindings($representative->getFindings());
+        $inputFileList[$index]->setUploads($representative->getUploads());
+      }
     }
+
     return $response->withJson(array_map(function ($file) {
         return $file->getArray();
-    }, $existsList), 200);
+    }, $inputFileList), 200);
   }
 
   /**
