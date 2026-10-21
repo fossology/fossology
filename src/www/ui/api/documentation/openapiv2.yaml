@@ -874,6 +874,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UploadSummary'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         '503':
           description: >
             The ununpack agent has not started yet. Please check the 'Look-at'
@@ -1867,6 +1873,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LicenseHistogram'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         '404':
           description: Resource Not Found
           content:
@@ -1988,6 +2000,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ScannedLicense'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         '404':
           description: Resource Not Found
           content:
@@ -2106,6 +2124,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TreeViewModel'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         '404':
           description: Resource Not Found
           content:

@@ -327,9 +327,10 @@ class UploadController extends RestController
   {
     $id = intval($args['id']);
     $query = $request->getQueryParams();
-    $selectedAgentId = $query['agentId'] ?? null;
     $agentDao = $this->container->get('dao.agent');
     $this->uploadAccessible($id);
+    $selectedAgentId = $this->getIdQueryParam($query, 'agentId',
+      self::PG_INT4_MAX);
     if ($selectedAgentId !== null && !$this->dbHelper->doesIdExist("agent", "agent_pk", $selectedAgentId)) {
       throw new HttpNotFoundException("Agent does not exist");
     }
@@ -1119,10 +1120,11 @@ class UploadController extends RestController
     $uploadId = intval($args['id']);
     $uploadDao = $this->restHelper->getUploadDao();
     $query = $request->getQueryParams();
-    $selectedAgentId = $query['agentId'] ?? null;
 
     $this->uploadAccessible($uploadId);
 
+    $selectedAgentId = $this->getIdQueryParam($query, 'agentId',
+      self::PG_INT4_MAX);
     if ($selectedAgentId !== null && !$this->dbHelper->doesIdExist("agent", "agent_pk", $selectedAgentId)) {
       throw new HttpNotFoundException("Agent does not exist.");
     }
@@ -1274,10 +1276,11 @@ class UploadController extends RestController
   {
     $uploadId = intval($args['id']);
     $query = $request->getQueryParams();
-    $selectedAgentId = $query['agentId'] ?? null;
     $licenseDao = $this->container->get('dao.license');
 
     $this->uploadAccessible($uploadId);
+    $selectedAgentId = $this->getIdQueryParam($query, 'agentId',
+      self::PG_INT4_MAX);
     if ($selectedAgentId !== null && !$this->dbHelper->doesIdExist("agent", "agent_pk", $selectedAgentId)) {
       throw new HttpNotFoundException("Agent does not exist.");
     }
