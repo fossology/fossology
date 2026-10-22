@@ -166,7 +166,7 @@ static int update(int* pid_ptr, agent_t* agent, gpointer unused)
   TEST_NULL(agent, 0);
   if (agent->owner == NULL)
   {
-    log_printf("ERROR %s.%d: Agent pid %d has no owner; killing to prevent NULL deref\n", __FILE__, __LINE__, agent->pid);
+    log_printf("ERROR %s.%d: Agent pid %d has no owner; killing\n", __FILE__, __LINE__, agent->pid);
     agent_kill(agent);
     return 0;
   }
@@ -321,6 +321,7 @@ typedef struct
   pid_t    pid;    ///< pid of the agent that reported failure
   agent_t* agent;  ///< expected agent pointer, only compared
 } fail_pid_arg;
+
 
 /**
  * Main function used for agent communication. This is where the communication
