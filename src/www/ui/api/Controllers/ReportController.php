@@ -310,6 +310,7 @@ class ReportController extends RestController
         "Missing or wrong query param 'reportFormat'");
     }
     $upload_pk = intval($query['upload']);
+    $this->uploadEditable($upload_pk);
     // checking if the scheduler is running or not
     $commu_status = fo_communicate_with_scheduler('status',
       $response_from_scheduler, $error_info);
@@ -318,7 +319,6 @@ class ReportController extends RestController
     }
     $files = $request->getUploadedFiles();
 
-    $this->uploadAccessible($upload_pk);
     if (empty($files['report'])) {
       throw new HttpBadRequestException("No file uploaded");
     }

@@ -512,4 +512,97 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $this->reportController->downloadReport(null, new ResponseHelper(),
       ["id" => $reportId]);
   }
+
+  /**
+   * Helper function to get response for importReport
+   *
+   * @param int $uploadId
+   * @param string $reportFormat
+   * @return ResponseHelper
+   */
+  private function getResponseForImportReport($uploadId, $reportFormat)
+  {
+    $body = $this->streamFactory->createStream();
+    $request = (new Request("POST", new Uri("HTTP", "localhost", 80,
+      "/repo/api/v2/report/import"), new Headers(), [], [], $body))
+      ->withQueryParams([
+        'upload' => $uploadId,
+        'reportFormat' => $reportFormat
+      ]);
+    $response = new ResponseHelper();
+    return $this->reportController->importReport($request, $response, []);
+  }
+
+  /**
+   * @test
+   * -# Test ReportController::importReport() when user has read-only access (no write permission)
+   * -# Check for 403 Forbidden exception
+   */
+  public function testImportReportWithoutWritePermission()
+  {
+    $uploadId = 3;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(['upload', 'upload_pk', $uploadId])
+      ->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
+      ->withArgs([$uploadId, $this->groupId])
+      ->andReturn(false);
+
+    $this->expectException(HttpForbiddenException::class);
+
+    $this->getResponseForImportReport($uploadId, 'spdxrdf');
+  }
+
+  /**
+   * @test
+   * -# Test ReportController::importReport() for non-existent upload
+   * -# Check for 404 Not Found exception
+   */
+  public function testImportReportNonExistentUpload()
+  {
+    $uploadId = 999;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(['upload', 'upload_pk', $uploadId])
+      ->andReturn(false);
+
+    $this->expectException(HttpNotFoundException::class);
+
+    $this->getResponseForImportReport($uploadId, 'spdxrdf');
+  }
+
+  /**
+   * @test
+   * -# Test ReportController::importReport() without upload query parameter
+   * -# Check for 400 Bad Request exception
+   */
+  public function testImportReportMissingUploadParam()
+  {
+    $body = $this->streamFactory->createStream();
+    $request = (new Request("POST", new Uri("HTTP", "localhost", 80,
+      "/repo/api/v2/report/import"), new Headers(), [], [], $body))
+      ->withQueryParams(['reportFormat' => 'spdxrdf']);
+
+    $this->expectException(HttpBadRequestException::class);
+
+    $this->reportController->importReport($request, new ResponseHelper(), []);
+  }
+
+  /**
+   * @test
+   * -# Test ReportController::importReport() with invalid reportFormat query parameter
+   * -# Check for 400 Bad Request exception
+   */
+  public function testImportReportInvalidReportFormat()
+  {
+    $body = $this->streamFactory->createStream();
+    $request = (new Request("POST", new Uri("HTTP", "localhost", 80,
+      "/repo/api/v2/report/import"), new Headers(), [], [], $body))
+      ->withQueryParams(['upload' => 3, 'reportFormat' => 'invalid_format']);
+
+    $this->expectException(HttpBadRequestException::class);
+
+    $this->reportController->importReport($request, new ResponseHelper(), []);
+  }
 }

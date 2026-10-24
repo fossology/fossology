@@ -108,6 +108,24 @@ class RestController
   }
 
   /**
+   * Check if upload is editable (write permission)
+   *
+   * @param integer $id Upload ID
+   * @throws HttpNotFoundException Upload not found
+   * @throws HttpForbiddenException Upload not accessible
+   */
+  protected function uploadEditable($id): void
+  {
+    if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $id)) {
+      throw new HttpNotFoundException("Upload does not exist");
+    }
+    if (! $this->restHelper->getUploadDao()->isEditable($id,
+        $this->restHelper->getGroupId())) {
+      throw new HttpForbiddenException("Upload is not accessible");
+    }
+  }
+
+  /**
    * Check if upload tree is accessible
    *
    * @param int $uploadId
