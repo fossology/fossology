@@ -4604,7 +4604,7 @@ paths:
                 $ref: '#/components/schemas/Hash'
       responses:
         '200':
-          description: List of matching files
+          description: One entry per requested hash, in request order, including not-found and invalid entries
           content:
             application/json:
               schema:
