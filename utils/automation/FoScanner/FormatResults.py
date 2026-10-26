@@ -113,13 +113,11 @@ class FormatResult:
       try:
         with open(file_path, 'rb') as file:
           binary_data = file.read()
-        string_data = binary_data.decode('utf-8', errors='ignore')
-
         # line_start_offsets will store the byte offset of the first character of each line.
         # Example: "Hello\nWorld" -> [0, 6]
         line_start_offsets = [0]
-        for i, char in enumerate(string_data):
-          if char == '\n':
+        for i, byte in enumerate(binary_data):
+          if byte == ord('\n'):
             line_start_offsets.append(i + 1)
 
         for word_info in words:
