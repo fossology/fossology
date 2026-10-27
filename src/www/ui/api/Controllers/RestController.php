@@ -15,6 +15,7 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\DbHelper;
@@ -28,6 +29,11 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class RestController
 {
+  /**
+   * @var int PG_INT4_MAX Largest value of a PostgreSQL int4 column
+   */
+  const PG_INT4_MAX = 2147483647;
+
   /**
    * @var ContainerInterface $container
    * Slim container
@@ -133,5 +139,33 @@ class RestController
   {
     return strcasecmp($request->getHeaderLine('Content-Type'),
         "application/json") === 0;
+  }
+
+  /**
+   * Read an optional ID from the query parameters.
+   *
+   * The ID is compared with an integer database column, so a value that is
+   * not a positive integer within the column's range is rejected with 400
+   * here rather than failing in the database with 500.
+   *
+   * @param array $query Query parameters of the request
+   * @param string $name Name of the query parameter
+   * @param int $max Largest value the column holds, PG_INT4_MAX for an
+   *        int4 column
+   * @return int|null The ID, or null when the parameter is not set
+   * @throws HttpBadRequestException
+   */
+  protected function getIdQueryParam(array $query, string $name,
+    int $max = PHP_INT_MAX): ?int
+  {
+    if (!isset($query[$name])) {
+      return null;
+    }
+    $id = filter_var($query[$name], FILTER_VALIDATE_INT,
+      ["options" => ["min_range" => 1, "max_range" => $max]]);
+    if ($id === false) {
+      throw new HttpBadRequestException("$name should be positive integer.");
+    }
+    return $id;
   }
 }
