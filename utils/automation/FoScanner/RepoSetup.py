@@ -9,8 +9,11 @@ import fnmatch
 import json
 import os
 import ssl
+import urllib.parse
 import urllib.request
 from tempfile import TemporaryDirectory
+
+from requests.utils import parse_header_links
 
 from .ApiConfig import ApiConfig, Runner
 from .CliOptions import CliOptions
@@ -125,6 +128,7 @@ class RepoSetup:
     try:
       with urllib.request.urlopen(req, context=context) as response:
         change_response = response.read()
+        link_header = response.headers.get('Link', '')
     except Exception as e:
       print(f"Unable to get URL {api_req_url}")
       raise e
@@ -142,6 +146,24 @@ class RepoSetup:
         changes = change_response
     else: # TRAVIS (or other unspecified runners)
       changes = change_response
+
+    # Only the GitHub PR-files endpoint paginates file lists. Compare responses
+    # are objects whose subsequent pages contain commits, not additional files.
+    if self.api_config.running_on != Runner.GITLAB and isinstance(change_response, list):
+      while True:
+        next_url = next((link['url'] for link in parse_header_links(link_header)
+                         if link.get('rel') == 'next'), None)
+        if next_url is None:
+          break
+        if urllib.parse.urlsplit(next_url)[:2] != urllib.parse.urlsplit(api_req_url)[:2]:
+          raise ValueError('Pagination URL must use the same API origin')
+        req = urllib.request.Request(next_url, headers=headers)
+        with urllib.request.urlopen(req, context=context) as response:
+          page = json.loads(response.read())
+          link_header = response.headers.get('Link', '')
+        if not isinstance(page, list):
+          raise ValueError('Expected a list of files from the pagination URL')
+        changes.extend(page)
 
     for change in changes:
       if path_key in change and change_key in change:
