@@ -20,6 +20,7 @@ use Fossology\Lib\Util\StringOperation;
 require_once 'SpdxTwoImportSource.php';
 require_once 'SpdxThreeImportSource.php';
 require_once 'XmlImportSource.php';
+require_once 'CycloneDxImportSource.php';
 require_once 'ReportImportSink.php';
 require_once 'ReportImportHelper.php';
 require_once 'ReportImportConfiguration.php';
@@ -210,7 +211,7 @@ class ReportImportAgent extends Agent
 
   /**
    * @param string $reportFilename
-   * @return SpdxTwoImportSource|SpdxThreeImportSource|XmlImportSource
+   * @return SpdxTwoImportSource|SpdxThreeImportSource|XmlImportSource|CycloneDxImportSource
    * @throws \Exception
    */
   private function getImportSource($reportFilename)
@@ -241,6 +242,14 @@ class ReportImportAgent extends Agent
 
     if (StringOperation::stringEndsWith($reportFilename, ".xml")) {
       $importSource = new XmlImportSource($reportFilename);
+      if($importSource->parse()) {
+        return $importSource;
+      }
+    }
+
+    if (StringOperation::stringEndsWith($reportFilename, ".json") || 
+        StringOperation::stringEndsWith($reportFilename, ".cdx.json")) {
+      $importSource = new CycloneDxImportSource($reportFilename);
       if($importSource->parse()) {
         return $importSource;
       }
