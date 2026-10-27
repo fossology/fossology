@@ -158,11 +158,7 @@ class FormatResult:
         file_path = os.path.join(root, file_name)
         with open(file_path, 'r', encoding='UTF-8') as file:
           file_contents = file.read()
-          try:
-            normal_string = file_contents.encode().decode('unicode_escape')
-          except UnicodeDecodeError:
-            normal_string = file_contents
-          formatted_diff = self.format_diff(normal_string)
+          formatted_diff = self.format_diff(file_contents)
         with open(file_path, 'w', encoding='utf-8') as file:
           file.write(formatted_diff)
     return None
