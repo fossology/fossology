@@ -22,7 +22,9 @@ class FormatResult:
   """
   cli_options: CliOptions = None
 
-  _RE_DIFF_HEADER = re.compile(r'^@@ -([0-9]+),([0-9]+) [+]([0-9]+),([0-9]+) @@')
+  _RE_DIFF_HEADER = re.compile(
+    r'^@@ -([0-9]+)(?:,([0-9]+))? [+]([0-9]+)(?:,([0-9]+))? @@'
+  )
   _RE_NON_CONTENT_LINE = re.compile(r'^(---|\+\+\+|[^-+ ])')
 
 
@@ -44,9 +46,9 @@ class FormatResult:
       match = self._RE_DIFF_HEADER.match(line)
       if match:
         left = int(match.group(1))
-        left_num_len = len(match.group(2))
+        left_num_len = len(match.group(2) or '1')
         right = int(match.group(3))
-        right_num_len = len(match.group(4))
+        right_num_len = len(match.group(4) or '1')
         formatted_diff.append(line)
         continue
 
