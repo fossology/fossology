@@ -1,0 +1,16 @@
+{
+  "groups": [
+    {
+      "keywords": ["patent", "patented"],
+      "text": "Review any patent-related restrictions."
+    },
+    {
+      "keywords": ["licensed under"],
+      "text": "Verify the referenced license and its conditions."
+    },
+    {
+      "keywords": ["private use only", "personal use only"],
+      "text": "Check whether the permitted use is restricted."
+    }
+  ]
+}
