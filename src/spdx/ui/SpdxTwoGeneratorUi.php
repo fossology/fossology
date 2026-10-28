@@ -11,6 +11,8 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Report\MultiUploadAggregatorScheduler;
+use Fossology\Lib\Report\ReportUtils;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -53,12 +55,14 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
 
     $text = _("Generate SPDX report in tag:value format");
     menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;tag:value&nbsp;report", 0, self::NAME . '&outputFormat=spdx2tv', $text);
+    menu_insert("UploadMulti::Generate&nbsp;SPDX&nbsp;tag:value", 0, self::NAME . '&outputFormat=spdx2tv', $text);
 
     $text = _("Generate CSV report (with SPDX IDs)");
     menu_insert("Browse-Pfile::Export&nbsp;CSV&nbsp;report&nbsp;(SPDX)", 0, self::NAME . '&outputFormat=spdx2csv', $text);
 
     $text = _("Generate Debian Copyright file");
     menu_insert("Browse-Pfile::Export&nbsp;DEP5&nbsp;report", 0, self::NAME . '&outputFormat=dep5', $text);
+    menu_insert("UploadMulti::Generate&nbsp;DEP5", 0, self::NAME . '&outputFormat=dep5', $text);
   }
 
   /**
@@ -138,6 +142,13 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
    */
   protected function getJobAndJobqueue($groupId, $upload, $addUploads)
   {
+    if (!empty($addUploads) && ReportUtils::isAggregatorSupportedFormat($this->outputFormat)) {
+      $allUploads = $addUploads;
+      $allUploads[$upload->getId()] = $upload;
+      $scheduler = new MultiUploadAggregatorScheduler();
+      return $scheduler->scheduleForCurrentUser($this->outputFormat, $upload, $allUploads);
+    }
+
     $uploadId = $upload->getId();
     $spdxTwoAgent = plugin_find('agent_'.$this->outputFormat);
     $userId = Auth::getUserId();

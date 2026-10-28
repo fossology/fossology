@@ -294,34 +294,8 @@ class SpdxAgent extends Agent
   protected function getFileBasename($packageName)
   {
     if ($this->filebasename == null) {
-      $fileName = strtoupper($this->outputFormat)."_".$packageName;
-      switch ($this->outputFormat) {
-        case "spdx2":
-          $fileName .= ".spdx.rdf";
-          break;
-        case "spdx2tv":
-          $fileName .= ".spdx";
-          break;
-        case "spdx2csv":
-          $fileName .= ".csv";
-          break;
-        case "dep5":
-          $fileName .= ".txt";
-          break;
-        case "spdx3jsonld":
-          $fileName .= ".jsonld";
-          break;
-        case "spdx3json":
-          $fileName .= ".json";
-          break;
-        case "spdx3rdf":
-          $fileName .= ".spdx.rdf";
-          break;
-        case "spdx3tv":
-          $fileName .= ".spdx";
-          break;
-      }
-      $this->filebasename = $fileName;
+      $this->filebasename = ReportUtils::canonicalReportBasename(
+        $this->outputFormat, $packageName);
     }
     return $this->filebasename;
   }
@@ -333,9 +307,7 @@ class SpdxAgent extends Agent
    */
   protected function getFileName($packageName)
   {
-    global $SysConf;
-    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
-    return $fileBase. $this->getFileBasename($packageName);
+    return ReportUtils::canonicalReportPath($this->outputFormat, $packageName);
   }
 
   /**

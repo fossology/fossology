@@ -136,6 +136,8 @@ class CycloneDXAgent extends Agent
 
     $this->reportutils = new ReportUtils();
     $this->reportGenerator = new BomReportGenerator();
+    $this->agentSpecifLongOptions[] = self::UPLOADS_ADD_KEY . ':';
+    $this->agentSpecifLongOptions[] = self::OUTPUT_FORMAT_KEY . ':';
   }
 
   /**
@@ -162,12 +164,12 @@ class CycloneDXAgent extends Agent
   protected function getUri($fileBase)
   {
     if (count($this->additionalUploads) > 0) {
-      $fileName = $fileBase . "multifile" . "_" . strtoupper($this->outputFormat);
-    } else {
-      $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+      return $fileBase . "multifile" . "_" . strtoupper($this->outputFormat)
+        . ReportUtils::reportFileExtension($this->outputFormat);
     }
 
-    return $fileName .".json" ;
+    return ReportUtils::canonicalReportPath($this->outputFormat,
+      $this->packageName);
   }
 
   /**

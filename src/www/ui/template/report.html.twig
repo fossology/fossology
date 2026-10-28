@@ -15,13 +15,18 @@
       }
     }
 
+    function buildDownloadActions() {
+      var downloadAction = $("<span>").append("[")
+        .append($("<a>").attr("href", downloadLink).text("Download " + reportType + " report"));
+      downloadAction.append("]");
+      return downloadAction;
+    }
+
     function markReportJobFinished(jqPk) {
       var jobRow = $("#showjobstable tr").filter(function () {
         return $.trim($(this).children("td:first").text()).split(/\s+/)[0] === String(jqPk);
       });
-      var downloadAction = $("<span>").append("[")
-        .append($("<a>").attr("href", downloadLink).text("Download " + reportType + " report"))
-        .append("]");
+      var downloadAction = buildDownloadActions();
 
       jobRow.removeClass("jobQueued jobScheduled jobFailed").addClass("jobFinished");
       jobRow.children("td").eq(1).text("Completed");
