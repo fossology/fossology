@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: © Fossology contributors
+#
+# SPDX-License-Identifier: GPL-2.0-only
+
+name: Python Linting
+
+concurrency:
+  group: python-lint-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+      - 'utils/automation/requirements.txt'
+      - 'utils/requirements.osadl.txt'
+  pull_request:
+    branches: [master]
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+      - 'utils/automation/requirements.txt'
+      - 'utils/requirements.osadl.txt'
+  workflow_dispatch:
+
+jobs:
+  ruff-lint:
+    name: Ruff Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Ruff
+        run: pip install ruff==0.11.13
+
+      - name: Run Ruff Linter
+        run: ruff check .
+
+
+  mypy:
+    name: Mypy Type Checking
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Mypy
+        run: pip install mypy==1.16.0
+
+      - name: Run Mypy
+        run: mypy .
