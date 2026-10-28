@@ -251,6 +251,13 @@ if [[ $LICENSEREF && $RUNNINGDATABASE ]]; then
     must_run_as_root
     echo "*** update the database and license_ref table ***"
     @FO_LIBEXECDIR@/fossinit.php -l -c @FO_SYSCONFDIR@ $FORCEDECISION $FORCEPFILE $FORCEENCODE
+
+    echo "*** Importing OSADL compatibility matrix ***"
+    DB_USER=$(grep "^user=" @FO_SYSCONFDIR@/Db.conf | cut -d= -f2)
+    DB_PASS=$(grep "^password=" @FO_SYSCONFDIR@/Db.conf | cut -d= -f2)
+    DB_NAME=$(grep "^dbname=" @FO_SYSCONFDIR@/Db.conf | cut -d= -f2)
+    # The converter dependencies must be installed
+    python3 @FO_LIBEXECDIR@/osadl_convertor.py --direct-import --user "$DB_USER" --password "$DB_PASS" --dbname "$DB_NAME" || echo "WARNING: Failed to import OSADL matrix"
 fi # end of license reference
 
 ########################################################################

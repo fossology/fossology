@@ -1,4 +1,4 @@
-#  SPDX-FileCopyrightText: © 2024 Siemens AG
+#  SPDX-FileCopyrightText: © 2026 Siemens AG
 #  SPDX-FileContributor: Gaurav Mishra <mishra.gaurav@siemens.com>
 #
 #  SPDX-License-Identifier: FSFAP
