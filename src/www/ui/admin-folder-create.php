@@ -27,10 +27,11 @@ class folder_create extends FO_Plugin
    * @param $parentId - parent folder id
    * @param $newFolder - new folder name
    * @param $desc - new folder discription
+   * @param $userId - id of user creating folder
    *
    * @return int 1 if created, 0 if failed
    */
-  public function create($parentId, $newFolder, $desc)
+  public function create($parentId, $newFolder, $desc, $userId = null)
   {
     $folderName = trim($newFolder);
     if (empty($folderName)) {
@@ -50,7 +51,7 @@ class folder_create extends FO_Plugin
       return 4;
     }
 
-    $folderDao->createFolder($folderName, $desc, $parentId);
+    $folderDao->createFolder($folderName, $desc, $parentId, $userId);
     return (1);
   }
 

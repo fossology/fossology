@@ -9,6 +9,7 @@
 namespace Fossology\Lib\Dao;
 
 use Exception;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
@@ -196,5 +197,25 @@ class FolderDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($goodFolder->getId(), equalTo(FolderDao::TOP_LEVEL));
     $badFolder = $this->folderDao->getFolder(987);
     assertThat($badFolder, is(nullValue()));
+  }
+
+  public function testCreateFolderWithUserId()
+  {
+    $folderId = $this->folderDao->createFolder('custom-user-folder', 'description', FolderDao::TOP_LEVEL, 42);
+    $row = $this->dbManager->getSingleRow('SELECT user_fk FROM folder WHERE folder_pk=$1', array($folderId), __METHOD__);
+    assertThat(intval($row['user_fk']), equalTo(42));
+  }
+
+  public function testCreateFolderDefaultUserId()
+  {
+    $prevSysConf = array_key_exists('SysConf', $GLOBALS) ? $GLOBALS['SysConf'] : null;
+    $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 2;
+    try {
+      $folderId = $this->folderDao->createFolder('default-user-folder', 'description', FolderDao::TOP_LEVEL);
+      $row = $this->dbManager->getSingleRow('SELECT user_fk FROM folder WHERE folder_pk=$1', array($folderId), __METHOD__);
+      assertThat(intval($row['user_fk']), equalTo(2));
+    } finally {
+      $GLOBALS['SysConf'] = $prevSysConf;
+    }
   }
 }
