@@ -533,7 +533,8 @@ class UploadTreeController extends RestController
           $obligation['ob_comment']
         );
       }
-      $license = $this->licenseDao->getLicenseById($licenseId);
+      $license = $this->licenseDao->getLicenseById($licenseId,
+        $this->restHelper->getGroupId());
       $licenseObj = new LicenseDecision(
         $license->getId(),
         $licenseShortName,
