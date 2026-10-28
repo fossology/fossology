@@ -269,7 +269,9 @@ class ReportImportSink
         $this->groupId,
         $this->configuration->getConcludeLicenseDecisionType(),
         DecisionScopes::ITEM,
-        $eventIds);
+        $eventIds,
+        false  // Import call: disable duplicate prevention to allow importing decisions
+      );
     }
   }
 
