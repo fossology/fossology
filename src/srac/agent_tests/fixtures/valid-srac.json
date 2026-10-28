@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "0.2-draft",
+  "assertionId": "srac-synthetic-brake-monitor-001",
+  "subject": {
+    "name": "synthetic-brake-monitor",
+    "purl": "pkg:generic/synthetic-brake-monitor@1.0.0",
+    "version": "1.0.0",
+    "repository": "https://example.org/repo/brake-monitor",
+    "componentPath": "components/synthetic-brake-monitor"
+  },
+  "safetyRelevance": {
+    "status": "safety-related",
+    "classification": "ASIL-B"
+  },
+  "rationale": "Synthetic demonstration component fulfilling ASIL-B requirements.",
+  "requirements": [
+    {
+      "id": "req-safe-brake-001",
+      "type": "functional-safety-requirement",
+      "uri": "https://example.org/reqs/req-safe-brake-001"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-test-report-001",
+      "type": "verification-report",
+      "uri": "https://example.org/evidence/test-report-001",
+      "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    }
+  ],
+  "impactAnalysis": [
+    {
+      "id": "impact-analysis-001",
+      "trigger": {
+        "type": "design-change",
+        "uri": "https://example.org/changes/chg-001"
+      },
+      "impactAnalysisStatus": "complete",
+      "impactLevel": "safetyImpact",
+      "safetyIntegrityLevel": "asilB",
+      "rationale": "Verified no regression on brake controller timing.",
+      "impactedElement": ["req-safe-brake-001"],
+      "addedElement": [],
+      "modifiedElement": [],
+      "removedElement": [],
+      "decisions": [
+        {
+          "id": "dec-001",
+          "decisionType": "approve",
+          "decisionStatus": "recorded",
+          "appliesTo": ["req-safe-brake-001"],
+          "originatedBy": {
+            "name": "Safety Officer Jane Doe",
+            "uri": "https://example.org/users/jdoe"
+          },
+          "rationale": "Approved after comprehensive test report review."
+        }
+      ],
+      "requirementVerification": [
+        {
+          "id": "verif-001",
+          "verifies": ["req-safe-brake-001"],
+          "evidence": ["ev-test-report-001"],
+          "rationale": "Automated HIL test verification."
+        }
+      ],
+      "bundle": {
+        "id": "bundle-001",
+        "rootElement": ["req-safe-brake-001"]
+      }
+    }
+  ],
+  "assertion": {
+    "status": "reviewed",
+    "author": {
+      "name": "Lead Engineer John Smith",
+      "uri": "https://example.org/users/jsmith"
+    },
+    "reviewer": {
+      "name": "Safety Officer Jane Doe",
+      "uri": "https://example.org/users/jdoe"
+    },
+    "created": "2026-09-01T10:00:00Z",
+    "updated": "2026-09-15T12:00:00Z"
+  }
+}
