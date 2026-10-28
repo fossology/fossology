@@ -10,6 +10,8 @@
 
 #include "OjosDatabaseHandler.hpp"
 
+#include "libfossLicenseRefResolver.hpp"
+
 using namespace fo;
 using namespace std;
 
@@ -168,6 +170,13 @@ unsigned long OjosDatabaseHandler::selectOrInsertLicenseIdForName(
   // Clean shortname to get utf8 string
   rfShortName = "";
   unicodeCleanShortname.toUTF8String(rfShortName);
+
+  result = fo::LicenseRefResolver(dbManager).resolveExistingLicenseId(
+    rfShortName);
+  if (result > 0)
+  {
+    return result;
+  }
 
   fo_dbManager_PreparedStatement *searchWithOr = fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),

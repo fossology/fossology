@@ -6,6 +6,8 @@
 
 #include "scancode_dbhandler.hpp"
 
+#include "libfossLicenseRefResolver.hpp"
+
 /**
  * @brief Default constructor for DatabaseEntry
  */
@@ -226,26 +228,6 @@ unsigned long ScancodeDatabaseHandler::getCachedLicenseIdForName(string const& r
 }
 
 /**
- * Helper function to check if a string ends with other string.
- * @param firstString   The string to be checked
- * @param ending        The ending string
- * @return True if first string has the ending string at end, false otherwise.
- */
-bool hasEnding(string const &firstString, string const &ending)
-{
-  if (firstString.length() >= ending.length())
-  {
-    return (0
-      == firstString.compare(firstString.length() - ending.length(),
-        ending.length(), ending));
-  }
-  else
-  {
-    return false;
-  }
-}
-
-/**
  * @brief insert license if not present in license_ref table and return rf_pk
  * @param rfShortName  spdx license key for the license
  * @param rfFullName   full name of the license
@@ -263,76 +245,12 @@ unsigned long ScancodeDatabaseHandler::selectOrInsertLicenseIdForName(string rfS
   rfShortName = "";
   unicodeCleanShortname.toUTF8String(rfShortName);
 
-  fo_dbManager_PreparedStatement *searchWithOr = fo_dbManager_PrepareStamement(
-      dbManager.getStruct_dbManager(),
-      "selectLicenseIdWithOrScancode",
-      " SELECT rf_pk FROM ONLY license_ref"
-      " WHERE LOWER(rf_shortname) = LOWER($1)"
-      " OR LOWER(rf_shortname) = LOWER($2);",
-      char*, char*);
-
-  if (hasEnding(rfShortName, "+") || hasEnding(rfShortName, "-or-later"))
-  {
-    string tempShortName(rfShortName);
-    /* Convert shortname to lower-case to make it case-insensitive*/
-    std::transform(tempShortName.begin(), tempShortName.end(), tempShortName.begin(),
-      ::tolower);
-    string plus("+");
-    string orLater("-or-later");
-
-    unsigned long int plusLast = tempShortName.rfind(plus);
-    unsigned long int orLaterLast = tempShortName.rfind(orLater);
-
-    /* Remove last occurrence of + and -or-later (if found) */
-    if (plusLast != string::npos)
-    {
-      tempShortName.erase(plusLast, string::npos);
-    }
-    if (orLaterLast != string::npos)
-    {
-      tempShortName.erase(orLaterLast, string::npos);
-    }
-
-    QueryResult queryResult = dbManager.execPrepared(searchWithOr,
-        (tempShortName + plus).c_str(), (tempShortName + orLater).c_str());
-
-    success = queryResult && queryResult.getRowCount() > 0;
-    if (success)
-    {
-      result = queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong)[0];
-    }
-  }
-  else
-  {
-    string tempShortName(rfShortName);
-    /* Convert shortname to lower-case */
-    std::transform(tempShortName.begin(), tempShortName.end(), tempShortName.begin(),
-      ::tolower);
-    string only("-only");
-
-    unsigned long int onlyLast = tempShortName.rfind(only);
-
-    /* Remove last occurrence of -only (if found) */
-    if (onlyLast != string::npos)
-    {
-      tempShortName.erase(onlyLast, string::npos);
-    }
-
-    QueryResult queryResult = dbManager.execPrepared(searchWithOr,
-        tempShortName.c_str(), (tempShortName + only).c_str());
-
-    success = queryResult && queryResult.getRowCount() > 0;
-    if (success)
-    {
-      result = queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong)[0];
-    }
-  }
-
+  result = fo::LicenseRefResolver(dbManager).resolveExistingLicenseId(
+    rfShortName, rfFullname);
   if (result > 0)
   {
     return result;
   }
-
 
   unsigned count = 0;
   while ((!success) && count++<3)

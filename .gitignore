@@ -35,6 +35,7 @@ php.ini
 # compiled or derived files
 compile_commands.json
 install/db/dbcreate
+install/db/licenseLynxMapping.json
 install/defconf/Db.conf
 install/defconf/fossology.conf
 install/fo-postinstall
