@@ -45,6 +45,8 @@
 #endif
 
 #define Last(x)	(x)[strlen(x)-1]
+#define DEFAULT_PDF_CMD_TIMEOUT 200
+#define DEFAULT_CMD_MEM_LIMIT_KB (2L * 1024 * 1024) /* 2 GiB */
 #define MAXCHILD        4096
 #define MAXSQL  4096
 #define PATH_MAX 4096
@@ -175,6 +177,7 @@ int	 CopyFile	(char *Src, char *Dst);
 int  ParentWait();
 void CheckCommands (int Show);
 int  RunCommand  (char *Cmd, char *CmdPre, char *File, char *CmdPost, char *Out, char *Where);
+int  IsPdfProcessable (const char *QuotedPath);
 int  InitMagic();
 int  FindCmd (char *Filename);
 void FreeDirList (dirlist *DL);
