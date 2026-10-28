@@ -30,7 +30,9 @@ from FoScanner.Utils import (
   validate_keyword_conf_file, copy_keyword_file_to_destination
 )
 from ScanDeps.Downloader import Downloader
-from ScanDeps.Parsers import Parser, PythonParser, NPMParser
+from ScanDeps.Parsers import (Parser, PythonParser, NPMParser,
+                               ComposerParser, MavenParser, GoParser,
+                               GitHubParser)
 
 SPDX3_FORMATS = (ReportFormat.SPDX3_JSON, ReportFormat.SPDX3_TTL, ReportFormat.SPDX3_RDF)
 
@@ -423,6 +425,22 @@ def main(parsed_args):
       npm_parser = NPMParser()
       npm_parser.parse_components(cli_options.parser)
 
+    if cli_options.parser.php_components:
+      composer_parser = ComposerParser()
+      composer_parser.parse_components(cli_options.parser)
+
+    if cli_options.parser.maven_components:
+      maven_parser = MavenParser()
+      maven_parser.parse_components(cli_options.parser)
+
+    if cli_options.parser.golang_components:
+      go_parser = GoParser()
+      go_parser.parse_components(cli_options.parser)
+
+    if cli_options.parser.github_components:
+      github_parser = GitHubParser()
+      github_parser.parse_components(cli_options.parser)
+
     if cli_options.parser.unsupported_components:
       for comp in cli_options.parser.unsupported_components:
         logging.warning(
@@ -430,14 +448,19 @@ def main(parsed_args):
           "Package will not be downloaded."
         )
 
-    scan_packages.dependencies = cli_options.parser.parsed_components
-
     try:
       downloader = Downloader()
       downloader.download_concurrently(cli_options.parser)
+      downloader.download_debian_sources(cli_options.parser)
     except Exception as e:
       logging.error(
         f"Something went wrong while downloading the dependencies: {e}")
+
+    scan_packages.dependencies = {
+      purl: component for purl, component in
+      cli_options.parser.parsed_components.items()
+      if component.get('base_dir') is not None
+    }
 
   if cli_options.scan_dir:
     cli_options.diff_dir = cli_options.dir_path
