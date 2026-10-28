@@ -146,7 +146,7 @@ class ReportImportPlugin extends DefaultPlugin
     {
       throw new Exception(_("parameter error: $uploadId"));
     }
-    if (!$this->uploadDao->isAccessible($uploadId, $groupId))
+    if (!$this->uploadDao->isEditable($uploadId, $groupId))
     {
       throw new Exception(_("permission denied"));
     }
