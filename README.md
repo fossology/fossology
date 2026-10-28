@@ -157,7 +157,12 @@ See [Contact Us](https://www.fossology.org/about/contact/)
 
 ## Contributing
 
-We really like contributions in several forms, see [CONTRIBUTING.md](CONTRIBUTING.md)
+We really like contributions in several forms, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+For AI-assisted development, FOSSology also provides an [AGENTS.md](AGENTS.md)
+guide at the repository root, with module-specific AGENTS.md files under
+`src/<module>/`. These files summarize the local architecture, expectations,
+and safety rules that help AI agents make smaller, more targeted changes.
 
 ## Licensing
 
