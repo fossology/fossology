@@ -30,6 +30,14 @@ selectedLicensesTableConfig = {
           $('td', nRow).addClass('read_only');
       }
   },
+  "fnDrawCallback": function () {
+      if (typeof applyNomosNavVisibility === 'function') {
+        applyNomosNavVisibility();
+      }
+      if (typeof activateNomosNavFromUrl === 'function') {
+        activateNomosNavFromUrl();
+      }
+  },
   "aoColumns": selectedLicensesTableColumns,
   "iDisplayLength": 25,
   "bProcessing": true,
@@ -182,7 +190,8 @@ function navigateToMatch(index) {
       currentElements.addClass("active-match");
       const container = $("#fileTextView");
       const scrollTop = currentElements.first().offset().top - container.offset().top + container.scrollTop() - (container.height() / 2);
-      container.animate({scrollTop}, 300);
+      const scrollLeft = currentElements.first().offset().left - container.offset().left + container.scrollLeft() - (container.width() / 2) + (currentElements.first().outerWidth() / 2);
+      container.animate({scrollTop: Math.max(0, scrollTop), scrollLeft: Math.max(0, scrollLeft)}, 300);
     }
     $("#searchCountInfo").text(`${currentMatchIndex + 1} / ${searchMatches.length}`);
   }
@@ -267,6 +276,271 @@ function highlightSearchMatches() {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Nomos occurrence navigation (shared core)
+//
+// A single "#1" hashtag in the Source column carries the full list of blue
+// signature occurrences (one per page) as data-occurrences. Prev/next reload
+// the file view at each occurrence, mirroring the search-match navigation.
+// ---------------------------------------------------------------------------
+// Active nomos-nav presentation: 'topbar' (Option 1), 'inline' (Option 2),
+// or 'floating' (Option 3).
+var NOMOS_NAV_UI = 'floating';
+var nomosNav = { occurrences: [], index: -1, highlightId: null, agentId: null, licenseName: '' };
+
+function buildOccurrenceUrl(occ) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('highlightId', nomosNav.highlightId);
+  if (nomosNav.agentId) {
+    url.searchParams.set('agentId', nomosNav.agentId);
+  }
+  url.searchParams.set('page', occ.page);
+  url.searchParams.set('anchorStart', occ.start);
+  url.searchParams.set('format', 'text');
+  url.hash = 'highlight';
+  return url.href;
+}
+
+function nomosNavigate(delta) {
+  if (!nomosNav.occurrences.length) {
+    return;
+  }
+  goToOccurrence(nomosNav.index + delta);
+}
+
+// Scroll the file pane to a same-page occurrence using its data-start marker.
+function scrollToOccurrence(occ) {
+  const container = document.getElementById('fileTextView');
+  if (!container) {
+    return;
+  }
+  const target = container.querySelector('.hi-signature[data-start="' + occ.start + '"]');
+  if (!target) {
+    return;
+  }
+  container.querySelectorAll('.nomos-active-occurrence').forEach(function (el) {
+    el.classList.remove('nomos-active-occurrence');
+  });
+  target.classList.add('nomos-active-occurrence');
+  const t = target.getBoundingClientRect();
+  const c = container.getBoundingClientRect();
+  const left = container.scrollLeft + (t.left - c.left) - (container.clientWidth / 2) + (t.width / 2);
+  const top = container.scrollTop + (t.top - c.top) - (container.clientHeight / 2) + (t.height / 2);
+  container.scrollTo({ left: Math.max(0, left), top: Math.max(0, top), behavior: 'smooth' });
+}
+
+// Navigate to an occurrence: smooth-scroll if it's on the current page,
+// otherwise reload the file view at that occurrence.
+function goToOccurrence(targetIndex) {
+  const n = nomosNav.occurrences.length;
+  if (!n) {
+    return;
+  }
+  const idx = (targetIndex + n) % n;
+  const occ = nomosNav.occurrences[idx];
+  if (occ.page === currentPage) {
+    nomosNav.index = idx;
+    const url = new URL(window.location.href);
+    url.searchParams.set('highlightId', nomosNav.highlightId);
+    url.searchParams.set('anchorStart', occ.start);
+    window.history.replaceState(null, '', url.pathname + url.search);
+    scrollToOccurrence(occ);
+    renderNomosNav();
+  } else {
+    window.location.href = buildOccurrenceUrl(occ);
+  }
+}
+
+function activateNomosNavFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const highlightId = params.get('highlightId');
+  if (!highlightId) {
+    return;
+  }
+  const link = document.querySelector(
+    '.nomos-occurrence-link[data-highlight-id="' + highlightId + '"]');
+  if (!link) {
+    return;
+  }
+  let occurrences;
+  try {
+    occurrences = JSON.parse(link.getAttribute('data-occurrences'));
+  } catch (e) {
+    return;
+  }
+  if (!Array.isArray(occurrences) || occurrences.length < 2) {
+    return;
+  }
+
+  const page = parseInt(params.get('page'));
+  const anchorStart = params.get('anchorStart') !== null
+    ? parseInt(params.get('anchorStart')) : null;
+  let idx = occurrences.findIndex(function (o) {
+    return o.page === page && (anchorStart === null || o.start === anchorStart);
+  });
+  if (idx < 0) {
+    idx = occurrences.findIndex(function (o) { return o.page === page; });
+  }
+  if (idx < 0) {
+    idx = 0;
+  }
+
+  nomosNav.occurrences = occurrences;
+  nomosNav.index = idx;
+  nomosNav.highlightId = highlightId;
+  nomosNav.agentId = link.getAttribute('data-agent-id');
+  const cur = nomosNav.occurrences[nomosNav.index];
+  if (cur && cur.page === currentPage) {
+    const fileView = document.getElementById('fileTextView');
+    const span = fileView && fileView.querySelector('.hi-signature[data-start="' + cur.start + '"]');
+    if (span) {
+      span.classList.add('nomos-active-occurrence');
+    }
+  }
+  renderNomosNav();
+}
+
+// Presentation dispatch for the active nav style.
+function renderNomosNav() {
+  if (NOMOS_NAV_UI === 'topbar') {
+    const bar = document.getElementById('nomosNavBar');
+    if (!bar) {
+      return;
+    }
+    bar.style.display = 'inline-flex';
+    const count = document.getElementById('nomosNavCount');
+    if (count) {
+      count.textContent = (nomosNav.index + 1) + ' / ' + nomosNav.occurrences.length;
+    }
+  } else if (NOMOS_NAV_UI === 'inline') {
+    const count = document.querySelector(
+      '.nomos-occurrence[data-highlight-id="' + nomosNav.highlightId + '"] .nomos-inline-count');
+    if (count) {
+      count.textContent = '(' + (nomosNav.index + 1) + ' / ' + nomosNav.occurrences.length + ')';
+    }
+  } else if (NOMOS_NAV_UI === 'floating') {
+    const nav = document.getElementById('nomosFloatingNav');
+    if (!nav) {
+      return;
+    }
+    const label = document.getElementById('nomosFloatingLabel');
+    const count = document.getElementById('nomosFloatingCount');
+    if (label) {
+      label.textContent = 'License matches:';
+    }
+    if (count) {
+      count.textContent = (nomosNav.index + 1) + ' / ' + nomosNav.occurrences.length;
+    }
+    nav.style.display = 'inline-flex';
+  }
+}
+
+// Hide the server-rendered inline arrows unless inline mode is active.
+function applyNomosNavVisibility() {
+  if (NOMOS_NAV_UI !== 'inline') {
+    document.querySelectorAll('.nomos-inline-prev, .nomos-inline-next, .nomos-inline-count')
+      .forEach(function (el) { el.style.display = 'none'; });
+  }
+}
+
+// Inline arrows (Option 2) navigate standalone: current index is derived from
+// the URL when this license is the active one, else it starts at the first.
+function nomosInlineNavigate(btn, delta) {
+  const wrap = btn.closest('.nomos-occurrence');
+  const link = wrap ? wrap.querySelector('.nomos-occurrence-link') : null;
+  if (!link) {
+    return;
+  }
+  let occurrences;
+  try {
+    occurrences = JSON.parse(link.getAttribute('data-occurrences'));
+  } catch (e) {
+    return;
+  }
+  if (!Array.isArray(occurrences) || !occurrences.length) {
+    return;
+  }
+  const highlightId = link.getAttribute('data-highlight-id');
+  const params = new URLSearchParams(window.location.search);
+  let curIdx = 0;
+  if (params.get('highlightId') === highlightId) {
+    const page = parseInt(params.get('page'));
+    const anchorStart = params.get('anchorStart') !== null
+      ? parseInt(params.get('anchorStart')) : null;
+    let i = occurrences.findIndex(function (o) {
+      return o.page === page && (anchorStart === null || o.start === anchorStart);
+    });
+    if (i < 0) {
+      i = occurrences.findIndex(function (o) { return o.page === page; });
+    }
+    if (i >= 0) {
+      curIdx = i;
+    }
+  }
+  nomosNav.occurrences = occurrences;
+  nomosNav.highlightId = highlightId;
+  nomosNav.agentId = link.getAttribute('data-agent-id');
+  nomosNav.index = curIdx;
+  goToOccurrence(curIdx + delta);
+}
+
+// ---------------------------------------------------------------------------
+// Center the linked blue signature span in the file pane after navigation.
+// ---------------------------------------------------------------------------
+var shouldFocusLinkedHighlight = (window.location.hash === '#highlight');
+
+function getLinkedHighlightNode() {
+  const container = document.getElementById('fileTextView');
+  if (!container) {
+    return null;
+  }
+  const marker = document.getElementById('highlight');
+  if (marker) {
+    let sibling = marker.nextElementSibling;
+    while (sibling && !(sibling.classList && sibling.classList.contains('hi-signature'))) {
+      sibling = sibling.nextElementSibling;
+    }
+    if (sibling) {
+      return sibling;
+    }
+    if (marker.parentElement && marker.parentElement.classList.contains('hi-signature')) {
+      return marker.parentElement;
+    }
+    return marker;
+  }
+  return container.querySelector('span.hi-signature');
+}
+
+function centerLinkedHighlight() {
+  const container = document.getElementById('fileTextView');
+  const target = getLinkedHighlightNode();
+  if (!container || !target) {
+    return;
+  }
+  const t = target.getBoundingClientRect();
+  const c = container.getBoundingClientRect();
+  const left = container.scrollLeft + (t.left - c.left) - (container.clientWidth / 2) + (t.width / 2);
+  const top = container.scrollTop + (t.top - c.top) - (container.clientHeight / 2) + (t.height / 2);
+  container.scrollLeft = Math.max(0, left);
+  container.scrollTop = Math.max(0, top);
+}
+
+function focusLinkedHighlight() {
+  if (!shouldFocusLinkedHighlight) {
+    return;
+  }
+  if (window.history && window.history.replaceState && window.location.hash === '#highlight') {
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+  window.requestAnimationFrame(function () {
+    centerLinkedHighlight();
+    window.requestAnimationFrame(centerLinkedHighlight);
+  });
+  [100, 300, 600, 1000].forEach(function (delay) {
+    window.setTimeout(centerLinkedHighlight, delay);
+  });
+}
+
 $(document).ready(function () {
   createClearingTable();
   createLicenseSelectionTable();
@@ -276,6 +550,18 @@ $(document).ready(function () {
     highlightSearchMatches(); 
   {% endif %}
   initSearchNavigation();
+
+  focusLinkedHighlight();
+  $(window).on('load', focusLinkedHighlight);
+
+  $("#btnNomosPrev").click(function() { nomosNavigate(-1); });
+  $("#btnNomosNext").click(function() { nomosNavigate(1); });
+
+  $(document).on('click', '.nomos-inline-prev', function() { nomosInlineNavigate(this, -1); });
+  $(document).on('click', '.nomos-inline-next', function() { nomosInlineNavigate(this, 1); });
+
+  $("#btnNomosFloatPrev").click(function() { nomosNavigate(-1); });
+  $("#btnNomosFloatNext").click(function() { nomosNavigate(1); });
 
   $("#btnTriggerSearch").click(performSearch);
   $("#textSearchInput").keypress(function(e) {
