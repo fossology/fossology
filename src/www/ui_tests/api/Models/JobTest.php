@@ -75,7 +75,7 @@ class JobTest extends TestCase
   {
     $jobQueue = new JobQueue(44, 'readmeoss', '2024-07-03 20:41:49', '2024-07-03 20:41:50',
       'Completed', 0, null, [], 0, true, false, true,
-      ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']
+      ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16'], 0
     );
 
     if ($version == ApiVersion::V2){
@@ -84,6 +84,7 @@ class JobTest extends TestCase
         'name'      => 'ojo',
         'queueDate' => '01-01-2020',
         'uploadId'  => 4,
+        'uploadName' => 'example-upload.zip',
         'userName'  => "fossy",
         'groupName' => "fossy",
         'eta'       => 3,
@@ -103,6 +104,7 @@ class JobTest extends TestCase
         'name'      => 'ojo',
         'queueDate' => '01-01-2020',
         'uploadId'  => 4,
+        'uploadName' => 'example-upload.zip',
         'userId'    => 2,
         'groupId'   => 2,
         'eta'       => 3,
@@ -110,7 +112,7 @@ class JobTest extends TestCase
       ];
     }
 
-    $actualJob = new Job(22, 'ojo', '01-01-2020', 4, 2, 2, 3, 'Processing', $jobQueue->getArray());
+    $actualJob = new Job(22, 'ojo', '01-01-2020', 4, 2, 2, 3, 'Processing', $jobQueue->getArray(), 'example-upload.zip');
 
     $this->assertEquals($expectedStatus, $actualJob->getArray($version));
   }
@@ -168,7 +170,7 @@ class JobTest extends TestCase
   {
     $jobQueue = new JobQueue(44, 'readmeoss', '2024-07-03 20:41:49', '2024-07-03 20:41:50',
       'Completed', 0, null, [], 0, true, false, true,
-      ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16']
+      ['text' => 'ReadMeOss', 'link' => 'http://localhost/repo/api/v1/report/16'], 0
     );
     $job = new Job(22, 'ojo', '01-01-2020', 4, 2, 2, 3, 'Processing', $jobQueue->getArray());
     $this->assertEquals($jobQueue->getArray(), $job->getJobQueue());
