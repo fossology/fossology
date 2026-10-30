@@ -35,6 +35,23 @@ popd
 
 # Copy fresh docs
 cp -r ${OPDIR}/html/* ./code_docs/
+
+# Redirect stubs so old flat URLs (e.g. /nomos.html) keep working
+for page in nomos monk ojo copyright ununpack; do
+  target=$(cd code_docs && find . -mindepth 2 -name "${page}.html" | head -n1 | sed 's|^\./||')
+  if [ -n "$target" ] && [ ! -e "code_docs/${page}.html" ]; then
+    cat > "code_docs/${page}.html" <<EOF
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta http-equiv="refresh" content="0; url=${target}">
+<link rel="canonical" href="${target}">
+<title>Redirecting…</title>
+</head><body>Redirecting to <a href="${target}">${target}</a></body></html>
+EOF
+  fi
+done
+
 touch ./code_docs/.nojekyll
 
 # Copy favicon
