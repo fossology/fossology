@@ -485,6 +485,26 @@ namespace Fossology\UI\Api\Test\Controllers
     }
 
     /**
+     * @test
+     * -# Check for decimal parent id on FolderController::createFolder()
+     * -# Check for 400 response
+     */
+    public function testCreateFolderDecimalParent()
+    {
+      $requestHeaders = new Headers();
+      $body = $this->streamFactory->createStream();
+      $request = new Request("POST", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+      $request = $request->withQueryParams(['parentFolder'=>'1.5',
+        'folderName'=>'root-child1']);
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+      $response = new ResponseHelper();
+      $this->expectException(HttpBadRequestException::class);
+      $this->folderController->createFolder($request, $response, []);
+    }
+
+    /**
      * @test FolderController::createFolder() with version 1 attributes
      * -# Check for duplicate folder response from
      *    FolderController::createFolder()
@@ -974,6 +994,27 @@ namespace Fossology\UI\Api\Test\Controllers
 
       $this->folderController->copyFolder($request, $response,
         ["id" => $folderId]);
+    }
+
+    /**
+     * @test
+     * -# Test for decimal parent id on FolderController::copyFolder()
+     * -# Check for 400 response
+     */
+    public function testCopyFolderDecimalParent()
+    {
+      $requestHeaders = new Headers();
+      $body = $this->streamFactory->createStream();
+      $request = new Request("PUT", new Uri("HTTP", "localhost"),
+        $requestHeaders, [], [], $body);
+      $request = $request->withQueryParams(['parent'=>'1.5',
+        'action'=>'copy']);
+      $request = $request->withAttribute(ApiVersion::ATTRIBUTE_NAME,
+        ApiVersion::V2);
+      $response = new ResponseHelper();
+      $this->expectException(HttpBadRequestException::class);
+
+      $this->folderController->copyFolder($request, $response, ["id" => 3]);
     }
 
     /**
