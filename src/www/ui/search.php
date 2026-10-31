@@ -127,6 +127,7 @@ class search extends FO_Plugin
     $this->vars['uploadsArray'] = $uploadsArray;
 
     $Item = GetParm("item",PARM_INTEGER);
+    $this->vars['Item'] = $Item;
     /* Show path if searching an item tree (don't show on global searches) */
     if ($Item) {
       $this->vars['pathOfItem'] = Dir2Browse($this->Name, $Item, NULL, 1, NULL) .

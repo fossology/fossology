@@ -37,7 +37,7 @@
             <select class="form-control" id="scanFilter" name='upload'>
               <option value="0">-- {{ 'All uploads'|trans }} --</option>
               {% for uploadObj in uploadsArray %}
-              <option value="{{ uploadObj.getId() }}"> {{ uploadObj.getFilename() }} from {{ uploadObj.getTimestamp() | date("Y-m-d H:i:s") }}</option>
+              <option value="{{ uploadObj.getId() }}"{% if uploadObj.getId() == Upload %} selected{% endif %}> {{ uploadObj.getFilename() }} from {{ uploadObj.getTimestamp() | date("Y-m-d H:i:s") }}</option>
               {% endfor %}
             </select>
           </div>
