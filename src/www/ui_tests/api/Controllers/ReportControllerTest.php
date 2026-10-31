@@ -375,6 +375,18 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
+   * -# Test ReportController::getReport() for decimal upload id
+   * -# Check for 400 response
+   */
+  public function testGetReportDecimalUploadId()
+  {
+    $this->expectException(HttpBadRequestException::class);
+
+    $this->getResponseForReport('1.5', $this->reportsAllowed[1]);
+  }
+
+  /**
+   * @test
    * -# Test ReportController::downloadReport()
    * -# Generate all mock objects
    * -# Generate a temporary file to be downloaded

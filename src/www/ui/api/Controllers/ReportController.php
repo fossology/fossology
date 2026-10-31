@@ -173,7 +173,7 @@ class ReportController extends RestController
    */
   private function getUpload($uploadId)
   {
-    if (empty($uploadId) || ! is_numeric($uploadId) || $uploadId <= 0) {
+    if (empty($uploadId) || ! ctype_digit((string) $uploadId)) {
       throw new HttpBadRequestException("uploadId must be a positive integer!");
     }
     $uploadDao = $this->restHelper->getUploadDao();
