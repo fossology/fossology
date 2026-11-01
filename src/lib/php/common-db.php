@@ -243,7 +243,7 @@ function DB_ColExists($tableName, $colName, $DBName=null)
 {
   global $PG_CONN;
 
-  $catalog = $DBName === null ? 'current_database()' : pg_escape_literal($PG_CONN, $DBName);
+  $catalog = empty($DBName) ? 'current_database()' : pg_escape_literal($PG_CONN, $DBName);
   $sql = "select count(*) as count from information_schema.columns where "
        . "table_catalog=$catalog and table_name='$tableName' and column_name='$colName'";
   $result = pg_query($PG_CONN, $sql);
@@ -268,7 +268,7 @@ function DB_ConstraintExists($ConstraintName, $DBName=null)
 {
   global $PG_CONN;
 
-  $catalog = $DBName === null ? 'current_database()' : pg_escape_literal($PG_CONN, $DBName);
+  $catalog = empty($DBName) ? 'current_database()' : pg_escape_literal($PG_CONN, $DBName);
   $sql = "select count(*) as count from information_schema.table_constraints "
        . "where table_catalog=$catalog and constraint_name='$ConstraintName' limit 1";
   $result = pg_query($PG_CONN, $sql);
