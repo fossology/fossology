@@ -112,13 +112,21 @@ class fo_libschema
    * @brief Make schema match $Filename. This is a single transaction.
    * @param string $filename Schema file written by schema-export.php
    * @param bool $debug Turn on debugging (echo sql as it is being executed)
-   * @param string $catalog Optional database name
+   * @param string|null $catalog Optional database name, defaults to the connected database
    * @param array[] $migrateColumns array('tablename'=>array('col1','col2'),...) of columns which should not be deleted
    * @return false=success, on error return string with error message.
    **/
-  function applySchema($filename = NULL, $debug = false, $catalog = 'fossology', $migrateColumns = array())
+  function applySchema($filename = NULL, $debug = false, $catalog = NULL, $migrateColumns = array())
   {
     global $PG_CONN;
+
+    if (empty($catalog)) {
+      $catalog = $this->dbman->getSingleRow(
+        'SELECT current_database() AS catalog',
+        array(),
+        __METHOD__ . '.getCatalog'
+      )['catalog'];
+    }
 
     // first check to make sure we don't already have the plpgsql language installed
     $result = $this->dbman->getSingleRow(
@@ -1139,10 +1147,10 @@ $libschema = new fo_libschema($dbManager);
  * @brief Make schema match $Filename.  This is a single transaction.
  * @param string $Filename Schema file written by schema-export.php
  * @param bool   $Debug Turn on debugging (echo sql as it is being executed)
- * @param string $Catalog Optional database name
+ * @param string|null $Catalog Optional database name, defaults to the connected database
  * @return false=success, on error return string with error message.
  **/
-function ApplySchema($Filename = NULL, $Debug = false, $Catalog = 'fossology')
+function ApplySchema($Filename = NULL, $Debug = false, $Catalog = NULL)
 {
   global $libschema;
   return $libschema->applySchema($Filename, $Debug, $Catalog);
