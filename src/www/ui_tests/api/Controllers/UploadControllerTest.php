@@ -535,6 +535,125 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->uploadController->getUploads($request, new ResponseHelper(), []);
   }
 
+  /** @dataProvider invalidSinceProvider */
+  public function testGetUploadsRejectsInvalidSince($version, $since)
+  {
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/uploads"), new Headers(), [], [],
+      $this->streamFactory->createStream());
+    $request = $request->withQueryParams(['since' => $since])
+      ->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
+    $this->dbHelper->shouldNotReceive('getUploads');
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionCode(400);
+    $this->expectExceptionMessage('Invalid since date; expected YYYY-MM-DD');
+
+    $this->uploadController->getUploads($request, new ResponseHelper(), []);
+  }
+
+  public static function invalidSinceProvider(): array
+  {
+    $dates = [
+      'malformed' => 'invalid-date',
+      'empty' => '',
+      'whitespace' => ' ',
+      'leading whitespace' => ' 2026-03-01',
+      'trailing whitespace' => '2026-03-01 ',
+      'trailing newline' => "2026-03-01\n",
+      'trailing content' => '2026-03-01extra',
+      'timestamp' => '2026-03-01T00:00:00Z',
+      'null byte' => "2026-03-01\0",
+      'wrong separators' => '2026/03/01',
+      'wrong order' => '01-03-2026',
+      'unpadded month' => '2026-3-01',
+      'unpadded day' => '2026-03-1',
+      'non-ASCII digits' => '٢٠٢٦-٠٣-٠١',
+      'zero month' => '2026-00-01',
+      'invalid month' => '2026-13-01',
+      'zero day' => '2026-01-00',
+      'invalid day' => '2026-01-32',
+      'April 31' => '2026-04-31',
+      'February 30' => '2026-02-30',
+      'invalid leap day' => '2026-02-29',
+      'invalid century leap day' => '1900-02-29',
+      'zero year' => '0000-01-01',
+      'null' => null,
+      'boolean' => false,
+      'integer' => 20260301,
+      'empty array' => [],
+      'indexed array' => ['2026-03-01'],
+      'associative array' => ['date' => '2026-03-01']
+    ];
+    $cases = [];
+    foreach ([ApiVersion::V1, ApiVersion::V2] as $version) {
+      foreach ($dates as $name => $date) {
+        $cases["v$version $name"] = [$version, $date];
+      }
+    }
+    return $cases;
+  }
+
+  public function testGetUploadsDoesNotNormalizeImpossibleSince()
+  {
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/uploads"), new Headers(), [], [],
+      $this->streamFactory->createStream());
+    $request = $request->withQueryParams(['since' => '2026-02-30'])
+      ->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2);
+    $this->dbHelper->shouldReceive('getUploads')->andReturn([1, []]);
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionCode(400);
+    $this->expectExceptionMessage('Invalid since date; expected YYYY-MM-DD');
+
+    $this->uploadController->getUploads($request, new ResponseHelper(), []);
+  }
+
+  /** @dataProvider validSinceProvider */
+  public function testGetUploadsWithValidSinceAndOtherFilters($version, $since)
+  {
+    $query = ['since' => $since, 'status' => 'Open'];
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/uploads"), new Headers(), [], [],
+      $this->streamFactory->createStream());
+    if ($version == ApiVersion::V2) {
+      $query['page'] = 2;
+      $query['limit'] = 2;
+    } else {
+      $request = $request->withHeader('page', '2')->withHeader('limit', '2');
+    }
+    $request = $request->withQueryParams($query)
+      ->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version);
+    $options = [
+      'folderId' => null,
+      'name' => null,
+      'status' => UploadStatus::OPEN,
+      'assignee' => null,
+      'since' => strtotime($since)
+    ];
+    $uploads = [$this->getUpload(2)->getArray($version)];
+    $this->dbHelper->shouldReceive('getUploads')
+      ->withArgs([$this->userId, $this->groupId, 2, 2, null, $options,
+        true, $version])->once()->andReturn([3, $uploads]);
+
+    $response = $this->uploadController->getUploads($request,
+      new ResponseHelper(), []);
+
+    $this->assertSame(200, $response->getStatusCode());
+    $this->assertSame('3', $response->getHeaderLine('X-Total-Pages'));
+    $this->assertSame($uploads, $this->getResponseJson($response));
+  }
+
+  public static function validSinceProvider(): array
+  {
+    $cases = [];
+    foreach ([ApiVersion::V1, ApiVersion::V2] as $version) {
+      foreach (['2026-03-01', '2026-02-28', '2024-02-29', '2000-02-29'] as $date) {
+        $cases["v$version $date"] = [$version, $date];
+      }
+    }
+    return $cases;
+  }
+
   /**
    * @test
    * -# Test UploadController::getUploads() for all uploads when version is V1

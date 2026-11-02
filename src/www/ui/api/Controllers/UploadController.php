@@ -208,11 +208,13 @@ class UploadController extends RestController
       }
     }
     if (array_key_exists(self::FILTER_DATE, $query)) {
-      $date = filter_var($query[self::FILTER_DATE], FILTER_VALIDATE_REGEXP,
-        ["options" => [
-          "regexp" => "/^\d{4}\-\d{2}\-\d{2}$/",
-          "flags" => FILTER_NULL_ON_FAILURE
-        ]]);
+      $date = $query[self::FILTER_DATE];
+      if (! is_string($date) ||
+          preg_match('/\A([0-9]{4})-([0-9]{2})-([0-9]{2})\z/', $date, $parts) !== 1 ||
+          ! checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1])) {
+        throw new HttpBadRequestException(
+          'Invalid since date; expected YYYY-MM-DD');
+      }
       $since = strtotime($date);
     }
     if ($apiVersion == ApiVersion::V2) {
