@@ -346,7 +346,7 @@ class GroupController extends RestController
       $group_pk = intval($args['pathParam']);
       $newuser = intval($args['userPathParam']);
     }
-    $newperm = intval($body['perm']);
+    $newperm = $body['perm'] ?? null;
 
     $userIsAdmin = Auth::isAdmin();
     $userHasGroupAccess = $this->restHelper->getUserDao()->isAdvisorOrAdmin(
@@ -361,9 +361,10 @@ class GroupController extends RestController
     if (!$this->dbHelper->doesIdExist("users", "user_pk", $newuser)) {
       throw new HttpNotFoundException("User id not found!");
     }
-    if ($newperm < 0 || $newperm > 2) {
-      throw new HttpBadRequestException("ERROR - Permission should be in range [0-2]");
+    if (!in_array($newperm, [0, 1, 2, '0', '1', '2'], true)) {
+      throw new HttpBadRequestException("Permission should be an integer in range [0-2]");
     }
+    $newperm = intval($newperm);
     if (! $userIsAdmin && ! $userHasGroupAccess) {
       throw new HttpForbiddenException("Not advisor or admin of the group. " .
         "Can not process request.");
@@ -414,7 +415,7 @@ class GroupController extends RestController
       $group_pk = intval($args['pathParam']);
     }
 
-    $newperm = intval($this->getParsedBody($request)['perm']);
+    $newperm = $this->getParsedBody($request)['perm'] ?? null;
     $userIsAdmin = Auth::isAdmin();
     $userHasGroupAccess = $this->restHelper->getUserDao()->isAdvisorOrAdmin(
       $this->restHelper->getUserId(), $group_pk);
@@ -430,12 +431,10 @@ class GroupController extends RestController
     if (!$this->dbHelper->doesIdExist("users", "user_pk", $user_pk)) {
       throw new HttpNotFoundException("User id not found!");
     }
-    if ($newperm < 0) {
-      throw new HttpBadRequestException("Permission can not be negative");
+    if (!in_array($newperm, [0, 1, 2, '0', '1', '2'], true)) {
+      throw new HttpBadRequestException("Permission should be an integer in range [0-2]");
     }
-    if ($newperm > 2) {
-      throw new HttpBadRequestException("Permission can not be greater than 2");
-    }
+    $newperm = intval($newperm);
     if (! $userIsAdmin && ! $userHasGroupAccess) {
       throw new HttpForbiddenException("Not advisor or admin of the group. " .
         "Can not process request.");

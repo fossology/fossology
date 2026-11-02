@@ -1108,6 +1108,152 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
       new ResponseHelper(), ['pathParam' => $groupId, 'userPathParam' => $userId]);
   }
 
+  /** @dataProvider provideValidMemberPermissions */
+  public function testValidMemberPermission($version, $method, $body, $contentType)
+  {
+    [$request, $args] = $this->getMemberPermissionRequest($version, $method,
+      $body, $contentType);
+    $permission = (int) $body['perm'];
+    $this->dbManager->shouldReceive('getSingleRow')->once()
+      ->andReturn($method === 'addMember' ? [] : ['group_user_member_pk' => 11]);
+
+    if ($method === 'addMember') {
+      $statement = GroupController::class . '::addMember.insertGUP';
+      $this->dbManager->shouldReceive('prepare')->once()
+        ->with($statement, M::type('string'));
+      $this->dbManager->shouldReceive('execute')->once()
+        ->withArgs(function ($actualStatement, $params) use ($statement, $permission) {
+          return $actualStatement === $statement && $params === [4, 7, $permission];
+        })->andReturn(1);
+      $this->dbManager->shouldReceive('freeResult')->once()->with(1);
+      $this->adminPlugin->shouldReceive('updateGUMPermission')->never();
+    } else {
+      $this->adminPlugin->shouldReceive('updateGUMPermission')->once()
+        ->withArgs(function ($membership, $actualPermission, $dbManager) use ($permission) {
+          return $membership === 11 && $actualPermission === $permission &&
+            $dbManager === $this->dbManager;
+        });
+      $this->dbManager->shouldReceive('prepare')->never();
+      $this->dbManager->shouldReceive('execute')->never();
+    }
+
+    $response = $this->groupController->$method($request, new ResponseHelper(), $args);
+    $this->assertSame($method === 'addMember' ? 201 : 202, $response->getStatusCode());
+  }
+
+  public static function provideValidMemberPermissions()
+  {
+    $cases = [];
+    foreach ([0, 1, 2, '0', '1', '2'] as $index => $permission) {
+      $cases['json-' . $index] = [['perm' => $permission], 'application/json'];
+    }
+    foreach (['0', '1', '2'] as $permission) {
+      $cases['form-' . $permission] = [['perm' => $permission],
+        'application/x-www-form-urlencoded'];
+    }
+    return self::withMemberPermissionVariants($cases);
+  }
+
+  /** @dataProvider provideInvalidMemberPermissions */
+  public function testInvalidMemberPermissionDoesNotWrite($version, $method,
+    $body, $contentType)
+  {
+    [$request, $args] = $this->getMemberPermissionRequest($version, $method,
+      $body, $contentType);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->andReturn($method === 'addMember' ? [] : ['group_user_member_pk' => 11]);
+    $this->dbManager->shouldReceive('prepare')->never();
+    $this->dbManager->shouldReceive('execute')->never();
+    $this->adminPlugin->shouldReceive('updateGUMPermission')->never();
+
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionCode(400);
+    $this->groupController->$method($request, new ResponseHelper(), $args);
+  }
+
+  public static function provideInvalidMemberPermissions()
+  {
+    $permissions = [
+      'invalid-string' => 'invalid',
+      'fraction-1.9' => 1.9,
+      'fraction-2.9' => 2.9,
+      'trailing-garbage' => '1garbage',
+      'true' => true,
+      'false' => false,
+      'null' => null,
+      'empty-array' => [],
+      'array' => [1],
+      'object' => (object) ['value' => 1],
+      'empty-string' => '',
+      'negative' => -1,
+      'out-of-range' => 3,
+      'float' => 1.0,
+      'decimal-string' => '1.0',
+      'exponent-string' => '1e0',
+      'leading-zero' => '01',
+      'leading-plus' => '+1',
+      'whitespace' => ' 1 ',
+    ];
+    $cases = [];
+    foreach ($permissions as $label => $permission) {
+      $cases['json-' . $label] = [['perm' => $permission], 'application/json'];
+      if (is_string($permission) || is_int($permission) || $label === 'array') {
+        $cases['form-' . $label] = [['perm' => $permission],
+          'application/x-www-form-urlencoded'];
+      }
+    }
+    $cases['json-missing'] = [[], 'application/json'];
+    $cases['form-missing'] = [[], 'application/x-www-form-urlencoded'];
+    return self::withMemberPermissionVariants($cases);
+  }
+
+  private static function withMemberPermissionVariants($cases)
+  {
+    $variants = [];
+    foreach ([ApiVersion::V1, ApiVersion::V2] as $version) {
+      foreach (['addMember', 'changeUserPermission'] as $method) {
+        foreach ($cases as $label => [$body, $contentType]) {
+          $variants[$version . '-' . $method . '-' . $label] =
+            [$version, $method, $body, $contentType];
+        }
+      }
+    }
+    return $variants;
+  }
+
+  private function getMemberPermissionRequest($version, $method, $body, $contentType)
+  {
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_WRITE;
+    $this->restHelper->shouldReceive('getUserId')->andReturn(1);
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')->with(1, 4)->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->with('groups', 'group_pk', 4)->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->with('users', 'user_pk', 7)->andReturn(true);
+    if ($version === ApiVersion::V2) {
+      $this->userDao->shouldReceive('getUserByName')->with('permission-user')
+        ->andReturn(['user_pk' => 7]);
+      $this->userDao->shouldReceive('getGroupIdByName')->with('permission-group')
+        ->andReturn(4);
+    }
+    $args = [
+      'pathParam' => $version === ApiVersion::V2 ? 'permission-group' : 4,
+      'userPathParam' => $version === ApiVersion::V2 ? 'permission-user' : 7
+    ];
+    $encoded = $contentType === 'application/json' ?
+      json_encode($body, JSON_PRESERVE_ZERO_FRACTION) : http_build_query($body);
+    $headers = new Headers();
+    $headers->setHeader('Content-Type', $contentType);
+    $request = new Request($method === 'addMember' ? 'POST' : 'PUT',
+      new Uri('HTTP', 'localhost'), $headers, [], [],
+      $this->streamFactory->createStream($encoded));
+    if ($contentType === 'application/x-www-form-urlencoded') {
+      parse_str($encoded, $parsed);
+      $request = $request->withParsedBody($parsed);
+    }
+    return [$request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version), $args];
+  }
+
   /**
    * @test
    * -# Test GroupController::changeUserPermission() for V2 when username not found
