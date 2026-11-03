@@ -95,11 +95,14 @@ class SearchController extends RestController
         "filesizemin and filesizemax need to be positive integers!");
     }
 
-    /*
-     * check if page && limit are numeric, if existing
-     */
-    if ((! ($page==='') && (! is_numeric($page) || $page < 1)) ||
-      (! ($limit==='') && (! is_numeric($limit) || $limit < 1))) {
+    if ($page !== '') {
+      $page = filter_var($page, FILTER_VALIDATE_INT);
+    }
+    if ($limit !== '') {
+      $limit = filter_var($limit, FILTER_VALIDATE_INT);
+    }
+    if (($page !== '' && ($page === false || $page < 1)) ||
+      ($limit !== '' && ($limit === false || $limit < 1))) {
       throw new HttpBadRequestException(
         "page and limit need to be positive integers!");
     }
