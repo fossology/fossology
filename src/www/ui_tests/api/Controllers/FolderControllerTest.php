@@ -555,6 +555,8 @@ namespace Fossology\UI\Api\Test\Controllers
       $folderName = \Fossology\UI\Api\Controllers\FolderGetName($folderId);
       $this->folderDao->shouldReceive('getFolder')
         ->withArgs(array($folderId))->andReturn($this->getFolder($folderId));
+      $this->folderDao->shouldReceive('getRootFolder')
+        ->withArgs(array($this->userId))->andReturn($this->getFolder(2));
       $this->deletePlugin->shouldReceive('Delete')
         ->withArgs(array("2 $folderId", $this->userId))->andReturnNull();
       $actualResponse = $this->folderController->deleteFolder(null,
@@ -595,9 +597,30 @@ namespace Fossology\UI\Api\Test\Controllers
       $errorText = "No access to delete this folder";
       $this->folderDao->shouldReceive('getFolder')
         ->withArgs(array($folderId))->andReturn($this->getFolder($folderId));
+      $this->folderDao->shouldReceive('getRootFolder')
+        ->withArgs(array($this->userId))->andReturn($this->getFolder(2));
       $this->deletePlugin->shouldReceive('Delete')
         ->withArgs(array("2 $folderId", $this->userId))
         ->andReturn($errorText);
+      $this->expectException(HttpForbiddenException::class);
+
+      $this->folderController->deleteFolder(null, new ResponseHelper(),
+        ["id" => $folderId]);
+    }
+
+    /**
+     * @test
+     * -# Test deleting the user's root folder on FolderController::deleteFolder()
+     * -# Check for 403 response and that no delete job is scheduled
+     */
+    public function testDeleteFolderRootFolder()
+    {
+      $folderId = 2;
+      $this->folderDao->shouldReceive('getFolder')
+        ->withArgs(array($folderId))->andReturn($this->getFolder($folderId));
+      $this->folderDao->shouldReceive('getRootFolder')
+        ->withArgs(array($this->userId))->andReturn($this->getFolder($folderId));
+      $this->deletePlugin->shouldNotReceive('Delete');
       $this->expectException(HttpForbiddenException::class);
 
       $this->folderController->deleteFolder(null, new ResponseHelper(),
