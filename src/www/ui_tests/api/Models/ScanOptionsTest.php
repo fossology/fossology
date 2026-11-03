@@ -162,7 +162,7 @@ namespace Fossology\UI\Api\Test\Models
         ->withArgs([$groupName])->andReturn($groupId);
       $this->agentAdderMock->shouldReceive('scheduleAgents')
         ->once()
-        ->andReturn(25);
+        ->andReturn(['jobId' => 25, 'alreadyRun' => [], 'scheduled' => $agentsToAdd]);
 
       $scanOption->scheduleAgents($folderId, $uploadId);
     }
@@ -211,7 +211,7 @@ namespace Fossology\UI\Api\Test\Models
         ->withArgs([$groupName])->andReturn($groupId);
       $this->agentAdderMock->shouldReceive('scheduleAgents')
         ->once()
-        ->andReturn(25);
+        ->andReturn(['jobId' => 25, 'alreadyRun' => [], 'scheduled' => $agentsToAdd]);
 
       $scanOption->scheduleAgents($folderId, $uploadId);
     }
@@ -260,7 +260,7 @@ namespace Fossology\UI\Api\Test\Models
             $scheduledRequest instanceof Request &&
             $scheduledRequest->get('uploadToReuse') === $expectedSelectors;
         })
-        ->andReturn(25);
+        ->andReturn(['jobId' => 25, 'alreadyRun' => [], 'scheduled' => $agentsToAdd]);
 
       $scanOption->scheduleAgents($folderId, $uploadId);
     }

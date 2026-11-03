@@ -3208,7 +3208,18 @@ paths:
               $ref: '#/components/schemas/ScanOptions'
       responses:
         '201':
-          description: Job Scheduled with job id in message
+          description: >-
+            Job created. Message is the job id. If only some requested
+            agents were already run, scheduled_agents and skipped_agents
+            list which agents were newly scheduled vs. already run.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '200':
+          description: >-
+            No job created: every requested agent already has results for
+            this upload. Message is empty.
           content:
             application/json:
               schema:
@@ -6024,6 +6035,21 @@ components:
         message:
           type: string
           description: Message in the info
+        scheduled_agents:
+          type: array
+          items:
+            type: string
+          description: >-
+            Agents newly scheduled under this response's job id. Only
+            present when a job was created with some, but not all,
+            requested agents already run.
+        skipped_agents:
+          type: array
+          items:
+            type: string
+          description: >-
+            Agents already run and skipped. Only present when a job was
+            created with some, but not all, requested agents already run.
         type:
           type: string
           enum:

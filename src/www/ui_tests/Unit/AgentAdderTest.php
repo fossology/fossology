@@ -105,6 +105,10 @@ class AgentAdderTest extends \PHPUnit\Framework\TestCase
         $this->log[] = "$this->Name:scheduleAgent";
         return 1;
       }
+      public function AgentHasResults($uploadId = 0)
+      {
+        return 0;
+      }
     };
 
     global $Plugins;
@@ -152,7 +156,7 @@ class AgentAdderTest extends \PHPUnit\Framework\TestCase
       $this->agentAdder, 'agentsAdd', [42, ['agent_nomos', 'agent_decider', 'agent_scancode'], $request]
     );
 
-    $this->assertSame(1, $result);
+    $this->assertSame(1, $result['jobId']);
 
     $nomosIdx = array_search('agent_nomos:AgentAdd', $this->callLog);
     $scancodeIdx = array_search('agent_scancode:scheduleAgent', $this->callLog);
