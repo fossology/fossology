@@ -7,6 +7,7 @@
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 
 class SearchHelperDao
@@ -59,7 +60,7 @@ class SearchHelperDao
       $upload_pk = $row["upload_fk"];
 
       /* Check upload permission */
-      if (!$uploadDao->isAccessible($upload_pk, $groupID)) {
+      if (!Auth::isAdmin() && !$uploadDao->isAccessible($upload_pk, $groupID)) {
         return array($UploadtreeRecs, $totalUploadtreeRecsCount);
       }
     }
@@ -160,11 +161,30 @@ class SearchHelperDao
     }
 
     if ($Upload != 0) {
+      if (!Auth::isAdmin() && !$uploadDao->isAccessible($Upload, $groupID)) {
+        return array($UploadtreeRecs, $totalUploadtreeRecsCount);
+      }
       if ($NeedAnd) {
         $SQLWhere .= " AND";
       }
-      $SQLWhere .= " upload_fk = " . $Upload . "";
+      $SQLWhere .= " uploadtree.upload_fk = " . intval($Upload);
       $NeedAnd = 1;
+    } else if (empty($Item)) {
+      if (!Auth::isAdmin()) {
+        $userCanReadPublic = isset($_SESSION) && array_key_exists(Auth::USER_LEVEL, $_SESSION) && $_SESSION[Auth::USER_LEVEL] !== Auth::PERM_NONE;
+        if ($groupID <= 0 && !$userCanReadPublic) {
+          return array($UploadtreeRecs, $totalUploadtreeRecsCount);
+        }
+        $permCondition = "p.perm > " . Auth::PERM_NONE;
+        if ($userCanReadPublic) {
+          $permCondition .= " OR u.public_perm > " . Auth::PERM_NONE;
+        }
+        if ($NeedAnd) {
+          $SQLWhere .= " AND";
+        }
+        $SQLWhere .= " uploadtree.upload_fk IN (SELECT u.upload_pk FROM upload u LEFT JOIN perm_upload p ON p.upload_fk = u.upload_pk AND p.group_fk = " . intval($groupID) . " WHERE u.pfile_fk IS NOT NULL AND ($permCondition))";
+        $NeedAnd = 1;
+      }
     }
 
     if (!empty($SizeMin) && is_numeric($SizeMin)) {
@@ -187,7 +207,7 @@ class SearchHelperDao
       if ($NeedAnd) {
         $SQLWhere .= " AND";
       }
-      $SQLWhere .= "  upload_fk = $upload_pk AND lft >= $lft AND rgt <= $rgt";
+      $SQLWhere .= "  uploadtree.upload_fk = " . intval($upload_pk) . " AND lft >= $lft AND rgt <= $rgt";
       $NeedAnd = 1;
     }
 
@@ -243,7 +263,7 @@ class SearchHelperDao
     $rows = $this->dbManager->getRows($PaginatedSQL, [], $stmt);
     if (!empty($rows)) {
       foreach ($rows as $row) {
-        if (!$uploadDao->isAccessible($row['upload_fk'], $groupID)) {
+        if (!Auth::isAdmin() && !$uploadDao->isAccessible($row['upload_fk'], $groupID)) {
           continue;
         }
         $totalUploadtreeRecs[] = $row;
