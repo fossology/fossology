@@ -58,23 +58,24 @@ class RestController
   }
 
   /**
-   * @brief Parse request body as JSON and return associative PHP array.
-   *
-   * If request is of type application/json, read the body content and parse
-   * with json_decode(). Otherwise, use slim's getParsedBody().
-   *
+   * @brief Parse JSON or URL-encoded data, preserving existing parsed form bodies.
    * @param ServerRequestInterface $request Request to parse
-   * @return array|null Parsed JSON, or null on error
+   * @return array|object|null Parsed request body
    */
   protected function getParsedBody(ServerRequestInterface $request)
   {
     if ($this->isJsonRequest($request)) {
       $content = $request->getBody()->getContents();
       return json_decode($content, true);
-    } else {
-      // application/x-www-form-urlencoded or multipart/form-data
-      return $request->getParsedBody();
     }
+    $body = $request->getParsedBody();
+    if ($body === null) {
+      $contentType = trim(explode(';', $request->getHeaderLine('Content-Type'), 2)[0]);
+      if (strcasecmp($contentType, 'application/x-www-form-urlencoded') === 0) {
+        parse_str((string) $request->getBody(), $body);
+      }
+    }
+    return $body;
   }
 
   /**

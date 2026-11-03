@@ -1247,10 +1247,6 @@ class GroupControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request($method === 'addMember' ? 'POST' : 'PUT',
       new Uri('HTTP', 'localhost'), $headers, [], [],
       $this->streamFactory->createStream($encoded));
-    if ($contentType === 'application/x-www-form-urlencoded') {
-      parse_str($encoded, $parsed);
-      $request = $request->withParsedBody($parsed);
-    }
     return [$request->withAttribute(ApiVersion::ATTRIBUTE_NAME, $version), $args];
   }
 
