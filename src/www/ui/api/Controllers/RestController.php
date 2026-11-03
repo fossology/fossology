@@ -108,7 +108,7 @@ class RestController
   }
 
   /**
-   * Check if upload tree is accessible
+    * Check if an upload tree item belongs to the requested upload
    *
    * @param int $uploadId
    * @param int $itemId
@@ -117,9 +117,10 @@ class RestController
    */
   protected function isItemExists(int $uploadId, int $itemId): void
   {
-    if (!$this->dbHelper->doesIdExist(
-      $this->restHelper->getUploadDao()->getUploadtreeTableName($uploadId),
-      "uploadtree_pk", $itemId)) {
+    $uploadDao = $this->restHelper->getUploadDao();
+    $item = $uploadDao->getUploadEntry($itemId,
+      $uploadDao->getUploadtreeTableName($uploadId));
+    if (empty($item) || intval($item['upload_fk']) !== $uploadId) {
       throw new HttpNotFoundException("Item does not exist");
     }
   }
