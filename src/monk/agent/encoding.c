@@ -18,14 +18,26 @@
 
 iconv_t guessConverter(const char* buffer, size_t len)
 {
+  if (buffer == NULL || len == 0)
+  {
+    return NULL;
+  }
+
   char* const target = "utf-8";
 
   iconv_t iconvCookie = NULL;
 
   gchar* encoding = guessEncoding(buffer, len);
-  if (encoding && (strcmp(encoding, target) != 0))
+  if (encoding)
   {
-    iconvCookie = iconv_open(target, encoding);
+    if (g_ascii_strcasecmp(encoding, target) != 0)
+    {
+      iconvCookie = iconv_open(target, encoding);
+      if (iconvCookie == (iconv_t) -1)
+      {
+        iconvCookie = NULL;
+      }
+    }
     g_free(encoding);
   }
 
@@ -33,6 +45,10 @@ iconv_t guessConverter(const char* buffer, size_t len)
 }
 
 gchar* guessEncoding(const char* buffer, size_t len) {
+  if (buffer == NULL || len == 0) {
+    return NULL;
+  }
+
   gchar* result = NULL;
 #ifdef HAVE_CHARDET
   uchardet_t cd = uchardet_new();
