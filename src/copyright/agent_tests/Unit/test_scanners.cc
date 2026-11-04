@@ -63,6 +63,7 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST (copyscannerBracketedYearNoiseTest);
   CPPUNIT_TEST (copyscannerBracketedYearBoundariesTest);
   CPPUNIT_TEST (copyscannerCopySymByHolderTest);
+  CPPUNIT_TEST (copyscannerCopySymPunctuatedHolderTest);
   CPPUNIT_TEST (copyscannerBareKeywordDiscardTest);
   CPPUNIT_TEST (copyscannerCopyrightedStatementTest);
   CPPUNIT_TEST (copyscannerCamelCaseHolderTest);
@@ -290,6 +291,71 @@ protected:
     // "by" alone still leaves nothing to keep.
     const char* bare[] = {"Copyright (c) by\n", "(c) by\n"};
     for (const char* statement : bare)
+    {
+      list<match> matches;
+      sc.ScanString(statement, matches);
+      for (const auto& finding : matches)
+        CPPUNIT_ASSERT_MESSAGE(
+          string("Expected no active match for: ") + statement,
+          !finding.is_enabled);
+    }
+  }
+
+  /**
+   * \brief A copyright symbol separated from the holder by punctuation
+   * (e.g. "Copyright (c), Data Geekery GmbH") must not be stripped down to
+   * a bare keyword by REG_STRIP_COPYSYM_NONYEAR.
+   * \test
+   */
+  void copyscannerCopySymPunctuatedHolderTest()
+  {
+    hCopyrightScanner sc;
+    const char* valid[] = {
+      "Copyright (c), Data Geekery GmbH, contact@datageekery.com",
+      "Copyright (c), Data Geekery GmbH",
+      "Copyright (C): Data Geekery GmbH",
+      "Copyright (c); Data Geekery GmbH",
+      "Copyright (c),Data Geekery GmbH",
+      "Copyright \xc2\xa9, Data Geekery GmbH",
+      "Copyright (c), 2021 Data Geekery GmbH",
+      "Copyright (c), by Data Geekery GmbH"
+    };
+
+    for (const char* statement : valid)
+    {
+      for (const char* ending : {"", "\n"})
+      {
+        list<match> matches;
+        sc.ScanString(string(statement) + ending, matches);
+        const string message = string("Expected full active match for: ") + statement;
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, (size_t)1, matches.size());
+        const match& finding = matches.front();
+        CPPUNIT_ASSERT_MESSAGE(message, finding.is_enabled);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, string("statement"), finding.type);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, 0, finding.start);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, (int)strlen(statement), finding.end);
+      }
+    }
+
+    // Full Apache header: license grant stripped, holder kept.
+    const char* apache =
+      "/*\n"
+      " * Copyright (c), Data Geekery GmbH, contact@datageekery.com\n"
+      " *\n"
+      " * Licensed under the Apache License, Version 2.0 (the \"License\");\n"
+      " * you may not use this file except in compliance with the License.\n"
+      " */\n"
+      "package com.fasterxml.jackson.module.blackbird.util;\n";
+    scannerTest(sc, apache, "statement",
+      {"Copyright (c), Data Geekery GmbH, contact@datageekery.com"});
+
+    // Punctuation followed by noise must still be stripped/discarded.
+    const char* noise[] = {
+      "Copyright (c), 0x1234\n",
+      "Copyright (c), {year} {name}\n",
+      "Copyright (c),\n"
+    };
+    for (const char* statement : noise)
     {
       list<match> matches;
       sc.ScanString(statement, matches);
