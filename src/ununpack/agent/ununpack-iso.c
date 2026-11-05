@@ -74,6 +74,7 @@ int	ExtractISO	(char *Source, char *Destination)
   FILE *Fin;
   int rc;
   char TempSource[FILENAME_MAX], TempDestination[FILENAME_MAX];
+  char TempIso[FILENAME_MAX], TempOut[FILENAME_MAX];
 
   /* judge if the parameters are empty */
   if ((NULL == Source) || (!strcmp(Source, "")) || (NULL == Destination) || (!strcmp(Destination, "")))
@@ -130,8 +131,16 @@ int	ExtractISO	(char *Source, char *Destination)
     if (Line[Len] != '/') continue; /* should not happen, but... */
     if (IsDir(Line))	continue;	/* don't do directories */
     if (Verbose > 1) printf("ISO file: %s\n",Line);
+    /* The in-ISO path (Line+Len) and the output path (Line) come from the
+       archive's own directory listing and are attacker-controlled, so they
+       must be shell-escaped before being passed to system(). Without this a
+       crafted ISO containing a file whose name has a single quote can inject
+       and run arbitrary commands as the agent user. */
+    if (TaintString(TempIso,FILENAME_MAX,Line+Len,1,NULL) ||
+        TaintString(TempOut,FILENAME_MAX,Line,1,NULL))
+      continue; /* name too long to escape safely; skip this file */
     /* create extraction command */
-    snprintf(Cmd,sizeof(Cmd),"(isoinfo -R -J -i '%s' -x '%s' || isoinfo -R -i '%s' -x '%s' || isoinfo -i '%s' -x '%s') > '%s' 2>/dev/null",TempSource,Line+Len,TempSource,Line+Len,TempSource, Line+Len,Line);
+    snprintf(Cmd,sizeof(Cmd),"(isoinfo -R -J -i '%s' -x '%s' || isoinfo -R -i '%s' -x '%s' || isoinfo -i '%s' -x '%s') > '%s' 2>/dev/null",TempSource,TempIso,TempSource,TempIso,TempSource, TempIso,TempOut);
     rc = system(Cmd);
     if (WIFSIGNALED(rc))
     {
