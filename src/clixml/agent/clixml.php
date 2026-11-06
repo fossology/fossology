@@ -193,12 +193,12 @@ class CliXml extends Agent
   protected function getUri($fileBase)
   {
     if (count($this->additionalUploads) > 0) {
-      $fileName = $fileBase . "multifile" . "_" . strtoupper($this->outputFormat);
-    } else {
-      $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName;
+      return $fileBase . "multifile" . "_" . strtoupper($this->outputFormat)
+        . ReportUtils::reportFileExtension($this->outputFormat);
     }
 
-    return $fileName .".xml";
+    return ReportUtils::canonicalReportPath($this->outputFormat,
+      $this->packageName);
   }
 
   protected function renderPackage($uploadId, $groupId)
