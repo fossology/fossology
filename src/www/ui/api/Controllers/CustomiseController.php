@@ -68,17 +68,55 @@ class CustomiseController extends RestController
    */
   public function updateCustomiseData($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $this->throwNotAdminException();
     $body = $this->getParsedBody($request);
-    if (empty($body) || !array_key_exists("key", $body) || !array_key_exists("value", $body)) {
-      throw new HttpBadRequestException("Invalid request body.");
-    }
-    list($success, $msg) = $this->sysconfigDao->UpdateConfigData($body);
-    if (!$success) {
-      throw new HttpBadRequestException($msg);
-    }
-    $info = new Info(200, "Successfully updated $msg.",
+    if ($apiVersion == ApiVersion::V2) {
+      if (empty($body) || !is_array($body)) {
+        throw new HttpBadRequestException("Invalid request body type.");
+      }
+      $errors = [];
+      $key = 0;
+      foreach ($body as $item) {
+        $key++;
+        if (!is_array($item) || !array_key_exists("key", $item) || !array_key_exists("value", $item)) {
+          $errors[] = "Invalid item format for key $key.";
+          continue;
+        }
+        list($success, $msg) = $this->sysconfigDao->UpdateConfigData($item);
+        // Specific case for OidcDiscoveryURL: Try to fetch other OIDC config from the URL
+        if ($success && $item['key'] === 'OidcDiscoveryURL') {
+          $config = $this->restHelper->getPlugin('foconfig');
+          $newarray = ["OidcDiscoveryURL" => $item['value']];
+          $oldarray = [];
+          $config->updateOidcEndpoints($newarray, $oldarray);
+          // If the fetch succeed, $newarray should contain fetched data (size>1)
+          if (count($newarray) > 1) {
+            foreach ($newarray as $tempKey => $tempValue) {
+              list($success, $msg) = $this->sysconfigDao->UpdateConfigData(["key" => $tempKey, "value" => $tempValue]);
+            }
+          }
+        }
+        if (!$success) {
+          $errors[] = $msg;
+        }
+      }
+      if (!empty($errors)) {
+        throw new HttpBadRequestException(implode(", ", $errors));
+      }
+      $info = new Info(200, "Successfully updated configurations.",
+        InfoType::INFO);
+    } else {
+      if (empty($body) || !array_key_exists("key", $body) || !array_key_exists("value", $body)) {
+        throw new HttpBadRequestException("Invalid request body.");
+      }
+      list($success, $msg) = $this->sysconfigDao->UpdateConfigData($body);
+      if (!$success) {
+        throw new HttpBadRequestException($msg);
+      }
+      $info = new Info(200, "Successfully updated $msg.",
       InfoType::INFO);
+    }
     return $response->withJson($info->getArray(), $info->getCode());
   }
 
