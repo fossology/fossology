@@ -27,11 +27,21 @@ bool insertResultInDb(CompatibilityStatus status, bool verbosityDebug,
                       unsigned long& pFileId, int agentId, unsigned long lid1,
                       unsigned long lid2, const string& ruleName)
 {
-  string compatibility = (status == COMPATIBLE) ? "t" : "f";
+  const char* compatibility;
+  if (status == EXPLICIT_UNKNOWN) {
+    compatibility = nullptr;
+  } else {
+    compatibility = (status == COMPATIBLE) ? "t" : "f";
+  }
+
   if (verbosityDebug)
   {
-    cout << ruleName << ((status == COMPATIBLE) ? "" : " not")
-         << " compatible, " << pFileId << '\n';
+    if (status == EXPLICIT_UNKNOWN) {
+      cout << ruleName << " explicitly unknown, " << pFileId << '\n';
+    } else {
+      cout << ruleName << ((status == COMPATIBLE) ? "" : " not")
+           << " compatible, " << pFileId << '\n';
+    }
   }
   return databaseHandler.queryInsertResult(pFileId, agentId, lid1, lid2,
                                            compatibility);
@@ -58,7 +68,7 @@ bool CompatibilityAgent::checkCompatibilityForPfile(
 {
   vector<tuple<unsigned long, string>> licenseTypes;
   CompatibilityStatus defaultStatus = databaseHandler.getDefaultRule();
-  string defaultRule = defaultStatus == COMPATIBLE ? "t" : "f";
+  const char* defaultRule = defaultStatus == COMPATIBLE ? "t" : "f";
   bool res, resultExists;
   licenseTypes = databaseHandler.queryLicDetails(licId);
   size_t length = licenseTypes.size();

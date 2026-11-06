@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#  SPDX-FileCopyrightText: © 2024 Siemens AG
+#  SPDX-FileCopyrightText: © 2026 Siemens AG
 #  SPDX-FileContributor: Gaurav Mishra <mishra.gaurav@siemens.com>
 #
 #  SPDX-License-Identifier: GPL-2.0-only
@@ -98,15 +98,17 @@ class MatrixItem:
     self.__second_type = second_type
 
   @property
-  def result(self) -> bool:
+  def result(self) -> Optional[bool]:
     """
-    Get result of the rule as boolean.
+    Get result of the rule as boolean or None for Unknown/Check Dependency.
     """
     if isinstance(self.__result, bool):
       return self.__result
-    if self.__result == osadl_matrix.OSADLCompatibility.YES \
-        or self.__result == osadl_matrix.OSADLCompatibility.CHECKDEP:
+    if self.__result == osadl_matrix.OSADLCompatibility.YES:
       return True
+    if self.__result == osadl_matrix.OSADLCompatibility.CHECKDEP \
+        or self.__result == osadl_matrix.OSADLCompatibility.UNKNOWN:
+      return None
     return False
 
   @result.setter
@@ -227,6 +229,26 @@ class LicenseHandler:
     if resp is not None:
       return resp[0]
     return None
+
+  def get_license_id(self, license_name: str) -> Optional[int]:
+    """
+    Get the rf_pk of the license from DB.
+    """
+    cur = self.__conn.cursor()
+    cur.execute("SELECT rf_pk FROM license_ref WHERE "
+                "lower(rf_shortname) = lower(%s);", (license_name,))
+    resp = cur.fetchone()
+    if resp is not None:
+      return resp[0]
+    return None
+
+  def execute_write(self, query: str, args: tuple) -> None:
+    """
+    Execute a write query on the database.
+    """
+    cur = self.__conn.cursor()
+    cur.execute(query, args)
+    self.__conn.commit()
 
   def different_type_exists(self) -> bool:
     """
@@ -390,6 +412,89 @@ def save_yaml(location: str, compliance_matrix: list[MatrixItem]) -> None:
     logger.info(f"Saved {len(compliance_matrix)} rules in {location}.")
 
 
+def save_db(license_handler: LicenseHandler, compliance_matrix: list[MatrixItem]) -> None:
+  """
+  Directly insert or update the compatibility rules into the license_rules
+  table. Uses directional matching (first_rf_fk, second_rf_fk) to preserve
+  asymmetric compatibility results.
+  """
+  count = 0
+  for rule in compliance_matrix:
+    if rule.first_license is None or rule.second_license is None:
+      continue
+
+    first_id = license_handler.get_license_id(rule.first_license)
+    second_id = license_handler.get_license_id(rule.second_license)
+
+    if first_id is None or second_id is None:
+      continue
+
+    cur = license_handler._LicenseHandler__conn.cursor()
+    cur.execute("SELECT lr_pk FROM license_rules WHERE "
+                "first_rf_fk = %s AND second_rf_fk = %s",
+                (first_id, second_id))
+    resp = cur.fetchone()
+
+    if resp is not None:
+      license_handler.execute_write(
+        "UPDATE license_rules SET first_type = %s, second_type = %s, "
+        "compatibility = %s, comment = %s WHERE lr_pk = %s",
+        (rule.first_type, rule.second_type, rule.result, rule.comment,
+         resp[0])
+      )
+    else:
+      license_handler.execute_write(
+        "INSERT INTO license_rules (first_rf_fk, second_rf_fk, first_type, "
+        "second_type, compatibility, comment) "
+        "VALUES (%s, %s, %s, %s, %s, %s)",
+        (first_id, second_id, rule.first_type, rule.second_type,
+         rule.result, rule.comment)
+      )
+    count += 1
+  logger.info(f"Successfully inserted/updated {count} rules directly to "
+              f"the database.")
+
+
+def convert_json_to_list(license_handler: LicenseHandler,
+                         json_loc: str) -> list[MatrixItem]:
+  """
+  Convert the OSADL matrix JSON into a list of all directional rules
+  without bidirectional deduplication.
+
+  Unlike convert_json_to_matrix(), this function preserves both (A->B) and
+  (B->A) as separate rules when they have different compatibility results.
+  This is required for --direct-import since the database stores rules with
+  explicit first/second license foreign keys.
+
+  :param license_handler: LicenseHandler object
+  :param json_loc: Location of OSADL JSON
+  :return: List of all directional rules
+  """
+  matrix: Union[dict[str, dict[str, str]], None] = None
+  compatibility_list: list[MatrixItem] = []
+  with open(json_loc, "r") as jsoninput:
+    matrix = json.load(jsoninput)
+  if matrix is None:
+    raise Exception("Unable to read JSON")
+  for first_license, comp_list in matrix.items():
+    if first_license in ["timestamp", "timeformat"] or not \
+        license_handler.license_exists(first_license):
+      continue
+    for second_license, result in comp_list.items():
+      if not license_handler.license_exists(second_license):
+        continue
+      row = MatrixItem()
+      row.first_license = first_license
+      row.second_license = second_license
+      row.result = osadl_matrix.OSADLCompatibility.from_text(result)
+      row.comment = f"{first_license} -> {second_license} -> {row.result}"
+      row.first_type = license_handler.get_license_type(row.first_license)
+      row.second_type = license_handler.get_license_type(row.second_license)
+      logger.debug(row.comment)
+      compatibility_list.append(row)
+  return compatibility_list
+
+
 def convert_json_to_matrix(license_handler: LicenseHandler, json_loc: str) \
       -> tuple[list[MatrixItem], dict[tuple[str, str, bool], int]]:
   """
@@ -440,14 +545,26 @@ def main(parsed_args):
   license_handler = LicenseHandler(parsed_args.host, parsed_args.port,
                                    parsed_args.user, parsed_args.password,
                                    parsed_args.database)
-  compatibility_matrix, type_dict = convert_json_to_matrix(
-    license_handler, osadl_matrix.OSADL_MATRIX_JSON)
-  reduce_start = int(round(time.time() * 1000))
-  reduced_list = reduce_matrix(license_handler, compatibility_matrix, type_dict)
-  reduce_end = int(round(time.time() * 1000))
-  save_yaml(parsed_args.yaml, reduced_list)
+
+  if parsed_args.direct_import:
+    all_rules = convert_json_to_list(
+      license_handler, osadl_matrix.OSADL_MATRIX_JSON)
+    save_db(license_handler, all_rules)
+  else:
+    compatibility_matrix, type_dict = convert_json_to_matrix(
+      license_handler, osadl_matrix.OSADL_MATRIX_JSON)
+    reduce_start = int(round(time.time() * 1000))
+    reduced_list = reduce_matrix(license_handler, compatibility_matrix,
+                                 type_dict)
+    reduce_end = int(round(time.time() * 1000))
+    if not parsed_args.yaml:
+      logger.error("You must provide --yaml if --direct-import is not used.")
+      return
+    save_yaml(parsed_args.yaml, reduced_list)
+    logger.info(f"Took {(reduce_end - reduce_start):.2f} ms for reducing "
+                f"list.")
+
   time_taken = time.time() - start_time
-  logger.info(f"Took {(reduce_end - reduce_start):.2f} ms for reducing list.")
   logger.info(f"Took {time_taken:.2f} seconds for processing.")
 
 
@@ -473,7 +590,11 @@ if __name__ == "__main__":
     "--port", type=str, help="Database port", default="5432"
   )
   parser.add_argument(
-    "--yaml", type=str, help="Location to store result file", required=True
+    "--yaml", type=str, help="Location to store result file", required=False
+  )
+  parser.add_argument(
+    "--direct-import", action="store_true", help="Directly insert the generated rules into the FOSSology database",
+    default=False
   )
   parser.add_argument(
     "-d", "--debug", action="store_true", help="Increase verbosity",
