@@ -678,7 +678,17 @@ void scheduler_update(scheduler_t* scheduler)
       }
 
       V_SCHED("Starting JOB[%d].%s\n", job->id, job->agent_type);
-      agent_init(scheduler, host, job);
+      {
+        /* Capture the pk before agent_init. */
+        int jq_pk = job->id;
+        if(agent_init(scheduler, host, job) == NULL &&
+           (job = g_tree_lookup(scheduler->job_list, &jq_pk)) != NULL)
+        {
+          /* agent_init() failed but did NOT remove the job (e.g. pipe creation). */
+          job->checkedout_at = time(NULL);
+          skipped_jobs = g_list_prepend(skipped_jobs, job);
+        }
+      }
       job = NULL;
     }
 
@@ -692,7 +702,16 @@ void scheduler_update(scheduler_t* scheduler)
 
   if(job != NULL && n_agents == 0 && n_jobs == 0)
   {
-    agent_init(scheduler, host, job);
+    /* Capture the pk before agent_init() may free the job (see regular path). */
+    int jq_pk = job->id;
+    if(agent_init(scheduler, host, job) == NULL &&
+       (job = g_tree_lookup(scheduler->job_list, &jq_pk)) != NULL)
+    {
+      /* exclusive job: agent_init() failed without removing the job;
+       * re-queue it for retry on the next cycle. */
+      job->checkedout_at = time(NULL);
+      g_sequence_insert_sorted(scheduler->job_queue, job, job_compare, NULL);
+    }
     lockout = 1;
     job  = NULL;
     host = NULL;
@@ -1201,6 +1220,18 @@ void scheduler_config_event(scheduler_t* scheduler, void* unused)
 
   scheduler_foss_config(scheduler);
   scheduler_agent_config(scheduler);
+
+  if(scheduler->workers)
+  {
+    GError* err = NULL;
+    gint nthreads = interface_pool_size(scheduler);
+    if(!g_thread_pool_set_max_threads(scheduler->workers, nthreads, &err))
+    {
+      WARNING("interface pool resize to %d failed: %s",
+              nthreads, err ? err->message : "unknown error");
+      g_clear_error(&err);
+    }
+  }
 
   database_init(scheduler);
   email_init(scheduler);

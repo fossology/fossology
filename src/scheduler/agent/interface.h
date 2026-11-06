@@ -19,5 +19,6 @@
 
 void interface_init(scheduler_t* scheduler);
 void interface_destroy(scheduler_t* scheduler);
+gint interface_pool_size(scheduler_t* scheduler);
 
 #endif /* INTERFACE_H_INCLUDE */
