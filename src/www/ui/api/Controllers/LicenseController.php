@@ -182,8 +182,14 @@ class LicenseController extends RestController
         $kind = $query["kind"];
     }
 
+    if (! empty($onlyActive)) {
+      $onlyActive = filter_var($onlyActive, FILTER_VALIDATE_BOOLEAN);
+    } else {
+      $onlyActive = false;
+    }
+
     $totalPages = $this->dbHelper->getLicenseCount($kind,
-      $this->restHelper->getGroupId());
+      $this->restHelper->getGroupId(), $onlyActive);
     $totalPages = intval(ceil($totalPages / $limit));
 
     if (! empty($page) || $page == "0") {
@@ -199,11 +205,6 @@ class LicenseController extends RestController
       }
     } else {
       $page = 1;
-    }
-    if (! empty($onlyActive)) {
-      $onlyActive = filter_var($onlyActive, FILTER_VALIDATE_BOOLEAN);
-    } else {
-      $onlyActive = false;
     }
 
     $licenses = $this->dbHelper->getLicensesPaginated($page, $limit,
