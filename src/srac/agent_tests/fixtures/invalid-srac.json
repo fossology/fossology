@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "0.2-draft",
+  "assertionId": "srac-invalid-001",
+  "subject": {
+    "name": "invalid-component",
+    "purl": "pkg:generic/invalid-component@1.0.0",
+    "version": "1.0.0"
+  },
+  "safetyRelevance": {
+    "status": "invalid-status-value",
+    "classification": "ASIL-B"
+  },
+  "rationale": "Testing invalid assertion validation.",
+  "evidence": [
+    {
+      "id": "ev-duplicate-001",
+      "type": "verification-report",
+      "uri": "https://example.org/evidence/1"
+    },
+    {
+      "id": "ev-duplicate-001",
+      "type": "verification-report",
+      "uri": "https://example.org/evidence/2"
+    }
+  ],
+  "impactAnalysis": [
+    {
+      "id": "impact-001",
+      "trigger": {
+        "type": "code-change",
+        "uri": "https://example.org/trigger"
+      },
+      "impactAnalysisStatus": "complete",
+      "safetyIntegrityLevel": "asilD",
+      "impactedElement": ["non-existent-element-id"],
+      "decisions": [
+        {
+          "id": "dec-001",
+          "decisionType": "approve",
+          "decisionStatus": "recorded",
+          "appliesTo": ["non-existent-element-id"],
+          "rationale": "Decision rationale"
+        }
+      ]
+    }
+  ],
+  "assertion": {
+    "status": "draft",
+    "author": {
+      "name": "Tester"
+    },
+    "created": "2026-09-01T10:00:00Z"
+  }
+}
