@@ -115,11 +115,33 @@ class ScanOptions
     $this->prepareDecider($paramAgentRequest);
     $this->prepareScancode($paramAgentRequest);
     $returnStatus = (new \AgentAdder())->scheduleAgents($uploadId, $agentsToAdd, $paramAgentRequest);
-    if (is_numeric($returnStatus)) {
-      return new Info(201, $returnStatus, InfoType::INFO);
+    if (is_array($returnStatus)) {
+      return $this->buildScheduleInfo($returnStatus);
     } else {
       throw new HttpForbiddenException($returnStatus);
     }
+  }
+
+  /**
+   * @param array $result Result of AgentAdder::scheduleAgents() with keys
+   *                       `jobId`, `alreadyRun` and `scheduled`
+   * @return \Fossology\UI\Api\Models\Info
+   */
+  private function buildScheduleInfo($result)
+  {
+    $jobId = $result['jobId'];
+    $alreadyRun = $result['alreadyRun'];
+    $scheduled = $result['scheduled'];
+
+    if ($jobId === null) {
+      return new Info(200, "No new agents were scheduled.", InfoType::INFO);
+    }
+
+    if (! empty($alreadyRun)) {
+      return new Info(201, $jobId, InfoType::INFO, $scheduled, $alreadyRun);
+    }
+
+    return new Info(201, $jobId, InfoType::INFO);
   }
 
   /**
