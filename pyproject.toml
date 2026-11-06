@@ -1,0 +1,78 @@
+# NOTE: This file configures Python linting and type-checking tools only.
+# FOSSology is not a Python project — this is not a build/packaging config.
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+indent-width = 2
+
+# Exclude test data files (license specimens, not real Python code)
+exclude = [
+  "src/nomos/agent_tests/testdata/",
+  "src/copyright/agent_tests/testdata/",
+]
+
+[tool.ruff.lint]
+# Start with a minimal, non-disruptive rule set.
+# Only flag actual bugs and serious issues — not style modernization.
+#   E   = pycodestyle errors (subset — see ignores below)
+#   F   = pyflakes (unused imports, undefined names, etc.)
+#   W   = pycodestyle warnings (subset)
+#   B   = flake8-bugbear (common bug patterns)
+select = ["E", "F", "W", "B"]
+
+ignore = [
+  "E501",   # Line too long — not enforced to avoid churn
+  "E402",   # Module-level import not at top — fossologyscanner.py configures logging first
+  "W291",   # Trailing whitespace — cosmetic, avoid churn on existing code
+  "W292",   # No newline at end of file — cosmetic
+  "W293",   # Blank line contains whitespace — cosmetic
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Legacy test harness: uses deprecated optparse, very different style
+"src/scheduler/agent_tests/Functional/Functional.py" = ["E", "W", "F", "B"]
+# Third-party integration script with wildcard imports
+"src/decider/agent/copyrightDeactivationClutterRemovalScript.py" = ["F403", "F405"]
+# Pre-existing patterns in scanner modules
+"utils/automation/FoScanner/Scanners.py" = ["B007"]
+"utils/automation/FoScanner/Spdx3Report.py" = ["B007", "E741", "F401"]
+"utils/automation/FoScanner/SpdxReport.py" = ["B007"]
+"utils/automation/FoScanner/FormatResults.py" = ["B007"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["FoScanner", "ScanDeps"]
+
+[tool.ruff.format]
+indent-style = "space"
+quote-style = "preserve"
+
+[tool.mypy]
+python_version = "3.10"
+mypy_path = "utils/automation"
+ignore_missing_imports = true
+check_untyped_defs = false
+warn_redundant_casts = true
+warn_unused_ignores = true
+disable_error_code = ["import-untyped"]
+
+# Exclude test data and legacy files from type checking
+exclude = [
+  "src/nomos/agent_tests/testdata/",
+  "src/copyright/agent_tests/testdata/",
+  "src/scheduler/agent_tests/Functional/",
+  "src/decider/agent/",
+]
+
+# Per-module overrides for files with heavy pre-existing type issues.
+[[tool.mypy.overrides]]
+module = [
+  "FoScanner.*",
+  "ScanDeps.*",
+  "fossologyscanner",
+  "osadl_convertor",
+  "utils.osadl_convertor",
+  "src.scancode.agent.runscanonfiles",
+  "runscanonfiles",
+]
+ignore_errors = true
