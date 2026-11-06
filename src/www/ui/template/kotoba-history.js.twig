@@ -13,3 +13,56 @@ function refreshKotobaHistory(callbacksuccess) {
   });
 }
 
+var kotobaDeletionWindowSeconds = 3600;
+
+function isKotobaDeletionExpired(dateAdded) {
+  if (!dateAdded) {
+    return false;
+  }
+  var now = Math.floor(Date.now() / 1000);
+  return (now - dateAdded) > kotobaDeletionWindowSeconds;
+}
+
+function deleteKotobaEntry(phraseId, dateAdded) {
+  if (isKotobaDeletionExpired(dateAdded)) {
+    alert('{{ "You can only delete entries within one hour of creation."| trans|e('js') }}');
+    return;
+  }
+  if (!confirm('{{ "Are you sure you want to delete this kotoba scan entry ?\n\nDeleting it will permanently remove it from kotoba history and undo all decisions previously applied using this phrase.\n\nYou can only delete this entry within one hour of its creation."| trans|e('js') }}')) {
+    return;
+  }
+  
+  $.ajax({
+    url: "{{ baseuri }}?mod=kotoba-history",
+    type: "POST",
+    data: {
+      do: "deleteKotoba",
+      cpFk: phraseId
+    },
+    success: function(response) {
+      try {
+        var data = typeof response === 'string' ? JSON.parse(response) : response;
+        if (data.status === 'success') {
+          $('#decTypeSet').addClass('border-danger');
+          
+          refreshKotobaHistory(function() {
+            if (typeof createClearingTable === 'function') {
+              var clearingTable = createClearingTable();
+              if (clearingTable && typeof clearingTable.fnDraw === 'function') {
+                clearingTable.fnDraw(false);
+              }
+            }
+          });
+        } else {
+          alert('{{ "Error deleting kotoba entry: "| trans|e('js') }}' + (data.message || 'Unknown error'));
+        }
+      } catch (e) {
+        alert('{{ "Error deleting kotoba entry: "| trans|e('js') }}' + 'Invalid response: ' + response);
+      }
+    },
+    error: function(xhr, status, error) {
+      alert('{{ "Error deleting kotoba entry: "| trans|e('js') }}' + error);
+    }
+  });
+}
+

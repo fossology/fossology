@@ -5,12 +5,25 @@
 #}
 <table class="dataTable" border="1" cellpadding="5px" id="kotobaHistoryTable" name="kotobaHistoryTable">
   <tr>
+    <th>{{ 'Action'| trans }}</th>
     <th>{{ 'License'| trans }}</th>
     <th>{{ 'Text'| trans }}</th>
   </tr>
   {% if kotobaHistory %}
+  {% set nowEpoch = "now"|date("U") %}
   {% for row in kotobaHistory %}
     <tr class="{{ cycle(['odd','even'], loop.index0) }}{% if row.matched %} match{% endif %}{% if not row.tried %} inactive{% endif %}">
+      <td>
+        {% set expired = row.dateAdded is not null and (nowEpoch - row.dateAdded) > 3600 %}
+        {% if expired %}
+          <img class="delete delete-disabled" src="images/space_16.png" alt="{{ 'Delete'| trans }}"
+               title="{{ 'You can only delete entries within one hour of creation.'| trans }}"/>
+        {% else %}
+        <a href="javascript:;" onclick="deleteKotobaEntry({{ row.phraseId }}{% if row.dateAdded is not null %}, {{ row.dateAdded }}{% endif %});" title="{{ 'Delete this kotoba scan entry'| trans }}">
+          <img class="delete" src="images/space_16.png" alt="{{ 'Delete'| trans }}"/>
+        </a>
+        {% endif %}
+      </td>
       <td>
           <table>
             {% if row.addedLicenses is not empty %}
@@ -40,6 +53,7 @@
   {% endfor %}
   {% else %}
     <tr class="even">
+      <td>&lt;no entries&gt;</td>
       <td>&lt;no entries&gt;</td>
       <td>&lt;no entries&gt;</td>
     </tr>
