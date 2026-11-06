@@ -5,6 +5,12 @@ create role fossy with createdb login password 'fossy';
 --
 -- PostgreSQL database dump
 --
+-- The database name comes from the psql variable "dbname"; it defaults to
+-- fossology when the script is run without -v dbname=<name>.
+\if :{?dbname}
+\else
+\set dbname fossology
+\endif
 
 SET client_encoding = 'UTF8';
 SET check_function_bodies = false;
@@ -14,12 +20,12 @@ SET client_min_messages = warning;
 -- Name: fossology; Type: DATABASE; Schema: -; Owner: fossy
 --
 
-CREATE DATABASE fossology WITH TEMPLATE = template1 ENCODING = 'UTF8';
+CREATE DATABASE :"dbname" WITH TEMPLATE = template1 ENCODING = 'UTF8';
 
 
-ALTER DATABASE fossology OWNER TO fossy;
+ALTER DATABASE :"dbname" OWNER TO fossy;
 
-\connect fossology
+\connect :"dbname"
 CREATE LANGUAGE plpgsql;
 
 SET client_encoding = 'UTF8';

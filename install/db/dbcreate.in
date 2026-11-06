@@ -4,13 +4,22 @@
 
 # SPDX-License-Identifier: GPL-2.0-only
 #
-# This script checks to see if the the fossology db exists and if not
+# This script checks to see if the fossology db (FOSSOLOGY_DB_NAME,
+# default "fossology") exists and if not
 # then creates it.
 
 if [ "$FOSSOLOGY_DB_HOST" ]; then
   echo "NOTE: using external DB on host $FOSSOLOGY_DB_HOST"
   exit 0
 fi
+
+DBNAME="${FOSSOLOGY_DB_NAME:-fossology}"
+case "$DBNAME" in
+  ''|*[!A-Za-z0-9_]*)
+    echo "ERROR: invalid database name '$DBNAME' (use only letters, digits and _)"
+    exit 1
+    ;;
+esac
 
 echo "*** Setting up the FOSSology database ***"
 
@@ -35,34 +44,34 @@ if [ $? != 0 ]; then
 fi
 
 # then check to see if the db already exists
-su --whitelist-environment="PGHOST" postgres -c "psql --tuples-only --command \"select * from pg_database where datname = 'fossology';\""|grep fossology >/dev/null 2>&1
+su --whitelist-environment="PGHOST" postgres -c "psql --tuples-only --no-align --command \"select 1 from pg_database where datname = '$DBNAME';\""|grep -q 1
 if [ $? = 0 ]; then
-   echo "NOTE: fossology database already exists, not creating"
+   echo "NOTE: $DBNAME database already exists, not creating"
    echo "*** Checking for plpgsql support ***"
-   su --whitelist-environment="PGHOST" postgres -c 'echo "SELECT * FROM pg_language;" | psql -t fossology' |grep -q plpgsql
+   su --whitelist-environment="PGHOST" postgres -c "echo 'SELECT * FROM pg_language;' | psql -t $DBNAME" |grep -q plpgsql
    if [ $? = 0 ]; then
-      echo "NOTE: plpgsql already exists in fossology database, good"
+      echo "NOTE: plpgsql already exists in $DBNAME database, good"
    else
       echo "NOTE: plpgsql doesn't exist, adding"
-      su --whitelist-environment="PGHOST" postgres -c 'echo "CREATE LANGUAGE plpgsql;" | psql fossology'
+      su --whitelist-environment="PGHOST" postgres -c "echo 'CREATE LANGUAGE plpgsql;' | psql $DBNAME"
       if [ $? != 0 ]; then
-         echo "ERROR: failed to add plpgsql to fossology database"
+         echo "ERROR: failed to add plpgsql to $DBNAME database"
       fi
    fi
    echo "*** Checking for 'uuid-ossp' support ***"
-   su --whitelist-environment="PGHOST" postgres -c 'echo "SELECT * FROM pg_extension;" | psql -t fossology' |grep -q uuid-ossp
+   su --whitelist-environment="PGHOST" postgres -c "echo 'SELECT * FROM pg_extension;' | psql -t $DBNAME" |grep -q uuid-ossp
    if [ $? = 0 ]; then
-      echo "NOTE: 'uuid-ossp' already exists in fossology database, good"
+      echo "NOTE: 'uuid-ossp' already exists in $DBNAME database, good"
    else
       echo "NOTE: 'uuid-ossp' doesn't exist, adding"
-      su --whitelist-environment="PGHOST" postgres -c 'echo "CREATE EXTENSION \"uuid-ossp\";" | psql fossology'
+      su --whitelist-environment="PGHOST" postgres -c "echo 'CREATE EXTENSION \"uuid-ossp\";' | psql $DBNAME"
       if [ $? != 0 ]; then
-         echo "ERROR: failed to add 'uuid-ossp' to fossology database"
+         echo "ERROR: failed to add 'uuid-ossp' to $DBNAME database"
       fi
    fi
 else
    echo "*** Initializing database ***"
-   su --whitelist-environment="PGHOST" postgres -c psql < @FO_LIBEXECDIR@/fossologyinit.sql
+   su --whitelist-environment="PGHOST" postgres -c "psql -v dbname=$DBNAME" < @FO_LIBEXECDIR@/fossologyinit.sql
    if [ $? != 0 ] ; then
       echo "ERROR: Database failed during configuration."
       exit 1
