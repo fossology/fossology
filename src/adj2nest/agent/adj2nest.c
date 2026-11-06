@@ -115,34 +115,38 @@ void	WalkTree	(long Index, long Depth)
 {
   long LeftSet;
   PGresult* pgResult;
+  int i;
 
-  if (agent_verbose)
+  /* Traverse sibling chain iteratively to avoid stack overflow on directories
+     with a large number of files
+  */
+  for (;;)
     {
-    int i;
-    for(i=0; i<Depth; i++) printf(" ");
-    LOG_VERBOSE("%ld\n",Tree[Index].UploadtreePk);
-    }
+    if (agent_verbose)
+      {
+      for(i=0; i<Depth; i++) printf(" ");
+      LOG_VERBOSE("%ld\n",Tree[Index].UploadtreePk);
+      }
 
-  LeftSet = SetNum;
-  SetNum++;
-
-  if (Tree[Index].Child > -1)
-    {
-    WalkTree(Tree[Index].Child,Depth+1);
+    LeftSet = SetNum;
     SetNum++;
-    }
 
-  snprintf(SQL,sizeof(SQL),"UPDATE %s SET lft='%ld', rgt='%ld' WHERE uploadtree_pk='%ld'",
+    if (Tree[Index].Child > -1)
+      {
+      WalkTree(Tree[Index].Child,Depth+1);
+      SetNum++;
+      }
+
+    snprintf(SQL,sizeof(SQL),"UPDATE %s SET lft='%ld', rgt='%ld' WHERE uploadtree_pk='%ld'",
 	uploadtree_tablename,LeftSet,SetNum,Tree[Index].UploadtreePk);
-  pgResult = PQexec(pgConn, SQL);
-  fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__, __LINE__);
-  PQclear(pgResult);
-  fo_scheduler_heart(1);
+    pgResult = PQexec(pgConn, SQL);
+    fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__, __LINE__);
+    PQclear(pgResult);
+    fo_scheduler_heart(1);
 
-  if (Tree[Index].Sibling > -1)
-    {
+    if (Tree[Index].Sibling < 0) break;
     SetNum++;
-    WalkTree(Tree[Index].Sibling,Depth+1);
+    Index = Tree[Index].Sibling;
     }
 
 } /* WalkTree() */
