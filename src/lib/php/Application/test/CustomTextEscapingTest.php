@@ -15,14 +15,16 @@ class CustomTextEscapingTest extends \PHPUnit\Framework\TestCase
 {
   /**
    * @test
-   * @dataProvider roundTripProvider
    */
-  public function testEscapeThenUnescapeRoundTrips(string $original, string $expectedAfterCrlfNormalization): void
+  public function testEscapeThenUnescapeRoundTrips(): void
   {
-    $escaped = CustomTextEscaping::escapeNewlines($original);
-    $restored = CustomTextEscaping::unescapeNewlines($escaped);
+    foreach (self::roundTripProvider() as $testCase) {
+      [$original, $expectedAfterCrlfNormalization] = $testCase;
+      $escaped = CustomTextEscaping::escapeNewlines($original);
+      $restored = CustomTextEscaping::unescapeNewlines($escaped);
 
-    $this->assertSame($expectedAfterCrlfNormalization, $restored);
+      $this->assertSame($expectedAfterCrlfNormalization, $restored);
+    }
   }
 
   public static function roundTripProvider(): array
