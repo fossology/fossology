@@ -337,6 +337,8 @@ $app->group('/jobs',
     $app->post('', JobController::class . ':createJob');
     $app->get('/history', JobController::class . ':getJobsHistory');
     $app->get('/dashboard', JobController::class . ':getAllServerJobsStatus');
+    $app->get('/{id:\d+}/{queue:\d+}/log', JobController::class . ':getJobLog');
+    $app->get('/{id:\d+}/{queue:\d+}/log/download', JobController::class . ':downloadJobLog');
     $app->delete('/{id:\\d+}/{queue:\\d+}', JobController::class . ':deleteJob');
     $app->any('/{params:.*}', BadRequestController::class);
   });
