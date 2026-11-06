@@ -65,9 +65,43 @@ void test_guess_encodingLatin1() {
   }
 }
 
+void test_guess_converter_utf8() {
+  char* buffer = "an utf8 ß";
+  iconv_t converter = guessConverter(buffer, strlen(buffer));
+
+  CU_ASSERT_PTR_NULL(converter);
+  if (converter && converter != (iconv_t) -1) {
+    iconv_close(converter);
+  }
+}
+
+void test_guess_converter_latin1() {
+  char* buffer = "a latin1 \xdf\x0a"; // ß
+  iconv_t converter = guessConverter(buffer, strlen(buffer));
+
+  CU_ASSERT_PTR_NOT_NULL(converter);
+  CU_ASSERT_TRUE(converter != (iconv_t) -1);
+
+  if (converter && converter != (iconv_t) -1) {
+    iconv_close(converter);
+  }
+}
+
+void test_guess_converter_null_or_empty() {
+  iconv_t converter = guessConverter(NULL, 0);
+  CU_ASSERT_PTR_NULL(converter);
+
+  char* emptyBuffer = "";
+  converter = guessConverter(emptyBuffer, 0);
+  CU_ASSERT_PTR_NULL(converter);
+}
+
 CU_TestInfo encoding_testcases[] = {
   {"Testing guessing encoding of buffer:", test_guess_encoding},
   {"Testing guessing encoding of buffer utf8:", test_guess_encodingUtf8},
   {"Testing guessing encoding of buffer Latin1:", test_guess_encodingLatin1},
+  {"Testing guessConverter with utf8 buffer:", test_guess_converter_utf8},
+  {"Testing guessConverter with Latin1 buffer:", test_guess_converter_latin1},
+  {"Testing guessConverter with null or empty buffer:", test_guess_converter_null_or_empty},
   CU_TEST_INFO_NULL
 };
