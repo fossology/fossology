@@ -235,16 +235,17 @@ function DB_TableExists($tableName)
  *
  * \param string $tableName Table to check in
  * \param string $colName   Column to check
- * \param string $DBName    Database name, default "fossology"
+ * \param string|null $DBName Database name, defaults to the connected database
  *
  * \return 1 if column exists, 0 if not.
 **/
-function DB_ColExists($tableName, $colName, $DBName='fossology')
+function DB_ColExists($tableName, $colName, $DBName=null)
 {
   global $PG_CONN;
 
+  $catalog = empty($DBName) ? 'current_database()' : pg_escape_literal($PG_CONN, $DBName);
   $sql = "select count(*) as count from information_schema.columns where "
-       . "table_catalog='$DBName' and table_name='$tableName' and column_name='$colName'";
+       . "table_catalog=$catalog and table_name='$tableName' and column_name='$colName'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
@@ -259,16 +260,17 @@ function DB_ColExists($tableName, $colName, $DBName='fossology')
  * \note This is postgresql specific.
  *
  * \param string $ConstraintName Constraint to check
- * \param string $DBName         Database name, default "fossology"
+ * \param string|null $DBName    Database name, defaults to the connected database
  *
  * \return True if constraint exists, False if not.
 **/
-function DB_ConstraintExists($ConstraintName, $DBName='fossology')
+function DB_ConstraintExists($ConstraintName, $DBName=null)
 {
   global $PG_CONN;
 
+  $catalog = empty($DBName) ? 'current_database()' : pg_escape_literal($PG_CONN, $DBName);
   $sql = "select count(*) as count from information_schema.table_constraints "
-       . "where table_catalog='$DBName' and constraint_name='$ConstraintName' limit 1";
+       . "where table_catalog=$catalog and constraint_name='$ConstraintName' limit 1";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
@@ -341,4 +343,3 @@ function DB_ColumnConstraints($table, $column)
   pg_free_result($result);
   return $constraints;
 }
-
