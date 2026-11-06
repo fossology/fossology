@@ -1887,6 +1887,85 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
+   * Values of agentId that are not a positive integer in agent_pk's (int4)
+   * range.
+   * @return array
+   */
+  public function invalidAgentIdProvider()
+  {
+    return [
+      'not a number' => ['abc'],
+      'decimal' => ['1.5'],
+      'zero' => ['0'],
+      'negative' => ['-1'],
+      'empty' => [''],
+      'above int4 range' => ['2147483648'],
+    ];
+  }
+
+  /**
+   * Mock an accessible upload and build a GET request with the given agentId.
+   * @param int $uploadId
+   * @param string $agentId
+   * @return Request
+   */
+  private function getAgentIdRequest($uploadId, $agentId)
+  {
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->dbHelper->shouldNotReceive('doesIdExist')
+      ->with("agent", "agent_pk", M::any());
+    $uri = (new Uri("HTTP", "localhost"))
+      ->withQuery(http_build_query(["agentId" => $agentId]));
+    return new Request("GET", $uri, new Headers(), [], [],
+      $this->streamFactory->createStream());
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::getUploadSummary() with an invalid agentId
+   *   -# Check if HttpBadRequestException is thrown before the id reaches the database
+   * @dataProvider invalidAgentIdProvider
+   */
+  public function testGetUploadSummaryInvalidAgentId($agentId)
+  {
+    $request = $this->getAgentIdRequest(3, $agentId);
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("agentId should be positive integer.");
+    $this->uploadController->getUploadSummary($request, new ResponseHelper(), ["id" => 3]);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::getLicensesHistogram() with an invalid agentId
+   *   -# Check if HttpBadRequestException is thrown before the id reaches the database
+   * @dataProvider invalidAgentIdProvider
+   */
+  public function testGetLicensesHistogramInvalidAgentId($agentId)
+  {
+    $request = $this->getAgentIdRequest(3, $agentId);
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("agentId should be positive integer.");
+    $this->uploadController->getLicensesHistogram($request, new ResponseHelper(), ["id" => 3]);
+  }
+
+  /**
+   * @test
+   *   -# Test UploadController::getScannedLicenses() with an invalid agentId
+   *   -# Check if HttpBadRequestException is thrown before the id reaches the database
+   * @dataProvider invalidAgentIdProvider
+   */
+  public function testGetScannedLicensesInvalidAgentId($agentId)
+  {
+    $request = $this->getAgentIdRequest(3, $agentId);
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("agentId should be positive integer.");
+    $this->uploadController->getScannedLicenses($request, new ResponseHelper(), ["id" => 3]);
+  }
+
+  /**
    * @test
    *   -# Test UploadController::agentsRevision()
    *   -# Check if is the statusCode is 200.
