@@ -54,4 +54,64 @@ class AuthTest extends \PHPUnit\Framework\TestCase
     $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
     $this->assertTrue(Auth::isAdmin());
   }
+
+  /**
+   * @test
+   * -# getUserId() must return 0 when $GLOBALS['SysConf'] is not populated.
+   */
+  public function testGetUserIdZeroWhenSysConfEmpty(): void
+  {
+    $prevSysConf = array_key_exists('SysConf', $GLOBALS) ? $GLOBALS['SysConf'] : null;
+    unset($GLOBALS['SysConf']);
+    try {
+      $this->assertSame(0, Auth::getUserId());
+    } finally {
+      $GLOBALS['SysConf'] = $prevSysConf;
+    }
+  }
+
+  /**
+   * @test
+   * -# getUserId() must return user id when $GLOBALS['SysConf']['auth'] is populated.
+   */
+  public function testGetUserIdWhenSysConfPopulated(): void
+  {
+    $prevSysConf = array_key_exists('SysConf', $GLOBALS) ? $GLOBALS['SysConf'] : null;
+    $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 42;
+    try {
+      $this->assertSame(42, Auth::getUserId());
+    } finally {
+      $GLOBALS['SysConf'] = $prevSysConf;
+    }
+  }
+
+  /**
+   * @test
+   * -# getGroupId() must return 0 when $GLOBALS['SysConf'] is not populated.
+   */
+  public function testGetGroupIdZeroWhenSysConfEmpty(): void
+  {
+    $prevSysConf = array_key_exists('SysConf', $GLOBALS) ? $GLOBALS['SysConf'] : null;
+    unset($GLOBALS['SysConf']);
+    try {
+      $this->assertSame(0, Auth::getGroupId());
+    } finally {
+      $GLOBALS['SysConf'] = $prevSysConf;
+    }
+  }
+
+  /**
+   * @test
+   * -# getGroupId() must return group id when $GLOBALS['SysConf']['auth'] is populated.
+   */
+  public function testGetGroupIdWhenSysConfPopulated(): void
+  {
+    $prevSysConf = array_key_exists('SysConf', $GLOBALS) ? $GLOBALS['SysConf'] : null;
+    $GLOBALS['SysConf']['auth'][Auth::GROUP_ID] = 10;
+    try {
+      $this->assertSame(10, Auth::getGroupId());
+    } finally {
+      $GLOBALS['SysConf'] = $prevSysConf;
+    }
+  }
 }

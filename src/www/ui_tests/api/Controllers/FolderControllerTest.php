@@ -392,7 +392,7 @@ namespace Fossology\UI\Api\Test\Controllers
       $this->folderDao->shouldReceive('isFolderAccessible')
         ->withArgs(array($parentFolder, $this->userId))->andReturn(true);
       $this->folderPlugin->shouldReceive('create')
-        ->withArgs(array($parentFolder, $folderName, $folderDescription))
+        ->withArgs(array($parentFolder, $folderName, $folderDescription, $this->userId))
         ->andReturn(1);
       $this->folderDao->shouldReceive('getFolderId')
         ->withArgs(array($folderName, $parentFolder))->andReturn($folderId);
@@ -516,7 +516,7 @@ namespace Fossology\UI\Api\Test\Controllers
       $this->folderDao->shouldReceive('isFolderAccessible')
         ->withArgs(array($parentFolder, $this->userId))->andReturn(true);
       $this->folderPlugin->shouldReceive('create')
-        ->withArgs(array($parentFolder, $folderName, $folderDescription))
+        ->withArgs(array($parentFolder, $folderName, $folderDescription, $this->userId))
         ->andReturn(4);
       $requestHeaders = new Headers();
       $requestHeaders->setHeader('parentFolder', $parentFolder);
