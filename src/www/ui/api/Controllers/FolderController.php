@@ -150,13 +150,21 @@ class FolderController extends RestController
     }
     /** @var \admin_folder_delete $folderDelete */
     $folderDelete = $this->restHelper->getPlugin('admin_folder_delete');
+    $rootFolder = $folderDao->getRootFolder($this->restHelper->getUserId());
+    if ($rootFolder !== null && $rootFolder->getId() == $folderId) {
+      throw new HttpForbiddenException("Can not delete the root folder!");
+    }
     $folderName = FolderGetName($folderId);
     $folderArray = Folder2Path($folderId);
+    if (count($folderArray) < 2) {
+      throw new HttpForbiddenException("Can not delete a folder without a parent!");
+    }
     $folderParent = intval($folderArray[count($folderArray) - 2]['folder_pk']);
     $folderId = "$folderParent $folderId";
 
     $rc = $folderDelete->Delete($folderId, $this->restHelper->getUserId());
-    if ($rc == "No access to delete this folder") {
+    if ($rc == "No access to delete this folder" ||
+        $rc == "Can Not Delete Root Folder") {
       throw new HttpForbiddenException($rc);
     } elseif ($rc !== null) {
       throw new HttpInternalServerErrorException($rc);
