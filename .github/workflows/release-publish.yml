@@ -24,6 +24,7 @@ jobs:
           - 'debian:trixie'
           - 'ubuntu:jammy'
           - 'ubuntu:noble'
+          - 'ubuntu:resolute'
 
     runs-on: ubuntu-latest
     container: ${{ matrix.os }}

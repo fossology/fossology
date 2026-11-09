@@ -80,6 +80,8 @@ if [[ $RUNTIME ]]; then
           apt-get $YesOpt install libpq5 libicu70;;
         noble)
           apt-get $YesOpt install libpq5 libicu74;;
+        resolute)
+          apt-get $YesOpt install libpq5 libicu78;;
         *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
       esac;;
     Fedora|RedHatEnterprise*|CentOS)

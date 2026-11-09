@@ -95,6 +95,8 @@ if [[ $RUNTIME ]]; then
           apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0;;
         noble)
           apt-get $YesOpt install libjsoncpp25 libboost-filesystem1.74.0 libboost-program-options1.74.0 libboost-regex1.74.0;;
+        resolute)
+          apt-get $YesOpt install libjsoncpp26 libboost-filesystem1.90.0 libboost-program-options1.90.0 libboost-regex1.90.0;;
         *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
       esac;;
     Fedora)
