@@ -25,6 +25,11 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class SearchController extends RestController
 {
+  /**
+   * @var int PG_INT4_MAX Largest value of the int4 upload_fk column
+   */
+  const PG_INT4_MAX = 2147483647;
+
   /** @var SearchHelperDao $searchHelperDao */
   private $searchHelperDao;
 
@@ -75,7 +80,8 @@ class SearchController extends RestController
     // set uploadId to 0 - search in all files
     if (empty($uploadId)) {
       $uploadId = 0;
-    } elseif (! ctype_digit((string) $uploadId)) {
+    } elseif (! ctype_digit((string) $uploadId) ||
+      intval($uploadId) > self::PG_INT4_MAX) {
       throw new HttpBadRequestException(
         "uploadId must be a positive integer!");
     } else {
