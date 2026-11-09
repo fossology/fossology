@@ -25,8 +25,9 @@ use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Mockery as M;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
-$GLOBALS['globalSession'] = new Session();
+$GLOBALS['globalSession'] = new Session(new MockArraySessionStorage());
 $GLOBALS['globalSession']->set('t','t');
 
 function plugin_find($plugin)

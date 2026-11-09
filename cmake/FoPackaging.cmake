@@ -122,13 +122,13 @@ This package contains the resources needed by all of the other
 fossology components. This includes admin tools for maintenance.")
 
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_DEPENDS
-    "php7.2-pgsql | php7.3-pgsql | php7.4-pgsql | php8.1-pgsql | php8.2-pgsql | php8.3-pgsql | php8.4-pgsql | php8.5-pgsql,
-    php-pear, php7.2-cli | php7.3-cli | php7.4-cli | php8.1-cli | php8.2-cli | php8.3-cli | php8.4-cli | php8.5-cli,
-    php-mbstring, php7.2-json | php7.3-json | php7.4-json | php-json,
+    "php8.1-pgsql | php8.2-pgsql | php8.3-pgsql | php8.4-pgsql | php8.5-pgsql,
+    php-pear, php8.1-cli | php8.2-cli | php8.3-cli | php8.4-cli | php8.5-cli,
+    php-mbstring, php-json,
     php-zip, php-xml,
-    php7.2-curl | php7.3-curl | php7.4-curl | php8.1-curl | php8.2-curl | php8.3-curl | php8.4-curl | php8.5-curl | php-uuid,
-    php7.2-gd | php7.3-gd | php7.4-gd | php8.1-gd | php8.2-gd | php8.3-gd | php8.4-gd | php8.5-gd,
-    php7.2-yaml | php7.3-yaml | php7.4-yaml | php8.1-yaml | php8.2-yaml | php8.3-yaml | php8.4-yaml | php8.5-yaml | php-yaml")
+    php8.1-curl | php8.2-curl | php8.3-curl | php8.4-curl | php8.5-curl | php-uuid,
+    php8.1-gd | php8.2-gd | php8.3-gd | php8.4-gd | php8.5-gd,
+    php8.1-yaml | php8.2-yaml | php8.3-yaml | php8.4-yaml | php8.5-yaml | php-yaml")
 
 set(CPACK_DEBIAN_FOSSOLOGY-COMMON_PACKAGE_CONFLICTS
     "fossology-spdx2 (<< 4.5.0)")
@@ -148,8 +148,8 @@ ${FO_PACKAGE_COMMON_DESCRIPTION}
 This package depends on the packages for the web interface.")
 
 set(CPACK_DEBIAN_WWW_PACKAGE_DEPENDS
-    "fossology-common, apache2, php7.2-gd|php7.3-gd|php7.4-gd|php8.1-gd|php8.2-gd|php8.3-gd|php8.4-gd|php8.5-gd,
-    libapache2-mod-php7.2|libapache2-mod-php7.3|libapache2-mod-php7.4|libapache2-mod-php8.1|libapache2-mod-php8.2|libapache2-mod-php8.3|libapache2-mod-php8.4|libapache2-mod-php8.5")
+    "fossology-common, apache2, php8.1-gd|php8.2-gd|php8.3-gd|php8.4-gd|php8.5-gd,
+    libapache2-mod-php8.1|libapache2-mod-php8.2|libapache2-mod-php8.3|libapache2-mod-php8.4|libapache2-mod-php8.5")
 
 set(CPACK_DEBIAN_WWW_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_WWW_PACKAGE_RECOMMENDS "fossology-db")
