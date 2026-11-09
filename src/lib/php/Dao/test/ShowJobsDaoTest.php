@@ -14,6 +14,8 @@ use Mockery as M;
 
 class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /** @var TestPgDb */
   private $testDb;
   /** @var DbManager */

@@ -15,6 +15,8 @@ use Mockery as M;
 
 class FolderDaoTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /** @var TestPgDb */
   private $testDb;
   /** @var DbManager */

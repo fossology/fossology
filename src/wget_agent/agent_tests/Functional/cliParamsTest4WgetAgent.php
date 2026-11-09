@@ -15,21 +15,24 @@
  */
 
 
-$TEST_RESULT_PATH = "./test_result";
+$GLOBALS['TEST_RESULT_PATH'] = "./test_result";
 
 use Fossology\Lib\Test\TestPgDb;
 use Fossology\Lib\Test\TestInstaller;
 
 /**
- * @class cliParamsTest4Wget
+ * @class cliParamsTest4WgetAgent
  * @biref Test wget agent from cli
  */
-class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
+class cliParamsTest4WgetAgent extends \PHPUnit\Framework\TestCase {
 
   public $WGET_PATH = "";
 
   /** @var TestPgDb */
   private $testDb;
+
+  /** @var TestInstaller */
+  private $testInstaller;
 
   /**
    * @biref Initialization
@@ -85,7 +88,7 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
     exec($command);
     $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/3.0.0/fedora/20/x86_64/fossology-3.0.0-1.fc20.x86_64.rpm");
     $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/3.0.0/fedora/20/x86_64/fossology-wgetagent-3.0.0-1.fc20.x86_64.rpm");
-    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/3.0.0/fedora/20/x86_64/fossology-debuginfo-3.0.0-1.fc20.x86_64.rpm");
+    $this->assertFileDoesNotExist("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/3.0.0/fedora/20/x86_64/fossology-debuginfo-3.0.0-1.fc20.x86_64.rpm");
   }
 
   /**
@@ -104,11 +107,11 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
     global $WGET_PATH;
     //$this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
 
-    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/3.0.0/debian/7.0/ -A deb -R fossology-*  -d $TEST_RESULT_PATH";
+    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/3.0.0/debian/7.0/ -A deb -R 'fossology-*' -d $TEST_RESULT_PATH";
     //print "command is:$command\n";
     exec($command);
     $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/3.0.0/debian/7.0/fossology_3.0.0-1_i386.deb");
-    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/3.0.0/debian/7.0/fossology-ununpack_3.0.0-1_amd64.deb");
+    $this->assertFileDoesNotExist("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/3.0.0/debian/7.0/fossology-ununpack_3.0.0-1_amd64.deb");
   }
 
   /**
@@ -130,8 +133,8 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
     $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/ -A rpm -R fossology-2.0.0-1.fc15.src.rpm,fossology-common-2.0.0-1.fc15.x86_64.rpm -l 1 -d $TEST_RESULT_PATH";
     //print "command is:$command\n";
     exec($command);
-    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/fossology-common-2.0.0-1.fc15.x86_64.rpm");
-    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/x86_64/fossology-common-2.0.0-1.fc15.x86_64.rpm");
+    $this->assertFileDoesNotExist("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/fossology-common-2.0.0-1.fc15.x86_64.rpm");
+    $this->assertFileDoesNotExist("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/x86_64/fossology-common-2.0.0-1.fc15.x86_64.rpm");
     $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386");
     $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/x86_64");
   }
@@ -191,11 +194,11 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
     global $WGET_PATH;
     //$this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
 
-    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/ -A fossology* -R fossology-2.0.0-1.fc15.i386.rpm,fossology-2.0.0-1.fc15.src.rpm -d $TEST_RESULT_PATH -l 2";
+    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/ -A 'fossology*' -R fossology-2.0.0-1.fc15.i386.rpm,fossology-2.0.0-1.fc15.src.rpm -d $TEST_RESULT_PATH -l 2";
     //print "command is:$command\n";
     exec($command);
     $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/fossology-pkgagent-2.0.0-1.fc15.i386.rpm");
-    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/fossology-2.0.0-1.fc15.src.rpm");
+    $this->assertFileDoesNotExist("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/fossology-2.0.0-1.fc15.src.rpm");
   }
 
   /**
@@ -212,11 +215,11 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
     global $WGET_PATH;
     //$this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
 
-    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/ -A fossology-scheduler_2.0.0* -R gz,fossology-scheduler_2.0.0-1_i386* -d $TEST_RESULT_PATH -l 1";
+    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/ -A 'fossology-scheduler_2.0.0*' -R 'gz,fossology-scheduler_2.0.0-1_i386*' -d $TEST_RESULT_PATH -l 1";
     //print "command is:$command\n";
     exec($command);
     $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-scheduler_2.0.0-1_amd64.deb");
-    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-scheduler_2.0.0-1_i386.deb");
+    $this->assertFileDoesNotExist("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-scheduler_2.0.0-1_i386.deb");
   }
 
 
@@ -271,7 +274,7 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
     //$this->change_proxy("no_proxy", "fossology.org");
     $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-mimetype_2.0.0-1_amd64.deb  -d $TEST_RESULT_PATH";
     exec($command);
-    //$this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-mimetype_2.0.0-1_amd64.deb");
+    //$this->assertFileDoesNotExist("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-mimetype_2.0.0-1_amd64.deb");
   }
 
   /**

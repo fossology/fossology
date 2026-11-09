@@ -46,7 +46,6 @@ class test_common_pkg extends \PHPUnit\Framework\TestCase
    */
   function test_GetPkgMimetypes()
   {
-    print "test function GetPkgMimetypes()\n";
 
     #prepare database testdata
     $mimeType = "application/x-rpm";

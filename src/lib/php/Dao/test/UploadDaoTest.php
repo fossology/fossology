@@ -19,6 +19,8 @@ use Mockery as M;
 
 class UploadDaoTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /** @var TestPgDb */
   private $testDb;
   /** @var DbManager */

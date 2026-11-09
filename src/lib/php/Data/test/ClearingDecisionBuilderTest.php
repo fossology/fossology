@@ -16,6 +16,8 @@ use Mockery as M;
 
 class ClearingDecisionBuilderTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /** @var bool */
   private $sameUpload = true;
   /** @var bool */

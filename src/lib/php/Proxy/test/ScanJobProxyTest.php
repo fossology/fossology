@@ -13,6 +13,8 @@ use Mockery as M;
 
 class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   private $agentDaoMock;
   private $uploadId = 23;
   private $agentId = 601;

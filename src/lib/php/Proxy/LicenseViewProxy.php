@@ -46,7 +46,7 @@ class LicenseViewProxy extends DbViewProxy
     if (array_key_exists(self::CANDIDATE_PREFIX, $options)) {
       $shortnameId = array_search('rf_shortname',$columns);
       if ($shortnameId !== false) {
-        $columns[$shortnameId] = "'". pg_escape_string($options[self::CANDIDATE_PREFIX]). '\'||rf_shortname AS rf_shortname';
+        $columns[$shortnameId] = "'". str_replace("'", "''", $options[self::CANDIDATE_PREFIX]). '\'||rf_shortname AS rf_shortname';
       }
     }
     $gluedColumns = implode(',', $columns);

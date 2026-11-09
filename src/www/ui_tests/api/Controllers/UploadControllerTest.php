@@ -62,6 +62,8 @@ function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
  */
 class UploadControllerTest extends \PHPUnit\Framework\TestCase
 {
+  public $userDao;
+
   /**
    * @var \Mockery\MockInterface $functions
    * Public function mock

@@ -10,6 +10,8 @@ namespace Fossology\Lib\Util;
 
 class StringOperationTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
 
   protected function setUp() : void
   {

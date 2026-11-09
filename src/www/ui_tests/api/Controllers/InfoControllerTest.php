@@ -30,6 +30,8 @@ use Symfony\Component\Yaml\Parser;
  */
 class InfoControllerTest extends \PHPUnit\Framework\TestCase
 {
+  public $infoController;
+
   /**
    * @var string YAML_LOC
    * Location of openapi.yaml file

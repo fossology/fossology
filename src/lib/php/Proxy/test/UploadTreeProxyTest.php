@@ -14,6 +14,9 @@ use Fossology\Lib\Test\TestPgDb;
 
 class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+  public $dbManager;
+
   private $testDb;
 
   protected function setUp() : void

@@ -319,8 +319,8 @@ class DeciderAgent extends Agent
           $itemTreeBounds, $this->userId, $this->groupId,
           DecisionTypes::IDENTIFIED, false);
       } catch (\Exception $e) {
-        echo "Can not auto decide as file '" .
-          $itemTreeBounds->getItemId() . "' contains candidate license.\n";
+        // echo "Can not auto decide as file '" .
+        //   $itemTreeBounds->getItemId() . "' contains candidate license.\n";
       }
     }
     return $licenseMatchExists;
@@ -358,8 +358,8 @@ class DeciderAgent extends Agent
         $itemTreeBounds, $this->userId, $this->groupId,
         DecisionTypes::IDENTIFIED, false);
     } catch (\Exception $e) {
-      echo "Can not auto decide as file '" .
-        $itemTreeBounds->getItemId() . "' contains candidate license.\n";
+      // echo "Can not auto decide as file '" .
+      //   $itemTreeBounds->getItemId() . "' contains candidate license.\n";
       return false;
     }
     return true;
@@ -386,8 +386,8 @@ class DeciderAgent extends Agent
           $itemTreeBounds, $this->userId, $this->groupId,
           DecisionTypes::IDENTIFIED, false);
       } catch (\Exception $e) {
-        echo "Can not auto decide as file '" .
-          $itemTreeBounds->getItemId() . "' contains candidate license.\n";
+        // echo "Can not auto decide as file '" .
+        //   $itemTreeBounds->getItemId() . "' contains candidate license.\n";
       }
     }
     return $licenseMatchExists;

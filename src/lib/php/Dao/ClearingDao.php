@@ -456,6 +456,7 @@ INSERT INTO clearing_decision (
     $row = $this->dbManager->getSingleRow($statementGetOldata, $params, $statementName);
 
     if (!$row) {  //The license was not added as user decision yet -> we promote it here
+      $row = array();
       $type = ClearingEventTypes::USER;
       $row['type_fk'] = $type;
       $row['comment'] = "";

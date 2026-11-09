@@ -21,7 +21,6 @@ class test_common_auth extends \PHPUnit\Framework\TestCase
   /* initialization */
   protected function setUp() : void
   {
-    print "Starting unit test for common-auth.php\n";
   }
 
   /**
@@ -42,7 +41,6 @@ class test_common_auth extends \PHPUnit\Framework\TestCase
    */
   protected function tearDown() : void
   {
-    print "Ending unit test for common-auth.php\n";
   }
 
   /**
