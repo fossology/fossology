@@ -129,6 +129,23 @@ function bootstrap($sysconfdir="")
   return $SysConf;
 }
 
+
+/**
+ * @brief Get the database name from Db.conf.
+ *
+ * @param string $sysconfdir FOSSology system configuration directory
+ * @return string
+ */
+function getDatabaseNameFromConfig($sysconfdir)
+{
+  $dbConf = parse_ini_file("$sysconfdir/Db.conf", false, INI_SCANNER_RAW);
+  if ($dbConf === false || !array_key_exists('dbname', $dbConf) || $dbConf['dbname'] === '') {
+    throw new RuntimeException("FATAL! Missing or invalid database name in $sysconfdir/Db.conf");
+  }
+  return $dbConf['dbname'];
+}
+
+
 /**
  * @brief Using bash's read command, read input from STDIN.
  *
