@@ -438,7 +438,14 @@ ORDER BY lft asc
         $licensesPerFileName[$path]['uploadtree_pk'][] = $row['uploadtree_pk'];
       }
     } else if (!$ignore) {
-      $licensesPerFileName[$path] = false;
+      /* Container that is kept in the listing. When tree ids are requested it
+       * must still carry its uploadtree_pk; downstream consumers (export list
+       * and the REST UploadHelper) read that key unconditionally. */
+      if ($includeTreeId) {
+        $licensesPerFileName[$path]['uploadtree_pk'][] = $row['uploadtree_pk'];
+      } else {
+        $licensesPerFileName[$path] = false;
+      }
     }
   }
 

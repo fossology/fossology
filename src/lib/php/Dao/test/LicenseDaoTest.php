@@ -372,6 +372,17 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
     $this->assertArrayNotHasKey("project.tar.gz", $result);
     $this->assertArrayNotHasKey("project.tar.gz/project.tar", $result);
 
+    //**************************************************************************
+    // Containers that are kept (not ignored) must still carry uploadtree_pk
+    // when tree ids are requested, otherwise the export list and REST path
+    // read a missing key (regression for container tree context)
+    $result = $licDao->getLicensesPerFileNameForAgentId($itemTreeBounds,
+      array($agentId), true, '', false, $noDecisions, true);
+
+    $key = "project.tar.gz";
+    $this->assertArrayHasKey($key, $result);
+    $this->assertArrayHasKey('uploadtree_pk', $result[$key]);
+
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
