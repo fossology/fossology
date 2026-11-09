@@ -2487,6 +2487,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SearchResults'
+        '400':
+          description: >
+            Bad Request. No search parameter given, or uploadId, page, limit,
+            filesizemin or filesizemax is not a valid positive integer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
   /users:
