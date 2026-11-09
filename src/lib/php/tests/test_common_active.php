@@ -29,8 +29,6 @@ class test_common_active extends \PHPUnit\Framework\TestCase
    */
   function testActiveHTTPscript()
   {
-    print "Start unit test for common-active.php\n";
-    print "test function ActiveHTTPscript\n";
     /** $IncludeScriptTags is default 1 */
     $html_result = ActiveHTTPscript("test");
     $script_header = "<script language='javascript'>\n<!--\n";
@@ -72,7 +70,6 @@ class test_common_active extends \PHPUnit\Framework\TestCase
     /** $IncludeScriptTags is no default 1 */
     $html_result = ActiveHTTPscript("test", 0);
     $this->assertEquals($html_expect, $html_result);
-    print "unit test for common-active.php end\n";
   }
 
   /**

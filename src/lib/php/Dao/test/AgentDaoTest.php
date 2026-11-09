@@ -15,6 +15,8 @@ use Monolog\Logger;
 
 class AgentDaoTest extends \PHPUnit\Framework\TestCase
 {
+  public $dbManagerMock;
+
 
   private $uploadId = 25;
   private $olderAgentId = 3;

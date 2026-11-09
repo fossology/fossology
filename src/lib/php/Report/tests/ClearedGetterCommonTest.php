@@ -52,6 +52,9 @@ class WeirdCharClearedGetter extends ClearedGetterCommon
 
 class ClearedGetterCommonTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+  public $clearedGetterTest;
+
   /** @var UploadDao|MockInterface */
   private $uploadDao;
   /** @var TreeDao|MockInterface */

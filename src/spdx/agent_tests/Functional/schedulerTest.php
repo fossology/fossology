@@ -31,6 +31,9 @@ include_once(__DIR__.'/SchedulerTestRunnerCli.php');
  */
 class SchedulerTest extends \PHPUnit\Framework\TestCase
 {
+  public $agentDir;
+  public $assertCountBefore;
+
   /** @var int $userId
    * User id to be used
    */
