@@ -5,12 +5,8 @@ create role fossy with createdb login password 'fossy';
 --
 -- PostgreSQL database dump
 --
--- The database name comes from the psql variable "dbname"; it defaults to
--- fossology when the script is run without -v dbname=<name>.
-\if :{?dbname}
-\else
-\set dbname fossology
-\endif
+-- The database name comes from the psql variable "dbname", which dbcreate
+-- passes with -v dbname=<name> (FOSSOLOGY_DB_NAME, default fossology).
 
 SET client_encoding = 'UTF8';
 SET check_function_bodies = false;

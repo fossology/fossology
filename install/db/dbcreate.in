@@ -20,6 +20,11 @@ case "$DBNAME" in
     exit 1
     ;;
 esac
+# PostgreSQL truncates identifiers longer than 63 bytes
+if [ ${#DBNAME} -gt 63 ]; then
+  echo "ERROR: database name '$DBNAME' is longer than 63 characters"
+  exit 1
+fi
 
 echo "*** Setting up the FOSSology database ***"
 
