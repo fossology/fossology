@@ -2489,8 +2489,9 @@ paths:
                   $ref: '#/components/schemas/SearchResults'
         '400':
           description: >
-            Bad Request. No search parameter given, or uploadId, page, limit,
-            filesizemin or filesizemax is not a valid positive integer.
+            Bad Request. No search parameter given, uploadId is not a
+            non-negative integer (0 searches all uploads), page or limit is
+            less than 1, or filesizemin or filesizemax is negative.
           content:
             application/json:
               schema:
