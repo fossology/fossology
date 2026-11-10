@@ -123,7 +123,7 @@ class BomReportGenerator
     }
 
     if (array_key_exists('mimeType', $componentData) && !empty($componentData['mimeType'])) {
-      $component['mime-type'] = $componentData['mimeType'];
+      $component['mime-type'] = strtolower($componentData['mimeType']);
     }
 
     if (array_key_exists('bomref', $componentData) && !empty($componentData['bomref'])) {
