@@ -83,7 +83,7 @@ class SearchController extends RestController
     } elseif (! ctype_digit((string) $uploadId) ||
       intval($uploadId) > self::PG_INT4_MAX) {
       throw new HttpBadRequestException(
-        "uploadId must be a positive integer!");
+        "uploadId must be a non-negative integer!");
     } else {
       $uploadId = intval($uploadId);
     }
