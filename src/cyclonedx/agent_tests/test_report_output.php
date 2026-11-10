@@ -378,7 +378,7 @@ namespace {
 
   echo "\n";
 
-  echo "Test 16: Component with an invalid mime-type specified shows up valid \n";
+  echo "Test 16: Component with an invalid mime-type specified shows up valid\n";
   $fullComp = $generator->createComponent(array(
     'type' => 'library',
     'name' => 'busybox',
