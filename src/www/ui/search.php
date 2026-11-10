@@ -127,6 +127,20 @@ class search extends FO_Plugin
     $this->vars['uploadsArray'] = $uploadsArray;
 
     $Item = GetParm("item",PARM_INTEGER);
+    $Upload = GetParm("upload",PARM_INTEGER);
+    $uploadFromRequest = ($Upload !== null);
+    if ($Item) {
+      $itemRow = $this->uploadDao->getUploadEntry($Item);
+      $itemUpload = empty($itemRow) ? 0 : intval($itemRow['upload_fk']);
+      if (!$uploadFromRequest) {
+        /* Preselect the upload of the item in the upload filter */
+        $Upload = $itemUpload;
+      } elseif ($Upload != $itemUpload) {
+        /* Another upload was chosen in the filter, drop the item scope */
+        $Item = 0;
+      }
+    }
+    $this->vars['Item'] = $Item;
     /* Show path if searching an item tree (don't show on global searches) */
     if ($Item) {
       $this->vars['pathOfItem'] = Dir2Browse($this->Name, $Item, NULL, 1, NULL) .
@@ -151,10 +165,11 @@ class search extends FO_Plugin
       $this->vars["Filename"] = $Filename;
     }
 
-    $Upload = GetParm("upload",PARM_INTEGER);
     $SelectedUploadName = "All uploads";
     if ($Upload != 0) {
-      $CriteriaCount++;
+      if ($uploadFromRequest) {
+        $CriteriaCount++;
+      }
       $GETvars .= "&upload=" . urlencode($Upload);
       $this->vars["Upload"] = $Upload;
       foreach ($uploadsArray as $row) {
