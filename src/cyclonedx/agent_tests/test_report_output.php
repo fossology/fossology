@@ -400,7 +400,6 @@ namespace {
 
   assert_test('Full component has valid mime-type', $fullComp['mimeType'] === 'application/x-tar');
   echo "\n";
-  
   echo "=== Results ===\n";
   echo "Passed: $passed | Failed: $failed\n";
 
