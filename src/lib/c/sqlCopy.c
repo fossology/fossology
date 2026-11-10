@@ -241,34 +241,50 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char* DataRow)
 int fo_sqlCopyExecute(psqlCopy_t pCopy)
 {
   char copystmt[2048];
-  PGresult* result;
+  PGresult* result = NULL;
 
   /* check pCopy */
   if (!pCopy)
-  ERROR_RETURN("Null pCopy");
+  {
+    ERROR_RETURN("Null pCopy");
+  }
   if (pCopy->DataIdx == 0) return (1);  /* nothing to copy */
 
   /* Start the Copy command */
-  sprintf(copystmt, "COPY %s(%s) from stdin",
+  snprintf(copystmt, sizeof(copystmt), "COPY %s(%s) from stdin",
     pCopy->TableName,
     pCopy->ColumnNames);
   result = PQexec(pCopy->pGconn, copystmt);
   if (PGRES_COPY_IN == PQresultStatus(result))
   {
     PQclear(result);
+    result = NULL;
     if (PQputCopyData(pCopy->pGconn, pCopy->DataBuf, pCopy->DataIdx) != 1)
-    ERROR_RETURN(PQresultErrorMessage(result))
+    {
+      ERROR_RETURN(PQerrorMessage(pCopy->pGconn));
+    }
   }
-  else if (fo_checkPQresult(pCopy->pGconn, result, copystmt, __FILE__, __LINE__)) return 0;
-
+  else
+  {
+    fo_checkPQresult(pCopy->pGconn, result, copystmt, __FILE__, __LINE__);
+    return 0;
+  }
 
   /* End copy  */
   if (PQputCopyEnd(pCopy->pGconn, NULL) == 1)
   {
     result = PQgetResult(pCopy->pGconn);
-    if (fo_checkPQcommand(pCopy->pGconn, result, "copy end", __FILE__, __LINE__)) return 0;
+    if (fo_checkPQcommand(pCopy->pGconn, result, "copy end", __FILE__, __LINE__))
+    {
+      return 0;
+    }
+    PQclear(result);
+    result = NULL;
   }
-  PQclear(result);
+  else
+  {
+    ERROR_RETURN(PQerrorMessage(pCopy->pGconn));
+  }
 
   /* reset DataBuf */
   pCopy->DataIdx = 0;
