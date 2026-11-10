@@ -378,6 +378,22 @@ namespace {
 
   echo "\n";
 
+  echo "Test 15: LicenseRef expression with bom-ref and acknowledgement\n";
+  $licenseRefWithRef = $generator->createLicense(array(
+    'id' => 'LicenseRef-fossology-BSD-style',
+    'bom-ref' => 'lic-scanner-320-42',
+    'acknowledgement' => 'declared'
+  ));
+
+  assert_test('Expression value correct',
+    $licenseRefWithRef['expression'] === 'LicenseRef-fossology-BSD-style');
+  assert_test('Expression has bom-ref', $licenseRefWithRef['bom-ref'] === 'lic-scanner-320-42');
+  assert_test('Expression has acknowledgement', $licenseRefWithRef['acknowledgement'] === 'declared');
+  assert_test('Expression has only schema keys',
+    array_keys($licenseRefWithRef) === array('expression', 'bom-ref', 'acknowledgement'));
+
+  echo "\n";
+
   echo "=== Results ===\n";
   echo "Passed: $passed | Failed: $failed\n";
 
