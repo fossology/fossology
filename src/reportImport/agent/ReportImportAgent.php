@@ -247,8 +247,7 @@ class ReportImportAgent extends Agent
       }
     }
 
-    if (StringOperation::stringEndsWith($reportFilename, ".json") || 
-        StringOperation::stringEndsWith($reportFilename, ".cdx.json")) {
+    if (StringOperation::stringEndsWith($reportFilename, ".json")) {
       $importSource = new CycloneDxImportSource($reportFilename);
       if($importSource->parse()) {
         return $importSource;
