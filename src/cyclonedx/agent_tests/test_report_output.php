@@ -378,6 +378,28 @@ namespace {
 
   echo "\n";
 
+  echo "Test 16: Component with an invalid mime-type specified shows up valid\n";
+  $fullComp = $generator->createComponent(array(
+    'type' => 'library',
+    'name' => 'busybox',
+    'version' => '1.36.1',
+    'bomref' => '99',
+    'scope' => 'required',
+    'mimeType' => 'application/X-Tar',
+    'copyright' => 'Copyright 2023 BusyBox Authors',
+    'description' => 'Tiny utilities for small and embedded systems',
+    'purl' => 'pkg:generic/busybox@1.36.1',
+    'hashes' => array($generator->createHash('SHA-256', 'abc123def456')),
+    'licenses' => array($result),
+    'externalReferences' => [
+      ['type' => 'vcs', 'url' => 'https://git.busybox.net/busybox/']
+    ],
+    'acknowledgements' => 'Thanks to Denys Vlasenko',
+    'comments' => 'Primary build dependency'
+  ));
+
+  assert_test('Full component has valid mime-type', $fullComp['mimeType'] === 'application/x-tar');
+  echo "\n";
   echo "=== Results ===\n";
   echo "Passed: $passed | Failed: $failed\n";
 
