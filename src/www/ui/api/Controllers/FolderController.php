@@ -50,11 +50,11 @@ class FolderController extends RestController
     $folderDao = $this->restHelper->getFolderDao();
     if (isset($args['id'])) {
       $id = intval($args['id']);
+      if ($folderDao->getFolder($id) === null) {
+        throw new HttpNotFoundException("Folder id $id does not exist");
+      }
       if (! $folderDao->isFolderAccessible($id, $this->restHelper->getUserId())) {
         throw new HttpForbiddenException("Folder id $id is not accessible");
-      }
-      if ($folderDao->getFolder($id) === null) {
-        throw new HttpNotFoundException("Folder id $id does not exists");
       }
       $allUserFolders = [
         $id

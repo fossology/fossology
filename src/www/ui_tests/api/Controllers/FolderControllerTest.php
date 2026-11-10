@@ -324,18 +324,16 @@ namespace Fossology\UI\Api\Test\Controllers
 
     /**
      * @test
-     * -# Test to check a 403 response of invalid folder
+     * -# Test to check a 404 response of invalid folder
      * -# Call FolderController::getFolders() for invalid folder
-     * -# Check for a 403 response
+     * -# Check for a 404 response
      */
     public function testGetInvalidFolder()
     {
       $folderId = -1;
-      $this->folderDao->shouldReceive('isFolderAccessible')
-        ->withArgs(array($folderId, $this->userId))->andReturn(false);
       $this->folderDao->shouldReceive('getFolder')
         ->andReturnUsing([$this, 'getFolder']);
-      $this->expectException(HttpForbiddenException::class);
+      $this->expectException(HttpNotFoundException::class);
 
       $this->folderController->getFolders(null, new ResponseHelper(),
         ['id' => $folderId]);
