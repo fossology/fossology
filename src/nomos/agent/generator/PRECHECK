@@ -128,7 +128,7 @@ BEGIN {
 $(grep -v "^#" $LIST)
 #endif
 #define	M(x)	ltsr[x] = LTSR_SMASK;
-extern int strGrep();
+extern int strGrep(char *regex, char *data, int flags);
 #ifdef	PROC_TRACE_SWITCH
 extern struct globals gl;
 #endif	/* PROC_TRACE_SWITCH */

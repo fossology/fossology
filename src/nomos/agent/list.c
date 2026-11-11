@@ -630,7 +630,7 @@ static void listDoubleSize(list_t *l) {
  */
 void listSort(list_t *l, int sortType) {
 
-  int (*f)() = 0;
+  int (*f)(item_t *, item_t *) = 0;
 
 #ifdef PROC_TRACE
   char *fName;
@@ -731,7 +731,8 @@ void listSort(list_t *l, int sortType) {
   traceFunc("=> invoking qsort(): callback is %s()\n", fName);
 #endif /* PROC_TRACE */
 
-  qsort(l->items, (size_t) l->used, sizeof(item_t), f);
+  qsort(l->items, (size_t) l->used, sizeof(item_t),
+      (int (*)(const void *, const void *)) f);
   return;
 }
 
