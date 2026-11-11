@@ -701,27 +701,31 @@ class UploadHelper
       unset($copyrightList["warn"]);
     }
 
-    $responseList = array();
+    $pathMap = [];
     foreach ($copyrightList as $copyFilepath) {
-      $flag=0;
-      foreach ($responseList as $response) {
-        if ($copyFilepath['content'] == $response['copyright']) {
-          $flag=1;
-          break;
-        }
+      $foldedContent = strtr((string) $copyFilepath['content'],
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
+      $foldedKey = "\0" . $foldedContent;
+      $pathMap[$foldedKey][] = $copyFilepath['filePath'];
+    }
+
+    $responseList = [];
+    $seenContent = [];
+    foreach ($copyrightList as $copyFilepath) {
+      $content = $copyFilepath['content'];
+      $contentKey = "\0" . serialize($content);
+      if (isset($seenContent[$contentKey])) {
+        continue;
       }
-      if ($flag==0) {
-        $copyrightContent = array();
-        foreach ($copyrightList as $copy) {
-          if (strcasecmp($copyFilepath['content'], $copy['content']) == 0) {
-            $copyrightContent[] = $copy['filePath'];
-          }
-        }
-        $responseRow = array();
-        $responseRow['copyright'] = $copyFilepath['content'];
-        $responseRow['filePath'] = $copyrightContent;
-        $responseList[] = $responseRow;
-      }
+
+      $seenContent[$contentKey] = true;
+      $foldedContent = strtr((string) $content,
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
+      $foldedKey = "\0" . $foldedContent;
+      $responseList[] = [
+        'copyright' => $content,
+        'filePath' => $pathMap[$foldedKey]
+      ];
     }
     return $responseList;
   }
