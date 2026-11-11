@@ -871,6 +871,34 @@ int IsDebianSourceFile(char *Filename)
 }
 
 /**
+ * @brief Check the leading magic bytes for a cpio archive.
+ *
+ * libmagic >= 5.45 can report an ASCII (newc/odc) cpio whose first member is
+ * a text file as text/x-diff or text/plain, e.g. the payload of a src.rpm
+ * starting with a .patch file.
+ * @param Filename File to open
+ * @returns 1 if Filename is a cpio archive, else 0
+ **/
+int IsCpioFile(char *Filename)
+{
+  unsigned char hdr[6];
+  FILE *fp;
+  size_t n;
+
+  if ((fp = fopen(Filename, "rb")) == NULL) return 0;
+  n = fread(hdr, 1, sizeof(hdr), fp);
+  fclose(fp);
+  if (n < 2) return 0;
+  /* binary cpio, either byte order */
+  if ((hdr[0] == 0xC7 && hdr[1] == 0x71) || (hdr[0] == 0x71 && hdr[1] == 0xC7))
+    return 1;
+  if (n < 6) return 0;
+  /* ASCII cpio: odc (070707), newc (070701), crc (070702) */
+  return (memcmp(hdr, "070707", 6) == 0 || memcmp(hdr, "070701", 6) == 0 ||
+          memcmp(hdr, "070702", 6) == 0);
+}
+
+/**
  * @brief Figure out the real type of "octet" files in case we can unarchive them.
  * @param Filename
  * @param Static buffer to return with new Type
@@ -984,6 +1012,12 @@ int	FindCmd	(char *Filename)
   strncpy(TypeBuf, Type, sizeof(TypeBuf));
   TypeBuf[255] = 0;  /* make sure TypeBuf is null terminated */
 
+  /* a cpio can only be misreported as a text type (see IsCpioFile) */
+  if (strncmp(Type, "text/", 5) == 0 && IsCpioFile(Filename))
+  {
+    strcpy(TypeBuf,"application/x-cpio");
+  }
+  else
   if (strstr(Type, "octet" ))
   {
     OctetType(Filename, TypeBuf);
