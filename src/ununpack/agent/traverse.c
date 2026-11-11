@@ -391,7 +391,24 @@ int	Traverse	(char *Filename, char *Basename,
     }
 
     if (CI.Source[strlen(CI.Source)-1] != '/') strcat(CI.Source,"/");
+    errno = 0;
     DLhead = MakeDirList(CI.Source);
+    if (DLhead == NULL && errno != 0)
+    {
+      /* Directory could not be opened even after chmod attempt — log and skip.
+         Do not register it as a container with children since none can be found. */
+      LOG_WARNING("pfile %s Cannot read directory \"%s\": %s -- skipping.",
+                  Pfile_Pk, CI.Source, strerror(errno));
+      CI.HasChild = 0;
+      IsContainer  = 0;
+      goto TraverseEnd;
+    }
+    if (DLhead == NULL)
+    {
+      /* Directory is accessible but empty — do not mark as container with children. */
+      CI.HasChild = 0;
+      IsContainer = 0;
+    }
     /* process inode in the directory (only if unique) */
     if (DisplayContainerInfo(&CI,PI->Cmd))
     {
@@ -406,7 +423,7 @@ int	Traverse	(char *Filename, char *Basename,
         CI.PI.uploadtree_pk = TmpPk;
       }
     }
-    if (PI->Cmd && ListOutFile)
+    if (PI->Cmd && ListOutFile && CI.HasChild)
     {
       fputs("</item>\n",ListOutFile);
     }
@@ -565,9 +582,14 @@ int	Traverse	(char *Filename, char *Basename,
       }
       if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
       else rc=-1;
-      if (rc != 0) LOG_ERROR("Unable to run command '%s'",Cmd)
-      /* add it to the list of files */
-      RecurseOk = DisplayContainerInfo(&CImeta,PI->Cmd);
+      if (rc != 0)
+      {
+        LOG_ERROR("Unable to run command '%s'",Cmd)
+      }
+      else
+      {
+        RecurseOk = DisplayContainerInfo(&CImeta,PI->Cmd);
+      }
       if (UnlinkAll) unlink(CImeta.Source);
     }
 
