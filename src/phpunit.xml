@@ -29,6 +29,7 @@
       <file>www/ui_tests/startUpTest.php</file>
       <file>www/ui_tests/Unit/AgentAdderTest.php</file>
       <file>www/ui_tests/Unit/UploadPermissionPageTest.php</file>
+      <file>www/ui_tests/Unit/UploadSrvPageTest.php</file>
       <file>www/ui_tests/Unit/UIExportListTest.php</file>
       <file>www/ui_tests/Unit/AdminLicenseFileTest.php</file>
       <file>www/ui_tests/Unit/AdminFolderSizeTest.php</file>
