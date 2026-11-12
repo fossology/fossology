@@ -161,6 +161,7 @@ typedef struct cmdlist cmdlist;
 /* utils.c */
 int  IsInflatedFile(char *FileName, int InflateSize);
 int  IsDebianSourceFile(char *Filename);
+int  IsCpioFile(char *Filename);
 void SafeExit	(int rc);
 void RemovePostfix(char *Name);
 void InitCmd ();
