@@ -225,8 +225,10 @@ class search extends FO_Plugin
     }
 
     $Page = GetParm("page", PARM_INTEGER);
-    if (!empty($Page)) {
+    if (!empty($Page) && $Page > 0) {
       $GETvars .= "&page=" . urlencode($Page);
+    } else {
+      $Page = 0;
     }
 
     $this->vars["postUrl"] = Traceback_uri() . "?mod=" . self::getName();
