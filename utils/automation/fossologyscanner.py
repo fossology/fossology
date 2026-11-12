@@ -461,11 +461,18 @@ def main(parsed_args):
         f"Something went wrong while downloading Debian sources: {e}")
 
     scan_packages.dependencies = {}
+    scan_packages.unscanned_dependencies = {}
     for purl, component in cli_options.parser.parsed_components.items():
       if component.get('base_dir') is None:
-        logging.warning(f"Skipping {purl}: no source was downloaded.")
+        logging.warning(f"Not scanning {purl}: no source was downloaded.")
+        scan_packages.unscanned_dependencies[purl] = component
       else:
         scan_packages.dependencies[purl] = component
+    if scan_packages.unscanned_dependencies:
+      logging.warning(
+        f"{len(scan_packages.unscanned_dependencies)} of "
+        f"{len(cli_options.parser.parsed_components)} dependencies were not "
+        "scanned; they are listed as not scanned in the reports.")
 
   if cli_options.scan_dir:
     cli_options.diff_dir = cli_options.dir_path

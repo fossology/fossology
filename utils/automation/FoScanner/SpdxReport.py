@@ -140,7 +140,8 @@ class SpdxReport(ReportBase):
                               raw_licenses_strings}
     parsed_expressions_list = list(parsed_expressions_set)
 
-    all_allowed_licenses = all(
+    # A file with no license has nothing to conclude from
+    all_allowed_licenses = bool(raw_licenses_strings) and all(
       lic_str in self._allowed_licenses_set for lic_str in raw_licenses_strings
     )
 
@@ -162,7 +163,8 @@ class SpdxReport(ReportBase):
 
     # Update package.license_concluded
     if file.license_concluded != SpdxNoAssertion():
-      if package.license_concluded in (SpdxNoAssertion(), SpdxNone()):
+      # The parent package starts with no concluded license (None)
+      if package.license_concluded in (None, SpdxNoAssertion(), SpdxNone()):
         package.license_concluded = file.license_concluded
       else:
         package.license_concluded = (
@@ -179,7 +181,10 @@ class SpdxReport(ReportBase):
     :return: New SPDX File
     """
     md5_hash, sha1_hash, sha256_hash = self.__get_file_info(scan_result)
-    file_spdx_id = self.__get_file_spdx_id(sha256_hash, package.name)
+    # Dependencies can share a name, so they are keyed by their unique ID
+    owner = package.name if package is self.package else (
+      package.spdx_id.removeprefix('SPDXRef-Package-'))
+    file_spdx_id = self.__get_file_spdx_id(sha256_hash, owner)
     if file_spdx_id not in self.report_files:
       spdx_file = File(
         name=scan_result.file,
@@ -266,10 +271,11 @@ class SpdxReport(ReportBase):
     :param component: Package/component to get SPDX ID for.
     :return: SPDX ID for the package.
     """
-    pkg_name = component.get('name', '')
-    pkg_version = component.get('version', '')
+    key = component.get('purl') or (
+      f"{component.get('name', '')}_{component.get('version', '')}"
+    )
     return "SPDXRef-Package-" + hashlib.md5(
-      f"{pkg_name}_{pkg_version}".encode('utf-8', errors='ignore')
+      key.encode('utf-8', errors='ignore')
     ).hexdigest()
 
   def write_report(self, file_name: str):
@@ -328,10 +334,13 @@ class SpdxReport(ReportBase):
     )
     self.document.relationships.append(describes_relationship)
 
-    for purl, component in (
-        self.scanner.get_scan_packages().dependencies.items()
-    ):
-      package = self.__get_package_for_component(component)
+    scan_packages = self.scanner.get_scan_packages()
+    components = [(c, True) for c in scan_packages.dependencies.values()]
+    components += [
+      (c, False) for c in scan_packages.unscanned_dependencies.values()
+    ]
+    for component, scanned in components:
+      package = self.__get_package_for_component(component, scanned)
       self.document.packages.append(package)
       depends_on_relationship = Relationship(
         self.package.spdx_id,
@@ -340,11 +349,15 @@ class SpdxReport(ReportBase):
       )
       self.document.relationships.append(depends_on_relationship)
 
-  def __get_package_for_component(self, component: dict) -> Package:
+  def __get_package_for_component(
+      self, component: dict, scanned: bool = True
+  ) -> Package:
     """
     For a given component, create a package and add it to the list.
 
     :param component: Component to create package for.
+    :param scanned: False when no source was downloaded, so no files were
+      analyzed.
     :return: Create or get existing package.
     """
     pkg_spdx_id = self.__get_package_spdx_id(component)
@@ -357,8 +370,11 @@ class SpdxReport(ReportBase):
           'fossology_download_url', SpdxNoAssertion()
         ),
         license_info_from_files=[],
-        license_concluded=SpdxNone(),
-        files_analyzed=True
+        license_concluded=SpdxNone() if scanned else SpdxNoAssertion(),
+        files_analyzed=scanned,
+        comment=None if scanned else (
+          'Not scanned: no source could be downloaded.'
+        )
       )
       purl_ref = ExternalPackageRef(
         category=ExternalPackageRefCategory.PACKAGE_MANAGER,

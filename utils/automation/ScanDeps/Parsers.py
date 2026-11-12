@@ -6,6 +6,7 @@
 
 # SPDX-License-Identifier: GPL-2.0-only
 
+import hashlib
 import json
 import logging
 import os
@@ -66,23 +67,45 @@ class Parser:
       if not purl:
         continue
       comp_type = self._extract_type(purl)
-
-      # Ensure component has 'name' and 'version' for path construction
-      comp_name = self._safe_segment(component.get('name', 'unknown_name'))
-      comp_version = self._safe_segment(
-        component.get('version', 'unknown_version'))
-
       component['download_dir'] = os.path.join(
-        root_download_dir, comp_type or 'unclassified', comp_name, comp_version
+        root_download_dir, comp_type or 'unclassified',
+        *self._download_segments(purl, component)
       )
       component[COMPONENT_TYPE_KEY] = comp_type
       self.parsed_components[purl] = component
 
+  @classmethod
+  def _download_segments(cls, purl: str,
+                         component: dict[str, Any]) -> tuple[str, str]:
+    """
+    Name and version directories that are distinct for every distinct PURL.
+    The name includes the namespace, and qualifiers or a subpath add a hash
+    of the PURL to the version, so packages that share a short name or differ
+    only by a Maven classifier do not share a directory.
+    """
+    name = component.get('name', 'unknown_name')
+    version = component.get('version', 'unknown_version')
+    suffix = ''
+    try:
+      parsed = PackageURL.from_string(purl)
+    except ValueError:
+      parsed = None
+    if parsed is not None:
+      name = '/'.join(filter(None, [parsed.namespace, parsed.name]))
+      version = parsed.version or version
+      if parsed.qualifiers or parsed.subpath:
+        suffix = '-' + hashlib.sha256(
+          parsed.to_string().encode('utf-8')).hexdigest()[:12]
+    return (cls._safe_segment(name),
+            cls._safe_segment(version) + suffix)
+
   @staticmethod
   def _safe_segment(value: Any) -> str:
-    """Make an SBOM value usable as a single directory name."""
-    segment = str(value).replace('/', '_').replace(os.sep, '_')
-    return '_' if segment in ('', '.', '..') else segment
+    """Encode an SBOM value as one directory name, without collisions."""
+    segment = quote(str(value), safe='')
+    if segment in ('', '.', '..'):
+      return segment.replace('.', '%2E') or '%00'
+    return segment
 
   def _extract_type(self, purl: str) -> str | None:
     """
@@ -478,9 +501,9 @@ class GoParser(PurlParser):
 
   @staticmethod
   def _escape_module_path(module_path: str) -> str:
-    """Apply the escaping required by the Go module proxy."""
+    """Apply the case escaping the Go module proxy needs on paths and versions."""
     return ''.join(
-      f'!{character.lower()}' if character.isupper() else character
+      f'!{character.lower()}' if 'A' <= character <= 'Z' else character
       for character in module_path
     )
 
@@ -494,7 +517,7 @@ class GoParser(PurlParser):
     return (
       f'{self.GO_PROXY_BASE}/'
       f'{quote(self._escape_module_path(module_path), safe="/!")}/@v/'
-      f'{quote(parsed_purl.version, safe="")}.zip'
+      f'{quote(self._escape_module_path(parsed_purl.version), safe="!")}.zip'
     )
 
 

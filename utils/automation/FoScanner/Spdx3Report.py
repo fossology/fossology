@@ -167,12 +167,18 @@ class Spdx3Report(ReportBase):
     parent = self.scanner.get_scan_packages().parent_package
     self._process_component(parent, self.root_package.spdx_id)
 
-    # Process each dependency
-    for _purl, component in (
-        self.scanner.get_scan_packages().dependencies.items()
-    ):
+    # Process each dependency; unscanned ones get a package and no files
+    scan_packages = self.scanner.get_scan_packages()
+    components = [(c, True) for c in scan_packages.dependencies.values()]
+    components += [
+      (c, False) for c in scan_packages.unscanned_dependencies.values()
+    ]
+    for component, scanned in components:
       dep_pkg = self._get_or_create_dep_package(component)
-      self._process_component(component, dep_pkg.spdx_id)
+      if scanned:
+        self._process_component(component, dep_pkg.spdx_id)
+      else:
+        dep_pkg.comment = 'Not scanned: no source could be downloaded.'
 
       # DEPENDS_ON relationship from root → dependency
       dep_rel = Relationship(
@@ -553,6 +559,9 @@ class Spdx3Report(ReportBase):
     pkg_name = component.get('name', 'UNKNOWN')
     pkg_version = component.get('version', 'UNKNOWN')
     safe = re.sub(r"[^a-zA-Z0-9._-]", "-", f"{pkg_name}-{pkg_version}")
+    purl = component.get('purl')
+    if purl:
+      safe += '-' + hashlib.sha256(purl.encode('utf-8')).hexdigest()[:12]
     pkg_id = f"{self._base}/Package/{safe}"
 
     # Check if already in payload

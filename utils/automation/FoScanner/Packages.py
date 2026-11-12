@@ -12,6 +12,9 @@ class Packages(object):
 
   :ivar parent_package: Parent package during the scan
   :ivar dependencies: List of dependencies of the parent package
+  :ivar unscanned_dependencies: Dependencies whose source could not be
+    downloaded; reported as not scanned
   """
   parent_package: dict = None
   dependencies: dict[str, dict] = {}
+  unscanned_dependencies: dict[str, dict] = {}

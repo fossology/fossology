@@ -45,27 +45,33 @@ class Downloader:
 
   @staticmethod
   def __extract_tar(tar_ref: tarfile.TarFile, destination: str) -> None:
-    """Extract a tar archive after rejecting unsafe or oversized members."""
+    """
+    Extract the regular files and directories of a tar archive.
+
+    Links and device files are skipped: scanning does not need them, and a
+    link extracted earlier in the archive can redirect a later member outside
+    the destination, which no check made before extraction can see.
+    """
     root = os.path.realpath(destination)
     members = tar_ref.getmembers()
     if sum(m.size for m in members) > MAX_UNPACKED_BYTES:
       raise tarfile.TarError("Archive unpacks to too much data")
+    safe_members = []
     for member in members:
+      if not (member.isfile() or member.isdir()):
+        continue
       target = os.path.realpath(os.path.join(root, member.name))
-      if member.issym():
-        link = os.path.join(os.path.dirname(target), member.linkname)
-      elif member.islnk():
-        link = os.path.join(root, member.linkname)
-      else:
-        link = target
-      if member.isdev() or any(
-          os.path.commonpath([root, os.path.realpath(path)]) != root
-          for path in (target, link)):
+      if os.path.commonpath([root, target]) != root:
         raise tarfile.TarError(f"Unsafe archive member: {member.name}")
+      member.mode = 0o755 if member.isdir() else 0o644
+      safe_members.append(member)
+    skipped = len(members) - len(safe_members)
+    if skipped:
+      logging.debug(f"Skipped {skipped} links or special files in archive")
     if hasattr(tarfile, 'data_filter'):
-      tar_ref.extractall(destination, filter='data')
+      tar_ref.extractall(destination, members=safe_members, filter='data')
     else:
-      tar_ref.extractall(destination)
+      tar_ref.extractall(destination, members=safe_members)
 
   def __get_archive_base_dir(self, archive_path: str) -> str:
     """
@@ -101,9 +107,7 @@ class Downloader:
               base_dir = first_part
             # else: archive extracts directly into
             # package_folder or has multiple roots
-    except (
-        zipfile.BadZipFile, tarfile.ReadError, tarfile.FilterError, IOError
-    ) as e:
+    except (zipfile.BadZipFile, tarfile.TarError, IOError) as e:
       logging.warning(
         f"Could not inspect archive {archive_path} for base directory: {e}"
       )

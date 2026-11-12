@@ -136,10 +136,33 @@ class DependencyParsersTest(unittest.TestCase):
       self.assertEqual(os.path.dirname(os.path.dirname(path)),
                        os.path.join(directory, 'golang'))
 
+  def test_download_dirs_are_distinct_per_purl(self):
+    purls = ['pkg:maven/org.a/core@1.0', 'pkg:maven/com.b/core@1.0',
+             'pkg:maven/com.b/core@1.0?classifier=javadoc',
+             'pkg:golang/github.com/pkg/errors@v0.9.1',
+             'pkg:golang/github.com/go-errors/errors@v0.9.1',
+             'pkg:golang/github.com/a/x/v2@v2.0.0',
+             'pkg:golang/github.com/b/y/v2@v2.0.0']
+    with tempfile.TemporaryDirectory() as directory:
+      parser = make_parser(directory, purls)
+      dirs = [parser.parsed_components[p]['download_dir'] for p in purls]
+      self.assertEqual(len(set(dirs)), len(purls))
+      for path in dirs:
+        self.assertTrue(path.startswith(directory + os.sep))
+        self.assertEqual(len(os.path.relpath(path, directory).split(os.sep)),
+                         3)
+
   def test_go_proxy_url_escapes_uppercase(self):
     url = GoParser()._get_download_url('pkg:golang/github.com/Azure/go-sdk@v1.0.0')
     self.assertEqual(
       url, 'https://proxy.golang.org/github.com/!azure/go-sdk/@v/v1.0.0.zip')
+
+  def test_go_proxy_url_escapes_uppercase_version(self):
+    url = GoParser()._get_download_url(
+      'pkg:golang/github.com/foo/bar@v1.0.0-RC1+incompatible')
+    self.assertEqual(
+      url, 'https://proxy.golang.org/github.com/foo/bar/@v/'
+           'v1.0.0-!r!c1%2Bincompatible.zip')
 
   def test_debian_source_components_need_arch_source(self):
     purls = ['pkg:deb/debian/bash@5.2?arch=source',
@@ -154,8 +177,9 @@ def make_tar(path, members):
   with tarfile.open(path, 'w') as tar:
     for name, kind, data in members:
       info = tarfile.TarInfo(name)
-      if kind == 'sym':
-        info.type, info.linkname = tarfile.SYMTYPE, data
+      if kind in ('sym', 'hard'):
+        info.type = tarfile.SYMTYPE if kind == 'sym' else tarfile.LNKTYPE
+        info.linkname = data
         tar.addfile(info)
       else:
         info.size = len(data)
@@ -164,6 +188,7 @@ def make_tar(path, members):
 
 class DownloaderTest(unittest.TestCase):
   def extract(self, members):
+    """Extract into <tmp>/out; return the files created anywhere in <tmp>."""
     extract = Downloader()._Downloader__extract_tar
     with tempfile.TemporaryDirectory() as directory:
       archive = os.path.join(directory, 'a.tar')
@@ -172,17 +197,43 @@ class DownloaderTest(unittest.TestCase):
       make_tar(archive, members)
       with tarfile.open(archive) as tar:
         extract(tar, out)
-      return os.path.exists(os.path.join(out, 'pkg', 'a.txt'))
+      return sorted(
+        os.path.relpath(os.path.join(base, name), directory)
+        for base, dirs, files in os.walk(directory)
+        for name in files + [d for d in dirs
+                             if os.path.islink(os.path.join(base, d))]
+        if name != 'a.tar')
 
   def test_tar_extracts_regular_archive(self):
-    self.assertTrue(self.extract([('pkg/a.txt', 'file', b'hi')]))
+    self.assertEqual(self.extract([('pkg/a.txt', 'file', b'hi')]),
+                     [os.path.join('out', 'pkg', 'a.txt')])
 
-  def test_tar_rejects_unsafe_members(self):
-    for member in [('../evil.txt', 'file', b'hi'),
-                   ('pkg/link', 'sym', '../../etc/passwd')]:
-      with self.subTest(member=member[0]):
+  def test_tar_rejects_paths_outside_destination(self):
+    for name in ['../evil.txt', '/tmp/evil.txt']:
+      with self.subTest(name=name):
         with self.assertRaises(tarfile.TarError):
-          self.extract([member])
+          self.extract([(name, 'file', b'hi')])
+
+  def test_tar_skips_links(self):
+    self.assertEqual(self.extract([('pkg/a.txt', 'file', b'hi'),
+                                   ('pkg/abs', 'sym', '/etc/passwd'),
+                                   ('pkg/up', 'sym', '../../etc/passwd'),
+                                   ('pkg/hard', 'hard', 'pkg/a.txt')]),
+                     [os.path.join('out', 'pkg', 'a.txt')])
+
+  def test_tar_chained_links_cannot_escape(self):
+    members = [('a', 'sym', '.'), ('a/c', 'sym', '..'),
+               ('a/c/escaped.txt', 'file', b'hi')]
+    for has_data_filter in (True, False):
+      with self.subTest(has_data_filter=has_data_filter):
+        with patch('ScanDeps.Downloader.hasattr',
+                   return_value=has_data_filter, create=True):
+          try:
+            files = self.extract(members)
+          except tarfile.TarError:
+            continue
+        self.assertNotIn('escaped.txt', files)
+        self.assertTrue(all(f.startswith('out' + os.sep) for f in files))
 
   def test_debian_source_download_survives_timeout(self):
     purl = 'pkg:deb/debian/bash@5.2?arch=source'
