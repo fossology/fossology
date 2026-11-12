@@ -3310,6 +3310,7 @@ paths:
         '200':
           description: >-
             No job created: every requested agent already has results for
+            this upload. Message explains that no new agents were scheduled.
             this upload. Message is empty.
           content:
             application/json:
