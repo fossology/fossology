@@ -4,6 +4,25 @@
 -->
 # Changelog of FOSSology
 
+### 4.7.3 (Nov 12th 2026)
+
+This release is based on FOSSology 4.7.2 and includes only the selected cherry-picked fix, along with the updated Docker build.
+
+* Fixed an issue where libmagic incorrectly identified CPIO files as text files.
+* Provides a newly built Docker image with updated dependencies to address the PHP2Shell vulnerabilities.
+
+#### Credits to contributors for 4.7.3
+
+From the GIT commit history, we have the following contributors since
+[4.7.2](https://github.com/fossology/fossology/releases/tag/4.7.2):
+
+```
+> its-sushant <sushant.kumar@siemens-healthineers.com>
+```
+
+#### Corrections
+* `87f8fcb8fa` fix(ununpack): detect cpio misreported as text by libmagic
+
 ### 4.7.2 (Sept 22nd 2026)
 
 Compared with the broader 4.7.1 patch release, 4.7.2 is a small targeted update that adds a new work-in-progress indication in the tree view and fixes a monkbulk issue where files scanned under an earlier upload could be dropped during bulk operations.
