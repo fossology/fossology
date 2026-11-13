@@ -486,4 +486,53 @@ class UserDao
     $this->dbManager->getSingleRow('UPDATE groups SET group_name=$2 WHERE group_pk=$1;',
             array($groupId, $newGroupName),__METHOD__.'.UpdateEditGroup');
   }
+
+  /**
+   * Get user by email or username
+   * @param string $identifier
+   * @return array|null
+   */
+  public function getUserByEmailOrUsername($identifier)
+  {
+    $sql = "SELECT * FROM users WHERE LOWER(user_email) = LOWER($1) OR LOWER(user_name) = LOWER($1)";
+    $row = $this->dbManager->getSingleRow($sql, array($identifier), __METHOD__);
+    return $row ?: null;
+  }
+
+  /**
+   * Create a new password reset token
+   * @param int $userId
+   * @param string $tokenHash
+   * @param string $expiresAt
+   * @return int password_reset_pk
+   */
+  public function createPasswordResetToken($userId, $tokenHash, $expiresAt)
+  {
+    $sql = "INSERT INTO password_reset (user_fk, token_hash, expires_at) VALUES ($1, $2, $3) RETURNING password_reset_pk";
+    $row = $this->dbManager->getSingleRow($sql, array($userId, $tokenHash, $expiresAt), __METHOD__);
+    return $row['password_reset_pk'];
+  }
+
+  /**
+   * Fetch a valid (unused and non-expired) password reset token
+   * @param string $tokenHash
+   * @return array|null
+   */
+  public function getValidPasswordResetToken($tokenHash)
+  {
+    $sql = "SELECT * FROM password_reset WHERE token_hash = $1 AND used_at IS NULL AND expires_at > NOW()";
+    $row = $this->dbManager->getSingleRow($sql, array($tokenHash), __METHOD__);
+    return $row ?: null;
+  }
+
+  /**
+   * Mark a password reset token as used
+   * @param int $passwordResetPk
+   * @return void
+   */
+  public function markTokenAsUsed($passwordResetPk)
+  {
+    $sql = "UPDATE password_reset SET used_at = NOW() WHERE password_reset_pk = $1";
+    $this->dbManager->getSingleRow($sql, array($passwordResetPk), __METHOD__);
+  }
 }
