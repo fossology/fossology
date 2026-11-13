@@ -31,8 +31,8 @@ $(document).ready(function () {
   if (typeof createLicHistTable === 'function') {
     createLicHistTable();
   }
-  if (typeof createReuseReportTable === 'function') {
-    createReuseReportTable();
+  if (typeof createCompatibilityReportTable === 'function') {
+    createCompatibilityReportTable();
   }
 
   searchField = $('#dirlist_filter input');

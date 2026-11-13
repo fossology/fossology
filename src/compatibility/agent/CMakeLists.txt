@@ -57,3 +57,8 @@ install(TARGETS compatibility_exec
         RUNTIME
         DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent
         COMPONENT compatibility)
+
+install(FILES auto_conclude.php
+        DESTINATION ${FO_MODDIR}/${PROJECT_NAME}/agent
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+        COMPONENT compatibility)
