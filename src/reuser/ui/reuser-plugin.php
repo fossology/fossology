@@ -567,7 +567,7 @@ class ReuserPlugin extends DefaultPlugin
   {
     $currentUserId = Auth::getUserId();
     $userDao = $GLOBALS['container']->get('dao.user');
-    $currentUserGroups = $userDao->getUserGroupIds($currentUserId);
+    $currentUserGroups = array_keys($userDao->getUserGroupMap($currentUserId));
     if (empty($currentUserGroups) || $uploaderUserId <= 0) {
       return [];
     }

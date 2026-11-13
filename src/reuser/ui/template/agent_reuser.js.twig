@@ -301,6 +301,9 @@ function runAutoDetect(groupIndex) {
   if (window.currentReuseSource && window.currentReuseSource !== 'local') {
     return;
   }
+  if (!$(`#reuseSearchInFolder${groupIndex}`).is(':checked')) {
+    return;
+  }
   if (!lastUploadedFiles || lastUploadedFiles.length === 0) {
     return;
   }
@@ -353,7 +356,12 @@ function toggleDisabled() {
     if (this.checked) {
       fs.trigger('change');
     } else {
-      reloadUploads('', gi, function () { runAutoDetect(gi); });
+      if (_autoDetectXhr) {
+        _autoDetectXhr.abort();
+        _autoDetectXhr = null;
+      }
+      $(`#auto-detect-loading${gi}`).hide();
+      reloadUploads('', gi);
     }
   });
   registerFolderSelectorChange();
@@ -462,7 +470,7 @@ function initializeOsselotFields() {
         if ($checkbox.length > 0 && $checkbox.is(':checked')) {
           $(`#{{ reuseFolderSelectorName }}${groupIndex}`).prop('disabled', false).trigger('change');
         } else {
-          reloadUploads('', groupIndex, function () { runAutoDetect(groupIndex); });
+          reloadUploads('', groupIndex);
         }
       }
     }
