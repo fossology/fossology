@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "0.2-draft",
+  "assertionId": "srac-needs-export-comp__com_configuration-0.1",
+  "subject": {
+    "name": "score_communication::configuration",
+    "purl": "pkg:github/eclipse-score/communication@313f1178628189d267c8cd0d75971bdac04c20ee#score/mw/com/configuration",
+    "version": "313f1178628189d267c8cd0d75971bdac04c20ee",
+    "repository": "https://github.com/eclipse-score/communication",
+    "componentPath": "score/mw/com/configuration"
+  },
+  "safetyRelevance": {
+    "status": "safety-related",
+    "classification": "ASIL-B"
+  },
+  "rationale": "Read-only projection of S-CORE need 'comp__com_configuration' at needs.json version '0.1'. The source lifecycle status is 'valid'. The export adds no safety decision; the referenced Sphinx-needs model remains authoritative.",
+  "requirements": [
+    {
+      "id": "aou_req__communication__1",
+      "type": "sphinx-needs:aou_req",
+      "uri": "https://eclipse-score.github.io/score/main/modules/communication/docs/requirements/aou_req.html#aou_req__communication__1"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "comp__com_configuration",
+      "type": "sphinx-needs:comp",
+      "uri": "https://eclipse-score.github.io/score/main/modules/communication/configuration/docs/architecture/index.html#comp__com_configuration"
+    },
+    {
+      "id": "feat__com_communication",
+      "type": "sphinx-needs:feat",
+      "uri": "https://eclipse-score.github.io/score/main/features/communication/architecture/index.html#feat__com_communication"
+    }
+  ],
+  "sourceOfTruth": {
+    "system": "sphinx-needs",
+    "documentUri": "https://eclipse-score.github.io/score/main/needs.json",
+    "version": "0.1",
+    "rootElement": "comp__com_configuration",
+    "rootElementType": "comp",
+    "rootElementStatus": "valid",
+    "includedElements": [
+      "feat__com_communication",
+      "aou_req__communication__1"
+    ],
+    "sha256": "8741a2702fa43193f3bb31a0e3b1d38105dcaffa565ba5bd6eced4a9d87e7dfa"
+  },
+  "assertion": {
+    "status": "draft",
+    "author": {
+      "name": "S-CORE needs.json export",
+      "uri": "https://eclipse-score.github.io/score/main/needs.json"
+    },
+    "reviewer": null,
+    "created": "2026-09-29T00:00:00Z"
+  }
+}

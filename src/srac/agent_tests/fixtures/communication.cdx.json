@@ -1,0 +1,28 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:5be15dbb-e23d-4d12-ac39-349604919f20",
+  "version": 1,
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "score-communication-configuration",
+      "name": "score_communication::configuration",
+      "version": "313f1178628189d267c8cd0d75971bdac04c20ee",
+      "purl": "pkg:github/eclipse-score/communication@313f1178628189d267c8cd0d75971bdac04c20ee#score/mw/com/configuration",
+      "externalReferences": [
+        {
+          "type": "other",
+          "url": "https://example.org/srac/communication.srac.json",
+          "comment": "SRAC sidecar",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "2108209f8a367eb370de5082b034ac015d6c9df9606c7a065c974d5c08344eea"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
