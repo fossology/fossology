@@ -2423,6 +2423,15 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SearchResults'
+        '400':
+          description: >
+            Bad Request. No search parameter given, uploadId is not a
+            non-negative integer (0 searches all uploads), page or limit is
+            less than 1, or filesizemin or filesizemax is negative.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
   /users:
