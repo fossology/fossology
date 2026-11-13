@@ -94,25 +94,27 @@ class HomePage extends DefaultPlugin
   }
 
   /**
-   * Get the email from the OAuth2 server.
+   * Get the access token from the OAuth2 server.
    *
-   * @throws \UnexpectedValueException If the state is invalid or access token
-   *                                   is invalid
-   * @throws IdentityProviderException If something goes wrong while
-   *                                   authenticating
-   * @return NULL|string Email from OAuth if success
+   * @param string $code
+   * @param string $state
+   * @param bool $getEmail
+   * @param bool $fromRest
+   * @return AccessToken|string
    */
-  private function getEmailFromOAuth()
+  public function getAccessToken($code, $state, $getEmail=false, $fromRest=false, $accessToken=null)
   {
     global $SysConf;
-    if (empty(GetParm("state", PARM_TEXT)) ||
+    if (! $fromRest) {
+      if (empty(GetParm("state", PARM_TEXT)) ||
         (isset($_SESSION['oauth2state']) &&
         GetParm("state", PARM_TEXT) !== $_SESSION['oauth2state'])) {
-      // Check given state against previously stored one to mitigate CSRF attack
-      if (isset($_SESSION['oauth2state'])) {
-        unset($_SESSION['oauth2state']);
+        // Check given state against previously stored one to mitigate CSRF attack
+        if (isset($_SESSION['oauth2state'])) {
+          unset($_SESSION['oauth2state']);
+        }
+        throw new \UnexpectedValueException('Invalid state');
       }
-      throw new \UnexpectedValueException('Invalid state');
     }
     $proxy = "";
     if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
@@ -134,12 +136,42 @@ class HomePage extends DefaultPlugin
       "responseResourceOwnerId" => $SysConf['SYSCONFIG']['OidcResourceOwnerId'],
       "proxy"                   => $proxy
     ]);
+
+    if ($getEmail && $accessToken !== null) {
+      $accessTokenObj = new AccessToken([
+        'access_token' => $accessToken
+      ]);
+      return $this->getEmailFromResource($provider, $accessTokenObj);
+    }
     $accessToken = $provider->getAccessToken('authorization_code',
-      ['code' => GetParm("code", PARM_TEXT)]);
+      ['code' => $fromRest ? $code : GetParm("code", PARM_TEXT)]);
 
     $this->validateAccessToken($accessToken);
 
-    return $this->getEmailFromResource($provider, $accessToken);
+    if ($getEmail) {
+      return $this->getEmailFromResource($provider, $accessToken);
+    }
+    return $accessToken->getToken();
+  }
+
+  /**
+   * Get the email from the OAuth2 server.
+   *
+   * @throws \UnexpectedValueException If the state is invalid or access token
+   *                                   is invalid
+   * @throws IdentityProviderException If something goes wrong while
+   *                                   authenticating
+   * @return NULL|string Email from OAuth if success
+   */
+  public function getEmailFromOAuth($accessToken=null, $fromRest=false)
+  {
+    if ($fromRest) {
+      return $this->getAccessToken(GetParm("code", PARM_TEXT),
+        GetParm("state", PARM_TEXT), true, true, $accessToken);
+    } else {
+      return $this->getAccessToken(GetParm("code", PARM_TEXT),
+        GetParm("state", PARM_TEXT), true, false, $accessToken);
+    }
   }
 
   /**

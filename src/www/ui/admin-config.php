@@ -231,7 +231,7 @@ class foconfig extends FO_Plugin
    * @param[in,out] array $newarray Array with new values
    * @param[in,out] array $oldarray Array with old values
    */
-  private function updateOidcEndpoints(&$newarray, &$oldarray)
+  public function updateOidcEndpoints(&$newarray, &$oldarray)
   {
     global $SysConf;
     $client = new Client();
