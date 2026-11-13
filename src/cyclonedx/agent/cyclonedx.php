@@ -292,8 +292,8 @@ class CycloneDXAgent extends Agent
     $allCopyrights = array();
     foreach ($filesWithLicenses as $fileNode) {
       $fileCopyrights = $fileNode->getCopyrights();
-      if (!empty($fileCopyrights)) {
-        $allCopyrights = array_merge($allCopyrights, $fileCopyrights);
+      foreach ($fileCopyrights as $copyright) {
+        $allCopyrights[] = $copyright;
       }
     }
     $allCopyrights = array_unique($allCopyrights);
