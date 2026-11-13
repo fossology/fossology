@@ -23,10 +23,6 @@ select = ["E", "F", "W", "B"]
 
 ignore = [
   "E501",   # Line too long — not enforced to avoid churn
-  "E402",   # Module-level import not at top — fossologyscanner.py configures logging first
-  "W291",   # Trailing whitespace — cosmetic, avoid churn on existing code
-  "W292",   # No newline at end of file — cosmetic
-  "W293",   # Blank line contains whitespace — cosmetic
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -34,6 +30,10 @@ ignore = [
 "src/scheduler/agent_tests/Functional/Functional.py" = ["E", "W", "F", "B"]
 # Third-party integration script with wildcard imports
 "src/decider/agent/copyrightDeactivationClutterRemovalScript.py" = ["F403", "F405"]
+# Module-level import not at top — fossologyscanner.py configures logging first
+"utils/automation/fossologyscanner.py" = ["E402"]
+# Module-level import not at top — runscanonfiles.py sets SCANCODE_CACHE first
+"src/scancode/agent/runscanonfiles.py" = ["E402"]
 # Pre-existing patterns in scanner modules
 "utils/automation/FoScanner/Scanners.py" = ["B007"]
 "utils/automation/FoScanner/Spdx3Report.py" = ["B007", "E741", "F401"]

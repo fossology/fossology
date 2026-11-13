@@ -17,51 +17,31 @@ on:
     paths:
       - '**.py'
       - 'pyproject.toml'
-      - 'utils/automation/requirements.txt'
-      - 'utils/requirements.osadl.txt'
   pull_request:
     branches: [master]
     paths:
       - '**.py'
       - 'pyproject.toml'
-      - 'utils/automation/requirements.txt'
-      - 'utils/requirements.osadl.txt'
   workflow_dispatch:
 
 jobs:
-  ruff-lint:
-    name: Ruff Linting
+  lint:
+    name: Python Linting and Type Checking
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
-      - name: Install Ruff
-        run: pip install ruff==0.11.13
+      - name: Install Tools
+        run: pip install --upgrade ruff mypy
 
       - name: Run Ruff Linter
         run: ruff check .
-
-
-  mypy:
-    name: Mypy Type Checking
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install Mypy
-        run: pip install mypy==1.16.0
 
       - name: Run Mypy
         run: mypy .

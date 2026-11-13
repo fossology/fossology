@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
- 
+
 # SPDX-FileCopyrightText: © 2026 Siemens AG
 # SPDX-FileContributor: Shatakshi Tiwari <shatakshi.tiwari@siemens.com>
 #
 # SPDX-License-Identifier: GPL-2.0-only
- 
+
 """
 Dashboard report generator for FOSSology CI scanners.
- 
+
 Generates a GitHub Actions job summary (Markdown) directly from scanner
 results (nomos, ojo)
 """
- 
+
 import logging
 import os
 from collections import Counter
- 
+
 from .CliOptions import CliOptions
 from .ReportBase import ReportBase
 from .Scanners import Scanners, ScanResult, ScanResultList, _NO_LICENSE
@@ -23,17 +23,17 @@ def _license_display_name(license_id: str) -> str:
   """Return human-readable license name for dashboard output."""
   return (license_id.removeprefix('LicenseRef-')
           if license_id.startswith('LicenseRef-') else license_id)
- 
- 
+
+
 # ---------------------------------------------------------------------------
 # DashboardReport
 # ---------------------------------------------------------------------------
- 
+
 class DashboardReport(ReportBase):
   """
   Build a Markdown compliance dashboard from scanner result objects
   already held by the ``Scanners`` instance.
- 
+
   Lifecycle (same as SpdxReport / Spdx3Report):
       1. ``fossologyscanner.perform_scans()`` populates
          ``scanner.scan_packages`` with NOMOS/OJO results.
@@ -43,41 +43,41 @@ class DashboardReport(ReportBase):
          when running in GitHub Actions, appends it to
          ``$GITHUB_STEP_SUMMARY``.
   """
- 
+
   def __init__(self, cli_options: CliOptions, scanner: Scanners):
     super().__init__(cli_options, scanner)
     self._markdown: str = ''
     self._stats: dict = {}
- 
+
     # Dashboard feature flags (env-driven, all default to True)
     self.include_charts = _parse_bool_env('DASHBOARD_CHARTS', True)
     self.include_unknown = _parse_bool_env('DASHBOARD_UNKNOWN', True)
- 
+
   # -----------------------------------------------------------------
   # ReportBase interface
   # -----------------------------------------------------------------
- 
+
   def finalize_document(self) -> None:
     """Collect scanner results and assemble the Markdown dashboard."""
     license_results = self._collect_license_results()
     failed_results = self.scanner.results_are_allow_listed(whole=False)
- 
+
     self._markdown, self._stats = self._build_markdown(
       license_results, failed_results
     )
     logging.info("Dashboard document finalized.")
- 
+
   def write_report(self, file_name: str) -> None:
     """Write the dashboard Markdown to *file_name* and GITHUB_STEP_SUMMARY."""
     if not self._markdown:
       logging.warning("Dashboard is empty — nothing to write.")
       return
- 
+
     # Write to file
     with open(file_name, 'w', encoding='utf-8') as fh:
       fh.write(self._markdown)
     logging.info(f"Dashboard written to {file_name}")
- 
+
     # Append to GitHub step summary when running in Actions
     summary_path = os.getenv('GITHUB_STEP_SUMMARY')
     if summary_path:
@@ -87,11 +87,11 @@ class DashboardReport(ReportBase):
         logging.info("Dashboard appended to GITHUB_STEP_SUMMARY.")
       except OSError as exc:
         logging.warning(f"Could not write to GITHUB_STEP_SUMMARY: {exc}")
- 
+
   # -----------------------------------------------------------------
   # Result collection helpers
   # -----------------------------------------------------------------
- 
+
   def _collect_license_results(self) -> list[ScanResult | ScanResultList]:
     """Return merged nomos+ojo results from all packages."""
     results: list[ScanResult | ScanResultList] = []
@@ -100,16 +100,16 @@ class DashboardReport(ReportBase):
     for dep in self.scanner.get_scan_packages().dependencies.values():
       results.extend(dep.get('SCANNER_RESULTS', []))
     return results
- 
+
   def _get_counts(self) -> tuple[int, int]:
     """Return (total_components, dependency_count)."""
     dep_count = len(self.scanner.get_scan_packages().dependencies)
     return 1 + dep_count, dep_count
- 
+
   # -----------------------------------------------------------------
   # Markdown builder
   # -----------------------------------------------------------------
- 
+
   def _finalise_data(
       self,
       license_results: list,
@@ -268,12 +268,12 @@ class DashboardReport(ReportBase):
       'files_without_license': len(data['unknown_files']),
     }
     return md, stats
- 
- 
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
- 
+
 def _parse_bool_env(name: str, default: bool = True) -> bool:
   value = os.getenv(name, str(default)).lower()
   return value in ('true', '1', 'yes', 'on')

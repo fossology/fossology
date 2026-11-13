@@ -320,7 +320,7 @@ def bom_report(
   :param format_results: FormatResult object
   :return: Program's return value
   """
-  
+
   if cli_options.report_format in SPDX3_FORMATS:
     report_obj = Spdx3Report(cli_options, scanner)
   else:
