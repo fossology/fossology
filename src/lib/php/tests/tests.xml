@@ -18,7 +18,7 @@
       <file>test_common_sysconfig.php</file>
       <file>test_fossdash_config.php</file>
       <file>test_common_ui.php</file>
-      <file></file>
+      <file>FossinitCommonTest.php</file>
     </testsuite>
   </testsuites>
 </phpunit>
