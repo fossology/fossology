@@ -98,6 +98,7 @@ class cliTest extends \PHPUnit\Framework\TestCase
   /**
    * @dataProvider providerWhetherToUseStandalone
    */
+  #[\PHPUnit\Framework\Attributes\DataProvider('providerWhetherToUseStandalone')]
   public function testRunMonkScan($standalone)
   {
     $this->setUpTables();
@@ -152,6 +153,7 @@ class cliTest extends \PHPUnit\Framework\TestCase
   /**
    * @dataProvider providerWhetherToUseStandalone
    */
+  #[\PHPUnit\Framework\Attributes\DataProvider('providerWhetherToUseStandalone')]
   public function testRunMultipleMonkScansFulls($standalone)
   {
     $this->setUpTables();
@@ -176,6 +178,7 @@ class cliTest extends \PHPUnit\Framework\TestCase
   /**
    * @dataProvider providerWhetherToUseStandalone
    */
+  #[\PHPUnit\Framework\Attributes\DataProvider('providerWhetherToUseStandalone')]
   public function testRunMultipleMonkScansDiff($standalone)
   {
     $this->setUpTables();
@@ -199,6 +202,7 @@ class cliTest extends \PHPUnit\Framework\TestCase
   /**
    * @dataProvider providerWhetherToUseStandalone
    */
+  #[\PHPUnit\Framework\Attributes\DataProvider('providerWhetherToUseStandalone')]
   public function testRunMonkHelpMode($standalone)
   {
     $this->setUpTables();
@@ -219,6 +223,7 @@ class cliTest extends \PHPUnit\Framework\TestCase
   /**
    * @dataProvider providerWhetherToUseStandalone
    */
+  #[\PHPUnit\Framework\Attributes\DataProvider('providerWhetherToUseStandalone')]
   public function testRunMonkScansWithNegativeMatch($standalone)
   {
     $this->setUpTables();
@@ -237,6 +242,7 @@ class cliTest extends \PHPUnit\Framework\TestCase
   /**
    * @dataProvider providerWhetherToUseStandalone
    */
+  #[\PHPUnit\Framework\Attributes\DataProvider('providerWhetherToUseStandalone')]
   public function testRunMonkScansWithNegativeMatchVerbose($standalone)
   {
     $this->setUpTables();
