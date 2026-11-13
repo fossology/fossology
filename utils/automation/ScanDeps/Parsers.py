@@ -6,10 +6,12 @@
 
 # SPDX-License-Identifier: GPL-2.0-only
 
+import hashlib
 import json
 import logging
 import os
 from typing import Any
+from urllib.parse import quote
 
 import requests
 from packageurl import PackageURL
@@ -65,16 +67,45 @@ class Parser:
       if not purl:
         continue
       comp_type = self._extract_type(purl)
-
-      # Ensure component has 'name' and 'version' for path construction
-      comp_name = component.get('name', 'unknown_name')
-      comp_version = component.get('version', 'unknown_version')
-
       component['download_dir'] = os.path.join(
-        root_download_dir, comp_type or 'unclassified', comp_name, comp_version
+        root_download_dir, comp_type or 'unclassified',
+        *self._download_segments(purl, component)
       )
       component[COMPONENT_TYPE_KEY] = comp_type
       self.parsed_components[purl] = component
+
+  @classmethod
+  def _download_segments(cls, purl: str,
+                         component: dict[str, Any]) -> tuple[str, str]:
+    """
+    Name and version directories that are distinct for every distinct PURL.
+    The name includes the namespace, and qualifiers or a subpath add a hash
+    of the PURL to the version, so packages that share a short name or differ
+    only by a Maven classifier do not share a directory.
+    """
+    name = component.get('name', 'unknown_name')
+    version = component.get('version', 'unknown_version')
+    suffix = ''
+    try:
+      parsed = PackageURL.from_string(purl)
+    except ValueError:
+      parsed = None
+    if parsed is not None:
+      name = '/'.join(filter(None, [parsed.namespace, parsed.name]))
+      version = parsed.version or version
+      if parsed.qualifiers or parsed.subpath:
+        suffix = '-' + hashlib.sha256(
+          parsed.to_string().encode('utf-8')).hexdigest()[:12]
+    return (cls._safe_segment(name),
+            cls._safe_segment(version) + suffix)
+
+  @staticmethod
+  def _safe_segment(value: Any) -> str:
+    """Encode an SBOM value as one directory name, without collisions."""
+    segment = quote(str(value), safe='')
+    if segment in ('', '.', '..'):
+      return segment.replace('.', '%2E') or '%00'
+    return segment
 
   def _extract_type(self, purl: str) -> str | None:
     """
@@ -102,25 +133,56 @@ class Parser:
       )
       return None
 
+  def _components_of(self, comp_type: str) -> list[dict[str, Any]]:
+    return [comp for comp in self.parsed_components.values() if
+            comp.get(COMPONENT_TYPE_KEY) == comp_type]
+
   @property
   def python_components(self) -> list[dict[str, Any]]:
-    return [comp for comp in self.parsed_components.values() if
-            comp.get(COMPONENT_TYPE_KEY) == 'pypi']
+    return self._components_of('pypi')
 
   @property
   def npm_components(self) -> list[dict[str, Any]]:
-    return [comp for comp in self.parsed_components.values() if
-            comp.get(COMPONENT_TYPE_KEY) == 'npm']
+    return self._components_of('npm')
 
   @property
   def php_components(self) -> list[dict[str, Any]]:
-    return [comp for comp in self.parsed_components.values() if
-            comp.get(COMPONENT_TYPE_KEY) == 'composer']
+    return self._components_of('composer')
+
+  @property
+  def maven_components(self) -> list[dict[str, Any]]:
+    return self._components_of('maven')
+
+  @property
+  def golang_components(self) -> list[dict[str, Any]]:
+    return self._components_of('golang')
+
+  @property
+  def github_components(self) -> list[dict[str, Any]]:
+    return self._components_of('github')
+
+  @property
+  def debian_components(self) -> list[dict[str, Any]]:
+    return self._components_of('deb')
+
+  @property
+  def debian_source_components(self) -> list[dict[str, Any]]:
+    source_components = []
+    for component in self.debian_components:
+      try:
+        purl = PackageURL.from_string(component['purl'])
+      except (KeyError, ValueError):
+        continue
+      if purl.qualifiers.get('arch') == 'source':
+        source_components.append(component)
+    return source_components
 
   @property
   def unsupported_components(self) -> list[dict[str, Any]]:
     return [comp for comp in self.parsed_components.values() if
-            comp.get(COMPONENT_TYPE_KEY) not in ['pypi', 'npm', 'composer']]
+            comp.get(COMPONENT_TYPE_KEY) not in [
+              'pypi', 'npm', 'composer', 'maven', 'golang', 'github', 'deb'
+            ]]
 
 
 class PythonParser:
@@ -270,3 +332,201 @@ class NPMParser:
         logging.error(
           f"Invalid Download URL for NPM package: {name} ({purl}) :: {e}"
         )
+
+
+class ComposerParser:
+  """
+  Composer Parser to parse PHP sboms to generate download urls from
+  cyclonedx format sbom files using the Packagist API.
+  """
+
+  def _generate_api_endpoint(self, vendor: str, package: str) -> str:
+    """
+    Generate Packagist API endpoint to fetch package metadata.
+    Args:
+        vendor: str Vendor/namespace of the package
+        package: str Name of the package
+    Return:
+        Packagist API endpoint URL
+    """
+    return (f"https://repo.packagist.org/p2/{quote(vendor, safe='')}/"
+            f"{quote(package, safe='')}.json")
+
+  def parse_components(self, parser: Parser) -> None:
+    """
+    Parse SBOM file for PHP package name and download url.
+    Return:
+        None
+    """
+    for comp in parser.php_components:
+      purl = comp.get('purl')
+      if not purl:
+        logging.warning(
+          f"Composer component missing PURL: {comp}. Skipping."
+        )
+        continue
+
+      component = comp
+
+      try:
+        parsed_purl = PackageURL.from_string(purl)
+      except ValueError as e:
+        logging.warning(f"Could not parse PURL '{purl}': {e}. Skipping.")
+        continue
+
+      vendor = parsed_purl.namespace
+      package_name = parsed_purl.name
+      version = parsed_purl.version
+
+      if not vendor or not package_name or not version:
+        logging.warning(
+          f"Composer component {purl} missing namespace, name, or version. "
+          "Skipping."
+        )
+        continue
+
+      api_endpoint = self._generate_api_endpoint(vendor, package_name)
+      logging.info(
+        f"API endpoint for {vendor}/{package_name} : {api_endpoint}"
+      )
+
+      try:
+        response = requests.get(api_endpoint, timeout=10)
+        response.raise_for_status()
+
+        data = response.json()
+        packages = data.get('packages', {}).get(
+          f"{vendor}/{package_name}", []
+        )
+
+        download_url = None
+        for release in packages:
+          if (str(release.get('version', '')).lstrip('v') ==
+              version.lstrip('v')):
+            download_url = release.get('dist', {}).get('url')
+            source_url = release.get('source', {}).get('url')
+            if source_url:
+              component['vcs_url'] = source_url
+            break
+
+        if download_url:
+          component[DOWNLOAD_URL_KEY] = download_url
+        else:
+          logging.warning(
+            f"No download URL found for {vendor}/{package_name} {version}"
+          )
+
+      except requests.exceptions.RequestException as e:
+        logging.error(
+          f"Failed to retrieve data for {vendor}/{package_name} {version} "
+          f"from {api_endpoint}: {e}"
+        )
+      except json.JSONDecodeError:
+        logging.error(
+          f"Failed to decode JSON response from {api_endpoint} for "
+          f"{vendor}/{package_name} {version}."
+        )
+      except Exception as e:
+        logging.error(
+          f"An unexpected error occurred while parsing Composer component "
+          f"{purl}: {e}"
+        )
+
+
+class PurlParser:
+  """
+  Base for parsers that derive the download url from the PURL alone.
+  Subclasses set `ecosystem` and implement `_get_download_url`.
+  """
+
+  ecosystem = ''
+
+  def _get_download_url(self, purl: str) -> str | None:
+    raise NotImplementedError
+
+  def parse_components(self, parser: Parser) -> None:
+    for component in getattr(parser, f'{self.ecosystem}_components'):
+      purl = component.get('purl')
+      if not purl:
+        logging.warning(
+          f'{self.ecosystem} component missing PURL: {component}. Skipping.'
+        )
+        continue
+      try:
+        download_url = self._get_download_url(purl)
+      except Exception as e:
+        logging.warning(f'Could not resolve {self.ecosystem} package {purl}: {e}')
+        continue
+      if download_url:
+        component[DOWNLOAD_URL_KEY] = download_url
+      else:
+        logging.warning(
+          f'No download URL could be determined for {self.ecosystem} '
+          f'package: {purl}'
+        )
+
+
+class MavenParser(PurlParser):
+  """
+  Resolve Maven artifacts, preferring the sources jar for license scanning.
+  """
+
+  ecosystem = 'maven'
+
+  def _get_download_url(self, purl: str) -> str | None:
+    parsed_purl = PackageURL.from_string(purl)
+    if 'classifier' in (parsed_purl.qualifiers or {}):
+      return purl2url.get_download_url(purl)
+    qualifiers = dict(parsed_purl.qualifiers or {}, classifier='sources')
+    sources_url = purl2url.get_download_url(
+      parsed_purl._replace(qualifiers=qualifiers).to_string()
+    )
+    try:
+      if sources_url and requests.head(
+          sources_url, timeout=10, allow_redirects=True).ok:
+        return sources_url
+    except requests.exceptions.RequestException:
+      pass
+    logging.warning(f'No sources jar for {purl}. Using the binary jar.')
+    return purl2url.get_download_url(purl)
+
+
+class GoParser(PurlParser):
+  """
+  Resolve Go module source archives through the public Go module proxy.
+  """
+
+  ecosystem = 'golang'
+  GO_PROXY_BASE = 'https://proxy.golang.org'
+
+  @staticmethod
+  def _escape_module_path(module_path: str) -> str:
+    """Apply the case escaping the Go module proxy needs on paths and versions."""
+    return ''.join(
+      f'!{character.lower()}' if 'A' <= character <= 'Z' else character
+      for character in module_path
+    )
+
+  def _get_download_url(self, purl: str) -> str | None:
+    parsed_purl = PackageURL.from_string(purl)
+    if not parsed_purl.name or not parsed_purl.version:
+      return None
+    module_path = '/'.join(
+      filter(None, [parsed_purl.namespace, parsed_purl.name])
+    )
+    return (
+      f'{self.GO_PROXY_BASE}/'
+      f'{quote(self._escape_module_path(module_path), safe="/!")}/@v/'
+      f'{quote(self._escape_module_path(parsed_purl.version), safe="!")}.zip'
+    )
+
+
+class GitHubParser(PurlParser):
+  """
+  Resolve GitHub package URLs to source archive downloads.
+  """
+
+  ecosystem = 'github'
+
+  def _get_download_url(self, purl: str) -> str | None:
+    return purl2url.get_download_url(purl)
