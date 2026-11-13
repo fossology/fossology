@@ -291,7 +291,7 @@ class JobController extends RestController
       }
       $finalJobs[] = $job->getArray($apiVersion);
     }
-    if ($id !== null) {
+    if ($id !== null && !empty($finalJobs)) {
       $finalJobs = $finalJobs[0];
     }
     return $response->withHeader("X-Total-Pages", $count)->withJson($finalJobs, 200);
