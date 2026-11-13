@@ -67,3 +67,7 @@ License: GPL-2.0-only
 Files: pbconf/pbcl pbconf/fossology/pbve.pre
 Copyright: Fossology contributors
 License: GPL-2.0-only
+
+Files: pyproject.toml
+Copyright: Fossology contributors
+License: GPL-2.0-only
