@@ -64,11 +64,14 @@ class SpashtAgent extends Agent
       $itemTreeBounds);
 
     $agentId = $this->agentDao->getCurrentAgentId("spasht");
-    $pfileSha1AndpfileId = array();
+    $sha1ToPfileId = array();
 
     foreach ($pfileFileDetails as $pfileDetail) {
-      $pfileSha1AndpfileId[$pfileDetail['pfile_pk']] = strtolower(
-        $pfileDetail['sha1']);
+      $sha1 = strtolower($pfileDetail['sha1']);
+
+      if (!array_key_exists($sha1, $sha1ToPfileId)) {
+        $sha1ToPfileId[$sha1] = $pfileDetail['pfile_pk'];
+      }
     }
 
     $uploadAvailable = $this->searchUploadIdInSpasht($uploadId);
@@ -78,7 +81,7 @@ class SpashtAgent extends Agent
     }
 
     $getNewResult = $this->getInformation($uploadAvailable,
-      $pfileSha1AndpfileId);
+      $sha1ToPfileId);
     if (is_string($getNewResult)) {
       echo "Error: $getNewResult";
       return false;
@@ -111,11 +114,11 @@ class SpashtAgent extends Agent
    * Search pfile for uploads into clearlydefined
    *
    * @param Coordinate $details
-   * @param array $pfileSha1AndpfileId Associated pfile and sha1 array
+   * @param array $sha1ToPfileId SHA-1 hashes mapped to pfile IDs
    * @return array Array containing license, copyright and pfile info. String
    *         containing error message if and error occurred
    */
-  protected function getInformation($details, $pfileSha1AndpfileId)
+  protected function getInformation($details, $sha1ToPfileId)
   {
     global $SysConf;
 
@@ -162,9 +165,10 @@ class SpashtAgent extends Agent
       $newResultBody = array();
 
       foreach ($body->$dir as $key) {
-        $searchInUpload = array_search($key->hashes->sha1, $pfileSha1AndpfileId);
+        $sha1 = $key->hashes->sha1;
+        $searchInUpload = $sha1ToPfileId[$sha1] ?? null;
 
-        if (! empty($searchInUpload)) {
+        if ($searchInUpload !== null && !empty($searchInUpload))  {
           $temp = array();
           $temp['pfileId'] = $searchInUpload;
           $temp['sha1'] = $key->hashes->sha1;
