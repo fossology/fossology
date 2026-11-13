@@ -18,7 +18,7 @@ require_once(dirname(__FILE__, 2) . '/common-db.php');
 /**
  * \class test_common_cache
  */
-class test_common_cached extends \PHPUnit\Framework\TestCase
+class test_common_cache extends \PHPUnit\Framework\TestCase
 {
    /** @var TestPgDb */
    private $testDb;
@@ -83,8 +83,6 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
    */
   function testReportCachePut_upload_id_not_null()
   {
-    print "Start unit test for common-cache.php\n";
-    print "test function ReportCachePut()\n";
     global $upload_pk;
     global $uploadtree_pk;
 
@@ -106,7 +104,6 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
    */
   function testReportCachePut_upload_id_null()
   {
-    print "test function ReportCachePut()\n";
     global $upload_pk;
     global $uploadtree_pk;
 
@@ -128,7 +125,6 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
    */
   function testReportCacheGet()
   {
-    print "test function ReportCacheGet()\n";
     global $upload_pk;
     global $uploadtree_pk;
     global $UserCacheStat;
@@ -144,7 +140,6 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
     $value = ReportCacheGet($CacheKey);
     $this->assertEquals($CacheValue, $value);
     $this->resetEnv4ReportCachePut();
-    print "unit test for common-cache.php end\n";
   }
 
   /**

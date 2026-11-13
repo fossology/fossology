@@ -9,6 +9,8 @@ namespace Fossology\Lib\Data\Upload;
 
 class UploadTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /** @var int */
   private $id = 132;
   /** @var string */

@@ -49,7 +49,7 @@ class StringOperation
    */
   public static function stringStartsWith($haystack, $needle)
   {
-    return strncmp($haystack, $needle, strlen($needle)) === 0;
+    return strncmp((string) $haystack, (string) $needle, strlen((string) $needle)) === 0;
   }
 
   /**

@@ -73,6 +73,10 @@ namespace Fossology\UI\Api\Test\Controllers {
    */
   class UploadTreeControllerTest extends \PHPUnit\Framework\TestCase
   {
+    public $assertCountBefore;
+    public $clearingDao;
+    public $userId;
+
     /**
      * @var DbHelper $dbHelper
      * DbHelper mock

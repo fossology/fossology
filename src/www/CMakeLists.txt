@@ -18,6 +18,7 @@ set(FO_WWW_OBSOLETE
     ui-license-list.php ui-browse-license.php ui-picker.php
     template/ui-license-list-form.html.twig
     template/components template/include
+    scripts/jquery-3.6.0.min.js
 )
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/gen/fossology.rc "${FO_SYSCONFDIR}")

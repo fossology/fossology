@@ -23,10 +23,10 @@ use Fossology\Ojo\Test\SchedulerTestRunnerCli;
 use Fossology\Ojo\Test\SchedulerTestRunnerScheduler;
 
 /**
- * @class OjoScheduledTest
+ * @class OjoSchedulerTest
  * @brief Functional test cases for ojo agent using scheduler
  */
-class OjoScheduledTest extends \PHPUnit\Framework\TestCase
+class OjoSchedulerTest extends \PHPUnit\Framework\TestCase
 {
 
   /**
@@ -366,12 +366,12 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
     $jsonFromOutput = json_decode($output, true);
 
     // Sort the data to reduce differences
-    usort($jsonFromFile, array('OjoScheduledTest', 'compareMatchesFiles'));
-    usort($jsonFromOutput, array('OjoScheduledTest', 'compareMatchesFiles'));
+    usort($jsonFromFile, array('OjoSchedulerTest', 'compareMatchesFiles'));
+    usort($jsonFromOutput, array('OjoSchedulerTest', 'compareMatchesFiles'));
 
     // Find the difference
     $jsonDiff = array_udiff($jsonFromFile, $jsonFromOutput,
-      array('OjoScheduledTest', 'compareMatches'));
+      array('OjoSchedulerTest', 'compareMatches'));
 
     $outputDiff = "JSON does not match regression test file.\n";
     $outputDiff .= "Following are the results not in regression test file.\n";

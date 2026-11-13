@@ -9,6 +9,8 @@ namespace Fossology\Lib\Util;
 
 class ArrayOperationTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
 
   protected function setUp() : void
   {

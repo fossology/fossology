@@ -100,7 +100,8 @@ class ReportStatic
     $footer = $section->addFooter();
     $table = $footer->addTable("footerTableStyle");
     $table->addRow(200, $styleFirstRow);
-    $table->addCell(15000,$styleFirstRow)->addPreserveText(htmlspecialchars("$footerCopyright "
+    // PhpWord 1.x sets noWrap by default; Word honours it in auto-layout tables
+    $table->addCell(15000, array_merge($styleFirstRow, array('noWrap' => false)))->addPreserveText(htmlspecialchars("$footerCopyright "
       ."$footerSpace $footerTime $footerSpace FOSSology Ver:#$commitId-$commitDate $footerSpace $footerPageNo"), $footerStyle);
   }
 
@@ -586,7 +587,7 @@ class ReportStatic
     $section->addListItem("which has been submitted to Clearing Support to be checked",
       1 , "Arial", PhpOffice\PhpWord\Style\ListItem::TYPE_SQUARE_FILLED);
 
-    $textrun = $section->createTextRun();
+    $textrun = $section->addTextRun();
     $textrun->addText("Other source code or binaries from the Internet ", $styleFont2);
     $textrun->addText("must not be ", $styleFont);
     $textrun->addText("used.", $styleFont1);

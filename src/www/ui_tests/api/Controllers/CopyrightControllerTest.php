@@ -37,6 +37,9 @@ use Slim\Psr7\Headers;
 */
 class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
 {
+  public $auth;
+  public $userDao;
+
   /**
    * @var DbHelper $dbHelper
    * DbHelper mock

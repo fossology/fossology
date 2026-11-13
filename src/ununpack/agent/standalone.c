@@ -46,7 +46,8 @@ size_t PQescapeStringConn(PGconn *conn,
                    char *to, const char *from, size_t length, int *error){*error=0;return(0);}
 void  PQfinish(PGconn *conn){}
 
-void  PQsetNoticeProcessor(PGconn *pgConn, char *SQLNoticeProcessor, char *SQL){}
+PQnoticeProcessor PQsetNoticeProcessor(PGconn *conn,
+                   PQnoticeProcessor proc, void *arg){return(0);}
 
 char*   fo_RepMkPath (char *Type, char *Filename){return(0);}
 int   fo_RepExist(char* Type, char* Filename){return 1;}

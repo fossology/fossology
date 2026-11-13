@@ -14,6 +14,8 @@ use Fossology\Lib\Test\TestPgDb;
 
 class TreeDaoTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /** @var TestPgDb */
   private $testDb;
   /** @var DbManager */

@@ -105,8 +105,8 @@ class LicenseRef
    */
   public static function convertToSpdxId($shortname, $spdxId): string
   {
-    if (strcasecmp($shortname, LicenseDao::NO_LICENSE_FOUND) === 0 ||
-        strcasecmp($shortname, LicenseDao::VOID_LICENSE) === 0) {
+    if (strcasecmp((string) $shortname, LicenseDao::NO_LICENSE_FOUND) === 0 ||
+        strcasecmp((string) $shortname, LicenseDao::VOID_LICENSE) === 0) {
       $spdxLicense = $shortname;
     } elseif (empty($spdxId)) {
       $spdxLicense = $shortname;

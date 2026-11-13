@@ -13,6 +13,9 @@ use Fossology\Lib\Test\TestPgDb;
 
 class LicenseMapTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+  public $testDb;
+
   /** @var DbManager $dbManager
    * DbManager */
   private $dbManager;

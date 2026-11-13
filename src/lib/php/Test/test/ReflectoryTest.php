@@ -23,6 +23,8 @@ class ClassWithPrivateMethod
 
 class ReflectoryTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   protected function setUp() : void
   {
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();

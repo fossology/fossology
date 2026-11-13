@@ -28,8 +28,6 @@ class test_common_parm extends \PHPUnit\Framework\TestCase
    */
   function test_GetParm()
   {
-    print "Starting unit test for common-parm.php\n";
-    print "test function GetParm()\n";
     //Test Case 1: $_GET[$Name] = "Name", $Type = PARM_INTEGER
     $Name = "Name";
     $_GET[$Name] = 20;
@@ -73,7 +71,6 @@ class test_common_parm extends \PHPUnit\Framework\TestCase
    */
   function test_Traceback()
   {
-    print "test function Traceback()\n";
     $expected = "http://fossology.org/";
     $_SERVER['REQUEST_URI'] = $expected;
     $result = Traceback();
@@ -85,7 +82,6 @@ class test_common_parm extends \PHPUnit\Framework\TestCase
    */
   function test_Traceback_uri()
   {
-    print "test function Traceback_uri()\n";
     $source = "http://fossology.org/?mod=test&parm=abc";
     $expected = "http://fossology.org/";
     $_SERVER['REQUEST_URI'] = $source;
@@ -98,7 +94,6 @@ class test_common_parm extends \PHPUnit\Framework\TestCase
    */
   function test_Traceback_parm()
   {
-    print "test function Traceback_parm()\n";
     $source1 = "http://fossology.org/?mod=test";
     $source2 = "http://fossology.org/?mod=test&parm=abc";
     $expected1 = "test&parm=abc";
@@ -118,7 +113,6 @@ class test_common_parm extends \PHPUnit\Framework\TestCase
    */
   function test_Traceback_parm_keep()
   {
-    print "test function Traceback_parm_keep()\n";
     $List = array('parm1', 'parm2');
     $_GET['parm1'] = "parm1";
     $expected = "&parm1=parm1";
@@ -131,13 +125,11 @@ class test_common_parm extends \PHPUnit\Framework\TestCase
    */
   function test_Traceback_dir()
   {
-    print "test function Traceback_dir()\n";
     $source = "http://fossology.org/repo/testdir?mod=test&parm=abc";
     $_SERVER['REQUEST_URI'] = $source;
     $expected = "http://fossology.org/repo/";
     $result = Traceback_dir();
     $this->assertEquals($expected, $result);
-    print "Ending unit test for common-parm.php\n";
   }
 
   /**

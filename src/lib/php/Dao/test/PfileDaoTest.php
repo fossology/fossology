@@ -131,8 +131,6 @@ class PfileDaoTest extends \PHPUnit\Framework\TestCase
    */
   public function testGetScannerFindings()
   {
-    echo dirname(dirname(dirname(dirname(__DIR__)))) .
-      "/spdx2/agent_tests/Functional/fo_report.sql";
     $this->testDb->createPlainTables(['license_ref', 'license_file']);
     $this->testDb->insertData(['license_ref', 'license_file']);
 

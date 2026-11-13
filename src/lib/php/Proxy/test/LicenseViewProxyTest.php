@@ -12,6 +12,8 @@ use Mockery as M;
 
 class LicenseViewProxyTest extends \PHPUnit\Framework\TestCase
 {
+  public $almostAllColumns;
+
   private $dbManagerMock;
 
   protected function setUp() : void
@@ -65,7 +67,7 @@ class LicenseViewProxyTest extends \PHPUnit\Framework\TestCase
     $prefix = '#';
     $options3 = array(LicenseViewProxy::CANDIDATE_PREFIX=>$prefix,'columns'=>array('rf_shortname'));
     $query3 = $method->invoke($licenseViewProxy,$options3);
-    assertThat($query3, is("SELECT '". pg_escape_string($prefix). "'||rf_shortname AS rf_shortname FROM license_candidate WHERE group_fk=$groupId"));
+    assertThat($query3, is("SELECT '". str_replace("'", "''", $prefix). "'||rf_shortname AS rf_shortname FROM license_candidate WHERE group_fk=$groupId"));
   }
 
   public function testConstruct()

@@ -19,6 +19,9 @@ define("TITLE_ADMIN_LICENSE_FILE", _("License Administration"));
 
 class admin_license_file extends FO_Plugin
 {
+  public $obligationSelectorId;
+  public $obligationSelectorName;
+
   /** @var DbManager */
   private $dbManager;
 

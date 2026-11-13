@@ -38,6 +38,10 @@ require_once dirname(__DIR__, 4) . '/lib/php/Plugin/FO_Plugin.php';
  */
 class MaintenanceControllerTest extends \PHPUnit\Framework\TestCase
 {
+  public $dbManager;
+  public $streamFactory;
+  public $userDao;
+
   /**
    * @var string YAML_LOC
    * Location of openapi.yaml file

@@ -22,7 +22,6 @@ class test_common_ui extends \PHPUnit\Framework\TestCase
   protected function setUp() : void
   {
     //print "Starting unit test for common-ui.php\n";
-    print('.');
   }
 
   /**
@@ -30,7 +29,6 @@ class test_common_ui extends \PHPUnit\Framework\TestCase
    */
   protected function tearDown() : void
   {
-    print "Ending unit test for common-ui.php\n";
   }
 
   /**
@@ -38,7 +36,6 @@ class test_common_ui extends \PHPUnit\Framework\TestCase
    */
   function test_HumanSize()
   {
-    print "test function HumanSize()\n";
     $result = HumanSize(1024 * 1024 * 1024);
     $this->assertEquals("1 GB", $result);
     $result = HumanSize(10240);

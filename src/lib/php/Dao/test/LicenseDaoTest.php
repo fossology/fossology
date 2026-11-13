@@ -19,6 +19,8 @@ use Fossology\Lib\Test\TestPgDb;
 
 class LicenseDaoTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /** @var TestLiteDb */
   private $testDb;
   /** @var DbManager */
