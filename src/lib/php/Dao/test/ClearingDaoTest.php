@@ -62,6 +62,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
             'custom_phrase_license_map',
             'highlight_bulk',
             'highlight_kotoba',
+            'license_file',
             'license_ref',
             'license_ref_bulk',
             'license_set_bulk',
@@ -599,5 +600,95 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $rowFuture = $this->dbManager->getSingleRow('SELECT * FROM clearing_event WHERE uploadtree_fk=$1 AND rf_fk=$2 ORDER BY clearing_event_pk DESC LIMIT 1',array($uploadTreeId,$licenseId),__METHOD__.'afterReportinfo');
     assertThat($rowFuture['comment'],equalTo($changeCom));
     assertThat($rowFuture['reportinfo'],equalTo($changeRep));
+  }
+
+  private function insertLicenseFinding($flPk, $rfFk, $pfileFk)
+  {
+    $this->dbManager->insertInto('license_file',
+      'fl_pk, agent_fk, rf_fk, pfile_fk',
+      array($flPk, 1, $rfFk, $pfileFk), 'insert.licenseFinding');
+  }
+
+  private function insertClearingDecision($pk, $uploadTreeId, $dateTs,
+    $decisionType = DecisionTypes::IDENTIFIED)
+  {
+    $this->dbManager->insertInto('clearing_decision',
+      'clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, date_added, scope',
+      array($pk, $uploadTreeId, $this->items[$uploadTreeId][2], 1, $this->groupId, $decisionType, $this->getMyDate($dateTs), 1),
+      'insert.clearingDecision');
+  }
+
+  public function testGetClearingCoverageEmpty()
+  {
+    assertThat($this->clearingDao->getClearingCoverage([], $this->groupId), is(emptyArray()));
+  }
+
+  public function testGetClearingCoverageOnlyCountsFilesOfInterest()
+  {
+    $this->dbManager->insertInto('license_ref',
+      'rf_pk, rf_shortname, rf_spdx_id, rf_fullname, rf_text',
+      array(405, 'No_license_found', 'No_license_found', 'no license found', '-'),
+      $logStmt = 'insert.ref.nlf');
+    /* pfile 201 is shared by items 301 (upload 101) and 303+305 (upload 102);
+       a No_license_found finding on pfile 202 must be ignored */
+    $this->insertLicenseFinding(1, 401, 201);
+    $this->insertLicenseFinding(2, 405, 202);
+    $coverage = $this->clearingDao->getClearingCoverage([101, 102], $this->groupId);
+    assertThat($coverage[101], is(array('total' => 1, 'cleared' => 0)));
+    assertThat($coverage[102], is(array('total' => 2, 'cleared' => 0)));
+  }
+
+  public function testGetClearingCoverageFullyCleared()
+  {
+    $this->insertLicenseFinding(1, 401, 201);
+    $this->insertClearingDecision(1, 301, $this->now - 100);
+    $this->insertClearingDecision(2, 305, $this->now - 90, DecisionTypes::IRRELEVANT);
+    $this->insertClearingDecision(3, 306, $this->now - 10); // decided without any finding
+    $coverage = $this->clearingDao->getClearingCoverage([101, 102], $this->groupId);
+    assertThat($coverage[101]['total'], is(1));
+    assertThat($coverage[101]['cleared'], is(1));
+    assertThat($coverage[102]['total'], is(3)); // 303+305 via findings, 306 via decision
+    assertThat($coverage[102]['cleared'], is(2));
+  }
+
+  public function testGetClearingCoverageLatestDecisionWins()
+  {
+    $this->insertLicenseFinding(1, 401, 201);
+    $this->insertClearingDecision(1, 301, $this->now - 100, DecisionTypes::IDENTIFIED);
+    $this->insertClearingDecision(2, 301, $this->now - 50, DecisionTypes::WIP);
+    $this->insertClearingDecision(3, 303, $this->now - 40, DecisionTypes::TO_BE_DISCUSSED);
+    $this->insertClearingDecision(4, 303, $this->now - 10, DecisionTypes::NON_FUNCTIONAL);
+    $coverage = $this->clearingDao->getClearingCoverage([101, 102], $this->groupId);
+    assertThat($coverage[101], is(array('total' => 1, 'cleared' => 0)));
+    assertThat($coverage[102]['total'], is(2));
+    assertThat($coverage[102]['cleared'], is(1));
+  }
+
+  public function testGetClearingCoverageGroupScoping()
+  {
+    $this->insertLicenseFinding(1, 401, 201);
+    $this->insertClearingDecision(1, 301, $this->now - 100);
+    // another group's decision neither clears nor makes item 302 interesting
+    $this->dbManager->insertInto('clearing_decision',
+      'clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, date_added, scope',
+      array(2, 302, $this->items[302][2], 1, $this->groupId + 1, DecisionTypes::IDENTIFIED,
+        $this->getMyDate($this->now - 10), 1),
+      'insert.clearingDecision.otherGroup');
+    $coverage = $this->clearingDao->getClearingCoverage([101], $this->groupId);
+    assertThat($coverage[101], is(array('total' => 1, 'cleared' => 1)));
+  }
+
+  public function testGetClearingCoverageUnknownUpload()
+  {
+    $coverage = $this->clearingDao->getClearingCoverage([999], $this->groupId);
+    assertThat($coverage[999], is(array('total' => 0, 'cleared' => 0)));
+  }
+
+  public function testGetClearingCoverageDuplicateIds()
+  {
+    $this->insertLicenseFinding(1, 401, 201);
+    $this->insertClearingDecision(1, 301, $this->now - 100);
+    $coverage = $this->clearingDao->getClearingCoverage([101, 101], $this->groupId);
+    assertThat($coverage[101], is(array('total' => 1, 'cleared' => 1)));
   }
 }
