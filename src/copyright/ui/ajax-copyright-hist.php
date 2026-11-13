@@ -3,6 +3,8 @@
  SPDX-FileCopyrightText: © 2014-2019, 2022, Siemens AG
  Author: Daniele Fognini, Johannes Najjar, Steffen Weber, Shaheem Azmal M MD
 
+ SPDX-FileCopyrightText: © 2026 DenishShiroya22 <denishshiroya22@gmail.com>
+
  SPDX-License-Identifier: GPL-2.0-only
 */
 
@@ -15,6 +17,7 @@ use Fossology\Lib\Util\StringOperation;
 use Fossology\Agent\Copyright\UI\TextFindingsAjax;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Fossology\Agent\Copyright\UI\KeywordHintProvider;
 
 define("TITLE_COPYRIGHTHISTOGRAMPROCESSPOST", _("Private: Browse post"));
 
@@ -212,8 +215,9 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $aaData = array();
     if (!empty($rows)) {
       $rw = $this->uploadDao->isEditable($upload, Auth::getGroupId());
+      $keywordHints = $type === 'keyword' ? new KeywordHintProvider() : null;
       foreach ($rows as $row) {
-        $aaData [] = $this->fillTableRow($row, $item, $upload, $agent_pk, $type,$listPage, $filter, $activated, $rw);
+        $aaData [] = $this->fillTableRow($row, $item, $upload, $agent_pk, $type,$listPage, $filter, $activated, $rw, $keywordHints);
       }
     }
 
@@ -442,10 +446,12 @@ count(*) AS copyright_count " .
    * @param string  $listPage     Page slug
    * @param string  $filter       Filter for query
    * @param boolean $activated    True to get activated results, false otherwise
+   * @param boolean $rw           True if the upload is editable
+   * @param KeywordHintProvider|null $keywordHints Guidance for keyword findings
    * @return string[]
    * @internal param boolean $normalizeString
    */
-  private function fillTableRow($row, $uploadTreeId, $upload, $agentId, $type,$listPage, $filter = "", $activated = true, $rw = true)
+  private function fillTableRow($row, $uploadTreeId, $upload, $agentId, $type,$listPage, $filter = "", $activated = true, $rw = true, ?KeywordHintProvider $keywordHints = null)
   {
     $hash = $row['hash'];
     $output = array('DT_RowId' => "$upload,$uploadTreeId,$hash,$type", "DT_RowClass" => "row$hash");
@@ -466,11 +472,17 @@ count(*) AS copyright_count " .
     $link .= $urlArgs . "'>" . $row['copyright_count'] . "</a>";
     $output['0'] = $link;
     $output['1'] = convertToUTF8($row['content']);
-    $output['2'] = $this->getTableRowAction($hash, $uploadTreeId, $upload, $type, $activated, $rw);
+    $actionColumn = 2;
+    if ($type === 'keyword') {
+      $hint = $keywordHints === null ? '' : $keywordHints->getHint($row['content']);
+      $output['2'] = htmlspecialchars($hint, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+      $actionColumn = 3;
+    }
+    $output[$actionColumn] = $this->getTableRowAction($hash, $uploadTreeId, $upload, $type, $activated, $rw);
     if ($rw && $activated) {
-      $output['3'] = "<input type='checkbox' class='deleteBySelect$type' id='deleteBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
+      $output[$actionColumn + 1] = "<input type='checkbox' class='deleteBySelect$type' id='deleteBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
     } else {
-        $output['3'] = "<input type='checkbox' class='undoBySelect$type' id='undoBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
+      $output[$actionColumn + 1] = "<input type='checkbox' class='undoBySelect$type' id='undoBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
     }
     return $output;
   }
