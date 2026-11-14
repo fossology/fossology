@@ -200,7 +200,7 @@ class dashboard extends FO_Plugin
     $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
 
     /* Database size */
-    $sql = "SELECT pg_database_size('fossology') as val;";
+    $sql = "SELECT pg_database_size(current_database()) as val;";
     $row = $this->dbManager->getSingleRow($sql, array(), __METHOD__."get_Size");
     $Size = HumanSize($row['val']);
     $text = _("FOSSology database size");
@@ -268,7 +268,7 @@ class dashboard extends FO_Plugin
     $oldVersion = str_replace(".", "", "9.2");
     $current_query = ($currentVersion >= $oldVersion) ? "state" : "current_query";
     $procpid = ($currentVersion >= $oldVersion) ? "pid" : "procpid";
-    $sql = "SELECT $procpid processid, $current_query, query_start AT TIME ZONE 'UTC' AS query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY $procpid";
+    $sql = "SELECT $procpid processid, $current_query, query_start AT TIME ZONE 'UTC' AS query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = current_database() ORDER BY $procpid";
 
     $statementName = __METHOD__."queryFor_".$current_query."_orderBy_".$procpid;
     $this->dbManager->prepare($statementName,$sql);

@@ -8,6 +8,7 @@
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\Report\CycloneDxSettings;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\Upload\Upload;
@@ -860,8 +861,10 @@ ORDER BY lft asc
     if (empty($row)) {
       $this->dbManager->begin();
       $stmt = __METHOD__.'ifempty';
-      $sql = "INSERT INTO report_info (upload_fk) VALUES ($1) RETURNING *";
-      $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
+      $userSPDXDefaults = $this->getUserSPDXDefaultsForUpload($uploadId);
+      $userCycloneDxDefaults = $this->getUserCycloneDxDefaultsForUpload($uploadId)->toReportInfo();
+      $sql = "INSERT INTO report_info (upload_fk, ri_spdx_selection, ri_cyclonedx_selection) VALUES ($1, $2, $3) RETURNING *";
+      $row = $this->dbManager->getSingleRow($sql, array($uploadId, $userSPDXDefaults, $userCycloneDxDefaults), $stmt);
       $this->dbManager->commit();
     }
     return $row;
@@ -907,42 +910,40 @@ ORDER BY lft asc
   }
 
   /**
-   * @brief Get cyclone dx settings for a user
-   * @param int $uploadId Upload ID to get user for
-   * @return string Comma separated values for cyclonedxLicenseComment, ignoreFilesWOInfo, osselotExport
+   * @brief CycloneDX defaults of the upload owner
+   * @param int $uploadId
+   * @return CycloneDxSettings
+   */
+  private function getUserCycloneDxDefaultsForUpload($uploadId)
+  {
+    $sql = "SELECT user_fk FROM upload WHERE upload_pk = $1";
+    $owner = $this->dbManager->getSingleRow($sql, array($uploadId),
+      __METHOD__ . '.owner');
+    if (empty($owner['user_fk'])) {
+      return new CycloneDxSettings();
+    }
+    $sql = "SELECT cyclonedx_settings FROM users WHERE user_pk = $1";
+    $row = $this->dbManager->getSingleRow($sql, array($owner['user_fk']),
+      __METHOD__ . '.settings');
+    return CycloneDxSettings::fromUserSettings(
+      empty($row) ? null : $row['cyclonedx_settings']);
+  }
+
+  /**
+   * @brief CycloneDX settings of an upload
+   *
+   * Uploads that have no per-upload settings stored yet (created before the
+   * column existed) use the upload owner's defaults.
+   * @param int $uploadId
+   * @return CycloneDxSettings
    */
   public function getCyclonedxSettings($uploadId)
   {
-    $stmt = __METHOD__ . '.getOwner';
-    $sql = "SELECT user_fk FROM upload WHERE upload_pk = $1";
-    $uploadOwner = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
-
-    if (empty($uploadOwner)) {
-      return "unchecked,unchecked,unchecked";
-    }
-
-    $userId = $uploadOwner['user_fk'];
-
-    $stmt = __METHOD__ . '.getUserDefaults';
-    $sql = "SELECT cyclonedx_settings FROM users WHERE user_pk = $1";
-    $userDefaults = $this->dbManager->getSingleRow($sql, array($userId), $stmt);
-
-    if (empty($userDefaults) || empty($userDefaults['cyclonedx_settings'])) {
-      return "unchecked,unchecked,unchecked";
-    }
-
-    $settings = explode(',', $userDefaults['cyclonedx_settings']);
-    if (count($settings) < 3) {
-      $settings = array_pad($settings, 3, 'unchecked');
-    }
-
-    $osselotExport = $settings[0];
-    $cyclonedxLicenseComment = $settings[1];
-    $ignoreFilesWOInfo = $settings[2];
-
-    $result = "$cyclonedxLicenseComment,$ignoreFilesWOInfo,$osselotExport";
-
-    return $result;
+    $sql = "SELECT ri_cyclonedx_selection FROM report_info WHERE upload_fk = $1";
+    $row = $this->dbManager->getSingleRow($sql, array($uploadId), __METHOD__);
+    $settings = empty($row) ? null :
+      CycloneDxSettings::fromReportInfo($row['ri_cyclonedx_selection']);
+    return $settings ?? $this->getUserCycloneDxDefaultsForUpload($uploadId);
   }
 
   /**
@@ -983,12 +984,50 @@ ORDER BY lft asc
       $value = json_encode($oldValues);
     } elseif ($column === "ri_globaldecision") {
       $value = filter_var($value, FILTER_VALIDATE_BOOL);
+    } elseif ($column === "ri_cyclonedx_selection") {
+      $value = $this->mergeCyclonedxSettings($uploadId, $value);
     }
 
     $sql = "UPDATE report_info SET $column = $2 WHERE upload_fk = $1;";
     $stmt = __METHOD__ . "updateReportInfo" . $column;
     $this->dbManager->getSingleRow($sql, [$uploadId, $value], $stmt);
     return true;
+  }
+
+  /**
+   * @brief Apply a partial CycloneDX settings update to an upload's settings
+   * @param int $uploadId
+   * @param string|array $value JSON object or array with any of the keys of
+   *        CycloneDxSettings::toReportInfo()
+   * @return string New value of ri_cyclonedx_selection
+   * @throws \UnexpectedValueException On unknown keys or invalid values
+   */
+  private function mergeCyclonedxSettings($uploadId, $value)
+  {
+    $changes = is_array($value) ? $value : json_decode((string) $value, true);
+    if (!is_array($changes)) {
+      throw new \UnexpectedValueException("CycloneDX settings must be a JSON object");
+    }
+    $merged = json_decode($this->getCyclonedxSettings($uploadId)->toReportInfo(), true);
+    foreach ($changes as $key => $newValue) {
+      if (!array_key_exists($key, $merged)) {
+        throw new \UnexpectedValueException("Unknown CycloneDX setting '$key'");
+      }
+      if (is_bool($merged[$key])) {
+        $newValue = filter_var($newValue, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
+        if ($newValue === null) {
+          throw new \UnexpectedValueException("CycloneDX setting '$key' must be a boolean");
+        }
+      }
+      $merged[$key] = $newValue;
+    }
+    if (CycloneDxSettings::normaliseNamespace((string) $merged['tagNamespace']) === null) {
+      throw new \UnexpectedValueException("Invalid CycloneDX tag namespace");
+    }
+    if (CycloneDxSettings::normaliseSpecVersion((string) $merged['specVersion']) === null) {
+      throw new \UnexpectedValueException("Unsupported CycloneDX spec version");
+    }
+    return CycloneDxSettings::fromReportInfo(json_encode($merged))->toReportInfo();
   }
 
   /* @param int $uploadId
@@ -1006,8 +1045,9 @@ ORDER BY lft asc
       }
       $stmt = __METHOD__ . 'ifempty';
       $userSPDXDefaults = $this->getUserSPDXDefaultsForUpload($uploadId);
-      $sql = "INSERT INTO report_info (upload_fk, ri_globaldecision, ri_spdx_selection) VALUES ($1, $2, $3) RETURNING ri_globaldecision";
-      $row = $this->dbManager->getSingleRow($sql, array($uploadId, $setGlobal, $userSPDXDefaults), $stmt);
+      $userCycloneDxDefaults = $this->getUserCycloneDxDefaultsForUpload($uploadId)->toReportInfo();
+      $sql = "INSERT INTO report_info (upload_fk, ri_globaldecision, ri_spdx_selection, ri_cyclonedx_selection) VALUES ($1, $2, $3, $4) RETURNING ri_globaldecision";
+      $row = $this->dbManager->getSingleRow($sql, array($uploadId, $setGlobal, $userSPDXDefaults, $userCycloneDxDefaults), $stmt);
 
     }
 

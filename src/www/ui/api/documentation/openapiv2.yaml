@@ -1647,6 +1647,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         '404':
           description: Resource not found.
           content:
@@ -1686,6 +1692,12 @@ paths:
       responses:
         '200':
           description: License is removed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
           content:
             application/json:
               schema:
@@ -7588,6 +7600,27 @@ components:
         spdxSelection:
           type: string
           description: shows checkbox status for spdx
+        cyclonedxSelection:
+          type: object
+          description: >
+            CycloneDX report settings. On update, send a JSON object with any
+            subset of these keys; the others keep their value.
+          properties:
+            licenseComment:
+              type: boolean
+            ignoreFilesWithoutInfo:
+              type: boolean
+            osselotExport:
+              type: boolean
+              description: Implies licenseComment in the generated report
+            tagNamespace:
+              type: string
+              pattern: '^[A-Za-z0-9._-]+(:[A-Za-z0-9._-]+)*:?$'
+              maxLength: 64
+              example: 'fossology:'
+            specVersion:
+              type: string
+              enum: ['1.4', '1.5', '1.6', '1.7']
         excludedObligations:
           type: string
           description: shows excluded obligations

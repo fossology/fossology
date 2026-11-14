@@ -34,8 +34,7 @@ class OsselotController extends RestController
   {
       global $SysConf;
 
-    if (empty($SysConf['SYSCONFIG']['EnableOsselotReuse']) ||
-          !$SysConf['SYSCONFIG']['EnableOsselotReuse']) {
+    if (($SysConf['SYSCONFIG']['EnableOsselotReuse'] ?? '') !== 'true') {
         $error = new Info(501, "OSSelot integration is disabled", InfoType::ERROR);
         return $response->withJson($error->getArray(), $error->getCode());
     }
@@ -76,8 +75,7 @@ class OsselotController extends RestController
   {
       global $SysConf;
 
-    if (empty($SysConf['SYSCONFIG']['EnableOsselotReuse']) ||
-          !$SysConf['SYSCONFIG']['EnableOsselotReuse']) {
+    if (($SysConf['SYSCONFIG']['EnableOsselotReuse'] ?? '') !== 'true') {
         $err = new Info(501, "OSSelot integration is disabled", InfoType::ERROR);
         return $response->withJson($err->getArray(), $err->getCode());
     }
