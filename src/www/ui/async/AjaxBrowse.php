@@ -9,6 +9,7 @@
 namespace Fossology\UI\Ajax;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
@@ -88,7 +89,12 @@ class AjaxBrowse extends DefaultPlugin
     } else if (! empty($uploadId) && ! empty($direction)) {
       $uploadBrowseProxy = new UploadBrowseProxy($groupId, $this->userPerm, $this->dbManager);
       $uploadBrowseProxy->moveUploadToInfinity($uploadId, $direction == 'top');
-    } else if (!empty($uploadId) && !empty($commentText) && !empty($statusId)) {
+    } else if (!empty($uploadId) && isset($commentText) && !empty($statusId)) {
+      $isClosing = ($statusId == UploadStatus::CLOSED || $statusId == UploadStatus::REJECTED);
+      $currentStatus = $this->uploadDao->getStatus($uploadId, $groupId);
+      if ($isClosing && $statusId != $currentStatus && trim($commentText) === '') {
+      return new Response('');
+      }
       $uploadBrowseProxy = new UploadBrowseProxy($groupId, $this->userPerm, $this->dbManager);
       $uploadBrowseProxy->setStatusAndComment($uploadId, $statusId, $commentText);
     } else {
