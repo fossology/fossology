@@ -204,9 +204,11 @@ class search extends FO_Plugin
     }
 
     $Limit = GetParm("limit", PARM_INTEGER);
-    if (!empty($Limit)) {
+    if (!empty($Limit) && $Limit > 0) {
       $GETvars .= "&limit=" . urlencode($Limit);
       $this->MaxPerPage = $Limit;
+    } else {
+      $Limit = $this->MaxPerPage;
     }
 
     $Page = GetParm("page", PARM_INTEGER);
