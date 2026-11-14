@@ -169,4 +169,18 @@ class CycloneDxImportSourceTest extends \PHPUnit\Framework\TestCase
     $this->assertCount(3, $files);
     $this->assertEquals(2, count(array_keys($files, "dup.c")));
   }
+
+  public function testGeneratedFallbackDoesNotOverwriteAnExistingComponent()
+  {
+    $source = $this->writeBom([
+      ["type" => "file", "name" => "a.c", "bom-ref" => "component-2-2"],
+      ["type" => "file", "name" => "b.c", "bom-ref" => "component-2"],
+      ["type" => "file", "name" => "c.c"]
+    ], "1.7");
+    $files = $source->getAllFiles();
+    $this->assertCount(3, $files);
+    $this->assertSame("a.c", $files["component-2-2"]);
+    $this->assertSame("b.c", $files["component-2"]);
+    $this->assertContains("c.c", $files);
+  }
 }
