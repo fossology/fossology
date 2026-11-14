@@ -48,7 +48,7 @@ class upload_properties extends FO_Plugin
   {
     /* Treat a whitespace-only name like an empty one, keep the old name */
     $newName = trim($newName ?? '');
-    if (empty($newName) and empty($newDesc)) {
+    if (empty($newName) && $newDesc === null) {
       return 2;
     }
 
@@ -75,7 +75,7 @@ class upload_properties extends FO_Plugin
         __METHOD__ . '.updateUpload.name');
     }
 
-    if (! empty($newDesc)) {
+    if ($newDesc !== null) {
       $trimNewDesc = trim($newDesc);
       $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=$2 WHERE upload_pk=$1",
         array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
@@ -96,7 +96,7 @@ class upload_properties extends FO_Plugin
     }
 
     $NewName = GetArrayVal("newname", $_POST);
-    $NewDesc = GetArrayVal("newdesc", $_POST);
+    $NewDesc = array_key_exists("newdesc", $_POST) ? $_POST["newdesc"] : null;
     $upload_pk = GetArrayVal("upload_pk", $_POST);
     if (empty($upload_pk)) {
       $upload_pk = GetParm('upload', PARM_INTEGER);
@@ -106,13 +106,15 @@ class upload_properties extends FO_Plugin
       $text = _("Permission Denied");
       return "<h2>$text</h2>";
     }
-    $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc);
-    if ($rc == 0) {
-      $text = _("Nothing to Change");
-      $this->vars['message'] = $text;
-    } else if ($rc == 1) {
-      $text = _("Upload Properties successfully changed");
-      $this->vars['message'] = $text;
+    if (array_key_exists("upload_pk", $_POST)) {
+      $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc);
+      if ($rc == 0) {
+        $text = _("Nothing to Change");
+        $this->vars['message'] = $text;
+      } else if ($rc == 1) {
+        $text = _("Upload Properties successfully changed");
+        $this->vars['message'] = $text;
+      }
     }
 
     $this->vars['folderStructure'] = $folderStructure;
