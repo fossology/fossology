@@ -77,7 +77,7 @@ class CycloneDxImportSource implements ImportSource
   {
     $bomRef = isset($component['bom-ref']) && $component['bom-ref'] !== ''
       ? (string) $component['bom-ref'] : "component-$index";
-    if (array_key_exists($bomRef, $this->componentsByBomRef)) {
+    while (array_key_exists($bomRef, $this->componentsByBomRef)) {
       $bomRef = "$bomRef-$index";
     }
     return $bomRef;
