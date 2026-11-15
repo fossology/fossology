@@ -255,7 +255,7 @@ class SracValidator
       }
 
       foreach (['id', 'type', 'uri'] as $field) {
-        if (empty($item[$field]) || !is_string($item[$field]) || trim($item[$field]) === '') {
+        if (!isset($item[$field]) || !is_string($item[$field]) || trim($item[$field]) === '') {
           $errors[] = "$itemPath.$field must be a non-empty string";
         }
       }
@@ -460,9 +460,13 @@ class SracValidator
     if (empty($assertion['created']) || !is_string($assertion['created']) || trim($assertion['created']) === '') {
       $errors[] = "assertion.created must be a non-empty date-time string";
     } else {
-      // Validate date-time format (ISO 8601)
-      if (strtotime($assertion['created']) === false) {
-        $errors[] = "assertion.created must be a valid ISO 8601 date-time string";
+      $date = \DateTimeImmutable::createFromFormat(
+        \DateTimeInterface::ATOM,
+        $assertion['created']
+      );
+
+      if ($date === false) {
+        $errors[] = "assertion.created must be a valid ISO-8601 date-time string";
       }
     }
 
@@ -471,8 +475,19 @@ class SracValidator
         $errors[] = "assertion.reviewer.name must be a non-empty string or null";
       }
     }
+  
+  if (
+    ($assertion['status'] ?? null) === 'approved' &&
+    (
+      !isset($assertion['reviewer']) ||
+      !is_array($assertion['reviewer']) ||
+      empty($assertion['reviewer']['name'])
+    )
+  ) {
+    $errors[] = "approved assertions require a reviewer";
   }
 
+  }
   /**
    * Collect all element IDs defined in the assertion and detect duplicates.
    *

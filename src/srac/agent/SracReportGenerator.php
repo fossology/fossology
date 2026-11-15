@@ -45,7 +45,7 @@ class SracReportGenerator
         'reviewer' => $safety['reviewer'] ?? null,
       ],
       'matchedComponents' => $this->sanitizeMatchedComponents($result->getMatchedComponents()),
-      'matchStatus' => ($result->getStatus() === SracResult::STATUS_MATCHED) ? 'matched' : 'unmatched',
+      'matchStatus' => $result->getStatus(),
       'generator' => [
         'name' => self::TOOL_NAME,
         'version' => self::TOOL_VERSION,

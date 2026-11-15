@@ -27,6 +27,8 @@ require_once __DIR__ . '/SracResult.php';
 require_once __DIR__ . '/SracParser.php';
 require_once __DIR__ . '/SracValidator.php';
 require_once __DIR__ . '/SracIntegrityChecker.php';
+require_once __DIR__ . '/SracCorrelator.php';
+require_once __DIR__ . '/SracReportGenerator.php';
 $vendorAutoload = dirname(__DIR__, 2) . '/vendor/autoload.php';
 if (file_exists($vendorAutoload)) {
   require_once $vendorAutoload;
@@ -199,7 +201,7 @@ class SracAgent extends Agent
     $result = $this->correlator->correlateAssertion($sracDoc, $sbom, $integrity, $discoveredRef);
 
     // Generate report
-    if ($format === 'text') {
+    if ($format === 'text' || $format === 'txt') {
       $comprehensive = $this->reportGenerator->generateComprehensiveReport([$result], $sourceFormat, [
         'sbomFile' => basename($sbomPath),
         'sracFile' => basename($resolvedSracPath),
