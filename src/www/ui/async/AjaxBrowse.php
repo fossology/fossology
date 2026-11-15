@@ -97,7 +97,7 @@ class AjaxBrowse extends DefaultPlugin
           'A comment is required to close or reject an upload',
           Response::HTTP_BAD_REQUEST,
           array('Content-type' => 'text/plain')
-       );
+        );
       }
       $uploadBrowseProxy = new UploadBrowseProxy($groupId, $this->userPerm, $this->dbManager);
       $uploadBrowseProxy->setStatusAndComment($uploadId, $statusId, $commentText);
