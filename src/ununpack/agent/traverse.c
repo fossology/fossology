@@ -556,6 +556,8 @@ int	Traverse	(char *Filename, char *Basename,
       /* This needs to call AddToRepository() or DisplayContainerInfo() */
       char Cmd[2*FILENAME_MAX];
       char Fname[FILENAME_MAX];
+      char TaintedFname[FILENAME_MAX];
+      char TaintedMetaSource[FILENAME_MAX];
       memcpy(&CImeta,&CI,sizeof(CI));
       CImeta.Artifact=1;
       CImeta.HasChild=0;
@@ -572,23 +574,46 @@ int	Traverse	(char *Filename, char *Basename,
       /* this gets past any permission problems with read-only files */
       unlink(CImeta.Source);
 
-      /* build the command and run it */
-      sprintf(Cmd,CMD[CI.PI.Cmd].MetaCmd,Fname,CImeta.Source);
-      rc = system(Cmd);
-      if (WIFSIGNALED(rc))
+      /* Fname and CImeta.Source are the extracted file's own on-disk name,
+         which is attacker-controlled (a crafted archive can give a nested
+         container entry a name containing shell metacharacters), so they
+         must be shell-escaped before being passed to system(). Without this
+         a crafted archive whose entry name has a single quote can inject
+         and run arbitrary commands as the agent user. */
+      if (TaintString(TaintedFname,sizeof(TaintedFname),Fname,1,NULL) ||
+          TaintString(TaintedMetaSource,sizeof(TaintedMetaSource),CImeta.Source,1,NULL))
       {
-        LOG_ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd)
-        SafeExit(32);
-      }
-      if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
-      else rc=-1;
-      if (rc != 0)
-      {
-        LOG_ERROR("Unable to run command '%s'",Cmd)
+        LOG_ERROR("Filename too long to escape safely, skipping meta extraction: %s",Fname)
       }
       else
       {
-        RecurseOk = DisplayContainerInfo(&CImeta,PI->Cmd);
+        /* build the command and run it */
+        rc = snprintf(Cmd,sizeof(Cmd),CMD[CI.PI.Cmd].MetaCmd,TaintedFname,TaintedMetaSource);
+        if (rc < 0 || (size_t)rc >= sizeof(Cmd))
+        {
+          /* command truncated; running it could execute a partial command, so skip */
+          LOG_ERROR("Meta extraction command too long, skipping: %s",Fname)
+        }
+        else
+        {
+          rc = system(Cmd);
+          if (WIFSIGNALED(rc))
+          {
+            LOG_ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd)
+            SafeExit(32);
+          }
+          if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
+          else rc=-1;
+          if (rc != 0)
+          {
+            LOG_ERROR("Unable to run command '%s'",Cmd)
+          }
+          else
+          {
+            /* add it to the list of files */
+            RecurseOk = DisplayContainerInfo(&CImeta,PI->Cmd);
+          }
+        }
       }
       if (UnlinkAll) unlink(CImeta.Source);
     }
