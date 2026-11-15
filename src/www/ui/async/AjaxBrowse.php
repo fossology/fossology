@@ -93,7 +93,7 @@ class AjaxBrowse extends DefaultPlugin
       $isClosing = ($statusId == UploadStatus::CLOSED || $statusId == UploadStatus::REJECTED);
       $currentStatus = $this->uploadDao->getStatus($uploadId, $groupId);
       if ($isClosing && $statusId != $currentStatus && trim($commentText) === '') {
-        return new Response( 
+        return new Response(
           'A comment is required to close or reject an upload',
           Response::HTTP_BAD_REQUEST,
           array('Content-type' => 'text/plain')
