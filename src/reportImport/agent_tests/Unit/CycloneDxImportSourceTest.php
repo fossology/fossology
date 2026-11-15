@@ -181,6 +181,6 @@ class CycloneDxImportSourceTest extends \PHPUnit\Framework\TestCase
     $this->assertCount(3, $files);
     $this->assertSame("a.c", $files["component-2-2"]);
     $this->assertSame("b.c", $files["component-2"]);
-    $this->assertContains("c.c", $files);
+    $this->assertSame("c.c", $files["component-2-2-2"]);
   }
 }
