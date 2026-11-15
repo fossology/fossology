@@ -219,7 +219,7 @@ class search extends FO_Plugin
     }
 
     $Limit = GetParm("limit", PARM_INTEGER);
-    if (!empty($Limit) && $Limit > 0) {
+    if ($Limit > 0) {
       $GETvars .= "&limit=" . urlencode($Limit);
       $this->MaxPerPage = $Limit;
     } else {
@@ -227,8 +227,10 @@ class search extends FO_Plugin
     }
 
     $Page = GetParm("page", PARM_INTEGER);
-    if (!empty($Page)) {
+    if ($Page > 0) {
       $GETvars .= "&page=" . urlencode($Page);
+    } else {
+      $Page = 0;
     }
 
     $this->vars["postUrl"] = Traceback_uri() . "?mod=" . self::getName();
