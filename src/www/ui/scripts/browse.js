@@ -188,6 +188,9 @@ function submitComment( ) {
     type: "POST",
     url: "?mod=browse-processPost",
     data: post_data,
-    success: mysuccess3
+    success: mysuccess3,
+    error: function (xhr) {
+      alert(xhr.responseText);
+    }
   });
 }
