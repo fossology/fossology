@@ -189,7 +189,8 @@ class CycloneDXAgent extends Agent
     $upload = $this->uploadDao->getUpload($uploadId);
     $this->packageName = $upload->getFilename();
 
-    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
+    // Keep reports from different uploads separate, even if their names match.
+    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/".$uploadId."/";
 
     $this->uri = $this->getUri($fileBase);
   }
