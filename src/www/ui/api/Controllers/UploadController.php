@@ -1342,15 +1342,13 @@ class UploadController extends RestController
    * @param ResponseHelper $response
    * @param array $args
    * @return ResponseHelper
-   * @throws Exception
+   * @throws HttpNotFoundException Upload does not exist
+   * @throws HttpForbiddenException Upload is not accessible
    */
   public function getTopItem($request, $response, $args)
   {
     $uploadId = intval($args['id']);
-    if (!$this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
-      $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-    }
+    $this->uploadAccessible($uploadId);
     $uploadDao = $this->restHelper->getUploadDao();
     $itemTreeBounds = $uploadDao->getParentItemBounds($uploadId,
       $uploadDao->getUploadtreeTableName($uploadId));

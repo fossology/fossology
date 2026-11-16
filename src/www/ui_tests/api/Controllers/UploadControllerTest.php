@@ -2017,8 +2017,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
   /**
    * @test
    *   -# Test UploadController::getTopItem()
-   *   -# Check if response status is 404
-   * /
+   *   -# Check if response status is 200
    */
   public function testGetTopItem()
   {
@@ -2026,6 +2025,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->uploadDao->shouldReceive('getParentItemBounds')
       ->withAnyArgs()->andReturn($this->getUploadBounds($uploadId));
     $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
@@ -2041,9 +2042,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   *   -# Test UploadController::getTopItem()
-   *   -# Check if response status is 404
-   * /
+   *   -# Test UploadController::getTopItem() for a missing upload
+   *   -# Check if HttpNotFoundException is thrown
    */
   public function testGetTopItemUploadNotFound()
   {
@@ -2052,11 +2052,31 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(false);
 
-    $actualResponse = $this->uploadController->getTopItem(null,new ResponseHelper(),["id"=>$uploadId]);
-    $info = new Info(404, "Upload does not exist", InfoType::ERROR);
-    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(), $info->getCode());
-    $this->assertEquals($expectedResponse->getStatusCode(), $actualResponse->getStatusCode());
+    $this->expectException(HttpNotFoundException::class);
+    $this->uploadController->getTopItem(null, new ResponseHelper(),
+      ["id" => $uploadId]);
+  }
 
+  /**
+   * @test
+   *   -# Test UploadController::getTopItem() for an upload the user's group
+   *      can't access
+   *   -# Check if HttpForbiddenException is thrown and the top item is not
+   *      looked up
+   */
+  public function testGetTopItemUploadNotAccessible()
+  {
+    $uploadId = 4;
+
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(false);
+    $this->uploadDao->shouldNotReceive('getParentItemBounds');
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->uploadController->getTopItem(null, new ResponseHelper(),
+      ["id" => $uploadId]);
   }
 
 
@@ -2073,6 +2093,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->uploadDao->shouldReceive('getParentItemBounds')
       ->withAnyArgs()->andReturn($this->getUploadBounds($uploadId));
     $this->uploadDao->shouldReceive("getUploadtreeTableName")->withArgs([$uploadId])->andReturn("uploadtree");
