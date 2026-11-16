@@ -147,8 +147,6 @@ class AdviceLicense extends DefaultPlugin
    */
   private function saveInput(Request $request, $oldRow, $userId)
   {
-    $spdxLicenses = new SpdxLicenses();
-
     $spdxId = $request->get('spdx_id');
     $shortname = $request->get('shortname');
     $fullname = $request->get('fullname');
@@ -178,16 +176,14 @@ class AdviceLicense extends DefaultPlugin
       $oldRow['rf_pk'] = $licenseDao->insertUploadLicense($shortname, $rfText, Auth::getGroupId(), $userId);
     }
 
-    if (! empty($spdxId) &&
-      strstr(strtolower($spdxId), strtolower(LicenseRef::SPDXREF_PREFIX)) === false) {
-      if (! $spdxLicenses->validate($spdxId)) {
-        $spdxId = LicenseRef::convertToSpdxId($spdxId, null);
-      }
-    } elseif (empty($spdxId)) {
+    if (($spdxId === '' || $spdxId === null) &&
+      (!isset($oldRow['rf_spdx_id']) || $oldRow['rf_spdx_id'] === '')) {
+      $spdxLicenses = new SpdxLicenses();
+      $spdxId = $spdxLicenses->validate($shortname) ? null :
+        LicenseRef::convertToSpdxId($shortname, null);
+    } elseif ($spdxId === '' ||
+      (isset($oldRow['rf_spdx_id']) && $spdxId === $oldRow['rf_spdx_id'])) {
       $spdxId = null;
-    }
-    if (! empty($spdxId)) {
-      $spdxId = LicenseRef::replaceSpaces($spdxId);
     }
 
     $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname,
