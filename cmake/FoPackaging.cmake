@@ -166,7 +166,7 @@ This package contains the scancode agent programs and their resources.")
 
 set(CPACK_DEBIAN_SCANCODE_PACKAGE_DEPENDS
     "fossology-common, fossology-ununpack, fossology-wgetagent,
-    python3, python3-pip")
+    python3, python3-pip, python3-dev, pkg-config, libicu-dev")
 
 set(CPACK_DEBIAN_SCANCODE_PACKAGE_SECTION "utils")
 

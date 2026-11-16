@@ -27,7 +27,8 @@ case "$1" in
     if [ -f "/etc/apache2/sites-available/fossology.conf" ]; then
         rm -rf  /etc/apache2/sites-available/fossology.conf
     fi
-    PHP_PATH=$(php --ini | awk '/\/etc\/php.*\/cli$/{print $5}')
+    # PHP >= 8.5 quotes the paths in `php --ini` output
+    PHP_PATH=$(php --ini | tr -d '"' | awk '/\/etc\/php.*\/cli$/{print $5}')
     phpIni="${PHP_PATH}/../apache2/php.ini"
     cp ${phpIni} ${phpIni}.bak
     sed -i 's/^\(max_execution_time\s*=\s*\).*$/\1300/' ${phpIni}
