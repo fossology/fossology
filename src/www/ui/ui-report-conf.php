@@ -516,6 +516,7 @@ class ui_report_conf extends FO_Plugin
       }
     }
     $this->vars += $this->allReportConfiguration($uploadId, $groupId);
+    $this->vars['uploadId'] = $uploadId;
     $this->vars['typemap'] = [];
     foreach (ComponentType::TYPE_MAP as $key => $name) {
       if ($key == ComponentType::PACKAGEURL) {
