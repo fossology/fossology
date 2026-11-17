@@ -81,14 +81,12 @@ Help, prints a verbose usage message.
 =item B<--username> I<username>
 
 username, specify the username for a user who has the priviledge to execute cp2foss.
-Alternatively, you can add the file .fossology.rc in your current home directory, add user name and 
-password in 2 separate lines.
+For credentials stored in a file, see L</CREDENTIALS>.
 
 =item B<--password> I<password>
 
 password, specify the password for a user who has the priviledge to execute cp2foss.
-Alternatively, you can add the file .fossology.rc in your current home directory, add user name and 
-password in 2 separate lines.
+For credentials stored in a file, see L</CREDENTIALS>.
 
 =item B<-c> I<configuration directory>
 
@@ -168,6 +166,24 @@ Ignored.
 Ignored.
 
 =back
+
+=head1 CREDENTIALS
+
+When both B<--username> and B<--password> are omitted, B<cp2foss> looks for
+C<$HOME/.fossology.rc>, where C<$HOME> is the HOME environment variable.
+Create the file with two C<key=value> lines:
+
+  username=USERNAME
+  password=PASSWORD
+
+C<user> is also accepted instead of C<username>. If both keys have nonempty
+values, C<username> takes precedence. Supplying only one command-line
+credential does not cause the other to be read from this file.
+
+The file contains a plaintext password. Restrict access to your account. On
+Unix-like systems, for example, run:
+
+  chmod 600 "$HOME/.fossology.rc"
 
 =head1 EXAMPLES
 
