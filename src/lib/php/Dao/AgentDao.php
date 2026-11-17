@@ -19,6 +19,8 @@ use Monolog\Logger;
  */
 class AgentDao
 {
+  public $logger;
+
   const ARS_TABLE_SUFFIX = "_ars";
 
   /** @var DbManager */

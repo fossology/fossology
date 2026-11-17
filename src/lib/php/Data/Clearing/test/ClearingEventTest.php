@@ -11,6 +11,8 @@ use Mockery as M;
 
 class ClearingEventTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /** @var int */
   private $eventId = 12;
   /** @var int */

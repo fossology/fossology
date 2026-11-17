@@ -105,7 +105,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
     $expectedUser = 2;
     $tokenScope = null;
     $jti = "4.2";
-    $key = "mysecretkey";
+    $key = "mysecretkey-mysecretkey-mysecretkey-1234";
     $createdOn = date('Y-m-d');
     $expire = date('Y-m-d', strtotime('+3 day'));
     $authToken = $this->authHelper->generateJwtToken($expire, $createdOn, $jti,
@@ -148,7 +148,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
     $expectedUser = 2;
     $tokenScope = null;
     $jti = "4.2";
-    $key = "mysecretkey";
+    $key = "mysecretkey-mysecretkey-mysecretkey-1234";
     $createdOn = date('Y-m-d');
     $expire = date('Y-m-d', strtotime('+3 day'));
     $authToken = $this->authHelper->generateJwtToken($expire, $createdOn, $jti,
@@ -185,7 +185,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
    */
   public function testIsTokenActive()
   {
-    $key = "mysecretkey";
+    $key = "mysecretkey-mysecretkey-mysecretkey-1234";
     $createdOn = date('Y-m-d');
     $expire = date('Y-m-d', strtotime('+3 day'));
     $tokenId = 4;
@@ -222,7 +222,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
    */
   public function testIsTokenActiveExpireOldToken()
   {
-    $key = "mysecretkey";
+    $key = "mysecretkey-mysecretkey-mysecretkey-1234";
     $createdOn = date('Y-m-d', strtotime('-3 day'));
     $expire = date('Y-m-d', strtotime('-1 day'));
     $tokenId = 4;

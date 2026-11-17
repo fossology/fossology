@@ -29,6 +29,9 @@ function ReportCachePurgeAll()
 
 class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+  public $pfileId;
+
   const MATCH_ID = 231;
   const PERCENTAGE = 315;
   /** @var int */

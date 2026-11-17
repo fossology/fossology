@@ -19,6 +19,8 @@ function Traceback_uri()
 
 class FolderNavTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /** @var M */
   private $dbManager;
   /** @var M */

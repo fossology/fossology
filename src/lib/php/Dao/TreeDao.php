@@ -129,7 +129,7 @@ class TreeDao
     }
     $pfileRow = $this->dbManager->getSingleRow('SELECT * FROM pfile WHERE pfile_pk=$1',array($pfileId));
     global $LIBEXECDIR;
-    if (empty($pfileRow['pfile_sha1'])) {
+    if (empty($pfileRow['pfile_sha1']) || empty($LIBEXECDIR)) {
       return null;
     }
     $hash = $pfileRow['pfile_sha1'] . "." . $pfileRow['pfile_md5'] . "." . $pfileRow['pfile_size'];

@@ -605,7 +605,7 @@ ORDER BY lft asc
    */
   public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText, $ignoreIrrelevant=true, $delimiters=null, $scanFindingsOnly=false)
   {
-    if (strcasecmp($delimiters, "DEFAULT") === 0) {
+    if (strcasecmp((string) $delimiters, "DEFAULT") === 0) {
       $delimiters = null;
     } elseif ($delimiters !== null) {
       $delimiters = StringOperation::replaceUnicodeControlChar($delimiters);

@@ -18,10 +18,10 @@ require_once dirname(__FILE__) . '/../common-menu.php';
 require_once dirname(__FILE__) . '/../common-parm.php';
 
 /**
- * \class CommonMenuTest
+ * \class test_common_menu
  * \brief Unit test for common-menu.php
  */
-class CommonMenuTest extends TestCase
+class test_common_menu extends TestCase
 {
   /**
    * Test for MenuPage() function
@@ -77,6 +77,9 @@ class CommonMenuTest extends TestCase
   public function testMenuFunctions()
   {
     global $MenuList;
+    if (!is_array($MenuList)) {
+      $MenuList = array();
+    }
 
     $path = "TestMenu::Test1::Test2";
     $lastOrder = 0;

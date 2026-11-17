@@ -661,7 +661,7 @@ class LicenseCsvImport
       "rf_source"        => $row['source'],
       "rf_risk"          => $row['risk'],
       "rf_external_id"   => $row['external_id'],
-      "rf_active"        => $this->dbManager->booleanToDb($row['active'] ?: true),
+      "rf_active"        => $this->dbManager->booleanToDb($row['active'] ?? true),
     );
 
     $as = "";

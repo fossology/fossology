@@ -23,6 +23,8 @@ use Mockery\MockInterface;
 
 class ClearingDaoTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /** @var  TestPgDb */
   private $testDb;
   /** @var DbManager */

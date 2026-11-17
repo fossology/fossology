@@ -115,7 +115,7 @@ endif(NOT DEFINED ARE_DEFAULTS_SET)
 
 find_package(PostgreSQL REQUIRED)
 if(DEFINED CMAKE_CXX_COMPILER)
-    find_package(Boost REQUIRED COMPONENTS regex system filesystem program_options NO_MODULE)
+    find_package(Boost REQUIRED COMPONENTS regex filesystem program_options OPTIONAL_COMPONENTS system NO_MODULE)
 endif()
 find_package(Git REQUIRED)
 

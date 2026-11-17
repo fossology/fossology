@@ -21,6 +21,8 @@ use Mockery as M;
  */
 class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /**
    * @brief One time setup for test
    * @see PHPUnit::Framework::TestCase::setUp()
@@ -787,6 +789,45 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $row = $dbManager->getSingleRow($sql, array($licenseId,
       LicenseMap::REPORT), $statement);
     assertThat($row, equalTo(false));
+  }
+
+  /**
+   * @brief Test for LicenseCsvImport::insertNewLicense() active flag
+   * @test
+   * -# Insert a new license with `active` false, true and missing.
+   * -# Check that false is kept and only a missing value defaults to true.
+   */
+  public function testInsertNewLicenseKeepsActiveFlag()
+  {
+    $baseRow = array(
+      'shortname' => 'licI', 'licensetype' => 'Permissive',
+      'fullname' => 'License I', 'spdx_id' => 'LicenseRef-licI',
+      'text' => 'txI', 'url' => '', 'notes' => '', 'source' => '',
+      'risk' => 0, 'external_id' => 'ext-licI'
+    );
+    $cases = array(
+      array('active' => false, 'expected' => false),
+      array('active' => true, 'expected' => true),
+      array('expected' => true)
+    );
+    foreach ($cases as $case) {
+      $expected = $case['expected'];
+      unset($case['expected']);
+      $dbManager = M::mock(DbManager::class);
+      $dbManager->shouldReceive('booleanToDb')
+        ->with($expected)->once()->andReturn($expected ? 't' : 'f');
+      $dbManager->shouldReceive('insertTableRow')
+        ->with('license_ref', M::on(function ($columns) use ($expected) {
+          return $columns['rf_active'] === ($expected ? 't' : 'f');
+        }), anything(), 'rf_pk')
+        ->once()->andReturn(110);
+      $licenseCsvImport = new LicenseCsvImport($dbManager,
+        M::mock(UserDao::class));
+
+      $result = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+        'insertNewLicense', array(array_merge($baseRow, $case)));
+      assertThat($result['pkey'], equalTo(110));
+    }
   }
 
   /**

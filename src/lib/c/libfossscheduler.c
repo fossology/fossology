@@ -70,11 +70,13 @@ int agent_verbose;
  *
  * \note Agents should NOT call this function directly.
  * \note This is the alarm SIGALRM function.
+* @param sig Signal number (unused)
 * @return void
  * @todo These functions are not safe for a signal handler
 */
-void fo_heartbeat()
+void fo_heartbeat(int sig)
 {
+  (void) sig;
   int processed = g_atomic_int_get(&items_processed);
   // TODO these functions are not safe for a signal handler
   fprintf(stdout, "HEART: %d %d\n", processed, alive);
@@ -350,7 +352,7 @@ void fo_scheduler_disconnect(int retcode)
     /* send "CLOSED" to the scheduler */
     if (sscheduler)
     {
-      fo_heartbeat();
+      fo_heartbeat(0);
       fprintf(stdout, "\nBYE %d\n", retcode);
       fflush(stdout);
 
