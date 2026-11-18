@@ -99,7 +99,7 @@ class core_init extends FO_Plugin
             $FailFlag = 1;
           } else {
             print "<pre>";
-            $FailFlag = $Schema->ApplySchema($Schema->Filename, 0, 0);
+            $FailFlag = $Schema->ApplySchema($Schema->Filename);
             print "</pre>";
           }
           if (! $FailFlag) {
