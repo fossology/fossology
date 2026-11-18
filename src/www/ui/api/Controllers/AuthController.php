@@ -109,4 +109,46 @@ class AuthController extends RestController
     }
     throw new HttpInternalServerErrorException("Please try again later.");
   }
+
+  /**
+   * Get the OAuth2 autherization URL for the user
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpInternalServerErrorException
+   */
+  public function getAuthUrl($request, $response, $args)
+  {
+    $auth = $this->restHelper->getPlugin('auth');
+    $authorizationUrl = $auth->Output(true);
+
+    return $response->withJson(["authorizationUrl" => $authorizationUrl],200);
+  }
+
+  /**
+   * Get the OAuth2 token for the user
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpBadRequestException
+   */
+  public function getOauthToken($request, $response, $args)
+  {
+    $ReqBody = $this->getParsedBody($request);
+    $code = $ReqBody['code'];
+    $state = $ReqBody['state'];
+
+    if (empty($code) || empty($state)) {
+      throw new HttpBadRequestException("both code and state are required");
+    }
+    $home = $this->restHelper->getPlugin('home');
+    $OAuthToken = $home->getAccessToken($code, $state, false, true);
+    return $response->withJson([
+      "Authorization" => "Bearer " . $OAuthToken
+    ], 200);
+  }
 }

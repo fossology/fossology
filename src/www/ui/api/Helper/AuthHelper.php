@@ -162,17 +162,28 @@ class AuthHelper
    *
    * @param array $valuesFromDb Values from DB.
    * @param int   $tokenId Token id (pat_pk)
-   * @throws HttpForbiddenException If the token is expired.
+   * @param bool  $returnVal Return value instead of throwing exception.
+   * @throws HttpForbiddenException If the token is expired based on $returnVal
+   * @return bool True if the token is active.
    */
-  public function isTokenActive($valuesFromDb, $tokenId)
+  public function isTokenActive($valuesFromDb, $tokenId, $returnVal = false)
   {
     if ($valuesFromDb['active'] == "f") {
-      throw new HttpForbiddenException("Token expired.");
+      if ($returnVal) {
+        return false;
+      } else {
+        throw new HttpForbiddenException("Token expired.");
+      }
     } elseif ($this->isDateExpired($valuesFromDb['expire_on']) &&
       $valuesFromDb['active'] == "t") {
       $this->dbHelper->invalidateToken($tokenId);
-      throw new HttpForbiddenException("Token expired.");
+      if ($returnVal) {
+        return false;
+      } else {
+        throw new HttpForbiddenException("Token expired.");
+      }
     }
+    return true;
   }
 
   /**
@@ -300,20 +311,35 @@ class AuthHelper
       } catch (\Exception $e) {
         throw new \UnexpectedValueException("JWKS: " . $e->getMessage());
       }
+      // Client Credentials grant type authorization check
       $clientId = $jwtTokenDecoded->{$SysConf['SYSCONFIG']['OidcClientIdClaim']};
       $tokenId = $this->dbHelper->getTokenIdFromClientId($clientId);
-      $dbRows = $this->dbHelper->getTokenKey($tokenId);
-
-      if (empty($dbRows)) {
+      $TokenDbRows = $this->dbHelper->getTokenKey($tokenId);
+      // Authorization grant type authorization check only if it is not client credentials flow
+      if (empty($TokenDbRows) || (! $this->isTokenActive($TokenDbRows, $tokenId, true))) {
+        $homePlugin = $GLOBALS["container"]->get("helper.restHelper")->getPlugin('home');
+        $userEmail = $homePlugin->getEmailFromOAuth($jwtToken, true);
+        $userDbRows = $this->userDao->getUserByName($userEmail);
+        // If the user is not found by username, try to find by email
+        if (empty($userDbRows)) {
+          $userDbRows = $this->userDao->getUserByEmail($userEmail);
+        }
+      }
+      if (empty($TokenDbRows) && empty($userDbRows)) {
         throw new \UnexpectedValueException("Invalid token sent.", 403);
       }
-      $this->isTokenActive($dbRows, $tokenId);
-      $userId = $dbRows['user_fk'];
-      $tokenScope = $dbRows['token_scope'];
-      if ($tokenScope == "w") {
+      if (! empty($userDbRows)) {
+        $userId = $userDbRows['user_pk'];
         $tokenScope = "write";
-      } elseif ($tokenScope == "r") {
-        $tokenScope = "read";
+      } else {
+        $this->isTokenActive($TokenDbRows, $tokenId);
+        $userId = $TokenDbRows['user_fk'];
+        $tokenScope = $TokenDbRows['token_scope'];
+        if ($tokenScope == "w") {
+          $tokenScope = "write";
+        } elseif ($tokenScope == "r") {
+          $tokenScope = "read";
+        }
       }
     } catch (\UnexpectedValueException $e) {
       throw new HttpForbiddenException($e->getMessage(), $e);
