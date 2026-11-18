@@ -89,7 +89,7 @@ function createBrowseTable() {
 
 $(document).ready(function() {
   browseTable = createBrowseTable();
-  $('.clickable-folder').click(function(event){
+  $('#sidetree').on('click', '.clickable-folder', function(event){
     folder = $(this).attr('data-folder');
     browseTable.draw();
     $('#current-folder').text($(this).text());
@@ -147,12 +147,16 @@ $('.multi-upload-agent').click( function() {
   return true;
 });
 
-$(function() {
-  $("#tree").treeview({
-    collapsed: false,
-    animated: "fast",
-    control: "#sidetreecontrol",
-    persist: "cookie",
-    cookieId: "fossology_treeview"
+// not in a ready handler: sent before the table request, so both are answered in parallel
+$.get("?mod=browse-processPost", {"folderTree": 1, "folder": folder})
+  .done(function (tree) {
+    $('#foldertree').html(tree);
+    $("#tree").treeview({
+      collapsed: false,
+      animated: "fast",
+      control: "#sidetreecontrol",
+      persist: "cookie",
+      cookieId: "fossology_treeview"
     });
-  });
+  })
+  .fail(failed);
