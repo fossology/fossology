@@ -147,6 +147,10 @@ CompatibilityStatus CompatibilityDatabaseHandler::queryRule1(
   }
   else
   {
+    if (queryResult.isNull(0, 0))
+    {
+      return EXPLICIT_UNKNOWN;
+    }
     bool result = queryResult.getSimpleResults(0, fo::stringToBool)[0];
     if (result)
     {
@@ -184,6 +188,10 @@ CompatibilityStatus CompatibilityDatabaseHandler::queryRule2(
   }
   else
   {
+    if (queryResult.isNull(0, 0))
+    {
+      return EXPLICIT_UNKNOWN;
+    }
     bool result = queryResult.getSimpleResults(0, fo::stringToBool)[0];
     if (result)
     {
@@ -227,6 +235,10 @@ CompatibilityStatus CompatibilityDatabaseHandler::queryRule3(
   }
   else
   {
+    if (queryResult.isNull(0, 0))
+    {
+      return EXPLICIT_UNKNOWN;
+    }
     bool result = queryResult.getSimpleResults(0, fo::stringToBool)[0];
     if (result)
     {
@@ -274,7 +286,7 @@ bool CompatibilityDatabaseHandler::queryInsertResult(unsigned long pFileId,
                                                      int a_id,
                                                      unsigned long id1,
                                                      unsigned long id2,
-                                                     const string& comp)
+                                                     const char* comp)
 {
   QueryResult queryResult = dbManager.execPrepared(
       fo_dbManager_PrepareStamement(
@@ -283,7 +295,7 @@ bool CompatibilityDatabaseHandler::queryInsertResult(unsigned long pFileId,
           "(pfile_fk, agent_fk, first_rf_fk, second_rf_fk, result)"
           "VALUES($1, $2, $3, $4, $5)",
           unsigned long, int, unsigned long, unsigned long, char*),
-      pFileId, a_id, id1, id2, comp.c_str());
+      pFileId, a_id, id1, id2, comp);
   return !queryResult.isFailed();
 }
 /**
