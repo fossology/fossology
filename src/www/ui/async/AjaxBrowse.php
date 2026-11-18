@@ -58,6 +58,10 @@ class AjaxBrowse extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
+    if ($request->get('folderTree')) {
+      return $this->respondFolderTree($request);
+    }
+
     $groupId = Auth::getGroupId();
     $gup = $this->dbManager->getSingleRow('SELECT group_perm FROM group_user_member WHERE user_fk=$1 AND group_fk=$2',
         array(Auth::getUserId(), $groupId), __METHOD__ . '.user_perm');
@@ -95,6 +99,22 @@ class AjaxBrowse extends DefaultPlugin
       return $this->respondFolderGetTableData($request);
     }
     return new Response('');
+  }
+
+  /**
+   * @param Request $request
+   * @return Response HTML of the folder tree below the requested folder
+   */
+  protected function respondFolderTree(Request $request)
+  {
+    global $container;
+    // release the session lock, the request for the uploads would wait for it
+    $request->getSession()->save();
+    $folderId = intval($request->get('folder'));
+    if (empty($folderId) || !$container->get('dao.folder')->isFolderAccessible($folderId)) {
+      return new Response(_("Permission Denied"), Response::HTTP_FORBIDDEN);
+    }
+    return new Response($container->get('ui.folder.nav')->showFolderTree($folderId));
   }
 
 
