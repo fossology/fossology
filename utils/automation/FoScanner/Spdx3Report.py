@@ -312,7 +312,7 @@ class Spdx3Report(ReportBase):
     logging.info("Deduplicated %d CreationInfo nodes into 1", len(ci_bnodes))
 
   def _fixup_rdf_graph(self, g, rdflib):
-    
+
     SH = Namespace("http://www.w3.org/ns/shacl#")
 
     model, _ = self._load_spdx_shacl_model()

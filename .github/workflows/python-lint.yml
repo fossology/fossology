@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: © Fossology contributors
+#
+# SPDX-License-Identifier: GPL-2.0-only
+
+name: Python Linting
+
+concurrency:
+  group: python-lint-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+  pull_request:
+    branches: [master]
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Python Linting and Type Checking
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Install Tools
+        run: pip install --upgrade ruff mypy
+
+      - name: Run Ruff Linter
+        run: ruff check .
+
+      - name: Run Mypy
+        run: mypy .
