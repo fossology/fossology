@@ -320,7 +320,14 @@ class fo_libschema
         if ($colNewTable ||
             $this->currSchema['TABLE'][$table][$column]['ADD'] != $modification['ADD']) {
           $rename = "";
-          if (DB_ColExists($table, $column)) {
+          $existingColumn = $this->dbman->getSingleRow(
+            "SELECT 1 FROM information_schema.columns
+              WHERE table_catalog = current_database() AND table_schema = 'public'
+                AND table_name = $1 AND column_name = $2",
+            array($table, $column),
+            __METHOD__ . '.columnExists'
+          );
+          if (!empty($existingColumn)) {
             /* The column exists, but it looks different!
              Solution: Delete the column! */
             $rename = $column . '_old';
@@ -560,7 +567,8 @@ class fo_libschema
    */
   function dropColumnsFromTable($columns, $table)
   {
-    if (empty($table) || empty($this->schema['TABLE'][$table])) {
+    if (empty($table) || empty($this->schema['TABLE'][$table]) ||
+        !empty($this->schema['INHERITS'][$table])) {
       return;
     }
     foreach ($columns as $column) {
@@ -631,12 +639,17 @@ class fo_libschema
     $referencedSequencesInTableColumns = array();
 
     $sql = "SELECT
-    table_name AS \"table\", ordinal_position AS ordinal, column_name,
+    table_name AS \"table\", attribute.attnum AS ordinal, column_name,
     udt_name AS type, character_maximum_length AS modifier,
     CASE is_nullable WHEN 'YES' THEN false WHEN 'NO' THEN true END AS \"notnull\",
-    column_default AS \"default\",
-    col_description(table_name::regclass, ordinal_position) AS description
-  FROM information_schema.columns
+    column_default AS \"default\", attribute.attinhcount AS inherited_count,
+    col_description(relation.oid, attribute.attnum) AS description
+  FROM information_schema.columns AS columns
+  JOIN pg_catalog.pg_namespace AS namespace ON namespace.nspname = columns.table_schema
+  JOIN pg_catalog.pg_class AS relation ON relation.relnamespace = namespace.oid
+    AND relation.relname = columns.table_name
+  JOIN pg_catalog.pg_attribute AS attribute ON attribute.attrelid = relation.oid
+    AND attribute.attname = columns.column_name AND NOT attribute.attisdropped
   WHERE table_schema = 'public'
   ORDER BY table_name, ordinal_position;";
     $stmt = __METHOD__;
@@ -645,7 +658,9 @@ class fo_libschema
     while ($R = $this->dbman->fetchArray($result)) {
       $Table = $R['table'];
       $Column = $R['column_name'];
-      if (array_key_exists($Table, $this->currSchema['INHERITS'])) {
+      // A merged local/inherited column cannot be renamed or dropped separately.
+      if (array_key_exists($Table, $this->currSchema['INHERITS']) &&
+          $R['inherited_count'] > 0) {
         $this->currSchema['TABLEID'][$Table][$R['ordinal']] = $Column;
         continue;
       }
