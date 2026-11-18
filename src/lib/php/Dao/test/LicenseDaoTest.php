@@ -359,6 +359,30 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
     $key = "project.tar.gz/project.tar";
     $this->assertArrayHasKey($key, $result);
 
+    //**************************************************************************
+    // Containers excluded ($ignore) must stay excluded even when tree ids are
+    // requested (regression for the License List "Show containers" filter)
+    $noDecisions = array();
+    $result = $licDao->getLicensesPerFileNameForAgentId($itemTreeBounds,
+      array($agentId), true, '', true, $noDecisions, true);
+
+    $key = "project.tar.gz/project.tar/project/folderB/subBfolderB/subBBsubBfolderA/BBBfileA";
+    $this->assertArrayHasKey($key, $result);
+    $this->assertArrayHasKey('uploadtree_pk', $result[$key]);
+    $this->assertArrayNotHasKey("project.tar.gz", $result);
+    $this->assertArrayNotHasKey("project.tar.gz/project.tar", $result);
+
+    //**************************************************************************
+    // Containers that are kept (not ignored) must still carry uploadtree_pk
+    // when tree ids are requested, otherwise the export list and REST path
+    // read a missing key (regression for container tree context)
+    $result = $licDao->getLicensesPerFileNameForAgentId($itemTreeBounds,
+      array($agentId), true, '', false, $noDecisions, true);
+
+    $key = "project.tar.gz";
+    $this->assertArrayHasKey($key, $result);
+    $this->assertArrayHasKey('uploadtree_pk', $result[$key]);
+
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
