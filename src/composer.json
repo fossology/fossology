@@ -64,6 +64,8 @@
             "Fossology\\DelAgent\\UI\\" : "delagent/ui",
             "Fossology\\ReadmeOSS\\UI\\" : "readmeoss/ui",
             "Fossology\\Spdx\\UI\\" : "spdx/ui",
+            "Fossology\\Srac\\" : "srac/agent",
+            "Fossology\\Srac\\UI\\" : "srac/ui",
             "Fossology\\UnifiedReport\\UI\\" : "unifiedreport/ui",
             "Fossology\\UI\\Page\\" : "www/ui/page",
             "Fossology\\UI\\Api\\" : "www/ui/api"
