@@ -160,6 +160,9 @@ class DashboardReport(ReportBase):
       'total_files': len(all_files),
       'component_count': component_count,
       'dep_count': dep_count,
+      'unscanned': sorted(
+        self.scanner.get_scan_packages().unscanned_dependencies
+      ),
     }
 
   def _markdown_builder(self, data: dict) -> str:
@@ -176,6 +179,7 @@ class DashboardReport(ReportBase):
     dep_count = data['dep_count']
     total_files = data['total_files']
     unique_licenses = data['unique_licenses']
+    unscanned = data['unscanned']
 
     md = "# License Compliance Dashboard\n\n"
 
@@ -183,6 +187,8 @@ class DashboardReport(ReportBase):
     md += "## Summary\n\n"
     md += "| Metric | Value |\n|--------|-------|\n"
     md += f"| Components Scanned | {component_count} (1 parent + {dep_count} dependencies) |\n"
+    if unscanned:
+      md += f"| Dependencies Not Scanned | {len(unscanned)} |\n"
     md += f"| Total Files Scanned | {total_files} |\n"
     md += f"| Unique Licenses Found | {unique_licenses} |\n"
     md += f"| Licenses with Violations | {len(failed_by_license)} |\n"
@@ -232,6 +238,18 @@ class DashboardReport(ReportBase):
         md += f"\n| `{lic}` | {len(files)} | {file_list} |"
       md += "\n\n---\n\n"
 
+    # Dependencies whose source could not be downloaded
+    if unscanned:
+      md += "## Dependencies Not Scanned\n\n"
+      md += ("No source could be downloaded for these dependencies, so "
+             "their licenses are unknown.\n\n")
+      md += "| Package URL |\n|-------------|\n"
+      for purl in unscanned[:100]:
+        md += f"| `{purl}` |\n"
+      if len(unscanned) > 100:
+        md += f"\n*...and {len(unscanned) - 100} more*\n"
+      md += "\n---\n\n"
+
     # Unknown-license files
     if self.include_unknown and unknown_files:
       md += "## Files Without License\n\n"
@@ -262,6 +280,7 @@ class DashboardReport(ReportBase):
     stats = {
       'components_scanned': data['component_count'],
       'dependencies': data['dep_count'],
+      'dependencies_not_scanned': len(data['unscanned']),
       'files_scanned': data['total_files'],
       'unique_licenses': data['unique_licenses'],
       'license_violations': len(data['failed_by_license']),
