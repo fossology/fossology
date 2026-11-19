@@ -307,10 +307,11 @@ class UploadTreeController extends RestController
     $this->uploadAccessible($uploadId);
     $this->isItemExists($uploadId, $uploadTreeId);
 
-    $agentId = $query['agentId'] ?? null;
-    $highlightId = $query['highlightId'] ?? null;
-    $licenseId = $query['licenseId'] ?? null;
-    $clearingId = $query['clearingId'] ?? null;
+    $agentId = $this->getIdQueryParam($query, 'agentId', self::PG_INT4_MAX);
+    $highlightId = $this->getIdQueryParam($query, 'highlightId');
+    $licenseId = $this->getIdQueryParam($query, 'licenseId');
+    $clearingId = $this->getIdQueryParam($query, 'clearingId',
+      self::PG_INT4_MAX);
 
     if ($licenseId !== null && !$this->dbHelper->doesIdExist("license_ref", "rf_pk", $licenseId)) {
       throw new HttpNotFoundException("License does not exist");
@@ -361,7 +362,6 @@ class UploadTreeController extends RestController
       throw new HttpBadRequestException("Invalid query parameter(s) : " . implode(",", $diff));
     }
 
-    $agentId = $query['agentId'] ?? null;
     $flatten = $query['flatten'] ?? null;
     $scanFilter = $query['scanLicenseFilter'] ?? null;
     $editedFilter = $query['editedLicenseFilter'] ?? null;
@@ -373,7 +373,6 @@ class UploadTreeController extends RestController
       $page = $request->getHeaderLine('page');
       $limit = $request->getHeaderLine('limit');
     }
-    $tagId = $query['tagId'] ?? null;
     $sSearch = $query['search'] ?? null;
     $openCBoxFilter = $query['filterOpen'] ?? null;
     $show = ($query['showQuick'] !== null && $query['showQuick'] !== 'false') ? true : null;
@@ -384,9 +383,11 @@ class UploadTreeController extends RestController
     $this->uploadAccessible($uploadId);
     $this->isItemExists($uploadId, $uploadTreeId);
 
+    $agentId = $this->getIdQueryParam($query, 'agentId', self::PG_INT4_MAX);
     if ($agentId !== null && !$this->dbHelper->doesIdExist("agent", "agent_pk", $agentId)) {
       throw new HttpNotFoundException("Agent does not exist");
     }
+    $tagId = $this->getIdQueryParam($query, 'tagId', self::PG_INT4_MAX);
     if ($tagId !== null && !$this->dbHelper->doesIdExist("tag", "tag_pk", $tagId)) {
       throw new HttpNotFoundException("Tag does not exist");
     }
