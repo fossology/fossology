@@ -904,7 +904,7 @@ meta_agent_t* meta_agent_init(char* name, char* cmd, int max, int spc)
   }
 
   /* confirm valid inputs */
-  if (strlen(name) > MAX_NAME || strlen(cmd) > MAX_CMD)
+  if (strlen(name) > MAX_NAME || strlen(cmd) > (MAX_CMD - strlen(" --scheduler_start")))
   {
     log_printf("ERROR failed to load %s meta agent", name);
     return NULL;
@@ -914,8 +914,7 @@ meta_agent_t* meta_agent_init(char* name, char* cmd, int max, int spc)
   ma = g_new0(meta_agent_t, 1);
 
   strcpy(ma->name, name);
-  strcpy(ma->raw_cmd, cmd);
-  strcat(ma->raw_cmd, " --scheduler_start");
+  snprintf(ma->raw_cmd, sizeof(ma->raw_cmd), "%s --scheduler_start", cmd);
   ma->max_run = max;
   ma->run_count = 0;
   ma->special = spc;
