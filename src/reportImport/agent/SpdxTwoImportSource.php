@@ -18,6 +18,7 @@ use Fossology\Lib\Util\StringOperation;
 require_once 'ReportImportData.php';
 require_once 'ReportImportDataItem.php';
 require_once 'ImportSource.php';
+require_once 'ReportImportHelper.php';
 
 class SpdxTwoImportSource implements ImportSource
 {
@@ -283,7 +284,7 @@ class SpdxTwoImportSource implements ImportSource
       $licenseTextLiteral != null) {
       $seeAlsoLiteral = $license->getLiteral("rdfs:seeAlso");
       $rawLicenseId = $licenseIdLiteral->getValue();
-      $licenseId = $this->stripLicenseRefPrefix($rawLicenseId);
+      $licenseId = ReportImportHelper::stripLicenseRefPrefix($rawLicenseId);
 
       $isCustomText = false;
       if ($license->isA('spdx:ExtractedLicensingInfo') &&
@@ -308,18 +309,6 @@ class SpdxTwoImportSource implements ImportSource
       return [$item];
     }
     return [];
-  }
-
-  private function stripLicenseRefPrefix($licenseId)
-  {
-    if (StringOperation::stringStartsWith($licenseId, LicenseRef::SPDXREF_PREFIX)) {
-      if (StringOperation::stringStartsWith($licenseId, LicenseRef::SPDXREF_PREFIX_FOSSOLOGY)) {
-        return urldecode(substr($licenseId, strlen(LicenseRef::SPDXREF_PREFIX_FOSSOLOGY)));
-      }
-      return urldecode(substr($licenseId, strlen(LicenseRef::SPDXREF_PREFIX)));
-    } else {
-      return urldecode($licenseId);
-    }
   }
 
   private function handleLicenseSet($license)

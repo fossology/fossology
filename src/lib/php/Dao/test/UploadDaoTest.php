@@ -14,6 +14,7 @@ use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\Upload\UploadEvents;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Data\Report\CycloneDxSettings;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 
@@ -528,5 +529,84 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
     $assigneeDate = $this->uploadDao->getClosedDate(2);
     assertThat(strtotime($assigneeDate), equalTo($time_1_day->getTimestamp()));
     self::assertThat($this->uploadDao->getClosedDate(3), self::equalTo(null));
+  }
+
+  /**
+   * Make user 7 the owner of upload 2 with the given CycloneDX defaults.
+   * @param string $userSettings Value of users.cyclonedx_settings
+   */
+  private function setUploadOwnerCyclonedxDefaults($userSettings)
+  {
+    $this->dbManager->insertTableRow('users', ['user_pk' => 7,
+      'user_name' => 'cdx', 'cyclonedx_settings' => $userSettings]);
+    $this->dbManager->getSingleRow("UPDATE upload SET user_fk = 7 WHERE upload_pk = 2",
+      [], __METHOD__);
+  }
+
+  public function testGetCyclonedxSettingsFallsBackToOwnerDefaults()
+  {
+    $this->setUploadOwnerCyclonedxDefaults('checked,unchecked,checked,acme:,1.5');
+    $this->dbManager->insertTableRow('report_info', ['upload_fk' => 2]);
+
+    $settings = $this->uploadDao->getCyclonedxSettings(2);
+    $this->assertTrue($settings->isOsselotExport());
+    $this->assertFalse($settings->isLicenseCommentChecked());
+    $this->assertTrue($settings->isIgnoreFilesWithoutInfo());
+    $this->assertSame('acme:', $settings->getTagNamespace());
+    $this->assertSame('1.5', $settings->getSpecVersion());
+  }
+
+  public function testGetCyclonedxSettingsPrefersStoredSettings()
+  {
+    $this->setUploadOwnerCyclonedxDefaults('checked,checked,checked,acme:,1.5');
+    $stored = new CycloneDxSettings(false, false, false, 'own:', '1.6');
+    $this->dbManager->insertTableRow('report_info', ['upload_fk' => 2,
+      'ri_cyclonedx_selection' => $stored->toReportInfo()]);
+
+    $this->assertEquals($stored, $this->uploadDao->getCyclonedxSettings(2));
+  }
+
+  public function testNewReportInfoRowIsSeededFromOwnerDefaults()
+  {
+    $this->setUploadOwnerCyclonedxDefaults('unchecked,checked,unchecked,acme:,1.4');
+
+    $this->assertEquals(0, $this->uploadDao->getGlobalDecisionSettingsFromInfo(2, 0));
+    $row = $this->dbManager->getSingleRow(
+      "SELECT ri_cyclonedx_selection FROM report_info WHERE upload_fk = 2", [], __METHOD__);
+    $this->assertEquals(new CycloneDxSettings(true, false, false, 'acme:', '1.4'),
+      CycloneDxSettings::fromReportInfo($row['ri_cyclonedx_selection']));
+  }
+
+  public function testUpdateReportInfoMergesCyclonedxSettings()
+  {
+    $this->setUploadOwnerCyclonedxDefaults('checked,checked,unchecked,acme:,1.5');
+    $this->dbManager->insertTableRow('report_info', ['upload_fk' => 2]);
+
+    $this->uploadDao->updateReportInfo(2, 'ri_cyclonedx_selection',
+      '{"specVersion":"1.4","osselotExport":"false"}');
+
+    $this->assertEquals(new CycloneDxSettings(true, false, false, 'acme:', '1.4'),
+      $this->uploadDao->getCyclonedxSettings(2));
+  }
+
+  public static function provideInvalidCyclonedxUpdates()
+  {
+    return [
+      'not an object' => ['"1.4"'],
+      'unknown key' => ['{"spec":"1.4"}'],
+      'comma in namespace' => ['{"tagNamespace":"a,b:"}'],
+      'unsupported version' => ['{"specVersion":"2.0"}'],
+      'not a boolean' => ['{"licenseComment":"maybe"}'],
+    ];
+  }
+
+  /**
+   * @dataProvider provideInvalidCyclonedxUpdates
+   */
+  public function testUpdateReportInfoRejectsInvalidCyclonedxSettings($value)
+  {
+    $this->dbManager->insertTableRow('report_info', ['upload_fk' => 2]);
+    $this->expectException(\UnexpectedValueException::class);
+    $this->uploadDao->updateReportInfo(2, 'ri_cyclonedx_selection', $value);
   }
 }

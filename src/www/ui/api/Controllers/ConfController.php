@@ -37,7 +37,10 @@ class ConfController extends RestController
     $uploadPk = $args["id"];
     $this->uploadAccessible($uploadPk);
 
-    $response_view = $this->restHelper->getUploadDao()->getReportInfo($uploadPk);
+    $uploadDao = $this->restHelper->getUploadDao();
+    $response_view = $uploadDao->getReportInfo($uploadPk);
+    $response_view['ri_cyclonedx_selection'] =
+      $uploadDao->getCyclonedxSettings($uploadPk)->toReportInfo();
     $returnVal = new Conf($response_view);
     return $response->withJson($returnVal->getArray(), 200);
   }
@@ -69,8 +72,12 @@ class ConfController extends RestController
 
     $key = $body['key'];
     $value = $body['value'];
-    $result = $this->restHelper->getUploadDao()->updateReportInfo($uploadPk,
-      $confObj->getKeyColumnName($key), $value);
+    try {
+      $result = $this->restHelper->getUploadDao()->updateReportInfo($uploadPk,
+        $confObj->getKeyColumnName($key), $value);
+    } catch (\UnexpectedValueException $e) {
+      throw new HttpBadRequestException($e->getMessage(), $e);
+    }
 
     if ($result) {
       $info = new Info(200, "Successfully updated " . $key, InfoType::INFO);
