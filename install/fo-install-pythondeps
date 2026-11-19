@@ -157,6 +157,27 @@ if [[ $RUNTIME ]]; then
     # Dependencies for scancode
     su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'python3 -m pip install --target=$HOME/pythondeps --no-input setuptools wheel'
     ###########################################################################
+    # report-aggregator: stdlib-only merge library used by the reportaggregator
+    # agent for multi-upload reports. Installed from the published package, so
+    # no report-aggregator sources are needed on the host or in the image.
+    # NOTE: still on TestPyPI while the package stabilises. Once it is released
+    # to production PyPI, set REPORT_AGGREGATOR_INDEX=https://pypi.org/simple/
+    # and drop the --extra-index-url below.
+    REPORT_AGGREGATOR_VERSION="0.1.0"
+    REPORT_AGGREGATOR_INDEX="https://test.pypi.org/simple/"
+    echo "*** Installing report-aggregator==$REPORT_AGGREGATOR_VERSION from $REPORT_AGGREGATOR_INDEX ***"
+    if ! su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c "PYTHONPATH=\"\$HOME/pythondeps\" python3 -m pip install \
+      --target=\$HOME/pythondeps --no-input --upgrade \
+      --index-url \"$REPORT_AGGREGATOR_INDEX\" \
+      --extra-index-url https://pypi.org/simple/ \
+      \"report-aggregator==$REPORT_AGGREGATOR_VERSION\""
+    then
+      echo "*** ERROR: failed to install report-aggregator==$REPORT_AGGREGATOR_VERSION ***"
+      echo "***        from $REPORT_AGGREGATOR_INDEX ***"
+      echo "*** The reportaggregator agent (multi-upload merge) will not work. ***"
+      echo "*** Re-run this script once the machine has network access. ***"
+    fi
+    ###########################################################################
     if [[ $EXPERIMENTAL ]]; then
       # Include experimental dependencies
       su --login --whitelist-environment="http_proxy,HTTP_PROXY,https_proxy,HTTPS_PROXY" $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install \
