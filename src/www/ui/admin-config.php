@@ -82,7 +82,7 @@ class foconfig extends FO_Plugin
           $OutBuf .= "<select name='new[$row[variablename]]' title='$row[description]' $InputStyle>";
           foreach ($Options as $Option) {
             $matches = array();
-            preg_match('/([ \\w]+)[{​​​​](.*)[}​​​​]/', $Option, $matches);
+            preg_match('/([ \\w]+)\\{(.*)\\}/', $Option, $matches);
             $Option_display = $matches[1];
             $Option_value = $matches[2];
             $OutBuf .= "<option $InputStyle value='$Option_value' ";
@@ -104,6 +104,25 @@ class foconfig extends FO_Plugin
           $OutBuf .= "<label for='" . $row['variablename'] .
             "'>" . $row['description'] . "</label>";
           break;
+        case CONFIG_TYPE_CHECKLIST:
+          $ConfVal = $row['conf_value'];
+          $selectedIds = array_map('trim', explode(',', $ConfVal));
+          $Options = explode("|", $row['option_value']);
+          $OutBuf .= "<div id='" . $row['variablename'] . "Div' style='display:inline-block; padding:5px;'>";
+          foreach ($Options as $Option) {
+            $matches = array();
+            preg_match('/([ \\w]+)\\{(.*)\\}/', $Option, $matches);
+            $Option_display = $matches[1];
+            $Option_value = $matches[2];
+            $isChecked = in_array($Option_value, $selectedIds) ? "checked" : "";
+            $OutBuf .= "<label style='margin-right:15px;'>";
+            $OutBuf .= "<input type='checkbox' name='new[" . $row['variablename'] . "][]' " .
+              "value='$Option_value' $isChecked /> $Option_display";
+            $OutBuf .= "</label>";
+          }
+          $OutBuf .= "</div>";
+          $OutBuf .= "<br>$row[description]";
+          break;
         default:
           $OutBuf .= "Invalid configuration variable. Unknown type.";
       }
@@ -116,6 +135,23 @@ class foconfig extends FO_Plugin
     $btnlabel = _("Update");
     $OutBuf .= "<p><input type='submit' value='$btnlabel'>";
     $OutBuf .= "</form>";
+
+    $OutBuf .= "<script>
+      (function () {
+        var autoDetect = document.getElementById('ReuserAutoDetect');
+        var statusDiv = document.getElementById('ReuserSearchStatusDiv');
+        if (!autoDetect || !statusDiv) {
+          return;
+        }
+        var toggle = function () {
+          var greyed = !autoDetect.checked;
+          statusDiv.style.opacity = greyed ? '0.4' : '1';
+          statusDiv.style.pointerEvents = greyed ? 'none' : 'auto';
+        };
+        autoDetect.addEventListener('change', toggle);
+        toggle();
+      })();
+    </script>";
 
     return $OutBuf;
   }
@@ -136,12 +172,25 @@ class foconfig extends FO_Plugin
       // Get missing keys from new array (unchecked checkboxes are not sent)
       $boolFalseArray = array_diff_key($oldarray, $newarray);
       foreach ($boolFalseArray as $varname => $value) {
-        // Make sure it was boolean data
+        // Make sure it was boolean or checklist data
         $isBoolean = $this->dbManager->getSingleRow("SELECT 1 FROM sysconfig " .
           "WHERE variablename = $1 AND vartype = " . CONFIG_TYPE_BOOL,
           array($varname), __METHOD__ . '.checkIfBool');
         if (! empty($isBoolean)) {
           $newarray[$varname] = 'false';
+          continue;
+        }
+        $isChecklist = $this->dbManager->getSingleRow("SELECT 1 FROM sysconfig " .
+          "WHERE variablename = $1 AND vartype = " . CONFIG_TYPE_CHECKLIST,
+          array($varname), __METHOD__ . '.checkIfChecklist');
+        if (! empty($isChecklist)) {
+          $newarray[$varname] = '';
+        }
+      }
+      // Normalize checklist arrays to comma-separated strings
+      foreach ($newarray as $varname => $value) {
+        if (is_array($value)) {
+          $newarray[$varname] = implode(',', $value);
         }
       }
     }
