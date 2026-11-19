@@ -491,12 +491,12 @@ static void reap_stale_jobs(scheduler_t* scheduler)
   }
 
   // Rate-limit: bail immediately if the check interval hasn't elapsed.
-  if((now - last_stale_check) < CONF_agent_update_interval)
+  if((now - scheduler->last_stale_check) < CONF_agent_update_interval)
   {
     return;
   }
 
-  last_stale_check = now;
+  scheduler->last_stale_check = now;
 
   // Skip the tree walk entirely when there are no jobs.
   if(g_tree_nnodes(scheduler->job_list) == 0)
@@ -595,16 +595,19 @@ void scheduler_update(scheduler_t* scheduler)
      * the loop, so a blocked high-priority job doesn't starve the rest */
     GList* skipped_jobs = NULL;
 
+
     while((job = peek_job(scheduler->job_queue)) != NULL)
     {
+      // Refresh stale timer once per visit: any job the scheduling loop
+      // touches is not stale. This single point replaces per-branch refreshes.
+      job->checkedout_at = time(NULL);
+
       // Check the max limit of running agents
       if (isMaxLimitReached(
           g_tree_lookup(scheduler->meta_agents, job->agent_type)))
       {
         V_SCHED("JOB_INIT: Unable to run agent %s due to max_run limit.\n",
             job->agent_type);
-        // max_run reached: reset stale timer and defer to next cycle.
-        job->checkedout_at = time(NULL);
         next_job(scheduler->job_queue);
         skipped_jobs = g_list_prepend(skipped_jobs, job);
         job = NULL;
@@ -617,8 +620,6 @@ void scheduler_update(scheduler_t* scheduler)
         host = g_tree_lookup(scheduler->host_list, LOCAL_HOST);
         if(!(host->running < host->max))
         {
-          // Local host full: reset stale timer and defer to next cycle.
-          job->checkedout_at = time(NULL);
           next_job(scheduler->job_queue);
           skipped_jobs = g_list_prepend(skipped_jobs, job);
           job = NULL;
@@ -633,8 +634,6 @@ void scheduler_update(scheduler_t* scheduler)
         {
           if(!(host->running < host->max))
           {
-            // Required host full: reset stale timer and defer to next cycle.
-            job->checkedout_at = time(NULL);
             next_job(scheduler->job_queue);
             skipped_jobs = g_list_prepend(skipped_jobs, job);
             job = NULL;
@@ -654,22 +653,13 @@ void scheduler_update(scheduler_t* scheduler)
       // the generic case, this can run anywhere, find a place
       else if((host = get_host(&(scheduler->host_queue), 1)) == NULL)
       {
-        // No host available: refresh stale timer on every queued job so reap_stale_jobs()
-        // doesn't misidentify legitimately blocked jobs as orphans.
-        time_t now = time(NULL);
-        GSequenceIter* sit = g_sequence_get_begin_iter(scheduler->job_queue);
-        while(!g_sequence_iter_is_end(sit))
-        {
-          ((job_t*)g_sequence_get(sit))->checkedout_at = now;
-          sit = g_sequence_iter_next(sit);
-        }
+        // No host available: remaining queued jobs were already touched by
+        // checkedout_at refresh at loop top, so the reaper won't misidentify them.
         job = NULL;
         break;
       }
 
       next_job(scheduler->job_queue);
-      // Reset stale timer: job is now actively being dispatched.
-      job->checkedout_at = time(NULL);
       if(is_meta_special(
           g_tree_lookup(scheduler->meta_agents, job->agent_type), SAG_EXCLUSIVE))
       {
@@ -1140,6 +1130,7 @@ void scheduler_foss_config(scheduler_t* scheduler)
     }
   }
 
+
   fo_config_free(version);
 
   /* This will create the load and the print command for the special
@@ -1318,6 +1309,7 @@ void scheduler_version_refresh(scheduler_t* scheduler, void* unused)
   log_printf("NOTE: scheduler_version_refresh: sent SIGKILL to %d agent(s); "
       "they will respawn automatically\n", ctx.count);
 }
+
 
 /**
  * @brief Checks if a string is entirely composed of numeric characters
