@@ -163,7 +163,7 @@ class SearchHelperDao
       if ($NeedAnd) {
         $SQLWhere .= " AND";
       }
-      $SQLWhere .= " upload_fk = " . $Upload . "";
+      $SQLWhere .= " upload_fk = " . intval($Upload) . "";
       $NeedAnd = 1;
     }
 
