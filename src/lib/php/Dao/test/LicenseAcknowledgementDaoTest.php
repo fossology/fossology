@@ -11,6 +11,7 @@
  */
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use PHPUnit\Framework\TestCase;
 use Fossology\Lib\Test\TestPgDb;
@@ -22,6 +23,8 @@ use PHPUnit\Runner\Version as PHPUnitVersion;
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
  */
+#[\PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses]
+#[\PHPUnit\Framework\Attributes\PreserveGlobalState(false)]
 class LicenseAcknowledgementDaoTest extends TestCase
 {
 
@@ -45,8 +48,6 @@ class LicenseAcknowledgementDaoTest extends TestCase
   /** @var int $assertCountBefore */
   private $assertCountBefore;
 
-  private $authClass;
-
   protected function setUp() : void
   {
     $this->testDb = new TestPgDb("licenseacknowledgementdao");
@@ -57,8 +58,8 @@ class LicenseAcknowledgementDaoTest extends TestCase
     $this->testDb->createSequences(["license_std_acknowledgement_la_pk_seq"]);
     $this->testDb->alterTables(["license_std_acknowledgement"]);
     $this->testDb->insertData(["users", "license_std_acknowledgement"]);
-    $this->authClass = \Mockery::mock('alias:Fossology\Lib\Auth\Auth');
-    $this->authClass->expects('getUserId')->andReturn(2);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
+    $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 2;
   }
 
   protected function tearDown() : void
@@ -67,6 +68,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
       \Hamcrest\MatcherAssert::getCount() - $this->assertCountBefore);
     $this->testDb = null;
     $this->dbManager = null;
+    \Mockery::close();
   }
 
   /**
@@ -136,7 +138,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testUpdateAcknowledgementAsAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+      $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $returnVal = $this->licenseAcknowledgementDao->updateAcknowledgement(2,
       "Updated acknowledgement #1", "This acknowledgement is updated!");
@@ -164,7 +166,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testUpdateAcknowledgementAsNonAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(false);
+      $_SESSION[Auth::USER_LEVEL] = Auth::PERM_NONE;
 
     $returnVal = $this->licenseAcknowledgementDao->updateAcknowledgement(3,
       "Updated acknowledgement #2", "This acknowledgement is updated!");
@@ -183,7 +185,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testUpdateAcknowledgementAsAdminInvalidId()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $this->expectException(\UnexpectedValueException::class);
     $this->licenseAcknowledgementDao->updateAcknowledgement(-1,
@@ -200,7 +202,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testUpdateAcknowledgementFromArrayAsAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+       $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $newValues = [];
     $newValues[3]['name'] = "Updated acknowledgement #2";
@@ -237,7 +239,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testUpdateAcknowledgementFromArrayAsNonAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(false);
+       $_SESSION[Auth::USER_LEVEL] = Auth::PERM_NONE;
 
     $newValues = [];
     $newValues[5]['name'] = "Updated acknowledgement #4";
@@ -258,7 +260,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testUpdateAcknowledgementFromArrayInvalidId()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $newValues = [];
     $newValues[-1]['name'] = "Updated acknowledgement #4";
@@ -279,7 +281,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testUpdateAcknowledgementFromArrayInvalidFields()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $newValues = [];
     $newValues[5]['naaaaame'] = "Updated acknowledgement #4";
@@ -300,7 +302,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testUpdateAcknowledgementFromArrayEmptyArray()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $newValues = [];
 
@@ -318,7 +320,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testUpdateAcknowledgementFromArrayEmptyValues()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $newValues = [3 => []];
 
@@ -368,7 +370,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testInsertAcknowledgementAsAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $returnVal = $this->licenseAcknowledgementDao->insertAcknowledgement(
       "Inserted acknowledgement #1", "This first inserted acknowledgement!");
@@ -396,7 +398,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testInsertAcknowledgementAsNonAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(false);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_NONE;
 
     $returnVal = $this->licenseAcknowledgementDao->insertAcknowledgement(
       "Inserted acknowledgement #1", "This first inserted acknowledgement!");
@@ -411,7 +413,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testInsertAcknowledgementEmptyValues()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $returnVal = $this->licenseAcknowledgementDao->insertAcknowledgement("",
       "       ");
@@ -427,7 +429,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testToggleAcknowledgementAsAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $returnVal = $this->licenseAcknowledgementDao->toggleAcknowledgement(5);
     $this->assertTrue($returnVal);
@@ -444,7 +446,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testToggleAcknowledgementAsNonAdmin()
   {
-    $this->authClass->expects('isAdmin')->andReturn(false);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_NONE;
 
     $returnVal = $this->licenseAcknowledgementDao->toggleAcknowledgement(5);
     $this->assertFalse($returnVal);
@@ -458,7 +460,7 @@ class LicenseAcknowledgementDaoTest extends TestCase
    */
   public function testToggleAcknowledgementInvalidId()
   {
-    $this->authClass->expects('isAdmin')->andReturn(true);
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_ADMIN;
 
     $this->expectException(\UnexpectedValueException::class);
 
