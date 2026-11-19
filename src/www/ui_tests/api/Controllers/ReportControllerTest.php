@@ -18,11 +18,13 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
+use Fossology\UI\Api\Exceptions\HttpInternalServerErrorException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Exceptions\HttpServiceUnavailableException;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Helper\RestHelper;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Mockery as M;
@@ -263,15 +265,24 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
    * @param string  $reportFormat
    * @return Response
    */
-  private function getResponseForReport($uploadId, $reportFormat)
+  private function getResponseForReport($uploadId, $reportFormat,
+    $apiVersion = ApiVersion::V1)
   {
-    $GLOBALS["apiBasePath"] = "/repo/api/v1";
+    $GLOBALS["apiBasePath"] = "/repo/api/v" . $apiVersion;
     $requestHeaders = new Headers();
     $requestHeaders->setHeader('uploadId', $uploadId);
     $requestHeaders->setHeader('reportFormat', $reportFormat);
     $body = $this->streamFactory->createStream();
     $request = new Request("GET", new Uri("HTTP", "localhost", 80,
-      "/repo/api/v1/report"), $requestHeaders, [], [], $body);
+      "/repo/api/v" . $apiVersion . "/report"), $requestHeaders, [], [], $body);
+    if ($apiVersion === ApiVersion::V2) {
+      $request = $request
+        ->withAttribute(ApiVersion::ATTRIBUTE_NAME, ApiVersion::V2)
+        ->withQueryParams([
+          'uploadId' => $uploadId,
+          'reportFormat' => $reportFormat
+        ]);
+    }
     $response = new ResponseHelper();
     return $this->reportController->getReport($request, $response, []);
   }
@@ -316,6 +327,96 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
         $this->getResponseJson($actualResponse));
       $this->assertEquals($expectedResponse->getCode(),
         $actualResponse->getStatusCode());
+    }
+  }
+
+
+  /**
+   * @test
+   * -# Report generation failures must not return a download URL
+   * -# Verify the same behavior for REST API v1 and v2
+   */
+  public function testGetReportRejectsFailedUnifiedReportSchedule()
+  {
+    $uploadId = 3;
+    $upload = $this->getUpload($uploadId);
+
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getUpload')
+      ->withArgs([$uploadId])->andReturn($upload);
+    $this->unifiedPlugin->shouldReceive('scheduleAgent')
+      ->withArgs([$this->groupId, $upload])
+      ->andReturn([42, -1, 'Synthetic queue insertion failure']);
+
+    foreach ([ApiVersion::V1, ApiVersion::V2] as $apiVersion) {
+      try {
+        $this->getResponseForReport($uploadId, 'unifiedreport', $apiVersion);
+        $this->fail('Failed scheduling must not return a download URL.');
+      } catch (HttpInternalServerErrorException $exception) {
+        $this->assertSame(500, $exception->getCode());
+        $this->assertSame('Unable to schedule report generation.',
+          $exception->getMessage());
+      }
+    }
+  }
+
+  /**
+   * @test
+   * -# Decision export queue errors must not return HTTP 201
+   * -# Verify the same behavior for REST API v1 and v2
+   */
+  public function testGetReportRejectsFailedDecisionExporterSchedule()
+  {
+    $uploadId = 3;
+    $upload = $this->getUpload($uploadId);
+
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getUpload')
+      ->withArgs([$uploadId])->andReturn($upload);
+    $this->decisionExporterPlugin->shouldReceive('scheduleAgent')
+      ->withArgs([$this->groupId, $upload])
+      ->andReturn([42, -1, 'Synthetic queue insertion failure']);
+
+    foreach ([ApiVersion::V1, ApiVersion::V2] as $apiVersion) {
+      try {
+        $this->getResponseForReport($uploadId, 'decisionexporter', $apiVersion);
+        $this->fail('Failed scheduling must not return a download URL.');
+      } catch (HttpInternalServerErrorException $exception) {
+        $this->assertSame(500, $exception->getCode());
+        $this->assertSame('Unable to schedule report generation.',
+          $exception->getMessage());
+      }
+    }
+  }
+
+  /**
+   * @test
+   * -# Successful report scheduling in API v2 still returns 201 and its URL
+   */
+  public function testGetReportSuccessfulScheduleV2()
+  {
+    $uploadId = 3;
+    $upload = $this->getUpload($uploadId);
+
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getUpload')
+      ->withArgs([$uploadId])->andReturn($upload);
+    $this->unifiedPlugin->shouldReceive('scheduleAgent')
+      ->withArgs([$this->groupId, $upload])->andReturn([42, 43, '']);
+    $this->decisionExporterPlugin->shouldReceive('scheduleAgent')
+      ->withArgs([$this->groupId, $upload])->andReturn([42, 43, '']);
+
+    $expected = new Info(201, 'http://localhost/repo/api/v2/report/42',
+      InfoType::INFO);
+    foreach (['unifiedreport', 'decisionexporter'] as $reportFormat) {
+      $response = $this->getResponseForReport(
+        $uploadId, $reportFormat, ApiVersion::V2);
+      $this->assertSame(201, $response->getStatusCode());
+      $this->assertEquals($expected->getArray(),
+        $this->getResponseJson($response));
     }
   }
 
