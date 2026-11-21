@@ -3782,7 +3782,7 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
-  /uploads/{id}/item/{ItemId}/totalcopyrights:
+  /uploads/{id}/item/{itemId}/totalcopyrights:
     parameters:
       - name: id
         required: true
@@ -3790,7 +3790,7 @@ paths:
         in: path
         schema:
           type: integer
-      - name: ItemId
+      - name: itemId
         required: true
         description: Upload Tree ID
         in: path
@@ -3848,7 +3848,7 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
-  /uploads/{id}/item/{ItemId}/totalusercopyrights:
+  /uploads/{id}/item/{itemId}/totalusercopyrights:
     parameters:
       - name: id
         required: true
@@ -3856,7 +3856,7 @@ paths:
         in: path
         schema:
           type: integer
-      - name: ItemId
+      - name: itemId
         required: true
         description: Upload Tree ID
         in: path
