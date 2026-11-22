@@ -26,9 +26,11 @@ use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Mockery as M;
+use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request;
+use Slim\Psr7\UploadedFile;
 use Slim\Psr7\Uri;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -371,6 +373,43 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $this->expectException(HttpNotFoundException::class);
 
     $this->getResponseForReport($uploadId, $reportFormat);
+  }
+
+  public static function licenseMatchProvider()
+  {
+    return [
+      'omitted' => [[], 'spdxid'],
+      'SPDX ID' => [['licenseMatch' => 'spdxid'], 'spdxid'],
+      'shortname' => [['licenseMatch' => 'shortname'], 'shortname'],
+      'unknown value' => [['licenseMatch' => 'unknown'], 'spdxid']
+    ];
+  }
+
+  /**
+   * @dataProvider licenseMatchProvider
+   */
+  public function testImportSpdxReportForwardsLicenseMatch($body, $expected)
+  {
+    $request = (new ServerRequestFactory())->createServerRequest('POST', '/report/import')
+      ->withParsedBody($body);
+    $file = M::mock(UploadedFile::class);
+    $file->shouldReceive('getClientFilename')->andReturn('report.rdf');
+    $file->shouldReceive('moveTo');
+    $plugin = M::mock();
+    $this->restHelper->shouldReceive('getPlugin')->with('ui_reportImport')
+      ->andReturn($plugin);
+    $plugin->shouldReceive('runImport')->once()
+      ->with(3, M::any(), M::capture($agentRequest))->andReturn([32]);
+
+    $path = sys_get_temp_dir() . '/fossology-report-import-' . uniqid();
+    $GLOBALS['SysConf']['FOSSOLOGY']['path'] = $path;
+    try {
+      $this->reportController->importSpdxReport($request, new ResponseHelper(), 3, $file);
+      $this->assertSame($expected, $agentRequest->request->get('licenseMatch'));
+    } finally {
+      rmdir($path . '/ReportImport');
+      rmdir($path);
+    }
   }
 
   /**

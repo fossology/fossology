@@ -423,6 +423,8 @@ class ReportController extends RestController
     $addConcludedAsDecisions = "true";
     $addConcludedAsDecisionsTBD = "true";
     $addCopyrights = "false";
+    $licenseMatch = ($reqBody["licenseMatch"] ?? null) === "shortname"
+      ? "shortname" : "spdxid";
     if (array_key_exists("addNewLicensesAs", $reqBody) &&
         $reqBody["addNewLicensesAs"] === "license") {
       $addNewLicensesAs = "license";
@@ -464,6 +466,7 @@ class ReportController extends RestController
     $symfonyRequest->request->set('addConcludedAsDecisionsTBD',
       $addConcludedAsDecisionsTBD);
     $symfonyRequest->request->set('addCopyrights', $addCopyrights);
+    $symfonyRequest->request->set('licenseMatch', $licenseMatch);
 
     $agentResp = $reportImport->runImport($upload_pk, $targetFile, $symfonyRequest);
     $returnVal = new Info(201, intval($agentResp[0]), InfoType::INFO);
