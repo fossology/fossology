@@ -295,6 +295,97 @@ class ReportUtils
   }
 
   /**
+   * Return the storage directory for a report, retaining its download basename.
+   *
+   * Repeated exports of the same scope reuse a path. Bulk upload order is kept
+   * because it can affect the generated document and its primary package.
+   *
+   * @param int $uploadId Primary upload ID
+   * @param int $groupId Group whose clearing decisions are reported
+   * @param int[] $additionalUploadIds Additional uploads in report order
+   * @return string Directory with a trailing slash
+   */
+  public static function getReportDirectory($uploadId, $groupId, $additionalUploadIds = array())
+  {
+    global $SysConf;
+    $ids = array_merge(array($uploadId, $groupId), $additionalUploadIds);
+    foreach ($ids as $id) {
+      if (filter_var($id, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1))) === false) {
+        throw new \InvalidArgumentException('Report upload and group IDs must be positive integers');
+      }
+    }
+    $directory = rtrim($SysConf['FOSSOLOGY']['path'], '/') . '/report/' .
+      (int) $uploadId . '/' . (int) $groupId . '/';
+    if (!empty($additionalUploadIds)) {
+      $directory .= 'bulk-' . hash('sha256', implode(',', array_map('intval', $additionalUploadIds))) . '/';
+    }
+    return $directory;
+  }
+
+  /**
+   * Publish a complete report and register its path for downloads.
+   *
+   * Render into the destination directory so rename replaces the report
+   * atomically. Serialize publication for the same upload so the database
+   * registration and the file replacement follow the same order.
+   */
+  public function saveReport($uploadId, $jobId, string $filepath, callable $writeReport)
+  {
+    $directory = dirname($filepath);
+    if (!is_dir($directory) && !@mkdir($directory, 0777, true) && !is_dir($directory)) {
+      throw new \RuntimeException('Cannot create report directory: ' . $directory);
+    }
+
+    $temporaryFile = tempnam($directory, '.report-');
+    if ($temporaryFile === false) {
+      throw new \RuntimeException('Cannot create temporary report file');
+    }
+
+    try {
+      if (dirname($temporaryFile) !== realpath($directory)) {
+        throw new \RuntimeException('Temporary report file is outside the report directory');
+      }
+
+      $writeReport($temporaryFile);
+      if (!chmod($temporaryFile, 0644)) {
+        throw new \RuntimeException('Cannot set report file permissions');
+      }
+
+      $this->dbManager->begin();
+      try {
+        $upload = $this->dbManager->getSingleRow(
+          'SELECT upload_pk FROM upload WHERE upload_pk = $1 FOR NO KEY UPDATE',
+          [$uploadId], __METHOD__ . '.lockUpload');
+        if (!$upload) {
+          throw new \RuntimeException('Cannot publish a report for a missing upload');
+        }
+        $this->updateOrInsertReportgenEntry($uploadId, $jobId, $filepath);
+
+        if (!rename($temporaryFile, $filepath)) {
+          throw new \RuntimeException('Cannot publish report: ' . $filepath);
+        }
+      } catch (\Throwable $error) {
+        $this->dbManager->rollback();
+        throw $error;
+      }
+      $this->dbManager->commit();
+    } finally {
+      if (file_exists($temporaryFile)) {
+        unlink($temporaryFile);
+      }
+    }
+  }
+
+  public function saveTextReport($uploadId, $jobId, string $filepath, string $contents)
+  {
+    $this->saveReport($uploadId, $jobId, $filepath, static function ($temporaryFile) use ($contents) {
+      if (file_put_contents($temporaryFile, $contents) !== strlen($contents)) {
+        throw new \RuntimeException('Cannot write complete report: ' . $temporaryFile);
+      }
+    });
+  }
+
+  /**
    * Update or insert an entry in the reportgen table.
    *
    * This function checks if an entry with the specified upload_fk and filepath
@@ -305,7 +396,7 @@ class ReportUtils
    * @param int $job_fk     ID of the job to be updated or inserted.
    * @param string $filepath  Filepath associated with the entry.
    */
-  public function updateOrInsertReportgenEntry($upload_fk, $job_fk, $filepath)
+  private function updateOrInsertReportgenEntry($upload_fk, $job_fk, $filepath)
   {
     $sqlCheck = "SELECT 1 FROM reportgen WHERE upload_fk = $1 AND filepath = $2";
     $row = $this->dbManager->getSingleRow($sqlCheck, [$upload_fk, $filepath],

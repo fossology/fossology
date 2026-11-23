@@ -198,6 +198,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     assertThat($row, hasKeyValuePair('job_fk', $jobId));
     $filepath = $row['filepath'];
     assertThat($filepath, endsWith('.rdf'));
+    assertThat(dirname($filepath), endsWith('/report/' . $uploadId . '/' . $this->groupId));
     $this->assertFileExists($filepath, "RDF report does not exists.");
 
     return $filepath;

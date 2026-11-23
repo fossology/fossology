@@ -108,7 +108,7 @@ class ReadmeOssAgent extends Agent
     $groupId = $this->groupId;
 
     $args = $this->args;
-    $this->additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
+    $this->additionalUploadIds = empty($args[self::UPLOAD_ADDS]) ? [] : explode(',', $args[self::UPLOAD_ADDS]);
     $uploadIds = $this->additionalUploadIds;
     array_unshift($uploadIds, $uploadId);
 
@@ -150,37 +150,18 @@ class ReadmeOssAgent extends Agent
    */
   private function writeReport($contents, $uploadId)
   {
-    global $SysConf;
-
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
 
-    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
+    $fileBase = ReportUtils::getReportDirectory($uploadId, $this->groupId, $this->additionalUploadIds);
     $fileName = $fileBase. "ReadMe_OSS_".$packageName.".txt" ;
 
     foreach ($this->additionalUploadIds as $addUploadId) {
       $packageName .= ', ' . $this->uploadDao->getUpload($addUploadId)->getFilename();
     }
 
-    if (!is_dir($fileBase)) {
-      mkdir($fileBase, 0777, true);
-    }
-    umask(0133);
     $message = $this->generateReport($contents, $packageName, $uploadId);
 
-    file_put_contents($fileName, $message);
-
-    $this->updateReportTable($uploadId, $this->jobId, $fileName);
-  }
-
-  /**
-   * @brief Update the report path
-   * @param int    $uploadId Upload ID
-   * @param int    $jobId    Job ID
-   * @param string $filename Path of the file
-   */
-  private function updateReportTable($uploadId, $jobId, $filename)
-  {
-    $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $filename);
+    $this->reportutils->saveTextReport($uploadId, $this->jobId, $fileName, $message);
   }
 
   /**
