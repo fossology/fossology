@@ -92,6 +92,27 @@ void test_meta_agent_init()
 
   FO_ASSERT_PTR_NULL(meta_agent_init(NULL, cmmd, max, spc));
   FO_ASSERT_PTR_NULL(meta_agent_init(name, NULL, max, spc));
+
+  /* Boundary check: raw_cmd holds MAX_CMD+1 bytes and " --scheduler_start"
+   * (18 bytes) is appended, so a command of MAX_CMD-18 (=1005) bytes is the
+   * longest that still fits and must be accepted, while one byte more
+   * (=1006) must be rejected. */
+  char boundary_cmd[MAX_CMD + 2];
+  size_t accept_len = MAX_CMD - strlen(" --scheduler_start"); /* 1005 */
+
+  memset(boundary_cmd, 'a', accept_len);
+  boundary_cmd[accept_len] = '\0';
+  meta_agent_t* ma_ok = meta_agent_init(name, boundary_cmd, max, spc);
+  FO_ASSERT_PTR_NOT_NULL(ma_ok);
+  if (ma_ok != NULL)
+  {
+    FO_ASSERT_EQUAL(strlen(ma_ok->raw_cmd), MAX_CMD);
+    meta_agent_destroy(ma_ok);
+  }
+
+  memset(boundary_cmd, 'a', accept_len + 1);
+  boundary_cmd[accept_len + 1] = '\0';
+  FO_ASSERT_PTR_NULL(meta_agent_init(name, boundary_cmd, max, spc));
 }
 
 /**
