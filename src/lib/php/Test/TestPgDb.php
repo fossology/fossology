@@ -30,7 +30,7 @@ class TestPgDb extends TestAbstractDb
 
   function __construct($dbName = null, $sysConf = null)
   {
-    $dbName = strtolower($dbName);
+    $dbName = strtolower((string) $dbName);
     $testDbFactory = new \TestDbFactory();
     $this->sys_conf = $sysConf;
     if (empty($this->sys_conf)) {

@@ -21,7 +21,6 @@ class test_common_dir extends \PHPUnit\Framework\TestCase
   protected function setUp() : void
   {
     // print "Starting unit test for common-dir.php\n";
-    print('.');
   }
 
   /**
@@ -37,22 +36,18 @@ class test_common_dir extends \PHPUnit\Framework\TestCase
    */
   function test_Is()
   {
-    print "Starting unit test for common-dir.php\n";
-    print "test function Isdir()\n";
     $mode = 536888320;
     $result = Isdir($mode);
     $this->assertEquals(true, $result);
     $mode = 33188;
     $result = Isdir($mode);
     $this->assertEquals(false, $result);
-    print "test function Isartifact()\n";
     $mode = 536888320;
     $result = Isartifact($mode);
     $this->assertEquals(false, $result);
     $mode = 805323776;
     $result = Isartifact($mode);
     $this->assertEquals(true, $result);
-    print "test function Iscontainer()\n";
     $mode = 536888320;
     $result = Iscontainer($mode);
     $this->assertEquals(true, $result);
@@ -60,7 +55,6 @@ class test_common_dir extends \PHPUnit\Framework\TestCase
     $result = Iscontainer($mode);
     $this->assertEquals(true, $result);
 
-    print "test function DirMode2String()\n";
     $result = DirMode2String($mode);
     $this->assertEquals("a-d-----S---", $result);
     //print "Ending unit test for common-dir.php\n";

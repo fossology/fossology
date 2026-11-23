@@ -62,7 +62,7 @@ function ReportCacheGet($CacheKey)
     }
   }
 
-  $EscKey = pg_escape_string($CacheKey);
+  $EscKey = pg_escape_string($PG_CONN, $CacheKey);
 
   // update time last accessed
   $sql = "UPDATE report_cache SET report_cache_tla = now() WHERE report_cache_key='$EscKey';";
@@ -105,8 +105,8 @@ function ReportCachePut($CacheKey, $CacheValue)
     return;
   }
 
-  $EscKey = pg_escape_string($CacheKey);
-  $EscValue = pg_escape_string($CacheValue);
+  $EscKey = pg_escape_string($PG_CONN, $CacheKey);
+  $EscValue = pg_escape_string($PG_CONN, $CacheValue);
 
   /* Parse the key.  If the key is a uri  */
   /* look for upload =>, if not found, look for item => */
@@ -200,7 +200,7 @@ function ReportCachePurgeByKey($CacheKey)
 {
   global $PG_CONN;
   $ParsedURI = array();
-  $EscKey = pg_escape_string($CacheKey);
+  $EscKey = pg_escape_string($PG_CONN, $CacheKey);
   parse_str($EscKey, $ParsedURI);
 
   $sql = "DELETE FROM report_cache WHERE report_cache_key = '$EscKey';";

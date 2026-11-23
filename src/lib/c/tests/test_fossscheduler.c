@@ -32,7 +32,7 @@ extern int items_processed;
 extern int valid;
 extern int sscheduler;
 extern int agent_verbose;
-extern void fo_heartbeat();
+extern void fo_heartbeat(int sig);
 
 /* ************************************************************************** */
 /* *** set up and tear down for fossschduler ******************************** */
@@ -109,8 +109,9 @@ void tear_down(void)
 *        main thread.
 * @return void
 */
-void signal_connect_end()
+void signal_connect_end(int sig)
 {
+  (void) sig;
   FO_ASSERT_FALSE(valid);
   FO_ASSERT_STRING_EQUAL(fgets(tbuffer, sizeof(tbuffer), read_from), "OK\n");
 
@@ -126,8 +127,9 @@ void signal_connect_end()
 * -# Update the verbose value
 * @return void
 */
-void signal_connect_verbose()
+void signal_connect_verbose(int sig)
 {
+  (void) sig;
   FO_ASSERT_FALSE(valid);
   FO_ASSERT_EQUAL(agent_verbose, VERBOSE_TEST);
 
@@ -142,8 +144,9 @@ void signal_connect_verbose()
 * -# Read from the scheduler connection
 * -# Check the version string with COMMIT_HASH
 */
-void signal_connect_version()
+void signal_connect_version(int sig)
 {
+  (void) sig;
   FO_ASSERT_FALSE(valid);
   FO_ASSERT_PTR_NOT_NULL(fgets(tbuffer, sizeof(tbuffer), read_from));
   tbuffer[strlen(tbuffer) - 1] = '\0';

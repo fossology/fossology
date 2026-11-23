@@ -10,6 +10,8 @@ use Fossology\Lib\Test\TestPgDb;
 
 class StartUpTest extends \PHPUnit\Framework\TestCase
 {
+  public $testInstaller;
+
   /** @var string */
   private $pageContent;
   /**

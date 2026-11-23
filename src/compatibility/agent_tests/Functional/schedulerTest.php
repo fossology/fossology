@@ -26,10 +26,10 @@ use Fossology\Lib\Test\TestPgDb;
 use Monolog\Logger;
 
 /**
- * @class CompatibilityScheduledTest
+ * @class CompatibilitySchedulerTest
  * @brief Functional test cases for compatibility agent using scheduler
  */
-class CompatibilityScheduledTest extends \PHPUnit\Framework\TestCase
+class CompatibilitySchedulerTest extends \PHPUnit\Framework\TestCase
 {
 
   /**

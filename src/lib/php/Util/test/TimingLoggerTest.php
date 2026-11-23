@@ -21,6 +21,8 @@ class HackedTimingLogger extends TimingLogger
 
 class TimingLoggerTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   private $logger;
 
   protected function setUp() : void

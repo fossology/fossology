@@ -19,6 +19,8 @@ use Mockery as M;
  */
 class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /**
    * @brief One time setup for test
    * @see PHPUnit::Framework::TestCase::setUp()
