@@ -124,19 +124,23 @@ class SearchController extends RestController
     $totalPages = intval(ceil($count / $limit));
 
     $searchResults = [];
+    $uploadCache = [];
     // rewrite it and add additional information about its parent upload
     foreach ($results as $result) {
-      $currentUpload = $this->dbHelper->getUploads(
-        $this->restHelper->getUserId(), $this->restHelper->getGroupId(), 1, 1,
-        $result["upload_fk"], null, true)[1];
-      if (! empty($currentUpload)) {
-        $currentUpload = $currentUpload[0];
-      } else {
+      $uploadFk = $result["upload_fk"];
+      if (!array_key_exists($uploadFk, $uploadCache)) {
+        $fetched = $this->dbHelper->getUploads(
+          $this->restHelper->getUserId(), $this->restHelper->getGroupId(), 1, 1,
+          $uploadFk, null, true)[1];
+        $uploadCache[$uploadFk] = !empty($fetched) ? $fetched[0] : null;
+      }
+      $currentUpload = $uploadCache[$uploadFk];
+      if ($currentUpload === null) {
         continue;
       }
       $uploadTreePk = $result["uploadtree_pk"];
-      $filename = $this->dbHelper->getFilenameFromUploadTree($uploadTreePk);
-      $currentResult = new SearchResult($currentUpload, $uploadTreePk, $filename);
+      $resultFilename = $result["ufile_name"] ?? $this->dbHelper->getFilenameFromUploadTree($uploadTreePk);
+      $currentResult = new SearchResult($currentUpload, $uploadTreePk, $resultFilename);
       $searchResults[] = $currentResult->getArray();
     }
     return $response->withHeader("X-Total-Pages", $totalPages)->withJson($searchResults, 200);
