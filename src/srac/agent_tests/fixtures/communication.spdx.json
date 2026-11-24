@@ -1,0 +1,34 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "synthetic-srac-receiving-example",
+  "documentNamespace": "https://example.org/spdx/synthetic-srac-receiving-example",
+  "creationInfo": {
+    "created": "2026-09-29T00:00:00Z",
+    "creators": ["Tool: synthetic SRAC receiving example"]
+  },
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-score-communication-configuration",
+      "name": "score_communication::configuration",
+      "versionInfo": "313f1178628189d267c8cd0d75971bdac04c20ee",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/eclipse-score/communication@313f1178628189d267c8cd0d75971bdac04c20ee#score/mw/com/configuration"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceType": "srac",
+          "referenceLocator": "https://example.org/srac/communication.srac.json",
+          "comment": "SRAC sidecar; SHA-256: 2108209f8a367eb370de5082b034ac015d6c9df9606c7a065c974d5c08344eea"
+        }
+      ]
+    }
+  ]
+}

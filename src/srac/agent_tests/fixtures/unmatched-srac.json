@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "0.2-draft",
+  "assertionId": "srac-unmatched-component-001",
+  "subject": {
+    "name": "non-existent-component",
+    "purl": "pkg:generic/non-existent-component@9.9.9",
+    "version": "9.9.9",
+    "repository": "https://example.org/repo/non-existent"
+  },
+  "safetyRelevance": {
+    "status": "safety-related",
+    "classification": "ASIL-D"
+  },
+  "rationale": "Valid assertion for a component that is not part of this target SBOM.",
+  "evidence": [
+    {
+      "id": "ev-unmatched-001",
+      "type": "safety-analysis",
+      "uri": "https://example.org/evidence/unmatched-001"
+    }
+  ],
+  "assertion": {
+    "status": "reviewed",
+    "author": {
+      "name": "Lead Engineer John Smith"
+    },
+    "created": "2026-09-01T10:00:00Z"
+  }
+}
