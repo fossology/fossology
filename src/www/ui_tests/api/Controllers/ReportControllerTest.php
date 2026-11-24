@@ -402,11 +402,18 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
       ->with(3, M::any(), M::capture($agentRequest))->andReturn([32]);
 
     $path = sys_get_temp_dir() . '/fossology-report-import-' . uniqid();
+    $hadSysConf = array_key_exists('SysConf', $GLOBALS);
+    $previousSysConf = $GLOBALS['SysConf'] ?? null;
     $GLOBALS['SysConf']['FOSSOLOGY']['path'] = $path;
     try {
       $this->reportController->importSpdxReport($request, new ResponseHelper(), 3, $file);
       $this->assertSame($expected, $agentRequest->request->get('licenseMatch'));
     } finally {
+      if ($hadSysConf) {
+        $GLOBALS['SysConf'] = $previousSysConf;
+      } else {
+        unset($GLOBALS['SysConf']);
+      }
       rmdir($path . '/ReportImport');
       rmdir($path);
     }
