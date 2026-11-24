@@ -25,12 +25,14 @@ class CompatibilityCliOptions
 private:
   int verbosity; /**< The verbosity level */
   bool json;     /**< Whether to generate JSON output */
+  bool autoConclude; /**< Whether to auto-conclude files */
 
 public:
   bool isVerbosityDebug() const;
   bool doJsonOutput() const;
+  bool doAutoConclude() const;
 
-  CompatibilityCliOptions(int verbosity, bool json);
+  CompatibilityCliOptions(int verbosity, bool json, bool autoConclude);
   CompatibilityCliOptions();
 };
 
