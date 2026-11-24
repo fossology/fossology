@@ -159,6 +159,11 @@ class ReportController extends RestController
       default:
         throw new HttpInternalServerErrorException("Some error occurred!");
     }
+    // AgentAdd() uses negative queue IDs for scheduling failures.
+    if ($jobQueueId < 0) {
+      throw new HttpInternalServerErrorException(
+        "Unable to schedule report generation.");
+    }
     $download_path = $this->buildDownloadPath($request, $jobId);
     $info = new Info(201, $download_path, InfoType::INFO);
     return $response->withJson($info->getArray(), $info->getCode());
