@@ -73,8 +73,11 @@ function RepPath($PfilePk, $Repo="files")
     return (null);
   }
   $Hash = $Row['pfile_sha1'] . "." . $Row['pfile_md5'] . "." . $Row['pfile_size'];
+  if (empty($LIBEXECDIR)) {
+    return null;
+  }
   exec("$LIBEXECDIR/reppath $Repo ".escapeshellarg($Hash), $Path);
-  return($Path[0]);
+  return($Path[0] ?? null);
 } // RepPath()
 
 /**
@@ -106,6 +109,9 @@ function RepPathItem($Item, $Repo="files")
     return (null);
   }
   $Hash = $Row['pfile_sha1'] . "." . $Row['pfile_md5'] . "." . $Row['pfile_size'];
+  if (empty($LIBEXECDIR)) {
+    return null;
+  }
   exec("$LIBEXECDIR/reppath $Repo ".escapeshellarg($Hash), $Path);
-  return($Path[0]);
+  return($Path[0] ?? null);
 }

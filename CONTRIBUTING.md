@@ -54,7 +54,7 @@ Not familiar with git, see [Git basic commands](https://github.com/fossology/fos
 We are using the [Feature Branch Workflow (also known as GitHub Flow)](https://guides.github.com/introduction/flow/),
 and prefer delivery as pull requests.
 
-Our first line of defense is the [Travis CI](https://travis-ci.org/fossology/fossology/) build defined within [.travis.yml](https://github.com/fossology/fossology/blob/master/.travis.yml) and triggered for every pull request.
+Our first line of defense is GitHub Actions, defined within [.github/workflows](https://github.com/fossology/fossology/tree/master/.github/workflows) and triggered for every pull request.
 
 Create a feature branch:
 

@@ -121,7 +121,8 @@ class JobController extends RestController
     }
 
     if ($id !== null) {
-      /* If the ID is passed, don't check for upload */
+      /* If the ID is passed, ignore any upload query parameter and let
+       * getAllResults() authorize access to the job's own upload. */
       return $this->getAllResults($id, $status, $request, $response, $sort, $limit, $page, $apiVersion);
     }
 
@@ -271,10 +272,17 @@ class JobController extends RestController
    * @param integer $page    Page number required
    * @param integer $apiVersion API version
    * @return ResponseHelper
+   * @throws HttpErrorException If a specific job id is requested and its
+   *         upload does not exist or is not accessible to the caller
    */
   private function getAllResults($id, $status, $request, $response, $sort, $limit, $page, $apiVersion)
   {
     list($jobs, $count) = $this->dbHelper->getJobs($id, $status, $sort, $limit, $page, null);
+    if ($id !== null && !empty($jobs)) {
+      /* A specific job was requested, make sure the caller can access the
+       * upload it belongs to before returning any of its data. */
+      $this->uploadAccessible($jobs[0]->getUploadId());
+    }
     $finalJobs = [];
     foreach ($jobs as $job) {
       $this->updateEta($job);
@@ -301,14 +309,12 @@ class JobController extends RestController
    * @param integer $page Page number required
    * @param integer $apiVersion API version
    * @return ResponseHelper
-   * @throws HttpNotFoundException
+   * @throws HttpErrorException If the upload does not exist or is not
+   *         accessible to the caller
    */
   private function getFilteredResults($uploadId, $status, $request, $response, $sort, $limit, $page, $apiVersion)
   {
-    if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
-      throw new HttpNotFoundException("Upload id " . $uploadId .
-        " doesn't exist");
-    }
+    $this->uploadAccessible($uploadId);
     list($jobs, $count) = $this->dbHelper->getJobs(null, $status, $sort, $limit, $page, $uploadId);
     $finalJobs = [];
     foreach ($jobs as $job) {

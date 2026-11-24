@@ -32,6 +32,7 @@ use Fossology\UI\Api\Controllers\FolderController;
 use Fossology\UI\Api\Controllers\GroupController;
 use Fossology\UI\Api\Controllers\InfoController;
 use Fossology\UI\Api\Controllers\JobController;
+use Fossology\UI\Api\Controllers\LicenseCompatibilityRuleController;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Controllers\MaintenanceController;
 use Fossology\UI\Api\Controllers\ObligationController;
@@ -166,6 +167,9 @@ if ($dbConnected) {
 
 // Regex for matching a valid path parameter
 $pattern = "[\\w\\d\\-\\.@_]+";
+
+// Regex for matching group names, which may contain spaces
+$groupPattern = "[\\w\\d\\-\\.@_ ]+";
 
 //////////////////////////OPTIONS/////////////////////
 $app->options('/{routes:.+}', AuthController::class . ':optionsVerification');
@@ -309,15 +313,16 @@ $app->group('/obligations',
 
 ////////////////////////////GROUPS/////////////////////
 $app->group('/groups',
-  function (\Slim\Routing\RouteCollectorProxy $app) use ($pattern) {
+  function (\Slim\Routing\RouteCollectorProxy $app) use ($pattern, $groupPattern) {
     $app->get('', GroupController::class . ':getGroups');
     $app->post('', GroupController::class . ':createGroup');
-    $app->post("/{pathParam:$pattern}/user/{userPathParam:$pattern}", GroupController::class . ':addMember');
-    $app->delete("/{pathParam:$pattern}", GroupController::class . ':deleteGroup');
-    $app->delete("/{pathParam:$pattern}/user/{userPathParam:$pattern}", GroupController::class . ':deleteGroupMember');
+    $app->post("/{pathParam:$groupPattern}/user/{userPathParam:$pattern}", GroupController::class . ':addMember');
+    $app->put("/{pathParam:$groupPattern}", GroupController::class . ':updateGroup');
+    $app->delete("/{pathParam:$groupPattern}", GroupController::class . ':deleteGroup');
+    $app->delete("/{pathParam:$groupPattern}/user/{userPathParam:$pattern}", GroupController::class . ':deleteGroupMember');
     $app->get('/deletable', GroupController::class . ':getDeletableGroups');
-    $app->get("/{pathParam:$pattern}/members", GroupController::class . ':getGroupMembers');
-    $app->put("/{pathParam:$pattern}/user/{userPathParam:$pattern}", GroupController::class . ':changeUserPermission');
+    $app->get("/{pathParam:$groupPattern}/members", GroupController::class . ':getGroupMembers');
+    $app->put("/{pathParam:$groupPattern}/user/{userPathParam:$pattern}", GroupController::class . ':changeUserPermission');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -346,6 +351,7 @@ $app->group('/search',
 $app->group('/maintenance',
   function (\Slim\Routing\RouteCollectorProxy $app) {
     $app->post('', MaintenanceController::class . ':createMaintenance');
+    $app->get('', MaintenanceController::class . ':getMaintenanceInfo');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -425,6 +431,18 @@ $app->group('/license',
     $app->delete('/admincandidates/{id:\\d+}',
       LicenseController::class . ':deleteAdminLicenseCandidate');
     $app->put('/adminacknowledgements', LicenseController::class . ':handleAdminLicenseAcknowledgement');
+    $app->any('/{params:.*}', BadRequestController::class);
+  });
+
+/////////////////LICENSE COMPATIBILITY RULES////////////
+$app->group('/license-compatibility-rules',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', LicenseCompatibilityRuleController::class . ':getRules');
+    $app->post('', LicenseCompatibilityRuleController::class . ':createRule');
+    $app->get('/export', LicenseCompatibilityRuleController::class . ':exportRules');
+    $app->post('/import', LicenseCompatibilityRuleController::class . ':importRules');
+    $app->put('/{id:\\d+}', LicenseCompatibilityRuleController::class . ':updateRule');
+    $app->delete('/{id:\\d+}', LicenseCompatibilityRuleController::class . ':deleteRule');
     $app->any('/{params:.*}', BadRequestController::class);
   });
 

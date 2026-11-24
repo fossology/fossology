@@ -37,15 +37,14 @@ PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId,
                              " WHERE upload_fk=$1 AND (ufile_mode&x'3C000000'::int)=0 AND (lft BETWEEN $2 AND $3) AND ut.pfile_fk != 0"
                              " ORDER BY ut.uploadtree_pk, scopesort, ut.pfile_fk, clearing_decision_pk DESC"
                              ") itemView WHERE decision_type!=$4 OR decision_type IS NULL";
-  char* nonVoidPfile = ", realFindings AS ("
-                       " SELECT DISTINCT lf.pfile_fk"
-                       " FROM license_file lf"
-                       " INNER JOIN ars_master am ON lf.agent_fk = am.agent_fk AND am.upload_fk = $1"
-                       " INNER JOIN " LICENSE_REF_TABLE " lr ON lf.rf_fk = lr.rf_pk"
-                       " WHERE lr.rf_shortname NOT IN ('No_license_found', 'Void')"
-                       ")"
-                       " SELECT pfile_fk FROM allPfileData"
-                       " WHERE pfile_fk IN (SELECT pfile_fk FROM realFindings)";
+  char* nonVoidPfile = "SELECT a.pfile_fk FROM allPfileData a"
+                       " WHERE EXISTS (SELECT 1 FROM license_file lf"
+                       "  JOIN license_ref lr ON lf.rf_fk = lr.rf_pk"
+                       "  WHERE lf.pfile_fk = a.pfile_fk"
+                       "  AND lr.rf_shortname NOT IN ('No_license_found', 'Void'))"
+                       " OR NOT EXISTS (SELECT 1 FROM license_file lf"
+                       "  JOIN license_ref lr ON lf.rf_fk = lr.rf_pk"
+                       "  WHERE lf.pfile_fk = a.pfile_fk)";
 
   if (!ignoreIrre && !scanFindings)
   {
@@ -241,7 +240,8 @@ GArray* queryActiveCustomPhrases(fo_dbManager* dbManager) {
       dbManager,
       "queryActiveCustomPhrasesWithMappings",
       "SELECT cp.cp_pk, cp.text, cp.acknowledgement, cp.comments,"
-      "       cplm.rf_fk, cplm.removing"
+      "       cplm.rf_fk, cplm.removing,"
+      "       cplm.comment, cplm.reportinfo, cplm.acknowledgement"
       " FROM custom_phrase cp"
       " LEFT JOIN custom_phrase_license_map cplm ON cp.cp_pk = cplm.cp_fk"
       " WHERE cp.is_active = true"
@@ -272,50 +272,20 @@ GArray* queryActiveCustomPhrases(fo_dbManager* dbManager) {
       current = phrase;
     }
 
-    /* LEFT JOIN row with no mapping has rf_fk = NULL — skip it. */
+    /* LEFT JOIN row with no mapping has rf_fk = NULL, skip it. */
     if (!PQgetisnull(result, i, 4)) {
-      LicenseMapping mapping;
+      LicenseMapping mapping = {0};
       mapping.rfPk = atol(PQgetvalue(result, i, 4));
       mapping.removing = (strcmp(PQgetvalue(result, i, 5), "t") == 0) ? 1 : 0;
+      mapping.comment = PQgetisnull(result, i, 6) ? NULL : g_strdup(PQgetvalue(result, i, 6));
+      mapping.reportinfo = PQgetisnull(result, i, 7) ? NULL : g_strdup(PQgetvalue(result, i, 7));
+      mapping.acknowledgement = PQgetisnull(result, i, 8) ? NULL : g_strdup(PQgetvalue(result, i, 8));
       g_array_append_val(current->licenseMappings, mapping);
     }
   }
 
   PQclear(result);
   return phrases;
-}
-
-/**
- * \brief Query mapped licenses for a given phrase with add/remove flags
- * \param dbManager Database manager
- * \param cpId Custom phrase ID (cp_pk)
- * \return GArray* of LicenseMapping structures
- */
-GArray* queryMappedLicensesForPhrase(fo_dbManager* dbManager, long cpId) {
-  PGresult* result = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "queryMappedLicensesForPhrase",
-      "SELECT rf_fk, removing FROM custom_phrase_license_map WHERE cp_fk = $1",
-      long
-    ),
-    cpId
-  );
-
-  GArray* licenseMappings = g_array_new(FALSE, FALSE, sizeof(LicenseMapping));
-
-  if (result) {
-    int numRows = PQntuples(result);
-    for (int i = 0; i < numRows; i++) {
-      LicenseMapping mapping;
-      mapping.rfPk = atol(PQgetvalue(result, i, 0));
-      mapping.removing = (strcmp(PQgetvalue(result, i, 1), "t") == 0) ? 1 : 0;
-      g_array_append_val(licenseMappings, mapping);
-    }
-    PQclear(result);
-  }
-
-  return licenseMappings;
 }
 
 /**
@@ -330,8 +300,15 @@ void phrase_free(Phrase* phrase) {
   g_free(phrase->comments);
   g_free(phrase->stmtName);
 
-  if (phrase->licenseMappings)
+  if (phrase->licenseMappings) {
+    for (guint i = 0; i < phrase->licenseMappings->len; i++) {
+      LicenseMapping* m = &g_array_index(phrase->licenseMappings, LicenseMapping, i);
+      g_free(m->comment);
+      g_free(m->reportinfo);
+      g_free(m->acknowledgement);
+    }
     g_array_free(phrase->licenseMappings, TRUE);
+  }
 
   g_free(phrase);
 }

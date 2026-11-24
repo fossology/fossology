@@ -27,9 +27,15 @@
             {% endif %}
           </table>
       </td>
+      {% if kotobaHistoryHighlightUri and row.id > 0 and row.matched %}
+      <td class="hi-kotoba">
+      <a href="{{ kotobaHistoryHighlightUri }}&item={{ itemId }}&clearingId={{ row.id }}#highlight">{{ row.text|e }}</a>
+      </td>
+      {% else %}
       <td>
       {{ row.text|e }}
       </td>
+      {% endif %}
     </tr>
   {% endfor %}
   {% else %}

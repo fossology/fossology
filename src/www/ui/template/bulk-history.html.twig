@@ -28,7 +28,7 @@
       </td>
       {% if bulkHistoryHighlightUri and row.id > 0 and row.matched %}
       <td class="hi-bulk">
-      <a href="{{ bulkHistoryHighlightUri }}&item={{ itemId }}&clearingId={{ row.id }}#highlight">{{ row.text|e }}<a>
+      <a href="{{ bulkHistoryHighlightUri }}&item={{ itemId }}&clearingId={{ row.id }}#highlight">{{ row.text|e }}</a>
       </td>
       {% else %}
       <td>

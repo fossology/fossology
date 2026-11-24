@@ -114,14 +114,20 @@ class LicenseCompatibilityRulesYamlImport
     if ($normalizedRow["firstname"] != null) {
       $firstLicense = $this->licenseDao->getLicenseByShortName(
           $normalizedRow["firstname"], null);
-      $firstLicenseId = $firstLicense->getId();
-      $normalizedRow["firstname"] = $firstLicenseId;
+      if ($firstLicense === null) {
+        throw new \UnexpectedValueException("Unable to find license " .
+          $normalizedRow["firstname"] . " from YAML");
+      }
+      $normalizedRow["firstname"] = $firstLicense->getId();
     }
     if ($normalizedRow["secondname"] != null) {
       $secondLicense = $this->licenseDao->getLicenseByShortName(
           $normalizedRow["secondname"], null);
-      $secondLicenseId = $secondLicense->getId();
-      $normalizedRow["secondname"] = $secondLicenseId;
+      if ($secondLicense === null) {
+        throw new \UnexpectedValueException("Unable to find license " .
+          $normalizedRow["secondname"] . " from YAML");
+      }
+      $normalizedRow["secondname"] = $secondLicense->getId();
     }
     return $this->handleYamlLicense($normalizedRow);
   }
@@ -144,14 +150,14 @@ class LicenseCompatibilityRulesYamlImport
 
     $log = [];
     if ($old_comp != $new_comp) {
-      $rule["compatibility"] = $this->dbManager->booleanToDb($new_comp);
+      $rule["result"] = $new_comp;
       $log[] = "updated compatibility";
     }
     if (!empty($row['comment']) && $row['comment'] != $oldRule['comment']) {
       $rule["comment"] = $row["comment"];
       $log[] = "updated comment";
     }
-    if (count($rule) > 1) {
+    if (!empty($rule)) {
       try {
         $this->compatibilityDao->updateRuleFromArray([$lrPk => $rule]);
       } catch (\UnexpectedValueException $e) {

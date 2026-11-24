@@ -1060,6 +1060,22 @@ void database_update_job(scheduler_t* scheduler, job_t* job, job_status status)
     g_free(sql);
   }
 
+  /* A failed prerequisite (e.g. a failed wget_agent) must fail its dependent
+   * queue entries (ununpack, adj2nest, ...) too, instead of leaving them stuck
+   * in the queue forever. Only real jobs (j_id >= 0) can have dependents. */
+  if(status == JB_FAILED && j_id >= 0)
+  {
+    gchar* dep_sql = g_strdup_printf(jobsql_fail_dependents, j_id);
+    db_result = database_exec(scheduler, dep_sql);
+    if(PQresultStatus(db_result) != PGRES_COMMAND_OK)
+    {
+      PQ_ERROR(db_result, "failed to fail dependent jobs for jq_pk %d", j_id);
+    }
+    else
+      SafePQclear(db_result);
+    g_free(dep_sql);
+  }
+
   if(status == JB_COMPLETE || status == JB_FAILED)
     email_notification(scheduler, job);
 }

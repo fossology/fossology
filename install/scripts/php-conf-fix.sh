@@ -7,7 +7,8 @@
 #
 # uses phpIni to store file path - change if required
 #
-PHP_PATH=$(php --ini | awk '/\/etc\/php.*\/cli$/{print $5}')
+# PHP >= 8.5 quotes the paths in `php --ini` output
+PHP_PATH=$(php --ini | tr -d '"' | awk '/\/etc\/php.*\/cli$/{print $5}')
 phpIni="${PHP_PATH}/../apache2/php.ini"
 
 echo 'Automated php.ini configuration adjustments'

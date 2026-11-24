@@ -78,7 +78,13 @@ class DeciderAgentPlugin extends AgentPlugin
     $dependencies = array();
 
     $rules = $request->get('deciderRules', []);
+    if (!is_array($rules)) {
+      $rules = [];
+    }
     $agents = $request->get('agents', []);
+    if (!is_array($agents)) {
+      $agents = [];
+    }
     if (in_array('agent_nomos', $agents)) {
       $checkAgentNomos = true;
     } else {
@@ -104,12 +110,6 @@ class DeciderAgentPlugin extends AgentPlugin
           $dependencies[] = 'agent_monk';
           $dependencies[] = 'agent_ninka';
           $rulebits |= 0x2;
-          break;
-        case 'reuseBulk':
-          $dependencies[] = 'agent_nomos';
-          $dependencies[] = 'agent_monk';
-          $dependencies[] = 'agent_reuser';
-          $rulebits |= 0x4;
           break;
         case 'wipScannerUpdates':
           $this->addScannerDependencies($dependencies, $request);
@@ -183,6 +183,9 @@ class DeciderAgentPlugin extends AgentPlugin
   protected function addScannerDependencies(&$dependencies, Request $request)
   {
     $agentList = $request->get('agents') ?: array();
+    if (!is_array($agentList)) {
+      $agentList = array();
+    }
     foreach (array('agent_nomos', 'agent_monk', 'agent_ninka') as $agentName) {
       if (in_array($agentName, $dependencies)) {
         continue;
@@ -216,7 +219,11 @@ class DeciderAgentPlugin extends AgentPlugin
     global $SysConf;
     $licenseTypes = array_map('trim', explode(',',
         $SysConf['SYSCONFIG']['LicenseTypes']));
-    $licenseType = trim($request->get("licenseTypeConc", ""));
+    $licenseType = $request->get("licenseTypeConc", "");
+    if (!is_string($licenseType)) {
+      return "";
+    }
+    $licenseType = trim($licenseType);
     if (in_array($licenseType, $licenseTypes)) {
       return $licenseType;
     }

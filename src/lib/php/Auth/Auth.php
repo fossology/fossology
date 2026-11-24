@@ -91,7 +91,7 @@ class Auth
    */
   public static function isAdmin()
   {
-    return $_SESSION[self::USER_LEVEL]==self::PERM_ADMIN;
+    return isset($_SESSION[self::USER_LEVEL]) && $_SESSION[self::USER_LEVEL] == self::PERM_ADMIN;
   }
 
   /**

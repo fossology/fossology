@@ -17,23 +17,26 @@
 
 // Kotoba-specific structures for custom phrase scanning
 /**
- * @brief Structure to hold a license mapping with add/remove flag
+ * @brief License mapping entry with per-mapping report metadata.
  */
 typedef struct LicenseMapping_t {
-    long rfPk;               ///< rf_pk from license_ref table
-    int removing;            ///< 0 = add license, 1 = remove license
+    long rfPk; ///< rf_pk from license_ref table
+    int removing; ///< 0 = add license, 1 = remove license
+    char* comment; ///< nullable
+    char* reportinfo; ///< nullable
+    char* acknowledgement; ///< nullable
 } LicenseMapping;
 
 /**
  * @brief Structure to hold a custom phrase and its mapped licenses
  */
 typedef struct Phrase_t {
-    long cpId;               /* cp_pk from custom_phrase table */
-    char* text;              /* phrase text to match */
-    char* acknowledgement;   /* acknowledgement text (nullable) */
-    char* comments;          /* comments (nullable) */
+    long cpId; /* cp_pk from custom_phrase table */
+    char* text; /* phrase text to match */
+    char* acknowledgement; /* nullable */
+    char* comments; /* nullable */
     GArray* licenseMappings; /* array of LicenseMapping */
-    char* stmtName;          /* pre-built prepared-statement name (per upload) */
+    char* stmtName; /* prepared-statement name built per upload */
 } Phrase;
 
 PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId,

@@ -1,0 +1,29 @@
+Contextual Copyleft AI (CCAI) License v1.0
+
+Copyright (c) [year] [author]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to use, copy, modify, merge, publish, distribute, and/or sublicense copies
+of the Software, subject to the following conditions:
+
+1. Software Freedom.
+Users are granted the freedom to run, study, modify, and distribute the Software, including modified versions,
+for any purpose.
+
+2. Copyleft Requirement.
+Any distribution, publication, or making available of the Software — including exact copies, modified versions,
+or derivative works — must be licensed in full under the terms of this CCAI License without imposing any
+further restrictions. This requirement also applies to any model, dataset, or system that is trained on, derived
+from, or incorporates the Software or its outputs. In the case of generative AI models, the obligation to apply
+this license includes, at minimum, the disclosure of the model's source code, a meaningful description of the
+training data, and the model's parameters, weights, and architecture.
+
+3. Distribution Clarification.
+Providing access to the Software or any covered model over a network or online service shall be considered
+distribution and triggers the obligations of this License.
+
+4. No Warranty.
+The Software is provided "as is", without warranty of any kind.
+
+5. Preservation of License Notice.
+Copies, modifications, and derivative works must retain this license notice.

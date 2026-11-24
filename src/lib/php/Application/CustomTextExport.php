@@ -40,24 +40,6 @@ class CustomTextExport
   }
 
   /**
-   * @brief Update the delimiter
-   * @param string $delimiter New delimiter to use.
-   */
-  public function setDelimiter($delimiter=',')
-  {
-    $this->delimiter = substr($delimiter,0,1);
-  }
-
-  /**
-   * @brief Update the enclosure
-   * @param string $enclosure New enclosure to use.
-   */
-  public function setEnclosure($enclosure='"')
-  {
-    $this->enclosure = substr($enclosure,0,1);
-  }
-
-  /**
    * @brief Create the CSV/JSON export from the DB
    * @param int $cp_pk Set the custom phrase ID to get only one phrase, set 0 to get all
    * @param bool $generateJson Whether to generate JSON format instead of CSV
@@ -74,31 +56,57 @@ class CustomTextExport
     }
 
     $sql = "SELECT
+              cp.cp_pk,
               cp.text,
-              cp.acknowledgement,
-              cp.comments,
               cp.created_date,
               cp.is_active,
               u.user_name,
               g.group_name,
-              STRING_AGG(CASE WHEN cplm.removing = false THEN lr.rf_shortname END, ', ' ORDER BY lr.rf_shortname) as licenses_to_add,
-              STRING_AGG(CASE WHEN cplm.removing = true THEN lr.rf_shortname END, ', ' ORDER BY lr.rf_shortname) as licenses_to_remove
+              lr.rf_shortname,
+              cplm.removing,
+              cplm.comment,
+              cplm.reportinfo,
+              cplm.acknowledgement
             FROM custom_phrase cp
             LEFT JOIN users u ON cp.user_fk = u.user_pk
             LEFT JOIN groups g ON cp.group_fk = g.group_pk
             LEFT JOIN custom_phrase_license_map cplm ON cp.cp_pk = cplm.cp_fk
             LEFT JOIN license_ref lr ON cplm.rf_fk = lr.rf_pk
             $whereClause
-            GROUP BY cp.cp_pk, cp.text, cp.acknowledgement, cp.comments,
-                     cp.created_date, cp.is_active, u.user_name, g.group_name
-            ORDER BY cp.created_date DESC";
+            ORDER BY cp.created_date DESC, cp.cp_pk, lr.rf_shortname";
 
-    $result = $this->dbManager->getRows($sql, $params);
+    $rows = $this->dbManager->getRows($sql, $params);
+
+    $phrases = array();
+    foreach ($rows as $row) {
+      $cpPk = $row['cp_pk'];
+      if (!isset($phrases[$cpPk])) {
+        $phrases[$cpPk] = array(
+          'text' => $row['text'],
+          'created_date' => $row['created_date'],
+          // booleanFromDb(), not raw truthiness: Postgres returns 'f' for
+          // false, which PHP treats as truthy.
+          'is_active' => $this->dbManager->booleanFromDb($row['is_active']),
+          'user_name' => $row['user_name'] ?: '',
+          'group_name' => $row['group_name'] ?: '',
+          'licenses' => array()
+        );
+      }
+      if (!empty($row['rf_shortname'])) {
+        $phrases[$cpPk]['licenses'][] = array(
+          'shortname' => $row['rf_shortname'],
+          'removing' => $this->dbManager->booleanFromDb($row['removing']),
+          'comment' => $row['comment'] ?: '',
+          'reportinfo' => $row['reportinfo'] ?: '',
+          'acknowledgement' => $row['acknowledgement'] ?: ''
+        );
+      }
+    }
 
     if ($generateJson) {
-      return $this->createJson($result);
+      return $this->createJson(array_values($phrases));
     } else {
-      return $this->createCsvContent($result);
+      return $this->createCsvContent(array_values($phrases));
     }
   }
 
@@ -107,38 +115,54 @@ class CustomTextExport
    * @param array $result Database result array
    * @return string CSV content
    */
-  private function createCsvContent($result)
+  private function createCsvContent($phrases)
   {
     $csv = '';
 
-    // Add header row
     $headers = array(
       'Text',
-      'Acknowledgement',
-      'Comments',
       'Created Date',
       'Is Active',
       'Created By',
       'Group',
-      'Licenses To Add',
-      'Licenses To Remove'
+      'License Shortname',
+      'Removing',
+      'Comment',
+      'License Text',
+      'Acknowledgement'
     );
     $csv .= $this->arrayToCsvLine($headers);
 
-    // Add data rows
-    foreach ($result as $row) {
-      $csvRow = array(
-        $row['text'],
-        $row['acknowledgement'] ?: '',
-        $row['comments'] ?: '',
-        $row['created_date'],
-        $row['is_active'] ? 'true' : 'false',
-        $row['user_name'] ?: '',
-        $row['group_name'] ?: '',
-        $row['licenses_to_add'] ?: '',
-        $row['licenses_to_remove'] ?: ''
-      );
-      $csv .= $this->arrayToCsvLine($csvRow);
+    foreach ($phrases as $phrase) {
+      // Same newline-flattening scheme as BulkTextExport, so CustomTextImport
+      // can reverse it regardless of which exporter produced the file.
+      $text = CustomTextEscaping::escapeNewlines($phrase['text']);
+
+      if (empty($phrase['licenses'])) {
+        $csv .= $this->arrayToCsvLine(array(
+          $text,
+          $phrase['created_date'],
+          $phrase['is_active'] ? 'true' : 'false',
+          $phrase['user_name'],
+          $phrase['group_name'],
+          '', '', '', '', ''
+        ));
+      } else {
+        foreach ($phrase['licenses'] as $lic) {
+          $csv .= $this->arrayToCsvLine(array(
+            $text,
+            $phrase['created_date'],
+            $phrase['is_active'] ? 'true' : 'false',
+            $phrase['user_name'],
+            $phrase['group_name'],
+            $lic['shortname'],
+            $lic['removing'] ? 'true' : 'false',
+            CustomTextEscaping::escapeNewlines($lic['comment']),
+            CustomTextEscaping::escapeNewlines($lic['reportinfo']),
+            CustomTextEscaping::escapeNewlines($lic['acknowledgement'])
+          ));
+        }
+      }
     }
 
     return $csv;
@@ -149,21 +173,26 @@ class CustomTextExport
    * @param array $result Database result array
    * @return string JSON content
    */
-  private function createJson($result)
+  private function createJson($phrases)
   {
     $data = array();
 
-    foreach ($result as $row) {
+    foreach ($phrases as $phrase) {
       $data[] = array(
-        'text' => $row['text'],
-        'acknowledgement' => $row['acknowledgement'] ?: '',
-        'comments' => $row['comments'] ?: '',
-        'created_date' => $row['created_date'],
-        'is_active' => $row['is_active'] ? true : false,
-        'created_by' => $row['user_name'] ?: '',
-        'group' => $row['group_name'] ?: '',
-        'licenses_to_add' => $row['licenses_to_add'] ? explode(', ', $row['licenses_to_add']) : array(),
-        'licenses_to_remove' => $row['licenses_to_remove'] ? explode(', ', $row['licenses_to_remove']) : array()
+        'text' => $phrase['text'],
+        'created_date' => $phrase['created_date'],
+        'is_active' => (bool) $phrase['is_active'],
+        'created_by' => $phrase['user_name'],
+        'group' => $phrase['group_name'],
+        'licenses' => array_map(function ($lic) {
+          return array(
+            'shortname' => $lic['shortname'],
+            'removing' => (bool) $lic['removing'],
+            'comment' => $lic['comment'],
+            'reportinfo' => $lic['reportinfo'],
+            'acknowledgement' => $lic['acknowledgement']
+          );
+        }, $phrase['licenses'])
       );
     }
 

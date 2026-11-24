@@ -260,6 +260,34 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
   /maintenance:
+    get:
+      operationId: getMaintenanceInfo
+      tags:
+        - Maintenance
+      summary: Get details about the last completed maintenance job
+      description: >
+        Retrieve the timestamp of the last successfully completed maintenance job.
+      responses:
+        '200':
+          description: Maintenance information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceInfo'
+        '403':
+          description: Access denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
     post:
       operationId: initiateMaintenance
       tags:
@@ -539,6 +567,14 @@ paths:
       responses:
         '202':
           description: Upload will be deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: >
+            Upload is not accessible or the user does not have write
+            permission on the upload
           content:
             application/json:
               schema:
@@ -1611,6 +1647,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         '404':
           description: Resource not found.
           content:
@@ -1650,6 +1692,12 @@ paths:
       responses:
         '200':
           description: License is removed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Access denied
           content:
             application/json:
               schema:
@@ -4056,6 +4104,61 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
+    put:
+      operationId: updateGroupByName
+      tags:
+        - Organize
+        - Groups
+        - Admin
+      summary: Rename group by name
+      description: >
+        Renames a single group by name. Only an admin of the group can rename it.
+      requestBody:
+        description: New name of the group
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroup'
+      responses:
+        '200':
+          description: Group has been renamed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: No group name provided or the new name is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Not admin of the group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '409':
+          description: Another group already uses the new name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /groups/{name}/user/{userName}:
     parameters:
       - name: name
@@ -4257,6 +4360,7 @@ paths:
               - dep5
               - spdx2
               - spdx2tv
+              - spdx2csv
               - readmeoss
               - unifiedreport
               - clixml
@@ -4264,6 +4368,7 @@ paths:
               - spdx3json
               - spdx3rdf
               - spdx3jsonld
+              - spdx3tv
         - name: groupName
           description: The group name to chose while generating a report
           in: query
@@ -5164,6 +5269,290 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
 
+  /license-compatibility-rules:
+    get:
+      operationId: getLicenseCompatibilityRules
+      tags:
+        - License
+        - Admin
+      summary: Get the license compatibility rules
+      description: >
+        Get the list of license compatibility rules from the server.
+      parameters:
+        - name: page
+          description: Page number for responses
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          description: Limit of rules per request
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+        - name: search
+          description: Filter the rules on their description
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of the license compatibility rules
+          headers:
+            X-Total-Pages:
+              description: Total number of pages available
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LicenseCompatibilityRule'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    post:
+      operationId: createLicenseCompatibilityRule
+      tags:
+        - License
+        - Admin
+      summary: Create a new license compatibility rule
+      description: >
+        Create a new license compatibility rule. At least one license or
+        license type has to be given, a rule without any of them would shadow
+        the default compatibility of the server.
+      requestBody:
+        description: New license compatibility rule
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewLicenseCompatibilityRule'
+      responses:
+        '201':
+          description: Rule added successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /license-compatibility-rules/{id}:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the license compatibility rule
+        in: path
+        schema:
+          type: integer
+    put:
+      operationId: updateLicenseCompatibilityRule
+      tags:
+        - License
+        - Admin
+      summary: Update a license compatibility rule
+      description: >
+        Update an existing license compatibility rule. Only the fields sent in
+        the request body are updated.
+      requestBody:
+        description: Values of the rule to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditLicenseCompatibilityRule'
+      responses:
+        '200':
+          description: Rule updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Rule not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    delete:
+      operationId: deleteLicenseCompatibilityRule
+      tags:
+        - License
+        - Admin
+      summary: Delete a license compatibility rule
+      description: >
+        Permanently remove an existing license compatibility rule.
+      responses:
+        '200':
+          description: Rule deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Rule not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /license-compatibility-rules/import:
+    post:
+      operationId: importLicenseCompatibilityRules
+      tags:
+        - License
+        - Admin
+      summary: Import license compatibility rules from a YAML file
+      description: >
+        Import the license compatibility rules from a YAML file. Rules already
+        present in the server are updated, the missing ones are created.
+      requestBody:
+        description: Include the YAML file
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileInput:
+                  type: string
+                  format: binary
+                  description: YAML to be imported
+              required:
+                - fileInput
+      responses:
+        '200':
+          description: Successfully imported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /license-compatibility-rules/export:
+    get:
+      operationId: exportLicenseCompatibilityRules
+      tags:
+        - License
+        - Admin
+      summary: Export the license compatibility rules as a YAML file
+      description: >
+        Export the license compatibility rules of the server as a YAML file.
+      parameters:
+        - name: id
+          description: Id of the rule to export, 0 for all
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Successfully exported
+          content:
+            text/x-yaml:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Route is not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '404':
+          description: Rule not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
   /overview/database/contents:
     get:
       operationId: getDatabaseContents
@@ -5405,7 +5794,7 @@ components:
           description: Scanners matches if all Nomos findings are within the Monk findings.
         bulkReused:
           type: boolean
-          description: Bulk phrases from reused packages.
+          description: Reuse bulk phrases.
         newScanner:
           type: boolean
           description: New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses.
@@ -5822,9 +6211,12 @@ components:
         reuseCopyright:
           type: boolean
           description: Copy the copyright deactivation and edits.
+        reuseBulk:
+          type: boolean
+          description: Reuse bulk decisions.
       required:
-        - reuse_upload
-        - reuse_group
+        - reuseUpload
+        - reuseGroup
     Scancode:
       type: object
       properties:
@@ -6589,6 +6981,7 @@ components:
             - grey
             - yellow
             - redGreen
+            - orange
         clearingProgress:
           type: object
           description: The progress of clearing.
@@ -6689,6 +7082,144 @@ components:
           nullable: true
           example:
             "Please respect the obligation"
+    LicenseCompatibilityRule:
+      description: License compatibility rule information
+      type: object
+      properties:
+        id:
+          description: Id of the rule
+          type: integer
+          example:
+            4
+        firstLicenseId:
+          description: Id of the first license, null matches every license
+          type: integer
+          nullable: true
+          example:
+            306
+        firstLicenseName:
+          description: Short name of the first license
+          type: string
+          nullable: true
+          example:
+            "MIT"
+        secondLicenseId:
+          description: Id of the second license, null matches every license
+          type: integer
+          nullable: true
+          example:
+            188
+        secondLicenseName:
+          description: Short name of the second license
+          type: string
+          nullable: true
+          example:
+            "GPL-2.0-only"
+        firstType:
+          description: >
+            License type of the first license, null matches every type. Allowed
+            values are configured by the `LicenseTypes` setting of the server.
+          type: string
+          nullable: true
+          example:
+            "Permissive"
+        secondType:
+          description: License type of the second license, null matches every type
+          type: string
+          nullable: true
+          example:
+            "Strong Copyleft"
+        comment:
+          description: Description of the rule
+          type: string
+          example:
+            "A permissive license is compatible with a copyleft license"
+        compatibility:
+          description: Compatibility result of the rule
+          type: boolean
+          example:
+            true
+    NewLicenseCompatibilityRule:
+      description: New license compatibility rule
+      type: object
+      properties:
+        firstLicenseId:
+          description: Id of the first license, null matches every license
+          type: integer
+          nullable: true
+          example:
+            306
+        secondLicenseId:
+          description: Id of the second license, null matches every license
+          type: integer
+          nullable: true
+          example:
+            188
+        firstType:
+          description: License type of the first license, null matches every type
+          type: string
+          nullable: true
+          example:
+            "Permissive"
+        secondType:
+          description: License type of the second license, null matches every type
+          type: string
+          nullable: true
+          example:
+            "Strong Copyleft"
+        comment:
+          description: Description of the rule
+          type: string
+          example:
+            "A permissive license is compatible with a copyleft license"
+        compatibility:
+          description: Compatibility result of the rule
+          type: boolean
+          example:
+            true
+      required:
+        - comment
+        - compatibility
+    EditLicenseCompatibilityRule:
+      description: >
+        Values of a license compatibility rule to update. Only the fields sent
+        in the request body are updated, at least one is required.
+      type: object
+      properties:
+        firstLicenseId:
+          description: Id of the first license, null matches every license
+          type: integer
+          nullable: true
+          example:
+            306
+        secondLicenseId:
+          description: Id of the second license, null matches every license
+          type: integer
+          nullable: true
+          example:
+            188
+        firstType:
+          description: License type of the first license, null matches every type
+          type: string
+          nullable: true
+          example:
+            "Permissive"
+        secondType:
+          description: License type of the second license, null matches every type
+          type: string
+          nullable: true
+          example:
+            "Strong Copyleft"
+        comment:
+          description: Description of the rule
+          type: string
+          example:
+            "A permissive license is compatible with a copyleft license"
+        compatibility:
+          description: Compatibility result of the rule
+          type: boolean
+          example:
+            true
     ApiInfo:
       description: Info about the API
       type: object
@@ -6751,6 +7282,16 @@ components:
               description: Date on which packages were built in ISO8601 format
               nullable: true
               example: "2022-01-07T11:13:00+05:30"
+    MaintenanceInfo:
+      description: Details about the last completed maintenance job
+      type: object
+      properties:
+        lastRun:
+          type: string
+          format: date-time
+          description: Timestamp of the most recently successfully completed maintenance job. Null if no maintenance job has completed successfully.
+          nullable: true
+          example: "2022-07-16T10:15:30+00:00"
     CreateMaintenance:
       description: Maintenance options
       type: object
@@ -6950,6 +7491,18 @@ components:
         hash:
           type: string
           description: MD5 hash of obligation text
+    UpdateGroup:
+      description: Group rename options
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          description: New name of the group
+          type: string
+          nullable: false
+          example:
+            "Main group"
     AddMember:
       description: UserMember options
       type: object
@@ -7047,6 +7600,27 @@ components:
         spdxSelection:
           type: string
           description: shows checkbox status for spdx
+        cyclonedxSelection:
+          type: object
+          description: >
+            CycloneDX report settings. On update, send a JSON object with any
+            subset of these keys; the others keep their value.
+          properties:
+            licenseComment:
+              type: boolean
+            ignoreFilesWithoutInfo:
+              type: boolean
+            osselotExport:
+              type: boolean
+              description: Implies licenseComment in the generated report
+            tagNamespace:
+              type: string
+              pattern: '^[A-Za-z0-9._-]+(:[A-Za-z0-9._-]+)*:?$'
+              maxLength: 64
+              example: 'fossology:'
+            specVersion:
+              type: string
+              enum: ['1.4', '1.5', '1.6', '1.7']
         excludedObligations:
           type: string
           description: shows excluded obligations

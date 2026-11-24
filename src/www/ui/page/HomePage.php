@@ -74,7 +74,7 @@ class HomePage extends DefaultPlugin
       }
     }
     if (! empty(GetParm("error", PARM_TEXT))) {
-      $vars['message'] = GetParm("error_description", PARM_TEXT);
+      $vars['message'] = htmlspecialchars(GetParm("error_description", PARM_TEXT), ENT_QUOTES, 'UTF-8');
     }
 
     if ($email !== null) {

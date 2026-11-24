@@ -26,6 +26,7 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Data\Report\CycloneDxSettings;
 use Fossology\Lib\Data\Report\FileNode;
 use Fossology\Lib\Data\Report\SpdxLicenseInfo;
 use Fossology\Lib\Db\DbManager;
@@ -54,6 +55,10 @@ class CycloneDXAgent extends Agent
    * UploadDao object
    */
   private $reportGenerator;
+  /**
+   * @var array $citations
+   */
+  protected $citations = [];
   /**
    * @var ReportUtils $reportutils
    * ReportUtils object
@@ -101,6 +106,11 @@ class CycloneDXAgent extends Agent
    * @var string $packageName
    */
   private $packageName;
+  /**
+   * @var CycloneDxSettings $settings
+   * Settings of the upload being reported
+   */
+  private $settings;
 
   function __construct()
   {
@@ -141,6 +151,9 @@ class CycloneDXAgent extends Agent
   function processUploadId($uploadId)
   {
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
+
+    $this->settings = $this->uploadDao->getCyclonedxSettings($uploadId);
+    $this->reportGenerator->applySettings($this->settings);
 
     $packageNodes = $this->renderPackage($uploadId);
 
@@ -207,6 +220,19 @@ class CycloneDXAgent extends Agent
     $this->reportutils->addCopyrightResults($filesWithLicenses, $uploadId);
     $this->heartbeat(0);
 
+    $this->citations = [
+      'cite-scanner' => [
+        'timestamp' => date('c'),
+        'attributedTo' => 'tool-fossology-scanners',
+        'expressions' => []
+      ],
+      'cite-analyst' => [
+        'timestamp' => date('c'),
+        'attributedTo' => 'person-fossology-analyst',
+        'expressions' => []
+      ]
+    ];
+
     $customLicenseTexts = $this->clearingDao->getMainLicenseReportInfos($uploadId, $this->groupId);
 
     $upload = $this->uploadDao->getUpload($uploadId);
@@ -223,6 +249,9 @@ class CycloneDXAgent extends Agent
       }
 
       $licensedata = $this->getLicenseDataForCycloneDX($mainLicObj, $licId, $customLicenseTexts);
+      $licensedata['bom-ref'] = 'lic-clearing-main-' . $licId;
+      $licensedata['acknowledgement'] = 'concluded';
+      $this->citations['cite-analyst']['expressions'][] = '$..[?(@.bom-ref=="lic-clearing-main-' . $licId . '")]';
       $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
 
       $customText = array_key_exists($licId, $customLicenseTexts) ? $customLicenseTexts[$licId] : null;
@@ -232,7 +261,8 @@ class CycloneDXAgent extends Agent
     }
 
     foreach ($filesWithLicenses as $fileNode) {
-      $licenseIds = !empty($fileNode->getConcludedLicenses())
+      $isConcluded = !empty($fileNode->getConcludedLicenses());
+      $licenseIds = $isConcluded
         ? $fileNode->getConcludedLicenses()
         : $fileNode->getScanners();
       foreach ($licenseIds as $licenseId) {
@@ -241,6 +271,10 @@ class CycloneDXAgent extends Agent
           $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
           $isCustomText = $this->licensesInDocument[$licenseId]->isCustomText();
           $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText);
+          $refPrefix = $isConcluded ? 'clearing' : 'scanner';
+          $licensedata['bom-ref'] = 'lic-' . $refPrefix . '-main-' . $licenseId;
+          $licensedata['acknowledgement'] = $isConcluded ? 'concluded' : 'declared';
+          $this->citations['cite-' . ($isConcluded ? 'analyst' : 'scanner')]['expressions'][] = '$..[?(@.bom-ref=="lic-' . $refPrefix . '-main-' . $licenseId . '")]';
           $mainLicenses[] = $this->reportGenerator->createLicense($licensedata);
         }
       }
@@ -308,11 +342,23 @@ class CycloneDXAgent extends Agent
     );
     $maincomponent = $this->reportGenerator->createComponent($maincomponentData);
 
-    $bomdata = array (
+    $formattedDate = date('Y-m-d\TH:i:s\Z');
+
+    $finalCitations = [];
+    if (!empty($this->citations['cite-scanner']['expressions'])) {
+      $finalCitations[] = $this->citations['cite-scanner'];
+    }
+    if (!empty($this->citations['cite-analyst']['expressions'])) {
+      $finalCitations[] = $this->citations['cite-analyst'];
+    }
+
+    $bomdata = array(
+      'timestamp' => $formattedDate,
       'tool-version' => $SysConf['BUILD']['VERSION'],
       'maincomponent' => $maincomponent,
       'components' => $components,
-      'externalReferences' => $externalReferences
+      'externalReferences' => $externalReferences,
+      'citations' => $finalCitations
     );
 
     return $this->reportGenerator->generateReport($bomdata);
@@ -330,7 +376,9 @@ class CycloneDXAgent extends Agent
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
 
-    $stateWoInfos = $this->getCycloneDXReportConf($uploadId, 1);
+    $stateLicenseComment = $this->settings->isLicenseCommentEnabled();
+    $stateWoInfos = $this->settings->isIgnoreFilesWithoutInfo();
+    $stateOsselot = $this->settings->isOsselotExport();
 
     $filesProceeded = 0;
     $lastValue = 0;
@@ -364,8 +412,10 @@ class CycloneDXAgent extends Agent
           if (array_key_exists($licenseId, $this->licensesInDocument)) {
             $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
             $isCustomText = $this->licensesInDocument[$licenseId]->isCustomText();
-            $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText, false);
-            $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
+            $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText, $stateOsselot);
+            $licensedata['bom-ref'] = 'lic-clearing-' . $licenseId . '-' . $fileId;
+            $licensedata['acknowledgement'] = 'concluded';
+            $licensesfound[] = $this->reportGenerator->createLicense($licensedata, false);
           }
         }
       } else {
@@ -373,8 +423,10 @@ class CycloneDXAgent extends Agent
           if (array_key_exists($licenseId, $this->licensesInDocument)) {
             $licObj = $this->licensesInDocument[$licenseId]->getLicenseObj();
             $isCustomText = $this->licensesInDocument[$licenseId]->isCustomText();
-            $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText, false);
-            $licensesfound[] = $this->reportGenerator->createLicense($licensedata);
+            $licensedata = $this->getLicenseDataForCycloneDX($licObj, $licenseId, $customLicenseTexts, $isCustomText, $stateOsselot);
+            $licensedata['bom-ref'] = 'lic-scanner-' . $licenseId . '-' . $fileId;
+            $licensedata['acknowledgement'] = 'declared';
+            $licensesfound[] = $this->reportGenerator->createLicense($licensedata, false);
           }
         }
       }
@@ -389,7 +441,7 @@ class CycloneDXAgent extends Agent
           'copyright' => implode("\n", $licenses->getCopyrights()),
           'licenses' => $licensesfound,
           'acknowledgements' => implode("\n", $licenses->getAcknowledgements()),
-          'comments' => implode("\n", $licenses->getComments())
+          'comments' => $stateLicenseComment ? implode("\n", $licenses->getComments()) : ''
         );
         $components[] = $this->reportGenerator->createComponent($componentdata);
       }
@@ -505,26 +557,6 @@ class CycloneDXAgent extends Agent
 
     $row = $this->dbManager->getSingleRow($sql, [$fileId], __METHOD__);
     return $row['mimetype_name'] ?? 'application/octet-stream';
-  }
-
-  /**
-   * @brief Get CycloneDX report conf state for a given upload
-   *
-   * Reads user default settings from users.cyclonedx_settings.
-   * @param int $uploadId
-   * @param int $key Array key (0=cyclonedxLicenseComment, 1=ignoreFilesWOInfo, 2=osselotExport)
-   * @return bool Configuration state (TRUE/FALSE)
-   */
-  protected function getCycloneDXReportConf($uploadId, $key)
-  {
-    $settings = $this->uploadDao->getCyclonedxSettings($uploadId);
-    if (!empty($settings)) {
-      $settingsArr = explode(',', $settings);
-      if (isset($settingsArr[$key]) && $settingsArr[$key] === "checked") {
-        return true;
-      }
-    }
-    return false;
   }
 }
 

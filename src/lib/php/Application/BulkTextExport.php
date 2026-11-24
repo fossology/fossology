@@ -91,17 +91,24 @@ class BulkTextExport
 
     $licenseTextColumn = $includeLicenseText ? ",\n              lr.rf_text AS license_text" : "";
 
-    $sql = "SELECT DISTINCT
+    // Subquery picks the latest lrb_pk per unique rf_text so duplicates keep only the newest entry.
+    $sql = "SELECT
               lrb.rf_text,
               lr.rf_shortname,
               lsb.removing,
               lsb.comment,
+              lsb.reportinfo,
               lsb.acknowledgement,
               lr.rf_active$licenseTextColumn
-            FROM license_ref_bulk lrb
+            FROM (
+              SELECT rf_text, MAX(lrb_pk) AS lrb_pk
+              FROM license_ref_bulk
+              $whereClause
+              GROUP BY rf_text
+            ) latest
+            JOIN license_ref_bulk lrb ON lrb.lrb_pk = latest.lrb_pk
             LEFT JOIN license_set_bulk lsb ON lsb.lrb_fk = lrb.lrb_pk
             LEFT JOIN license_ref lr ON lr.rf_pk = lsb.rf_fk
-            $whereClause
             ORDER BY lrb.rf_text, lr.rf_shortname";
 
     $result = $this->dbManager->getRows($sql, $params);
@@ -114,9 +121,10 @@ class BulkTextExport
   }
 
   /**
-   * @brief Group flat DB rows by bulk text, splitting licenses into add/remove buckets
+   * @brief Group flat DB rows by rf_text into the nested licenses format.
    * @param array $result Database result array
-   * @return array Associative array keyed by rf_text with grouped export fields
+   * @param bool $includeLicenseText Whether to include rf_text from license_ref
+   * @return array keyed by rf_text
    */
   private function groupResultsByText($result, $includeLicenseText=false)
   {
@@ -125,53 +133,36 @@ class BulkTextExport
       $text = $row['rf_text'] ?: '';
       if (!isset($grouped[$text])) {
         $grouped[$text] = array(
-          'licenses_to_add'    => array(),
-          'licenses_to_remove' => array(),
-          'comments'           => array(),
-          'acknowledgements'   => array(),
-          'is_active_values'   => array(),
-          'license_texts'      => array()
+          'licenses' => array(),
+          'is_active_values' => array()
         );
       }
+
       if (!empty($row['rf_shortname'])) {
-        if ($row['removing'] === 't' || $row['removing'] === true) {
-          $grouped[$text]['licenses_to_remove'][] = $row['rf_shortname'];
-        } else {
-          $grouped[$text]['licenses_to_add'][] = $row['rf_shortname'];
-          if ($includeLicenseText && !empty($row['license_text'])) {
-            $grouped[$text]['license_texts'][$row['rf_shortname']] = $row['license_text'];
-          }
+        $removing = ($row['removing'] === 't' || $row['removing'] === true);
+        $license = array(
+          'shortname' => $row['rf_shortname'],
+          'removing' => $removing,
+          'comment' => $row['comment'] ?: '',
+          'reportinfo' => $row['reportinfo'] ?: '',
+          'acknowledgement' => $row['acknowledgement'] ?: ''
+        );
+        if ($includeLicenseText && !empty($row['license_text'])) {
+          $license['license_text'] = $row['license_text'];
         }
-      }
-
-      if (!empty($row['comment'])) {
-        $grouped[$text]['comments'][] = $row['comment'];
-      }
-
-      if (!empty($row['acknowledgement'])) {
-        $grouped[$text]['acknowledgements'][] = $row['acknowledgement'];
+        $grouped[$text]['licenses'][] = $license;
       }
 
       if ($row['rf_active'] !== null) {
-        $isActive = ($row['rf_active'] === 't' || $row['rf_active'] === true ||
-          $row['rf_active'] === 1 || $row['rf_active'] === '1');
+        $isActive = ($row['rf_active'] === 't' || $row['rf_active'] === true);
         $grouped[$text]['is_active_values'][] = $isActive;
       }
     }
 
     foreach ($grouped as $text => $values) {
-      $grouped[$text]['licenses_to_add'] = array_values(array_unique($values['licenses_to_add']));
-      $grouped[$text]['licenses_to_remove'] = array_values(array_unique($values['licenses_to_remove']));
-      $grouped[$text]['comments'] = array_values(array_unique($values['comments']));
-      $grouped[$text]['acknowledgements'] = array_values(array_unique($values['acknowledgements']));
-      $grouped[$text]['license_texts'] = array_values($values['license_texts']);
-
-      if (empty($values['is_active_values'])) {
-        $grouped[$text]['is_active'] = null;
-      } else {
-        $grouped[$text]['is_active'] = !in_array(false, $values['is_active_values'], true);
-      }
-
+      $grouped[$text]['is_active'] = empty($values['is_active_values'])
+        ? null
+        : !in_array(false, $values['is_active_values'], true);
       unset($grouped[$text]['is_active_values']);
     }
 
@@ -179,34 +170,55 @@ class BulkTextExport
   }
 
   /**
-   * @brief Create CSV content from result array
+   * @brief Create CSV content, one row per text+license, compatible with CustomTextImport.
    * @param array $result Database result array
+   * @param bool $includeLicenseText Whether to include rf_text from license_ref
    * @return string CSV content
    */
   private function createCsvContent($result, $includeLicenseText=false)
   {
-    $headers = array('text', 'licenses_to_add', 'licenses_to_remove', 'comments', 'acknowledgements', 'is_active');
+    $headers = array(
+      'Text', 'Is Active', 'License Shortname', 'Removing',
+      'Comment', 'License Text', 'Acknowledgement'
+    );
     if ($includeLicenseText) {
-      $headers[] = 'license_text';
+      $headers[] = 'license_ref_text';
     }
+
     $out = fopen('php://output', 'w');
     ob_start();
-    fputs($out, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+    fputs($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
     fputcsv($out, $headers, $this->delimiter, $this->enclosure);
 
-    foreach ($this->groupResultsByText($result, $includeLicenseText) as $text => $licenses) {
-      $csvRow = array(
-        $this->normalizeNewlinesForCsv($text),
-        implode('|', array_map(array($this, 'normalizeNewlinesForCsv'), $licenses['licenses_to_add'])),
-        implode('|', array_map(array($this, 'normalizeNewlinesForCsv'), $licenses['licenses_to_remove'])),
-        implode('|', array_map(array($this, 'normalizeNewlinesForCsv'), $licenses['comments'])),
-        implode('|', array_map(array($this, 'normalizeNewlinesForCsv'), $licenses['acknowledgements'])),
-        $licenses['is_active'] === null ? '' : ($licenses['is_active'] ? 'true' : 'false')
-      );
-      if ($includeLicenseText) {
-        $csvRow[] = implode('|', array_map(array($this, 'normalizeNewlinesForCsv'), $licenses['license_texts']));
+    foreach ($this->groupResultsByText($result, $includeLicenseText) as $text => $entry) {
+      $isActive = $entry['is_active'] === null ? '' : ($entry['is_active'] ? 'true' : 'false');
+
+      if (empty($entry['licenses'])) {
+        $row = array(
+          $this->normalizeNewlinesForCsv($text),
+          $isActive, '', '', '', '', ''
+        );
+        if ($includeLicenseText) {
+          $row[] = '';
+        }
+        fputcsv($out, $row, $this->delimiter, $this->enclosure);
+      } else {
+        foreach ($entry['licenses'] as $lic) {
+          $row = array(
+            $this->normalizeNewlinesForCsv($text),
+            $isActive,
+            $lic['shortname'],
+            $lic['removing'] ? 'true' : 'false',
+            $this->normalizeNewlinesForCsv($lic['comment']),
+            $this->normalizeNewlinesForCsv($lic['reportinfo']),
+            $this->normalizeNewlinesForCsv($lic['acknowledgement'])
+          );
+          if ($includeLicenseText) {
+            $row[] = $this->normalizeNewlinesForCsv($lic['license_text'] ?? '');
+          }
+          fputcsv($out, $row, $this->delimiter, $this->enclosure);
+        }
       }
-      fputcsv($out, $csvRow, $this->delimiter, $this->enclosure);
     }
 
     $content = ob_get_contents();
@@ -221,34 +233,39 @@ class BulkTextExport
    */
   private function normalizeNewlinesForCsv($value)
   {
-    if ($value === null) {
-      return '';
-    }
-    return str_replace(array("\r\n", "\r", "\n"), '\\n', (string)$value);
+    return CustomTextEscaping::escapeNewlines($value);
   }
 
   /**
-   * @brief Create JSON content from result array
+   * @brief Create JSON content, nested licenses format, compatible with CustomTextImport.
    * @param array $result Database result array
+   * @param bool $includeLicenseText Whether to include rf_text from license_ref
    * @return string JSON content
    */
   private function createJson($result, $includeLicenseText=false)
   {
     $data = array();
 
-    foreach ($this->groupResultsByText($result, $includeLicenseText) as $text => $licenses) {
-      $entry = array(
-        'text'               => $text,
-        'licenses_to_add'    => $licenses['licenses_to_add'],
-        'licenses_to_remove' => $licenses['licenses_to_remove'],
-        'comments'           => $licenses['comments'],
-        'acknowledgements'   => $licenses['acknowledgements'],
-        'is_active'          => $licenses['is_active']
+    foreach ($this->groupResultsByText($result, $includeLicenseText) as $text => $entry) {
+      $licenses = array_map(function($lic) use ($includeLicenseText) {
+        $out = array(
+          'shortname' => $lic['shortname'],
+          'removing' => $lic['removing'],
+          'comment' => $lic['comment'],
+          'reportinfo' => $lic['reportinfo'],
+          'acknowledgement' => $lic['acknowledgement']
+        );
+        if ($includeLicenseText) {
+          $out['license_ref_text'] = $lic['license_text'] ?? '';
+        }
+        return $out;
+      }, $entry['licenses']);
+
+      $data[] = array(
+        'text' => $text,
+        'is_active' => $entry['is_active'],
+        'licenses' => $licenses
       );
-      if ($includeLicenseText) {
-        $entry['license_text'] = $licenses['license_texts'];
-      }
-      $data[] = $entry;
     }
 
     return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);

@@ -216,6 +216,9 @@ class ScanOptions
     if ($this->reuse->getReuseCopyright() === true) {
       $reuserRules[] = 'reuseCopyright';
     }
+    if ($this->reuse->getReuseBulk() === true) {
+      $reuserRules[] = 'reuseBulk';
+    }
     $userDao = $GLOBALS['container']->get("dao.user");
     $groupId = $userDao->getGroupIdByName($this->reuse->getReuseGroup());
     $reuserSelectors = [];
@@ -239,9 +242,6 @@ class ScanOptions
     $deciderRules = [];
     if ($this->decider->getNomosMonk() === true) {
       $deciderRules[] = 'nomosInMonk';
-    }
-    if ($this->decider->getBulkReused() === true) {
-      $deciderRules[] = 'reuseBulk';
     }
     if ($this->decider->getNewScanner() === true) {
       $deciderRules[] = 'wipScannerUpdates';

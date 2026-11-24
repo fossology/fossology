@@ -34,3 +34,4 @@ constexpr int REUSE_ENHANCED  =   2; ///< Match by filename and diff
 constexpr int REUSE_MAIN      =   4; ///< Copy main license
 constexpr int REUSE_CONF      =  16; ///< Copy report configuration
 constexpr int REUSE_COPYRIGHT = 128; ///< Copy copyright events
+constexpr int REUSE_BULK      = 8; ///< Copy bulk license ref/set and run monkbulk

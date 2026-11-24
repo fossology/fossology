@@ -283,13 +283,19 @@ class UploadController extends RestController
       $id = intval($args['id']);
       $this->uploadAccessible($id);
     }
+    $this->isAdj2nestDone($id);
     $dbManager = $this->restHelper->getDbHelper()->getDbManager();
     $uploadDao = $this->restHelper->getUploadDao();
     $uploadTreeTableName = $uploadDao->getUploadtreeTableName($id);
     $itemTreeBounds = $uploadDao->getParentItemBounds($id,$uploadTreeTableName);
-    $sql =  "SELECT pfile_fk , ufile_name FROM uploadtree_a WHERE uploadtree_pk=$1";
+    $sql = "SELECT pfile_fk, ufile_name FROM $uploadTreeTableName " .
+      "WHERE uploadtree_pk=$1";
     $params = array($itemTreeBounds->getItemId());
-    $descendants = $dbManager->getSingleRow($sql,$params);
+    $descendants = $dbManager->getSingleRow($sql, $params,
+      __METHOD__ . "." . $uploadTreeTableName);
+    if (empty($descendants)) {
+      throw new HttpNotFoundException("Upload file not found.");
+    }
     $path= RepPath(($descendants['pfile_fk']));
     $responseFile = $ui_download->getDownload($path, $descendants['ufile_name']);
     $responseContent = $responseFile->getFile();
@@ -369,6 +375,10 @@ class UploadController extends RestController
     $result = TryToDelete($id, $this->restHelper->getUserId(),
       $this->restHelper->getGroupId(), $this->restHelper->getUploadDao());
     if ($result->getDeleteMessageCode() !== DeleteMessages::SUCCESS) {
+      if (ApiVersion::getVersion($request) == ApiVersion::V2 &&
+          $result->getDeleteMessageCode() === DeleteMessages::NO_PERMISSION) {
+        throw new HttpForbiddenException($result->getDeleteMessageString());
+      }
       throw new HttpInternalServerErrorException(
         $result->getDeleteMessageString());
     }
@@ -467,6 +477,9 @@ class UploadController extends RestController
     if (array_key_exists('scanOptions', $reqBody)) {
       if ($uploadType == 'file') {
         $scanOptions = json_decode($reqBody['scanOptions'], true);
+        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($scanOptions)) {
+          throw new HttpBadRequestException("Invalid scanOptions JSON");
+        }
       } else {
         $scanOptions = $reqBody['scanOptions'];
       }
@@ -493,7 +506,8 @@ class UploadController extends RestController
     if (!in_array($folderId, $allFolderIds)) {
       throw new HttpNotFoundException("folderId $folderId does not exists!");
     }
-    if (!$this->restHelper->getFolderDao()->isFolderAccessible($folderId)) {
+    if (!$this->restHelper->getFolderDao()->isFolderAccessible($folderId,
+        $this->restHelper->getUserId())) {
       throw new HttpForbiddenException("folderId $folderId is not accessible!");
     }
 
@@ -525,7 +539,7 @@ class UploadController extends RestController
     $uploadId = $uploadResponse[3];
     if (! empty($scanOptions)) {
       $info =  $uploadHelper->handleScheduleAnalysis(intval($uploadId),
-        intval($folderId), $scanOptions, true);
+        intval($folderId), $scanOptions, true, ApiVersion::getVersion($request));
       if ($info->getCode() == 201) {
         $info = new Info($info->getCode(), intval($uploadId), $info->getType());
       }
@@ -951,7 +965,8 @@ class UploadController extends RestController
           $obligation['ob_comment']
         );
       }
-      $license = $licenseDao->getLicenseById($licenseId);
+      $license = $licenseDao->getLicenseById($licenseId,
+        $this->restHelper->getGroupId());
       $licenseObj = new License(
         $license->getId(),
         $license->getShortName(),
@@ -978,12 +993,12 @@ class UploadController extends RestController
   public function setMainLicense($request, $response, $args)
   {
     $uploadId = intval($args['id']);
+    $this->uploadEditable($uploadId);
+
     $body = $this->getParsedBody($request);
     $shortName = $body['shortName'];
     $licenseDao = $this->container->get('dao.license');
     $clearingDao = $this->container->get('dao.clearing');
-
-    $this->uploadAccessible($uploadId);
 
     if (empty($shortName)) {
       throw new HttpBadRequestException("Short name missing from request.");
@@ -1021,12 +1036,12 @@ class UploadController extends RestController
   public function removeMainLicense($request, $response, $args)
   {
     $uploadId = intval($args['id']);
+    $this->uploadEditable($uploadId);
+
     $shortName = $args['shortName'];
     $licenseDao = $this->container->get('dao.license');
     $clearingDao = $this->container->get('dao.clearing');
     $license = $licenseDao->getLicenseByShortName($shortName, $this->restHelper->getGroupId());
-
-    $this->uploadAccessible($uploadId);
 
     if ($license === null) {
       throw new HttpNotFoundException(

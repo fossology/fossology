@@ -18,20 +18,20 @@
 
   <table style='border:1px solid black; text-align:left; background:lightyellow;'>
     <tr {{ style }}>
-      <th width="25%">{{ "Username."|trans }}</th>
-      <td><input type="text" value="{{ userName|e }}" name="username" size="20" /></td>
+      <th width="25%"><label for="username">{{ "Username."|trans }}</label></th>
+      <td><input type="text" value="{{ userName|e }}" name="username" id="username" size="20" /></td>
     </tr>
     <tr {{ style }}>
-      <th width="25%">{{ "Description (name, contact, or other information)."|trans }} {{ "This may be blank."|trans }}</th>
-      <td><input type="text" value="{{ userDescription|e }}" name="description" size="60" /></td>
+      <th width="25%"><label for="description">{{ "Description (name, contact, or other information)."|trans }} {{ "This may be blank."|trans }}</label></th>
+      <td><input type="text" value="{{ userDescription|e }}" name="description" id="description" size="60" /></td>
     </tr>
     <tr {{ style }}>
-      <th width="25%">{{ "Email address."|trans }} {{ "This may be blank."|trans }}</th>
-      <td><input type="text" value="{{ userEmail|e }}" name="email" size="60" /></td>
+      <th width="25%"><label for="email">{{ "Email address."|trans }} {{ "This may be blank."|trans }}</label></th>
+      <td><input type="text" value="{{ userEmail|e }}" name="email" id="email" size="60" /></td>
     </tr>
     <tr {{ style }}>
-      <th width="25%">{{ "Access level"|trans }}</th>
-      <td><select name='permission'>
+      <th width="25%"><label for="permission">{{ "Access level"|trans }}</label></th>
+      <td><select name='permission' id="permission">
         <option value="{{ accessLevel[0] }}">{{ "None (very basic, no database access)"|trans }}</option>
         <option value="{{ accessLevel[1] }}">{{ "Read-only (read, but no writes or downloads)"|trans }}</option>
         <option value="{{ accessLevel[2] }}">{{ "Read-Write (read, download, or edit information)"|trans }}</option>
@@ -41,26 +41,25 @@
       </td>
     </tr>
     <tr {{ style }}>
-      <th width="25%">{{ "User root folder"|trans }}</th>
-      <td><select name="folder" class="ui-render-select2">
+      <th width="25%"><label for="folder">{{ "User root folder"|trans }}</label></th>
+      <td><select name="folder" id="folder" class="ui-render-select2">
         {{ folderListOption }}
       </select></td>
     </tr>
-      <title>Toggle Password Visibility</title>
     <tr {{ style }}>
-      <th width="25%">{{ "Password"|trans }}{{ passOptional|trans }}</th>
+      <th width="25%"><label for="passcheck">{{ "Password"|trans }}{{ passOptional|trans }}</label></th>
         <td><input type="password" name="pass1" size="20" id="passcheck" /><span class="bi bi-eye"></span>
-        <img src="images/eyes.png" class="bi bi-eye-slash" id="togglePasswords"></img>{% if passwordPolicy is not empty %}
+        <img src="images/eyes.png" class="bi bi-eye-slash" id="togglePasswords" alt="Toggle password visibility" />{% if passwordPolicy is not empty %}
         <br /><span class="passPolicy">{{ passwordPolicy }}</span>
       {% endif %}</td>
     </tr>
     <tr {{ style }}>
-      <th width='25%'>{{ "Re-enter password."|trans }}</th>
+      <th width='25%'><label for="pass2">{{ "Re-enter password."|trans }}</label></th>
       <td><input type="password" name="pass2" size="20" id="pass2" style='margin:4px' /></td>
     </tr>
     <tr {{ style }}>
-      <th width="25%">{{ "E-mail Notification"|trans }}</th>
-      <td><input type="checkbox" name="enote" value="y" checked="checked" />
+      <th width="25%"><label for="enote">{{ "E-mail Notification"|trans }}</label></th>
+      <td><input type="checkbox" name="enote" id="enote" value="y" checked="checked" />
         {{ "Check to enable email notification when upload scan completes."|trans }}</td>
     </tr>
     <tr {{ style }}>

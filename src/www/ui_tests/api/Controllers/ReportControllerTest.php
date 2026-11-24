@@ -39,6 +39,9 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
  */
 class ReportControllerTest extends \PHPUnit\Framework\TestCase
 {
+  public $dbHelper;
+  public $restHelper;
+
 
   /**
    * @var array $reportsAllowed
@@ -48,6 +51,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     'dep5',
     'spdx2',
     'spdx2tv',
+    'spdx2csv',
     'readmeoss',
     'unifiedreport',
     'clixml',
@@ -55,7 +59,8 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     'cyclonedx',
     'spdx3json',
     'spdx3rdf',
-    'spdx3jsonld'
+    'spdx3jsonld',
+    'spdx3tv'
   );
 
   /**
@@ -289,8 +294,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $this->uploadDao->shouldReceive('getUpload')->withArgs([$uploadId])
       ->andReturn($upload);
     $this->spdxPlugin->shouldReceive('scheduleAgent')
-      ->withArgs([$this->groupId, $upload, M::anyOf($this->reportsAllowed[0],
-        $this->reportsAllowed[1], $this->reportsAllowed[2])])
+      ->withArgs([$this->groupId, $upload, M::anyOf('dep5', 'spdx2', 'spdx2tv', 'spdx2csv')])
       ->andReturn([32, 33, ""]);
     $this->readmeossPlugin->shouldReceive('scheduleAgent')
       ->withArgs([$this->groupId, $upload])->andReturn([32, 33, ""]);
@@ -303,8 +307,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $this->cyclonedxPlugin->shouldReceive('scheduleAgent')
       ->withArgs([$this->groupId, $upload])->andReturn([32, 33]);
     $this->spdx3Plugin->shouldReceive('scheduleAgent')
-      ->withArgs([$this->groupId, $upload, M::anyOf($this->reportsAllowed[8],
-        $this->reportsAllowed[9], $this->reportsAllowed[10])])
+      ->withArgs([$this->groupId, $upload, M::anyOf('spdx3json', 'spdx3rdf', 'spdx3jsonld', 'spdx3tv')])
       ->andReturn([32, 33, ""]);
 
     $expectedResponse = new Info(201, "http://localhost/repo/api/v1/report/32",

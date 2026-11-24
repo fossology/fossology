@@ -9,6 +9,7 @@
 namespace Fossology\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
@@ -58,16 +59,15 @@ class AdminCustomTextManagement extends DefaultPlugin
 
     // Handle form submissions
     if ($request->get('updateit') || $request->get('addit')) {
-      $resultstr = $this->savePhrase($request, $userId, $groupId);
-      if (strpos($resultstr, 'ERROR') !== false) {
-        $vars = $this->getEditFormVars($request->get('cp_pk', 0));
-        $vars['message'] = $resultstr;
+      $result = $this->savePhrase($request, $userId, $groupId);
+      if (!$result['success']) {
+        $vars = $this->getEditFormVarsFromRequest($request);
+        $vars['message'] = $result['message'];
         return $this->render('admin_custom_text_edit.html.twig', $this->mergeWithDefault($vars));
-      } else {
-        // Redirect to list view after successful save
-        $redirectUrl = Traceback_uri() . '?mod=admin_custom_text_list';
-        return new RedirectResponse($redirectUrl);
       }
+      // Redirect to list view after successful save
+      $redirectUrl = Traceback_uri() . '?mod=admin_custom_text_list';
+      return new RedirectResponse($redirectUrl);
     }
 
     // Handle edit form display
@@ -89,30 +89,25 @@ class AdminCustomTextManagement extends DefaultPlugin
   {
     $vars = array();
 
-    if ($cp_pk > 0) {
+    $phraseData = $cp_pk > 0 ? $this->getPhraseData($cp_pk) : false;
+
+    if ($phraseData) {
       // Edit existing phrase
-      $phraseData = $this->getPhraseData($cp_pk);
-      if ($phraseData) {
-        $vars = array_merge($vars, $phraseData);
-        $vars['isEdit'] = true;
-        // Get associated licenses for this phrase
-        $vars['selectedLicenses'] = $this->getAssociatedLicenses($cp_pk);
-      }
+      $vars = array_merge($vars, $phraseData);
+      $vars['isEdit'] = true;
+      // Get associated licenses for this phrase
+      $vars['selectedLicenses'] = $this->getAssociatedLicenses($cp_pk);
     } else {
-      // Add new phrase
+      // Add new phrase, or an edit whose phrase has since been deleted
       $vars['isEdit'] = false;
       $vars['cp_pk'] = 0;
+      $vars['text'] = '';
       $vars['selectedLicenses'] = array();
     }
 
     $vars['formAction'] = Traceback_uri() . '?mod=' . self::NAME;
     $vars['updateParam'] = $vars['isEdit'] ? 'updateit' : 'addit';
     $vars['textParam'] = 'text';
-    $vars['acknowledgementParam'] = 'acknowledgement';
-    $vars['commentsParam'] = 'comments';
-    $vars['userFkParam'] = 'user_fk';
-    $vars['groupFkParam'] = 'group_fk';
-    $vars['licensesParam'] = 'licenses';
     $vars['isActiveParam'] = 'is_active';
 
     // Get license options for dropdown
@@ -127,18 +122,80 @@ class AdminCustomTextManagement extends DefaultPlugin
   }
 
   /**
+   * Rebuild the form from the post, so a rejected save keeps what was entered.
+   */
+  private function getEditFormVarsFromRequest(Request $request)
+  {
+    $vars = $this->getEditFormVars(intval($request->get('cp_pk', 0)));
+    $vars['text'] = $this->stringValue($request->get('text'));
+    $vars['is_active'] = $request->get('is_active') == 'on';
+
+    $selectedLicenses = array();
+    foreach ($this->parseLicenseData($request->get('license_data')) as $mapping) {
+      $shortname = $mapping['rf_shortname'];
+      if ($shortname === '') {
+        $shortname = isset($vars['licenseOptions'][$mapping['rf_pk']]) ?
+          $vars['licenseOptions'][$mapping['rf_pk']] : '';
+      }
+      $mapping['rf_shortname'] = $shortname;
+      $selectedLicenses[] = $mapping;
+    }
+    $vars['selectedLicenses'] = $selectedLicenses;
+
+    return $vars;
+  }
+
+  /**
+   * Decode the license_data JSON posted by the form into license map entries.
+   */
+  private function parseLicenseData($licenseData)
+  {
+    $mappings = array();
+    if (empty($licenseData) || !is_string($licenseData)) {
+      return $mappings;
+    }
+    $decodedData = json_decode($licenseData, true);
+    if (!is_array($decodedData)) {
+      return $mappings;
+    }
+
+    foreach ($decodedData as $item) {
+      if (!is_array($item) || empty($item['licenseId'])) {
+        continue;
+      }
+      $mappings[] = array(
+        'rf_pk' => intval($item['licenseId']),
+        'rf_shortname' => $this->stringValue($item['licenseName'] ?? null),
+        'removing' => ($this->stringValue($item['action'] ?? null) === 'Remove'),
+        'comment' => $this->stringValue($item['comment'] ?? null),
+        'reportinfo' => $this->stringValue($item['reportinfo'] ?? null),
+        'acknowledgement' => $this->stringValue($item['acknowledgement'] ?? null)
+      );
+    }
+    return $mappings;
+  }
+
+  /**
+   * Trimmed string, or '' for non-string input that trim() would fatal on.
+   */
+  private function stringValue($value)
+  {
+    return is_string($value) ? trim($value) : '';
+  }
+
+  /**
    * AJAX endpoint to check for duplicate text
    */
   private function checkDuplicateAjax(Request $request)
   {
-    $textMd5 = trim($request->get('text_md5'));
+    $text = StringOperation::replaceUnicodeControlChar(trim($request->get('text')));
     $currentCpPk = intval($request->get('cp_pk'));
 
-    if (empty($textMd5)) {
+    if (empty($text)) {
       return new JsonResponse(array('duplicate' => false));
     }
 
-    $isDuplicate = $this->checkDuplicateTextMd5($textMd5, $currentCpPk > 0 ? $currentCpPk : null);
+    $isDuplicate = $this->checkDuplicateTextMd5(md5($text), $currentCpPk > 0 ? $currentCpPk : null);
 
     return new JsonResponse(array('duplicate' => $isDuplicate));
   }
@@ -191,7 +248,8 @@ class AdminCustomTextManagement extends DefaultPlugin
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
 
-    $sql = "SELECT lr.rf_pk, lr.rf_shortname, cplm.removing
+    $sql = "SELECT lr.rf_pk, lr.rf_shortname, cplm.removing,
+                   cplm.comment, cplm.reportinfo, cplm.acknowledgement
             FROM custom_phrase_license_map cplm
             JOIN license_ref lr ON cplm.rf_fk = lr.rf_pk
             WHERE cplm.cp_fk = $1
@@ -202,9 +260,12 @@ class AdminCustomTextManagement extends DefaultPlugin
     $licenses = array();
     foreach ($result as $row) {
       $licenses[] = array(
-        'rf_pk' => $row['rf_pk'],
-        'rf_shortname' => $row['rf_shortname'],
-        'removing' => $dbManager->booleanFromDb($row['removing'])
+        'rf_pk'           => $row['rf_pk'],
+        'rf_shortname'    => $row['rf_shortname'],
+        'removing'        => $dbManager->booleanFromDb($row['removing']),
+        'comment'         => $row['comment'] ?? '',
+        'reportinfo'      => $row['reportinfo'] ?? '',
+        'acknowledgement' => $row['acknowledgement'] ?? ''
       );
     }
 
@@ -213,49 +274,38 @@ class AdminCustomTextManagement extends DefaultPlugin
 
   /**
    * Save phrase data (add or update)
+   *
+   * @return array success flag and a message to show the user
    */
   private function savePhrase(Request $request, $userId, $groupId)
   {
     $cp_pk = intval($request->get('cp_pk'));
-    $text = StringOperation::replaceUnicodeControlChar(trim($request->get('text')));
-    $acknowledgement = StringOperation::replaceUnicodeControlChar(trim($request->get('acknowledgement')));
-    $comments = StringOperation::replaceUnicodeControlChar(trim($request->get('comments')));
+    $isUpdate = $cp_pk > 0;
+    $text = StringOperation::replaceUnicodeControlChar($this->stringValue($request->get('text')));
     $user_fk = intval($request->get('user_fk'));
     $group_fk = intval($request->get('group_fk'));
-    $licenseData = $request->get('license_data'); // JSON data with license add/remove operations
     $is_active = $request->get('is_active') == 'on' ? 'true' : 'false';
 
     if (empty($text)) {
-      return _("ERROR: The text field cannot be empty.");
+      return array('success' => false,
+        'message' => _("ERROR: The text field cannot be empty."));
     }
 
-    // Parse license data from JSON (new bulk-style form)
-    $licenseMappings = array();
-    if (!empty($licenseData)) {
-      $decodedData = json_decode($licenseData, true);
-      if (is_array($decodedData)) {
-        foreach ($decodedData as $item) {
-          if (!empty($item['licenseId'])) {
-            $licenseMappings[] = array(
-              'rf_pk' => intval($item['licenseId']),
-              'removing' => ($item['action'] === 'Remove')
-            );
-          }
-        }
-      }
-    }
+    $licenseMappings = $this->parseLicenseData($request->get('license_data'));
 
     // Validate that at least one license is associated
     if (empty($licenseMappings)) {
-      return _("ERROR: At least one license must be associated with the custom text.");
+      return array('success' => false,
+        'message' => _("ERROR: At least one license must be associated with the custom text."));
     }
 
     // Generate MD5 hash of the text
     $textMd5 = md5($text);
 
     // Check for duplicate text (exclude current record when updating)
-    if ($this->checkDuplicateTextMd5($textMd5, $cp_pk > 0 ? $cp_pk : null)) {
-      return _("ERROR: A custom text with the same content already exists in the database. Please modify the text or use the existing entry.");
+    if ($this->checkDuplicateTextMd5($textMd5, $isUpdate ? $cp_pk : null)) {
+      return array('success' => false,
+        'message' => _("ERROR: A custom text with the same content already exists in the database. Please modify the text or use the existing entry."));
     }
 
     // Set defaults for user and group if not provided
@@ -266,21 +316,20 @@ class AdminCustomTextManagement extends DefaultPlugin
       $group_fk = $groupId;
     }
 
-    try {
-      /** @var DbManager */
-      $dbManager = $this->getObject('db.manager');
+    /** @var DbManager */
+    $dbManager = $this->getObject('db.manager');
 
+    try {
       // Start transaction
       $dbManager->begin();
 
-      if ($cp_pk > 0) {
-        // Update existing phrase
-        $sql = "UPDATE custom_phrase SET 
-                text = $2, text_md5 = $3, acknowledgement = $4, comments = $5, 
-                user_fk = $6, group_fk = $7, is_active = $8
+      if ($isUpdate) {
+        // Update existing phrase. acknowledgement/comments are not set here:
+        // metadata lives on the license map now, not the phrase.
+        $sql = "UPDATE custom_phrase SET
+                text = $2, text_md5 = $3, user_fk = $4, group_fk = $5, is_active = $6
                 WHERE cp_pk = $1";
-        $params = array($cp_pk, $text, $textMd5, $acknowledgement, $comments,
-                       $user_fk, $group_fk, $is_active);
+        $params = array($cp_pk, $text, $textMd5, $user_fk, $group_fk, $is_active);
         $dbManager->prepare($stmt = __METHOD__ . ".update", $sql);
         $dbManager->freeResult($dbManager->execute($stmt, $params));
 
@@ -290,12 +339,11 @@ class AdminCustomTextManagement extends DefaultPlugin
         $dbManager->freeResult($dbManager->execute($deleteStmt, array($cp_pk)));
 
       } else {
-        // Insert new phrase
-        $sql = "INSERT INTO custom_phrase 
-                (text, text_md5, acknowledgement, comments, user_fk, group_fk, is_active, created_date)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING cp_pk";
-        $params = array($text, $textMd5, $acknowledgement, $comments,
-                       $user_fk, $group_fk, $is_active);
+        // Insert new phrase. acknowledgement/comments stay NULL by omission.
+        $sql = "INSERT INTO custom_phrase
+                (text, text_md5, user_fk, group_fk, is_active, created_date)
+                VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP) RETURNING cp_pk";
+        $params = array($text, $textMd5, $user_fk, $group_fk, $is_active);
         $dbManager->prepare($stmt = __METHOD__ . ".insert", $sql);
         $result = $dbManager->execute($stmt, $params);
         $row = $dbManager->fetchArray($result);
@@ -303,15 +351,22 @@ class AdminCustomTextManagement extends DefaultPlugin
         $dbManager->freeResult($result);
       }
 
-      // Insert license associations
       if (!empty($licenseMappings)) {
-        $insertLicenseSql = "INSERT INTO custom_phrase_license_map (cp_fk, rf_fk, removing) VALUES ($1, $2, $3)";
+        $insertLicenseSql = "INSERT INTO custom_phrase_license_map
+                             (cp_fk, rf_fk, removing, comment, reportinfo, acknowledgement)
+                             VALUES ($1, $2, $3, $4, $5, $6)";
         $dbManager->prepare($insertLicenseStmt = __METHOD__ . ".insert_license", $insertLicenseSql);
 
         foreach ($licenseMappings as $mapping) {
           if (!empty($mapping['rf_pk'])) {
-            $removingValue = $mapping['removing'] ? 'true' : 'false';
-            $dbManager->freeResult($dbManager->execute($insertLicenseStmt, array($cp_pk, $mapping['rf_pk'], $removingValue)));
+            $dbManager->freeResult($dbManager->execute($insertLicenseStmt, array(
+              $cp_pk,
+              $mapping['rf_pk'],
+              $mapping['removing'] ? 'true' : 'false',
+              $mapping['comment'] ?: null,
+              $mapping['reportinfo'] ?: null,
+              $mapping['acknowledgement'] ?: null
+            )));
           }
         }
       }
@@ -319,29 +374,23 @@ class AdminCustomTextManagement extends DefaultPlugin
       // Commit transaction
       $dbManager->commit();
 
-      return $cp_pk > 0 ? _("Custom text updated successfully.") :
-                         _("Custom text added successfully.");
+      return array('success' => true,
+        'message' => $isUpdate ? _("Custom text updated successfully.") :
+        _("Custom text added successfully."));
 
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
       $dbManager->rollback();
-      return _("ERROR: Failed to save custom text: ") . $e->getMessage();
+      return array('success' => false,
+        'message' => _("ERROR: Failed to save custom text: ") . $e->getMessage());
     }
   }
 
   private function getLicenseOptions()
   {
-    /** @var DbManager */
-    $dbManager = $this->getObject('db.manager');
+    /** @var LicenseDao */
+    $licenseDao = $this->getObject('dao.license');
 
-    $sql = "SELECT rf_pk, rf_shortname FROM license_ref WHERE rf_active = true ORDER BY rf_shortname";
-    $result = $dbManager->getRows($sql);
-
-    $options = array();
-    foreach ($result as $row) {
-      $options[$row['rf_pk']] = $row['rf_shortname'];
-    }
-
-    return $options;
+    return $licenseDao->getActiveLicensesForGroup(Auth::getGroupId());
   }
 }
 

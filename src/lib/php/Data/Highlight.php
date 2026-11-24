@@ -19,6 +19,7 @@ class Highlight
   const SIGNATURE = "S";
   const KEYWORD = "K";
   const BULK = "B";
+  const KOTOBA = "KB";
 
   const COPYRIGHT = "C";
   const URL = "U";

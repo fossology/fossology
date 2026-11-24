@@ -225,13 +225,14 @@ class AdminLicenseCompatibilityRules extends DefaultPlugin
       $searchQuery = '%' . $searchQuery . '%';
     }
 
-    $totalCount = $this->compatibilityDao->getTotalRulesCount($searchQuery);
+    $totalCount = $this->compatibilityDao->getTotalRulesCount();
+    $filteredCount = empty($searchQuery) ? $totalCount : $this->compatibilityDao->getTotalRulesCount($searchQuery);
     $ruleArray = $this->compatibilityDao->getAllRules($limit, $offset, $searchQuery);
 
     return new JsonResponse([
       "draw" => $draw,
       "recordsTotal" => $totalCount,
-      "recordsFiltered" => $totalCount,
+      "recordsFiltered" => $filteredCount,
       "data" => $ruleArray,
     ], JsonResponse::HTTP_OK);
   }

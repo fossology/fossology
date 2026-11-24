@@ -108,10 +108,15 @@ class TokenRequest
    */
   public function setTokenExpire(string $tokenExpire): TokenRequest
   {
-    $this->tokenExpire = DateTime::createFromFormat("Y-m-d", $tokenExpire);
-    if ($this->tokenExpire === false) {
+    $date = DateTime::createFromFormat("!Y-m-d", $tokenExpire);
+    $errors = DateTime::getLastErrors();
+    if ($date === false ||
+      ($errors !== false &&
+        ($errors['warning_count'] > 0 || $errors['error_count'] > 0)) ||
+      $date->format('Y-m-d') !== $tokenExpire) {
       throw new HttpBadRequestException("Invalid date format provided");
     }
+    $this->tokenExpire = $date;
     return $this;
   }
 

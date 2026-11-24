@@ -145,7 +145,7 @@ abstract class UploadPageBase extends DefaultPlugin
     $plainAgentList = MenuHook::getAgentPluginNames("Agents");
     $agentList = array_merge($plainAgentList, $parmAgentList);
 
-    $this->rearrangeDependencies($parmAgentList);
+    MenuHook::rearrangeParmAgentsBeforeDecider($parmAgentList);
 
     foreach ($parmAgentList as $parmAgent) {
       $agent = plugin_find($parmAgent);
@@ -274,21 +274,6 @@ abstract class UploadPageBase extends DefaultPlugin
     return $str;
   }
 
-  /**
-   * Make sure reuser is scheduled before decider so decider does not run
-   * another reuser as dependency
-   * @param[in,out] array $parmList List of parameterized agents
-   */
-  private function rearrangeDependencies(&$parmList)
-  {
-    $deciderKey = array_search('agent_decider', $parmList);
-    $reuserKey = array_search('agent_reuser', $parmList);
-    if ($deciderKey !== false && $reuserKey !== false) {
-      $temp = $parmList[$deciderKey];
-      $parmList[$deciderKey] = $parmList[$reuserKey];
-      $parmList[$reuserKey] = $temp;
-    }
-  }
   /**
    * Sanitize a comma-separated list of exclude path patterns.
    *

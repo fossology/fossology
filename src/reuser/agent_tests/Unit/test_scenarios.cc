@@ -39,6 +39,11 @@
 static bool runProcess(ReuserDatabaseHandler& db, int uploadId,
   int groupId, int userId)
 {
+  if (!db.processBulkReuser(uploadId, groupId, userId))
+  {
+    return false;
+  }
+
   auto reusedUploads = db.getReusedUploads(uploadId, groupId);
   for (const auto& triple : reusedUploads)
   {

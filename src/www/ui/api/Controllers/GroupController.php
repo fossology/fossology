@@ -16,6 +16,7 @@ namespace Fossology\UI\Api\Controllers;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpConflictException;
 use Fossology\UI\Api\Exceptions\HttpErrorException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
@@ -132,6 +133,59 @@ class GroupController extends RestController
   }
 
   /**
+   * Rename a given group
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   * @throws HttpErrorException
+   */
+  public function updateGroup($request, $response, $args)
+  {
+    $apiVersion = ApiVersion::getVersion($request);
+    if (empty($args['pathParam'])) {
+      throw new HttpBadRequestException("ERROR - No group name or id provided");
+    }
+    $newGroupName = trim($this->getParsedBody($request)['name'] ?? '');
+    if (empty($newGroupName)) {
+      throw new HttpBadRequestException("ERROR - no group name provided");
+    }
+    /** @var \Fossology\UI\Page\AdminGroupEdit $adminGroupEdit */
+    $adminGroupEdit = $this->restHelper->getPlugin('group_edit');
+    $validationError = $adminGroupEdit->validateGroupName($newGroupName);
+    if (!empty($validationError)) {
+      throw new HttpBadRequestException($validationError);
+    }
+
+    /** @var UserDao $userDao */
+    $userDao = $this->restHelper->getUserDao();
+    $groupId = null;
+    if ($apiVersion == ApiVersion::V2) {
+      $groupId = intval($userDao->getGroupIdByName($args['pathParam']));
+    } else {
+      $groupId = intval($args['pathParam']);
+    }
+
+    if (!$this->dbHelper->doesIdExist("groups", "group_pk", $groupId)) {
+      throw new HttpNotFoundException("Group id not found!");
+    }
+    $groupMap = $userDao->getDeletableAdminGroupMap($this->restHelper->getUserId(),
+      $_SESSION[Auth::USER_LEVEL]);
+    if (!array_key_exists($groupId, $groupMap)) {
+      throw new HttpForbiddenException("Not admin of the group. " .
+        "Can not process request.");
+    }
+    try {
+      $userDao->editGroup($groupId, $newGroupName);
+    } catch (\Exception $e) {
+      throw new HttpConflictException($e->getMessage(), $e);
+    }
+    $returnVal = new Info(200, "Group $newGroupName updated.", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
    * Delete a given group member
    *
    * @param ServerRequestInterface $request
@@ -226,14 +280,20 @@ class GroupController extends RestController
     $apiVersion = ApiVersion::getVersion($request);
     $userId = $this->restHelper->getUserId();
     $userDao = $this->restHelper->getUserDao();
-    $groupMap = $userDao->getAdminGroupMap($userId, $_SESSION[Auth::USER_LEVEL]);
-
-    if (empty($groupMap)) {
-      throw new HttpForbiddenException("You have no permission to manage any group.");
-    }
 
     // Get the group name/id form the params and then the group Id
-    $groupId = $apiVersion == ApiVersion::V2 ? intval($this->restHelper->getUserDao()->getGroupIdByName($args['pathParam'])) : intval($args['pathParam']);
+    $groupId = $apiVersion == ApiVersion::V2 ? intval($userDao->getGroupIdByName($args['pathParam'])) : intval($args['pathParam']);
+
+    $userIsAdmin = Auth::isAdmin();
+    $userHasGroupAccess = $userDao->isAdvisorOrAdmin($userId, $groupId);
+
+    if (!$this->dbHelper->doesIdExist("groups", "group_pk", $groupId)) {
+      throw new HttpNotFoundException("Group id not found!");
+    }
+    if (! $userIsAdmin && ! $userHasGroupAccess) {
+      throw new HttpForbiddenException("Not advisor or admin of the group. " .
+        "Can not process request.");
+    }
 
     // The query to get the list of users with corresponding roles from the group.
     $dbManager = $this->dbHelper->getDbManager();

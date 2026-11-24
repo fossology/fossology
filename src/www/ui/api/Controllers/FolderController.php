@@ -50,7 +50,7 @@ class FolderController extends RestController
     $folderDao = $this->restHelper->getFolderDao();
     if (isset($args['id'])) {
       $id = intval($args['id']);
-      if (! $folderDao->isFolderAccessible($id)) {
+      if (! $folderDao->isFolderAccessible($id, $this->restHelper->getUserId())) {
         throw new HttpForbiddenException("Folder id $id is not accessible");
       }
       if ($folderDao->getFolder($id) === null) {
@@ -92,9 +92,9 @@ class FolderController extends RestController
   {
     if (ApiVersion::getVersion($request) == ApiVersion::V2) {
       $queryParams = $request->getQueryParams();
-      $parentFolder = $queryParams['parentFolder'];
-      $folderName = trim($queryParams['folderName']);
-      $folderDescription = trim($queryParams['folderDescription']);
+      $parentFolder = $queryParams['parentFolder'] ?? '';
+      $folderName = trim($queryParams['folderName'] ?? '');
+      $folderDescription = trim($queryParams['folderDescription'] ?? '');
     } else {
       $parentFolder = $request->getHeaderLine('parentFolder');
       $folderName = trim($request->getHeaderLine('folderName'));
@@ -150,13 +150,21 @@ class FolderController extends RestController
     }
     /** @var \admin_folder_delete $folderDelete */
     $folderDelete = $this->restHelper->getPlugin('admin_folder_delete');
+    $rootFolder = $folderDao->getRootFolder($this->restHelper->getUserId());
+    if ($rootFolder !== null && $rootFolder->getId() == $folderId) {
+      throw new HttpForbiddenException("Can not delete the root folder!");
+    }
     $folderName = FolderGetName($folderId);
     $folderArray = Folder2Path($folderId);
+    if (count($folderArray) < 2) {
+      throw new HttpForbiddenException("Can not delete a folder without a parent!");
+    }
     $folderParent = intval($folderArray[count($folderArray) - 2]['folder_pk']);
     $folderId = "$folderParent $folderId";
 
     $rc = $folderDelete->Delete($folderId, $this->restHelper->getUserId());
-    if ($rc == "No access to delete this folder") {
+    if ($rc == "No access to delete this folder" ||
+        $rc == "Can Not Delete Root Folder") {
       throw new HttpForbiddenException($rc);
     } elseif ($rc !== null) {
       throw new HttpInternalServerErrorException($rc);
@@ -180,8 +188,8 @@ class FolderController extends RestController
     $folderId = $args['id'];
     if (ApiVersion::getVersion($request) == ApiVersion::V2) {
       $queryParams = $request->getQueryParams();
-      $newName = $queryParams['name'];
-      $newDesc = $queryParams['description'];
+      $newName = $queryParams['name'] ?? '';
+      $newDesc = $queryParams['description'] ?? '';
     } else {
       $newName = $request->getHeaderLine('name');
       $newDesc = $request->getHeaderLine('description');
@@ -196,8 +204,13 @@ class FolderController extends RestController
     /** @var \folder_properties $folderEdit */
     $folderEdit = $this->restHelper->getPlugin('folder_properties');
     $folderName = FolderGetName($folderId);
-    $folderEdit->Edit($folderId, $newName, $newDesc);
-    $info = new Info(200, "Folder \"$folderName\" updated.", InfoType::INFO);
+    $rc = $folderEdit->Edit($folderId, $newName, $newDesc);
+    if ($rc == 4) {
+      $newName = trim($newName);
+      $info = new Info(200, "Folder $newName already exists!", InfoType::INFO);
+    } else {
+      $info = new Info(200, "Folder \"$folderName\" updated.", InfoType::INFO);
+    }
     return $response->withJson($info->getArray(), $info->getCode());
   }
 
@@ -216,8 +229,8 @@ class FolderController extends RestController
     $folderId = $args['id'];
     if (ApiVersion::getVersion($request) == ApiVersion::V2) {
       $queryParams = $request->getQueryParams();
-      $newParent = $queryParams['parent'];
-      $action = strtolower($queryParams['action']);
+      $newParent = $queryParams['parent'] ?? '';
+      $action = strtolower($queryParams['action'] ?? '');
     } else {
       $newParent = $request->getHeaderLine('parent');
       $action = strtolower($request->getHeaderLine('action'));
@@ -310,7 +323,11 @@ class FolderController extends RestController
       throw new HttpNotFoundException("Folder content id not found!");
     }
     /** @var FolderDao $folderDao */
-    $folderDao = $this->container->get('dao.folder');
+    $folderDao = $this->restHelper->getFolderDao();
+    $content = $folderDao->getContent($folderContentId);
+    if (! $folderDao->isFolderAccessible($content['parent_fk'], $this->restHelper->getUserId())) {
+      throw new HttpForbiddenException("Folder is not accessible!");
+    }
     if (!$folderDao->removeContent($folderContentId)) {
       throw new HttpBadRequestException("Content cannot be unlinked.");
     }

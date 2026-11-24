@@ -6,11 +6,13 @@ let osselotVersions = [];
 let lastUploadedFiles = [];
 let _reloadUploadsXhr = null;
 function registerFolderSelectorChange() {
-  $('[id^={{ reuseFolderSelectorName }}]').change(function () {
-    const groupIndex = $(this).attr('id').replace('{{ reuseFolderSelectorName }}', '');
-    const folderGroupPair = this.selectedOptions[0].value;
-    reloadUploads('&{{ folderParameterName }}=' + folderGroupPair, groupIndex);
-  });
+  $(document)
+    .off('change.reuseFolderSelector', '[id^={{ reuseFolderSelectorName }}]')
+    .on('change.reuseFolderSelector', '[id^={{ reuseFolderSelectorName }}]', function () {
+      const groupIndex = $(this).attr('id').replace('{{ reuseFolderSelectorName }}', '');
+      const folderGroupPair = this.selectedOptions[0].value;
+      reloadUploads('&{{ folderParameterName }}=' + folderGroupPair, groupIndex);
+    });
 }
 
 function reloadUploads(folderGroupPair, groupIndex) {
@@ -32,6 +34,7 @@ function reloadUploads(folderGroupPair, groupIndex) {
       });
       packageForReuse.empty();
       packageForReuse[0].appendChild(fragment);
+      packageForReuse.trigger('change.select2');
     })
     .fail(function (xhr) { if (xhr.statusText !== 'abort') failed(xhr); })
     .always(function () { _reloadUploadsXhr = null; });
@@ -45,6 +48,17 @@ function toggleDisabled() {
     this.checked ? fs.trigger('change') : reloadUploads('', gi);
   });
   registerFolderSelectorChange();
+  if ($('#hiddenFormHolder').length === 0) {
+    $('[id^={{ reuseFolderSelectorName }}], [id^={{ uploadToReuseSelectorName }}]')
+      .not('.select2-hidden-accessible')
+      .each(function () {
+        $(this).select2({
+          "placeholder": "Select upload to reuse",
+          width: 'style',
+          dropdownAutoWidth: true
+        });
+      });
+  }
 }
 
 window.osselotInitialized = window.osselotInitialized || {};

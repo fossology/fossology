@@ -12,7 +12,6 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\ArrayOperation;
 use Exception;
 
 /**
@@ -43,17 +42,27 @@ class CustomTextImport
   /** @var null|array $headrow
    * Header of CSV */
   protected $headrow = null;
+  /**
+   * @var bool $unescapeNewlines
+   * True for a CSV row, where real newlines were flattened to a literal
+   * '\n' on export. JSON is never unescaped: it carries real newlines as-is.
+   */
+  protected $unescapeNewlines = false;
   /** @var array $alias
-   * Alias for headers */
+   * Alias for CSV headers */
   protected $alias = array(
-      'text'=>array('text','Text'),
-      'acknowledgement'=>array('acknowledgement','Acknowledgement','acknowledgements'),
-      'comments'=>array('comments','Comments'),
-      'is_active'=>array('is_active','Is Active','active'),
-      'created_by'=>array('created_by','Created By','user_name'),
-      'group'=>array('group','Group','group_name'),
-      'licenses_to_add'=>array('licenses_to_add','Licenses To Add','add_licenses'),
-      'licenses_to_remove'=>array('licenses_to_remove','Licenses To Remove','remove_licenses')
+      'text' => array('text', 'Text'),
+      'is_active' => array('is_active', 'Is Active', 'active'),
+      'created_by' => array('created_by', 'Created By', 'user_name'),
+      'group' => array('group', 'Group', 'group_name'),
+      'license_shortname' => array('license_shortname', 'License Shortname'),
+      'removing' => array('removing', 'Removing'),
+      'comment' => array('comment', 'Comment'),
+      'reportinfo' => array('reportinfo', 'License Text'),
+      'acknowledgement' => array('acknowledgement', 'Acknowledgement'),
+      // legacy flat-format aliases kept for backward compatibility
+      'licenses_to_add' => array('licenses_to_add', 'Licenses To Add', 'add_licenses'),
+      'licenses_to_remove' => array('licenses_to_remove', 'Licenses To Remove', 'remove_licenses')
       );
 
   /**
@@ -109,6 +118,8 @@ class CustomTextImport
    */
   private function handleJsonFile($filename)
   {
+    $this->unescapeNewlines = false;
+
     $content = file_get_contents($filename);
     if ($content === false) {
       return _("Could not read JSON file");
@@ -133,6 +144,8 @@ class CustomTextImport
    */
   private function handleCsvFile($filename)
   {
+    $this->unescapeNewlines = true;
+
     $handle = fopen($filename, 'r');
     if ($handle === false) {
       return _("Could not open CSV file");
@@ -174,23 +187,41 @@ class CustomTextImport
    */
   private function importPhrases($data)
   {
-    $imported = 0;
+    $created = 0;
+    $updated = 0;
+    $unchanged = 0;
     $errors = array();
 
     foreach ($data as $index => $phraseData) {
       try {
         $result = $this->importSinglePhrase($phraseData);
         if ($result['success']) {
-          $imported++;
+          if (!empty($result['unchanged'])) {
+            $unchanged++;
+          } elseif (!empty($result['existing'])) {
+            $updated++;
+          } else {
+            $created++;
+          }
         } else {
           $errors[] = sprintf(_("Row %d: %s"), $index + 1, $result['message']);
         }
-      } catch (Exception $e) {
+      } catch (\Throwable $e) {
         $errors[] = sprintf(_("Row %d: %s"), $index + 1, $e->getMessage());
       }
     }
 
-    $message = sprintf(_("Read file: %d phrases"), $imported);
+    $parts = array();
+    if ($created > 0) {
+      $parts[] = sprintf(_("%d phrase(s) created"), $created);
+    }
+    if ($updated > 0) {
+      $parts[] = sprintf(_("%d license(s) added to existing phrase(s)"), $updated);
+    }
+    if ($unchanged > 0) {
+      $parts[] = sprintf(_("%d row(s) already up to date"), $unchanged);
+    }
+    $message = _("Import complete") . ": " . (empty($parts) ? _("nothing new to import") : implode(', ', $parts));
     if (!empty($errors)) {
       $message .= "\n" . _("Errors:") . "\n" . implode("\n", $errors);
     }
@@ -216,66 +247,86 @@ class CustomTextImport
     // Get current user info
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
-
-    // Check for duplicate text
     $textMd5 = md5($mappedData['text']);
-    $existingSql = "SELECT cp_pk FROM custom_phrase WHERE text_md5 = $1";
-    $existing = $this->dbManager->getSingleRow($existingSql, array($textMd5), __METHOD__ . '.duplicateCheck');
 
-    if ($existing) {
-      return array('success' => false, 'message' => _("Duplicate text already exists"));
-    }
-
-    // Insert the phrase
-    $insertSql = "INSERT INTO custom_phrase (text, text_md5, acknowledgement, comments, user_fk, group_fk, is_active) 
-                  VALUES ($1, $2, $3, $4, $5, $6, $7)";
-
-    $params = array(
-      $mappedData['text'],
-      $textMd5,
-      $mappedData['acknowledgement'] ?? '',
-      $mappedData['comments'] ?? '',
-      $userId,
-      $groupId,
-      $this->parseBoolean($mappedData['is_active'] ?? false) ? 'true' : 'false'
-    );
-
+    $this->dbManager->begin();
     try {
-      $cpPk = $this->dbManager->insertPreparedAndReturn(__METHOD__ . '.insertPhrase', $insertSql, $params, 'cp_pk');
-      $message = _("Phrase imported successfully");
+      // ON CONFLICT avoids a check-then-insert race on concurrent imports.
+      // ack/comments left NULL; metadata lives in the license map.
+      $insertSql = "INSERT INTO custom_phrase (text, text_md5, user_fk, group_fk, is_active)
+                    VALUES ($1, $2, $3, $4, $5)
+                    ON CONFLICT (text_md5) DO NOTHING
+                    RETURNING cp_pk";
+      $params = array(
+        $mappedData['text'],
+        $textMd5,
+        $userId,
+        $groupId,
+        $this->parseBoolean($mappedData['is_active'] ?? false) ? 'true' : 'false'
+      );
+      $row = $this->dbManager->getSingleRow($insertSql, $params, __METHOD__ . '.insertPhrase');
 
-      $totalAssociated = 0;
+      $isNewPhrase = ($row !== false);
+      if ($isNewPhrase) {
+        $cpPk = intval($row['cp_pk']);
+      } else {
+        $existing = $this->dbManager->getSingleRow(
+          "SELECT cp_pk FROM custom_phrase WHERE text_md5 = $1", array($textMd5),
+          __METHOD__ . '.findExisting');
+        if ($existing === false) {
+          throw new Exception("custom_phrase insert conflicted but no row found for text_md5");
+        }
+        $cpPk = intval($existing['cp_pk']);
+      }
+
+      $totalInserted = 0;
       $allFailed = array();
-      $allCreated = array();
 
-      // Handle licenses to add
-      if (!empty($mappedData['licenses_to_add'])) {
-        $licenseResult = $this->associateLicenses($cpPk, $mappedData['licenses_to_add'], false);
-        $totalAssociated += $licenseResult['associated'];
-        $allFailed = array_merge($allFailed, $licenseResult['failed']);
-        $allCreated = array_merge($allCreated, $licenseResult['created']);
+      if (!empty($mappedData['licenses'])) {
+        $result = $this->associateLicensesWithMetadata($cpPk, $mappedData['licenses'], $groupId);
+        $totalInserted += $result['inserted'];
+        $allFailed = array_merge($allFailed, $result['failed']);
+      } elseif ($isNewPhrase) {
+        // Backward compat for the old flat licenses_to_add/licenses_to_remove format.
+        if (!empty($mappedData['licenses_to_add'])) {
+          $r = $this->associateLicenseNames($cpPk, $mappedData['licenses_to_add'], false, $groupId);
+          $totalInserted += $r['inserted'];
+          $allFailed = array_merge($allFailed, $r['failed']);
+        }
+        if (!empty($mappedData['licenses_to_remove'])) {
+          $r = $this->associateLicenseNames($cpPk, $mappedData['licenses_to_remove'], true, $groupId);
+          $totalInserted += $r['inserted'];
+          $allFailed = array_merge($allFailed, $r['failed']);
+        }
       }
 
-      // Handle licenses to remove
-      if (!empty($mappedData['licenses_to_remove'])) {
-        $licenseResult = $this->associateLicenses($cpPk, $mappedData['licenses_to_remove'], true);
-        $totalAssociated += $licenseResult['associated'];
-        $allFailed = array_merge($allFailed, $licenseResult['failed']);
-        $allCreated = array_merge($allCreated, $licenseResult['created']);
+      $this->dbManager->commit();
+
+      if (!$isNewPhrase) {
+        // Nothing new is "unchanged", not an error: re-importing the same
+        // export must be a safe no-op.
+        if ($totalInserted > 0) {
+          return array('success' => true, 'existing' => true,
+            'message' => sprintf(_("Added %d license(s) to existing phrase"), $totalInserted));
+        }
+        if (!empty($allFailed)) {
+          return array('success' => false,
+            'message' => sprintf(_("Duplicate text; could not associate license(s): %s"), implode(', ', $allFailed)));
+        }
+        return array('success' => true, 'unchanged' => true,
+          'message' => _("Phrase already exists, nothing new to add"));
       }
 
-      if (!empty($allCreated)) {
-        $message .= ". " . sprintf(_("Created new licenses: %s"), implode(', ', $allCreated));
-      }
+      $message = _("Phrase imported successfully");
       if (!empty($allFailed)) {
-        $message .= ". " . sprintf(_("Warning: Could not create/find licenses: %s"), implode(', ', $allFailed));
+        $message .= ". " . sprintf(_("Warning: Could not find license(s): %s"), implode(', ', $allFailed));
       }
-      if ($totalAssociated > 0) {
-        $message .= ". " . sprintf(_("Associated %d licenses"), $totalAssociated);
+      if ($totalInserted > 0) {
+        $message .= ". " . sprintf(_("Associated %d license(s)"), $totalInserted);
       }
-
       return array('success' => true, 'message' => $message);
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
+      $this->dbManager->rollback();
       return array('success' => false, 'message' => _("Failed to import phrase: ") . $e->getMessage());
     }
   }
@@ -289,6 +340,10 @@ class CustomTextImport
   {
     $mapped = array();
 
+    if (isset($data['licenses']) && is_array($data['licenses'])) {
+      $mapped['licenses'] = $data['licenses'];
+    }
+
     foreach ($this->alias as $standardName => $aliases) {
       foreach ($aliases as $alias) {
         if (isset($data[$alias])) {
@@ -298,42 +353,49 @@ class CustomTextImport
       }
     }
 
-    // Normalize array/pipe-separated values from bulk text export format
-    $mapped = $this->normalizeBulkExportValues($mapped);
-
-    return $mapped;
-  }
-
-  /**
-   * @brief Normalize values from bulk text export format
-   *
-   * The bulk text export produces arrays (JSON) or pipe-separated strings (CSV)
-   * for acknowledgements and comments. This method joins them into single
-   * strings suitable for the custom_phrase table.
-   * It also restores literal '\\n' escape sequences (produced by the bulk CSV
-   * exporter) back to real newlines in the text field.
-   *
-   * @param array $mapped Mapped data
-   * @return array Normalized data
-   */
-  private function normalizeBulkExportValues($mapped)
-  {
-    // Join array values to single strings for acknowledgement and comments
-    foreach (array('acknowledgement', 'comments') as $field) {
-      if (isset($mapped[$field])) {
-        if (is_array($mapped[$field])) {
-          $mapped[$field] = implode('; ', array_filter($mapped[$field]));
-        } elseif (is_string($mapped[$field]) && strpos($mapped[$field], '|') !== false) {
-          // Handle pipe-separated values from bulk CSV export
-          $parts = array_map('trim', explode('|', $mapped[$field]));
-          $mapped[$field] = implode('; ', array_filter($parts));
-        }
-      }
+    if (empty($mapped['licenses']) && !empty($mapped['license_shortname'])) {
+      $mapped['licenses'] = array(array(
+        'shortname' => $mapped['license_shortname'],
+        'removing' => $this->parseBoolean($mapped['removing'] ?? false),
+        'comment' => $mapped['comment'] ?? '',
+        'reportinfo' => $mapped['reportinfo'] ?? '',
+        'acknowledgement' => $mapped['acknowledgement'] ?? ''
+      ));
     }
 
-    // Restore literal '\n' escape sequences back to real newlines in text
-    if (isset($mapped['text']) && is_string($mapped['text'])) {
-      $mapped['text'] = str_replace('\\n', "\n", $mapped['text']);
+    // JSON allows any value type per field; drop what downstream code can't
+    // safely trim()/md5() as a string instead of crashing on it.
+    if (isset($mapped['text']) && !is_string($mapped['text'])) {
+      unset($mapped['text']);
+    }
+    if (!empty($mapped['licenses']) && is_array($mapped['licenses'])) {
+      $mapped['licenses'] = array_values(array_filter($mapped['licenses'], function ($entry) {
+        return is_array($entry) && is_string($entry['shortname'] ?? null);
+      }));
+      foreach ($mapped['licenses'] as &$licenseEntry) {
+        foreach (array('comment', 'reportinfo', 'acknowledgement') as $field) {
+          if (isset($licenseEntry[$field]) && !is_string($licenseEntry[$field])) {
+            $licenseEntry[$field] = '';
+          }
+        }
+      }
+      unset($licenseEntry);
+    }
+
+    if ($this->unescapeNewlines) {
+      if (isset($mapped['text']) && is_string($mapped['text'])) {
+        $mapped['text'] = CustomTextEscaping::unescapeNewlines($mapped['text']);
+      }
+      if (!empty($mapped['licenses']) && is_array($mapped['licenses'])) {
+        foreach ($mapped['licenses'] as &$licenseEntry) {
+          foreach (array('comment', 'reportinfo', 'acknowledgement') as $field) {
+            if (isset($licenseEntry[$field]) && is_string($licenseEntry[$field])) {
+              $licenseEntry[$field] = CustomTextEscaping::unescapeNewlines($licenseEntry[$field]);
+            }
+          }
+        }
+        unset($licenseEntry);
+      }
     }
 
     return $mapped;
@@ -349,115 +411,125 @@ class CustomTextImport
     if (is_bool($value)) {
       return $value;
     }
+    if (!is_scalar($value)) {
+      return false;
+    }
 
     $value = strtolower(trim($value));
     return in_array($value, array('true', '1', 'yes', 'on', 'active'));
   }
 
-  private function associateLicenses($cpPk, $licenseNames, $removing = false, $allowCreate = false)
+  /**
+   * @brief Associate licenses with a phrase, writing per-mapping metadata.
+   *
+   * Looks licenses up by shortname within the importing group, so
+   * group-scoped candidate licenses resolve too (see
+   * LicenseDao::getLicenseByCondition()). An already-mapped license is
+   * counted as 'skipped', never 'inserted', so a caller can tell a real
+   * import apart from a no-op re-import of the same file.
+   *
+   * @param int $cpPk custom phrase PK
+   * @param array $licenses entries with shortname, removing, comment, reportinfo, acknowledgement
+   * @param int|null $groupId Group to resolve candidate licenses against
+   * @return array{inserted:int,skipped:int,failed:string[]}
+   */
+  private function associateLicensesWithMetadata($cpPk, $licenses, $groupId = null)
   {
-    if (is_array($licenseNames)) {
-      $licenseArray = $licenseNames;
-    } else {
-      // Handle multiple possible separators: comma-space, comma, semicolon, pipe
-      $separators = array(', ', ',', ';', '|');
-      $licenseArray = array($licenseNames); // Default to single license
+    $inserted = 0;
+    $skipped = 0;
+    $failed = array();
 
-      foreach ($separators as $separator) {
-        if (strpos($licenseNames, $separator) !== false) {
-          $licenseArray = array_map('trim', explode($separator, $licenseNames));
-          break;
-        }
-      }
-    }
-
-    $associatedCount = 0;
-    $failedLicenses = array();
-    $createdLicenses = array();
-
-    foreach ($licenseArray as $licenseName) {
-      if (empty($licenseName)) {
+    foreach ($licenses as $entry) {
+      $shortname = trim($entry['shortname'] ?? '');
+      if ($shortname === '') {
         continue;
       }
 
-      $normalizedLicenseName = trim($licenseName);
-
-      $license = $this->licenseDao->getLicenseByShortName($normalizedLicenseName);
-
+      $license = $this->licenseDao->getLicenseByShortName($shortname, $groupId);
       if (!$license) {
-        if (!$allowCreate || !$this->isValidLicenseShortname($normalizedLicenseName)) {
-          $failedLicenses[] = $licenseName . " (unknown)";
-          continue;
-        }
-
-        try {
-          $newLicenseId = $this->licenseDao->insertLicense(
-            $normalizedLicenseName,
-            '',
-            null
-          );
-          $license = $this->licenseDao->getLicenseById($newLicenseId);
-          $createdLicenses[] = $normalizedLicenseName;
-        } catch (Exception $e) {
-          $failedLicenses[] = $licenseName . " (creation failed)";
-          continue;
-        }
+        $failed[] = $shortname . " (unknown)";
+        continue;
       }
 
-      if ($license) {
-        $licenseId = $license->getId();
+      $licenseId = $license->getId();
+      $removing = $this->parseBoolean($entry['removing'] ?? false);
 
-        // Check if association already exists
-        $checkSql = "SELECT 1 FROM custom_phrase_license_map WHERE cp_fk = $1 AND rf_fk = $2 LIMIT 1";
-        $existing = $this->dbManager->getSingleRow($checkSql, array($cpPk, $licenseId),
-                                                  __METHOD__ . '.check.' . $cpPk . '.' . $licenseId);
+      // Constant statement name: the SQL never varies, so a large import
+      // does not create one prepared statement per (cpPk, licenseId) pair.
+      $existing = $this->dbManager->getSingleRow(
+        "SELECT 1 FROM custom_phrase_license_map WHERE cp_fk = $1 AND rf_fk = $2 LIMIT 1",
+        array($cpPk, $licenseId), __METHOD__ . '.checkMapping');
+      if ($existing) {
+        $skipped++;
+        continue;
+      }
 
-        if (!$existing) {
-          // Insert the license association with removing flag
-          $insertData = array(
-            'cp_fk' => $cpPk,
-            'rf_fk' => $licenseId,
-            'removing' => $removing ? 'true' : 'false'
-          );
+      $insertData = array(
+        'cp_fk' => $cpPk,
+        'rf_fk' => $licenseId,
+        'removing' => $removing ? 'true' : 'false',
+        'comment' => ($entry['comment'] ?? '') ?: null,
+        'reportinfo' => ($entry['reportinfo'] ?? '') ?: null,
+        'acknowledgement' => ($entry['acknowledgement'] ?? '') ?: null
+      );
 
-          try {
-            $this->dbManager->insertTableRow('custom_phrase_license_map', $insertData);
-            $associatedCount++;
-          } catch (Exception $e) {
-            $failedLicenses[] = $licenseName . " (insert failed)";
-          }
-        } else {
-          $associatedCount++; // Already exists, count as successful
-        }
+      try {
+        $this->dbManager->insertTableRow('custom_phrase_license_map', $insertData);
+        $inserted++;
+      } catch (\Throwable $e) {
+        $failed[] = $shortname . " (insert failed)";
       }
     }
 
-    return array('associated' => $associatedCount, 'failed' => $failedLicenses, 'created' => $createdLicenses);
+    return array('inserted' => $inserted, 'skipped' => $skipped, 'failed' => $failed);
   }
 
   /**
-   * @brief Validate a license shortname before auto-creating it
-   * @param string $shortname License shortname to validate
-   * @return bool True if valid, false otherwise
+   * @brief Legacy flat-format helper: split a license-name string/array and
+   * delegate to associateLicensesWithMetadata() so the two formats share one
+   * lookup/insert path.
+   * @param int $cpPk custom phrase PK
+   * @param string|array $licenseNames Comma/semicolon/pipe separated names, or an array of names
+   * @param bool $removing
+   * @param int|null $groupId
+   * @return array{inserted:int,failed:string[]}
    */
-  private function isValidLicenseShortname($shortname)
+  private function associateLicenseNames($cpPk, $licenseNames, $removing, $groupId = null)
   {
-    // Must not be empty
-    if (empty(trim($shortname))) {
-      return false;
+    $names = is_array($licenseNames) ? $licenseNames : $this->splitLicenseNames($licenseNames);
+
+    $entries = array();
+    foreach ($names as $name) {
+      $name = trim($name);
+      if ($name === '') {
+        continue;
+      }
+      $entries[] = array(
+        'shortname' => $name,
+        'removing' => $removing,
+        'comment' => '',
+        'reportinfo' => '',
+        'acknowledgement' => ''
+      );
     }
 
-    // Must not exceed 256 characters
-    if (strlen($shortname) > 256) {
-      return false;
-    }
+    $result = $this->associateLicensesWithMetadata($cpPk, $entries, $groupId);
+    return array('inserted' => $result['inserted'], 'failed' => $result['failed']);
+  }
 
-    // Must not contain control characters (except spaces)
-    if (preg_match('/[\x00-\x1F\x7F]/', $shortname)) {
-      return false;
+  /**
+   * @brief Split a delimited license-name string on the first separator found.
+   * @param string $licenseNames
+   * @return string[]
+   */
+  private function splitLicenseNames($licenseNames)
+  {
+    foreach (array(', ', ',', ';', '|') as $separator) {
+      if (strpos($licenseNames, $separator) !== false) {
+        return array_map('trim', explode($separator, $licenseNames));
+      }
     }
-
-    return true;
+    return array($licenseNames);
   }
 
   /**
@@ -468,6 +540,7 @@ class CustomTextImport
    */
   public function importJsonData($data, string &$msg): string
   {
+    $this->unescapeNewlines = false;
     $msg = $this->importPhrases($data);
     return $msg;
   }

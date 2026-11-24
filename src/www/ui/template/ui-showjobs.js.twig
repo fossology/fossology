@@ -185,7 +185,8 @@ function fillTableWithJobInfo(tableTemplate, job) {
     } else {
       jqETA = "{{ "Scanned"|trans }}";
     }
-    if (jqET.indexOf("Fail") !== -1 || jqET.indexOf("kill") !== -1) {
+    var jqETLower = jqET.toLowerCase();
+    if (jqETLower.indexOf("fail") !== -1 || jqETLower.indexOf("kill") !== -1) {
       trClass = "jobFailed";
     }
 

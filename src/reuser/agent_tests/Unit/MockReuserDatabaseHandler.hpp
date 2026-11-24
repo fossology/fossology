@@ -68,6 +68,15 @@ public:
   std::function<bool(int, int, int)>
     onReuseCopyrights;
 
+  std::function<bool(int, int, int)>
+    onProcessBulkReuser;
+
+  std::function<bool(int)>
+    onIsJobQueueRunning;
+
+  std::function<int(int)>
+    onGetEstimatedTime;
+
   // ── ReuserDatabaseHandler overrides ──────────────────────────────────────
 
   bool getParentItemBounds(int uploadId, ItemTreeBounds& out) override
@@ -136,5 +145,24 @@ public:
     if (onReuseCopyrights)
       return onReuseCopyrights(uploadId, reusedUploadId, userId);
     return true;
+  }
+
+  bool processBulkReuser(int uploadId, int groupId, int userId) override
+  {
+    if (onProcessBulkReuser)
+      return onProcessBulkReuser(uploadId, groupId, userId);
+    return true;
+  }
+
+  bool isJobQueueRunning(int jqPk) override
+  {
+    if (onIsJobQueueRunning) return onIsJobQueueRunning(jqPk);
+    return false;
+  }
+
+  int getEstimatedTime(int jqPk) override
+  {
+    if (onGetEstimatedTime) return onGetEstimatedTime(jqPk);
+    return 0;
   }
 };

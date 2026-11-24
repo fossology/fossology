@@ -59,8 +59,14 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (scannerTestSuite);
   CPPUNIT_TEST (copyscannerTest);
   CPPUNIT_TEST (copyscannerDotPrefixedNameTest);
+  CPPUNIT_TEST (copyscannerBracketedYearTest);
+  CPPUNIT_TEST (copyscannerBracketedYearNoiseTest);
+  CPPUNIT_TEST (copyscannerBracketedYearBoundariesTest);
+  CPPUNIT_TEST (copyscannerCopySymByHolderTest);
+  CPPUNIT_TEST (copyscannerCopySymPunctuatedHolderTest);
   CPPUNIT_TEST (copyscannerBareKeywordDiscardTest);
   CPPUNIT_TEST (copyscannerCopyrightedStatementTest);
+  CPPUNIT_TEST (copyscannerCamelCaseHolderTest);
   CPPUNIT_TEST (copyscannerBinaryNoiseTest);
   CPPUNIT_TEST (copyscannerSpdxFullLineTest);
   CPPUNIT_TEST (copyscannerSpdxArrayTest);
@@ -70,6 +76,7 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST (regEccTest);
   CPPUNIT_TEST (regUrlTest);
   CPPUNIT_TEST (regEmailTest);
+  CPPUNIT_TEST (regEmailReservedDomainTest);
   CPPUNIT_TEST (regKeywordTest);
   CPPUNIT_TEST (cleanEntries);
 
@@ -148,6 +155,218 @@ protected:
   }
 
   /**
+   * \brief Preserve bracketed numeric years after a copyright symbol.
+   * \test
+   */
+  void copyscannerBracketedYearTest()
+  {
+    hCopyrightScanner sc;
+    const char* valid[] = {
+      "Copyright (c) [2021] [Marvin Countryman]",
+      "Copyright (C) [1999] Marvin Countryman",
+      "Copyright (c)[2021] [Marvin Countryman]",
+      "Copyright (c)\t[ 2021 ] [Marvin Countryman]",
+      "Copyright (c) [\t2021\t] [Marvin Countryman]",
+      "Copyright \xc2\xa9 [2021] [Marvin Countryman]",
+      "Copyright &copy; [2021] [Marvin Countryman]",
+      "Copyrighted (C) [2021] [Marvin Countryman]",
+      "Copyright (c) 2021 [Marvin Countryman]",
+      "Copyright [2021] [Marvin Countryman]",
+      "Copyright (c) 2021 Marvin Countryman"
+    };
+
+    for (const char* statement : valid)
+    {
+      for (const char* ending : {"", "\n"})
+      {
+        list<match> matches;
+        sc.ScanString(string(statement) + ending, matches);
+        const string message = string("Expected full active match for: ") + statement;
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, (size_t)1, matches.size());
+        const match& finding = matches.front();
+        CPPUNIT_ASSERT_MESSAGE(message, finding.is_enabled);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, string("statement"), finding.type);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, 0, finding.start);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, (int)strlen(statement), finding.end);
+      }
+    }
+  }
+
+  /**
+   * \brief Brackets must not exempt placeholders or noise from cleanup.
+   * \test
+   */
+  void copyscannerBracketedYearNoiseTest()
+  {
+    hCopyrightScanner sc;
+    const char* noise[] = {
+      "Copyright (c) [year] [name]\n",
+      "Copyright (c) [yyyy] [name]\n",
+      "Copyright (c) [Marvin Countryman]\n",
+      "Copyright (c) [c] [name]\n",
+      "Copyright (c) [] [name]\n",
+      "Copyright (c) [202] [name]\n",
+      "Copyright (c) [20210] [name]\n",
+      "Copyright (c) [2021suffix] [name]\n",
+      "Copyright (c) [2021 [name]\n",
+      "Copyright (c) [[2021]] [name]\n",
+      "Copyright (c) {year} {name}\n",
+      "Copyright (c) <year> <name>\n",
+      "Copyright (c) $year $name\n",
+      "Copyright (c) %year% %name%\n"
+    };
+
+    for (const char* statement : noise)
+    {
+      list<match> matches;
+      sc.ScanString(statement, matches);
+      for (const auto& finding : matches)
+        CPPUNIT_ASSERT_MESSAGE(
+          string("Expected no active match for: ") + statement,
+          !finding.is_enabled);
+    }
+  }
+
+  /**
+   * \brief Preserve offsets and separation from the following statement.
+   * \test
+   */
+  void copyscannerBracketedYearBoundariesTest()
+  {
+    hCopyrightScanner sc;
+    const char* content =
+      "// Copyright (c) [2021] [Marvin Countryman]. All rights reserved.\n"
+      "// Copyright (c) 2022 Another Company\n";
+    scannerTest(sc, content, "statement", {
+      "Copyright (c) [2021] [Marvin Countryman].",
+      "Copyright (c) 2022 Another Company"
+    });
+
+    list<match> matches;
+    sc.ScanString(content, matches);
+    for (const auto& finding : matches)
+      CPPUNIT_ASSERT_MESSAGE("Both copyright statements must stay active",
+        finding.is_enabled);
+  }
+
+  /**
+   * \brief A copyright symbol followed by "by <holder>" without a year must
+   * not be stripped down to a bare keyword by REG_STRIP_COPYSYM_NONYEAR.
+   * \test
+   */
+  void copyscannerCopySymByHolderTest()
+  {
+    hCopyrightScanner sc;
+    const char* valid[] = {
+      "Copyright(c) by Mei Qingguang",
+      "Copyright (c) by Mei Qingguang",
+      "Copyright (C) by Heiko Eissfeldt",
+      "Copyright \xc2\xa9 by Mei Qingguang"
+    };
+
+    for (const char* statement : valid)
+    {
+      for (const char* ending : {"", "\n"})
+      {
+        list<match> matches;
+        sc.ScanString(string(statement) + ending, matches);
+        const string message = string("Expected full active match for: ") + statement;
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, (size_t)1, matches.size());
+        const match& finding = matches.front();
+        CPPUNIT_ASSERT_MESSAGE(message, finding.is_enabled);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, 0, finding.start);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, (int)strlen(statement), finding.end);
+      }
+    }
+
+    // Full MIT header: the grant text must be stripped, holder kept.
+    const char* mit =
+      "This software is licensed under the MIT License.\n\n"
+      "Copyright(c) by Mei Qingguang\n\n"
+      "Permission is hereby granted, free of charge, to any person obtaining a copy\n"
+      "of this software and associated documentation files (the \"Software\"), to deal\n"
+      "in the Software without restriction.\n";
+    scannerTest(sc, mit, "statement", {"Copyright(c) by Mei Qingguang"});
+
+    // "by" alone still leaves nothing to keep.
+    const char* bare[] = {"Copyright (c) by\n", "(c) by\n"};
+    for (const char* statement : bare)
+    {
+      list<match> matches;
+      sc.ScanString(statement, matches);
+      for (const auto& finding : matches)
+        CPPUNIT_ASSERT_MESSAGE(
+          string("Expected no active match for: ") + statement,
+          !finding.is_enabled);
+    }
+  }
+
+  /**
+   * \brief A copyright symbol separated from the holder by punctuation
+   * (e.g. "Copyright (c), Data Geekery GmbH") must not be stripped down to
+   * a bare keyword by REG_STRIP_COPYSYM_NONYEAR.
+   * \test
+   */
+  void copyscannerCopySymPunctuatedHolderTest()
+  {
+    hCopyrightScanner sc;
+    const char* valid[] = {
+      "Copyright (c), Data Geekery GmbH, contact@datageekery.com",
+      "Copyright (c), Data Geekery GmbH",
+      "Copyright (C): Data Geekery GmbH",
+      "Copyright (c); Data Geekery GmbH",
+      "Copyright (c),Data Geekery GmbH",
+      "Copyright \xc2\xa9, Data Geekery GmbH",
+      "Copyright (c), 2021 Data Geekery GmbH",
+      "Copyright (c), by Data Geekery GmbH"
+    };
+
+    for (const char* statement : valid)
+    {
+      for (const char* ending : {"", "\n"})
+      {
+        list<match> matches;
+        sc.ScanString(string(statement) + ending, matches);
+        const string message = string("Expected full active match for: ") + statement;
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, (size_t)1, matches.size());
+        const match& finding = matches.front();
+        CPPUNIT_ASSERT_MESSAGE(message, finding.is_enabled);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, string("statement"), finding.type);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, 0, finding.start);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message, (int)strlen(statement), finding.end);
+      }
+    }
+
+    // Full Apache header: license grant stripped, holder kept.
+    const char* apache =
+      "/*\n"
+      " * Copyright (c), Data Geekery GmbH, contact@datageekery.com\n"
+      " *\n"
+      " * Licensed under the Apache License, Version 2.0 (the \"License\");\n"
+      " * you may not use this file except in compliance with the License.\n"
+      " */\n"
+      "package com.fasterxml.jackson.module.blackbird.util;\n";
+    scannerTest(sc, apache, "statement",
+      {"Copyright (c), Data Geekery GmbH, contact@datageekery.com"});
+
+    // Punctuation followed by noise must still be stripped/discarded.
+    const char* noise[] = {
+      "Copyright (c), 0x1234\n",
+      "Copyright (c), {year} {name}\n",
+      "Copyright (c),\n"
+    };
+    for (const char* statement : noise)
+    {
+      list<match> matches;
+      sc.ScanString(statement, matches);
+      for (const auto& finding : matches)
+        CPPUNIT_ASSERT_MESSAGE(
+          string("Expected no active match for: ") + statement,
+          !finding.is_enabled);
+    }
+  }
+
+  /**
    * \brief Test that bare copyright keywords produce no matches
    * \test
    */
@@ -219,6 +438,58 @@ protected:
       CPPUNIT_ASSERT_MESSAGE(
         string("Expected active match for: ") + valid[i],
         !matches.empty() && matches.front().is_enabled);
+    }
+  }
+
+  /**
+   * \brief Regression: REG_EXCEPTION_COPY carries a To[A-Z][a-zA-Z]{4,} branch
+   * to skip camelCase identifiers such as Copyright.ToString(). The expression
+   * is compiled with icase, which makes [A-Z] match lowercase too, degrading the
+   * branch into "any word starting with to". Holder names such as TOSHIBA then
+   * matched and were deactivated. The branch is guarded with (?-i:...) so only
+   * real camelCase matches.
+   * \test
+   */
+  void copyscannerCamelCaseHolderTest()
+  {
+    hCopyrightScanner sc;
+
+    // Holder names beginning with "to" in any casing must stay active
+    const char* holders[] = {
+      "Copyright TOSHIBA CORPORATION, 2022. Part of the SW360 Portal Project.\n",
+      "Copyright Toshiba Software Development (Vietnam) Co., Ltd., 2022. Part of the SW360 Portal Project.\n",
+      "Copyright (C) TOSHIBA CORPORATION, 2025. Part of the SW360 Frontend Project.\n",
+      "Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2025. Part of the SW360 Frontend Project.\n",
+      "Copyright TOSHIBA TEC CORPORATION, 2023\n",
+      "Copyright TORONTO DOMINION BANK, 2019\n",
+      "Copyright TOYOTA MOTOR CORPORATION, 2018\n",
+      "Copyright TOMTOM INTERNATIONAL BV, 2021\n",
+      nullptr
+    };
+    for (int i = 0; holders[i]; ++i)
+    {
+      list<match> matches;
+      sc.ScanString(holders[i], matches);
+      CPPUNIT_ASSERT_MESSAGE(
+        string("Expected active match for holder: ") + holders[i],
+        !matches.empty() && matches.front().is_enabled);
+    }
+
+    // Genuine camelCase identifiers must still be deactivated
+    const char* identifiers[] = {
+      "Copyright.ToString() returns the assembly attribute\n",
+      "copyright.ToArray().Select(x => x.Holder)\n",
+      "Copyright ToUpperInvariant helper for holder names\n",
+      nullptr
+    };
+    for (int i = 0; identifiers[i]; ++i)
+    {
+      list<match> matches;
+      sc.ScanString(identifiers[i], matches);
+      bool hasActive = !matches.empty() && matches.front().is_enabled;
+      CPPUNIT_ASSERT_MESSAGE(
+        string("Expected no active match for identifier: ") + identifiers[i],
+        !hasActive);
     }
   }
 
@@ -485,6 +756,33 @@ protected:
   void regEmailTest () {
     regexScanner sc("email", "copyright",1);
     scannerTest(sc, testContent, "email", { "info@mysite.org", "benj@debian.org" });
+  }
+
+  /**
+   * \brief Test email scanner skips reserved domains (RFC 2606)
+   * \test
+   * -# Create a email scanner
+   * -# Scan addresses in example.{com,net,org}, .test and .invalid
+   * -# Check that they are not reported, not even truncated
+   * -# Check that other addresses are reported unchanged
+   */
+  void regEmailReservedDomainTest () {
+    const char content[] =
+      "alice@example.com\n"
+      "<bob@example.net>\n"
+      "(carol@example.org)\n"
+      "dave@server.test\n"
+      "erin@host.invalid\n"
+      "grace@sub.example.com\n"
+      "frank@realcompany.de\n"
+      "john@myexample.com\n"
+      "maria@example.community\n"
+      "Contact paul@kernel.org.\n"
+      "sam@mail.co.uk\n";
+    regexScanner sc("email", "copyright", 1);
+    scannerTest(sc, content, "email", { "frank@realcompany.de",
+      "john@myexample.com", "maria@example.community", "paul@kernel.org",
+      "sam@mail.co.uk" });
   }
 
   /**

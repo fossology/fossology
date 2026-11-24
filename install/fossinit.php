@@ -292,8 +292,8 @@ if (version_compare($release, '4.3.0', '<')) {
   Migrate_42_43($Verbose);
 }
 
-require_once("$LIBEXECDIR/dbmigrate_cmu-mach.php");
-Migrate_Cmu_Mach($dbManager, $Verbose);
+require_once("$LIBEXECDIR/dbmigrate_legacy-license-names.php");
+Migrate_Legacy_License_Names($dbManager, $Verbose);
 
 /* initialize the license_ref table */
 if ($UpdateLiceneseRef)
@@ -439,6 +439,12 @@ $errors = $checker->check();
 
 require_once("$LIBEXECDIR/dbmigrate_licensedb_compatibility.php");
 LicenseDB_compatibility_migration();
+
+require_once("$LIBEXECDIR/dbmigrate_token.php");
+Token_timestamp_migration();
+
+require_once("$LIBEXECDIR/dbmigrate_kotoba_candidate_licenses.php");
+Kotoba_candidate_license_migration();
 
 if($errors>0)
 {

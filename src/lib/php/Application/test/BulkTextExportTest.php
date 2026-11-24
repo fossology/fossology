@@ -52,6 +52,7 @@ class BulkTextExportTest extends \PHPUnit\Framework\TestCase
         'rf_shortname' => 'MIT',
         'removing' => 'f',
         'comment' => null,
+        'reportinfo' => null,
         'acknowledgement' => null,
         'rf_active' => 't'
       )
@@ -71,9 +72,9 @@ class BulkTextExportTest extends \PHPUnit\Framework\TestCase
     fclose($handle);
 
     $this->assertCount(2, $rows);
-    $this->assertSame("\xEF\xBB\xBFtext", $rows[0][0]);
+    $this->assertSame("\xEF\xBB\xBFText", $rows[0][0]);
     $this->assertSame('hello, world\\nsecond line', $rows[1][0]);
-    $this->assertSame('MIT', $rows[1][1]);
+    $this->assertSame('MIT', $rows[1][2]);
     $this->assertSame(2, substr_count($csv, "\n"));
   }
 
@@ -115,6 +116,7 @@ class BulkTextExportTest extends \PHPUnit\Framework\TestCase
         'rf_shortname' => 'MIT',
         'removing' => 'f',
         'comment' => null,
+        'reportinfo' => null,
         'acknowledgement' => null,
         'rf_active' => 't',
         'license_text' => 'Permission is hereby granted, free of charge...'
@@ -124,6 +126,7 @@ class BulkTextExportTest extends \PHPUnit\Framework\TestCase
         'rf_shortname' => 'Apache-2.0',
         'removing' => 't',
         'comment' => null,
+        'reportinfo' => null,
         'acknowledgement' => null,
         'rf_active' => 't',
         'license_text' => 'Apache License Version 2.0...'
@@ -143,12 +146,14 @@ class BulkTextExportTest extends \PHPUnit\Framework\TestCase
     }
     fclose($handle);
 
-    $this->assertCount(2, $rows);
-    $this->assertSame('license_text', $rows[0][6]);
-    $this->assertSame('MIT', $rows[1][1]);
-    $this->assertSame('Apache-2.0', $rows[1][2]);
-    $this->assertStringContainsString('Permission is hereby granted', $rows[1][6]);
-    $this->assertStringNotContainsString('Apache License', $rows[1][6]);
+    // header + one row per license sharing "some bulk text": MIT, then Apache-2.0
+    $this->assertCount(3, $rows);
+    $this->assertSame('license_ref_text', $rows[0][7]);
+    $this->assertSame('MIT', $rows[1][2]);
+    $this->assertSame('Apache-2.0', $rows[2][2]);
+    $this->assertStringContainsString('Permission is hereby granted', $rows[1][7]);
+    $this->assertStringNotContainsString('Apache License', $rows[1][7]);
+    $this->assertStringContainsString('Apache License', $rows[2][7]);
   }
 
   /**
@@ -165,6 +170,7 @@ class BulkTextExportTest extends \PHPUnit\Framework\TestCase
         'rf_shortname' => 'MIT',
         'removing' => 'f',
         'comment' => null,
+        'reportinfo' => null,
         'acknowledgement' => null,
         'rf_active' => 't'
       )
@@ -184,7 +190,7 @@ class BulkTextExportTest extends \PHPUnit\Framework\TestCase
     fclose($handle);
 
     $this->assertCount(2, $rows);
-    $this->assertCount(6, $rows[0]);
-    $this->assertSame('is_active', $rows[0][5]);
+    $this->assertCount(7, $rows[0]);
+    $this->assertSame('License Text', $rows[0][5]);
   }
 }

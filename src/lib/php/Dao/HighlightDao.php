@@ -197,7 +197,7 @@ class HighlightDao
     while ($row = $this->dbManager->fetchArray($result)) {
       $newHighlight = new Highlight(
           intval($row['start']), intval($row['start'] + $row['len']),
-          Highlight::BULK, 0, 0);
+          Highlight::KOTOBA, 0, 0);
       $newHighlight->setLicenseId($row['rf_fk']);
       $newHighlight->setInfoText($row['text']);
       $highlightEntries[] = $newHighlight;

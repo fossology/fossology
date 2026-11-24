@@ -31,7 +31,7 @@ class softwareHeritageAgentPlugin extends AgentPlugin
    */
   function AgentHasResults($uploadId=0)
   {
-    return CheckARS($uploadId, $this->AgentName, "Software Heritage scanner", "softwareHeritage");
+    return CheckARS($uploadId, $this->AgentName, "Software Heritage scanner", "softwareheritage_ars");
   }
 }
 

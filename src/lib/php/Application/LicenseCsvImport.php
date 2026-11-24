@@ -49,7 +49,7 @@ class LicenseCsvImport
    * Alias for headers */
   protected $alias = array(
       'shortname'=>array('shortname','Short Name'),
-      'licensetype'=>array('licensetype','License Type'),
+      'licensetype'=>array('licensetype','license_type','License Type'),
       'fullname'=>array('fullname','Long Name'),
       'spdx_id'=>array('spdx_id', 'SPDX ID'),
       'text'=>array('text','Full Text'),
@@ -193,7 +193,7 @@ class LicenseCsvImport
     }
     foreach (array('parent_shortname' => null, 'report_shortname' => null,
       'url' => '', 'notes' => '', 'source' => '', 'risk' => 0,
-      'group' => null, 'spdx_id' => null, 'licensetype' => "Permisssive"
+      'group' => null, 'spdx_id' => null, 'licensetype' => null
       ) as $optNeedle=>$defaultValue) {
       $mRow[$optNeedle] = $defaultValue;
       if ($this->headrow[$optNeedle]!==false && array_key_exists($this->headrow[$optNeedle], $row)) {
@@ -214,13 +214,17 @@ class LicenseCsvImport
   {
     $mRow = $this->handleRowJson($row);
     foreach (array('parent_shortname' => null, 'report_shortname' => null,
-      'url' => '', 'notes' => '', 'source' => '', 'risk' => 0,
-      'group' => null, 'spdx_id' => null, 'licensetype' => 'Permisssive',
+      'url' => '', 'notes' => '', 'source' => '', 'risk' => 0, 'active' => true,
+      'group' => null, 'spdx_id' => null, 'licensetype' => null,
       'obligation_ids' => array()
       ) as $optNeedle => $defaultValue) {
       if (!array_key_exists($optNeedle, $mRow)) {
         $mRow[$optNeedle] = $defaultValue;
       }
+    }
+
+    if (empty($mRow['external_id'])) {
+      return $this->handleCsvLicense($mRow);
     }
 
     return $this->handleLicenseDBLicenseImport($mRow);
@@ -260,7 +264,7 @@ class LicenseCsvImport
   {
     $stmt = __METHOD__ . '.getOldLicense';
     $oldLicense = $this->dbManager->getSingleRow('SELECT ' .
-      'rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype ' .
+      'rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype, rf_active ' .
       'FROM license_ref WHERE rf_pk = $1', array($rfPk), $stmt);
 
     $log = "License '$row[shortname]' already exists in DB (id = $rfPk)";
@@ -326,6 +330,13 @@ class LicenseCsvImport
       $stmt .= '.types';
       $extraParams[] = "rf_licensetype=$".count($param);
       $log .= ', updated the licensetype';
+    }
+    if (isset($row['active']) && $row['active'] !=
+        $this->dbManager->booleanFromDb($oldLicense['rf_active'])) {
+      $param[] = $this->dbManager->booleanToDb($row['active']);
+      $stmt .= '.active';
+      $extraParams[] = 'rf_active=$' . count($param);
+      $log .= ', updated active';
     }
     if (count($param) > 1) {
       $sql .= join(",", $extraParams);
@@ -412,6 +423,11 @@ class LicenseCsvImport
     } else {
       $return = $this->insertNewLicense($row, "license_ref");
     }
+    // insertNewLicense() returns a plain string on error (e.g. missing group)
+    // or an array on success.
+    if (is_string($return)) {
+      return $return;
+    }
     return $return['log'];
   }
 
@@ -466,6 +482,13 @@ class LicenseCsvImport
       // associated obligations
       $diff = ArrayOperation::getArrayDiffs($oldObIds, $newObIds);
 
+      if (!empty($diff['remove'])) {
+        $log .= ' unlinked obligation ids [' . implode(',', $diff['remove']) . ']';
+      }
+      if (!empty($diff['add'])) {
+        $log .= ' linked obligation ids [' . implode(',', $diff['add']) . ']';
+      }
+
       // delete associations
       foreach ($diff['remove'] as $obid) {
         $this->obligationMap->unassociateLicenseFromObligation($obid, $rfPk['rf_pk']);
@@ -494,6 +517,9 @@ class LicenseCsvImport
       }
 
       // insert associations
+      if (!empty($newObIds)) {
+        $log .= ' linked obligation ids [' . implode(',', $newObIds) . ']';
+      }
       foreach ($newObIds as $obid) {
         $this->obligationMap->associateLicenseWithObligation($obid, $licRetVal['pkey']);
       }
@@ -615,7 +641,7 @@ class LicenseCsvImport
    *
    * Creates a new main license/candidate license based on table name sent
    * and if the required group exists in DB.
-   * @param array $row        Rows comming from CSV
+   * @param array $row        Rows comming from CSV/LicenseDB
    * @param string $tableName Table where this new license should go to
    * @return string Log messages
    */
@@ -623,18 +649,19 @@ class LicenseCsvImport
   {
     $stmtInsert = __METHOD__ . '.insert.' . $tableName;
     $columns = array(
-      "rf_shortname" => $row['shortname'],
-      "rf_licensetype" => $row['licensetype'],
-      "rf_fullname"  => $row['fullname'],
-      "rf_spdx_id"   => $row['spdx_id'],
-      "rf_text"      => $row['text'],
-      "rf_md5"       => md5($row['text']),
+      "rf_shortname"     => $row['shortname'],
+      "rf_licensetype"   => $row['licensetype'] ?: 'Unknown',
+      "rf_fullname"      => $row['fullname'],
+      "rf_spdx_id"       => $row['spdx_id'],
+      "rf_text"          => $row['text'],
+      "rf_md5"           => md5($row['text']),
       "rf_detector_type" => 1,
-      "rf_url"       => $row['url'],
-      "rf_notes"     => $row['notes'],
-      "rf_source"    => $row['source'],
-      "rf_risk"      => $row['risk'],
-      "rf_external_id" => $row['external_id']
+      "rf_url"           => $row['url'],
+      "rf_notes"         => $row['notes'],
+      "rf_source"        => $row['source'],
+      "rf_risk"          => $row['risk'],
+      "rf_external_id"   => $row['external_id'],
+      "rf_active"        => $this->dbManager->booleanToDb($row['active'] ?? true),
     );
 
     $as = "";

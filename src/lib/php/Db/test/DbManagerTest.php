@@ -26,7 +26,7 @@ abstract class DbManagerTestCase extends \PHPUnit\Framework\TestCase
     $this->driver->shouldReceive('booleanToDb')->with(true)->andReturn('t');
     $this->driver->shouldReceive('booleanToDb')->with(false)->andReturn('f');
     $this->driver->shouldReceive('escapeString')->andReturnUsing(function ($v){
-      return pg_escape_string($v);
+      return str_replace("'", "''", $v);
     });
 
     $this->logger = M::mock('Monolog\\Logger');

@@ -6,10 +6,7 @@
 set -o errexit -o nounset -o xtrace
 
 docker compose build
-docker compose up -d
-
-#### fossology needs up to 15 seconds to startup
-sleep 15
+docker compose up -d --wait --wait-timeout 60
 
 readonly HOST="$(docker compose port web 80)"
 

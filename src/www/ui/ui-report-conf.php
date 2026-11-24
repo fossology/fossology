@@ -15,6 +15,7 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Data\Package\ComponentType;
+use Fossology\Lib\Data\Report\CycloneDxSettings;
 
 class ui_report_conf extends FO_Plugin
 {
@@ -156,15 +157,15 @@ class ui_report_conf extends FO_Plugin
     $textAreaStyle = ' style="overflow:auto;width:98%;height:80px;"';
     $vars['styleDependencyTA'] = $vars['styleExportTA'] = $vars['styleRestrictionTA'] = $textAreaStyle;
     if ($row['ri_depnotes'] == 'NA' || empty($row['ri_depnotes'])) {
-       $vars['styleDependencyTA'] = $textAreaNoneStyle;
+      $vars['styleDependencyTA'] = $textAreaNoneStyle;
     }
 
     if ($row['ri_exportnotes'] == 'NA' || empty($row['ri_exportnotes'])) {
-       $vars['styleExportTA'] = $textAreaNoneStyle;
+      $vars['styleExportTA'] = $textAreaNoneStyle;
     }
 
     if ($row['ri_copyrightnotes'] == 'NA' || empty($row['ri_copyrightnotes'])) {
-       $vars['styleRestrictionTA'] = $textAreaNoneStyle;
+      $vars['styleRestrictionTA'] = $textAreaNoneStyle;
     }
 
     if (!empty($row['ri_ga_checkbox_selection'])) {
@@ -184,6 +185,9 @@ class ui_report_conf extends FO_Plugin
         $vars[$key] = 'unchecked';
       }
     }
+
+    $vars['cyclonedx'] = $this->uploadDao->getCyclonedxSettings($uploadId);
+    $vars['cyclonedxSupportedVersions'] = CycloneDxSettings::SUPPORTED_VERSIONS;
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
@@ -379,6 +383,7 @@ class ui_report_conf extends FO_Plugin
    */
   protected function getCheckBoxSelectionList($listParams)
   {
+    $cbList = [];
     foreach ($listParams as $listkey => $listValue) {
       $ret = GetParm($listValue, PARM_STRING);
       if ($ret != $listkey) {
@@ -392,6 +397,34 @@ class ui_report_conf extends FO_Plugin
     return $cbSelectionList;
   }
 
+  /**
+   * @brief CycloneDX settings submitted with the form
+   *
+   * An invalid namespace keeps the stored one and sets an error message.
+   * @param int $uploadId
+   * @return CycloneDxSettings
+   */
+  private function getCycloneDxSettingsFromRequest($uploadId)
+  {
+    $stored = $this->uploadDao->getCyclonedxSettings($uploadId);
+    $namespaceInput = trim((string) GetParm('cyclonedxCustomTagNamespace', PARM_RAW));
+    $namespace = $namespaceInput === '' ? CycloneDxSettings::DEFAULT_NAMESPACE :
+      CycloneDxSettings::normaliseNamespace($namespaceInput);
+    if ($namespace === null) {
+      $namespace = $stored->getTagNamespace();
+      $this->vars['message'] = sprintf(_("CycloneDX tag namespace not saved: " .
+        "use letters, digits, '.', '_', '-' and ':' (at most %d characters)."),
+        CycloneDxSettings::MAX_NAMESPACE_LENGTH);
+    }
+    $specVersion = CycloneDxSettings::normaliseSpecVersion(
+      GetParm('cyclonedxSpecVersion', PARM_STRING)) ?? $stored->getSpecVersion();
+    return new CycloneDxSettings(
+      GetParm('cyclonedxLicenseComment', PARM_STRING) === 'cyclonedxLicenseComment',
+      GetParm('cyclonedxIgnoreFilesWOInfo', PARM_STRING) === 'cyclonedxIgnoreFilesWOInfo',
+      GetParm('cyclonedxOsselotExport', PARM_STRING) === 'cyclonedxOsselotExport',
+      $namespace, $specVersion);
+  }
+
   public function Output()
   {
     $uploadId = GetParm("upload", PARM_INTEGER);
@@ -401,8 +434,8 @@ class ui_report_conf extends FO_Plugin
       return;
     }
 
-    $itemId = GetParm("item",PARM_INTEGER);
-    $this->vars['micromenu'] = Dir2Browse("browse", $itemId, NULL, $showBox=0, "View-Meta");
+    $itemId = GetParm("item", PARM_INTEGER);
+    $this->vars['micromenu'] = Dir2Browse("browse", $itemId, null, $showBox = 0, "View-Meta");
     $this->vars['globalClearingAvailable'] = Auth::isClearingAdmin();
 
     $submitReportConf = GetParm("submitReportConf", PARM_STRING);
@@ -441,6 +474,8 @@ class ui_report_conf extends FO_Plugin
       $checkBoxUrPos = count($parms);
       $parms[] = $this->getCheckBoxSelectionList($this->checkBoxListSPDX);
       $checkBoxSpdxPos = count($parms);
+      $parms[] = $this->getCycloneDxSettingsFromRequest($uploadId)->toReportInfo();
+      $cyclonedxPos = count($parms);
       $parms[] = json_encode($obLicenses);
       $excludeObligationPos = count($parms);
       $parms[] = json_encode($unifiedReportColumnsForJson);
@@ -455,6 +490,7 @@ class ui_report_conf extends FO_Plugin
       $SQL = "UPDATE report_info SET $columns" .
                "ri_ga_checkbox_selection = $$checkBoxUrPos, " .
                "ri_spdx_selection = $$checkBoxSpdxPos, " .
+               "ri_cyclonedx_selection = $$cyclonedxPos, " .
                "ri_excluded_obligations = $$excludeObligationPos, " .
                "ri_unifiedcolumns = $$unifiedColumnsPos, " .
                "ri_clixmlcolumns = $$clixmlColumnsPos, " .
@@ -558,12 +594,24 @@ class ui_report_conf extends FO_Plugin
           $('#spdxLicenseCommentCheckbox').prop('checked', true);
         }
       });
-      $(\"[data-toggle='tooltip']\").tooltip();
       $('#spdxLicenseCommentCheckbox').change(function() {
         if (!this.checked) {
           $('#osselotExportCheckbox').prop('checked', false);
         }
       });
+
+      $('#cyclonedxOsselotExportCheckbox').change(function() {
+        if ($(this).is(':checked')) {
+          $('#cyclonedxLicenseCommentCheckbox').prop('checked', true);
+        }
+      });
+      $('#cyclonedxLicenseCommentCheckbox').change(function() {
+        if (!this.checked) {
+          $('#cyclonedxOsselotExportCheckbox').prop('checked', false);
+        }
+      });
+
+      $(\"[data-toggle='tooltip']\").tooltip();
 
       var ackAjaxUrl = '?mod=ajax-acknowledgement-conf';
 

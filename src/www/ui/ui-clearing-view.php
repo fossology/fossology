@@ -247,6 +247,7 @@ class ClearingView extends FO_Plugin
     $this->vars['baseuri'] = $baseUri;
     $this->vars['uri'] = $baseUri . "?mod=" . $this->Name . Traceback_parm_keep(array('upload', 'folder'));
     $this->vars['bulkHistoryHighlightUri'] = $this->vars['uri'];
+    $this->vars['kotobaHistoryHighlightUri'] = $this->vars['uri'];
     $this->vars['optionName'] = "skipFile";
     $this->vars['formName'] = "uiClearingForm";
     $this->vars['ajaxAction'] = "setNextPrev";
@@ -330,6 +331,7 @@ class ClearingView extends FO_Plugin
     $this->vars['bulkHistory'] = $bulkHistory;
     $this->vars['hasKotobaFindings'] = $hasKotobaFindings;
     $this->vars['kotobaHistory'] = $kotobaHistory;
+    $this->vars['isAdmin'] = Auth::isAdmin();
 
     $noLicenseUploadTreeView = new UploadTreeProxy($uploadId,
       array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",

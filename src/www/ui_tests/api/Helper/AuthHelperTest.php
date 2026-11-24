@@ -105,9 +105,9 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
     $expectedUser = 2;
     $tokenScope = null;
     $jti = "4.2";
-    $key = "mysecretkey";
-    $createdOn = strftime('%Y-%m-%d');
-    $expire = strftime('%Y-%m-%d', strtotime('+3 day'));
+    $key = "mysecretkey-mysecretkey-mysecretkey-1234";
+    $createdOn = date('Y-m-d');
+    $expire = date('Y-m-d', strtotime('+3 day'));
     $authToken = $this->authHelper->generateJwtToken($expire, $createdOn, $jti,
       "w", $key);
     $authHeader = "Bearer " . $authToken;
@@ -148,9 +148,9 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
     $expectedUser = 2;
     $tokenScope = null;
     $jti = "4.2";
-    $key = "mysecretkey";
-    $createdOn = strftime('%Y-%m-%d');
-    $expire = strftime('%Y-%m-%d', strtotime('+3 day'));
+    $key = "mysecretkey-mysecretkey-mysecretkey-1234";
+    $createdOn = date('Y-m-d');
+    $expire = date('Y-m-d', strtotime('+3 day'));
     $authToken = $this->authHelper->generateJwtToken($expire, $createdOn, $jti,
       "w", $key);
     $authHeader = "Bearer " . $authToken;
@@ -185,9 +185,9 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
    */
   public function testIsTokenActive()
   {
-    $key = "mysecretkey";
-    $createdOn = strftime('%Y-%m-%d');
-    $expire = strftime('%Y-%m-%d', strtotime('+3 day'));
+    $key = "mysecretkey-mysecretkey-mysecretkey-1234";
+    $createdOn = date('Y-m-d');
+    $expire = date('Y-m-d', strtotime('+3 day'));
     $tokenId = 4;
     $activeTokenRow = [
       "token_key" => $key,
@@ -222,9 +222,9 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
    */
   public function testIsTokenActiveExpireOldToken()
   {
-    $key = "mysecretkey";
-    $createdOn = strftime('%Y-%m-%d', strtotime('-3 day'));
-    $expire = strftime('%Y-%m-%d', strtotime('-1 day'));
+    $key = "mysecretkey-mysecretkey-mysecretkey-1234";
+    $createdOn = date('Y-m-d', strtotime('-3 day'));
+    $expire = date('Y-m-d', strtotime('-1 day'));
     $tokenId = 4;
     $tokenRow = [
       "token_key" => $key,
