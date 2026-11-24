@@ -435,12 +435,18 @@ class UserDao
 
   /**
    * @param $groupId
-   * @return array
+   * @param bool $allowMissing Retain deleted-group references in job history.
+   * @return string
    */
-  public function getGroupNameById($groupId)
+  public function getGroupNameById($groupId, $allowMissing = false)
   {
     $groupRow =  $this->dbManager->getSingleRow("SELECT group_name FROM groups WHERE group_pk = $1",array($groupId),__METHOD__);
     if (empty($groupRow)) {
+      if ($allowMissing) {
+        $this->logger->warning("Job history references missing group ID {groupId}",
+          array('groupId' => $groupId));
+        return "[missing group ID " . $groupId . "]";
+      }
       throw new \Exception('Error: GroupId ='. $groupId .' not a member of a valid group.');
     }
     return $groupRow['group_name'];

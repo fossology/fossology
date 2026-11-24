@@ -135,6 +135,31 @@ class UserDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($groupId,equalTo(2));
   }
 
+  public function testMissingGroupNameStillFailsByDefault()
+  {
+    $this->testDb->createPlainTables(array('groups'));
+    $this->expectException(Exception::class);
+    $this->expectExceptionMessage('Error: GroupId =5 not a member of a valid group.');
+    $this->userDao->getGroupNameById(5);
+  }
+
+  public function testMissingGroupNameInJobHistoryIsExplicitAndLogged()
+  {
+    $this->testDb->createPlainTables(array('groups'));
+    $handler = new \Monolog\Handler\TestHandler();
+    $this->logger->pushHandler($handler);
+
+    $this->assertSame('[missing group ID 5]', $this->userDao->getGroupNameById(5, true));
+    $this->assertTrue($handler->hasWarningRecords());
+  }
+
+  public function testExistingGroupNameIsUnchangedForJobHistory()
+  {
+    $this->testDb->createPlainTables(array('groups'));
+    $this->testDb->insertData(array('groups'));
+    $this->assertSame('fossy', $this->userDao->getGroupNameById(2, true));
+  }
+
   public function testAddGroupMembership()
   {
     $this->testDb->createPlainTables(array('users','groups','group_user_member'));
