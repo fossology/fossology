@@ -103,7 +103,7 @@ class PagedHexResult extends PagedResult
         $this->highlightState->openExistingElements($this);
         $this->lineCount++;
       }
-    } while ($text);
+    } while (strlen($text) > 0);
 
     return "";
   }
