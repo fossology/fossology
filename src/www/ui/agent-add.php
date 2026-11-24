@@ -41,14 +41,23 @@ class AgentAdder extends DefaultPlugin
 
     if (! empty($uploadId) && ! empty($agents) && is_array($agents)) {
       $rc = $this->agentsAdd($uploadId, $agents, $request);
-      if (is_numeric($rc)) {
-        $status = GetRunnableJobList();
-        $scheduler_msg = empty($status) ? _("Is the scheduler running? ") : '';
-        $url = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
-        $text = _("Your jobs have been added to job queue.");
-        $linkText = _("View Jobs");
-        $msg = "$scheduler_msg" . "$text <a href=\"$url\">$linkText</a>";
-        $vars['message'] = $msg;
+      if (is_array($rc)) {
+        if ($rc['jobId'] === null) {
+
+          $vars['message'] = _("All selected agents have already been run for this upload: ") .
+            implode(', ', $rc['alreadyRun']) . ". " . _("No new job was created.");
+        } else {
+          $status = GetRunnableJobList();
+          $scheduler_msg = empty($status) ? _("Is the scheduler running? ") : '';
+          $url = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
+          $text = _("Your jobs have been added to job queue.");
+          $linkText = _("View Jobs");
+          $msg = "$scheduler_msg" . "$text <a href=\"$url\">$linkText</a>";
+          if (! empty($rc['alreadyRun'])) {
+            $msg .= " " . _("Already run and skipped: ") . implode(', ', $rc['alreadyRun']) . ".";
+          }
+          $vars['message'] = $msg;
+        }
       } else {
         $text = _("Scheduling of Agent(s) failed: ");
         $vars['message'] = $text.$rc;
@@ -85,7 +94,7 @@ class AgentAdder extends DefaultPlugin
    * @brief Add an upload to multiple agents.
    * @param int $uploadId
    * @param string[] $agentsToStart - list of agents
-   * @return integer Job ID on success, error message string on failure
+   * @return array|string Array with keys jobId, alreadyRun, scheduled on success, error message string on failure
    */
   private function agentsAdd($uploadId, $agentsToStart, Request $request)
   {
@@ -110,6 +119,26 @@ class AgentAdder extends DefaultPlugin
       if (in_array($agentName, $agentsToStart)) {
         $agents[$agentName] = plugin_find($agentName);
       }
+    }
+
+    // Decide per-agent, before creating any job, whether it already has
+    // results for this upload so we never create an empty/useless job.
+    $alreadyRun = array();
+    $toSchedule = array();
+    foreach ($agents as $agentName => $agent) {
+      if ($agent->AgentHasResults($uploadId) == 1) {
+        $alreadyRun[] = $agentName;
+      } else {
+        $toSchedule[] = $agentName;
+      }
+    }
+
+    if (empty($toSchedule)) {
+      return array(
+        'jobId' => null,
+        'alreadyRun' => $alreadyRun,
+        'scheduled' => array()
+      );
     }
 
     $jobId = JobAddJob(Auth::getUserId(), Auth::getGroupId(), $upload->getFilename(), $uploadId);
@@ -167,14 +196,19 @@ class AgentAdder extends DefaultPlugin
         return $errorMsg;
       }
     }
-    return $jobId;
+    return array(
+      'jobId' => $jobId,
+      'alreadyRun' => $alreadyRun,
+      'scheduled' => $toSchedule
+    );
   }
 
   /**
    * @brief Add an upload to multiple agents (wrapper for agentsAdd()).
    * @param int $uploadId
    * @param string[] $agentsToStart - list of agents
-   * @return integer Job ID on success, error message string on failure
+   * @return array|string Result array on success, error message string on
+   *                      failure
    * @sa agentsAdd()
    */
   public function scheduleAgents($uploadId, $agentsToStart, Request $request)

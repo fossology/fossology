@@ -33,16 +33,31 @@ class Info
    */
   private $type;
   /**
+   * @var string[]|null $scheduledAgents
+   * Newly scheduled agents
+   */
+  private $scheduledAgents;
+  /**
+   * @var string[]|null $skippedAgents
+   * Skipped agents
+   */
+  private $skippedAgents;
+  /**
    * Error constructor.
    * @param integer $code
    * @param string $message
    * @param InfoType $type
+   * @param string[]|null $scheduledAgents
+   * @param string[]|null $skippedAgents
    */
-  public function __construct($code, $message, $type)
+  public function __construct($code, $message, $type, $scheduledAgents = null,
+      $skippedAgents = null)
   {
     $this->code = $code;
     $this->message = $message;
     $this->type = $type;
+    $this->scheduledAgents = $scheduledAgents;
+    $this->skippedAgents = $skippedAgents;
   }
 
   ////// Getters //////
@@ -62,11 +77,18 @@ class Info
    */
   public function getArray()
   {
-    return [
+    $info = [
       'code' => $this->code,
-      'message' => $this->message,
-      'type' => $this->type
+      'message' => $this->message
     ];
+    if ($this->scheduledAgents !== null) {
+      $info['scheduled_agents'] = $this->scheduledAgents;
+    }
+    if ($this->skippedAgents !== null) {
+      $info['skipped_agents'] = $this->skippedAgents;
+    }
+    $info['type'] = $this->type;
+    return $info;
   }
 
   /**
