@@ -96,7 +96,7 @@ class JobTest extends TestCase
       $container = M::mock('ContainerBuilder');
       $container->shouldReceive('get')->with('dao.user')->andReturn($userDao);
       $userDao->shouldReceive('getUserName')->with(2)->andReturn('fossy');
-      $userDao->shouldReceive('getGroupNameById')->with(2)->andReturn('fossy');
+      $userDao->shouldReceive('getGroupNameById')->with(2, true)->andReturn('fossy');
     } else {
       $expectedStatus = [
         'id'        => 22,
@@ -113,6 +113,24 @@ class JobTest extends TestCase
     $actualJob = new Job(22, 'ojo', '01-01-2020', 4, 2, 2, 3, 'Processing', $jobQueue->getArray());
 
     $this->assertEquals($expectedStatus, $actualJob->getArray($version));
+  }
+
+  public function testMissingGroupRemainsInV2JobHistory()
+  {
+    global $container;
+    $userDao = M::mock(UserDao::class);
+    $container = M::mock('ContainerBuilder');
+    $container->shouldReceive('get')->with('dao.user')->andReturn($userDao);
+    $userDao->shouldReceive('getUserName')->with(2)->andReturn('fossy');
+    $userDao->shouldReceive('getGroupNameById')->with(5, true)
+      ->andReturn('[missing group ID 5]');
+
+    $job = new Job(22, 'ojo', '01-01-2020', 4, 2, 5, 3, 'Processing');
+    $result = $job->getArray(ApiVersion::V2);
+
+    $this->assertSame(22, $result['id']);
+    $this->assertSame('[missing group ID 5]', $result['groupName']);
+    $this->assertSame('Processing', $result['status']);
   }
 
   // Getter tests

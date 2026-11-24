@@ -124,7 +124,7 @@ class Job
         'queueDate' => $this->queueDate,
         'uploadId'  => $this->uploadId,
         'userName'  => $userDao->getUserName($this->userId),
-        'groupName' => $userDao->getGroupNameById($this->groupId),
+        'groupName' => $userDao->getGroupNameById($this->groupId, true),
         'eta'       => $this->eta,
         'status'    => $this->status,
         'jobQueue'  => $this->jobQueue
