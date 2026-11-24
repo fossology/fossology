@@ -524,4 +524,19 @@ class ShowJobsDao
     );
     return !empty($row);
   }
+
+  /**
+   * @brief Whether the job merges several uploads into one report
+   * @param int $jobId
+   * @return bool
+   */
+  public function jobIsAggregated($jobId)
+  {
+    $row = $this->dbManager->getSingleRow(
+      "SELECT 1 FROM jobqueue WHERE jq_job_fk = $1 AND jq_type = $2",
+      array($jobId, 'reportaggregator'),
+      __METHOD__
+    );
+    return !empty($row);
+  }
 }
