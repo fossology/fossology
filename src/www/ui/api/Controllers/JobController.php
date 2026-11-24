@@ -55,6 +55,10 @@ class JobController extends RestController
    * Job failed
    */
   const JOB_FAILED = 0x1 << 4;
+  /**
+   * Maximum value of a PostgreSQL integer column
+   */
+  private const PG_INT4_MAX = 2147483647;
 
   /**
    * Get all jobs created by all the users
@@ -128,7 +132,7 @@ class JobController extends RestController
 
     if (array_key_exists(self::UPLOAD_PARAM, $queryParams)) {
       /* If the upload is passed, filter accordingly */
-      return $this->getFilteredResults(intval($queryParams[self::UPLOAD_PARAM]),
+      return $this->getFilteredResults($this->getUploadId($queryParams),
         $status, $request, $response, $sort, $limit, $page, $apiVersion);
     }
 
@@ -328,6 +332,27 @@ class JobController extends RestController
   }
 
   /**
+   * Validate and return the upload ID from the query parameters.
+   *
+   * @param array $query Query parameters
+   * @return integer Valid upload ID
+   * @throws HttpBadRequestException If upload is missing or invalid
+   */
+  private function getUploadId($query)
+  {
+    if (!array_key_exists(self::UPLOAD_PARAM, $query)) {
+      throw new HttpBadRequestException("'upload' is a required query param");
+    }
+    $uploadId = filter_var($query[self::UPLOAD_PARAM], FILTER_VALIDATE_INT,
+      ['options' => ['min_range' => 1, 'max_range' => self::PG_INT4_MAX]]);
+    if ($uploadId === false) {
+      throw new HttpBadRequestException(
+        "upload should be positive integer.");
+    }
+    return $uploadId;
+  }
+
+  /**
    * Update the ETA and status for the given job
    *
    * @param[in,out] Job $job The job to be updated
@@ -370,10 +395,7 @@ class JobController extends RestController
   public function getJobsHistory($request, $response, $args)
   {
     $query = $request->getQueryParams();
-    if (!array_key_exists(self::UPLOAD_PARAM, $query)) {
-      throw new HttpBadRequestException("'upload' is a required query param");
-    }
-    $upload_fk = intval($query[self::UPLOAD_PARAM]);
+    $upload_fk = $this->getUploadId($query);
     // checking if the upload exists and if yes, whether it is accessible
     $this->uploadAccessible($upload_fk);
 

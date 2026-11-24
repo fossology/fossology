@@ -16,6 +16,7 @@ use Fossology\Lib\Dao\JobDao;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\UI\Api\Controllers\JobController;
+use Fossology\UI\Api\Exceptions\HttpBadRequestException;
 use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\ResponseHelper;
@@ -449,6 +450,76 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
+   * @dataProvider invalidUploadIdProvider
+   * -# Test JobController::getJobs() with an invalid upload query parameter
+   * -# Check if HttpBadRequestException is thrown before querying the database
+   * @param string $uploadId Invalid upload ID
+   */
+  public function testGetJobsFromInvalidUpload($uploadId)
+  {
+    $this->dbHelper->shouldNotReceive('doesIdExist');
+    $this->dbHelper->shouldNotReceive('getJobs');
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withQueryParams([
+      JobController::UPLOAD_PARAM => $uploadId
+    ]);
+    $response = new ResponseHelper();
+    $this->restHelper->shouldReceive('getUserId')->andReturn(2);
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("upload should be positive integer.");
+
+    $this->jobController->getJobs($request, $response, []);
+  }
+
+  /**
+   * @test
+   * @dataProvider invalidUploadIdProvider
+   * -# Test JobController::getJobsHistory() with an invalid upload query
+   *    parameter
+   * -# Check if HttpBadRequestException is thrown before querying the database
+   * @param string $uploadId Invalid upload ID
+   */
+  public function testGetJobsHistoryFromInvalidUpload($uploadId)
+  {
+    $this->dbHelper->shouldNotReceive('doesIdExist');
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("GET", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $request = $request->withQueryParams([
+      JobController::UPLOAD_PARAM => $uploadId
+    ]);
+    $response = new ResponseHelper();
+    $this->expectException(HttpBadRequestException::class);
+    $this->expectExceptionMessage("upload should be positive integer.");
+
+    $this->jobController->getJobsHistory($request, $response, []);
+  }
+
+  /**
+   * Invalid upload query parameter values.
+   *
+   * @return array[] Invalid values
+   */
+  public static function invalidUploadIdProvider()
+  {
+    return [
+      'empty' => [''],
+      'text' => ['abc'],
+      'decimal' => ['1.5'],
+      'zero' => ['0'],
+      'negative' => ['-1'],
+      'above PostgreSQL integer range' => ['2147483648']
+    ];
+  }
+
+  /**
+   * @test
    * -# Test JobController::getUploadEtaInSeconds()
    * -# Test if HH:MM:SS can be translated to seconds
    * -# Test if empty response results in 0
@@ -476,5 +547,4 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
       [$completedJob, $completedUpload]);
     $this->assertEquals(0, $result);
   }
-
 }
