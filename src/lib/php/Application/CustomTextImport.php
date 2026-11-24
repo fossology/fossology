@@ -70,7 +70,7 @@ class CustomTextImport
    * @param UserDao $userDao
    * @param LicenseDao $licenseDao Falls back to DI container when null.
    */
-  public function __construct(DbManager $dbManager, UserDao $userDao, LicenseDao $licenseDao = null)
+  public function __construct(DbManager $dbManager, UserDao $userDao, ?LicenseDao $licenseDao = null)
   {
     $this->dbManager = $dbManager;
     $this->userDao = $userDao;
@@ -151,7 +151,7 @@ class CustomTextImport
       return _("Could not open CSV file");
     }
 
-    $this->headrow = fgetcsv($handle, 0, $this->delimiter, $this->enclosure);
+    $this->headrow = fgetcsv($handle, 0, $this->delimiter, $this->enclosure, '\\');
     if ($this->headrow === false) {
       fclose($handle);
       return _("Could not read CSV header");
@@ -165,7 +165,7 @@ class CustomTextImport
 
     $data = array();
     $lineNumber = 1;
-    while (($row = fgetcsv($handle, 0, $this->delimiter, $this->enclosure)) !== false) {
+    while (($row = fgetcsv($handle, 0, $this->delimiter, $this->enclosure, '\\')) !== false) {
       $lineNumber++;
       if (count($row) !== count($this->headrow)) {
         fclose($handle);

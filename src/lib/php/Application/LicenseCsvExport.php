@@ -119,14 +119,14 @@ WHERE rf.rf_detector_type=$1";
         'report_shortname', 'url', 'notes', 'source', 'risk', 'group',
         'obligations');
       fputs($out, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
-      fputcsv($out, $head, $this->delimiter, $this->enclosure);
+      fputcsv($out, $head, $this->delimiter, $this->enclosure, '\\');
       foreach ($vars as $row) {
         $row['spdx_id'] = LicenseRef::convertToSpdxId($row['shortname'],
           $row['spdx_id']);
         if (strlen($row['text']) > LicenseMap::MAX_CHAR_LIMIT) {
           $row['text'] = LicenseMap::TEXT_MAX_CHAR_LIMIT;
         }
-        fputcsv($out, $row, $this->delimiter, $this->enclosure);
+        fputcsv($out, $row, $this->delimiter, $this->enclosure, '\\');
       }
       $content = ob_get_contents();
       ob_end_clean();

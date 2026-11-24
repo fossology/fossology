@@ -188,7 +188,7 @@ class BulkTextExport
     $out = fopen('php://output', 'w');
     ob_start();
     fputs($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
-    fputcsv($out, $headers, $this->delimiter, $this->enclosure);
+    fputcsv($out, $headers, $this->delimiter, $this->enclosure, '\\');
 
     foreach ($this->groupResultsByText($result, $includeLicenseText) as $text => $entry) {
       $isActive = $entry['is_active'] === null ? '' : ($entry['is_active'] ? 'true' : 'false');
@@ -201,7 +201,7 @@ class BulkTextExport
         if ($includeLicenseText) {
           $row[] = '';
         }
-        fputcsv($out, $row, $this->delimiter, $this->enclosure);
+        fputcsv($out, $row, $this->delimiter, $this->enclosure, '\\');
       } else {
         foreach ($entry['licenses'] as $lic) {
           $row = array(
@@ -216,7 +216,7 @@ class BulkTextExport
           if ($includeLicenseText) {
             $row[] = $this->normalizeNewlinesForCsv($lic['license_text'] ?? '');
           }
-          fputcsv($out, $row, $this->delimiter, $this->enclosure);
+          fputcsv($out, $row, $this->delimiter, $this->enclosure, '\\');
         }
       }
     }

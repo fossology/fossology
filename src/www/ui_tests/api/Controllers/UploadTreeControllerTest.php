@@ -310,7 +310,7 @@ namespace Fossology\UI\Api\Test\Controllers {
       $this->assertEquals($expectedResponse->getBody()->getContents(), $actualResponse->getBody()->getContents());
     }
 
-    public function itemTableProvider(): array
+    public static function itemTableProvider(): array
     {
       $cases = [];
       foreach ([ApiVersion::V1, ApiVersion::V2] as $version) {
@@ -374,7 +374,7 @@ namespace Fossology\UI\Api\Test\Controllers {
         ['id' => $uploadId, 'itemId' => $itemId]);
     }
 
-    public function invalidItemProvider(): array
+    public static function invalidItemProvider(): array
     {
       $cases = [];
       foreach ([ApiVersion::V1, ApiVersion::V2] as $version) {

@@ -145,7 +145,7 @@ class size_dashboard extends FO_Plugin
     header('Content-Disposition: attachment; filename="folder_export.csv"');
 
     $output = fopen('php://output', 'w');
-    fputcsv($output, ['Upload id', 'Upload name', 'Size (bytes)', 'Clearing duration (seconds)', 'Upload date', 'Upload status']);
+    fputcsv($output, ['Upload id', 'Upload name', 'Size (bytes)', 'Clearing duration (seconds)', 'Upload date', 'Upload status'], ',', '"', '\\');
 
     foreach ($data as $row) {
       fputcsv($output, [
@@ -155,7 +155,7 @@ class size_dashboard extends FO_Plugin
         $row['duration'],
         $row['date'],
         $row['status']
-      ]);
+      ], ',', '"', '\\');
     }
     fclose($output);
     exit;

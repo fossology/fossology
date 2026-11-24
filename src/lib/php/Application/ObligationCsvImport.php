@@ -95,7 +95,7 @@ class ObligationCsvImport
     $msg = '';
     try {
       if ($fileExtension == 'csv') {
-        while (($row = fgetcsv($handle,0,$this->delimiter,$this->enclosure)) !== false) {
+        while (($row = fgetcsv($handle,0,$this->delimiter,$this->enclosure,'\\')) !== false) {
           $log = $this->handleCsv($row);
           if (!empty($log)) {
             $msg .= "$log\n";
