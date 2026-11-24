@@ -210,6 +210,40 @@ const char* jobsql_fail_dependents =
     "     AND jq_endtime IS NULL;";
 
 /**
+ * Periodic safety-net sweep for jobqueue entries whose dependency already
+ * failed but were never caught by jobsql_fail_dependents.
+ *
+ * jobsql_fail_dependents only fires once, at the moment its own jq_pk is
+ * marked failed, and only reaches jobdepends rows that exist at that instant.
+ * The PHP side (JobQueueAdd()) inserts one jobqueue+jobdepends row per
+ * selected agent in its own transaction, so when a fast-failing prerequisite
+ * (e.g. wget_agent hitting an invalid/missing URL) fails before all of its
+ * sibling agent rows have been inserted, the not-yet-inserted rows are
+ * invisible to that one-shot cascade and are left stuck forever (their
+ * dependency already shows failed, so basic_checkout's NOT EXISTS guard
+ * never lets them run).
+ *
+ * This statement is not parametrized: it is run on every scheduler poll
+ * (alongside basic_checkout) and simply fails any pending jobqueue entry
+ * whose direct dependency is already marked failed. Only jq_endtime IS NULL
+ * rows are touched, and only jobqueue join jobdepends join jobqueue (all
+ * indexed on jq_pk), so the cost is bounded by the currently pending queue,
+ * not the whole history. Multi-level chains resolve one hop per poll cycle,
+ * which is fast enough since polling runs every few seconds.
+ */
+const char* jobsql_fail_stuck_dependents =
+    " UPDATE jobqueue"
+    "   SET jq_endtime = now(),"
+    "       jq_end_bits = jq_end_bits | 2,"
+    "       jq_schedinfo = null,"
+    "       jq_endtext = 'dependency failed'"
+    "   FROM jobdepends jd"
+    "   INNER JOIN jobqueue dep ON dep.jq_pk = jd.jdep_jq_depends_fk"
+    "   WHERE jd.jdep_jq_fk = jobqueue.jq_pk"
+    "     AND jobqueue.jq_endtime IS NULL"
+    "     AND (dep.jq_end_bits & 2) = 2;";
+
+/**
  * Update the items processed for the given job id
  */
 const char* jobsql_processed =
