@@ -19,6 +19,7 @@
   PQgetvalue(db_result, row, PQfnumber(db_result, col))
 
 extern const char* jobsql_failed;
+extern const char* jobsql_kill_unfinished;
 
 /* ************************************************************************** */
 /* **** constructor destructor ********************************************** */

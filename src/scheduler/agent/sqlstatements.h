@@ -179,6 +179,20 @@ const char* jobsql_failed =
     "   WHERE jq_pk = %d;";
 
 /**
+ * Mark the given job id as failed on a kill request, but only if it has not
+ * finished yet. Used when the job is no longer in the scheduler's job list, so
+ * a late kill does not relabel an already completed entry as killed.
+ */
+const char* jobsql_kill_unfinished =
+    " UPDATE jobqueue "
+    "   SET jq_endtime = now(), "
+    "       jq_end_bits = jq_end_bits | 2, "
+    "       jq_schedinfo = null, "
+    "       jq_endtext = '%s' "
+    "   WHERE jq_pk = %d "
+    "     AND jq_endtime IS NULL;";
+
+/**
  * Mark every jobqueue entry that (transitively) depends on the given jq_pk as
  * failed, so a failed prerequisite (e.g. a failed wget_agent) fails its
  * dependent ununpack/adj2nest jobs instead of leaving them stuck in the queue

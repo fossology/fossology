@@ -328,6 +328,78 @@ void test_database_job()
 }
 
 /**
+ * \brief Test for jobsql_kill_unfinished
+ * \test
+ * -# Initialize test database and create a jobqueue entry
+ * -# Mark the entry as completed and send the kill update
+ * -# Check the entry is still completed and not relabelled as killed
+ * -# Reset the entry to unfinished and send the kill update again
+ * -# Check the entry is now marked as killed
+ */
+void test_database_kill_unfinished()
+{
+  scheduler_t* scheduler;
+  PGresult* db_result;
+  gchar* sql;
+  int jq_pk;
+
+  scheduler = scheduler_init(testdb, NULL);
+
+  FO_ASSERT_PTR_NULL(scheduler->db_conn);
+  database_init(scheduler);
+  FO_ASSERT_PTR_NOT_NULL(scheduler->db_conn);
+
+  jq_pk = Prepare_Testing_Data(scheduler);
+
+  /* a completed entry must not be relabelled by a late kill */
+  sql = g_strdup_printf("UPDATE jobqueue SET jq_endtime = now(), "
+      "jq_end_bits = 1, jq_endtext = 'Completed' WHERE jq_pk = %d", jq_pk);
+  PQclear(database_exec(scheduler, sql));
+  g_free(sql);
+
+  sql = g_strdup_printf(jobsql_kill_unfinished, "Killed by test", jq_pk);
+  PQclear(database_exec(scheduler, sql));
+  g_free(sql);
+
+  sql = g_strdup_printf("SELECT jq_end_bits, jq_endtext FROM jobqueue "
+      "WHERE jq_pk = %d", jq_pk);
+  db_result = database_exec(scheduler, sql);
+  g_free(sql);
+  FO_ASSERT_EQUAL(PQntuples(db_result), 1);
+  if (PQntuples(db_result) == 1)
+  {
+    FO_ASSERT_EQUAL(atoi(PQget(db_result, 0, "jq_end_bits")), 1);
+    FO_ASSERT_STRING_EQUAL(PQget(db_result, 0, "jq_endtext"), "Completed");
+  }
+  PQclear(db_result);
+
+  /* an entry that has not finished is still marked as killed */
+  sql = g_strdup_printf("UPDATE jobqueue SET jq_endtime = NULL, "
+      "jq_end_bits = 0, jq_endtext = NULL WHERE jq_pk = %d", jq_pk);
+  PQclear(database_exec(scheduler, sql));
+  g_free(sql);
+
+  sql = g_strdup_printf(jobsql_kill_unfinished, "Killed by test", jq_pk);
+  PQclear(database_exec(scheduler, sql));
+  g_free(sql);
+
+  sql = g_strdup_printf("SELECT jq_end_bits, jq_endtext FROM jobqueue "
+      "WHERE jq_pk = %d", jq_pk);
+  db_result = database_exec(scheduler, sql);
+  g_free(sql);
+  FO_ASSERT_EQUAL(PQntuples(db_result), 1);
+  if (PQntuples(db_result) == 1)
+  {
+    FO_ASSERT_EQUAL(atoi(PQget(db_result, 0, "jq_end_bits")), 2);
+    FO_ASSERT_STRING_EQUAL(PQget(db_result, 0, "jq_endtext"), "Killed by test");
+  }
+  PQclear(db_result);
+
+  database_reset_queue(scheduler);
+  scheduler_destroy(scheduler);
+}
+
+/**
  * \brief Test for email_notification()
  * \test
  * -# Initialize scheduler, DB and email
@@ -368,6 +440,7 @@ CU_TestInfo tests_database[] =
     {"Test database_update_event excludes known",  test_database_update_event_excludes_known },
     {"Test database_update_job",                   test_database_update_job                  },
     {"Test database_job",                          test_database_job                         },
+    {"Test database kill unfinished",              test_database_kill_unfinished             },
     CU_TEST_INFO_NULL
 };
 
