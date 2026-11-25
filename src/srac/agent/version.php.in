@@ -1,0 +1,10 @@
+<?php
+/*
+ SPDX-FileCopyrightText: © 2026 Fossology contributors
+
+ SPDX-License-Identifier: GPL-2.0-only
+*/
+
+define("SRAC_AGENT_NAME", "srac");
+define("AGENT_VERSION", "@FO_VERSION@");
+define("AGENT_REV", "@FO_COMMIT_HASH@");
