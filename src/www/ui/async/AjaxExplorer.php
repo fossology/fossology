@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2008-2015 Hewlett-Packard Development Company, L.P.
+ SPDX-FileCopyrightText: © 2026 Gaurav Kumar <Student-sst@outlook.com>
  SPDX-FileCopyrightText: © 2014-2017, 2020 Siemens AG
 
  SPDX-License-Identifier: GPL-2.0-only
@@ -109,6 +110,13 @@ class AjaxExplorer extends DefaultPlugin
    */
   public function handle(Request $request)
   {
+    try {
+      foreach (array('scanFilter', 'conFilter') as $name) {
+        $request->attributes->set($name, $this->parseLicenseFilter($request->get($name)));
+      }
+    } catch (\InvalidArgumentException $exception) {
+      return new JsonResponse(array('error' => $exception->getMessage()), 400);
+    }
     $upload = intval($request->get("upload"));
     $groupId = Auth::getGroupId();
     if (!$this->uploadDao->isAccessible($upload, $groupId)) {
@@ -141,6 +149,29 @@ class AjaxExplorer extends DefaultPlugin
           ) );
   }
 
+
+  /**
+   * Accept comma-separated selections and the legacy single-license value.
+   * An empty selection (or the old zero placeholder) means no filter.
+   */
+  private function parseLicenseFilter($value)
+  {
+    if ($value === null || $value === '' || $value === 0 || $value === '0') {
+      return array();
+    }
+    if (!is_string($value) && !is_int($value)) {
+      throw new \InvalidArgumentException('License filters must contain positive integer IDs.');
+    }
+    $ids = array();
+    foreach (explode(',', (string) $value) as $id) {
+      $id = filter_var($id, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1)));
+      if ($id === false) {
+        throw new \InvalidArgumentException('License filters must contain positive integer IDs.');
+      }
+      $ids[] = $id;
+    }
+    return array_values(array_unique($ids));
+  }
 
   /**
    * @param $tagId
@@ -187,13 +218,13 @@ class AjaxExplorer extends DefaultPlugin
     if (array_key_exists('head', $searchMap) && strlen($searchMap['head'])>=1) {
       $options[UploadTreeProxy::OPT_HEAD] = $searchMap['head'];
     }
-    if (($rfId=$request->get('scanFilter'))>0) {
+    if ($rfIds = $request->get('scanFilter')) {
       $options[UploadTreeProxy::OPT_AGENT_SET] = $selectedScanners;
-      $options[UploadTreeProxy::OPT_SCAN_REF] = $rfId;
+      $options[UploadTreeProxy::OPT_SCAN_REF] = $rfIds;
     }
-    if (($rfId=$request->get('conFilter'))>0) {
+    if ($rfIds = $request->get('conFilter')) {
       $options[UploadTreeProxy::OPT_GROUP_ID] = Auth::getGroupId();
-      $options[UploadTreeProxy::OPT_CONCLUDE_REF] = $rfId;
+      $options[UploadTreeProxy::OPT_CONCLUDE_REF] = $rfIds;
     }
     $openFilter = $request->get('openCBoxFilter');
     if ($openFilter=='true' || $openFilter=='checked') {

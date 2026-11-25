@@ -1,12 +1,14 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2015 Siemens AG
+ SPDX-FileCopyrightText: © 2026 Gaurav Kumar <Student-sst@outlook.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
 
 namespace Fossology\Lib\Proxy;
 
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -214,6 +216,131 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
       return $foo;
     }, array());
     assertThat($zipDescendantsT, equalTo(array(103)) );
+  }
+
+  /**
+   * @dataProvider multipleLicenseViews
+   */
+  public function testMultipleScanLicenses($flat)
+  {
+    $this->testDb->createPlainTables(array('license_map', 'license_file'));
+    $this->prepareUploadTree();
+    foreach (array(
+      array('rf_fk' => 201, 'pfile_fk' => 101, 'agent_fk' => 401),
+      array('rf_fk' => 203, 'pfile_fk' => 102, 'agent_fk' => 401),
+      array('rf_fk' => 202, 'pfile_fk' => 103, 'agent_fk' => 402),
+      array('rf_fk' => 204, 'pfile_fk' => 104, 'agent_fk' => 401)
+    ) as $finding) {
+      $this->dbManager->insertTableRow('license_file', $finding);
+    }
+    // A child license should also match its mapped conclusion license.
+    $this->dbManager->insertTableRow('license_map', array(
+      'rf_fk' => 203, 'rf_parent' => 202, 'usage' => LicenseMap::CONCLUSION
+    ));
+    $options = array(
+      UploadTreeProxy::OPT_AGENT_SET => array(401),
+      UploadTreeProxy::OPT_SCAN_REF => array(201, 202, 201)
+    );
+    $this->assertSame($flat ? array(303, 306) : array(302, 305),
+      $this->getFilteredItems($options, $flat));
+
+    // The legacy scalar filter remains supported, including mapped licenses.
+    $options[UploadTreeProxy::OPT_SCAN_REF] = 202;
+    $this->assertSame($flat ? array(306) : array(305),
+      $this->getFilteredItems($options, $flat));
+    $options[UploadTreeProxy::OPT_SCAN_REF] = array();
+    $this->assertSame(array(), $this->getFilteredItems($options, $flat));
+  }
+
+  /**
+   * @dataProvider multipleLicenseViews
+   */
+  public function testMultipleConcludedLicenses($flat)
+  {
+    $this->testDb->createPlainTables(array('clearing_decision', 'clearing_decision_event', 'clearing_event'));
+    $this->prepareUploadTree();
+    $decisionId = 501;
+    $eventId = 601;
+    // MIT is removed later, but the other selected license remains active.
+    $this->insertDecisionEvent($decisionId++, $eventId++, 201, 301, 303, 101,
+      DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:00');
+    $this->insertDecisionEvent($decisionId++, $eventId++, 202, 301, 303, 101,
+      DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:01');
+    $this->insertDecisionEvent($decisionId++, $eventId++, 201, 301, 303, 101,
+      DecisionTypes::IDENTIFIED, 'true', '2015-05-11 12:02');
+    $this->insertDecisionEvent($decisionId++, $eventId++, 201, 301, 306, 102,
+      DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:00');
+    $this->insertDecisionEvent($decisionId++, $eventId++, 201, 301, 306, 102,
+      DecisionTypes::WIP, 'true', '2015-05-11 12:02');
+    // Another group's decision and an irrelevant decision must not match.
+    $this->insertDecisionEvent($decisionId++, $eventId++, 202, 302, 307, 103,
+      DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:00');
+    $this->insertDecisionEvent($decisionId++, $eventId++, 202, 301, 308, 104,
+      DecisionTypes::IRRELEVANT, 'false', '2015-05-11 12:00');
+    $options = array(
+      UploadTreeProxy::OPT_GROUP_ID => 301,
+      UploadTreeProxy::OPT_CONCLUDE_REF => array(201, 202, 201)
+    );
+    $this->assertSame($flat ? array(303, 306) : array(302, 305),
+      $this->getFilteredItems($options, $flat));
+    $options[UploadTreeProxy::OPT_CONCLUDE_REF] = 201;
+    $this->assertSame($flat ? array(306) : array(305),
+      $this->getFilteredItems($options, $flat));
+    $options[UploadTreeProxy::OPT_CONCLUDE_REF] = array();
+    $this->assertSame(array(), $this->getFilteredItems($options, $flat));
+  }
+
+  /**
+   * @dataProvider multipleLicenseViews
+   */
+  public function testMultipleLicensesWithGlobalDecisions($flat)
+  {
+    $this->testDb->createPlainTables(array('license_map', 'license_file',
+      'clearing_decision', 'clearing_decision_event', 'clearing_event'));
+    $this->prepareUploadTree();
+    $this->dbManager->insertTableRow('report_info', array('upload_fk' => 4, 'ri_globaldecision' => 1));
+    $this->insertDecisionEvent(501, 601, 201, 301, 303, 101,
+      DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:00');
+    $this->insertDecisionEvent(502, 602, 201, 302, 999, 101,
+      DecisionTypes::IDENTIFIED, 'true', '2015-05-11 12:02', DecisionScopes::REPO);
+    $this->insertDecisionEvent(503, 603, 202, 302, 999, 101,
+      DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:01', DecisionScopes::REPO);
+    $options = array(
+      UploadTreeProxy::OPT_GROUP_ID => 301,
+      UploadTreeProxy::OPT_CONCLUDE_REF => array(201, 202)
+    );
+    $this->assertSame($flat ? array(303) : array(302),
+      $this->getFilteredItems($options, $flat));
+
+    // Scanner and edited filters still combine with AND, not OR.
+    $this->dbManager->insertTableRow('license_file', array(
+      'rf_fk' => 204, 'pfile_fk' => 101, 'agent_fk' => 401
+    ));
+    $options[UploadTreeProxy::OPT_AGENT_SET] = array(401);
+    $options[UploadTreeProxy::OPT_SCAN_REF] = array(203, 204);
+    $this->assertSame($flat ? array(303) : array(302),
+      $this->getFilteredItems($options, $flat));
+    $options[UploadTreeProxy::OPT_SCAN_REF] = array(203);
+    $this->assertSame(array(), $this->getFilteredItems($options, $flat));
+  }
+
+  public static function multipleLicenseViews()
+  {
+    return array('flat view' => array(true), 'tree view' => array(false));
+  }
+
+  private function getFilteredItems($options, $flat)
+  {
+    if ($flat) {
+      $options[UploadTreeProxy::OPT_RANGE] = new ItemTreeBounds(301, 'uploadtree_a', 4, 1, 16);
+    } else {
+      $options[UploadTreeProxy::OPT_REALPARENT] = 301;
+    }
+    $proxy = new UploadTreeProxy(4, $options, 'uploadtree_a', 'filter' . md5(serialize($options)));
+    $rows = $this->dbManager->getRows($proxy->getDbViewQuery() . ' ORDER BY uploadtree_pk',
+      $proxy->getParams(), __METHOD__ . $proxy->getDbViewName());
+    $this->assertEquals(count($rows), $proxy->count(), 'The filtered count must match the listing.');
+    return array_map('intval', array_column($rows, 'uploadtree_pk'));
   }
 
   protected function insertDecisionEvent($decisionId,$eventId,$rfId,$groupId,$item,$pfileId,$type,$removed,$date,$scope=DecisionScopes::ITEM)
