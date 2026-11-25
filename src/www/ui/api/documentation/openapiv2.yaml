@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: © 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 # SPDX-FileCopyrightText: © 2025 Tiyasa Kundu <tiyasakundu20@gmail.com>
 # SPDX-FileContributor: Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
+# SPDX-FileCopyrightText: © 2026 Gaurav Kumar <Student-sst@outlook.com>
 
 # SPDX-License-Identifier: GPL-2.0-only
 
@@ -6833,9 +6834,18 @@ components:
     OneShotInfo:
       type: object
       properties:
-        data:
-          description: Data found during scan, e.g. Licenses, Copyrights
+        licenses:
+          description: License findings returned by Nomos (string) or Monk (array of shortnames).
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+        copyrights:
+          description: Copyright, email and URL findings returned by the CEU scanner.
           type: array
+          items:
+            type: string
         highlights:
           type: array
           items:
