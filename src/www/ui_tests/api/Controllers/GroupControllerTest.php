@@ -43,6 +43,11 @@ use Slim\Psr7\Uri;
  */
 class GroupControllerTest extends \PHPUnit\Framework\TestCase
 {
+  public $dbManager;
+  public $groupController;
+  public $streamFactory;
+  public $userDao;
+
 
   /**
    * @var string YAML_LOC

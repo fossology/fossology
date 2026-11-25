@@ -35,6 +35,9 @@ use Slim\Psr7\Request;
  */
 class UserControllerTest extends \PHPUnit\Framework\TestCase
 {
+  public $userController;
+  public $userDao;
+
 
   /**
    * @var integer $assertCountBefore

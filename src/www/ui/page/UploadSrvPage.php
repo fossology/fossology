@@ -43,16 +43,36 @@ class UploadSrvPage extends UploadPageBase
   }
 
   /**
-   * \brief checks, whether a normalized path starts with an path in the
-   * whiteliste
+   * \brief checks, whether a normalized path lies inside one of the
+   * directories in the whitelist
+   *
+   * The whitelist is the colon separated setting UploadFromServerWhitelist.
+   * A path is accepted if it is equal to a whitelist entry or located below it
+   * (the match is done on directory boundaries, so "/tmp" does not allow
+   * "/tmpevil"). Empty entries (empty setting, leading, trailing or doubled
+   * colon) are ignored and never match, so a malformed setting can only
+   * restrict uploads and never lift the restriction. Entries that are not
+   * absolute paths or contain a ".." component are ignored as well. An
+   * explicit "/" entry allows everything.
+   *
+   * For localhost, whitelist entries are also resolved with realpath(), so a
+   * symlinked entry matches the resolved path produced by normalize_path().
+   * For other hosts the entries are only compared textually, because a
+   * symlink on the UI host says nothing about the file system of that host.
+   * For the same reason, wildcard paths are refused for other hosts, and for
+   * localhost a wildcard is only accepted in the last path component: the
+   * wildcard is expanded by wget_agent and may follow a symlink out of the
+   * whitelist.
    *
    * \param $path - the path to check
+   * \param $host - host the path belongs to
    *
    * \return boolean
    *
    */
-  function check_by_whitelist($path)
+  function check_by_whitelist($path, $host = 'localhost')
   {
+    $isLocalHost = ($host === 'localhost' || empty($host));
     global $SysConf;
     $sysConfig = $SysConf['SYSCONFIG'];
     if (array_key_exists('UploadFromServerWhitelist', $sysConfig)) {
@@ -61,10 +81,52 @@ class UploadSrvPage extends UploadPageBase
     } else {
       $whitelist = array("/tmp");
     }
+    // An explicit "/" entry allows everything, there is no boundary to escape.
+    foreach ($whitelist as $item) {
+      if (trim($item) === '/') {
+        return true;
+      }
+    }
+    // A wildcard is expanded by wget_agent without being resolved. For other
+    // hosts the whole path is unresolved, for localhost normalize_path()
+    // resolves only the directory up to the first wildcard. A wildcard in a
+    // directory component (e.g. "/tmp/*/file") could match a symlink like
+    // /tmp/link -> /etc, so only a wildcard in the last component of a local
+    // path is accepted.
+    if ($this->path_is_pattern($path) &&
+      (!$isLocalHost || $this->path_is_pattern(dirname($path)))) {
+      return false;
+    }
+
+    $path = str_replace('\ ', ' ', $path);
+    // Paths of remote hosts are compared textually, so a ".." segment
+    // could leave the whitelisted directory on that host.
+    if (preg_match('#(^|/)\.\.(/|$)#', $path)) {
+      return false;
+    }
 
     foreach ($whitelist as $item) {
-      if (substr($path, 0,strlen($item)) === trim($item)) {
+      $item = rtrim(trim($item), '/');
+      // Skip empty entries, relative entries, which realpath() would resolve
+      // against the working directory, and entries with "..", which
+      // realpath() could widen up to "/" (e.g. "/tmp/..").
+      if ($item === '' || $item[0] !== '/' ||
+        preg_match('#(^|/)\.\.(/|$)#', $item)) {
+        continue;
+      }
+      $prefixes = array($item);
+      $realItem = $isLocalHost ? realpath($item) : false;
+      if ($realItem === '/') {
         return true;
+      }
+      if ($realItem !== false && $realItem !== $item) {
+        $prefixes[] = rtrim($realItem, '/');
+      }
+      foreach ($prefixes as $prefix) {
+        if ($prefix !== '' &&
+          ($path === $prefix || strpos($path, $prefix . '/') === 0)) {
+          return true;
+        }
       }
     }
     return false;
@@ -199,7 +261,7 @@ class UploadSrvPage extends UploadPageBase
       $text = _("failed to normalize/validate given path");
       return array(false, $text, $description);
     }
-    if ($this->check_by_whitelist($sourceFiles) === FALSE) {
+    if ($this->check_by_whitelist($sourceFiles, $host) === FALSE) {
       $text = _("no suitable prefix found in the whitelist") . ", " .
         _("you are not allowed to upload this file");
       return array(false, $text, $description);

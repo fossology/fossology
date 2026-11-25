@@ -614,6 +614,43 @@ void	CheckCommands	(int Show)
 } /* CheckCommands() */
 
 /**
+ * @brief Structurally validate a PDF before handing it to pdftotext.
+ *
+ * Runs `pdfinfo`, which only parses the PDF's cross-reference table,
+ * catalog and page tree (cheap compared to full text extraction). If
+ * pdfinfo exits non-zero the file is corrupt/malformed or locked with a
+ * password pdftotext could not use anyway, so we skip it up front.
+ *
+ * @param QuotedPath fully-qualified, shell-quoted path (e.g. "'/dir/f.pdf'")
+ *        of the PDF, exactly as embedded in the command line.
+ * @returns 1 if the PDF looks processable, 0 if it should be skipped.
+ *************************************************/
+int IsPdfProcessable(const char *QuotedPath)
+{
+  char InfoCmd[FILENAME_MAX + 64];
+  int rc;
+
+  if (!IsExe("pdfinfo",1))
+  {
+    /* pdfinfo not installed: cannot pre-validate, let pdftotext try. */
+    return(1);
+  }
+
+  snprintf(InfoCmd,sizeof(InfoCmd),"pdfinfo %s >/dev/null 2>&1",QuotedPath);
+  rc = system(InfoCmd);
+  if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
+  else rc = -1;
+
+  if (rc != 0)
+  {
+    LOG_ERROR("Skipping pdftotext, PDF is encrypted/corrupt (pdfinfo rc=%d): %s",
+        rc,QuotedPath);
+    return(0);
+  }
+  return(1);
+} /* IsPdfProcessable() */
+
+/**
  * @brief Try a command and return command code.
  *
  * Command becomes:
@@ -631,6 +668,7 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
     char *Out, char *Where)
 {
   char Cmd1[FILENAME_MAX * 5];
+  char ResolvedPath[FILENAME_MAX * 2];
   char CWD[FILENAME_MAX];
   int rc;
   char TempPre[FILENAME_MAX];
@@ -693,20 +731,79 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
     TaintString(TempCwd,FILENAME_MAX,CWD,1,Out);
     snprintf(Cmd1,sizeof(Cmd1),"%s %s '%s/%s' %s",
         Cmd,TempPre,TempCwd,TempFile,TempPost);
+    snprintf(ResolvedPath,sizeof(ResolvedPath),"'%s/%s'",TempCwd,TempFile);
   }
   else
   {
     snprintf(Cmd1,sizeof(Cmd1),"%s %s '%s' %s",
         Cmd,TempPre,TempFile,TempPost);
+    snprintf(ResolvedPath,sizeof(ResolvedPath),"'%s'",TempFile);
   }
-  rc = system(Cmd1);
-  if (WIFSIGNALED(rc))
+
+  if (strcmp(Cmd,"pdftotext")==0)
   {
-    LOG_ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd1);
-    SafeExit(8);
+    char TimedCmd[FILENAME_MAX * 5 + 96];
+    long CmdMemLimitKB;
+    char *CmdMemLimitEnv;
+    int CmdTimeout = DEFAULT_PDF_CMD_TIMEOUT;
+    char *CmdTimeoutEnv = getenv("FOSSOLOGY_CMD_TIMEOUT");
+    if (CmdTimeoutEnv && atoi(CmdTimeoutEnv) > 0) CmdTimeout = atoi(CmdTimeoutEnv);
+
+    /* Structurally validate the PDF (encryption/corruption) before spending
+     * time and memory on pdftotext. */
+    if (!IsPdfProcessable(ResolvedPath))
+    {
+      if (Out && Out[0]) unlink(Out);
+      if (chdir(CWD) != 0)
+        LOG_ERROR("Unable to change directory to %s", CWD);
+      return(0);
+    }
+
+    CmdMemLimitEnv = getenv("FOSSOLOGY_CMD_MEM_LIMIT_KB");
+    if (CmdMemLimitEnv && atol(CmdMemLimitEnv) > 0)
+      CmdMemLimitKB = atol(CmdMemLimitEnv);
+    else
+      CmdMemLimitKB = DEFAULT_CMD_MEM_LIMIT_KB;
+
+    if (CmdMemLimitKB > 0)
+      snprintf(TimedCmd,sizeof(TimedCmd),"ulimit -v %ld 2>/dev/null; timeout -k 10 %ds %s",
+          CmdMemLimitKB,CmdTimeout,Cmd1);
+    else
+      snprintf(TimedCmd,sizeof(TimedCmd),"timeout -k 10 %ds %s",CmdTimeout,Cmd1);
+
+    int Killed = 0;
+    rc = system(TimedCmd);
+    if (WIFSIGNALED(rc))
+    {
+      LOG_ERROR("Process killed by signal (%d), skipping file: %s",WTERMSIG(rc),Cmd1);
+      rc = -1;
+      Killed = 1;
+    }
+    else
+    {
+      if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
+      else rc=-1;
+      if (rc == 124 || rc == 137)
+      {
+        LOG_ERROR("Command killed (timeout %ds or memory limit), skipping file: %s",CmdTimeout,Cmd1);
+        Killed = 1;
+      }
+    }
+    /* pdftotext streams its text output as it parses; a killed run leaves a
+     * truncated file that would be scanned as if complete. Drop it. */
+    if (Killed && Out && Out[0]) unlink(Out);
   }
-  if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
-  else rc=-1;
+  else
+  {
+    rc = system(Cmd1);
+    if (WIFSIGNALED(rc))
+    {
+      LOG_ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd1);
+      SafeExit(8);
+    }
+    if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
+    else rc=-1;
+  }
   if (Verbose) LOG_DEBUG("in %s -- %s ; rc=%d",Where,Cmd1,rc);
 
   if(chdir(CWD) != 0)
@@ -774,6 +871,34 @@ int IsDebianSourceFile(char *Filename)
 }
 
 /**
+ * @brief Check the leading magic bytes for a cpio archive.
+ *
+ * libmagic >= 5.45 can report an ASCII (newc/odc) cpio whose first member is
+ * a text file as text/x-diff or text/plain, e.g. the payload of a src.rpm
+ * starting with a .patch file.
+ * @param Filename File to open
+ * @returns 1 if Filename is a cpio archive, else 0
+ **/
+int IsCpioFile(char *Filename)
+{
+  unsigned char hdr[6];
+  FILE *fp;
+  size_t n;
+
+  if ((fp = fopen(Filename, "rb")) == NULL) return 0;
+  n = fread(hdr, 1, sizeof(hdr), fp);
+  fclose(fp);
+  if (n < 2) return 0;
+  /* binary cpio, either byte order */
+  if ((hdr[0] == 0xC7 && hdr[1] == 0x71) || (hdr[0] == 0x71 && hdr[1] == 0xC7))
+    return 1;
+  if (n < 6) return 0;
+  /* ASCII cpio: odc (070707), newc (070701), crc (070702) */
+  return (memcmp(hdr, "070707", 6) == 0 || memcmp(hdr, "070701", 6) == 0 ||
+          memcmp(hdr, "070702", 6) == 0);
+}
+
+/**
  * @brief Figure out the real type of "octet" files in case we can unarchive them.
  * @param Filename
  * @param Static buffer to return with new Type
@@ -807,7 +932,7 @@ void OctetType(char *Filename, char *TypeBuf)
   rc2 = RunCommand("7z","t -y -pjunk",Filename,">/dev/null 2>&1",NULL,NULL);
   if(rc2!=0)
   {
-    rc3 = RunCommand("7z","t -y -pjunk",Filename,"|grep 'Wrong password' >/dev/null 2>&1",NULL,NULL);
+    rc3 = RunCommand("7z","t -y -pjunk",Filename," 2>&1 | grep 'Wrong password' >/dev/null",NULL,NULL);
     if(rc3==0)
     {
       LOG_ERROR("'%s' cannot be unpacked, password required.",Filename);
@@ -887,6 +1012,12 @@ int	FindCmd	(char *Filename)
   strncpy(TypeBuf, Type, sizeof(TypeBuf));
   TypeBuf[255] = 0;  /* make sure TypeBuf is null terminated */
 
+  /* a cpio can only be misreported as a text type (see IsCpioFile) */
+  if (strncmp(Type, "text/", 5) == 0 && IsCpioFile(Filename))
+  {
+    strcpy(TypeBuf,"application/x-cpio");
+  }
+  else
   if (strstr(Type, "octet" ))
   {
     OctetType(Filename, TypeBuf);

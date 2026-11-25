@@ -13,6 +13,8 @@ use Mockery as M;
 
 class ClearingResultTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
 
   /** @var LicenseRef|M\MockInterface */
   private $licenseRef;

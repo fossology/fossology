@@ -133,7 +133,6 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
     $this->uploadtree_pk_child = $row['uploadtree_pk'];
 
     $this->uploadtree_tablename = GetUploadtreeTableName($upload_pk);
-    print('.');
   }
 
   /**

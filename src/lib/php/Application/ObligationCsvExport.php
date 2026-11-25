@@ -91,7 +91,7 @@ class ObligationCsvExport
         $candidatelist = $this->obligationMap->getLicenseList($row['ob_pk'], True);
         array_shift($row);
         $row["Associated Licenses"] = $liclist;
-        $row["Associated candidate Licenses/"] = $candidatelist;
+        $row["Associated candidate Licenses"] = $candidatelist;
         $csvarray[] = $row;
       }
     }

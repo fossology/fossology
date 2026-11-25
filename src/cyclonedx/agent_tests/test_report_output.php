@@ -33,9 +33,11 @@ namespace {
     }
   }
 
+  require_once __DIR__ . '/../../lib/php/Data/Report/CycloneDxSettings.php';
   require_once __DIR__ . '/../agent/reportgenerator.php';
 
   use Fossology\CycloneDX\BomReportGenerator;
+  use Fossology\Lib\Data\Report\CycloneDxSettings;
 
   $generator = new BomReportGenerator();
   $passed = 0;
@@ -163,7 +165,9 @@ namespace {
   assert_test('Report has serialNumber', !empty($report['serialNumber']));
   assert_test('Report has metadata', isset($report['metadata']));
   assert_test('Report metadata has tools', isset($report['metadata']['tools']));
-  assert_test('Tool vendor is FOSSology', $report['metadata']['tools']['components'][0]['vendor'] === 'FOSSology');
+  assert_test('Tool manufacturer is FOSSology',
+    $report['metadata']['tools']['components'][0]['manufacturer']['name'] === 'FOSSology');
+  assert_test('Tool has no vendor', !isset($report['metadata']['tools']['components'][0]['vendor']));
   assert_test('Tool version is 4.5.0', $report['metadata']['tools']['components'][0]['version'] === '4.5.0');
   assert_test('Metadata has main component', isset($report['metadata']['component']));
   assert_test('Main component has copyright', isset($report['metadata']['component']['copyright']));
@@ -357,6 +361,60 @@ namespace {
   assert_test('Full component has licenses', count($fullComp['licenses']) === 1);
   assert_test('Full component has externalReferences', count($fullComp['externalReferences']) === 1);
   assert_test('Full component has properties', count($fullComp['properties']) === 2);
+
+  echo "\n";
+
+  echo "Test 15: LicenseRef expression with bom-ref and acknowledgement\n";
+  $licenseRefWithRef = $generator->createLicense(array(
+    'id' => 'LicenseRef-fossology-BSD-style',
+    'bom-ref' => 'lic-scanner-320-42',
+    'acknowledgement' => 'declared'
+  ));
+
+  assert_test('Expression value correct',
+    $licenseRefWithRef['expression'] === 'LicenseRef-fossology-BSD-style');
+  assert_test('Expression has bom-ref', $licenseRefWithRef['bom-ref'] === 'lic-scanner-320-42');
+  assert_test('Expression has acknowledgement', $licenseRefWithRef['acknowledgement'] === 'declared');
+  assert_test('Expression has only schema keys',
+    array_keys($licenseRefWithRef) === array('expression', 'bom-ref', 'acknowledgement'));
+
+  echo "\n";
+
+  echo "Test 16: Spec version gates fields the older schemas reject\n";
+  foreach (CycloneDxSettings::SUPPORTED_VERSIONS as $version) {
+    $versioned = new BomReportGenerator();
+    $versioned->applySettings(new CycloneDxSettings(false, false, false, 'acme:', $version));
+    $lic = $versioned->createLicense(['id' => 'MIT', 'bom-ref' => 'lic-1', 'acknowledgement' => 'concluded']);
+    $ref = $versioned->createLicense(['id' => 'LicenseRef-x', 'bom-ref' => 'lic-2', 'acknowledgement' => 'declared']);
+    $comp = $versioned->createComponent(['type' => 'file', 'name' => 'f', 'licenses' => [$lic, $ref], 'comments' => 'c']);
+    $bom = $versioned->generateReport([
+      'tool-version' => '1.0', 'maincomponent' => $comp, 'components' => [],
+      'citations' => [['attributedTo' => 'tool-fossology', 'expressions' => ['$']]]
+    ]);
+    $atLeast = function ($v) use ($version) {
+      return version_compare($version, $v, '>=');
+    };
+    assert_test("$version: specVersion and \$schema",
+      $bom['specVersion'] === $version && strpos($bom['$schema'], "bom-$version.schema.json") !== false);
+    assert_test("$version: tools form",
+      $atLeast('1.5') ? isset($bom['metadata']['tools']['components'])
+                      : isset($bom['metadata']['tools'][0]['vendor']));
+    assert_test("$version: tool manufacturer only from 1.6",
+      $atLeast('1.6') === isset($bom['metadata']['tools']['components'][0]['manufacturer']));
+    assert_test("$version: author bom-ref only from 1.5",
+      $atLeast('1.5') === isset($bom['metadata']['authors'][0]['bom-ref']));
+    assert_test("$version: license bom-ref only from 1.5",
+      $atLeast('1.5') === isset($lic['license']['bom-ref']));
+    assert_test("$version: license acknowledgement only from 1.6",
+      $atLeast('1.6') === isset($lic['license']['acknowledgement']));
+    assert_test("$version: LicenseRef as expression only from 1.7",
+      $atLeast('1.7') ? $ref['expression'] === 'LicenseRef-x'
+                      : $ref['license']['name'] === 'LicenseRef-x');
+    assert_test("$version: citations only from 1.7",
+      $atLeast('1.7') === isset($bom['citations']));
+    assert_test("$version: property names use the namespace",
+      $comp['properties'][0]['name'] === 'acme:comment');
+  }
 
   echo "\n";
 

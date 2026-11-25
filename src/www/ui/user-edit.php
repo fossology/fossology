@@ -9,6 +9,7 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Data\Report\CycloneDxSettings;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
 use Fossology\Lib\Exceptions\DuplicateTokenNameException;
@@ -198,13 +199,13 @@ class UserEditPage extends DefaultPlugin
     $vars['spdxLicenseCommentDefault'] = ($spdxSettings[1] === 'checked');
     $vars['ignoreFilesWOInfoDefault'] = ($spdxSettings[2] === 'checked');
 
-    $cyclonedxSettings = isset($UserRec['cyclonedx_settings']) ? explode(',', $UserRec['cyclonedx_settings']) : ['unchecked', 'unchecked', 'unchecked'];
-    if (count($cyclonedxSettings) < 3) {
-      $cyclonedxSettings = array_pad($cyclonedxSettings, 3, 'unchecked');
-    }
-    $vars['cyclonedxOsselotExportEnabled'] = ($cyclonedxSettings[0] === 'checked');
-    $vars['cyclonedxLicenseCommentDefault'] = ($cyclonedxSettings[1] === 'checked');
-    $vars['cyclonedxIgnoreFilesWOInfoDefault'] = ($cyclonedxSettings[2] === 'checked');
+    $cyclonedxSettings = CycloneDxSettings::fromUserSettings($UserRec['cyclonedx_settings'] ?? null);
+    $vars['cyclonedxOsselotExportEnabled'] = $cyclonedxSettings->isOsselotExport();
+    $vars['cyclonedxLicenseCommentDefault'] = $cyclonedxSettings->isLicenseCommentChecked();
+    $vars['cyclonedxIgnoreFilesWOInfoDefault'] = $cyclonedxSettings->isIgnoreFilesWithoutInfo();
+    $vars['cyclonedxCustomTagNamespace'] = $cyclonedxSettings->getTagNamespace();
+    $vars['cyclonedxSpecVersion'] = $cyclonedxSettings->getSpecVersion();
+    $vars['cyclonedxSupportedVersions'] = CycloneDxSettings::SUPPORTED_VERSIONS;
 
     if ($SessionIsAdmin) {
       $vars['allAccessLevels'] = array(
@@ -324,6 +325,12 @@ class UserEditPage extends DefaultPlugin
         $Errors .= "<li>" . _("User is not member of provided group.") .
           "</li>";
       }
+    }
+
+    if (!empty($UserRec['_cyclonedx_namespace_invalid'])) {
+      $Errors .= "<li>" . sprintf(_("Invalid CycloneDX tag namespace: use " .
+        "letters, digits, '.', '_', '-' and ':' (at most %d characters)."),
+        CycloneDxSettings::MAX_NAMESPACE_LENGTH) . "</li>";
     }
 
     /* Make sure only admin can change the username */
@@ -470,11 +477,18 @@ class UserEditPage extends DefaultPlugin
       }
 
       if ($this->dbManager->existsColumn('users', 'cyclonedx_settings')) {
-        $cyclonedxOsselotEnabled = !empty($request->get('cyclonedx_osselot_export_enabled')) ? 'checked' : 'unchecked';
-        $cyclonedxCommentEnabled = !empty($request->get('cyclonedx_license_comment_default')) ? 'checked' : 'unchecked';
-        $cyclonedxIgnoreFilesEnabled = !empty($request->get('cyclonedx_ignore_files_wo_info_default')) ? 'checked' : 'unchecked';
-
-        $UserRec['cyclonedx_settings'] = "$cyclonedxOsselotEnabled,$cyclonedxCommentEnabled,$cyclonedxIgnoreFilesEnabled";
+        $namespaceInput = trim((string) $request->get('cyclonedx_custom_tag_namespace'));
+        $namespace = $namespaceInput === '' ? CycloneDxSettings::DEFAULT_NAMESPACE :
+          CycloneDxSettings::normaliseNamespace($namespaceInput);
+        if ($namespace === null) {
+          $UserRec['_cyclonedx_namespace_invalid'] = true;
+        }
+        $cyclonedxSettings = new CycloneDxSettings(
+          !empty($request->get('cyclonedx_license_comment_default')),
+          !empty($request->get('cyclonedx_ignore_files_wo_info_default')),
+          !empty($request->get('cyclonedx_osselot_export_enabled')),
+          $namespace, $request->get('cyclonedx_spec_version'));
+        $UserRec['cyclonedx_settings'] = $cyclonedxSettings->toUserSettings();
       }
     }
     return $UserRec;

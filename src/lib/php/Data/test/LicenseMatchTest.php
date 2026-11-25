@@ -9,6 +9,9 @@ namespace Fossology\Lib\Data;
 
 class LicenseMatchTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+  public $spdxId;
+
   /** @var LicenseRef */
   private $licenseRef;
   /** @var AgentRef */

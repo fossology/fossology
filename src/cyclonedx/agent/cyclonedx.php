@@ -26,6 +26,7 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Data\Report\CycloneDxSettings;
 use Fossology\Lib\Data\Report\FileNode;
 use Fossology\Lib\Data\Report\SpdxLicenseInfo;
 use Fossology\Lib\Db\DbManager;
@@ -105,6 +106,11 @@ class CycloneDXAgent extends Agent
    * @var string $packageName
    */
   private $packageName;
+  /**
+   * @var CycloneDxSettings $settings
+   * Settings of the upload being reported
+   */
+  private $settings;
 
   function __construct()
   {
@@ -145,6 +151,9 @@ class CycloneDXAgent extends Agent
   function processUploadId($uploadId)
   {
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
+
+    $this->settings = $this->uploadDao->getCyclonedxSettings($uploadId);
+    $this->reportGenerator->applySettings($this->settings);
 
     $packageNodes = $this->renderPackage($uploadId);
 
@@ -367,7 +376,9 @@ class CycloneDXAgent extends Agent
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
 
-    $stateWoInfos = $this->getCycloneDXReportConf($uploadId, 1);
+    $stateLicenseComment = $this->settings->isLicenseCommentEnabled();
+    $stateWoInfos = $this->settings->isIgnoreFilesWithoutInfo();
+    $stateOsselot = $this->settings->isOsselotExport();
 
     $filesProceeded = 0;
     $lastValue = 0;
@@ -430,7 +441,7 @@ class CycloneDXAgent extends Agent
           'copyright' => implode("\n", $licenses->getCopyrights()),
           'licenses' => $licensesfound,
           'acknowledgements' => implode("\n", $licenses->getAcknowledgements()),
-          'comments' => implode("\n", $licenses->getComments())
+          'comments' => $stateLicenseComment ? implode("\n", $licenses->getComments()) : ''
         );
         $components[] = $this->reportGenerator->createComponent($componentdata);
       }
@@ -546,26 +557,6 @@ class CycloneDXAgent extends Agent
 
     $row = $this->dbManager->getSingleRow($sql, [$fileId], __METHOD__);
     return $row['mimetype_name'] ?? 'application/octet-stream';
-  }
-
-  /**
-   * @brief Get CycloneDX report conf state for a given upload
-   *
-   * Reads user default settings from users.cyclonedx_settings.
-   * @param int $uploadId
-   * @param int $key Array key (0=cyclonedxLicenseComment, 1=ignoreFilesWOInfo, 2=osselotExport)
-   * @return bool Configuration state (TRUE/FALSE)
-   */
-  protected function getCycloneDXReportConf($uploadId, $key)
-  {
-    $settings = $this->uploadDao->getCyclonedxSettings($uploadId);
-    if (!empty($settings)) {
-      $settingsArr = explode(',', $settings);
-      if (isset($settingsArr[$key]) && $settingsArr[$key] === "checked") {
-        return true;
-      }
-    }
-    return false;
   }
 }
 

@@ -138,7 +138,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   pg_free_result($result);
 
   /* Find rf_pk for rf_shortname.  This will speed up the main query tremendously */
-  $pg_shortname = pg_escape_string($rf_shortname);
+  $pg_shortname = pg_escape_string($PG_CONN, $rf_shortname);
   $sql = "SELECT rf_pk FROM license_ref WHERE rf_shortname='$pg_shortname'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);

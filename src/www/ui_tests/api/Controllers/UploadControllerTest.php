@@ -62,6 +62,8 @@ function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
  */
 class UploadControllerTest extends \PHPUnit\Framework\TestCase
 {
+  public $userDao;
+
   /**
    * @var \Mockery\MockInterface $functions
    * Public function mock
@@ -1334,7 +1336,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->clearingDao->shouldReceive('getMainLicenseIds')->withArgs([$uploadId, $this->groupId])->andReturn($licenseIds);
     $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], false])->andReturn([]);
     $this->licenseDao->shouldReceive('getLicenseObligations')->withArgs([[$licenseId], true])->andReturn([]);
-    $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId])->andReturn($license);
+    $this->licenseDao->shouldReceive('getLicenseById')->withArgs([$licenseId, $this->groupId])->andReturn($license);
 
     $licenses[] = $license->getArray();
     $expectedResponse = (new ResponseHelper())->withJson($licenses, 200);
@@ -1361,6 +1363,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       'type', 1);
     $licenseIds[$licenseId] = $licenseId;
     $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
       ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
@@ -1407,6 +1411,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $licenseIds[$licenseId] = $licenseId;
     $this->uploadDao->shouldReceive('isAccessible')
       ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
     $this->licenseDao->shouldReceive('getLicenseByShortName')
@@ -1427,6 +1433,35 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->uploadController->setMainLicense($request, new ResponseHelper(), ['id' => $uploadId]);
   }
 
+  /**
+   * @test
+   * -# Test for UploadController::setMainLicense()
+   * -# Check if HttpForbiddenException is thrown when user lacks write permission
+   */
+  public function testSetMainLicense_forbiddenForReadOnlyUser()
+  {
+    $uploadId = 2;
+    $rq = [
+      "shortName" => "MIT",
+    ];
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(false);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+
+    $reqBody = $this->streamFactory->createStream(json_encode($rq));
+    $requestHeaders = new Headers();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $reqBody);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->expectExceptionMessage(
+      "You do not have write permission on this upload.");
+    $this->uploadController->setMainLicense($request, new ResponseHelper(), ['id' => $uploadId]);
+  }
 
   /**
    * @test
@@ -1443,6 +1478,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $licenseIds[$licenseId] = $licenseId;
 
     $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
       ->withArgs([$uploadId, $this->groupId])->andReturn(true);
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
@@ -1463,6 +1500,29 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::removeMainLicense()
+   * -# Check if HttpForbiddenException is thrown when user lacks write permission
+   */
+  public function testRemoveMainLicense_forbiddenForReadOnlyUser()
+  {
+    $uploadId = 3;
+    $shortName = "MIT";
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isEditable')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(false);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->expectExceptionMessage(
+      "You do not have write permission on this upload.");
+    $this->uploadController->removeMainLicense(null, new ResponseHelper(),
+      ['id' => $uploadId, 'shortName' => $shortName]);
   }
 
   /**
@@ -2024,5 +2084,56 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $this->assertEquals(500,$actualResponse->getStatusCode());
 
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::uploadDownload() where ununpack not finished
+   * -# Check if HttpServiceUnavailableException is thrown
+   */
+  public function testUploadDownloadNotUnpacked()
+  {
+    $uploadId = 5;
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withArgs([$uploadId])->andReturn(false);
+    $this->expectException(HttpServiceUnavailableException::class);
+
+    $this->uploadController->uploadDownload(null, new ResponseHelper(),
+      ['id' => $uploadId]);
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::uploadDownload() where upload root file is
+   *    missing
+   * -# Check if the dynamic uploadtree table is queried
+   * -# Check if HttpNotFoundException is thrown
+   */
+  public function testUploadDownloadFileNotFound()
+  {
+    $uploadId = 2;
+    $uploadTreeTableName = "uploadtree";
+    $itemTreeBounds = $this->getUploadBounds($uploadId);
+    $this->dbHelper->shouldReceive('doesIdExist')
+      ->withArgs(["upload", "upload_pk", $uploadId])->andReturn(true);
+    $this->uploadDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])->andReturn(true);
+    $this->uploadDao->shouldReceive('getParentItemBounds')
+      ->withAnyArgs()->andReturn($itemTreeBounds);
+    $this->uploadDao->shouldReceive('getUploadtreeTableName')
+      ->withArgs([$uploadId])->andReturn($uploadTreeTableName);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([M::on(function ($sql) use ($uploadTreeTableName) {
+        return strpos($sql, "FROM $uploadTreeTableName WHERE") !== false;
+      }), [$itemTreeBounds->getItemId()], M::any()])
+      ->once()->andReturn(false);
+    $this->expectException(HttpNotFoundException::class);
+
+    $this->uploadController->uploadDownload(null, new ResponseHelper(),
+      ['id' => $uploadId]);
   }
 }

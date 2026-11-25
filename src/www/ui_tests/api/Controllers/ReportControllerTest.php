@@ -39,6 +39,9 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
  */
 class ReportControllerTest extends \PHPUnit\Framework\TestCase
 {
+  public $dbHelper;
+  public $restHelper;
+
 
   /**
    * @var array $reportsAllowed
