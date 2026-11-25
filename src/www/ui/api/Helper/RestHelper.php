@@ -208,6 +208,9 @@ class RestHelper
     if (!$this->uploadPermissionDao->isAccessible($uploadId, $this->getGroupId())) {
       throw new HttpForbiddenException("Upload is not accessible.");
     }
+    if (!$isCopy && !$this->uploadPermissionDao->isEditable($uploadId, $this->getGroupId())) {
+      throw new HttpForbiddenException("Upload cannot be moved without write permission.");
+    }
     $uploadContentId = $this->folderDao->getFolderContentsId($uploadId,
       $this->folderDao::MODE_UPLOAD);
     /** @var \AdminContentMove $contentMove */
