@@ -364,7 +364,7 @@ class UIExportList extends FO_Plugin
    * @param integer $uploadtree_pk       Item ID
    * @param integer $uploadTreeTableName Upload tree table name
    * @param integer $NomostListNum       Limit of lines to print
-   * @param integer $exclude             Files to be excluded
+   * @param string  $exclude             Literal substring to exclude from paths
    * @param string  $copyrightType       Which copyrights to print (`"all"` to
    *                                     print everything, `"nolic"` to print
    *                                     only files with no scanner findings and
@@ -393,21 +393,18 @@ class UIExportList extends FO_Plugin
       $uploadTreeTableName);
     $extrawhere = "UT.lft BETWEEN " . $itemTreeBounds->getLeft() . " AND " .
       $itemTreeBounds->getRight();
-    if (! empty($exclude)) {
-      $extrawhere .= " AND UT.ufile_name NOT LIKE '%$exclude%'";
-    }
     $lines = [];
     $uploadtreePkToFilePath = [];
 
     $copyrights =  $this->copyrightDao->getScannerEntries($agentName[0],
       $uploadTreeTableName, $uploadId, null, $extrawhere . $agentFilter);
     $this->updateCopyrightList($lines, $uploadtreePkToFilePath, $copyrights,
-      $NomostListNum, $uploadTreeTableName, "content");
+      $NomostListNum, $uploadTreeTableName, "content", $exclude);
 
     $copyrights = $this->copyrightDao->getEditedEntries('copyright_decision',
       $uploadTreeTableName, $uploadId, [], $extrawhere);
     $this->updateCopyrightList($lines, $uploadtreePkToFilePath, $copyrights,
-      $NomostListNum, $uploadTreeTableName, "textfinding");
+      $NomostListNum, $uploadTreeTableName, "textfinding", $exclude);
 
     if ($copyrightType != "all") {
       $agentList = [];
@@ -431,11 +428,18 @@ class UIExportList extends FO_Plugin
    * @param integer $NomostListNum  Limit of copyrights
    * @param string  $uploadTreeTableName Upload tree table name
    * @param string  $key            Key of the array holding copyright
+   * @param string  $exclude        Literal substring to exclude from paths
    */
   private function updateCopyrightList(&$list, &$uploadtreePkToFilePath,
-    $newCopyrights, $NomostListNum, $uploadTreeTableName, $key)
+    $newCopyrights, $NomostListNum, $uploadTreeTableName, $key, $exclude = '')
   {
     foreach ($newCopyrights as $copyright) {
+      $filePath = $this->treeDao->getFullPath($copyright["uploadtree_pk"],
+        $uploadTreeTableName);
+      if ($exclude !== null && $exclude !== '' &&
+        strpos($filePath, $exclude) !== false) {
+        continue;
+      }
       if ($NomostListNum > -1 && count($list) >= $NomostListNum) {
         $list["warn"] = _("<br><b>Warning: Only the first $NomostListNum lines
  are displayed. To see the whole list, run fo_nomos_license_list from the
@@ -444,8 +448,7 @@ class UIExportList extends FO_Plugin
       }
       $row = [];
       $row["content"] = $copyright[$key];
-      $row["filePath"] = $this->treeDao->getFullPath($copyright["uploadtree_pk"],
-        $uploadTreeTableName);
+      $row["filePath"] = $filePath;
       $uploadtreePkToFilePath[$copyright["uploadtree_pk"]] = $row["filePath"];
       $list[$row["filePath"]][] = $row;
     }
