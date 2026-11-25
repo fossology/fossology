@@ -531,14 +531,14 @@ class CycloneDXAgent extends Agent
    */
   protected function getMimeType($uploadId)
   {
-    $sql = "SELECT mimetype_name
+    $sql = "SELECT m.mimetype_name
       FROM upload u
       JOIN pfile pf ON u.pfile_fk = pf.pfile_pk
-      JOIN mimetype m ON pf.pfile_mimetypefk = m.mimetype_pk
+      LEFT JOIN mimetype m ON pf.pfile_mimetypefk = m.mimetype_pk
       WHERE u.upload_pk = $1";
 
     $row = $this->dbManager->getSingleRow($sql, [$uploadId], __METHOD__);
-    return $row['mimetype_name'];
+    return $row['mimetype_name'] ?? 'application/octet-stream';
   }
 
   /**
