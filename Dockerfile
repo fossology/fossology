@@ -104,6 +104,7 @@ RUN mkdir -p /var/log/apache2/ \
 
 COPY ./docker-entrypoint.sh /fossology/docker-entrypoint.sh
 RUN chmod +x /fossology/docker-entrypoint.sh
+RUN mkdir -p /var/local/cache/fossology && chown -R www-data:www-data /var/local/cache/fossology && chmod -R 775 /var/local/cache/fossology
 ENTRYPOINT ["/fossology/docker-entrypoint.sh"]
 
 COPY --from=builder /etc/cron.d/fossology /etc/cron.d/fossology
