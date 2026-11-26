@@ -239,9 +239,14 @@ function DB_TableExists($tableName)
  *
  * \return 1 if column exists, 0 if not.
 **/
-function DB_ColExists($tableName, $colName, $DBName='fossology')
+function DB_ColExists($tableName, $colName, $DBName = null)
 {
   global $PG_CONN;
+
+  // Use the connected database name if not specified
+  if ($DBName === null) {
+    $DBName = pg_dbname($PG_CONN) ?: 'fossology';
+  }
 
   $sql = "select count(*) as count from information_schema.columns where "
        . "table_catalog='$DBName' and table_name='$tableName' and column_name='$colName'";
@@ -263,9 +268,14 @@ function DB_ColExists($tableName, $colName, $DBName='fossology')
  *
  * \return True if constraint exists, False if not.
 **/
-function DB_ConstraintExists($ConstraintName, $DBName='fossology')
+function DB_ConstraintExists($ConstraintName, $DBName = null)
 {
   global $PG_CONN;
+
+  // Use the connected database name if not specified
+  if ($DBName === null) {
+    $DBName = pg_dbname($PG_CONN) ?: 'fossology';
+  }
 
   $sql = "select count(*) as count from information_schema.table_constraints "
        . "where table_catalog='$DBName' and constraint_name='$ConstraintName' limit 1";

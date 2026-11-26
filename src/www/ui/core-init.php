@@ -99,7 +99,9 @@ class core_init extends FO_Plugin
             $FailFlag = 1;
           } else {
             print "<pre>";
-            $FailFlag = $Schema->ApplySchema($Schema->Filename, 0, 0);
+            /* Use configured database name instead of hardcoded 0 for the catalog */
+            $dbName = $GLOBALS['SysConf']['DBCONF']['dbname'] ?? 'fossology';
+            $FailFlag = $Schema->ApplySchema($Schema->Filename, 0, $dbName);
             print "</pre>";
           }
           if (! $FailFlag) {

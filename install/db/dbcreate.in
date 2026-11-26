@@ -12,6 +12,9 @@ if [ "$FOSSOLOGY_DB_HOST" ]; then
   exit 0
 fi
 
+# Determine the database name to use
+DB_NAME="${FOSSOLOGY_DB_NAME:-fossology}"
+
 echo "*** Setting up the FOSSology database ***"
 
 # At some point this is where we could dynamically set the db password
@@ -35,27 +38,27 @@ if [ $? != 0 ]; then
 fi
 
 # then check to see if the db already exists
-su --whitelist-environment="PGHOST" postgres -c "psql --tuples-only --command \"select * from pg_database where datname = 'fossology';\""|grep fossology >/dev/null 2>&1
+su --whitelist-environment="PGHOST" postgres -c "psql --tuples-only --command \"select * from pg_database where datname = '$DB_NAME';\""|grep "$DB_NAME" >/dev/null 2>&1
 if [ $? = 0 ]; then
    echo "NOTE: fossology database already exists, not creating"
    echo "*** Checking for plpgsql support ***"
-   su --whitelist-environment="PGHOST" postgres -c 'echo "SELECT * FROM pg_language;" | psql -t fossology' |grep -q plpgsql
+   su --whitelist-environment="PGHOST" postgres -c "echo \"SELECT * FROM pg_language;\" | psql -t \"$DB_NAME\"" |grep -q plpgsql
    if [ $? = 0 ]; then
       echo "NOTE: plpgsql already exists in fossology database, good"
    else
       echo "NOTE: plpgsql doesn't exist, adding"
-      su --whitelist-environment="PGHOST" postgres -c 'echo "CREATE LANGUAGE plpgsql;" | psql fossology'
+      su --whitelist-environment="PGHOST" postgres -c "echo \"CREATE LANGUAGE plpgsql;\" | psql \"$DB_NAME\""
       if [ $? != 0 ]; then
          echo "ERROR: failed to add plpgsql to fossology database"
       fi
    fi
    echo "*** Checking for 'uuid-ossp' support ***"
-   su --whitelist-environment="PGHOST" postgres -c 'echo "SELECT * FROM pg_extension;" | psql -t fossology' |grep -q uuid-ossp
+   su --whitelist-environment="PGHOST" postgres -c "echo \"SELECT * FROM pg_extension;\" | psql -t \"$DB_NAME\"" |grep -q uuid-ossp
    if [ $? = 0 ]; then
       echo "NOTE: 'uuid-ossp' already exists in fossology database, good"
    else
       echo "NOTE: 'uuid-ossp' doesn't exist, adding"
-      su --whitelist-environment="PGHOST" postgres -c 'echo "CREATE EXTENSION \"uuid-ossp\";" | psql fossology'
+      su --whitelist-environment="PGHOST" postgres -c "echo \"CREATE EXTENSION \\\"uuid-ossp\\\";\" | psql \"$DB_NAME\""
       if [ $? != 0 ]; then
          echo "ERROR: failed to add 'uuid-ossp' to fossology database"
       fi

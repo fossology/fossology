@@ -53,7 +53,7 @@ $longOpts = [
 
 /* defaults */
 $Verbose = false;
-$DatabaseName = "fossology";
+$DatabaseName = null;
 $UpdateLiceneseRef = false;
 $sysconfdir = '';
 $delDbPattern = 'the option -rfosstest will drop data bases with datname like "fosstest%"';
@@ -105,6 +105,11 @@ require_once 'fossinit-common.php';
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap($sysconfdir);
+
+/* Use the database name from Db.conf if -d was not specified */
+if ($DatabaseName === null) {
+  $DatabaseName = $SysConf["DBCONF"]["dbname"] ?? 'fossology';
+}
 $SysConf["DBCONF"]["dbname"] = $DatabaseName;
 $GLOBALS["SysConf"] = array_merge($GLOBALS["SysConf"], $SysConf);
 $projectGroup = $SysConf['DIRECTORIES']['PROJECTGROUP'] ?: 'fossy';
