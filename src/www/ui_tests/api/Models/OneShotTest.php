@@ -182,14 +182,22 @@ class OneShotTest extends TestCase
   /**
    * @dataProvider responseSchemaProvider
    */
-  public function testResponseFieldsAreDocumented($specification, $field, $data)
+  public function testResponseFieldsAreDocumented($specification, $endpoint,
+    $field, $data)
   {
     $parser = new Parser();
     $document = $parser->parse(file_get_contents(__DIR__ .
       '/../../../ui/api/documentation/' . $specification));
-    $properties = $document['components']['schemas']['OneShotInfo']['properties'];
+    $reference = $document['paths']['/uploads/oneshot/' . $endpoint]['post']
+      ['responses']['200']['content']['application/json']['schema']['$ref'];
+    $schemaName = basename($reference);
+    $schema = $document['components']['schemas'][$schemaName];
+    $properties = $schema['properties'];
     $response = (new OneShot($data, []))->getArray($field);
 
+    $this->assertEqualsCanonicalizing(array_keys($response),
+      array_keys($properties));
+    $this->assertEqualsCanonicalizing(array_keys($response), $schema['required']);
     foreach ($response as $name => $value) {
       $this->assertArrayHasKey($name, $properties);
       $variants = $properties[$name]['oneOf'] ?? [$properties[$name]];
@@ -206,12 +214,12 @@ class OneShotTest extends TestCase
   public static function responseSchemaProvider()
   {
     foreach (['openapi.yaml', 'openapiv2.yaml'] as $specification) {
-      yield $specification . ' nomos' => [$specification, 'licenses', ' MIT '];
-      yield $specification . ' nomos no match' => [$specification, 'licenses', ' No_license_found '];
-      yield $specification . ' monk' => [$specification, 'licenses', ['MIT', 'Apache-2.0']];
-      yield $specification . ' monk no match' => [$specification, 'licenses', []];
-      yield $specification . ' ceu' => [$specification, 'copyrights', ['Copyright 2026 Example']];
-      yield $specification . ' ceu no match' => [$specification, 'copyrights', []];
+      yield $specification . ' nomos' => [$specification, 'nomos', 'licenses', ' MIT '];
+      yield $specification . ' nomos no match' => [$specification, 'nomos', 'licenses', ' No_license_found '];
+      yield $specification . ' monk' => [$specification, 'monk', 'licenses', ['MIT', 'Apache-2.0']];
+      yield $specification . ' monk no match' => [$specification, 'monk', 'licenses', []];
+      yield $specification . ' ceu' => [$specification, 'ceu', 'copyrights', ['Copyright 2026 Example']];
+      yield $specification . ' ceu no match' => [$specification, 'ceu', 'copyrights', []];
     }
   }
 }

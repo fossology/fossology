@@ -2262,7 +2262,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OneShotInfo'
+                $ref: '#/components/schemas/OneShotLicenseInfo'
         default:
           $ref: '#/components/responses/defaultResponse'
   /uploads/oneshot/monk:
@@ -2291,7 +2291,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OneShotInfo'
+                $ref: '#/components/schemas/OneShotLicenseInfo'
         default:
           $ref: '#/components/responses/defaultResponse'
   /uploads/oneshot/ceu:
@@ -2320,7 +2320,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OneShotInfo'
+                $ref: '#/components/schemas/OneShotCopyrightInfo'
         default:
           $ref: '#/components/responses/defaultResponse'
   /search:
@@ -6831,8 +6831,11 @@ components:
           example: "MIT: 'MIT License\n\nCopyright (c) <year> <copyright holders>'"
         htmlElement:
           type: string
-    OneShotInfo:
+    OneShotLicenseInfo:
       type: object
+      required:
+        - licenses
+        - highlights
       properties:
         licenses:
           description: License findings returned by Nomos (string) or Monk (array of shortnames).
@@ -6841,6 +6844,16 @@ components:
             - type: array
               items:
                 type: string
+        highlights:
+          type: array
+          items:
+            $ref: '#/components/schemas/HighlightInfo'
+    OneShotCopyrightInfo:
+      type: object
+      required:
+        - copyrights
+        - highlights
+      properties:
         copyrights:
           description: Copyright, email and URL findings returned by the CEU scanner.
           type: array
