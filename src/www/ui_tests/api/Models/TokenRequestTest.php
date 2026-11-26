@@ -240,7 +240,7 @@ class TokenRequestTest extends TestCase
     TokenRequest::fromArray($input, $version);
   }
 
-  public function invalidTokenExpireProvider(): array
+  public static function invalidTokenExpireProvider(): array
   {
     $cases = [];
     foreach ([1, 2] as $version) {
@@ -265,7 +265,7 @@ class TokenRequestTest extends TestCase
     $this->assertSame($expiry, $tokenRequest->getTokenExpire());
   }
 
-  public function validTokenExpireProvider(): array
+  public static function validTokenExpireProvider(): array
   {
     return [
       ['2026-11-01', 1],

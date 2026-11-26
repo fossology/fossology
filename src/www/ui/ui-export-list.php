@@ -662,7 +662,7 @@ class UIExportList extends FO_Plugin
     } else {
       $head = array('file path', 'copyright');
     }
-    fputcsv($out, $head, $this->delimiter, $this->enclosure);
+    fputcsv($out, $head, $this->delimiter, $this->enclosure, '\\');
     foreach ($lines as $row) {
       $newRow = array();
       $newRow[] = $row['filePath'];
@@ -680,7 +680,7 @@ class UIExportList extends FO_Plugin
           $newRow[] = "";
         }
       }
-      fputcsv($out, $newRow, $this->delimiter, $this->enclosure);
+      fputcsv($out, $newRow, $this->delimiter, $this->enclosure, '\\');
     }
     $content = ob_get_contents();
     ob_end_clean();

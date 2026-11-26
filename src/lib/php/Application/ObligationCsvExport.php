@@ -101,9 +101,9 @@ class ObligationCsvExport
       $out = fopen('php://output', 'w');
       ob_start();
       $head = array('Type','Obligation or Risk topic','Full Text','Classification','Apply on modified source code','Comment','Associated Licenses','Associated candidate Licenses');
-      fputcsv($out, $head, $this->delimiter, $this->enclosure);
+      fputcsv($out, $head, $this->delimiter, $this->enclosure, '\\');
       foreach ($csvarray as $row) {
-        fputcsv($out, $row, $this->delimiter, $this->enclosure);
+        fputcsv($out, $row, $this->delimiter, $this->enclosure, '\\');
       }
       $content = ob_get_contents();
       ob_end_clean();

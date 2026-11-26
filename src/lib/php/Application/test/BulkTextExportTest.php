@@ -66,7 +66,7 @@ class BulkTextExportTest extends \PHPUnit\Framework\TestCase
     rewind($handle);
 
     $rows = array();
-    while (($row = fgetcsv($handle, 0, ',', '"')) !== false) {
+    while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
       $rows[] = $row;
     }
     fclose($handle);
@@ -141,7 +141,7 @@ class BulkTextExportTest extends \PHPUnit\Framework\TestCase
     rewind($handle);
 
     $rows = array();
-    while (($row = fgetcsv($handle, 0, ',', '"')) !== false) {
+    while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
       $rows[] = $row;
     }
     fclose($handle);
@@ -184,7 +184,7 @@ class BulkTextExportTest extends \PHPUnit\Framework\TestCase
     rewind($handle);
 
     $rows = array();
-    while (($row = fgetcsv($handle, 0, ',', '"')) !== false) {
+    while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
       $rows[] = $row;
     }
     fclose($handle);

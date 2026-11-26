@@ -40,8 +40,8 @@ class FileLicenses
    * @param Findings|null $findings
    * @param string|null $clearing_status
    */
-  public function __construct(string $filePath = null, Findings $findings = null,
-                              string $clearing_status = null)
+  public function __construct(?string $filePath = null, ?Findings $findings = null,
+                              ?string $clearing_status = null)
   {
     $this->setFilePath($filePath);
     $this->setFindings($findings);

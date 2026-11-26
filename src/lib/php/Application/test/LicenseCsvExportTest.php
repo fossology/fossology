@@ -107,7 +107,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
     $csv = $licenseCsvExport->createCsv();
     ob_start();
     fputs($out, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
-    fputcsv($out, $head);
+    fputcsv($out, $head, ',', '"', '\\');
     fputcsv($out, array($licenses[1]['rf_shortname'],
         $licenses[1]['rf_fullname'],
         $licenses[1]['rf_spdx_id'],
@@ -119,7 +119,8 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
         $licenses[1]['rf_notes'],
         $licenses[1]['rf_source'],
         $licenses[1]['rf_risk'],
-        null, null));
+        null, null
+    ), ',', '"', '\\');
 
     fputcsv($out, array($licenses[2]['rf_shortname'],
         $licenses[2]['rf_fullname'],
@@ -132,7 +133,8 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
         $licenses[2]['rf_notes'],
         $licenses[2]['rf_source'],
         $licenses[2]['rf_risk'],
-        null, null));
+        null, null
+    ), ',', '"', '\\');
 
     fputcsv($out, array($licenses[3]['rf_shortname'],
         $licenses[3]['rf_fullname'],
@@ -145,7 +147,8 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
         $licenses[3]['rf_notes'],
         $licenses[3]['rf_source'],
         $licenses[3]['rf_risk'],
-        null, null));
+        null, null
+    ), ',', '"', '\\');
 
     fputcsv($out, array($candLicenses[2]['rf_shortname'],
       $candLicenses[2]['rf_fullname'],
@@ -158,7 +161,8 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
       $candLicenses[2]['rf_notes'],
       $candLicenses[2]['rf_source'],
       $candLicenses[2]['rf_risk'],
-      "test", null));
+      "test", null
+    ), ',', '"', '\\');
 
     fputcsv($out, array($candLicenses[4]['rf_shortname'],
       $candLicenses[4]['rf_fullname'],
@@ -171,7 +175,8 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
       $candLicenses[4]['rf_notes'],
       $candLicenses[4]['rf_source'],
       $candLicenses[4]['rf_risk'],
-      "test", null));
+      "test", null
+    ), ',', '"', '\\');
     $expected = ob_get_contents();
     ob_end_clean();
 
@@ -182,7 +187,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
     $csv3 = $licenseCsvExport->createCsv(3);
     ob_start();
     fputs($out, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
-    fputcsv($out, $head, $delimiter);
+    fputcsv($out, $head, $delimiter, '"', '\\');
     fputcsv($out, array($licenses[3]['rf_shortname'],
           $licenses[3]['rf_fullname'],
           $licenses[3]['rf_spdx_id'],
@@ -195,8 +200,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
           $licenses[3]['rf_source'],
           $licenses[3]['rf_risk'],
           null, null
-        ),
-        $delimiter);
+        ), $delimiter, '"', '\\');
     $expected3 = ob_get_contents();
     ob_end_clean();
     assertThat($csv3, is(equalTo($expected3)));
