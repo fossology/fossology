@@ -3199,6 +3199,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Job'
+        '400':
+          description: The upload query parameter must be a positive integer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
     post:
