@@ -7,9 +7,28 @@
 namespace Fossology\ReportImport;
 
 use EasyRdf\Graph;
+use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Util\StringOperation;
 
 class ReportImportHelper
 {
+  /**
+   * Strip the SPDX LicenseRef prefix (and the FOSSology specific variant)
+   * from a license id and URL-decode the remainder.
+   * @param string $licenseId
+   * @return string
+   */
+  public static function stripLicenseRefPrefix($licenseId)
+  {
+    if (StringOperation::stringStartsWith($licenseId, LicenseRef::SPDXREF_PREFIX)) {
+      if (StringOperation::stringStartsWith($licenseId, LicenseRef::SPDXREF_PREFIX_FOSSOLOGY)) {
+        return urldecode(substr($licenseId, strlen(LicenseRef::SPDXREF_PREFIX_FOSSOLOGY)));
+      }
+      return urldecode(substr($licenseId, strlen(LicenseRef::SPDXREF_PREFIX)));
+    }
+    return urldecode($licenseId);
+  }
+
   private static function getTokensFromlicenseExpression($licenseExpr) // TODO
   {
     return array_filter(explode(' ', str_replace(array("(",")"), " ", $licenseExpr)));

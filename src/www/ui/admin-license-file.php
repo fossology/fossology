@@ -19,6 +19,9 @@ define("TITLE_ADMIN_LICENSE_FILE", _("License Administration"));
 
 class admin_license_file extends FO_Plugin
 {
+  public $obligationSelectorId;
+  public $obligationSelectorName;
+
   /** @var DbManager */
   private $dbManager;
 
@@ -414,6 +417,17 @@ class admin_license_file extends FO_Plugin
     }
   }
 
+  /** @brief check if text is the placeholder an agent stores instead of a license text */
+  private function isAgentPlaceholderText($text)
+  {
+    foreach (["License by Nomos", "License by Ninka", "License by OJO", "License by Scancode"] as $placeholder) {
+      if (stristr($text, $placeholder)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * \brief Update the database
    *
@@ -461,7 +475,7 @@ class admin_license_file extends FO_Plugin
       return "<b>$text</b><p>";
     }
 
-    $md5term = (empty($text) || stristr($text, "License by Nomos")) ? 'null' : 'md5($10)';
+    $md5term = (empty($text) || $this->isAgentPlaceholderText($text)) ? 'null' : 'md5($10)';
 
     $sql = "UPDATE license_ref SET
         rf_active=$2, marydone=$3,  rf_shortname=$4, rf_fullname=$5,
@@ -576,7 +590,7 @@ class admin_license_file extends FO_Plugin
       return "<b>$text</b><p>";
     }
 
-    $md5term = (empty($rf_text) || stristr($rf_text, "License by Nomos")) ? 'null' : 'md5($7)';
+    $md5term = (empty($rf_text) || $this->isAgentPlaceholderText($rf_text)) ? 'null' : 'md5($7)';
     $stmt = __METHOD__.'.rf';
     $sql = "INSERT into license_ref (
         rf_active, marydone, rf_shortname, rf_fullname,

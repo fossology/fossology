@@ -21,6 +21,8 @@ use Mockery as M;
  */
 class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   /**
    * @brief One time setup for test
    * @see PHPUnit::Framework::TestCase::setUp()
@@ -180,7 +182,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     );
     $dbManager->shouldReceive('getSingleRow')
       ->with(
-      'SELECT rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype ' .
+      'SELECT rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype, rf_active ' .
       'FROM license_ref WHERE rf_pk = $1', array(101), anything())
       ->once()
       ->andReturn($singleRowA);
@@ -291,7 +293,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $canLicA["rf_group"] = 4;
     $dbManager->shouldReceive('getSingleRow')
     ->with(
-      'SELECT rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype ' .
+      'SELECT rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype, rf_active ' .
       'FROM license_ref WHERE rf_pk = $1', array(200), anything())
       ->once()
       ->andReturn($canLicA);
@@ -584,6 +586,70 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
+   * @brief Test for LicenseCsvImport::handleCsv() without licensetype column
+   * @test
+   * -# Import an existing and a new license from a CSV without licensetype.
+   * -# Type of the existing license must not be updated.
+   * -# New license must be inserted with type `Unknown`.
+   */
+  public function testHandleCsvWithoutLicenseType()
+  {
+    $dbManager = M::mock(DbManager::class);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
+    Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleCsv',
+      array(array('shortname', 'fullname', 'text')));
+    Reflectory::setObjectsProperty($licenseCsvImport, 'nkMap', array(
+      'licA' => 101, 'licB' => false
+    ));
+    Reflectory::setObjectsProperty($licenseCsvImport, 'mdkMap', array(
+      md5('txA') => 101, md5('txB') => false
+    ));
+
+    $dbManager->shouldReceive('getSingleRow')
+      ->with(
+      'SELECT rf_shortname, rf_fullname, rf_spdx_id, rf_text, rf_url, rf_notes, rf_source, rf_risk, rf_licensetype, rf_active ' .
+      'FROM license_ref WHERE rf_pk = $1', array(101), anything())
+      ->once()
+      ->andReturn(array(
+        'rf_shortname' => 'licA',
+        'rf_fullname' => 'liceA',
+        'rf_spdx_id' => null,
+        'rf_text' => 'txA',
+        'rf_url' => '',
+        'rf_notes' => '',
+        'rf_source' => '',
+        'rf_risk' => 0,
+        'rf_licensetype' => 'Strong Copyleft'
+      ));
+    $dbManager->shouldReceive('getSingleRow')
+      ->with('SELECT rf_parent FROM license_map WHERE rf_fk = $1 AND usage = $2;',
+        anything(), anything())
+      ->andReturn(false);
+    $returnA = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'handleCsv', array(array('licA', 'liceA', 'txA')));
+    assertThat($returnA, is("License 'licA' already exists in DB (id = 101)"));
+
+    $this->addLicenseInsertToDbManager($dbManager, array(
+      "rf_shortname" => "licB",
+      "rf_licensetype" => "Unknown",
+      "rf_fullname" => "liceB",
+      "rf_spdx_id" => null,
+      "rf_text" => "txB",
+      "rf_md5" => md5("txB"),
+      "rf_detector_type" => 1,
+      "rf_url" => '',
+      "rf_notes" => '',
+      "rf_source" => '',
+      "rf_risk" => 0,
+      "rf_external_id" => null,
+    ), 102);
+    $returnB = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'handleCsv', array(array('licB', 'liceB', 'txB')));
+    assertThat($returnB, is("Inserted 'licB' in DB"));
+  }
+
+  /**
    * @brief Test for LicenseCsvImport::handleFile() (non-existing file)
    * @test
    * -# Call LicenseCsvImport::handleFile() on non-existing file
@@ -726,6 +792,45 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
+   * @brief Test for LicenseCsvImport::insertNewLicense() active flag
+   * @test
+   * -# Insert a new license with `active` false, true and missing.
+   * -# Check that false is kept and only a missing value defaults to true.
+   */
+  public function testInsertNewLicenseKeepsActiveFlag()
+  {
+    $baseRow = array(
+      'shortname' => 'licI', 'licensetype' => 'Permissive',
+      'fullname' => 'License I', 'spdx_id' => 'LicenseRef-licI',
+      'text' => 'txI', 'url' => '', 'notes' => '', 'source' => '',
+      'risk' => 0, 'external_id' => 'ext-licI'
+    );
+    $cases = array(
+      array('active' => false, 'expected' => false),
+      array('active' => true, 'expected' => true),
+      array('expected' => true)
+    );
+    foreach ($cases as $case) {
+      $expected = $case['expected'];
+      unset($case['expected']);
+      $dbManager = M::mock(DbManager::class);
+      $dbManager->shouldReceive('booleanToDb')
+        ->with($expected)->once()->andReturn($expected ? 't' : 'f');
+      $dbManager->shouldReceive('insertTableRow')
+        ->with('license_ref', M::on(function ($columns) use ($expected) {
+          return $columns['rf_active'] === ($expected ? 't' : 'f');
+        }), anything(), 'rf_pk')
+        ->once()->andReturn(110);
+      $licenseCsvImport = new LicenseCsvImport($dbManager,
+        M::mock(UserDao::class));
+
+      $result = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+        'insertNewLicense', array(array_merge($baseRow, $case)));
+      assertThat($result['pkey'], equalTo(110));
+    }
+  }
+
+  /**
    * Create candidate license table
    * @param DbManager $dbManager
    */
@@ -747,6 +852,11 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   private function addLicenseInsertToDbManager(&$dbManager, $row, $return,
     $table = "license_ref")
   {
+    $dbManager->shouldReceive('booleanToDb')
+      ->with(true)
+      ->once()
+      ->andReturn('t');
+    $row['rf_active'] = 't';
     $dbManager->shouldReceive('insertTableRow')
       ->with($table, $row, anything(), 'rf_pk')
       ->once()

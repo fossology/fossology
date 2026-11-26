@@ -16,6 +16,8 @@ require_once __DIR__.'/../../common-string.php';
 
 class TextRendererTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   const START_OFFSET = 10;
   const FRAGMENT_TEXT = "foo bar baz quux";
 

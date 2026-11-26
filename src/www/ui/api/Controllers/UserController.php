@@ -2,7 +2,7 @@
 /*
  SPDX-FileCopyrightText: © 2018, 2021 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
-
+ SPDX-FileCopyrightText: Kaushlendra Pratap <kaushlendra-pratap.singh@siemens.com>
  SPDX-License-Identifier: GPL-2.0-only
 */
 /**
@@ -46,7 +46,6 @@ class UserController extends RestController
    */
   public function getUsers($request, $response, $args)
   {
-    $this->throwNotAdminException();
     $apiVersion = ApiVersion::getVersion($request);
     $id = null;
     if (isset($args['pathParam'])) {

@@ -81,13 +81,13 @@ if [[ $RUNTIME ]]; then
   case "$DISTRO" in
     Debian|Ubuntu|Tuxedo)
       case "$CODENAME" in
-        bullseye)
-          apt-get $YesOpt install libjson-c5;;
-        bookworm|trixie|sid)
+        trixie|sid)
           apt-get $YesOpt install libjson-c5;;
         jammy)
           apt-get $YesOpt install libjson-c5;;
         noble)
+          apt-get $YesOpt install libjson-c5;;
+        resolute)
           apt-get $YesOpt install libjson-c5;;
         *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
       esac;;

@@ -51,7 +51,7 @@ class SearchHelperDao
       /* Find lft and rgt bounds for this $Uploadtree_pk  */
       $row = $uploadDao->getUploadEntry($Item);
       if (empty($row)) {
-        $text = _("Invalid URL, nonexistant item");
+        $text = _("Invalid URL, nonexistent item");
         return "<h2>$text $Item</h2>";
       }
       $lft = $row["lft"];

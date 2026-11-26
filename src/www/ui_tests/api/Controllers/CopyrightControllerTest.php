@@ -37,6 +37,9 @@ use Slim\Psr7\Headers;
 */
 class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
 {
+  public $auth;
+  public $userDao;
+
   /**
    * @var DbHelper $dbHelper
    * DbHelper mock
@@ -160,8 +163,9 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
       ->andReturn(4);
     $this->uploadDao->shouldReceive("isAccessible")
       ->withArgs([$args['id'],4])->andReturn(true);
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(false);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(false);
 
     $requestHeaders = new Headers();
     $body = $this->streamFactory->createStream();
@@ -192,8 +196,9 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
       ->andReturn(4);
     $this->uploadDao->shouldReceive("isAccessible")
       ->withArgs([$args['id'],4])->andReturn(true);
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
 
     $requestHeaders = new Headers();
     $body = $this->streamFactory->createStream();
@@ -225,8 +230,9 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
       ->andReturn(4);
     $this->uploadDao->shouldReceive("isAccessible")
       ->withArgs([$args['id'],4])->andReturn(true);
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->copyrightHist->shouldReceive('getAgentId')
       ->withArgs([$args['id'],'copyright_ars'])->andReturn(1);
     $this->copyrightDao->shouldReceive('getTotalCopyrights')
@@ -282,8 +288,9 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
 
     $this->uploadDao->shouldReceive("getUploadtreeTableName")
       ->withArgs([$args['id']])->andReturn("uploadtree");
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
@@ -328,8 +335,9 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
 
     $this->uploadDao->shouldReceive("getUploadtreeTableName")
       ->withArgs([$args['id']])->andReturn("uploadtree");
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
@@ -385,8 +393,9 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
     $args = $this->getDummyData()['args'];
     $this->uploadDao->shouldReceive("getUploadtreeTableName")
       ->withArgs([$args['id']])->andReturn("uploadtree");
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
@@ -431,8 +440,9 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
     $args = $this->getDummyData()['args'];
     $this->uploadDao->shouldReceive("getUploadtreeTableName")
       ->withArgs([$args['id']])->andReturn("uploadtree");
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
@@ -478,8 +488,9 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
     $args = $this->getDummyData()['args'];
     $this->uploadDao->shouldReceive("getUploadtreeTableName")
       ->withArgs([$args['id']])->andReturn("uploadtree");
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
@@ -523,8 +534,9 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
     $args = $this->getDummyData()['args'];
     $this->uploadDao->shouldReceive("getUploadtreeTableName")
       ->withArgs([$args['id']])->andReturn("uploadtree");
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
@@ -569,8 +581,9 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
     $args = $this->getDummyData()['args'];
     $this->uploadDao->shouldReceive("getUploadtreeTableName")
       ->withArgs([$args['id']])->andReturn("uploadtree");
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
@@ -614,8 +627,9 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
     $args = $this->getDummyData()['args'];
     $this->uploadDao->shouldReceive("getUploadtreeTableName")
       ->withArgs([$args['id']])->andReturn("uploadtree");
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
@@ -665,18 +679,20 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
       'left' => 1,
       'right' => 31314
     ];
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
       ->andReturn(4);
     $this->uploadDao->shouldReceive("isAccessible")
       ->withArgs([$args['id'],4])->andReturn(true);
+    $this->uploadDao->shouldReceive("isEditable")
+      ->withArgs([$args['id'],4])->andReturn(true);
 
     $this->uploadDao->shouldReceive("getUploadTreeTableName")
       ->withAnyArgs()->andReturn("uploadtree");
-
     $this->restHelper->shouldReceive("getUserId")
       ->andReturn($userId);
     $this->copyrightHist->shouldReceive('getTableName')
@@ -718,18 +734,20 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
       'left' => 1,
       'right' => 31314
     ];
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
       ->andReturn(4);
     $this->uploadDao->shouldReceive("isAccessible")
       ->withArgs([$args['id'],4])->andReturn(true);
+    $this->uploadDao->shouldReceive("isEditable")
+      ->withArgs([$args['id'],4])->andReturn(true);
 
     $this->uploadDao->shouldReceive("getUploadTreeTableName")
       ->withAnyArgs()->andReturn("uploadtree");
-
     $this->restHelper->shouldReceive("getUserId")
       ->andReturn($userId);
     $this->copyrightHist->shouldReceive('getTableName')
@@ -770,18 +788,20 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
       'left' => 1,
       'right' => 31314
     ];
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
       ->andReturn(4);
     $this->uploadDao->shouldReceive("isAccessible")
       ->withArgs([$args['id'],4])->andReturn(true);
+    $this->uploadDao->shouldReceive("isEditable")
+      ->withArgs([$args['id'],4])->andReturn(true);
 
     $this->uploadDao->shouldReceive("getUploadTreeTableName")
       ->withAnyArgs()->andReturn("uploadtree");
-
     $this->restHelper->shouldReceive("getUserId")
       ->andReturn($userId);
     $this->copyrightHist->shouldReceive('getTableName')
@@ -825,18 +845,20 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
       'left' => 1,
       'right' => 31314
     ];
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
       ->andReturn(4);
     $this->uploadDao->shouldReceive("isAccessible")
       ->withArgs([$args['id'],4])->andReturn(true);
+    $this->uploadDao->shouldReceive("isEditable")
+      ->withArgs([$args['id'],4])->andReturn(true);
 
     $this->uploadDao->shouldReceive("getUploadTreeTableName")
       ->withAnyArgs()->andReturn("uploadtree");
-
     $this->restHelper->shouldReceive("getUserId")
       ->andReturn($userId);
     $this->copyrightHist->shouldReceive('getTableName')
@@ -877,18 +899,20 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
       'left' => 1,
       'right' => 31314
     ];
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
       ->andReturn(4);
     $this->uploadDao->shouldReceive("isAccessible")
       ->withArgs([$args['id'],4])->andReturn(true);
+    $this->uploadDao->shouldReceive("isEditable")
+      ->withArgs([$args['id'],4])->andReturn(true);
 
     $this->uploadDao->shouldReceive("getUploadTreeTableName")
       ->withAnyArgs()->andReturn("uploadtree");
-
     $this->restHelper->shouldReceive("getUserId")
       ->andReturn($userId);
     $this->copyrightHist->shouldReceive('getTableName')
@@ -930,18 +954,20 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
       'left' => 1,
       'right' => 31314
     ];
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
       ->andReturn(4);
     $this->uploadDao->shouldReceive("isAccessible")
       ->withArgs([$args['id'],4])->andReturn(true);
+    $this->uploadDao->shouldReceive("isEditable")
+      ->withArgs([$args['id'],4])->andReturn(true);
 
     $this->uploadDao->shouldReceive("getUploadTreeTableName")
       ->withAnyArgs()->andReturn("uploadtree");
-
     $this->restHelper->shouldReceive("getUserId")
       ->andReturn($userId);
     $this->copyrightHist->shouldReceive('getTableName')
@@ -984,18 +1010,20 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
       'left' => 1,
       'right' => 31314
     ];
-    $this->dbHelper->shouldReceive("doesIdExist")
-      ->withArgs(['uploadtree','uploadtree_pk', $args['itemId']])->andReturn(true);
+    $this->uploadDao->shouldReceive("getUploadEntry")
+      ->withArgs([$args['itemId'], 'uploadtree'])
+      ->andReturn(['upload_fk' => (string) $args['id']]);
     $this->dbHelper->shouldReceive("doesIdExist")
       ->withArgs(['upload','upload_pk', $args['id']])->andReturn(true);
     $this->restHelper->shouldReceive("getGroupId")
       ->andReturn(4);
     $this->uploadDao->shouldReceive("isAccessible")
       ->withArgs([$args['id'],4])->andReturn(true);
+    $this->uploadDao->shouldReceive("isEditable")
+      ->withArgs([$args['id'],4])->andReturn(true);
 
     $this->uploadDao->shouldReceive("getUploadTreeTableName")
       ->withAnyArgs()->andReturn("uploadtree");
-
     $this->restHelper->shouldReceive("getUserId")
       ->andReturn($userId);
     $this->copyrightHist->shouldReceive('getTableName')
@@ -1017,4 +1045,111 @@ class CopyrightControllerTest extends  \PHPUnit\Framework\TestCase
     $this->assertEquals($this->getResponseJson($expectedResponse), $this->getResponseJson($actualResponse));
   }
 
+  /**
+   * @test
+   * -# Test CopyrightController::deleteFileCopyright() with a group that only
+   *    has read-only permission (isEditable returns false).
+   * -# Check if response is 403 with HttpForbiddenException.
+   */
+  public function testDeleteFileCopyrightForbiddenWithReadOnlyPermission()
+  {
+    $args = $this->getDummyData()['args'];
+    $args['hash'] = "hash";
+
+    $this->dbHelper->shouldReceive("doesIdExist")
+      ->withArgs(['upload', 'upload_pk', $args['id']])->andReturn(true);
+    $this->restHelper->shouldReceive("getGroupId")
+      ->andReturn(4);
+    $this->uploadDao->shouldReceive("isAccessible")
+      ->withArgs([$args['id'], 4])->andReturn(true);
+    $this->uploadDao->shouldReceive("isEditable")
+      ->withArgs([$args['id'], 4])->andReturn(false);
+
+    $this->copyrightDao->shouldNotReceive('updateTable');
+    $this->copyrightDao->shouldNotReceive('removeDecision');
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("DELETE", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $this->expectException(
+      \Fossology\UI\Api\Exceptions\HttpForbiddenException::class);
+    $this->expectExceptionMessage(
+      "You do not have write permission on this upload.");
+    $this->copyrightController->deleteFileCopyright(
+      $request, new ResponseHelper(), $args);
+  }
+
+  /**
+   * @test
+   * -# Test CopyrightController::restoreFileCopyright() with a group that only
+   *    has read-only permission (isEditable returns false).
+   * -# Check if response is 403 with HttpForbiddenException.
+   */
+  public function testRestoreFileCopyrightForbiddenWithReadOnlyPermission()
+  {
+    $args = $this->getDummyData()['args'];
+    $args['hash'] = "hash";
+
+    $this->dbHelper->shouldReceive("doesIdExist")
+      ->withArgs(['upload', 'upload_pk', $args['id']])->andReturn(true);
+    $this->restHelper->shouldReceive("getGroupId")
+      ->andReturn(4);
+    $this->uploadDao->shouldReceive("isAccessible")
+      ->withArgs([$args['id'], 4])->andReturn(true);
+    $this->uploadDao->shouldReceive("isEditable")
+      ->withArgs([$args['id'], 4])->andReturn(false);
+
+    $this->copyrightDao->shouldNotReceive('updateTable');
+    $this->copyrightDao->shouldNotReceive('undoDecision');
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("PUT", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $this->expectException(
+      \Fossology\UI\Api\Exceptions\HttpForbiddenException::class);
+    $this->expectExceptionMessage(
+      "You do not have write permission on this upload.");
+    $this->copyrightController->restoreFileCopyright(
+      $request, new ResponseHelper(), $args);
+  }
+
+  /**
+   * @test
+   * -# Test CopyrightController::updateFileCopyright() with a group that only
+   *    has read-only permission (isEditable returns false).
+   * -# Check if response is 403 with HttpForbiddenException.
+   */
+  public function testUpdateFileCopyrightForbiddenWithReadOnlyPermission()
+  {
+    $args = $this->getDummyData()['args'];
+    $args['hash'] = "hash";
+
+    $this->dbHelper->shouldReceive("doesIdExist")
+      ->withArgs(['upload', 'upload_pk', $args['id']])->andReturn(true);
+    $this->restHelper->shouldReceive("getGroupId")
+      ->andReturn(4);
+    $this->uploadDao->shouldReceive("isAccessible")
+      ->withArgs([$args['id'], 4])->andReturn(true);
+    $this->uploadDao->shouldReceive("isEditable")
+      ->withArgs([$args['id'], 4])->andReturn(false);
+
+    $this->copyrightDao->shouldNotReceive('updateTable');
+    $this->copyrightDao->shouldNotReceive('undoDecision');
+
+    $requestHeaders = new Headers();
+    $body = $this->streamFactory->createStream();
+    $request = new Request("PATCH", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+
+    $this->expectException(
+      \Fossology\UI\Api\Exceptions\HttpForbiddenException::class);
+    $this->expectExceptionMessage(
+      "You do not have write permission on this upload.");
+    $this->copyrightController->updateFileCopyright(
+      $request, new ResponseHelper(), $args);
+  }
 }

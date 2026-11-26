@@ -25,8 +25,9 @@ use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Mockery as M;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
-$GLOBALS['globalSession'] = new Session();
+$GLOBALS['globalSession'] = new Session(new MockArraySessionStorage());
 $GLOBALS['globalSession']->set('t','t');
 
 function plugin_find($plugin)
@@ -210,7 +211,7 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
    */
   public function testValidateTokenRequest()
   {
-    $tokenExpire = strftime('%Y-%m-%d', strtotime('+3 day'));
+    $tokenExpire = date('Y-m-d', strtotime('+3 day'));
     $tokenName = "myTok";
     $tokenScope = "r";
     $tokenValidity = 30;
@@ -228,7 +229,7 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
    */
   public function testValidateTokenRequestMaxExpire()
   {
-    $tokenExpire = strftime('%Y-%m-%d', strtotime('+10 day'));
+    $tokenExpire = date('Y-m-d', strtotime('+10 day'));
     $tokenName = "myTok";
     $tokenScope = "read";
     $tokenValidity = 3;
@@ -248,7 +249,7 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
    */
   public function testValidateTokenRequestInvalidExpire()
   {
-    $tokenExpire = strftime('%d-%m-%Y', strtotime('+10 day'));
+    $tokenExpire = date('d-m-Y', strtotime('+10 day'));
     $tokenName = "myTok";
     $tokenScope = "read";
     $tokenValidity = 30;
@@ -268,7 +269,7 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
    */
   public function testValidateTokenRequestInvalidScope()
   {
-    $tokenExpire = strftime('%Y-%m-%d', strtotime('+10 day'));
+    $tokenExpire = date('Y-m-d', strtotime('+10 day'));
     $tokenName = "myTok";
     $tokenScope = "rread";
     $tokenValidity = 30;

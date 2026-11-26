@@ -10,7 +10,6 @@ use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
-use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Exceptions\HttpConflictException;
 use Fossology\UI\Api\Exceptions\HttpServiceUnavailableException;
 use Fossology\Lib\Util\OsselotLookupHelper;
@@ -35,8 +34,7 @@ class OsselotController extends RestController
   {
       global $SysConf;
 
-    if (empty($SysConf['SYSCONFIG']['EnableOsselotReuse']) ||
-          !$SysConf['SYSCONFIG']['EnableOsselotReuse']) {
+    if (($SysConf['SYSCONFIG']['EnableOsselotReuse'] ?? '') !== 'true') {
         $error = new Info(501, "OSSelot integration is disabled", InfoType::ERROR);
         return $response->withJson($error->getArray(), $error->getCode());
     }
@@ -77,18 +75,13 @@ class OsselotController extends RestController
   {
       global $SysConf;
 
-    if (empty($SysConf['SYSCONFIG']['EnableOsselotReuse']) ||
-          !$SysConf['SYSCONFIG']['EnableOsselotReuse']) {
+    if (($SysConf['SYSCONFIG']['EnableOsselotReuse'] ?? '') !== 'true') {
         $err = new Info(501, "OSSelot integration is disabled", InfoType::ERROR);
         return $response->withJson($err->getArray(), $err->getCode());
     }
 
       $uploadId = (int)($args['id'] ?? 0);
-
-    if (!$this->dbHelper->doesIdExist('upload', 'upload_pk', $uploadId)) {
-        $err = new Info(404, "Upload does not exist", InfoType::ERROR);
-        return $response->withJson($err->getArray(), $err->getCode());
-    }
+      $this->uploadAccessible($uploadId);
 
       $body = $this->getParsedBody($request);
       $pkg = $body['package'] ?? null;

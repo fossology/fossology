@@ -12,6 +12,8 @@
 current_github_hash="93dcb87e6dec5783a15fff51da1aa79fc4179c46"
 # version of composer (must be present in https://github.com/composer/getcomposer.org/tree/${current_github_hash}/web/download)
 version="2.8.9"
+# sha256 of composer.phar ${version}, as published at https://getcomposer.org/download/
+sha256="8e8829ec2b97fcb05158236984bc252bef902e7b8ff65555a1eeda4ec13fb82b"
 
 ##
 ################################################################################
@@ -61,9 +63,28 @@ target="$install_dir/$filename"
 # do the install
 
 echo "composer $version will be installed to: $target (this will override any old executable)"
-curl --silent \
-     --output "$target" --location \
-     "https://github.com/composer/getcomposer.org/raw/$current_github_hash/web/download/$version/composer.phar"
-chmod +x "$target"
+tmpfile="$(mktemp "${install_dir}/.composer.XXXXXX")"
+trap 'rm -f "$tmpfile"' EXIT
+
+downloaded=""
+for url in \
+    "https://getcomposer.org/download/$version/composer.phar" \
+    "https://github.com/composer/getcomposer.org/raw/$current_github_hash/web/download/$version/composer.phar"; do
+  if curl --silent --show-error --fail --location --retry 3 --output "$tmpfile" "$url" \
+     && echo "$sha256  $tmpfile" | sha256sum --check --status; then
+    downloaded="$url"
+    break
+  fi
+  echo "WARNING: download from $url failed or did not match the expected checksum" >&2
+done
+
+if [[ -z "$downloaded" ]]; then
+  echo "ERROR: could not download a verified composer $version; $target was left unchanged" >&2
+  exit 1
+fi
+
+chmod 0755 "$tmpfile"
+mv -f "$tmpfile" "$target"
+trap - EXIT
 
 popd

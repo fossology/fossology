@@ -2192,7 +2192,7 @@ msgstr "Blader door buckets (categorieën)"
 #: plugins/ui-buckets.php:185
 #: plugins/search.php:55
 #: plugins/search.php:132
-msgid "Invalid URL, nonexistant item"
+msgid "Invalid URL, nonexistent item"
 msgstr "Ongeldige URL, niet-bestaand item"
 
 #: plugins/ui-buckets.php:273
