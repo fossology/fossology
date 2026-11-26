@@ -10,6 +10,8 @@ namespace Fossology\Lib\View;
 
 abstract class PagedResult
 {
+  public $empty;
+
   const TARGET_CHARSET = "UTF-8";
 
   /**

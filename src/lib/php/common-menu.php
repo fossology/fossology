@@ -18,6 +18,8 @@ const MENU_BREAK = "[BREAK]";       ///< Break menu at this
  */
 class menu
 {
+  public $Title;
+
   var $Name = "";       ///< Name of the menu item
   var $URI = NULL;      ///< URI for the plugin (everything after the "?mod=")
   var $HTML = NULL;     ///< HTML to include (if provided, used in place of all else)

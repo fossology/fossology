@@ -15,6 +15,8 @@ use Fossology\Lib\Test\TestPgDb;
 
 class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
 {
+  public $assertCountBefore;
+
   private $testDb;
   private $groupId = 401;
 

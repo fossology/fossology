@@ -202,7 +202,7 @@ class Analysis
     ];
 
     foreach ($propertyMap as $key => $property) {
-      if (stristr($analysisString, $key)) {
+      if (stristr((string) $analysisString, $key)) {
         $this->$property = true;
       }
     }

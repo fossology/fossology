@@ -15,6 +15,9 @@ use Mockery as M;
 
 class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
 {
+  public $addedLicense;
+  public $removedLicense;
+
   private $itemId = 12;
   private $userId = 5;
   private $groupId = 2;

@@ -59,7 +59,7 @@ void normalizeUploadPriorities();
 void reIndexAllTables();
 void removeOrphanedRows();
 void removeOrphanedLogFiles();
-void removeExpiredTokens();
+void removeExpiredTokens(long int retentionPeriod);
 void deleteOldGold(char* date);
 void removeOldLogFiles(const char* olderThan);
 

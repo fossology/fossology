@@ -83,6 +83,9 @@ extern size_t PQescapeStringConn(PGconn *conn,
                    char *to, const char *from, size_t length,
                    int *error);
 extern void  PQfinish(PGconn *conn);
+typedef void (*PQnoticeProcessor)(void *arg, const char *message);
+extern PQnoticeProcessor PQsetNoticeProcessor(PGconn *conn,
+                   PQnoticeProcessor proc, void *arg);
 
 extern char* fo_RepMkPath (char *Type, char *Filename);
 extern int   fo_RepExist(char* Type, char* Filename);

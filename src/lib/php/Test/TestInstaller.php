@@ -69,15 +69,21 @@ class TestInstaller
 
   public function install($srcDir)
   {
+    if (!is_file("$srcDir/TestInstall.make")) {
+      return false;
+    }
     $sysConfDir = $this->sysConf;
-    exec("make MODDIR=$sysConfDir DESTDIR= BINDIR=$sysConfDir SYSCONFDIR=$sysConfDir -C $srcDir --file=TestInstall.make install", $unused, $rt);
+    exec("make MODDIR=$sysConfDir DESTDIR= BINDIR=$sysConfDir SYSCONFDIR=$sysConfDir -C $srcDir --file=TestInstall.make install 2>&1", $unused, $rt);
     return ($rt != 0);
   }
 
   public function uninstall($srcDir)
   {
+    if (!is_file("$srcDir/TestInstall.make")) {
+      return false;
+    }
     $sysConfDir = $this->sysConf;
-    exec("make MODDIR=$sysConfDir DESTDIR= BINDIR=$sysConfDir SYSCONFDIR=$sysConfDir -C $srcDir --file=TestInstall.make uninstall", $unused, $rt);
+    exec("make MODDIR=$sysConfDir DESTDIR= BINDIR=$sysConfDir SYSCONFDIR=$sysConfDir -C $srcDir --file=TestInstall.make uninstall 2>&1", $unused, $rt);
     $modEnabled = "$sysConfDir/mods-enabled";
     if (is_dir($modEnabled)) {
       rmdir($modEnabled);

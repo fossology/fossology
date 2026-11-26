@@ -37,6 +37,9 @@ require_once(__DIR__ . '/../../agent/DeciderAgent.php');
  */
 class DeciderAgentTest extends \PHPUnit\Framework\TestCase
 {
+  public $agentDao;
+  public $assertCountBefore;
+
   /** @var DbManager */
   private $dbManager;
   /** @var ClearingDao */
